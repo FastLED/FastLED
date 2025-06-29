@@ -11,6 +11,16 @@ const AUDIO_SAMPLE_BLOCK_SIZE = 512;  // Matches i2s read size on esp32c3
 const MAX_AUDIO_BUFFER_LIMIT = 10;    // Maximum number of audio buffers to accumulate
 
 /**
+ * Debug configuration
+ */
+const AUDIO_DEBUG = {
+  enabled: false,  // Set to true to enable verbose debugging
+  sampleRate: 0.001,  // How often to log sample processing (0.1% of the time)
+  bufferRate: 0.1,    // How often to log buffer operations (10% of the time)
+  workletRate: 0.0001 // How often to log worklet debug messages (0.01% of the time)
+};
+
+/**
  * Audio processor types
  */
 const AUDIO_PROCESSOR_TYPES = {
@@ -158,12 +168,8 @@ class AudioWorkletAudioProcessor extends AudioProcessor {
 
   async initialize(source) {
     try {
-      console.log('🎵 Initializing AudioWorklet processor...');
-      
       // Load the AudioWorklet module if not already loaded
       if (!this.isWorkletLoaded) {
-        console.log('🎵 Loading AudioWorklet module...');
-        
         // Try different possible paths for the AudioWorklet processor
         const possiblePaths = [
           './audio_worklet_processor.js',
@@ -176,11 +182,15 @@ class AudioWorkletAudioProcessor extends AudioProcessor {
         for (const path of possiblePaths) {
           try {
             await this.audioContext.audioWorklet.addModule(path);
-            console.log(`🎵 AudioWorklet module loaded from: ${path}`);
+            if (AUDIO_DEBUG.enabled) {
+              console.log(`🎵 AudioWorklet module loaded from: ${path}`);
+            }
             loadSuccess = true;
             break;
           } catch (pathError) {
-            console.warn(`🎵 Failed to load AudioWorklet from ${path}:`, pathError.message);
+            if (AUDIO_DEBUG.enabled) {
+              console.warn(`🎵 Failed to load AudioWorklet from ${path}:`, pathError.message);
+            }
           }
         }
         
@@ -208,11 +218,9 @@ For now, ScriptProcessor will be used instead.`);
         }
         
         this.isWorkletLoaded = true;
-        console.log('🎵 AudioWorklet module loaded successfully');
       }
       
       // Create the AudioWorklet node
-      console.log('🎵 Creating AudioWorkletNode...');
       this.workletNode = new AudioWorkletNode(this.audioContext, 'fastled-audio-processor', {
         numberOfInputs: 1,
         numberOfOutputs: 1,
@@ -235,8 +243,6 @@ For now, ScriptProcessor will be used instead.`);
       // Connect nodes: source -> worklet -> destination
       source.connect(this.workletNode);
       this.workletNode.connect(this.audioContext.destination);
-      
-      console.log('🎵 AudioWorklet processor initialized successfully');
       
     } catch (error) {
       console.error('🎵 Failed to initialize AudioWorklet processor:', error);
@@ -276,8 +282,8 @@ For now, ScriptProcessor will be used instead.`);
         break;
         
       case 'debug':
-        // Only log debug messages occasionally to avoid spam
-        if (Math.random() < 0.001) {
+        // Only log debug messages when debugging is enabled
+        if (AUDIO_DEBUG.enabled && Math.random() < AUDIO_DEBUG.workletRate) {
           console.log('🎵 AudioWorklet debug:', data.message);
         }
         break;
@@ -541,7 +547,9 @@ export class AudioManager {
       // Start audio playback
       this.startAudioPlayback(audioElement);
       
-      console.log(`🎵 Audio analysis setup complete for ${audioId} using ${audioComponents.processor.getType()}`);
+      if (AUDIO_DEBUG.enabled) {
+        console.log(`🎵 Audio analysis setup complete for ${audioId} using ${audioComponents.processor.getType()}`);
+      }
       
       return audioComponents;
     } catch (error) {
@@ -556,16 +564,17 @@ export class AudioManager {
    * @returns {Object} Created audio components
    */
   async createAudioComponents(audioElement) {
-    // Create audio context with browser compatibility
-    const AudioContext = window.AudioContext || window.webkitAudioContext;
-    const audioContext = new AudioContext();
-    
-    console.log(`🎵 Creating new AudioContext (state: ${audioContext.state})`);
-    
-    // Create audio source - this is where the error occurs if element is already connected
-    console.log(`🎵 Creating MediaElementSourceNode for audio element`);
-    const source = audioContext.createMediaElementSource(audioElement);
-    source.connect(audioContext.destination); // Connect to output
+          // Create audio context with browser compatibility
+      const AudioContext = window.AudioContext || window.webkitAudioContext;
+      const audioContext = new AudioContext();
+      
+      if (AUDIO_DEBUG.enabled) {
+        console.log(`🎵 Creating new AudioContext (state: ${audioContext.state})`);
+      }
+      
+      // Create audio source - this is where the error occurs if element is already connected
+      const source = audioContext.createMediaElementSource(audioElement);
+      source.connect(audioContext.destination); // Connect to output
     
     // Create sample callback for the processor
     const sampleCallback = (sampleBuffer, timestamp) => {
@@ -578,29 +587,27 @@ export class AudioManager {
     
     try {
       // First attempt: Try preferred processor type
-      console.log(`🎵 Attempting to create ${this.processorType} processor...`);
       processor = AudioProcessorFactory.create(this.processorType, audioContext, sampleCallback);
       await processor.initialize(source);
-      console.log(`🎵 Successfully initialized ${processor.getType()} processor`);
+      console.log(`🎵 Audio processor initialized: ${processor.getType()}`);
       
     } catch (processorError) {
-      console.warn(`🎵 Failed to initialize ${this.processorType} processor:`, processorError.message);
+      console.warn(`🎵 Failed to initialize ${this.processorType}:`, processorError.message);
       
       // If AudioWorklet failed, try fallback to ScriptProcessor
       if (this.processorType === AUDIO_PROCESSOR_TYPES.AUDIO_WORKLET) {
         try {
-          console.log(`🎵 Falling back to ${AUDIO_PROCESSOR_TYPES.SCRIPT_PROCESSOR}...`);
+          console.log(`🎵 Falling back to ${AUDIO_PROCESSOR_TYPES.SCRIPT_PROCESSOR}`);
           processor = AudioProcessorFactory.create(AUDIO_PROCESSOR_TYPES.SCRIPT_PROCESSOR, audioContext, sampleCallback);
           await processor.initialize(source);
           actualProcessorType = AUDIO_PROCESSOR_TYPES.SCRIPT_PROCESSOR;
-          console.log(`🎵 Successfully fell back to ${processor.getType()} processor`);
+          console.log(`🎵 Successfully using ${processor.getType()} processor`);
           
           // Update the AudioManager's processor type for future uses
           this.processorType = AUDIO_PROCESSOR_TYPES.SCRIPT_PROCESSOR;
-          console.log(`🎵 Updated default processor type to ${this.processorType} due to AudioWorklet failure`);
           
         } catch (fallbackError) {
-          console.error('🎵 Even ScriptProcessor fallback failed:', fallbackError);
+          console.error('🎵 Both processors failed:', fallbackError);
           throw new Error(`Failed to initialize any audio processor. AudioWorklet error: ${processorError.message}, ScriptProcessor error: ${fallbackError.message}`);
         }
       } else {
@@ -702,16 +709,11 @@ export class AudioManager {
       timestamp = Math.floor(performance.now());
     }
 
-    // Debug logging (sample ~1% of audio blocks to avoid console spam)
-    if (Math.random() < 0.01) {
+    // Debug logging (controlled by AUDIO_DEBUG settings)
+    if (AUDIO_DEBUG.enabled && Math.random() < AUDIO_DEBUG.sampleRate) {
       const processor = window.audioData.audioProcessors[audioId];
       const processorType = processor ? processor.getType() : 'unknown';
-      const timestampSource = audioElement && !audioElement.paused && audioElement.currentTime >= 0 
-        ? 'audioElement.currentTime' 
-        : audioContext && audioContext.currentTime >= 0 
-        ? 'audioContext.currentTime' 
-        : 'performance.now()';
-      console.log(`🎵 Audio ${audioId} (${processorType}): ${timestamp}ms (source: ${timestampSource})`);
+      console.log(`🎵 Audio ${audioId} (${processorType}): Processing samples`);
     }
 
     // Use optimized buffer storage system
@@ -824,11 +826,9 @@ export class AudioManager {
           this.updateButtonText(uploadButton, file);
           
           // Clean up previous audio context BEFORE setting up new audio
-          console.log(`🎵 Cleaning up previous audio context for ${audioInput.id}`);
           await this.cleanupPreviousAudioContext(audioInput.id);
           
           // Small delay to ensure cleanup is complete
-          console.log('🎵 Waiting for cleanup to complete...');
           await new Promise(resolve => setTimeout(resolve, 100));
           
           // Set up audio playback with fresh audio element
@@ -872,7 +872,6 @@ export class AudioManager {
     // Remove any existing audio element first
     const existingAudio = container.querySelector('audio');
     if (existingAudio) {
-      console.log(`🎵 Removing existing audio element for ${audioId} to avoid MediaElementSourceNode conflicts`);
       existingAudio.pause();
       existingAudio.currentTime = 0;
       existingAudio.src = '';
@@ -881,7 +880,6 @@ export class AudioManager {
     }
     
     // Always create a fresh audio element
-    console.log(`🎵 Creating new audio element for ${audioId}`);
     const audio = document.createElement('audio');
     audio.controls = true;
     audio.className = 'audio-player';
@@ -897,12 +895,16 @@ export class AudioManager {
    * @returns {Promise<void>}
    */
   async cleanupPreviousAudioContext(inputId) {
-    console.log(`🎵 Starting cleanup for ${inputId}`);
+    if (AUDIO_DEBUG.enabled) {
+      console.log(`🎵 Starting cleanup for ${inputId}`);
+    }
     
     // Clean up audio processor first (this disconnects nodes)
     if (window.audioData?.audioProcessors?.[inputId]) {
       const processor = window.audioData.audioProcessors[inputId];
-      console.log(`🎵 Cleaning up ${processor.getType()} processor for ${inputId}`);
+      if (AUDIO_DEBUG.enabled) {
+        console.log(`🎵 Cleaning up ${processor.getType()} processor for ${inputId}`);
+      }
       processor.cleanup();
       delete window.audioData.audioProcessors[inputId];
     }
@@ -911,7 +913,6 @@ export class AudioManager {
     if (window.audioData?.audioSources?.[inputId]) {
       try {
         const source = window.audioData.audioSources[inputId];
-        console.log(`🎵 Disconnecting MediaElementSourceNode for ${inputId}`);
         source.disconnect();
       } catch (e) {
         console.warn('Error disconnecting MediaElementSourceNode:', e);
@@ -923,9 +924,7 @@ export class AudioManager {
     if (window.audioData?.audioContexts?.[inputId]) {
       try {
         const context = window.audioData.audioContexts[inputId];
-        console.log(`🎵 Closing AudioContext for ${inputId} (state: ${context.state})`);
         await context.close();
-        console.log(`🎵 AudioContext closed successfully for ${inputId} (final state: ${context.state})`);
       } catch (e) {
         console.warn('Error closing previous audio context:', e);
       }
@@ -935,8 +934,6 @@ export class AudioManager {
     // Clean up buffer storage with proper memory cleanup
     if (window.audioData?.audioBuffers?.[inputId]) {
       const bufferStorage = window.audioData.audioBuffers[inputId];
-      const stats = bufferStorage.getStats();
-      console.log(`🎵 Clearing buffer storage for ${inputId}: ${stats.bufferCount} buffers, ${stats.memoryEstimateKB.toFixed(1)}KB`);
       bufferStorage.clear();
       delete window.audioData.audioBuffers[inputId];
     }
@@ -949,13 +946,10 @@ export class AudioManager {
     // Clean up any lingering audio elements in the DOM that might be associated with this ID
     const audioElements = document.querySelectorAll(`#audio-${inputId}, audio[data-audio-id="${inputId}"]`);
     audioElements.forEach(audio => {
-      console.log(`🎵 Found and cleaning up stray audio element for ${inputId}`);
       audio.pause();
       audio.src = '';
       audio.load();
     });
-    
-    console.log(`🎵 Cleanup completed for ${inputId}`);
   }
   
   /**
@@ -971,13 +965,11 @@ export class AudioManager {
     
     try {
       // Initialize audio analysis before playing
-      console.log('🎵 Setting up audio analysis...');
       await this.setupAudioAnalysis(audio);
-      console.log('🎵 Audio analysis setup completed');
       
       // Try to play the audio (may be blocked by browser policies)
       await audio.play();
-      console.log("🎵 Audio playback started successfully");
+      
     } catch (err) {
       console.error("🎵 Error during audio playback setup:", err);
       this.createFallbackPlayButton(audio, container);
@@ -1115,6 +1107,25 @@ window.forceScriptProcessor = function() {
 };
 
 /**
+ * Enable audio debug logging (for troubleshooting)
+ * @param {boolean} enabled - Whether to enable debug logging
+ */
+window.setAudioDebug = function(enabled = true) {
+  AUDIO_DEBUG.enabled = enabled;
+  console.log(`🎵 Audio debug logging ${enabled ? 'enabled' : 'disabled'}`);
+  return AUDIO_DEBUG.enabled;
+};
+
+/**
+ * Get current audio debug settings
+ * @returns {Object} Current debug configuration
+ */
+window.getAudioDebugSettings = function() {
+  console.log('🎵 Audio Debug Settings:', AUDIO_DEBUG);
+  return AUDIO_DEBUG;
+};
+
+/**
  * Get audio buffer statistics for all active audio inputs (debugging)
  * @returns {Object} Statistics for all audio buffers
  */
@@ -1169,7 +1180,10 @@ class AudioBufferStorage {
     while (this.buffers.length >= MAX_AUDIO_BUFFER_LIMIT) {
       const removedBuffer = this.buffers.shift();
       this.totalSamples -= removedBuffer.samples.length;
-      console.log(`*** Audio ${this.audioId}: Dropping oldest buffer (limit: ${MAX_AUDIO_BUFFER_LIMIT}) ***`);
+      // Only log buffer drops when debugging is enabled or occasionally for important info
+      if (AUDIO_DEBUG.enabled && Math.random() < AUDIO_DEBUG.bufferRate) {
+        console.log(`🎵 Audio ${this.audioId}: Dropping oldest buffer (limit: ${MAX_AUDIO_BUFFER_LIMIT})`);
+      }
     }
     
     // Add new buffer

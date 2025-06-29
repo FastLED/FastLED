@@ -281,6 +281,7 @@ export class JsonUiManager {
     this.uiControlsId = uiControlsId;
     this.groups = new Map(); // Track created groups
     this.ungroupedContainer = null; // Container for ungrouped items
+    this.debugMode = false; // Debug logging control
   }
 
   // Method called by C++ backend to update UI components
@@ -436,9 +437,11 @@ export class JsonUiManager {
             changes[id] = samples;
             hasChanges = true;
             
-            // Log stats about the accumulated audio data including storage optimization info
-            const stats = bufferStorage.getStats();
-            console.log(`*** Audio ${id}: ${stats.bufferCount} blocks, ${stats.totalSamples} samples, ${stats.storageType} storage, ~${stats.memoryEstimateKB.toFixed(1)}KB ***`);
+            // Debug logging for audio stats (only when enabled)
+            if (this.debugMode) {
+              const stats = bufferStorage.getStats();
+              console.log(`🎵 UI Audio ${id}: ${stats.bufferCount} blocks, ${stats.totalSamples} samples, ${stats.storageType} storage, ~${stats.memoryEstimateKB.toFixed(1)}KB`);
+            }
             
             // Clear the buffer with proper cleanup after sending samples
             bufferStorage.clear();
@@ -476,11 +479,11 @@ export class JsonUiManager {
         this.uiElements[key].accept === 'audio/*'
       );
       
-      if (audioKeys.length > 0) {
-        // For each audio element, log summary info but not the full array
+      // Debug logging for audio processing (only when enabled)
+      if (this.debugMode && audioKeys.length > 0) {
         audioKeys.forEach(key => {
           const audioData = changes[key];
-          console.log(`*** Audio ${key}: ${audioData.length} samples ***`);
+          console.log(`🎵 UI Audio ${key}: ${audioData.length} samples sent to backend`);
         });
       }
       
@@ -596,6 +599,29 @@ export class JsonUiManager {
       this.uiElements[data.id] = control.querySelector('input');
     }
     this.previousUiState[data.id] = data.value;
-    //console.log(`*** REGISTERED UI ELEMENT: ID '${data.id}' (${data.type}) - Total: ${Object.keys(this.uiElements).length} ***`);
+    
+    if (this.debugMode) {
+      console.log(`🎵 UI Registered element: ID '${data.id}' (${data.type}) - Total: ${Object.keys(this.uiElements).length}`);
+    }
   }
+
+  // Enable or disable debug logging
+  setDebugMode(enabled) {
+    this.debugMode = enabled;
+    console.log(`🎵 UI Manager debug mode ${enabled ? 'enabled' : 'disabled'}`);
+  }
+}
+
+// Global debug controls for UI Manager
+if (typeof window !== 'undefined') {
+  window.setUiDebug = function(enabled = true) {
+    // Access the global UI manager instance if available
+    if (window.uiManager && typeof window.uiManager.setDebugMode === 'function') {
+      window.uiManager.setDebugMode(enabled);
+    } else {
+      console.warn('🎵 UI Manager instance not found. Debug mode will be applied when manager is created.');
+      // Store the preference for when the manager is created
+      window._pendingUiDebugMode = enabled;
+    }
+  };
 }

@@ -506,8 +506,15 @@ async function localLoadFastLed(options) {
     frameRate = options.frameRate || DEFAULT_FRAME_RATE_60FPS;
     uiManager = new JsonUiManager(uiControlsId);
     
-    // Expose UI manager method to C++ module - this will be called by the WASM binding
+    // Expose UI manager globally for debug functions and C++ module
+    window.uiManager = uiManager;
     window.uiManagerInstance = uiManager;
+    
+    // Apply pending debug mode setting if it was set before manager creation
+    if (typeof window._pendingUiDebugMode !== 'undefined') {
+      uiManager.setDebugMode(window._pendingUiDebugMode);
+      delete window._pendingUiDebugMode;
+    }
     
     const { threeJs } = options;
     console.log('ThreeJS:', threeJs);
