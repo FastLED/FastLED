@@ -26,13 +26,22 @@ body {
     max-width: 640px;
     padding: 0 20px;
     box-sizing: border-box;
+    
+    /* Grid layout support for multi-column */
+    grid-auto-flow: column dense;
+    grid-auto-columns: minmax(var(--ui-column-width, 320px), 1fr);
 }
 
 #ui-controls.active {
     display: flex;
 }
 
-/* UI Group Styling */
+/* Multi-column grid layout when CSS custom properties are set */
+#ui-controls[style*="--ui-columns"] {
+    display: grid !important;
+}
+
+/* UI Group Styling - Enhanced for multi-column */
 .ui-group {
     width: 100%;
     margin: 15px 0;
@@ -42,6 +51,28 @@ body {
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
     overflow: hidden;
     transition: all 0.3s ease;
+    
+    /* Grid layout support */
+    grid-column: span 1;
+    align-self: start;
+    
+    /* Prevent groups from being too narrow */
+    min-width: 280px;
+}
+
+/* In multi-column layouts, reduce vertical margins */
+#ui-controls[style*="grid-template-columns"] .ui-group {
+    margin: 10px 0;
+}
+
+/* Special handling for groups that might need more space */
+.ui-group.wide-group {
+    grid-column: span 2;
+    max-width: none;
+}
+
+.ui-group.full-width {
+    grid-column: 1 / -1;
 }
 
 .ui-group-header {
@@ -91,9 +122,15 @@ body {
     padding-bottom: 0;
 }
 
-/* Ungrouped items container */
+/* Ungrouped items container - Enhanced for multi-column */
 .ui-ungrouped {
     width: 100%;
+    display: contents; /* Allow children to participate in parent grid */
+}
+
+/* In single column mode, restore normal display */
+#ui-controls:not([style*="grid-template-columns"]) .ui-ungrouped {
+    display: block;
 }
 
 .ui-control {
@@ -103,6 +140,10 @@ body {
     align-items: center;
     width: 100%;
     gap: 10px;
+    
+    /* Grid layout support */
+    grid-column: span 1;
+    align-self: start;
 }
 
 /* Special styling for controls within groups */
@@ -110,10 +151,25 @@ body {
     margin: 8px 0;
     padding: 8px 0;
     border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    grid-column: unset; /* Reset grid behavior inside groups */
 }
 
 .ui-group .ui-control:last-child {
     border-bottom: none;
+}
+
+/* Help controls should span only one column */
+.ui-help-container {
+    grid-column: span 1;
+}
+
+/* Wide controls that might benefit from spanning multiple columns */
+.ui-control.wide-control {
+    grid-column: span 2;
+}
+
+.ui-control.full-width-control {
+    grid-column: 1 / -1;
 }
 
 .ui-control input[type="range"] {
@@ -166,8 +222,11 @@ h1 {
     flex-direction: column;
     align-items: center;
     width: 100%;
-    max-width: 1000px; /* Adjust this value as needed */
+    max-width: 1000px;
     margin: 20px auto;
+    
+    /* Enhanced for dynamic sizing */
+    transition: max-width 0.3s ease;
 }
 
 #top-row {
@@ -177,56 +236,126 @@ h1 {
     align-items: center;
     width: 100%;
     margin-bottom: 20px;
+    
+    /* Enhanced for dynamic layouts */
+    transition: flex-direction 0.3s ease, gap 0.3s ease;
 }
 
-/* Layout-specific styles - now managed by UILayoutPlacementManager */
+/* Layout-specific styles - Enhanced responsive system */
 
-/* Desktop layout styles (applied via JavaScript) */
-.desktop-layout#main-container {
-    max-width: 1400px; /* Increase max width for wide screens */
+/* Mobile layout styles */
+.mobile-layout#main-container {
+    max-width: calc(100vw - 40px);
+    padding: 0 20px;
 }
 
-/* Adjust UI groups for desktop side layout */
-.desktop-layout .ui-group {
-    margin: 10px 0; /* Reduce vertical margin for side layout */
+.mobile-layout#top-row {
+    flex-direction: column;
+    gap: 20px;
 }
 
-/* Make sure canvas maintains its aspect ratio in desktop layout */
-.desktop-layout #myCanvas {
-    max-width: 640px; /* Maintain reasonable size on wide screens */
-    max-height: 640px;
-    width: auto;
+.mobile-layout .ui-group {
+    margin: 15px 0;
+}
+
+.mobile-layout #myCanvas {
+    width: 100%;
     height: auto;
+    max-width: 400px;
+    max-height: 400px;
 }
 
-/* Portrait layout styles (applied via JavaScript) */
-.portrait-layout#main-container {
-    max-width: 1000px; /* Standard width for portrait mode */
+/* Tablet layout styles */
+.tablet-layout#main-container {
+    max-width: 1200px;
 }
 
-.portrait-layout .ui-group {
-    margin: 15px 0; /* Standard vertical margin for stacked layout */
+.tablet-layout#top-row {
+    flex-direction: row;
+    gap: 30px;
+}
+
+.tablet-layout .ui-group {
+    margin: 12px 0;
+}
+
+/* Desktop layout styles */
+.desktop-layout#main-container {
+    max-width: 1400px;
+}
+
+.desktop-layout#top-row {
+    flex-direction: row;
+    gap: 40px;
+}
+
+.desktop-layout .ui-group {
+    margin: 10px 0;
+}
+
+/* Ultrawide layout styles */
+.ultrawide-layout#main-container {
+    max-width: 2000px;
+}
+
+.ultrawide-layout#top-row {
+    flex-direction: row;
+    gap: 50px;
+}
+
+.ultrawide-layout .ui-group {
+    margin: 8px 0;
+}
+
+/* Canvas responsive behavior */
+#canvas-container {
+    flex: 0 0 auto;
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+#myCanvas {
+    background-color: #1E1E1E;
+    width: 320px;
+    height: 320px;
+    image-rendering: pixelated;
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+    transition: width 0.3s ease, height 0.3s ease;
+    
+    /* Ensure pixel-perfect scaling */
+    image-rendering: -moz-crisp-edges;
+    image-rendering: -webkit-crisp-edges;
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+}
+
+/* Responsive canvas sizing */
+@media (max-width: 767px) {
+    #myCanvas {
+        width: min(calc(100vw - 80px), 400px);
+        height: min(calc(100vw - 80px), 400px);
+    }
 }
 
 /* Legacy media query support (fallback if JavaScript fails) */
 @media (min-width: 1200px) {
-    #main-container:not(.portrait-layout) {
+    #main-container:not(.mobile-layout) {
         max-width: 1400px;
     }
     
-    #top-row:not(.portrait-layout) {
+    #top-row:not(.mobile-layout) {
         flex-direction: row;
         align-items: flex-start;
         gap: 40px;
         justify-content: center;
     }
     
-    #canvas-container:not(.portrait-layout) {
+    #canvas-container:not(.mobile-layout) {
         flex: 0 0 auto;
         order: 1;
     }
     
-    #ui-controls:not(.portrait-layout) {
+    #ui-controls:not(.mobile-layout) {
         flex: 0 0 auto;
         order: 2;
         margin-top: 0;
@@ -236,28 +365,16 @@ h1 {
         height: fit-content;
     }
     
-    .ui-group:not(.portrait-layout .ui-group) {
+    .ui-group:not(.mobile-layout .ui-group) {
         margin: 10px 0;
     }
     
-    #myCanvas:not(.portrait-layout #myCanvas) {
+    #myCanvas:not(.mobile-layout #myCanvas) {
         max-width: 640px;
         max-height: 640px;
         width: auto;
         height: auto;
     }
-}
-
-#canvas-container {
-    flex: 0 0 auto;
-}
-
-#myCanvas {
-    background-color: #1E1E1E;
-    width: 320px;
-    height: 320px;
-    image-rendering: pixelated;
-    box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
 }
 
 #fastled-description {

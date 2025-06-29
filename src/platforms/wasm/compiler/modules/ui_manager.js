@@ -615,9 +615,27 @@ export class JsonUiManager {
     this.layoutManager = new UILayoutPlacementManager();
 
     // Listen for layout changes to potentially optimize UI element rendering
-    this.layoutManager.mediaQuery.addEventListener('change', (e) => {
-      this.onLayoutChange(e.matches ? 'desktop' : 'portrait');
+    this.layoutManager.mediaQuery
+      ? this.layoutManager.mediaQuery.addEventListener('change', (e) => {
+        this.onLayoutChange(e.matches ? 'desktop' : 'portrait');
+      })
+      // Handle new breakpoint system
+      : Object.values(this.layoutManager.breakpoints).forEach((mq) => {
+        mq.addEventListener('change', () => {
+          this.onLayoutChange(this.layoutManager.currentLayout);
+        });
+      });
+
+    // Listen for custom layout events from the enhanced layout manager
+    globalThis.addEventListener('layoutChanged', (e) => {
+      this.onAdvancedLayoutChange(e.detail);
     });
+
+    // Apply any pending debug mode setting
+    if (window._pendingUiDebugMode !== undefined) {
+      this.setDebugMode(window._pendingUiDebugMode);
+      delete window._pendingUiDebugMode;
+    }
   }
 
   // Method called by C++ backend to update UI components
@@ -684,6 +702,19 @@ export class JsonUiManager {
     groupDiv.className = 'ui-group';
     groupDiv.id = `group-${groupName}`;
 
+    // Add data attributes for layout optimization
+    groupDiv.setAttribute('data-group-name', groupName);
+
+    // Analyze group name to determine if it should be wide or full-width
+    const isWideGroup = this.shouldBeWideGroup(groupName);
+    const isFullWidthGroup = this.shouldBeFullWidthGroup(groupName);
+
+    if (isFullWidthGroup) {
+      groupDiv.classList.add('full-width');
+    } else if (isWideGroup) {
+      groupDiv.classList.add('wide-group');
+    }
+
     const headerDiv = document.createElement('div');
     headerDiv.className = 'ui-group-header';
 
@@ -704,6 +735,13 @@ export class JsonUiManager {
     // Add click handler for collapse/expand
     headerDiv.addEventListener('click', () => {
       groupDiv.classList.toggle('collapsed');
+
+      // Trigger layout recalculation after animation
+      setTimeout(() => {
+        if (this.layoutManager) {
+          this.layoutManager.forceLayoutUpdate();
+        }
+      }, 300);
     });
 
     groupDiv.appendChild(headerDiv);
@@ -713,10 +751,41 @@ export class JsonUiManager {
       container: groupDiv,
       content: contentDiv,
       name: groupName,
+      isWide: isWideGroup,
+      isFullWidth: isFullWidthGroup,
     };
 
     this.groups.set(groupName, groupInfo);
     return groupInfo;
+  }
+
+  /**
+   * Determine if a group should span multiple columns
+   */
+  shouldBeWideGroup(groupName) {
+    const wideGroupPatterns = [
+      /audio/i,
+      /spectrum/i,
+      /visualization/i,
+      /advanced/i,
+      /settings/i,
+    ];
+
+    return wideGroupPatterns.some((pattern) => pattern.test(groupName));
+  }
+
+  /**
+   * Determine if a group should span all columns
+   */
+  shouldBeFullWidthGroup(groupName) {
+    const fullWidthPatterns = [
+      /debug/i,
+      /output/i,
+      /console/i,
+      /log/i,
+    ];
+
+    return fullWidthPatterns.some((pattern) => pattern.test(groupName));
   }
 
   // Create or get the ungrouped items container
@@ -853,11 +922,14 @@ export class JsonUiManager {
     const groupedElements = new Map();
     const ungroupedElements = [];
 
-    // First pass: organize elements by group
+    // First pass: organize elements by group and analyze layout requirements
     jsonData.forEach((data) => {
       console.log('data:', data);
       const { group } = data;
       const hasGroup = group !== '' && group !== undefined && group !== null;
+
+      // Add layout hints based on element type
+      this.addElementLayoutHints(data);
 
       if (hasGroup) {
         console.log(`Group ${group} found, for item ${data.name}`);
@@ -869,6 +941,9 @@ export class JsonUiManager {
         ungroupedElements.push(data);
       }
     });
+
+    // Optimize layout based on current screen size and element count
+    this.optimizeLayoutForElements(groupedElements, ungroupedElements);
 
     // Second pass: create groups and add elements
     // Add ungrouped elements first
@@ -886,8 +961,10 @@ export class JsonUiManager {
       });
     }
 
-    // Add grouped elements
-    for (const [groupName, elements] of groupedElements) {
+    // Add grouped elements with optimized ordering
+    const sortedGroups = this.sortGroupsForOptimalLayout(groupedElements);
+
+    for (const [groupName, elements] of sortedGroups) {
       const groupInfo = this.createGroupContainer(groupName);
       uiControlsContainer.appendChild(groupInfo.container);
 
@@ -904,6 +981,135 @@ export class JsonUiManager {
     if (foundUi) {
       console.log('UI elements added, showing UI controls container');
       uiControlsContainer.classList.add('active');
+
+      // Trigger layout optimization after UI is visible
+      setTimeout(() => {
+        this.optimizeCurrentLayout();
+      }, 100);
+    }
+  }
+
+  /**
+   * Add layout hints to UI elements based on their type and properties
+   */
+  addElementLayoutHints(data) {
+    // Mark elements that might benefit from wider layouts
+    if (
+      data.type === 'audio' ||
+      data.type === 'slider' && data.name.toLowerCase().includes('spectrum')
+    ) {
+      data._layoutHint = 'wide';
+    }
+
+    // Mark elements that should always be full width
+    if (data.type === 'help' || data.name.toLowerCase().includes('debug')) {
+      data._layoutHint = 'full-width';
+    }
+  }
+
+  /**
+   * Optimize layout distribution based on element analysis
+   */
+  optimizeLayoutForElements(groupedElements, ungroupedElements) {
+    const layoutInfo = this.layoutManager.getLayoutInfo();
+    const totalGroups = groupedElements.size;
+    const totalUngrouped = ungroupedElements.length;
+
+    if (this.debugMode) {
+      console.log(
+        `🎵 UI Layout optimization: ${totalGroups} groups, ${totalUngrouped} ungrouped, ${layoutInfo.uiColumns} columns available`,
+      );
+    }
+
+    // Suggest layout adjustments to the layout manager if needed
+    if (layoutInfo.uiColumns > 1 && totalGroups > layoutInfo.uiColumns) {
+      // Many groups with multiple columns available - optimize for density
+      this.requestLayoutOptimization('dense');
+    } else if (layoutInfo.uiColumns === 1 && (totalGroups + totalUngrouped) > 10) {
+      // Single column with many elements - consider requesting more space
+      this.requestLayoutOptimization('expand');
+    }
+  }
+
+  /**
+   * Sort groups for optimal multi-column layout
+   */
+  sortGroupsForOptimalLayout(groupedElements) {
+    const layoutInfo = this.layoutManager.getLayoutInfo();
+
+    if (layoutInfo.uiColumns <= 1) {
+      // Single column - return as-is
+      return Array.from(groupedElements.entries());
+    }
+
+    // Multi-column layout - optimize placement
+    const groups = Array.from(groupedElements.entries());
+
+    // Sort by priority: full-width first, then wide, then regular
+    return groups.sort(([nameA, elementsA], [nameB, elementsB]) => {
+      const priorityA = this.getGroupLayoutPriority(nameA);
+      const priorityB = this.getGroupLayoutPriority(nameB);
+
+      if (priorityA !== priorityB) {
+        return priorityB - priorityA; // Higher priority first
+      }
+
+      // Same priority - sort by element count (more elements first)
+      return elementsB.length - elementsA.length;
+    });
+  }
+
+  /**
+   * Get layout priority for group ordering
+   */
+  getGroupLayoutPriority(groupName) {
+    if (this.shouldBeFullWidthGroup(groupName)) return 3;
+    if (this.shouldBeWideGroup(groupName)) return 2;
+    return 1;
+  }
+
+  /**
+   * Request layout optimization from the layout manager
+   */
+  requestLayoutOptimization(type) {
+    if (this.debugMode) {
+      console.log(`🎵 UI Requesting layout optimization: ${type}`);
+    }
+
+    // Could be extended to communicate with layout manager
+    // for dynamic layout adjustments
+  }
+
+  /**
+   * Optimize the current layout after UI elements are added
+   */
+  optimizeCurrentLayout() {
+    const layoutInfo = this.layoutManager.getLayoutInfo();
+
+    if (layoutInfo.uiColumns > 1) {
+      this.balanceColumnHeights();
+    }
+
+    if (this.debugMode) {
+      console.log(
+        `🎵 UI Layout optimized for ${layoutInfo.mode} mode with ${layoutInfo.uiColumns} columns`,
+      );
+    }
+  }
+
+  /**
+   * Balance heights across multiple columns by reordering elements
+   */
+  balanceColumnHeights() {
+    const uiControlsContainer = document.getElementById(this.uiControlsId);
+    if (!uiControlsContainer) return;
+
+    // This could be enhanced with more sophisticated column balancing
+    // For now, CSS Grid handles most of the heavy lifting
+    const groups = uiControlsContainer.querySelectorAll('.ui-group');
+
+    if (this.debugMode && groups.length > 0) {
+      console.log(`🎵 UI Column balancing: ${groups.length} groups distributed`);
     }
   }
 
@@ -952,11 +1158,18 @@ export class JsonUiManager {
     }
     this.previousUiState[data.id] = data.value;
 
+    // Add layout classes based on element hints
+    if (data._layoutHint === 'wide') {
+      control.classList.add('wide-control');
+    } else if (data._layoutHint === 'full-width') {
+      control.classList.add('full-width-control');
+    }
+
     if (this.debugMode) {
       console.log(
-        `🎵 UI Registered element: ID '${data.id}' (${data.type}) - Total: ${
-          Object.keys(this.uiElements).length
-        }`,
+        `🎵 UI Registered element: ID '${data.id}' (${data.type}${
+          data._layoutHint ? ', ' + data._layoutHint : ''
+        }) - Total: ${Object.keys(this.uiElements).length}`,
       );
     }
   }
@@ -965,9 +1178,12 @@ export class JsonUiManager {
   setDebugMode(enabled) {
     this.debugMode = enabled;
     console.log(`🎵 UI Manager debug mode ${enabled ? 'enabled' : 'disabled'}`);
+
+    // Store globally for layout manager access
+    window.uiManager = this;
   }
 
-  // Handle layout changes (can be used for layout-specific UI optimizations)
+  // Handle layout changes (enhanced for new system)
   onLayoutChange(layoutMode) {
     if (this.debugMode) {
       console.log(`🎵 UI Manager: Layout changed to ${layoutMode}`);
@@ -977,16 +1193,59 @@ export class JsonUiManager {
     if (this.layoutManager) {
       this.layoutManager.forceLayoutUpdate();
     }
+
+    // Re-optimize layout for new mode
+    setTimeout(() => {
+      this.optimizeCurrentLayout();
+    }, 100);
+  }
+
+  /**
+   * Handle advanced layout changes from the enhanced layout system
+   */
+  onAdvancedLayoutChange(layoutDetail) {
+    const { layout, data } = layoutDetail;
+
+    if (this.debugMode) {
+      console.log(`🎵 UI Manager: Advanced layout change to ${layout}:`, data);
+    }
+
+    // Adjust UI elements based on new layout data
+    this.adaptToLayoutData(data);
+  }
+
+  /**
+   * Adapt UI elements to new layout constraints
+   */
+  adaptToLayoutData(layoutData) {
+    const { uiColumns, uiColumnWidth, canExpand } = layoutData;
+
+    // Update group layouts based on available columns
+    this.groups.forEach((groupInfo, groupName) => {
+      const { container } = groupInfo;
+
+      // Adjust wide groups based on available columns
+      if (groupInfo.isWide && uiColumns < 2) {
+        container.classList.remove('wide-group');
+      } else if (groupInfo.isWide && uiColumns >= 2) {
+        container.classList.add('wide-group');
+      }
+
+      // Adjust full-width groups
+      if (groupInfo.isFullWidth && uiColumns > 1) {
+        container.classList.add('full-width');
+      }
+    });
+
+    if (this.debugMode) {
+      console.log(`🎵 UI Adapted ${this.groups.size} groups to ${uiColumns} columns`);
+    }
   }
 
   // Get current layout information
   getLayoutInfo() {
     if (this.layoutManager) {
-      return {
-        mode: this.layoutManager.getCurrentLayout(),
-        isDesktop: this.layoutManager.isDesktop(),
-        isPortrait: this.layoutManager.isPortrait(),
-      };
+      return this.layoutManager.getLayoutInfo();
     }
     return null;
   }
@@ -997,6 +1256,8 @@ export class JsonUiManager {
       this.layoutManager.destroy();
       this.layoutManager = null;
     }
+
+    globalThis.removeEventListener('layoutChanged', this.onAdvancedLayoutChange);
   }
 }
 
