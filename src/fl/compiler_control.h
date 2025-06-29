@@ -69,3 +69,17 @@
   #define FL_OPTIMIZATION_LEVEL_O3_BEGIN /* nothing */
   #define FL_OPTIMIZATION_LEVEL_O3_END   /* nothing */
 #endif
+
+
+// All Source Build Control
+// When FASTLED_ALL_SRC is enabled, all source is compiled into a single translation unit
+// Debug/testing builds use individual compilation for better error isolation
+#ifndef FASTLED_ALL_SRC
+  #if defined(DEBUG) || defined(FASTLED_TESTING)
+    #define FASTLED_ALL_SRC 0
+  #elif !defined(RELEASE) || (RELEASE == 0)
+    #define FASTLED_ALL_SRC 1
+  #else
+    #define FASTLED_ALL_SRC 0
+  #endif
+#endif

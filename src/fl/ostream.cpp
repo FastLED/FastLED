@@ -1,11 +1,5 @@
-#include "fl/ostream.h"
+#include "fl/compiler_control.h"
 
-namespace fl {
-
-// Global cout instance for immediate output
-ostream cout;
-
-// endl manipulator instance
-const endl_t endl;
-
-} // namespace fl
+#if !FASTLED_ALL_SRC
+#include "fl/ostream.cpp.hpp"
+#endif

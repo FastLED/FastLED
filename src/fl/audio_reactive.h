@@ -6,9 +6,7 @@
 #include "fl/stdint.h"
 #include "fl/audio.h"
 #include "crgb.h"
-
-// Forward declaration
-class CRGBPalette16;
+#include "fl/colorutils.h"
 
 namespace fl {
 
