@@ -18,8 +18,8 @@ const AUDIO_PROCESSOR_TYPES = {
   AUDIO_WORKLET: 'audio_worklet'
 };
 
-// Default processor type - can be easily changed here
-const DEFAULT_PROCESSOR_TYPE = AUDIO_PROCESSOR_TYPES.SCRIPT_PROCESSOR;
+// Default processor type - will be determined automatically
+let DEFAULT_PROCESSOR_TYPE = AUDIO_PROCESSOR_TYPES.SCRIPT_PROCESSOR;
 
 /**
  * TIMESTAMP IMPLEMENTATION:
@@ -146,42 +146,219 @@ class ScriptProcessorAudioProcessor extends AudioProcessor {
 
 /**
  * AudioWorklet-based audio processor (modern, runs on audio thread)
- * Currently contains stubs - not fully implemented yet
+ * Provides better performance and timing consistency than ScriptProcessor
  */
 class AudioWorkletAudioProcessor extends AudioProcessor {
   constructor(audioContext, sampleCallback) {
     super(audioContext, sampleCallback);
     this.workletNode = null;
     this.isWorkletLoaded = false;
-    console.warn('🎵 AudioWorklet is not implemented yet!');
+    console.log('🎵 AudioWorklet processor created');
   }
 
   async initialize(source) {
-    console.warn('🎵 AudioWorklet is not implemented yet!');
+    try {
+      console.log('🎵 Initializing AudioWorklet processor...');
+      
+      // Load the AudioWorklet module if not already loaded
+      if (!this.isWorkletLoaded) {
+        console.log('🎵 Loading AudioWorklet module...');
+        
+        // Try different possible paths for the AudioWorklet processor
+        const possiblePaths = [
+          './audio_worklet_processor.js',
+          'audio_worklet_processor.js',
+          '../audio_worklet_processor.js',
+          'src/platforms/wasm/compiler/modules/audio_worklet_processor.js'
+        ];
+        
+        let loadSuccess = false;
+        for (const path of possiblePaths) {
+          try {
+            await this.audioContext.audioWorklet.addModule(path);
+            console.log(`🎵 AudioWorklet module loaded from: ${path}`);
+            loadSuccess = true;
+            break;
+          } catch (pathError) {
+            console.warn(`🎵 Failed to load AudioWorklet from ${path}:`, pathError.message);
+          }
+        }
+        
+        if (!loadSuccess) {
+          const detailedError = new Error(`
+🎵 AudioWorklet module could not be loaded from any path.
+
+Tried paths:
+${possiblePaths.map(path => `  - ${path}`).join('\n')}
+
+This usually means:
+1. The audio_worklet_processor.js file is not being served by your web server
+2. The file path is incorrect for your deployment setup
+3. CORS restrictions are preventing module loading
+
+Solutions:
+- Ensure audio_worklet_processor.js is in the same directory as this script
+- Check your web server configuration
+- Look at browser Network tab to see which path is being requested
+- The system will automatically fall back to ScriptProcessor
+
+For now, ScriptProcessor will be used instead.`);
+          
+          throw detailedError;
+        }
+        
+        this.isWorkletLoaded = true;
+        console.log('🎵 AudioWorklet module loaded successfully');
+      }
+      
+      // Create the AudioWorklet node
+      console.log('🎵 Creating AudioWorkletNode...');
+      this.workletNode = new AudioWorkletNode(this.audioContext, 'fastled-audio-processor', {
+        numberOfInputs: 1,
+        numberOfOutputs: 1,
+        outputChannelCount: [1],
+        processorOptions: {
+          sampleRate: this.audioContext.sampleRate
+        }
+      });
+      
+      // Set up message handling from the worklet
+      this.workletNode.port.onmessage = (event) => {
+        this.handleWorkletMessage(event.data);
+      };
+      
+      // Handle worklet errors
+      this.workletNode.onprocessorerror = (error) => {
+        console.error('🎵 AudioWorklet processor error:', error);
+      };
+      
+      // Connect nodes: source -> worklet -> destination
+      source.connect(this.workletNode);
+      this.workletNode.connect(this.audioContext.destination);
+      
+      console.log('🎵 AudioWorklet processor initialized successfully');
+      
+    } catch (error) {
+      console.error('🎵 Failed to initialize AudioWorklet processor:', error);
+      
+      // Provide helpful error messages for common issues
+      if (error.name === 'NotSupportedError') {
+        console.error('🎵 AudioWorklet is not supported in this browser');
+      } else if (error.message.includes('audio_worklet_processor.js')) {
+        console.error('🎵 Could not load audio_worklet_processor.js - check file path');
+      }
+      
+      throw error;
+    }
+  }
+
+  /**
+   * Handle messages from the AudioWorklet
+   * @param {Object} data - Message data from worklet
+   */
+  handleWorkletMessage(data) {
+    const { type, samples, timestamp } = data;
     
-    // Stub implementation - just connect source to destination for passthrough
-    source.connect(this.audioContext.destination);
-    
-    // Log that this is a stub
-    console.log('🎵 AudioWorklet stub: Using passthrough connection (no processing)');
+    switch (type) {
+      case 'audioData':
+        if (this.isProcessing && samples && samples.length > 0) {
+          // Convert samples array back to Int16Array for compatibility
+          const sampleBuffer = new Int16Array(samples);
+          
+          // Call the sample callback with enhanced timestamp
+          const enhancedTimestamp = this.enhanceTimestamp(timestamp);
+          this.sampleCallback(sampleBuffer, enhancedTimestamp);
+        }
+        break;
+        
+      case 'error':
+        console.error('🎵 AudioWorklet reported error:', data.message);
+        break;
+        
+      case 'debug':
+        // Only log debug messages occasionally to avoid spam
+        if (Math.random() < 0.001) {
+          console.log('🎵 AudioWorklet debug:', data.message);
+        }
+        break;
+        
+      default:
+        console.warn('🎵 Unknown message type from AudioWorklet:', type);
+    }
+  }
+
+  /**
+   * Enhance the timestamp from AudioWorklet with additional context
+   * @param {number} workletTimestamp - Timestamp from AudioWorklet (audioContext.currentTime)
+   * @returns {number} Enhanced timestamp in milliseconds
+   */
+  enhanceTimestamp(workletTimestamp) {
+    // AudioWorklet provides high-precision AudioContext.currentTime
+    // Convert from seconds to milliseconds for consistency
+    return Math.floor(workletTimestamp);
   }
 
   start() {
     super.start();
-    console.warn('🎵 AudioWorklet is not implemented yet!');
-    console.log('🎵 AudioWorklet stub: Processing "started" (no actual processing)');
+    if (this.workletNode) {
+      console.log('🎵 Starting AudioWorklet processing');
+      this.workletNode.port.postMessage({ 
+        type: 'start',
+        timestamp: this.audioContext.currentTime 
+      });
+    }
   }
 
   stop() {
     super.stop();
-    console.warn('🎵 AudioWorklet is not implemented yet!');
-    console.log('🎵 AudioWorklet stub: Processing "stopped" (no actual processing)');
+    if (this.workletNode) {
+      console.log('🎵 Stopping AudioWorklet processing');
+      this.workletNode.port.postMessage({ 
+        type: 'stop',
+        timestamp: this.audioContext.currentTime 
+      });
+    }
+  }
+
+  /**
+   * Send configuration to the AudioWorklet
+   * @param {Object} config - Configuration object
+   */
+  sendConfig(config) {
+    if (this.workletNode) {
+      console.log('🎵 Sending config to AudioWorklet:', config);
+      this.workletNode.port.postMessage({
+        type: 'config',
+        data: config,
+        timestamp: this.audioContext.currentTime
+      });
+    }
   }
 
   cleanup() {
     super.cleanup();
-    console.warn('🎵 AudioWorklet is not implemented yet!');
-    console.log('🎵 AudioWorklet stub: Cleanup complete (no actual cleanup needed)');
+    
+    if (this.workletNode) {
+      console.log('🎵 Cleaning up AudioWorklet processor');
+      
+      try {
+        // Stop processing
+        this.workletNode.port.postMessage({ type: 'stop' });
+        
+        // Clear message handler
+        this.workletNode.port.onmessage = null;
+        this.workletNode.onprocessorerror = null;
+        
+        // Disconnect the node
+        this.workletNode.disconnect();
+        
+        console.log('🎵 AudioWorklet cleanup completed');
+      } catch (error) {
+        console.warn('🎵 Error during AudioWorklet cleanup:', error);
+      }
+      
+      this.workletNode = null;
+    }
   }
 
   getType() {
@@ -222,12 +399,23 @@ class AudioProcessorFactory {
 
   /**
    * Get the best available processor type
+   * Note: This only checks API support, not actual file availability
    * @returns {string}
    */
   static getBestProcessorType() {
     if (this.isAudioWorkletSupported()) {
       return AUDIO_PROCESSOR_TYPES.AUDIO_WORKLET;
     }
+    return AUDIO_PROCESSOR_TYPES.SCRIPT_PROCESSOR;
+  }
+
+  /**
+   * Get a conservative processor type that's most likely to work
+   * @returns {string}
+   */
+  static getReliableProcessorType() {
+    // For now, always return ScriptProcessor as it's more reliable
+    // Can be changed to return AUDIO_WORKLET when file loading is more robust
     return AUDIO_PROCESSOR_TYPES.SCRIPT_PROCESSOR;
   }
 }
@@ -239,7 +427,14 @@ export class AudioManager {
   /**
    * Initialize the AudioManager and set up global audio data storage
    */
-  constructor(processorType = DEFAULT_PROCESSOR_TYPE) {
+  constructor(processorType = null) {
+    // Auto-select the best processor type if not specified
+    if (processorType === null) {
+      processorType = AudioProcessorFactory.getBestProcessorType();
+      console.log(`🎵 Auto-selected audio processor: ${processorType}`);
+      console.log(`🎵 (Will automatically fallback to ScriptProcessor if AudioWorklet fails to load)`);
+    }
+    
     this.processorType = processorType;
     this.initializeGlobalAudioData();
   }
@@ -283,6 +478,50 @@ export class AudioManager {
   }
 
   /**
+   * Check if AudioWorklet is supported in this browser
+   * @returns {boolean}
+   */
+  isAudioWorkletSupported() {
+    return AudioProcessorFactory.isAudioWorkletSupported();
+  }
+
+  /**
+   * Get the best available processor type for this browser
+   * @returns {string}
+   */
+  getBestProcessorType() {
+    return AudioProcessorFactory.getBestProcessorType();
+  }
+
+  /**
+   * Switch to AudioWorklet if supported, otherwise fall back to ScriptProcessor
+   * @returns {boolean} True if switched to AudioWorklet, false if fell back to ScriptProcessor
+   */
+  useAudioWorkletIfSupported() {
+    if (this.isAudioWorkletSupported()) {
+      this.setProcessorType(AUDIO_PROCESSOR_TYPES.AUDIO_WORKLET);
+      return true;
+    } else {
+      console.warn('🎵 AudioWorklet not supported, using ScriptProcessor');
+      this.setProcessorType(AUDIO_PROCESSOR_TYPES.SCRIPT_PROCESSOR);
+      return false;
+    }
+  }
+
+  /**
+   * Get processor capabilities and status
+   * @returns {Object} Capabilities object
+   */
+  getCapabilities() {
+    return {
+      currentProcessor: this.processorType,
+      audioWorkletSupported: this.isAudioWorkletSupported(),
+      bestAvailable: this.getBestProcessorType(),
+      availableTypes: Object.values(AUDIO_PROCESSOR_TYPES)
+    };
+  }
+
+  /**
    * Set up audio analysis for a given audio element
    * @param {HTMLAudioElement} audioElement - The audio element to analyze
    * @returns {Object} Audio analysis components
@@ -312,45 +551,70 @@ export class AudioManager {
   }
   
   /**
-   * Create audio context and processing components
+   * Create audio context and processing components with automatic fallback
    * @param {HTMLAudioElement} audioElement - The audio element to analyze
    * @returns {Object} Created audio components
    */
   async createAudioComponents(audioElement) {
+    // Create audio context with browser compatibility
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    const audioContext = new AudioContext();
+    
+    console.log(`🎵 Creating new AudioContext (state: ${audioContext.state})`);
+    
+    // Create audio source - this is where the error occurs if element is already connected
+    console.log(`🎵 Creating MediaElementSourceNode for audio element`);
+    const source = audioContext.createMediaElementSource(audioElement);
+    source.connect(audioContext.destination); // Connect to output
+    
+    // Create sample callback for the processor
+    const sampleCallback = (sampleBuffer, timestamp) => {
+      this.handleAudioSamples(sampleBuffer, timestamp, audioElement);
+    };
+    
+    // Try to create and initialize the preferred processor with fallback
+    let processor = null;
+    let actualProcessorType = this.processorType;
+    
     try {
-      // Create audio context with browser compatibility
-      const AudioContext = window.AudioContext || window.webkitAudioContext;
-      const audioContext = new AudioContext();
-      
-      console.log(`🎵 Creating new AudioContext (state: ${audioContext.state})`);
-      
-      // Create audio source - this is where the error occurs if element is already connected
-      console.log(`🎵 Creating MediaElementSourceNode for audio element`);
-      const source = audioContext.createMediaElementSource(audioElement);
-      source.connect(audioContext.destination); // Connect to output
-      
-      // Create sample callback for the processor
-      const sampleCallback = (sampleBuffer, timestamp) => {
-        this.handleAudioSamples(sampleBuffer, timestamp, audioElement);
-      };
-      
-      // Create audio processor using the factory
-      const processor = AudioProcessorFactory.create(this.processorType, audioContext, sampleCallback);
-      
-      // Initialize the processor
+      // First attempt: Try preferred processor type
+      console.log(`🎵 Attempting to create ${this.processorType} processor...`);
+      processor = AudioProcessorFactory.create(this.processorType, audioContext, sampleCallback);
       await processor.initialize(source);
+      console.log(`🎵 Successfully initialized ${processor.getType()} processor`);
       
-      console.log(`🎵 Audio components created successfully using ${processor.getType()}`);
+    } catch (processorError) {
+      console.warn(`🎵 Failed to initialize ${this.processorType} processor:`, processorError.message);
       
-      return {
-        audioContext,
-        source,
-        processor
-      };
-    } catch (error) {
+      // If AudioWorklet failed, try fallback to ScriptProcessor
+      if (this.processorType === AUDIO_PROCESSOR_TYPES.AUDIO_WORKLET) {
+        try {
+          console.log(`🎵 Falling back to ${AUDIO_PROCESSOR_TYPES.SCRIPT_PROCESSOR}...`);
+          processor = AudioProcessorFactory.create(AUDIO_PROCESSOR_TYPES.SCRIPT_PROCESSOR, audioContext, sampleCallback);
+          await processor.initialize(source);
+          actualProcessorType = AUDIO_PROCESSOR_TYPES.SCRIPT_PROCESSOR;
+          console.log(`🎵 Successfully fell back to ${processor.getType()} processor`);
+          
+          // Update the AudioManager's processor type for future uses
+          this.processorType = AUDIO_PROCESSOR_TYPES.SCRIPT_PROCESSOR;
+          console.log(`🎵 Updated default processor type to ${this.processorType} due to AudioWorklet failure`);
+          
+        } catch (fallbackError) {
+          console.error('🎵 Even ScriptProcessor fallback failed:', fallbackError);
+          throw new Error(`Failed to initialize any audio processor. AudioWorklet error: ${processorError.message}, ScriptProcessor error: ${fallbackError.message}`);
+        }
+      } else {
+        // If ScriptProcessor itself failed, re-throw the error
+        throw processorError;
+      }
+    }
+    
+    // Handle media element connection errors separately (these aren't processor-specific)
+    if (!processor) {
+      const error = new Error('No audio processor could be created');
       console.error('🎵 Failed to create audio components:', error);
       
-      // If this is the "already connected" error, provide helpful information
+      // Check for common connection issues
       if (error.name === 'InvalidStateError' && error.message.includes('already connected')) {
         console.error('🎵 The audio element is still connected to a previous MediaElementSourceNode.');
         console.error('🎵 This usually means the cleanup process did not complete properly.');
@@ -359,6 +623,14 @@ export class AudioManager {
       
       throw error;
     }
+    
+    console.log(`🎵 Audio components created successfully using ${processor.getType()}`);
+    
+    return {
+      audioContext,
+      source,
+      processor
+    };
   }
 
   /**
@@ -783,6 +1055,63 @@ const audioManager = new AudioManager();
  */
 window.setupAudioAnalysis = function(audioElement) {
   return audioManager.setupAudioAnalysis(audioElement);
+};
+
+/**
+ * Get audio processor capabilities and status (debugging utility)
+ * @returns {Object} Capabilities and status information
+ */
+window.getAudioCapabilities = function() {
+  const capabilities = audioManager.getCapabilities();
+  console.log('🎵 Audio Engine Capabilities:', capabilities);
+  return capabilities;
+};
+
+/**
+ * Switch audio processor type (debugging utility)
+ * @param {string} type - Processor type ('script_processor' or 'audio_worklet')
+ * @returns {boolean} True if switch was successful
+ */
+window.setAudioProcessor = function(type) {
+  try {
+    audioManager.setProcessorType(type);
+    console.log(`🎵 Audio processor switched to: ${type}`);
+    return true;
+  } catch (error) {
+    console.error('🎵 Failed to switch audio processor:', error);
+    return false;
+  }
+};
+
+/**
+ * Use the best available audio processor (debugging utility)
+ * @returns {string} The processor type that was selected
+ */
+window.useBestAudioProcessor = function() {
+  const isWorklet = audioManager.useAudioWorkletIfSupported();
+  const selected = audioManager.getProcessorType();
+  console.log(`🎵 Selected best audio processor: ${selected} (AudioWorklet: ${isWorklet})`);
+  return selected;
+};
+
+/**
+ * Force AudioWorklet mode (for testing - will fallback automatically if it fails)
+ * @returns {string} The processor type that was set
+ */
+window.forceAudioWorklet = function() {
+  audioManager.setProcessorType(AUDIO_PROCESSOR_TYPES.AUDIO_WORKLET);
+  console.log(`🎵 Forced AudioWorklet mode (with automatic ScriptProcessor fallback)`);
+  return audioManager.getProcessorType();
+};
+
+/**
+ * Force ScriptProcessor mode (for compatibility testing)
+ * @returns {string} The processor type that was set
+ */
+window.forceScriptProcessor = function() {
+  audioManager.setProcessorType(AUDIO_PROCESSOR_TYPES.SCRIPT_PROCESSOR);
+  console.log(`🎵 Forced ScriptProcessor mode`);
+  return audioManager.getProcessorType();
 };
 
 /**
