@@ -104,11 +104,25 @@ template <typename... Types> class Variant {
     }
 
     template <typename T> T *ptr() {
-        return is<T>() ? reinterpret_cast<T *>(&_storage) : nullptr;
+        if (!is<T>()) return nullptr;
+        // Safe approach using union to avoid strict aliasing violations
+        union {
+            char* char_ptr;
+            T* typed_ptr;
+        } converter;
+        converter.char_ptr = &_storage[0];
+        return converter.typed_ptr;
     }
 
     template <typename T> const T *ptr() const {
-        return is<T>() ? reinterpret_cast<const T *>(&_storage) : nullptr;
+        if (!is<T>()) return nullptr;
+        // Safe approach using union to avoid strict aliasing violations
+        union {
+            const char* char_ptr;
+            const T* typed_ptr;
+        } converter;
+        converter.char_ptr = &_storage[0];
+        return converter.typed_ptr;
     }
 
     // template <typename T> T &get() {
@@ -169,14 +183,24 @@ template <typename... Types> class Variant {
     // –– helper for the visit table
     template <typename T, typename Visitor>
     static void visit_fn(void *storage, Visitor &v) {
-        // unsafe_cast is OK here because we know _tag matched T
-        v.accept(*reinterpret_cast<T *>(storage));
+        // Safe approach using union to avoid strict aliasing violations
+        union {
+            void* void_ptr;
+            T* typed_ptr;
+        } converter;
+        converter.void_ptr = storage;
+        v.accept(*converter.typed_ptr);
     }
 
     template <typename T, typename Visitor>
     static void visit_fn_const(const void *storage, Visitor &v) {
-        // unsafe_cast is OK here because we know _tag matched T
-        v.accept(*reinterpret_cast<const T *>(storage));
+        // Safe approach using union to avoid strict aliasing violations
+        union {
+            const void* void_ptr;
+            const T* typed_ptr;
+        } converter;
+        converter.void_ptr = storage;
+        v.accept(*converter.typed_ptr);
     }
 
     // –– destroy via table
@@ -189,7 +213,13 @@ template <typename... Types> class Variant {
     }
 
     template <typename T> static void destroy_fn(void *storage) {
-        reinterpret_cast<T *>(storage)->~T();
+        // Safe approach using union to avoid strict aliasing violations
+        union {
+            void* void_ptr;
+            T* typed_ptr;
+        } converter;
+        converter.void_ptr = storage;
+        converter.typed_ptr->~T();
     }
 
     // –– copy‐construct via table
@@ -202,7 +232,13 @@ template <typename... Types> class Variant {
 
     template <typename T>
     static void copy_fn(void *storage, const Variant &other) {
-        new (storage) T(*reinterpret_cast<const T *>(&other._storage));
+        // Safe approach using union to avoid strict aliasing violations
+        union {
+            const char* char_ptr;
+            const T* typed_ptr;
+        } converter;
+        converter.char_ptr = &other._storage[0];
+        new (storage) T(*converter.typed_ptr);
     }
 
     // –– move‐construct via table
@@ -215,7 +251,13 @@ template <typename... Types> class Variant {
     }
 
     template <typename T> static void move_fn(void *storage, Variant &other) {
-        new (storage) T(fl::move(*reinterpret_cast<T *>(&other._storage)));
+        // Safe approach using union to avoid strict aliasing violations
+        union {
+            char* char_ptr;
+            T* typed_ptr;
+        } converter;
+        converter.char_ptr = &other._storage[0];
+        new (storage) T(fl::move(*converter.typed_ptr));
     }
 
     // –– everything below here (type_traits, construct<T>, type_to_tag,
