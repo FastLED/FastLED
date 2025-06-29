@@ -66,7 +66,6 @@ void JsonAudioImpl::toJson(FLArduinoJson::JsonObject &json) const {
     json["group"] = mInternal->groupName().c_str();
     json["type"] = "audio";
     json["id"] = mInternal->id();
-    json["audioSamples"] = kJsAudioSamples;
     if (!mSerializeBuffer.empty()) {
         json["audioData"] = mSerializeBuffer.c_str();
     }
@@ -181,18 +180,18 @@ void JsonAudioImpl::updateInternal(
     fl::vector<AudioBuffer> audioBuffers;
     parseJsonToAudioBuffers(value, &audioBuffers);
     
-    // Convert each audio buffer to AudioSample objects
+    // Convert each audio buffer to a single AudioSample object (no chunking)
     for (const auto& buffer : audioBuffers) {
         const fl::vector<int16_t>& samples = buffer.samples;
         uint32_t timestamp = buffer.timestamp;
-        int size = samples.size();
         
-        // Break up the data into chunks of kJsAudioSamples
-        for (int i = 0; i < size; i += kJsAudioSamples) {
+        // Create one AudioSample per buffer object (preserve separation)
+        if (!samples.empty()) {
             AudioSampleImplPtr sample = NewPtr<AudioSampleImpl>();
-            int endIdx = MIN(i + kJsAudioSamples, size);
-            sample->assign(samples.begin() + i, samples.begin() + endIdx, timestamp);
+            sample->assign(samples.begin(), samples.end(), timestamp);
             mAudioSampleImpls.push_back(sample);
+            
+            // Maintain buffer limit to prevent excessive accumulation
             while (mAudioSampleImpls.size() > 10) {
                 mAudioSampleImpls.erase(mAudioSampleImpls.begin());
             }

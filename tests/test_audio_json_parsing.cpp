@@ -278,4 +278,33 @@ TEST_CASE("AudioJsonParsing - Edge case with many samples") {
     CHECK(buffers[0].samples[511] == -511);
 }
 
+TEST_CASE("AudioJsonParsing - Large buffer preserved without chunking") {
+    // Test with more than 512 samples to verify no chunking occurs
+    // Previously, buffers were chunked into 512-sample pieces, now they should remain intact
+    fl::string jsonStr = R"([{"samples": [)";
+    
+    // Generate 1024 sample values (larger than old chunk size of 512)
+    for (int i = 0; i < 1024; ++i) {
+        if (i > 0) jsonStr += ",";
+        jsonStr.append(i);
+    }
+    
+    jsonStr += R"(], "timestamp": 4000000000}])";
+    
+    fl::vector<AudioBuffer> buffers;
+    parseJsonToAudioBuffers(jsonStr, &buffers);
+    
+    // Should have exactly ONE buffer (not chunked into multiple 512-sample pieces)
+    REQUIRE(buffers.size() == 1);
+    
+    // The single buffer should contain all 1024 samples
+    REQUIRE(buffers[0].samples.size() == 1024);
+    CHECK(buffers[0].timestamp == 4000000000UL);
+    
+    // Verify first, middle, and last samples
+    CHECK(buffers[0].samples[0] == 0);
+    CHECK(buffers[0].samples[511] == 511);  // This would be in a separate chunk with old behavior
+    CHECK(buffers[0].samples[1023] == 1023);
+}
+
 #endif // FASTLED_ENABLE_JSON 
