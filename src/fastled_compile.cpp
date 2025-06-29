@@ -6,6 +6,9 @@
 
 #if FASTLED_ALL_SRC
 
+// Include io.h early to set FL_IO_H_INCLUDED guard for unified compilation
+#include "fl/io.h"
+
 #include "fl/allocator.cpp.hpp"
 #include "fl/audio.cpp.hpp"
 #include "fl/audio_reactive.cpp.hpp"

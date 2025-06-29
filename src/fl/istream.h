@@ -1,6 +1,7 @@
 #pragma once
 
 // Forward declarations to avoid pulling in fl/io.h and causing fl/io.cpp to be compiled
+#ifndef FL_IO_H_INCLUDED
 namespace fl {
     int available();
     int read();
@@ -11,6 +12,7 @@ namespace fl {
     void inject_read_handler(const function<int()>& handler);
 #endif
 }
+#endif
 
 #include "fl/str.h"
 #include "fl/type_traits.h"

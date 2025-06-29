@@ -73,13 +73,11 @@
 
 // All Source Build Control
 // When FASTLED_ALL_SRC is enabled, all source is compiled into a single translation unit
-// Debug/testing builds use individual compilation for better error isolation
+// Individual compilation (FASTLED_ALL_SRC=0) is only used for release builds
 #ifndef FASTLED_ALL_SRC
-  #if defined(DEBUG) || defined(FASTLED_TESTING)
-    #define FASTLED_ALL_SRC 0
-  #elif !defined(RELEASE) || (RELEASE == 0)
-    #define FASTLED_ALL_SRC 1
+  #if defined(RELEASE) && (RELEASE != 0)
+    #define FASTLED_ALL_SRC 0  // Individual compilation for release builds only
   #else
-    #define FASTLED_ALL_SRC 0
+    #define FASTLED_ALL_SRC 1  // Unified compilation for all other builds (debug, testing, non-release)
   #endif
 #endif

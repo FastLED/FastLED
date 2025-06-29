@@ -1,5 +1,7 @@
 #pragma once
 
+#define FL_IO_H_INCLUDED
+
 #ifdef FASTLED_TESTING
 #include "fl/function.h"
 #endif

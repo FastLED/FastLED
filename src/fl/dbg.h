@@ -5,9 +5,11 @@
 
 // Forward declaration to avoid pulling in fl/io.h and causing fl/io.cpp to be compiled
 // This prevents ~5KB memory bloat for simple applications
+#ifndef FL_IO_H_INCLUDED
 namespace fl {
     void println(const char* str);
 }
+#endif
 
 namespace fl {
 // ".build/src/fl/dbg.h" -> "src/fl/dbg.h"
