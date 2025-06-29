@@ -255,6 +255,7 @@ export class AudioManager {
         audioSamples: {},   // Store current audio samples by ID
         audioBuffers: {},   // Store optimized audio buffer storage by ID
         audioProcessors: {},// Store audio processors by ID
+        audioSources: {},   // Store MediaElementSourceNodes by ID
         hasActiveSamples: false
       };
     }
@@ -316,30 +317,48 @@ export class AudioManager {
    * @returns {Object} Created audio components
    */
   async createAudioComponents(audioElement) {
-    // Create audio context with browser compatibility
-    const AudioContext = window.AudioContext || window.webkitAudioContext;
-    const audioContext = new AudioContext();
-    
-    // Create audio source
-    const source = audioContext.createMediaElementSource(audioElement);
-    source.connect(audioContext.destination); // Connect to output
-    
-    // Create sample callback for the processor
-    const sampleCallback = (sampleBuffer, timestamp) => {
-      this.handleAudioSamples(sampleBuffer, timestamp, audioElement);
-    };
-    
-    // Create audio processor using the factory
-    const processor = AudioProcessorFactory.create(this.processorType, audioContext, sampleCallback);
-    
-    // Initialize the processor
-    await processor.initialize(source);
-    
-    return {
-      audioContext,
-      source,
-      processor
-    };
+    try {
+      // Create audio context with browser compatibility
+      const AudioContext = window.AudioContext || window.webkitAudioContext;
+      const audioContext = new AudioContext();
+      
+      console.log(`🎵 Creating new AudioContext (state: ${audioContext.state})`);
+      
+      // Create audio source - this is where the error occurs if element is already connected
+      console.log(`🎵 Creating MediaElementSourceNode for audio element`);
+      const source = audioContext.createMediaElementSource(audioElement);
+      source.connect(audioContext.destination); // Connect to output
+      
+      // Create sample callback for the processor
+      const sampleCallback = (sampleBuffer, timestamp) => {
+        this.handleAudioSamples(sampleBuffer, timestamp, audioElement);
+      };
+      
+      // Create audio processor using the factory
+      const processor = AudioProcessorFactory.create(this.processorType, audioContext, sampleCallback);
+      
+      // Initialize the processor
+      await processor.initialize(source);
+      
+      console.log(`🎵 Audio components created successfully using ${processor.getType()}`);
+      
+      return {
+        audioContext,
+        source,
+        processor
+      };
+    } catch (error) {
+      console.error('🎵 Failed to create audio components:', error);
+      
+      // If this is the "already connected" error, provide helpful information
+      if (error.name === 'InvalidStateError' && error.message.includes('already connected')) {
+        console.error('🎵 The audio element is still connected to a previous MediaElementSourceNode.');
+        console.error('🎵 This usually means the cleanup process did not complete properly.');
+        console.error('🎵 Try pausing the audio and waiting a moment before switching tracks.');
+      }
+      
+      throw error;
+    }
   }
 
   /**
@@ -365,6 +384,7 @@ export class AudioManager {
   storeAudioReferences(audioId, components) {
     window.audioData.audioContexts[audioId] = components.audioContext;
     window.audioData.audioProcessors[audioId] = components.processor;
+    window.audioData.audioSources[audioId] = components.source; // Store source for cleanup
     window.audioData.audioBuffers[audioId] = new AudioBufferStorage(audioId);
     
     // Create a placeholder for current samples (for backward compatibility)
@@ -521,24 +541,37 @@ export class AudioManager {
    * @param {HTMLElement} controlDiv - The control container
    */
   setupFileSelectionHandler(uploadButton, audioInput, controlDiv) {
-    audioInput.addEventListener('change', (event) => {
+    audioInput.addEventListener('change', async (event) => {
       const file = event.target.files[0];
       if (file) {
-        // Create object URL for the selected file
-        const url = URL.createObjectURL(file);
-        
-        // Update UI to show selected file
-        this.updateButtonText(uploadButton, file);
-        
-        // Set up audio playback
-        const audio = this.createOrUpdateAudioElement(controlDiv);
-        this.cleanupPreviousAudioContext(audioInput.id);
-        
-        // Configure and play the audio
-        this.configureAudioPlayback(audio, url, controlDiv);
-        
-        // Add processing indicator
-        this.updateAudioProcessingIndicator(controlDiv);
+        try {
+          // Create object URL for the selected file
+          const url = URL.createObjectURL(file);
+          
+          // Update UI to show selected file
+          this.updateButtonText(uploadButton, file);
+          
+          // Clean up previous audio context BEFORE setting up new audio
+          console.log(`🎵 Cleaning up previous audio context for ${audioInput.id}`);
+          await this.cleanupPreviousAudioContext(audioInput.id);
+          
+          // Small delay to ensure cleanup is complete
+          console.log('🎵 Waiting for cleanup to complete...');
+          await new Promise(resolve => setTimeout(resolve, 100));
+          
+          // Set up audio playback with fresh audio element
+          const audio = this.createOrUpdateAudioElement(controlDiv);
+          
+          // Configure and play the audio
+          await this.configureAudioPlayback(audio, url, controlDiv);
+          
+          // Add processing indicator
+          this.updateAudioProcessingIndicator(controlDiv);
+        } catch (error) {
+          console.error('🎵 Error during audio file selection:', error);
+          // Show error to user
+          this.showAudioError(controlDiv, 'Failed to load audio file. Please try again.');
+        }
       }
     });
   }
@@ -560,22 +593,41 @@ export class AudioManager {
    * @returns {HTMLAudioElement} The audio element
    */
   createOrUpdateAudioElement(container) {
-    let audio = container.querySelector('audio');
-    if (!audio) {
-      audio = document.createElement('audio');
-      audio.controls = true;
-      audio.className = 'audio-player';
-      container.appendChild(audio);
+    // Get the audio input ID from the container
+    const audioInput = container.querySelector('input[type="file"]');
+    const audioId = audioInput ? audioInput.id : 'unknown';
+    
+    // Remove any existing audio element first
+    const existingAudio = container.querySelector('audio');
+    if (existingAudio) {
+      console.log(`🎵 Removing existing audio element for ${audioId} to avoid MediaElementSourceNode conflicts`);
+      existingAudio.pause();
+      existingAudio.currentTime = 0;
+      existingAudio.src = '';
+      existingAudio.load();
+      container.removeChild(existingAudio);
     }
+    
+    // Always create a fresh audio element
+    console.log(`🎵 Creating new audio element for ${audioId}`);
+    const audio = document.createElement('audio');
+    audio.controls = true;
+    audio.className = 'audio-player';
+    audio.setAttribute('data-audio-id', audioId); // Track which input this belongs to
+    container.appendChild(audio);
+    
     return audio;
   }
   
   /**
    * Clean up any previous audio context and buffer storage
    * @param {string} inputId - The ID of the audio input
+   * @returns {Promise<void>}
    */
-  cleanupPreviousAudioContext(inputId) {
-    // Clean up audio processor
+  async cleanupPreviousAudioContext(inputId) {
+    console.log(`🎵 Starting cleanup for ${inputId}`);
+    
+    // Clean up audio processor first (this disconnects nodes)
     if (window.audioData?.audioProcessors?.[inputId]) {
       const processor = window.audioData.audioProcessors[inputId];
       console.log(`🎵 Cleaning up ${processor.getType()} processor for ${inputId}`);
@@ -583,10 +635,25 @@ export class AudioManager {
       delete window.audioData.audioProcessors[inputId];
     }
     
-    // Clean up audio context
+    // Clean up MediaElementSourceNode
+    if (window.audioData?.audioSources?.[inputId]) {
+      try {
+        const source = window.audioData.audioSources[inputId];
+        console.log(`🎵 Disconnecting MediaElementSourceNode for ${inputId}`);
+        source.disconnect();
+      } catch (e) {
+        console.warn('Error disconnecting MediaElementSourceNode:', e);
+      }
+      delete window.audioData.audioSources[inputId];
+    }
+    
+    // Clean up audio context and wait for it to close
     if (window.audioData?.audioContexts?.[inputId]) {
       try {
-        window.audioData.audioContexts[inputId].close();
+        const context = window.audioData.audioContexts[inputId];
+        console.log(`🎵 Closing AudioContext for ${inputId} (state: ${context.state})`);
+        await context.close();
+        console.log(`🎵 AudioContext closed successfully for ${inputId} (final state: ${context.state})`);
       } catch (e) {
         console.warn('Error closing previous audio context:', e);
       }
@@ -597,6 +664,7 @@ export class AudioManager {
     if (window.audioData?.audioBuffers?.[inputId]) {
       const bufferStorage = window.audioData.audioBuffers[inputId];
       const stats = bufferStorage.getStats();
+      console.log(`🎵 Clearing buffer storage for ${inputId}: ${stats.bufferCount} buffers, ${stats.memoryEstimateKB.toFixed(1)}KB`);
       bufferStorage.clear();
       delete window.audioData.audioBuffers[inputId];
     }
@@ -605,6 +673,17 @@ export class AudioManager {
     if (window.audioData?.audioSamples?.[inputId]) {
       delete window.audioData.audioSamples[inputId];
     }
+    
+    // Clean up any lingering audio elements in the DOM that might be associated with this ID
+    const audioElements = document.querySelectorAll(`#audio-${inputId}, audio[data-audio-id="${inputId}"]`);
+    audioElements.forEach(audio => {
+      console.log(`🎵 Found and cleaning up stray audio element for ${inputId}`);
+      audio.pause();
+      audio.src = '';
+      audio.load();
+    });
+    
+    console.log(`🎵 Cleanup completed for ${inputId}`);
   }
   
   /**
@@ -613,21 +692,25 @@ export class AudioManager {
    * @param {string} url - The audio file URL
    * @param {HTMLElement} container - The control container
    */
-  configureAudioPlayback(audio, url, container) {
+  async configureAudioPlayback(audio, url, container) {
     // Set source and loop
     audio.src = url;
     audio.loop = true;
     
-    // Initialize audio analysis before playing
-    const analysisSetup = this.setupAudioAnalysis(audio);
-    
-    // Try to play the audio (may be blocked by browser policies)
-    audio.play().then(() => {
-      console.log("Audio playback started successfully");
-    }).catch(err => {
-      console.error("Error starting audio playback:", err);
+    try {
+      // Initialize audio analysis before playing
+      console.log('🎵 Setting up audio analysis...');
+      await this.setupAudioAnalysis(audio);
+      console.log('🎵 Audio analysis setup completed');
+      
+      // Try to play the audio (may be blocked by browser policies)
+      await audio.play();
+      console.log("🎵 Audio playback started successfully");
+    } catch (err) {
+      console.error("🎵 Error during audio playback setup:", err);
       this.createFallbackPlayButton(audio, container);
-    });
+      throw err; // Re-throw so the caller can handle it
+    }
   }
   
   /**
@@ -662,6 +745,29 @@ export class AudioManager {
     }
     
     container.appendChild(audioIndicator);
+  }
+
+  /**
+   * Show an error message in the audio control container
+   * @param {HTMLElement} container - The control container
+   * @param {string} message - Error message to display
+   */
+  showAudioError(container, message) {
+    // Create error indicator
+    const errorIndicator = document.createElement('div');
+    errorIndicator.className = 'audio-error';
+    errorIndicator.textContent = message;
+    errorIndicator.style.color = 'red';
+    errorIndicator.style.fontSize = '12px';
+    errorIndicator.style.marginTop = '5px';
+    
+    // Replace any existing indicator
+    const existingIndicator = container.querySelector('.audio-indicator, .audio-error');
+    if (existingIndicator) {
+      container.removeChild(existingIndicator);
+    }
+    
+    container.appendChild(errorIndicator);
   }
 }
 
