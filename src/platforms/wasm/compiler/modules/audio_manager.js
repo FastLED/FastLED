@@ -287,6 +287,7 @@ class AudioWorkletAudioProcessor extends AudioProcessor {
 
         for (const path of possiblePaths) {
           try {
+            // deno-lint-ignore no-await-in-loop
             await this.audioContext.audioWorklet.addModule(path);
             console.log(`🎵 ✅ AudioWorklet module loaded successfully from: ${path}`);
             loadSuccess = true;
@@ -1330,6 +1331,7 @@ window.testAudioWorkletPath = async function (customPath = null) {
 
       // First, try a simple fetch to see if the file exists
       try {
+        // deno-lint-ignore no-await-in-loop
         const fetchResponse = await fetch(path);
         console.log(`🎵    📡 Fetch status: ${fetchResponse.status} ${fetchResponse.statusText}`);
 
@@ -1345,6 +1347,7 @@ window.testAudioWorkletPath = async function (customPath = null) {
       }
 
       // Now try loading as AudioWorklet module
+      // deno-lint-ignore no-await-in-loop
       await testContext.audioWorklet.addModule(path);
       console.log(`🎵    🎵 ✅ AudioWorklet module loaded successfully!`);
 

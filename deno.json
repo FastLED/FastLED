@@ -24,9 +24,49 @@
       "tags": [
         "recommended"
       ],
+      "include": [
+        // Critical Safety & Bug Prevention
+        "eqeqeq",
+        "no-eval", 
+        "no-throw-literal",
+        "prefer-const",
+        
+        // Performance Best Practices  
+        "no-await-in-loop",
+        
+        // Code Quality (lenient)
+        "default-param-last"
+      ],
       "exclude": [
+        // Allow console usage (needed for debug output)
+        "no-console",
+        
+        // Allow unused variables (common in graphics/audio callbacks)  
         "no-unused-vars",
-        "no-console"
+        
+        // Allow explicit any (gradual typing)
+        "no-explicit-any",
+        
+        // Allow non-null assertions (sometimes needed for DOM)
+        "no-non-null-assertion",
+        
+        // Keep flexible for WebAssembly bindings
+        "ban-types",
+        
+        // Allow snake_case naming (WebAssembly interface compatibility)
+        "camelcase",
+        
+        // Allow unguarded for-in (common in this codebase)
+        "guard-for-in",
+        
+        // Allow undefined globals (browser environment)
+        "no-undef",
+        
+        // Allow multiple var declarations per line
+        "single-var-declarator",
+        
+        // Allow sparse arrays (used in graphics)
+        "no-sparse-arrays"
       ]
     },
     "include": [

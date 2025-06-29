@@ -569,6 +569,7 @@ async function fastledLoadSetupLoop(
       console.log(`File fetched: ${file.path}, size: ${file.size}`);
 
       while (true) {
+        // deno-lint-ignore no-await-in-loop
         const { value, done } = await reader.read();
         if (done) break;
         // Allocate and copy chunk data
