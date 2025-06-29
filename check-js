@@ -30,30 +30,59 @@ fi
 echo -e "${BLUE}Found JavaScript files:${NC}"
 echo "$JS_FILES" | sed 's/^/  /'
 
+# Check if type checking is enabled in deno.json
+CHECK_JS_ENABLED=$(grep -o '"checkJs": *true' deno.json || echo "false")
+
 # Run enhanced linting with Deno (syntax, style, and best practices)
-echo -e "${BLUE}Running enhanced JavaScript linting...${NC}"
+if [[ "$CHECK_JS_ENABLED" != "false" ]]; then
+    echo -e "${BLUE}Running enhanced JavaScript linting + type checking...${NC}"
+else
+    echo -e "${BLUE}Running enhanced JavaScript linting...${NC}"
+fi
 
 TYPE_ERRORS=0
 for file in $JS_FILES; do
     echo -e "${BLUE}Checking: $file${NC}"
-    # Use deno lint for basic syntax checking
-    if "$DENO_BINARY" lint --config deno.json "$file" 2>/dev/null; then
-        echo -e "${GREEN}  ✅ $file - No lint errors${NC}"
-    else
+    
+    # First run linting
+    if ! "$DENO_BINARY" lint --config deno.json "$file" 2>/dev/null; then
         echo -e "${YELLOW}  ⚠️  Lint issues found in $file...${NC}"
         "$DENO_BINARY" lint --config deno.json "$file"
         TYPE_ERRORS=$((TYPE_ERRORS + 1))
+        continue
+    fi
+    
+    # Then run type checking if enabled
+    if [[ "$CHECK_JS_ENABLED" != "false" ]]; then
+        if "$DENO_BINARY" check --config deno.json "$file" 2>/dev/null; then
+            echo -e "${GREEN}  ✅ $file - No lint or type errors${NC}"
+        else
+            echo -e "${YELLOW}  🔍 Type checking $file...${NC}"
+            "$DENO_BINARY" check --config deno.json "$file"
+            TYPE_ERRORS=$((TYPE_ERRORS + 1))
+        fi
+    else
+        echo -e "${GREEN}  ✅ $file - No lint errors${NC}"
     fi
 done
 
 echo ""
 if [ $TYPE_ERRORS -eq 0 ]; then
-    echo -e "${GREEN}🎉 All JavaScript files passed enhanced linting!${NC}"
-    echo -e "${BLUE}💡 This covers syntax, style, and best practices.${NC}"
-    echo -e ""
-    echo -e "${BLUE}🔬 Full JSDoc type checking is available but currently disabled.${NC}"
-    echo -e "${BLUE}   To enable type checking, edit deno.json and set:${NC}"
-    echo -e "   ${BLUE}\"checkJs\": true${NC}"
+    if [[ "$CHECK_JS_ENABLED" != "false" ]]; then
+        echo -e "${GREEN}🎉 All JavaScript files passed enhanced linting AND type checking!${NC}"
+        echo -e "${BLUE}💡 This covers syntax, style, best practices, and JSDoc type safety.${NC}"
+        echo -e ""
+        echo -e "${BLUE}🔬 JSDoc type checking is currently ENABLED.${NC}"
+        echo -e "${BLUE}   To disable type checking, edit deno.json and set:${NC}"
+        echo -e "   ${BLUE}\"checkJs\": false${NC}"
+    else
+        echo -e "${GREEN}🎉 All JavaScript files passed enhanced linting!${NC}"
+        echo -e "${BLUE}💡 This covers syntax, style, and best practices.${NC}"
+        echo -e ""
+        echo -e "${BLUE}🔬 Full JSDoc type checking is available but currently disabled.${NC}"
+        echo -e "${BLUE}   To enable type checking, edit deno.json and set:${NC}"
+        echo -e "   ${BLUE}\"checkJs\": true${NC}"
+    fi
     echo -e ""
     echo -e "${BLUE}💡 To improve type safety, consider adding JSDoc annotations:${NC}"
     echo -e "   ${BLUE}/**${NC}"
@@ -64,7 +93,12 @@ if [ $TYPE_ERRORS -eq 0 ]; then
     echo -e "   ${BLUE}async function createUser(name, age) { ... }${NC}"
     exit 0
 else
-    echo -e "${RED}❌ Found $TYPE_ERRORS file(s) with linting issues${NC}"
-    echo -e "${YELLOW}💡 Fix linting issues before proceeding${NC}"
+    if [[ "$CHECK_JS_ENABLED" != "false" ]]; then
+        echo -e "${RED}❌ Found $TYPE_ERRORS file(s) with linting or type checking issues${NC}"
+        echo -e "${YELLOW}💡 Fix linting and type errors before proceeding${NC}"
+    else
+        echo -e "${RED}❌ Found $TYPE_ERRORS file(s) with linting issues${NC}"
+        echo -e "${YELLOW}💡 Fix linting issues before proceeding${NC}"
+    fi
     exit 1
 fi 

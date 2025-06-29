@@ -15,6 +15,7 @@
     "strictFunctionTypes": false,
     "noImplicitThis": false,
     "suppressExcessPropertyErrors": true,
+    "ignoreDeprecations": "5.0",
     "skipLibCheck": true,
     "lib": ["dom", "dom.asynciterable", "es2022", "webworker"]
   },
