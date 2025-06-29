@@ -381,6 +381,26 @@ class UIDescription : public UIElement {
     UIDescriptionImpl mImpl;
 };
 
+class UIHelp : public UIElement {
+  public:
+    FL_NO_COPY(UIHelp);
+    UIHelp(const char *markdownContent) : mImpl(markdownContent) {}
+    ~UIHelp() {}
+    
+    // Override setGroup to also update the implementation
+    void setGroup(const fl::string& groupName) override { 
+        UIElement::setGroup(groupName); 
+        // Update the implementation's group if it has the method (WASM platforms)
+        mImpl.setGroup(groupName);
+    }
+
+    // Access to the markdown content
+    const fl::string& markdownContent() const { return mImpl.markdownContent(); }
+
+  protected:
+    UIHelpImpl mImpl;
+};
+
 class UIAudio : public UIElement {
   public:
     FL_NO_COPY(UIAudio)

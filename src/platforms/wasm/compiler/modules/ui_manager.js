@@ -272,6 +272,91 @@ function setDescription(descData) {
   }
 }
 
+function createHelp(element) {
+  const helpDiv = document.createElement('div');
+  helpDiv.className = 'ui-help';
+  helpDiv.id = `help-${element.id}`;
+  
+  // Convert markdown to HTML
+  const htmlContent = markdownToHtml(element.markdownContent);
+  helpDiv.innerHTML = htmlContent;
+  
+  // Add some basic styling
+  helpDiv.style.cssText = `
+    margin: 10px 0;
+    padding: 15px;
+    background-color: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 5px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    line-height: 1.6;
+  `;
+  
+  // Style the rendered HTML elements
+  const style = document.createElement('style');
+  style.textContent = `
+    .ui-help h1, .ui-help h2, .ui-help h3 {
+      margin-top: 0;
+      margin-bottom: 10px;
+      color: #343a40;
+    }
+    .ui-help h1 { font-size: 1.5em; }
+    .ui-help h2 { font-size: 1.3em; }
+    .ui-help h3 { font-size: 1.1em; }
+    .ui-help p {
+      margin: 10px 0;
+      color: #495057;
+    }
+    .ui-help ul, .ui-help ol {
+      padding-left: 20px;
+      margin: 10px 0;
+    }
+    .ui-help li {
+      margin: 5px 0;
+      color: #495057;
+    }
+    .ui-help code {
+      background-color: #e9ecef;
+      padding: 2px 4px;
+      border-radius: 3px;
+      font-family: 'Courier New', monospace;
+      font-size: 0.9em;
+    }
+    .ui-help pre {
+      background-color: #f1f3f4;
+      padding: 10px;
+      border-radius: 3px;
+      overflow-x: auto;
+      margin: 10px 0;
+    }
+    .ui-help pre code {
+      background-color: transparent;
+      padding: 0;
+    }
+    .ui-help a {
+      color: #007bff;
+      text-decoration: none;
+    }
+    .ui-help a:hover {
+      text-decoration: underline;
+    }
+    .ui-help strong {
+      font-weight: 600;
+    }
+    .ui-help em {
+      font-style: italic;
+    }
+  `;
+  
+  // Append the style to document head if it doesn't exist
+  if (!document.querySelector('#ui-help-styles')) {
+    style.id = 'ui-help-styles';
+    document.head.appendChild(style);
+  }
+  
+  return helpDiv;
+}
+
 
 export class JsonUiManager {
   constructor(uiControlsId) {
@@ -569,6 +654,10 @@ export class JsonUiManager {
     if (data.type === 'description') {
       setDescription(data);
       return null; // Skip creating UI control for description
+    }
+
+    if (data.type === 'help') {
+      return createHelp(data); // Return the help element for insertion
     }
 
     let control;

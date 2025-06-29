@@ -16,6 +16,7 @@
 #include "platforms/shared/ui/json/button.h"
 #include "platforms/shared/ui/json/title.h"
 #include "platforms/shared/ui/json/description.h"
+#include "platforms/shared/ui/json/help.h"
 #include "platforms/shared/ui/json/number_field.h"
 
 FASTLED_USING_NAMESPACE
@@ -267,6 +268,47 @@ TEST_CASE("JsonUiManager basic functionality") {
 }
 
 
+
+TEST_CASE("JsonHelpImpl comprehensive testing") {
+    // Test basic creation
+    fl::string helpContent = R"(# FastLED Quick Start
+
+## Basic Setup
+```cpp
+#include <FastLED.h>
+#define NUM_LEDS 60
+CRGB leds[NUM_LEDS];
+```
+
+## Key Functions
+- **FastLED.addLeds()** - Initialize LED strip
+- **FastLED.show()** - Update display  
+- **fill_solid()** - Set all LEDs to one color
+
+For more info, visit [FastLED.io](https://fastled.io))";
+    
+    JsonHelpImpl help(helpContent);
+    
+    // Test basic properties
+    CHECK(help.name() == "help");
+    CHECK(help.markdownContent() == helpContent);
+    CHECK(help.groupName().empty());
+    
+    // Test group setting
+    help.Group("documentation");
+    CHECK(help.groupName() == "documentation");
+    
+    // Test JSON serialization
+    FLArduinoJson::JsonDocument doc;
+    auto jsonObj = doc.to<FLArduinoJson::JsonObject>();
+    help.toJson(jsonObj);
+    
+    CHECK(fl::string(jsonObj["name"].as<const char*>()) == fl::string("help"));
+    CHECK(fl::string(jsonObj["type"].as<const char*>()) == fl::string("help"));
+    CHECK(fl::string(jsonObj["group"].as<const char*>()) == fl::string("documentation"));
+    CHECK(jsonObj["id"].as<int>() >= 0);
+    CHECK(fl::string(jsonObj["markdownContent"].as<const char*>()) == helpContent);
+}
 
 TEST_CASE("Component boundary value testing") {
     // Test slider with edge values

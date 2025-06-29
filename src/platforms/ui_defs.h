@@ -15,6 +15,7 @@
 #include "platforms/shared/ui/json/checkbox.h"
 #include "platforms/shared/ui/json/description.h"
 #include "platforms/shared/ui/json/dropdown.h"
+#include "platforms/shared/ui/json/help.h"
 #include "platforms/shared/ui/json/number_field.h"
 #include "platforms/shared/ui/json/slider.h"
 #include "platforms/shared/ui/json/title.h"
@@ -27,6 +28,7 @@ namespace fl {
 #define FASTLED_HAS_UI_NUMBER_FIELD 1
 #define FASTLED_HAS_UI_TITLE 1
 #define FASTLED_HAS_UI_DESCRIPTION 1
+#define FASTLED_HAS_UI_HELP 1
 #define FASTLED_HAS_UI_AUDIO 1
 #define FASTLED_HAS_UI_DROPDOWN 1
 
@@ -36,6 +38,7 @@ typedef JsonCheckboxImpl UICheckboxImpl;
 typedef JsonButtonImpl UIButtonImpl;
 typedef JsonTitleImpl UITitleImpl;
 typedef JsonDescriptionImpl UIDescriptionImpl;
+typedef JsonHelpImpl UIHelpImpl;
 typedef JsonAudioImpl UIAudioImpl;
 typedef JsonDropdownImpl UIDropdownImpl;
 

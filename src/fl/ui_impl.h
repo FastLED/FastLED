@@ -212,6 +212,25 @@ class UIDescriptionImpl {
 
 #endif
 
+#if !FASTLED_HAS_UI_HELP
+
+class UIHelpImpl {
+  public:
+    UIHelpImpl(const char *markdownContent) : mContent(markdownContent) { FASTLED_UNUSED(markdownContent); }
+    ~UIHelpImpl() {}
+    
+    // Stub method for group setting (does nothing on non-WASM platforms)
+    void setGroup(const fl::string& groupName) { FASTLED_UNUSED(groupName); }
+    
+    // Stub method for accessing markdown content
+    const fl::string& markdownContent() const { return mContent; }
+    
+  private:
+    fl::string mContent;
+};
+
+#endif
+
 #if !FASTLED_HAS_UI_AUDIO
 class UIAudioImpl {
   public:

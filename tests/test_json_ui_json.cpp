@@ -128,8 +128,15 @@ TEST_CASE("JSON UI Elements Array Serialization - Complete Set") {
     descObj["type"] = "description";
     descObj["text"] = "Interactive LED control panel";
     
+    // Add help element
+    auto helpObj = jsonArray.add<FLArduinoJson::JsonObject>();
+    helpObj["id"] = 8;
+    helpObj["type"] = "help";
+    helpObj["markdownContent"] = "# Help\n\nThis is **help** text with *markdown*.";
+    helpObj["group"] = "Documentation";
+    
     // Validate the array structure
-    CHECK(jsonArray.size() == 7);
+    CHECK(jsonArray.size() == 8);
     
     // Validate slider structure
     auto slider = jsonArray[0];
@@ -162,6 +169,13 @@ TEST_CASE("JSON UI Elements Array Serialization - Complete Set") {
     CHECK(fl::string(options[0].as<const char*>()) == fl::string("Auto"));
     CHECK(fl::string(options[1].as<const char*>()) == fl::string("Manual"));
     CHECK(fl::string(options[2].as<const char*>()) == fl::string("Off"));
+    
+    // Validate help structure
+    auto help = jsonArray[7];
+    CHECK(help["id"].as<int>() == 8);
+    CHECK(fl::string(help["type"].as<const char*>()) == fl::string("help"));
+    CHECK(fl::string(help["markdownContent"].as<const char*>()) == fl::string("# Help\n\nThis is **help** text with *markdown*."));
+    CHECK(fl::string(help["group"].as<const char*>()) == fl::string("Documentation"));
     
     // Test JSON string serialization
     fl::string jsonString;

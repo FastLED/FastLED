@@ -700,4 +700,15 @@ class string : public StrN<FASTLED_STR_INLINED_SIZE> {
     static void compileTimeAssertions();
 };
 
+// to_string template function for converting values to fl::string
+// This provides std::to_string equivalent functionality using fl::string
+// Delegates to fl::string::append which handles all type conversions
+
+template<typename T>
+inline string to_string(T value) {
+    string result;
+    result.append(value);
+    return result;
+}
+
 } // namespace fl
