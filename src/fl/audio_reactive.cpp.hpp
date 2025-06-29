@@ -1,6 +1,6 @@
 #include "fl/audio_reactive.h"
 #include "fl/math.h"
-#include "fl/slice.h"
+#include "fl/span.h"
 #include <math.h>
 
 namespace fl {

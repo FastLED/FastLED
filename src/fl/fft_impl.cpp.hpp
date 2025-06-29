@@ -66,7 +66,7 @@ class FFTContext {
 
     size_t sampleSize() const { return m_cq_cfg.samples; }
 
-    void fft_unit_test(Slice<const int16_t> buffer, FFTBins *out) {
+    void fft_unit_test(span<const int16_t> buffer, FFTBins *out) {
 
         // FASTLED_ASSERT(512 == m_cq_cfg.samples, "FFTImpl samples mismatch and
         // are still hardcoded to 512");
@@ -151,11 +151,11 @@ size_t FFTImpl::sampleSize() const {
 
 FFTImpl::Result FFTImpl::run(const AudioSample &sample, FFTBins *out) {
     auto &audio_sample = sample.pcm();
-    Slice<const int16_t> slice(audio_sample);
+    span<const int16_t> slice(audio_sample);
     return run(slice, out);
 }
 
-FFTImpl::Result FFTImpl::run(Slice<const int16_t> sample, FFTBins *out) {
+FFTImpl::Result FFTImpl::run(span<const int16_t> sample, FFTBins *out) {
     if (!mContext) {
         return FFTImpl::Result(false, "FFTImpl context is not initialized");
     }

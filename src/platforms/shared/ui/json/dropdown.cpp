@@ -2,7 +2,7 @@
 #include "fl/json.h"
 #include "platforms/shared/ui/json/ui.h"
 #include <string.h>
-#include "fl/slice.h"
+#include "fl/span.h"
 
 #if FASTLED_ENABLE_JSON
 
@@ -34,8 +34,8 @@ JsonDropdownImpl::JsonDropdownImpl(const fl::string &name, const fl::string* opt
     commonInit(name);
 }
 
-// Constructor with fl::Slice<fl::string>
-JsonDropdownImpl::JsonDropdownImpl(const fl::string &name, fl::Slice<fl::string> options) 
+// Constructor with fl::span<fl::string>
+JsonDropdownImpl::JsonDropdownImpl(const fl::string &name, fl::span<fl::string> options) 
     : mSelectedIndex(0) {
     for (const auto &option : options) {
         mOptions.push_back(option);

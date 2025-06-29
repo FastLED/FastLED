@@ -3,7 +3,7 @@
 #include "fl/hash_map_lru.h"
 #include "fl/pair.h"
 #include "fl/scoped_ptr.h"
-#include "fl/slice.h"
+#include "fl/span.h"
 #include "fl/vector.h"
 
 namespace fl {
@@ -34,7 +34,7 @@ class FFTImpl : public fl::Referent {
     // Note that the sample sizes MUST match the samples size passed into the
     // constructor.
     Result run(const AudioSample &sample, FFTBins *out);
-    Result run(Slice<const int16_t> sample, FFTBins *out);
+    Result run(span<const int16_t> sample, FFTBins *out);
     // Info on what the frequency the bins represent
     fl::string info() const;
 

@@ -118,7 +118,7 @@ void ObjectFled::showPixels(uint8_t data_pin, PixelIterator& pixel_iterator) {
     group.onQueuingDone();
     const Rgbw rgbw = pixel_iterator.get_rgbw();
 
-    fl::Slice<uint8_t> strip_pixels = group.mRectDrawBuffer.getLedsBufferBytesForPin(data_pin, true);
+            fl::span<uint8_t> strip_pixels = group.mRectDrawBuffer.getLedsBufferBytesForPin(data_pin, true);
     if (rgbw.active()) {
         uint8_t r, g, b, w;
         while (pixel_iterator.has(1)) {

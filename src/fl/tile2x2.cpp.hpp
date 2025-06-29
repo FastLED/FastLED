@@ -30,7 +30,7 @@ Tile2x2_u8_wrap::Tile2x2_u8_wrap() {
     mData[1][1] = {vec2i16(1, 1), 0};
 }
 
-void Tile2x2_u8::Rasterize(const Slice<const Tile2x2_u8> &tiles,
+void Tile2x2_u8::Rasterize(const span<const Tile2x2_u8> &tiles,
                            XYRasterU8Sparse *out_raster) {
     out_raster->rasterize(tiles);
 }

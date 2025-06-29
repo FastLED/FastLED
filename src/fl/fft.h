@@ -1,7 +1,7 @@
 #pragma once
 
 #include "fl/scoped_ptr.h"
-#include "fl/slice.h"
+#include "fl/span.h"
 #include "fl/vector.h"
 #include "fl/move.h"
 
@@ -104,7 +104,7 @@ class FFT {
     FFT(const FFT & other);
     FFT &operator=(const FFT & other);
 
-    void run(const Slice<const int16_t> &sample, FFTBins *out,
+            void run(const span<const int16_t> &sample, FFTBins *out,
              const FFT_Args &args = FFT_Args());
 
     void clear();

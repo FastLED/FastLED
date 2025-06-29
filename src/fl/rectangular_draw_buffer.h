@@ -6,7 +6,7 @@
 #include "fl/map.h"
 #include "fl/namespace.h"
 #include "fl/scoped_ptr.h"
-#include "fl/slice.h"
+#include "fl/span.h"
 #include "fl/vector.h"
 
 namespace fl {
@@ -36,7 +36,7 @@ struct DrawItem {
 // data. The strips are not necessarily contiguous in memory. One or more
 // DrawItems containing the pin number and number are queued up. When the
 // queue-ing is done, the buffers are compacted into the rectangular buffer.
-// Data access is achieved through a Slice<uint8_t> representing the pixel data
+// Data access is achieved through a span<uint8_t> representing the pixel data
 // for that pin.
 class RectangularDrawBuffer {
   public:
@@ -45,7 +45,7 @@ class RectangularDrawBuffer {
     // go into psram on ESP32S3, which is managed by fl::PSRamAllocator.
     scoped_array<uint8_t> mAllLedsBufferUint8;
     uint32_t mAllLedsBufferUint8Size = 0;
-    fl::FixedMap<uint8_t, fl::Slice<uint8_t>, 50> mPinToLedSegment;
+    fl::FixedMap<uint8_t, fl::span<uint8_t>, 50> mPinToLedSegment;
     DrawList mDrawList;
     DrawList mPrevDrawList;
     bool mDrawListChangedThisFrame = false;
@@ -56,8 +56,8 @@ class RectangularDrawBuffer {
     RectangularDrawBuffer() = default;
     ~RectangularDrawBuffer() = default;
 
-    fl::Slice<uint8_t> getLedsBufferBytesForPin(uint8_t pin,
-                                                bool clear_first = true);
+    fl::span<uint8_t> getLedsBufferBytesForPin(uint8_t pin,
+                                               bool clear_first = true);
 
     // Safe to call multiple times before calling queue() once. Returns true on
     // the first call, false after.

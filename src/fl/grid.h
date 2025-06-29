@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include "fl/slice.h"
+#include "fl/span.h"
 #include "fl/vector.h"
 
 namespace fl {

@@ -18,7 +18,7 @@ threshold. The first version is much faster and should be used in most cases.
 #include "fl/math_macros.h"
 #include "fl/pair.h"
 #include "fl/point.h"
-#include "fl/slice.h"
+#include "fl/span.h"
 #include "fl/vector.h"
 
 namespace fl {
@@ -51,12 +51,12 @@ template <typename NumberT = float> class LineSimplifier {
     }
 
     // simplify to the output vector.
-    void simplify(const fl::Slice<const Point> &polyLine,
+    void simplify(const fl::span<const Point> &polyLine,
                   fl::vector<Point> *out) {
         simplifyT(polyLine, out);
     }
     template <typename VectorType>
-    void simplify(const fl::Slice<Point> &polyLine, VectorType *out) {
+    void simplify(const fl::span<Point> &polyLine, VectorType *out) {
         simplifyT(polyLine, out);
     }
 
@@ -112,12 +112,12 @@ template <typename NumberT = float> class LineSimplifier {
   private:
     template <typename VectorType> void simplifyInplaceT(VectorType *polyLine) {
         // run the simplification algorithm
-        Slice<Point> slice(polyLine->data(), polyLine->size());
+        span<Point> slice(polyLine->data(), polyLine->size());
         simplifyT(slice, polyLine);
     }
 
     template <typename VectorType>
-    void simplifyT(const fl::Slice<const Point> &polyLine, VectorType *out) {
+    void simplifyT(const fl::span<const Point> &polyLine, VectorType *out) {
         // run the simplification algorithm
         simplifyInternal(polyLine);
 
@@ -126,7 +126,7 @@ template <typename NumberT = float> class LineSimplifier {
     }
     // Runs in O(n) allocations: one bool‐array + one index stack + one output
     // vector
-    void simplifyInternal(const fl::Slice<const Point> &polyLine) {
+    void simplifyInternal(const fl::span<const Point> &polyLine) {
         mSimplified.clear();
         int n = polyLine.size();
         if (n < 2) {
@@ -247,7 +247,7 @@ template <typename NumberT = float> class LineSimplifierExact {
     }
 
     template <typename VectorType = fl::vector<Point>>
-    void simplify(const fl::Slice<const Point> &polyLine, VectorType *out) {
+    void simplify(const fl::span<const Point> &polyLine, VectorType *out) {
         if (mCount > polyLine.size()) {
             safeCopy(polyLine, out);
             return;
@@ -316,7 +316,7 @@ template <typename NumberT = float> class LineSimplifierExact {
     }
 
   private:
-    static NumberT estimateMaxDistance(const fl::Slice<const Point> &polyLine) {
+    static NumberT estimateMaxDistance(const fl::span<const Point> &polyLine) {
         // Rough guess: max distance between endpoints
         if (polyLine.size() < 2)
             return 0;
@@ -329,7 +329,7 @@ template <typename NumberT = float> class LineSimplifierExact {
     }
 
     template <typename VectorType>
-    void safeCopy(const fl::Slice<const Point> &polyLine, VectorType *out) {
+    void safeCopy(const fl::span<const Point> &polyLine, VectorType *out) {
         auto *first_out = out->data();
         // auto* last_out = first_out + mCount;
         auto *other_first_out = polyLine.data();

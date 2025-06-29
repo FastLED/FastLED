@@ -33,7 +33,7 @@ FFT &FFT::operator=(const FFT &other) {
     return *this;
 }
 
-void FFT::run(const Slice<const int16_t> &sample, FFTBins *out,
+void FFT::run(const span<const int16_t> &sample, FFTBins *out,
               const FFT_Args &args) {
     FFT_Args args2 = args;
     args2.samples = sample.size();

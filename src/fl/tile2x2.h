@@ -5,7 +5,7 @@
 #include "fl/geometry.h"
 #include "fl/namespace.h"
 #include "fl/pair.h"
-#include "fl/slice.h"
+#include "fl/span.h"
 #include "fl/xymap.h"
 #include "fl/vector.h"
 
@@ -22,7 +22,7 @@ class XYRasterU8Sparse;
 class Tile2x2_u8 {
 
   public:
-    static void Rasterize(const Slice<const Tile2x2_u8> &tiles,
+    static void Rasterize(const span<const Tile2x2_u8> &tiles,
                           XYRasterU8Sparse *output);
 
     Tile2x2_u8() = default;

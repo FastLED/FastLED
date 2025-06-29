@@ -3,7 +3,7 @@
 #include "fl/fft.h"
 #include "fl/math.h"
 #include "fl/ptr.h"
-#include "fl/slice.h"
+#include "fl/span.h"
 #include "fl/vector.h"
 #include <math.h>
 #include "fl/stdint.h"
@@ -66,7 +66,7 @@ class SoundLevelMeter {
 
     /// Process a block of int16 PCM samples.
     void processBlock(const int16_t *samples, size_t count);
-    void processBlock(fl::Slice<const int16_t> samples) {
+            void processBlock(fl::span<const int16_t> samples) {
         processBlock(samples.data(), samples.size());
     }
 

@@ -39,7 +39,7 @@ struct Visitor {
 };
 
 struct VisitorFill {
-    VisitorFill(Slice<const uint8_t> indices, Slice<CRGB> output)
+    VisitorFill(span<const uint8_t> indices, span<CRGB> output)
         : output(output), indices(indices) {
         FASTLED_ASSERT(
             indices.size() == output.size(),
@@ -76,8 +76,8 @@ struct VisitorFill {
         accept(&obj);
     }
 
-    Slice<CRGB> output;
-    Slice<const uint8_t> indices;
+    span<CRGB> output;
+    span<const uint8_t> indices;
     uint8_t n = 0;
 };
 
@@ -111,7 +111,7 @@ Gradient &Gradient::operator=(const Gradient &other) {
     return *this;
 }
 
-void Gradient::fill(Slice<const uint8_t> input, Slice<CRGB> output) const {
+void Gradient::fill(span<const uint8_t> input, span<CRGB> output) const {
     VisitorFill visitor(input, output);
     mVariant.visit(visitor);
 }
@@ -121,8 +121,8 @@ CRGB GradientInlined::colorAt(uint8_t index) const {
     mVariant.visit(visitor);
     return visitor.return_val;
 }
-void GradientInlined::fill(Slice<const uint8_t> input,
-                           Slice<CRGB> output) const {
+void GradientInlined::fill(span<const uint8_t> input,
+                           span<CRGB> output) const {
     VisitorFill visitor(input, output);
     mVariant.visit(visitor);
 }

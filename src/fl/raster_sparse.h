@@ -14,7 +14,7 @@ only a small number of pixels are set.
 #include "fl/hash_map.h"
 #include "fl/map.h"
 #include "fl/namespace.h"
-#include "fl/slice.h"
+#include "fl/span.h"
 #include "fl/tile2x2.h"
 #include "fl/xymap.h"
 
@@ -83,7 +83,7 @@ class XYRasterU8Sparse {
     size_t size() const { return mSparseGrid.size(); }
     bool empty() const { return mSparseGrid.empty(); }
 
-    void rasterize(const Slice<const Tile2x2_u8> &tiles);
+    void rasterize(const span<const Tile2x2_u8> &tiles);
     void rasterize(const Tile2x2_u8 &tile) { rasterize_internal(tile); }
 
     void rasterize_internal(const Tile2x2_u8 &tile,

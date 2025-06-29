@@ -11,8 +11,8 @@ namespace fl {
 class JsonDropdownImpl {
   public:
 
-    // Constructor with fl::Slice<fl::string> for arrays and containers.
-    JsonDropdownImpl(const fl::string &name, fl::Slice<fl::string> options);
+    // Constructor with fl::span<fl::string> for arrays and containers.
+JsonDropdownImpl(const fl::string &name, fl::span<fl::string> options);
 
     // Constructor with initializer_list (FastLED requires C++11 support)
     JsonDropdownImpl(const fl::string &name, fl::initializer_list<fl::string> options);

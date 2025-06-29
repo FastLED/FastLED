@@ -14,14 +14,14 @@ DrawItem::DrawItem(uint8_t pin, uint16_t numLeds, bool is_rgbw)
     mNumBytes = numLeds * 3;
 }
 
-Slice<uint8_t>
+span<uint8_t>
 RectangularDrawBuffer::getLedsBufferBytesForPin(uint8_t pin, bool clear_first) {
     auto it = mPinToLedSegment.find(pin);
     if (it == mPinToLedSegment.end()) {
         FASTLED_ASSERT(false, "Pin not found in RectangularDrawBuffer");
-        return fl::Slice<uint8_t>();
+        return fl::span<uint8_t>();
     }
-    fl::Slice<uint8_t> slice = it->second;
+    fl::span<uint8_t> slice = it->second;
     if (clear_first) {
         memset(slice.data(), 0, slice.size() * sizeof(slice[0]));
     }
@@ -68,8 +68,8 @@ bool RectangularDrawBuffer::onQueuingDone() {
     uint32_t offset = 0;
     for (auto it = mDrawList.begin(); it != mDrawList.end(); ++it) {
         uint8_t pin = it->mPin;
-        Slice<uint8_t> slice(mAllLedsBufferUint8.get() + offset,
-                             max_bytes_in_strip);
+        span<uint8_t> slice(mAllLedsBufferUint8.get() + offset,
+                            max_bytes_in_strip);
         mPinToLedSegment[pin] = slice;
         offset += max_bytes_in_strip;
     }

@@ -26,7 +26,7 @@ void XYRasterU8Sparse::drawGradient(const Gradient &gradient, Leds *leds) {
     drawGradient(gradient, leds->xymap(), leds->rgb());
 }
 
-void XYRasterU8Sparse::rasterize(const Slice<const Tile2x2_u8> &tiles) {
+void XYRasterU8Sparse::rasterize(const span<const Tile2x2_u8> &tiles) {
     // Tile2x2_u8::Rasterize(tiles, this, mAbsoluteBoundsSet ? &mAbsoluteBounds
     // : nullptr);
     if (tiles.size() == 0) {

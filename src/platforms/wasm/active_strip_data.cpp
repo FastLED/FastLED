@@ -40,7 +40,7 @@
 
 #include "fl/map.h"
 #include "fl/singleton.h"
-#include "fl/slice.h"
+#include "fl/span.h"
 
 #include "active_strip_data.h"
 #include "fl/map.h"

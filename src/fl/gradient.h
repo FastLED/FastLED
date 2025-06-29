@@ -2,7 +2,7 @@
 
 #include "fl/colorutils.h"
 #include "fl/function.h"
-#include "fl/slice.h"
+#include "fl/span.h"
 #include "fl/type_traits.h"
 #include "fl/variant.h"
 
@@ -32,7 +32,7 @@ class Gradient {
     void set(const GradientFunction &func);
 
     CRGB colorAt(uint8_t index) const;
-    void fill(Slice<const uint8_t> input, Slice<CRGB> output) const;
+    void fill(span<const uint8_t> input, span<CRGB> output) const;
 
   private:
     using GradientVariant =
@@ -58,7 +58,7 @@ class GradientInlined {
     void set(const GradientFunction &func) { mVariant = func; }
 
     CRGB colorAt(uint8_t index) const;
-    void fill(Slice<const uint8_t> input, Slice<CRGB> output) const;
+    void fill(span<const uint8_t> input, span<CRGB> output) const;
 
     GradientVariant &variant() { return mVariant; }
     const GradientVariant &variant() const { return mVariant; }

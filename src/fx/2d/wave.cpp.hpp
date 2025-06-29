@@ -26,7 +26,7 @@ struct BatchDraw {
     bool isFull() { return mIndices.size() >= kMaxBatchSize; }
 
     void flush() {
-        Slice<const uint8_t> alphas(mAlphas);
+        span<const uint8_t> alphas(mAlphas);
         CRGB rgb[kMaxBatchSize] = {};
         mGradient->fill(mAlphas, rgb);
         for (size_t i = 0; i < mIndices.size(); i++) {

@@ -428,8 +428,8 @@ class UIDropdown : public UIElement {
     UIDropdown(const char *name, Iterator begin, Iterator end)
         : mImpl(name, begin, end), mListener(this) {}
 
-    // Constructor with fl::Slice<fl::string> for arrays and containers.
-    UIDropdown(const char *name, fl::Slice<fl::string> options)
+    // Constructor with fl::span<fl::string> for arrays and containers.
+    UIDropdown(const char *name, fl::span<fl::string> options)
         : mImpl(name, options), mListener(this) {}
 
     // Constructor with initializer_list

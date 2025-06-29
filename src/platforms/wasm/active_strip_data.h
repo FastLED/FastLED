@@ -7,13 +7,13 @@
 #include "fl/namespace.h"
 #include "fl/screenmap.h"
 #include "fl/singleton.h"
-#include "fl/slice.h"
+#include "fl/span.h"
 #include "strip_id_map.h"
 
 
 namespace fl {
 
-typedef fl::Slice<const uint8_t> SliceUint8;
+typedef fl::span<const uint8_t> SliceUint8;
 
 // Zero copy data transfer of strip information from C++ to JavaScript.
 class ActiveStripData : public fl::EngineEvents::Listener {

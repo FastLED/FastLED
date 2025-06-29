@@ -17,6 +17,7 @@
 #include "fl/ptr.h"
 #include "fl/template_magic.h"
 #include "fl/vector.h"
+#include "fl/span.h"
 
 #ifndef FASTLED_STR_INLINED_SIZE
 #define FASTLED_STR_INLINED_SIZE 64
@@ -521,7 +522,7 @@ class string : public StrN<FASTLED_STR_INLINED_SIZE> {
         return *this;
     }
 
-    template <typename T> string &append(const Slice<T> &slice) {
+    template <typename T> string &append(const fl::span<T> &slice) {
         append("[");
         for (size_t i = 0; i < slice.size(); ++i) {
             if (i > 0) {
@@ -534,14 +535,14 @@ class string : public StrN<FASTLED_STR_INLINED_SIZE> {
     }
 
     template <typename T> string &append(const fl::HeapVector<T> &vec) {
-        Slice<const T> slice(vec.data(), vec.size());
+        fl::span<const T> slice(vec.data(), vec.size());
         append(slice);
         return *this;
     }
 
     template <typename T, size_t N>
     string &append(const fl::InlinedVector<T, N> &vec) {
-        Slice<const T> slice(vec.data(), vec.size());
+        fl::span<const T> slice(vec.data(), vec.size());
         append(slice);
         return *this;
     }
@@ -642,7 +643,7 @@ class string : public StrN<FASTLED_STR_INLINED_SIZE> {
 
     template <typename T, size_t N>
     string &append(const fl::FixedVector<T, N> &vec) {
-        Slice<const T> slice(vec.data(), vec.size());
+        fl::span<const T> slice(vec.data(), vec.size());
         append(slice);
         return *this;
     }

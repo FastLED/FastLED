@@ -284,8 +284,8 @@ class UIDropdownImpl {
         }
     }
 
-    // Constructor with fl::Slice<fl::string>
-    UIDropdownImpl(const char *name, fl::Slice<fl::string> options) 
+    // Constructor with fl::span<fl::string>
+    UIDropdownImpl(const char *name, fl::span<fl::string> options) 
         : mSelectedIndex(0) {
         FASTLED_UNUSED(name);
         for (size_t i = 0; i < options.size(); ++i) {
