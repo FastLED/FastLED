@@ -11,6 +11,17 @@ const AUDIO_SAMPLE_BLOCK_SIZE = 512;  // Matches i2s read size on esp32c3
 const MAX_AUDIO_BUFFER_LIMIT = 10;    // Maximum number of audio buffers to accumulate
 
 /**
+ * Audio processor types
+ */
+const AUDIO_PROCESSOR_TYPES = {
+  SCRIPT_PROCESSOR: 'script_processor',
+  AUDIO_WORKLET: 'audio_worklet'
+};
+
+// Default processor type - can be easily changed here
+const DEFAULT_PROCESSOR_TYPE = AUDIO_PROCESSOR_TYPES.SCRIPT_PROCESSOR;
+
+/**
  * TIMESTAMP IMPLEMENTATION:
  * Audio sample timestamps are relative to the start of the audio file, not absolute time.
  * Priority order:
@@ -21,13 +32,215 @@ const MAX_AUDIO_BUFFER_LIMIT = 10;    // Maximum number of audio buffers to accu
  */
 
 /**
+ * Abstract base class for audio processors
+ * Provides a common interface for different audio processing implementations
+ */
+class AudioProcessor {
+  constructor(audioContext, sampleCallback) {
+    this.audioContext = audioContext;
+    this.sampleCallback = sampleCallback;
+    this.isProcessing = false;
+  }
+
+  /**
+   * Initialize the audio processor
+   * @param {MediaElementAudioSourceNode} source - Audio source node
+   * @returns {Promise<void>}
+   */
+  async initialize(source) {
+    throw new Error('initialize() must be implemented by subclass');
+  }
+
+  /**
+   * Start audio processing
+   */
+  start() {
+    this.isProcessing = true;
+  }
+
+  /**
+   * Stop audio processing
+   */
+  stop() {
+    this.isProcessing = false;
+  }
+
+  /**
+   * Clean up resources
+   */
+  cleanup() {
+    this.stop();
+  }
+
+  /**
+   * Get the processor type
+   * @returns {string}
+   */
+  getType() {
+    throw new Error('getType() must be implemented by subclass');
+  }
+}
+
+/**
+ * ScriptProcessor-based audio processor (legacy but widely supported)
+ */
+class ScriptProcessorAudioProcessor extends AudioProcessor {
+  constructor(audioContext, sampleCallback) {
+    super(audioContext, sampleCallback);
+    this.scriptNode = null;
+    this.sampleBuffer = new Int16Array(AUDIO_SAMPLE_BLOCK_SIZE);
+  }
+
+  async initialize(source) {
+    // Create script processor node
+    this.scriptNode = this.audioContext.createScriptProcessor(AUDIO_SAMPLE_BLOCK_SIZE, 1, 1);
+    
+    // Set up audio processing callback
+    this.scriptNode.onaudioprocess = (audioProcessingEvent) => {
+      if (!this.isProcessing) return;
+      
+      // Get input data from the left channel
+      const inputBuffer = audioProcessingEvent.inputBuffer;
+      const inputData = inputBuffer.getChannelData(0);
+      
+      // Convert float32 audio data to int16 range
+      this.convertAudioSamples(inputData, this.sampleBuffer);
+      
+      // Get timestamp
+      const timestamp = this.getTimestamp();
+      
+      // Call the sample callback
+      this.sampleCallback(this.sampleBuffer, timestamp);
+    };
+    
+    // Connect nodes
+    source.connect(this.scriptNode);
+    this.scriptNode.connect(this.audioContext.destination);
+  }
+
+  convertAudioSamples(inputData, sampleBuffer) {
+    for (let i = 0; i < inputData.length; i++) {
+      // Convert from float32 (-1.0 to 1.0) to int16 range (-32768 to 32767)
+      sampleBuffer[i] = Math.floor(inputData[i] * 32767);
+    }
+  }
+
+  getTimestamp() {
+    // Use AudioContext.currentTime as primary source for ScriptProcessor
+    return Math.floor(this.audioContext.currentTime * 1000);
+  }
+
+  cleanup() {
+    super.cleanup();
+    if (this.scriptNode) {
+      this.scriptNode.onaudioprocess = null;
+      this.scriptNode.disconnect();
+      this.scriptNode = null;
+    }
+  }
+
+  getType() {
+    return AUDIO_PROCESSOR_TYPES.SCRIPT_PROCESSOR;
+  }
+}
+
+/**
+ * AudioWorklet-based audio processor (modern, runs on audio thread)
+ * Currently contains stubs - not fully implemented yet
+ */
+class AudioWorkletAudioProcessor extends AudioProcessor {
+  constructor(audioContext, sampleCallback) {
+    super(audioContext, sampleCallback);
+    this.workletNode = null;
+    this.isWorkletLoaded = false;
+    console.warn('🎵 AudioWorklet is not implemented yet!');
+  }
+
+  async initialize(source) {
+    console.warn('🎵 AudioWorklet is not implemented yet!');
+    
+    // Stub implementation - just connect source to destination for passthrough
+    source.connect(this.audioContext.destination);
+    
+    // Log that this is a stub
+    console.log('🎵 AudioWorklet stub: Using passthrough connection (no processing)');
+  }
+
+  start() {
+    super.start();
+    console.warn('🎵 AudioWorklet is not implemented yet!');
+    console.log('🎵 AudioWorklet stub: Processing "started" (no actual processing)');
+  }
+
+  stop() {
+    super.stop();
+    console.warn('🎵 AudioWorklet is not implemented yet!');
+    console.log('🎵 AudioWorklet stub: Processing "stopped" (no actual processing)');
+  }
+
+  cleanup() {
+    super.cleanup();
+    console.warn('🎵 AudioWorklet is not implemented yet!');
+    console.log('🎵 AudioWorklet stub: Cleanup complete (no actual cleanup needed)');
+  }
+
+  getType() {
+    return AUDIO_PROCESSOR_TYPES.AUDIO_WORKLET;
+  }
+}
+
+/**
+ * Factory for creating audio processors
+ */
+class AudioProcessorFactory {
+  /**
+   * Create an audio processor of the specified type
+   * @param {string} type - Processor type
+   * @param {AudioContext} audioContext - Audio context
+   * @param {Function} sampleCallback - Callback for audio samples
+   * @returns {AudioProcessor}
+   */
+  static create(type, audioContext, sampleCallback) {
+    switch (type) {
+      case AUDIO_PROCESSOR_TYPES.SCRIPT_PROCESSOR:
+        return new ScriptProcessorAudioProcessor(audioContext, sampleCallback);
+      case AUDIO_PROCESSOR_TYPES.AUDIO_WORKLET:
+        return new AudioWorkletAudioProcessor(audioContext, sampleCallback);
+      default:
+        console.warn(`Unknown audio processor type: ${type}, falling back to ScriptProcessor`);
+        return new ScriptProcessorAudioProcessor(audioContext, sampleCallback);
+    }
+  }
+
+  /**
+   * Check if AudioWorklet is supported
+   * @returns {boolean}
+   */
+  static isAudioWorkletSupported() {
+    return 'audioWorklet' in AudioContext.prototype;
+  }
+
+  /**
+   * Get the best available processor type
+   * @returns {string}
+   */
+  static getBestProcessorType() {
+    if (this.isAudioWorkletSupported()) {
+      return AUDIO_PROCESSOR_TYPES.AUDIO_WORKLET;
+    }
+    return AUDIO_PROCESSOR_TYPES.SCRIPT_PROCESSOR;
+  }
+}
+
+/**
  * Audio Manager class to handle audio processing and UI
  */
 export class AudioManager {
   /**
    * Initialize the AudioManager and set up global audio data storage
    */
-  constructor() {
+  constructor(processorType = DEFAULT_PROCESSOR_TYPE) {
+    this.processorType = processorType;
     this.initializeGlobalAudioData();
   }
   
@@ -41,9 +254,31 @@ export class AudioManager {
         audioContexts: {},  // Store audio contexts by ID
         audioSamples: {},   // Store current audio samples by ID
         audioBuffers: {},   // Store optimized audio buffer storage by ID
+        audioProcessors: {},// Store audio processors by ID
         hasActiveSamples: false
       };
     }
+  }
+
+  /**
+   * Set the processor type for new audio setups
+   * @param {string} type - Processor type
+   */
+  setProcessorType(type) {
+    if (Object.values(AUDIO_PROCESSOR_TYPES).includes(type)) {
+      this.processorType = type;
+      console.log(`🎵 Audio processor type set to: ${type}`);
+    } else {
+      console.warn(`🎵 Invalid processor type: ${type}`);
+    }
+  }
+
+  /**
+   * Get current processor type
+   * @returns {string}
+   */
+  getProcessorType() {
+    return this.processorType;
   }
 
   /**
@@ -51,21 +286,28 @@ export class AudioManager {
    * @param {HTMLAudioElement} audioElement - The audio element to analyze
    * @returns {Object} Audio analysis components
    */
-  setupAudioAnalysis(audioElement) {
-    // Create and configure the audio context and nodes
-    const audioComponents = this.createAudioComponents(audioElement);
-    
-    // Get the audio element's input ID and store references
-    const audioId = audioElement.parentNode.querySelector('input').id;
-    this.storeAudioReferences(audioId, audioComponents);
-    
-    // Set up the audio processing callback
-    this.setupAudioProcessing(audioComponents.scriptNode, audioComponents.sampleBuffer, audioElement, audioId);
-    
-    // Start audio playback
-    this.startAudioPlayback(audioElement);
-    
-    return audioComponents;
+  async setupAudioAnalysis(audioElement) {
+    try {
+      // Create and configure the audio context and nodes
+      const audioComponents = await this.createAudioComponents(audioElement);
+      
+      // Get the audio element's input ID and store references
+      const audioId = audioElement.parentNode.querySelector('input').id;
+      this.storeAudioReferences(audioId, audioComponents);
+      
+      // Start audio processing
+      audioComponents.processor.start();
+      
+      // Start audio playback
+      this.startAudioPlayback(audioElement);
+      
+      console.log(`🎵 Audio analysis setup complete for ${audioId} using ${audioComponents.processor.getType()}`);
+      
+      return audioComponents;
+    } catch (error) {
+      console.error('🎵 Failed to setup audio analysis:', error);
+      throw error;
+    }
   }
   
   /**
@@ -73,30 +315,46 @@ export class AudioManager {
    * @param {HTMLAudioElement} audioElement - The audio element to analyze
    * @returns {Object} Created audio components
    */
-  createAudioComponents(audioElement) {
+  async createAudioComponents(audioElement) {
     // Create audio context with browser compatibility
     const AudioContext = window.AudioContext || window.webkitAudioContext;
     const audioContext = new AudioContext();
     
-    // Create script processor node for raw sample access
-    // Note: ScriptProcessorNode is deprecated but still widely supported
-    const scriptNode = audioContext.createScriptProcessor(AUDIO_SAMPLE_BLOCK_SIZE, 1, 1);
-    
-    // Create a buffer to store the latest samples as Int16Array
-    const sampleBuffer = new Int16Array(AUDIO_SAMPLE_BLOCK_SIZE);
-    
-    // Connect audio element to script processor
+    // Create audio source
     const source = audioContext.createMediaElementSource(audioElement);
     source.connect(audioContext.destination); // Connect to output
-    source.connect(scriptNode); // Also connect to script processor
-    scriptNode.connect(audioContext.destination); // Connect script processor to output
+    
+    // Create sample callback for the processor
+    const sampleCallback = (sampleBuffer, timestamp) => {
+      this.handleAudioSamples(sampleBuffer, timestamp, audioElement);
+    };
+    
+    // Create audio processor using the factory
+    const processor = AudioProcessorFactory.create(this.processorType, audioContext, sampleCallback);
+    
+    // Initialize the processor
+    await processor.initialize(source);
     
     return {
       audioContext,
-      scriptNode,
       source,
-      sampleBuffer
+      processor
     };
+  }
+
+  /**
+   * Handle audio samples from the processor
+   * @param {Int16Array} sampleBuffer - Audio samples
+   * @param {number} timestamp - Sample timestamp
+   * @param {HTMLAudioElement} audioElement - Audio element
+   */
+  handleAudioSamples(sampleBuffer, timestamp, audioElement) {
+    // Store samples if audio is playing
+    if (!audioElement.paused) {
+      const audioId = audioElement.parentNode.querySelector('input').id;
+      this.storeAudioSamples(sampleBuffer, audioId, audioElement);
+      this.updateProcessingIndicator();
+    }
   }
   
   /**
@@ -106,8 +364,11 @@ export class AudioManager {
    */
   storeAudioReferences(audioId, components) {
     window.audioData.audioContexts[audioId] = components.audioContext;
-    window.audioData.audioSamples[audioId] = components.sampleBuffer;
+    window.audioData.audioProcessors[audioId] = components.processor;
     window.audioData.audioBuffers[audioId] = new AudioBufferStorage(audioId);
+    
+    // Create a placeholder for current samples (for backward compatibility)
+    window.audioData.audioSamples[audioId] = new Int16Array(AUDIO_SAMPLE_BLOCK_SIZE);
   }
   
   /**
@@ -121,87 +382,50 @@ export class AudioManager {
   }
   
   /**
-   * Set up the audio processing callback
-   * @param {ScriptProcessorNode} scriptNode - The script processor node
-   * @param {Int16Array} sampleBuffer - Buffer to store audio samples
-   * @param {HTMLAudioElement} audioElement - The audio element being processed
-   * @param {string} audioId - The ID of the audio input
-   */
-  setupAudioProcessing(scriptNode, sampleBuffer, audioElement, audioId) {
-    scriptNode.onaudioprocess = (audioProcessingEvent) => {
-      // Get input data from the left channel
-      const inputBuffer = audioProcessingEvent.inputBuffer;
-      const inputData = inputBuffer.getChannelData(0);
-      
-      // Convert float32 audio data to int16 range
-      this.convertAudioSamples(inputData, sampleBuffer);
-      
-      // Store samples if audio is playing
-      if (!audioElement.paused) {
-        this.storeAudioSamples(sampleBuffer, audioId);
-        this.updateProcessingIndicator();
-      }
-    };
-  }
-  
-  /**
-   * Convert float32 audio samples to int16 format
-   * @param {Float32Array} inputData - Raw audio data (-1.0 to 1.0)
-   * @param {Int16Array} sampleBuffer - Target buffer for converted samples
-   */
-  convertAudioSamples(inputData, sampleBuffer) {
-    for (let i = 0; i < inputData.length; i++) {
-      // Convert from float32 (-1.0 to 1.0) to int16 range (-32768 to 32767)
-      sampleBuffer[i] = Math.floor(inputData[i] * 32767);
-    }
-  }
-  
-  /**
    * Store a copy of the current audio samples
    * @param {Int16Array} sampleBuffer - Buffer containing current samples
    * @param {string} audioId - The ID of the audio input
+   * @param {HTMLAudioElement} audioElement - The audio element (for timestamp)
    */
-  storeAudioSamples(sampleBuffer, audioId) {
+  storeAudioSamples(sampleBuffer, audioId, audioElement) {
     const bufferCopy = new Int16Array(sampleBuffer);
     
-    // Get timestamp relative to start of audio file (preferred method)
-    let timestamp = 0;
+    // Update the current samples reference for backward compatibility
+    if (window.audioData.audioSamples[audioId]) {
+      window.audioData.audioSamples[audioId].set(bufferCopy);
+    }
     
-    // Try to get the audio element for this ID to use its currentTime
+    // Get timestamp with priority order
+    let timestamp = 0;
     const audioContext = window.audioData.audioContexts[audioId];
-    const audioElement = document.querySelector(`#audio-${audioId}`);
     
     if (audioElement && !audioElement.paused && audioElement.currentTime >= 0) {
       // Use audio element's currentTime (seconds) converted to milliseconds
-      // This gives us time relative to the start of the audio file
       timestamp = Math.floor(audioElement.currentTime * 1000);
     } else if (audioContext && audioContext.currentTime >= 0) {
-      // Fallback to AudioContext.currentTime (high-resolution audio time)
-      // This is relative to when the audio context was created
+      // Fallback to AudioContext.currentTime
       timestamp = Math.floor(audioContext.currentTime * 1000);
     } else {
-      // Final fallback: use performance.now() for high-resolution system time
-      // This is relative to when the page loaded (better than Date.now())
+      // Final fallback: use performance.now()
       timestamp = Math.floor(performance.now());
     }
 
     // Debug logging (sample ~1% of audio blocks to avoid console spam)
     if (Math.random() < 0.01) {
+      const processor = window.audioData.audioProcessors[audioId];
+      const processorType = processor ? processor.getType() : 'unknown';
       const timestampSource = audioElement && !audioElement.paused && audioElement.currentTime >= 0 
         ? 'audioElement.currentTime' 
         : audioContext && audioContext.currentTime >= 0 
         ? 'audioContext.currentTime' 
         : 'performance.now()';
-      console.log(`Audio timestamp for ${audioId}: ${timestamp}ms (source: ${timestampSource})`);
+      console.log(`🎵 Audio ${audioId} (${processorType}): ${timestamp}ms (source: ${timestampSource})`);
     }
 
     // Use optimized buffer storage system
     const bufferStorage = window.audioData.audioBuffers[audioId];
-    const prevBufferCount = bufferStorage.getBufferCount();
     bufferStorage.addSamples(bufferCopy, timestamp);
     window.audioData.hasActiveSamples = true;
-
-
   }
   
   /**
@@ -351,6 +575,14 @@ export class AudioManager {
    * @param {string} inputId - The ID of the audio input
    */
   cleanupPreviousAudioContext(inputId) {
+    // Clean up audio processor
+    if (window.audioData?.audioProcessors?.[inputId]) {
+      const processor = window.audioData.audioProcessors[inputId];
+      console.log(`🎵 Cleaning up ${processor.getType()} processor for ${inputId}`);
+      processor.cleanup();
+      delete window.audioData.audioProcessors[inputId];
+    }
+    
     // Clean up audio context
     if (window.audioData?.audioContexts?.[inputId]) {
       try {
@@ -365,7 +597,6 @@ export class AudioManager {
     if (window.audioData?.audioBuffers?.[inputId]) {
       const bufferStorage = window.audioData.audioBuffers[inputId];
       const stats = bufferStorage.getStats();
-      //console.log(`*** Cleaning up audio ${inputId}: ${stats.bufferCount} blocks, ${stats.memoryEstimateKB.toFixed(1)}KB freed ***`);
       bufferStorage.clear();
       delete window.audioData.audioBuffers[inputId];
     }
