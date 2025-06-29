@@ -42,8 +42,9 @@ template <typename T, size_t N> class array {
 
     // Initializer list constructor
     array(fl::initializer_list<T> list) {
-        for (size_t i = 0; i < N && i < list.size(); ++i) {
-            data_[i] = list[i];
+        size_t i = 0;
+        for (auto it = list.begin(); it != list.end() && i < N; ++it, ++i) {
+            data_[i] = *it;
         }
     }
 

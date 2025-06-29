@@ -14,6 +14,8 @@ template <typename T, typename Allocator> class HeapVector;
 
 template <typename T, size_t INLINED_SIZE> class InlinedVector;
 
+template <typename T, size_t N> class array;
+
 // Slice<int> is equivalent to int* with a length. It is used to pass around
 // arrays of integers with a length, without needing to pass around a separate
 // length parameter.
@@ -23,6 +25,8 @@ template <typename T> class Slice {
     Slice() : mData(nullptr), mSize(0) {}
     Slice(T *data, size_t size) : mData(data), mSize(size) {}
 
+    // ======= CONTAINER CONSTRUCTORS =======
+    // Simple constructors that work for all cases
     template<typename Alloc>
     Slice(const HeapVector<T, Alloc> &vector)
         : mData(vector.data()), mSize(vector.size()) {}
@@ -35,24 +39,71 @@ template <typename T> class Slice {
     Slice(const InlinedVector<T, INLINED_SIZE> &vector)
         : mData(vector.data()), mSize(vector.size()) {}
 
-    template <typename U, typename Alloc>
+    // Additional constructors for const conversion (U -> const U)
+    template<typename U, typename Alloc>
     Slice(const HeapVector<U, Alloc> &vector)
         : mData(vector.data()), mSize(vector.size()) {}
 
-    template <typename U, size_t INLINED_SIZE>
+    template<typename U, size_t INLINED_SIZE>
     Slice(const FixedVector<U, INLINED_SIZE> &vector)
         : mData(vector.data()), mSize(vector.size()) {}
 
-    template <typename U, size_t INLINED_SIZE>
+    template<typename U, size_t INLINED_SIZE>
     Slice(const InlinedVector<U, INLINED_SIZE> &vector)
         : mData(vector.data()), mSize(vector.size()) {}
 
+    // ======= NON-CONST CONTAINER CONVERSIONS =======
+    // Non-const versions for mutable spans
+    template<typename Alloc>
+    Slice(HeapVector<T, Alloc> &vector)
+        : mData(vector.data()), mSize(vector.size()) {}
+
+    template <size_t INLINED_SIZE>
+    Slice(FixedVector<T, INLINED_SIZE> &vector)
+        : mData(vector.data()), mSize(vector.size()) {}
+
+    template <size_t INLINED_SIZE>
+    Slice(InlinedVector<T, INLINED_SIZE> &vector)
+        : mData(vector.data()), mSize(vector.size()) {}
+
+
+
+    // ======= FL::ARRAY CONVERSIONS =======
+    // fl::array<T> -> Slice<T>
+    template <size_t N>
+    Slice(const array<T, N> &arr)
+        : mData(arr.data()), mSize(N) {}
+
+    template <size_t N>
+    Slice(array<T, N> &arr)
+        : mData(arr.data()), mSize(N) {}
+
+    // fl::array<U> -> Slice<T> (for type conversions like U -> const U)
+    template <typename U, size_t N>
+    Slice(const array<U, N> &arr)
+        : mData(arr.data()), mSize(N) {}
+
+    template <typename U, size_t N>
+    Slice(array<U, N> &arr)
+        : mData(arr.data()), mSize(N) {}
+
+    // ======= C-STYLE ARRAY CONVERSIONS =======
+    // T[] -> Slice<T>
     template <size_t ARRAYSIZE>
-    Slice(T (&array)[ARRAYSIZE]) : mData(array), mSize(ARRAYSIZE) {}
+    Slice(T (&array)[ARRAYSIZE]) 
+        : mData(array), mSize(ARRAYSIZE) {}
 
+    // U[] -> Slice<T> (for type conversions like U -> const U)
     template <typename U, size_t ARRAYSIZE>
-    Slice(T (&array)[ARRAYSIZE]) : mData(array), mSize(ARRAYSIZE) {}
+    Slice(U (&array)[ARRAYSIZE]) 
+        : mData(array), mSize(ARRAYSIZE) {}
 
+    // const U[] -> Slice<T> (for const arrays)
+    template <typename U, size_t ARRAYSIZE>
+    Slice(const U (&array)[ARRAYSIZE]) 
+        : mData(array), mSize(ARRAYSIZE) {}
+
+    // ======= ITERATOR CONVERSIONS =======
     template <typename Iterator>
     Slice(Iterator begin, Iterator end)
         : mData(&(*begin)), mSize(end - begin) {}
