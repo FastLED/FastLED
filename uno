@@ -1,0 +1,1 @@
+./compile uno examples/Blink
