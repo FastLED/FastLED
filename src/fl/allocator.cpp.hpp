@@ -39,29 +39,18 @@ void SetPSRamAllocator(void *(*alloc)(size_t), void (*free)(void *)) {
 
 void *PSRamAllocate(size_t size, bool zero) {
     void *ptr = Alloc(size);
-    if (zero) {
+    if (ptr && zero) {
         memset(ptr, 0, size);
     }
     return ptr;
 }
 
-void PSRamDeallocate(void *ptr) { Dealloc(ptr); }
-
-void Malloc(size_t size) {
-    void *ptr = Alloc(size);
-    if (ptr == nullptr) {
-        // Handle allocation failure, e.g., log an error or throw an exception.
-        // For now, we just return without doing anything.
-        return;
-    }
-    memset(ptr, 0, size); // Zero-initialize the memory
-
+void PSRamDeallocate(void *ptr) {
+    Dealloc(ptr);
 }
-void Free(void *ptr) {
-    if (ptr == nullptr) {
-        return; // Handle null pointer
-    }
-    Dealloc(ptr); // Free the allocated memory
-}
+
+void Malloc(size_t size) { Alloc(size); }
+
+void Free(void *ptr) { Dealloc(ptr); }
 
 } // namespace fl
