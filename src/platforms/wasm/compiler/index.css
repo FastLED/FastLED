@@ -179,42 +179,69 @@ h1 {
     margin-bottom: 20px;
 }
 
-/* Wide screen desktop layout - UI controls on the right */
+/* Layout-specific styles - now managed by UILayoutPlacementManager */
+
+/* Desktop layout styles (applied via JavaScript) */
+.desktop-layout#main-container {
+    max-width: 1400px; /* Increase max width for wide screens */
+}
+
+/* Adjust UI groups for desktop side layout */
+.desktop-layout .ui-group {
+    margin: 10px 0; /* Reduce vertical margin for side layout */
+}
+
+/* Make sure canvas maintains its aspect ratio in desktop layout */
+.desktop-layout #myCanvas {
+    max-width: 640px; /* Maintain reasonable size on wide screens */
+    max-height: 640px;
+    width: auto;
+    height: auto;
+}
+
+/* Portrait layout styles (applied via JavaScript) */
+.portrait-layout#main-container {
+    max-width: 1000px; /* Standard width for portrait mode */
+}
+
+.portrait-layout .ui-group {
+    margin: 15px 0; /* Standard vertical margin for stacked layout */
+}
+
+/* Legacy media query support (fallback if JavaScript fails) */
 @media (min-width: 1200px) {
-    #main-container {
-        max-width: 1400px; /* Increase max width for wide screens */
+    #main-container:not(.portrait-layout) {
+        max-width: 1400px;
     }
     
-    #top-row {
+    #top-row:not(.portrait-layout) {
         flex-direction: row;
         align-items: flex-start;
-        gap: 40px; /* Space between canvas and UI controls */
+        gap: 40px;
         justify-content: center;
     }
     
-    #canvas-container {
+    #canvas-container:not(.portrait-layout) {
         flex: 0 0 auto;
-        order: 1; /* Canvas on the left */
+        order: 1;
     }
     
-    #ui-controls {
+    #ui-controls:not(.portrait-layout) {
         flex: 0 0 auto;
-        order: 2; /* UI controls on the right */
-        margin-top: 0; /* Remove top margin since we're side-by-side */
-        max-width: 400px; /* Limit width of UI controls */
-        min-width: 320px; /* Ensure minimum width for usability */
-        align-self: flex-start; /* Align to top instead of center */
-        height: fit-content; /* Don't stretch to full height */
+        order: 2;
+        margin-top: 0;
+        max-width: 400px;
+        min-width: 320px;
+        align-self: flex-start;
+        height: fit-content;
     }
     
-    /* Adjust UI groups for better side layout */
-    .ui-group {
-        margin: 10px 0; /* Reduce vertical margin */
+    .ui-group:not(.portrait-layout .ui-group) {
+        margin: 10px 0;
     }
     
-    /* Make sure canvas maintains its aspect ratio in wide layout */
-    #myCanvas {
-        max-width: 640px; /* Maintain reasonable size on wide screens */
+    #myCanvas:not(.portrait-layout #myCanvas) {
+        max-width: 640px;
         max-height: 640px;
         width: auto;
         height: auto;

@@ -5,6 +5,7 @@
 /* eslint-disable guard-for-in */
 
 import { AudioManager } from './audio_manager.js';
+import { UILayoutPlacementManager } from './ui_layout_placement_manager.js';
 
 // Create a global instance of AudioManager
 const audioManager = new AudioManager();
@@ -609,6 +610,14 @@ export class JsonUiManager {
     this.groups = new Map(); // Track created groups
     this.ungroupedContainer = null; // Container for ungrouped items
     this.debugMode = false; // Debug logging control
+
+    // Initialize the UI Layout Placement Manager
+    this.layoutManager = new UILayoutPlacementManager();
+
+    // Listen for layout changes to potentially optimize UI element rendering
+    this.layoutManager.mediaQuery.addEventListener('change', (e) => {
+      this.onLayoutChange(e.matches ? 'desktop' : 'portrait');
+    });
   }
 
   // Method called by C++ backend to update UI components
@@ -956,6 +965,38 @@ export class JsonUiManager {
   setDebugMode(enabled) {
     this.debugMode = enabled;
     console.log(`🎵 UI Manager debug mode ${enabled ? 'enabled' : 'disabled'}`);
+  }
+
+  // Handle layout changes (can be used for layout-specific UI optimizations)
+  onLayoutChange(layoutMode) {
+    if (this.debugMode) {
+      console.log(`🎵 UI Manager: Layout changed to ${layoutMode}`);
+    }
+
+    // Force layout update in case UI elements were added before layout was ready
+    if (this.layoutManager) {
+      this.layoutManager.forceLayoutUpdate();
+    }
+  }
+
+  // Get current layout information
+  getLayoutInfo() {
+    if (this.layoutManager) {
+      return {
+        mode: this.layoutManager.getCurrentLayout(),
+        isDesktop: this.layoutManager.isDesktop(),
+        isPortrait: this.layoutManager.isPortrait(),
+      };
+    }
+    return null;
+  }
+
+  // Cleanup method to remove event listeners
+  destroy() {
+    if (this.layoutManager) {
+      this.layoutManager.destroy();
+      this.layoutManager = null;
+    }
   }
 }
 
