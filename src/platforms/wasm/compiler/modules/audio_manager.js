@@ -179,40 +179,59 @@ class AudioWorkletAudioProcessor extends AudioProcessor {
         ];
         
         let loadSuccess = false;
+        let diagnosticInfo = [];
+        
         for (const path of possiblePaths) {
           try {
             await this.audioContext.audioWorklet.addModule(path);
-            if (AUDIO_DEBUG.enabled) {
-              console.log(`🎵 AudioWorklet module loaded from: ${path}`);
-            }
+            console.log(`🎵 ✅ AudioWorklet module loaded successfully from: ${path}`);
             loadSuccess = true;
             break;
           } catch (pathError) {
-            if (AUDIO_DEBUG.enabled) {
-              console.warn(`🎵 Failed to load AudioWorklet from ${path}:`, pathError.message);
-            }
+            // Collect detailed diagnostic information
+            const diagnostic = {
+              path: path,
+              error: pathError.message,
+              errorName: pathError.name,
+              errorType: this.diagnoseAudioWorkletError(pathError, path)
+            };
+            diagnosticInfo.push(diagnostic);
+            
+            console.warn(`🎵 ❌ Failed to load AudioWorklet from ${path}:`, pathError.message);
+            console.warn(`🎵 🔍 Error type: ${diagnostic.errorType}`);
           }
         }
         
+        // If all paths failed, show diagnostic information
         if (!loadSuccess) {
+          console.log('🎵 📊 AudioWorklet Loading Diagnostic Report');
+          diagnosticInfo.forEach((info, index) => {
+            console.log(`🎵 📁 Attempt ${index + 1}: ${info.path}`);
+            console.log(`🎵    Error: ${info.error}`);
+            console.log(`🎵    Type: ${info.errorType}`);
+          });
+          console.log('🎵 💡 Check browser Network tab for specific HTTP status codes');
+        }
+        
+        if (!loadSuccess) {
+          // Provide a summary of the diagnostic information
+          const errorTypes = [...new Set(diagnosticInfo.map(d => d.errorType))];
           const detailedError = new Error(`
 🎵 AudioWorklet module could not be loaded from any path.
 
-Tried paths:
-${possiblePaths.map(path => `  - ${path}`).join('\n')}
+Diagnosed error types: ${errorTypes.join(', ')}
 
-This usually means:
-1. The audio_worklet_processor.js file is not being served by your web server
-2. The file path is incorrect for your deployment setup
-3. CORS restrictions are preventing module loading
+Run these diagnostic commands in the browser console:
+  window.testAudioWorkletPath()              - Test all paths
+  window.getAudioWorkletEnvironmentInfo()    - Check environment
 
-Solutions:
-- Ensure audio_worklet_processor.js is in the same directory as this script
-- Check your web server configuration
-- Look at browser Network tab to see which path is being requested
-- The system will automatically fall back to ScriptProcessor
+Quick fixes to try:
+1. Copy audio_worklet_processor.js to the same directory as this page
+2. Check browser Network tab for 404 or CORS errors
+3. Ensure you're using http:// or https:// (not file://)
+4. Verify web server is serving .js files correctly
 
-For now, ScriptProcessor will be used instead.`);
+The system will automatically fall back to ScriptProcessor.`);
           
           throw detailedError;
         }
@@ -365,6 +384,56 @@ For now, ScriptProcessor will be used instead.`);
       
       this.workletNode = null;
     }
+  }
+
+  /**
+   * Diagnose the type of AudioWorklet loading error
+   * @param {Error} error - The error that occurred
+   * @param {string} path - The path that failed to load
+   * @returns {string} Error type description
+   */
+  diagnoseAudioWorkletError(error, path) {
+    const errorMsg = error.message.toLowerCase();
+    const errorName = error.name;
+    
+    // Common error patterns and their likely causes
+    if (errorMsg.includes('cors') || errorMsg.includes('cross-origin')) {
+      return 'CORS_ERROR - Cross-origin request blocked';
+    }
+    
+    if (errorMsg.includes('404') || errorMsg.includes('not found')) {
+      return 'PATH_ERROR - File not found (404)';
+    }
+    
+    if (errorMsg.includes('network') || errorMsg.includes('fetch')) {
+      return 'NETWORK_ERROR - Network request failed';
+    }
+    
+    if (errorMsg.includes('syntax') || errorMsg.includes('parse')) {
+      return 'SYNTAX_ERROR - JavaScript syntax error in worklet file';
+    }
+    
+    if (errorMsg.includes('security') || errorMsg.includes('insecure')) {
+      return 'SECURITY_ERROR - Security restriction (HTTPS required?)';
+    }
+    
+    if (errorMsg.includes('mime') || errorMsg.includes('content-type')) {
+      return 'MIME_ERROR - Incorrect MIME type (should be application/javascript)';
+    }
+    
+    if (errorName === 'TypeError') {
+      return 'TYPE_ERROR - Likely a path resolution or module loading issue';
+    }
+    
+    if (errorName === 'AbortError') {
+      return 'ABORT_ERROR - Request was aborted (timeout or manual cancel)';
+    }
+    
+    if (errorMsg.includes('unable to load') || errorMsg.includes('failed to load')) {
+      return 'LOAD_ERROR - Generic loading failure (check network tab)';
+    }
+    
+    return `UNKNOWN_ERROR - ${errorName}: Check browser console and network tab`;
   }
 
   getType() {
@@ -1123,6 +1192,94 @@ window.setAudioDebug = function(enabled = true) {
 window.getAudioDebugSettings = function() {
   console.log('🎵 Audio Debug Settings:', AUDIO_DEBUG);
   return AUDIO_DEBUG;
+};
+
+/**
+ * Test AudioWorklet path loading (diagnostic tool)
+ * @param {string} customPath - Optional custom path to test
+ * @returns {Promise<boolean>} True if path loads successfully
+ */
+window.testAudioWorkletPath = async function(customPath = null) {
+  console.log('🎵 🔍 Testing AudioWorklet Path Loading...');
+  
+  const AudioContext = window.AudioContext || window.webkitAudioContext;
+  const testContext = new AudioContext();
+  
+  const pathsToTest = customPath ? [customPath] : [
+    './audio_worklet_processor.js',
+    'audio_worklet_processor.js',
+    '../audio_worklet_processor.js',
+    'src/platforms/wasm/compiler/modules/audio_worklet_processor.js'
+  ];
+  
+  for (const path of pathsToTest) {
+    try {
+      console.log(`🎵 🧪 Testing path: ${path}`);
+      
+      // First, try a simple fetch to see if the file exists
+      try {
+        const fetchResponse = await fetch(path);
+        console.log(`🎵    📡 Fetch status: ${fetchResponse.status} ${fetchResponse.statusText}`);
+        
+        if (!fetchResponse.ok) {
+          console.log(`🎵    ❌ Fetch failed: HTTP ${fetchResponse.status}`);
+          continue;
+        }
+        
+        console.log(`🎵    ✅ File exists and is accessible`);
+      } catch (fetchError) {
+        console.log(`🎵    ❌ Fetch error: ${fetchError.message}`);
+        continue;
+      }
+      
+      // Now try loading as AudioWorklet module
+      await testContext.audioWorklet.addModule(path);
+      console.log(`🎵    🎵 ✅ AudioWorklet module loaded successfully!`);
+      
+      testContext.close();
+      return true;
+      
+    } catch (error) {
+      console.log(`🎵    🎵 ❌ AudioWorklet loading failed: ${error.message}`);
+    }
+  }
+  
+  console.log('🎵 💡 Check browser Network tab for 404s or CORS errors');
+  testContext.close();
+  return false;
+};
+
+/**
+ * Get information about the current page and potential AudioWorklet issues
+ * @returns {Object} Environment information
+ */
+window.getAudioWorkletEnvironmentInfo = function() {
+  const info = {
+    currentURL: window.location.href,
+    protocol: window.location.protocol,
+    host: window.location.host,
+    pathname: window.location.pathname,
+    isSecureContext: window.isSecureContext,
+    audioWorkletSupported: 'audioWorklet' in (window.AudioContext || window.webkitAudioContext).prototype,
+    userAgent: navigator.userAgent
+  };
+  
+  console.log('🎵 🌍 AudioWorklet Environment Information');
+  console.log('🎵 Current URL:', info.currentURL);
+  console.log('🎵 Protocol:', info.protocol);
+  console.log('🎵 AudioWorklet API Supported:', info.audioWorkletSupported);
+  
+  // Check for common issues
+  if (info.protocol === 'file:') {
+    console.log('🎵 ⚠️  Running from file:// protocol - AudioWorklet may not work');
+    console.log('🎵 💡 Solution: Use a local web server (python -m http.server, etc.)');
+  }
+  
+  if (!info.audioWorkletSupported) {
+    console.log('🎵 ❌ AudioWorklet API not supported in this browser');
+  }
+  
+  return info;
 };
 
 /**
