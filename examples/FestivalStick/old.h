@@ -35,10 +35,18 @@ using namespace fl;
 // #define CM_BETWEEN_LEDS 1.0 // 1cm between LEDs
 // #define CM_LED_DIAMETER 0.5 // 0.5cm LED diameter
 
-UITitle festivalStickTitle("Festival Stick");
+UITitle festivalStickTitle("Festival Stick - Classic Version");
 UIDescription festivalStickDescription(
-    "Take a wooden walking stick, wrap dense LEDs around it like a corkscrew. Super simple but very awesome looking."
-    "This assumes the dense 144 LEDs / meter.");
+    "Take a wooden walking stick, wrap dense LEDs around it like a corkscrew. Super simple but very awesome looking. "
+    "This classic version uses 3D Perlin noise to create organic, flowing patterns around the cylindrical surface. "
+    "Assumes dense 144 LEDs/meter (288 total LEDs).");
+
+// UIHelp festivalStickHelp("Festival Stick - Classic Guide");
+
+// UIHelp technicalHelp("Technical Details - Classic Festival Stick");
+// UIHelp usageHelp("Usage Guide - Classic Festival Stick");  
+// UIHelp physicalBuildHelp("Building Your Festival Stick");
+
 
 UISlider ledsScale("Leds scale", 0.1f, 0.1f, 1.0f, 0.01f);
 UIButton button("Button");

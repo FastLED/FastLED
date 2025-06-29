@@ -61,7 +61,7 @@ using namespace fl;
 // #define CM_BETWEEN_LEDS 1.0 // 1cm between LEDs
 // #define CM_LED_DIAMETER 0.5 // 0.5cm LED diameter
 
-UITitle festivalStickTitle("Festival Stick");
+UITitle festivalStickTitle("Festival Stick - Advanced Version");
 UIDescription festivalStickDescription(
     "# Festival Stick Demo\n\n"
     "This example demonstrates **proper corkscrew LED mapping** for a festival stick using FastLED's advanced mapping capabilities.\n\n"
@@ -77,6 +77,12 @@ UIDescription festivalStickDescription(
     "2. Maps the grid to corkscrew LED positions using `readFrom()`\n"
     "3. Web interface shows the actual spiral shape via ScreenMap\n\n"
     "*Select different render modes and adjust parameters to see various effects!*");
+
+// UIHelp festivalStickHelp("Festival Stick - Advanced Guide");
+
+// UIHelp corkscrewMappingHelp("Understanding Corkscrew Mapping");
+
+// UIHelp uiControlsHelp("UI Controls Guide");
 
 
 
