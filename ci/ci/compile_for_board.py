@@ -1,6 +1,7 @@
 import os
 import shutil
 import subprocess
+import time
 from pathlib import Path
 from threading import Lock
 
@@ -105,21 +106,43 @@ def compile_for_board_and_example(
     ]
     msg = "\n".join(msg_lsit)
     locked_print(msg)
-    result = subprocess.run(
+
+    # Start timing for the process
+    start_time = time.time()
+
+    # Run the process with real-time output capture and timing
+    result = subprocess.Popen(
         cmd_list,
         cwd=cwd,
         shell=shell,
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
         text=True,
-        check=False,
     )
 
-    stdout = result.stdout
+    # Capture output lines in real-time with timing
+    stdout_lines = []
+    if result.stdout:
+        for line in iter(result.stdout.readline, ""):
+            if line:
+                elapsed = time.time() - start_time
+                # Format timing as seconds with 2 decimal places
+                timing_prefix = f"{elapsed:5.2f} "
+                timed_line = timing_prefix + line.rstrip()
+                stdout_lines.append(
+                    line.rstrip()
+                )  # Store original line for return value
+                locked_print(timed_line)
+
+    # Wait for process to complete
+    result.wait()
+
+    # Join all stdout lines for the return value
+    stdout = "\n".join(stdout_lines)
+
     # replace all instances of "lib/src" => "src" so intellisense can find the files
     # with one click.
     stdout = stdout.replace("lib/src", "src").replace("lib\\src", "src")
-    locked_print(stdout)
     if result.returncode != 0:
         if not verbose_on_failure:
             ERROR_HAPPENED = True
@@ -141,22 +164,41 @@ def compile_for_board_and_example(
         ]
         msg = "\n".join(msg_lsit)
         locked_print(msg)
-        result = subprocess.run(
+
+        # Start timing for the verbose re-run
+        start_time_verbose = time.time()
+
+        # Run the verbose process with real-time output capture and timing
+        result = subprocess.Popen(
             cmd_list,
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
             text=True,
-            check=False,
         )
-        stdout = result.stdout
-        # replace all instances of "lib/src" => "src" so intellisense can find the files
-        # with one click.
-        stdout = stdout.replace("lib/src", "src").replace("lib\\src", "src")
+
+        # Capture output lines in real-time with timing for verbose run
+        stdout_lines_verbose = []
+        if result.stdout:
+            for line in iter(result.stdout.readline, ""):
+                if line:
+                    elapsed = time.time() - start_time_verbose
+                    # Format timing as seconds with 2 decimal places
+                    timing_prefix = f"{elapsed:5.2f} "
+                    timed_line = timing_prefix + line.rstrip()
+                    stdout_lines_verbose.append(
+                        line.rstrip()
+                    )  # Store original line for return value
+                    locked_print(timed_line)
+
+        # Wait for verbose process to complete
+        result.wait()
+
+        # Join all stdout lines for the return value
+        stdout = "\n".join(stdout_lines_verbose)
         stdout = (
             stdout
             + "\n\nThis is a second attempt, but with verbose output, look above for compiler errors.\n"
         )
-        locked_print(stdout)
         return False, stdout
     locked_print(f"*** Finished building example {example} for board {board_name} ***")
     return True, stdout
