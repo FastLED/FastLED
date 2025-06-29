@@ -208,9 +208,31 @@ def parse_args():
         action="store_true",
         help="Disable all-source build (adds FASTLED_ALL_SRC=0 define)",
     )
-    args, unknown = parser.parse_known_args()
-    if unknown:
-        warnings.warn(f"Unknown arguments: {unknown}")
+    try:
+        args = parser.parse_intermixed_args()
+        unknown = []
+    except SystemExit:
+        # If parse_intermixed_args fails, fall back to parse_known_args
+        args, unknown = parser.parse_known_args()
+
+    # Handle unknown arguments intelligently - treat non-flag arguments as examples
+    unknown_examples = []
+    unknown_flags = []
+    for arg in unknown:
+        if arg.startswith("-"):
+            unknown_flags.append(arg)
+        else:
+            unknown_examples.append(arg)
+
+    # Add unknown examples to positional_examples
+    if unknown_examples:
+        if not hasattr(args, "positional_examples") or args.positional_examples is None:
+            args.positional_examples = []
+        args.positional_examples.extend(unknown_examples)
+
+    # Only warn about actual unknown flags, not examples
+    if unknown_flags:
+        warnings.warn(f"Unknown arguments: {unknown_flags}")
 
     # Check for FASTLED_CI_NO_INTERACTIVE environment variable
     # This allows test.py and other scripts to force non-interactive mode
