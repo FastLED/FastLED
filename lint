@@ -62,11 +62,11 @@ for folder in "${folders[@]}"; do
 done
 
 # JavaScript linting (if tools are available)
-# if [ -f "./lint-js" ] && [ -f ".js-tools/deno/deno" ]; then
-#     echo "Running JavaScript linting"
-#     ./lint-js
-# else
-#     echo "⚠️  JavaScript linting tools not found. Run: python3 ci/setup-js-linting.py"
-# fi
+if [ -f "./lint-js" ] && [ -f ".js-tools/deno/deno" ]; then
+    echo "Running JavaScript linting"
+    ./lint-js
+else
+    echo "⚠️  JavaScript linting tools not found. Run: python3 ci/setup-js-linting.py"
+fi
 
 echo "🎉 All linting completed!"

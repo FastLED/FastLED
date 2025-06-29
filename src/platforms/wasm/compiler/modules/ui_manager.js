@@ -10,7 +10,7 @@ import { AudioManager } from './audio_manager.js';
 const audioManager = new AudioManager();
 
 // Make setupAudioAnalysis available globally
-window.setupAudioAnalysis = function(audioElement) {
+window.setupAudioAnalysis = function (audioElement) {
   return audioManager.setupAudioAnalysis(audioElement);
 };
 
@@ -20,56 +20,62 @@ window.setupAudioAnalysis = function(audioElement) {
  */
 function markdownToHtml(markdown) {
   if (!markdown) return '';
-  
+
   let html = markdown;
-  
+
   // Convert headers (# ## ### etc.)
   html = html.replace(/^### (.+)$/gm, '<h3>$1</h3>');
   html = html.replace(/^## (.+)$/gm, '<h2>$1</h2>');
   html = html.replace(/^# (.+)$/gm, '<h1>$1</h1>');
-  
+
   // Convert bold **text** and __text__
   html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
   html = html.replace(/__(.+?)__/g, '<strong>$1</strong>');
-  
+
   // Convert italic *text* and _text_
   html = html.replace(/\*(.+?)\*/g, '<em>$1</em>');
   html = html.replace(/_(.+?)_/g, '<em>$1</em>');
-  
+
   // Convert inline code `code`
   html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
-  
+
   // Convert code blocks ```code```
   html = html.replace(/```([^`]+)```/g, '<pre><code>$1</code></pre>');
-  
+
   // Convert links [text](url)
   html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank">$1</a>');
-  
+
   // Convert unordered lists (- item or * item)
   html = html.replace(/^[\-\*] (.+)$/gm, '<li>$1</li>');
-  
+
   // Convert ordered lists (1. item, 2. item, etc.)
   html = html.replace(/^\d+\. (.+)$/gm, '<li class="ordered">$1</li>');
-  
+
   // Wrap consecutive <li> elements properly
-  html = html.replace(/(<li(?:\s+class="ordered")?>.*?<\/li>(?:\s*<li(?:\s+class="ordered")?>.*?<\/li>)*)/gs, function(match) {
-    if (match.includes('class="ordered"')) {
-      return '<ol>' + match.replace(/\s+class="ordered"/g, '') + '</ol>';
-    } else {
-      return '<ul>' + match + '</ul>';
-    }
-  });
-  
+  html = html.replace(
+    /(<li(?:\s+class="ordered")?>.*?<\/li>(?:\s*<li(?:\s+class="ordered")?>.*?<\/li>)*)/gs,
+    function (match) {
+      if (match.includes('class="ordered"')) {
+        return '<ol>' + match.replace(/\s+class="ordered"/g, '') + '</ol>';
+      } else {
+        return '<ul>' + match + '</ul>';
+      }
+    },
+  );
+
   // Convert line breaks to paragraphs (double newlines become paragraph breaks)
   const paragraphs = html.split(/\n\s*\n/);
-  html = paragraphs.map(p => {
+  html = paragraphs.map((p) => {
     const trimmed = p.trim();
-    if (trimmed && !trimmed.startsWith('<h') && !trimmed.startsWith('<ul') && !trimmed.startsWith('<ol') && !trimmed.startsWith('<pre')) {
+    if (
+      trimmed && !trimmed.startsWith('<h') && !trimmed.startsWith('<ul') &&
+      !trimmed.startsWith('<ol') && !trimmed.startsWith('<pre')
+    ) {
       return '<p>' + trimmed.replace(/\n/g, '<br>') + '</p>';
     }
     return trimmed;
   }).join('\n');
-  
+
   return html;
 }
 
@@ -264,7 +270,7 @@ function setDescription(descData) {
         document.body.insertBefore(descElement, document.body.firstChild);
       }
     }
-    
+
     // Always process text as markdown (plain text is valid markdown)
     descElement.innerHTML = markdownToHtml(descData.text);
   } else {
@@ -276,52 +282,52 @@ function createHelp(element) {
   const helpContainer = document.createElement('div');
   helpContainer.className = 'ui-help-container';
   helpContainer.id = `help-${element.id}`;
-  
+
   // Create help button
   const helpButton = document.createElement('button');
   helpButton.className = 'ui-help-button';
   helpButton.textContent = '?';
   helpButton.setAttribute('type', 'button');
   helpButton.setAttribute('aria-label', 'Help');
-  
+
   // Prepare content for tooltip and popup
   const markdownContent = element.markdownContent || '';
-  const tooltipText = markdownContent.length > 200 
-    ? markdownContent.substring(0, 200).trim() + '...' 
+  const tooltipText = markdownContent.length > 200
+    ? markdownContent.substring(0, 200).trim() + '...'
     : markdownContent;
-  
+
   // Convert markdown to HTML for popup
   const htmlContent = markdownToHtml(markdownContent);
-  
+
   // Create tooltip
   const tooltip = document.createElement('div');
   tooltip.className = 'ui-help-tooltip';
   tooltip.textContent = tooltipText;
-  
+
   // Add event listeners for tooltip
   helpButton.addEventListener('mouseenter', () => {
     if (tooltipText.trim()) {
       showTooltip(helpButton, tooltip);
     }
   });
-  
+
   helpButton.addEventListener('mouseleave', () => {
     hideTooltip(tooltip);
   });
-  
+
   // Add event listener for popup
   helpButton.addEventListener('click', (e) => {
     e.preventDefault();
     e.stopPropagation();
     showHelpPopup(htmlContent);
   });
-  
+
   // Assemble the help container
   helpContainer.appendChild(helpButton);
-  
+
   // Append tooltip to document body so it can appear above everything
   document.body.appendChild(tooltip);
-  
+
   // Add styles if not already present
   if (!document.querySelector('#ui-help-styles')) {
     const style = document.createElement('style');
@@ -501,7 +507,7 @@ function createHelp(element) {
     `;
     document.head.appendChild(style);
   }
-  
+
   return helpContainer;
 }
 
@@ -511,37 +517,37 @@ function showHelpPopup(htmlContent) {
   if (existingPopup) {
     existingPopup.remove();
   }
-  
+
   // Create popup
   const popup = document.createElement('div');
   popup.className = 'ui-help-popup';
-  
+
   const popupContent = document.createElement('div');
   popupContent.className = 'ui-help-popup-content';
-  
+
   const closeButton = document.createElement('button');
   closeButton.className = 'ui-help-popup-close';
   closeButton.innerHTML = '&times;';
   closeButton.setAttribute('aria-label', 'Close help');
-  
+
   const contentDiv = document.createElement('div');
   contentDiv.innerHTML = htmlContent;
-  
+
   popupContent.appendChild(closeButton);
   popupContent.appendChild(contentDiv);
   popup.appendChild(popupContent);
-  
+
   // Add event listeners
   closeButton.addEventListener('click', () => {
     popup.remove();
   });
-  
+
   popup.addEventListener('click', (e) => {
     if (e.target === popup) {
       popup.remove();
     }
   });
-  
+
   // Handle escape key
   const handleEscape = (e) => {
     if (e.key === 'Escape') {
@@ -550,7 +556,7 @@ function showHelpPopup(htmlContent) {
     }
   };
   document.addEventListener('keydown', handleEscape);
-  
+
   // Add to DOM
   document.body.appendChild(popup);
 }
@@ -558,21 +564,21 @@ function showHelpPopup(htmlContent) {
 function showTooltip(button, tooltip) {
   // Get button position relative to viewport
   const buttonRect = button.getBoundingClientRect();
-  
+
   // Make tooltip visible but transparent to measure it
   tooltip.style.visibility = 'visible';
   tooltip.style.opacity = '0';
-  
+
   // Now get tooltip dimensions
   const tooltipRect = tooltip.getBoundingClientRect();
-  
+
   // Calculate tooltip position
   const buttonCenterX = buttonRect.left + buttonRect.width / 2;
   const tooltipTop = buttonRect.top - tooltipRect.height - 8; // 8px gap above button
-  
+
   // Position tooltip centered above the button
   let tooltipLeft = buttonCenterX - tooltipRect.width / 2;
-  
+
   // Ensure tooltip doesn't go off-screen horizontally
   const padding = 10;
   if (tooltipLeft < padding) {
@@ -580,11 +586,11 @@ function showTooltip(button, tooltip) {
   } else if (tooltipLeft + tooltipRect.width > window.innerWidth - padding) {
     tooltipLeft = window.innerWidth - tooltipRect.width - padding;
   }
-  
+
   // Position tooltip
   tooltip.style.left = `${tooltipLeft}px`;
   tooltip.style.top = `${tooltipTop}px`;
-  
+
   // Show tooltip with fade-in
   tooltip.style.opacity = '1';
 }
@@ -593,7 +599,6 @@ function hideTooltip(tooltip) {
   tooltip.style.visibility = 'hidden';
   tooltip.style.opacity = '0';
 }
-
 
 export class JsonUiManager {
   constructor(uiControlsId) {
@@ -609,20 +614,20 @@ export class JsonUiManager {
   // Method called by C++ backend to update UI components
   updateUiComponents(jsonString) {
     // console.log('*** C++→JS: Backend update received:', jsonString);
-    
+
     try {
       const updates = JSON.parse(jsonString);
-      
+
       // Process each update
       for (const [elementId, updateData] of Object.entries(updates)) {
         // Strip 'id_' prefix if present to match our element storage
         const actualElementId = elementId.startsWith('id_') ? elementId.substring(3) : elementId;
-        
+
         const element = this.uiElements[actualElementId];
         if (element) {
           // Extract value from update data
           const value = updateData.value !== undefined ? updateData.value : updateData;
-          
+
           // Update the element based on its type
           if (element.type === 'checkbox') {
             element.checked = Boolean(value);
@@ -647,7 +652,7 @@ export class JsonUiManager {
           } else {
             element.value = value;
           }
-          
+
           // Update our internal state tracking
           this.previousUiState[actualElementId] = value;
           // console.log(`*** C++→JS: Updated UI element '${actualElementId}' = ${value} ***`);
@@ -672,35 +677,35 @@ export class JsonUiManager {
 
     const headerDiv = document.createElement('div');
     headerDiv.className = 'ui-group-header';
-    
+
     const titleSpan = document.createElement('span');
     titleSpan.className = 'ui-group-title';
     titleSpan.textContent = groupName;
-    
+
     const toggleSpan = document.createElement('span');
     toggleSpan.className = 'ui-group-toggle';
     toggleSpan.textContent = '▼';
-    
+
     headerDiv.appendChild(titleSpan);
     headerDiv.appendChild(toggleSpan);
-    
+
     const contentDiv = document.createElement('div');
     contentDiv.className = 'ui-group-content';
-    
+
     // Add click handler for collapse/expand
     headerDiv.addEventListener('click', () => {
       groupDiv.classList.toggle('collapsed');
     });
-    
+
     groupDiv.appendChild(headerDiv);
     groupDiv.appendChild(contentDiv);
-    
+
     const groupInfo = {
       container: groupDiv,
       content: contentDiv,
-      name: groupName
+      name: groupName,
     };
-    
+
     this.groups.set(groupName, groupInfo);
     return groupInfo;
   }
@@ -714,7 +719,7 @@ export class JsonUiManager {
     const ungroupedDiv = document.createElement('div');
     ungroupedDiv.className = 'ui-ungrouped';
     ungroupedDiv.id = 'ungrouped-items';
-    
+
     this.ungroupedContainer = ungroupedDiv;
     return ungroupedDiv;
   }
@@ -725,11 +730,11 @@ export class JsonUiManager {
     if (uiControlsContainer) {
       uiControlsContainer.innerHTML = '';
     }
-    
+
     // Remove any tooltips that were added to document.body
     const tooltips = document.querySelectorAll('.ui-help-tooltip');
-    tooltips.forEach(tooltip => tooltip.remove());
-    
+    tooltips.forEach((tooltip) => tooltip.remove());
+
     this.groups.clear();
     this.ungroupedContainer = null;
     this.uiElements = {};
@@ -740,7 +745,7 @@ export class JsonUiManager {
   processUiChanges() {
     const changes = {}; // Json object to store changes.
     let hasChanges = false;
-    
+
     for (const id in this.uiElements) {
       const element = this.uiElements[id];
       let currentValue;
@@ -755,32 +760,38 @@ export class JsonUiManager {
         currentValue = parseInt(element.value);
       } else if (element.type === 'file' && element.accept === 'audio/*') {
         // Handle audio input - get all accumulated sample blocks with timestamps
-        if (window.audioData && window.audioData.audioBuffers && window.audioData.hasActiveSamples) {
+        if (
+          window.audioData && window.audioData.audioBuffers && window.audioData.hasActiveSamples
+        ) {
           const bufferStorage = window.audioData.audioBuffers[element.id];
-          
+
           if (bufferStorage && bufferStorage.getBufferCount() > 0) {
             // Get all samples using the optimized storage system
             const samples = bufferStorage.getAllSamples();
             changes[id] = samples;
             hasChanges = true;
-            
+
             // Debug logging for audio stats (only when enabled)
             if (this.debugMode) {
               const stats = bufferStorage.getStats();
-              console.log(`🎵 UI Audio ${id}: ${stats.bufferCount} blocks, ${stats.totalSamples} samples, ${stats.storageType} storage, ~${stats.memoryEstimateKB.toFixed(1)}KB`);
+              console.log(
+                `🎵 UI Audio ${id}: ${stats.bufferCount} blocks, ${stats.totalSamples} samples, ${stats.storageType} storage, ~${
+                  stats.memoryEstimateKB.toFixed(1)
+                }KB`,
+              );
             }
-            
+
             // Clear the buffer with proper cleanup after sending samples
             bufferStorage.clear();
             window.audioData.hasActiveSamples = false;
-            
+
             continue; // Skip the comparison below for audio
           }
         }
       } else {
         currentValue = parseFloat(element.value);
       }
-      
+
       // For non-audio elements, only include if changed
       if (this.previousUiState[id] !== currentValue) {
         // console.log(`*** UI CHANGE: '${id}' changed from ${this.previousUiState[id]} to ${currentValue} ***`);
@@ -798,36 +809,37 @@ export class JsonUiManager {
         transformedChanges[key] = value;
       }
       // console.log('*** SENDING TO BACKEND:', JSON.stringify(transformedChanges));
-      
+
       // Check if there's audio data in the changes
-      const audioKeys = Object.keys(changes).filter(key => 
-        this.uiElements[key] && 
-        this.uiElements[key].type === 'file' && 
+      const audioKeys = Object.keys(changes).filter((key) =>
+        this.uiElements[key] &&
+        this.uiElements[key].type === 'file' &&
         this.uiElements[key].accept === 'audio/*'
       );
-      
+
       // Debug logging for audio processing (only when enabled)
       if (this.debugMode && audioKeys.length > 0) {
-        audioKeys.forEach(key => {
+        audioKeys.forEach((key) => {
           const audioData = changes[key];
           console.log(`🎵 UI Audio ${key}: ${audioData.length} samples sent to backend`);
         });
       }
-      
+
       // Return the transformed format
       return transformedChanges;
     }
-    
+
     return null;
   }
 
   addUiElements(jsonData) {
     console.log('UI elements added:', jsonData);
-    const uiControlsContainer = document.getElementById(this.uiControlsId) || createUiControlsContainer();
-    
+    const uiControlsContainer = document.getElementById(this.uiControlsId) ||
+      createUiControlsContainer();
+
     // Clear existing UI elements
     this.clearUiElements();
-    
+
     let foundUi = false;
     const groupedElements = new Map();
     const ungroupedElements = [];
@@ -837,7 +849,7 @@ export class JsonUiManager {
       console.log('data:', data);
       const { group } = data;
       const hasGroup = group !== '' && group !== undefined && group !== null;
-      
+
       if (hasGroup) {
         console.log(`Group ${group} found, for item ${data.name}`);
         if (!groupedElements.has(group)) {
@@ -854,7 +866,7 @@ export class JsonUiManager {
     if (ungroupedElements.length > 0) {
       const ungroupedContainer = this.createUngroupedContainer();
       uiControlsContainer.appendChild(ungroupedContainer);
-      
+
       ungroupedElements.forEach((data) => {
         const control = this.createControlElement(data);
         if (control) {
@@ -869,7 +881,7 @@ export class JsonUiManager {
     for (const [groupName, elements] of groupedElements) {
       const groupInfo = this.createGroupContainer(groupName);
       uiControlsContainer.appendChild(groupInfo.container);
-      
+
       elements.forEach((data) => {
         const control = this.createControlElement(data);
         if (control) {
@@ -930,9 +942,13 @@ export class JsonUiManager {
       this.uiElements[data.id] = control.querySelector('input');
     }
     this.previousUiState[data.id] = data.value;
-    
+
     if (this.debugMode) {
-      console.log(`🎵 UI Registered element: ID '${data.id}' (${data.type}) - Total: ${Object.keys(this.uiElements).length}`);
+      console.log(
+        `🎵 UI Registered element: ID '${data.id}' (${data.type}) - Total: ${
+          Object.keys(this.uiElements).length
+        }`,
+      );
     }
   }
 
@@ -945,12 +961,14 @@ export class JsonUiManager {
 
 // Global debug controls for UI Manager
 if (typeof window !== 'undefined') {
-  window.setUiDebug = function(enabled = true) {
+  window.setUiDebug = function (enabled = true) {
     // Access the global UI manager instance if available
     if (window.uiManager && typeof window.uiManager.setDebugMode === 'function') {
       window.uiManager.setDebugMode(enabled);
     } else {
-      console.warn('🎵 UI Manager instance not found. Debug mode will be applied when manager is created.');
+      console.warn(
+        '🎵 UI Manager instance not found. Debug mode will be applied when manager is created.',
+      );
       // Store the preference for when the manager is created
       window._pendingUiDebugMode = enabled;
     }

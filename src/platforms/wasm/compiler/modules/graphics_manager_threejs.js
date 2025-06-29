@@ -32,7 +32,7 @@ function makePositionCalculators(frameData, screenWidth, screenHeight) {
     calcYPosition: (y) => {
       const negY = (((y - screenMap.absMin[1]) / height) * screenHeight) - (screenHeight / 2);
       return negY; // Remove negative sign to fix Y-axis orientation
-    }
+    },
   };
 }
 
@@ -48,19 +48,19 @@ export class GraphicsManagerThreeJS {
    */
   constructor(graphicsArgs) {
     const { canvasId, threeJsModules } = graphicsArgs;
-    
+
     // Configuration
     this.canvasId = canvasId;
     this.threeJsModules = threeJsModules;
     this.SEGMENTS = 16;
     this.LED_SCALE = 1.0;
-    
+
     // Rendering properties
     this.SCREEN_WIDTH = 0;
     this.SCREEN_HEIGHT = 0;
     this.bloom_stength = 1;
     this.bloom_radius = 16;
-    
+
     // Scene objects
     this.leds = [];
     this.mergedMeshes = []; // Store merged meshes
@@ -68,7 +68,7 @@ export class GraphicsManagerThreeJS {
     this.camera = null;
     this.renderer = null;
     this.composer = null;
-    
+
     // State tracking
     this.previousTotalLeds = 0;
     this.outside_bounds_warning_count = 0;
@@ -90,7 +90,7 @@ export class GraphicsManagerThreeJS {
       });
     }
     this.leds = [];
-    
+
     // Clean up merged meshes
     if (this.mergedMeshes) {
       this.mergedMeshes.forEach((mesh) => {
@@ -119,7 +119,6 @@ export class GraphicsManagerThreeJS {
     }
   }
 
-
   /**
    * Initializes the Three.js rendering environment
    * @param {Object} frameData - The frame data containing screen mapping information
@@ -129,7 +128,7 @@ export class GraphicsManagerThreeJS {
     this._setupScene(frameData);
     this._setupRenderer();
     this._setupRenderPasses(frameData);
-    
+
     // For orthographic camera, we need to update the projection matrix
     // after all setup is complete
     if (this.camera) {
@@ -162,13 +161,13 @@ export class GraphicsManagerThreeJS {
     // Set internal canvas size to 2x for higher resolution
     canvas.width = targetWidth * RESOLUTION_BOOST;
     canvas.height = targetHeight * RESOLUTION_BOOST;
-    
+
     // But keep display size the same
     canvas.style.width = `${targetWidth}px`;
     canvas.style.height = `${targetHeight}px`;
     canvas.style.maxWidth = `${targetWidth}px`;
     canvas.style.maxHeight = `${targetHeight}px`;
-    
+
     // Store the bounds for orthographic camera calculations
     this.screenBounds = {
       width: screenMapWidth,
@@ -176,7 +175,7 @@ export class GraphicsManagerThreeJS {
       minX: screenMap.absMin[0],
       minY: screenMap.absMin[1],
       maxX: screenMap.absMax[0],
-      maxY: screenMap.absMax[1]
+      maxY: screenMap.absMax[1],
     };
   }
 
@@ -186,40 +185,40 @@ export class GraphicsManagerThreeJS {
    */
   _setupScene(frameData) {
     const { THREE } = this.threeJsModules;
-    
+
     // Create the scene
     this.scene = new THREE.Scene();
-    
+
     // Camera configuration
     this._setupCamera();
   }
-  
+
   /**
    * Sets up the camera with proper positioning
    * @private
    */
   _setupCamera() {
     const { THREE } = this.threeJsModules;
-    
+
     // Camera parameters
     const NEAR_PLANE = 0.1;
     const FAR_PLANE = 5000;
     const MARGIN = 1.05; // Add a small margin around the screen
-    
+
     // Calculate half width and height for orthographic camera
     const halfWidth = this.SCREEN_WIDTH / 2;
     const halfHeight = this.SCREEN_HEIGHT / 2;
-    
+
     // Create orthographic camera
     this.camera = new THREE.OrthographicCamera(
-      -halfWidth * MARGIN,  // left
-      halfWidth * MARGIN,   // right
-      halfHeight * MARGIN,  // top
+      -halfWidth * MARGIN, // left
+      halfWidth * MARGIN, // right
+      halfHeight * MARGIN, // top
       -halfHeight * MARGIN, // bottom
       NEAR_PLANE,
-      FAR_PLANE
+      FAR_PLANE,
     );
-    
+
     // Position the camera at a fixed distance
     this.camera.position.set(0, 0, 1000);
     this.camera.zoom = 1.0;
@@ -233,7 +232,7 @@ export class GraphicsManagerThreeJS {
   _setupRenderer() {
     const { THREE } = this.threeJsModules;
     const canvas = document.getElementById(this.canvasId);
-    
+
     this.renderer = new THREE.WebGLRenderer({
       canvas,
       antialias: true,
@@ -247,7 +246,7 @@ export class GraphicsManagerThreeJS {
    */
   _setupRenderPasses(frameData) {
     const { THREE, EffectComposer, RenderPass, UnrealBloomPass } = this.threeJsModules;
-    
+
     // Create basic render pass
     const renderScene = new RenderPass(this.scene, this.camera);
     this.composer = new EffectComposer(this.renderer);
@@ -271,7 +270,7 @@ export class GraphicsManagerThreeJS {
         new THREE.Vector2(this.SCREEN_WIDTH, this.SCREEN_HEIGHT),
         this.bloom_stength,
         this.bloom_radius,
-        0.0 // threshold
+        0.0, // threshold
       );
       this.composer.addPass(bloomPass);
     }
@@ -284,23 +283,23 @@ export class GraphicsManagerThreeJS {
    */
   createGrid(frameData) {
     this._clearExistingLeds();
-    
+
     // Collect LED positions and calculate layout properties
     const ledPositions = this._collectLedPositions(frameData);
     const { screenMap } = frameData;
     const width = screenMap.absMax[0] - screenMap.absMin[0];
     const height = screenMap.absMax[1] - screenMap.absMin[1];
-    
+
     // Get position calculators from utility function
     const { calcXPosition, calcYPosition } = makePositionCalculators(
-      frameData, 
-      this.SCREEN_WIDTH, 
-      this.SCREEN_HEIGHT
+      frameData,
+      this.SCREEN_WIDTH,
+      this.SCREEN_HEIGHT,
     );
-    
+
     // Determine if we have a dense grid layout
     const isDenseScreenMap = isDenseGrid(frameData);
-    
+
     // Calculate dot sizes
     const { defaultDotSize, normalizedScale } = this._calculateDotSizes(
       frameData,
@@ -308,7 +307,7 @@ export class GraphicsManagerThreeJS {
       width,
       height,
       calcXPosition,
-      isDenseScreenMap
+      isDenseScreenMap,
     );
 
     // Create LED objects
@@ -318,12 +317,12 @@ export class GraphicsManagerThreeJS {
       calcYPosition,
       isDenseScreenMap,
       defaultDotSize,
-      normalizedScale
+      normalizedScale,
     );
-    
+
     return { isDenseScreenMap };
   }
-  
+
   /**
    * Clears existing LED objects
    * @private
@@ -336,7 +335,7 @@ export class GraphicsManagerThreeJS {
     });
     this.leds = [];
   }
-  
+
   /**
    * Collects all LED positions from frame data
    * @private
@@ -344,23 +343,23 @@ export class GraphicsManagerThreeJS {
   _collectLedPositions(frameData) {
     const { screenMap } = frameData;
     const ledPositions = [];
-    
+
     frameData.forEach((strip) => {
       const stripId = strip.strip_id;
       if (stripId in screenMap.strips) {
         const stripMap = screenMap.strips[stripId];
         const x_array = stripMap.map.x;
         const y_array = stripMap.map.y;
-        
+
         for (let i = 0; i < x_array.length; i++) {
           ledPositions.push([x_array[i], y_array[i]]);
         }
       }
     });
-    
+
     return ledPositions;
   }
-  
+
   /**
    * Calculates appropriate dot sizes for LEDs
    * @private
@@ -369,7 +368,7 @@ export class GraphicsManagerThreeJS {
     const { screenMap } = frameData;
     const screenArea = width * height;
     let pixelDensityDefault;
-    
+
     // For dense grids, use the distance between adjacent pixels
     if (isDenseScreenMap) {
       console.log('Pixel density is close to 1, assuming grid or strip');
@@ -378,14 +377,14 @@ export class GraphicsManagerThreeJS {
 
     // Calculate default dot size based on screen area and LED count
     const defaultDotSizeScale = Math.max(
-      4, 
-      Math.sqrt(screenArea / (ledPositions.length * Math.PI)) * 0.4
+      4,
+      Math.sqrt(screenArea / (ledPositions.length * Math.PI)) * 0.4,
     );
-    
+
     // Get average diameter from strip data
     const stripDotSizes = Object.values(screenMap.strips).map((strip) => strip.diameter);
     const avgPointDiameter = stripDotSizes.reduce((a, b) => a + b, 0) / stripDotSizes.length;
-      
+
     // Use pixel density for dense grids, otherwise calculate based on area
     let defaultDotSize = defaultDotSizeScale * avgPointDiameter;
     if (pixelDensityDefault) {
@@ -394,37 +393,36 @@ export class GraphicsManagerThreeJS {
     }
 
     const normalizedScale = this.SCREEN_WIDTH / width;
-    
+
     return { defaultDotSize, normalizedScale };
   }
-  
+
   /**
    * Creates LED objects for each pixel in the frame data
    * @private
    */
   _createLedObjects(
-    frameData, 
-    calcXPosition, 
-    calcYPosition, 
-    isDenseScreenMap, 
-    defaultDotSize, 
-    normalizedScale
+    frameData,
+    calcXPosition,
+    calcYPosition,
+    isDenseScreenMap,
+    defaultDotSize,
+    normalizedScale,
   ) {
     const { THREE } = this.threeJsModules;
     const { screenMap } = frameData;
 
-
-    
     // If BufferGeometryUtils is not available, fall back to individual LEDs
     const BufferGeometryUtils = this.threeJsModules.BufferGeometryUtils;
-    const canMergeGeometries = this.useMergedGeometry && BufferGeometryUtils && !DISABLE_MERGE_GEOMETRIES;
+    const canMergeGeometries = this.useMergedGeometry && BufferGeometryUtils &&
+      !DISABLE_MERGE_GEOMETRIES;
 
     if (!canMergeGeometries) {
       console.log('BufferGeometryUtils not available, falling back to individual LEDs');
     } else {
       console.log('Using merged geometries for better performance');
     }
-    
+
     // Create template geometries for reuse
     let circleGeometry, planeGeometry;
     if (!isDenseScreenMap) {
@@ -432,17 +430,17 @@ export class GraphicsManagerThreeJS {
     } else {
       planeGeometry = new THREE.PlaneGeometry(1.0, 1.0);
     }
-    
+
     // Group all geometries together for merging
     const allGeometries = [];
     const allLedData = [];
-    
+
     frameData.forEach((strip) => {
       const stripId = strip.strip_id;
       if (!(stripId in screenMap.strips)) {
         return;
       }
-      
+
       const stripData = screenMap.strips[stripId];
       let stripDiameter = null;
       if (stripData.diameter) {
@@ -450,16 +448,16 @@ export class GraphicsManagerThreeJS {
       } else {
         stripDiameter = defaultDotSize;
       }
-      
+
       const x_array = stripData.map.x;
       const y_array = stripData.map.y;
-      
+
       for (let i = 0; i < x_array.length; i++) {
         // Calculate position
         const x = calcXPosition(x_array[i]);
         const y = calcYPosition(y_array[i]);
         const z = 500;
-        
+
         if (!canMergeGeometries) {
           // Create individual LEDs (original approach)
           let geometry;
@@ -469,15 +467,15 @@ export class GraphicsManagerThreeJS {
             geometry = new THREE.PlaneGeometry(w, h);
           } else {
             geometry = new THREE.CircleGeometry(
-              stripDiameter * this.LED_SCALE, 
-              this.SEGMENTS
+              stripDiameter * this.LED_SCALE,
+              this.SEGMENTS,
             );
           }
-          
+
           const material = new THREE.MeshBasicMaterial({ color: 0x000000 });
           const led = new THREE.Mesh(geometry, material);
           led.position.set(x, y, z);
-          
+
           this.scene.add(led);
           this.leds.push(led);
         } else {
@@ -488,48 +486,48 @@ export class GraphicsManagerThreeJS {
             instanceGeometry.scale(
               stripDiameter * this.LED_SCALE,
               stripDiameter * this.LED_SCALE,
-              1
+              1,
             );
           } else {
             instanceGeometry = circleGeometry.clone();
             instanceGeometry.scale(
               stripDiameter * this.LED_SCALE,
               stripDiameter * this.LED_SCALE,
-              1
+              1,
             );
           }
-          
+
           // Apply position transformation
           instanceGeometry.translate(x, y, z);
-          
+
           // Add to collection for merging
           allGeometries.push(instanceGeometry);
           allLedData.push({ x, y, z });
         }
       }
     });
-    
+
     // If using merged geometry, create a single merged mesh for all LEDs
     if (canMergeGeometries && allGeometries.length > 0) {
       try {
         // Merge all geometries together
         const mergedGeometry = BufferGeometryUtils.mergeGeometries(allGeometries);
-        
+
         // Create material and mesh with vertex colors
-        const material = new THREE.MeshBasicMaterial({ 
+        const material = new THREE.MeshBasicMaterial({
           color: 0xffffff,
-          vertexColors: true 
+          vertexColors: true,
         });
-        
+
         // Create color attribute for the merged geometry
         const colorCount = mergedGeometry.attributes.position.count;
         const colorArray = new Float32Array(colorCount * 3);
         mergedGeometry.setAttribute('color', new THREE.BufferAttribute(colorArray, 3));
-        
+
         const mesh = new THREE.Mesh(mergedGeometry, material);
         this.scene.add(mesh);
         this.mergedMeshes.push(mesh);
-        
+
         // Create dummy objects for individual control
         for (let i = 0; i < allLedData.length; i++) {
           const pos = allLedData[i];
@@ -538,14 +536,14 @@ export class GraphicsManagerThreeJS {
             position: new THREE.Vector3(pos.x, pos.y, pos.z),
             _isMerged: true,
             _mergedIndex: i,
-            _parentMesh: mesh
+            _parentMesh: mesh,
           };
           this.leds.push(dummyObj);
         }
       } catch (e) {
         console.log(BufferGeometryUtils);
         console.error('Failed to merge geometries:', e);
-        
+
         // Fallback to individual geometries
         for (let i = 0; i < allGeometries.length; i++) {
           const pos = allLedData[i];
@@ -558,13 +556,13 @@ export class GraphicsManagerThreeJS {
           this.leds.push(led);
         }
       }
-      
+
       // Clean up template geometries
       if (circleGeometry) circleGeometry.dispose();
       if (planeGeometry) planeGeometry.dispose();
-      
+
       // Clean up individual geometries
-      allGeometries.forEach(g => g.dispose());
+      allGeometries.forEach((g) => g.dispose());
     }
   }
 
@@ -578,28 +576,28 @@ export class GraphicsManagerThreeJS {
       console.warn('Received empty frame data, skipping update');
       // return;
     }
-    
+
     // Check if we need to initialize or reinitialize the scene
     this._checkAndInitializeScene(frameData);
-    
+
     // Process the frame data
     const positionMap = this._collectLedColorData(frameData);
-    
+
     // Update LED visuals
     this._updateLedVisuals(positionMap, frameData.screenMap);
-    
+
     // Render the scene
     this.composer.render();
   }
-  
+
   /**
    * Checks if scene needs initialization and handles it
    * @private
    */
   _checkAndInitializeScene(frameData) {
     const totalPixels = frameData.reduce(
-      (acc, strip) => acc + strip.pixel_data.length / 3, 
-      0
+      (acc, strip) => acc + strip.pixel_data.length / 3,
+      0,
     );
 
     // Initialize scene if it doesn't exist or if LED count changed
@@ -611,7 +609,7 @@ export class GraphicsManagerThreeJS {
       this.previousTotalLeds = totalPixels;
     }
   }
-  
+
   /**
    * Collects LED color data from frame data
    * @private
@@ -644,17 +642,17 @@ export class GraphicsManagerThreeJS {
           this._handleOutOfBoundsPixel(strip_id, j, map.length, WARNING_COUNT);
           continue;
         }
-        
+
         // Get pixel coordinates and color
         const x = x_array[j];
         const y = y_array[j];
         const posKey = `${x},${y}`;
         const srcIndex = j * 3;
-        
+
         // Extract RGB values (0-1 range)
-        const r = (data[srcIndex] & 0xFF) / 255;  // eslint-disable-line
-        const g = (data[srcIndex + 1] & 0xFF) / 255;  // eslint-disable-line
-        const b = (data[srcIndex + 2] & 0xFF) / 255;  // eslint-disable-line
+        const r = (data[srcIndex] & 0xFF) / 255; // eslint-disable-line
+        const g = (data[srcIndex + 1] & 0xFF) / 255; // eslint-disable-line
+        const b = (data[srcIndex + 2] & 0xFF) / 255; // eslint-disable-line
         const brightness = (r + g + b) / 3;
 
         // Only update if this LED is brighter than any existing LED at this position
@@ -663,10 +661,10 @@ export class GraphicsManagerThreeJS {
         }
       }
     });
-    
+
     return positionMap;
   }
-  
+
   /**
    * Handles warning for pixels outside the screen map bounds
    * @private
@@ -675,22 +673,24 @@ export class GraphicsManagerThreeJS {
     this.outside_bounds_warning_count++;
     if (this.outside_bounds_warning_count < WARNING_COUNT) {
       console.warn(
-        `Strip ${strip_id}: Pixel ${j} is outside the screen map ${mapLength}, skipping update`
+        `Strip ${strip_id}: Pixel ${j} is outside the screen map ${mapLength}, skipping update`,
       );
       if (this.outside_bounds_warning_count === WARNING_COUNT) {
         console.warn('Suppressing further warnings about pixels outside the screen map');
       }
     }
-    console.warn(`Strip ${strip_id}: Pixel ${j} is outside the screen map ${mapLength}, skipping update`);
+    console.warn(
+      `Strip ${strip_id}: Pixel ${j} is outside the screen map ${mapLength}, skipping update`,
+    );
   }
-  
+
   /**
    * Updates LED visuals based on position map data
    * @private
    */
   _updateLedVisuals(positionMap, screenMap) {
     const { THREE } = this.threeJsModules;
-    
+
     // Use the stored bounds from setup
     const min_x = this.screenBounds.minX;
     const min_y = this.screenBounds.minY;
@@ -699,14 +699,14 @@ export class GraphicsManagerThreeJS {
 
     // Track which merged meshes need updates
     const mergedMeshUpdates = new Map();
-    
+
     // Update LED positions and colors
     let ledIndex = 0;
-    for (const [_, ledData] of positionMap) {  // eslint-disable-line
+    for (const [_, ledData] of positionMap) { // eslint-disable-line
       if (ledIndex >= this.leds.length) break;
 
       const led = this.leds[ledIndex];
-      
+
       // Calculate normalized position for orthographic view
       const x = ledData.x - min_x;
       const y = ledData.y - min_y;
@@ -721,7 +721,7 @@ export class GraphicsManagerThreeJS {
         // For merged geometries, track color updates
         led.material.color.setRGB(ledData.r, ledData.g, ledData.b);
         led.position.set(normalizedX, normalizedY, z);
-        
+
         // Track which parent mesh needs updating
         if (led._parentMesh) {
           if (!mergedMeshUpdates.has(led._parentMesh)) {
@@ -729,7 +729,7 @@ export class GraphicsManagerThreeJS {
           }
           mergedMeshUpdates.get(led._parentMesh).push({
             index: led._mergedIndex,
-            color: new THREE.Color(ledData.r, ledData.g, ledData.b)
+            color: new THREE.Color(ledData.r, ledData.g, ledData.b),
           });
         }
       } else {
@@ -737,47 +737,47 @@ export class GraphicsManagerThreeJS {
         led.position.set(normalizedX, normalizedY, z);
         led.material.color.setRGB(ledData.r, ledData.g, ledData.b);
       }
-      
+
       ledIndex++;
     }
 
     // Update merged meshes with instance colors
     this._updateMergedMeshes(mergedMeshUpdates);
-    
+
     // Clear any remaining LEDs
     this._clearUnusedLeds(ledIndex);
   }
-  
+
   /**
    * Updates merged meshes with new colors
    * @private
    */
   _updateMergedMeshes(mergedMeshUpdates) {
     const { THREE } = this.threeJsModules;
-    
+
     // Process each mesh that needs updates
     for (const [mesh, updates] of mergedMeshUpdates.entries()) {
       if (!mesh.geometry || !mesh.material) continue;
-      
+
       // Create or update the color attribute if needed
       if (!mesh.geometry.attributes.color) {
         // Create a new color attribute
         const count = mesh.geometry.attributes.position.count;
         const colorArray = new Float32Array(count * 3);
         mesh.geometry.setAttribute('color', new THREE.BufferAttribute(colorArray, 3));
-        
+
         // Update material to use vertex colors
         mesh.material.vertexColors = true;
       }
-      
+
       // Get the color attribute
       const colorAttribute = mesh.geometry.attributes.color;
-      
+
       // Update colors for each LED
-      updates.forEach(update => {
+      updates.forEach((update) => {
         const { index, color } = update;
         const baseIndex = index * 3;
-        
+
         // Each vertex of the geometry needs the color
         const verticesPerInstance = mesh.geometry.attributes.position.count / this.leds.length;
         for (let v = 0; v < verticesPerInstance; v++) {
@@ -787,12 +787,12 @@ export class GraphicsManagerThreeJS {
           colorAttribute.array[i + 2] = color.b;
         }
       });
-      
+
       // Mark the attribute as needing an update
       colorAttribute.needsUpdate = true;
     }
   }
-  
+
   /**
    * Calculates a depth effect based on distance from center
    * @private
@@ -802,7 +802,7 @@ export class GraphicsManagerThreeJS {
     // But we can still use a small z-offset to prevent z-fighting
     return 0; // Fixed z position for orthographic view
   }
-  
+
   /**
    * Clears unused LEDs by setting them to black and moving offscreen
    * @private
@@ -811,16 +811,16 @@ export class GraphicsManagerThreeJS {
     // Track which merged meshes need updates for clearing
     const mergedMeshUpdates = new Map();
     const { THREE } = this.threeJsModules;
-    
+
     for (let i = startIndex; i < this.leds.length; i++) {
       const led = this.leds[i];
       led.material.color.setRGB(0, 0, 0);
-      
+
       if (!led._isMerged) {
         led.position.set(-1000, -1000, 0); // Move offscreen
       } else {
         led.position.set(-1000, -1000, 0); // Update tracking position
-        
+
         // Track which parent mesh needs clearing
         if (led._parentMesh) {
           if (!mergedMeshUpdates.has(led._parentMesh)) {
@@ -828,12 +828,12 @@ export class GraphicsManagerThreeJS {
           }
           mergedMeshUpdates.get(led._parentMesh).push({
             index: led._mergedIndex,
-            color: new THREE.Color(0, 0, 0)
+            color: new THREE.Color(0, 0, 0),
           });
         }
       }
     }
-    
+
     // Update merged meshes with cleared colors
     this._updateMergedMeshes(mergedMeshUpdates);
   }

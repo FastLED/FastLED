@@ -62,6 +62,6 @@ export function makePositionCalculators(frameData, screenWidth, screenHeight) {
     calcYPosition: (y) => {
       const negY = (((y - screenMap.absMin[1]) / height) * screenHeight) - (screenHeight / 2);
       return negY; // Remove negative sign to fix Y-axis orientation
-    }
+    },
   };
 }

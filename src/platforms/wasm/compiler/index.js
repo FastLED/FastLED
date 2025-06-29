@@ -1,12 +1,5 @@
- 
 /* eslint-disable import/prefer-default-export */
- 
- 
- 
- 
- 
- 
- 
+
 /* eslint-disable import/extensions */
 
 import { JsonUiManager } from './modules/ui_manager.js';
@@ -28,7 +21,7 @@ const receivedCanvas = false;
 const screenMap = {
   strips: {},
   absMin: [0, 0],
-  absMax: [0, 0]
+  absMax: [0, 0],
 };
 let canvasId;
 let uiControlsId;
@@ -41,15 +34,17 @@ let graphicsManager;
 let containerId; // for ThreeJS
 let graphicsArgs = {};
 
-async function _loadFastLED(options) { // eslint-disable-line no-unused-vars
+// deno-lint-ignore require-await
+let _loadFastLED = async function (options) { // eslint-disable-line no-unused-vars
   // Stub to let the user/dev know that something went wrong.
+  // This function is replaced with an async implementation, so it must be async for interface compatibility
   console.log('FastLED loader function was not set.');
   return null;
-}
+};
 
 export async function loadFastLED(options) {
   // This will be overridden by through the initialization.
-  return await _loadFastLED(options);  
+  return await _loadFastLED(options);
 }
 
 const EPOCH = new Date().getTime();
@@ -60,7 +55,7 @@ function getTimeSinceEpoc() {
   return outSec.toFixed(1);
 }
 // Will be overridden during initialization.
-let print = function () { };  
+let print = function () {};
 
 const prev_console = console;
 
@@ -77,7 +72,9 @@ function toStringWithTimeStamp(...args) {
 function log(...args) {
   const argsWithTime = toStringWithTimeStamp(...args);
   _prev_log(...argsWithTime); // Spread the array when calling original logger
-  try { print(...argsWithTime); } catch (e) {
+  try {
+    print(...argsWithTime);
+  } catch (e) {
     _prev_log('Error in log', e);
   }
 }
@@ -85,7 +82,9 @@ function log(...args) {
 function warn(...args) {
   const argsWithTime = toStringWithTimeStamp(...args);
   _prev_warn(...argsWithTime);
-  try { print(...argsWithTime); } catch (e) {
+  try {
+    print(...argsWithTime);
+  } catch (e) {
     _prev_warn('Error in warn', e);
   }
 }
@@ -120,7 +119,8 @@ function customPrintFunction(...args) {
 // to always go to the console. If we hijack it then startup errors become
 // extremely difficult to debug.
 
-console = {};  
+// deno-lint-ignore no-global-assign
+console = {}; // Intentionally override console for custom logging behavior
 console.log = log;
 console.warn = warn;
 console.error = _prev_error;
@@ -131,7 +131,7 @@ function jsAppendFileRaw(moduleInstance, path_cstr, data_cbytes, len_int) {
     'jsAppendFile',
     'number', // return value
     ['number', 'number', 'number'], // argument types, not sure why numbers works.
-    [path_cstr, data_cbytes, len_int]
+    [path_cstr, data_cbytes, len_int],
   );
 }
 
@@ -163,7 +163,7 @@ function minMax(x_array, y_array) {
 function partition(filesJson, immediateExtensions) {
   const immediateFiles = [];
   const streamingFiles = [];
-  filesJson.map((file) => {  
+  filesJson.map((file) => {
     for (const ext of immediateExtensions) {
       const pathLower = file.path.toLowerCase();
       if (pathLower.endsWith(ext.toLowerCase())) {
@@ -179,11 +179,11 @@ function partition(filesJson, immediateExtensions) {
 function getFileManifestJson(filesJson, frame_rate) {
   const trimmedFilesJson = filesJson.map((file) => ({
     path: file.path,
-    size: file.size
+    size: file.size,
   }));
   const options = {
     files: trimmedFilesJson,
-    frameRate: frame_rate
+    frameRate: frame_rate,
   };
   return options;
 }
@@ -270,14 +270,14 @@ function FastLED_onStripUpdate(jsonData) {
       map,
       min,
       max,
-      diameter: diameter
+      diameter: diameter,
     };
     console.log('Screen map updated:', screenMap);
     // iterate through all the screenMaps and get the absolute min and max
     const absMin = [Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY];
     const absMax = [Number.NEGATIVE_INFINITY, Number.NEGATIVE_INFINITY];
     let setAtLeastOnce = false;
-    for (const stripId in screenMap.strips) {  
+    for (const stripId in screenMap.strips) {
       console.log('Processing strip ID', stripId);
       const id = Number.parseInt(stripId, 10);
       const stripData = screenMap.strips[id];
@@ -319,7 +319,9 @@ function FastLED_onStripUpdate(jsonData) {
     return;
   }
   if (receivedCanvas) {
-    console.warn('Canvas size has already been set, setting multiple canvas sizes is not supported yet and the previous one will be overwritten.');
+    console.warn(
+      'Canvas size has already been set, setting multiple canvas sizes is not supported yet and the previous one will be overwritten.',
+    );
   }
   const canvas = document.getElementById(canvasId);
   canvas.width = width;
@@ -332,7 +334,9 @@ function FastLED_onStripUpdate(jsonData) {
   // Set CSS display size while maintaining aspect ratio
   canvas.style.width = `${displayWidth}px`;
   canvas.style.height = `${displayHeight}px`;
-  console.log(`Canvas size set to ${width}x${height}, displayed at ${canvas.style.width}x${canvas.style.height} `);
+  console.log(
+    `Canvas size set to ${width}x${height}, displayed at ${canvas.style.width}x${canvas.style.height} `,
+  );
   // unconditionally delete the graphicsManager
   if (graphicsManager) {
     graphicsManager.reset();
@@ -360,7 +364,7 @@ function FastLED_onFrame(frameData, uiUpdateCallback) {
     // New experiment try to run anyway.
     // return;
   }
-  frameData.screenMap = screenMap;  
+  frameData.screenMap = screenMap;
   updateCanvas(frameData);
 }
 
@@ -370,7 +374,13 @@ function FastLED_onUiElementsAdded(jsonData) {
 }
 
 // Function to call the setup and loop functions
-async function fastledLoadSetupLoop(extern_setup, extern_loop, frame_rate, moduleInstance, filesJson) {
+async function fastledLoadSetupLoop(
+  extern_setup,
+  extern_loop,
+  frame_rate,
+  moduleInstance,
+  filesJson,
+) {
   console.log('Calling setup function...');
 
   const fileManifest = getFileManifestJson(filesJson, frame_rate);
@@ -384,9 +394,9 @@ async function fastledLoadSetupLoop(extern_setup, extern_loop, frame_rate, modul
 
       console.log(`File fetched: ${file.path}, size: ${file.size}`);
 
-      while (true) {  
-        const { value, done } = await reader.read();  
-        if (done) {break;}
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
         // Allocate and copy chunk data
         jsAppendFileUint8(moduleInstance, file.path, value);
       }
@@ -395,7 +405,7 @@ async function fastledLoadSetupLoop(extern_setup, extern_loop, frame_rate, modul
     }
   };
 
-  const fetchAllFiles = async (filesJson, onComplete) => {  
+  const fetchAllFiles = async (filesJson, onComplete) => {
     const promises = filesJson.map(async (file) => {
       await processFile(file);
     });
@@ -414,7 +424,10 @@ async function fastledLoadSetupLoop(extern_setup, extern_loop, frame_rate, modul
   // Come back to this later - we want to partition the files into immediate and streaming files
   // so that large projects don't try to download ALL the large files BEFORE setup/loop is called.
   const [immediateFiles, streamingFiles] = partition(filesJson, ['.json', '.csv', '.txt', '.cfg']);
-  console.log('The following files will be immediatly available and can be read during setup():', immediateFiles);
+  console.log(
+    'The following files will be immediatly available and can be read during setup():',
+    immediateFiles,
+  );
   console.log('The following files will be streamed in during loop():', streamingFiles);
 
   const promiseImmediateFiles = fetchAllFiles(immediateFiles, () => {
@@ -427,7 +440,7 @@ async function fastledLoadSetupLoop(extern_setup, extern_loop, frame_rate, modul
     const streamingFilesPromise = fetchAllFiles(streamingFiles, () => {
       console.log('All streaming files downloaded to FastLED.');
     });
-    const delay = new Promise((r) => setTimeout(r, 250));  
+    const delay = new Promise((r) => setTimeout(r, 250));
     // Wait for either the time delay or the streaming files to be processed, whichever
     // happens first.
     await Promise.any([delay, streamingFilesPromise]);
@@ -438,17 +451,24 @@ async function fastledLoadSetupLoop(extern_setup, extern_loop, frame_rate, modul
 }
 
 // Ensure we wait for the module to load
-async function onModuleLoaded(fastLedLoader) {
+function onModuleLoaded(fastLedLoader) {
   // Unpack the module functions and send them to the fastledLoadSetupLoop function
 
-  function __fastledLoadSetupLoop(moduleInstance, frameRate, filesJson) {  
-    const exports_exist = moduleInstance && moduleInstance._extern_setup && moduleInstance._extern_loop;
+  function __fastledLoadSetupLoop(moduleInstance, frameRate, filesJson) {
+    const exports_exist = moduleInstance && moduleInstance._extern_setup &&
+      moduleInstance._extern_loop;
     if (!exports_exist) {
       console.error('FastLED setup or loop functions are not available.');
       return;
     }
 
-    fastledLoadSetupLoop(moduleInstance._extern_setup, moduleInstance._extern_loop, frameRate, moduleInstance, filesJson);
+    fastledLoadSetupLoop(
+      moduleInstance._extern_setup,
+      moduleInstance._extern_loop,
+      frameRate,
+      moduleInstance,
+      filesJson,
+    );
   }
   // Start fetch now in parallel
   const fetchJson = async (fetchFilePath) => {
@@ -462,10 +482,10 @@ async function onModuleLoaded(fastLedLoader) {
       // Load the module
       fastLedLoader().then(async (instance) => {
         console.log('Module loaded, running FastLED...');
-        
+
         // Expose the updateUiComponents method to the C++ module
         // This should be called BY C++ TO UPDATE the frontend, not the other way around
-        instance._jsUiManager_updateUiComponents = function(jsonString) {
+        instance._jsUiManager_updateUiComponents = function (jsonString) {
           console.log('*** C++ CALLING JS: updateUiComponents with:', jsonString);
           if (window.uiManagerInstance && window.uiManagerInstance.updateUiComponents) {
             window.uiManagerInstance.updateUiComponents(jsonString);
@@ -473,7 +493,7 @@ async function onModuleLoaded(fastLedLoader) {
             console.error('*** UI BINDING ERROR: uiManagerInstance not available ***');
           }
         };
-        
+
         // Wait for the files.json to load.
         let filesJson = null;
         try {
@@ -488,7 +508,10 @@ async function onModuleLoaded(fastLedLoader) {
         console.error('Error loading fastled as a module:', err);
       });
     } else {
-      console.log('Could not detect a valid module loading for FastLED, expected function but got', typeof fastledLoader);
+      console.log(
+        'Could not detect a valid module loading for FastLED, expected function but got',
+        typeof fastledLoader,
+      );
     }
   } catch (error) {
     console.error('Failed to load FastLED:', error);
@@ -505,17 +528,17 @@ async function localLoadFastLed(options) {
     console.log('Loading FastLED with options:', options);
     frameRate = options.frameRate || DEFAULT_FRAME_RATE_60FPS;
     uiManager = new JsonUiManager(uiControlsId);
-    
+
     // Expose UI manager globally for debug functions and C++ module
     window.uiManager = uiManager;
     window.uiManagerInstance = uiManager;
-    
+
     // Apply pending debug mode setting if it was set before manager creation
     if (typeof window._pendingUiDebugMode !== 'undefined') {
       uiManager.setDebugMode(window._pendingUiDebugMode);
       delete window._pendingUiDebugMode;
     }
-    
+
     const { threeJs } = options;
     console.log('ThreeJS:', threeJs);
     const fastLedLoader = options.fastled;
@@ -525,12 +548,12 @@ async function localLoadFastLed(options) {
     console.log('Container ID:', containerId);
     graphicsArgs = {
       canvasId,
-      threeJsModules
+      threeJsModules,
     };
     await onModuleLoaded(fastLedLoader);
   } catch (error) {
     console.error('Error loading FastLED:', error);
-    debugger; // eslint-disable-line no-debugger
+    // Debug point removed for linting compliance
   }
 }
-_loadFastLED = localLoadFastLed;  
+_loadFastLED = localLoadFastLed;

@@ -79,8 +79,14 @@ export class GraphicsManager {
     }
 
     // Create shaders
-    const vertexShader = this.createShader(this.gl.VERTEX_SHADER, document.getElementById('fastled_vertexShader').text);
-    const fragmentShader = this.createShader(this.gl.FRAGMENT_SHADER, document.getElementById('fastled_FragmentShader').text);
+    const vertexShader = this.createShader(
+      this.gl.VERTEX_SHADER,
+      document.getElementById('fastled_vertexShader').text,
+    );
+    const fragmentShader = this.createShader(
+      this.gl.FRAGMENT_SHADER,
+      document.getElementById('fastled_FragmentShader').text,
+    );
 
     // Create program
     this.program = this.createProgram(vertexShader, fragmentShader);
@@ -88,11 +94,19 @@ export class GraphicsManager {
     // Create buffers
     this.positionBuffer = this.gl.createBuffer();
     this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.positionBuffer);
-    this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), this.gl.STREAM_DRAW);
+    this.gl.bufferData(
+      this.gl.ARRAY_BUFFER,
+      new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]),
+      this.gl.STREAM_DRAW,
+    );
 
     this.texCoordBuffer = this.gl.createBuffer();
     this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.texCoordBuffer);
-    this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array([0, 0, 1, 0, 0, 1, 1, 1]), this.gl.STREAM_DRAW);
+    this.gl.bufferData(
+      this.gl.ARRAY_BUFFER,
+      new Float32Array([0, 0, 1, 0, 0, 1, 1, 1]),
+      this.gl.STREAM_DRAW,
+    );
 
     // Create texture
     this.texture = this.gl.createTexture();
@@ -186,9 +200,11 @@ export class GraphicsManager {
       const y_array = map.y;
       const len = Math.min(x_array.length, y_array.length);
       // log("Writing data to canvas");
-      for (let i = 0; i < pixelCount; i++) {  // eslint-disable-line
+      for (let i = 0; i < pixelCount; i++) { // eslint-disable-line
         if (i >= len) {
-          console.warn(`Strip ${strip_id}: Pixel ${i} is outside the screen map ${map.length}, skipping update`);
+          console.warn(
+            `Strip ${strip_id}: Pixel ${i} is outside the screen map ${map.length}, skipping update`,
+          );
           continue;
         }
         // let [x, y] = map[i];
@@ -203,7 +219,9 @@ export class GraphicsManager {
 
         // check to make sure that the pixel is within the canvas
         if (x < 0 || x >= canvasWidth || y < 0 || y >= canvasHeight) {
-          console.warn(`Strip ${strip_id}: Pixel ${i} is outside the canvas at ${x}, ${y}, skipping update`);
+          console.warn(
+            `Strip ${strip_id}: Pixel ${i} is outside the canvas at ${x}, ${y}, skipping update`,
+          );
           continue;
         }
         // log(x, y);
@@ -221,7 +239,7 @@ export class GraphicsManager {
               const srcIndex = i * 3;
               const destIndex = (py * this.texWidth + px) * 3;
               // Pixel data is already in 0-255 range, use directly
-              const r = data[srcIndex] & 0xFF;  // eslint-disable-line
+              const r = data[srcIndex] & 0xFF; // eslint-disable-line
               const g = data[srcIndex + 1] & 0xFF; // eslint-disable-line
               const b = data[srcIndex + 2] & 0xFF; // eslint-disable-line
               this.texData[destIndex] = r;
@@ -266,10 +284,14 @@ export class GraphicsManager {
 
     // Update texture coordinates based on actual canvas size
     const texCoords = new Float32Array([
-      0, 0,
-      canvasWidth / this.texWidth, 0,
-      0, canvasHeight / this.texHeight,
-      canvasWidth / this.texWidth, canvasHeight / this.texHeight,
+      0,
+      0,
+      canvasWidth / this.texWidth,
+      0,
+      0,
+      canvasHeight / this.texHeight,
+      canvasWidth / this.texWidth,
+      canvasHeight / this.texHeight,
     ]);
     this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.texCoordBuffer);
     this.gl.bufferData(this.gl.ARRAY_BUFFER, texCoords, this.gl.STREAM_DRAW);
