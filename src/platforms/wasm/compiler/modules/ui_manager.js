@@ -301,14 +301,12 @@ function createHelp(element) {
   // Add event listeners for tooltip
   helpButton.addEventListener('mouseenter', () => {
     if (tooltipText.trim()) {
-      tooltip.style.visibility = 'visible';
-      tooltip.style.opacity = '1';
+      showTooltip(helpButton, tooltip);
     }
   });
   
   helpButton.addEventListener('mouseleave', () => {
-    tooltip.style.visibility = 'hidden';
-    tooltip.style.opacity = '0';
+    hideTooltip(tooltip);
   });
   
   // Add event listener for popup
@@ -320,7 +318,9 @@ function createHelp(element) {
   
   // Assemble the help container
   helpContainer.appendChild(helpButton);
-  helpContainer.appendChild(tooltip);
+  
+  // Append tooltip to document body so it can appear above everything
+  document.body.appendChild(tooltip);
   
   // Add styles if not already present
   if (!document.querySelector('#ui-help-styles')) {
@@ -354,10 +354,7 @@ function createHelp(element) {
       }
       
       .ui-help-tooltip {
-        position: absolute;
-        bottom: 100%;
-        left: 50%;
-        transform: translateX(-50%);
+        position: fixed;
         background-color: #333;
         color: white;
         padding: 8px 12px;
@@ -365,23 +362,15 @@ function createHelp(element) {
         font-size: 12px;
         white-space: pre-wrap;
         max-width: 300px;
-        z-index: 1000;
+        z-index: 10001;
         visibility: hidden;
         opacity: 0;
         transition: opacity 0.2s ease;
-        margin-bottom: 5px;
         box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        pointer-events: none;
       }
       
-      .ui-help-tooltip::after {
-        content: '';
-        position: absolute;
-        top: 100%;
-        left: 50%;
-        transform: translateX(-50%);
-        border: 5px solid transparent;
-        border-top-color: #333;
-      }
+
       
       .ui-help-popup {
         position: fixed;
@@ -566,6 +555,45 @@ function showHelpPopup(htmlContent) {
   document.body.appendChild(popup);
 }
 
+function showTooltip(button, tooltip) {
+  // Get button position relative to viewport
+  const buttonRect = button.getBoundingClientRect();
+  
+  // Make tooltip visible but transparent to measure it
+  tooltip.style.visibility = 'visible';
+  tooltip.style.opacity = '0';
+  
+  // Now get tooltip dimensions
+  const tooltipRect = tooltip.getBoundingClientRect();
+  
+  // Calculate tooltip position
+  const buttonCenterX = buttonRect.left + buttonRect.width / 2;
+  const tooltipTop = buttonRect.top - tooltipRect.height - 8; // 8px gap above button
+  
+  // Position tooltip centered above the button
+  let tooltipLeft = buttonCenterX - tooltipRect.width / 2;
+  
+  // Ensure tooltip doesn't go off-screen horizontally
+  const padding = 10;
+  if (tooltipLeft < padding) {
+    tooltipLeft = padding;
+  } else if (tooltipLeft + tooltipRect.width > window.innerWidth - padding) {
+    tooltipLeft = window.innerWidth - tooltipRect.width - padding;
+  }
+  
+  // Position tooltip
+  tooltip.style.left = `${tooltipLeft}px`;
+  tooltip.style.top = `${tooltipTop}px`;
+  
+  // Show tooltip with fade-in
+  tooltip.style.opacity = '1';
+}
+
+function hideTooltip(tooltip) {
+  tooltip.style.visibility = 'hidden';
+  tooltip.style.opacity = '0';
+}
+
 
 export class JsonUiManager {
   constructor(uiControlsId) {
@@ -697,6 +725,11 @@ export class JsonUiManager {
     if (uiControlsContainer) {
       uiControlsContainer.innerHTML = '';
     }
+    
+    // Remove any tooltips that were added to document.body
+    const tooltips = document.querySelectorAll('.ui-help-tooltip');
+    tooltips.forEach(tooltip => tooltip.remove());
+    
     this.groups.clear();
     this.ungroupedContainer = null;
     this.uiElements = {};
