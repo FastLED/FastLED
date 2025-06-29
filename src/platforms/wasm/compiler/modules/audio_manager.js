@@ -8,7 +8,7 @@
  * Configuration constants
  */
 const AUDIO_SAMPLE_BLOCK_SIZE = 512;  // Matches i2s read size on esp32c3
-const AUDIO_STACK_BUFFER_THRESHOLD = 5;  // Use stack storage for < 5 buffers, heap for >= 5
+const MAX_AUDIO_BUFFER_LIMIT = 10;    // Maximum number of audio buffers to accumulate
 
 /**
  * TIMESTAMP IMPLEMENTATION:
@@ -469,60 +469,49 @@ window.getAudioBufferStats = function() {
     totalBufferCount: acc.totalBufferCount + stat.bufferCount,
     totalSamples: acc.totalSamples + stat.totalSamples,
     totalMemoryKB: acc.totalMemoryKB + stat.memoryEstimateKB,
-    stackCount: acc.stackCount + (stat.storageType === 'stack' ? 1 : 0),
-    heapCount: acc.heapCount + (stat.storageType === 'heap' ? 1 : 0)
-  }), { totalBufferCount: 0, totalSamples: 0, totalMemoryKB: 0, stackCount: 0, heapCount: 0 });
+    activeStreams: acc.activeStreams + 1
+  }), { totalBufferCount: 0, totalSamples: 0, totalMemoryKB: 0, activeStreams: 0 });
   
   return {
     individual: stats,
     totals: totals,
-    optimization: {
-      stackThreshold: AUDIO_STACK_BUFFER_THRESHOLD,
-      description: `Uses efficient Int16Array storage for <${AUDIO_STACK_BUFFER_THRESHOLD} buffers, heap storage for >=${AUDIO_STACK_BUFFER_THRESHOLD} buffers`
+    limit: {
+      maxBuffers: MAX_AUDIO_BUFFER_LIMIT,
+      description: `Limited to ${MAX_AUDIO_BUFFER_LIMIT} audio buffers to prevent accumulation during engine freezes`
     }
   };
 };
 
 /**
  * Audio Buffer Storage Manager
- * Optimizes memory usage by using stack-based storage for small buffer counts
- * and heap-based storage for larger accumulations
+ * Simple buffer storage with limiting to prevent accumulation during engine freezes
  */
 class AudioBufferStorage {
   constructor(audioId) {
     this.audioId = audioId;
-    this.stackBuffers = [];  // Efficient storage for small counts (< 5)
-    this.heapBuffer = null;  // Consolidated storage for large counts (>= 5)
-    this.isUsingHeap = false;
+    this.buffers = [];  // Simple array of audio buffers
     this.totalSamples = 0;
   }
 
   /**
-   * Add audio samples to the buffer using optimal storage strategy
+   * Add audio samples to the buffer with automatic limiting
    * @param {Int16Array} sampleBuffer - Raw audio samples
    * @param {number} timestamp - Sample timestamp
    */
   addSamples(sampleBuffer, timestamp) {
-    const currentBufferCount = this.getBufferCount();
-    
-    if (currentBufferCount < AUDIO_STACK_BUFFER_THRESHOLD && !this.isUsingHeap) {
-      // Use stack-based storage for small counts - keep as Int16Array for efficiency
-      this.stackBuffers.push({
-        samples: new Int16Array(sampleBuffer), // Keep as typed array
-        timestamp: timestamp,
-        length: sampleBuffer.length
-      });
-      this.totalSamples += sampleBuffer.length;
-    } else {
-      // Transition to or use heap-based storage for large counts
-      this._transitionToHeapStorage();
-      this._addToHeapStorage(sampleBuffer, timestamp);
+    // Enforce buffer limit to prevent excessive accumulation during engine freezes
+    while (this.buffers.length >= MAX_AUDIO_BUFFER_LIMIT) {
+      const removedBuffer = this.buffers.shift();
+      this.totalSamples -= removedBuffer.samples.length;
+      console.log(`*** Audio ${this.audioId}: Dropping oldest buffer (limit: ${MAX_AUDIO_BUFFER_LIMIT}) ***`);
     }
     
-    // Debug logging for storage transitions
-    if (currentBufferCount === AUDIO_STACK_BUFFER_THRESHOLD - 1 && !this.isUsingHeap) {
-      console.log(`*** Audio ${this.audioId}: Transitioning to heap storage at ${AUDIO_STACK_BUFFER_THRESHOLD} buffers ***`);
-    }
+    // Add new buffer
+    this.buffers.push({
+      samples: Array.from(sampleBuffer), // Convert to regular array for JSON serialization
+      timestamp: timestamp
+    });
+    this.totalSamples += sampleBuffer.length;
   }
 
   /**
@@ -530,19 +519,10 @@ class AudioBufferStorage {
    * @returns {Array} Array of sample objects with timestamp
    */
   getAllSamples() {
-    if (!this.isUsingHeap) {
-      // Return stack buffers, converting Int16Array to regular array for JSON serialization
-      return this.stackBuffers.map(buffer => ({
-        samples: Array.from(buffer.samples),
-        timestamp: buffer.timestamp
-      }));
-    } else {
-      // Return heap buffer data
-      return this.heapBuffer.chunks.map(chunk => ({
-        samples: chunk.samples,
-        timestamp: chunk.timestamp
-      }));
-    }
+    return this.buffers.map(buffer => ({
+      samples: buffer.samples,
+      timestamp: buffer.timestamp
+    }));
   }
 
   /**
@@ -550,7 +530,7 @@ class AudioBufferStorage {
    * @returns {number} Number of audio blocks
    */
   getBufferCount() {
-    return this.isUsingHeap ? this.heapBuffer.chunks.length : this.stackBuffers.length;
+    return this.buffers.length;
   }
 
   /**
@@ -562,27 +542,10 @@ class AudioBufferStorage {
   }
 
   /**
-   * Clear all buffered data with proper cleanup
+   * Clear all buffered data
    */
   clear() {
-    // Clean up stack buffers
-    if (this.stackBuffers.length > 0) {
-      // Set to null to help garbage collection of Int16Arrays
-      this.stackBuffers.forEach(buffer => {
-        buffer.samples = null;
-      });
-      this.stackBuffers = [];
-    }
-    
-    // Clean up heap buffer
-    if (this.heapBuffer) {
-      this.heapBuffer.chunks.forEach(chunk => {
-        chunk.samples = null;
-      });
-      this.heapBuffer = null;
-    }
-    
-    this.isUsingHeap = false;
+    this.buffers = [];
     this.totalSamples = 0;
   }
 
@@ -594,52 +557,9 @@ class AudioBufferStorage {
     return {
       bufferCount: this.getBufferCount(),
       totalSamples: this.totalSamples,
-      storageType: this.isUsingHeap ? 'heap' : 'stack',
+      storageType: 'simple',
       memoryEstimateKB: this._estimateMemoryUsage()
     };
-  }
-
-  /**
-   * Transition from stack-based to heap-based storage
-   * @private
-   */
-  _transitionToHeapStorage() {
-    if (this.isUsingHeap) return;
-
-    // Create heap storage structure
-    this.heapBuffer = {
-      chunks: [],
-      totalLength: 0
-    };
-
-    // Move existing stack buffers to heap storage
-    this.stackBuffers.forEach(stackBuffer => {
-      this.heapBuffer.chunks.push({
-        samples: Array.from(stackBuffer.samples), // Convert to regular array for heap storage
-        timestamp: stackBuffer.timestamp
-      });
-      this.heapBuffer.totalLength += stackBuffer.length;
-      // Clear the stack buffer reference
-      stackBuffer.samples = null;
-    });
-
-    // Clear stack storage
-    this.stackBuffers = [];
-    this.isUsingHeap = true;
-  }
-
-  /**
-   * Add samples to heap storage
-   * @private
-   */
-  _addToHeapStorage(sampleBuffer, timestamp) {
-    const samplesArray = Array.from(sampleBuffer);
-    this.heapBuffer.chunks.push({
-      samples: samplesArray,
-      timestamp: timestamp
-    });
-    this.heapBuffer.totalLength += sampleBuffer.length;
-    this.totalSamples += sampleBuffer.length;
   }
 
   /**
@@ -647,12 +567,7 @@ class AudioBufferStorage {
    * @private
    */
   _estimateMemoryUsage() {
-    if (!this.isUsingHeap) {
-      // Stack storage: Int16Array = 2 bytes per sample + object overhead
-      return ((this.totalSamples * 2) + (this.stackBuffers.length * 50)) / 1024;
-    } else {
-      // Heap storage: Regular array = ~8 bytes per sample + object overhead  
-      return ((this.totalSamples * 8) + (this.heapBuffer.chunks.length * 50)) / 1024;
-    }
+    // Regular array = ~8 bytes per sample + object overhead  
+    return ((this.totalSamples * 8) + (this.buffers.length * 50)) / 1024;
   }
 }
