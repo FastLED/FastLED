@@ -1,3 +1,27 @@
+/**
+ * FastLED UI Layout Placement Manager
+ *
+ * Advanced responsive layout management system for FastLED WebAssembly applications.
+ * Intelligently manages UI layout with dynamic column allocation and responsive behavior.
+ *
+ * Key features:
+ * - Calculates optimal number of UI columns based on available space
+ * - Allows main content area to expand when space permits
+ * - Maintains responsive behavior across different screen sizes
+ * - Ensures main content always has priority for space allocation
+ * - Handles breakpoint transitions smoothly
+ * - Provides layout optimization callbacks for UI elements
+ * - Manages container styling and positioning
+ *
+ * Supported layouts:
+ * - Mobile: Single column, stacked layout
+ * - Tablet: Side-by-side with single UI column
+ * - Desktop: Multi-column UI with expandable canvas
+ * - Ultrawide: Maximum columns and aggressive expansion
+ *
+ * @module UILayoutPlacementManager
+ */
+
 /* eslint-disable no-console */
 /* eslint-disable import/prefer-default-export */
 
@@ -11,38 +35,66 @@
  * - Ensures main content always has priority for space allocation
  */
 export class UILayoutPlacementManager {
+  /**
+   * Creates a new UILayoutPlacementManager instance
+   * Sets up responsive breakpoints and initializes layout calculations
+   */
   constructor() {
-    // Media queries for different layout breakpoints
+    /**
+     * Media queries for different layout breakpoints
+     * @type {Object<string, MediaQueryList>}
+     */
     this.breakpoints = {
+      /** @type {MediaQueryList} Mobile devices (max 767px) */
       mobile: globalThis.matchMedia('(max-width: 767px)'),
+      /** @type {MediaQueryList} Tablet devices (768px-1199px) */
       tablet: globalThis.matchMedia('(min-width: 768px) and (max-width: 1199px)'),
+      /** @type {MediaQueryList} Desktop devices (1200px+) */
       desktop: globalThis.matchMedia('(min-width: 1200px)'),
+      /** @type {MediaQueryList} Ultrawide displays (1600px+) */
       ultrawide: globalThis.matchMedia('(min-width: 1600px)'),
     };
 
-    // Layout configuration
+    /**
+     * Layout configuration parameters
+     * @type {Object}
+     */
     this.config = {
       // Minimum dimensions
+      /** @type {number} Minimum canvas size in pixels */
       minCanvasSize: 320,
+      /** @type {number} Maximum canvas size in pixels */
       maxCanvasSize: 800,
+      /** @type {number} Minimum UI column width in pixels */
       minUIColumnWidth: 280,
+      /** @type {number} Maximum UI column width in pixels */
       maxUIColumnWidth: 400,
 
       // Spacing
+      /** @type {number} Horizontal gap between elements */
       horizontalGap: 40,
+      /** @type {number} Vertical gap between elements */
       verticalGap: 20,
+      /** @type {number} Container padding */
       containerPadding: 40,
 
       // UI column settings
+      /** @type {number} Maximum number of UI columns */
       maxUIColumns: 3,
+      /** @type {number} Preferred UI column width */
       preferredUIColumnWidth: 320,
 
       // Canvas expansion rules
-      canvasExpansionRatio: 0.6, // Canvas should take up to 60% of available width
-      minContentRatio: 0.4, // Content area should have at least 40% of width
+      /** @type {number} Canvas should take up to 60% of available width */
+      canvasExpansionRatio: 0.6,
+      /** @type {number} Content area should have at least 40% of width */
+      minContentRatio: 0.4,
     };
 
+    /** @type {string} Current layout mode */
     this.currentLayout = this.detectLayout();
+
+    /** @type {Object} Current layout calculation data */
     this.layoutData = this.calculateLayoutData();
 
     // Bind event handlers
@@ -63,6 +115,7 @@ export class UILayoutPlacementManager {
 
   /**
    * Detect current layout mode based on screen size
+   * @returns {string} Layout mode ('mobile', 'tablet', 'desktop', or 'ultrawide')
    */
   detectLayout() {
     if (this.breakpoints.mobile.matches) return 'mobile';
@@ -73,20 +126,30 @@ export class UILayoutPlacementManager {
 
   /**
    * Calculate optimal layout dimensions and column allocation
+   * @returns {Object} Layout data with dimensions and configuration
    */
   calculateLayoutData() {
     const viewportWidth = globalThis.innerWidth;
     const availableWidth = viewportWidth - (this.config.containerPadding * 2);
 
     let layoutData = {
+      /** @type {number} Current viewport width */
       viewportWidth,
+      /** @type {number} Available width after padding */
       availableWidth,
+      /** @type {number} Calculated canvas size */
       canvasSize: this.config.minCanvasSize,
+      /** @type {number} Number of UI columns */
       uiColumns: 1,
+      /** @type {number} Width of each UI column */
       uiColumnWidth: this.config.preferredUIColumnWidth,
+      /** @type {number} Total width of all UI columns */
       uiTotalWidth: this.config.preferredUIColumnWidth,
+      /** @type {number} Total content area width */
       contentWidth: this.config.minCanvasSize,
+      /** @type {string} Current layout mode */
       layoutMode: this.currentLayout,
+      /** @type {boolean} Whether canvas can expand beyond minimum */
       canExpand: false,
     };
 
@@ -111,6 +174,8 @@ export class UILayoutPlacementManager {
 
   /**
    * Calculate mobile layout (stacked, single column)
+   * @param {Object} layoutData - Base layout data to modify
+   * @returns {Object} Updated layout data for mobile
    */
   calculateMobileLayout(layoutData) {
     layoutData.uiColumns = 1;
@@ -124,6 +189,8 @@ export class UILayoutPlacementManager {
 
   /**
    * Calculate tablet layout (side-by-side, single UI column)
+   * @param {Object} layoutData - Base layout data to modify
+   * @returns {Object} Updated layout data for tablet
    */
   calculateTabletLayout(layoutData) {
     const requiredWidth = this.config.minCanvasSize + this.config.minUIColumnWidth +
@@ -153,6 +220,8 @@ export class UILayoutPlacementManager {
 
   /**
    * Calculate desktop layout (multi-column UI possible)
+   * @param {Object} layoutData - Base layout data to modify
+   * @returns {Object} Updated layout data for desktop
    */
   calculateDesktopLayout(layoutData) {
     const baseRequiredWidth = this.config.minCanvasSize + this.config.minUIColumnWidth +
@@ -193,6 +262,8 @@ export class UILayoutPlacementManager {
 
   /**
    * Calculate ultrawide layout (maximum columns and expansion)
+   * @param {Object} layoutData - Base layout data to modify
+   * @returns {Object} Updated layout data for ultrawide displays
    */
   calculateUltrawideLayout(layoutData) {
     const result = this.calculateDesktopLayout(layoutData);

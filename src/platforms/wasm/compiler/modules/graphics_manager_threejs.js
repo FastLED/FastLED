@@ -1,3 +1,19 @@
+/**
+ * FastLED Graphics Manager - Beautiful 3D Three.js Renderer
+ *
+ * Provides stunning 3D rendering of LED layouts using Three.js with advanced visual effects.
+ * This renderer is optimized for sparse LED layouts and visual appeal over performance.
+ *
+ * Key features:
+ * - Three.js-based 3D rendering with bloom effects
+ * - Dynamic LED geometry creation and management
+ * - Selective bloom for enhanced visual appeal
+ * - Optimized mesh merging for performance
+ * - Advanced lighting and post-processing effects
+ *
+ * @module GraphicsManagerThreeJS
+ */
+
 /* eslint-disable no-console */
 /* eslint-disable import/prefer-default-export */
 /* eslint-disable no-restricted-syntax */
@@ -13,22 +29,44 @@
 
 import { isDenseGrid } from './graphics_utils.js';
 
+/** Disable geometry merging for debugging (set to true to force individual LED objects) */
 const DISABLE_MERGE_GEOMETRIES = false;
 
-// Helper function to group all LEDs together unconditionally
+/**
+ * Groups all LEDs together for processing (utility function)
+ * @param {Array} leds - Array of LED objects to group
+ * @returns {Array} The same array (no actual grouping performed)
+ */
 function groupAllLeds(leds) {
   return leds;
 }
 
+/**
+ * Creates position calculator functions for mapping LED coordinates to 3D space
+ * @param {Object} frameData - Frame data containing screen mapping information
+ * @param {number} screenWidth - Width of the screen coordinate system
+ * @param {number} screenHeight - Height of the screen coordinate system
+ * @returns {Object} Object with calcXPosition and calcYPosition functions
+ */
 function makePositionCalculators(frameData, screenWidth, screenHeight) {
   const { screenMap } = frameData;
   const width = screenMap.absMax[0] - screenMap.absMin[0];
   const height = screenMap.absMax[1] - screenMap.absMin[1];
 
   return {
+    /**
+     * Calculates X position in 3D space from screen coordinates
+     * @param {number} x - Screen X coordinate
+     * @returns {number} 3D X position centered around origin
+     */
     calcXPosition: (x) => {
       return (((x - screenMap.absMin[0]) / width) * screenWidth) - (screenWidth / 2);
     },
+    /**
+     * Calculates Y position in 3D space from screen coordinates
+     * @param {number} y - Screen Y coordinate
+     * @returns {number} 3D Y position centered around origin
+     */
     calcYPosition: (y) => {
       const negY = (((y - screenMap.absMin[1]) / height) * screenHeight) - (screenHeight / 2);
       return negY; // Remove negative sign to fix Y-axis orientation
@@ -37,46 +75,78 @@ function makePositionCalculators(frameData, screenWidth, screenHeight) {
 }
 
 /**
- * Manages 3D rendering of LED layouts using Three.js
+ * Beautiful 3D Graphics Manager using Three.js for LED rendering
+ * Provides advanced visual effects and post-processing for stunning LED displays
  */
 export class GraphicsManagerThreeJS {
   /**
    * Creates a new GraphicsManagerThreeJS instance
    * @param {Object} graphicsArgs - Configuration options
    * @param {string} graphicsArgs.canvasId - ID of the canvas element to render to
-   * @param {Object} graphicsArgs.threeJsModules - Three.js modules
+   * @param {Object} graphicsArgs.threeJsModules - Three.js modules and dependencies
    */
   constructor(graphicsArgs) {
     const { canvasId, threeJsModules } = graphicsArgs;
 
     // Configuration
+    /** @type {string} HTML canvas element ID */
     this.canvasId = canvasId;
+
+    /** @type {Object} Three.js modules and dependencies */
     this.threeJsModules = threeJsModules;
+
+    /** @type {number} Number of segments for LED sphere geometry */
     this.SEGMENTS = 16;
+
+    /** @type {number} Scale factor for LED size */
     this.LED_SCALE = 1.0;
 
     // Rendering properties
+    /** @type {number} Screen width in rendering units */
     this.SCREEN_WIDTH = 0;
+
+    /** @type {number} Screen height in rendering units */
     this.SCREEN_HEIGHT = 0;
+
+    /** @type {number} Bloom effect strength (0-1) */
     this.bloom_stength = 1;
+
+    /** @type {number} Bloom effect radius in pixels */
     this.bloom_radius = 16;
 
     // Scene objects
+    /** @type {Array} Array of LED mesh objects */
     this.leds = [];
-    this.mergedMeshes = []; // Store merged meshes
+
+    /** @type {Array} Array of merged mesh objects for performance */
+    this.mergedMeshes = [];
+
+    /** @type {THREE.Scene|null} Three.js scene object */
     this.scene = null;
+
+    /** @type {THREE.Camera|null} Three.js camera object */
     this.camera = null;
+
+    /** @type {THREE.WebGLRenderer|null} Three.js WebGL renderer */
     this.renderer = null;
+
+    /** @type {THREE.EffectComposer|null} Post-processing composer */
     this.composer = null;
 
     // State tracking
+    /** @type {number} Previous frame's total LED count for optimization */
     this.previousTotalLeds = 0;
+
+    /** @type {number} Counter for out-of-bounds warnings to prevent spam */
     this.outside_bounds_warning_count = 0;
+
+    /** @type {boolean} Whether to use merged geometries for performance */
     this.useMergedGeometry = true; // Enable geometry merging by default
   }
 
   /**
    * Cleans up and resets the rendering environment
+   * Disposes of all Three.js objects and clears scene
    */
   reset() {
     // Clean up LED objects
@@ -121,6 +191,7 @@ export class GraphicsManagerThreeJS {
 
   /**
    * Initializes the Three.js rendering environment
+   * Sets up scene, camera, renderer, and post-processing pipeline
    * @param {Object} frameData - The frame data containing screen mapping information
    */
   initThreeJS(frameData) {
@@ -139,6 +210,7 @@ export class GraphicsManagerThreeJS {
   /**
    * Sets up canvas dimensions and display properties
    * @private
+   * @param {Object} frameData - Frame data containing screen mapping
    */
   _setupCanvasAndDimensions(frameData) {
     const RESOLUTION_BOOST = 2; // 2x resolution for higher quality
@@ -180,8 +252,9 @@ export class GraphicsManagerThreeJS {
   }
 
   /**
-   * Sets up the scene and camera
+   * Sets up the Three.js scene and camera
    * @private
+   * @param {Object} frameData - Frame data for scene configuration
    */
   _setupScene(frameData) {
     const { THREE } = this.threeJsModules;
@@ -194,7 +267,7 @@ export class GraphicsManagerThreeJS {
   }
 
   /**
-   * Sets up the camera with proper positioning
+   * Sets up the camera with proper positioning and projection
    * @private
    */
   _setupCamera() {

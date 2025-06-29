@@ -1,3 +1,30 @@
+/**
+ * FastLED UI Manager Module
+ *
+ * Comprehensive UI management system for FastLED WebAssembly applications.
+ * Handles dynamic UI element creation, user interaction processing, and layout management.
+ *
+ * Key features:
+ * - Dynamic UI element creation from JSON configuration
+ * - Responsive layout management with multi-column support
+ * - Audio integration and file handling
+ * - Markdown parsing for rich text descriptions
+ * - Real-time change tracking and synchronization with FastLED
+ * - Accessible UI controls with proper labeling
+ * - Advanced layout optimization and grouping
+ *
+ * Supported UI elements:
+ * - Sliders (range inputs with live value display)
+ * - Checkboxes (boolean toggles)
+ * - Buttons (momentary and toggle actions)
+ * - Number fields (numeric inputs with validation)
+ * - Dropdowns (select lists with options)
+ * - Audio controls (file upload and playback)
+ * - Help sections (expandable content with markdown support)
+ *
+ * @module UIManager
+ */
+
 /* eslint-disable no-console */
 /* eslint-disable import/prefer-default-export */
 /* eslint-disable no-restricted-syntax */
@@ -7,7 +34,7 @@
 import { AudioManager } from './audio_manager.js';
 import { UILayoutPlacementManager } from './ui_layout_placement_manager.js';
 
-// Create a global instance of AudioManager
+/** Global instance of AudioManager for audio processing */
 const audioManager = new AudioManager();
 
 // Make setupAudioAnalysis available globally
@@ -18,6 +45,8 @@ window.setupAudioAnalysis = function (audioElement) {
 /**
  * Simple markdown to HTML converter
  * Supports: headers, bold, italic, code, links, lists, and paragraphs
+ * @param {string} markdown - Markdown text to convert
+ * @returns {string} HTML string with converted markdown
  */
 function markdownToHtml(markdown) {
   if (!markdown) return '';
@@ -80,6 +109,17 @@ function markdownToHtml(markdown) {
   return html;
 }
 
+/**
+ * Creates a number input field UI element
+ * @param {Object} element - Element configuration object
+ * @param {string} element.name - Display name for the input
+ * @param {string} element.id - Unique identifier for the input
+ * @param {number} element.value - Current/default value
+ * @param {number} element.min - Minimum allowed value
+ * @param {number} element.max - Maximum allowed value
+ * @param {number} [element.step] - Step increment (defaults to 'any')
+ * @returns {HTMLDivElement} Container div with label and number input
+ */
 function createNumberField(element) {
   const controlDiv = document.createElement('div');
   controlDiv.className = 'ui-control';
@@ -102,10 +142,27 @@ function createNumberField(element) {
   return controlDiv;
 }
 
+/**
+ * Creates an audio input field UI element
+ * Delegates to the AudioManager for specialized audio handling
+ * @param {Object} element - Element configuration object for audio control
+ * @returns {HTMLElement} Audio control element from AudioManager
+ */
 function createAudioField(element) {
   return audioManager.createAudioField(element);
 }
 
+/**
+ * Creates a slider (range) input UI element with live value display
+ * @param {Object} element - Element configuration object
+ * @param {string} element.name - Display name for the slider
+ * @param {string} element.id - Unique identifier for the slider
+ * @param {number} element.value - Current/default value
+ * @param {number} element.min - Minimum allowed value
+ * @param {number} element.max - Maximum allowed value
+ * @param {number} element.step - Step increment for the slider
+ * @returns {HTMLDivElement} Container div with label, value display, and slider
+ */
 function createSlider(element) {
   const controlDiv = document.createElement('div');
   controlDiv.className = 'ui-control';
@@ -149,6 +206,14 @@ function createSlider(element) {
   return controlDiv;
 }
 
+/**
+ * Creates a checkbox UI element for boolean values
+ * @param {Object} element - Element configuration object
+ * @param {string} element.name - Display name for the checkbox
+ * @param {string} element.id - Unique identifier for the checkbox
+ * @param {boolean} element.value - Current/default checked state
+ * @returns {HTMLDivElement} Container div with label and checkbox
+ */
 function createCheckbox(element) {
   const controlDiv = document.createElement('div');
   controlDiv.className = 'ui-control';
@@ -175,6 +240,13 @@ function createCheckbox(element) {
   return controlDiv;
 }
 
+/**
+ * Creates a button UI element with press/release state tracking
+ * @param {Object} element - Element configuration object
+ * @param {string} element.name - Display text for the button
+ * @param {string} element.id - Unique identifier for the button
+ * @returns {HTMLDivElement} Container div with configured button element
+ */
 function createButton(element) {
   const controlDiv = document.createElement('div');
   controlDiv.className = 'ui-control';
@@ -601,17 +673,38 @@ function hideTooltip(tooltip) {
   tooltip.style.opacity = '0';
 }
 
+/**
+ * Main UI Manager class for FastLED WebAssembly applications
+ * Handles dynamic UI creation, change tracking, and synchronization with the FastLED backend
+ */
 export class JsonUiManager {
+  /**
+   * Creates a new JsonUiManager instance
+   * @param {string} uiControlsId - HTML element ID where UI controls should be rendered
+   */
   constructor(uiControlsId) {
     // console.log('*** JsonUiManager JS: CONSTRUCTOR CALLED ***');
+
+    /** @type {Object} Map of UI element IDs to DOM elements */
     this.uiElements = {};
+
+    /** @type {Object} Previous state values for change detection */
     this.previousUiState = {};
+
+    /** @type {string} HTML element ID for the UI controls container */
     this.uiControlsId = uiControlsId;
-    this.groups = new Map(); // Track created groups
-    this.ungroupedContainer = null; // Container for ungrouped items
-    this.debugMode = false; // Debug logging control
+
+    /** @type {Map<string, HTMLElement>} Track created UI groups */
+    this.groups = new Map();
+
+    /** @type {HTMLElement|null} Container for ungrouped UI items */
+    this.ungroupedContainer = null;
+
+    /** @type {boolean} Enable debug logging for UI operations */
+    this.debugMode = false;
 
     // Initialize the UI Layout Placement Manager
+    /** @type {UILayoutPlacementManager} Responsive layout management */
     this.layoutManager = new UILayoutPlacementManager();
 
     // Listen for layout changes to potentially optimize UI element rendering
@@ -638,7 +731,11 @@ export class JsonUiManager {
     }
   }
 
-  // Method called by C++ backend to update UI components
+  /**
+   * Updates UI components from backend data (called by C++ backend)
+   * Processes JSON updates and synchronizes UI element states
+   * @param {string} jsonString - JSON string containing UI element updates
+   */
   updateUiComponents(jsonString) {
     // console.log('*** C++→JS: Backend update received:', jsonString);
 
@@ -692,7 +789,11 @@ export class JsonUiManager {
     }
   }
 
-  // Create a collapsible group container
+  /**
+   * Creates a collapsible group container for organizing UI elements
+   * @param {string} groupName - Name of the group (displayed as header)
+   * @returns {HTMLElement} The group container element
+   */
   createGroupContainer(groupName) {
     if (this.groups.has(groupName)) {
       return this.groups.get(groupName);

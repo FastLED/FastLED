@@ -1,3 +1,31 @@
+/**
+ * FastLED Audio Manager Module
+ *
+ * Comprehensive audio processing system for FastLED WebAssembly applications.
+ * Provides real-time audio analysis, file handling, and integration with LED effects.
+ *
+ * Key features:
+ * - Multiple audio processor support (AudioWorklet and ScriptProcessor)
+ * - Real-time audio sample processing and buffering
+ * - Audio file upload and playback management
+ * - Cross-browser compatibility with fallbacks
+ * - High-precision timing and synchronization
+ * - Memory-efficient sample storage and retrieval
+ * - Debug logging and diagnostics
+ * - Automatic processor selection based on browser capabilities
+ *
+ * Supported audio formats:
+ * - MP3, WAV, OGG, AAC (browser-dependent)
+ * - Real-time microphone input
+ * - HTML audio element playback
+ *
+ * Processor types:
+ * - AudioWorklet: Modern, high-performance (runs on audio thread)
+ * - ScriptProcessor: Legacy fallback (runs on main thread)
+ *
+ * @module AudioManager
+ */
+
 /* eslint-disable no-console */
 /* eslint-disable import/prefer-default-export */
 /* eslint-disable no-restricted-syntax */
@@ -5,62 +33,100 @@
 /* eslint-disable guard-for-in */
 
 /**
- * Configuration constants
+ * Audio sample block size configuration
+ * Must match i2s read size on ESP32-C3 for compatibility
+ * @constant {number}
  */
-const AUDIO_SAMPLE_BLOCK_SIZE = 512; // Matches i2s read size on esp32c3
-const MAX_AUDIO_BUFFER_LIMIT = 10; // Maximum number of audio buffers to accumulate
+const AUDIO_SAMPLE_BLOCK_SIZE = 512;
 
 /**
- * Debug configuration
+ * Maximum number of audio buffers to accumulate before cleanup
+ * Prevents excessive memory usage during long playback sessions
+ * @constant {number}
+ */
+const MAX_AUDIO_BUFFER_LIMIT = 10;
+
+/**
+ * Debug configuration for audio processing
+ * Controls logging frequency to prevent console spam while maintaining visibility
+ * @constant {Object}
  */
 const AUDIO_DEBUG = {
-  enabled: false, // Set to true to enable verbose debugging
-  sampleRate: 0.001, // How often to log sample processing (0.1% of the time)
-  bufferRate: 0.1, // How often to log buffer operations (10% of the time)
-  workletRate: 0.0001, // How often to log worklet debug messages (0.01% of the time)
+  /** @type {boolean} Enable/disable verbose debugging */
+  enabled: false,
+  /** @type {number} How often to log sample processing (0.1% of the time) */
+  sampleRate: 0.001,
+  /** @type {number} How often to log buffer operations (10% of the time) */
+  bufferRate: 0.1,
+  /** @type {number} How often to log worklet debug messages (0.01% of the time) */
+  workletRate: 0.0001,
 };
 
 /**
- * Audio processor types
+ * Audio processor type constants
+ * Defines available audio processing implementations
+ * @constant {Object}
  */
 const AUDIO_PROCESSOR_TYPES = {
+  /** @type {string} Legacy ScriptProcessor (main thread) */
   SCRIPT_PROCESSOR: 'script_processor',
+  /** @type {string} Modern AudioWorklet (audio thread) */
   AUDIO_WORKLET: 'audio_worklet',
 };
 
-// Default processor type - will be determined automatically
+/**
+ * Default processor type for fallback scenarios
+ * ScriptProcessor is more widely supported across browsers
+ * @constant {string}
+ */
 const DEFAULT_PROCESSOR_TYPE = AUDIO_PROCESSOR_TYPES.SCRIPT_PROCESSOR;
 
 /**
- * TIMESTAMP IMPLEMENTATION:
+ * TIMESTAMP IMPLEMENTATION DOCUMENTATION:
+ *
  * Audio sample timestamps are relative to the start of the audio file, not absolute time.
- * Priority order:
+ * This ensures consistent timing that's meaningful for audio synchronization.
+ *
+ * Priority order for timestamp sources:
  * 1. audioElement.currentTime - Preferred: gives playback position in audio file (seconds → milliseconds)
  * 2. audioContext.currentTime - Fallback: high-precision audio context time (seconds → milliseconds)
  * 3. performance.now() - Final fallback: high-resolution system time relative to page load
- * This ensures consistent timing that's meaningful for audio synchronization.
+ *
+ * This approach ensures that audio-visual synchronization remains accurate regardless
+ * of when playback starts or system performance variations.
  */
 
 /**
  * Abstract base class for audio processors
  * Provides a common interface for different audio processing implementations
+ * Enables polymorphic usage of ScriptProcessor and AudioWorklet implementations
  */
 class AudioProcessor {
+  /**
+   * Creates a new AudioProcessor instance
+   * @param {AudioContext} audioContext - Web Audio API context
+   * @param {Function} sampleCallback - Callback function for processed audio samples
+   */
   constructor(audioContext, sampleCallback) {
+    /** @type {AudioContext} Web Audio API context */
     this.audioContext = audioContext;
+
+    /** @type {Function} Callback for processed audio samples */
     this.sampleCallback = sampleCallback;
+
+    /** @type {boolean} Whether audio processing is currently active */
     this.isProcessing = false;
   }
 
   /**
    * Initialize the audio processor
+   * @abstract
    * @param {MediaElementAudioSourceNode} source - Audio source node
    * @returns {Promise<void>}
    */
-  // deno-lint-ignore require-await
-  async initialize(source) {
-    // Base class method - must be async for subclass compatibility
-    throw new Error('initialize() must be implemented by subclass');
+  initialize(source) {
+    // Base class method - returns rejected promise since it must be implemented by subclass
+    return Promise.reject(new Error('initialize() must be implemented by subclass'));
   }
 
   /**
@@ -85,8 +151,9 @@ class AudioProcessor {
   }
 
   /**
-   * Get the processor type
-   * @returns {string}
+   * Get the processor type identifier
+   * @abstract
+   * @returns {string} Processor type string
    */
   getType() {
     throw new Error('getType() must be implemented by subclass');
@@ -95,17 +162,32 @@ class AudioProcessor {
 
 /**
  * ScriptProcessor-based audio processor (legacy but widely supported)
+ * Uses the deprecated ScriptProcessorNode for broad browser compatibility
+ * Runs on the main thread which can cause performance issues but works everywhere
  */
 class ScriptProcessorAudioProcessor extends AudioProcessor {
+  /**
+   * Creates a new ScriptProcessorAudioProcessor instance
+   * @param {AudioContext} audioContext - Web Audio API context
+   * @param {Function} sampleCallback - Callback function for processed audio samples
+   */
   constructor(audioContext, sampleCallback) {
     super(audioContext, sampleCallback);
+
+    /** @type {ScriptProcessorNode|null} The ScriptProcessor node */
     this.scriptNode = null;
+
+    /** @type {Int16Array} Buffer for converting audio samples to int16 format */
     this.sampleBuffer = new Int16Array(AUDIO_SAMPLE_BLOCK_SIZE);
   }
 
-  // deno-lint-ignore require-await
-  async initialize(source) {
-    // Create script processor node - async for base class compatibility
+  /**
+   * Initialize the ScriptProcessor node and audio processing chain
+   * @param {MediaElementAudioSourceNode} source - Audio source node to connect
+   * @returns {Promise<void>}
+   */
+  initialize(source) {
+    // Create script processor node - returns promise for base class compatibility
     this.scriptNode = this.audioContext.createScriptProcessor(AUDIO_SAMPLE_BLOCK_SIZE, 1, 1);
 
     // Set up audio processing callback
@@ -129,8 +211,16 @@ class ScriptProcessorAudioProcessor extends AudioProcessor {
     // Connect nodes
     source.connect(this.scriptNode);
     this.scriptNode.connect(this.audioContext.destination);
+
+    // Return resolved promise for interface compatibility
+    return Promise.resolve();
   }
 
+  /**
+   * Convert audio samples from float32 to int16 format
+   * @param {Float32Array} inputData - Input audio data in float32 format (-1.0 to 1.0)
+   * @param {Int16Array} sampleBuffer - Output buffer for int16 samples (-32768 to 32767)
+   */
   convertAudioSamples(inputData, sampleBuffer) {
     for (let i = 0; i < inputData.length; i++) {
       // Convert from float32 (-1.0 to 1.0) to int16 range (-32768 to 32767)
@@ -138,11 +228,18 @@ class ScriptProcessorAudioProcessor extends AudioProcessor {
     }
   }
 
+  /**
+   * Get current timestamp for audio synchronization
+   * @returns {number} Timestamp in milliseconds
+   */
   getTimestamp() {
     // Use AudioContext.currentTime as primary source for ScriptProcessor
     return Math.floor(this.audioContext.currentTime * 1000);
   }
 
+  /**
+   * Clean up ScriptProcessor resources
+   */
   cleanup() {
     super.cleanup();
     if (this.scriptNode) {
@@ -152,6 +249,10 @@ class ScriptProcessorAudioProcessor extends AudioProcessor {
     }
   }
 
+  /**
+   * Get the processor type identifier
+   * @returns {string} Processor type
+   */
   getType() {
     return AUDIO_PROCESSOR_TYPES.SCRIPT_PROCESSOR;
   }

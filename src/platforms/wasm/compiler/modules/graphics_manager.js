@@ -1,3 +1,18 @@
+/**
+ * FastLED Graphics Manager - 2D WebGL Renderer
+ *
+ * Provides fast 2D rendering of LED layouts using WebGL for optimal performance.
+ * This renderer is optimized for dense LED grids and high frame rates.
+ *
+ * Key features:
+ * - WebGL-based texture rendering for performance
+ * - Power-of-2 texture allocation for compatibility
+ * - Pixel-perfect LED positioning and sizing
+ * - Automatic canvas and texture management
+ *
+ * @module GraphicsManager
+ */
+
 /* eslint-disable no-console */
 /* eslint-disable import/prefer-default-export */
 /* eslint-disable no-restricted-syntax */
@@ -7,6 +22,10 @@
 /* eslint-disable no-plusplus */
 /* eslint-disable no-continue */
 
+/**
+ * Creates and injects WebGL shaders into the document head
+ * Ensures shaders are only created once by checking for existing elements
+ */
 function createShaders() {
   const fragmentShaderId = 'fastled_FragmentShader';
   const vertexShaderId = 'fastled_vertexShader';
@@ -43,20 +62,51 @@ function createShaders() {
   document.head.appendChild(vertexShader);
 }
 
+/**
+ * Fast 2D Graphics Manager using WebGL for LED rendering
+ * Optimized for dense LED grids and high frame rates
+ */
 export class GraphicsManager {
+  /**
+   * Creates a new GraphicsManager instance
+   * @param {Object} graphicsArgs - Configuration arguments
+   * @param {string} graphicsArgs.canvasId - ID of the HTML canvas element to render to
+   */
   constructor(graphicsArgs) {
     const { canvasId } = graphicsArgs;
+
+    /** @type {string} HTML canvas element ID */
     this.canvasId = canvasId;
+
+    /** @type {WebGLRenderingContext|null} WebGL rendering context */
     this.gl = null;
+
+    /** @type {WebGLProgram|null} Compiled shader program */
     this.program = null;
+
+    /** @type {WebGLBuffer|null} Vertex position buffer */
     this.positionBuffer = null;
+
+    /** @type {WebGLBuffer|null} Texture coordinate buffer */
     this.texCoordBuffer = null;
+
+    /** @type {WebGLTexture|null} Main rendering texture */
     this.texture = null;
+
+    /** @type {number} Current texture width (power of 2) */
     this.texWidth = 0;
+
+    /** @type {number} Current texture height (power of 2) */
     this.texHeight = 0;
+
+    /** @type {Uint8Array|null} Texture data buffer (RGB) */
     this.texData = null;
   }
 
+  /**
+   * Resets and cleans up WebGL resources
+   * Disposes of buffers, textures, and programs to free memory
+   */
   reset() {
     if (this.gl) {
       this.gl.deleteBuffer(this.positionBuffer);
@@ -69,6 +119,10 @@ export class GraphicsManager {
     this.gl = null;
   }
 
+  /**
+   * Initializes the WebGL rendering context and resources
+   * Sets up shaders, buffers, and textures for LED rendering
+   */
   initWebGL() {
     createShaders();
     const canvas = document.getElementById(this.canvasId);
@@ -117,6 +171,12 @@ export class GraphicsManager {
     this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MAG_FILTER, this.gl.NEAREST);
   }
 
+  /**
+   * Creates and compiles a WebGL shader
+   * @param {number} type - Shader type (VERTEX_SHADER or FRAGMENT_SHADER)
+   * @param {string} source - GLSL shader source code
+   * @returns {WebGLShader|null} Compiled shader or null on error
+   */
   createShader(type, source) {
     const shader = this.gl.createShader(type);
     this.gl.shaderSource(shader, source);
@@ -129,6 +189,12 @@ export class GraphicsManager {
     return shader;
   }
 
+  /**
+   * Creates and links a WebGL program from vertex and fragment shaders
+   * @param {WebGLShader} vertexShader - Compiled vertex shader
+   * @param {WebGLShader} fragmentShader - Compiled fragment shader
+   * @returns {WebGLProgram|null} Linked program or null on error
+   */
   createProgram(vertexShader, fragmentShader) {
     const program = this.gl.createProgram();
     this.gl.attachShader(program, vertexShader);
@@ -141,6 +207,14 @@ export class GraphicsManager {
     return program;
   }
 
+  /**
+   * Updates the canvas with new LED frame data
+   * Processes strip data and renders LEDs to the WebGL texture
+   * @param {Array<Object>} frameData - Array of LED strip data
+   * @param {Object} frameData[].strip_id - Strip identifier
+   * @param {Uint8Array} frameData[].pixel_data - RGB pixel data (3 bytes per pixel)
+   * @param {Object} frameData.screenMap - Screen coordinate mapping data
+   */
   updateCanvas(frameData) {
     if (frameData.length === 0) {
       console.warn('Received empty frame data, skipping update');

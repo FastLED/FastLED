@@ -1,3 +1,21 @@
+/**
+ * FastLED WebAssembly Compiler Main Module
+ *
+ * This module serves as the main entry point for the FastLED WebAssembly compiler.
+ * It handles module loading, UI management, graphics rendering, file processing,
+ * and the main setup/loop execution for FastLED programs.
+ *
+ * Key responsibilities:
+ * - Loading and initializing the FastLED WASM module
+ * - Managing UI components and user interactions
+ * - Handling graphics rendering (both fast 2D and beautiful 3D modes)
+ * - Processing frame data and LED strip updates
+ * - File system operations and asset loading
+ * - Audio integration and processing
+ *
+ * @module FastLED/Compiler
+ */
+
 /* eslint-disable import/prefer-default-export */
 
 /* eslint-disable import/extensions */
@@ -7,68 +25,132 @@ import { GraphicsManager } from './modules/graphics_manager.js';
 import { GraphicsManagerThreeJS } from './modules/graphics_manager_threejs.js';
 import { isDenseGrid } from './modules/graphics_utils.js';
 
+/** URL parameters for runtime configuration */
 const urlParams = new URLSearchParams(window.location.search);
+
+/** Force fast 2D renderer when gfx=0 URL parameter is present */
 const FORCE_FAST_RENDERER = urlParams.get('gfx') === '0';
+
+/** Force beautiful 3D renderer when gfx=1 URL parameter is present */
 const FORCE_THREEJS_RENDERER = urlParams.get('gfx') === '1';
+
+/** Maximum number of lines to keep in stdout output display */
 const MAX_STDOUT_LINES = 50;
 
-const DEFAULT_FRAME_RATE_60FPS = 60; // 60 FPS
+/** Default frame rate for FastLED animations (60 FPS) */
+const DEFAULT_FRAME_RATE_60FPS = 60;
+
+/** Current frame rate setting */
 let frameRate = DEFAULT_FRAME_RATE_60FPS;
+
+/** Flag indicating if canvas data has been received */
 const receivedCanvas = false;
-// screenMap contains data mapping a strip id to a screen map,
-// transforming led strip data pixel with an index
-// to a screen pixel with xy.
+
+/**
+ * Screen mapping data structure containing strip-to-screen coordinate mappings
+ * @type {Object} screenMap
+ * @property {Object} strips - Map of strip ID to screen coordinate data
+ * @property {number[]} absMin - Absolute minimum [x, y] coordinates
+ * @property {number[]} absMax - Absolute maximum [x, y] coordinates
+ */
 const screenMap = {
   strips: {},
   absMin: [0, 0],
   absMax: [0, 0],
 };
+
+/** HTML element ID for the main rendering canvas */
 let canvasId;
+
+/** HTML element ID for the UI controls container */
 let uiControlsId;
+
+/** HTML element ID for the output/console display */
 let outputId;
 
+/** UI manager instance for handling user interface components */
 let uiManager;
+
+/** Flag indicating if UI canvas settings have changed */
 let uiCanvasChanged = false;
-let threeJsModules = {}; // For graphics.
+
+/** Three.js modules container for 3D rendering */
+let threeJsModules = {};
+
+/** Graphics manager instance (either 2D or 3D) */
 let graphicsManager;
-let containerId; // for ThreeJS
+
+/** Container ID for ThreeJS rendering context */
+let containerId;
+
+/** Graphics configuration arguments */
 let graphicsArgs = {};
 
-// deno-lint-ignore require-await
-let _loadFastLED = async function (options) { // eslint-disable-line no-unused-vars
+/**
+ * Stub FastLED loader function (replaced during initialization)
+ * @param {Object} options - Loading options
+ * @returns {Promise<null>} Always returns null (stub implementation)
+ */
+let _loadFastLED = function (options) {
   // Stub to let the user/dev know that something went wrong.
   // This function is replaced with an async implementation, so it must be async for interface compatibility
   console.log('FastLED loader function was not set.');
-  return null;
+  return Promise.resolve(null);
 };
 
+/**
+ * Public FastLED loading function (delegates to private implementation)
+ * @async
+ * @param {Object} options - Loading options and configuration
+ * @returns {Promise<*>} Result from the FastLED loader
+ */
 export async function loadFastLED(options) {
-  // This will be overridden by through the initialization.
+  // This will be overridden through the initialization.
   return await _loadFastLED(options);
 }
 
+/** Application start time epoch for timing calculations */
 const EPOCH = new Date().getTime();
+
+/**
+ * Gets elapsed time since application start
+ * @returns {string} Time in seconds with one decimal place
+ */
 function getTimeSinceEpoc() {
   const outMS = new Date().getTime() - EPOCH;
   const outSec = outMS / 1000;
   // one decimal place
   return outSec.toFixed(1);
 }
-// Will be overridden during initialization.
+
+/**
+ * Print function (will be overridden during initialization)
+ * @function
+ */
 let print = function () {};
 
+/** Store reference to original console for fallback */
 const prev_console = console;
 
-// Override console.log, console.warn, console.error to print to the output element
+// Store original console methods
 const _prev_log = prev_console.log;
 const _prev_warn = prev_console.warn;
 const _prev_error = prev_console.error;
 
+/**
+ * Adds timestamp to console arguments
+ * @param {...*} args - Console arguments to timestamp
+ * @returns {Array} Arguments array with timestamp prepended
+ */
 function toStringWithTimeStamp(...args) {
   const time = `${getTimeSinceEpoc()}s`;
   return [time, ...args]; // Return array with time prepended, don't join
 }
 
+/**
+ * Custom console.log implementation with timestamps
+ * @param {...*} args - Arguments to log
+ */
 function log(...args) {
   const argsWithTime = toStringWithTimeStamp(...args);
   _prev_log(...argsWithTime); // Spread the array when calling original logger
@@ -79,6 +161,10 @@ function log(...args) {
   }
 }
 
+/**
+ * Custom console.warn implementation with timestamps
+ * @param {...*} args - Arguments to warn about
+ */
 function warn(...args) {
   const argsWithTime = toStringWithTimeStamp(...args);
   _prev_warn(...argsWithTime);
@@ -89,6 +175,10 @@ function warn(...args) {
   }
 }
 
+/**
+ * Custom print function for displaying output in the UI
+ * @param {...*} args - Arguments to print to UI output
+ */
 function customPrintFunction(...args) {
   if (containerId === undefined) {
     return; // Not ready yet.
@@ -119,12 +209,20 @@ function customPrintFunction(...args) {
 // to always go to the console. If we hijack it then startup errors become
 // extremely difficult to debug.
 
-// deno-lint-ignore no-global-assign
-console = {}; // Intentionally override console for custom logging behavior
+// Override console for custom logging behavior
+// Note: Modifying existing console properties instead of reassigning the global
+const originalConsole = console;
 console.log = log;
 console.warn = warn;
 console.error = _prev_error;
 
+/**
+ * Appends raw file data to WASM module file system
+ * @param {Object} moduleInstance - The WASM module instance
+ * @param {number} path_cstr - C string pointer to file path
+ * @param {number} data_cbytes - C bytes pointer to file data
+ * @param {number} len_int - Length of data in bytes
+ */
 function jsAppendFileRaw(moduleInstance, path_cstr, data_cbytes, len_int) {
   // Stream this chunk
   moduleInstance.ccall(
@@ -135,6 +233,12 @@ function jsAppendFileRaw(moduleInstance, path_cstr, data_cbytes, len_int) {
   );
 }
 
+/**
+ * Appends Uint8Array file data to WASM module file system
+ * @param {Object} moduleInstance - The WASM module instance
+ * @param {string} path - File path in the virtual file system
+ * @param {Uint8Array} blob - File data as byte array
+ */
 function jsAppendFileUint8(moduleInstance, path, blob) {
   const n = moduleInstance.lengthBytesUTF8(path) + 1;
   const path_cstr = moduleInstance._malloc(n);
@@ -146,6 +250,12 @@ function jsAppendFileUint8(moduleInstance, path, blob) {
   moduleInstance._free(path_cstr);
 }
 
+/**
+ * Calculates minimum and maximum values from coordinate arrays
+ * @param {number[]} x_array - Array of X coordinates
+ * @param {number[]} y_array - Array of Y coordinates
+ * @returns {Array<Array<number>>} [[min_x, min_y], [max_x, max_y]]
+ */
 function minMax(x_array, y_array) {
   let min_x = x_array[0];
   let min_y = y_array[0];
@@ -160,6 +270,12 @@ function minMax(x_array, y_array) {
   return [[min_x, min_y], [max_x, max_y]];
 }
 
+/**
+ * Partitions files into immediate and streaming categories based on extensions
+ * @param {Array<Object>} filesJson - Array of file objects with path and data
+ * @param {string[]} immediateExtensions - Extensions that should be loaded immediately
+ * @returns {Array<Array<Object>>} [immediateFiles, streamingFiles]
+ */
 function partition(filesJson, immediateExtensions) {
   const immediateFiles = [];
   const streamingFiles = [];
@@ -176,6 +292,12 @@ function partition(filesJson, immediateExtensions) {
   return [immediateFiles, streamingFiles];
 }
 
+/**
+ * Creates a file manifest JSON for the WASM module
+ * @param {Array<Object>} filesJson - Array of file objects
+ * @param {number} frame_rate - Target frame rate for animations
+ * @returns {Object} Manifest object with files and frameRate
+ */
 function getFileManifestJson(filesJson, frame_rate) {
   const trimmedFilesJson = filesJson.map((file) => ({
     path: file.path,
@@ -188,6 +310,10 @@ function getFileManifestJson(filesJson, frame_rate) {
   return options;
 }
 
+/**
+ * Updates the canvas with new frame data from FastLED
+ * @param {Array<Object>} frameData - Array of strip data with pixel information
+ */
 function updateCanvas(frameData) {
   // we are going to add the screenMap to the graphicsManager
   if (frameData.screenMap === undefined) {
@@ -220,12 +346,22 @@ function updateCanvas(frameData) {
   graphicsManager.updateCanvas(frameData);
 }
 
+/**
+ * Main setup and loop execution function for FastLED programs
+ * @param {Function} extern_setup - Setup function from the WASM module
+ * @param {Function} extern_loop - Loop function from the WASM module
+ * @param {number} frame_rate - Target frame rate for the animation loop
+ */
 function FastLED_SetupAndLoop(extern_setup, extern_loop, frame_rate) {
   extern_setup();
   console.log('Starting loop...');
   const frameInterval = 1000 / frame_rate;
   let lastFrameTime = 0;
-  // Executes every frame but only runs the loop function at the specified frame rate
+
+  /**
+   * Animation loop function that maintains consistent frame rate
+   * @param {number} currentTime - Current timestamp from requestAnimationFrame
+   */
   function runLoop(currentTime) {
     if (currentTime - lastFrameTime >= frameInterval) {
       extern_loop();
@@ -236,6 +372,15 @@ function FastLED_SetupAndLoop(extern_setup, extern_loop, frame_rate) {
   requestAnimationFrame(runLoop);
 }
 
+/**
+ * Handles strip update events from the FastLED library
+ * Processes screen mapping configuration and canvas setup
+ * @param {Object} jsonData - Strip update data from FastLED
+ * @param {string} jsonData.event - Event type (e.g., 'set_canvas_map')
+ * @param {number} jsonData.strip_id - ID of the LED strip
+ * @param {Object} jsonData.map - Coordinate mapping data
+ * @param {number} [jsonData.diameter] - LED diameter in mm (default: 0.2)
+ */
 function FastLED_onStripUpdate(jsonData) {
   // Hooks into FastLED to receive updates from the FastLED library related
   // to the strip state. This is where the ScreenMap will be effectively set.
@@ -344,15 +489,25 @@ function FastLED_onStripUpdate(jsonData) {
   }
 }
 
+/**
+ * Handles new LED strip registration events
+ * @param {number} stripId - Unique identifier for the LED strip
+ * @param {number} stripLength - Number of LEDs in the strip
+ */
 function FastLED_onStripAdded(stripId, stripLength) {
   // uses global variables.
   const output = document.getElementById(outputId);
   output.textContent += `Strip added: ID ${stripId}, length ${stripLength}\n`;
 }
 
-// uiUpdateCallback is a function from FastLED that will parse a json string
-// representing the changes to the UI that FastLED will need to respond to.
+/**
+ * Main frame processing function called by FastLED for each animation frame
+ * @param {Array<Object>} frameData - Array of strip data with pixel colors
+ * @param {Function} uiUpdateCallback - Callback to send UI changes back to FastLED
+ */
 function FastLED_onFrame(frameData, uiUpdateCallback) {
+  // uiUpdateCallback is a function from FastLED that will parse a json string
+  // representing the changes to the UI that FastLED will need to respond to.
   // uses global variables.
   const changesJson = uiManager.processUiChanges();
   if (changesJson !== null) {
@@ -368,12 +523,24 @@ function FastLED_onFrame(frameData, uiUpdateCallback) {
   updateCanvas(frameData);
 }
 
+/**
+ * Handles UI element addition events from FastLED
+ * @param {Object} jsonData - UI element configuration data
+ */
 function FastLED_onUiElementsAdded(jsonData) {
   // uses global variables.
   uiManager.addUiElements(jsonData);
 }
 
-// Function to call the setup and loop functions
+/**
+ * Main function to initialize and start the FastLED setup/loop cycle
+ * @async
+ * @param {Function} extern_setup - Setup function from WASM module
+ * @param {Function} extern_loop - Loop function from WASM module
+ * @param {number} frame_rate - Target frame rate for animations
+ * @param {Object} moduleInstance - The loaded WASM module instance
+ * @param {Array<Object>} filesJson - Array of files to load into the virtual filesystem
+ */
 async function fastledLoadSetupLoop(
   extern_setup,
   extern_loop,
@@ -387,6 +554,13 @@ async function fastledLoadSetupLoop(
   moduleInstance.cwrap('fastled_declare_files', null, ['string'])(JSON.stringify(fileManifest));
   console.log('Files JSON:', filesJson);
 
+  /**
+   * Processes a single file by streaming it to the WASM module
+   * @async
+   * @param {Object} file - File object with path and data
+   * @param {string} file.path - File path in the virtual filesystem
+   * @param {number} file.size - File size in bytes
+   */
   const processFile = async (file) => {
     try {
       const response = await fetch(file.path);
@@ -405,6 +579,12 @@ async function fastledLoadSetupLoop(
     }
   };
 
+  /**
+   * Fetches all files in parallel and calls completion callback
+   * @async
+   * @param {Array<Object>} filesJson - Array of file objects to fetch
+   * @param {Function} [onComplete] - Optional callback when all files are loaded
+   */
   const fetchAllFiles = async (filesJson, onComplete) => {
     const promises = filesJson.map(async (file) => {
       await processFile(file);
@@ -450,10 +630,20 @@ async function fastledLoadSetupLoop(
   FastLED_SetupAndLoop(extern_setup, extern_loop, frame_rate);
 }
 
-// Ensure we wait for the module to load
+/**
+ * Callback function executed when the WASM module is loaded
+ * Sets up the module loading infrastructure
+ * @param {Function} fastLedLoader - The FastLED loader function
+ */
 function onModuleLoaded(fastLedLoader) {
   // Unpack the module functions and send them to the fastledLoadSetupLoop function
 
+  /**
+   * Internal function to start FastLED with loaded module
+   * @param {Object} moduleInstance - The loaded WASM module instance
+   * @param {number} frameRate - Target frame rate for animations
+   * @param {Array<Object>} filesJson - Files to load into virtual filesystem
+   */
   function __fastledLoadSetupLoop(moduleInstance, frameRate, filesJson) {
     const exports_exist = moduleInstance && moduleInstance._extern_setup &&
       moduleInstance._extern_loop;
@@ -471,6 +661,13 @@ function onModuleLoaded(fastLedLoader) {
     );
   }
   // Start fetch now in parallel
+
+  /**
+   * Fetches and parses JSON from a given file path
+   * @async
+   * @param {string} fetchFilePath - Path to the JSON file to fetch
+   * @returns {Promise<Object>} Parsed JSON data
+   */
   const fetchJson = async (fetchFilePath) => {
     const response = await fetch(fetchFilePath);
     const data = await response.json();
@@ -518,6 +715,21 @@ function onModuleLoaded(fastLedLoader) {
   }
 }
 
+/**
+ * Main FastLED loading and initialization function
+ * Sets up the entire FastLED environment including UI, graphics, and WASM module
+ * @async
+ * @param {Object} options - Configuration options for FastLED initialization
+ * @param {string} options.canvasId - ID of the HTML canvas element for rendering
+ * @param {string} options.uiControlsId - ID of the HTML element for UI controls
+ * @param {string} options.printId - ID of the HTML element for console output
+ * @param {number} [options.frameRate] - Target frame rate (defaults to 60 FPS)
+ * @param {Object} options.threeJs - Three.js configuration object
+ * @param {Object} options.threeJs.modules - Three.js module imports
+ * @param {string} options.threeJs.containerId - Container ID for Three.js rendering
+ * @param {Function} options.fastled - FastLED WASM module loader function
+ * @returns {Promise<void>} Promise that resolves when FastLED is fully loaded
+ */
 async function localLoadFastLed(options) {
   try {
     console.log('Loading FastLED with options:', options);
@@ -556,4 +768,6 @@ async function localLoadFastLed(options) {
     // Debug point removed for linting compliance
   }
 }
+
+/** Replace the stub loader with the actual implementation */
 _loadFastLED = localLoadFastLed;
