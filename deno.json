@@ -17,7 +17,12 @@
     "suppressExcessPropertyErrors": true,
     "ignoreDeprecations": "5.0",
     "skipLibCheck": true,
-    "lib": ["dom", "dom.asynciterable", "es2022", "webworker"]
+    "lib": [
+      "dom",
+      "dom.asynciterable",
+      "es2022",
+      "webworker"
+    ]
   },
   "lint": {
     "files": {
@@ -45,7 +50,7 @@
       "include": [
         "eqeqeq",
         "no-eval",
-        "no-throw-literal", 
+        "no-throw-literal",
         "prefer-const",
         "no-await-in-loop",
         "default-param-last",
@@ -142,7 +147,7 @@
   },
   "exclude": [
     "**/*.min.js",
-    "**/vendor/**", 
+    "**/vendor/**",
     "**/node_modules/**",
     "**/.build/**",
     "**/build/**",

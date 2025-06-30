@@ -1,15 +1,30 @@
-#!/usr/bin/env python3
+#!/usr/bin/env -S uv run --script
+#
+# /// script
+# requires-python = ">=3.11"
+# dependencies = ["httpx", "pathspec"]
+# ///
+
 """
 Simple JavaScript linting setup for FastLED using Deno
 Downloads Deno binary and sets up basic linting - no Node.js/npm complexity
+Uses uv run --script for dynamic package management
 """
+import io
 import os
 import platform
 import subprocess
 import sys
-import urllib.request
 import zipfile
 from pathlib import Path
+
+# Import httpx for HTTP requests (dynamically managed by uv)
+import httpx
+
+# Force UTF-8 output for Windows consoles
+if sys.platform.startswith("win"):
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
+    sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding="utf-8", errors="replace")
 
 # Configuration
 DENO_VERSION = "1.38.3"  # Latest stable version
@@ -48,7 +63,7 @@ def get_deno_download_info():
 
 
 def download_and_extract_deno():
-    """Download and extract Deno binary"""
+    """Download and extract Deno binary using httpx"""
     url, filename = get_deno_download_info()
     download_path = TOOLS_DIR / filename
 
@@ -57,7 +72,12 @@ def download_and_extract_deno():
     DENO_DIR.mkdir(exist_ok=True)
 
     if not download_path.exists():
-        urllib.request.urlretrieve(url, download_path)
+        print(f"🌐 Downloading from: {url}")
+        with httpx.stream("GET", url, follow_redirects=True) as response:
+            response.raise_for_status()
+            with open(download_path, "wb") as f:
+                for chunk in response.iter_bytes(chunk_size=8192):
+                    f.write(chunk)
         print(f"✅ Downloaded {filename}")
 
     # Extract Deno binary
@@ -84,34 +104,164 @@ def download_and_extract_deno():
 def create_deno_config():
     """Create deno.json configuration"""
     config_content = {
+        "compilerOptions": {
+            "allowJs": True,
+            "checkJs": False,
+            "strict": False,
+            "noImplicitAny": False,
+            "noImplicitReturns": False,
+            "noUnusedLocals": False,
+            "noUnusedParameters": False,
+            "exactOptionalPropertyTypes": False,
+            "noImplicitOverride": False,
+            "noPropertyAccessFromIndexSignature": False,
+            "noUncheckedIndexedAccess": False,
+            "strictNullChecks": False,
+            "strictFunctionTypes": False,
+            "noImplicitThis": False,
+            "suppressExcessPropertyErrors": True,
+            "ignoreDeprecations": "5.0",
+            "skipLibCheck": True,
+            "lib": ["dom", "dom.asynciterable", "es2022", "webworker"],
+        },
         "lint": {
-            "rules": {
-                "tags": ["recommended"],
+            "files": {
+                "include": [
+                    "src/platforms/wasm/compiler/*.js",
+                    "src/platforms/wasm/compiler/modules/*.js",
+                ],
                 "exclude": [
-                    "no-unused-vars",  # Too noisy for existing code
-                    "no-console",  # Console is needed for debugging
+                    "**/*.min.js",
+                    "**/vendor/**",
+                    "**/node_modules/**",
+                    "**/.build/**",
+                    "**/build/**",
+                    "**/dist/**",
+                    "**/tmp/**",
+                    "**/three.min.js",
+                    "**/codemirror.min.js",
+                    "**/bootstrap.min.js",
                 ],
             },
-            "include": ["src/platforms/wasm/"],
-            "exclude": [],
+            "rules": {
+                "tags": ["recommended"],
+                "include": [
+                    "eqeqeq",
+                    "no-eval",
+                    "no-throw-literal",
+                    "prefer-const",
+                    "no-await-in-loop",
+                    "default-param-last",
+                    "guard-for-in",
+                    "no-explicit-any",
+                    "no-implicit-coercion",
+                    "no-non-null-assertion",
+                    "no-prototype-builtins",
+                    "single-var-declarator",
+                    "adjacent-overload-signatures",
+                    "ban-untagged-todo",
+                    "for-direction",
+                    "getter-return",
+                    "no-array-constructor",
+                    "no-async-promise-executor",
+                    "no-case-declarations",
+                    "no-class-assign",
+                    "no-compare-neg-zero",
+                    "no-cond-assign",
+                    "no-const-assign",
+                    "no-constant-condition",
+                    "no-control-regex",
+                    "no-debugger",
+                    "no-delete-var",
+                    "no-dupe-args",
+                    "no-dupe-keys",
+                    "no-duplicate-case",
+                    "no-empty",
+                    "no-empty-character-class",
+                    "no-empty-interface",
+                    "no-empty-pattern",
+                    "no-ex-assign",
+                    "no-extra-boolean-cast",
+                    "no-fallthrough",
+                    "no-func-assign",
+                    "no-global-assign",
+                    "no-import-assign",
+                    "no-inner-declarations",
+                    "no-invalid-regexp",
+                    "no-irregular-whitespace",
+                    "no-misleading-character-class",
+                    "no-new-symbol",
+                    "no-obj-calls",
+                    "no-octal",
+                    "no-redeclare",
+                    "no-regex-spaces",
+                    "no-setter-return",
+                    "no-shadow-restricted-names",
+                    "no-sparse-arrays",
+                    "no-this-before-super",
+                    "no-unexpected-multiline",
+                    "no-unreachable",
+                    "no-unsafe-finally",
+                    "no-unsafe-negation",
+                    "no-unused-labels",
+                    "no-useless-catch",
+                    "no-with",
+                    "require-yield",
+                    "use-isnan",
+                    "valid-typeof",
+                ],
+                "exclude": [
+                    "no-console",
+                    "prefer-primordials",
+                    "no-window-prefix",
+                    "camelcase",
+                    "no-undef",
+                    "no-unused-vars",
+                ],
+            },
         },
         "fmt": {
+            "files": {
+                "include": [
+                    "src/platforms/wasm/compiler/*.js",
+                    "src/platforms/wasm/compiler/modules/*.js",
+                ],
+                "exclude": [
+                    "**/*.min.js",
+                    "**/vendor/**",
+                    "**/node_modules/**",
+                    "**/.build/**",
+                    "**/build/**",
+                    "**/dist/**",
+                    "**/tmp/**",
+                ],
+            },
             "useTabs": False,
             "lineWidth": 100,
             "indentWidth": 2,
             "semiColons": True,
             "singleQuote": True,
             "proseWrap": "preserve",
-            "include": ["src/platforms/wasm/"],
-            "exclude": [],
         },
+        "exclude": [
+            "**/*.min.js",
+            "**/vendor/**",
+            "**/node_modules/**",
+            "**/.build/**",
+            "**/build/**",
+            "**/dist/**",
+            "**/tmp/**",
+            "**/three.min.js",
+            "**/codemirror.min.js",
+            "**/bootstrap.min.js",
+        ],
     }
 
     import json
 
     config_path = Path("deno.json")
-    with open(config_path, "w") as f:
-        json.dump(config_content, f, indent=2)
+    with open(config_path, "w", encoding="utf-8") as f:
+        json.dump(config_content, f, indent=2, ensure_ascii=False)
 
     print("✅ Created deno.json configuration")
 
@@ -134,7 +284,7 @@ echo -e "${{BLUE}}🔍 FastLED JavaScript Linting (Deno)${{NC}}"
 
 # Check if Deno is installed
 if [ ! -f "{deno_binary}" ]; then
-    echo -e "${{RED}}❌ Deno not found. Run: python3 ci/setup-js-linting.py${{NC}}"
+    echo -e "${{RED}}❌ Deno not found. Run: uv run ci/setup-js-linting.py${{NC}}"
     exit 1
 fi
 
@@ -168,7 +318,7 @@ fi
 """
 
     lint_script_path = Path("lint-js")
-    with open(lint_script_path, "w") as f:
+    with open(lint_script_path, "w", encoding="utf-8") as f:
         f.write(lint_script_content)
 
     # Make executable
@@ -200,7 +350,7 @@ fi
 """
 
     format_script_path = Path("format-js")
-    with open(format_script_path, "w") as f:
+    with open(format_script_path, "w", encoding="utf-8") as f:
         f.write(format_script_content)
 
     # Make executable
@@ -218,15 +368,15 @@ def update_gitignore():
 """
 
     if gitignore_path.exists():
-        with open(gitignore_path, "r") as f:
+        with open(gitignore_path, "r", encoding="utf-8") as f:
             content = f.read()
 
         if ".js-tools/" not in content:
-            with open(gitignore_path, "a") as f:
+            with open(gitignore_path, "a", encoding="utf-8") as f:
                 f.write(gitignore_entry)
             print("✅ Updated .gitignore")
     else:
-        with open(gitignore_path, "w") as f:
+        with open(gitignore_path, "w", encoding="utf-8") as f:
             f.write(gitignore_entry.strip())
         print("✅ Created .gitignore")
 
@@ -253,6 +403,7 @@ def test_deno_installation():
 def main():
     """Main setup function"""
     print("🚀 Setting up simple JavaScript linting for FastLED (Deno-based)...")
+    print("📦 Using uv run --script for dynamic package management")
 
     try:
         # Step 1: Download and extract Deno
@@ -284,6 +435,7 @@ def main():
         print("  lint-js                 # JavaScript linting script")
         print("  format-js               # JavaScript formatting script")
         print("\nNo Node.js, npm, or complex setup required! 🎊")
+        print("📦 Dependencies managed by uv run --script")
 
     except Exception as e:
         print(f"\n❌ Setup failed: {e}")

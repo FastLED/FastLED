@@ -938,20 +938,6 @@ export class JsonUiManager {
     return fullWidthPatterns.some((pattern) => pattern.test(groupName));
   }
 
-  // Create or get the ungrouped items container
-  createUngroupedContainer() {
-    if (this.ungroupedContainer) {
-      return this.ungroupedContainer;
-    }
-
-    const ungroupedDiv = document.createElement('div');
-    ungroupedDiv.className = 'ui-ungrouped';
-    ungroupedDiv.id = 'ungrouped-items';
-
-    this.ungroupedContainer = ungroupedDiv;
-    return ungroupedDiv;
-  }
-
   // Clear all UI elements and groups
   clearUiElements() {
     const uiControlsContainer = document.getElementById(this.uiControlsId);
@@ -974,7 +960,7 @@ export class JsonUiManager {
     this.ungroupedContainer2 = null;
     this.uiElements = {};
     this.previousUiState = {};
-    
+
     // Reset element distribution counter for ultra-wide mode
     this.elementDistributionIndex = 0;
 
@@ -1114,7 +1100,7 @@ export class JsonUiManager {
       ungroupedElements.forEach((data) => {
         const targetContainer = this.getTargetContainer();
         const ungroupedContainer = this.getUngroupedContainer(targetContainer);
-        
+
         const control = this.createControlElement(data);
         if (control) {
           foundUi = true;
@@ -1142,7 +1128,7 @@ export class JsonUiManager {
 
     if (foundUi) {
       console.log('UI elements added, showing UI controls containers');
-      
+
       // Show main container
       const uiControlsContainer = document.getElementById(this.uiControlsId);
       if (uiControlsContainer) {
@@ -1163,7 +1149,9 @@ export class JsonUiManager {
       if (this.debugMode) {
         const main1Count = uiControlsContainer ? uiControlsContainer.children.length : 0;
         const main2Count = uiControls2Container ? uiControls2Container.children.length : 0;
-        console.log(`🎵 UI Distribution: Container 1: ${main1Count} elements, Container 2: ${main2Count} elements`);
+        console.log(
+          `🎵 UI Distribution: Container 1: ${main1Count} elements, Container 2: ${main2Count} elements`,
+        );
       }
     }
   }
@@ -1286,7 +1274,10 @@ export class JsonUiManager {
     const uiControls2Container = document.getElementById(this.uiControls2Id);
 
     // Handle ultra-wide mode with two separate containers
-    if (layoutInfo.mode === 'ultrawide' && uiControls2Container && uiControls2Container.children.length > 0) {
+    if (
+      layoutInfo.mode === 'ultrawide' && uiControls2Container &&
+      uiControls2Container.children.length > 0
+    ) {
       // Balance between two containers
       const container1Groups = uiControlsContainer.querySelectorAll('.ui-group');
       const container2Groups = uiControls2Container.querySelectorAll('.ui-group');
@@ -1303,19 +1294,25 @@ export class JsonUiManager {
       });
 
       if (this.debugMode) {
-        console.log(`🎵 Grid Layout Heights - UI Container 1: ${height1}px, UI Container 2: ${height2}px`);
-        console.log(`🎵 Distribution: Container 1 has ${container1Groups.length} groups, Container 2 has ${container2Groups.length} groups`);
+        console.log(
+          `🎵 Grid Layout Heights - UI Container 1: ${height1}px, UI Container 2: ${height2}px`,
+        );
+        console.log(
+          `🎵 Distribution: Container 1 has ${container1Groups.length} groups, Container 2 has ${container2Groups.length} groups`,
+        );
       }
 
       // In grid layout, CSS Grid handles positioning, so we just report statistics
       const heightDiff = Math.abs(height1 - height2);
       if (heightDiff > 200 && this.debugMode) {
-        console.log(`🎵 Height imbalance detected: ${heightDiff}px difference (handled by CSS Grid)`);
+        console.log(
+          `🎵 Height imbalance detected: ${heightDiff}px difference (handled by CSS Grid)`,
+        );
       }
     } else if (this.debugMode) {
       // Single container layouts
       const groups = uiControlsContainer.querySelectorAll('.ui-group');
-      
+
       if (groups.length > 0) {
         console.log(`🎵 Grid Layout: ${groups.length} groups in single column layout`);
       }
@@ -1475,12 +1472,12 @@ export class JsonUiManager {
    */
   getTargetContainer() {
     const layoutInfo = this.layoutManager.getLayoutInfo();
-    
+
     if (layoutInfo.mode === 'ultrawide') {
       // In ultra-wide mode, alternate between containers for better distribution
       const useSecondContainer = this.elementDistributionIndex % 2 === 1;
       this.elementDistributionIndex++;
-      
+
       if (useSecondContainer) {
         const container2 = document.getElementById(this.uiControls2Id);
         if (container2) {
@@ -1488,7 +1485,7 @@ export class JsonUiManager {
         }
       }
     }
-    
+
     // Default to main container for all other layouts
     return document.getElementById(this.uiControlsId);
   }
@@ -1513,15 +1510,18 @@ export class JsonUiManager {
   getUngroupedContainer(container) {
     if (container && container.id === this.uiControls2Id) {
       if (!this.ungroupedContainer2) {
-        this.ungroupedContainer2 = this.createUngroupedContainer(container, 'ungrouped-container-2');
+        this.ungroupedContainer2 = this.createUngroupedContainer(
+          container,
+          'ungrouped-container-2',
+        );
       }
       return this.ungroupedContainer2;
     }
-    
+
     if (!this.ungroupedContainer) {
       this.ungroupedContainer = this.createUngroupedContainer(
-        document.getElementById(this.uiControlsId), 
-        'ungrouped-container'
+        document.getElementById(this.uiControlsId),
+        'ungrouped-container',
       );
     }
     return this.ungroupedContainer;
@@ -1535,7 +1535,7 @@ export class JsonUiManager {
    */
   createUngroupedContainer(parent, id) {
     if (!parent) return null;
-    
+
     let container = document.getElementById(id);
     if (!container) {
       container = document.createElement('div');

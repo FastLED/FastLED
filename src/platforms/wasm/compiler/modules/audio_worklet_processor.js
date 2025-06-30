@@ -12,13 +12,13 @@ class FastLEDAudioProcessor extends AudioWorkletProcessor {
     this.bufferSize = 512;
     this.sampleRate = 44100;
     this.initialized = false;
-    
+
     /**
      * @param {MessageEvent} event - Message event from main thread
      */
     this.port.onmessage = (event) => {
       const { type, data } = event.data;
-      
+
       switch (type) {
         case 'init':
           this.sampleRate = data.sampleRate || 44100;
@@ -39,7 +39,7 @@ class FastLEDAudioProcessor extends AudioWorkletProcessor {
   /**
    * Process audio data
    * @param {Float32Array[][]} inputs - Input audio data
-   * @param {Float32Array[][]} outputs - Output audio data  
+   * @param {Float32Array[][]} outputs - Output audio data
    * @param {Record<string, Float32Array>} parameters - Audio parameters
    * @returns {boolean} - Whether to continue processing
    */
@@ -61,7 +61,7 @@ class FastLEDAudioProcessor extends AudioWorkletProcessor {
       sum += inputChannel[i] * inputChannel[i];
     }
     const rms = Math.sqrt(sum / inputChannel.length);
-    
+
     // Find peak
     let peak = 0;
     for (let i = 0; i < inputChannel.length; i++) {
@@ -72,13 +72,13 @@ class FastLEDAudioProcessor extends AudioWorkletProcessor {
     // Create audio data packet
     if (this.initialized && (rms > 0.001 || peak > 0.001)) {
       const timestamp = Math.floor(this.currentTime * 1000);
-      
+
       // Create sample data - convert to Int16 for efficiency
       const samples = new Int16Array(inputChannel.length);
       for (let i = 0; i < inputChannel.length; i++) {
         samples[i] = Math.round(inputChannel[i] * 32767);
       }
-      
+
       // Send processed audio data to main thread
       this.port.postMessage({
         type: 'audioData',
@@ -88,8 +88,8 @@ class FastLEDAudioProcessor extends AudioWorkletProcessor {
           rms,
           peak,
           sampleRate: this.sampleRate,
-          bufferSize: inputChannel.length
-        }
+          bufferSize: inputChannel.length,
+        },
       });
     }
 

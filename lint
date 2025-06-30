@@ -2,6 +2,41 @@
 
 set -e
 
+# Parse command line arguments
+RUN_JS_LINTING=false
+RUN_FULL_LINTING=false
+
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        --js)
+            RUN_JS_LINTING=true
+            shift
+            ;;
+        --full)
+            RUN_JS_LINTING=true
+            RUN_FULL_LINTING=true
+            shift
+            ;;
+        --help|-h)
+            echo "Usage: bash lint [OPTIONS]"
+            echo ""
+            echo "Options:"
+            echo "  --js     Include JavaScript linting"
+            echo "  --full   Include all linting (same as --js)"
+            echo "  --help   Show this help message"
+            echo ""
+            echo "By default, only Python and C++ linting is performed."
+            echo "Use --js or --full to include JavaScript linting."
+            exit 0
+            ;;
+        *)
+            echo "Unknown option: $1"
+            echo "Use --help for usage information"
+            exit 1
+            ;;
+    esac
+done
+
 # Unset VIRTUAL_ENV to avoid warnings about mismatched paths
 unset VIRTUAL_ENV
 
@@ -70,25 +105,32 @@ for folder in "${folders[@]}"; do
   uv run ci/run-clang-format.py -i -r "$folder" || uv run ci/run-clang-format.py -i -r "$folder"
 done
 
-# JavaScript linting and enhanced checking
-echo ""
-echo "🌐 JAVASCRIPT LINTING & TYPE CHECKING"
-echo "--------------------------------------"
+# JavaScript linting and enhanced checking (only if --js or --full is specified)
+if [ "$RUN_JS_LINTING" = true ]; then
+    echo ""
+    echo "🌐 JAVASCRIPT LINTING & TYPE CHECKING"
+    echo "--------------------------------------"
 
-if [ -f "./lint-js" ] && [ -f ".js-tools/deno/deno" ]; then
-    echo "Running JavaScript linting"
-    ./lint-js
-    
-    echo "Running JavaScript enhanced linting & type checking"
-    ./check-js
-    
-    # Run JavaScript enhancement analysis for additional insights
-    if [ -f "scripts/enhance-js-typing.py" ]; then
-        echo "Running JavaScript enhancement analysis"
-        python3 scripts/enhance-js-typing.py --approach summary 2>/dev/null || echo "  ℹ️  Enhancement analysis completed (some warnings expected)"
+    if [ -f "./lint-js" ] && [ -f ".js-tools/deno/deno" ]; then
+        echo "Running JavaScript linting"
+        ./lint-js
+        
+        echo "Running JavaScript enhanced linting & type checking"
+        ./check-js
+        
+        # Run JavaScript enhancement analysis for additional insights
+        if [ -f "scripts/enhance-js-typing.py" ]; then
+            echo "Running JavaScript enhancement analysis"
+            python3 scripts/enhance-js-typing.py --approach summary 2>/dev/null || echo "  ℹ️  Enhancement analysis completed (some warnings expected)"
+        fi
+    else
+        echo "⚠️  JavaScript linting tools not found. Run: python3 ci/setup-js-linting.py"
     fi
 else
-    echo "⚠️  JavaScript linting tools not found. Run: python3 ci/setup-js-linting.py"
+    echo ""
+    echo "🌐 JAVASCRIPT LINTING (SKIPPED)"
+    echo "-------------------------------"
+    echo "ℹ️  JavaScript linting skipped. Use --js or --full to include it."
 fi
 
 echo ""
@@ -96,5 +138,6 @@ echo "🎉 All linting completed!"
 echo "========================="
 echo ""
 echo "💡 FOR AI AGENTS:"
-echo "  - FOREGROUND AGENTS: Use 'bash lint' for all linting tasks"
-echo "  - BACKGROUND AGENTS: Can use individual scripts for fine-grained control"
+echo "  - Use 'bash lint' for Python and C++ linting (default)"
+echo "  - Use 'bash lint --js' or 'bash lint --full' to include JavaScript linting"
+echo "  - Use 'bash lint --help' for usage information"

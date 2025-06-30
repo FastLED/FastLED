@@ -11,8 +11,8 @@ NC='\033[0m' # No Color
 echo -e "${BLUE}🔍 FastLED JavaScript Linting (Deno)${NC}"
 
 # Check if Deno is installed
-if [ ! -f ".js-tools/deno/deno" ]; then
-    echo -e "${RED}❌ Deno not found. Run: python3 ci/setup-js-linting.py${NC}"
+if [ ! -f ".js-tools\deno\deno.exe" ]; then
+    echo -e "${RED}❌ Deno not found. Run: uv run ci/setup-js-linting.py${NC}"
     exit 1
 fi
 
@@ -29,7 +29,7 @@ echo "$JS_FILES" | sed 's/^/  /'
 
 # Run Deno linting
 echo -e "${BLUE}Running Deno lint...${NC}"
-if ".js-tools/deno/deno" lint --config deno.json; then
+if ".js-tools\deno\deno.exe" lint --config deno.json; then
     echo -e "${GREEN}✅ JavaScript linting completed successfully${NC}"
 else
     echo -e "${RED}❌ JavaScript linting failed${NC}"
@@ -38,8 +38,8 @@ fi
 
 # Optionally run formatting check
 echo -e "${BLUE}Checking JavaScript formatting...${NC}"
-if ".js-tools/deno/deno" fmt --config deno.json --check; then
+if ".js-tools\deno\deno.exe" fmt --config deno.json --check; then
     echo -e "${GREEN}✅ JavaScript formatting is correct${NC}"
 else
-    echo -e "${YELLOW}⚠️  JavaScript formatting issues found. Run: .js-tools/deno/deno fmt --config deno.json${NC}"
+    echo -e "${YELLOW}⚠️  JavaScript formatting issues found. Run: .js-tools\deno\deno.exe fmt --config deno.json${NC}"
 fi

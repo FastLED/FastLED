@@ -104,7 +104,7 @@ function allPixelDensitiesUndefined(frameData) {
   if (!screenMap || !screenMap.strips) {
     return true;
   }
-  
+
   let allPixelDensitiesUndefined = true;
   for (const stripId in screenMap.strips) {
     if (!Object.prototype.hasOwnProperty.call(screenMap.strips, stripId)) continue;
@@ -126,7 +126,7 @@ function isDenseScreenMap(frameData) {
   if (!frameData || typeof frameData !== 'object') {
     return false;
   }
-  
+
   for (const strip of frameData) {
     if (strip && strip.map && strip.map.x && strip.map.y) {
       return true;
@@ -148,7 +148,7 @@ function createScreenBoundsCalculation(frameData) {
 
   return {
     /**
-     * Calculate X position  
+     * Calculate X position
      * @param {number} x - X coordinate
      * @returns {number} Calculated X position
      */
@@ -157,13 +157,13 @@ function createScreenBoundsCalculation(frameData) {
     },
     /**
      * Calculate Y position
-     * @param {number} y - Y coordinate  
+     * @param {number} y - Y coordinate
      * @returns {number} Calculated Y position
      */
     calcYPosition: (y) => {
       return y; // Placeholder implementation
-    }
+    },
   };
 }
 
-export { allPixelDensitiesUndefined, isDenseScreenMap, createScreenBoundsCalculation };
+export { allPixelDensitiesUndefined, createScreenBoundsCalculation, isDenseScreenMap };

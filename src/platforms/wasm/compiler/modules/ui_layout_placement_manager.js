@@ -164,8 +164,10 @@ export class UILayoutPlacementManager {
    */
   detectLayout() {
     const viewportWidth = globalThis.innerWidth;
-    console.log(`🔍 Layout detection: viewport=${viewportWidth}px, mobile=${this.breakpoints.mobile.matches}, tablet=${this.breakpoints.tablet.matches}, desktop=${this.breakpoints.desktop.matches}, ultrawide=${this.breakpoints.ultrawide.matches}`);
-    
+    console.log(
+      `🔍 Layout detection: viewport=${viewportWidth}px, mobile=${this.breakpoints.mobile.matches}, tablet=${this.breakpoints.tablet.matches}, desktop=${this.breakpoints.desktop.matches}, ultrawide=${this.breakpoints.ultrawide.matches}`,
+    );
+
     if (this.breakpoints.mobile.matches) return 'mobile';
     if (this.breakpoints.tablet.matches) return 'tablet';
     if (this.breakpoints.ultrawide.matches) return 'ultrawide';
@@ -229,18 +231,18 @@ export class UILayoutPlacementManager {
     layoutData.uiColumns = 1;
     layoutData.uiColumnWidth = Math.min(layoutData.availableWidth, this.config.maxUIColumnWidth);
     layoutData.uiTotalWidth = layoutData.uiColumnWidth;
-    
+
     // In mobile mode, allow canvas to scale properly within available space
     // Use a reasonable percentage of available width, but respect min/max constraints
     const maxCanvasSize = Math.min(
       layoutData.availableWidth * 0.8, // Use up to 80% of available width
       this.config.maxCanvasSize,
     );
-    
+
     layoutData.canvasSize = Math.max(maxCanvasSize, this.config.minCanvasSize);
     layoutData.contentWidth = layoutData.canvasSize;
     layoutData.canExpand = layoutData.canvasSize > this.config.minCanvasSize;
-    
+
     return layoutData;
   }
 
@@ -325,30 +327,32 @@ export class UILayoutPlacementManager {
   calculateUltrawideLayout(layoutData) {
     // For ultra-wide, we use a flexible grid approach
     // Canvas gets a reasonable size, UI columns use flexible sizing
-    
+
     const remainingWidth = layoutData.availableWidth - (this.config.horizontalGap * 2); // Account for gaps between 3 columns
-    
+
     // Calculate optimal canvas size (not too large, leave room for UI)
     const maxCanvasSize = Math.min(
       remainingWidth * 0.5, // Canvas takes up to 50% of available space
       this.config.maxCanvasSize,
     );
-    
+
     const optimalCanvasSize = Math.max(maxCanvasSize, this.config.minCanvasSize);
-    
+
     // UI columns will use flexible sizing (minmax(280px, 1fr))
     // So we don't need to calculate exact pixel widths
     const uiColumnMinWidth = this.config.minUIColumnWidth; // 280px minimum
-    
+
     layoutData.canvasSize = optimalCanvasSize;
     layoutData.uiColumns = 2; // Two UI columns in ultra-wide
     layoutData.uiColumnWidth = uiColumnMinWidth; // Minimum width, will expand with 1fr
     layoutData.uiTotalWidth = uiColumnMinWidth * 2; // Total minimum width
     layoutData.contentWidth = optimalCanvasSize;
     layoutData.canExpand = true;
-    
-    console.log(`Ultra-wide layout: canvas=${optimalCanvasSize}px, UI columns=2 (flexible), min width=${uiColumnMinWidth}px each`);
-    
+
+    console.log(
+      `Ultra-wide layout: canvas=${optimalCanvasSize}px, UI columns=2 (flexible), min width=${uiColumnMinWidth}px each`,
+    );
+
     return layoutData;
   }
 
@@ -375,7 +379,7 @@ export class UILayoutPlacementManager {
       // First, check if layout mode has changed (most important)
       const newLayout = this.detectLayout();
       const layoutModeChanged = newLayout !== this.currentLayout;
-      
+
       if (layoutModeChanged) {
         console.log(`Layout mode change detected on resize: ${this.currentLayout} → ${newLayout}`);
         this.currentLayout = newLayout;
@@ -386,7 +390,7 @@ export class UILayoutPlacementManager {
 
       // If layout mode hasn't changed, check for fine-grained adjustments
       const newLayoutData = this.calculateLayoutData();
-      
+
       // Always update if there are any changes (remove the "significant" threshold for mode-specific updates)
       if (this.hasAnyLayoutChange(newLayoutData)) {
         this.layoutData = newLayoutData;
@@ -444,7 +448,12 @@ export class UILayoutPlacementManager {
     });
 
     if (uiControls2) {
-      uiControls2.classList.remove('mobile-layout', 'tablet-layout', 'desktop-layout', 'ultrawide-layout');
+      uiControls2.classList.remove(
+        'mobile-layout',
+        'tablet-layout',
+        'desktop-layout',
+        'ultrawide-layout',
+      );
       uiControls2.classList.add(layoutClass);
     }
 
@@ -511,35 +520,34 @@ export class UILayoutPlacementManager {
       contentGrid.style.gridTemplateColumns = '1fr';
       contentGrid.style.gridTemplateRows = 'auto auto';
       contentGrid.style.gridTemplateAreas = '"canvas" "ui"';
-      
+
       // Hide second UI container
       if (uiControls2) {
         uiControls2.style.display = 'none';
       }
-      
     } else if (isLandscape) {
       // 2×N grid (landscape)
       contentGrid.style.gridTemplateColumns = `${this.layoutData.canvasSize}px minmax(280px, 1fr)`;
       contentGrid.style.gridTemplateRows = 'auto';
       contentGrid.style.gridTemplateAreas = '"canvas ui"';
-      
+
       // Hide second UI container
       if (uiControls2) {
         uiControls2.style.display = 'none';
       }
-      
     } else if (isUltrawide) {
       // 3×N grid (ultra-wide) - Use flexible sizing for UI columns
       const minUIWidth = 280; // Minimum width for UI columns
       const canvasWidth = this.layoutData.canvasSize;
-      
+
       console.log(`🔍 Ultra-wide layout: canvas=${canvasWidth}px, minUIWidth=${minUIWidth}px`);
-      
+
       // Use flexible grid: fixed canvas width + two flexible UI columns
-      contentGrid.style.gridTemplateColumns = `${canvasWidth}px minmax(${minUIWidth}px, 1fr) minmax(${minUIWidth}px, 1fr)`;
+      contentGrid.style.gridTemplateColumns =
+        `${canvasWidth}px minmax(${minUIWidth}px, 1fr) minmax(${minUIWidth}px, 1fr)`;
       contentGrid.style.gridTemplateRows = 'auto';
       contentGrid.style.gridTemplateAreas = '"canvas ui ui2"';
-      
+
       // Show and configure second UI container
       if (uiControls2) {
         console.log('🔍 Showing ui-controls-2 container');
@@ -550,17 +558,17 @@ export class UILayoutPlacementManager {
         uiControls2.style.gridArea = 'ui2';
         uiControls2.style.width = '100%';
         uiControls2.style.minWidth = `${minUIWidth}px`;
-        
+
         // Force the container to be visible
         uiControls2.style.visibility = 'visible';
         uiControls2.style.opacity = '1';
       } else {
         console.warn('🔍 ui-controls-2 container not found!');
       }
-      
+
       // Configure first UI container for ultra-wide
       uiControls.style.minWidth = `${minUIWidth}px`;
-      
+
       console.log('🔍 Ultra-wide grid applied:', contentGrid.style.gridTemplateColumns);
     }
 
@@ -591,14 +599,15 @@ export class UILayoutPlacementManager {
     const aspectRatio = canvasWidth / canvasHeight;
 
     // Calculate display dimensions that maintain aspect ratio
-    let displayWidth, displayHeight;
-    
+    let displayWidth;
+    let displayHeight;
+
     if (aspectRatio >= 1) {
       // Landscape or square: constrain by width
       displayWidth = canvasSize;
       displayHeight = Math.round(canvasSize / aspectRatio);
     } else {
-      // Portrait: constrain by height  
+      // Portrait: constrain by height
       displayHeight = canvasSize;
       displayWidth = Math.round(canvasSize * aspectRatio);
     }
@@ -612,7 +621,11 @@ export class UILayoutPlacementManager {
     // Maintain pixel-perfect rendering
     canvas.style.imageRendering = 'pixelated';
 
-    console.log(`Canvas sized to ${displayWidth}x${displayHeight}px (aspect ratio: ${aspectRatio.toFixed(2)}, expanded: ${this.layoutData.canExpand})`);
+    console.log(
+      `Canvas sized to ${displayWidth}x${displayHeight}px (aspect ratio: ${
+        aspectRatio.toFixed(2)
+      }, expanded: ${this.layoutData.canExpand})`,
+    );
   }
 
   /**
@@ -633,14 +646,14 @@ export class UILayoutPlacementManager {
    */
   forceLayoutUpdate() {
     console.log('Force layout update triggered');
-    
+
     // First check if layout mode has changed
     const newLayout = this.detectLayout();
     if (newLayout !== this.currentLayout) {
       console.log(`Force update detected layout change: ${this.currentLayout} → ${newLayout}`);
       this.currentLayout = newLayout;
     }
-    
+
     // Recalculate layout data and apply immediately
     this.layoutData = this.calculateLayoutData();
     this.applyLayout();

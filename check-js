@@ -15,7 +15,7 @@ echo -e "${BLUE}🔍 FastLED JavaScript Enhanced Linting (Deno-based)${NC}"
 
 # Check if Deno is installed
 if [ ! -f "$DENO_BINARY" ]; then
-    echo -e "${RED}❌ Deno not found. Run: python3 ci/setup-js-linting.py${NC}"
+    echo -e "${RED}❌ Deno not found. Run: uv run ci/setup-js-linting.py${NC}"
     exit 1
 fi
 

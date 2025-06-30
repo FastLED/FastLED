@@ -9,7 +9,7 @@ NC='\033[0m' # No Color
 echo -e "${BLUE}🎨 FastLED JavaScript Formatting (Deno)${NC}"
 
 # Run Deno formatting
-if ".js-tools/deno/deno" fmt --config deno.json; then
+if ".js-tools\deno\deno.exe" fmt --config deno.json; then
     echo -e "${GREEN}✅ JavaScript files formatted successfully${NC}"
 else
     echo -e "${RED}❌ JavaScript formatting failed${NC}"
