@@ -141,19 +141,12 @@ body {
 }
 
 .ui-control {
-    margin: 10px 0;
+    margin: 0; /* Remove default margin that causes misalignment */
+    padding: 8px 0; /* Use padding for consistent spacing */
     display: flex;
-    flex-direction: row;
+    justify-content: space-between;
     align-items: center;
     width: 100%;
-    gap: 10px;
-    
-    /* Grid layout support */
-    grid-column: span 1;
-    align-self: start;
-    
-    /* Allow controls to expand and use available space */
-    min-width: 0; /* Allow shrinking */
     box-sizing: border-box;
 }
 
@@ -215,12 +208,12 @@ body {
 }
 
 .ui-control label {
-    min-width: 120px;
-    margin-right: 10px;
+    margin: 0; /* Remove margin that causes misalignment */
+    padding-right: 10px; /* Use padding instead */
     flex-shrink: 0;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    min-width: 120px; /* Consistent label width */
+    font-weight: 500;
+    color: #E0E0E0;
 }
 
 /* Audio controls optimizations */
@@ -318,10 +311,11 @@ h1 {
 
 /* Layout-specific styles - Enhanced responsive grid system */
 
-/* Mobile layout styles - 1×N grid */
+/* Mobile layout styles - 1×N grid - Enhanced for pixel-perfect alignment */
 .mobile-layout#main-container {
     max-width: calc(100vw - 40px);
-    padding: 0 20px;
+    padding: 20px; /* Consistent with other layouts */
+    margin: 0 auto;
 }
 
 .mobile-layout#content-grid {
@@ -331,10 +325,62 @@ h1 {
         "canvas"
         "ui";
     gap: 20px;
+    justify-items: center; /* Center both canvas and UI containers */
+    align-items: start;
 }
 
 .mobile-layout .ui-group {
-    margin: 15px 0;
+    margin: 10px 0; /* Reduced from 15px for tighter alignment */
+    width: 100%; /* Ensure full width for consistent alignment */
+}
+
+/* Mobile-specific UI controls alignment */
+.mobile-layout #ui-controls {
+    gap: 20px;
+    align-items: center; /* Center items within the container */
+    width: 100%;
+    max-width: 400px; /* Match canvas max width for alignment */
+    justify-content: center; /* Center the flex container itself */
+}
+
+/* Mobile-specific canvas container alignment */
+.mobile-layout #canvas-container {
+    justify-self: center;
+    align-self: start;
+    width: 100%;
+    max-width: 400px; /* Match UI controls max width */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* Mobile-specific UI control alignment */
+.mobile-layout .ui-control {
+    margin: 0; /* Remove margins that cause misalignment */
+    padding: 8px 0; /* Use padding instead of margin for consistent spacing */
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-sizing: border-box;
+}
+
+/* Mobile-specific label alignment */
+.mobile-layout .ui-control label {
+    margin: 0; /* Remove margin that causes misalignment */
+    padding-right: 10px; /* Use padding instead */
+    flex-shrink: 0;
+    min-width: 120px; /* Consistent label width */
+}
+
+/* Mobile-specific input alignment */
+.mobile-layout .ui-control input[type="range"],
+.mobile-layout .ui-control input[type="number"],
+.mobile-layout .ui-control select,
+.mobile-layout .ui-control button {
+    margin: 0; /* Remove all margins */
+    flex: 1;
+    min-width: 0; /* Allow shrinking */
 }
 
 /* Remove conflicting mobile canvas styles - let JavaScript handle sizing */
@@ -498,11 +544,16 @@ h1 {
             "canvas"
             "ui";
         gap: 20px;
+        justify-items: center; /* Center both canvas and UI containers */
+        align-items: start;
     }
     
     #ui-controls {
         gap: 20px;
-        align-items: stretch;
+        align-items: center; /* Center items within the container */
+        width: 100%;
+        max-width: 400px; /* Match canvas max width for alignment */
+        justify-content: center; /* Center the flex container itself */
     }
     
     #ui-controls-2 {
@@ -511,7 +562,19 @@ h1 {
     
     #main-container {
         max-width: calc(100vw - 40px);
-        padding: 0 20px;
+        padding: 20px; /* Consistent with other layouts */
+        margin: 0 auto;
+    }
+    
+    /* Ensure canvas container is properly centered */
+    #canvas-container {
+        justify-self: center;
+        align-self: start;
+        width: 100%;
+        max-width: 400px; /* Match UI controls max width */
+        display: flex;
+        flex-direction: column;
+        align-items: center;
     }
 }
 
@@ -535,19 +598,6 @@ h1 {
     border-radius: 5px;
     box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
     margin: 0;  /* Add this line to remove margins */
-}
-
-.ui-control {
-    margin: 10px 0;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    width: 100%;
-}
-
-.ui-control label {
-    margin-right: 10px;
-    /* Adjust space between label and checkbox */
 }
 
 .ui-control input[type="checkbox"] {
