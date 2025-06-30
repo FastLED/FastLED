@@ -60,7 +60,7 @@ class Board:
         options = out.setdefault(self.board_name, [])
 
         # Add build cache configuration for all boards
-        options.append("build_cache_dir=.pio/cache")
+        options.append("build_cache_dir=.pio_cache")
 
         if self.platform:
             options.append(f"platform={self.platform}")
