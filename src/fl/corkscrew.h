@@ -44,6 +44,7 @@
 #include "fl/tile2x2.h"
 #include "fl/vector.h"
 #include "crgb.h"
+#include "fl/int.h"
 
 namespace fl {
 
@@ -53,14 +54,14 @@ class ScreenMap;
 template<typename T> class Grid;
 
 // Simple constexpr functions for compile-time corkscrew dimension calculation
-constexpr uint16_t calculateCorkscrewWidth(float totalTurns, uint16_t numLeds) {
-    return static_cast<uint16_t>(ceil_constexpr(static_cast<float>(numLeds) / totalTurns));
+constexpr fl::u16 calculateCorkscrewWidth(float totalTurns, fl::u16 numLeds) {
+    return static_cast<fl::u16>(ceil_constexpr(static_cast<float>(numLeds) / totalTurns));
 }
 
-constexpr uint16_t calculateCorkscrewHeight(float totalTurns, uint16_t numLeds) {
+constexpr fl::u16 calculateCorkscrewHeight(float totalTurns, fl::u16 numLeds) {
     return (calculateCorkscrewWidth(totalTurns, numLeds) * static_cast<int>(ceil_constexpr(totalTurns)) > numLeds) ?
-        static_cast<uint16_t>(ceil_constexpr(static_cast<float>(numLeds) / static_cast<float>(calculateCorkscrewWidth(totalTurns, numLeds)))) :
-        static_cast<uint16_t>(ceil_constexpr(totalTurns));
+        static_cast<fl::u16>(ceil_constexpr(static_cast<float>(numLeds) / static_cast<float>(calculateCorkscrewWidth(totalTurns, numLeds)))) :
+        static_cast<fl::u16>(ceil_constexpr(totalTurns));
 }
 
 /**
@@ -88,14 +89,14 @@ struct Gap {
  */
 struct CorkscrewInput {
     float totalTurns = 19.f;   // Default to 19 turns
-    uint16_t numLeds = 144;        // Default to dense 144 leds.
+    fl::u16 numLeds = 144;        // Default to dense 144 leds.
     Gap gapParams;             // Gap parameters for gap accounting
     bool invert = false;           // If true, reverse the mapping order
     
     CorkscrewInput() = default;
     
     // Constructor with turns and LEDs
-    CorkscrewInput(float total_turns, uint16_t leds, bool invertMapping = false, 
+    CorkscrewInput(float total_turns, fl::u16 leds, bool invertMapping = false, 
                    const Gap& gap = Gap())
         : totalTurns(total_turns), numLeds(leds), gapParams(gap),
           invert(invertMapping) {}
@@ -107,21 +108,21 @@ struct CorkscrewInput {
     CorkscrewInput &operator=(CorkscrewInput &&other) noexcept = default;
     
     // Calculate optimal width and height based on number of turns and LEDs
-    uint16_t calculateWidth() const {
+    fl::u16 calculateWidth() const {
         // Width = LEDs per turn
         float ledsPerTurn = static_cast<float>(numLeds) / totalTurns;
-        return static_cast<uint16_t>(fl::ceil(ledsPerTurn));
+        return static_cast<fl::u16>(fl::ceil(ledsPerTurn));
     }
     
-    uint16_t calculateHeight() const {
+    fl::u16 calculateHeight() const {
         // Calculate optimal height to minimize empty pixels
-        uint16_t width = calculateWidth();
-        uint16_t height_from_turns = static_cast<uint16_t>(fl::ceil(totalTurns));
+        fl::u16 width = calculateWidth();
+        fl::u16 height_from_turns = static_cast<fl::u16>(fl::ceil(totalTurns));
         
         // If the grid would have more pixels than LEDs, adjust height to better match
         if (width * height_from_turns > numLeds) {
             // Calculate height that better matches LED count
-            return static_cast<uint16_t>(fl::ceil(static_cast<float>(numLeds) / static_cast<float>(width)));
+            return static_cast<fl::u16>(fl::ceil(static_cast<float>(numLeds) / static_cast<float>(width)));
         }
         
         return height_from_turns;
@@ -129,8 +130,8 @@ struct CorkscrewInput {
 };
 
 struct CorkscrewState {
-    uint16_t width = 0;  // Width of cylindrical map (circumference of one turn)
-    uint16_t height = 0; // Height of cylindrical map (total vertical segments)
+    fl::u16 width = 0;  // Width of cylindrical map (circumference of one turn)
+    fl::u16 height = 0; // Height of cylindrical map (total vertical segments)
     // Removed mapping vector - positions now computed on-the-fly
     CorkscrewState() = default;
     
@@ -205,8 +206,8 @@ class Corkscrew {
     Corkscrew(const Corkscrew &) = default;
     Corkscrew(Corkscrew &&) = default;
 
-    vec2f at_no_wrap(uint16_t i) const;
-    vec2f at_exact(uint16_t i) const;
+    vec2f at_no_wrap(fl::u16 i) const;
+    vec2f at_exact(fl::u16 i) const;
 
     // This is the future api.
     Tile2x2_u8_wrap at_wrap(float i) const;

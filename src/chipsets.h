@@ -330,7 +330,7 @@ protected:
 
 		startBoundary();
 		while(pixels.has(1)) {
-            FASTLED_REGISTER uint16_t command;
+            FASTLED_REGISTER fl::u16 command;
             command = 0x8000;
             command |= (pixels.loadAndScale0() & 0xF8) << 7; // red is the high 5 bits
             command |= (pixels.loadAndScale1() & 0xF8) << 2; // green is the middle 5 bits
@@ -401,9 +401,9 @@ class APA102Controller : public CPixelLEDController<RGB_ORDER> {
 		mSPI.writeByte(b1);
 		mSPI.writeByte(b2);
 #else
-		uint16_t b = 0xE000 | (brightness << 8) | (uint16_t)b0;
+		fl::u16 b = 0xE000 | (brightness << 8) | (fl::u16)b0;
 		mSPI.writeWord(b);
-		uint16_t w = b1 << 8;
+		fl::u16 w = b1 << 8;
 		w |= b2;
 		mSPI.writeWord(w);
 #endif
@@ -414,7 +414,7 @@ class APA102Controller : public CPixelLEDController<RGB_ORDER> {
 		mSPI.writeByte(b1);
 		mSPI.writeByte(b2);
 #else
-		mSPI.writeWord(uint16_t(b1) << 8 | b2);
+		mSPI.writeWord(fl::u16(b1) << 8 | b2);
 #endif
 	}
 
@@ -449,15 +449,15 @@ private:
 		uint8_t brightness;
 		pixels.getHdScale(out_s0, out_s1, out_s2, &brightness);
 		struct Math {
-			static uint16_t map(uint16_t x, uint16_t in_min, uint16_t in_max, uint16_t out_min, uint16_t out_max) {
-				const uint16_t run = in_max - in_min;
-				const uint16_t rise = out_max - out_min;
-				const uint16_t delta = x - in_min;
+			static fl::u16 map(fl::u16 x, fl::u16 in_min, fl::u16 in_max, fl::u16 out_min, fl::u16 out_max) {
+				const fl::u16 run = in_max - in_min;
+				const fl::u16 rise = out_max - out_min;
+				const fl::u16 delta = x - in_min;
 				return (delta * rise) / run + out_min;
 			}
 		};
 		// *out_brightness = Math::map(brightness, 0, 255, 0, 31);
-		uint16_t bri = Math::map(brightness, 0, 255, 0, 31);
+		fl::u16 bri = Math::map(brightness, 0, 255, 0, 31);
 		if (bri == 0 && brightness != 0) {
 			// Fixes https://github.com/FastLED/FastLED/issues/1908
 			bri = 1;
@@ -469,8 +469,8 @@ private:
 		pixels.loadAndScaleRGB(&s0, &s1, &s2);
 #if FASTLED_USE_GLOBAL_BRIGHTNESS == 1
 		// This function is pure magic.
-		const uint16_t maxBrightness = 0x1F;
-		uint16_t brightness = ((((uint16_t)max(max(s0, s1), s2) + 1) * maxBrightness - 1) >> 8) + 1;
+		const fl::u16 maxBrightness = 0x1F;
+		fl::u16 brightness = ((((fl::u16)max(max(s0, s1), s2) + 1) * maxBrightness - 1) >> 8) + 1;
 		s0 = (maxBrightness * s0 + (brightness >> 1)) / brightness;
 		s1 = (maxBrightness * s1 + (brightness >> 1)) / brightness;
 		s2 = (maxBrightness * s2 + (brightness >> 1)) / brightness;
@@ -1062,6 +1062,7 @@ class WS2812Controller800Khz:
 };
 #elif defined(FASTLED_USES_ESP32S3_I2S)
 #include "platforms/esp/32/clockless_i2s_esp32s3.h"
+#include "fl/int.h"
 template <uint8_t DATA_PIN, EOrder RGB_ORDER = GRB>
 class WS2812Controller800Khz:
 	public fl::ClocklessController_I2S_Esp32_WS2812<
@@ -1192,7 +1193,7 @@ public:
         while (pixels.has(1)) {
             pixels.stepDithering();
 
-			uint16_t s0, s1, s2;
+			fl::u16 s0, s1, s2;
             pixels.loadAndScale_WS2816_HD(&s0, &s1, &s2);
 			uint8_t b0_hi = s0 >> 8;
 			uint8_t b0_lo = s0 & 0xFF;

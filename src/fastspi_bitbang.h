@@ -10,6 +10,7 @@
 
 #include "fastled_delay.h"
 #include "fl/force_inline.h"
+#include "fl/int.h"
 
 FASTLED_NAMESPACE_BEGIN
 
@@ -70,7 +71,7 @@ public:
 	static void writeBytePostWait(uint8_t b) __attribute__((always_inline)) { writeByte(b); wait(); }
 
 	/// Write a word (two bytes) over SPI. 
-	static void writeWord(uint16_t w) __attribute__((always_inline)) { writeByte(w>>8); writeByte(w&0xFF); }
+	static void writeWord(fl::u16 w) __attribute__((always_inline)) { writeByte(w>>8); writeByte(w&0xFF); }
 
 	/// Write a single byte over SPI. 
 	/// Naive implelentation, simply calls writeBit() on the 8 bits in the byte.

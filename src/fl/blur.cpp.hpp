@@ -12,26 +12,27 @@
 #include "fl/unused.h"
 #include "fl/xymap.h"
 #include "lib8tion/scale8.h"
+#include "fl/int.h"
 
 namespace fl {
 
 // Legacy XY function. This is a weak symbol that can be overridden by the user.
-uint16_t XY(uint8_t x, uint8_t y) __attribute__((weak));
+fl::u16 XY(uint8_t x, uint8_t y) __attribute__((weak));
 
-__attribute__((weak)) uint16_t XY(uint8_t x, uint8_t y) {
+__attribute__((weak)) fl::u16 XY(uint8_t x, uint8_t y) {
     FASTLED_UNUSED(x);
     FASTLED_UNUSED(y);
     FASTLED_ASSERT(false, "the user didn't provide an XY function");
     return 0;
 }
 
-// uint16_t XY(uint8_t x, uint8_t y) {
+// fl::u16 XY(uint8_t x, uint8_t y) {
 //   return 0;
 // }
 // make this a weak symbol
 namespace {
-uint16_t xy_legacy_wrapper(uint16_t x, uint16_t y, uint16_t width,
-                           uint16_t height) {
+fl::u16 xy_legacy_wrapper(fl::u16 x, fl::u16 y, fl::u16 width,
+                           fl::u16 height) {
     FASTLED_UNUSED(width);
     FASTLED_UNUSED(height);
     return XY(x, y);
@@ -51,11 +52,11 @@ uint16_t xy_legacy_wrapper(uint16_t x, uint16_t y, uint16_t width,
 //         calls to 'blur' will also result in the light fading,
 //         eventually all the way to black; this is by design so that
 //         it can be used to (slowly) clear the LEDs to black.
-void blur1d(CRGB *leds, uint16_t numLeds, fract8 blur_amount) {
+void blur1d(CRGB *leds, fl::u16 numLeds, fract8 blur_amount) {
     uint8_t keep = 255 - blur_amount;
     uint8_t seep = blur_amount >> 1;
     CRGB carryover = CRGB::Black;
-    for (uint16_t i = 0; i < numLeds; ++i) {
+    for (fl::u16 i = 0; i < numLeds; ++i) {
         CRGB cur = leds[i];
         CRGB part = cur;
         part.nscale8(seep);

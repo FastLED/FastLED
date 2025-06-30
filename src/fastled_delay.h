@@ -6,6 +6,7 @@
 #include "FastLED.h"
 #include "fl/types.h"
 #include "fl/force_inline.h"
+#include "fl/int.h"
 
 /// @file fastled_delay.h
 /// Utility functions and classes for managing delay cycles
@@ -19,7 +20,7 @@ FASTLED_NAMESPACE_BEGIN
 /// @tparam WAIT The amount of time to wait, in microseconds
 template<int WAIT> class CMinWait {
 	/// Timestamp of the last time this was run, in microseconds
-	uint16_t mLastMicros;
+	fl::u16 mLastMicros;
 
 public:
 	/// Constructor
@@ -27,7 +28,7 @@ public:
 
 	/// Blocking delay until WAIT time since mark() has passed
 	void wait() {
-		uint16_t diff;
+		fl::u16 diff;
 		do {
 			diff = (micros() & 0xFFFF) - mLastMicros;
 		} while(diff < WAIT);

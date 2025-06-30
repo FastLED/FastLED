@@ -17,6 +17,7 @@
 #include "fl/engine_events.h"
 #include "fl/screenmap.h"
 #include "fl/virtual_if_not_avr.h"
+#include "fl/int.h"
 
 FASTLED_NAMESPACE_BEGIN
 
@@ -208,7 +209,7 @@ public:
         return *this;
     }
 
-    CLEDController& setScreenMap(uint16_t width, uint16_t height, float diameter = -1.f) {
+    CLEDController& setScreenMap(fl::u16 width, fl::u16 height, float diameter = -1.f) {
         fl::XYMap xymap = fl::XYMap::constructRectangularGrid(width, height);
         return setScreenMap(xymap, diameter);
     }
@@ -277,7 +278,7 @@ public:
 
     /// Gets the maximum possible refresh rate of the strip
     /// @returns the maximum refresh rate, in frames per second (FPS)
-    virtual uint16_t getMaxRefreshRate() const { return 0; }
+    virtual fl::u16 getMaxRefreshRate() const { return 0; }
 };
 
 FASTLED_NAMESPACE_END
