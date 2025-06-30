@@ -176,9 +176,22 @@ function createSlider(element) {
   const controlDiv = document.createElement('div');
   controlDiv.className = 'ui-control slider-control';
 
-  // Create the label container with text and value
-  const labelContainer = document.createElement('div');
-  labelContainer.className = 'slider-label';
+  // Create the slider container with relative positioning
+  const sliderContainer = document.createElement('div');
+  sliderContainer.className = 'slider-container';
+
+  // Create the slider input
+  const slider = document.createElement('input');
+  slider.type = 'range';
+  slider.id = `slider-${element.id}`;
+  slider.min = Number.parseFloat(element.min);
+  slider.max = Number.parseFloat(element.max);
+  slider.value = Number.parseFloat(element.value);
+  slider.step = Number.parseFloat(element.step);
+
+  // Create the overlay label div
+  const overlayDiv = document.createElement('div');
+  overlayDiv.className = 'slider-label-overlay';
 
   const labelText = document.createElement('span');
   labelText.className = 'label-text';
@@ -188,21 +201,9 @@ function createSlider(element) {
   valueDisplay.className = 'slider-value';
   valueDisplay.textContent = element.value;
 
-  labelContainer.appendChild(labelText);
-  labelContainer.appendChild(valueDisplay);
+  overlayDiv.appendChild(labelText);
+  overlayDiv.appendChild(valueDisplay);
 
-  // Create the slider container
-  const sliderContainer = document.createElement('div');
-  sliderContainer.className = 'slider-container';
-
-  const slider = document.createElement('input');
-  slider.type = 'range';
-  slider.id = `slider-${element.id}`;
-  slider.min = Number.parseFloat(element.min);
-  slider.max = Number.parseFloat(element.max);
-  slider.value = Number.parseFloat(element.value);
-  slider.step = Number.parseFloat(element.step);
-  
   // Set initial value in next frame to ensure proper initialization
   setTimeout(() => {
     slider.value = Number.parseFloat(element.value);
@@ -214,8 +215,9 @@ function createSlider(element) {
     valueDisplay.textContent = slider.value;
   });
 
+  // Add elements to container
   sliderContainer.appendChild(slider);
-  controlDiv.appendChild(labelContainer);
+  sliderContainer.appendChild(overlayDiv);
   controlDiv.appendChild(sliderContainer);
 
   return controlDiv;

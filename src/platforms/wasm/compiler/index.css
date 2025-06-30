@@ -1100,29 +1100,38 @@ audio::-webkit-media-controls-mute-button {
     max-width: none; /* Remove any max-width constraints */
 }
 
-/* Sleek Slider Widget - New approach for better UX */
+/* Sleek Slider Widget - Overlay label design */
 .ui-control.slider-control {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+    display: block;
     width: 100%;
     margin: 12px 0;
     padding: 8px 0;
     position: relative;
 }
 
+.ui-control.slider-control .slider-container {
+    width: 100%;
+    position: relative;
+    display: block;
+}
+
 .ui-control.slider-control .slider-label {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
     display: flex;
     justify-content: center;
     align-items: center;
     width: 100%;
-    margin-bottom: 8px;
     font-weight: 500;
     color: #E0E0E0;
     opacity: 0.7;
     transition: opacity 0.2s ease;
     text-align: center;
     font-size: 0.9em;
+    pointer-events: none;
+    z-index: 1;
 }
 
 .ui-control.slider-control .slider-label .label-text {
@@ -1136,13 +1145,6 @@ audio::-webkit-media-controls-mute-button {
     text-align: right;
 }
 
-.ui-control.slider-control .slider-container {
-    width: 100%;
-    position: relative;
-    display: flex;
-    align-items: center;
-}
-
 .ui-control.slider-control input[type="range"] {
     width: 100%;
     height: 6px;
@@ -1153,6 +1155,8 @@ audio::-webkit-media-controls-mute-button {
     appearance: none;
     cursor: pointer;
     transition: all 0.2s ease;
+    position: relative;
+    z-index: 2;
 }
 
 /* Custom slider thumb styling */
@@ -1307,4 +1311,51 @@ audio::-webkit-media-controls-mute-button {
     display: inline-block;
     vertical-align: middle;
     box-sizing: border-box;
+}
+
+/* Overlay label for slider - hovers over the slider widget */
+.slider-label-overlay {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    pointer-events: none;
+    background: transparent;
+    z-index: 2;
+    font-size: 0.95em;
+    font-weight: 600;
+}
+
+.slider-label-overlay .label-text,
+.slider-label-overlay .slider-value {
+    color: #fff;
+    text-shadow:
+        0 0 2px #000,
+        0 0 4px #000,
+        1px 1px 0 #000,
+        -1px -1px 0 #000,
+        1px -1px 0 #000,
+        -1px 1px 0 #000,
+        0 2px 8px #000;
+    font-weight: 600;
+    margin: 0 4px;
+}
+
+.slider-label-overlay .slider-value {
+    color: #fff;
+    text-shadow:
+        0 0 2px #000,
+        0 0 4px #000,
+        1px 1px 0 #000,
+        -1px -1px 0 #000,
+        1px -1px 0 #000,
+        -1px 1px 0 #000,
+        0 2px 8px #000;
+    font-weight: 700;
+    min-width: 40px;
+    text-align: right;
 }
