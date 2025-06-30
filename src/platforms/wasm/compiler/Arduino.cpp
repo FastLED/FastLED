@@ -1,11 +1,10 @@
+// Auto-generated wrapper for all-source build
+// Generated automatically by platform conversion script
 
-#ifdef __EMSCRIPTEN__
+#include "fl/compiler_control.h"
 
-#include "./Arduino.h"
-
-SerialEmulation Serial;
-SerialEmulation Serial1;
-SerialEmulation Serial2;
-SerialEmulation Serial3;
-
+#ifdef FASTLED_ALL_SRC
+// No implementation when building all-source
+#else
+#include "Arduino.cpp.hpp"
 #endif
