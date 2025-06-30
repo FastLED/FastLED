@@ -436,7 +436,7 @@ h1 {
 .ultrawide-layout #ui-controls,
 .ultrawide-layout #ui-controls-2 {
     min-width: 280px;
-    max-width: 400px;
+    /* Remove max-width constraint to allow full expansion in ultra-wide mode */
 }
 
 /* Canvas responsive behavior */
