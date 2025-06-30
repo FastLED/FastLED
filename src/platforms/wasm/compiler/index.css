@@ -1330,6 +1330,7 @@ audio::-webkit-media-controls-mute-button {
     z-index: 2;
     font-size: 0.95em;
     font-weight: 600;
+    opacity: 0.8;
 }
 
 .slider-label-overlay .label-text,
