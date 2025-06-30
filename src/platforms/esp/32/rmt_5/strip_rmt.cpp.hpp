@@ -22,7 +22,7 @@ namespace fl {
 
 namespace {  // anonymous namespace
 
-static const char *TAG = "strip_rmt";
+static const char *STRIP_RMT_TAG = "strip_rmt";
 
 // 10MHz resolution, 1 tick = 0.1us (led strip needs a high resolution)
 #define LED_STRIP_RMT_RES_HZ (10 * 1000 * 1000)
@@ -67,7 +67,7 @@ led_strip_handle_t configure_led_with_timings(int pin, uint32_t led_count, bool 
     // LED Strip object handle
     led_strip_handle_t led_strip;
     ESP_ERROR_CHECK(led_strip_new_rmt_device(&strip_config, &rmt_config, &led_strip));
-    FASTLED_ESP_LOGI(TAG, "Created LED strip object with RMT backend");
+    FASTLED_ESP_LOGI(STRIP_RMT_TAG, "Created LED strip object with RMT backend");
     return led_strip;
 }
 
@@ -122,7 +122,7 @@ public:
     {
         if (!mDrawIssued)
         {
-            // ESP_LOGE(TAG, "No draw issued, skipping wait");
+            // ESP_LOGE(STRIP_RMT_TAG, "No draw issued, skipping wait");
             return;
         }
         ESP_ERROR_CHECK(led_strip_refresh_wait_done(mStrip));

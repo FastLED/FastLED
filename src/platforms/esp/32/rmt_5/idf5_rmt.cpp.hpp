@@ -1,5 +1,3 @@
-
-
 #ifdef ESP32
 
 #include "third_party/espressif/led_strip/src/enabled.h"
@@ -21,7 +19,7 @@
 #include "strip_rmt.h"
 
 
-#define TAG "idf5_rmt.cpp"
+#define IDF5_RMT_TAG "idf5_rmt.cpp"
 
 namespace fl {
 

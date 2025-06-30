@@ -1,4 +1,3 @@
-
 #ifdef ESP32
 
 #include "third_party/espressif/led_strip/src/enabled.h"
@@ -27,7 +26,7 @@
 FASTLED_NAMESPACE_BEGIN
 
 
-static const char *TAG = "strip_spi";
+static const char *STRIP_SPI_TAG = "strip_spi";
 
 led_strip_handle_t configure_led(int pin, uint32_t led_count, led_model_t led_model, spi_host_device_t spi_bus, bool with_dma)
 {
@@ -62,7 +61,7 @@ led_strip_handle_t configure_led(int pin, uint32_t led_count, led_model_t led_mo
     // LED Strip object handle
     led_strip_handle_t led_strip;
     ESP_ERROR_CHECK(led_strip_new_spi_device(&strip_config, &spi_config, &led_strip));
-    FASTLED_ESP_LOGI(TAG, "Created LED strip object with SPI backend");
+    FASTLED_ESP_LOGI(STRIP_SPI_TAG, "Created LED strip object with SPI backend");
     return led_strip;
 }
 
