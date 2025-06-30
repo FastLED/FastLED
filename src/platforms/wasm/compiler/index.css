@@ -1159,13 +1159,13 @@ audio::-webkit-media-controls-mute-button {
     z-index: 2;
 }
 
-/* Custom slider thumb styling */
+/* Custom slider thumb styling - CD player style oval */
 .ui-control.slider-control input[type="range"]::-webkit-slider-thumb {
     -webkit-appearance: none;
     appearance: none;
-    width: 18px;
-    height: 18px;
-    border-radius: 50%;
+    width: 24px;
+    height: 14px;
+    border-radius: 7px;
     background: #1E90FF;
     cursor: pointer;
     box-shadow: 0 2px 6px rgba(30, 144, 255, 0.3);
@@ -1173,9 +1173,9 @@ audio::-webkit-media-controls-mute-button {
 }
 
 .ui-control.slider-control input[type="range"]::-moz-range-thumb {
-    width: 18px;
-    height: 18px;
-    border-radius: 50%;
+    width: 24px;
+    height: 14px;
+    border-radius: 7px;
     background: #1E90FF;
     cursor: pointer;
     border: none;
@@ -1238,13 +1238,15 @@ audio::-webkit-media-controls-mute-button {
 }
 
 .ultrawide-layout .ui-control.slider-control input[type="range"]::-webkit-slider-thumb {
-    width: 22px;
-    height: 22px;
+    width: 28px;
+    height: 16px;
+    border-radius: 8px;
 }
 
 .ultrawide-layout .ui-control.slider-control input[type="range"]::-moz-range-thumb {
-    width: 22px;
-    height: 22px;
+    width: 28px;
+    height: 16px;
+    border-radius: 8px;
 }
 
 /* Number control specific styling - block layout instead of flexbox */
