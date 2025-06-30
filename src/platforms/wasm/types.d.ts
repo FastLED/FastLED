@@ -14,6 +14,9 @@ export interface StripData {
     x: number[];
     y: number[];
   };
+  min?: number[];
+  max?: number[];
+  diameter?: number;
 }
 
 export interface ScreenMapData {
@@ -21,6 +24,17 @@ export interface ScreenMapData {
   min?: number[];
   max?: number[];
   diameter?: number;
+  // Additional properties found in graphics_utils.js
+  absMin?: number[];
+  absMax?: number[];
+}
+
+export interface FrameData {
+  screenMap: ScreenMapData;
+  strip_id?: number;
+  pixel_data?: Uint8Array;
+  // Make FrameData iterable for for-of loops
+  [Symbol.iterator](): Iterator<any>;
 }
 
 export interface LayoutData {
@@ -46,139 +60,96 @@ export interface LayoutResult {
   canvasSize: number;
   uiColumns: number;
   uiColumnWidth: number;
-  uiTotalWidth: number;
-  contentWidth: number;
-  layoutMode: string;
-  canExpand: boolean;
 }
 
-// UI element types
-export interface UIElementData {
+// Audio system types
+export interface AudioData {
+  audioContexts: { [key: string]: AudioContext };
+  audioProcessors: { [key: string]: any };
+  audioSources: { [key: string]: any };
+  audioBuffers: { [key: string]: any };
+  audioSamples: { [key: string]: Int16Array };
+  hasActiveSamples?: boolean;
+}
+
+export interface AudioBufferStorage {
+  audioId: string;
+  // Add other properties as needed
+}
+
+// UI Manager types
+export interface UIGroupInfo {
+  container: HTMLDivElement;
+  content: HTMLDivElement;
+  name: string;
+  isWide: boolean;
+  isFullWidth: boolean;
+}
+
+export interface UIElement {
   id: string;
   type: string;
-  name: string;
-  value?: string | number | boolean;
-  min?: number;
-  max?: number;
-  step?: number;
-  checked?: boolean;
-  options?: string[];
+  value: number | string | boolean;
+  min?: number | string;
+  max?: number | string;
+  step?: number | string;
+  accept?: string;
 }
 
-export interface UIChanges {
-  [key: string]: string | number | boolean | Int16Array;
+export interface UILayoutPlacementManager {
+  mediaQuery?: MediaQueryList;
+  // Add other properties as needed
 }
 
-export interface GraphicsManager {
-  initialize(): void;
-  updateFrame(frameData: LayoutData): void;
-  resize(width: number, height: number): void;
-  destroy(): void;
-}
-
-export interface EmscriptenModule {
-  ccall: (name: string, returnType: string, argTypes: string[], args: unknown[]) => unknown;
-  cwrap: (name: string, returnType: string, argTypes: string[]) => Function;
-  _malloc: (size: number) => number;
-  _free: (ptr: number) => void;
-  HEAP8: Int8Array;
-  HEAP16: Int16Array;  
-  HEAP32: Int32Array;
-  HEAPU8: Uint8Array;
-  HEAPU16: Uint16Array;
-  HEAPU32: Uint32Array;
-  HEAPF32: Float32Array;
-  HEAPF64: Float64Array;
-}
-
-// Audio Worklet types
-export interface AudioWorkletProcessor {
-  readonly port: MessagePort;
-  readonly currentTime: number;
-  process(
-    inputs: Float32Array[][],
-    outputs: Float32Array[][],
-    parameters: Record<string, Float32Array>
-  ): boolean;
-}
-
-export interface AudioWorkletProcessorConstructor {
-  new (): AudioWorkletProcessor;
-}
-
-export interface AudioWorkletGlobalScope {
-  registerProcessor(name: string, constructor: AudioWorkletProcessorConstructor): void;
-  AudioWorkletProcessor: AudioWorkletProcessorConstructor;
-  currentTime: number;
-}
-
-// Extend global scope for WebAssembly modules
+// AudioWorklet types for worklet environment
 declare global {
-  interface Window {
-    // Audio system globals
-    audioData?: {
-      audioBuffers: { [key: string]: unknown };
-      hasActiveSamples: boolean;
-    };
-    
-    // FastLED globals
-    FastLED_onFrame?: (frameData: LayoutData) => void;
-    FastLED_onStripAdded?: (stripData: StripData) => void;
-    FastLED_onStripRemoved?: (stripId: number) => void;
-    
-    // UI globals
-    onFastLEDUiUpdate?: (changes: UIChanges) => void;
-    onFastLEDUiUpdateJson?: (jsonData: UIElementData[]) => void;
-    onFastLEDUiElementRegistered?: (elementData: UIElementData) => void;
-    onFastLEDUiSetDebugMode?: (enabled: boolean) => void;
-    onFastLEDUiLayoutChanged?: (layoutMode: string) => void;
-    onFastLEDUiAdvancedLayoutChanged?: (layout: string, data: LayoutResult) => void;
-    
-    // Graphics globals
-    createGraphicsManager?: () => GraphicsManager;
-    createGraphicsManagerThreeJS?: () => GraphicsManager;
-    
-    // Module system
-    Module?: EmscriptenModule;
-
-    // UI manager instances
-    uiManager?: unknown;
-    uiManagerInstance?: unknown;
-    _pendingUiDebugMode?: boolean;
-    
-    // UI helper functions
-    setUiDebug?: (enabled?: boolean) => void;
-  }
-
-  // Browser globals that Deno doesn't know about
-  declare const document: Document;
-  declare const requestAnimationFrame: (callback: FrameRequestCallback) => number;
-  declare const AudioContext: {
-    new (): AudioContext;
-    prototype: AudioContext;
+  // AudioWorklet context globals
+  var AudioWorkletProcessor: {
+    new(): AudioWorkletProcessor;
   };
-  declare const AudioWorkletNode: {
-    new (context: AudioContext, name: string, options?: AudioWorkletNodeOptions): AudioWorkletNode;
-  };
-
-  // Audio Worklet global scope
-  interface AudioWorkletGlobalScope {
-    registerProcessor(name: string, constructor: AudioWorkletProcessorConstructor): void;
-    AudioWorkletProcessor: AudioWorkletProcessorConstructor;
+  
+  interface AudioWorkletProcessor {
+    port: MessagePort;
     currentTime: number;
   }
+  
+  var registerProcessor: (name: string, processorClass: any) => void;
 
-  // Extend AudioWorkletProcessor to include port and currentTime
-  interface AudioWorkletProcessor {
-    readonly port: MessagePort;
-    readonly currentTime: number;
+  // Browser compatibility extensions
+  interface Window {
+    webkitAudioContext?: typeof AudioContext;
+    
+    // FastLED global functions
+    audioData?: AudioData;
+    setupAudioAnalysis?: (audioElement: HTMLAudioElement) => void;
+    getAudioCapabilities?: () => any;
+    setAudioProcessor?: (type: string) => void;
+    useBestAudioProcessor?: () => void;
+    forceAudioWorklet?: () => void;
+    forceScriptProcessor?: () => void;
+    setAudioDebug?: (enabled?: boolean) => void;
+    getAudioDebugSettings?: () => any;
+    testAudioWorkletPath?: (customPath?: string | null) => Promise<any>;
+    getAudioWorkletEnvironmentInfo?: () => any;
+    getAudioBufferStats?: () => any;
+    
+    // UI Manager globals
+    uiManager?: any;
+    setUiDebug?: (enabled?: boolean) => void;
+    _pendingUiDebugMode?: boolean;
   }
 
-  // HTML Element extensions
-  interface HTMLElement {
-    text?: string; // For script elements
+  // DOM element type extensions
+  interface HTMLInputElement {
+    // Ensure proper types for number inputs
+    valueAsNumber: number;
+  }
+
+  // File input event target
+  interface HTMLInputFileEvent extends Event {
+    target: HTMLInputElement & { files: FileList };
   }
 }
 
-// Export for module usage
+// Module exports for ES modules
 export {};
