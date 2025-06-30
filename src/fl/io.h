@@ -15,7 +15,11 @@ namespace fl {
 void print(const char* str);
 
 // Print a string with newline  
+#ifndef FL_DBG_PRINTLN_DECLARED
 void println(const char* str);
+#else
+// Declaration already exists from fl/dbg.h
+#endif
 
 // Low-level input functions that provide Serial-style read functionality
 // These use the most efficient input method for each platform

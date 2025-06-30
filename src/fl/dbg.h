@@ -5,7 +5,8 @@
 
 // Forward declaration to avoid pulling in fl/io.h and causing fl/io.cpp to be compiled
 // This prevents ~5KB memory bloat for simple applications
-#ifndef FL_IO_H_INCLUDED
+#ifndef FL_DBG_PRINTLN_DECLARED
+#define FL_DBG_PRINTLN_DECLARED
 namespace fl {
     void println(const char* str);
 }
