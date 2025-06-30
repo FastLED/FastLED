@@ -122,11 +122,16 @@ function markdownToHtml(markdown) {
  */
 function createNumberField(element) {
   const controlDiv = document.createElement('div');
-  controlDiv.className = 'ui-control';
+  controlDiv.className = 'ui-control number-control inline-row';
 
   const label = document.createElement('label');
   label.textContent = element.name;
   label.htmlFor = `number-${element.id}`;
+  label.style.display = 'inline-block';
+  label.style.verticalAlign = 'middle';
+  label.style.fontWeight = '500';
+  label.style.color = '#E0E0E0';
+  label.style.marginRight = '10px';
 
   const numberInput = document.createElement('input');
   numberInput.type = 'number';
@@ -135,6 +140,10 @@ function createNumberField(element) {
   numberInput.min = element.min;
   numberInput.max = element.max;
   numberInput.step = (element.step !== undefined) ? element.step : 'any';
+  numberInput.style.display = 'inline-block';
+  numberInput.style.verticalAlign = 'middle';
+  numberInput.style.width = '60px';
+  numberInput.style.boxSizing = 'border-box';
 
   controlDiv.appendChild(label);
   controlDiv.appendChild(numberInput);

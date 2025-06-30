@@ -1242,3 +1242,69 @@ audio::-webkit-media-controls-mute-button {
     width: 22px;
     height: 22px;
 }
+
+/* Number control specific styling - block layout instead of flexbox */
+.ui-control.number-control {
+    display: block;
+    width: 100%;
+    margin: 8px 0;
+}
+
+.ui-control.number-control label {
+    display: block;
+    margin-bottom: 4px;
+    font-weight: 500;
+    color: #E0E0E0;
+    min-width: auto;
+    padding-right: 0;
+}
+
+.ui-control.number-control input[type="number"] {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+    flex: none;
+    min-width: auto;
+    max-width: none;
+}
+
+/* Ultra-wide specific number control styling */
+.ultrawide-layout .ui-control.number-control {
+    margin: 8px 0;
+}
+
+.ultrawide-layout .ui-control.number-control input[type="number"] {
+    width: 100%;
+    min-width: auto;
+    max-width: none;
+}
+
+/* Inline row number control: label and input on the same row, no flex */
+.ui-control.number-control.inline-row {
+    display: block;
+    width: 100%;
+    margin: 8px 0;
+    /* Remove flex or grid for this variant */
+}
+
+.ui-control.number-control.inline-row label,
+.ui-control.number-control.inline-row input[type="number"] {
+    display: inline-block;
+    vertical-align: middle;
+}
+
+.ui-control.number-control.inline-row label {
+    margin-right: 10px;
+    min-width: 0;
+    padding-right: 0;
+}
+
+.ui-control.number-control.inline-row input[type="number"] {
+    width: 80px;
+    min-width: 0;
+    max-width: none;
+    flex: none;
+    display: inline-block;
+    vertical-align: middle;
+    box-sizing: border-box;
+}
