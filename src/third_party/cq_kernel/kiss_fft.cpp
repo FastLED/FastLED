@@ -202,7 +202,7 @@ static void kf_bfly_generic(
     kiss_fft_cpx t;
     int Norig = st->nfft;
 
-    kiss_fft_cpx * scratch = (kiss_fft_cpx*)KISS_FFT_TMP_ALLOC(sizeof(kiss_fft_cpx)*p);
+    kiss_fft_cpx * scratch = (kiss_fft_cpx*)KISS_FFT_MALLOC(sizeof(kiss_fft_cpx)*p);
 
     for ( u=0; u<m; ++u ) {
         k=u;
@@ -220,12 +220,12 @@ static void kf_bfly_generic(
                 twidx += fstride * k;
                 if (twidx>=Norig) twidx-=Norig;
                 C_MUL(t,scratch[q] , twiddles[twidx] );
-                C_ADDTO( Fout[ k ] ,t);
+                C_ADDTO( Fout[ k ],t);
             }
             k += m;
         }
     }
-    KISS_FFT_TMP_FREE(scratch);
+    KISS_FFT_FREE(scratch);
 }
 
 static
@@ -258,9 +258,9 @@ void kf_work(
 
         switch (p) {
             case 2: kf_bfly2(Fout,fstride,st,m); break;
-            case 3: kf_bfly3(Fout,fstride,st,m); break; 
+            case 3: kf_bfly3(Fout,fstride,st,m); break;
             case 4: kf_bfly4(Fout,fstride,st,m); break;
-            case 5: kf_bfly5(Fout,fstride,st,m); break; 
+            case 5: kf_bfly5(Fout,fstride,st,m); break;
             default: kf_bfly_generic(Fout,fstride,st,m,p); break;
         }
         return;
@@ -274,10 +274,6 @@ void kf_work(
         }while(++Fout != Fout_end );
     }else{
         do{
-            // recursive call:
-            // DFT of size m*p performed by doing
-            // p instances of smaller DFTs of size m, 
-            // each one takes a decimated version of the input
             kf_work( Fout , f, fstride*p, in_stride, factors,st);
             f += fstride*in_stride;
         }while( (Fout += m) != Fout_end );
@@ -285,12 +281,12 @@ void kf_work(
 
     Fout=Fout_beg;
 
-    // recombine the p smaller DFTs 
+    // recombine the results of the shorter ffts 
     switch (p) {
         case 2: kf_bfly2(Fout,fstride,st,m); break;
-        case 3: kf_bfly3(Fout,fstride,st,m); break; 
+        case 3: kf_bfly3(Fout,fstride,st,m); break;
         case 4: kf_bfly4(Fout,fstride,st,m); break;
-        case 5: kf_bfly5(Fout,fstride,st,m); break; 
+        case 5: kf_bfly5(Fout,fstride,st,m); break;
         default: kf_bfly_generic(Fout,fstride,st,m,p); break;
     }
 }
@@ -367,12 +363,12 @@ void kiss_fft_stride(kiss_fft_cfg st,const kiss_fft_cpx *fin,kiss_fft_cpx *fout,
     if (fin == fout) {
         //NOTE: this is not really an in-place FFT algorithm.
         //It just performs an out-of-place FFT into a temp buffer
-        kiss_fft_cpx * tmpbuf = (kiss_fft_cpx*)KISS_FFT_TMP_ALLOC( sizeof(kiss_fft_cpx)*st->nfft);
+        kiss_fft_cpx * tmpbuf = (kiss_fft_cpx*)KISS_FFT_MALLOC( sizeof(kiss_fft_cpx)*st->nfft);
         kf_work(tmpbuf,fin,1,in_stride, st->factors,st);
         memcpy(fout,tmpbuf,sizeof(kiss_fft_cpx)*st->nfft);
-        KISS_FFT_TMP_FREE(tmpbuf);
+        KISS_FFT_FREE(tmpbuf);
     }else{
-        kf_work( fout, fin, 1,in_stride, st->factors,st );
+        kf_work( fout, fin, 1, in_stride, st->factors, st );
     }
 }
 
@@ -399,4 +395,4 @@ int kiss_fft_next_fast_size(int n)
         n++;
     }
     return n;
-}
+} 

@@ -156,4 +156,4 @@ void kiss_fftri(kiss_fftr_cfg st,const kiss_fft_cpx *freqdata,kiss_fft_scalar *t
 #endif
     }
     kiss_fft (st->substate, st->tmpbuf, (kiss_fft_cpx *) timedata);
-}
+} 
