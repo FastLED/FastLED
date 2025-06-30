@@ -21,25 +21,14 @@
 #include "fl/wave_simulation_real.cpp.hpp"
 #include "fl/screenmap.cpp.hpp"
 #include "fl/splat.cpp.hpp"
-#include "fx/fx_engine.cpp.hpp"
-#include "fx/time.cpp.hpp"
-#include "fx/2d/blend.cpp.hpp"
-#include "fx/2d/wave.cpp.hpp"
 #include "fl/fill.cpp.hpp"
-#include "fx/frame.cpp.hpp"
-#include "fx/detail/fx_layer.cpp.hpp"
 #include "fl/blur.cpp.hpp"
-#include "fx/video.cpp.hpp"
 #include "fl/crgb_hsv16.cpp.hpp"
 #include "fl/ui.cpp.hpp"
-#include "fx/video/video_impl.cpp.hpp"
 #include "fl/transform.cpp.hpp"
 #include "fl/noise_woryley.cpp.hpp"
 #include "fl/hsv16.cpp.hpp"
 #include "fl/xmap.cpp.hpp"
-#include "fx/video/pixel_stream.cpp.hpp"
-#include "fx/video/frame_interpolator.cpp.hpp"
-#include "fx/video/frame_tracker.cpp.hpp"
 #include "fl/bytestreammemory.cpp.hpp"
 #include "fl/leds.cpp.hpp"
 #include "fl/audio.cpp.hpp"
@@ -102,6 +91,14 @@
 
 // Third-party implementations (auto-generated, excluding FFT)
 #include "third_party/object_fled/src/OjectFLED.cpp.hpp"
+
+// SENSORS MODULE (hierarchical)
+#ifdef FASTLED_ALL_SRC
+#include "sensors/sensors_compile.hpp"
+
+// FX MODULE (hierarchical)
+#include "fx/fx_compile.hpp"
+#endif // FASTLED_ALL_SRC
 
 // SENSORS MODULE (hierarchical)
 #ifdef FASTLED_ALL_SRC
