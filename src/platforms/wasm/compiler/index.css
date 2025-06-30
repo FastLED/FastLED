@@ -152,7 +152,12 @@ body {
 
 /* Ultra-wide specific control optimizations */
 .ultrawide-layout .ui-control {
-    margin: 10px 0; /* Consistent with 20px total spacing from container gap */
+    width: 100%;
+    box-sizing: border-box;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px; /* Consistent spacing between label and input */
 }
 
 /* Special styling for controls within groups - optimized for space usage */
@@ -1064,4 +1069,176 @@ audio::-webkit-media-controls-mute-button {
 
 #fastled-description > *:last-child {
     margin-bottom: 0;
+}
+
+/* Ultra-wide specific optimizations for better space utilization */
+.ultrawide-layout .ui-control input[type="range"] {
+    width: 100%;
+    flex: 1;
+    min-width: 150px; /* Increased minimum for ultra-wide */
+    max-width: none; /* Remove any max-width constraints */
+}
+
+.ultrawide-layout .ui-control input[type="number"] {
+    width: 100%;
+    flex: 1;
+    min-width: 100px;
+    max-width: 150px; /* Reasonable max for number inputs */
+}
+
+.ultrawide-layout .ui-control select {
+    width: 100%;
+    flex: 1;
+    min-width: 120px;
+    max-width: none; /* Remove any max-width constraints */
+}
+
+.ultrawide-layout .ui-control button {
+    width: 100%;
+    flex: 1;
+    min-width: 100px;
+    max-width: none; /* Remove any max-width constraints */
+}
+
+/* Sleek Slider Widget - New approach for better UX */
+.ui-control.slider-control {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    margin: 12px 0;
+    padding: 8px 0;
+    position: relative;
+}
+
+.ui-control.slider-control .slider-label {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: #E0E0E0;
+    opacity: 0.7;
+    transition: opacity 0.2s ease;
+    text-align: center;
+    font-size: 0.9em;
+}
+
+.ui-control.slider-control .slider-label .label-text {
+    margin-right: 8px;
+}
+
+.ui-control.slider-control .slider-label .slider-value {
+    font-weight: 600;
+    color: #1E90FF;
+    min-width: 40px;
+    text-align: right;
+}
+
+.ui-control.slider-control .slider-container {
+    width: 100%;
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.ui-control.slider-control input[type="range"] {
+    width: 100%;
+    height: 6px;
+    border-radius: 3px;
+    background: #333;
+    outline: none;
+    -webkit-appearance: none;
+    appearance: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+/* Custom slider thumb styling */
+.ui-control.slider-control input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #1E90FF;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(30, 144, 255, 0.3);
+    transition: all 0.2s ease;
+}
+
+.ui-control.slider-control input[type="range"]::-moz-range-thumb {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #1E90FF;
+    cursor: pointer;
+    border: none;
+    box-shadow: 0 2px 6px rgba(30, 144, 255, 0.3);
+    transition: all 0.2s ease;
+}
+
+/* Hover and focus states */
+.ui-control.slider-control:hover .slider-label,
+.ui-control.slider-control input[type="range"]:focus + .slider-label {
+    opacity: 0.4;
+}
+
+.ui-control.slider-control input[type="range"]:hover {
+    background: #444;
+}
+
+.ui-control.slider-control input[type="range"]:hover::-webkit-slider-thumb {
+    background: #4DA6FF;
+    box-shadow: 0 3px 8px rgba(30, 144, 255, 0.4);
+    transform: scale(1.1);
+}
+
+.ui-control.slider-control input[type="range"]:hover::-moz-range-thumb {
+    background: #4DA6FF;
+    box-shadow: 0 3px 8px rgba(30, 144, 255, 0.4);
+    transform: scale(1.1);
+}
+
+/* Active state (when dragging) */
+.ui-control.slider-control input[type="range"]:active {
+    background: #555;
+}
+
+.ui-control.slider-control input[type="range"]:active::-webkit-slider-thumb {
+    background: #0066CC;
+    box-shadow: 0 4px 12px rgba(30, 144, 255, 0.5);
+    transform: scale(1.2);
+}
+
+.ui-control.slider-control input[type="range"]:active::-moz-range-thumb {
+    background: #0066CC;
+    box-shadow: 0 4px 12px rgba(30, 144, 255, 0.5);
+    transform: scale(1.2);
+}
+
+/* Ultra-wide optimizations for slider widget */
+.ultrawide-layout .ui-control.slider-control {
+    margin: 16px 0;
+    padding: 12px 0;
+}
+
+.ultrawide-layout .ui-control.slider-control .slider-label {
+    font-size: 1em;
+    margin-bottom: 12px;
+}
+
+.ultrawide-layout .ui-control.slider-control input[type="range"] {
+    height: 8px;
+}
+
+.ultrawide-layout .ui-control.slider-control input[type="range"]::-webkit-slider-thumb {
+    width: 22px;
+    height: 22px;
+}
+
+.ultrawide-layout .ui-control.slider-control input[type="range"]::-moz-range-thumb {
+    width: 22px;
+    height: 22px;
 }

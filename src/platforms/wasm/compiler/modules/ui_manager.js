@@ -165,22 +165,26 @@ function createAudioField(element) {
  */
 function createSlider(element) {
   const controlDiv = document.createElement('div');
-  controlDiv.className = 'ui-control';
+  controlDiv.className = 'ui-control slider-control';
 
-  const labelValueContainer = document.createElement('div');
-  labelValueContainer.style.display = 'flex';
-  labelValueContainer.style.justifyContent = 'space-between';
-  labelValueContainer.style.width = '100%';
+  // Create the label container with text and value
+  const labelContainer = document.createElement('div');
+  labelContainer.className = 'slider-label';
 
-  const label = document.createElement('label');
-  label.textContent = element.name;
-  label.htmlFor = `slider-${element.id}`;
+  const labelText = document.createElement('span');
+  labelText.className = 'label-text';
+  labelText.textContent = element.name;
 
   const valueDisplay = document.createElement('span');
+  valueDisplay.className = 'slider-value';
   valueDisplay.textContent = element.value;
 
-  labelValueContainer.appendChild(label);
-  labelValueContainer.appendChild(valueDisplay);
+  labelContainer.appendChild(labelText);
+  labelContainer.appendChild(valueDisplay);
+
+  // Create the slider container
+  const sliderContainer = document.createElement('div');
+  sliderContainer.className = 'slider-container';
 
   const slider = document.createElement('input');
   slider.type = 'range';
@@ -189,19 +193,21 @@ function createSlider(element) {
   slider.max = Number.parseFloat(element.max);
   slider.value = Number.parseFloat(element.value);
   slider.step = Number.parseFloat(element.step);
+  
+  // Set initial value in next frame to ensure proper initialization
   setTimeout(() => {
-    // Sets the slider value, for some reason we have to do it
-    // next frame.
     slider.value = Number.parseFloat(element.value);
     valueDisplay.textContent = slider.value;
   }, 0);
 
+  // Update value display when slider changes
   slider.addEventListener('input', () => {
     valueDisplay.textContent = slider.value;
   });
 
-  controlDiv.appendChild(labelValueContainer);
-  controlDiv.appendChild(slider);
+  sliderContainer.appendChild(slider);
+  controlDiv.appendChild(labelContainer);
+  controlDiv.appendChild(sliderContainer);
 
   return controlDiv;
 }
