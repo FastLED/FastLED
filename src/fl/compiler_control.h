@@ -73,7 +73,7 @@
 // 6/29/2025 - Differences in all src vs individual compilation was 35 to 39 seconds.
 // #define FASTLED_ALL_SRC 0
 
-#ifdef FASTLED_TESTING
+#if defined(FASTLED_TESTING)
 #define FASTLED_ALL_SRC 1
 #endif
 
@@ -81,7 +81,9 @@
 // When FASTLED_ALL_SRC is enabled, all source is compiled into a single translation unit
 // Individual compilation (FASTLED_ALL_SRC=0) is only used for release builds
 #ifndef FASTLED_ALL_SRC
-  #if defined(RELEASE) || defined(NDEBUG)
+  #if defined(FASTLED_TESTING) || defined(__EMSCRIPTEN__)
+    #define FASTLED_ALL_SRC 1  // Individual compilation for testing and Emscripten builds only
+  #elif defined(RELEASE) || defined(NDEBUG)
     #define FASTLED_ALL_SRC 0  // Individual compilation for release builds only
   #else
     #define FASTLED_ALL_SRC 1  // Unified compilation for all other builds (debug, testing, non-release)
