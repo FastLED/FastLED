@@ -76,7 +76,7 @@ static bool isspace(char c) {
 
 struct AudioBuffer {
     fl::vector<int16_t> samples;
-    uint32_t timestamp;
+    uint32_t timestamp = 0;
 };
 
 // Fast manual parsing of PCM data from a samples array string
@@ -145,6 +145,7 @@ static void parseJsonToAudioBuffers(const FLArduinoJson::JsonVariantConst &jsonV
         
         FLArduinoJson::JsonObjectConst obj = item.as<FLArduinoJson::JsonObjectConst>();
         AudioBuffer buffer;
+        buffer.timestamp = 0; // Initialize timestamp to prevent uninitialized warning
         
         // Use JSON parser to extract timestamp using proper type checking
         auto timestampVar = obj["timestamp"];

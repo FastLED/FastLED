@@ -85,13 +85,17 @@ public:
         return f.available() > 0;
     }
     size_t size() const override { 
-        return _file.size(); 
+        // Arduino's size() is not const, so we need const_cast
+        auto f = const_cast<File&>(_file);
+        return f.size(); 
     }
     size_t read(uint8_t *dst, size_t bytesToRead) override { 
         return _file.read(dst, bytesToRead); 
     }
     size_t pos() const override { 
-        return _file.position(); 
+        // Arduino's position() is not const, so we need const_cast
+        auto f = const_cast<File&>(_file);
+        return f.position(); 
     }
     const char* path() const override { 
         return _path.c_str(); 
@@ -105,7 +109,9 @@ public:
         }
     }
     bool valid() const override { 
-        return _file; 
+        // Arduino's operator bool() is not const, so we need const_cast
+        auto f = const_cast<File&>(_file);
+        return f; 
     }
 };
 #endif
