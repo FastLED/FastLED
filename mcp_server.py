@@ -18,6 +18,53 @@ This is MANDATORY for both foreground and background agents.
 you MUST run `bash lint` immediately after making changes and before indicating completion.
 This is a NON-NEGOTIABLE REQUIREMENT to ensure code quality and prevent build failures.
 
+🚨 MANDATORY COMMAND EXECUTION RULES 🚨
+
+ALL AGENTS MUST FOLLOW THESE COMMAND EXECUTION PATTERNS:
+
+### Python Code Execution:
+- ❌ NEVER run Python code directly
+- ✅ ALWAYS create/modify tmp.py with your code
+- ✅ ALWAYS run: `uv run tmp.py`
+
+### Shell Command Execution:
+- ❌ NEVER run shell commands directly
+- ✅ ALWAYS create/modify tmp.sh with your commands
+- ✅ ALWAYS run: `bash tmp.sh`
+
+### DELETE Operations - DANGER ZONE:
+- 🚨 STOP and ask for permission before ANY delete operations
+- ✅ EXCEPTION: Single files that you just created are OK to delete
+- ❌ NEVER delete multiple files without explicit permission
+- ❌ NEVER delete directories without explicit permission
+- ❌ NEVER delete system files or project files without permission
+
+### Examples:
+
+**Python Code:**
+```python
+# tmp.py
+import subprocess
+result = subprocess.run(['git', 'status'], capture_output=True, text=True)
+print(result.stdout)
+```
+Then run: `uv run tmp.py`
+
+**Shell Commands:**
+```bash
+# tmp.sh
+#!/bin/bash
+git status
+ls -la
+```
+Then run: `bash tmp.sh`
+
+**Why These Rules:**
+- Ensures all operations are reviewable and traceable
+- Prevents accidental destructive operations
+- Allows for better debugging and error handling
+- Maintains consistency across all agent operations
+
 To use this server, make sure you have the MCP library installed:
 pip install mcp
 

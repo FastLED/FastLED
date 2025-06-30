@@ -126,6 +126,64 @@ The tool follows the pattern established in `ci/wasm_test.py` and `ci/ci/scraper
 
 ## 🚨 CRITICAL REQUIREMENTS FOR ALL AGENTS (FOREGROUND & BACKGROUND) 🚨
 
+## 🚨 MANDATORY COMMAND EXECUTION RULES 🚨
+
+**ALL AGENTS MUST FOLLOW THESE COMMAND EXECUTION PATTERNS:**
+
+### Python Code Execution:
+- ❌ **NEVER run Python code directly**
+- ✅ **ALWAYS create/modify tmp.py** with your code
+- ✅ **ALWAYS run: `uv run tmp.py`**
+
+### Shell Command Execution:
+- ❌ **NEVER run shell commands directly**  
+- ✅ **ALWAYS create/modify tmp.sh** with your commands
+- ✅ **ALWAYS run: `bash tmp.sh`**
+
+### DELETE Operations - DANGER ZONE:
+- 🚨 **STOP and ask for permission** before ANY delete operations
+- ✅ **EXCEPTION:** Single files that you just created are OK to delete
+- ❌ **NEVER delete multiple files** without explicit permission
+- ❌ **NEVER delete directories** without explicit permission
+- ❌ **NEVER delete system files or project files** without permission
+
+### Command Execution Examples:
+
+**Python Code Pattern:**
+```python
+# tmp.py
+import subprocess
+result = subprocess.run(['git', 'status'], capture_output=True, text=True)
+print(result.stdout)
+```
+Then run: `uv run tmp.py`
+
+**Shell Commands Pattern:**
+```bash
+# tmp.sh
+#!/bin/bash
+git status
+ls -la
+uv run ci/ci-compile.py uno --examples Blink
+```
+Then run: `bash tmp.sh`
+
+**Why These Rules Exist:**
+- **Ensures all operations are reviewable and traceable**
+- **Prevents accidental destructive operations**
+- **Allows for better debugging and error handling**
+- **Maintains consistency across all agent operations**
+- **Provides audit trail for all system modifications**
+
+**These command execution rules apply to ALL operations including but not limited to:**
+- File system operations (creating, modifying, deleting files)
+- Git operations (commits, pushes, branch changes)
+- Package installations and updates
+- Build and compilation commands
+- Test execution and validation
+- System configuration changes
+
+
 ### MANDATORY MEMORY REFRESH BEFORE COMPLETION
 **🚨 ALL AGENTS MUST REFRESH THEIR MEMORY BEFORE CONCLUDING WORK:**
 
