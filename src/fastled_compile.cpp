@@ -25,9 +25,7 @@
 #include "fx/time.cpp.hpp"
 #include "fx/2d/blend.cpp.hpp"
 #include "fx/2d/wave.cpp.hpp"
-#include "sensors/button.cpp.hpp"
 #include "fl/fill.cpp.hpp"
-#include "sensors/digital_pin.cpp.hpp"
 #include "fx/frame.cpp.hpp"
 #include "fx/detail/fx_layer.cpp.hpp"
 #include "fl/blur.cpp.hpp"
@@ -104,6 +102,11 @@
 
 // Third-party implementations (auto-generated, excluding FFT)
 #include "third_party/object_fled/src/OjectFLED.cpp.hpp"
+
+// SENSORS MODULE (hierarchical)
+#ifdef FASTLED_ALL_SRC
+#include "sensors/sensors_compile.hpp"
+#endif // FASTLED_ALL_SRC
 
 
 
