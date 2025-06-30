@@ -26,6 +26,38 @@
 /* eslint-disable import/prefer-default-export */
 
 /**
+ * @fileoverview UI Layout Placement Manager for FastLED
+ * Handles responsive layout calculations and CSS application
+ */
+
+/**
+ * @typedef {Object} LayoutConfig
+ * @property {number} containerPadding
+ * @property {number} minCanvasSize
+ * @property {number} maxCanvasSize
+ * @property {number} preferredUIColumnWidth
+ * @property {number} maxUIColumnWidth
+ * @property {number} minUIColumnWidth
+ * @property {number} maxUIColumns
+ * @property {number} canvasExpansionRatio
+ * @property {number} horizontalGap
+ * @property {number} verticalGap
+ */
+
+/**
+ * @typedef {Object} LayoutResult
+ * @property {number} viewportWidth
+ * @property {number} availableWidth
+ * @property {number} canvasSize
+ * @property {number} uiColumns
+ * @property {number} uiColumnWidth
+ * @property {number} uiTotalWidth
+ * @property {number} contentWidth
+ * @property {string} layoutMode
+ * @property {boolean} canExpand
+ */
+
+/**
  * Advanced UI Layout Placement Manager
  *
  * Intelligently manages UI layout with dynamic column allocation:
@@ -57,7 +89,7 @@ export class UILayoutPlacementManager {
 
     /**
      * Layout configuration parameters
-     * @type {Object}
+     * @type {LayoutConfig}
      */
     this.config = {
       // Minimum dimensions
@@ -94,7 +126,7 @@ export class UILayoutPlacementManager {
     /** @type {string} Current layout mode */
     this.currentLayout = this.detectLayout();
 
-    /** @type {Object} Current layout calculation data */
+    /** @type {LayoutResult|null} */
     this.layoutData = this.calculateLayoutData();
 
     // Bind event handlers
@@ -126,7 +158,7 @@ export class UILayoutPlacementManager {
 
   /**
    * Calculate optimal layout dimensions and column allocation
-   * @returns {Object} Layout data with dimensions and configuration
+   * @returns {LayoutResult} Layout data with dimensions and configuration
    */
   calculateLayoutData() {
     const viewportWidth = globalThis.innerWidth;
@@ -174,8 +206,8 @@ export class UILayoutPlacementManager {
 
   /**
    * Calculate mobile layout (stacked, single column)
-   * @param {Object} layoutData - Base layout data to modify
-   * @returns {Object} Updated layout data for mobile
+   * @param {LayoutResult} layoutData - Base layout data to modify
+   * @returns {LayoutResult} Updated layout data for mobile
    */
   calculateMobileLayout(layoutData) {
     layoutData.uiColumns = 1;
@@ -189,8 +221,8 @@ export class UILayoutPlacementManager {
 
   /**
    * Calculate tablet layout (side-by-side, single UI column)
-   * @param {Object} layoutData - Base layout data to modify
-   * @returns {Object} Updated layout data for tablet
+   * @param {LayoutResult} layoutData - Base layout data to modify
+   * @returns {LayoutResult} Updated layout data for tablet
    */
   calculateTabletLayout(layoutData) {
     const requiredWidth = this.config.minCanvasSize + this.config.minUIColumnWidth +
@@ -220,8 +252,8 @@ export class UILayoutPlacementManager {
 
   /**
    * Calculate desktop layout (multi-column UI possible)
-   * @param {Object} layoutData - Base layout data to modify
-   * @returns {Object} Updated layout data for desktop
+   * @param {LayoutResult} layoutData - Base layout data to modify
+   * @returns {LayoutResult} Updated layout data for desktop
    */
   calculateDesktopLayout(layoutData) {
     const baseRequiredWidth = this.config.minCanvasSize + this.config.minUIColumnWidth +
@@ -262,8 +294,8 @@ export class UILayoutPlacementManager {
 
   /**
    * Calculate ultrawide layout (maximum columns and expansion)
-   * @param {Object} layoutData - Base layout data to modify
-   * @returns {Object} Updated layout data for ultrawide displays
+   * @param {LayoutResult} layoutData - Base layout data to modify
+   * @returns {LayoutResult} Updated layout data for ultrawide displays
    */
   calculateUltrawideLayout(layoutData) {
     const result = this.calculateDesktopLayout(layoutData);

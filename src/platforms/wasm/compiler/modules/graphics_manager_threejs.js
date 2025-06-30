@@ -497,7 +497,8 @@ export class GraphicsManagerThreeJS {
     }
 
     // Create template geometries for reuse
-    let circleGeometry, planeGeometry;
+    let circleGeometry;
+    let planeGeometry;
     if (!isDenseScreenMap) {
       circleGeometry = new THREE.CircleGeometry(1.0, this.SEGMENTS);
     } else {

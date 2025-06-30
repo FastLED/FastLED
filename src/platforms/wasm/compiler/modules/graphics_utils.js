@@ -3,8 +3,35 @@
 /* eslint-disable no-restricted-syntax */
 
 /**
+ * @fileoverview Graphics utility functions for FastLED
+ * Provides screen mapping and coordinate calculation functions
+ */
+
+/**
+ * @typedef {Object} StripData
+ * @property {number} id
+ * @property {number[]} leds
+ * @property {Object} map
+ * @property {number[]} map.x
+ * @property {number[]} map.y
+ * @property {number} [diameter]
+ */
+
+/**
+ * @typedef {Object} ScreenMapData
+ * @property {{ [key: string]: StripData }} strips
+ * @property {number[]} [min]
+ * @property {number[]} [max]
+ */
+
+/**
+ * @typedef {Object} FrameData
+ * @property {ScreenMapData} screenMap
+ */
+
+/**
  * Determines if the LED layout represents a dense grid
- * @param {Object} frameData - The frame data containing screen mapping information
+ * @param {FrameData} frameData - The frame data containing screen mapping information
  * @returns {boolean} - True if the layout is a dense grid (pixel density close to 1)
  */
 export function isDenseGrid(frameData) {
@@ -13,6 +40,7 @@ export function isDenseGrid(frameData) {
   // Check if all pixel densities are undefined
   let allPixelDensitiesUndefined = true;
   for (const stripId in screenMap.strips) {
+    if (!Object.prototype.hasOwnProperty.call(screenMap.strips, stripId)) continue;
     const strip = screenMap.strips[stripId];
     allPixelDensitiesUndefined = allPixelDensitiesUndefined && (strip.diameter === undefined);
     if (!allPixelDensitiesUndefined) {
@@ -45,7 +73,7 @@ export function isDenseGrid(frameData) {
 
 /**
  * Creates position calculator functions for mapping LED coordinates to screen space
- * @param {Object} frameData - The frame data containing screen mapping information
+ * @param {FrameData} frameData - The frame data containing screen mapping information
  * @param {number} screenWidth - The width of the screen in pixels
  * @param {number} screenHeight - The height of the screen in pixels
  * @returns {Object} - Object containing calcXPosition and calcYPosition functions
@@ -65,3 +93,77 @@ export function makePositionCalculators(frameData, screenWidth, screenHeight) {
     },
   };
 }
+
+/**
+ * Check if all pixel densities are undefined in the screen map
+ * @param {FrameData} frameData - Frame data containing screen map
+ * @returns {boolean} True if all pixel densities are undefined
+ */
+function allPixelDensitiesUndefined(frameData) {
+  const { screenMap } = frameData;
+  if (!screenMap || !screenMap.strips) {
+    return true;
+  }
+  
+  let allPixelDensitiesUndefined = true;
+  for (const stripId in screenMap.strips) {
+    if (!Object.prototype.hasOwnProperty.call(screenMap.strips, stripId)) continue;
+    const strip = screenMap.strips[stripId];
+    allPixelDensitiesUndefined = allPixelDensitiesUndefined && (strip.diameter === undefined);
+    if (!allPixelDensitiesUndefined) {
+      break;
+    }
+  }
+  return allPixelDensitiesUndefined;
+}
+
+/**
+ * Check if screen map is a dense screen map (has valid position data)
+ * @param {FrameData} frameData - Frame data containing screen map
+ * @returns {boolean} True if screen map is dense
+ */
+function isDenseScreenMap(frameData) {
+  if (!frameData || typeof frameData !== 'object') {
+    return false;
+  }
+  
+  for (const strip of frameData) {
+    if (strip && strip.map && strip.map.x && strip.map.y) {
+      return true;
+    }
+  }
+  return false;
+}
+
+/**
+ * Create screen bounds calculation functions
+ * @param {FrameData} frameData - Frame data containing screen map
+ * @returns {Object} Object containing coordinate calculation functions
+ */
+function createScreenBoundsCalculation(frameData) {
+  const { screenMap } = frameData;
+  if (!screenMap || !screenMap.strips) {
+    throw new Error('Invalid frameData: missing screenMap or strips');
+  }
+
+  return {
+    /**
+     * Calculate X position  
+     * @param {number} x - X coordinate
+     * @returns {number} Calculated X position
+     */
+    calcXPosition: (x) => {
+      return x; // Placeholder implementation
+    },
+    /**
+     * Calculate Y position
+     * @param {number} y - Y coordinate  
+     * @returns {number} Calculated Y position
+     */
+    calcYPosition: (y) => {
+      return y; // Placeholder implementation
+    }
+  };
+}
+
+export { allPixelDensitiesUndefined, isDenseScreenMap, createScreenBoundsCalculation };

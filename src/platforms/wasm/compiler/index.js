@@ -423,6 +423,7 @@ function FastLED_onStripUpdate(jsonData) {
     const absMax = [Number.NEGATIVE_INFINITY, Number.NEGATIVE_INFINITY];
     let setAtLeastOnce = false;
     for (const stripId in screenMap.strips) {
+      if (!Object.prototype.hasOwnProperty.call(screenMap.strips, stripId)) continue;
       console.log('Processing strip ID', stripId);
       const id = Number.parseInt(stripId, 10);
       const stripData = screenMap.strips[id];

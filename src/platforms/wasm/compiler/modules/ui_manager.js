@@ -926,6 +926,7 @@ export class JsonUiManager {
     let hasChanges = false;
 
     for (const id in this.uiElements) {
+      if (!Object.prototype.hasOwnProperty.call(this.uiElements, id)) continue;
       const element = this.uiElements[id];
       let currentValue;
       if (element.type === 'checkbox') {

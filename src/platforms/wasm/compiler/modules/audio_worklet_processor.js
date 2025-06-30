@@ -1,107 +1,109 @@
 /**
- * AudioWorklet Processor for FastLED Audio Processing
- * Runs on the audio thread for better performance and consistency
+ * @fileoverview FastLED Audio Worklet Processor
+ * Processes audio input for LED visualization
+ */
+
+/**
+ * @extends AudioWorkletProcessor
  */
 class FastLEDAudioProcessor extends AudioWorkletProcessor {
   constructor() {
     super();
-    this.sampleBuffer = new Int16Array(512); // Match AUDIO_SAMPLE_BLOCK_SIZE
-    this.isProcessing = false;
-    this.debugCounter = 0;
-
-    console.log('🎵 FastLEDAudioProcessor: 🚀 Constructor called, worklet initialized');
-
-    // Listen for messages from main thread
-    console.log('🎵 FastLEDAudioProcessor: Setting up message handler');
+    this.bufferSize = 512;
+    this.sampleRate = 44100;
+    this.initialized = false;
+    
+    /**
+     * @param {MessageEvent} event - Message event from main thread
+     */
     this.port.onmessage = (event) => {
       const { type, data } = event.data;
-
+      
       switch (type) {
-        case 'start':
-          this.isProcessing = true;
-          console.log('🎵 FastLEDAudioProcessor: ▶️ Processing started');
-          break;
-        case 'stop':
-          this.isProcessing = false;
-          console.log('🎵 FastLEDAudioProcessor: ⏸️ Processing stopped');
+        case 'init':
+          this.sampleRate = data.sampleRate || 44100;
+          this.bufferSize = data.bufferSize || 512;
+          this.initialized = true;
           break;
         case 'config':
-          // Future: handle configuration changes
-          console.log('🎵 FastLEDAudioProcessor: Config message received');
+          // Handle configuration updates
+          if (data.bufferSize) this.bufferSize = data.bufferSize;
+          if (data.sampleRate) this.sampleRate = data.sampleRate;
           break;
         default:
-          console.log(`🎵 FastLEDAudioProcessor: Unknown message type: ${type}`);
+          console.log('Unknown message type:', type);
       }
     };
   }
 
+  /**
+   * Process audio data
+   * @param {Float32Array[][]} inputs - Input audio data
+   * @param {Float32Array[][]} outputs - Output audio data  
+   * @param {Record<string, Float32Array>} parameters - Audio parameters
+   * @returns {boolean} - Whether to continue processing
+   */
   process(inputs, outputs, parameters) {
-    // Debug logging (every 500 calls for more visibility)
-    this.debugCounter++;
-    if (this.debugCounter % 500 === 0) {
-      console.log(
-        `🎵 FastLEDAudioProcessor: 🔄 process() called ${this.debugCounter} times, isProcessing: ${this.isProcessing}, inputs.length: ${inputs.length}`,
-      );
+    // Process input audio
+    const input = inputs[0];
+    if (!input || input.length === 0) {
+      return true; // Continue processing even without input
     }
 
-    // Only process if we have input audio and processing is enabled
-    if (!this.isProcessing || inputs.length === 0 || inputs[0].length === 0) {
-      if (this.debugCounter % 1000 === 0 && this.debugCounter > 0) {
-        console.log(
-          `🎵 FastLEDAudioProcessor: ⏭️ Skipping processing - isProcessing: ${this.isProcessing}, inputs: ${inputs.length}`,
-        );
-      }
+    const inputChannel = input[0];
+    if (!inputChannel || inputChannel.length === 0) {
       return true;
     }
 
-    const input = inputs[0];
-    const inputChannel = input[0]; // Left channel
-
-    if (inputChannel && inputChannel.length === 512) {
-      // Convert float32 audio data to int16 format
-      for (let i = 0; i < inputChannel.length; i++) {
-        // Convert from float32 (-1.0 to 1.0) to int16 range (-32768 to 32767)
-        this.sampleBuffer[i] = Math.floor(inputChannel[i] * 32767);
-      }
-
-      // Get high-resolution timestamp from AudioContext (fixed: use this.currentTime)
-      const timestamp = Math.floor(this.currentTime * 1000);
-
-      // Debug: Log sample data more frequently
-      if (this.debugCounter % 500 === 0) {
-        const avgSample = this.sampleBuffer.slice(0, 10).reduce((a, b) => a + Math.abs(b), 0) / 10;
-        console.log(
-          `🎵 FastLEDAudioProcessor: 📤 Sending audio data, timestamp: ${timestamp}ms, avg sample magnitude: ${
-            avgSample.toFixed(1)
-          }`,
-        );
-      }
-
-      // Send audio data to main thread
-      this.port.postMessage({
-        type: 'audioData',
-        samples: this.sampleBuffer.slice(), // Copy the buffer
-        timestamp: timestamp,
-      });
-    } else if (this.debugCounter % 500 === 0) {
-      console.log(
-        `🎵 FastLEDAudioProcessor: ❌ Invalid input channel - length: ${
-          inputChannel ? inputChannel.length : 'null'
-        }`,
-      );
+    // Calculate RMS and other audio features
+    let sum = 0;
+    for (let i = 0; i < inputChannel.length; i++) {
+      sum += inputChannel[i] * inputChannel[i];
+    }
+    const rms = Math.sqrt(sum / inputChannel.length);
+    
+    // Find peak
+    let peak = 0;
+    for (let i = 0; i < inputChannel.length; i++) {
+      const abs = Math.abs(inputChannel[i]);
+      if (abs > peak) peak = abs;
     }
 
-    // Copy input to output for passthrough
+    // Create audio data packet
+    if (this.initialized && (rms > 0.001 || peak > 0.001)) {
+      const timestamp = Math.floor(this.currentTime * 1000);
+      
+      // Create sample data - convert to Int16 for efficiency
+      const samples = new Int16Array(inputChannel.length);
+      for (let i = 0; i < inputChannel.length; i++) {
+        samples[i] = Math.round(inputChannel[i] * 32767);
+      }
+      
+      // Send processed audio data to main thread
+      this.port.postMessage({
+        type: 'audioData',
+        data: {
+          timestamp,
+          samples: samples,
+          rms,
+          peak,
+          sampleRate: this.sampleRate,
+          bufferSize: inputChannel.length
+        }
+      });
+    }
+
+    // Pass through to output (optional)
     if (outputs.length > 0 && outputs[0].length > 0) {
-      const output = outputs[0];
-      for (let channel = 0; channel < Math.min(input.length, output.length); channel++) {
-        if (input[channel] && output[channel]) {
-          output[channel].set(input[channel]);
+      const output = outputs[0][0];
+      if (output && inputChannel) {
+        for (let i = 0; i < Math.min(output.length, inputChannel.length); i++) {
+          output[i] = inputChannel[i];
         }
       }
     }
 
-    return true; // Keep processor alive
+    return true; // Continue processing
   }
 }
 
