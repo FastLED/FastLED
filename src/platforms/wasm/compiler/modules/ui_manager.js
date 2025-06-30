@@ -694,14 +694,26 @@ export class JsonUiManager {
     /** @type {string} HTML element ID for the UI controls container */
     this.uiControlsId = uiControlsId;
 
+    /** @type {string} HTML element ID for the second UI controls container (ultra-wide mode) */
+    this.uiControls2Id = 'ui-controls-2';
+
     /** @type {Map<string, HTMLElement>} Track created UI groups */
     this.groups = new Map();
+
+    /** @type {Map<string, HTMLElement>} Track created UI groups in second container */
+    this.groups2 = new Map();
 
     /** @type {HTMLElement|null} Container for ungrouped UI items */
     this.ungroupedContainer = null;
 
+    /** @type {HTMLElement|null} Container for ungrouped UI items in second container */
+    this.ungroupedContainer2 = null;
+
     /** @type {boolean} Enable debug logging for UI operations */
     this.debugMode = false;
+
+    /** @type {number} Counter to track UI element distribution in ultra-wide mode */
+    this.elementDistributionIndex = 0;
 
     // Initialize the UI Layout Placement Manager
     /** @type {UILayoutPlacementManager} Responsive layout management */
@@ -792,12 +804,21 @@ export class JsonUiManager {
   /**
    * Creates a collapsible group container for organizing UI elements
    * @param {string} groupName - Name of the group (displayed as header)
+   * @param {HTMLElement} [targetContainer] - Specific container to use (optional)
    * @returns {HTMLElement} The group container element
    */
-  createGroupContainer(groupName) {
+  createGroupContainer(groupName, targetContainer = null) {
+    // First check if group already exists in any container
     if (this.groups.has(groupName)) {
       return this.groups.get(groupName);
     }
+    if (this.groups2.has(groupName)) {
+      return this.groups2.get(groupName);
+    }
+
+    // Determine which container to use
+    const container = targetContainer || this.getTargetContainer();
+    const groupsMap = this.getGroupsForContainer(container);
 
     const groupDiv = document.createElement('div');
     groupDiv.className = 'ui-group';
@@ -805,6 +826,7 @@ export class JsonUiManager {
 
     // Add data attributes for layout optimization
     groupDiv.setAttribute('data-group-name', groupName);
+    groupDiv.setAttribute('data-container', container.id);
 
     // Analyze group name to determine if it should be wide or full-width
     const isWideGroup = this.shouldBeWideGroup(groupName);
@@ -854,9 +876,19 @@ export class JsonUiManager {
       name: groupName,
       isWide: isWideGroup,
       isFullWidth: isFullWidthGroup,
+      parentContainer: container,
     };
 
-    this.groups.set(groupName, groupInfo);
+    // Store in appropriate groups map
+    groupsMap.set(groupName, groupInfo);
+
+    // Append to the target container
+    container.appendChild(groupDiv);
+
+    if (this.debugMode) {
+      console.log(`🎵 Created group "${groupName}" in container ${container.id}`);
+    }
+
     return groupInfo;
   }
 
@@ -910,14 +942,28 @@ export class JsonUiManager {
       uiControlsContainer.innerHTML = '';
     }
 
+    const uiControls2Container = document.getElementById(this.uiControls2Id);
+    if (uiControls2Container) {
+      uiControls2Container.innerHTML = '';
+    }
+
     // Remove any tooltips that were added to document.body
     const tooltips = document.querySelectorAll('.ui-help-tooltip');
     tooltips.forEach((tooltip) => tooltip.remove());
 
     this.groups.clear();
+    this.groups2.clear();
     this.ungroupedContainer = null;
+    this.ungroupedContainer2 = null;
     this.uiElements = {};
     this.previousUiState = {};
+    
+    // Reset element distribution counter for ultra-wide mode
+    this.elementDistributionIndex = 0;
+
+    if (this.debugMode) {
+      console.log('🎵 Cleared all UI elements and reset distribution');
+    }
   }
 
   // Returns a Json object if there are changes, otherwise null.
@@ -1014,8 +1060,6 @@ export class JsonUiManager {
 
   addUiElements(jsonData) {
     console.log('UI elements added:', jsonData);
-    const uiControlsContainer = document.getElementById(this.uiControlsId) ||
-      createUiControlsContainer();
 
     // Clear existing UI elements
     this.clearUiElements();
@@ -1047,13 +1091,13 @@ export class JsonUiManager {
     // Optimize layout based on current screen size and element count
     this.optimizeLayoutForElements(groupedElements, ungroupedElements);
 
-    // Second pass: create groups and add elements
+    // Second pass: create groups and add elements with container distribution
     // Add ungrouped elements first
     if (ungroupedElements.length > 0) {
-      const ungroupedContainer = this.createUngroupedContainer();
-      uiControlsContainer.appendChild(ungroupedContainer);
-
       ungroupedElements.forEach((data) => {
+        const targetContainer = this.getTargetContainer();
+        const ungroupedContainer = this.getUngroupedContainer(targetContainer);
+        
         const control = this.createControlElement(data);
         if (control) {
           foundUi = true;
@@ -1063,12 +1107,11 @@ export class JsonUiManager {
       });
     }
 
-    // Add grouped elements with optimized ordering
+    // Add grouped elements with optimized ordering and distribution
     const sortedGroups = this.sortGroupsForOptimalLayout(groupedElements);
 
     for (const [groupName, elements] of sortedGroups) {
       const groupInfo = this.createGroupContainer(groupName);
-      uiControlsContainer.appendChild(groupInfo.container);
 
       elements.forEach((data) => {
         const control = this.createControlElement(data);
@@ -1081,13 +1124,30 @@ export class JsonUiManager {
     }
 
     if (foundUi) {
-      console.log('UI elements added, showing UI controls container');
-      uiControlsContainer.classList.add('active');
+      console.log('UI elements added, showing UI controls containers');
+      
+      // Show main container
+      const uiControlsContainer = document.getElementById(this.uiControlsId);
+      if (uiControlsContainer) {
+        uiControlsContainer.classList.add('active');
+      }
+
+      // Show secondary container if it has content
+      const uiControls2Container = document.getElementById(this.uiControls2Id);
+      if (uiControls2Container && uiControls2Container.children.length > 0) {
+        uiControls2Container.classList.add('active');
+      }
 
       // Trigger layout optimization after UI is visible
       setTimeout(() => {
         this.optimizeCurrentLayout();
       }, 100);
+
+      if (this.debugMode) {
+        const main1Count = uiControlsContainer ? uiControlsContainer.children.length : 0;
+        const main2Count = uiControls2Container ? uiControls2Container.children.length : 0;
+        console.log(`🎵 UI Distribution: Container 1: ${main1Count} elements, Container 2: ${main2Count} elements`);
+      }
     }
   }
 
@@ -1200,18 +1260,48 @@ export class JsonUiManager {
   }
 
   /**
-   * Balance heights across multiple columns by reordering elements
+   * Balance column heights in grid layouts
    */
   balanceColumnHeights() {
+    const layoutInfo = this.layoutManager.getLayoutInfo();
+
     const uiControlsContainer = document.getElementById(this.uiControlsId);
-    if (!uiControlsContainer) return;
+    const uiControls2Container = document.getElementById(this.uiControls2Id);
 
-    // This could be enhanced with more sophisticated column balancing
-    // For now, CSS Grid handles most of the heavy lifting
-    const groups = uiControlsContainer.querySelectorAll('.ui-group');
+    // Handle ultra-wide mode with two separate containers
+    if (layoutInfo.mode === 'ultrawide' && uiControls2Container && uiControls2Container.children.length > 0) {
+      // Balance between two containers
+      const container1Groups = uiControlsContainer.querySelectorAll('.ui-group');
+      const container2Groups = uiControls2Container.querySelectorAll('.ui-group');
 
-    if (this.debugMode && groups.length > 0) {
-      console.log(`🎵 UI Column balancing: ${groups.length} groups distributed`);
+      let height1 = 0;
+      let height2 = 0;
+
+      container1Groups.forEach((group) => {
+        height1 += group.offsetHeight;
+      });
+
+      container2Groups.forEach((group) => {
+        height2 += group.offsetHeight;
+      });
+
+      if (this.debugMode) {
+        console.log(`🎵 Grid Layout Heights - UI Container 1: ${height1}px, UI Container 2: ${height2}px`);
+        console.log(`🎵 Distribution: Container 1 has ${container1Groups.length} groups, Container 2 has ${container2Groups.length} groups`);
+      }
+
+      // In grid layout, CSS Grid handles positioning, so we just report statistics
+      const heightDiff = Math.abs(height1 - height2);
+      if (heightDiff > 200 && this.debugMode) {
+        console.log(`🎵 Height imbalance detected: ${heightDiff}px difference (handled by CSS Grid)`);
+      }
+    } else if (this.debugMode) {
+      // Single container layouts
+      const groups = uiControlsContainer.querySelectorAll('.ui-group');
+      
+      if (groups.length > 0) {
+        console.log(`🎵 Grid Layout: ${groups.length} groups in single column layout`);
+      }
     }
   }
 
@@ -1360,6 +1450,83 @@ export class JsonUiManager {
     }
 
     globalThis.removeEventListener('layoutChanged', this.onAdvancedLayoutChange);
+  }
+
+  /**
+   * Get the appropriate UI container based on current layout and element distribution
+   * @returns {HTMLElement} The container where the next UI element should be placed
+   */
+  getTargetContainer() {
+    const layoutInfo = this.layoutManager.getLayoutInfo();
+    
+    if (layoutInfo.mode === 'ultrawide') {
+      // In ultra-wide mode, alternate between containers for better distribution
+      const useSecondContainer = this.elementDistributionIndex % 2 === 1;
+      this.elementDistributionIndex++;
+      
+      if (useSecondContainer) {
+        const container2 = document.getElementById(this.uiControls2Id);
+        if (container2) {
+          return container2;
+        }
+      }
+    }
+    
+    // Default to main container for all other layouts
+    return document.getElementById(this.uiControlsId);
+  }
+
+  /**
+   * Get the appropriate groups map based on the target container
+   * @param {HTMLElement} container - The target container
+   * @returns {Map<string, HTMLElement>} The groups map for the container
+   */
+  getGroupsForContainer(container) {
+    if (container && container.id === this.uiControls2Id) {
+      return this.groups2;
+    }
+    return this.groups;
+  }
+
+  /**
+   * Get the ungrouped container for the specified UI container
+   * @param {HTMLElement} container - The target container
+   * @returns {HTMLElement|null} The ungrouped container
+   */
+  getUngroupedContainer(container) {
+    if (container && container.id === this.uiControls2Id) {
+      if (!this.ungroupedContainer2) {
+        this.ungroupedContainer2 = this.createUngroupedContainer(container, 'ungrouped-container-2');
+      }
+      return this.ungroupedContainer2;
+    }
+    
+    if (!this.ungroupedContainer) {
+      this.ungroupedContainer = this.createUngroupedContainer(
+        document.getElementById(this.uiControlsId), 
+        'ungrouped-container'
+      );
+    }
+    return this.ungroupedContainer;
+  }
+
+  /**
+   * Create an ungrouped container for the specified parent
+   * @param {HTMLElement} parent - The parent container
+   * @param {string} id - The ID for the ungrouped container
+   * @returns {HTMLElement} The created ungrouped container
+   */
+  createUngroupedContainer(parent, id) {
+    if (!parent) return null;
+    
+    let container = document.getElementById(id);
+    if (!container) {
+      container = document.createElement('div');
+      container.id = id;
+      container.className = 'ui-group ungrouped';
+      parent.appendChild(container);
+    }
+    return container;
   }
 }
 

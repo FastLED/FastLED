@@ -378,37 +378,40 @@ export class UILayoutPlacementManager {
    */
   applyLayout() {
     const mainContainer = document.getElementById('main-container');
-    const topRow = document.getElementById('top-row');
+    const contentGrid = document.getElementById('content-grid');
     const canvasContainer = document.getElementById('canvas-container');
     const uiControls = document.getElementById('ui-controls');
+    const uiControls2 = document.getElementById('ui-controls-2');
     const canvas = document.getElementById('myCanvas');
 
-    if (!mainContainer || !topRow || !canvasContainer || !uiControls) {
+    if (!mainContainer || !contentGrid || !canvasContainer || !uiControls) {
       console.warn('Layout containers not found, cannot apply layout');
       return;
     }
 
     // Remove existing layout classes
-    [mainContainer, topRow, canvasContainer, uiControls].forEach((el) => {
+    [mainContainer, contentGrid, canvasContainer, uiControls].forEach((el) => {
       el.classList.remove('mobile-layout', 'tablet-layout', 'desktop-layout', 'ultrawide-layout');
     });
 
     // Apply new layout classes
     const layoutClass = `${this.currentLayout}-layout`;
-    [mainContainer, topRow, canvasContainer, uiControls].forEach((el) => {
+    [mainContainer, contentGrid, canvasContainer, uiControls].forEach((el) => {
       el.classList.add(layoutClass);
     });
 
+    if (uiControls2) {
+      uiControls2.classList.remove('mobile-layout', 'tablet-layout', 'desktop-layout', 'ultrawide-layout');
+      uiControls2.classList.add(layoutClass);
+    }
+
     // Apply layout-specific styles
-    this.applyContainerStyles(mainContainer, topRow, canvasContainer, uiControls);
+    this.applyContainerStyles(mainContainer, contentGrid, canvasContainer, uiControls, uiControls2);
 
     // Apply canvas sizing
     if (canvas) {
       this.applyCanvasStyles(canvas);
     }
-
-    // Apply UI column layout
-    this.applyUIColumnLayout(uiControls);
 
     // Trigger custom event for other components
     globalThis.dispatchEvent(
@@ -420,39 +423,98 @@ export class UILayoutPlacementManager {
       }),
     );
 
-    console.log(`Applied ${this.currentLayout} layout:`, this.layoutData);
+    console.log(`Applied ${this.currentLayout} layout: ${this.getGridDescription()}`);
+  }
+
+  /**
+   * Get description of current grid layout
+   */
+  getGridDescription() {
+    switch (this.currentLayout) {
+      case 'mobile':
+        return '1×N grid (portrait)';
+      case 'tablet':
+      case 'desktop':
+        return '2×N grid (landscape)';
+      case 'ultrawide':
+        return '3×N grid (ultra-wide)';
+      default:
+        return 'unknown grid';
+    }
   }
 
   /**
    * Apply styles to main container elements
    */
-  applyContainerStyles(mainContainer, topRow, canvasContainer, uiControls) {
-    const isStacked = this.currentLayout === 'mobile';
+  applyContainerStyles(mainContainer, contentGrid, canvasContainer, uiControls, uiControls2) {
+    const isUltrawide = this.currentLayout === 'ultrawide';
+    const isLandscape = this.currentLayout === 'tablet' || this.currentLayout === 'desktop';
+    const isPortrait = this.currentLayout === 'mobile';
 
     // Main container
     mainContainer.style.maxWidth = `${
       Math.min(this.layoutData.availableWidth + this.config.containerPadding * 2, 2000)
     }px`;
 
-    // Top row
-    topRow.style.flexDirection = isStacked ? 'column' : 'row';
-    topRow.style.alignItems = isStacked ? 'center' : 'flex-start';
-    topRow.style.gap = isStacked
-      ? `${this.config.verticalGap}px`
-      : `${this.config.horizontalGap}px`;
-    topRow.style.justifyContent = 'center';
+    // Content grid - implements 1×N, 2×N, 3×N layout
+    contentGrid.style.display = 'grid';
+    contentGrid.style.width = '100%';
+    contentGrid.style.gap = `${this.config.verticalGap}px ${this.config.horizontalGap}px`;
+    contentGrid.style.justifyContent = 'center';
+    contentGrid.style.alignItems = 'start';
+
+    if (isPortrait) {
+      // 1×N grid (portrait)
+      contentGrid.style.gridTemplateColumns = '1fr';
+      contentGrid.style.gridTemplateRows = 'auto auto';
+      contentGrid.style.gridTemplateAreas = '"canvas" "ui"';
+      
+      // Hide second UI container
+      if (uiControls2) {
+        uiControls2.style.display = 'none';
+      }
+      
+    } else if (isLandscape) {
+      // 2×N grid (landscape)
+      contentGrid.style.gridTemplateColumns = `${this.layoutData.canvasSize}px ${this.layoutData.uiTotalWidth}px`;
+      contentGrid.style.gridTemplateRows = 'auto';
+      contentGrid.style.gridTemplateAreas = '"canvas ui"';
+      
+      // Hide second UI container
+      if (uiControls2) {
+        uiControls2.style.display = 'none';
+      }
+      
+    } else if (isUltrawide) {
+      // 3×N grid (ultra-wide)
+      const uiColumnWidth = Math.floor(this.layoutData.uiTotalWidth / 2);
+      contentGrid.style.gridTemplateColumns = `${this.layoutData.canvasSize}px ${uiColumnWidth}px ${uiColumnWidth}px`;
+      contentGrid.style.gridTemplateRows = 'auto';
+      contentGrid.style.gridTemplateAreas = '"canvas ui ui2"';
+      
+      // Show and configure second UI container
+      if (uiControls2) {
+        uiControls2.style.display = 'flex';
+        uiControls2.style.flexDirection = 'column';
+        uiControls2.style.gap = `${this.config.verticalGap}px`;
+        uiControls2.style.alignItems = 'center';
+        uiControls2.style.gridArea = 'ui2';
+      }
+    }
 
     // Canvas container
-    canvasContainer.style.order = '1';
-    canvasContainer.style.flex = '0 0 auto';
+    canvasContainer.style.gridArea = 'canvas';
+    canvasContainer.style.justifySelf = 'center';
 
     // UI controls
-    uiControls.style.order = '2';
-    uiControls.style.flex = '0 0 auto';
-    uiControls.style.marginTop = isStacked ? `${this.config.verticalGap}px` : '0';
-    uiControls.style.width = `${this.layoutData.uiTotalWidth}px`;
-    uiControls.style.alignSelf = isStacked ? 'center' : 'flex-start';
-    uiControls.style.height = 'fit-content';
+    uiControls.style.gridArea = 'ui';
+    uiControls.style.display = 'flex';
+    uiControls.style.flexDirection = 'column';
+    uiControls.style.gap = `${this.config.verticalGap}px`;
+    uiControls.style.alignItems = 'center';
+    uiControls.style.width = '100%';
+
+    console.log(`Applied grid layout: ${this.getGridDescription()}`);
   }
 
   /**
@@ -489,39 +551,6 @@ export class UILayoutPlacementManager {
     canvas.style.imageRendering = 'pixelated';
 
     console.log(`Canvas sized to ${displayWidth}x${displayHeight}px (aspect ratio: ${aspectRatio.toFixed(2)}, expanded: ${this.layoutData.canExpand})`);
-  }
-
-  /**
-   * Apply multi-column layout to UI controls
-   */
-  applyUIColumnLayout(uiControls) {
-    const { uiColumns, uiColumnWidth } = this.layoutData;
-
-    if (uiColumns > 1) {
-      // Multi-column layout
-      uiControls.style.display = 'grid';
-      uiControls.style.gridTemplateColumns = `repeat(${uiColumns}, ${uiColumnWidth}px)`;
-      uiControls.style.gridGap = `${this.config.verticalGap}px ${this.config.horizontalGap / 2}px`;
-      uiControls.style.alignItems = 'start';
-      uiControls.style.justifyContent = 'center';
-
-      // Add CSS custom properties for child elements
-      uiControls.style.setProperty('--ui-columns', uiColumns);
-      uiControls.style.setProperty('--ui-column-width', `${uiColumnWidth}px`);
-
-      console.log(`UI arranged in ${uiColumns} columns of ${uiColumnWidth}px each`);
-    } else {
-      // Single column layout
-      uiControls.style.display = 'flex';
-      uiControls.style.flexDirection = 'column';
-      uiControls.style.gridTemplateColumns = 'none';
-      uiControls.style.gridGap = 'unset';
-      uiControls.style.alignItems = 'center';
-      uiControls.style.gap = `${this.config.verticalGap}px`;
-
-      uiControls.style.removeProperty('--ui-columns');
-      uiControls.style.removeProperty('--ui-column-width');
-    }
   }
 
   /**

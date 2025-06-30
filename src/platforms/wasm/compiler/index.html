@@ -15,16 +15,17 @@
 </head>
 
 <body>
+    <!-- Row 1: Title (always full width) -->
     <h1>FastLED</h1>
+    
+    <!-- Row 2: Description (always full width) -->
     <div class="studio-link">
         <a href="https://ledmapper.com" target="_blank">FastLED Video Mapper</a>
     </div>
-
-
-
-
+    
+    <!-- Row 3: Responsive Grid (1×N, 2×N, 3×N) -->
     <div id="main-container">
-        <div id="top-row">
+        <div id="content-grid">
             <div id="canvas-container">
                 <canvas id="myCanvas" width="16" height="16"></canvas>
                 <div id="canvas-label">stdout</div>
@@ -41,9 +42,11 @@
                         <div class="gear-dropdown-item" data-value="gfx-bloom">gfx - bloom</div>
                     </div>
                 </div>
-            </div>        
+            </div>
             <div id="ui-controls"></div>
+            <div id="ui-controls-2" style="display: none;"></div>
         </div>
+        
         <div id="container"></div>
         <div class="popup-overlay" id="popup-overlay"></div>
         <div class="popup" id="output-popup">
