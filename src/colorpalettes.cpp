@@ -3,8 +3,8 @@
 
 #include "fl/compiler_control.h"
 
-#ifdef FASTLED_ALL_SRC
-// No implementation when building all-source
-#else
+// When FASTLED_ALL_SRC=1, this file is completely empty to avoid duplicate symbols
+// The implementation is included through fastled_compile.cpp hierarchical structure
+#if !defined(FASTLED_ALL_SRC) || FASTLED_ALL_SRC == 0
 #include "colorpalettes.cpp.hpp"
 #endif
