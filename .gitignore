@@ -59,3 +59,7 @@ CMakeCache.txt
 .eslintcache
 
 tmp.*
+
+.ccache/
+
+.pio_cache

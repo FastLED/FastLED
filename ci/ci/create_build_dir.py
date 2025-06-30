@@ -313,9 +313,114 @@ def create_build_dir(
         cmd_list.append(f'--project-option=lib_deps={",".join(extra_packages)}')
     if no_install_deps:
         cmd_list.append("--no-install-dependencies")
+
+    # Add CCACHE configuration script
+    ccache_script = builddir / "ccache_config.py"
+    if not ccache_script.exists():
+        locked_print(
+            f"[Thread {thread_id}] Creating CCACHE configuration script at {ccache_script}"
+        )
+        with open(ccache_script, "w") as f:
+            f.write(
+                '''"""Configure CCACHE for PlatformIO builds."""
+
+import os
+import platform
+import subprocess
+from pathlib import Path
+
+Import("env")
+
+def is_ccache_available():
+    """Check if ccache is available in the system."""
+    try:
+        subprocess.run(["ccache", "--version"], capture_output=True, check=True)
+        return True
+    except (subprocess.CalledProcessError, FileNotFoundError):
+        return False
+
+def get_ccache_path():
+    """Get the full path to ccache executable."""
+    if platform.system() == "Windows":
+        # On Windows, look in chocolatey's bin directory
+        ccache_paths = [
+            "C:\\ProgramData\\chocolatey\\bin\\ccache.exe",
+            os.path.expanduser("~\\scoop\\shims\\ccache.exe")
+        ]
+        for path in ccache_paths:
+            if os.path.exists(path):
+                return path
+    else:
+        # On Unix-like systems, use which to find ccache
+        try:
+            return subprocess.check_output(["which", "ccache"]).decode().strip()
+        except subprocess.CalledProcessError:
+            pass
+    return None
+
+def configure_ccache(env):
+    """Configure CCACHE for the build environment."""
+    if not is_ccache_available():
+        print("CCACHE is not available. Skipping CCACHE configuration.")
+        return
+
+    ccache_path = get_ccache_path()
+    if not ccache_path:
+        print("Could not find CCACHE executable. Skipping CCACHE configuration.")
+        return
+
+    print(f"Found CCACHE at: {ccache_path}")
+
+    # Set up CCACHE environment variables if not already set
+    if "CCACHE_DIR" not in os.environ:
+        ccache_dir = os.path.join(env.get("PROJECT_DIR", os.getcwd()), ".ccache")
+        os.environ["CCACHE_DIR"] = ccache_dir
+        Path(ccache_dir).mkdir(parents=True, exist_ok=True)
+
+    # Configure CCACHE for this build
+    os.environ["CCACHE_BASEDIR"] = env.get("PROJECT_DIR", os.getcwd())
+    os.environ["CCACHE_COMPRESS"] = "true"
+    os.environ["CCACHE_COMPRESSLEVEL"] = "6"
+    os.environ["CCACHE_MAXSIZE"] = "400M"
+
+    # Wrap compiler commands with ccache
+    original_cc = env.get("CC", "gcc")
+    original_cxx = env.get("CXX", "g++")
+
+    # Don't wrap if already wrapped
+    if "ccache" not in original_cc:
+        env.Replace(
+            CC=f"{ccache_path} {original_cc}",
+            CXX=f"{ccache_path} {original_cxx}",
+        )
+        print(f"Wrapped CC: {env.get('CC')}")
+        print(f"Wrapped CXX: {env.get('CXX')}")
+
+    # Show CCACHE stats
+    subprocess.run([ccache_path, "--show-stats"], check=False)
+
+configure_ccache(env)'''
+            )
+
+    # Get absolute paths for scripts
+    project_root = Path.cwd()
+    ci_flags_script = (project_root / "ci" / "ci-flags.py").resolve().as_posix()
+    ccache_script = (builddir / "ccache_config.py").resolve().as_posix()
+
+    # Create a list of scripts with pre: prefix
+    script_list = [f"pre:{ci_flags_script}", f"pre:{ccache_script}"]
+
+    # Add any additional scripts
     if extra_scripts:
-        p = Path(extra_scripts)
-        cmd_list.append(f"--project-option=extra_scripts={p.resolve()}")
+        # Convert to absolute path and use Unix-style separators
+        extra_scripts_path = str(Path(extra_scripts).resolve().as_posix())
+        if not extra_scripts_path.startswith("pre:"):
+            extra_scripts_path = f"pre:{extra_scripts_path}"
+        script_list.append(extra_scripts_path)
+
+    # Add the scripts as a list
+    cmd_list.append(f"--project-option=extra_scripts=[{','.join(script_list)}]")
+
     cmd_str = subprocess.list2cmdline(cmd_list)
     locked_print(f"\n\nRunning command:\n  {cmd_str}\n")
     result = subprocess.run(

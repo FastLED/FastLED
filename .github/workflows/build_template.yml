@@ -51,6 +51,36 @@ jobs:
         with:
           python-version-file: ".python-version"
 
+      - name: Install CCACHE
+        run: |
+          if [ "$RUNNER_OS" == "Linux" ]; then
+            sudo apt-get update && sudo apt-get install -y ccache
+          elif [ "$RUNNER_OS" == "macOS" ]; then
+            brew install ccache
+          elif [ "$RUNNER_OS" == "Windows" ]; then
+            choco install ccache
+          fi
+        shell: bash
+
+      - name: Setup CCACHE
+        run: |
+          echo "CCACHE_BASEDIR=$GITHUB_WORKSPACE" >> $GITHUB_ENV
+          echo "CCACHE_DIR=$GITHUB_WORKSPACE/.ccache" >> $GITHUB_ENV
+          echo "CCACHE_COMPRESS=true" >> $GITHUB_ENV
+          echo "CCACHE_COMPRESSLEVEL=6" >> $GITHUB_ENV
+          echo "CCACHE_MAXSIZE=400M" >> $GITHUB_ENV
+          ccache --version
+          ccache --show-stats
+          ccache --zero-stats
+        shell: bash
+
+      - name: Cache CCACHE directory
+        uses: actions/cache@v4
+        with:
+          path: .ccache
+          key: ${{ runner.os }}-ccache-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-ccache-
 
       - name: Install Platform
         if: inputs.platform != ''
