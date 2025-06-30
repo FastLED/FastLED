@@ -132,6 +132,7 @@ export class UILayoutPlacementManager {
     // Bind event handlers
     this.handleLayoutChange = this.handleLayoutChange.bind(this);
     this.handleResize = this.handleResize.bind(this);
+    this.forceLayoutUpdate = this.forceLayoutUpdate.bind(this);
 
     // Listen for breakpoint changes
     Object.values(this.breakpoints).forEach((mq) => {
@@ -141,8 +142,20 @@ export class UILayoutPlacementManager {
     // Listen for window resize for fine-grained adjustments
     globalThis.addEventListener('resize', this.handleResize);
 
+    // Add visibility change listener to re-apply layout when page becomes visible
+    globalThis.addEventListener('visibilitychange', () => {
+      if (!document.hidden) {
+        this.forceLayoutUpdate();
+      }
+    });
+
     // Apply initial layout
     this.applyLayout();
+
+    // Force layout update after a brief delay to handle any timing issues
+    setTimeout(() => {
+      this.forceLayoutUpdate();
+    }, 100);
   }
 
   /**
@@ -345,16 +358,29 @@ export class UILayoutPlacementManager {
   }
 
   /**
-   * Handle window resize for fine-grained adjustments
+   * Handle window resize for fine-grained adjustments and layout mode changes
    */
   handleResize() {
     // Debounce resize events
     clearTimeout(this.resizeTimeout);
     this.resizeTimeout = setTimeout(() => {
-      const newLayoutData = this.calculateLayoutData();
+      // First, check if layout mode has changed (most important)
+      const newLayout = this.detectLayout();
+      const layoutModeChanged = newLayout !== this.currentLayout;
+      
+      if (layoutModeChanged) {
+        console.log(`Layout mode change detected on resize: ${this.currentLayout} → ${newLayout}`);
+        this.currentLayout = newLayout;
+        this.layoutData = this.calculateLayoutData();
+        this.applyLayout();
+        return; // Layout mode change trumps fine-grained adjustments
+      }
 
-      // Only update if significant changes
-      if (this.hasSignificantLayoutChange(newLayoutData)) {
+      // If layout mode hasn't changed, check for fine-grained adjustments
+      const newLayoutData = this.calculateLayoutData();
+      
+      // Always update if there are any changes (remove the "significant" threshold for mode-specific updates)
+      if (this.hasAnyLayoutChange(newLayoutData)) {
         this.layoutData = newLayoutData;
         this.applyLayout();
       }
@@ -362,15 +388,24 @@ export class UILayoutPlacementManager {
   }
 
   /**
-   * Check if layout change is significant enough to warrant update
+   * Check if there are any layout changes worth updating
    */
-  hasSignificantLayoutChange(newLayoutData) {
-    const threshold = 50; // pixels
+  hasAnyLayoutChange(newLayoutData) {
+    const threshold = 10; // Much smaller threshold for responsive updates
     return (
       Math.abs(newLayoutData.canvasSize - this.layoutData.canvasSize) > threshold ||
       newLayoutData.uiColumns !== this.layoutData.uiColumns ||
-      Math.abs(newLayoutData.uiColumnWidth - this.layoutData.uiColumnWidth) > threshold
+      Math.abs(newLayoutData.uiColumnWidth - this.layoutData.uiColumnWidth) > threshold ||
+      Math.abs(newLayoutData.uiTotalWidth - this.layoutData.uiTotalWidth) > threshold ||
+      newLayoutData.viewportWidth !== this.layoutData.viewportWidth
     );
+  }
+
+  /**
+   * Check if layout change is significant enough to warrant update (legacy method, kept for compatibility)
+   */
+  hasSignificantLayoutChange(newLayoutData) {
+    return this.hasAnyLayoutChange(newLayoutData);
   }
 
   /**
@@ -567,9 +602,19 @@ export class UILayoutPlacementManager {
   }
 
   /**
-   * Force a layout recalculation and update
+   * Force a layout recalculation and update (bypasses debouncing)
    */
   forceLayoutUpdate() {
+    console.log('Force layout update triggered');
+    
+    // First check if layout mode has changed
+    const newLayout = this.detectLayout();
+    if (newLayout !== this.currentLayout) {
+      console.log(`Force update detected layout change: ${this.currentLayout} → ${newLayout}`);
+      this.currentLayout = newLayout;
+    }
+    
+    // Recalculate layout data and apply immediately
     this.layoutData = this.calculateLayoutData();
     this.applyLayout();
   }
@@ -582,6 +627,7 @@ export class UILayoutPlacementManager {
       mq.removeEventListener('change', this.handleLayoutChange);
     });
     globalThis.removeEventListener('resize', this.handleResize);
+    globalThis.removeEventListener('visibilitychange', this.forceLayoutUpdate);
     clearTimeout(this.resizeTimeout);
   }
 }

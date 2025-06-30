@@ -257,6 +257,13 @@ h1 {
     justify-content: center;
     align-items: start;
     transition: grid-template-columns 0.3s ease, grid-template-areas 0.3s ease;
+    
+    /* Default: 1×N grid (mobile-first) */
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto;
+    grid-template-areas: 
+        "canvas"
+        "ui";
 }
 
 /* Layout-specific styles - Enhanced responsive grid system */
@@ -377,46 +384,33 @@ h1 {
     width: 100%;
 }
 
-/* Responsive canvas sizing */
-@media (max-width: 767px) {
-    #myCanvas {
-        width: min(calc(100vw - 80px), 400px);
-        height: min(calc(100vw - 80px), 400px);
-    }
-}
+/* Responsive CSS Media Queries - Provide fallback when JavaScript isn't available */
 
-/* Legacy media query support (fallback if JavaScript fails) */
-@media (min-width: 1200px) {
-    #main-container:not(.mobile-layout) {
-        max-width: 1400px;
-    }
-    
-    #content-grid:not(.mobile-layout) {
+/* Tablet and Desktop: 2×N grid (768px - 1599px) */
+@media (min-width: 768px) and (max-width: 1599px) {
+    #content-grid {
+        grid-template-columns: minmax(320px, 1fr) minmax(280px, 400px);
+        grid-template-rows: auto;
         grid-template-areas: "canvas ui";
         gap: 20px 40px;
     }
     
-    .ui-group:not(.mobile-layout .ui-group) {
-        margin: 10px 0;
+    #ui-controls-2 {
+        display: none !important;
     }
     
-    #myCanvas:not(.mobile-layout #myCanvas) {
-        max-width: 640px;
-        max-height: 640px;
-        width: auto;
-        height: auto;
+    #main-container {
+        max-width: 1400px;
     }
 }
 
-/* Ultra-wide specific enhancements */
+/* Ultra-wide: 3×N grid (1600px+) */
 @media (min-width: 1600px) {
-    #main-container {
-        max-width: 2000px;
-    }
-    
     #content-grid {
-        grid-template-areas: "canvas ui ui2" !important;
-        gap: 20px 50px !important;
+        grid-template-columns: minmax(320px, 800px) minmax(280px, 400px) minmax(280px, 400px);
+        grid-template-rows: auto;
+        grid-template-areas: "canvas ui ui2";
+        gap: 20px 50px;
     }
     
     #ui-controls-2 {
@@ -425,6 +419,32 @@ h1 {
         gap: 20px;
         align-items: center;
         grid-area: ui2;
+        width: 100%;
+    }
+    
+    #main-container {
+        max-width: 2000px;
+    }
+}
+
+/* Mobile-specific overrides */
+@media (max-width: 767px) {
+    #content-grid {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto auto;
+        grid-template-areas: 
+            "canvas"
+            "ui";
+        gap: 20px;
+    }
+    
+    #ui-controls-2 {
+        display: none !important;
+    }
+    
+    #main-container {
+        max-width: calc(100vw - 40px);
+        padding: 0 20px;
     }
 }
 
