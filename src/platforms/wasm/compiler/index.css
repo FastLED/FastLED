@@ -1362,3 +1362,12 @@ audio::-webkit-media-controls-mute-button {
     min-width: 40px;
     text-align: right;
 }
+
+.ui-control.slider-control .slider-label-overlay {
+    transition: opacity 0.2s ease;
+}
+
+.ui-control.slider-control:hover .slider-label-overlay,
+.ui-control.slider-control input[type="range"]:hover + .slider-label-overlay {
+    opacity: 0.3;
+}
