@@ -3,7 +3,9 @@
 
 #ifdef FASTLED_ALL_SRC
 
-// ARM PLATFORM IMPLEMENTATIONS
+#if defined(__IMXRT1062__)
+// ARM PLATFORM IMPLEMENTATIONS (Teensy 4.x only)
 #include "platforms/arm/k20/clockless_objectfled.cpp.hpp"
+#endif
 
 #endif // FASTLED_ALL_SRC
