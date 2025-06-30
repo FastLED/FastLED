@@ -10,7 +10,6 @@
 // Platform implementations (auto-generated)
 
 // Third-party implementations (auto-generated, excluding FFT)
-#include "third_party/object_fled/src/OjectFLED.cpp.hpp"
 
 // SENSORS MODULE (hierarchical)
 #ifdef FASTLED_ALL_SRC
@@ -24,6 +23,9 @@
 
 // PLATFORMS MODULE (hierarchical)
 #include "platforms/platforms_compile.hpp"
+
+// THIRD PARTY MODULE (hierarchical)
+#include "third_party/third_party_compile.hpp"
 #endif // FASTLED_ALL_SRC
 
 // SENSORS MODULE (hierarchical)
