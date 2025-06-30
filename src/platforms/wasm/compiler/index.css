@@ -337,12 +337,13 @@ h1 {
     margin: 15px 0;
 }
 
-.mobile-layout #myCanvas {
+/* Remove conflicting mobile canvas styles - let JavaScript handle sizing */
+/* .mobile-layout #myCanvas {
     width: 100%;
     height: auto;
     max-width: 400px;
     max-height: 400px;
-}
+} */
 
 /* Tablet layout styles - 2×N grid */
 .tablet-layout#main-container {

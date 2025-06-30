@@ -229,9 +229,18 @@ export class UILayoutPlacementManager {
     layoutData.uiColumns = 1;
     layoutData.uiColumnWidth = Math.min(layoutData.availableWidth, this.config.maxUIColumnWidth);
     layoutData.uiTotalWidth = layoutData.uiColumnWidth;
-    layoutData.canvasSize = Math.min(layoutData.availableWidth, this.config.minCanvasSize);
+    
+    // In mobile mode, allow canvas to scale properly within available space
+    // Use a reasonable percentage of available width, but respect min/max constraints
+    const maxCanvasSize = Math.min(
+      layoutData.availableWidth * 0.8, // Use up to 80% of available width
+      this.config.maxCanvasSize,
+    );
+    
+    layoutData.canvasSize = Math.max(maxCanvasSize, this.config.minCanvasSize);
     layoutData.contentWidth = layoutData.canvasSize;
-    layoutData.canExpand = false;
+    layoutData.canExpand = layoutData.canvasSize > this.config.minCanvasSize;
+    
     return layoutData;
   }
 
