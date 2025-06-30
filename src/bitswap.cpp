@@ -1,5 +1,10 @@
-/// @file bitswap.cpp
-/// Functions for doing a rotation of bits/bytes used by parallel output
+// Auto-generated wrapper for all-source build
+// Generated automatically by root src conversion script
 
-/// Disables pragma messages and warnings
-#define FASTLED_INTERNAL
+#include "fl/compiler_control.h"
+
+#ifdef FASTLED_ALL_SRC
+// No implementation when building all-source
+#else
+#include "bitswap.cpp.hpp"
+#endif

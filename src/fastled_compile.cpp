@@ -26,6 +26,9 @@
 
 // THIRD PARTY MODULE (hierarchical)
 #include "third_party/third_party_compile.hpp"
+
+// ROOT SRC MODULE (hierarchical)
+#include "src_compile.hpp"
 #endif // FASTLED_ALL_SRC
 
 // SENSORS MODULE (hierarchical)
