@@ -214,15 +214,33 @@ export class GraphicsManagerThreeJS {
    */
   _setupCanvasAndDimensions(frameData) {
     const RESOLUTION_BOOST = 2; // 2x resolution for higher quality
-    const MAX_WIDTH = 640; // Max pixels width on browser
 
     const canvas = document.getElementById(this.canvasId);
     const { screenMap } = frameData;
     const screenMapWidth = screenMap.absMax[0] - screenMap.absMin[0];
     const screenMapHeight = screenMap.absMax[1] - screenMap.absMin[1];
 
-    // Always set width to 640px and scale height proportionally
-    const targetWidth = MAX_WIDTH;
+    // Get display width from current canvas style (set by layout manager)
+    // Fall back to responsive calculation if no layout manager sizing is available
+    let targetWidth = 640; // Default fallback
+    if (canvas.style.width) {
+      targetWidth = parseInt(canvas.style.width, 10);
+    } else {
+      // Get responsive size from layout manager if available
+      if (globalThis.layoutManager) {
+        const layoutData = globalThis.layoutManager.getLayoutInfo();
+        targetWidth = layoutData.data.canvasSize;
+        console.log(`Using layout manager canvas size: ${targetWidth}px`);
+      } else {
+        // Try to get from CSS computed style as last resort
+        const computedStyle = getComputedStyle(canvas);
+        if (computedStyle.width && computedStyle.width !== 'auto') {
+          targetWidth = parseInt(computedStyle.width, 10);
+        }
+        console.log(`Using computed canvas size: ${targetWidth}px`);
+      }
+    }
+    
     const aspectRatio = screenMapWidth / screenMapHeight;
     const targetHeight = Math.round(targetWidth / aspectRatio);
 
@@ -234,11 +252,13 @@ export class GraphicsManagerThreeJS {
     canvas.width = targetWidth * RESOLUTION_BOOST;
     canvas.height = targetHeight * RESOLUTION_BOOST;
 
-    // But keep display size the same
+    // Keep display size consistent with layout manager
     canvas.style.width = `${targetWidth}px`;
     canvas.style.height = `${targetHeight}px`;
     canvas.style.maxWidth = `${targetWidth}px`;
     canvas.style.maxHeight = `${targetHeight}px`;
+
+    console.log(`ThreeJS canvas dimensions: ${targetWidth}x${targetHeight}px display, ${this.SCREEN_WIDTH}x${this.SCREEN_HEIGHT}px internal`);
 
     // Store the bounds for orthographic camera calculations
     this.screenBounds = {

@@ -24,6 +24,7 @@ import { JsonUiManager } from './modules/ui_manager.js';
 import { GraphicsManager } from './modules/graphics_manager.js';
 import { GraphicsManagerThreeJS } from './modules/graphics_manager_threejs.js';
 import { isDenseGrid } from './modules/graphics_utils.js';
+import { UILayoutPlacementManager } from './modules/ui_layout_placement_manager.js';
 
 /** URL parameters for runtime configuration */
 const urlParams = new URLSearchParams(window.location.search);
@@ -73,6 +74,9 @@ let uiManager;
 
 /** Flag indicating if UI canvas settings have changed */
 let uiCanvasChanged = false;
+
+/** Layout manager instance for responsive canvas sizing */
+let layoutManager = null;
 
 /** Three.js modules container for 3D rendering */
 let threeJsModules = {};
@@ -473,15 +477,42 @@ function FastLED_onStripUpdate(jsonData) {
   canvas.width = width;
   canvas.height = height;
 
-  // Set display size (CSS pixels) to 640px width while maintaining aspect ratio
-  const displayWidth = 640;
+  // Initialize layout manager if not already done
+  if (!layoutManager) {
+    layoutManager = new UILayoutPlacementManager();
+    
+    // Expose layout manager globally for graphics managers to access
+    globalThis.layoutManager = layoutManager;
+    
+    // Listen for layout changes to update canvas size
+    globalThis.addEventListener('layoutChanged', (e) => {
+      const canvas = document.getElementById(canvasId);
+      if (canvas && canvas.width && canvas.height) {
+        const layoutData = e.detail.data;
+        const displayWidth = layoutData.canvasSize;
+        const displayHeight = Math.round((canvas.height / canvas.width) * displayWidth);
+        
+        canvas.style.width = `${displayWidth}px`;
+        canvas.style.height = `${displayHeight}px`;
+        
+        console.log(`Canvas resized for ${e.detail.layout} layout: ${displayWidth}x${displayHeight}px`);
+        
+        // Mark graphics manager for reset to handle canvas size change
+        uiCanvasChanged = true;
+      }
+    });
+  }
+
+  // Get responsive canvas size from layout manager
+  const layoutData = layoutManager.getLayoutInfo();
+  const displayWidth = layoutData.canvasSize;
   const displayHeight = Math.round((height / width) * displayWidth);
 
-  // Set CSS display size while maintaining aspect ratio
+  // Set CSS display size using responsive dimensions
   canvas.style.width = `${displayWidth}px`;
   canvas.style.height = `${displayHeight}px`;
   console.log(
-    `Canvas size set to ${width}x${height}, displayed at ${canvas.style.width}x${canvas.style.height} `,
+    `Canvas size set to ${width}x${height}, displayed at ${canvas.style.width}x${canvas.style.height} (${layoutData.layoutMode} layout)`,
   );
   // unconditionally delete the graphicsManager
   if (graphicsManager) {
