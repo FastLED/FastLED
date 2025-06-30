@@ -8,6 +8,7 @@ cd "$(dirname "$0")"
 rm -rf .venv
 rm -rf .build
 rm -rf .pio
+rm -rf .pio_cache
 rm -rf ci/tmp
 rm -rf tests/.build
 
