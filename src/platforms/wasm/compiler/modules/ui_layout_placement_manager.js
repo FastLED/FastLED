@@ -461,16 +461,34 @@ export class UILayoutPlacementManager {
   applyCanvasStyles(canvas) {
     const { canvasSize } = this.layoutData;
 
-    // Set canvas display size
-    canvas.style.width = `${canvasSize}px`;
-    canvas.style.height = `${canvasSize}px`;
-    canvas.style.maxWidth = `${canvasSize}px`;
-    canvas.style.maxHeight = `${canvasSize}px`;
+    // Get the canvas's internal dimensions to determine aspect ratio
+    const canvasWidth = canvas.width || 1;
+    const canvasHeight = canvas.height || 1;
+    const aspectRatio = canvasWidth / canvasHeight;
+
+    // Calculate display dimensions that maintain aspect ratio
+    let displayWidth, displayHeight;
+    
+    if (aspectRatio >= 1) {
+      // Landscape or square: constrain by width
+      displayWidth = canvasSize;
+      displayHeight = Math.round(canvasSize / aspectRatio);
+    } else {
+      // Portrait: constrain by height  
+      displayHeight = canvasSize;
+      displayWidth = Math.round(canvasSize * aspectRatio);
+    }
+
+    // Set canvas display size while maintaining aspect ratio
+    canvas.style.width = `${displayWidth}px`;
+    canvas.style.height = `${displayHeight}px`;
+    canvas.style.maxWidth = `${displayWidth}px`;
+    canvas.style.maxHeight = `${displayHeight}px`;
 
     // Maintain pixel-perfect rendering
     canvas.style.imageRendering = 'pixelated';
 
-    console.log(`Canvas sized to ${canvasSize}px (expanded: ${this.layoutData.canExpand})`);
+    console.log(`Canvas sized to ${displayWidth}x${displayHeight}px (aspect ratio: ${aspectRatio.toFixed(2)}, expanded: ${this.layoutData.canExpand})`);
   }
 
   /**
