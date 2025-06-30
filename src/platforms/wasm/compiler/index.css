@@ -41,10 +41,10 @@ body {
     display: grid !important;
 }
 
-/* UI Group Styling - Enhanced for multi-column */
+/* UI Group Styling - Enhanced for multi-column and space utilization */
 .ui-group {
     width: 100%;
-    margin: 15px 0;
+    margin: 10px 0;
     background-color: #1A1A1A;
     border: 1px solid #333;
     border-radius: 8px;
@@ -56,13 +56,20 @@ body {
     grid-column: span 1;
     align-self: start;
     
-    /* Prevent groups from being too narrow */
+    /* Allow groups to expand to full width of their container */
     min-width: 280px;
+    max-width: none; /* Remove max-width constraint */
 }
 
-/* In multi-column layouts, reduce vertical margins */
-#ui-controls[style*="grid-template-columns"] .ui-group {
+/* In multi-column layouts, reduce vertical margins and optimize spacing */
+#ui-controls[style*="grid-template-columns"] .ui-group,
+.ultrawide-layout .ui-group {
     margin: 10px 0;
+}
+
+/* Ultra-wide specific optimizations */
+.ultrawide-layout .ui-group {
+    margin: 10px 0; /* Consistent with 20px total spacing */
 }
 
 /* Special handling for groups that might need more space */
@@ -144,14 +151,24 @@ body {
     /* Grid layout support */
     grid-column: span 1;
     align-self: start;
+    
+    /* Allow controls to expand and use available space */
+    min-width: 0; /* Allow shrinking */
+    box-sizing: border-box;
 }
 
-/* Special styling for controls within groups */
+/* Ultra-wide specific control optimizations */
+.ultrawide-layout .ui-control {
+    margin: 10px 0; /* Consistent with 20px total spacing from container gap */
+}
+
+/* Special styling for controls within groups - optimized for space usage */
 .ui-group .ui-control {
     margin: 8px 0;
     padding: 8px 0;
     border-bottom: 1px solid rgba(255, 255, 255, 0.05);
     grid-column: unset; /* Reset grid behavior inside groups */
+    width: 100%; /* Ensure full width within groups */
 }
 
 .ui-group .ui-control:last-child {
@@ -161,6 +178,7 @@ body {
 /* Help controls should span only one column */
 .ui-help-container {
     grid-column: span 1;
+    width: 100%;
 }
 
 /* Wide controls that might benefit from spanning multiple columns */
@@ -172,15 +190,47 @@ body {
     grid-column: 1 / -1;
 }
 
+/* Enhanced input styling for better space utilization */
 .ui-control input[type="range"] {
     width: 100%;
     margin: 0;
+    flex: 1; /* Allow range inputs to expand */
+    min-width: 100px; /* Minimum usable width */
+}
+
+.ui-control input[type="number"] {
+    flex: 1;
+    min-width: 80px;
+    max-width: 120px;
+}
+
+.ui-control select {
+    flex: 1;
+    min-width: 100px;
+}
+
+.ui-control button {
+    flex: 1;
+    min-width: 80px;
 }
 
 .ui-control label {
     min-width: 120px;
     margin-right: 10px;
     flex-shrink: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Audio controls optimizations */
+.audio-control {
+    width: 100%;
+}
+
+.audio-upload-button,
+.audio-player {
+    width: 100%;
 }
 
 h1 {
@@ -389,10 +439,15 @@ h1 {
 /* Tablet and Desktop: 2×N grid (768px - 1599px) */
 @media (min-width: 768px) and (max-width: 1599px) {
     #content-grid {
-        grid-template-columns: minmax(320px, 1fr) minmax(280px, 400px);
+        grid-template-columns: minmax(320px, 800px) minmax(280px, 1fr);
         grid-template-rows: auto;
         grid-template-areas: "canvas ui";
         gap: 20px 40px;
+    }
+    
+    #ui-controls {
+        gap: 20px;
+        align-items: stretch;
     }
     
     #ui-controls-2 {
@@ -407,17 +462,23 @@ h1 {
 /* Ultra-wide: 3×N grid (1600px+) */
 @media (min-width: 1600px) {
     #content-grid {
-        grid-template-columns: minmax(320px, 800px) minmax(280px, 400px) minmax(280px, 400px);
+        grid-template-columns: minmax(320px, 800px) minmax(280px, 1fr) minmax(280px, 1fr);
         grid-template-rows: auto;
         grid-template-areas: "canvas ui ui2";
         gap: 20px 50px;
+    }
+    
+    #ui-controls,
+    #ui-controls-2 {
+        gap: 20px;
+        align-items: stretch;
     }
     
     #ui-controls-2 {
         display: flex !important;
         flex-direction: column;
         gap: 20px;
-        align-items: center;
+        align-items: stretch;
         grid-area: ui2;
         width: 100%;
     }
@@ -436,6 +497,11 @@ h1 {
             "canvas"
             "ui";
         gap: 20px;
+    }
+    
+    #ui-controls {
+        gap: 20px;
+        align-items: stretch;
     }
     
     #ui-controls-2 {

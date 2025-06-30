@@ -163,6 +163,9 @@ export class UILayoutPlacementManager {
    * @returns {string} Layout mode ('mobile', 'tablet', 'desktop', or 'ultrawide')
    */
   detectLayout() {
+    const viewportWidth = globalThis.innerWidth;
+    console.log(`🔍 Layout detection: viewport=${viewportWidth}px, mobile=${this.breakpoints.mobile.matches}, tablet=${this.breakpoints.tablet.matches}, desktop=${this.breakpoints.desktop.matches}, ultrawide=${this.breakpoints.ultrawide.matches}`);
+    
     if (this.breakpoints.mobile.matches) return 'mobile';
     if (this.breakpoints.tablet.matches) return 'tablet';
     if (this.breakpoints.ultrawide.matches) return 'ultrawide';
@@ -306,42 +309,38 @@ export class UILayoutPlacementManager {
   }
 
   /**
-   * Calculate ultrawide layout (maximum columns and expansion)
+   * Calculate ultrawide layout (3-column grid with flexible UI columns)
    * @param {LayoutResult} layoutData - Base layout data to modify
-   * @returns {LayoutResult} Updated layout data for ultrawide displays
+   * @returns {LayoutResult} Updated layout data for ultrawide
    */
   calculateUltrawideLayout(layoutData) {
-    const result = this.calculateDesktopLayout(layoutData);
-
-    // On ultrawide screens, allow more aggressive expansion
-    const remainingWidth = layoutData.availableWidth - this.config.horizontalGap;
-    const maxExpandedCanvas = Math.min(
-      remainingWidth * 0.7, // Allow canvas to take up to 70% on ultrawide
+    // For ultra-wide, we use a flexible grid approach
+    // Canvas gets a reasonable size, UI columns use flexible sizing
+    
+    const remainingWidth = layoutData.availableWidth - (this.config.horizontalGap * 2); // Account for gaps between 3 columns
+    
+    // Calculate optimal canvas size (not too large, leave room for UI)
+    const maxCanvasSize = Math.min(
+      remainingWidth * 0.5, // Canvas takes up to 50% of available space
       this.config.maxCanvasSize,
     );
-
-    if (maxExpandedCanvas > result.canvasSize) {
-      const extraSpace = maxExpandedCanvas - result.canvasSize;
-      const availableUIWidth = result.uiTotalWidth + extraSpace;
-
-      // Recalculate UI columns with extra space
-      const optimalColumns = Math.min(
-        Math.floor(availableUIWidth / this.config.minUIColumnWidth),
-        this.config.maxUIColumns,
-      );
-
-      result.canvasSize = maxExpandedCanvas;
-      result.uiColumns = Math.max(result.uiColumns, optimalColumns);
-      result.uiColumnWidth = Math.min(
-        availableUIWidth / result.uiColumns,
-        this.config.maxUIColumnWidth,
-      );
-      result.uiTotalWidth = result.uiColumnWidth * result.uiColumns;
-      result.contentWidth = result.canvasSize;
-      result.canExpand = true;
-    }
-
-    return result;
+    
+    const optimalCanvasSize = Math.max(maxCanvasSize, this.config.minCanvasSize);
+    
+    // UI columns will use flexible sizing (minmax(280px, 1fr))
+    // So we don't need to calculate exact pixel widths
+    const uiColumnMinWidth = this.config.minUIColumnWidth; // 280px minimum
+    
+    layoutData.canvasSize = optimalCanvasSize;
+    layoutData.uiColumns = 2; // Two UI columns in ultra-wide
+    layoutData.uiColumnWidth = uiColumnMinWidth; // Minimum width, will expand with 1fr
+    layoutData.uiTotalWidth = uiColumnMinWidth * 2; // Total minimum width
+    layoutData.contentWidth = optimalCanvasSize;
+    layoutData.canExpand = true;
+    
+    console.log(`Ultra-wide layout: canvas=${optimalCanvasSize}px, UI columns=2 (flexible), min width=${uiColumnMinWidth}px each`);
+    
+    return layoutData;
   }
 
   /**
@@ -511,7 +510,7 @@ export class UILayoutPlacementManager {
       
     } else if (isLandscape) {
       // 2×N grid (landscape)
-      contentGrid.style.gridTemplateColumns = `${this.layoutData.canvasSize}px ${this.layoutData.uiTotalWidth}px`;
+      contentGrid.style.gridTemplateColumns = `${this.layoutData.canvasSize}px minmax(280px, 1fr)`;
       contentGrid.style.gridTemplateRows = 'auto';
       contentGrid.style.gridTemplateAreas = '"canvas ui"';
       
@@ -521,32 +520,51 @@ export class UILayoutPlacementManager {
       }
       
     } else if (isUltrawide) {
-      // 3×N grid (ultra-wide)
-      const uiColumnWidth = Math.floor(this.layoutData.uiTotalWidth / 2);
-      contentGrid.style.gridTemplateColumns = `${this.layoutData.canvasSize}px ${uiColumnWidth}px ${uiColumnWidth}px`;
+      // 3×N grid (ultra-wide) - Use flexible sizing for UI columns
+      const minUIWidth = 280; // Minimum width for UI columns
+      const canvasWidth = this.layoutData.canvasSize;
+      
+      console.log(`🔍 Ultra-wide layout: canvas=${canvasWidth}px, minUIWidth=${minUIWidth}px`);
+      
+      // Use flexible grid: fixed canvas width + two flexible UI columns
+      contentGrid.style.gridTemplateColumns = `${canvasWidth}px minmax(${minUIWidth}px, 1fr) minmax(${minUIWidth}px, 1fr)`;
       contentGrid.style.gridTemplateRows = 'auto';
       contentGrid.style.gridTemplateAreas = '"canvas ui ui2"';
       
       // Show and configure second UI container
       if (uiControls2) {
+        console.log('🔍 Showing ui-controls-2 container');
         uiControls2.style.display = 'flex';
         uiControls2.style.flexDirection = 'column';
-        uiControls2.style.gap = `${this.config.verticalGap}px`;
-        uiControls2.style.alignItems = 'center';
+        uiControls2.style.gap = '20px'; // Use 20px gaps between elements
+        uiControls2.style.alignItems = 'stretch'; // Allow elements to expand
         uiControls2.style.gridArea = 'ui2';
+        uiControls2.style.width = '100%';
+        uiControls2.style.minWidth = `${minUIWidth}px`;
+        
+        // Force the container to be visible
+        uiControls2.style.visibility = 'visible';
+        uiControls2.style.opacity = '1';
+      } else {
+        console.warn('🔍 ui-controls-2 container not found!');
       }
+      
+      // Configure first UI container for ultra-wide
+      uiControls.style.minWidth = `${minUIWidth}px`;
+      
+      console.log('🔍 Ultra-wide grid applied:', contentGrid.style.gridTemplateColumns);
     }
 
     // Canvas container
     canvasContainer.style.gridArea = 'canvas';
     canvasContainer.style.justifySelf = 'center';
 
-    // UI controls
+    // UI controls - Configure for optimal space usage
     uiControls.style.gridArea = 'ui';
     uiControls.style.display = 'flex';
     uiControls.style.flexDirection = 'column';
-    uiControls.style.gap = `${this.config.verticalGap}px`;
-    uiControls.style.alignItems = 'center';
+    uiControls.style.gap = '20px'; // Use 20px gaps between elements
+    uiControls.style.alignItems = 'stretch'; // Allow elements to expand to fill width
     uiControls.style.width = '100%';
 
     console.log(`Applied grid layout: ${this.getGridDescription()}`);
