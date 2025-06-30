@@ -12,7 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#pragma once
+
 #include <math.h>
+#include <string.h>
 #include "cq_kernel.h"
 
 #ifndef M_PI
@@ -129,7 +132,7 @@ struct sparse_arr* reallocate_kernels(struct sparse_arr *old_ptr, struct cq_kern
     struct sparse_arr *new_ptr = (struct sparse_arr*)malloc(cfg.bands*sizeof(struct sparse_arr));
     for(int i = 0; i < cfg.bands; i++){
         new_ptr[i].n_elems = old_ptr[i].n_elems;
-        new_ptr[i].elems = malloc(old_ptr[i].n_elems*sizeof(struct sparse_arr_elem));
+        new_ptr[i].elems = (struct sparse_arr_elem*)malloc(old_ptr[i].n_elems*sizeof(struct sparse_arr_elem));
         memcpy(new_ptr[i].elems, old_ptr[i].elems, old_ptr[i].n_elems*sizeof(struct sparse_arr_elem));
         free(old_ptr[i].elems);
     }
@@ -150,4 +153,4 @@ void apply_kernels(kiss_fft_cpx fft[], kiss_fft_cpx cq[], struct sparse_arr kern
 void free_kernels(struct sparse_arr *kernels, struct cq_kernel_cfg cfg){
     for(int i = 0; i < cfg.bands; i++) free(kernels[i].elems);
     free(kernels);
-}
+} 

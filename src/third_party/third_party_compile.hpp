@@ -10,4 +10,7 @@
 #include "third_party/cq_kernel/kiss_fft.cpp.hpp"
 #include "third_party/cq_kernel/kiss_fftr.cpp.hpp"
 
+// CQ KERNEL IMPLEMENTATION
+#include "third_party/cq_kernel/cq_kernel.cpp.hpp"
+
 #endif // FASTLED_ALL_SRC
