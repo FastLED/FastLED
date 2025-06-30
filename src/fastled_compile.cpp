@@ -102,5 +102,9 @@
 #include "platforms/wasm/timer.cpp.hpp"
 #include "platforms/wasm/ui.cpp.hpp"
 
+// Third-party implementations (auto-generated, excluding FFT)
+#include "third_party/object_fled/src/OjectFLED.cpp.hpp"
+
+
 
 #endif // FASTLED_ALL_SRC

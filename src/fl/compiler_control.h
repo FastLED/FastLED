@@ -73,6 +73,10 @@
 // 6/29/2025 - Differences in all src vs individual compilation was 35 to 39 seconds.
 // #define FASTLED_ALL_SRC 0
 
+#ifdef FASTLED_TESTING
+#define FASTLED_ALL_SRC 1
+#endif
+
 // All Source Build Control
 // When FASTLED_ALL_SRC is enabled, all source is compiled into a single translation unit
 // Individual compilation (FASTLED_ALL_SRC=0) is only used for release builds
