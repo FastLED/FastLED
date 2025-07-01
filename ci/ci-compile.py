@@ -271,6 +271,111 @@ def resolve_example_path(example: str) -> Path:
     return example_path
 
 
+def generate_build_info(board: Board, board_build_dir: Path, defines: list[str]) -> bool:
+    """Generate build_info.json file for the board using pio project metadata."""
+    import json
+    import tempfile
+    import shutil
+    
+    board_name = board.board_name
+    real_board_name = board.get_real_board_name()
+    
+    # Create a temporary project to get metadata
+    with tempfile.TemporaryDirectory() as temp_dir:
+        temp_project = Path(temp_dir) / "temp_project"
+        temp_project.mkdir(parents=True, exist_ok=True)
+        
+        # Initialize a temporary project
+        cmd_list = [
+            "pio",
+            "project",
+            "init",
+            "--project-dir",
+            str(temp_project),
+            "--board",
+            real_board_name,
+        ]
+        
+        # Add platform-specific options
+        if board.platform:
+            cmd_list.append(f"--project-option=platform={board.platform}")
+        if board.platform_packages:
+            cmd_list.append(f"--project-option=platform_packages={board.platform_packages}")
+        if board.framework:
+            cmd_list.append(f"--project-option=framework={board.framework}")
+        if board.board_build_core:
+            cmd_list.append(f"--project-option=board_build.core={board.board_build_core}")
+        if board.board_build_filesystem_size:
+            cmd_list.append(f"--project-option=board_build.filesystem_size={board.board_build_filesystem_size}")
+        
+        # Add defines
+        all_defines = defines.copy()
+        if board.defines:
+            all_defines.extend(board.defines)
+        if all_defines:
+            build_flags_str = " ".join(f"-D{define}" for define in all_defines)
+            cmd_list.append(f"--project-option=build_flags={build_flags_str}")
+        
+        if board.customsdk:
+            cmd_list.append(f"--project-option=custom_sdkconfig={board.customsdk}")
+        
+        try:
+            # Initialize the project
+            result = subprocess.run(
+                cmd_list,
+                capture_output=True,
+                text=True,
+                cwd=str(temp_project),
+                timeout=60,
+            )
+            
+            if result.returncode != 0:
+                locked_print(f"Warning: Failed to initialize temp project for {board_name}: {result.stderr}")
+                return False
+            
+            # Get metadata
+            metadata_cmd = ["pio", "project", "metadata", "--json-output"]
+            metadata_result = subprocess.run(
+                metadata_cmd,
+                capture_output=True,
+                text=True,
+                cwd=str(temp_project),
+                timeout=60,
+            )
+            
+            if metadata_result.returncode != 0:
+                locked_print(f"Warning: Failed to get metadata for {board_name}: {metadata_result.stderr}")
+                return False
+            
+            # Parse and save the metadata
+            try:
+                data = json.loads(metadata_result.stdout)
+                
+                # Add tool aliases (from create_build_dir.py)
+                sys.path.insert(0, str(HERE))
+                from ci.create_build_dir import insert_tool_aliases
+                insert_tool_aliases(data)
+                
+                # Save to build_info.json
+                build_info_path = board_build_dir / "build_info.json"
+                with open(build_info_path, "w") as f:
+                    json.dump(data, f, indent=4, sort_keys=True)
+                
+                locked_print(f"Generated build_info.json for {board_name}")
+                return True
+                
+            except json.JSONDecodeError as e:
+                locked_print(f"Warning: Failed to parse metadata JSON for {board_name}: {e}")
+                return False
+                
+        except subprocess.TimeoutExpired:
+            locked_print(f"Warning: Timeout generating build_info.json for {board_name}")
+            return False
+        except Exception as e:
+            locked_print(f"Warning: Exception generating build_info.json for {board_name}: {e}")
+            return False
+
+
 def compile_with_pio_ci(
     board: Board,
     example_paths: list[Path],
@@ -295,6 +400,9 @@ def compile_with_pio_ci(
         board_build_dir = Path(".build") / board_name
 
     board_build_dir.mkdir(parents=True, exist_ok=True)
+
+    # Generate build_info.json for this board
+    generate_build_info(board, board_build_dir, defines)
 
     locked_print(f"*** Compiling examples for board {board_name} using pio ci ***")
 
