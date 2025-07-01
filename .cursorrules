@@ -175,26 +175,21 @@ The `bash lint` command now includes:
 
 ## 🚨 MANDATORY COMMAND EXECUTION RULES 🚨
 
-**ALL AGENTS MUST FOLLOW THESE COMMAND EXECUTION PATTERNS:**
+### FOREGROUND AGENTS (Interactive Development)
 
-### Python Code Execution:
+**FOREGROUND AGENTS MUST FOLLOW THESE COMMAND EXECUTION PATTERNS:**
+
+#### Python Code Execution:
 - ❌ **NEVER run Python code directly**
 - ✅ **ALWAYS create/modify tmp.py** with your code
 - ✅ **ALWAYS run: `uv run tmp.py`**
 
-### Shell Command Execution:
+#### Shell Command Execution:
 - ❌ **NEVER run shell commands directly**  
 - ✅ **ALWAYS create/modify tmp.sh** with your commands
 - ✅ **ALWAYS run: `bash tmp.sh`**
 
-### DELETE Operations - DANGER ZONE:
-- 🚨 **STOP and ask for permission** before ANY delete operations
-- ✅ **EXCEPTION:** Single files that you just created are OK to delete
-- ❌ **NEVER delete multiple files** without explicit permission
-- ❌ **NEVER delete directories** without explicit permission
-- ❌ **NEVER delete system files or project files** without permission
-
-### Command Execution Examples:
+#### Command Execution Examples:
 
 **Python Code Pattern:**
 ```python
@@ -215,12 +210,60 @@ uv run ci/ci-compile.py uno --examples Blink
 ```
 Then run: `bash tmp.sh`
 
-**Why These Rules Exist:**
+### BACKGROUND AGENTS (Automated/CI Environments)
+
+**BACKGROUND AGENTS MUST FOLLOW THESE RESTRICTED COMMAND EXECUTION PATTERNS:**
+
+#### Python Code Execution:
+- ❌ **NEVER run Python code directly**
+- ❌ **NEVER create/use tmp.py files** (forbidden for background agents)
+- ✅ **ALWAYS use `uv run` with existing scripts** (e.g., `uv run test.py`, `uv run ci/ci-compile.py`)
+- ✅ **ALWAYS use MCP server tools** for programmatic operations when available
+
+#### Shell Command Execution:
+- ❌ **NEVER run shell commands directly**
+- ❌ **NEVER create/use tmp.sh files** (forbidden for background agents)
+- ✅ **ALWAYS use existing bash scripts** (e.g., `bash test`, `bash lint`)
+- ✅ **ALWAYS use `uv run` for Python scripts** with proper arguments
+- ✅ **ALWAYS use MCP server tools** for complex operations when available
+
+#### Background Agent Command Examples:
+
+**✅ ALLOWED - Using existing scripts:**
+```bash
+bash test
+bash lint
+uv run test.py audio_json_parsing
+uv run ci/ci-compile.py uno --examples Blink
+```
+
+**❌ FORBIDDEN - Creating temporary files:**
+```bash
+# DON'T DO THIS - tmp.sh is forbidden for background agents
+echo "git status" > tmp.sh
+bash tmp.sh
+```
+
+**✅ PREFERRED - Using MCP server tools:**
+```bash
+uv run mcp_server.py
+# Then use appropriate MCP tools like: validate_completion, symbol_analysis, etc.
+```
+
+### DELETE Operations - DANGER ZONE (ALL AGENTS):
+- 🚨 **STOP and ask for permission** before ANY delete operations
+- ✅ **EXCEPTION:** Single files that you just created are OK to delete
+- ❌ **NEVER delete multiple files** without explicit permission
+- ❌ **NEVER delete directories** without explicit permission
+- ❌ **NEVER delete system files or project files** without permission
+
+### Why These Rules Exist:
 - **Ensures all operations are reviewable and traceable**
-- **Prevents accidental destructive operations**
+- **Prevents accidental destructive operations in automated environments**
 - **Allows for better debugging and error handling**
-- **Maintains consistency across all agent operations**
+- **Maintains consistency across different agent types**
 - **Provides audit trail for all system modifications**
+- **Prevents background agents from creating unnecessary temporary files**
 
 **These command execution rules apply to ALL operations including but not limited to:**
 - File system operations (creating, modifying, deleting files)
