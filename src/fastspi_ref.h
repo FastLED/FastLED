@@ -9,12 +9,13 @@
 
 #if FASTLED_DOXYGEN // guard against the arduino ide idiotically including every header file
 #include "FastLED.h"
+#include "fl/int.h"
 
 FASTLED_NAMESPACE_BEGIN
 
 /// A skeletal implementation of hardware SPI support.  Fill in the necessary code for init, waiting, and writing.  The rest of
 /// the method implementations should provide a starting point, even if they're not the most efficient to start with
-template <uint8_t _DATA_PIN, uint8_t _CLOCK_PIN, uint32_t _SPI_CLOCK_DIVIDER>
+template <uint8_t _DATA_PIN, uint8_t _CLOCK_PIN, fl::u32 _SPI_CLOCK_DIVIDER>
 class REFHardwareSPIOutput {
 	Selectable *m_pSelect;
 
@@ -102,4 +103,3 @@ FASTLED_NAMESPACE_END
 #endif
 
 #endif
-

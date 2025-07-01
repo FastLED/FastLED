@@ -8,6 +8,7 @@
 
 #include "led_sysdefs.h"
 #include "fl/unused.h"
+#include "fl/int.h"
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wignored-qualifiers"
@@ -359,8 +360,8 @@ public:
 /// @note This bitband class is optional!
 template<uint8_t PIN> class FastPinBB : public FastPin<PIN> {};
 
-typedef volatile uint32_t & reg32_t;      ///< Reference to a 32-bit register, volatile
-typedef volatile uint32_t * ptr_reg32_t;  ///< Pointer to a 32-bit register, volatile
+typedef volatile fl::u32 & reg32_t;      ///< Reference to a 32-bit register, volatile
+typedef volatile fl::u32 * ptr_reg32_t;  ///< Pointer to a 32-bit register, volatile
 
 /// Utility template for tracking down information about pins and ports
 /// @tparam port the port to check information for

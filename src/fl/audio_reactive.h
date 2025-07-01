@@ -20,7 +20,7 @@ struct AudioData {
     float frequencyBins[16] = {0};          // 16 frequency bins (matches WLED NUM_GEQ_CHANNELS)
     float dominantFrequency = 0.0f;         // Major peak frequency (Hz)
     float magnitude = 0.0f;                 // FFT magnitude of dominant frequency
-    uint32_t timestamp = 0;                 // millis() when data was captured
+    fl::u32 timestamp = 0;                 // millis() when data was captured
 };
 
 struct AudioConfig {
@@ -47,7 +47,7 @@ public:
     void processSample(const AudioSample& sample);
     
     // Optional: update smoothing without new sample data  
-    void update(uint32_t currentTimeMs);
+    void update(fl::u32 currentTimeMs);
     
     // Data access
     const AudioData& getData() const;
@@ -70,7 +70,7 @@ private:
     void processFFT(const AudioSample& sample);
     void mapFFTBinsToFrequencyChannels();
     void updateVolumeAndPeak(const AudioSample& sample);
-    void detectBeat(uint32_t currentTimeMs);
+    void detectBeat(fl::u32 currentTimeMs);
     void smoothResults();
     void applyScaling();
     void applyGain();
@@ -91,8 +91,8 @@ private:
     AudioData mSmoothedData;
     
     // Processing state  
-    uint32_t mLastBeatTime = 0;
-    static constexpr uint32_t BEAT_COOLDOWN = 100;   // 100ms minimum between beats
+    fl::u32 mLastBeatTime = 0;
+    static constexpr fl::u32 BEAT_COOLDOWN = 100;   // 100ms minimum between beats
     
     // Volume tracking for beat detection
     float mPreviousVolume = 0.0f;

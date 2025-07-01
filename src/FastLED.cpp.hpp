@@ -3,6 +3,7 @@
 #include "fl/singleton.h"
 #include "fl/engine_events.h"
 #include "fl/compiler_control.h"
+#include "fl/int.h"
 
 /// @file FastLED.cpp
 /// Central source file for FastLED, implements the CFastLED class/object
@@ -21,7 +22,7 @@
 #endif  // MAX_CLED_CONTROLLERS
 
 #if defined(__SAM3X8E__)
-volatile uint32_t fuckit;
+volatile fl::u32 fuckit;
 #endif
 
 // Disable to fix build breakage.
@@ -65,15 +66,15 @@ FL_DISABLE_WARNING_POP
 
 CLEDController *CLEDController::m_pHead = NULL;
 CLEDController *CLEDController::m_pTail = NULL;
-static uint32_t lastshow = 0;
+static fl::u32 lastshow = 0;
 
 /// Global frame counter, used for debugging ESP implementations
 /// @todo Include in FASTLED_DEBUG_COUNT_FRAME_RETRIES block?
-uint32_t _frame_cnt=0;
+fl::u32 _frame_cnt=0;
 
 /// Global frame retry counter, used for debugging ESP implementations
 /// @todo Include in FASTLED_DEBUG_COUNT_FRAME_RETRIES block?
-uint32_t _retry_cnt=0;
+fl::u32 _retry_cnt=0;
 
 // uint32_t CRGB::Squant = ((uint32_t)((__TIME__[4]-'0') * 28))<<16 | ((__TIME__[6]-'0')*50)<<8 | ((__TIME__[7]-'0')*28);
 
@@ -343,10 +344,10 @@ extern int noise_max;
 
 void CFastLED::countFPS(int nFrames) {
 	static int br = 0;
-	static uint32_t lastframe = 0; // millis();
+	static fl::u32 lastframe = 0; // millis();
 
 	if(br++ >= nFrames) {
-		uint32_t now = millis();
+		fl::u32 now = millis();
 		now -= lastframe;
 		if(now == 0) {
 			now = 1; // prevent division by zero below

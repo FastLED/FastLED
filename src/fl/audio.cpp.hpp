@@ -1,6 +1,7 @@
 
 #include "audio.h"
 #include "fl/thread_local.h"
+#include "fl/int.h"
 
 namespace fl {
 
@@ -72,7 +73,7 @@ const AudioSample::VectorPCM &AudioSample::empty() {
 
 float AudioSample::zcf() const { return mImpl->zcf(); }
 
-uint32_t AudioSample::timestamp() const {
+fl::u32 AudioSample::timestamp() const {
     if (isValid()) {
         return mImpl->timestamp();
     }

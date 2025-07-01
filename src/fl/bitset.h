@@ -4,24 +4,25 @@
 #include "fl/type_traits.h"
 #include "fl/variant.h"
 #include "fl/stdint.h"
+#include "fl/int.h"
 
 namespace fl {
 
-template <uint32_t N> class BitsetInlined;
+template <fl::u32 N> class BitsetInlined;
 
-template <uint32_t N> class BitsetFixed;
+template <fl::u32 N> class BitsetFixed;
 
-template <uint32_t N = 256>
+template <fl::u32 N = 256>
 using bitset = BitsetInlined<N>; // inlined but can go bigger.
 
-template <uint32_t N>
+template <fl::u32 N>
 using bitset_fixed = BitsetFixed<N>; // fixed size, no dynamic allocation.
 
 /// A simple fixed-size Bitset implementation similar to std::Bitset.
-template <uint32_t N> class BitsetFixed {
+template <fl::u32 N> class BitsetFixed {
   private:
-    static constexpr uint32_t bits_per_block = 8 * sizeof(uint64_t);
-    static constexpr uint32_t block_count =
+    static constexpr fl::u32 bits_per_block = 8 * sizeof(uint64_t);
+    static constexpr fl::u32 block_count =
         (N + bits_per_block - 1) / bits_per_block;
     using block_type = uint64_t;
 
@@ -31,9 +32,9 @@ template <uint32_t N> class BitsetFixed {
   public:
     struct Proxy {
         BitsetFixed &_bitset;
-        uint32_t _pos;
+        fl::u32 _pos;
 
-        Proxy(BitsetFixed &bitset, uint32_t pos) : _bitset(bitset), _pos(pos) {}
+        Proxy(BitsetFixed &bitset, fl::u32 pos) : _bitset(bitset), _pos(pos) {}
 
         Proxy &operator=(bool value) {
             _bitset.set(_pos, value);
@@ -43,23 +44,23 @@ template <uint32_t N> class BitsetFixed {
         operator bool() const { return _bitset.test(_pos); }
     };
 
-    Proxy operator[](uint32_t pos) { return Proxy(*this, pos); }
+    Proxy operator[](fl::u32 pos) { return Proxy(*this, pos); }
 
     /// Constructs a BitsetFixed with all bits reset.
     constexpr BitsetFixed() noexcept : _blocks{} {}
 
     /// Resets all bits to zero.
     void reset() noexcept {
-        for (uint32_t i = 0; i < block_count; ++i) {
+        for (fl::u32 i = 0; i < block_count; ++i) {
             _blocks[i] = 0;
         }
     }
 
     /// Sets or clears the bit at position pos.
-    BitsetFixed &set(uint32_t pos, bool value = true) {
+    BitsetFixed &set(fl::u32 pos, bool value = true) {
         if (pos < N) {
-            const uint32_t idx = pos / bits_per_block;
-            const uint32_t off = pos % bits_per_block;
+            const fl::u32 idx = pos / bits_per_block;
+            const fl::u32 off = pos % bits_per_block;
             if (value) {
                 _blocks[idx] |= (block_type(1) << off);
             } else {
@@ -79,13 +80,13 @@ template <uint32_t N> class BitsetFixed {
     }
 
     /// Clears the bit at position pos.
-    BitsetFixed &reset(uint32_t pos) { return set(pos, false); }
+    BitsetFixed &reset(fl::u32 pos) { return set(pos, false); }
 
     /// Flips (toggles) the bit at position pos.
-    BitsetFixed &flip(uint32_t pos) {
+    BitsetFixed &flip(fl::u32 pos) {
         if (pos < N) {
-            const uint32_t idx = pos / bits_per_block;
-            const uint32_t off = pos % bits_per_block;
+            const fl::u32 idx = pos / bits_per_block;
+            const fl::u32 off = pos % bits_per_block;
             _blocks[idx] ^= (block_type(1) << off);
         }
         return *this;
@@ -93,35 +94,35 @@ template <uint32_t N> class BitsetFixed {
 
     /// Flips all bits.
     BitsetFixed &flip() noexcept {
-        for (uint32_t i = 0; i < block_count; ++i) {
+        for (fl::u32 i = 0; i < block_count; ++i) {
             _blocks[i] = ~_blocks[i];
         }
         // Mask out unused high bits in the last block
         if (N % bits_per_block != 0) {
-            const uint32_t extra = bits_per_block - (N % bits_per_block);
+            const fl::u32 extra = bits_per_block - (N % bits_per_block);
             _blocks[block_count - 1] &= (~block_type(0) >> extra);
         }
         return *this;
     }
 
     /// Tests whether the bit at position pos is set.
-    bool test(uint32_t pos) const noexcept {
+    bool test(fl::u32 pos) const noexcept {
         if (pos < N) {
-            const uint32_t idx = pos / bits_per_block;
-            const uint32_t off = pos % bits_per_block;
+            const fl::u32 idx = pos / bits_per_block;
+            const fl::u32 off = pos % bits_per_block;
             return (_blocks[idx] >> off) & 1;
         }
         return false;
     }
 
     /// Returns the value of the bit at position pos.
-    bool operator[](uint32_t pos) const noexcept { return test(pos); }
+    bool operator[](fl::u32 pos) const noexcept { return test(pos); }
 
     /// Returns the number of set bits.
-    uint32_t count() const noexcept {
-        uint32_t cnt = 0;
+    fl::u32 count() const noexcept {
+        fl::u32 cnt = 0;
         // Count bits in all complete blocks
-        for (uint32_t i = 0; i < block_count - 1; ++i) {
+        for (fl::u32 i = 0; i < block_count - 1; ++i) {
             cnt += __builtin_popcountll(_blocks[i]);
         }
 
@@ -132,7 +133,7 @@ template <uint32_t N> class BitsetFixed {
             // If N is not a multiple of bits_per_block, mask out the unused
             // bits
             if (N % bits_per_block != 0) {
-                const uint32_t valid_bits = N % bits_per_block;
+                const fl::u32 valid_bits = N % bits_per_block;
                 // Create a mask with only the valid bits set to 1
                 block_type mask = (valid_bits == bits_per_block)
                                       ? ~block_type(0)
@@ -153,7 +154,7 @@ template <uint32_t N> class BitsetFixed {
             return true;
 
         // Check all complete blocks
-        for (uint32_t i = 0; i < block_count - 1; ++i) {
+        for (fl::u32 i = 0; i < block_count - 1; ++i) {
             if (_blocks[i] != ~block_type(0)) {
                 return false;
             }
@@ -179,28 +180,28 @@ template <uint32_t N> class BitsetFixed {
 
     /// Bitwise AND
     BitsetFixed &operator&=(const BitsetFixed &other) noexcept {
-        for (uint32_t i = 0; i < block_count; ++i) {
+        for (fl::u32 i = 0; i < block_count; ++i) {
             _blocks[i] &= other._blocks[i];
         }
         return *this;
     }
     /// Bitwise OR
     BitsetFixed &operator|=(const BitsetFixed &other) noexcept {
-        for (uint32_t i = 0; i < block_count; ++i) {
+        for (fl::u32 i = 0; i < block_count; ++i) {
             _blocks[i] |= other._blocks[i];
         }
         return *this;
     }
     /// Bitwise XOR
     BitsetFixed &operator^=(const BitsetFixed &other) noexcept {
-        for (uint32_t i = 0; i < block_count; ++i) {
+        for (fl::u32 i = 0; i < block_count; ++i) {
             _blocks[i] ^= other._blocks[i];
         }
         return *this;
     }
 
     /// Size of the BitsetFixed (number of bits).
-    constexpr uint32_t size() const noexcept { return N; }
+    constexpr fl::u32 size() const noexcept { return N; }
 
     /// Friend operators for convenience.
     friend BitsetFixed operator&(BitsetFixed lhs,
@@ -221,7 +222,7 @@ template <uint32_t N> class BitsetFixed {
 /// A Bitset implementation with inline storage that can grow if needed.
 /// T is the storage type (uint8_t, uint16_t, uint32_t, uint64_t)
 /// N is the initial number of bits to store inline
-template <uint32_t N = 256> // Default size is 256 bits, or 32 bytes
+template <fl::u32 N = 256> // Default size is 256 bits, or 32 bytes
 class BitsetInlined {
   private:
     // Either store a fixed Bitset<N> or a dynamic Bitset
@@ -231,9 +232,9 @@ class BitsetInlined {
   public:
     struct Proxy {
         BitsetInlined &_bitset;
-        uint32_t _pos;
+        fl::u32 _pos;
 
-        Proxy(BitsetInlined &bitset, uint32_t pos)
+        Proxy(BitsetInlined &bitset, fl::u32 pos)
             : _bitset(bitset), _pos(pos) {}
 
         Proxy &operator=(bool value) {
@@ -244,7 +245,7 @@ class BitsetInlined {
         operator bool() const { return _bitset.test(_pos); }
     };
 
-    Proxy operator[](uint32_t pos) { return Proxy(*this, pos); }
+    Proxy operator[](fl::u32 pos) { return Proxy(*this, pos); }
 
     /// Constructs a Bitset with all bits reset.
     BitsetInlined() : _storage(fixed_bitset()) {}
@@ -288,7 +289,7 @@ class BitsetInlined {
     }
 
     /// Resizes the Bitset if needed
-    void resize(uint32_t new_size) {
+    void resize(fl::u32 new_size) {
         if (new_size <= N) {
             // If we're already using the fixed Bitset, nothing to do
             if (_storage.template is<bitset_dynamic>()) {
@@ -298,7 +299,7 @@ class BitsetInlined {
                     _storage.template ptr<bitset_dynamic>();
 
                 // Copy bits from dynamic to fixed
-                for (uint32_t i = 0; i < N && i < dynamic->size(); ++i) {
+                for (fl::u32 i = 0; i < N && i < dynamic->size(); ++i) {
                     if (dynamic->test(i)) {
                         fixed.set(i);
                     }
@@ -314,7 +315,7 @@ class BitsetInlined {
                 fixed_bitset *fixed = _storage.template ptr<fixed_bitset>();
 
                 // Copy bits from fixed to dynamic
-                for (uint32_t i = 0; i < N; ++i) {
+                for (fl::u32 i = 0; i < N; ++i) {
                     if (fixed->test(i)) {
                         dynamic.set(i);
                     }
@@ -329,7 +330,7 @@ class BitsetInlined {
     }
 
     /// Sets or clears the bit at position pos.
-    BitsetInlined &set(uint32_t pos, bool value = true) {
+    BitsetInlined &set(fl::u32 pos, bool value = true) {
         if (pos >= N && _storage.template is<fixed_bitset>()) {
             resize(pos + 1);
         }
@@ -348,10 +349,10 @@ class BitsetInlined {
     }
 
     /// Clears the bit at position pos.
-    BitsetInlined &reset(uint32_t pos) { return set(pos, false); }
+    BitsetInlined &reset(fl::u32 pos) { return set(pos, false); }
 
     /// Flips (toggles) the bit at position pos.
-    BitsetInlined &flip(uint32_t pos) {
+    BitsetInlined &flip(fl::u32 pos) {
         if (pos >= N && _storage.template is<fixed_bitset>()) {
             resize(pos + 1);
         }
@@ -380,7 +381,7 @@ class BitsetInlined {
     }
 
     /// Tests whether the bit at position pos is set.
-    bool test(uint32_t pos) const noexcept {
+    bool test(fl::u32 pos) const noexcept {
         if (_storage.template is<fixed_bitset>()) {
             return pos < N ? _storage.template ptr<fixed_bitset>()->test(pos)
                            : false;
@@ -390,10 +391,10 @@ class BitsetInlined {
     }
 
     /// Returns the value of the bit at position pos.
-    bool operator[](uint32_t pos) const noexcept { return test(pos); }
+    bool operator[](fl::u32 pos) const noexcept { return test(pos); }
 
     /// Returns the number of set bits.
-    uint32_t count() const noexcept {
+    fl::u32 count() const noexcept {
         if (_storage.template is<fixed_bitset>()) {
             return _storage.template ptr<fixed_bitset>()->count();
         } else {
@@ -427,7 +428,7 @@ class BitsetInlined {
     }
 
     /// Size of the Bitset (number of bits).
-    uint32_t size() const noexcept {
+    fl::u32 size() const noexcept {
         if (_storage.template is<fixed_bitset>()) {
             return N;
         } else {
@@ -453,13 +454,13 @@ class BitsetInlined {
                 *rhs._storage.template ptr<fixed_bitset>();
         } else {
             // At least one is dynamic, handle bit by bit
-            uint32_t min_size =
+            fl::u32 min_size =
                 result.size() < rhs.size() ? result.size() : rhs.size();
-            for (uint32_t i = 0; i < min_size; ++i) {
+            for (fl::u32 i = 0; i < min_size; ++i) {
                 result.set(i, result.test(i) && rhs.test(i));
             }
             // Clear any bits beyond the size of rhs
-            for (uint32_t i = min_size; i < result.size(); ++i) {
+            for (fl::u32 i = min_size; i < result.size(); ++i) {
                 result.reset(i);
             }
         }
@@ -478,7 +479,7 @@ class BitsetInlined {
                 *rhs._storage.template ptr<fixed_bitset>();
         } else {
             // At least one is dynamic, handle bit by bit
-            uint32_t max_size =
+            fl::u32 max_size =
                 result.size() > rhs.size() ? result.size() : rhs.size();
 
             // Resize if needed
@@ -487,7 +488,7 @@ class BitsetInlined {
             }
 
             // Set bits from rhs
-            for (uint32_t i = 0; i < rhs.size(); ++i) {
+            for (fl::u32 i = 0; i < rhs.size(); ++i) {
                 if (rhs.test(i)) {
                     result.set(i);
                 }
@@ -508,7 +509,7 @@ class BitsetInlined {
                 *rhs._storage.template ptr<fixed_bitset>();
         } else {
             // At least one is dynamic, handle bit by bit
-            uint32_t max_size =
+            fl::u32 max_size =
                 result.size() > rhs.size() ? result.size() : rhs.size();
 
             // Resize if needed
@@ -517,7 +518,7 @@ class BitsetInlined {
             }
 
             // XOR bits from rhs
-            for (uint32_t i = 0; i < rhs.size(); ++i) {
+            for (fl::u32 i = 0; i < rhs.size(); ++i) {
                 result.set(i, result.test(i) != rhs.test(i));
             }
         }

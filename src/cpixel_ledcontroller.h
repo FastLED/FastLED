@@ -10,6 +10,7 @@
 #include "eorder.h"
 
 #include "fl/force_inline.h"
+#include "fl/int.h"
 #include "pixel_controller.h"
 #include "cled_controller.h"
 
@@ -21,7 +22,7 @@ FASTLED_NAMESPACE_BEGIN
 /// @tparam RGB_ORDER the rgb ordering for the LEDs (e.g. what order red, green, and blue data is written out in)
 /// @tparam LANES how many parallel lanes of output to write
 /// @tparam MASK bitmask for the output lanes
-template<EOrder RGB_ORDER, int LANES=1, uint32_t MASK=0xFFFFFFFF> class CPixelLEDController : public CLEDController {
+template<EOrder RGB_ORDER, int LANES=1, fl::u32 MASK=0xFFFFFFFF> class CPixelLEDController : public CLEDController {
 protected:
 
 
@@ -55,7 +56,7 @@ protected:
 public:
     static const EOrder RGB_ORDER_VALUE = RGB_ORDER; ///< The RGB ordering for this controller
     static const int LANES_VALUE = LANES;             ///< The number of lanes for this controller
-    static const uint32_t MASK_VALUE = MASK;         ///< The mask for the lanes for this controller
+    static const fl::u32 MASK_VALUE = MASK;         ///< The mask for the lanes for this controller
     CPixelLEDController() : CLEDController() {}
 
     /// Send the LED data to the strip

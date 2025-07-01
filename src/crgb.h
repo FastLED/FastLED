@@ -173,16 +173,16 @@ struct CRGB {
 
     /// Allow construction from 32-bit (really 24-bit) bit 0xRRGGBB color code
     /// @param colorcode a packed 24 bit color code
-    constexpr CRGB(uint32_t colorcode) noexcept
+    constexpr CRGB(fl::u32 colorcode) noexcept
     : r((colorcode >> 16) & 0xFF), g((colorcode >> 8) & 0xFF), b((colorcode >> 0) & 0xFF)
     {
     }
 
-    constexpr uint32_t as_uint32_t() const noexcept {
-        return uint32_t(0xff000000) |
-               (uint32_t{r} << 16) |
-               (uint32_t{g} << 8) |
-               uint32_t{b};
+    constexpr fl::u32 as_uint32_t() const noexcept {
+        return fl::u32(0xff000000) |
+               (fl::u32{r} << 16) |
+               (fl::u32{g} << 8) |
+               fl::u32{b};
     }
 
     /// Allow construction from a LEDColorCorrection enum
@@ -217,7 +217,7 @@ struct CRGB {
 
     /// Allow assignment from 32-bit (really 24-bit) 0xRRGGBB color code
     /// @param colorcode a packed 24 bit color code
-    FASTLED_FORCE_INLINE CRGB& operator= (const uint32_t colorcode)
+    FASTLED_FORCE_INLINE CRGB& operator= (const fl::u32 colorcode)
     {
         r = (colorcode >> 16) & 0xFF;
         g = (colorcode >>  8) & 0xFF;
@@ -265,7 +265,7 @@ struct CRGB {
 
     /// Allow assignment from 32-bit (really 24-bit) 0xRRGGBB color code
     /// @param colorcode a packed 24 bit color code
-    FASTLED_FORCE_INLINE CRGB& setColorCode (uint32_t colorcode)
+    FASTLED_FORCE_INLINE CRGB& setColorCode (fl::u32 colorcode)
     {
         r = (colorcode >> 16) & 0xFF;
         g = (colorcode >>  8) & 0xFF;
@@ -410,12 +410,12 @@ struct CRGB {
     }
 
     /// Converts a CRGB to a 32-bit color having an alpha of 255.
-    constexpr explicit operator uint32_t() const
+    constexpr explicit operator fl::u32() const
     {
-        return uint32_t(0xff000000) |
-               (uint32_t{r} << 16) |
-               (uint32_t{g} << 8) |
-               uint32_t{b};
+        return fl::u32(0xff000000) |
+               (fl::u32{r} << 16) |
+               (fl::u32{g} << 8) |
+               fl::u32{b};
     }
 
     /// Invert each channel

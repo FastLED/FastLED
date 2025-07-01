@@ -1,5 +1,6 @@
 #include "fl/engine_events.h"
 #include "fl/namespace.h"
+#include "fl/int.h"
 
 
 namespace fl {
@@ -104,7 +105,7 @@ void EngineEvents::_onEndFrame() {
     }
 }
 
-void EngineEvents::_onStripAdded(CLEDController *strip, uint32_t num_leds) {
+void EngineEvents::_onStripAdded(CLEDController *strip, fl::u32 num_leds) {
     // Make the copy of the listener list to avoid issues with listeners being
     // added or removed during the loop.
     ListenerList copy = mListeners;

@@ -365,7 +365,7 @@ enum EBlockChipsets {
 /// @param scale the initial brightness scale value
 /// @param data max power data, in milliwatts
 /// @returns the brightness scale, limited to max power
-typedef uint8_t (*power_func)(uint8_t scale, uint32_t data);
+typedef uint8_t (*power_func)(uint8_t scale, fl::u32 data);
 
 /// High level controller interface for FastLED.
 /// This class manages controllers, global settings, and trackings such as brightness
@@ -377,8 +377,8 @@ class CFastLED {
 	// int m_nControllers;
 	uint8_t  m_Scale;         ///< the current global brightness scale setting
 	        fl::u16 m_nFPS;          ///< tracking for current frames per second (FPS) value
-	uint32_t m_nMinMicros;    ///< minimum µs between frames, used for capping frame rates
-	uint32_t m_nPowerData;    ///< max power use parameter
+	fl::u32 m_nMinMicros;    ///< minimum µs between frames, used for capping frame rates
+	fl::u32 m_nPowerData;    ///< max power use parameter
 	power_func m_pPowerFunc;  ///< function for overriding brightness when using FastLED.show();
 
 public:
@@ -458,7 +458,7 @@ public:
 				typedef CONTROLLER_CLASS<DATA_PIN, CLOCK_PIN, RGB_ORDER> ControllerType;           \
 			};                                                                                     \
 			/* Controller type with RGB_ORDER and spi frequency specified */                       \
-			template<EOrder RGB_ORDER, uint32_t FREQ>                                              \
+			template<EOrder RGB_ORDER, fl::u32 FREQ>                                              \
 			struct CONTROLLER_CLASS_WITH_ORDER_AND_FREQ {                                          \
 				typedef CONTROLLER_CLASS<DATA_PIN, CLOCK_PIN, RGB_ORDER, FREQ> ControllerType;     \
 			};                                                                                     \
@@ -491,7 +491,7 @@ public:
 	/// Stubbed out platforms have unique challenges in faking out the SPI based controllers.
 	/// Therefore for these platforms we will always delegate to the WS2812 clockless controller.
 	/// This is fine because the clockless controllers on the stubbed out platforms are fake anyways.
-	template<ESPIChipsets CHIPSET, uint8_t DATA_PIN, uint8_t CLOCK_PIN, EOrder RGB_ORDER, uint32_t SPI_DATA_RATE > CLEDController &addLeds(struct CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) {
+	template<ESPIChipsets CHIPSET, uint8_t DATA_PIN, uint8_t CLOCK_PIN, EOrder RGB_ORDER, fl::u32 SPI_DATA_RATE > CLEDController &addLeds(struct CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) {
 		// Instantiate the controller using ClockedChipsetHelper
 		// Always USE WS2812 clockless controller since it's the common path.
 		return addLeds<WS2812, DATA_PIN, RGB_ORDER>(data, nLedsOrOffset, nLedsIfOffset);
@@ -515,7 +515,7 @@ public:
 
 
 	/// Add an SPI based CLEDController instance to the world.
-	template<ESPIChipsets CHIPSET, uint8_t DATA_PIN, uint8_t CLOCK_PIN, EOrder RGB_ORDER, uint32_t SPI_DATA_RATE > CLEDController &addLeds(struct CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) {
+	template<ESPIChipsets CHIPSET, uint8_t DATA_PIN, uint8_t CLOCK_PIN, EOrder RGB_ORDER, fl::u32 SPI_DATA_RATE > CLEDController &addLeds(struct CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) {
 		// Instantiate the controller using ClockedChipsetHelper
 		typedef ClockedChipsetHelper<CHIPSET, DATA_PIN, CLOCK_PIN> CHIP;
 		typedef typename CHIP::template CONTROLLER_CLASS_WITH_ORDER_AND_FREQ<RGB_ORDER, SPI_DATA_RATE>::ControllerType ControllerTypeWithFreq;
@@ -555,7 +555,7 @@ public:
 		return addLeds<CHIPSET, SPI_DATA, SPI_CLOCK, RGB_ORDER>(data, nLedsOrOffset, nLedsIfOffset);
 	}
 
-	template<ESPIChipsets CHIPSET, EOrder RGB_ORDER, uint32_t SPI_DATA_RATE> static CLEDController &addLeds(struct CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) {
+	template<ESPIChipsets CHIPSET, EOrder RGB_ORDER, fl::u32 SPI_DATA_RATE> static CLEDController &addLeds(struct CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) {
 		return addLeds<CHIPSET, SPI_DATA, SPI_CLOCK, RGB_ORDER, SPI_DATA_RATE>(data, nLedsOrOffset, nLedsIfOffset);
 	}
 
@@ -803,11 +803,11 @@ public:
 	/// Set the maximum power to be used, given in volts and milliamps.
 	/// @param volts how many volts the leds are being driven at (usually 5)
 	/// @param milliamps the maximum milliamps of power draw you want
-	inline void setMaxPowerInVoltsAndMilliamps(uint8_t volts, uint32_t milliamps) { setMaxPowerInMilliWatts(volts * milliamps); }
+	inline void setMaxPowerInVoltsAndMilliamps(uint8_t volts, fl::u32 milliamps) { setMaxPowerInMilliWatts(volts * milliamps); }
 
 	/// Set the maximum power to be used, given in milliwatts
 	/// @param milliwatts the max power draw desired, in milliwatts
-	inline void setMaxPowerInMilliWatts(uint32_t milliwatts) { m_pPowerFunc = &calculate_max_brightness_for_power_mW; m_nPowerData = milliwatts; }
+	inline void setMaxPowerInMilliWatts(fl::u32 milliwatts) { m_pPowerFunc = &calculate_max_brightness_for_power_mW; m_nPowerData = milliwatts; }
 
 	/// Update all our controllers with the current led colors, using the passed in brightness
 	/// @param scale the brightness value to use in place of the stored value

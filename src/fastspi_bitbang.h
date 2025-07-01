@@ -23,7 +23,7 @@ FASTLED_NAMESPACE_BEGIN
 /// @tparam SPI_SPEED speed of the bus. Determines the delay times between pin writes.
 /// @note Although this is named with the "AVR" prefix, this will work on any platform. Theoretically. 
 /// @todo Replace the select pin definition with a set of pins, to allow using mux hardware for routing in the future. 
-template <uint8_t DATA_PIN, uint8_t CLOCK_PIN, uint32_t SPI_SPEED>
+template <uint8_t DATA_PIN, uint8_t CLOCK_PIN, fl::u32 SPI_SPEED>
 class AVRSoftwareSPIOutput {
 	// The data types for pointers to the pin port - typedef'd here from the ::Pin definition because on AVR these
 	// are pointers to 8 bit values, while on ARM they are 32 bit

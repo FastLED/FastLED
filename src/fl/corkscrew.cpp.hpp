@@ -11,6 +11,7 @@
 #include "fl/leds.h"
 #include "fl/grid.h"
 #include "fl/screenmap.h"
+#include "fl/int.h"
 
 
 
@@ -281,8 +282,8 @@ void Corkscrew::readFromMulti(const fl::Grid<CRGB>& source_grid) const {
         Tile2x2_u8_wrap tile = at_wrap(static_cast<float>(led_idx));
         
         // Accumulate color from the 4 sample points with their weights
-        uint32_t r_accum = 0, g_accum = 0, b_accum = 0;
-        uint32_t total_weight = 0;
+        fl::u32 r_accum = 0, g_accum = 0, b_accum = 0;
+        fl::u32 total_weight = 0;
         
         // Sample from each of the 4 corners of the tile
         for (uint8_t x = 0; x < 2; x++) {
@@ -299,9 +300,9 @@ void Corkscrew::readFromMulti(const fl::Grid<CRGB>& source_grid) const {
                     CRGB sample_color = source_grid.at(pos.x, pos.y);
                     
                     // Accumulate weighted color components
-                    r_accum += static_cast<uint32_t>(sample_color.r) * weight;
-                    g_accum += static_cast<uint32_t>(sample_color.g) * weight;
-                    b_accum += static_cast<uint32_t>(sample_color.b) * weight;
+                    r_accum += static_cast<fl::u32>(sample_color.r) * weight;
+                    g_accum += static_cast<fl::u32>(sample_color.g) * weight;
+                    b_accum += static_cast<fl::u32>(sample_color.b) * weight;
                     total_weight += weight;
                 }
             }
