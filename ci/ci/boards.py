@@ -342,6 +342,40 @@ TEENSY41 = Board(
     framework="arduino",
 )
 
+# Basic Arduino boards
+UNO = Board(
+    board_name="uno",
+    platform="atmelavr",
+    framework="arduino",
+)
+
+YUN = Board(
+    board_name="yun",
+    platform="atmelavr",
+    framework="arduino",
+)
+
+DIGIX = Board(
+    board_name="digix",
+    real_board_name="due",  # Digix is Arduino Due compatible
+    platform="atmelsam",
+    framework="arduino",
+)
+
+# ESP8266 boards
+ESP01 = Board(
+    board_name="esp01",
+    platform="espressif8266",
+    framework="arduino",
+)
+
+# ATtiny boards
+ATTINY85 = Board(
+    board_name="attiny85",
+    platform="atmelavr",
+    framework="arduino",
+)
+
 
 def _make_board_map(boards: list[Board]) -> dict[str, Board]:
     # make board map, but assert on duplicate board names
