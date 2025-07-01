@@ -4,6 +4,7 @@
 #include "fl/span.h"
 #include "fl/vector.h"
 #include "fl/move.h"
+#include "fl/memset.h"
 
 namespace fl {
 
@@ -76,7 +77,7 @@ struct FFT_Args {
              int sample_rate = DefaultSampleRate()) {
         // Memset so that this object can be hashed without garbage from packed
         // in data.
-        memset(this, 0, sizeof(FFT_Args));
+        fl::memset(this, 0, sizeof(FFT_Args));
         this->samples = samples;
         this->bands = bands;
         this->fmin = fmin;

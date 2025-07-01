@@ -231,6 +231,7 @@ int ESP32RMTController::gMemBlocks;
 // for gpio_matrix_out
 #include <rom/gpio.h>
 
+#include "fl/memset.h"
 // copied from rmt_private.h with slight changes to match the idf 4.x syntax
 typedef struct
 {
@@ -369,7 +370,7 @@ void ESP32RMTController::init(gpio_num_t pin, bool built_in_driver)
 
         // -- RMT configuration for transmission
         rmt_config_t rmt_tx;
-        memset(&rmt_tx, 0, sizeof(rmt_config_t));
+        fl::memset(&rmt_tx, 0, sizeof(rmt_config_t));
         rmt_tx.channel = rmt_channel_t(i);
         rmt_tx.rmt_mode = RMT_MODE_TX;
         rmt_tx.gpio_num = pin;

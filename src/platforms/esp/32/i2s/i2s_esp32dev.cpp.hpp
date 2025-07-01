@@ -22,6 +22,7 @@
 // Patches the i2s driver for compatibility with ESP-IDF v5.0.
 // This has only been compile tested. If there are issues then please file a bug.
 #include "soc/gpio_periph.h"
+#include "fl/memset.h"
 #define gpio_matrix_out esp_rom_gpio_connect_out_signal
 #endif
 
@@ -97,7 +98,7 @@ static DMABuffer *allocateDMABuffer(int bytes) {
         (DMABuffer *)heap_caps_malloc(sizeof(DMABuffer), MALLOC_CAP_DMA);
 
     b->buffer = (uint8_t *)heap_caps_malloc(bytes, MALLOC_CAP_DMA);
-    memset(b->buffer, 0, bytes);
+    fl::memset(b->buffer, 0, bytes);
 
     b->descriptor.length = bytes;
     b->descriptor.size = bytes;
@@ -339,8 +340,8 @@ void i2s_define_bit_patterns(int T1, int T2, int T3) {
         ++i;
     }
 
-    memset(gPixelRow, 0, NUM_COLOR_CHANNELS * 32);
-    memset(gPixelBits, 0, NUM_COLOR_CHANNELS * 32);
+    fl::memset(gPixelRow, 0, NUM_COLOR_CHANNELS * 32);
+    fl::memset(gPixelBits, 0, NUM_COLOR_CHANNELS * 32);
 }
 
 bool i2s_is_initialized() { return gInitialized; }

@@ -31,6 +31,7 @@
 #include "midi_Defs.h"
 #ifndef ARDUINO
 #include <string.h>
+#include "fl/memset.h"
 #endif
 
 BEGIN_MIDI_NAMESPACE
@@ -51,7 +52,7 @@ struct Message
         , data2(0)
         , valid(false)
     {
-        memset(sysexArray, 0, sSysExMaxSize * sizeof(DataByte));
+        fl::memset(sysexArray, 0, sSysExMaxSize * sizeof(DataByte));
     }
 
     /*! The maximum size for the System Exclusive array.

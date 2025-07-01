@@ -10,11 +10,12 @@
 #include "fl/xymap.h"
 #include "frame.h"
 
+#include "fl/memset.h"
 namespace fl {
 
 Frame::Frame(int pixels_count) : mPixelsCount(pixels_count), mRgb() {
     mRgb.resize(pixels_count);
-    memset((uint8_t*)mRgb.data(), 0, pixels_count * sizeof(CRGB));
+    fl::memset((uint8_t*)mRgb.data(), 0, pixels_count * sizeof(CRGB));
 }
 
 Frame::~Frame() {
@@ -71,7 +72,7 @@ void Frame::drawXY(CRGB *leds, const XYMap &xyMap, DrawMode draw_mode) const {
     }
 }
 
-void Frame::clear() { memset((uint8_t*)mRgb.data(), 0, mPixelsCount * sizeof(CRGB)); }
+void Frame::clear() { fl::memset((uint8_t*)mRgb.data(), 0, mPixelsCount * sizeof(CRGB)); }
 
 void Frame::interpolate(const Frame &frame1, const Frame &frame2,
                         uint8_t amountofFrame2, CRGB *pixels) {

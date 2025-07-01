@@ -3,6 +3,7 @@
 #include <string.h>
 
 #include "fl/inplacenew.h"
+#include "fl/memset.h"
 #include "fl/type_traits.h"
 #include "fl/bitcast.h"
 
@@ -179,17 +180,17 @@ void swap(array<T, N> &lhs,
 #if !FASTLED_VARIABLE_LENGTH_ARRAY_NEEDS_EMULATION
 #define FASTLED_STACK_ARRAY(TYPE, NAME, SIZE)                                  \
     TYPE NAME[SIZE];                                                           \
-    memset(NAME, 0, sizeof(TYPE) * (SIZE))
+    fl::memset(NAME, 0, sizeof(TYPE) * (SIZE))
 #elif __has_include(<alloca.h>)
 #include <alloca.h>
 #define FASTLED_STACK_ARRAY(TYPE, NAME, SIZE)                                  \
     TYPE *NAME = fl::bit_cast_ptr<TYPE>(alloca(sizeof(TYPE) * (SIZE)));      \
-    memset(NAME, 0, sizeof(TYPE) * (SIZE))
+    fl::memset(NAME, 0, sizeof(TYPE) * (SIZE))
 #elif __has_include(<cstdlib>)
 #include <cstdlib>  // ok include
 #define FASTLED_STACK_ARRAY(TYPE, NAME, SIZE)                                  \
     TYPE *NAME = fl::bit_cast_ptr<TYPE>(alloca(sizeof(TYPE) * (SIZE)));      \
-    memset(NAME, 0, sizeof(TYPE) * (SIZE))
+    fl::memset(NAME, 0, sizeof(TYPE) * (SIZE))
 #else
 #error "Compiler does not allow variable type arrays."
 #endif

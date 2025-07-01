@@ -5,6 +5,7 @@
 #include "fl/int.h"
 #include "fl/stdint.h"
 #include "fl/force_inline.h"
+#include "fl/memset.h"
 #include <string.h>
 
 namespace fl {
@@ -150,7 +151,7 @@ template <typename T> struct Hash<vec2<T>> {
 #pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
 #endif
         T packed[2];
-        memset(packed, 0, sizeof(packed));
+        fl::memset(packed, 0, sizeof(packed));
         packed[0] = key.x;
         packed[1] = key.y; // Protect against alignment issues
         const void *p = &packed[0];
