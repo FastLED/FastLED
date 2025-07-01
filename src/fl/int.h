@@ -13,6 +13,13 @@ namespace fl {
         typedef unsigned int u16;
         typedef long i32;
         typedef unsigned long u32;
+    #elif defined(ESP32) || defined(ESP_PLATFORM)
+        // On ESP32: short is 16-bit, long is 32-bit (to match uint32_t)
+        // This ensures fl::u32 matches uint32_t exactly for function pointer compatibility
+        typedef short i16;
+        typedef unsigned short u16;
+        typedef long i32;
+        typedef unsigned long u32;
     #else
         // On most other platforms: short is 16-bit, int is 32-bit
         typedef short i16;
