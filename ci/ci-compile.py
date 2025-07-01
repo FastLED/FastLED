@@ -495,6 +495,24 @@ def compile_with_pio_ci(
         if has_subdirs or verbose:
             locked_print(f"Scanning {example_path.name} for additional sources...")
 
+        # First, check for header files in the example root directory itself
+        # (e.g., defs.h files that need to be accessible to .ino files)
+        root_header_files = [
+            f
+            for f in example_path.iterdir()
+            if f.is_file() and f.suffix in [".h", ".hpp"]
+        ]
+
+        if root_header_files:
+            example_include_dirs.append(str(example_path))
+            locked_print(
+                f"  Found {len(root_header_files)} header file(s) in root directory"
+            )
+            if verbose:
+                for header in root_header_files:
+                    locked_print(f"    -> {header.name}")
+
+        # Then check subdirectories
         for subdir in example_path.iterdir():
             if subdir.is_dir() and subdir.name not in [
                 ".git",
@@ -604,6 +622,33 @@ def compile_with_pio_ci(
         # Add example source directories as libraries
         for src_dir in example_src_dirs:
             cmd_list.extend(["--lib", src_dir])
+
+        # Add example include directories as libraries (for header files like defs.h)
+        for include_dir in example_include_dirs:
+            # Only add as --lib if it's not already added as a source dir
+            if include_dir not in example_src_dirs:
+                cmd_list.extend(["--lib", include_dir])
+
+        # Copy header files from example root to build src directory for .ino compilation
+        # This ensures that .ino files can find header files like defs.h in the same directory
+        build_src_dir = board_build_dir / example_path.name / "src"
+        for include_dir in example_include_dirs:
+            if str(include_dir) == str(example_path):  # Root directory headers
+                # Copy .h/.hpp files to build src directory
+                for header_file in Path(include_dir).glob("*.h"):
+                    build_src_dir.mkdir(parents=True, exist_ok=True)
+                    shutil.copy2(header_file, build_src_dir)
+                    if verbose:
+                        locked_print(
+                            f"  Copied header file: {header_file.name} -> {build_src_dir}"
+                        )
+                for header_file in Path(include_dir).glob("*.hpp"):
+                    build_src_dir.mkdir(parents=True, exist_ok=True)
+                    shutil.copy2(header_file, build_src_dir)
+                    if verbose:
+                        locked_print(
+                            f"  Copied header file: {header_file.name} -> {build_src_dir}"
+                        )
 
         # Add custom SDK config if specified
         if board.customsdk:
