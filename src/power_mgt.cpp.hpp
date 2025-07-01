@@ -108,7 +108,7 @@ uint8_t calculate_max_brightness_for_power_mW(const CRGB* ledbuffer, uint16_t nu
 // sets brightness to
 //  - no more than target_brightness
 //  - no more than max_mW milliwatts
-uint8_t calculate_max_brightness_for_power_mW( uint8_t target_brightness, uint32_t max_power_mW)
+uint8_t calculate_max_brightness_for_power_mW( uint8_t target_brightness, fl::u32 max_power_mW)
 {
     uint32_t total_mW = gMCU_mW;
 

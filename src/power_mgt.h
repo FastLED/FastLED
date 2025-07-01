@@ -96,7 +96,7 @@ uint8_t calculate_max_brightness_for_power_vmA(const CRGB* ledbuffer, uint16_t n
 /// @param max_power_mW the max power draw desired, in milliwatts
 /// @returns a limited brightness value. No higher than the target brightness,
 /// but may be lower depending on the power limit.
-uint8_t  calculate_max_brightness_for_power_mW( uint8_t target_brightness, uint32_t max_power_mW);
+uint8_t  calculate_max_brightness_for_power_mW( uint8_t target_brightness, fl::u32 max_power_mW);
 
 /// @} PowerInternal
 
@@ -104,4 +104,3 @@ uint8_t  calculate_max_brightness_for_power_mW( uint8_t target_brightness, uint3
 /// @} Power
 
 FASTLED_NAMESPACE_END
-
