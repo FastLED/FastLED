@@ -442,19 +442,12 @@ def compile_with_pio_ci(
         # Use the first .ino file found
         ino_file = ino_files[0]
 
-        # Build pio ci command
-        cmd_list = [
-            "pio",
-            "ci",
-            str(ino_file),
-            "--board",
-            real_board_name,
-            "--lib",
-            "src",  # FastLED source directory
-            "--keep-build-dir",
-            "--build-dir",
-            str(board_build_dir / example_path.name),
-        ]
+        # Build pio ci command - create temporary FastLED library if it doesn't exist
+        fastled_lib_path = "/tmp/fastled_lib"
+        if not Path(fastled_lib_path).exists():
+            import shutil
+            Path(fastled_lib_path).mkdir(parents=True, exist_ok=True)
+            shutil.copytree(HERE.parent / "src", Path(fastled_lib_path) / "src")
 
         # Check for additional source directories in the example and collect them
         example_include_dirs = []
@@ -504,6 +497,32 @@ def compile_with_pio_ci(
                     if verbose:
                         locked_print(f"Added example source directory: {subdir}")
 
+        # Collect all source files to compile (after directories are scanned)
+        source_files = [str(ino_file)]
+        
+        # Add any .cpp files from the example directory and subdirectories
+        example_cpp_files = list(example_path.glob("*.cpp"))
+        source_files.extend(str(f) for f in example_cpp_files)
+        
+        for src_dir in example_src_dirs:
+            src_path = Path(src_dir)
+            cpp_files = list(src_path.glob("*.cpp"))
+            source_files.extend(str(f) for f in cpp_files)
+        
+        # Build the command list
+        cmd_list = [
+            "pio",
+            "ci",
+            *source_files,  # All source files (.ino and .cpp)
+            "--board",
+            real_board_name,
+            "--lib",
+            fastled_lib_path,  # FastLED library directory with proper structure
+            "--keep-build-dir",
+            "--build-dir",
+            str(board_build_dir / example_path.name),
+        ]
+
         # Add platform-specific options
         if board.platform:
             cmd_list.extend(["--project-option", f"platform={board.platform}"])
@@ -544,6 +563,9 @@ def compile_with_pio_ci(
         if all_defines:
             build_flags_list.extend(f"-D{define}" for define in all_defines)
 
+        # Add FastLED source directory as include path (absolute path)
+        build_flags_list.append(f"-I{fastled_lib_path}/src")
+        
         # Add example include directories as build flags
         if example_include_dirs:
             build_flags_list.extend(
@@ -552,6 +574,7 @@ def compile_with_pio_ci(
 
         # Add build flags directly using project options
         if build_flags_list:
+            # Combine all build flags into a single project option
             build_flags_str = " ".join(build_flags_list)
             cmd_list.extend(["--project-option", f"build_flags={build_flags_str}"])
 
