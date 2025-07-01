@@ -453,7 +453,7 @@ def compile_with_pio_ci(
             "--build-dir",
             str(board_build_dir / example_path.name),
             "--project-option",
-            "lib_deps=FastLED=symlink://.",  # Use PlatformIO's native symlink functionality
+            "lib_deps=FastLED=symlink://../../../",  # Use PlatformIO's native symlink functionality
         ]
 
         # Check for additional source directories in the example and collect them
