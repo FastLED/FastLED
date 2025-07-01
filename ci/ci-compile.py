@@ -597,7 +597,7 @@ def compile_with_pio_ci(
         start_time = time.time()
 
         try:
-            # Always stream output in real-time, with timestamps only in verbose mode
+            # Launch subprocess.Popen and capture output line by line with timestamps
             result = subprocess.Popen(
                 cmd_list,
                 stdout=subprocess.PIPE,
@@ -606,19 +606,25 @@ def compile_with_pio_ci(
                 cwd=str(HERE.parent),
             )
 
-            # Capture output lines in real-time
+            # Capture output lines in real-time with timestamp buffer
             stdout_lines = []
+            timestamped_lines = []
+
             if result.stdout:
                 for line in iter(result.stdout.readline, ""):
                     if line:
                         line_stripped = line.rstrip()
                         stdout_lines.append(line_stripped)
 
+                        # Add elapsed time since build started with 2 decimal places
+                        elapsed_time = time.time() - start_time
+                        timestamp = f"{elapsed_time:.2f}"
+                        timestamped_line = f"{timestamp} {line_stripped}"
+                        timestamped_lines.append(timestamped_line)
+
                         if verbose:
-                            # In verbose mode, add timestamps
-                            elapsed = time.time() - start_time
-                            timing_prefix = f"{elapsed:6.2f}s "
-                            locked_print(timing_prefix + line_stripped)
+                            # In verbose mode, show each line immediately with timestamp
+                            locked_print(timestamped_line)
                         else:
                             # In normal mode, show important compilation steps
                             if any(
@@ -657,10 +663,19 @@ def compile_with_pio_ci(
                                     "MethodWrapper",
                                 ]
                             ):
-                                locked_print(line_stripped)
+                                locked_print(timestamped_line)
 
             # Wait for process to complete
             result.wait()
+
+            # Join all timestamped lines and output them in a buffer
+            if not verbose and timestamped_lines:
+                # Output full timestamped buffer for non-verbose mode
+                full_timestamped_output = "\n".join(timestamped_lines)
+                locked_print(
+                    f"Full build output with timestamps:\n{full_timestamped_output}"
+                )
+
             stdout = "\n".join(stdout_lines)
             stderr = ""
             returncode = result.returncode
