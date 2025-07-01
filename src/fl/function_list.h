@@ -47,7 +47,7 @@ template <typename FunctionType> class FunctionListBase {
     const_iterator cend() const { return mFunctions.cend(); }
     
     // Size information
-    size_t size() const { return mFunctions.size(); }
+    fl::sz size() const { return mFunctions.size(); }
     bool empty() const { return mFunctions.empty(); }
 };
 

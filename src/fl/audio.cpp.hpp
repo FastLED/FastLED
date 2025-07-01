@@ -27,21 +27,21 @@ AudioSample &AudioSample::operator=(const AudioSample &other) {
     return *this;
 }
 
-size_t AudioSample::size() const {
+fl::sz AudioSample::size() const {
     if (isValid()) {
         return mImpl->pcm().size();
     }
     return 0;
 }
 
-const fl::i16 &AudioSample::at(size_t i) const {
+const fl::i16 &AudioSample::at(fl::sz i) const {
     if (i < size()) {
         return pcm()[i];
     }
     return empty()[0];
 }
 
-const fl::i16 &AudioSample::operator[](size_t i) const { return at(i); }
+const fl::i16 &AudioSample::operator[](fl::sz i) const { return at(i); }
 
 bool AudioSample::operator==(const AudioSample &other) const {
     if (mImpl == other.mImpl) {
@@ -53,7 +53,7 @@ bool AudioSample::operator==(const AudioSample &other) const {
     if (mImpl->pcm().size() != other.mImpl->pcm().size()) {
         return false;
     }
-    for (size_t i = 0; i < mImpl->pcm().size(); ++i) {
+    for (fl::sz i = 0; i < mImpl->pcm().size(); ++i) {
         if (mImpl->pcm()[i] != other.mImpl->pcm()[i]) {
             return false;
         }
@@ -99,10 +99,10 @@ SoundLevelMeter::SoundLevelMeter(double spl_floor, double smoothing_alpha)
       dbfs_floor_global_(INFINITY_DOUBLE), offset_(0.0), current_dbfs_(0.0),
       current_spl_(spl_floor) {}
 
-void SoundLevelMeter::processBlock(const fl::i16 *samples, size_t count) {
+void SoundLevelMeter::processBlock(const fl::i16 *samples, fl::sz count) {
     // 1) compute block power → dBFS
     double sum_sq = 0.0;
-    for (size_t i = 0; i < count; ++i) {
+    for (fl::sz i = 0; i < count; ++i) {
         double s = samples[i] / 32768.0; // normalize to ±1
         sum_sq += s * s;
     }

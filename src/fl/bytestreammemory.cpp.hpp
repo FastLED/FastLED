@@ -13,11 +13,11 @@ ByteStreamMemory::ByteStreamMemory(fl::u32 size_buffer)
 
 ByteStreamMemory::~ByteStreamMemory() = default;
 
-bool ByteStreamMemory::available(size_t n) const {
+bool ByteStreamMemory::available(fl::sz n) const {
     return mReadBuffer.size() >= n;
 }
 
-size_t ByteStreamMemory::read(fl::u8 *dst, size_t bytesToRead) {
+fl::sz ByteStreamMemory::read(fl::u8 *dst, fl::sz bytesToRead) {
     if (!available(bytesToRead) || dst == nullptr) {
         FASTLED_WARN("ByteStreamMemory::read: !available(bytesToRead): "
                      << bytesToRead
@@ -25,8 +25,8 @@ size_t ByteStreamMemory::read(fl::u8 *dst, size_t bytesToRead) {
         return 0;
     }
 
-    size_t actualBytesToRead = MIN(bytesToRead, mReadBuffer.size());
-    size_t bytesRead = 0;
+    fl::sz actualBytesToRead = MIN(bytesToRead, mReadBuffer.size());
+    fl::sz bytesRead = 0;
 
     while (bytesRead < actualBytesToRead) {
         fl::u8 &b = dst[bytesRead];
@@ -41,7 +41,7 @@ size_t ByteStreamMemory::read(fl::u8 *dst, size_t bytesToRead) {
     return bytesRead;
 }
 
-size_t ByteStreamMemory::write(const fl::u8 *src, size_t n) {
+fl::sz ByteStreamMemory::write(const fl::u8 *src, fl::sz n) {
     if (src == nullptr || mReadBuffer.capacity() == 0) {
         FASTLED_WARN_IF(src == nullptr,
                         "ByteStreamMemory::write: src == nullptr");
@@ -50,8 +50,8 @@ size_t ByteStreamMemory::write(const fl::u8 *src, size_t n) {
         return 0;
     }
 
-    size_t written = 0;
-    for (size_t i = 0; i < n; ++i) {
+    fl::sz written = 0;
+    for (fl::sz i = 0; i < n; ++i) {
         if (mReadBuffer.full()) {
             FASTLED_WARN("ByteStreamMemory::write: mReadBuffer.full(): "
                          << mReadBuffer.size());
@@ -63,9 +63,9 @@ size_t ByteStreamMemory::write(const fl::u8 *src, size_t n) {
     return written;
 }
 
-size_t ByteStreamMemory::writeCRGB(const CRGB *src, size_t n) {
-    size_t bytes_written = write(reinterpret_cast<const fl::u8 *>(src), n * 3);
-    size_t pixels_written = bytes_written / 3;
+fl::sz ByteStreamMemory::writeCRGB(const CRGB *src, fl::sz n) {
+    fl::sz bytes_written = write(reinterpret_cast<const fl::u8 *>(src), n * 3);
+    fl::sz pixels_written = bytes_written / 3;
     return pixels_written;
 }
 

@@ -82,7 +82,7 @@ class bitset_dynamic {
     // Assign n bits to the value specified
     FL_DISABLE_WARNING_PUSH
     FL_DISABLE_WARNING(null-dereference)
-    void assign(size_t n, bool value) {
+    void assign(fl::sz n, bool value) {
         if (n > _size) {
             resize(n);
         }

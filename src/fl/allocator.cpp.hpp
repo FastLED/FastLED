@@ -14,7 +14,7 @@ namespace {
 
 #ifdef ESP32
 // On esp32, attempt to always allocate in psram first.
-void *DefaultAlloc(size_t size) {
+void *DefaultAlloc(fl::sz size) {
     void *out = heap_caps_malloc(size, MALLOC_CAP_SPIRAM);
     if (out == nullptr) {
         // Fallback to default allocator.
@@ -24,20 +24,20 @@ void *DefaultAlloc(size_t size) {
 }
 void DefaultFree(void *ptr) { heap_caps_free(ptr); }
 #else
-void *DefaultAlloc(size_t size) { return malloc(size); }
+void *DefaultAlloc(fl::sz size) { return malloc(size); }
 void DefaultFree(void *ptr) { free(ptr); }
 #endif
 
-void *(*Alloc)(size_t) = DefaultAlloc;
+void *(*Alloc)(fl::sz) = DefaultAlloc;
 void (*Dealloc)(void *) = DefaultFree;
 } // namespace
 
-void SetPSRamAllocator(void *(*alloc)(size_t), void (*free)(void *)) {
+void SetPSRamAllocator(void *(*alloc)(fl::sz), void (*free)(void *)) {
     Alloc = alloc;
     Dealloc = free;
 }
 
-void *PSRamAllocate(size_t size, bool zero) {
+void *PSRamAllocate(fl::sz size, bool zero) {
     void *ptr = Alloc(size);
     if (ptr && zero) {
         memset(ptr, 0, size);
@@ -49,7 +49,7 @@ void PSRamDeallocate(void *ptr) {
     Dealloc(ptr);
 }
 
-void Malloc(size_t size) { Alloc(size); }
+void Malloc(fl::sz size) { Alloc(size); }
 
 void Free(void *ptr) { Dealloc(ptr); }
 

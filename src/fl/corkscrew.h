@@ -148,7 +148,7 @@ struct CorkscrewState {
         using pointer = vec2f *;
         using reference = vec2f &;
 
-        iterator(const class Corkscrew *corkscrew, size_t position)
+        iterator(const class Corkscrew *corkscrew, fl::sz position)
             : corkscrew_(corkscrew), position_(position) {}
 
         vec2f operator*() const;
@@ -190,7 +190,7 @@ struct CorkscrewState {
 
       private:
         const class Corkscrew *corkscrew_;
-        size_t position_;
+        fl::sz position_;
     };
 };
 
@@ -211,7 +211,7 @@ class Corkscrew {
 
     // This is the future api.
     Tile2x2_u8_wrap at_wrap(float i) const;
-    size_t size() const;
+    fl::sz size() const;
     iterator begin() { return iterator(this, 0); }
     iterator end() { return iterator(this, size()); }
 

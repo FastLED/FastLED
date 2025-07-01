@@ -158,8 +158,8 @@ void JsonConsole::parseCommand(const fl::string& command) {
     }
     
     // Work around fl::string::substring bug - it includes the end index when it shouldn't
-    fl::string name = command.substring(0, static_cast<size_t>(colonPos - 1));
-    fl::string valueStr = command.substring(static_cast<size_t>(colonPos + 1), command.size());
+    fl::string name = command.substring(0, static_cast<fl::sz>(colonPos - 1));
+    fl::string valueStr = command.substring(static_cast<fl::sz>(colonPos + 1), command.size());
     
     FL_WARN("JsonConsole::parseCommand: Raw name: '" << name.c_str() << "'");
     FL_WARN("JsonConsole::parseCommand: Raw valueStr: '" << valueStr.c_str() << "'");

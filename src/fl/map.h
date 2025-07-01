@@ -21,7 +21,7 @@ namespace fl {
 // do not exceed the capacity of the set, otherwise they will
 // fail. Because of this limitation, this set is not a drop in
 // replacement for std::map.
-template <typename Key, typename Value, size_t N> class FixedMap {
+template <typename Key, typename Value, fl::sz N> class FixedMap {
   public:
     using PairKV = fl::Pair<Key, Value>;
 
@@ -246,12 +246,12 @@ template <typename Key, typename Value, size_t N> class FixedMap {
     }
 
     // Get the current size of the vector
-    constexpr size_t size() const { return data.size(); }
+    constexpr fl::sz size() const { return data.size(); }
 
     constexpr bool empty() const { return data.empty(); }
 
     // Get the capacity of the vector
-    constexpr size_t capacity() const { return N; }
+    constexpr fl::sz capacity() const { return N; }
 
     // Clear the vector
     void clear() { data.clear(); }
@@ -273,7 +273,7 @@ class SortedHeapMap {
     using key_type = Key;
     using mapped_type = Value;
     using value_type = fl::Pair<Key, Value>;
-    using size_type = size_t;
+    using size_type = fl::sz;
     using difference_type = ptrdiff_t;
     using key_compare = Less;
     using reference = value_type&;
@@ -320,15 +320,15 @@ class SortedHeapMap {
     const_iterator cend() const { return data.end(); }
 
     // Capacity
-    size_t size() const { return data.size(); }
+    fl::sz size() const { return data.size(); }
     bool empty() const { return data.empty(); }
     bool full() const { return data.full(); }
-    size_t capacity() const { return data.capacity(); }
-    size_t max_size() const { return data.capacity(); }
+    fl::sz capacity() const { return data.capacity(); }
+    fl::sz max_size() const { return data.capacity(); }
 
     // FastLED specific methods
-    void setMaxSize(size_t n) { data.setMaxSize(n); }
-    void reserve(size_t n) { data.reserve(n); }
+    void setMaxSize(fl::sz n) { data.setMaxSize(n); }
+    void reserve(fl::sz n) { data.reserve(n); }
 
     // Element access
     Value &operator[](const Key &key) {

@@ -16,9 +16,9 @@
 namespace fl {
 
 // Aligned memory block for inlined data structures.
-template <typename T, size_t N> struct InlinedMemoryBlock {
+template <typename T, fl::sz N> struct InlinedMemoryBlock {
     // using MemoryType = uinptr_t;
-    typedef uintptr_t MemoryType;
+    typedef fl::uptr MemoryType;
     enum {
         kTotalBytes = N * sizeof(T),
         kAlign = sizeof(MemoryType),
@@ -44,16 +44,16 @@ template <typename T, size_t N> struct InlinedMemoryBlock {
 
     T *memory() {
         MemoryType *begin = &mMemoryBlock[0];
-        uintptr_t shift_up =
-            reinterpret_cast<uintptr_t>(begin) & (sizeof(MemoryType) - 1);
+        fl::uptr shift_up =
+            reinterpret_cast<fl::uptr>(begin) & (sizeof(MemoryType) - 1);
         MemoryType *raw = begin + shift_up;
         return reinterpret_cast<T *>(raw);
     }
 
     const T *memory() const {
         const MemoryType *begin = &mMemoryBlock[0];
-        const uintptr_t shift_up =
-            reinterpret_cast<uintptr_t>(begin) & (sizeof(MemoryType) - 1);
+        const fl::uptr shift_up =
+            reinterpret_cast<fl::uptr>(begin) & (sizeof(MemoryType) - 1);
         const MemoryType *raw = begin + shift_up;
         return reinterpret_cast<const T *>(raw);
     }
@@ -68,7 +68,7 @@ template <typename T, size_t N> struct InlinedMemoryBlock {
 // Because of this limitation, this vector is not a drop in replacement for
 // std::vector. However it used for vector_inlined<T, N> which allows spill over
 // to a heap vector when size > N.
-template <typename T, size_t N> class FixedVector {
+template <typename T, fl::sz N> class FixedVector {
   private:
     InlinedMemoryBlock<T, N> mMemoryBlock;
 
@@ -95,7 +95,7 @@ template <typename T, size_t N> class FixedVector {
         assign_array(other.memory(), other.current_size);
     }
 
-    template <size_t M> FixedVector(T (&values)[M]) : current_size(0) {
+    template <fl::sz M> FixedVector(T (&values)[M]) : current_size(0) {
         static_assert(M <= N, "Too many elements for FixedVector");
         assign_array(values, M);
     }
@@ -105,7 +105,7 @@ template <typename T, size_t N> class FixedVector {
         if (init.size() > N) {
             // Only assign the first N elements if the list is too long
             auto it = init.begin();
-            for (size_t i = 0; i < N && it != init.end(); ++i, ++it) {
+            for (fl::sz i = 0; i < N && it != init.end(); ++i, ++it) {
                 push_back(*it);
             }
         } else {
@@ -126,10 +126,10 @@ template <typename T, size_t N> class FixedVector {
     ~FixedVector() { clear(); }
 
     // Array subscript operator
-    T &operator[](size_t index) { return memory()[index]; }
+    T &operator[](fl::sz index) { return memory()[index]; }
 
     // Const array subscript operator
-    const T &operator[](size_t index) const {
+    const T &operator[](fl::sz index) const {
         if (index >= current_size) {
             const T *out = nullptr;
             return *out; // Cause a nullptr dereference
@@ -137,7 +137,7 @@ template <typename T, size_t N> class FixedVector {
         return memory()[index];
     }
 
-    void resize(size_t n) {
+    void resize(fl::sz n) {
         while (current_size < n) {
             push_back(T());
         }
@@ -147,12 +147,12 @@ template <typename T, size_t N> class FixedVector {
     }
 
     // Get the current size of the vector
-    constexpr size_t size() const { return current_size; }
+    constexpr fl::sz size() const { return current_size; }
 
     constexpr bool empty() const { return current_size == 0; }
 
     // Get the capacity of the vector
-    constexpr size_t capacity() const { return N; }
+    constexpr fl::sz capacity() const { return N; }
 
     // Add an element to the end of the vector
     void push_back(const T &value) {
@@ -172,16 +172,16 @@ template <typename T, size_t N> class FixedVector {
         }
     }
 
-    void reserve(size_t n) {
+    void reserve(fl::sz n) {
         if (n > N) {
             // This is a no-op for fixed size vectors
             return;
         }
     }
 
-    void assign_array(const T *values, size_t count) {
+    void assign_array(const T *values, fl::sz count) {
         clear();
-        for (size_t i = 0; i < count; ++i) {
+        for (fl::sz i = 0; i < count; ++i) {
             push_back(values[i]);
         }
     }
@@ -324,21 +324,21 @@ template <typename T, size_t N> class FixedVector {
                 fl::swap(memory()[i], other.memory()[i]);
             }
             // swap the sizes
-            size_t temp_size = current_size;
+            fl::sz temp_size = current_size;
             current_size = other.current_size;
             other.current_size = temp_size;
         }
     }
 
   private:
-    size_t current_size = 0;
+    fl::sz current_size = 0;
 };
 
 template <typename T, typename Allocator = fl::allocator<T>> class HeapVector {
   private:
     T* mArray = nullptr;
-    size_t mCapacity = 0;
-    size_t mSize = 0;
+    fl::sz mCapacity = 0;
+    fl::sz mSize = 0;
     Allocator mAlloc;
 
   public:
@@ -359,11 +359,11 @@ template <typename T, typename Allocator = fl::allocator<T>> class HeapVector {
     };
 
     // Constructor
-    HeapVector(size_t size = 0, const T &value = T()) : mCapacity(size), mSize(size) {
+    HeapVector(fl::sz size = 0, const T &value = T()) : mCapacity(size), mSize(size) {
         if (size > 0) {
             // mArray.reset(size);
             mArray = mAlloc.allocate(size);
-            for (size_t i = 0; i < size; ++i) {
+            for (fl::sz i = 0; i < size; ++i) {
                 mAlloc.construct(&mArray[i], value);
             }
         }
@@ -385,7 +385,7 @@ template <typename T, typename Allocator = fl::allocator<T>> class HeapVector {
         return *this;
     }
 
-    template <size_t N> HeapVector(T (&values)[N]) {
+    template <fl::sz N> HeapVector(T (&values)[N]) {
         T *begin = &values[0];
         T *end = &values[N];
         assign(begin, end);
@@ -403,7 +403,7 @@ template <typename T, typename Allocator = fl::allocator<T>> class HeapVector {
     ~HeapVector() { 
         clear();
         if (mArray) {
-            for (size_t i = 0; i < mSize; ++i) {
+            for (fl::sz i = 0; i < mSize; ++i) {
                 mAlloc.destroy(&mArray[i]);
             }
             mAlloc.deallocate(mArray, mCapacity);
@@ -411,9 +411,9 @@ template <typename T, typename Allocator = fl::allocator<T>> class HeapVector {
         }
     }
 
-    void ensure_size(size_t n) {
+    void ensure_size(fl::sz n) {
         if (n > mCapacity) {
-            size_t new_capacity = (3 * mCapacity) / 2;
+            fl::sz new_capacity = (3 * mCapacity) / 2;
             if (new_capacity < n) {
                 new_capacity = n;
             }
@@ -421,13 +421,13 @@ template <typename T, typename Allocator = fl::allocator<T>> class HeapVector {
             T* new_array = mAlloc.allocate(new_capacity);
             
             // Move existing elements to new array
-            for (size_t i = 0; i < mSize; ++i) {
+            for (fl::sz i = 0; i < mSize; ++i) {
                 mAlloc.construct(&new_array[i], fl::move(mArray[i]));
             }
             
             // Clean up old array
             if (mArray) {
-                for (size_t i = 0; i < mSize; ++i) {
+                for (fl::sz i = 0; i < mSize; ++i) {
                     mAlloc.destroy(&mArray[i]);
                 }
                 mAlloc.deallocate(mArray, mCapacity);
@@ -438,13 +438,13 @@ template <typename T, typename Allocator = fl::allocator<T>> class HeapVector {
         }
     }
 
-    void reserve(size_t n) {
+    void reserve(fl::sz n) {
         if (n > mCapacity) {
             ensure_size(n);
         }
     }
 
-    void resize(size_t n) {
+    void resize(fl::sz n) {
         if (mSize == n) {
             return;
         }
@@ -459,24 +459,24 @@ template <typename T, typename Allocator = fl::allocator<T>> class HeapVector {
         }
     }
 
-    void resize(size_t n, const T &value) {
+    void resize(fl::sz n, const T &value) {
         if (n > mCapacity) {
             // Need to allocate more space
             T* new_array = mAlloc.allocate(n);
             
             // Move existing elements
-            for (size_t i = 0; i < mSize; ++i) {
+            for (fl::sz i = 0; i < mSize; ++i) {
                 mAlloc.construct(&new_array[i], fl::move(mArray[i]));
             }
             
             // Initialize new elements with value
-            for (size_t i = mSize; i < n; ++i) {
+            for (fl::sz i = mSize; i < n; ++i) {
                 mAlloc.construct(&new_array[i], value);
             }
             
             // Clean up old array
             if (mArray) {
-                for (size_t i = 0; i < mSize; ++i) {
+                for (fl::sz i = 0; i < mSize; ++i) {
                     mAlloc.destroy(&mArray[i]);
                 }
                 mAlloc.deallocate(mArray, mCapacity);
@@ -487,13 +487,13 @@ template <typename T, typename Allocator = fl::allocator<T>> class HeapVector {
             mSize = n;
         } else if (n > mSize) {
             // Just need to add more elements
-            for (size_t i = mSize; i < n; ++i) {
+            for (fl::sz i = mSize; i < n; ++i) {
                 mAlloc.construct(&mArray[i], value);
             }
             mSize = n;
         } else if (n < mSize) {
             // Need to remove elements
-            for (size_t i = n; i < mSize; ++i) {
+            for (fl::sz i = n; i < mSize; ++i) {
                 mAlloc.destroy(&mArray[i]);
             }
             mSize = n;
@@ -510,7 +510,7 @@ template <typename T, typename Allocator = fl::allocator<T>> class HeapVector {
         }
     }
 
-    void assign(size_t new_cap, const T &value) {
+    void assign(fl::sz new_cap, const T &value) {
         clear();
         reserve(new_cap);
         while (size() < new_cap) {
@@ -519,16 +519,16 @@ template <typename T, typename Allocator = fl::allocator<T>> class HeapVector {
     }
 
     // Array access operators
-    T &operator[](size_t index) { return mArray[index]; }
+    T &operator[](fl::sz index) { return mArray[index]; }
 
-    const T &operator[](size_t index) const { return mArray[index]; }
+    const T &operator[](fl::sz index) const { return mArray[index]; }
 
     // Capacity and size methods
-    size_t size() const { return mSize; }
+    fl::sz size() const { return mSize; }
 
     bool empty() const { return mSize == 0; }
 
-    size_t capacity() const { return mCapacity; }
+    fl::sz capacity() const { return mCapacity; }
 
     // Element addition/removal
     void push_back(const T &value) {
@@ -556,7 +556,7 @@ template <typename T, typename Allocator = fl::allocator<T>> class HeapVector {
     }
 
     void clear() {
-        for (size_t i = 0; i < mSize; ++i) {
+        for (fl::sz i = 0; i < mSize; ++i) {
             mAlloc.destroy(&mArray[i]);
         }
         mSize = 0;
@@ -650,10 +650,10 @@ template <typename T, typename Allocator = fl::allocator<T>> class HeapVector {
     bool insert(iterator pos, const T &value) {
         // TODO: Introduce mMaxSize (and move it from SortedVector to here)
         // push back and swap into place.
-        size_t target_idx = pos - begin();
+        fl::sz target_idx = pos - begin();
         push_back(value);
         auto last = end() - 1;
-        for (size_t curr_idx = last - begin(); curr_idx > target_idx;
+        for (fl::sz curr_idx = last - begin(); curr_idx > target_idx;
              --curr_idx) {
             auto first = begin() + curr_idx - 1;
             auto second = begin() + curr_idx;
@@ -665,10 +665,10 @@ template <typename T, typename Allocator = fl::allocator<T>> class HeapVector {
     // Move version of insert
     bool insert(iterator pos, T &&value) {
         // push back and swap into place.
-        size_t target_idx = pos - begin();
+        fl::sz target_idx = pos - begin();
         push_back(fl::move(value));
         auto last = end() - 1;
-        for (size_t curr_idx = last - begin(); curr_idx > target_idx;
+        for (fl::sz curr_idx = last - begin(); curr_idx > target_idx;
              --curr_idx) {
             auto first = begin() + curr_idx - 1;
             auto second = begin() + curr_idx;
@@ -682,7 +682,7 @@ template <typename T, typename Allocator = fl::allocator<T>> class HeapVector {
     // template <typename InputIt>
     // void assign(InputIt begin, InputIt end) {
     //     clear();
-    //     auto n = static_cast<std::size_t>(end - begin);
+    //     auto n = static_cast<std::fl::sz>(end - begin);
     //     reserve(n);
     //     for (InputIt it = begin; it != end; ++it) {
     //         push_back(*it);
@@ -697,7 +697,7 @@ template <typename T, typename Allocator = fl::allocator<T>> class HeapVector {
         if (size() != other.size()) {
             return false;
         }
-        for (size_t i = 0; i < size(); ++i) {
+        for (fl::sz i = 0; i < size(); ++i) {
             if (mArray[i] != other.mArray[i]) {
                 return false;
             }
@@ -714,7 +714,7 @@ template <typename T, typename LessThan = fl::less<T>> class SortedHeapVector {
   private:
     HeapVector<T> mArray;
     LessThan mLess;
-    size_t mMaxSize = size_t(-1);
+    fl::sz mMaxSize = fl::sz(-1);
 
   public:
     typedef typename HeapVector<T>::iterator iterator;
@@ -722,7 +722,7 @@ template <typename T, typename LessThan = fl::less<T>> class SortedHeapVector {
 
     SortedHeapVector(LessThan less = LessThan()) : mLess(less) {}
 
-    void setMaxSize(size_t n) {
+    void setMaxSize(fl::sz n) {
         if (mMaxSize == n) {
             return;
         }
@@ -737,7 +737,7 @@ template <typename T, typename LessThan = fl::less<T>> class SortedHeapVector {
 
     ~SortedHeapVector() { mArray.clear(); }
 
-    void reserve(size_t n) { mArray.reserve(n); }
+    void reserve(fl::sz n) { mArray.reserve(n); }
 
     // Insert while maintaining sort order
     bool insert(const T &value, InsertResult *result = nullptr) {
@@ -818,9 +818,9 @@ template <typename T, typename LessThan = fl::less<T>> class SortedHeapVector {
     bool erase(iterator pos) { return mArray.erase(pos); }
 
     // Basic container operations
-    size_t size() const { return mArray.size(); }
+    fl::sz size() const { return mArray.size(); }
     bool empty() const { return mArray.empty(); }
-    size_t capacity() const { return mArray.capacity(); }
+    fl::sz capacity() const { return mArray.capacity(); }
     void clear() { mArray.clear(); }
     bool full() const {
         if (mArray.size() >= mMaxSize) {
@@ -830,8 +830,8 @@ template <typename T, typename LessThan = fl::less<T>> class SortedHeapVector {
     }
 
     // Element access
-    T &operator[](size_t index) { return mArray[index]; }
-    const T &operator[](size_t index) const { return mArray[index]; }
+    T &operator[](fl::sz index) { return mArray[index]; }
+    const T &operator[](fl::sz index) const { return mArray[index]; }
 
     T &front() { return mArray.front(); }
     const T &front() const { return mArray.front(); }
@@ -850,7 +850,7 @@ template <typename T, typename LessThan = fl::less<T>> class SortedHeapVector {
     const T *data() const { return mArray.data(); }
 };
 
-template <typename T, size_t INLINED_SIZE> class InlinedVector {
+template <typename T, fl::sz INLINED_SIZE> class InlinedVector {
   public:
     using iterator = typename FixedVector<T, INLINED_SIZE>::iterator;
     using const_iterator =
@@ -871,7 +871,7 @@ template <typename T, size_t INLINED_SIZE> class InlinedVector {
         fl::swap(*this, other);
         other.clear();
     }
-    InlinedVector(size_t size) : mUsingHeap(false) {
+    InlinedVector(fl::sz size) : mUsingHeap(false) {
         if (size > INLINED_SIZE) {
             mHeap.resize(size);
             mUsingHeap = true;
@@ -917,7 +917,7 @@ template <typename T, size_t INLINED_SIZE> class InlinedVector {
         return *this;
     }
 
-    void reserve(size_t size) {
+    void reserve(fl::sz size) {
         if (size > INLINED_SIZE) {
             if (mUsingHeap) {
                 mHeap.reserve(size);
@@ -943,7 +943,7 @@ template <typename T, size_t INLINED_SIZE> class InlinedVector {
         }
     }
 
-    void resize(size_t size) {
+    void resize(fl::sz size) {
         if (size > INLINED_SIZE) {
             if (mUsingHeap) {
                 mHeap.resize(size);
@@ -970,12 +970,12 @@ template <typename T, size_t INLINED_SIZE> class InlinedVector {
     }
 
     // Get current size
-    size_t size() const { return mUsingHeap ? mHeap.size() : mFixed.size(); }
+    fl::sz size() const { return mUsingHeap ? mHeap.size() : mFixed.size(); }
     bool empty() const { return size() == 0; }
     T *data() { return mUsingHeap ? mHeap.data() : mFixed.data(); }
     const T *data() const { return mUsingHeap ? mHeap.data() : mFixed.data(); }
 
-    void assign(size_t new_cap, const T &value) {
+    void assign(fl::sz new_cap, const T &value) {
         clear();
         if (INLINED_SIZE > new_cap) {
             // mFixed.assign(value);
@@ -1015,8 +1015,8 @@ template <typename T, size_t INLINED_SIZE> class InlinedVector {
     // }
 
     // Element access
-    T &operator[](size_t idx) { return mUsingHeap ? mHeap[idx] : mFixed[idx]; }
-    const T &operator[](size_t idx) const {
+    T &operator[](fl::sz idx) { return mUsingHeap ? mHeap[idx] : mFixed[idx]; }
+    const T &operator[](fl::sz idx) const {
         return mUsingHeap ? mHeap[idx] : mFixed[idx];
     }
 
@@ -1106,9 +1106,9 @@ template <typename T, size_t INLINED_SIZE> class InlinedVector {
             return mFixed.insert(pos, value);
         }
 
-        // size_t diff = pos - mFixed.begin();
+        // fl::sz diff = pos - mFixed.begin();
         // make safe for data that grows down
-        size_t idx = mFixed.end() - pos;
+        fl::sz idx = mFixed.end() - pos;
 
         // overflow: move inline data into heap
         mHeap.reserve(INLINED_SIZE * 2);
@@ -1130,9 +1130,9 @@ template <typename T, size_t INLINED_SIZE> class InlinedVector {
             return mFixed.insert(pos, fl::move(value));
         }
 
-        // size_t diff = pos - mFixed.begin();
+        // fl::sz diff = pos - mFixed.begin();
         // make safe for data that grows down
-        size_t idx = mFixed.end() - pos;
+        fl::sz idx = mFixed.end() - pos;
 
         // overflow: move inline data into heap
         mHeap.reserve(INLINED_SIZE * 2);
@@ -1178,10 +1178,10 @@ template <typename T, size_t INLINED_SIZE> class InlinedVector {
 
 template <typename T, typename Allocator = fl::allocator<T>> using vector = HeapVector<T, Allocator>;
 
-template <typename T, size_t INLINED_SIZE>
+template <typename T, fl::sz INLINED_SIZE>
 using vector_fixed = FixedVector<T, INLINED_SIZE>;
 
-template <typename T, size_t INLINED_SIZE = 64>
+template <typename T, fl::sz INLINED_SIZE = 64>
 using vector_inlined = InlinedVector<T, INLINED_SIZE>;
 
 } // namespace fl

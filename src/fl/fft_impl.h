@@ -30,7 +30,7 @@ class FFTImpl : public fl::Referent {
     FFTImpl(const FFT_Args &args);
     ~FFTImpl();
 
-    size_t sampleSize() const;
+    fl::sz sampleSize() const;
     // Note that the sample sizes MUST match the samples size passed into the
     // constructor.
     Result run(const AudioSample &sample, FFTBins *out);

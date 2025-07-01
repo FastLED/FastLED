@@ -31,10 +31,10 @@ namespace fl {
 
 class istream_real {
 private:
-    static const size_t BUFFER_SIZE = 256;
+    static const fl::sz BUFFER_SIZE = 256;
     char buffer_[BUFFER_SIZE];
-    size_t buffer_len_ = 0;
-    size_t pos_ = 0;
+    fl::sz buffer_len_ = 0;
+    fl::sz pos_ = 0;
     bool failed_ = false;
     
     // Helper to read a line from input
@@ -70,7 +70,7 @@ public:
     istream_real& operator>>(double& d);
     
 #if FASTLED_STRSTREAM_USES_SIZE_T
-    istream_real& operator>>(size_t& n);
+    istream_real& operator>>(fl::sz& n);
 #endif
     
     // Get a line from input
@@ -233,7 +233,7 @@ public:
     }
     
 #if FASTLED_STRSTREAM_USES_SIZE_T
-    istream& operator>>(size_t& n) {
+    istream& operator>>(fl::sz& n) {
 #if SKETCH_HAS_LOTS_OF_MEMORY
         real_stream_ >> n;
 #else

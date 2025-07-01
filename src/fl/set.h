@@ -13,7 +13,7 @@ namespace fl {
 // do not exceed the capacity of the set, otherwise they will
 // fail. Because of this limitation, this set is not a drop in
 // replacement for std::set.
-template <typename Key, size_t N> class FixedSet {
+template <typename Key, fl::sz N> class FixedSet {
   public:
     typedef FixedVector<Key, N> VectorType;
     typedef typename VectorType::iterator iterator;
@@ -133,12 +133,12 @@ template <typename Key, size_t N> class FixedSet {
     }
 
     // Get the current size of the set
-    constexpr size_t size() const { return data.size(); }
+    constexpr fl::sz size() const { return data.size(); }
 
     constexpr bool empty() const { return data.empty(); }
 
     // Get the capacity of the set
-    constexpr size_t capacity() const { return N; }
+    constexpr fl::sz capacity() const { return N; }
 
     // Clear the set
     void clear() { data.clear(); }

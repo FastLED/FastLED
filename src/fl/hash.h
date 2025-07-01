@@ -16,7 +16,7 @@ template <typename T> struct vec2;
 //-----------------------------------------------------------------------------
 // Based on the public‐domain implementation by Austin Appleby:
 // https://github.com/aappleby/smhasher/blob/master/src/MurmurHash3.cpp
-static inline uint32_t MurmurHash3_x86_32(const void *key, size_t len,
+static inline uint32_t MurmurHash3_x86_32(const void *key, fl::sz len,
                                           uint32_t seed = 0) {
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wimplicit-fallthrough"
@@ -135,7 +135,7 @@ template <typename T> struct FastHash<vec2<T>> {
 template <typename T> struct Hash<T *> {
     uint32_t operator()(T *key) const noexcept {
         if (sizeof(T *) == sizeof(uint32_t)) {
-            uint32_t key_u = reinterpret_cast<uintptr_t>(key);
+            uint32_t key_u = reinterpret_cast<fl::uptr>(key);
             return fast_hash32(key_u);
         } else {
             return MurmurHash3_x86_32(key, sizeof(T *));

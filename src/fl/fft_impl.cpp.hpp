@@ -64,7 +64,7 @@ class FFTContext {
         }
     }
 
-    size_t sampleSize() const { return m_cq_cfg.samples; }
+    fl::sz sampleSize() const { return m_cq_cfg.samples; }
 
     void fft_unit_test(span<const int16_t> buffer, FFTBins *out) {
 
@@ -142,7 +142,7 @@ fl::string FFTImpl::info() const {
     }
 }
 
-size_t FFTImpl::sampleSize() const {
+fl::sz FFTImpl::sampleSize() const {
     if (mContext) {
         return mContext->sampleSize();
     }

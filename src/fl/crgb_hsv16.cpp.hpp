@@ -13,8 +13,8 @@ CRGB CRGB::colorBoost(fl::EaseType saturation_function, fl::EaseType luminance_f
     return hsv.colorBoost(saturation_function, luminance_function);
 }
 
-void CRGB::colorBoost(const CRGB* src, CRGB* dst, size_t count, fl::EaseType saturation_function, fl::EaseType luminance_function) {
-    for (size_t i = 0; i < count; i++) {
+void CRGB::colorBoost(const CRGB* src, CRGB* dst, fl::sz count, fl::EaseType saturation_function, fl::EaseType luminance_function) {
+    for (fl::sz i = 0; i < count; i++) {
         dst[i] = src[i].colorBoost(saturation_function, luminance_function);
     }
 }

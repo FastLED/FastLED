@@ -70,11 +70,11 @@ template <fl::u32 N> class BitsetFixed {
         return *this;
     }
 
-    void assign(size_t n, bool value) {
+    void assign(fl::sz n, bool value) {
         if (n > N) {
             n = N;
         }
-        for (size_t i = 0; i < n; ++i) {
+        for (fl::sz i = 0; i < n; ++i) {
             set(i, value);
         }
     }
@@ -249,7 +249,7 @@ class BitsetInlined {
 
     /// Constructs a Bitset with all bits reset.
     BitsetInlined() : _storage(fixed_bitset()) {}
-    BitsetInlined(size_t size) : _storage(fixed_bitset()) {
+    BitsetInlined(fl::sz size) : _storage(fixed_bitset()) {
         if (size > N) {
             _storage = bitset_dynamic(size);
         }
@@ -279,7 +279,7 @@ class BitsetInlined {
         }
     }
 
-    void assign(size_t n, bool value) {
+    void assign(fl::sz n, bool value) {
         resize(n);
         if (_storage.template is<fixed_bitset>()) {
             _storage.template ptr<fixed_bitset>()->assign(n, value);
