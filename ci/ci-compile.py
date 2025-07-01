@@ -419,21 +419,6 @@ def compile_with_pio_ci(
 
     board_build_dir.mkdir(parents=True, exist_ok=True)
 
-    # Create symlink to FastLED source directory
-    fastled_symlink = board_build_dir / "fastled_src"
-    fastled_source_dir = HERE.parent / "src"
-    
-    # Remove existing symlink if it exists
-    if fastled_symlink.exists() or fastled_symlink.is_symlink():
-        fastled_symlink.unlink()
-    
-    # Create new symlink - make it relative to the build directory
-    relative_src_path = Path("../../src")  # Relative path from .build/{board}/ to src/
-    fastled_symlink.symlink_to(relative_src_path)
-    
-    if verbose:
-        locked_print(f"Created FastLED symlink: {fastled_symlink} -> {relative_src_path}")
-
     # Generate build_info.json for this board
     generate_build_info(board, board_build_dir, defines)
 
@@ -464,11 +449,11 @@ def compile_with_pio_ci(
             str(ino_file),
             "--board",
             real_board_name,
-            "--lib",
-            str(fastled_symlink),  # FastLED source directory via symlink
             "--keep-build-dir",
             "--build-dir",
             str(board_build_dir / example_path.name),
+            "--project-option",
+            "lib_deps=FastLED=symlink://.",  # Use PlatformIO's native symlink functionality
         ]
 
         # Check for additional source directories in the example and collect them
