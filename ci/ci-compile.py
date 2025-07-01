@@ -396,11 +396,7 @@ def compile_with_pio_ci(
 
         # Add optimization report flag for all builds (generates optimization_report.txt)
         # The report will be created in the build directory where GCC runs
-        # Use -fopt-info-all for newer GCC, fallback to -fopt-info for older versions
-        if board.board_name in ["uno", "yun", "attiny85", "ATtiny1616"]:  # AVR platforms with older GCC
-            build_flags_list.append("-fopt-info=optimization_report.txt")
-        else:
-            build_flags_list.append("-fopt-info-all=optimization_report.txt")
+        build_flags_list.append("-fopt-info-all=optimization_report.txt")
 
         # Add defines as build flags
         if all_defines:
