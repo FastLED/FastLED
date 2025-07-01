@@ -1,0 +1,30 @@
+#!/bin/bash
+# FastLED JavaScript Instant Check
+# Fastest possible JavaScript validation for all files
+
+DENO_BINARY=".js-tools/deno/deno"
+
+echo "⚡ Instant JS check (8 files)"
+
+# Check all 8 files with syntax validation (much faster than linting)
+# Using deno check instead of deno lint for speed
+FILES=(
+    "src/platforms/wasm/compiler/index.js"
+    "src/platforms/wasm/compiler/modules/audio_manager.js"
+    "src/platforms/wasm/compiler/modules/ui_manager.js"
+    "src/platforms/wasm/compiler/modules/graphics_manager.js"
+    "src/platforms/wasm/compiler/modules/graphics_manager_threejs.js"
+    "src/platforms/wasm/compiler/modules/ui_layout_placement_manager.js"
+    "src/platforms/wasm/compiler/modules/graphics_utils.js"
+    "src/platforms/wasm/compiler/modules/audio_worklet_processor.js"
+)
+
+# Check all files in one command for maximum speed
+if "$DENO_BINARY" check "${FILES[@]}" >/dev/null 2>&1; then
+    echo "✅ All files OK"
+    exit 0
+else
+    echo "❌ Syntax errors detected:"
+    "$DENO_BINARY" check "${FILES[@]}"
+    exit 1
+fi

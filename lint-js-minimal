@@ -1,0 +1,24 @@
+#!/bin/bash
+# FastLED JavaScript Linting Script (Minimal - Speed Optimized)
+# Designed for small file counts - prioritizes speed over comprehensive checking
+
+DENO_BINARY=".js-tools/deno/deno"
+
+# Quick check - if Deno not available, exit fast
+[ ! -f "$DENO_BINARY" ] && echo "❌ Deno not found" && exit 1
+
+# Count files quickly
+FILE_COUNT=$(find src/platforms/wasm/compiler -name "*.js" -type f 2>/dev/null | wc -l)
+[ "$FILE_COUNT" -eq 0 ] && echo "⚠️ No JS files" && exit 0
+
+echo "⚡ JS lint ($FILE_COUNT files)"
+
+# Single command - no config file, direct file paths, minimal overhead
+if "$DENO_BINARY" lint src/platforms/wasm/compiler/*.js src/platforms/wasm/compiler/modules/*.js 2>/dev/null; then
+    echo "✅ OK"
+    exit 0
+else
+    echo "❌ Issues found:"
+    "$DENO_BINARY" lint src/platforms/wasm/compiler/*.js src/platforms/wasm/compiler/modules/*.js
+    exit 1
+fi
