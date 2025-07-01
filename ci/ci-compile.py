@@ -5,6 +5,7 @@ This replaces the previous concurrent build system with a simpler pio ci approac
 
 import argparse
 import os
+import shutil
 import subprocess
 import sys
 import time
@@ -316,23 +317,8 @@ def compile_with_pio_ci(
         # Use the first .ino file found
         ino_file = ino_files[0]
 
-        # Build pio ci command
-        cmd_list = [
-            "pio",
-            "ci",
-            str(ino_file),
-            "--board",
-            real_board_name,
-            "--lib",
-            "src",  # FastLED source directory
-            "--keep-build-dir",
-            "--build-dir",
-            str(board_build_dir / example_path.name),
-        ]
-
-        # Check for additional source directories in the example and collect them
-        example_include_dirs = []
-        example_src_dirs = []
+        # Check if this is a complex example with subdirectories containing source files
+        has_subdirectories = False
         for subdir in example_path.iterdir():
             if subdir.is_dir() and subdir.name not in [
                 ".git",
@@ -341,85 +327,246 @@ def compile_with_pio_ci(
                 ".vscode",
             ]:
                 # Check if this directory contains source files
-                header_files = [
-                    f
-                    for f in subdir.rglob("*")
-                    if f.is_file() and f.suffix in [".h", ".hpp"]
-                ]
                 source_files = [
                     f
                     for f in subdir.rglob("*")
-                    if f.is_file() and f.suffix in [".cpp", ".c"]
+                    if f.is_file() and f.suffix in [".h", ".hpp", ".cpp", ".c"]
                 ]
-
-                if header_files:
-                    example_include_dirs.append(str(subdir))
-                    if verbose:
-                        locked_print(f"Added example include directory: {subdir}")
-
                 if source_files:
-                    example_src_dirs.append(str(subdir))
+                    has_subdirectories = True
+                    break
+
+        if has_subdirectories:
+            # Complex example: copy all files to preserve directory structure
+            if verbose:
+                locked_print(f"Complex example detected for {example_path.name}, copying all files to preserve directory structure")
+            
+            example_build_dir = board_build_dir / example_path.name
+            example_src_dir = example_build_dir / "src"
+            
+            # Remove any existing source directory to start fresh
+            if example_src_dir.exists():
+                shutil.rmtree(example_src_dir, ignore_errors=True)
+            
+            # Copy all files from the example directory to preserve structure
+            for src_file in example_path.rglob("*"):
+                if src_file.is_file():
+                    # Skip hidden files and build artifacts
+                    if src_file.name.startswith('.') or src_file.suffix in ['.o', '.a', '.so']:
+                        continue
+                    
+                    src_dir = src_file.parent
+                    rel_path = src_dir.relative_to(example_path)
+                    dst_dir = example_src_dir / rel_path
+                    dst_dir.mkdir(parents=True, exist_ok=True)
+                    
+                    dst_file = dst_dir / src_file.name
+                    shutil.copy2(src_file, dst_file)
                     if verbose:
-                        locked_print(f"Added example source directory: {subdir}")
+                        locked_print(f"Copied {src_file} to {dst_file}")
+            
+            # Use pio run instead of pio ci for complex examples
+            cmd_list = [
+                "pio",
+                "run",
+                "--project-dir",
+                str(example_build_dir),
+                "--environment",
+                real_board_name,
+            ]
+            
+            # Create a platformio.ini file for the complex example
+            platformio_ini_content = f"""[platformio]
+src_dir = src
 
-        # Add platform-specific options
-        if board.platform:
-            cmd_list.extend(["--project-option", f"platform={board.platform}"])
+[env:{real_board_name}]
+"""
+            # Determine platform - use board's platform or default based on board name
+            platform = board.platform
+            if not platform:
+                # Default platforms for common boards
+                if real_board_name in ["uno", "nano", "leonardo", "micro"]:
+                    platform = "atmelavr"
+                elif real_board_name.startswith("esp32"):
+                    platform = "espressif32"
+                elif real_board_name.startswith("esp8266") or real_board_name == "esp01":
+                    platform = "espressif8266"
+                elif real_board_name.startswith("teensy"):
+                    platform = "teensy"
+                elif "stm32" in real_board_name.lower() or "bluepill" in real_board_name.lower():
+                    platform = "ststm32"
+                else:
+                    # Generic fallback - let PlatformIO auto-detect
+                    platform = "atmelavr"  # Most common default
+            
+            platformio_ini_content += f"platform = {platform}\n"
+            platformio_ini_content += f"board = {real_board_name}\n"
+            
+            # Add framework - use board's framework or default to arduino
+            framework = board.framework or "arduino"
+            platformio_ini_content += f"framework = {framework}\n"
+            
+            # Note: We'll copy FastLED source directly instead of using lib_deps
+            # to avoid library manifest requirements
+            
+            # Write the platformio.ini file
+            platformio_ini_path = example_build_dir / "platformio.ini"
+            with open(platformio_ini_path, 'w') as f:
+                f.write(platformio_ini_content)
+            
+            if verbose:
+                locked_print(f"Created platformio.ini for complex example at {platformio_ini_path}")
+            
+            # Copy FastLED source into the project's lib directory
+            fastled_src_dir = Path("src")
+            project_lib_dir = example_build_dir / "lib" / "FastLED"
+            
+            if project_lib_dir.exists():
+                shutil.rmtree(project_lib_dir, ignore_errors=True)
+            
+            # Copy all FastLED source files
+            for src_file in fastled_src_dir.rglob("*"):
+                if src_file.is_file() and src_file.suffix in [".h", ".hpp", ".cpp", ".c"]:
+                    rel_path = src_file.relative_to(fastled_src_dir)
+                    dst_file = project_lib_dir / rel_path
+                    dst_file.parent.mkdir(parents=True, exist_ok=True)
+                    shutil.copy2(src_file, dst_file)
+            
+            if verbose:
+                locked_print(f"Copied FastLED source to {project_lib_dir}")
+        else:
+            # Simple example: use pio ci as before
+            if verbose:
+                locked_print(f"Simple example detected for {example_path.name}, using pio ci")
+            
+            # Build pio ci command
+            cmd_list = [
+                "pio",
+                "ci",
+                str(ino_file),
+                "--board",
+                real_board_name,
+                "--lib",
+                "src",  # FastLED source directory
+                "--keep-build-dir",
+                "--build-dir",
+                str(board_build_dir / example_path.name),
+            ]
 
-        if board.platform_packages:
-            cmd_list.extend(
-                ["--project-option", f"platform_packages={board.platform_packages}"]
-            )
+        # For simple examples, check for additional source directories and collect them
+        example_include_dirs = []
+        example_src_dirs = []
+        if not has_subdirectories:
+            for subdir in example_path.iterdir():
+                if subdir.is_dir() and subdir.name not in [
+                    ".git",
+                    "__pycache__",
+                    ".pio",
+                    ".vscode",
+                ]:
+                    # Check if this directory contains source files
+                    header_files = [
+                        f
+                        for f in subdir.rglob("*")
+                        if f.is_file() and f.suffix in [".h", ".hpp"]
+                    ]
+                    source_files = [
+                        f
+                        for f in subdir.rglob("*")
+                        if f.is_file() and f.suffix in [".cpp", ".c"]
+                    ]
 
-        if board.framework:
-            cmd_list.extend(["--project-option", f"framework={board.framework}"])
+                    if header_files:
+                        example_include_dirs.append(str(subdir))
+                        if verbose:
+                            locked_print(f"Added example include directory: {subdir}")
 
-        if board.board_build_core:
-            cmd_list.extend(
-                ["--project-option", f"board_build.core={board.board_build_core}"]
-            )
+                    if source_files:
+                        example_src_dirs.append(str(subdir))
+                        if verbose:
+                            locked_print(f"Added example source directory: {subdir}")
 
-        if board.board_build_filesystem_size:
-            cmd_list.extend(
-                [
-                    "--project-option",
-                    f"board_build.filesystem_size={board.board_build_filesystem_size}",
-                ]
-            )
+        # Add platform-specific options (only for simple examples using pio ci)
+        if not has_subdirectories:
+            if board.platform:
+                cmd_list.extend(["--project-option", f"platform={board.platform}"])
 
-        # Add defines and include paths
-        all_defines = defines.copy()
-        if board.defines:
-            all_defines.extend(board.defines)
+            if board.platform_packages:
+                cmd_list.extend(
+                    ["--project-option", f"platform_packages={board.platform_packages}"]
+                )
 
-        build_flags_list = []
+            if board.framework:
+                cmd_list.extend(["--project-option", f"framework={board.framework}"])
 
-        # Add defines as build flags
-        if all_defines:
-            build_flags_list.extend(f"-D{define}" for define in all_defines)
+            if board.board_build_core:
+                cmd_list.extend(
+                    ["--project-option", f"board_build.core={board.board_build_core}"]
+                )
 
-        # Add example include directories as build flags
-        if example_include_dirs:
-            build_flags_list.extend(
-                f"-I{include_dir}" for include_dir in example_include_dirs
-            )
+            if board.board_build_filesystem_size:
+                cmd_list.extend(
+                    [
+                        "--project-option",
+                        f"board_build.filesystem_size={board.board_build_filesystem_size}",
+                    ]
+                )
 
-        if build_flags_list:
-            # Combine all build flags into a single project option
-            all_flags = " ".join(build_flags_list)
-            cmd_list.extend(["-O", f"build_flags={all_flags}"])
+            # Add defines and include paths
+            all_defines = defines.copy()
+            if board.defines:
+                all_defines.extend(board.defines)
 
-        # Add example source directories as libraries
-        for src_dir in example_src_dirs:
-            cmd_list.extend(["--lib", src_dir])
+            build_flags_list = []
 
-        # Add custom SDK config if specified
-        if board.customsdk:
-            cmd_list.extend(["--project-option", f"custom_sdkconfig={board.customsdk}"])
+            # Add defines as build flags
+            if all_defines:
+                build_flags_list.extend(f"-D{define}" for define in all_defines)
 
-        # Add verbose flag if requested
-        if verbose:
+            # Add example include directories as build flags
+            if example_include_dirs:
+                build_flags_list.extend(
+                    f"-I{include_dir}" for include_dir in example_include_dirs
+                )
+
+            if build_flags_list:
+                # Combine all build flags into a single project option
+                all_flags = " ".join(build_flags_list)
+                cmd_list.extend(["-O", f"build_flags={all_flags}"])
+
+            # Add example source directories as libraries
+            for src_dir in example_src_dirs:
+                cmd_list.extend(["--lib", src_dir])
+
+            # Add custom SDK config if specified
+            if board.customsdk:
+                cmd_list.extend(["--project-option", f"custom_sdkconfig={board.customsdk}"])
+        else:
+            # For complex examples, add defines to the platformio.ini file if needed
+            all_defines = defines.copy()
+            if board.defines:
+                all_defines.extend(board.defines)
+            
+            if all_defines or board.board_build_core or board.board_build_filesystem_size or board.customsdk:
+                # Update the platformio.ini file with additional options
+                platformio_ini_path = board_build_dir / example_path.name / "platformio.ini"
+                with open(platformio_ini_path, 'a') as f:
+                    if all_defines:
+                        build_flags = " ".join(f"-D{define}" for define in all_defines)
+                        f.write(f"build_flags = {build_flags}\n")
+                    if board.board_build_core:
+                        f.write(f"board_build.core = {board.board_build_core}\n")
+                    if board.board_build_filesystem_size:
+                        f.write(f"board_build.filesystem_size = {board.board_build_filesystem_size}\n")
+                    if board.customsdk:
+                        f.write(f"custom_sdkconfig = {board.customsdk}\n")
+
+        # Add verbose flag if requested (only for simple examples using pio ci)
+        if verbose and not has_subdirectories:
             cmd_list.append("--verbose")
+        elif verbose and has_subdirectories:
+            # For complex examples using pio run, add verbose flag
+            cmd_list.extend(["--verbose"])
 
         # Execute the command
         cmd_str = subprocess.list2cmdline(cmd_list)
