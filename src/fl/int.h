@@ -1,14 +1,25 @@
 #pragma once
 
-#include <stdint.h>  // ok include
-
 namespace fl {
-    typedef int8_t i8;
-    typedef int16_t i16;
-    typedef int32_t i32;
-    typedef uint8_t u8;
-    typedef uint16_t u16;
-    typedef uint32_t u32;
+    // 8-bit types - char is reliably 8 bits on all supported platforms
+    typedef signed char i8;
+    typedef unsigned char u8;
+    
+    // 16-bit and 32-bit types - platform-specific to match stdint.h exactly
+    #ifdef __AVR__
+        // On AVR: int is 16-bit, long is 32-bit
+        // This matches how stdint.h defines these types on AVR
+        typedef int i16;
+        typedef unsigned int u16;
+        typedef long i32;
+        typedef unsigned long u32;
+    #else
+        // On most other platforms: short is 16-bit, int is 32-bit
+        typedef short i16;
+        typedef unsigned short u16;
+        typedef int i32;
+        typedef unsigned int u32;
+    #endif
     
     // Compile-time verification that types are exactly the expected size
     static_assert(sizeof(i8) == 1, "i8 must be exactly 1 byte");
