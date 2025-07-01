@@ -4,6 +4,7 @@
 
 #include "fl/inplacenew.h"
 #include "fl/type_traits.h"
+#include "fl/bitcast.h"
 
 #include "fl/initializer_list.h"
 
@@ -182,12 +183,12 @@ void swap(array<T, N> &lhs,
 #elif __has_include(<alloca.h>)
 #include <alloca.h>
 #define FASTLED_STACK_ARRAY(TYPE, NAME, SIZE)                                  \
-    TYPE *NAME = reinterpret_cast<TYPE *>(alloca(sizeof(TYPE) * (SIZE)));      \
+    TYPE *NAME = fl::bit_cast_ptr<TYPE>(alloca(sizeof(TYPE) * (SIZE)));      \
     memset(NAME, 0, sizeof(TYPE) * (SIZE))
 #elif __has_include(<cstdlib>)
 #include <cstdlib>  // ok include
 #define FASTLED_STACK_ARRAY(TYPE, NAME, SIZE)                                  \
-    TYPE *NAME = reinterpret_cast<TYPE *>(alloca(sizeof(TYPE) * (SIZE)));      \
+    TYPE *NAME = fl::bit_cast_ptr<TYPE>(alloca(sizeof(TYPE) * (SIZE)));      \
     memset(NAME, 0, sizeof(TYPE) * (SIZE))
 #else
 #error "Compiler does not allow variable type arrays."

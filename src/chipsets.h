@@ -6,6 +6,7 @@
 #include "pixeltypes.h"
 #include "fl/five_bit_hd_gamma.h"
 #include "fl/force_inline.h"
+#include "fl/bitcast.h"
 #include "pixel_iterator.h"
 #include "crgb.h"
 #include "eorder.h"
@@ -154,7 +155,7 @@ class RGBWEmulatedController
         // Ensure buffer is large enough
         ensureBuffer(pixels.size());
 		Rgbw rgbw = this->getRgbw();
-        fl::u8 *data = reinterpret_cast<fl::u8 *>(mRGBWPixels);
+        fl::u8 *data = fl::bit_cast_ptr<fl::u8>(mRGBWPixels);
         while (pixels.has(1)) {
             pixels.stepDithering();
             pixels.loadAndScaleRGBW(rgbw, data, data + 1, data + 2, data + 3);

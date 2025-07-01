@@ -18,6 +18,7 @@
 #include "fl/screenmap.h"
 #include "fl/virtual_if_not_avr.h"
 #include "fl/int.h"
+#include "fl/bitcast.h"
 
 FASTLED_NAMESPACE_BEGIN
 
@@ -233,7 +234,7 @@ public:
         // for each controller:
         //   endShowLeds();
         uintptr_t d = getDither();
-        void* out = reinterpret_cast<void*>(d);
+        void* out = fl::int_to_ptr<void>(d);
         return out;
     }
 
@@ -241,7 +242,7 @@ public:
         // By default recieves the integer that beginShowLeds() emitted.
         //For async controllers this should be used to signal the controller
         // to begin transmitting the current frame to the leds.
-        uintptr_t d = reinterpret_cast<uintptr_t>(data);
+        uintptr_t d = fl::ptr_to_int(data);
         setDither(static_cast<fl::u8>(d));
     }
 

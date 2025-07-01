@@ -44,5 +44,3 @@ ColorAdjustment CLEDController::getAdjustmentData(uint8_t brightness) {
 
 
 FASTLED_NAMESPACE_END
-
-

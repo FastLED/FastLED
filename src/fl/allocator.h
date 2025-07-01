@@ -5,6 +5,7 @@
 #include "fl/inplacenew.h"
 #include "fl/type_traits.h"
 #include "fl/unused.h"
+#include "fl/bitcast.h"
 
 namespace fl {
 
@@ -18,7 +19,7 @@ template <typename T> class PSRamAllocator {
   public:
     static T *Alloc(size_t n) {
         void *ptr = PSRamAllocate(sizeof(T) * n, true);
-        return reinterpret_cast<T *>(ptr);
+        return fl::bit_cast_ptr<T>(ptr);
     }
 
     static void Free(T *p) {
@@ -176,7 +177,7 @@ class allocator<TYPE> { \
     ~allocator() noexcept {} \
     \
     TYPE *allocate(size_t n) { \
-        return reinterpret_cast<TYPE *>(PSRamAllocate(sizeof(TYPE) * n, true)); \
+        return fl::bit_cast_ptr<TYPE>(PSRamAllocate(sizeof(TYPE) * n, true)); \
     } \
     void deallocate(TYPE *p, size_t n) { \
         if (p == nullptr) { \

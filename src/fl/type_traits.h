@@ -718,45 +718,7 @@ template <typename T, typename... Rest> struct max_align<T, Rest...> {
                                         : max_align<Rest...>::value;
 };
 
-//-------------------------------------------------------------------------------
-// bit_cast - Safe type-punning utility (C++20 std::bit_cast equivalent)
-//-------------------------------------------------------------------------------
 
-// C++20-style bit_cast for safe type reinterpretation
-// This avoids strict aliasing violations that occur with reinterpret_cast
-template <typename To, typename From>
-typename fl::enable_if<
-    sizeof(To) == sizeof(From) && 
-    fl::is_pod<To>::value && 
-    fl::is_pod<From>::value,
-    To
->::type
-bit_cast(const From& from) noexcept {
-    To result;
-    // Use memcpy for safe type-punning - compiler will optimize this away
-    // when both types are POD and same size
-    memcpy(&result, &from, sizeof(To));
-    return result;
-}
-
-// Overload for pointer types - converts storage pointer to typed pointer safely
-template <typename To>
-typename fl::enable_if<
-    fl::is_pod<To>::value,
-    To*
->::type
-bit_cast_ptr(void* storage) noexcept {
-    return static_cast<To*>(storage);
-}
-
-template <typename To>
-typename fl::enable_if<
-    fl::is_pod<To>::value,
-    const To*
->::type
-bit_cast_ptr(const void* storage) noexcept {
-    return static_cast<const To*>(storage);
-}
 
 } // namespace fl
 

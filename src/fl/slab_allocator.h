@@ -7,6 +7,7 @@
 #include "fl/type_traits.h"
 #include "fl/unused.h"
 #include "fl/assert.h"
+#include "fl/bitcast.h"
 
 namespace fl {
 
@@ -61,7 +62,7 @@ private:
         
         // Initialize all blocks in the slab as free
         for (size_t i = 0; i < BLOCKS_PER_SLAB; ++i) {
-            FreeBlock* block = reinterpret_cast<FreeBlock*>(slab->memory + i * BLOCK_SIZE);
+            FreeBlock* block = fl::bit_cast_ptr<FreeBlock>(static_cast<void*>(slab->memory + i * BLOCK_SIZE));
             block->next = free_list_;
             free_list_ = block;
         }
@@ -88,7 +89,7 @@ private:
         for (Slab* slab = slabs_; slab; slab = slab->next) {
             uint8_t* slab_start = slab->memory;
             uint8_t* slab_end = slab_start + SLAB_MEMORY_SIZE;
-            uint8_t* block_ptr = reinterpret_cast<uint8_t*>(block);
+            uint8_t* block_ptr = fl::bit_cast_ptr<uint8_t>(static_cast<void*>(block));
             
             if (block_ptr >= slab_start && block_ptr < slab_end) {
                 ++slab->allocated_count;
@@ -108,7 +109,7 @@ private:
         for (Slab* slab = slabs_; slab; slab = slab->next) {
             uint8_t* slab_start = slab->memory;
             uint8_t* slab_end = slab_start + SLAB_MEMORY_SIZE;
-            uint8_t* block_ptr = reinterpret_cast<uint8_t*>(ptr);
+            uint8_t* block_ptr = fl::bit_cast_ptr<uint8_t>(ptr);
             
             if (block_ptr >= slab_start && block_ptr < slab_end) {
                 FASTLED_ASSERT(slab->allocated_count > 0, "Slab allocated count underflow");
@@ -117,7 +118,7 @@ private:
             }
         }
         
-        FreeBlock* block = reinterpret_cast<FreeBlock*>(ptr);
+        FreeBlock* block = fl::bit_cast_ptr<FreeBlock>(ptr);
         block->next = free_list_;
         free_list_ = block;
         ++total_deallocated_;
