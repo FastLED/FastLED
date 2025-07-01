@@ -2,6 +2,7 @@
 
 #include "crgb.h"
 #include "fl/colorutils_misc.h"
+#include "fl/int.h"
 #include "fl/stdint.h"
 
 /// ANSI: signed short _Accum.  8 bits int, 7 bits fraction
@@ -36,12 +37,12 @@ void fill_solid(struct CHSV *targetArray, int numToFill,
 /// @param numToFill the number of LEDs to fill in the array
 /// @param initialhue the starting hue for the rainbow
 /// @param deltahue how many hue values to advance for each LED
-void fill_rainbow(struct CRGB *targetArray, int numToFill, uint8_t initialhue,
-                  uint8_t deltahue = 5);
+void fill_rainbow(struct CRGB *targetArray, int numToFill, fl::u8 initialhue,
+                  fl::u8 deltahue = 5);
 
 /// @copydoc fill_rainbow()
-void fill_rainbow(struct CHSV *targetArray, int numToFill, uint8_t initialhue,
-                  uint8_t deltahue = 5);
+void fill_rainbow(struct CHSV *targetArray, int numToFill, fl::u8 initialhue,
+                  fl::u8 deltahue = 5);
 
 /// Fill a range of LEDs with a rainbow of colors, so that the hues
 /// are continuous between the end of the strip and the beginning.
@@ -52,11 +53,11 @@ void fill_rainbow(struct CHSV *targetArray, int numToFill, uint8_t initialhue,
 /// @param initialhue the starting hue for the rainbow
 /// @param reversed whether to progress through the rainbow hues backwards
 void fill_rainbow_circular(struct CRGB *targetArray, int numToFill,
-                           uint8_t initialhue, bool reversed = false);
+                           fl::u8 initialhue, bool reversed = false);
 
 /// @copydoc fill_rainbow_circular()
 void fill_rainbow_circular(struct CHSV *targetArray, int numToFill,
-                           uint8_t initialhue, bool reversed = false);
+                           fl::u8 initialhue, bool reversed = false);
 
 /// Fill a range of LEDs with a smooth HSV gradient between two HSV colors.
 /// This function can write the gradient colors either:
@@ -110,7 +111,7 @@ void fill_gradient(T *targetArray, uint16_t startpos, CHSV startcolor,
     satdistance87 = (endcolor.sat - startcolor.sat) << 7;
     valdistance87 = (endcolor.val - startcolor.val) << 7;
 
-    uint8_t huedelta8 = endcolor.hue - startcolor.hue;
+    fl::u8 huedelta8 = endcolor.hue - startcolor.hue;
 
     if (directionCode == SHORTEST_HUES) {
         directionCode = FORWARD_HUES;
@@ -130,7 +131,7 @@ void fill_gradient(T *targetArray, uint16_t startpos, CHSV startcolor,
         huedistance87 = huedelta8 << 7;
     } else /* directionCode == BACKWARD_HUES */
     {
-        huedistance87 = (uint8_t)(256 - huedelta8) << 7;
+        huedistance87 = (fl::u8)(256 - huedelta8) << 7;
         huedistance87 = -huedistance87;
     }
 

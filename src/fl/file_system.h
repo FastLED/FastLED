@@ -3,6 +3,7 @@
 // Note, fs.h breaks ESPAsyncWebServer so we use file_system.h instead.
 
 #include "fl/stdint.h"
+#include "fl/int.h"
 
 #include "fl/namespace.h"
 #include "fl/ptr.h"
@@ -66,7 +67,7 @@ class FileHandle : public Referent {
     virtual bool available() const = 0;
     virtual size_t bytesLeft() const;
     virtual size_t size() const = 0;
-    virtual size_t read(uint8_t *dst, size_t bytesToRead) = 0;
+    virtual size_t read(fl::u8 *dst, size_t bytesToRead) = 0;
     virtual size_t pos() const = 0;
     virtual const char *path() const = 0;
     virtual bool seek(size_t pos) = 0;
@@ -75,7 +76,7 @@ class FileHandle : public Referent {
 
     // convenience functions
     size_t readCRGB(CRGB *dst, size_t n) {
-        return read((uint8_t *)dst, n * 3) / 3;
+        return read((fl::u8 *)dst, n * 3) / 3;
     }
 };
 

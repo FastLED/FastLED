@@ -4,6 +4,7 @@
 #pragma once
 
 #include "fl/stdint.h"
+#include "fl/int.h"
 
 #include "fl/namespace.h"
 
@@ -20,22 +21,22 @@ struct CHSV {
                 /// Color hue.
                 /// This is an 8-bit value representing an angle around
                 /// the color wheel. Where 0 is 0°, and 255 is 358°.
-                uint8_t hue;
-                uint8_t h;  ///< @copydoc hue
+                fl::u8 hue;
+                fl::u8 h;  ///< @copydoc hue
             };
             union {
                 /// Color saturation.
                 /// This is an 8-bit value representing a percentage.
-                uint8_t saturation;
-                uint8_t sat;  ///< @copydoc saturation
-                uint8_t s;    ///< @copydoc saturation
+                fl::u8 saturation;
+                fl::u8 sat;  ///< @copydoc saturation
+                fl::u8 s;    ///< @copydoc saturation
             };
             union {
                 /// Color value (brightness).
                 /// This is an 8-bit value representing a percentage.
-                uint8_t value;
-                uint8_t val;  ///< @copydoc value
-                uint8_t v;    ///< @copydoc value
+                fl::u8 value;
+                fl::u8 val;  ///< @copydoc value
+                fl::u8 v;    ///< @copydoc value
             };
         };
         /// Access the hue, saturation, and value data as an array.
@@ -43,19 +44,19 @@ struct CHSV {
         /// * `raw[0]` is the hue
         /// * `raw[1]` is the saturation
         /// * `raw[2]` is the value
-        uint8_t raw[3];
+        fl::u8 raw[3];
     };
 
     /// Array access operator to index into the CHSV object
     /// @param x the index to retrieve (0-2)
     /// @returns the CHSV::raw value for the given index
-    inline uint8_t& operator[] (uint8_t x) __attribute__((always_inline))
+    inline fl::u8& operator[] (fl::u8 x) __attribute__((always_inline))
     {
         return raw[x];
     }
 
     /// @copydoc operator[]
-    inline const uint8_t& operator[] (uint8_t x) const __attribute__((always_inline))
+    inline const fl::u8& operator[] (fl::u8 x) const __attribute__((always_inline))
     {
         return raw[x];
     }
@@ -68,7 +69,7 @@ struct CHSV {
     /// @param ih input hue
     /// @param is input saturation
     /// @param iv input value
-    constexpr inline CHSV( uint8_t ih, uint8_t is, uint8_t iv) __attribute__((always_inline))
+    constexpr inline CHSV( fl::u8 ih, fl::u8 is, fl::u8 iv) __attribute__((always_inline))
         : h(ih), s(is), v(iv)
     {
     }
@@ -84,7 +85,7 @@ struct CHSV {
     /// @param is input saturation
     /// @param iv input value
     /// @returns reference to the CHSV object
-    inline CHSV& setHSV(uint8_t ih, uint8_t is, uint8_t iv) __attribute__((always_inline))
+    inline CHSV& setHSV(fl::u8 ih, fl::u8 is, fl::u8 iv) __attribute__((always_inline))
     {
         h = ih;
         s = is;

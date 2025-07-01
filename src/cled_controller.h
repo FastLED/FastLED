@@ -52,13 +52,13 @@ public:
     /// @param data the CRGB color to set the LEDs to
     /// @param nLeds the number of LEDs to set to this color
     /// @param scale the rgb scaling value for outputting color
-    virtual void showColor(const CRGB & data, int nLeds, uint8_t brightness) = 0;
+    virtual void showColor(const CRGB & data, int nLeds, fl::u8 brightness) = 0;
 
     /// Write the passed in RGB data out to the LEDs managed by this controller. 
     /// @param data the rgb data to write out to the strip
     /// @param nLeds the number of LEDs being written out
     /// @param scale the rgb scaling to apply to each led before writing it out
-    virtual void show(const struct CRGB *data, int nLeds, uint8_t brightness) = 0;
+    virtual void show(const struct CRGB *data, int nLeds, fl::u8 brightness) = 0;
 
 
     Rgbw mRgbMode = RgbwInvalid::value();
@@ -95,13 +95,13 @@ public:
     }
 
     // Compatibility with the 3.8.x codebase.
-    VIRTUAL_IF_NOT_AVR void showLeds(uint8_t brightness) {
+    VIRTUAL_IF_NOT_AVR void showLeds(fl::u8 brightness) {
         void* data = beginShowLeds(m_nLeds);
         showLedsInternal(brightness);
         endShowLeds(data);
     }
 
-    ColorAdjustment getAdjustmentData(uint8_t brightness);
+    ColorAdjustment getAdjustmentData(fl::u8 brightness);
 
     /// @copybrief show(const struct CRGB*, int, CRGB)
     ///
@@ -110,7 +110,7 @@ public:
     /// @param nLeds the number of LEDs in the data array
     /// @param brightness the brightness of the LEDs
     /// @see show(const struct CRGB*, int, CRGB)
-    void showInternal(const struct CRGB *data, int nLeds, uint8_t brightness) {
+    void showInternal(const struct CRGB *data, int nLeds, fl::u8 brightness) {
         if (m_enabled) {
            show(data, nLeds,brightness);
         }
@@ -123,7 +123,7 @@ public:
     /// @param nLeds the number of LEDs in the data array
     /// @param brightness the brightness of the LEDs
     /// @see showColor(const struct CRGB&, int, CRGB)
-    void showColorInternal(const struct CRGB &data, int nLeds, uint8_t brightness) {
+    void showColorInternal(const struct CRGB &data, int nLeds, fl::u8 brightness) {
         if (m_enabled) {
             showColor(data, nLeds, brightness);
         }
@@ -131,8 +131,8 @@ public:
 
     /// Write the data to the LEDs managed by this controller
     /// @param brightness the brightness of the LEDs
-    /// @see show(const struct CRGB*, int, uint8_t)
-    void showLedsInternal(uint8_t brightness) {
+    /// @see show(const struct CRGB*, int, fl::u8)
+    void showLedsInternal(fl::u8 brightness) {
         if (m_enabled) {
             show(m_Data, m_nLeds, brightness);
         }
@@ -143,7 +143,7 @@ public:
     /// @param data the CRGB color to set the LEDs to
     /// @param brightness the brightness of the LEDs
     /// @see showColor(const struct CRGB&, int, CRGB)
-    void showColorInternal(const struct CRGB & data, uint8_t brightness) {
+    void showColorInternal(const struct CRGB & data, fl::u8 brightness) {
         if (m_enabled) {
             showColor(data, m_nLeds, brightness);
         }
@@ -189,7 +189,7 @@ public:
     /// Set the dithering mode for this controller to use
     /// @param ditherMode the dithering mode to set
     /// @returns a reference to the controller
-    inline CLEDController & setDither(uint8_t ditherMode = BINARY_DITHER) { m_DitherMode = ditherMode; return *this; }
+    inline CLEDController & setDither(fl::u8 ditherMode = BINARY_DITHER) { m_DitherMode = ditherMode; return *this; }
 
     CLEDController& setScreenMap(const fl::XYMap& map, float diameter = -1.f) {
         // EngineEvents::onCanvasUiSet(this, map);
@@ -216,7 +216,7 @@ public:
 
     /// Get the dithering option currently set for this controller
     /// @return the currently set dithering option (CLEDController::m_DitherMode)
-    inline uint8_t getDither() { return m_DitherMode; }
+    inline fl::u8 getDither() { return m_DitherMode; }
 
     virtual void* beginShowLeds(int size) {
         FASTLED_UNUSED(size);
@@ -242,7 +242,7 @@ public:
         //For async controllers this should be used to signal the controller
         // to begin transmitting the current frame to the leds.
         uintptr_t d = reinterpret_cast<uintptr_t>(data);
-        setDither(static_cast<uint8_t>(d));
+        setDither(static_cast<fl::u8>(d));
     }
 
     /// The color corrction to use for this controller, expressed as a CRGB object
@@ -272,7 +272,7 @@ public:
     /// Get the combined brightness/color adjustment for this controller
     /// @param scale the brightness scale to get the correction for
     /// @returns a CRGB object representing the total adjustment, including color correction and color temperature
-    CRGB getAdjustment(uint8_t scale) {
+    CRGB getAdjustment(fl::u8 scale) {
         return CRGB::computeAdjustment(scale, m_ColorCorrection, m_ColorTemperature);
     }
 

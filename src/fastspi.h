@@ -42,7 +42,7 @@ FASTLED_NAMESPACE_BEGIN
 #if defined(FASTLED_STUB_IMPL)
 
 
-template<uint8_t _DATA_PIN, uint8_t _CLOCK_PIN, fl::u32 _SPI_CLOCK_DIVIDER>
+template<fl::u8 _DATA_PIN, fl::u8 _CLOCK_PIN, fl::u32 _SPI_CLOCK_DIVIDER>
 class SPIOutput : public StubSPIOutput {};
 
 
@@ -50,38 +50,38 @@ class SPIOutput : public StubSPIOutput {};
 
 #if !defined(FASTLED_ALL_PINS_HARDWARE_SPI)
 /// Hardware SPI output
-template<uint8_t _DATA_PIN, uint8_t _CLOCK_PIN, fl::u32 _SPI_CLOCK_DIVIDER>
+template<fl::u8 _DATA_PIN, fl::u8 _CLOCK_PIN, fl::u32 _SPI_CLOCK_DIVIDER>
 class SPIOutput : public AVRSoftwareSPIOutput<_DATA_PIN, _CLOCK_PIN, _SPI_CLOCK_DIVIDER> {};
 #endif
 
 /// Software SPI output
-template<uint8_t _DATA_PIN, uint8_t _CLOCK_PIN, fl::u32 _SPI_CLOCK_DIVIDER>
+template<fl::u8 _DATA_PIN, fl::u8 _CLOCK_PIN, fl::u32 _SPI_CLOCK_DIVIDER>
 class SoftwareSPIOutput : public AVRSoftwareSPIOutput<_DATA_PIN, _CLOCK_PIN, _SPI_CLOCK_DIVIDER> {};
 
 #ifndef FASTLED_FORCE_SOFTWARE_SPI
 
 #if defined(NRF51) && defined(FASTLED_ALL_PINS_HARDWARE_SPI)
-template<uint8_t _DATA_PIN, uint8_t _CLOCK_PIN, fl::u32 _SPI_CLOCK_DIVIDER>
+template<fl::u8 _DATA_PIN, fl::u8 _CLOCK_PIN, fl::u32 _SPI_CLOCK_DIVIDER>
 class SPIOutput : public NRF51SPIOutput<_DATA_PIN, _CLOCK_PIN, _SPI_CLOCK_DIVIDER> {};
 #endif
 
 #if defined(NRF52_SERIES) && defined(FASTLED_ALL_PINS_HARDWARE_SPI)
-template<uint8_t _DATA_PIN, uint8_t _CLOCK_PIN, fl::u32 _SPI_CLOCK_DIVIDER>
+template<fl::u8 _DATA_PIN, fl::u8 _CLOCK_PIN, fl::u32 _SPI_CLOCK_DIVIDER>
 class SPIOutput : public NRF52SPIOutput<_DATA_PIN, _CLOCK_PIN, _SPI_CLOCK_DIVIDER> {};
 #endif
 
 #if defined(FASTLED_APOLLO3) && defined(FASTLED_ALL_PINS_HARDWARE_SPI)
-template<uint8_t _DATA_PIN, uint8_t _CLOCK_PIN, fl::u32 _SPI_CLOCK_DIVIDER>
+template<fl::u8 _DATA_PIN, fl::u8 _CLOCK_PIN, fl::u32 _SPI_CLOCK_DIVIDER>
 class SPIOutput : public APOLLO3HardwareSPIOutput<_DATA_PIN, _CLOCK_PIN, _SPI_CLOCK_DIVIDER> {};
 #endif
 
 #if defined(ESP32) && defined(FASTLED_ALL_PINS_HARDWARE_SPI)
-template<uint8_t _DATA_PIN, uint8_t _CLOCK_PIN, fl::u32 _SPI_CLOCK_DIVIDER>
+template<fl::u8 _DATA_PIN, fl::u8 _CLOCK_PIN, fl::u32 _SPI_CLOCK_DIVIDER>
 class SPIOutput : public ESP32SPIOutput<_DATA_PIN, _CLOCK_PIN, _SPI_CLOCK_DIVIDER> {};
 #endif
 
 #if defined(ESP8266) && defined(FASTLED_ALL_PINS_HARDWARE_SPI)
-template<uint8_t _DATA_PIN, uint8_t _CLOCK_PIN, fl::u32 _SPI_CLOCK_DIVIDER>
+template<fl::u8 _DATA_PIN, fl::u8 _CLOCK_PIN, fl::u32 _SPI_CLOCK_DIVIDER>
 class SPIOutput : public ESP8266SPIOutput<_DATA_PIN, _CLOCK_PIN, _SPI_CLOCK_DIVIDER> {};
 #endif
 

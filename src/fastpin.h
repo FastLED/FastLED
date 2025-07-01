@@ -51,7 +51,7 @@ class Pin : public Selectable {
 	volatile RwReg *mPort;    ///< Output register for the pin
 	volatile RoReg *mInPort;  ///< Input register for the pin
 	RwReg mPinMask;  ///< Bitmask for the pin within its register
-	uint8_t mPin;    ///< Arduino digital pin number
+	fl::u8 mPin;    ///< Arduino digital pin number
 
 	/// Initialize the class by retrieving the register
 	/// pointers and bitmask.
@@ -148,7 +148,7 @@ class Pin : public Selectable {
 	volatile RwReg *mPort;
 	volatile RoReg *mInPort;
 	RwReg mPinMask;
-	uint8_t mPin;
+	fl::u8 mPin;
 
 
 
@@ -228,7 +228,7 @@ public:
 /// Note that these classes are all static functions.  So the proper usage is Pin<13>::hi(); or such.  Instantiating objects is not recommended,
 /// as passing Pin objects around will likely -not- have the effect you're expecting.
 #ifdef FASTLED_FORCE_SOFTWARE_PINS
-template<uint8_t PIN> class FastPin {
+template<fl::u8 PIN> class FastPin {
 	static RwReg sPinMask;            ///< Bitmask for the pin within its register
 	static volatile RwReg *sPort;     ///< Output register for the pin
 	static volatile RoReg *sInPort;   ///< Input register for the pin
@@ -280,13 +280,13 @@ public:
 	static port_t mask() __attribute__ ((always_inline)) { return sPinMask; }
 };
 
-template<uint8_t PIN> RwReg FastPin<PIN>::sPinMask;
-template<uint8_t PIN> volatile RwReg *FastPin<PIN>::sPort;
-template<uint8_t PIN> volatile RoReg *FastPin<PIN>::sInPort;
+template<fl::u8 PIN> RwReg FastPin<PIN>::sPinMask;
+template<fl::u8 PIN> volatile RwReg *FastPin<PIN>::sPort;
+template<fl::u8 PIN> volatile RoReg *FastPin<PIN>::sInPort;
 
 #else
 
-template<uint8_t PIN> class FastPin {
+template<fl::u8 PIN> class FastPin {
 	// This is a default implementation. If you are hitting this then FastPin<> is either:
 	// 1) Not defined -or-
 	// 2) Not part of the set of defined FastPin<> specializations for your platform
@@ -358,14 +358,14 @@ public:
 /// FastPin implementation for bit-banded access. 
 /// Only for MCUs that support bitbanding.
 /// @note This bitband class is optional!
-template<uint8_t PIN> class FastPinBB : public FastPin<PIN> {};
+template<fl::u8 PIN> class FastPinBB : public FastPin<PIN> {};
 
 typedef volatile fl::u32 & reg32_t;      ///< Reference to a 32-bit register, volatile
 typedef volatile fl::u32 * ptr_reg32_t;  ///< Pointer to a 32-bit register, volatile
 
 /// Utility template for tracking down information about pins and ports
 /// @tparam port the port to check information for
-template<uint8_t port> struct __FL_PORT_INFO {
+template<fl::u8 port> struct __FL_PORT_INFO {
 	/// Checks whether a port exists
 	static bool hasPort() { return 0; }
 	/// Gets the name of the port, as a C-string

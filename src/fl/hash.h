@@ -21,7 +21,7 @@ static inline uint32_t MurmurHash3_x86_32(const void *key, size_t len,
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wimplicit-fallthrough"
 
-    const uint8_t *data = static_cast<const uint8_t *>(key);
+    const fl::u8 *data = static_cast<const fl::u8 *>(key);
     const int nblocks = int(len / 4);
 
     uint32_t h1 = seed;
@@ -42,7 +42,7 @@ static inline uint32_t MurmurHash3_x86_32(const void *key, size_t len,
     }
 
     // tail
-    const uint8_t *tail = data + (nblocks * 4);
+    const fl::u8 *tail = data + (nblocks * 4);
     uint32_t k1 = 0;
     switch (len & 3) {
     case 3:
@@ -115,7 +115,7 @@ template <typename T> struct FastHash {
 
 template <typename T> struct FastHash<vec2<T>> {
     uint32_t operator()(const vec2<T> &key) const noexcept {
-        if (sizeof(T) == sizeof(uint8_t)) {
+        if (sizeof(T) == sizeof(fl::u8)) {
             uint32_t x = static_cast<uint32_t>(key.x) +
                          (static_cast<uint32_t>(key.y) << 8);
             return fast_hash32(x);
@@ -175,7 +175,7 @@ template <typename T> struct Hash<Ptr<T>> {
         }                                                                      \
     };
 
-FASTLED_DEFINE_FAST_HASH(uint8_t)
+FASTLED_DEFINE_FAST_HASH(fl::u8)
 FASTLED_DEFINE_FAST_HASH(uint16_t)
 FASTLED_DEFINE_FAST_HASH(uint32_t)
 FASTLED_DEFINE_FAST_HASH(int8_t)

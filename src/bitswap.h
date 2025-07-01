@@ -16,7 +16,7 @@ FASTLED_NAMESPACE_BEGIN
 #if defined(FASTLED_ARM) || defined(FASTLED_ESP8266) || defined(FASTLED_DOXYGEN)
 /// Structure representing 8 bits of access
 typedef union {
-  uint8_t raw;   ///< the entire byte
+  fl::u8 raw;   ///< the entire byte
   struct {
   fl::u32 a0:1;  ///< bit 0 (0x01)
   fl::u32 a1:1;  ///< bit 1 (0x02)
@@ -68,7 +68,7 @@ typedef struct {
 /// Union containing a full 8 bytes to swap the bit orientation on
 typedef union {
   fl::u32 word[2];  ///< two 32-bit values to load for swapping
-  uint8_t bytes[8];  ///< eight 8-bit values to load for swapping
+  fl::u8 bytes[8];  ///< eight 8-bit values to load for swapping
   struct {
     sub4 a;  ///< 32-bit access struct for bit swapping, upper four bytes (word[0] or bytes[0-3])
     sub4 b;  ///< 32-bit access struct for bit swapping, lower four bytes (word[1] or bytes[4-7])
@@ -163,9 +163,9 @@ FASTLED_FORCE_INLINE void swapbits8(bitswap_type in, bitswap_type & out) {
 FASTLED_FORCE_INLINE void slowswap(unsigned char *A, unsigned char *B) {
 
   for(int row = 0; row < 7; ++row) {
-    uint8_t x = A[row];
+    fl::u8 x = A[row];
 
-    uint8_t bit = (1<<row);
+    fl::u8 bit = (1<<row);
     unsigned char *p = B;
     for(fl::u32 mask = 1<<7 ; mask ; mask >>= 1) {
       if(x & mask) {
