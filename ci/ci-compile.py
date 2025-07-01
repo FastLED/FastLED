@@ -330,6 +330,38 @@ def compile_with_pio_ci(
             str(board_build_dir / example_path.name),
         ]
 
+        # Check for additional source directories in the example and collect them
+        example_include_dirs = []
+        example_src_dirs = []
+        for subdir in example_path.iterdir():
+            if subdir.is_dir() and subdir.name not in [
+                ".git",
+                "__pycache__",
+                ".pio",
+                ".vscode",
+            ]:
+                # Check if this directory contains source files
+                header_files = [
+                    f
+                    for f in subdir.rglob("*")
+                    if f.is_file() and f.suffix in [".h", ".hpp"]
+                ]
+                source_files = [
+                    f
+                    for f in subdir.rglob("*")
+                    if f.is_file() and f.suffix in [".cpp", ".c"]
+                ]
+
+                if header_files:
+                    example_include_dirs.append(str(subdir))
+                    if verbose:
+                        locked_print(f"Added example include directory: {subdir}")
+
+                if source_files:
+                    example_src_dirs.append(str(subdir))
+                    if verbose:
+                        locked_print(f"Added example source directory: {subdir}")
+
         # Add platform-specific options
         if board.platform:
             cmd_list.extend(["--project-option", f"platform={board.platform}"])
@@ -355,14 +387,31 @@ def compile_with_pio_ci(
                 ]
             )
 
-        # Add defines
+        # Add defines and include paths
         all_defines = defines.copy()
         if board.defines:
             all_defines.extend(board.defines)
 
+        build_flags_list = []
+
+        # Add defines as build flags
         if all_defines:
-            build_flags = " ".join(f"-D{define}" for define in all_defines)
-            cmd_list.extend(["--project-option", f"build_flags={build_flags}"])
+            build_flags_list.extend(f"-D{define}" for define in all_defines)
+
+        # Add example include directories as build flags
+        if example_include_dirs:
+            build_flags_list.extend(
+                f"-I{include_dir}" for include_dir in example_include_dirs
+            )
+
+        if build_flags_list:
+            # Combine all build flags into a single project option
+            all_flags = " ".join(build_flags_list)
+            cmd_list.extend(["-O", f"build_flags={all_flags}"])
+
+        # Add example source directories as libraries
+        for src_dir in example_src_dirs:
+            cmd_list.extend(["--lib", src_dir])
 
         # Add custom SDK config if specified
         if board.customsdk:
