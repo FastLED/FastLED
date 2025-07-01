@@ -1,9 +1,10 @@
-
 #pragma once
 
 #include "fl/str.h"
 #include "fl/template_magic.h"
+#include "fl/int.h"
 #include "fl/stdint.h"
+#include "fl/force_inline.h"
 #include <string.h>
 
 namespace fl {
@@ -119,7 +120,7 @@ template <typename T> struct FastHash<vec2<T>> {
                          (static_cast<uint32_t>(key.y) << 8);
             return fast_hash32(x);
         }
-        if (sizeof(T) == sizeof(uint16_t)) {
+        if (sizeof(T) == sizeof(u16)) {
             uint32_t x = static_cast<uint32_t>(key.x) +
                          (static_cast<uint32_t>(key.y) << 16);
             return fast_hash32(x);

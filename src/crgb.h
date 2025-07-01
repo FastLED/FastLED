@@ -4,6 +4,7 @@
 #pragma once
 
 #include "fl/stdint.h"
+#include "fl/int.h"
 
 #include "chsv.h"
 #include "fl/namespace.h"
@@ -458,7 +459,7 @@ struct CRGB {
 
         // stop div/0 when color is black
         if(max > 0) {
-            uint16_t factor = ((uint16_t)(limit) * 256) / max;
+            fl::u16 factor = ((fl::u16)(limit) * 256) / max;
             red =   (red   * factor) / 256;
             green = (green * factor) / 256;
             blue =  (blue  * factor) / 256;
@@ -744,7 +745,7 @@ FASTLED_FORCE_INLINE bool operator!= (const CHSV& lhs, const CHSV& rhs)
 /// Check if the sum of the color channels in one CRGB object is less than another
 FASTLED_FORCE_INLINE bool operator< (const CRGB& lhs, const CRGB& rhs)
 {
-    uint16_t sl, sr;
+    fl::u16 sl, sr;
     sl = lhs.r + lhs.g + lhs.b;
     sr = rhs.r + rhs.g + rhs.b;
     return sl < sr;
@@ -753,7 +754,7 @@ FASTLED_FORCE_INLINE bool operator< (const CRGB& lhs, const CRGB& rhs)
 /// Check if the sum of the color channels in one CRGB object is greater than another
 FASTLED_FORCE_INLINE bool operator> (const CRGB& lhs, const CRGB& rhs)
 {
-    uint16_t sl, sr;
+    fl::u16 sl, sr;
     sl = lhs.r + lhs.g + lhs.b;
     sr = rhs.r + rhs.g + rhs.b;
     return sl > sr;
@@ -762,7 +763,7 @@ FASTLED_FORCE_INLINE bool operator> (const CRGB& lhs, const CRGB& rhs)
 /// Check if the sum of the color channels in one CRGB object is greater than or equal to another
 FASTLED_FORCE_INLINE bool operator>= (const CRGB& lhs, const CRGB& rhs)
 {
-    uint16_t sl, sr;
+    fl::u16 sl, sr;
     sl = lhs.r + lhs.g + lhs.b;
     sr = rhs.r + rhs.g + rhs.b;
     return sl >= sr;
@@ -771,7 +772,7 @@ FASTLED_FORCE_INLINE bool operator>= (const CRGB& lhs, const CRGB& rhs)
 /// Check if the sum of the color channels in one CRGB object is less than or equal to another
 FASTLED_FORCE_INLINE bool operator<= (const CRGB& lhs, const CRGB& rhs)
 {
-    uint16_t sl, sr;
+    fl::u16 sl, sr;
     sl = lhs.r + lhs.g + lhs.b;
     sr = rhs.r + rhs.g + rhs.b;
     return sl <= sr;

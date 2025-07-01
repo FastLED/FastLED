@@ -8,6 +8,7 @@ namespace fl {
 #endif
 
 #include "fl/str.h"
+#include "fl/int.h"
 #include "crgb.h"
 
 #ifndef FASTLED_STRSTREAM_USES_SIZE_T
@@ -52,7 +53,7 @@ public:
 
     ostream& operator<<(uint8_t n) {
         string temp;
-        temp.append(uint16_t(n));
+        temp.append(u16(n));
         print(temp.c_str());
         return *this;
     }
@@ -64,7 +65,7 @@ public:
         return *this;
     }
 
-    ostream& operator<<(uint16_t n) {
+    ostream& operator<<(u16 n) {
         string temp;
         temp.append(n);
         print(temp.c_str());

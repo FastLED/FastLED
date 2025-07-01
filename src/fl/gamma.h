@@ -2,12 +2,13 @@
 
 #include "crgb.h"
 #include "fl/stdint.h"
+#include "fl/int.h"
 
 namespace fl {
 
-inline void gamma16(const CRGB &rgb, uint16_t* r16, uint16_t* g16, uint16_t* b16) {
+inline void gamma16(const CRGB &rgb, u16* r16, u16* g16, u16* b16) {
 
-    static const uint16_t _gamma_2_8[256] = {
+    static const u16 _gamma_2_8[256] = {
         0,     0,     0,     1,     1,     2,     4,     6,     8,     11,
         14,    18,    23,    29,    35,    41,    49,    57,    67,    77,
         88,    99,    112,   126,   141,   156,   173,   191,   210,   230,

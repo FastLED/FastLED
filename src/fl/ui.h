@@ -1,12 +1,15 @@
 #pragma once
 
-#include "fl/stdint.h"
 
+#include "fl/namespace.h"
+#include "fl/ptr.h"
+#include "fl/json.h"
+#include "fl/str.h"
+#include "fl/int.h"
 #include "fl/audio.h"
 #include "fl/engine_events.h"
 #include "fl/function_list.h"
 #include "fl/math_macros.h"
-#include "fl/namespace.h"
 #include "fl/template_magic.h"
 #include "fl/ui_impl.h"
 #include "fl/unused.h"
@@ -56,7 +59,7 @@ class UISlider : public UIElement {
     void setValue(float value);
     operator float() const { return mImpl.value(); }
     operator uint8_t() const { return static_cast<uint8_t>(mImpl.value()); }
-    operator uint16_t() const { return static_cast<uint16_t>(mImpl.value()); }
+    operator fl::u16() const { return static_cast<fl::u16>(mImpl.value()); }
     operator int() const { return static_cast<int>(mImpl.value()); }
     template <typename T> T as() const {
         return static_cast<T>(mImpl.value());

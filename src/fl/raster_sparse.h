@@ -9,6 +9,7 @@ only a small number of pixels are set.
 
 #include "fl/stdint.h"
 
+#include "fl/int.h"
 #include "fl/geometry.h"
 #include "fl/grid.h"
 #include "fl/hash_map.h"
@@ -64,7 +65,7 @@ class XYRasterU8Sparse {
         write(pt, value);
     }
 
-    void setSize(uint16_t width, uint16_t height) {
+    void setSize(u16 width, u16 height) {
         setBounds(rect<int16_t>(0, 0, width, height));
     }
 
@@ -92,11 +93,11 @@ class XYRasterU8Sparse {
     // Renders the subpixel tiles to the raster. Any previous data is
     // cleared. Memory will only be allocated if the size of the raster
     // increased. void rasterize(const Slice<const Tile2x2_u8> &tiles);
-    // uint8_t &at(uint16_t x, uint16_t y) { return mGrid.at(x, y); }
-    // const uint8_t &at(uint16_t x, uint16_t y) const { return mGrid.at(x,
+    // uint8_t &at(u16 x, u16 y) { return mGrid.at(x, y); }
+    // const uint8_t &at(u16 x, u16 y) const { return mGrid.at(x,
     // y); }
 
-    Pair<bool, uint8_t> at(uint16_t x, uint16_t y) const {
+    Pair<bool, uint8_t> at(u16 x, u16 y) const {
         const uint8_t *val = mSparseGrid.find_value(vec2<int16_t>(x, y));
         if (val != nullptr) {
             return {true, *val};
@@ -143,8 +144,8 @@ class XYRasterU8Sparse {
     }
 
     // Warning! - SLOW.
-    uint16_t width() const { return bounds().width(); }
-    uint16_t height() const { return bounds().height(); }
+    u16 width() const { return bounds().width(); }
+    u16 height() const { return bounds().height(); }
 
     void draw(const CRGB &color, const XYMap &xymap, CRGB *out);
     void draw(const CRGB &color, Leds *leds);
@@ -257,7 +258,7 @@ class XYRasterSparse_CRGB {
         write(pt, color);
     }
 
-    void setSize(uint16_t width, uint16_t height) {
+    void setSize(u16 width, u16 height) {
         setBounds(rect<int16_t>(0, 0, width, height));
     }
 
@@ -276,7 +277,7 @@ class XYRasterSparse_CRGB {
     size_t size() const { return mSparseGrid.size(); }
     bool empty() const { return mSparseGrid.empty(); }
 
-    Pair<bool, CRGB> at(uint16_t x, uint16_t y) const {
+    Pair<bool, CRGB> at(u16 x, u16 y) const {
         const CRGB *val = mSparseGrid.find_value(vec2<int16_t>(x, y));
         if (val != nullptr) {
             return {true, *val};
@@ -323,8 +324,8 @@ class XYRasterSparse_CRGB {
     }
 
     // Warning! - SLOW.
-    uint16_t width() const { return bounds().width(); }
-    uint16_t height() const { return bounds().height(); }
+    u16 width() const { return bounds().width(); }
+    u16 height() const { return bounds().height(); }
 
     void draw(const XYMap &xymap, CRGB *out);
     void draw(Leds *leds);

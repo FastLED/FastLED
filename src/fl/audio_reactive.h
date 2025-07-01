@@ -4,6 +4,7 @@
 #include "fl/math.h"
 #include "fl/vector.h"
 #include "fl/stdint.h"
+#include "fl/int.h"
 #include "fl/audio.h"
 #include "crgb.h"
 #include "fl/colorutils.h"
@@ -29,7 +30,7 @@ struct AudioConfig {
     bool noiseGate = true;           // Noise gate
     uint8_t attack = 50;             // Attack time (ms) - how fast to respond to increases
     uint8_t decay = 200;             // Decay time (ms) - how slow to respond to decreases
-    uint16_t sampleRate = 22050;     // Sample rate (Hz)
+    u16 sampleRate = 22050;     // Sample rate (Hz)
     uint8_t scalingMode = 3;         // 0=none, 1=log, 2=linear, 3=sqrt
 };
 

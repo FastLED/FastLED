@@ -1,6 +1,7 @@
 #pragma once
 
 #include "fl/stdint.h"
+#include "fl/int.h"
 #include "lib8tion/random8.h"
 
 namespace fl {
@@ -19,11 +20,11 @@ namespace fl {
 class fl_random {
 private:
     /// The current seed state for this instance
-    uint16_t seed_;
+    u16 seed_;
 
     /// Generate next 16-bit random number using this instance's seed
     /// @returns The next 16-bit random number
-    uint16_t next_random16() {
+    u16 next_random16() {
         seed_ = APPLY_FASTLED_RAND16_2053(seed_) + FASTLED_RAND16_13849;
         return seed_;
     }
@@ -45,7 +46,7 @@ public:
 
     /// Constructor with explicit seed
     /// @param seed The seed value for the random number generator
-    explicit fl_random(uint16_t seed) : seed_(seed) {}
+    explicit fl_random(u16 seed) : seed_(seed) {}
 
     /// Generate a random number
     /// @returns A random 32-bit unsigned integer
@@ -75,19 +76,19 @@ public:
 
     /// Set the seed for this random number generator instance
     /// @param seed The new seed value
-    void set_seed(uint16_t seed) {
+    void set_seed(u16 seed) {
         seed_ = seed;
     }
 
     /// Get the current seed value for this instance
     /// @returns The current seed value
-    uint16_t get_seed() const {
+    u16 get_seed() const {
         return seed_;
     }
 
     /// Add entropy to this random number generator instance
     /// @param entropy The entropy value to add
-    void add_entropy(uint16_t entropy) {
+    void add_entropy(u16 entropy) {
         seed_ += entropy;
     }
 
@@ -106,7 +107,7 @@ public:
     /// Generate an 8-bit random number
     /// @returns A random 8-bit unsigned integer (0-255)
     uint8_t random8() {
-        uint16_t r = next_random16();
+        u16 r = next_random16();
         // return the sum of the high and low bytes, for better mixing
         return (uint8_t)(((uint8_t)(r & 0xFF)) + ((uint8_t)(r >> 8)));
     }
@@ -132,14 +133,14 @@ public:
 
     /// Generate a 16-bit random number
     /// @returns A random 16-bit unsigned integer (0-65535)
-    uint16_t random16() {
+    u16 random16() {
         return next_random16();
     }
 
     /// Generate a 16-bit random number in the range [0, n)
     /// @param n The upper bound (exclusive)
     /// @returns A random 16-bit number from 0 to n-1
-    uint16_t random16(uint16_t n) {
+    u16 random16(u16 n) {
         return (*this)(n);
     }
 
@@ -147,7 +148,7 @@ public:
     /// @param min The lower bound (inclusive)
     /// @param max The upper bound (exclusive)
     /// @returns A random 16-bit number from min to max-1
-    uint16_t random16(uint16_t min, uint16_t max) {
+    u16 random16(u16 min, u16 max) {
         return (*this)(min, max);
     }
 };

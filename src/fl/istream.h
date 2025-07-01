@@ -18,6 +18,7 @@ namespace fl {
 #include "fl/type_traits.h"
 #include "fl/sketch_macros.h"
 
+#include "fl/int.h"
 #ifndef FASTLED_STRSTREAM_USES_SIZE_T
 #if defined(__AVR__) || defined(ESP8266) || defined(ESP32)
 #define FASTLED_STRSTREAM_USES_SIZE_T 0
@@ -62,7 +63,7 @@ public:
     istream_real& operator>>(int8_t& n);
     istream_real& operator>>(uint8_t& n);
     istream_real& operator>>(int16_t& n);
-    istream_real& operator>>(uint16_t& n);
+    istream_real& operator>>(u16& n);
     istream_real& operator>>(int32_t& n);
     istream_real& operator>>(uint32_t& n);
     istream_real& operator>>(float& f);
@@ -181,7 +182,7 @@ public:
         return *this;
     }
     
-    istream& operator>>(uint16_t& n) {
+    istream& operator>>(u16& n) {
 #if SKETCH_HAS_LOTS_OF_MEMORY
         real_stream_ >> n;
 #else

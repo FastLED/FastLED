@@ -2,6 +2,7 @@
 
 #include "fl/stdint.h"
 
+#include "fl/int.h"
 #include "force_inline.h"
 #include "namespace.h"
 
@@ -15,7 +16,7 @@ namespace fl {
 // that's 32767 * 65536
 // this is because I use int16_t look up table to interpolate the results
 //
-// sin16 and cos16 are faster and more accurate funtions that take uint16_t as
+// sin16 and cos16 are faster and more accurate funtions that take u16 as
 // arguments and return int16_t as output they can replace the older
 // implementation and are 62 times more accurate and twice as fast the downside
 // with these funtions is that they use 640 bytes for the look up table thats a
@@ -50,7 +51,7 @@ FASTLED_FORCE_INLINE static int32_t cos32(uint32_t angle) {
 
 // 0 to 65536 is a full circle
 // output is between -32767 and 32767
-FASTLED_FORCE_INLINE static int16_t sin16lut(uint16_t angle) {
+FASTLED_FORCE_INLINE static int16_t sin16lut(u16 angle) {
     uint8_t angle256 = angle / 256;
     int32_t subAngle = angle % 256;
     return (sinArray[angle256] * (256 - subAngle) +
@@ -60,7 +61,7 @@ FASTLED_FORCE_INLINE static int16_t sin16lut(uint16_t angle) {
 
 // 0 to 65536 is a full circle
 // output is between -32767 and 32767
-FASTLED_FORCE_INLINE static int16_t cos16lut(uint16_t angle) {
+FASTLED_FORCE_INLINE static int16_t cos16lut(u16 angle) {
     uint8_t angle256 = angle / 256;
     int32_t subAngle = angle % 256;
     return (cosArray[angle256] * (256 - subAngle) +

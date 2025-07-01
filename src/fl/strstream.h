@@ -1,5 +1,7 @@
 #pragma once
 
+#include "fl/int.h"
+#include "fl/str.h"
 #include "crgb.h"
 #include "str.h"
 
@@ -24,11 +26,11 @@ template <> struct StrStreamHelper<int> {
 };
 
 template <> struct StrStreamHelper<uint8_t> {
-    static void append(string &str, const uint8_t &n) { str.append(uint16_t(n)); }
+    static void append(string &str, const uint8_t &n) { str.append(u16(n)); }
 };
 
 template <> struct StrStreamHelper<char> {
-    static void append(string &str, const char &n) { str.append(uint16_t(n)); }
+    static void append(string &str, const char &n) { str.append(u16(n)); }
 };
 
 template <> struct StrStreamHelper<unsigned int> {
@@ -60,7 +62,7 @@ class StrStream {
 
     StrStream &operator<<(const Tile2x2_u8 &subpixel);
 
-    StrStream &operator=(const uint16_t &n) {
+    StrStream &operator=(const u16 &n) {
         mStr.clear();
         (*this) << n;
         return *this;
@@ -124,7 +126,7 @@ class StrStream {
 
     StrStream &operator<<(const uint8_t &n) {
         if (mTreatCharAsInt) {
-            mStr.append(uint16_t(n));
+            mStr.append(u16(n));
         } else {
             mStr.append(n);
         }
@@ -201,7 +203,7 @@ class FakeStrStream {
 
     FakeStrStream &operator=(const string &) { return *this; }
     FakeStrStream &operator=(const CRGB &) { return *this; }
-    FakeStrStream &operator=(uint16_t) { return *this; }
+    FakeStrStream &operator=(u16) { return *this; }
     FakeStrStream &operator=(uint8_t) { return *this; }
     FakeStrStream &operator=(char) { return *this; }
 };

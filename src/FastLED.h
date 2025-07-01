@@ -100,12 +100,13 @@
 #include "fl/engine_events.h"
 
 #include "fl/leds.h"
+#include "fl/int.h"
 
 FASTLED_NAMESPACE_BEGIN
 
 // Backdoor to get the size of the CLedController object. The one place
 // that includes this just uses extern to declare the function.
-uint16_t cled_contoller_size();
+fl::u16 cled_contoller_size();
 
 /// LED chipsets with SPI interface
 enum ESPIChipsets {
@@ -375,7 +376,7 @@ typedef uint8_t (*power_func)(uint8_t scale, uint32_t data);
 class CFastLED {
 	// int m_nControllers;
 	uint8_t  m_Scale;         ///< the current global brightness scale setting
-	uint16_t m_nFPS;          ///< tracking for current frames per second (FPS) value
+	        fl::u16 m_nFPS;          ///< tracking for current frames per second (FPS) value
 	uint32_t m_nMinMicros;    ///< minimum µs between frames, used for capping frame rates
 	uint32_t m_nPowerData;    ///< max power use parameter
 	power_func m_pPowerFunc;  ///< function for overriding brightness when using FastLED.show();
@@ -863,7 +864,7 @@ public:
 	/// adding all of your leds.
 	/// @param refresh maximum refresh rate in hz
 	/// @param constrain constrain refresh rate to the slowest speed yet set
-	void setMaxRefreshRate(uint16_t refresh, bool constrain=false);
+	        void setMaxRefreshRate(fl::u16 refresh, bool constrain=false);
 
 	/// For debugging, this will keep track of time between calls to countFPS(). Every
 	/// `nFrames` calls, it will update an internal counter for the current FPS.
@@ -873,7 +874,7 @@ public:
 
 	/// Get the number of frames/second being written out
 	/// @returns the most recently computed FPS value
-	uint16_t getFPS() { return m_nFPS; }
+	        fl::u16 getFPS() { return m_nFPS; }
 
 	/// Get how many controllers have been registered
 	/// @returns the number of controllers (strips) that have been added with addLeds()

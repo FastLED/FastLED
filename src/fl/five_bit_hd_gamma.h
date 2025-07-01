@@ -5,6 +5,7 @@
 
 #include "fl/gamma.h"
 #include "fl/stdint.h"
+#include "fl/int.h"
 
 #include "crgb.h"
 #include "lib8tion/scale8.h"
@@ -46,7 +47,7 @@ void internal_builtin_five_bit_hd_gamma_bitshift(CRGB colors, CRGB colors_scale,
                                                  uint8_t *out_power_5bit);
 
 // Exposed for testing.
-uint8_t five_bit_bitshift(uint16_t r16, uint16_t g16, uint16_t b16,
+uint8_t five_bit_bitshift(u16 r16, u16 g16, u16 b16,
                           uint8_t brightness, CRGB *out,
                           uint8_t *out_power_5bit);
 
@@ -76,18 +77,18 @@ inline void five_bit_hd_gamma_bitshift(CRGB colors, CRGB colors_scale,
 //  FASTLED_NAMESPACE_BEGIN
 //  void five_bit_hd_gamma_function(
 //    uint8_t r8, uint8_t g8, uint8_t b8,
-//    uint16_t* r16, uint16_t* g16, uint16_t* b16) {
+//    u16* r16, u16* g16, u16* b16) {
 //      cout << "hello world\n";
 //  }
 //  FASTLED_NAMESPACE_END
 #ifdef FASTLED_FIVE_BIT_HD_GAMMA_FUNCTION_OVERRIDE
 // This function is located somewhere else in your project, so it's declared
 // extern here.
-extern void five_bit_hd_gamma_function(CRGB color, uint16_t *r16, uint16_t *g16,
-                                       uint16_t *b16);
+extern void five_bit_hd_gamma_function(CRGB color, u16 *r16, u16 *g16,
+                                       u16 *b16);
 #else
-inline void five_bit_hd_gamma_function(CRGB color, uint16_t *r16, uint16_t *g16,
-                                       uint16_t *b16) {
+inline void five_bit_hd_gamma_function(CRGB color, u16 *r16, u16 *g16,
+                                       u16 *b16) {
 
     gamma16(color, r16, g16, b16);
 }
@@ -104,7 +105,7 @@ inline void internal_builtin_five_bit_hd_gamma_bitshift(
     }
 
     // Step 1: Gamma Correction
-    uint16_t r16, g16, b16;
+    u16 r16, g16, b16;
     five_bit_hd_gamma_function(colors, &r16, &g16, &b16);
 
     // Step 2: Color correction step comes after gamma correction. These values
@@ -123,11 +124,11 @@ inline void internal_builtin_five_bit_hd_gamma_bitshift(
                       out_power_5bit);
 }
 
-inline uint8_t five_bit_bitshift(uint16_t r16, uint16_t g16, uint16_t b16,
+inline uint8_t five_bit_bitshift(u16 r16, u16 g16, u16 b16,
                                  uint8_t brightness, CRGB *out,
                                  uint8_t *out_power_5bit) {
 
-    auto max3 = [](uint16_t a, uint16_t b, uint16_t c) {
+    auto max3 = [](u16 a, u16 b, u16 c) {
         return fl_max(fl_max(a, b), c);
     };
 
@@ -155,9 +156,9 @@ inline uint8_t five_bit_bitshift(uint16_t r16, uint16_t g16, uint16_t b16,
 
     // Step 3: Boost brightness of the color channels by swapping power with the
     // driver brightness.
-    uint16_t max_component = max3(r16, g16, b16);
+    u16 max_component = max3(r16, g16, b16);
     // five_bit_color_bitshift(&r16, &g16, &b16, &v5);
-    uint8_t shifts = brightness_bitshifter16(&v5, &max_component, 4, 2);
+    uint8_t shifts = brightness_bitshifter16(&v5, reinterpret_cast<uint16_t*>(&max_component), 4, 2);
     if (shifts) {
         r16 = r16 << shifts;
         g16 = g16 << shifts;

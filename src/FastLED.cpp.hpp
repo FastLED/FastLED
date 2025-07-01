@@ -46,7 +46,7 @@ extern "C" void yield(void) { }
 
 FASTLED_NAMESPACE_BEGIN
 
-uint16_t cled_contoller_size() {
+fl::u16 cled_contoller_size() {
 	return sizeof(CLEDController);
 }
 
@@ -357,7 +357,7 @@ void CFastLED::countFPS(int nFrames) {
 	}
 }
 
-void CFastLED::setMaxRefreshRate(uint16_t refresh, bool constrain) {
+void CFastLED::setMaxRefreshRate(fl::u16 refresh, bool constrain) {
 	if(constrain) {
 		// if we're constraining, the new value of m_nMinMicros _must_ be higher than previously (because we're only
 		// allowed to slow things down if constraining)

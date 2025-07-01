@@ -1,21 +1,22 @@
 #pragma once
 
-#include "fl/stdint.h"
+#include "fl/int.h"
+#include "fl/namespace.h"
+#include "fl/force_inline.h"
+#include "fl/pair.h"
 #include <string.h>
 
 #include "crgb.h"
 #include "fl/clamp.h"
-#include "fl/force_inline.h"
 #include "fl/lut.h"
-#include "fl/namespace.h"
 #include "fl/ptr.h"
 #include "fl/xmap.h" // Include xmap.h for LUT16
 
 namespace fl {
 class ScreenMap;
 
-FASTLED_FORCE_INLINE uint16_t xy_serpentine(uint16_t x, uint16_t y,
-                                            uint16_t width, uint16_t height) {
+FASTLED_FORCE_INLINE u16 xy_serpentine(u16 x, u16 y,
+                                            u16 width, u16 height) {
     (void)height;
     if (y & 1) // Even or odd row?
         // reverse every second line for a serpentine lled layout
@@ -24,15 +25,15 @@ FASTLED_FORCE_INLINE uint16_t xy_serpentine(uint16_t x, uint16_t y,
         return y * width + x;
 }
 
-FASTLED_FORCE_INLINE uint16_t xy_line_by_line(uint16_t x, uint16_t y,
-                                              uint16_t width, uint16_t height) {
+FASTLED_FORCE_INLINE u16 xy_line_by_line(u16 x, u16 y,
+                                              u16 width, u16 height) {
     (void)height;
     return y * width + x;
 }
 
 // typedef for xyMap function type
-typedef uint16_t (*XYFunction)(uint16_t x, uint16_t y, uint16_t width,
-                               uint16_t height);
+typedef u16 (*XYFunction)(u16 x, u16 y, u16 width,
+                               u16 height);
 
 // Maps x,y -> led index
 //
@@ -44,28 +45,28 @@ class XYMap {
   public:
     enum XyMapType { kSerpentine = 0, kLineByLine, kFunction, kLookUpTable };
 
-    static XYMap constructWithUserFunction(uint16_t width, uint16_t height,
+    static XYMap constructWithUserFunction(u16 width, u16 height,
                                            XYFunction xyFunction,
-                                           uint16_t offset = 0);
+                                           u16 offset = 0);
 
-    static XYMap constructRectangularGrid(uint16_t width, uint16_t height,
-                                          uint16_t offset = 0);
+    static XYMap constructRectangularGrid(u16 width, u16 height,
+                                          u16 offset = 0);
 
-    static XYMap constructWithLookUpTable(uint16_t width, uint16_t height,
-                                          const uint16_t *lookUpTable,
-                                          uint16_t offset = 0);
+    static XYMap constructWithLookUpTable(u16 width, u16 height,
+                                          const u16 *lookUpTable,
+                                          u16 offset = 0);
 
-    static XYMap constructSerpentine(uint16_t width, uint16_t height,
-                                     uint16_t offset = 0);
+    static XYMap constructSerpentine(u16 width, u16 height,
+                                     u16 offset = 0);
 
-    static XYMap identity(uint16_t width, uint16_t height) {
+    static XYMap identity(u16 width, u16 height) {
         return constructRectangularGrid(width, height);
     }
 
     // is_serpentine is true by default. You probably want this unless you are
     // using a different layout
-    XYMap(uint16_t width, uint16_t height, bool is_serpentine = true,
-          uint16_t offset = 0);
+    XYMap(u16 width, u16 height, bool is_serpentine = true,
+          u16 offset = 0);
 
     XYMap(const XYMap &other) = default;
     XYMap &operator=(const XYMap &other) = default;
@@ -78,18 +79,18 @@ class XYMap {
 
     void setRectangularGrid();
 
-    uint16_t operator()(uint16_t x, uint16_t y) const {
+    u16 operator()(u16 x, u16 y) const {
         return mapToIndex(x, y);
     }
 
-    uint16_t mapToIndex(const uint16_t &x, const uint16_t &y) const;
+    u16 mapToIndex(const u16 &x, const u16 &y) const;
 
     template <typename IntType,
               typename = fl::enable_if_t<!fl::is_integral<IntType>::value>>
-    uint16_t mapToIndex(IntType x, IntType y) const {
+    u16 mapToIndex(IntType x, IntType y) const {
         x = fl::clamp<int>(x, 0, width - 1);
         y = fl::clamp<int>(y, 0, height - 1);
-        return mapToIndex((uint16_t)x, (uint16_t)y);
+        return mapToIndex((u16)x, (u16)y);
     }
 
     bool has(uint16_t x, uint16_t y) const {
@@ -97,7 +98,7 @@ class XYMap {
     }
 
     bool has(int x, int y) const {
-        return (x >= 0) && (y >= 0) && has((uint16_t)x, (uint16_t)y);
+        return (x >= 0) && (y >= 0) && has((u16)x, (u16)y);
     }
 
     bool isSerpentine() const { return type == kSerpentine; }
@@ -109,20 +110,20 @@ class XYMap {
         return type == kSerpentine || type == kLineByLine;
     }
 
-    uint16_t getWidth() const;
-    uint16_t getHeight() const;
-    uint16_t getTotal() const;
+    u16 getWidth() const;
+    u16 getHeight() const;
+    u16 getTotal() const;
     XyMapType getType() const;
 
   private:
-    XYMap(uint16_t width, uint16_t height, XyMapType type);
+    XYMap(u16 width, u16 height, XyMapType type);
 
     XyMapType type;
-    uint16_t width;
-    uint16_t height;
+    u16 width;
+    u16 height;
     XYFunction xyFunction = nullptr;
     fl::LUT16Ptr mLookUpTable; // optional refptr to look up table.
-    uint16_t mOffset = 0;      // offset to be added to the output
+    u16 mOffset = 0;      // offset to be added to the output
 };
 
 } // namespace fl

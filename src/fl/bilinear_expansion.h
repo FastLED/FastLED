@@ -6,6 +6,7 @@
 
 #include "fl/stdint.h"
 
+#include "fl/int.h"
 #include "crgb.h"
 #include "fl/deprecated.h"
 #include "fl/namespace.h"
@@ -23,7 +24,7 @@ namespace fl {
 /// pixel is mapped outside of the range then it is clipped.
 
 void bilinearExpandArbitrary(const CRGB *input, CRGB *output,
-                             uint16_t inputWidth, uint16_t inputHeight,
+                             u16 inputWidth, u16 inputHeight,
                              fl::XYMap xyMap)
     FASTLED_DEPRECATED("use upscaleArbitrary from upscale.h");
 
@@ -31,8 +32,8 @@ void bilinearExpandPowerOf2(const CRGB *input, CRGB *output, uint8_t inputWidth,
                             uint8_t inputHeight, fl::XYMap xyMap)
     FASTLED_DEPRECATED("use upscalePowerOf2 from upscale.h");
 
-void bilinearExpand(const CRGB *input, CRGB *output, uint16_t inputWidth,
-                    uint16_t inputHeight, fl::XYMap xyMap)
+void bilinearExpand(const CRGB *input, CRGB *output, u16 inputWidth,
+                    u16 inputHeight, fl::XYMap xyMap)
     FASTLED_DEPRECATED("use upscale from upscale.h");
 
 void bilinearExpandFloat(const CRGB *input, CRGB *output, uint8_t inputWidth,
@@ -40,7 +41,7 @@ void bilinearExpandFloat(const CRGB *input, CRGB *output, uint8_t inputWidth,
     FASTLED_DEPRECATED("use upscaleFloat from upscale.h");
 
 void bilinearExpandArbitraryFloat(const CRGB *input, CRGB *output,
-                                  uint16_t inputWidth, uint16_t inputHeight,
+                                  u16 inputWidth, u16 inputHeight,
                                   fl::XYMap xyMap)
     FASTLED_DEPRECATED("use upscaleArbitraryFloat from upscale.h");
 
@@ -51,7 +52,7 @@ uint8_t bilinearInterpolateFloat(uint8_t v00, uint8_t v10, uint8_t v01,
 ////////////////// Inline definitions for backward compatibility ///////////////////////
 
 inline void bilinearExpandArbitrary(const CRGB *input, CRGB *output,
-                                    uint16_t inputWidth, uint16_t inputHeight,
+                                    u16 inputWidth, u16 inputHeight,
                                     fl::XYMap xyMap) {
     upscaleArbitrary(input, output, inputWidth, inputHeight, xyMap);
 }
@@ -62,14 +63,14 @@ inline void bilinearExpandPowerOf2(const CRGB *input, CRGB *output,
     upscalePowerOf2(input, output, inputWidth, inputHeight, xyMap);
 }
 
-inline void bilinearExpand(const CRGB *input, CRGB *output, uint16_t inputWidth,
-                           uint16_t inputHeight, fl::XYMap xyMap) {
+inline void bilinearExpand(const CRGB *input, CRGB *output, u16 inputWidth,
+                           u16 inputHeight, fl::XYMap xyMap) {
     upscale(input, output, inputWidth, inputHeight, xyMap);
 }
 
 inline void bilinearExpandArbitraryFloat(const CRGB *input, CRGB *output,
-                                         uint16_t inputWidth,
-                                         uint16_t inputHeight,
+                                         u16 inputWidth,
+                                         u16 inputHeight,
                                          fl::XYMap xyMap) {
     upscaleArbitraryFloat(input, output, inputWidth, inputHeight, xyMap);
 }

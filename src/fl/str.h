@@ -4,7 +4,7 @@
 // fl::string has inlined memory and copy on write semantics.
 
 
-#include "fl/stdint.h"
+#include "fl/int.h"
 #include <string.h>
 
 #ifdef __EMSCRIPTEN__
@@ -18,6 +18,7 @@
 #include "fl/template_magic.h"
 #include "fl/vector.h"
 #include "fl/span.h"
+#include "fl/force_inline.h"
 
 #ifndef FASTLED_STR_INLINED_SIZE
 #define FASTLED_STR_INLINED_SIZE 64
