@@ -5,6 +5,7 @@ This replaces the previous concurrent build system with a simpler pio ci approac
 
 import argparse
 import os
+import shutil
 import subprocess
 import sys
 import time
@@ -394,6 +395,26 @@ def generate_build_info(
             return False
 
 
+def setup_library_for_windows(board_build_dir: Path, example_path: Path) -> Path:
+    """Set up the FastLED library for Windows builds by copying files."""
+    lib_dir = (
+        board_build_dir / example_path.name / ".pio" / "libdeps" / "uno" / "FastLED"
+    )
+    lib_dir.mkdir(parents=True, exist_ok=True)
+
+    # Copy the library files
+    src_dir = HERE.parent
+    if lib_dir.exists():
+        shutil.rmtree(lib_dir)
+    shutil.copytree(
+        src_dir,
+        lib_dir,
+        ignore=shutil.ignore_patterns(".git", ".pio", "__pycache__", ".vscode"),
+    )
+
+    return lib_dir
+
+
 def compile_with_pio_ci(
     board: Board,
     example_paths: list[Path],
@@ -442,6 +463,10 @@ def compile_with_pio_ci(
         # Use the first .ino file found
         ino_file = ino_files[0]
 
+        # Get absolute path to FastLED library using platform's natural path format
+        fastled_path = str(HERE.parent.absolute())
+        lib_option = f"lib_deps=symlink://{fastled_path}"
+
         # Build pio ci command
         cmd_list = [
             "pio",
@@ -449,11 +474,11 @@ def compile_with_pio_ci(
             str(ino_file),
             "--board",
             real_board_name,
-            "--lib",
-            "src",  # FastLED source directory
             "--keep-build-dir",
             "--build-dir",
             str(board_build_dir / example_path.name),
+            "--project-option",
+            lib_option,
         ]
 
         # Check for additional source directories in the example and collect them
