@@ -459,6 +459,22 @@ def compile_with_pio_ci(
         # Check for additional source directories in the example and collect them
         example_include_dirs = []
         example_src_dirs = []
+        
+        # First, check the example root directory itself for header files
+        example_root_headers = [
+            f
+            for f in example_path.glob("*")
+            if f.is_file() and f.suffix in [".h", ".hpp"]
+        ]
+        if example_root_headers:
+            example_include_dirs.append(str(example_path))
+            # Also add the example directory as a library so headers are copied
+            example_src_dirs.append(str(example_path))
+            if verbose:
+                locked_print(f"Added example root include directory: {example_path}")
+                locked_print(f"Added example root as library: {example_path}")
+        
+        # Then check subdirectories
         for subdir in example_path.iterdir():
             if subdir.is_dir() and subdir.name not in [
                 ".git",
