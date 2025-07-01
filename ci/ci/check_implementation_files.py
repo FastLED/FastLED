@@ -15,7 +15,17 @@ PROJECT_ROOT = Path(__file__).parent.parent.parent
 SRC_ROOT = PROJECT_ROOT / "src"
 FL_DIR = SRC_ROOT / "fl"
 FX_DIR = SRC_ROOT / "fx"
-ALL_SOURCE_BUILD_FILE = SRC_ROOT / "fastled_compile.cpp"
+ALL_SOURCE_BUILD_FILE = SRC_ROOT / "fastled_compile.hpp.cpp"
+
+# Hierarchical compile files
+HIERARCHICAL_FILES = [
+    SRC_ROOT / "fl" / "fl_compile.hpp",
+    SRC_ROOT / "fx" / "fx_compile.hpp",
+    SRC_ROOT / "sensors" / "sensors_compile.hpp",
+    SRC_ROOT / "platforms" / "platforms_compile.hpp",
+    SRC_ROOT / "third_party" / "third_party_compile.hpp",
+    SRC_ROOT / "src_compile.hpp",
+]
 
 # Detect if running in CI/test environment for ASCII-only output
 USE_ASCII_ONLY = (
@@ -51,28 +61,50 @@ def collect_files_by_type(directory: Path) -> Dict[str, List[Path]]:
 
 
 def get_all_source_build_includes() -> Set[str]:
-    """Extract the list of #include statements from the all-source build file.
+    """Extract the list of #include statements from the all-source build files.
+
+    This function handles the hierarchical structure by checking:
+    1. The main all-source build file (fastled_compile.hpp.cpp)
+    2. All hierarchical module compile files (fl_compile.hpp, fx_compile.hpp, etc.)
 
     Returns:
         Set of included file paths (relative to src/)
     """
     includes = set()
 
+    # Check main all-source build file
     if not ALL_SOURCE_BUILD_FILE.exists():
         print(f"Warning: All-source build file {ALL_SOURCE_BUILD_FILE} does not exist")
         return includes
 
-    try:
-        with open(ALL_SOURCE_BUILD_FILE, "r", encoding="utf-8") as f:
-            for line in f:
-                line = line.strip()
-                # Look for #include statements
-                if line.startswith('#include "') and line.endswith('"'):
-                    # Extract the include path
-                    include_path = line[10:-1]  # Remove '#include "' and '"'
-                    includes.add(include_path)
-    except Exception as e:
-        print(f"Error reading all-source build file: {e}")
+    # Function to extract includes from a file
+    def extract_includes_from_file(file_path: Path) -> Set[str]:
+        file_includes = set()
+        if not file_path.exists():
+            return file_includes
+
+        try:
+            with open(file_path, "r", encoding="utf-8") as f:
+                for line in f:
+                    line = line.strip()
+                    # Look for #include statements
+                    if line.startswith('#include "') and line.endswith('"'):
+                        # Extract the include path
+                        include_path = line[10:-1]  # Remove '#include "' and '"'
+                        file_includes.add(include_path)
+        except Exception as e:
+            print(f"Error reading file {file_path}: {e}")
+
+        return file_includes
+
+    # Extract includes from main file
+    includes.update(extract_includes_from_file(ALL_SOURCE_BUILD_FILE))
+
+    # Extract includes from all hierarchical files
+    for hierarchical_file in HIERARCHICAL_FILES:
+        if hierarchical_file.exists():
+            hierarchical_includes = extract_includes_from_file(hierarchical_file)
+            includes.update(hierarchical_includes)
 
     return includes
 
@@ -381,6 +413,10 @@ def main():
         print(f"   FL directory: {FL_DIR}")
         print(f"   FX directory: {FX_DIR}")
         print(f"   All-source build file: {ALL_SOURCE_BUILD_FILE}")
+        print("   Hierarchical compile files:")
+        for hfile in HIERARCHICAL_FILES:
+            status = "✓" if hfile.exists() else "✗"
+            print(f"     {status} {hfile.relative_to(PROJECT_ROOT)}")
 
 
 if __name__ == "__main__":
