@@ -443,11 +443,14 @@ def compile_with_pio_ci(
         ino_file = ino_files[0]
 
         # Build pio ci command - create temporary FastLED library if it doesn't exist
-        fastled_lib_path = "/tmp/fastled_lib"
-        if not Path(fastled_lib_path).exists():
-            import shutil
-            Path(fastled_lib_path).mkdir(parents=True, exist_ok=True)
-            shutil.copytree(HERE.parent / "src", Path(fastled_lib_path) / "src")
+        import tempfile
+        import shutil
+        
+        # Use a cross-platform temporary directory in the build folder
+        fastled_lib_path = board_build_dir / "fastled_lib"
+        if not fastled_lib_path.exists():
+            fastled_lib_path.mkdir(parents=True, exist_ok=True)
+            shutil.copytree(HERE.parent / "src", fastled_lib_path / "src")
 
         # Check for additional source directories in the example and collect them
         example_include_dirs = []
