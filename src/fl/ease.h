@@ -9,9 +9,14 @@ Modern platforms are so fast that the extra performance is not needed, but accur
 */
 
 #include "fl/stdint.h"
-
 #include "fl/int.h"
+#include "fastled_progmem.h"
+
 namespace fl {
+
+// Gamma 2.8 lookup table for 8-bit to 16-bit gamma correction 
+// Used for converting linear 8-bit values to gamma-corrected 16-bit values
+extern const u16 gamma_2_8[256] FL_PROGMEM;
 
 enum EaseType {
     EASE_NONE,
