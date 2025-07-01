@@ -408,39 +408,10 @@ def compile_with_pio_ci(
                 f"-I{include_dir}" for include_dir in example_include_dirs
             )
 
-        # Create a temporary platformio.ini with build flags if needed
+        # Add build flags directly using project options
         if build_flags_list:
             build_flags_str = " ".join(build_flags_list)
-            platformio_ini_content = f"""[env:{real_board_name}]
-board = {real_board_name}
-build_flags = {build_flags_str}
-"""
-            # Add platform and framework if specified
-            if board.platform:
-                platformio_ini_content += f"platform = {board.platform}\n"
-            else:
-                # Add default platforms for common boards
-                if board.board_name in ["uno", "yun", "attiny85"]:
-                    platformio_ini_content += "platform = atmelavr\n"
-                elif board.board_name in ["ATtiny1604", "ATtiny1616"]:
-                    platformio_ini_content += "platform = atmelmegaavr\n"
-                elif board.board_name.startswith("esp32"):
-                    platformio_ini_content += "platform = espressif32\n"
-                elif board.board_name.startswith("teensy"):
-                    platformio_ini_content += "platform = teensy\n"
-                
-            if board.framework:
-                platformio_ini_content += f"framework = {board.framework}\n"
-            else:
-                platformio_ini_content += "framework = arduino\n"
-                
-            # Write temporary platformio.ini for this build
-            temp_ini_path = board_build_dir / example_path.name / "temp_platformio.ini"
-            with open(temp_ini_path, "w") as f:
-                f.write(platformio_ini_content)
-            
-            # Use the temporary config file
-            cmd_list.extend(["-c", str(temp_ini_path)])
+            cmd_list.extend(["--project-option", f"build_flags={build_flags_str}"])
 
         # Add example source directories as libraries
         for src_dir in example_src_dirs:
