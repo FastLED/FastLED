@@ -1343,18 +1343,18 @@ async def lint_code(arguments: Dict[str, Any], project_root: Path) -> CallToolRe
     
     elif tool == "javascript":
         # JavaScript-only linting for background agents
-        lint_js_script = project_root / "lint-js"
-        check_js_script = project_root / "check-js"
+        lint_js_script = project_root / "ci" / "js" / "lint-js"
+        check_js_script = project_root / "ci" / "js" / "check-js"
         
         if lint_js_script.exists():
-            result = await run_command(["./lint-js"], project_root)
+            result = await run_command(["ci/js/lint-js"], project_root)
             results.append(f"🌐 JavaScript Linting:\n{result}")
             
             if check_js_script.exists():
-                result = await run_command(["./check-js"], project_root)
+                result = await run_command(["ci/js/check-js"], project_root)
                 results.append(f"🔍 JavaScript Type Checking:\n{result}")
         else:
-            results.append("❌ JavaScript linting tools not found. Run: python3 ci/setup-js-linting.py")
+            results.append("❌ JavaScript linting tools not found. Run: uv run ci/setup-js-linting.py")
         
         if agent_type == "background":
             results.append("\n💡 Background Agent: Consider running 'bash_lint' for comprehensive coverage.")
