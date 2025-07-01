@@ -8,6 +8,7 @@ intersecting the line and calls a visitor function for each cell.
 
 #include "fl/math.h"
 #include "fl/point.h"
+#include "fl/int.h"
 
 namespace fl {
 
@@ -224,11 +225,11 @@ inline void traverseGridSegment32(const vec2f &start, const vec2f &end,
 
     uint32_t absDeltaX_fp =
         (deltaX_fp != 0) ? static_cast<uint32_t>(
-                               ABS((int64_t(FP_ONE) << FP_SHIFT) / deltaX_fp))
+                               ABS((fl::i64(FP_ONE) << FP_SHIFT) / deltaX_fp))
                          : UINT32_MAX;
     uint32_t absDeltaY_fp =
         (deltaY_fp != 0) ? static_cast<uint32_t>(
-                               ABS((int64_t(FP_ONE) << FP_SHIFT) / deltaY_fp))
+                               ABS((fl::i64(FP_ONE) << FP_SHIFT) / deltaY_fp))
                          : UINT32_MAX;
 
     int32_t nextX_fp = (stepX > 0) ? ((x0 + 1) << FP_SHIFT) : (x0 << FP_SHIFT);
@@ -237,12 +238,12 @@ inline void traverseGridSegment32(const vec2f &start, const vec2f &end,
     uint32_t tMaxX_fp =
         (deltaX_fp != 0)
             ? static_cast<uint32_t>(
-                  ABS(int64_t(nextX_fp - startX_fp)) * absDeltaX_fp >> FP_SHIFT)
+                  ABS(fl::i64(nextX_fp - startX_fp)) * absDeltaX_fp >> FP_SHIFT)
             : UINT32_MAX;
     uint32_t tMaxY_fp =
         (deltaY_fp != 0)
             ? static_cast<uint32_t>(
-                  ABS(int64_t(nextY_fp - startY_fp)) * absDeltaY_fp >> FP_SHIFT)
+                  ABS(fl::i64(nextY_fp - startY_fp)) * absDeltaY_fp >> FP_SHIFT)
             : UINT32_MAX;
 
     const uint32_t maxT_fp = FP_ONE;

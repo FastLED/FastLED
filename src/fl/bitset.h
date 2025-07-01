@@ -21,10 +21,10 @@ using bitset_fixed = BitsetFixed<N>; // fixed size, no dynamic allocation.
 /// A simple fixed-size Bitset implementation similar to std::Bitset.
 template <fl::u32 N> class BitsetFixed {
   private:
-    static constexpr fl::u32 bits_per_block = 8 * sizeof(uint64_t);
+    static constexpr fl::u32 bits_per_block = 8 * sizeof(fl::u64);
     static constexpr fl::u32 block_count =
         (N + bits_per_block - 1) / bits_per_block;
-    using block_type = uint64_t;
+    using block_type = fl::u64;
 
     // Underlying blocks storing bits
     block_type _blocks[block_count];

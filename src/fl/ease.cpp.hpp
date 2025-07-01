@@ -10,6 +10,7 @@
 #include "fl/map_range.h"
 #include "lib8tion/intmap.h"
 #include "fl/sin32.h"
+#include "fl/int.h"
 
 namespace fl {
 
@@ -191,13 +192,13 @@ uint16_t easeInOutQuad16(uint16_t x) {
 
     if (x < HALF) {
         // first half: y = 2·(x/MAX)² → y_i = 2·x² / MAX
-        uint64_t xi = x;
-        uint64_t num = 2 * xi * xi + ROUND; // 2*x², +half for rounding
+        fl::u64 xi = x;
+        fl::u64 num = 2 * xi * xi + ROUND; // 2*x², +half for rounding
         return uint16_t(num / DENOM);
     } else {
         // second half: y = 1 − 2·(1−x/MAX)² → y_i = MAX − (2·(MAX−x)² / MAX)
-        uint64_t d = MAX - x;
-        uint64_t num = 2 * d * d + ROUND; // 2*(MAX−x)², +half for rounding
+        fl::u64 d = MAX - x;
+        fl::u64 num = 2 * d * d + ROUND; // 2*(MAX−x)², +half for rounding
         return uint16_t(MAX - (num / DENOM));
     }
 }
@@ -205,21 +206,21 @@ uint16_t easeInOutQuad16(uint16_t x) {
 uint16_t easeInOutCubic16(uint16_t x) {
     const uint32_t MAX = 0xFFFF;             // 65535
     const uint32_t HALF = (MAX + 1) >> 1;    // 32768
-    const uint64_t M2 = (uint64_t)MAX * MAX; // 65535² = 4 294 836 225
+    const fl::u64 M2 = (fl::u64)MAX * MAX; // 65535² = 4 294 836 225
 
     if (x < HALF) {
         // first half:  y = 4·(x/MAX)³  →  y_i = 4·x³ / MAX²
-        uint64_t xi = x;
-        uint64_t cube = xi * xi * xi; // x³
+        fl::u64 xi = x;
+        fl::u64 cube = xi * xi * xi; // x³
         // add M2/2 for rounding
-        uint64_t num = 4 * cube + (M2 >> 1);
+        fl::u64 num = 4 * cube + (M2 >> 1);
         return (uint16_t)(num / M2);
     } else {
         // second half: y = 1 − ((2·(1−x/MAX))³)/2
         // → y_i = MAX − (4·(MAX−x)³ / MAX²)
-        uint64_t d = MAX - x;
-        uint64_t cube = d * d * d; // (MAX−x)³
-        uint64_t num = 4 * cube + (M2 >> 1);
+        fl::u64 d = MAX - x;
+        fl::u64 cube = d * d * d; // (MAX−x)³
+        fl::u64 num = 4 * cube + (M2 >> 1);
         return (uint16_t)(MAX - (num / M2));
     }
 }
@@ -230,8 +231,8 @@ uint16_t easeOutQuad16(uint16_t i) {
     constexpr uint32_t MAX = 0xFFFF;     // 65535
     constexpr uint32_t ROUND = MAX >> 1; // for rounding
 
-    uint64_t d = MAX - i;         // (MAX - i)
-    uint64_t num = d * d + ROUND; // (MAX-i)² + rounding
+    fl::u64 d = MAX - i;         // (MAX - i)
+    fl::u64 num = d * d + ROUND; // (MAX-i)² + rounding
     return uint16_t(MAX - (num / MAX));
 }
 
@@ -239,12 +240,12 @@ uint16_t easeInCubic16(uint16_t i) {
     // Simple cubic ease-in: i³ scaled to 16-bit range
     // y = i³ / MAX²
     constexpr uint32_t MAX = 0xFFFF;                // 65535
-    constexpr uint64_t DENOM = (uint64_t)MAX * MAX; // 65535²
-    constexpr uint64_t ROUND = DENOM >> 1;          // for rounding
+    constexpr fl::u64 DENOM = (fl::u64)MAX * MAX; // 65535²
+    constexpr fl::u64 ROUND = DENOM >> 1;          // for rounding
 
-    uint64_t ii = i;
-    uint64_t cube = ii * ii * ii; // i³
-    uint64_t num = cube + ROUND;
+    fl::u64 ii = i;
+    fl::u64 cube = ii * ii * ii; // i³
+    fl::u64 num = cube + ROUND;
     return uint16_t(num / DENOM);
 }
 
@@ -252,12 +253,12 @@ uint16_t easeOutCubic16(uint16_t i) {
     // ease-out cubic: 1 - (1-t)³
     // For 16-bit: y = MAX - (MAX-i)³ / MAX²
     constexpr uint32_t MAX = 0xFFFF;                // 65535
-    constexpr uint64_t DENOM = (uint64_t)MAX * MAX; // 65535²
-    constexpr uint64_t ROUND = DENOM >> 1;          // for rounding
+    constexpr fl::u64 DENOM = (fl::u64)MAX * MAX; // 65535²
+    constexpr fl::u64 ROUND = DENOM >> 1;          // for rounding
 
-    uint64_t d = MAX - i;      // (MAX - i)
-    uint64_t cube = d * d * d; // (MAX-i)³
-    uint64_t num = cube + ROUND;
+    fl::u64 d = MAX - i;      // (MAX - i)
+    fl::u64 cube = d * d * d; // (MAX-i)³
+    fl::u64 num = cube + ROUND;
     return uint16_t(MAX - (num / DENOM));
 }
 
@@ -272,7 +273,7 @@ uint16_t easeInSine16(uint16_t i) {
     // Map i from [0,65535] to [0,4194304] in cos32 space (zero to quarter wave)
     // Formula: 1 - cos(t * π/2) where t goes from 0 to 1
     // sin32/cos32 quarter cycle is 16777216/4 = 4194304
-    uint32_t angle = ((uint64_t)i * 4194304ULL) / 65535ULL;
+    uint32_t angle = ((fl::u64)i * 4194304ULL) / 65535ULL;
     int32_t cos_result = fl::cos32(angle);
 
     // Convert cos32 output and apply easing formula: 1 - cos(t * π/2)
@@ -280,14 +281,14 @@ uint16_t easeInSine16(uint16_t i) {
     // At t=0: cos(0) = 2147418112, result should be 0
     // At t=1: cos(π/2) = 0, result should be 65535
     
-    const int64_t MAX_COS32 = 2147418112LL;
+    const fl::i64 MAX_COS32 = 2147418112LL;
     
     // Calculate: (MAX_COS32 - cos_result) and scale to [0, 65535]
-    int64_t adjusted = MAX_COS32 - (int64_t)cos_result;
+    fl::i64 adjusted = MAX_COS32 - (fl::i64)cos_result;
     
     // Scale from [0, 2147418112] to [0, 65535]
-    uint64_t result = (uint64_t)adjusted * 65535ULL + (MAX_COS32 >> 1); // Add half for rounding
-    uint16_t final_result = (uint16_t)(result / (uint64_t)MAX_COS32);
+    fl::u64 result = (fl::u64)adjusted * 65535ULL + (MAX_COS32 >> 1); // Add half for rounding
+    uint16_t final_result = (uint16_t)(result / (fl::u64)MAX_COS32);
     
     return final_result;
 }
@@ -304,13 +305,13 @@ uint16_t easeOutSine16(uint16_t i) {
     // Map i from [0,65535] to [0,4194304] in sin32 space (zero to quarter wave)
     // Formula: sin(t * π/2) where t goes from 0 to 1
     // sin32 quarter cycle is 16777216/4 = 4194304
-    uint32_t angle = ((uint64_t)i * 4194304ULL) / 65535ULL;
+    uint32_t angle = ((fl::u64)i * 4194304ULL) / 65535ULL;
     int32_t sin_result = fl::sin32(angle);
     
     // Convert sin32 output range [-2147418112, 2147418112] to [0, 65535]
     // sin32 output is in range -32767*65536 to +32767*65536
     // For ease-out sine, we only use positive portion [0, 2147418112] -> [0, 65535]
-    return (uint16_t)((uint64_t)sin_result * 65535ULL / 2147418112ULL);
+    return (uint16_t)((fl::u64)sin_result * 65535ULL / 2147418112ULL);
 }
 
 uint16_t easeInOutSine16(uint16_t i) {
@@ -325,14 +326,14 @@ uint16_t easeInOutSine16(uint16_t i) {
     // Map i from [0,65535] to [0,8388608] in cos32 space (0 to half wave)
     // Formula: (1 - cos(π*t)) / 2 where t goes from 0 to 1
     // sin32/cos32 half cycle is 16777216/2 = 8388608
-    uint32_t angle = ((uint64_t)i * 8388608ULL) / 65535ULL;
+    uint32_t angle = ((fl::u64)i * 8388608ULL) / 65535ULL;
     int32_t cos_result = fl::cos32(angle);
 
     // Convert cos32 output and apply easing formula: (1 - cos(π*t)) / 2
     // cos32 output range is [-2147418112, 2147418112]
     // We want: (2147418112 - cos_result) / 2, then scale to [0, 65535]
-    int64_t adjusted = (2147418112LL - (int64_t)cos_result) / 2;
-    return (uint16_t)((uint64_t)adjusted * 65535ULL / 2147418112ULL);
+    fl::i64 adjusted = (2147418112LL - (fl::i64)cos_result) / 2;
+    return (uint16_t)((fl::u64)adjusted * 65535ULL / 2147418112ULL);
 }
 
 } // namespace fl

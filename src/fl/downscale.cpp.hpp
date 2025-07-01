@@ -102,7 +102,7 @@ void downscaleArbitrary(const CRGB *src, const XYMap &srcXY, CRGB *dst,
             fl::u32 dstX0 = (dx * srcWidth * FP_ONE) / dstWidth;
             fl::u32 dstX1 = ((dx + 1) * srcWidth * FP_ONE) / dstWidth;
 
-            uint64_t rSum = 0, gSum = 0, bSum = 0;
+            fl::u64 rSum = 0, gSum = 0, bSum = 0;
             fl::u32 totalWeight = 0;
 
             // Find covered source pixels

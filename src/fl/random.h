@@ -60,7 +60,7 @@ public:
     result_type operator()(result_type n) {
         if (n == 0) return 0;
         uint32_t r = next_random32();
-        uint64_t p = (uint64_t)n * (uint64_t)r;
+        fl::u64 p = (fl::u64)n * (fl::u64)r;
         return (uint32_t)(p >> 32);
     }
 

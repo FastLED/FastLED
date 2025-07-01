@@ -1,4 +1,5 @@
 #include "frame_tracker.h"
+#include "fl/int.h"
 
 namespace fl {
 
@@ -26,7 +27,7 @@ void FrameTracker::get_interval_frames(uint32_t now, uint32_t *frameNumber,
     uint32_t effectiveTime = now;
 
     // Convert milliseconds to microseconds for precise calculation
-    uint64_t microseconds = static_cast<uint64_t>(effectiveTime) * 1000ULL;
+    fl::u64 microseconds = static_cast<fl::u64>(effectiveTime) * 1000ULL;
 
     // Calculate frame number with proper rounding
     *frameNumber = microseconds / mMicrosSecondsPerInterval;
@@ -34,8 +35,8 @@ void FrameTracker::get_interval_frames(uint32_t now, uint32_t *frameNumber,
 
     // Calculate interpolation amount if requested
     if (amountOfNextFrame != nullptr) {
-        uint64_t frame1_start = (*frameNumber * mMicrosSecondsPerInterval);
-        uint64_t frame2_start = (*nextFrameNumber * mMicrosSecondsPerInterval);
+        fl::u64 frame1_start = (*frameNumber * mMicrosSecondsPerInterval);
+        fl::u64 frame2_start = (*nextFrameNumber * mMicrosSecondsPerInterval);
         uint32_t rel_time = microseconds - frame1_start;
         uint32_t frame_duration = frame2_start - frame1_start;
         uint8_t progress = uint8_t(linear_map(rel_time, 0, frame_duration, 0, 255));
@@ -44,7 +45,7 @@ void FrameTracker::get_interval_frames(uint32_t now, uint32_t *frameNumber,
 }
 
 uint32_t FrameTracker::get_exact_timestamp_ms(uint32_t frameNumber) const {
-    uint64_t microseconds = frameNumber * mMicrosSecondsPerInterval;
+    fl::u64 microseconds = frameNumber * mMicrosSecondsPerInterval;
     return static_cast<uint32_t>(microseconds / 1000) + mStartTime;
 }
 

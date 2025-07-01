@@ -84,7 +84,7 @@ float AudioSample::rms() const {
     if (!isValid()) {
         return 0.0f;
     }
-    uint64_t sum_sq = 0;
+    fl::u64 sum_sq = 0;
     const int N = size();
     for (int i = 0; i < N; ++i) {
         fl::i32 x32 = fl::i32(pcm()[i]);

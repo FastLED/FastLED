@@ -12,8 +12,8 @@ namespace fl {
 /// A dynamic bitset implementation that can be resized at runtime
 class bitset_dynamic {
   private:
-    static constexpr fl::u32 bits_per_block = 8 * sizeof(uint64_t);
-    using block_type = uint64_t;
+    static constexpr fl::u32 bits_per_block = 8 * sizeof(fl::u64);
+    using block_type = fl::u64;
 
     block_type *_blocks = nullptr;
     fl::u32 _block_count = 0;
