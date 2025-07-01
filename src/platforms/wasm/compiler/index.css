@@ -1315,6 +1315,77 @@ audio::-webkit-media-controls-mute-button {
     box-sizing: border-box;
 }
 
+/* Paired number field styling - Enhanced space utilization */
+.ui-control.number-pair-control {
+    display: flex !important;
+    gap: 20px;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 0;
+    margin: 8px 0;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.ui-control.number-pair-control .single-number-field {
+    flex: 1;
+    max-width: calc(50% - 10px);
+    margin: 0;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.ui-control.number-pair-control .single-number-field label {
+    font-size: 0.9em;
+    margin-right: 8px;
+    padding-right: 0;
+    min-width: 80px;
+    flex-shrink: 0;
+    color: #E0E0E0;
+    font-weight: 500;
+}
+
+.ui-control.number-pair-control .single-number-field input[type="number"] {
+    width: 55px;
+    min-width: 50px;
+    max-width: 65px;
+    flex-shrink: 0;
+    box-sizing: border-box;
+}
+
+/* Mobile optimizations for paired number fields */
+.mobile-layout .ui-control.number-pair-control {
+    gap: 15px;
+}
+
+.mobile-layout .ui-control.number-pair-control .single-number-field label {
+    font-size: 0.85em;
+    min-width: 70px;
+}
+
+.mobile-layout .ui-control.number-pair-control .single-number-field input[type="number"] {
+    width: 50px;
+    min-width: 45px;
+    max-width: 60px;
+}
+
+/* Ultra-wide optimizations for paired number fields */
+.ultrawide-layout .ui-control.number-pair-control {
+    gap: 25px;
+}
+
+.ultrawide-layout .ui-control.number-pair-control .single-number-field label {
+    min-width: 90px;
+}
+
+.ultrawide-layout .ui-control.number-pair-control .single-number-field input[type="number"] {
+    width: 65px;
+    min-width: 55px;
+    max-width: 75px;
+}
+
 /* Overlay label for slider - hovers over the slider widget */
 .slider-label-overlay {
     position: absolute;

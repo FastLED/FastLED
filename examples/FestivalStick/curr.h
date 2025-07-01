@@ -241,8 +241,8 @@ UIGroup pointGraphicsGroup("Point Graphics Mode", speed, positionCoarse, positio
 
 // Animartrix-related UI controls
 UINumberField animartrixIndex("Animartrix Animation", 5, 0, NUM_ANIMATIONS - 1);
-UISlider animartrixTimeSpeed("Animartrix Time Speed", 1, -10, 10, .1);
 UINumberField animartrixColorOrder("Animartrix Color Order", 0, 0, 5);
+UISlider animartrixTimeSpeed("Animartrix Time Speed", 1, -10, 10, .1);
 
 UIGroup animartrixGroup("Animartrix Controls", animartrixIndex, animartrixTimeSpeed, animartrixColorOrder);
 

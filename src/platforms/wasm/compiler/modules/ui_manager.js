@@ -110,6 +110,42 @@ function markdownToHtml(markdown) {
 }
 
 /**
+ * Groups adjacent number fields into pairs for more efficient space utilization
+ * @param {Array} elements - Array of UI element configurations
+ * @returns {Array} Array with adjacent number fields grouped into pairs
+ */
+function groupAdjacentNumberFields(elements) {
+  const result = [];
+  let i = 0;
+
+  while (i < elements.length) {
+    const current = elements[i];
+    
+    // Check if current element is a number field and the next one is also a number field
+    if (current.type === 'number' && i + 1 < elements.length && elements[i + 1].type === 'number') {
+      const next = elements[i + 1];
+      
+      // Create a paired element that will be handled specially
+      result.push({
+        type: 'number-pair',
+        leftElement: current,
+        rightElement: next,
+        id: `pair-${current.id}-${next.id}`,
+        group: current.group // Use the group from the first element
+      });
+      
+      i += 2; // Skip both elements since we've paired them
+    } else {
+      // Add single element as-is
+      result.push(current);
+      i += 1;
+    }
+  }
+
+  return result;
+}
+
+/**
  * Creates a number input field UI element
  * @param {Object} element - Element configuration object
  * @param {string} element.name - Display name for the input
@@ -121,8 +157,53 @@ function markdownToHtml(markdown) {
  * @returns {HTMLDivElement} Container div with label and number input
  */
 function createNumberField(element) {
+  return createSingleNumberField(element);
+}
+
+/**
+ * Creates a paired number input field UI element with two number fields side by side
+ * @param {Object} leftElement - Left element configuration object
+ * @param {Object} rightElement - Right element configuration object
+ * @returns {HTMLDivElement} Container div with two number fields in a flex layout
+ */
+function createNumberFieldPair(leftElement, rightElement) {
+  const pairContainer = document.createElement('div');
+  pairContainer.className = 'ui-control number-pair-control';
+  pairContainer.style.display = 'flex';
+  pairContainer.style.gap = '20px';
+  pairContainer.style.alignItems = 'center';
+  pairContainer.style.justifyContent = 'space-between';
+
+  // Create left number field
+  const leftField = createSingleNumberField(leftElement);
+  leftField.style.flex = '1';
+  leftField.style.maxWidth = 'calc(50% - 10px)';
+
+  // Create right number field  
+  const rightField = createSingleNumberField(rightElement);
+  rightField.style.flex = '1';
+  rightField.style.maxWidth = 'calc(50% - 10px)';
+
+  pairContainer.appendChild(leftField);
+  pairContainer.appendChild(rightField);
+
+  // Store reference to both elements for later registration
+  pairContainer._leftElement = leftElement;
+  pairContainer._rightElement = rightElement;
+  pairContainer._leftControl = leftField;
+  pairContainer._rightControl = rightField;
+
+  return pairContainer;
+}
+
+/**
+ * Creates a single number input field UI element (used by both single and paired fields)
+ * @param {Object} element - Element configuration object
+ * @returns {HTMLDivElement} Container div with label and number input
+ */
+function createSingleNumberField(element) {
   const controlDiv = document.createElement('div');
-  controlDiv.className = 'ui-control number-control inline-row';
+  controlDiv.className = 'ui-control number-control inline-row single-number-field';
 
   const label = document.createElement('label');
   label.textContent = element.name;
@@ -132,6 +213,7 @@ function createNumberField(element) {
   label.style.fontWeight = '500';
   label.style.color = '#E0E0E0';
   label.style.marginRight = '10px';
+  label.style.fontSize = '0.9em'; // Slightly smaller for paired layout
 
   const numberInput = document.createElement('input');
   numberInput.type = 'number';
@@ -1069,7 +1151,7 @@ export class JsonUiManager {
 
     let foundUi = false;
     const groupedElements = new Map();
-    const ungroupedElements = [];
+    let ungroupedElements = [];
 
     // First pass: organize elements by group and analyze layout requirements
     jsonData.forEach((data) => {
@@ -1090,6 +1172,15 @@ export class JsonUiManager {
         ungroupedElements.push(data);
       }
     });
+
+    // Apply number field grouping to ungrouped elements
+    ungroupedElements = groupAdjacentNumberFields(ungroupedElements);
+
+    // Apply number field grouping to each group
+    for (const [groupName, elements] of groupedElements.entries()) {
+      const groupedElementsArray = groupAdjacentNumberFields(elements);
+      groupedElements.set(groupName, groupedElementsArray);
+    }
 
     // Optimize layout based on current screen size and element count
     this.optimizeLayoutForElements(groupedElements, ungroupedElements);
@@ -1344,6 +1435,8 @@ export class JsonUiManager {
       control = createButton(data);
     } else if (data.type === 'number') {
       control = createNumberField(data);
+    } else if (data.type === 'number-pair') {
+      control = createNumberFieldPair(data.leftElement, data.rightElement);
     } else if (data.type === 'audio') {
       control = createAudioField(data);
     } else if (data.type === 'dropdown') {
@@ -1355,28 +1448,51 @@ export class JsonUiManager {
 
   // Register a control element for state tracking
   registerControlElement(control, data) {
-    if (data.type === 'button') {
+    if (data.type === 'number-pair') {
+      // Register both left and right elements separately
+      const leftElement = data.leftElement;
+      const rightElement = data.rightElement;
+      
+      // Find the input elements within the paired control
+      const leftInput = control._leftControl.querySelector('input');
+      const rightInput = control._rightControl.querySelector('input');
+      
+      this.uiElements[leftElement.id] = leftInput;
+      this.uiElements[rightElement.id] = rightInput;
+      this.previousUiState[leftElement.id] = leftElement.value;
+      this.previousUiState[rightElement.id] = rightElement.value;
+
+      if (this.debugMode) {
+        console.log(
+          `🎵 UI Registered paired elements: IDs '${leftElement.id}' and '${rightElement.id}' (number-pair) - Total: ${Object.keys(this.uiElements).length}`,
+        );
+      }
+    } else if (data.type === 'button') {
       this.uiElements[data.id] = control.querySelector('button');
+      this.previousUiState[data.id] = data.value;
     } else if (data.type === 'dropdown') {
       this.uiElements[data.id] = control.querySelector('select');
+      this.previousUiState[data.id] = data.value;
     } else {
       this.uiElements[data.id] = control.querySelector('input');
-    }
-    this.previousUiState[data.id] = data.value;
-
-    // Add layout classes based on element hints
-    if (data._layoutHint === 'wide') {
-      control.classList.add('wide-control');
-    } else if (data._layoutHint === 'full-width') {
-      control.classList.add('full-width-control');
+      this.previousUiState[data.id] = data.value;
     }
 
-    if (this.debugMode) {
-      console.log(
-        `🎵 UI Registered element: ID '${data.id}' (${data.type}${
-          data._layoutHint ? ', ' + data._layoutHint : ''
-        }) - Total: ${Object.keys(this.uiElements).length}`,
-      );
+    // Add layout classes based on element hints (only for non-paired elements)
+    if (data.type !== 'number-pair') {
+      if (data._layoutHint === 'wide') {
+        control.classList.add('wide-control');
+      } else if (data._layoutHint === 'full-width') {
+        control.classList.add('full-width-control');
+      }
+
+      if (this.debugMode && data.type !== 'number-pair') {
+        console.log(
+          `🎵 UI Registered element: ID '${data.id}' (${data.type}${
+            data._layoutHint ? ', ' + data._layoutHint : ''
+          }) - Total: ${Object.keys(this.uiElements).length}`,
+        );
+      }
     }
   }
 
