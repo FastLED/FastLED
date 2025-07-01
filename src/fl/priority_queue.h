@@ -67,7 +67,7 @@ template <typename T, typename Compare = fl::less<T>,
 class PriorityQueue {
   public:
     using value_type = T;
-    using size_type = size_t;
+    using size_type = fl::sz;
     using compare_type = Compare;
 
     PriorityQueue() = default;

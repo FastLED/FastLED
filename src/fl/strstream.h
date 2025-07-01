@@ -113,7 +113,7 @@ class StrStream {
     }
 
 #if FASTLED_STRSTREAM_USES_SIZE_T
-    StrStream &operator<<(size_t n) {
+    StrStream &operator<<(fl::sz n) {
         mStr.append(uint32_t(n));
         return *this;
     }
@@ -192,7 +192,7 @@ class FakeStrStream {
     FakeStrStream &operator<<(char) { return *this; }
 
 #if FASTLED_STRSTREAM_USES_SIZE_T
-    FakeStrStream &operator<<(size_t) { return *this; }
+    FakeStrStream &operator<<(fl::sz) { return *this; }
 #endif
 
     FakeStrStream &operator<<(uint8_t) { return *this; }
