@@ -9,7 +9,7 @@
 // Copy the AudioBuffer struct and parsing function from audio.cpp for testing
 struct AudioBuffer {
     fl::vector<int16_t> samples;
-    uint32_t timestamp;
+    uint32_t timestamp = 0;
 };
 
 // Copy the helper functions from audio.cpp

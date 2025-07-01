@@ -2,6 +2,7 @@
 
 //#include <stddef.h>
 #include "fl/stdint.h"
+#include "fl/int.h"
 #include <string.h>
 
 #include "fl/functional.h"
