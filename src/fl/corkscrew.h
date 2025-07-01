@@ -144,7 +144,7 @@ struct CorkscrewState {
     class iterator {
       public:
         using value_type = vec2f;
-        using difference_type = int32_t;
+        using difference_type = fl::i32;
         using pointer = vec2f *;
         using reference = vec2f &;
 
@@ -215,8 +215,8 @@ class Corkscrew {
     iterator begin() { return iterator(this, 0); }
     iterator end() { return iterator(this, size()); }
 
-    int16_t cylinder_width() const { return mState.width; }
-    int16_t cylinder_height() const { return mState.height; }
+    fl::i16 cylinder_width() const { return mState.width; }
+    fl::i16 cylinder_height() const { return mState.height; }
 
     // Caching control
     void setCachingEnabled(bool enabled);

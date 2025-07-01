@@ -43,13 +43,13 @@ void blur1d(CRGB *leds, u16 numLeds, fract8 blur_amount);
 /// @param width the width of the matrix
 /// @param height the height of the matrix
 /// @param blur_amount the amount of blur to apply
-void blur2d(CRGB *leds, uint8_t width, uint8_t height, fract8 blur_amount,
+void blur2d(CRGB *leds, fl::u8 width, fl::u8 height, fract8 blur_amount,
             const fl::XYMap &xymap);
 
 /// Legacy version of blur2d, which does not require an XYMap but instead
 /// implicitly binds to XY() function. If you are hitting a linker error here,
 /// then use blur2d(..., const fl::XYMap& xymap) instead.
-void blur2d(CRGB *leds, uint8_t width, uint8_t height, fract8 blur_amount)
+void blur2d(CRGB *leds, fl::u8 width, fl::u8 height, fract8 blur_amount)
     FASTLED_DEPRECATED("Use blur2d(..., const fl::XYMap& xymap) instead");
 
 /// Perform a blur1d() on every row of a rectangular matrix
@@ -58,12 +58,12 @@ void blur2d(CRGB *leds, uint8_t width, uint8_t height, fract8 blur_amount)
 /// @param width the width of the matrix
 /// @param height the height of the matrix
 /// @param blur_amount the amount of blur to apply
-void blurRows(CRGB *leds, uint8_t width, uint8_t height, fract8 blur_amount,
+void blurRows(CRGB *leds, fl::u8 width, fl::u8 height, fract8 blur_amount,
               const fl::XYMap &xymap);
 
 /// Perform a blur1d() on every column of a rectangular matrix
 /// @copydetails blurRows()
-void blurColumns(CRGB *leds, uint8_t width, uint8_t height, fract8 blur_amount,
+void blurColumns(CRGB *leds, fl::u8 width, fl::u8 height, fract8 blur_amount,
                  const fl::XYMap &xymap);
 
 /// @} ColorBlurs

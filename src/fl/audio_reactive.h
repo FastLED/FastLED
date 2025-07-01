@@ -24,14 +24,14 @@ struct AudioData {
 };
 
 struct AudioConfig {
-    uint8_t gain = 128;              // Input gain (0-255)
-    uint8_t sensitivity = 128;       // AGC sensitivity
+    fl::u8 gain = 128;              // Input gain (0-255)
+    fl::u8 sensitivity = 128;       // AGC sensitivity
     bool agcEnabled = true;          // Auto gain control
     bool noiseGate = true;           // Noise gate
-    uint8_t attack = 50;             // Attack time (ms) - how fast to respond to increases
-    uint8_t decay = 200;             // Decay time (ms) - how slow to respond to decreases
+    fl::u8 attack = 50;             // Attack time (ms) - how fast to respond to increases
+    fl::u8 decay = 200;             // Decay time (ms) - how slow to respond to decreases
     u16 sampleRate = 22050;     // Sample rate (Hz)
-    uint8_t scalingMode = 3;         // 0=none, 1=log, 2=linear, 3=sqrt
+    fl::u8 scalingMode = 3;         // 0=none, 1=log, 2=linear, 3=sqrt
 };
 
 class AudioReactive {
@@ -61,9 +61,9 @@ public:
     bool isBeat() const;
     
     // Effect helpers
-    uint8_t volumeToScale255() const;
+    fl::u8 volumeToScale255() const;
     CRGB volumeToColor(const CRGBPalette16& palette) const;
-    uint8_t frequencyToScale255(uint8_t binIndex) const;
+    fl::u8 frequencyToScale255(fl::u8 binIndex) const;
 
 private:
     // Internal processing methods
@@ -77,7 +77,7 @@ private:
     
     // Helper methods
     float mapFrequencyBin(int fromBin, int toBin);
-    float computeRMS(const fl::vector<int16_t>& samples);
+    float computeRMS(const fl::vector<fl::i16>& samples);
     
     // Configuration
     AudioConfig mConfig;

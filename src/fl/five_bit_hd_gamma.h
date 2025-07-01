@@ -29,12 +29,12 @@ enum FiveBitGammaCorrectionMode {
 // Example:
 //  FASTLED_NAMESPACE_BEGIN
 //  void five_bit_hd_gamma_bitshift(
-//      uint8_t r8, uint8_t g8, uint8_t b8,
-//      uint8_t r8_scale, uint8_t g8_scale, uint8_t b8_scale,
-//      uint8_t* out_r8,
-//      uint8_t* out_g8,
-//      uint8_t* out_b8,
-//      uint8_t* out_power_5bit) {
+//      fl::u8 r8, fl::u8 g8, fl::u8 b8,
+//      fl::u8 r8_scale, fl::u8 g8_scale, fl::u8 b8_scale,
+//      fl::u8* out_r8,
+//      fl::u8* out_g8,
+//      fl::u8* out_b8,
+//      fl::u8* out_power_5bit) {
 //        cout << "hello world\n";
 //  }
 //  FASTLED_NAMESPACE_END
@@ -42,27 +42,27 @@ enum FiveBitGammaCorrectionMode {
 // Force push
 
 void internal_builtin_five_bit_hd_gamma_bitshift(CRGB colors, CRGB colors_scale,
-                                                 uint8_t global_brightness,
+                                                 fl::u8 global_brightness,
                                                  CRGB *out_colors,
-                                                 uint8_t *out_power_5bit);
+                                                 fl::u8 *out_power_5bit);
 
 // Exposed for testing.
-uint8_t five_bit_bitshift(u16 r16, u16 g16, u16 b16,
-                          uint8_t brightness, CRGB *out,
-                          uint8_t *out_power_5bit);
+fl::u8 five_bit_bitshift(u16 r16, u16 g16, u16 b16,
+                          fl::u8 brightness, CRGB *out,
+                          fl::u8 *out_power_5bit);
 
 #ifdef FASTLED_FIVE_BIT_HD_BITSHIFT_FUNCTION_OVERRIDE
 // This function is located somewhere else in your project, so it's declared
 // extern here.
 extern void five_bit_hd_gamma_bitshift(CRGB colors, CRGB colors_scale,
-                                       uint8_t global_brightness,
+                                       fl::u8 global_brightness,
                                        CRGB *out_colors,
-                                       uint8_t *out_power_5bit);
+                                       fl::u8 *out_power_5bit);
 #else
 inline void five_bit_hd_gamma_bitshift(CRGB colors, CRGB colors_scale,
-                                       uint8_t global_brightness,
+                                       fl::u8 global_brightness,
                                        CRGB *out_colors,
-                                       uint8_t *out_power_5bit) {
+                                       fl::u8 *out_power_5bit) {
     internal_builtin_five_bit_hd_gamma_bitshift(
         colors, colors_scale, global_brightness, out_colors, out_power_5bit);
 }
@@ -76,7 +76,7 @@ inline void five_bit_hd_gamma_bitshift(CRGB colors, CRGB colors_scale,
 // and then define your own version anywhere in your project. Example:
 //  FASTLED_NAMESPACE_BEGIN
 //  void five_bit_hd_gamma_function(
-//    uint8_t r8, uint8_t g8, uint8_t b8,
+//    fl::u8 r8, fl::u8 g8, fl::u8 b8,
 //    u16* r16, u16* g16, u16* b16) {
 //      cout << "hello world\n";
 //  }
@@ -95,8 +95,8 @@ inline void five_bit_hd_gamma_function(CRGB color, u16 *r16, u16 *g16,
 #endif // FASTLED_FIVE_BIT_HD_GAMMA_FUNCTION_OVERRIDE
 
 inline void internal_builtin_five_bit_hd_gamma_bitshift(
-    CRGB colors, CRGB colors_scale, uint8_t global_brightness, CRGB *out_colors,
-    uint8_t *out_power_5bit) {
+    CRGB colors, CRGB colors_scale, fl::u8 global_brightness, CRGB *out_colors,
+    fl::u8 *out_power_5bit) {
 
     if (global_brightness == 0) {
         *out_colors = CRGB(0, 0, 0);
@@ -124,9 +124,9 @@ inline void internal_builtin_five_bit_hd_gamma_bitshift(
                       out_power_5bit);
 }
 
-inline uint8_t five_bit_bitshift(u16 r16, u16 g16, u16 b16,
-                                 uint8_t brightness, CRGB *out,
-                                 uint8_t *out_power_5bit) {
+inline fl::u8 five_bit_bitshift(u16 r16, u16 g16, u16 b16,
+                                 fl::u8 brightness, CRGB *out,
+                                 fl::u8 *out_power_5bit) {
 
     auto max3 = [](u16 a, u16 b, u16 c) {
         return fl_max(fl_max(a, b), c);
@@ -149,8 +149,8 @@ inline uint8_t five_bit_bitshift(u16 r16, u16 g16, u16 b16,
     // much as possible.
 
     // Step 1: Initialize brightness
-    static const uint8_t kStartBrightness = 0b00010000;
-    uint8_t v5 = kStartBrightness;
+    static const fl::u8 kStartBrightness = 0b00010000;
+    fl::u8 v5 = kStartBrightness;
     // Step 2: Boost brightness by swapping power with the driver brightness.
     brightness_bitshifter8(&v5, &brightness, 4);
 
@@ -158,7 +158,7 @@ inline uint8_t five_bit_bitshift(u16 r16, u16 g16, u16 b16,
     // driver brightness.
     u16 max_component = max3(r16, g16, b16);
     // five_bit_color_bitshift(&r16, &g16, &b16, &v5);
-    uint8_t shifts = brightness_bitshifter16(&v5, reinterpret_cast<uint16_t*>(&max_component), 4, 2);
+    fl::u8 shifts = brightness_bitshifter16(&v5, reinterpret_cast<fl::u16*>(&max_component), 4, 2);
     if (shifts) {
         r16 = r16 << shifts;
         g16 = g16 << shifts;

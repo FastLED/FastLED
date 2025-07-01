@@ -8,6 +8,7 @@ Experimental bilinearn downscaling algorithm. Not tested yet and completely
 If you use this and find an issue then please report it.
 */
 
+#include "fl/int.h"
 #include "crgb.h"
 
 namespace fl {
@@ -22,7 +23,7 @@ void downscale(const CRGB *src, const XYMap &srcXY, CRGB *dst,
 // functions. It's important to note that downscale(...) will invoke
 // downscaleHalf(...) automatically when the source and destination are half the
 // size of each other.
-void downscaleHalf(const CRGB *src, uint16_t srcWidth, uint16_t srcHeight,
+void downscaleHalf(const CRGB *src, fl::u16 srcWidth, fl::u16 srcHeight,
                    CRGB *dst);
 void downscaleHalf(const CRGB *src, const XYMap &srcXY, CRGB *dst,
                    const XYMap &dstXY);

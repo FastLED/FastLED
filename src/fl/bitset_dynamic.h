@@ -1,6 +1,7 @@
 #pragma once
 
 #include "fl/stdint.h"
+#include "fl/int.h"
 #include <string.h> // for memcpy
 
 #include "fl/math_macros.h"
@@ -11,15 +12,15 @@ namespace fl {
 /// A dynamic bitset implementation that can be resized at runtime
 class bitset_dynamic {
   private:
-    static constexpr uint32_t bits_per_block = 8 * sizeof(uint64_t);
+    static constexpr fl::u32 bits_per_block = 8 * sizeof(uint64_t);
     using block_type = uint64_t;
 
     block_type *_blocks = nullptr;
-    uint32_t _block_count = 0;
-    uint32_t _size = 0;
+    fl::u32 _block_count = 0;
+    fl::u32 _size = 0;
 
     // Helper to calculate block count from bit count
-    static uint32_t calc_block_count(uint32_t bit_count) {
+    static fl::u32 calc_block_count(fl::u32 bit_count) {
         return (bit_count + bits_per_block - 1) / bits_per_block;
     }
 
@@ -28,7 +29,7 @@ class bitset_dynamic {
     bitset_dynamic() = default;
 
     // Constructor with initial size
-    explicit bitset_dynamic(uint32_t size) { resize(size); }
+    explicit bitset_dynamic(fl::u32 size) { resize(size); }
 
     // Copy constructor
     bitset_dynamic(const bitset_dynamic &other) {
@@ -88,13 +89,13 @@ class bitset_dynamic {
         if (value) {
             // Set all bits to 1
             if (_blocks && _block_count > 0) {
-                for (uint32_t i = 0; i < _block_count; ++i) {
+                for (fl::u32 i = 0; i < _block_count; ++i) {
                     _blocks[i] = ~static_cast<block_type>(0);
                 }
                 // Clear any bits beyond the actual size
                 if (_size % bits_per_block != 0) {
-                    uint32_t last_block_idx = (_size - 1) / bits_per_block;
-                    uint32_t last_bit_pos = (_size - 1) % bits_per_block;
+                    fl::u32 last_block_idx = (_size - 1) / bits_per_block;
+                    fl::u32 last_bit_pos = (_size - 1) % bits_per_block;
                     block_type mask = (static_cast<block_type>(1) << (last_bit_pos + 1)) - 1;
                     _blocks[last_block_idx] &= mask;
                 }
@@ -109,18 +110,18 @@ class bitset_dynamic {
     // Resize the bitset
     FL_DISABLE_WARNING_PUSH
     FL_DISABLE_WARNING(null-dereference)
-    void resize(uint32_t new_size) {
+    void resize(fl::u32 new_size) {
         if (new_size == _size)
             return;
 
-        uint32_t new_block_count = (new_size + bits_per_block - 1) / bits_per_block;
+        fl::u32 new_block_count = (new_size + bits_per_block - 1) / bits_per_block;
 
         if (new_block_count != _block_count) {
             block_type *new_blocks = new block_type[new_block_count];
             memset(new_blocks, 0, new_block_count * sizeof(block_type));
 
             if (_blocks) {
-                uint32_t copy_blocks = MIN(_block_count, new_block_count);
+                fl::u32 copy_blocks = MIN(_block_count, new_block_count);
                 memcpy(new_blocks, _blocks, copy_blocks * sizeof(block_type));
             }
 
@@ -133,8 +134,8 @@ class bitset_dynamic {
 
         // Clear any bits beyond the new size
         if (_blocks && _block_count > 0 && _size % bits_per_block != 0) {
-            uint32_t last_block_idx = (_size - 1) / bits_per_block;
-            uint32_t last_bit_pos = (_size - 1) % bits_per_block;
+            fl::u32 last_block_idx = (_size - 1) / bits_per_block;
+            fl::u32 last_bit_pos = (_size - 1) % bits_per_block;
             block_type mask =
                 (static_cast<block_type>(1) << (last_bit_pos + 1)) - 1;
             _blocks[last_block_idx] &= mask;
@@ -163,10 +164,10 @@ class bitset_dynamic {
     // Reset a specific bit to 0
     FL_DISABLE_WARNING_PUSH
     FL_DISABLE_WARNING(null-dereference)
-    void reset(uint32_t pos) noexcept {
+    void reset(fl::u32 pos) noexcept {
         if (_blocks && pos < _size) {
-            const uint32_t idx = pos / bits_per_block;
-            const uint32_t off = pos % bits_per_block;
+            const fl::u32 idx = pos / bits_per_block;
+            const fl::u32 off = pos % bits_per_block;
             _blocks[idx] &= ~(static_cast<block_type>(1) << off);
         }
     }
@@ -175,17 +176,17 @@ class bitset_dynamic {
     // Set a specific bit to 1
     FL_DISABLE_WARNING_PUSH
     FL_DISABLE_WARNING(null-dereference)
-    void set(uint32_t pos) noexcept {
+    void set(fl::u32 pos) noexcept {
         if (_blocks && pos < _size) {
-            const uint32_t idx = pos / bits_per_block;
-            const uint32_t off = pos % bits_per_block;
+            const fl::u32 idx = pos / bits_per_block;
+            const fl::u32 off = pos % bits_per_block;
             _blocks[idx] |= (static_cast<block_type>(1) << off);
         }
     }
     FL_DISABLE_WARNING_POP
 
     // Set a specific bit to a given value
-    void set(uint32_t pos, bool value) noexcept {
+    void set(fl::u32 pos, bool value) noexcept {
         if (value) {
             set(pos);
         } else {
@@ -196,10 +197,10 @@ class bitset_dynamic {
     // Flip a specific bit
     FL_DISABLE_WARNING_PUSH
     FL_DISABLE_WARNING(null-dereference)
-    void flip(uint32_t pos) noexcept {
+    void flip(fl::u32 pos) noexcept {
         if (_blocks && pos < _size) {
-            const uint32_t idx = pos / bits_per_block;
-            const uint32_t off = pos % bits_per_block;
+            const fl::u32 idx = pos / bits_per_block;
+            const fl::u32 off = pos % bits_per_block;
             _blocks[idx] ^= (static_cast<block_type>(1) << off);
         }
     }
@@ -209,14 +210,14 @@ class bitset_dynamic {
     void flip() noexcept {
         if (!_blocks) return;
         
-        for (uint32_t i = 0; i < _block_count; ++i) {
+        for (fl::u32 i = 0; i < _block_count; ++i) {
             _blocks[i] = ~_blocks[i];
         }
 
         // Clear any bits beyond size
         if (_block_count > 0 && _size % bits_per_block != 0) {
-            uint32_t last_block_idx = (_size - 1) / bits_per_block;
-            uint32_t last_bit_pos = (_size - 1) % bits_per_block;
+            fl::u32 last_block_idx = (_size - 1) / bits_per_block;
+            fl::u32 last_bit_pos = (_size - 1) % bits_per_block;
             block_type mask =
                 (static_cast<block_type>(1) << (last_bit_pos + 1)) - 1;
             _blocks[last_block_idx] &= mask;
@@ -226,10 +227,10 @@ class bitset_dynamic {
     // Test if a bit is set
     FL_DISABLE_WARNING_PUSH
     FL_DISABLE_WARNING(null-dereference)
-    bool test(uint32_t pos) const noexcept {
+    bool test(fl::u32 pos) const noexcept {
         if (_blocks && pos < _size) {
-            const uint32_t idx = pos / bits_per_block;
-            const uint32_t off = pos % bits_per_block;
+            const fl::u32 idx = pos / bits_per_block;
+            const fl::u32 off = pos % bits_per_block;
             return (_blocks[idx] >> off) & 1;
         }
         return false;
@@ -237,11 +238,11 @@ class bitset_dynamic {
     FL_DISABLE_WARNING_POP
 
     // Count the number of set bits
-    uint32_t count() const noexcept {
+    fl::u32 count() const noexcept {
         if (!_blocks) return 0;
         
-        uint32_t result = 0;
-        for (uint32_t i = 0; i < _block_count; ++i) {
+        fl::u32 result = 0;
+        for (fl::u32 i = 0; i < _block_count; ++i) {
             block_type v = _blocks[i];
             // Brian Kernighan's algorithm for counting bits
             while (v) {
@@ -256,7 +257,7 @@ class bitset_dynamic {
     bool any() const noexcept {
         if (!_blocks) return false;
         
-        for (uint32_t i = 0; i < _block_count; ++i) {
+        for (fl::u32 i = 0; i < _block_count; ++i) {
             if (_blocks[i] != 0)
                 return true;
         }
@@ -273,14 +274,14 @@ class bitset_dynamic {
         
         if (!_blocks) return false;
 
-        for (uint32_t i = 0; i < _block_count - 1; ++i) {
+        for (fl::u32 i = 0; i < _block_count - 1; ++i) {
             if (_blocks[i] != ~static_cast<block_type>(0))
                 return false;
         }
 
         // Check last block with mask for valid bits
         if (_block_count > 0) {
-            uint32_t last_bit_pos = (_size - 1) % bits_per_block;
+            fl::u32 last_bit_pos = (_size - 1) % bits_per_block;
             block_type mask =
                 (static_cast<block_type>(1) << (last_bit_pos + 1)) - 1;
             return (_blocks[_block_count - 1] & mask) == mask;
@@ -292,7 +293,7 @@ class bitset_dynamic {
     // Get the size of the bitset
     FL_DISABLE_WARNING_PUSH
     FL_DISABLE_WARNING(null-dereference)
-    uint32_t size() const noexcept { 
+    fl::u32 size() const noexcept { 
         // Note: _size is a member variable, not a pointer, so this should be safe
         // but we add this comment to clarify for static analysis
         return _size; 
@@ -300,7 +301,7 @@ class bitset_dynamic {
     FL_DISABLE_WARNING_POP
 
     // Access operator
-    bool operator[](uint32_t pos) const noexcept { return test(pos); }
+    bool operator[](fl::u32 pos) const noexcept { return test(pos); }
 
     // Bitwise AND operator
     bitset_dynamic operator&(const bitset_dynamic &other) const {
@@ -310,9 +311,9 @@ class bitset_dynamic {
             return result;
         }
         
-        uint32_t min_blocks = MIN(_block_count, other._block_count);
+        fl::u32 min_blocks = MIN(_block_count, other._block_count);
 
-        for (uint32_t i = 0; i < min_blocks; ++i) {
+        for (fl::u32 i = 0; i < min_blocks; ++i) {
             result._blocks[i] = _blocks[i] & other._blocks[i];
         }
 
@@ -327,9 +328,9 @@ class bitset_dynamic {
             return result;
         }
         
-        uint32_t min_blocks = MIN(_block_count, other._block_count);
+        fl::u32 min_blocks = MIN(_block_count, other._block_count);
 
-        for (uint32_t i = 0; i < min_blocks; ++i) {
+        for (fl::u32 i = 0; i < min_blocks; ++i) {
             result._blocks[i] = _blocks[i] | other._blocks[i];
         }
 
@@ -350,9 +351,9 @@ class bitset_dynamic {
             return result;
         }
         
-        uint32_t min_blocks = MIN(_block_count, other._block_count);
+        fl::u32 min_blocks = MIN(_block_count, other._block_count);
 
-        for (uint32_t i = 0; i < min_blocks; ++i) {
+        for (fl::u32 i = 0; i < min_blocks; ++i) {
             result._blocks[i] = _blocks[i] ^ other._blocks[i];
         }
 
@@ -373,14 +374,14 @@ class bitset_dynamic {
             return result;
         }
 
-        for (uint32_t i = 0; i < _block_count; ++i) {
+        for (fl::u32 i = 0; i < _block_count; ++i) {
             result._blocks[i] = ~_blocks[i];
         }
 
         // Clear any bits beyond size
         if (_block_count > 0 && _size % bits_per_block != 0) {
-            uint32_t last_block_idx = (_size - 1) / bits_per_block;
-            uint32_t last_bit_pos = (_size - 1) % bits_per_block;
+            fl::u32 last_block_idx = (_size - 1) / bits_per_block;
+            fl::u32 last_bit_pos = (_size - 1) % bits_per_block;
             block_type mask =
                 (static_cast<block_type>(1) << (last_bit_pos + 1)) - 1;
             result._blocks[last_block_idx] &= mask;

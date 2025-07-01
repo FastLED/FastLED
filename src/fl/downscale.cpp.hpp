@@ -3,6 +3,7 @@
 // VIBE CODED WITH AI
 
 #include "fl/downscale.h"
+#include "fl/int.h"
 
 #include "crgb.h"
 #include "fl/assert.h"
@@ -14,16 +15,16 @@
 
 namespace fl {
 
-void downscaleHalf(const CRGB *src, uint16_t srcWidth, uint16_t srcHeight,
+void downscaleHalf(const CRGB *src, fl::u16 srcWidth, fl::u16 srcHeight,
                    CRGB *dst) {
-    uint16_t dstWidth = srcWidth / 2;
-    uint16_t dstHeight = srcHeight / 2;
+    fl::u16 dstWidth = srcWidth / 2;
+    fl::u16 dstHeight = srcHeight / 2;
 
-    for (uint16_t y = 0; y < dstHeight; ++y) {
-        for (uint16_t x = 0; x < dstWidth; ++x) {
+    for (fl::u16 y = 0; y < dstHeight; ++y) {
+        for (fl::u16 x = 0; x < dstWidth; ++x) {
             // Map to top-left of the 2x2 block in source
-            uint16_t srcX = x * 2;
-            uint16_t srcY = y * 2;
+            fl::u16 srcX = x * 2;
+            fl::u16 srcY = y * 2;
 
             // Fetch 2x2 block
             const CRGB &p00 = src[(srcY)*srcWidth + (srcX)];
@@ -32,32 +33,32 @@ void downscaleHalf(const CRGB *src, uint16_t srcWidth, uint16_t srcHeight,
             const CRGB &p11 = src[(srcY + 1) * srcWidth + (srcX + 1)];
 
             // Average each color channel
-            uint16_t r =
+            fl::u16 r =
                 (p00.r + p10.r + p01.r + p11.r + 2) / 4; // +2 for rounding
-            uint16_t g = (p00.g + p10.g + p01.g + p11.g + 2) / 4;
-            uint16_t b = (p00.b + p10.b + p01.b + p11.b + 2) / 4;
+            fl::u16 g = (p00.g + p10.g + p01.g + p11.g + 2) / 4;
+            fl::u16 b = (p00.b + p10.b + p01.b + p11.b + 2) / 4;
 
             // Store result
-            dst[y * dstWidth + x] = CRGB((uint8_t)r, (uint8_t)g, (uint8_t)b);
+            dst[y * dstWidth + x] = CRGB((fl::u8)r, (fl::u8)g, (fl::u8)b);
         }
     }
 }
 
 void downscaleHalf(const CRGB *src, const XYMap &srcXY, CRGB *dst,
                    const XYMap &dstXY) {
-    uint16_t dstWidth = dstXY.getWidth();
-    uint16_t dstHeight = dstXY.getHeight();
+    fl::u16 dstWidth = dstXY.getWidth();
+    fl::u16 dstHeight = dstXY.getHeight();
 
     FASTLED_ASSERT(srcXY.getWidth() == dstXY.getWidth() * 2,
                    "Source width must be double the destination width");
     FASTLED_ASSERT(srcXY.getHeight() == dstXY.getHeight() * 2,
                    "Source height must be double the destination height");
 
-    for (uint16_t y = 0; y < dstHeight; ++y) {
-        for (uint16_t x = 0; x < dstWidth; ++x) {
+    for (fl::u16 y = 0; y < dstHeight; ++y) {
+        for (fl::u16 x = 0; x < dstWidth; ++x) {
             // Map to top-left of the 2x2 block in source
-            uint16_t srcX = x * 2;
-            uint16_t srcY = y * 2;
+            fl::u16 srcX = x * 2;
+            fl::u16 srcY = y * 2;
 
             // Fetch 2x2 block
             const CRGB &p00 = src[srcXY.mapToIndex(srcX, srcY)];
@@ -66,67 +67,67 @@ void downscaleHalf(const CRGB *src, const XYMap &srcXY, CRGB *dst,
             const CRGB &p11 = src[srcXY.mapToIndex(srcX + 1, srcY + 1)];
 
             // Average each color channel
-            uint16_t r =
+            fl::u16 r =
                 (p00.r + p10.r + p01.r + p11.r + 2) / 4; // +2 for rounding
-            uint16_t g = (p00.g + p10.g + p01.g + p11.g + 2) / 4;
-            uint16_t b = (p00.b + p10.b + p01.b + p11.b + 2) / 4;
+            fl::u16 g = (p00.g + p10.g + p01.g + p11.g + 2) / 4;
+            fl::u16 b = (p00.b + p10.b + p01.b + p11.b + 2) / 4;
 
             // Store result
             dst[dstXY.mapToIndex(x, y)] =
-                CRGB((uint8_t)r, (uint8_t)g, (uint8_t)b);
+                CRGB((fl::u8)r, (fl::u8)g, (fl::u8)b);
         }
     }
 }
 
 void downscaleArbitrary(const CRGB *src, const XYMap &srcXY, CRGB *dst,
                         const XYMap &dstXY) {
-    const uint16_t srcWidth = srcXY.getWidth();
-    const uint16_t srcHeight = srcXY.getHeight();
-    const uint16_t dstWidth = dstXY.getWidth();
-    const uint16_t dstHeight = dstXY.getHeight();
+    const fl::u16 srcWidth = srcXY.getWidth();
+    const fl::u16 srcHeight = srcXY.getHeight();
+    const fl::u16 dstWidth = dstXY.getWidth();
+    const fl::u16 dstHeight = dstXY.getHeight();
 
-    const uint32_t FP_ONE = 256; // Q8.8 fixed-point multiplier
+    const fl::u32 FP_ONE = 256; // Q8.8 fixed-point multiplier
 
     FASTLED_ASSERT(dstWidth <= srcWidth,
                    "Destination width must be <= source width");
     FASTLED_ASSERT(dstHeight <= srcHeight,
                    "Destination height must be <= source height");
 
-    for (uint16_t dy = 0; dy < dstHeight; ++dy) {
+    for (fl::u16 dy = 0; dy < dstHeight; ++dy) {
         // Fractional boundaries in Q8.8
-        uint32_t dstY0 = (dy * srcHeight * FP_ONE) / dstHeight;
-        uint32_t dstY1 = ((dy + 1) * srcHeight * FP_ONE) / dstHeight;
+        fl::u32 dstY0 = (dy * srcHeight * FP_ONE) / dstHeight;
+        fl::u32 dstY1 = ((dy + 1) * srcHeight * FP_ONE) / dstHeight;
 
-        for (uint16_t dx = 0; dx < dstWidth; ++dx) {
-            uint32_t dstX0 = (dx * srcWidth * FP_ONE) / dstWidth;
-            uint32_t dstX1 = ((dx + 1) * srcWidth * FP_ONE) / dstWidth;
+        for (fl::u16 dx = 0; dx < dstWidth; ++dx) {
+            fl::u32 dstX0 = (dx * srcWidth * FP_ONE) / dstWidth;
+            fl::u32 dstX1 = ((dx + 1) * srcWidth * FP_ONE) / dstWidth;
 
             uint64_t rSum = 0, gSum = 0, bSum = 0;
-            uint32_t totalWeight = 0;
+            fl::u32 totalWeight = 0;
 
             // Find covered source pixels
-            uint16_t srcY_start = dstY0 / FP_ONE;
-            uint16_t srcY_end = (dstY1 + FP_ONE - 1) / FP_ONE; // ceil
+            fl::u16 srcY_start = dstY0 / FP_ONE;
+            fl::u16 srcY_end = (dstY1 + FP_ONE - 1) / FP_ONE; // ceil
 
-            uint16_t srcX_start = dstX0 / FP_ONE;
-            uint16_t srcX_end = (dstX1 + FP_ONE - 1) / FP_ONE; // ceil
+            fl::u16 srcX_start = dstX0 / FP_ONE;
+            fl::u16 srcX_end = (dstX1 + FP_ONE - 1) / FP_ONE; // ceil
 
-            for (uint16_t sy = srcY_start; sy < srcY_end; ++sy) {
+            for (fl::u16 sy = srcY_start; sy < srcY_end; ++sy) {
                 // Calculate vertical overlap in Q8.8
-                uint32_t sy0 = sy * FP_ONE;
-                uint32_t sy1 = (sy + 1) * FP_ONE;
-                uint32_t y_overlap = MIN(dstY1, sy1) - MAX(dstY0, sy0);
+                fl::u32 sy0 = sy * FP_ONE;
+                fl::u32 sy1 = (sy + 1) * FP_ONE;
+                fl::u32 y_overlap = MIN(dstY1, sy1) - MAX(dstY0, sy0);
                 if (y_overlap == 0)
                     continue;
 
-                for (uint16_t sx = srcX_start; sx < srcX_end; ++sx) {
-                    uint32_t sx0 = sx * FP_ONE;
-                    uint32_t sx1 = (sx + 1) * FP_ONE;
-                    uint32_t x_overlap = MIN(dstX1, sx1) - MAX(dstX0, sx0);
+                for (fl::u16 sx = srcX_start; sx < srcX_end; ++sx) {
+                    fl::u32 sx0 = sx * FP_ONE;
+                    fl::u32 sx1 = (sx + 1) * FP_ONE;
+                    fl::u32 x_overlap = MIN(dstX1, sx1) - MAX(dstX0, sx0);
                     if (x_overlap == 0)
                         continue;
 
-                    uint32_t weight = (x_overlap * y_overlap + (FP_ONE >> 1)) >>
+                    fl::u32 weight = (x_overlap * y_overlap + (FP_ONE >> 1)) >>
                                       8; // Q8.8 * Q8.8 → Q16.16 → Q8.8
 
                     const CRGB &p = src[srcXY.mapToIndex(sx, sy)];
@@ -138,11 +139,11 @@ void downscaleArbitrary(const CRGB *src, const XYMap &srcXY, CRGB *dst,
             }
 
             // Final division, rounding
-            uint8_t r =
+            fl::u8 r =
                 totalWeight ? (rSum + (totalWeight >> 1)) / totalWeight : 0;
-            uint8_t g =
+            fl::u8 g =
                 totalWeight ? (gSum + (totalWeight >> 1)) / totalWeight : 0;
-            uint8_t b =
+            fl::u8 b =
                 totalWeight ? (bSum + (totalWeight >> 1)) / totalWeight : 0;
 
             dst[dstXY.mapToIndex(dx, dy)] = CRGB(r, g, b);
@@ -152,10 +153,10 @@ void downscaleArbitrary(const CRGB *src, const XYMap &srcXY, CRGB *dst,
 
 void downscale(const CRGB *src, const XYMap &srcXY, CRGB *dst,
                const XYMap &dstXY) {
-    uint16_t srcWidth = srcXY.getWidth();
-    uint16_t srcHeight = srcXY.getHeight();
-    uint16_t dstWidth = dstXY.getWidth();
-    uint16_t dstHeight = dstXY.getHeight();
+    fl::u16 srcWidth = srcXY.getWidth();
+    fl::u16 srcHeight = srcXY.getHeight();
+    fl::u16 dstWidth = dstXY.getWidth();
+    fl::u16 dstHeight = dstXY.getHeight();
 
     FASTLED_ASSERT(dstWidth <= srcWidth,
                    "Destination width must be <= source width");

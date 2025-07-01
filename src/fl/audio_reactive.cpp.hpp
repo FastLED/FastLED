@@ -1,6 +1,7 @@
 #include "fl/audio_reactive.h"
 #include "fl/math.h"
 #include "fl/span.h"
+#include "fl/int.h"
 #include <math.h>
 
 namespace fl {
@@ -36,7 +37,7 @@ void AudioReactive::processSample(const AudioSample& sample) {
     }
     
     // Extract timestamp from the AudioSample
-    uint32_t currentTimeMs = sample.timestamp();
+    fl::u32 currentTimeMs = sample.timestamp();
     
     // Process the AudioSample immediately - timing is gated by sample availability
     processFFT(sample);
@@ -49,7 +50,7 @@ void AudioReactive::processSample(const AudioSample& sample) {
     mCurrentData.timestamp = currentTimeMs;
 }
 
-void AudioReactive::update(uint32_t currentTimeMs) {
+void AudioReactive::update(fl::u32 currentTimeMs) {
     // This method handles updates without new sample data
     // Just apply smoothing and update timestamp
     smoothResults();
@@ -133,7 +134,7 @@ void AudioReactive::updateVolumeAndPeak(const AudioSample& sample) {
     
     // Calculate peak from PCM data
     float maxSample = 0.0f;
-    for (int16_t pcmSample : pcmData) {
+    for (fl::i16 pcmSample : pcmData) {
         float absSample = (pcmSample < 0) ? -pcmSample : pcmSample;
         maxSample = (maxSample > absSample) ? maxSample : absSample;
     }
@@ -180,7 +181,7 @@ void AudioReactive::updateVolumeAndPeak(const AudioSample& sample) {
     }
 }
 
-void AudioReactive::detectBeat(uint32_t currentTimeMs) {
+void AudioReactive::detectBeat(fl::u32 currentTimeMs) {
     // Need minimum time since last beat
     if (currentTimeMs - mLastBeatTime < BEAT_COOLDOWN) {
         mCurrentData.beatDetected = false;
@@ -359,23 +360,23 @@ bool AudioReactive::isBeat() const {
     return mCurrentData.beatDetected;
 }
 
-uint8_t AudioReactive::volumeToScale255() const {
+fl::u8 AudioReactive::volumeToScale255() const {
     float vol = (mCurrentData.volume < 0.0f) ? 0.0f : ((mCurrentData.volume > 255.0f) ? 255.0f : mCurrentData.volume);
-    return static_cast<uint8_t>(vol);
+    return static_cast<fl::u8>(vol);
 }
 
 CRGB AudioReactive::volumeToColor(const CRGBPalette16& /* palette */) const {
-    uint8_t index = volumeToScale255();
+    fl::u8 index = volumeToScale255();
     // Simplified color palette lookup 
     return CRGB(index, index, index);  // For now, return grayscale
 }
 
-uint8_t AudioReactive::frequencyToScale255(uint8_t binIndex) const {
+fl::u8 AudioReactive::frequencyToScale255(fl::u8 binIndex) const {
     if (binIndex >= 16) return 0;
     
     float value = (mCurrentData.frequencyBins[binIndex] < 0.0f) ? 0.0f : 
                   ((mCurrentData.frequencyBins[binIndex] > 255.0f) ? 255.0f : mCurrentData.frequencyBins[binIndex]);
-    return static_cast<uint8_t>(value);
+    return static_cast<fl::u8>(value);
 }
 
 // Helper methods
@@ -394,7 +395,7 @@ float AudioReactive::mapFrequencyBin(int fromBin, int toBin) {
     return sum / static_cast<float>(toBin - fromBin + 1);
 }
 
-float AudioReactive::computeRMS(const fl::vector<int16_t>& samples) {
+float AudioReactive::computeRMS(const fl::vector<fl::i16>& samples) {
     if (samples.empty()) return 0.0f;
     
     float sumSquares = 0.0f;

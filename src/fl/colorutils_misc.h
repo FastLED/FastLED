@@ -1,23 +1,24 @@
 #pragma once
 
 #include "fl/stdint.h"
+#include "fl/int.h"
 
 // TODO: Figure out how to namespace these.
-typedef uint32_t TProgmemRGBPalette16[16]; ///< CRGBPalette16 entries stored in
+typedef fl::u32 TProgmemRGBPalette16[16]; ///< CRGBPalette16 entries stored in
                                            ///< PROGMEM memory
-typedef uint32_t TProgmemHSVPalette16[16]; ///< CHSVPalette16 entries stored in
+typedef fl::u32 TProgmemHSVPalette16[16]; ///< CHSVPalette16 entries stored in
                                            ///< PROGMEM memory
 /// Alias for TProgmemRGBPalette16
 #define TProgmemPalette16 TProgmemRGBPalette16
-typedef uint32_t TProgmemRGBPalette32[32]; ///< CRGBPalette32 entries stored in
+typedef fl::u32 TProgmemRGBPalette32[32]; ///< CRGBPalette32 entries stored in
                                            ///< PROGMEM memory
-typedef uint32_t TProgmemHSVPalette32[32]; ///< CHSVPalette32 entries stored in
+typedef fl::u32 TProgmemHSVPalette32[32]; ///< CHSVPalette32 entries stored in
                                            ///< PROGMEM memory
 /// Alias for TProgmemRGBPalette32
 #define TProgmemPalette32 TProgmemRGBPalette32
 
 /// Byte of an RGB gradient, stored in PROGMEM memory
-typedef const uint8_t TProgmemRGBGradientPalette_byte;
+typedef const fl::u8 TProgmemRGBGradientPalette_byte;
 /// Pointer to bytes of an RGB gradient, stored in PROGMEM memory
 /// @see DEFINE_GRADIENT_PALETTE
 /// @see DECLARE_GRADIENT_PALETTE

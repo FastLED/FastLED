@@ -5,6 +5,7 @@
 #include "fl/ptr.h"
 #include "fl/span.h"
 #include "fl/vector.h"
+#include "fl/int.h"
 #include <math.h>
 #include "fl/stdint.h"
 
@@ -19,7 +20,7 @@ FASTLED_SMART_PTR(AudioSampleImpl);
 // semantics.
 class AudioSample {
   public:
-    using VectorPCM = fl::vector<int16_t>;
+    using VectorPCM = fl::vector<fl::i16>;
     using const_iterator = VectorPCM::const_iterator;
     AudioSample() {}
     AudioSample(const AudioSample &other) : mImpl(other.mImpl) {}
@@ -34,14 +35,14 @@ class AudioSample {
     // and sounds like cloths rubbing. Useful for sound analysis.
     float zcf() const;
     float rms() const;
-    uint32_t timestamp() const;  // Timestamp when sample became valid (millis)
+    fl::u32 timestamp() const;  // Timestamp when sample became valid (millis)
 
     void fft(FFTBins *out) const;
 
     const_iterator begin() const { return pcm().begin(); }
     const_iterator end() const { return pcm().end(); }
-    const int16_t &at(size_t i) const;
-    const int16_t &operator[](size_t i) const;
+    const fl::i16 &at(size_t i) const;
+    const fl::i16 &operator[](size_t i) const;
     operator bool() const { return isValid(); }
     bool operator==(const AudioSample &other) const;
     bool operator!=(const AudioSample &other) const;
@@ -65,8 +66,8 @@ class SoundLevelMeter {
     SoundLevelMeter(double spl_floor = 33.0f, double smoothing_alpha = 0.0);
 
     /// Process a block of int16 PCM samples.
-    void processBlock(const int16_t *samples, size_t count);
-            void processBlock(fl::span<const int16_t> samples) {
+    void processBlock(const fl::i16 *samples, size_t count);
+            void processBlock(fl::span<const fl::i16> samples) {
         processBlock(samples.data(), samples.size());
     }
 
@@ -100,19 +101,19 @@ class SoundLevelMeter {
 // Implementation details.
 class AudioSampleImpl : public fl::Referent {
   public:
-    using VectorPCM = fl::vector<int16_t>;
+    using VectorPCM = fl::vector<fl::i16>;
     ~AudioSampleImpl() {}
     // template <typename It> void assign(It begin, It end) {
     //     assign(begin, end, 0);  // Default timestamp to 0
     // }
-    template <typename It> void assign(It begin, It end, uint32_t timestamp) {
+    template <typename It> void assign(It begin, It end, fl::u32 timestamp) {
         mSignedPcm.assign(begin, end);
         mTimestamp = timestamp;
         // calculate zero crossings
         initZeroCrossings();
     }
     const VectorPCM &pcm() const { return mSignedPcm; }
-    uint32_t timestamp() const { return mTimestamp; }
+    fl::u32 timestamp() const { return mTimestamp; }
 
     // "Zero crossing factor". High values > .4 indicate hissing
     // sounds. For example a microphone rubbing against a clothing.
@@ -147,8 +148,8 @@ class AudioSampleImpl : public fl::Referent {
     }
 
     VectorPCM mSignedPcm;
-    int16_t mZeroCrossings = 0;
-    uint32_t mTimestamp = 0;
+    fl::i16 mZeroCrossings = 0;
+    fl::u32 mTimestamp = 0;
 };
 
 } // namespace fl

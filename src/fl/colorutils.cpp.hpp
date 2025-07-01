@@ -5,6 +5,7 @@
 /// Misc utility functions for palettes, blending, and more. This file is being
 /// refactored.
 
+#include "fl/int.h"
 #include <math.h>
 #include "fl/stdint.h"
 
@@ -48,9 +49,9 @@ CRGB &nblend(CRGB &existing, const CRGB &overlay, fract8 amountOfOverlay) {
     return existing;
 }
 
-void nblend(CRGB *existing, const CRGB *overlay, uint16_t count,
+void nblend(CRGB *existing, const CRGB *overlay, fl::u16 count,
             fract8 amountOfOverlay) {
-    for (uint16_t i = count; i; --i) {
+    for (fl::u16 i = count; i; --i) {
         nblend(*existing, *overlay, amountOfOverlay);
         ++existing;
         ++overlay;
@@ -63,9 +64,9 @@ CRGB blend(const CRGB &p1, const CRGB &p2, fract8 amountOfP2) {
     return nu;
 }
 
-CRGB *blend(const CRGB *src1, const CRGB *src2, CRGB *dest, uint16_t count,
+CRGB *blend(const CRGB *src1, const CRGB *src2, CRGB *dest, fl::u16 count,
             fract8 amountOfsrc2) {
-    for (uint16_t i = 0; i < count; ++i) {
+    for (fl::u16 i = 0; i < count; ++i) {
         dest[i] = blend(src1[i], src2[i], amountOfsrc2);
     }
     return dest;
@@ -84,7 +85,7 @@ CHSV &nblend(CHSV &existing, const CHSV &overlay, fract8 amountOfOverlay,
 
     fract8 amountOfKeep = 255 - amountOfOverlay;
 
-    uint8_t huedelta8 = overlay.hue - existing.hue;
+    fl::u8 huedelta8 = overlay.hue - existing.hue;
 
     if (directionCode == SHORTEST_HUES) {
         directionCode = FORWARD_HUES;
@@ -118,11 +119,11 @@ CHSV &nblend(CHSV &existing, const CHSV &overlay, fract8 amountOfOverlay,
     return existing;
 }
 
-void nblend(CHSV *existing, const CHSV *overlay, uint16_t count,
+void nblend(CHSV *existing, const CHSV *overlay, fl::u16 count,
             fract8 amountOfOverlay, TGradientDirectionCode directionCode) {
     if (existing == overlay)
         return;
-    for (uint16_t i = count; i; --i) {
+    for (fl::u16 i = count; i; --i) {
         nblend(*existing, *overlay, amountOfOverlay, directionCode);
         ++existing;
         ++overlay;
@@ -136,56 +137,56 @@ CHSV blend(const CHSV &p1, const CHSV &p2, fract8 amountOfP2,
     return nu;
 }
 
-CHSV *blend(const CHSV *src1, const CHSV *src2, CHSV *dest, uint16_t count,
+CHSV *blend(const CHSV *src1, const CHSV *src2, CHSV *dest, fl::u16 count,
             fract8 amountOfsrc2, TGradientDirectionCode directionCode) {
-    for (uint16_t i = 0; i < count; ++i) {
+    for (fl::u16 i = 0; i < count; ++i) {
         dest[i] = blend(src1[i], src2[i], amountOfsrc2, directionCode);
     }
     return dest;
 }
 
-void nscale8_video(CRGB *leds, uint16_t num_leds, uint8_t scale) {
-    for (uint16_t i = 0; i < num_leds; ++i) {
+void nscale8_video(CRGB *leds, fl::u16 num_leds, fl::u8 scale) {
+    for (fl::u16 i = 0; i < num_leds; ++i) {
         leds[i].nscale8_video(scale);
     }
 }
 
-void fade_video(CRGB *leds, uint16_t num_leds, uint8_t fadeBy) {
+void fade_video(CRGB *leds, fl::u16 num_leds, fl::u8 fadeBy) {
     nscale8_video(leds, num_leds, 255 - fadeBy);
 }
 
-void fadeLightBy(CRGB *leds, uint16_t num_leds, uint8_t fadeBy) {
+void fadeLightBy(CRGB *leds, fl::u16 num_leds, fl::u8 fadeBy) {
     nscale8_video(leds, num_leds, 255 - fadeBy);
 }
 
-void fadeToBlackBy(CRGB *leds, uint16_t num_leds, uint8_t fadeBy) {
+void fadeToBlackBy(CRGB *leds, fl::u16 num_leds, fl::u8 fadeBy) {
     nscale8(leds, num_leds, 255 - fadeBy);
 }
 
-void fade_raw(CRGB *leds, uint16_t num_leds, uint8_t fadeBy) {
+void fade_raw(CRGB *leds, fl::u16 num_leds, fl::u8 fadeBy) {
     nscale8(leds, num_leds, 255 - fadeBy);
 }
 
-void nscale8(CRGB *leds, uint16_t num_leds, uint8_t scale) {
-    for (uint16_t i = 0; i < num_leds; ++i) {
+void nscale8(CRGB *leds, fl::u16 num_leds, fl::u8 scale) {
+    for (fl::u16 i = 0; i < num_leds; ++i) {
         leds[i].nscale8(scale);
     }
 }
 
-void fadeUsingColor(CRGB *leds, uint16_t numLeds, const CRGB &colormask) {
-    uint8_t fr, fg, fb;
+void fadeUsingColor(CRGB *leds, fl::u16 numLeds, const CRGB &colormask) {
+    fl::u8 fr, fg, fb;
     fr = colormask.r;
     fg = colormask.g;
     fb = colormask.b;
 
-    for (uint16_t i = 0; i < numLeds; ++i) {
+    for (fl::u16 i = 0; i < numLeds; ++i) {
         leds[i].r = scale8_LEAVING_R1_DIRTY(leds[i].r, fr);
         leds[i].g = scale8_LEAVING_R1_DIRTY(leds[i].g, fg);
         leds[i].b = scale8(leds[i].b, fb);
     }
 }
 
-// CRGB HeatColor( uint8_t temperature)
+// CRGB HeatColor( fl::u8 temperature)
 //
 // Approximates a 'black body radiation' spectrum for
 // a given 'heat' level.  This is useful for animations of 'fire'.
@@ -196,17 +197,17 @@ void fadeUsingColor(CRGB *leds, uint16_t numLeds, const CRGB &colormask) {
 // On AVR/Arduino, this typically takes around 70 bytes of program memory,
 // versus 768 bytes for a full 256-entry RGB lookup table.
 
-CRGB HeatColor(uint8_t temperature) {
+CRGB HeatColor(fl::u8 temperature) {
     CRGB heatcolor;
 
     // Scale 'heat' down from 0-255 to 0-191,
     // which can then be easily divided into three
     // equal 'thirds' of 64 units each.
-    uint8_t t192 = scale8_video(temperature, 191);
+    fl::u8 t192 = scale8_video(temperature, 191);
 
     // calculate a value that ramps up from
     // zero to 255 in each 'third' of the scale.
-    uint8_t heatramp = t192 & 0x3F; // 0..63
+    fl::u8 heatramp = t192 & 0x3F; // 0..63
     heatramp <<= 2;                 // scale up to 0..252
 
     // now figure out which third of the spectrum we're in:
@@ -236,8 +237,8 @@ CRGB HeatColor(uint8_t temperature) {
 /// (LSR)'s. On avr-gcc, "u8 >> 4" generates a loop, which is big, and slow.
 /// merely forcing it to be four /=2's causes avr-gcc to emit
 /// a SWAP instruction followed by an AND 0x0F, which is faster, and smaller.
-inline uint8_t lsrX4(uint8_t dividend) __attribute__((always_inline));
-inline uint8_t lsrX4(uint8_t dividend) {
+inline fl::u8 lsrX4(fl::u8 dividend) __attribute__((always_inline));
+inline fl::u8 lsrX4(fl::u8 dividend) {
 #if defined(__AVR__)
     dividend /= 2;
     dividend /= 2;
@@ -249,19 +250,19 @@ inline uint8_t lsrX4(uint8_t dividend) {
     return dividend;
 }
 
-CRGB ColorFromPaletteExtended(const CRGBPalette32 &pal, uint16_t index,
-                              uint8_t brightness, TBlendType blendType) {
+CRGB ColorFromPaletteExtended(const CRGBPalette32 &pal, fl::u16 index,
+                              fl::u8 brightness, TBlendType blendType) {
     // Extract the five most significant bits of the index as a palette index.
-    uint8_t index_5bit = (index >> 11);
+    fl::u8 index_5bit = (index >> 11);
     // Calculate the 8-bit offset from the palette index.
-    uint8_t offset = (uint8_t)(index >> 3);
+    fl::u8 offset = (fl::u8)(index >> 3);
     // Get the palette entry from the 5-bit index
     const CRGB *entry = &(pal[0]) + index_5bit;
-    uint8_t red1 = entry->red;
-    uint8_t green1 = entry->green;
-    uint8_t blue1 = entry->blue;
+    fl::u8 red1 = entry->red;
+    fl::u8 green1 = entry->green;
+    fl::u8 blue1 = entry->blue;
 
-    uint8_t blend = offset && (blendType != NOBLEND);
+    fl::u8 blend = offset && (blendType != NOBLEND);
     if (blend) {
         if (index_5bit == 31) {
             entry = &(pal[0]);
@@ -271,15 +272,15 @@ CRGB ColorFromPaletteExtended(const CRGBPalette32 &pal, uint16_t index,
 
         // Calculate the scaling factor and scaled values for the lower palette
         // value.
-        uint8_t f1 = 255 - offset;
+        fl::u8 f1 = 255 - offset;
         red1 = scale8_LEAVING_R1_DIRTY(red1, f1);
         green1 = scale8_LEAVING_R1_DIRTY(green1, f1);
         blue1 = scale8_LEAVING_R1_DIRTY(blue1, f1);
 
         // Calculate the scaled values for the neighbouring palette value.
-        uint8_t red2 = entry->red;
-        uint8_t green2 = entry->green;
-        uint8_t blue2 = entry->blue;
+        fl::u8 red2 = entry->red;
+        fl::u8 green2 = entry->green;
+        fl::u8 blue2 = entry->blue;
         red2 = scale8_LEAVING_R1_DIRTY(red2, offset);
         green2 = scale8_LEAVING_R1_DIRTY(green2, offset);
         blue2 = scale8_LEAVING_R1_DIRTY(blue2, offset);
@@ -296,30 +297,30 @@ CRGB ColorFromPaletteExtended(const CRGBPalette32 &pal, uint16_t index,
     return CRGB(red1, green1, blue1);
 }
 
-CRGB ColorFromPalette(const CRGBPalette16 &pal, uint8_t index,
-                      uint8_t brightness, TBlendType blendType) {
+CRGB ColorFromPalette(const CRGBPalette16 &pal, fl::u8 index,
+                      fl::u8 brightness, TBlendType blendType) {
     if (blendType == LINEARBLEND_NOWRAP) {
         index = map8(index, 0, 239); // Blend range is affected by lo4 blend of
                                      // values, remap to avoid wrapping
     }
 
     //      hi4 = index >> 4;
-    uint8_t hi4 = lsrX4(index);
-    uint8_t lo4 = index & 0x0F;
+    fl::u8 hi4 = lsrX4(index);
+    fl::u8 lo4 = index & 0x0F;
 
     // const CRGB* entry = &(pal[0]) + hi4;
     // since hi4 is always 0..15, hi4 * sizeof(CRGB) can be a single-byte value,
     // instead of the two byte 'int' that avr-gcc defaults to.
     // So, we multiply hi4 X sizeof(CRGB), giving hi4XsizeofCRGB;
-    uint8_t hi4XsizeofCRGB = hi4 * sizeof(CRGB);
+    fl::u8 hi4XsizeofCRGB = hi4 * sizeof(CRGB);
     // We then add that to a base array pointer.
-    const CRGB *entry = (CRGB *)((uint8_t *)(&(pal[0])) + hi4XsizeofCRGB);
+    const CRGB *entry = (CRGB *)((fl::u8 *)(&(pal[0])) + hi4XsizeofCRGB);
 
-    uint8_t blend = lo4 && (blendType != NOBLEND);
+    fl::u8 blend = lo4 && (blendType != NOBLEND);
 
-    uint8_t red1 = entry->red;
-    uint8_t green1 = entry->green;
-    uint8_t blue1 = entry->blue;
+    fl::u8 red1 = entry->red;
+    fl::u8 green1 = entry->green;
+    fl::u8 blue1 = entry->blue;
 
     if (blend) {
 
@@ -329,21 +330,21 @@ CRGB ColorFromPalette(const CRGBPalette16 &pal, uint8_t index,
             ++entry;
         }
 
-        uint8_t f2 = lo4 << 4;
-        uint8_t f1 = 255 - f2;
+        fl::u8 f2 = lo4 << 4;
+        fl::u8 f1 = 255 - f2;
 
         //    rgb1.nscale8(f1);
-        uint8_t red2 = entry->red;
+        fl::u8 red2 = entry->red;
         red1 = scale8_LEAVING_R1_DIRTY(red1, f1);
         red2 = scale8_LEAVING_R1_DIRTY(red2, f2);
         red1 += red2;
 
-        uint8_t green2 = entry->green;
+        fl::u8 green2 = entry->green;
         green1 = scale8_LEAVING_R1_DIRTY(green1, f1);
         green2 = scale8_LEAVING_R1_DIRTY(green2, f2);
         green1 += green2;
 
-        uint8_t blue2 = entry->blue;
+        fl::u8 blue2 = entry->blue;
         blue1 = scale8_LEAVING_R1_DIRTY(blue1, f1);
         blue2 = scale8_LEAVING_R1_DIRTY(blue2, f2);
         blue1 += blue2;
@@ -386,19 +387,19 @@ CRGB ColorFromPalette(const CRGBPalette16 &pal, uint8_t index,
     return CRGB(red1, green1, blue1);
 }
 
-CRGB ColorFromPaletteExtended(const CRGBPalette16 &pal, uint16_t index,
-                              uint8_t brightness, TBlendType blendType) {
+CRGB ColorFromPaletteExtended(const CRGBPalette16 &pal, fl::u16 index,
+                              fl::u8 brightness, TBlendType blendType) {
     // Extract the four most significant bits of the index as a palette index.
-    uint8_t index_4bit = index >> 12;
+    fl::u8 index_4bit = index >> 12;
     // Calculate the 8-bit offset from the palette index.
-    uint8_t offset = (uint8_t)(index >> 4);
+    fl::u8 offset = (fl::u8)(index >> 4);
     // Get the palette entry from the 4-bit index
     const CRGB *entry = &(pal[0]) + index_4bit;
-    uint8_t red1 = entry->red;
-    uint8_t green1 = entry->green;
-    uint8_t blue1 = entry->blue;
+    fl::u8 red1 = entry->red;
+    fl::u8 green1 = entry->green;
+    fl::u8 blue1 = entry->blue;
 
-    uint8_t blend = offset && (blendType != NOBLEND);
+    fl::u8 blend = offset && (blendType != NOBLEND);
     if (blend) {
         if (index_4bit == 15) {
             entry = &(pal[0]);
@@ -408,15 +409,15 @@ CRGB ColorFromPaletteExtended(const CRGBPalette16 &pal, uint16_t index,
 
         // Calculate the scaling factor and scaled values for the lower palette
         // value.
-        uint8_t f1 = 255 - offset;
+        fl::u8 f1 = 255 - offset;
         red1 = scale8_LEAVING_R1_DIRTY(red1, f1);
         green1 = scale8_LEAVING_R1_DIRTY(green1, f1);
         blue1 = scale8_LEAVING_R1_DIRTY(blue1, f1);
 
         // Calculate the scaled values for the neighbouring palette value.
-        uint8_t red2 = entry->red;
-        uint8_t green2 = entry->green;
-        uint8_t blue2 = entry->blue;
+        fl::u8 red2 = entry->red;
+        fl::u8 green2 = entry->green;
+        fl::u8 blue2 = entry->blue;
         red2 = scale8_LEAVING_R1_DIRTY(red2, offset);
         green2 = scale8_LEAVING_R1_DIRTY(green2, offset);
         blue2 = scale8_LEAVING_R1_DIRTY(blue2, offset);
@@ -434,24 +435,24 @@ CRGB ColorFromPaletteExtended(const CRGBPalette16 &pal, uint16_t index,
     return CRGB(red1, green1, blue1);
 }
 
-CRGB ColorFromPalette(const TProgmemRGBPalette16 &pal, uint8_t index,
-                      uint8_t brightness, TBlendType blendType) {
+CRGB ColorFromPalette(const TProgmemRGBPalette16 &pal, fl::u8 index,
+                      fl::u8 brightness, TBlendType blendType) {
     if (blendType == LINEARBLEND_NOWRAP) {
         index = map8(index, 0, 239); // Blend range is affected by lo4 blend of
                                      // values, remap to avoid wrapping
     }
 
     //      hi4 = index >> 4;
-    uint8_t hi4 = lsrX4(index);
-    uint8_t lo4 = index & 0x0F;
+    fl::u8 hi4 = lsrX4(index);
+    fl::u8 lo4 = index & 0x0F;
 
     CRGB entry(FL_PGM_READ_DWORD_NEAR(&(pal[0]) + hi4));
 
-    uint8_t red1 = entry.red;
-    uint8_t green1 = entry.green;
-    uint8_t blue1 = entry.blue;
+    fl::u8 red1 = entry.red;
+    fl::u8 green1 = entry.green;
+    fl::u8 blue1 = entry.blue;
 
-    uint8_t blend = lo4 && (blendType != NOBLEND);
+    fl::u8 blend = lo4 && (blendType != NOBLEND);
 
     if (blend) {
 
@@ -461,20 +462,20 @@ CRGB ColorFromPalette(const TProgmemRGBPalette16 &pal, uint8_t index,
             entry = FL_PGM_READ_DWORD_NEAR(&(pal[1]) + hi4);
         }
 
-        uint8_t f2 = lo4 << 4;
-        uint8_t f1 = 255 - f2;
+        fl::u8 f2 = lo4 << 4;
+        fl::u8 f1 = 255 - f2;
 
-        uint8_t red2 = entry.red;
+        fl::u8 red2 = entry.red;
         red1 = scale8_LEAVING_R1_DIRTY(red1, f1);
         red2 = scale8_LEAVING_R1_DIRTY(red2, f2);
         red1 += red2;
 
-        uint8_t green2 = entry.green;
+        fl::u8 green2 = entry.green;
         green1 = scale8_LEAVING_R1_DIRTY(green1, f1);
         green2 = scale8_LEAVING_R1_DIRTY(green2, f2);
         green1 += green2;
 
-        uint8_t blue2 = entry.blue;
+        fl::u8 blue2 = entry.blue;
         blue1 = scale8_LEAVING_R1_DIRTY(blue1, f1);
         blue2 = scale8_LEAVING_R1_DIRTY(blue2, f2);
         blue1 += blue2;
@@ -517,14 +518,14 @@ CRGB ColorFromPalette(const TProgmemRGBPalette16 &pal, uint8_t index,
     return CRGB(red1, green1, blue1);
 }
 
-CRGB ColorFromPalette(const CRGBPalette32 &pal, uint8_t index,
-                      uint8_t brightness, TBlendType blendType) {
+CRGB ColorFromPalette(const CRGBPalette32 &pal, fl::u8 index,
+                      fl::u8 brightness, TBlendType blendType) {
     if (blendType == LINEARBLEND_NOWRAP) {
         index = map8(index, 0, 247); // Blend range is affected by lo3 blend of
                                      // values, remap to avoid wrapping
     }
 
-    uint8_t hi5 = index;
+    fl::u8 hi5 = index;
 #if defined(__AVR__)
     hi5 /= 2;
     hi5 /= 2;
@@ -532,21 +533,21 @@ CRGB ColorFromPalette(const CRGBPalette32 &pal, uint8_t index,
 #else
     hi5 >>= 3;
 #endif
-    uint8_t lo3 = index & 0x07;
+    fl::u8 lo3 = index & 0x07;
 
     // const CRGB* entry = &(pal[0]) + hi5;
     // since hi5 is always 0..31, hi4 * sizeof(CRGB) can be a single-byte value,
     // instead of the two byte 'int' that avr-gcc defaults to.
     // So, we multiply hi5 X sizeof(CRGB), giving hi5XsizeofCRGB;
-    uint8_t hi5XsizeofCRGB = hi5 * sizeof(CRGB);
+    fl::u8 hi5XsizeofCRGB = hi5 * sizeof(CRGB);
     // We then add that to a base array pointer.
-    const CRGB *entry = (CRGB *)((uint8_t *)(&(pal[0])) + hi5XsizeofCRGB);
+    const CRGB *entry = (CRGB *)((fl::u8 *)(&(pal[0])) + hi5XsizeofCRGB);
 
-    uint8_t red1 = entry->red;
-    uint8_t green1 = entry->green;
-    uint8_t blue1 = entry->blue;
+    fl::u8 red1 = entry->red;
+    fl::u8 green1 = entry->green;
+    fl::u8 blue1 = entry->blue;
 
-    uint8_t blend = lo3 && (blendType != NOBLEND);
+    fl::u8 blend = lo3 && (blendType != NOBLEND);
 
     if (blend) {
 
@@ -556,20 +557,20 @@ CRGB ColorFromPalette(const CRGBPalette32 &pal, uint8_t index,
             ++entry;
         }
 
-        uint8_t f2 = lo3 << 5;
-        uint8_t f1 = 255 - f2;
+        fl::u8 f2 = lo3 << 5;
+        fl::u8 f1 = 255 - f2;
 
-        uint8_t red2 = entry->red;
+        fl::u8 red2 = entry->red;
         red1 = scale8_LEAVING_R1_DIRTY(red1, f1);
         red2 = scale8_LEAVING_R1_DIRTY(red2, f2);
         red1 += red2;
 
-        uint8_t green2 = entry->green;
+        fl::u8 green2 = entry->green;
         green1 = scale8_LEAVING_R1_DIRTY(green1, f1);
         green2 = scale8_LEAVING_R1_DIRTY(green2, f2);
         green1 += green2;
 
-        uint8_t blue2 = entry->blue;
+        fl::u8 blue2 = entry->blue;
         blue1 = scale8_LEAVING_R1_DIRTY(blue1, f1);
         blue2 = scale8_LEAVING_R1_DIRTY(blue2, f2);
         blue1 += blue2;
@@ -612,14 +613,14 @@ CRGB ColorFromPalette(const CRGBPalette32 &pal, uint8_t index,
     return CRGB(red1, green1, blue1);
 }
 
-CRGB ColorFromPalette(const TProgmemRGBPalette32 &pal, uint8_t index,
-                      uint8_t brightness, TBlendType blendType) {
+CRGB ColorFromPalette(const TProgmemRGBPalette32 &pal, fl::u8 index,
+                      fl::u8 brightness, TBlendType blendType) {
     if (blendType == LINEARBLEND_NOWRAP) {
         index = map8(index, 0, 247); // Blend range is affected by lo3 blend of
                                      // values, remap to avoid wrapping
     }
 
-    uint8_t hi5 = index;
+    fl::u8 hi5 = index;
 #if defined(__AVR__)
     hi5 /= 2;
     hi5 /= 2;
@@ -627,15 +628,15 @@ CRGB ColorFromPalette(const TProgmemRGBPalette32 &pal, uint8_t index,
 #else
     hi5 >>= 3;
 #endif
-    uint8_t lo3 = index & 0x07;
+    fl::u8 lo3 = index & 0x07;
 
     CRGB entry(FL_PGM_READ_DWORD_NEAR(&(pal[0]) + hi5));
 
-    uint8_t red1 = entry.red;
-    uint8_t green1 = entry.green;
-    uint8_t blue1 = entry.blue;
+    fl::u8 red1 = entry.red;
+    fl::u8 green1 = entry.green;
+    fl::u8 blue1 = entry.blue;
 
-    uint8_t blend = lo3 && (blendType != NOBLEND);
+    fl::u8 blend = lo3 && (blendType != NOBLEND);
 
     if (blend) {
 
@@ -645,20 +646,20 @@ CRGB ColorFromPalette(const TProgmemRGBPalette32 &pal, uint8_t index,
             entry = FL_PGM_READ_DWORD_NEAR(&(pal[1]) + hi5);
         }
 
-        uint8_t f2 = lo3 << 5;
-        uint8_t f1 = 255 - f2;
+        fl::u8 f2 = lo3 << 5;
+        fl::u8 f1 = 255 - f2;
 
-        uint8_t red2 = entry.red;
+        fl::u8 red2 = entry.red;
         red1 = scale8_LEAVING_R1_DIRTY(red1, f1);
         red2 = scale8_LEAVING_R1_DIRTY(red2, f2);
         red1 += red2;
 
-        uint8_t green2 = entry.green;
+        fl::u8 green2 = entry.green;
         green1 = scale8_LEAVING_R1_DIRTY(green1, f1);
         green2 = scale8_LEAVING_R1_DIRTY(green2, f2);
         green1 += green2;
 
-        uint8_t blue2 = entry.blue;
+        fl::u8 blue2 = entry.blue;
         blue1 = scale8_LEAVING_R1_DIRTY(blue1, f1);
         blue2 = scale8_LEAVING_R1_DIRTY(blue2, f2);
         blue1 += blue2;
@@ -701,13 +702,13 @@ CRGB ColorFromPalette(const TProgmemRGBPalette32 &pal, uint8_t index,
     return CRGB(red1, green1, blue1);
 }
 
-CRGB ColorFromPalette(const CRGBPalette256 &pal, uint8_t index,
-                      uint8_t brightness, TBlendType) {
+CRGB ColorFromPalette(const CRGBPalette256 &pal, fl::u8 index,
+                      fl::u8 brightness, TBlendType) {
     const CRGB *entry = &(pal[0]) + index;
 
-    uint8_t red = entry->red;
-    uint8_t green = entry->green;
-    uint8_t blue = entry->blue;
+    fl::u8 red = entry->red;
+    fl::u8 green = entry->green;
+    fl::u8 blue = entry->blue;
 
     if (brightness != 255) {
         ++brightness; // adjust for rounding
@@ -720,19 +721,19 @@ CRGB ColorFromPalette(const CRGBPalette256 &pal, uint8_t index,
     return CRGB(red, green, blue);
 }
 
-CRGB ColorFromPaletteExtended(const CRGBPalette256 &pal, uint16_t index,
-                              uint8_t brightness, TBlendType blendType) {
+CRGB ColorFromPaletteExtended(const CRGBPalette256 &pal, fl::u16 index,
+                              fl::u8 brightness, TBlendType blendType) {
     // Extract the eight most significant bits of the index as a palette index.
-    uint8_t index_8bit = index >> 8;
+    fl::u8 index_8bit = index >> 8;
     // Calculate the 8-bit offset from the palette index.
-    uint8_t offset = index & 0xff;
+    fl::u8 offset = index & 0xff;
     // Get the palette entry from the 8-bit index
     const CRGB *entry = &(pal[0]) + index_8bit;
-    uint8_t red1 = entry->red;
-    uint8_t green1 = entry->green;
-    uint8_t blue1 = entry->blue;
+    fl::u8 red1 = entry->red;
+    fl::u8 green1 = entry->green;
+    fl::u8 blue1 = entry->blue;
 
-    uint8_t blend = offset && (blendType != NOBLEND);
+    fl::u8 blend = offset && (blendType != NOBLEND);
     if (blend) {
         if (index_8bit == 255) {
             entry = &(pal[0]);
@@ -742,15 +743,15 @@ CRGB ColorFromPaletteExtended(const CRGBPalette256 &pal, uint16_t index,
 
         // Calculate the scaling factor and scaled values for the lower palette
         // value.
-        uint8_t f1 = 255 - offset;
+        fl::u8 f1 = 255 - offset;
         red1 = scale8_LEAVING_R1_DIRTY(red1, f1);
         green1 = scale8_LEAVING_R1_DIRTY(green1, f1);
         blue1 = scale8_LEAVING_R1_DIRTY(blue1, f1);
 
         // Calculate the scaled values for the neighbouring palette value.
-        uint8_t red2 = entry->red;
-        uint8_t green2 = entry->green;
-        uint8_t blue2 = entry->blue;
+        fl::u8 red2 = entry->red;
+        fl::u8 green2 = entry->green;
+        fl::u8 blue2 = entry->blue;
         red2 = scale8_LEAVING_R1_DIRTY(red2, offset);
         green2 = scale8_LEAVING_R1_DIRTY(green2, offset);
         blue2 = scale8_LEAVING_R1_DIRTY(blue2, offset);
@@ -768,25 +769,25 @@ CRGB ColorFromPaletteExtended(const CRGBPalette256 &pal, uint16_t index,
     return CRGB(red1, green1, blue1);
 }
 
-CHSV ColorFromPalette(const CHSVPalette16 &pal, uint8_t index,
-                      uint8_t brightness, TBlendType blendType) {
+CHSV ColorFromPalette(const CHSVPalette16 &pal, fl::u8 index,
+                      fl::u8 brightness, TBlendType blendType) {
     if (blendType == LINEARBLEND_NOWRAP) {
         index = map8(index, 0, 239); // Blend range is affected by lo4 blend of
                                      // values, remap to avoid wrapping
     }
 
     //      hi4 = index >> 4;
-    uint8_t hi4 = lsrX4(index);
-    uint8_t lo4 = index & 0x0F;
+    fl::u8 hi4 = lsrX4(index);
+    fl::u8 lo4 = index & 0x0F;
 
     //  CRGB rgb1 = pal[ hi4];
     const CHSV *entry = &(pal[0]) + hi4;
 
-    uint8_t hue1 = entry->hue;
-    uint8_t sat1 = entry->sat;
-    uint8_t val1 = entry->val;
+    fl::u8 hue1 = entry->hue;
+    fl::u8 sat1 = entry->sat;
+    fl::u8 val1 = entry->val;
 
-    uint8_t blend = lo4 && (blendType != NOBLEND);
+    fl::u8 blend = lo4 && (blendType != NOBLEND);
 
     if (blend) {
 
@@ -796,12 +797,12 @@ CHSV ColorFromPalette(const CHSVPalette16 &pal, uint8_t index,
             ++entry;
         }
 
-        uint8_t f2 = lo4 << 4;
-        uint8_t f1 = 255 - f2;
+        fl::u8 f2 = lo4 << 4;
+        fl::u8 f1 = 255 - f2;
 
-        uint8_t hue2 = entry->hue;
-        uint8_t sat2 = entry->sat;
-        uint8_t val2 = entry->val;
+        fl::u8 hue2 = entry->hue;
+        fl::u8 sat2 = entry->sat;
+        fl::u8 val2 = entry->val;
 
         // Now some special casing for blending to or from
         // either black or white.  Black and white don't have
@@ -836,7 +837,7 @@ CHSV ColorFromPalette(const CHSVPalette16 &pal, uint8_t index,
         sat1 += sat2;
         val1 += val2;
 
-        uint8_t deltaHue = (uint8_t)(hue2 - hue1);
+        fl::u8 deltaHue = (fl::u8)(hue2 - hue1);
         if (deltaHue & 0x80) {
             // go backwards
             hue1 -= scale8(256 - deltaHue, f2);
@@ -855,14 +856,14 @@ CHSV ColorFromPalette(const CHSVPalette16 &pal, uint8_t index,
     return CHSV(hue1, sat1, val1);
 }
 
-CHSV ColorFromPalette(const CHSVPalette32 &pal, uint8_t index,
-                      uint8_t brightness, TBlendType blendType) {
+CHSV ColorFromPalette(const CHSVPalette32 &pal, fl::u8 index,
+                      fl::u8 brightness, TBlendType blendType) {
     if (blendType == LINEARBLEND_NOWRAP) {
         index = map8(index, 0, 247); // Blend range is affected by lo3 blend of
                                      // values, remap to avoid wrapping
     }
 
-    uint8_t hi5 = index;
+    fl::u8 hi5 = index;
 #if defined(__AVR__)
     hi5 /= 2;
     hi5 /= 2;
@@ -870,16 +871,16 @@ CHSV ColorFromPalette(const CHSVPalette32 &pal, uint8_t index,
 #else
     hi5 >>= 3;
 #endif
-    uint8_t lo3 = index & 0x07;
+    fl::u8 lo3 = index & 0x07;
 
-    uint8_t hi5XsizeofCHSV = hi5 * sizeof(CHSV);
-    const CHSV *entry = (CHSV *)((uint8_t *)(&(pal[0])) + hi5XsizeofCHSV);
+    fl::u8 hi5XsizeofCHSV = hi5 * sizeof(CHSV);
+    const CHSV *entry = (CHSV *)((fl::u8 *)(&(pal[0])) + hi5XsizeofCHSV);
 
-    uint8_t hue1 = entry->hue;
-    uint8_t sat1 = entry->sat;
-    uint8_t val1 = entry->val;
+    fl::u8 hue1 = entry->hue;
+    fl::u8 sat1 = entry->sat;
+    fl::u8 val1 = entry->val;
 
-    uint8_t blend = lo3 && (blendType != NOBLEND);
+    fl::u8 blend = lo3 && (blendType != NOBLEND);
 
     if (blend) {
 
@@ -889,12 +890,12 @@ CHSV ColorFromPalette(const CHSVPalette32 &pal, uint8_t index,
             ++entry;
         }
 
-        uint8_t f2 = lo3 << 5;
-        uint8_t f1 = 255 - f2;
+        fl::u8 f2 = lo3 << 5;
+        fl::u8 f1 = 255 - f2;
 
-        uint8_t hue2 = entry->hue;
-        uint8_t sat2 = entry->sat;
-        uint8_t val2 = entry->val;
+        fl::u8 hue2 = entry->hue;
+        fl::u8 sat2 = entry->sat;
+        fl::u8 val2 = entry->val;
 
         // Now some special casing for blending to or from
         // either black or white.  Black and white don't have
@@ -929,7 +930,7 @@ CHSV ColorFromPalette(const CHSVPalette32 &pal, uint8_t index,
         sat1 += sat2;
         val1 += val2;
 
-        uint8_t deltaHue = (uint8_t)(hue2 - hue1);
+        fl::u8 deltaHue = (fl::u8)(hue2 - hue1);
         if (deltaHue & 0x80) {
             // go backwards
             hue1 -= scale8(256 - deltaHue, f2);
@@ -948,8 +949,8 @@ CHSV ColorFromPalette(const CHSVPalette32 &pal, uint8_t index,
     return CHSV(hue1, sat1, val1);
 }
 
-CHSV ColorFromPalette(const CHSVPalette256 &pal, uint8_t index,
-                      uint8_t brightness, TBlendType) {
+CHSV ColorFromPalette(const CHSVPalette256 &pal, fl::u8 index,
+                      fl::u8 brightness, TBlendType) {
     CHSV hsv = *(&(pal[0]) + index);
 
     if (brightness != 255) {
@@ -962,21 +963,21 @@ CHSV ColorFromPalette(const CHSVPalette256 &pal, uint8_t index,
 void UpscalePalette(const class CRGBPalette16 &srcpal16,
                     class CRGBPalette256 &destpal256) {
     for (int i = 0; i < 256; ++i) {
-        destpal256[(uint8_t)(i)] = ColorFromPalette(srcpal16, i);
+        destpal256[(fl::u8)(i)] = ColorFromPalette(srcpal16, i);
     }
 }
 
 void UpscalePalette(const class CHSVPalette16 &srcpal16,
                     class CHSVPalette256 &destpal256) {
     for (int i = 0; i < 256; ++i) {
-        destpal256[(uint8_t)(i)] = ColorFromPalette(srcpal16, i);
+        destpal256[(fl::u8)(i)] = ColorFromPalette(srcpal16, i);
     }
 }
 
 void UpscalePalette(const class CRGBPalette16 &srcpal16,
                     class CRGBPalette32 &destpal32) {
-    for (uint8_t i = 0; i < 16; ++i) {
-        uint8_t j = i * 2;
+    for (fl::u8 i = 0; i < 16; ++i) {
+        fl::u8 j = i * 2;
         destpal32[j + 0] = srcpal16[i];
         destpal32[j + 1] = srcpal16[i];
     }
@@ -984,8 +985,8 @@ void UpscalePalette(const class CRGBPalette16 &srcpal16,
 
 void UpscalePalette(const class CHSVPalette16 &srcpal16,
                     class CHSVPalette32 &destpal32) {
-    for (uint8_t i = 0; i < 16; ++i) {
-        uint8_t j = i * 2;
+    for (fl::u8 i = 0; i < 16; ++i) {
+        fl::u8 j = i * 2;
         destpal32[j + 0] = srcpal16[i];
         destpal32[j + 1] = srcpal16[i];
     }
@@ -994,14 +995,14 @@ void UpscalePalette(const class CHSVPalette16 &srcpal16,
 void UpscalePalette(const class CRGBPalette32 &srcpal32,
                     class CRGBPalette256 &destpal256) {
     for (int i = 0; i < 256; ++i) {
-        destpal256[(uint8_t)(i)] = ColorFromPalette(srcpal32, i);
+        destpal256[(fl::u8)(i)] = ColorFromPalette(srcpal32, i);
     }
 }
 
 void UpscalePalette(const class CHSVPalette32 &srcpal32,
                     class CHSVPalette256 &destpal256) {
     for (int i = 0; i < 256; ++i) {
-        destpal256[(uint8_t)(i)] = ColorFromPalette(srcpal32, i);
+        destpal256[(fl::u8)(i)] = ColorFromPalette(srcpal32, i);
     }
 }
 
@@ -1015,16 +1016,16 @@ void SetupPartyColors(CRGBPalette16& pal)
 #endif
 
 void nblendPaletteTowardPalette(CRGBPalette16 &current, CRGBPalette16 &target,
-                                uint8_t maxChanges) {
-    uint8_t *p1;
-    uint8_t *p2;
-    uint8_t changes = 0;
+                                fl::u8 maxChanges) {
+    fl::u8 *p1;
+    fl::u8 *p2;
+    fl::u8 changes = 0;
 
-    p1 = (uint8_t *)current.entries;
-    p2 = (uint8_t *)target.entries;
+    p1 = (fl::u8 *)current.entries;
+    p2 = (fl::u8 *)target.entries;
 
-    const uint8_t totalChannels = sizeof(CRGBPalette16);
-    for (uint8_t i = 0; i < totalChannels; ++i) {
+    const fl::u8 totalChannels = sizeof(CRGBPalette16);
+    for (fl::u8 i = 0; i < totalChannels; ++i) {
         // if the values are equal, no changes are needed
         if (p1[i] == p2[i]) {
             continue;
@@ -1053,12 +1054,12 @@ void nblendPaletteTowardPalette(CRGBPalette16 &current, CRGBPalette16 &target,
     }
 }
 
-uint8_t applyGamma_video(uint8_t brightness, float gamma) {
+fl::u8 applyGamma_video(fl::u8 brightness, float gamma) {
     float orig;
     float adj;
     orig = (float)(brightness) / (255.0);
     adj = pow(orig, gamma) * (255.0);
-    uint8_t result = (uint8_t)(adj);
+    fl::u8 result = (fl::u8)(adj);
     if ((brightness > 0) && (result == 0)) {
         result = 1; // never gamma-adjust a positive number down to zero
     }
@@ -1092,15 +1093,15 @@ CRGB &napplyGamma_video(CRGB &rgb, float gammaR, float gammaG, float gammaB) {
     return rgb;
 }
 
-void napplyGamma_video(CRGB *rgbarray, uint16_t count, float gamma) {
-    for (uint16_t i = 0; i < count; ++i) {
+void napplyGamma_video(CRGB *rgbarray, fl::u16 count, float gamma) {
+    for (fl::u16 i = 0; i < count; ++i) {
         rgbarray[i] = applyGamma_video(rgbarray[i], gamma);
     }
 }
 
-void napplyGamma_video(CRGB *rgbarray, uint16_t count, float gammaR,
+void napplyGamma_video(CRGB *rgbarray, fl::u16 count, float gammaR,
                        float gammaG, float gammaB) {
-    for (uint16_t i = 0; i < count; ++i) {
+    for (fl::u16 i = 0; i < count; ++i) {
         rgbarray[i] = applyGamma_video(rgbarray[i], gammaR, gammaG, gammaB);
     }
 }

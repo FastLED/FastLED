@@ -6,6 +6,7 @@
 #include "fl/vector.h"
 #include "fl/xymap.h"
 #include "fl/string.h"
+#include "fl/int.h"
 
 #ifndef FASTLED_HAS_ENGINE_EVENTS
 #define FASTLED_HAS_ENGINE_EVENTS SKETCH_HAS_LOTS_OF_MEMORY
@@ -30,7 +31,7 @@ class EngineEvents {
         virtual void onBeginFrame() {}
         virtual void onEndShowLeds() {}
         virtual void onEndFrame() {}
-        virtual void onStripAdded(CLEDController *strip, uint32_t num_leds) {
+        virtual void onStripAdded(CLEDController *strip, fl::u32 num_leds) {
             (void)strip;
             (void)num_leds;
         }
@@ -88,7 +89,7 @@ class EngineEvents {
 #endif
     }
 
-    static void onStripAdded(CLEDController *strip, uint32_t num_leds) {
+    static void onStripAdded(CLEDController *strip, fl::u32 num_leds) {
 #if FASTLED_HAS_ENGINE_EVENTS
         EngineEvents::getInstance()->_onStripAdded(strip, num_leds);
 #else
@@ -123,7 +124,7 @@ class EngineEvents {
     void _onBeginFrame();
     void _onEndShowLeds();
     void _onEndFrame();
-    void _onStripAdded(CLEDController *strip, uint32_t num_leds);
+    void _onStripAdded(CLEDController *strip, fl::u32 num_leds);
     void _onCanvasUiSet(CLEDController *strip, const ScreenMap &xymap);
     void _onPlatformPreLoop();
     bool _hasListener(Listener *listener);

@@ -28,16 +28,16 @@ void bilinearExpandArbitrary(const CRGB *input, CRGB *output,
                              fl::XYMap xyMap)
     FASTLED_DEPRECATED("use upscaleArbitrary from upscale.h");
 
-void bilinearExpandPowerOf2(const CRGB *input, CRGB *output, uint8_t inputWidth,
-                            uint8_t inputHeight, fl::XYMap xyMap)
+void bilinearExpandPowerOf2(const CRGB *input, CRGB *output, fl::u8 inputWidth,
+                            fl::u8 inputHeight, fl::XYMap xyMap)
     FASTLED_DEPRECATED("use upscalePowerOf2 from upscale.h");
 
 void bilinearExpand(const CRGB *input, CRGB *output, u16 inputWidth,
                     u16 inputHeight, fl::XYMap xyMap)
     FASTLED_DEPRECATED("use upscale from upscale.h");
 
-void bilinearExpandFloat(const CRGB *input, CRGB *output, uint8_t inputWidth,
-                         uint8_t inputHeight, fl::XYMap xyMap)
+void bilinearExpandFloat(const CRGB *input, CRGB *output, fl::u8 inputWidth,
+                         fl::u8 inputHeight, fl::XYMap xyMap)
     FASTLED_DEPRECATED("use upscaleFloat from upscale.h");
 
 void bilinearExpandArbitraryFloat(const CRGB *input, CRGB *output,
@@ -45,8 +45,8 @@ void bilinearExpandArbitraryFloat(const CRGB *input, CRGB *output,
                                   fl::XYMap xyMap)
     FASTLED_DEPRECATED("use upscaleArbitraryFloat from upscale.h");
 
-uint8_t bilinearInterpolateFloat(uint8_t v00, uint8_t v10, uint8_t v01,
-                                 uint8_t v11, float dx, float dy)
+fl::u8 bilinearInterpolateFloat(fl::u8 v00, fl::u8 v10, fl::u8 v01,
+                                 fl::u8 v11, float dx, float dy)
     FASTLED_DEPRECATED("use upscaleFloat from upscale.h");
 
 ////////////////// Inline definitions for backward compatibility ///////////////////////
@@ -58,7 +58,7 @@ inline void bilinearExpandArbitrary(const CRGB *input, CRGB *output,
 }
 
 inline void bilinearExpandPowerOf2(const CRGB *input, CRGB *output,
-                                   uint8_t inputWidth, uint8_t inputHeight,
+                                   fl::u8 inputWidth, fl::u8 inputHeight,
                                    fl::XYMap xyMap) {
     upscalePowerOf2(input, output, inputWidth, inputHeight, xyMap);
 }
@@ -75,8 +75,8 @@ inline void bilinearExpandArbitraryFloat(const CRGB *input, CRGB *output,
     upscaleArbitraryFloat(input, output, inputWidth, inputHeight, xyMap);
 }
 
-inline uint8_t bilinearInterpolateFloat(uint8_t v00, uint8_t v10, uint8_t v01,
-                                        uint8_t v11, float dx, float dy) {
+inline fl::u8 bilinearInterpolateFloat(fl::u8 v00, fl::u8 v10, fl::u8 v01,
+                                        fl::u8 v11, float dx, float dy) {
     return upscaleFloat(v00, v10, v01, v11, dx, dy);
 }
 
