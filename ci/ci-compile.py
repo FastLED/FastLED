@@ -467,6 +467,11 @@ def compile_with_pio_ci(
         fastled_path = str(HERE.parent.absolute())
         lib_option = f"lib_deps=symlink://{fastled_path}"
 
+        # Set up board-specific build cache directory with absolute path
+        cache_dir = HERE.parent / ".pio_cache" / board.board_name
+        absolute_cache_dir = str(cache_dir.absolute())
+        cache_option = f"build_cache_dir={absolute_cache_dir}"
+
         # Build pio ci command
         cmd_list = [
             "pio",
@@ -479,6 +484,8 @@ def compile_with_pio_ci(
             str(board_build_dir / example_path.name),
             "--project-option",
             lib_option,
+            "--project-option",
+            cache_option,
         ]
 
         # Check for additional source directories in the example and collect them

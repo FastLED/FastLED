@@ -70,9 +70,17 @@ def configure_ccache(env: PlatformIOEnv) -> None:  # type: ignore # env is provi
         project_dir = env.get("PROJECT_DIR")
         if project_dir is None:
             project_dir = os.getcwd()
-        ccache_dir = os.path.join(project_dir, ".ccache")
+
+        # Use board-specific ccache directory if PIOENV (board environment) is available
+        board_name = env.get("PIOENV")
+        if board_name:
+            ccache_dir = os.path.join(project_dir, ".ccache", board_name)
+        else:
+            ccache_dir = os.path.join(project_dir, ".ccache", "default")
+
         os.environ["CCACHE_DIR"] = ccache_dir
         Path(ccache_dir).mkdir(parents=True, exist_ok=True)
+        print(f"Using board-specific CCACHE directory: {ccache_dir}")
 
     # Configure CCACHE for this build
     project_dir = env.get("PROJECT_DIR")
