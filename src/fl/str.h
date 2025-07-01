@@ -5,7 +5,7 @@
 
 
 #include "fl/int.h"
-#include <string.h>
+#include <string.h>  // for standard string functions // ok include
 
 #ifdef __EMSCRIPTEN__
 #include <string>

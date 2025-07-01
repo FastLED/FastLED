@@ -4,7 +4,6 @@
 #pragma once
 
 #include "fl/stdint.h"
-#include <string.h>
 
 #include "fl/namespace.h"
 #include "rgbw.h"

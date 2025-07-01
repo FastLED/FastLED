@@ -285,9 +285,9 @@ ARDUINOJSON_BEGIN_PRIVATE_NAMESPACE
 template <typename T1, typename T2>
 class InvalidConversion;  // Error here? See https://arduinojson.org/v7/invalid-conversion/
 ARDUINOJSON_END_PRIVATE_NAMESPACE
-#include <stddef.h>
+#include <stddef.h>  // ok include
 #include "fl/stdint.h"
-#include <stdlib.h>
+#include <stdlib.h>  // ok include
 ARDUINOJSON_BEGIN_PUBLIC_NAMESPACE
 class Allocator {
  public:
@@ -659,7 +659,7 @@ void swap_(T& a, T& b) {
   b = move(tmp);
 }
 ARDUINOJSON_END_PRIVATE_NAMESPACE
-#include <string.h>
+#include <string.h>  // ok include
 ARDUINOJSON_BEGIN_PRIVATE_NAMESPACE
 using PoolCount = SlotId;
 template <typename T>
@@ -1049,7 +1049,7 @@ struct SizedStringAdapter<TChar*, enable_if_t<IsChar<TChar>::value>> {
 };
 ARDUINOJSON_END_PRIVATE_NAMESPACE
 #if ARDUINOJSON_ENABLE_STD_STREAM
-#include <ostream>
+#include <ostream>  // ok include
 #endif
 ARDUINOJSON_BEGIN_PUBLIC_NAMESPACE
 class JsonString {
@@ -1186,7 +1186,7 @@ ARDUINOJSON_END_PRIVATE_NAMESPACE
 #ifdef ARDUINO
 #else
 class __FlashStringHelper;
-#include <avr/pgmspace.h>
+#include <avr/pgmspace.h>  // ok include
 #endif
 ARDUINOJSON_BEGIN_PRIVATE_NAMESPACE
 struct pgm_p {
@@ -5385,10 +5385,10 @@ class StringBuilder {
 };
 ARDUINOJSON_END_PRIVATE_NAMESPACE
 #if ARDUINOJSON_ENABLE_STD_STRING
-#include <string>
+#include <string>  // ok include
 #endif
 #if ARDUINOJSON_ENABLE_STRING_VIEW
-#include <string_view>
+#include <string_view>  // ok include
 #endif
 ARDUINOJSON_BEGIN_PUBLIC_NAMESPACE
 template <typename T, typename Enable>
@@ -6301,7 +6301,7 @@ struct BoundedReader<const __FlashStringHelper*, void> {
 ARDUINOJSON_END_PRIVATE_NAMESPACE
 #endif
 #if ARDUINOJSON_ENABLE_STD_STREAM
-#include <istream>
+#include <istream>  // ok include
 ARDUINOJSON_BEGIN_PRIVATE_NAMESPACE
 template <typename TSource>
 struct Reader<TSource, enable_if_t<is_base_of<std::istream, TSource>::value>> {

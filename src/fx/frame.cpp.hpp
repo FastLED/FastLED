@@ -1,5 +1,5 @@
 
-#include <string.h>
+#include <string.h>  // for memcpy // ok include
 
 #include "crgb.h"
 #include "fl/allocator.h"

@@ -4,7 +4,7 @@
 #include "fl/namespace.h"
 #include "fl/force_inline.h"
 #include "fl/pair.h"
-#include <string.h>
+#include <string.h>  // for memcpy // ok include
 
 #include "crgb.h"
 #include "fl/clamp.h"

@@ -6,7 +6,7 @@
 #include "fl/stdint.h"
 #include "fl/force_inline.h"
 #include "fl/memset.h"
-#include <string.h>
+#include <string.h>  // for memcpy // ok include
 
 namespace fl {
 

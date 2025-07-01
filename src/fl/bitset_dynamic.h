@@ -2,7 +2,7 @@
 
 #include "fl/stdint.h"
 #include "fl/int.h"
-#include <string.h> // for memcpy
+#include <string.h>  // for memcpy // ok include
 
 #include "fl/math_macros.h"
 #include "fl/memset.h"

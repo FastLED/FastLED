@@ -1,7 +1,7 @@
 #pragma once
 
 #include "fl/type_traits.h"
-#include <string.h>  // for memcpy
+#include <string.h>  // for memcpy // ok include
 
 namespace fl {
 

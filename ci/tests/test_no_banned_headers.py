@@ -61,6 +61,7 @@ BANNED_HEADERS_COMMON = [
     "stddef.h",
     "cstddef",  # this certainally fails
     "type_traits",  # this certainally fails
+    "string.h",  # Use fl/string.h instead
 ]
 
 BANNED_HEADERS_CORE = BANNED_HEADERS_COMMON + BANNED_HEADERS_ESP + ["Arduino.h"]

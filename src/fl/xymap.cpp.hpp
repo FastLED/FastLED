@@ -1,6 +1,6 @@
 
 #include "fl/stdint.h"
-#include <string.h>
+#include <string.h>  // for memcpy // ok include
 
 #include "fl/clamp.h"
 #include "fl/force_inline.h"

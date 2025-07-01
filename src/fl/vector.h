@@ -3,7 +3,7 @@
 //#include <stddef.h>
 #include "fl/stdint.h"
 #include "fl/int.h"
-#include <string.h>
+#include <string.h>  // for memcpy // ok include
 
 #include "fl/functional.h"
 #include "fl/initializer_list.h"

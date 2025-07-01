@@ -1,7 +1,7 @@
 #pragma once
 
 #include "fl/stdint.h"
-#include <string.h>
+#include <string.h>  // for memcpy // ok include
 
 #include "fl/force_inline.h"
 #include "fl/lut.h"

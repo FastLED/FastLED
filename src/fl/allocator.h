@@ -1,7 +1,7 @@
 #pragma once
 
 #include <stdlib.h>
-#include <string.h>
+#include <string.h>  // for memcpy // ok include
 #include "fl/inplacenew.h"
 #include "fl/memset.h"
 #include "fl/type_traits.h"
@@ -70,7 +70,7 @@ template <typename T> class allocator {
         if (ptr == nullptr) {
             return nullptr; // Handle allocation failure
         }
-        fl::memset(ptr, 0, sizeof(T) * n); // Zero-initialize the memory
+        memset(ptr, 0, sizeof(T) * n); // Zero-initialize the memory
         return static_cast<T*>(ptr);
     }
 

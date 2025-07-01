@@ -1,4 +1,4 @@
-#include <string.h>
+#include <string.h>  // for memcpy // ok include
 #include "fl/int.h"
 
 #include "fl/bytestreammemory.h"

@@ -355,11 +355,18 @@ uv run mcp_server.py
 - ❌ `#include <cmath>` → ✅ `#include "fl/math.h"`
 - ❌ `#include <cstdint>` → ✅ `#include "fl/stdint.h"`
 
+**String & Memory Operations:**
+- ❌ `#include <string.h>` → ✅ `#include "fl/string.h"` (or specific: `fl/strlen.h`, `fl/memcpy.h`, `fl/strcmp.h`, `fl/memset.h`)
+
 **Functions and classes:**
 - ❌ `std::move()` → ✅ `fl::move()`
 - ❌ `std::forward()` → ✅ `fl::forward()`
 - ❌ `std::vector` → ✅ `fl::vector`
 - ❌ `std::enable_if` → ✅ `fl::enable_if`
+- ❌ `strlen()` → ✅ `fl::strlen()`
+- ❌ `memcpy()` → ✅ `fl::memcpy()`
+- ❌ `strcmp()` → ✅ `fl::strcmp()`
+- ❌ `memset()` → ✅ `fl::memset()`
 
 **Why:** The project maintains its own implementations to ensure compatibility across all supported platforms and to avoid bloating the library with unnecessary STL dependencies.
 

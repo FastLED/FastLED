@@ -4,7 +4,7 @@
 Provides eanble_if and is_derived for compilers before C++14.
 */
 
-#include <string.h>  // for memcpy
+#include <string.h>  // for memcpy // ok include
 
 #include "fl/stdint.h"
 

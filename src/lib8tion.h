@@ -24,7 +24,7 @@
 
 
 #if !defined(__AVR__)
-#include <string.h>
+#include "fl/string.h"
 // for memmove, memcpy, and memset if not defined here
 #endif // end of !defined(__AVR__)
 

@@ -1,6 +1,6 @@
 
 
-#include <string.h>
+#include <string.h>  // for memcpy // ok include
 
 #include "fx_layer.h"
 

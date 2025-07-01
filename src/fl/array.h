@@ -1,9 +1,8 @@
 #pragma once
 
-#include <string.h>
-
-#include "fl/inplacenew.h"
+#include <string.h>  // for memcpy // ok include
 #include "fl/memset.h"
+#include "fl/inplacenew.h"
 #include "fl/type_traits.h"
 #include "fl/bitcast.h"
 
