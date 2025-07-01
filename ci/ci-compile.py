@@ -459,6 +459,17 @@ def compile_with_pio_ci(
         # Check for additional source directories in the example and collect them
         example_include_dirs = []
         example_src_dirs = []
+
+        # Always show some level of scanning info
+        has_subdirs = any(
+            subdir.is_dir()
+            and subdir.name not in [".git", "__pycache__", ".pio", ".vscode"]
+            for subdir in example_path.iterdir()
+        )
+
+        if has_subdirs or verbose:
+            locked_print(f"Scanning {example_path.name} for additional sources...")
+
         for subdir in example_path.iterdir():
             if subdir.is_dir() and subdir.name not in [
                 ".git",
@@ -480,13 +491,27 @@ def compile_with_pio_ci(
 
                 if header_files:
                     example_include_dirs.append(str(subdir))
+                    locked_print(
+                        f"  Found {len(header_files)} header file(s) in: {subdir.name}"
+                    )
                     if verbose:
-                        locked_print(f"Added example include directory: {subdir}")
+                        for header in header_files:
+                            locked_print(f"    -> {header.relative_to(example_path)}")
 
                 if source_files:
                     example_src_dirs.append(str(subdir))
+                    locked_print(
+                        f"  Found {len(source_files)} source file(s) in: {subdir.name}"
+                    )
                     if verbose:
-                        locked_print(f"Added example source directory: {subdir}")
+                        for source in source_files:
+                            locked_print(f"    -> {source.relative_to(example_path)}")
+
+        # Show summary if we found additional sources
+        if example_include_dirs or example_src_dirs:
+            locked_print(
+                f"  Added {len(example_include_dirs)} include dir(s), {len(example_src_dirs)} source dir(s)"
+            )
 
         # Add platform-specific options
         if board.platform:
@@ -539,6 +564,18 @@ def compile_with_pio_ci(
             build_flags_str = " ".join(build_flags_list)
             cmd_list.extend(["--project-option", f"build_flags={build_flags_str}"])
 
+            # Show custom defines (excluding the optimization report flag)
+            custom_defines = [
+                flag
+                for flag in build_flags_list
+                if flag.startswith("-D") and "FASTLED" in flag
+            ]
+            if custom_defines or verbose:
+                if custom_defines:
+                    locked_print(f"Custom defines: {' '.join(custom_defines)}")
+                if verbose:
+                    locked_print(f"All build flags: {build_flags_str}")
+
         # Add example source directories as libraries
         for src_dir in example_src_dirs:
             cmd_list.extend(["--lib", src_dir])
@@ -546,43 +583,106 @@ def compile_with_pio_ci(
         # Add custom SDK config if specified
         if board.customsdk:
             cmd_list.extend(["--project-option", f"custom_sdkconfig={board.customsdk}"])
+            locked_print(f"Using custom SDK config: {board.customsdk}")
 
-        # Add verbose flag if requested
-        if verbose:
-            cmd_list.append("--verbose")
+        # Always add verbose flag to pio ci for better default output
+        cmd_list.append("--verbose")
 
         # Execute the command
         cmd_str = subprocess.list2cmdline(cmd_list)
-        locked_print(f"Running command: {cmd_str}")
+        locked_print(f"Building {example_path.name} for {board_name}...")
+        if verbose:
+            locked_print(f"Command: {cmd_str}")
 
         start_time = time.time()
 
         try:
-            result = subprocess.run(
+            # Always stream output in real-time, with timestamps only in verbose mode
+            result = subprocess.Popen(
                 cmd_list,
-                capture_output=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
                 text=True,
                 cwd=str(HERE.parent),
-                timeout=300,  # 5 minute timeout per example
             )
+
+            # Capture output lines in real-time
+            stdout_lines = []
+            if result.stdout:
+                for line in iter(result.stdout.readline, ""):
+                    if line:
+                        line_stripped = line.rstrip()
+                        stdout_lines.append(line_stripped)
+
+                        if verbose:
+                            # In verbose mode, add timestamps
+                            elapsed = time.time() - start_time
+                            timing_prefix = f"{elapsed:6.2f}s "
+                            locked_print(timing_prefix + line_stripped)
+                        else:
+                            # In normal mode, show important compilation steps
+                            if any(
+                                keyword in line_stripped
+                                for keyword in [
+                                    "Compiling",
+                                    "Linking",
+                                    "Building",
+                                    "Archiving",
+                                    "Collecting",
+                                    "Looking for",
+                                    "Library Manager",
+                                    "Installing",
+                                    "PackageManager",
+                                    "LibraryManager",
+                                    "Framework",
+                                    "Toolchain",
+                                    "PLATFORM:",
+                                    "PACKAGES:",
+                                    "LDF:",
+                                    "Building in",
+                                    "RAM:",
+                                    "Flash:",
+                                    "SUCCESS",
+                                    "ERROR",
+                                    "FAILED",
+                                    "warning:",
+                                    "error:",
+                                    "Dependency Graph",
+                                    "avr-g++",
+                                    "xtensa-",
+                                    "arm-",
+                                    "gcc",
+                                    "g++",
+                                    "checkprogsize",
+                                    "MethodWrapper",
+                                ]
+                            ):
+                                locked_print(line_stripped)
+
+            # Wait for process to complete
+            result.wait()
+            stdout = "\n".join(stdout_lines)
+            stderr = ""
+            returncode = result.returncode
 
             elapsed_time = time.time() - start_time
 
-            if result.returncode == 0:
+            if returncode == 0:
                 locked_print(
                     f"*** Successfully built {example_path.name} for {board_name} in {elapsed_time:.2f}s ***"
                 )
-                if verbose and result.stdout:
-                    locked_print(f"Build output:\n{result.stdout}")
+                if verbose and stdout:
+                    locked_print(f"Final build summary:\n{stdout}")
             else:
                 error_msg = f"Failed to build {example_path.name} for {board_name}"
                 locked_print(f"ERROR: {error_msg}")
-                locked_print(f"Command: {cmd_str}")
-                if result.stdout:
-                    locked_print(f"STDOUT:\n{result.stdout}")
-                if result.stderr:
-                    locked_print(f"STDERR:\n{result.stderr}")
-                errors.append(f"{error_msg}: {result.stderr}")
+                if verbose:
+                    locked_print(f"Command: {cmd_str}")
+                if stdout:
+                    locked_print(f"STDOUT:\n{stdout}")
+                if stderr:
+                    locked_print(f"STDERR:\n{stderr}")
+                errors.append(f"{error_msg}: {stderr}")
 
         except subprocess.TimeoutExpired:
             error_msg = f"Timeout building {example_path.name} for {board_name}"
