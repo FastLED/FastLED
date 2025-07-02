@@ -248,14 +248,15 @@ XIAOBLESENSE_NRF52 = Board(
 # migration where the board was temporarily mapped to the XIAO variant.
 NRF52840 = Board(
     board_name="nrf52840_dk",
-    real_board_name=None,
-    platform="https://github.com/maxgerhardt/platform-nordicnrf52",
+    real_board_name="nrf52840_dk_adafruit",  # Use Adafruit BSP variant which includes full Nordic SDK headers
+    platform="nordicnrf52",
     framework="arduino",
-    platform_needs_install=True,
-    platform_packages=None,
+    platform_needs_install=False,
+    platform_packages="framework-arduinoadafruitnrf52@^1.10601.0",
     defines=[
         "FASTLED_USE_COMPILE_TESTS=0",
     ],
+    board_build_core="adafruit",
 )
 
 RPI_PICO = Board(
