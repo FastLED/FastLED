@@ -639,58 +639,11 @@ def compile_with_pio_ci(
             if include_dir not in example_src_dirs:
                 cmd_list.extend(["--lib", include_dir])
 
-        # Copy header files to build src directory preserving subdirectory structure
-        # This ensures that .ino files can find header files using relative paths like "shared/defs.h"
-        build_src_dir = board_build_dir / example_path.name / "src"
-        for include_dir in example_include_dirs:
-            include_path = Path(include_dir)
-            if str(include_dir) == str(example_path):  # Root directory headers
-                # Copy .h/.hpp files to build src directory
-                for header_file in include_path.glob("*.h"):
-                    build_src_dir.mkdir(parents=True, exist_ok=True)
-                    shutil.copy2(header_file, build_src_dir)
-                    if verbose:
-                        locked_print(
-                            f"  Copied header file: {header_file.name} -> {build_src_dir}"
-                        )
-                for header_file in include_path.glob("*.hpp"):
-                    build_src_dir.mkdir(parents=True, exist_ok=True)
-                    shutil.copy2(header_file, build_src_dir)
-                    if verbose:
-                        locked_print(
-                            f"  Copied header file: {header_file.name} -> {build_src_dir}"
-                        )
-            else:  # Subdirectory headers - preserve directory structure
-                # Get the relative path from example root to this include directory
-                try:
-                    rel_path = include_path.relative_to(example_path)
-                    target_subdir = build_src_dir / rel_path
-
-                    # Copy all header files from this subdirectory
-                    header_files = list(include_path.glob("*.h")) + list(
-                        include_path.glob("*.hpp")
-                    )
-                    if header_files:
-                        target_subdir.mkdir(parents=True, exist_ok=True)
-                        for header_file in header_files:
-                            shutil.copy2(header_file, target_subdir)
-                            if verbose:
-                                locked_print(
-                                    f"  Copied header file: {rel_path}/{header_file.name} -> {target_subdir}"
-                                )
-                except ValueError:
-                    # Include directory is not relative to example path, skip
-                    pass
-
-        # Add custom SDK config if specified
-        if board.customsdk:
-            cmd_list.extend(["--project-option", f"custom_sdkconfig={board.customsdk}"])
-            locked_print(f"Using custom SDK config: {board.customsdk}")
-
-        # Dynamically add example source directories so PlatformIO compiles them
-        if example_src_dirs:
-            abs_src_dirs = [str(Path(d).resolve()) for d in example_src_dirs]
-            extra_dirs_value = ",".join(f"symlink://{p}" for p in abs_src_dirs)
+        # Use both source and include directories for extra_src_dirs so both headers and sources are visible without copying.
+        all_example_dirs = sorted(set(example_src_dirs + example_include_dirs))
+        if all_example_dirs:
+            abs_dirs = [str(Path(d).resolve()) for d in all_example_dirs]
+            extra_dirs_value = ",".join(f"symlink://{p}" for p in abs_dirs)
             cmd_list.extend([
                 "--project-option",
                 f"extra_src_dirs={extra_dirs_value}",
