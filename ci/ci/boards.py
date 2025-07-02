@@ -325,6 +325,14 @@ XIAOBLESENSE_ADAFRUIT_NRF52 = Board(
     platform_needs_install=True,  # Install platform package to get the boards
 )
 
+# Alias: handle common misspelling without the trailing 't'
+XIAOBLESENSE_ADAFRUI_ALIAS = Board(
+    board_name="xiaoblesense_adafrui",  # missing 't'
+    real_board_name="xiaoblesense_adafruit",  # map to the correct board name
+    platform="https://github.com/maxgerhardt/platform-nordicnrf52",
+    platform_needs_install=True,
+)
+
 XIAOBLESENSE_NRF52 = Board(
     board_name="xiaoblesense",
     real_board_name="xiaoble_adafruit",
