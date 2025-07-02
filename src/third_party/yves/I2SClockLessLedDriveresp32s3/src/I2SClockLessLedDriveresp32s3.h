@@ -72,44 +72,35 @@
 // ---------------------------------------------------------------------------
 // Scoped constants
 // ---------------------------------------------------------------------------
-// The following pattern mirrors the scoped-define technique used in
-// `src/fl/json.h`.  A single controlling macro —
-// `FASTLED_ENABLE_I2S_CONSTANTS` — determines whether or not the constants
-// are defined.  By default they are enabled (value 1).  Upstream code that
-// experiences name clashes can disable these definitions by defining
-// `FASTLED_ENABLE_I2S_CONSTANTS` to 0 *before* including this header.
+// A single controlling macro – `FASTLED_ENABLE_I2S_CONSTANTS` – determines
+// whether we emit the bit-mask constants that this driver uses. This mirrors
+// the pattern in `fl/json.h` (see FASTLED_ENABLE_JSON):
+//   1. Provide a `#ifndef/#define` default of 1.
+//   2. Inside `#if FASTLED_ENABLE_I2S_CONSTANTS` emit `#ifndef` guarded
+//      `#define` for each constant.  This guarantees we never re-define a
+//      macro if the user has already provided their own definition.
+//   3. No `push_macro` / `pop_macro` dance is required; the caller can simply
+//      disable the entire block by defining the switch macro to 0 before this
+//      header is included.
 
 #ifndef FASTLED_ENABLE_I2S_CONSTANTS
 #define FASTLED_ENABLE_I2S_CONSTANTS 1
 #endif
 
 #if FASTLED_ENABLE_I2S_CONSTANTS
-  /*
-   * Scoped-define pattern (similar to ArduinoJson):
-   *   1. Save any incoming definitions with push_macro.
-   *   2. Undef to avoid accidental textual replacement inside this header.
-   *   3. Redefine only what we actually need (AA).
-   *   4. Pop macros at the end so caller's environment is restored
-   *      exactly as it was on entry.
-   */
-
-  #pragma push_macro("AA")
-  #undef AA
+  #ifndef AA
   #define AA (0x00AA00AAL)
+  #endif
 
-  /* BB, B, and BA are *not* used inside this header, but we still guard them
-   * to ensure any external definitions are preserved. We simply undef them
-   * for the duration of this header.
-   */
-  #pragma push_macro("BB")
-  #undef BB
+  // Additional masks that may be used by external utilities; not referenced
+  // inside this implementation but provided to avoid collisions elsewhere.
+  #ifndef BB
+  #define BB (0x0000BBBBL)
+  #endif
 
-  #pragma push_macro("B")
-  #undef B
-
-  #pragma push_macro("BA")
-  #undef BA
-
+  #ifndef BA
+  #define BA (0x0A0A0A0AL)
+  #endif
 #endif // FASTLED_ENABLE_I2S_CONSTANTS
 
 #ifndef MIN
@@ -552,14 +543,6 @@ static bool IRAM_ATTR flush_ready(esp_lcd_panel_io_handle_t panel_io,
 }
 
 #pragma GCC diagnostic pop
-
-#if FASTLED_ENABLE_I2S_CONSTANTS
-  /* Restore original macro definitions */
-  #pragma pop_macro("BA")
-  #pragma pop_macro("B")
-  #pragma pop_macro("BB")
-  #pragma pop_macro("AA")
-#endif
 
 } // namespace fl
 
