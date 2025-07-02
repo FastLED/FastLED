@@ -91,6 +91,11 @@ class Board:
             for uf in self.build_unflags:
                 options.append(f"build_unflags={uf}")
 
+        # Handle explicit build_flags (added for native host compilation and other special cases)
+        if self.build_flags:
+            for bf in self.build_flags:
+                options.append(f"build_flags={bf}")
+
         if self.customsdk:
             options.append(f"custom_sdkconfig={self.customsdk}")
 
@@ -185,6 +190,23 @@ class Board:
 
 WEBTARGET = Board(
     board_name="web",
+)
+
+# Native host compilation target using PlatformIO's "native" platform.
+# This allows compiling FastLED for the host machine (Linux/macOS/Windows)
+# which is useful for CI compile-tests and static analysis.  We replicate
+# the build flags present in ci/native/platformio.ini so that the same
+# stub implementation and main-file inclusion are used.
+
+NATIVE = Board(
+    board_name="native",
+    real_board_name="native",
+    platform="native",
+    build_flags=[
+        "-DFASTLED_STUB_IMPL",
+        "-DFASTLED_STUB_MAIN_INCLUDE_INO=\"../examples/Blink/Blink.ino\"",
+        "-std=c++17",
+    ],
 )
 
 DUE = Board(
