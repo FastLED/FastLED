@@ -643,6 +643,18 @@ def compile_with_pio_ci(
         if verbose:
             cmd_list.append("--verbose")
 
+        # Determine absolute directories for example sources/includes
+        all_example_dirs = sorted(set(example_src_dirs + example_include_dirs))
+        if all_example_dirs:
+            abs_dirs = [str(Path(d).resolve()) for d in all_example_dirs]
+            extra_dirs_value = ",".join(f"symlink://{p}" for p in abs_dirs)
+            cmd_list.extend([
+                "--project-option",
+                f"extra_src_dirs={extra_dirs_value}",
+                "--project-option",
+                "src_filter=+<**/*.cpp>"
+            ])
+
         # Execute the command
         cmd_str = subprocess.list2cmdline(cmd_list)
         locked_print(f"Building {example_path.name} for {board_name}...")
@@ -746,31 +758,6 @@ def compile_with_pio_ci(
                 if stderr:
                     locked_print(f"STDERR:\n{stderr}")
                 errors.append(f"{error_msg}: {stderr}")
-
-            # Create symlinks in the build src directory that point to each example source/include directory
-            all_example_dirs = sorted(set(example_src_dirs + example_include_dirs))
-            build_src_dir = board_build_dir / example_path.name / "src"
-            if all_example_dirs:
-                build_src_dir.mkdir(parents=True, exist_ok=True)
-                for abs_dir in all_example_dirs:
-                    src_path = Path(abs_dir).resolve()
-                    link_name = build_src_dir / src_path.name
-                    try:
-                        if link_name.exists() or link_name.is_symlink():
-                            link_name.unlink()
-                        link_name.symlink_to(src_path, target_is_directory=True)
-                        if verbose:
-                            locked_print(f"  Symlinked {link_name} -> {src_path}")
-                    except Exception as e:
-                        # On some systems (e.g. Windows without permissions) symlink might fail; fall back to copy
-                        try:
-                            if link_name.exists():
-                                shutil.rmtree(link_name)
-                            shutil.copytree(src_path, link_name)
-                            if verbose:
-                                locked_print(f"  Copied {src_path} -> {link_name} (symlink fallback)")
-                        except Exception as ee:
-                            locked_print(f"Warning: Could not link or copy {src_path}: {ee}")
 
         except subprocess.TimeoutExpired:
             error_msg = f"Timeout building {example_path.name} for {board_name}"
