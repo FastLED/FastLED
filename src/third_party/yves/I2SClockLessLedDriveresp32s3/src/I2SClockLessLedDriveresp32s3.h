@@ -64,25 +64,37 @@
 
 #define I2S_DEVICE 0
 
-// Scoped macro defines to avoid collisions with other headers.
-// If these macros are already defined by a downstream file, we leave the
-// existing definitions intact.  This mirrors the scoped‐define pattern used
-// in src/fl/json.h (see FASTLED_ENABLE_JSON)
-#ifndef AA
-#define AA (0x00AA00AAL)
+// ---------------------------------------------------------------------------
+// Scoped constants
+// ---------------------------------------------------------------------------
+// The following pattern mirrors the scoped-define technique used in
+// `src/fl/json.h`.  A single controlling macro —
+// `FASTLED_ENABLE_I2S_CONSTANTS` — determines whether or not the constants
+// are defined.  By default they are enabled (value 1).  Upstream code that
+// experiences name clashes can disable these definitions by defining
+// `FASTLED_ENABLE_I2S_CONSTANTS` to 0 *before* including this header.
+
+#ifndef FASTLED_ENABLE_I2S_CONSTANTS
+#define FASTLED_ENABLE_I2S_CONSTANTS 1
 #endif
 
-#ifndef CC
-#define CC (0x0000CCCCL)
-#endif
+#if FASTLED_ENABLE_I2S_CONSTANTS
+  #ifndef AA
+  #define AA (0x00AA00AAL)
+  #endif
 
-#ifndef FF
-#define FF (0xF0F0F0F0L)
-#endif
+  #ifndef CC
+  #define CC (0x0000CCCCL)
+  #endif
 
-#ifndef FF2
-#define FF2 (0x0F0F0F0FL)
-#endif
+  #ifndef FF
+  #define FF (0xF0F0F0F0L)
+  #endif
+
+  #ifndef FF2
+  #define FF2 (0x0F0F0F0FL)
+  #endif
+#endif // FASTLED_ENABLE_I2S_CONSTANTS
 
 #ifndef MIN
 #define MIN(a, b) (((a) < (b)) ? (a) : (b))
@@ -146,7 +158,6 @@
 #define _p_g 0
 #define _p_b 2
 #define _nb_components 3
-#endif
 #endif
 #endif
 #endif
