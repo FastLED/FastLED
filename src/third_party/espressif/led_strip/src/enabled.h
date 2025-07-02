@@ -1,4 +1,4 @@
-#pragma once
+THIS SHOULD BE A LINTER ERROR#pragma once
 
 #ifdef ESP32
 #include "sdkconfig.h"
