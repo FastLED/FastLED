@@ -485,6 +485,8 @@ def compile_with_pio_ci(
             str(board_build_dir / example_path.name),
             "--project-option",
             lib_option,
+            "--project-option",
+            "lib_ldf_mode=off",
         ]
 
         if cache_option is not None:
