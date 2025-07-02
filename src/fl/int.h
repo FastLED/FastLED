@@ -40,6 +40,15 @@ namespace fl {
         typedef unsigned long u32;
         typedef long long i64;
         typedef unsigned long long u64;
+    #elif defined(__MKL26Z64__)
+        // Teensy LC (MKL26Z64 Cortex-M0+) – uint32_t resolves to 'unsigned long'
+        // Similar to other Teensy ARM cores; map 32-bit types to 'long' to match uint32_t exactly
+        typedef short i16;
+        typedef unsigned short u16;
+        typedef long i32;
+        typedef unsigned long u32;
+        typedef long long i64;
+        typedef unsigned long long u64;
     #elif defined(ARDUINO_ARCH_RENESAS_UNO)
         // ATmega328P (Arduino Uno) – int is 16-bit, long is 32-bit
         typedef int i16;
