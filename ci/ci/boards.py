@@ -111,6 +111,70 @@ class Board:
         data_str = self.__repr__()
         return hash(data_str)
 
+    def to_platformio_ini(self) -> str:
+        """Return a `platformio.ini` snippet representing this board.
+
+        The output is suitable for directly appending to a *platformio.ini* file
+        and follows the same semantics used by the PlatformIO CLI.  Only
+        parameters understood by PlatformIO are emitted – internal helper
+        fields like ``platform_needs_install`` and ``use_pio_run`` are **not**
+        included because they are consumed exclusively by the build helpers in
+        the *ci/* folder and would be ignored (or flagged as errors) by
+        PlatformIO itself.
+        """
+        lines: list[str] = []
+
+        # Section header
+        lines.append(f"[env:{self.board_name}]")
+
+        # Mandatory board identifier (use the *real* board name if provided)
+        lines.append(f"board = {self.get_real_board_name()}")
+
+        # Optional parameters -------------------------------------------------
+        if self.platform:
+            lines.append(f"platform = {self.platform}")
+
+        if self.platform_packages:
+            lines.append(f"platform_packages = {self.platform_packages}")
+
+        if self.framework:
+            lines.append(f"framework = {self.framework}")
+
+        if self.board_build_core:
+            lines.append(f"board_build.core = {self.board_build_core}")
+
+        if self.board_build_mcu:
+            lines.append(f"board_build.mcu = {self.board_build_mcu}")
+
+        if self.board_build_filesystem_size:
+            lines.append(
+                f"board_build.filesystem_size = {self.board_build_filesystem_size}"
+            )
+
+        if self.board_partitions:
+            lines.append(f"board_partitions = {self.board_partitions}")
+
+        # Build-time flags and unflags ---------------------------------------
+        build_flags_elements: list[str] = []
+        if self.defines:
+            build_flags_elements.extend(f"-D{define}" for define in self.defines)
+        if self.build_flags:
+            build_flags_elements.extend(self.build_flags)
+        if build_flags_elements:
+            # Join all build flags with a space so that PlatformIO parses them
+            lines.append(f"build_flags = {' '.join(build_flags_elements)}")
+
+        if self.build_unflags:
+            # PlatformIO accepts multiple *build_unflags* separated by spaces.
+            # Emit a single line for readability.
+            lines.append(f"build_unflags = {' '.join(self.build_unflags)}")
+
+        # Custom ESP-IDF sdkconfig override (ESP32-family boards)
+        if self.customsdk:
+            lines.append(f"custom_sdkconfig = {self.customsdk}")
+
+        return "\n".join(lines) + "\n"
+
 
 # [env:sparkfun_xrp_controller]
 # platform = https://github.com/maxgerhardt/platform-raspberrypi
