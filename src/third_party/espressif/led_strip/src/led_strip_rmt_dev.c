@@ -55,7 +55,7 @@ typedef struct {
     uint32_t strip_len;
     uint8_t bytes_per_pixel;
     led_color_component_format_t component_fmt;
-    uint8_t pixel_buf[];
+    uint8_t *pixel_buf;
 } led_strip_rmt_obj;
 
 static esp_err_t led_strip_rmt_set_pixel(led_strip_t *strip, uint32_t index, uint32_t red, uint32_t green, uint32_t blue)
@@ -136,6 +136,7 @@ static esp_err_t led_strip_rmt_del(led_strip_t *strip)
     led_strip_rmt_obj *rmt_strip = __containerof(strip, led_strip_rmt_obj, base);
     ESP_RETURN_ON_ERROR(rmt_del_channel(rmt_strip->rmt_chan), TAG, "delete RMT channel failed");
     ESP_RETURN_ON_ERROR(rmt_del_encoder(rmt_strip->strip_encoder), TAG, "delete strip encoder failed");
+    free(rmt_strip->pixel_buf);
     free(rmt_strip);
     return ESP_OK;
 }
@@ -166,8 +167,10 @@ esp_err_t led_strip_new_rmt_device(const led_strip_config_t *led_config, const l
     }
     // TODO: we assume each color component is 8 bits, may need to support other configurations in the future, e.g. 10bits per color component?
     uint8_t bytes_per_pixel = component_fmt.format.num_components;
-    rmt_strip = calloc(1, sizeof(led_strip_rmt_obj) + led_config->max_leds * bytes_per_pixel);
+    rmt_strip = calloc(1, sizeof(led_strip_rmt_obj));
     ESP_GOTO_ON_FALSE(rmt_strip, ESP_ERR_NO_MEM, err, TAG, "no mem for rmt strip");
+    rmt_strip->pixel_buf = calloc(led_config->max_leds * bytes_per_pixel, sizeof(uint8_t));
+    ESP_GOTO_ON_FALSE(rmt_strip->pixel_buf, ESP_ERR_NO_MEM, err, TAG, "no mem for pixel buffer");
     uint32_t resolution = rmt_config->resolution_hz ? rmt_config->resolution_hz : LED_STRIP_RMT_DEFAULT_RESOLUTION;
 
     // for backward compatibility, if the user does not set the clk_src, use the default value
@@ -218,6 +221,9 @@ err:
         }
         if (rmt_strip->strip_encoder) {
             rmt_del_encoder(rmt_strip->strip_encoder);
+        }
+        if (rmt_strip->pixel_buf) {
+            free(rmt_strip->pixel_buf);
         }
         free(rmt_strip);
     }
