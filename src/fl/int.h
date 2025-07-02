@@ -21,12 +21,16 @@ namespace fl {
         typedef long long i64;
         typedef unsigned long long u64;
     #elif defined(__SAM3X8E__)
-        // On ARM: int is 32-bit, long is 32-bit
-        typedef int i16;
-        typedef unsigned int u16;
-        typedef int i32;
-        typedef unsigned int u32;
+        // Arduino Due (SAM3X8E Cortex-M3, 32-bit ARM)
+        //   * short           -> 16-bit
+        //   * int / long      -> 32-bit
+        //   * long long       -> 64-bit
+        typedef short i16;
+        typedef unsigned short u16;
+        typedef long i32;
+        typedef unsigned long u32;
         typedef long long i64;
+        typedef unsigned long long u64;
     #elif defined(__MK20DX128__) || defined(__MK20DX256__)
         // Teensy 3.0 / 3.1 (MK20DX128 / MK20DX256) – compiler defines uint32_t as unsigned long
         // Use 'long' to guarantee type identity with uint32_t on this platform
@@ -43,6 +47,7 @@ namespace fl {
         typedef long int i32;
         typedef long unsigned int u32;
         typedef long long i64;
+        typedef unsigned long long u64;
     #elif defined(ESP32)
         // ESP32: short is 16-bit, long is 32-bit (same as Teensy but separate macro for clarity)
         typedef short i16;
