@@ -59,6 +59,15 @@ namespace fl {
         typedef unsigned long u32;
         typedef long long i64;
         typedef unsigned long long u64;
+    #elif defined(ARDUINO_ARCH_STM32F1)
+        // STM32F1 (Maple Mini and similar) – 32-bit ARM Cortex-M3
+        // short is 16-bit, int and long are 32-bit just like the generic ARM EABI
+        typedef short i16;
+        typedef unsigned short u16;
+        typedef long i32;
+        typedef unsigned long u32;
+        typedef long long i64;
+        typedef unsigned long long u64;
     #else
         // Default: assume short 16-bit, int 32-bit (uint32_t is unsigned int)
         typedef short i16;
