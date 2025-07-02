@@ -92,7 +92,7 @@ def main() -> int:
             "pio",
             "check",
             "--skip-packages",
-            "--src-filters=+<lib/src/>",
+            "--src-filters=+<src/>",
             f"--severity={MINIMUM_REPORT_SEVERTIY}",
             f"--fail-on-defect={MINIMUM_FAIL_SEVERTIY}",
             "--flags",
