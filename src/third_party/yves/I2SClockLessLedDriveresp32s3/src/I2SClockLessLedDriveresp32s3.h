@@ -88,23 +88,36 @@
 #endif
 
 #if FASTLED_ENABLE_I2S_CONSTANTS
-  #ifndef AA
+  /*
+   * Scoped-define guard pattern identical to third_party/arduinojson/json.h.
+   * Save any prior definitions, undefine them, then provide the constants
+   * needed by this header.  At the end of the file we pop the macros to
+   * restore the original state.
+   */
+
+  #pragma push_macro("AA")
+  #ifdef AA
+    #undef AA
+  #endif
   #define AA (0x00AA00AAL)
-  #endif
 
-  // Additional masks that may be used by external utilities; not referenced
-  // inside this implementation but provided to avoid collisions elsewhere.
-  #ifndef BB
+  #pragma push_macro("BB")
+  #ifdef BB
+    #undef BB
+  #endif
   #define BB (0x0000BBBBL)
-  #endif
 
-  #ifndef BA
+  #pragma push_macro("B")
+  #ifdef B
+    #undef B
+  #endif
+  #define B  (0x0000000BL)
+
+  #pragma push_macro("BA")
+  #ifdef BA
+    #undef BA
+  #endif
   #define BA (0x0A0A0A0AL)
-  #endif
-
-  #ifndef B
-  #define B (0x0000000BL)
-  #endif
 #endif // FASTLED_ENABLE_I2S_CONSTANTS
 
 #ifndef MIN
@@ -547,6 +560,13 @@ static bool IRAM_ATTR flush_ready(esp_lcd_panel_io_handle_t panel_io,
 }
 
 #pragma GCC diagnostic pop
+
+#if FASTLED_ENABLE_I2S_CONSTANTS
+  #pragma pop_macro("BA")
+  #pragma pop_macro("B")
+  #pragma pop_macro("BB")
+  #pragma pop_macro("AA")
+#endif
 
 } // namespace fl
 
