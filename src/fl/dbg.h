@@ -2,6 +2,7 @@
 
 #include "fl/strstream.h"
 #include "fl/sketch_macros.h"
+#include "fl/int.h"
 
 // Forward declaration to avoid pulling in fl/io.h and causing fl/io.cpp to be compiled
 // This prevents ~5KB memory bloat for simple applications
@@ -52,7 +53,7 @@ inline const char *fastled_file_offset(const char *file) {
 #define _FASTLED_DGB(X)                                                        \
     fl::println(                                                               \
         (fl::StrStream() << (fl::fastled_file_offset(__FILE__))                \
-                         << "(" << __LINE__ << "): " << X)                     \
+                         << "(" << fl::u32(__LINE__) << "): " << X)                     \
             .c_str())
 #endif
 
