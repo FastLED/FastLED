@@ -631,9 +631,9 @@ def compile_with_pio_ci(
 
         # Add build_unflags if provided
         if board.build_unflags:
-            # PlatformIO expects build_unflags entries to be separated by semicolons.
-            unflags_str = ";".join(board.build_unflags)
-            cmd_list.extend(["--project-option", f"build_unflags={unflags_str}"])
+            # Emit each unflag separately so PlatformIO treats them individually.
+            for uf in board.build_unflags:
+                cmd_list.extend(["--project-option", f"build_unflags={uf}"])
 
         # Add example source directories as libraries
         for src_dir in example_src_dirs:
