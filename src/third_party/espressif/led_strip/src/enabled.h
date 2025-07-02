@@ -54,4 +54,11 @@
 #endif
 #endif
 
+#ifndef FASTLED_ESP32_HAS_RMT5
+#define FASTLED_ESP32_HAS_RMT5 1
+#endif
+#ifndef FASTLED_ESP32_HAS_CLOCKLESS_SPI
+#define FASTLED_ESP32_HAS_CLOCKLESS_SPI 1
+#endif
+
 #endif  // ESP32
