@@ -44,20 +44,21 @@
 #warning "Unknown board, assuming support for clockless RMT5 and SPI chipsets. Please file an bug report with FastLED and tell them about your board type."
 #endif
 
-#ifndef FASTLED_ESP32_HAS_RMT5
+// Ensure the feature macros default to *enabled* even if earlier code set them
+// to 0 or left them undefined.  Any board that truly lacks RMT-5 support
+// should set the flag to 0 *after* this header is included.
+#if !defined(FASTLED_ESP32_HAS_RMT5) || (FASTLED_ESP32_HAS_RMT5 == 0)
+#undef FASTLED_ESP32_HAS_RMT5
 #define FASTLED_ESP32_HAS_RMT5 1
 #endif
-#ifndef FASTLED_ESP32_HAS_CLOCKLESS_SPI
+
+#if !defined(FASTLED_ESP32_HAS_CLOCKLESS_SPI) || (FASTLED_ESP32_HAS_CLOCKLESS_SPI == 0)
+#undef FASTLED_ESP32_HAS_CLOCKLESS_SPI
 #define FASTLED_ESP32_HAS_CLOCKLESS_SPI 1
 #endif
 
-// Note that FASTLED_RMT5 is a legacy name,
-#ifndef FASTLED_RMT5
-#if FASTLED_ESP32_HAS_RMT5 && !defined(FASTLED_RMT5)
-#define FASTLED_RMT5 1
-#else
-#define FASTLED_RMT5 0
-#endif
-#endif
+// Legacy macro FASTLED_RMT5 should mirror FASTLED_ESP32_HAS_RMT5.
+#undef FASTLED_RMT5
+#define FASTLED_RMT5 FASTLED_ESP32_HAS_RMT5
 
 #endif  // ESP32
