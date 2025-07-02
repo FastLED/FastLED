@@ -1,5 +1,6 @@
 import sys
 from pathlib import Path
+import re
 
 HERE = Path(__file__).resolve().parent
 PROJECT_ROOT = HERE.parent
@@ -118,7 +119,12 @@ def main() -> None:
     with PLATFORMIO_INI.open("w") as f:
         f.write(_ALL[platform])
     print(f"Selected platform: {platform}")
-    print("To generate the project, run: pio run -e dev")
+    # Extract board id from the selected platform configuration for instructions
+    match = re.search(r"^board\s*=\s*(.+)$", _ALL[platform], re.MULTILINE)
+    board_id = match.group(1).strip() if match else "<board_id>"
+    example_path = "dev/dev.ino"
+    ci_cmd = f"pio ci {example_path} --board {board_id} --project-option=lib_deps=symlink://./"
+    print("To generate the project, run:\n  " + ci_cmd)
 
     sys.exit(1)
 
