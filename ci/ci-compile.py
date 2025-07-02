@@ -687,6 +687,12 @@ def compile_with_pio_ci(
             cmd_list.extend(["--project-option", f"custom_sdkconfig={board.customsdk}"])
             locked_print(f"Using custom SDK config: {board.customsdk}")
 
+        # Add project options to ensure example-specific sources in typical subdirectories are compiled
+        cmd_list.extend([
+            "--project-option", "extra_src_dirs=arduino,shared",
+            "--project-option", "src_filter=+<*.cpp>"
+        ])
+
         # Only add verbose flag to pio ci when explicitly requested
         if verbose:
             cmd_list.append("--verbose")

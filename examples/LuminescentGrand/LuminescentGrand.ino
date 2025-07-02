@@ -28,15 +28,15 @@ void loop() {}
 
 // H
 #include <Arduino.h>
-#include "shared/Keyboard.cpp"
-#include "shared/color.cpp"
-#include "shared/led_layout_array.cpp"
 #include "shared/Keyboard.h"
-#include "shared/Painter.cpp"
+#include "shared/color.h"
+#include "shared/led_layout_array.h"
+#include "shared/Keyboard.h"
+#include "shared/Painter.h"
 #include "shared/settings.h"
-#include "arduino/LedRopeTCL.cpp"
-#include "arduino/ui_state.cpp"
-#include "shared/dprint.cpp"
+#include "arduino/LedRopeTCL.h"
+#include "arduino/ui_state.h"
+#include "shared/dprint.h"
 #include "fl/dbg.h"
 #include "fl/ui.h"
 #include "fl/unused.h"
@@ -254,7 +254,5 @@ void loop() {
 
   FastLED.show();
 }
-
-#include "all_sources.cpp"
 
 #endif  // __AVR__
