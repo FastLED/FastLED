@@ -43,6 +43,7 @@ class Board:
     board_build_core: str | None = None
     board_build_filesystem_size: str | None = None
     build_flags: list[str] | None = None  # Reserved for future use.
+    build_unflags: list[str] | None = None  # New: unflag options
     defines: list[str] | None = None
     customsdk: str | None = None
     board_partitions: str | None = None  # Reserved for future use.
@@ -84,6 +85,12 @@ class Board:
         if self.defines:
             for define in self.defines:
                 options.append(f"build_flags=-D{define}")
+
+        # Handle build_unflags
+        if self.build_unflags:
+            for uf in self.build_unflags:
+                options.append(f"build_unflags={uf}")
+
         if self.customsdk:
             options.append(f"custom_sdkconfig={self.customsdk}")
 
@@ -198,7 +205,8 @@ ESP32_S3_DEVKITC_1 = Board(
     board_name="esp32s3",
     real_board_name="esp32-s3-devkitc-1",
     platform=ESP32_IDF_5_4_PIOARDUINO,
-    board_partitions="huge_app.csv",  # Reserved for future use.
+    board_partitions="huge_app.csv",
+    build_unflags=["-DFASTLED_RMT5=0", "-DFASTLED_RMT5"],
 )
 
 ESP32_S2_DEVKITM_1 = Board(
@@ -393,6 +401,16 @@ ATTINY85 = Board(
     board_name="attiny85",
     platform="atmelavr",
     framework="arduino",
+)
+
+# Seeed XIAO ESP32S3 board – same platform, needs FASTLED_RMT5 macro removal
+XIAO_ESP32S3 = Board(
+    board_name="seeed_xiao_esp32s3",
+    real_board_name="seeed_xiao_esp32s3",
+    platform=ESP32_IDF_5_4_PIOARDUINO,
+    board_partitions="huge_app.csv",
+    defines=None,
+    build_unflags=["-DFASTLED_RMT5=0", "-DFASTLED_RMT5"],
 )
 
 
