@@ -51,7 +51,7 @@ void loop() {}
 #define MIDI_AUTO_INSTANCIATE 0
 #endif
 
-#include "arduino/MIDI.cpp"
+#include "arduino/MIDI.h"
 
 
 MIDI_CREATE_INSTANCE(HardwareSerial, Serial1, MY_MIDI);
