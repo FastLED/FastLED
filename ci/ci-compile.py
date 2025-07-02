@@ -629,33 +629,50 @@ def compile_with_pio_ci(
                 if verbose:
                     locked_print(f"All build flags: {build_flags_str}")
 
-        # Add example source directories as libraries
-        for src_dir in example_src_dirs:
-            cmd_list.extend(["--lib", src_dir])
+        # ----------------------------------------------------------
+        # Treat example-specific directories as part of the main project
+        # by symlinking them into the temporary PlatformIO project's src/
+        # folder.  This guarantees their object files are linked, without
+        # relying on library semantics (which were previously discarded).
+        # ----------------------------------------------------------
 
-        # Add example include directories as libraries (for header files like defs.h)
-        for include_dir in example_include_dirs:
-            # Only add as --lib if it's not already added as a source dir
-            if include_dir not in example_src_dirs:
-                cmd_list.extend(["--lib", include_dir])
+        all_example_dirs_symlink = sorted(set(example_src_dirs + example_include_dirs))
+        build_src_dir = board_build_dir / example_path.name / "src"
+
+        if all_example_dirs_symlink:
+            build_src_dir.mkdir(parents=True, exist_ok=True)
+
+            for abs_dir in all_example_dirs_symlink:
+                src_path = Path(abs_dir).resolve()
+                link_name = build_src_dir / src_path.name
+
+                try:
+                    if link_name.exists() or link_name.is_symlink():
+                        link_name.unlink()
+                    link_name.symlink_to(src_path, target_is_directory=True)
+                    if verbose:
+                        locked_print(f"  Symlinked {link_name} -> {src_path}")
+                except Exception:
+                    # Symlinks can fail on Windows or restricted FS; fall back to copy.
+                    try:
+                        if link_name.exists():
+                            shutil.rmtree(link_name)
+                        shutil.copytree(src_path, link_name)
+                        if verbose:
+                            locked_print(f"  Copied {src_path} -> {link_name} (symlink fallback)")
+                    except Exception as ee:
+                        locked_print(f"Warning: Could not link or copy {src_path}: {ee}")
+
+        # We no longer add these directories with --lib because they are now
+        # part of the main src tree via symlinks.
+
+        # src_filter not needed when directories live under src/, but make
+        # sure recursive globbing is enabled for .cpp in nested dirs.
+        cmd_list.extend(["--project-option", "src_filter=+<**/*.cpp>"])
 
         # Only add verbose flag to pio ci when explicitly requested
         if verbose:
             cmd_list.append("--verbose")
-
-        # Determine absolute directories for example sources/includes
-        all_example_dirs = sorted(set(example_src_dirs + example_include_dirs))
-        if all_example_dirs:
-            abs_dirs = [str(Path(d).resolve()) for d in all_example_dirs]
-            extra_dirs_value = ",".join(f"symlink://{p}" for p in abs_dirs)
-            if verbose or os.environ.get("FASTLED_DEBUG_SYMLINKS") == "1":
-                locked_print(f"extra_src_dirs for {example_path.name}: {extra_dirs_value}")
-            cmd_list.extend([
-                "--project-option",
-                f"extra_src_dirs={extra_dirs_value}",
-                "--project-option",
-                "src_filter=+<**/*.cpp>"
-            ])
 
         # Execute the command
         cmd_str = subprocess.list2cmdline(cmd_list)
