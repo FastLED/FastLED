@@ -135,7 +135,12 @@ class StrStream {
         return *this;
     }
 
-    
+    // bool support - output as "true"/"false" for readability
+    StrStream &operator<<(bool b) {
+        mStr.append(b ? "true" : "false");
+        return *this;
+    }
+
     StrStream &operator<<(const fl::u8 &n) {
         if (mTreatCharAsInt) {
             mStr.append(fl::u16(n));
@@ -214,6 +219,9 @@ class FakeStrStream {
     FakeStrStream &operator<<(const CRGB &) { return *this; }
     FakeStrStream &operator<<(const string &) { return *this; }
     FakeStrStream &operator<<(char) { return *this; }
+
+    // bool support to match StrStream interface
+    FakeStrStream &operator<<(bool) { return *this; }
 
     // Unified template for fl:: namespace types and int to avoid conflicts on AVR
     template<typename T>
