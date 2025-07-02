@@ -1,8 +1,8 @@
-#if defined(ESP32) || defined(CONFIG_IDF_TARGET_ESP32S3)
+#ifdef ESP32
 
 #include "third_party/espressif/led_strip/src/enabled.h"
 
-#if FASTLED_RMT5 || defined(CONFIG_IDF_TARGET_ESP32S3)
+#if FASTLED_RMT5
 
 #ifdef FASTLED_RMT_BUILTIN_DRIVER
 #warning "FASTLED_RMT_BUILTIN_DRIVER is not supported in RMT5 and will be ignored."
@@ -89,6 +89,6 @@ void RmtController5::showPixels() {
 
 } // namespace fl
 
-#endif  // FASTLED_RMT5 || defined(CONFIG_IDF_TARGET_ESP32S3)
+#endif  // FASTLED_RMT5
 
 #endif  // ESP32

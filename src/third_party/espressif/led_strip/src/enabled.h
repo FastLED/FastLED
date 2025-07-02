@@ -42,6 +42,9 @@
 #define FASTLED_ESP32_HAS_RMT5 1
 #else
 #warning "Unknown board, assuming support for clockless RMT5 and SPI chipsets. Please file an bug report with FastLED and tell them about your board type."
+#define FASTLED_ESP32_HAS_CLOCKLESS_SPI 1
+#define FASTLED_ESP32_HAS_RMT 1
+#define FASTLED_ESP32_HAS_RMT5 1
 #endif
 
 #if ESP_IDF_VERSION < ESP_IDF_VERSION_VAL(5, 0, 0)
