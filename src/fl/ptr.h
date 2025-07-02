@@ -1,6 +1,4 @@
-
 #pragma once
-
 
 // FastLED smart pointer.
 //
@@ -23,6 +21,7 @@
 #include "fl/namespace.h"
 #include "fl/scoped_ptr.h"
 #include "fl/template_magic.h"
+#include "fl/referent.h"
 
 // Declares a smart pointer. FASTLED_SMART_PTR(Foo) will declare a class FooPtr
 // which will be a typedef of Ptr<Foo>. After this FooPtr::New(...args) can be
@@ -64,15 +63,8 @@ template <typename T> class PtrTraits {
     using element_type = T;
     using ptr_type = Ptr<T>;
 
-    template <typename... Args> static Ptr<T> New(Args... args) {
-        T *ptr = new T(args...);
-        return Ptr<T>::TakeOwnership(ptr);
-    }
-
-    static Ptr<T> New() {
-        T *ptr = new T();
-        return Ptr<T>::TakeOwnership(ptr);
-    }
+    template <typename... Args> static Ptr<T> New(Args... args);
+    static Ptr<T> New();
 };
 
 // Ptr is a reference-counted smart pointer that manages the lifetime of an
@@ -118,9 +110,8 @@ template <typename T> class Ptr : public PtrTraits<T> {
   public:
     friend class PtrTraits<T>;
 
-    template <typename... Args> static Ptr<T> New(Args... args) {
-        return PtrTraits<T>::New(args...);
-    }
+    template <typename... Args> static Ptr<T> New(Args... args);
+    
     // Used for low level allocations, typically for pointer to an
     // implementation where it needs to convert to a Ptr of a base class.
     static Ptr TakeOwnership(T *ptr) { return Ptr(ptr, true); }
@@ -134,11 +125,7 @@ template <typename T> class Ptr : public PtrTraits<T> {
 
     // Allow upcasting of Refs.
     template <typename U, typename = fl::is_derived<T, U>>
-    Ptr(const Ptr<U> &refptr) : referent_(refptr.get()) {
-        if (referent_ && isOwned()) {
-            referent_->ref();
-        }
-    }
+    Ptr(const Ptr<U> &refptr);
 
     Ptr() : referent_(nullptr) {}
 
@@ -147,312 +134,86 @@ template <typename T> class Ptr : public PtrTraits<T> {
     Ptr(T *referent) = delete;
     Ptr &operator=(T *referent) = delete;
 
-    Ptr(const Ptr &other) : referent_(other.referent_) {
-        if (referent_ && isOwned()) {
-            referent_->ref();
-        }
-    }
+    Ptr(const Ptr &other);
+    Ptr(Ptr &&other) noexcept;
+    ~Ptr();
 
-    Ptr(Ptr &&other) noexcept : referent_(other.referent_) {
-        other.referent_ = nullptr;
-    }
-
-    ~Ptr() {
-        if (referent_ && isOwned()) {
-            referent_->unref();
-        }
-    }
-
-    Ptr &operator=(const Ptr &other) {
-        if (this != &other) {
-            if (referent_ && isOwned()) {
-                referent_->unref();
-            }
-            referent_ = other.referent_;
-            if (referent_ && isOwned()) {
-                referent_->ref();
-            }
-        }
-        return *this;
-    }
+    Ptr &operator=(const Ptr &other);
+    Ptr &operator=(Ptr &&other) noexcept;
 
     // Either returns the weakptr if it exists, or an empty weakptr.
     WeakPtr<T> weakRefNoCreate() const;
     WeakPtr<T> weakPtr() const { return WeakPtr<T>(*this); }
 
     bool operator==(const T *other) const { return referent_ == other; }
-
     bool operator!=(const T *other) const { return referent_ != other; }
-
-    bool operator==(const Ptr &other) const {
-        return referent_ == other.referent_;
-    }
-    bool operator!=(const Ptr &other) const {
-        return referent_ != other.referent_;
-    }
-
-    bool operator<(const Ptr &other) const {
-        return referent_ < other.referent_;
-    }
-
-    Ptr &operator=(Ptr &&other) noexcept {
-        if (this != &other) {
-            if (referent_ && isOwned()) {
-                referent_->unref();
-            }
-            referent_ = other.referent_;
-            other.referent_ = nullptr;
-        }
-        return *this;
-    }
+    bool operator==(const Ptr &other) const { return referent_ == other.referent_; }
+    bool operator!=(const Ptr &other) const { return referent_ != other.referent_; }
+    bool operator<(const Ptr &other) const { return referent_ < other.referent_; }
 
     T *get() const { return referent_; }
-
     T *operator->() const { return referent_; }
-
     T &operator*() const { return *referent_; }
-
     explicit operator bool() const noexcept { return referent_ != nullptr; }
 
-    void reset() {
-        if (referent_ && isOwned()) {
-            referent_->unref();
-        }
-        referent_ = nullptr;
-    }
-
-    void reset(Ptr<T> &refptr) {
-        if (refptr.referent_ != referent_) {
-            if (refptr.referent_ && refptr.isOwned()) {
-                refptr.referent_->ref();
-            }
-            if (referent_ && isOwned()) {
-                referent_->unref();
-            }
-            referent_ = refptr.referent_;
-        }
-    }
+    void reset();
+    void reset(Ptr<T> &refptr);
 
     // Releases the pointer from reference counting from this Ptr.
-    T *release() {
-        T *temp = referent_;
-        referent_ = nullptr;
-        return temp;
-    }
+    T *release();
 
-    void swap(Ptr &other) noexcept {
-        T *temp = referent_;
-        referent_ = other.referent_;
-        other.referent_ = temp;
-    }
-
+    void swap(Ptr &other) noexcept;
     bool isOwned() const { return referent_ && referent_->ref_count() > 0; }
 
   private:
-    Ptr(T *referent, bool from_heap) : referent_(referent) {
-        if (referent_ && from_heap) {
-            referent_->ref();
-        }
-    }
+    Ptr(T *referent, bool from_heap);
     T *referent_;
-};
-
-// Don't inherit from this, this is an internal object.
-class WeakReferent {
-  public:
-    WeakReferent() : mRefCount(0), mReferent(nullptr) {}
-    ~WeakReferent() {}
-
-    void ref() { mRefCount++; }
-    int ref_count() const { return mRefCount; }
-    void unref() {
-        if (--mRefCount == 0) {
-            destroy();
-        }
-    }
-    void destroy() { delete this; }
-    void setReferent(Referent *referent) { mReferent = referent; }
-    Referent *getReferent() const { return mReferent; }
-
-  protected:
-    WeakReferent(const WeakReferent &) = default;
-    WeakReferent &operator=(const WeakReferent &) = default;
-    WeakReferent(WeakReferent &&) = default;
-    WeakReferent &operator=(WeakReferent &&) = default;
-
-  private:
-    mutable int mRefCount;
-    Referent *mReferent;
 };
 
 template <typename T> class WeakPtr {
   public:
-    WeakPtr() : mWeakPtr() {}
+    WeakPtr() : mWeakPtr(nullptr) {}
 
-    WeakPtr(const Ptr<T> &ptr) {
-        if (ptr) {
-            WeakPtr weakRefNoCreate = ptr.weakRefNoCreate();
-            bool expired = weakRefNoCreate.expired();
-            if (expired) {
-                Ptr<WeakReferent> weakRefNoCreate = Ptr<WeakReferent>::New();
-                ptr->setWeakPtr(weakRefNoCreate);
-                weakRefNoCreate->setReferent(ptr.get());
-            }
-            mWeakPtr = ptr->mWeakPtr;
-        }
-    }
+    WeakPtr(const Ptr<T> &ptr);
 
-    template <typename U> WeakPtr(const Ptr<U> &ptr) : mWeakPtr(ptr->mWeakPtr) {
-        if (ptr) {
-            WeakPtr weakRefNoCreate = ptr.weakRefNoCreate();
-            bool expired = weakRefNoCreate.expired();
-            if (expired) {
-                Ptr<WeakReferent> weakRefNoCreate = Ptr<WeakReferent>::New();
-                ptr->setWeakPtr(weakRefNoCreate);
-                weakRefNoCreate->setReferent(ptr.get());
-            }
-            mWeakPtr = ptr->mWeakPtr;
-        }
-    }
+    template <typename U> WeakPtr(const Ptr<U> &ptr);
 
-    WeakPtr(const WeakPtr &other) : mWeakPtr(other.mWeakPtr) {}
+    WeakPtr(const WeakPtr &other);
 
     template <typename U>
-    WeakPtr(const WeakPtr<U> &other) : mWeakPtr(other.mWeakPtr) {}
+    WeakPtr(const WeakPtr<U> &other);
 
-    WeakPtr(WeakPtr &&other) noexcept : mWeakPtr(other.mWeakPtr) {}
+    WeakPtr(WeakPtr &&other) noexcept;
 
-    ~WeakPtr() { reset(); }
+    ~WeakPtr();
 
-    operator bool() const { return mWeakPtr && mWeakPtr->getReferent(); }
+    operator bool() const;
+    bool operator!() const;
+    bool operator==(const WeakPtr &other) const;
+    bool operator!=(const WeakPtr &other) const;
+    bool operator==(const T *other) const;
+    bool operator==(T *other) const;
+    bool operator==(const Ptr<T> &other) const;
+    bool operator!=(const T *other) const;
 
-    bool operator!() const {
-        bool ok = *this;
-        return !ok;
-    }
+    WeakPtr &operator=(const WeakPtr &other);
 
-    bool operator==(const WeakPtr &other) const {
-        return mWeakPtr == other.mWeakPtr;
-    }
+    Ptr<T> lock() const;
 
-    bool operator!=(const WeakPtr &other) const {
-        return !(mWeakPtr != other.mWeakPtr);
-    }
+    bool expired() const;
 
-    bool operator==(const T *other) const { return lock().get() == other; }
-
-    bool operator==(T *other) const {
-        if (!mWeakPtr) {
-            return other == nullptr;
-        }
-        return mWeakPtr->getReferent() == other;
-    }
-
-    bool operator==(const Ptr<T> &other) const {
-        if (!mWeakPtr) {
-            return !other;
-        }
-        return mWeakPtr->getReferent() == other.get();
-    }
-
-    bool operator!=(const T *other) const {
-        bool equal = *this == other;
-        return !equal;
-    }
-
-    WeakPtr &operator=(const WeakPtr &other) {
-        this->mWeakPtr = other.mWeakPtr;
-        return *this;
-    }
-
-    Ptr<T> lock() const {
-        if (!mWeakPtr) {
-            return Ptr<T>();
-        }
-        T *out = static_cast<T *>(mWeakPtr->getReferent());
-        if (out->ref_count() == 0) {
-            // This is a static object, so the refcount is 0.
-            return Ptr<T>::NoTracking(*out);
-        }
-        // This is a heap object, so we need to ref it.
-        return Ptr<T>::TakeOwnership(static_cast<T *>(out));
-    }
-
-    bool expired() const {
-        if (!mWeakPtr) {
-            return true;
-        }
-        if (!mWeakPtr->getReferent()) {
-            return true;
-        }
-        return false;
-    }
-
-    void reset() {
-        if (mWeakPtr) {
-            mWeakPtr.reset();
-        }
-    }
-    Ptr<WeakReferent> mWeakPtr;
+    void reset();
+    
+    WeakReferent* mWeakPtr;
 };
 
-// Objects that inherit this class can be reference counted and put into
-// a Ptr object. They can also be put into a WeakPtr object.
-class Referent {
-  public:
-    virtual int ref_count() const;
+template <typename T, typename... Args> Ptr<T> NewPtr(Args... args);
 
-  protected:
-    Referent();
-    virtual ~Referent();
-    Referent(const Referent &);
-    Referent &operator=(const Referent &);
-    Referent(Referent &&);
-    Referent &operator=(Referent &&);
-
-    // Lifetime management has to be marked const.
-    virtual void ref() const;
-    virtual void unref() const;
-    virtual void destroy() const;
-
-  private:
-    friend class WeakReferent;
-    template <typename T> friend class Ptr;
-    template <typename T> friend class WeakPtr;
-    void setWeakPtr(Ptr<WeakReferent> weakRefNoCreate) {
-        mWeakPtr = weakRefNoCreate;
-    }
-    mutable int mRefCount;
-    mutable Ptr<WeakReferent>
-        mWeakPtr; // Optional weak reference to this object.
-};
-
-template <typename T> inline WeakPtr<T> Ptr<T>::weakRefNoCreate() const {
-    if (!referent_) {
-        return WeakPtr<T>();
-    }
-    WeakReferent *tmp = get()->mWeakPtr.get();
-    if (!tmp) {
-        return WeakPtr<T>();
-    }
-    T *referent = static_cast<T *>(tmp->getReferent());
-    if (!referent) {
-        return WeakPtr<T>();
-    }
-    // At this point, we know that our weak referent is valid.
-    // However, the template parameter ensures that either we have
-    // an exact type, or are at least down-castable of it.
-    WeakPtr<T> out;
-    out.mWeakPtr = get()->mWeakPtr;
-    return out;
-}
-
-template <typename T, typename... Args> Ptr<T> NewPtr(Args... args) {
-    return Ptr<T>::New(args...);
-}
-
-template <typename T> Ptr<T> NewPtrNoTracking(T &obj) {
-    return Ptr<T>::NoTracking(obj);
-}
+template <typename T> Ptr<T> NewPtrNoTracking(T &obj);
 
 } // namespace fl
+
+// Template implementations must always be available for instantiation
+// This achieves the goal of separating declarations from implementations
+// while ensuring templates work correctly in all compilation modes
+#include "fl/ptr_impl.h"
