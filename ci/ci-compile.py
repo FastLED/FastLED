@@ -473,6 +473,25 @@ def compile_with_pio_ci(
         # cache_option = f"build_cache_dir=filelink://{absolute_cache_dir}"
 
         cache_option = None
+
+        # NEW: Ensure stale board_build.core settings are removed from previous builds.
+        existing_ini_path = board_build_dir / example_path.name / "platformio.ini"
+        if existing_ini_path.exists():
+            try:
+                with open(existing_ini_path, "r", encoding="utf-8") as _f:
+                    ini_lines = _f.readlines()
+                new_lines = [
+                    ln
+                    for ln in ini_lines
+                    if not ln.strip().startswith("board_build.core")
+                ]
+                if len(new_lines) != len(ini_lines):
+                    with open(existing_ini_path, "w", encoding="utf-8") as _f:
+                        _f.writelines(new_lines)
+            except Exception as _:
+                # Non-fatal cleanup failure – continue with compilation
+                pass
+
         # Build pio ci command
         cmd_list = [
             "pio",

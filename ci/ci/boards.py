@@ -143,7 +143,7 @@ APOLLO3_RED_BOARD = Board(
     platform_needs_install=True,
 )
 
-APOLLO3_SPARKFUN_THING_PLUS_EXPLORERABLE = Board(
+APOLLO3_SPARKFUN_THING_PLUS_EXPLORABLE = Board(
     board_name="apollo3_thing_explorable",
     real_board_name="SparkFun_Thing_Plus_expLoRaBLE",
     platform=APOLLO3_2_2_0,
@@ -264,7 +264,7 @@ NRF52840 = Board(
     defines=[
         "FASTLED_USE_COMPILE_TESTS=0",
     ],
-    board_build_core="adafruit",
+    board_build_core="nRF5",  # Ensure correct core directory
 )
 
 RPI_PICO = Board(
