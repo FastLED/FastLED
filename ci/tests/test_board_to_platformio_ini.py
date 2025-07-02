@@ -40,7 +40,6 @@ class TestBoardToPlatformioIni(unittest.TestCase):
             board_name="custom",
             defines=["FASTLED_TEST=1"],
             build_flags=["-O2"],
-            build_unflags=["-DFASTLED_RMT5"],
         )
         ini = board.to_platformio_ini()
         lines = self._ini_to_set(ini)
@@ -52,13 +51,6 @@ class TestBoardToPlatformioIni(unittest.TestCase):
         assert build_flags_line is not None  # hint for type checker
         self.assertIn("-DFASTLED_TEST=1", build_flags_line)
         self.assertIn("-O2", build_flags_line)
-
-        build_unflags_line = next(
-            (line for line in lines if line.startswith("build_unflags")), None
-        )
-        self.assertIsNotNone(build_unflags_line)
-        assert build_unflags_line is not None
-        self.assertIn("-DFASTLED_RMT5", build_unflags_line)
 
 
 if __name__ == "__main__":

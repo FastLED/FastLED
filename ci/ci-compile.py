@@ -651,10 +651,7 @@ def compile_with_pio_ci(
                     locked_print(f"All build flags: {build_flags_str}")
 
         # Add build_unflags if provided
-        if board.build_unflags:
-            # Emit each unflag separately so PlatformIO treats them individually.
-            for uf in board.build_unflags:
-                cmd_list.extend(["--project-option", f"build_unflags={uf}"])
+        # build_unflags no longer used
 
         # Add example source directories as libraries
         for src_dir in example_src_dirs:
