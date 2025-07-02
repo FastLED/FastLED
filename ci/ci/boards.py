@@ -2,7 +2,6 @@
 
 import json
 from dataclasses import dataclass
-from pathlib import Path
 
 # An open source version of the esp-idf 5.1 platform for the ESP32 that
 # gives esp32 boards the same build environment as the Arduino 2.3.1+.
@@ -60,14 +59,6 @@ class Board:
             out[self.board_name] = [f"board={self.real_board_name}"]
         options = out.setdefault(self.board_name, [])
 
-        # Add board-specific build cache configuration with absolute path
-        # Convert relative cache path to absolute path, similar to symlink handling
-        here = Path(__file__).parent
-        project_root = here.parent.parent  # Navigate from ci/ci/ to project root
-        cache_dir = project_root / ".pio_cache" / self.board_name
-        absolute_cache_dir = str(cache_dir.absolute())
-        options.append(f"build_cache_dir={absolute_cache_dir}")
-
         if self.platform:
             options.append(f"platform={self.platform}")
             # Add IDF ccache enable flag for ESP32 boards
@@ -95,6 +86,14 @@ class Board:
                 options.append(f"build_flags=-D{define}")
         if self.customsdk:
             options.append(f"custom_sdkconfig={self.customsdk}")
+
+        # Add board-specific build cache directory pointing via symlink directive
+        # here = Path(__file__).parent
+        # project_root = here.parent.parent  # Move from ci/ci/ to project root
+        # cache_dir = project_root / ".pio_cache" / self.board_name
+        # absolute_cache_dir = cache_dir.resolve()
+        # options.append(f"build_cache_dir=symlink://{absolute_cache_dir}")
+
         return out
 
     def __repr__(self) -> str:
