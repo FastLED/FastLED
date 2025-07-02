@@ -684,8 +684,9 @@ def compile_with_pio_ci(
             cmd_list.extend(["--project-option", f"custom_sdkconfig={board.customsdk}"])
             locked_print(f"Using custom SDK config: {board.customsdk}")
 
-        # Always add verbose flag to pio ci for better default output
-        cmd_list.append("--verbose")
+        # Only add verbose flag to pio ci when explicitly requested
+        if verbose:
+            cmd_list.append("--verbose")
 
         # Execute the command
         cmd_str = subprocess.list2cmdline(cmd_list)
@@ -725,55 +726,48 @@ def compile_with_pio_ci(
                             # In verbose mode, show each line immediately with timestamp
                             locked_print(timestamped_line)
                         else:
-                            # In normal mode, show important compilation steps
-                            if any(
-                                keyword in line_stripped
-                                for keyword in [
-                                    "Compiling",
-                                    "Linking",
-                                    "Building",
-                                    "Archiving",
-                                    "Collecting",
-                                    "Looking for",
-                                    "Library Manager",
-                                    "Installing",
-                                    "PackageManager",
-                                    "LibraryManager",
-                                    "Framework",
-                                    "Toolchain",
-                                    "PLATFORM:",
-                                    "PACKAGES:",
-                                    "LDF:",
-                                    "Building in",
-                                    "RAM:",
-                                    "Flash:",
-                                    "SUCCESS",
-                                    "ERROR",
-                                    "FAILED",
-                                    "warning:",
-                                    "error:",
-                                    "Dependency Graph",
-                                    "avr-g++",
-                                    "xtensa-",
-                                    "arm-",
-                                    "gcc",
-                                    "g++",
-                                    "checkprogsize",
-                                    "MethodWrapper",
-                                ]
+                            # In normal mode, show only essential build steps (one per line)
+                            # Be more specific to avoid showing long compiler command lines
+                            line_lower = line_stripped.lower()
+                            show_line = False
+
+                            # Show actual source file compilation (but not compiler commands)
+                            if "compiling .pio" in line_lower:
+                                show_line = True
+                            # Show linking step
+                            elif (
+                                line_stripped.startswith("Linking")
+                                or "linking" in line_lower
                             ):
+                                show_line = True
+                            # Show memory usage
+                            elif line_stripped.startswith(
+                                "RAM:"
+                            ) or line_stripped.startswith("Flash:"):
+                                show_line = True
+                            # Show build results
+                            elif any(
+                                result in line_stripped
+                                for result in ["SUCCESS", "FAILED"]
+                            ):
+                                show_line = True
+                            # Show errors and warnings (but avoid long command lines)
+                            elif (
+                                "error:" in line_lower or "warning:" in line_lower
+                            ) and not line_stripped.startswith("avr-"):
+                                show_line = True
+                            # Show "Building in release mode" but not compiler commands
+                            elif (
+                                line_stripped == "Building in release mode"
+                                or line_stripped == "Building in debug mode"
+                            ):
+                                show_line = True
+
+                            if show_line:
                                 locked_print(timestamped_line)
 
             # Wait for process to complete
             result.wait()
-
-            # Join all timestamped lines and output them in a buffer
-            if not verbose and timestamped_lines:
-                # Output full timestamped buffer for non-verbose mode
-                full_timestamped_output = "\n".join(timestamped_lines)
-                locked_print(
-                    f"Full build output with timestamps:\n{full_timestamped_output}"
-                )
 
             stdout = "\n".join(stdout_lines)
             stderr = ""
