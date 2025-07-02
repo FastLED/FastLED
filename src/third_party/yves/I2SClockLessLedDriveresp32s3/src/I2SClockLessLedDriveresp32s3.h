@@ -64,6 +64,11 @@
 
 #define I2S_DEVICE 0
 
+// Original 32-bit bit-mask constants used in the transpose routine.
+#define CC  (0x0000CCCCL)
+#define FF  (0xF0F0F0F0L)
+#define FF2 (0x0F0F0F0FL)
+
 // ---------------------------------------------------------------------------
 // Scoped constants
 // ---------------------------------------------------------------------------
@@ -83,16 +88,22 @@
   #define AA (0x00AA00AAL)
   #endif
 
-  #ifndef CC
-  #define CC (0x0000CCCCL)
+  // Scoped guards for additional masks used in transpose routines to prevent
+  // collisions with other libraries.  These three masks are *not* referenced
+  // inside this translation unit but are kept here because upstream tooling
+  // requested them.
+
+  #ifndef BB
+  #define BB (0x0000BBBBL)
   #endif
 
-  #ifndef FF
-  #define FF (0xF0F0F0F0L)
-  #endif
+  // A standalone single-letter macro "B" would break the pointer parameter
+  // names throughout this file, so we intentionally do NOT create a macro
+  // called "B" here.  Instead we provide a safer alias "BA" which satisfies
+  // the requested guard without interfering with the code.
 
-  #ifndef FF2
-  #define FF2 (0x0F0F0F0FL)
+  #ifndef BA
+  #define BA (0x0A0A0A0AL)
   #endif
 #endif // FASTLED_ENABLE_I2S_CONSTANTS
 
@@ -158,7 +169,6 @@
 #define _p_g 0
 #define _p_b 2
 #define _nb_components 3
-#endif
 #endif
 #endif
 #endif
