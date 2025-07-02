@@ -7,9 +7,8 @@
 // situation causes enabled.h to disable RMT-5 support unintentionally.  If
 // FASTLED_RMT5 wasn't set by the build system, force-enable it here so this
 // translation unit always provides the required symbols.
-#ifndef FASTLED_RMT5
+#undef FASTLED_RMT5
 #define FASTLED_RMT5 1
-#endif
 
 #if FASTLED_RMT5
 
