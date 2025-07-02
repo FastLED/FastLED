@@ -9,6 +9,7 @@ namespace fl {
 
 #include "fl/str.h"
 #include "fl/int.h"
+#include "fl/type_traits.h"
 #include "crgb.h"
 
 namespace fl {
@@ -36,42 +37,35 @@ public:
         return *this;
     }
 
-    ostream& operator<<(int8_t n) {
+    ostream& operator<<(fl::i8 n) {
         string temp;
-        temp.append(int16_t(n));
+        temp.append(fl::i16(n));
         print(temp.c_str());
         return *this;
     }
 
-    ostream& operator<<(uint8_t n) {
+    ostream& operator<<(fl::u8 n) {
         string temp;
-        temp.append(u16(n));
+        temp.append(fl::u16(n));
         print(temp.c_str());
         return *this;
     }
 
-    ostream& operator<<(int16_t n) {
-        string temp;
-        temp.append(n);
-        print(temp.c_str());
-        return *this;
-    }
-
-    ostream& operator<<(u16 n) {
+    ostream& operator<<(fl::i16 n) {
         string temp;
         temp.append(n);
         print(temp.c_str());
         return *this;
     }
 
-    ostream& operator<<(int32_t n) {
+    ostream& operator<<(fl::i32 n) {
         string temp;
         temp.append(n);
         print(temp.c_str());
         return *this;
     }
 
-    ostream& operator<<(uint32_t n) {
+    ostream& operator<<(fl::u32 n) {
         string temp;
         temp.append(n);
         print(temp.c_str());
@@ -99,16 +93,28 @@ public:
         return *this;
     }
 
-    ostream& operator<<(fl::sz n) {
+    // Unified handler for fl:: namespace size-like unsigned integer types to avoid conflicts
+    // This handles fl::sz and fl::u16 from the fl:: namespace only
+    template<typename T>
+    typename fl::enable_if<
+        fl::is_same<T, fl::sz>::value ||
+        fl::is_same<T, fl::u16>::value,
+        ostream&
+    >::type operator<<(T n) {
         string temp;
-        temp.append(uint32_t(n));
+        temp.append(fl::u32(n));
         print(temp.c_str());
         return *this;
     }
 
     // Generic template for other types that have string append support
+    // Note: This must come after the specific SFINAE template to avoid conflicts
     template<typename T>
-    ostream& operator<<(const T& value) {
+    typename fl::enable_if<
+        !fl::is_same<T, fl::sz>::value &&
+        !fl::is_same<T, fl::u16>::value,
+        ostream&
+    >::type operator<<(const T& value) {
         string temp;
         temp.append(value);
         print(temp.c_str());

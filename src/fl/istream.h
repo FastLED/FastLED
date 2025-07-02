@@ -53,16 +53,22 @@ public:
     // Stream input operators
     istream_real& operator>>(string& str);
     istream_real& operator>>(char& c);
-    istream_real& operator>>(int8_t& n);
-    istream_real& operator>>(uint8_t& n);
-    istream_real& operator>>(int16_t& n);
-    istream_real& operator>>(u16& n);
-    istream_real& operator>>(int32_t& n);
-    istream_real& operator>>(uint32_t& n);
+    istream_real& operator>>(fl::i8& n);
+    istream_real& operator>>(fl::u8& n);
+    istream_real& operator>>(fl::i16& n);
+    istream_real& operator>>(fl::i32& n);
+    istream_real& operator>>(fl::u32& n);
     istream_real& operator>>(float& f);
     istream_real& operator>>(double& d);
     
-    istream_real& operator>>(fl::sz& n);
+    // Unified handler for fl:: namespace size-like unsigned integer types to avoid conflicts
+    // This only handles fl::sz and fl::u16 from the fl:: namespace
+    template<typename T>
+    typename fl::enable_if<
+        fl::is_same<T, fl::sz>::value ||
+        fl::is_same<T, fl::u16>::value,
+        istream_real&
+    >::type operator>>(T& n);
     
     // Get a line from input
     istream_real& getline(string& str);
@@ -143,7 +149,7 @@ public:
         return *this;
     }
     
-    istream& operator>>(int8_t& n) {
+    istream& operator>>(fl::i8& n) {
 #if SKETCH_HAS_LOTS_OF_MEMORY
         real_stream_ >> n;
 #else
@@ -153,7 +159,7 @@ public:
         return *this;
     }
     
-    istream& operator>>(uint8_t& n) {
+    istream& operator>>(fl::u8& n) {
 #if SKETCH_HAS_LOTS_OF_MEMORY
         real_stream_ >> n;
 #else
@@ -163,7 +169,7 @@ public:
         return *this;
     }
     
-    istream& operator>>(int16_t& n) {
+    istream& operator>>(fl::i16& n) {
 #if SKETCH_HAS_LOTS_OF_MEMORY
         real_stream_ >> n;
 #else
@@ -173,7 +179,7 @@ public:
         return *this;
     }
     
-    istream& operator>>(u16& n) {
+    istream& operator>>(fl::i32& n) {
 #if SKETCH_HAS_LOTS_OF_MEMORY
         real_stream_ >> n;
 #else
@@ -183,17 +189,7 @@ public:
         return *this;
     }
     
-    istream& operator>>(int32_t& n) {
-#if SKETCH_HAS_LOTS_OF_MEMORY
-        real_stream_ >> n;
-#else
-        // No-op on memory-constrained platforms
-        n = 0;
-#endif
-        return *this;
-    }
-    
-    istream& operator>>(uint32_t& n) {
+    istream& operator>>(fl::u32& n) {
 #if SKETCH_HAS_LOTS_OF_MEMORY
         real_stream_ >> n;
 #else
@@ -223,7 +219,13 @@ public:
         return *this;
     }
     
-    istream& operator>>(fl::sz& n) {
+    // Unified handler for fl:: namespace size-like unsigned integer types to avoid conflicts
+    template<typename T>
+    typename fl::enable_if<
+        fl::is_same<T, fl::sz>::value ||
+        fl::is_same<T, fl::u16>::value,
+        istream&
+    >::type operator>>(T& n) {
 #if SKETCH_HAS_LOTS_OF_MEMORY
         real_stream_ >> n;
 #else
@@ -275,5 +277,20 @@ public:
 
 // Global cin instance for input (now uses the stub)
 extern istream cin;
+
+// Template implementation for istream_real
+template<typename T>
+typename fl::enable_if<
+    fl::is_same<T, fl::sz>::value ||
+    fl::is_same<T, fl::u16>::value,
+    istream_real&
+>::type istream_real::operator>>(T& n) {
+    // Use existing fl::u32 parsing logic for both fl::sz and fl::u16
+    // since they're both unsigned integer types that fit in fl::u32
+    fl::u32 temp;
+    (*this) >> temp;
+    n = static_cast<T>(temp);
+    return *this;
+}
 
 } // namespace fl

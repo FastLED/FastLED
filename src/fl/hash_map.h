@@ -53,9 +53,9 @@ template <typename Key, typename T, typename Hash = Hash<Key>,
 class HashMap {
   public:
     HashMap() : HashMap(FASTLED_HASHMAP_INLINED_COUNT, 0.7f) {}
-    HashMap(size_t initial_capacity) : HashMap(initial_capacity, 0.7f) {}
+    HashMap(fl::sz initial_capacity) : HashMap(initial_capacity, 0.7f) {}
 
-    HashMap(size_t initial_capacity, float max_load)
+    HashMap(fl::sz initial_capacity, float max_load)
         : _buckets(next_power_of_two(initial_capacity)), _size(0),
           _tombstones(0), _occupied(next_power_of_two(initial_capacity)),
           _deleted(next_power_of_two(initial_capacity)) {
@@ -77,7 +77,7 @@ class HashMap {
         // using iterator_category = std::forward_iterator_tag;
 
         iterator() : _map(nullptr), _idx(0) {}
-        iterator(HashMap *m, size_t idx) : _map(m), _idx(idx) {
+        iterator(HashMap *m, fl::sz idx) : _map(m), _idx(idx) {
             advance_to_occupied();
         }
 
@@ -111,14 +111,14 @@ class HashMap {
         void advance_to_occupied() {
             if (!_map)
                 return;
-            size_t cap = _map->_buckets.size();
+            fl::sz cap = _map->_buckets.size();
             while (_idx < cap && !_map->is_occupied(_idx))
                 ++_idx;
         }
 
       private:
         HashMap *_map;
-        size_t _idx;
+        fl::sz _idx;
         mutable value_type _cached_value;
     };
 
@@ -131,7 +131,7 @@ class HashMap {
         // using iterator_category = std::forward_iterator_tag;
 
         const_iterator() : _map(nullptr), _idx(0) {}
-        const_iterator(const HashMap *m, size_t idx) : _map(m), _idx(idx) {
+        const_iterator(const HashMap *m, fl::sz idx) : _map(m), _idx(idx) {
             advance_to_occupied();
         }
         const_iterator(const iterator &it) : _map(it._map), _idx(it._idx) {}
@@ -166,7 +166,7 @@ class HashMap {
         void advance_to_occupied() {
             if (!_map)
                 return;
-            size_t cap = _map->_buckets.size();
+            fl::sz cap = _map->_buckets.size();
             while (_idx < cap && !_map->is_occupied(_idx))
                 ++_idx;
         }
@@ -175,7 +175,7 @@ class HashMap {
 
       private:
         const HashMap *_map;
-        size_t _idx;
+        fl::sz _idx;
         mutable value_type _cached_value;
     };
 
@@ -188,7 +188,7 @@ class HashMap {
         return const_iterator(this, _buckets.size());
     }
 
-    static bool NeedsRehash(size_t size, size_t bucket_size, size_t tombstones,
+    static bool NeedsRehash(fl::sz size, fl::sz bucket_size, fl::sz tombstones,
                             uint8_t load_factor) {
         // (size + tombstones) << 8   : multiply numerator by 256
         // capacity * max_load : denominator * threshold
@@ -214,9 +214,9 @@ class HashMap {
                 rehash(_buckets.size() * 2);
             }
         }
-        size_t idx;
+        fl::sz idx;
         bool is_new;
-        fl::pair<size_t, bool> p = find_slot(key);
+        fl::pair<fl::sz, bool> p = find_slot(key);
         idx = p.first;
         is_new = p.second;
         if (is_new) {
@@ -243,9 +243,9 @@ class HashMap {
                 rehash(_buckets.size() * 2);
             }
         }
-        size_t idx;
+        fl::sz idx;
         bool is_new;
-        fl::pair<size_t, bool> p = find_slot(key);
+        fl::pair<fl::sz, bool> p = find_slot(key);
         idx = p.first;
         is_new = p.second;
         if (is_new) {
@@ -303,10 +303,10 @@ class HashMap {
 
     // access or default-construct
     T &operator[](const Key &key) {
-        size_t idx;
+        fl::sz idx;
         bool is_new;
 
-        fl::pair<size_t, bool> p = find_slot(key);
+        fl::pair<fl::sz, bool> p = find_slot(key);
         idx = p.first;
         is_new = p.second;
         if (is_new) {
@@ -318,33 +318,33 @@ class HashMap {
         return _buckets[idx].value;
     }
 
-    size_t size() const { return _size; }
+    fl::sz size() const { return _size; }
     bool empty() const { return _size == 0; }
-    size_t capacity() const { return _buckets.size(); }
+    fl::sz capacity() const { return _buckets.size(); }
 
   private:
-    static constexpr size_t npos = size_t(-1);
+    static constexpr fl::sz npos = fl::sz(-1);
 
     // Helper methods to check entry state
-    bool is_occupied(size_t idx) const { return _occupied.test(idx); }
+    bool is_occupied(fl::sz idx) const { return _occupied.test(idx); }
 
-    bool is_deleted(size_t idx) const { return _deleted.test(idx); }
+    bool is_deleted(fl::sz idx) const { return _deleted.test(idx); }
 
-    bool is_empty(size_t idx) const {
+    bool is_empty(fl::sz idx) const {
         return !is_occupied(idx) && !is_deleted(idx);
     }
 
-    void mark_occupied(size_t idx) {
+    void mark_occupied(fl::sz idx) {
         _occupied.set(idx);
         _deleted.reset(idx);
     }
 
-    void mark_deleted(size_t idx) {
+    void mark_deleted(fl::sz idx) {
         _occupied.reset(idx);
         _deleted.set(idx);
     }
 
-    void mark_empty(size_t idx) {
+    void mark_empty(fl::sz idx) {
         _occupied.reset(idx);
         _deleted.reset(idx);
     }
@@ -358,23 +358,23 @@ class HashMap {
         }
     };
 
-    static size_t next_power_of_two(size_t n) {
-        size_t p = 1;
+    static fl::sz next_power_of_two(fl::sz n) {
+        fl::sz p = 1;
         while (p < n)
             p <<= 1;
         return p;
     }
 
-    pair<size_t, bool> find_slot(const Key &key) const {
-        const size_t cap = _buckets.size();
-        const size_t mask = cap - 1;
-        const size_t h = _hash(key) & mask;
-        size_t first_tomb = npos;
+    pair<fl::sz, bool> find_slot(const Key &key) const {
+        const fl::sz cap = _buckets.size();
+        const fl::sz mask = cap - 1;
+        const fl::sz h = _hash(key) & mask;
+        fl::sz first_tomb = npos;
 
         if (cap <= 8) {
             // linear probing
-            for (size_t i = 0; i < cap; ++i) {
-                const size_t idx = (h + i) & mask;
+            for (fl::sz i = 0; i < cap; ++i) {
+                const fl::sz idx = (h + i) & mask;
 
                 if (is_empty(idx))
                     return {first_tomb != npos ? first_tomb : idx, true};
@@ -387,9 +387,9 @@ class HashMap {
             }
         } else {
             // quadratic probing up to 8 tries
-            size_t i = 0;
+            fl::sz i = 0;
             for (; i < 8; ++i) {
-                const size_t idx = (h + i + i * i) & mask;
+                const fl::sz idx = (h + i + i * i) & mask;
 
                 if (is_empty(idx))
                     return {first_tomb != npos ? first_tomb : idx, true};
@@ -402,7 +402,7 @@ class HashMap {
             }
             // fallback to linear for the rest
             for (; i < cap; ++i) {
-                const size_t idx = (h + i) & mask;
+                const fl::sz idx = (h + i) & mask;
 
                 if (is_empty(idx))
                     return {first_tomb != npos ? first_tomb : idx, true};
@@ -423,15 +423,15 @@ class HashMap {
         kQuadraticProbingTries = 8,
     };
 
-    size_t find_index(const Key &key) const {
-        const size_t cap = _buckets.size();
-        const size_t mask = cap - 1;
-        const size_t h = _hash(key) & mask;
+    fl::sz find_index(const Key &key) const {
+        const fl::sz cap = _buckets.size();
+        const fl::sz mask = cap - 1;
+        const fl::sz h = _hash(key) & mask;
 
         if (cap <= kLinearProbingOnlySize) {
             // linear probing
-            for (size_t i = 0; i < cap; ++i) {
-                const size_t idx = (h + i) & mask;
+            for (fl::sz i = 0; i < cap; ++i) {
+                const fl::sz idx = (h + i) & mask;
                 if (is_empty(idx))
                     return npos;
                 if (is_occupied(idx) && _equal(_buckets[idx].key, key))
@@ -439,9 +439,9 @@ class HashMap {
             }
         } else {
             // quadratic probing up to 8 tries
-            size_t i = 0;
+            fl::sz i = 0;
             for (; i < kQuadraticProbingTries; ++i) {
-                const size_t idx = (h + i + i * i) & mask;
+                const fl::sz idx = (h + i + i * i) & mask;
                 if (is_empty(idx))
                     return npos;
                 if (is_occupied(idx) && _equal(_buckets[idx].key, key))
@@ -449,7 +449,7 @@ class HashMap {
             }
             // fallback to linear for the rest
             for (; i < cap; ++i) {
-                const size_t idx = (h + i) & mask;
+                const fl::sz idx = (h + i) & mask;
                 if (is_empty(idx))
                     return npos;
                 if (is_occupied(idx) && _equal(_buckets[idx].key, key))
@@ -460,16 +460,16 @@ class HashMap {
         return npos;
     }
 
-    size_t find_unoccupied_index_using_bitset(
+    fl::sz find_unoccupied_index_using_bitset(
         const Key &key, const fl::bitset<1024> &occupied_set) const {
-        const size_t cap = _buckets.size();
-        const size_t mask = cap - 1;
-        const size_t h = _hash(key) & mask;
+        const fl::sz cap = _buckets.size();
+        const fl::sz mask = cap - 1;
+        const fl::sz h = _hash(key) & mask;
 
         if (cap <= kLinearProbingOnlySize) {
             // linear probing
-            for (size_t i = 0; i < cap; ++i) {
-                const size_t idx = (h + i) & mask;
+            for (fl::sz i = 0; i < cap; ++i) {
+                const fl::sz idx = (h + i) & mask;
                 bool occupied = occupied_set.test(idx);
                 if (occupied) {
                     continue;
@@ -478,9 +478,9 @@ class HashMap {
             }
         } else {
             // quadratic probing up to 8 tries
-            size_t i = 0;
+            fl::sz i = 0;
             for (; i < kQuadraticProbingTries; ++i) {
-                const size_t idx = (h + i + i * i) & mask;
+                const fl::sz idx = (h + i + i * i) & mask;
                 bool occupied = occupied_set.test(idx);
                 if (occupied) {
                     continue;
@@ -489,7 +489,7 @@ class HashMap {
             }
             // fallback to linear for the rest
             for (; i < cap; ++i) {
-                const size_t idx = (h + i) & mask;
+                const fl::sz idx = (h + i) & mask;
                 bool occupied = occupied_set.test(idx);
                 if (occupied) {
                     continue;
@@ -500,7 +500,7 @@ class HashMap {
         return npos;
     }
 
-    void rehash(size_t new_cap) {
+    void rehash(fl::sz new_cap) {
         new_cap = next_power_of_two(new_cap);
         fl::vector_inlined<Entry, INLINED_COUNT> old;
         fl::bitset<1024> old_occupied = _occupied;
@@ -516,7 +516,7 @@ class HashMap {
 
         _size = _tombstones = 0;
 
-        for (size_t i = 0; i < old.size(); i++) {
+        for (fl::sz i = 0; i < old.size(); i++) {
             if (old_occupied.test(i))
                 insert(fl::move(old[i].key), fl::move(old[i].value));
         }
@@ -527,10 +527,10 @@ class HashMap {
     FL_DISABLE_WARNING(null-dereference)
     void rehash_inline_no_resize() {
         // filter out tombstones and compact
-        size_t cap = _buckets.size();
-        size_t pos = 0;
+        fl::sz cap = _buckets.size();
+        fl::sz pos = 0;
         // compact live elements to the left.
-        for (size_t i = 0; i < cap; ++i) {
+        for (fl::sz i = 0; i < cap; ++i) {
             if (is_occupied(i)) {
                 if (pos != i) {
                     _buckets[pos] = _buckets[i];
@@ -548,7 +548,7 @@ class HashMap {
         // use the occupied bitset to track which entries are occupied
         // in the array rather than just copied in.
         fl::optional<Entry> tmp;
-        for (size_t i = 0; i < _size; ++i) {
+        for (fl::sz i = 0; i < _size; ++i) {
             const bool already_finished = occupied.test(i);
             if (already_finished) {
                 continue;
@@ -558,7 +558,7 @@ class HashMap {
             //                "HashMap::rehash_inline_no_resize: invalid
             //                state");
 
-            size_t idx = find_unoccupied_index_using_bitset(e.key, occupied);
+            fl::sz idx = find_unoccupied_index_using_bitset(e.key, occupied);
             if (idx == npos) {
                 // no more space
                 FASTLED_ASSERT(
@@ -581,7 +581,7 @@ class HashMap {
                 // we have to find a place for temp.
                 // find new position for tmp.
                 auto key = tmp.ptr()->key;
-                size_t new_idx =
+                fl::sz new_idx =
                     find_unoccupied_index_using_bitset(key, occupied);
                 if (new_idx == npos) {
                     // no more space
@@ -615,8 +615,8 @@ class HashMap {
     FL_DISABLE_WARNING_POP
 
     fl::vector_inlined<Entry, INLINED_COUNT> _buckets;
-    size_t _size;
-    size_t _tombstones;
+    fl::sz _size;
+    fl::sz _tombstones;
     uint8_t mLoadFactor;
     fl::bitset<1024> _occupied;
     fl::bitset<1024> _deleted;
