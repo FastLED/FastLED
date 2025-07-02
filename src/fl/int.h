@@ -37,6 +37,14 @@ namespace fl {
         typedef unsigned long u32;
         typedef long long i64;
         typedef unsigned long long u64;
+    #elif defined(__IMXRT1062__)
+        // Teensy 4.0 / 4.1 (iMXRT1062 Cortex-M7) – uint32_t resolves to 'unsigned long'
+        typedef short i16;
+        typedef unsigned short u16;
+        typedef long i32;
+        typedef unsigned long u32;
+        typedef long long i64;
+        typedef unsigned long long u64;
     #else
         // Default: assume short 16-bit, int 32-bit (uint32_t is unsigned int)
         typedef short i16;
