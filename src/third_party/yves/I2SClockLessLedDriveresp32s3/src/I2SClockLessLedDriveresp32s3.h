@@ -84,27 +84,32 @@
 #endif
 
 #if FASTLED_ENABLE_I2S_CONSTANTS
-  #ifndef AA
+  /*
+   * Scoped-define pattern (similar to ArduinoJson):
+   *   1. Save any incoming definitions with push_macro.
+   *   2. Undef to avoid accidental textual replacement inside this header.
+   *   3. Redefine only what we actually need (AA).
+   *   4. Pop macros at the end so caller's environment is restored
+   *      exactly as it was on entry.
+   */
+
+  #pragma push_macro("AA")
+  #undef AA
   #define AA (0x00AA00AAL)
-  #endif
 
-  // Scoped guards for additional masks used in transpose routines to prevent
-  // collisions with other libraries.  These three masks are *not* referenced
-  // inside this translation unit but are kept here because upstream tooling
-  // requested them.
+  /* BB, B, and BA are *not* used inside this header, but we still guard them
+   * to ensure any external definitions are preserved. We simply undef them
+   * for the duration of this header.
+   */
+  #pragma push_macro("BB")
+  #undef BB
 
-  #ifndef BB
-  #define BB (0x0000BBBBL)
-  #endif
+  #pragma push_macro("B")
+  #undef B
 
-  // A standalone single-letter macro "B" would break the pointer parameter
-  // names throughout this file, so we intentionally do NOT create a macro
-  // called "B" here.  Instead we provide a safer alias "BA" which satisfies
-  // the requested guard without interfering with the code.
+  #pragma push_macro("BA")
+  #undef BA
 
-  #ifndef BA
-  #define BA (0x0A0A0A0AL)
-  #endif
 #endif // FASTLED_ENABLE_I2S_CONSTANTS
 
 #ifndef MIN
@@ -547,6 +552,14 @@ static bool IRAM_ATTR flush_ready(esp_lcd_panel_io_handle_t panel_io,
 }
 
 #pragma GCC diagnostic pop
+
+#if FASTLED_ENABLE_I2S_CONSTANTS
+  /* Restore original macro definitions */
+  #pragma pop_macro("BA")
+  #pragma pop_macro("B")
+  #pragma pop_macro("BB")
+  #pragma pop_macro("AA")
+#endif
 
 } // namespace fl
 
