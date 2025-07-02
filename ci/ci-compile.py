@@ -612,7 +612,7 @@ def compile_with_pio_ci(
                 f"-I{include_dir}" for include_dir in example_include_dirs
             )
 
-        # Add build flags directly using project options
+        # Add build flags and unflags directly using project options
         if build_flags_list:
             build_flags_str = " ".join(build_flags_list)
             cmd_list.extend(["--project-option", f"build_flags={build_flags_str}"])
@@ -628,6 +628,11 @@ def compile_with_pio_ci(
                     locked_print(f"Custom defines: {' '.join(custom_defines)}")
                 if verbose:
                     locked_print(f"All build flags: {build_flags_str}")
+
+        # Add build_unflags if provided
+        if board.build_unflags:
+            unflags_str = " ".join(board.build_unflags)
+            cmd_list.extend(["--project-option", f"build_unflags={unflags_str}"])
 
         # Add example source directories as libraries
         for src_dir in example_src_dirs:
