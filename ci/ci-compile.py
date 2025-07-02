@@ -659,7 +659,9 @@ def compile_with_pio_ci(
                             shutil.rmtree(link_name)
                         shutil.copytree(src_path, link_name)
                         if verbose:
-                            locked_print(f"  Copied {src_path} -> {link_name} (symlink fallback)")
+                            locked_pr
+                            
+                            int(f"  Copied {src_path} -> {link_name} (symlink fallback)")
                     except Exception as ee:
                         locked_print(f"Warning: Could not link or copy {src_path}: {ee}")
 
