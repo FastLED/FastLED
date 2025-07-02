@@ -65,32 +65,44 @@
 #define I2S_DEVICE 0
 
 // ---------------------------------------------------------------------------
-// Scoped constants (push_macro / pop_macro pattern)
+// Scoped constants (simple enable guard like fl/json.h)
 // ---------------------------------------------------------------------------
 
-#pragma push_macro("AA")
-#pragma push_macro("BB")
-#pragma push_macro("B")
-#pragma push_macro("BA")
-#pragma push_macro("CC")
-#pragma push_macro("FF")
-#pragma push_macro("FF2")
+#ifndef FASTLED_ENABLE_I2S_CONSTANTS
+#define FASTLED_ENABLE_I2S_CONSTANTS 1
+#endif
 
-#undef AA
-#undef BB
-#undef B
-#undef BA
-#undef CC
-#undef FF
-#undef FF2
+#if FASTLED_ENABLE_I2S_CONSTANTS
 
-#define AA  (0x00AA00AAL)
-#define BB  (0x0000BBBBL)
-#define B   (0x0000000BL)
-#define BA  (0x0A0A0A0AL)
-#define CC  (0x0000CCCCL)
-#define FF  (0xF0F0F0F0L)
+#ifndef AA
+#define AA (0x00AA00AAL)
+#endif
+
+#ifndef BB
+#define BB (0x0000BBBBL)
+#endif
+
+#ifndef B
+#define B  (0x0000000BL)
+#endif
+
+#ifndef BA
+#define BA (0x0A0A0A0AL)
+#endif
+
+#ifndef CC
+#define CC (0x0000CCCCL)
+#endif
+
+#ifndef FF
+#define FF (0xF0F0F0F0L)
+#endif
+
+#ifndef FF2
 #define FF2 (0x0F0F0F0FL)
+#endif
+
+#endif // FASTLED_ENABLE_I2S_CONSTANTS
 
 // ---------------------------------------------------------------------------
 // End scoped constants
@@ -534,14 +546,6 @@ static bool IRAM_ATTR flush_ready(esp_lcd_panel_io_handle_t panel_io,
     }
     return false;
 }
-
-#pragma pop_macro("FF2")
-#pragma pop_macro("FF")
-#pragma pop_macro("CC")
-#pragma pop_macro("BA")
-#pragma pop_macro("B")
-#pragma pop_macro("BB")
-#pragma pop_macro("AA")
 
 } // namespace fl
 
