@@ -200,11 +200,10 @@ WEBTARGET = Board(
 
 NATIVE = Board(
     board_name="native",
-    real_board_name="native",
-    platform="native",
+    platform="platformio/native",
     build_flags=[
         "-DFASTLED_STUB_IMPL",
-        "-DFASTLED_STUB_MAIN_INCLUDE_INO=\"../examples/Blink/Blink.ino\"",
+        '-DFASTLED_STUB_MAIN_INCLUDE_INO="../examples/Blink/Blink.ino"',
         "-std=c++17",
     ],
 )
