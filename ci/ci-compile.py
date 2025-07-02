@@ -486,9 +486,7 @@ def compile_with_pio_ci(
             "--project-option",
             lib_option,
             "--project-option",
-            "lib_ignore=FastLED",
-            "--project-option",
-            "lib_ldf_mode=chain",
+            "lib_extra_dirs=/workspace",
         ]
 
         if cache_option is not None:
