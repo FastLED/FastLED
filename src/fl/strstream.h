@@ -160,15 +160,20 @@ class StrStream {
         return *this;
     }
 
-    // Unified handler for fl:: namespace size-like unsigned integer types
-    // This handles fl::sz and fl::u16 from the fl:: namespace only
+    // Unified handler for fl:: namespace size-like unsigned integer types and int
+    // This handles fl::sz, fl::u16 from the fl:: namespace, and int type
     template<typename T>
     typename fl::enable_if<
         fl::is_same<T, fl::sz>::value ||
-        fl::is_same<T, fl::u16>::value,
+        fl::is_same<T, fl::u16>::value ||
+        fl::is_same<T, int>::value,
         StrStream&
     >::type operator<<(T n) {
-        mStr.append(fl::u32(n));
+        if (fl::is_same<T, int>::value) {
+            mStr.append(fl::i32(n));
+        } else {
+            mStr.append(fl::u32(n));
+        }
         return *this;
     }
 
@@ -210,11 +215,12 @@ class FakeStrStream {
     FakeStrStream &operator<<(const string &) { return *this; }
     FakeStrStream &operator<<(char) { return *this; }
 
-    // Unified template for fl:: namespace types to avoid conflicts on AVR
+    // Unified template for fl:: namespace types and int to avoid conflicts on AVR
     template<typename T>
     typename fl::enable_if<
         fl::is_same<T, fl::sz>::value ||
-        fl::is_same<T, fl::u16>::value,
+        fl::is_same<T, fl::u16>::value ||
+        fl::is_same<T, int>::value,
         FakeStrStream&
     >::type operator<<(T) { return *this; }
 
