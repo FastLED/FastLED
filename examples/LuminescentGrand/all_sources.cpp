@@ -1,0 +1,12 @@
+#include "shared/Keyboard.cpp"
+#include "shared/Painter.cpp"
+#include "shared/color.cpp"
+#include "shared/color_mapper.cpp"
+#include "shared/util.cpp"
+#include "shared/led_layout_array.cpp"
+#include "shared/framebuffer.cpp"
+#include "shared/dprint.cpp"
+
+#include "arduino/LedRopeTCL.cpp"
+#include "arduino/MIDI.cpp"
+#include "arduino/ui_state.cpp"
