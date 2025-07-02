@@ -69,7 +69,7 @@ DEFAULT_EXAMPLES = [
     "Corkscrew",
     "Cylon",
     "DemoReel100",
-    "Downscale",
+    # "Downscale",
     "FestivalStick",
     "FirstLight",
     "Fire2012",
