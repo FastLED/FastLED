@@ -1,4 +1,3 @@
-
 #if !__has_include("esp_memory_utils.h")
 #error                                                                         \
     "esp_memory_utils.h is not available, are you using esp-idf 4.4 or earlier?"
@@ -65,10 +64,25 @@
 
 #define I2S_DEVICE 0
 
+// Scoped macro defines to avoid collisions with other headers.
+// If these macros are already defined by a downstream file, we leave the
+// existing definitions intact.  This mirrors the scoped‐define pattern used
+// in src/fl/json.h (see FASTLED_ENABLE_JSON)
+#ifndef AA
 #define AA (0x00AA00AAL)
+#endif
+
+#ifndef CC
 #define CC (0x0000CCCCL)
+#endif
+
+#ifndef FF
 #define FF (0xF0F0F0F0L)
+#endif
+
+#ifndef FF2
 #define FF2 (0x0F0F0F0FL)
+#endif
 
 #ifndef MIN
 #define MIN(a, b) (((a) < (b)) ? (a) : (b))
@@ -132,7 +146,6 @@
 #define _p_g 0
 #define _p_b 2
 #define _nb_components 3
-#endif
 #endif
 #endif
 #endif

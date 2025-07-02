@@ -63,7 +63,10 @@ namespace fl {
         // Default: assume short 16-bit, int 32-bit (uint32_t is unsigned int)
         typedef short i16;
         typedef unsigned short u16;
-        typedef long i32;
+        // On 64-bit desktop architectures, `long` is 8 bytes, which breaks
+        // the size checks below. Fall back to `int` here so that `i32` is
+        // always exactly 4 bytes regardless of host platform.
+        typedef int i32;
         typedef unsigned int u32;
         typedef long long i64;
         typedef unsigned long long u64;
