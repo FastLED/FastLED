@@ -64,46 +64,37 @@
 
 #define I2S_DEVICE 0
 
-// Original 32-bit bit-mask constants used in the transpose routine.
+// ---------------------------------------------------------------------------
+// Scoped constants (push_macro / pop_macro pattern)
+// ---------------------------------------------------------------------------
+
+#pragma push_macro("AA")
+#pragma push_macro("BB")
+#pragma push_macro("B")
+#pragma push_macro("BA")
+#pragma push_macro("CC")
+#pragma push_macro("FF")
+#pragma push_macro("FF2")
+
+#undef AA
+#undef BB
+#undef B
+#undef BA
+#undef CC
+#undef FF
+#undef FF2
+
+#define AA  (0x00AA00AAL)
+#define BB  (0x0000BBBBL)
+#define B   (0x0000000BL)
+#define BA  (0x0A0A0A0AL)
 #define CC  (0x0000CCCCL)
 #define FF  (0xF0F0F0F0L)
 #define FF2 (0x0F0F0F0FL)
 
 // ---------------------------------------------------------------------------
-// Scoped constants
+// End scoped constants
 // ---------------------------------------------------------------------------
-// A single controlling macro – `FASTLED_ENABLE_I2S_CONSTANTS` – determines
-// whether we emit the bit-mask constants that this driver uses. This mirrors
-// the pattern in `fl/json.h` (see FASTLED_ENABLE_JSON):
-//   1. Provide a `#ifndef/#define` default of 1.
-//   2. Inside `#if FASTLED_ENABLE_I2S_CONSTANTS` emit `#ifndef` guarded
-//      `#define` for each constant.  This guarantees we never re-define a
-//      macro if the user has already provided their own definition.
-//   3. No `push_macro` / `pop_macro` dance is required; the caller can simply
-//      disable the entire block by defining the switch macro to 0 before this
-//      header is included.
-
-#ifndef FASTLED_ENABLE_I2S_CONSTANTS
-#define FASTLED_ENABLE_I2S_CONSTANTS 1
-#endif
-
-#if FASTLED_ENABLE_I2S_CONSTANTS
-  #ifndef AA
-  #define AA (0x00AA00AAL)
-  #endif
-
-  #ifndef BB
-  #define BB (0x0000BBBBL)
-  #endif
-
-  #ifndef B
-  #define B  (0x0000000BL)
-  #endif
-
-  #ifndef BA
-  #define BA (0x0A0A0A0AL)
-  #endif
-#endif // FASTLED_ENABLE_I2S_CONSTANTS
 
 #ifndef MIN
 #define MIN(a, b) (((a) < (b)) ? (a) : (b))
@@ -544,12 +535,13 @@ static bool IRAM_ATTR flush_ready(esp_lcd_panel_io_handle_t panel_io,
     return false;
 }
 
-#if FASTLED_ENABLE_I2S_CONSTANTS
-#undef BA
-#undef B
-#undef BB
-#undef AA
-#endif
+#pragma pop_macro("FF2")
+#pragma pop_macro("FF")
+#pragma pop_macro("CC")
+#pragma pop_macro("BA")
+#pragma pop_macro("B")
+#pragma pop_macro("BB")
+#pragma pop_macro("AA")
 
 } // namespace fl
 
