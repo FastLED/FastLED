@@ -1,5 +1,8 @@
 #define FASTLED_INTERNAL  
 #include "FastLED.h"
+#include "fl/int.h"
+#include "fl/stdint.h"
+#include "fl/type_traits.h"
 
 // In the future, one of these might fail, and the user will want
 // to disable the compile tests so that they can continue on their
@@ -41,6 +44,15 @@ namespace fl {
 // The platform-specific test functions are called to trigger
 // any compile-time errors if the platform is not configured correctly.
 static void compile_tests() {
+
+    static_assert(fl::is_same_type<u32, uint32_t>::value, "u32 must be exactly uint32_t");
+    static_assert(fl::is_same_type<u16, uint16_t>::value, "u16 must be exactly uint16_t");
+    static_assert(fl::is_same_type<u8, uint8_t>::value, "u8 must be exactly uint8_t");
+    static_assert(fl::is_same_type<i32, int32_t>::value, "i32 must be exactly int32_t");
+    static_assert(fl::is_same_type<i16, int16_t>::value, "i16 must be exactly int16_t");
+    static_assert(fl::is_same_type<i8, int8_t>::value, "i8 must be exactly int8_t");
+
+
 #if defined(__AVR__)
     avr_compile_tests();
 #elif defined(ESP32)
