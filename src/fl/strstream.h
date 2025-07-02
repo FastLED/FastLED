@@ -165,20 +165,6 @@ class StrStream {
         return *this;
     }
 
-    // Provide explicit overload for 'unsigned long' to avoid ambiguous
-    // overload resolution on tool-chains where uint32_t is NOT an alias of
-    // 'unsigned long'.  On platforms like Nordic nRF52 the FastLED typedef
-    // fl::u32 already maps to 'unsigned long', so defining a second overload
-    // with the same signature is illegal.  We therefore compile this
-    // overload only when fl::u32 is NOT 'unsigned long' which we approximate
-    // via the platform macros.
-#if !defined(NRF52_SERIES) && !defined(ARDUINO_ARCH_NRF52) && !defined(NRF52840_XXAA)
-    StrStream &operator<<(const unsigned long &n) {
-        mStr.append(fl::u32(n));
-        return *this;
-    }
-#endif
-
     // Unified handler for fl:: namespace size-like unsigned integer types and int
     // This handles fl::sz, fl::u16 from the fl:: namespace, and int type
     template<typename T>
