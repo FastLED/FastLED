@@ -1,5 +1,8 @@
 #pragma once
 
+#include <stdint.h>  // ok include
+#include <stddef.h>  // ok include
+
 namespace fl {
     // 8-bit types - char is reliably 8 bits on all supported platforms
     typedef signed char i8;
