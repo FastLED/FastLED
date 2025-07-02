@@ -1,4 +1,4 @@
-THIS SHOULD BE A LINTER ERROR#pragma once
+#pragma once
 
 #ifdef ESP32
 #include "sdkconfig.h"
@@ -42,13 +42,6 @@ THIS SHOULD BE A LINTER ERROR#pragma once
 #define FASTLED_ESP32_HAS_RMT5 1
 #else
 #warning "Unknown board, assuming support for clockless RMT5 and SPI chipsets. Please file an bug report with FastLED and tell them about your board type."
-#endif
-
-#if (ESP_IDF_VERSION < ESP_IDF_VERSION_VAL(5, 0, 0)) && !defined(ARDUINO)
-#undef FASTLED_ESP32_HAS_RMT5
-#undef FASTLED_ESP32_HAS_CLOCKLESS_SPI
-#define FASTLED_ESP32_HAS_RMT5 0
-#define FASTLED_ESP32_HAS_CLOCKLESS_SPI 0
 #endif
 
 // Note that FASTLED_RMT5 is a legacy name,
