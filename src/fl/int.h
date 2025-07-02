@@ -20,6 +20,13 @@ namespace fl {
         typedef unsigned long u32;
         typedef long long i64;
         typedef unsigned long long u64;
+    #elif defined(__SAM3X8E__)
+        // On ARM: int is 32-bit, long is 32-bit
+        typedef int i16;
+        typedef unsigned int u16;
+        typedef int i32;
+        typedef unsigned int u32;
+        typedef long long i64;
     #elif defined(__MK20DX128__) || defined(__MK20DX256__)
         // Teensy 3.0 / 3.1 (MK20DX128 / MK20DX256) – compiler defines uint32_t as unsigned long
         // Use 'long' to guarantee type identity with uint32_t on this platform
@@ -49,7 +56,7 @@ namespace fl {
         // Default: assume short 16-bit, int 32-bit (uint32_t is unsigned int)
         typedef short i16;
         typedef unsigned short u16;
-        typedef int i32;
+        typedef long i32;
         typedef unsigned int u32;
         typedef long long i64;
         typedef unsigned long long u64;
