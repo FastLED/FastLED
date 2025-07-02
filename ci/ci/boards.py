@@ -206,7 +206,7 @@ ESP32_S3_DEVKITC_1 = Board(
     real_board_name="esp32-s3-devkitc-1",
     platform=ESP32_IDF_5_4_PIOARDUINO,
     board_partitions="huge_app.csv",  # Reserved for future use.
-    build_unflags=["-DFASTLED_RMT5=0"],
+    defines=None,
 )
 
 ESP32_S2_DEVKITM_1 = Board(
@@ -396,7 +396,7 @@ XIAO_ESP32S3 = Board(
     real_board_name="seeed_xiao_esp32s3",
     platform=ESP32_IDF_5_4_PIOARDUINO,
     board_partitions="huge_app.csv",
-    build_unflags=["-DFASTLED_RMT5=0"],
+    defines=None,
 )
 
 
