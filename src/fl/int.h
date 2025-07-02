@@ -36,6 +36,13 @@ namespace fl {
         typedef unsigned long u32;
         typedef long long i64;
         typedef unsigned long long u64;
+    #elif defined(ARDUINO_ARCH_RENESAS_UNO)
+        // ATmega328P (Arduino Uno) – int is 16-bit, long is 32-bit
+        typedef int i16;
+        typedef unsigned int u16;
+        typedef long int i32;
+        typedef long unsigned int u32;
+        typedef long long i64;
     #elif defined(ESP32)
         // ESP32: short is 16-bit, long is 32-bit (same as Teensy but separate macro for clarity)
         typedef short i16;
