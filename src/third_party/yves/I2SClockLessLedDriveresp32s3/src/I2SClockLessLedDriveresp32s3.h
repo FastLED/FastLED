@@ -65,10 +65,45 @@
 
 #define I2S_DEVICE 0
 
+#pragma push_macro("AA")
+#pragma push_macro("CC")
+#pragma push_macro("FF")
+#pragma push_macro("FF2")
+
+// #ifndef AA
+// #define AA (0x00AA00AAL)
+// #endif
+
+#ifdef AA
+#undef AA
+#endif
+
+
+
+#ifdef BA
+#undef BA
+#endif
+
+#ifdef CC
+#undef CC
+#endif
+
+#ifdef FF
+#undef FF
+#endif
+
+#ifdef FF2
+#undef FF2
+#endif
+
 #define AA (0x00AA00AAL)
 #define CC (0x0000CCCCL)
 #define FF (0xF0F0F0F0L)
 #define FF2 (0x0F0F0F0FL)
+
+// ---------------------------------------------------------------------------
+// End scoped constants
+// ---------------------------------------------------------------------------
 
 #ifndef MIN
 #define MIN(a, b) (((a) < (b)) ? (a) : (b))
@@ -515,5 +550,10 @@ static bool IRAM_ATTR flush_ready(esp_lcd_panel_io_handle_t panel_io,
 #pragma GCC diagnostic pop
 
 } // namespace fl
+
+#pragma pop_macro("AA")
+#pragma pop_macro("CC")
+#pragma pop_macro("FF")
+#pragma pop_macro("FF2")
 
 #endif // __has_include("esp_memory_utils.h")
