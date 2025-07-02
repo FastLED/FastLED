@@ -196,7 +196,7 @@ ESP32_C6_DEVKITC_1 = Board(
 
 ESP32_S3_DEVKITC_1 = Board(
     board_name="esp32s3",
-    real_board_name="seeed_xiao_esp32s3",  # Seeed Xiao ESP32-S3 has psram.
+    real_board_name="esp32-s3-devkitc-1",
     platform=ESP32_IDF_5_4_PIOARDUINO,
     board_partitions="huge_app.csv",  # Reserved for future use.
 )
