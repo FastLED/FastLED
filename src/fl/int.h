@@ -76,6 +76,19 @@ namespace fl {
         typedef unsigned long u32;
         typedef long long i64;
         typedef unsigned long long u64;
+    #elif defined(NRF52_SERIES) || defined(ARDUINO_ARCH_NRF52) || defined(NRF52840_XXAA)
+        // Nordic nRF52 family (e.g., nRF52832, nRF52840) – ARM Cortex-M4 / M33.
+        // The GNU ARM tool-chain used by both the Adafruit and Nordic cores aliases
+        // uint32_t to 'unsigned long', so we follow that mapping.  Using 'long' /
+        // 'unsigned long' for 32-bit types keeps fl::u32 identical to uint32_t and
+        // avoids the ambiguous overload issues that can arise on GCC 7.x when
+        // both 'unsigned int' and 'unsigned long' overloads are viable.
+        typedef short i16;
+        typedef unsigned short u16;
+        typedef long i32;
+        typedef unsigned long u32;
+        typedef long long i64;
+        typedef unsigned long long u64;
     #else
         // Default: assume short 16-bit, int 32-bit (uint32_t is unsigned int)
         typedef short i16;

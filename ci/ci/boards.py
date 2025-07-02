@@ -239,11 +239,24 @@ XIAOBLESENSE_NRF52 = Board(
     platform_needs_install=True,
 )
 
+# Correct nRF52840 DK board definition
+# The Nordic nRF52840 DK is directly supported by the default PlatformIO
+# `nordicnrf52` platform under the board name `nrf52840_dk`, so we don't
+# need a custom platform package or extra installation steps.  Point the
+# Board definition at the stock platform and use the canonical board name.
+# This fixes compilation failures introduced during the build-system
+# migration where the board was temporarily mapped to the XIAO variant.
 NRF52840 = Board(
     board_name="nrf52840_dk",
-    real_board_name="xiaoble_adafruit",
-    platform="https://github.com/maxgerhardt/platform-nordicnrf52",
-    platform_needs_install=True,
+    real_board_name="nrf52840_dk_adafruit",  # Use Adafruit BSP variant which includes full Nordic SDK headers
+    platform="nordicnrf52",
+    framework="arduino",
+    platform_needs_install=False,
+    platform_packages="framework-arduinoadafruitnrf52@^1.10601.0",
+    defines=[
+        "FASTLED_USE_COMPILE_TESTS=0",
+    ],
+    board_build_core="adafruit",
 )
 
 RPI_PICO = Board(
