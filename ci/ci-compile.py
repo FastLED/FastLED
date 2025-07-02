@@ -487,6 +487,8 @@ def compile_with_pio_ci(
             lib_option,
             "--project-option",
             "lib_ldf_mode=off",
+            "--project-option",
+            "lib_ignore=FastLED",
         ]
 
         if cache_option is not None:
