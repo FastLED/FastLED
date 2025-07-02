@@ -101,6 +101,10 @@
   #ifndef BA
   #define BA (0x0A0A0A0AL)
   #endif
+
+  #ifndef B
+  #define B (0x0000000BL)
+  #endif
 #endif // FASTLED_ENABLE_I2S_CONSTANTS
 
 #ifndef MIN
@@ -233,7 +237,7 @@ volatile xSemaphoreHandle I2SClocklessLedDriverS3_sem = NULL;
 volatile bool isDisplaying = false;
 volatile bool iswaiting = false;
 
-static void IRAM_ATTR transpose16x1_noinline2(unsigned char *A, uint16_t *B) {
+static void IRAM_ATTR transpose16x1_noinline2(unsigned char *A, uint16_t *bufOut) {
 
     uint32_t x, y, x1, y1, t;
 
@@ -288,20 +292,20 @@ static void IRAM_ATTR transpose16x1_noinline2(unsigned char *A, uint16_t *B) {
     y1 = ((x1 << 4) & FF) | (y1 & FF2);
     x1 = t;
 
-    *((uint16_t *)(B)) =
+    *((uint16_t *)(bufOut)) =
         (uint16_t)(((x & 0xff000000) >> 8 | ((x1 & 0xff000000))) >> 16);
-    *((uint16_t *)(B + 3)) =
+    *((uint16_t *)(bufOut + 3)) =
         (uint16_t)(((x & 0xff0000) >> 16 | ((x1 & 0xff0000) >> 8)));
-    *((uint16_t *)(B + 6)) =
+    *((uint16_t *)(bufOut + 6)) =
         (uint16_t)(((x & 0xff00) | ((x1 & 0xff00) << 8)) >> 8);
-    *((uint16_t *)(B + 9)) = (uint16_t)((x & 0xff) | ((x1 & 0xff) << 8));
-    *((uint16_t *)(B + 12)) =
+    *((uint16_t *)(bufOut + 9)) = (uint16_t)((x & 0xff) | ((x1 & 0xff) << 8));
+    *((uint16_t *)(bufOut + 12)) =
         (uint16_t)(((y & 0xff000000) >> 8 | ((y1 & 0xff000000))) >> 16);
-    *((uint16_t *)(B + 15)) =
+    *((uint16_t *)(bufOut + 15)) =
         (uint16_t)(((y & 0xff0000) | ((y1 & 0xff0000) << 8)) >> 16);
-    *((uint16_t *)(B + 18)) =
+    *((uint16_t *)(bufOut + 18)) =
         (uint16_t)(((y & 0xff00) | ((y1 & 0xff00) << 8)) >> 8);
-    *((uint16_t *)(B + 21)) = (uint16_t)((y & 0xff) | ((y1 & 0xff) << 8));
+    *((uint16_t *)(bufOut + 21)) = (uint16_t)((y & 0xff) | ((y1 & 0xff) << 8));
 }
 
 esp_lcd_panel_io_handle_t led_io_handle = NULL;
