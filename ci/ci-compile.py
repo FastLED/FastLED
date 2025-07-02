@@ -648,6 +648,8 @@ def compile_with_pio_ci(
         if all_example_dirs:
             abs_dirs = [str(Path(d).resolve()) for d in all_example_dirs]
             extra_dirs_value = ",".join(f"symlink://{p}" for p in abs_dirs)
+            if verbose or os.environ.get("FASTLED_DEBUG_SYMLINKS") == "1":
+                locked_print(f"extra_src_dirs for {example_path.name}: {extra_dirs_value}")
             cmd_list.extend([
                 "--project-option",
                 f"extra_src_dirs={extra_dirs_value}",
