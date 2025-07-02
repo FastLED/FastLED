@@ -74,33 +74,57 @@
 
 #if FASTLED_ENABLE_I2S_CONSTANTS
 
-#ifndef AA
+// #ifndef AA
+// #define AA (0x00AA00AAL)
+// #endif
+
+#ifdef AA
+#undef AA
+#endif
+
+
+
+// #ifndef BB
+// #define BB (0x0000BBBBL)
+// #endif
+
+#ifdef BB
+#undef BB
+#endif
+
+
+#ifdef B
+#undef B
+#endif
+
+
+#ifdef BA
+#undef BA
+#endif
+
+#ifdef CC
+#undef CC
+#endif
+
+
+#ifdef FF
+#undef FF
+#endif
+
+
+#ifdef FF2
+#undef FF2
+#endif
+
 #define AA (0x00AA00AAL)
-#endif
-
-#ifndef BB
 #define BB (0x0000BBBBL)
-#endif
-
-#ifndef B
-#define B  (0x0000000BL)
-#endif
-
-#ifndef BA
-#define BA (0x0A0A0A0AL)
-#endif
-
-#ifndef CC
+#define B (0x0000000BL)
 #define CC (0x0000CCCCL)
-#endif
-
-#ifndef FF
 #define FF (0xF0F0F0F0L)
-#endif
-
-#ifndef FF2
 #define FF2 (0x0F0F0F0FL)
-#endif
+
+
+
 
 #endif // FASTLED_ENABLE_I2S_CONSTANTS
 
