@@ -19,13 +19,6 @@ namespace fl {
 #include "fl/sketch_macros.h"
 
 #include "fl/int.h"
-#ifndef FASTLED_STRSTREAM_USES_SIZE_T
-#if defined(__AVR__) || defined(ESP8266) || defined(ESP32)
-#define FASTLED_STRSTREAM_USES_SIZE_T 0
-#else
-#define FASTLED_STRSTREAM_USES_SIZE_T 1
-#endif
-#endif
 
 namespace fl {
 
@@ -69,9 +62,7 @@ public:
     istream_real& operator>>(float& f);
     istream_real& operator>>(double& d);
     
-#if FASTLED_STRSTREAM_USES_SIZE_T
     istream_real& operator>>(fl::sz& n);
-#endif
     
     // Get a line from input
     istream_real& getline(string& str);
@@ -232,7 +223,6 @@ public:
         return *this;
     }
     
-#if FASTLED_STRSTREAM_USES_SIZE_T
     istream& operator>>(fl::sz& n) {
 #if SKETCH_HAS_LOTS_OF_MEMORY
         real_stream_ >> n;
@@ -242,7 +232,6 @@ public:
 #endif
         return *this;
     }
-#endif
     
     // Get a line from input
     istream& getline(string& str) {

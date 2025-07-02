@@ -347,13 +347,12 @@ istream_real& istream_real::operator>>(double& d) {
 
 
 
-#if FASTLED_STRSTREAM_USES_SIZE_T
-istream_real& istream_real::operator>>(size_t& n) {
+istream_real& istream_real::operator>>(fl::sz& n) {
     string token;
     if (readToken(token)) {
         uint32_t temp;
         if (parse_uint32(token.c_str(), temp)) {
-            n = static_cast<size_t>(temp);
+            n = static_cast<fl::sz>(temp);
         } else {
             failed_ = true;
         }
@@ -362,7 +361,6 @@ istream_real& istream_real::operator>>(size_t& n) {
     }
     return *this;
 }
-#endif
 
 istream_real& istream_real::getline(string& str) {
     str.clear();
@@ -418,7 +416,7 @@ istream_real& istream_real::putback(char c) {
     } else {
         // Insert at beginning of buffer - shift existing data
         if (buffer_len_ < BUFFER_SIZE - 1) {
-            for (size_t i = buffer_len_; i > 0; --i) {
+            for (fl::sz i = buffer_len_; i > 0; --i) {
                 buffer_[i] = buffer_[i-1];
             }
             buffer_[0] = c;

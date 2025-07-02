@@ -11,14 +11,6 @@ namespace fl {
 #include "fl/int.h"
 #include "crgb.h"
 
-#ifndef FASTLED_STRSTREAM_USES_SIZE_T
-#if defined(__AVR__) || defined(ESP8266) || defined(ESP32)
-#define FASTLED_STRSTREAM_USES_SIZE_T 0
-#else
-#define FASTLED_STRSTREAM_USES_SIZE_T 1
-#endif
-#endif
-
 namespace fl {
 
 class ostream {
@@ -107,14 +99,12 @@ public:
         return *this;
     }
 
-#if FASTLED_STRSTREAM_USES_SIZE_T
-    ostream& operator<<(size_t n) {
+    ostream& operator<<(fl::sz n) {
         string temp;
         temp.append(uint32_t(n));
         print(temp.c_str());
         return *this;
     }
-#endif
 
     // Generic template for other types that have string append support
     template<typename T>

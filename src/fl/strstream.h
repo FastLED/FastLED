@@ -5,14 +5,6 @@
 #include "crgb.h"
 #include "str.h"
 
-#ifndef FASTLED_STRSTREAM_USES_SIZE_T
-#if defined(__AVR__) || defined(ESP8266) || defined(ESP32)
-#define FASTLED_STRSTREAM_USES_SIZE_T 0
-#else
-#define FASTLED_STRSTREAM_USES_SIZE_T 1
-#endif
-#endif
-
 namespace fl {
 
 class Tile2x2_u8;
@@ -112,12 +104,10 @@ class StrStream {
         return *this;
     }
 
-#if FASTLED_STRSTREAM_USES_SIZE_T
     StrStream &operator<<(fl::sz n) {
         mStr.append(uint32_t(n));
         return *this;
     }
-#endif
 
     template <typename T> StrStream &operator<<(T n) {
         StrStreamHelper<T>::append(mStr, n);
@@ -191,9 +181,7 @@ class FakeStrStream {
     FakeStrStream &operator<<(const string &) { return *this; }
     FakeStrStream &operator<<(char) { return *this; }
 
-#if FASTLED_STRSTREAM_USES_SIZE_T
     FakeStrStream &operator<<(fl::sz) { return *this; }
-#endif
 
     FakeStrStream &operator<<(uint8_t) { return *this; }
     FakeStrStream &operator<<(uint16_t) { return *this; }
