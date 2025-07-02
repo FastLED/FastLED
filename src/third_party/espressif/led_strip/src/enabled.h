@@ -1,5 +1,6 @@
 #pragma once
 
+#ifdef ESP32
 #include "sdkconfig.h"
 #include "platforms/esp/esp_version.h"
 
@@ -60,3 +61,5 @@
 #define FASTLED_RMT5 0
 #endif
 #endif
+
+#endif  // ESP32

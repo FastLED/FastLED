@@ -6,6 +6,13 @@
 
 #if FASTLED_ALL_SRC
 
+// TODO: Remove this from the top level.
+#ifdef ESP32
+#if defined(__has_include) && __has_include("sdkconfig.h")
+#include "sdkconfig.h"
+#endif  // sdkconfig
+#endif  // ESP32
+
 
 // Platform implementations (auto-generated)
 
