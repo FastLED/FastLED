@@ -2,14 +2,6 @@
 
 #include "third_party/espressif/led_strip/src/enabled.h"
 
-// Ensure the driver compiles on ESP32-S3 (and any other variants) even when
-// the ESP-IDF version macros are not available during Arduino builds – that
-// situation causes enabled.h to disable RMT-5 support unintentionally.  If
-// FASTLED_RMT5 wasn't set by the build system, force-enable it here so this
-// translation unit always provides the required symbols.
-#undef FASTLED_RMT5
-#define FASTLED_RMT5 1
-
 #if FASTLED_RMT5
 
 #ifdef FASTLED_RMT_BUILTIN_DRIVER
