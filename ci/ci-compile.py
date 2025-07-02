@@ -790,6 +790,11 @@ def compile_with_pio_ci(
                 locked_print(
                     f"*** Successfully built {example_path.name} for {board_name} in {elapsed_time:.2f}s ***"
                 )
+                # Print location of generated platformio.ini for this build
+                platformio_ini_path = (
+                    board_build_dir / example_path.name / "platformio.ini"
+                )
+                locked_print(f"Writing to platformio.ini {platformio_ini_path}")
                 if verbose and stdout:
                     locked_print(f"Final build summary:\n{stdout}")
             else:

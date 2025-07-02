@@ -442,6 +442,10 @@ configure_ccache(env)'''
         f"*** [Thread {thread_id}] Finished initializing environment for board {board_name} ***"
     )
 
+    # Print the location of the generated platformio.ini file
+    platformio_ini_path = builddir / "platformio.ini"
+    locked_print(f"Writing to platformio.ini {platformio_ini_path}")
+
     # Print the contents of the generated platformio.ini file for debugging
     platformio_ini_path = builddir / "platformio.ini"
     if platformio_ini_path.exists():
