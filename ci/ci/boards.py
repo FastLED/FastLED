@@ -199,6 +199,7 @@ ESP32_S3_DEVKITC_1 = Board(
     real_board_name="esp32-s3-devkitc-1",
     platform=ESP32_IDF_5_4_PIOARDUINO,
     board_partitions="huge_app.csv",  # Reserved for future use.
+    defines=["FASTLED_RMT5=1"],
 )
 
 ESP32_S2_DEVKITM_1 = Board(
