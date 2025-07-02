@@ -37,8 +37,7 @@
 namespace { // anonymous namespace
 
 typedef fl::FixedVector<int, 16> PinList16;
-
-typedef uint8_t Pin;
+typedef uint8_t I2SPin;  // Renamed to avoid conflict with FastLED Pin class
 
 bool gPsramInited = false;
 
@@ -68,7 +67,7 @@ class I2SEsp32S3_Group {
         mRectDrawBuffer.onQueuingDone();
     }
 
-    void addObject(Pin pin, uint16_t numLeds, bool is_rgbw) {
+    void addObject(I2SPin pin, uint16_t numLeds, bool is_rgbw) {
         mRectDrawBuffer.queue(fl::DrawItem(pin, numLeds, is_rgbw));
     }
 
