@@ -32,8 +32,8 @@ namespace fl {
         // Use 'long' to guarantee type identity with uint32_t on this platform
         typedef short i16;
         typedef unsigned short u16;
-        typedef long i32;
-        typedef unsigned long u32;
+        typedef int i32;             // 'int' is 32-bit on all desktop and most embedded targets
+        typedef unsigned int u32;
         typedef long long i64;
         typedef unsigned long long u64;
     #elif defined(ARDUINO_ARCH_RENESAS_UNO)
@@ -47,12 +47,21 @@ namespace fl {
         // ESP32: short is 16-bit, long is 32-bit (same as Teensy but separate macro for clarity)
         typedef short i16;
         typedef unsigned short u16;
-        typedef long i32;
-        typedef unsigned long u32;
+        typedef int i32;             // 'int' is 32-bit on all desktop and most embedded targets
+        typedef unsigned int u32;
         typedef long long i64;
         typedef unsigned long long u64;
     #elif defined(__IMXRT1062__)
         // Teensy 4.0 / 4.1 (iMXRT1062 Cortex-M7) – uint32_t resolves to 'unsigned long'
+        typedef short i16;
+        typedef unsigned short u16;
+        typedef int i32;
+        typedef unsigned int u32;
+        typedef long long i64;
+        typedef unsigned long long u64;
+    #elif defined(ARDUINO_ARCH_STM32F1)
+        // STM32F1 (Maple Mini and similar) – 32-bit ARM Cortex-M3
+        // short is 16-bit, int and long are 32-bit just like the generic ARM EABI
         typedef short i16;
         typedef unsigned short u16;
         typedef long i32;
