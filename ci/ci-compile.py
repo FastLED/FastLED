@@ -642,6 +642,13 @@ def compile_with_pio_ci(
         if all_example_dirs_symlink:
             build_src_dir.mkdir(parents=True, exist_ok=True)
 
+            # Enable extra diagnostics when VERBOSE or FASTLED_DEBUG_SYMLINKS=1
+            debug_symlinks = verbose or os.environ.get("FASTLED_DEBUG_SYMLINKS") == "1"
+            if debug_symlinks:
+                locked_print(
+                    f"  Preparing symlinks/copies in build src dir: {build_src_dir}"
+                )
+
             for abs_dir in all_example_dirs_symlink:
                 src_path = Path(abs_dir).resolve()
                 link_name = build_src_dir / src_path.name
@@ -650,20 +657,22 @@ def compile_with_pio_ci(
                     if link_name.exists() or link_name.is_symlink():
                         link_name.unlink()
                     link_name.symlink_to(src_path, target_is_directory=True)
-                    if verbose:
+                    if debug_symlinks:
                         locked_print(f"  Symlinked {link_name} -> {src_path}")
-                except Exception:
-                    # Symlinks can fail on Windows or restricted FS; fall back to copy.
+                except Exception as symlink_err:
+                    # Symlinks can fail on Windows (without developer mode) or restricted FS; fall back to copy.
                     try:
                         if link_name.exists():
                             shutil.rmtree(link_name)
                         shutil.copytree(src_path, link_name)
-                        if verbose:
-                            locked_pr
-                            
-                            int(f"  Copied {src_path} -> {link_name} (symlink fallback)")
+                        if debug_symlinks:
+                            locked_print(
+                                f"  Copied {src_path} -> {link_name} (symlink fallback, reason: {symlink_err})"
+                            )
                     except Exception as ee:
-                        locked_print(f"Warning: Could not link or copy {src_path}: {ee}")
+                        locked_print(
+                            f"Warning: Could not link or copy {src_path}: {ee}"
+                        )
 
         # We no longer add these directories with --lib because they are now
         # part of the main src tree via symlinks.
