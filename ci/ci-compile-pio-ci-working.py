@@ -78,7 +78,7 @@ DEFAULT_EXAMPLES = [
     "Noise",
     "NoisePlayground",
     "NoisePlusPalette",
-    "LuminescentGrand",
+    # "LuminescentGrand",
     "Pacifica",
     "Pride2015",
     "RGBCalibrate",
