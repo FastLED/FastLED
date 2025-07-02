@@ -1,4 +1,4 @@
-#ifdef ESP32
+#if defined(ESP32) || defined(ESP32S3) || defined(CONFIG_IDF_TARGET_ESP32S3)
 
 #include "fl/stdint.h"
 #include "third_party/espressif/led_strip/src/enabled.h"
@@ -27,7 +27,7 @@ static const char *STRIP_RMT_TAG = "strip_rmt";
 // 10MHz resolution, 1 tick = 0.1us (led strip needs a high resolution)
 #define LED_STRIP_RMT_RES_HZ (10 * 1000 * 1000)
 
-led_strip_handle_t configure_led_with_timings(int pin, uint32_t led_count, bool is_rgbw, uint32_t t0h, uint32_t t0l, uint32_t t1h, uint32_t t1l, uint32_t reset, bool with_dma, uint8_t interrupt_priority)
+led_strip_handle_t configure_led_with_timings(int pin, uint32_t led_count, bool is_rgbw, uint32_t t0h, uint32_t t0l, uint32_t t1h, uint32_t t1l, uint32_t reset, bool with_dma, uint8_t interrupt_priority, uint8_t* external_pixel_buf)
 {
     led_strip_encoder_timings_t timings = {
         .t0h = t0h,
@@ -47,6 +47,7 @@ led_strip_handle_t configure_led_with_timings(int pin, uint32_t led_count, bool 
         .max_leds = led_count,                            // The number of LEDs in the strip,
         .led_model = LED_MODEL_WS2812,                    // LED strip model
         .color_component_format = color_component_format, // The color order of the strip: GRB
+        .external_pixel_buf = external_pixel_buf,         // Optional external pixel buffer
         .flags = {
             .invert_out = false, // don't invert the output signal
         },
@@ -75,7 +76,7 @@ led_strip_handle_t configure_led_with_timings(int pin, uint32_t led_count, bool 
 class RmtStrip : public IRmtStrip
 {
 public:
-    RmtStrip(int pin, uint32_t led_count, bool is_rgbw, uint32_t th0, uint32_t tl0, uint32_t th1, uint32_t tl1, uint32_t reset, IRmtStrip::DmaMode dma_mode, uint8_t interrupt_priority)
+    RmtStrip(int pin, uint32_t led_count, bool is_rgbw, uint32_t th0, uint32_t tl0, uint32_t th1, uint32_t tl1, uint32_t reset, IRmtStrip::DmaMode dma_mode, uint8_t interrupt_priority, uint8_t* external_pixel_buf)
         : mIsRgbw(is_rgbw), mLedCount(led_count)
     {
         bool with_dma;
@@ -85,7 +86,7 @@ public:
         } else {
             with_dma = dma_mode == IRmtStrip::DMA_ENABLED;
         }
-        led_strip_handle_t led_strip = configure_led_with_timings(pin, led_count, is_rgbw, th0, tl0, th1, tl1, reset, with_dma, interrupt_priority);
+        led_strip_handle_t led_strip = configure_led_with_timings(pin, led_count, is_rgbw, th0, tl0, th1, tl1, reset, with_dma, interrupt_priority, external_pixel_buf);
         mStrip = led_strip;
     }
 
@@ -172,12 +173,12 @@ private:
 IRmtStrip *IRmtStrip::Create(
     int pin, uint32_t led_count, bool is_rgbw,
     uint32_t th0, uint32_t tl0, uint32_t th1, uint32_t tl1, uint32_t reset,
-    DmaMode dma_config, uint8_t interrupt_priority)
+    DmaMode dma_config, uint8_t interrupt_priority, uint8_t* external_pixel_buf)
 {
     return new RmtStrip(
         pin, led_count, is_rgbw,
         th0, tl0, th1, tl1, reset,
-        dma_config, interrupt_priority
+        dma_config, interrupt_priority, external_pixel_buf
     );
 }
 
@@ -185,4 +186,4 @@ IRmtStrip *IRmtStrip::Create(
 
 #endif  // FASTLED_RMT5
 
-#endif  // ESP32
+#endif  // ESP32 || ESP32S3 || CONFIG_IDF_TARGET_ESP32S3

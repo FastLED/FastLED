@@ -77,7 +77,7 @@
 // When FASTLED_ALL_SRC is enabled, all source is compiled into a single translation unit
 // Individual compilation (FASTLED_ALL_SRC=0) is only used for release builds
 #ifndef FASTLED_ALL_SRC
-  #if defined(__EMSCRIPTEN__)
+  #if defined(__EMSCRIPTEN__) || defined(ESP32)
     #define FASTLED_ALL_SRC 1  // Individual compilation for Emscripten builds only
   #elif defined(RELEASE) || defined(NDEBUG)
     #define FASTLED_ALL_SRC 0  // Individual compilation for release builds only

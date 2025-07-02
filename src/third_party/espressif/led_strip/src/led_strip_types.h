@@ -72,6 +72,7 @@ typedef struct {
     led_model_t led_model;        /*!< Specifies the LED strip model (e.g., WS2812, SK6812) */
     led_color_component_format_t color_component_format; /*!< Specifies the order of color components in each pixel.
                                                               Use helper macros like `LED_STRIP_COLOR_COMPONENT_FMT_GRB` to set the format */
+    uint8_t *external_pixel_buf;  /*!< Optional external pixel buffer. If NULL, driver will allocate its own buffer */
     /*!< LED strip extra driver flags */
     struct led_strip_extra_flags {
         uint32_t invert_out: 1; /*!< Invert output signal */
