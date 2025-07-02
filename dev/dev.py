@@ -114,9 +114,11 @@ def main() -> None:
         print("Invalid selection")
         sys.exit(1)
     platform = list(_ALL.keys())[val - 1]
+    print("Writing to platformio.ini {}".format(PLATFORMIO_INI))
     with PLATFORMIO_INI.open("w") as f:
         f.write(_ALL[platform])
     print(f"Selected platform: {platform}")
+    print("To generate the project, run: pio run -e dev")
 
     sys.exit(1)
 
