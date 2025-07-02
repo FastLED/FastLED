@@ -33,4 +33,10 @@ StrStream &StrStream::operator<<(const FFTBins &bins) {
     return *this;
 }
 
+// Tile2x2_u8_wrap support - delegates to fl::string::append which already knows how to format it
+StrStream &StrStream::operator<<(const Tile2x2_u8_wrap &tile) {
+    mStr.append(tile);
+    return *this;
+}
+
 } // namespace fl
