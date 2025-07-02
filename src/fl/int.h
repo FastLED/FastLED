@@ -1,8 +1,11 @@
 #pragma once
 
+// Eventually these will go away.
 #include <stdint.h>  // ok include
 #include <stddef.h>  // ok include
-
+/// IMPORTANT NOTE!
+/// DO NOT ADD ANY MORE HEADERS. THIS FILE IS MIGRATING TO
+/// A STANDALONE FILE.
 namespace fl {
     // 8-bit types - char is reliably 8 bits on all supported platforms
     typedef signed char i8;
@@ -10,17 +13,24 @@ namespace fl {
     
     // 16-bit and 32-bit types - platform-specific to match stdint.h exactly
     #ifdef __AVR__
-        // On AVR: int is 16-bit, long is 32-bit
-        // This matches how stdint.h defines these types on AVR
+        // On AVR: int is 16-bit, long is 32-bit — match stdint sizes manually
         typedef int i16;
         typedef unsigned int u16;
         typedef long i32;
         typedef unsigned long u32;
         typedef long long i64;
         typedef unsigned long long u64;
-    #elif defined(ESP32) || defined(ESP_PLATFORM)
-        // On ESP32: short is 16-bit, long is 32-bit (to match uint32_t)
-        // This ensures fl::u32 matches uint32_t exactly for function pointer compatibility
+    #elif defined(__MK20DX128__) || defined(__MK20DX256__)
+        // Teensy 3.0 / 3.1 (MK20DX128 / MK20DX256) – compiler defines uint32_t as unsigned long
+        // Use 'long' to guarantee type identity with uint32_t on this platform
+        typedef short i16;
+        typedef unsigned short u16;
+        typedef long i32;
+        typedef unsigned long u32;
+        typedef long long i64;
+        typedef unsigned long long u64;
+    #elif defined(ESP32)
+        // ESP32: short is 16-bit, long is 32-bit (same as Teensy but separate macro for clarity)
         typedef short i16;
         typedef unsigned short u16;
         typedef long i32;
@@ -28,7 +38,7 @@ namespace fl {
         typedef long long i64;
         typedef unsigned long long u64;
     #else
-        // On most other platforms: short is 16-bit, int is 32-bit
+        // Default: assume short 16-bit, int 32-bit (uint32_t is unsigned int)
         typedef short i16;
         typedef unsigned short u16;
         typedef int i32;
