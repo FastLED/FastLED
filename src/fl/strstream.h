@@ -165,6 +165,16 @@ class StrStream {
         return *this;
     }
 
+    // Provide explicit overload for 'unsigned long' to avoid ambiguous
+    // overload resolution on some tool-chains where uint32_t is an alias of
+    // 'unsigned long'.  This funnels the value through the fl::u32 overload so
+    // there remains a single authoritative implementation.
+
+    StrStream &operator<<(const unsigned long &n) {
+        mStr.append(fl::u32(n));
+        return *this;
+    }
+
     // Unified handler for fl:: namespace size-like unsigned integer types and int
     // This handles fl::sz, fl::u16 from the fl:: namespace, and int type
     template<typename T>
