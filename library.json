@@ -42,7 +42,7 @@
     "license": "MIT",
     "homepage": "http://fastled.io",
     "frameworks": "arduino",
-    "platforms": "atmelavr, atmelsam, freescalekinetis, nordicnrf51, nxplpc, ststm32, teensy, espressif8266, espressif32, nordicnrf52",
+    "platforms": "atmelavr, atmelmegaavr, atmelsam, freescalekinetis, nordicnrf51, nordicnrf52, nxplpc, ststm32, renesas-ra, teensy, espressif8266, espressif32, raspberrypi, native",
     "headers": "FastLED.h",
     "export": {
         "exclude": [
