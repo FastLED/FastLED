@@ -17,7 +17,7 @@ class ClocklessSpiWs2812Controller : public CPixelLEDController<RGB_ORDER>
 {
 private:
     // -- Verify that the pin is valid
-    static_assert(FastPin<DATA_PIN>::validpin(), "Invalid pin specified");
+    static_assert(FastPin<DATA_PIN>::validpin(), "This pin has been marked as an invalid pin, common reasons includes it being a ground pin, read only, or too noisy (e.g. hooked up to the uart).");
     fl::scoped_ptr<ISpiStripWs2812> mLedStrip;
 
 public:

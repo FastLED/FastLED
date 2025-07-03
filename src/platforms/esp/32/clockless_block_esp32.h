@@ -49,7 +49,7 @@ class InlineBlockClocklessController : public CPixelLEDController<RGB_ORDER, LAN
     typedef typename FastPin<FIRST_PIN>::port_t data_t;
 
 	// Verify that the pin is valid
-	static_assert(FastPin<FIRST_PIN>::validpin(), "Invalid pin specified");
+	static_assert(FastPin<FIRST_PIN>::validpin(), "This pin has been marked as an invalid pin, common reasons includes it being a ground pin, read only, or too noisy (e.g. hooked up to the uart).");
 
 	data_t mPinMask;
     data_ptr_t mPort;

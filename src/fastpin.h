@@ -300,7 +300,7 @@ template<fl::u8 PIN> class FastPin {
         return false; // choosing default to be FALSE, to allow users to ATTEMPT to use high-speed on pins where support is not known
     }
 
-	static_assert(validpin(), "Invalid pin specified");
+	static_assert(validpin(), "This pin has been marked as an invalid pin, common reasons includes it being a ground pin, read only, or too noisy (e.g. hooked up to the uart).");
 
 	static void _init() { }
 

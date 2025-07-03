@@ -31,7 +31,7 @@ public:
   #endif
 
   inline static void setOutput() {
-      static_assert(validpin(), "Invalid pin specified");
+      static_assert(validpin(), "This pin has been marked as an invalid pin, common reasons includes it being a ground pin, read only, or too noisy (e.g. hooked up to the uart).");
       pinMode(PIN, OUTPUT);
   }
   inline static void setInput() { pinMode(PIN, INPUT); }
