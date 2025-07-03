@@ -1,4 +1,3 @@
-
 #ifdef FASTLED_STUB_IMPL  // Only use this if explicitly defined.
 
 #include "platforms/stub/led_sysdefs_stub.h"
@@ -8,6 +7,11 @@
 
 #include <chrono>
 #include <thread>
+#if defined(FASTLED_USE_PTHREAD_DELAY) || defined(FASTLED_USE_PTHREAD_YIELD)
+#include <time.h>
+#include <errno.h>
+#include <sched.h>
+#endif
 
 
 FL_DISABLE_WARNING_PUSH
@@ -34,11 +38,29 @@ uint32_t micros() {
 }
 
 void delay(int ms) {
-    std::this_thread::sleep_for (std::chrono::milliseconds(ms));
+#ifdef FASTLED_USE_PTHREAD_DELAY
+    if (ms <= 0) {
+        return; // nothing to wait for
+    }
+    struct timespec req;
+    req.tv_sec = ms / 1000;
+    req.tv_nsec = (ms % 1000) * 1000000L;
+    // nanosleep may be interrupted by a signal; retry until the full time has elapsed
+    while (nanosleep(&req, &req) == -1 && errno == EINTR) {
+        // continue sleeping for the remaining time
+    }
+#else
+    std::this_thread::sleep_for(std::chrono::milliseconds(ms));
+#endif
 }
 
 void yield() {
+#ifdef FASTLED_USE_PTHREAD_YIELD
+    // POSIX thread yield to allow other threads to run
+    sched_yield();
+#else
     std::this_thread::yield();
+#endif
 }
 
 #endif  // FASTLED_STUB_IMPL
