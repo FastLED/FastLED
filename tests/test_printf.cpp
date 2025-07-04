@@ -298,7 +298,7 @@ TEST_CASE("fl::snprintf buffer management") {
     SUBCASE("buffer too small") {
         char buffer[10]; // Too small for "Hello, world!"
         int result = fl::snprintf(buffer, sizeof(buffer), "Hello, %s!", "world");
-        REQUIRE_EQ(result, 13); // Should return full length that would have been written
+        REQUIRE_EQ(result, 9); // Should return number of characters actually written
         REQUIRE_EQ(strlen(buffer), 9); // Buffer should contain 9 chars + null terminator
         REQUIRE_EQ(strcmp(buffer, "Hello, wo"), 0); // Truncated but null-terminated
     }
@@ -306,7 +306,7 @@ TEST_CASE("fl::snprintf buffer management") {
     SUBCASE("buffer size 1") {
         char buffer[1];
         int result = fl::snprintf(buffer, sizeof(buffer), "Hello, %s!", "world");
-        REQUIRE_EQ(result, 13); // Should return full length
+        REQUIRE_EQ(result, 0); // Should return 0 characters written (only null terminator fits)
         REQUIRE_EQ(buffer[0], '\0'); // Should only contain null terminator
     }
     
@@ -324,7 +324,7 @@ TEST_CASE("fl::snprintf buffer management") {
     SUBCASE("very long string") {
         char buffer[10];
         int result = fl::snprintf(buffer, sizeof(buffer), "This is a very long string that will be truncated");
-        REQUIRE_EQ(result, 49); // Should return full length
+        REQUIRE_EQ(result, 9); // Should return number of characters actually written
         REQUIRE_EQ(strlen(buffer), 9); // Buffer should contain 9 chars + null terminator
         REQUIRE_EQ(strcmp(buffer, "This is a"), 0); // Truncated but null-terminated
     }
@@ -480,13 +480,13 @@ TEST_CASE("fl::sprintf buffer management") {
         REQUIRE_EQ(strcmp(buffer, expected), 0);
     }
 
-    // SUBCASE("overflow") {
-    //     char buffer[10];
-    //     int result = fl::sprintf(buffer, "Hello, %s!", "world");
-    //     REQUIRE_EQ(result, 10); // Should return the full lenght of the string.
-    //     //REQUIRE_EQ(strcmp(buffer, "Hello, wor"), 0);
-    //     REQUIRE_EQ(fl::string("Hello, wor"), buffer);
-    // }
+    SUBCASE("overflow") {
+        char buffer[10];
+        int result = fl::sprintf(buffer, "Hello, %s!", "world");
+        REQUIRE_EQ(result, 9); // Should return the number of characters actually written (excluding null terminator)
+        REQUIRE_EQ(strcmp(buffer, "Hello, wo"), 0); // Should be truncated to fit in buffer
+        REQUIRE_EQ(fl::string("Hello, wo"), buffer);
+    }
     
 }
 

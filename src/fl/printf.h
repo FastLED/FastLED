@@ -443,8 +443,9 @@ int snprintf(char* buffer, size_t size, const char* format, const Args&... args)
     // Null terminate
     buffer[copy_len] = '\0';
     
-    // Return total length that would have been written (excluding null terminator)
-    return static_cast<int>(formatted_len);
+    // Return the number of characters actually written (excluding null terminator)
+    // This respects the buffer size limit instead of returning the full formatted length
+    return static_cast<int>(copy_len);
 }
 
 /// @brief Sprintf-like formatting function that writes to a buffer
