@@ -55,6 +55,24 @@ void printf(const char* format, const Args&... args);
 template<typename... Args>
 int snprintf(char* buffer, size_t size, const char* format, const Args&... args);
 
+/// @brief Sprintf-like formatting function that writes to a buffer
+/// @param buffer Output buffer to write formatted string to (must be large enough)
+/// @param format Format string with placeholders like "%d", "%s", "%f" etc.
+/// @param args Arguments to format
+/// @return Number of characters written (excluding null terminator)
+/// 
+/// This function writes a formatted string to the provided buffer.
+/// Unlike snprintf, it does not take a size parameter, so the caller
+/// must ensure the buffer is large enough to hold the result.
+///
+/// Example usage:
+/// @code
+/// char buffer[100];
+/// int len = fl::sprintf(buffer, "Value: %d, Name: %s", 42, "test");
+/// @endcode
+template<typename... Args>
+int sprintf(char* buffer, const char* format, const Args&... args);
+
 
 ///////////////////// IMPLEMENTATION /////////////////////
 
@@ -427,6 +445,29 @@ int snprintf(char* buffer, size_t size, const char* format, const Args&... args)
     
     // Return total length that would have been written (excluding null terminator)
     return static_cast<int>(formatted_len);
+}
+
+/// @brief Sprintf-like formatting function that writes to a buffer
+/// @param buffer Output buffer to write formatted string to (must be large enough)
+/// @param format Format string with placeholders like "%d", "%s", "%f" etc.
+/// @param args Arguments to format
+/// @return Number of characters written (excluding null terminator)
+/// 
+/// This function writes a formatted string to the provided buffer.
+/// Unlike snprintf, it does not take a size parameter, so the caller
+/// must ensure the buffer is large enough to hold the result.
+///
+/// Example usage:
+/// @code
+/// char buffer[100];
+/// int len = fl::sprintf(buffer, "Value: %d, Name: %s", 42, "test");
+/// @endcode
+template<typename... Args>
+int sprintf(char* buffer, const char* format, const Args&... args) {
+    // sprintf is just snprintf with a very large buffer size
+    // This assumes the caller has provided a buffer large enough
+    // Use a very large size to effectively disable truncation
+    return snprintf(buffer, static_cast<size_t>(-1), format, args...);
 }
 
 } // namespace fl
