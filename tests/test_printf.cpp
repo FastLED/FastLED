@@ -469,10 +469,6 @@ TEST_CASE("fl::sprintf buffer management") {
         REQUIRE_EQ(strcmp(buffer, "Hello, world!"), 0);
     }
     
-    SUBCASE("null buffer") {
-        int result = fl::sprintf(nullptr, "Hello, %s!", "world");
-        REQUIRE_EQ(result, 0); // Should return 0 for null buffer
-    }
     
     SUBCASE("very long string") {
         char buffer[100]; // Large enough buffer

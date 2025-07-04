@@ -56,22 +56,22 @@ template<typename... Args>
 int snprintf(char* buffer, size_t size, const char* format, const Args&... args);
 
 /// @brief Sprintf-like formatting function that writes to a buffer
-/// @param buffer Output buffer to write formatted string to (must be large enough)
+/// @param buffer Output buffer to write formatted string to
 /// @param format Format string with placeholders like "%d", "%s", "%f" etc.
 /// @param args Arguments to format
 /// @return Number of characters written (excluding null terminator)
 /// 
 /// This function writes a formatted string to the provided buffer.
-/// Unlike snprintf, it does not take a size parameter, so the caller
-/// must ensure the buffer is large enough to hold the result.
+/// The buffer size is deduced at compile time from the array reference,
+/// providing automatic safety against buffer overflows.
 ///
 /// Example usage:
 /// @code
 /// char buffer[100];
 /// int len = fl::sprintf(buffer, "Value: %d, Name: %s", 42, "test");
 /// @endcode
-template<typename... Args>
-int sprintf(char* buffer, const char* format, const Args&... args);
+template<size_t N, typename... Args>
+int sprintf(char (&buffer)[N], const char* format, const Args&... args);
 
 
 ///////////////////// IMPLEMENTATION /////////////////////
@@ -448,26 +448,24 @@ int snprintf(char* buffer, size_t size, const char* format, const Args&... args)
 }
 
 /// @brief Sprintf-like formatting function that writes to a buffer
-/// @param buffer Output buffer to write formatted string to (must be large enough)
+/// @param buffer Output buffer to write formatted string to
 /// @param format Format string with placeholders like "%d", "%s", "%f" etc.
 /// @param args Arguments to format
 /// @return Number of characters written (excluding null terminator)
 /// 
 /// This function writes a formatted string to the provided buffer.
-/// Unlike snprintf, it does not take a size parameter, so the caller
-/// must ensure the buffer is large enough to hold the result.
+/// The buffer size is deduced at compile time from the array reference,
+/// providing automatic safety against buffer overflows.
 ///
 /// Example usage:
 /// @code
 /// char buffer[100];
 /// int len = fl::sprintf(buffer, "Value: %d, Name: %s", 42, "test");
 /// @endcode
-template<typename... Args>
-int sprintf(char* buffer, const char* format, const Args&... args) {
-    // sprintf is just snprintf with a very large buffer size
-    // This assumes the caller has provided a buffer large enough
-    // Use a very large size to effectively disable truncation
-    return snprintf(buffer, static_cast<size_t>(-1), format, args...);
+template<size_t N, typename... Args>
+int sprintf(char (&buffer)[N], const char* format, const Args&... args) {
+    // Use the compile-time known buffer size for safety
+    return snprintf(buffer, N, format, args...);
 }
 
 } // namespace fl
