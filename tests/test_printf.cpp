@@ -479,6 +479,14 @@ TEST_CASE("fl::sprintf buffer management") {
         REQUIRE_EQ(result, expected_len); // Should return actual length written
         REQUIRE_EQ(strcmp(buffer, expected), 0);
     }
+
+    // SUBCASE("overflow") {
+    //     char buffer[10];
+    //     int result = fl::sprintf(buffer, "Hello, %s!", "world");
+    //     REQUIRE_EQ(result, 13); // Should return actual length written
+    //     REQUIRE_EQ(strcmp(buffer, "Hello, world!"), 0);
+    // }
+    
 }
 
 TEST_CASE("fl::sprintf edge cases") {
