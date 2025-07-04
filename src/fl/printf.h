@@ -30,6 +30,31 @@ namespace fl {
 template<typename... Args>
 void printf(const char* format, const Args&... args);
 
+/// @brief Snprintf-like formatting function that writes to a buffer
+/// @param buffer Output buffer to write formatted string to
+/// @param size Maximum number of characters to write (including null terminator)
+/// @param format Format string with placeholders like "%d", "%s", "%f" etc.
+/// @param args Arguments to format
+/// @return Number of characters that would have been written if buffer was large enough
+/// 
+/// Supported format specifiers:
+/// - %d, %i: integers (all integral types)
+/// - %u: unsigned integers  
+/// - %f: floating point numbers
+/// - %s: strings (const char*, fl::string)
+/// - %c: characters
+/// - %x: hexadecimal (lowercase)
+/// - %X: hexadecimal (uppercase)
+/// - %%: literal % character
+///
+/// Example usage:
+/// @code
+/// char buffer[100];
+/// int len = fl::snprintf(buffer, sizeof(buffer), "Value: %d, Name: %s", 42, "test");
+/// @endcode
+template<typename... Args>
+int snprintf(char* buffer, size_t size, const char* format, const Args&... args);
+
 
 ///////////////////// IMPLEMENTATION /////////////////////
 
@@ -350,6 +375,58 @@ void printf(const char* format, const Args&... args) {
     StrStream stream;
     printf_detail::format_impl(stream, format, args...);
     fl::print(stream.str().c_str());
+}
+
+/// @brief Snprintf-like formatting function that writes to a buffer
+/// @param buffer Output buffer to write formatted string to
+/// @param size Maximum number of characters to write (including null terminator)
+/// @param format Format string with placeholders like "%d", "%s", "%f" etc.
+/// @param args Arguments to format
+/// @return Number of characters that would have been written if buffer was large enough
+/// 
+/// Supported format specifiers:
+/// - %d, %i: integers (all integral types)
+/// - %u: unsigned integers  
+/// - %f: floating point numbers
+/// - %s: strings (const char*, fl::string)
+/// - %c: characters
+/// - %x: hexadecimal (lowercase)
+/// - %X: hexadecimal (uppercase)
+/// - %%: literal % character
+///
+/// Example usage:
+/// @code
+/// char buffer[100];
+/// int len = fl::snprintf(buffer, sizeof(buffer), "Value: %d, Name: %s", 42, "test");
+/// @endcode
+template<typename... Args>
+int snprintf(char* buffer, size_t size, const char* format, const Args&... args) {
+    // Handle null buffer or zero size
+    if (!buffer || size == 0) {
+        return 0;
+    }
+    
+    // Format to internal string stream
+    StrStream stream;
+    printf_detail::format_impl(stream, format, args...);
+    fl::string result = stream.str();
+    
+    // Get the formatted string length
+    size_t formatted_len = result.size();
+    
+    // Copy to buffer, ensuring null termination
+    size_t copy_len = (formatted_len < size - 1) ? formatted_len : size - 1;
+    
+    // Copy characters
+    for (size_t i = 0; i < copy_len; ++i) {
+        buffer[i] = result[i];
+    }
+    
+    // Null terminate
+    buffer[copy_len] = '\0';
+    
+    // Return total length that would have been written (excluding null terminator)
+    return static_cast<int>(formatted_len);
 }
 
 } // namespace fl
