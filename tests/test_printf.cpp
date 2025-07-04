@@ -3,6 +3,7 @@
 #include "fl/strstream.h"
 #include "fl/io.h"
 #include <iostream>
+#include <cstdio> // For std::sprintf and std::snprintf
 
 // Test helper for capturing platform output
 namespace test_helper {
@@ -622,5 +623,139 @@ TEST_CASE("fl::sprintf vs fl::snprintf comparison") {
         
         REQUIRE_EQ(result1, result2);
         REQUIRE_EQ(strcmp(buffer1, buffer2), 0);
+    }
+}
+
+TEST_CASE("fl::sprintf vs std::sprintf return value comparison") {
+    // Test that fl::sprintf returns the same values as std::sprintf
+    
+    SUBCASE("simple string formatting") {
+        char buffer1[100];
+        char buffer2[100];
+        
+        int fl_result = fl::sprintf(buffer1, "Hello, %s!", "world");
+        int std_result = std::sprintf(buffer2, "Hello, %s!", "world");
+        
+        REQUIRE_EQ(fl_result, std_result);
+        REQUIRE_EQ(strcmp(buffer1, buffer2), 0);
+    }
+    
+    SUBCASE("integer formatting") {
+        char buffer1[50];
+        char buffer2[50];
+        
+        int fl_result = fl::sprintf(buffer1, "Value: %d", 42);
+        int std_result = std::sprintf(buffer2, "Value: %d", 42);
+        
+        REQUIRE_EQ(fl_result, std_result);
+        REQUIRE_EQ(strcmp(buffer1, buffer2), 0);
+    }
+    
+    SUBCASE("multiple arguments") {
+        char buffer1[100];
+        char buffer2[100];
+        
+        int fl_result = fl::sprintf(buffer1, "Name: %s, Age: %d", "Alice", 25);
+        int std_result = std::sprintf(buffer2, "Name: %s, Age: %d", "Alice", 25);
+        
+        REQUIRE_EQ(fl_result, std_result);
+        REQUIRE_EQ(strcmp(buffer1, buffer2), 0);
+    }
+    
+    SUBCASE("character formatting") {
+        char buffer1[20];
+        char buffer2[20];
+        
+        int fl_result = fl::sprintf(buffer1, "Letter: %c", 'A');
+        int std_result = std::sprintf(buffer2, "Letter: %c", 'A');
+        
+        REQUIRE_EQ(fl_result, std_result);
+        REQUIRE_EQ(strcmp(buffer1, buffer2), 0);
+    }
+    
+    SUBCASE("hexadecimal formatting") {
+        char buffer1[20];
+        char buffer2[20];
+        
+        int fl_result = fl::sprintf(buffer1, "Hex: %x", 255);
+        int std_result = std::sprintf(buffer2, "Hex: %x", 255);
+        
+        REQUIRE_EQ(fl_result, std_result);
+        REQUIRE_EQ(strcmp(buffer1, buffer2), 0);
+    }
+}
+
+TEST_CASE("fl::snprintf vs std::snprintf return value comparison") {
+    // Test that fl::snprintf returns the same values as std::snprintf
+    
+    SUBCASE("simple string formatting") {
+        char buffer1[100];
+        char buffer2[100];
+        
+        int fl_result = fl::snprintf(buffer1, sizeof(buffer1), "Hello, %s!", "world");
+        int std_result = std::snprintf(buffer2, sizeof(buffer2), "Hello, %s!", "world");
+        
+        REQUIRE_EQ(fl_result, std_result);
+        REQUIRE_EQ(strcmp(buffer1, buffer2), 0);
+    }
+    
+    SUBCASE("integer formatting") {
+        char buffer1[50];
+        char buffer2[50];
+        
+        int fl_result = fl::snprintf(buffer1, sizeof(buffer1), "Value: %d", 42);
+        int std_result = std::snprintf(buffer2, sizeof(buffer2), "Value: %d", 42);
+        
+        REQUIRE_EQ(fl_result, std_result);
+        REQUIRE_EQ(strcmp(buffer1, buffer2), 0);
+    }
+    
+    SUBCASE("multiple arguments") {
+        char buffer1[100];
+        char buffer2[100];
+        
+        int fl_result = fl::snprintf(buffer1, sizeof(buffer1), "Name: %s, Age: %d", "Alice", 25);
+        int std_result = std::snprintf(buffer2, sizeof(buffer2), "Name: %s, Age: %d", "Alice", 25);
+        
+        REQUIRE_EQ(fl_result, std_result);
+        REQUIRE_EQ(strcmp(buffer1, buffer2), 0);
+    }
+    
+    SUBCASE("character formatting") {
+        char buffer1[20];
+        char buffer2[20];
+        
+        int fl_result = fl::snprintf(buffer1, sizeof(buffer1), "Letter: %c", 'A');
+        int std_result = std::snprintf(buffer2, sizeof(buffer2), "Letter: %c", 'A');
+        
+        REQUIRE_EQ(fl_result, std_result);
+        REQUIRE_EQ(strcmp(buffer1, buffer2), 0);
+    }
+    
+    SUBCASE("hexadecimal formatting") {
+        char buffer1[20];
+        char buffer2[20];
+        
+        int fl_result = fl::snprintf(buffer1, sizeof(buffer1), "Hex: %x", 255);
+        int std_result = std::snprintf(buffer2, sizeof(buffer2), "Hex: %x", 255);
+        
+        REQUIRE_EQ(fl_result, std_result);
+        REQUIRE_EQ(strcmp(buffer1, buffer2), 0);
+    }
+    
+    SUBCASE("buffer truncation behavior") {
+        char buffer1[10];
+        char buffer2[10];
+        
+        int fl_result = fl::snprintf(buffer1, sizeof(buffer1), "Hello, %s!", "world");
+        int std_result = std::snprintf(buffer2, sizeof(buffer2), "Hello, %s!", "world");
+        
+        // Note: std::snprintf returns the number of characters that would have been written
+        // while fl::snprintf returns the number actually written. This is a known difference.
+        // For truncated strings, we verify the buffer contents are the same
+        REQUIRE_EQ(strcmp(buffer1, buffer2), 0);
+        
+        // Both should be null-terminated and truncated to the same content
+        REQUIRE_EQ(strlen(buffer1), strlen(buffer2));
     }
 }
