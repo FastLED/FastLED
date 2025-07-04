@@ -8,6 +8,31 @@
 
 namespace fl {
 
+/// @brief Printf-like formatting function that prints directly to the platform output
+/// @param format Format string with placeholders like "%d", "%s", "%f" etc.
+/// @param args Arguments to format
+/// 
+/// Supported format specifiers:
+/// - %d, %i: integers (all integral types)
+/// - %u: unsigned integers  
+/// - %f: floating point numbers
+/// - %s: strings (const char*, fl::string)
+/// - %c: characters
+/// - %x: hexadecimal (lowercase)
+/// - %X: hexadecimal (uppercase)
+/// - %%: literal % character
+///
+/// Example usage:
+/// @code
+/// fl::printf("Value: %d, Name: %s", 42, "test");
+/// fl::printf("Float: %.2f", 3.14159);
+/// @endcode
+template<typename... Args>
+void printf(const char* format, const Args&... args);
+
+
+///////////////////// IMPLEMENTATION /////////////////////
+
 namespace printf_detail {
 
 // Helper to parse format specifiers and extract precision
