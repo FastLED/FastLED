@@ -136,7 +136,7 @@ static esp_err_t led_strip_rmt_del(led_strip_t *strip)
     ESP_RETURN_ON_ERROR(rmt_del_channel(rmt_strip->rmt_chan), TAG, "delete RMT channel failed");
     ESP_RETURN_ON_ERROR(rmt_del_encoder(rmt_strip->strip_encoder), TAG, "delete strip encoder failed");
     if (rmt_strip->pixel_buf_allocated_internally) {
-    free(rmt_strip->pixel_buf);
+      free(rmt_strip->pixel_buf);
     }
     free(rmt_strip);
     return ESP_OK;
@@ -178,8 +178,8 @@ esp_err_t led_strip_new_rmt_device(const led_strip_config_t *led_config, const l
         rmt_strip->pixel_buf_allocated_internally = false;
     } else {
         // Allocate our own pixel buffer
-    rmt_strip->pixel_buf = calloc(led_config->max_leds * bytes_per_pixel, sizeof(uint8_t));
-    ESP_GOTO_ON_FALSE(rmt_strip->pixel_buf, ESP_ERR_NO_MEM, err, TAG, "no mem for pixel buffer");
+        rmt_strip->pixel_buf = calloc(led_config->max_leds * bytes_per_pixel, sizeof(uint8_t));
+        ESP_GOTO_ON_FALSE(rmt_strip->pixel_buf, ESP_ERR_NO_MEM, err, TAG, "no mem for pixel buffer");
         rmt_strip->pixel_buf_allocated_internally = true;
     }
     uint32_t resolution = rmt_config->resolution_hz ? rmt_config->resolution_hz : LED_STRIP_RMT_DEFAULT_RESOLUTION;

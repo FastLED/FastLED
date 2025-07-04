@@ -1,4 +1,4 @@
-#if defined(ESP32) || defined(ESP32S3) || defined(CONFIG_IDF_TARGET_ESP32S3)
+#ifdef ESP32
 
 #include "fl/stdint.h"
 #include "third_party/espressif/led_strip/src/enabled.h"
@@ -186,4 +186,4 @@ IRmtStrip *IRmtStrip::Create(
 
 #endif  // FASTLED_RMT5
 
-#endif  // ESP32 || ESP32S3 || CONFIG_IDF_TARGET_ESP32S3
+#endif  // ESP32
