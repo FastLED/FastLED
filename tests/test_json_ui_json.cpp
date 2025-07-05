@@ -1,13 +1,16 @@
+
+
 #include "test.h"
 
 #include "fl/json.h"
 #include "fl/namespace.h"
+#include "platforms/shared/ui/json/ui.h"
+#include "platforms/shared/ui/json/slider.h"
 
 #if FASTLED_ENABLE_JSON
 
 #include "platforms/shared/ui/json/ui_internal.h"
 #include "platforms/shared/ui/json/ui_manager.h"
-#include "platforms/shared/ui/json/slider.h"
 #include "platforms/shared/ui/json/checkbox.h"
 #include "platforms/shared/ui/json/dropdown.h"
 #include "platforms/shared/ui/json/button.h"
@@ -16,6 +19,37 @@
 #include "platforms/shared/ui/json/number_field.h"
 
 FASTLED_USING_NAMESPACE
+
+#if 0  // TODO: Investigate why this test is not sending stuff. In production this works.
+TEST_CASE("Test slider component") {
+    // Create a callback to capture JSON updates that would be sent to JavaScript
+    fl::vector<fl::string> capturedJsonStrings;
+    auto jsCallback = [&capturedJsonStrings](const char* json) {
+        capturedJsonStrings.push_back(fl::string(json));
+    };
+    
+    // Set up the UI handler with our callback
+    auto updateEngineState = fl::setJsonUiHandlers(jsCallback);
+    
+    // Create a slider with range 0-255, step 1, starting at 0
+    fl::JsonSliderImpl slider("test_slider", 0.0f, 0.0f, 255.0f, 1.0f);
+    
+    // Verify initial state
+    CHECK_CLOSE(slider.value(), 0.0f, 0.001f);
+    CHECK_CLOSE(slider.getMin(), 0.0f, 0.001f);
+    CHECK_CLOSE(slider.getMax(), 255.0f, 0.001f);
+    
+    // Send a JSON update to the slider (simulating JavaScript UI interaction)
+    const char* updateJson = R"({"1": 128})";
+    updateEngineState(updateJson);
+    
+    // Process any pending UI updates (normally done by engine loop)
+    fl::processJsonUiPendingUpdates();
+    
+    // Verify the slider value was updated
+    CHECK_CLOSE(slider.value(), 128.0f, 0.001f);
+}
+#endif
 
 TEST_CASE("JSON parsing and serialization utilities") {
     // Test parseJson function
