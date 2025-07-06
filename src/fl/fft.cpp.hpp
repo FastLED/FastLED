@@ -14,7 +14,7 @@ template <> struct Hash<FFT_Args> {
 };
 
 struct FFT::HashMap : public fl::HashMapLru<FFT_Args, Ptr<FFTImpl>> {
-    HashMap(size_t max_size)
+    HashMap(fl::sz max_size)
         : fl::HashMapLru<FFT_Args, Ptr<FFTImpl>>(max_size) {}
 };
 
@@ -43,9 +43,9 @@ void FFT::run(const span<const fl::i16> &sample, FFTBins *out,
 
 void FFT::clear() { mMap->clear(); }
 
-size_t FFT::size() const { return mMap->size(); }
+fl::sz FFT::size() const { return mMap->size(); }
 
-void FFT::setFFTCacheSize(size_t size) { mMap->setMaxSize(size); }
+void FFT::setFFTCacheSize(fl::sz size) { mMap->setMaxSize(size); }
 
 FFTImpl &FFT::get_or_create(const FFT_Args &args) {
     Ptr<FFTImpl> *val = mMap->find_value(args);

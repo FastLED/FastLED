@@ -19,7 +19,7 @@ public:
     using key_type = Key;
     using mapped_type = Value;
     using value_type = fl::Pair<Key, Value>;
-    using size_type = size_t;
+    using size_type = fl::sz;
     using difference_type = ptrdiff_t;
     using key_compare = Compare;
     using reference = value_type&;
@@ -49,7 +49,7 @@ private:
     using NodeAllocator = typename Allocator::template rebind<Node>::other;
 
     Node* root_;
-    size_type size_;
+    fl::sz size_;
     Compare comp_;
     NodeAllocator alloc_;
 
@@ -492,8 +492,8 @@ public:
 
     // Capacity
     bool empty() const { return size_ == 0; }
-    size_type size() const { return size_; }
-    size_type max_size() const { return size_type(-1); }
+    fl::sz size() const { return size_; }
+    fl::sz max_size() const { return fl::sz(-1); }
 
     // Element access
     Value& operator[](const Key& key) {
@@ -626,7 +626,7 @@ public:
         return iterator(successor, this);
     }
 
-    size_type erase(const Key& key) {
+    fl::sz erase(const Key& key) {
         Node* nodeToDelete = findNode(key);
         if (nodeToDelete == nullptr) {
             return 0;
@@ -679,7 +679,7 @@ public:
     }
 
     // Lookup
-    size_type count(const Key& key) const {
+    fl::sz count(const Key& key) const {
         return findNode(key) != nullptr ? 1 : 0;
     }
 

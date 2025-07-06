@@ -13,7 +13,7 @@ struct AudioBuffer {
 };
 
 // Copy the helper functions from audio.cpp
-static bool isdigit(char c) { return c >= '0' && c <= '9'; }
+//static bool isdigit(char c) { return c >= '0' && c <= '9'; }
 static bool isspace(char c) { return c == ' ' || c == '\t' || c == '\n' || c == '\r'; }
 
 // Fast manual parsing of PCM data from a samples array string

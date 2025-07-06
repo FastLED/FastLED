@@ -3,6 +3,7 @@
 #include "fl/strstream.h"
 #include "fl/sketch_macros.h"
 #include "fl/int.h"
+#include "fl/stdint.h"
 
 // Forward declaration to avoid pulling in fl/io.h and causing fl/io.cpp to be compiled
 // This prevents ~5KB memory bloat for simple applications

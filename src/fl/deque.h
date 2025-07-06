@@ -17,19 +17,19 @@ template <typename T, typename Allocator = fl::allocator<T>>
 class deque {
 private:
     T* mData = nullptr;
-    size_t mCapacity = 0;
-    size_t mSize = 0;
-    size_t mFront = 0;  // Index of the front element
+    fl::sz mCapacity = 0;
+    fl::sz mSize = 0;
+    fl::sz mFront = 0;  // Index of the front element
     Allocator mAlloc;
 
-    static const size_t kInitialCapacity = 8;
+    static const fl::sz kInitialCapacity = 8;
 
-    void ensure_capacity(size_t min_capacity) {
+    void ensure_capacity(fl::sz min_capacity) {
         if (mCapacity >= min_capacity) {
             return;
         }
 
-        size_t new_capacity = mCapacity == 0 ? kInitialCapacity : mCapacity * 2;
+        fl::sz new_capacity = mCapacity == 0 ? kInitialCapacity : mCapacity * 2;
         while (new_capacity < min_capacity) {
             new_capacity *= 2;
         }
@@ -40,8 +40,8 @@ private:
         }
 
         // Copy existing elements to new buffer in linear order
-        for (size_t i = 0; i < mSize; ++i) {
-            size_t old_idx = (mFront + i) % mCapacity;
+        for (fl::sz i = 0; i < mSize; ++i) {
+            fl::sz old_idx = (mFront + i) % mCapacity;
             mAlloc.construct(&new_data[i], fl::move(mData[old_idx]));
             mAlloc.destroy(&mData[old_idx]);
         }
@@ -55,7 +55,7 @@ private:
         mFront = 0; // Reset front to 0 after reallocation
     }
 
-    size_t get_index(size_t logical_index) const {
+    fl::sz get_index(fl::sz logical_index) const {
         return (mFront + logical_index) % mCapacity;
     }
 
@@ -64,10 +64,10 @@ public:
     class iterator {
     private:
         deque* mDeque;
-        size_t mIndex;
+        fl::sz mIndex;
 
     public:
-        iterator(deque* dq, size_t index) : mDeque(dq), mIndex(index) {}
+        iterator(deque* dq, fl::sz index) : mDeque(dq), mIndex(index) {}
 
         T& operator*() const {
             return (*mDeque)[mIndex];
@@ -111,10 +111,10 @@ public:
     class const_iterator {
     private:
         const deque* mDeque;
-        size_t mIndex;
+        fl::sz mIndex;
 
     public:
-        const_iterator(const deque* dq, size_t index) : mDeque(dq), mIndex(index) {}
+        const_iterator(const deque* dq, fl::sz index) : mDeque(dq), mIndex(index) {}
 
         const T& operator*() const {
             return (*mDeque)[mIndex];
@@ -158,7 +158,7 @@ public:
     // Constructors
     deque() : mData(nullptr), mCapacity(0), mSize(0), mFront(0) {}
 
-    explicit deque(size_t count, const T& value = T()) : deque() {
+    explicit deque(fl::sz count, const T& value = T()) : deque() {
         resize(count, value);
     }
 
@@ -188,7 +188,7 @@ public:
     deque& operator=(const deque& other) {
         if (this != &other) {
             clear();
-            for (size_t i = 0; i < other.size(); ++i) {
+            for (fl::sz i = 0; i < other.size(); ++i) {
                 push_back(other[i]);
             }
         }
@@ -217,15 +217,15 @@ public:
     }
 
     // Element access
-    T& operator[](size_t index) {
+    T& operator[](fl::sz index) {
         return mData[get_index(index)];
     }
 
-    const T& operator[](size_t index) const {
+    const T& operator[](fl::sz index) const {
         return mData[get_index(index)];
     }
 
-    T& at(size_t index) {
+    T& at(fl::sz index) {
         if (index >= mSize) {
             // Handle bounds error - in embedded context, we'll just return the first element
             // In a real implementation, this might throw an exception
@@ -234,7 +234,7 @@ public:
         return mData[get_index(index)];
     }
 
-    const T& at(size_t index) const {
+    const T& at(fl::sz index) const {
         if (index >= mSize) {
             // Handle bounds error - in embedded context, we'll just return the first element
             return mData[mFront];
@@ -280,11 +280,11 @@ public:
         return mSize == 0;
     }
 
-    size_t size() const {
+    fl::sz size() const {
         return mSize;
     }
 
-    size_t capacity() const {
+    fl::sz capacity() const {
         return mCapacity;
     }
 
@@ -297,14 +297,14 @@ public:
 
     void push_back(const T& value) {
         ensure_capacity(mSize + 1);
-        size_t back_index = get_index(mSize);
+        fl::sz back_index = get_index(mSize);
         mAlloc.construct(&mData[back_index], value);
         ++mSize;
     }
 
     void push_back(T&& value) {
         ensure_capacity(mSize + 1);
-        size_t back_index = get_index(mSize);
+        fl::sz back_index = get_index(mSize);
         mAlloc.construct(&mData[back_index], fl::move(value));
         ++mSize;
     }
@@ -325,7 +325,7 @@ public:
 
     void pop_back() {
         if (mSize > 0) {
-            size_t back_index = get_index(mSize - 1);
+            fl::sz back_index = get_index(mSize - 1);
             mAlloc.destroy(&mData[back_index]);
             --mSize;
         }
@@ -339,11 +339,11 @@ public:
         }
     }
 
-    void resize(size_t new_size) {
+    void resize(fl::sz new_size) {
         resize(new_size, T());
     }
 
-    void resize(size_t new_size, const T& value) {
+    void resize(fl::sz new_size, const T& value) {
         if (new_size > mSize) {
             // Add elements
             ensure_capacity(new_size);
@@ -362,9 +362,9 @@ public:
     void swap(deque& other) {
         if (this != &other) {
             T* temp_data = mData;
-            size_t temp_capacity = mCapacity;
-            size_t temp_size = mSize;
-            size_t temp_front = mFront;
+            fl::sz temp_capacity = mCapacity;
+            fl::sz temp_size = mSize;
+            fl::sz temp_front = mFront;
             Allocator temp_alloc = mAlloc;
 
             mData = other.mData;

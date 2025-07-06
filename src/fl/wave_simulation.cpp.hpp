@@ -59,7 +59,7 @@ int WaveSimulation2D::getDampenening() const { return mSim->getDampenening(); }
 
 float WaveSimulation2D::getSpeed() const { return mSim->getSpeed(); }
 
-float WaveSimulation2D::getf(size_t x, size_t y) const {
+float WaveSimulation2D::getf(fl::sz x, fl::sz y) const {
     if (!has(x, y))
         return 0.0f;
     float sum = 0.0f;
@@ -71,7 +71,7 @@ float WaveSimulation2D::getf(size_t x, size_t y) const {
     return sum / static_cast<float>(mMultiplier * mMultiplier);
 }
 
-int16_t WaveSimulation2D::geti16(size_t x, size_t y) const {
+int16_t WaveSimulation2D::geti16(fl::sz x, fl::sz y) const {
     if (!has(x, y))
         return 0;    
     int32_t sum = 0;
@@ -94,7 +94,7 @@ int16_t WaveSimulation2D::geti16(size_t x, size_t y) const {
     return out;
 }
 
-int16_t WaveSimulation2D::geti16Previous(size_t x, size_t y) const {
+int16_t WaveSimulation2D::geti16Previous(fl::sz x, fl::sz y) const {
     if (!has(x, y))
         return 0;
     int32_t sum = 0;
@@ -109,7 +109,7 @@ int16_t WaveSimulation2D::geti16Previous(size_t x, size_t y) const {
     return out;
 }
 
-bool WaveSimulation2D::geti16All(size_t x, size_t y, int16_t *curr,
+bool WaveSimulation2D::geti16All(fl::sz x, fl::sz y, int16_t *curr,
                                  int16_t *prev, int16_t *diff) const {
     if (!has(x, y))
         return false;
@@ -119,11 +119,11 @@ bool WaveSimulation2D::geti16All(size_t x, size_t y, int16_t *curr,
     return true;
 }
 
-int8_t WaveSimulation2D::geti8(size_t x, size_t y) const {
+int8_t WaveSimulation2D::geti8(fl::sz x, fl::sz y) const {
     return static_cast<int8_t>(geti16(x, y) >> 8);
 }
 
-uint8_t WaveSimulation2D::getu8(size_t x, size_t y) const {
+uint8_t WaveSimulation2D::getu8(fl::sz x, fl::sz y) const {
     int16_t value = geti16(x, y);
     if (mSim->getHalfDuplex()) {
         uint16_t v2 = static_cast<uint16_t>(value);
@@ -137,11 +137,11 @@ uint8_t WaveSimulation2D::getu8(size_t x, size_t y) const {
     return static_cast<uint8_t>(((static_cast<uint16_t>(value) + 32768)) >> 8);
 }
 
-bool WaveSimulation2D::has(size_t x, size_t y) const {
+bool WaveSimulation2D::has(fl::sz x, fl::sz y) const {
     return (x < mOuterWidth) && (y < mOuterHeight);
 }
 
-void WaveSimulation2D::seti16(size_t x, size_t y, int16_t v16) {
+void WaveSimulation2D::seti16(fl::sz x, fl::sz y, int16_t v16) {
     if (!has(x, y))
         return;
 
@@ -150,8 +150,8 @@ void WaveSimulation2D::seti16(size_t x, size_t y, int16_t v16) {
     // radius in pixels of your diamond
     int rad = static_cast<int>(mult) / 2;
 
-    for (size_t j = 0; j < mult; ++j) {
-        for (size_t i = 0; i < mult; ++i) {
+    for (fl::sz j = 0; j < mult; ++j) {
+        for (fl::sz i = 0; i < mult; ++i) {
             // compute offset from the center of this block
             int dx = static_cast<int>(i) - rad;
             int dy = static_cast<int>(j) - rad;
@@ -159,8 +159,8 @@ void WaveSimulation2D::seti16(size_t x, size_t y, int16_t v16) {
             if (ABS(dx) + ABS(dy) > rad) {
                 continue;
             }
-            size_t xx = x * mult + i;
-            size_t yy = y * mult + j;
+            fl::sz xx = x * mult + i;
+            fl::sz yy = y * mult + j;
             if (mSim->has(xx, yy)) {
                 int16_t &pt = mChangeGrid.at(xx, yy);
                 if (pt == 0) {
@@ -186,7 +186,7 @@ void WaveSimulation2D::seti16(size_t x, size_t y, int16_t v16) {
     }
 }
 
-void WaveSimulation2D::setf(size_t x, size_t y, float value) {
+void WaveSimulation2D::setf(fl::sz x, fl::sz y, float value) {
     if (!has(x, y))
         return;
 
@@ -250,7 +250,7 @@ void WaveSimulation1D::setExtraFrames(uint8_t extra) { mExtraFrames = extra; }
 
 float WaveSimulation1D::getSpeed() const { return mSim->getSpeed(); }
 
-float WaveSimulation1D::getf(size_t x) const {
+float WaveSimulation1D::getf(fl::sz x) const {
     if (!has(x))
         return 0.0f;
     float sum = 0.0f;
@@ -261,7 +261,7 @@ float WaveSimulation1D::getf(size_t x) const {
     return sum / static_cast<float>(mult);
 }
 
-int16_t WaveSimulation1D::geti16(size_t x) const {
+int16_t WaveSimulation1D::geti16(fl::sz x) const {
     if (!has(x))
         return 0;
     uint8_t mult = MAX(1, mMultiplier);
@@ -272,7 +272,7 @@ int16_t WaveSimulation1D::geti16(size_t x) const {
     return static_cast<int16_t>(sum / mult);
 }
 
-int16_t WaveSimulation1D::geti16Previous(size_t x) const {
+int16_t WaveSimulation1D::geti16Previous(fl::sz x) const {
     if (!has(x))
         return 0;
     uint8_t mult = MAX(1, mMultiplier);
@@ -283,7 +283,7 @@ int16_t WaveSimulation1D::geti16Previous(size_t x) const {
     return static_cast<int16_t>(sum / mult);
 }
 
-bool WaveSimulation1D::geti16All(size_t x, int16_t *curr, int16_t *prev,
+bool WaveSimulation1D::geti16All(fl::sz x, int16_t *curr, int16_t *prev,
                                  int16_t *diff) const {
     if (!has(x))
         return false;
@@ -293,11 +293,11 @@ bool WaveSimulation1D::geti16All(size_t x, int16_t *curr, int16_t *prev,
     return true;
 }
 
-int8_t WaveSimulation1D::geti8(size_t x) const {
+int8_t WaveSimulation1D::geti8(fl::sz x) const {
     return static_cast<int8_t>(geti16(x) >> 8);
 }
 
-// uint8_t WaveSimulation2D::getu8(size_t x, size_t y) const {
+// uint8_t WaveSimulation2D::getu8(fl::sz x, fl::sz y) const {
 //     int16_t value = geti16(x, y);
 //     if (mSim->getHalfDuplex()) {
 //         uint16_t v2 = static_cast<uint16_t>(value);
@@ -312,7 +312,7 @@ int8_t WaveSimulation1D::geti8(size_t x) const {
 //     8);
 // }
 
-uint8_t WaveSimulation1D::getu8(size_t x) const {
+uint8_t WaveSimulation1D::getu8(fl::sz x) const {
     int16_t value = geti16(x);
     if (mSim->getHalfDuplex()) {
         uint16_t v2 = static_cast<uint16_t>(value);
@@ -326,9 +326,9 @@ uint8_t WaveSimulation1D::getu8(size_t x) const {
     return static_cast<uint8_t>(((static_cast<uint16_t>(value) + 32768)) >> 8);
 }
 
-bool WaveSimulation1D::has(size_t x) const { return (x < mOuterLength); }
+bool WaveSimulation1D::has(fl::sz x) const { return (x < mOuterLength); }
 
-void WaveSimulation1D::setf(size_t x, float value) {
+void WaveSimulation1D::setf(fl::sz x, float value) {
     if (!has(x))
         return;
     value = fl::clamp(value, -1.0f, 1.0f);

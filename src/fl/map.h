@@ -396,7 +396,7 @@ class SortedHeapMap {
         return upper_bound(key);
     }
 
-    size_type erase(const Key& key) {
+    fl::sz erase(const Key& key) {
         return data.erase(value_type(key, Value())) ? 1 : 0;
     }
 
@@ -409,7 +409,7 @@ class SortedHeapMap {
     }
 
     // Lookup
-    size_type count(const Key& key) const {
+    fl::sz count(const Key& key) const {
         return contains(key) ? 1 : 0;
     }
 

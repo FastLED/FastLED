@@ -66,7 +66,7 @@ float WaveSimulation1D_Real::getSpeed() const {
     return fixed_to_float(mCourantSq);
 }
 
-int16_t WaveSimulation1D_Real::geti16(size_t x) const {
+int16_t WaveSimulation1D_Real::geti16(fl::sz x) const {
     if (x >= length) {
         FASTLED_WARN("Out of range.");
         return 0;
@@ -75,7 +75,7 @@ int16_t WaveSimulation1D_Real::geti16(size_t x) const {
     return curr[x + 1];
 }
 
-int16_t WaveSimulation1D_Real::geti16Previous(size_t x) const {
+int16_t WaveSimulation1D_Real::geti16Previous(fl::sz x) const {
     if (x >= length) {
         FASTLED_WARN("Out of range.");
         return 0;
@@ -84,7 +84,7 @@ int16_t WaveSimulation1D_Real::geti16Previous(size_t x) const {
     return prev[x + 1];
 }
 
-float WaveSimulation1D_Real::getf(size_t x) const {
+float WaveSimulation1D_Real::getf(fl::sz x) const {
     if (x >= length) {
         FASTLED_WARN("Out of range.");
         return 0.0f;
@@ -94,9 +94,9 @@ float WaveSimulation1D_Real::getf(size_t x) const {
     return fixed_to_float(curr[x + 1]);
 }
 
-bool WaveSimulation1D_Real::has(size_t x) const { return (x < length); }
+bool WaveSimulation1D_Real::has(fl::sz x) const { return (x < length); }
 
-void WaveSimulation1D_Real::set(size_t x, float value) {
+void WaveSimulation1D_Real::set(fl::sz x, float value) {
     if (x >= length) {
         FASTLED_WARN("warning X value too high");
         return;
@@ -118,7 +118,7 @@ void WaveSimulation1D_Real::update() {
 
     int32_t mCourantSq32 = static_cast<int32_t>(mCourantSq);
     // Iterate over each inner cell.
-    for (size_t i = 1; i < length + 1; i++) {
+    for (fl::sz i = 1; i < length + 1; i++) {
         // Compute the 1D Laplacian:
         // lap = curr[i+1] - 2 * curr[i] + curr[i-1]
         int32_t lap =
@@ -145,7 +145,7 @@ void WaveSimulation1D_Real::update() {
 
     if (mHalfDuplex) {
         // Set the negative values to zero.
-        for (size_t i = 1; i < length + 1; i++) {
+        for (fl::sz i = 1; i < length + 1; i++) {
             if (next[i] < 0) {
                 next[i] = 0;
             }
@@ -178,7 +178,7 @@ float WaveSimulation2D_Real::getSpeed() const {
     return fixed_to_float(mCourantSq);
 }
 
-float WaveSimulation2D_Real::getf(size_t x, size_t y) const {
+float WaveSimulation2D_Real::getf(fl::sz x, fl::sz y) const {
     if (x >= width || y >= height) {
         FASTLED_WARN("Out of range: " << x << ", " << y);
         return 0.0f;
@@ -187,7 +187,7 @@ float WaveSimulation2D_Real::getf(size_t x, size_t y) const {
     return fixed_to_float(curr[(y + 1) * stride + (x + 1)]);
 }
 
-int16_t WaveSimulation2D_Real::geti16(size_t x, size_t y) const {
+int16_t WaveSimulation2D_Real::geti16(fl::sz x, fl::sz y) const {
     if (x >= width || y >= height) {
         FASTLED_WARN("Out of range: " << x << ", " << y);
         return 0;
@@ -196,7 +196,7 @@ int16_t WaveSimulation2D_Real::geti16(size_t x, size_t y) const {
     return curr[(y + 1) * stride + (x + 1)];
 }
 
-int16_t WaveSimulation2D_Real::geti16Previous(size_t x, size_t y) const {
+int16_t WaveSimulation2D_Real::geti16Previous(fl::sz x, fl::sz y) const {
     if (x >= width || y >= height) {
         FASTLED_WARN("Out of range: " << x << ", " << y);
         return 0;
@@ -205,16 +205,16 @@ int16_t WaveSimulation2D_Real::geti16Previous(size_t x, size_t y) const {
     return prev[(y + 1) * stride + (x + 1)];
 }
 
-bool WaveSimulation2D_Real::has(size_t x, size_t y) const {
+bool WaveSimulation2D_Real::has(fl::sz x, fl::sz y) const {
     return (x < width && y < height);
 }
 
-void WaveSimulation2D_Real::setf(size_t x, size_t y, float value) {
+void WaveSimulation2D_Real::setf(fl::sz x, fl::sz y, float value) {
     int16_t v = float_to_fixed(value);
     return seti16(x, y, v);
 }
 
-void WaveSimulation2D_Real::seti16(size_t x, size_t y, int16_t value) {
+void WaveSimulation2D_Real::seti16(fl::sz x, fl::sz y, int16_t value) {
     if (x >= width || y >= height) {
         FASTLED_WARN("Out of range: " << x << ", " << y);
         return;
@@ -228,7 +228,7 @@ void WaveSimulation2D_Real::update() {
     int16_t *next = (whichGrid == 0 ? grid2.data() : grid1.data());
 
     // Update horizontal boundaries.
-    for (size_t j = 0; j < height + 2; ++j) {
+    for (fl::sz j = 0; j < height + 2; ++j) {
         if (mXCylindrical) {
             curr[j * stride + 0] = curr[j * stride + width];
             curr[j * stride + (width + 1)] = curr[j * stride + 1];
@@ -239,7 +239,7 @@ void WaveSimulation2D_Real::update() {
     }
 
     // Update vertical boundaries.
-    for (size_t i = 0; i < width + 2; ++i) {
+    for (fl::sz i = 0; i < width + 2; ++i) {
         curr[0 * stride + i] = curr[1 * stride + i];
         curr[(height + 1) * stride + i] = curr[height * stride + i];
     }
@@ -249,8 +249,8 @@ void WaveSimulation2D_Real::update() {
     int32_t mCourantSq32 = static_cast<int32_t>(mCourantSq);
 
     // Update each inner cell.
-    for (size_t j = 1; j <= height; ++j) {
-        for (size_t i = 1; i <= width; ++i) {
+    for (fl::sz j = 1; j <= height; ++j) {
+        for (fl::sz i = 1; i <= width; ++i) {
             int index = j * stride + i;
             // Laplacian: sum of four neighbors minus 4 times the center.
             int32_t laplacian = (int32_t)curr[index + 1] + curr[index - 1] +
@@ -278,8 +278,8 @@ void WaveSimulation2D_Real::update() {
 
     if (mHalfDuplex) {
         // Set negative values to zero.
-        for (size_t j = 1; j <= height; ++j) {
-            for (size_t i = 1; i <= width; ++i) {
+        for (fl::sz j = 1; j <= height; ++j) {
+            for (fl::sz i = 1; i <= width; ++i) {
                 int index = j * stride + i;
                 if (next[index] < 0) {
                     next[index] = 0;

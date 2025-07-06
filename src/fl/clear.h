@@ -18,7 +18,7 @@ template <int N> inline void clear(CRGB (&arr)[N]) {
 
 inline void clear(Leds &leds) { leds.fill(CRGB::Black); }
 
-template<size_t W, size_t H>
+template<fl::sz W, fl::sz H>
 inline void clear(LedsXY<W, H> &leds) {
     leds.fill(CRGB::Black);
 }

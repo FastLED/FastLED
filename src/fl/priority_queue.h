@@ -86,7 +86,7 @@ class PriorityQueue {
     const T &top() const { return _data.front(); }
 
     bool empty() const { return _data.size() == 0; }
-    size_type size() const { return _data.size(); }
+    fl::sz size() const { return _data.size(); }
 
     const Compare &compare() const { return _comp; }
 

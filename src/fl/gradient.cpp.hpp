@@ -50,25 +50,25 @@ struct VisitorFill {
         n = MIN(indices.size(), output.size());
     }
     void accept(const CRGBPalette16 *palette) {
-        for (size_t i = 0; i < n; ++i) {
+        for (fl::sz i = 0; i < n; ++i) {
             output[i] = ColorFromPalette(*palette, indices[i]);
         }
     }
 
     void accept(const CRGBPalette32 *palette) {
-        for (size_t i = 0; i < n; ++i) {
+        for (fl::sz i = 0; i < n; ++i) {
             output[i] = ColorFromPalette(*palette, indices[i]);
         }
     }
 
     void accept(const CRGBPalette256 *palette) {
-        for (size_t i = 0; i < n; ++i) {
+        for (fl::sz i = 0; i < n; ++i) {
             output[i] = ColorFromPaletteExtended(*palette, indices[i]);
         }
     }
 
     void accept(const Gradient::GradientFunction &func) {
-        for (size_t i = 0; i < n; ++i) {
+        for (fl::sz i = 0; i < n; ++i) {
             output[i] = func(indices[i]);
         }
     }

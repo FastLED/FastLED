@@ -10,6 +10,7 @@ Provides eanble_if and is_derived for compilers before C++14.
 
 #include "fl/namespace.h"
 #include "fl/move.h"
+#include "fl/int.h"
 
 namespace fl { // mandatory namespace to prevent name collision with
                // std::enable_if.
@@ -88,7 +89,7 @@ template <typename T> struct is_array<T[]> {
     static constexpr bool value = true;
 };
 
-template <typename T, size_t N> struct is_array<T[N]> {
+template <typename T, fl::sz N> struct is_array<T[N]> {
     static constexpr bool value = true;
 };
 
@@ -101,7 +102,7 @@ template <typename T> struct remove_extent<T[]> {
     using type = T;
 };
 
-template <typename T, size_t N> struct remove_extent<T[N]> {
+template <typename T, fl::sz N> struct remove_extent<T[N]> {
     using type = T;
 };
 
@@ -696,11 +697,11 @@ struct contains_type<T, U, Rest...> {
 template <typename... Types> struct max_size;
 
 template <> struct max_size<> {
-    static constexpr size_t value = 0;
+    static constexpr fl::sz value = 0;
 };
 
 template <typename T, typename... Rest> struct max_size<T, Rest...> {
-    static constexpr size_t value = (sizeof(T) > max_size<Rest...>::value)
+    static constexpr fl::sz value = (sizeof(T) > max_size<Rest...>::value)
                                         ? sizeof(T)
                                         : max_size<Rest...>::value;
 };
@@ -709,11 +710,11 @@ template <typename T, typename... Rest> struct max_size<T, Rest...> {
 template <typename... Types> struct max_align;
 
 template <> struct max_align<> {
-    static constexpr size_t value = 1;
+    static constexpr fl::sz value = 1;
 };
 
 template <typename T, typename... Rest> struct max_align<T, Rest...> {
-    static constexpr size_t value = (alignof(T) > max_align<Rest...>::value)
+    static constexpr fl::sz value = (alignof(T) > max_align<Rest...>::value)
                                         ? alignof(T)
                                         : max_align<Rest...>::value;
 };

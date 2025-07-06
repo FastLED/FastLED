@@ -5,13 +5,13 @@
 namespace fl {
 
 // fl::begin for arrays
-template <typename T, size_t N>
+template <typename T, fl::sz N>
 constexpr T* begin(T (&array)[N]) noexcept {
     return array;
 }
 
 // fl::end for arrays
-template <typename T, size_t N>
+template <typename T, fl::sz N>
 constexpr T* end(T (&array)[N]) noexcept {
     return array + N;
 }
@@ -41,4 +41,3 @@ constexpr auto end(const Container& c) -> decltype(c.end()) {
 }
 
 } // namespace fl
-

@@ -124,7 +124,7 @@ Tile2x2_u8 Corkscrew::at_splat_extrapolate(float i) const {
     }
 }
 
-size_t Corkscrew::size() const { return mInput.numLeds; }
+fl::sz Corkscrew::size() const { return mInput.numLeds; }
 
 Corkscrew::State Corkscrew::generateState(const Corkscrew::Input &input) {
     CorkscrewState output;
@@ -138,7 +138,7 @@ Tile2x2_u8_wrap Corkscrew::at_wrap(float i) const {
         initializeCache();
         
         // Convert float index to integer for cache lookup
-        size_t cache_index = static_cast<size_t>(i);
+        fl::sz cache_index = static_cast<fl::sz>(i);
         if (cache_index < mTileCache.size()) {
             return mTileCache[cache_index];
         }
@@ -182,7 +182,7 @@ void Corkscrew::initializeCache() const {
         mTileCache.resize(mInput.numLeds);
         
         // Populate cache lazily
-        for (size_t i = 0; i < mInput.numLeds; ++i) {
+        for (fl::sz i = 0; i < mInput.numLeds; ++i) {
             mTileCache[i] = calculateTileAtWrap(static_cast<float>(i));
         }
         
@@ -194,7 +194,7 @@ void Corkscrew::initializeCache() const {
 
 void Corkscrew::initializeBuffer() const {
     if (!mBufferInitialized) {
-        size_t buffer_size = static_cast<size_t>(mState.width) * static_cast<size_t>(mState.height);
+        fl::sz buffer_size = static_cast<fl::sz>(mState.width) * static_cast<fl::sz>(mState.height);
         mCorkscrewLeds.resize(buffer_size, CRGB::Black);
         mBufferInitialized = true;
     }
@@ -235,7 +235,7 @@ void Corkscrew::readFrom(const fl::Grid<CRGB>& source_grid, bool use_multi_sampl
     clearBuffer();
     
     // Iterate through each LED in the corkscrew
-    for (size_t led_idx = 0; led_idx < mInput.numLeds; ++led_idx) {
+    for (fl::sz led_idx = 0; led_idx < mInput.numLeds; ++led_idx) {
         // Get the rectangular coordinates for this corkscrew LED
         vec2f rect_pos = at_no_wrap(static_cast<fl::u16>(led_idx));
         
@@ -257,14 +257,14 @@ void Corkscrew::readFrom(const fl::Grid<CRGB>& source_grid, bool use_multi_sampl
 
 void Corkscrew::clearBuffer() {
     initializeBuffer();
-    for (size_t i = 0; i < mCorkscrewLeds.size(); ++i) {
+    for (fl::sz i = 0; i < mCorkscrewLeds.size(); ++i) {
         mCorkscrewLeds[i] = CRGB::Black;
     }
 }
 
 void Corkscrew::fillBuffer(const CRGB& color) {
     initializeBuffer();
-    for (size_t i = 0; i < mCorkscrewLeds.size(); ++i) {
+    for (fl::sz i = 0; i < mCorkscrewLeds.size(); ++i) {
         mCorkscrewLeds[i] = color;
     }
 }
@@ -277,7 +277,7 @@ void Corkscrew::readFromMulti(const fl::Grid<CRGB>& source_grid) const {
     const_cast<Corkscrew*>(this)->clearBuffer();
     
     // Iterate through each LED in the corkscrew
-    for (size_t led_idx = 0; led_idx < mInput.numLeds; ++led_idx) {
+    for (fl::sz led_idx = 0; led_idx < mInput.numLeds; ++led_idx) {
         // Get the wrapped tile for this LED position
         Tile2x2_u8_wrap tile = at_wrap(static_cast<float>(led_idx));
         

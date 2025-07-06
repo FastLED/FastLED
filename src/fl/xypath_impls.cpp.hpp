@@ -266,7 +266,7 @@ void CatmullRomPath::addPoint(float x, float y) { params().addPoint(x, y); }
 
 void CatmullRomPath::clear() { params().clear(); }
 
-size_t CatmullRomPath::size() const { return params().size(); }
+fl::sz CatmullRomPath::size() const { return params().size(); }
 
 CatmullRomParams &CatmullRomPath::params() { return *mParams; }
 

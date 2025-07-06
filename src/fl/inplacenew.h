@@ -2,6 +2,7 @@
 
 
 #include "fl/stdint.h"
+#include "fl/int.h"
 // This file must not be in the fl namespace, it must be in the global
 // namespace.
 
@@ -11,7 +12,7 @@
 #else
 #define _NO_EXCEPT noexcept
 #endif
-inline void *operator new(size_t, void *ptr) _NO_EXCEPT { return ptr; }
+inline void *operator new(fl::sz, void *ptr) _NO_EXCEPT { return ptr; }
 #elif __has_include(<new>)
 #include <new>
 #elif __has_include(<new.h>)

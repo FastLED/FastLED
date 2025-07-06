@@ -9,7 +9,7 @@ namespace fl {
 
 template <typename T> class CircularBuffer {
   public:
-    CircularBuffer(size_t capacity)
+    CircularBuffer(fl::sz capacity)
         : mCapacity(capacity + 1), mHead(0),
           mTail(0) { // Extra space for distinguishing full/empty
         mBuffer.reset(new T[mCapacity]);
@@ -68,15 +68,15 @@ template <typename T> class CircularBuffer {
         return mBuffer[(mHead + mCapacity - 1) % mCapacity];
     }
 
-    T &operator[](size_t index) { return mBuffer[(mTail + index) % mCapacity]; }
+    T &operator[](fl::sz index) { return mBuffer[(mTail + index) % mCapacity]; }
 
-    const T &operator[](size_t index) const {
+    const T &operator[](fl::sz index) const {
         return mBuffer[(mTail + index) % mCapacity];
     }
 
-    size_t size() const { return (mHead + mCapacity - mTail) % mCapacity; }
+    fl::sz size() const { return (mHead + mCapacity - mTail) % mCapacity; }
 
-    size_t capacity() const { return mCapacity - 1; }
+    fl::sz capacity() const { return mCapacity - 1; }
 
     bool empty() const { return mHead == mTail; }
 
@@ -85,16 +85,16 @@ template <typename T> class CircularBuffer {
     void clear() { mHead = mTail = 0; }
 
   private:
-    size_t increment(size_t index) const { return (index + 1) % mCapacity; }
+    fl::sz increment(fl::sz index) const { return (index + 1) % mCapacity; }
 
-    size_t decrement(size_t index) const {
+    fl::sz decrement(fl::sz index) const {
         return (index + mCapacity - 1) % mCapacity;
     }
 
     fl::scoped_array<T> mBuffer;
-    size_t mCapacity;
-    size_t mHead;
-    size_t mTail;
+    fl::sz mCapacity;
+    fl::sz mHead;
+    fl::sz mTail;
 };
 
 } // namespace fl

@@ -53,7 +53,7 @@ void printf(const char* format, const Args&... args);
 /// int len = fl::snprintf(buffer, sizeof(buffer), "Value: %d, Name: %s", 42, "test");
 /// @endcode
 template<typename... Args>
-int snprintf(char* buffer, size_t size, const char* format, const Args&... args);
+int snprintf(char* buffer, fl::sz size, const char* format, const Args&... args);
 
 /// @brief Sprintf-like formatting function that writes to a buffer
 /// @param buffer Output buffer to write formatted string to
@@ -70,7 +70,7 @@ int snprintf(char* buffer, size_t size, const char* format, const Args&... args)
 /// char buffer[100];
 /// int len = fl::sprintf(buffer, "Value: %d, Name: %s", 42, "test");
 /// @endcode
-template<size_t N, typename... Args>
+template<fl::sz N, typename... Args>
 int sprintf(char (&buffer)[N], const char* format, const Args&... args);
 
 
@@ -316,7 +316,7 @@ inline void format_arg(StrStream& stream, const FormatSpec& spec, const char* ar
 }
 
 // Specialized format_arg for char arrays (string literals like "hello")
-template<size_t N>
+template<fl::sz N>
 void format_arg(StrStream& stream, const FormatSpec& spec, const char (&arg)[N]) {
     format_arg(stream, spec, static_cast<const char*>(arg));
 }
@@ -418,7 +418,7 @@ void printf(const char* format, const Args&... args) {
 /// int len = fl::snprintf(buffer, sizeof(buffer), "Value: %d, Name: %s", 42, "test");
 /// @endcode
 template<typename... Args>
-int snprintf(char* buffer, size_t size, const char* format, const Args&... args) {
+int snprintf(char* buffer, fl::sz size, const char* format, const Args&... args) {
     // Handle null buffer or zero size
     if (!buffer || size == 0) {
         return 0;
@@ -430,13 +430,13 @@ int snprintf(char* buffer, size_t size, const char* format, const Args&... args)
     fl::string result = stream.str();
     
     // Get the formatted string length
-    size_t formatted_len = result.size();
+    fl::sz formatted_len = result.size();
     
     // Copy to buffer, ensuring null termination
-    size_t copy_len = (formatted_len < size - 1) ? formatted_len : size - 1;
+    fl::sz copy_len = (formatted_len < size - 1) ? formatted_len : size - 1;
     
     // Copy characters
-    for (size_t i = 0; i < copy_len; ++i) {
+    for (fl::sz i = 0; i < copy_len; ++i) {
         buffer[i] = result[i];
     }
     
@@ -463,7 +463,7 @@ int snprintf(char* buffer, size_t size, const char* format, const Args&... args)
 /// char buffer[100];
 /// int len = fl::sprintf(buffer, "Value: %d, Name: %s", 42, "test");
 /// @endcode
-template<size_t N, typename... Args>
+template<fl::sz N, typename... Args>
 int sprintf(char (&buffer)[N], const char* format, const Args&... args) {
     // Use the compile-time known buffer size for safety
     return snprintf(buffer, N, format, args...);
