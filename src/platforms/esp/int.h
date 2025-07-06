@@ -6,10 +6,12 @@ namespace fl {
     // Note: On ESP-IDF 3.3 and older, uint32_t is 'unsigned int', not 'unsigned long'
     #if ESP_IDF_VERSION_MAJOR >= 4
         // ESP-IDF 4.0+ uses 'long' for 32-bit types
+        // ESP32: Like ARM platforms, uint32_t and int32_t are 'unsigned long' and 'long'
+        // This matches the Xtensa toolchain behavior similar to ARM toolchains
         typedef short i16;
         typedef unsigned short u16;
         typedef long i32;
-        typedef long unsigned int u32;
+        typedef unsigned long u32;
         typedef long long i64;
         typedef unsigned long long u64;
     #else
