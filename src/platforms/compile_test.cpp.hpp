@@ -52,6 +52,7 @@ static void compile_tests() {
     static_assert(fl::is_same<i16, int16_t>::value, "i16 must be exactly int16_t");
     static_assert(fl::is_same<i8, int8_t>::value, "i8 must be exactly int8_t");
     static_assert(fl::is_same<sz, size_t>::value, "sz must be exactly size_t");
+    static_assert(fl::is_same<uptr, uintptr_t>::value, "uptr must be exactly uintptr_t");
 
     // Size assertions for FastLED integer types
     static_assert(sizeof(i8) == 1, "i8 must be exactly 1 byte");
@@ -62,7 +63,7 @@ static void compile_tests() {
     static_assert(sizeof(u32) == 4, "u32 must be exactly 4 bytes");
     static_assert(sizeof(i64) == 8, "i64 must be exactly 8 bytes");
     static_assert(sizeof(u64) == 8, "u64 must be exactly 8 bytes");
-    static_assert(sizeof(uptr) >= sizeof(void*), "uptr must be at least pointer size");
+    static_assert(sizeof(uptr) == sizeof(uintptr_t), "uptr must be exactly the same size as uintptr_t");
     static_assert(sizeof(sz) == sizeof(size_t), "sz must be exactly the same size as size_t");
 
 

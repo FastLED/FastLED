@@ -21,4 +21,6 @@ namespace fl {
     typedef unsigned long long u64;
     // size_t is unsigned long on ARM (32-bit)
     typedef unsigned long sz;
+    // uintptr_t is unsigned long on ARM (32-bit pointers)
+    typedef unsigned long uptr;
 } 

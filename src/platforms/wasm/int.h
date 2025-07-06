@@ -11,4 +11,6 @@ namespace fl {
     typedef unsigned long long u64;
     // size_t is unsigned long on WASM (32-bit or 64-bit depending on target)
     typedef unsigned long sz;
+    // uintptr_t is unsigned long on WASM (32-bit or 64-bit depending on target)
+    typedef unsigned long uptr;
 }

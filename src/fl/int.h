@@ -15,9 +15,8 @@ namespace fl {
     typedef signed char i8;
     typedef unsigned char u8;
     
-    // Pointer types - universal across platforms
-    typedef uintptr_t uptr;  ///< Pointer-sized unsigned integer
-    // sz (size type) is defined per-platform in platforms/int.h
+    // Pointer and size types are defined per-platform in platforms/int.h
+    // uptr (pointer type) and sz (size type) are defined per-platform
 
 }
 

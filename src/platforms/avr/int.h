@@ -10,4 +10,6 @@ namespace fl {
     typedef unsigned long long u64;
     // size_t is unsigned int on AVR (16-bit)
     typedef unsigned int sz;
+    // uintptr_t is unsigned int on AVR (16-bit pointers)
+    typedef unsigned int uptr;
 }
