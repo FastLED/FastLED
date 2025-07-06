@@ -5,6 +5,10 @@
 
 #include "fl/stdint.h"  // For uintptr_t and size_t
 
+// Platform-specific integer type definitions
+// This includes platform-specific 16/32/64-bit types
+#include "platforms/int.h"
+
 namespace fl {
     // 8-bit types - char is reliably 8 bits on all supported platforms
     // These must be defined BEFORE platform includes so fractional types can use them
@@ -17,9 +21,7 @@ namespace fl {
 
 }
 
-// Platform-specific integer type definitions
-// This includes platform-specific 16/32/64-bit types
-#include "platforms/int.h"
+
 
 namespace fl {
     ///////////////////////////////////////////////////////////////////////
