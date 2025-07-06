@@ -50,11 +50,12 @@ namespace fl {
         typedef long long i64;
         typedef unsigned long long u64;
     #elif defined(ARDUINO_ARCH_RENESAS_UNO)
-        // ATmega328P (Arduino Uno) – int is 16-bit, long is 32-bit
-        typedef int i16;
-        typedef unsigned int u16;
-        typedef long int i32;
-        typedef long unsigned int u32;
+        // Arduino UNO R4 WiFi (Renesas RA4M1) – ARM Cortex-M4, 32-bit
+        // On this platform: short is 16-bit, long is 32-bit, int is also 32-bit but stdint.h uses long
+        typedef short i16;
+        typedef unsigned short u16;
+        typedef long i32;
+        typedef unsigned long u32;
         typedef long long i64;
         typedef unsigned long long u64;
     #elif defined(ESP32)
