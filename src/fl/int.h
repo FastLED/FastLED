@@ -13,12 +13,7 @@ namespace fl {
     // Pointer and size types - universal across platforms
     typedef uintptr_t uptr;  ///< Pointer-sized unsigned integer
     typedef size_t sz;       ///< Size type for containers and memory
-    
-    // Compile-time verification that types are exactly the expected size
-    static_assert(sizeof(i8) == 1, "i8 must be exactly 1 byte");
-    static_assert(sizeof(u8) == 1, "u8 must be exactly 1 byte");
-    static_assert(sizeof(uptr) >= sizeof(void*), "uptr must be at least pointer size");
-    static_assert(sizeof(sz) >= sizeof(void*), "sz must be at least pointer size for large memory operations");
+
 }
 
 // Platform-specific integer type definitions
@@ -74,6 +69,14 @@ namespace fl {
     typedef i32   saccum1516; ///< ANSI: signed         _Accum. 15 bits int, 16 bits fraction
     typedef u16  accum124;   ///< no direct ANSI counterpart. 12 bits int, 4 bits fraction
     typedef i32   saccum114;  ///< no direct ANSI counterpart. 1 bit int, 14 bits fraction
+}
+
+namespace fl {    
+    // Compile-time verification that types are exactly the expected size
+    static_assert(sizeof(i8) == 1, "i8 must be exactly 1 byte");
+    static_assert(sizeof(u8) == 1, "u8 must be exactly 1 byte");
+    static_assert(sizeof(uptr) >= sizeof(void*), "uptr must be at least pointer size");
+    static_assert(sizeof(sz) >= sizeof(void*), "sz must be at least pointer size for large memory operations");
 }
 
 // Make fractional types available in global namespace
