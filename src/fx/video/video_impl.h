@@ -33,32 +33,32 @@ class VideoImpl : public fl::Referent {
     // Api
     void begin(fl::FileHandlePtr h);
     void beginStream(fl::ByteStreamPtr s);
-    void setFade(uint32_t fadeInTime, uint32_t fadeOutTime);
-    bool draw(uint32_t now, CRGB *leds);
+    void setFade(fl::u32 fadeInTime, fl::u32 fadeOutTime);
+    bool draw(fl::u32 now, CRGB *leds);
     void end();
     bool rewind();
     // internal use
-    bool draw(uint32_t now, Frame *frame);
+    bool draw(fl::u32 now, Frame *frame);
     bool full() const;
     void setTimeScale(float timeScale);
     float timeScale() const { return mTimeScale; }
     size_t pixelsPerFrame() const { return mPixelsPerFrame; }
-    void pause(uint32_t now);
-    void resume(uint32_t now);
-    bool needsFrame(uint32_t now) const;
+    void pause(fl::u32 now);
+    void resume(fl::u32 now);
+    bool needsFrame(fl::u32 now) const;
     int32_t durationMicros() const; // -1 if this is a stream.
 
   private:
-    bool updateBufferIfNecessary(uint32_t prev, uint32_t now);
-    bool updateBufferFromFile(uint32_t now, bool forward);
-    bool updateBufferFromStream(uint32_t now);
-    uint32_t mPixelsPerFrame = 0;
+    bool updateBufferIfNecessary(fl::u32 prev, fl::u32 now);
+    bool updateBufferFromFile(fl::u32 now, bool forward);
+    bool updateBufferFromStream(fl::u32 now);
+    fl::u32 mPixelsPerFrame = 0;
     PixelStreamPtr mStream;
-    uint32_t mPrevNow = 0;
+    fl::u32 mPrevNow = 0;
     FrameInterpolatorPtr mFrameInterpolator;
     TimeWarpPtr mTime;
-    uint32_t mFadeInTime = 1000;
-    uint32_t mFadeOutTime = 1000;
+    fl::u32 mFadeInTime = 1000;
+    fl::u32 mFadeOutTime = 1000;
     float mTimeScale = 1.0f;
 };
 

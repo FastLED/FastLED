@@ -9,7 +9,7 @@
 
 namespace fl {
 
-TimeWarp::TimeWarp(uint32_t realTimeNow, float initialTimeScale)
+TimeWarp::TimeWarp(fl::u32 realTimeNow, float initialTimeScale)
     : mLastRealTime(realTimeNow), mStartTime(realTimeNow),
       mTimeScale(initialTimeScale) {}
 
@@ -19,25 +19,25 @@ void TimeWarp::setSpeed(float timeScale) { mTimeScale = timeScale; }
 
 float TimeWarp::scale() const { return mTimeScale; }
 
-void TimeWarp::pause(uint32_t now) {
+void TimeWarp::pause(fl::u32 now) {
     if (mPauseTime) {
         FASTLED_WARN("TimeWarp::pause: already paused");
         return;
     }
     mPauseTime = now;
 }
-void TimeWarp::resume(uint32_t now) {
+void TimeWarp::resume(fl::u32 now) {
     if (mLastRealTime == 0) {
         reset(now);
         return;
     }
-    uint32_t diff = now - mPauseTime;
+    fl::u32 diff = now - mPauseTime;
     mStartTime += diff;
     mLastRealTime += diff;
     mPauseTime = 0;
 }
 
-uint32_t TimeWarp::update(uint32_t timeNow) {
+fl::u32 TimeWarp::update(fl::u32 timeNow) {
 
     // DBG("TimeWarp::update: timeNow: " << timeNow << " mLastRealTime: " <<
     // mLastRealTime
@@ -52,16 +52,16 @@ uint32_t TimeWarp::update(uint32_t timeNow) {
     return time();
 }
 
-uint32_t TimeWarp::time() const { return mRelativeTime; }
+fl::u32 TimeWarp::time() const { return mRelativeTime; }
 
-void TimeWarp::reset(uint32_t realTimeNow) {
+void TimeWarp::reset(fl::u32 realTimeNow) {
     mLastRealTime = realTimeNow;
     mStartTime = realTimeNow;
     mRelativeTime = 0;
 }
 
-void TimeWarp::applyExact(uint32_t timeNow) {
-    uint32_t elapsedRealTime = timeNow - mLastRealTime;
+void TimeWarp::applyExact(fl::u32 timeNow) {
+    fl::u32 elapsedRealTime = timeNow - mLastRealTime;
     mLastRealTime = timeNow;
     int32_t diff = static_cast<int32_t>(elapsedRealTime * mTimeScale);
     if (diff == 0) {
@@ -73,7 +73,7 @@ void TimeWarp::applyExact(uint32_t timeNow) {
     }
 
     // diff < 0
-    uint32_t abs_diff = -diff;
+    fl::u32 abs_diff = -diff;
     if (abs_diff > mRelativeTime) {
         // Protection against rollover.
         mRelativeTime = 0;

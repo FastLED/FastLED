@@ -16,7 +16,7 @@ void FxLayer::setFx(fl::Ptr<Fx> newFx) {
     }
 }
 
-void FxLayer::draw(uint32_t now) {
+void FxLayer::draw(fl::u32 now) {
     // assert(fx);
     if (!frame) {
         frame = FramePtr::New(fx->getNumLeds());
@@ -32,7 +32,7 @@ void FxLayer::draw(uint32_t now) {
     fx->draw(context);
 }
 
-void FxLayer::pause(uint32_t now) {
+void FxLayer::pause(fl::u32 now) {
     if (fx && running) {
         fx->pause(now);
         running = false;

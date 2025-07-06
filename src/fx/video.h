@@ -56,8 +56,8 @@ class Video : public Fx1d { // Fx1d because video can be irregular.
     // Api
     bool begin(fl::FileHandlePtr h);
     bool beginStream(fl::ByteStreamPtr s);
-    bool draw(uint32_t now, CRGB *leds);
-    bool draw(uint32_t now, Frame *frame);
+    bool draw(fl::u32 now, CRGB *leds);
+    bool draw(fl::u32 now, Frame *frame);
     void end();
     bool finished();
     bool rewind();
@@ -66,9 +66,9 @@ class Video : public Fx1d { // Fx1d because video can be irregular.
     Str error() const;
     void setError(const Str &error) { mError = error; }
     size_t pixelsPerFrame() const;
-    void pause(uint32_t now) override;
-    void resume(uint32_t now) override;
-    void setFade(uint32_t fadeInTime, uint32_t fadeOutTime);
+    void pause(fl::u32 now) override;
+    void resume(fl::u32 now) override;
+    void setFade(fl::u32 fadeInTime, fl::u32 fadeOutTime);
     int32_t durationMicros() const; // -1 if this is a stream.
 
     // make compatible with if statements
@@ -92,7 +92,7 @@ class VideoFxWrapper : public Fx1d {
     ~VideoFxWrapper() override;
     void draw(DrawContext context) override;
     Str fxName() const override;
-    void setFade(uint32_t fadeInTime, uint32_t fadeOutTime);
+    void setFade(fl::u32 fadeInTime, fl::u32 fadeOutTime);
 
   private:
     FxPtr mFx;

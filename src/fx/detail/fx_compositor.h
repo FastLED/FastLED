@@ -19,12 +19,12 @@ namespace fl {
 // Takes two fx layers and composites them together to a final output buffer.
 class FxCompositor {
   public:
-    FxCompositor(uint32_t numLeds) : mNumLeds(numLeds) {
+    FxCompositor(fl::u32 numLeds) : mNumLeds(numLeds) {
         mLayers[0] = FxLayerPtr::New();
         mLayers[1] = FxLayerPtr::New();
     }
 
-    void startTransition(uint32_t now, uint32_t duration, fl::Ptr<Fx> nextFx) {
+    void startTransition(fl::u32 now, fl::u32 duration, fl::Ptr<Fx> nextFx) {
         completeTransition();
         if (duration == 0) {
             mLayers[0]->setFx(nextFx);
@@ -42,7 +42,7 @@ class FxCompositor {
         mTransition.end();
     }
 
-    void draw(uint32_t now, uint32_t warpedTime, CRGB *finalBuffer);
+    void draw(fl::u32 now, fl::u32 warpedTime, CRGB *finalBuffer);
 
   private:
     void swapLayers() {
@@ -52,11 +52,11 @@ class FxCompositor {
     }
 
     FxLayerPtr mLayers[2];
-    const uint32_t mNumLeds;
+    const fl::u32 mNumLeds;
     Transition mTransition;
 };
 
-inline void FxCompositor::draw(uint32_t now, uint32_t warpedTime,
+inline void FxCompositor::draw(fl::u32 now, fl::u32 warpedTime,
                                CRGB *finalBuffer) {
     if (!mLayers[0]->getFx()) {
         return;
@@ -71,7 +71,7 @@ inline void FxCompositor::draw(uint32_t now, uint32_t warpedTime,
     const CRGB *surface0 = mLayers[0]->getSurface();
     const CRGB *surface1 = mLayers[1]->getSurface();
 
-    for (uint32_t i = 0; i < mNumLeds; i++) {
+    for (fl::u32 i = 0; i < mNumLeds; i++) {
         const CRGB &p0 = surface0[i];
         const CRGB &p1 = surface1[i];
         CRGB out = CRGB::blend(p0, p1, progress);

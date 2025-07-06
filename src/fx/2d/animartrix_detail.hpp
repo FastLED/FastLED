@@ -201,9 +201,9 @@ class ANIMartRIX {
 
     virtual uint16_t xyMap(uint16_t x, uint16_t y) = 0;
 
-    uint32_t currentTime = 0;
-    void setTime(uint32_t t) { currentTime = t; }
-    uint32_t getTime() { return currentTime ? currentTime : millis(); }
+    fl::u32 currentTime = 0;
+    void setTime(fl::u32 t) { currentTime = t; }
+    fl::u32 getTime() { return currentTime ? currentTime : millis(); }
 
     void init(int w, int h) {
         animation = render_parameters();

@@ -59,8 +59,8 @@ void Pride2015::draw(Fx::DrawContext ctx) {
         brightnesstheta16 += brightnessthetainc16;
         uint16_t b16 = sin16(brightnesstheta16) + 32768;
 
-        uint16_t bri16 = (uint32_t)((uint32_t)b16 * (uint32_t)b16) / 65536;
-        uint8_t bri8 = (uint32_t)(((uint32_t)bri16) * brightdepth) / 65536;
+        uint16_t bri16 = (fl::u32)((fl::u32)b16 * (fl::u32)b16) / 65536;
+        uint8_t bri8 = (fl::u32)(((fl::u32)bri16) * brightdepth) / 65536;
         bri8 += (255 - brightdepth);
 
         CRGB newcolor = CHSV(hue8, sat8, bri8);

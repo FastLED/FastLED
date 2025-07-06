@@ -101,7 +101,7 @@ class Animartrix : public Fx2d {
     EOrder getColorOrder() const { return color_order; }
 
   private:
-    friend void AnimartrixLoop(Animartrix &self, uint32_t now);
+    friend void AnimartrixLoop(Animartrix &self, fl::u32 now);
     friend class FastLEDANIMartRIX;
     static const char *getAnimartrixName(AnimartrixAnim animation);
     AnimartrixAnim prev_animation = NUM_ANIMATIONS;
@@ -111,7 +111,7 @@ class Animartrix : public Fx2d {
     EOrder color_order = RGB;
 };
 
-void AnimartrixLoop(Animartrix &self, uint32_t now);
+void AnimartrixLoop(Animartrix &self, fl::u32 now);
 
 /// ##################################################
 /// Details with the implementation of Animartrix
@@ -159,7 +159,7 @@ void Animartrix::fxSet(int fx) {
     FASTLED_DBG("Setting animation to " << getAnimartrixName(current_animation));
 }
 
-void AnimartrixLoop(Animartrix &self, uint32_t now) {
+void AnimartrixLoop(Animartrix &self, fl::u32 now) {
     if (self.prev_animation != self.current_animation) {
         if (self.impl) {
             // Re-initialize object.

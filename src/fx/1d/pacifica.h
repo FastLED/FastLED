@@ -21,7 +21,7 @@ class Pacifica : public Fx1d {
 
   private:
     uint16_t sCIStart1 = 0, sCIStart2 = 0, sCIStart3 = 0, sCIStart4 = 0;
-    uint32_t sLastms = 0;
+    fl::u32 sLastms = 0;
 
     CRGBPalette16 pacifica_palette_1 = {0x000507, 0x000409, 0x00030B, 0x00030D,
                                         0x000210, 0x000212, 0x000114, 0x000117,
@@ -44,20 +44,20 @@ class Pacifica : public Fx1d {
 
 void Pacifica::draw(DrawContext ctx) {
     CRGB *leds = ctx.leds;
-    uint32_t now = ctx.now;
+    fl::u32 now = ctx.now;
     if (leds == nullptr || mNumLeds == 0) {
         return;
     }
 
     // Update the hue each time through the loop
-    uint32_t ms = now;
-    uint32_t deltams = ms - sLastms;
+    fl::u32 ms = now;
+    fl::u32 deltams = ms - sLastms;
     sLastms = ms;
     uint16_t speedfactor1 = beatsin16(3, 179, 269);
     uint16_t speedfactor2 = beatsin16(4, 179, 269);
-    uint32_t deltams1 = (deltams * speedfactor1) / 256;
-    uint32_t deltams2 = (deltams * speedfactor2) / 256;
-    uint32_t deltams21 = (deltams1 + deltams2) / 2;
+    fl::u32 deltams1 = (deltams * speedfactor1) / 256;
+    fl::u32 deltams2 = (deltams * speedfactor2) / 256;
+    fl::u32 deltams21 = (deltams1 + deltams2) / 2;
     sCIStart1 += (deltams1 * beatsin88(1011, 10, 13));
     sCIStart2 -= (deltams21 * beatsin88(777, 8, 11));
     sCIStart3 -= (deltams1 * beatsin88(501, 5, 7));

@@ -18,9 +18,9 @@ class FxLayer : public fl::Referent {
   public:
     void setFx(fl::Ptr<Fx> newFx);
 
-    void draw(uint32_t now);
+    void draw(fl::u32 now);
 
-    void pause(uint32_t now);
+    void pause(fl::u32 now);
 
     void release();
 

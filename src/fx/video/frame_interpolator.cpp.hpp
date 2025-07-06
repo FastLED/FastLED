@@ -19,13 +19,13 @@ FrameInterpolator::FrameInterpolator(size_t nframes, float fps)
     mFrames.setMaxSize(capacity);
 }
 
-bool FrameInterpolator::draw(uint32_t now, Frame *dst) {
+bool FrameInterpolator::draw(fl::u32 now, Frame *dst) {
     bool ok = draw(now, dst->rgb());
     return ok;
 }
 
-bool FrameInterpolator::draw(uint32_t now, CRGB *leds) {
-    uint32_t frameNumber, nextFrameNumber;
+bool FrameInterpolator::draw(fl::u32 now, CRGB *leds) {
+    fl::u32 frameNumber, nextFrameNumber;
     uint8_t amountOfNextFrame;
     // DBG("now: " << now);
     mFrameTracker.get_interval_frames(now, &frameNumber, &nextFrameNumber,

@@ -31,13 +31,13 @@ Video::Video(size_t pixelsPerFrame, float fps, size_t frame_history_count)
     mImpl = VideoImplPtr::New(pixelsPerFrame, fps, frame_history_count);
 }
 
-void Video::setFade(uint32_t fadeInTime, uint32_t fadeOutTime) {
+void Video::setFade(fl::u32 fadeInTime, fl::u32 fadeOutTime) {
     mImpl->setFade(fadeInTime, fadeOutTime);
 }
 
-void Video::pause(uint32_t now) { mImpl->pause(now); }
+void Video::pause(fl::u32 now) { mImpl->pause(now); }
 
-void Video::resume(uint32_t now) { mImpl->resume(now); }
+void Video::resume(fl::u32 now) { mImpl->resume(now); }
 
 Video::~Video() = default;
 Video::Video(const Video &) = default;
@@ -78,7 +78,7 @@ bool Video::beginStream(ByteStreamPtr bs) {
     return true;
 }
 
-bool Video::draw(uint32_t now, CRGB *leds) {
+bool Video::draw(fl::u32 now, CRGB *leds) {
     if (!mImpl) {
         FASTLED_WARN_IF(!mError.empty(), mError.c_str());
         return false;
@@ -108,7 +108,7 @@ int32_t Video::durationMicros() const {
 
 Str Video::fxName() const { return "Video"; }
 
-bool Video::draw(uint32_t now, Frame *frame) {
+bool Video::draw(fl::u32 now, Frame *frame) {
     if (!mImpl) {
         return false;
     }
@@ -190,7 +190,7 @@ void VideoFxWrapper::draw(DrawContext context) {
     }
 }
 
-void VideoFxWrapper::setFade(uint32_t fadeInTime, uint32_t fadeOutTime) {
+void VideoFxWrapper::setFade(fl::u32 fadeInTime, fl::u32 fadeOutTime) {
     mVideo->setFade(fadeInTime, fadeOutTime);
 }
 

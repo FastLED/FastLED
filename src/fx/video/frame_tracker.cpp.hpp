@@ -17,14 +17,14 @@ long linear_map(long x, long in_min, long in_max, long out_min, long out_max) {
 
 FrameTracker::FrameTracker(float fps) {
     // Convert fps to microseconds per frame interval
-    mMicrosSecondsPerInterval = static_cast<uint32_t>(1000000.0f / fps + .5f);
+    mMicrosSecondsPerInterval = static_cast<fl::u32>(1000000.0f / fps + .5f);
 }
 
-void FrameTracker::get_interval_frames(uint32_t now, uint32_t *frameNumber,
-                                       uint32_t *nextFrameNumber,
+void FrameTracker::get_interval_frames(fl::u32 now, fl::u32 *frameNumber,
+                                       fl::u32 *nextFrameNumber,
                                        uint8_t *amountOfNextFrame) const {
     // Account for any pause time
-    uint32_t effectiveTime = now;
+    fl::u32 effectiveTime = now;
 
     // Convert milliseconds to microseconds for precise calculation
     fl::u64 microseconds = static_cast<fl::u64>(effectiveTime) * 1000ULL;
@@ -37,16 +37,16 @@ void FrameTracker::get_interval_frames(uint32_t now, uint32_t *frameNumber,
     if (amountOfNextFrame != nullptr) {
         fl::u64 frame1_start = (*frameNumber * mMicrosSecondsPerInterval);
         fl::u64 frame2_start = (*nextFrameNumber * mMicrosSecondsPerInterval);
-        uint32_t rel_time = microseconds - frame1_start;
-        uint32_t frame_duration = frame2_start - frame1_start;
+        fl::u32 rel_time = microseconds - frame1_start;
+        fl::u32 frame_duration = frame2_start - frame1_start;
         uint8_t progress = uint8_t(linear_map(rel_time, 0, frame_duration, 0, 255));
         *amountOfNextFrame = progress;
     }
 }
 
-uint32_t FrameTracker::get_exact_timestamp_ms(uint32_t frameNumber) const {
+fl::u32 FrameTracker::get_exact_timestamp_ms(fl::u32 frameNumber) const {
     fl::u64 microseconds = frameNumber * mMicrosSecondsPerInterval;
-    return static_cast<uint32_t>(microseconds / 1000) + mStartTime;
+    return static_cast<fl::u32>(microseconds / 1000) + mStartTime;
 }
 
 } // namespace fl

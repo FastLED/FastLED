@@ -15,7 +15,7 @@ struct BatchDraw {
         mAlphas.reserve(kMaxBatchSize);
     }
 
-    void push(uint32_t index, uint8_t alpha) {
+    void push(fl::u32 index, uint8_t alpha) {
         if (isFull()) {
             flush();
         }
@@ -37,7 +37,7 @@ struct BatchDraw {
     }
 
     static const size_t kMaxBatchSize = 32;
-    using ArrayIndices = fl::FixedVector<uint32_t, kMaxBatchSize>;
+    using ArrayIndices = fl::FixedVector<fl::u32, kMaxBatchSize>;
     using ArrayAlphas = fl::FixedVector<uint8_t, kMaxBatchSize>;
     ArrayIndices mIndices;
     ArrayAlphas mAlphas;
@@ -49,11 +49,11 @@ struct BatchDraw {
 void WaveCrgbGradientMap::mapWaveToLEDs(const XYMap &xymap,
                                         WaveSimulation2D &waveSim, CRGB *leds) {
     BatchDraw batch(leds, &mGradient);
-    const uint32_t width = waveSim.getWidth();
-    const uint32_t height = waveSim.getHeight();
-    for (uint32_t y = 0; y < height; y++) {
-        for (uint32_t x = 0; x < width; x++) {
-            uint32_t idx = xymap(x, y);
+    const fl::u32 width = waveSim.getWidth();
+    const fl::u32 height = waveSim.getHeight();
+    for (fl::u32 y = 0; y < height; y++) {
+        for (fl::u32 x = 0; x < width; x++) {
+            fl::u32 idx = xymap(x, y);
             uint8_t value8 = waveSim.getu8(x, y);
             batch.push(idx, value8);
         }

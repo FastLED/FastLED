@@ -16,9 +16,9 @@ FASTLED_SMART_PTR(FrameInterpolator);
 class FrameInterpolator : public fl::Referent {
   public:
     struct Less {
-        bool operator()(uint32_t a, uint32_t b) const { return a < b; }
+        bool operator()(fl::u32 a, fl::u32 b) const { return a < b; }
     };
-    typedef fl::SortedHeapMap<uint32_t, FramePtr, Less> FrameBuffer;
+    typedef fl::SortedHeapMap<fl::u32, FramePtr, Less> FrameBuffer;
     FrameInterpolator(size_t nframes, float fpsVideo);
 
     // Will search through the array, select the two frames that are closest to
@@ -29,9 +29,9 @@ class FrameInterpolator : public fl::Referent {
     // selected. Returns true if the interpolation was successful, false
     // otherwise. If false then the destination frame will not be modified. Note
     // that this adjustable_time is allowed to go pause or go backward in time.
-    bool draw(uint32_t adjustable_time, Frame *dst);
-    bool draw(uint32_t adjustable_time, CRGB *leds);
-    bool insert(uint32_t frameNumber, FramePtr frame) {
+    bool draw(fl::u32 adjustable_time, Frame *dst);
+    bool draw(fl::u32 adjustable_time, CRGB *leds);
+    bool insert(fl::u32 frameNumber, FramePtr frame) {
         InsertResult result;
         mFrames.insert(frameNumber, frame, &result);
         return result != InsertResult::kMaxSize;
@@ -42,9 +42,9 @@ class FrameInterpolator : public fl::Referent {
 
     bool empty() const { return mFrames.empty(); }
 
-    bool has(uint32_t frameNum) const { return mFrames.has(frameNum); }
+    bool has(fl::u32 frameNum) const { return mFrames.has(frameNum); }
 
-    FramePtr erase(uint32_t frameNum) {
+    FramePtr erase(fl::u32 frameNum) {
         FramePtr out;
         auto it = mFrames.find(frameNum);
         if (it == mFrames.end()) {
@@ -55,7 +55,7 @@ class FrameInterpolator : public fl::Referent {
         return out;
     }
 
-    FramePtr get(uint32_t frameNum) const {
+    FramePtr get(fl::u32 frameNum) const {
         auto it = mFrames.find(frameNum);
         if (it != mFrames.end()) {
             return it->second;
@@ -68,14 +68,14 @@ class FrameInterpolator : public fl::Referent {
 
     FrameBuffer *getFrames() { return &mFrames; }
 
-    bool needsFrame(uint32_t now, uint32_t *currentFrameNumber,
-                    uint32_t *nextFrameNumber) const {
+    bool needsFrame(fl::u32 now, fl::u32 *currentFrameNumber,
+                    fl::u32 *nextFrameNumber) const {
         mFrameTracker.get_interval_frames(now, currentFrameNumber,
                                           nextFrameNumber);
         return !has(*currentFrameNumber) || !has(*nextFrameNumber);
     }
 
-    bool get_newest_frame_number(uint32_t *frameNumber) const {
+    bool get_newest_frame_number(fl::u32 *frameNumber) const {
         if (mFrames.empty()) {
             return false;
         }
@@ -84,7 +84,7 @@ class FrameInterpolator : public fl::Referent {
         return true;
     }
 
-    bool get_oldest_frame_number(uint32_t *frameNumber) const {
+    bool get_oldest_frame_number(fl::u32 *frameNumber) const {
         if (mFrames.empty()) {
             return false;
         }
@@ -93,7 +93,7 @@ class FrameInterpolator : public fl::Referent {
         return true;
     }
 
-    uint32_t get_exact_timestamp_ms(uint32_t frameNumber) const {
+    fl::u32 get_exact_timestamp_ms(fl::u32 frameNumber) const {
         return mFrameTracker.get_exact_timestamp_ms(frameNumber);
     }
 
