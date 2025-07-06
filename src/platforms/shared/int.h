@@ -9,6 +9,3 @@ namespace fl {
     typedef long long i64;
     typedef unsigned long long u64;
 }
-
-// Include size assertions after platform-specific typedefs
-#include "platforms/shared/int_size_assertions.h"
