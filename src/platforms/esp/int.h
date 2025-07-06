@@ -24,6 +24,3 @@ namespace fl {
 
 // Include size assertions after platform-specific typedefs
 #include "platforms/shared/int_size_assertions.h"
-
-// Include fractional types after platform-specific typedefs
-#include "platforms/shared/int_fractional_types.h"
