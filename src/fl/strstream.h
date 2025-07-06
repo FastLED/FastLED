@@ -137,6 +137,12 @@ class StrStream {
         return *this;
     }
 
+    template<fl::sz N>
+    StrStream &operator<<(const char (&str)[N]) {
+        mStr.append(str);
+        return *this;
+    }
+
     // bool support - output as "true"/"false" for readability
     StrStream &operator<<(bool b) {
         mStr.append(b ? "true" : "false");
@@ -195,6 +201,7 @@ class StrStream {
         mStr.append(str);
         return *this;
     }
+    
 
     // crgb
     StrStream &operator=(const CRGB &rgb) {
@@ -215,6 +222,9 @@ class FakeStrStream {
     template <typename T> FakeStrStream &operator<<(const T &) { return *this; }
 
     FakeStrStream &operator<<(const char *) { return *this; }
+
+    template<fl::sz N>
+    FakeStrStream &operator<<(const char (&)[N]) { return *this; }
 
     template <typename T> FakeStrStream &operator=(const T &) { return *this; }
 
@@ -245,5 +255,6 @@ class FakeStrStream {
     FakeStrStream &operator=(fl::u8) { return *this; }
     FakeStrStream &operator=(char) { return *this; }
 };
+
 
 } // namespace fl
