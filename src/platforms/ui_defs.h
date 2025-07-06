@@ -1,11 +1,12 @@
 #pragma once
 
+#ifndef FASTLED_USE_JSON_UI
 #ifdef __EMSCRIPTEN__
 #define FASTLED_USE_JSON_UI 1
 #else
 #define FASTLED_USE_JSON_UI 0
 #endif  // __EMSCRIPTEN__
-
+#endif  // FASTLED_USE_JSON_UI
 
 
 #if FASTLED_USE_JSON_UI
