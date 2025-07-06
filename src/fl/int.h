@@ -60,12 +60,24 @@ namespace fl {
         typedef unsigned long long u64;
     #elif defined(ESP32)
         // ESP32: short is 16-bit, long is 32-bit (same as Teensy but separate macro for clarity)
-        typedef short i16;
-        typedef unsigned short u16;
-        typedef long i32;
-        typedef unsigned long u32;
-        typedef long long i64;
-        typedef unsigned long long u64;
+        // Note: On ESP-IDF 3.3 and older, uint32_t is 'unsigned int', not 'unsigned long'
+        #if ESP_IDF_VERSION_MAJOR >= 4
+            // ESP-IDF 4.0+ uses 'long' for 32-bit types
+            typedef short i16;
+            typedef unsigned short u16;
+            typedef long i32;
+            typedef unsigned long u32;
+            typedef long long i64;
+            typedef unsigned long long u64;
+        #else
+            // ESP-IDF 3.x uses 'int' for 32-bit types
+            typedef short i16;
+            typedef unsigned short u16;
+            typedef int i32;
+            typedef unsigned int u32;
+            typedef long long i64;
+            typedef unsigned long long u64;
+        #endif
     #elif defined(__IMXRT1062__)
         // Teensy 4.0 / 4.1 (iMXRT1062 Cortex-M7) – uint32_t resolves to 'unsigned long'
         typedef short i16;
