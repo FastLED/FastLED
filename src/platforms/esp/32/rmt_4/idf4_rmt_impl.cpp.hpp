@@ -12,6 +12,7 @@
 
 #include "FastLED.h"
 #include "fl/force_inline.h"
+#include "fl/assert.h"
 #include "platforms/esp/32/rmt_4/idf4_rmt.h"
 #include "platforms/esp/32/rmt_4/idf4_rmt_impl.h"
 #include "platforms/esp/32/clock_cycles.h"
@@ -61,20 +62,6 @@ extern "C"
 
 #ifndef FASTLED_RMT_SERIAL_DEBUG
 #define FASTLED_RMT_SERIAL_DEBUG 0
-#endif
-
-#ifdef FASTLED_ASSERT
-#undef FASTLED_ASSERT
-#endif
-#if FASTLED_ESP32_ENABLE_LOGGING
-#define FASTLED_ASSERT(format, errcode, ...)                                  \
-    if (errcode != ESP_OK)                                                    \
-    {                                                                         \
-        Serial.printf(PSTR("FASTLED: " format "\n"), errcode, ##__VA_ARGS__); \
-    }
-#else
-// No-op version to avoid pulling in Serial.printf and vfprintf dependencies
-#define FASTLED_ASSERT(format, errcode, ...) ((void)errcode)
 #endif
 
 
