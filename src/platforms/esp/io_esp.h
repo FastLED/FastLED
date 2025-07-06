@@ -12,11 +12,6 @@
 
 namespace fl {
 
-// Helper function for ESP native lightweight output
-#ifdef ESP32
-static const char* FL_TAG = "FastLED";
-#endif
-
 // Print functions using low-level UART instead of ESP_LOG
 inline void print_esp(const char* str) {
     if (!str) return;
