@@ -8,4 +8,6 @@ namespace fl {
     typedef unsigned int u32;
     typedef long long i64;
     typedef unsigned long long u64;
+    // size_t is unsigned long on most desktop platforms (32-bit or 64-bit)
+    typedef unsigned long sz;
 }
