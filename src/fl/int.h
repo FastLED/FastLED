@@ -3,6 +3,7 @@
 /// IMPORTANT!
 /// This file MUST not
 
+#include "fl/stdint.h"  // For uintptr_t and size_t
 
 namespace fl {
     // 8-bit types - char is reliably 8 bits on all supported platforms
