@@ -91,7 +91,7 @@ static xSemaphoreHandle gTX_semaphore = NULL;
 #endif
 
 // -- One-time I2S initialization
-static bool gInitialized = false;
+static bool gInitializedI2sInitialized = false;
 
 static DMABuffer *allocateDMABuffer(int bytes) {
     DMABuffer *b =
@@ -344,7 +344,7 @@ void i2s_define_bit_patterns(int T1, int T2, int T3) {
     fl::memset(gPixelBits, 0, NUM_COLOR_CHANNELS * 32);
 }
 
-bool i2s_is_initialized() { return gInitialized; }
+bool i2s_is_initialized() { return gInitializedI2sInitialized; }
 
 void i2s_init(int i2s_device) {
 
@@ -438,7 +438,7 @@ void i2s_init(int i2s_device) {
     }
 
     // Serial.println("Init I2S");
-    gInitialized = true;
+    gInitializedI2sInitialized = true;
 }
 
 void i2s_clear_dma_buffer(uint32_t *buf) {
