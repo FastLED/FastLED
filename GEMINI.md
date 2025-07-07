@@ -1,0 +1,1 @@
+Please read the `.cursorrules` file for project-specific guidelines and configurations.

@@ -168,15 +168,12 @@ def run_tests(specific_test: str | None = None) -> None:
             print(
                 f"Test {failed_test.name} failed with return code {failed_test.return_code}"
             )
-            if not _VERBOSE:
-                print("Output:")
-                # Show indented output for better readability
-                for line in failed_test.stdout.splitlines():
-                    print(f"  {line}")
-                print()  # Add spacing between failed tests
-            else:
-                print(failed_test.stdout)
-                print("-" * 40)
+            # Always show output on failure
+            print("Output:")
+            # Show indented output for better readability
+            for line in failed_test.stdout.splitlines():
+                print(f"  {line}")
+            print()  # Add spacing between failed tests
         tests_failed = len(failed_tests)
         failed_test_names = [test.name for test in failed_tests]
         print(
@@ -294,10 +291,10 @@ def main() -> None:
         else:
             cmd = "ctest --test-dir tests/.build"
             if not _VERBOSE:
-                # Show progress, verbose summaries, and output on failure by default
-                cmd += " --verbose --progress --output-on-failure"
+                # Show progress, and output on failure by default
+                cmd += " --progress --output-on-failure"
             else:
-                # Full verbose mode when explicitly requested (same flags for consistency)
+                # Full verbose mode when explicitly requested
                 cmd += " --verbose --progress --output-on-failure"
             if only_run_failed_test:
                 cmd += " --rerun-failed"
