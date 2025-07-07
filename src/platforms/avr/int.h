@@ -1,5 +1,8 @@
 #pragma once
 
+#include <stdint.h>
+#include <stddef.h>
+
 namespace fl {
     // On AVR: int is 16-bit, long is 32-bit — match stdint sizes manually
     typedef int i16;
@@ -8,8 +11,7 @@ namespace fl {
     typedef unsigned long u32;
     typedef long long i64;
     typedef unsigned long long u64;
-    // size_t is unsigned int on AVR (16-bit)
-    typedef unsigned int sz;
-    // uintptr_t is unsigned int on AVR (16-bit pointers)
-    typedef unsigned int uptr;
+    // Use standard types directly to ensure exact compatibility
+    typedef size_t sz;
+    typedef uintptr_t uptr;
 }

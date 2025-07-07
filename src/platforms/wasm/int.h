@@ -1,5 +1,8 @@
 #pragma once
 
+#include <stdint.h>
+#include <stddef.h>
+
 namespace fl {
     // WebAssembly / Emscripten: Default desktop-like type mapping
     // short is 16-bit, int is 32-bit (uint32_t is unsigned int)
@@ -9,8 +12,7 @@ namespace fl {
     typedef unsigned int u32;
     typedef long long i64;
     typedef unsigned long long u64;
-    // size_t is unsigned long on WASM (32-bit or 64-bit depending on target)
-    typedef unsigned long sz;
-    // uintptr_t is unsigned long on WASM (32-bit or 64-bit depending on target)
-    typedef unsigned long uptr;
+    // Use standard types directly to ensure exact compatibility
+    typedef size_t sz;
+    typedef uintptr_t uptr;
 }

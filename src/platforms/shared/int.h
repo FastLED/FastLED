@@ -1,5 +1,8 @@
 #pragma once
 
+#include <stdint.h>
+#include <stddef.h>
+
 namespace fl {
     // Default platform (desktop/generic): assume short 16-bit, int 32-bit (uint32_t is unsigned int)
     typedef short i16;
@@ -8,8 +11,7 @@ namespace fl {
     typedef unsigned int u32;
     typedef long long i64;
     typedef unsigned long long u64;
-    // size_t is unsigned long on most desktop platforms (32-bit or 64-bit)
-    typedef unsigned long sz;
-    // uintptr_t is unsigned long on most desktop platforms (32-bit or 64-bit)
-    typedef unsigned long uptr;
+    // Use standard types directly to ensure exact compatibility
+    typedef size_t sz;
+    typedef uintptr_t uptr;
 }
