@@ -6,16 +6,24 @@
 
 namespace fl {
 
-// fl::memset - provides a FastLED-specific memset implementation
-// that is compatible across all supported platforms
-template <typename T>
-inline void* memset(T* ptr, int value, fl::size num) {
-    return ::memset(static_cast<void*>(ptr), value, num);
-}
 
 // Overload for void* to maintain standard memset signature
 inline void* memset(void* ptr, int value, fl::size num) {
     return ::memset(ptr, value, num);
+}
+
+
+// fl::memset - provides a FastLED-specific memset implementation
+// that is compatible across all supported platforms
+template <typename T>
+inline void* memset(T* ptr, int value, fl::size num) {
+    union memset_union {  // For type aliasing safety.
+        T* ptr;
+        void* void_ptr;
+    };
+    memset_union u;
+    u.ptr = ptr;
+    return fl::memset(u.void_ptr, value, num);
 }
 
 } // namespace fl
