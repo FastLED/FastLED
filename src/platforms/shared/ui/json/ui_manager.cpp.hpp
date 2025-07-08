@@ -128,7 +128,7 @@ fl::vector<JsonUiInternalPtr> JsonUiManager::getComponents() {
     return out;
 }
 
-JsonUiInternalPtr JsonUiManager::findUiComponent(const char* idStr) {
+JsonUiInternalPtr JsonUiManager::findUiComponent(const char* id_or_name) {
     auto components = getComponents();
     
     for (auto &component : components) {
@@ -136,8 +136,15 @@ JsonUiInternalPtr JsonUiManager::findUiComponent(const char* idStr) {
         string componentIdStr;
         componentIdStr.append(id);
         
-        if (fl::string::strcmp(componentIdStr.c_str(), idStr) == 0) {
+        if (fl::string::strcmp(componentIdStr.c_str(), id_or_name) == 0) {
             //FL_WARN("*** Found component with ID " << id);
+            return component;
+        }
+    }
+
+    // If we didn't find it by id, try to find it by name
+    for (auto &component : components) {
+        if (fl::string::strcmp(component->name().c_str(), id_or_name) == 0) {
             return component;
         }
     }
@@ -189,6 +196,8 @@ void JsonUiManager::executeUiUpdates(const FLArduinoJson::JsonDocument &doc) {
                 component->update(v);
                 any_found = true;
                 //FL_WARN("*** Updated component with ID " << idStr);
+            } else {
+                FL_WARN("*** ERROR: could not find component with ID or name: " << idStr);
             }
         }
         FL_WARN_IF(!any_found, "*** ERROR: could not find any components in the JSON update mapping into internal component ids");

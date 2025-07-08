@@ -33,7 +33,7 @@ class JsonUiManager : fl::EngineEvents::Listener {
       mUpdateJs = updateJs;
     }
 
-    JsonUiInternalPtr findUiComponent(const char* idStr);
+    JsonUiInternalPtr findUiComponent(const char* id_or_name);
 
 
   private:

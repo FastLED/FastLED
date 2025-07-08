@@ -132,6 +132,8 @@
         "cstdbool": "cpp",
         "source_location": "cpp",
         "text_encoding": "cpp",
-        "__node_handle": "cpp"
+        "__node_handle": "cpp",
+        "xstring": "cpp",
+        "xutility": "cpp"
     }
 }

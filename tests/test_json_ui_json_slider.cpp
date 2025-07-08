@@ -57,4 +57,13 @@ TEST_CASE("Test slider component") {
     
     // Verify the slider value was updated
     CHECK_CLOSE(slider.value(), 128.0f, 0.001f);
+
+    // Now do it again but this time use the name instead of the id
+    updateJson = R"({"test_slider": 255})";
+    updateEngineState(updateJson);
+    fl::processJsonUiPendingUpdates();
+    //CHECK_EQ(capturedJsonStrings.size(), 2);
+    //CHECK_EQ(capturedJsonStrings[1], expected_serialization);
+    CHECK_CLOSE(slider.value(), 255.0f, 0.001f);
+    
 }
