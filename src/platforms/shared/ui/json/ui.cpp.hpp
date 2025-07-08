@@ -32,27 +32,26 @@ JsonUiUpdateInput setJsonUiHandlers(const JsonUiUpdateOutput& updateJsHandler) {
         
         // Only create a new manager if one doesn't exist
         // This prevents destroying existing components when called multiple times
+
         if (!manager) {
             manager.reset(new JsonUiManager(updateJsHandler));
-            // FL_WARN("setJsonUiHandlers: New manager pointer=" << manager.get());
-            // FL_WARN("Created internal JsonUiManager with updateJs callback");
-            
-            // Flush any pending components to the internal manager
-            auto& pending = getPendingComponents();
-            if (!pending.empty()) {
-                FL_WARN("Flushing " << pending.size() << " pending UI components to internal JsonUiManager");
-                for (const auto& component : pending) {
-                    // Only add components that are still valid (not destroyed)
-                    if (component) {
-                        manager->addComponent(component);
-                    }
-                }
-                pending.clear();
-            } else {
-                // FL_WARN("setJsonUiHandlers: No pending components to flush");
-            }
         } else {
-            FL_WARN("setJsonUiHandlers: Manager already exists, reusing existing manager");
+            manager->resetCallback(updateJsHandler);
+        }
+
+        // Flush any pending components to the internal manager
+        auto& pending = getPendingComponents();
+        if (!pending.empty()) {
+            FL_WARN("Flushing " << pending.size() << " pending UI components to internal JsonUiManager");
+            for (const auto& component : pending) {
+                // Only add components that are still valid (not destroyed)
+                if (component) {
+                    manager->addComponent(component);
+                }
+            }
+            pending.clear();
+        } else {
+            // FL_WARN("setJsonUiHandlers: No pending components to flush");
         }
         
         // Return a function that allows updating the engine state

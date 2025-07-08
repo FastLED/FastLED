@@ -50,11 +50,10 @@ TEST_CASE("Test slider component") {
     
     // Process any pending UI updates (normally done by engine loop)
     fl::processJsonUiPendingUpdates();
-    
-    // Print all captured strings to see what's happening
-    for (const auto& str : capturedJsonStrings) {
-        FL_WARN("All captured JSON: " << str);
-    }
+
+    CHECK_EQ(capturedJsonStrings.size(), 1);
+    fl::string expected_serialization = "[{\"name\":\"test_slider\",\"group\":\"\",\"type\":\"slider\",\"id\":0,\"value\":128,\"min\":0,\"max\":255,\"step\":1}]";
+    CHECK_EQ(capturedJsonStrings[0], expected_serialization);
     
     // Verify the slider value was updated
     CHECK_CLOSE(slider.value(), 128.0f, 0.001f);

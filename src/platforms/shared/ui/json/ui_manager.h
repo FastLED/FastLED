@@ -29,7 +29,10 @@ class JsonUiManager : fl::EngineEvents::Listener {
     void updateUiComponents(const char *jsonStr);
     void executeUiUpdates(const FLArduinoJson::JsonDocument &doc);
 
-    Callback mUpdateJs;
+    void resetCallback(Callback updateJs) {
+      mUpdateJs = updateJs;
+    }
+
 
   private:
     
@@ -37,11 +40,10 @@ class JsonUiManager : fl::EngineEvents::Listener {
 
     void onEndFrame() override;
 
-    void onEndShowLeds() override;
-
     fl::vector<JsonUiInternalPtr> getComponents();
     void toJson(FLArduinoJson::JsonArray &json);
 
+    Callback mUpdateJs;
     JsonUIRefSet mComponents;
     fl::mutex mMutex;
 

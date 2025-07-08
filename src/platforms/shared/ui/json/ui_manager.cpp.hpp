@@ -55,11 +55,58 @@ void JsonUiManager::removeComponent(fl::WeakPtr<JsonUiInternal> component) {
 
 void JsonUiManager::processPendingUpdates() {
     // Force immediate processing of pending updates (for testing)
+
     if (mHasPendingUpdate) {
         executeUiUpdates(mPendingJsonUpdate);
         mPendingJsonUpdate.clear();
         mHasPendingUpdate = false;
     }
+
+
+    bool shouldUpdate = false;
+    {
+        fl::lock_guard<fl::mutex> lock(mMutex);
+        // Check if new components were added
+        shouldUpdate = mItemsAdded;
+        mItemsAdded = false;
+        
+        // Poll all components for changes (eliminates need for manual notifications)
+        if (!shouldUpdate) {
+            for (auto &componentRef : mComponents) {
+                if (auto component = componentRef.lock()) {
+                    if (component->hasChanged()) {
+                        shouldUpdate = true;
+                        break; // Found at least one change, no need to check more
+                    }
+                }
+            }
+        }
+    }
+    
+    if (shouldUpdate) {
+        // Clear the changed flags for all components
+        {
+            fl::lock_guard<fl::mutex> lock(mMutex);
+            for (auto &componentRef : mComponents) {
+                if (auto component = componentRef.lock()) {
+                    component->clearChanged();
+                }
+            }
+        }
+        
+        FLArduinoJson::JsonDocument doc;
+        auto json = doc.to<FLArduinoJson::JsonArray>();
+        toJson(json);
+        string jsonStr;
+        serializeJson(doc, jsonStr);
+        //FL_WARN("*** SENDING UI TO FRONTEND: " << jsonStr.substr(0, 100).c_str() << "...");
+        mUpdateJs(jsonStr.c_str());
+    }
+
+
+
+
+
 }
 
 fl::vector<JsonUiInternalPtr> JsonUiManager::getComponents() {
@@ -147,48 +194,6 @@ void JsonUiManager::toJson(FLArduinoJson::JsonArray &json) {
     }
 }
 
-void JsonUiManager::onEndShowLeds() {
-   // FL_WARN("*** onEndShowLeds CALLED ***");
-    bool shouldUpdate = false;
-    {
-        fl::lock_guard<fl::mutex> lock(mMutex);
-        // Check if new components were added
-        shouldUpdate = mItemsAdded;
-        mItemsAdded = false;
-        
-        // Poll all components for changes (eliminates need for manual notifications)
-        if (!shouldUpdate) {
-            for (auto &componentRef : mComponents) {
-                if (auto component = componentRef.lock()) {
-                    if (component->hasChanged()) {
-                        shouldUpdate = true;
-                        break; // Found at least one change, no need to check more
-                    }
-                }
-            }
-        }
-    }
-    
-    if (shouldUpdate) {
-        // Clear the changed flags for all components
-        {
-            fl::lock_guard<fl::mutex> lock(mMutex);
-            for (auto &componentRef : mComponents) {
-                if (auto component = componentRef.lock()) {
-                    component->clearChanged();
-                }
-            }
-        }
-        
-        FLArduinoJson::JsonDocument doc;
-        auto json = doc.to<FLArduinoJson::JsonArray>();
-        toJson(json);
-        string jsonStr;
-        serializeJson(doc, jsonStr);
-        //FL_WARN("*** SENDING UI TO FRONTEND: " << jsonStr.substr(0, 100).c_str() << "...");
-        mUpdateJs(jsonStr.c_str());
-    }
-}
 
 } // namespace fl
 #endif // FASTLED_ENABLE_JSON
