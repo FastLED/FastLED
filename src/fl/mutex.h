@@ -1,6 +1,7 @@
 #pragma once
 
 #include "fl/thread.h"
+#include "fl/assert.h"
 
 #if FASTLED_MULTITHREADED
 #include <mutex>  // ok include
@@ -20,6 +21,9 @@ using mutex = MutexFake<void>;
 ///////////////////// IMPLEMENTATION //////////////////////////////////////
 
 template <typename T> class MutexFake {
+  private:
+    int mLockCount = 0;
+    
   public:
     MutexFake() = default;
     
@@ -29,40 +33,41 @@ template <typename T> class MutexFake {
     MutexFake(MutexFake&&) = delete;
     MutexFake& operator=(MutexFake&&) = delete;
     
-    // Fake mutex operations - these do nothing but provide the interface
+    // Recursive fake mutex operations
     void lock() {
-        // In a real implementation, this would block until the mutex is acquired
-        // Fake implementation: do nothing
+        // In single-threaded mode, we just track the lock count for debugging
+        mLockCount++;
     }
     
     void unlock() {
-        // In a real implementation, this would release the mutex
-        // Fake implementation: do nothing
+        // In single-threaded mode, we just track the lock count for debugging
+        FL_ASSERT(mLockCount > 0, "MutexFake: unlock called without matching lock");
+        mLockCount--;
     }
     
     bool try_lock() {
-        // In a real implementation, this would try to acquire the mutex without blocking
-        // Fake implementation: always return true (success)
+        // In single-threaded mode, always succeed and increment count
+        mLockCount++;
         return true;
     }
 };
 
 
 #if FASTLED_MULTITHREADED
-class MutexReal : public std::mutex {
+class MutexReal : public std::recursive_mutex {
   public:
     MutexReal() = default;
     
-    // Non-copyable and non-movable (inherited from std::mutex)
+    // Non-copyable and non-movable (inherited from std::recursive_mutex)
     MutexReal(const MutexReal&) = delete;
     MutexReal& operator=(const MutexReal&) = delete;
     MutexReal(MutexReal&&) = delete;
     MutexReal& operator=(MutexReal&&) = delete;
     
-    // Mutex operations are inherited from std::mutex:
-    // - void lock()
-    // - void unlock()
-    // - bool try_lock()
+    // Mutex operations are inherited from std::recursive_mutex:
+    // - void lock()     - can be called multiple times by the same thread
+    // - void unlock()   - must be called the same number of times as lock()
+    // - bool try_lock() - can succeed multiple times for the same thread
 };
 #endif
 
