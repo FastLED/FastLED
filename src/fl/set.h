@@ -10,26 +10,26 @@
 
 namespace fl {
 
-// OrderedSet stores values in order of insertion.
-template <typename Key, sz N> class OrderedSetFixed;
-template <typename Key, typename Allocator> class OrderedSet;
+// VectorSet stores values in order of insertion.
+template <typename Key, sz N> class VectorSetFixed;
+template <typename Key, typename Allocator> class VectorSet;
 
 template <typename Key, sz N>
-using FixedSet = OrderedSetFixed<Key, N>;  // Backwards compatibility
+using FixedSet = VectorSetFixed<Key, N>;  // Backwards compatibility
 
 // A simple unordered set implementation with a fixed size.
 // The user is responsible for making sure that the inserts
 // do not exceed the capacity of the set, otherwise they will
 // fail. Because of this limitation, this set is not a drop in
 // replacement for std::set.
-template <typename Key, sz N> class OrderedSetFixed {
+template <typename Key, sz N> class VectorSetFixed {
   public:
     typedef FixedVector<Key, N> VectorType;
     typedef typename VectorType::iterator iterator;
     typedef typename VectorType::const_iterator const_iterator;
 
     // Constructor
-    constexpr OrderedSetFixed() = default;
+    constexpr VectorSetFixed() = default;
 
     iterator begin() { return data.begin(); }
     iterator end() { return data.end(); }
@@ -164,14 +164,14 @@ template <typename Key, sz N> class OrderedSetFixed {
     VectorType data;
 };
 
-template <typename Key, typename Allocator = fl::allocator<Key>> class OrderedSet {
+template <typename Key, typename Allocator = fl::allocator<Key>> class VectorSet {
   public:
     typedef fl::HeapVector<Key, Allocator> VectorType;
     typedef typename VectorType::iterator iterator;
     typedef typename VectorType::const_iterator const_iterator;
 
     // Constructor
-    constexpr OrderedSet() = default;
+    constexpr VectorSet() = default;
 
     iterator begin() { return data.begin(); }
     iterator end() { return data.end(); }

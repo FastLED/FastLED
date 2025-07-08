@@ -38,7 +38,7 @@ class JsonUiManager : fl::EngineEvents::Listener {
 
   private:
     
-    typedef fl::OrderedSet<fl::WeakPtr<JsonUiInternal>> JsonUIRefSet;
+    typedef fl::VectorSet<fl::WeakPtr<JsonUiInternal>> JsonUIRefSet;
 
     void onEndFrame() override;
 
