@@ -8,15 +8,20 @@
 
 namespace fl {
 
-template <typename T> class AtomicFake;
+
 
 #if FASTLED_MULTITHREADED
 template <typename T>
 using atomic = std::atomic<T>;
 #else
+template <typename T> class AtomicFake;
 template <typename T>
 using atomic = AtomicFake<T>;
 #endif
+
+using atomic_bool = atomic<bool>;
+using atomic_int = atomic<int>;
+using atomic_uint = atomic<unsigned int>;
 
 ///////////////////// IMPLEMENTATION //////////////////////////////////////
 
