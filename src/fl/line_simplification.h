@@ -277,7 +277,7 @@ template <typename NumberT = float> class LineSimplifierExact {
             mLineSimplifier.setMinimumDistance(mid);
             mLineSimplifier.simplify(polyLine, out);
 
-            fl::sz n = out->size();
+            fl::size n = out->size();
 
             if (n == mCount) {
                 return; // we are done

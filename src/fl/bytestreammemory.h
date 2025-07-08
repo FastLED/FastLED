@@ -17,12 +17,12 @@ class ByteStreamMemory : public ByteStream {
   public:
     ByteStreamMemory(fl::u32 size_buffer);
     ~ByteStreamMemory() override;
-    bool available(fl::sz n) const override;
-    fl::sz read(fl::u8 *dst, fl::sz bytesToRead) override;
+    bool available(fl::size n) const override;
+    fl::size read(fl::u8 *dst, fl::size bytesToRead) override;
     void clear() { mReadBuffer.clear(); }
     const char *path() const override { return "ByteStreamMemory"; }
-    fl::sz write(const fl::u8 *src, fl::sz n);
-    fl::sz writeCRGB(const CRGB *src, fl::sz n);
+    fl::size write(const fl::u8 *src, fl::size n);
+    fl::size writeCRGB(const CRGB *src, fl::size n);
 
   private:
     CircularBuffer<fl::u8> mReadBuffer;

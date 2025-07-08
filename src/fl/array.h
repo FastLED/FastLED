@@ -20,11 +20,11 @@ namespace fl {
  * @tparam T The type of elements
  * @tparam N The number of elements
  */
-template <typename T, fl::sz N> class array {
+template <typename T, fl::size N> class array {
   public:
     // Standard container type definitions
     using value_type = T;
-    using size_type = fl::sz;
+    using size_type = fl::size;
     using difference_type = ptrdiff_t;
     using reference = value_type &;
     using const_reference = const value_type &;
@@ -44,7 +44,7 @@ template <typename T, fl::sz N> class array {
 
     // Initializer list constructor
     array(fl::initializer_list<T> list) {
-        fl::sz i = 0;
+        fl::size i = 0;
         for (auto it = list.begin(); it != list.end() && i < N; ++it, ++i) {
             data_[i] = *it;
         }
@@ -63,23 +63,23 @@ template <typename T, fl::sz N> class array {
     array &operator=(array &&) = default;
 
     // Element access
-    T &at(fl::sz pos) {
+    T &at(fl::size pos) {
         if (pos >= N) {
             return error_value();
         }
         return data_[pos];
     }
 
-    const T &at(fl::sz pos) const {
+    const T &at(fl::size pos) const {
         if (pos >= N) {
             return error_value();
         }
         return data_[pos];
     }
 
-    T &operator[](fl::sz pos) { return data_[pos]; }
+    T &operator[](fl::size pos) { return data_[pos]; }
 
-    const_reference operator[](fl::sz pos) const { return data_[pos]; }
+    const_reference operator[](fl::size pos) const { return data_[pos]; }
 
     T &front() { return data_[0]; }
 
@@ -107,19 +107,19 @@ template <typename T, fl::sz N> class array {
     // Capacity
     bool empty() const noexcept { return N == 0; }
 
-    fl::sz size() const noexcept { return N; }
+    fl::size size() const noexcept { return N; }
 
-    fl::sz max_size() const noexcept { return N; }
+    fl::size max_size() const noexcept { return N; }
 
     // Operations
     void fill(const T &value) {
-        for (fl::sz i = 0; i < N; ++i) {
+        for (fl::size i = 0; i < N; ++i) {
             data_[i] = value;
         }
     }
 
     void swap(array &other) {
-        for (fl::sz i = 0; i < N; ++i) {
+        for (fl::size i = 0; i < N; ++i) {
             fl::swap(data_[i], other.data_[i]);
         }
     }
@@ -133,22 +133,22 @@ template <typename T, fl::sz N> class array {
 };
 
 // Non-member functions
-template <typename T, fl::sz N>
+template <typename T, fl::size N>
 bool operator==(const array<T, N> &lhs, const array<T, N> &rhs) {
     // return std::equal(lhs.begin(), lhs.end(), rhs.begin());
-    for (fl::sz i = 0; i < N; ++i) {
+    for (fl::size i = 0; i < N; ++i) {
         if (lhs[i] != rhs[i]) {
             return false;
         }
     }
 }
 
-template <typename T, fl::sz N>
+template <typename T, fl::size N>
 bool operator!=(const array<T, N> &lhs, const array<T, N> &rhs) {
     return !(lhs == rhs);
 }
 
-template <typename T, fl::sz N>
+template <typename T, fl::size N>
 void swap(array<T, N> &lhs,
           array<T, N> &rhs) noexcept(noexcept(lhs.swap(rhs))) {
     lhs.swap(rhs);

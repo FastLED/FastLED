@@ -256,7 +256,7 @@ class UIAudioImpl {
 class UIDropdownImpl {
   public:
     // Constructor with array of options (size determined automatically)
-    template<fl::sz N>
+    template<fl::size N>
     UIDropdownImpl(const char *name, const fl::string (&options)[N]) 
         : UIDropdownImpl(name, options, N) {}
     
@@ -264,7 +264,7 @@ class UIDropdownImpl {
     UIDropdownImpl(const char *name, const fl::vector<fl::string>& options) 
         : mSelectedIndex(0) {
         FASTLED_UNUSED(name);
-        for (fl::sz i = 0; i < options.size(); ++i) {
+        for (fl::size i = 0; i < options.size(); ++i) {
             mOptions.push_back(options[i]);
         }
         if (mOptions.empty()) {
@@ -288,7 +288,7 @@ class UIDropdownImpl {
     UIDropdownImpl(const char *name, fl::span<fl::string> options) 
         : mSelectedIndex(0) {
         FASTLED_UNUSED(name);
-        for (fl::sz i = 0; i < options.size(); ++i) {
+        for (fl::size i = 0; i < options.size(); ++i) {
             mOptions.push_back(options[i]);
         }
         if (mOptions.empty()) {
@@ -321,12 +321,12 @@ class UIDropdownImpl {
     
     void setSelectedIndex(int index) { 
         if (index >= 0 && index < static_cast<int>(mOptions.size())) {
-            mSelectedIndex = static_cast<fl::sz>(index);
+            mSelectedIndex = static_cast<fl::size>(index);
         }
     }
     
-    fl::sz getOptionCount() const { return mOptions.size(); }
-    fl::string getOption(fl::sz index) const {
+    fl::size getOptionCount() const { return mOptions.size(); }
+    fl::string getOption(fl::size index) const {
         if (index < mOptions.size()) {
             return mOptions[index];
         }
@@ -338,10 +338,10 @@ class UIDropdownImpl {
 
   private:
     // Private constructor with array of options and count (used by template constructor)
-    UIDropdownImpl(const char *name, const fl::string* options, fl::sz count) 
+    UIDropdownImpl(const char *name, const fl::string* options, fl::size count) 
         : mSelectedIndex(0) {
         FASTLED_UNUSED(name);
-        for (fl::sz i = 0; i < count; ++i) {
+        for (fl::size i = 0; i < count; ++i) {
             mOptions.push_back(options[i]);
         }
         if (mOptions.empty()) {
@@ -350,7 +350,7 @@ class UIDropdownImpl {
     }
 
     fl::vector<fl::string> mOptions;
-    fl::sz mSelectedIndex;
+    fl::size mSelectedIndex;
 };
 #endif
 

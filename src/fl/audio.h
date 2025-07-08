@@ -28,7 +28,7 @@ class AudioSample {
     AudioSample &operator=(const AudioSample &other);
     bool isValid() const { return mImpl != nullptr; }
 
-    fl::sz size() const;
+    fl::size size() const;
     // Raw pcm levels.
     const VectorPCM &pcm() const;
     // Zero crossing factor between 0.0f -> 1.0f, detects "hiss"
@@ -41,8 +41,8 @@ class AudioSample {
 
     const_iterator begin() const { return pcm().begin(); }
     const_iterator end() const { return pcm().end(); }
-    const fl::i16 &at(fl::sz i) const;
-    const fl::i16 &operator[](fl::sz i) const;
+    const fl::i16 &at(fl::size i) const;
+    const fl::i16 &operator[](fl::size i) const;
     operator bool() const { return isValid(); }
     bool operator==(const AudioSample &other) const;
     bool operator!=(const AudioSample &other) const;
@@ -66,7 +66,7 @@ class SoundLevelMeter {
     SoundLevelMeter(double spl_floor = 33.0f, double smoothing_alpha = 0.0);
 
     /// Process a block of int16 PCM samples.
-    void processBlock(const fl::i16 *samples, fl::sz count);
+    void processBlock(const fl::i16 *samples, fl::size count);
             void processBlock(fl::span<const fl::i16> samples) {
         processBlock(samples.data(), samples.size());
     }
@@ -125,7 +125,7 @@ class AudioSampleImpl : public fl::Referent {
     //
     // Returns: a value -> [0.0f, 1.0f)
     float zcf() const {
-        const fl::sz n = pcm().size();
+        const fl::size n = pcm().size();
         if (n < 2) {
             return 0.f;
         }
@@ -136,7 +136,7 @@ class AudioSampleImpl : public fl::Referent {
     void initZeroCrossings() {
         mZeroCrossings = 0;
         if (mSignedPcm.size() > 1) {
-            for (fl::sz i = 1; i < mSignedPcm.size(); ++i) {
+            for (fl::size i = 1; i < mSignedPcm.size(); ++i) {
                 const bool crossed =
                     (mSignedPcm[i - 1] < 0 && mSignedPcm[i] >= 0) ||
                     (mSignedPcm[i - 1] >= 0 && mSignedPcm[i] < 0);

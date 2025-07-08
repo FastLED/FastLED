@@ -61,7 +61,7 @@ template <typename T> class Grid {
     T* data() { return mData.data(); }
     const T* data() const { return mData.data(); }
 
-    fl::sz size() const { return mData.size(); }
+    fl::size size() const { return mData.size(); }
 
   private:
     static T &NullValue() {

@@ -30,7 +30,7 @@ class ScreenMap;
 FASTLED_SMART_PTR(FileSystem);
 FASTLED_SMART_PTR(FileHandle);
 class Video;
-template <typename Key, typename Value, fl::sz N> class FixedMap;
+template <typename Key, typename Value, fl::size N> class FixedMap;
 
 class JsonDocument;
 
@@ -45,8 +45,8 @@ class FileSystem {
     FileHandlePtr
     openRead(const char *path); // Null if file could not be opened.
     Video
-    openVideo(const char *path, fl::sz pixelsPerFrame, float fps = 30.0f,
-              fl::sz nFrameHistory = 0); // Null if video could not be opened.
+    openVideo(const char *path, fl::size pixelsPerFrame, float fps = 30.0f,
+              fl::size nFrameHistory = 0); // Null if video could not be opened.
     bool readText(const char *path, string *out);
     bool readJson(const char *path, JsonDocument *doc);
     bool readScreenMaps(const char *path, FixedMap<string, ScreenMap, 16> *out,
@@ -65,17 +65,17 @@ class FileHandle : public Referent {
   public:
     virtual ~FileHandle() {}
     virtual bool available() const = 0;
-    virtual fl::sz bytesLeft() const;
-    virtual fl::sz size() const = 0;
-    virtual fl::sz read(fl::u8 *dst, fl::sz bytesToRead) = 0;
-    virtual fl::sz pos() const = 0;
+    virtual fl::size bytesLeft() const;
+    virtual fl::size size() const = 0;
+    virtual fl::size read(fl::u8 *dst, fl::size bytesToRead) = 0;
+    virtual fl::size pos() const = 0;
     virtual const char *path() const = 0;
-    virtual bool seek(fl::sz pos) = 0;
+    virtual bool seek(fl::size pos) = 0;
     virtual void close() = 0;
     virtual bool valid() const = 0;
 
     // convenience functions
-    fl::sz readCRGB(CRGB *dst, fl::sz n) {
+    fl::size readCRGB(CRGB *dst, fl::size n) {
         return read((fl::u8 *)dst, n * 3) / 3;
     }
 };

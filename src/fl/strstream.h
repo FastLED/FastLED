@@ -77,7 +77,7 @@ class StrStream {
     template<typename T, typename Alloc>
     StrStream &operator<<(const HeapVector<T, Alloc> &vec) {
         mStr.append("[");
-        for (fl::sz i = 0; i < vec.size(); ++i) {
+        for (fl::size i = 0; i < vec.size(); ++i) {
             if (i > 0) {
                 mStr.append(", ");
             }
@@ -137,7 +137,7 @@ class StrStream {
         return *this;
     }
 
-    template<fl::sz N>
+    template<fl::size N>
     StrStream &operator<<(const char (&str)[N]) {
         mStr.append(str);
         return *this;
@@ -174,10 +174,10 @@ class StrStream {
     }
 
     // Unified handler for fl:: namespace size-like unsigned integer types and int
-    // This handles fl::sz, fl::u16 from the fl:: namespace, and int type
+    // This handles fl::size, fl::u16 from the fl:: namespace, and int type
     template<typename T>
     typename fl::enable_if<
-        fl::is_same<T, fl::sz>::value ||
+        fl::is_same<T, fl::size>::value ||
         fl::is_same<T, fl::u16>::value ||
         fl::is_same<T, int>::value,
         StrStream&
@@ -223,7 +223,7 @@ class FakeStrStream {
 
     FakeStrStream &operator<<(const char *) { return *this; }
 
-    template<fl::sz N>
+    template<fl::size N>
     FakeStrStream &operator<<(const char (&)[N]) { return *this; }
 
     template <typename T> FakeStrStream &operator=(const T &) { return *this; }
@@ -238,7 +238,7 @@ class FakeStrStream {
     // Unified template for fl:: namespace types and int to avoid conflicts on AVR
     template<typename T>
     typename fl::enable_if<
-        fl::is_same<T, fl::sz>::value ||
+        fl::is_same<T, fl::size>::value ||
         fl::is_same<T, fl::u16>::value ||
         fl::is_same<T, int>::value,
         FakeStrStream&

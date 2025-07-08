@@ -17,7 +17,7 @@ template <typename T> struct vec2;
 //-----------------------------------------------------------------------------
 // Based on the public‐domain implementation by Austin Appleby:
 // https://github.com/aappleby/smhasher/blob/master/src/MurmurHash3.cpp
-static inline uint32_t MurmurHash3_x86_32(const void *key, fl::sz len,
+static inline uint32_t MurmurHash3_x86_32(const void *key, fl::size len,
                                           uint32_t seed = 0) {
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wimplicit-fallthrough"

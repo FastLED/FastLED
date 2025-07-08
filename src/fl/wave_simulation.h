@@ -76,26 +76,26 @@ class WaveSimulation1D {
     // Downsampled getter for the floating point value at index x.
     // It averages over the corresponding 'multiplier'-sized block in the
     // high-res simulation.
-    float getf(fl::sz x) const;
+    float getf(fl::size x) const;
 
     // Downsampled getter for the Q15 (fixed point) value at index x.
     // It averages the multiplier cells of Q15 values.
-    int16_t geti16(fl::sz x) const;
-    int16_t geti16Previous(fl::sz x) const;
+    int16_t geti16(fl::size x) const;
+    int16_t geti16Previous(fl::size x) const;
 
-    bool geti16All(fl::sz x, int16_t *curr, int16_t *prev, int16_t *diff) const;
+    bool geti16All(fl::size x, int16_t *curr, int16_t *prev, int16_t *diff) const;
 
     // Downsampled getters for the 8-bit representations.
-    int8_t geti8(fl::sz x) const;
+    int8_t geti8(fl::size x) const;
 
-    uint8_t getu8(fl::sz x) const;
+    uint8_t getu8(fl::size x) const;
 
     // Check if x is within the bounds of the outer (downsampled) simulation.
-    bool has(fl::sz x) const;
+    bool has(fl::size x) const;
 
     // Upsampling setter: set the value at an outer grid cell x by replicating
     // it to the corresponding multiplier cells in the high-res simulation.
-    void setf(fl::sz x, float value);
+    void setf(fl::size x, float value);
 
     void setHalfDuplex(bool on) { mSim->setHalfDuplex(on); }
 
@@ -162,32 +162,32 @@ class WaveSimulation2D {
     // Downsampled getter for the floating point value at (x,y) in the outer
     // grid. It averages over the corresponding multiplier×multiplier block in
     // the high-res simulation.
-    float getf(fl::sz x, fl::sz y) const;
+    float getf(fl::size x, fl::size y) const;
 
     // Downsampled getter for the Q15 (fixed point) value at (x,y).
     // It averages the multiplier×multiplier block of Q15 values.
-    int16_t geti16(fl::sz x, fl::sz y) const;
-    int16_t geti16Previous(fl::sz x, fl::sz y) const;
+    int16_t geti16(fl::size x, fl::size y) const;
+    int16_t geti16Previous(fl::size x, fl::size y) const;
 
-    bool geti16All(fl::sz x, fl::sz y, int16_t *curr, int16_t *prev,
+    bool geti16All(fl::size x, fl::size y, int16_t *curr, int16_t *prev,
                    int16_t *diff) const;
 
     // Downsampled getters for the 8-bit representations.
-    int8_t geti8(fl::sz x, fl::sz y) const;
+    int8_t geti8(fl::size x, fl::size y) const;
 
     // Special function to get the value as a uint8_t for drawing / gradients.
     // Ease out functions are applied to this when in half duplex mode.
-    uint8_t getu8(fl::sz x, fl::sz y) const;
+    uint8_t getu8(fl::size x, fl::size y) const;
 
     // Check if (x,y) is within the bounds of the outer (downsampled) grid.
-    bool has(fl::sz x, fl::sz y) const;
+    bool has(fl::size x, fl::size y) const;
 
     // Upsampling setter: set the value at an outer grid cell (x,y) by
     // replicating it to all cells of the corresponding multiplier×multiplier
     // block in the high-res simulation.
-    void setf(fl::sz x, fl::sz y, float value);
+    void setf(fl::size x, fl::size y, float value);
 
-    void seti16(fl::sz x, fl::sz y, int16_t value);
+    void seti16(fl::size x, fl::size y, int16_t value);
 
     void setHalfDuplex(bool on) { mSim->setHalfDuplex(on); }
 

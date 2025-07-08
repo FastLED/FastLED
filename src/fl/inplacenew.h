@@ -12,7 +12,7 @@
 #else
 #define _NO_EXCEPT noexcept
 #endif
-inline void *operator new(fl::sz, void *ptr) _NO_EXCEPT { return ptr; }
+inline void *operator new(fl::size, void *ptr) _NO_EXCEPT { return ptr; }
 #elif __has_include(<new>)
 #include <new>
 #elif __has_include(<new.h>)

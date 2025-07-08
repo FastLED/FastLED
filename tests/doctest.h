@@ -606,12 +606,12 @@ private:
         view data;
     };
 
-    char* allocate(size_type sz);
+    char* allocate(size_type size);
 
     bool isOnStack() const noexcept { return (buf[last] & 128) == 0; }
     void setOnHeap() noexcept;
     void setLast(size_type in = last) noexcept;
-    void setSize(size_type sz) noexcept;
+    void setSize(size_type size) noexcept;
 
     void copy(const String& other);
 
@@ -3349,9 +3349,9 @@ namespace detail {
 
             std::streampos pos = stack.back();
             stack.pop_back();
-            unsigned sz = static_cast<unsigned>(ss.tellp() - pos);
+            unsigned size = static_cast<unsigned>(ss.tellp() - pos);
             ss.rdbuf()->pubseekpos(pos, std::ios::in | std::ios::out);
-            return String(ss, sz);
+            return String(ss, size);
         }
     } g_oss;
 
@@ -3595,26 +3595,26 @@ using ticks_t = timer_large_integer::type;
 #endif // DOCTEST_CONFIG_DISABLE
 } // namespace detail
 
-char* String::allocate(size_type sz) {
-    if (sz <= last) {
-        buf[sz] = '\0';
-        setLast(last - sz);
+char* String::allocate(size_type size) {
+    if (size <= last) {
+        buf[size] = '\0';
+        setLast(last - size);
         return buf;
     } else {
         setOnHeap();
-        data.size = sz;
+        data.size = size;
         data.capacity = data.size + 1;
         data.ptr = new char[data.capacity];
-        data.ptr[sz] = '\0';
+        data.ptr[size] = '\0';
         return data.ptr;
     }
 }
 
 void String::setOnHeap() noexcept { *reinterpret_cast<unsigned char*>(&buf[last]) = 128; }
 void String::setLast(size_type in) noexcept { buf[last] = char(in); }
-void String::setSize(size_type sz) noexcept {
-    if (isOnStack()) { buf[sz] = '\0'; setLast(last - sz); }
-    else { data.ptr[sz] = '\0'; data.size = sz; }
+void String::setSize(size_type size) noexcept {
+    if (isOnStack()) { buf[size] = '\0'; setLast(last - size); }
+    else { data.ptr[size] = '\0'; data.size = size; }
 }
 
 void String::copy(const String& other) {

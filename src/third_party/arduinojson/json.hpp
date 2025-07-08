@@ -1018,7 +1018,7 @@ struct StringAdapter<const char*, void> {
 class SizedRamString {
  public:
   static const size_t typeSortKey = 2;
-  SizedRamString(const char* str, size_t sz) : str_(str), size_(sz) {}
+  SizedRamString(const char* str, size_t size) : str_(str), size_(size) {}
   bool isNull() const {
     return !str_;
   }
@@ -1058,8 +1058,8 @@ class JsonString {
   JsonString() : data_(0), size_(0), ownership_(Linked) {}
   JsonString(const char* data, Ownership ownership = Linked)
       : data_(data), size_(data ? ::strlen(data) : 0), ownership_(ownership) {}
-  JsonString(const char* data, size_t sz, Ownership ownership = Linked)
-      : data_(data), size_(sz), ownership_(ownership) {}
+  JsonString(const char* data, size_t size, Ownership ownership = Linked)
+      : data_(data), size_(size), ownership_(ownership) {}
   const char* c_str() const {
     return data_;
   }
@@ -1306,8 +1306,8 @@ ARDUINOJSON_BEGIN_PRIVATE_NAMESPACE
 class FlashString {
  public:
   static const size_t typeSortKey = 1;
-  FlashString(const __FlashStringHelper* str, size_t sz)
-      : str_(reinterpret_cast<const char*>(str)), size_(sz) {}
+  FlashString(const __FlashStringHelper* str, size_t size)
+      : str_(reinterpret_cast<const char*>(str)), size_(size) {}
   bool isNull() const {
     return !str_;
   }

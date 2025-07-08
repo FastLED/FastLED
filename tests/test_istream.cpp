@@ -72,7 +72,7 @@ TEST_CASE("fl::istream input operators compile") {
     test_stream >> float_val;
     test_stream >> double_val;
     
-    fl::sz size_val;
+    fl::size size_val;
     test_stream >> size_val;
     (void)size_val;
     
@@ -224,7 +224,7 @@ TEST_CASE("fl::istream types match expected interfaces") {
 class InputMocker {
 private:
     Str data_;
-    fl::sz pos_;
+    fl::size pos_;
     
 public:
     InputMocker(const char* input_data) : data_(input_data), pos_(0) {}

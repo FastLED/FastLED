@@ -27,13 +27,13 @@ class HashMapLru {
     };
 
   public:
-    HashMapLru(fl::sz max_size) : mMaxSize(max_size), mCurrentTime(0) {
+    HashMapLru(fl::size max_size) : mMaxSize(max_size), mCurrentTime(0) {
         // Ensure max size is at least 1
         if (mMaxSize < 1)
             mMaxSize = 1;
     }
 
-    void setMaxSize(fl::sz max_size) {
+    void setMaxSize(fl::size max_size) {
         while (mMaxSize < max_size) {
             // Evict oldest items until we reach the new max size
             evictOldest();
@@ -122,9 +122,9 @@ class HashMapLru {
     }
 
     // Size accessors
-    fl::sz size() const { return mMap.size(); }
+    fl::size size() const { return mMap.size(); }
     bool empty() const { return mMap.empty(); }
-    fl::sz capacity() const { return mMaxSize; }
+    fl::size capacity() const { return mMaxSize; }
 
   private:
     // Evict the least recently used item
@@ -155,7 +155,7 @@ class HashMapLru {
     }
 
     HashMap<Key, ValueWithTimestamp, Hash, KeyEqual, INLINED_COUNT> mMap;
-    fl::sz mMaxSize;
+    fl::size mMaxSize;
     uint32_t mCurrentTime;
 };
 

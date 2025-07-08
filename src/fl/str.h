@@ -41,9 +41,9 @@ template <typename T> struct vec2;
 template <typename T> struct vec3;
 template <typename T> class Slice;
 template <typename T, typename Allocator> class HeapVector;
-template <typename T, fl::sz N> class InlinedVector;
-template <typename T, fl::sz N> class FixedVector;
-template <fl::sz N> class StrN;
+template <typename T, fl::size N> class InlinedVector;
+template <typename T, fl::size N> class FixedVector;
+template <fl::size N> class StrN;
 
 template <typename T> class WeakPtr;
 template <typename T> class Ptr;
@@ -82,7 +82,7 @@ class StringFormatter {
     static bool isSpace(char c) {
         return c == ' ' || c == '\t' || c == '\n' || c == '\r';
     }
-    static float parseFloat(const char *str, fl::sz len);
+    static float parseFloat(const char *str, fl::size len);
     static bool isDigit(char c) { return c >= '0' && c <= '9'; }
     static void appendFloat(const float &val, StrN<FASTLED_STR_INLINED_SIZE> *dst);
 };
@@ -90,20 +90,20 @@ class StringFormatter {
 class StringHolder : public fl::Referent {
   public:
     StringHolder(const char *str);
-    StringHolder(fl::sz length);
-    StringHolder(const char *str, fl::sz length);
+    StringHolder(fl::size length);
+    StringHolder(const char *str, fl::size length);
     StringHolder(const StringHolder &other) = delete;
     StringHolder &operator=(const StringHolder &other) = delete;
     ~StringHolder();
 
     bool isShared() const { return ref_count() > 1; }
-    void grow(fl::sz newLength);
-    bool hasCapacity(fl::sz newLength) const { return newLength <= mCapacity; }
+    void grow(fl::size newLength);
+    bool hasCapacity(fl::size newLength) const { return newLength <= mCapacity; }
     const char *data() const { return mData; }
     char *data() { return mData; }
-    fl::sz length() const { return mLength; }
-    fl::sz capacity() const { return mCapacity; }
-    bool copy(const char *str, fl::sz len) {
+    fl::size length() const { return mLength; }
+    fl::size capacity() const { return mCapacity; }
+    bool copy(const char *str, fl::size len) {
         if ((len + 1) > mCapacity) {
             return false;
         }
@@ -115,13 +115,13 @@ class StringHolder : public fl::Referent {
 
   private:
     char *mData = nullptr;
-    fl::sz mLength = 0;
-    fl::sz mCapacity = 0;
+    fl::size mLength = 0;
+    fl::size mCapacity = 0;
 };
 
-template <fl::sz SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
+template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
   protected:
-    fl::sz mLength = 0;
+    fl::size mLength = 0;
     char mInlineData[SIZE] = {0};
     StringHolderPtr mHeapData;
 
@@ -130,9 +130,9 @@ template <fl::sz SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
     StrN() = default;
 
     // cppcheck-suppress-begin [operatorEqVarError]
-    template <fl::sz M> StrN(const StrN<M> &other) { copy(other); }
+    template <fl::size M> StrN(const StrN<M> &other) { copy(other); }
     StrN(const char *str) {
-        fl::sz len = strlen(str);
+        fl::size len = strlen(str);
         mLength = len;         // Length is without null terminator
         if (len + 1 <= SIZE) { // Check capacity including null
             memcpy(mInlineData, str, len + 1); // Copy including null
@@ -143,7 +143,7 @@ template <fl::sz SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
     }
     StrN(const StrN &other) { copy(other); }
     void copy(const char *str) {
-        fl::sz len = strlen(str);
+        fl::size len = strlen(str);
         mLength = len;
         if (len + 1 <= SIZE) {
             memcpy(mInlineData, str, len + 1);
@@ -170,7 +170,7 @@ template <fl::sz SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
         copy(other);
         return *this;
     }
-    template <fl::sz M> StrN &operator=(const StrN<M> &other) {
+    template <fl::size M> StrN &operator=(const StrN<M> &other) {
         copy(other);
         return *this;
     }
@@ -184,7 +184,7 @@ template <fl::sz SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
         return strcmp(c_str(), other.c_str()) != 0;
     }
 
-    void copy(const char *str, fl::sz len) {
+    void copy(const char *str, fl::size len) {
         mLength = len;
         if (len + 1 <= SIZE) {
             memcpy(mInlineData, str, len + 1);
@@ -194,8 +194,8 @@ template <fl::sz SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
         }
     }
 
-    template <fl::sz M> void copy(const StrN<M> &other) {
-        fl::sz len = other.size();
+    template <fl::size M> void copy(const StrN<M> &other) {
+        fl::size len = other.size();
         if (len + 1 <= SIZE) {
             memcpy(mInlineData, other.c_str(), len + 1);
             mHeapData.reset();
@@ -209,18 +209,18 @@ template <fl::sz SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
         mLength = len;
     }
 
-    fl::sz capacity() const { return mHeapData ? mHeapData->capacity() : SIZE; }
+    fl::size capacity() const { return mHeapData ? mHeapData->capacity() : SIZE; }
 
-    fl::sz write(const uint8_t *data, fl::sz n) {
+    fl::size write(const uint8_t *data, fl::size n) {
         const char *str = fl::bit_cast_ptr<const char>(static_cast<const void*>(data));
         return write(str, n);
     }
 
-    fl::sz write(const char *str, fl::sz n) {
-        fl::sz newLen = mLength + n;
+    fl::size write(const char *str, fl::size n) {
+        fl::size newLen = mLength + n;
         if (mHeapData && !mHeapData->isShared()) {
             if (!mHeapData->hasCapacity(newLen)) {
-                fl::sz grow_length = MAX(3, newLen * 3 / 2);
+                fl::size grow_length = MAX(3, newLen * 3 / 2);
                 mHeapData->grow(grow_length); // Grow by 50%
             }
             memcpy(mHeapData->data() + mLength, str, n);
@@ -247,32 +247,32 @@ template <fl::sz SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
         return mLength;
     }
 
-    fl::sz write(char c) { return write(&c, 1); }
+    fl::size write(char c) { return write(&c, 1); }
 
-    fl::sz write(uint8_t c) {
+    fl::size write(uint8_t c) {
         const char *str = fl::bit_cast_ptr<const char>(static_cast<const void*>(&c));
         return write(str, 1);
     }
 
-    fl::sz write(const uint16_t &n) {
+    fl::size write(const uint16_t &n) {
         StrN<FASTLED_STR_INLINED_SIZE> dst;
         StringFormatter::append(n, &dst); // Inlined size should suffice
         return write(dst.c_str(), dst.size());
     }
 
-    fl::sz write(const uint32_t &val) {
+    fl::size write(const uint32_t &val) {
         StrN<FASTLED_STR_INLINED_SIZE> dst;
         StringFormatter::append(val, &dst); // Inlined size should suffice
         return write(dst.c_str(), dst.size());
     }
 
-    fl::sz write(const int32_t &val) {
+    fl::size write(const int32_t &val) {
         StrN<FASTLED_STR_INLINED_SIZE> dst;
         StringFormatter::append(val, &dst); // Inlined size should suffice
         return write(dst.c_str(), dst.size());
     }
 
-    fl::sz write(const int8_t val) {
+    fl::size write(const int8_t val) {
         StrN<FASTLED_STR_INLINED_SIZE> dst;
         StringFormatter::append(int16_t(val),
                                 &dst); // Inlined size should suffice
@@ -283,8 +283,8 @@ template <fl::sz SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
     ~StrN() {}
 
     // Accessors
-    fl::sz size() const { return mLength; }
-    fl::sz length() const { return size(); }
+    fl::size size() const { return mLength; }
+    fl::size length() const { return size(); }
     const char *c_str() const {
         return mHeapData ? mHeapData->data() : mInlineData;
     }
@@ -293,7 +293,7 @@ template <fl::sz SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
         return mHeapData ? mHeapData->data() : mInlineData;
     }
 
-    char &operator[](fl::sz index) {
+    char &operator[](fl::size index) {
         if (index >= mLength) {
             static char dummy = '\0';
             return dummy;
@@ -301,7 +301,7 @@ template <fl::sz SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
         return c_str_mutable()[index];
     }
 
-    char operator[](fl::sz index) const {
+    char operator[](fl::size index) const {
         if (index >= mLength) {
             static char dummy = '\0';
             return dummy;
@@ -317,11 +317,11 @@ template <fl::sz SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
         return strcmp(c_str(), other.c_str()) < 0;
     }
 
-    template <fl::sz M> bool operator<(const StrN<M> &other) const {
+    template <fl::size M> bool operator<(const StrN<M> &other) const {
         return strcmp(c_str(), other.c_str()) < 0;
     }
 
-    void reserve(fl::sz newCapacity) {
+    void reserve(fl::size newCapacity) {
         // If capacity is less than current length, do nothing
         if (newCapacity <= mLength) {
             return;
@@ -359,35 +359,35 @@ template <fl::sz SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
 
 
     // Find single character
-    fl::sz find(const char &value) const {
-        for (fl::sz i = 0; i < mLength; ++i) {
+    fl::size find(const char &value) const {
+        for (fl::size i = 0; i < mLength; ++i) {
             if (c_str()[i] == value) {
                 return i;
             }
         }
-        return static_cast<fl::sz>(-1);
+        return static_cast<fl::size>(-1);
     }
 
     // Find substring (string literal support)
-    fl::sz find(const char* substr) const {
+    fl::size find(const char* substr) const {
         if (!substr) {
-            return static_cast<fl::sz>(-1);
+            return static_cast<fl::size>(-1);
         }
         auto begin = c_str();
         const char* found = strstr(begin, substr);
         if (found) {
             return found - begin;
         }
-        return static_cast<fl::sz>(-1);
+        return static_cast<fl::size>(-1);
     }
 
     // Find another string
-    template<fl::sz M>
-    fl::sz find(const StrN<M>& other) const {
+    template<fl::size M>
+    fl::size find(const StrN<M>& other) const {
         return find(other.c_str());
     }
 
-    StrN substring(fl::sz start, fl::sz end) const {
+    StrN substring(fl::size start, fl::size end) const {
         // short cut, it's the same string
         if (start == 0 && end == mLength) {
             return *this;
@@ -406,14 +406,14 @@ template <fl::sz SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
         return out;
     }
 
-     StrN substr(fl::sz start, fl::sz end) {
+     StrN substr(fl::size start, fl::size end) {
         return substring(start, end);
     }
 
     StrN trim() const {
         StrN out;
-        fl::sz start = 0;
-        fl::sz end = mLength;
+        fl::size start = 0;
+        fl::size end = mLength;
         while (start < mLength && StringFormatter::isSpace(c_str()[start])) {
             start++;
         }
@@ -434,14 +434,14 @@ template <fl::sz SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
 class string : public StrN<FASTLED_STR_INLINED_SIZE> {
   public:
     // Standard string npos constant for compatibility
-    static const fl::sz npos = static_cast<fl::sz>(-1);
+    static const fl::size npos = static_cast<fl::size>(-1);
 
     static int strcmp(const string& a, const string& b);
     
     string() : StrN<FASTLED_STR_INLINED_SIZE>() {}
     string(const char *str) : StrN<FASTLED_STR_INLINED_SIZE>(str) {}
     string(const string &other) : StrN<FASTLED_STR_INLINED_SIZE>(other) {}
-    template <fl::sz M>
+    template <fl::size M>
     string(const StrN<M> &other) : StrN<FASTLED_STR_INLINED_SIZE>(other) {}
     string &operator=(const string &other) {
         copy(other);
@@ -527,7 +527,7 @@ class string : public StrN<FASTLED_STR_INLINED_SIZE> {
 
     template <typename T> string &append(const fl::span<T> &slice) {
         append("[");
-        for (fl::sz i = 0; i < slice.size(); ++i) {
+        for (fl::size i = 0; i < slice.size(); ++i) {
             if (i > 0) {
                 append(", ");
             }
@@ -543,7 +543,7 @@ class string : public StrN<FASTLED_STR_INLINED_SIZE> {
         return *this;
     }
 
-    template <typename T, fl::sz N>
+    template <typename T, fl::size N>
     string &append(const fl::InlinedVector<T, N> &vec) {
         fl::span<const T> slice(vec.data(), vec.size());
         append(slice);
@@ -554,7 +554,7 @@ class string : public StrN<FASTLED_STR_INLINED_SIZE> {
         write(str, strlen(str));
         return *this;
     }
-    string &append(const char *str, fl::sz len) {
+    string &append(const char *str, fl::size len) {
         write(str, len);
         return *this;
     }
@@ -644,7 +644,7 @@ class string : public StrN<FASTLED_STR_INLINED_SIZE> {
 
     string &append(const JsonUiInternal& val);
 
-    template <typename T, fl::sz N>
+    template <typename T, fl::size N>
     string &append(const fl::FixedVector<T, N> &vec) {
         fl::span<const T> slice(vec.data(), vec.size());
         append(slice);

@@ -10,15 +10,15 @@
 
 namespace fl {
 
-void SetPSRamAllocator(void *(*alloc)(fl::sz), void (*free)(void *));
-void *PSRamAllocate(fl::sz size, bool zero = true);
+void SetPSRamAllocator(void *(*alloc)(fl::size), void (*free)(void *));
+void *PSRamAllocate(fl::size size, bool zero = true);
 void PSRamDeallocate(void *ptr);
-void Malloc(fl::sz size);
+void Malloc(fl::size size);
 void Free(void *ptr);
 
 template <typename T> class PSRamAllocator {
   public:
-    static T *Alloc(fl::sz n) {
+    static T *Alloc(fl::size n) {
         void *ptr = PSRamAllocate(sizeof(T) * n, true);
         return fl::bit_cast_ptr<T>(ptr);
     }
@@ -40,7 +40,7 @@ template <typename T> class allocator {
     using const_pointer = const T*;
     using reference = T&;
     using const_reference = const T&;
-    using size_type = fl::sz;
+    using size_type = fl::size;
     using difference_type = ptrdiff_t;
     
     // Rebind allocator to type U
@@ -62,7 +62,7 @@ template <typename T> class allocator {
     // Use this to allocate large blocks of memory for T.
     // This is useful for large arrays or objects that need to be allocated
     // in a single block.
-    T* allocate(fl::sz n) {
+    T* allocate(fl::size n) {
         if (n == 0) {
             return nullptr; // Handle zero allocation
         }
@@ -74,7 +74,7 @@ template <typename T> class allocator {
         return static_cast<T*>(ptr);
     }
 
-    void deallocate(T* p, fl::sz n) {
+    void deallocate(T* p, fl::size n) {
         FASTLED_UNUSED(n);
         if (p == nullptr) {
             return; // Handle null pointer
@@ -105,7 +105,7 @@ template <typename T> class allocator_psram {
         using const_pointer = const T*;
         using reference = T&;
         using const_reference = const T&;
-        using size_type = fl::sz;
+        using size_type = fl::size;
         using difference_type = ptrdiff_t;
     
         // Rebind allocator to type U
@@ -125,12 +125,12 @@ template <typename T> class allocator_psram {
         ~allocator_psram() noexcept {}
     
         // Allocate memory for n objects of type T
-        T* allocate(fl::sz n) {
+        T* allocate(fl::size n) {
             return PSRamAllocator<T>::Alloc(n);
         }
     
         // Deallocate memory for n objects of type T
-        void deallocate(T* p, fl::sz n) {
+        void deallocate(T* p, fl::size n) {
             PSRamAllocator<T>::Free(p);
             FASTLED_UNUSED(n);
         }
@@ -162,7 +162,7 @@ class allocator<TYPE> { \
     using const_pointer = const TYPE*; \
     using reference = TYPE&; \
     using const_reference = const TYPE&; \
-    using size_type = fl::sz; \
+    using size_type = fl::size; \
     using difference_type = ptrdiff_t; \
     \
     template <typename U> \
@@ -177,10 +177,10 @@ class allocator<TYPE> { \
     \
     ~allocator() noexcept {} \
     \
-    TYPE *allocate(fl::sz n) { \
+    TYPE *allocate(fl::size n) { \
         return fl::bit_cast_ptr<TYPE>(PSRamAllocate(sizeof(TYPE) * n, true)); \
     } \
-    void deallocate(TYPE *p, fl::sz n) { \
+    void deallocate(TYPE *p, fl::size n) { \
         if (p == nullptr) { \
             return; \
         } \

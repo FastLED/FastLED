@@ -451,8 +451,8 @@ class UIDropdown : public UIElement {
         mImpl.setSelectedIndex(index); 
     }
     
-    fl::sz getOptionCount() const { return mImpl.getOptionCount(); }
-    fl::string getOption(fl::sz index) const { return mImpl.getOption(index); }
+    fl::size getOptionCount() const { return mImpl.getOptionCount(); }
+    fl::string getOption(fl::size index) const { return mImpl.getOption(index); }
     
     operator fl::string() const { return value(); }
     operator int() const { return as_int(); }

@@ -11,10 +11,10 @@
 namespace fl {
 
 // VectorSet stores values in order of insertion.
-template <typename Key, sz N> class VectorSetFixed;
+template <typename Key, size N> class VectorSetFixed;
 template <typename Key, typename Allocator> class VectorSet;
 
-template <typename Key, sz N>
+template <typename Key, size N>
 using FixedSet = VectorSetFixed<Key, N>;  // Backwards compatibility
 
 // A simple unordered set implementation with a fixed size.
@@ -22,7 +22,7 @@ using FixedSet = VectorSetFixed<Key, N>;  // Backwards compatibility
 // do not exceed the capacity of the set, otherwise they will
 // fail. Because of this limitation, this set is not a drop in
 // replacement for std::set.
-template <typename Key, sz N> class VectorSetFixed {
+template <typename Key, size N> class VectorSetFixed {
   public:
     typedef FixedVector<Key, N> VectorType;
     typedef typename VectorType::iterator iterator;
@@ -142,12 +142,12 @@ template <typename Key, sz N> class VectorSetFixed {
     }
 
     // Get the current size of the set
-    constexpr fl::sz size() const { return data.size(); }
+    constexpr fl::size size() const { return data.size(); }
 
     constexpr bool empty() const { return data.empty(); }
 
     // Get the capacity of the set
-    constexpr fl::sz capacity() const { return N; }
+    constexpr fl::size capacity() const { return N; }
 
     // Clear the set
     void clear() { data.clear(); }
@@ -248,12 +248,12 @@ template <typename Key, typename Allocator = fl::allocator<Key>> class VectorSet
 
 
     // Get the current size of the set
-    constexpr fl::sz size() const { return data.size(); }
+    constexpr fl::size size() const { return data.size(); }
 
     constexpr bool empty() const { return data.empty(); }
 
     // Get the capacity of the set
-    constexpr fl::sz capacity() const { return data.capacity(); }
+    constexpr fl::size capacity() const { return data.capacity(); }
 
     // Clear the set
     void clear() { data.clear(); }

@@ -94,10 +94,10 @@ public:
     }
 
     // Unified handler for fl:: namespace size-like unsigned integer types to avoid conflicts
-    // This handles fl::sz and fl::u16 from the fl:: namespace only
+    // This handles fl::size and fl::u16 from the fl:: namespace only
     template<typename T>
     typename fl::enable_if<
-        fl::is_same<T, fl::sz>::value ||
+        fl::is_same<T, fl::size>::value ||
         fl::is_same<T, fl::u16>::value,
         ostream&
     >::type operator<<(T n) {
@@ -111,7 +111,7 @@ public:
     // Note: This must come after the specific SFINAE template to avoid conflicts
     template<typename T>
     typename fl::enable_if<
-        !fl::is_same<T, fl::sz>::value &&
+        !fl::is_same<T, fl::size>::value &&
         !fl::is_same<T, fl::u16>::value,
         ostream&
     >::type operator<<(const T& value) {

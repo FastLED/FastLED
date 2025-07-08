@@ -12,17 +12,17 @@ namespace fl {
     class initializer_list {
     private:
         const T* mBegin;
-        fl::sz mSize;
+        fl::size mSize;
         
         // Private constructor used by compiler
-        constexpr initializer_list(const T* first, fl::sz size)
+        constexpr initializer_list(const T* first, fl::size size)
             : mBegin(first), mSize(size) {}
             
     public:
         using value_type = T;
         using reference = const T&;
         using const_reference = const T&;
-        using size_type = fl::sz;
+        using size_type = fl::size;
         using iterator = const T*;
         using const_iterator = const T*;
         
@@ -30,7 +30,7 @@ namespace fl {
         constexpr initializer_list() : mBegin(nullptr), mSize(0) {}
         
         // Size and capacity
-        constexpr fl::sz size() const { return mSize; }
+        constexpr fl::size size() const { return mSize; }
         constexpr bool empty() const { return mSize == 0; }
         
         // Iterators

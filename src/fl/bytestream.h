@@ -16,12 +16,12 @@ FASTLED_SMART_PTR(ByteStream);
 class ByteStream : public fl::Referent {
   public:
     virtual ~ByteStream() {}
-    virtual bool available(fl::sz) const = 0;
-    virtual fl::sz read(fl::u8 *dst, fl::sz bytesToRead) = 0;
+    virtual bool available(fl::size) const = 0;
+    virtual fl::size read(fl::u8 *dst, fl::size bytesToRead) = 0;
     virtual const char *path() const = 0;
     virtual void close() {} // default is do nothing on close.
     // convenience functions
-    virtual fl::sz readCRGB(CRGB *dst, fl::sz n) {
+    virtual fl::size readCRGB(CRGB *dst, fl::size n) {
         return read((fl::u8 *)dst, n * 3) / 3;
     }
 };

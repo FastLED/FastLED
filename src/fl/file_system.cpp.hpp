@@ -26,15 +26,15 @@ class NullFileHandle : public FileHandle {
     ~NullFileHandle() override {}
 
     bool available() const override { return false; }
-    fl::sz size() const override { return 0; }
-    fl::sz read(uint8_t *dst, fl::sz bytesToRead) override {
+    fl::size size() const override { return 0; }
+    fl::size read(uint8_t *dst, fl::size bytesToRead) override {
         FASTLED_UNUSED(dst);
         FASTLED_UNUSED(bytesToRead);
         return 0;
     }
-    fl::sz pos() const override { return 0; }
+    fl::size pos() const override { return 0; }
     const char *path() const override { return "NULL FILE HANDLE"; }
-    bool seek(fl::sz pos) override {
+    bool seek(fl::size pos) override {
         FASTLED_UNUSED(pos);
         return false;
     }
@@ -87,7 +87,7 @@ bool FileSystem::begin(FsImplPtr platform_filesystem) {
     return true;
 }
 
-fl::sz FileHandle::bytesLeft() const { return size() - pos(); }
+fl::size FileHandle::bytesLeft() const { return size() - pos(); }
 
 FileSystem::FileSystem() : mFs() {}
 
@@ -152,8 +152,8 @@ void FileSystem::close(FileHandlePtr file) { mFs->close(file); }
 FileHandlePtr FileSystem::openRead(const char *path) {
     return mFs->openRead(path);
 }
-Video FileSystem::openVideo(const char *path, fl::sz pixelsPerFrame, float fps,
-                            fl::sz nFrameHistory) {
+Video FileSystem::openVideo(const char *path, fl::size pixelsPerFrame, float fps,
+                            fl::size nFrameHistory) {
     Video video(pixelsPerFrame, fps, nFrameHistory);
     FileHandlePtr file = openRead(path);
     if (!file) {
@@ -170,12 +170,12 @@ bool FileSystem::readText(const char *path, fl::string *out) {
         FASTLED_WARN("Failed to open file: " << path);
         return false;
     }
-    fl::sz size = file->size();
+    fl::size size = file->size();
     out->reserve(size + out->size());
     bool wrote = false;
     while (file->available()) {
         uint8_t buf[64];
-        fl::sz n = file->read(buf, sizeof(buf));
+        fl::size n = file->read(buf, sizeof(buf));
         // out->append(buf, n);
         out->append((const char *)buf, n);
         wrote = true;

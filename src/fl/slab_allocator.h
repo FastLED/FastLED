@@ -15,7 +15,7 @@ namespace fl {
 // Slab allocator for fixed-size objects
 // Optimized for frequent allocation/deallocation of objects of the same size
 // Uses pre-allocated memory slabs with free lists to reduce fragmentation
-template <typename T, fl::sz SLAB_SIZE = 64>
+template <typename T, fl::size SLAB_SIZE = 64>
 class SlabAllocator {
 private:
     struct FreeBlock {
@@ -25,7 +25,7 @@ private:
     struct Slab {
         Slab* next;
         uint8_t* memory;
-        fl::sz allocated_count;
+        fl::size allocated_count;
         
         Slab() : next(nullptr), memory(nullptr), allocated_count(0) {}
         
@@ -36,14 +36,14 @@ private:
         }
     };
 
-    static constexpr fl::sz BLOCK_SIZE = sizeof(T) > sizeof(FreeBlock*) ? sizeof(T) : sizeof(FreeBlock*);
-    static constexpr fl::sz BLOCKS_PER_SLAB = SLAB_SIZE;
-    static constexpr fl::sz SLAB_MEMORY_SIZE = BLOCK_SIZE * BLOCKS_PER_SLAB;
+    static constexpr fl::size BLOCK_SIZE = sizeof(T) > sizeof(FreeBlock*) ? sizeof(T) : sizeof(FreeBlock*);
+    static constexpr fl::size BLOCKS_PER_SLAB = SLAB_SIZE;
+    static constexpr fl::size SLAB_MEMORY_SIZE = BLOCK_SIZE * BLOCKS_PER_SLAB;
 
     static Slab* slabs_;
     static FreeBlock* free_list_;
-    static fl::sz total_allocated_;
-    static fl::sz total_deallocated_;
+    static fl::size total_allocated_;
+    static fl::size total_deallocated_;
 
     static Slab* createSlab() {
         Slab* slab = static_cast<Slab*>(malloc(sizeof(Slab)));
@@ -62,7 +62,7 @@ private:
         }
         
         // Initialize all blocks in the slab as free
-        for (fl::sz i = 0; i < BLOCKS_PER_SLAB; ++i) {
+        for (fl::size i = 0; i < BLOCKS_PER_SLAB; ++i) {
             FreeBlock* block = fl::bit_cast_ptr<FreeBlock>(static_cast<void*>(slab->memory + i * BLOCK_SIZE));
             block->next = free_list_;
             free_list_ = block;
@@ -126,7 +126,7 @@ private:
     }
 
 public:
-    static T* allocate(fl::sz n = 1) {
+    static T* allocate(fl::size n = 1) {
         if (n != 1) {
             // Slab allocator only supports single object allocation
             // Fall back to regular malloc for bulk allocations
@@ -144,7 +144,7 @@ public:
         return static_cast<T*>(ptr);
     }
 
-    static void deallocate(T* ptr, fl::sz n = 1) {
+    static void deallocate(T* ptr, fl::size n = 1) {
         if (!ptr) {
             return;
         }
@@ -159,13 +159,13 @@ public:
     }
 
     // Get allocation statistics
-    static fl::sz getTotalAllocated() { return total_allocated_; }
-    static fl::sz getTotalDeallocated() { return total_deallocated_; }
-    static fl::sz getActiveAllocations() { return total_allocated_ - total_deallocated_; }
+    static fl::size getTotalAllocated() { return total_allocated_; }
+    static fl::size getTotalDeallocated() { return total_deallocated_; }
+    static fl::size getActiveAllocations() { return total_allocated_ - total_deallocated_; }
     
     // Get number of slabs
-    static fl::sz getSlabCount() {
-        fl::sz count = 0;
+    static fl::size getSlabCount() {
+        fl::size count = 0;
         for (Slab* slab = slabs_; slab; slab = slab->next) {
             ++count;
         }
@@ -187,20 +187,20 @@ public:
 };
 
 // Static member definitions
-template <typename T, fl::sz SLAB_SIZE>
+template <typename T, fl::size SLAB_SIZE>
 typename SlabAllocator<T, SLAB_SIZE>::Slab* SlabAllocator<T, SLAB_SIZE>::slabs_ = nullptr;
 
-template <typename T, fl::sz SLAB_SIZE>
+template <typename T, fl::size SLAB_SIZE>
 typename SlabAllocator<T, SLAB_SIZE>::FreeBlock* SlabAllocator<T, SLAB_SIZE>::free_list_ = nullptr;
 
-template <typename T, fl::sz SLAB_SIZE>
-fl::sz SlabAllocator<T, SLAB_SIZE>::total_allocated_ = 0;
+template <typename T, fl::size SLAB_SIZE>
+fl::size SlabAllocator<T, SLAB_SIZE>::total_allocated_ = 0;
 
-template <typename T, fl::sz SLAB_SIZE>
-fl::sz SlabAllocator<T, SLAB_SIZE>::total_deallocated_ = 0;
+template <typename T, fl::size SLAB_SIZE>
+fl::size SlabAllocator<T, SLAB_SIZE>::total_deallocated_ = 0;
 
 // STL-compatible slab allocator
-template <typename T, fl::sz SLAB_SIZE = 64>
+template <typename T, fl::size SLAB_SIZE = 64>
 class allocator_slab {
 public:
     // Type definitions required by STL
@@ -209,7 +209,7 @@ public:
     using const_pointer = const T*;
     using reference = T&;
     using const_reference = const T&;
-    using size_type = fl::sz;
+    using size_type = fl::size;
     using difference_type = ptrdiff_t;
 
     // Rebind allocator to type U
@@ -233,12 +233,12 @@ public:
     ~allocator_slab() noexcept {}
 
     // Allocate memory for n objects of type T
-    T* allocate(fl::sz n) {
+    T* allocate(fl::size n) {
         return SlabAllocator<T, SLAB_SIZE>::allocate(n);
     }
 
     // Deallocate memory for n objects of type T
-    void deallocate(T* p, fl::sz n) {
+    void deallocate(T* p, fl::size n) {
         SlabAllocator<T, SLAB_SIZE>::deallocate(p, n);
     }
 

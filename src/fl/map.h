@@ -21,7 +21,7 @@ namespace fl {
 // do not exceed the capacity of the set, otherwise they will
 // fail. Because of this limitation, this set is not a drop in
 // replacement for std::map.
-template <typename Key, typename Value, fl::sz N> class FixedMap {
+template <typename Key, typename Value, fl::size N> class FixedMap {
   public:
     using PairKV = fl::Pair<Key, Value>;
 
@@ -246,12 +246,12 @@ template <typename Key, typename Value, fl::sz N> class FixedMap {
     }
 
     // Get the current size of the vector
-    constexpr fl::sz size() const { return data.size(); }
+    constexpr fl::size size() const { return data.size(); }
 
     constexpr bool empty() const { return data.empty(); }
 
     // Get the capacity of the vector
-    constexpr fl::sz capacity() const { return N; }
+    constexpr fl::size capacity() const { return N; }
 
     // Clear the vector
     void clear() { data.clear(); }
@@ -273,7 +273,7 @@ class SortedHeapMap {
     using key_type = Key;
     using mapped_type = Value;
     using value_type = fl::Pair<Key, Value>;
-    using size_type = fl::sz;
+    using size_type = fl::size;
     using difference_type = ptrdiff_t;
     using key_compare = Less;
     using reference = value_type&;
@@ -320,15 +320,15 @@ class SortedHeapMap {
     const_iterator cend() const { return data.end(); }
 
     // Capacity
-    fl::sz size() const { return data.size(); }
+    fl::size size() const { return data.size(); }
     bool empty() const { return data.empty(); }
     bool full() const { return data.full(); }
-    fl::sz capacity() const { return data.capacity(); }
-    fl::sz max_size() const { return data.capacity(); }
+    fl::size capacity() const { return data.capacity(); }
+    fl::size max_size() const { return data.capacity(); }
 
     // FastLED specific methods
-    void setMaxSize(fl::sz n) { data.setMaxSize(n); }
-    void reserve(fl::sz n) { data.reserve(n); }
+    void setMaxSize(fl::size n) { data.setMaxSize(n); }
+    void reserve(fl::size n) { data.reserve(n); }
 
     // Element access
     Value &operator[](const Key &key) {
@@ -396,7 +396,7 @@ class SortedHeapMap {
         return upper_bound(key);
     }
 
-    fl::sz erase(const Key& key) {
+    fl::size erase(const Key& key) {
         return data.erase(value_type(key, Value())) ? 1 : 0;
     }
 
@@ -409,7 +409,7 @@ class SortedHeapMap {
     }
 
     // Lookup
-    fl::sz count(const Key& key) const {
+    fl::size count(const Key& key) const {
         return contains(key) ? 1 : 0;
     }
 

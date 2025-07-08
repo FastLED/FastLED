@@ -141,8 +141,8 @@ bool equal(Iterator1 first1, Iterator1 last1, Iterator2 first2, Iterator2 last2,
 
 template <typename Container1, typename Container2>
 bool equal_container(const Container1& c1, const Container2& c2) {
-    fl::sz size1 = c1.size();
-    fl::sz size2 = c2.size();
+    fl::size size1 = c1.size();
+    fl::size size2 = c2.size();
     if (size1 != size2) {
         return false;
     }
@@ -151,8 +151,8 @@ bool equal_container(const Container1& c1, const Container2& c2) {
 
 template <typename Container1, typename Container2, typename BinaryPredicate>
 bool equal_container(const Container1& c1, const Container2& c2, BinaryPredicate pred) {
-    fl::sz size1 = c1.size();
-    fl::sz size2 = c2.size();
+    fl::size size1 = c1.size();
+    fl::size size2 = c2.size();
     if (size1 != size2) {
         return false;
     }

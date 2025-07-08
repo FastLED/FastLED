@@ -109,7 +109,7 @@ class CatmullRomParams : public XYPathParams {
     void clear() { points.clear(); }
 
     // Get the number of control points
-    fl::sz size() const { return points.size(); }
+    fl::size size() const { return points.size(); }
 
     // Vector of control points
     HeapVector<vec2f> points;
@@ -255,7 +255,7 @@ class CatmullRomPath : public XYPathGenerator {
     void clear();
 
     /// Get the number of control points
-    fl::sz size() const;
+    fl::size size() const;
 
     vec2f compute(float alpha) override;
     const string name() const override;

@@ -15,7 +15,7 @@ class HashSet : public HashMap<Key, bool, Hash, KeyEqual> {
     using iterator = typename Base::iterator;
     using const_iterator = typename Base::const_iterator;
 
-    HashSet(fl::sz initial_capacity = 8, float max_load = 0.7f)
+    HashSet(fl::size initial_capacity = 8, float max_load = 0.7f)
         : Base(initial_capacity, max_load) {}
 
     void insert(const Key &key) { Base::insert(key, true); }

@@ -61,16 +61,16 @@ class WaveSimulation1D_Real {
 
     // Get the simulation value at the inner grid cell x (converted to float in
     // the range [-1.0, 1.0]).
-    float getf(fl::sz x) const;
+    float getf(fl::size x) const;
 
-    int16_t geti16(fl::sz x) const;
-    int16_t geti16Previous(fl::sz x) const;
+    int16_t geti16(fl::size x) const;
+    int16_t geti16Previous(fl::size x) const;
 
-    int8_t geti8(fl::sz x) const { return static_cast<int8_t>(geti16(x) >> 8); }
+    int8_t geti8(fl::size x) const { return static_cast<int8_t>(geti16(x) >> 8); }
 
     // If mHalfDuplex is set then the the values are adjusted so that negative
     // values will instead be represented by zero.
-    uint8_t getu8(fl::sz x) const {
+    uint8_t getu8(fl::size x) const {
         int16_t value = geti16(x);
         // Rebase the range from [-32768, 32767] to [0, 65535] then extract the
         // upper 8 bits.
@@ -88,11 +88,11 @@ class WaveSimulation1D_Real {
     }
 
     // Returns whether x is within the inner grid bounds.
-    bool has(fl::sz x) const;
+    bool has(fl::size x) const;
 
     // Set the value at grid cell x (expected range: [-1.0, 1.0]); the value is
     // stored in Q15.
-    void set(fl::sz x, float value);
+    void set(fl::size x, float value);
 
     // Advance the simulation one time step.
     void update();
@@ -103,7 +103,7 @@ class WaveSimulation1D_Real {
     // (including boundary cells).
     fl::vector<int16_t> grid1;
     fl::vector<int16_t> grid2;
-    fl::sz whichGrid; // Indicates the active grid (0 or 1).
+    fl::size whichGrid; // Indicates the active grid (0 or 1).
 
     int16_t mCourantSq; // Simulation speed (courant squared) stored in Q15.
     int mDampenening; // Dampening exponent (damping factor = 2^(mDampenening)).
@@ -138,18 +138,18 @@ class WaveSimulation2D_Real {
 
     // Return the value at an inner grid cell (x,y), converted to float.
     // The value returned is in the range [-1.0, 1.0].
-    float getf(fl::sz x, fl::sz y) const;
+    float getf(fl::size x, fl::size y) const;
 
     // Return the value at an inner grid cell (x,y) as a fixed Q15 integer
     // in the range [-32768, 32767].
-    int16_t geti16(fl::sz x, fl::sz y) const;
-    int16_t geti16Previous(fl::sz x, fl::sz y) const;
+    int16_t geti16(fl::size x, fl::size y) const;
+    int16_t geti16Previous(fl::size x, fl::size y) const;
 
-    int8_t geti8(fl::sz x, fl::sz y) const {
+    int8_t geti8(fl::size x, fl::size y) const {
         return static_cast<int8_t>(geti16(x, y) >> 8);
     }
 
-    uint8_t getu8(fl::sz x, fl::sz y) const {
+    uint8_t getu8(fl::size x, fl::size y) const {
         int16_t value = geti16(x, y);
         // Rebase the range from [-32768, 32767] to [0, 65535] then extract the
         // upper 8 bits.
@@ -169,14 +169,14 @@ class WaveSimulation2D_Real {
     void setXCylindrical(bool on) { mXCylindrical = on; }
 
     // Check if (x,y) is within the inner grid.
-    bool has(fl::sz x, fl::sz y) const;
+    bool has(fl::size x, fl::size y) const;
 
     // Set the value at an inner grid cell using a float;
     // the value is stored in fixed Q15 format.
     // value shoudl be between -1.0 and 1.0.
-    void setf(fl::sz x, fl::sz y, float value);
+    void setf(fl::size x, fl::size y, float value);
 
-    void seti16(fl::sz x, fl::sz y, int16_t value);
+    void seti16(fl::size x, fl::size y, int16_t value);
 
     void setHalfDuplex(bool on) { mHalfDuplex = on; }
 
@@ -197,7 +197,7 @@ class WaveSimulation2D_Real {
     fl::vector<int16_t, fl::allocator_psram<int16_t>> grid1;
     fl::vector<int16_t, fl::allocator_psram<int16_t>> grid2;
 
-    fl::sz whichGrid; // Indicates the active grid (0 or 1).
+    fl::size whichGrid; // Indicates the active grid (0 or 1).
 
     int16_t mCourantSq; // Fixed speed parameter in Q15.
     int mDampening;     // Dampening exponent; used as 2^(dampening).

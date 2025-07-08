@@ -332,7 +332,7 @@ istream_real& istream_real::operator>>(double& d) {
     return *this;
 }
 
-// fl::sz operator>> removed - now handled by template in header
+// fl::size operator>> removed - now handled by template in header
 
 istream_real& istream_real::getline(string& str) {
     str.clear();
@@ -388,7 +388,7 @@ istream_real& istream_real::putback(char c) {
     } else {
         // Insert at beginning of buffer - shift existing data
         if (buffer_len_ < BUFFER_SIZE - 1) {
-            for (fl::sz i = buffer_len_; i > 0; --i) {
+            for (fl::size i = buffer_len_; i > 0; --i) {
                 buffer_[i] = buffer_[i-1];
             }
             buffer_[0] = c;

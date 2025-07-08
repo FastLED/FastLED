@@ -13,7 +13,7 @@ class AudioSample;
 
 struct FFTBins {
   public:
-    FFTBins(fl::sz n) : mSize(n) {
+    FFTBins(fl::size n) : mSize(n) {
         bins_raw.reserve(n);
         bins_db.reserve(n);
     }
@@ -47,7 +47,7 @@ struct FFTBins {
         bins_db.clear();
     }
 
-    fl::sz size() const { return mSize; }
+    fl::size size() const { return mSize; }
 
     // The bins are the output of the FFTImpl.
     fl::vector<float> bins_raw;
@@ -55,7 +55,7 @@ struct FFTBins {
     fl::vector<float> bins_db;
 
   private:
-    fl::sz mSize;
+    fl::size mSize;
 };
 
 struct FFT_Args {
@@ -109,11 +109,11 @@ class FFT {
              const FFT_Args &args = FFT_Args());
 
     void clear();
-    fl::sz size() const;
+    fl::size size() const;
 
     // FFT's are expensive to create, so we cache them. This sets the size of
     // the cache. The default is 8.
-    void setFFTCacheSize(fl::sz size);
+    void setFFTCacheSize(fl::size size);
 
   private:
     // Get the FFTImpl for the given arguments.

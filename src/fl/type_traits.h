@@ -89,7 +89,7 @@ template <typename T> struct is_array<T[]> {
     static constexpr bool value = true;
 };
 
-template <typename T, fl::sz N> struct is_array<T[N]> {
+template <typename T, fl::size N> struct is_array<T[N]> {
     static constexpr bool value = true;
 };
 
@@ -102,7 +102,7 @@ template <typename T> struct remove_extent<T[]> {
     using type = T;
 };
 
-template <typename T, fl::sz N> struct remove_extent<T[N]> {
+template <typename T, fl::size N> struct remove_extent<T[N]> {
     using type = T;
 };
 
@@ -697,11 +697,11 @@ struct contains_type<T, U, Rest...> {
 template <typename... Types> struct max_size;
 
 template <> struct max_size<> {
-    static constexpr fl::sz value = 0;
+    static constexpr fl::size value = 0;
 };
 
 template <typename T, typename... Rest> struct max_size<T, Rest...> {
-    static constexpr fl::sz value = (sizeof(T) > max_size<Rest...>::value)
+    static constexpr fl::size value = (sizeof(T) > max_size<Rest...>::value)
                                         ? sizeof(T)
                                         : max_size<Rest...>::value;
 };
@@ -710,11 +710,11 @@ template <typename T, typename... Rest> struct max_size<T, Rest...> {
 template <typename... Types> struct max_align;
 
 template <> struct max_align<> {
-    static constexpr fl::sz value = 1;
+    static constexpr fl::size value = 1;
 };
 
 template <typename T, typename... Rest> struct max_align<T, Rest...> {
-    static constexpr fl::sz value = (alignof(T) > max_align<Rest...>::value)
+    static constexpr fl::size value = (alignof(T) > max_align<Rest...>::value)
                                         ? alignof(T)
                                         : max_align<Rest...>::value;
 };

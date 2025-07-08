@@ -81,7 +81,7 @@ class XYRasterU8Sparse {
     const_iterator begin() const { return mSparseGrid.begin(); }
     iterator end() { return mSparseGrid.end(); }
     const_iterator end() const { return mSparseGrid.end(); }
-    fl::sz size() const { return mSparseGrid.size(); }
+    fl::size size() const { return mSparseGrid.size(); }
     bool empty() const { return mSparseGrid.empty(); }
 
     void rasterize(const span<const Tile2x2_u8> &tiles);
@@ -274,7 +274,7 @@ class XYRasterSparse_CRGB {
     const_iterator begin() const { return mSparseGrid.begin(); }
     iterator end() { return mSparseGrid.end(); }
     const_iterator end() const { return mSparseGrid.end(); }
-    fl::sz size() const { return mSparseGrid.size(); }
+    fl::size size() const { return mSparseGrid.size(); }
     bool empty() const { return mSparseGrid.empty(); }
 
     Pair<bool, CRGB> at(u16 x, u16 y) const {

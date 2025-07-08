@@ -25,8 +25,8 @@ class Leds {
     CRGB &at(int x, int y) { return (*this)(x, y); }
     const CRGB &at(int x, int y) const { return (*this)(x, y); }
 
-    fl::sz width() const { return mXyMap.getHeight(); }
-    fl::sz height() const { return mXyMap.getWidth(); }
+    fl::size width() const { return mXyMap.getHeight(); }
+    fl::size height() const { return mXyMap.getWidth(); }
 
     // Allows normal matrix array (row major) access, bypassing the XYMap.
     // Will assert if XYMap is not serpentine or line by line.
@@ -42,7 +42,7 @@ class Leds {
     operator const CRGB *() const { return mLeds; }
 
     void fill(const CRGB &color) {
-        for (fl::sz i = 0; i < mXyMap.getTotal(); ++i) {
+        for (fl::size i = 0; i < mXyMap.getTotal(); ++i) {
             mLeds[i] = color;
         }
     }
@@ -55,7 +55,7 @@ class Leds {
     CRGB *mLeds;
 };
 
-template <fl::sz W, fl::sz H> class LedsXY : public Leds {
+template <fl::size W, fl::size H> class LedsXY : public Leds {
   public:
     LedsXY() : Leds(mLedsData, XYMap::constructSerpentine(W, H)) {}
     explicit LedsXY(bool is_serpentine)

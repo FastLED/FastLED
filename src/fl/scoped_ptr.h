@@ -130,7 +130,7 @@ template <typename T, typename Deleter = ArrayDeleter<T>> class scoped_array {
     }
 
     // Array subscript operator
-    T &operator[](fl::sz i) const { return arr_[i]; }
+    T &operator[](fl::size i) const { return arr_[i]; }
 
     // Get the raw pointer
     T *get() const { return arr_; }
@@ -177,12 +177,12 @@ template <typename T, typename Alloc = fl::allocator<T>> class scoped_array2 {
     FASTLED_DEPRECATED_CLASS("Use fl::vector<T, fl::allocator_psram<T>> instead");
     Alloc mAlloc; // Allocator instance to manage memory allocation
     // Constructor
-    explicit scoped_array2(fl::sz size = 0)
+    explicit scoped_array2(fl::size size = 0)
         : arr_(nullptr), size_(size) {
         if (size > 0) {
             arr_ = mAlloc.allocate(size);
             // Default initialize each element
-            for (fl::sz i = 0; i < size; ++i) {
+            for (fl::size i = 0; i < size; ++i) {
                 mAlloc.construct(&arr_[i]);
             }
         }
@@ -192,7 +192,7 @@ template <typename T, typename Alloc = fl::allocator<T>> class scoped_array2 {
     ~scoped_array2() {
         if (arr_) {
             // Call destructor on each element
-            for (fl::sz i = 0; i < size_; ++i) {
+            for (fl::size i = 0; i < size_; ++i) {
                 mAlloc.destroy(&arr_[i]);
             }
             mAlloc.deallocate(arr_, size_);
@@ -223,13 +223,13 @@ template <typename T, typename Alloc = fl::allocator<T>> class scoped_array2 {
     }
 
     // Array subscript operator
-    T &operator[](fl::sz i) const { return arr_[i]; }
+    T &operator[](fl::size i) const { return arr_[i]; }
 
     // Get the raw pointer
     T *get() const { return arr_; }
 
     // Get the size of the array
-    fl::sz size() const { return size_; }
+    fl::size size() const { return size_; }
 
     // Boolean conversion operator
     explicit operator bool() const noexcept { return arr_ != nullptr; }
@@ -238,10 +238,10 @@ template <typename T, typename Alloc = fl::allocator<T>> class scoped_array2 {
     bool operator!() const noexcept { return arr_ == nullptr; }
 
     // Release the managed array and reset the pointer
-    void reset(fl::sz new_size = 0) {
+    void reset(fl::size new_size = 0) {
         if (arr_) {
             // Call destructor on each element
-            for (fl::sz i = 0; i < size_; ++i) {
+            for (fl::size i = 0; i < size_; ++i) {
                 // arr_[i].~T();
                 mAlloc.destroy(&arr_[i]);
             }
@@ -255,7 +255,7 @@ template <typename T, typename Alloc = fl::allocator<T>> class scoped_array2 {
             // arr_ = static_cast<T*>(::operator new(new_size * sizeof(T)));
             arr_ = mAlloc.allocate(new_size);
             // Default initialize each element
-            for (fl::sz i = 0; i < new_size; ++i) {
+            for (fl::size i = 0; i < new_size; ++i) {
                 // new (&arr_[i]) T();
                 mAlloc.construct(&arr_[i]);
             }
@@ -272,7 +272,7 @@ template <typename T, typename Alloc = fl::allocator<T>> class scoped_array2 {
 
     void swap(scoped_array2 &other) noexcept {
         T *tmp_arr = arr_;
-        fl::sz tmp_size = size_;
+        fl::size tmp_size = size_;
         
         arr_ = other.arr_;
         size_ = other.size_;
@@ -283,7 +283,7 @@ template <typename T, typename Alloc = fl::allocator<T>> class scoped_array2 {
 
   private:
     T *arr_ = nullptr;     // Managed array pointer
-    fl::sz size_ = 0;      // Size of the array
+    fl::size size_ = 0;      // Size of the array
 };
 
 

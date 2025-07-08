@@ -24,10 +24,10 @@ namespace fl {
 
 class istream_real {
 private:
-    static const fl::sz BUFFER_SIZE = 256;
+    static const fl::size BUFFER_SIZE = 256;
     char buffer_[BUFFER_SIZE];
-    fl::sz buffer_len_ = 0;
-    fl::sz pos_ = 0;
+    fl::size buffer_len_ = 0;
+    fl::size pos_ = 0;
     bool failed_ = false;
     
     // Helper to read a line from input
@@ -62,10 +62,10 @@ public:
     istream_real& operator>>(double& d);
     
     // Unified handler for fl:: namespace size-like unsigned integer types to avoid conflicts
-    // This only handles fl::sz and fl::u16 from the fl:: namespace
+    // This only handles fl::size and fl::u16 from the fl:: namespace
     template<typename T>
     typename fl::enable_if<
-        fl::is_same<T, fl::sz>::value ||
+        fl::is_same<T, fl::size>::value ||
         fl::is_same<T, fl::u16>::value,
         istream_real&
     >::type operator>>(T& n);
@@ -222,7 +222,7 @@ public:
     // Unified handler for fl:: namespace size-like unsigned integer types to avoid conflicts
     template<typename T>
     typename fl::enable_if<
-        fl::is_same<T, fl::sz>::value ||
+        fl::is_same<T, fl::size>::value ||
         fl::is_same<T, fl::u16>::value,
         istream&
     >::type operator>>(T& n) {
@@ -281,11 +281,11 @@ extern istream cin;
 // Template implementation for istream_real
 template<typename T>
 typename fl::enable_if<
-    fl::is_same<T, fl::sz>::value ||
+    fl::is_same<T, fl::size>::value ||
     fl::is_same<T, fl::u16>::value,
     istream_real&
 >::type istream_real::operator>>(T& n) {
-    // Use existing fl::u32 parsing logic for both fl::sz and fl::u16
+    // Use existing fl::u32 parsing logic for both fl::size and fl::u16
     // since they're both unsigned integer types that fit in fl::u32
     fl::u32 temp;
     (*this) >> temp;

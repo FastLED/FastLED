@@ -104,7 +104,7 @@ class unordered_set {
     }
     
     // Count - returns 0 or 1 for sets
-    fl::sz count(const Key &key) const {
+    fl::size count(const Key &key) const {
         return has(key) ? 1 : 0;
     }
 
@@ -130,8 +130,8 @@ class unordered_set {
     }
 
     // Capacity operations
-    fl::sz size() const { return data.size(); }
-    fl::sz capacity() const { return data.capacity(); }
+    fl::size size() const { return data.size(); }
+    fl::size capacity() const { return data.capacity(); }
     bool empty() const { return data.empty(); }
     
     // Modifiers

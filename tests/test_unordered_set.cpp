@@ -127,10 +127,10 @@ TEST_CASE("Stress test with many elements and rehashing") {
     // Insert many elements
     for (int i = 0; i < N; ++i) {
         s.insert(i);
-        REQUIRE_EQ(s.size(), static_cast<fl::sz>(i + 1));
+        REQUIRE_EQ(s.size(), static_cast<fl::size>(i + 1));
     }
     
-    REQUIRE_EQ(s.size(), static_cast<fl::sz>(N));
+    REQUIRE_EQ(s.size(), static_cast<fl::size>(N));
     
     // Verify all elements are present
     for (int i = 0; i < N; ++i) {
@@ -140,7 +140,7 @@ TEST_CASE("Stress test with many elements and rehashing") {
 
 TEST_CASE("Iterator functionality") {
     HashSet<int> s;
-    fl::sz expected_size = 0;
+    fl::size expected_size = 0;
     
     // Insert some elements
     for (int i = 0; i < 10; ++i) {
@@ -152,7 +152,7 @@ TEST_CASE("Iterator functionality") {
     
     // Iterate and collect all keys
     std::set<int> found_keys;
-    fl::sz count = 0;
+    fl::size count = 0;
     
     for (auto it = s.begin(); it != s.end(); ++it) {
         found_keys.insert((*it).first);
@@ -174,7 +174,7 @@ TEST_CASE("Const iterator functionality") {
         s.insert(i);
     }
     
-    fl::sz count = 0;
+    fl::size count = 0;
     std::set<int> found_keys;
     
     // Use const_iterator directly from non-const object
@@ -194,7 +194,7 @@ TEST_CASE("Range-based for loop") {
     }
     
     std::set<int> found_keys;
-    fl::sz count = 0;
+    fl::size count = 0;
     
     // Range-based for loop
     for (const auto& kv : s) {
@@ -251,12 +251,12 @@ TEST_CASE("Capacity management") {
 TEST_CASE("Custom hash and equality") {
     // Test with custom hash and equality functions for case-insensitive strings
     struct CaseInsensitiveHash {
-        fl::sz operator()(const fl::string& str) const {
-            fl::sz hash = 0;
-            for (fl::sz i = 0; i < str.size(); ++i) {
+        fl::size operator()(const fl::string& str) const {
+            fl::size hash = 0;
+            for (fl::size i = 0; i < str.size(); ++i) {
                 char c = str[i];
                 char lower_c = (c >= 'A' && c <= 'Z') ? c + 32 : c;
-                hash = hash * 31 + static_cast<fl::sz>(lower_c);
+                hash = hash * 31 + static_cast<fl::size>(lower_c);
             }
             return hash;
         }
@@ -265,7 +265,7 @@ TEST_CASE("Custom hash and equality") {
     struct CaseInsensitiveEqual {
         bool operator()(const fl::string& a, const fl::string& b) const {
             if (a.size() != b.size()) return false;
-            for (fl::sz i = 0; i < a.size(); ++i) {
+            for (fl::size i = 0; i < a.size(); ++i) {
                 char ca = (a[i] >= 'A' && a[i] <= 'Z') ? a[i] + 32 : a[i];
                 char cb = (b[i] >= 'A' && b[i] <= 'Z') ? b[i] + 32 : b[i];
                 if (ca != cb) return false;

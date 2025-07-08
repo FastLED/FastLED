@@ -18,7 +18,7 @@
 namespace fl {
 
 // Define static const member for npos (only for string class)
-const fl::sz string::npos;
+const fl::size string::npos;
 
 // Explicit template instantiations for commonly used sizes
 template class StrN<64>;
@@ -106,14 +106,14 @@ static int itoa(int value, char *sp, int radix) {
     return len;
 }
 
-static float atoff(const char *str, fl::sz len) {
+static float atoff(const char *str, fl::size len) {
     float result = 0.0f;   // The resulting number
     float sign = 1.0f;     // Positive or negative
     float fraction = 0.0f; // Fractional part
     float divisor = 1.0f;  // Divisor for the fractional part
     int isFractional = 0;  // Whether the current part is fractional
 
-    fl::sz pos = 0; // Current position in the string
+    fl::size pos = 0; // Current position in the string
 
     // Handle empty input
     if (len == 0) {
@@ -174,7 +174,7 @@ StringHolder::StringHolder(const char *str) {
     memcpy(mData, str, mLength);
     mData[mLength] = '\0';
 }
-StringHolder::StringHolder(fl::sz length) {
+StringHolder::StringHolder(fl::size length) {
     mData = (char *)malloc(length + 1);
     if (mData) {
         mLength = length;
@@ -185,7 +185,7 @@ StringHolder::StringHolder(fl::sz length) {
     mCapacity = mLength;
 }
 
-StringHolder::StringHolder(const char *str, fl::sz length) {
+StringHolder::StringHolder(const char *str, fl::size length) {
     mData = (char *)malloc(length + 1);
     if (mData) {
         mLength = length;
@@ -201,7 +201,7 @@ StringHolder::~StringHolder() {
     free(mData); // Release the memory
 }
 
-void StringHolder::grow(fl::sz newLength) {
+void StringHolder::grow(fl::size newLength) {
     if (newLength <= mCapacity) {
         // New length must be greater than current length
         mLength = newLength;
@@ -228,7 +228,7 @@ void StringHolder::grow(fl::sz newLength) {
     }
 }
 
-float StringFormatter::parseFloat(const char *str, fl::sz len) {
+float StringFormatter::parseFloat(const char *str, fl::size len) {
     return string_functions::atoff(str, len);
 }
 

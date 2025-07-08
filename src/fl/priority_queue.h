@@ -67,7 +67,7 @@ template <typename T, typename Compare = fl::less<T>,
 class PriorityQueue {
   public:
     using value_type = T;
-    using size_type = fl::sz;
+    using size_type = fl::size;
     using compare_type = Compare;
 
     PriorityQueue() = default;
@@ -86,7 +86,7 @@ class PriorityQueue {
     const T &top() const { return _data.front(); }
 
     bool empty() const { return _data.size() == 0; }
-    fl::sz size() const { return _data.size(); }
+    fl::size size() const { return _data.size(); }
 
     const Compare &compare() const { return _comp; }
 

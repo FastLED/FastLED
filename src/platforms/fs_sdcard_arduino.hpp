@@ -41,19 +41,19 @@ public:
         auto f = const_cast<SdFatFileHandle*>(this);
         return f->_file.available() > 0;
     }
-    fl::sz size() const override { 
+    fl::size size() const override { 
         return _file.fileSize(); 
     }
-    fl::sz read(uint8_t *dst, fl::sz bytesToRead) override { 
+    fl::size read(uint8_t *dst, fl::size bytesToRead) override { 
         return _file.read(dst, bytesToRead); 
     }
-    fl::sz pos() const override { 
+    fl::size pos() const override { 
         return _file.curPosition(); 
     }
     const char* path() const override { 
         return _path.c_str(); 
     }
-    bool seek(fl::sz pos) override { 
+    bool seek(fl::size pos) override { 
         return _file.seekSet(pos); 
     }
     void close() override { 
@@ -84,15 +84,15 @@ public:
         auto f = const_cast<File&>(_file);
         return f.available() > 0;
     }
-    fl::sz size() const override { 
+    fl::size size() const override { 
         // Arduino's size() is not const, so we need const_cast
         auto f = const_cast<File&>(_file);
         return f.size(); 
     }
-    fl::sz read(uint8_t *dst, fl::sz bytesToRead) override { 
+    fl::size read(uint8_t *dst, fl::size bytesToRead) override { 
         return _file.read(dst, bytesToRead); 
     }
-    fl::sz pos() const override { 
+    fl::size pos() const override { 
         // Arduino's position() is not const, so we need const_cast
         auto f = const_cast<File&>(_file);
         return f.position(); 
@@ -100,7 +100,7 @@ public:
     const char* path() const override { 
         return _path.c_str(); 
     }
-    bool seek(fl::sz pos) override { 
+    bool seek(fl::size pos) override { 
         return _file.seek(pos); 
     }
     void close() override { 
