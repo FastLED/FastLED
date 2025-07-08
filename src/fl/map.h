@@ -12,7 +12,7 @@
 #include "fl/type_traits.h"
 #include "fl/vector.h"
 #include "fl/rbtree.h"
-#include "fl/slab_allocator.h"
+#include "fl/allocator.h"
 
 namespace fl {
 

@@ -1,7 +1,7 @@
 // Unit tests for SlabAllocator to ensure contiguous memory allocation
 
 #include "test.h"
-#include "fl/slab_allocator.h"
+#include "fl/allocator.h"
 #include "fl/vector.h"
 #include <algorithm>
 #include <set>

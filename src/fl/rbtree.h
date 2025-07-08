@@ -7,7 +7,7 @@
 #include "fl/template_magic.h"
 #include "fl/type_traits.h"
 #include "fl/algorithm.h"
-#include "fl/slab_allocator.h"
+#include "fl/allocator.h"
 
 namespace fl {
 
