@@ -14,14 +14,14 @@ namespace fl {
 // do not exceed the capacity of the set, otherwise they will
 // fail. Because of this limitation, this set is not a drop in
 // replacement for std::set.
-template <typename Key, sz N> class FixedSet {
+template <typename Key, sz N> class OrderedSetFixed {
   public:
     typedef FixedVector<Key, N> VectorType;
     typedef typename VectorType::iterator iterator;
     typedef typename VectorType::const_iterator const_iterator;
 
     // Constructor
-    constexpr FixedSet() = default;
+    constexpr OrderedSetFixed() = default;
 
     iterator begin() { return data.begin(); }
     iterator end() { return data.end(); }
@@ -155,6 +155,9 @@ template <typename Key, sz N> class FixedSet {
   private:
     VectorType data;
 };
+
+template <typename Key, fl::sz N>
+using FixedSet = OrderedSetFixed<Key, N>;  // Backwards compatibility
 
 template <typename Key>
 class unordered_set {
