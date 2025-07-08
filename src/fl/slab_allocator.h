@@ -8,7 +8,7 @@
 #include "fl/type_traits.h"
 #include "fl/unused.h"
 #include "fl/assert.h"
-#include "fl/bitcast.h"
+#include "fl/bit_cast.h"
 
 namespace fl {
 

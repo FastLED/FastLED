@@ -22,6 +22,8 @@
 #include "fl/scoped_ptr.h"
 #include "fl/template_magic.h"
 #include "fl/referent.h"
+#include "fl/bit_cast.h"
+#include "fl/int.h"
 
 // Declares a smart pointer. FASTLED_SMART_PTR(Foo) will declare a class FooPtr
 // which will be a typedef of Ptr<Foo>. After this FooPtr::New(...args) can be
@@ -203,6 +205,11 @@ template <typename T> class WeakPtr {
     bool expired() const;
 
     void reset();
+
+    fl::uptr ptr_value() const {
+      fl::uptr val = fl::bit_cast<fl::uptr>(mWeakPtr);
+      return val;
+    }
     
     WeakReferent* mWeakPtr;
 };

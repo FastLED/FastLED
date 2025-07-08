@@ -18,7 +18,7 @@
 #include "fl/screenmap.h"
 #include "fl/virtual_if_not_avr.h"
 #include "fl/int.h"
-#include "fl/bitcast.h"
+#include "fl/bit_cast.h"
 
 FASTLED_NAMESPACE_BEGIN
 

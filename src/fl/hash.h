@@ -169,6 +169,13 @@ template <typename T> struct Hash<Ptr<T>> {
     }
 };
 
+template <typename T> struct Hash<fl::WeakPtr<T>> {
+    uint32_t operator()(const fl::WeakPtr<T> &key) const noexcept {
+        fl::uptr val = key.ptr_value();
+        return MurmurHash3_x86_32(&val, sizeof(fl::uptr));
+    }
+};
+
 #define FASTLED_DEFINE_FAST_HASH(T)                                            \
     template <> struct Hash<T> {                                               \
         uint32_t operator()(const int &key) const noexcept {                   \

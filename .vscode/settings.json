@@ -134,6 +134,7 @@
         "text_encoding": "cpp",
         "__node_handle": "cpp",
         "xstring": "cpp",
-        "xutility": "cpp"
+        "xutility": "cpp",
+        "xtree": "cpp"
     }
 }
