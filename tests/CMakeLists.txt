@@ -75,8 +75,13 @@ message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
 # 3. Disable frame pointers if stack traces aren't needed:
 #    set(FAST_FRAME_POINTER -fomit-frame-pointer)
 # Current optimized settings (proven 66% improvement from baseline):
-set(FAST_DEBUG_OPT -O1)
+# set(FAST_DEBUG_OPT -O1)  # DISABLED for full debugging
 # set(FAST_DEBUG_INFO -gline-tables-only)  # something wrong with this
+# set(FAST_FRAME_POINTER -fno-omit-frame-pointer)
+
+# Full debugging settings (enables step-through debugging)
+set(FAST_DEBUG_OPT -O0)  # No optimization for accurate debugging
+set(FAST_DEBUG_INFO -g3)  # Full debug info including macros
 set(FAST_FRAME_POINTER -fno-omit-frame-pointer)
 
 # Define common compiler flags and definitions

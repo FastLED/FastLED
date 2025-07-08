@@ -2,6 +2,7 @@
 #include "fl/printf.h"
 #include "fl/strstream.h"
 #include "fl/io.h"
+#include "fl/string.h"
 #include <iostream>
 #include <cstdio> // For std::sprintf and std::snprintf
 

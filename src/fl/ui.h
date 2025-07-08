@@ -16,6 +16,7 @@
 #include "platforms/ui_defs.h"
 #include "sensors/button.h"
 #include "fl/virtual_if_not_avr.h"
+#include "fl/int.h"
 
 #define FL_NO_COPY(CLASS)                                                      \
     CLASS(const CLASS &) = delete;                                             \
@@ -56,6 +57,7 @@ class UISlider : public UIElement {
         return (value() - min) / (max - min);
     }
     float getMax() const { return mImpl.getMax(); }
+    float getMin() const { return mImpl.getMin(); }
     void setValue(float value);
     operator float() const { return mImpl.value(); }
     operator uint8_t() const { return static_cast<uint8_t>(mImpl.value()); }

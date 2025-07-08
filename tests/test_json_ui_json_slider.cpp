@@ -20,7 +20,7 @@
 
 FASTLED_USING_NAMESPACE
 
-#if 0  // TODO: Investigate why this test is not sending stuff. In production this works.
+#if 1  // TODO: Investigate why this test is not sending stuff. In production this works.
 TEST_CASE("Test slider component") {
     // Create a callback to capture JSON updates that would be sent to JavaScript
     fl::vector<fl::string> capturedJsonStrings;
@@ -33,7 +33,7 @@ TEST_CASE("Test slider component") {
     auto updateEngineState = fl::setJsonUiHandlers(jsCallback);
     
     // Create a slider with range 0-255, step 1, starting at 0
-    fl::JsonSliderImpl slider("test_slider", 0.0f, 0.0f, 255.0f, 1.0f);
+    fl::UISlider slider("test_slider", 0.0f, 0.0f, 255.0f, 1.0f);
     
     // Verify initial state
     CHECK_CLOSE(slider.value(), 0.0f, 0.001f);
@@ -42,7 +42,7 @@ TEST_CASE("Test slider component") {
     
     // Send a JSON update to the slider (simulating JavaScript UI interaction)
     // We'll use the ID from the captured JSON strings
-    const char* updateJson = R"({"1": 128})";  // Using the slider's internal ID.
+    const char* updateJson = R"({"0": 128})";  // Using the slider's internal ID.
     updateEngineState(updateJson);
     
     // Process any pending UI updates (normally done by engine loop)
