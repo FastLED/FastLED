@@ -54,9 +54,7 @@ class TestMissingPragmaOnce(unittest.TestCase):
             rel_path = os.path.relpath(root, SRC_ROOT)
             if current_dir != rel_path:
                 current_dir = rel_path
-                print(f"Traversing directory: {rel_path}")
                 if rel_path in EXCLUDED_DIRS:
-                    print(f"  Skipping excluded directory: {rel_path}")
                     dirs[:] = []  # Skip this directory and its subdirectories
                     continue
 
@@ -68,9 +66,7 @@ class TestMissingPragmaOnce(unittest.TestCase):
             for excluded_dir in EXCLUDED_DIRS:
                 npath = os.path.normpath(root)
                 npath_excluded = os.path.normpath(excluded_dir)
-                print(f"Checking {npath} against excluded {npath_excluded}")
                 if npath.startswith(npath_excluded):
-                    print(f"  Skipping excluded directory: {rel_path}")
                     break
 
             for file in files:
