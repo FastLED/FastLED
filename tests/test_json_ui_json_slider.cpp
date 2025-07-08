@@ -2,7 +2,7 @@
 
 #include "FastLED.h"
 
-#if FASTLED_ENABLE_JSON
+
 
 #include "fl/json.h"
 #include "fl/namespace.h"
@@ -20,7 +20,11 @@
 
 FASTLED_USING_NAMESPACE
 
-#if 1  // TODO: Investigate why this test is not sending stuff. In production this works.
+TEST_CASE("Sanity check") {
+    static_assert(FASTLED_ENABLE_JSON==1, "FASTLED_ENABLE_JSON must be defined during testing");
+}
+
+
 TEST_CASE("Test slider component") {
     // Create a callback to capture JSON updates that would be sent to JavaScript
     fl::vector<fl::string> capturedJsonStrings;
@@ -56,5 +60,3 @@ TEST_CASE("Test slider component") {
     // Verify the slider value was updated
     CHECK_CLOSE(slider.value(), 128.0f, 0.001f);
 }
-#endif
-#endif
