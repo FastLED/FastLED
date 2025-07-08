@@ -103,6 +103,7 @@ void JsonUiManager::updateUiComponents(const char* jsonStr) {
     // FL_WARN("*** BACKEND SET mHasPendingUpdate = true, waiting for onEndFrame()");
 }
 
+
 void JsonUiManager::executeUiUpdates(const FLArduinoJson::JsonDocument &doc) {
     auto type = getJsonType(doc);
     auto components = getComponents();
@@ -135,16 +136,7 @@ void JsonUiManager::executeUiUpdates(const FLArduinoJson::JsonDocument &doc) {
 }
 
 void JsonUiManager::onEndFrame() {
-    // Don't re-enable this, it fills the screen with spam.
-    //FL_WARN("*** onEndFrame CALLED: JsonUiManager=" << this << ", mHasPendingUpdate=" << (mHasPendingUpdate ? "true" : "false"));
-    if (!mHasPendingUpdate) {
-        return;
-    }
-    // FL_WARN("*** onEndFrame: Processing pending update");
-    executeUiUpdates(mPendingJsonUpdate);
-    mPendingJsonUpdate.clear();
-    mHasPendingUpdate = false;
-    // FL_WARN("*** onEndFrame: Update processed and cleared");
+    processPendingUpdates();
 }
 
 void JsonUiManager::toJson(FLArduinoJson::JsonArray &json) {
