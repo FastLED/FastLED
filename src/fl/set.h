@@ -10,6 +10,13 @@
 
 namespace fl {
 
+template <typename Key, sz N> class OrderedSetFixed;
+template <typename Key, typename Allocator> class OrderedSet;
+template <typename Key> class unordered_set;
+
+template <typename Key, sz N>
+using FixedSet = OrderedSetFixed<Key, N>;  // Backwards compatibility
+
 // A simple unordered set implementation with a fixed size.
 // The user is responsible for making sure that the inserts
 // do not exceed the capacity of the set, otherwise they will
@@ -263,8 +270,6 @@ template <typename Key, typename Allocator = fl::allocator<Key>> class OrderedSe
     VectorType data;
 };
 
-template <typename Key, sz N>
-using FixedSet = OrderedSetFixed<Key, N>;  // Backwards compatibility
 
 template <typename Key>
 class unordered_set {
