@@ -6,6 +6,7 @@
 #include "fl/namespace.h"
 #include "fl/vector.h"
 #include "fl/hash_map.h"
+#include "fl/allocator.h"
 
 namespace fl {
 
@@ -156,7 +157,113 @@ template <typename Key, sz N> class OrderedSetFixed {
     VectorType data;
 };
 
-template <typename Key, fl::sz N>
+template <typename Key, typename Allocator = fl::allocator<Key>> class OrderedSet {
+  public:
+    typedef fl::HeapVector<Key, Allocator> VectorType;
+    typedef typename VectorType::iterator iterator;
+    typedef typename VectorType::const_iterator const_iterator;
+
+    // Constructor
+    constexpr OrderedSet() = default;
+
+    iterator begin() { return data.begin(); }
+    iterator end() { return data.end(); }
+    const_iterator begin() const { return data.begin(); }
+    const_iterator end() const { return data.end(); }
+
+    iterator find(const Key &key) {
+        for (auto it = begin(); it != end(); ++it) {
+            if (*it == key) {
+                return it;
+            }
+        }
+        return end();
+    }
+
+    const_iterator find(const Key &key) const {
+        for (auto it = begin(); it != end(); ++it) {
+            if (*it == key) {
+                return it;
+            }
+        }
+        return end();
+    }
+
+    bool insert(const Key &key) {
+        auto it = find(key);
+        if (it == end()) {
+            data.push_back(key);
+            return true;
+        }
+
+        return false;
+    }
+
+    // Move version of insert
+    bool insert(Key &&key) {
+        auto it = find(key);
+        if (it == end()) {
+            data.push_back(fl::move(key));
+            return true;
+        }
+        return false;
+    }
+
+    // Emplace - construct in place with perfect forwarding
+    template<typename... Args>
+    bool emplace(Args&&... args) {
+        // Create a temporary to check if it already exists
+        Key temp_key(fl::forward<Args>(args)...);
+        auto it = find(temp_key);
+        if (it == end()) {
+            data.push_back(fl::move(temp_key));
+            return true;
+        }
+        return false;
+    }
+
+    bool erase(const Key &key) {
+        auto it = find(key);
+        if (it != end()) {
+            data.erase(it);
+            return true;
+        }
+        return false;
+    }
+
+    bool erase(iterator pos) {
+        if (pos != end()) {
+            data.erase(pos);
+            return true;
+        }
+        return false;
+    }
+
+
+    // Get the current size of the set
+    constexpr fl::sz size() const { return data.size(); }
+
+    constexpr bool empty() const { return data.empty(); }
+
+    // Get the capacity of the set
+    constexpr fl::sz capacity() const { return data.capacity(); }
+
+    // Clear the set
+    void clear() { data.clear(); }
+
+    bool has(const Key &key) const { return find(key) != end(); }
+
+    // Return the first element of the set
+    const Key &front() const { return data.front(); }
+
+    // Return the last element of the set
+    const Key &back() const { return data.back(); }
+
+  private:
+    VectorType data;
+};
+
+template <typename Key, sz N>
 using FixedSet = OrderedSetFixed<Key, N>;  // Backwards compatibility
 
 template <typename Key>
