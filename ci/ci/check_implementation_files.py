@@ -407,6 +407,19 @@ def main():
             print(f"   Included in all-source build:   {included_count}")
             print(f"   Inclusion percentage:           {inclusion_percentage:.1f}%")
 
+        # Determine if any files are missing and force a non-zero exit code
+        total_missing = total_impl_files - included_count
+        if total_missing > 0:
+            # Print an explicit error message before exiting
+            error_symbol = "[ERROR]" if USE_ASCII_ONLY else "🚨"
+            print(
+                f"\n{error_symbol} {total_missing} implementation file(s) are missing from the all-source build!"
+            )
+            print("   Failing script due to incomplete all-source build inclusion.")
+            import sys
+
+            sys.exit(1)
+
     if args.verbose:
         print(f"\n{config_symbol} CONFIGURATION:")
         print(f"   Project root: {PROJECT_ROOT}")
