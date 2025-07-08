@@ -435,6 +435,8 @@ class string : public StrN<FASTLED_STR_INLINED_SIZE> {
   public:
     // Standard string npos constant for compatibility
     static const fl::sz npos = static_cast<fl::sz>(-1);
+
+    static int strcmp(const string& a, const string& b);
     
     string() : StrN<FASTLED_STR_INLINED_SIZE>() {}
     string(const char *str) : StrN<FASTLED_STR_INLINED_SIZE>(str) {}

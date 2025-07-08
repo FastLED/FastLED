@@ -33,6 +33,8 @@ class JsonUiManager : fl::EngineEvents::Listener {
       mUpdateJs = updateJs;
     }
 
+    JsonUiInternalPtr findUiComponent(const char* idStr);
+
 
   private:
     
@@ -42,6 +44,7 @@ class JsonUiManager : fl::EngineEvents::Listener {
 
     fl::vector<JsonUiInternalPtr> getComponents();
     void toJson(FLArduinoJson::JsonArray &json);
+    JsonUiInternalPtr findUiComponent(const fl::string& idStr);
 
     Callback mUpdateJs;
     JsonUIRefSet mComponents;

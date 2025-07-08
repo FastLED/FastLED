@@ -6,6 +6,8 @@
 #include "fl/compiler_control.h"
 #include "fl/warn.h"
 #include "fl/assert.h"
+#include "fl/string.h"
+
 
 FL_DISABLE_WARNING(deprecated-declarations)
 
@@ -126,6 +128,23 @@ fl::vector<JsonUiInternalPtr> JsonUiManager::getComponents() {
     return out;
 }
 
+JsonUiInternalPtr JsonUiManager::findUiComponent(const char* idStr) {
+    auto components = getComponents();
+    
+    for (auto &component : components) {
+        int id = component->id();
+        string componentIdStr;
+        componentIdStr.append(id);
+        
+        if (fl::string::strcmp(componentIdStr.c_str(), idStr) == 0) {
+            //FL_WARN("*** Found component with ID " << id);
+            return component;
+        }
+    }
+    
+    return JsonUiInternalPtr(); // Return null pointer if not found
+}
+
 void JsonUiManager::updateUiComponents(const char* jsonStr) {
     //FL_WARN("*** JsonUiManager::updateUiComponents ENTRY ***");
     // FL_WARN("*** INCOMING JSON: " << (jsonStr ? jsonStr : "NULL"));
@@ -153,30 +172,26 @@ void JsonUiManager::updateUiComponents(const char* jsonStr) {
 
 void JsonUiManager::executeUiUpdates(const FLArduinoJson::JsonDocument &doc) {
     auto type = getJsonType(doc);
-    auto components = getComponents();
     
     if (type == fl::JSON_OBJECT) {
         auto obj = doc.as<FLArduinoJson::JsonObjectConst>();
         bool any_found = false;
-        int id = -1;
-        for (auto &component : components) {
-            id = component->id();
-            string idStr;
-            idStr.append(id);
+        
+        // Iterate through all keys in the JSON object
+        for (auto kv : obj) {
+            const char* idStr = kv.key().c_str();
             
-            //FL_WARN("*** Checking for key: " << idStr.c_str());
+            //FL_WARN("*** Checking for component with ID: " << idStr);
             
-            if (obj.containsKey(idStr.c_str())) {
-                const FLArduinoJson::JsonVariantConst v = obj[idStr.c_str()];
+            auto component = findUiComponent(idStr);
+            if (component) {
+                const FLArduinoJson::JsonVariantConst v = kv.value();
                 component->update(v);
                 any_found = true;
-                //FL_WARN("*** Found component with ID " << id << " and updated it");
-                break;
+                //FL_WARN("*** Updated component with ID " << idStr);
             }
         }
-
         FL_WARN_IF(!any_found, "*** ERROR: could not find any components in the JSON update mapping into internal component ids");
-
     } else {
         FL_WARN("JSON document is not an object, cannot execute UI updates");
     }

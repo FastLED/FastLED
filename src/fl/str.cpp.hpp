@@ -1,5 +1,5 @@
 #include <stdlib.h>
-
+#include <string.h>  // ok include - for strcmp
 #include "fl/str.h"
 
 #include "crgb.h"
@@ -13,7 +13,6 @@
 
 #ifdef FASTLED_TESTING
 #include <cstdio> // ok include
-
 #endif
 
 namespace fl {
@@ -231,6 +230,10 @@ void StringHolder::grow(fl::sz newLength) {
 
 float StringFormatter::parseFloat(const char *str, fl::sz len) {
     return string_functions::atoff(str, len);
+}
+
+int string::strcmp(const string& a, const string& b) {
+    return ::strcmp(a.c_str(), b.c_str());
 }
 
 string &string::append(const FFTBins &str) {
