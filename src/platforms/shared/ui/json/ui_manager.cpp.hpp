@@ -133,7 +133,7 @@ void JsonUiManager::updateUiComponents(const char* jsonStr) {
     // FL_WARN("*** CURRENT COMPONENT COUNT: " << mComponents.size());
     
     if (!jsonStr) {
-        FL_WARN("*** JsonUiManager::updateUiComponents: NULL JSON string provided");
+        FL_ASSERT(false, "*** JsonUiManager::updateUiComponents: NULL JSON string provided");
         return;
     }
 
