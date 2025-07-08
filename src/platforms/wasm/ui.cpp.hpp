@@ -151,6 +151,11 @@ void ensureWasmUiSystemInitialized() {
     }
 }
 
+__attribute__((constructor))
+void on_startup_initialize_wasm_ui() {
+    ensureWasmUiSystemInitialized();
+}
+
 } // namespace fl
 
 // C binding wrapper for jsUpdateUiComponents
