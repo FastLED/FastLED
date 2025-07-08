@@ -18,7 +18,6 @@
 #include "platforms/shared/ui/json/description.h"
 #include "platforms/shared/ui/json/number_field.h"
 
-FASTLED_USING_NAMESPACE
 
 TEST_CASE("Sanity check") {
     static_assert(FASTLED_ENABLE_JSON==1, "FASTLED_ENABLE_JSON must be defined during testing");
