@@ -2,6 +2,7 @@
 #include "fl/ptr.h"
 #include "fl/template_magic.h"
 #include "fl/compiler_control.h"
+#include "fl/warn.h"
 
 FL_DISABLE_WARNING_PUSH
 FL_DISABLE_WARNING(float-equal)
@@ -13,94 +14,163 @@ namespace fl {
 // function<R(Args...)>: type‐erasing "std::function" replacement
 // Supports free functions, lambdas/functors, member functions (const &
 // non‑const)
+// 
+// NEW: Uses inline storage for member function callables
+// to avoid heap allocation for member function calls.
 //----------------------------------------------------------------------------
 template <typename> class function;
 
-template <typename R, typename... Args> class function<R(Args...)> {
-  private:
+template <typename R, typename... Args>
+class function<R(Args...)> {
+private:
     struct CallableBase : public Referent {
         virtual R invoke(Args... args) = 0;
         virtual ~CallableBase() = default;
     };
 
-    // Wraps a lambda/functor or free function pointer
-    template <typename F> struct Callable : CallableBase {
+    template <typename F>
+    struct Callable : CallableBase {
         F f;
         Callable(F fn) : f(fn) {}
         R invoke(Args... args) override { return f(args...); }
     };
 
-    // Wraps a non‑const member function
-    template <typename C> struct MemCallable : CallableBase {
-        C *obj;
-        R (C::*mfp)(Args...);
-        MemCallable(C *o, R (C::*m)(Args...)) : obj(o), mfp(m) {}
-        R invoke(Args... args) override { return (obj->*mfp)(args...); }
+    // Type-erased member function callable
+    struct MemberCallableBase {
+        virtual R invoke(Args... args) const = 0;
+        virtual MemberCallableBase* clone() const = 0;
+        virtual ~MemberCallableBase() = default;
     };
 
-    // Wraps a const member function
-    template <typename C> struct ConstMemCallable : CallableBase {
-        const C *obj;
-        R (C::*mfp)(Args...) const;
-        ConstMemCallable(const C *o, R (C::*m)(Args...) const)
-            : obj(o), mfp(m) {}
-        R invoke(Args... args) override { return (obj->*mfp)(args...); }
+    template <typename C>
+    struct NonConstMemberCallable : MemberCallableBase {
+        C* obj;
+        R (C::*member_func)(Args...);
+        NonConstMemberCallable(C* o, R (C::*mf)(Args...)) : obj(o), member_func(mf) {}
+        R invoke(Args... args) const override {
+            return (obj->*member_func)(args...);
+        }
+        MemberCallableBase* clone() const override {
+            return new NonConstMemberCallable(*this);
+        }
     };
 
-    Ptr<CallableBase> callable_;
+    template <typename C>
+    struct ConstMemberCallable : MemberCallableBase {
+        const C* obj;
+        R (C::*member_func)(Args...) const;
+        ConstMemberCallable(const C* o, R (C::*mf)(Args...) const) : obj(o), member_func(mf) {}
+        R invoke(Args... args) const override {
+            return (obj->*member_func)(args...);
+        }
+        MemberCallableBase* clone() const override {
+            return new ConstMemberCallable(*this);
+        }
+    };
 
-  public:
-    function() = default;
-    ~function() = default;
+    union Storage {
+        Ptr<CallableBase> heap_callable;
+        MemberCallableBase* member_callable;
+        Storage() : heap_callable() {}
+        ~Storage() {}
+    };
+    Storage storage_;
+    bool is_member_callable_;
 
-    function(const function &o) : callable_(o.callable_) {}
-
-    function(function &&o) noexcept {
-        callable_.swap(o.callable_);
-        o.callable_.reset();
+public:
+    function() : is_member_callable_(false) {}
+    ~function() {
+        if (is_member_callable_) {
+            delete storage_.member_callable;
+        }
     }
-
-    function &operator=(const function &o) {
+    function(const function& o) : is_member_callable_(o.is_member_callable_) {
+        if (is_member_callable_) {
+            storage_.member_callable = o.storage_.member_callable ? o.storage_.member_callable->clone() : nullptr;
+        } else {
+            new (&storage_.heap_callable) Ptr<CallableBase>(o.storage_.heap_callable);
+        }
+    }
+    function(function&& o) noexcept : is_member_callable_(o.is_member_callable_) {
+        if (is_member_callable_) {
+            storage_.member_callable = o.storage_.member_callable;
+            o.storage_.member_callable = nullptr;
+        } else {
+            new (&storage_.heap_callable) Ptr<CallableBase>(fl::move(o.storage_.heap_callable));
+        }
+        o.is_member_callable_ = false;
+    }
+    function& operator=(const function& o) {
         if (this != &o) {
-            callable_ = o.callable_;
+            if (is_member_callable_) {
+                delete storage_.member_callable;
+            }
+            is_member_callable_ = o.is_member_callable_;
+            if (is_member_callable_) {
+                storage_.member_callable = o.storage_.member_callable ? o.storage_.member_callable->clone() : nullptr;
+            } else {
+                new (&storage_.heap_callable) Ptr<CallableBase>(o.storage_.heap_callable);
+            }
         }
         return *this;
     }
-
     function& operator=(function&& o) noexcept {
         if (this != &o) {
-            callable_.swap(o.callable_);
-            o.callable_.reset();
+            if (is_member_callable_) {
+                delete storage_.member_callable;
+            }
+            is_member_callable_ = o.is_member_callable_;
+            if (is_member_callable_) {
+                storage_.member_callable = o.storage_.member_callable;
+                o.storage_.member_callable = nullptr;
+            } else {
+                new (&storage_.heap_callable) Ptr<CallableBase>(fl::move(o.storage_.heap_callable));
+            }
+            o.is_member_callable_ = false;
         }
         return *this;
     }
-
     // 1) generic constructor for lambdas, free functions, functors
-    template <typename F,
-              typename = enable_if_t<!is_member_function_pointer<F>::value>>
-    function(F f) : callable_(NewPtr<Callable<F>>(f)) {}
-
+    template <typename F, typename = enable_if_t<!is_member_function_pointer<F>::value>>
+    function(F f) : is_member_callable_(false) {
+        new (&storage_.heap_callable) Ptr<CallableBase>(NewPtr<Callable<F>>(f));
+    }
     // 2) non‑const member function
     template <typename C>
-    function(R (C::*mf)(Args...), C *obj)
-        : callable_(NewPtr<MemCallable<C>>(obj, mf)) {}
-
+    function(R (C::*mf)(Args...), C* obj) : is_member_callable_(true) {
+        storage_.member_callable = new NonConstMemberCallable<C>(obj, mf);
+    }
     // 3) const member function
     template <typename C>
-    function(R (C::*mf)(Args...) const, const C *obj)
-        : callable_(NewPtr<ConstMemCallable<C>>(obj, mf)) {}
-
-    // Invocation
-    R operator()(Args... args) const { return callable_->invoke(args...); }
-
-    explicit operator bool() const { return callable_ != nullptr; }
-
-    bool operator==(const function &o) const {
-        return callable_ == o.callable_;
+    function(R (C::*mf)(Args...) const, const C* obj) : is_member_callable_(true) {
+        storage_.member_callable = new ConstMemberCallable<C>(obj, mf);
     }
-
-    bool operator!=(const function &o) const {
-        return callable_ != o.callable_;
+    R operator()(Args... args) const {
+        if (is_member_callable_) {
+            return storage_.member_callable->invoke(args...);
+        } else {
+            return storage_.heap_callable->invoke(args...);
+        }
+    }
+    explicit operator bool() const {
+        if (is_member_callable_) {
+            return storage_.member_callable != nullptr;
+        } else {
+            return storage_.heap_callable != nullptr;
+        }
+    }
+    bool operator==(const function& o) const {
+        if (is_member_callable_ != o.is_member_callable_) {
+            return false;
+        }
+        if (is_member_callable_) {
+            return storage_.member_callable == o.storage_.member_callable;
+        } else {
+            return storage_.heap_callable == o.storage_.heap_callable;
+        }
+    }
+    bool operator!=(const function& o) const {
+        return !(*this == o);
     }
 };
 
