@@ -4,21 +4,182 @@
         {
             "type": "shell",
             "label": "Build FastLED Tests",
-            "command": "cmake",
+            "command": "bash",
             "args": [
-                "--build",
-                "${workspaceFolder}/tests/.build/bin/test_apa102_hd.exe",
-                "--config",
-                "Debug"
+                "test",
+                "--quick",
+                "--cpp"
             ],
             "options": {
                 "cwd": "${workspaceFolder}"
             },
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "silent",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": false
+            },
             "problemMatcher": [
                 "$gcc"
             ],
-            "group": "build",
-            "detail": "Build FastLED tests using CMake and Ninja"
+            "detail": "Build FastLED tests using the project's build system with Clang"
         },
+        {
+            "type": "shell",
+            "label": "Build FastLED Tests (Full)",
+            "command": "bash",
+            "args": [
+                "test"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": false
+            },
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "detail": "Build FastLED tests with full test suite (includes Python tests)"
+        },
+        {
+            "type": "shell",
+            "label": "Build Single Test",
+            "command": "bash",
+            "args": [
+                "test",
+                "${input:testName}"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": false
+            },
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "detail": "Build and run a specific FastLED test"
+        },
+        {
+            "type": "shell",
+            "label": "Clean Build",
+            "command": "rm",
+            "args": [
+                "-rf",
+                "tests/.build"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": false
+            },
+            "detail": "Clean all build artifacts"
+        },
+        {
+            "type": "shell",
+            "label": "Run FastLED Linting",
+            "command": "bash",
+            "args": [
+                "lint"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": false
+            },
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "detail": "Run FastLED code linting and formatting"
+        },
+        {
+            "type": "shell",
+            "label": "Check Debug Symbols",
+            "command": "file",
+            "args": [
+                "${workspaceFolder}/tests/.build/bin/test_${input:testNameOnly}"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": false
+            },
+            "detail": "Check if debug symbols are present in test executable"
+        },
+        {
+            "type": "shell",
+            "label": "Verify GDB Setup",
+            "command": "gdb",
+            "args": [
+                "--version"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "group": "test",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": false
+            },
+            "detail": "Verify GDB debugger is available and working"
+        }
+    ],
+    "inputs": [
+        {
+            "id": "testName",
+            "description": "Enter test name to build/run",
+            "type": "promptString",
+            "default": "allocator"
+        },
+        {
+            "id": "testNameOnly",
+            "description": "Enter test name (without test_ prefix)",
+            "type": "promptString",
+            "default": "allocator"
+        }
     ]
 }
