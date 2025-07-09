@@ -390,6 +390,17 @@ target_compile_options(test_shared_static PRIVATE ${UNIT_TEST_COMPILE_FLAGS})
 target_compile_options(test_shared_static PRIVATE $<$<COMPILE_LANGUAGE:CXX>:${UNIT_TEST_CXX_FLAGS}>)
 target_compile_definitions(test_shared_static PRIVATE ${COMMON_COMPILE_DEFINITIONS})
 
+# Enable debug symbols for the static library on Windows
+if(WIN32)
+    if(MSVC)
+        set_target_properties(test_shared_static PROPERTIES
+            COMPILE_FLAGS "/Zi /Od /RTC1")
+    else()
+        target_compile_options(test_shared_static PRIVATE -g -O0 -fno-omit-frame-pointer)
+    endif()
+    target_compile_definitions(test_shared_static PRIVATE _DEBUG)
+endif()
+
 # Find all test source files
 file(GLOB TEST_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/test_*.cpp")
 
@@ -409,21 +420,28 @@ foreach(TEST_SOURCE ${TEST_SOURCES})
         # Add Windows debugging libraries for crash handler
         target_link_libraries(${TEST_NAME} dbghelp psapi)
         
+        # Enable debug symbols for better stack traces
         if(MSVC)
             set_target_properties(${TEST_NAME} PROPERTIES
                 WIN32_EXECUTABLE FALSE
-                LINK_FLAGS "/SUBSYSTEM:CONSOLE")
+                LINK_FLAGS "/SUBSYSTEM:CONSOLE /DEBUG:FULL /OPT:NOREF /OPT:NOICF"
+                COMPILE_FLAGS "/Zi /Od /RTC1")
         else()
             # For MinGW/Clang on Windows
             if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
                 set_target_properties(${TEST_NAME} PROPERTIES
                     WIN32_EXECUTABLE FALSE
-                    LINK_FLAGS "-Xlinker /subsystem:console")
+                    LINK_FLAGS "-Xlinker /subsystem:console -g -O0")
+                target_compile_options(${TEST_NAME} PRIVATE -g -O0 -fno-omit-frame-pointer)
             else()
                 set_target_properties(${TEST_NAME} PROPERTIES
                     WIN32_EXECUTABLE FALSE)
+                target_compile_options(${TEST_NAME} PRIVATE -g -O0 -fno-omit-frame-pointer)
             endif()
         endif()
+        
+        # Ensure debug information is preserved
+        target_compile_definitions(${TEST_NAME} PRIVATE _DEBUG)
     endif()
     
     # Add C++-specific flags only for C++ files
