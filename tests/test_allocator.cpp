@@ -3,6 +3,7 @@
 #include "test.h"
 #include "fl/allocator.h"
 #include "fl/vector.h"
+#include "fl/set.h"
 #include <algorithm>
 #include <set>
 
@@ -740,5 +741,752 @@ TEST_CASE("allocator_inlined - Clear functionality") {
         CHECK(*new_ptr == 999);
         
         allocator.deallocate(new_ptr, 1);
+    }
+} 
+
+TEST_CASE("allocator_inlined_slab - Basic functionality") {
+    using TestAllocator = fl::allocator_inlined_slab<int, 4>;
+    
+    SUBCASE("Single allocation within inlined capacity") {
+        TestAllocator allocator;
+        
+        int* ptr = allocator.allocate(1);
+        REQUIRE(ptr != nullptr);
+        CHECK(allocator.is_using_inlined());
+        CHECK(allocator.total_size() == 1);
+        CHECK(allocator.inlined_capacity() == 4);
+        
+        // Test that we can write to the allocation
+        *ptr = 42;
+        CHECK(*ptr == 42);
+        
+        allocator.deallocate(ptr, 1);
+    }
+    
+    SUBCASE("Multiple allocations within inlined capacity") {
+        TestAllocator allocator;
+        
+        fl::vector<int*> ptrs;
+        const size_t num_allocs = 4;  // Exactly the inlined capacity
+        
+        for (size_t i = 0; i < num_allocs; ++i) {
+            int* ptr = allocator.allocate(1);
+            REQUIRE(ptr != nullptr);
+            *ptr = static_cast<int>(i + 100);
+            ptrs.push_back(ptr);
+        }
+        
+        CHECK(allocator.is_using_inlined());
+        CHECK(allocator.total_size() == num_allocs);
+        
+        // Verify all data is intact
+        for (size_t i = 0; i < ptrs.size(); ++i) {
+            CHECK(*ptrs[i] == static_cast<int>(i + 100));
+        }
+        
+        // Cleanup
+        for (int* ptr : ptrs) {
+            allocator.deallocate(ptr, 1);
+        }
+    }
+    
+    SUBCASE("Allocation beyond inlined capacity") {
+        TestAllocator allocator;
+        
+        fl::vector<int*> ptrs;
+        const size_t num_allocs = 6;  // More than inlined capacity (4)
+        
+        for (size_t i = 0; i < num_allocs; ++i) {
+            int* ptr = allocator.allocate(1);
+            REQUIRE(ptr != nullptr);
+            *ptr = static_cast<int>(i + 200);
+            ptrs.push_back(ptr);
+        }
+        
+        // Should now be using heap (slab allocator backend)
+        CHECK(!allocator.is_using_inlined());
+        CHECK(allocator.total_size() == num_allocs);
+        
+        // Verify all data is intact
+        for (size_t i = 0; i < ptrs.size(); ++i) {
+            CHECK(*ptrs[i] == static_cast<int>(i + 200));
+        }
+        
+        // Cleanup
+        for (int* ptr : ptrs) {
+            allocator.deallocate(ptr, 1);
+        }
+    }
+}
+
+TEST_CASE("allocator_inlined_slab - Memory layout and contiguity") {
+    using TestAllocator = fl::allocator_inlined_slab<TestObject, 3>;
+    
+    SUBCASE("Inlined memory layout verification") {
+        TestAllocator allocator;
+        
+        fl::vector<TestObject*> ptrs;
+        
+        // Allocate exactly the inlined capacity
+        for (size_t i = 0; i < 3; ++i) {
+            TestObject* ptr = allocator.allocate(1);
+            REQUIRE(ptr != nullptr);
+            ptrs.push_back(ptr);
+        }
+        
+        // Sort pointers by address
+        std::sort(ptrs.begin(), ptrs.end());
+        
+        // Verify contiguous allocation within inlined storage
+        for (size_t i = 1; i < ptrs.size(); ++i) {
+            uintptr_t prev_addr = reinterpret_cast<uintptr_t>(ptrs[i-1]);
+            uintptr_t curr_addr = reinterpret_cast<uintptr_t>(ptrs[i]);
+            uintptr_t diff = curr_addr - prev_addr;
+            
+            // Should be exactly sizeof(TestObject) apart
+            CHECK(diff == sizeof(TestObject));
+        }
+        
+        // Verify all pointers are within the same memory range
+        uintptr_t first_addr = reinterpret_cast<uintptr_t>(ptrs[0]);
+        uintptr_t last_addr = reinterpret_cast<uintptr_t>(ptrs.back());
+        uintptr_t total_range = last_addr - first_addr + sizeof(TestObject);
+        uintptr_t expected_range = sizeof(TestObject) * 3;
+        
+        CHECK(total_range == expected_range);
+        
+        // Cleanup
+        for (TestObject* ptr : ptrs) {
+            allocator.deallocate(ptr, 1);
+        }
+    }
+    
+    SUBCASE("Mixed inlined and heap allocation layout") {
+        TestAllocator allocator;
+        
+        fl::vector<TestObject*> inlined_ptrs;
+        fl::vector<TestObject*> heap_ptrs;
+        
+        // Allocate inlined capacity
+        for (size_t i = 0; i < 3; ++i) {
+            TestObject* ptr = allocator.allocate(1);
+            REQUIRE(ptr != nullptr);
+            inlined_ptrs.push_back(ptr);
+        }
+        
+        // Allocate additional objects (should use heap/slab)
+        for (size_t i = 0; i < 5; ++i) {
+            TestObject* ptr = allocator.allocate(1);
+            REQUIRE(ptr != nullptr);
+            heap_ptrs.push_back(ptr);
+        }
+        
+        // Verify inlined pointers are contiguous
+        std::sort(inlined_ptrs.begin(), inlined_ptrs.end());
+        for (size_t i = 1; i < inlined_ptrs.size(); ++i) {
+            uintptr_t prev_addr = reinterpret_cast<uintptr_t>(inlined_ptrs[i-1]);
+            uintptr_t curr_addr = reinterpret_cast<uintptr_t>(inlined_ptrs[i]);
+            uintptr_t diff = curr_addr - prev_addr;
+            CHECK(diff == sizeof(TestObject));
+        }
+        
+        // Verify heap pointers are in different memory range
+        uintptr_t inlined_start = reinterpret_cast<uintptr_t>(inlined_ptrs[0]);
+        uintptr_t inlined_end = reinterpret_cast<uintptr_t>(inlined_ptrs.back()) + sizeof(TestObject);
+        
+        for (TestObject* heap_ptr : heap_ptrs) {
+            uintptr_t heap_addr = reinterpret_cast<uintptr_t>(heap_ptr);
+            // Heap pointers should be outside inlined range
+            CHECK((heap_addr < inlined_start || heap_addr >= inlined_end));
+        }
+        
+        // Cleanup
+        for (TestObject* ptr : inlined_ptrs) {
+            allocator.deallocate(ptr, 1);
+        }
+        for (TestObject* ptr : heap_ptrs) {
+            allocator.deallocate(ptr, 1);
+        }
+    }
+}
+
+TEST_CASE("allocator_inlined_slab - Bulk allocation behavior") {
+    using TestAllocator = fl::allocator_inlined_slab<int, 2>;
+    
+    SUBCASE("Bulk allocation bypasses inlined storage") {
+        TestAllocator allocator;
+        
+        // Allocate 3 objects at once (more than inlined capacity)
+        int* bulk_ptr = allocator.allocate(3);
+        REQUIRE(bulk_ptr != nullptr);
+        
+        // Should be using heap, not inlined
+        CHECK(!allocator.is_using_inlined());
+        
+        // Test that we can write to all allocated objects
+        for (int i = 0; i < 3; ++i) {
+            bulk_ptr[i] = i + 100;
+        }
+        
+        // Verify data integrity
+        for (int i = 0; i < 3; ++i) {
+            CHECK(bulk_ptr[i] == i + 100);
+        }
+        
+        allocator.deallocate(bulk_ptr, 3);
+    }
+    
+    SUBCASE("Mixed single and bulk allocations") {
+        TestAllocator allocator;
+        
+        // First, allocate single objects to fill inlined storage
+        fl::vector<int*> single_ptrs;
+        for (size_t i = 0; i < 2; ++i) {
+            int* ptr = allocator.allocate(1);
+            REQUIRE(ptr != nullptr);
+            *ptr = static_cast<int>(i + 10);
+            single_ptrs.push_back(ptr);
+        }
+        
+        CHECK(allocator.is_using_inlined());
+        
+        // Now allocate bulk objects
+        int* bulk_ptr = allocator.allocate(4);
+        REQUIRE(bulk_ptr != nullptr);
+        
+        // Should still be using inlined for the single allocations
+        // but bulk allocation goes to heap
+        for (int i = 0; i < 4; ++i) {
+            bulk_ptr[i] = i + 1000;
+        }
+        
+        // Verify all data is intact
+        for (size_t i = 0; i < single_ptrs.size(); ++i) {
+            CHECK(*single_ptrs[i] == static_cast<int>(i + 10));
+        }
+        
+        for (int i = 0; i < 4; ++i) {
+            CHECK(bulk_ptr[i] == i + 1000);
+        }
+        
+        // Cleanup
+        for (int* ptr : single_ptrs) {
+            allocator.deallocate(ptr, 1);
+        }
+        allocator.deallocate(bulk_ptr, 4);
+    }
+}
+
+TEST_CASE("allocator_inlined_slab - Free slot management") {
+    using TestAllocator = fl::allocator_inlined_slab<int, 4>;
+    
+    SUBCASE("Reuse of freed inlined slots") {
+        TestAllocator allocator;
+        
+        // Allocate all inlined slots
+        fl::vector<int*> ptrs;
+        for (size_t i = 0; i < 4; ++i) {
+            int* ptr = allocator.allocate(1);
+            REQUIRE(ptr != nullptr);
+            *ptr = static_cast<int>(i + 100);
+            ptrs.push_back(ptr);
+        }
+        
+        CHECK(allocator.is_using_inlined());
+        CHECK(allocator.total_size() == 4);
+        
+        // Free the first and third allocations
+        allocator.deallocate(ptrs[0], 1);
+        allocator.deallocate(ptrs[2], 1);
+        
+        // Allocate two new objects - should reuse freed slots
+        int* new1 = allocator.allocate(1);
+        int* new2 = allocator.allocate(1);
+        REQUIRE(new1 != nullptr);
+        REQUIRE(new2 != nullptr);
+        
+        *new1 = 999;
+        *new2 = 888;
+        
+        // Should still be using inlined storage
+        CHECK(allocator.is_using_inlined());
+        
+        // Verify remaining original allocations are intact
+        CHECK(*ptrs[1] == 101);
+        CHECK(*ptrs[3] == 103);
+        
+        // Cleanup
+        allocator.deallocate(ptrs[1], 1);
+        allocator.deallocate(ptrs[3], 1);
+        allocator.deallocate(new1, 1);
+        allocator.deallocate(new2, 1);
+    }
+    
+    SUBCASE("Complex allocation/deallocation pattern") {
+        TestAllocator allocator;
+        
+        fl::vector<int*> ptrs;
+        
+        // Allocate 6 objects (4 inlined + 2 heap)
+        for (size_t i = 0; i < 6; ++i) {
+            int* ptr = allocator.allocate(1);
+            REQUIRE(ptr != nullptr);
+            *ptr = static_cast<int>(i + 100);
+            ptrs.push_back(ptr);
+        }
+        
+        // Free objects in a pattern: keep 0,2,4, free 1,3,5
+        allocator.deallocate(ptrs[1], 1);
+        allocator.deallocate(ptrs[3], 1);
+        allocator.deallocate(ptrs[5], 1);
+        
+        // Allocate 3 new objects - should reuse freed slots
+        fl::vector<int*> new_ptrs;
+        for (size_t i = 0; i < 3; ++i) {
+            int* ptr = allocator.allocate(1);
+            REQUIRE(ptr != nullptr);
+            *ptr = static_cast<int>(i + 1000);
+            new_ptrs.push_back(ptr);
+        }
+        
+        // Verify remaining original allocations are intact
+        CHECK(*ptrs[0] == 100);
+        CHECK(*ptrs[2] == 102);
+        CHECK(*ptrs[4] == 104);
+        
+        // Verify new allocations
+        CHECK(*new_ptrs[0] == 1000);
+        CHECK(*new_ptrs[1] == 1001);
+        CHECK(*new_ptrs[2] == 1002);
+        
+        // Cleanup
+        allocator.deallocate(ptrs[0], 1);
+        allocator.deallocate(ptrs[2], 1);
+        allocator.deallocate(ptrs[4], 1);
+        for (int* ptr : new_ptrs) {
+            allocator.deallocate(ptr, 1);
+        }
+    }
+}
+
+TEST_CASE("allocator_inlined_slab - Copy and assignment") {
+    using TestAllocator = fl::allocator_inlined_slab<int, 3>;
+    
+    SUBCASE("Copy constructor with inlined data") {
+        TestAllocator allocator1;
+        
+        // Allocate some objects in the first allocator
+        fl::vector<int*> ptrs1;
+        for (size_t i = 0; i < 3; ++i) {
+            int* ptr = allocator1.allocate(1);
+            REQUIRE(ptr != nullptr);
+            *ptr = static_cast<int>(i + 100);
+            ptrs1.push_back(ptr);
+        }
+        
+        // Copy the allocator
+        TestAllocator allocator2(allocator1);
+        
+        // Verify the copy has the same data
+        CHECK(allocator2.total_size() == allocator1.total_size());
+        CHECK(allocator2.is_using_inlined() == allocator1.is_using_inlined());
+        
+        // Cleanup original
+        for (int* ptr : ptrs1) {
+            allocator1.deallocate(ptr, 1);
+        }
+        
+        // Cleanup copy
+        allocator2.clear();
+    }
+    
+    SUBCASE("Copy assignment with mixed storage") {
+        TestAllocator allocator1;
+        TestAllocator allocator2;
+        
+        // Fill allocator1 with more than inlined capacity
+        fl::vector<int*> ptrs1;
+        for (size_t i = 0; i < 5; ++i) {
+            int* ptr = allocator1.allocate(1);
+            REQUIRE(ptr != nullptr);
+            *ptr = static_cast<int>(i + 200);
+            ptrs1.push_back(ptr);
+        }
+        
+        // Assign to allocator2
+        allocator2 = allocator1;
+        
+        // Verify allocator2 has the same state
+        CHECK(allocator2.total_size() == allocator1.total_size());
+        CHECK(allocator2.is_using_inlined() == allocator1.is_using_inlined());
+        
+        // Cleanup
+        allocator1.clear();
+        allocator2.clear();
+    }
+}
+
+TEST_CASE("allocator_inlined_slab - Clear functionality") {
+    using TestAllocator = fl::allocator_inlined_slab<int, 3>;
+    
+    SUBCASE("Clear inlined allocations") {
+        TestAllocator allocator;
+        
+        // Allocate inlined objects
+        fl::vector<int*> ptrs;
+        for (size_t i = 0; i < 3; ++i) {
+            int* ptr = allocator.allocate(1);
+            REQUIRE(ptr != nullptr);
+            *ptr = static_cast<int>(i + 100);
+            ptrs.push_back(ptr);
+        }
+        
+        CHECK(allocator.total_size() == 3);
+        CHECK(allocator.is_using_inlined());
+        
+        // Clear all allocations
+        allocator.clear();
+        
+        CHECK(allocator.total_size() == 0);
+        CHECK(allocator.is_using_inlined());
+        
+        // Should be able to allocate again
+        int* new_ptr = allocator.allocate(1);
+        REQUIRE(new_ptr != nullptr);
+        *new_ptr = 999;
+        CHECK(*new_ptr == 999);
+        
+        allocator.deallocate(new_ptr, 1);
+    }
+    
+    SUBCASE("Clear mixed allocations") {
+        TestAllocator allocator;
+        
+        // Allocate more than inlined capacity
+        fl::vector<int*> ptrs;
+        for (size_t i = 0; i < 6; ++i) {
+            int* ptr = allocator.allocate(1);
+            REQUIRE(ptr != nullptr);
+            *ptr = static_cast<int>(i + 100);
+            ptrs.push_back(ptr);
+        }
+        
+        CHECK(allocator.total_size() == 6);
+        CHECK(!allocator.is_using_inlined());
+        
+        // Clear all allocations
+        allocator.clear();
+        
+        CHECK(allocator.total_size() == 0);
+        CHECK(allocator.is_using_inlined());
+        
+        // Should be able to allocate again, starting with inlined
+        int* new_ptr = allocator.allocate(1);
+        REQUIRE(new_ptr != nullptr);
+        *new_ptr = 999;
+        CHECK(*new_ptr == 999);
+        CHECK(allocator.is_using_inlined());
+        
+        allocator.deallocate(new_ptr, 1);
+    }
+}
+
+TEST_CASE("allocator_inlined_slab - Edge cases and error handling") {
+    using TestAllocator = fl::allocator_inlined_slab<int, 2>;
+    
+    SUBCASE("Zero allocation") {
+        TestAllocator allocator;
+        
+        int* ptr = allocator.allocate(0);
+        CHECK(ptr == nullptr);
+        
+        // Should still be in inlined mode
+        CHECK(allocator.is_using_inlined());
+    }
+    
+    SUBCASE("Null deallocation") {
+        TestAllocator allocator;
+        
+        // Should not crash
+        allocator.deallocate(nullptr, 1);
+        allocator.deallocate(nullptr, 0);
+        
+        CHECK(allocator.total_size() == 0);
+    }
+    
+    SUBCASE("Large bulk allocation") {
+        TestAllocator allocator;
+        
+        // Allocate a large number of objects at once
+        const size_t large_count = 100;
+        int* bulk_ptr = allocator.allocate(large_count);
+        REQUIRE(bulk_ptr != nullptr);
+        
+        // Should be using heap
+        CHECK(!allocator.is_using_inlined());
+        
+        // Test that we can write to all allocated objects
+        for (size_t i = 0; i < large_count; ++i) {
+            bulk_ptr[i] = static_cast<int>(i + 1000);
+        }
+        
+        // Verify data integrity
+        for (size_t i = 0; i < large_count; ++i) {
+            CHECK(bulk_ptr[i] == static_cast<int>(i + 1000));
+        }
+        
+        allocator.deallocate(bulk_ptr, large_count);
+    }
+    
+    SUBCASE("Memory exhaustion simulation") {
+        TestAllocator allocator;
+        
+        // This test simulates what happens when the slab allocator
+        // runs out of memory (though we can't easily force this in practice)
+        
+        // Allocate many objects to stress the allocator
+        fl::vector<int*> ptrs;
+        const size_t stress_count = 1000;
+        
+        for (size_t i = 0; i < stress_count; ++i) {
+            int* ptr = allocator.allocate(1);
+            if (ptr != nullptr) {
+                *ptr = static_cast<int>(i);
+                ptrs.push_back(ptr);
+            } else {
+                // If allocation fails, break
+                break;
+            }
+        }
+        
+        // Verify we got some allocations
+        CHECK(ptrs.size() > 0);
+        
+        // Verify data integrity
+        for (size_t i = 0; i < ptrs.size(); ++i) {
+            CHECK(*ptrs[i] == static_cast<int>(i));
+        }
+        
+        // Cleanup
+        for (int* ptr : ptrs) {
+            allocator.deallocate(ptr, 1);
+        }
+    }
+}
+
+TEST_CASE("allocator_inlined_slab - Performance characteristics") {
+    using TestAllocator = fl::allocator_inlined_slab<int, 8>;
+    
+    SUBCASE("Allocation speed comparison") {
+        TestAllocator allocator;
+        
+        // Measure allocation speed for inlined vs heap
+        const size_t test_count = 1000;
+        fl::vector<int*> ptrs;
+        ptrs.reserve(test_count);
+        
+        // Allocate objects and measure time
+        for (size_t i = 0; i < test_count; ++i) {
+            int* ptr = allocator.allocate(1);
+            REQUIRE(ptr != nullptr);
+            *ptr = static_cast<int>(i);
+            ptrs.push_back(ptr);
+        }
+        
+        // Verify all allocations succeeded
+        CHECK(ptrs.size() == test_count);
+        
+        // Verify data integrity
+        for (size_t i = 0; i < ptrs.size(); ++i) {
+            CHECK(*ptrs[i] == static_cast<int>(i));
+        }
+        
+        // Cleanup
+        for (int* ptr : ptrs) {
+            allocator.deallocate(ptr, 1);
+        }
+    }
+    
+    SUBCASE("Memory efficiency") {
+        TestAllocator allocator;
+        
+        // Test that the allocator efficiently manages memory
+        fl::vector<int*> ptrs;
+        
+        // Allocate and deallocate in a pattern to test memory reuse
+        for (size_t round = 0; round < 10; ++round) {
+            // Allocate a batch
+            for (size_t i = 0; i < 5; ++i) {
+                int* ptr = allocator.allocate(1);
+                REQUIRE(ptr != nullptr);
+                *ptr = static_cast<int>(round * 100 + i);
+                ptrs.push_back(ptr);
+            }
+            
+            // Deallocate half of them
+            for (size_t i = 0; i < 2; ++i) {
+                if (!ptrs.empty()) {
+                    allocator.deallocate(ptrs.back(), 1);
+                    ptrs.pop_back();
+                }
+            }
+        }
+        
+        // Verify remaining allocations
+        for (size_t i = 0; i < ptrs.size(); ++i) {
+            CHECK(*ptrs[i] >= 0);
+        }
+        
+        // Cleanup
+        for (int* ptr : ptrs) {
+            allocator.deallocate(ptr, 1);
+        }
+    }
+}
+
+TEST_CASE("allocator_inlined_slab - STL container compatibility") {
+    using TestAllocator = fl::allocator_inlined_slab<int, 4>;
+    
+    SUBCASE("Vector with inlined slab allocator") {
+        fl::vector<int, TestAllocator> vec;
+        
+        // Test basic vector operations
+        vec.push_back(1);
+        vec.push_back(2);
+        vec.push_back(3);
+        vec.push_back(4);
+        vec.push_back(5);  // This should trigger heap allocation
+        
+        CHECK(vec.size() == 5);
+        CHECK(vec[0] == 1);
+        CHECK(vec[1] == 2);
+        CHECK(vec[2] == 3);
+        CHECK(vec[3] == 4);
+        CHECK(vec[4] == 5);
+        
+        // Test vector growth
+        for (int i = 6; i <= 20; ++i) {
+            vec.push_back(i);
+        }
+        
+        CHECK(vec.size() == 20);
+        CHECK(vec[19] == 20);
+    }
+    
+    SUBCASE("Set with inlined slab allocator") {
+        fl::set<int, TestAllocator> set;
+        
+        // Test basic set operations
+        set.insert(3);
+        set.insert(1);
+        set.insert(4);
+        set.insert(1);  // Duplicate
+        set.insert(2);
+        
+        CHECK(set.size() == 4);
+        CHECK(set.find(1) != set.end());
+        CHECK(set.find(2) != set.end());
+        CHECK(set.find(3) != set.end());
+        CHECK(set.find(4) != set.end());
+        CHECK(set.find(5) == set.end());
+    }
+}
+
+TEST_CASE("allocator_inlined_slab - Complex object types") {
+    struct ComplexObject {
+        fl::string str;
+        fl::vector<int> vec;
+        int data[4];
+        
+        ComplexObject() {
+            for (int i = 0; i < 4; ++i) {
+                data[i] = i;
+            }
+        }
+        
+        ComplexObject(const fl::string& s, const fl::vector<int>& v) 
+            : str(s), vec(v) {
+            for (int i = 0; i < 4; ++i) {
+                data[i] = i + 100;
+            }
+        }
+    };
+    
+    using TestAllocator = fl::allocator_inlined_slab<ComplexObject, 3>;
+    
+    SUBCASE("Complex object allocation") {
+        TestAllocator allocator;
+        
+        // Allocate complex objects
+        fl::vector<ComplexObject*> ptrs;
+        for (size_t i = 0; i < 3; ++i) {
+            ComplexObject* ptr = allocator.allocate(1);
+            REQUIRE(ptr != nullptr);
+            
+            // Use placement new to construct the object
+            new(ptr) ComplexObject();
+            
+            // Test that the object is properly constructed
+            for (int j = 0; j < 4; ++j) {
+                CHECK(ptr->data[j] == j);
+            }
+            
+            ptrs.push_back(ptr);
+        }
+        
+        CHECK(allocator.is_using_inlined());
+        CHECK(allocator.total_size() == 3);
+        
+        // Test object modification
+        ptrs[0]->str = "test1";
+        ptrs[1]->str = "test2";
+        ptrs[2]->str = "test3";
+        
+        CHECK(ptrs[0]->str == "test1");
+        CHECK(ptrs[1]->str == "test2");
+        CHECK(ptrs[2]->str == "test3");
+        
+        // Cleanup - destroy objects before deallocation
+        for (ComplexObject* ptr : ptrs) {
+            ptr->~ComplexObject();
+            allocator.deallocate(ptr, 1);
+        }
+    }
+    
+    SUBCASE("Complex object with heap transition") {
+        TestAllocator allocator;
+        
+        fl::vector<ComplexObject*> ptrs;
+        
+        // Allocate more than inlined capacity
+        for (size_t i = 0; i < 5; ++i) {
+            ComplexObject* ptr = allocator.allocate(1);
+            REQUIRE(ptr != nullptr);
+            
+            fl::vector<int> test_vec;
+            test_vec.push_back(static_cast<int>(i));
+            test_vec.push_back(static_cast<int>(i + 10));
+            
+            new(ptr) ComplexObject("obj" + fl::to_string(i), test_vec);
+            
+            ptrs.push_back(ptr);
+        }
+        
+        CHECK(!allocator.is_using_inlined());
+        CHECK(allocator.total_size() == 5);
+        
+        // Verify all objects are intact
+        for (size_t i = 0; i < ptrs.size(); ++i) {
+            CHECK(ptrs[i]->str == "obj" + fl::to_string(i));
+            CHECK(ptrs[i]->vec.size() == 2);
+            CHECK(ptrs[i]->vec[0] == static_cast<int>(i));
+            CHECK(ptrs[i]->vec[1] == static_cast<int>(i + 10));
+        }
+        
+        // Cleanup
+        for (ComplexObject* ptr : ptrs) {
+            ptr->~ComplexObject();
+            allocator.deallocate(ptr, 1);
+        }
     }
 } 
