@@ -49,6 +49,82 @@ inline std::string demangle_symbol(const char* symbol_name) {
     return std::string(symbol_name);
 }
 
+inline std::string get_symbol_with_addr2line(DWORD64 address) {
+    // Get the module base address to calculate file offset
+    HMODULE hModule = nullptr;
+    if (!GetModuleHandleExA(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS, 
+                           (LPCSTR)address, &hModule)) {
+        return "-- module not found";
+    }
+    
+    // Calculate file offset by subtracting module base
+    DWORD64 fileOffset = address - (DWORD64)hModule;
+    
+    // Get module filename
+    char modulePath[MAX_PATH];
+    if (!GetModuleFileNameA(hModule, modulePath, MAX_PATH)) {
+        return "-- module path not found";
+    }
+    
+    // Only use addr2line for our test executable
+    char* fileName = strrchr(modulePath, '\\');
+    if (!fileName) fileName = modulePath;
+    else fileName++;
+    
+    if (strstr(fileName, "test_double_free_crash.exe") == nullptr) {
+        return "-- not our executable";
+    }
+    
+    // Build addr2line command
+    char command[1024];
+    snprintf(command, sizeof(command), 
+             "addr2line -e \"%s\" -f -C 0x%llx 2>nul", 
+             modulePath, fileOffset);
+    
+    // Execute addr2line
+    FILE* pipe = _popen(command, "r");
+    if (!pipe) {
+        return "-- addr2line failed";
+    }
+    
+    char function[256] = {0};
+    char location[256] = {0};
+    
+    // Read function name
+    if (fgets(function, sizeof(function), pipe)) {
+        // Remove newline
+        char* newline = strchr(function, '\n');
+        if (newline) *newline = '\0';
+    }
+    
+    // Read file:line
+    if (fgets(location, sizeof(location), pipe)) {
+        // Remove newline
+        char* newline = strchr(location, '\n');
+        if (newline) *newline = '\0';
+    }
+    
+    _pclose(pipe);
+    
+    // Format result
+    std::string result;
+    if (strlen(function) > 0 && strcmp(function, "??") != 0) {
+        result = function;
+        if (strlen(location) > 0 && strcmp(location, "??:0") != 0) {
+            // Extract just filename from full path
+            char* justFile = strrchr(location, '/');
+            if (!justFile) justFile = strrchr(location, '\\');
+            if (justFile) justFile++;
+            else justFile = location;
+            result += " [" + std::string(justFile) + "]";
+        }
+    } else {
+        result = "-- symbol not found";
+    }
+    
+    return result;
+}
+
 inline void print_stacktrace_windows() {
     HANDLE process = GetCurrentProcess();
     
@@ -115,10 +191,17 @@ inline void print_stacktrace_windows() {
                 }
             } else {
                 DWORD error = GetLastError();
-                if (error != ERROR_MOD_NOT_FOUND) {
-                    printf(" -- symbol lookup failed (error %lu)", error);
+                
+                // Try addr2line as fallback for DWARF symbols
+                std::string addr2line_result = get_symbol_with_addr2line(address);
+                if (addr2line_result.find("--") != 0) {
+                    printf(" %s (via addr2line)", addr2line_result.c_str());
                 } else {
-                    printf(" -- no debug symbols available");
+                    if (error != ERROR_MOD_NOT_FOUND) {
+                        printf(" -- symbol lookup failed (error %lu)", error);
+                    } else {
+                        printf(" -- no debug symbols available");
+                    }
                 }
             }
         } else {

@@ -256,6 +256,11 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
     )
     parser.add_argument(
+        "--gcc",
+        help="Use GCC compiler (default on non-Windows)",
+        action="store_true",
+    )
+    parser.add_argument(
         "--verbose",
         "-v",
         action="store_true",
@@ -263,6 +268,12 @@ def parse_args() -> argparse.Namespace:
     )
     args, unknown = parser.parse_known_args()
     args.unknown = unknown
+
+    # Handle compiler selection logic - only validate mutual exclusivity
+    if args.clang and args.gcc:
+        print("Error: --clang and --gcc cannot be used together", file=sys.stderr)
+        sys.exit(1)
+
     return args
 
 
@@ -278,11 +289,13 @@ def main() -> None:
     specific_test = args.test
     only_run_failed_test = args.only_run_failed_test
     use_clang = args.clang
+    # use_gcc = args.gcc
 
     if not run_only:
         passthrough_args = args.unknown
         if use_clang:
             passthrough_args.append("--use-clang")
+        # Note: --gcc is handled by not passing --use-clang (GCC is the default in cpp_test_compile.py)
         compile_tests(clean=args.clean, unknown_args=passthrough_args)
 
     if not compile_only:
