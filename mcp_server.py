@@ -318,7 +318,7 @@ async def list_tools() -> List[Tool]:
                 "properties": {
                     "topic": {
                         "type": "string",
-                        "enum": ["all", "exceptions", "std_namespace", "naming", "containers", "debug", "bindings", "arduino_includes", "variable_naming", "python_linting"],
+                        "enum": ["all", "exceptions", "std_namespace", "naming", "member_naming", "containers", "debug", "bindings", "arduino_includes", "variable_naming", "python_linting"],
                         "description": "Specific topic to get standards for, or 'all' for complete guide",
                         "default": "all"
                     }
@@ -885,9 +885,110 @@ FastLED provides its own STL-equivalent implementations under the `fl::` namespa
         "naming": """
 # Naming Conventions
 
-**Simple Objects:** lowercase (e.g., `fl::vec2f`, `fl::point`)
-**Complex Objects:** CamelCase (e.g., `Raster`, `Controller`)
+## Class/Object Names:
+**Simple Objects:** lowercase (e.g., `fl::vec2f`, `fl::point`, `fl::rect`)
+**Complex Objects:** CamelCase (e.g., `Raster`, `Controller`, `Canvas`)
 **Pixel Types:** ALL CAPS (e.g., `CRGB`, `CHSV`, `RGB24`)
+
+## Member Variables and Functions:
+
+### Complex Classes/Objects:
+✅ **Member variables:** Use `mVariableName` format (e.g., `mPixelCount`, `mBufferSize`, `mCurrentIndex`)
+✅ **Member functions:** Use camelCase (e.g., `getValue()`, `setPixelColor()`, `updateBuffer()`)
+❌ Avoid: `m_variable_name`, `variableName`, `GetValue()`, `set_pixel_color()`
+
+### Simple Classes/Structs:
+✅ **Member variables:** Use lowercase snake_case (e.g., `x`, `y`, `width`, `height`, `pixel_count`)
+✅ **Member functions:** Use camelCase (e.g., `getValue()`, `setPosition()`, `normalize()`)
+❌ Avoid: `mX`, `mY`, `get_value()`, `set_position()`
+
+## Examples:
+
+```cpp
+// Complex class - use mVariableName for members
+class Controller {
+private:
+    int mPixelCount;           // ✅ Complex class member variable
+    uint8_t* mBuffer;          // ✅ Complex class member variable
+    bool mIsInitialized;       // ✅ Complex class member variable
+    
+public:
+    void setPixelCount(int count);  // ✅ Complex class member function
+    int getPixelCount() const;      // ✅ Complex class member function
+    void updateBuffer();            // ✅ Complex class member function
+};
+
+// Simple struct - use snake_case for members
+struct vec2 {
+    int x;                     // ✅ Simple struct member variable
+    int y;                     // ✅ Simple struct member variable
+    
+    float magnitude() const;   // ✅ Simple struct member function
+    void normalize();          // ✅ Simple struct member function
+};
+
+struct point {
+    float x;                   // ✅ Simple struct member variable
+    float y;                   // ✅ Simple struct member variable
+    float z;                   // ✅ Simple struct member variable
+    
+    void setPosition(float x, float y, float z);  // ✅ Simple struct member function
+    float distanceTo(const point& other) const;   // ✅ Simple struct member function
+};
+```
+
+**Why:** Complex classes use Hungarian notation for member variables to clearly distinguish them from local variables, while simple structs use concise snake_case for lightweight data containers.
+""",
+        
+        "member_naming": """
+# Member Variable and Function Naming Standards
+
+## Complex Classes/Objects:
+✅ **Member variables:** Use `mVariableName` format (e.g., `mPixelCount`, `mBufferSize`, `mCurrentIndex`)
+✅ **Member functions:** Use camelCase (e.g., `getValue()`, `setPixelColor()`, `updateBuffer()`)
+❌ Avoid: `m_variable_name`, `variableName`, `GetValue()`, `set_pixel_color()`
+
+## Simple Classes/Structs:
+✅ **Member variables:** Use lowercase snake_case (e.g., `x`, `y`, `width`, `height`, `pixel_count`)
+✅ **Member functions:** Use camelCase (e.g., `getValue()`, `setPosition()`, `normalize()`)
+❌ Avoid: `mX`, `mY`, `get_value()`, `set_position()`
+
+## Examples:
+
+```cpp
+// Complex class - use mVariableName for members
+class Controller {
+private:
+    int mPixelCount;           // ✅ Complex class member variable
+    uint8_t* mBuffer;          // ✅ Complex class member variable
+    bool mIsInitialized;       // ✅ Complex class member variable
+    
+public:
+    void setPixelCount(int count);  // ✅ Complex class member function
+    int getPixelCount() const;      // ✅ Complex class member function
+    void updateBuffer();            // ✅ Complex class member function
+};
+
+// Simple struct - use snake_case for members
+struct vec2 {
+    int x;                     // ✅ Simple struct member variable
+    int y;                     // ✅ Simple struct member variable
+    
+    float magnitude() const;   // ✅ Simple struct member function
+    void normalize();          // ✅ Simple struct member function
+};
+
+struct point {
+    float x;                   // ✅ Simple struct member variable
+    float y;                   // ✅ Simple struct member variable
+    float z;                   // ✅ Simple struct member variable
+    
+    void setPosition(float x, float y, float z);  // ✅ Simple struct member function
+    float distanceTo(const point& other) const;   // ✅ Simple struct member function
+};
+```
+
+**Why:** Complex classes use Hungarian notation for member variables to clearly distinguish them from local variables, while simple structs use concise snake_case for lightweight data containers.
 """,
         
         "containers": """
@@ -1099,7 +1200,8 @@ IMMEDIATELY after Python modifications, not wait until final validation.
         result += "4. **NO TRY-CATCH BLOCKS** - Use return codes, fl::optional, or early returns\n"
         result += "5. **NO std:: NAMESPACE** - Use fl:: equivalents instead\n"
         result += "6. **NO WASM BINDING CHANGES** - Extremely dangerous for runtime stability\n"
-        result += "7. **NO UNNECESSARY VARIABLE RENAMING** - Don't change names unless absolutely necessary\n\n"
+        result += "7. **NO UNNECESSARY VARIABLE RENAMING** - Don't change names unless absolutely necessary\n"
+        result += "8. **MEMBER NAMING CONVENTIONS** - Complex classes: mVariableName; Simple structs: snake_case\n\n"
         
         for section_name, content in standards.items():
             result += content + "\n" + ("="*50) + "\n\n"
@@ -1492,7 +1594,7 @@ async def validate_completion(arguments: Dict[str, Any], project_root: Path) -> 
                 result_text += "🚨 **BACKGROUND AGENT MUST NOT INDICATE COMPLETION**\n"
                 result_text += "🚨 **PLEASE FIX ALL ERRORS BEFORE COMPLETING THE TASK**\n\n"
             else:
-                result_text += "✅ **ALL TESTS PASSED**\n\n"
+                result_text += "�� **ALL TESTS PASSED**\n\n"
                 result_text += "```\n" + test_result + "\n```\n\n"
                 result_text += "✅ **VALIDATION SUCCESSFUL - SAFE TO INDICATE COMPLETION**\n\n"
             

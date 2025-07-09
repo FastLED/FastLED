@@ -389,7 +389,54 @@ uv run mcp_server.py
 - ✅ Use ALL CAPS for pixel types (e.g., `CRGB`, `CHSV`, `HSV16`, `RGB24`)
 - ❌ Avoid: `crgb`, `Crgb`, `chsv`, `Chsv`
 
-**Why:** These conventions help distinguish between different categories of objects and maintain consistency with existing FastLED patterns.
+**Member Variables and Functions:**
+
+**Complex Classes/Objects:**
+- ✅ **Member variables:** Use `mVariableName` format (e.g., `mPixelCount`, `mBufferSize`, `mCurrentIndex`)
+- ✅ **Member functions:** Use camelCase (e.g., `getValue()`, `setPixelColor()`, `updateBuffer()`)
+- ❌ Avoid: `m_variable_name`, `variableName`, `GetValue()`, `set_pixel_color()`
+
+**Simple Classes/Structs:**
+- ✅ **Member variables:** Use lowercase snake_case (e.g., `x`, `y`, `width`, `height`, `pixel_count`)
+- ✅ **Member functions:** Use camelCase (e.g., `getValue()`, `setPosition()`, `normalize()`)
+- ❌ Avoid: `mX`, `mY`, `get_value()`, `set_position()`
+
+**Examples:**
+
+```cpp
+// Complex class - use mVariableName for members
+class Controller {
+private:
+    int mPixelCount;           // ✅ Complex class member variable
+    uint8_t* mBuffer;          // ✅ Complex class member variable
+    bool mIsInitialized;       // ✅ Complex class member variable
+    
+public:
+    void setPixelCount(int count);  // ✅ Complex class member function
+    int getPixelCount() const;      // ✅ Complex class member function
+    void updateBuffer();            // ✅ Complex class member function
+};
+
+// Simple struct - use snake_case for members
+struct vec2 {
+    int x;                     // ✅ Simple struct member variable
+    int y;                     // ✅ Simple struct member variable
+    
+    float magnitude() const;   // ✅ Simple struct member function
+    void normalize();          // ✅ Simple struct member function
+};
+
+struct point {
+    float x;                   // ✅ Simple struct member variable
+    float y;                   // ✅ Simple struct member variable
+    float z;                   // ✅ Simple struct member variable
+    
+    void setPosition(float x, float y, float z);  // ✅ Simple struct member function
+    float distanceTo(const point& other) const;   // ✅ Simple struct member function
+};
+```
+
+**Why:** These conventions help distinguish between different categories of objects and maintain consistency with existing FastLED patterns. Complex classes use Hungarian notation for member variables to clearly distinguish them from local variables, while simple structs use concise snake_case for lightweight data containers.
 
 ### Container Parameter Types
 **Prefer `fl::span<T>` over `fl::vector<T>` or arrays for function parameters.** `fl::span<T>` provides a non-owning view that automatically converts from various container types, making APIs more flexible and efficient.
