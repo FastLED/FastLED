@@ -7,7 +7,6 @@
 
 using namespace fl;
 
-#if 0
 
 TEST_CASE("test bitset") {
     // default‐constructed bitset is empty
@@ -414,7 +413,6 @@ TEST_CASE("test bitset_inlined find_first") {
     REQUIRE_EQ(bs4.find_first(false), 0);
 }
 
-#endif
 
 TEST_CASE("test bitset_fixed find_run") {
     // Test interesting patterns
