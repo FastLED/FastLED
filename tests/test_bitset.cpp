@@ -498,13 +498,13 @@ TEST_CASE("test bitset_fixed bitstring constructor") {
     
     // Test with mixed characters (should ignore non-0/1 chars)
     bitset_fixed<8> bs6("1a0b1c0d");
-    REQUIRE_EQ(bs6.size(), 8);
-    REQUIRE_EQ(bs6.count(), 1);
-    REQUIRE_EQ(bs6.test(0), true);
-    REQUIRE_EQ(bs6.test(1), false);
-    REQUIRE_EQ(bs6.test(2), false);
-    REQUIRE_EQ(bs6.test(3), false);
-    REQUIRE_EQ(bs6.test(4), false);
+    REQUIRE_EQ(bs6.size(), 8);  // Fixed size is still 8
+    REQUIRE_EQ(bs6.count(), 2);  // 2 bits set ('1' and '1')
+    REQUIRE_EQ(bs6.test(0), true);   // '1'
+    REQUIRE_EQ(bs6.test(1), false);  // '0'
+    REQUIRE_EQ(bs6.test(2), true);   // '1'
+    REQUIRE_EQ(bs6.test(3), false);  // '0'
+    REQUIRE_EQ(bs6.test(4), false);  // remaining bits unset
     REQUIRE_EQ(bs6.test(5), false);
     REQUIRE_EQ(bs6.test(6), false);
     REQUIRE_EQ(bs6.test(7), false);
@@ -545,7 +545,10 @@ TEST_CASE("test bitset_dynamic bitstring constructor") {
     bitset_dynamic bs3("1111111111111111111111111111111111111111111111111111111111111111");
     REQUIRE_EQ(bs3.size(), 64);
     REQUIRE_EQ(bs3.count(), 64);
-    REQUIRE_EQ(bs3.all(), true);
+    // Check that all bits are set
+    for (fl::u32 i = 0; i < 64; ++i) {
+        REQUIRE_EQ(bs3.test(i), true);
+    }
     
     // Test with null pointer (should not crash)
     bitset_dynamic bs4(nullptr);
@@ -559,16 +562,12 @@ TEST_CASE("test bitset_dynamic bitstring constructor") {
     
     // Test with mixed characters (should ignore non-0/1 chars)
     bitset_dynamic bs6("1a0b1c0d");
-    REQUIRE_EQ(bs6.size(), 8);
+    REQUIRE_EQ(bs6.size(), 4);  // Only 4 valid '0'/'1' characters
     REQUIRE_EQ(bs6.count(), 2);
-    REQUIRE_EQ(bs6.test(0), true);
-    REQUIRE_EQ(bs6.test(1), false);
-    REQUIRE_EQ(bs6.test(2), true);
-    REQUIRE_EQ(bs6.test(3), false);
-    REQUIRE_EQ(bs6.test(4), false);
-    REQUIRE_EQ(bs6.test(5), false);
-    REQUIRE_EQ(bs6.test(6), false);
-    REQUIRE_EQ(bs6.test(7), false);
+    REQUIRE_EQ(bs6.test(0), true);   // '1'
+    REQUIRE_EQ(bs6.test(1), false);  // '0'
+    REQUIRE_EQ(bs6.test(2), true);   // '1'
+    REQUIRE_EQ(bs6.test(3), false);  // '0'
 }
 
 TEST_CASE("test bitset_inlined bitstring constructor") {
@@ -631,13 +630,13 @@ TEST_CASE("test bitset_inlined bitstring constructor") {
     
     // Test with mixed characters (should ignore non-0/1 chars)
     bitset<8> bs6("1a0b1c0d");
-    REQUIRE_EQ(bs6.size(), 8);
-    REQUIRE_EQ(bs6.count(), 1);
-    REQUIRE_EQ(bs6.test(0), true);
-    REQUIRE_EQ(bs6.test(1), false);
-    REQUIRE_EQ(bs6.test(2), false);
-    REQUIRE_EQ(bs6.test(3), false);
-    REQUIRE_EQ(bs6.test(4), false);
+    REQUIRE_EQ(bs6.size(), 8);  // Fixed size is still 8
+    REQUIRE_EQ(bs6.count(), 2);  // 2 bits set ('1' and '1')
+    REQUIRE_EQ(bs6.test(0), true);   // '1'
+    REQUIRE_EQ(bs6.test(1), false);  // '0'
+    REQUIRE_EQ(bs6.test(2), true);   // '1'
+    REQUIRE_EQ(bs6.test(3), false);  // '0'
+    REQUIRE_EQ(bs6.test(4), false);  // remaining bits unset
     REQUIRE_EQ(bs6.test(5), false);
     REQUIRE_EQ(bs6.test(6), false);
     REQUIRE_EQ(bs6.test(7), false);

@@ -26,14 +26,22 @@ void to_string(const fl::u16 *bit_data, fl::u32 bit_count, string* dst) {
 template<typename SetBitFunc>
 inline void parse_bitstring(const char* bitstring, SetBitFunc&& set_bit) {
     if (!bitstring) return;
-    fl::u32 len = 0;
-    while (bitstring[len] == '0' || bitstring[len] == '1') ++len;
     
-    // Parse the bitstring and set bits (first character is MSB)
-    for (fl::u32 i = 0; i < len; ++i) {
-        if (bitstring[i] == '1') set_bit(i, true);
-        else if (bitstring[i] == '0') set_bit(i, false);
-        // ignore other chars
+    // First pass: find the total length including valid '0'/'1' chars
+    fl::u32 total_len = 0;
+    while (bitstring[total_len] != '\0') ++total_len;
+    
+    // Second pass: parse only valid '0'/'1' characters
+    fl::u32 bit_index = 0;
+    for (fl::u32 i = 0; i < total_len; ++i) {
+        if (bitstring[i] == '1') {
+            set_bit(bit_index, true);
+            ++bit_index;
+        } else if (bitstring[i] == '0') {
+            set_bit(bit_index, false);
+            ++bit_index;
+        }
+        // ignore other chars (don't increment bit_index)
     }
 }
 
@@ -60,9 +68,16 @@ fl::BitsetFixed<N>::BitsetFixed(const char* bitstring) : _blocks{} {
 template <fl::u32 N>
 fl::BitsetInlined<N>::BitsetInlined(const char* bitstring) : _storage(typename BitsetInlined<N>::fixed_bitset()) {
     if (!bitstring) return;
-    fl::u32 len = 0;
-    while (bitstring[len] == '0' || bitstring[len] == '1') ++len;
-    if (len <= N) {
+    
+    // Count valid '0'/'1' characters
+    fl::u32 valid_bits = 0;
+    for (fl::u32 i = 0; bitstring[i] != '\0'; ++i) {
+        if (bitstring[i] == '0' || bitstring[i] == '1') {
+            ++valid_bits;
+        }
+    }
+    
+    if (valid_bits <= N) {
         // Use fixed bitset
         detail::parse_bitstring(bitstring, [this](fl::u32 i, bool v) {
             if (i < N) this->_storage.template ptr<fixed_bitset>()->set(i, v);
