@@ -20,7 +20,7 @@ JsonHelpImpl::JsonHelpImpl(const string &markdownContent): mMarkdownContent(mark
     addJsonUiComponent(mInternal);
 }
 
-JsonHelpImpl::~JsonHelpImpl() {}
+JsonHelpImpl::~JsonHelpImpl() { removeJsonUiComponent(mInternal); }
 
 JsonHelpImpl &JsonHelpImpl::Group(const fl::string &name) {
     mInternal->setGroup(name);

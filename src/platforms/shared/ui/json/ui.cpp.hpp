@@ -109,6 +109,11 @@ void addJsonUiComponent(fl::WeakPtr<JsonUiInternal> component) {
 
 void removeJsonUiComponent(fl::WeakPtr<JsonUiInternal> component) {
     // Check if we have an internal manager first
+    JsonUiInternalPtr ptr = component.lock();
+    if (ptr) {
+        ptr->clearFunctions();
+    }
+
     auto& manager = getInternalManager();
     if (manager) {
         manager->removeComponent(component);

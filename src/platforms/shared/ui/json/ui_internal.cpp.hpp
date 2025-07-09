@@ -58,9 +58,8 @@ const fl::string &JsonUiInternal::groupName() const {
 bool JsonUiInternal::clearFunctions() {
     fl::lock_guard<fl::mutex> lock(mMutex);
     bool wasCleared = !mUpdateFunc || !mtoJsonFunc;
-    mUpdateFunc =
-        UpdateFunction([](const FLArduinoJson::JsonVariantConst &) {});
-    mtoJsonFunc = ToJsonFunction([](FLArduinoJson::JsonObject &) {});
+    mUpdateFunc = UpdateFunction();
+    mtoJsonFunc = ToJsonFunction();
     return wasCleared;
 }
 

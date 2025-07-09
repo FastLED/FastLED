@@ -150,7 +150,7 @@ const typename pair_element<I, T1, T2>::type& get(const pair<T1, T2> &p) noexcep
 template <fl::size I, typename T1, typename T2>
 typename pair_element<I, T1, T2>::type&& get(pair<T1, T2> &&p) noexcept {
     static_assert(I < 2, "Index out of bounds for pair");
-    if constexpr (I == 0) {
+    if (I == 0) {
         return fl::move(p.first);
     } else {
         return fl::move(p.second);
@@ -164,7 +164,7 @@ T& get(pair<T1, T2> &p) noexcept {
                   "Type T must be one of the pair's element types");
     static_assert(!(fl::is_same<T, T1>::value && fl::is_same<T, T2>::value), 
                   "Type T must be unique in the pair");
-    if constexpr (fl::is_same<T, T1>::value) {
+    if (fl::is_same<T, T1>::value) {
         return p.first;
     } else {
         return p.second;
@@ -177,7 +177,7 @@ const T& get(const pair<T1, T2> &p) noexcept {
                   "Type T must be one of the pair's element types");
     static_assert(!(fl::is_same<T, T1>::value && fl::is_same<T, T2>::value), 
                   "Type T must be unique in the pair");
-    if constexpr (fl::is_same<T, T1>::value) {
+    if (fl::is_same<T, T1>::value) {
         return p.first;
     } else {
         return p.second;
@@ -190,7 +190,7 @@ T&& get(pair<T1, T2> &&p) noexcept {
                   "Type T must be one of the pair's element types");
     static_assert(!(fl::is_same<T, T1>::value && fl::is_same<T, T2>::value), 
                   "Type T must be unique in the pair");
-    if constexpr (fl::is_same<T, T1>::value) {
+    if (fl::is_same<T, T1>::value) {
         return fl::move(p.first);
     } else {
         return fl::move(p.second);
