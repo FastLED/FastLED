@@ -12,6 +12,7 @@ from typing import Optional, Tuple
 
 from download import download  # type: ignore
 
+
 # Configs
 DOXYGEN_VERSION = (
     "1.13.2"  # DOXYGEN_AWESOME styler is has certain restrictions with doxygen version
@@ -145,7 +146,6 @@ def generate_docs(doxygen_bin: Path) -> None:
 
 
 def main() -> None:
-
     is_windows = platform.system() == "Windows"
     # is_macos = platform.system() == "Darwin"
     _, commit_msg = get_git_info()

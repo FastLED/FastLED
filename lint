@@ -56,48 +56,14 @@ echo "=============================================="
 echo ""
 echo "📝 PYTHON LINTING"
 echo "------------------"
-echo "Running ruff check"
+echo "Running ruff check (linting)"
 uv run ruff check --fix test.py
 uv run ruff check --fix ci --exclude ci/tmp/ --exclude ci/wasm/
 uv run ruff check --fix dev/dev.py
-echo "Running black"
-# Check if black needs to run using intelligent caching
-if uv run python ci/black-cached.py ci --exclude ci/tmp/ --exclude ci/wasm/; then
-    # Cache hit - black was skipped or ran successfully
-    true
-else
-    # Cache miss or error - fall back to regular black
-    echo "Falling back to regular black..."
-    uv run black ci --exclude ci/tmp/ --exclude ci/wasm/
-fi
-
-if uv run python ci/black-cached.py dev/dev.py; then
-    # Cache hit - black was skipped or ran successfully
-    true
-else
-    # Cache miss or error - fall back to regular black
-    echo "Falling back to regular black..."
-    uv run black dev/dev.py
-fi
-echo "Running isort"
-# Check if isort needs to run using intelligent caching
-if uv run python ci/isort-cached.py --profile black ci --skip ci/tmp/ --skip ci/wasm/; then
-    # Cache hit - isort was skipped or ran successfully
-    true
-else
-    # Cache miss or error - fall back to regular isort
-    echo "Falling back to regular isort..."
-    uv run isort --profile black ci --skip ci/tmp/ --skip ci/wasm/
-fi
-
-if uv run python ci/isort-cached.py --profile black dev/dev.py; then
-    # Cache hit - isort was skipped or ran successfully
-    true
-else
-    # Cache miss or error - fall back to regular isort
-    echo "Falling back to regular isort..."
-    uv run isort --profile black dev/dev.py
-fi
+echo "Running ruff format (formatting + import sorting)"
+uv run ruff format test.py
+uv run ruff format ci --exclude ci/tmp/ --exclude ci/wasm/
+uv run ruff format dev/dev.py
 echo "Running pyright ci"
 # Check if pyright needs to run using intelligent caching
 if uv run python ci/pyright-cached.py ci --threads; then

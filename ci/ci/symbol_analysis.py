@@ -5,6 +5,7 @@ Analyzes ELF files to identify symbols and function call relationships.
 Shows which functions call other functions (call graph analysis).
 Works with any platform (ESP32S3, UNO, etc.) that has build_info.json.
 """
+
 import json
 import re
 import subprocess
@@ -383,7 +384,7 @@ def generate_report(
     print(f"  Symbols with size info: {len(symbols_with_size)}")
     print(f"  Symbols without size info: {len(symbols_without_size)}")
     print(
-        f"  Total symbol size: {total_size} bytes ({total_size/1024:.1f} KB) [sized symbols only]"
+        f"  Total symbol size: {total_size} bytes ({total_size / 1024:.1f} KB) [sized symbols only]"
     )
 
     if enhanced_mode and call_graph and reverse_call_graph:
@@ -409,7 +410,7 @@ def generate_report(
     display_count = 30 if enhanced_mode else 50
     for i, sym in enumerate(symbols_sorted[:display_count]):
         display_name = sym.get("demangled_name", sym["name"])
-        print(f"  {i+1:2d}. {sym['size']:6d} bytes - {display_name}")
+        print(f"  {i + 1:2d}. {sym['size']:6d} bytes - {display_name}")
 
         # Show what functions call this symbol (if enhanced mode and it's a function)
         if enhanced_mode and reverse_call_graph and display_name in reverse_call_graph:
@@ -450,7 +451,7 @@ def generate_report(
         print("\nMOST CALLED FUNCTIONS (functions called by many others):")
         for i, (func_name, callers) in enumerate(most_called[:15]):
             short_name = func_name[:60] + "..." if len(func_name) > 60 else func_name
-            print(f"  {i+1:2d}. {short_name}")
+            print(f"  {i + 1:2d}. {short_name}")
             print(f"      Called by {len(callers)} functions")
             if len(callers) <= 5:
                 for caller in callers:
@@ -468,7 +469,7 @@ def generate_report(
         print("\nFUNCTIONS THAT CALL MANY OTHERS:")
         for i, (func_name, callees) in enumerate(most_calling[:10]):
             short_name = func_name[:60] + "..." if len(func_name) > 60 else func_name
-            print(f"  {i+1:2d}. {short_name}")
+            print(f"  {i + 1:2d}. {short_name}")
             print(f"      Calls {len(callees)} functions")
             if len(callees) <= 5:
                 for callee in callees:
@@ -496,7 +497,7 @@ def generate_report(
         type_stats.items(), key=lambda x: x[1]["size"], reverse=True
     ):
         print(
-            f"  {sym_type}: {stats['count']} symbols, {stats['size']} bytes ({stats['size']/1024:.1f} KB)"
+            f"  {sym_type}: {stats['count']} symbols, {stats['size']} bytes ({stats['size'] / 1024:.1f} KB)"
         )
 
     # Dependencies analysis

@@ -4,11 +4,13 @@ Implementation Files Checker
 Scans src/fl/ and src/fx/ directories for *.hpp and *.cpp.hpp files.
 Provides statistics and can verify inclusion in the all-source build.
 """
+
 import argparse
 import json
 import os
 from pathlib import Path
 from typing import Dict, List, Set
+
 
 # Get project root directory
 PROJECT_ROOT = Path(__file__).parent.parent.parent

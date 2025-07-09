@@ -3,6 +3,7 @@
 ESP32 Symbol Analysis Runner for GitHub Actions
 Wrapper script to run ESP32 symbol analysis with proper error handling
 """
+
 import argparse
 import os
 import sys
@@ -63,7 +64,6 @@ def main():
             return 1
 
     try:
-
         # TODO - Remove this.
         # Change to the ci/ci directory since the script expects to be run from there
         original_cwd = os.getcwd()

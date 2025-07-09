@@ -15,6 +15,7 @@ from ci.symbol_analysis import (
 )
 from ci.tools import Tools, load_tools
 
+
 HERE = Path(__file__).resolve().parent.absolute()
 UNO = HERE / "uno"
 OUTPUT = HERE / "output"
@@ -88,7 +89,6 @@ def init() -> None:
 
 
 class TestSymbolAnalysis(unittest.TestCase):
-
     @classmethod
     @unittest.skipUnless(_ENABLED, "Tests disabled - set _ENABLED = True to run")
     def setUpClass(cls):
@@ -338,7 +338,7 @@ class TestSymbolAnalysis(unittest.TestCase):
         print(f"  Board: {report['board']}")
         print(f"  Total symbols: {report['total_symbols']}")
         print(
-            f"  Total size: {report['total_size']} bytes ({report['total_size']/1024:.1f} KB)"
+            f"  Total size: {report['total_size']} bytes ({report['total_size'] / 1024:.1f} KB)"
         )
         print(
             f"  Largest symbol: {report['largest_symbols'][0]['demangled_name']} ({report['largest_symbols'][0]['size']} bytes)"

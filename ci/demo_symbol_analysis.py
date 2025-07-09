@@ -2,6 +2,7 @@
 """
 Demo script showing how to use the new generic symbol analysis functionality
 """
+
 import json
 import subprocess
 import sys
@@ -48,7 +49,7 @@ def load_and_summarize_results(board_name: str):
         print(f"\n📊 SUMMARY FOR {board_name.upper()}:")
         print(f"   Total symbols: {summary['total_symbols']}")
         print(
-            f"   Total size: {summary['total_size']} bytes ({summary['total_size']/1024:.1f} KB)"
+            f"   Total size: {summary['total_size']} bytes ({summary['total_size'] / 1024:.1f} KB)"
         )
 
         print("\n🔝 TOP 5 LARGEST SYMBOLS:")

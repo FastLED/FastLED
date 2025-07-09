@@ -310,7 +310,7 @@ def create_build_dir(
     if board.customsdk:
         cmd_list.append(f"--project-option=custom_sdkconfig={customsdk}")
     if extra_packages:
-        cmd_list.append(f'--project-option=lib_deps={",".join(extra_packages)}')
+        cmd_list.append(f"--project-option=lib_deps={','.join(extra_packages)}")
     if no_install_deps:
         cmd_list.append("--no-install-dependencies")
 

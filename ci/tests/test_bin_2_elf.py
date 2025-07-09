@@ -8,6 +8,7 @@ from ci.elf import dump_symbol_sizes
 from ci.paths import PROJECT_ROOT
 from ci.tools import Tools, load_tools
 
+
 HERE = Path(__file__).resolve().parent.absolute()
 UNO = HERE / "uno"
 OUTPUT = HERE / "output"
@@ -19,7 +20,6 @@ DISABLED = True
 
 
 class TestBinToElf(unittest.TestCase):
-
     @classmethod
     def setUpClass(cls):
         if DISABLED:

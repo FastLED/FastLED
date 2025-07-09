@@ -4,6 +4,7 @@ from concurrent.futures import ThreadPoolExecutor
 
 from ci.paths import PROJECT_ROOT
 
+
 SRC_ROOT = PROJECT_ROOT / "src"
 PLATFORMS_DIR = os.path.join(SRC_ROOT, "platforms")
 
@@ -11,7 +12,6 @@ NUM_WORKERS = (os.cpu_count() or 1) * 4
 
 
 class NoUsingNamespaceFlInHeaderTester(unittest.TestCase):
-
     def check_file(self, file_path) -> list[str]:
         if "FastLED.h" in file_path:
             return []

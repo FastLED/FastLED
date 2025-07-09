@@ -13,8 +13,6 @@ dependencies = [
     "pyright",
     "types-python-dateutil",
     "clang-format",
-    "isort",
-    "black",
     "pip",
     "pytest",
     "pytest-xdist",
@@ -38,3 +36,24 @@ build-backend = "hatchling.build"
 
 [tool.hatch.build]
 packages = ["ci/ci"]
+
+[tool.ruff]
+exclude = ["ci/tmp", "ci/wasm"]
+
+[tool.ruff.lint]
+# Enable import sorting (replaces isort)
+select = ["I"]
+
+[tool.ruff.lint.isort]
+# Configure import sorting to match isort's black profile
+force-single-line = false
+force-sort-within-sections = false
+lines-after-imports = 2
+
+[tool.ruff.format]
+# Enable formatting (replaces black)
+# Use black-compatible settings
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"

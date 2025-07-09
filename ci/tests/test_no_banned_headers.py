@@ -11,6 +11,7 @@ from ci.check_files import (
 )
 from ci.paths import PROJECT_ROOT
 
+
 SRC_ROOT = PROJECT_ROOT / "src"
 
 ENABLE_PARANOID_GNU_HEADER_INSPECTION = False
@@ -143,7 +144,6 @@ def _test_no_banned_headers(
 
 
 class TestNoBannedHeaders(unittest.TestCase):
-
     def test_no_banned_headers_src(self) -> None:
         """Searches through the program files to check for banned headers."""
 

@@ -8,6 +8,7 @@ from dataclasses import dataclass
 
 from ci.paths import PROJECT_ROOT
 
+
 # Global verbose flag
 _VERBOSE = False
 

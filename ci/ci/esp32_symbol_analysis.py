@@ -3,6 +3,7 @@
 ESP32 Symbol Analysis Tool
 Analyzes the ESP32 ELF file to identify symbols that can be eliminated for binary size reduction.
 """
+
 import json
 import subprocess
 import sys
@@ -156,14 +157,14 @@ def generate_report(symbols, fastled_symbols, large_symbols, dependencies):
     print("\nSUMMARY:")
     print(f"  Total symbols: {total_symbols}")
     print(f"  FastLED symbols: {total_fastled}")
-    print(f"  Total FastLED size: {fastled_size} bytes ({fastled_size/1024:.1f} KB)")
+    print(f"  Total FastLED size: {fastled_size} bytes ({fastled_size / 1024:.1f} KB)")
 
     # Largest FastLED symbols
     print("\nLARGEST FASTLED SYMBOLS (potential elimination targets):")
     fastled_sorted = sorted(fastled_symbols, key=lambda x: x["size"], reverse=True)
     for i, sym in enumerate(fastled_sorted[:20]):
         display_name = sym.get("demangled_name", sym["name"])
-        print(f"  {i+1:2d}. {sym['size']:6d} bytes - {display_name}")
+        print(f"  {i + 1:2d}. {sym['size']:6d} bytes - {display_name}")
         if "demangled_name" in sym and sym["demangled_name"] != sym["name"]:
             print(
                 f"      (mangled: {sym['name'][:80]}{'...' if len(sym['name']) > 80 else ''})"
@@ -198,7 +199,7 @@ def generate_report(symbols, fastled_symbols, large_symbols, dependencies):
 
     for i, sym in enumerate(non_fastled_sorted[:15]):
         display_name = sym.get("demangled_name", sym["name"])
-        print(f"  {i+1:2d}. {sym['size']:6d} bytes - {display_name}")
+        print(f"  {i + 1:2d}. {sym['size']:6d} bytes - {display_name}")
 
     # Recommendations
     print("\nRECOMMENDATIONS FOR SIZE REDUCTION:")
@@ -227,7 +228,7 @@ def generate_report(symbols, fastled_symbols, large_symbols, dependencies):
             print(f"  - {feature}: {len(feature_symbols)} symbols, {total_size} bytes")
             if total_size > 1000:  # Only show features with >1KB
                 print(
-                    f"    Consider removing if not needed (could save ~{total_size/1024:.1f} KB)"
+                    f"    Consider removing if not needed (could save ~{total_size / 1024:.1f} KB)"
                 )
                 # Show a few example symbols
                 for sym in feature_symbols[:3]:
@@ -336,9 +337,7 @@ def main():
         ),
         "all_symbols_sorted_by_size": sorted(
             symbols, key=lambda x: x["size"], reverse=True
-        )[
-            :100
-        ],  # Top 100 largest symbols
+        )[:100],  # Top 100 largest symbols
         "dependencies": dependencies,
         "large_symbols": sorted(large_symbols, key=lambda x: x["size"], reverse=True)[
             :50

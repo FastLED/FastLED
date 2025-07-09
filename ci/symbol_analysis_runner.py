@@ -3,6 +3,7 @@
 Generic Symbol Analysis Runner for GitHub Actions
 Wrapper script to run symbol analysis with proper error handling for any platform
 """
+
 import argparse
 import sys
 from pathlib import Path

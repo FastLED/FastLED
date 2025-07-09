@@ -4,6 +4,7 @@ from concurrent.futures import ThreadPoolExecutor
 
 from ci.paths import PROJECT_ROOT
 
+
 SRC_ROOT = PROJECT_ROOT / "src"
 # PLATFORMS_DIR = os.path.join(SRC_ROOT, "platforms")
 
@@ -17,7 +18,6 @@ WRONG_DEFINES: dict[str, str] = {
 
 
 class TestWrongDefines(unittest.TestCase):
-
     def check_file(self, file_path) -> list[str]:
         failings = []
         with open(file_path, "r", encoding="utf-8") as f:

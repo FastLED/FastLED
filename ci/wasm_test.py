@@ -6,6 +6,7 @@ from pathlib import Path
 
 from playwright.async_api import async_playwright  # type: ignore
 
+
 HERE = Path(__file__).parent
 PROJECT_ROOT = HERE.parent
 

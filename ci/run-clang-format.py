@@ -24,6 +24,7 @@ import sys
 import traceback
 from functools import partial
 
+
 try:
     from subprocess import DEVNULL  # py3k
 except ImportError:
@@ -293,7 +294,7 @@ def main():
         metavar="N",
         type=int,
         default=0,
-        help="run N clang-format jobs in parallel" " (default number of cpus + 1)",
+        help="run N clang-format jobs in parallel (default number of cpus + 1)",
     )
     parser.add_argument(
         "--color",

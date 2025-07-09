@@ -4,6 +4,7 @@ from concurrent.futures import ThreadPoolExecutor
 
 from ci.paths import PROJECT_ROOT
 
+
 NUM_WORKERS = (os.cpu_count() or 1) * 4
 
 
@@ -11,7 +12,6 @@ WASM_ROOT = PROJECT_ROOT / "src" / "platforms" / "wasm"
 
 
 class TestMissingPragmaOnce(unittest.TestCase):
-
     def check_file(self, file_path: str) -> list[str]:
         """Check if a header file has #pragma once directive or if a cpp file incorrectly has it."""
         failings: list[str] = []

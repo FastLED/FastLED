@@ -1,6 +1,7 @@
 import sys
 from pathlib import Path
 
+
 HERE = Path(__file__).resolve().parent
 PROJECT_ROOT = HERE.parent
 PLATFORMIO_INI = PROJECT_ROOT / "platformio.ini"
@@ -106,7 +107,7 @@ def main() -> None:
     print("Please select a platform:")
     print("[0]: Exit")
     for i, platform in enumerate(_ALL.keys()):
-        print(f"[{i+1}]: {platform}")
+        print(f"[{i + 1}]: {platform}")
     val = prompt_user("Enter a number: ")
     if val == 0:
         sys.exit(0)

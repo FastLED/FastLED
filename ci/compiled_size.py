@@ -6,9 +6,9 @@ from pathlib import Path
 def _get_board_info(path: Path) -> dict:
     build_info = json.loads(path.read_text())
     assert build_info.keys(), f"No boards found in {build_info}"
-    assert (
-        len(build_info.keys()) == 1
-    ), f"Multiple boards found in {build_info}, so correct board should be specified"
+    assert len(build_info.keys()) == 1, (
+        f"Multiple boards found in {build_info}, so correct board should be specified"
+    )
     return build_info[next(iter(build_info))]
 
 

@@ -10,6 +10,7 @@ Simple JavaScript linting setup for FastLED using Deno
 Downloads Deno binary and sets up basic linting - no Node.js/npm complexity
 Uses uv run --script for dynamic package management
 """
+
 import io
 import os
 import platform
@@ -20,6 +21,7 @@ from pathlib import Path
 
 # Import httpx for HTTP requests (dynamically managed by uv)
 import httpx
+
 
 # Force UTF-8 output for Windows consoles
 if sys.platform.startswith("win"):

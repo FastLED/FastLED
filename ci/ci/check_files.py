@@ -6,6 +6,7 @@ from typing import Dict, List, Optional
 
 from ci.paths import PROJECT_ROOT
 
+
 SRC_ROOT = PROJECT_ROOT / "src"
 
 NUM_WORKERS = (os.cpu_count() or 1) * 4

@@ -13,7 +13,6 @@ class ApiTester(unittest.TestCase):
         from fastled import Api, Test  # type: ignore
 
         with Api.server(auto_updates=True) as server:
-
             exception_map = Test.test_examples(host=server)
             if len(exception_map) > 0:
                 exception: Exception

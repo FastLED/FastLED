@@ -10,6 +10,7 @@ from typing import Tuple
 from ci.paths import PROJECT_ROOT
 from ci.running_process import RunningProcess
 
+
 BUILD_DIR = PROJECT_ROOT / "tests" / ".build"
 BUILD_DIR.mkdir(parents=True, exist_ok=True)
 
@@ -73,9 +74,9 @@ def use_clang_compiler() -> Tuple[Path, Path, Path]:
 
 
 def use_zig_compiler() -> Tuple[Path, Path, Path]:
-    assert 0 == os.system(
-        "uv run python -m ziglang version"
-    ), "Zig-clang compiler not found"
+    assert 0 == os.system("uv run python -m ziglang version"), (
+        "Zig-clang compiler not found"
+    )
     uv_path_str: str | None = shutil.which("uv")
     assert uv_path_str is not None, "uv not found in PATH"
     uv_path = Path(uv_path_str).resolve()
@@ -152,9 +153,9 @@ def compile_fastled(specific_test: str | None = None) -> None:
             "python -m ziglang version", shell=True, capture_output=True
         ).returncode
         zig_is_installed = rtn == 0
-        assert (
-            zig_is_installed
-        ), 'Zig compiler not when using "python -m ziglang version" command'
+        assert zig_is_installed, (
+            'Zig compiler not when using "python -m ziglang version" command'
+        )
         use_zig_compiler()
     elif USE_CLANG:
         print("USING CLANG COMPILER")
@@ -293,7 +294,6 @@ def should_clean_build(build_info: dict[str, str | dict[str, str]]) -> bool:
             and old_build_info.get("CFLAGS") == build_info.get("CFLAGS")
             and old_build_info.get("CXXFLAGS") == build_info.get("CXXFLAGS")
         ):
-
             print(
                 f"Build parameters unchanged, only test target changed: {old_test} -> {new_test}"
             )

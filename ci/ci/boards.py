@@ -3,6 +3,7 @@
 import json
 from dataclasses import dataclass
 
+
 # An open source version of the esp-idf 5.1 platform for the ESP32 that
 # gives esp32 boards the same build environment as the Arduino 2.3.1+.
 
@@ -511,9 +512,9 @@ def _make_board_map(boards: list[Board]) -> dict[str, Board]:
     # make board map, but assert on duplicate board names
     board_map: dict[str, Board] = {}
     for board in boards:
-        assert (
-            board.board_name not in board_map
-        ), f"Duplicate board name: {board.board_name}"
+        assert board.board_name not in board_map, (
+            f"Duplicate board name: {board.board_name}"
+        )
         board_map[board.board_name] = board
     return board_map
 

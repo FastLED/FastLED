@@ -4,6 +4,7 @@ from concurrent.futures import ThreadPoolExecutor
 
 from ci.paths import PROJECT_ROOT
 
+
 SRC_ROOT = PROJECT_ROOT / "src"
 
 NUM_WORKERS = (os.cpu_count() or 1) * 4
@@ -20,7 +21,6 @@ EXCLUDED_DIRS = [
 
 
 class TestMissingPragmaOnce(unittest.TestCase):
-
     def check_file(self, file_path: str) -> list[str]:
         """Check if a header file has #pragma once directive or if a cpp file incorrectly has it."""
         failings: list[str] = []

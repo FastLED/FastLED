@@ -4,6 +4,7 @@ from pathlib import Path
 
 from ci.elf import dump_symbol_sizes
 
+
 HERE = Path(__file__).resolve().parent
 PROJECT_ROOT = HERE.parent
 

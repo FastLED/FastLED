@@ -3,6 +3,7 @@
 Improved Binary to ELF Converter
 Handles platform-specific binary formats for ESP32, Uno, and other platforms.
 """
+
 import json
 import subprocess
 from pathlib import Path

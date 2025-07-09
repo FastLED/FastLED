@@ -15,6 +15,7 @@ from pathlib import Path
 from ci.boards import Board, get_board  # type: ignore
 from ci.locked_print import locked_print
 
+
 HERE = Path(__file__).parent.resolve()
 
 # Default boards to compile for
