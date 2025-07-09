@@ -203,6 +203,64 @@ template <fl::u32 N> class BitsetFixed {
     /// Size of the BitsetFixed (number of bits).
     constexpr fl::u32 size() const noexcept { return N; }
 
+    /// Finds the first bit that matches the test value.
+    /// Returns the index of the first matching bit, or -1 if none found.
+    fl::i32 find_first(bool test_value) const noexcept {
+        // If looking for true bits, we need to find the first set bit
+        // If looking for false bits, we need to find the first unset bit
+        
+        for (fl::u32 block_idx = 0; block_idx < block_count; ++block_idx) {
+            block_type current_block = _blocks[block_idx];
+            
+            // For the last block, we need to mask out unused bits
+            if (block_idx == block_count - 1 && N % bits_per_block != 0) {
+                const fl::u32 valid_bits = N % bits_per_block;
+                block_type mask = (valid_bits == bits_per_block) 
+                    ? ~block_type(0) 
+                    : ((block_type(1) << valid_bits) - 1);
+                current_block &= mask;
+            }
+            
+            // If looking for false bits, invert the block
+            if (!test_value) {
+                current_block = ~current_block;
+            }
+            
+            // If this block has any matching bits, find the first one
+            if (current_block != 0) {
+                // Step 1: Test entire u64 block
+                if (current_block != 0) {
+                    // Step 2: Use a union to treat as u16[4]
+                    union { block_type u64; fl::u16 u16[4]; } u16_union = { current_block };
+                    for (fl::u32 u16_idx = 0; u16_idx < 4; ++u16_idx) {
+                        if (u16_union.u16[u16_idx] != 0) {
+                            // Step 3: Use a union to treat as u8[2]
+                            union { fl::u16 u16; fl::u8 u8[2]; } u8_union = { u16_union.u16[u16_idx] };
+                            for (fl::u32 u8_idx = 0; u8_idx < 2; ++u8_idx) {
+                                if (u8_union.u8[u8_idx] != 0) {
+                                    // Step 4: Test each bit to find exact index
+                                    fl::u8 byte = u8_union.u8[u8_idx];
+                                    for (fl::u32 bit_idx = 0; bit_idx < 8; ++bit_idx) {
+                                        if (byte & (1 << bit_idx)) {
+                                            fl::u32 global_bit_idx = block_idx * bits_per_block + 
+                                                                     u16_idx * 16 + u8_idx * 8 + bit_idx;
+                                            // Check if this bit is within our valid range
+                                            if (global_bit_idx < N) {
+                                                return static_cast<fl::i32>(global_bit_idx);
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        
+        return -1; // No matching bit found
+    }
+
     /// Friend operators for convenience.
     friend BitsetFixed operator&(BitsetFixed lhs,
                                  const BitsetFixed &rhs) noexcept {

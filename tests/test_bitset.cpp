@@ -268,3 +268,52 @@ TEST_CASE("test bitset_dynamic") {
 }
 
 
+TEST_CASE("test bitset_fixed find_first") {
+    // Test find_first for true bits
+    bitset_fixed<64> bs;
+    
+    // Initially no bits are set, so find_first(true) should return -1
+    REQUIRE_EQ(bs.find_first(true), -1);
+    
+    // find_first(false) should return 0 (first unset bit)
+    REQUIRE_EQ(bs.find_first(false), 0);
+    
+    // Set bit at position 5
+    bs.set(5);
+    REQUIRE_EQ(bs.find_first(true), 5);
+    REQUIRE_EQ(bs.find_first(false), 0);
+    
+    // Set bit at position 0
+    bs.set(0);
+    REQUIRE_EQ(bs.find_first(true), 0);
+    REQUIRE_EQ(bs.find_first(false), 1);
+    
+    // Set bit at position 63 (last bit)
+    bs.set(63);
+    REQUIRE_EQ(bs.find_first(true), 0);
+    REQUIRE_EQ(bs.find_first(false), 1);
+    
+    // Clear bit 0, now first set bit should be 5
+    bs.reset(0);
+    REQUIRE_EQ(bs.find_first(true), 5);
+    REQUIRE_EQ(bs.find_first(false), 0);
+    
+    // Test with larger bitset
+    bitset_fixed<128> bs2;
+    bs2.set(100);
+    REQUIRE_EQ(bs2.find_first(true), 100);
+    REQUIRE_EQ(bs2.find_first(false), 0);
+    
+    // Test edge case: all bits set
+    bitset_fixed<8> bs3;
+    for (fl::u32 i = 0; i < 8; ++i) {
+        bs3.set(i);
+    }
+    REQUIRE_EQ(bs3.find_first(true), 0);
+    REQUIRE_EQ(bs3.find_first(false), -1);
+    
+    // Test edge case: no bits set
+    bitset_fixed<8> bs4;
+    REQUIRE_EQ(bs4.find_first(true), -1);
+    REQUIRE_EQ(bs4.find_first(false), 0);
+}
