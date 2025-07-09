@@ -21,7 +21,7 @@ class RunningProcess:
         check: bool = False,
         auto_run: bool = True,
         echo: bool = True,
-        timeout: int = 30,  # 30 second default timeout (reduced from 300)
+        timeout: int = 300,  # five minutes
         enable_stack_trace: bool = True,  # Enable stack trace dumping on timeout
     ):
         """

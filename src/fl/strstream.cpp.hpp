@@ -6,6 +6,7 @@
 
 namespace fl {
 
+
 StrStream &StrStream::operator<<(const Tile2x2_u8 &subpixel) {
     mStr.append("Tile2x2_u8(");
     mStr.append(subpixel.bounds());

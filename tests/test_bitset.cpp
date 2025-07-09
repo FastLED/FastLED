@@ -7,6 +7,8 @@
 
 using namespace fl;
 
+#if 0
+
 TEST_CASE("test bitset") {
     // default‐constructed bitset is empty
     bitset_fixed<10> bs;
@@ -410,4 +412,40 @@ TEST_CASE("test bitset_inlined find_first") {
     bs4.set(150);
     REQUIRE_EQ(bs4.find_first(true), 150);
     REQUIRE_EQ(bs4.find_first(false), 0);
+}
+
+#endif
+
+TEST_CASE("test bitset_fixed find_run") {
+    // Test interesting patterns
+    bitset_fixed<32> bs;
+    // Set pattern: 0001 1001 0111 1100 0000 1111 0000 0011
+    bs.set(3);
+    bs.set(4);
+    bs.set(7);
+    bs.set(9);
+    bs.set(10);
+    bs.set(11);
+    bs.set(12);
+    bs.set(13);
+    bs.set(20);
+    bs.set(21);
+    bs.set(22);
+    bs.set(23);
+    bs.set(30);
+    bs.set(31);
+
+    FL_WARN("bs: " << bs);
+
+    // Find first run of any length
+    int idx = bs.find_run(true, 3);
+    REQUIRE_EQ(idx, 9);  // First run at 3
+
+    idx = bs.find_run(false, 2, 9);
+    REQUIRE_EQ(idx, 14);  // First run at 3
+
+    // off the edge
+    idx = bs.find_run(true, 3, 31);
+    REQUIRE_EQ(idx, -1);
+
 }

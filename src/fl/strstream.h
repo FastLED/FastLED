@@ -5,6 +5,7 @@
 #include "crgb.h"
 #include "str.h"
 
+
 namespace fl {
 
 class Tile2x2_u8;
@@ -12,6 +13,7 @@ class Tile2x2_u8_wrap;  // Forward declaration to support operator<< overload
 template <typename T> struct vec2;  // Forward declaration from fl/geometry.h
 template <typename T, typename Alloc> class HeapVector;  // Forward declaration from fl/vector.h
 struct FFTBins;  // Forward declaration from fl/fft.h
+template <fl::u32 N> class BitsetFixed;
 
 template <typename T> struct StrStreamHelper {
     static void append(string &str, const T &n) { str.append(n); }
@@ -140,6 +142,13 @@ class StrStream {
     template<fl::size N>
     StrStream &operator<<(const char (&str)[N]) {
         mStr.append(str);
+        return *this;
+    }
+
+    template<fl::u32 N>
+    StrStream &operator<<(const BitsetFixed<N> &bs) {
+        // mStr.append(bs);
+        bs.to_string(&mStr);
         return *this;
     }
 

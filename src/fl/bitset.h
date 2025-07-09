@@ -6,11 +6,14 @@
 #include "fl/stdint.h"
 #include "fl/int.h"
 
+
 namespace fl {
 
 template <fl::u32 N> class BitsetInlined;
 
 template <fl::u32 N> class BitsetFixed;
+
+class string;
 
 
 template <fl::u32 N = 16>
@@ -18,6 +21,11 @@ using bitset = BitsetInlined<N>; // inlined but can go bigger.
 
 template <fl::u32 N>
 using bitset_fixed = BitsetFixed<N>; // fixed size, no dynamic allocation.
+
+
+namespace detail {
+void to_string(const fl::u16 *bit_data, fl::u32 bit_count, string* dst);
+}
 
 /// A simple fixed-size Bitset implementation similar to std::Bitset.
 template <fl::u32 N> class BitsetFixed {
@@ -49,6 +57,10 @@ template <fl::u32 N> class BitsetFixed {
 
     /// Constructs a BitsetFixed with all bits reset.
     constexpr BitsetFixed() noexcept : _blocks{} {}
+
+    void to_string(string* dst) const {
+        detail::to_string(_blocks, N, dst);
+    }
 
     /// Resets all bits to zero.
     void reset() noexcept {
@@ -240,6 +252,34 @@ template <fl::u32 N> class BitsetFixed {
         }
         
         return -1; // No matching bit found
+    }
+
+    /// Finds the first run of consecutive bits that match the test value.
+    /// Returns the index of the first bit in the run, or -1 if no run found.
+    /// @param test_value The value to search for (true or false)
+    /// @param min_length Minimum length of the run (default: 1)
+    /// @param offset Starting position to search from (default: 0)
+    fl::i32 find_run(bool test_value, fl::u32 min_length, fl::u32 offset = 0) const noexcept {
+        fl::u32 run_start = offset;
+        fl::u32 run_length = 0;
+        
+        for (fl::u32 i = offset; i < N && run_length < min_length; ++i) {
+            bool current_bit = test(i);
+            if (current_bit != test_value) {
+                run_length = 0;
+                if (i + 1 < N) {
+                    run_start = i + 1;
+                }
+            } else {
+                ++run_length;
+            }
+        }
+
+        if (run_length >= min_length) {
+            return run_start;
+        }
+        
+        return -1; // No run found
     }
 
     /// Friend operators for convenience.

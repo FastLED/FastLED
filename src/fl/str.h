@@ -54,6 +54,8 @@ template <typename T> struct EqualTo;
 
 template <typename Key, typename Hash, typename KeyEqual> class HashSet;
 
+template <fl::u32 N> class BitsetFixed;
+
 class XYMap;
 
 struct FFTBins;
@@ -468,6 +470,8 @@ class string : public StrN<FASTLED_STR_INLINED_SIZE> {
     }
 #endif
 
+
+
     bool operator>(const string &other) const {
         return strcmp(c_str(), other.c_str()) > 0;
     }
@@ -499,6 +503,12 @@ class string : public StrN<FASTLED_STR_INLINED_SIZE> {
 
     template <typename T> string &operator+=(const T &val) {
         append(val);
+        return *this;
+    }
+
+    template <fl::size N>
+    string &append(const BitsetFixed<N> &bs) {
+        append(bs.to_string());
         return *this;
     }
 
