@@ -16,10 +16,27 @@
 
 namespace fl {
 
+// Test hooks for malloc/free operations
+#if defined(FASTLED_TESTING)
+// Interface class for malloc/free test hooks
+class MallocFreeHook {
+public:
+    virtual ~MallocFreeHook() = default;
+    virtual void onMalloc(void* ptr, fl::size size) = 0;
+    virtual void onFree(void* ptr) = 0;
+};
+
+// Set test hooks for malloc and free operations
+void SetMallocFreeHook(MallocFreeHook* hook);
+
+// Clear test hooks (set to nullptr)
+void ClearMallocFreeHook();
+#endif
+
 void SetPSRamAllocator(void *(*alloc)(fl::size), void (*free)(void *));
 void *PSRamAllocate(fl::size size, bool zero = true);
 void PSRamDeallocate(void *ptr);
-void Malloc(fl::size size);
+void* Malloc(fl::size size);
 void Free(void *ptr);
 
 template <typename T> class PSRamAllocator {
@@ -72,7 +89,8 @@ template <typename T> class allocator {
         if (n == 0) {
             return nullptr; // Handle zero allocation
         }
-        void *ptr = malloc(sizeof(T) * n);
+        fl::size size = sizeof(T) * n;
+        void *ptr = Malloc(size);
         if (ptr == nullptr) {
             return nullptr; // Handle allocation failure
         }
@@ -85,7 +103,7 @@ template <typename T> class allocator {
         if (p == nullptr) {
             return; // Handle null pointer
         }
-        free(p); // Free the allocated memory
+        Free(p); // Free the allocated memory
     }
     
     // Construct an object at the specified address
