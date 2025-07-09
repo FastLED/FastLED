@@ -7,6 +7,7 @@
 #include "fl/int.h"
 
 
+
 namespace fl {
 
 template <fl::u32 N> class BitsetInlined;
@@ -14,8 +15,6 @@ template <fl::u32 N> class BitsetInlined;
 template <fl::u32 N> class BitsetFixed;
 
 class string;
-
-
 template <fl::u32 N = 16>
 using bitset = BitsetInlined<N>; // inlined but can go bigger.
 
@@ -23,9 +22,7 @@ template <fl::u32 N>
 using bitset_fixed = BitsetFixed<N>; // fixed size, no dynamic allocation.
 
 
-namespace detail {
-void to_string(const fl::u16 *bit_data, fl::u32 bit_count, string* dst);
-}
+
 
 /// A simple fixed-size Bitset implementation similar to std::Bitset.
 template <fl::u32 N> class BitsetFixed {
@@ -512,6 +509,15 @@ class BitsetInlined {
             return N;
         } else {
             return _storage.template ptr<bitset_dynamic>()->size();
+        }
+    }
+
+    /// Convert bitset to string representation
+    void to_string(string* dst) const {
+        if (_storage.template is<fixed_bitset>()) {
+            _storage.template ptr<fixed_bitset>()->to_string(dst);
+        } else {
+            _storage.template ptr<bitset_dynamic>()->to_string(dst);
         }
     }
 

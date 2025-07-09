@@ -437,7 +437,7 @@ TEST_CASE("test bitset_fixed find_run") {
 
     FL_WARN("bs: " << bs);
 
-    // Find first run of any length
+    // Find first run of length 3
     int idx = bs.find_run(true, 3);
     REQUIRE_EQ(idx, 9);  // First run at 3
 

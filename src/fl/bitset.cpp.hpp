@@ -1,7 +1,8 @@
 #pragma once
 
 #include "fl/bitset.h"
-#include "fl/str.h"
+
+#include "fl/string.h"
 
 namespace fl {
 
@@ -20,5 +21,10 @@ void to_string(const fl::u16 *bit_data, fl::u32 bit_count, string* dst) {
     }
 }
 } // namespace detail
+
+// Implementation for bitset_dynamic::to_string
+void bitset_dynamic::to_string(string* dst) const {
+    detail::to_string(_blocks, _size, dst);
+}
 
 } // namespace fl

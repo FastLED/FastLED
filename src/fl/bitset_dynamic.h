@@ -10,6 +10,12 @@
 
 namespace fl {
 
+class string;
+
+namespace detail {
+void to_string(const fl::u16 *bit_data, fl::u32 bit_count, string* dst);
+}
+
 /// A dynamic bitset implementation that can be resized at runtime
 class bitset_dynamic {
   private:
@@ -295,6 +301,9 @@ class bitset_dynamic {
         return _size; 
     }
     FL_DISABLE_WARNING_POP
+
+    // Convert bitset to string representation
+    void to_string(string* dst) const;
 
     // Access operator
     bool operator[](fl::u32 pos) const noexcept { return test(pos); }
