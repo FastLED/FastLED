@@ -122,7 +122,7 @@ template <typename Key, typename Value, fl::size N> class FixedMap {
         return Value();
     }
 
-    Pair<bool, iterator> insert(const Key &key, const Value &value,
+    pair<bool, iterator> insert(const Key &key, const Value &value,
                                 InsertResult *result = nullptr) {
         iterator it = find(key);
         if (it != end()) {
@@ -148,7 +148,7 @@ template <typename Key, typename Value, fl::size N> class FixedMap {
     }
 
     // Move version of insert
-    Pair<bool, iterator> insert(Key &&key, Value &&value,
+    pair<bool, iterator> insert(Key &&key, Value &&value,
                                 InsertResult *result = nullptr) {
         iterator it = find(key);
         if (it != end()) {

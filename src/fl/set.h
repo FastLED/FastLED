@@ -276,7 +276,7 @@ template <typename Key, typename Allocator = fl::allocator<Key>> class VectorSet
 template <typename Key, typename Allocator = fl::allocator_slab<Key>> class set {
   private:
     // Use bool as the value type for the map to create a set
-    // Rebind the allocator to work with Pair<Key, bool>
+    // Rebind the allocator to work with pair<Key, bool>
     using PairType = fl::pair<Key, bool>;
     using ReboundAllocator = typename Allocator::template rebind<PairType>::other;
     using MapType = fl::SortedHeapMap<Key, bool>;

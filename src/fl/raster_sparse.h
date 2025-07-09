@@ -97,7 +97,7 @@ class XYRasterU8Sparse {
     // const uint8_t &at(u16 x, u16 y) const { return mGrid.at(x,
     // y); }
 
-    Pair<bool, uint8_t> at(u16 x, u16 y) const {
+    pair<bool, uint8_t> at(u16 x, u16 y) const {
         const uint8_t *val = mSparseGrid.find_value(vec2<int16_t>(x, y));
         if (val != nullptr) {
             return {true, *val};
@@ -277,7 +277,7 @@ class XYRasterSparse_CRGB {
     fl::size size() const { return mSparseGrid.size(); }
     bool empty() const { return mSparseGrid.empty(); }
 
-    Pair<bool, CRGB> at(u16 x, u16 y) const {
+    pair<bool, CRGB> at(u16 x, u16 y) const {
         const CRGB *val = mSparseGrid.find_value(vec2<int16_t>(x, y));
         if (val != nullptr) {
             return {true, *val};
