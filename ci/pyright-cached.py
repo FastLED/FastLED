@@ -134,15 +134,15 @@ def main() -> int:
     # If --force is passed, skip cache check
     if "--force" in args:
         args.remove("--force")
-        print("🔄 Forcing pyright run (--force flag detected)")
+        print("Forcing pyright run (--force flag detected)")
         return run_pyright(args)
 
-    # Check if files have changed
+        # Check if files have changed
     if not has_files_changed():
-        print("⚡ No changes detected, skipping pyright (use --force to override)")
+        print("No changes detected, skipping pyright (use --force to override)")
         return 0
 
-    print("🔍 Changes detected, running pyright...")
+    print("Changes detected, running pyright...")
     return run_pyright(args)
 
 

@@ -125,7 +125,7 @@ def main() -> int:
     # If --force is passed, skip cache check
     if "--force" in args:
         args.remove("--force")
-        print("🔄 Forcing isort run (--force flag detected)")
+        print("Forcing isort run (--force flag detected)")
         return run_isort(args)
 
     # Extract directories to check from arguments
@@ -142,12 +142,12 @@ def main() -> int:
     if not directories:
         directories = [Path(".")]
 
-    # Check if files have changed
+        # Check if files have changed
     if not has_files_changed(directories):
-        print("⚡ No changes detected, skipping isort (use --force to override)")
+        print("No changes detected, skipping isort (use --force to override)")
         return 0
 
-    print("🔍 Changes detected, running isort...")
+    print("Changes detected, running isort...")
     return run_isort(args)
 
 

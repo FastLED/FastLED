@@ -124,7 +124,7 @@ def main() -> int:
     # If --force is passed, skip cache check
     if "--force" in args:
         args.remove("--force")
-        print("🔄 Forcing black run (--force flag detected)")
+        print("Forcing black run (--force flag detected)")
         return run_black(args)
 
     # Extract directories to check from arguments
@@ -141,12 +141,12 @@ def main() -> int:
     if not directories:
         directories = [Path(".")]
 
-    # Check if files have changed
+        # Check if files have changed
     if not has_files_changed(directories):
-        print("⚡ No changes detected, skipping black (use --force to override)")
+        print("No changes detected, skipping black (use --force to override)")
         return 0
 
-    print("🔍 Changes detected, running black...")
+    print("Changes detected, running black...")
     return run_black(args)
 
 
