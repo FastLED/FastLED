@@ -285,5 +285,9 @@
     
     // Inlay hints (parameter names, type hints) - Brighter gray for better visibility
     "editor.inlayHints.fontColor": "#808080",
-    "editor.inlayHints.background": "#3C3C3C20"
+    "editor.inlayHints.background": "#3C3C3C20",
+    
+    // Disable Microsoft C++ extension to prevent conflicts with clangd
+    "extensions.ignoreRecommendations": true,
+    "C_Cpp.disabled": true
 }
