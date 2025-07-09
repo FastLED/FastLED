@@ -266,7 +266,7 @@ template <typename Key, typename Value, fl::size N> class FixedMap {
 
 // Closest data structure to an std::map. Always sorted.
 // O(n + log(n)) for insertions, O(log(n)) for searches, O(n) for iteration.
-template <typename Key, typename Value, typename Less = fl::DefaultLess<Key>>
+template <typename Key, typename Value, typename Less = fl::less<Key>>
 class SortedHeapMap {
   public:
     // Standard typedefs to match std::map interface
@@ -536,7 +536,7 @@ namespace fl {
 // Default map uses slab allocator for better performance
 // Can't use fl::map because it conflicts with Arduino.h's map() function when
 // the user is using `using namespace fl`
-template <typename Key, typename T, typename Compare = fl::DefaultLess<Key>>
+template <typename Key, typename T, typename Compare = fl::less<Key>>
 using fl_map = MapRedBlackTree<Key, T, Compare, fl::allocator_slab<char>>;
 
 

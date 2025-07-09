@@ -15,7 +15,7 @@ namespace fl {
 // This is a self-balancing binary search tree with O(log n) operations
 // T is the value type stored in the tree
 // Compare is a comparator that can compare T values
-template <typename T, typename Compare = DefaultLess<T>, typename Allocator = allocator_slab<char>>
+template <typename T, typename Compare = less<T>, typename Allocator = allocator_slab<char>>
 class RedBlackTree {
 public:
     using value_type = T;
@@ -781,7 +781,7 @@ public:
 };
 
 // Specialized Red-Black Tree for key-value pairs (maps)
-template <typename Key, typename Value, typename Compare = DefaultLess<Key>, typename Allocator = allocator_slab<char>>
+template <typename Key, typename Value, typename Compare = less<Key>, typename Allocator = allocator_slab<char>>
 class MapRedBlackTree {
 public:
     using key_type = Key;
@@ -953,7 +953,7 @@ public:
 };
 
 // Specialized Red-Black Tree for sets (just keys, no values)
-template <typename Key, typename Compare = DefaultLess<Key>, typename Allocator = allocator_slab<char>>
+template <typename Key, typename Compare = less<Key>, typename Allocator = allocator_slab<char>>
 class SetRedBlackTree {
 public:
     using key_type = Key;

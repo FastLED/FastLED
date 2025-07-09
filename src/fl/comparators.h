@@ -1,9 +1,9 @@
 #pragma once
 
+#include "fl/utility.h"
+
 namespace fl {
 
-template <typename T> struct DefaultLess {
-    bool operator()(const T &a, const T &b) const { return a < b; }
-};
+// DefaultLess is now an alias for less<T>, defined in utility.h
 
 } // namespace fl

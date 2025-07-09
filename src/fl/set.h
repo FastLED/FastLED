@@ -276,7 +276,7 @@ template <typename Key, typename Allocator = fl::allocator<Key>> class VectorSet
 // This is an ordered set that keeps elements sorted, similar to std::set
 template <typename Key, typename Allocator = fl::allocator_slab<Key>> class set {
   private:
-    using TreeType = fl::SetRedBlackTree<Key, fl::DefaultLess<Key>, Allocator>;
+    using TreeType = fl::SetRedBlackTree<Key, fl::less<Key>, Allocator>;
     TreeType tree_;
     
   public:

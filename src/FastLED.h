@@ -964,7 +964,7 @@ using fl::XYMap;
 
 // Common fl:: type aliases for global namespace convenience
 template<typename T> using fl_vector = fl::vector<T>;
-template<typename Key, typename Value, typename Compare = fl::DefaultLess<Key>> using fl_map = fl::fl_map<Key, Value, Compare>;
+template<typename Key, typename Value, typename Compare = fl::less<Key>> using fl_map = fl::fl_map<Key, Value, Compare>;
 using fl_string = fl::string;
 
 #define FASTLED_TITLE(text) fl::UITitle g_title(text)
