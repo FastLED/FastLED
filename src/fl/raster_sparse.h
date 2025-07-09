@@ -40,7 +40,7 @@ class XYRasterU8Sparse {
   public:
     XYRasterU8Sparse() = default;
     XYRasterU8Sparse(int width, int height) {
-        setBounds(rect<int16_t>(0, 0, width, height));
+        setBounds(rect<i16>(0, 0, width, height));
     }
     XYRasterU8Sparse(const XYRasterU8Sparse &) = default;
     XYRasterU8Sparse &operator=(XYRasterU8Sparse &&) = default;
@@ -60,22 +60,22 @@ class XYRasterU8Sparse {
     // to represent sub pixel / neightbor splatting positions along a path.
     // TODO: Bring the math from XYPathRenderer::at_subpixel(float alpha)
     // into a general purpose function.
-    void rasterize(const vec2<int16_t> &pt, uint8_t value) {
+    void rasterize(const vec2<i16> &pt, uint8_t value) {
         // Turn it into a Tile2x2_u8 tile and see if we can cache it.
         write(pt, value);
     }
 
     void setSize(u16 width, u16 height) {
-        setBounds(rect<int16_t>(0, 0, width, height));
+        setBounds(rect<i16>(0, 0, width, height));
     }
 
-    void setBounds(const rect<int16_t> &bounds) {
+    void setBounds(const rect<i16> &bounds) {
         mAbsoluteBounds = bounds;
         mAbsoluteBoundsSet = true;
     }
 
-    using iterator = fl::HashMap<vec2<int16_t>, uint8_t>::iterator;
-    using const_iterator = fl::HashMap<vec2<int16_t>, uint8_t>::const_iterator;
+    using iterator = fl::HashMap<vec2<i16>, uint8_t>::iterator;
+    using const_iterator = fl::HashMap<vec2<i16>, uint8_t>::const_iterator;
 
     iterator begin() { return mSparseGrid.begin(); }
     const_iterator begin() const { return mSparseGrid.begin(); }
@@ -88,7 +88,7 @@ class XYRasterU8Sparse {
     void rasterize(const Tile2x2_u8 &tile) { rasterize_internal(tile); }
 
     void rasterize_internal(const Tile2x2_u8 &tile,
-                            const rect<int16_t> *optional_bounds = nullptr);
+                            const rect<i16> *optional_bounds = nullptr);
 
     // Renders the subpixel tiles to the raster. Any previous data is
     // cleared. Memory will only be allocated if the size of the raster
@@ -98,21 +98,21 @@ class XYRasterU8Sparse {
     // y); }
 
     pair<bool, uint8_t> at(u16 x, u16 y) const {
-        const uint8_t *val = mSparseGrid.find_value(vec2<int16_t>(x, y));
+        const uint8_t *val = mSparseGrid.find_value(vec2<i16>(x, y));
         if (val != nullptr) {
             return {true, *val};
         }
         return {false, 0};
     }
 
-    rect<int16_t> bounds() const {
+    rect<i16> bounds() const {
         if (mAbsoluteBoundsSet) {
             return mAbsoluteBounds;
         }
         return bounds_pixels();
     }
 
-    rect<int16_t> bounds_pixels() const {
+    rect<i16> bounds_pixels() const {
         int min_x = 0;
         bool min_x_set = false;
         int min_y = 0;
@@ -122,7 +122,7 @@ class XYRasterU8Sparse {
         int max_y = 0;
         bool max_y_set = false;
         for (const auto &it : mSparseGrid) {
-            const vec2<int16_t> &pt = it.first;
+            const vec2<i16> &pt = it.first;
             if (!min_x_set || pt.x < min_x) {
                 min_x = pt.x;
                 min_x_set = true;
@@ -140,7 +140,7 @@ class XYRasterU8Sparse {
                 max_y_set = true;
             }
         }
-        return rect<int16_t>(min_x, min_y, max_x + 1, max_y + 1);
+        return rect<i16>(min_x, min_y, max_x + 1, max_y + 1);
     }
 
     // Warning! - SLOW.
@@ -172,7 +172,7 @@ class XYRasterU8Sparse {
 
     static const int kMaxCacheSize = 8; // Max size for tiny cache.
 
-    void write(const vec2<int16_t> &pt, uint8_t value) {
+    void write(const vec2<i16> &pt, uint8_t value) {
         // FASTLED_WARN("write: " << pt.x << "," << pt.y << " value: " <<
         // value); mSparseGrid.insert(pt, value);
 
@@ -213,7 +213,7 @@ class XYRasterU8Sparse {
     }
 
   private:
-    using Key = vec2<int16_t>;
+    using Key = vec2<i16>;
     using Value = uint8_t;
     using HashKey = Hash<Key>;
     using EqualToKey = EqualTo<Key>;
@@ -222,9 +222,9 @@ class XYRasterU8Sparse {
                                      FASTLED_HASHMAP_INLINED_COUNT>;
     HashMapLarge mSparseGrid;
     // Small cache for the last N writes to help performance.
-    HashMap<vec2<int16_t>, uint8_t *, FastHashKey, EqualToKey, kMaxCacheSize>
+    HashMap<vec2<i16>, uint8_t *, FastHashKey, EqualToKey, kMaxCacheSize>
         mCache;
-    fl::rect<int16_t> mAbsoluteBounds;
+    fl::rect<i16> mAbsoluteBounds;
     bool mAbsoluteBoundsSet = false;
 };
 
@@ -238,7 +238,7 @@ class XYRasterSparse_CRGB {
   public:
     XYRasterSparse_CRGB() = default;
     XYRasterSparse_CRGB(int width, int height) {
-        setBounds(rect<int16_t>(0, 0, width, height));
+        setBounds(rect<i16>(0, 0, width, height));
     }
     XYRasterSparse_CRGB(const XYRasterSparse_CRGB &) = default;
     XYRasterSparse_CRGB &operator=(XYRasterSparse_CRGB &&) = default;
@@ -254,21 +254,21 @@ class XYRasterSparse_CRGB {
     XYRasterSparse_CRGB &clear() { return reset(); }
 
     // Rasterizes point with a CRGB color value
-    void rasterize(const vec2<int16_t> &pt, const CRGB &color) {
+    void rasterize(const vec2<i16> &pt, const CRGB &color) {
         write(pt, color);
     }
 
     void setSize(u16 width, u16 height) {
-        setBounds(rect<int16_t>(0, 0, width, height));
+        setBounds(rect<i16>(0, 0, width, height));
     }
 
-    void setBounds(const rect<int16_t> &bounds) {
+    void setBounds(const rect<i16> &bounds) {
         mAbsoluteBounds = bounds;
         mAbsoluteBoundsSet = true;
     }
 
-    using iterator = fl::HashMap<vec2<int16_t>, CRGB>::iterator;
-    using const_iterator = fl::HashMap<vec2<int16_t>, CRGB>::const_iterator;
+    using iterator = fl::HashMap<vec2<i16>, CRGB>::iterator;
+    using const_iterator = fl::HashMap<vec2<i16>, CRGB>::const_iterator;
 
     iterator begin() { return mSparseGrid.begin(); }
     const_iterator begin() const { return mSparseGrid.begin(); }
@@ -278,21 +278,21 @@ class XYRasterSparse_CRGB {
     bool empty() const { return mSparseGrid.empty(); }
 
     pair<bool, CRGB> at(u16 x, u16 y) const {
-        const CRGB *val = mSparseGrid.find_value(vec2<int16_t>(x, y));
+        const CRGB *val = mSparseGrid.find_value(vec2<i16>(x, y));
         if (val != nullptr) {
             return {true, *val};
         }
         return {false, CRGB::Black};
     }
 
-    rect<int16_t> bounds() const {
+    rect<i16> bounds() const {
         if (mAbsoluteBoundsSet) {
             return mAbsoluteBounds;
         }
         return bounds_pixels();
     }
 
-    rect<int16_t> bounds_pixels() const {
+    rect<i16> bounds_pixels() const {
         int min_x = 0;
         bool min_x_set = false;
         int min_y = 0;
@@ -302,7 +302,7 @@ class XYRasterSparse_CRGB {
         int max_y = 0;
         bool max_y_set = false;
         for (const auto &it : mSparseGrid) {
-            const vec2<int16_t> &pt = it.first;
+            const vec2<i16> &pt = it.first;
             if (!min_x_set || pt.x < min_x) {
                 min_x = pt.x;
                 min_x_set = true;
@@ -320,7 +320,7 @@ class XYRasterSparse_CRGB {
                 max_y_set = true;
             }
         }
-        return rect<int16_t>(min_x, min_y, max_x + 1, max_y + 1);
+        return rect<i16>(min_x, min_y, max_x + 1, max_y + 1);
     }
 
     // Warning! - SLOW.
@@ -350,7 +350,7 @@ class XYRasterSparse_CRGB {
 
     static const int kMaxCacheSize = 8; // Max size for tiny cache.
 
-    void write(const vec2<int16_t> &pt, const CRGB &color) {
+    void write(const vec2<i16> &pt, const CRGB &color) {
         CRGB **cached = mCache.find_value(pt);
         if (cached) {
             CRGB *val = *cached;
@@ -382,7 +382,7 @@ class XYRasterSparse_CRGB {
     }
 
   private:
-    using Key = vec2<int16_t>;
+    using Key = vec2<i16>;
     using Value = CRGB;
     using HashKey = Hash<Key>;
     using EqualToKey = EqualTo<Key>;
@@ -391,9 +391,9 @@ class XYRasterSparse_CRGB {
                                      FASTLED_HASHMAP_INLINED_COUNT>;
     HashMapLarge mSparseGrid;
     // Small cache for the last N writes to help performance.
-    HashMap<vec2<int16_t>, CRGB *, FastHashKey, EqualToKey, kMaxCacheSize>
+    HashMap<vec2<i16>, CRGB *, FastHashKey, EqualToKey, kMaxCacheSize>
         mCache;
-    fl::rect<int16_t> mAbsoluteBounds;
+    fl::rect<i16> mAbsoluteBounds;
     bool mAbsoluteBoundsSet = false;
 };
 

@@ -149,7 +149,7 @@ void JsonConsole::parseCommand(const fl::string& command) {
     FL_WARN("JsonConsole::parseCommand: Parsing command '" << command.c_str() << "'");
     
     // Look for pattern: "name: value"
-    int16_t colonPos = command.find(':');
+    i16 colonPos = command.find(':');
     FL_WARN("JsonConsole::parseCommand: Colon position: " << colonPos);
     
     if (colonPos == -1) {

@@ -237,7 +237,7 @@ XYPathPtr XYPath::NewCatmullRomPath(u16 width, u16 height,
 }
 
 XYPathPtr XYPath::NewCustomPath(const fl::function<vec2f(float)> &f,
-                                const rect<int16_t> &drawbounds,
+                                const rect<i16> &drawbounds,
                                 const TransformFloat &transform,
                                 const char *name) {
 
@@ -250,7 +250,7 @@ XYPathPtr XYPath::NewCustomPath(const fl::function<vec2f(float)> &f,
     if (!transform.is_identity()) {
         out->setTransform(transform);
     }
-    rect<int16_t> bounds;
+    rect<i16> bounds;
     if (path->hasDrawBounds(&bounds)) {
         if (!bounds.mMin.is_zero()) {
             // Set the bounds to the path's bounds

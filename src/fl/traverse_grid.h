@@ -122,26 +122,26 @@ inline void traverseGridSegmentFloat(const vec2f &start, const vec2f &end,
 template <typename GridVisitor>
 inline void traverseGridSegment16(const vec2f &start, const vec2f &end,
                                   GridVisitor &visitor) {
-    const int16_t FP_SHIFT = 8;
-    const int16_t FP_ONE = 1 << FP_SHIFT;
-    // const int16_t FP_MASK = FP_ONE - 1;
+    const i16 FP_SHIFT = 8;
+    const i16 FP_ONE = 1 << FP_SHIFT;
+    // const i16 FP_MASK = FP_ONE - 1;
 
     // Convert to fixed-point (Q8.8), signed
-    int16_t startX_fp = static_cast<int16_t>(start.x * FP_ONE);
-    int16_t startY_fp = static_cast<int16_t>(start.y * FP_ONE);
-    int16_t endX_fp = static_cast<int16_t>(end.x * FP_ONE);
-    int16_t endY_fp = static_cast<int16_t>(end.y * FP_ONE);
+    i16 startX_fp = static_cast<i16>(start.x * FP_ONE);
+    i16 startY_fp = static_cast<i16>(start.y * FP_ONE);
+    i16 endX_fp = static_cast<i16>(end.x * FP_ONE);
+    i16 endY_fp = static_cast<i16>(end.y * FP_ONE);
 
-    int16_t x0 = startX_fp >> FP_SHIFT;
-    int16_t y0 = startY_fp >> FP_SHIFT;
-    int16_t x1 = endX_fp >> FP_SHIFT;
-    int16_t y1 = endY_fp >> FP_SHIFT;
+    i16 x0 = startX_fp >> FP_SHIFT;
+    i16 y0 = startY_fp >> FP_SHIFT;
+    i16 x1 = endX_fp >> FP_SHIFT;
+    i16 y1 = endY_fp >> FP_SHIFT;
 
-    int16_t stepX = (x1 > x0) ? 1 : (x1 < x0) ? -1 : 0;
-    int16_t stepY = (y1 > y0) ? 1 : (y1 < y0) ? -1 : 0;
+    i16 stepX = (x1 > x0) ? 1 : (x1 < x0) ? -1 : 0;
+    i16 stepY = (y1 > y0) ? 1 : (y1 < y0) ? -1 : 0;
 
-    int16_t deltaX_fp = endX_fp - startX_fp;
-    int16_t deltaY_fp = endY_fp - startY_fp;
+    i16 deltaX_fp = endX_fp - startX_fp;
+    i16 deltaY_fp = endY_fp - startY_fp;
 
     u16 absDeltaX_fp =
         (deltaX_fp != 0) ? static_cast<u16>(
@@ -152,8 +152,8 @@ inline void traverseGridSegment16(const vec2f &start, const vec2f &end,
                                ABS((i32(FP_ONE) << FP_SHIFT) / deltaY_fp))
                          : UINT16_MAX;
 
-    int16_t nextX_fp = (stepX > 0) ? ((x0 + 1) << FP_SHIFT) : (x0 << FP_SHIFT);
-    int16_t nextY_fp = (stepY > 0) ? ((y0 + 1) << FP_SHIFT) : (y0 << FP_SHIFT);
+    i16 nextX_fp = (stepX > 0) ? ((x0 + 1) << FP_SHIFT) : (x0 << FP_SHIFT);
+    i16 nextY_fp = (stepY > 0) ? ((y0 + 1) << FP_SHIFT) : (y0 << FP_SHIFT);
 
     u16 tMaxX_fp =
         (deltaX_fp != 0)
@@ -168,8 +168,8 @@ inline void traverseGridSegment16(const vec2f &start, const vec2f &end,
 
     const u16 maxT_fp = FP_ONE;
 
-    int16_t currentX = x0;
-    int16_t currentY = y0;
+    i16 currentX = x0;
+    i16 currentY = y0;
 
     while (true) {
         visitor.visit(currentX, currentY);

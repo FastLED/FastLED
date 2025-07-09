@@ -10,24 +10,24 @@ namespace fl {
 
 // Define Q15 conversion constants.
 // #define FIXED_SCALE (1 << 15) // 32768: 1.0 in Q15
-#define INT16_POS (32767)  // Maximum value for int16_t
-#define INT16_NEG (-32768) // Minimum value for int16_t
+#define INT16_POS (32767)  // Maximum value for i16
+#define INT16_NEG (-32768) // Minimum value for i16
 
 namespace wave_detail { // Anonymous namespace for internal linkage
 // Convert float to fixed Q15.
-// int16_t float_to_fixed(float f) { return (int16_t)(f * FIXED_SCALE); }
+// i16 float_to_fixed(float f) { return (i16)(f * FIXED_SCALE); }
 
-int16_t float_to_fixed(float f) {
+i16 float_to_fixed(float f) {
     f = fl::clamp(f, -1.0f, 1.0f);
     if (f < 0.0f) {
-        return (int16_t)(f * INT16_NEG);
+        return (i16)(f * INT16_NEG);
     } else {
-        return (int16_t)(f * INT16_POS); // Round to nearest
+        return (i16)(f * INT16_POS); // Round to nearest
     }
 }
 
 // Convert fixed Q15 to float.
-float fixed_to_float(int16_t f) {
+float fixed_to_float(i16 f) {
     // return ((float)f) / FIXED_SCALE;
     if (f < 0) {
         return ((float)f) / INT16_NEG; // Negative values
@@ -37,8 +37,8 @@ float fixed_to_float(int16_t f) {
 }
 
 // // Multiply two Q15 fixed point numbers.
-// int16_t fixed_mul(int16_t a, int16_t b) {
-//     return (int16_t)(((i32)a * b) >> 15);
+// i16 fixed_mul(i16 a, i16 b) {
+//     return (i16)(((i32)a * b) >> 15);
 // }
 } // namespace wave_detail
 
@@ -66,21 +66,21 @@ float WaveSimulation1D_Real::getSpeed() const {
     return fixed_to_float(mCourantSq);
 }
 
-int16_t WaveSimulation1D_Real::geti16(fl::size x) const {
+i16 WaveSimulation1D_Real::geti16(fl::size x) const {
     if (x >= length) {
         FASTLED_WARN("Out of range.");
         return 0;
     }
-    const int16_t *curr = (whichGrid == 0) ? grid1.data() : grid2.data();
+    const i16 *curr = (whichGrid == 0) ? grid1.data() : grid2.data();
     return curr[x + 1];
 }
 
-int16_t WaveSimulation1D_Real::geti16Previous(fl::size x) const {
+i16 WaveSimulation1D_Real::geti16Previous(fl::size x) const {
     if (x >= length) {
         FASTLED_WARN("Out of range.");
         return 0;
     }
-    const int16_t *prev = (whichGrid == 0) ? grid2.data() : grid1.data();
+    const i16 *prev = (whichGrid == 0) ? grid2.data() : grid1.data();
     return prev[x + 1];
 }
 
@@ -90,7 +90,7 @@ float WaveSimulation1D_Real::getf(fl::size x) const {
         return 0.0f;
     }
     // Retrieve value from the active grid (offset by 1 for boundary).
-    const int16_t *curr = (whichGrid == 0) ? grid1.data() : grid2.data();
+    const i16 *curr = (whichGrid == 0) ? grid1.data() : grid2.data();
     return fixed_to_float(curr[x + 1]);
 }
 
@@ -101,13 +101,13 @@ void WaveSimulation1D_Real::set(fl::size x, float value) {
         FASTLED_WARN("warning X value too high");
         return;
     }
-    int16_t *curr = (whichGrid == 0) ? grid1.data() : grid2.data();
+    i16 *curr = (whichGrid == 0) ? grid1.data() : grid2.data();
     curr[x + 1] = float_to_fixed(value);
 }
 
 void WaveSimulation1D_Real::update() {
-    int16_t *curr = (whichGrid == 0) ? grid1.data() : grid2.data();
-    int16_t *next = (whichGrid == 0) ? grid2.data() : grid1.data();
+    i16 *curr = (whichGrid == 0) ? grid1.data() : grid2.data();
+    i16 *next = (whichGrid == 0) ? grid2.data() : grid1.data();
 
     // Update boundaries with a Neumann (zero-gradient) condition:
     curr[0] = curr[1];
@@ -140,7 +140,7 @@ void WaveSimulation1D_Real::update() {
         else if (f < -32768)
             f = -32768;
 
-        next[i] = (int16_t)f;
+        next[i] = (i16)f;
     }
 
     if (mHalfDuplex) {
@@ -183,25 +183,25 @@ float WaveSimulation2D_Real::getf(fl::size x, fl::size y) const {
         FASTLED_WARN("Out of range: " << x << ", " << y);
         return 0.0f;
     }
-    const int16_t *curr = (whichGrid == 0 ? grid1.data() : grid2.data());
+    const i16 *curr = (whichGrid == 0 ? grid1.data() : grid2.data());
     return fixed_to_float(curr[(y + 1) * stride + (x + 1)]);
 }
 
-int16_t WaveSimulation2D_Real::geti16(fl::size x, fl::size y) const {
+i16 WaveSimulation2D_Real::geti16(fl::size x, fl::size y) const {
     if (x >= width || y >= height) {
         FASTLED_WARN("Out of range: " << x << ", " << y);
         return 0;
     }
-    const int16_t *curr = (whichGrid == 0 ? grid1.data() : grid2.data());
+    const i16 *curr = (whichGrid == 0 ? grid1.data() : grid2.data());
     return curr[(y + 1) * stride + (x + 1)];
 }
 
-int16_t WaveSimulation2D_Real::geti16Previous(fl::size x, fl::size y) const {
+i16 WaveSimulation2D_Real::geti16Previous(fl::size x, fl::size y) const {
     if (x >= width || y >= height) {
         FASTLED_WARN("Out of range: " << x << ", " << y);
         return 0;
     }
-    const int16_t *prev = (whichGrid == 0 ? grid2.data() : grid1.data());
+    const i16 *prev = (whichGrid == 0 ? grid2.data() : grid1.data());
     return prev[(y + 1) * stride + (x + 1)];
 }
 
@@ -210,22 +210,22 @@ bool WaveSimulation2D_Real::has(fl::size x, fl::size y) const {
 }
 
 void WaveSimulation2D_Real::setf(fl::size x, fl::size y, float value) {
-    int16_t v = float_to_fixed(value);
+    i16 v = float_to_fixed(value);
     return seti16(x, y, v);
 }
 
-void WaveSimulation2D_Real::seti16(fl::size x, fl::size y, int16_t value) {
+void WaveSimulation2D_Real::seti16(fl::size x, fl::size y, i16 value) {
     if (x >= width || y >= height) {
         FASTLED_WARN("Out of range: " << x << ", " << y);
         return;
     }
-    int16_t *curr = (whichGrid == 0 ? grid1.data() : grid2.data());
+    i16 *curr = (whichGrid == 0 ? grid1.data() : grid2.data());
     curr[(y + 1) * stride + (x + 1)] = value;
 }
 
 void WaveSimulation2D_Real::update() {
-    int16_t *curr = (whichGrid == 0 ? grid1.data() : grid2.data());
-    int16_t *next = (whichGrid == 0 ? grid2.data() : grid1.data());
+    i16 *curr = (whichGrid == 0 ? grid1.data() : grid2.data());
+    i16 *next = (whichGrid == 0 ? grid2.data() : grid1.data());
 
     // Update horizontal boundaries.
     for (fl::size j = 0; j < height + 2; ++j) {
@@ -272,7 +272,7 @@ void WaveSimulation2D_Real::update() {
             else if (f < -32768)
                 f = -32768;
 
-            next[index] = (int16_t)f;
+            next[index] = (i16)f;
         }
     }
 

@@ -125,7 +125,7 @@ void fill_gradient_RGB(CRGB *leds, u16 startpos, CRGB startcolor,
     bdistance87 = (endcolor.b - startcolor.b) << 7;
 
     u16 pixeldistance = endpos - startpos;
-    int16_t divisor = pixeldistance ? pixeldistance : 1;
+    i16 divisor = pixeldistance ? pixeldistance : 1;
 
     saccum87 rdelta87 = rdistance87 / divisor;
     saccum87 gdelta87 = gdistance87 / divisor;

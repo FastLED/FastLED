@@ -4,7 +4,7 @@
 
 namespace fl {
 
-const int16_t sinLut[] = {
+const i16 sinLut[] = {
     0,      804,    1608,   2410,   3212,   4011,   4808,   5602,   6393,
     7179,   7962,   8739,   9512,   10278,  11039,  11793,  12539,  13279,
     14010,  14732,  15446,  16151,  16846,  17530,  18204,  18868,  19519,
@@ -42,8 +42,8 @@ const int16_t sinLut[] = {
     30852,  31113,  31356,  31580,  31785,  31971,  32137,  32285,  32412,
     32521,  32609,  32678,  32728,  32757,  32767};
 
-const int16_t *sinArray = &sinLut[0];
+const i16 *sinArray = &sinLut[0];
 
-const int16_t *cosArray = &sinLut[64];
+const i16 *cosArray = &sinLut[64];
 
 } // namespace fl

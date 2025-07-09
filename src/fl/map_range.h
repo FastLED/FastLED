@@ -72,13 +72,13 @@ template <> struct map_range_math<uint8_t, uint8_t> {
         if (value == in_max) {
             return out_max;
         }
-        // Promote uint8_t to int16_t for mapping.
-        int16_t v16 = value;
-        int16_t in_min16 = in_min;
-        int16_t in_max16 = in_max;
-        int16_t out_min16 = out_min;
-        int16_t out_max16 = out_max;
-        int16_t out16 = map_range<u16, u16>(v16, in_min16, in_max16,
+        // Promote uint8_t to i16 for mapping.
+        i16 v16 = value;
+        i16 in_min16 = in_min;
+        i16 in_max16 = in_max;
+        i16 out_min16 = out_min;
+        i16 out_max16 = out_max;
+        i16 out16 = map_range<u16, u16>(v16, in_min16, in_max16,
                                                       out_min16, out_max16);
         if (out16 < 0) {
             out16 = 0;

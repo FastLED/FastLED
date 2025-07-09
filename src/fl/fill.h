@@ -7,7 +7,7 @@
 
 /// ANSI: signed short _Accum.  8 bits int, 7 bits fraction
 /// @see accum88
-#define saccum87 int16_t
+#define saccum87 i16
 
 namespace fl {
 
@@ -136,7 +136,7 @@ void fill_gradient(T *targetArray, u16 startpos, CHSV startcolor,
     }
 
     u16 pixeldistance = endpos - startpos;
-    int16_t divisor = pixeldistance ? pixeldistance : 1;
+    i16 divisor = pixeldistance ? pixeldistance : 1;
 
 #if FASTLED_USE_32_BIT_GRADIENT_FILL
     // Use higher precision 32 bit math for new micros.

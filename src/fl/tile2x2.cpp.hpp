@@ -118,10 +118,10 @@ Tile2x2_u8 Tile2x2_u8::MaxTile(const Tile2x2_u8 &a, const Tile2x2_u8 &b) {
     return result;
 }
 
-rect<int16_t> Tile2x2_u8::bounds() const {
-    vec2<int16_t> min = mOrigin;
-    vec2<int16_t> max = mOrigin + vec2<int16_t>(2, 2);
-    return rect<int16_t>(min, max);
+rect<i16> Tile2x2_u8::bounds() const {
+    vec2<i16> min = mOrigin;
+    vec2<i16> max = mOrigin + vec2<i16>(2, 2);
+    return rect<i16>(min, max);
 }
 
 fl::vector_fixed<Tile2x2_u8_wrap, 2> Tile2x2_u8_wrap::Interpolate(const Tile2x2_u8_wrap& a, const Tile2x2_u8_wrap& b, float t) {

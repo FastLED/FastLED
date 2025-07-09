@@ -33,7 +33,7 @@ void XYRasterU8Sparse::rasterize(const span<const Tile2x2_u8> &tiles) {
         FASTLED_WARN("Rasterize: no tiles");
         return;
     }
-    const rect<int16_t> *optional_bounds =
+    const rect<i16> *optional_bounds =
         mAbsoluteBoundsSet ? nullptr : &mAbsoluteBounds;
 
     // Check if the bounds are set.
@@ -46,8 +46,8 @@ void XYRasterU8Sparse::rasterize(const span<const Tile2x2_u8> &tiles) {
 }
 
 void XYRasterU8Sparse::rasterize_internal(const Tile2x2_u8 &tile,
-                                          const rect<int16_t> *optional_bounds) {
-    const vec2<int16_t> &origin = tile.origin();
+                                          const rect<i16> *optional_bounds) {
+    const vec2<i16> &origin = tile.origin();
     for (int x = 0; x < 2; ++x) {
         for (int y = 0; y < 2; ++y) {
             uint8_t value = tile.at(x, y);
@@ -59,7 +59,7 @@ void XYRasterU8Sparse::rasterize_internal(const Tile2x2_u8 &tile,
             if (optional_bounds && !optional_bounds->contains(xx, yy)) {
                 continue;
             }
-            write(vec2<int16_t>(xx, yy), value);
+            write(vec2<i16>(xx, yy), value);
         }
     }
 }

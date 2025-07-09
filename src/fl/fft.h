@@ -105,7 +105,7 @@ class FFT {
     FFT(const FFT & other);
     FFT &operator=(const FFT & other);
 
-            void run(const span<const int16_t> &sample, FFTBins *out,
+            void run(const span<const i16> &sample, FFTBins *out,
              const FFT_Args &args = FFT_Args());
 
     void clear();

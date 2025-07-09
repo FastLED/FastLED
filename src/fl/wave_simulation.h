@@ -81,10 +81,10 @@ class WaveSimulation1D {
 
     // Downsampled getter for the Q15 (fixed point) value at index x.
     // It averages the multiplier cells of Q15 values.
-    int16_t geti16(fl::size x) const;
-    int16_t geti16Previous(fl::size x) const;
+    i16 geti16(fl::size x) const;
+    i16 geti16Previous(fl::size x) const;
 
-    bool geti16All(fl::size x, int16_t *curr, int16_t *prev, int16_t *diff) const;
+    bool geti16All(fl::size x, i16 *curr, i16 *prev, i16 *diff) const;
 
     // Downsampled getters for the 8-bit representations.
     int8_t geti8(fl::size x) const;
@@ -167,11 +167,11 @@ class WaveSimulation2D {
 
     // Downsampled getter for the Q15 (fixed point) value at (x,y).
     // It averages the multiplier×multiplier block of Q15 values.
-    int16_t geti16(fl::size x, fl::size y) const;
-    int16_t geti16Previous(fl::size x, fl::size y) const;
+    i16 geti16(fl::size x, fl::size y) const;
+    i16 geti16Previous(fl::size x, fl::size y) const;
 
-    bool geti16All(fl::size x, fl::size y, int16_t *curr, int16_t *prev,
-                   int16_t *diff) const;
+    bool geti16All(fl::size x, fl::size y, i16 *curr, i16 *prev,
+                   i16 *diff) const;
 
     // Downsampled getters for the 8-bit representations.
     int8_t geti8(fl::size x, fl::size y) const;
@@ -188,7 +188,7 @@ class WaveSimulation2D {
     // block in the high-res simulation.
     void setf(fl::size x, fl::size y, float value);
 
-    void seti16(fl::size x, fl::size y, int16_t value);
+    void seti16(fl::size x, fl::size y, i16 value);
 
     void setHalfDuplex(bool on) { mSim->setHalfDuplex(on); }
 
@@ -209,7 +209,7 @@ class WaveSimulation2D {
     U8EasingFunction mU8Mode = WAVE_U8_MODE_LINEAR;
     // Internal high-resolution simulation.
     fl::scoped_ptr<WaveSimulation2D_Real> mSim;
-    fl::Grid<int16_t> mChangeGrid; // Needed for multiple updates.
+    fl::Grid<i16> mChangeGrid; // Needed for multiple updates.
 };
 
 } // namespace fl

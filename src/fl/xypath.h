@@ -54,7 +54,7 @@ class XYPath : public Referent {
     // Custom path using just a function.
     static XYPathPtr
     NewCustomPath(const fl::function<vec2f(float)> &path,
-                  const rect<int16_t> &drawbounds = rect<int16_t>(),
+                  const rect<i16> &drawbounds = rect<i16>(),
                   const TransformFloat &transform = TransformFloat(),
                   const char *name = nullptr);
 
@@ -145,10 +145,10 @@ class XYPathFunction : public XYPathGenerator {
     const string name() const override { return mName; }
     void setName(const string &name) { mName = name; }
 
-    fl::rect<int16_t> drawBounds() const { return mDrawBounds; }
-    void setDrawBounds(const fl::rect<int16_t> &bounds) { mDrawBounds = bounds; }
+    fl::rect<i16> drawBounds() const { return mDrawBounds; }
+    void setDrawBounds(const fl::rect<i16> &bounds) { mDrawBounds = bounds; }
 
-    bool hasDrawBounds(fl::rect<int16_t> *bounds) override {
+    bool hasDrawBounds(fl::rect<i16> *bounds) override {
         if (bounds) {
             *bounds = mDrawBounds;
         }
@@ -158,7 +158,7 @@ class XYPathFunction : public XYPathGenerator {
   private:
     fl::function<vec2f(float)> mFunction;
     fl::string mName = "XYPathFunction Unnamed";
-    fl::rect<int16_t> mDrawBounds;
+    fl::rect<i16> mDrawBounds;
 };
 
 } // namespace fl

@@ -14,10 +14,10 @@ namespace fl {
 // 0 to 16777216 is one cycle
 // they output an integer between -2147418112 and 2147418112
 // that's 32767 * 65536
-// this is because I use int16_t look up table to interpolate the results
+// this is because I use i16 look up table to interpolate the results
 //
 // sin16 and cos16 are faster and more accurate funtions that take u16 as
-// arguments and return int16_t as output they can replace the older
+// arguments and return i16 as output they can replace the older
 // implementation and are 62 times more accurate and twice as fast the downside
 // with these funtions is that they use 640 bytes for the look up table thats a
 // lot for old microcontrollers but nothing for modern ones
@@ -27,9 +27,9 @@ namespace fl {
 // you can use choose to use these new by writing
 // #define USE_SIN_32 before #include "FastLED.h"
 
-extern const int16_t *sinArray;
+extern const i16 *sinArray;
 
-extern const int16_t *cosArray;
+extern const i16 *cosArray;
 
 // 0 to 16777216 is a full circle
 // output is between -2147418112 and 2147418112
@@ -51,7 +51,7 @@ FASTLED_FORCE_INLINE static i32 cos32(u32 angle) {
 
 // 0 to 65536 is a full circle
 // output is between -32767 and 32767
-FASTLED_FORCE_INLINE static int16_t sin16lut(u16 angle) {
+FASTLED_FORCE_INLINE static i16 sin16lut(u16 angle) {
     uint8_t angle256 = angle / 256;
     i32 subAngle = angle % 256;
     return (sinArray[angle256] * (256 - subAngle) +
@@ -61,7 +61,7 @@ FASTLED_FORCE_INLINE static int16_t sin16lut(u16 angle) {
 
 // 0 to 65536 is a full circle
 // output is between -32767 and 32767
-FASTLED_FORCE_INLINE static int16_t cos16lut(u16 angle) {
+FASTLED_FORCE_INLINE static i16 cos16lut(u16 angle) {
     uint8_t angle256 = angle / 256;
     i32 subAngle = angle % 256;
     return (cosArray[angle256] * (256 - subAngle) +

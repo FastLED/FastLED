@@ -19,7 +19,7 @@ uint8_t half_duplex_blend_sqrt_q15(fl::u16 x) {
     for (int i = 0; i < 4; i++) {
         y = (y + (X / y)) >> 1;
     }
-    return static_cast<int16_t>(y) >> 8;
+    return static_cast<fl::i16>(y) >> 8;
 }
 
 uint8_t half_duplex_blend_linear(fl::u16 x) {
@@ -72,7 +72,7 @@ float WaveSimulation2D::getf(fl::size x, fl::size y) const {
     return sum / static_cast<float>(mMultiplier * mMultiplier);
 }
 
-int16_t WaveSimulation2D::geti16(fl::size x, fl::size y) const {
+i16 WaveSimulation2D::geti16(fl::size x, fl::size y) const {
     if (!has(x, y))
         return 0;    
     i32 sum = 0;
@@ -91,11 +91,11 @@ int16_t WaveSimulation2D::geti16(fl::size x, fl::size y) const {
             }
         }
     }
-    int16_t out = static_cast<int16_t>(sum / (mult * mult));
+    i16 out = static_cast<i16>(sum / (mult * mult));
     return out;
 }
 
-int16_t WaveSimulation2D::geti16Previous(fl::size x, fl::size y) const {
+i16 WaveSimulation2D::geti16Previous(fl::size x, fl::size y) const {
     if (!has(x, y))
         return 0;
     i32 sum = 0;
@@ -106,12 +106,12 @@ int16_t WaveSimulation2D::geti16Previous(fl::size x, fl::size y) const {
                 mSim->geti16Previous(x * mult + i, y * mult + j);
         }
     }
-    int16_t out = static_cast<int16_t>(sum / (mult * mult));
+    i16 out = static_cast<i16>(sum / (mult * mult));
     return out;
 }
 
-bool WaveSimulation2D::geti16All(fl::size x, fl::size y, int16_t *curr,
-                                 int16_t *prev, int16_t *diff) const {
+bool WaveSimulation2D::geti16All(fl::size x, fl::size y, i16 *curr,
+                                 i16 *prev, i16 *diff) const {
     if (!has(x, y))
         return false;
     *curr = geti16(x, y);
@@ -125,7 +125,7 @@ int8_t WaveSimulation2D::geti8(fl::size x, fl::size y) const {
 }
 
 uint8_t WaveSimulation2D::getu8(fl::size x, fl::size y) const {
-    int16_t value = geti16(x, y);
+    i16 value = geti16(x, y);
     if (mSim->getHalfDuplex()) {
         u16 v2 = static_cast<u16>(value);
         switch (mU8Mode) {
@@ -142,7 +142,7 @@ bool WaveSimulation2D::has(fl::size x, fl::size y) const {
     return (x < mOuterWidth) && (y < mOuterHeight);
 }
 
-void WaveSimulation2D::seti16(fl::size x, fl::size y, int16_t v16) {
+void WaveSimulation2D::seti16(fl::size x, fl::size y, i16 v16) {
     if (!has(x, y))
         return;
 
@@ -163,7 +163,7 @@ void WaveSimulation2D::seti16(fl::size x, fl::size y, int16_t v16) {
             fl::size xx = x * mult + i;
             fl::size yy = y * mult + j;
             if (mSim->has(xx, yy)) {
-                int16_t &pt = mChangeGrid.at(xx, yy);
+                i16 &pt = mChangeGrid.at(xx, yy);
                 if (pt == 0) {
                     // not set yet so set unconditionally.
                     pt = v16;
@@ -192,13 +192,13 @@ void WaveSimulation2D::setf(fl::size x, fl::size y, float value) {
         return;
 
     value = fl::clamp(value, 0.0f, 1.0f);
-    int16_t v16 = wave_detail::float_to_fixed(value);
+    i16 v16 = wave_detail::float_to_fixed(value);
     seti16(x, y, v16);
 }
 
 void WaveSimulation2D::update() {
-    const vec2<int16_t> min_max = mChangeGrid.minMax();
-    const bool has_updates = min_max != vec2<int16_t>(0, 0);
+    const vec2<i16> min_max = mChangeGrid.minMax();
+    const bool has_updates = min_max != vec2<i16>(0, 0);
     for (uint8_t i = 0; i < mExtraFrames + 1; ++i) {
         if (has_updates) {
             // apply them
@@ -206,7 +206,7 @@ void WaveSimulation2D::update() {
             const u32 h = mChangeGrid.height();
             for (u32 x = 0; x < w; ++x) {
                 for (u32 y = 0; y < h; ++y) {
-                    int16_t v16 = mChangeGrid(x, y);
+                    i16 v16 = mChangeGrid(x, y);
                     if (v16 != 0) {
                         mSim->seti16(x, y, v16);
                     }
@@ -262,7 +262,7 @@ float WaveSimulation1D::getf(fl::size x) const {
     return sum / static_cast<float>(mult);
 }
 
-int16_t WaveSimulation1D::geti16(fl::size x) const {
+i16 WaveSimulation1D::geti16(fl::size x) const {
     if (!has(x))
         return 0;
     uint8_t mult = MAX(1, mMultiplier);
@@ -270,10 +270,10 @@ int16_t WaveSimulation1D::geti16(fl::size x) const {
     for (u32 i = 0; i < mult; ++i) {
         sum += mSim->geti16(x * mult + i);
     }
-    return static_cast<int16_t>(sum / mult);
+    return static_cast<i16>(sum / mult);
 }
 
-int16_t WaveSimulation1D::geti16Previous(fl::size x) const {
+i16 WaveSimulation1D::geti16Previous(fl::size x) const {
     if (!has(x))
         return 0;
     uint8_t mult = MAX(1, mMultiplier);
@@ -281,11 +281,11 @@ int16_t WaveSimulation1D::geti16Previous(fl::size x) const {
     for (u32 i = 0; i < mult; ++i) {
         sum += mSim->geti16Previous(x * mult + i);
     }
-    return static_cast<int16_t>(sum / mult);
+    return static_cast<i16>(sum / mult);
 }
 
-bool WaveSimulation1D::geti16All(fl::size x, int16_t *curr, int16_t *prev,
-                                 int16_t *diff) const {
+bool WaveSimulation1D::geti16All(fl::size x, i16 *curr, i16 *prev,
+                                 i16 *diff) const {
     if (!has(x))
         return false;
     *curr = geti16(x);
@@ -299,7 +299,7 @@ int8_t WaveSimulation1D::geti8(fl::size x) const {
 }
 
 // uint8_t WaveSimulation2D::getu8(fl::size x, fl::size y) const {
-//     int16_t value = geti16(x, y);
+//     i16 value = geti16(x, y);
 //     if (mSim->getHalfDuplex()) {
 //         u16 v2 = static_cast<u16>(value);
 //         switch (mU8Mode) {
@@ -314,7 +314,7 @@ int8_t WaveSimulation1D::geti8(fl::size x) const {
 // }
 
 uint8_t WaveSimulation1D::getu8(fl::size x) const {
-    int16_t value = geti16(x);
+    i16 value = geti16(x);
     if (mSim->getHalfDuplex()) {
         u16 v2 = static_cast<u16>(value);
         switch (mU8Mode) {
