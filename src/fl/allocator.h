@@ -470,7 +470,7 @@ private:
     InlinedStorage m_inlined_storage;
     BaseAllocator m_base_allocator;
     fl::size m_inlined_used = 0;
-    fl::bitset_fixed<N> m_inlined_free_bits;  // Track free slots in inlined storage
+    fl::bitset<> m_free_bits;  // Track free slots for both inlined and heap
     T* m_heap_data = nullptr;
     fl::size m_heap_capacity = 0;
     fl::size m_heap_used = 0;
@@ -503,7 +503,7 @@ public:
         }
         
         // Copy free bits
-        m_inlined_free_bits = other.m_inlined_free_bits;
+        m_free_bits = other.m_free_bits;
         
         // Copy heap data if any
         if (other.m_heap_used > 0) {
@@ -528,7 +528,7 @@ public:
             }
             
             // Copy free bits
-            m_inlined_free_bits = other.m_inlined_free_bits;
+            m_free_bits = other.m_free_bits;
             
             // Copy heap data if any
             if (other.m_heap_used > 0) {
@@ -560,55 +560,121 @@ public:
             return nullptr;
         }
         
-        // First try to use inlined storage
-        if (n == 1) {
-            // For single allocation, find first free bit using find_first(false)
-            fl::i32 free_slot = m_inlined_free_bits.find_first(false);
-            if (free_slot >= 0) {
-                m_inlined_free_bits.set(static_cast<fl::u32>(free_slot), true);
+        // For large allocations (n > 1), use heap directly
+        if (n > 1) {
+            // Ensure heap is initialized
+            if (m_heap_data == nullptr) {
+                fl::size initial_capacity = n * 2;
+                m_heap_data = m_base_allocator.allocate(initial_capacity);
+                m_heap_capacity = initial_capacity;
+                m_heap_used = 0;
+            }
+            
+            // Ensure heap has enough capacity
+            if (m_heap_used + n > m_heap_capacity) {
+                fl::size new_capacity = m_heap_capacity * 2;
+                if (new_capacity < m_heap_used + n) {
+                    new_capacity = m_heap_used + n;
+                }
+                
+                T* new_heap_data = m_base_allocator.allocate(new_capacity);
+                
+                // Move existing heap data
+                for (fl::size i = 0; i < m_heap_used; ++i) {
+                    m_base_allocator.construct(&new_heap_data[i], fl::move(m_heap_data[i]));
+                    m_base_allocator.destroy(&m_heap_data[i]);
+                }
+                
+                m_base_allocator.deallocate(m_heap_data, m_heap_capacity);
+                m_heap_data = new_heap_data;
+                m_heap_capacity = new_capacity;
+            }
+            
+            // Allocate from heap
+            T* result = &m_heap_data[m_heap_used];
+            m_heap_used += n;
+            
+            // Mark slots as used in bitset
+            fl::size total_capacity = N + m_heap_capacity;
+            if (m_free_bits.size() < total_capacity) {
+                m_free_bits.resize(total_capacity);
+            }
+            
+            for (fl::size i = 0; i < n; ++i) {
+                m_free_bits.set(N + m_heap_used - n + i, true);
+            }
+            
+            return result;
+        }
+        
+        // For single allocations, use bitset-based allocation
+        // Ensure bitset is large enough to track all possible allocations
+        fl::size total_capacity = N + (m_heap_capacity > 0 ? m_heap_capacity : 2);
+        if (m_free_bits.size() < total_capacity) {
+            m_free_bits.resize(total_capacity);
+        }
+        
+        // Find first free slot using find_first(false)
+        fl::i32 free_slot = m_free_bits.find_first(false);
+        if (free_slot >= 0) {
+            // Mark the slot as used
+            m_free_bits.set(static_cast<fl::u32>(free_slot), true);
+            
+            // Check if this is inlined memory
+            if (static_cast<fl::size>(free_slot) < N) {
                 return &get_inlined_ptr()[static_cast<fl::size>(free_slot)];
-            }
-        } else {
-            // For multiple allocations, try to find consecutive free slots
-            // This is a simplified approach - for now, just use sequential allocation
-            if (m_inlined_used + n <= N) {
-                T* ptr = &get_inlined_ptr()[m_inlined_used];
-                m_inlined_used += n;
-                return ptr;
+            } else {
+                // This is heap memory - ensure heap is initialized
+                if (m_heap_data == nullptr) {
+                    fl::size initial_capacity = 2;
+                    m_heap_data = m_base_allocator.allocate(initial_capacity);
+                    m_heap_capacity = initial_capacity;
+                    m_heap_used = 0;
+                }
+                
+                // Calculate heap index
+                fl::size heap_index = static_cast<fl::size>(free_slot) - N;
+                
+                // Ensure heap has enough capacity
+                if (heap_index >= m_heap_capacity) {
+                    fl::size new_capacity = m_heap_capacity * 2;
+                    if (new_capacity <= heap_index) {
+                        new_capacity = heap_index + 1;
+                    }
+                    
+                    T* new_heap_data = m_base_allocator.allocate(new_capacity);
+                    
+                    // Move existing heap data
+                    for (fl::size i = 0; i < m_heap_used; ++i) {
+                        m_base_allocator.construct(&new_heap_data[i], fl::move(m_heap_data[i]));
+                        m_base_allocator.destroy(&m_heap_data[i]);
+                    }
+                    
+                    m_base_allocator.deallocate(m_heap_data, m_heap_capacity);
+                    m_heap_data = new_heap_data;
+                    m_heap_capacity = new_capacity;
+                    
+                    // Update bitset size
+                    if (m_free_bits.size() < N + new_capacity) {
+                        m_free_bits.resize(N + new_capacity);
+                    }
+                }
+                
+                // Update heap usage tracking
+                if (heap_index + 1 > m_heap_used) {
+                    m_heap_used = heap_index + 1;
+                }
+                
+                return &m_heap_data[heap_index];
             }
         }
         
-        // We need heap storage - initialize heap if this is the first time
-        if (m_heap_data == nullptr) {
-            fl::size initial_capacity = n * 2; // Start with some extra capacity
-            m_heap_data = m_base_allocator.allocate(initial_capacity);
-            m_heap_capacity = initial_capacity;
-            m_heap_used = 0;
-        }
+        // If no free slot found, we need to expand
+        fl::size new_total_capacity = total_capacity * 2;
+        m_free_bits.resize(new_total_capacity);
         
-        // If we need more heap storage
-        if (m_heap_used + n > m_heap_capacity) {
-            fl::size new_capacity = m_heap_capacity * 2;
-            if (new_capacity < m_heap_used + n) {
-                new_capacity = m_heap_used + n;
-            }
-            
-            T* new_heap_data = m_base_allocator.allocate(new_capacity);
-            
-            // Move existing heap data
-            for (fl::size i = 0; i < m_heap_used; ++i) {
-                m_base_allocator.construct(&new_heap_data[i], fl::move(m_heap_data[i]));
-                m_base_allocator.destroy(&m_heap_data[i]);
-            }
-            
-            m_base_allocator.deallocate(m_heap_data, m_heap_capacity);
-            m_heap_data = new_heap_data;
-            m_heap_capacity = new_capacity;
-        }
-        
-        T* ptr = &m_heap_data[m_heap_used];
-        m_heap_used += n;
-        return ptr;
+        // Try allocation again
+        return allocate(n);
     }
 
     // Deallocate memory for n objects of type T
@@ -626,16 +692,22 @@ public:
             fl::size slot_index = (p - inlined_start);
             for (fl::size i = 0; i < n; ++i) {
                 if (slot_index + i < N) {
-                    m_inlined_free_bits.set(slot_index + i, false); // Mark as free
+                    m_free_bits.set(slot_index + i, false); // Mark as free
                 }
             }
             return;
         }
         
-        // This is heap memory, deallocate through base allocator
+        // This is heap memory, mark slots as free
         if (p >= m_heap_data && p < m_heap_data + m_heap_capacity) {
-            // Mark as deallocated
-            m_heap_used -= n;
+            fl::size heap_index = (p - m_heap_data);
+            fl::size global_index = N + heap_index;
+            
+            for (fl::size i = 0; i < n; ++i) {
+                if (global_index + i < m_free_bits.size()) {
+                    m_free_bits.set(global_index + i, false); // Mark as free
+                }
+            }
             return;
         }
         
@@ -664,7 +736,7 @@ public:
             get_inlined_ptr()[i].~T();
         }
         m_inlined_used = 0;
-        m_inlined_free_bits.reset();
+        m_free_bits.reset();
         
         // Destroy heap objects
         for (fl::size i = 0; i < m_heap_used; ++i) {

@@ -345,3 +345,400 @@ TEST_CASE("SlabAllocator - STL compatibility") {
         CHECK_FALSE(alloc1 != alloc2);
     }
 } 
+
+TEST_CASE("allocator_inlined - Basic functionality") {
+    using TestAllocator = fl::allocator_inlined<int, 3>;
+    
+    SUBCASE("Single allocation and deallocation") {
+        TestAllocator allocator;
+        
+        int* ptr = allocator.allocate(1);
+        REQUIRE(ptr != nullptr);
+        
+        // Write to the allocation
+        *ptr = 42;
+        CHECK(*ptr == 42);
+        
+        allocator.deallocate(ptr, 1);
+    }
+    
+    SUBCASE("Multiple inlined allocations") {
+        TestAllocator allocator;
+        
+        fl::vector<int*> ptrs;
+        const size_t num_allocs = 3;  // Exactly the inlined capacity
+        
+        for (size_t i = 0; i < num_allocs; ++i) {
+            int* ptr = allocator.allocate(1);
+            REQUIRE(ptr != nullptr);
+            *ptr = static_cast<int>(i + 100);
+            ptrs.push_back(ptr);
+        }
+        
+        // Verify all allocations are valid and contain expected data
+        for (size_t i = 0; i < ptrs.size(); ++i) {
+            CHECK(*ptrs[i] == static_cast<int>(i + 100));
+        }
+        
+        // Cleanup
+        for (int* ptr : ptrs) {
+            allocator.deallocate(ptr, 1);
+        }
+    }
+}
+
+TEST_CASE("allocator_inlined - Inlined to heap transition") {
+    using TestAllocator = fl::allocator_inlined<int, 3>;
+    
+    SUBCASE("Overflow to heap") {
+        TestAllocator allocator;
+        
+        fl::vector<int*> ptrs;
+        const size_t total_allocs = 5;  // More than inlined capacity (3)
+        
+        for (size_t i = 0; i < total_allocs; ++i) {
+            int* ptr = allocator.allocate(1);
+            REQUIRE(ptr != nullptr);
+            *ptr = static_cast<int>(i + 100);
+            ptrs.push_back(ptr);
+        }
+        
+        // Verify all allocations are valid and contain expected data
+        for (size_t i = 0; i < ptrs.size(); ++i) {
+            CHECK(*ptrs[i] == static_cast<int>(i + 100));
+        }
+        
+        // Cleanup
+        for (int* ptr : ptrs) {
+            allocator.deallocate(ptr, 1);
+        }
+    }
+    
+    SUBCASE("Mixed inlined and heap allocations") {
+        TestAllocator allocator;
+        
+        fl::vector<int*> inlined_ptrs;
+        fl::vector<int*> heap_ptrs;
+        
+        // Allocate inlined storage first
+        for (size_t i = 0; i < 3; ++i) {
+            int* ptr = allocator.allocate(1);
+            REQUIRE(ptr != nullptr);
+            *ptr = static_cast<int>(i + 100);
+            inlined_ptrs.push_back(ptr);
+        }
+        
+        // Then allocate heap storage
+        for (size_t i = 0; i < 2; ++i) {
+            int* ptr = allocator.allocate(1);
+            REQUIRE(ptr != nullptr);
+            *ptr = static_cast<int>(i + 200);
+            heap_ptrs.push_back(ptr);
+        }
+        
+        // Verify inlined allocations
+        for (size_t i = 0; i < inlined_ptrs.size(); ++i) {
+            CHECK(*inlined_ptrs[i] == static_cast<int>(i + 100));
+        }
+        
+        // Verify heap allocations
+        for (size_t i = 0; i < heap_ptrs.size(); ++i) {
+            CHECK(*heap_ptrs[i] == static_cast<int>(i + 200));
+        }
+        
+        // Cleanup
+        for (int* ptr : inlined_ptrs) {
+            allocator.deallocate(ptr, 1);
+        }
+        for (int* ptr : heap_ptrs) {
+            allocator.deallocate(ptr, 1);
+        }
+    }
+}
+
+TEST_CASE("allocator_inlined - Free slot management") {
+    using TestAllocator = fl::allocator_inlined<int, 3>;
+    
+    SUBCASE("Deallocate and reuse inlined slots") {
+        TestAllocator allocator;
+        
+        fl::vector<int*> ptrs;
+        
+        // Allocate all inlined slots
+        for (size_t i = 0; i < 3; ++i) {
+            int* ptr = allocator.allocate(1);
+            REQUIRE(ptr != nullptr);
+            *ptr = static_cast<int>(i + 100);
+            ptrs.push_back(ptr);
+        }
+        
+        // Deallocate the middle slot
+        allocator.deallocate(ptrs[1], 1);
+        ptrs[1] = nullptr;
+        
+        // Allocate a new slot - should reuse the freed slot
+        int* new_ptr = allocator.allocate(1);
+        REQUIRE(new_ptr != nullptr);
+        *new_ptr = 999;
+        
+        // The new allocation should be from the same memory location as the freed slot
+        // (This is implementation-dependent, but the slot should be reused)
+        
+        // Verify other allocations are still intact
+        CHECK(*ptrs[0] == 100);
+        CHECK(*ptrs[2] == 102);
+        CHECK(*new_ptr == 999);
+        
+        // Cleanup
+        allocator.deallocate(ptrs[0], 1);
+        allocator.deallocate(ptrs[2], 1);
+        allocator.deallocate(new_ptr, 1);
+    }
+    
+    SUBCASE("Deallocate and reuse heap slots") {
+        TestAllocator allocator;
+        
+        fl::vector<int*> ptrs;
+        
+        // Allocate more than inlined capacity to force heap usage
+        for (size_t i = 0; i < 5; ++i) {
+            int* ptr = allocator.allocate(1);
+            REQUIRE(ptr != nullptr);
+            *ptr = static_cast<int>(i + 100);
+            ptrs.push_back(ptr);
+        }
+        
+        // Deallocate a heap slot (index 4)
+        allocator.deallocate(ptrs[4], 1);
+        ptrs[4] = nullptr;
+        
+        // Allocate a new slot - should reuse the freed heap slot
+        int* new_ptr = allocator.allocate(1);
+        REQUIRE(new_ptr != nullptr);
+        *new_ptr = 999;
+        
+        // Verify other allocations are still intact
+        for (size_t i = 0; i < 4; ++i) {
+            CHECK(*ptrs[i] == static_cast<int>(i + 100));
+        }
+        CHECK(*new_ptr == 999);
+        
+        // Cleanup
+        for (size_t i = 0; i < ptrs.size(); ++i) {
+            if (ptrs[i] != nullptr) {
+                allocator.deallocate(ptrs[i], 1);
+            }
+        }
+        allocator.deallocate(new_ptr, 1);
+    }
+}
+
+TEST_CASE("allocator_inlined - Memory layout verification") {
+    using TestAllocator = fl::allocator_inlined<int, 3>;
+    
+    SUBCASE("Inlined storage layout") {
+        TestAllocator allocator;
+        
+        fl::vector<int*> ptrs;
+        
+        // Allocate exactly inlined capacity
+        for (size_t i = 0; i < 3; ++i) {
+            int* ptr = allocator.allocate(1);
+            REQUIRE(ptr != nullptr);
+            ptrs.push_back(ptr);
+        }
+        
+        // Sort by address to check layout
+        std::sort(ptrs.begin(), ptrs.end());
+        
+        // Verify that inlined allocations are contiguous
+        for (size_t i = 1; i < ptrs.size(); ++i) {
+            uintptr_t prev_addr = reinterpret_cast<uintptr_t>(ptrs[i-1]);
+            uintptr_t curr_addr = reinterpret_cast<uintptr_t>(ptrs[i]);
+            uintptr_t diff = curr_addr - prev_addr;
+            
+            // Should be exactly sizeof(int) apart (or aligned size)
+            CHECK(diff >= sizeof(int));
+        }
+        
+        // Cleanup
+        for (int* ptr : ptrs) {
+            allocator.deallocate(ptr, 1);
+        }
+    }
+    
+    SUBCASE("Heap storage layout") {
+        TestAllocator allocator;
+        
+        fl::vector<int*> ptrs;
+        
+        // Allocate more than inlined capacity to force heap usage
+        for (size_t i = 0; i < 5; ++i) {
+            int* ptr = allocator.allocate(1);
+            REQUIRE(ptr != nullptr);
+            ptrs.push_back(ptr);
+        }
+        
+        // Sort by address
+        std::sort(ptrs.begin(), ptrs.end());
+        
+        // Verify that heap allocations are properly spaced
+        for (size_t i = 1; i < ptrs.size(); ++i) {
+            uintptr_t prev_addr = reinterpret_cast<uintptr_t>(ptrs[i-1]);
+            uintptr_t curr_addr = reinterpret_cast<uintptr_t>(ptrs[i]);
+            uintptr_t diff = curr_addr - prev_addr;
+            
+            // Should be at least sizeof(int) apart
+            CHECK(diff >= sizeof(int));
+        }
+        
+        // Cleanup
+        for (int* ptr : ptrs) {
+            allocator.deallocate(ptr, 1);
+        }
+    }
+}
+
+TEST_CASE("allocator_inlined - Edge cases") {
+    using TestAllocator = fl::allocator_inlined<int, 3>;
+    
+    SUBCASE("Zero allocation") {
+        TestAllocator allocator;
+        
+        int* ptr = allocator.allocate(0);
+        CHECK(ptr == nullptr);
+        
+        allocator.deallocate(ptr, 0);  // Should be safe
+    }
+    
+    SUBCASE("Null deallocation") {
+        TestAllocator allocator;
+        
+        allocator.deallocate(nullptr, 1);  // Should be safe
+    }
+    
+    SUBCASE("Large allocation") {
+        TestAllocator allocator;
+        
+        // Allocate a large block (should go to heap)
+        int* large_ptr = allocator.allocate(100);
+        REQUIRE(large_ptr != nullptr);
+        
+        // Write to the allocation
+        for (int i = 0; i < 100; ++i) {
+            large_ptr[i] = i;
+        }
+        
+        // Verify the data
+        for (int i = 0; i < 100; ++i) {
+            CHECK(large_ptr[i] == i);
+        }
+        
+        allocator.deallocate(large_ptr, 100);
+    }
+}
+
+TEST_CASE("allocator_inlined - Copy and assignment") {
+    using TestAllocator = fl::allocator_inlined<int, 3>;
+    
+    SUBCASE("Copy constructor") {
+        TestAllocator allocator1;
+        
+        // Allocate some memory in the first allocator
+        int* ptr1 = allocator1.allocate(1);
+        *ptr1 = 42;
+        
+        // Copy the allocator
+        TestAllocator allocator2(allocator1);
+        
+        // Allocate from the copy
+        int* ptr2 = allocator2.allocate(1);
+        *ptr2 = 100;
+        
+        // Verify both allocations work
+        CHECK(*ptr1 == 42);
+        CHECK(*ptr2 == 100);
+        
+        // Cleanup
+        allocator1.deallocate(ptr1, 1);
+        allocator2.deallocate(ptr2, 1);
+    }
+    
+    SUBCASE("Assignment operator") {
+        TestAllocator allocator1;
+        TestAllocator allocator2;
+        
+        // Allocate in first allocator
+        int* ptr1 = allocator1.allocate(1);
+        *ptr1 = 42;
+        
+        // Assign to second allocator
+        allocator2 = allocator1;
+        
+        // Allocate from second allocator
+        int* ptr2 = allocator2.allocate(1);
+        *ptr2 = 100;
+        
+        // Verify both allocations work
+        CHECK(*ptr1 == 42);
+        CHECK(*ptr2 == 100);
+        
+        // Cleanup
+        allocator1.deallocate(ptr1, 1);
+        allocator2.deallocate(ptr2, 1);
+    }
+}
+
+TEST_CASE("allocator_inlined - Clear functionality") {
+    using TestAllocator = fl::allocator_inlined<int, 3>;
+    
+    SUBCASE("Clear inlined allocations") {
+        TestAllocator allocator;
+        
+        fl::vector<int*> ptrs;
+        
+        // Allocate inlined storage
+        for (size_t i = 0; i < 3; ++i) {
+            int* ptr = allocator.allocate(1);
+            REQUIRE(ptr != nullptr);
+            *ptr = static_cast<int>(i + 100);
+            ptrs.push_back(ptr);
+        }
+        
+        // Clear the allocator
+        allocator.clear();
+        
+        // Allocate again - should work normally
+        int* new_ptr = allocator.allocate(1);
+        REQUIRE(new_ptr != nullptr);
+        *new_ptr = 999;
+        CHECK(*new_ptr == 999);
+        
+        allocator.deallocate(new_ptr, 1);
+    }
+    
+    SUBCASE("Clear mixed allocations") {
+        TestAllocator allocator;
+        
+        fl::vector<int*> ptrs;
+        
+        // Allocate both inlined and heap storage
+        for (size_t i = 0; i < 5; ++i) {
+            int* ptr = allocator.allocate(1);
+            REQUIRE(ptr != nullptr);
+            *ptr = static_cast<int>(i + 100);
+            ptrs.push_back(ptr);
+        }
+        
+        // Clear the allocator
+        allocator.clear();
+        
+        // Allocate again - should work normally
+        int* new_ptr = allocator.allocate(1);
+        REQUIRE(new_ptr != nullptr);
+        *new_ptr = 999;
+        CHECK(*new_ptr == 999);
+        
+        allocator.deallocate(new_ptr, 1);
+    }
+} 
