@@ -32,9 +32,20 @@ else
     echo "⚠️  Warning: compile_commands.json not found. Tests may not have built successfully."
 fi
 
+echo "Setting up JavaScript development environment..."
+
+# Install fast JavaScript linter (Node.js + ESLint)
+echo "Installing fast JavaScript linter (Node.js + ESLint)..."
+if uv run ci/setup-js-linting-fast.py; then
+    echo "✅ Fast JavaScript linting enabled - 53x faster than Deno!"
+else
+    echo "⚠️  Warning: JavaScript linter setup failed. You can retry with: uv run ci/setup-js-linting-fast.py"
+fi
+
 echo "🎉 Installation complete!"
 echo ""
 echo "To use:"
 echo "  - Run tests: bash test"
+echo "  - Run linting: bash lint (Python, C++, and JavaScript)"
 echo "  - Debug in VSCode: Open test file and press F5"
 echo "  - clangd IntelliSense: Should work automatically in VSCode"

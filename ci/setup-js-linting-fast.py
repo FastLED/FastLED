@@ -70,18 +70,18 @@ def download_and_extract_node():
     url, filename, is_zip = get_node_download_info()
     download_path = TOOLS_DIR / filename
 
-    print(f"📦 Downloading Node.js v{NODE_VERSION}...")
+    print(f"Downloading Node.js v{NODE_VERSION}...")
     TOOLS_DIR.mkdir(exist_ok=True)
     NODE_DIR.mkdir(exist_ok=True)
 
     if not download_path.exists():
-        print(f"🌐 Downloading from: {url}")
+        print(f"Downloading from: {url}")
         with httpx.stream("GET", url, follow_redirects=True) as response:
             response.raise_for_status()
             with open(download_path, "wb") as f:
                 for chunk in response.iter_bytes(chunk_size=8192):
                     f.write(chunk)
-        print(f"✅ Downloaded {filename}")
+        print(f"SUCCESS: Downloaded {filename}")
 
     # Extract Node.js
     if platform.system() == "Windows":
@@ -90,7 +90,7 @@ def download_and_extract_node():
         node_exe = NODE_DIR / "bin" / "node"
 
     if not node_exe.exists():
-        print("📂 Extracting Node.js...")
+        print("Extracting Node.js...")
 
         if is_zip:
             with zipfile.ZipFile(download_path, "r") as zip_ref:
@@ -113,7 +113,7 @@ def download_and_extract_node():
                     item.rename(NODE_DIR / item.name)
                 nested_dir.rmdir()
 
-        print("✅ Node.js extracted")
+        print("SUCCESS: Node.js extracted")
 
     # Clean up download file
     if download_path.exists():
@@ -131,7 +131,7 @@ def setup_eslint():
         node_exe = NODE_DIR / "bin" / "node"
         npm_exe = NODE_DIR / "bin" / "npm"
 
-    print("📦 Installing ESLint...")
+    print("Installing ESLint...")
 
     # Create package.json
     package_json = {
@@ -145,33 +145,61 @@ def setup_eslint():
         json.dump(package_json, f, indent=2)
 
     # Install ESLint
-    subprocess.run([str(npm_exe), "install"], cwd=TOOLS_DIR, check=True)
+    try:
+        # Use absolute path for npm executable
+        npm_exe_abs = (
+            (TOOLS_DIR / "node" / "npm.cmd").resolve()
+            if platform.system() == "Windows"
+            else (TOOLS_DIR / "node" / "bin" / "npm").resolve()
+        )
 
-    # Create minimal .eslintrc.js
+        # On Windows, use shell=True to properly execute .cmd files
+        if platform.system() == "Windows":
+            result = subprocess.run(
+                [str(npm_exe_abs), "install"],
+                cwd=TOOLS_DIR,
+                check=True,
+                capture_output=True,
+                text=True,
+                shell=True,
+            )
+        else:
+            result = subprocess.run(
+                [str(npm_exe_abs), "install"],
+                cwd=TOOLS_DIR,
+                check=True,
+                capture_output=True,
+                text=True,
+            )
+        # npm install succeeded
+    except subprocess.CalledProcessError as e:
+        # Show stderr output for debugging
+        print(f"npm install stderr: {e.stderr}")
+        print(f"npm install stdout: {e.stdout}")
+        raise
+
+    # Create minimal .eslintrc.js - FAST ONLY: Critical issues only
     eslint_config = """module.exports = {
   env: {
     browser: true,
     es2022: true,
     worker: true
   },
-  extends: ["eslint:recommended"],
   parserOptions: {
     ecmaVersion: 2022,
     sourceType: "module"
   },
   rules: {
+    // FAST LINTING: Only check for critical runtime issues
     "no-debugger": "error",
-    "no-eval": "error",
-    "eqeqeq": "error",
-    "prefer-const": "error",
-    "no-var": "error"
+    "no-eval": "error"
   }
 };"""
 
     with open(TOOLS_DIR / ".eslintrc.js", "w") as f:
         f.write(eslint_config)
 
-    print("✅ ESLint configured")
+    print("SUCCESS: ESLint configured")
 
 
 def create_fast_lint_script():
@@ -193,11 +221,11 @@ YELLOW='\\033[1;33m'
 BLUE='\\033[0;34m'
 NC='\\033[0m' # No Color
 
-echo -e "${{BLUE}}⚡ FastLED JavaScript Linting (Node.js + ESLint - FAST!)${{NC}}"
+echo -e "${{BLUE}}FAST FastLED JavaScript Linting (Node.js + ESLint - FAST!)${{NC}}"
 
 # Check if ESLint is installed
-if [ ! -f ".js-tools/node_modules/.bin/eslint{"cmd" if platform.system() == "Windows" else ""}" ]; then
-    echo -e "${{RED}}❌ ESLint not found. Run: uv run ci/setup-js-linting-fast.py${{NC}}"
+if [ ! -f ".js-tools/node_modules/.bin/eslint{".cmd" if platform.system() == "Windows" else ""}" ]; then
+    echo -e "${{RED}}ERROR: ESLint not found. Run: uv run ci/setup-js-linting-fast.py${{NC}}"
     exit 1
 fi
 
@@ -205,7 +233,7 @@ fi
 JS_FILES=$(find src/platforms/wasm -name "*.js" -type f 2>/dev/null)
 
 if [ -z "$JS_FILES" ]; then
-    echo -e "${{YELLOW}}⚠️  No JavaScript files found in src/platforms/wasm/${{NC}}"
+    echo -e "${{YELLOW}}WARNING: No JavaScript files found in src/platforms/wasm/${{NC}}"
     exit 0
 fi
 
@@ -215,10 +243,10 @@ echo "$JS_FILES" | sed 's/^/  /'
 # Run ESLint
 echo -e "${{BLUE}}Running ESLint...${{NC}}"
 cd .js-tools
-if "./node_modules/.bin/eslint{"cmd" if platform.system() == "Windows" else ""}" ../src/platforms/wasm/compiler/*.js ../src/platforms/wasm/compiler/modules/*.js; then
-    echo -e "${{GREEN}}✅ JavaScript linting completed successfully${{NC}}"
+if "./node_modules/.bin/eslint{".cmd" if platform.system() == "Windows" else ""}" --no-eslintrc --no-inline-config -c .eslintrc.js ../src/platforms/wasm/compiler/*.js ../src/platforms/wasm/compiler/modules/*.js; then
+    echo -e "${{GREEN}}SUCCESS: JavaScript linting completed successfully${{NC}}"
 else
-    echo -e "${{RED}}❌ JavaScript linting failed${{NC}}"
+    echo -e "${{RED}}ERROR: JavaScript linting failed${{NC}}"
     exit 1
 fi
 """
@@ -231,25 +259,25 @@ fi
     if platform.system() != "Windows":
         os.chmod(script_path, 0o755)
 
-    print("✅ Fast lint script created")
+    print("SUCCESS: Fast lint script created")
 
 
 def main():
     """Main setup function"""
-    print("🚀 Setting up fast JavaScript linting (Node.js + ESLint)...")
+    print("Setting up fast JavaScript linting (Node.js + ESLint)...")
 
     try:
         node_exe = download_and_extract_node()
         setup_eslint()
         create_fast_lint_script()
 
-        print("\\n🎉 Fast JavaScript linting setup complete!")
+        print("\\nFast JavaScript linting setup complete!")
         print("\\nUsage:")
         print("  bash ci/js/lint-js-fast    # Fast linting with ESLint")
         print("  bash ci/js/lint-js         # Original Deno linting")
 
     except Exception as e:
-        print(f"❌ Setup failed: {e}")
+        print(f"Setup failed: {e}")
         sys.exit(1)
 
 

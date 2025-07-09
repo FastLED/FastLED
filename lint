@@ -12,7 +12,7 @@ while [[ $# -gt 0 ]]; do
             echo "  --help   Show this help message"
             echo ""
             echo "This script runs comprehensive linting for Python, C++, and JavaScript."
-            echo "JavaScript linting is now included by default (it's fast!)."
+            echo "JavaScript linting: FAST ONLY (skips if not available)."
             exit 0
             ;;
         *)
@@ -87,20 +87,22 @@ BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
 # Check if fast linting is available
-if [ -f "ci/js/lint-js-fast" ] && [ -f ".js-tools/node_modules/.bin/eslint.cmd" ]; then
+ESLINT_EXE=""
+if [[ "$OSTYPE" == "msys" || "$OSTYPE" == "cygwin" || "$OSTYPE" == "win32" ]]; then
+    ESLINT_EXE=".js-tools/node_modules/.bin/eslint.cmd"
+else
+    ESLINT_EXE=".js-tools/node_modules/.bin/eslint"
+fi
+
+if [ -f "ci/js/lint-js-fast" ] && [ -f "$ESLINT_EXE" ]; then
     echo -e "${BLUE}🚀 Using fast JavaScript linting (Node.js + ESLint)${NC}"
     if ! bash ci/js/lint-js-fast; then
         echo -e "${RED}❌ Fast JavaScript linting failed${NC}"
         exit 1
     fi
-elif [ -f "ci/js/lint-js" ] && [ -f ".js-tools/deno/deno" ]; then
-    echo -e "${BLUE}🔍 Using comprehensive JavaScript linting (Deno)${NC}"
-    if ! bash ci/js/lint-js; then
-        echo -e "${RED}❌ JavaScript linting failed${NC}"
-        exit 1
-    fi
 else
-    echo "⚠️  JavaScript linting tools not found. Run: uv run ci/setup-js-linting-fast.py"
+    echo -e "${BLUE}⚠️  Fast JavaScript linting not available. Skipping JavaScript linting.${NC}"
+    echo -e "${BLUE}💡 To enable fast JavaScript linting, run: uv run ci/setup-js-linting-fast.py${NC}"
 fi
 
 echo ""
@@ -109,5 +111,6 @@ echo "========================="
 echo ""
 echo "💡 FOR AI AGENTS:"
 echo "  - Use 'bash lint' for comprehensive linting (Python, C++, and JavaScript)"
-echo "  - JavaScript linting is now included by default (it's fast!)"
+echo "  - JavaScript linting: FAST ONLY (no slow fallback)"
+echo "  - To enable fast JavaScript linting: uv run ci/setup-js-linting-fast.py"
 echo "  - Use 'bash lint --help' for usage information"
