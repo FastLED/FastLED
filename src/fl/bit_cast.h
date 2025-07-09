@@ -1,5 +1,9 @@
 #pragma once
 
+// What is bit cast?
+// Bit cast is a safe version of reinterpret_cast that is robust against strict aliasing rules
+// that are used in aggressive compiler optimizations.
+
 #include "fl/type_traits.h"
 #include "fl/int.h"
 
