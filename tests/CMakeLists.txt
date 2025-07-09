@@ -331,19 +331,16 @@ endif()
 # Enable testing
 enable_testing()
 
-# Create doctest main library
-add_library(doctest_main STATIC doctest_main.cpp)
-target_include_directories(doctest_main PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-target_compile_options(doctest_main PRIVATE ${UNIT_TEST_COMPILE_FLAGS})
-target_compile_options(doctest_main PRIVATE $<$<COMPILE_LANGUAGE:CXX>:${UNIT_TEST_CXX_FLAGS}>)
-target_compile_definitions(doctest_main PRIVATE ${COMMON_COMPILE_DEFINITIONS})
+# Create a static library for test infrastructure to avoid Windows symbol conflicts
+# This avoids the duplicate symbol issues that occur when mixing shared and static libraries
+add_library(test_shared_static STATIC
+    doctest_main.cpp
+)
 
-
-
-# Add Windows debugging libraries for crash handler
-if(WIN32)
-    target_link_libraries(doctest_main dbghelp psapi)
-endif()
+target_include_directories(test_shared_static PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+target_compile_options(test_shared_static PRIVATE ${UNIT_TEST_COMPILE_FLAGS})
+target_compile_options(test_shared_static PRIVATE $<$<COMPILE_LANGUAGE:CXX>:${UNIT_TEST_CXX_FLAGS}>)
+target_compile_definitions(test_shared_static PRIVATE ${COMMON_COMPILE_DEFINITIONS})
 
 # Find all test source files
 file(GLOB TEST_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/test_*.cpp")
@@ -351,11 +348,13 @@ file(GLOB TEST_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/test_*.cpp")
 # Find test executables (only actual test executables, not libraries)
 file(GLOB TEST_BINARIES "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/test_*${CMAKE_EXECUTABLE_SUFFIX}")
 
-# Process source files
+# Process source files - create executables that link to static library
 foreach(TEST_SOURCE ${TEST_SOURCES})
     get_filename_component(TEST_NAME ${TEST_SOURCE} NAME_WE)
+    
+    # Create executable that links to static library
     add_executable(${TEST_NAME} ${TEST_SOURCE})
-    target_link_libraries(${TEST_NAME} fastled doctest_main)
+    target_link_libraries(${TEST_NAME} fastled test_shared_static)
     
     # Set the correct subsystem for Windows
     if(WIN32)
@@ -378,6 +377,7 @@ foreach(TEST_SOURCE ${TEST_SOURCES})
             endif()
         endif()
     endif()
+    
     # Add C++-specific flags only for C++ files
     target_compile_options(fastled PRIVATE $<$<COMPILE_LANGUAGE:CXX>:${CXX_SPECIFIC_FLAGS}>)
     if(USE_LIBUNWIND)
@@ -394,8 +394,6 @@ foreach(TEST_SOURCE ${TEST_SOURCES})
         target_link_options(${TEST_NAME} PRIVATE -static-libgcc -static-libstdc++)
     endif()
     target_compile_options(${TEST_NAME} PRIVATE ${UNIT_TEST_COMPILE_FLAGS})
-    # Add C++-specific flags only for C++ files
-    target_compile_options(${TEST_NAME} PRIVATE $<$<COMPILE_LANGUAGE:CXX>:${UNIT_TEST_CXX_FLAGS}>)
     # Add C++-specific flags only for C++ files
     target_compile_options(${TEST_NAME} PRIVATE $<$<COMPILE_LANGUAGE:CXX>:${UNIT_TEST_CXX_FLAGS}>)
     target_compile_definitions(${TEST_NAME} PRIVATE 
@@ -422,8 +420,6 @@ if(CLEAN_ORPHANED_BINARIES)
         endif()
     endforeach()
 endif()
-
-
 
 # Add verbose output for tests
 set(CMAKE_CTEST_ARGUMENTS "--output-on-failure")
