@@ -218,23 +218,28 @@ TEST_CASE("fl::set_inlined - Exceeding inlined size") {
         CHECK(set.contains(3));
     }
 
-    #if 0
-    
     SUBCASE("Heap overflow") {
         fl::set_inlined<int, 3> set;
         
         // Insert more than inlined capacity but not too many
         for (int i = 0; i < 5; ++i) {
-            CHECK(set.insert(i).second);
+            auto result = set.insert(i);
+            FL_WARN("Insert " << i << ": success=" << result.second << ", size=" << set.size());
         }
         
         CHECK(set.size() == 5);
         
+        // Debug: print all elements in the set
+        FL_WARN("Elements in set:");
+        for (auto it = set.begin(); it != set.end(); ++it) {
+            FL_WARN("  " << *it);
+        }
+        
         // Verify all elements are present
         for (int i = 0; i < 5; ++i) {
             bool contains = set.contains(i);
+            FL_WARN("Contains " << i << ": " << (contains ? "true" : "false"));
             CHECK(contains);
         }
     }
-    #endif
 }
