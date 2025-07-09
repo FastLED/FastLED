@@ -274,7 +274,7 @@ def main():
         print("\\nFast JavaScript linting setup complete!")
         print("\\nUsage:")
         print("  bash ci/js/lint-js-fast    # Fast linting with ESLint")
-        print("  bash ci/js/lint-js         # Original Deno linting")
+        print("  For more info: ci/js/README.md")
 
     except Exception as e:
         print(f"Setup failed: {e}")

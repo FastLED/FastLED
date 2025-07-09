@@ -3,18 +3,20 @@
 FastLED JavaScript Type Enhancement and Linting Strategy Script
 
 This script provides multiple approaches for enhancing JavaScript code quality
-while keeping files in .js format:
+while keeping files in .js format. Uses fast Node.js + ESLint for linting.
 
-1. Linting Analysis - Analyze current linting issues and provide fixes
+1. Linting Analysis - Analyze current ESLint issues and provide fixes
 2. Type Safety - Add comprehensive JSDoc annotations and type checking
 3. Performance - Identify and fix performance issues (await in loops, etc.)
 4. Code Quality - Consistent formatting and best practices
+5. Config Management - Create ESLint configuration variants
 
 Usage:
-    python3 scripts/enhance-js-typing.py --approach linting
-    python3 scripts/enhance-js-typing.py --approach performance
-    python3 scripts/enhance-js-typing.py --approach types --file src/platforms/wasm/compiler/index.js
-    python3 scripts/enhance-js-typing.py --approach summary
+    uv run scripts/enhance-js-typing.py --approach linting
+    uv run scripts/enhance-js-typing.py --approach performance
+    uv run scripts/enhance-js-typing.py --approach types --file src/platforms/wasm/compiler/index.js
+    uv run scripts/enhance-js-typing.py --approach configs
+    uv run scripts/enhance-js-typing.py --approach summary
 """
 
 import argparse
@@ -40,34 +42,47 @@ class JSLintingEnhancer:
             self.js_files = list(self.wasm_dir.rglob("*.js"))
         
     def analyze_current_linting(self) -> Dict:
-        """Analyze current linting issues"""
+        """Analyze current linting issues using fast ESLint"""
         print("🔍 Analyzing current linting issues...")
         
         try:
+            # Check if fast linting is available
+            import platform
+            eslint_exe = ".js-tools/node_modules/.bin/eslint.cmd" if platform.system() == "Windows" else ".js-tools/node_modules/.bin/eslint"
+            
+            if not Path(eslint_exe).exists():
+                return {"issues": [], "summary": "Fast linting not available. Run: uv run ci/setup-js-linting-fast.py", "error": "eslint_not_found"}
+            
+            # Run ESLint with JSON output
             result = subprocess.run(
-                [".js-tools/deno/deno", "lint", "--config", "deno.json", "--json"],
+                [eslint_exe, "--format", "json", "--no-eslintrc", "--no-inline-config", "-c", ".js-tools/.eslintrc.js", 
+                 "src/platforms/wasm/compiler/*.js", "src/platforms/wasm/compiler/modules/*.js"],
                 capture_output=True,
                 text=True,
-                cwd=self.workspace_root
+                cwd=self.workspace_root,
+                shell=platform.system() == "Windows"
             )
             
             if result.returncode == 0:
                 print("✅ No linting issues found!")
                 return {"issues": [], "summary": "clean"}
             
-            # Parse the output to extract issues
+            # Parse ESLint JSON output
             issues = []
             if result.stdout:
                 try:
                     lint_data = json.loads(result.stdout)
-                    if isinstance(lint_data, dict) and 'diagnostics' in lint_data:
-                        issues = lint_data['diagnostics']
+                    for file_result in lint_data:
+                        for message in file_result.get('messages', []):
+                            issues.append({
+                                "rule": message.get('ruleId', 'unknown'),
+                                "message": message.get('message', ''),
+                                "file": file_result.get('filePath', ''),
+                                "line": message.get('line', 0),
+                                "severity": message.get('severity', 1)
+                            })
                 except json.JSONDecodeError:
                     pass
-            
-            # If JSON parsing fails, parse text output
-            if not issues and result.stdout:
-                issues = self._parse_text_lint_output(result.stdout)
             
             return {
                 "issues": issues,
@@ -274,61 +289,68 @@ export {};
         return f"✅ Generated enhanced types: {types_file}"
     
     def create_linting_config_variants(self) -> List[str]:
-        """Create different linting configuration variants"""
-        print("⚙️  Creating linting configuration variants...")
+        """Create different ESLint configuration variants"""
+        print("⚙️  Creating ESLint configuration variants...")
         
         configs = []
         
-        # Strict config
-        strict_config = {
-            "compilerOptions": {
-                "allowJs": True,
-                "checkJs": True,
-                "strict": True,
-                "noImplicitAny": True,
-                "strictNullChecks": True,
-                "lib": ["dom", "dom.asynciterable", "es2022", "webworker"]
-            },
-            "lint": {
-                "rules": {
-                    "tags": ["recommended"],
-                    "include": [
-                        "eqeqeq", "guard-for-in", "no-await-in-loop", 
-                        "no-eval", "prefer-const", "camelcase",
-                        "single-var-declarator", "default-param-last"
-                    ],
-                    "exclude": ["no-console", "no-unused-vars"]
-                }
-            }
-        }
+        # Strict ESLint config
+        strict_config = '''module.exports = {
+  env: {
+    browser: true,
+    es2022: true,
+    worker: true
+  },
+  parserOptions: {
+    ecmaVersion: 2022,
+    sourceType: "module"
+  },
+  rules: {
+    // Critical issues
+    "no-debugger": "error",
+    "no-eval": "error",
+    // Code quality
+    "eqeqeq": "error",
+    "prefer-const": "error",
+    "no-var": "error",
+    "no-await-in-loop": "error",
+    "guard-for-in": "error",
+    "camelcase": "warn",
+    "default-param-last": "warn"
+  }
+};'''
         
-        # Gradual config  
-        gradual_config = {
-            "compilerOptions": {
-                "allowJs": True,
-                "checkJs": False,
-                "strict": False,
-                "lib": ["dom", "dom.asynciterable", "es2022", "webworker"]
-            },
-            "lint": {
-                "rules": {
-                    "tags": ["recommended"],
-                    "include": ["eqeqeq", "no-eval", "prefer-const", "no-await-in-loop"],
-                    "exclude": ["no-console", "no-unused-vars", "camelcase", "no-undef"]
-                }
-            }
-        }
+        # Minimal ESLint config  
+        minimal_config = '''module.exports = {
+  env: {
+    browser: true,
+    es2022: true,
+    worker: true
+  },
+  parserOptions: {
+    ecmaVersion: 2022,
+    sourceType: "module"
+  },
+  rules: {
+    // Only critical runtime issues
+    "no-debugger": "error",
+    "no-eval": "error"
+  }
+};'''
         
         # Write config variants
-        strict_file = self.workspace_root / "deno.strict.json"
-        gradual_file = self.workspace_root / "deno.gradual.json" 
+        strict_file = self.workspace_root / ".js-tools" / ".eslintrc.strict.js"
+        minimal_file = self.workspace_root / ".js-tools" / ".eslintrc.minimal.js"
         
-        strict_file.write_text(json.dumps(strict_config, indent=2))
-        gradual_file.write_text(json.dumps(gradual_config, indent=2))
+        # Ensure .js-tools directory exists
+        (self.workspace_root / ".js-tools").mkdir(exist_ok=True)
+        
+        strict_file.write_text(strict_config)
+        minimal_file.write_text(minimal_config)
         
         configs.extend([
-            f"✅ Created strict config: {strict_file}",
-            f"✅ Created gradual config: {gradual_file}"
+            f"✅ Created strict ESLint config: {strict_file}",
+            f"✅ Created minimal ESLint config: {minimal_file}"
         ])
         
         return configs
@@ -383,11 +405,12 @@ export {};
         
         # Available tools
         summary.append(f"\n🛠️  AVAILABLE ENHANCEMENT TOOLS:")
-        summary.append(f"  • python3 scripts/enhance-js-typing.py --approach linting")
-        summary.append(f"  • python3 scripts/enhance-js-typing.py --approach performance") 
-        summary.append(f"  • python3 scripts/enhance-js-typing.py --approach types --file <path>")
-        summary.append(f"  • .js-tools/deno/deno lint --config deno.json")
-        summary.append(f"  • .js-tools/deno/deno check --config deno.json <file>")
+        summary.append(f"  • uv run scripts/enhance-js-typing.py --approach linting")
+        summary.append(f"  • uv run scripts/enhance-js-typing.py --approach performance") 
+        summary.append(f"  • uv run scripts/enhance-js-typing.py --approach types --file <path>")
+        summary.append(f"  • uv run scripts/enhance-js-typing.py --approach configs")
+        summary.append(f"  • bash ci/js/lint-js-fast    # Fast ESLint linting")
+        summary.append(f"  • bash lint                  # Full project linting")
         
         summary.append("\n" + "=" * 80)
         

@@ -1,57 +1,68 @@
 # FastLED JavaScript Linting Tools
 
-This directory contains JavaScript linting tools for the FastLED project, using Deno for fast and simple JavaScript validation.
+This directory contains JavaScript linting tools for the FastLED project, using Node.js + ESLint for **fast** JavaScript validation.
 
 ## Scripts
 
-- **`lint-js`** - Basic JavaScript linting using Deno lint
-- **`check-js`** - Enhanced linting with optional type checking via JSDoc
-- **`format-js`** - JavaScript code formatting using Deno fmt
-- **`lint-js-minimal`** - Speed-optimized minimal linting (legacy)
-- **`lint-js-instant`** - Fastest possible syntax validation (legacy)
+- **`lint-js-fast`** - Fast JavaScript linting using Node.js + ESLint (critical issues only)
 
 ## Usage
 
 ### From Project Root
 
 ```bash
-# Basic linting
-ci/js/lint-js
-
-# Enhanced linting + type checking
-ci/js/check-js
-
-# Format JavaScript files
-ci/js/format-js
+# Fast JavaScript linting (recommended)
+bash ci/js/lint-js-fast
 ```
 
 ### Via Main Lint Script (Recommended)
 
 ```bash
-# JavaScript linting is included by default (it's fast!)
+# JavaScript linting is included by default (fast only!)
 bash lint
 ```
 
 ## Setup
 
-Run the setup script to install Deno and create all necessary files:
+The fast JavaScript linter is automatically installed during project setup:
 
 ```bash
-uv run ci/setup-js-linting.py
+# Installs everything including fast JS linting
+./install
+```
+
+Or manually install just the JavaScript linter:
+
+```bash
+uv run ci/setup-js-linting-fast.py
 ```
 
 This will:
-- Download Deno binary to `.js-tools/deno/`
-- Create `deno.json` configuration in project root
-- Create all linting scripts in `ci/js/`
-- Update `.gitignore` to exclude Deno tools
+- Download Node.js binary to `.js-tools/node/`
+- Install ESLint to `.js-tools/node_modules/`
+- Create ESLint configuration in `.js-tools/.eslintrc.js`
+- Create fast linting script `ci/js/lint-js-fast`
+
+## Philosophy: Fast Only
+
+**JavaScript linting follows a "fast only" policy:**
+- ✅ **Fast linting available**: Uses Node.js + ESLint (~0.9 seconds)
+- ⚠️ **Fast linting unavailable**: Skips JavaScript linting entirely
+- ❌ **No slow fallback**: Fast linting or no linting at all
+
+## Configuration
+
+The fast linter only checks for **critical runtime issues**:
+- `no-debugger` - Prevents debugger statements in production
+- `no-eval` - Prevents eval() security vulnerabilities
+
+**No style enforcement** - focuses on critical issues only for maximum speed.
 
 ## Integration
 
-JavaScript linting is now included by default in `bash lint` because it's fast and lightweight. No need for the old `--js` flag!
+JavaScript linting is included by default in `bash lint` when fast linting is available.
 
-## Files
+## Performance
 
-All scripts work from the `ci/js/` directory but operate on the project root via `cd ../../`.
-
-The Deno configuration (`deno.json`) remains in the project root for consistency with Deno conventions.
+- **Fast linting**: ~0.9 seconds (53x faster than previous solution)
+- **Total lint time**: ~1.6 seconds (Python + C++ + JavaScript)

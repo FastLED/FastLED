@@ -1171,7 +1171,7 @@ bash lint
 ## What `bash lint` Does:
 - **📝 Python Linting** - ruff, black, isort, pyright
 - **🔧 C++ Linting** - clang-format (when enabled)
-- **🌐 JavaScript Linting** - Deno lint, format check, type checking
+- **🌐 JavaScript Linting** - Fast Node.js + ESLint linting (critical issues only)
 - **🔍 JavaScript Enhancement** - Analysis and recommendations
 - **💡 AI Agent Guidance** - Clear instructions for proper usage
 

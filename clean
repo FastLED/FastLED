@@ -16,6 +16,10 @@ rm -rf .*_cache
 rm -rf __pycache__
 rm -rf .tools
 
+# JavaScript linting cleanup
+rm -rf .js-tools
+rm -f ci/js/lint-js-fast
+
 rm -rf ci/__pycache__
 rm -rf ci/.*_cache
 
