@@ -257,6 +257,30 @@ uv run mcp_server.py
 - ❌ **NEVER delete directories** without explicit permission
 - ❌ **NEVER delete system files or project files** without permission
 
+### Git-Bash Terminal Truncation Issue
+**🚨 IMPORTANT: Git-Bash terminal may truncate the first character of commands**
+
+**Problem:** The git-bash terminal on Windows sometimes truncates the first character of commands, causing them to fail or execute incorrectly.
+
+**Solution:** Pre-pend commands with an additional space when using git-bash:
+- ✅ **CORRECT**: ` bash test` (note the leading space)
+- ❌ **INCORRECT**: `bash test` (may get truncated to `ash test`)
+
+**Examples:**
+```bash
+# Good - with leading space for git-bash compatibility
+ bash test
+ uv run test.py
+ bash lint
+
+# Bad - may get truncated in git-bash
+bash test
+uv run test.py
+bash lint
+```
+
+**Why:** This ensures commands work reliably across all terminal environments, especially git-bash on Windows systems.
+
 ### Why These Rules Exist:
 - **Ensures all operations are reviewable and traceable**
 - **Prevents accidental destructive operations in automated environments**
@@ -548,6 +572,59 @@ The project uses a comprehensive test suite including:
 - Platform compilation tests  
 - Code quality checks (ruff, clang-format)
 - Example compilation verification
+
+### Test Assertion Macros
+**🚨 CRITICAL: Always use the proper assertion macros for better error messages and debugging:**
+
+**Equality Assertions:**
+- ✅ **CORRECT**: `CHECK_EQ(A, B)` - for equality comparisons
+- ❌ **INCORRECT**: `CHECK(A == B)` - provides poor error messages
+
+**Inequality Assertions:**
+- ✅ **CORRECT**: `CHECK_LT(A, B)` - for less than comparisons
+- ✅ **CORRECT**: `CHECK_LE(A, B)` - for less than or equal comparisons
+- ✅ **CORRECT**: `CHECK_GT(A, B)` - for greater than comparisons
+- ✅ **CORRECT**: `CHECK_GE(A, B)` - for greater than or equal comparisons
+- ❌ **INCORRECT**: `CHECK(A < B)`, `CHECK(A <= B)`, `CHECK(A > B)`, `CHECK(A >= B)`
+
+**Boolean Assertions:**
+- ✅ **CORRECT**: `CHECK_TRUE(condition)` - for true conditions
+- ✅ **CORRECT**: `CHECK_FALSE(condition)` - for false conditions
+- ❌ **INCORRECT**: `CHECK(condition)` - for boolean checks
+
+**String Assertions:**
+- ✅ **CORRECT**: `CHECK_STREQ(str1, str2)` - for string equality
+- ✅ **CORRECT**: `CHECK_STRNE(str1, str2)` - for string inequality
+- ❌ **INCORRECT**: `CHECK(str1 == str2)` - for string comparisons
+
+**Floating Point Assertions:**
+- ✅ **CORRECT**: `CHECK_DOUBLE_EQ(a, b)` - for floating point equality
+- ✅ **CORRECT**: `CHECK_DOUBLE_NE(a, b)` - for floating point inequality
+- ❌ **INCORRECT**: `CHECK(a == b)` - for floating point comparisons
+
+**Examples:**
+```cpp
+// Good assertion usage
+CHECK_EQ(expected_value, actual_value);
+CHECK_LT(current_index, max_index);
+CHECK_GT(temperature, 0.0);
+CHECK_TRUE(is_initialized);
+CHECK_FALSE(has_error);
+CHECK_STREQ("expected", actual_string);
+CHECK_DOUBLE_EQ(3.14159, pi_value, 0.001);
+
+// Bad assertion usage
+CHECK(expected_value == actual_value);  // Poor error messages
+CHECK(current_index < max_index);       // Poor error messages
+CHECK(is_initialized);                  // Unclear intent
+CHECK("expected" == actual_string);     // Wrong comparison type
+```
+
+**Why:** Using the proper assertion macros provides:
+- **Better error messages** with actual vs expected values
+- **Clearer intent** about what is being tested
+- **Consistent debugging** across all test failures
+- **Type safety** for different comparison types
 
 ### Test Execution Format
 **🚨 CRITICAL: Always use the correct test execution format:**
