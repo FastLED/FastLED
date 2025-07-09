@@ -25,24 +25,22 @@
     ]
   },
   "lint": {
-    "files": {
-      "include": [
-        "src/platforms/wasm/compiler/*.js",
-        "src/platforms/wasm/compiler/modules/*.js"
-      ],
-      "exclude": [
-        "**/*.min.js",
-        "**/vendor/**",
-        "**/node_modules/**",
-        "**/.build/**",
-        "**/build/**",
-        "**/dist/**",
-        "**/tmp/**",
-        "**/three.min.js",
-        "**/codemirror.min.js",
-        "**/bootstrap.min.js"
-      ]
-    },
+    "include": [
+      "src/platforms/wasm/compiler/*.js",
+      "src/platforms/wasm/compiler/modules/*.js"
+    ],
+    "exclude": [
+      "**/*.min.js",
+      "**/vendor/**",
+      "**/node_modules/**",
+      "**/.build/**",
+      "**/build/**",
+      "**/dist/**",
+      "**/tmp/**",
+      "**/three.min.js",
+      "**/codemirror.min.js",
+      "**/bootstrap.min.js"
+    ],
     "rules": {
       "tags": [
         "recommended"
@@ -123,21 +121,19 @@
     }
   },
   "fmt": {
-    "files": {
-      "include": [
-        "src/platforms/wasm/compiler/*.js",
-        "src/platforms/wasm/compiler/modules/*.js"
-      ],
-      "exclude": [
-        "**/*.min.js",
-        "**/vendor/**",
-        "**/node_modules/**",
-        "**/.build/**",
-        "**/build/**",
-        "**/dist/**",
-        "**/tmp/**"
-      ]
-    },
+    "include": [
+      "src/platforms/wasm/compiler/*.js",
+      "src/platforms/wasm/compiler/modules/*.js"
+    ],
+    "exclude": [
+      "**/*.min.js",
+      "**/vendor/**",
+      "**/node_modules/**",
+      "**/.build/**",
+      "**/build/**",
+      "**/dist/**",
+      "**/tmp/**"
+    ],
     "useTabs": false,
     "lineWidth": 100,
     "indentWidth": 2,
