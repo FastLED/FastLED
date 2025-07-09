@@ -9,7 +9,7 @@
 #include "fl/initializer_list.h"
 #include "fl/insert_result.h"
 #include "fl/math_macros.h"
-#include "fl/memset.h"
+#include "fl/memfill.h"
 #include "fl/namespace.h"
 #include "fl/scoped_ptr.h"
 #include "fl/type_traits.h"
@@ -30,7 +30,7 @@ template <typename T, fl::size N> struct InlinedMemoryBlock {
     };
 
     InlinedMemoryBlock() {
-        fl::memset(mMemoryBlock, 0, sizeof(mMemoryBlock));
+        fl::memfill(mMemoryBlock, 0, sizeof(mMemoryBlock));
 #ifdef FASTLED_TESTING
         __data = memory();
 #endif
@@ -258,7 +258,7 @@ template <typename T, fl::size N> class FixedVector {
                 (p)->~T(); // Destroy the current element
                 // Clear the memory
                 void *vp = static_cast<void *>(p);
-                fl::memset(vp, 0, sizeof(T));
+                fl::memfill(vp, 0, sizeof(T));
                 new (p) T(fl::move(temp)); // Use move constructor
             }
             ++current_size;
@@ -278,7 +278,7 @@ template <typename T, fl::size N> class FixedVector {
                 (p)->~T(); // Destroy the current element
                 // Clear the memory
                 void *vp = static_cast<void *>(p);
-                fl::memset(vp, 0, sizeof(T));
+                fl::memfill(vp, 0, sizeof(T));
                 new (p) T(fl::move(temp)); // Use move constructor
             }
             ++current_size;
