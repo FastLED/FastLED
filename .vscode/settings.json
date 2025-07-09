@@ -43,17 +43,29 @@
         "--completion-style=detailed",
         "--function-arg-placeholders=false",
         "--background-index",
-        "--pch-storage=memory"
+        "--pch-storage=memory",
+        "-Wno-global-constructors"
     ],
     "clangd.fallbackFlags": [
         "-std=c++17",
         "-I${workspaceFolder}/src",
-        "-I${workspaceFolder}/tests"
+        "-I${workspaceFolder}/tests",
+        "-Wno-global-constructors"
     ],
     // Disable conflicting IntelliSense to let clangd handle C++ analysis
     "C_Cpp.intelliSenseEngine": "disabled",
     "C_Cpp.autocomplete": "disabled",
     "C_Cpp.errorSquiggles": "disabled",
+    "C_Cpp.suggestSnippets": false,
+    "C_Cpp.intelliSenseEngineFallback": "disabled",
+    "C_Cpp.autocompleteAddParentheses": false,
+    "C_Cpp.formatting": "disabled",
+    "C_Cpp.vcpkg.enabled": false,
+    "C_Cpp.configurationWarnings": "disabled",
+    "C_Cpp.intelliSenseCachePath": "",
+    "C_Cpp.intelliSenseCacheSize": 0,
+    "C_Cpp.intelliSenseUpdateDelay": 0,
+    "C_Cpp.workspaceParsingPriority": "lowest",
     "files.associations": {
         "*.embeddedhtml": "html",
         "compare": "cpp",
