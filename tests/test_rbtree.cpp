@@ -138,7 +138,7 @@ TEST_CASE("MapRedBlackTree vs std::map - Insert Operations") {
         
         for (const auto& item : test_data) {
             std_map.insert(item);
-            rb_tree.insert(fl::Pair<int, fl::string>(item.first, item.second));
+            rb_tree.insert(fl::pair<int, fl::string>(item.first, item.second));
         }
         
         CHECK(maps_equal(std_map, rb_tree));
@@ -285,7 +285,7 @@ TEST_CASE("MapRedBlackTree vs std::map - Iterator Operations") {
     
     for (const auto& item : test_data) {
         std_map.insert(item);
-        rb_tree.insert(fl::Pair<int, fl::string>(item.first, item.second));
+        rb_tree.insert(fl::pair<int, fl::string>(item.first, item.second));
     }
     
     SUBCASE("Forward iteration order") {

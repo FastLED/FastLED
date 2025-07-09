@@ -23,7 +23,7 @@ namespace fl {
 // replacement for std::map.
 template <typename Key, typename Value, fl::size N> class FixedMap {
   public:
-    using PairKV = fl::Pair<Key, Value>;
+    using PairKV = fl::pair<Key, Value>;
 
     typedef FixedVector<PairKV, N> VectorType;
     typedef typename VectorType::iterator iterator;
@@ -272,7 +272,7 @@ class SortedHeapMap {
     // Standard typedefs to match std::map interface
     using key_type = Key;
     using mapped_type = Value;
-    using value_type = fl::Pair<Key, Value>;
+    using value_type = fl::pair<Key, Value>;
     using size_type = fl::size;
     using difference_type = ptrdiff_t;
     using key_compare = Less;
@@ -357,19 +357,19 @@ class SortedHeapMap {
     // Modifiers
     void clear() { data.clear(); }
 
-    fl::Pair<iterator, bool> insert(const value_type& value) {
+    fl::pair<iterator, bool> insert(const value_type& value) {
         InsertResult result;
         bool success = data.insert(value, &result);
         iterator it = success ? data.find(value) : data.end();
-        return fl::Pair<iterator, bool>(it, success);
+        return fl::pair<iterator, bool>(it, success);
     }
 
     // Move version of insert
-    fl::Pair<iterator, bool> insert(value_type&& value) {
+    fl::pair<iterator, bool> insert(value_type&& value) {
         InsertResult result;
         bool success = data.insert(fl::move(value), &result);
         iterator it = success ? data.find(value) : data.end();
-        return fl::Pair<iterator, bool>(it, success);
+        return fl::pair<iterator, bool>(it, success);
     }
 
     bool insert(const Key &key, const Value &value, InsertResult *result = nullptr) {
@@ -382,12 +382,12 @@ class SortedHeapMap {
     }
 
     template<class... Args>
-    fl::Pair<iterator, bool> emplace(Args&&... args) {
+    fl::pair<iterator, bool> emplace(Args&&... args) {
         value_type pair(fl::forward<Args>(args)...);
         InsertResult result;
         bool success = data.insert(pair, &result);
         iterator it = success ? data.find(pair) : data.end();
-        return fl::Pair<iterator, bool>(it, success);
+        return fl::pair<iterator, bool>(it, success);
     }
 
     iterator erase(const_iterator pos) {
@@ -429,16 +429,16 @@ class SortedHeapMap {
         return data.has(value_type(key, Value())); 
     }
 
-    fl::Pair<iterator, iterator> equal_range(const Key& key) {
+    fl::pair<iterator, iterator> equal_range(const Key& key) {
         iterator lower = lower_bound(key);
         iterator upper = upper_bound(key);
-        return fl::Pair<iterator, iterator>(lower, upper);
+        return fl::pair<iterator, iterator>(lower, upper);
     }
 
-    fl::Pair<const_iterator, const_iterator> equal_range(const Key& key) const {
+    fl::pair<const_iterator, const_iterator> equal_range(const Key& key) const {
         const_iterator lower = lower_bound(key);
         const_iterator upper = upper_bound(key);
-        return fl::Pair<const_iterator, const_iterator>(lower, upper);
+        return fl::pair<const_iterator, const_iterator>(lower, upper);
     }
 
     iterator lower_bound(const Key &key) { 

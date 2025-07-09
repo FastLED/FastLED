@@ -73,7 +73,7 @@ TEST_CASE("std::map vs fl::fl_map - Insert Operations") {
         
         for (const auto& item : test_data) {
             std_map.insert(item);
-            fl_map.insert(fl::Pair<int, fl::string>(item.first, item.second));
+            fl_map.insert(fl::pair<int, fl::string>(item.first, item.second));
         }
         
         CHECK(maps_equal(std_map, fl_map));
@@ -189,7 +189,7 @@ TEST_CASE("std::map vs fl::fl_map - Iterator Operations") {
     
     for (const auto& item : test_data) {
         std_map.insert(item);
-        fl_map.insert(fl::Pair<int, fl::string>(item.first, item.second));
+        fl_map.insert(fl::pair<int, fl::string>(item.first, item.second));
     }
     
     SUBCASE("Forward iteration order") {

@@ -277,7 +277,7 @@ template <typename Key, typename Allocator = fl::allocator_slab<Key>> class set 
   private:
     // Use bool as the value type for the map to create a set
     // Rebind the allocator to work with Pair<Key, bool>
-    using PairType = fl::Pair<Key, bool>;
+    using PairType = fl::pair<Key, bool>;
     using ReboundAllocator = typename Allocator::template rebind<PairType>::other;
     using MapType = fl::SortedHeapMap<Key, bool>;
     
@@ -335,20 +335,20 @@ template <typename Key, typename Allocator = fl::allocator_slab<Key>> class set 
     // Modifiers
     void clear() { map_data.clear(); }
     
-    fl::Pair<const_iterator, bool> insert(const Key& key) {
-        auto result = map_data.insert(fl::Pair<Key, bool>(key, true));
-        return fl::Pair<const_iterator, bool>(const_iterator(result.first), result.second);
+    fl::pair<const_iterator, bool> insert(const Key& key) {
+        auto result = map_data.insert(fl::pair<Key, bool>(key, true));
+        return fl::pair<const_iterator, bool>(const_iterator(result.first), result.second);
     }
     
-    fl::Pair<const_iterator, bool> insert(Key&& key) {
-        auto result = map_data.insert(fl::Pair<Key, bool>(fl::move(key), true));
-        return fl::Pair<const_iterator, bool>(const_iterator(result.first), result.second);
+    fl::pair<const_iterator, bool> insert(Key&& key) {
+        auto result = map_data.insert(fl::pair<Key, bool>(fl::move(key), true));
+        return fl::pair<const_iterator, bool>(const_iterator(result.first), result.second);
     }
     
     template<typename... Args>
-    fl::Pair<const_iterator, bool> emplace(Args&&... args) {
+    fl::pair<const_iterator, bool> emplace(Args&&... args) {
         auto result = map_data.emplace(fl::forward<Args>(args)..., true);
-        return fl::Pair<const_iterator, bool>(const_iterator(result.first), result.second);
+        return fl::pair<const_iterator, bool>(const_iterator(result.first), result.second);
     }
     
     const_iterator erase(const_iterator pos) {
@@ -381,9 +381,9 @@ template <typename Key, typename Allocator = fl::allocator_slab<Key>> class set 
         return contains(key);
     }
     
-    fl::Pair<const_iterator, const_iterator> equal_range(const Key& key) const {
+    fl::pair<const_iterator, const_iterator> equal_range(const Key& key) const {
         auto range = map_data.equal_range(key);
-        return fl::Pair<const_iterator, const_iterator>(
+        return fl::pair<const_iterator, const_iterator>(
             const_iterator(range.first), 
             const_iterator(range.second)
         );

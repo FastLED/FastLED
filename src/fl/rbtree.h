@@ -18,7 +18,7 @@ class MapRedBlackTree {
 public:
     using key_type = Key;
     using mapped_type = Value;
-    using value_type = fl::Pair<Key, Value>;
+    using value_type = fl::pair<Key, Value>;
     using size_type = fl::size;
     using difference_type = ptrdiff_t;
     using key_compare = Compare;
@@ -561,16 +561,16 @@ public:
         size_ = 0;
     }
 
-    fl::Pair<iterator, bool> insert(const value_type& value) {
+    fl::pair<iterator, bool> insert(const value_type& value) {
         Node* existing = findNode(value.first);
         if (existing) {
-            return fl::Pair<iterator, bool>(iterator(existing, this), false);
+            return fl::pair<iterator, bool>(iterator(existing, this), false);
         }
 
         Node* newNode = alloc_.allocate(1);
         if (newNode == nullptr) {
             // Out of memory - return failed insertion
-            return fl::Pair<iterator, bool>(end(), false);
+            return fl::pair<iterator, bool>(end(), false);
         }
         alloc_.construct(newNode, value);
         
@@ -601,11 +601,11 @@ public:
         }
         
         ++size_;
-        return fl::Pair<iterator, bool>(iterator(newNode, this), true);
+        return fl::pair<iterator, bool>(iterator(newNode, this), true);
     }
 
     template<class... Args>
-    fl::Pair<iterator, bool> emplace(Args&&... args) {
+    fl::pair<iterator, bool> emplace(Args&&... args) {
         value_type value(fl::forward<Args>(args)...);
         return insert(value);
     }
@@ -697,24 +697,24 @@ public:
         return findNode(key) != nullptr;
     }
 
-    fl::Pair<iterator, iterator> equal_range(const Key& key) {
+    fl::pair<iterator, iterator> equal_range(const Key& key) {
         iterator it = find(key);
         if (it == end()) {
-            return fl::Pair<iterator, iterator>(it, it);
+            return fl::pair<iterator, iterator>(it, it);
         }
         iterator next = it;
         ++next;
-        return fl::Pair<iterator, iterator>(it, next);
+        return fl::pair<iterator, iterator>(it, next);
     }
 
-    fl::Pair<const_iterator, const_iterator> equal_range(const Key& key) const {
+    fl::pair<const_iterator, const_iterator> equal_range(const Key& key) const {
         const_iterator it = find(key);
         if (it == end()) {
-            return fl::Pair<const_iterator, const_iterator>(it, it);
+            return fl::pair<const_iterator, const_iterator>(it, it);
         }
         const_iterator next = it;
         ++next;
-        return fl::Pair<const_iterator, const_iterator>(it, next);
+        return fl::pair<const_iterator, const_iterator>(it, next);
     }
 
     iterator lower_bound(const Key& key) {
