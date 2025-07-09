@@ -560,22 +560,22 @@ public:
             return nullptr;
         }
         
-        // First try to find n consecutive free slots in inlined storage
+        // First try to use inlined storage
         if (n == 1) {
-            // For single allocation, find first free bit
-            for (fl::size i = 0; i < N; ++i) {
-                if (m_inlined_free_bits.test(i)) {
-                    m_inlined_free_bits.reset(i);
-                    return &get_inlined_ptr()[i];
-                }
+            // For single allocation, find first free bit using find_first(false)
+            fl::i32 free_slot = m_inlined_free_bits.find_first(false);
+            if (free_slot >= 0) {
+                m_inlined_free_bits.set(static_cast<fl::u32>(free_slot), true);
+                return &get_inlined_ptr()[static_cast<fl::size>(free_slot)];
             }
-        }
-        
-        // If we can fit in remaining inlined storage
-        if (m_inlined_used + n <= N) {
-            T* ptr = &get_inlined_ptr()[m_inlined_used];
-            m_inlined_used += n;
-            return ptr;
+        } else {
+            // For multiple allocations, try to find consecutive free slots
+            // This is a simplified approach - for now, just use sequential allocation
+            if (m_inlined_used + n <= N) {
+                T* ptr = &get_inlined_ptr()[m_inlined_used];
+                m_inlined_used += n;
+                return ptr;
+            }
         }
         
         // We need heap storage - initialize heap if this is the first time
@@ -626,7 +626,7 @@ public:
             fl::size slot_index = (p - inlined_start);
             for (fl::size i = 0; i < n; ++i) {
                 if (slot_index + i < N) {
-                    m_inlined_free_bits.set(slot_index + i);
+                    m_inlined_free_bits.set(slot_index + i, false); // Mark as free
                 }
             }
             return;
