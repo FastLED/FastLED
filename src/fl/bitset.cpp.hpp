@@ -99,6 +99,7 @@ template fl::BitsetFixed<64>::BitsetFixed(const char* bitstring);
 template fl::BitsetFixed<100>::BitsetFixed(const char* bitstring);
 template fl::BitsetFixed<200>::BitsetFixed(const char* bitstring);
 
+template fl::BitsetInlined<4>::BitsetInlined(const char* bitstring);
 template fl::BitsetInlined<8>::BitsetInlined(const char* bitstring);
 template fl::BitsetInlined<16>::BitsetInlined(const char* bitstring);
 template fl::BitsetInlined<32>::BitsetInlined(const char* bitstring);

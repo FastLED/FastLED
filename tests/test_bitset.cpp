@@ -484,6 +484,20 @@ TEST_CASE("test bitset_fixed bitstring constructor") {
     REQUIRE_EQ(bs3.test(2), true);
     REQUIRE_EQ(bs3.test(3), true);
     
+    // Test with very large bitstring that overflows fixed size
+    bitset_fixed<8> bs_overflow("1010101011111111000000001111111100000000111111110000000011111111");
+    REQUIRE_EQ(bs_overflow.size(), 8);  // Fixed size remains 8
+    REQUIRE_EQ(bs_overflow.count(), 4);  // Only first 8 bits: "10101010" = 4 set bits
+    REQUIRE_EQ(bs_overflow.test(0), true);   // '1'
+    REQUIRE_EQ(bs_overflow.test(1), false);  // '0'
+    REQUIRE_EQ(bs_overflow.test(2), true);   // '1'
+    REQUIRE_EQ(bs_overflow.test(3), false);  // '0'
+    REQUIRE_EQ(bs_overflow.test(4), true);   // '1'
+    REQUIRE_EQ(bs_overflow.test(5), false);  // '0'
+    REQUIRE_EQ(bs_overflow.test(6), true);   // '1'
+    REQUIRE_EQ(bs_overflow.test(7), false);  // '0'
+    // Remaining input "11111111000000001111111100000000111111110000000011111111" is ignored
+    
     // Test with null pointer (should not crash)
     bitset_fixed<8> bs4(nullptr);
     REQUIRE_EQ(bs4.size(), 8);
@@ -640,6 +654,26 @@ TEST_CASE("test bitset_inlined bitstring constructor") {
     REQUIRE_EQ(bs6.test(5), false);
     REQUIRE_EQ(bs6.test(6), false);
     REQUIRE_EQ(bs6.test(7), false);
+    
+    // Test with bitstring that fits exactly in inlined fixed size  
+    bitset<4> bs_exact_inlined("1010");
+    REQUIRE_EQ(bs_exact_inlined.size(), 4);   // Fixed size
+    REQUIRE_EQ(bs_exact_inlined.count(), 2);  // 2 bits set
+    REQUIRE_EQ(bs_exact_inlined.test(0), true);   // '1'
+    REQUIRE_EQ(bs_exact_inlined.test(1), false);  // '0'
+    REQUIRE_EQ(bs_exact_inlined.test(2), true);   // '1'
+    REQUIRE_EQ(bs_exact_inlined.test(3), false);  // '0'
+    
+    // Test with very large bitstring that overflows inlined fixed size
+    // BitsetInlined<4> will switch to dynamic bitset when string has > 4 valid bits
+    bitset<4> bs_overflow_inlined("1010111100001111000011110000111100001111");
+    REQUIRE_EQ(bs_overflow_inlined.size(), 40);  // Dynamic size matches valid bit count
+    REQUIRE_EQ(bs_overflow_inlined.count(), 22);  // 22 bits are '1' in the string
+    REQUIRE_EQ(bs_overflow_inlined.test(0), true);   // '1'
+    REQUIRE_EQ(bs_overflow_inlined.test(1), false);  // '0'
+    REQUIRE_EQ(bs_overflow_inlined.test(2), true);   // '1'
+    REQUIRE_EQ(bs_overflow_inlined.test(3), false);  // '0'
+    // All 40 bits are processed since it switched to dynamic bitset
 }
 
 TEST_CASE("test bitstring serialization roundtrip") {
