@@ -6,13 +6,13 @@
 
 namespace fl {
 
-template <typename Key, typename Value> struct Pair {
+template <typename T1, typename T2> struct Pair {
     // Member typedefs for std::pair compatibility
-    using first_type = Key;
-    using second_type = Value;
+    using first_type = T1;
+    using second_type = T2;
     
-    Key first = Key();
-    Value second = Value();
+    T1 first = T1();
+    T2 second = T2();
     
     // Default constructor
     Pair() = default;
@@ -20,7 +20,7 @@ template <typename Key, typename Value> struct Pair {
     // Constructor from values
     FL_DISABLE_WARNING_PUSH
     FL_DISABLE_WARNING(null-dereference)
-    Pair(const Key &k, const Value &v) : first(k), second(v) {}
+    Pair(const T1 &k, const T2 &v) : first(k), second(v) {}
     FL_DISABLE_WARNING_POP
     
     // Perfect forwarding constructor
@@ -220,6 +220,6 @@ struct tuple_element<1, Pair<T1, T2>> {
 };
 
 // std compatibility
-template <typename Key, typename Value> using pair = Pair<Key, Value>;
+template <typename T1, typename T2> using pair = Pair<T1, T2>;
 
 } // namespace fl
