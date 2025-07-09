@@ -643,6 +643,13 @@ template <typename T, typename Allocator = fl::allocator<T>> class HeapVector {
         fl::swap(mAlloc, other.mAlloc);
     }
 
+    void swap(HeapVector<T> &&other) {
+        fl::swap(mArray, other.mArray);
+        fl::swap(mSize, other.mSize);
+        fl::swap(mCapacity, other.mCapacity);
+        fl::swap(mAlloc, other.mAlloc);
+    }
+
     void swap(iterator a, iterator b) {
         fl::swap(*a, *b);
     }

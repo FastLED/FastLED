@@ -95,8 +95,7 @@ message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
 
 # Additional build optimizations for faster compilation
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-    # Use -O1 instead of -O0 for faster compilation while still maintaining debuggability
-    set(FAST_DEBUG_OPT -O1)
+    set(FAST_DEBUG_OPT -O0)
     # Use minimal debug info for faster compilation
     set(FAST_DEBUG_INFO -gline-tables-only)
     message(STATUS "Using optimized debug build settings for faster compilation")
