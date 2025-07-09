@@ -43,8 +43,7 @@
         "--completion-style=detailed",
         "--function-arg-placeholders=false",
         "--background-index",
-        "--pch-storage=memory",
-        "-Wno-global-constructors"
+        "--pch-storage=memory"
     ],
     "clangd.fallbackFlags": [
         "-std=c++17",

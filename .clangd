@@ -1,0 +1,23 @@
+CompileFlags:
+  Add: 
+    - -Wno-global-constructors
+    - -std=c++17
+  Remove: 
+    - -Wglobal-constructors
+
+Diagnostics:
+  Suppress: 
+    - global-constructors
+    - exit-time-destructors
+  ClangTidy:
+    Remove: 
+      - cppcoreguidelines-avoid-non-const-global-variables
+      - misc-use-anonymous-namespace
+
+InlayHints:
+  Enabled: true
+  ParameterNames: true
+  DeducedTypes: true
+
+Hover:
+  ShowAKA: true 
