@@ -556,10 +556,14 @@ The project uses a comprehensive test suite including:
 - ❌ **INCORRECT**: Running executables directly
 
 **Examples:**
-- `bash test` - Run all tests
+- `bash test` - Run all tests (includes debug symbols)
 - `bash test audio_json_parsing` - Run specific test
 - `bash test xypath` - Run test_xypath.cpp
 - `bash compile uno --examples Blink` - Compile examples
+
+**Quick Build Options:**
+- `bash test --quick --cpp` - Quick C++ tests only (when no *.py changes)
+- `bash test --quick` - Quick tests including Python (when *.py changes)
 
 **Why:** The `bash test` wrapper handles platform differences, environment setup, and proper test execution across all supported systems.
 
