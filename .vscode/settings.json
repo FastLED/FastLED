@@ -135,6 +135,7 @@
         "__node_handle": "cpp",
         "xstring": "cpp",
         "xutility": "cpp",
-        "xtree": "cpp"
+        "xtree": "cpp",
+        "xhash": "cpp"
     }
 }
