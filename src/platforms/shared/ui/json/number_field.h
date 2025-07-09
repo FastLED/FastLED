@@ -25,6 +25,10 @@ class JsonNumberFieldImpl {
     // Method to allow parent UIElement class to set the group
     void setGroup(const fl::string &groupName);
 
+    int id() const {
+      return mInternal->id();
+    }
+
     JsonNumberFieldImpl &operator=(double value);
     JsonNumberFieldImpl &operator=(int value);
     // Use ALMOST_EQUAL_FLOAT for floating-point comparison

@@ -22,6 +22,10 @@ class JsonDescriptionImpl {
     // Method to allow parent UIElement class to set the group
     void setGroup(const fl::string &groupName);
 
+    int id() const {
+      return mInternal->id();
+    }
+
   private:
     JsonUiInternalPtr mInternal;
     fl::string mText;

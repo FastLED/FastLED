@@ -29,6 +29,10 @@ class JsonAudioImpl {
     // Method to allow parent UIElement class to set the group
     void setGroup(const fl::string &groupName);
 
+    int id() const {
+      return mInternal->id();
+    }
+
   private:
     struct Updater : fl::EngineEvents::Listener {
         void init(JsonAudioImpl *owner);

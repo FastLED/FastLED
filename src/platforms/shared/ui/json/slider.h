@@ -27,6 +27,10 @@ class JsonSliderImpl {
     // Method to allow parent UIElement class to set the group
     void setGroup(const fl::string &groupName);
 
+    int id() const {
+      return mInternal->id();
+    }
+
     template <typename T> T as() const { return static_cast<T>(mValue); }
 
     int as_int() const;

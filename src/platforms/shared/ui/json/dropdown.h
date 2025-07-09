@@ -41,6 +41,10 @@ JsonDropdownImpl(const fl::string &name, fl::span<fl::string> options);
     // Method to allow parent UIElement class to set the group
     void setGroup(const fl::string &groupName);
 
+    int id() const {
+      return mInternal->id();
+    }
+
     JsonDropdownImpl &operator=(int index);
 
   private:

@@ -26,6 +26,10 @@ class JsonButtonImpl {
 
     void click();
 
+    int id() const {
+      return mInternal->id();
+    }
+
   private:
     struct Updater : fl::EngineEvents::Listener {
         void init(JsonButtonImpl *owner);
