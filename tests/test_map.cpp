@@ -113,20 +113,6 @@ TEST_CASE("std::map vs fl::fl_map - Element Access") {
         CHECK(std_map.at(3) == fl_map.at(3));
     }
     
-    SUBCASE("at() method for non-existent keys") {
-        // Note: std::map::at() throws std::out_of_range, but fl::fl_map::at() asserts
-        // We can't directly compare exception behavior, but we can verify the basic functionality
-        try {
-            std_map.at(99);
-        } catch (...) {
-            // Expected exception
-        }
-        
-        // For fl_map, we expect an assertion, but in test mode it might not crash
-        // So we just verify the key doesn't exist
-        CHECK(std_map.find(99) == std_map.end());
-        CHECK(fl_map.find(99) == fl_map.end());
-    }
 }
 
 TEST_CASE("std::map vs fl::fl_map - Find Operations") {

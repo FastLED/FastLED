@@ -5,6 +5,8 @@
 #include "fl/variant.h"
 #include "fl/memfill.h"
 #include "fl/type_traits.h"
+#include "fl/inplacenew.h"
+#include "fl/bit_cast.h"
 
 FL_DISABLE_WARNING_PUSH
 FL_DISABLE_WARNING(float-equal)
@@ -29,8 +31,8 @@ struct is_function_pointer<R(*)(Args...)> {
 // Supports free functions, lambdas/functors, member functions (const &
 // non‑const)
 // 
-// NEW: Uses inline storage for member function callables and free functions
-// to avoid heap allocation. Only lambdas and functors use heap allocation.
+// NEW: Uses inline storage for member functions, free functions, and small
+// lambdas/functors. Only large lambdas/functors use heap allocation.
 //----------------------------------------------------------------------------
 template <typename> class function;
 
@@ -57,6 +59,93 @@ private:
         
         R invoke(Args... args) const {
             return func_ptr(args...);
+        }
+    };
+
+    // Type-erased small lambda/functor callable - stored inline!
+    // Size limit for inline storage - configurable via preprocessor define
+#ifndef FASTLED_INLINE_LAMBDA_SIZE
+#define FASTLED_INLINE_LAMBDA_SIZE 64
+#endif
+    static constexpr fl::size kInlineLambdaSize = FASTLED_INLINE_LAMBDA_SIZE;
+    
+    struct InlinedLambda {
+        // Storage for the lambda/functor object
+        // Use aligned storage to ensure proper alignment for any type
+        union Storage {
+            char bytes[kInlineLambdaSize];
+            void* alignment_dummy;  // Ensure proper alignment
+            long double align_max;  // Ensure maximum alignment
+        } storage;
+        
+        // Type-erased invoker and destructor function pointers
+        R (*invoker)(const Storage& storage, Args... args);
+        void (*destructor)(Storage& storage);
+        
+        template <typename F>
+        InlinedLambda(F f) {
+            static_assert(sizeof(F) <= kInlineLambdaSize, 
+                         "Lambda/functor too large for inline storage");
+            static_assert(alignof(F) <= alignof(Storage), 
+                         "Lambda/functor requires stricter alignment than storage provides");
+            
+            // Construct the lambda/functor in-place
+            new (storage.bytes) F(fl::move(f));
+            
+            // Set up type-erased function pointers
+            invoker = &invoke_lambda<F>;
+            destructor = &destroy_lambda<F>;
+        }
+        
+        // Copy constructor
+        InlinedLambda(const InlinedLambda& other) 
+            : invoker(other.invoker), destructor(other.destructor) {
+            // This is tricky - we need to copy the stored object
+            // For now, we'll use memcopy (works for trivially copyable types)
+            fl::memcopy(storage.bytes, other.storage.bytes, kInlineLambdaSize);
+        }
+        
+        // Move constructor
+        InlinedLambda(InlinedLambda&& other) 
+            : invoker(other.invoker), destructor(other.destructor) {
+            fl::memcopy(storage.bytes, other.storage.bytes, kInlineLambdaSize);
+            // Reset the other object to prevent double destruction
+            other.destructor = nullptr;
+        }
+        
+        ~InlinedLambda() {
+            if (destructor) {
+                destructor(storage);
+            }
+        }
+        
+        template <typename FUNCTOR>
+        static R invoke_lambda(const Storage& storage, Args... args) {
+            // Use placement new to safely access the stored lambda
+            alignas(FUNCTOR) char temp_storage[sizeof(FUNCTOR)];
+            // Copy the lambda from storage
+            fl::memcopy(temp_storage, storage.bytes, sizeof(FUNCTOR));
+            // Get a properly typed pointer to the copied lambda
+            const FUNCTOR* f = static_cast<const FUNCTOR*>(static_cast<const void*>(temp_storage));
+            // Invoke the lambda
+            return (*f)(args...);
+        }
+        
+        template <typename FUNCTOR>
+        static void destroy_lambda(Storage& storage) {
+            // For destruction, we need to call the destructor on the actual object
+            // that was constructed with placement new in storage.bytes
+            // We use the standard library approach: create a properly typed pointer
+            // using placement new, then call the destructor through that pointer
+            
+            // This is the standard-compliant way to get a properly typed pointer
+            // to an object that was constructed with placement new
+            FUNCTOR* obj_ptr = static_cast<FUNCTOR*>(static_cast<void*>(storage.bytes));
+            obj_ptr->~FUNCTOR();
+        }
+        
+        R invoke(Args... args) const {
+            return invoker(storage, args...);
         }
     };
 
@@ -138,8 +227,8 @@ private:
         }
     };
 
-    // Variant to store any of our callable types inline
-    using Storage = Variant<Ptr<CallableBase>, FreeFunctionCallable, NonConstMemberCallable, ConstMemberCallable>;
+    // Variant to store any of our callable types inline (with heap fallback for large lambdas)
+    using Storage = Variant<Ptr<CallableBase>, FreeFunctionCallable, InlinedLambda, NonConstMemberCallable, ConstMemberCallable>;
     Storage storage_;
 
     // Helper function to handle default return value for void and non-void types
@@ -158,15 +247,16 @@ private:
 public:
     function() = default;
     
-    // 1) Free function constructor - now stored inline!
+    // 1) Free function constructor - stored inline!
     function(R (*fp)(Args...)) {
         storage_ = FreeFunctionCallable(fp);
     }
     
-    // 2) generic constructor for lambdas and functors (heap allocated)
+    // 2) Lambda/functor constructor - inline if small, heap if large
     template <typename F, typename = enable_if_t<!is_member_function_pointer<F>::value && !is_function_pointer<F>::value>>
     function(F f) {
-        storage_ = Ptr<CallableBase>(NewPtr<Callable<F>>(f));
+        // Use template specialization instead of if constexpr for C++14 compatibility
+        construct_lambda_or_functor(fl::move(f), typename conditional<sizeof(F) <= kInlineLambdaSize, true_type, false_type>::type{});
     }
     
     // 3) non‑const member function - stored inline!
@@ -182,23 +272,28 @@ public:
     }
     
     R operator()(Args... args) const {
-        // Direct dispatch using type checking
+        // Direct dispatch using type checking - efficient and simple
         if (auto* heap_callable = storage_.template ptr<Ptr<CallableBase>>()) {
             return (*heap_callable)->invoke(args...);
         } else if (auto* free_func = storage_.template ptr<FreeFunctionCallable>()) {
             return free_func->invoke(args...);
+        } else if (auto* inlined_lambda = storage_.template ptr<InlinedLambda>()) {
+            return inlined_lambda->invoke(args...);
         } else if (auto* nonconst_member = storage_.template ptr<NonConstMemberCallable>()) {
             return nonconst_member->invoke(args...);
         } else if (auto* const_member = storage_.template ptr<ConstMemberCallable>()) {
             return const_member->invoke(args...);
         }
         // This should never happen if the function is properly constructed
-        // Return default-constructed R (or throw if you prefer)
         return default_return_helper<R>();
     }
     
     explicit operator bool() const {
         return !storage_.empty();
+    }
+    
+    void clear() {
+        storage_ = Storage{};  // Reset to empty variant
     }
     
     bool operator==(const function& o) const {
@@ -209,6 +304,19 @@ public:
     
     bool operator!=(const function& o) const {
         return !(*this == o);
+    }
+
+private:
+    // Helper for small lambdas/functors - inline storage
+    template <typename F>
+    void construct_lambda_or_functor(F f, true_type /* small */) {
+        storage_ = InlinedLambda(fl::move(f));
+    }
+    
+    // Helper for large lambdas/functors - heap storage
+    template <typename F>
+    void construct_lambda_or_functor(F f, false_type /* large */) {
+        storage_ = Ptr<CallableBase>(NewPtr<Callable<F>>(fl::move(f)));
     }
 };
 

@@ -93,3 +93,31 @@ TEST_CASE("Function list void float") {
     fl.add([](float) { /* do nothing */ });
     fl.invoke(1);
 }
+
+TEST_CASE("Test clear() method") {
+    // Test with lambda
+    function<int(int,int)> f = [](int a, int b) { return a + b; };
+    REQUIRE(f);
+    REQUIRE(f(2, 3) == 5);
+    
+    f.clear();
+    REQUIRE(!f);
+    
+    // Test with free function
+    function<int(int,int)> f2(add);
+    REQUIRE(f2);
+    REQUIRE(f2(4, 6) == 10);
+    
+    f2.clear();
+    REQUIRE(!f2);
+    
+    // Test with member function
+    Foo foo;
+    function<void(int)> f3(&Foo::set, &foo);
+    REQUIRE(f3);
+    f3(42);
+    REQUIRE(foo.value == 42);
+    
+    f3.clear();
+    REQUIRE(!f3);
+}
