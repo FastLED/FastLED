@@ -55,6 +55,8 @@ template <typename T> struct EqualTo;
 template <typename Key, typename Hash, typename KeyEqual> class HashSet;
 
 template <fl::u32 N> class BitsetFixed;
+class bitset_dynamic;
+template <fl::u32 N> class BitsetInlined;
 
 class XYMap;
 
@@ -506,9 +508,20 @@ class string : public StrN<FASTLED_STR_INLINED_SIZE> {
         return *this;
     }
 
-    template <fl::size N>
+    template <fl::u32 N>
     string &append(const BitsetFixed<N> &bs) {
-        append(bs.to_string());
+        bs.to_string(this);
+        return *this;
+    }
+
+    string &append(const bitset_dynamic &bs) {
+        bs.to_string(this);
+        return *this;
+    }
+
+    template <fl::u32 N>
+    string &append(const BitsetInlined<N> &bs) {
+        bs.to_string(this);
         return *this;
     }
 
