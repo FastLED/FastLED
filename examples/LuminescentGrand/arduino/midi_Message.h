@@ -29,7 +29,7 @@
 
 #include "midi_Namespace.h"
 #include "midi_Defs.h"
-#include "fl/memset.h"
+#include "fl/memfill.h"
 
 BEGIN_MIDI_NAMESPACE
 
@@ -49,7 +49,7 @@ struct Message
         , data2(0)
         , valid(false)
     {
-        fl::memset(sysexArray, 0, sSysExMaxSize * sizeof(DataByte));
+        fl::memfill(sysexArray, 0, sSysExMaxSize * sizeof(DataByte));
     }
 
     /*! The maximum size for the System Exclusive array.

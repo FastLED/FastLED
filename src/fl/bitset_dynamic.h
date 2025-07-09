@@ -5,7 +5,7 @@
 #include <string.h> // for memcpy
 
 #include "fl/math_macros.h"
-#include "fl/memset.h"
+#include "fl/memfill.h"
 #include "fl/compiler_control.h"
 
 namespace fl {
@@ -119,7 +119,7 @@ class bitset_dynamic {
 
         if (new_block_count != _block_count) {
             block_type *new_blocks = new block_type[new_block_count];
-            fl::memset(new_blocks, 0, new_block_count * sizeof(block_type));
+            fl::memfill(new_blocks, 0, new_block_count * sizeof(block_type));
 
             if (_blocks) {
                 fl::u32 copy_blocks = MIN(_block_count, new_block_count);
@@ -157,7 +157,7 @@ class bitset_dynamic {
     FL_DISABLE_WARNING(null-dereference)
     void reset() noexcept {
         if (_blocks && _block_count > 0) {
-            fl::memset(_blocks, 0, _block_count * sizeof(block_type));
+            fl::memfill(_blocks, 0, _block_count * sizeof(block_type));
         }
     }
     FL_DISABLE_WARNING_POP

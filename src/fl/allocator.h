@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "fl/inplacenew.h"
-#include "fl/memset.h"
+#include "fl/memfill.h"
 #include "fl/type_traits.h"
 #include "fl/unused.h"
 #include "fl/bit_cast.h"
@@ -76,7 +76,7 @@ template <typename T> class allocator {
         if (ptr == nullptr) {
             return nullptr; // Handle allocation failure
         }
-        fl::memset(ptr, 0, sizeof(T) * n); // Zero-initialize the memory
+        fl::memfill(ptr, 0, sizeof(T) * n); // Zero-initialize the memory
         return static_cast<T*>(ptr);
     }
 
@@ -314,14 +314,14 @@ public:
             // Fall back to regular malloc for bulk allocations
             void* ptr = malloc(sizeof(T) * n);
             if (ptr) {
-                fl::memset(ptr, 0, sizeof(T) * n);
+                fl::memfill(ptr, 0, sizeof(T) * n);
             }
             return static_cast<T*>(ptr);
         }
         
         void* ptr = allocateFromSlab();
         if (ptr) {
-            fl::memset(ptr, 0, sizeof(T));
+            fl::memfill(ptr, 0, sizeof(T));
         }
         return static_cast<T*>(ptr);
     }
@@ -463,7 +463,7 @@ private:
         alignas(T) u8 data[N * sizeof(T)];
         
         InlinedStorage() {
-            fl::memset(data, 0, sizeof(data));
+            fl::memfill(data, 0, sizeof(data));
         }
     };
     

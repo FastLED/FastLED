@@ -28,7 +28,7 @@ all the UI elements you see below.
 #include "src/wave.h"
 #include "src/xypaths.h"
 
-#include "fl/memset.h"
+#include "fl/memfill.h"
 using namespace fl;
 
 #define HEIGHT 64
@@ -113,7 +113,7 @@ float getAnimationTime(uint32_t now) {
     return pointf + transition.value();
 }
 
-void clearLeds() { fl::memset(leds, 0, NUM_LEDS * sizeof(CRGB)); }
+void clearLeds() { fl::memfill(leds, 0, NUM_LEDS * sizeof(CRGB)); }
 
 void loop() {
     // Your code here

@@ -5,8 +5,8 @@
 #include "fx_layer.h"
 
 
-#include "fl/memset.h"
-\
+#include "fl/memfill.h"
+
 namespace fl {
 
 void FxLayer::setFx(fl::Ptr<Fx> newFx) {
@@ -24,7 +24,7 @@ void FxLayer::draw(fl::u32 now) {
 
     if (!running) {
         // Clear the frame
-        fl::memset((uint8_t*)frame->rgb(), 0, frame->size() * sizeof(CRGB));
+        fl::memfill((uint8_t*)frame->rgb(), 0, frame->size() * sizeof(CRGB));
         fx->resume(now);
         running = true;
     }

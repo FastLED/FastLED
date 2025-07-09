@@ -8,22 +8,22 @@ namespace fl {
 
 
 // Overload for void* to maintain standard memset signature
-inline void* memset(void* ptr, int value, fl::size num) {
+inline void* memfill(void* ptr, int value, fl::size num) {
     return ::memset(ptr, value, num);
 }
 
 
-// fl::memset - provides a FastLED-specific memset implementation
+// fl::memfill - provides a FastLED-specific memfill implementation
 // that is compatible across all supported platforms
 template <typename T>
-inline void* memset(T* ptr, int value, fl::size num) {
-    union memset_union {  // For type aliasing safety.
+inline void* memfill(T* ptr, int value, fl::size num) {
+    union memfill_union {  // For type aliasing safety.
         T* ptr;
         void* void_ptr;
     };
-    memset_union u;
+    memfill_union u;
     u.ptr = ptr;
-    return fl::memset(u.void_ptr, value, num);
+    return fl::memfill(u.void_ptr, value, num);
 }
 
 

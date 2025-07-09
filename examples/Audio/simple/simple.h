@@ -41,7 +41,7 @@ all the UI elements you see below.
 // Sketch.
 #include "fx_audio.h"
 
-#include "fl/memset.h"
+#include "fl/memfill.h"
 using namespace fl;
 
 #define HEIGHT 128
@@ -147,7 +147,7 @@ void shiftUp() {
         memcpy(row1, row2, WIDTH * sizeof(CRGB));
     }
     CRGB* row = &framebuffer[frameBufferXY(0, 0)];
-    fl::memset(row, 0, sizeof(CRGB) * WIDTH);
+    fl::memfill(row, 0, sizeof(CRGB) * WIDTH);
 }
 
 
