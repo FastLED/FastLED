@@ -152,54 +152,6 @@ template <typename T> class allocator_psram {
 };
 
 
-// Macro to specialize the Allocator for a specific type to use PSRam
-// Usage: FL_USE_PSRAM_ALLOCATOR(MyClass)
-#define FL_USE_PSRAM_ALLOCATOR(TYPE) \
-template <> \
-class allocator<TYPE> { \
-  public: \
-    using value_type = TYPE; \
-    using pointer = TYPE*; \
-    using const_pointer = const TYPE*; \
-    using reference = TYPE&; \
-    using const_reference = const TYPE&; \
-    using size_type = fl::size; \
-    using difference_type = ptrdiff_t; \
-    \
-    template <typename U> \
-    struct rebind { \
-        using other = allocator<U>; \
-    }; \
-    \
-    allocator() noexcept {} \
-    \
-    template <typename U> \
-    allocator(const allocator<U>&) noexcept {} \
-    \
-    ~allocator() noexcept {} \
-    \
-    TYPE *allocate(fl::size n) { \
-        return fl::bit_cast_ptr<TYPE>(PSRamAllocate(sizeof(TYPE) * n, true)); \
-    } \
-    void deallocate(TYPE *p, fl::size n) { \
-        if (p == nullptr) { \
-            return; \
-        } \
-        PSRamDeallocate(p); \
-    } \
-    \
-    template <typename U, typename... Args> \
-    void construct(U* p, Args&&... args) { \
-        if (p == nullptr) return; \
-        new(static_cast<void*>(p)) U(fl::forward<Args>(args)...); \
-    } \
-    \
-    template <typename U> \
-    void destroy(U* p) { \
-        if (p == nullptr) return; \
-        p->~U(); \
-    } \
-};
 
 // Slab allocator for fixed-size objects
 // Optimized for frequent allocation/deallocation of objects of the same size
@@ -229,12 +181,12 @@ private:
     static constexpr fl::size BLOCKS_PER_SLAB = SLAB_SIZE;
     static constexpr fl::size SLAB_MEMORY_SIZE = BLOCK_SIZE * BLOCKS_PER_SLAB;
 
-    static Slab* slabs_;
-    static FreeBlock* free_list_;
-    static fl::size total_allocated_;
-    static fl::size total_deallocated_;
+    Slab* slabs_;
+    FreeBlock* free_list_;
+    fl::size total_allocated_;
+    fl::size total_deallocated_;
 
-    static Slab* createSlab() {
+    Slab* createSlab() {
         Slab* slab = static_cast<Slab*>(malloc(sizeof(Slab)));
         if (!slab) {
             return nullptr;
@@ -264,7 +216,7 @@ private:
         return slab;
     }
 
-    static void* allocateFromSlab() {
+    void* allocateFromSlab() {
         if (!free_list_) {
             if (!createSlab()) {
                 return nullptr; // Out of memory
@@ -290,7 +242,7 @@ private:
         return block;
     }
 
-    static void deallocateToSlab(void* ptr) {
+    void deallocateToSlab(void* ptr) {
         if (!ptr) {
             return;
         }
@@ -314,7 +266,44 @@ private:
     }
 
 public:
-    static T* allocate(fl::size n = 1) {
+    // Constructor
+    SlabAllocator() : slabs_(nullptr), free_list_(nullptr), total_allocated_(0), total_deallocated_(0) {}
+    
+    // Destructor
+    ~SlabAllocator() {
+        cleanup();
+    }
+    
+    // Non-copyable
+    SlabAllocator(const SlabAllocator&) = delete;
+    SlabAllocator& operator=(const SlabAllocator&) = delete;
+    
+    // Movable
+    SlabAllocator(SlabAllocator&& other) noexcept 
+        : slabs_(other.slabs_), free_list_(other.free_list_), 
+          total_allocated_(other.total_allocated_), total_deallocated_(other.total_deallocated_) {
+        other.slabs_ = nullptr;
+        other.free_list_ = nullptr;
+        other.total_allocated_ = 0;
+        other.total_deallocated_ = 0;
+    }
+    
+    SlabAllocator& operator=(SlabAllocator&& other) noexcept {
+        if (this != &other) {
+            cleanup();
+            slabs_ = other.slabs_;
+            free_list_ = other.free_list_;
+            total_allocated_ = other.total_allocated_;
+            total_deallocated_ = other.total_deallocated_;
+            other.slabs_ = nullptr;
+            other.free_list_ = nullptr;
+            other.total_allocated_ = 0;
+            other.total_deallocated_ = 0;
+        }
+        return *this;
+    }
+
+    T* allocate(fl::size n = 1) {
         if (n != 1) {
             // Slab allocator only supports single object allocation
             // Fall back to regular malloc for bulk allocations
@@ -332,7 +321,7 @@ public:
         return static_cast<T*>(ptr);
     }
 
-    static void deallocate(T* ptr, fl::size n = 1) {
+    void deallocate(T* ptr, fl::size n = 1) {
         if (!ptr) {
             return;
         }
@@ -347,12 +336,12 @@ public:
     }
 
     // Get allocation statistics
-    static fl::size getTotalAllocated() { return total_allocated_; }
-    static fl::size getTotalDeallocated() { return total_deallocated_; }
-    static fl::size getActiveAllocations() { return total_allocated_ - total_deallocated_; }
+    fl::size getTotalAllocated() const { return total_allocated_; }
+    fl::size getTotalDeallocated() const { return total_deallocated_; }
+    fl::size getActiveAllocations() const { return total_allocated_ - total_deallocated_; }
     
     // Get number of slabs
-    static fl::size getSlabCount() {
+    fl::size getSlabCount() const {
         fl::size count = 0;
         for (Slab* slab = slabs_; slab; slab = slab->next) {
             ++count;
@@ -360,8 +349,8 @@ public:
         return count;
     }
 
-    // Cleanup all slabs (call at program exit)
-    static void cleanup() {
+    // Cleanup all slabs
+    void cleanup() {
         while (slabs_) {
             Slab* next = slabs_->next;
             slabs_->~Slab();
@@ -373,19 +362,6 @@ public:
         total_deallocated_ = 0;
     }
 };
-
-// Static member definitions
-template <typename T, fl::size SLAB_SIZE>
-typename SlabAllocator<T, SLAB_SIZE>::Slab* SlabAllocator<T, SLAB_SIZE>::slabs_ = nullptr;
-
-template <typename T, fl::size SLAB_SIZE>
-typename SlabAllocator<T, SLAB_SIZE>::FreeBlock* SlabAllocator<T, SLAB_SIZE>::free_list_ = nullptr;
-
-template <typename T, fl::size SLAB_SIZE>
-fl::size SlabAllocator<T, SLAB_SIZE>::total_allocated_ = 0;
-
-template <typename T, fl::size SLAB_SIZE>
-fl::size SlabAllocator<T, SLAB_SIZE>::total_deallocated_ = 0;
 
 // STL-compatible slab allocator
 template <typename T, fl::size SLAB_SIZE = 64>
@@ -414,20 +390,37 @@ public:
     allocator_slab() noexcept {}
 
     // Copy constructor
+    allocator_slab(const allocator_slab& other) noexcept {
+        FASTLED_UNUSED(other);
+    }
+
+    // Copy assignment
+    allocator_slab& operator=(const allocator_slab& other) noexcept {
+        FASTLED_UNUSED(other);
+        return *this;
+    }
+
+    // Template copy constructor
     template <typename U>
-    allocator_slab(const allocator_slab<U, SLAB_SIZE>&) noexcept {}
+    allocator_slab(const allocator_slab<U, SLAB_SIZE>& other) noexcept {
+        FASTLED_UNUSED(other);
+    }
 
     // Destructor
     ~allocator_slab() noexcept {}
 
     // Allocate memory for n objects of type T
     T* allocate(fl::size n) {
-        return SlabAllocator<T, SLAB_SIZE>::allocate(n);
+        // Use a static allocator instance per type/size combination
+        static SlabAllocator<T, SLAB_SIZE> allocator;
+        return allocator.allocate(n);
     }
 
     // Deallocate memory for n objects of type T
     void deallocate(T* p, fl::size n) {
-        SlabAllocator<T, SLAB_SIZE>::deallocate(p, n);
+        // Use the same static allocator instance
+        static SlabAllocator<T, SLAB_SIZE> allocator;
+        allocator.deallocate(p, n);
     }
 
     // Construct an object at the specified address

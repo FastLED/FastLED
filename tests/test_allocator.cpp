@@ -22,55 +22,51 @@ TEST_CASE("SlabAllocator - Basic functionality") {
     using TestAllocator = SlabAllocator<TestObject, 8>;
     
     SUBCASE("Single allocation and deallocation") {
-        // Clean slate
-        TestAllocator::cleanup();
+        TestAllocator allocator;
         
-        TestObject* ptr = TestAllocator::allocate();
+        TestObject* ptr = allocator.allocate();
         REQUIRE(ptr != nullptr);
-        CHECK(TestAllocator::getTotalAllocated() == 1);
-        CHECK(TestAllocator::getActiveAllocations() == 1);
+        CHECK(allocator.getTotalAllocated() == 1);
+        CHECK(allocator.getActiveAllocations() == 1);
         
-        TestAllocator::deallocate(ptr);
-        CHECK(TestAllocator::getTotalDeallocated() == 1);
-        CHECK(TestAllocator::getActiveAllocations() == 0);
-        
-        TestAllocator::cleanup();
+        allocator.deallocate(ptr);
+        CHECK(allocator.getTotalDeallocated() == 1);
+        CHECK(allocator.getActiveAllocations() == 0);
     }
     
     SUBCASE("Multiple allocations") {
-        TestAllocator::cleanup();
+        TestAllocator allocator;
         
         fl::vector<TestObject*> ptrs;
         const size_t num_allocs = 5;
         
         for (size_t i = 0; i < num_allocs; ++i) {
-            TestObject* ptr = TestAllocator::allocate();
+            TestObject* ptr = allocator.allocate();
             REQUIRE(ptr != nullptr);
             ptrs.push_back(ptr);
         }
         
-        CHECK(TestAllocator::getTotalAllocated() == num_allocs);
-        CHECK(TestAllocator::getActiveAllocations() == num_allocs);
+        CHECK(allocator.getTotalAllocated() == num_allocs);
+        CHECK(allocator.getActiveAllocations() == num_allocs);
         
         for (TestObject* ptr : ptrs) {
-            TestAllocator::deallocate(ptr);
+            allocator.deallocate(ptr);
         }
         
-        CHECK(TestAllocator::getActiveAllocations() == 0);
-        TestAllocator::cleanup();
+        CHECK(allocator.getActiveAllocations() == 0);
     }
 }
 
 TEST_CASE("SlabAllocator - Contiguous memory within slab") {
     using TestAllocator = SlabAllocator<TestObject, 8>;
-    TestAllocator::cleanup();
+    TestAllocator allocator;
     
     SUBCASE("First 8 allocations should be contiguous") {
         fl::vector<TestObject*> ptrs;
         
         // Allocate exactly one slab worth of objects
         for (size_t i = 0; i < 8; ++i) {
-            TestObject* ptr = TestAllocator::allocate();
+            TestObject* ptr = allocator.allocate();
             REQUIRE(ptr != nullptr);
             ptrs.push_back(ptr);
         }
@@ -101,9 +97,8 @@ TEST_CASE("SlabAllocator - Contiguous memory within slab") {
         
         // Cleanup
         for (TestObject* ptr : ptrs) {
-            TestAllocator::deallocate(ptr);
+            allocator.deallocate(ptr);
         }
-        TestAllocator::cleanup();
     }
     
     SUBCASE("Memory boundaries verification") {
@@ -111,7 +106,7 @@ TEST_CASE("SlabAllocator - Contiguous memory within slab") {
         
         // Allocate one slab worth
         for (size_t i = 0; i < 8; ++i) {
-            TestObject* ptr = TestAllocator::allocate();
+            TestObject* ptr = allocator.allocate();
             REQUIRE(ptr != nullptr);
             ptrs.push_back(ptr);
         }
@@ -146,15 +141,14 @@ TEST_CASE("SlabAllocator - Contiguous memory within slab") {
         
         // Cleanup
         for (TestObject* ptr : ptrs) {
-            TestAllocator::deallocate(ptr);
+            allocator.deallocate(ptr);
         }
-        TestAllocator::cleanup();
     }
 }
 
 TEST_CASE("SlabAllocator - Multiple slabs behavior") {
     using TestAllocator = SlabAllocator<TestObject, 4>;  // Smaller slab for easier testing
-    TestAllocator::cleanup();
+    TestAllocator allocator;
     
     SUBCASE("Allocation across multiple slabs") {
         fl::vector<TestObject*> ptrs;
@@ -162,13 +156,13 @@ TEST_CASE("SlabAllocator - Multiple slabs behavior") {
         // Allocate more than one slab can hold (4 * 3 = 12 objects across 3 slabs)
         const size_t total_allocs = 12;
         for (size_t i = 0; i < total_allocs; ++i) {
-            TestObject* ptr = TestAllocator::allocate();
+            TestObject* ptr = allocator.allocate();
             REQUIRE(ptr != nullptr);
             ptrs.push_back(ptr);
         }
         
-        CHECK(TestAllocator::getSlabCount() == 3);  // Should have created 3 slabs
-        CHECK(TestAllocator::getTotalAllocated() == total_allocs);
+        CHECK(allocator.getSlabCount() == 3);  // Should have created 3 slabs
+        CHECK(allocator.getTotalAllocated() == total_allocs);
         
         // Test that all allocations are valid and don't overlap
         fl::vector<TestObject*> sorted_ptrs = ptrs;
@@ -209,22 +203,21 @@ TEST_CASE("SlabAllocator - Multiple slabs behavior") {
         
         // Cleanup
         for (TestObject* ptr : ptrs) {
-            TestAllocator::deallocate(ptr);
+            allocator.deallocate(ptr);
         }
-        TestAllocator::cleanup();
     }
 }
 
 TEST_CASE("SlabAllocator - Memory layout verification") {
     using SmallAllocator = SlabAllocator<uint32_t, 16>;
-    SmallAllocator::cleanup();
+    SmallAllocator allocator;
     
     SUBCASE("Detailed memory layout check") {
         fl::vector<uint32_t*> ptrs;
         
         // Allocate exactly one slab worth
         for (size_t i = 0; i < 16; ++i) {
-            uint32_t* ptr = SmallAllocator::allocate();
+            uint32_t* ptr = allocator.allocate();
             REQUIRE(ptr != nullptr);
             ptrs.push_back(ptr);
         }
@@ -264,68 +257,63 @@ TEST_CASE("SlabAllocator - Memory layout verification") {
         
         // Cleanup
         for (uint32_t* ptr : ptrs) {
-            SmallAllocator::deallocate(ptr);
+            allocator.deallocate(ptr);
         }
-        SmallAllocator::cleanup();
     }
 }
 
 TEST_CASE("SlabAllocator - Edge cases") {
     using EdgeAllocator = SlabAllocator<char, 8>;
-    EdgeAllocator::cleanup();
+    EdgeAllocator allocator;
     
     SUBCASE("Allocation and deallocation pattern") {
         fl::vector<char*> ptrs;
         
         // Allocate all blocks in slab
         for (size_t i = 0; i < 8; ++i) {
-            char* ptr = EdgeAllocator::allocate();
+            char* ptr = allocator.allocate();
             REQUIRE(ptr != nullptr);
             ptrs.push_back(ptr);
         }
         
         // Deallocate every other block
         for (size_t i = 0; i < ptrs.size(); i += 2) {
-            EdgeAllocator::deallocate(ptrs[i]);
+            allocator.deallocate(ptrs[i]);
             ptrs[i] = nullptr;
         }
         
         // Reallocate - should reuse freed blocks
         fl::vector<char*> new_ptrs;
         for (size_t i = 0; i < 4; ++i) {  // 4 blocks were freed
-            char* ptr = EdgeAllocator::allocate();
+            char* ptr = allocator.allocate();
             REQUIRE(ptr != nullptr);
             new_ptrs.push_back(ptr);
         }
         
         // All new allocations should be from the same slab (reused memory)
-        CHECK(EdgeAllocator::getSlabCount() == 1);  // Still only one slab
+        CHECK(allocator.getSlabCount() == 1);  // Still only one slab
         
         // Cleanup
         for (size_t i = 0; i < ptrs.size(); ++i) {
             if (ptrs[i] != nullptr) {
-                EdgeAllocator::deallocate(ptrs[i]);
+                allocator.deallocate(ptrs[i]);
             }
         }
         for (char* ptr : new_ptrs) {
-            EdgeAllocator::deallocate(ptr);
+            allocator.deallocate(ptr);
         }
-        EdgeAllocator::cleanup();
     }
     
     SUBCASE("Bulk allocation fallback") {
-        EdgeAllocator::cleanup();
-        
         // Request bulk allocation (n != 1) - should fallback to malloc
-        char* bulk_ptr = EdgeAllocator::allocate(10);
+        char* bulk_ptr = allocator.allocate(10);
         REQUIRE(bulk_ptr != nullptr);
         
         // This should not affect slab statistics since it uses malloc
-        CHECK(EdgeAllocator::getTotalAllocated() == 0);  // Slab stats unchanged
-        CHECK(EdgeAllocator::getSlabCount() == 0);       // No slabs created
+        CHECK(allocator.getTotalAllocated() == 0);  // Slab stats unchanged
+        CHECK(allocator.getSlabCount() == 0);       // No slabs created
         
-        EdgeAllocator::deallocate(bulk_ptr, 10);
-        EdgeAllocator::cleanup();
+        allocator.deallocate(bulk_ptr, 10);
     }
 }
 
@@ -347,8 +335,6 @@ TEST_CASE("SlabAllocator - STL compatibility") {
         // Destroy and deallocate
         alloc.destroy(ptr);
         alloc.deallocate(ptr, 1);
-        
-        SlabAllocator<TestObject, 8>::cleanup();
     }
     
     SUBCASE("Allocator equality") {
