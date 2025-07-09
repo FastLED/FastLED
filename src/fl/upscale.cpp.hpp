@@ -17,6 +17,92 @@ u8 bilinearInterpolate(u8 v00, u8 v10, u8 v01, u8 v11,
 u8 bilinearInterpolatePowerOf2(u8 v00, u8 v10, u8 v01,
                                     u8 v11, u8 dx, u8 dy);
 
+void upscaleRectangular(const CRGB *input, CRGB *output, u16 inputWidth,
+                        u16 inputHeight, u16 outputWidth, u16 outputHeight) {
+    const u16 scale_factor = 256; // Using 8 bits for the fractional part
+
+    for (u16 y = 0; y < outputHeight; y++) {
+        for (u16 x = 0; x < outputWidth; x++) {
+            // Calculate the corresponding position in the input grid
+            u32 fx = ((u32)x * (inputWidth - 1) * scale_factor) /
+                          (outputWidth - 1);
+            u32 fy = ((u32)y * (inputHeight - 1) * scale_factor) /
+                          (outputHeight - 1);
+
+            u16 ix = fx / scale_factor; // Integer part of x
+            u16 iy = fy / scale_factor; // Integer part of y
+            u16 dx = fx % scale_factor; // Fractional part of x
+            u16 dy = fy % scale_factor; // Fractional part of y
+
+            u16 ix1 = (ix + 1 < inputWidth) ? ix + 1 : ix;
+            u16 iy1 = (iy + 1 < inputHeight) ? iy + 1 : iy;
+
+            // Direct array access - no XY mapping overhead
+            u16 i00 = iy * inputWidth + ix;
+            u16 i10 = iy * inputWidth + ix1;
+            u16 i01 = iy1 * inputWidth + ix;
+            u16 i11 = iy1 * inputWidth + ix1;
+
+            CRGB c00 = input[i00];
+            CRGB c10 = input[i10];
+            CRGB c01 = input[i01];
+            CRGB c11 = input[i11];
+
+            CRGB result;
+            result.r = bilinearInterpolate(c00.r, c10.r, c01.r, c11.r, dx, dy);
+            result.g = bilinearInterpolate(c00.g, c10.g, c01.g, c11.g, dx, dy);
+            result.b = bilinearInterpolate(c00.b, c10.b, c01.b, c11.b, dx, dy);
+
+            // Direct array access - no XY mapping overhead
+            u16 idx = y * outputWidth + x;
+            output[idx] = result;
+        }
+    }
+}
+
+void upscaleRectangularPowerOf2(const CRGB *input, CRGB *output, u8 inputWidth,
+                                u8 inputHeight, u8 outputWidth, u8 outputHeight) {
+    for (u8 y = 0; y < outputHeight; y++) {
+        for (u8 x = 0; x < outputWidth; x++) {
+            // Use 8-bit fixed-point arithmetic with 8 fractional bits
+            // (scale factor of 256)
+            u16 fx = ((u16)x * (inputWidth - 1) * 256) / (outputWidth - 1);
+            u16 fy = ((u16)y * (inputHeight - 1) * 256) / (outputHeight - 1);
+
+            u8 ix = fx >> 8; // Integer part
+            u8 iy = fy >> 8;
+            u8 dx = fx & 0xFF; // Fractional part
+            u8 dy = fy & 0xFF;
+
+            u8 ix1 = (ix + 1 < inputWidth) ? ix + 1 : ix;
+            u8 iy1 = (iy + 1 < inputHeight) ? iy + 1 : iy;
+
+            // Direct array access - no XY mapping overhead
+            u16 i00 = iy * inputWidth + ix;
+            u16 i10 = iy * inputWidth + ix1;
+            u16 i01 = iy1 * inputWidth + ix;
+            u16 i11 = iy1 * inputWidth + ix1;
+
+            CRGB c00 = input[i00];
+            CRGB c10 = input[i10];
+            CRGB c01 = input[i01];
+            CRGB c11 = input[i11];
+
+            CRGB result;
+            result.r =
+                bilinearInterpolatePowerOf2(c00.r, c10.r, c01.r, c11.r, dx, dy);
+            result.g =
+                bilinearInterpolatePowerOf2(c00.g, c10.g, c01.g, c11.g, dx, dy);
+            result.b =
+                bilinearInterpolatePowerOf2(c00.b, c10.b, c01.b, c11.b, dx, dy);
+
+            // Direct array access - no XY mapping overhead
+            u16 idx = y * outputWidth + x;
+            output[idx] = result;
+        }
+    }
+}
+
 void upscaleArbitrary(const CRGB *input, CRGB *output, u16 inputWidth,
                       u16 inputHeight, const XYMap& xyMap) {
     u16 n = xyMap.getTotal();
