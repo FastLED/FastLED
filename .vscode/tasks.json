@@ -81,6 +81,32 @@
         },
         {
             "type": "shell",
+            "label": "Build Current Test File",
+            "command": "bash",
+            "args": [
+                "test",
+                "--cpp",
+                "${fileBasenameNoExtension}"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": false
+            },
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "detail": "Build the test file currently open in the editor"
+        },
+        {
+            "type": "shell",
             "label": "Clean Build",
             "command": "rm",
             "args": [
@@ -130,7 +156,7 @@
             "label": "Check Debug Symbols",
             "command": "file",
             "args": [
-                "${workspaceFolder}/tests/.build/bin/test_${input:testNameOnly}"
+                "${workspaceFolder}/tests/.build/bin/${input:testNameFull}"
             ],
             "options": {
                 "cwd": "${workspaceFolder}"
@@ -171,7 +197,7 @@
     "inputs": [
         {
             "id": "testName",
-            "description": "Enter test name to build/run",
+            "description": "Enter test name to build/run (with or without test_ prefix)",
             "type": "promptString",
             "default": "allocator"
         },
@@ -180,6 +206,12 @@
             "description": "Enter test name (without test_ prefix)",
             "type": "promptString",
             "default": "allocator"
+        },
+        {
+            "id": "testNameFull",
+            "description": "Enter full test executable name (e.g., test_allocator.exe)",
+            "type": "promptString",
+            "default": "test_allocator.exe"
         }
     ]
 }

@@ -111,7 +111,12 @@ def run_tests(specific_test: str | None = None) -> None:
 
     # If specific test is specified, filter for just that test
     if specific_test:
-        test_name = f"test_{specific_test}"
+        # Check if the test name already starts with "test_" prefix
+        if specific_test.startswith("test_"):
+            test_name = specific_test
+        else:
+            test_name = f"test_{specific_test}"
+
         if sys.platform == "win32":
             test_name += ".exe"
         files = [f for f in files if f == test_name]
