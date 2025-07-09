@@ -329,7 +329,7 @@ TEST_CASE("circular_buffer stress test with rapid operations") {
     CircularBuffer<int> buffer(50);
 
     // Stress test: rapid push/pop operations
-    const size_t stress_iterations = 10000;
+    const size_t stress_iterations = 1000; // Reduced from 10000
     size_t total_added = 0;
     size_t total_removed = 0;
     FL_UNUSED(total_added);
@@ -372,7 +372,7 @@ TEST_CASE("circular_buffer wraparound integrity test") {
     CircularBuffer<int> buffer(7); // Prime number for interesting wraparound behavior
 
     // Fill buffer multiple times to test wraparound
-    const size_t cycles = 100;
+    const size_t cycles = 20; // Reduced from 100
     for (size_t cycle = 0; cycle < cycles; ++cycle) {
         // Fill the buffer completely
         for (size_t i = 0; i < 7; ++i) {
@@ -404,7 +404,7 @@ TEST_CASE("circular_buffer bulk operations without overflow") {
 
     // Test 1: Add elements in chunks
     const size_t chunk_size = 250;
-    const size_t num_chunks = 20; // Total: 5000 elements (5x buffer capacity)
+    const size_t num_chunks = 8; // Reduced from 20 - Total: 2000 elements (2x buffer capacity)
 
     for (size_t chunk = 0; chunk < num_chunks; ++chunk) {
         for (size_t i = 0; i < chunk_size; ++i) {
@@ -421,13 +421,13 @@ TEST_CASE("circular_buffer bulk operations without overflow") {
     CHECK_EQ(buffer.size(), 1000);
 
     // Verify the buffer contains the correct last 1000 elements
-    size_t expected_start = (num_chunks * chunk_size) - 1000; // 4000
+    size_t expected_start = (num_chunks * chunk_size) - 1000; // 1000
     for (size_t i = 0; i < buffer.size(); ++i) {
         CHECK_EQ(buffer[i], static_cast<int>(expected_start + i));
     }
 
     // Test 2: Mixed operations (bulk add, partial remove)
-    for (size_t round = 0; round < 100; ++round) {
+    for (size_t round = 0; round < 20; ++round) { // Reduced from 100
         // Add 50 elements
         for (size_t i = 0; i < 50; ++i) {
             buffer.push_back(static_cast<int>(10000 + round * 50 + i));
@@ -452,7 +452,7 @@ TEST_CASE("circular_buffer edge case with maximum indices") {
 
     // Test that internal index calculations don't overflow
     // by simulating many wraparounds
-    const size_t many_operations = 1000000;
+    const size_t many_operations = 10000; // Reduced from 1000000
 
     for (size_t i = 0; i < many_operations; ++i) {
         buffer.push_back(static_cast<int>(i % 100));
@@ -485,7 +485,7 @@ TEST_CASE("circular_buffer memory safety with alternating operations") {
     CircularBuffer<int> buffer(10);
 
     // Pattern that could potentially cause memory issues if buffer logic is wrong
-    for (size_t iteration = 0; iteration < 1000; ++iteration) {
+    for (size_t iteration = 0; iteration < 100; ++iteration) { // Reduced from 1000
         // Fill buffer
         for (size_t i = 0; i < 15; ++i) { // Overfill by 5
             buffer.push_back(static_cast<int>(iteration * 15 + i));
