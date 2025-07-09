@@ -102,7 +102,16 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug")
 else()
     # Full debugging settings (enables step-through debugging)
     set(FAST_DEBUG_OPT -O0)  # No optimization for accurate debugging
-    set(FAST_DEBUG_INFO -g3)  # Full debug info including macros
+    # Generate both debug formats: DWARF for GDB and CodeView for stack traces
+    if(WIN32 AND CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+        # On Windows with Clang: generate both DWARF (for GDB) and CodeView (for stack traces)
+        set(FAST_DEBUG_INFO -g3 -gdwarf-4)  # DWARF for GDB compatibility + full debug info
+        message(STATUS "Using dual debug format: DWARF for GDB + CodeView for stack traces")
+    else()
+        # Non-Windows or non-Clang: standard DWARF debug info
+        set(FAST_DEBUG_INFO -g3)  # Full debug info including macros
+        message(STATUS "Using DWARF debug format")
+    endif()
 endif()
 
 # Optimization suggestions for even faster builds (uncomment to test):
@@ -123,7 +132,18 @@ endif()
 
 # Full debugging settings (enables step-through debugging)
 set(FAST_DEBUG_OPT -O0)  # No optimization for accurate debugging
-set(FAST_DEBUG_INFO -g3)  # Full debug info including macros
+
+# Generate both debug formats: DWARF for GDB and CodeView for stack traces
+if(WIN32 AND CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+    # On Windows with Clang: generate both DWARF (for GDB) and CodeView (for stack traces)
+    set(FAST_DEBUG_INFO -g3 -gdwarf-4)  # DWARF for GDB compatibility + full debug info
+    message(STATUS "Using dual debug format: DWARF for GDB + CodeView for stack traces")
+else()
+    # Non-Windows or non-Clang: standard DWARF debug info
+    set(FAST_DEBUG_INFO -g3)  # Full debug info including macros
+    message(STATUS "Using DWARF debug format")
+endif()
+
 set(FAST_FRAME_POINTER -fno-omit-frame-pointer)
 
 # Define common compiler flags and definitions

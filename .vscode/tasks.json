@@ -28,7 +28,8 @@
             "problemMatcher": [
                 "$gcc"
             ],
-            "detail": "Build FastLED tests using the project's build system with Clang"
+            "detail": "Build FastLED tests using the project's build system with Clang",
+            "dependsOn": "Copy Compile Commands"
         },
         {
             "type": "shell",
@@ -52,7 +53,8 @@
             "problemMatcher": [
                 "$gcc"
             ],
-            "detail": "Build FastLED tests with full test suite (includes Python tests)"
+            "detail": "Build FastLED tests with full test suite (includes Python tests)",
+            "dependsOn": "Copy Compile Commands"
         },
         {
             "type": "shell",
@@ -77,7 +79,8 @@
             "problemMatcher": [
                 "$gcc"
             ],
-            "detail": "Build and run a specific FastLED test"
+            "detail": "Build and run a specific FastLED test",
+            "dependsOn": "Copy Compile Commands"
         },
         {
             "type": "shell",
@@ -103,7 +106,60 @@
             "problemMatcher": [
                 "$gcc"
             ],
-            "detail": "Build the test file currently open in the editor"
+            "detail": "Build the test file currently open in the editor",
+            "dependsOn": "Copy Compile Commands"
+        },
+        {
+            "type": "shell",
+            "label": "Compile Current Test File (Debug Only)",
+            "command": "uv",
+            "args": [
+                "run",
+                "ci/cpp_test_run.py",
+                "--compile-only",
+                "--clang",
+                "--test",
+                "${fileBasenameNoExtension}"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": false
+            },
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "detail": "Compile (but don't run) the test file for debugging",
+            "dependsOn": "Copy Compile Commands"
+        },
+        {
+            "type": "shell",
+            "label": "Copy Compile Commands",
+            "command": "cp",
+            "args": [
+                "tests/.build/compile_commands.json",
+                "compile_commands.json"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "group": "build",
+            "presentation": {
+                "echo": false,
+                "reveal": "silent",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": false,
+                "clear": false
+            },
+            "detail": "Copy compile_commands.json to project root for clangd"
         },
         {
             "type": "shell",

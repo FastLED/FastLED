@@ -18,6 +18,42 @@
     "editor.insertSpaces": true,
     "editor.detectIndentation": true,
     "editor.formatOnSave": false,
+    // Debugger defaults - ensure C++ debugger is used for C++ files
+    "debug.defaultDebuggerType": "cppdbg",
+    "debug.toolBarLocation": "docked",
+    "debug.console.fontSize": 14,
+    "debug.console.lineHeight": 19,
+    // Prevent Python debugger from interfering with C++ files
+    "python.defaultInterpreterPath": "uv",
+    "python.debugger": "debugpy",
+    // File associations for debugger
+    "[cpp]": {
+        "editor.defaultFormatter": "ms-vscode.cpptools",
+        "debug.defaultDebuggerType": "cppdbg"
+    },
+    "[c]": {
+        "editor.defaultFormatter": "ms-vscode.cpptools", 
+        "debug.defaultDebuggerType": "cppdbg"
+    },
+    // clangd configuration
+    "clangd.arguments": [
+        "--compile-commands-dir=${workspaceFolder}",
+        "--clang-tidy",
+        "--header-insertion=never",
+        "--completion-style=detailed",
+        "--function-arg-placeholders=false",
+        "--background-index",
+        "--pch-storage=memory"
+    ],
+    "clangd.fallbackFlags": [
+        "-std=c++17",
+        "-I${workspaceFolder}/src",
+        "-I${workspaceFolder}/tests"
+    ],
+    // Disable conflicting IntelliSense to let clangd handle C++ analysis
+    "C_Cpp.intelliSenseEngine": "disabled",
+    "C_Cpp.autocomplete": "disabled",
+    "C_Cpp.errorSquiggles": "disabled",
     "files.associations": {
         "*.embeddedhtml": "html",
         "compare": "cpp",

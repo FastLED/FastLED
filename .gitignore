@@ -63,3 +63,4 @@ tmp.*
 .ccache/
 
 .pio_cache
+compile_commands.json
