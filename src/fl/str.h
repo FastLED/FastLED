@@ -715,4 +715,62 @@ inline string to_string(T value) {
     return result;
 }
 
+// Free operator+ functions for string concatenation
+// These allow expressions like: fl::string val = "string" + fl::to_string(5)
+
+// String literal + fl::string
+inline string operator+(const char* lhs, const string& rhs) {
+    string result(lhs);
+    result += rhs;
+    return result;
+}
+
+// fl::string + string literal
+inline string operator+(const string& lhs, const char* rhs) {
+    string result(lhs);
+    result += rhs;
+    return result;
+}
+
+// fl::string + fl::string
+inline string operator+(const string& lhs, const string& rhs) {
+    string result(lhs);
+    result += rhs;
+    return result;
+}
+
+// String literal + any type that can be converted to string
+template<typename T>
+inline string operator+(const char* lhs, const T& rhs) {
+    string result(lhs);
+    result += rhs;
+    return result;
+}
+
+// Any type that can be converted to string + string literal
+template<typename T>
+inline string operator+(const T& lhs, const char* rhs) {
+    string result;
+    result.append(lhs);
+    result += rhs;
+    return result;
+}
+
+// fl::string + any type that can be converted to string
+template<typename T>
+inline string operator+(const string& lhs, const T& rhs) {
+    string result(lhs);
+    result += rhs;
+    return result;
+}
+
+// Any type that can be converted to string + fl::string
+template<typename T>
+inline string operator+(const T& lhs, const string& rhs) {
+    string result;
+    result.append(lhs);
+    result += rhs;
+    return result;
+}
+
 } // namespace fl
