@@ -21,7 +21,7 @@ uint8_t time_alpha8(uint32_t now, uint32_t start, uint32_t end) {
     return static_cast<uint8_t>(out);
 }
 
-uint16_t time_alpha16(uint32_t now, uint32_t start, uint32_t end) {
+u16 time_alpha16(uint32_t now, uint32_t start, uint32_t end) {
     if (now < start) {
         return 0;
     }
@@ -34,7 +34,7 @@ uint16_t time_alpha16(uint32_t now, uint32_t start, uint32_t end) {
     if (out > 65535) {
         out = 65535;
     }
-    return static_cast<uint16_t>(out);
+    return static_cast<u16>(out);
 }
 
 TimeRamp::TimeRamp(uint32_t risingTime, uint32_t latchMs, uint32_t fallingTime)

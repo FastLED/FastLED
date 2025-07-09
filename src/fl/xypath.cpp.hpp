@@ -46,7 +46,7 @@ vec2f XYPath::at(float alpha, const TransformFloat &tx) {
     return mPathRenderer->at(alpha, tx);
 }
 
-void XYPath::setDrawBounds(uint16_t width, uint16_t height) {
+void XYPath::setDrawBounds(u16 width, u16 height) {
     mPathRenderer->setDrawBounds(width, height);
 }
 
@@ -89,7 +89,7 @@ void XYPathRenderer::rasterize(
     }
 }
 
-void XYPathRenderer::setDrawBounds(uint16_t width, uint16_t height) {
+void XYPathRenderer::setDrawBounds(u16 width, u16 height) {
     // auto &tx = *(mGridTransform.mImpl);
     auto &tx = mGridTransform;
 
@@ -164,7 +164,7 @@ XYPathPtr XYPath::NewCirclePath() {
     return XYPathPtr::New(path);
 }
 
-XYPathPtr XYPath::NewCirclePath(uint16_t width, uint16_t height) {
+XYPathPtr XYPath::NewCirclePath(u16 width, u16 height) {
     CirclePathPtr path = CirclePathPtr::New();
     XYPathPtr out = XYPathPtr::New(path);
     out->setDrawBounds(width, height);
@@ -176,14 +176,14 @@ XYPathPtr XYPath::NewHeartPath() {
     return XYPathPtr::New(path);
 }
 
-XYPathPtr XYPath::NewHeartPath(uint16_t width, uint16_t height) {
+XYPathPtr XYPath::NewHeartPath(u16 width, u16 height) {
     HeartPathPtr path = HeartPathPtr::New();
     XYPathPtr out = XYPathPtr::New(path);
     out->setDrawBounds(width, height);
     return out;
 }
 
-XYPathPtr XYPath::NewArchimedeanSpiralPath(uint16_t width, uint16_t height) {
+XYPathPtr XYPath::NewArchimedeanSpiralPath(u16 width, u16 height) {
     ArchimedeanSpiralPathPtr path = ArchimedeanSpiralPathPtr::New();
     XYPathPtr out = XYPathPtr::New(path);
     out->setDrawBounds(width, height);
@@ -196,7 +196,7 @@ XYPathPtr XYPath::NewArchimedeanSpiralPath() {
     return out;
 }
 
-XYPathPtr XYPath::NewRosePath(uint16_t width, uint16_t height,
+XYPathPtr XYPath::NewRosePath(u16 width, u16 height,
                               const Ptr<RosePathParams> &params) {
     RosePathPtr path = RosePathPtr::New(params);
     XYPathPtr out = XYPathPtr::New(path);
@@ -206,7 +206,7 @@ XYPathPtr XYPath::NewRosePath(uint16_t width, uint16_t height,
     return out;
 }
 
-XYPathPtr XYPath::NewPhyllotaxisPath(uint16_t width, uint16_t height,
+XYPathPtr XYPath::NewPhyllotaxisPath(u16 width, u16 height,
                                      const Ptr<PhyllotaxisParams> &args) {
     PhyllotaxisPathPtr path = PhyllotaxisPathPtr::New(args);
     XYPathPtr out = XYPathPtr::New(path);
@@ -216,7 +216,7 @@ XYPathPtr XYPath::NewPhyllotaxisPath(uint16_t width, uint16_t height,
     return out;
 }
 
-XYPathPtr XYPath::NewGielisCurvePath(uint16_t width, uint16_t height,
+XYPathPtr XYPath::NewGielisCurvePath(u16 width, u16 height,
                                      const Ptr<GielisCurveParams> &params) {
     GielisCurvePathPtr path = GielisCurvePathPtr::New(params);
     XYPathPtr out = XYPathPtr::New(path);
@@ -226,7 +226,7 @@ XYPathPtr XYPath::NewGielisCurvePath(uint16_t width, uint16_t height,
     return out;
 }
 
-XYPathPtr XYPath::NewCatmullRomPath(uint16_t width, uint16_t height,
+XYPathPtr XYPath::NewCatmullRomPath(u16 width, u16 height,
                                     const Ptr<CatmullRomParams> &params) {
     CatmullRomPathPtr path = CatmullRomPathPtr::New(params);
     XYPathPtr out = XYPathPtr::New(path);

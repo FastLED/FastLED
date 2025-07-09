@@ -72,7 +72,7 @@ class UISliderImpl {
     void setValue(float value) { mValue = MAX(mMin, MIN(mMax, value)); }
     operator float() const { return mValue; }
     operator uint8_t() const { return static_cast<uint8_t>(mValue); }
-    operator uint16_t() const { return static_cast<uint16_t>(mValue); }
+    operator u16() const { return static_cast<u16>(mValue); }
     operator int() const { return static_cast<int>(mValue); }
     template <typename T> T as() const { return static_cast<T>(mValue); }
 

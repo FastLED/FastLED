@@ -19,7 +19,7 @@ namespace fl {
 FASTLED_SMART_PTR(TransformFloatImpl);
 
 using alpha16 =
-    uint16_t; // fixed point representation of 0->1 in the range [0, 65535]
+    u16; // fixed point representation of 0->1 in the range [0, 65535]
 
 // This transform assumes the coordinates are in the range [0,65535].
 struct Transform16 {
@@ -29,7 +29,7 @@ struct Transform16 {
     static Transform16 ToBounds(const vec2<alpha16> &min,
                                 const vec2<alpha16> &max, alpha16 rotation = 0);
 
-    static Transform16 From(uint16_t width, uint16_t height) {
+    static Transform16 From(u16 width, u16 height) {
         vec2<alpha16> min = vec2<alpha16>(0, 0);
         vec2<alpha16> max = vec2<alpha16>(width, height);
         return Transform16::ToBounds(min, max);

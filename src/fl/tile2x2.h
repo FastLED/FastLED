@@ -65,8 +65,8 @@ class Tile2x2_u8 {
     // that are within the bounds of the XYMap.
     template <typename XYVisitor>
     void draw(const XYMap &xymap, XYVisitor &visitor) const {
-        for (uint16_t x = 0; x < 2; ++x) {
-            for (uint16_t y = 0; y < 2; ++y) {
+        for (u16 x = 0; x < 2; ++x) {
+            for (u16 y = 0; y < 2; ++y) {
                 uint8_t value = at(x, y);
                 if (value > 0) {
                     int xx = mOrigin.x + x;
@@ -96,14 +96,14 @@ class Tile2x2_u8_wrap {
     using Data = Entry[2][2];
 
     Tile2x2_u8_wrap();
-    Tile2x2_u8_wrap(const Tile2x2_u8 &from, uint16_t width);
-    Tile2x2_u8_wrap(const Tile2x2_u8 &from, uint16_t width, uint16_t height);
+    Tile2x2_u8_wrap(const Tile2x2_u8 &from, u16 width);
+    Tile2x2_u8_wrap(const Tile2x2_u8 &from, u16 width, u16 height);
 
     Tile2x2_u8_wrap(const Data& data);
 
     // Returns the absolute position and the alpha.
-    Entry &at(uint16_t x, uint16_t y);
-    const Entry &at(uint16_t x, uint16_t y) const;
+    Entry &at(u16 x, u16 y);
+    const Entry &at(u16 x, u16 y) const;
 
     // Interpolates between two wrapped tiles and returns up to 2 interpolated tiles
     static vector_fixed<Tile2x2_u8_wrap, 2> Interpolate(const Tile2x2_u8_wrap& a, const Tile2x2_u8_wrap& b, float t);

@@ -10,7 +10,7 @@ namespace fl {
 // of the leds. Hence this class.
 class Leds {
   public:
-    Leds(CRGB *leds, uint16_t width, uint16_t height);
+    Leds(CRGB *leds, u16 width, u16 height);
     Leds(CRGB *leds, const XYMap &xymap);
 
     // Copy constructor and assignment operator.

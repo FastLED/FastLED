@@ -75,12 +75,12 @@ void fill_rainbow_circular(struct CHSV *targetArray, int numToFill,
 /// @param endcolor the end color for the gradient
 /// @param directionCode the direction to travel around the color wheel
 template <typename T>
-void fill_gradient(T *targetArray, uint16_t startpos, CHSV startcolor,
-                   uint16_t endpos, CHSV endcolor,
+void fill_gradient(T *targetArray, u16 startpos, CHSV startcolor,
+                   u16 endpos, CHSV endcolor,
                    TGradientDirectionCode directionCode = SHORTEST_HUES) {
     // if the points are in the wrong order, straighten them
     if (endpos < startpos) {
-        uint16_t t = endpos;
+        u16 t = endpos;
         CHSV tc = endcolor;
         endcolor = startcolor;
         endpos = startpos;
@@ -135,7 +135,7 @@ void fill_gradient(T *targetArray, uint16_t startpos, CHSV startcolor,
         huedistance87 = -huedistance87;
     }
 
-    uint16_t pixeldistance = endpos - startpos;
+    u16 pixeldistance = endpos - startpos;
     int16_t divisor = pixeldistance ? pixeldistance : 1;
 
 #if FASTLED_USE_32_BIT_GRADIENT_FILL
@@ -150,7 +150,7 @@ void fill_gradient(T *targetArray, uint16_t startpos, CHSV startcolor,
     uint32_t hue824 = static_cast<uint32_t>(startcolor.hue) << 24;
     uint32_t sat824 = static_cast<uint32_t>(startcolor.sat) << 24;
     uint32_t val824 = static_cast<uint32_t>(startcolor.val) << 24;
-    for (uint16_t i = startpos; i <= endpos; ++i) {
+    for (u16 i = startpos; i <= endpos; ++i) {
         targetArray[i] = CHSV(hue824 >> 24, sat824 >> 24, val824 >> 24);
         hue824 += huedelta823;
         sat824 += satdelta823;
@@ -169,7 +169,7 @@ void fill_gradient(T *targetArray, uint16_t startpos, CHSV startcolor,
     accum88 hue88 = startcolor.hue << 8;
     accum88 sat88 = startcolor.sat << 8;
     accum88 val88 = startcolor.val << 8;
-    for (uint16_t i = startpos; i <= endpos; ++i) {
+    for (u16 i = startpos; i <= endpos; ++i) {
         targetArray[i] = CHSV(hue88 >> 8, sat88 >> 8, val88 >> 8);
         hue88 += huedelta87;
         sat88 += satdelta87;
@@ -186,10 +186,10 @@ void fill_gradient(T *targetArray, uint16_t startpos, CHSV startcolor,
 /// @param c2 the end color for the gradient
 /// @param directionCode the direction to travel around the color wheel
 template <typename T>
-void fill_gradient(T *targetArray, uint16_t numLeds, const CHSV &c1,
+void fill_gradient(T *targetArray, u16 numLeds, const CHSV &c1,
                    const CHSV &c2,
                    TGradientDirectionCode directionCode = SHORTEST_HUES) {
-    uint16_t last = numLeds - 1;
+    u16 last = numLeds - 1;
     fill_gradient(targetArray, 0, c1, last, c2, directionCode);
 }
 
@@ -202,11 +202,11 @@ void fill_gradient(T *targetArray, uint16_t numLeds, const CHSV &c1,
 /// @param c3 the end color for the gradient
 /// @param directionCode the direction to travel around the color wheel
 template <typename T>
-void fill_gradient(T *targetArray, uint16_t numLeds, const CHSV &c1,
+void fill_gradient(T *targetArray, u16 numLeds, const CHSV &c1,
                    const CHSV &c2, const CHSV &c3,
                    TGradientDirectionCode directionCode = SHORTEST_HUES) {
-    uint16_t half = (numLeds / 2);
-    uint16_t last = numLeds - 1;
+    u16 half = (numLeds / 2);
+    u16 last = numLeds - 1;
     fill_gradient(targetArray, 0, c1, half, c2, directionCode);
     fill_gradient(targetArray, half, c2, last, c3, directionCode);
 }
@@ -221,12 +221,12 @@ void fill_gradient(T *targetArray, uint16_t numLeds, const CHSV &c1,
 /// @param c4 the end color for the gradient
 /// @param directionCode the direction to travel around the color wheel
 template <typename T>
-void fill_gradient(T *targetArray, uint16_t numLeds, const CHSV &c1,
+void fill_gradient(T *targetArray, u16 numLeds, const CHSV &c1,
                    const CHSV &c2, const CHSV &c3, const CHSV &c4,
                    TGradientDirectionCode directionCode = SHORTEST_HUES) {
-    uint16_t onethird = (numLeds / 3);
-    uint16_t twothirds = ((numLeds * 2) / 3);
-    uint16_t last = numLeds - 1;
+    u16 onethird = (numLeds / 3);
+    u16 twothirds = ((numLeds * 2) / 3);
+    u16 last = numLeds - 1;
     fill_gradient(targetArray, 0, c1, onethird, c2, directionCode);
     fill_gradient(targetArray, onethird, c2, twothirds, c3, directionCode);
     fill_gradient(targetArray, twothirds, c3, last, c4, directionCode);
@@ -244,8 +244,8 @@ void fill_gradient(T *targetArray, uint16_t numLeds, const CHSV &c1,
 /// @param startcolor the starting color for the gradient
 /// @param endpos the ending position in the array
 /// @param endcolor the end color for the gradient
-void fill_gradient_RGB(CRGB *leds, uint16_t startpos, CRGB startcolor,
-                       uint16_t endpos, CRGB endcolor);
+void fill_gradient_RGB(CRGB *leds, u16 startpos, CRGB startcolor,
+                       u16 endpos, CRGB endcolor);
 
 /// Fill a range of LEDs with a smooth RGB gradient between two RGB colors.
 /// @see fill_gradient_RGB()
@@ -253,7 +253,7 @@ void fill_gradient_RGB(CRGB *leds, uint16_t startpos, CRGB startcolor,
 /// @param numLeds the number of LEDs to fill
 /// @param c1 the starting color in the gradient
 /// @param c2 the end color for the gradient
-void fill_gradient_RGB(CRGB *leds, uint16_t numLeds, const CRGB &c1,
+void fill_gradient_RGB(CRGB *leds, u16 numLeds, const CRGB &c1,
                        const CRGB &c2);
 
 /// Fill a range of LEDs with a smooth RGB gradient between three RGB colors.
@@ -263,7 +263,7 @@ void fill_gradient_RGB(CRGB *leds, uint16_t numLeds, const CRGB &c1,
 /// @param c1 the starting color in the gradient
 /// @param c2 the middle color for the gradient
 /// @param c3 the end color for the gradient
-void fill_gradient_RGB(CRGB *leds, uint16_t numLeds, const CRGB &c1,
+void fill_gradient_RGB(CRGB *leds, u16 numLeds, const CRGB &c1,
                        const CRGB &c2, const CRGB &c3);
 
 /// Fill a range of LEDs with a smooth RGB gradient between four RGB colors.
@@ -274,7 +274,7 @@ void fill_gradient_RGB(CRGB *leds, uint16_t numLeds, const CRGB &c1,
 /// @param c2 the first middle color for the gradient
 /// @param c3 the second middle color for the gradient
 /// @param c4 the end color for the gradient
-void fill_gradient_RGB(CRGB *leds, uint16_t numLeds, const CRGB &c1,
+void fill_gradient_RGB(CRGB *leds, u16 numLeds, const CRGB &c1,
                        const CRGB &c2, const CRGB &c3, const CRGB &c4);
 
 } // namespace fl

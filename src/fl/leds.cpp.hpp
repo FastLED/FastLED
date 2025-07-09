@@ -39,7 +39,7 @@ const CRGB *Leds::operator[](int y) const {
     return &mLeds[mXyMap(0, y)];
 }
 
-Leds::Leds(CRGB *leds, uint16_t width, uint16_t height)
+Leds::Leds(CRGB *leds, u16 width, u16 height)
     : Leds(leds, XYMap::constructRectangularGrid(width, height)) {}
 
 

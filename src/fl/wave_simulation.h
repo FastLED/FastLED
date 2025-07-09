@@ -26,6 +26,7 @@ Based on works and code by Shawn Silverman.
 #include "fl/xymap.h"
 #include "fx/fx.h"
 #include "fx/fx2d.h"
+#include "fl/int.h"
 
 namespace fl {
 

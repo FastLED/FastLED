@@ -5,10 +5,11 @@
 #include "fl/clamp.h"
 #include "fl/namespace.h"
 #include "fl/wave_simulation.h"
+#include "fl/int.h"
 
 namespace {
 
-uint8_t half_duplex_blend_sqrt_q15(uint16_t x) {
+uint8_t half_duplex_blend_sqrt_q15(fl::u16 x) {
     x = MIN(x, 32767); // Q15
     const int Q = 15;
     uint32_t X = (uint32_t)x << Q; // promote to Q30
@@ -21,7 +22,7 @@ uint8_t half_duplex_blend_sqrt_q15(uint16_t x) {
     return static_cast<int16_t>(y) >> 8;
 }
 
-uint8_t half_duplex_blend_linear(uint16_t x) {
+uint8_t half_duplex_blend_linear(fl::u16 x) {
     x = MIN(x, 32767); // Q15
     x *= 2;
     return x >> 8;
@@ -126,7 +127,7 @@ int8_t WaveSimulation2D::geti8(fl::size x, fl::size y) const {
 uint8_t WaveSimulation2D::getu8(fl::size x, fl::size y) const {
     int16_t value = geti16(x, y);
     if (mSim->getHalfDuplex()) {
-        uint16_t v2 = static_cast<uint16_t>(value);
+        u16 v2 = static_cast<u16>(value);
         switch (mU8Mode) {
         case WAVE_U8_MODE_LINEAR:
             return half_duplex_blend_linear(v2);
@@ -134,7 +135,7 @@ uint8_t WaveSimulation2D::getu8(fl::size x, fl::size y) const {
             return half_duplex_blend_sqrt_q15(v2);
         }
     }
-    return static_cast<uint8_t>(((static_cast<uint16_t>(value) + 32768)) >> 8);
+    return static_cast<uint8_t>(((static_cast<u16>(value) + 32768)) >> 8);
 }
 
 bool WaveSimulation2D::has(fl::size x, fl::size y) const {
@@ -174,8 +175,8 @@ void WaveSimulation2D::seti16(fl::size x, fl::size y, int16_t v16) {
                     } else {
                         // if the magnitude of the new pt is greater than what
                         // was already there, then overwrite.
-                        uint16_t abs_pt = static_cast<uint16_t>(ABS(pt));
-                        uint16_t abs_v16 = static_cast<uint16_t>(ABS(v16));
+                        u16 abs_pt = static_cast<u16>(ABS(pt));
+                        u16 abs_v16 = static_cast<u16>(ABS(v16));
                         if (abs_v16 > abs_pt) {
                             pt = v16;
                         }
@@ -300,7 +301,7 @@ int8_t WaveSimulation1D::geti8(fl::size x) const {
 // uint8_t WaveSimulation2D::getu8(fl::size x, fl::size y) const {
 //     int16_t value = geti16(x, y);
 //     if (mSim->getHalfDuplex()) {
-//         uint16_t v2 = static_cast<uint16_t>(value);
+//         u16 v2 = static_cast<u16>(value);
 //         switch (mU8Mode) {
 //             case WAVE_U8_MODE_LINEAR:
 //                 return half_duplex_blend_linear(v2);
@@ -308,14 +309,14 @@ int8_t WaveSimulation1D::geti8(fl::size x) const {
 //                 return half_duplex_blend_sqrt_q15(v2);
 //         }
 //     }
-//     return static_cast<uint8_t>(((static_cast<uint16_t>(value) + 32768)) >>
+//     return static_cast<uint8_t>(((static_cast<u16>(value) + 32768)) >>
 //     8);
 // }
 
 uint8_t WaveSimulation1D::getu8(fl::size x) const {
     int16_t value = geti16(x);
     if (mSim->getHalfDuplex()) {
-        uint16_t v2 = static_cast<uint16_t>(value);
+        u16 v2 = static_cast<u16>(value);
         switch (mU8Mode) {
         case WAVE_U8_MODE_LINEAR:
             return half_duplex_blend_linear(v2);
@@ -323,7 +324,7 @@ uint8_t WaveSimulation1D::getu8(fl::size x) const {
             return half_duplex_blend_sqrt_q15(v2);
         }
     }
-    return static_cast<uint8_t>(((static_cast<uint16_t>(value) + 32768)) >> 8);
+    return static_cast<uint8_t>(((static_cast<u16>(value) + 32768)) >> 8);
 }
 
 bool WaveSimulation1D::has(fl::size x) const { return (x < mOuterLength); }

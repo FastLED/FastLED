@@ -8,12 +8,12 @@ namespace fl {
 
 // Improved 8-bit to 16-bit scaling using the same technique as map8_to_16
 // but with proper rounding for the 0-255 to 0-65535 conversion
-static inline uint16_t scale8_to_16_accurate(uint8_t x) {
+static inline u16 scale8_to_16_accurate(uint8_t x) {
     if (x == 0) return 0;
     if (x == 255) return 65535;
     // Use 32-bit arithmetic with rounding: (x * 65535 + 127) / 255
     // This is equivalent to: (x * 65535 + 255/2) / 255
-    return (uint16_t)(((uint32_t)x * 65535 + 127) / 255);
+    return (u16)(((uint32_t)x * 65535 + 127) / 255);
 }
 
 static HSV16 RGBtoHSV16(const CRGB &rgb) {
@@ -27,9 +27,9 @@ static HSV16 RGBtoHSV16(const CRGB &rgb) {
     uint8_t mn = fl_min(r, fl_min(g, b));
     uint8_t delta = mx - mn;
 
-    uint16_t h = 0;
-    uint16_t s = 0;
-    uint16_t v = scale8_to_16_accurate(mx);
+    u16 h = 0;
+    u16 s = 0;
+    u16 v = scale8_to_16_accurate(mx);
 
     // Calculate saturation using improved scaling
     if (mx > 0) {
@@ -38,7 +38,7 @@ static HSV16 RGBtoHSV16(const CRGB &rgb) {
         if (delta == mx) {
             s = 65535;  // Saturation is 100%
         } else {
-            s = (uint16_t)(((uint32_t)delta * 65535 + (mx >> 1)) / mx);
+            s = (u16)(((uint32_t)delta * 65535 + (mx >> 1)) / mx);
         }
     }
 
@@ -112,7 +112,7 @@ static HSV16 RGBtoHSV16(const CRGB &rgb) {
             }
         }
         
-        h = (uint16_t)(hue_calc & 0xFFFF);
+        h = (u16)(hue_calc & 0xFFFF);
     }
 
     return HSV16{h, s, v};
@@ -163,9 +163,9 @@ static CRGB HSV16toRGB(const HSV16& hsv) {
     }
 
     // Add baseline and scale to 8-bit using accurate mapping
-    uint8_t R = map16_to_8(uint16_t(r1 + m));
-    uint8_t G = map16_to_8(uint16_t(g1 + m));
-    uint8_t B = map16_to_8(uint16_t(b1 + m));
+    uint8_t R = map16_to_8(u16(r1 + m));
+    uint8_t G = map16_to_8(u16(g1 + m));
+    uint8_t B = map16_to_8(u16(b1 + m));
 
     return CRGB{R, G, B};
 }
@@ -182,7 +182,7 @@ CRGB HSV16::colorBoost(EaseType saturation_function, EaseType luminance_function
     HSV16 hsv = *this;
     
     if (saturation_function != EASE_NONE) {
-        uint16_t inv_sat = 65535 - hsv.s;
+        u16 inv_sat = 65535 - hsv.s;
         inv_sat = ease16(saturation_function, inv_sat);
         hsv.s = (65535 - inv_sat);
     }

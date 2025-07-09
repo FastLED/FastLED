@@ -82,8 +82,8 @@ void __compile_test() {
                   "uint8_t should be integral");
     static_assert(fl::is_integral<int16_t>::value,
                   "int16_t should be integral");
-    static_assert(fl::is_integral<uint16_t>::value,
-                  "uint16_t should be integral");
+    static_assert(fl::is_integral<fl::u16>::value,
+                  "u16 should be integral");
     static_assert(fl::is_integral<int32_t>::value,
                   "int32_t should be integral");
     static_assert(fl::is_integral<uint32_t>::value,

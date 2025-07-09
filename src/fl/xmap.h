@@ -11,17 +11,17 @@
 
 namespace fl {
 
-FASTLED_FORCE_INLINE uint16_t x_linear(uint16_t x, uint16_t length) {
+FASTLED_FORCE_INLINE u16 x_linear(u16 x, u16 length) {
     (void)length;
     return x;
 }
 
-FASTLED_FORCE_INLINE uint16_t x_reverse(uint16_t x, uint16_t length) {
+FASTLED_FORCE_INLINE u16 x_reverse(u16 x, u16 length) {
     return length - 1 - x;
 }
 
 // typedef for xMap function type
-typedef uint16_t (*XFunction)(uint16_t x, uint16_t length);
+typedef u16 (*XFunction)(u16 x, u16 length);
 
 // XMap holds either a function or a look up table to map x coordinates to a 1D
 // index.
@@ -29,17 +29,17 @@ class XMap {
   public:
     enum Type { kLinear = 0, kReverse, kFunction, kLookUpTable };
 
-    static XMap constructWithUserFunction(uint16_t length, XFunction xFunction,
-                                          uint16_t offset = 0);
+    static XMap constructWithUserFunction(u16 length, XFunction xFunction,
+                                          u16 offset = 0);
 
     // When a pointer to a lookup table is passed in then we assume it's
     // owned by someone else and will not be deleted.
-    static XMap constructWithLookUpTable(uint16_t length,
-                                         const uint16_t *lookUpTable,
-                                         uint16_t offset = 0);
+    static XMap constructWithLookUpTable(u16 length,
+                                         const u16 *lookUpTable,
+                                         u16 offset = 0);
 
     // is_reverse is false by default for linear layout
-    XMap(uint16_t length, bool is_reverse = false, uint16_t offset = 0);
+    XMap(u16 length, bool is_reverse = false, u16 offset = 0);
 
     XMap(const XMap &other);
 
@@ -48,22 +48,22 @@ class XMap {
 
     void convertToLookUpTable();
 
-    uint16_t mapToIndex(uint16_t x) const;
+    u16 mapToIndex(u16 x) const;
 
-    uint16_t operator()(uint16_t x) const { return mapToIndex(x); }
+    u16 operator()(u16 x) const { return mapToIndex(x); }
 
-    uint16_t getLength() const;
+    u16 getLength() const;
 
     Type getType() const;
 
   private:
-    XMap(uint16_t length, Type type);
-    uint16_t length = 0;
+    XMap(u16 length, Type type);
+    u16 length = 0;
     Type type = kLinear;
     XFunction xFunction = nullptr;
-    const uint16_t *mData = nullptr;
+    const u16 *mData = nullptr;
     fl::LUT16Ptr mLookUpTable;
-    uint16_t mOffset = 0; // offset to be added to the output
+    u16 mOffset = 0; // offset to be added to the output
 };
 
 } // namespace fl

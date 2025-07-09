@@ -254,7 +254,7 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
         return write(str, 1);
     }
 
-    fl::size write(const uint16_t &n) {
+    fl::size write(const u16 &n) {
         StrN<FASTLED_STR_INLINED_SIZE> dst;
         StringFormatter::append(n, &dst); // Inlined size should suffice
         return write(dst.c_str(), dst.size());
@@ -565,10 +565,10 @@ class string : public StrN<FASTLED_STR_INLINED_SIZE> {
         return *this;
     }
     string &append(const uint8_t &c) {
-        write(uint16_t(c));
+        write(u16(c));
         return *this;
     }
-    string &append(const uint16_t &val) {
+    string &append(const u16 &val) {
         write(val);
         return *this;
     }

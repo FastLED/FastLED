@@ -143,30 +143,30 @@ inline void traverseGridSegment16(const vec2f &start, const vec2f &end,
     int16_t deltaX_fp = endX_fp - startX_fp;
     int16_t deltaY_fp = endY_fp - startY_fp;
 
-    uint16_t absDeltaX_fp =
-        (deltaX_fp != 0) ? static_cast<uint16_t>(
+    u16 absDeltaX_fp =
+        (deltaX_fp != 0) ? static_cast<u16>(
                                ABS((int32_t(FP_ONE) << FP_SHIFT) / deltaX_fp))
                          : UINT16_MAX;
-    uint16_t absDeltaY_fp =
-        (deltaY_fp != 0) ? static_cast<uint16_t>(
+    u16 absDeltaY_fp =
+        (deltaY_fp != 0) ? static_cast<u16>(
                                ABS((int32_t(FP_ONE) << FP_SHIFT) / deltaY_fp))
                          : UINT16_MAX;
 
     int16_t nextX_fp = (stepX > 0) ? ((x0 + 1) << FP_SHIFT) : (x0 << FP_SHIFT);
     int16_t nextY_fp = (stepY > 0) ? ((y0 + 1) << FP_SHIFT) : (y0 << FP_SHIFT);
 
-    uint16_t tMaxX_fp =
+    u16 tMaxX_fp =
         (deltaX_fp != 0)
-            ? static_cast<uint16_t>(
+            ? static_cast<u16>(
                   ABS(int32_t(nextX_fp - startX_fp)) * absDeltaX_fp >> FP_SHIFT)
             : UINT16_MAX;
-    uint16_t tMaxY_fp =
+    u16 tMaxY_fp =
         (deltaY_fp != 0)
-            ? static_cast<uint16_t>(
+            ? static_cast<u16>(
                   ABS(int32_t(nextY_fp - startY_fp)) * absDeltaY_fp >> FP_SHIFT)
             : UINT16_MAX;
 
-    const uint16_t maxT_fp = FP_ONE;
+    const u16 maxT_fp = FP_ONE;
 
     int16_t currentX = x0;
     int16_t currentY = y0;
@@ -174,7 +174,7 @@ inline void traverseGridSegment16(const vec2f &start, const vec2f &end,
     while (true) {
         visitor.visit(currentX, currentY);
 
-        uint16_t t_fp = (tMaxX_fp < tMaxY_fp) ? tMaxX_fp : tMaxY_fp;
+        u16 t_fp = (tMaxX_fp < tMaxY_fp) ? tMaxX_fp : tMaxY_fp;
         if (t_fp > maxT_fp)
             break;
 

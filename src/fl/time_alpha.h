@@ -12,7 +12,7 @@ namespace fl {
 // 0 -> 255
 uint8_t time_alpha8(uint32_t now, uint32_t start, uint32_t end);
 // 0 -> 65535
-uint16_t time_alpha16(uint32_t now, uint32_t start, uint32_t end);
+u16 time_alpha16(uint32_t now, uint32_t start, uint32_t end);
 
 inline float time_alphaf(uint32_t now, uint32_t start, uint32_t end) {
     if (now < start) {
@@ -29,8 +29,8 @@ class TimeAlpha {
     virtual ~TimeAlpha() = default;
     virtual void trigger(uint32_t now) = 0;
     virtual uint8_t update8(uint32_t now) = 0;
-    virtual uint16_t update16(uint32_t now) {
-        return static_cast<uint16_t>(update8(now) << 8) + 0xFF;
+    virtual u16 update16(uint32_t now) {
+        return static_cast<u16>(update8(now) << 8) + 0xFF;
     }
     virtual float updatef(uint32_t now) {
         return static_cast<float>(update16(now)) / 65535.0f;

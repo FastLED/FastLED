@@ -17,7 +17,7 @@ static vec2i16 wrap(const vec2i16 &v, const vec2i16 &size) {
     return vec2i16(v.x % size.x, v.y % size.y);
 }
 
-static vec2i16 wrap_x(const vec2i16 &v, const uint16_t width) {
+static vec2i16 wrap_x(const vec2i16 &v, const u16 width) {
     // Wrap the x component of the vector v around the size
     return vec2i16(v.x % width, v.y);
 }
@@ -47,13 +47,13 @@ void Tile2x2_u8::scale(uint8_t scale) {
     }
     for (int x = 0; x < 2; ++x) {
         for (int y = 0; y < 2; ++y) {
-            uint16_t value = at(x, y);
+            u16 value = at(x, y);
             at(x, y) = (value * scale) >> 8;
         }
     }
 }
 
-Tile2x2_u8_wrap::Tile2x2_u8_wrap(const Tile2x2_u8 &from, uint16_t width) {
+Tile2x2_u8_wrap::Tile2x2_u8_wrap(const Tile2x2_u8 &from, u16 width) {
     const vec2i16 origin = from.origin();
     at(0, 0) = {wrap_x(vec2i16(origin.x, origin.y), width), from.at(0, 0)};
     at(0, 1) = {wrap_x(vec2i16(origin.x, origin.y + 1), width), from.at(0, 1)};
@@ -62,7 +62,7 @@ Tile2x2_u8_wrap::Tile2x2_u8_wrap(const Tile2x2_u8 &from, uint16_t width) {
                 from.at(1, 1)};
 }
 
-Tile2x2_u8_wrap::Entry &Tile2x2_u8_wrap::at(uint16_t x, uint16_t y) {
+Tile2x2_u8_wrap::Entry &Tile2x2_u8_wrap::at(u16 x, u16 y) {
     // Wrap around the edges
     x = (x + 2) % 2;
     y = (y + 2) % 2;
@@ -78,15 +78,15 @@ Tile2x2_u8_wrap::Tile2x2_u8_wrap(const Data& data) {
 }
 
 
-const Tile2x2_u8_wrap::Entry &Tile2x2_u8_wrap::at(uint16_t x, uint16_t y) const {
+const Tile2x2_u8_wrap::Entry &Tile2x2_u8_wrap::at(u16 x, u16 y) const {
     // Wrap around the edges
     x = (x + 2) % 2;
     y = (y + 2) % 2;
     return mData[y][x];
 }
 
-Tile2x2_u8_wrap::Tile2x2_u8_wrap(const Tile2x2_u8 &from, uint16_t width,
-                                 uint16_t height) {
+Tile2x2_u8_wrap::Tile2x2_u8_wrap(const Tile2x2_u8 &from, u16 width,
+                                 u16 height) {
     const vec2i16 origin = from.origin();
     at(0, 0) = {wrap(vec2i16(origin.x, origin.y), vec2i16(width, height)),
                 from.at(0, 0)};
@@ -141,8 +141,8 @@ fl::vector_fixed<Tile2x2_u8_wrap, 2> Tile2x2_u8_wrap::Interpolate(const Tile2x2_
     Tile2x2_u8_wrap interpolated;
     
     // Interpolate each of the 4 positions
-    for (uint16_t x = 0; x < 2; ++x) {
-        for (uint16_t y = 0; y < 2; ++y) {
+    for (u16 x = 0; x < 2; ++x) {
+        for (u16 y = 0; y < 2; ++y) {
             const auto& data_a = a.at(x, y);
             const auto& data_b = b.at(x, y);
             

@@ -74,16 +74,16 @@ class WaveSimulation1D_Real {
         int16_t value = geti16(x);
         // Rebase the range from [-32768, 32767] to [0, 65535] then extract the
         // upper 8 bits.
-        // return static_cast<uint8_t>(((static_cast<uint16_t>(value) + 32768))
+        // return static_cast<uint8_t>(((static_cast<u16>(value) + 32768))
         // >>
         //                            8);
         if (mHalfDuplex) {
-            uint16_t v2 = static_cast<uint16_t>(value);
+            u16 v2 = static_cast<u16>(value);
             v2 *= 2;
             return static_cast<uint8_t>(v2 >> 8);
         } else {
             return static_cast<uint8_t>(
-                ((static_cast<uint16_t>(value) + 32768)) >> 8);
+                ((static_cast<u16>(value) + 32768)) >> 8);
         }
     }
 
@@ -153,16 +153,16 @@ class WaveSimulation2D_Real {
         int16_t value = geti16(x, y);
         // Rebase the range from [-32768, 32767] to [0, 65535] then extract the
         // upper 8 bits.
-        // return static_cast<uint8_t>(((static_cast<uint16_t>(value) + 32768))
+        // return static_cast<uint8_t>(((static_cast<u16>(value) + 32768))
         // >>
         //                             8);
         if (mHalfDuplex) {
-            uint16_t v2 = static_cast<uint16_t>(value);
+            u16 v2 = static_cast<u16>(value);
             v2 *= 2;
             return static_cast<uint8_t>(v2 >> 8);
         } else {
             return static_cast<uint8_t>(
-                ((static_cast<uint16_t>(value) + 32768)) >> 8);
+                ((static_cast<u16>(value) + 32768)) >> 8);
         }
     }
 

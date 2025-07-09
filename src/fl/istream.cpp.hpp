@@ -273,7 +273,7 @@ istream_real& istream_real::operator>>(fl::i16& n) {
     return *this;
 }
 
-// uint16_t operator>> removed - now handled by template in header
+// u16 operator>> removed - now handled by template in header
 
 istream_real& istream_real::operator>>(fl::i32& n) {
     string token;

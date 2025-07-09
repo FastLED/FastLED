@@ -27,7 +27,7 @@ template <typename T, typename U>
 FASTLED_FORCE_INLINE U map_range(T value, T in_min, T in_max, U out_min,
                                  U out_max) {
     // Not fully tested with all unsigned types, so watch out if you use this
-    // with uint16_t and you value < in_min.
+    // with u16 and you value < in_min.
     using namespace map_range_detail;
     if (equals(value, in_min)) {
         return out_min;
@@ -42,7 +42,7 @@ template <typename T, typename U>
 FASTLED_FORCE_INLINE U map_range_clamped(T value, T in_min, T in_max, U out_min,
                                          U out_max) {
     // Not fully tested with all unsigned types, so watch out if you use this
-    // with uint16_t and you value < in_min.
+    // with u16 and you value < in_min.
     using namespace map_range_detail;
     value = clamp(value, in_min, in_max);
     return map_range<T, U>(value, in_min, in_max, out_min, out_max);
@@ -78,7 +78,7 @@ template <> struct map_range_math<uint8_t, uint8_t> {
         int16_t in_max16 = in_max;
         int16_t out_min16 = out_min;
         int16_t out_max16 = out_max;
-        int16_t out16 = map_range<uint16_t, uint16_t>(v16, in_min16, in_max16,
+        int16_t out16 = map_range<u16, u16>(v16, in_min16, in_max16,
                                                       out_min16, out_max16);
         if (out16 < 0) {
             out16 = 0;
