@@ -23,7 +23,7 @@ struct DrawItem {
     DrawItem &operator=(DrawItem &&other) noexcept = default;
     
     uint8_t mPin = 0;
-    uint32_t mNumBytes = 0;
+    u32 mNumBytes = 0;
     bool mIsRgbw = false;
     bool operator!=(const DrawItem &other) const {
         return mPin != other.mPin || mNumBytes != other.mNumBytes ||
@@ -45,7 +45,7 @@ class RectangularDrawBuffer {
     // We manually manage the memory for the buffer of all LEDs so that it can
     // go into psram on ESP32S3, which is managed by fl::PSRamAllocator.
     scoped_array<uint8_t> mAllLedsBufferUint8;
-    uint32_t mAllLedsBufferUint8Size = 0;
+    u32 mAllLedsBufferUint8Size = 0;
     fl::FixedMap<uint8_t, fl::span<uint8_t>, 50> mPinToLedSegment;
     DrawList mDrawList;
     DrawList mPrevDrawList;
@@ -68,10 +68,10 @@ class RectangularDrawBuffer {
     // Safe to call multiple times before calling onQueueingStart() again.
     // Returns true on the first call, false after.
     bool onQueuingDone();
-    uint32_t getMaxBytesInStrip() const;
-    uint32_t getTotalBytes() const;
-    void getBlockInfo(uint32_t *num_strips, uint32_t *bytes_per_strip,
-                      uint32_t *total_bytes) const;
+    u32 getMaxBytesInStrip() const;
+    u32 getTotalBytes() const;
+    void getBlockInfo(u32 *num_strips, u32 *bytes_per_strip,
+                      u32 *total_bytes) const;
 };
 
 } // namespace fl

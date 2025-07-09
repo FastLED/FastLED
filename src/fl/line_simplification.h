@@ -239,7 +239,7 @@ template <typename NumberT = float> class LineSimplifierExact {
 
     LineSimplifierExact(int count) : mCount(count) {}
 
-    void setCount(uint32_t count) { mCount = count; }
+    void setCount(u32 count) { mCount = count; }
 
     template <typename VectorType = fl::vector<Point>>
     void simplifyInplace(VectorType *polyLine) {
@@ -357,7 +357,7 @@ template <typename NumberT = float> class LineSimplifierExact {
         return;
     }
 
-    uint32_t mCount = 10;
+    u32 mCount = 10;
     LineSimplifier<NumberT> mLineSimplifier;
 };
 

@@ -34,19 +34,19 @@ FASTLED_SMART_PTR_NO_FWD(LUTXYZFLOAT);
 // Templated lookup table.
 template <typename T> class LUT : public fl::Referent {
   public:
-    LUT(uint32_t length) : length(length) {
+    LUT(u32 length) : length(length) {
         T *ptr = PSRamAllocator<T>::Alloc(length);
         mDataHandle.reset(ptr);
         data = ptr;
     }
     // In this version the data is passed in but not managed by this object.
-    LUT(uint32_t length, T *data) : length(length) { this->data = data; }
+    LUT(u32 length, T *data) : length(length) { this->data = data; }
     ~LUT() {
         PSRamAllocator<T>::Free(mDataHandle.release());
         data = mDataHandle.get();
     }
 
-    const T &operator[](uint32_t index) const { return data[index]; }
+    const T &operator[](u32 index) const { return data[index]; }
 
     const T &operator[](u16 index) const { return data[index]; }
 
@@ -54,7 +54,7 @@ template <typename T> class LUT : public fl::Referent {
 
     const T *getData() const { return data; }
 
-    uint32_t size() const { return length; }
+    u32 size() const { return length; }
 
     T interp8(uint8_t alpha) {
         if (length == 0)
@@ -65,10 +65,10 @@ template <typename T> class LUT : public fl::Referent {
             return data[length - 1];
 
         // treat alpha/255 as fraction, scale to [0..length-1]
-        uint32_t maxIndex = length - 1;
-        uint32_t pos = uint32_t(alpha) * maxIndex; // numerator
-        uint32_t idx0 = pos / 255;                 // floor(position)
-        uint32_t idx1 = idx0 < maxIndex ? idx0 + 1 : maxIndex;
+        u32 maxIndex = length - 1;
+        u32 pos = u32(alpha) * maxIndex; // numerator
+        u32 idx0 = pos / 255;                 // floor(position)
+        u32 idx1 = idx0 < maxIndex ? idx0 + 1 : maxIndex;
         uint8_t blend = pos % 255; // fractional part
 
         const T &a = data[idx0];
@@ -86,10 +86,10 @@ template <typename T> class LUT : public fl::Referent {
             return data[length - 1];
 
         // treat alpha/65535 as fraction, scale to [0..length-1]
-        uint32_t maxIndex = length - 1;
-        uint32_t pos = uint32_t(alpha) * maxIndex; // numerator
-        uint32_t idx0 = pos / 65535;               // floor(position)
-        uint32_t idx1 = idx0 < maxIndex ? idx0 + 1 : maxIndex;
+        u32 maxIndex = length - 1;
+        u32 pos = u32(alpha) * maxIndex; // numerator
+        u32 idx0 = pos / 65535;               // floor(position)
+        u32 idx1 = idx0 < maxIndex ? idx0 + 1 : maxIndex;
         u16 blend = pos % 65535; // fractional part
 
         const T &a = data[idx0];
@@ -101,7 +101,7 @@ template <typename T> class LUT : public fl::Referent {
   private:
     fl::scoped_ptr<T> mDataHandle;
     T *data = nullptr;
-    uint32_t length;
+    u32 length;
 };
 
 } // namespace fl

@@ -84,10 +84,10 @@ void __compile_test() {
                   "int16_t should be integral");
     static_assert(fl::is_integral<fl::u16>::value,
                   "u16 should be integral");
-    static_assert(fl::is_integral<int32_t>::value,
-                  "int32_t should be integral");
-    static_assert(fl::is_integral<uint32_t>::value,
-                  "uint32_t should be integral");
+    static_assert(fl::is_integral<fl::i32>::value,
+                  "i32 should be integral");
+    static_assert(fl::is_integral<fl::u32>::value,
+                  "u32 should be integral");
     static_assert(fl::is_integral<fl::i64>::value,
                   "fl::i64 should be integral");
     static_assert(fl::is_integral<fl::u64>::value,

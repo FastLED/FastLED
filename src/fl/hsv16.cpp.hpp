@@ -13,7 +13,7 @@ static inline u16 scale8_to_16_accurate(uint8_t x) {
     if (x == 255) return 65535;
     // Use 32-bit arithmetic with rounding: (x * 65535 + 127) / 255
     // This is equivalent to: (x * 65535 + 255/2) / 255
-    return (u16)(((uint32_t)x * 65535 + 127) / 255);
+    return (u16)(((u32)x * 65535 + 127) / 255);
 }
 
 static HSV16 RGBtoHSV16(const CRGB &rgb) {
@@ -38,26 +38,26 @@ static HSV16 RGBtoHSV16(const CRGB &rgb) {
         if (delta == mx) {
             s = 65535;  // Saturation is 100%
         } else {
-            s = (u16)(((uint32_t)delta * 65535 + (mx >> 1)) / mx);
+            s = (u16)(((u32)delta * 65535 + (mx >> 1)) / mx);
         }
     }
 
     // Calculate hue using improved algorithms
     if (delta > 0) {
-        uint32_t hue_calc = 0;
+        u32 hue_calc = 0;
         
         if (mx == r) {
             // Hue in red sector (0-60 degrees)
             if (g >= b) {
                 // Use improved division: hue_calc = (g - b) * 65535 / (6 * delta)
-                uint32_t numerator = (uint32_t)(g - b) * 65535;
+                u32 numerator = (u32)(g - b) * 65535;
                 if (delta <= 42) {  // 6 * 42 = 252, safe for small delta
                     hue_calc = numerator / (6 * delta);
                 } else {
                     hue_calc = numerator / delta / 6;  // Avoid overflow
                 }
             } else {
-                uint32_t numerator = (uint32_t)(b - g) * 65535;
+                u32 numerator = (u32)(b - g) * 65535;
                 if (delta <= 42) {
                     hue_calc = 65535 - numerator / (6 * delta);
                 } else {
@@ -67,12 +67,12 @@ static HSV16 RGBtoHSV16(const CRGB &rgb) {
         } else if (mx == g) {
             // Hue in green sector (60-180 degrees)
             // Handle signed arithmetic properly to avoid integer underflow
-            int32_t signed_diff = (int32_t)b - (int32_t)r;
-            uint32_t sector_offset = 65535 / 3;  // 60 degrees (120 degrees in 16-bit space)
+            i32 signed_diff = (i32)b - (i32)r;
+            u32 sector_offset = 65535 / 3;  // 60 degrees (120 degrees in 16-bit space)
             
             if (signed_diff >= 0) {
                 // Positive case: b >= r
-                uint32_t numerator = (uint32_t)signed_diff * 65535;
+                u32 numerator = (u32)signed_diff * 65535;
                 if (delta <= 42) {
                     hue_calc = sector_offset + numerator / (6 * delta);
                 } else {
@@ -80,7 +80,7 @@ static HSV16 RGBtoHSV16(const CRGB &rgb) {
                 }
             } else {
                 // Negative case: b < r  
-                uint32_t numerator = (uint32_t)(-signed_diff) * 65535;
+                u32 numerator = (u32)(-signed_diff) * 65535;
                 if (delta <= 42) {
                     hue_calc = sector_offset - numerator / (6 * delta);
                 } else {
@@ -90,12 +90,12 @@ static HSV16 RGBtoHSV16(const CRGB &rgb) {
         } else { // mx == b
             // Hue in blue sector (180-300 degrees)
             // Handle signed arithmetic properly to avoid integer underflow
-            int32_t signed_diff = (int32_t)r - (int32_t)g;
-            uint32_t sector_offset = (2 * 65535) / 3;  // 240 degrees (240 degrees in 16-bit space)
+            i32 signed_diff = (i32)r - (i32)g;
+            u32 sector_offset = (2 * 65535) / 3;  // 240 degrees (240 degrees in 16-bit space)
             
             if (signed_diff >= 0) {
                 // Positive case: r >= g
-                uint32_t numerator = (uint32_t)signed_diff * 65535;
+                u32 numerator = (u32)signed_diff * 65535;
                 if (delta <= 42) {
                     hue_calc = sector_offset + numerator / (6 * delta);
                 } else {
@@ -103,7 +103,7 @@ static HSV16 RGBtoHSV16(const CRGB &rgb) {
                 }
             } else {
                 // Negative case: r < g
-                uint32_t numerator = (uint32_t)(-signed_diff) * 65535;
+                u32 numerator = (u32)(-signed_diff) * 65535;
                 if (delta <= 42) {
                     hue_calc = sector_offset - numerator / (6 * delta);
                 } else {
@@ -120,9 +120,9 @@ static HSV16 RGBtoHSV16(const CRGB &rgb) {
 
 static CRGB HSV16toRGB(const HSV16& hsv) {
     // Convert 16-bit values to working range
-    uint32_t h = hsv.h;
-    uint32_t s = hsv.s; 
-    uint32_t v = hsv.v;
+    u32 h = hsv.h;
+    u32 s = hsv.s; 
+    u32 v = hsv.v;
 
     if (s == 0) {
         // Grayscale case - use precise mapping
@@ -131,15 +131,15 @@ static CRGB HSV16toRGB(const HSV16& hsv) {
     }
 
     // Determine which sector of the color wheel (0-5)
-    uint32_t sector = (h * 6) / 65536;
-    uint32_t sector_pos = (h * 6) % 65536; // Position within sector (0-65535)
+    u32 sector = (h * 6) / 65536;
+    u32 sector_pos = (h * 6) % 65536; // Position within sector (0-65535)
 
     // Calculate intermediate values using precise mapping
     // c = v * s / 65536, with proper rounding
-    uint32_t c = map32_to_16(v * s);
+    u32 c = map32_to_16(v * s);
     
     // Calculate x = c * (1 - |2*(sector_pos/65536) - 1|)
-    uint32_t x;
+    u32 x;
     if (sector & 1) {
         // For odd sectors (1, 3, 5), we want decreasing values
         // x = c * (65535 - sector_pos) / 65535
@@ -150,9 +150,9 @@ static CRGB HSV16toRGB(const HSV16& hsv) {
         x = map32_to_16(c * sector_pos);
     }
     
-    uint32_t m = v - c;
+    u32 m = v - c;
 
-    uint32_t r1, g1, b1;
+    u32 r1, g1, b1;
     switch (sector) {
         case 0: r1 = c; g1 = x; b1 = 0; break;
         case 1: r1 = x; g1 = c; b1 = 0; break;

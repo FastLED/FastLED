@@ -61,20 +61,22 @@ class RunningProcess:
             bufsize=256,
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,  # Merge stderr into stdout
-            text=True,  # Automatically decode bytes to str
+            text=False,  # Automatically decode bytes to str
         )
 
         def output_reader():
             try:
                 assert self.proc is not None
                 assert self.proc.stdout is not None
-                for line in iter(self.proc.stdout.readline, ""):
+                line: bytes
+                for line in iter(self.proc.stdout.readline, b""):
                     if self.shutdown.is_set():
                         break
-                    line = line.rstrip()
+                    linestr = line.decode("utf-8", errors="ignore")
+                    linestr = linestr.rstrip()
                     if self.echo:
-                        print(line)  # Print to console in real time
-                    self.buffer.append(line)
+                        print(linestr)  # Print to console in real time
+                    self.buffer.append(linestr)
             finally:
                 if self.proc and self.proc.stdout:
                     self.proc.stdout.close()

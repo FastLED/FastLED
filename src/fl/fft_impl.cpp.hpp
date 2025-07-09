@@ -83,8 +83,8 @@ class FFTContext {
         const float delta_f = (maxf - minf) / m_cq_cfg.bands;
         // begin transform
         for (int i = 0; i < m_cq_cfg.bands; ++i) {
-            int32_t real = cq[i].r;
-            int32_t imag = cq[i].i;
+            i32 real = cq[i].r;
+            i32 imag = cq[i].i;
             float r2 = float(real * real);
             float i2 = float(imag * imag);
             float magnitude = sqrt(r2 + i2);

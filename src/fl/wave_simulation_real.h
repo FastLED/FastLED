@@ -38,7 +38,7 @@ class WaveSimulation1D_Real {
     //  - speed: simulation speed (in float, will be stored in Q15).
     //  - dampening: exponent so that the effective damping factor is
     //  2^(dampening).
-    WaveSimulation1D_Real(uint32_t length, float speed = 0.16f,
+    WaveSimulation1D_Real(u32 length, float speed = 0.16f,
                           int dampening = 6);
     ~WaveSimulation1D_Real() = default;
 
@@ -98,7 +98,7 @@ class WaveSimulation1D_Real {
     void update();
 
   private:
-    uint32_t length; // Length of the inner simulation grid.
+    u32 length; // Length of the inner simulation grid.
     // Two grids stored in fixed Q15 format, each with length+2 entries
     // (including boundary cells).
     fl::vector<int16_t> grid1;
@@ -119,7 +119,7 @@ class WaveSimulation2D_Real {
     // Here, 'speed' is specified as a float (converted to fixed Q15)
     // and 'dampening' is given as an exponent so that the damping factor is
     // 2^dampening.
-    WaveSimulation2D_Real(uint32_t W, uint32_t H, float speed = 0.16f,
+    WaveSimulation2D_Real(u32 W, u32 H, float speed = 0.16f,
                           float dampening = 6.0f);
     ~WaveSimulation2D_Real() = default;
 
@@ -185,13 +185,13 @@ class WaveSimulation2D_Real {
     // Advance the simulation one time step using fixed-point arithmetic.
     void update();
 
-    uint32_t getWidth() const { return width; }
-    uint32_t getHeight() const { return height; }
+    u32 getWidth() const { return width; }
+    u32 getHeight() const { return height; }
 
   private:
-    uint32_t width;  // Width of the inner grid.
-    uint32_t height; // Height of the inner grid.
-    uint32_t stride; // Row length (width + 2 for the borders).
+    u32 width;  // Width of the inner grid.
+    u32 height; // Height of the inner grid.
+    u32 stride; // Row length (width + 2 for the borders).
 
     // Two separate grids stored in fixed Q15 format.
     fl::vector<int16_t, fl::allocator_psram<int16_t>> grid1;

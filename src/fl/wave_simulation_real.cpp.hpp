@@ -38,13 +38,13 @@ float fixed_to_float(int16_t f) {
 
 // // Multiply two Q15 fixed point numbers.
 // int16_t fixed_mul(int16_t a, int16_t b) {
-//     return (int16_t)(((int32_t)a * b) >> 15);
+//     return (int16_t)(((i32)a * b) >> 15);
 // }
 } // namespace wave_detail
 
 using namespace wave_detail;
 
-WaveSimulation1D_Real::WaveSimulation1D_Real(uint32_t len, float courantSq,
+WaveSimulation1D_Real::WaveSimulation1D_Real(u32 len, float courantSq,
                                              int dampening)
     : length(len),
       grid1(length + 2), // Initialize vector with correct size
@@ -114,22 +114,22 @@ void WaveSimulation1D_Real::update() {
     curr[length + 1] = curr[length];
 
     // Compute dampening factor as an integer value: 2^(mDampenening)
-    int32_t dampening_factor = 1 << mDampenening;
+    i32 dampening_factor = 1 << mDampenening;
 
-    int32_t mCourantSq32 = static_cast<int32_t>(mCourantSq);
+    i32 mCourantSq32 = static_cast<i32>(mCourantSq);
     // Iterate over each inner cell.
     for (fl::size i = 1; i < length + 1; i++) {
         // Compute the 1D Laplacian:
         // lap = curr[i+1] - 2 * curr[i] + curr[i-1]
-        int32_t lap =
-            (int32_t)curr[i + 1] - ((int32_t)curr[i] << 1) + curr[i - 1];
+        i32 lap =
+            (i32)curr[i + 1] - ((i32)curr[i] << 1) + curr[i - 1];
 
         // Multiply the Laplacian by the simulation speed using Q15 arithmetic:
-        int32_t term = (mCourantSq32 * lap) >> 15;
+        i32 term = (mCourantSq32 * lap) >> 15;
 
         // Compute the new value:
         // f = -next[i] + 2 * curr[i] + term
-        int32_t f = -(int32_t)next[i] + ((int32_t)curr[i] << 1) + term;
+        i32 f = -(i32)next[i] + ((i32)curr[i] << 1) + term;
 
         // Apply damping:
         f = f - (f / dampening_factor);
@@ -156,7 +156,7 @@ void WaveSimulation1D_Real::update() {
     whichGrid ^= 1;
 }
 
-WaveSimulation2D_Real::WaveSimulation2D_Real(uint32_t W, uint32_t H,
+WaveSimulation2D_Real::WaveSimulation2D_Real(u32 W, u32 H,
                                              float speed, float dampening)
     : width(W), height(H), stride(W + 2),
       grid1((W + 2) * (H + 2)),
@@ -245,23 +245,23 @@ void WaveSimulation2D_Real::update() {
     }
 
     // Compute the dampening factor as an integer: 2^(dampening).
-    int32_t dampening_factor = 1 << mDampening; // e.g., 6 -> 64
-    int32_t mCourantSq32 = static_cast<int32_t>(mCourantSq);
+    i32 dampening_factor = 1 << mDampening; // e.g., 6 -> 64
+    i32 mCourantSq32 = static_cast<i32>(mCourantSq);
 
     // Update each inner cell.
     for (fl::size j = 1; j <= height; ++j) {
         for (fl::size i = 1; i <= width; ++i) {
             int index = j * stride + i;
             // Laplacian: sum of four neighbors minus 4 times the center.
-            int32_t laplacian = (int32_t)curr[index + 1] + curr[index - 1] +
+            i32 laplacian = (i32)curr[index + 1] + curr[index - 1] +
                                 curr[index + stride] + curr[index - stride] -
-                                ((int32_t)curr[index] << 2);
+                                ((i32)curr[index] << 2);
             // Compute the new value:
             // f = - next[index] + 2 * curr[index] + mCourantSq * laplacian
             // The multiplication is in Q15, so we shift right by 15.
-            int32_t term = (mCourantSq32 * laplacian) >> 15;
-            int32_t f =
-                -(int32_t)next[index] + ((int32_t)curr[index] << 1) + term;
+            i32 term = (mCourantSq32 * laplacian) >> 15;
+            i32 f =
+                -(i32)next[index] + ((i32)curr[index] << 1) + term;
 
             // Apply damping:
             f = f - (f / dampening_factor);

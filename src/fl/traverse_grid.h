@@ -145,11 +145,11 @@ inline void traverseGridSegment16(const vec2f &start, const vec2f &end,
 
     u16 absDeltaX_fp =
         (deltaX_fp != 0) ? static_cast<u16>(
-                               ABS((int32_t(FP_ONE) << FP_SHIFT) / deltaX_fp))
+                               ABS((i32(FP_ONE) << FP_SHIFT) / deltaX_fp))
                          : UINT16_MAX;
     u16 absDeltaY_fp =
         (deltaY_fp != 0) ? static_cast<u16>(
-                               ABS((int32_t(FP_ONE) << FP_SHIFT) / deltaY_fp))
+                               ABS((i32(FP_ONE) << FP_SHIFT) / deltaY_fp))
                          : UINT16_MAX;
 
     int16_t nextX_fp = (stepX > 0) ? ((x0 + 1) << FP_SHIFT) : (x0 << FP_SHIFT);
@@ -158,12 +158,12 @@ inline void traverseGridSegment16(const vec2f &start, const vec2f &end,
     u16 tMaxX_fp =
         (deltaX_fp != 0)
             ? static_cast<u16>(
-                  ABS(int32_t(nextX_fp - startX_fp)) * absDeltaX_fp >> FP_SHIFT)
+                  ABS(i32(nextX_fp - startX_fp)) * absDeltaX_fp >> FP_SHIFT)
             : UINT16_MAX;
     u16 tMaxY_fp =
         (deltaY_fp != 0)
             ? static_cast<u16>(
-                  ABS(int32_t(nextY_fp - startY_fp)) * absDeltaY_fp >> FP_SHIFT)
+                  ABS(i32(nextY_fp - startY_fp)) * absDeltaY_fp >> FP_SHIFT)
             : UINT16_MAX;
 
     const u16 maxT_fp = FP_ONE;
@@ -202,59 +202,59 @@ inline void traverseGridSegment16(const vec2f &start, const vec2f &end,
 template <typename GridVisitor>
 inline void traverseGridSegment32(const vec2f &start, const vec2f &end,
                                   GridVisitor &visitor) {
-    const int32_t FP_SHIFT = 8;
-    const int32_t FP_ONE = 1 << FP_SHIFT;
-    // const int32_t FP_MASK = FP_ONE - 1;
+    const i32 FP_SHIFT = 8;
+    const i32 FP_ONE = 1 << FP_SHIFT;
+    // const i32 FP_MASK = FP_ONE - 1;
 
     // Convert to fixed-point (Q24.8) signed
-    int32_t startX_fp = static_cast<int32_t>(start.x * FP_ONE);
-    int32_t startY_fp = static_cast<int32_t>(start.y * FP_ONE);
-    int32_t endX_fp = static_cast<int32_t>(end.x * FP_ONE);
-    int32_t endY_fp = static_cast<int32_t>(end.y * FP_ONE);
+    i32 startX_fp = static_cast<i32>(start.x * FP_ONE);
+    i32 startY_fp = static_cast<i32>(start.y * FP_ONE);
+    i32 endX_fp = static_cast<i32>(end.x * FP_ONE);
+    i32 endY_fp = static_cast<i32>(end.y * FP_ONE);
 
-    int32_t x0 = startX_fp >> FP_SHIFT;
-    int32_t y0 = startY_fp >> FP_SHIFT;
-    int32_t x1 = endX_fp >> FP_SHIFT;
-    int32_t y1 = endY_fp >> FP_SHIFT;
+    i32 x0 = startX_fp >> FP_SHIFT;
+    i32 y0 = startY_fp >> FP_SHIFT;
+    i32 x1 = endX_fp >> FP_SHIFT;
+    i32 y1 = endY_fp >> FP_SHIFT;
 
-    int32_t stepX = (x1 > x0) ? 1 : (x1 < x0) ? -1 : 0;
-    int32_t stepY = (y1 > y0) ? 1 : (y1 < y0) ? -1 : 0;
+    i32 stepX = (x1 > x0) ? 1 : (x1 < x0) ? -1 : 0;
+    i32 stepY = (y1 > y0) ? 1 : (y1 < y0) ? -1 : 0;
 
-    int32_t deltaX_fp = endX_fp - startX_fp;
-    int32_t deltaY_fp = endY_fp - startY_fp;
+    i32 deltaX_fp = endX_fp - startX_fp;
+    i32 deltaY_fp = endY_fp - startY_fp;
 
-    uint32_t absDeltaX_fp =
-        (deltaX_fp != 0) ? static_cast<uint32_t>(
+    u32 absDeltaX_fp =
+        (deltaX_fp != 0) ? static_cast<u32>(
                                ABS((fl::i64(FP_ONE) << FP_SHIFT) / deltaX_fp))
                          : UINT32_MAX;
-    uint32_t absDeltaY_fp =
-        (deltaY_fp != 0) ? static_cast<uint32_t>(
+    u32 absDeltaY_fp =
+        (deltaY_fp != 0) ? static_cast<u32>(
                                ABS((fl::i64(FP_ONE) << FP_SHIFT) / deltaY_fp))
                          : UINT32_MAX;
 
-    int32_t nextX_fp = (stepX > 0) ? ((x0 + 1) << FP_SHIFT) : (x0 << FP_SHIFT);
-    int32_t nextY_fp = (stepY > 0) ? ((y0 + 1) << FP_SHIFT) : (y0 << FP_SHIFT);
+    i32 nextX_fp = (stepX > 0) ? ((x0 + 1) << FP_SHIFT) : (x0 << FP_SHIFT);
+    i32 nextY_fp = (stepY > 0) ? ((y0 + 1) << FP_SHIFT) : (y0 << FP_SHIFT);
 
-    uint32_t tMaxX_fp =
+    u32 tMaxX_fp =
         (deltaX_fp != 0)
-            ? static_cast<uint32_t>(
+            ? static_cast<u32>(
                   ABS(fl::i64(nextX_fp - startX_fp)) * absDeltaX_fp >> FP_SHIFT)
             : UINT32_MAX;
-    uint32_t tMaxY_fp =
+    u32 tMaxY_fp =
         (deltaY_fp != 0)
-            ? static_cast<uint32_t>(
+            ? static_cast<u32>(
                   ABS(fl::i64(nextY_fp - startY_fp)) * absDeltaY_fp >> FP_SHIFT)
             : UINT32_MAX;
 
-    const uint32_t maxT_fp = FP_ONE;
+    const u32 maxT_fp = FP_ONE;
 
-    int32_t currentX = x0;
-    int32_t currentY = y0;
+    i32 currentX = x0;
+    i32 currentY = y0;
 
     while (true) {
         visitor.visit(currentX, currentY);
 
-        uint32_t t_fp = (tMaxX_fp < tMaxY_fp) ? tMaxX_fp : tMaxY_fp;
+        u32 t_fp = (tMaxX_fp < tMaxY_fp) ? tMaxX_fp : tMaxY_fp;
         if (t_fp > maxT_fp)
             break;
 

@@ -78,7 +78,7 @@ FASTLED_SMART_PTR(StringHolder);
 
 class StringFormatter {
   public:
-    static void append(int32_t val, StrN<FASTLED_STR_INLINED_SIZE> *dst);
+    static void append(i32 val, StrN<FASTLED_STR_INLINED_SIZE> *dst);
     static bool isSpace(char c) {
         return c == ' ' || c == '\t' || c == '\n' || c == '\r';
     }
@@ -260,13 +260,13 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
         return write(dst.c_str(), dst.size());
     }
 
-    fl::size write(const uint32_t &val) {
+    fl::size write(const u32 &val) {
         StrN<FASTLED_STR_INLINED_SIZE> dst;
         StringFormatter::append(val, &dst); // Inlined size should suffice
         return write(dst.c_str(), dst.size());
     }
 
-    fl::size write(const int32_t &val) {
+    fl::size write(const i32 &val) {
         StrN<FASTLED_STR_INLINED_SIZE> dst;
         StringFormatter::append(val, &dst); // Inlined size should suffice
         return write(dst.c_str(), dst.size());
@@ -517,11 +517,11 @@ class string : public StrN<FASTLED_STR_INLINED_SIZE> {
 
     // Generic integral append: only enabled if T is an integral type. This is
     // needed because on some platforms type(int) is not one of the integral
-    // types like int8_t, int16_t, int32_t, int64_t etc. In such a has just case
-    // the value to int32_t and then append it.
+    // types like int8_t, int16_t, i32, int64_t etc. In such a has just case
+    // the value to i32 and then append it.
     template <typename T, typename = fl::enable_if_t<fl::is_integral<T>::value>>
     string &append(const T &val) {
-        write(int32_t(val));
+        write(i32(val));
         return *this;
     }
 
@@ -573,14 +573,14 @@ class string : public StrN<FASTLED_STR_INLINED_SIZE> {
         return *this;
     }
     string &append(const int16_t &val) {
-        write(int32_t(val));
+        write(i32(val));
         return *this;
     }
-    string &append(const uint32_t &val) {
+    string &append(const u32 &val) {
         write(val);
         return *this;
     }
-    string &append(const int32_t &c) {
+    string &append(const i32 &c) {
         write(c);
         return *this;
     }

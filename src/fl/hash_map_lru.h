@@ -19,10 +19,10 @@ class HashMapLru {
     // Wrapper for values that includes access time tracking
     struct ValueWithTimestamp {
         T value;
-        uint32_t last_access_time;
+        u32 last_access_time;
 
         ValueWithTimestamp() : last_access_time(0) {}
-        ValueWithTimestamp(const T &v, uint32_t time)
+        ValueWithTimestamp(const T &v, u32 time)
             : value(v), last_access_time(time) {}
     };
 
@@ -134,7 +134,7 @@ class HashMapLru {
 
         // Find the entry with the oldest timestamp
         Key oldest_key;
-        uint32_t oldest_time = UINT32_MAX;
+        u32 oldest_time = UINT32_MAX;
         bool found = false;
 
         for (auto it = mMap.begin(); it != mMap.end(); ++it) {
@@ -156,7 +156,7 @@ class HashMapLru {
 
     HashMap<Key, ValueWithTimestamp, Hash, KeyEqual, INLINED_COUNT> mMap;
     fl::size mMaxSize;
-    uint32_t mCurrentTime;
+    u32 mCurrentTime;
 };
 
 } // namespace fl

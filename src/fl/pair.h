@@ -130,7 +130,7 @@ struct pair_element<1, T1, T2> {
 template <fl::size I, typename T1, typename T2>
 typename pair_element<I, T1, T2>::type& get(pair<T1, T2> &p) noexcept {
     static_assert(I < 2, "Index out of bounds for pair");
-    if constexpr (I == 0) {
+    if (I == 0) {
         return p.first;
     } else {
         return p.second;
@@ -140,7 +140,7 @@ typename pair_element<I, T1, T2>::type& get(pair<T1, T2> &p) noexcept {
 template <fl::size I, typename T1, typename T2>
 const typename pair_element<I, T1, T2>::type& get(const pair<T1, T2> &p) noexcept {
     static_assert(I < 2, "Index out of bounds for pair");
-    if constexpr (I == 0) {
+    if (I == 0) {
         return p.first;
     } else {
         return p.second;

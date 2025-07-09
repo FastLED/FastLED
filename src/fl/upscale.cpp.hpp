@@ -27,9 +27,9 @@ void upscaleArbitrary(const CRGB *input, CRGB *output, u16 inputWidth,
     for (u16 y = 0; y < outputHeight; y++) {
         for (u16 x = 0; x < outputWidth; x++) {
             // Calculate the corresponding position in the input grid
-            uint32_t fx = ((uint32_t)x * (inputWidth - 1) * scale_factor) /
+            u32 fx = ((u32)x * (inputWidth - 1) * scale_factor) /
                           (outputWidth - 1);
-            uint32_t fy = ((uint32_t)y * (inputHeight - 1) * scale_factor) /
+            u32 fy = ((u32)y * (inputHeight - 1) * scale_factor) /
                           (outputHeight - 1);
 
             u16 ix = fx / scale_factor; // Integer part of x
@@ -67,12 +67,12 @@ uint8_t bilinearInterpolate(uint8_t v00, uint8_t v10, uint8_t v01, uint8_t v11,
     u16 dx_inv = 256 - dx;
     u16 dy_inv = 256 - dy;
 
-    uint32_t w00 = (uint32_t)dx_inv * dy_inv;
-    uint32_t w10 = (uint32_t)dx * dy_inv;
-    uint32_t w01 = (uint32_t)dx_inv * dy;
-    uint32_t w11 = (uint32_t)dx * dy;
+    u32 w00 = (u32)dx_inv * dy_inv;
+    u32 w10 = (u32)dx * dy_inv;
+    u32 w01 = (u32)dx_inv * dy;
+    u32 w11 = (u32)dx * dy;
 
-    uint32_t sum = v00 * w00 + v10 * w10 + v01 * w01 + v11 * w11;
+    u32 sum = v00 * w00 + v10 * w10 + v01 * w01 + v11 * w11;
 
     // Normalize the result by dividing by 65536 (shift right by 16 bits),
     // with rounding

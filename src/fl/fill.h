@@ -140,16 +140,16 @@ void fill_gradient(T *targetArray, u16 startpos, CHSV startcolor,
 
 #if FASTLED_USE_32_BIT_GRADIENT_FILL
     // Use higher precision 32 bit math for new micros.
-    int32_t huedelta823 = (huedistance87 * 65536) / divisor;
-    int32_t satdelta823 = (satdistance87 * 65536) / divisor;
-    int32_t valdelta823 = (valdistance87 * 65536) / divisor;
+    i32 huedelta823 = (huedistance87 * 65536) / divisor;
+    i32 satdelta823 = (satdistance87 * 65536) / divisor;
+    i32 valdelta823 = (valdistance87 * 65536) / divisor;
 
     huedelta823 *= 2;
     satdelta823 *= 2;
     valdelta823 *= 2;
-    uint32_t hue824 = static_cast<uint32_t>(startcolor.hue) << 24;
-    uint32_t sat824 = static_cast<uint32_t>(startcolor.sat) << 24;
-    uint32_t val824 = static_cast<uint32_t>(startcolor.val) << 24;
+    u32 hue824 = static_cast<u32>(startcolor.hue) << 24;
+    u32 sat824 = static_cast<u32>(startcolor.sat) << 24;
+    u32 val824 = static_cast<u32>(startcolor.val) << 24;
     for (u16 i = startpos; i <= endpos; ++i) {
         targetArray[i] = CHSV(hue824 >> 24, sat824 >> 24, val824 >> 24);
         hue824 += huedelta823;

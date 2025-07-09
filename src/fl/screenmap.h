@@ -39,25 +39,25 @@ class ScreenMap {
     ScreenMap() = default;
 
     // is_reverse is false by default for linear layout
-    ScreenMap(uint32_t length, float mDiameter = -1.0f);
+    ScreenMap(u32 length, float mDiameter = -1.0f);
 
-    ScreenMap(const vec2f *lut, uint32_t length, float diameter = -1.0);
+    ScreenMap(const vec2f *lut, u32 length, float diameter = -1.0);
 
-    template <uint32_t N>
+    template <u32 N>
     ScreenMap(const vec2f (&lut)[N], float diameter = -1.0)
         : ScreenMap(lut, N, diameter) {}
 
     ScreenMap(const ScreenMap &other);
 
-    const vec2f &operator[](uint32_t x) const;
+    const vec2f &operator[](u32 x) const;
 
-    void set(uint16_t index, const vec2f &p);
+    void set(u16 index, const vec2f &p);
 
     void addOffset(const vec2f &p);
     void addOffsetX(float x);
     void addOffsetY(float y);
 
-    vec2f &operator[](uint32_t x);
+    vec2f &operator[](u32 x);
 
     // TODO: change this name to setDiameterLed. Default should be .5f
     // for 5 mm ws lense.
@@ -66,9 +66,9 @@ class ScreenMap {
     // define the assignment operator
     ScreenMap &operator=(const ScreenMap &other);
 
-    vec2f mapToIndex(uint32_t x) const;
+    vec2f mapToIndex(u32 x) const;
 
-    uint32_t getLength() const;
+    u32 getLength() const;
     // The diameter each point represents.
     float getDiameter() const;
 
@@ -89,7 +89,7 @@ class ScreenMap {
 
   private:
     static const vec2f &empty();
-    uint32_t length = 0;
+    u32 length = 0;
     float mDiameter = -1.0f; // Only serialized if it's not > 0.0f.
     LUTXYFLOATPtr mLookUpTable;
 };

@@ -73,7 +73,7 @@ void fl::XYRasterSparse_CRGB::draw(const XYMap &xymap, CRGB *out) {
         if (!xymap.has(pt.x, pt.y)) {
             continue;
         }
-        uint32_t index = xymap(pt.x, pt.y);
+        u32 index = xymap(pt.x, pt.y);
         const CRGB &color = it.second;
         // Only draw non-black pixels (since black represents "no data")
         if (color.r != 0 || color.g != 0 || color.b != 0) {

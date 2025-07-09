@@ -39,13 +39,13 @@ def run_command(command, use_gdb=False) -> tuple[int, str]:
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,  # Merge stderr into stdout
             shell=True,
-            text=True,
-            bufsize=1,  # Line buffered
+            text=False,
         )
         assert process.stdout is not None
         # Stream and capture output
         while True:
-            line = process.stdout.readline()
+            line_bytes = process.stdout.readline()
+            line = line_bytes.decode("utf-8", errors="ignore")
             if not line and process.poll() is not None:
                 break
             if line:
@@ -62,13 +62,13 @@ def run_command(command, use_gdb=False) -> tuple[int, str]:
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,  # Merge stderr into stdout
             shell=True,
-            text=True,
-            bufsize=1,  # Line buffered
+            text=False,
         )
         assert process.stdout is not None
         # Stream and capture output
         while True:
-            line = process.stdout.readline()
+            line_bytes = process.stdout.readline()
+            line = line_bytes.decode("utf-8", errors="ignore")
             if not line and process.poll() is not None:
                 break
             if line:

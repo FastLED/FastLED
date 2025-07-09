@@ -168,22 +168,22 @@ void ScreenMap::toJsonStr(const FixedMap<string, ScreenMap, 16> &segmentMaps,
 #endif
 }
 
-ScreenMap::ScreenMap(uint32_t length, float mDiameter)
+ScreenMap::ScreenMap(u32 length, float mDiameter)
     : length(length), mDiameter(mDiameter) {
     mLookUpTable = LUTXYFLOATPtr::New(length);
     LUTXYFLOAT &lut = *mLookUpTable.get();
     vec2f *data = lut.getDataMutable();
-    for (uint32_t x = 0; x < length; x++) {
+    for (u32 x = 0; x < length; x++) {
         data[x] = {0, 0};
     }
 }
 
-ScreenMap::ScreenMap(const vec2f *lut, uint32_t length, float diameter)
+ScreenMap::ScreenMap(const vec2f *lut, u32 length, float diameter)
     : length(length), mDiameter(diameter) {
     mLookUpTable = LUTXYFLOATPtr::New(length);
     LUTXYFLOAT &lut16xy = *mLookUpTable.get();
     vec2f *data = lut16xy.getDataMutable();
-    for (uint32_t x = 0; x < length; x++) {
+    for (u32 x = 0; x < length; x++) {
         data[x] = lut[x];
     }
 }
@@ -204,7 +204,7 @@ void ScreenMap::set(u16 index, const vec2f &p) {
 
 void ScreenMap::setDiameter(float diameter) { mDiameter = diameter; }
 
-vec2f ScreenMap::mapToIndex(uint32_t x) const {
+vec2f ScreenMap::mapToIndex(u32 x) const {
     if (x >= length || !mLookUpTable) {
         return {0, 0};
     }
@@ -213,7 +213,7 @@ vec2f ScreenMap::mapToIndex(uint32_t x) const {
     return screen_coords;
 }
 
-uint32_t ScreenMap::getLength() const { return length; }
+u32 ScreenMap::getLength() const { return length; }
 
 float ScreenMap::getDiameter() const { return mDiameter; }
 
@@ -235,7 +235,7 @@ vec2f ScreenMap::getBounds() const {
     float minY = data[0].y;
     float maxY = data[0].y;
 
-    for (uint32_t i = 1; i < length; i++) {
+    for (u32 i = 1; i < length; i++) {
         const vec2f &p = lut[i];
         minX = MIN(minX, p.x);
         maxX = MAX(maxX, p.x);
@@ -251,7 +251,7 @@ const vec2f &ScreenMap::empty() {
     return s_empty;
 }
 
-const vec2f &ScreenMap::operator[](uint32_t x) const {
+const vec2f &ScreenMap::operator[](u32 x) const {
     if (x >= length || !mLookUpTable) {
         return empty(); // better than crashing.
     }
@@ -259,7 +259,7 @@ const vec2f &ScreenMap::operator[](uint32_t x) const {
     return lut[x];
 }
 
-vec2f &ScreenMap::operator[](uint32_t x) {
+vec2f &ScreenMap::operator[](u32 x) {
     if (x >= length || !mLookUpTable) {
         return const_cast<vec2f &>(empty()); // better than crashing.
     }
@@ -279,7 +279,7 @@ ScreenMap &ScreenMap::operator=(const ScreenMap &other) {
 
 void ScreenMap::addOffset(const vec2f &p) {
     vec2f *data = mLookUpTable->getDataMutable();
-    for (uint32_t i = 0; i < length; i++) {
+    for (u32 i = 0; i < length; i++) {
         vec2f &curr = data[i];
         curr.x += p.x;
         curr.y += p.y;

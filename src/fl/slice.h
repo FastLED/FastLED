@@ -199,9 +199,9 @@ template <typename T> class MatrixSlice {
     // represents a window into a matrix
     // bottom-left and top-right corners are passed as plain ints
     MatrixSlice() = default;
-    MatrixSlice(T *data, int32_t dataWidth, int32_t dataHeight,
-                int32_t bottomLeftX, int32_t bottomLeftY, int32_t topRightX,
-                int32_t topRightY)
+    MatrixSlice(T *data, i32 dataWidth, i32 dataHeight,
+                i32 bottomLeftX, i32 bottomLeftY, i32 topRightX,
+                i32 topRightY)
         : mData(data), mDataWidth(dataWidth), mDataHeight(dataHeight),
           mBottomLeft{bottomLeftX, bottomLeftY},
           mTopRight{topRightX, topRightY} {}
@@ -210,43 +210,43 @@ template <typename T> class MatrixSlice {
     MatrixSlice &operator=(const MatrixSlice &other) = default;
 
     // outputs a vec2 but takes x,y as inputs
-    vec2<int32_t> getParentCoord(int32_t x_local, int32_t y_local) const {
+    vec2<i32> getParentCoord(i32 x_local, i32 y_local) const {
         return {x_local + mBottomLeft.x, y_local + mBottomLeft.y};
     }
 
-    vec2<int32_t> getLocalCoord(int32_t x_world, int32_t y_world) const {
+    vec2<i32> getLocalCoord(i32 x_world, i32 y_world) const {
         // clamp to [mBottomLeft, mTopRight]
-        int32_t x_clamped = fl::clamp(x_world, mBottomLeft.x, mTopRight.x);
-        int32_t y_clamped = fl::clamp(y_world, mBottomLeft.y, mTopRight.y);
+        i32 x_clamped = fl::clamp(x_world, mBottomLeft.x, mTopRight.x);
+        i32 y_clamped = fl::clamp(y_world, mBottomLeft.y, mTopRight.y);
         // convert to local
         return {x_clamped - mBottomLeft.x, y_clamped - mBottomLeft.y};
     }
 
     // element access via (x,y)
-    T &operator()(int32_t x, int32_t y) { return at(x, y); }
+    T &operator()(i32 x, i32 y) { return at(x, y); }
 
     // Add access like slice[y][x]
-    T *operator[](int32_t row) {
-        int32_t parentRow = row + mBottomLeft.y;
+    T *operator[](i32 row) {
+        i32 parentRow = row + mBottomLeft.y;
         return mData + parentRow * mDataWidth + mBottomLeft.x;
     }
 
-    T &at(int32_t x, int32_t y) {
+    T &at(i32 x, i32 y) {
         auto parent = getParentCoord(x, y);
         return mData[parent.x + parent.y * mDataWidth];
     }
 
-    const T &at(int32_t x, int32_t y) const {
+    const T &at(i32 x, i32 y) const {
         auto parent = getParentCoord(x, y);
         return mData[parent.x + parent.y * mDataWidth];
     }
 
   private:
     T *mData = nullptr;
-    int32_t mDataWidth = 0;
-    int32_t mDataHeight = 0;
-    vec2<int32_t> mBottomLeft;
-    vec2<int32_t> mTopRight;
+    i32 mDataWidth = 0;
+    i32 mDataHeight = 0;
+    vec2<i32> mBottomLeft;
+    vec2<i32> mTopRight;
 };
 
 } // namespace fl

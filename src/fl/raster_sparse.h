@@ -162,7 +162,7 @@ class XYRasterU8Sparse {
             if (!xymap.has(pt.x, pt.y)) {
                 continue;
             }
-            uint32_t index = xymap(pt.x, pt.y);
+            u32 index = xymap(pt.x, pt.y);
             uint8_t value = it.second;
             if (value > 0) { // Something wrote here.
                 visitor.draw(pt, index, value);
@@ -339,7 +339,7 @@ class XYRasterSparse_CRGB {
             if (!xymap.has(pt.x, pt.y)) {
                 continue;
             }
-            uint32_t index = xymap(pt.x, pt.y);
+            u32 index = xymap(pt.x, pt.y);
             const CRGB &color = it.second;
             // Only draw non-black pixels (since black represents "no data")
             if (color.r != 0 || color.g != 0 || color.b != 0) {

@@ -31,15 +31,15 @@ private:
 
     /// Generate next 32-bit random number using this instance's seed
     /// @returns The next 32-bit random number
-    uint32_t next_random32() {
-        uint32_t high = next_random16();
-        uint32_t low = next_random16();
+    u32 next_random32() {
+        u32 high = next_random16();
+        u32 low = next_random16();
         return (high << 16) | low;
     }
 
 public:
     /// The result type for this random generator (32-bit unsigned integer)
-    typedef uint32_t result_type;
+    typedef u32 result_type;
 
     /// Default constructor - uses current global random seed
     fl_random() : seed_(random16_get_seed()) {}
@@ -59,9 +59,9 @@ public:
     /// @returns A random number from 0 to n-1
     result_type operator()(result_type n) {
         if (n == 0) return 0;
-        uint32_t r = next_random32();
+        u32 r = next_random32();
         fl::u64 p = (fl::u64)n * (fl::u64)r;
-        return (uint32_t)(p >> 32);
+        return (u32)(p >> 32);
     }
 
     /// Generate a random number in the range [min, max)
