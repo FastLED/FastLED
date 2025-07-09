@@ -6,6 +6,7 @@
 #include "fl/namespace.h"
 #include "fl/vector.h"
 #include "fl/map.h"
+#include "fl/rbtree.h"
 #include "fl/allocator.h"
 
 
@@ -271,17 +272,12 @@ template <typename Key, typename Allocator = fl::allocator<Key>> class VectorSet
     VectorType data;
 };
 
-// fl::set<T, Allocator> - Ordered set implementation using SortedHeapMap
+// fl::set<T, Allocator> - Ordered set implementation using SetRedBlackTree
 // This is an ordered set that keeps elements sorted, similar to std::set
 template <typename Key, typename Allocator = fl::allocator_slab<Key>> class set {
   private:
-    // Use bool as the value type for the map to create a set
-    // Rebind the allocator to work with pair<Key, bool>
-    using PairType = fl::pair<Key, bool>;
-    using ReboundAllocator = typename Allocator::template rebind<PairType>::other;
-    using MapType = fl::SortedHeapMap<Key, bool>;
-    
-    MapType map_data;
+    using TreeType = fl::SetRedBlackTree<Key, fl::DefaultLess<Key>, Allocator>;
+    TreeType tree_;
     
   public:
     // Standard set typedefs
@@ -295,23 +291,7 @@ template <typename Key, typename Allocator = fl::allocator_slab<Key>> class set 
     using const_pointer = const Key*;
     
     // Iterator types - we only provide const iterators since set elements are immutable
-    class const_iterator {
-    private:
-        typename MapType::const_iterator map_it;
-        
-    public:
-        explicit const_iterator(typename MapType::const_iterator it) : map_it(it) {}
-        
-        const Key& operator*() const { return map_it->first; }
-        const Key* operator->() const { return &(map_it->first); }
-        
-        const_iterator& operator++() { ++map_it; return *this; }
-        const_iterator operator++(int) { const_iterator tmp = *this; ++map_it; return tmp; }
-        
-        bool operator==(const const_iterator& other) const { return map_it == other.map_it; }
-        bool operator!=(const const_iterator& other) const { return map_it != other.map_it; }
-    };
-    
+    using const_iterator = typename TreeType::const_iterator;
     using iterator = const_iterator;  // set only provides const iterators
     
     // Constructors
@@ -322,59 +302,55 @@ template <typename Key, typename Allocator = fl::allocator_slab<Key>> class set 
     set& operator=(set&& other) = default;
     
     // Iterators
-    const_iterator begin() const { return const_iterator(map_data.begin()); }
-    const_iterator end() const { return const_iterator(map_data.end()); }
-    const_iterator cbegin() const { return begin(); }
-    const_iterator cend() const { return end(); }
+    const_iterator begin() const { return tree_.begin(); }
+    const_iterator end() const { return tree_.end(); }
+    const_iterator cbegin() const { return tree_.cbegin(); }
+    const_iterator cend() const { return tree_.cend(); }
     
     // Capacity
-    bool empty() const { return map_data.empty(); }
-    size_type size() const { return map_data.size(); }
-    size_type max_size() const { return map_data.max_size(); }
+    bool empty() const { return tree_.empty(); }
+    size_type size() const { return tree_.size(); }
+    size_type max_size() const { return tree_.max_size(); }
     
     // Modifiers
-    void clear() { map_data.clear(); }
+    void clear() { tree_.clear(); }
     
     fl::pair<const_iterator, bool> insert(const Key& key) {
-        auto result = map_data.insert(fl::pair<Key, bool>(key, true));
-        return fl::pair<const_iterator, bool>(const_iterator(result.first), result.second);
+        return tree_.insert(key);
     }
     
     fl::pair<const_iterator, bool> insert(Key&& key) {
-        auto result = map_data.insert(fl::pair<Key, bool>(fl::move(key), true));
-        return fl::pair<const_iterator, bool>(const_iterator(result.first), result.second);
+        return tree_.insert(fl::move(key));
     }
     
     template<typename... Args>
     fl::pair<const_iterator, bool> emplace(Args&&... args) {
-        auto result = map_data.emplace(fl::forward<Args>(args)..., true);
-        return fl::pair<const_iterator, bool>(const_iterator(result.first), result.second);
+        return tree_.emplace(fl::forward<Args>(args)...);
     }
     
     const_iterator erase(const_iterator pos) {
-        auto map_it = map_data.erase(pos.map_it);
-        return const_iterator(map_it);
+        return tree_.erase(pos);
     }
     
     size_type erase(const Key& key) {
-        return map_data.erase(key);
+        return tree_.erase(key);
     }
     
     void swap(set& other) {
-        map_data.swap(other.map_data);
+        tree_.swap(other.tree_);
     }
     
     // Lookup
     size_type count(const Key& key) const {
-        return map_data.count(key);
+        return tree_.count(key);
     }
     
     const_iterator find(const Key& key) const {
-        return const_iterator(map_data.find(key));
+        return tree_.find(key);
     }
     
     bool contains(const Key& key) const {
-        return map_data.contains(key);
+        return tree_.contains(key);
     }
     
     bool has(const Key& key) const {
@@ -382,19 +358,15 @@ template <typename Key, typename Allocator = fl::allocator_slab<Key>> class set 
     }
     
     fl::pair<const_iterator, const_iterator> equal_range(const Key& key) const {
-        auto range = map_data.equal_range(key);
-        return fl::pair<const_iterator, const_iterator>(
-            const_iterator(range.first), 
-            const_iterator(range.second)
-        );
+        return tree_.equal_range(key);
     }
     
     const_iterator lower_bound(const Key& key) const {
-        return const_iterator(map_data.lower_bound(key));
+        return tree_.lower_bound(key);
     }
     
     const_iterator upper_bound(const Key& key) const {
-        return const_iterator(map_data.upper_bound(key));
+        return tree_.upper_bound(key);
     }
 };
 
