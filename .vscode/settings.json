@@ -172,6 +172,16 @@
         "xstring": "cpp",
         "xutility": "cpp",
         "xtree": "cpp",
-        "xhash": "cpp"
-    }
+        "xhash": "cpp",
+        "*.ino": "cpp"
+    },
+    // Arduino/FastLED Integration
+    "[ino]": {
+        "editor.defaultFormatter": "ms-vscode.cpptools",
+        "debug.defaultDebuggerType": "cppdbg"
+    },
+    // Disable PlatformIO auto-detection for .ino files in FastLED project
+    "platformio.autoRebuildAutocompleteIndex": false,
+    "platformio.disableToolchainAutoInstaller": true,
+    "platformio.activateProjectOnTextEditor": false
 }

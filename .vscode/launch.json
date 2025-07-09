@@ -1,0 +1,20 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Run .ino with FastLED",
+            "type": "node-terminal", 
+            "request": "launch",
+            "command": "uv run fastled \"${file}\" --no-auto-updates",
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "name": "Debug C++ Test",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/tests/.build/bin/${fileBasenameNoExtension}.exe",
+            "preLaunchTask": "Compile Current Test File (Debug Only)",
+            "MIMode": "gdb"
+        }
+    ]
+}

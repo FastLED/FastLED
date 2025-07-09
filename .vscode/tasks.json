@@ -248,6 +248,62 @@
                 "clear": false
             },
             "detail": "Verify GDB debugger is available and working"
+        },
+        {
+            "type": "shell",
+            "label": "Run FastLED Web Compiler",
+            "command": "uv",
+            "args": [
+                "run",
+                "fastled",
+                "${file}",
+                "--no-auto-updates"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": true,
+                "panel": "new",
+                "showReuseMessage": false,
+                "clear": true
+            },
+            "detail": "Run FastLED web compiler on the current .ino file",
+            "problemMatcher": []
+        },
+        {
+            "type": "shell",
+            "label": "Run Current .ino File with FastLED",
+            "command": "uv",
+            "args": [
+                "run",
+                "fastled",
+                "${file}",
+                "--no-auto-updates"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": true,
+                "panel": "new",
+                "showReuseMessage": false,
+                "clear": true
+            },
+            "detail": "Run the current .ino file with FastLED web compiler (alias for convenience)",
+            "problemMatcher": []
         }
     ],
     "inputs": [

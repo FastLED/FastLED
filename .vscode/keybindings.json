@@ -1,0 +1,20 @@
+[
+    {
+        "key": "f5",
+        "command": "workbench.action.tasks.runTask",
+        "args": "Run FastLED Web Compiler",
+        "when": "editorTextFocus && resourceExtname == '.ino'"
+    },
+    {
+        "key": "ctrl+f5",
+        "command": "workbench.action.tasks.runTask", 
+        "args": "Run Current .ino File with FastLED",
+        "when": "editorTextFocus && resourceExtname == '.ino'"
+    },
+    {
+        "key": "shift+f5",
+        "command": "workbench.action.tasks.runTask",
+        "args": "Run FastLED Web Compiler",
+        "when": "editorTextFocus && resourceExtname == '.ino'"
+    }
+] 
