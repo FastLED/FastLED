@@ -1,5 +1,6 @@
 import subprocess
 import threading
+import time
 from pathlib import Path
 
 
@@ -18,6 +19,7 @@ class RunningProcess:
         check: bool = False,
         auto_run: bool = True,
         echo: bool = True,
+        timeout: int = 300,  # 5 minute default timeout
     ):
         """
         Initialize the RunningProcess instance. Note that stderr is merged into stdout!!
@@ -28,6 +30,7 @@ class RunningProcess:
             check (bool): If True, raise an exception if the command returns a non-zero exit code.
             auto_run (bool): If True, automatically run the command when the instance is created.
             echo (bool): If True, print the output of the command to the console in real-time.
+            timeout (int): Timeout in seconds for process execution. Default 300 seconds (5 minutes).
         """
         if isinstance(command, list):
             command = subprocess.list2cmdline(command)
@@ -38,6 +41,7 @@ class RunningProcess:
         self.check = check
         self.auto_run = auto_run
         self.echo = echo
+        self.timeout = timeout
         self.reader_thread: threading.Thread | None = None
         self.shutdown: threading.Event = threading.Event()
         if auto_run:
@@ -87,14 +91,30 @@ class RunningProcess:
 
     def wait(self) -> int:
         """
-        Wait for the process to complete.
+        Wait for the process to complete with timeout protection.
 
         Raises:
             ValueError: If the process hasn't been started.
+            TimeoutError: If the process takes longer than the timeout.
         """
         if self.proc is None:
             raise ValueError("Process is not running.")
-        rtn = self.proc.wait()
+
+        # Use a timeout to prevent hanging
+        start_time = time.time()
+        while self.proc.poll() is None:
+            if time.time() - start_time > self.timeout:
+                # Process is taking too long, kill it
+                print(
+                    f"Process timeout after {self.timeout} seconds, killing: {self.command}"
+                )
+                self.kill()
+                raise TimeoutError(
+                    f"Process timed out after {self.timeout} seconds: {self.command}"
+                )
+            time.sleep(0.1)  # Check every 100ms
+
+        rtn = self.proc.returncode
         assert self.reader_thread is not None
         self.reader_thread.join(timeout=1)
         return rtn
