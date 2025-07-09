@@ -29,10 +29,10 @@ inline void parse_bitstring(const char* bitstring, SetBitFunc&& set_bit) {
     fl::u32 len = 0;
     while (bitstring[len] == '0' || bitstring[len] == '1') ++len;
     
-    // Parse the bitstring and set bits (reverse order - first character is LSB)
+    // Parse the bitstring and set bits (first character is MSB)
     for (fl::u32 i = 0; i < len; ++i) {
-        if (bitstring[len - 1 - i] == '1') set_bit(i, true);
-        else if (bitstring[len - 1 - i] == '0') set_bit(i, false);
+        if (bitstring[i] == '1') set_bit(i, true);
+        else if (bitstring[i] == '0') set_bit(i, false);
         // ignore other chars
     }
 }
