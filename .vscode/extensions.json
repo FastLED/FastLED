@@ -7,6 +7,13 @@
     ],
     "unwantedRecommendations": [
         "ms-vscode.cpptools",
-        "ms-vscode.cpptools-extension-pack"
+        "ms-vscode.cpptools-extension-pack",
+        "redhat.java",
+        "vscjava.vscode-java-pack",
+        "vscjava.vscode-java-dependency",
+        "vscjava.vscode-java-test",
+        "vscjava.vscode-maven",
+        "vscjava.vscode-gradle",
+        "oracle.oracle-java"
     ]
 }

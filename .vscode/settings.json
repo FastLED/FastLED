@@ -183,5 +183,27 @@
     // Disable PlatformIO auto-detection for .ino files in FastLED project
     "platformio.autoRebuildAutocompleteIndex": false,
     "platformio.disableToolchainAutoInstaller": true,
-    "platformio.activateProjectOnTextEditor": false
+    "platformio.activateProjectOnTextEditor": false,
+    
+    // Disable Java language support and popups
+    "java.enabled": false,
+    "java.jdt.ls.enabled": false,
+    "java.compile.nullAnalysis.mode": "disabled",
+    "java.configuration.checkProjectSettingsExclusions": false,
+    "java.import.gradle.enabled": false,
+    "java.import.maven.enabled": false,
+    "java.autobuild.enabled": false,
+    "java.maxConcurrentBuilds": 0,
+    "java.recommendations.enabled": false,
+    "java.help.showReleaseNotes": false,
+    "redhat.telemetry.enabled": false,
+    
+    // Exclude files from Java language server scanning
+    "java.project.sourcePaths": [],
+    "java.project.referencedLibraries": [],
+    "files.exclude": {
+        "**/.classpath": true,
+        "**/.project": true,
+        "**/.factorypath": true
+    }
 }
