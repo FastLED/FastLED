@@ -272,12 +272,12 @@ public:
         friend class const_iterator;
     private:
         Node* node_;
-        const RedBlackTree* tree_;
+        const RedBlackTree* mTree;
 
         Node* successor(Node* x) const {
             if (x == nullptr) return nullptr;
             if (x->right != nullptr) {
-                return tree_->minimum(x->right);
+                return mTree->minimum(x->right);
             }
             Node* y = x->parent;
             while (y != nullptr && x == y->right) {
@@ -290,7 +290,7 @@ public:
         Node* predecessor(Node* x) const {
             if (x == nullptr) return nullptr;
             if (x->left != nullptr) {
-                return tree_->maximum(x->left);
+                return mTree->maximum(x->left);
             }
             Node* y = x->parent;
             while (y != nullptr && x == y->left) {
@@ -301,8 +301,8 @@ public:
         }
 
     public:
-        iterator() : node_(nullptr), tree_(nullptr) {}
-        iterator(Node* n, const RedBlackTree* t) : node_(n), tree_(t) {}
+        iterator() : node_(nullptr), mTree(nullptr) {}
+        iterator(Node* n, const RedBlackTree* t) : node_(n), mTree(t) {}
 
         value_type& operator*() const { 
             FASTLED_ASSERT(node_ != nullptr, "RedBlackTree::iterator: dereferencing end iterator");
@@ -329,9 +329,9 @@ public:
         iterator& operator--() {
             if (node_) {
                 node_ = predecessor(node_);
-            } else if (tree_ && tree_->root_) {
+            } else if (mTree && mTree->root_) {
                 // Decrementing from end() should give us the maximum element
-                node_ = tree_->maximum(tree_->root_);
+                node_ = mTree->maximum(mTree->root_);
             }
             return *this;
         }
@@ -356,12 +356,12 @@ public:
         friend class iterator;
     private:
         const Node* node_;
-        const RedBlackTree* tree_;
+        const RedBlackTree* mTree;
 
         const Node* successor(const Node* x) const {
             if (x == nullptr) return nullptr;
             if (x->right != nullptr) {
-                return tree_->minimum(x->right);
+                return mTree->minimum(x->right);
             }
             const Node* y = x->parent;
             while (y != nullptr && x == y->right) {
@@ -374,7 +374,7 @@ public:
         const Node* predecessor(const Node* x) const {
             if (x == nullptr) return nullptr;
             if (x->left != nullptr) {
-                return tree_->maximum(x->left);
+                return mTree->maximum(x->left);
             }
             const Node* y = x->parent;
             while (y != nullptr && x == y->left) {
@@ -385,9 +385,9 @@ public:
         }
 
     public:
-        const_iterator() : node_(nullptr), tree_(nullptr) {}
-        const_iterator(const Node* n, const RedBlackTree* t) : node_(n), tree_(t) {}
-        const_iterator(const iterator& it) : node_(it.node_), tree_(it.tree_) {}
+        const_iterator() : node_(nullptr), mTree(nullptr) {}
+        const_iterator(const Node* n, const RedBlackTree* t) : node_(n), mTree(t) {}
+        const_iterator(const iterator& it) : node_(it.node_), mTree(it.mTree) {}
 
         const value_type& operator*() const { 
             FASTLED_ASSERT(node_ != nullptr, "RedBlackTree::iterator: dereferencing end iterator");
@@ -414,9 +414,9 @@ public:
         const_iterator& operator--() {
             if (node_) {
                 node_ = predecessor(node_);
-            } else if (tree_ && tree_->root_) {
+            } else if (mTree && mTree->root_) {
                 // Decrementing from end() should give us the maximum element
-                node_ = tree_->maximum(tree_->root_);
+                node_ = mTree->maximum(mTree->root_);
             }
             return *this;
         }
@@ -809,7 +809,7 @@ private:
     };
 
     using TreeType = RedBlackTree<value_type, PairCompare, Allocator>;
-    TreeType tree_;
+    TreeType mTree;
 
 public:
     using iterator = typename TreeType::iterator;
@@ -817,125 +817,125 @@ public:
 
     // Constructors and destructor
     MapRedBlackTree(const Compare& comp = Compare(), const Allocator& alloc = Allocator()) 
-        : tree_(PairCompare(comp), alloc) {}
+        : mTree(PairCompare(comp), alloc) {}
 
     MapRedBlackTree(const MapRedBlackTree& other) = default;
     MapRedBlackTree& operator=(const MapRedBlackTree& other) = default;
     ~MapRedBlackTree() = default;
 
     // Iterators
-    iterator begin() { return tree_.begin(); }
-    const_iterator begin() const { return tree_.begin(); }
-    const_iterator cbegin() const { return tree_.cbegin(); }
-    iterator end() { return tree_.end(); }
-    const_iterator end() const { return tree_.end(); }
-    const_iterator cend() const { return tree_.cend(); }
+    iterator begin() { return mTree.begin(); }
+    const_iterator begin() const { return mTree.begin(); }
+    const_iterator cbegin() const { return mTree.cbegin(); }
+    iterator end() { return mTree.end(); }
+    const_iterator end() const { return mTree.end(); }
+    const_iterator cend() const { return mTree.cend(); }
 
     // Capacity
-    bool empty() const { return tree_.empty(); }
-    fl::size size() const { return tree_.size(); }
-    fl::size max_size() const { return tree_.max_size(); }
+    bool empty() const { return mTree.empty(); }
+    fl::size size() const { return mTree.size(); }
+    fl::size max_size() const { return mTree.max_size(); }
 
     // Element access
     Value& operator[](const Key& key) {
-        auto result = tree_.insert(value_type(key, Value()));
+        auto result = mTree.insert(value_type(key, Value()));
         return result.first->second;
     }
 
     Value& at(const Key& key) {
-        auto it = tree_.find(value_type(key, Value()));
-        FASTLED_ASSERT(it != tree_.end(), "MapRedBlackTree::at: key not found");
+        auto it = mTree.find(value_type(key, Value()));
+        FASTLED_ASSERT(it != mTree.end(), "MapRedBlackTree::at: key not found");
         return it->second;
     }
 
     const Value& at(const Key& key) const {
-        auto it = tree_.find(value_type(key, Value()));
-        FASTLED_ASSERT(it != tree_.end(), "MapRedBlackTree::at: key not found");
+        auto it = mTree.find(value_type(key, Value()));
+        FASTLED_ASSERT(it != mTree.end(), "MapRedBlackTree::at: key not found");
         return it->second;
     }
 
     // Modifiers
-    void clear() { tree_.clear(); }
+    void clear() { mTree.clear(); }
 
     fl::pair<iterator, bool> insert(const value_type& value) {
-        return tree_.insert(value);
+        return mTree.insert(value);
     }
 
     fl::pair<iterator, bool> insert(value_type&& value) {
-        return tree_.insert(fl::move(value));
+        return mTree.insert(fl::move(value));
     }
 
     template<typename... Args>
     fl::pair<iterator, bool> emplace(Args&&... args) {
-        return tree_.emplace(fl::forward<Args>(args)...);
+        return mTree.emplace(fl::forward<Args>(args)...);
     }
 
     iterator erase(const_iterator pos) {
-        return tree_.erase(pos);
+        return mTree.erase(pos);
     }
 
     fl::size erase(const Key& key) {
-        return tree_.erase(value_type(key, Value()));
+        return mTree.erase(value_type(key, Value()));
     }
 
     void swap(MapRedBlackTree& other) {
-        tree_.swap(other.tree_);
+        mTree.swap(other.mTree);
     }
 
     // Lookup
     fl::size count(const Key& key) const {
-        return tree_.count(value_type(key, Value()));
+        return mTree.count(value_type(key, Value()));
     }
 
     iterator find(const Key& key) {
-        return tree_.find(value_type(key, Value()));
+        return mTree.find(value_type(key, Value()));
     }
 
     const_iterator find(const Key& key) const {
-        return tree_.find(value_type(key, Value()));
+        return mTree.find(value_type(key, Value()));
     }
 
     bool contains(const Key& key) const {
-        return tree_.contains(value_type(key, Value()));
+        return mTree.contains(value_type(key, Value()));
     }
 
     fl::pair<iterator, iterator> equal_range(const Key& key) {
-        return tree_.equal_range(value_type(key, Value()));
+        return mTree.equal_range(value_type(key, Value()));
     }
 
     fl::pair<const_iterator, const_iterator> equal_range(const Key& key) const {
-        return tree_.equal_range(value_type(key, Value()));
+        return mTree.equal_range(value_type(key, Value()));
     }
 
     iterator lower_bound(const Key& key) {
-        return tree_.lower_bound(value_type(key, Value()));
+        return mTree.lower_bound(value_type(key, Value()));
     }
 
     const_iterator lower_bound(const Key& key) const {
-        return tree_.lower_bound(value_type(key, Value()));
+        return mTree.lower_bound(value_type(key, Value()));
     }
 
     iterator upper_bound(const Key& key) {
-        return tree_.upper_bound(value_type(key, Value()));
+        return mTree.upper_bound(value_type(key, Value()));
     }
 
     const_iterator upper_bound(const Key& key) const {
-        return tree_.upper_bound(value_type(key, Value()));
+        return mTree.upper_bound(value_type(key, Value()));
     }
 
     // Observers
     key_compare key_comp() const {
-        return tree_.value_comp().comp_;
+        return mTree.value_comp().comp_;
     }
 
     // Comparison operators
     bool operator==(const MapRedBlackTree& other) const {
-        if (tree_.size() != other.tree_.size()) return false;
+        if (mTree.size() != other.mTree.size()) return false;
         
-        auto it1 = tree_.begin();
-        auto it2 = other.tree_.begin();
+        auto it1 = mTree.begin();
+        auto it2 = other.mTree.begin();
         
-        while (it1 != tree_.end() && it2 != other.tree_.end()) {
+        while (it1 != mTree.end() && it2 != other.mTree.end()) {
             // Compare both key and value
             if (it1->first != it2->first || it1->second != it2->second) {
                 return false;
@@ -944,7 +944,7 @@ public:
             ++it2;
         }
         
-        return it1 == tree_.end() && it2 == other.tree_.end();
+        return it1 == mTree.end() && it2 == other.mTree.end();
     }
 
     bool operator!=(const MapRedBlackTree& other) const {
@@ -969,7 +969,7 @@ public:
 
 private:
     using TreeType = RedBlackTree<Key, Compare, Allocator>;
-    TreeType tree_;
+    TreeType mTree;
 
 public:
     using iterator = typename TreeType::const_iterator;  // Set iterators are always const
@@ -977,91 +977,91 @@ public:
 
     // Constructors and destructor
     SetRedBlackTree(const Compare& comp = Compare(), const Allocator& alloc = Allocator()) 
-        : tree_(comp, alloc) {}
+        : mTree(comp, alloc) {}
 
     SetRedBlackTree(const SetRedBlackTree& other) = default;
     SetRedBlackTree& operator=(const SetRedBlackTree& other) = default;
     ~SetRedBlackTree() = default;
 
     // Iterators
-    const_iterator begin() const { return tree_.begin(); }
-    const_iterator cbegin() const { return tree_.cbegin(); }
-    const_iterator end() const { return tree_.end(); }
-    const_iterator cend() const { return tree_.cend(); }
+    const_iterator begin() const { return mTree.begin(); }
+    const_iterator cbegin() const { return mTree.cbegin(); }
+    const_iterator end() const { return mTree.end(); }
+    const_iterator cend() const { return mTree.cend(); }
 
     // Capacity
-    bool empty() const { return tree_.empty(); }
-    fl::size size() const { return tree_.size(); }
-    fl::size max_size() const { return tree_.max_size(); }
+    bool empty() const { return mTree.empty(); }
+    fl::size size() const { return mTree.size(); }
+    fl::size max_size() const { return mTree.max_size(); }
 
     // Modifiers
-    void clear() { tree_.clear(); }
+    void clear() { mTree.clear(); }
 
     fl::pair<const_iterator, bool> insert(const value_type& value) {
-        auto result = tree_.insert(value);
+        auto result = mTree.insert(value);
         return fl::pair<const_iterator, bool>(result.first, result.second);
     }
 
     fl::pair<const_iterator, bool> insert(value_type&& value) {
-        auto result = tree_.insert(fl::move(value));
+        auto result = mTree.insert(fl::move(value));
         return fl::pair<const_iterator, bool>(result.first, result.second);
     }
 
     template<typename... Args>
     fl::pair<const_iterator, bool> emplace(Args&&... args) {
-        auto result = tree_.emplace(fl::forward<Args>(args)...);
+        auto result = mTree.emplace(fl::forward<Args>(args)...);
         return fl::pair<const_iterator, bool>(result.first, result.second);
     }
 
     const_iterator erase(const_iterator pos) {
-        return tree_.erase(pos);
+        return mTree.erase(pos);
     }
 
     fl::size erase(const Key& key) {
-        return tree_.erase(key);
+        return mTree.erase(key);
     }
 
     void swap(SetRedBlackTree& other) {
-        tree_.swap(other.tree_);
+        mTree.swap(other.mTree);
     }
 
     // Lookup
     fl::size count(const Key& key) const {
-        return tree_.count(key);
+        return mTree.count(key);
     }
 
     const_iterator find(const Key& key) const {
-        return tree_.find(key);
+        return mTree.find(key);
     }
 
     bool contains(const Key& key) const {
-        return tree_.contains(key);
+        return mTree.contains(key);
     }
 
     fl::pair<const_iterator, const_iterator> equal_range(const Key& key) const {
-        return tree_.equal_range(key);
+        return mTree.equal_range(key);
     }
 
     const_iterator lower_bound(const Key& key) const {
-        return tree_.lower_bound(key);
+        return mTree.lower_bound(key);
     }
 
     const_iterator upper_bound(const Key& key) const {
-        return tree_.upper_bound(key);
+        return mTree.upper_bound(key);
     }
 
     // Observers
     key_compare key_comp() const {
-        return tree_.value_comp();
+        return mTree.value_comp();
     }
 
     // Comparison operators
     bool operator==(const SetRedBlackTree& other) const {
-        return tree_ == other.tree_;
+        return mTree == other.mTree;
     }
 
     bool operator!=(const SetRedBlackTree& other) const {
-        return tree_ != other.tree_;
+        return mTree != other.mTree;
     }
 };
 
