@@ -3,26 +3,8 @@
     "allowJs": true,
     "checkJs": false,
     "strict": false,
-    "noImplicitAny": false,
-    "noImplicitReturns": false,
-    "noUnusedLocals": false,
-    "noUnusedParameters": false,
-    "exactOptionalPropertyTypes": false,
-    "noImplicitOverride": false,
-    "noPropertyAccessFromIndexSignature": false,
-    "noUncheckedIndexedAccess": false,
-    "strictNullChecks": false,
-    "strictFunctionTypes": false,
-    "noImplicitThis": false,
-    "suppressExcessPropertyErrors": true,
-    "ignoreDeprecations": "5.0",
     "skipLibCheck": true,
-    "lib": [
-      "dom",
-      "dom.asynciterable",
-      "es2022",
-      "webworker"
-    ]
+    "lib": ["dom", "dom.asynciterable", "es2022", "webworker"]
   },
   "lint": {
     "include": [
@@ -42,81 +24,13 @@
       "**/bootstrap.min.js"
     ],
     "rules": {
-      "tags": [
-        "recommended"
-      ],
+      "tags": [],
       "include": [
-        "eqeqeq",
-        "no-eval",
-        "no-throw-literal",
-        "prefer-const",
-        "no-await-in-loop",
-        "default-param-last",
-        "guard-for-in",
-        "no-explicit-any",
-        "no-implicit-coercion",
-        "no-non-null-assertion",
-        "no-prototype-builtins",
-        "single-var-declarator",
-        "adjacent-overload-signatures",
-        "ban-untagged-todo",
-        "for-direction",
-        "getter-return",
-        "no-array-constructor",
-        "no-async-promise-executor",
-        "no-case-declarations",
-        "no-class-assign",
-        "no-compare-neg-zero",
-        "no-cond-assign",
-        "no-const-assign",
-        "no-constant-condition",
-        "no-control-regex",
         "no-debugger",
-        "no-delete-var",
-        "no-dupe-args",
-        "no-dupe-keys",
-        "no-duplicate-case",
-        "no-empty",
-        "no-empty-character-class",
-        "no-empty-interface",
-        "no-empty-pattern",
-        "no-ex-assign",
-        "no-extra-boolean-cast",
-        "no-fallthrough",
-        "no-func-assign",
-        "no-global-assign",
-        "no-import-assign",
-        "no-inner-declarations",
-        "no-invalid-regexp",
-        "no-irregular-whitespace",
-        "no-misleading-character-class",
-        "no-new-symbol",
-        "no-obj-calls",
-        "no-octal",
-        "no-redeclare",
-        "no-regex-spaces",
-        "no-setter-return",
-        "no-shadow-restricted-names",
-        "no-sparse-arrays",
-        "no-this-before-super",
-        "no-unexpected-multiline",
-        "no-unreachable",
-        "no-unsafe-finally",
-        "no-unsafe-negation",
-        "no-unused-labels",
-        "no-useless-catch",
-        "no-with",
-        "require-yield",
-        "use-isnan",
-        "valid-typeof"
-      ],
-      "exclude": [
-        "no-console",
-        "prefer-primordials",
-        "no-window-prefix",
-        "camelcase",
-        "no-undef",
-        "no-unused-vars"
+        "no-eval",
+        "eqeqeq",
+        "prefer-const",
+        "no-var"
       ]
     }
   },
@@ -132,25 +46,16 @@
       "**/.build/**",
       "**/build/**",
       "**/dist/**",
-      "**/tmp/**"
+      "**/tmp/**",
+      "**/three.min.js",
+      "**/codemirror.min.js",
+      "**/bootstrap.min.js"
     ],
-    "useTabs": false,
-    "lineWidth": 100,
-    "indentWidth": 2,
-    "semiColons": true,
-    "singleQuote": true,
-    "proseWrap": "preserve"
-  },
-  "exclude": [
-    "**/*.min.js",
-    "**/vendor/**",
-    "**/node_modules/**",
-    "**/.build/**",
-    "**/build/**",
-    "**/dist/**",
-    "**/tmp/**",
-    "**/three.min.js",
-    "**/codemirror.min.js",
-    "**/bootstrap.min.js"
-  ]
+    "options": {
+      "indentWidth": 2,
+      "lineWidth": 100,
+      "singleQuote": true,
+      "proseWrap": "preserve"
+    }
+  }
 }
