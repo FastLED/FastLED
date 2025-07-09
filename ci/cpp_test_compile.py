@@ -205,8 +205,10 @@ def compile_fastled(specific_test: str | None = None) -> None:
         print(f"Building with {parallel_jobs} parallel jobs ({cpu_count} CPU cores)")
 
     if specific_test:
+        print(f"Building specific test: test_{specific_test}")
         cmake_build_command = f"cmake --build {BUILD_DIR} --target test_{specific_test} --parallel {parallel_jobs}"
     else:
+        print("Building all tests")
         cmake_build_command = f"cmake --build {BUILD_DIR} --parallel {parallel_jobs}"
 
     run_command(cmake_build_command)
@@ -247,6 +249,7 @@ def get_build_info(args: argparse.Namespace) -> dict[str, str | dict[str, str]]:
             "use_zig": str(args.use_zig),
             "use_clang": str(args.use_clang),
             "wasm": str(args.wasm),
+            "specific_test": str(args.test) if args.test else "all",
         },
     }
 
@@ -259,7 +262,46 @@ def should_clean_build(build_info: dict[str, str | dict[str, str]]) -> bool:
     with open(build_info_file, "r") as f:
         old_build_info = json.load(f)
 
-    return old_build_info != build_info
+    # If build parameters have changed, we need to rebuild
+    if old_build_info != build_info:
+        # Check if this is just a change in specific test target
+        old_args = old_build_info.get("ARGS", {})
+        new_args = build_info.get("ARGS", {})
+
+        # Ensure ARGS is a dictionary
+        if not isinstance(old_args, dict) or not isinstance(new_args, dict):
+            return True
+
+        # If only the specific test changed and everything else is the same,
+        # we don't need to clean the build directory
+        old_test = old_args.get("specific_test", "all")
+        new_test = new_args.get("specific_test", "all")
+
+        # Create copies without the specific_test field for comparison
+        old_args_no_test = {k: v for k, v in old_args.items() if k != "specific_test"}
+        new_args_no_test = {k: v for k, v in new_args.items() if k != "specific_test"}
+
+        # If only the test target changed, don't clean
+        if (
+            old_args_no_test == new_args_no_test
+            and old_build_info.get("USE_ZIG") == build_info.get("USE_ZIG")
+            and old_build_info.get("USE_CLANG") == build_info.get("USE_CLANG")
+            and old_build_info.get("WASM_BUILD") == build_info.get("WASM_BUILD")
+            and old_build_info.get("CC") == build_info.get("CC")
+            and old_build_info.get("CXX") == build_info.get("CXX")
+            and old_build_info.get("AR") == build_info.get("AR")
+            and old_build_info.get("CFLAGS") == build_info.get("CFLAGS")
+            and old_build_info.get("CXXFLAGS") == build_info.get("CXXFLAGS")
+        ):
+
+            print(
+                f"Build parameters unchanged, only test target changed: {old_test} -> {new_test}"
+            )
+            return False
+
+        return True
+
+    return False
 
 
 def update_build_info(build_info: dict[str, str | dict[str, str]]):

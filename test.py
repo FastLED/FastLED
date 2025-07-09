@@ -46,7 +46,14 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--interactive", action="store_true", help="Enable interactive mode (allows confirmation prompts)")
     parser.add_argument("--verbose", "-v", action="store_true", help="Enable verbose output showing all test details")
     parser.add_argument("--quick", action="store_true", help="Enable quick mode with FASTLED_ALL_SRC=1")
-    return parser.parse_args()
+    args = parser.parse_args()
+    
+    # Auto-enable --cpp when a specific test is provided
+    if args.test and not args.cpp:
+        args.cpp = True
+        print(f"Auto-enabled --cpp mode for specific test: {args.test}")
+    
+    return args
 
 
 def _make_pio_check_cmd() -> List[str]:
