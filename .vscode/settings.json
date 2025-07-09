@@ -205,5 +205,73 @@
         "**/.classpath": true,
         "**/.project": true,
         "**/.factorypath": true
-    }
+    },
+    
+    // Semantic token color customizations for better type vs variable distinction
+    "editor.semanticTokenColorCustomizations": {
+        "rules": {
+            // Types (classes, structs, enums) - Teal/Cyan
+            "class": "#4EC9B0",
+            "struct": "#4EC9B0", 
+            "type": "#4EC9B0",
+            "enum": "#4EC9B0",
+            "enumMember": "#B5CEA8",
+            "typedef": "#4EC9B0",
+            
+            // Variables - Almost pure white for maximum readability
+            "variable": "#FAFAFA",
+            "variable.local": "#FAFAFA",
+            
+            // Parameters - Orange for clear distinction
+            "parameter": "#FF8C42",
+            "variable.parameter": "#FF8C42",
+            
+            // Properties - Light purple/pink
+            "property": "#D197D9",
+            
+            // Functions and methods - Yellow
+            "function": "#DCDCAA",
+            "method": "#DCDCAA",
+            "function.declaration": "#DCDCAA",
+            "method.declaration": "#DCDCAA",
+            
+            // Namespaces - Soft blue (less aggressive)
+            "namespace": "#86C5F7",
+            
+            // Constants and readonly - Light green with italic
+            "variable.readonly": {
+                "foreground": "#B5CEA8",
+                "fontStyle": "italic"
+            },
+            "variable.defaultLibrary": "#B5CEA8",
+            
+            // Macros and defines - Muted red/salmon
+            "macro": "#E06C75",
+            
+            // String literals - Peach/salmon
+            "string": "#CE9178",
+            
+            // Numbers - Light green
+            "number": "#B5CEA8",
+            
+            // Keywords - Pink/magenta
+            "keyword": "#C586C0",
+            
+            // Storage specifiers - Bright magenta/pink for distinction
+            "keyword.storage": "#FF79C6",
+            "storageClass": "#FF79C6",
+            
+            // Built-in types - Different from user-defined types
+            "type.builtin": "#569CD6",
+            "keyword.type": "#569CD6",
+            
+            // Comments - Green (unchanged but specified)
+            "comment": "#6A9955",
+            "comment.documentation": "#6A9955"
+        }
+    },
+    
+    // Inlay hints (parameter names, type hints) - Brighter gray for better visibility
+    "editor.inlayHints.fontColor": "#808080",
+    "editor.inlayHints.background": "#3C3C3C20"
 }
