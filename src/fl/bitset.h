@@ -475,6 +475,16 @@ class BitsetInlined {
         }
     }
 
+    /// Finds the first bit that matches the test value.
+    /// Returns the index of the first matching bit, or -1 if none found.
+    fl::i32 find_first(bool test_value) const noexcept {
+        if (_storage.template is<fixed_bitset>()) {
+            return _storage.template ptr<fixed_bitset>()->find_first(test_value);
+        } else {
+            return _storage.template ptr<bitset_dynamic>()->find_first(test_value);
+        }
+    }
+
     /// Bitwise operators
     friend BitsetInlined operator~(const BitsetInlined &bs) noexcept {
         BitsetInlined result = bs;

@@ -13,8 +13,8 @@ namespace fl {
 /// A dynamic bitset implementation that can be resized at runtime
 class bitset_dynamic {
   private:
-    static constexpr fl::u32 bits_per_block = 8 * sizeof(fl::u64);
-    using block_type = fl::u64;
+    static constexpr fl::u32 bits_per_block = 8 * sizeof(fl::u16);
+    using block_type = fl::u16;
 
     block_type *_blocks = nullptr;
     fl::u32 _block_count = 0;
@@ -244,12 +244,7 @@ class bitset_dynamic {
         
         fl::u32 result = 0;
         for (fl::u32 i = 0; i < _block_count; ++i) {
-            block_type v = _blocks[i];
-            // Brian Kernighan's algorithm for counting bits
-            while (v) {
-                v &= (v - 1);
-                ++result;
-            }
+            result += __builtin_popcount(_blocks[i]);
         }
         return result;
     }
@@ -303,6 +298,46 @@ class bitset_dynamic {
 
     // Access operator
     bool operator[](fl::u32 pos) const noexcept { return test(pos); }
+
+    /// Finds the first bit that matches the test value.
+    /// Returns the index of the first matching bit, or -1 if none found.
+    fl::i32 find_first(bool test_value) const noexcept {
+        if (!_blocks) return -1;
+        
+        for (fl::u32 block_idx = 0; block_idx < _block_count; ++block_idx) {
+            block_type current_block = _blocks[block_idx];
+            
+            // For the last block, we need to mask out unused bits
+            if (block_idx == _block_count - 1 && _size % bits_per_block != 0) {
+                const fl::u32 valid_bits = _size % bits_per_block;
+                block_type mask = (valid_bits == bits_per_block) 
+                    ? ~block_type(0) 
+                    : ((block_type(1) << valid_bits) - 1);
+                current_block &= mask;
+            }
+            
+            // If looking for false bits, invert the block
+            if (!test_value) {
+                current_block = ~current_block;
+            }
+            
+            // Step 1: Test the entire u16 block first
+            if (current_block != 0) {
+                // Step 2: If the block has matching bits, find the first one
+                for (fl::u32 bit_idx = 0; bit_idx < bits_per_block; ++bit_idx) {
+                    if (current_block & (block_type(1) << bit_idx)) {
+                        fl::u32 global_bit_idx = block_idx * bits_per_block + bit_idx;
+                        // Check if this bit is within our valid range
+                        if (global_bit_idx < _size) {
+                            return static_cast<fl::i32>(global_bit_idx);
+                        }
+                    }
+                }
+            }
+        }
+        
+        return -1; // No matching bit found
+    }
 
     // Bitwise AND operator
     bitset_dynamic operator&(const bitset_dynamic &other) const {
