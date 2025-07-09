@@ -199,6 +199,15 @@ template <typename T> struct is_lvalue_reference<T &> {
     static constexpr bool value = true;
 };
 
+// Define is_void trait
+template <typename T> struct is_void {
+    static constexpr bool value = false;
+};
+
+template <> struct is_void<void> {
+    static constexpr bool value = true;
+};
+
 // Implementation of forward
 template <typename T>
 constexpr T &&forward(typename remove_reference<T>::type &t) noexcept {
