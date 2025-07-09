@@ -9,6 +9,10 @@
 #include "fl/bit_cast.h"
 #include "fl/stdint.h"
 
+#ifndef FASTLED_DEFAULT_SLAB_SIZE
+#define FASTLED_DEFAULT_SLAB_SIZE 8
+#endif
+
 namespace fl {
 
 void SetPSRamAllocator(void *(*alloc)(fl::size), void (*free)(void *));
@@ -156,7 +160,7 @@ template <typename T> class allocator_psram {
 // Slab allocator for fixed-size objects
 // Optimized for frequent allocation/deallocation of objects of the same size
 // Uses pre-allocated memory slabs with free lists to reduce fragmentation
-template <typename T, fl::size SLAB_SIZE = 64>
+template <typename T, fl::size SLAB_SIZE = FASTLED_DEFAULT_SLAB_SIZE>
 class SlabAllocator {
 private:
     struct FreeBlock {
@@ -364,7 +368,7 @@ public:
 };
 
 // STL-compatible slab allocator
-template <typename T, fl::size SLAB_SIZE = 64>
+template <typename T, fl::size SLAB_SIZE = FASTLED_DEFAULT_SLAB_SIZE>
 class allocator_slab {
 public:
     // Type definitions required by STL
@@ -447,5 +451,249 @@ public:
         return !(*this == other);
     }
 };
+
+// Inlined allocator that stores the first N elements inline
+// Falls back to the base allocator for additional elements
+template <typename T, fl::size N, typename BaseAllocator = fl::allocator<T>>
+class allocator_inlined {
+private:
+    // Inlined storage block
+    struct InlinedStorage {
+        alignas(T) uint8_t data[N * sizeof(T)];
+        
+        InlinedStorage() {
+            fl::memset(data, 0, sizeof(data));
+        }
+    };
+    
+    InlinedStorage m_inlined_storage;
+    BaseAllocator m_base_allocator;
+    fl::size m_inlined_used = 0;
+    T* m_heap_data = nullptr;
+    fl::size m_heap_capacity = 0;
+    fl::size m_heap_used = 0;
+
+public:
+    // Type definitions required by STL
+    using value_type = T;
+    using pointer = T*;
+    using const_pointer = const T*;
+    using reference = T&;
+    using const_reference = const T&;
+    using size_type = fl::size;
+    using difference_type = ptrdiff_t;
+
+    // Rebind allocator to type U
+    template <typename U>
+    struct rebind {
+        using other = allocator_inlined<U, N, typename BaseAllocator::template rebind<U>::other>;
+    };
+
+    // Default constructor
+    allocator_inlined() noexcept = default;
+
+    // Copy constructor
+    allocator_inlined(const allocator_inlined& other) noexcept {
+        // Copy inlined data
+        m_inlined_used = other.m_inlined_used;
+        for (fl::size i = 0; i < m_inlined_used; ++i) {
+            new (&get_inlined_ptr()[i]) T(other.get_inlined_ptr()[i]);
+        }
+        
+        // Copy heap data if any
+        if (other.m_heap_used > 0) {
+            m_heap_capacity = other.m_heap_capacity;
+            m_heap_data = m_base_allocator.allocate(m_heap_capacity);
+            m_heap_used = other.m_heap_used;
+            for (fl::size i = 0; i < m_heap_used; ++i) {
+                m_base_allocator.construct(&m_heap_data[i], other.m_heap_data[i]);
+            }
+        }
+    }
+
+    // Copy assignment
+    allocator_inlined& operator=(const allocator_inlined& other) noexcept {
+        if (this != &other) {
+            clear();
+            
+            // Copy inlined data
+            m_inlined_used = other.m_inlined_used;
+            for (fl::size i = 0; i < m_inlined_used; ++i) {
+                new (&get_inlined_ptr()[i]) T(other.get_inlined_ptr()[i]);
+            }
+            
+            // Copy heap data if any
+            if (other.m_heap_used > 0) {
+                m_heap_capacity = other.m_heap_capacity;
+                m_heap_data = m_base_allocator.allocate(m_heap_capacity);
+                m_heap_used = other.m_heap_used;
+                for (fl::size i = 0; i < m_heap_used; ++i) {
+                    m_base_allocator.construct(&m_heap_data[i], other.m_heap_data[i]);
+                }
+            }
+        }
+        return *this;
+    }
+
+    // Template copy constructor
+    template <typename U>
+    allocator_inlined(const allocator_inlined<U, N, typename BaseAllocator::template rebind<U>::other>& other) noexcept {
+        FASTLED_UNUSED(other);
+    }
+
+    // Destructor
+    ~allocator_inlined() noexcept {
+        clear();
+    }
+
+    // Allocate memory for n objects of type T
+    T* allocate(fl::size n) {
+        if (n == 0) {
+            return nullptr;
+        }
+        
+        // If we can fit in inlined storage
+        if (m_inlined_used + n <= N) {
+            T* ptr = &get_inlined_ptr()[m_inlined_used];
+            m_inlined_used += n;
+            return ptr;
+        }
+        
+        // If we need heap storage
+        if (m_heap_used + n > m_heap_capacity) {
+            fl::size new_capacity = m_heap_capacity == 0 ? n : m_heap_capacity * 2;
+            if (new_capacity < m_heap_used + n) {
+                new_capacity = m_heap_used + n;
+            }
+            
+            T* new_heap_data = m_base_allocator.allocate(new_capacity);
+            
+            // Move existing heap data
+            for (fl::size i = 0; i < m_heap_used; ++i) {
+                m_base_allocator.construct(&new_heap_data[i], fl::move(m_heap_data[i]));
+                m_base_allocator.destroy(&m_heap_data[i]);
+            }
+            
+            if (m_heap_data) {
+                m_base_allocator.deallocate(m_heap_data, m_heap_capacity);
+            }
+            
+            m_heap_data = new_heap_data;
+            m_heap_capacity = new_capacity;
+        }
+        
+        T* ptr = &m_heap_data[m_heap_used];
+        m_heap_used += n;
+        return ptr;
+    }
+
+    // Deallocate memory for n objects of type T
+    void deallocate(T* p, fl::size n) {
+        if (!p || n == 0) {
+            return;
+        }
+        
+        // Check if this is inlined memory
+        T* inlined_start = get_inlined_ptr();
+        T* inlined_end = inlined_start + N;
+        
+        if (p >= inlined_start && p < inlined_end) {
+            // This is inlined memory, just mark as unused
+            // The destructor will handle cleanup
+            return;
+        }
+        
+        // This is heap memory, deallocate through base allocator
+        if (p >= m_heap_data && p < m_heap_data + m_heap_capacity) {
+            // Mark as deallocated
+            m_heap_used -= n;
+            return;
+        }
+        
+        // Fallback to base allocator for external allocations
+        m_base_allocator.deallocate(p, n);
+    }
+
+    // Construct an object at the specified address
+    template <typename U, typename... Args>
+    void construct(U* p, Args&&... args) {
+        if (p == nullptr) return;
+        new(static_cast<void*>(p)) U(fl::forward<Args>(args)...);
+    }
+
+    // Destroy an object at the specified address
+    template <typename U>
+    void destroy(U* p) {
+        if (p == nullptr) return;
+        p->~U();
+    }
+
+    // Clear all allocated memory
+    void clear() {
+        // Destroy inlined objects
+        for (fl::size i = 0; i < m_inlined_used; ++i) {
+            get_inlined_ptr()[i].~T();
+        }
+        m_inlined_used = 0;
+        
+        // Destroy heap objects
+        for (fl::size i = 0; i < m_heap_used; ++i) {
+            m_base_allocator.destroy(&m_heap_data[i]);
+        }
+        
+        if (m_heap_data) {
+            m_base_allocator.deallocate(m_heap_data, m_heap_capacity);
+            m_heap_data = nullptr;
+        }
+        m_heap_capacity = 0;
+        m_heap_used = 0;
+    }
+
+    // Get total allocated size
+    fl::size total_size() const {
+        return m_inlined_used + m_heap_used;
+    }
+
+    // Get inlined capacity
+    fl::size inlined_capacity() const {
+        return N;
+    }
+
+    // Check if using inlined storage
+    bool is_using_inlined() const {
+        return m_heap_used == 0;
+    }
+
+private:
+    T* get_inlined_ptr() {
+        return reinterpret_cast<T*>(m_inlined_storage.data);
+    }
+    
+    const T* get_inlined_ptr() const {
+        return reinterpret_cast<const T*>(m_inlined_storage.data);
+    }
+
+    // Equality comparison
+    bool operator==(const allocator_inlined& other) const noexcept {
+        FASTLED_UNUSED(other);
+        return true; // All instances are equivalent for now
+    }
+
+    bool operator!=(const allocator_inlined& other) const noexcept {
+        return !(*this == other);
+    }
+};
+
+// Inlined allocator that uses PSRam for heap allocation
+template <typename T, fl::size N>
+using allocator_inlined_psram = allocator_inlined<T, N, fl::allocator_psram<T>>;
+
+// Inlined allocator that uses slab allocator for heap allocation
+template <typename T, fl::size N, fl::size SLAB_SIZE = 8>
+using allocator_inlined_slab_psram = allocator_inlined<T, N, fl::allocator_slab<T, SLAB_SIZE>>;
+
+
+template <typename T, fl::size N>
+using allocator_inlined_slab = allocator_inlined<T, N, fl::allocator_slab<T>>;
 
 } // namespace fl

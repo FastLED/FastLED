@@ -8,6 +8,7 @@
 #include "fl/map.h"
 #include "fl/rbtree.h"
 #include "fl/allocator.h"
+#include "fl/pair.h"
 
 
 namespace fl {
@@ -369,5 +370,10 @@ template <typename Key, typename Allocator = fl::allocator_slab<Key>> class set 
         return tree_.upper_bound(key);
     }
 };
+
+// fl::set_inlined<T, N> - Inlined set implementation using proper allocator
+// This is a using declaration that sets the proper allocator for fl::set
+template <typename T, fl::size N>
+using set_inlined = fl::set<T, fl::allocator_inlined_slab<T, N>>;
 
 } // namespace fl
