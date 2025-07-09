@@ -191,11 +191,24 @@ def compile_fastled(specific_test: str | None = None) -> None:
     if specific_test is not None and specific_test.startswith("test_"):
         specific_test = specific_test[5:]
 
-    # Build the project
-    if specific_test:
-        cmake_build_command = f"cmake --build {BUILD_DIR} --target test_{specific_test}"
+    # Build the project with explicit parallelization
+    import multiprocessing
+
+    cpu_count = multiprocessing.cpu_count()
+
+    # Allow override via environment variable
+    if os.environ.get("FASTLED_PARALLEL_JOBS"):
+        parallel_jobs = int(os.environ["FASTLED_PARALLEL_JOBS"])
+        print(f"Using custom parallel jobs: {parallel_jobs}")
     else:
-        cmake_build_command = f"cmake --build {BUILD_DIR}"
+        parallel_jobs = cpu_count * 2  # Use 2x CPU cores for better I/O utilization
+        print(f"Building with {parallel_jobs} parallel jobs ({cpu_count} CPU cores)")
+
+    if specific_test:
+        cmake_build_command = f"cmake --build {BUILD_DIR} --target test_{specific_test} --parallel {parallel_jobs}"
+    else:
+        cmake_build_command = f"cmake --build {BUILD_DIR} --parallel {parallel_jobs}"
+
     run_command(cmake_build_command)
 
     print("FastLED library compiled successfully.")

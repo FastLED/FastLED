@@ -17,12 +17,26 @@ if(NOT APPLE)
     message(STATUS "Using thin archives for Clang build")
 endif()
 
-# Enable parallel compilation
+# Enable parallel compilation with aggressive parallelization
 include(ProcessorCount)
 ProcessorCount(CPU_COUNT)
-if(CPU_COUNT)
-    set(CMAKE_BUILD_PARALLEL_LEVEL ${CPU_COUNT})
+
+# Allow override via environment variable
+if(DEFINED ENV{FASTLED_PARALLEL_JOBS})
+    set(PARALLEL_JOBS $ENV{FASTLED_PARALLEL_JOBS})
+    message(STATUS "Using custom parallel jobs: ${PARALLEL_JOBS}")
+elseif(CPU_COUNT)
+    # Use more jobs than CPU cores for better I/O utilization
+    # This is especially effective with fast storage and when some jobs are I/O bound
+    math(EXPR PARALLEL_JOBS "${CPU_COUNT} * 2")
+    message(STATUS "Setting parallel build level to ${PARALLEL_JOBS} (${CPU_COUNT} CPU cores)")
+else()
+    # Fallback to 8 jobs if we can't detect CPU count
+    set(PARALLEL_JOBS 8)
+    message(STATUS "CPU count not detected, setting parallel build level to 8")
 endif()
+
+set(CMAKE_BUILD_PARALLEL_LEVEL ${PARALLEL_JOBS})
 
 # Check for ccache to speed up compilation
 find_program(CCACHE_FOUND ccache)
@@ -33,8 +47,20 @@ if(CCACHE_FOUND)
     # Set ccache options for better performance
     set(ENV{CCACHE_SLOPPINESS} time_macros)
     set(ENV{CCACHE_COMPRESS} true)
+    # Additional ccache optimizations for faster builds
+    set(ENV{CCACHE_MAXSIZE} 10G)
+    set(ENV{CCACHE_DIR} ${CMAKE_BINARY_DIR}/ccache)
 else()
     message(STATUS "ccache not found. Install ccache for faster incremental builds.")
+endif()
+
+# Enable parallel compilation within individual files
+if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+    list(APPEND COMMON_COMPILE_FLAGS "-pipe")
+    # Enable parallel compilation within files (for template-heavy code)
+    if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+        list(APPEND COMMON_COMPILE_FLAGS "-ftree-parallelize-loops=auto")
+    endif()
 endif()
 
 # Check if mold linker is available
@@ -67,6 +93,19 @@ set(CMAKE_BUILD_TYPE Debug CACHE STRING "Choose the type of build." FORCE)
 # Output the current build type
 message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
 
+# Additional build optimizations for faster compilation
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    # Use -O1 instead of -O0 for faster compilation while still maintaining debuggability
+    set(FAST_DEBUG_OPT -O1)
+    # Use minimal debug info for faster compilation
+    set(FAST_DEBUG_INFO -gline-tables-only)
+    message(STATUS "Using optimized debug build settings for faster compilation")
+else()
+    # Full debugging settings (enables step-through debugging)
+    set(FAST_DEBUG_OPT -O0)  # No optimization for accurate debugging
+    set(FAST_DEBUG_INFO -g3)  # Full debug info including macros
+endif()
+
 # Optimization suggestions for even faster builds (uncomment to test):
 # 1. Use -Og instead of -O1 for potentially faster compilation:
 #    set(FAST_DEBUG_OPT -Og)
@@ -78,6 +117,10 @@ message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
 # set(FAST_DEBUG_OPT -O1)  # DISABLED for full debugging
 # set(FAST_DEBUG_INFO -gline-tables-only)  # something wrong with this
 # set(FAST_FRAME_POINTER -fno-omit-frame-pointer)
+
+# 🚀 FAST BUILD TIP: Use ./fast_build.sh [jobs] for even faster builds!
+# Example: ./fast_build.sh 16 (uses 16 parallel jobs)
+# Default: ./fast_build.sh (uses 2x CPU cores)
 
 # Full debugging settings (enables step-through debugging)
 set(FAST_DEBUG_OPT -O0)  # No optimization for accurate debugging
