@@ -347,30 +347,31 @@ TEST_CASE("JsonUiManager executeUiUpdates") {
     
     // Create a slider - it will auto-register with the global manager
     JsonSliderImpl slider("test_slider", 50.0f, 0.0f, 100.0f, 1.0f);
+    int id = slider.id();
     
     // The component should auto-register with the manager
     // We'll test by sending an update with a likely ID
     
     // Create JSON update - we'll try IDs 0-20 since we don't know the exact ID
-    for (int testId = 0; testId <= 20; testId++) {
-        FLArduinoJson::JsonDocument updateDoc;
-        auto updateObj = updateDoc.to<FLArduinoJson::JsonObject>();
-        
-        // Convert ID to string properly
-        fl::string idStr;
-        idStr.append(testId);
-        updateObj[idStr.c_str()] = 75.0f;
-        
-        // Convert to JSON string
-        fl::string jsonStr;
-        serializeJson(updateDoc, jsonStr);
-        
-        // Send update through the engine state updater
-        updateEngineState(jsonStr.c_str());
-        
-        // Process the pending update
-        processJsonUiPendingUpdates();
-    }
+
+    FLArduinoJson::JsonDocument updateDoc;
+    auto updateObj = updateDoc.to<FLArduinoJson::JsonObject>();
+    
+    // Convert ID to string properly
+    fl::string idStr;
+    idStr.append(id);
+    updateObj[idStr.c_str()] = 75.0f;
+    
+    // Convert to JSON string
+    fl::string jsonStr;
+    serializeJson(updateDoc, jsonStr);
+    
+    // Send update through the engine state updater
+    updateEngineState(jsonStr.c_str());
+    
+    // Process the pending update
+    processJsonUiPendingUpdates();
+
     
     // Check that the slider value was updated (at least one of the IDs should have worked)
     CHECK_CLOSE(slider.value(), 75.0f, 0.001f);
