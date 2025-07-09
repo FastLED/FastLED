@@ -805,7 +805,7 @@ class MemoryPoolList {
       newPools = allocator->allocate(newCapacity * sizeof(Pool));
       if (!newPools)
         return false;
-      memcpy(newPools, preallocatedPools_, sizeof(preallocatedPools_));
+      ::memcpy(newPools, preallocatedPools_, sizeof(preallocatedPools_));
     } else {
       newPools = allocator->reallocate(pools_, newCapacity * sizeof(Pool));
       if (!newPools)

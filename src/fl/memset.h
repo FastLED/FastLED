@@ -26,4 +26,11 @@ inline void* memset(T* ptr, int value, fl::size num) {
     return fl::memset(u.void_ptr, value, num);
 }
 
+
+inline void* memcopy(void* dst, const void* src, fl::size num) {
+    return ::memcpy(dst, src, num);
+}
+
+
+
 } // namespace fl
