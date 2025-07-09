@@ -364,6 +364,8 @@ class BitsetInlined {
         }
     }
 
+
+
     /// Resizes the Bitset if needed
     void resize(fl::u32 new_size) {
         if (new_size <= N) {
