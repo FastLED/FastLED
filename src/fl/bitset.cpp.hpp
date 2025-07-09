@@ -1,6 +1,7 @@
 #pragma once
 
 #include "fl/bitset.h"
+#include "fl/bitset_dynamic.h"
 
 #include "fl/string.h"
 
@@ -22,7 +23,8 @@ void to_string(const fl::u16 *bit_data, fl::u32 bit_count, string* dst) {
 }
 
 // Helper to parse a bitstring and set bits in a bitset
-inline void parse_bitstring(const char* bitstring, auto&& set_bit) {
+template<typename SetBitFunc>
+inline void parse_bitstring(const char* bitstring, SetBitFunc&& set_bit) {
     if (!bitstring) return;
     for (fl::u32 i = 0; bitstring[i] != '\0'; ++i) {
         if (bitstring[i] == '1') set_bit(i, true);
@@ -47,17 +49,7 @@ fl::BitsetFixed<N>::BitsetFixed(const char* bitstring) : _blocks{} {
     });
 }
 
-// Implementation for bitset_dynamic constructor from bitstring
-inline fl::bitset_dynamic::bitset_dynamic(const char* bitstring) : _blocks(nullptr), _block_count(0), _size(0) {
-    if (!bitstring) return;
-    fl::u32 len = 0;
-    while (bitstring[len] == '0' || bitstring[len] == '1') ++len;
-    if (len == 0) return;
-    resize(len);
-    detail::parse_bitstring(bitstring, [this](fl::u32 i, bool v) {
-        if (i < _size) this->set(i, v);
-    });
-}
+
 
 // Implementation for BitsetInlined<N> constructor from bitstring
 
@@ -78,3 +70,19 @@ fl::BitsetInlined<N>::BitsetInlined(const char* bitstring) : _storage(typename B
 }
 
 } // namespace fl
+
+// Explicit instantiations for common sizes used in tests
+template fl::BitsetFixed<4>::BitsetFixed(const char* bitstring);
+template fl::BitsetFixed<8>::BitsetFixed(const char* bitstring);
+template fl::BitsetFixed<16>::BitsetFixed(const char* bitstring);
+template fl::BitsetFixed<32>::BitsetFixed(const char* bitstring);
+template fl::BitsetFixed<64>::BitsetFixed(const char* bitstring);
+template fl::BitsetFixed<100>::BitsetFixed(const char* bitstring);
+template fl::BitsetFixed<200>::BitsetFixed(const char* bitstring);
+
+template fl::BitsetInlined<8>::BitsetInlined(const char* bitstring);
+template fl::BitsetInlined<16>::BitsetInlined(const char* bitstring);
+template fl::BitsetInlined<32>::BitsetInlined(const char* bitstring);
+template fl::BitsetInlined<64>::BitsetInlined(const char* bitstring);
+template fl::BitsetInlined<100>::BitsetInlined(const char* bitstring);
+template fl::BitsetInlined<200>::BitsetInlined(const char* bitstring);

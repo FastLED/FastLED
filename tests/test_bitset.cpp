@@ -447,3 +447,198 @@ TEST_CASE("test bitset_fixed find_run") {
     REQUIRE_EQ(idx, -1);
 
 }
+
+TEST_CASE("test bitset_fixed bitstring constructor") {
+    // Test basic bitstring construction
+    bitset_fixed<8> bs1("10101010");
+    REQUIRE_EQ(bs1.size(), 8);
+    REQUIRE_EQ(bs1.count(), 4);
+    REQUIRE_EQ(bs1.test(0), true);
+    REQUIRE_EQ(bs1.test(1), false);
+    REQUIRE_EQ(bs1.test(2), true);
+    REQUIRE_EQ(bs1.test(3), false);
+    REQUIRE_EQ(bs1.test(4), true);
+    REQUIRE_EQ(bs1.test(5), false);
+    REQUIRE_EQ(bs1.test(6), true);
+    REQUIRE_EQ(bs1.test(7), false);
+    
+    // Test with shorter string than bitset size
+    bitset_fixed<16> bs2("1100");
+    REQUIRE_EQ(bs2.size(), 16);
+    REQUIRE_EQ(bs2.count(), 2);
+    REQUIRE_EQ(bs2.test(0), true);
+    REQUIRE_EQ(bs2.test(1), true);
+    REQUIRE_EQ(bs2.test(2), false);
+    REQUIRE_EQ(bs2.test(3), false);
+    // Remaining bits should be false
+    for (fl::u32 i = 4; i < 16; ++i) {
+        REQUIRE_EQ(bs2.test(i), false);
+    }
+    
+    // Test with longer string than bitset size (should truncate)
+    bitset_fixed<4> bs3("11110000");
+    REQUIRE_EQ(bs3.size(), 4);
+    REQUIRE_EQ(bs3.count(), 4);
+    REQUIRE_EQ(bs3.test(0), true);
+    REQUIRE_EQ(bs3.test(1), true);
+    REQUIRE_EQ(bs3.test(2), true);
+    REQUIRE_EQ(bs3.test(3), true);
+    
+    // Test with null pointer (should not crash)
+    bitset_fixed<8> bs4(nullptr);
+    REQUIRE_EQ(bs4.size(), 8);
+    REQUIRE_EQ(bs4.count(), 0);
+    REQUIRE_EQ(bs4.none(), true);
+    
+    // Test with empty string
+    bitset_fixed<8> bs5("");
+    REQUIRE_EQ(bs5.size(), 8);
+    REQUIRE_EQ(bs5.count(), 0);
+    REQUIRE_EQ(bs5.none(), true);
+    
+    // Test with mixed characters (should ignore non-0/1 chars)
+    bitset_fixed<8> bs6("1a0b1c0d");
+    REQUIRE_EQ(bs6.size(), 8);
+    REQUIRE_EQ(bs6.count(), 2);
+    REQUIRE_EQ(bs6.test(0), true);
+    REQUIRE_EQ(bs6.test(1), false);
+    REQUIRE_EQ(bs6.test(2), true);
+    REQUIRE_EQ(bs6.test(3), false);
+    REQUIRE_EQ(bs6.test(4), false);
+    REQUIRE_EQ(bs6.test(5), false);
+    REQUIRE_EQ(bs6.test(6), false);
+    REQUIRE_EQ(bs6.test(7), false);
+}
+
+TEST_CASE("test bitset_dynamic bitstring constructor") {
+    // Test basic bitstring construction
+    bitset_dynamic bs1("10101010");
+    REQUIRE_EQ(bs1.size(), 8);
+    REQUIRE_EQ(bs1.count(), 4);
+    REQUIRE_EQ(bs1.test(0), true);
+    REQUIRE_EQ(bs1.test(1), false);
+    REQUIRE_EQ(bs1.test(2), true);
+    REQUIRE_EQ(bs1.test(3), false);
+    REQUIRE_EQ(bs1.test(4), true);
+    REQUIRE_EQ(bs1.test(5), false);
+    REQUIRE_EQ(bs1.test(6), true);
+    REQUIRE_EQ(bs1.test(7), false);
+    
+    // Test with longer string
+    bitset_dynamic bs2("1111000011110000");
+    REQUIRE_EQ(bs2.size(), 16);
+    REQUIRE_EQ(bs2.count(), 8);
+    for (fl::u32 i = 0; i < 4; ++i) {
+        REQUIRE_EQ(bs2.test(i), true);
+    }
+    for (fl::u32 i = 4; i < 8; ++i) {
+        REQUIRE_EQ(bs2.test(i), false);
+    }
+    for (fl::u32 i = 8; i < 12; ++i) {
+        REQUIRE_EQ(bs2.test(i), true);
+    }
+    for (fl::u32 i = 12; i < 16; ++i) {
+        REQUIRE_EQ(bs2.test(i), false);
+    }
+    
+    // Test with very long string (should handle multiple blocks)
+    bitset_dynamic bs3("1111111111111111111111111111111111111111111111111111111111111111");
+    REQUIRE_EQ(bs3.size(), 64);
+    REQUIRE_EQ(bs3.count(), 64);
+    REQUIRE_EQ(bs3.all(), true);
+    
+    // Test with null pointer (should not crash)
+    bitset_dynamic bs4(nullptr);
+    REQUIRE_EQ(bs4.size(), 0);
+    REQUIRE_EQ(bs4.count(), 0);
+    
+    // Test with empty string
+    bitset_dynamic bs5("");
+    REQUIRE_EQ(bs5.size(), 0);
+    REQUIRE_EQ(bs5.count(), 0);
+    
+    // Test with mixed characters (should ignore non-0/1 chars)
+    bitset_dynamic bs6("1a0b1c0d");
+    REQUIRE_EQ(bs6.size(), 8);
+    REQUIRE_EQ(bs6.count(), 2);
+    REQUIRE_EQ(bs6.test(0), true);
+    REQUIRE_EQ(bs6.test(1), false);
+    REQUIRE_EQ(bs6.test(2), true);
+    REQUIRE_EQ(bs6.test(3), false);
+    REQUIRE_EQ(bs6.test(4), false);
+    REQUIRE_EQ(bs6.test(5), false);
+    REQUIRE_EQ(bs6.test(6), false);
+    REQUIRE_EQ(bs6.test(7), false);
+}
+
+TEST_CASE("test bitset_inlined bitstring constructor") {
+    // Test with small size (uses fixed bitset internally)
+    bitset<8> bs1("10101010");
+    REQUIRE_EQ(bs1.size(), 8);
+    REQUIRE_EQ(bs1.count(), 4);
+    REQUIRE_EQ(bs1.test(0), true);
+    REQUIRE_EQ(bs1.test(1), false);
+    REQUIRE_EQ(bs1.test(2), true);
+    REQUIRE_EQ(bs1.test(3), false);
+    REQUIRE_EQ(bs1.test(4), true);
+    REQUIRE_EQ(bs1.test(5), false);
+    REQUIRE_EQ(bs1.test(6), true);
+    REQUIRE_EQ(bs1.test(7), false);
+    
+    // Test with larger size (uses dynamic bitset internally)
+    bitset<100> bs2("1111000011110000");
+    REQUIRE_EQ(bs2.size(), 100);
+    REQUIRE_EQ(bs2.count(), 8);
+    for (fl::u32 i = 0; i < 4; ++i) {
+        REQUIRE_EQ(bs2.test(i), true);
+    }
+    for (fl::u32 i = 4; i < 8; ++i) {
+        REQUIRE_EQ(bs2.test(i), false);
+    }
+    for (fl::u32 i = 8; i < 12; ++i) {
+        REQUIRE_EQ(bs2.test(i), true);
+    }
+    for (fl::u32 i = 12; i < 16; ++i) {
+        REQUIRE_EQ(bs2.test(i), false);
+    }
+    // Remaining bits should be false
+    for (fl::u32 i = 16; i < 100; ++i) {
+        REQUIRE_EQ(bs2.test(i), false);
+    }
+    
+    // Test with very long string
+    bitset<200> bs3("1111111111111111111111111111111111111111111111111111111111111111");
+    REQUIRE_EQ(bs3.size(), 200);
+    REQUIRE_EQ(bs3.count(), 64);
+    for (fl::u32 i = 0; i < 64; ++i) {
+        REQUIRE_EQ(bs3.test(i), true);
+    }
+    for (fl::u32 i = 64; i < 200; ++i) {
+        REQUIRE_EQ(bs3.test(i), false);
+    }
+    
+    // Test with null pointer (should not crash)
+    bitset<16> bs4(nullptr);
+    REQUIRE_EQ(bs4.size(), 16);
+    REQUIRE_EQ(bs4.count(), 0);
+    REQUIRE_EQ(bs4.none(), true);
+    
+    // Test with empty string
+    bitset<16> bs5("");
+    REQUIRE_EQ(bs5.size(), 16);
+    REQUIRE_EQ(bs5.count(), 0);
+    REQUIRE_EQ(bs5.none(), true);
+    
+    // Test with mixed characters (should ignore non-0/1 chars)
+    bitset<8> bs6("1a0b1c0d");
+    REQUIRE_EQ(bs6.size(), 8);
+    REQUIRE_EQ(bs6.count(), 2);
+    REQUIRE_EQ(bs6.test(0), true);
+    REQUIRE_EQ(bs6.test(1), false);
+    REQUIRE_EQ(bs6.test(2), true);
+    REQUIRE_EQ(bs6.test(3), false);
+    REQUIRE_EQ(bs6.test(4), false);
+    REQUIRE_EQ(bs6.test(5), false);
+    REQUIRE_EQ(bs6.test(6), false);
+    REQUIRE_EQ(bs6.test(7), false);
+}

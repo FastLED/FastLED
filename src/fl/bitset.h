@@ -5,6 +5,7 @@
 #include "fl/variant.h"
 #include "fl/stdint.h"
 #include "fl/int.h"
+#include "fl/force_inline.h"
 
 
 
@@ -55,7 +56,7 @@ template <fl::u32 N> class BitsetFixed {
     /// Constructs a BitsetFixed with all bits reset.
     constexpr BitsetFixed() noexcept : _blocks{} {}
     /// Constructs a BitsetFixed from a bitstring of '0' and '1' chars.
-    FL_FORCE_INLINE BitsetFixed(const char* bitstring);
+    FASTLED_FORCE_INLINE BitsetFixed(const char* bitstring);
 
     void to_string(string* dst) const {
         detail::to_string(_blocks, N, dst);
@@ -333,7 +334,7 @@ class BitsetInlined {
         }
     }
     /// Constructs a BitsetInlined from a bitstring of '0' and '1' chars.
-    FL_FORCE_INLINE BitsetInlined(const char* bitstring);
+    FASTLED_FORCE_INLINE BitsetInlined(const char* bitstring);
     BitsetInlined(const BitsetInlined &other) : _storage(other._storage) {}
     BitsetInlined(BitsetInlined &&other) noexcept
         : _storage(fl::move(other._storage)) {}
