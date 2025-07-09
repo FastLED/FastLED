@@ -26,9 +26,13 @@ void to_string(const fl::u16 *bit_data, fl::u32 bit_count, string* dst) {
 template<typename SetBitFunc>
 inline void parse_bitstring(const char* bitstring, SetBitFunc&& set_bit) {
     if (!bitstring) return;
-    for (fl::u32 i = 0; bitstring[i] != '\0'; ++i) {
-        if (bitstring[i] == '1') set_bit(i, true);
-        else if (bitstring[i] == '0') set_bit(i, false);
+    fl::u32 len = 0;
+    while (bitstring[len] == '0' || bitstring[len] == '1') ++len;
+    
+    // Parse the bitstring and set bits (reverse order - first character is LSB)
+    for (fl::u32 i = 0; i < len; ++i) {
+        if (bitstring[len - 1 - i] == '1') set_bit(i, true);
+        else if (bitstring[len - 1 - i] == '0') set_bit(i, false);
         // ignore other chars
     }
 }
