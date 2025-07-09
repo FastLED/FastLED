@@ -37,6 +37,8 @@ class bitset_dynamic {
 
     // Constructor with initial size
     explicit bitset_dynamic(fl::u32 size) { resize(size); }
+    // Constructor from a bitstring of '0' and '1' chars.
+    bitset_dynamic(const char* bitstring);
 
     // Copy constructor
     bitset_dynamic(const bitset_dynamic &other) {
