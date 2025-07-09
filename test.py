@@ -46,6 +46,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--interactive", action="store_true", help="Enable interactive mode (allows confirmation prompts)")
     parser.add_argument("--verbose", "-v", action="store_true", help="Enable verbose output showing all test details")
     parser.add_argument("--quick", action="store_true", help="Enable quick mode with FASTLED_ALL_SRC=1")
+    parser.add_argument("--no-stack-trace", action="store_true", help="Disable stack trace dumping on timeout")
     args = parser.parse_args()
     
     # Auto-enable --cpp when a specific test is provided
@@ -63,13 +64,13 @@ def _make_pio_check_cmd() -> List[str]:
                             '--inline-suppr --enable=all --std=c++17']
 
 
-def make_compile_uno_test_process() -> RunningProcess:
+def make_compile_uno_test_process(enable_stack_trace: bool = True) -> RunningProcess:
     """Create a process to compile the uno tests"""
     cmd = ['uv', 'run', 'ci/ci-compile.py', 'uno', '--examples', 'Blink', '--no-interactive']
     # shell=True wasn't working for some reason
     # cmd = cmd + ['||'] + cmd
     # return RunningProcess(cmd, echo=False, auto_run=not _IS_GITHUB, shell=True)
-    return RunningProcess(cmd, echo=False, auto_run=not _IS_GITHUB)
+    return RunningProcess(cmd, echo=False, auto_run=not _IS_GITHUB, enable_stack_trace=enable_stack_trace)
 
 
 def fingerprint_code_base(start_directory: Path, glob: str = "**/*.h,**/*.cpp,**/*.hpp") -> Dict[str, str]:
@@ -179,6 +180,13 @@ def main() -> None:
             os.environ['FASTLED_ALL_SRC'] = '1'
             print("Quick mode enabled. FASTLED_ALL_SRC=1")
             
+        # Handle stack trace control
+        enable_stack_trace = not args.no_stack_trace
+        if enable_stack_trace:
+            print("Stack trace dumping enabled for test timeouts")
+        else:
+            print("Stack trace dumping disabled for test timeouts")
+            
         # Validate conflicting arguments
         if args.no_interactive and args.interactive:
             print("Error: --interactive and --no-interactive cannot be used together", file=sys.stderr)
@@ -250,14 +258,14 @@ def main() -> None:
             
             if args.test:
                 # Run specific C++ test
-                proc = RunningProcess(cmd_str_cpp)
+                proc = RunningProcess(cmd_str_cpp, enable_stack_trace=enable_stack_trace)
                 proc.wait()
                 if proc.returncode != 0:
                     print(f"Command failed: {proc.command}")
                     sys.exit(proc.returncode)
             else:
                 # Run all C++ tests
-                proc = RunningProcess(cmd_str_cpp)
+                proc = RunningProcess(cmd_str_cpp, enable_stack_trace=enable_stack_trace)
                 proc.wait()
                 if proc.returncode != 0:
                     print(f"Command failed: {proc.command}")
@@ -274,15 +282,15 @@ def main() -> None:
         cmd_str = subprocess.list2cmdline(cmd_list)
     
         print(f"Running command (in the background): {cmd_str}")
-        pio_process = RunningProcess(cmd_str, echo=False, auto_run=not _IS_GITHUB)
-        cpp_test_proc = RunningProcess(cmd_str_cpp)
-        compile_native_proc = RunningProcess('uv run ci/ci-compile-native.py', echo=False, auto_run=not _IS_GITHUB)
-        pytest_proc = RunningProcess('uv run pytest -s ci/tests -xvs --durations=0', echo=True, auto_run=not _IS_GITHUB)
-        impl_files_proc = RunningProcess('uv run ci/ci/check_implementation_files.py --check-inclusion --ascii-only --suppress-summary-on-100-percent', echo=False, auto_run=not _IS_GITHUB)
+        pio_process = RunningProcess(cmd_str, echo=False, auto_run=not _IS_GITHUB, enable_stack_trace=enable_stack_trace)
+        cpp_test_proc = RunningProcess(cmd_str_cpp, enable_stack_trace=enable_stack_trace)
+        compile_native_proc = RunningProcess('uv run ci/ci-compile-native.py', echo=False, auto_run=not _IS_GITHUB, enable_stack_trace=enable_stack_trace)
+        pytest_proc = RunningProcess('uv run pytest -s ci/tests -xvs --durations=0', echo=True, auto_run=not _IS_GITHUB, enable_stack_trace=enable_stack_trace)
+        impl_files_proc = RunningProcess('uv run ci/ci/check_implementation_files.py --check-inclusion --ascii-only --suppress-summary-on-100-percent', echo=False, auto_run=not _IS_GITHUB, enable_stack_trace=enable_stack_trace)
         tests = [cpp_test_proc, compile_native_proc, pytest_proc, impl_files_proc, pio_process]
         if src_code_change:
             print("Source code changed, running uno tests")
-            tests += [make_compile_uno_test_process()]
+            tests += [make_compile_uno_test_process(enable_stack_trace)]
 
         is_first = True
         for test in tests:
