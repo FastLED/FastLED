@@ -310,10 +310,19 @@ class bitset_dynamic {
 
     /// Finds the first bit that matches the test value.
     /// Returns the index of the first matching bit, or -1 if none found.
-    fl::i32 find_first(bool test_value) const noexcept {
-        if (!_blocks) return -1;
+    /// @param test_value The value to search for (true or false)
+    /// @param offset Starting position to search from (default: 0)
+    fl::i32 find_first(bool test_value, fl::u32 offset = 0) const noexcept {
+        // If offset is beyond our size, no match possible
+        if (offset >= _size) {
+            return -1;
+        }
+
+        // Calculate which block to start from
+        fl::u32 start_block = offset / bits_per_block;
+        fl::u32 start_bit = offset % bits_per_block;
         
-        for (fl::u32 block_idx = 0; block_idx < _block_count; ++block_idx) {
+        for (fl::u32 block_idx = start_block; block_idx < _block_count; ++block_idx) {
             block_type current_block = _blocks[block_idx];
             
             // For the last block, we need to mask out unused bits
@@ -330,22 +339,25 @@ class bitset_dynamic {
                 current_block = ~current_block;
             }
             
-            // Step 1: Test the entire u16 block first
+            // For the first block, mask out bits before the offset
+            if (block_idx == start_block && start_bit > 0) {
+                current_block &= ~((block_type(1) << start_bit) - 1);
+            }
+            
+            // If there are any matching bits in this block
             if (current_block != 0) {
-                // Step 2: If the block has matching bits, find the first one
-                for (fl::u32 bit_idx = 0; bit_idx < bits_per_block; ++bit_idx) {
-                    if (current_block & (block_type(1) << bit_idx)) {
-                        fl::u32 global_bit_idx = block_idx * bits_per_block + bit_idx;
-                        // Check if this bit is within our valid range
-                        if (global_bit_idx < _size) {
-                            return static_cast<fl::i32>(global_bit_idx);
-                        }
-                    }
+                // Find the first set bit
+                fl::u32 bit_pos = __builtin_ctz(current_block);
+                fl::u32 absolute_pos = block_idx * bits_per_block + bit_pos;
+                
+                // Make sure we haven't gone past the end of the bitset
+                if (absolute_pos < _size) {
+                    return absolute_pos;
                 }
             }
         }
         
-        return -1; // No matching bit found
+        return -1;  // No matching bit found
     }
 
     // Bitwise AND operator
