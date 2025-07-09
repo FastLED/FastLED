@@ -1,4 +1,4 @@
-// FastLED Project Debug Configurations (Manually Maintained)
+// AUTOMATICALLY GENERATED FILE. PLEASE DO NOT MODIFY IT MANUALLY
 //
 // PlatformIO Debugging Solution
 //
@@ -79,61 +79,6 @@
             "toolchainBinDir": "C:/Users/niteris/.platformio/packages/toolchain-xtensa-esp-elf/bin",
             "internalConsoleOptions": "openOnSessionStart",
             "loadMode": "manual"
-        },
-        {
-            "name": "Python: Current File",
-            "type": "debugpy",
-            "request": "launch",
-            "program": "${file}",
-            "console": "integratedTerminal",
-            "cwd": "${workspaceFolder}",
-            "python": "${workspaceFolder}/.venv/bin/python",
-            "env": {
-                "PYTHONPATH": "${workspaceFolder}"
-            },
-            "justMyCode": false
-        },
-        {
-            "name": "Python: FastLED Tests",
-            "type": "debugpy",
-            "request": "launch",
-            "program": "${workspaceFolder}/test.py",
-            "console": "integratedTerminal",
-            "cwd": "${workspaceFolder}",
-            "python": "${workspaceFolder}/.venv/bin/python",
-            "env": {
-                "PYTHONPATH": "${workspaceFolder}"
-            },
-            "justMyCode": false,
-            "args": []
-        },
-        {
-            "name": "Python: CI Compile",
-            "type": "debugpy",
-            "request": "launch",
-            "program": "${workspaceFolder}/ci/ci-compile.py",
-            "console": "integratedTerminal",
-            "cwd": "${workspaceFolder}",
-            "python": "${workspaceFolder}/.venv/bin/python",
-            "env": {
-                "PYTHONPATH": "${workspaceFolder}"
-            },
-            "justMyCode": false,
-            "args": ["uno", "--examples", "Blink"]
-        },
-        {
-            "name": "Python: MCP Server",
-            "type": "debugpy",
-            "request": "launch",
-            "program": "${workspaceFolder}/mcp_server.py",
-            "console": "integratedTerminal",
-            "cwd": "${workspaceFolder}",
-            "python": "${workspaceFolder}/.venv/bin/python",
-            "env": {
-                "PYTHONPATH": "${workspaceFolder}"
-            },
-            "justMyCode": false
         }
     ]
 }
-     

@@ -288,5 +288,10 @@
     
     // Disable Microsoft C++ extension to prevent conflicts with clangd
     "extensions.ignoreRecommendations": true,
-    "C_Cpp.disabled": true
+    "C_Cpp.disabled": true,
+    
+    // Prevent PlatformIO from overwriting launch.json and other config files
+    "platformio-ide.autoRebuildAutocompleteIndex": false,
+    "platformio-ide.activateProjectOnTextEditorChange": false,
+    "platformio-ide.autoOpenPlatformIOIniFile": false
 }
