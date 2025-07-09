@@ -87,7 +87,7 @@ class WaveSimulation1D {
     bool geti16All(fl::size x, i16 *curr, i16 *prev, i16 *diff) const;
 
     // Downsampled getters for the 8-bit representations.
-    int8_t geti8(fl::size x) const;
+    i8 geti8(fl::size x) const;
 
     u8 getu8(fl::size x) const;
 
@@ -174,7 +174,7 @@ class WaveSimulation2D {
                    i16 *diff) const;
 
     // Downsampled getters for the 8-bit representations.
-    int8_t geti8(fl::size x, fl::size y) const;
+    i8 geti8(fl::size x, fl::size y) const;
 
     // Special function to get the value as a u8 for drawing / gradients.
     // Ease out functions are applied to this when in half duplex mode.

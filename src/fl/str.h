@@ -272,7 +272,7 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
         return write(dst.c_str(), dst.size());
     }
 
-    fl::size write(const int8_t val) {
+    fl::size write(const i8 val) {
         StrN<FASTLED_STR_INLINED_SIZE> dst;
         StringFormatter::append(i16(val),
                                 &dst); // Inlined size should suffice
@@ -517,7 +517,7 @@ class string : public StrN<FASTLED_STR_INLINED_SIZE> {
 
     // Generic integral append: only enabled if T is an integral type. This is
     // needed because on some platforms type(int) is not one of the integral
-    // types like int8_t, i16, i32, int64_t etc. In such a has just case
+    // types like i8, i16, i32, int64_t etc. In such a has just case
     // the value to i32 and then append it.
     template <typename T, typename = fl::enable_if_t<fl::is_integral<T>::value>>
     string &append(const T &val) {
@@ -559,7 +559,7 @@ class string : public StrN<FASTLED_STR_INLINED_SIZE> {
         return *this;
     }
     // string& append(char c) { write(&c, 1); return *this; }
-    string &append(const int8_t &c) {
+    string &append(const i8 &c) {
         const char *str = fl::bit_cast_ptr<const char>(static_cast<const void*>(&c));
         write(str, 1);
         return *this;

@@ -66,7 +66,7 @@ class WaveSimulation1D_Real {
     i16 geti16(fl::size x) const;
     i16 geti16Previous(fl::size x) const;
 
-    int8_t geti8(fl::size x) const { return static_cast<int8_t>(geti16(x) >> 8); }
+    i8 geti8(fl::size x) const { return static_cast<i8>(geti16(x) >> 8); }
 
     // If mHalfDuplex is set then the the values are adjusted so that negative
     // values will instead be represented by zero.
@@ -145,8 +145,8 @@ class WaveSimulation2D_Real {
     i16 geti16(fl::size x, fl::size y) const;
     i16 geti16Previous(fl::size x, fl::size y) const;
 
-    int8_t geti8(fl::size x, fl::size y) const {
-        return static_cast<int8_t>(geti16(x, y) >> 8);
+    i8 geti8(fl::size x, fl::size y) const {
+        return static_cast<i8>(geti16(x, y) >> 8);
     }
 
     u8 getu8(fl::size x, fl::size y) const {

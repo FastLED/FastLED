@@ -14,6 +14,7 @@ namespace fl {
     // These must be defined BEFORE platform includes so fractional types can use them
     typedef signed char i8;
     typedef unsigned char u8;
+    typedef unsigned int uint;
     
     // Pointer and size types are defined per-platform in platforms/int.h
     // uptr (pointer type) and size (size type) are defined per-platform

@@ -76,8 +76,8 @@ void __compile_test() {
     static_assert(fl::is_integral<const unsigned char &>::value,
                   "const unsigned char& should be integral");
 
-    // fixed width int types
-    static_assert(fl::is_integral<int8_t>::value, "int8_t should be integral");
+    // fixed width int types from fl/int.h
+    static_assert(fl::is_integral<fl::i8>::value, "i8 should be integral");
     static_assert(fl::is_integral<fl::u8>::value,
                   "u8 should be integral");
     static_assert(fl::is_integral<fl::i16>::value,
@@ -92,10 +92,33 @@ void __compile_test() {
                   "fl::i64 should be integral");
     static_assert(fl::is_integral<fl::u64>::value,
                   "fl::u64 should be integral");
-    static_assert(fl::is_integral<int8_t *>::value == false,
-                  "int8_t* should not be integral");
+    static_assert(fl::is_integral<fl::i8 *>::value == false,
+                  "i8* should not be integral");
     static_assert(fl::is_integral<fl::u8 *>::value == false,
                   "u8* should not be integral");
+    static_assert(fl::is_integral<fl::uint>::value,
+                  "uint should be integral");
+
+    // fixed width int types from fl/stdint.h
+    static_assert(fl::is_integral<int8_t>::value, "int8_t should be integral");
+    static_assert(fl::is_integral<uint8_t>::value,
+                  "uint8_t should be integral");
+    static_assert(fl::is_integral<int16_t>::value,
+                  "int16_t should be integral");
+    static_assert(fl::is_integral<uint16_t>::value,
+                  "uint16_t should be integral");
+    static_assert(fl::is_integral<int32_t>::value,
+                  "int32_t should be integral");
+    static_assert(fl::is_integral<uint32_t>::value,
+                  "uint32_t should be integral");
+    static_assert(fl::is_integral<int64_t>::value,
+                  "int64_t should be integral");
+    static_assert(fl::is_integral<uint64_t>::value,
+                  "uint64_t should be integral");
+    static_assert(fl::is_integral<int8_t *>::value == false,
+                  "int8_t* should not be integral");
+    static_assert(fl::is_integral<uint8_t *>::value == false,
+                  "uint8_t* should not be integral");
 }
 } // namespace
 

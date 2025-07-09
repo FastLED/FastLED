@@ -120,8 +120,8 @@ bool WaveSimulation2D::geti16All(fl::size x, fl::size y, i16 *curr,
     return true;
 }
 
-int8_t WaveSimulation2D::geti8(fl::size x, fl::size y) const {
-    return static_cast<int8_t>(geti16(x, y) >> 8);
+i8 WaveSimulation2D::geti8(fl::size x, fl::size y) const {
+    return static_cast<i8>(geti16(x, y) >> 8);
 }
 
 u8 WaveSimulation2D::getu8(fl::size x, fl::size y) const {
@@ -294,8 +294,8 @@ bool WaveSimulation1D::geti16All(fl::size x, i16 *curr, i16 *prev,
     return true;
 }
 
-int8_t WaveSimulation1D::geti8(fl::size x) const {
-    return static_cast<int8_t>(geti16(x) >> 8);
+i8 WaveSimulation1D::geti8(fl::size x) const {
+    return static_cast<i8>(geti16(x) >> 8);
 }
 
 // u8 WaveSimulation2D::getu8(fl::size x, fl::size y) const {

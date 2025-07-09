@@ -414,7 +414,7 @@ template <> struct is_signed<double> {
 template <> struct is_signed<long double> {
     static constexpr bool value = true;
 };
-// Note: sized integer types (int8_t, i16, i32, int64_t) are typedefs
+// Note: sized integer types (i8, i16, i32, int64_t) are typedefs
 // for the basic types above, so they automatically inherit these specializations
 
 //-------------------------------------------------------------------------------
@@ -468,7 +468,7 @@ template <> struct type_rank<double> {
 template <> struct type_rank<long double> {
     static constexpr int value = 12;
 };
-// Note: sized integer types (int8_t, i16, i32, int64_t) are typedefs
+// Note: sized integer types (i8, i16, i32, int64_t) are typedefs
 // for the basic types above, so they automatically inherit these specializations
 
 //-------------------------------------------------------------------------------
@@ -570,16 +570,16 @@ struct common_type_impl<double, T, typename enable_if<(is_integral<T>::value || 
     using type = double;
 };
 
-// Explicitly forbid int8_t and u8 combinations 
+// Explicitly forbid i8 and u8 combinations 
 // No type member = clear compilation error when accessed
 template <>
-struct common_type_impl<int8_t, u8, void> {
+struct common_type_impl<i8, u8, void> {
     // Intentionally no 'type' member - will cause error: 
     // "no type named 'type' in 'struct fl::common_type_impl<signed char, unsigned char, void>'"
 };
 
 template <>
-struct common_type_impl<u8, int8_t, void> {
+struct common_type_impl<u8, i8, void> {
     // Intentionally no 'type' member - will cause error:
     // "no type named 'type' in 'struct fl::common_type_impl<unsigned char, signed char, void>'"
 };
@@ -589,8 +589,8 @@ template <typename T, typename U>
 struct common_type_impl<T, U, typename enable_if<
     is_integral<T>::value && is_integral<U>::value &&
     !is_same<T, U>::value &&
-    !((is_same<T, int8_t>::value && is_same<U, u8>::value) ||
-      (is_same<T, u8>::value && is_same<U, int8_t>::value))
+    !((is_same<T, i8>::value && is_same<U, u8>::value) ||
+      (is_same<T, u8>::value && is_same<U, i8>::value))
 >::type> {
     using type = typename integer_promotion_impl<T, U>::type;
 };
