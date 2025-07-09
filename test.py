@@ -271,7 +271,7 @@ def main() -> None:
         cpp_test_proc = RunningProcess(cmd_str_cpp)
         compile_native_proc = RunningProcess('uv run ci/ci-compile-native.py', echo=False, auto_run=not _IS_GITHUB)
         pytest_proc = RunningProcess('uv run pytest -s ci/tests -xvs --durations=0', echo=True, auto_run=not _IS_GITHUB)
-        impl_files_proc = RunningProcess('uv run ci/ci/check_implementation_files.py --check-inclusion --ascii-only', echo=False, auto_run=not _IS_GITHUB)
+        impl_files_proc = RunningProcess('uv run ci/ci/check_implementation_files.py --check-inclusion --ascii-only --suppress-summary-on-100-percent', echo=False, auto_run=not _IS_GITHUB)
         tests = [cpp_test_proc, compile_native_proc, pytest_proc, impl_files_proc, pio_process]
         if src_code_change:
             print("Source code changed, running uno tests")
