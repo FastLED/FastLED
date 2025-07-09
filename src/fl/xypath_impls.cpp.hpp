@@ -79,7 +79,7 @@ vec2f HeartPath::compute(float alpha) {
     return vec2f(x, y);
 }
 
-ArchimedeanSpiralPath::ArchimedeanSpiralPath(uint8_t turns, float radius)
+ArchimedeanSpiralPath::ArchimedeanSpiralPath(u8 turns, float radius)
     : mTurns(turns), mRadius(radius) {}
 
 vec2f ArchimedeanSpiralPath::compute(float alpha) {
@@ -103,7 +103,7 @@ vec2f ArchimedeanSpiralPath::compute(float alpha) {
     return vec2f(x, y);
 }
 
-RosePath::RosePath(uint8_t n, uint8_t d) {
+RosePath::RosePath(u8 n, u8 d) {
     mParams = NewPtr<RosePathParams>();
     params().n = n;
     params().d = d;
@@ -220,15 +220,15 @@ const string ArchimedeanSpiralPath::name() const {
     return "ArchimedeanSpiralPath";
 }
 
-void ArchimedeanSpiralPath::setTurns(uint8_t turns) { mTurns = turns; }
+void ArchimedeanSpiralPath::setTurns(u8 turns) { mTurns = turns; }
 
 void ArchimedeanSpiralPath::setRadius(float radius) { mRadius = radius; }
 
 const string RosePath::name() const { return "RosePath"; }
 
-void RosePath::setN(uint8_t n) { params().n = n; }
+void RosePath::setN(u8 n) { params().n = n; }
 
-void RosePath::setD(uint8_t d) { params().d = d; }
+void RosePath::setD(u8 d) { params().d = d; }
 
 RosePath::RosePath(const Ptr<RosePathParams> &p) : mParams(p) {}
 

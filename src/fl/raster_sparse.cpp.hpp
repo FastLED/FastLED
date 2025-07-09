@@ -50,7 +50,7 @@ void XYRasterU8Sparse::rasterize_internal(const Tile2x2_u8 &tile,
     const vec2<i16> &origin = tile.origin();
     for (int x = 0; x < 2; ++x) {
         for (int y = 0; y < 2; ++y) {
-            uint8_t value = tile.at(x, y);
+            u8 value = tile.at(x, y);
             if (!value) {
                 continue;
             }

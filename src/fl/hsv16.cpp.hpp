@@ -8,7 +8,7 @@ namespace fl {
 
 // Improved 8-bit to 16-bit scaling using the same technique as map8_to_16
 // but with proper rounding for the 0-255 to 0-65535 conversion
-static inline u16 scale8_to_16_accurate(uint8_t x) {
+static inline u16 scale8_to_16_accurate(u8 x) {
     if (x == 0) return 0;
     if (x == 255) return 65535;
     // Use 32-bit arithmetic with rounding: (x * 65535 + 127) / 255
@@ -18,14 +18,14 @@ static inline u16 scale8_to_16_accurate(uint8_t x) {
 
 static HSV16 RGBtoHSV16(const CRGB &rgb) {
     // Work with 8-bit values directly
-    uint8_t r = rgb.r;
-    uint8_t g = rgb.g;
-    uint8_t b = rgb.b;
+    u8 r = rgb.r;
+    u8 g = rgb.g;
+    u8 b = rgb.b;
 
     // Find min and max
-    uint8_t mx = fl_max(r, fl_max(g, b));
-    uint8_t mn = fl_min(r, fl_min(g, b));
-    uint8_t delta = mx - mn;
+    u8 mx = fl_max(r, fl_max(g, b));
+    u8 mn = fl_min(r, fl_min(g, b));
+    u8 delta = mx - mn;
 
     u16 h = 0;
     u16 s = 0;
@@ -126,7 +126,7 @@ static CRGB HSV16toRGB(const HSV16& hsv) {
 
     if (s == 0) {
         // Grayscale case - use precise mapping
-        uint8_t gray = map16_to_8(v);
+        u8 gray = map16_to_8(v);
         return CRGB{gray, gray, gray};
     }
 
@@ -163,9 +163,9 @@ static CRGB HSV16toRGB(const HSV16& hsv) {
     }
 
     // Add baseline and scale to 8-bit using accurate mapping
-    uint8_t R = map16_to_8(u16(r1 + m));
-    uint8_t G = map16_to_8(u16(g1 + m));
-    uint8_t B = map16_to_8(u16(b1 + m));
+    u8 R = map16_to_8(u16(r1 + m));
+    u8 G = map16_to_8(u16(g1 + m));
+    u8 B = map16_to_8(u16(b1 + m));
 
     return CRGB{R, G, B};
 }

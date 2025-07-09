@@ -40,7 +40,7 @@ void Tile2x2_u8::draw(const CRGB &color, const XYMap &xymap, CRGB *out) const {
     draw(xymap, visitor);
 }
 
-void Tile2x2_u8::scale(uint8_t scale) {
+void Tile2x2_u8::scale(u8 scale) {
     // scale the tile
     if (scale == 255) {
         return;
@@ -99,8 +99,8 @@ Tile2x2_u8_wrap::Tile2x2_u8_wrap(const Tile2x2_u8 &from, u16 width,
              from.at(1, 1)};
 }
 
-uint8_t Tile2x2_u8::maxValue() const {
-    uint8_t max = 0;
+u8 Tile2x2_u8::maxValue() const {
+    u8 max = 0;
     max = MAX(max, at(0, 0));
     max = MAX(max, at(0, 1));
     max = MAX(max, at(1, 0));
@@ -151,12 +151,12 @@ fl::vector_fixed<Tile2x2_u8_wrap, 2> Tile2x2_u8_wrap::Interpolate(const Tile2x2_
             vec2i16 pos = data_a.first;
             
             // Simple linear interpolation for alpha values
-            uint8_t alpha_a = data_a.second;
-            uint8_t alpha_b = data_b.second;
+            u8 alpha_a = data_a.second;
+            u8 alpha_b = data_b.second;
             
             // Linear interpolation: a + t * (b - a)
             float alpha_float = alpha_a + t * (alpha_b - alpha_a);
-            uint8_t interpolated_alpha = static_cast<uint8_t>(alpha_float + 0.5f); // Round to nearest
+            u8 interpolated_alpha = static_cast<u8>(alpha_float + 0.5f); // Round to nearest
             
             interpolated.mData[y][x] = {pos, interpolated_alpha};
         }

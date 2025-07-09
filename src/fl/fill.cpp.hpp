@@ -26,8 +26,8 @@ void fill_solid(struct CHSV *targetArray, int numToFill,
 // 	fill_solid<CRGB>( targetArray, numToFill, (CRGB) hsvColor);
 // }
 
-void fill_rainbow(struct CRGB *targetArray, int numToFill, uint8_t initialhue,
-                  uint8_t deltahue) {
+void fill_rainbow(struct CRGB *targetArray, int numToFill, u8 initialhue,
+                  u8 deltahue) {
     CHSV hsv;
     hsv.hue = initialhue;
     hsv.val = 255;
@@ -38,8 +38,8 @@ void fill_rainbow(struct CRGB *targetArray, int numToFill, uint8_t initialhue,
     }
 }
 
-void fill_rainbow(struct CHSV *targetArray, int numToFill, uint8_t initialhue,
-                  uint8_t deltahue) {
+void fill_rainbow(struct CHSV *targetArray, int numToFill, u8 initialhue,
+                  u8 deltahue) {
     CHSV hsv;
     hsv.hue = initialhue;
     hsv.val = 255;
@@ -51,7 +51,7 @@ void fill_rainbow(struct CHSV *targetArray, int numToFill, uint8_t initialhue,
 }
 
 void fill_rainbow_circular(struct CRGB *targetArray, int numToFill,
-                           uint8_t initialhue, bool reversed) {
+                           u8 initialhue, bool reversed) {
     if (numToFill == 0)
         return; // avoiding div/0
 
@@ -72,13 +72,13 @@ void fill_rainbow_circular(struct CRGB *targetArray, int numToFill,
         else
             hueOffset += hueChange;
         hsv.hue = initialhue +
-                  (uint8_t)(hueOffset >>
+                  (u8)(hueOffset >>
                             8); // assign new hue with precise offset (as 8-bit)
     }
 }
 
 void fill_rainbow_circular(struct CHSV *targetArray, int numToFill,
-                           uint8_t initialhue, bool reversed) {
+                           u8 initialhue, bool reversed) {
     if (numToFill == 0)
         return; // avoiding div/0
 
@@ -99,7 +99,7 @@ void fill_rainbow_circular(struct CHSV *targetArray, int numToFill,
         else
             hueOffset += hueChange;
         hsv.hue = initialhue +
-                  (uint8_t)(hueOffset >>
+                  (u8)(hueOffset >>
                             8); // assign new hue with precise offset (as 8-bit)
     }
 }

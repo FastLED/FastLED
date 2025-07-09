@@ -35,47 +35,47 @@ enum EaseType {
 /// 8-bit quadratic ease-in function
 /// Takes an input value 0-255 and returns an eased value 0-255
 /// The curve starts slow and accelerates (ease-in only)
-uint8_t easeInQuad8(uint8_t i);
+u8 easeInQuad8(u8 i);
 
 /// 8-bit quadratic ease-out function
 /// Takes an input value 0-255 and returns an eased value 0-255
 /// The curve starts fast and decelerates (ease-out only)
-uint8_t easeOutQuad8(uint8_t i);
+u8 easeOutQuad8(u8 i);
 
 /// 8-bit quadratic ease-in/ease-out function
 /// Takes an input value 0-255 and returns an eased value 0-255
 /// The curve starts slow, accelerates in the middle, then slows down again
-uint8_t easeInOutQuad8(uint8_t i);
+u8 easeInOutQuad8(u8 i);
 
 /// 8-bit cubic ease-in function
 /// Takes an input value 0-255 and returns an eased value 0-255
 /// More pronounced acceleration than quadratic
-uint8_t easeInCubic8(uint8_t i);
+u8 easeInCubic8(u8 i);
 
 /// 8-bit cubic ease-out function
 /// Takes an input value 0-255 and returns an eased value 0-255
 /// More pronounced deceleration than quadratic
-uint8_t easeOutCubic8(uint8_t i);
+u8 easeOutCubic8(u8 i);
 
 /// 8-bit cubic ease-in/ease-out function
 /// Takes an input value 0-255 and returns an eased value 0-255
 /// More pronounced easing curve than quadratic
-uint8_t easeInOutCubic8(uint8_t i);
+u8 easeInOutCubic8(u8 i);
 
 /// 8-bit sine ease-in function
 /// Takes an input value 0-255 and returns an eased value 0-255
 /// Smooth sinusoidal acceleration
-uint8_t easeInSine8(uint8_t i);
+u8 easeInSine8(u8 i);
 
 /// 8-bit sine ease-out function
 /// Takes an input value 0-255 and returns an eased value 0-255
 /// Smooth sinusoidal deceleration
-uint8_t easeOutSine8(uint8_t i);
+u8 easeOutSine8(u8 i);
 
 /// 8-bit sine ease-in/ease-out function
 /// Takes an input value 0-255 and returns an eased value 0-255
 /// Smooth sinusoidal acceleration and deceleration
-uint8_t easeInOutSine8(uint8_t i);
+u8 easeInOutSine8(u8 i);
 
 
 // 16-bit easing functions
@@ -117,8 +117,8 @@ u16 easeInOutSine16(u16 i);
 
 u16 ease16(EaseType type, u16 i);
 void ease16(EaseType type, u16* src, u16* dst, u16 count);
-uint8_t ease8(EaseType type, uint8_t i);
-void ease8(EaseType type, uint8_t* src, uint8_t* dst, uint8_t count);
+u8 ease8(EaseType type, u8 i);
+void ease8(EaseType type, u8* src, u8* dst, u8 count);
 
 
 //////// INLINE FUNCTIONS ////////
@@ -199,7 +199,7 @@ inline void ease16(EaseType type, u16* src, u16* dst, u16 count) {
     }
 }
 
-inline uint8_t ease8(EaseType type, uint8_t i) {
+inline u8 ease8(EaseType type, u8 i) {
     switch (type) {
         case EASE_NONE: return i;
         case EASE_IN_QUAD: return easeInQuad8(i);
@@ -215,59 +215,59 @@ inline uint8_t ease8(EaseType type, uint8_t i) {
     }
 }
 
-inline void ease8(EaseType type, uint8_t* src, uint8_t* dst, uint8_t count) {
+inline void ease8(EaseType type, u8* src, u8* dst, u8 count) {
     switch (type) {
         case EASE_NONE: return;
         case EASE_IN_QUAD: {
-            for (uint8_t i = 0; i < count; i++) {
+            for (u8 i = 0; i < count; i++) {
                 dst[i] = easeInQuad8(src[i]);
             }
             break;
         }
         case EASE_OUT_QUAD: {
-            for (uint8_t i = 0; i < count; i++) {
+            for (u8 i = 0; i < count; i++) {
                 dst[i] = easeOutQuad8(src[i]);
             }
             break;
         }
         case EASE_IN_OUT_QUAD: {
-            for (uint8_t i = 0; i < count; i++) {
+            for (u8 i = 0; i < count; i++) {
                 dst[i] = easeInOutQuad8(src[i]);
             }
             break;
         }
         case EASE_IN_CUBIC: {
-            for (uint8_t i = 0; i < count; i++) {
+            for (u8 i = 0; i < count; i++) {
                 dst[i] = easeInCubic8(src[i]);
             }
             break;
         }
         case EASE_OUT_CUBIC: {
-            for (uint8_t i = 0; i < count; i++) {
+            for (u8 i = 0; i < count; i++) {
                 dst[i] = easeOutCubic8(src[i]);
             }
             break;
         }
         case EASE_IN_OUT_CUBIC: {
-            for (uint8_t i = 0; i < count; i++) {
+            for (u8 i = 0; i < count; i++) {
                 dst[i] = easeInOutCubic8(src[i]);
             }
             break;
         }
         case EASE_IN_SINE: {
-            for (uint8_t i = 0; i < count; i++) {
+            for (u8 i = 0; i < count; i++) {
                 dst[i] = easeInSine8(src[i]);
             }
             break;
         }
         case EASE_OUT_SINE: {
-            for (uint8_t i = 0; i < count; i++) {
+            for (u8 i = 0; i < count; i++) {
                 dst[i] = easeOutSine8(src[i]);
             }
             break;
         }
         case EASE_IN_OUT_SINE: {
-            for (uint8_t i = 0; i < count; i++) {
+            for (u8 i = 0; i < count; i++) {
                 dst[i] = easeInOutSine8(src[i]);
             }
             break;

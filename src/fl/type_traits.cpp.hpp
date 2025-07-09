@@ -78,8 +78,8 @@ void __compile_test() {
 
     // fixed width int types
     static_assert(fl::is_integral<int8_t>::value, "int8_t should be integral");
-    static_assert(fl::is_integral<uint8_t>::value,
-                  "uint8_t should be integral");
+    static_assert(fl::is_integral<fl::u8>::value,
+                  "u8 should be integral");
     static_assert(fl::is_integral<fl::i16>::value,
                   "i16 should be integral");
     static_assert(fl::is_integral<fl::u16>::value,
@@ -94,8 +94,8 @@ void __compile_test() {
                   "fl::u64 should be integral");
     static_assert(fl::is_integral<int8_t *>::value == false,
                   "int8_t* should not be integral");
-    static_assert(fl::is_integral<uint8_t *>::value == false,
-                  "uint8_t* should not be integral");
+    static_assert(fl::is_integral<fl::u8 *>::value == false,
+                  "u8* should not be integral");
 }
 } // namespace
 

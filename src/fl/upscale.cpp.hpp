@@ -11,11 +11,11 @@
 
 namespace fl {
 
-uint8_t bilinearInterpolate(uint8_t v00, uint8_t v10, uint8_t v01, uint8_t v11,
+u8 bilinearInterpolate(u8 v00, u8 v10, u8 v01, u8 v11,
                             u16 dx, u16 dy);
 
-uint8_t bilinearInterpolatePowerOf2(uint8_t v00, uint8_t v10, uint8_t v01,
-                                    uint8_t v11, uint8_t dx, uint8_t dy);
+u8 bilinearInterpolatePowerOf2(u8 v00, u8 v10, u8 v01,
+                                    u8 v11, u8 dx, u8 dy);
 
 void upscaleArbitrary(const CRGB *input, CRGB *output, u16 inputWidth,
                       u16 inputHeight, XYMap xyMap) {
@@ -62,7 +62,7 @@ void upscaleArbitrary(const CRGB *input, CRGB *output, u16 inputWidth,
         }
     }
 }
-uint8_t bilinearInterpolate(uint8_t v00, uint8_t v10, uint8_t v01, uint8_t v11,
+u8 bilinearInterpolate(u8 v00, u8 v10, u8 v01, u8 v11,
                             u16 dx, u16 dy) {
     u16 dx_inv = 256 - dx;
     u16 dy_inv = 256 - dy;
@@ -76,36 +76,36 @@ uint8_t bilinearInterpolate(uint8_t v00, uint8_t v10, uint8_t v01, uint8_t v11,
 
     // Normalize the result by dividing by 65536 (shift right by 16 bits),
     // with rounding
-    uint8_t result = (uint8_t)((sum + 32768) >> 16);
+    u8 result = (u8)((sum + 32768) >> 16);
 
     return result;
 }
 
-void upscalePowerOf2(const CRGB *input, CRGB *output, uint8_t inputWidth,
-                     uint8_t inputHeight, XYMap xyMap) {
-    uint8_t width = xyMap.getWidth();
-    uint8_t height = xyMap.getHeight();
+void upscalePowerOf2(const CRGB *input, CRGB *output, u8 inputWidth,
+                     u8 inputHeight, XYMap xyMap) {
+    u8 width = xyMap.getWidth();
+    u8 height = xyMap.getHeight();
     if (width != xyMap.getWidth() || height != xyMap.getHeight()) {
         // xyMap has width and height that do not fit in an u16.
         return;
     }
     u16 n = xyMap.getTotal();
 
-    for (uint8_t y = 0; y < height; y++) {
-        for (uint8_t x = 0; x < width; x++) {
+    for (u8 y = 0; y < height; y++) {
+        for (u8 x = 0; x < width; x++) {
             // Use 8-bit fixed-point arithmetic with 8 fractional bits
             // (scale factor of 256)
             u16 fx = ((u16)x * (inputWidth - 1) * 256) / (width - 1);
             u16 fy =
                 ((u16)y * (inputHeight - 1) * 256) / (height - 1);
 
-            uint8_t ix = fx >> 8; // Integer part
-            uint8_t iy = fy >> 8;
-            uint8_t dx = fx & 0xFF; // Fractional part
-            uint8_t dy = fy & 0xFF;
+            u8 ix = fx >> 8; // Integer part
+            u8 iy = fy >> 8;
+            u8 dx = fx & 0xFF; // Fractional part
+            u8 dy = fy & 0xFF;
 
-            uint8_t ix1 = (ix + 1 < inputWidth) ? ix + 1 : ix;
-            uint8_t iy1 = (iy + 1 < inputHeight) ? iy + 1 : iy;
+            u8 ix1 = (ix + 1 < inputWidth) ? ix + 1 : ix;
+            u8 iy1 = (iy + 1 < inputHeight) ? iy + 1 : iy;
 
             u16 i00 = iy * inputWidth + ix;
             u16 i10 = iy * inputWidth + ix1;
@@ -133,8 +133,8 @@ void upscalePowerOf2(const CRGB *input, CRGB *output, uint8_t inputWidth,
     }
 }
 
-uint8_t bilinearInterpolatePowerOf2(uint8_t v00, uint8_t v10, uint8_t v01,
-                                    uint8_t v11, uint8_t dx, uint8_t dy) {
+u8 bilinearInterpolatePowerOf2(u8 v00, u8 v10, u8 v01,
+                                    u8 v11, u8 dx, u8 dy) {
     u16 dx_inv = 256 - dx; // 0 to 256
     u16 dy_inv = 256 - dy; // 0 to 256
 
@@ -151,14 +151,14 @@ uint8_t bilinearInterpolatePowerOf2(uint8_t v00, uint8_t v10, uint8_t v01,
     u16 sum = v00 * w00 + v10 * w10 + v01 * w01 + v11 * w11;
 
     // Normalize the result
-    uint8_t result = (sum + (weight_sum >> 1)) / weight_sum;
+    u8 result = (sum + (weight_sum >> 1)) / weight_sum;
 
     return result;
 }
 
 // Floating-point version of bilinear interpolation
-uint8_t upscaleFloat(uint8_t v00, uint8_t v10, uint8_t v01,
-                                 uint8_t v11, float dx, float dy) {
+u8 upscaleFloat(u8 v00, u8 v10, u8 v01,
+                                 u8 v11, float dx, float dy) {
     float dx_inv = 1.0f - dx;
     float dy_inv = 1.0f - dy;
 
@@ -172,7 +172,7 @@ uint8_t upscaleFloat(uint8_t v00, uint8_t v10, uint8_t v01,
     float sum = v00 * w00 + v10 * w10 + v01 * w01 + v11 * w11;
 
     // Clamp the result to [0, 255] and round
-    uint8_t result = static_cast<uint8_t>(sum + 0.5f);
+    u8 result = static_cast<u8>(sum + 0.5f);
 
     return result;
 }
@@ -227,31 +227,31 @@ void upscaleArbitraryFloat(const CRGB *input, CRGB *output, u16 inputWidth,
 }
 
 // Floating-point version for power-of-two grid sizes
-void upscaleFloat(const CRGB *input, CRGB *output, uint8_t inputWidth,
-                  uint8_t inputHeight, XYMap xyMap) {
-    uint8_t outputWidth = xyMap.getWidth();
-    uint8_t outputHeight = xyMap.getHeight();
+void upscaleFloat(const CRGB *input, CRGB *output, u8 inputWidth,
+                  u8 inputHeight, XYMap xyMap) {
+    u8 outputWidth = xyMap.getWidth();
+    u8 outputHeight = xyMap.getHeight();
     if (outputWidth != xyMap.getWidth() || outputHeight != xyMap.getHeight()) {
-        // xyMap has width and height that do not fit in a uint8_t.
+        // xyMap has width and height that do not fit in a u8.
         return;
     }
     u16 n = xyMap.getTotal();
 
-    for (uint8_t y = 0; y < outputHeight; y++) {
-        for (uint8_t x = 0; x < outputWidth; x++) {
+    for (u8 y = 0; y < outputHeight; y++) {
+        for (u8 x = 0; x < outputWidth; x++) {
             // Map output pixel to input grid position
             float fx =
                 static_cast<float>(x) * (inputWidth - 1) / (outputWidth - 1);
             float fy =
                 static_cast<float>(y) * (inputHeight - 1) / (outputHeight - 1);
 
-            uint8_t ix = static_cast<uint8_t>(fx);
-            uint8_t iy = static_cast<uint8_t>(fy);
+            u8 ix = static_cast<u8>(fx);
+            u8 iy = static_cast<u8>(fy);
             float dx = fx - ix;
             float dy = fy - iy;
 
-            uint8_t ix1 = (ix + 1 < inputWidth) ? ix + 1 : ix;
-            uint8_t iy1 = (iy + 1 < inputHeight) ? iy + 1 : iy;
+            u8 ix1 = (ix + 1 < inputWidth) ? ix + 1 : ix;
+            u8 iy1 = (iy + 1 < inputHeight) ? iy + 1 : iy;
 
             u16 i00 = iy * inputWidth + ix;
             u16 i10 = iy * inputWidth + ix1;

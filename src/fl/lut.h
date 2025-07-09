@@ -56,7 +56,7 @@ template <typename T> class LUT : public fl::Referent {
 
     u32 size() const { return length; }
 
-    T interp8(uint8_t alpha) {
+    T interp8(u8 alpha) {
         if (length == 0)
             return T();
         if (alpha == 0)
@@ -69,7 +69,7 @@ template <typename T> class LUT : public fl::Referent {
         u32 pos = u32(alpha) * maxIndex; // numerator
         u32 idx0 = pos / 255;                 // floor(position)
         u32 idx1 = idx0 < maxIndex ? idx0 + 1 : maxIndex;
-        uint8_t blend = pos % 255; // fractional part
+        u8 blend = pos % 255; // fractional part
 
         const T &a = data[idx0];
         const T &b = data[idx1];

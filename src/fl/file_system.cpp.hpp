@@ -27,7 +27,7 @@ class NullFileHandle : public FileHandle {
 
     bool available() const override { return false; }
     fl::size size() const override { return 0; }
-    fl::size read(uint8_t *dst, fl::size bytesToRead) override {
+    fl::size read(u8 *dst, fl::size bytesToRead) override {
         FASTLED_UNUSED(dst);
         FASTLED_UNUSED(bytesToRead);
         return 0;
@@ -174,7 +174,7 @@ bool FileSystem::readText(const char *path, fl::string *out) {
     out->reserve(size + out->size());
     bool wrote = false;
     while (file->available()) {
-        uint8_t buf[64];
+        u8 buf[64];
         fl::size n = file->read(buf, sizeof(buf));
         // out->append(buf, n);
         out->append((const char *)buf, n);

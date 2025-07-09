@@ -31,25 +31,25 @@ class Tile2x2_u8 {
     Tile2x2_u8 &operator=(const Tile2x2_u8 &) = default;
     Tile2x2_u8(Tile2x2_u8 &&) = default;
 
-    void scale(uint8_t scale);
+    void scale(u8 scale);
 
     void setOrigin(i16 x, i16 y) { mOrigin = vec2<i16>(x, y); }
 
-    uint8_t &operator()(int x, int y) { return at(x, y); }
-    uint8_t &at(int x, int y) { return mTile[y][x]; }
-    const uint8_t &at(int x, int y) const { return mTile[y][x]; }
+    u8 &operator()(int x, int y) { return at(x, y); }
+    u8 &at(int x, int y) { return mTile[y][x]; }
+    const u8 &at(int x, int y) const { return mTile[y][x]; }
 
-    uint8_t &lower_left() { return at(0, 0); }
-    uint8_t &upper_left() { return at(0, 1); }
-    uint8_t &lower_right() { return at(1, 0); }
-    uint8_t &upper_right() { return at(1, 1); }
+    u8 &lower_left() { return at(0, 0); }
+    u8 &upper_left() { return at(0, 1); }
+    u8 &lower_right() { return at(1, 0); }
+    u8 &upper_right() { return at(1, 1); }
 
-    const uint8_t &lower_left() const { return at(0, 0); }
-    const uint8_t &upper_left() const { return at(0, 1); }
-    const uint8_t &lower_right() const { return at(1, 0); }
-    const uint8_t &upper_right() const { return at(1, 1); }
+    const u8 &lower_left() const { return at(0, 0); }
+    const u8 &upper_left() const { return at(0, 1); }
+    const u8 &lower_right() const { return at(1, 0); }
+    const u8 &upper_right() const { return at(1, 1); }
 
-    uint8_t maxValue() const;
+    u8 maxValue() const;
 
     static Tile2x2_u8 MaxTile(const Tile2x2_u8 &a, const Tile2x2_u8 &b);
 
@@ -67,7 +67,7 @@ class Tile2x2_u8 {
     void draw(const XYMap &xymap, XYVisitor &visitor) const {
         for (u16 x = 0; x < 2; ++x) {
             for (u16 y = 0; y < 2; ++y) {
-                uint8_t value = at(x, y);
+                u8 value = at(x, y);
                 if (value > 0) {
                     int xx = mOrigin.x + x;
                     int yy = mOrigin.y + y;
@@ -81,7 +81,7 @@ class Tile2x2_u8 {
     }
 
   private:
-    uint8_t mTile[2][2] = {};
+    u8 mTile[2][2] = {};
     // Subpixels can be rendered outside the viewport so this must be signed.
     vec2<i16> mOrigin;
 };
@@ -92,7 +92,7 @@ class Tile2x2_u8_wrap {
     // the width of the cylinder and the y-coordinate wraps around the height.
     // This converts a tile2x2 to a wrapped x,y version.
   public:
-    using Entry = fl::pair<vec2i16, uint8_t>;  // absolute position, alpha
+    using Entry = fl::pair<vec2i16, u8>;  // absolute position, alpha
     using Data = Entry[2][2];
 
     Tile2x2_u8_wrap();

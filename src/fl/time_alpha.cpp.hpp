@@ -5,7 +5,7 @@
 
 namespace fl {
 
-uint8_t time_alpha8(u32 now, u32 start, u32 end) {
+u8 time_alpha8(u32 now, u32 start, u32 end) {
     if (now < start) {
         return 0;
     }
@@ -18,7 +18,7 @@ uint8_t time_alpha8(u32 now, u32 start, u32 end) {
     if (out > 255) {
         out = 255;
     }
-    return static_cast<uint8_t>(out);
+    return static_cast<u8>(out);
 }
 
 u16 time_alpha16(u32 now, u32 start, u32 end) {
@@ -80,12 +80,12 @@ bool TimeRamp::isActive(u32 now) const {
     return true;
 }
 
-uint8_t TimeRamp::update8(u32 now) {
+u8 TimeRamp::update8(u32 now) {
     if (!isActive(now)) {
         return 0;
     }
     // u32 elapsed = now - mStart;
-    uint8_t out = 0;
+    u8 out = 0;
     if (now < mFinishedRisingTime) {
         out = time_alpha8(now, mStart, mFinishedRisingTime);
     } else if (now < mFinishedPlateauTime) {
@@ -93,7 +93,7 @@ uint8_t TimeRamp::update8(u32 now) {
         out = 255;
     } else if (now < mFinishedFallingTime) {
         // ramp down
-        uint8_t alpha =
+        u8 alpha =
             time_alpha8(now, mFinishedPlateauTime, mFinishedFallingTime);
         out = 255 - alpha;
     } else {

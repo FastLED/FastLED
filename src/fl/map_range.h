@@ -63,16 +63,16 @@ template <typename T, typename U> struct map_range_math {
     }
 };
 
-template <> struct map_range_math<uint8_t, uint8_t> {
-    static uint8_t map(uint8_t value, uint8_t in_min, uint8_t in_max,
-                       uint8_t out_min, uint8_t out_max) {
+template <> struct map_range_math<u8, u8> {
+    static u8 map(u8 value, u8 in_min, u8 in_max,
+                       u8 out_min, u8 out_max) {
         if (value == in_min) {
             return out_min;
         }
         if (value == in_max) {
             return out_max;
         }
-        // Promote uint8_t to i16 for mapping.
+        // Promote u8 to i16 for mapping.
         i16 v16 = value;
         i16 in_min16 = in_min;
         i16 in_max16 = in_max;
@@ -85,7 +85,7 @@ template <> struct map_range_math<uint8_t, uint8_t> {
         } else if (out16 > 255) {
             out16 = 255;
         }
-        return static_cast<uint8_t>(out16);
+        return static_cast<u8>(out16);
     }
 };
 

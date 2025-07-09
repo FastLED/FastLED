@@ -64,7 +64,7 @@ class HashMap {
 
     void setLoadFactor(float f) {
         f = fl::clamp(f, 0.f, 1.f);
-        mLoadFactor = fl::map_range<float, uint8_t>(f, 0.f, 1.f, 0, 255);
+        mLoadFactor = fl::map_range<float, u8>(f, 0.f, 1.f, 0, 255);
     }
 
     // Iterator support.
@@ -189,7 +189,7 @@ class HashMap {
     }
 
     static bool NeedsRehash(fl::size size, fl::size bucket_size, fl::size tombstones,
-                            uint8_t load_factor) {
+                            u8 load_factor) {
         // (size + tombstones) << 8   : multiply numerator by 256
         // capacity * max_load : denominator * threshold
         u32 lhs = (size + tombstones) << 8;
@@ -617,7 +617,7 @@ class HashMap {
     fl::vector_inlined<Entry, INLINED_COUNT> _buckets;
     fl::size _size;
     fl::size _tombstones;
-    uint8_t mLoadFactor;
+    u8 mLoadFactor;
     fl::bitset<1024> _occupied;
     fl::bitset<1024> _deleted;
     Hash _hash;

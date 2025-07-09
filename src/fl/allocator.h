@@ -169,7 +169,7 @@ private:
 
     struct Slab {
         Slab* next;
-        uint8_t* memory;
+        u8* memory;
         fl::size allocated_count;
         
         Slab() : next(nullptr), memory(nullptr), allocated_count(0) {}
@@ -199,7 +199,7 @@ private:
         // Use placement new to properly initialize the Slab
         new(slab) Slab();
         
-        slab->memory = static_cast<uint8_t*>(malloc(SLAB_MEMORY_SIZE));
+        slab->memory = static_cast<u8*>(malloc(SLAB_MEMORY_SIZE));
         if (!slab->memory) {
             slab->~Slab();
             free(slab);
@@ -233,9 +233,9 @@ private:
         
         // Find which slab this block belongs to and increment its count
         for (Slab* slab = slabs_; slab; slab = slab->next) {
-            uint8_t* slab_start = slab->memory;
-            uint8_t* slab_end = slab_start + SLAB_MEMORY_SIZE;
-            uint8_t* block_ptr = fl::bit_cast_ptr<uint8_t>(static_cast<void*>(block));
+            u8* slab_start = slab->memory;
+            u8* slab_end = slab_start + SLAB_MEMORY_SIZE;
+            u8* block_ptr = fl::bit_cast_ptr<u8>(static_cast<void*>(block));
             
             if (block_ptr >= slab_start && block_ptr < slab_end) {
                 ++slab->allocated_count;
@@ -253,9 +253,9 @@ private:
         
         // Find which slab this block belongs to and decrement its count
         for (Slab* slab = slabs_; slab; slab = slab->next) {
-            uint8_t* slab_start = slab->memory;
-            uint8_t* slab_end = slab_start + SLAB_MEMORY_SIZE;
-            uint8_t* block_ptr = fl::bit_cast_ptr<uint8_t>(ptr);
+            u8* slab_start = slab->memory;
+            u8* slab_end = slab_start + SLAB_MEMORY_SIZE;
+            u8* block_ptr = fl::bit_cast_ptr<u8>(ptr);
             
             if (block_ptr >= slab_start && block_ptr < slab_end) {
                 --slab->allocated_count;
@@ -459,7 +459,7 @@ class allocator_inlined {
 private:
     // Inlined storage block
     struct InlinedStorage {
-        alignas(T) uint8_t data[N * sizeof(T)];
+        alignas(T) u8 data[N * sizeof(T)];
         
         InlinedStorage() {
             fl::memset(data, 0, sizeof(data));

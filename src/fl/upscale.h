@@ -29,8 +29,8 @@ void upscaleArbitrary(const CRGB *input, CRGB *output, u16 inputWidth,
 /// @param inputHeight The height of the input grid.
 /// @param xyMap The XYMap to use to determine where to write the pixel. If the
 /// pixel is mapped outside of the range then it is clipped.
-void upscalePowerOf2(const CRGB *input, CRGB *output, uint8_t inputWidth,
-                     uint8_t inputHeight, fl::XYMap xyMap);
+void upscalePowerOf2(const CRGB *input, CRGB *output, u8 inputWidth,
+                     u8 inputHeight, fl::XYMap xyMap);
 
 //
 inline void upscale(const CRGB *input, CRGB *output, u16 inputWidth,
@@ -51,13 +51,13 @@ inline void upscale(const CRGB *input, CRGB *output, u16 inputWidth,
 
 // These are here for testing purposes and are slow. Their primary use
 // is to test against the fixed integer version above.
-void upscaleFloat(const CRGB *input, CRGB *output, uint8_t inputWidth,
-                  uint8_t inputHeight, fl::XYMap xyMap);
+void upscaleFloat(const CRGB *input, CRGB *output, u8 inputWidth,
+                  u8 inputHeight, fl::XYMap xyMap);
 
 void upscaleArbitraryFloat(const CRGB *input, CRGB *output, u16 inputWidth,
                            u16 inputHeight, fl::XYMap xyMap);
 
-uint8_t upscaleFloat(uint8_t v00, uint8_t v10, uint8_t v01,
-                                 uint8_t v11, float dx, float dy);
+u8 upscaleFloat(u8 v00, u8 v10, u8 v01,
+                                 u8 v11, float dx, float dy);
 
 } // namespace fl

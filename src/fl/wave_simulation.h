@@ -72,7 +72,7 @@ class WaveSimulation1D {
     float getSpeed() const;
 
     // Runs the simulator faster by updating it multiple times.
-    void setExtraFrames(uint8_t extra);
+    void setExtraFrames(u8 extra);
 
     // Downsampled getter for the floating point value at index x.
     // It averages over the corresponding 'multiplier'-sized block in the
@@ -89,7 +89,7 @@ class WaveSimulation1D {
     // Downsampled getters for the 8-bit representations.
     int8_t geti8(fl::size x) const;
 
-    uint8_t getu8(fl::size x) const;
+    u8 getu8(fl::size x) const;
 
     // Check if x is within the bounds of the outer (downsampled) simulation.
     bool has(fl::size x) const;
@@ -110,7 +110,7 @@ class WaveSimulation1D {
 
   private:
     u32 mOuterLength; // Length of the downsampled simulation.
-    uint8_t mExtraFrames = 0;
+    u8 mExtraFrames = 0;
     u32 mMultiplier; // Supersampling multiplier (e.g., 2, 4, or 8).
     U8EasingFunction mU8Mode = WAVE_U8_MODE_LINEAR;
     // Internal high-resolution simulation.
@@ -140,7 +140,7 @@ class WaveSimulation2D {
     // Delegated simulation methods.
     void setSpeed(float speed);
 
-    void setExtraFrames(uint8_t extra);
+    void setExtraFrames(u8 extra);
 
     void setDampening(int damp);
 
@@ -176,9 +176,9 @@ class WaveSimulation2D {
     // Downsampled getters for the 8-bit representations.
     int8_t geti8(fl::size x, fl::size y) const;
 
-    // Special function to get the value as a uint8_t for drawing / gradients.
+    // Special function to get the value as a u8 for drawing / gradients.
     // Ease out functions are applied to this when in half duplex mode.
-    uint8_t getu8(fl::size x, fl::size y) const;
+    u8 getu8(fl::size x, fl::size y) const;
 
     // Check if (x,y) is within the bounds of the outer (downsampled) grid.
     bool has(fl::size x, fl::size y) const;
@@ -204,7 +204,7 @@ class WaveSimulation2D {
   private:
     u32 mOuterWidth;  // Width of the downsampled (outer) grid.
     u32 mOuterHeight; // Height of the downsampled (outer) grid.
-    uint8_t mExtraFrames = 0;
+    u8 mExtraFrames = 0;
     u32 mMultiplier = 1; // Supersampling multiplier (e.g., 1, 2, 4, or 8).
     U8EasingFunction mU8Mode = WAVE_U8_MODE_LINEAR;
     // Internal high-resolution simulation.

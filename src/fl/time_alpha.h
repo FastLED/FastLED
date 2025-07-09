@@ -10,7 +10,7 @@ namespace fl {
 
 // Use this function to compute the alpha value based on the time elapsed
 // 0 -> 255
-uint8_t time_alpha8(u32 now, u32 start, u32 end);
+u8 time_alpha8(u32 now, u32 start, u32 end);
 // 0 -> 65535
 u16 time_alpha16(u32 now, u32 start, u32 end);
 
@@ -28,7 +28,7 @@ class TimeAlpha {
   public:
     virtual ~TimeAlpha() = default;
     virtual void trigger(u32 now) = 0;
-    virtual uint8_t update8(u32 now) = 0;
+    virtual u8 update8(u32 now) = 0;
     virtual u16 update16(u32 now) {
         return static_cast<u16>(update8(now) << 8) + 0xFF;
     }
@@ -70,7 +70,7 @@ class TimeRamp : public TimeAlpha {
 
     /// Compute current 0–255 output based on how much time has elapsed since
     /// trigger().
-    uint8_t update8(u32 now) override;
+    u8 update8(u32 now) override;
 
   private:
     u32 mLatchMs;
@@ -82,7 +82,7 @@ class TimeRamp : public TimeAlpha {
     u32 mFinishedFallingTime = 0;
 
     u32 mStart = 0;
-    uint8_t mLastValue = 0;
+    u8 mLastValue = 0;
 };
 
 /*
@@ -125,13 +125,13 @@ class TimeClampedTransition : public TimeAlpha {
         return true;
     }
 
-    uint8_t update8(u32 now) override {
+    u8 update8(u32 now) override {
         bool not_started = (mEnd == 0) && (mStart == 0);
         if (not_started) {
             // if we have not started, we are not active
             return 0;
         }
-        uint8_t out = time_alpha8(now, mStart, mEnd);
+        u8 out = time_alpha8(now, mStart, mEnd);
         return out;
     }
 

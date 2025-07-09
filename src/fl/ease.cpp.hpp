@@ -46,13 +46,13 @@ const u16 gamma_2_8[256] FL_PROGMEM = {
     62246, 62896, 63549, 64207, 64869, 65535};
 
 // 8-bit easing functions
-uint8_t easeInQuad8(uint8_t i) {
+u8 easeInQuad8(u8 i) {
     // Simple quadratic ease-in: i^2 scaled to 8-bit range
     // Using scale8(i, i) which computes (i * i) / 255
     return scale8(i, i);
 }
 
-uint8_t easeInOutQuad8(uint8_t i) {
+u8 easeInOutQuad8(u8 i) {
     constexpr u16 MAX = 0xFF;            // 255
     constexpr u16 HALF = (MAX + 1) >> 1; // 128
     constexpr u16 DENOM = MAX;           // divisor for scaling
@@ -62,17 +62,17 @@ uint8_t easeInOutQuad8(uint8_t i) {
         // first half: y = 2·(i/MAX)² → y_i = 2·i² / MAX
         u32 t = i;
         u32 num = 2 * t * t + ROUND; // 2*i², +half for rounding
-        return uint8_t(num / DENOM);
+        return u8(num / DENOM);
     } else {
         // second half: y = 1 − 2·(1−i/MAX)²
         // → y_i = MAX − (2·(MAX−i)² / MAX)
         u32 d = MAX - i;
         u32 num = 2 * d * d + ROUND; // 2*(MAX−i)², +half for rounding
-        return uint8_t(MAX - (num / DENOM));
+        return u8(MAX - (num / DENOM));
     }
 }
 
-uint8_t easeInOutCubic8(uint8_t i) {
+u8 easeInOutCubic8(u8 i) {
     constexpr u16 MAX = 0xFF;                  // 255
     constexpr u16 HALF = (MAX + 1) >> 1;       // 128
     constexpr u32 DENOM = (u32)MAX * MAX; // 255*255 = 65025
@@ -83,7 +83,7 @@ uint8_t easeInOutCubic8(uint8_t i) {
         u32 ii = i;
         u32 cube = ii * ii * ii;    // i³
         u32 num = 4 * cube + ROUND; // 4·i³, +half denom for rounding
-        return uint8_t(num / DENOM);
+        return u8(num / DENOM);
     } else {
         // second half: y = 1 − ((−2·t+2)³)/2
         // where t = i/MAX; equivalently:
@@ -91,20 +91,20 @@ uint8_t easeInOutCubic8(uint8_t i) {
         u32 d = MAX - i;
         u32 cube = d * d * d; // (MAX−i)³
         u32 num = 4 * cube + ROUND;
-        return uint8_t(MAX - (num / DENOM));
+        return u8(MAX - (num / DENOM));
     }
 }
 
-uint8_t easeOutQuad8(uint8_t i) {
+u8 easeOutQuad8(u8 i) {
     // ease-out is the inverse of ease-in: 1 - (1-t)²
     // For 8-bit: y = MAX - (MAX-i)² / MAX
     constexpr u16 MAX = 0xFF;
     u32 d = MAX - i;              // (MAX - i)
     u32 num = d * d + (MAX >> 1); // (MAX-i)² + rounding
-    return uint8_t(MAX - (num / MAX));
+    return u8(MAX - (num / MAX));
 }
 
-uint8_t easeInCubic8(uint8_t i) {
+u8 easeInCubic8(u8 i) {
     // Simple cubic ease-in: i³ scaled to 8-bit range
     // y = i³ / MAX²
     constexpr u16 MAX = 0xFF;
@@ -114,10 +114,10 @@ uint8_t easeInCubic8(uint8_t i) {
     u32 ii = i;
     u32 cube = ii * ii * ii; // i³
     u32 num = cube + ROUND;
-    return uint8_t(num / DENOM);
+    return u8(num / DENOM);
 }
 
-uint8_t easeOutCubic8(uint8_t i) {
+u8 easeOutCubic8(u8 i) {
     // ease-out cubic: 1 - (1-t)³
     // For 8-bit: y = MAX - (MAX-i)³ / MAX²
     constexpr u16 MAX = 0xFF;
@@ -127,12 +127,12 @@ uint8_t easeOutCubic8(uint8_t i) {
     u32 d = MAX - i;      // (MAX - i)
     u32 cube = d * d * d; // (MAX-i)³
     u32 num = cube + ROUND;
-    return uint8_t(MAX - (num / DENOM));
+    return u8(MAX - (num / DENOM));
 }
 
-uint8_t easeInSine8(uint8_t i) {
+u8 easeInSine8(u8 i) {
 
-    static const uint8_t easeInSineTable[256] = {
+    static const u8 easeInSineTable[256] = {
         0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   1,   1,   1,
         1,   1,   1,   1,   2,   2,   2,   2,   2,   3,   3,   3,   3,   4,
         4,   4,   4,   5,   5,   5,   6,   6,   6,   7,   7,   7,   8,   8,
@@ -158,7 +158,7 @@ uint8_t easeInSine8(uint8_t i) {
     return easeInSineTable[i];
 }
 
-uint8_t easeOutSine8(uint8_t i) {
+u8 easeOutSine8(u8 i) {
     // ease-out sine: sin(t * π/2)
     // Delegate to 16-bit version for consistency and accuracy
     // Scale 8-bit input to 16-bit range, call 16-bit function, scale result back
@@ -167,7 +167,7 @@ uint8_t easeOutSine8(uint8_t i) {
     return map16_to_8(result16);
 }
 
-uint8_t easeInOutSine8(uint8_t i) {
+u8 easeInOutSine8(u8 i) {
     // ease-in-out sine: -(cos(π*t) - 1) / 2
     // Delegate to 16-bit version for consistency and accuracy
     // Scale 8-bit input to 16-bit range, call 16-bit function, scale result back

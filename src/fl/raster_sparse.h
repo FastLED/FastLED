@@ -34,7 +34,7 @@ class Gradient;
 class Tile2x2_u8;
 class Leds;
 
-// A raster of uint8_t values. This is a sparse raster, meaning that it will
+// A raster of u8 values. This is a sparse raster, meaning that it will
 // only store the values that are set.
 class XYRasterU8Sparse {
   public:
@@ -60,7 +60,7 @@ class XYRasterU8Sparse {
     // to represent sub pixel / neightbor splatting positions along a path.
     // TODO: Bring the math from XYPathRenderer::at_subpixel(float alpha)
     // into a general purpose function.
-    void rasterize(const vec2<i16> &pt, uint8_t value) {
+    void rasterize(const vec2<i16> &pt, u8 value) {
         // Turn it into a Tile2x2_u8 tile and see if we can cache it.
         write(pt, value);
     }
@@ -74,8 +74,8 @@ class XYRasterU8Sparse {
         mAbsoluteBoundsSet = true;
     }
 
-    using iterator = fl::HashMap<vec2<i16>, uint8_t>::iterator;
-    using const_iterator = fl::HashMap<vec2<i16>, uint8_t>::const_iterator;
+    using iterator = fl::HashMap<vec2<i16>, u8>::iterator;
+    using const_iterator = fl::HashMap<vec2<i16>, u8>::const_iterator;
 
     iterator begin() { return mSparseGrid.begin(); }
     const_iterator begin() const { return mSparseGrid.begin(); }
@@ -93,12 +93,12 @@ class XYRasterU8Sparse {
     // Renders the subpixel tiles to the raster. Any previous data is
     // cleared. Memory will only be allocated if the size of the raster
     // increased. void rasterize(const Slice<const Tile2x2_u8> &tiles);
-    // uint8_t &at(u16 x, u16 y) { return mGrid.at(x, y); }
-    // const uint8_t &at(u16 x, u16 y) const { return mGrid.at(x,
+    // u8 &at(u16 x, u16 y) { return mGrid.at(x, y); }
+    // const u8 &at(u16 x, u16 y) const { return mGrid.at(x,
     // y); }
 
-    pair<bool, uint8_t> at(u16 x, u16 y) const {
-        const uint8_t *val = mSparseGrid.find_value(vec2<i16>(x, y));
+    pair<bool, u8> at(u16 x, u16 y) const {
+        const u8 *val = mSparseGrid.find_value(vec2<i16>(x, y));
         if (val != nullptr) {
             return {true, *val};
         }
@@ -163,7 +163,7 @@ class XYRasterU8Sparse {
                 continue;
             }
             u32 index = xymap(pt.x, pt.y);
-            uint8_t value = it.second;
+            u8 value = it.second;
             if (value > 0) { // Something wrote here.
                 visitor.draw(pt, index, value);
             }
@@ -172,13 +172,13 @@ class XYRasterU8Sparse {
 
     static const int kMaxCacheSize = 8; // Max size for tiny cache.
 
-    void write(const vec2<i16> &pt, uint8_t value) {
+    void write(const vec2<i16> &pt, u8 value) {
         // FASTLED_WARN("write: " << pt.x << "," << pt.y << " value: " <<
         // value); mSparseGrid.insert(pt, value);
 
-        uint8_t **cached = mCache.find_value(pt);
+        u8 **cached = mCache.find_value(pt);
         if (cached) {
-            uint8_t *val = *cached;
+            u8 *val = *cached;
             if (*val < value) {
                 *val = value;
             }
@@ -186,7 +186,7 @@ class XYRasterU8Sparse {
         }
         if (mCache.size() <= kMaxCacheSize) {
             // cache it.
-            uint8_t *v = mSparseGrid.find_value(pt);
+            u8 *v = mSparseGrid.find_value(pt);
             if (v == nullptr) {
                 // FASTLED_WARN("write: " << pt.x << "," << pt.y << " value: "
                 // << value);
@@ -214,7 +214,7 @@ class XYRasterU8Sparse {
 
   private:
     using Key = vec2<i16>;
-    using Value = uint8_t;
+    using Value = u8;
     using HashKey = Hash<Key>;
     using EqualToKey = EqualTo<Key>;
     using FastHashKey = FastHash<Key>;
@@ -222,7 +222,7 @@ class XYRasterU8Sparse {
                                      FASTLED_HASHMAP_INLINED_COUNT>;
     HashMapLarge mSparseGrid;
     // Small cache for the last N writes to help performance.
-    HashMap<vec2<i16>, uint8_t *, FastHashKey, EqualToKey, kMaxCacheSize>
+    HashMap<vec2<i16>, u8 *, FastHashKey, EqualToKey, kMaxCacheSize>
         mCache;
     fl::rect<i16> mAbsoluteBounds;
     bool mAbsoluteBoundsSet = false;

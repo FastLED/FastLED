@@ -80,12 +80,12 @@ class XYPath : public Referent {
 
     // Takes in a float at time [0, 1] and returns alpha values
     // for that point in time.
-    using AlphaFunction = fl::function<uint8_t(float)>;
+    using AlphaFunction = fl::function<u8(float)>;
 
     // Future work: we don't actually want just the point, but also
     // it's intensity at that value. Otherwise a seperate class has to
     // made to also control the intensity and that sucks.
-    using xy_brightness = fl::pair<vec2f, uint8_t>;
+    using xy_brightness = fl::pair<vec2f, u8>;
 
     /////////////////////////////////////////////////////////////
     // Create a new Catmull-Rom spline path with custom parameters

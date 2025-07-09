@@ -211,7 +211,7 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
 
     fl::size capacity() const { return mHeapData ? mHeapData->capacity() : SIZE; }
 
-    fl::size write(const uint8_t *data, fl::size n) {
+    fl::size write(const u8 *data, fl::size n) {
         const char *str = fl::bit_cast_ptr<const char>(static_cast<const void*>(data));
         return write(str, n);
     }
@@ -249,7 +249,7 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
 
     fl::size write(char c) { return write(&c, 1); }
 
-    fl::size write(uint8_t c) {
+    fl::size write(u8 c) {
         const char *str = fl::bit_cast_ptr<const char>(static_cast<const void*>(&c));
         return write(str, 1);
     }
@@ -564,7 +564,7 @@ class string : public StrN<FASTLED_STR_INLINED_SIZE> {
         write(str, 1);
         return *this;
     }
-    string &append(const uint8_t &c) {
+    string &append(const u8 &c) {
         write(u16(c));
         return *this;
     }

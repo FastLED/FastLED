@@ -5,9 +5,9 @@
 
 namespace fl {
 
-static uint8_t to_uint8(float f) {
+static u8 to_uint8(float f) {
     // convert to [0..255] range
-    uint8_t i = static_cast<uint8_t>(f * 255.0f + .5f);
+    u8 i = static_cast<u8>(f * 255.0f + .5f);
     return MIN(i, 255);
 }
 

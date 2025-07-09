@@ -76,13 +76,13 @@ XYPath::~XYPath() {}
 
 void XYPathRenderer::rasterize(
     float from, float to, int steps, XYRaster &raster,
-    fl::function<uint8_t(float)> *optional_alpha_gen) {
+    fl::function<u8(float)> *optional_alpha_gen) {
     for (int i = 0; i < steps; ++i) {
         float alpha = fl::map_range<int, float>(i, 0, steps - 1, from, to);
         Tile2x2_u8 tile = at_subpixel(alpha);
         if (optional_alpha_gen) {
             // Scale the tile based on the alpha value.
-            uint8_t a8 = (*optional_alpha_gen)(alpha);
+            u8 a8 = (*optional_alpha_gen)(alpha);
             tile.scale(a8);
         }
         raster.rasterize(tile);

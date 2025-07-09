@@ -6,7 +6,7 @@
 
 namespace fl {
 
-DrawItem::DrawItem(uint8_t pin, u16 numLeds, bool is_rgbw)
+DrawItem::DrawItem(u8 pin, u16 numLeds, bool is_rgbw)
     : mPin(pin), mIsRgbw(is_rgbw) {
     if (is_rgbw) {
         numLeds = Rgbw::size_as_rgb(numLeds);
@@ -14,14 +14,14 @@ DrawItem::DrawItem(uint8_t pin, u16 numLeds, bool is_rgbw)
     mNumBytes = numLeds * 3;
 }
 
-span<uint8_t>
-RectangularDrawBuffer::getLedsBufferBytesForPin(uint8_t pin, bool clear_first) {
+span<u8>
+RectangularDrawBuffer::getLedsBufferBytesForPin(u8 pin, bool clear_first) {
     auto it = mPinToLedSegment.find(pin);
     if (it == mPinToLedSegment.end()) {
         FASTLED_ASSERT(false, "Pin not found in RectangularDrawBuffer");
-        return fl::span<uint8_t>();
+        return fl::span<u8>();
     }
-    fl::span<uint8_t> slice = it->second;
+    fl::span<u8> slice = it->second;
     if (clear_first) {
         memset(slice.data(), 0, slice.size() * sizeof(slice[0]));
     }
@@ -59,16 +59,16 @@ bool RectangularDrawBuffer::onQueuingDone() {
     u32 num_strips = 0;
     getBlockInfo(&num_strips, &max_bytes_in_strip, &total_bytes);
     if (total_bytes > mAllLedsBufferUint8Size) {
-        uint8_t *old_ptr = mAllLedsBufferUint8.release();
-        fl::PSRamAllocator<uint8_t>::Free(old_ptr);
-        uint8_t *ptr = fl::PSRamAllocator<uint8_t>::Alloc(total_bytes);
+        u8 *old_ptr = mAllLedsBufferUint8.release();
+        fl::PSRamAllocator<u8>::Free(old_ptr);
+        u8 *ptr = fl::PSRamAllocator<u8>::Alloc(total_bytes);
         mAllLedsBufferUint8.reset(ptr);
     }
     mAllLedsBufferUint8Size = total_bytes;
     u32 offset = 0;
     for (auto it = mDrawList.begin(); it != mDrawList.end(); ++it) {
-        uint8_t pin = it->mPin;
-        span<uint8_t> slice(mAllLedsBufferUint8.get() + offset,
+        u8 pin = it->mPin;
+        span<u8> slice(mAllLedsBufferUint8.get() + offset,
                             max_bytes_in_strip);
         mPinToLedSegment[pin] = slice;
         offset += max_bytes_in_strip;

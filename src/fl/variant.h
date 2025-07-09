@@ -8,7 +8,7 @@ namespace fl {
 // A variant that can hold any of N different types
 template <typename... Types> class Variant {
   public:
-    using Tag = uint8_t;
+    using Tag = u8;
     static constexpr Tag Empty = 0;
 
     // –– ctors/dtors/assign as before …

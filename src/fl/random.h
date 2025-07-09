@@ -106,17 +106,17 @@ public:
 
     /// Generate an 8-bit random number
     /// @returns A random 8-bit unsigned integer (0-255)
-    uint8_t random8() {
+    u8 random8() {
         u16 r = next_random16();
         // return the sum of the high and low bytes, for better mixing
-        return (uint8_t)(((uint8_t)(r & 0xFF)) + ((uint8_t)(r >> 8)));
+        return (u8)(((u8)(r & 0xFF)) + ((u8)(r >> 8)));
     }
 
     /// Generate an 8-bit random number in the range [0, n)
     /// @param n The upper bound (exclusive)
     /// @returns A random 8-bit number from 0 to n-1
-    uint8_t random8(uint8_t n) {
-        uint8_t r = random8();
+    u8 random8(u8 n) {
+        u8 r = random8();
         r = (r * n) >> 8;
         return r;
     }
@@ -125,9 +125,9 @@ public:
     /// @param min The lower bound (inclusive)
     /// @param max The upper bound (exclusive)
     /// @returns A random 8-bit number from min to max-1
-    uint8_t random8(uint8_t min, uint8_t max) {
-        uint8_t delta = max - min;
-        uint8_t r = random8(delta) + min;
+    u8 random8(u8 min, u8 max) {
+        u8 delta = max - min;
+        u8 r = random8(delta) + min;
         return r;
     }
 
