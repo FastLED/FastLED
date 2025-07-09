@@ -145,3 +145,54 @@ TEST_CASE("Str overflowing inline data") {
         CHECK(s2[s2.size() - 1] == 'a');
     }
 }
+
+TEST_CASE("String concatenation operators") {
+    SUBCASE("String literal + fl::to_string") {
+        // Test the specific case mentioned in the user query
+        fl::string val = "string" + fl::to_string(5);
+        CHECK(strcmp(val.c_str(), "string5") == 0);
+    }
+
+    SUBCASE("fl::to_string + string literal") {
+        fl::string val = fl::to_string(10) + " is a number";
+        CHECK(strcmp(val.c_str(), "10 is a number") == 0);
+    }
+
+    SUBCASE("String literal + fl::string") {
+        fl::string str = "world";
+        fl::string result = "Hello " + str;
+        CHECK(strcmp(result.c_str(), "Hello world") == 0);
+    }
+
+    SUBCASE("fl::string + string literal") {
+        fl::string str = "Hello";
+        fl::string result = str + " world";
+        CHECK(strcmp(result.c_str(), "Hello world") == 0);
+    }
+
+    SUBCASE("fl::string + fl::string") {
+        fl::string str1 = "Hello";
+        fl::string str2 = "World";
+        fl::string result = str1 + " " + str2;
+        CHECK(strcmp(result.c_str(), "Hello World") == 0);
+    }
+
+    SUBCASE("Complex concatenation") {
+        fl::string result = "Value: " + fl::to_string(42) + " and " + fl::to_string(3.14f);
+        // Check that it contains the expected parts rather than exact match
+        CHECK(result.find("Value: ") != fl::string::npos);
+        CHECK(result.find("42") != fl::string::npos);
+        CHECK(result.find("and") != fl::string::npos);
+        CHECK(result.find("3.14") != fl::string::npos);
+    }
+
+    SUBCASE("Number + string literal") {
+        fl::string result = fl::to_string(100) + " percent";
+        CHECK(strcmp(result.c_str(), "100 percent") == 0);
+    }
+
+    SUBCASE("String literal + number") {
+        fl::string result = "Count: " + fl::to_string(7);
+        CHECK(strcmp(result.c_str(), "Count: 7") == 0);
+    }
+}
