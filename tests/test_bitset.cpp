@@ -84,20 +84,20 @@ TEST_CASE("test bitset") {
     REQUIRE_EQ(bitset_fixed<1000>().size(), 1000);
     
     // Test memory size of bitset_fixed class (sizeof)
-    // For bitset_fixed<8>, we expect 1 uint64_t block (8 bytes)
-    REQUIRE_EQ(sizeof(bitset_fixed<8>), 8);
+    // For bitset_fixed<8>, we expect 1 uint16_t block (2 bytes)
+    REQUIRE_EQ(sizeof(bitset_fixed<8>), 2);
     
-    // For bitset_fixed<64>, we expect 1 uint64_t block (8 bytes)
-    REQUIRE_EQ(sizeof(bitset_fixed<64>), 8);
+    // For bitset_fixed<16>, we expect 1 uint16_t block (2 bytes)
+    REQUIRE_EQ(sizeof(bitset_fixed<16>), 2);
     
-    // For bitset_fixed<65>, we expect 2 uint64_t blocks (16 bytes)
-    REQUIRE_EQ(sizeof(bitset_fixed<65>), 16);
+    // For bitset_fixed<17>, we expect 2 uint16_t blocks (4 bytes)
+    REQUIRE_EQ(sizeof(bitset_fixed<17>), 4);
     
-    // For bitset_fixed<128>, we expect 2 uint64_t blocks (16 bytes)
-    REQUIRE_EQ(sizeof(bitset_fixed<128>), 16);
+    // For bitset_fixed<32>, we expect 2 uint16_t blocks (4 bytes)
+    REQUIRE_EQ(sizeof(bitset_fixed<32>), 4);
     
-    // For bitset_fixed<129>, we expect 3 uint64_t blocks (24 bytes)
-    REQUIRE_EQ(sizeof(bitset_fixed<129>), 24);
+    // For bitset_fixed<33>, we expect 3 uint16_t blocks (6 bytes)
+    REQUIRE_EQ(sizeof(bitset_fixed<33>), 6);
 }
 
 

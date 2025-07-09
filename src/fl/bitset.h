@@ -22,10 +22,10 @@ using bitset_fixed = BitsetFixed<N>; // fixed size, no dynamic allocation.
 /// A simple fixed-size Bitset implementation similar to std::Bitset.
 template <fl::u32 N> class BitsetFixed {
   private:
-    static constexpr fl::u32 bits_per_block = 8 * sizeof(fl::u64);
+    static constexpr fl::u32 bits_per_block = 8 * sizeof(fl::u16);
     static constexpr fl::u32 block_count =
         (N + bits_per_block - 1) / bits_per_block;
-    using block_type = fl::u64;
+    using block_type = fl::u16;
 
     // Underlying blocks storing bits
     block_type _blocks[block_count];
@@ -124,7 +124,7 @@ template <fl::u32 N> class BitsetFixed {
         fl::u32 cnt = 0;
         // Count bits in all complete blocks
         for (fl::u32 i = 0; i < block_count - 1; ++i) {
-            cnt += __builtin_popcountll(_blocks[i]);
+            cnt += __builtin_popcount(_blocks[i]);
         }
 
         // For the last block, we need to be careful about counting only valid
@@ -141,7 +141,7 @@ template <fl::u32 N> class BitsetFixed {
                                       : ((block_type(1) << valid_bits) - 1);
                 last_block &= mask;
             }
-            cnt += __builtin_popcountll(last_block);
+            cnt += __builtin_popcount(last_block);
         }
 
         return cnt;
@@ -207,9 +207,6 @@ template <fl::u32 N> class BitsetFixed {
     /// Finds the first bit that matches the test value.
     /// Returns the index of the first matching bit, or -1 if none found.
     fl::i32 find_first(bool test_value) const noexcept {
-        // If looking for true bits, we need to find the first set bit
-        // If looking for false bits, we need to find the first unset bit
-        
         for (fl::u32 block_idx = 0; block_idx < block_count; ++block_idx) {
             block_type current_block = _blocks[block_idx];
             
@@ -227,32 +224,15 @@ template <fl::u32 N> class BitsetFixed {
                 current_block = ~current_block;
             }
             
-            // If this block has any matching bits, find the first one
+            // Step 1: Test the entire u16 block first
             if (current_block != 0) {
-                // Step 1: Test entire u64 block
-                if (current_block != 0) {
-                    // Step 2: Use a union to treat as u16[4]
-                    union { block_type u64; fl::u16 u16[4]; } u16_union = { current_block };
-                    for (fl::u32 u16_idx = 0; u16_idx < 4; ++u16_idx) {
-                        if (u16_union.u16[u16_idx] != 0) {
-                            // Step 3: Use a union to treat as u8[2]
-                            union { fl::u16 u16; fl::u8 u8[2]; } u8_union = { u16_union.u16[u16_idx] };
-                            for (fl::u32 u8_idx = 0; u8_idx < 2; ++u8_idx) {
-                                if (u8_union.u8[u8_idx] != 0) {
-                                    // Step 4: Test each bit to find exact index
-                                    fl::u8 byte = u8_union.u8[u8_idx];
-                                    for (fl::u32 bit_idx = 0; bit_idx < 8; ++bit_idx) {
-                                        if (byte & (1 << bit_idx)) {
-                                            fl::u32 global_bit_idx = block_idx * bits_per_block + 
-                                                                     u16_idx * 16 + u8_idx * 8 + bit_idx;
-                                            // Check if this bit is within our valid range
-                                            if (global_bit_idx < N) {
-                                                return static_cast<fl::i32>(global_bit_idx);
-                                            }
-                                        }
-                                    }
-                                }
-                            }
+                // Step 2: If the block has matching bits, find the first one
+                for (fl::u32 bit_idx = 0; bit_idx < bits_per_block; ++bit_idx) {
+                    if (current_block & (block_type(1) << bit_idx)) {
+                        fl::u32 global_bit_idx = block_idx * bits_per_block + bit_idx;
+                        // Check if this bit is within our valid range
+                        if (global_bit_idx < N) {
+                            return static_cast<fl::i32>(global_bit_idx);
                         }
                     }
                 }
