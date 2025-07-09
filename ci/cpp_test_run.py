@@ -248,31 +248,29 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--test",
-        help="Specific test to run (without test_ prefix)",
+        help="Specific test to run (without extension)",
     )
     parser.add_argument(
+        "--verbose",
+        action="store_true",
+        help="Enable verbose output",
+    )
+
+    # Create mutually exclusive group for compiler selection
+    compiler_group = parser.add_mutually_exclusive_group()
+    compiler_group.add_argument(
         "--clang",
         help="Use Clang compiler",
         action="store_true",
     )
-    parser.add_argument(
+    compiler_group.add_argument(
         "--gcc",
         help="Use GCC compiler (default on non-Windows)",
         action="store_true",
     )
-    parser.add_argument(
-        "--verbose",
-        "-v",
-        action="store_true",
-        help="Enable verbose output showing all test details",
-    )
+
     args, unknown = parser.parse_known_args()
     args.unknown = unknown
-
-    # Handle compiler selection logic - only validate mutual exclusivity
-    if args.clang and args.gcc:
-        print("Error: --clang and --gcc cannot be used together", file=sys.stderr)
-        sys.exit(1)
 
     return args
 

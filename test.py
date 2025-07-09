@@ -40,25 +40,25 @@ def parse_args() -> argparse.Namespace:
                        help='Run C++ tests only')
     parser.add_argument('test', type=str, nargs='?', default=None,
                        help='Specific C++ test to run')
-    parser.add_argument("--clang", action="store_true", help="Use Clang compiler")
-    parser.add_argument("--gcc", action="store_true", help="Use GCC compiler (default on non-Windows)")
+    
+    # Create mutually exclusive group for compiler selection
+    compiler_group = parser.add_mutually_exclusive_group()
+    compiler_group.add_argument("--clang", action="store_true", help="Use Clang compiler")
+    compiler_group.add_argument("--gcc", action="store_true", help="Use GCC compiler (default on non-Windows)")
+    
     parser.add_argument("--clean", action="store_true", help="Clean build before compiling")
     parser.add_argument("--no-interactive", action="store_true", help="Force non-interactive mode (no confirmation prompts)")
     parser.add_argument("--interactive", action="store_true", help="Enable interactive mode (allows confirmation prompts)")
     parser.add_argument("--verbose", "-v", action="store_true", help="Enable verbose output showing all test details")
     parser.add_argument("--quick", action="store_true", help="Enable quick mode with FASTLED_ALL_SRC=1")
     parser.add_argument("--no-stack-trace", action="store_true", help="Disable stack trace dumping on timeout")
+    
     args = parser.parse_args()
     
     # Auto-enable --cpp when a specific test is provided
     if args.test and not args.cpp:
         args.cpp = True
         print(f"Auto-enabled --cpp mode for specific test: {args.test}")
-    
-    # Handle compiler selection logic
-    if args.clang and args.gcc:
-        print("Error: --clang and --gcc cannot be used together", file=sys.stderr)
-        sys.exit(1)
     
     # Default to Clang on Windows unless --gcc is explicitly passed
     if sys.platform == "win32" and not args.gcc and not args.clang:
