@@ -12,13 +12,25 @@ FL_DISABLE_WARNING(float-equal)
 namespace fl {
 
 //----------------------------------------------------------------------------
+// is_function_pointer trait - detects function pointers like R(*)(Args...)
+//----------------------------------------------------------------------------
+template <typename T> struct is_function_pointer {
+    static constexpr bool value = false;
+};
+
+template <typename R, typename... Args> 
+struct is_function_pointer<R(*)(Args...)> {
+    static constexpr bool value = true;
+};
+
+//----------------------------------------------------------------------------
 // More or less a drop in replacement for std::function
 // function<R(Args...)>: type‐erasing "std::function" replacement
 // Supports free functions, lambdas/functors, member functions (const &
 // non‑const)
 // 
-// NEW: Uses inline storage for member function callables
-// to avoid heap allocation for member function calls.
+// NEW: Uses inline storage for member function callables and free functions
+// to avoid heap allocation. Only lambdas and functors use heap allocation.
 //----------------------------------------------------------------------------
 template <typename> class function;
 
@@ -35,6 +47,17 @@ private:
         F f;
         Callable(F fn) : f(fn) {}
         R invoke(Args... args) override { return f(args...); }
+    };
+
+    // Type-erased free function callable - stored inline!
+    struct FreeFunctionCallable {
+        R (*func_ptr)(Args...);
+        
+        FreeFunctionCallable(R (*fp)(Args...)) : func_ptr(fp) {}
+        
+        R invoke(Args... args) const {
+            return func_ptr(args...);
+        }
     };
 
     // Type-erased member function callable base
@@ -116,7 +139,7 @@ private:
     };
 
     // Variant to store any of our callable types inline
-    using Storage = Variant<Ptr<CallableBase>, NonConstMemberCallable, ConstMemberCallable>;
+    using Storage = Variant<Ptr<CallableBase>, FreeFunctionCallable, NonConstMemberCallable, ConstMemberCallable>;
     Storage storage_;
 
     // Helper function to handle default return value for void and non-void types
@@ -135,19 +158,24 @@ private:
 public:
     function() = default;
     
-    // 1) generic constructor for lambdas, free functions, functors
-    template <typename F, typename = enable_if_t<!is_member_function_pointer<F>::value>>
+    // 1) Free function constructor - now stored inline!
+    function(R (*fp)(Args...)) {
+        storage_ = FreeFunctionCallable(fp);
+    }
+    
+    // 2) generic constructor for lambdas and functors (heap allocated)
+    template <typename F, typename = enable_if_t<!is_member_function_pointer<F>::value && !is_function_pointer<F>::value>>
     function(F f) {
         storage_ = Ptr<CallableBase>(NewPtr<Callable<F>>(f));
     }
     
-    // 2) non‑const member function - now stored inline!
+    // 3) non‑const member function - stored inline!
     template <typename C>
     function(R (C::*mf)(Args...), C* obj) {
         storage_ = NonConstMemberCallable(obj, mf);
     }
     
-    // 3) const member function - now stored inline!
+    // 4) const member function - stored inline!
     template <typename C>
     function(R (C::*mf)(Args...) const, const C* obj) {
         storage_ = ConstMemberCallable(obj, mf);
@@ -157,6 +185,8 @@ public:
         // Direct dispatch using type checking
         if (auto* heap_callable = storage_.template ptr<Ptr<CallableBase>>()) {
             return (*heap_callable)->invoke(args...);
+        } else if (auto* free_func = storage_.template ptr<FreeFunctionCallable>()) {
+            return free_func->invoke(args...);
         } else if (auto* nonconst_member = storage_.template ptr<NonConstMemberCallable>()) {
             return nonconst_member->invoke(args...);
         } else if (auto* const_member = storage_.template ptr<ConstMemberCallable>()) {
