@@ -45,6 +45,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--no-interactive", action="store_true", help="Force non-interactive mode (no confirmation prompts)")
     parser.add_argument("--interactive", action="store_true", help="Enable interactive mode (allows confirmation prompts)")
     parser.add_argument("--verbose", "-v", action="store_true", help="Enable verbose output showing all test details")
+    parser.add_argument("--quick", action="store_true", help="Enable quick mode with FASTLED_ALL_SRC=1")
     return parser.parse_args()
 
 
@@ -165,6 +166,11 @@ def main() -> None:
             _IS_GITHUB = False
             os.environ.pop('FASTLED_CI_NO_INTERACTIVE', None)
             os.environ.pop('GITHUB_ACTIONS', None)
+            
+        # Handle --quick flag
+        if args.quick:
+            os.environ['FASTLED_ALL_SRC'] = '1'
+            print("Quick mode enabled. FASTLED_ALL_SRC=1")
             
         # Validate conflicting arguments
         if args.no_interactive and args.interactive:
