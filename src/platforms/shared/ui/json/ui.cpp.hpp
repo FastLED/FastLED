@@ -74,14 +74,9 @@ JsonUiUpdateInput setJsonUiHandlers(const JsonUiUpdateOutput& updateJsHandler) {
         // FL_WARN("setJsonUiHandlers: updateEngineState lambda created, returning it (is " << (result ? "VALID" : "NULL") << ")");
         return result;
     } else {
-        FL_WARN("setJsonUiHandlers: updateJsHandler is NULL/EMPTY");
         // No updateJs handler, clear any existing internal manager
         auto& manager = getInternalManager();
         manager.reset(); // Clear the internal manager
-        FL_WARN("No updateJs handler provided, cleared internal JsonUiManager");
-        
-        // Return an empty function since no manager exists
-        FL_WARN("setJsonUiHandlers: Returning empty function");
         return fl::function<void(const char*)>{};
     }
 }
