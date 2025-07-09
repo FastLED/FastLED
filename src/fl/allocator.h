@@ -470,7 +470,7 @@ private:
     InlinedStorage m_inlined_storage;
     BaseAllocator m_base_allocator;
     fl::size m_inlined_used = 0;
-    fl::bitset<> m_free_bits;  // Track free slots for both inlined and heap
+    fl::bitset<N> m_free_bits;  // Track free slots for both inlined and heap
     T* m_heap_data = nullptr;
     fl::size m_heap_capacity = 0;
     fl::size m_heap_used = 0;
