@@ -9,15 +9,18 @@ static fl::vector<void*> gMallocCalls;
 static fl::vector<fl::size> gMallocSizes;
 static fl::vector<void*> gFreeCalls;
 
-// Test hook functions
-void TestMallocHook(void* ptr, fl::size size) {
-    gMallocCalls.push_back(ptr);
-    gMallocSizes.push_back(size);
-}
-
-void TestFreeHook(void* ptr) {
-    gFreeCalls.push_back(ptr);
-}
+// Test hook implementation class
+class TestMallocFreeHook : public MallocFreeHook {
+public:
+    void onMalloc(void* ptr, fl::size size) override {
+        gMallocCalls.push_back(ptr);
+        gMallocSizes.push_back(size);
+    }
+    
+    void onFree(void* ptr) override {
+        gFreeCalls.push_back(ptr);
+    }
+};
 
 // Helper function to clear tracking data
 void ClearTrackingData() {
@@ -31,15 +34,14 @@ TEST_CASE("Malloc/Free Test Hooks - Basic functionality") {
     ClearTrackingData();
     
     SUBCASE("Set and clear hooks") {
-        // Set hooks
-        SetMallocHook(TestMallocHook);
-        SetFreeHook(TestFreeHook);
+        // Create hook instance
+        TestMallocFreeHook hook;
         
-        // Verify hooks are set (we can't directly test this, but we can test they work)
+        // Set hook
+        SetMallocFreeHook(&hook);
         
-        // Clear hooks
-        ClearMallocHook();
-        ClearFreeHook();
+        // Clear hook
+        ClearMallocFreeHook();
         
         // Test that hooks are cleared by doing allocations that shouldn't trigger callbacks
         ClearTrackingData();
@@ -57,7 +59,8 @@ TEST_CASE("Malloc/Free Test Hooks - Basic functionality") {
     }
     
     SUBCASE("Malloc hook is called after allocation") {
-        SetMallocHook(TestMallocHook);
+        TestMallocFreeHook hook;
+        SetMallocFreeHook(&hook);
         
         ClearTrackingData();
         
@@ -79,11 +82,12 @@ TEST_CASE("Malloc/Free Test Hooks - Basic functionality") {
         
         // Cleanup
         PSRamDeallocate(ptr1);
-        ClearMallocHook();
+        ClearMallocFreeHook();
     }
     
     SUBCASE("Free hook is called before deallocation") {
-        SetFreeHook(TestFreeHook);
+        TestMallocFreeHook hook;
+        SetMallocFreeHook(&hook);
         
         ClearTrackingData();
         
@@ -107,12 +111,12 @@ TEST_CASE("Malloc/Free Test Hooks - Basic functionality") {
         CHECK(gFreeCalls.size() == 1);
         CHECK(gFreeCalls[0] == ptr2);
         
-        ClearFreeHook();
+        ClearMallocFreeHook();
     }
     
     SUBCASE("Both hooks work together") {
-        SetMallocHook(TestMallocHook);
-        SetFreeHook(TestFreeHook);
+        TestMallocFreeHook hook;
+        SetMallocFreeHook(&hook);
         
         ClearTrackingData();
         
@@ -143,13 +147,12 @@ TEST_CASE("Malloc/Free Test Hooks - Basic functionality") {
         CHECK(gMallocCalls.empty());
         CHECK(gMallocSizes.empty());
         
-        ClearMallocHook();
-        ClearFreeHook();
+        ClearMallocFreeHook();
     }
     
     SUBCASE("Null pointer handling") {
-        SetMallocHook(TestMallocHook);
-        SetFreeHook(TestFreeHook);
+        TestMallocFreeHook hook;
+        SetMallocFreeHook(&hook);
         
         ClearTrackingData();
         
@@ -165,14 +168,13 @@ TEST_CASE("Malloc/Free Test Hooks - Basic functionality") {
             CHECK(gMallocSizes.empty());
         }
         
-        ClearMallocHook();
-        ClearFreeHook();
+        ClearMallocFreeHook();
     }
     
     SUBCASE("Hook replacement") {
-        // Set initial hooks
-        SetMallocHook(TestMallocHook);
-        SetFreeHook(TestFreeHook);
+        // Create initial hook
+        TestMallocFreeHook hook1;
+        SetMallocFreeHook(&hook1);
         
         ClearTrackingData();
         
@@ -180,16 +182,33 @@ TEST_CASE("Malloc/Free Test Hooks - Basic functionality") {
         
         CHECK(gMallocCalls.size() == 1);
         
-        // Replace with different hooks
+        // Replace with different hook
         fl::vector<void*> newMallocCalls;
         fl::vector<fl::size> newMallocSizes;
+        fl::vector<void*> newFreeCalls;
         
-        auto NewMallocHook = [&newMallocCalls, &newMallocSizes](void* p, fl::size s) {
-            newMallocCalls.push_back(p);
-            newMallocSizes.push_back(s);
+        class NewTestHook : public MallocFreeHook {
+        public:
+            NewTestHook(fl::vector<void*>& mallocCalls, fl::vector<fl::size>& mallocSizes, fl::vector<void*>& freeCalls)
+                : mMallocCalls(mallocCalls), mMallocSizes(mallocSizes), mFreeCalls(freeCalls) {}
+            
+            void onMalloc(void* ptr, fl::size size) override {
+                mMallocCalls.push_back(ptr);
+                mMallocSizes.push_back(size);
+            }
+            
+            void onFree(void* ptr) override {
+                mFreeCalls.push_back(ptr);
+            }
+            
+        private:
+            fl::vector<void*>& mMallocCalls;
+            fl::vector<fl::size>& mMallocSizes;
+            fl::vector<void*>& mFreeCalls;
         };
         
-        SetMallocHook(NewMallocHook);
+        NewTestHook hook2(newMallocCalls, newMallocSizes, newFreeCalls);
+        SetMallocFreeHook(&hook2);
         
         void* ptr2 = PSRamAllocate(200);
         
@@ -206,14 +225,13 @@ TEST_CASE("Malloc/Free Test Hooks - Basic functionality") {
         // Cleanup
         PSRamDeallocate(ptr);
         PSRamDeallocate(ptr2);
-        ClearMallocHook();
-        ClearFreeHook();
+        ClearMallocFreeHook();
     }
 }
 
 TEST_CASE("Malloc/Free Test Hooks - Integration with allocators") {
-    SetMallocHook(TestMallocHook);
-    SetFreeHook(TestFreeHook);
+    TestMallocFreeHook hook;
+    SetMallocFreeHook(&hook);
     
     SUBCASE("Standard allocator integration") {
         ClearTrackingData();
@@ -263,6 +281,5 @@ TEST_CASE("Malloc/Free Test Hooks - Integration with allocators") {
         CHECK(gFreeCalls[0] == ptr);
     }
     
-    ClearMallocHook();
-    ClearFreeHook();
+    ClearMallocFreeHook();
 }
