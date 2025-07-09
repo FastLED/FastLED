@@ -16,3 +16,25 @@ if [[ "$OSTYPE" == "linux-gnu"* || "$OSTYPE" == "darwin"* ]]; then
 else
     ln -s .venv/Scripts/activate activate
 fi
+
+echo "Setting up C++ development environment..."
+
+# Build tests to generate compile_commands.json for clangd
+echo "Building C++ tests to generate compile_commands.json..."
+uv run ci/cpp_test_run.py --compile-only --clang --test test_function
+
+# Copy compile_commands.json to project root for clangd IntelliSense
+if [ -f tests/.build/compile_commands.json ]; then
+    echo "Copying compile_commands.json for clangd support..."
+    cp tests/.build/compile_commands.json compile_commands.json
+    echo "✅ clangd support enabled - IntelliSense should work in VSCode"
+else
+    echo "⚠️  Warning: compile_commands.json not found. Tests may not have built successfully."
+fi
+
+echo "🎉 Installation complete!"
+echo ""
+echo "To use:"
+echo "  - Run tests: bash test"
+echo "  - Debug in VSCode: Open test file and press F5"
+echo "  - clangd IntelliSense: Should work automatically in VSCode"

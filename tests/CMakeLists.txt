@@ -144,6 +144,19 @@ else()
     message(STATUS "Using DWARF debug format")
 endif()
 
+# Windows symbol files for stack traces
+if(WIN32)
+    if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+        # Clang supports CodeView debug format for Windows
+        set(FAST_DEBUG_INFO ${FAST_DEBUG_INFO} -gcodeview)
+        message(STATUS "Adding CodeView debug info for Windows stack traces (Clang)")
+    elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+        # GCC doesn't support CodeView, but DWARF format works well for stack traces
+        # LLD linker doesn't support --print-map, so we skip MAP file generation
+        message(STATUS "Using DWARF debug format for Windows stack traces (GCC)")
+    endif()
+endif()
+
 set(FAST_FRAME_POINTER -fno-omit-frame-pointer)
 
 # Define common compiler flags and definitions
