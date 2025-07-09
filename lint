@@ -67,7 +67,15 @@ echo "Running isort"
 uv run isort --profile black ci --skip ci/tmp/ --skip ci/wasm/
 uv run isort --profile black dev/dev.py
 echo "Running pyright ci"
-uv run pyright ci
+# Check if pyright needs to run using intelligent caching
+if uv run python ci/pyright-cached.py ci --threads; then
+    # Cache hit - pyright was skipped or ran successfully
+    true
+else
+    # Cache miss or error - fall back to regular pyright
+    echo "Falling back to regular pyright..."
+    uv run pyright ci --threads
+fi
 
 export CLANG_FORMAT_STYLE="{SortIncludes: false}"
 
