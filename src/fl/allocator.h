@@ -182,14 +182,17 @@ template <typename T> class allocator_psram {
 template <typename T, fl::size SLAB_SIZE = FASTLED_DEFAULT_SLAB_SIZE>
 class SlabAllocator {
 private:
-    struct FreeBlock {
-        FreeBlock* next;
-    };
+
+
+    static constexpr fl::size BLOCK_SIZE = sizeof(T) > sizeof(void*) ? sizeof(T) : sizeof(void*);
+    static constexpr fl::size BLOCKS_PER_SLAB = SLAB_SIZE;
+    static constexpr fl::size SLAB_MEMORY_SIZE = BLOCK_SIZE * BLOCKS_PER_SLAB;
 
     struct Slab {
         Slab* next;
         u8* memory;
         fl::size allocated_count;
+        fl::bitset_fixed<BLOCKS_PER_SLAB> allocated_blocks;  // Track which blocks are allocated
         
         Slab() : next(nullptr), memory(nullptr), allocated_count(0) {}
         
@@ -200,12 +203,7 @@ private:
         }
     };
 
-    static constexpr fl::size BLOCK_SIZE = sizeof(T) > sizeof(FreeBlock*) ? sizeof(T) : sizeof(FreeBlock*);
-    static constexpr fl::size BLOCKS_PER_SLAB = SLAB_SIZE;
-    static constexpr fl::size SLAB_MEMORY_SIZE = BLOCK_SIZE * BLOCKS_PER_SLAB;
-
     Slab* slabs_;
-    FreeBlock* free_list_;
     fl::size total_allocated_;
     fl::size total_deallocated_;
 
@@ -226,11 +224,7 @@ private:
         }
         
         // Initialize all blocks in the slab as free
-        for (fl::size i = 0; i < BLOCKS_PER_SLAB; ++i) {
-            FreeBlock* block = fl::bit_cast_ptr<FreeBlock>(static_cast<void*>(slab->memory + i * BLOCK_SIZE));
-            block->next = free_list_;
-            free_list_ = block;
-        }
+        slab->allocated_blocks.reset(); // All blocks start as free
         
         // Add slab to the slab list
         slab->next = slabs_;
@@ -239,58 +233,94 @@ private:
         return slab;
     }
 
-    void* allocateFromSlab() {
-        if (!free_list_) {
+    void* allocateFromSlab(fl::size n = 1) {
+        // Try to find n contiguous free blocks in existing slabs
+        for (Slab* slab = slabs_; slab; slab = slab->next) {
+            void* ptr = findContiguousBlocks(slab, n);
+            if (ptr) {
+                return ptr;
+            }
+        }
+        
+        // No contiguous blocks found, create new slab if n fits
+        if (n <= BLOCKS_PER_SLAB) {
             if (!createSlab()) {
                 return nullptr; // Out of memory
             }
+            
+            // Try again with the new slab
+            return findContiguousBlocks(slabs_, n);
         }
         
-        FreeBlock* block = free_list_;
-        free_list_ = free_list_->next;
-        ++total_allocated_;
+        // Request too large for slab, fall back to malloc
+        return nullptr;
+    }
+    
+
+    
+    void* findContiguousBlocks(Slab* slab, fl::size n) {
+        // Check if allocation is too large for this slab
+        if (n > BLOCKS_PER_SLAB) {
+            return nullptr;
+        }
         
-        // Find which slab this block belongs to and increment its count
-        for (Slab* slab = slabs_; slab; slab = slab->next) {
-            u8* slab_start = slab->memory;
-            u8* slab_end = slab_start + SLAB_MEMORY_SIZE;
-            u8* block_ptr = fl::bit_cast_ptr<u8>(static_cast<void*>(block));
+        // Find n contiguous free blocks in the slab
+        for (fl::size start = 0; start <= BLOCKS_PER_SLAB - n; ++start) {
+            bool found = true;
+            for (fl::size i = 0; i < n; ++i) {
+                if (slab->allocated_blocks.test(start + i)) {
+                    found = false;
+                    break;
+                }
+            }
             
-            if (block_ptr >= slab_start && block_ptr < slab_end) {
-                ++slab->allocated_count;
-                break;
+            if (found) {
+                // Mark blocks as allocated
+                for (fl::size i = 0; i < n; ++i) {
+                    slab->allocated_blocks.set(start + i, true);
+                }
+                slab->allocated_count += n;
+                total_allocated_ += n;
+                
+                // Return pointer to the first block
+                return slab->memory + start * BLOCK_SIZE;
             }
         }
         
-        return block;
+        return nullptr;
     }
 
-    void deallocateToSlab(void* ptr) {
+    void deallocateToSlab(void* ptr, fl::size n = 1) {
         if (!ptr) {
             return;
         }
         
-        // Find which slab this block belongs to and decrement its count
+        // Find which slab this block belongs to
         for (Slab* slab = slabs_; slab; slab = slab->next) {
             u8* slab_start = slab->memory;
             u8* slab_end = slab_start + SLAB_MEMORY_SIZE;
             u8* block_ptr = fl::bit_cast_ptr<u8>(ptr);
             
             if (block_ptr >= slab_start && block_ptr < slab_end) {
-                --slab->allocated_count;
+                fl::size block_index = (block_ptr - slab_start) / BLOCK_SIZE;
+                
+                // Mark blocks as free in the bitset
+                for (fl::size i = 0; i < n; ++i) {
+                    if (block_index + i < BLOCKS_PER_SLAB) {
+                        slab->allocated_blocks.set(block_index + i, false);
+                    }
+                }
+                
+                slab->allocated_count -= n;
+                total_deallocated_ += n;
                 break;
             }
         }
-        
-        FreeBlock* block = fl::bit_cast_ptr<FreeBlock>(ptr);
-        block->next = free_list_;
-        free_list_ = block;
-        ++total_deallocated_;
     }
 
 public:
     // Constructor
-    SlabAllocator() : slabs_(nullptr), free_list_(nullptr), total_allocated_(0), total_deallocated_(0) {}
+    SlabAllocator() : slabs_(nullptr), total_allocated_(0), total_deallocated_(0) {}
     
     // Destructor
     ~SlabAllocator() {
@@ -303,10 +333,8 @@ public:
     
     // Movable
     SlabAllocator(SlabAllocator&& other) noexcept 
-        : slabs_(other.slabs_), free_list_(other.free_list_), 
-          total_allocated_(other.total_allocated_), total_deallocated_(other.total_deallocated_) {
+        : slabs_(other.slabs_), total_allocated_(other.total_allocated_), total_deallocated_(other.total_deallocated_) {
         other.slabs_ = nullptr;
-        other.free_list_ = nullptr;
         other.total_allocated_ = 0;
         other.total_deallocated_ = 0;
     }
@@ -315,11 +343,9 @@ public:
         if (this != &other) {
             cleanup();
             slabs_ = other.slabs_;
-            free_list_ = other.free_list_;
             total_allocated_ = other.total_allocated_;
             total_deallocated_ = other.total_deallocated_;
             other.slabs_ = nullptr;
-            other.free_list_ = nullptr;
             other.total_allocated_ = 0;
             other.total_deallocated_ = 0;
         }
@@ -327,19 +353,21 @@ public:
     }
 
     T* allocate(fl::size n = 1) {
-        if (n != 1) {
-            // Slab allocator only supports single object allocation
-            // Fall back to regular malloc for bulk allocations
-            void* ptr = malloc(sizeof(T) * n);
-            if (ptr) {
-                fl::memfill(ptr, 0, sizeof(T) * n);
-            }
+        if (n == 0) {
+            return nullptr;
+        }
+        
+        // Try to allocate from slab first
+        void* ptr = allocateFromSlab(n);
+        if (ptr) {
+            fl::memfill(ptr, 0, sizeof(T) * n);
             return static_cast<T*>(ptr);
         }
         
-        void* ptr = allocateFromSlab();
+        // Fall back to regular malloc for large allocations
+        ptr = malloc(sizeof(T) * n);
         if (ptr) {
-            fl::memfill(ptr, 0, sizeof(T));
+            fl::memfill(ptr, 0, sizeof(T) * n);
         }
         return static_cast<T*>(ptr);
     }
@@ -349,13 +377,24 @@ public:
             return;
         }
         
-        if (n != 1) {
-            // This was allocated with regular malloc
-            free(ptr);
-            return;
+        // Try to deallocate from slab first
+        bool found_in_slab = false;
+        for (Slab* slab = slabs_; slab; slab = slab->next) {
+            u8* slab_start = slab->memory;
+            u8* slab_end = slab_start + SLAB_MEMORY_SIZE;
+            u8* block_ptr = fl::bit_cast_ptr<u8>(static_cast<void*>(ptr));
+            
+            if (block_ptr >= slab_start && block_ptr < slab_end) {
+                deallocateToSlab(ptr, n);
+                found_in_slab = true;
+                break;
+            }
         }
         
-        deallocateToSlab(ptr);
+        if (!found_in_slab) {
+            // This was allocated with regular malloc
+            free(ptr);
+        }
     }
 
     // Get allocation statistics
@@ -380,7 +419,6 @@ public:
             free(slabs_);
             slabs_ = next;
         }
-        free_list_ = nullptr;
         total_allocated_ = 0;
         total_deallocated_ = 0;
     }
@@ -432,17 +470,25 @@ public:
     // Destructor
     ~allocator_slab() noexcept {}
 
+private:
+    // Get the shared static allocator instance
+    static SlabAllocator<T, SLAB_SIZE>& get_allocator() {
+        static SlabAllocator<T, SLAB_SIZE> allocator;
+        return allocator;
+    }
+
+public:
     // Allocate memory for n objects of type T
     T* allocate(fl::size n) {
         // Use a static allocator instance per type/size combination
-        static SlabAllocator<T, SLAB_SIZE> allocator;
+        SlabAllocator<T, SLAB_SIZE>& allocator = get_allocator();
         return allocator.allocate(n);
     }
 
     // Deallocate memory for n objects of type T
     void deallocate(T* p, fl::size n) {
         // Use the same static allocator instance
-        static SlabAllocator<T, SLAB_SIZE> allocator;
+        SlabAllocator<T, SLAB_SIZE>& allocator = get_allocator();
         allocator.deallocate(p, n);
     }
 
@@ -458,6 +504,13 @@ public:
     void destroy(U* p) {
         if (p == nullptr) return;
         p->~U();
+    }
+
+    // Cleanup method to clean up the static slab allocator
+    void cleanup() {
+        // Access the same static allocator instance and clean it up
+        static SlabAllocator<T, SLAB_SIZE> allocator;
+        allocator.cleanup();
     }
 
     // Equality comparison
@@ -651,6 +704,9 @@ public:
         m_inlined_used = 0;
         m_free_bits.reset();
         m_active_allocations = 0;
+        
+        // Clean up the base allocator (for SlabAllocator, this clears slabs and free lists)
+        cleanup_base_allocator();
     }
 
     // Get total allocated size
@@ -676,6 +732,30 @@ private:
     const T* get_inlined_ptr() const {
         return reinterpret_cast<const T*>(m_inlined_storage.data);
     }
+    
+    // SFINAE helper to detect if base allocator has cleanup() method
+    template<typename U>
+    static auto has_cleanup_impl(int) -> decltype(fl::declval<U>().cleanup(), fl::true_type{});
+    
+    template<typename U>
+    static fl::false_type has_cleanup_impl(...);
+    
+    using has_cleanup = decltype(has_cleanup_impl<BaseAllocator>(0));
+    
+    // Call cleanup on base allocator if it has the method
+    void cleanup_base_allocator() {
+        cleanup_base_allocator_impl(has_cleanup{});
+    }
+    
+    void cleanup_base_allocator_impl(fl::true_type) {
+        m_base_allocator.cleanup();
+    }
+    
+    void cleanup_base_allocator_impl(fl::false_type) {
+        // Base allocator doesn't have cleanup method, do nothing
+    }
+    
+
 
     // Equality comparison
     bool operator==(const allocator_inlined& other) const noexcept {
