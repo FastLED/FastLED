@@ -39,7 +39,7 @@ WaveFx::Args CreateArgsUpper() {
     return out;
 }
 
-WaveEffect NewWaveSimulation2D(const XYMap xymap) {
+WaveEffect NewWaveSimulation2D(const XYMap& xymap) {
     // only apply complex xymap as the last step after compositiing.
     XYMap xy_rect =
         XYMap::constructRectangularGrid(xymap.getWidth(), xymap.getHeight());

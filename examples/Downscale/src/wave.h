@@ -31,4 +31,4 @@ struct DrawRasterToWaveSimulator {
     WaveEffect* mWaveFx;
 };
 
-WaveEffect NewWaveSimulation2D(const XYMap xymap);
+WaveEffect NewWaveSimulation2D(const XYMap& xymap);

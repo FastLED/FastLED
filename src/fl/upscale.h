@@ -20,7 +20,7 @@ namespace fl {
 /// @param xyMap The XYMap to use to determine where to write the pixel. If the
 /// pixel is mapped outside of the range then it is clipped.
 void upscaleArbitrary(const CRGB *input, CRGB *output, u16 inputWidth,
-                      u16 inputHeight, fl::XYMap xyMap);
+                      u16 inputHeight, const fl::XYMap& xyMap);
 
 /// @brief Performs bilinear interpolation for upscaling an image.
 /// @param output The output grid to write into the interpolated values.
@@ -30,11 +30,11 @@ void upscaleArbitrary(const CRGB *input, CRGB *output, u16 inputWidth,
 /// @param xyMap The XYMap to use to determine where to write the pixel. If the
 /// pixel is mapped outside of the range then it is clipped.
 void upscalePowerOf2(const CRGB *input, CRGB *output, u8 inputWidth,
-                     u8 inputHeight, fl::XYMap xyMap);
+                     u8 inputHeight, const fl::XYMap& xyMap);
 
 //
 inline void upscale(const CRGB *input, CRGB *output, u16 inputWidth,
-                    u16 inputHeight, fl::XYMap xyMap) {
+                    u16 inputHeight, const fl::XYMap& xyMap) {
     u16 outputWidth = xyMap.getWidth();
     u16 outputHeight = xyMap.getHeight();
     const bool wontFit =
@@ -52,10 +52,10 @@ inline void upscale(const CRGB *input, CRGB *output, u16 inputWidth,
 // These are here for testing purposes and are slow. Their primary use
 // is to test against the fixed integer version above.
 void upscaleFloat(const CRGB *input, CRGB *output, u8 inputWidth,
-                  u8 inputHeight, fl::XYMap xyMap);
+                  u8 inputHeight, const fl::XYMap& xyMap);
 
 void upscaleArbitraryFloat(const CRGB *input, CRGB *output, u16 inputWidth,
-                           u16 inputHeight, fl::XYMap xyMap);
+                           u16 inputHeight, const fl::XYMap& xyMap);
 
 u8 upscaleFloat(u8 v00, u8 v10, u8 v01,
                                  u8 v11, float dx, float dy);

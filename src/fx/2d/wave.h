@@ -79,7 +79,7 @@ class WaveFx : public Fx2d {
   public:
     using Args = WaveFxArgs;
 
-    WaveFx(XYMap xymap, Args args = Args())
+    WaveFx(const XYMap& xymap, Args args = Args())
         : Fx2d(xymap), mWaveSim(xymap.getWidth(), xymap.getHeight(),
                                 args.factor, args.speed, args.dampening) {
         // Initialize the wave simulation with the given parameters.

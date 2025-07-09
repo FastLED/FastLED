@@ -16,7 +16,7 @@ class RedSquare : public Fx2d {
         template <typename T> static T min(T a, T b) { return a < b ? a : b; }
     };
 
-    RedSquare(XYMap xymap) : Fx2d(xymap) {}
+    RedSquare(const XYMap& xymap) : Fx2d(xymap) {}
 
     void draw(DrawContext context) override {
         uint16_t width = getWidth();

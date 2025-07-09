@@ -18,7 +18,7 @@ u8 bilinearInterpolatePowerOf2(u8 v00, u8 v10, u8 v01,
                                     u8 v11, u8 dx, u8 dy);
 
 void upscaleArbitrary(const CRGB *input, CRGB *output, u16 inputWidth,
-                      u16 inputHeight, XYMap xyMap) {
+                      u16 inputHeight, const XYMap& xyMap) {
     u16 n = xyMap.getTotal();
     u16 outputWidth = xyMap.getWidth();
     u16 outputHeight = xyMap.getHeight();
@@ -82,7 +82,7 @@ u8 bilinearInterpolate(u8 v00, u8 v10, u8 v01, u8 v11,
 }
 
 void upscalePowerOf2(const CRGB *input, CRGB *output, u8 inputWidth,
-                     u8 inputHeight, XYMap xyMap) {
+                     u8 inputHeight, const XYMap& xyMap) {
     u8 width = xyMap.getWidth();
     u8 height = xyMap.getHeight();
     if (width != xyMap.getWidth() || height != xyMap.getHeight()) {
@@ -179,7 +179,7 @@ u8 upscaleFloat(u8 v00, u8 v10, u8 v01,
 
 // Floating-point version for arbitrary grid sizes
 void upscaleArbitraryFloat(const CRGB *input, CRGB *output, u16 inputWidth,
-                           u16 inputHeight, XYMap xyMap) {
+                           u16 inputHeight, const XYMap& xyMap) {
     u16 n = xyMap.getTotal();
     u16 outputWidth = xyMap.getWidth();
     u16 outputHeight = xyMap.getHeight();
@@ -228,7 +228,7 @@ void upscaleArbitraryFloat(const CRGB *input, CRGB *output, u16 inputWidth,
 
 // Floating-point version for power-of-two grid sizes
 void upscaleFloat(const CRGB *input, CRGB *output, u8 inputWidth,
-                  u8 inputHeight, XYMap xyMap) {
+                  u8 inputHeight, const XYMap& xyMap) {
     u8 outputWidth = xyMap.getWidth();
     u8 outputHeight = xyMap.getHeight();
     if (outputWidth != xyMap.getWidth() || outputHeight != xyMap.getHeight()) {

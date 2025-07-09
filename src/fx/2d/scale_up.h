@@ -43,11 +43,11 @@ FASTLED_SMART_PTR(ScaleUp);
 // Uses bilearn filtering to double the size of the grid.
 class ScaleUp : public Fx2d {
   public:
-    ScaleUp(XYMap xymap, Fx2dPtr fx);
+    ScaleUp(const XYMap& xymap, Fx2dPtr fx);
     void draw(DrawContext context) override;
 
     void expand(const CRGB *input, CRGB *output, uint16_t width,
-                uint16_t height, XYMap mXyMap);
+                uint16_t height, const XYMap& mXyMap);
 
     fl::string fxName() const override { return "scale_up"; }
 
