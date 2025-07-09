@@ -3,18 +3,43 @@
     "configurations": [
         {
             "name": "Run .ino with FastLED",
-            "type": "node-terminal", 
+            "type": "node-terminal",
             "request": "launch",
             "command": "uv run fastled \"${file}\" --no-auto-updates",
-            "cwd": "${workspaceFolder}"
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal",
+            "internalConsoleOptions": "neverOpen"
         },
         {
             "name": "Debug C++ Test",
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/tests/.build/bin/${fileBasenameNoExtension}.exe",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "miDebuggerPath": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                },
+                {
+                    "description": "Set Disassembly Flavor to Intel",
+                    "text": "-gdb-set disassembly-flavor intel",
+                    "ignoreFailures": true
+                }
+            ],
             "preLaunchTask": "Compile Current Test File (Debug Only)",
-            "MIMode": "gdb"
+            "logging": {
+                "moduleLoad": false,
+                "programOutput": true,
+                "trace": false
+            }
         }
     ]
 }
