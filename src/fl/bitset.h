@@ -12,6 +12,7 @@ template <fl::u32 N> class BitsetInlined;
 
 template <fl::u32 N> class BitsetFixed;
 
+
 template <fl::u32 N = 256>
 using bitset = BitsetInlined<N>; // inlined but can go bigger.
 

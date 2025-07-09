@@ -164,11 +164,12 @@ endif()
 # Set FASTLED_ALL_SRC=1 for clang builds or when explicitly requested via environment variable
 # This allows testing both all source on (clang) and off (gcc) builds
 if (CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR DEFINED ENV{FASTLED_ALL_SRC})
-if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-    message(STATUS "Clang compiler detected: enabling FASTLED_ALL_SRC for unified compilation testing")
+    if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+        message(STATUS "Clang compiler detected: enabling FASTLED_ALL_SRC for unified compilation testing")
     else()
         message(STATUS "FASTLED_ALL_SRC environment variable set: enabling unified compilation testing")
     endif()
+    set(FASTLED_ALL_SRC 1)
     add_compile_definitions(FASTLED_ALL_SRC=1)
 endif()
 

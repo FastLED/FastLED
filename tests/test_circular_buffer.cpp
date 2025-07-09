@@ -332,6 +332,8 @@ TEST_CASE("circular_buffer stress test with rapid operations") {
     const size_t stress_iterations = 10000;
     size_t total_added = 0;
     size_t total_removed = 0;
+    FL_UNUSED(total_added);
+    FL_UNUSED(total_removed);
     
     for (size_t i = 0; i < stress_iterations; ++i) {
         // Add 3 elements
