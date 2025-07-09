@@ -21,7 +21,7 @@ class RunningProcess:
         check: bool = False,
         auto_run: bool = True,
         echo: bool = True,
-        timeout: int = 300,  # 5 minute default timeout
+        timeout: int = 30,  # 30 second default timeout (reduced from 300)
         enable_stack_trace: bool = True,  # Enable stack trace dumping on timeout
     ):
         """
@@ -33,7 +33,7 @@ class RunningProcess:
             check (bool): If True, raise an exception if the command returns a non-zero exit code.
             auto_run (bool): If True, automatically run the command when the instance is created.
             echo (bool): If True, print the output of the command to the console in real-time.
-            timeout (int): Timeout in seconds for process execution. Default 300 seconds (5 minutes).
+            timeout (int): Timeout in seconds for process execution. Default 30 seconds.
             enable_stack_trace (bool): If True, dump stack trace when process times out.
         """
         if isinstance(command, list):
