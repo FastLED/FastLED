@@ -31,7 +31,32 @@ void DefaultFree(void *ptr) { free(ptr); }
 
 void *(*Alloc)(fl::size) = DefaultAlloc;
 void (*Dealloc)(void *) = DefaultFree;
+
+#if defined(FASTLED_TESTING)
+// Test hook function pointers
+MallocHook gMallocHook = nullptr;
+FreeHook gFreeHook = nullptr;
+#endif
+
 } // namespace
+
+#if defined(FASTLED_TESTING)
+void SetMallocHook(MallocHook hook) {
+    gMallocHook = hook;
+}
+
+void SetFreeHook(FreeHook hook) {
+    gFreeHook = hook;
+}
+
+void ClearMallocHook() {
+    gMallocHook = nullptr;
+}
+
+void ClearFreeHook() {
+    gFreeHook = nullptr;
+}
+#endif
 
 void SetPSRamAllocator(void *(*alloc)(fl::size), void (*free)(void *)) {
     Alloc = alloc;
@@ -43,15 +68,44 @@ void *PSRamAllocate(fl::size size, bool zero) {
     if (ptr && zero) {
         memset(ptr, 0, size);
     }
+    
+#if defined(FASTLED_TESTING)
+    if (gMallocHook && ptr) {
+        gMallocHook(ptr, size);
+    }
+#endif
+    
     return ptr;
 }
 
 void PSRamDeallocate(void *ptr) {
+#if defined(FASTLED_TESTING)
+    if (gFreeHook && ptr) {
+        gFreeHook(ptr);
+    }
+#endif
+    
     Dealloc(ptr);
 }
 
-void Malloc(fl::size size) { Alloc(size); }
+void Malloc(fl::size size) { 
+    void* ptr = Alloc(size); 
+    
+#if defined(FASTLED_TESTING)
+    if (gMallocHook && ptr) {
+        gMallocHook(ptr, size);
+    }
+#endif
+}
 
-void Free(void *ptr) { Dealloc(ptr); }
+void Free(void *ptr) { 
+#if defined(FASTLED_TESTING)
+    if (gFreeHook && ptr) {
+        gFreeHook(ptr);
+    }
+#endif
+    
+    Dealloc(ptr); 
+}
 
 } // namespace fl

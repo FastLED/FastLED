@@ -16,6 +16,21 @@
 
 namespace fl {
 
+// Test hooks for malloc/free operations
+#if defined(FASTLED_TESTING)
+// Function pointer types for test hooks
+using MallocHook = void (*)(void* ptr, fl::size size);
+using FreeHook = void (*)(void* ptr);
+
+// Set test hooks for malloc and free operations
+void SetMallocHook(MallocHook hook);
+void SetFreeHook(FreeHook hook);
+
+// Clear test hooks
+void ClearMallocHook();
+void ClearFreeHook();
+#endif
+
 void SetPSRamAllocator(void *(*alloc)(fl::size), void (*free)(void *));
 void *PSRamAllocate(fl::size size, bool zero = true);
 void PSRamDeallocate(void *ptr);
