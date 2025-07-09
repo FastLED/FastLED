@@ -1467,7 +1467,8 @@ TEST_CASE("allocator_inlined_slab - Complex object types") {
             test_vec.push_back(static_cast<int>(i));
             test_vec.push_back(static_cast<int>(i + 10));
             
-            new(ptr) ComplexObject("obj" + fl::to_string(i), test_vec);
+            fl::string obj_name = "obj" + fl::to_string(i);
+            new(ptr) ComplexObject(obj_name, test_vec);
             
             ptrs.push_back(ptr);
         }
@@ -1477,7 +1478,8 @@ TEST_CASE("allocator_inlined_slab - Complex object types") {
         
         // Verify all objects are intact
         for (size_t i = 0; i < ptrs.size(); ++i) {
-            CHECK(ptrs[i]->str == "obj" + fl::to_string(i));
+            fl::string expected_name = "obj" + fl::to_string(i);
+            CHECK(ptrs[i]->str == expected_name);
             CHECK(ptrs[i]->vec.size() == 2);
             CHECK(ptrs[i]->vec[0] == static_cast<int>(i));
             CHECK(ptrs[i]->vec[1] == static_cast<int>(i + 10));
