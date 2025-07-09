@@ -106,4 +106,41 @@ TEST_CASE("SlabAllocator - Edge cases") {
         
         allocator.deallocate(ptr2);
     }
+    
+    SUBCASE("Large block allocation exceeding slab size") {
+        // Try to allocate more blocks than fit in a single slab
+        // This should fall back to malloc and not crash
+        char* large_ptr = allocator.allocate(10);  // 10 blocks, but slab only has 8
+        REQUIRE(large_ptr != nullptr);
+        
+        // Verify we can use the memory
+        for (int i = 0; i < 10; ++i) {
+            large_ptr[i] = static_cast<char>(i);
+        }
+        
+        // Verify the values
+        for (int i = 0; i < 10; ++i) {
+            CHECK_EQ(large_ptr[i], static_cast<char>(i));
+        }
+        
+        allocator.deallocate(large_ptr, 10);
+    }
+    
+    SUBCASE("Very large block allocation") {
+        // Try to allocate a very large block that should definitely fall back to malloc
+        char* huge_ptr = allocator.allocate(1000);  // 1000 blocks
+        REQUIRE(huge_ptr != nullptr);
+        
+        // Verify we can use the memory
+        for (int i = 0; i < 1000; ++i) {
+            huge_ptr[i] = static_cast<char>(i % 256);
+        }
+        
+        // Verify some values
+        for (int i = 0; i < 100; ++i) {
+            CHECK_EQ(huge_ptr[i], static_cast<char>(i % 256));
+        }
+        
+        allocator.deallocate(huge_ptr, 1000);
+    }
 } 

@@ -264,27 +264,18 @@ private:
             return nullptr;
         }
         
-        // Find n contiguous free blocks in the slab
-        for (fl::size start = 0; start <= BLOCKS_PER_SLAB - n; ++start) {
-            bool found = true;
+        // Use bitset's find_run to find n contiguous free blocks (false = free)
+        fl::i32 start = slab->allocated_blocks.find_run(false, static_cast<fl::u32>(n));
+        if (start >= 0) {
+            // Mark blocks as allocated
             for (fl::size i = 0; i < n; ++i) {
-                if (slab->allocated_blocks.test(start + i)) {
-                    found = false;
-                    break;
-                }
+                slab->allocated_blocks.set(static_cast<fl::u32>(start + i), true);
             }
+            slab->allocated_count += n;
+            total_allocated_ += n;
             
-            if (found) {
-                // Mark blocks as allocated
-                for (fl::size i = 0; i < n; ++i) {
-                    slab->allocated_blocks.set(start + i, true);
-                }
-                slab->allocated_count += n;
-                total_allocated_ += n;
-                
-                // Return pointer to the first block
-                return slab->memory + start * BLOCK_SIZE;
-            }
+            // Return pointer to the first block
+            return slab->memory + static_cast<fl::size>(start) * BLOCK_SIZE;
         }
         
         return nullptr;
