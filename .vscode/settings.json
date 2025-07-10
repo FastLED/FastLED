@@ -298,9 +298,9 @@
     
     // Language-specific debug defaults
     "[python]": {
-        "debug.defaultDebuggerType": "python"
+        "debug.defaultConfiguration": "python"
     },
     "[ino]": {
-        "debug.defaultDebuggerType": "node-terminal"
+        "debug.defaultConfiguration": "node-terminal"
     }
 }

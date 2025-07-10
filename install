@@ -42,10 +42,62 @@ else
     echo "⚠️  Warning: JavaScript linter setup failed. You can retry with: uv run ci/setup-js-linting-fast.py"
 fi
 
+echo "Setting up VSCode extensions..."
+
+# Install Auto Debug extension from local .vsix file
+echo "Installing Auto Debug extension for VSCode..."
+if [ -f .vscode/DarrenLevine.auto-debug-1.0.2.vsix ]; then
+    installed_count=0
+    
+    # Try installing on VSCode
+    if command -v code &> /dev/null; then
+        echo "Installing Auto Debug extension on VSCode..."
+        if code --install-extension .vscode/DarrenLevine.auto-debug-1.0.2.vsix; then
+            echo "✅ Auto Debug extension installed successfully on VSCode!"
+            installed_count=$((installed_count + 1))
+        else
+            echo "⚠️  Warning: Auto Debug extension installation failed on VSCode."
+        fi
+    else
+        echo "ℹ️  VSCode not found (code command not available)."
+    fi
+    
+    # Try installing on Cursor
+    if command -v cursor &> /dev/null; then
+        echo "Installing Auto Debug extension on Cursor..."
+        if cursor --install-extension .vscode/DarrenLevine.auto-debug-1.0.2.vsix; then
+            echo "✅ Auto Debug extension installed successfully on Cursor!"
+            installed_count=$((installed_count + 1))
+        else
+            echo "⚠️  Warning: Auto Debug extension installation failed on Cursor."
+        fi
+    else
+        echo "ℹ️  Cursor not found (cursor command not available)."
+    fi
+    
+    # Summary
+    if [ $installed_count -eq 0 ]; then
+        echo "⚠️  Warning: Auto Debug extension could not be installed automatically."
+        echo "      Please install manually:"
+        echo "      - Open VSCode/Cursor"
+        echo "      - Go to Extensions (Ctrl+Shift+X)"
+        echo "      - Click ... menu → Install from VSIX"
+        echo "      - Select: .vscode/DarrenLevine.auto-debug-1.0.2.vsix"
+    elif [ $installed_count -eq 1 ]; then
+        echo "✅ Auto Debug extension installed on 1 editor."
+    else
+        echo "✅ Auto Debug extension installed on $installed_count editors!"
+    fi
+else
+    echo "⚠️  Warning: Auto Debug extension file not found at .vscode/DarrenLevine.auto-debug-1.0.2.vsix"
+    echo "      Please ensure the extension file is in the correct location."
+fi
+
 echo "🎉 Installation complete!"
 echo ""
 echo "To use:"
 echo "  - Run tests: bash test"
 echo "  - Run linting: bash lint (Python, C++, and JavaScript)"
 echo "  - Debug in VSCode: Open test file and press F5"
+echo "  - Auto Debug: Use '🎯 Auto Debug (Smart File Detection)' configuration"
 echo "  - clangd IntelliSense: Should work automatically in VSCode"
