@@ -15,10 +15,10 @@
             "map": {
                 "tests/*.cpp": "C++: Debug Test (Tests Directory)",
                 "tests/*.h": "C++: Debug Test (Tests Directory)",
-                "*.py": "Python: Current File",
-                "test.py": "Python: FastLED Tests",
-                "ci/ci-compile.py": "Python: CI Compile",
-                "mcp_server.py": "Python: MCP Server",
+                "*.py": "Python: Current File (UV)",
+                "test.py": "Python: FastLED Tests (UV)",
+                "ci/ci-compile.py": "Python: CI Compile (UV)",
+                "mcp_server.py": "Python: MCP Server (UV)",
                 "*.ino": "Arduino: Run .ino with FastLED (Examples)",
                 "examples/**/*.ino": "Arduino: Run .ino with FastLED (Examples)"
             }
@@ -29,8 +29,17 @@
             "request": "launch",
             "program": "${file}",
             "console": "integratedTerminal",
-            "python": "${workspaceFolder}/.venv/bin/python",
-            "cwd": "${workspaceFolder}"
+            "cwd": "${workspaceFolder}",
+            "justMyCode": true
+        },
+        {
+            "name": "Python: Current File (UV)",
+            "type": "node-terminal",
+            "request": "launch",
+            "command": "uv run python \"${file}\"",
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal",
+            "internalConsoleOptions": "neverOpen"
         },
         {
             "name": "Arduino: Run .ino with FastLED (Examples)",
@@ -78,9 +87,18 @@
             "request": "launch",
             "program": "${workspaceFolder}/test.py",
             "console": "integratedTerminal",
-            "python": "${workspaceFolder}/.venv/bin/python",
             "cwd": "${workspaceFolder}",
-            "args": ["--cpp"]
+            "args": ["--cpp"],
+            "justMyCode": true
+        },
+        {
+            "name": "Python: FastLED Tests (UV)",
+            "type": "node-terminal",
+            "request": "launch",
+            "command": "uv run python test.py --cpp",
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal",
+            "internalConsoleOptions": "neverOpen"
         },
         {
             "name": "Python: CI Compile",
@@ -88,9 +106,18 @@
             "request": "launch",
             "program": "${workspaceFolder}/ci/ci-compile.py",
             "console": "integratedTerminal",
-            "python": "${workspaceFolder}/.venv/bin/python",
             "cwd": "${workspaceFolder}",
-            "args": ["uno", "--examples", "Blink"]
+            "args": ["uno", "--examples", "Blink"],
+            "justMyCode": true
+        },
+        {
+            "name": "Python: CI Compile (UV)",
+            "type": "node-terminal",
+            "request": "launch",
+            "command": "uv run python ci/ci-compile.py uno --examples Blink",
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal",
+            "internalConsoleOptions": "neverOpen"
         },
         {
             "name": "Python: MCP Server",
@@ -98,8 +125,17 @@
             "request": "launch",
             "program": "${workspaceFolder}/mcp_server.py",
             "console": "integratedTerminal",
-            "python": "${workspaceFolder}/.venv/bin/python",
-            "cwd": "${workspaceFolder}"
+            "cwd": "${workspaceFolder}",
+            "justMyCode": true
+        },
+        {
+            "name": "Python: MCP Server (UV)",
+            "type": "node-terminal",
+            "request": "launch",
+            "command": "uv run python mcp_server.py",
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal",
+            "internalConsoleOptions": "neverOpen"
         },
         {
             "type": "platformio-debug",

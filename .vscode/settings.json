@@ -294,13 +294,5 @@
     "platformio-ide.autoOpenPlatformIOIniFile": false,
     "platformio-ide.autoPreloadEnvTasks": false,
     "platformio-ide.autoCloseSerialMonitor": false,
-    "platformio-ide.disablePIOHomeStartup": true,
-    
-    // Language-specific debug defaults
-    "[python]": {
-        "debug.defaultConfiguration": "python"
-    },
-    "[ino]": {
-        "debug.defaultConfiguration": "node-terminal"
-    }
+    "platformio-ide.disablePIOHomeStartup": true
 }
