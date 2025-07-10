@@ -185,53 +185,29 @@ static int8_t inline __attribute__((always_inline)) selectBasedOnHashBit(uint8_t
 }
 
 static int8_t  inline __attribute__((always_inline)) grad8(uint8_t hash, int8_t x, int8_t y, int8_t z) {
-#if 0
+    // Industry-standard 3D Perlin noise gradient implementation
+    // Uses proper 12 edge vectors of a cube for maximum range coverage
+    
     switch(hash & 0xF) {
-        case  0: return (( x) + ( y))>>1;
-        case  1: return ((-x) + ( y))>>1;
-        case  2: return (( x) + (-y))>>1;
-        case  3: return ((-x) + (-y))>>1;
-        case  4: return (( x) + ( z))>>1;
-        case  5: return ((-x) + ( z))>>1;
-        case  6: return (( x) + (-z))>>1;
-        case  7: return ((-x) + (-z))>>1;
-        case  8: return (( y) + ( z))>>1;
-        case  9: return ((-y) + ( z))>>1;
-        case 10: return (( y) + (-z))>>1;
-        case 11: return ((-y) + (-z))>>1;
-        case 12: return (( y) + ( x))>>1;
-        case 13: return ((-y) + ( z))>>1;
-        case 14: return (( y) + (-x))>>1;
-        case 15: return ((-y) + (-z))>>1;
+        case  0: return avg7( x,  y);  // (1,1,0)
+        case  1: return avg7(-x,  y);  // (-1,1,0)
+        case  2: return avg7( x, -y);  // (1,-1,0)
+        case  3: return avg7(-x, -y);  // (-1,-1,0)
+        case  4: return avg7( x,  z);  // (1,0,1)
+        case  5: return avg7(-x,  z);  // (-1,0,1)
+        case  6: return avg7( x, -z);  // (1,0,-1)
+        case  7: return avg7(-x, -z);  // (-1,0,-1)
+        case  8: return avg7( y,  z);  // (0,1,1)
+        case  9: return avg7(-y,  z);  // (0,-1,1)
+        case 10: return avg7( y, -z);  // (0,1,-1)
+        case 11: return avg7(-y, -z);  // (0,-1,-1)
+        // Repeat first 4 for hash values 12-15 (proper wrap-around)
+        case 12: return avg7( x,  y);  // (1,1,0)
+        case 13: return avg7(-x,  y);  // (-1,1,0)
+        case 14: return avg7( x, -y);  // (1,-1,0)
+        case 15: return avg7(-x, -y);  // (-1,-1,0)
     }
-#else
-
-    hash &= 0xF;
-
-    int8_t u, v;
-    //u = (hash&8)?y:x;
-    u = selectBasedOnHashBit( hash, 3, y, x);
-
-#if 1
-    v = hash<4?y:hash==12||hash==14?x:z;
-#else
-    // Verbose version for analysis; generates idenitical code.
-    if( hash < 4) { // 00 01 02 03
-        v = y;
-    } else {
-        if( hash==12 || hash==14) { // 0C 0E
-            v = x;
-        } else {
-            v = z; // 04 05 06 07   08 09 0A 0B   0D  0F
-        }
-    }
-#endif
-
-    if(hash&1) { u = -u; }
-    if(hash&2) { v = -v; }
-
-    return avg7(u,v);
-#endif
+    return 0; // Should never reach here
 }
 
 static int8_t inline __attribute__((always_inline)) grad8(uint8_t hash, int8_t x, int8_t y)
