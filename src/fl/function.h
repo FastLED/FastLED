@@ -8,6 +8,10 @@
 #include "fl/inplacenew.h"
 #include "fl/bit_cast.h"
 
+#ifndef FASTLED_INLINE_LAMBDA_SIZE
+#define FASTLED_INLINE_LAMBDA_SIZE 64
+#endif
+
 FL_DISABLE_WARNING_PUSH
 FL_DISABLE_WARNING(float-equal)
 
@@ -64,9 +68,7 @@ private:
 
     // Type-erased small lambda/functor callable - stored inline!
     // Size limit for inline storage - configurable via preprocessor define
-#ifndef FASTLED_INLINE_LAMBDA_SIZE
-#define FASTLED_INLINE_LAMBDA_SIZE 64
-#endif
+
     static constexpr fl::size kInlineLambdaSize = FASTLED_INLINE_LAMBDA_SIZE;
     
     struct InlinedLambda {
@@ -82,19 +84,19 @@ private:
         R (*invoker)(const Storage& storage, Args... args);
         void (*destructor)(Storage& storage);
         
-        template <typename F>
-        InlinedLambda(F f) {
-            static_assert(sizeof(F) <= kInlineLambdaSize, 
+        template <typename Function>
+        InlinedLambda(Function f) {
+            static_assert(sizeof(Function) <= kInlineLambdaSize, 
                          "Lambda/functor too large for inline storage");
-            static_assert(alignof(F) <= alignof(Storage), 
+            static_assert(alignof(Function) <= alignof(Storage), 
                          "Lambda/functor requires stricter alignment than storage provides");
             
             // Construct the lambda/functor in-place
-            new (storage.bytes) F(fl::move(f));
+            new (storage.bytes) Function(fl::move(f));
             
             // Set up type-erased function pointers
-            invoker = &invoke_lambda<F>;
-            destructor = &destroy_lambda<F>;
+            invoker = &invoke_lambda<Function>;
+            destructor = &destroy_lambda<Function>;
         }
         
         // Copy constructor

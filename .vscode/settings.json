@@ -192,9 +192,7 @@
         "debug.defaultDebuggerType": "cppdbg"
     },
     // Disable PlatformIO auto-detection for .ino files in FastLED project
-    "platformio.autoRebuildAutocompleteIndex": false,
     "platformio.disableToolchainAutoInstaller": true,
-    "platformio.activateProjectOnTextEditor": false,
     
     // Disable Java language support and popups
     "java.enabled": false,
@@ -290,8 +288,19 @@
     "extensions.ignoreRecommendations": true,
     "C_Cpp.disabled": true,
     
-    // Prevent PlatformIO from overwriting launch.json and other config files
+    // Keep PlatformIO UI/icons but disable all automatic behaviors
     "platformio-ide.autoRebuildAutocompleteIndex": false,
     "platformio-ide.activateProjectOnTextEditorChange": false,
-    "platformio-ide.autoOpenPlatformIOIniFile": false
+    "platformio-ide.autoOpenPlatformIOIniFile": false,
+    "platformio-ide.autoPreloadEnvTasks": false,
+    "platformio-ide.autoCloseSerialMonitor": false,
+    "platformio-ide.disablePIOHomeStartup": true,
+    
+    // Language-specific debug defaults
+    "[python]": {
+        "debug.defaultDebuggerType": "python"
+    },
+    "[ino]": {
+        "debug.defaultDebuggerType": "node-terminal"
+    }
 }

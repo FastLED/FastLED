@@ -27,9 +27,6 @@ ignore/
 .venv/
 .env
 
-# IDE/Editor
-.vscode/launch.json
-
 # Other build outputs
 dist/
 firmware_sizes.csv

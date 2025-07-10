@@ -9,7 +9,16 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Run .ino with FastLED",
+            "name": "Python: Current File",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "python": "${workspaceFolder}/.venv/bin/python",
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "name": "Arduino: Run .ino with FastLED (Examples)",
             "type": "node-terminal",
             "request": "launch",
             "command": "uv run fastled \"${file}\" --no-auto-updates",
@@ -18,7 +27,7 @@
             "internalConsoleOptions": "neverOpen"
         },
         {
-            "name": "Debug C++ Test",
+            "name": "C++: Debug Test (Tests Directory)",
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/tests/.build/bin/${fileBasenameNoExtension}.exe",
@@ -49,9 +58,38 @@
             }
         },
         {
+            "name": "Python: FastLED Tests",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/test.py",
+            "console": "integratedTerminal",
+            "python": "${workspaceFolder}/.venv/bin/python",
+            "cwd": "${workspaceFolder}",
+            "args": ["--cpp"]
+        },
+        {
+            "name": "Python: CI Compile",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/ci/ci-compile.py",
+            "console": "integratedTerminal",
+            "python": "${workspaceFolder}/.venv/bin/python",
+            "cwd": "${workspaceFolder}",
+            "args": ["uno", "--examples", "Blink"]
+        },
+        {
+            "name": "Python: MCP Server",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/mcp_server.py",
+            "console": "integratedTerminal",
+            "python": "${workspaceFolder}/.venv/bin/python",
+            "cwd": "${workspaceFolder}"
+        },
+        {
             "type": "platformio-debug",
             "request": "launch",
-            "name": "PIO Debug",
+            "name": "PlatformIO: Debug",
             "executable": "c:/Users/niteris/dev/fastled/.pio/build/dev/firmware.elf",
             "projectEnvName": "dev",
             "toolchainBinDir": "C:/Users/niteris/.platformio/packages/toolchain-xtensa-esp-elf/bin",
@@ -64,7 +102,7 @@
         {
             "type": "platformio-debug",
             "request": "launch",
-            "name": "PIO Debug (skip Pre-Debug)",
+            "name": "PlatformIO: Debug (skip Pre-Debug)",
             "executable": "c:/Users/niteris/dev/fastled/.pio/build/dev/firmware.elf",
             "projectEnvName": "dev",
             "toolchainBinDir": "C:/Users/niteris/.platformio/packages/toolchain-xtensa-esp-elf/bin",
@@ -73,66 +111,12 @@
         {
             "type": "platformio-debug",
             "request": "launch",
-            "name": "PIO Debug (without uploading)",
+            "name": "PlatformIO: Debug (without uploading)",
             "executable": "c:/Users/niteris/dev/fastled/.pio/build/dev/firmware.elf",
             "projectEnvName": "dev",
             "toolchainBinDir": "C:/Users/niteris/.platformio/packages/toolchain-xtensa-esp-elf/bin",
             "internalConsoleOptions": "openOnSessionStart",
             "loadMode": "manual"
-        },
-        {
-            "name": "Python: Current File",
-            "type": "debugpy",
-            "request": "launch",
-            "program": "${file}",
-            "console": "integratedTerminal",
-            "cwd": "${workspaceFolder}",
-            "python": "${workspaceFolder}/.venv/bin/python",
-            "env": {
-                "PYTHONPATH": "${workspaceFolder}"
-            },
-            "justMyCode": false
-        },
-        {
-            "name": "Python: FastLED Tests",
-            "type": "debugpy",
-            "request": "launch",
-            "program": "${workspaceFolder}/test.py",
-            "console": "integratedTerminal",
-            "cwd": "${workspaceFolder}",
-            "python": "${workspaceFolder}/.venv/bin/python",
-            "env": {
-                "PYTHONPATH": "${workspaceFolder}"
-            },
-            "justMyCode": false,
-            "args": []
-        },
-        {
-            "name": "Python: CI Compile",
-            "type": "debugpy",
-            "request": "launch",
-            "program": "${workspaceFolder}/ci/ci-compile.py",
-            "console": "integratedTerminal",
-            "cwd": "${workspaceFolder}",
-            "python": "${workspaceFolder}/.venv/bin/python",
-            "env": {
-                "PYTHONPATH": "${workspaceFolder}"
-            },
-            "justMyCode": false,
-            "args": ["uno", "--examples", "Blink"]
-        },
-        {
-            "name": "Python: MCP Server",
-            "type": "debugpy",
-            "request": "launch",
-            "program": "${workspaceFolder}/mcp_server.py",
-            "console": "integratedTerminal",
-            "cwd": "${workspaceFolder}",
-            "python": "${workspaceFolder}/.venv/bin/python",
-            "env": {
-                "PYTHONPATH": "${workspaceFolder}"
-            },
-            "justMyCode": false
         }
     ]
 }
