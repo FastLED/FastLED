@@ -22,11 +22,11 @@ dependencies = [
     "ninja",
     "cmake",
     "download",
-    "fastled>=1.2.26",
     "playwright",
     "download",
     "httpx",
     "pytest-xdist",
+    "fastled>=1.3.37",
 ]
 
 [build-system]

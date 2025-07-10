@@ -4,6 +4,9 @@
 //
 // Documentation: https://docs.platformio.org/en/latest/plus/debugging.html
 // Configuration: https://docs.platformio.org/en/latest/projectconf/sections/env/options/debug/index.html
+//
+// NOTE: Arduino debugging requires fastled package to have __main__.py
+// See task.md for implementation details
 
 {
     "version": "0.2.0",
@@ -43,12 +46,13 @@
         },
         {
             "name": "Arduino: Run .ino with FastLED (Examples)",
-            "type": "node-terminal",
+            "type": "python",
             "request": "launch",
-            "command": "uv run fastled \"${file}\" --no-auto-updates",
-            "cwd": "${workspaceFolder}",
+            "module": "fastled",
+            "args": ["${file}", "--no-auto-updates"],
             "console": "integratedTerminal",
-            "internalConsoleOptions": "neverOpen"
+            "cwd": "${workspaceFolder}",
+            "justMyCode": false
         },
         {
             "name": "C++: Debug Test (Tests Directory)",
