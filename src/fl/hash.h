@@ -1,7 +1,7 @@
 #pragma once
 
 #include "fl/str.h"
-#include "fl/template_magic.h"
+#include "fl/type_traits.h"
 #include "fl/int.h"
 #include "fl/stdint.h"
 #include "fl/force_inline.h"

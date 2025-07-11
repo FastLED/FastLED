@@ -10,7 +10,7 @@
 #include "fl/engine_events.h"
 #include "fl/function_list.h"
 #include "fl/math_macros.h"
-#include "fl/template_magic.h"
+#include "fl/type_traits.h"
 #include "fl/ui_impl.h"
 #include "fl/unused.h"
 #include "platforms/ui_defs.h"

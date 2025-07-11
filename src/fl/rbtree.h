@@ -4,7 +4,7 @@
 #include "fl/comparators.h"
 #include "fl/namespace.h"
 #include "fl/pair.h"
-#include "fl/template_magic.h"
+#include "fl/type_traits.h"
 #include "fl/type_traits.h"
 #include "fl/algorithm.h"
 #include "fl/allocator.h"

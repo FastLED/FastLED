@@ -20,7 +20,7 @@
 
 #include "fl/namespace.h"
 #include "fl/scoped_ptr.h"
-#include "fl/template_magic.h"
+#include "fl/type_traits.h"
 #include "fl/referent.h"
 #include "fl/bit_cast.h"
 #include "fl/int.h"

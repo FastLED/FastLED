@@ -8,7 +8,7 @@
 #include "fl/insert_result.h"
 #include "fl/namespace.h"
 #include "fl/pair.h"
-#include "fl/template_magic.h"
+#include "fl/type_traits.h"
 #include "fl/type_traits.h"
 #include "fl/vector.h"
 #include "fl/rbtree.h"

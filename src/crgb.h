@@ -11,7 +11,7 @@
 #include "color.h"
 #include "lib8tion/types.h"
 #include "fl/force_inline.h"
-#include "fl/template_magic.h"
+#include "fl/type_traits.h"
 #include "hsv2rgb.h"
 #include "fl/ease.h"
 

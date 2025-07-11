@@ -19,7 +19,7 @@ and removals.
 #include "fl/map_range.h"
 #include "fl/optional.h"
 #include "fl/pair.h"
-#include "fl/template_magic.h"
+#include "fl/type_traits.h"
 #include "fl/vector.h"
 #include "fl/warn.h"
 #include "fl/compiler_control.h"

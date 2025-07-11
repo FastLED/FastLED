@@ -6,7 +6,7 @@
 #include "fl/math_macros.h"
 #include "fl/namespace.h"
 #include "fl/str.h"
-#include "fl/template_magic.h"
+#include "fl/type_traits.h"
 #include "fl/unused.h"
 #include "fl/vector.h"
 #include "fl/warn.h"

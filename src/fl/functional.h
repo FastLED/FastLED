@@ -1,6 +1,6 @@
 #pragma once
 #include "fl/ptr.h"
-#include "fl/template_magic.h"
+#include "fl/type_traits.h"
 #include "fl/utility.h"
 #include "fl/type_traits.h"
 

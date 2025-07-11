@@ -1,5 +1,5 @@
 #pragma once
-#include "fl/template_magic.h"
+#include "fl/type_traits.h"
 
 namespace fl {
 
