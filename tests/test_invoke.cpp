@@ -176,27 +176,37 @@ TEST_CASE("fl::invoke with Ptr smart pointers") {
         int multiply(int x) { return value * x; }
     };
 
-    // Create stack object and wrap with Ptr without tracking
-    TestPtrClass obj;
-    auto ptr = fl::Ptr<TestPtrClass>::NoTracking(obj);
+    // 1. Heap-allocated Ptr via New()
+    auto heapPtr = fl::Ptr<TestPtrClass>::New();
 
     // Member function: const getter
-    CHECK_EQ(42, fl::invoke(&TestPtrClass::getValue, ptr));
+    CHECK_EQ(42, fl::invoke(&TestPtrClass::getValue, heapPtr));
 
     // Member function: setter
-    fl::invoke(&TestPtrClass::setValue, ptr, 123);
-    CHECK_EQ(123, obj.value);
+    fl::invoke(&TestPtrClass::setValue, heapPtr, 123);
+    CHECK_EQ(123, (*heapPtr).value);
 
     // Member function with additional arg, const
-    CHECK_EQ(133, fl::invoke(&TestPtrClass::add, ptr, 10));
+    CHECK_EQ(133, fl::invoke(&TestPtrClass::add, heapPtr, 10));
 
     // Member function with additional arg, non-const
-    CHECK_EQ(246, fl::invoke(&TestPtrClass::multiply, ptr, 2));
+    CHECK_EQ(246, fl::invoke(&TestPtrClass::multiply, heapPtr, 2));
 
-    // Member data pointer access
-    CHECK_EQ(123, fl::invoke(&TestPtrClass::value, ptr));
+    // Member data pointer access and modification
+    CHECK_EQ(123, fl::invoke(&TestPtrClass::value, heapPtr));
+    fl::invoke(&TestPtrClass::value, heapPtr) = 999;
+    CHECK_EQ(999, (*heapPtr).value);
 
-    // Modify through member data pointer
-    fl::invoke(&TestPtrClass::value, ptr) = 999;
-    CHECK_EQ(999, obj.value);
+    // 2. NoTracking Ptr wrapping stack object
+    TestPtrClass stackObj;
+    auto noTrackPtr = fl::Ptr<TestPtrClass>::NoTracking(stackObj);
+
+    CHECK_EQ(42, fl::invoke(&TestPtrClass::getValue, noTrackPtr));
+    fl::invoke(&TestPtrClass::setValue, noTrackPtr, 77);
+    CHECK_EQ(77, stackObj.value);
+    CHECK_EQ(102, fl::invoke(&TestPtrClass::add, noTrackPtr, 25));
+    CHECK_EQ(154, fl::invoke(&TestPtrClass::multiply, noTrackPtr, 2));
+    CHECK_EQ(77, fl::invoke(&TestPtrClass::value, noTrackPtr));
+    fl::invoke(&TestPtrClass::value, noTrackPtr) = 888;
+    CHECK_EQ(888, stackObj.value);
 } 
