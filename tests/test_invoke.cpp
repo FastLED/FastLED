@@ -2,6 +2,7 @@
 #include "fl/functional.h"
 #include "fl/function.h"
 #include "fl/ptr.h"
+#include "fl/scoped_ptr.h"
 
 using namespace fl;
 
@@ -209,4 +210,114 @@ TEST_CASE("fl::invoke with Ptr smart pointers") {
     CHECK_EQ(77, fl::invoke(&TestPtrClass::value, noTrackPtr));
     fl::invoke(&TestPtrClass::value, noTrackPtr) = 888;
     CHECK_EQ(888, stackObj.value);
+} 
+
+// Test fl::invoke with fl::scoped_ptr smart pointers
+TEST_CASE("fl::invoke with scoped_ptr smart pointers") {
+    struct TestScopedPtrClass {
+        int value = 42;
+        int getValue() const { return value; }
+        void setValue(int v) { value = v; }
+        int add(int x) const { return value + x; }
+        int multiply(int x) { return value * x; }
+    };
+
+    // Test with scoped_ptr
+    fl::scoped_ptr<TestScopedPtrClass> scopedPtr(new TestScopedPtrClass);
+
+    // Member function: const getter
+    CHECK_EQ(42, fl::invoke(&TestScopedPtrClass::getValue, scopedPtr));
+
+    // Member function: setter
+    fl::invoke(&TestScopedPtrClass::setValue, scopedPtr, 123);
+    CHECK_EQ(123, scopedPtr->value);
+
+    // Member function with additional arg, const
+    CHECK_EQ(133, fl::invoke(&TestScopedPtrClass::add, scopedPtr, 10));
+
+    // Member function with additional arg, non-const
+    CHECK_EQ(246, fl::invoke(&TestScopedPtrClass::multiply, scopedPtr, 2));
+
+    // Member data pointer access and modification
+    CHECK_EQ(123, fl::invoke(&TestScopedPtrClass::value, scopedPtr));
+    fl::invoke(&TestScopedPtrClass::value, scopedPtr) = 999;
+    CHECK_EQ(999, scopedPtr->value);
+
+    // Test with custom deleter
+    struct CustomDeleter {
+        void operator()(TestScopedPtrClass* ptr) {
+            delete ptr;
+        }
+    };
+    
+    fl::scoped_ptr<TestScopedPtrClass, CustomDeleter> customScopedPtr(new TestScopedPtrClass, CustomDeleter{});
+    
+    // Member function with custom deleter scoped_ptr
+    CHECK_EQ(42, fl::invoke(&TestScopedPtrClass::getValue, customScopedPtr));
+    fl::invoke(&TestScopedPtrClass::setValue, customScopedPtr, 555);
+    CHECK_EQ(555, customScopedPtr->value);
+    CHECK_EQ(565, fl::invoke(&TestScopedPtrClass::add, customScopedPtr, 10));
+} 
+
+// Test fl::invoke with fl::function objects
+TEST_CASE("fl::invoke with fl::function objects") {
+    struct TestFunctionClass {
+        int value = 100;
+        int getValue() const { return value; }
+        void setValue(int v) { value = v; }
+        int add(int x) const { return value + x; }
+        int multiply(int x) { return value * x; }
+    };
+
+    // 1. Test fl::function with free function
+    fl::function<int(int, int)> free_func = add;
+    auto result1 = fl::invoke(free_func, 10, 20);
+    CHECK_EQ(30, result1);
+
+    // 2. Test fl::function with lambda
+    fl::function<int(int, int)> lambda_func = [](int a, int b) { return a * b; };
+    auto result2 = fl::invoke(lambda_func, 6, 7);
+    CHECK_EQ(42, result2);
+
+    // 3. Test fl::function with member function bound to object
+    TestFunctionClass obj;
+    fl::function<int()> member_func = fl::function<int()>(&TestFunctionClass::getValue, &obj);
+    auto result3 = fl::invoke(member_func);
+    CHECK_EQ(100, result3);
+
+    // 4. Test fl::function with member function bound to raw pointer
+    TestFunctionClass* raw_ptr = &obj;
+    fl::function<void(int)> setter_func = fl::function<void(int)>(&TestFunctionClass::setValue, raw_ptr);
+    fl::invoke(setter_func, 200);
+    CHECK_EQ(200, obj.value);
+
+    // 5. Test fl::function with member function bound to scoped_ptr
+    fl::scoped_ptr<TestFunctionClass> scoped_ptr(new TestFunctionClass);
+    scoped_ptr->setValue(300);
+    
+    // Create function bound to scoped_ptr
+    fl::function<int()> scoped_getter = fl::function<int()>(&TestFunctionClass::getValue, scoped_ptr.get());
+    auto result4 = fl::invoke(scoped_getter);
+    CHECK_EQ(300, result4);
+
+    // 6. Test fl::function with member function with args bound to scoped_ptr
+    fl::function<int(int)> scoped_adder = fl::function<int(int)>(&TestFunctionClass::add, scoped_ptr.get());
+    auto result5 = fl::invoke(scoped_adder, 50);
+    CHECK_EQ(350, result5);
+
+    // 7. Test fl::function with complex lambda capturing scoped_ptr
+    auto complex_lambda = [&scoped_ptr](int multiplier) {
+        return fl::invoke(&TestFunctionClass::multiply, scoped_ptr, multiplier);
+    };
+    fl::function<int(int)> complex_func = complex_lambda;
+    auto result6 = fl::invoke(complex_func, 3);
+    CHECK_EQ(900, result6);  // 300 * 3 = 900
+
+    // 8. Test nested fl::invoke calls
+    fl::function<int(int)> nested_func = [&scoped_ptr](int x) {
+        // Use fl::invoke inside a function that's also invoked with fl::invoke
+        return fl::invoke(&TestFunctionClass::add, scoped_ptr, x) * 2;
+    };
+    auto result7 = fl::invoke(nested_func, 25);
+    CHECK_EQ(650, result7);  // (300 + 25) * 2 = 650
 } 
