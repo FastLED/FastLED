@@ -1,12 +1,11 @@
 #pragma once
-#include "fl/ptr.h"
 #include "fl/type_traits.h"
 #include "fl/utility.h"
-#include "fl/type_traits.h"
 
 namespace fl {
 
-// less is now defined in utility.h and included above
+template <typename T>
+class Ptr; // Forward declare Ptr to avoid header inclusion
 
 //----------------------------------------------------------------------------
 // invoke implementation - equivalent to std::invoke from C++17
@@ -27,6 +26,9 @@ struct is_pointer_like : false_type {};
 
 template <typename T>
 struct is_pointer_like<T*> : true_type {};
+
+template <typename T>
+struct is_pointer_like<fl::Ptr<T>> : true_type {};
 
 // Helper to detect if we should use pointer-to-member syntax
 template <typename T>

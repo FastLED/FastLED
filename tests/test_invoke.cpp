@@ -1,6 +1,7 @@
 #include "test.h"
 #include "fl/functional.h"
 #include "fl/function.h"
+#include "fl/ptr.h"
 
 using namespace fl;
 
@@ -163,4 +164,39 @@ TEST_CASE("fl::invoke edge cases") {
     const TestClass* const_ptr = &const_obj2;
     auto result4 = fl::invoke(&TestClass::getValue, const_ptr);
     CHECK_EQ(42, result4);
+} 
+
+// Test fl::invoke with fl::Ptr smart pointers
+TEST_CASE("fl::invoke with Ptr smart pointers") {
+    struct TestPtrClass : public fl::Referent {
+        int value = 42;
+        int getValue() const { return value; }
+        void setValue(int v) { value = v; }
+        int add(int x) const { return value + x; }
+        int multiply(int x) { return value * x; }
+    };
+
+    // Create stack object and wrap with Ptr without tracking
+    TestPtrClass obj;
+    auto ptr = fl::Ptr<TestPtrClass>::NoTracking(obj);
+
+    // Member function: const getter
+    CHECK_EQ(42, fl::invoke(&TestPtrClass::getValue, ptr));
+
+    // Member function: setter
+    fl::invoke(&TestPtrClass::setValue, ptr, 123);
+    CHECK_EQ(123, obj.value);
+
+    // Member function with additional arg, const
+    CHECK_EQ(133, fl::invoke(&TestPtrClass::add, ptr, 10));
+
+    // Member function with additional arg, non-const
+    CHECK_EQ(246, fl::invoke(&TestPtrClass::multiply, ptr, 2));
+
+    // Member data pointer access
+    CHECK_EQ(123, fl::invoke(&TestPtrClass::value, ptr));
+
+    // Modify through member data pointer
+    fl::invoke(&TestPtrClass::value, ptr) = 999;
+    CHECK_EQ(999, obj.value);
 } 
