@@ -3,6 +3,10 @@ FastLED 3.10.2
   * 3D Perlin noise (`inoise8(x, y, z)`) range utilization improved from 72.9% to 88.6%
     * Significantly better quality for volumetric LED effects (3D fire, clouds, particles)
     * Uses industry-standard 12 edge vectors of a cube for optimal gradient coverage
+  * New high-resolution noise functions: `inoise8_hires(x)`, `inoise8_hires(x, y)`, `inoise8_hires(x, y, z)`
+    * Uses 16-bit precision internally, returns 8-bit values for drop-in replacement
+    * Alternative noise patterns with different coordinate scaling characteristics
+    * FxNoiseRing example updated to demonstrate usage
   * New LED chipset: SM16824E
     * 3-Wire
     * See also: https://github.com/FastLED/FastLED/issues/1941#issuecomment-2981643952
