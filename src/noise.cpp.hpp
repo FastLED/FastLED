@@ -652,6 +652,43 @@ uint8_t inoise8(uint16_t x) {
     return ans;
 }
 
+// High-resolution 8-bit noise functions using inoise16 internally
+uint8_t inoise8_hires(uint16_t x, uint16_t y, uint16_t z) {
+    // Convert to 32-bit coordinates for inoise16 (scale by 256 for better precision)
+    uint32_t xx = ((uint32_t)x) << 8;
+    uint32_t yy = ((uint32_t)y) << 8;
+    uint32_t zz = ((uint32_t)z) << 8;
+    
+    // Get 16-bit noise value
+    uint16_t noise16 = inoise16(xx, yy, zz);
+    
+    // Scale down to 8-bit (shift right by 8)
+    return noise16 >> 8;
+}
+
+uint8_t inoise8_hires(uint16_t x, uint16_t y) {
+    // Convert to 32-bit coordinates for inoise16 (scale by 256 for better precision)
+    uint32_t xx = ((uint32_t)x) << 8;
+    uint32_t yy = ((uint32_t)y) << 8;
+    
+    // Get 16-bit noise value
+    uint16_t noise16 = inoise16(xx, yy);
+    
+    // Scale down to 8-bit (shift right by 8)
+    return noise16 >> 8;
+}
+
+uint8_t inoise8_hires(uint16_t x) {
+    // Convert to 32-bit coordinates for inoise16 (scale by 256 for better precision)
+    uint32_t xx = ((uint32_t)x) << 8;
+    
+    // Get 16-bit noise value
+    uint16_t noise16 = inoise16(xx);
+    
+    // Scale down to 8-bit (shift right by 8)
+    return noise16 >> 8;
+}
+
 // struct q44 {
 //   uint8_t i:4;
 //   uint8_t f:4;

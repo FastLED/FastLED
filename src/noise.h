@@ -87,6 +87,30 @@ extern uint8_t inoise8(uint16_t x, uint16_t y);
 /// @param x x-axis coordinate on noise map (1D)
 extern uint8_t inoise8(uint16_t x);
 
+/// @name High-Resolution 8-Bit Noise Functions
+/// High-resolution versions that use inoise16() internally for improved range coverage.
+/// @{
+
+/// High-resolution 3D noise using inoise16() internally for maximum range coverage.
+/// @param x x-axis coordinate on noise map (3D)
+/// @param y y-axis coordinate on noise map (3D)
+/// @param z z-axis coordinate on noise map (3D)
+/// @returns scaled noise value as an unsigned integer, 0-255
+extern uint8_t inoise8_hires(uint16_t x, uint16_t y, uint16_t z);
+
+/// High-resolution 2D noise using inoise16() internally for maximum range coverage.
+/// @param x x-axis coordinate on noise map (2D)
+/// @param y y-axis coordinate on noise map (2D)
+/// @returns scaled noise value as an unsigned integer, 0-255
+extern uint8_t inoise8_hires(uint16_t x, uint16_t y);
+
+/// High-resolution 1D noise using inoise16() internally for maximum range coverage.
+/// @param x x-axis coordinate on noise map (1D)
+/// @returns scaled noise value as an unsigned integer, 0-255
+extern uint8_t inoise8_hires(uint16_t x);
+
+/// @} High-Resolution 8-Bit Noise Functions
+
 /// @} 8-Bit Scaled Noise Functions
 
 
