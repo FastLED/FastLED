@@ -20,6 +20,22 @@ FASTLED_USING_NAMESPACE
 #define cli()  __disable_irq(); __disable_fault_irq();
 #define sei() __enable_irq(); __enable_fault_irq();
 
+#elif defined(__STM32F4__)
+// For STM32F4xx family (including F401), use CMSIS interrupt macro
+#include <stdint.h> // for standard types
+
+
+#define cli() nvic_globalirq_disable()
+#define sei() nvic_globalirq_enable()
+
+#elif defined(STM32F401xE) || defined(STM32F401xC) || defined(STM32F401) || defined(STM32F4)
+#include "fl/stdint.h"
+
+#include "fl/namespace.h"
+
+#define cli() noInterrupts()
+#define sei() interrupts()
+
 #elif defined (__STM32F1__)
 
 #include "cm3_regs.h"
@@ -55,7 +71,7 @@ FASTLED_USING_NAMESPACE
 // pgmspace definitions
 #define PROGMEM
 
-#if !defined(STM32F1)
+#if !defined(STM32F1) && !defined(STM32F4)
 // The stm32duino core already defines these
 #define pgm_read_dword(addr) (*(const unsigned long *)(addr))
 #define pgm_read_dword_near(addr) pgm_read_dword(addr)
@@ -74,6 +90,12 @@ typedef volatile       uint8_t RwReg; /**< Read-Write 8-bit register (volatile u
 
 #if defined(STM32F2XX)
 #define F_CPU 120000000
+// *** F401/F4 ADD SUPPORT START ***
+#elif defined(STM32F401xE) || defined(STM32F401xC) || defined(STM32F401) || defined(__STM32F4__) || defined(STM32F4)
+// STM32F401 typically runs at 84MHz by default; set F_CPU accordingly
+#undef F_CPU
+#define F_CPU 84000000
+// *** F401/F4 ADD SUPPORT END ***
 #elif defined(STM32F1)
 // F_CPU is already defined on stm32duino, but it's not constant.
 #undef F_CPU
@@ -86,6 +108,7 @@ typedef volatile       uint8_t RwReg; /**< Read-Write 8-bit register (volatile u
 // Photon doesn't provide yield
 #define FASTLED_NEEDS_YIELD
 extern "C" void yield();
-#endif
 
 #endif // defined(STM32F10X_MD) || defined(STM32F2XX)
+
+#endif

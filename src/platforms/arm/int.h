@@ -14,6 +14,7 @@ namespace fl {
     // - Teensy 4.0 / 4.1 (iMXRT1062 Cortex-M7)
     // - Arduino UNO R4 WiFi (Renesas RA4M1)
     // - STM32F1 (Maple Mini and similar)
+    // - STM32F4
     // - Arduino GIGA R1 (STM32H747)
     // - Nordic nRF52 family (nRF52832, nRF52840, etc.)
     typedef short i16;

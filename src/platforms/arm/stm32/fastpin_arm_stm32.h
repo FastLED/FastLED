@@ -7,7 +7,7 @@
 #else
 
 #ifndef USE_NEW_STM32_PIN_DEFINITIONS
-#if defined(ARDUINO_BLUEPILL_F103C8) || defined(ARDUINO_MAPLE_MINI) || defined(ARDUINO_GENERIC_STM32F103T) || defined(STM32F103TBU6) || defined(STM32F103TB)
+#if defined(ARDUINO_BLUEPILL_F103C8) || defined(ARDUINO_MAPLE_MINI) || defined(ARDUINO_GENERIC_STM32F103T) || defined(STM32F103TBU6) || defined(STM32F103TB) || defined(STM32F401xE) || defined(STM32F401xC) || defined(STM32F401) || defined(__STM32F4__) || defined(STM32F4) 
 #define USE_NEW_STM32_PIN_DEFINITIONS
 #endif
 #endif

@@ -34,7 +34,7 @@
 #elif defined(__SAM3X8E__)
 // Include sam/due headers
 #include "platforms/arm/sam/led_sysdefs_arm_sam.h"
-#elif defined(STM32F10X_MD) || defined(__STM32F1__) || defined(STM32F2XX) || defined(STM32F1)
+#elif defined(STM32F10X_MD) || defined(__STM32F1__) || defined(STM32F2XX) || defined(STM32F1) || defined(STM32F401xE) || defined(STM32F401xC) || defined(STM32F401) || defined(__STM32F4__) || defined(STM32F4)
 #include "platforms/arm/stm32/led_sysdefs_arm_stm32.h"
 #elif defined(__SAMD21G18A__) || defined(__SAMD21J18A__) || defined(__SAMD21E17A__) || defined(__SAMD21E18A__) 
 #include "platforms/arm/d21/led_sysdefs_arm_d21.h"
