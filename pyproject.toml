@@ -26,7 +26,7 @@ dependencies = [
     "download",
     "httpx",
     "pytest-xdist",
-    "fastled>=1.3.38",
+    "fastled[full]>=1.4.01",
 ]
 
 [build-system]
