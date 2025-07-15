@@ -20,4 +20,11 @@ InlayHints:
   DeducedTypes: true
 
 Hover:
-  ShowAKA: true 
+  ShowAKA: true
+
+# Additional configuration to prevent PlatformIO conflicts
+Index:
+  Background: Build
+  
+Completion:
+  AllScopes: true 

@@ -8,6 +8,8 @@
     "unwantedRecommendations": [
         "ms-vscode.cpptools",
         "ms-vscode.cpptools-extension-pack",
+        "ms-vscode.cpptools-themes",
+        "ms-vscode.cmake-tools",
         "oracle.oracle-java",
         "redhat.java",
         "vscjava.vscode-gradle",
