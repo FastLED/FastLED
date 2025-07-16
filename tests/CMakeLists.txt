@@ -15,6 +15,25 @@ option(NO_THIN_LTO "Disable thin optimizations (archives and LTO)" OFF)
 # Option to disable dead code elimination for debugging or compatibility
 option(NO_DEAD_CODE_ELIMINATION "Disable dead code elimination (function/data sections + gc-sections)" OFF)
 
+# Build phase control options
+option(NO_LINK "Compile object files but skip linking executables" OFF)
+option(NO_BUILD "Skip compilation but perform linking (requires existing object files)" OFF)
+
+# Validate build phase options
+if(NO_LINK AND NO_BUILD)
+    message(FATAL_ERROR "NO_LINK and NO_BUILD cannot both be enabled simultaneously")
+endif()
+
+if(NO_LINK)
+    message(STATUS "Build mode: Compile-only (NO_LINK enabled)")
+    message(STATUS "  Object files will be created but executables will not be linked")
+elseif(NO_BUILD)
+    message(STATUS "Build mode: Link-only (NO_BUILD enabled)")
+    message(STATUS "  Existing object files will be linked but no compilation will occur")
+else()
+    message(STATUS "Build mode: Full build (compile + link)")
+endif()
+
 # Configure thin optimizations based on platform and user preference
 # Automatically disable on problematic combinations
 set(DISABLE_THIN_REASON "")
@@ -520,68 +539,181 @@ file(GLOB TEST_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/test_*.cpp")
 # Find test executables (only actual test executables, not libraries)
 file(GLOB TEST_BINARIES "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/test_*${CMAKE_EXECUTABLE_SUFFIX}")
 
-# Process source files - create executables that link to static library
-foreach(TEST_SOURCE ${TEST_SOURCES})
-    get_filename_component(TEST_NAME ${TEST_SOURCE} NAME_WE)
+# Process source files based on build mode
+if(NO_BUILD)
+    # NO_BUILD mode: Find existing object files and link them
+    file(GLOB EXISTING_OBJECTS "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/../CMakeFiles/test_*.dir/*.obj"
+                               "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/../CMakeFiles/test_*.dir/*.o")
     
-    # Create executable that links to static library
-    add_executable(${TEST_NAME} ${TEST_SOURCE})
-    target_link_libraries(${TEST_NAME} fastled test_shared_static)
-    
-    # Set the correct subsystem for Windows
-    if(WIN32)
-        # Add Windows debugging libraries for crash handler
-        target_link_libraries(${TEST_NAME} dbghelp psapi)
+    foreach(OBJECT_FILE ${EXISTING_OBJECTS})
+        get_filename_component(OBJECT_DIR ${OBJECT_FILE} DIRECTORY)
+        get_filename_component(CMAKE_TARGET_DIR ${OBJECT_DIR} NAME)
+        string(REGEX REPLACE "\\.dir$" "" TEST_NAME ${CMAKE_TARGET_DIR})
         
-        # Enable debug symbols for better stack traces
-        if(MSVC)
-            set_target_properties(${TEST_NAME} PROPERTIES
-                WIN32_EXECUTABLE FALSE
-                LINK_FLAGS "/SUBSYSTEM:CONSOLE /DEBUG:FULL /OPT:NOREF /OPT:NOICF"
-                COMPILE_FLAGS "/Zi /Od /RTC1")
-        else()
-            # For MinGW/Clang on Windows
-            if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-                set_target_properties(${TEST_NAME} PROPERTIES
-                    WIN32_EXECUTABLE FALSE
-                    LINK_FLAGS "-Xlinker /subsystem:console -g -O0")
-                target_compile_options(${TEST_NAME} PRIVATE -g -O0 -fno-omit-frame-pointer)
-            else()
-                set_target_properties(${TEST_NAME} PROPERTIES
-                    WIN32_EXECUTABLE FALSE)
-                target_compile_options(${TEST_NAME} PRIVATE -g -O0 -fno-omit-frame-pointer)
+        if(NOT TARGET ${TEST_NAME})
+            message(STATUS "Creating link-only target: ${TEST_NAME}")
+            # Create executable from existing object file
+            add_executable(${TEST_NAME} ${OBJECT_FILE})
+            target_link_libraries(${TEST_NAME} fastled test_shared_static)
+            
+            # Configure Windows-specific settings for NO_BUILD targets
+            if(WIN32)
+                # Add Windows debugging libraries for crash handler
+                target_link_libraries(${TEST_NAME} dbghelp psapi)
+                
+                # Enable debug symbols for better stack traces
+                if(MSVC)
+                    set_target_properties(${TEST_NAME} PROPERTIES
+                        WIN32_EXECUTABLE FALSE
+                        LINK_FLAGS "/SUBSYSTEM:CONSOLE /DEBUG:FULL /OPT:NOREF /OPT:NOICF")
+                else()
+                    # For MinGW/Clang on Windows
+                    if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+                        set_target_properties(${TEST_NAME} PROPERTIES
+                            WIN32_EXECUTABLE FALSE
+                            LINK_FLAGS "-Xlinker /subsystem:console -g -O0")
+                    else()
+                        set_target_properties(${TEST_NAME} PROPERTIES
+                            WIN32_EXECUTABLE FALSE)
+                    endif()
+                endif()
+                
+                # Ensure debug information is preserved
+                target_compile_definitions(${TEST_NAME} PRIVATE _DEBUG)
             endif()
+            
+            # Add static linking flags for NO_BUILD executables
+            if(NOT APPLE AND NOT CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+                target_link_options(${TEST_NAME} PRIVATE -static-libgcc -static-libstdc++)
+            endif()
+            
+            # Add libunwind for NO_BUILD executables
+            if(USE_LIBUNWIND)
+                target_link_libraries(${TEST_NAME} ${LIBUNWIND_LIBRARIES})
+                target_include_directories(${TEST_NAME} PRIVATE ${LIBUNWIND_INCLUDE_DIRS})
+            endif()
+            
+            set_target_properties(${TEST_NAME} PROPERTIES
+                LINKER_LANGUAGE CXX
+                CXX_STANDARD 17
+                CXX_STANDARD_REQUIRED ON
+            )
+            
+            # Add test to CTest for NO_BUILD targets
+            add_test(NAME ${TEST_NAME} COMMAND ${TEST_NAME})
+        endif()
+    endforeach()
+    
+    if(NOT EXISTING_OBJECTS)
+        message(WARNING "NO_BUILD mode enabled but no existing object files found in ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/../CMakeFiles/")
+        message(STATUS "Expected object files matching: test_*.dir/*.obj or test_*.dir/*.o")
+        message(STATUS "To create object files first, run: cmake -DNO_LINK=ON . && make")
+    else()
+        list(LENGTH EXISTING_OBJECTS OBJECT_COUNT)
+        message(STATUS "Found ${OBJECT_COUNT} existing object files for linking")
+    endif()
+else()
+    # Normal build or NO_LINK mode: Process source files
+    foreach(TEST_SOURCE ${TEST_SOURCES})
+        get_filename_component(TEST_NAME ${TEST_SOURCE} NAME_WE)
+        
+        if(NO_LINK)
+            # NO_LINK mode: Create object library (compile but don't link)
+            message(STATUS "Creating compile-only target: ${TEST_NAME}")
+            add_library(${TEST_NAME} OBJECT ${TEST_SOURCE})
+            # Object libraries can still link to other libraries for header dependencies
+            target_link_libraries(${TEST_NAME} fastled test_shared_static)
+        else()
+            # Normal mode: Create executable that links to static library
+            add_executable(${TEST_NAME} ${TEST_SOURCE})
+            target_link_libraries(${TEST_NAME} fastled test_shared_static)
+        endif()
+    
+        # Configure target properties for both normal and NO_LINK modes
+        if(NOT NO_LINK)
+            # Set the correct subsystem for Windows (executables only)
+            if(WIN32)
+                # Add Windows debugging libraries for crash handler
+                target_link_libraries(${TEST_NAME} dbghelp psapi)
+                
+                # Enable debug symbols for better stack traces
+                if(MSVC)
+                    set_target_properties(${TEST_NAME} PROPERTIES
+                        WIN32_EXECUTABLE FALSE
+                        LINK_FLAGS "/SUBSYSTEM:CONSOLE /DEBUG:FULL /OPT:NOREF /OPT:NOICF"
+                        COMPILE_FLAGS "/Zi /Od /RTC1")
+                else()
+                    # For MinGW/Clang on Windows
+                    if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+                        set_target_properties(${TEST_NAME} PROPERTIES
+                            WIN32_EXECUTABLE FALSE
+                            LINK_FLAGS "-Xlinker /subsystem:console -g -O0")
+                        target_compile_options(${TEST_NAME} PRIVATE -g -O0 -fno-omit-frame-pointer)
+                    else()
+                        set_target_properties(${TEST_NAME} PROPERTIES
+                            WIN32_EXECUTABLE FALSE)
+                        target_compile_options(${TEST_NAME} PRIVATE -g -O0 -fno-omit-frame-pointer)
+                    endif()
+                endif()
+                
+                # Ensure debug information is preserved
+                target_compile_definitions(${TEST_NAME} PRIVATE _DEBUG)
+            endif()
+            
+            # Add static linking flags for executables
+            if(NOT APPLE AND NOT CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+                target_link_options(${TEST_NAME} PRIVATE -static-libgcc -static-libstdc++)
+            endif()
+            
+            # Add libunwind for executables
+            if(USE_LIBUNWIND)
+                target_link_libraries(${TEST_NAME} ${LIBUNWIND_LIBRARIES})
+                target_include_directories(${TEST_NAME} PRIVATE ${LIBUNWIND_INCLUDE_DIRS})
+            endif()
+            
+            # Add test to CTest (executables only)
+            add_test(NAME ${TEST_NAME} COMMAND ${TEST_NAME})
         endif()
         
-        # Ensure debug information is preserved
-        target_compile_definitions(${TEST_NAME} PRIVATE _DEBUG)
-    endif()
-    
-    # Add C++-specific flags only for C++ files
-    target_compile_options(fastled PRIVATE $<$<COMPILE_LANGUAGE:CXX>:${CXX_SPECIFIC_FLAGS}>)
-    if(USE_LIBUNWIND)
-        target_link_libraries(${TEST_NAME} ${LIBUNWIND_LIBRARIES})
-        target_include_directories(${TEST_NAME} PRIVATE ${LIBUNWIND_INCLUDE_DIRS})
-    endif()
-    target_include_directories(${TEST_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-    set_target_properties(${TEST_NAME} PROPERTIES
-        CXX_STANDARD 17
-        CXX_STANDARD_REQUIRED ON
-    )
-    # Add static linking flags and debug flags for test executables
-    if(NOT APPLE AND NOT CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-        target_link_options(${TEST_NAME} PRIVATE -static-libgcc -static-libstdc++)
-    endif()
-    target_compile_options(${TEST_NAME} PRIVATE ${UNIT_TEST_COMPILE_FLAGS})
-    # Add C++-specific flags only for C++ files
-    target_compile_options(${TEST_NAME} PRIVATE $<$<COMPILE_LANGUAGE:CXX>:${UNIT_TEST_CXX_FLAGS}>)
-    target_compile_definitions(${TEST_NAME} PRIVATE 
-        ${COMMON_COMPILE_DEFINITIONS}
-        $<$<BOOL:${USE_LIBUNWIND}>:USE_LIBUNWIND>
-    )
-    
-    add_test(NAME ${TEST_NAME} COMMAND ${TEST_NAME})
-endforeach()
+        # Configure common properties for both executables and object libraries
+        target_include_directories(${TEST_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+        set_target_properties(${TEST_NAME} PROPERTIES
+            CXX_STANDARD 17
+            CXX_STANDARD_REQUIRED ON
+        )
+        target_compile_options(${TEST_NAME} PRIVATE ${UNIT_TEST_COMPILE_FLAGS})
+        # Add C++-specific flags only for C++ files
+        target_compile_options(${TEST_NAME} PRIVATE $<$<COMPILE_LANGUAGE:CXX>:${UNIT_TEST_CXX_FLAGS}>)
+        target_compile_definitions(${TEST_NAME} PRIVATE 
+            ${COMMON_COMPILE_DEFINITIONS}
+            $<$<BOOL:${USE_LIBUNWIND}>:USE_LIBUNWIND>
+        )
+    endforeach()
+endif()
+
+# Add C++-specific flags to fastled library
+target_compile_options(fastled PRIVATE $<$<COMPILE_LANGUAGE:CXX>:${CXX_SPECIFIC_FLAGS}>)
+
+# Build summary
+if(NO_LINK)
+    get_property(ALL_TARGETS DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY BUILDSYSTEM_TARGETS)
+    list(FILTER ALL_TARGETS INCLUDE REGEX "^test_")
+    list(LENGTH ALL_TARGETS TARGET_COUNT)
+    message(STATUS "Build summary: Created ${TARGET_COUNT} object library targets (NO_LINK mode)")
+    message(STATUS "  Object files will be in: ${CMAKE_BINARY_DIR}/CMakeFiles/test_*/")
+    message(STATUS "  To link executables later, run: cmake -DNO_BUILD=ON . && make")
+elseif(NO_BUILD)
+    get_property(ALL_TARGETS DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY BUILDSYSTEM_TARGETS)
+    list(FILTER ALL_TARGETS INCLUDE REGEX "^test_")
+    list(LENGTH ALL_TARGETS TARGET_COUNT)
+    message(STATUS "Build summary: Created ${TARGET_COUNT} executable targets from existing objects (NO_BUILD mode)")
+    message(STATUS "  Executables will be in: ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/")
+else()
+    get_property(ALL_TARGETS DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY BUILDSYSTEM_TARGETS)
+    list(FILTER ALL_TARGETS INCLUDE REGEX "^test_")
+    list(LENGTH ALL_TARGETS TARGET_COUNT)
+    message(STATUS "Build summary: Created ${TARGET_COUNT} executable targets (full build mode)")
+endif()
 
 # Process remaining binaries (those without corresponding source files)
 option(CLEAN_ORPHANED_BINARIES "Remove orphaned test binaries" ON)
