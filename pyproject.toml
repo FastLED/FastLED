@@ -6,10 +6,8 @@ readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
     "platformio==6.1.18",
-    "fastled-wasm",
     "python-dateutil",
     "ruff",
-    "mypy",
     "pyright",
     "types-python-dateutil",
     "clang-format",
@@ -26,7 +24,7 @@ dependencies = [
     "download",
     "httpx",
     "pytest-xdist",
-    "fastled[full]>=1.4.01",
+    "fastled>=1.4.30",
 ]
 
 [build-system]

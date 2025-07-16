@@ -49,7 +49,7 @@
             "type": "python",
             "request": "launch",
             "module": "fastled",
-            "args": ["${file}", "--no-auto-updates"],
+            "args": ["${file}", "--background-update", "--app", "--debug"],
             "console": "integratedTerminal",
             "cwd": "${workspaceFolder}",
             "justMyCode": false
