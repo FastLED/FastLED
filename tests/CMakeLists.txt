@@ -9,12 +9,50 @@ project(FastLED_Tests)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# Force creation of thin archives (instead of full .a files) only for non apple builds
-if(NOT APPLE)
+# Option to disable thin optimizations (archives + LTO) for debugging or compatibility
+option(NO_THIN_LTO "Disable thin optimizations (archives and LTO)" OFF)
+
+# Configure thin optimizations based on platform and user preference
+# Automatically disable on problematic combinations
+set(DISABLE_THIN_REASON "")
+if(NO_THIN_LTO)
+    set(DISABLE_THIN_REASON "NO_THIN_LTO option")
+elseif(APPLE)
+    set(DISABLE_THIN_REASON "Apple platform")
+elseif(WIN32 AND CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+    set(DISABLE_THIN_REASON "Windows + Clang (known linking issues)")
+endif()
+
+if(DISABLE_THIN_REASON)
+    message(STATUS "Thin optimizations disabled: ${DISABLE_THIN_REASON}")
+    if(WIN32 AND CMAKE_CXX_COMPILER_ID MATCHES "Clang" AND NOT NO_THIN_LTO)
+        message(STATUS "  Use -DNO_THIN_LTO=ON to explicitly control this setting")
+    endif()
+    
+    # Disable thin LTO
+    set(CMAKE_INTERPROCEDURAL_OPTIMIZATION OFF)
+    # Remove any existing LTO flags from compiler options
+    string(REPLACE "-flto=thin" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+    string(REPLACE "-flto" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+    
+    # Use standard archives (not thin archives)
+    # CMAKE uses default archive commands when not explicitly set
+else()
+    message(STATUS "Enabling thin optimizations (compatible platform/compiler combination)")
+    
+    # Enable thin archives for faster linking
     set(CMAKE_CXX_ARCHIVE_CREATE "<CMAKE_AR> rcT <TARGET> <OBJECTS>")
     set(CMAKE_CXX_ARCHIVE_APPEND "<CMAKE_AR> rT <TARGET> <OBJECTS>")
     set(CMAKE_CXX_ARCHIVE_FINISH "<CMAKE_RANLIB> <TARGET>")
-    message(STATUS "Using thin archives for Clang build")
+    
+    # Enable thin LTO for supported compilers
+    if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+        message(STATUS "Enabling thin LTO for Clang compiler")
+        set(CMAKE_INTERPROCEDURAL_OPTIMIZATION ON)
+        # Use thin LTO for faster linking
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -flto=thin")
+        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -flto=thin")
+    endif()
 endif()
 
 # Enable parallel compilation with aggressive parallelization
