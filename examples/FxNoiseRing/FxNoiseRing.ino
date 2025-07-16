@@ -22,6 +22,12 @@
 #include "FastLED.h"
 #include "sensors/pir.h"
 #include "timer.h"
+#include "fl/sstream.h"
+#include "fl/assert.h"
+
+
+
+
 
 #define LED_PIN 2
 #define COLOR_ORDER GRB  // Color order matters for a real device, web-compiler will ignore this.
@@ -53,7 +59,6 @@ float current_brightness = 0;
 // Save a pointer to the controller so that we can modify the dither in real time.
 CLEDController* controller = nullptr;
 
-
 void setup() {
     Serial.begin(115200);
     // ScreenMap is purely something that is needed for the sketch to correctly
@@ -66,29 +71,38 @@ void setup() {
                 .setScreenMap(xyMap);
     FastLED.setBrightness(brightness);
     pir.activate(millis());  // Activate the PIR sensor on startup.
+    
 }
 
 void draw(uint32_t now) {
     double angle_offset = double(now) / 32000.0 * 2 * M_PI;
     now = (now << timeBitshift.as<int>()) * timescale.as<double>();
     // go in circular formation and set the leds
+
     for (int i = 0; i < NUM_LEDS; i++) {
-        // Using inoise8_hires for optimal 8-bit range coverage with 16-bit precision internally.
-        // This provides better range utilization than inoise16 >> 8 scaling.
+        // Sorry this is a little convoluted but we are applying noise
+        // in the 16-bit space and then mapping it back to 8-bit space.
+        // All the constants were experimentally determined.
         float angle = i * 2 * M_PI / NUM_LEDS + angle_offset;
         float x = cos(angle);
         float y = sin(angle);
         x *= 0xffff * scale.as<double>();
         y *= 0xffff * scale.as<double>();
-        uint8_t noise = inoise8_hires(x, y, now);
-        uint8_t noise2 = inoise8_hires(x, y, 0xfff + now);
-        uint8_t noise3 = inoise8_hires(x, y, 0xffff + now);
+        uint16_t noise = inoise16(x, y, now);
+        uint16_t noise2 = inoise16(x, y, 0xfff + now);
+        uint16_t noise3 = inoise16(x, y, 0xffff + now);
+        noise3 = noise3 >> 8;
         int16_t noise4 = map(noise3, 0, 255, -64, 255);
         if (noise4 < 0) {  // Clamp negative values to 0.
             noise4 = 0;
         }
-        // Direct 8-bit values from inoise8_hires - no bit shifting needed!
-        leds[i] = CHSV(noise, MAX(128, noise2), noise4);
+        //ss << "noise: " << noise << " noise2: " << noise2 << " noise3: " << noise3 << " noise4: " << noise4 << "\n";
+        // Shift back to 8-bit space.
+        u8 hue = noise >> 8;
+        u8 sat = MAX(128, noise2 >> 8);
+        u8 val = noise4;
+        // leds[i] = CHSV(noise >> 8, MAX(128, noise2 >> 8), noise4);
+        leds[i] = CHSV(hue, sat, val);
     }
 }
 
@@ -100,5 +114,7 @@ void loop() {
     FastLED.setBrightness(bri * brightness.as<float>());
     // Apply leds generation to the leds.
     draw(now);
+    
+    
     FastLED.show();
 }

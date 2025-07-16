@@ -75,7 +75,7 @@ public:
 	inline void strobe() __attribute__ ((always_inline)) {  }
 	inline void toggle() __attribute__ ((always_inline)) { }
 
-	inline void hi(FASTLED_REGISTER port_ptr_t port) __attribute__ ((always_inline)) {}
+	inline void hi(FASTLED_REGISTER port_ptr_t port) __attribute__ ((always_inline)) { FL_UNUSED(port); }
 	inline void lo(FASTLED_REGISTER port_ptr_t port) __attribute__ ((always_inline)) { FL_UNUSED(port); }
 	inline void set(FASTLED_REGISTER port_t val) __attribute__ ((always_inline)) { FL_UNUSED(val); }
 
