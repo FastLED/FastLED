@@ -44,7 +44,67 @@ public:
 	virtual bool isSelected() = 0;  ///< Check if this object is currently selected
 };
 
-#if !defined(FASTLED_NO_PINMAP)
+#if defined(FASTLED_STUB_IMPL) || defined(__EMSCRIPTEN__)
+
+
+class Pin : public Selectable {
+
+
+	void _init() {
+	}
+
+public:
+	Pin(int pin) { FL_UNUSED(pin); }
+
+
+	void setPin(int pin) { FL_UNUSED(pin); }
+
+	typedef volatile RwReg * port_ptr_t;
+	typedef RwReg port_t;
+
+	inline void setOutput() { /* NOOP */ }
+	inline void setInput() { /* NOOP */ }
+	inline void setInputPullup() { /* NOOP */ }
+
+
+	inline void hi() __attribute__ ((always_inline)) {}
+	/// Set the pin state to `LOW`
+	inline void lo() __attribute__ ((always_inline)) {}
+
+
+	inline void strobe() __attribute__ ((always_inline)) {  }
+	inline void toggle() __attribute__ ((always_inline)) { }
+
+	inline void hi(FASTLED_REGISTER port_ptr_t port) __attribute__ ((always_inline)) {}
+	inline void lo(FASTLED_REGISTER port_ptr_t port) __attribute__ ((always_inline)) { FL_UNUSED(port); }
+	inline void set(FASTLED_REGISTER port_t val) __attribute__ ((always_inline)) { FL_UNUSED(val); }
+
+	inline void fastset(FASTLED_REGISTER port_ptr_t port, FASTLED_REGISTER port_t val) __attribute__ ((always_inline)) { FL_UNUSED(port); FL_UNUSED(val); }
+
+	port_t hival() __attribute__ ((always_inline)) { return 0; }
+	port_t loval() __attribute__ ((always_inline)) { return 0; }
+	port_ptr_t  port() __attribute__ ((always_inline)) {
+		static volatile RwReg port = 0;
+		return &port;
+	}
+	port_t mask() __attribute__ ((always_inline)) { return 0xff; }
+
+	virtual void select() override { hi(); }
+	virtual void release() override { lo(); }
+	virtual bool isSelected() override { return true; }
+};
+
+class OutputPin : public Pin {
+public:
+	OutputPin(int pin) : Pin(pin) { setOutput(); }
+};
+
+class InputPin : public Pin {
+public:
+	InputPin(int pin) : Pin(pin) { setInput(); }
+};
+
+#elif !defined(FASTLED_NO_PINMAP)
 
 /// Naive fallback solution for low level pin access
 class Pin : public Selectable {
@@ -144,19 +204,23 @@ public:
 #else
 // This is the empty code version of the raw pin class, method bodies should be filled in to Do The Right Thing[tm] when making this
 // available on a new platform
+
 class Pin : public Selectable {
 	volatile RwReg *mPort;
 	volatile RoReg *mInPort;
 	RwReg mPinMask;
 	fl::u8 mPin;
 
+	RwReg mPortFake = 0;
+	RoReg mInPortFake = 0;
+
 
 
 	void _init() {
 		// TODO: fill in init on a new platform
 		mPinMask = 0;
-		mPort = NULL;
-		mInPort = NULL;
+		mPort = &mPortFake;
+		mInPort = &mInPortFake;
 	}
 
 public:
