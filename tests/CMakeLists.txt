@@ -12,6 +12,9 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # Option to disable thin optimizations (archives + LTO) for debugging or compatibility
 option(NO_THIN_LTO "Disable thin optimizations (archives and LTO)" OFF)
 
+# Option to disable dead code elimination for debugging or compatibility
+option(NO_DEAD_CODE_ELIMINATION "Disable dead code elimination (function/data sections + gc-sections)" OFF)
+
 # Configure thin optimizations based on platform and user preference
 # Automatically disable on problematic combinations
 set(DISABLE_THIN_REASON "")
@@ -52,6 +55,37 @@ else()
         # Use thin LTO for faster linking
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -flto=thin")
         set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -flto=thin")
+    endif()
+endif()
+
+# Configure dead code elimination for smaller binaries
+if(NO_DEAD_CODE_ELIMINATION)
+    message(STATUS "Dead code elimination disabled via NO_DEAD_CODE_ELIMINATION option")
+    set(DEAD_CODE_ELIMINATION_FLAGS "")
+    set(DEAD_CODE_ELIMINATION_LINKER_FLAGS "")
+else()
+    message(STATUS "Enabling dead code elimination for smaller binaries")
+    # Enable function and data sections for dead code elimination
+    set(DEAD_CODE_ELIMINATION_FLAGS "-ffunction-sections" "-fdata-sections")
+    
+    # Enable garbage collection of unused sections (linker flag)
+    if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+        if(WIN32)
+            # Windows with MinGW/Clang uses different syntax
+            set(DEAD_CODE_ELIMINATION_LINKER_FLAGS "-Wl,--gc-sections")
+        else()
+            # Unix-like systems
+            set(DEAD_CODE_ELIMINATION_LINKER_FLAGS "-Wl,--gc-sections")
+        endif()
+    elseif(MSVC)
+        # MSVC uses /OPT:REF for similar functionality
+        set(DEAD_CODE_ELIMINATION_LINKER_FLAGS "/OPT:REF")
+    endif()
+    
+    if(DEAD_CODE_ELIMINATION_LINKER_FLAGS)
+        message(STATUS "Using linker dead code elimination: ${DEAD_CODE_ELIMINATION_LINKER_FLAGS}")
+    else()
+        message(STATUS "Linker dead code elimination not available for this compiler")
     endif()
 endif()
 
@@ -123,6 +157,13 @@ else()
     else()
         message(STATUS "Neither mold nor lld-link found. Using system default linker.")
     endif()
+endif()
+
+# Apply dead code elimination linker flags globally
+if(DEAD_CODE_ELIMINATION_LINKER_FLAGS)
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${DEAD_CODE_ELIMINATION_LINKER_FLAGS}")
+    set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} ${DEAD_CODE_ELIMINATION_LINKER_FLAGS}")
+    set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} ${DEAD_CODE_ELIMINATION_LINKER_FLAGS}")
 endif()
 
 # Set build type to Debug
@@ -206,6 +247,7 @@ set(COMMON_COMPILE_FLAGS
     ${FAST_DEBUG_INFO}
     ${FAST_FRAME_POINTER}
     ${FAST_DEBUG_OPT}
+    ${DEAD_CODE_ELIMINATION_FLAGS}
     -Werror=return-type
     -Werror=missing-declarations
     -Werror=redundant-decls
@@ -295,6 +337,7 @@ set(UNIT_TEST_COMPILE_FLAGS
     ${FAST_DEBUG_INFO}
     ${FAST_FRAME_POINTER}
     ${FAST_DEBUG_OPT}
+    ${DEAD_CODE_ELIMINATION_FLAGS}
     -Werror=return-type
     -Werror=missing-declarations
     #-Werror=redundant-decls
