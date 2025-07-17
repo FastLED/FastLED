@@ -129,20 +129,82 @@ endif()
 
 set(CMAKE_BUILD_PARALLEL_LEVEL ${PARALLEL_JOBS})
 
-# Check for ccache to speed up compilation
-find_program(CCACHE_FOUND ccache)
-if(CCACHE_FOUND)
-    message(STATUS "Using ccache: ${CCACHE_FOUND}")
-    set(CMAKE_CXX_COMPILER_LAUNCHER ${CCACHE_FOUND})
-    set(CMAKE_C_COMPILER_LAUNCHER ${CCACHE_FOUND})
-    # Set ccache options for better performance
-    set(ENV{CCACHE_SLOPPINESS} time_macros)
-    set(ENV{CCACHE_COMPRESS} true)
-    # Additional ccache optimizations for faster builds
-    set(ENV{CCACHE_MAXSIZE} 10G)
-    set(ENV{CCACHE_DIR} ${CMAKE_BINARY_DIR}/ccache)
+# Compiler caching for faster builds - prefer sccache over ccache
+option(PREFER_SCCACHE "Prefer sccache over ccache for compilation caching" ON)
+
+set(CACHE_TOOL_FOUND FALSE)
+set(CACHE_TOOL_NAME "")
+set(CACHE_TOOL_PATH "")
+
+if(PREFER_SCCACHE)
+    # Try to find sccache via Python/uv installation first
+    find_program(SCCACHE_PYTHON_FOUND sccache HINTS ${CMAKE_CURRENT_SOURCE_DIR}/../.venv/bin ${CMAKE_CURRENT_SOURCE_DIR}/../.venv/Scripts)
+    
+    if(SCCACHE_PYTHON_FOUND)
+        set(CACHE_TOOL_FOUND TRUE)
+        set(CACHE_TOOL_NAME "sccache (Python)")
+        set(CACHE_TOOL_PATH ${SCCACHE_PYTHON_FOUND})
+    else()
+        # Try system-installed sccache
+        find_program(SCCACHE_SYSTEM_FOUND sccache)
+        if(SCCACHE_SYSTEM_FOUND)
+            set(CACHE_TOOL_FOUND TRUE)
+            set(CACHE_TOOL_NAME "sccache (system)")
+            set(CACHE_TOOL_PATH ${SCCACHE_SYSTEM_FOUND})
+        endif()
+    endif()
+endif()
+
+# Fall back to ccache if sccache not found or not preferred
+if(NOT CACHE_TOOL_FOUND)
+    find_program(CCACHE_FOUND ccache)
+    if(CCACHE_FOUND)
+        set(CACHE_TOOL_FOUND TRUE)
+        set(CACHE_TOOL_NAME "ccache")
+        set(CACHE_TOOL_PATH ${CCACHE_FOUND})
+    endif()
+endif()
+
+# Configure the found cache tool
+if(CACHE_TOOL_FOUND)
+    message(STATUS "Using ${CACHE_TOOL_NAME}: ${CACHE_TOOL_PATH}")
+    set(CMAKE_CXX_COMPILER_LAUNCHER ${CACHE_TOOL_PATH})
+    set(CMAKE_C_COMPILER_LAUNCHER ${CACHE_TOOL_PATH})
+    
+    # Configure cache tool settings
+    if(CACHE_TOOL_NAME MATCHES "sccache")
+        # sccache configuration
+        message(STATUS "Configuring sccache for optimal performance")
+        set(ENV{SCCACHE_CACHE_SIZE} "2G")
+        set(ENV{SCCACHE_DIR} "${CMAKE_BINARY_DIR}/sccache")
+        # Enable local disk cache (fastest option)
+        set(ENV{SCCACHE_CACHE} "local")
+        # Simple activity indicator
+        set(ENV{SCCACHE_LOG} "warn")
+        message(STATUS "sccache: Compiler caching active - builds will show cache hits/misses")
+        
+        # Cross-platform optimizations
+        if(WIN32)
+            set(ENV{SCCACHE_CACHE_MULTIPART_UPLOAD} "true")
+        endif()
+        
+    elseif(CACHE_TOOL_NAME MATCHES "ccache")
+        # ccache configuration
+        message(STATUS "Configuring ccache for optimal performance")
+        set(ENV{CCACHE_SLOPPINESS} "time_macros")
+        set(ENV{CCACHE_COMPRESS} "true")
+        set(ENV{CCACHE_MAXSIZE} "2G")
+        set(ENV{CCACHE_DIR} "${CMAKE_BINARY_DIR}/ccache")
+        # Enable more aggressive caching
+        set(ENV{CCACHE_HASHDIR} "false")
+        set(ENV{CCACHE_NOHASHDIR} "true")
+    endif()
+    
 else()
-    message(STATUS "ccache not found. Install ccache for faster incremental builds.")
+    message(STATUS "No compiler cache found. Install sccache (uv add sccache) or ccache for faster builds")
+    if(PREFER_SCCACHE)
+        message(STATUS "  Recommended: Run 'uv add sccache' for cross-platform caching")
+    endif()
 endif()
 
 # Enable parallel compilation within individual files

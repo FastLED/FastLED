@@ -25,6 +25,7 @@ dependencies = [
     "httpx",
     "pytest-xdist",
     "fastled>=1.4.30",
+    "sccache>=0.10.0",
 ]
 
 [build-system]
