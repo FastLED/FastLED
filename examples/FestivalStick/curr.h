@@ -341,13 +341,13 @@ void setup() {
     waveArgs.speed = 0.16f;                          // Wave propagation speed
     waveArgs.dampening = 6.0f;                       // Wave energy loss
     waveArgs.x_cyclical = true;                      // Enable cylindrical wrapping!
-    waveArgs.crgbMap = WaveCrgbGradientMapPtr::New(waveBluepal); // Default color palette
+    waveArgs.crgbMap = fl::make_shared<WaveCrgbGradientMap>(waveBluepal); // Default color palette
     
     // Create wave effect with cylindrical mapping
-    waveFx = NewPtr<WaveFx>(xyRect, waveArgs);
+    waveFx = fl::make_shared<WaveFx>(xyRect, waveArgs);
     
     // Create blender for wave effects (allows multiple wave layers in future)
-    waveBlend = NewPtr<Blend2d>(xyRect);
+    waveBlend = fl::make_shared<Blend2d>(xyRect);
     waveBlend->add(waveFx);
     
     // Initialize Animartrix effect
@@ -708,7 +708,7 @@ void drawWave(uint32_t now) {
     
     // Update wave color palette
     CRGBPalette16 currentPalette = getWavePalette();
-    WaveCrgbMapPtr newCrgbMap = WaveCrgbGradientMapPtr::New(currentPalette);
+    WaveCrgbMapPtr newCrgbMap = fl::make_shared<WaveCrgbGradientMap>(currentPalette);
     waveFx->setCrgbMap(newCrgbMap);
     
     // Check if manual trigger button was pressed

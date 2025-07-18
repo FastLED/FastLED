@@ -29,7 +29,7 @@
 #include <FastLED.h>
 #include "fl/bytestreammemory.h"
 #include "fx/fx_engine.h"
-#include "fl/ptr.h"
+#include "fl/memory.h"
 #include "fx/video.h"
 #include "fl/dbg.h"
 
@@ -83,7 +83,7 @@ void setup() {
     FastLED.setBrightness(BRIGHTNESS);
 
     // Create and fill the ByteStreamMemory with test data
-    memoryStream = ByteStreamMemoryPtr::New(BUFFER_SIZE*sizeof(CRGB));
+    memoryStream = fl::make_shared<ByteStreamMemory>(BUFFER_SIZE*sizeof(CRGB));
 
     video.beginStream(memoryStream);
     // Add the video effect to the FxEngine

@@ -102,7 +102,7 @@ WaveFx::Args CreateArgsLower() {
     out.auto_updates = true;                    // Automatically update the simulation each frame
     out.speed = 0.18f;                          // Wave propagation speed
     out.dampening = 9.0f;                       // How quickly waves lose energy
-    out.crgbMap = WaveCrgbGradientMapPtr::New(electricBlueFirePal);  // Color palette for this wave
+    out.crgbMap = fl::make_shared<WaveCrgbGradientMap>(electricBlueFirePal);  // Color palette for this wave
     return out;
 }
 
@@ -114,7 +114,7 @@ WaveFx::Args CreateArgsUpper() {
     out.auto_updates = true;                    // Automatically update the simulation each frame
     out.speed = 0.25f;                          // Wave propagation speed (faster than lower)
     out.dampening = 3.0f;                       // How quickly waves lose energy (less than lower)
-    out.crgbMap = WaveCrgbGradientMapPtr::New(electricGreenFirePal);  // Color palette for this wave
+    out.crgbMap = fl::make_shared<WaveCrgbGradientMap>(electricGreenFirePal);  // Color palette for this wave
     return out;
 }
 

@@ -24,7 +24,7 @@ WaveFx::Args CreateArgsLower() {
     out.auto_updates = true;
     out.speed = 0.18f;
     out.dampening = 9.0f;
-    out.crgbMap = WaveCrgbGradientMapPtr::New(electricBlueFirePal);
+    out.crgbMap = fl::make_shared<WaveCrgbGradientMap>(electricBlueFirePal);
     return out;
 }
 
@@ -35,7 +35,7 @@ WaveFx::Args CreateArgsUpper() {
     out.auto_updates = true;
     out.speed = 0.25f;
     out.dampening = 3.0f;
-    out.crgbMap = WaveCrgbGradientMapPtr::New(electricGreenFirePal);
+    out.crgbMap = fl::make_shared<WaveCrgbGradientMap>(electricGreenFirePal);
     return out;
 }
 
@@ -44,15 +44,15 @@ WaveEffect NewWaveSimulation2D(const XYMap xymap) {
     XYMap xy_rect =
         XYMap::constructRectangularGrid(xymap.getWidth(), xymap.getHeight());
     Blend2dPtr fxBlend =
-        NewPtr<Blend2d>(xymap); // Final transformation goes to the blend stack.
+        fl::make_shared<Blend2d>(xymap); // Final transformation goes to the blend stack.
     int width = xymap.getWidth();
     int height = xymap.getHeight();
     XYMap xyRect(width, height, false);
     WaveFx::Args args_lower = CreateArgsLower();
     WaveFx::Args args_upper = CreateArgsUpper();
-    WaveFxPtr wave_fx_low = NewPtr<WaveFx>(xy_rect, args_lower);
-    WaveFxPtr wave_fx_high = NewPtr<WaveFx>(xy_rect, args_upper);
-    Blend2dPtr blend_stack = NewPtr<Blend2d>(xymap);
+    WaveFxPtr wave_fx_low = fl::make_shared<WaveFx>(xy_rect, args_lower);
+    WaveFxPtr wave_fx_high = fl::make_shared<WaveFx>(xy_rect, args_upper);
+    Blend2dPtr blend_stack = fl::make_shared<Blend2d>(xymap);
     blend_stack->add(wave_fx_low);
     blend_stack->add(wave_fx_high);
     WaveEffect out = {

@@ -63,7 +63,7 @@ using namespace fl;
 #define REVERSE_DIRECTION false
 
 CRGB leds[NUM_LEDS];
-Fire2012Ptr fire = Fire2012Ptr::New(NUM_LEDS, COOLING, SPARKING, REVERSE_DIRECTION);
+Fire2012Ptr fire = fl::make_shared<Fire2012>(NUM_LEDS, COOLING, SPARKING, REVERSE_DIRECTION);
 
 void setup() {
   ScreenMap screenMap = ScreenMap::DefaultStrip(NUM_LEDS, 1.5, .4);
