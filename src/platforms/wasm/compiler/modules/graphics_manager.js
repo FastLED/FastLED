@@ -77,12 +77,14 @@ function createShaders() {
 export class GraphicsManager {
   /**
    * Creates a new GraphicsManager instance
-   * @param {string} canvasId - HTML canvas element ID for rendering
-   * @param {ScreenMapData} screenMap - Screen coordinate mapping data
-   * @param {Object} [args={}] - Additional configuration options
-   * @param {boolean} [args.usePixelatedRendering=true] - Whether to use pixelated rendering
+   * @param {Object} graphicsArgs - Configuration options
+   * @param {string} graphicsArgs.canvasId - ID of the canvas element to render to
+   * @param {Object} [graphicsArgs.threeJsModules] - Three.js modules (unused but kept for consistency)
+   * @param {boolean} [graphicsArgs.usePixelatedRendering=true] - Whether to use pixelated rendering
    */
-  constructor(canvasId, screenMap, args = {}) {
+  constructor(graphicsArgs) {
+    const { canvasId, usePixelatedRendering = true } = graphicsArgs;
+
     /** @type {string} */
     this.canvasId = canvasId;
 
@@ -108,10 +110,10 @@ export class GraphicsManager {
     this.texData = null;
 
     /** @type {ScreenMapData} */
-    this.screenMap = screenMap;
+    this.screenMap = null;
 
     /** @type {Object} */
-    this.args = args;
+    this.args = { usePixelatedRendering };
 
     /** @type {number} */
     this.texWidth = 0;

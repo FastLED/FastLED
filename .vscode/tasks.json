@@ -304,6 +304,63 @@
             },
             "detail": "Run the current .ino file with FastLED web compiler (alias for convenience)",
             "problemMatcher": []
+        },
+        {
+            "type": "shell",
+            "label": "Run FastLED (Debug)",
+            "command": "uv",
+            "args": [
+                "run",
+                "fastled",
+                "${file}",
+                "--debug",
+                "--app"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": true,
+                "panel": "new",
+                "showReuseMessage": false,
+                "clear": true
+            },
+            "detail": "Run FastLED with debug mode and app visualization (always includes --app flag)",
+            "problemMatcher": []
+        },
+        {
+            "type": "shell",
+            "label": "Run FastLED (Quick)",
+            "command": "uv",
+            "args": [
+                "run",
+                "fastled",
+                "${file}",
+                "--background-update"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": true,
+                "panel": "new",
+                "showReuseMessage": false,
+                "clear": true
+            },
+            "detail": "Run FastLED with quick background update mode",
+            "problemMatcher": []
         }
     ],
     "inputs": [
