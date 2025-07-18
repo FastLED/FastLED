@@ -1,10 +1,5 @@
-// Auto-generated wrapper for all-source build
-// Generated automatically by root src conversion script
+/// @file bitswap.cpp
+/// Functions for doing a rotation of bits/bytes used by parallel output
 
-#include "fl/compiler_control.h"
-
-// When FASTLED_ALL_SRC=1, this file is completely empty to avoid duplicate symbols
-// The implementation is included through fastled_compile.cpp hierarchical structure
-#if !FASTLED_ALL_SRC
-#include "bitswap.cpp.hpp"
-#endif
+/// Disables pragma messages and warnings
+#define FASTLED_INTERNAL

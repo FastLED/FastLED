@@ -238,18 +238,18 @@ TEST_CASE("fl::shared_ptr comparison operators") {
     fl::shared_ptr<TestClass> ptr3(new TestClass(100));
     fl::shared_ptr<TestClass> null_ptr;
     
-    // Equality
-    CHECK(ptr1 == ptr2);
-    CHECK(!(ptr1 == ptr3));
-    CHECK(null_ptr == nullptr);
-    CHECK(nullptr == null_ptr);
-    CHECK(!(ptr1 == nullptr));
+    // Equality - using CHECK_EQ for better error messages
+    CHECK_EQ(ptr1 == ptr2, true);
+    CHECK_EQ(ptr1 == ptr3, false);
+    CHECK_EQ(null_ptr == nullptr, true);
+    CHECK_EQ(nullptr == null_ptr, true);
+    CHECK_EQ(ptr1 == nullptr, false);
     
-    // Inequality
-    CHECK(!(ptr1 != ptr2));
-    CHECK(ptr1 != ptr3);
-    CHECK(!(null_ptr != nullptr));
-    CHECK(ptr1 != nullptr);
+    // Inequality - using CHECK_EQ for better error messages
+    CHECK_EQ(ptr1 != ptr2, false);
+    CHECK_EQ(ptr1 != ptr3, true);
+    CHECK_EQ(null_ptr != nullptr, false);
+    CHECK_EQ(ptr1 != nullptr, true);
 }
 
 TEST_CASE("fl::shared_ptr polymorphism") {
@@ -349,7 +349,7 @@ TEST_CASE("fl::shared_ptr self-assignment safety") {
     
     // Self-assignment should not change anything
     FL_DISABLE_WARNING_PUSH
-    FL_DISABLE_WARNING(self-assign-overloaded)
+    FL_DISABLE_WARNING_SELF_ASSIGN_OVERLOADED
     ptr = ptr;  // Test self-assignment
     FL_DISABLE_WARNING_POP
     CHECK_EQ(ptr.use_count(), 1);

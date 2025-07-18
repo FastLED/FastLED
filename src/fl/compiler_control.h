@@ -23,8 +23,16 @@
 #if defined(__clang__)
   #define FL_DISABLE_WARNING_GLOBAL_CONSTRUCTORS \
     FL_DISABLE_WARNING(global-constructors)
+  #define FL_DISABLE_WARNING_SELF_ASSIGN_OVERLOADED \
+    FL_DISABLE_WARNING(self-assign-overloaded)
+#elif defined(__GNUC__)
+  #define FL_DISABLE_WARNING_GLOBAL_CONSTRUCTORS \
+    FL_DISABLE_WARNING(global-constructors)
+  // GCC doesn't have self-assign-overloaded warning, use no-op
+  #define FL_DISABLE_WARNING_SELF_ASSIGN_OVERLOADED
 #else
-  #define FL_DISABLE_WARNING_GLOBAL_CONSTRUCTORS /* nothing */
+  #define FL_DISABLE_WARNING_GLOBAL_CONSTRUCTORS
+  #define FL_DISABLE_WARNING_SELF_ASSIGN_OVERLOADED
 #endif
 
 // Fast math optimization controls with additional aggressive flags
