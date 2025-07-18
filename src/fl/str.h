@@ -14,7 +14,7 @@
 #include "fl/geometry.h"
 #include "fl/math_macros.h"
 #include "fl/namespace.h"
-#include "fl/ptr.h"
+#include "fl/memory.h"
 #include "fl/type_traits.h"
 #include "fl/vector.h"
 #include "fl/span.h"
@@ -142,7 +142,7 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
             memcpy(mInlineData, str, len + 1); // Copy including null
             mHeapData.reset();
         } else {
-            mHeapData = StringHolderPtr::New(str);
+            mHeapData = fl::make_shared<StringHolder>(str);
         }
     }
     StrN(const StrN &other) { copy(other); }
@@ -159,7 +159,7 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
                 return;
             }
             mHeapData.reset();
-            mHeapData = StringHolderPtr::New(str);
+            mHeapData = fl::make_shared<StringHolder>(str);
         }
     }
 
@@ -194,7 +194,7 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
             memcpy(mInlineData, str, len + 1);
             mHeapData.reset();
         } else {
-            mHeapData = StringHolderPtr::New(str, len);
+            mHeapData = fl::make_shared<StringHolder>(str, len);
         }
     }
 
@@ -207,7 +207,7 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
             if (other.mHeapData) {
                 mHeapData = other.mHeapData;
             } else {
-                mHeapData = StringHolderPtr::New(other.c_str());
+                mHeapData = fl::make_shared<StringHolder>(other.c_str());
             }
         }
         mLength = len;
@@ -239,7 +239,7 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
             return mLength;
         }
         mHeapData.reset();
-        StringHolderPtr newData = StringHolderPtr::New(newLen);
+        StringHolderPtr newData = fl::make_shared<StringHolder>(newLen);
         if (newData) {
             memcpy(newData->data(), c_str(), mLength);
             memcpy(newData->data() + mLength, str, n);
@@ -344,7 +344,7 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
         }
 
         // Need to allocate new storage
-        StringHolderPtr newData = StringHolderPtr::New(newCapacity);
+        StringHolderPtr newData = fl::make_shared<StringHolder>(newCapacity);
         if (newData) {
             // Copy existing content
             memcpy(newData->data(), c_str(), mLength);
