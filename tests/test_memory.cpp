@@ -109,4 +109,64 @@ TEST_CASE("fl::intrusive_ptr alias functionality") {
     ptr3 = ptr2;  // Should work seamlessly
     CHECK_EQ(ptr3->getValue(), 42);
     CHECK_EQ(ptr3->ref_count(), 3);
-} 
+}
+
+// Node class for testing circular references and self-assignment scenarios
+class IntrusiveNode : public fl::Referent {
+public:
+    IntrusiveNode(int value) : value_(value) {}
+    
+    int getValue() const { return value_; }
+    void setValue(int value) { value_ = value; }
+    
+    void setNext(fl::intrusive_ptr<IntrusiveNode> next) { next_ = next; }
+    fl::intrusive_ptr<IntrusiveNode> getNext() const { return next_; }
+    
+private:
+    int value_;
+    fl::intrusive_ptr<IntrusiveNode> next_;
+};
+
+FASTLED_SMART_PTR(IntrusiveNode);
+
+TEST_CASE("fl::intrusive_ptr self-assignment safety - a = b scenario") {
+    auto nodeA = fl::make_intrusive<IntrusiveNode>(1);
+    auto nodeB = fl::make_intrusive<IntrusiveNode>(2);
+    
+    // Test the scenario: a -> b, and we have a, and a = b
+    nodeA->setNext(nodeB);
+    
+    // Verify initial state
+    CHECK_EQ(nodeA->getValue(), 1);
+    CHECK_EQ(nodeB->getValue(), 2);
+    CHECK_EQ(nodeA->getNext().get(), nodeB.get());
+    CHECK_EQ(nodeA->ref_count(), 1); // Only nodeA variable
+    CHECK_EQ(nodeB->ref_count(), 2); // nodeB variable + nodeA->next_
+    
+    // Get a reference to A before the dangerous assignment
+    auto aRef = nodeA;
+    CHECK_EQ(aRef.get(), nodeA.get());
+    CHECK_EQ(nodeA->ref_count(), 2); // nodeA + aRef
+    CHECK_EQ(nodeB->ref_count(), 2); // nodeB + nodeA->next_
+    
+    // Now do the dangerous assignment: a = b (while a is referenced through aRef)
+    // This could cause issues if a gets destroyed while setting itself to b
+    nodeA = nodeB; // a = b (dangerous assignment)
+    
+    // Verify no segfault occurred and state is consistent
+    CHECK_EQ(nodeA.get(), nodeB.get()); // nodeA should now point to nodeB
+    CHECK_EQ(nodeA->getValue(), 2); // Should have nodeB's value
+    CHECK_EQ(nodeB->getValue(), 2); // nodeB unchanged
+    
+    // aRef should still be valid (original nodeA should still exist)
+    CHECK(aRef);
+    CHECK_EQ(aRef->getValue(), 1); // Original nodeA value
+    CHECK_EQ(aRef->ref_count(), 1); // Only aRef now points to original nodeA
+    
+    // nodeB should now have increased reference count
+    CHECK_EQ(nodeB->ref_count(), 3); // nodeB + nodeA + nodeA->next_ (which points to nodeB)
+    
+    // Clean up - clear the circular reference in the original node
+    aRef->setNext(fl::intrusive_ptr<IntrusiveNode>());
+    CHECK_EQ(nodeB->ref_count(), 2); // nodeB + nodeA
+}

@@ -359,4 +359,89 @@ TEST_CASE("fl::shared_ptr self-assignment safety") {
     ptr = fl::move(ptr);
     CHECK_EQ(ptr.use_count(), 1);
     CHECK_EQ(ptr->getValue(), 42);
-} 
+}
+
+// Node class for testing circular references and self-assignment scenarios
+class SharedNode {
+public:
+    SharedNode(int value) : value_(value), destructor_called_(nullptr) {}
+    SharedNode(int value, bool* destructor_flag) : value_(value), destructor_called_(destructor_flag) {}
+    
+    ~SharedNode() {
+        if (destructor_called_) {
+            *destructor_called_ = true;
+        }
+    }
+    
+    int getValue() const { return value_; }
+    void setValue(int value) { value_ = value; }
+    
+    void setNext(fl::shared_ptr<SharedNode> next) { next_ = next; }
+    fl::shared_ptr<SharedNode> getNext() const { return next_; }
+    
+private:
+    int value_;
+    bool* destructor_called_;
+    fl::shared_ptr<SharedNode> next_;
+};
+
+TEST_CASE("fl::shared_ptr self-assignment safety - a = b scenario") {
+    bool nodeA_destroyed = false;
+    bool nodeB_destroyed = false;
+    
+    auto nodeA = fl::make_shared<SharedNode>(1, &nodeA_destroyed);
+    auto nodeB = fl::make_shared<SharedNode>(2, &nodeB_destroyed);
+    
+    // Test the scenario: a -> b, and we have a, and a = b
+    nodeA->setNext(nodeB);
+    
+    // Verify initial state
+    CHECK_EQ(nodeA->getValue(), 1);
+    CHECK_EQ(nodeB->getValue(), 2);
+    CHECK_EQ(nodeA->getNext().get(), nodeB.get());
+    CHECK_EQ(nodeA.use_count(), 1); // Only nodeA variable
+    CHECK_EQ(nodeB.use_count(), 2); // nodeB variable + nodeA->next_
+    CHECK(!nodeA_destroyed);
+    CHECK(!nodeB_destroyed);
+    
+    // Get a reference to A before the dangerous assignment
+    auto aRef = nodeA;
+    CHECK_EQ(aRef.get(), nodeA.get());
+    CHECK_EQ(nodeA.use_count(), 2); // nodeA + aRef
+    CHECK_EQ(nodeB.use_count(), 2); // nodeB + nodeA->next_
+    
+    // Now do the dangerous assignment: a = b (while a is referenced through aRef)
+    // This could cause issues if a gets destroyed while setting itself to b
+    nodeA = nodeB; // a = b (dangerous assignment)
+    
+    // Verify no segfault occurred and state is consistent
+    CHECK_EQ(nodeA.get(), nodeB.get()); // nodeA should now point to nodeB
+    CHECK_EQ(nodeA->getValue(), 2); // Should have nodeB's value
+    CHECK_EQ(nodeB->getValue(), 2); // nodeB unchanged
+    CHECK(!nodeA_destroyed); // Original nodeA object should still exist
+    CHECK(!nodeB_destroyed);
+    
+    // aRef should still be valid (original nodeA should still exist)
+    CHECK(aRef);
+    CHECK_EQ(aRef->getValue(), 1); // Original nodeA value
+    CHECK_EQ(aRef.use_count(), 1); // Only aRef now points to original nodeA
+    
+    // nodeB should now have increased reference count
+    CHECK_EQ(nodeB.use_count(), 3); // nodeB + nodeA + nodeA->next_ (which points to nodeB)
+    
+    // Clean up - clear the circular reference in the original node
+    aRef->setNext(nullptr);
+    CHECK_EQ(nodeB.use_count(), 2); // nodeB + nodeA
+    CHECK(!nodeA_destroyed); // Original nodeA still referenced by aRef
+    CHECK(!nodeB_destroyed);
+    
+    // Clear the reference to original nodeA
+    aRef.reset();
+    CHECK(nodeA_destroyed); // Now original nodeA should be destroyed
+    CHECK(!nodeB_destroyed); // nodeB still referenced by nodeA
+    
+    // Clear final reference
+    nodeA.reset();
+    nodeB.reset();
+    CHECK(nodeB_destroyed); // Now nodeB should be destroyed
+}
