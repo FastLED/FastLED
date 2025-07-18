@@ -329,11 +329,12 @@ set(COMMON_COMPILE_FLAGS
     ${FAST_FRAME_POINTER}
     ${FAST_DEBUG_OPT}
     ${DEAD_CODE_ELIMINATION_FLAGS}
-    # 🚨 CRITICAL: Disable C++ exceptions (FastLED embedded design requirement)
+    # 🚨 CRITICAL: Disable C++ exceptions and RTTI (FastLED embedded design requirement)
     # FastLED must work on embedded systems (Arduino, ESP32, etc.) where exceptions
     # may not be available or are disabled for memory/performance reasons.
-    # This flag ensures the compiler errors if any exception handling is used.
+    # These flags ensure the compiler errors if any exception handling is used.
     -fno-exceptions    # Disable C++ exception handling (try/catch/throw)
+    -fno-rtti          # Disable runtime type information (typeid/dynamic_cast)
     -Werror=return-type
     -Werror=missing-declarations
     -Werror=redundant-decls
