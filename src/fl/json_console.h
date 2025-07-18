@@ -16,8 +16,8 @@ FASTLED_SMART_PTR(JsonConsole);
  * It takes two callbacks for reading and writing to a serial interface (or mock functions for testing).
  * 
  * Usage:
- * - Production: JsonConsolePtr console = fl::make_shared<JsonConsole>(Serial.available, Serial.read, Serial.println);
- * - Testing: JsonConsolePtr console = fl::make_shared<JsonConsole>(mockAvailable, mockRead, mockPrintln);
+ * - Production: JsonConsolePtr console = fl::make_intrusive<JsonConsole>(Serial.available, Serial.read, Serial.println);
+ * - Testing: JsonConsolePtr console = fl::make_intrusive<JsonConsole>(mockAvailable, mockRead, mockPrintln);
  * 
  * Console commands:
  * - "slider: 80" sets a UISlider named "slider" to value 80

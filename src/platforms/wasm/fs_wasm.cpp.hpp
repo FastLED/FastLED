@@ -242,7 +242,7 @@ FileDataPtr _findOrCreate(const Str &path, size_t len) {
     if (it != gFileMap.end()) {
         return it->second;
     }
-    auto entry = fl::make_shared<FileData>(len);
+    auto entry = fl::make_intrusive<FileData>(len);
     gFileMap.insert(std::make_pair(path, entry));
     return entry;
 }
@@ -253,7 +253,7 @@ FileDataPtr _createIfNotExists(const Str &path, size_t len) {
     if (it != gFileMap.end()) {
         return FileDataPtr::Null();
     }
-    auto entry = fl::make_shared<FileData>(len);
+    auto entry = fl::make_intrusive<FileData>(len);
     gFileMap.insert(std::make_pair(path, entry));
     return entry;
 }
@@ -332,7 +332,7 @@ EMSCRIPTEN_KEEPALIVE void fastled_declare_files(const char* jsonStr) {
 
 namespace fl {
 // Platforms eed to implement this to create an instance of the filesystem.
-FsImplPtr make_sdcard_filesystem(int cs_pin) { return fl::make_shared<FsImplWasm>(); }
+FsImplPtr make_sdcard_filesystem(int cs_pin) { return fl::make_intrusive<FsImplWasm>(); }
 } // namespace fl
 
 #endif // __EMSCRIPTEN__

@@ -20,7 +20,7 @@ JsonButtonImpl::JsonButtonImpl(const string &name) : mPressed(false) {
         JsonUiInternal::ToJsonFunction([this](FLArduinoJson::JsonObject &json) {
             static_cast<JsonButtonImpl *>(this)->toJson(json);
         });
-    mInternal = fl::make_shared<JsonUiInternal>(name, fl::move(updateFunc),
+    mInternal = fl::make_intrusive<JsonUiInternal>(name, fl::move(updateFunc),
                                      fl::move(toJsonFunc));
     addJsonUiComponent(mInternal);
     mUpdater.init(this);

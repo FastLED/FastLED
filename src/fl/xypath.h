@@ -44,12 +44,12 @@ class XYPath : public Referent {
     // Lines and curves
     static XYPathPtr NewLinePath(float x0, float y0, float x1, float y1);
     static XYPathPtr
-    NewLinePath(const shared_ptr<LinePathParams> &params = fl::make_shared<LinePathParams>());
+    NewLinePath(const intrusive_ptr<LinePathParams> &params = fl::make_intrusive<LinePathParams>());
     // Cutmull allows for a path to be defined by a set of points. The path will
     // be a smooth curve through the points.
     static XYPathPtr NewCatmullRomPath(
         u16 width = 0, u16 height = 0,
-        const shared_ptr<CatmullRomParams> &params = fl::make_shared<CatmullRomParams>());
+        const intrusive_ptr<CatmullRomParams> &params = fl::make_intrusive<CatmullRomParams>());
 
     // Custom path using just a function.
     static XYPathPtr
@@ -67,15 +67,15 @@ class XYPath : public Referent {
 
     static XYPathPtr
     NewRosePath(u16 width = 0, u16 height = 0,
-                const shared_ptr<RosePathParams> &params = fl::make_shared<RosePathParams>());
+                const intrusive_ptr<RosePathParams> &params = fl::make_intrusive<RosePathParams>());
 
     static XYPathPtr NewPhyllotaxisPath(
         u16 width = 0, u16 height = 0,
-        const shared_ptr<PhyllotaxisParams> &args = fl::make_shared<PhyllotaxisParams>());
+        const intrusive_ptr<PhyllotaxisParams> &args = fl::make_intrusive<PhyllotaxisParams>());
 
     static XYPathPtr NewGielisCurvePath(
         u16 width = 0, u16 height = 0,
-        const shared_ptr<GielisCurveParams> &params = fl::make_shared<GielisCurveParams>());
+        const intrusive_ptr<GielisCurveParams> &params = fl::make_intrusive<GielisCurveParams>());
     // END pre-baked paths.
 
     // Takes in a float at time [0, 1] and returns alpha values

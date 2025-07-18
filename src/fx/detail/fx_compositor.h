@@ -20,11 +20,11 @@ namespace fl {
 class FxCompositor {
   public:
     FxCompositor(fl::u32 numLeds) : mNumLeds(numLeds) {
-        mLayers[0] = fl::make_shared<FxLayer>();
-        mLayers[1] = fl::make_shared<FxLayer>();
+        mLayers[0] = fl::make_intrusive<FxLayer>();
+        mLayers[1] = fl::make_intrusive<FxLayer>();
     }
 
-    void startTransition(fl::u32 now, fl::u32 duration, fl::shared_ptr<Fx> nextFx) {
+    void startTransition(fl::u32 now, fl::u32 duration, fl::intrusive_ptr<Fx> nextFx) {
         completeTransition();
         if (duration == 0) {
             mLayers[0]->setFx(nextFx);

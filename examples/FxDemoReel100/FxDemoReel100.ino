@@ -40,7 +40,7 @@ Rgbw rgbwMode = RgbwDefault();
 Rgbw rgbwMode = RgbwInvalid();  // No RGBW mode, just use RGB.
 #endif
 
-DemoReel100Ptr demoReel = fl::make_shared<DemoReel100>(NUM_LEDS);
+DemoReel100Ptr demoReel = fl::make_intrusive<DemoReel100>(NUM_LEDS);
 
 void setup() {
   ScreenMap screenMap = ScreenMap::DefaultStrip(NUM_LEDS);

@@ -41,7 +41,7 @@ void XMap::convertToLookUpTable() {
         return;
     }
     mLookUpTable.reset();
-    mLookUpTable = fl::make_shared<LUT16>(length);
+    mLookUpTable = fl::make_intrusive<LUT16>(length);
     u16 *dataMutable = mLookUpTable->getDataMutable();
     mData = mLookUpTable->getData();
     for (u16 x = 0; x < length; x++) {

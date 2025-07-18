@@ -162,7 +162,7 @@ template <typename T> struct Hash<vec2<T>> {
     }
 };
 
-template <typename T> struct Hash<shared_ptr<T>> {
+template <typename T> struct Hash<intrusive_ptr<T>> {
     u32 operator()(const T &key) const noexcept {
         auto hasher = Hash<T *>();
         return hasher(key.get());

@@ -16,7 +16,7 @@ namespace fl {
 FASTLED_SMART_PTR(FxLayer);
 class FxLayer : public fl::Referent {
   public:
-    void setFx(fl::shared_ptr<Fx> newFx);
+    void setFx(fl::intrusive_ptr<Fx> newFx);
 
     void draw(fl::u32 now);
 
@@ -24,13 +24,13 @@ class FxLayer : public fl::Referent {
 
     void release();
 
-    fl::shared_ptr<Fx> getFx();
+    fl::intrusive_ptr<Fx> getFx();
 
     CRGB *getSurface();
 
   private:
-    fl::shared_ptr<Frame> frame;
-    fl::shared_ptr<Fx> fx;
+    fl::intrusive_ptr<Frame> frame;
+    fl::intrusive_ptr<Fx> fx;
     bool running = false;
 };
 

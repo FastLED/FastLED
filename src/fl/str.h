@@ -142,7 +142,7 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
             memcpy(mInlineData, str, len + 1); // Copy including null
             mHeapData.reset();
         } else {
-            mHeapData = fl::make_shared<StringHolder>(str);
+            mHeapData = fl::make_intrusive<StringHolder>(str);
         }
     }
     StrN(const StrN &other) { copy(other); }
@@ -159,7 +159,7 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
                 return;
             }
             mHeapData.reset();
-            mHeapData = fl::make_shared<StringHolder>(str);
+            mHeapData = fl::make_intrusive<StringHolder>(str);
         }
     }
 
@@ -194,7 +194,7 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
             memcpy(mInlineData, str, len + 1);
             mHeapData.reset();
         } else {
-            mHeapData = fl::make_shared<StringHolder>(str, len);
+            mHeapData = fl::make_intrusive<StringHolder>(str, len);
         }
     }
 
@@ -207,7 +207,7 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
             if (other.mHeapData) {
                 mHeapData = other.mHeapData;
             } else {
-                mHeapData = fl::make_shared<StringHolder>(other.c_str());
+                mHeapData = fl::make_intrusive<StringHolder>(other.c_str());
             }
         }
         mLength = len;
@@ -239,7 +239,7 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
             return mLength;
         }
         mHeapData.reset();
-        StringHolderPtr newData = fl::make_shared<StringHolder>(newLen);
+        StringHolderPtr newData = fl::make_intrusive<StringHolder>(newLen);
         if (newData) {
             memcpy(newData->data(), c_str(), mLength);
             memcpy(newData->data() + mLength, str, n);
@@ -344,7 +344,7 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
         }
 
         // Need to allocate new storage
-        StringHolderPtr newData = fl::make_shared<StringHolder>(newCapacity);
+        StringHolderPtr newData = fl::make_intrusive<StringHolder>(newCapacity);
         if (newData) {
             // Copy existing content
             memcpy(newData->data(), c_str(), mLength);
@@ -649,12 +649,12 @@ class string : public StrN<FASTLED_STR_INLINED_SIZE> {
     
     
     template <typename T> string &append(const WeakPtr<T> &val) {
-        shared_ptr<T> ptr = val.lock();
+        intrusive_ptr<T> ptr = val.lock();
         append(ptr);
         return *this;
     }
 
-    template <typename T> string &append(const shared_ptr<T>& val) {
+    template <typename T> string &append(const intrusive_ptr<T>& val) {
         // append(val->toString());
         if (!val) {
             append("null");

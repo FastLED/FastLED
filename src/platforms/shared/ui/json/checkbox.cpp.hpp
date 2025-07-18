@@ -18,7 +18,7 @@ JsonCheckboxImpl::JsonCheckboxImpl(const fl::string &name, bool value)
         JsonUiInternal::ToJsonFunction([this](FLArduinoJson::JsonObject &json) {
             static_cast<JsonCheckboxImpl *>(this)->toJson(json);
         });
-    mInternal = fl::make_shared<JsonUiInternal>(name, fl::move(updateFunc),
+    mInternal = fl::make_intrusive<JsonUiInternal>(name, fl::move(updateFunc),
                                      fl::move(toJsonFunc));
     addJsonUiComponent(mInternal);
 }

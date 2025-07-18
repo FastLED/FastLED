@@ -16,8 +16,8 @@ Blend2d::Blend2d(const XYMap &xymap) : Fx2d(xymap) {
     // Warning, the xyMap will be the final transrformation applied to the
     // frame. If the delegate Fx2d layers have their own transformation then
     // both will be applied.
-    mFrame = fl::make_shared<Frame>(mXyMap.getTotal());
-    mFrameTransform = fl::make_shared<Frame>(mXyMap.getTotal());
+    mFrame = fl::make_intrusive<Frame>(mXyMap.getTotal());
+    mFrameTransform = fl::make_intrusive<Frame>(mXyMap.getTotal());
 }
 
 Str Blend2d::fxName() const {

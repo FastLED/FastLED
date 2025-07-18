@@ -230,7 +230,7 @@ private:
     };
 
     // Variant to store any of our callable types inline (with heap fallback for large lambdas)
-    using Storage = Variant<shared_ptr<CallableBase>, FreeFunctionCallable, InlinedLambda, NonConstMemberCallable, ConstMemberCallable>;
+    using Storage = Variant<intrusive_ptr<CallableBase>, FreeFunctionCallable, InlinedLambda, NonConstMemberCallable, ConstMemberCallable>;
     Storage storage_;
 
     // Helper function to handle default return value for void and non-void types
@@ -275,7 +275,7 @@ public:
     
     R operator()(Args... args) const {
         // Direct dispatch using type checking - efficient and simple
-        if (auto* heap_callable = storage_.template ptr<shared_ptr<CallableBase>>()) {
+        if (auto* heap_callable = storage_.template ptr<intrusive_ptr<CallableBase>>()) {
             return (*heap_callable)->invoke(args...);
         } else if (auto* free_func = storage_.template ptr<FreeFunctionCallable>()) {
             return free_func->invoke(args...);
@@ -318,7 +318,7 @@ private:
     // Helper for large lambdas/functors - heap storage
     template <typename F>
     void construct_lambda_or_functor(F f, false_type /* large */) {
-        storage_ = shared_ptr<CallableBase>(NewPtr<Callable<F>>(fl::move(f)));
+        storage_ = intrusive_ptr<CallableBase>(NewPtr<Callable<F>>(fl::move(f)));
     }
 };
 

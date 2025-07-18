@@ -5,25 +5,25 @@
 
 namespace fl {
 
-// FastLED equivalent of std::shared_ptr<T>
-// Alias for fl::Ptr<T> to provide familiar std:: naming
+// FastLED equivalent of std::intrusive_ptr<T>
+// Alias for fl::Ptr<T> to provide familiar intrusive pointer naming
 template <typename T>
-using shared_ptr = fl::Ptr<T>;
+using intrusive_ptr = fl::Ptr<T>;
 
-// FastLED equivalent of std::make_shared<T>
+// FastLED equivalent of std::make_intrusive<T>
 // Creates a new object of type T and returns it wrapped in a fl::Ptr<T>
 // 
 // Usage:
-//   auto ptr = fl::make_shared<MyClass>(arg1, arg2, ...);
+//   auto ptr = fl::make_intrusive<MyClass>(arg1, arg2, ...);
 //
 // This is equivalent to:
-//   fl::Ptr<MyClass> ptr = fl::make_shared<MyClass>(arg1, arg2, ...);
+//   fl::Ptr<MyClass> ptr = fl::make_intrusive<MyClass>(arg1, arg2, ...);
 //
 // Requirements:
 //   - T must inherit from fl::Referent
 //   - T must have a constructor that accepts the provided arguments
 template <typename T, typename... Args>
-fl::Ptr<T> make_shared(Args&&... args) {
+fl::Ptr<T> make_intrusive(Args&&... args) {
     return fl::NewPtr<T>(fl::forward<Args>(args)...);
 }
 

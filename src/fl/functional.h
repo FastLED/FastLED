@@ -31,7 +31,7 @@ template <typename T>
 struct is_pointer_like<T*> : true_type {};
 
 template <typename T>
-struct is_pointer_like<fl::shared_ptr<T>> : true_type {};
+struct is_pointer_like<fl::intrusive_ptr<T>> : true_type {};
 
 template <typename T, typename Deleter>
 struct is_pointer_like<fl::scoped_ptr<T, Deleter>> : true_type {};

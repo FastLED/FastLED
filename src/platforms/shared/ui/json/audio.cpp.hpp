@@ -27,7 +27,7 @@ JsonAudioImpl::JsonAudioImpl(const fl::string &name) {
         JsonUiInternal::ToJsonFunction([this](FLArduinoJson::JsonObject &json) {
             static_cast<JsonAudioImpl *>(this)->toJson(json);
         });
-    mInternal = fl::make_shared<JsonUiInternal>(name, fl::move(updateFunc),
+    mInternal = fl::make_intrusive<JsonUiInternal>(name, fl::move(updateFunc),
                                        fl::move(toJsonFunc));
     mUpdater.init(this);
     addJsonUiComponent(mInternal);
@@ -186,7 +186,7 @@ void JsonAudioImpl::updateInternal(
         
         // Create one AudioSample per buffer object (preserve separation)
         if (!samples.empty()) {
-            AudioSampleImplPtr sample = fl::make_shared<AudioSampleImpl>();
+            AudioSampleImplPtr sample = fl::make_intrusive<AudioSampleImpl>();
             sample->assign(samples.begin(), samples.end(), timestamp);
             mAudioSampleImpls.push_back(sample);
             
@@ -199,7 +199,7 @@ void JsonAudioImpl::updateInternal(
 }
 
 AudioSample JsonAudioImpl::next() {
-    shared_ptr<AudioSampleImpl> out;
+    intrusive_ptr<AudioSampleImpl> out;
     if (mAudioSampleImpls.empty()) {
         // FASTLED_WARN("No audio samples available");
         return out;

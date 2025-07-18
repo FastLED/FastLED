@@ -10,9 +10,9 @@
 using namespace fl;
 
 namespace {
-    shared_ptr<CatmullRomParams> make_path(int width, int height) {
+    intrusive_ptr<CatmullRomParams> make_path(int width, int height) {
         // make a triangle.
-        shared_ptr<CatmullRomParams> params = fl::make_shared<CatmullRomParams>();
+        intrusive_ptr<CatmullRomParams> params = fl::make_intrusive<CatmullRomParams>();
         vector_inlined<vec2f, 5> points;
         points.push_back(vec2f(0.0f, 0.0f));
         points.push_back(vec2f(width / 3, height / 2));

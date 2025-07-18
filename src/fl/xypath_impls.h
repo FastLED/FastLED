@@ -133,7 +133,7 @@ class PointPath : public XYPathGenerator {
 
 class LinePath : public XYPathGenerator {
   public:
-    LinePath(const LinePathParamsPtr &params = fl::make_shared<LinePathParams>());
+    LinePath(const LinePathParamsPtr &params = fl::make_intrusive<LinePathParams>());
     LinePath(float x0, float y0, float x1, float y1);
     vec2f compute(float alpha) override;
     const string name() const override;
@@ -144,7 +144,7 @@ class LinePath : public XYPathGenerator {
     const LinePathParams &params() const;
 
   private:
-    shared_ptr<LinePathParams> mParams;
+    intrusive_ptr<LinePathParams> mParams;
 };
 
 class CirclePath : public XYPathGenerator {
@@ -182,7 +182,7 @@ class RosePath : public XYPathGenerator {
     // For n/d even: produces 2n petals
     // For n and d coprime: produces n petals if n is odd, 2n petals if n is
     // even
-    RosePath(const shared_ptr<RosePathParams> &p = fl::make_shared<RosePathParams>());
+    RosePath(const intrusive_ptr<RosePathParams> &p = fl::make_intrusive<RosePathParams>());
     RosePath(u8 n = 3, u8 d = 1);
     vec2f compute(float alpha) override;
     const string name() const override;
@@ -194,7 +194,7 @@ class RosePath : public XYPathGenerator {
     void setD(u8 d);
 
   private:
-    shared_ptr<RosePathParams> mParams;
+    intrusive_ptr<RosePathParams> mParams;
 };
 
 class PhyllotaxisPath : public XYPathGenerator {
@@ -202,7 +202,7 @@ class PhyllotaxisPath : public XYPathGenerator {
     // c is a scaling factor, angle is the divergence angle in degrees (often
     // 137.5° - the golden angle)
     PhyllotaxisPath(
-        const shared_ptr<PhyllotaxisParams> &p = fl::make_shared<PhyllotaxisParams>());
+        const intrusive_ptr<PhyllotaxisParams> &p = fl::make_intrusive<PhyllotaxisParams>());
     vec2f compute(float alpha) override;
     const string name() const override;
 
@@ -210,7 +210,7 @@ class PhyllotaxisPath : public XYPathGenerator {
     const PhyllotaxisParams &params() const;
 
   private:
-    shared_ptr<PhyllotaxisParams> mParams;
+    intrusive_ptr<PhyllotaxisParams> mParams;
 };
 
 class GielisCurvePath : public XYPathGenerator {
@@ -220,7 +220,7 @@ class GielisCurvePath : public XYPathGenerator {
     // m: symmetry parameter (number of rotational symmetries)
     // n1, n2, n3: shape parameters
     GielisCurvePath(
-        const shared_ptr<GielisCurveParams> &p = fl::make_shared<GielisCurveParams>());
+        const intrusive_ptr<GielisCurveParams> &p = fl::make_intrusive<GielisCurveParams>());
     vec2f compute(float alpha) override;
     const string name() const override;
 
@@ -235,7 +235,7 @@ class GielisCurvePath : public XYPathGenerator {
     void setN3(float n3);
 
   private:
-    shared_ptr<GielisCurveParams> mParams;
+    intrusive_ptr<GielisCurveParams> mParams;
 };
 
 /// Catmull–Rom spline through arbitrary points.
@@ -243,7 +243,7 @@ class GielisCurvePath : public XYPathGenerator {
 /// them.
 class CatmullRomPath : public XYPathGenerator {
   public:
-    CatmullRomPath(const shared_ptr<CatmullRomParams> &p = fl::make_shared<CatmullRomParams>());
+    CatmullRomPath(const intrusive_ptr<CatmullRomParams> &p = fl::make_intrusive<CatmullRomParams>());
 
     /// Add a point in [0,1]² to the path
     void addPoint(vec2f p);
@@ -264,7 +264,7 @@ class CatmullRomPath : public XYPathGenerator {
     const CatmullRomParams &params() const;
 
   private:
-    shared_ptr<CatmullRomParams> mParams;
+    intrusive_ptr<CatmullRomParams> mParams;
 
     // Helper function to interpolate between points using Catmull-Rom spline
     vec2f interpolate(const vec2f &p0, const vec2f &p1, const vec2f &p2,

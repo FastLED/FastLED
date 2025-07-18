@@ -83,7 +83,7 @@ void setup() {
     FastLED.setBrightness(BRIGHTNESS);
 
     // Create and fill the ByteStreamMemory with test data
-    memoryStream = fl::make_shared<ByteStreamMemory>(BUFFER_SIZE*sizeof(CRGB));
+    memoryStream = fl::make_intrusive<ByteStreamMemory>(BUFFER_SIZE*sizeof(CRGB));
 
     video.beginStream(memoryStream);
     // Add the video effect to the FxEngine

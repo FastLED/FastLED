@@ -16,7 +16,7 @@ JsonHelpImpl::JsonHelpImpl(const string &markdownContent): mMarkdownContent(mark
         JsonUiInternal::ToJsonFunction([this](FLArduinoJson::JsonObject &json) {
             static_cast<JsonHelpImpl *>(this)->toJson(json);
         });
-    mInternal = fl::make_shared<JsonUiInternal>("help", update_fcn, to_json_fcn);
+    mInternal = fl::make_intrusive<JsonUiInternal>("help", update_fcn, to_json_fcn);
     addJsonUiComponent(mInternal);
 }
 
