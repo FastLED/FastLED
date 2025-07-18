@@ -1,5 +1,12 @@
-#include "fl/compiler_control.h"
+#include "fl/random.h"
 
-#if !FASTLED_ALL_SRC
-#include "fl/random.cpp.hpp"
-#endif
+namespace fl {
+
+// Global default random number generator instance
+// Use function with static local to avoid global constructor
+fl_random& default_random() {
+    static fl_random instance;
+    return instance;
+}
+
+} // namespace fl 

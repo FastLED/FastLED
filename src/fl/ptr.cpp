@@ -1,5 +1,10 @@
-#include "fl/compiler_control.h"
+#include "fl/ptr.h"
+#include "fl/referent.h"
 
-#if !FASTLED_ALL_SRC
-#include "fl/ptr.cpp.hpp"
-#endif
+#include "fl/namespace.h"
+
+namespace fl {
+
+// Ptr implementation is all in the header file
+
+} // namespace fl

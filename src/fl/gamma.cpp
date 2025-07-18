@@ -1,5 +1,8 @@
-#include "fl/compiler_control.h"
+#include "fl/gamma.h"
 
-#if !FASTLED_ALL_SRC
-#include "fl/gamma.cpp.hpp"
-#endif
+namespace fl {
+
+// gamma_2_8 lookup table has been moved to fl/ease.cpp.hpp
+// This file is kept for compatibility with the build system
+
+} // namespace fl
