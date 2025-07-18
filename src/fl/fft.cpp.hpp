@@ -13,9 +13,9 @@ template <> struct Hash<FFT_Args> {
     }
 };
 
-struct FFT::HashMap : public fl::HashMapLru<FFT_Args, Ptr<FFTImpl>> {
+struct FFT::HashMap : public fl::HashMapLru<FFT_Args, shared_ptr<FFTImpl>> {
     HashMap(fl::size max_size)
-        : fl::HashMapLru<FFT_Args, Ptr<FFTImpl>>(max_size) {}
+        : fl::HashMapLru<FFT_Args, shared_ptr<FFTImpl>>(max_size) {}
 };
 
 FFT::FFT() { mMap.reset(new HashMap(8)); };
@@ -48,13 +48,13 @@ fl::size FFT::size() const { return mMap->size(); }
 void FFT::setFFTCacheSize(fl::size size) { mMap->setMaxSize(size); }
 
 FFTImpl &FFT::get_or_create(const FFT_Args &args) {
-    Ptr<FFTImpl> *val = mMap->find_value(args);
+    shared_ptr<FFTImpl> *val = mMap->find_value(args);
     if (val) {
         // we have it.
         return **val;
     }
     // else we have to make a new one.
-    Ptr<FFTImpl> fft = fl::make_shared<FFTImpl>(args);
+    shared_ptr<FFTImpl> fft = fl::make_shared<FFTImpl>(args);
     (*mMap)[args] = fft;
     return *fft;
 }

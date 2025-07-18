@@ -154,7 +154,7 @@ XYPathPtr XYPath::NewLinePath(float x0, float y0, float x1, float y1) {
     return fl::make_shared<XYPath>(path);
 }
 
-XYPathPtr XYPath::NewLinePath(const Ptr<LinePathParams> &params) {
+XYPathPtr XYPath::NewLinePath(const shared_ptr<LinePathParams> &params) {
     auto path = fl::make_shared<LinePath>(params);
     return fl::make_shared<XYPath>(path);
 }
@@ -197,7 +197,7 @@ XYPathPtr XYPath::NewArchimedeanSpiralPath() {
 }
 
 XYPathPtr XYPath::NewRosePath(u16 width, u16 height,
-                              const Ptr<RosePathParams> &params) {
+                              const shared_ptr<RosePathParams> &params) {
     RosePathPtr path = fl::make_shared<RosePath>(params);
     XYPathPtr out = fl::make_shared<XYPath>(path);
     if (width > 0 && height > 0) {
@@ -207,7 +207,7 @@ XYPathPtr XYPath::NewRosePath(u16 width, u16 height,
 }
 
 XYPathPtr XYPath::NewPhyllotaxisPath(u16 width, u16 height,
-                                     const Ptr<PhyllotaxisParams> &args) {
+                                     const shared_ptr<PhyllotaxisParams> &args) {
     PhyllotaxisPathPtr path = fl::make_shared<PhyllotaxisPath>(args);
     XYPathPtr out = fl::make_shared<XYPath>(path);
     if (width > 0 && height > 0) {
@@ -217,7 +217,7 @@ XYPathPtr XYPath::NewPhyllotaxisPath(u16 width, u16 height,
 }
 
 XYPathPtr XYPath::NewGielisCurvePath(u16 width, u16 height,
-                                     const Ptr<GielisCurveParams> &params) {
+                                     const shared_ptr<GielisCurveParams> &params) {
     GielisCurvePathPtr path = fl::make_shared<GielisCurvePath>(params);
     XYPathPtr out = fl::make_shared<XYPath>(path);
     if (width > 0 && height > 0) {
@@ -227,7 +227,7 @@ XYPathPtr XYPath::NewGielisCurvePath(u16 width, u16 height,
 }
 
 XYPathPtr XYPath::NewCatmullRomPath(u16 width, u16 height,
-                                    const Ptr<CatmullRomParams> &params) {
+                                    const shared_ptr<CatmullRomParams> &params) {
     CatmullRomPathPtr path = fl::make_shared<CatmullRomPath>(params);
     XYPathPtr out = fl::make_shared<XYPath>(path);
     if (width > 0 && height > 0) {

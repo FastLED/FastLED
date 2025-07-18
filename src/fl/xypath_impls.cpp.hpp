@@ -230,7 +230,7 @@ void RosePath::setN(u8 n) { params().n = n; }
 
 void RosePath::setD(u8 d) { params().d = d; }
 
-RosePath::RosePath(const Ptr<RosePathParams> &p) : mParams(p) {}
+RosePath::RosePath(const shared_ptr<RosePathParams> &p) : mParams(p) {}
 
 RosePathParams &RosePath::params() { return *mParams; }
 
@@ -238,14 +238,14 @@ const RosePathParams &RosePath::params() const { return *mParams; }
 
 const string PhyllotaxisPath::name() const { return "PhyllotaxisPath"; }
 
-PhyllotaxisPath::PhyllotaxisPath(const Ptr<PhyllotaxisParams> &p)
+PhyllotaxisPath::PhyllotaxisPath(const shared_ptr<PhyllotaxisParams> &p)
     : mParams(p) {}
 
 PhyllotaxisParams &PhyllotaxisPath::params() { return *mParams; }
 
 const PhyllotaxisParams &PhyllotaxisPath::params() const { return *mParams; }
 
-GielisCurvePath::GielisCurvePath(const Ptr<GielisCurveParams> &p)
+GielisCurvePath::GielisCurvePath(const shared_ptr<GielisCurveParams> &p)
     : mParams(p) {}
 
 const string GielisCurvePath::name() const { return "GielisCurvePath"; }
@@ -258,7 +258,7 @@ void GielisCurvePath::setN3(float n3) { params().n3 = n3; }
 GielisCurveParams &GielisCurvePath::params() { return *mParams; }
 const GielisCurveParams &GielisCurvePath::params() const { return *mParams; }
 
-CatmullRomPath::CatmullRomPath(const Ptr<CatmullRomParams> &p) : mParams(p) {}
+CatmullRomPath::CatmullRomPath(const shared_ptr<CatmullRomParams> &p) : mParams(p) {}
 
 void CatmullRomPath::addPoint(vec2f p) { params().addPoint(p); }
 

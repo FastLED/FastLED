@@ -144,7 +144,7 @@ class LinePath : public XYPathGenerator {
     const LinePathParams &params() const;
 
   private:
-    Ptr<LinePathParams> mParams;
+    shared_ptr<LinePathParams> mParams;
 };
 
 class CirclePath : public XYPathGenerator {
@@ -182,7 +182,7 @@ class RosePath : public XYPathGenerator {
     // For n/d even: produces 2n petals
     // For n and d coprime: produces n petals if n is odd, 2n petals if n is
     // even
-    RosePath(const Ptr<RosePathParams> &p = fl::make_shared<RosePathParams>());
+    RosePath(const shared_ptr<RosePathParams> &p = fl::make_shared<RosePathParams>());
     RosePath(u8 n = 3, u8 d = 1);
     vec2f compute(float alpha) override;
     const string name() const override;
@@ -194,7 +194,7 @@ class RosePath : public XYPathGenerator {
     void setD(u8 d);
 
   private:
-    Ptr<RosePathParams> mParams;
+    shared_ptr<RosePathParams> mParams;
 };
 
 class PhyllotaxisPath : public XYPathGenerator {
@@ -202,7 +202,7 @@ class PhyllotaxisPath : public XYPathGenerator {
     // c is a scaling factor, angle is the divergence angle in degrees (often
     // 137.5° - the golden angle)
     PhyllotaxisPath(
-        const Ptr<PhyllotaxisParams> &p = fl::make_shared<PhyllotaxisParams>());
+        const shared_ptr<PhyllotaxisParams> &p = fl::make_shared<PhyllotaxisParams>());
     vec2f compute(float alpha) override;
     const string name() const override;
 
@@ -210,7 +210,7 @@ class PhyllotaxisPath : public XYPathGenerator {
     const PhyllotaxisParams &params() const;
 
   private:
-    Ptr<PhyllotaxisParams> mParams;
+    shared_ptr<PhyllotaxisParams> mParams;
 };
 
 class GielisCurvePath : public XYPathGenerator {
@@ -220,7 +220,7 @@ class GielisCurvePath : public XYPathGenerator {
     // m: symmetry parameter (number of rotational symmetries)
     // n1, n2, n3: shape parameters
     GielisCurvePath(
-        const Ptr<GielisCurveParams> &p = fl::make_shared<GielisCurveParams>());
+        const shared_ptr<GielisCurveParams> &p = fl::make_shared<GielisCurveParams>());
     vec2f compute(float alpha) override;
     const string name() const override;
 
@@ -235,7 +235,7 @@ class GielisCurvePath : public XYPathGenerator {
     void setN3(float n3);
 
   private:
-    Ptr<GielisCurveParams> mParams;
+    shared_ptr<GielisCurveParams> mParams;
 };
 
 /// Catmull–Rom spline through arbitrary points.
@@ -243,7 +243,7 @@ class GielisCurvePath : public XYPathGenerator {
 /// them.
 class CatmullRomPath : public XYPathGenerator {
   public:
-    CatmullRomPath(const Ptr<CatmullRomParams> &p = fl::make_shared<CatmullRomParams>());
+    CatmullRomPath(const shared_ptr<CatmullRomParams> &p = fl::make_shared<CatmullRomParams>());
 
     /// Add a point in [0,1]² to the path
     void addPoint(vec2f p);
@@ -264,7 +264,7 @@ class CatmullRomPath : public XYPathGenerator {
     const CatmullRomParams &params() const;
 
   private:
-    Ptr<CatmullRomParams> mParams;
+    shared_ptr<CatmullRomParams> mParams;
 
     // Helper function to interpolate between points using Catmull-Rom spline
     vec2f interpolate(const vec2f &p0, const vec2f &p1, const vec2f &p2,

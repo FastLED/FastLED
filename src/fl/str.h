@@ -649,12 +649,12 @@ class string : public StrN<FASTLED_STR_INLINED_SIZE> {
     
     
     template <typename T> string &append(const WeakPtr<T> &val) {
-        Ptr<T> ptr = val.lock();
+        shared_ptr<T> ptr = val.lock();
         append(ptr);
         return *this;
     }
 
-    template <typename T> string &append(const Ptr<T>& val) {
+    template <typename T> string &append(const shared_ptr<T>& val) {
         // append(val->toString());
         if (!val) {
             append("null");

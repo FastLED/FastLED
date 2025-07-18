@@ -24,7 +24,7 @@ class FxCompositor {
         mLayers[1] = fl::make_shared<FxLayer>();
     }
 
-    void startTransition(fl::u32 now, fl::u32 duration, fl::Ptr<Fx> nextFx) {
+    void startTransition(fl::u32 now, fl::u32 duration, fl::shared_ptr<Fx> nextFx) {
         completeTransition();
         if (duration == 0) {
             mLayers[0]->setFx(nextFx);

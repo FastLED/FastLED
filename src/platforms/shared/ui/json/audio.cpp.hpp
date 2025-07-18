@@ -199,7 +199,7 @@ void JsonAudioImpl::updateInternal(
 }
 
 AudioSample JsonAudioImpl::next() {
-    Ptr<AudioSampleImpl> out;
+    shared_ptr<AudioSampleImpl> out;
     if (mAudioSampleImpls.empty()) {
         // FASTLED_WARN("No audio samples available");
         return out;

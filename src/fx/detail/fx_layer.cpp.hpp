@@ -9,7 +9,7 @@
 
 namespace fl {
 
-void FxLayer::setFx(fl::Ptr<Fx> newFx) {
+void FxLayer::setFx(fl::shared_ptr<Fx> newFx) {
     if (newFx != fx) {
         release();
         fx = newFx;
@@ -44,7 +44,7 @@ void FxLayer::release() {
     fx.reset();
 }
 
-fl::Ptr<Fx> FxLayer::getFx() { 
+fl::shared_ptr<Fx> FxLayer::getFx() { 
     return fx; 
 }
 
