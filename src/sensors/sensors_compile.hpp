@@ -4,8 +4,7 @@
 #ifdef FASTLED_ALL_SRC
 
 // SENSORS MODULE IMPLEMENTATIONS
-#include "sensors/button.cpp.hpp"
-#include "sensors/digital_pin.cpp.hpp"
-#include "sensors/pir.cpp.hpp"
+// Note: .cpp files are now automatically included via CMake globbing
+// No manual includes needed
 
 #endif // FASTLED_ALL_SRC

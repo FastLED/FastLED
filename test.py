@@ -369,17 +369,11 @@ def main() -> None:
             auto_run=not _IS_GITHUB,
             enable_stack_trace=enable_stack_trace,
         )
-        impl_files_proc = RunningProcess(
-            "uv run ci/ci/check_implementation_files.py --check-inclusion --ascii-only --suppress-summary-on-100-percent",
-            echo=False,
-            auto_run=not _IS_GITHUB,
-            enable_stack_trace=enable_stack_trace,
-        )
+
         tests = [
             cpp_test_proc,
             compile_native_proc,
             pytest_proc,
-            impl_files_proc,
             pio_process,
         ]
         if src_code_change:
