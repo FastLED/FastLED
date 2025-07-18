@@ -2,7 +2,7 @@
 
 #include "fl/math_macros.h"
 #include "fl/namespace.h"
-#include "fl/memory.h" // Assuming this provides `scoped_array` or similar
+#include "fl/scoped_array.h"
 #include "fl/stdint.h" // For standard integer types
 
 namespace fl {

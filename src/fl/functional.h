@@ -8,7 +8,7 @@ template <typename T>
 class Ptr; // Forward declare Ptr to avoid header inclusion
 
 template <typename T, typename Deleter>
-class scoped_ptr; // Forward declare scoped_ptr to avoid header inclusion
+class unique_ptr; // Forward declare unique_ptr to avoid header inclusion
 
 //----------------------------------------------------------------------------
 // invoke implementation - equivalent to std::invoke from C++17
@@ -31,10 +31,10 @@ template <typename T>
 struct is_pointer_like<T*> : true_type {};
 
 template <typename T>
-struct is_pointer_like<fl::intrusive_ptr<T>> : true_type {};
+struct is_pointer_like<fl::Ptr<T>> : true_type {};
 
 template <typename T, typename Deleter>
-struct is_pointer_like<fl::scoped_ptr<T, Deleter>> : true_type {};
+struct is_pointer_like<fl::unique_ptr<T, Deleter>> : true_type {};
 
 // Helper to detect if we should use pointer-to-member syntax
 template <typename T>

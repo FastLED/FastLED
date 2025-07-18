@@ -6,7 +6,7 @@
 #include "fl/int.h"
 #include "fl/map.h"
 #include "fl/namespace.h"
-#include "fl/scoped_ptr.h"
+#include "fl/scoped_array.h"
 #include "fl/span.h"
 #include "fl/vector.h"
 

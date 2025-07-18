@@ -11,6 +11,7 @@
 #include "test.h"
 
 #include "fl/namespace.h"
+#include "fl/scoped_array.h"
 
 using namespace fl;
 using std::cout;
