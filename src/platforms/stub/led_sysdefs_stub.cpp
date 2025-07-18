@@ -1,10 +1,13 @@
-// Auto-generated wrapper for all-source build
-// Generated automatically by platform conversion script
 
-#include "fl/compiler_control.h"
 
-#ifdef FASTLED_ALL_SRC
-// No implementation when building all-source
+#ifdef FASTLED_STUB_IMPL  // Only use this if explicitly defined.
+
+#include "platforms/stub/led_sysdefs_stub.h"
+
+#if defined(__EMSCRIPTEN__)
+#include "platforms/wasm/led_sysdefs_wasm.h"
 #else
-#include "led_sysdefs_stub.cpp.hpp"
+#include "platforms/stub/generic/led_sysdefs_generic.hpp"
 #endif
+
+#endif  // FASTLED_STUB_IMPL

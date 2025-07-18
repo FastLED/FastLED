@@ -1,10 +1,43 @@
-// Auto-generated wrapper for all-source build
-// Generated automatically by platform conversion script
+#ifdef __EMSCRIPTEN__
 
-#include "fl/compiler_control.h"
+#include <emscripten.h>
+#include <emscripten/emscripten.h> // Include Emscripten headers
+#include <emscripten/html5.h>
+#include <emscripten/val.h>
 
-#ifdef FASTLED_ALL_SRC
-// No implementation when building all-source
-#else
-#include "engine_listener.cpp.hpp"
-#endif
+#include <map>
+
+#include "engine_listener.h"
+#include "fl/namespace.h"
+
+#include "platforms/wasm/active_strip_data.h"
+#include "platforms/wasm/js.h"
+#include "platforms/wasm/js_bindings.h"
+
+namespace fl {
+
+// Note: Having trouble getting this into a cpp file.
+void EngineListener::Init() { Singleton<EngineListener>::instance(); }
+
+EngineListener::EngineListener() { EngineEvents::addListener(this); }
+EngineListener::~EngineListener() { EngineEvents::removeListener(this); }
+
+void EngineListener::onEndFrame() {
+    ActiveStripData &active_strips = ActiveStripData::Instance();
+    jsOnFrame(active_strips);
+}
+
+void EngineListener::onStripAdded(CLEDController *strip, uint32_t num_leds) {
+    int id = StripIdMap::addOrGetId(strip);
+    jsOnStripAdded(id, num_leds);
+}
+
+void EngineListener::onCanvasUiSet(CLEDController *strip,
+                                   const ScreenMap &screenmap) {
+    int controller_id = StripIdMap::addOrGetId(strip);
+    jsSetCanvasSize(controller_id, screenmap);
+}
+
+} // namespace fl
+
+#endif // __EMSCRIPTEN__

@@ -4,14 +4,7 @@
 #ifdef FASTLED_ALL_SRC
 
 // WASM PLATFORM IMPLEMENTATIONS
-#include "platforms/wasm/active_strip_data.cpp.hpp"
-#include "platforms/wasm/compiler/Arduino.cpp.hpp"
-#include "platforms/wasm/engine_listener.cpp.hpp"
-#include "platforms/wasm/fastspi_wasm.cpp.hpp"
-#include "platforms/wasm/fs_wasm.cpp.hpp"
-#include "platforms/wasm/js.cpp.hpp"
-#include "platforms/wasm/js_bindings.cpp.hpp"
-#include "platforms/wasm/timer.cpp.hpp"
-#include "platforms/wasm/ui.cpp.hpp"
+// Note: .cpp files are now automatically included via CMake globbing
+// No manual includes needed
 
 #endif // FASTLED_ALL_SRC

@@ -4,13 +4,7 @@
 #ifdef FASTLED_ALL_SRC
 
 // THIRD PARTY MODULE IMPLEMENTATIONS
-#include "third_party/object_fled/src/OjectFLED.cpp.hpp"
-
-// KISS FFT IMPLEMENTATIONS
-#include "third_party/cq_kernel/kiss_fft.cpp.hpp"
-#include "third_party/cq_kernel/kiss_fftr.cpp.hpp"
-
-// CQ KERNEL IMPLEMENTATION
-#include "third_party/cq_kernel/cq_kernel.cpp.hpp"
+// Note: .cpp files are now automatically included via CMake globbing
+// No manual includes needed
 
 #endif // FASTLED_ALL_SRC

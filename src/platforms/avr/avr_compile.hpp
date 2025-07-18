@@ -4,6 +4,7 @@
 #ifdef FASTLED_ALL_SRC
 
 // AVR PLATFORM IMPLEMENTATIONS
-#include "platforms/avr/avr_millis_timer_source.cpp.hpp"
+// Note: .cpp files are now automatically included via CMake globbing
+// No manual includes needed
 
 #endif // FASTLED_ALL_SRC
