@@ -5,6 +5,11 @@
 
 namespace fl {
 
+// FastLED equivalent of std::shared_ptr<T>
+// Alias for fl::Ptr<T> to provide familiar std:: naming
+template <typename T>
+using shared_ptr = fl::Ptr<T>;
+
 // FastLED equivalent of std::make_shared<T>
 // Creates a new object of type T and returns it wrapped in a fl::Ptr<T>
 // 

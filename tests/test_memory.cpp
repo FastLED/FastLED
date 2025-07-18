@@ -90,4 +90,23 @@ TEST_CASE("fl::make_shared perfect forwarding") {
     auto ptr = fl::make_shared<ForwardingTest>(42, true);
     CHECK_EQ(ptr->getValue(), 42);
     CHECK(ptr->isCopy());
+}
+
+TEST_CASE("fl::shared_ptr alias functionality") {
+    // Test that fl::shared_ptr<T> works as an alias for fl::Ptr<T>
+    fl::shared_ptr<TestClass> ptr1 = fl::make_shared<TestClass>(42);
+    CHECK(ptr1 != nullptr);
+    CHECK_EQ(ptr1->getValue(), 42);
+    
+    // Test assignment between shared_ptr and Ptr
+    fl::Ptr<TestClass> ptr2 = ptr1;
+    CHECK_EQ(ptr1.get(), ptr2.get());
+    CHECK_EQ(ptr1->ref_count(), 2);
+    CHECK_EQ(ptr2->ref_count(), 2);
+    
+    // Test that they are the same type
+    fl::shared_ptr<TestClass> ptr3;
+    ptr3 = ptr2;  // Should work seamlessly
+    CHECK_EQ(ptr3->getValue(), 42);
+    CHECK_EQ(ptr3->ref_count(), 3);
 } 
