@@ -15,7 +15,7 @@
 namespace fl {
 
 LinePath::LinePath(float x0, float y0, float x1, float y1) {
-    mParams = NewPtr<LinePathParams>();
+    mParams = fl::make_shared<LinePathParams>();
     params().x0 = x0;
     params().y0 = y0;
     params().x1 = x1;
@@ -104,7 +104,7 @@ vec2f ArchimedeanSpiralPath::compute(float alpha) {
 }
 
 RosePath::RosePath(u8 n, u8 d) {
-    mParams = NewPtr<RosePathParams>();
+    mParams = fl::make_shared<RosePathParams>();
     params().n = n;
     params().d = d;
 }

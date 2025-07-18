@@ -13,17 +13,17 @@ VideoImpl::VideoImpl(size_t pixelsPerFrame, float fpsVideo,
                      size_t nFramesInBuffer)
     : mPixelsPerFrame(pixelsPerFrame),
       mFrameInterpolator(
-          FrameInterpolatorPtr::New(MAX(1, nFramesInBuffer), fpsVideo)) {}
+          fl::make_shared<FrameInterpolator>(MAX(1, nFramesInBuffer), fpsVideo)) {}
 
 void VideoImpl::pause(fl::u32 now) {
     if (!mTime) {
-        mTime = TimeWarpPtr::New(now);
+        mTime = fl::make_shared<TimeWarp>(now);
     }
     mTime->pause(now);
 }
 void VideoImpl::resume(fl::u32 now) {
     if (!mTime) {
-        mTime = TimeWarpPtr::New(now);
+        mTime = fl::make_shared<TimeWarp>(now);
     }
     mTime->resume(now);
 }
@@ -51,14 +51,14 @@ VideoImpl::~VideoImpl() { end(); }
 void VideoImpl::begin(FileHandlePtr h) {
     end();
     // Removed setStartTime call
-    mStream = PixelStreamPtr::New(mPixelsPerFrame * kSizeRGB8);
+    mStream = fl::make_shared<PixelStream>(mPixelsPerFrame * kSizeRGB8);
     mStream->begin(h);
     mPrevNow = 0;
 }
 
 void VideoImpl::beginStream(ByteStreamPtr bs) {
     end();
-    mStream = PixelStreamPtr::New(mPixelsPerFrame * kSizeRGB8);
+    mStream = fl::make_shared<PixelStream>(mPixelsPerFrame * kSizeRGB8);
     // Removed setStartTime call
     mStream->beginStream(bs);
     mPrevNow = 0;
@@ -91,7 +91,7 @@ int32_t VideoImpl::durationMicros() const {
 
 bool VideoImpl::draw(fl::u32 now, CRGB *leds) {
     if (!mTime) {
-        mTime = TimeWarpPtr::New(now);
+        mTime = fl::make_shared<TimeWarp>(now);
         mTime->setSpeed(mTimeScale);
         mTime->reset(now);
     }
@@ -205,7 +205,7 @@ bool VideoImpl::updateBufferFromStream(fl::u32 now) {
         fl::u32 frame_to_fetch = frame_numbers[i];
         if (!recycled_frame) {
             // Happens when we are not full and we need to allocate a new frame.
-            recycled_frame = FramePtr::New(mPixelsPerFrame);
+            recycled_frame = fl::make_shared<Frame>(mPixelsPerFrame);
         }
 
         if (!mStream->readFrame(recycled_frame.get())) {
@@ -291,7 +291,7 @@ bool VideoImpl::updateBufferFromFile(fl::u32 now, bool forward) {
         fl::u32 frame_to_fetch = frame_numbers[i];
         if (!recycled_frame) {
             // Happens when we are not full and we need to allocate a new frame.
-            recycled_frame = FramePtr::New(mPixelsPerFrame);
+            recycled_frame = fl::make_shared<Frame>(mPixelsPerFrame);
         }
 
         do { // only to use break

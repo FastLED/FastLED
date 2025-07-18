@@ -12,7 +12,7 @@
 //       * `FASTLED_SAMRT_PTR_NO_FWD(FooInt)`
 //       * `FooIntPtr` is now available.
 //   * Instantiate from heap
-//     * `FooPtr foo = NewPtr<Foo>(a, b, ...args);`
+//     * `FooPtr foo = fl::make_shared<Foo>(a, b, ...args);`
 //     * Use `foo->method()` to call methods.
 //   * Instantiate from stack object and disable tracking
 //     * `Foo foo; FooPtr fooPtr = FooPtr::NoTracking(foo);`
@@ -26,7 +26,7 @@
 #include "fl/int.h"
 
 // Declares a smart pointer. FASTLED_SMART_PTR(Foo) will declare a class FooPtr
-// which will be a typedef of Ptr<Foo>. After this FooPtr::New(...args) can be
+// which will be a typedef of Ptr<Foo>. After this fl::make_shared<Foo>(...args) can be
 // used to create a new instance of Ptr<Foo>.
 #define FASTLED_SMART_PTR(type)                                                \
     class type;                                                                \
@@ -80,7 +80,7 @@ template <typename T> class PtrTraits {
 // methods.
 //
 // To create a Ptr to a concrete object, it's best to use FASTLED_SMART_PTR(Foo)
-// and then use FooPtr::New(...) to create a new instance of Ptr<Foo>.
+// and then use fl::make_shared<Foo>(...) to create a new instance of Ptr<Foo>.
 //
 // To create a Ptr of an interface bound to a subclass (common for driver code
 // or when hiding implementation) use the Ptr<InterfaceClass>::TakeOwnership(new
@@ -93,13 +93,13 @@ template <typename T> class PtrTraits {
 // Example:
 //   FASTLED_SMART_PTR(Foo);
 //   class Foo: public fl::Referent {};
-//   FooPtr foo = FooPtr::New();
+//   FooPtr foo = fl::make_shared<Foo>();
 //
 // Example 2: (Manual binding to constructor)
 //   class FooSubclass: public Foo {};
 //   Ptr<Foo> bar = Ptr<FooSubclass>::TakeOwnership(new FooSubclass());
 //
-// Example 3: (Provide your own constructor so that FooPtr::New() works to
+// Example 3: (Provide your own constructor so that fl::make_shared<Foo>() works to
 // create a FooSubclass)
 //   class FooSubclass: public Foo {  // Foo is an interface, FooSubclass is an
 //   implementation.
@@ -107,7 +107,7 @@ template <typename T> class PtrTraits {
 //       static FooPtr New(int a, int b);
 //   };
 //   FASTLED_SMART_PTR_CONSTRUCTOR(Foo, FooSubclass::New);
-//   FooPtr foo = FooPtr::New(1, 2);  // this will now work.
+//   FooPtr foo = fl::make_shared<Foo>(1, 2);  // this will now work.
 template <typename T> class Ptr : public PtrTraits<T> {
   public:
     friend class PtrTraits<T>;

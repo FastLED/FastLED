@@ -133,7 +133,7 @@ class PointPath : public XYPathGenerator {
 
 class LinePath : public XYPathGenerator {
   public:
-    LinePath(const LinePathParamsPtr &params = NewPtr<LinePathParams>());
+    LinePath(const LinePathParamsPtr &params = fl::make_shared<LinePathParams>());
     LinePath(float x0, float y0, float x1, float y1);
     vec2f compute(float alpha) override;
     const string name() const override;
@@ -182,7 +182,7 @@ class RosePath : public XYPathGenerator {
     // For n/d even: produces 2n petals
     // For n and d coprime: produces n petals if n is odd, 2n petals if n is
     // even
-    RosePath(const Ptr<RosePathParams> &p = NewPtr<RosePathParams>());
+    RosePath(const Ptr<RosePathParams> &p = fl::make_shared<RosePathParams>());
     RosePath(u8 n = 3, u8 d = 1);
     vec2f compute(float alpha) override;
     const string name() const override;
@@ -202,7 +202,7 @@ class PhyllotaxisPath : public XYPathGenerator {
     // c is a scaling factor, angle is the divergence angle in degrees (often
     // 137.5° - the golden angle)
     PhyllotaxisPath(
-        const Ptr<PhyllotaxisParams> &p = NewPtr<PhyllotaxisParams>());
+        const Ptr<PhyllotaxisParams> &p = fl::make_shared<PhyllotaxisParams>());
     vec2f compute(float alpha) override;
     const string name() const override;
 
@@ -220,7 +220,7 @@ class GielisCurvePath : public XYPathGenerator {
     // m: symmetry parameter (number of rotational symmetries)
     // n1, n2, n3: shape parameters
     GielisCurvePath(
-        const Ptr<GielisCurveParams> &p = NewPtr<GielisCurveParams>());
+        const Ptr<GielisCurveParams> &p = fl::make_shared<GielisCurveParams>());
     vec2f compute(float alpha) override;
     const string name() const override;
 
@@ -243,7 +243,7 @@ class GielisCurvePath : public XYPathGenerator {
 /// them.
 class CatmullRomPath : public XYPathGenerator {
   public:
-    CatmullRomPath(const Ptr<CatmullRomParams> &p = NewPtr<CatmullRomParams>());
+    CatmullRomPath(const Ptr<CatmullRomParams> &p = fl::make_shared<CatmullRomParams>());
 
     /// Add a point in [0,1]² to the path
     void addPoint(vec2f p);

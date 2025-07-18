@@ -54,7 +54,7 @@ FFTImpl &FFT::get_or_create(const FFT_Args &args) {
         return **val;
     }
     // else we have to make a new one.
-    Ptr<FFTImpl> fft = NewPtr<FFTImpl>(args);
+    Ptr<FFTImpl> fft = fl::make_shared<FFTImpl>(args);
     (*mMap)[args] = fft;
     return *fft;
 }

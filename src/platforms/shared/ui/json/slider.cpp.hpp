@@ -27,7 +27,7 @@ JsonSliderImpl::JsonSliderImpl(const fl::string &name, float value, float min,
         JsonUiInternal::ToJsonFunction([this](FLArduinoJson::JsonObject &json) {
             static_cast<JsonSliderImpl *>(this)->toJson(json);
         });
-    mInternal = JsonUiInternalPtr::New(name, fl::move(updateFunc),
+    mInternal = fl::make_shared<JsonUiInternal>(name, fl::move(updateFunc),
                                        fl::move(toJsonFunc));
     addJsonUiComponent(mInternal);
 }

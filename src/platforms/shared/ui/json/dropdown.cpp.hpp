@@ -20,7 +20,7 @@ void JsonDropdownImpl::commonInit(const fl::string &name) {
         JsonUiInternal::ToJsonFunction([this](FLArduinoJson::JsonObject &json) {
             static_cast<JsonDropdownImpl *>(this)->toJson(json);
         });
-    mInternal = JsonUiInternalPtr::New(name, fl::move(updateFunc),
+    mInternal = fl::make_shared<JsonUiInternal>(name, fl::move(updateFunc),
                                      fl::move(toJsonFunc));
     addJsonUiComponent(mInternal);
 }

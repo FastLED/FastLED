@@ -42,7 +42,7 @@ XYMap XYMap::constructWithLookUpTable(u16 width, u16 height,
                                       const u16 *lookUpTable,
                                       u16 offset) {
     XYMap out(width, height, kLookUpTable);
-    out.mLookUpTable = LUT16Ptr::New(width * height);
+    out.mLookUpTable = fl::make_shared<LUT16>(width * height);
     memcpy(out.mLookUpTable->getDataMutable(), lookUpTable,
            width * height * sizeof(u16));
     out.mOffset = offset;
@@ -75,7 +75,7 @@ void XYMap::convertToLookUpTable() {
     if (type == kLookUpTable) {
         return;
     }
-    mLookUpTable = LUT16Ptr::New(width * height);
+    mLookUpTable = fl::make_shared<LUT16>(width * height);
     u16 *data = mLookUpTable->getDataMutable();
     for (u16 y = 0; y < height; y++) {
         for (u16 x = 0; x < width; x++) {

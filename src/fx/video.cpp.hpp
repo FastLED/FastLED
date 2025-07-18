@@ -28,7 +28,7 @@ Video::Video() : Fx1d(0) {}
 
 Video::Video(size_t pixelsPerFrame, float fps, size_t frame_history_count)
     : Fx1d(pixelsPerFrame) {
-    mImpl = VideoImplPtr::New(pixelsPerFrame, fps, frame_history_count);
+    mImpl = fl::make_shared<VideoImpl>(pixelsPerFrame, fps, frame_history_count);
 }
 
 void Video::setFade(fl::u32 fadeInTime, fl::u32 fadeOutTime) {
@@ -164,8 +164,8 @@ VideoFxWrapper::VideoFxWrapper(Ptr<Fx> fx) : Fx1d(fx->getNumLeds()), mFx(fx) {
                      "assuming 30fps.");
         mFps = 30.0f;
     }
-    mVideo = VideoImplPtr::New(mFx->getNumLeds(), mFps, 2);
-    mByteStream = ByteStreamMemoryPtr::New(mFx->getNumLeds() * sizeof(CRGB));
+    mVideo = fl::make_shared<VideoImpl>(mFx->getNumLeds(), mFps, 2);
+    mByteStream = fl::make_shared<ByteStreamMemory>(mFx->getNumLeds() * sizeof(CRGB));
     mVideo->beginStream(mByteStream);
 }
 

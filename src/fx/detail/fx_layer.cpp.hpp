@@ -19,7 +19,7 @@ void FxLayer::setFx(fl::Ptr<Fx> newFx) {
 void FxLayer::draw(fl::u32 now) {
     // assert(fx);
     if (!frame) {
-        frame = FramePtr::New(fx->getNumLeds());
+        frame = fl::make_shared<Frame>(fx->getNumLeds());
     }
 
     if (!running) {

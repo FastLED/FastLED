@@ -12,7 +12,7 @@ namespace fl {
 //   auto ptr = fl::make_shared<MyClass>(arg1, arg2, ...);
 //
 // This is equivalent to:
-//   fl::Ptr<MyClass> ptr = fl::NewPtr<MyClass>(arg1, arg2, ...);
+//   fl::Ptr<MyClass> ptr = fl::make_shared<MyClass>(arg1, arg2, ...);
 //
 // Requirements:
 //   - T must inherit from fl::Referent

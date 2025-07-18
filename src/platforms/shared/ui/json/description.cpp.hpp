@@ -16,7 +16,7 @@ JsonDescriptionImpl::JsonDescriptionImpl(const string &text): mText(text) {
         JsonUiInternal::ToJsonFunction([this](FLArduinoJson::JsonObject &json) {
             static_cast<JsonDescriptionImpl *>(this)->toJson(json);
         });
-    mInternal = JsonUiInternalPtr::New("description", update_fcn, to_json_fcn);
+    mInternal = fl::make_shared<JsonUiInternal>("description", update_fcn, to_json_fcn);
     addJsonUiComponent(mInternal);
 }
 

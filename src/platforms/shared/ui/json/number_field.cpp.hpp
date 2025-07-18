@@ -22,7 +22,7 @@ JsonNumberFieldImpl::JsonNumberFieldImpl(const fl::string &name, double value,
         JsonUiInternal::ToJsonFunction([this](FLArduinoJson::JsonObject &json) {
             static_cast<JsonNumberFieldImpl *>(this)->toJson(json);
         });
-    mInternal = JsonUiInternalPtr::New(name, fl::move(updateFunc),
+    mInternal = fl::make_shared<JsonUiInternal>(name, fl::move(updateFunc),
                                      fl::move(toJsonFunc));
     addJsonUiComponent(mInternal);
 }

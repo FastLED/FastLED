@@ -14,7 +14,7 @@ int FxEngine::addFx(FxPtr effect) {
     if (mInterpolate && effect->hasFixedFrameRate(&fps)) {
         // Wrap the effect in a VideoFxWrapper so that we can get
         // interpolation.
-        VideoFxWrapperPtr vid_fx = VideoFxWrapperPtr::New(effect);
+        VideoFxWrapperPtr vid_fx = fl::make_shared<VideoFxWrapper>(effect);
         vid_fx->setFade(0, 0); // No fade for interpolated effects
         effect = vid_fx;
     }

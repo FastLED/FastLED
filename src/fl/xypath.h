@@ -44,12 +44,12 @@ class XYPath : public Referent {
     // Lines and curves
     static XYPathPtr NewLinePath(float x0, float y0, float x1, float y1);
     static XYPathPtr
-    NewLinePath(const Ptr<LinePathParams> &params = NewPtr<LinePathParams>());
+    NewLinePath(const Ptr<LinePathParams> &params = fl::make_shared<LinePathParams>());
     // Cutmull allows for a path to be defined by a set of points. The path will
     // be a smooth curve through the points.
     static XYPathPtr NewCatmullRomPath(
         u16 width = 0, u16 height = 0,
-        const Ptr<CatmullRomParams> &params = NewPtr<CatmullRomParams>());
+        const Ptr<CatmullRomParams> &params = fl::make_shared<CatmullRomParams>());
 
     // Custom path using just a function.
     static XYPathPtr
@@ -67,15 +67,15 @@ class XYPath : public Referent {
 
     static XYPathPtr
     NewRosePath(u16 width = 0, u16 height = 0,
-                const Ptr<RosePathParams> &params = NewPtr<RosePathParams>());
+                const Ptr<RosePathParams> &params = fl::make_shared<RosePathParams>());
 
     static XYPathPtr NewPhyllotaxisPath(
         u16 width = 0, u16 height = 0,
-        const Ptr<PhyllotaxisParams> &args = NewPtr<PhyllotaxisParams>());
+        const Ptr<PhyllotaxisParams> &args = fl::make_shared<PhyllotaxisParams>());
 
     static XYPathPtr NewGielisCurvePath(
         u16 width = 0, u16 height = 0,
-        const Ptr<GielisCurveParams> &params = NewPtr<GielisCurveParams>());
+        const Ptr<GielisCurveParams> &params = fl::make_shared<GielisCurveParams>());
     // END pre-baked paths.
 
     // Takes in a float at time [0, 1] and returns alpha values

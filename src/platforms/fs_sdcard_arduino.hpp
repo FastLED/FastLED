@@ -168,7 +168,7 @@ public:
 
 // Implementation of the factory function to create SD card filesystem
 inline FsImplPtr make_sdcard_filesystem(int cs_pin) {
-    return FsArduinoPtr::New(cs_pin);
+    return fl::make_shared<FsArduino>(cs_pin);
 }
 
 } // namespace fl
