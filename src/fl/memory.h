@@ -1,6 +1,8 @@
 #pragma once
 
 #include "fl/ptr.h"
+#include "fl/shared_ptr.h"
+#include "fl/weak_ptr.h"
 #include "fl/type_traits.h"
 
 namespace fl {
