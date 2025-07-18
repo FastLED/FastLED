@@ -27,7 +27,7 @@
 #include "fl/math_macros.h"
 #include "pixel_iterator.h"
 #include "fl/allocator.h"
-#include "fl/scoped_ptr.h"
+#include "fl/unique_ptr.h"
 #include "fl/assert.h"
 #include "fl/rectangular_draw_buffer.h"
 #include "cpixel_ledcontroller.h"
@@ -47,7 +47,7 @@ bool gPsramInited = false;
 class I2SEsp32S3_Group {
   public:
 
-    fl::scoped_ptr<fl::I2SClocklessLedDriveresp32S3> mDriver;
+    fl::unique_ptr<fl::I2SClocklessLedDriveresp32S3> mDriver;
     fl::RectangularDrawBuffer mRectDrawBuffer;
     bool mDrawn = false;
 

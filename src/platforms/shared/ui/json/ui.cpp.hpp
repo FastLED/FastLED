@@ -4,7 +4,7 @@
 #include "fl/warn.h"
 #include "fl/memory.h"
 #include "fl/vector.h"
-#include "fl/scoped_ptr.h"
+#include "fl/unique_ptr.h"
 #include "fl/function.h"
 
 namespace fl {
@@ -16,8 +16,8 @@ static fl::vector_inlined<fl::WeakPtr<JsonUiInternal>, 32>& getPendingComponents
 }
 
 // Internal JsonUiManager instance
-static fl::scoped_ptr<JsonUiManager>& getInternalManager() {
-    static fl::scoped_ptr<JsonUiManager> manager;
+static fl::unique_ptr<JsonUiManager>& getInternalManager() {
+    static fl::unique_ptr<JsonUiManager> manager;
     return manager;
 }
 

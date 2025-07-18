@@ -9,7 +9,7 @@
 #include "eorder.h"
 #include "pixel_iterator.h"
 #include "spi_ws2812/strip_spi.h"
-#include "fl/scoped_ptr.h"
+#include "fl/unique_ptr.h"
 #include "fl/assert.h"
 
 template <int DATA_PIN, int T1, int T2, int T3, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 5>
@@ -18,7 +18,7 @@ class ClocklessSpiWs2812Controller : public CPixelLEDController<RGB_ORDER>
 private:
     // -- Verify that the pin is valid
     static_assert(FastPin<DATA_PIN>::validpin(), "This pin has been marked as an invalid pin, common reasons includes it being a ground pin, read only, or too noisy (e.g. hooked up to the uart).");
-    fl::scoped_ptr<ISpiStripWs2812> mLedStrip;
+    fl::unique_ptr<ISpiStripWs2812> mLedStrip;
 
 public:
     ClocklessSpiWs2812Controller() = default;

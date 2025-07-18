@@ -1,6 +1,6 @@
 #pragma once
 
-#include "fl/scoped_ptr.h"
+#include "fl/unique_ptr.h"
 #include "fl/span.h"
 #include "fl/vector.h"
 #include "fl/move.h"

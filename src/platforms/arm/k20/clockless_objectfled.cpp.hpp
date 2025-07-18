@@ -34,7 +34,7 @@ class ObjectFLEDGroup {
   public:
 
 
-    fl::scoped_ptr<fl::ObjectFLED> mObjectFLED;
+    fl::unique_ptr<fl::ObjectFLED> mObjectFLED;
     fl::RectangularDrawBuffer mRectDrawBuffer;
     bool mDrawn = false;
 

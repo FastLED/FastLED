@@ -1,6 +1,6 @@
 #include <FastLED.h>
 #include "fl/json_console.h"
-#include "fl/scoped_ptr.h"
+#include "fl/unique_ptr.h"
 
 #define NUM_LEDS 60
 #define DATA_PIN 2
@@ -11,7 +11,7 @@ CRGB leds[NUM_LEDS];
 fl::UISlider brightness("brightness", 128, 0, 255);
 
 // JsonConsole for interactive control (using scoped_ptr for automatic cleanup)
-fl::scoped_ptr<fl::JsonConsole> console;
+fl::unique_ptr<fl::JsonConsole> console;
 
 void setup() {
     Serial.begin(115200);

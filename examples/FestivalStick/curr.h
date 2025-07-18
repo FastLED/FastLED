@@ -292,8 +292,8 @@ WaveFxPtr waveFx;
 Blend2dPtr waveBlend;
 
 // Animartrix effect objects - declared here but initialized in setup()
-fl::scoped_ptr<Animartrix> animartrix;
-fl::scoped_ptr<FxEngine> fxEngine;
+fl::unique_ptr<Animartrix> animartrix;
+fl::unique_ptr<FxEngine> fxEngine;
 
 void setup() {
     // Use constexpr dimensions (computed at compile time)

@@ -99,7 +99,7 @@ template <typename T> class LUT : public fl::Referent {
     }
 
   private:
-    fl::scoped_ptr<T> mDataHandle;
+    fl::unique_ptr<T> mDataHandle;
     T *data = nullptr;
     u32 length;
 };

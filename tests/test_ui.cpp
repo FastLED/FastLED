@@ -263,7 +263,7 @@ TEST_CASE("JsonConsole destructor cleanup") {
     
     // Test proper cleanup through scoped destruction
     {
-        fl::scoped_ptr<fl::JsonConsole> console;
+        fl::unique_ptr<fl::JsonConsole> console;
         console.reset(new fl::JsonConsole(mockAvailable, mockRead, mockWrite));
         
         // Initialize and add some test data
@@ -296,7 +296,7 @@ TEST_CASE("JsonConsole destructor cleanup") {
     
     // Test manual destruction via scoped_ptr reset
     {
-        fl::scoped_ptr<fl::JsonConsole> console;
+        fl::unique_ptr<fl::JsonConsole> console;
         console.reset(new fl::JsonConsole(mockAvailable, mockRead, mockWrite));
         
         // Initialize the console
@@ -314,7 +314,7 @@ TEST_CASE("JsonConsole destructor cleanup") {
     
     // Test destruction of uninitialized console
     {
-        fl::scoped_ptr<fl::JsonConsole> console;
+        fl::unique_ptr<fl::JsonConsole> console;
         console.reset(new fl::JsonConsole(mockAvailable, mockRead, mockWrite));
         // Don't call init() - test destructor works on uninitialized console
         // Console destructor should handle this gracefully
@@ -322,7 +322,7 @@ TEST_CASE("JsonConsole destructor cleanup") {
     
     // Test destruction with null callbacks
     {
-        fl::scoped_ptr<fl::JsonConsole> console;
+        fl::unique_ptr<fl::JsonConsole> console;
         console.reset(new fl::JsonConsole(
             fl::function<int()>{}, // null available
             fl::function<int()>{}, // null read  

@@ -12,7 +12,7 @@ Based on works and code by Shawn Silverman.
 
 #include "fl/math_macros.h" // if needed for MAX/MIN macros
 #include "fl/namespace.h"
-#include "fl/scoped_ptr.h"
+#include "fl/unique_ptr.h"
 #include "fl/vector.h"
 #include "fl/warn.h"
 

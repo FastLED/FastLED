@@ -220,7 +220,7 @@ class UIButton : public UIElement {
   private:
     FunctionList<UIButton &> mCallbacks;
     Listener mListener;
-    fl::scoped_ptr<Button> mRealButton;
+    fl::unique_ptr<Button> mRealButton;
 };
 
 class UICheckbox : public UIElement {
@@ -519,7 +519,7 @@ class UIDropdown : public UIElement {
     int mLastFrameValue = -1;
     bool mLastFrameValueValid = false;
     Listener mListener;
-    fl::scoped_ptr<Button> mNextButton;
+    fl::unique_ptr<Button> mNextButton;
 };
 
 class UIGroup {

@@ -16,7 +16,7 @@ Based on works and code by Shawn Silverman.
 
 #include "fl/math_macros.h" // if needed for MAX/MIN macros
 #include "fl/namespace.h"
-#include "fl/scoped_ptr.h"
+#include "fl/unique_ptr.h"
 #include "fl/warn.h"
 #include "fl/wave_simulation_real.h"
 
@@ -114,7 +114,7 @@ class WaveSimulation1D {
     u32 mMultiplier; // Supersampling multiplier (e.g., 2, 4, or 8).
     U8EasingFunction mU8Mode = WAVE_U8_MODE_LINEAR;
     // Internal high-resolution simulation.
-    fl::scoped_ptr<WaveSimulation1D_Real> mSim;
+    fl::unique_ptr<WaveSimulation1D_Real> mSim;
 };
 
 class WaveSimulation2D {
@@ -208,7 +208,7 @@ class WaveSimulation2D {
     u32 mMultiplier = 1; // Supersampling multiplier (e.g., 1, 2, 4, or 8).
     U8EasingFunction mU8Mode = WAVE_U8_MODE_LINEAR;
     // Internal high-resolution simulation.
-    fl::scoped_ptr<WaveSimulation2D_Real> mSim;
+    fl::unique_ptr<WaveSimulation2D_Real> mSim;
     fl::Grid<i16> mChangeGrid; // Needed for multiple updates.
 };
 

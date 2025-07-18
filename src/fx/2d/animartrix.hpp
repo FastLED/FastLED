@@ -11,7 +11,7 @@
 #include "fl/dbg.h"
 #include "fl/namespace.h"
 #include "fl/memory.h"
-#include "fl/scoped_ptr.h"
+#include "fl/unique_ptr.h"
 #include "fl/xymap.h"
 #include "fx/fx2d.h"
 #include "eorder.h"
@@ -105,7 +105,7 @@ class Animartrix : public Fx2d {
     friend class FastLEDANIMartRIX;
     static const char *getAnimartrixName(AnimartrixAnim animation);
     AnimartrixAnim prev_animation = NUM_ANIMATIONS;
-    fl::scoped_ptr<FastLEDANIMartRIX> impl;
+    fl::unique_ptr<FastLEDANIMartRIX> impl;
     CRGB *leds = nullptr; // Only set during draw, then unset back to nullptr.
     AnimartrixAnim current_animation = RGB_BLOBS5;
     EOrder color_order = RGB;

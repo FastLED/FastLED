@@ -2,7 +2,7 @@
 
 #include "fl/hash_map_lru.h"
 #include "fl/pair.h"
-#include "fl/scoped_ptr.h"
+#include "fl/unique_ptr.h"
 #include "fl/span.h"
 #include "fl/vector.h"
 
@@ -52,7 +52,7 @@ class FFTImpl : public fl::Referent {
     FFTImpl &operator=(FFTImpl &&) = delete;
 
   private:
-    fl::scoped_ptr<FFTContext> mContext;
+    fl::unique_ptr<FFTContext> mContext;
 };
 
 }; // namespace fl
