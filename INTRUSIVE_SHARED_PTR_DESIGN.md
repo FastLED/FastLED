@@ -1,119 +1,16 @@
-# FastLED Intrusive Shared Pointer Design Document
+# FastLED True Shared Pointer Implementation
 
 ## Overview
-Design document for converting the existing `fl::shared_ptr` (which is actually intrusive) to properly named `fl::intrusive_ptr`, and then implementing a true `std::`-like `shared_ptr` system.
+Design document for implementing a complete `std::`-like `shared_ptr` system for FastLED. The existing intrusive pointer system (`fl::intrusive_ptr`) has been completed and is now available alongside the new non-intrusive system.
 
-## Phase 1: Convert Existing `fl::shared_ptr` to `fl::intrusive_ptr`
+## Implementation Task: Add True `std::`-like `shared_ptr` System
 
-### Current Situation
-The existing `fl::shared_ptr<T>` in `fl/memory.h` is actually an **intrusive** smart pointer because:
-- It aliases `fl::Ptr<T>` which requires objects to inherit from `fl::Referent`
-- Objects manage their own reference counting
-- This is the behavior of `std::intrusive_ptr`, not `std::shared_ptr`
+**COMPLETED:** ✅ The intrusive pointer system has been renamed correctly:
+- `fl::shared_ptr` → `fl::intrusive_ptr` 
+- `fl::make_shared` → `fl::make_intrusive`
+- All references updated in `src/`, `examples/`, and `tests/`
 
-### Transformation Plan
-
-#### 1. Understand Current System
-The current system in `fl/memory.h`:
-```cpp
-// This is actually intrusive behavior, not std::shared_ptr behavior
-template <typename T>
-using shared_ptr = fl::Ptr<T>;  // ← This should be intrusive_ptr
-
-template <typename T, typename... Args>
-fl::Ptr<T> make_shared(Args&&... args) {  // ← This should be make_intrusive
-    return fl::NewPtr<T>(fl::forward<Args>(args)...);
-}
-```
-
-#### 2. Required Changes
-
-**Step 1: Rename shared_ptr to intrusive_ptr**
-```bash
-# Find all uses of fl::shared_ptr (the alias)
-grep -r "fl::shared_ptr" src/ tests/ examples/
-grep -r "fl::make_shared" src/ tests/ examples/
-```
-
-**Step 2: Create templated alias for fl::Referent**
-```cpp
-// Add to fl/memory.h or new fl/intrusive_ptr.h
-namespace fl {
-    // Templated alias for intrusive reference-counted base
-    template<typename T = void>
-    using intrusive_referent = fl::Referent;
-    
-    // Alias the old name for compatibility
-    using referent = fl::Referent;
-}
-```
-
-**Step 3: Update API naming**
-```cpp
-// Before (incorrect naming):
-template <typename T>
-using shared_ptr = fl::Ptr<T>;
-
-template <typename T, typename... Args>
-fl::Ptr<T> make_shared(Args&&... args);
-
-// After (correct naming):
-template <typename T>
-using intrusive_ptr = fl::Ptr<T>;
-
-template <typename T, typename... Args>
-fl::Ptr<T> make_intrusive(Args&&... args);
-```
-
-#### 3. Grep/Sed Transformation Commands
-
-```bash
-# 1. Find current usage patterns
-echo "=== Finding fl::shared_ptr usage ==="
-grep -r "fl::shared_ptr" src/ tests/ examples/
-
-echo "=== Finding fl::make_shared usage ==="
-grep -r "fl::make_shared" src/ tests/ examples/
-
-# 2. Transform fl::shared_ptr -> fl::intrusive_ptr
-find src/ tests/ examples/ -name "*.h" -o -name "*.cpp" -o -name "*.hpp" -o -name "*.ino" | \
-    xargs sed -i 's/fl::shared_ptr/fl::intrusive_ptr/g'
-
-# 3. Transform fl::make_shared -> fl::make_intrusive  
-find src/ tests/ examples/ -name "*.h" -o -name "*.cpp" -o -name "*.hpp" -o -name "*.ino" | \
-    xargs sed -i 's/fl::make_shared/fl::make_intrusive/g'
-
-# 4. Update fl/memory.h with correct naming
-sed -i 's/using shared_ptr = fl::Ptr<T>;/using intrusive_ptr = fl::Ptr<T>;/g' src/fl/memory.h
-sed -i 's/fl::Ptr<T> make_shared(/fl::Ptr<T> make_intrusive(/g' src/fl/memory.h
-
-# 5. Update comments and documentation
-find src/ tests/ examples/ -name "*.h" -o -name "*.cpp" -o -name "*.hpp" -o -name "*.ino" -o -name "*.md" | \
-    xargs sed -i 's/std::shared_ptr/std::intrusive_ptr/g' 
-```
-
-#### 4. Agent Instructions
-
-**CRITICAL: Agent must follow this exact sequence:**
-
-1. **RENAME PHASE**: 
-   - Execute the grep/sed commands above to rename `fl::shared_ptr` → `fl::intrusive_ptr`
-   - Execute the grep/sed commands above to rename `fl::make_shared` → `fl::make_intrusive`
-   - Update `fl/memory.h` with correct intrusive naming
-
-2. **TEST PHASE**:
-   - Run `bash test` to ensure all tests pass
-   - Run `bash lint` to ensure no linting errors
-   - Verify compilation works: `bash compile uno --examples Blink`
-
-3. **HALT PHASE**: 
-   - **STOP and report results**
-   - **DO NOT PROCEED** to Phase 2 until user confirms merge
-   - Wait for user to review and merge changes
-
----
-
-## Phase 2: Implement True `std::`-like `shared_ptr` System
+**REMAINING TASK:** Implement a complete `std::shared_ptr`-compatible system alongside the existing intrusive system.
 
 ### Overview
 Implement a complete `shared_ptr` system that follows `std::shared_ptr` design exactly, including weak pointer support and aligned allocation.
@@ -127,20 +24,28 @@ Implement a complete `shared_ptr` system that follows `std::shared_ptr` design e
 5. **Aligned allocation**: `allocate_shared_aligned` for cache optimization
 6. **Thread safety**: Reference counting (where supported by platform)
 
-### File Structure After Phase 1 & 2
+### File Structure for Implementation
 
+**EXISTING FILES (already correctly updated):**
+```
+src/fl/
+├── memory.h              # ✅ Contains intrusive_ptr alias and make_intrusive
+└── [other existing files with intrusive_ptr references]
+
+tests/
+├── test_memory.cpp       # ✅ Tests intrusive_ptr (renamed from shared_ptr)
+└── [other test files with intrusive_ptr references]
+```
+
+**NEW FILES TO CREATE:**
 ```
 src/fl/
 ├── shared_ptr.h          # NEW: Main shared_ptr implementation (std:: equivalent)
 ├── weak_ptr.h            # NEW: Weak pointer implementation  
-├── memory.h              # UPDATED: Contains intrusive_ptr alias + new shared_ptr
-└── intrusive_ptr.h       # OPTIONAL: Dedicated intrusive pointer header
 
 tests/
 ├── test_shared_ptr.cpp   # NEW: Comprehensive shared_ptr tests (std:: equivalent)
 ├── test_weak_ptr.cpp     # NEW: Weak pointer tests
-├── test_memory.cpp       # UPDATED: Tests intrusive_ptr (renamed from shared_ptr)
-└── test_intrusive_ptr.cpp # OPTIONAL: Dedicated intrusive tests
 ```
 
 ### Core Implementation Design
@@ -408,30 +313,31 @@ weak_ptr<T> make_weak(const shared_ptr<T>& shared) {
 - SIMD-friendly memory layout
 ```
 
-### Migration Strategy
+### Implementation Instructions for Next Agent
 
-#### Phase 1: Rename Current System (IMMEDIATE)
-1. **AGENT TASK**: Rename `fl::shared_ptr` → `fl::intrusive_ptr` (correct naming)
-2. **AGENT TASK**: Rename `fl::make_shared` → `fl::make_intrusive` (correct naming)  
-3. **AGENT TASK**: Add templated `fl::intrusive_referent<T>` alias for `fl::Referent`
-4. **AGENT TASK**: Test everything works (`bash test`, `bash lint`, `bash compile`)
-5. **AGENT TASK**: **HALT** and wait for user merge approval
+**CURRENT STATUS:** ✅ Phase 1 Complete - Intrusive pointer system properly renamed
 
-#### Phase 2: Implement True std:: shared_ptr (AFTER MERGE)
-1. **AGENT TASK**: Implement `fl/shared_ptr.h` with full `std::shared_ptr` compatibility
-2. **AGENT TASK**: Implement `fl/weak_ptr.h` with `std::weak_ptr` support
-3. **AGENT TASK**: Implement `make_shared_aligned` for cache-optimized allocation
-4. **AGENT TASK**: Update `fl/memory.h` to include both intrusive_ptr and shared_ptr
-5. **AGENT TASK**: Create comprehensive test suite matching std:: behavior
-6. **AGENT TASK**: Benchmark against `std::shared_ptr` for performance validation
+**YOUR TASK:** Implement the new `std::shared_ptr`-compatible system
 
-#### Phase 3: Integration and Documentation
-1. Keep both `intrusive_ptr` and `shared_ptr` available
-2. Update high-level APIs to use `shared_ptr` (std:: equivalent) by default
-3. Provide clear documentation on when to use each pointer type:
+#### Step 1: Implement Core Files
+1. **Create `src/fl/shared_ptr.h`** with full `std::shared_ptr` API compatibility
+2. **Create `src/fl/weak_ptr.h`** with `std::weak_ptr` support  
+3. **Update `src/fl/memory.h`** to include the new shared_ptr alongside existing intrusive_ptr
+
+#### Step 2: Create Test Suite
+1. **Create `tests/test_shared_ptr.cpp`** with comprehensive std:: compatibility tests
+2. **Create `tests/test_weak_ptr.cpp`** for weak pointer functionality
+
+#### Step 3: Integration and Validation
+1. **Run `bash test`** to ensure all tests pass (including existing intrusive_ptr tests)
+2. **Run `bash lint`** to ensure code quality
+3. **Test compilation:** `bash compile uno --examples Blink`
+
+#### Step 4: Documentation
+1. Keep both `intrusive_ptr` and `shared_ptr` available for different use cases
+2. Document when to use each pointer type:
    - `fl::intrusive_ptr<T>`: When objects inherit from `fl::Referent` (existing code)
    - `fl::shared_ptr<T>`: For new code requiring std:: compatibility
-4. Create migration guides and best practices
 
 ### Performance Considerations
 
