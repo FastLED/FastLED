@@ -3,7 +3,7 @@
 #pragma once
 
 #include "FastLED.h"
-#include "fl/ptr.h"
+#include "fl/memory.h"
 #include "fx/fx2d.h"
 
 namespace fl {

@@ -2,7 +2,7 @@
 
 #include "fl/stdint.h"
 
-#include "fl/ptr.h"
+#include "fl/memory.h"
 
 
 namespace fl {

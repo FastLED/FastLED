@@ -2,7 +2,7 @@
 
 #include "fl/fft.h"
 #include "fl/math.h"
-#include "fl/ptr.h"
+#include "fl/memory.h"
 #include "fl/span.h"
 #include "fl/vector.h"
 #include "fl/int.h"

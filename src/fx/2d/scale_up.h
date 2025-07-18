@@ -10,7 +10,7 @@
 #include "fl/stdint.h"
 
 #include "fl/upscale.h"
-#include "fl/ptr.h"
+#include "fl/memory.h"
 #include "fl/vector.h"
 #include "fl/xymap.h"
 #include "fx/fx2d.h"

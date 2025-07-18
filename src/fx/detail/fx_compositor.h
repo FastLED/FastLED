@@ -5,7 +5,7 @@
 
 #include "crgb.h"
 #include "fl/namespace.h"
-#include "fl/ptr.h"
+#include "fl/memory.h"
 #include "fl/vector.h"
 #include "fx/detail/fx_layer.h"
 #include "fx/fx.h"
@@ -20,8 +20,8 @@ namespace fl {
 class FxCompositor {
   public:
     FxCompositor(fl::u32 numLeds) : mNumLeds(numLeds) {
-        mLayers[0] = FxLayerPtr::New();
-        mLayers[1] = FxLayerPtr::New();
+        mLayers[0] = fl::make_shared<FxLayer>();
+        mLayers[1] = fl::make_shared<FxLayer>();
     }
 
     void startTransition(fl::u32 now, fl::u32 duration, fl::Ptr<Fx> nextFx) {

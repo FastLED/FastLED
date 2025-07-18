@@ -10,7 +10,7 @@ expensive trig functions are needed. Same with scale and offset.
 
 #include "fl/lut.h"
 #include "fl/math_macros.h"
-#include "fl/ptr.h"
+#include "fl/memory.h"
 #include "fl/xymap.h"
 #include "lib8tion/types.h"
 

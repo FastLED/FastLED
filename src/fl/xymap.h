@@ -9,7 +9,7 @@
 #include "crgb.h"
 #include "fl/clamp.h"
 #include "fl/lut.h"
-#include "fl/ptr.h"
+#include "fl/memory.h"
 #include "fl/xmap.h" // Include xmap.h for LUT16
 
 namespace fl {

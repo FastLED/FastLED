@@ -6,7 +6,7 @@
 
 #include "fl/colorutils.h"
 #include "fl/gradient.h"
-#include "fl/ptr.h"
+#include "fl/memory.h"
 #include "fl/wave_simulation.h"
 #include "fl/xymap.h"
 #include "fx/fx.h"

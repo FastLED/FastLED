@@ -3,7 +3,7 @@
 #include "fl/stdint.h"
 
 #include "fl/namespace.h"
-#include "fl/ptr.h"
+#include "fl/memory.h"
 #include "fl/str.h"
 #include "fx/fx1d.h"
 #include "fx/time.h"

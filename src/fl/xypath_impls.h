@@ -12,7 +12,7 @@
 
 #include "fl/lut.h"
 #include "fl/math_macros.h"
-#include "fl/ptr.h"
+#include "fl/memory.h"
 #include "fl/tile2x2.h"
 #include "fl/transform.h"
 #include "fl/unused.h"
