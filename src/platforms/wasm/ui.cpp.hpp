@@ -81,12 +81,8 @@ void jsUpdateUiComponents(const std::string &jsonStr) {
     
     if (getUpdateEngineState()) {
         //FL_WARN("*** WASM CALLING BACKEND WITH JSON: " << jsonStr.c_str());
-        try {
-            getUpdateEngineState()(jsonStr.c_str());
-            //FL_WARN("*** WASM BACKEND CALL COMPLETED SUCCESSFULLY");
-        } catch (...) {
-            FL_WARN("*** WASM BACKEND CALL THREW EXCEPTION!");
-        }
+        getUpdateEngineState()(jsonStr.c_str());
+        //FL_WARN("*** WASM BACKEND CALL COMPLETED SUCCESSFULLY");
     } else {
         FL_WARN("*** WASM ERROR: No engine state updater available, attempting emergency reinitialization...");
         //FL_WARN("*** WASM ERROR: No engine state updater available");
