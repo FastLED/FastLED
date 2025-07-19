@@ -245,6 +245,15 @@ else()
             set(DEAD_CODE_ELIMINATION_LINKER_FLAGS "")
             list(APPEND DEAD_CODE_ELIMINATION_LINKER_FLAGS "-Xlinker" "/OPT:REF" "-Xlinker" "/OPT:ICF")
             message(STATUS "Overriding dead code elimination flags for lld-link: ${DEAD_CODE_ELIMINATION_LINKER_FLAGS}")
+            
+            # Force errors for unknown arguments on Windows for strict builds
+            # Compiler: Force error for any unknown compiler arguments
+            set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror=unknown-argument")
+            set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Werror=unknown-argument")
+            
+            # Note: lld-link already errors on unknown arguments by default, so no additional flags needed
+            # The /WX flag would turn harmless debug section warnings into errors
+            message(STATUS "Enabling strict argument validation on Windows: compiler will error on unknown arguments")
         endif()
     else()
         message(STATUS "Neither mold nor lld-link found. Using system default linker.")
