@@ -21,6 +21,7 @@ set(GNU_WARNING_FLAGS
     -Werror=unused-value             # Unused computed values
     -Werror=uninitialized            # Use of uninitialized variables
     -Werror=array-bounds             # Array boundary violations
+    -Werror=tautological-constant-out-of-range-compare  # Tautological constant comparisons
     -Wcast-align                     # Alignment-breaking casts
     -Wmissleading-indentation        # Confusing indentation
     -Wdeprecated-declarations        # Use of deprecated functions
@@ -82,6 +83,7 @@ function(filter_gnu_flags_for_compiler input_flags output_var)
                flag STREQUAL "-Werror=infinite-recursion" OR
                flag STREQUAL "-Werror=extra-tokens" OR
                flag STREQUAL "-Werror=unused-private-field" OR
+               flag STREQUAL "-Werror=tautological-constant-out-of-range-compare" OR
                flag STREQUAL "-Wglobal-constructors" OR
                flag STREQUAL "-Werror=global-constructors")
                 set(keep_flag FALSE)
