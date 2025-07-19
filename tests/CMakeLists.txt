@@ -69,22 +69,9 @@ detect_compiler_capabilities()
 find_and_configure_dependencies()
 
 # ============================================================================
-# PHASE 4: Configure build settings based on build type
+# PHASE 4: Configure build settings based on build type (REFACTORED)
 # ============================================================================
-if(CMAKE_BUILD_TYPE STREQUAL "Release")
-    # Release builds: optimized for performance
-    configure_release_build()
-    set_optimization_level("O2")
-    if(NOT NO_THIN_LTO)
-        enable_lto()
-    endif()
-    configure_dead_code_elimination()
-else()
-    # Debug, Quick, and other builds: optimized for compilation speed and debugging
-    configure_debug_build()
-    set_optimization_level("O0")
-    configure_dead_code_elimination()
-endif()
+configure_build_type_settings()
 
 # ============================================================================
 # PHASE 5: Configure build performance and parallelization

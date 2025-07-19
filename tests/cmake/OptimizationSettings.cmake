@@ -267,4 +267,26 @@ function(apply_performance_profile)
     enable_lto()                         # Link-time optimization
     configure_fast_math()               # Aggressive math optimizations
     configure_dead_code_elimination()    # Remove unused code
+endfunction()
+
+# Function to configure build settings based on build type
+function(configure_build_type_settings)
+    if(CMAKE_BUILD_TYPE STREQUAL "Release")
+        # Release builds: optimized for performance
+        message(STATUS "OptimizationSettings: Configuring Release build")
+        configure_release_build()
+        set_optimization_level("O2")
+        if(NOT NO_THIN_LTO)
+            enable_lto()
+        else()
+            message(STATUS "OptimizationSettings: LTO disabled by NO_THIN_LTO option")
+        endif()
+        configure_dead_code_elimination()
+    else()
+        # Debug, Quick, and other builds: optimized for compilation speed and debugging
+        message(STATUS "OptimizationSettings: Configuring Debug/non-Release build (${CMAKE_BUILD_TYPE})")
+        configure_debug_build()
+        set_optimization_level("O0")
+        configure_dead_code_elimination()
+    endif()
 endfunction() 
