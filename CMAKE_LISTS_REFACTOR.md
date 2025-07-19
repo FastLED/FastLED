@@ -1,8 +1,44 @@
 # CMakeLists.txt Refactor Design Document
 
+## 🚧 **REFACTOR STATUS - IN PROGRESS** 🚧
+
+### ✅ **COMPLETED SECTIONS** 
+| Section | Status | Lines Reduced | Description |
+|---------|--------|---------------|-------------|
+| **Compiler Flags** | ✅ DONE | ~120 lines | Moved to `CompilerFlags.cmake` module with `apply_test_compiler_flags()` |
+| **Optimization Settings** | ✅ DONE | ~30 lines | Proper O0/O2 logic - O2 only for Release builds |
+| **Build Flags Summary** | ✅ DONE | ~80 lines | Updated to work with modular flag system |
+| **Libunwind Detection** | ✅ DONE | ~60 lines | Moved to `DependencyManagement.cmake` module |
+| **Individual Test Flags Logging** | ✅ DONE | ~20 lines | Fixed undefined variable references |
+
+### 🔄 **PARTIALLY COMPLETED**
+| Section | Status | Description |
+|---------|--------|-------------|
+| **Target Creation** | 🔄 PARTIAL | Manual target creation still exists, modules available but not used |
+
+### ❌ **REMAINING WORK**
+| Section | Priority | Lines | Description |
+|---------|----------|-------|-------------|
+| **Test Target Creation** | HIGH | ~100 lines | Replace manual `add_executable()` with `create_test_executable()` |
+| **Windows Configuration** | MEDIUM | ~50 lines | Move Windows-specific settings to modules |
+| **Linker Flags Application** | MEDIUM | ~30 lines | Use `LinkerCompatibility.cmake` functions |
+| **Final Cleanup** | LOW | ~20 lines | Remove remaining manual configurations |
+
+### 📊 **PROGRESS METRICS**
+- **Total Original Lines**: ~812 lines
+- **Lines Refactored**: ~310 lines (38%)
+- **Lines Remaining**: ~500 lines (62%)
+- **Current File Size**: ~460 lines
+- **Target Final Size**: ~150-200 lines
+
+### 🎯 **NEXT PRIORITY**
+Replace manual test target creation with modular `create_test_executable()` function calls to eliminate the remaining ~100 lines of manual target configuration.
+
+---
+
 ## Overview
 
-The current `tests/CMakeLists.txt` is a monolithic 812-line file that mixes platform detection, compiler flags, linker settings, and target creation. This document outlines a modular refactor that separates concerns into focused, reusable CMake modules.
+The current `tests/CMakeLists.txt` is being refactored from a monolithic 812-line file that mixes platform detection, compiler flags, linker settings, and target creation into a modular system with focused, reusable CMake modules.
 
 ## Design Principles
 
