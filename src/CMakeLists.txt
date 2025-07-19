@@ -30,24 +30,62 @@ endif()
 # Include FastLED headers (assumed to be in this directory)
 include_directories(${FASTLED_SOURCE_DIR})
 
-# All source build system removed - using standard individual file compilation
-message(STATUS "Using individual file compilation mode with automatic source globbing")
+# Check if we should use unified compilation mode (FASTLED_ALL_SRC=1)
+option(FASTLED_ALL_SRC "Enable unified compilation mode" ON)
 
-# === Get all the source files ===
-file(GLOB_RECURSE FASTLED_SOURCES "${FASTLED_SOURCE_DIR}/*.c*")
-message(STATUS "Found source files: ${FASTLED_SOURCES}")
+if(FASTLED_ALL_SRC)
+    message(STATUS "FASTLED_ALL_SRC=ON: Using unified compilation mode")
+    
+    # === Get all the source files ===
+    file(GLOB_RECURSE ALL_CPP_FILES "${FASTLED_SOURCE_DIR}/*.cpp")
+    message(STATUS "Found ${CMAKE_CURRENT_LIST_LENGTH} .cpp files for unified compilation")
+    
+    # Exclude platform-specific files (e.g. esp, arm, avr)
+    list(FILTER ALL_CPP_FILES EXCLUDE REGEX ".*esp.*")
+    list(FILTER ALL_CPP_FILES EXCLUDE REGEX ".*arm.*")
+    list(FILTER ALL_CPP_FILES EXCLUDE REGEX ".*avr.*")
+    
+    # Generate unified source file that includes all .cpp files
+    set(UNIFIED_SOURCE_FILE "${CMAKE_CURRENT_BINARY_DIR}/fastled_unified.cpp")
+    
+    # Create content for unified source file
+    set(UNIFIED_CONTENT "// Auto-generated unified compilation file\n")
+    set(UNIFIED_CONTENT "${UNIFIED_CONTENT}// This file includes all FastLED source files for unified compilation\n\n")
+    
+    foreach(cpp_file ${ALL_CPP_FILES})
+        # Convert absolute path to relative path from FASTLED_SOURCE_DIR
+        file(RELATIVE_PATH relative_path ${FASTLED_SOURCE_DIR} ${cpp_file})
+        set(UNIFIED_CONTENT "${UNIFIED_CONTENT}#include \"${relative_path}\"\n")
+    endforeach()
+    
+    # Write the unified source file
+    file(WRITE ${UNIFIED_SOURCE_FILE} ${UNIFIED_CONTENT})
+    
+    # Use only the unified source file for compilation
+    set(FASTLED_SOURCES ${UNIFIED_SOURCE_FILE})
+    
+    list(LENGTH ALL_CPP_FILES CPP_FILE_COUNT)
+    message(STATUS "Generated unified source file including ${CPP_FILE_COUNT} .cpp files")
+    
+else()
+    message(STATUS "FASTLED_ALL_SRC=OFF: Using individual file compilation mode")
+    
+    # === Get all the source files ===
+    file(GLOB_RECURSE FASTLED_SOURCES "${FASTLED_SOURCE_DIR}/*.c*")
+    message(STATUS "Found source files: ${FASTLED_SOURCES}")
 
-if(FASTLED_SOURCES STREQUAL "")
-    message(FATAL_ERROR "Error: No source files found in ${FASTLED_SOURCE_DIR}!")
+    if(FASTLED_SOURCES STREQUAL "")
+        message(FATAL_ERROR "Error: No source files found in ${FASTLED_SOURCE_DIR}!")
+    endif()
+
+    # Exclude platform-specific files (e.g. esp, arm, avr)
+    list(FILTER FASTLED_SOURCES EXCLUDE REGEX ".*esp.*")
+    list(FILTER FASTLED_SOURCES EXCLUDE REGEX ".*arm.*")
+    list(FILTER FASTLED_SOURCES EXCLUDE REGEX ".*avr.*")
 endif()
 
-# Exclude platform-specific files (e.g. esp, arm, avr)
-list(FILTER FASTLED_SOURCES EXCLUDE REGEX ".*esp.*")
-list(FILTER FASTLED_SOURCES EXCLUDE REGEX ".*arm.*")
-list(FILTER FASTLED_SOURCES EXCLUDE REGEX ".*avr.*")
-
 # -----------------------------------------------------------------------------
-# Create the main FastLED library from all globbed sources
+# Create the main FastLED library from sources (unified or individual)
 # -----------------------------------------------------------------------------
 
 add_library(fastled STATIC ${FASTLED_SOURCES})
@@ -66,4 +104,8 @@ if(WIN32)
 endif()
 
 list(LENGTH FASTLED_SOURCES FASTLED_SOURCE_COUNT)
-message(STATUS "Created fastled library with ${FASTLED_SOURCE_COUNT} source files")
+if(FASTLED_ALL_SRC)
+    message(STATUS "Created fastled library with unified compilation (${CPP_FILE_COUNT} .cpp files combined into ${FASTLED_SOURCE_COUNT} compilation unit)")
+else()
+    message(STATUS "Created fastled library with ${FASTLED_SOURCE_COUNT} individual source files")
+endif()
