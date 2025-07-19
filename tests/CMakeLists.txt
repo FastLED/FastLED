@@ -146,43 +146,8 @@ foreach(TEST_SOURCE ${TEST_SOURCES})
         message(STATUS "Processing specific test: ${TEST_NAME}")
     endif()
     
-    # ============================================================================
-    # 🚨 MODULAR TEST CREATION LOGGING
-    # ============================================================================
-    if(DEFINED SPECIFIC_TEST AND CURRENT_TEST_NAME STREQUAL SPECIFIC_TEST)
-        message(STATUS "")
-        message(STATUS "🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪")
-        message(STATUS "🧪                        MODULAR TEST CREATION: ${TEST_NAME}                       🧪")
-        message(STATUS "🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪")
-        message(STATUS "")
-        message(STATUS "  📁 Source File: ${TEST_SOURCE}")
-        message(STATUS "  🎯 Target Name: ${TEST_NAME}")
-        message(STATUS "")
-        
-        message(STATUS "  🔧 Modular Target Creation:")
-        message(STATUS "     - Using create_test_executable() from TargetCreation module")
-        message(STATUS "     - Automatic Windows configuration via configure_windows_executable()")
-        message(STATUS "     - Standard test settings via apply_test_settings()")
-        message(STATUS "     - Unit test flags via apply_unit_test_flags()")
-        message(STATUS "     - CTest registration via register_test_executable()")
-        message(STATUS "")
-        
-        message(STATUS "  📌 Modular system will automatically provide:")
-        message(STATUS "     - FastLED library linking")
-        message(STATUS "     - Test infrastructure (test_shared_static) linking")
-        message(STATUS "     - C++17 standard compliance")
-        message(STATUS "     - Platform-specific debugging libraries (Windows: dbghelp, psapi)")
-        message(STATUS "     - Stack unwinding support (if available)")
-        message(STATUS "     - Static runtime linking (GNU on non-Apple platforms)")
-        message(STATUS "     - Consistent compile definitions and flags")
-        message(STATUS "")
-        
-        message(STATUS "🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪")
-        message(STATUS "🧪                       END MODULAR TEST CREATION: ${TEST_NAME}                    🧪")
-        message(STATUS "🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪")
-        message(STATUS "")
-    endif()
-    # ============================================================================
+    # Display verbose test creation logging (handled by TestConfiguration module)
+    display_verbose_test_creation_logging(${TEST_NAME} ${TEST_SOURCE})
     
     # Create test executable using modular system
     create_test_executable(${TEST_NAME} ${TEST_SOURCE})

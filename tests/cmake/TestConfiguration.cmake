@@ -321,4 +321,50 @@ function(display_build_summary)
     
     # Configure verbose test output
     set(CMAKE_CTEST_ARGUMENTS "--output-on-failure" PARENT_SCOPE)
+endfunction()
+
+# Function to display verbose test creation logging for specific tests
+function(display_verbose_test_creation_logging test_name test_source)
+    # Only display verbose logging for specific test builds
+    if(NOT DEFINED SPECIFIC_TEST)
+        return()
+    endif()
+    
+    # Extract test name without "test_" prefix for comparison
+    string(REPLACE "test_" "" current_test_name ${test_name})
+    if(NOT current_test_name STREQUAL SPECIFIC_TEST)
+        return()
+    endif()
+    
+    message(STATUS "")
+    message(STATUS "🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪")
+    message(STATUS "🧪                        MODULAR TEST CREATION: ${test_name}                       🧪")
+    message(STATUS "🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪")
+    message(STATUS "")
+    message(STATUS "  📁 Source File: ${test_source}")
+    message(STATUS "  🎯 Target Name: ${test_name}")
+    message(STATUS "")
+    
+    message(STATUS "  🔧 Modular Target Creation:")
+    message(STATUS "     - Using create_test_executable() from TargetCreation module")
+    message(STATUS "     - Automatic Windows configuration via configure_windows_executable()")
+    message(STATUS "     - Standard test settings via apply_test_settings()")
+    message(STATUS "     - Unit test flags via apply_unit_test_flags()")
+    message(STATUS "     - CTest registration via register_test_executable()")
+    message(STATUS "")
+    
+    message(STATUS "  📌 Modular system will automatically provide:")
+    message(STATUS "     - FastLED library linking")
+    message(STATUS "     - Test infrastructure (test_shared_static) linking")
+    message(STATUS "     - C++17 standard compliance")
+    message(STATUS "     - Platform-specific debugging libraries (Windows: dbghelp, psapi)")
+    message(STATUS "     - Stack unwinding support (if available)")
+    message(STATUS "     - Static runtime linking (GNU on non-Apple platforms)")
+    message(STATUS "     - Consistent compile definitions and flags")
+    message(STATUS "")
+    
+    message(STATUS "🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪")
+    message(STATUS "🧪                       END MODULAR TEST CREATION: ${test_name}                    🧪")
+    message(STATUS "🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪")
+    message(STATUS "")
 endfunction() 
