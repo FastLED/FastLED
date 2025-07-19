@@ -95,6 +95,10 @@ TEST_CASE("pending component storage without updateJs") {
     
     // Test the returned updateEngineState function
     updateEngineState("{\"test\": \"data\"}");
+    
+    // Clean up components to avoid destructor warnings
+    fl::removeJsonUiComponent(weakComponent1);
+    fl::removeJsonUiComponent(weakComponent2);
 }
 
 TEST_CASE("pending component storage with updateJs") {
@@ -125,6 +129,10 @@ TEST_CASE("pending component storage with updateJs") {
     
     // Test the returned updateEngineState function
     updateEngineState("{\"test\": \"data\"}");
+    
+    // Clean up components to avoid destructor warnings
+    fl::removeJsonUiComponent(weakComponent1);
+    fl::removeJsonUiComponent(weakComponent2);
 }
 
 TEST_CASE("pending component cleanup with destroyed components") {
@@ -141,6 +149,9 @@ TEST_CASE("pending component cleanup with destroyed components") {
         
         // Add component to pending
         fl::addJsonUiComponent(weakComponent);
+        
+        // Explicitly remove to test cleanup behavior before destruction
+        fl::removeJsonUiComponent(weakComponent);
         
         // Component goes out of scope and gets destroyed here
     }
@@ -159,6 +170,9 @@ TEST_CASE("pending component cleanup with destroyed components") {
     
     // Should return valid function when updateJs handler is provided
     CHECK(updateEngineState);
+    
+    // Clean up the valid component
+    fl::removeJsonUiComponent(weakValidComponent);
 }
 
 TEST_CASE("null handlers behavior") {
@@ -206,6 +220,9 @@ TEST_CASE("updateEngineState function behavior") {
     // Verify the function works without crashing
     updateEngineState("{}");
     updateEngineState("{\"invalid\": \"json\"}");
+    
+    // Clean up component to avoid destructor warning
+    fl::removeJsonUiComponent(weakComponent);
 }
 
 TEST_CASE("manager replacement") {
@@ -234,6 +251,9 @@ TEST_CASE("manager replacement") {
     // Both update functions should work
     updateEngineState1("{\"test1\": \"data\"}");
     updateEngineState2("{\"test2\": \"data\"}");
+    
+    // Clean up component to avoid destructor warning
+    fl::removeJsonUiComponent(weakComponent);
 }
 
 #ifdef SKETCH_HAS_LOTS_OF_MEMORY

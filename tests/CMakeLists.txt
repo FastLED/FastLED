@@ -244,6 +244,9 @@ else()
         if(WIN32 AND CMAKE_CXX_COMPILER_ID MATCHES "Clang")
             set(DEAD_CODE_ELIMINATION_LINKER_FLAGS "")
             list(APPEND DEAD_CODE_ELIMINATION_LINKER_FLAGS "-Xlinker" "/OPT:REF" "-Xlinker" "/OPT:ICF")
+            # Suppress harmless debug section warnings for lld-link (long section names)
+            # lld-link doesn't support /ignore: flags, but these warnings are harmless
+            # They occur because DWARF debug sections have names longer than 8 characters
             message(STATUS "Overriding dead code elimination flags for lld-link: ${DEAD_CODE_ELIMINATION_LINKER_FLAGS}")
             
             # Force errors for unknown arguments on Windows for strict builds
