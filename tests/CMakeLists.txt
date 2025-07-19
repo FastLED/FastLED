@@ -5,6 +5,9 @@
 cmake_minimum_required(VERSION 3.10)
 project(FastLED_Tests)
 
+# Include linker compatibility layer early
+include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/LinkerCompatibility.cmake)
+
 # Enforce C++17 globally for all targets.
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -87,18 +90,9 @@ else()
     # Enable function and data sections for dead code elimination
     set(DEAD_CODE_ELIMINATION_FLAGS "-ffunction-sections" "-fdata-sections")
     
-    # Enable garbage collection of unused sections (linker flag)
-    if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
-        if(WIN32)
-            # Windows with MinGW/Clang uses different syntax
-            set(DEAD_CODE_ELIMINATION_LINKER_FLAGS "-Wl,--gc-sections")
-        else()
-            # Unix-like systems
-            set(DEAD_CODE_ELIMINATION_LINKER_FLAGS "-Wl,--gc-sections")
-        endif()
-    elseif(MSVC)
-        # MSVC uses /OPT:REF for similar functionality
-        set(DEAD_CODE_ELIMINATION_LINKER_FLAGS "/OPT:REF")
+    # Get platform-appropriate linker flags (unless already set by linker detection above)
+    if(NOT DEFINED DEAD_CODE_ELIMINATION_LINKER_FLAGS)
+        get_dead_code_elimination_flags(DEAD_CODE_ELIMINATION_LINKER_FLAGS)
     endif()
     
     if(DEAD_CODE_ELIMINATION_LINKER_FLAGS)
@@ -236,26 +230,15 @@ else()
         message(STATUS "Using lld-link linker: ${LLDLINK_EXECUTABLE}")
         set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fuse-ld=lld")
         
-        # Override dead code elimination flags for lld-link on Windows
-        # lld-link (Windows LLVM linker) requires MSVC-style optimization flags
-        # -ffunction-sections -fdata-sections tells the frontend to put each function/data in its own section,
-        # /OPT:REF then drops any sections with no references,
-        # /OPT:ICF merges identical ones.
+        # Use compatibility layer for Windows + Clang + lld-link
         if(WIN32 AND CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-            set(DEAD_CODE_ELIMINATION_LINKER_FLAGS "")
-            list(APPEND DEAD_CODE_ELIMINATION_LINKER_FLAGS "-Xlinker" "/OPT:REF" "-Xlinker" "/OPT:ICF")
-            # Suppress harmless debug section warnings for lld-link (long section names)
-            # lld-link doesn't support /ignore: flags, but these warnings are harmless
-            # They occur because DWARF debug sections have names longer than 8 characters
-            message(STATUS "Overriding dead code elimination flags for lld-link: ${DEAD_CODE_ELIMINATION_LINKER_FLAGS}")
+            # Get MSVC-compatible dead code elimination flags
+            get_dead_code_elimination_flags(DEAD_CODE_ELIMINATION_LINKER_FLAGS)
             
             # Force errors for unknown arguments on Windows for strict builds
-            # Compiler: Force error for any unknown compiler arguments
             set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror=unknown-argument")
             set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Werror=unknown-argument")
             
-            # Note: lld-link already errors on unknown arguments by default, so no additional flags needed
-            # The /WX flag would turn harmless debug section warnings into errors
             message(STATUS "Enabling strict argument validation on Windows: compiler will error on unknown arguments")
         endif()
     else()
