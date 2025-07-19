@@ -171,6 +171,106 @@ The `bash lint` command now includes:
 - Use the MCP server tools for common tasks
 - Check examples when making API changes
 
+## 🔧 CMAKE BUILD SYSTEM ARCHITECTURE
+
+### Build System Overview
+FastLED uses a sophisticated CMake build system located in `tests/cmake/` with modular configuration:
+
+**Core Build Files:**
+- `tests/CMakeLists.txt` - Main CMake entry point
+- `tests/cmake/` - Modular CMake configuration directory
+
+**Key CMake Modules:**
+- `LinkerCompatibility.cmake` - **🚨 CRITICAL for linker issues** - GNU↔MSVC flag translation, lld-link compatibility, warning suppression
+- `CompilerDetection.cmake` - Compiler identification and toolchain setup
+- `CompilerFlags.cmake` - Compiler-specific flag configuration
+- `DebugSettings.cmake` - Debug symbol and optimization configuration  
+- `OptimizationSettings.cmake` - LTO and performance optimization settings
+- `ParallelBuild.cmake` - Parallel compilation and linker selection (mold, lld)
+- `TestConfiguration.cmake` - Test target setup and configuration
+- `BuildOptions.cmake` - Build option definitions and defaults
+
+### Linker Configuration (Most Important for Build Issues)
+
+**🎯 PRIMARY LOCATION for linker problems: `tests/cmake/LinkerCompatibility.cmake`**
+
+**Key Functions:**
+- `apply_linker_compatibility()` - **Main entry point** - auto-detects lld-link and applies compatibility
+- `translate_gnu_to_msvc_linker_flags()` - Converts GNU-style flags to MSVC-style for lld-link
+- `get_dead_code_elimination_flags()` - Platform-specific dead code elimination
+- `get_debug_flags()` - Debug information configuration
+- `get_optimization_flags()` - Performance optimization flags
+
+**Linker Detection Logic:**
+```cmake
+if(WIN32 AND CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+    find_program(LLDLINK_EXECUTABLE lld-link)
+    if(LLDLINK_EXECUTABLE)
+        # Apply lld-link compatibility automatically
+    endif()
+endif()
+```
+
+**Common Linker Issues & Solutions:**
+- **lld-link warnings**: Suppressed via `/ignore:4099` in `apply_linker_compatibility()`
+- **GNU→MSVC flag translation**: Automatic in `translate_gnu_to_msvc_linker_flags()`
+- **Dead code elimination**: Platform-specific via `get_dead_code_elimination_flags()`
+- **Debug symbol conflicts**: Handled in `get_debug_flags()`
+
+### Compiler Configuration
+
+**Compiler Detection**: `tests/cmake/CompilerDetection.cmake`
+- Auto-detects Clang, GCC, MSVC
+- Sets up toolchain-specific configurations
+- Handles cross-compilation scenarios
+
+**Compiler Flags**: `tests/cmake/CompilerFlags.cmake`
+- Warning configurations per compiler
+- Optimization level management
+- Platform-specific adjustments
+
+### Build Options & Configuration
+
+**Available Build Options** (defined in `BuildOptions.cmake`):
+- `FASTLED_DEBUG_LEVEL` - Debug information level (NONE, MINIMAL, STANDARD, FULL)
+- `FASTLED_OPTIMIZATION_LEVEL` - Optimization (O0, O1, O2, O3, Os, Ofast)
+- `FASTLED_ENABLE_LTO` - Link-time optimization
+- `FASTLED_ENABLE_PARALLEL_BUILD` - Parallel compilation
+- `FASTLED_STATIC_RUNTIME` - Static runtime linking
+
+### Testing Infrastructure
+
+**Test Configuration**: `tests/cmake/TestConfiguration.cmake`
+- Defines test targets and dependencies
+- Configures test execution parameters
+- Sets up coverage and profiling
+
+**Test Execution**:
+- `bash test` - Comprehensive test runner (preferred)
+- `uv run test.py` - Python test interface
+- Individual test executables in `.build/bin/`
+
+### Build Troubleshooting Guide
+
+**For Linker Issues:**
+1. **Check `tests/cmake/LinkerCompatibility.cmake` first**
+2. Look for lld-link detection and compatibility functions
+3. Check GNU→MSVC flag translation logic
+4. Verify warning suppression settings
+
+**For Compiler Issues:**
+1. Check `tests/cmake/CompilerDetection.cmake` for detection logic
+2. Review `tests/cmake/CompilerFlags.cmake` for flag conflicts
+3. Verify optimization settings in `OptimizationSettings.cmake`
+
+**For Build Performance:**
+1. Check `tests/cmake/ParallelBuild.cmake` for parallel settings
+2. Review LTO configuration in `OptimizationSettings.cmake`
+3. Verify linker selection (mold, lld, default)
+
+
+
+
 ## 🚨 CRITICAL REQUIREMENTS FOR ALL AGENTS (FOREGROUND & BACKGROUND) 🚨
 
 ## 🚨 MANDATORY COMMAND EXECUTION RULES 🚨
