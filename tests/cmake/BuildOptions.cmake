@@ -39,9 +39,35 @@ function(report_build_mode)
     endif()
 endfunction()
 
+# Function to mark manually-specified variables as used (prevents CMake warnings)
+function(mark_variables_as_used)
+    # Explicitly reference variables that might be set via -D flags to prevent
+    # "Manually-specified variables were not used" warnings
+    if(DEFINED NO_LINK)
+        # Variable is used in create_test_executable() function
+        message(STATUS "BuildOptions: NO_LINK variable acknowledged (set to: ${NO_LINK})")
+    endif()
+    
+    if(DEFINED NO_BUILD)
+        # Variable is declared but implementation may be added later
+        message(STATUS "BuildOptions: NO_BUILD variable acknowledged (set to: ${NO_BUILD})")
+    endif()
+    
+    if(DEFINED NO_THIN_LTO)
+        # Variable is used in optimization configuration
+        message(STATUS "BuildOptions: NO_THIN_LTO variable acknowledged (set to: ${NO_THIN_LTO})")
+    endif()
+    
+    if(DEFINED NO_DEAD_CODE_ELIMINATION)
+        # Variable is used in linker configuration
+        message(STATUS "BuildOptions: NO_DEAD_CODE_ELIMINATION variable acknowledged (set to: ${NO_DEAD_CODE_ELIMINATION})")
+    endif()
+endfunction()
+
 # Function to configure all build options (main entry point)
 function(configure_build_options)
     declare_build_options()
     validate_build_options()
     report_build_mode()
+    mark_variables_as_used()
 endfunction() 
