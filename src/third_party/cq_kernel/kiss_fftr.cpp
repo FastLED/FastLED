@@ -6,8 +6,6 @@
  *  See COPYING file for more information.
  */
 
-#pragma once
-
 #include "kiss_fftr.h"
 #include "_kiss_fft_guts.h"
 

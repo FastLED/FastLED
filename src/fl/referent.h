@@ -1,7 +1,6 @@
 #pragma once
 
 #include "fl/namespace.h"
-#include "fl/no_rtti_check.h"  // Enforce RTTI is disabled
 
 namespace fl {
 
