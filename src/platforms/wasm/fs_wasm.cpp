@@ -125,7 +125,7 @@ class WasmFileHandle : public fl::FileHandle {
 
   public:
     WasmFileHandle(const Str &path, const FileDataPtr data)
-        : mPath(path), mData(data), mPos(0) {}
+        : mData(data), mPos(0), mPath(path) {}
 
     virtual ~WasmFileHandle() override {}
 

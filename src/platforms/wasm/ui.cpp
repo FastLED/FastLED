@@ -36,6 +36,7 @@
 #include "platforms/wasm/js_bindings.h"
 #include "platforms/shared/ui/json/ui.h"
 #include "fl/warn.h"
+#include "fl/compiler_control.h"
 
 using fl::JsonUiUpdateOutput;
 
@@ -52,10 +53,6 @@ static bool& getUiSystemInitialized() {
     return uiSystemInitialized;
 }
 
-// Add a debug function to track when g_updateEngineState changes
-static void logUpdateEngineStateChange(const char* location) {
-    FL_WARN("*** " << location << ": g_updateEngineState=" << (getUpdateEngineState() ? "VALID" : "NULL"));
-}
 
 // Add a periodic check function that can be called from JavaScript
 extern "C" void checkUpdateEngineState() {
@@ -126,24 +123,13 @@ void ensureWasmUiSystemInitialized() {
             fl::updateJs(jsonStr);
         };
         
-        // Test the lambda
-        //updateJsHandler("[]");  // Valid empty JSON array
-        
-        // FL_WARN("*** ABOUT TO CALL setJsonUiHandlers");
-        // FL_WARN("*** BEFORE setJsonUiHandlers: g_updateEngineState=" << (getUpdateEngineState() ? "VALID" : "NULL"));
         
         auto tempResult = setJsonUiHandlers(updateJsHandler);
-        // FL_WARN("*** setJsonUiHandlers RETURNED: " << (tempResult ? "VALID" : "NULL"));
-        
-        // FL_WARN("*** ABOUT TO ASSIGN TO g_updateEngineState");
+
         getUpdateEngineState() = tempResult;
-        // FL_WARN("*** ASSIGNMENT COMPLETED");
         
-        // logUpdateEngineStateChange("AFTER setJsonUiHandlers");
         getUiSystemInitialized() = true;
         
-        // FL_WARN("*** WASM UI SYSTEM INITIALIZED ***");
-        // FL_WARN("*** FINAL CHECK: g_updateEngineState=" << (getUpdateEngineState() ? "VALID" : "NULL"));
     }
 }
 
