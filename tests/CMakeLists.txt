@@ -99,105 +99,19 @@ optimize_build_performance()
 set(CMAKE_BUILD_TYPE Debug CACHE STRING "Choose the type of build." FORCE)
 message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
 
-# Apply compiler flags using the CompilerFlags module
-# Since we've enabled exceptions and RTTI, we can use test flags globally
-apply_test_compiler_flags()      # Sets CMAKE_C_FLAGS and CMAKE_CXX_FLAGS globally
-
-# Define common preprocessor definitions for all targets
-set(COMMON_COMPILE_DEFINITIONS
-    DEBUG
-    FASTLED_FORCE_NAMESPACE=1
-    FASTLED_USE_JSON_UI=1
-    FASTLED_NO_AUTO_NAMESPACE
-    FASTLED_TESTING
-    ENABLE_CRASH_HANDLER
-    FASTLED_STUB_IMPL
-    FASTLED_NO_PINMAP
-    HAS_HARDWARE_PIN_SUPPORT
-    _GLIBCXX_DEBUG
-    _GLIBCXX_DEBUG_PEDANTIC
-)
-
-# Fix for Microsoft STL version check with older Clang versions on Windows
-if(WIN32 AND CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-    list(APPEND COMMON_COMPILE_DEFINITIONS _ALLOW_COMPILER_AND_STL_VERSION_MISMATCH)
-endif()
-
-# Apply definitions globally
-add_compile_definitions(${COMMON_COMPILE_DEFINITIONS})
-
-# Set FASTLED_ALL_SRC=1 for clang builds or when explicitly requested via environment variable
-if (CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR DEFINED ENV{FASTLED_ALL_SRC})
-    if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-        message(STATUS "Clang compiler detected: enabling FASTLED_ALL_SRC for unified compilation testing")
-    else()
-        message(STATUS "FASTLED_ALL_SRC environment variable set: enabling unified compilation testing")
-    endif()
-    set(FASTLED_ALL_SRC 1)
-    add_compile_definitions(FASTLED_ALL_SRC=1)
-endif()
-
-# Compile definitions are already set above, removing duplicate
+# Apply compiler flags and definitions using the CompilerFlags module
+apply_test_compiler_flags()              # Sets CMAKE_C_FLAGS and CMAKE_CXX_FLAGS globally
+apply_test_compile_definitions()         # Sets all test-specific compile definitions
 
 # ============================================================================
-# 🚨 BUILD FLAGS SUMMARY - Show all flags sent to every compilation unit (REFACTORED)
+# PHASE 6: Display build configuration summary (REFACTORED)
 # ============================================================================
-
-message(STATUS "")
-message(STATUS "🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨")
-message(STATUS "🚨                                  BUILD FLAGS SUMMARY                                 🚨")
-message(STATUS "🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨")
-message(STATUS "")
-
-# Display Build Configuration
-message(STATUS "📚 BUILD CONFIGURATION (MODULAR SYSTEM):")
-message(STATUS "  Compiler: ${CMAKE_CXX_COMPILER_ID} ${CMAKE_CXX_COMPILER_VERSION}")
-message(STATUS "  C++ Standard: ${CMAKE_CXX_STANDARD}")
-message(STATUS "  Build Type: ${CMAKE_BUILD_TYPE}")
-message(STATUS "  Platform: ${CMAKE_SYSTEM_NAME}")
-message(STATUS "")
-
-# Show current CMAKE compiler flags (applied globally via modules)
-message(STATUS "  📌 Global CMAKE_CXX_FLAGS (applied to all C++ files):")
-message(STATUS "      ${CMAKE_CXX_FLAGS}")
-message(STATUS "")
-message(STATUS "  📌 Global CMAKE_C_FLAGS (applied to all C files):")
-message(STATUS "      ${CMAKE_C_FLAGS}")
-message(STATUS "")
-
-# Show compile definitions
-string(REPLACE ";" " " COMMON_COMPILE_DEFINITIONS_STR "${COMMON_COMPILE_DEFINITIONS}")
-message(STATUS "  📌 Preprocessor Definitions:")
-message(STATUS "      ${COMMON_COMPILE_DEFINITIONS_STR}")
-message(STATUS "")
-
-# Show linker flags
-message(STATUS "🔗 LINKER FLAGS:")
-message(STATUS "  📌 CMAKE_EXE_LINKER_FLAGS (executables):")
-message(STATUS "      ${CMAKE_EXE_LINKER_FLAGS}")
-message(STATUS "")
-
-# Additional debug information (module-managed configurations)
-message(STATUS "🔧 MODULAR CONFIGURATION:")
-message(STATUS "  📌 All compiler flags and dependencies managed by modules")
-message(STATUS "  📌 Libunwind: Handled by DependencyManagement module")  
-message(STATUS "  📌 Dead Code Elimination: Handled by OptimizationSettings module")
-message(STATUS "")
-
-message(STATUS "🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨")
-message(STATUS "")
+display_build_configuration_summary()
 
 # ============================================================================
-# PHASE 7: Set output directories
+# PHASE 7: Configure build output directories (REFACTORED)
 # ============================================================================
-
-# Set output directories
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/.build/lib)
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/.build/lib)
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/.build/bin)
-
-# Set binary directory
-set(CMAKE_BINARY_DIR ${CMAKE_CURRENT_SOURCE_DIR}/.build/bin)
+configure_build_output_directories()
 
 # ============================================================================
 # PHASE 8: Include FastLED source directory and create targets

@@ -266,6 +266,45 @@ function(apply_test_compiler_flags)
     message(STATUS "Applied test compiler flags (inherited from library, LTO disabled) for ${CMAKE_CXX_COMPILER_ID}")
 endfunction()
 
+# Function to apply test-specific compile definitions
+function(apply_test_compile_definitions)
+    # Standard test definitions for all targets
+    set(TEST_DEFINITIONS
+        DEBUG
+        FASTLED_FORCE_NAMESPACE=1
+        FASTLED_USE_JSON_UI=1
+        FASTLED_NO_AUTO_NAMESPACE
+        FASTLED_TESTING
+        ENABLE_CRASH_HANDLER
+        FASTLED_STUB_IMPL
+        FASTLED_NO_PINMAP
+        HAS_HARDWARE_PIN_SUPPORT
+        _GLIBCXX_DEBUG
+        _GLIBCXX_DEBUG_PEDANTIC
+    )
+    
+    # Platform-specific definitions
+    if(WIN32 AND CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+        list(APPEND TEST_DEFINITIONS _ALLOW_COMPILER_AND_STL_VERSION_MISMATCH)
+    endif()
+    
+    # Unified compilation for Clang builds or when explicitly requested
+    if(CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR DEFINED ENV{FASTLED_ALL_SRC})
+        if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+            message(STATUS "Clang compiler detected: enabling FASTLED_ALL_SRC for unified compilation testing")
+        else()
+            message(STATUS "FASTLED_ALL_SRC environment variable set: enabling unified compilation testing")
+        endif()
+        set(FASTLED_ALL_SRC 1 PARENT_SCOPE)
+        list(APPEND TEST_DEFINITIONS FASTLED_ALL_SRC=1)
+    endif()
+    
+    # Apply definitions globally
+    add_compile_definitions(${TEST_DEFINITIONS})
+    
+    message(STATUS "Applied test compile definitions: ${CMAKE_CXX_COMPILER_ID}")
+endfunction()
+
 # Function to apply standard FastLED library flags (strict for main library)
 function(apply_fastled_library_flags)
     # Combine GNU-style warning and library flags

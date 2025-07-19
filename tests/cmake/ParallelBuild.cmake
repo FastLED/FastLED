@@ -124,6 +124,21 @@ function(optimize_build_performance)
     message(STATUS "=== Build Performance Optimization Complete ===")
 endfunction()
 
+# Function to configure build output directories
+function(configure_build_output_directories)
+    # Set standard output directories for organized builds
+    set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/.build/lib PARENT_SCOPE)
+    set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/.build/lib PARENT_SCOPE)
+    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/.build/bin PARENT_SCOPE)
+    
+    # Set binary directory for backwards compatibility
+    set(CMAKE_BINARY_DIR ${CMAKE_CURRENT_SOURCE_DIR}/.build/bin PARENT_SCOPE)
+    
+    message(STATUS "Build output directories configured:")
+    message(STATUS "  Libraries: ${CMAKE_CURRENT_SOURCE_DIR}/.build/lib")
+    message(STATUS "  Executables: ${CMAKE_CURRENT_SOURCE_DIR}/.build/bin")
+endfunction()
+
 # Function to configure additional build performance flags
 function(configure_build_performance_flags)
     # Use faster memory allocator if available (for build tools)

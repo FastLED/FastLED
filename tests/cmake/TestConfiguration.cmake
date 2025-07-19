@@ -215,4 +215,52 @@ function(setup_test_configuration)
     create_test_suites()
     
     message(STATUS "=== Test Configuration Setup Complete ===")
+endfunction()
+
+# Function to display build configuration summary
+function(display_build_configuration_summary)
+    message(STATUS "")
+    message(STATUS "🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨")
+    message(STATUS "🚨                                  BUILD FLAGS SUMMARY                                 🚨")
+    message(STATUS "🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨")
+    message(STATUS "")
+
+    # Display Build Configuration
+    message(STATUS "📚 BUILD CONFIGURATION (MODULAR SYSTEM):")
+    message(STATUS "  Compiler: ${CMAKE_CXX_COMPILER_ID} ${CMAKE_CXX_COMPILER_VERSION}")
+    message(STATUS "  C++ Standard: ${CMAKE_CXX_STANDARD}")
+    message(STATUS "  Build Type: ${CMAKE_BUILD_TYPE}")
+    message(STATUS "  Platform: ${CMAKE_SYSTEM_NAME}")
+    message(STATUS "")
+
+    # Show current CMAKE compiler flags (applied globally via modules)
+    message(STATUS "  📌 Global CMAKE_CXX_FLAGS (applied to all C++ files):")
+    message(STATUS "      ${CMAKE_CXX_FLAGS}")
+    message(STATUS "")
+    message(STATUS "  📌 Global CMAKE_C_FLAGS (applied to all C files):")
+    message(STATUS "      ${CMAKE_C_FLAGS}")
+    message(STATUS "")
+
+    # Show compile definitions
+    get_directory_property(ALL_DEFINITIONS COMPILE_DEFINITIONS)
+    string(REPLACE ";" " " ALL_DEFINITIONS_STR "${ALL_DEFINITIONS}")
+    message(STATUS "  📌 Preprocessor Definitions:")
+    message(STATUS "      ${ALL_DEFINITIONS_STR}")
+    message(STATUS "")
+
+    # Show linker flags
+    message(STATUS "🔗 LINKER FLAGS:")
+    message(STATUS "  📌 CMAKE_EXE_LINKER_FLAGS (executables):")
+    message(STATUS "      ${CMAKE_EXE_LINKER_FLAGS}")
+    message(STATUS "")
+
+    # Additional debug information (module-managed configurations)
+    message(STATUS "🔧 MODULAR CONFIGURATION:")
+    message(STATUS "  📌 All compiler flags and dependencies managed by modules")
+    message(STATUS "  📌 Libunwind: Handled by DependencyManagement module")  
+    message(STATUS "  📌 Dead Code Elimination: Handled by OptimizationSettings module")
+    message(STATUS "")
+
+    message(STATUS "🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨")
+    message(STATUS "")
 endfunction() 
