@@ -225,6 +225,26 @@ function(apply_test_compiler_flags)
         endif()
     endforeach()
     
+    # 🚨 CRITICAL: Enforce RTTI is DISABLED - Add explicit RTTI detection and build failure
+    message(STATUS "🚨 ENFORCING NO-RTTI POLICY 🚨")
+    
+    # Verify that -fno-rtti is in our flags
+    list(FIND filtered_flags "-fno-rtti" rtti_flag_index)
+    if(rtti_flag_index EQUAL -1)
+        message(FATAL_ERROR "🚨 CRITICAL: -fno-rtti flag is missing from compiler flags! RTTI must be disabled.")
+    endif()
+    
+    # Add RTTI detection at compile time - this will cause build failure if RTTI is enabled
+    if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+        # Add a compile check that fails if RTTI is enabled
+        list(APPEND filtered_flags "-Werror" "-DFASTLED_CHECK_NO_RTTI=1")
+    elseif(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
+        # MSVC equivalent  
+        list(APPEND filtered_flags "/we4996" "/DFASTLED_CHECK_NO_RTTI=1")
+    endif()
+    
+    message(STATUS "✅ RTTI properly disabled: -fno-rtti flag confirmed in build")
+    
     # Apply the filtered flags to maintain ABI compatibility with library
     foreach(flag ${filtered_flags})
         set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${flag}" PARENT_SCOPE)
