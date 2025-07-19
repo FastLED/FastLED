@@ -95,7 +95,12 @@ function(apply_linker_compatibility)
             )
             
             translate_gnu_to_msvc_linker_flags("${gnu_style_flags}" msvc_flags)
-            
+                        
+            # /ignore:longsections suppresses the specific "section name is longer than 8 characters" warnings
+            # This is the correct flag for lld-link to suppress debug section name length warnings
+            # Reference: https://groups.google.com/g/llvm-dev/c/2HGqO_xrbic/m/2eHEJd4TAwAJ
+            list(APPEND msvc_flags "-Xlinker" "/ignore:longsections")
+
             # Apply the translated flags globally
             string(REPLACE ";" " " msvc_flags_str "${msvc_flags}")
             set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${msvc_flags_str}" PARENT_SCOPE)
