@@ -206,6 +206,17 @@ function(apply_test_compiler_flags)
         )
     endif()
     
+    # 🚨 CRITICAL: Universal RTTI enforcement - ensure -fno-rtti is always included
+    message(STATUS "🚨 UNIVERSAL RTTI ENFORCEMENT - ensuring RTTI is disabled on ALL platforms")
+    # Force -fno-rtti to be included regardless of compiler or platform detection
+    list(FIND ALL_GNU_FLAGS "-fno-rtti" rtti_flag_idx)
+    if(rtti_flag_idx EQUAL -1)
+        message(STATUS "🚨 CRITICAL: Adding missing -fno-rtti to build flags")
+        list(APPEND ALL_GNU_FLAGS "-fno-rtti")
+    endif()
+    # Always add compile-time RTTI check
+    list(APPEND ALL_GNU_FLAGS "-DFASTLED_CHECK_NO_RTTI=1")
+    
     # Get platform-appropriate flags
     get_platform_flags("${ALL_GNU_FLAGS}" platform_flags)
     
@@ -218,21 +229,21 @@ function(apply_test_compiler_flags)
         if(flag STREQUAL "-fno-exceptions")
             set(keep_flag FALSE)  # Tests can use exceptions
         endif()
-        # Keep -fno-rtti for ABI compatibility with FastLED library
+        # Keep -fno-rtti for ABI compatibility with FastLED library - NEVER FILTER THIS OUT
         
         if(keep_flag)
             list(APPEND filtered_flags ${flag})
         endif()
     endforeach()
     
-    # 🚨 CRITICAL: Enforce RTTI is DISABLED - Add explicit RTTI detection and build failure
-    message(STATUS "🚨 ENFORCING NO-RTTI POLICY 🚨")
-    
-    # Verify that -fno-rtti is in our flags
+    # 🚨 CRITICAL: Double-check RTTI enforcement after filtering
     list(FIND filtered_flags "-fno-rtti" rtti_flag_index)
     if(rtti_flag_index EQUAL -1)
-        message(FATAL_ERROR "🚨 CRITICAL: -fno-rtti flag is missing from compiler flags! RTTI must be disabled.")
+        message(FATAL_ERROR "🚨 CRITICAL: -fno-rtti flag was filtered out! This should never happen. RTTI must be disabled.")
     endif()
+    
+    # 🚨 CRITICAL: Triple-check by adding -fno-rtti again to be absolutely sure
+    list(APPEND filtered_flags "-fno-rtti")  # Add it again in case it got lost
     
     # Add RTTI detection at compile time - this will cause build failure if RTTI is enabled
     if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
@@ -243,7 +254,7 @@ function(apply_test_compiler_flags)
         list(APPEND filtered_flags "/we4996" "/DFASTLED_CHECK_NO_RTTI=1")
     endif()
     
-    message(STATUS "✅ RTTI properly disabled: -fno-rtti flag confirmed in build")
+    message(STATUS "✅ RTTI enforcement complete: -fno-rtti confirmed in filtered flags")
     
     # Apply the filtered flags to maintain ABI compatibility with library
     foreach(flag ${filtered_flags})

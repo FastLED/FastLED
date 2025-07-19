@@ -63,6 +63,7 @@ function(apply_unit_test_flags target)
     set(UNIT_TEST_FLAGS
         -Wall
         -funwind-tables
+        -fno-rtti                    # 🚨 CRITICAL: Ensure RTTI is disabled at target level
         -Werror=return-type
         -Werror=missing-declarations
         -Werror=init-self
@@ -73,6 +74,20 @@ function(apply_unit_test_flags target)
         -Werror=deprecated-declarations
         -Wno-comment
     )
+    
+    # 🚨 CRITICAL: Verify -fno-rtti is in the flags
+    list(FIND UNIT_TEST_FLAGS "-fno-rtti" rtti_flag_index)
+    if(rtti_flag_index EQUAL -1)
+        message(FATAL_ERROR "🚨 CRITICAL: -fno-rtti missing from UNIT_TEST_FLAGS for target ${target}!")
+    endif()
+    
+    # 🚨 CRITICAL: Universal RTTI enforcement at target level (all platforms)
+    message(STATUS "🚨 Universal target-level RTTI enforcement for: ${target}")
+    # Add -fno-rtti multiple times and with different approaches to ensure it sticks
+    list(APPEND UNIT_TEST_FLAGS "-fno-rtti")  # Add again to be absolutely sure
+    target_compile_options(${target} PRIVATE "-fno-rtti")  # Apply directly to target
+    target_compile_definitions(${target} PRIVATE "FASTLED_CHECK_NO_RTTI=1")  # Enable compile-time check
+    message(STATUS "✅ Universal RTTI disabled for target: ${target}")
     
     # Add GCC-specific unit test warning flags
     if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
@@ -91,7 +106,7 @@ function(apply_unit_test_flags target)
     target_compile_options(${target} PRIVATE ${UNIT_TEST_FLAGS})
     target_compile_options(${target} PRIVATE $<$<COMPILE_LANGUAGE:CXX>:${UNIT_TEST_CXX_FLAGS}>)
     
-    message(STATUS "Applied unit test flags to target: ${target}")
+    message(STATUS "Applied unit test flags to target: ${target} (✅ RTTI disabled)")
 endfunction()
 
 # Function to create a test executable with standard settings
