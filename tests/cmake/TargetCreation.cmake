@@ -116,10 +116,8 @@ function(create_test_executable name sources)
             configure_windows_executable(${name})
         endif()
         
-        # Apply static runtime linking on non-Apple platforms (GCC only)
-        if(NOT APPLE AND CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-            target_link_options(${name} PRIVATE -static-libgcc -static-libstdc++)
-        endif()
+        # Apply platform-specific static runtime linking
+        apply_static_runtime_linking(${name})
         
         message(STATUS "Created test executable: ${name}")
     endif()

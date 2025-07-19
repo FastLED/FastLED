@@ -133,10 +133,8 @@ include_directories(${FASTLED_SOURCE_DIR}/src)
 # Delegate source file computation to src/CMakeLists.txt
 add_subdirectory(${FASTLED_SOURCE_DIR}/src ${CMAKE_BINARY_DIR}/fastled)
 
-# Apply static runtime linking on non-Apple platforms (GCC only)
-if(NOT APPLE AND CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-    target_link_options(fastled PRIVATE -static-libgcc -static-libstdc++)
-endif()
+# Platform-specific static runtime linking is now handled by the TargetCreation module
+# via apply_static_runtime_linking() function calls
 
 # ============================================================================
 # PHASE 9: Create test infrastructure and targets (working old approach)
