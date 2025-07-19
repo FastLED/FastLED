@@ -50,8 +50,9 @@ set(WINDOWS_CALLING_CONVENTION_FLAGS
 
 # FastLED library flags (strict for main library)
 set(GNU_FASTLED_LIBRARY_FLAGS
-    -fno-exceptions                  # Disable C++ exceptions (library only)
-    -fno-rtti                        # Disable runtime type info (library only)
+    # Temporarily enabling exceptions and RTTI for compatibility with test framework
+    # -fno-exceptions                  # Disable C++ exceptions (library only)
+    # -fno-rtti                        # Disable runtime type info (library only)
     -ffunction-sections              # Enable dead code elimination
     -fdata-sections                  # Enable dead data elimination
 )
@@ -242,7 +243,27 @@ function(apply_test_compiler_flags)
     # Apply Windows calling convention fixes if needed (same as library)
     apply_windows_calling_convention_fixes()
     
-    message(STATUS "Applied test compiler flags (inherited from library) for ${CMAKE_CXX_COMPILER_ID}")
+    # Disable LTO for tests - test frameworks need predictable symbol resolution
+    set(CMAKE_INTERPROCEDURAL_OPTIMIZATION OFF PARENT_SCOPE)
+    # Remove any existing LTO flags from compiler options
+    string(REPLACE "-flto=thin" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+    string(REPLACE "-flto=auto" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+    string(REPLACE "-flto" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+    string(REPLACE "-fno-fat-lto-objects" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}" PARENT_SCOPE)
+    
+    string(REPLACE "-flto=thin" "" CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
+    string(REPLACE "-flto=auto" "" CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
+    string(REPLACE "-flto" "" CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
+    string(REPLACE "-fno-fat-lto-objects" "" CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}" PARENT_SCOPE)
+    
+    string(REPLACE "-flto=thin" "" CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS}")
+    string(REPLACE "-flto=auto" "" CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS}")
+    string(REPLACE "-flto" "" CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS}")
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS}" PARENT_SCOPE)
+    
+    message(STATUS "Applied test compiler flags (inherited from library, LTO disabled) for ${CMAKE_CXX_COMPILER_ID}")
 endfunction()
 
 # Function to apply standard FastLED library flags (strict for main library)

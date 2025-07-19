@@ -159,11 +159,31 @@ set(CMAKE_BUILD_TYPE Debug CACHE STRING "Choose the type of build." FORCE)
 message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
 
 # Apply compiler flags using the CompilerFlags module
-# This replaces the old manual flag definitions
-# For tests, we use test-specific flags which are more permissive but ABI-compatible
-apply_test_compiler_flags()      # Sets CMAKE_C_FLAGS and CMAKE_CXX_FLAGS globally for tests
+# Since we've enabled exceptions and RTTI, we can use test flags globally
+apply_test_compiler_flags()      # Sets CMAKE_C_FLAGS and CMAKE_CXX_FLAGS globally
 
-# Note: apply_fastled_cxx_flags() is included in apply_test_compiler_flags()
+# Define common preprocessor definitions for all targets
+set(COMMON_COMPILE_DEFINITIONS
+    DEBUG
+    FASTLED_FORCE_NAMESPACE=1
+    FASTLED_USE_JSON_UI=1
+    FASTLED_NO_AUTO_NAMESPACE
+    FASTLED_TESTING
+    ENABLE_CRASH_HANDLER
+    FASTLED_STUB_IMPL
+    FASTLED_NO_PINMAP
+    HAS_HARDWARE_PIN_SUPPORT
+    _GLIBCXX_DEBUG
+    _GLIBCXX_DEBUG_PEDANTIC
+)
+
+# Fix for Microsoft STL version check with older Clang versions on Windows
+if(WIN32 AND CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+    list(APPEND COMMON_COMPILE_DEFINITIONS _ALLOW_COMPILER_AND_STL_VERSION_MISMATCH)
+endif()
+
+# Apply definitions globally
+add_compile_definitions(${COMMON_COMPILE_DEFINITIONS})
 
 # Set FASTLED_ALL_SRC=1 for clang builds or when explicitly requested via environment variable
 if (CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR DEFINED ENV{FASTLED_ALL_SRC})
@@ -316,9 +336,6 @@ add_subdirectory(${FASTLED_SOURCE_DIR}/src ${CMAKE_BINARY_DIR}/fastled)
 if(NOT APPLE AND CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     target_link_options(fastled PRIVATE -static-libgcc -static-libstdc++)
 endif()
-
-# Add C++-specific flags to fastled library
-target_compile_options(fastled PRIVATE $<$<COMPILE_LANGUAGE:CXX>:${CXX_SPECIFIC_FLAGS}>)
 
 # ============================================================================
 # PHASE 9: Create test infrastructure and targets (working old approach)
