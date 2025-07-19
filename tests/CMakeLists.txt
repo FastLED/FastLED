@@ -235,6 +235,17 @@ else()
     if(LLDLINK_EXECUTABLE)
         message(STATUS "Using lld-link linker: ${LLDLINK_EXECUTABLE}")
         set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fuse-ld=lld")
+        
+        # Override dead code elimination flags for lld-link on Windows
+        # lld-link (Windows LLVM linker) requires MSVC-style optimization flags
+        # -ffunction-sections -fdata-sections tells the frontend to put each function/data in its own section,
+        # /OPT:REF then drops any sections with no references,
+        # /OPT:ICF merges identical ones.
+        if(WIN32 AND CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+            set(DEAD_CODE_ELIMINATION_LINKER_FLAGS "")
+            list(APPEND DEAD_CODE_ELIMINATION_LINKER_FLAGS "-Xlinker" "/OPT:REF" "-Xlinker" "/OPT:ICF")
+            message(STATUS "Overriding dead code elimination flags for lld-link: ${DEAD_CODE_ELIMINATION_LINKER_FLAGS}")
+        endif()
     else()
         message(STATUS "Neither mold nor lld-link found. Using system default linker.")
     endif()
@@ -242,9 +253,10 @@ endif()
 
 # Apply dead code elimination linker flags globally
 if(DEAD_CODE_ELIMINATION_LINKER_FLAGS)
-    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${DEAD_CODE_ELIMINATION_LINKER_FLAGS}")
-    set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} ${DEAD_CODE_ELIMINATION_LINKER_FLAGS}")
-    set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} ${DEAD_CODE_ELIMINATION_LINKER_FLAGS}")
+    string(REPLACE ";" " " DEAD_CODE_ELIMINATION_LINKER_FLAGS_STR "${DEAD_CODE_ELIMINATION_LINKER_FLAGS}")
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${DEAD_CODE_ELIMINATION_LINKER_FLAGS_STR}")
+    set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} ${DEAD_CODE_ELIMINATION_LINKER_FLAGS_STR}")
+    set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} ${DEAD_CODE_ELIMINATION_LINKER_FLAGS_STR}")
 endif()
 
 # Set build type to Debug
