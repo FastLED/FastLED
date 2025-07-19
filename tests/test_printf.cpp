@@ -3,8 +3,13 @@
 #include "fl/strstream.h"
 #include "fl/io.h"
 #include "fl/string.h"
+#include "fl/compiler_control.h"
 #include <iostream>
 #include <cstdio> // For std::sprintf and std::snprintf
+
+
+
+
 
 // Test helper for capturing platform output
 namespace test_helper {
@@ -690,8 +695,12 @@ TEST_CASE("fl::snprintf vs std::snprintf return value comparison") {
         char buffer1[10];
         char buffer2[10];
         
+        // Intentionally test buffer truncation behavior - suppress format-truncation warning
+        FL_DISABLE_WARNING_PUSH
+        FL_DISABLE_FORMAT_TRUNCATION
         int fl_result = fl::snprintf(buffer1, sizeof(buffer1), "Hello, %s!", "world");
         int std_result = std::snprintf(buffer2, sizeof(buffer2), "Hello, %s!", "world");
+        FL_DISABLE_WARNING_POP
         FL_UNUSED(std_result);
         FL_UNUSED(fl_result);
         // Note: std::snprintf returns the number of characters that would have been written

@@ -25,14 +25,20 @@
     FL_DISABLE_WARNING(global-constructors)
   #define FL_DISABLE_WARNING_SELF_ASSIGN_OVERLOADED \
     FL_DISABLE_WARNING(self-assign-overloaded)
+  // Clang doesn't have format-truncation warning, use no-op
+  #define FL_DISABLE_FORMAT_TRUNCATION
 #elif defined(__GNUC__)
   // GCC doesn't have global-constructors warning, use no-op
   #define FL_DISABLE_WARNING_GLOBAL_CONSTRUCTORS
   // GCC doesn't have self-assign-overloaded warning, use no-op
   #define FL_DISABLE_WARNING_SELF_ASSIGN_OVERLOADED
+  // GCC has format-truncation warning
+  #define FL_DISABLE_FORMAT_TRUNCATION \
+    FL_DISABLE_WARNING(format-truncation)
 #else
   #define FL_DISABLE_WARNING_GLOBAL_CONSTRUCTORS
   #define FL_DISABLE_WARNING_SELF_ASSIGN_OVERLOADED
+  #define FL_DISABLE_FORMAT_TRUNCATION
 #endif
 
 // Fast math optimization controls with additional aggressive flags
