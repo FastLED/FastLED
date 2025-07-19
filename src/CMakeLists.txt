@@ -182,10 +182,55 @@ endif()
 
 add_library(fastled STATIC ${FASTLED_SOURCES})
 
-# Apply compile flags and definitions
-target_compile_options(fastled PRIVATE ${COMMON_COMPILE_FLAGS})
-target_compile_options(fastled PRIVATE $<$<COMPILE_LANGUAGE:CXX>:${CXX_SPECIFIC_FLAGS}>)
-target_compile_definitions(fastled PRIVATE ${COMMON_COMPILE_DEFINITIONS})
+# Apply FastLED library-specific compile flags and definitions
+# Note: We apply library-specific flags that disable exceptions/RTTI for embedded compatibility
+target_compile_options(fastled PRIVATE 
+    # Core warning flags
+    -Wall
+    -funwind-tables
+    $<$<CONFIG:Debug>:-g>
+    $<$<CONFIG:Release>:-O2>
+    # FastLED embedded requirements: disable exceptions and RTTI
+    -fno-exceptions              # Disable C++ exceptions (embedded requirement)
+    -fno-rtti                    # Disable runtime type info (embedded requirement)
+    # Dead code elimination
+    -ffunction-sections
+    -fdata-sections
+    # Essential warnings
+    -Werror=return-type
+    -Werror=missing-declarations
+    -Werror=uninitialized
+    -Werror=array-bounds
+    -Werror=null-dereference
+    -Werror=deprecated-declarations
+    -Wno-comment
+)
+
+# Add GCC-specific flags for FastLED library
+if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    target_compile_options(fastled PRIVATE 
+        -Werror=maybe-uninitialized
+    )
+endif()
+
+# Add C++ specific flags for FastLED library
+target_compile_options(fastled PRIVATE $<$<COMPILE_LANGUAGE:CXX>:
+    -Werror=suggest-override
+    -Werror=non-virtual-dtor
+    -Werror=switch-enum
+    -Werror=delete-non-virtual-dtor
+>)
+
+# Apply FastLED library-specific definitions
+target_compile_definitions(fastled PRIVATE 
+    FASTLED_FORCE_NAMESPACE=1
+    FASTLED_NO_AUTO_NAMESPACE
+    FASTLED_STUB_IMPL
+    FASTLED_NO_PINMAP
+    HAS_HARDWARE_PIN_SUPPORT
+    PROGMEM=
+    FASTLED_FIVE_BIT_HD_GAMMA_FUNCTION_2_8
+)
 
 # Ensure full archive linking: force inclusion of all object files
 target_link_options(fastled PRIVATE "-Wl,--whole-archive" "-Wl,--no-whole-archive")

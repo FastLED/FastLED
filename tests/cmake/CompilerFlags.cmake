@@ -50,9 +50,9 @@ set(WINDOWS_CALLING_CONVENTION_FLAGS
 
 # FastLED library flags (strict for main library)
 set(GNU_FASTLED_LIBRARY_FLAGS
-    # Temporarily enabling exceptions and RTTI for compatibility with test framework
-    # -fno-exceptions                  # Disable C++ exceptions (library only)
-    # -fno-rtti                        # Disable runtime type info (library only)
+    # FastLED embedded design requirement: disable exceptions and RTTI
+    -fno-exceptions                  # Disable C++ exceptions (library only)
+    -fno-rtti                        # Disable runtime type info (library only)
     -ffunction-sections              # Enable dead code elimination
     -fdata-sections                  # Enable dead data elimination
 )
