@@ -215,10 +215,10 @@ function(apply_test_compiler_flags)
         set(keep_flag TRUE)
         
         # Remove flags that are too strict for tests but don't affect ABI
-        if(flag STREQUAL "-fno-exceptions" OR 
-           flag STREQUAL "-fno-rtti")
-            set(keep_flag FALSE)  # Tests can use exceptions and RTTI
+        if(flag STREQUAL "-fno-exceptions")
+            set(keep_flag FALSE)  # Tests can use exceptions
         endif()
+        # Keep -fno-rtti for ABI compatibility with FastLED library
         
         if(keep_flag)
             list(APPEND filtered_flags ${flag})
