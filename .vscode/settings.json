@@ -28,7 +28,7 @@
     "python.debugger": "debugpy",
     // File associations for debugger
     "[cpp]": {
-        "editor.defaultFormatter": "ms-vscode.cpptools",
+        "editor.defaultFormatter": "llvm-vs-code-extensions.vscode-clangd",
         "debug.defaultDebuggerType": "cppdbg"
     },
     "[c]": {
