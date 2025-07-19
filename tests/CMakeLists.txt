@@ -151,121 +151,19 @@ endif()
 optimize_build_performance()
 
 # ============================================================================
-# PHASE 6: Apply compiler flags directly (based on working old version)
+# PHASE 6: Apply compiler flags using modules (REFACTORED)
 # ============================================================================
 
 # Set build type to Debug
 set(CMAKE_BUILD_TYPE Debug CACHE STRING "Choose the type of build." FORCE)
 message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
 
-# Full debugging settings (enables step-through debugging)
-set(FAST_DEBUG_OPT -O0)  # No optimization for accurate debugging
+# Apply compiler flags using the CompilerFlags module
+# This replaces the old manual flag definitions
+# For tests, we use test-specific flags which are more permissive but ABI-compatible
+apply_test_compiler_flags()      # Sets CMAKE_C_FLAGS and CMAKE_CXX_FLAGS globally for tests
 
-# Generate both debug formats: DWARF for GDB and CodeView for stack traces
-if(WIN32 AND CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-    # On Windows with Clang: generate both DWARF (for GDB) and CodeView (for stack traces)
-    set(FAST_DEBUG_INFO -g3 -gdwarf-4)  # DWARF for GDB compatibility + full debug info
-    message(STATUS "Using dual debug format: DWARF for GDB + CodeView for stack traces")
-else()
-    # Non-Windows or non-Clang: standard DWARF debug info
-    set(FAST_DEBUG_INFO -g3)  # Full debug info including macros
-    message(STATUS "Using DWARF debug format")
-endif()
-
-# Windows symbol files for stack traces
-if(WIN32)
-    if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-        # Clang supports CodeView debug format for Windows
-        set(FAST_DEBUG_INFO ${FAST_DEBUG_INFO} -gcodeview)
-        message(STATUS "Adding CodeView debug info for Windows stack traces (Clang)")
-    elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-        # GCC doesn't support CodeView, but DWARF format works well for stack traces
-        message(STATUS "Using DWARF debug format for Windows stack traces (GCC)")
-    endif()
-endif()
-
-set(FAST_FRAME_POINTER -fno-omit-frame-pointer)
-
-# Get dead code elimination flags
-if(NOT NO_DEAD_CODE_ELIMINATION)
-    message(STATUS "Enabling dead code elimination for smaller binaries")
-    set(DEAD_CODE_ELIMINATION_FLAGS "-ffunction-sections" "-fdata-sections")
-else()
-    message(STATUS "Dead code elimination disabled")
-    set(DEAD_CODE_ELIMINATION_FLAGS "")
-endif()
-
-# Define common compiler flags and definitions (from working old version)
-set(COMMON_COMPILE_FLAGS
-    -Wall
-    -Wextra 
-    -funwind-tables
-    ${FAST_DEBUG_INFO}
-    ${FAST_FRAME_POINTER}
-    ${FAST_DEBUG_OPT}
-    ${DEAD_CODE_ELIMINATION_FLAGS}
-    # 🚨 NOTE: Allowing exceptions and RTTI for easier testing
-    # Production builds can disable these with -fno-exceptions -fno-rtti if needed
-    -Werror=return-type
-    -Werror=missing-declarations
-    -Werror=redundant-decls
-    -Werror=init-self
-    -Werror=missing-field-initializers  
-    -Werror=pointer-arith
-    -Werror=write-strings
-    -Werror=format=2
-    -Werror=implicit-fallthrough
-    -Werror=missing-include-dirs
-    -Werror=date-time
-    -Werror=unused-parameter
-    -Werror=unused-variable
-    -Werror=unused-value
-    -Werror=cast-align
-    -Werror=misleading-indentation
-    -Werror=uninitialized
-    -Werror=array-bounds
-    -Werror=strict-overflow=2
-    -Werror=null-dereference
-    -Werror=format-security
-    -Werror=unused-function
-    -Werror=deprecated-declarations
-    -DFASTLED_FIVE_BIT_HD_GAMMA_FUNCTION_2_8
-    -Wno-comment
-    # ignore Arduino/PlatformIO-specific PROGMEM macro
-    -DPROGMEM=
-)
-
-# Add GCC-specific warning flags
-if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-    list(APPEND COMMON_COMPILE_FLAGS 
-        -Werror=maybe-uninitialized
-        -Werror=logical-op
-        -Werror=class-memaccess
-    )
-endif()
-
-# C++-specific compiler flags
-set(CXX_SPECIFIC_FLAGS
-    -Werror=suggest-override
-    -Werror=non-virtual-dtor
-    -Werror=reorder
-    -Werror=sign-compare
-    -Werror=float-equal
-    -Werror=mismatched-tags
-    -Werror=switch-enum
-    -Werror=delete-non-virtual-dtor
-)
-
-# Add GCC-specific C++ warning flags
-if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-    list(APPEND CXX_SPECIFIC_FLAGS 
-        -Werror=redundant-move
-    )
-endif()
-
-if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-    list(APPEND CXX_SPECIFIC_FLAGS -Werror=self-assign -Werror=infinite-recursion -Werror=extra-tokens -Werror=unused-private-field -Wglobal-constructors -Werror=global-constructors)
-endif()
+# Note: apply_fastled_cxx_flags() is included in apply_test_compiler_flags()
 
 # Set FASTLED_ALL_SRC=1 for clang builds or when explicitly requested via environment variable
 if (CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR DEFINED ENV{FASTLED_ALL_SRC})
@@ -278,49 +176,7 @@ if (CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR DEFINED ENV{FASTLED_ALL_SRC})
     add_compile_definitions(FASTLED_ALL_SRC=1)
 endif()
 
-# Apply compiler flags globally 
-foreach(flag ${COMMON_COMPILE_FLAGS})
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${flag}")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${flag}")
-endforeach()
-
-# Test-specific flags (more permissive)
-set(UNIT_TEST_COMPILE_FLAGS
-    -Wall
-    -funwind-tables
-    ${FAST_DEBUG_INFO}
-    ${FAST_FRAME_POINTER}
-    ${FAST_DEBUG_OPT}
-    ${DEAD_CODE_ELIMINATION_FLAGS}
-    -Werror=return-type
-    -Werror=missing-declarations
-    -Werror=init-self
-    -Werror=date-time
-    -Werror=uninitialized
-    -Werror=array-bounds
-    -Werror=null-dereference
-    -Werror=deprecated-declarations
-    -Wno-comment
-    # 🚨 HACK: More permissive flags for tests (common test code patterns)
-    -Wno-unused-parameter      # Test functions often have unused params
-    -Wno-unused-variable       # Test code often has temporary variables
-    -Wno-unused-value          # Test assertions may appear to not use values
-)
-
-# Add GCC-specific unit test warning flags
-if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-    list(APPEND UNIT_TEST_COMPILE_FLAGS 
-        -Werror=maybe-uninitialized
-    )
-endif()
-
-set(UNIT_TEST_CXX_FLAGS
-    -Werror=suggest-override
-    -Werror=non-virtual-dtor
-    -Werror=switch-enum
-    -Werror=delete-non-virtual-dtor
-)
-
+# Apply global compile definitions
 set(COMMON_COMPILE_DEFINITIONS
     DEBUG
     FASTLED_FORCE_NAMESPACE=1
@@ -477,8 +333,7 @@ add_library(test_shared_static STATIC
 )
 
 target_include_directories(test_shared_static PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-target_compile_options(test_shared_static PRIVATE ${UNIT_TEST_COMPILE_FLAGS})
-target_compile_options(test_shared_static PRIVATE $<$<COMPILE_LANGUAGE:CXX>:${UNIT_TEST_CXX_FLAGS}>)
+# Compiler flags are now applied globally via apply_test_compiler_flags()
 target_compile_definitions(test_shared_static PRIVATE ${COMMON_COMPILE_DEFINITIONS})
 
 # Enable debug symbols for the static library on Windows
@@ -619,8 +474,7 @@ foreach(TEST_SOURCE ${TEST_SOURCES})
         CXX_STANDARD 17
         CXX_STANDARD_REQUIRED ON
     )
-    target_compile_options(${TEST_NAME} PRIVATE ${UNIT_TEST_COMPILE_FLAGS})
-    target_compile_options(${TEST_NAME} PRIVATE $<$<COMPILE_LANGUAGE:CXX>:${UNIT_TEST_CXX_FLAGS}>)
+    # Compiler flags are now applied globally via apply_test_compiler_flags()
     target_compile_definitions(${TEST_NAME} PRIVATE 
         ${COMMON_COMPILE_DEFINITIONS}
         $<$<BOOL:${USE_LIBUNWIND}>:USE_LIBUNWIND>
