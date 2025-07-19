@@ -8,6 +8,7 @@
 #include "FastLED.h"
 #include "cled_controller.h"
 #include "platforms/wasm/strip_id_map.h"
+#include "fl/unused.h"
 
 #include "fl/namespace.h"
 FASTLED_USING_NAMESPACE
@@ -20,10 +21,18 @@ class FakeCLedController : public CLEDController {
   public:
     FakeSpi fake_spi;
     virtual void showColor(const CRGB &data, int nLeds,
-                           uint8_t brightness) override {}
+                           uint8_t brightness) override {
+                            FL_UNUSED(data);
+                            FL_UNUSED(nLeds);
+                            FL_UNUSED(brightness);
+                           }
 
     virtual void show(const struct CRGB *data, int nLeds,
-                      uint8_t brightness) override {}
+                      uint8_t brightness) override {
+                        FL_UNUSED(data);
+                        FL_UNUSED(nLeds);
+                        FL_UNUSED(brightness);
+                      }
     virtual void init() override {}
 };
 

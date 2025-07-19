@@ -1,6 +1,6 @@
 # LinkerCompatibility.cmake
-# Compatibility layer for translating GNU-style linker flags to MSVC-style flags
-# when using lld-link (LLVM's linker) on Windows with Clang
+# Comprehensive GNU ↔ MSVC linker flag translation and universal linker flag management
+# Enhanced version with universal flag interface
 
 # Function to translate GNU-style linker flags to MSVC-style for lld-link
 function(translate_gnu_to_msvc_linker_flags input_flags output_var)
@@ -347,4 +347,144 @@ function(get_windows_debug_build_flags output_compiler_flags output_linker_flags
     
     set(${output_compiler_flags} ${compiler_flags} PARENT_SCOPE)
     set(${output_linker_flags} ${linker_flags} PARENT_SCOPE)
-endfunction() 
+endfunction()
+
+# Universal linker flags - high-level interface
+set(UNIVERSAL_LINKER_FLAGS
+    "dead-code-elimination"          # Remove unused code
+    "debug-full"                     # Full debug information  
+    "debug-minimal"                  # Minimal debug (stack traces only)
+    "optimize-speed"                 # Optimize for execution speed
+    "optimize-size"                  # Optimize for binary size
+    "subsystem-console"              # Console application (Windows)
+    "static-runtime"                 # Link runtime statically
+    "dynamic-runtime"                # Link runtime dynamically
+)
+
+# Function to set universal linker flags
+function(set_universal_linker_flags flag_list)
+    translate_universal_linker_flags("${flag_list}" translated_flags)
+    string(REPLACE ";" " " flags_str "${translated_flags}")
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${flags_str}" PARENT_SCOPE)
+    set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} ${flags_str}" PARENT_SCOPE)
+    set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} ${flags_str}" PARENT_SCOPE)
+endfunction()
+
+# Function to translate universal linker flags to platform-specific equivalents
+function(translate_universal_linker_flags universal_flags output_var)
+    set(translated_flags "")
+    
+    foreach(flag ${universal_flags})
+        if(flag STREQUAL "dead-code-elimination")
+            if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+                get_dead_code_elimination_flags(dce_flags)
+                list(APPEND translated_flags ${dce_flags})
+            elseif(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
+                list(APPEND translated_flags "/OPT:REF" "/OPT:ICF")
+            endif()
+        elseif(flag STREQUAL "debug-full")
+            if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+                # Debug info is handled in compiler flags, not linker
+            elseif(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
+                list(APPEND translated_flags "/DEBUG:FULL")
+            endif()
+        elseif(flag STREQUAL "debug-minimal")
+            if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+                # Debug info is handled in compiler flags, not linker
+            elseif(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
+                list(APPEND translated_flags "/DEBUG:FASTLINK")
+            endif()
+        elseif(flag STREQUAL "optimize-speed")
+            translate_optimization_level("O2" opt_flags)
+            list(APPEND translated_flags ${opt_flags})
+        elseif(flag STREQUAL "optimize-size")
+            translate_optimization_level("Os" opt_flags)
+            list(APPEND translated_flags ${opt_flags})
+        elseif(flag STREQUAL "subsystem-console")
+            if(WIN32)
+                if(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
+                    list(APPEND translated_flags "/SUBSYSTEM:CONSOLE")
+                elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+                    list(APPEND translated_flags "-Xlinker" "/SUBSYSTEM:CONSOLE")
+                endif()
+            endif()
+        elseif(flag STREQUAL "static-runtime")
+            if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+                if(NOT APPLE)
+                    list(APPEND translated_flags "-static-libgcc" "-static-libstdc++")
+                endif()
+            elseif(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
+                # MSVC static runtime is handled through compiler flags
+            endif()
+        elseif(flag STREQUAL "dynamic-runtime")
+            # Dynamic runtime is typically the default
+        else()
+            message(WARNING "Unknown universal linker flag: ${flag}")
+        endif()
+    endforeach()
+    
+    set(${output_var} ${translated_flags} PARENT_SCOPE)
+endfunction()
+
+# Function to get executable-specific flags
+function(get_executable_flags output_var)
+    set(exe_flags "")
+    if(WIN32)
+        if(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
+            list(APPEND exe_flags "/SUBSYSTEM:CONSOLE")
+        elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+            list(APPEND exe_flags "-Xlinker" "/SUBSYSTEM:CONSOLE")
+        endif()
+    endif()
+    set(${output_var} ${exe_flags} PARENT_SCOPE)
+endfunction()
+
+# Function to get library-specific flags
+function(get_library_flags output_var)
+    set(lib_flags "")
+    if(WIN32)
+        if(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
+            list(APPEND lib_flags "/DLL")
+        endif()
+    endif()
+    set(${output_var} ${lib_flags} PARENT_SCOPE)
+endfunction()
+
+# Function to translate optimization levels
+function(translate_optimization_level level output_var)
+    set(opt_flags "")
+    if(level STREQUAL "O0")
+        # No optimization
+    elseif(level STREQUAL "O1")
+        if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+            set(opt_flags "-O1")
+        elseif(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
+            set(opt_flags "/O1")
+        endif()
+    elseif(level STREQUAL "O2")
+        if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+            set(opt_flags "-O2")
+        elseif(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
+            set(opt_flags "/O2")
+        endif()
+    elseif(level STREQUAL "O3")
+        if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+            set(opt_flags "-O3")
+        elseif(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
+            set(opt_flags "/Ox")
+        endif()
+    elseif(level STREQUAL "Os")
+        if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+            set(opt_flags "-Os")
+        elseif(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
+            set(opt_flags "/O1" "/Os")
+        endif()
+    elseif(level STREQUAL "Ofast")
+        if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+            set(opt_flags "-Ofast")
+        elseif(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
+            set(opt_flags "/Ox" "/fp:fast")
+        endif()
+    endif()
+    set(${output_var} ${opt_flags} PARENT_SCOPE)
+endfunction()

@@ -144,7 +144,10 @@ TEST_CASE("Fixed vector find_if with predicate") {
     }
 
     SUBCASE("Find in empty vector") {
-        auto it = vec.find_if([](int n) { return true; });
+        auto it = vec.find_if([](int n) {
+            FL_UNUSED(n);
+            return true;
+        });
         CHECK(it == vec.end());
     }
 }

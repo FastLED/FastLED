@@ -63,6 +63,7 @@ static float calculateRGBError(const CRGB& original, const CRGB& converted) {
 // Test a specific conversion function with RGB -> HSV -> RGB round trip
 template<typename ConversionFunc>
 static ErrorStats testConversionFunction(ConversionFunc hsv2rgb_func, const char* func_name) {
+    (void)func_name; // Suppress unused parameter warning
     ErrorStats stats;
     
     // Test a comprehensive set of RGB colors
@@ -247,6 +248,3 @@ TEST_CASE("HSV to RGB Conversion - Hue Sweep Test") {
     }
     printf("\n");
 }
-
-
-

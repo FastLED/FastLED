@@ -14,6 +14,7 @@
 
 // Define the main entry point for Windows
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, INT nCmdShow) {
+    (void)hInstance; (void)hPrevInstance; (void)lpCmdLine; (void)nCmdShow; // Suppress unused parameter warnings
 #ifdef ENABLE_CRASH_HANDLER
     setup_crash_handler();
 #endif
