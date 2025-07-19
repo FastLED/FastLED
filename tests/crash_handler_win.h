@@ -14,8 +14,10 @@
 #include <vector>
 #include <string>
 
+#ifdef _MSC_VER
 #pragma comment(lib, "dbghelp.lib")
 #pragma comment(lib, "psapi.lib")
+#endif
 
 namespace crash_handler_win {
 
