@@ -291,14 +291,10 @@ foreach(TEST_SOURCE ${TEST_SOURCES})
         message(STATUS "     CMAKE_CXX_FLAGS: ${CMAKE_CXX_FLAGS}")
         message(STATUS "")
         
-        message(STATUS "  📌 Test will receive these ADDITIONAL unit test flags:")
-        string(REPLACE ";" " " UNIT_TEST_COMPILE_FLAGS_STR "${UNIT_TEST_COMPILE_FLAGS}")
-        message(STATUS "     UNIT_TEST_COMPILE_FLAGS: ${UNIT_TEST_COMPILE_FLAGS_STR}")
-        message(STATUS "")
-        
-        message(STATUS "  📌 Test will receive these ADDITIONAL C++ flags:")
-        string(REPLACE ";" " " UNIT_TEST_CXX_FLAGS_STR "${UNIT_TEST_CXX_FLAGS}")
-        message(STATUS "     UNIT_TEST_CXX_FLAGS: ${UNIT_TEST_CXX_FLAGS_STR}")
+        message(STATUS "  📌 Test inherits modular flags (applied globally via CompilerFlags module):")
+        message(STATUS "     - Test flags: Inherited from apply_test_compiler_flags() function")
+        message(STATUS "     - No per-target flags: All flags applied globally for consistency")
+        message(STATUS "     - Modular system: Compiler detection, optimization, and platform flags")
         message(STATUS "")
         
         message(STATUS "  📌 Test will receive these compile definitions:")
