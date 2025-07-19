@@ -9,6 +9,25 @@ from dataclasses import dataclass
 from ci.paths import PROJECT_ROOT
 
 
+# Configure console for UTF-8 output on Windows
+if os.name == "nt":  # Windows
+    # Try to set console to UTF-8 mode
+    try:
+        # Set stdout and stderr to UTF-8 encoding
+        # Note: reconfigure() was added in Python 3.7
+        if hasattr(sys.stdout, "reconfigure") and callable(
+            getattr(sys.stdout, "reconfigure", None)
+        ):
+            sys.stdout.reconfigure(encoding="utf-8", errors="replace")  # type: ignore[attr-defined]
+        if hasattr(sys.stderr, "reconfigure") and callable(
+            getattr(sys.stderr, "reconfigure", None)
+        ):
+            sys.stderr.reconfigure(encoding="utf-8", errors="replace")  # type: ignore[attr-defined]
+    except (AttributeError, OSError):
+        # Fallback for older Python versions or if reconfigure fails
+        pass
+
+
 # Global verbose flag
 _VERBOSE = False
 
@@ -52,7 +71,16 @@ def run_command(command, use_gdb=False) -> tuple[int, str]:
             if line:
                 captured_lines.append(line.rstrip())
                 if _VERBOSE:
-                    print(line, end="")  # Only print in real-time if verbose
+                    try:
+                        print(line, end="")  # Only print in real-time if verbose
+                    except UnicodeEncodeError:
+                        # Fallback: replace problematic characters
+                        print(
+                            line.encode("utf-8", errors="replace").decode(
+                                "utf-8", errors="replace"
+                            ),
+                            end="",
+                        )
 
         os.unlink(gdb_script.name)
         output = "\n".join(captured_lines)
@@ -75,19 +103,32 @@ def run_command(command, use_gdb=False) -> tuple[int, str]:
             if line:
                 captured_lines.append(line.rstrip())
                 if _VERBOSE:
-                    print(line, end="")  # Only print in real-time if verbose
+                    try:
+                        print(line, end="")  # Only print in real-time if verbose
+                    except UnicodeEncodeError:
+                        # Fallback: replace problematic characters
+                        print(
+                            line.encode("utf-8", errors="replace").decode(
+                                "utf-8", errors="replace"
+                            ),
+                            end="",
+                        )
 
         output = "\n".join(captured_lines)
         return process.returncode, output
 
 
-def compile_tests(clean: bool = False, unknown_args: list[str] = []) -> None:
+def compile_tests(
+    clean: bool = False, unknown_args: list[str] = [], specific_test: str | None = None
+) -> None:
     os.chdir(str(PROJECT_ROOT))
     if _VERBOSE:
         print("Compiling tests...")
     command = ["uv", "run", "ci/cpp_test_compile.py"]
     if clean:
         command.append("--clean")
+    if specific_test:
+        command.extend(["--test", specific_test])
     command.extend(unknown_args)
     return_code, output = run_command(" ".join(command))
     if return_code != 0:
@@ -300,7 +341,9 @@ def main() -> None:
         if use_clang:
             passthrough_args.append("--use-clang")
         # Note: --gcc is handled by not passing --use-clang (GCC is the default in cpp_test_compile.py)
-        compile_tests(clean=args.clean, unknown_args=passthrough_args)
+        compile_tests(
+            clean=args.clean, unknown_args=passthrough_args, specific_test=specific_test
+        )
 
     if not compile_only:
         if specific_test:

@@ -3,6 +3,14 @@
 # gcc. This allows the unit tests to be compiled across different platforms
 # without having to worry about the underlying compiler.
 
+message(STATUS "=== CMAKE STARTING ===")
+if(DEFINED SPECIFIC_TEST)
+    message(STATUS "🎯 SPECIFIC_TEST IS SET TO: ${SPECIFIC_TEST}")
+else()
+    message(STATUS "🌐 SPECIFIC_TEST IS NOT DEFINED - BUILDING ALL TESTS")
+endif()
+message(STATUS "======================")
+
 cmake_minimum_required(VERSION 3.10)
 project(FastLED_Tests)
 
@@ -336,6 +344,87 @@ endif()
 add_compile_definitions(${COMMON_COMPILE_DEFINITIONS})
 
 # ============================================================================
+# 🚨 BUILD FLAGS SUMMARY - Show all flags sent to every compilation unit
+# ============================================================================
+
+message(STATUS "")
+message(STATUS "🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨")
+message(STATUS "🚨                                  BUILD FLAGS SUMMARY                                 🚨")
+message(STATUS "🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨")
+message(STATUS "")
+
+# Display FastLED Library Flags
+message(STATUS "📚 FASTLED LIBRARY COMPILATION FLAGS:")
+message(STATUS "  Compiler: ${CMAKE_CXX_COMPILER_ID}")
+message(STATUS "  C++ Standard: ${CMAKE_CXX_STANDARD}")
+message(STATUS "  Build Type: ${CMAKE_BUILD_TYPE}")
+message(STATUS "")
+
+# Show all flags that will be applied to FastLED library
+string(REPLACE ";" " " COMMON_COMPILE_FLAGS_STR "${COMMON_COMPILE_FLAGS}")
+message(STATUS "  📌 C/C++ Common Flags (FastLED Library):")
+message(STATUS "     ${COMMON_COMPILE_FLAGS_STR}")
+message(STATUS "")
+
+string(REPLACE ";" " " CXX_SPECIFIC_FLAGS_STR "${CXX_SPECIFIC_FLAGS}")
+message(STATUS "  📌 C++ Only Flags (FastLED Library):")
+message(STATUS "     ${CXX_SPECIFIC_FLAGS_STR}")
+message(STATUS "")
+
+string(REPLACE ";" " " COMMON_COMPILE_DEFINITIONS_STR "${COMMON_COMPILE_DEFINITIONS}")
+message(STATUS "  📌 Preprocessor Definitions (FastLED Library):")
+message(STATUS "     ${COMMON_COMPILE_DEFINITIONS_STR}")
+message(STATUS "")
+
+# Show current CMAKE compiler flags (these are applied globally)
+message(STATUS "  📌 Final CMAKE_CXX_FLAGS (applied to all C++ files):")
+message(STATUS "     ${CMAKE_CXX_FLAGS}")
+message(STATUS "")
+message(STATUS "  📌 Final CMAKE_C_FLAGS (applied to all C files):")
+message(STATUS "     ${CMAKE_C_FLAGS}")
+message(STATUS "")
+
+# Display Test Compilation Flags
+message(STATUS "🧪 TEST COMPILATION FLAGS:")
+string(REPLACE ";" " " UNIT_TEST_COMPILE_FLAGS_STR "${UNIT_TEST_COMPILE_FLAGS}")
+message(STATUS "  📌 Unit Test C/C++ Common Flags:")
+message(STATUS "     ${UNIT_TEST_COMPILE_FLAGS_STR}")
+message(STATUS "")
+
+string(REPLACE ";" " " UNIT_TEST_CXX_FLAGS_STR "${UNIT_TEST_CXX_FLAGS}")
+message(STATUS "  📌 Unit Test C++ Only Flags:")
+message(STATUS "     ${UNIT_TEST_CXX_FLAGS_STR}")
+message(STATUS "")
+
+# Display Linker Flags
+message(STATUS "🔗 LINKER FLAGS:")
+message(STATUS "  📌 CMAKE_EXE_LINKER_FLAGS (executables):")
+message(STATUS "     ${CMAKE_EXE_LINKER_FLAGS}")
+message(STATUS "")
+message(STATUS "  📌 CMAKE_SHARED_LINKER_FLAGS (shared libraries):")
+message(STATUS "     ${CMAKE_SHARED_LINKER_FLAGS}")
+message(STATUS "")
+message(STATUS "  📌 CMAKE_MODULE_LINKER_FLAGS (modules):")
+message(STATUS "     ${CMAKE_MODULE_LINKER_FLAGS}")
+message(STATUS "")
+
+# Additional configuration info
+if(USE_LIBUNWIND)
+    message(STATUS "🔧 LIBUNWIND CONFIGURATION:")
+    message(STATUS "  📌 Libraries: ${LIBUNWIND_LIBRARIES}")
+    message(STATUS "  📌 Include Dirs: ${LIBUNWIND_INCLUDE_DIRS}")
+    message(STATUS "")
+endif()
+
+# Dead code elimination info
+if(NOT NO_DEAD_CODE_ELIMINATION)
+    string(REPLACE ";" " " DEAD_CODE_ELIMINATION_FLAGS_STR "${DEAD_CODE_ELIMINATION_FLAGS}")
+    message(STATUS "🗑️  DEAD CODE ELIMINATION:")
+    message(STATUS "  📌 Compiler Flags: ${DEAD_CODE_ELIMINATION_FLAGS_STR}")
+    message(STATUS "")
+endif()
+
+# ============================================================================
 # PHASE 7: Set output directories
 # ============================================================================
 
@@ -350,6 +439,13 @@ set(CMAKE_BINARY_DIR ${CMAKE_CURRENT_SOURCE_DIR}/.build/bin)
 # ============================================================================
 # PHASE 8: Include FastLED source directory and create targets
 # ============================================================================
+
+# 🚨 DEBUG: Check if SPECIFIC_TEST variable is being set
+if(DEFINED SPECIFIC_TEST)
+    message(STATUS "DEBUG: SPECIFIC_TEST VARIABLE IS SET: '${SPECIFIC_TEST}'")
+else()
+    message(STATUS "DEBUG: SPECIFIC_TEST VARIABLE IS NOT SET - BUILDING ALL TESTS")
+endif()
 
 # Set path to FastLED source directory
 set(FASTLED_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/..)
@@ -390,23 +486,87 @@ if(WIN32)
     target_compile_definitions(test_shared_static PRIVATE _DEBUG)
 endif()
 
-# Find all test source files
-file(GLOB TEST_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/test_*.cpp")
+# Determine which test source files to process
+if(DEFINED SPECIFIC_TEST)
+    # Only process the specific test file
+    set(SPECIFIC_TEST_SOURCE "${CMAKE_CURRENT_SOURCE_DIR}/test_${SPECIFIC_TEST}.cpp")
+    message(STATUS "🔍 Looking for specific test file: ${SPECIFIC_TEST_SOURCE}")
+    if(EXISTS ${SPECIFIC_TEST_SOURCE})
+        set(TEST_SOURCES ${SPECIFIC_TEST_SOURCE})
+        message(STATUS "✅ Building ONLY specific test: test_${SPECIFIC_TEST}")
+    else()
+        message(FATAL_ERROR "❌ Specific test file not found: ${SPECIFIC_TEST_SOURCE}")
+    endif()
+else()
+    # Find all test source files for full build
+    file(GLOB TEST_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/test_*.cpp")
+    list(LENGTH TEST_SOURCES TEST_COUNT)
+    message(STATUS "🌐 Building ALL tests - found ${TEST_COUNT} test files")
+endif()
 
 # Create test executables
 foreach(TEST_SOURCE ${TEST_SOURCES})
     get_filename_component(TEST_NAME ${TEST_SOURCE} NAME_WE)
     
-    # If SPECIFIC_TEST is defined, only create that test target
+    # For specific test builds, we know this is the right test
     if(DEFINED SPECIFIC_TEST)
-        # Check if this is the specific test we want to build
         string(REPLACE "test_" "" CURRENT_TEST_NAME ${TEST_NAME})
-        if(NOT CURRENT_TEST_NAME STREQUAL SPECIFIC_TEST)
-            # Skip this test, it's not the one we want
-            continue()
-        endif()
-        message(STATUS "Building specific test: ${TEST_NAME}")
+        message(STATUS "Processing specific test: ${TEST_NAME}")
     endif()
+    
+    # ============================================================================
+    # 🚨 INDIVIDUAL TEST FLAGS LOGGING
+    # ============================================================================
+    if(DEFINED SPECIFIC_TEST AND CURRENT_TEST_NAME STREQUAL SPECIFIC_TEST)
+        message(STATUS "")
+        message(STATUS "🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪")
+        message(STATUS "🧪                        SPECIFIC TEST FLAGS: ${TEST_NAME}                        🧪")
+        message(STATUS "🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪")
+        message(STATUS "")
+        message(STATUS "  📁 Source File: ${TEST_SOURCE}")
+        message(STATUS "  🎯 Target Name: ${TEST_NAME}")
+        message(STATUS "")
+        
+        # Show the flags that will be applied to this specific test
+        message(STATUS "  📌 Test will inherit ALL global C++ flags:")
+        message(STATUS "     CMAKE_CXX_FLAGS: ${CMAKE_CXX_FLAGS}")
+        message(STATUS "")
+        
+        message(STATUS "  📌 Test will receive these ADDITIONAL unit test flags:")
+        string(REPLACE ";" " " UNIT_TEST_COMPILE_FLAGS_STR "${UNIT_TEST_COMPILE_FLAGS}")
+        message(STATUS "     UNIT_TEST_COMPILE_FLAGS: ${UNIT_TEST_COMPILE_FLAGS_STR}")
+        message(STATUS "")
+        
+        message(STATUS "  📌 Test will receive these ADDITIONAL C++ flags:")
+        string(REPLACE ";" " " UNIT_TEST_CXX_FLAGS_STR "${UNIT_TEST_CXX_FLAGS}")
+        message(STATUS "     UNIT_TEST_CXX_FLAGS: ${UNIT_TEST_CXX_FLAGS_STR}")
+        message(STATUS "")
+        
+        message(STATUS "  📌 Test will receive these compile definitions:")
+        string(REPLACE ";" " " COMMON_COMPILE_DEFINITIONS_STR "${COMMON_COMPILE_DEFINITIONS}")
+        message(STATUS "     COMMON_COMPILE_DEFINITIONS: ${COMMON_COMPILE_DEFINITIONS_STR}")
+        message(STATUS "")
+        
+        message(STATUS "  📌 Test will be linked with:")
+        message(STATUS "     - fastled library")
+        message(STATUS "     - test_shared_static library")
+        if(WIN32)
+            message(STATUS "     - dbghelp psapi (Windows debugging libraries)")
+        endif()
+        if(USE_LIBUNWIND)
+            message(STATUS "     - ${LIBUNWIND_LIBRARIES} (stack unwinding)")
+        endif()
+        if(NOT APPLE AND CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+            message(STATUS "     - static runtime (-static-libgcc -static-libstdc++)")
+        endif()
+        message(STATUS "")
+        
+        message(STATUS "🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪")
+        message(STATUS "🧪                       END SPECIFIC TEST FLAGS: ${TEST_NAME}                      🧪")
+        message(STATUS "🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪")
+        message(STATUS "")
+    endif()
+    # ============================================================================
     
     # Create executable that links to static library
     add_executable(${TEST_NAME} ${TEST_SOURCE})
@@ -468,6 +628,51 @@ foreach(TEST_SOURCE ${TEST_SOURCES})
     
     # Add test to CTest
     add_test(NAME ${TEST_NAME} COMMAND ${TEST_NAME})
+    
+    # ============================================================================
+    # 🚨 FINAL INDIVIDUAL TEST LINKER FLAGS LOGGING
+    # ============================================================================
+    if(DEFINED SPECIFIC_TEST AND CURRENT_TEST_NAME STREQUAL SPECIFIC_TEST)
+        message(STATUS "")
+        message(STATUS "🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗")
+        message(STATUS "🔗                        FINAL LINKER FLAGS: ${TEST_NAME}                         🔗")
+        message(STATUS "🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗")
+        message(STATUS "")
+        
+        # Get the actual target properties
+        get_target_property(TEST_LINK_FLAGS ${TEST_NAME} LINK_FLAGS)
+        if(TEST_LINK_FLAGS)
+            message(STATUS "  📌 Target-specific Link Flags:")
+            message(STATUS "     ${TEST_LINK_FLAGS}")
+        else()
+            message(STATUS "  📌 Target-specific Link Flags: (none)")
+        endif()
+        message(STATUS "")
+        
+        message(STATUS "  📌 Global Executable Linker Flags:")
+        message(STATUS "     CMAKE_EXE_LINKER_FLAGS: ${CMAKE_EXE_LINKER_FLAGS}")
+        message(STATUS "")
+        
+        if(WIN32)
+            message(STATUS "  📌 Windows-specific Configuration:")
+            get_target_property(TEST_WIN32_EXECUTABLE ${TEST_NAME} WIN32_EXECUTABLE)
+            message(STATUS "     WIN32_EXECUTABLE: ${TEST_WIN32_EXECUTABLE}")
+            message(STATUS "     - Console subsystem enforced")
+            message(STATUS "     - Debug symbols included")
+        endif()
+        
+        if(NOT APPLE AND CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+            message(STATUS "  📌 Static Runtime Linking:")
+            message(STATUS "     -static-libgcc -static-libstdc++")
+        endif()
+        
+        message(STATUS "")
+        message(STATUS "🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗")
+        message(STATUS "🔗                      END FINAL LINKER FLAGS: ${TEST_NAME}                       🔗")
+        message(STATUS "🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗")
+        message(STATUS "")
+    endif()
+    # ============================================================================
 endforeach()
 
 # Build summary

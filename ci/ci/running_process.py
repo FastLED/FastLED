@@ -1,9 +1,29 @@
 import os
 import subprocess
+import sys
 import tempfile
 import threading
 import time
 from pathlib import Path
+
+
+# Configure console for UTF-8 output on Windows
+if os.name == "nt":  # Windows
+    # Try to set console to UTF-8 mode
+    try:
+        # Set stdout and stderr to UTF-8 encoding
+        # Note: reconfigure() was added in Python 3.7
+        if hasattr(sys.stdout, "reconfigure") and callable(
+            getattr(sys.stdout, "reconfigure", None)
+        ):
+            sys.stdout.reconfigure(encoding="utf-8", errors="replace")  # type: ignore[attr-defined]
+        if hasattr(sys.stderr, "reconfigure") and callable(
+            getattr(sys.stderr, "reconfigure", None)
+        ):
+            sys.stderr.reconfigure(encoding="utf-8", errors="replace")  # type: ignore[attr-defined]
+    except (AttributeError, OSError):
+        # Fallback for older Python versions or if reconfigure fails
+        pass
 
 
 class RunningProcess:
@@ -131,7 +151,16 @@ class RunningProcess:
                     linestr = line.decode("utf-8", errors="ignore")
                     linestr = linestr.rstrip()
                     if self.echo:
-                        print(linestr)  # Print to console in real time
+                        # Handle Unicode output properly on Windows
+                        try:
+                            print(linestr)  # Print to console in real time
+                        except UnicodeEncodeError:
+                            # Fallback: encode to utf-8 bytes and decode with errors='replace'
+                            print(
+                                linestr.encode("utf-8", errors="replace").decode(
+                                    "utf-8", errors="replace"
+                                )
+                            )
                     self.buffer.append(linestr)
             finally:
                 if self.proc and self.proc.stdout:
