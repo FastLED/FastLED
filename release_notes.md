@@ -1,5 +1,9 @@
 FastLED 3.10.2
 ==============
+  * **APA102HD Gamma Correction Algorithm**: Completely rewritten with closed-form mathematical solution
+    * Thanks https://github.com/gwgill!
+    * Graph of the old algorithms quantization issues can be see here:
+      * https://www.argyllcms.com/APA102_loglog.svg
   * 3D Perlin noise (`inoise8(x, y, z)`) range utilization improved from 72.9% to 88.6%
     * Significantly better quality for volumetric LED effects (3D fire, clouds, particles)
     * Uses industry-standard 12 edge vectors of a cube for optimal gradient coverage
