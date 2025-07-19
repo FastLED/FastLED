@@ -27,6 +27,7 @@ include(cmake/DependencyManagement.cmake)
 include(cmake/ParallelBuild.cmake)
 include(cmake/TargetCreation.cmake)
 include(cmake/TestConfiguration.cmake)
+include(cmake/TestSourceDiscovery.cmake)
 
 # Enforce C++17 globally for all targets.
 set(CMAKE_CXX_STANDARD 17)
@@ -78,88 +79,18 @@ display_build_configuration_summary()
 configure_build_output_directories()
 
 # ============================================================================
-# PHASE 8: Include FastLED source directory and create targets
+# PHASE 8: Include FastLED source and create test targets (REFACTORED)
 # ============================================================================
 
-# 🚨 DEBUG: Check if SPECIFIC_TEST variable is being set
-if(DEFINED SPECIFIC_TEST)
-    message(STATUS "DEBUG: SPECIFIC_TEST VARIABLE IS SET: '${SPECIFIC_TEST}'")
-else()
-    message(STATUS "DEBUG: SPECIFIC_TEST VARIABLE IS NOT SET - BUILDING ALL TESTS")
-endif()
+# Setup FastLED source directory (handled by TestSourceDiscovery module)
+setup_fastled_source_directory()
 
-# Set path to FastLED source directory
-set(FASTLED_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/..)
-
-# Include FastLED source directory
-include_directories(${FASTLED_SOURCE_DIR}/src)
-
-# Delegate source file computation to src/CMakeLists.txt
-add_subdirectory(${FASTLED_SOURCE_DIR}/src ${CMAKE_BINARY_DIR}/fastled)
-
-# Platform-specific static runtime linking is now handled by the TargetCreation module
-# via apply_static_runtime_linking() function calls
-
-# ============================================================================
-# PHASE 9: Create test infrastructure and targets (working old approach)
-# ============================================================================
-
-# Test infrastructure and testing setup is now handled by modular functions:
-# - enable_testing() is called by configure_ctest()
-# - test_shared_static library is created by create_test_infrastructure()
-
-# Determine which test source files to process
-if(DEFINED SPECIFIC_TEST)
-    # Only process the specific test file
-    set(SPECIFIC_TEST_SOURCE "${CMAKE_CURRENT_SOURCE_DIR}/test_${SPECIFIC_TEST}.cpp")
-    message(STATUS "🔍 Looking for specific test file: ${SPECIFIC_TEST_SOURCE}")
-    if(EXISTS ${SPECIFIC_TEST_SOURCE})
-        set(TEST_SOURCES ${SPECIFIC_TEST_SOURCE})
-        message(STATUS "✅ Building ONLY specific test: test_${SPECIFIC_TEST}")
-    else()
-        message(FATAL_ERROR "❌ Specific test file not found: ${SPECIFIC_TEST_SOURCE}")
-    endif()
-else()
-    # Find all test source files for full build
-    file(GLOB TEST_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/test_*.cpp")
-    list(LENGTH TEST_SOURCES TEST_COUNT)
-    message(STATUS "🌐 Building ALL tests - found ${TEST_COUNT} test files")
-endif()
-
-# ============================================================================
-# PHASE 8: Create test targets using modular system (REFACTORED)
-# ============================================================================
-
-# Configure CTest system
+# Configure CTest system and create test infrastructure
 configure_ctest()
-
-# Create test infrastructure library
 create_test_infrastructure()
 
-# Create test executables using modular approach
-foreach(TEST_SOURCE ${TEST_SOURCES})
-    get_filename_component(TEST_NAME ${TEST_SOURCE} NAME_WE)
-    
-    # For specific test builds, we know this is the right test
-    if(DEFINED SPECIFIC_TEST)
-        string(REPLACE "test_" "" CURRENT_TEST_NAME ${TEST_NAME})
-        message(STATUS "Processing specific test: ${TEST_NAME}")
-    endif()
-    
-    # Display verbose test creation logging (handled by TestConfiguration module)
-    display_verbose_test_creation_logging(${TEST_NAME} ${TEST_SOURCE})
-    
-    # Create test executable using modular system
-    create_test_executable(${TEST_NAME} ${TEST_SOURCE})
-    
-    # Register with CTest
-    register_test_executable(${TEST_NAME})
-    
-    # Display detailed linker flags for specific test builds (debugging)
-    if(DEFINED SPECIFIC_TEST AND CURRENT_TEST_NAME STREQUAL SPECIFIC_TEST)
-        display_target_linker_flags(${TEST_NAME})
-    endif()
-endforeach()
+# Process test targets using modular approach (handled by TestSourceDiscovery module)
+process_test_targets()
 
 # ============================================================================
 # PHASE 9: Display build summary (REFACTORED)
