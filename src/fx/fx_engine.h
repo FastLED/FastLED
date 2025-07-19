@@ -13,8 +13,7 @@
 #include "fx/video.h"
 #include "fl/stdint.h"
 
-// Forward declaration
-class TimeFunction;
+// TimeFunction is defined in fx/time.h (fl::TimeFunction)
 
 #ifndef FASTLED_FX_ENGINE_MAX_FX
 #define FASTLED_FX_ENGINE_MAX_FX 64

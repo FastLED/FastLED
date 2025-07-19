@@ -636,21 +636,25 @@ if(NO_BUILD)
                 # Add Windows debugging libraries for crash handler
                 target_link_libraries(${TEST_NAME} dbghelp psapi)
                 
-                # Enable debug symbols for better stack traces
-                if(MSVC)
+                # Use compatibility layer for Windows debug build settings
+                get_windows_debug_build_flags(win_compiler_flags win_linker_flags)
+                get_subsystem_flags(subsystem_flags "console")
+                
+                # Apply the platform-appropriate flags
+                if(win_compiler_flags)
+                    target_compile_options(${TEST_NAME} PRIVATE ${win_compiler_flags})
+                endif()
+                
+                # Combine subsystem and debug linker flags
+                set(combined_linker_flags ${subsystem_flags} ${win_linker_flags})
+                if(combined_linker_flags)
+                    string(REPLACE ";" " " combined_linker_flags_str "${combined_linker_flags}")
                     set_target_properties(${TEST_NAME} PROPERTIES
                         WIN32_EXECUTABLE FALSE
-                        LINK_FLAGS "/SUBSYSTEM:CONSOLE /DEBUG:FULL /OPT:NOREF /OPT:NOICF")
+                        LINK_FLAGS "${combined_linker_flags_str}")
                 else()
-                    # For MinGW/Clang on Windows
-                    if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-                        set_target_properties(${TEST_NAME} PROPERTIES
-                            WIN32_EXECUTABLE FALSE
-                            LINK_FLAGS "-Xlinker /subsystem:console -g -O0")
-                    else()
-                        set_target_properties(${TEST_NAME} PROPERTIES
-                            WIN32_EXECUTABLE FALSE)
-                    endif()
+                    set_target_properties(${TEST_NAME} PROPERTIES
+                        WIN32_EXECUTABLE FALSE)
                 endif()
                 
                 # Ensure debug information is preserved
@@ -711,24 +715,25 @@ else()
                 # Add Windows debugging libraries for crash handler
                 target_link_libraries(${TEST_NAME} dbghelp psapi)
                 
-                # Enable debug symbols for better stack traces
-                if(MSVC)
+                # Use compatibility layer for Windows debug build settings
+                get_windows_debug_build_flags(win_compiler_flags win_linker_flags)
+                get_subsystem_flags(subsystem_flags "console")
+                
+                # Apply the platform-appropriate flags
+                if(win_compiler_flags)
+                    target_compile_options(${TEST_NAME} PRIVATE ${win_compiler_flags})
+                endif()
+                
+                # Combine subsystem and debug linker flags
+                set(combined_linker_flags ${subsystem_flags} ${win_linker_flags})
+                if(combined_linker_flags)
+                    string(REPLACE ";" " " combined_linker_flags_str "${combined_linker_flags}")
                     set_target_properties(${TEST_NAME} PROPERTIES
                         WIN32_EXECUTABLE FALSE
-                        LINK_FLAGS "/SUBSYSTEM:CONSOLE /DEBUG:FULL /OPT:NOREF /OPT:NOICF"
-                        COMPILE_FLAGS "/Zi /Od /RTC1")
+                        LINK_FLAGS "${combined_linker_flags_str}")
                 else()
-                    # For MinGW/Clang on Windows
-                    if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-                        set_target_properties(${TEST_NAME} PROPERTIES
-                            WIN32_EXECUTABLE FALSE
-                            LINK_FLAGS "-Xlinker /subsystem:console -g -O0")
-                        target_compile_options(${TEST_NAME} PRIVATE -g -O0 -fno-omit-frame-pointer)
-                    else()
-                        set_target_properties(${TEST_NAME} PROPERTIES
-                            WIN32_EXECUTABLE FALSE)
-                        target_compile_options(${TEST_NAME} PRIVATE -g -O0 -fno-omit-frame-pointer)
-                    endif()
+                    set_target_properties(${TEST_NAME} PROPERTIES
+                        WIN32_EXECUTABLE FALSE)
                 endif()
                 
                 # Ensure debug information is preserved
