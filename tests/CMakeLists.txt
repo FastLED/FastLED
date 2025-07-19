@@ -228,22 +228,9 @@ endif()
 # PHASE 9: Create test infrastructure and targets (working old approach)
 # ============================================================================
 
-# Enable testing
-enable_testing()
-
-# Create a static library for test infrastructure to avoid Windows symbol conflicts
-add_library(test_shared_static STATIC
-    doctest_main.cpp
-)
-
-target_include_directories(test_shared_static PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-# Compiler flags are now applied globally via apply_test_compiler_flags()
-target_compile_definitions(test_shared_static PRIVATE ${COMMON_COMPILE_DEFINITIONS})
-
-# Enable debug symbols for the static library on Windows
-if(WIN32)
-    target_compile_definitions(test_shared_static PRIVATE _DEBUG)
-endif()
+# Test infrastructure and testing setup is now handled by modular functions:
+# - enable_testing() is called by configure_ctest()
+# - test_shared_static library is created by create_test_infrastructure()
 
 # Determine which test source files to process
 if(DEFINED SPECIFIC_TEST)
@@ -263,7 +250,17 @@ else()
     message(STATUS "🌐 Building ALL tests - found ${TEST_COUNT} test files")
 endif()
 
-# Create test executables
+# ============================================================================
+# PHASE 8: Create test targets using modular system (REFACTORED)
+# ============================================================================
+
+# Configure CTest system
+configure_ctest()
+
+# Create test infrastructure library
+create_test_infrastructure()
+
+# Create test executables using modular approach
 foreach(TEST_SOURCE ${TEST_SOURCES})
     get_filename_component(TEST_NAME ${TEST_SOURCE} NAME_WE)
     
@@ -274,120 +271,48 @@ foreach(TEST_SOURCE ${TEST_SOURCES})
     endif()
     
     # ============================================================================
-    # 🚨 INDIVIDUAL TEST FLAGS LOGGING
+    # 🚨 MODULAR TEST CREATION LOGGING
     # ============================================================================
     if(DEFINED SPECIFIC_TEST AND CURRENT_TEST_NAME STREQUAL SPECIFIC_TEST)
         message(STATUS "")
         message(STATUS "🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪")
-        message(STATUS "🧪                        SPECIFIC TEST FLAGS: ${TEST_NAME}                        🧪")
+        message(STATUS "🧪                        MODULAR TEST CREATION: ${TEST_NAME}                       🧪")
         message(STATUS "🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪")
         message(STATUS "")
         message(STATUS "  📁 Source File: ${TEST_SOURCE}")
         message(STATUS "  🎯 Target Name: ${TEST_NAME}")
         message(STATUS "")
         
-        # Show the flags that will be applied to this specific test
-        message(STATUS "  📌 Test will inherit ALL global C++ flags:")
-        message(STATUS "     CMAKE_CXX_FLAGS: ${CMAKE_CXX_FLAGS}")
+        message(STATUS "  🔧 Modular Target Creation:")
+        message(STATUS "     - Using create_test_executable() from TargetCreation module")
+        message(STATUS "     - Automatic Windows configuration via configure_windows_executable()")
+        message(STATUS "     - Standard test settings via apply_test_settings()")
+        message(STATUS "     - Unit test flags via apply_unit_test_flags()")
+        message(STATUS "     - CTest registration via register_test_executable()")
         message(STATUS "")
         
-        message(STATUS "  📌 Test inherits modular flags (applied globally via CompilerFlags module):")
-        message(STATUS "     - Test flags: Inherited from apply_test_compiler_flags() function")
-        message(STATUS "     - No per-target flags: All flags applied globally for consistency")
-        message(STATUS "     - Modular system: Compiler detection, optimization, and platform flags")
-        message(STATUS "")
-        
-        message(STATUS "  📌 Test will receive these compile definitions:")
-        string(REPLACE ";" " " COMMON_COMPILE_DEFINITIONS_STR "${COMMON_COMPILE_DEFINITIONS}")
-        message(STATUS "     COMMON_COMPILE_DEFINITIONS: ${COMMON_COMPILE_DEFINITIONS_STR}")
-        message(STATUS "")
-        
-        message(STATUS "  📌 Test will be linked with:")
-        message(STATUS "     - fastled library")
-        message(STATUS "     - test_shared_static library")
-        if(WIN32)
-            message(STATUS "     - dbghelp psapi (Windows debugging libraries)")
-        endif()
-        if(USE_LIBUNWIND)
-            message(STATUS "     - ${LIBUNWIND_LIBRARIES} (stack unwinding)")
-        endif()
-        if(NOT APPLE AND CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-            message(STATUS "     - static runtime (-static-libgcc -static-libstdc++)")
-        endif()
+        message(STATUS "  📌 Modular system will automatically provide:")
+        message(STATUS "     - FastLED library linking")
+        message(STATUS "     - Test infrastructure (test_shared_static) linking")
+        message(STATUS "     - C++17 standard compliance")
+        message(STATUS "     - Platform-specific debugging libraries (Windows: dbghelp, psapi)")
+        message(STATUS "     - Stack unwinding support (if available)")
+        message(STATUS "     - Static runtime linking (GNU on non-Apple platforms)")
+        message(STATUS "     - Consistent compile definitions and flags")
         message(STATUS "")
         
         message(STATUS "🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪")
-        message(STATUS "🧪                       END SPECIFIC TEST FLAGS: ${TEST_NAME}                      🧪")
+        message(STATUS "🧪                       END MODULAR TEST CREATION: ${TEST_NAME}                    🧪")
         message(STATUS "🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪")
         message(STATUS "")
     endif()
     # ============================================================================
     
-    # Create executable that links to static library
-    add_executable(${TEST_NAME} ${TEST_SOURCE})
-    target_link_libraries(${TEST_NAME} fastled test_shared_static)
+    # Create test executable using modular system
+    create_test_executable(${TEST_NAME} ${TEST_SOURCE})
     
-    # Configure Windows-specific settings
-    if(WIN32)
-        # Add Windows debugging libraries for crash handler
-        target_link_libraries(${TEST_NAME} dbghelp psapi)
-        
-        # Use compatibility layer for Windows debug build settings
-        get_windows_debug_build_flags(win_compiler_flags win_linker_flags)
-        get_subsystem_flags(subsystem_flags "console")
-        
-        # Apply the platform-appropriate flags
-        if(win_compiler_flags)
-            target_compile_options(${TEST_NAME} PRIVATE ${win_compiler_flags})
-        endif()
-        
-        # Combine subsystem and debug linker flags
-        set(combined_linker_flags ${subsystem_flags} ${win_linker_flags})
-        if(combined_linker_flags)
-            string(REPLACE ";" " " combined_linker_flags_str "${combined_linker_flags}")
-            set_target_properties(${TEST_NAME} PROPERTIES
-                WIN32_EXECUTABLE FALSE
-                LINK_FLAGS "${combined_linker_flags_str}")
-        else()
-            set_target_properties(${TEST_NAME} PROPERTIES
-                WIN32_EXECUTABLE FALSE)
-        endif()
-        
-        # Ensure debug information is preserved
-        target_compile_definitions(${TEST_NAME} PRIVATE _DEBUG)
-    endif()
-    
-    # Add static linking flags for executables
-    if(NOT APPLE AND CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-        target_link_options(${TEST_NAME} PRIVATE -static-libgcc -static-libstdc++)
-    endif()
-    
-    # Add libunwind for executables (handled by TargetCreation module)
-    # This is now handled by the apply_test_settings function from TargetCreation module
-    if(USE_LIBUNWIND)
-        target_compile_definitions(${TEST_NAME} PRIVATE USE_LIBUNWIND)
-        if(LIBUNWIND_LIBRARIES)
-            target_link_libraries(${TEST_NAME} ${LIBUNWIND_LIBRARIES})
-        endif()
-        if(LIBUNWIND_INCLUDE_DIRS)
-            target_include_directories(${TEST_NAME} PRIVATE ${LIBUNWIND_INCLUDE_DIRS})
-        endif()
-    endif()
-    
-    # Configure common properties
-    target_include_directories(${TEST_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-    set_target_properties(${TEST_NAME} PROPERTIES
-        CXX_STANDARD 17
-        CXX_STANDARD_REQUIRED ON
-    )
-    # Compiler flags are now applied globally via apply_test_compiler_flags()
-    target_compile_definitions(${TEST_NAME} PRIVATE 
-        ${COMMON_COMPILE_DEFINITIONS}
-        $<$<BOOL:${USE_LIBUNWIND}>:USE_LIBUNWIND>
-    )
-    
-    # Add test to CTest
-    add_test(NAME ${TEST_NAME} COMMAND ${TEST_NAME})
+    # Register with CTest
+    register_test_executable(${TEST_NAME})
     
     # ============================================================================
     # 🚨 FINAL INDIVIDUAL TEST LINKER FLAGS LOGGING
