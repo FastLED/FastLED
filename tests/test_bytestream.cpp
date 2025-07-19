@@ -218,7 +218,7 @@ TEST_CASE("byte stream memory basic operations") {
     
     // Create a ByteStreamMemory
     const uint32_t BUFFER_SIZE = BYTES_PER_FRAME * 10; // Enough for 10 frames
-    ByteStreamMemoryPtr memoryStream = ByteStreamMemoryPtr::New(BUFFER_SIZE);
+    ByteStreamMemoryPtr memoryStream = fl::make_intrusive<ByteStreamMemory>(BUFFER_SIZE);
 
     // Fill the ByteStreamMemory with test data
     uint8_t testData[BUFFER_SIZE];
@@ -228,7 +228,7 @@ TEST_CASE("byte stream memory basic operations") {
     memoryStream->write(testData, BUFFER_SIZE);
 
     // Create and initialize PixelStream
-    PixelStreamPtr stream = PixelStreamPtr::New(BYTES_PER_FRAME);
+    PixelStreamPtr stream = fl::make_intrusive<PixelStream>(BYTES_PER_FRAME);
     bool initSuccess = stream->beginStream(memoryStream);
     REQUIRE(initSuccess);
 

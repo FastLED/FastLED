@@ -112,7 +112,7 @@ TEST_CASE("LinePath at_subpixel moves x") {
 
 
 TEST_CASE("Test HeartPath") {
-    HeartPathPtr heart = HeartPathPtr::New();
+    HeartPathPtr heart = fl::make_intrusive<HeartPath>();
     
     // Track min and max values to help with scaling
     float min_x = 1.0f;
@@ -151,7 +151,7 @@ TEST_CASE("Test HeartPath") {
 }
 
 TEST_CASE("Test ArchimedeanSpiralPath") {
-    ArchimedeanSpiralPathPtr spiral = ArchimedeanSpiralPathPtr::New(3, 1.0f);
+    ArchimedeanSpiralPathPtr spiral = fl::make_intrusive<ArchimedeanSpiralPath>(3, 1.0f);
     
     // Track min and max values to help with scaling
     float min_x = 1.0f;
@@ -192,7 +192,7 @@ TEST_CASE("Test ArchimedeanSpiralPath") {
 TEST_CASE("Test RosePath") {
     // Test with different petal configurations
     SUBCASE("3-petal rose") {
-        RosePathPtr rose = RosePathPtr::New(3, 1);
+        RosePathPtr rose = fl::make_intrusive<RosePath>(3, 1);
         
         // Track min and max values to help with scaling
         float min_x = 1.0f;
@@ -231,7 +231,7 @@ TEST_CASE("Test RosePath") {
     }
     
     SUBCASE("4-petal rose") {
-        RosePathPtr rose = RosePathPtr::New(2, 1);  // n=2 gives 4 petals
+        RosePathPtr rose = fl::make_intrusive<RosePath>(2, 1);  // n=2 gives 4 petals
         
         // Track min and max values to help with scaling
         float min_x = 1.0f;
@@ -281,9 +281,9 @@ TEST_CASE("Check complex types") {
     XYPathPtr phyllotaxis = XYPath::NewPhyllotaxisPath();
     paths.push_back(phyllotaxis);
     
-    // paths.push_back(LissajousPathPtr::New());
-    // paths.push_back(GielisCurvePathPtr::New());
-    // paths.push_back(CatmullRomPathPtr::New());
+    // paths.push_back(fl::make_intrusive<LissajousPath>());
+    // paths.push_back(fl::make_intrusive<GielisCurvePath>());
+    // paths.push_back(fl::make_intrusive<CatmullRomPath>());
 
     SUBCASE("Check floating point range") {
         for (auto &path : paths) {

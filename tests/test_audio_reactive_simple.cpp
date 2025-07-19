@@ -34,7 +34,7 @@ TEST_CASE("AudioReactive basic functionality") {
     }
     
     // Create AudioSample from our generated samples with timestamp
-    AudioSampleImplPtr impl = AudioSampleImplPtr::New();
+    AudioSampleImplPtr impl = fl::make_intrusive<AudioSampleImpl>();
     uint32_t testTimestamp = 1234567; // Test timestamp value
     impl->assign(samples.begin(), samples.end(), testTimestamp);
     AudioSample audioSample(impl);

@@ -36,7 +36,7 @@ class Fake2d : public Fx2d {
 
 
 TEST_CASE("test_fixed_fps") {
-    Fake2dPtr fake = Fake2dPtr::New();
+    Fake2dPtr fake = fl::make_intrusive<Fake2d>();
     fake->mColors.push_back(CRGB(0, 0, 0));
     fake->mColors.push_back(CRGB(255, 0, 0));
     VideoFxWrapper wrapper(fake);

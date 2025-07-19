@@ -25,7 +25,7 @@ class MyClass : public fl::Referent {
 };
 
 TEST_CASE("Ptr basic functionality") {
-    Ptr<MyClass> ptr = MyClassPtr::New();
+    Ptr<MyClass> ptr = fl::make_intrusive<MyClass>();
 
     SUBCASE("Ptr is not null after construction") {
         CHECK(ptr.get() != nullptr);
@@ -45,7 +45,7 @@ TEST_CASE("Ptr basic functionality") {
 TEST_CASE("Ptr move semantics") {
 
     SUBCASE("Move constructor works correctly") {
-        Ptr<MyClass> ptr1 = MyClassPtr::New();
+        Ptr<MyClass> ptr1 = fl::make_intrusive<MyClass>();
         MyClass *rawPtr = ptr1.get();
         Ptr<MyClass> ptr2(std::move(ptr1));
         CHECK(ptr2.get() == rawPtr);
@@ -54,7 +54,7 @@ TEST_CASE("Ptr move semantics") {
     }
 
     SUBCASE("Move assignment works correctly") {
-        Ptr<MyClass> ptr1 = MyClassPtr::New();
+        Ptr<MyClass> ptr1 = fl::make_intrusive<MyClass>();
         MyClass *rawPtr = ptr1.get();
         Ptr<MyClass> ptr2;
         ptr2 = std::move(ptr1);
@@ -67,14 +67,14 @@ TEST_CASE("Ptr move semantics") {
 TEST_CASE("Ptr reference counting") {
 
     SUBCASE("Reference count increases when copied") {
-        Ptr<MyClass> ptr1 = MyClassPtr::New();
+        Ptr<MyClass> ptr1 = fl::make_intrusive<MyClass>();
         Ptr<MyClass> ptr2 = ptr1;
         CHECK(ptr1->ref_count() == 2);
         CHECK(ptr2->ref_count() == 2);
     }
 
     SUBCASE("Reference count decreases when Ptr goes out of scope") {
-        Ptr<MyClass> ptr1 = MyClassPtr::New();
+        Ptr<MyClass> ptr1 = fl::make_intrusive<MyClass>();
         {
             Ptr<MyClass> ptr2 = ptr1;
             CHECK(ptr1->ref_count() == 2);
@@ -114,7 +114,7 @@ TEST_CASE("Ptr from static memory") {
 
 TEST_CASE("WeakPtr functionality") {
     WeakPtr<MyClass> weakPtr;
-    MyClassPtr strongPtr = MyClassPtr::New();
+    MyClassPtr strongPtr = fl::make_intrusive<MyClass>();
     weakPtr = strongPtr;
 
     REQUIRE_EQ(strongPtr->ref_count(), 1);
@@ -134,7 +134,7 @@ TEST_CASE("WeakPtr functionality") {
 
 TEST_CASE("WeakPtr functionality early expiration") {
     WeakPtr<MyClass> weakPtr;
-    MyClassPtr strongPtr = MyClassPtr::New();
+    MyClassPtr strongPtr = fl::make_intrusive<MyClass>();
     weakPtr = strongPtr;
 
     REQUIRE_EQ(strongPtr->ref_count(), 1);
@@ -160,8 +160,8 @@ TEST_CASE("WeakPtr additional functionality") {
     }
 
     SUBCASE("WeakPtr assignment and reset") {
-        MyClassPtr strongRef1 = MyClassPtr::New();
-        MyClassPtr strongRef2 = MyClassPtr::New();
+        MyClassPtr strongRef1 = fl::make_intrusive<MyClass>();
+        MyClassPtr strongRef2 = fl::make_intrusive<MyClass>();
         WeakPtr<MyClass> weakPtr = strongRef1;
 
         CHECK_FALSE(weakPtr.expired());
@@ -177,7 +177,7 @@ TEST_CASE("WeakPtr additional functionality") {
     }
 
     SUBCASE("WeakPtr multiple instances") {
-        MyClassPtr strongPtr = MyClassPtr::New();
+        MyClassPtr strongPtr = fl::make_intrusive<MyClass>();
         WeakPtr<MyClass> weakRef1 = strongPtr;
         WeakPtr<MyClass> weakRef2 = strongPtr;
 
@@ -193,7 +193,7 @@ TEST_CASE("WeakPtr additional functionality") {
     SUBCASE("WeakPtr with temporary strong pointer") {
         WeakPtr<MyClass> weakPtr;
         {
-            MyClassPtr tempStrongPtr = MyClassPtr::New();
+            MyClassPtr tempStrongPtr = fl::make_intrusive<MyClass>();
             weakPtr = tempStrongPtr;
             CHECK_FALSE(weakPtr.expired());
         }
@@ -201,7 +201,7 @@ TEST_CASE("WeakPtr additional functionality") {
     }
 
     SUBCASE("WeakPtr lock performance") {
-        MyClassPtr strongPtr = MyClassPtr::New();
+        MyClassPtr strongPtr = fl::make_intrusive<MyClass>();
         WeakPtr<MyClass> weakPtr = strongPtr;
 
         for (int i = 0; i < 1000; ++i) {

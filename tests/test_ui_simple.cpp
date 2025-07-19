@@ -25,7 +25,7 @@ TEST_CASE("Simple JsonConsole test") {
     
     // Create JsonConsole using smart pointer
     FL_WARN("Creating JsonConsole...");
-    fl::JsonConsolePtr console = fl::JsonConsolePtr::New(mockAvailable, mockRead, mockWrite);
+    fl::JsonConsolePtr console = fl::make_intrusive<fl::JsonConsole>(mockAvailable, mockRead, mockWrite);
     
     // Initialize JsonConsole
     FL_WARN("Initializing JsonConsole...");
@@ -102,7 +102,7 @@ TEST_CASE("JsonConsole polling system test") {
     };
     
     // Test JsonConsole integration with smart pointer
-    auto console = fl::JsonConsolePtr::New(mockAvailable, mockRead, mockWrite);
+    auto console = fl::make_intrusive<fl::JsonConsole>(mockAvailable, mockRead, mockWrite);
     console->init();
     
     // Trigger the UI system to send component information to JsonConsole
