@@ -228,64 +228,16 @@ foreach(TEST_SOURCE ${TEST_SOURCES})
     # Register with CTest
     register_test_executable(${TEST_NAME})
     
-    # ============================================================================
-    # 🚨 FINAL INDIVIDUAL TEST LINKER FLAGS LOGGING
-    # ============================================================================
+    # Display detailed linker flags for specific test builds (debugging)
     if(DEFINED SPECIFIC_TEST AND CURRENT_TEST_NAME STREQUAL SPECIFIC_TEST)
-        message(STATUS "")
-        message(STATUS "🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗")
-        message(STATUS "🔗                        FINAL LINKER FLAGS: ${TEST_NAME}                         🔗")
-        message(STATUS "🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗")
-        message(STATUS "")
-        
-        # Get the actual target properties
-        get_target_property(TEST_LINK_FLAGS ${TEST_NAME} LINK_FLAGS)
-        if(TEST_LINK_FLAGS)
-            message(STATUS "  📌 Target-specific Link Flags:")
-            message(STATUS "     ${TEST_LINK_FLAGS}")
-        else()
-            message(STATUS "  📌 Target-specific Link Flags: (none)")
-        endif()
-        message(STATUS "")
-        
-        message(STATUS "  📌 Global Executable Linker Flags:")
-        message(STATUS "     CMAKE_EXE_LINKER_FLAGS: ${CMAKE_EXE_LINKER_FLAGS}")
-        message(STATUS "")
-        
-        if(WIN32)
-            message(STATUS "  📌 Windows-specific Configuration:")
-            get_target_property(TEST_WIN32_EXECUTABLE ${TEST_NAME} WIN32_EXECUTABLE)
-            message(STATUS "     WIN32_EXECUTABLE: ${TEST_WIN32_EXECUTABLE}")
-            message(STATUS "     - Console subsystem enforced")
-            message(STATUS "     - Debug symbols included")
-        endif()
-        
-        if(NOT APPLE AND CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-            message(STATUS "  📌 Static Runtime Linking:")
-            message(STATUS "     -static-libgcc -static-libstdc++")
-        endif()
-        
-        message(STATUS "")
-        message(STATUS "🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗")
-        message(STATUS "🔗                      END FINAL LINKER FLAGS: ${TEST_NAME}                       🔗")
-        message(STATUS "🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗")
-        message(STATUS "")
+        display_target_linker_flags(${TEST_NAME})
     endif()
-    # ============================================================================
 endforeach()
 
-# Build summary
-get_property(ALL_TARGETS DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY BUILDSYSTEM_TARGETS)
-list(FILTER ALL_TARGETS INCLUDE REGEX "^test_")
-list(LENGTH ALL_TARGETS TARGET_COUNT)
-if(DEFINED SPECIFIC_TEST)
-    message(STATUS "Build summary: Created ${TARGET_COUNT} executable targets (specific test mode)")
-else()
-    message(STATUS "Build summary: Created ${TARGET_COUNT} executable targets (full build mode)")
-endif()
-
-# Add verbose output for tests
-set(CMAKE_CTEST_ARGUMENTS "--output-on-failure")
+# ============================================================================
+# PHASE 9: Display build summary (REFACTORED)
+# ============================================================================
+display_build_summary()
 
 # End of modular CMakeLists.txt
 # 
