@@ -19,11 +19,11 @@ typedef fl::span<const uint8_t> SliceUint8;
 class ActiveStripData : public fl::EngineEvents::Listener {
   public:
     typedef fl::SortedHeapMap<int, SliceUint8> StripDataMap;
-    typedef fl::SortedHeapMap<int, fl::ScreenMap> ScreenMapMap;
+    typedef fl::SortedHeapMap<int, ScreenMap> ScreenMapMap;
 
     static ActiveStripData &Instance();
     void update(int id, uint32_t now, const uint8_t *pixel_data, size_t size);
-    void updateScreenMap(int id, const fl::ScreenMap &screenmap);
+    void updateScreenMap(int id, const ScreenMap &screenmap);
 
     fl::string infoJsonString();
 
@@ -34,7 +34,7 @@ class ActiveStripData : public fl::EngineEvents::Listener {
     void onBeginFrame() override { mStripMap.clear(); }
 
     void onCanvasUiSet(CLEDController *strip,
-                       const fl::ScreenMap &screenmap) override {
+                       const ScreenMap &screenmap) override {
         int id = StripIdMap::addOrGetId(strip);
         updateScreenMap(id, screenmap);
     }

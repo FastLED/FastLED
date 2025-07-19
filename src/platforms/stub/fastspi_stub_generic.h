@@ -11,7 +11,7 @@
 // Signal to the engine that all pins are hardware SPI
 #define FASTLED_ALL_PINS_HARDWARE_SPI
 
-FASTLED_NAMESPACE_BEGIN
+namespace fl {
 
 class StubSPIOutput {
 public:
@@ -25,4 +25,4 @@ public:
 };
 
 
-FASTLED_NAMESPACE_END
+}  // namespace fl

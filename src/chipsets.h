@@ -12,7 +12,12 @@
 #include "eorder.h"
 #include "fl/namespace.h"
 
-
+// Conditional namespace handling for WASM builds
+#ifdef FASTLED_FORCE_NAMESPACE
+#define FASTLED_CLOCKLESS_CONTROLLER fl::ClocklessController
+#else
+#define FASTLED_CLOCKLESS_CONTROLLER ClocklessController
+#endif
 
 #ifndef FASTLED_CLOCKLESS_USES_NANOSECONDS
  #if defined(FASTLED_TEENSY4)
@@ -775,127 +780,127 @@ protected:
 /// GE8822 controller class.
 /// @copydetails WS2812Controller800Khz
 template <fl::u8 DATA_PIN, EOrder RGB_ORDER = RGB>
-class GE8822Controller800Khz : public ClocklessController<DATA_PIN, 3 * FMUL, 5 * FMUL, 3 * FMUL, RGB_ORDER, 4> {};
+class GE8822Controller800Khz : public FASTLED_CLOCKLESS_CONTROLLER<DATA_PIN, 3 * FMUL, 5 * FMUL, 3 * FMUL, RGB_ORDER, 4> {};
 
 /// LPD1886 controller class.
 /// @copydetails WS2812Controller800Khz
 template <fl::u8 DATA_PIN, EOrder RGB_ORDER = RGB>
-class LPD1886Controller1250Khz : public ClocklessController<DATA_PIN, 2 * FMUL, 3 * FMUL, 2 * FMUL, RGB_ORDER, 4> {};
+class LPD1886Controller1250Khz : public FASTLED_CLOCKLESS_CONTROLLER<DATA_PIN, 2 * FMUL, 3 * FMUL, 2 * FMUL, RGB_ORDER, 4> {};
 
 /// LPD1886 controller class.
 /// @copydetails WS2812Controller800Khz
 template <fl::u8 DATA_PIN, EOrder RGB_ORDER = RGB>
-class LPD1886Controller1250Khz_8bit : public ClocklessController<DATA_PIN, 2 * FMUL, 3 * FMUL, 2 * FMUL, RGB_ORDER> {};
+class LPD1886Controller1250Khz_8bit : public FASTLED_CLOCKLESS_CONTROLLER<DATA_PIN, 2 * FMUL, 3 * FMUL, 2 * FMUL, RGB_ORDER> {};
 
 /// WS2812 controller class @ 800 KHz.
 /// @tparam DATA_PIN the data pin for these LEDs
 /// @tparam RGB_ORDER the RGB ordering for these LEDs
 template <fl::u8 DATA_PIN, EOrder RGB_ORDER = GRB>
-class WS2812Controller800Khz : public ClocklessController<DATA_PIN, 2 * FMUL, 5 * FMUL, 3 * FMUL, RGB_ORDER> {};
+class WS2812Controller800Khz : public FASTLED_CLOCKLESS_CONTROLLER<DATA_PIN, 2 * FMUL, 5 * FMUL, 3 * FMUL, RGB_ORDER> {};
 
 /// WS2815 controller class @ 400 KHz.
 /// @copydetails WS2812Controller800Khz
 template <fl::u8 DATA_PIN, EOrder RGB_ORDER = GRB>
-class WS2815Controller : public ClocklessController<DATA_PIN, 2 * FMUL, 9 * FMUL, 4 * FMUL, RGB_ORDER> {};
+class WS2815Controller : public FASTLED_CLOCKLESS_CONTROLLER<DATA_PIN, 2 * FMUL, 9 * FMUL, 4 * FMUL, RGB_ORDER> {};
 
 /// WS2811 controller class @ 800 KHz.
 /// @copydetails WS2812Controller800Khz
 template <fl::u8 DATA_PIN, EOrder RGB_ORDER = GRB>
-class WS2811Controller800Khz : public ClocklessController<DATA_PIN, 3 * FMUL, 4 * FMUL, 3 * FMUL, RGB_ORDER> {};
+class WS2811Controller800Khz : public FASTLED_CLOCKLESS_CONTROLLER<DATA_PIN, 3 * FMUL, 4 * FMUL, 3 * FMUL, RGB_ORDER> {};
 
 /// DP1903 controller class @ 800 KHz.
 /// @copydetails WS2812Controller800Khz
 template <fl::u8 DATA_PIN, EOrder RGB_ORDER = RGB>
-class DP1903Controller800Khz : public ClocklessController<DATA_PIN, 2 * FMUL, 8 * FMUL, 2 * FMUL, RGB_ORDER> {};
+class DP1903Controller800Khz : public FASTLED_CLOCKLESS_CONTROLLER<DATA_PIN, 2 * FMUL, 8 * FMUL, 2 * FMUL, RGB_ORDER> {};
 
 /// DP1903 controller class @ 400 KHz.
 /// @copydetails WS2812Controller800Khz
 template <fl::u8 DATA_PIN, EOrder RGB_ORDER = RGB>
-class DP1903Controller400Khz : public ClocklessController<DATA_PIN, 4 * FMUL, 16 * FMUL, 4 * FMUL, RGB_ORDER> {};
+class DP1903Controller400Khz : public FASTLED_CLOCKLESS_CONTROLLER<DATA_PIN, 4 * FMUL, 16 * FMUL, 4 * FMUL, RGB_ORDER> {};
 
 /// WS2813 controller class.
 /// @copydetails WS2812Controller800Khz
 template <fl::u8 DATA_PIN, EOrder RGB_ORDER = GRB>                                                             //not tested
-class WS2813Controller : public ClocklessController<DATA_PIN, 3 * FMUL, 4 * FMUL, 3 * FMUL, RGB_ORDER> {};
+class WS2813Controller : public FASTLED_CLOCKLESS_CONTROLLER<DATA_PIN, 3 * FMUL, 4 * FMUL, 3 * FMUL, RGB_ORDER> {};
 
 /// WS2811 controller class @ 400 KHz.
 /// @copydetails WS2812Controller800Khz
 template <fl::u8 DATA_PIN, EOrder RGB_ORDER = GRB>
-class WS2811Controller400Khz : public ClocklessController<DATA_PIN, 4 * FMUL, 10 * FMUL, 6 * FMUL, RGB_ORDER> {};
+class WS2811Controller400Khz : public FASTLED_CLOCKLESS_CONTROLLER<DATA_PIN, 4 * FMUL, 10 * FMUL, 6 * FMUL, RGB_ORDER> {};
 
 /// SK6822 controller class.
 /// @copydetails WS2812Controller800Khz
 template <fl::u8 DATA_PIN, EOrder RGB_ORDER = RGB>
-class SK6822Controller : public ClocklessController<DATA_PIN, 3 * FMUL, 8 * FMUL, 3 * FMUL, RGB_ORDER> {};
+class SK6822Controller : public FASTLED_CLOCKLESS_CONTROLLER<DATA_PIN, 3 * FMUL, 8 * FMUL, 3 * FMUL, RGB_ORDER> {};
 
 /// SM16703 controller class.
 /// @copydetails WS2812Controller800Khz
 template <fl::u8 DATA_PIN, EOrder RGB_ORDER = RGB>
-class SM16703Controller : public ClocklessController<DATA_PIN, 3 * FMUL, 4 * FMUL, 3 * FMUL, RGB_ORDER> {};
+class SM16703Controller : public FASTLED_CLOCKLESS_CONTROLLER<DATA_PIN, 3 * FMUL, 4 * FMUL, 3 * FMUL, RGB_ORDER> {};
 
 /// SK6812 controller class.
 /// @copydetails WS2812Controller800Khz
 template <fl::u8 DATA_PIN, EOrder RGB_ORDER = RGB>
-class SK6812Controller : public ClocklessController<DATA_PIN, 3 * FMUL, 3 * FMUL, 4 * FMUL, RGB_ORDER> {};
+class SK6812Controller : public FASTLED_CLOCKLESS_CONTROLLER<DATA_PIN, 3 * FMUL, 3 * FMUL, 4 * FMUL, RGB_ORDER> {};
 
 /// UCS1903 controller class @ 400 KHz.
 /// @copydetails WS2812Controller800Khz
 template <fl::u8 DATA_PIN, EOrder RGB_ORDER = RGB>
-class UCS1903Controller400Khz : public ClocklessController<DATA_PIN, 4 * FMUL, 12 * FMUL, 4 * FMUL, RGB_ORDER> {};
+class UCS1903Controller400Khz : public FASTLED_CLOCKLESS_CONTROLLER<DATA_PIN, 4 * FMUL, 12 * FMUL, 4 * FMUL, RGB_ORDER> {};
 
 /// UCS1903B controller class.
 /// @copydetails WS2812Controller800Khz
 template <fl::u8 DATA_PIN, EOrder RGB_ORDER = RGB>
-class UCS1903BController800Khz : public ClocklessController<DATA_PIN, 2 * FMUL, 4 * FMUL, 4 * FMUL, RGB_ORDER> {};
+class UCS1903BController800Khz : public FASTLED_CLOCKLESS_CONTROLLER<DATA_PIN, 2 * FMUL, 4 * FMUL, 4 * FMUL, RGB_ORDER> {};
 
 /// UCS1904 controller class.
 /// @copydetails WS2812Controller800Khz
 template <fl::u8 DATA_PIN, EOrder RGB_ORDER = RGB>
-class UCS1904Controller800Khz : public ClocklessController<DATA_PIN, 3 * FMUL, 3 * FMUL, 4 * FMUL, RGB_ORDER> {};
+class UCS1904Controller800Khz : public FASTLED_CLOCKLESS_CONTROLLER<DATA_PIN, 3 * FMUL, 3 * FMUL, 4 * FMUL, RGB_ORDER> {};
 
 /// UCS2903 controller class.
 /// @copydetails WS2812Controller800Khz
 template <fl::u8 DATA_PIN, EOrder RGB_ORDER = RGB>
-class UCS2903Controller : public ClocklessController<DATA_PIN, 2 * FMUL, 6 * FMUL, 2 * FMUL, RGB_ORDER> {};
+class UCS2903Controller : public FASTLED_CLOCKLESS_CONTROLLER<DATA_PIN, 2 * FMUL, 6 * FMUL, 2 * FMUL, RGB_ORDER> {};
 
 /// TM1809 controller class.
 /// @copydetails WS2812Controller800Khz
 template <fl::u8 DATA_PIN, EOrder RGB_ORDER = RGB>
-class TM1809Controller800Khz : public ClocklessController<DATA_PIN, 2 * FMUL, 5 * FMUL, 3 * FMUL, RGB_ORDER> {};
+class TM1809Controller800Khz : public FASTLED_CLOCKLESS_CONTROLLER<DATA_PIN, 2 * FMUL, 5 * FMUL, 3 * FMUL, RGB_ORDER> {};
 
 /// TM1803 controller class.
 /// @copydetails WS2812Controller800Khz
 template <fl::u8 DATA_PIN, EOrder RGB_ORDER = RGB>
-class TM1803Controller400Khz : public ClocklessController<DATA_PIN, 6 * FMUL, 9 * FMUL, 6 * FMUL, RGB_ORDER> {};
+class TM1803Controller400Khz : public FASTLED_CLOCKLESS_CONTROLLER<DATA_PIN, 6 * FMUL, 9 * FMUL, 6 * FMUL, RGB_ORDER> {};
 
 /// TM1829 controller class.
 /// @copydetails WS2812Controller800Khz
 template <fl::u8 DATA_PIN, EOrder RGB_ORDER = RGB>
-class TM1829Controller800Khz : public ClocklessController<DATA_PIN, 2 * FMUL, 5 * FMUL, 3 * FMUL, RGB_ORDER, 0, true, 500> {};
+class TM1829Controller800Khz : public FASTLED_CLOCKLESS_CONTROLLER<DATA_PIN, 2 * FMUL, 5 * FMUL, 3 * FMUL, RGB_ORDER, 0, true, 500> {};
 
 /// GW6205 controller class @ 400 KHz.
 /// @copydetails WS2812Controller800Khz
 template <fl::u8 DATA_PIN, EOrder RGB_ORDER = RGB>
-class GW6205Controller400Khz : public ClocklessController<DATA_PIN, 6 * FMUL, 7 * FMUL, 6 * FMUL, RGB_ORDER, 4> {};
+class GW6205Controller400Khz : public FASTLED_CLOCKLESS_CONTROLLER<DATA_PIN, 6 * FMUL, 7 * FMUL, 6 * FMUL, RGB_ORDER, 4> {};
 
 /// UCS1904 controller class @ 800 KHz.
 /// @copydetails WS2812Controller800Khz
 template <fl::u8 DATA_PIN, EOrder RGB_ORDER = RGB>
-class GW6205Controller800Khz : public ClocklessController<DATA_PIN, 2 * FMUL, 4 * FMUL, 4 * FMUL, RGB_ORDER, 4> {};
+class GW6205Controller800Khz : public FASTLED_CLOCKLESS_CONTROLLER<DATA_PIN, 2 * FMUL, 4 * FMUL, 4 * FMUL, RGB_ORDER, 4> {};
 
 /// PL9823 controller class.
 /// @copydetails WS2812Controller800Khz
 template <fl::u8 DATA_PIN, EOrder RGB_ORDER = RGB>
-class PL9823Controller : public ClocklessController<DATA_PIN, 3 * FMUL, 8 * FMUL, 3 * FMUL, RGB_ORDER> {};
+class PL9823Controller : public FASTLED_CLOCKLESS_CONTROLLER<DATA_PIN, 3 * FMUL, 8 * FMUL, 3 * FMUL, RGB_ORDER> {};
 
 // UCS1912 - Note, never been tested, this is according to the datasheet
 template <fl::u8 DATA_PIN, EOrder RGB_ORDER = RGB>
-class UCS1912Controller : public ClocklessController<DATA_PIN, 2 * FMUL, 8 * FMUL, 3 * FMUL, RGB_ORDER> {};
+class UCS1912Controller : public FASTLED_CLOCKLESS_CONTROLLER<DATA_PIN, 2 * FMUL, 8 * FMUL, 3 * FMUL, RGB_ORDER> {};
 
 /// SM16824E controller class.
 /// @copydetails WS2812Controller800Khz
 template <fl::u8 DATA_PIN, EOrder RGB_ORDER = RGB>
-class SM16824EController : public ClocklessController<DATA_PIN, 3 * FMUL, 9 * FMUL, 1 * FMUL, RGB_ORDER, 0, false, 200> {};
+class SM16824EController : public FASTLED_CLOCKLESS_CONTROLLER<DATA_PIN, 3 * FMUL, 9 * FMUL, 1 * FMUL, RGB_ORDER, 0, false, 200> {};
 
 
 #else
@@ -997,43 +1002,43 @@ class SM16824EController : public ClocklessController<DATA_PIN, 3 * FMUL, 9 * FM
 
 // GE8822 - 350ns 660ns 350ns
 template <fl::u8 DATA_PIN, EOrder RGB_ORDER = RGB>
-class GE8822Controller800Khz : public ClocklessController<DATA_PIN, C_NS(350), C_NS(660), C_NS(350), RGB_ORDER, 4> {};
+class GE8822Controller800Khz : public FASTLED_CLOCKLESS_CONTROLLER<DATA_PIN, C_NS(350), C_NS(660), C_NS(350), RGB_ORDER, 4> {};
 
 // GW6205@400khz - 800ns, 800ns, 800ns
 template <fl::u8 DATA_PIN, EOrder RGB_ORDER = RGB>
-class GW6205Controller400Khz : public ClocklessController<DATA_PIN, C_NS(800), C_NS(800), C_NS(800), RGB_ORDER, 4> {};
+class GW6205Controller400Khz : public FASTLED_CLOCKLESS_CONTROLLER<DATA_PIN, C_NS(800), C_NS(800), C_NS(800), RGB_ORDER, 4> {};
 
 // GW6205@400khz - 400ns, 400ns, 400ns
 template <fl::u8 DATA_PIN, EOrder RGB_ORDER = RGB>
-class GW6205Controller800Khz : public ClocklessController<DATA_PIN, C_NS(400), C_NS(400), C_NS(400), RGB_ORDER, 4> {};
+class GW6205Controller800Khz : public FASTLED_CLOCKLESS_CONTROLLER<DATA_PIN, C_NS(400), C_NS(400), C_NS(400), RGB_ORDER, 4> {};
 
 // UCS1903 - 500ns, 1500ns, 500ns
 template <fl::u8 DATA_PIN, EOrder RGB_ORDER = RGB>
-class UCS1903Controller400Khz : public ClocklessController<DATA_PIN, C_NS(500), C_NS(1500), C_NS(500), RGB_ORDER> {};
+class UCS1903Controller400Khz : public FASTLED_CLOCKLESS_CONTROLLER<DATA_PIN, C_NS(500), C_NS(1500), C_NS(500), RGB_ORDER> {};
 
 // UCS1903B - 400ns, 450ns, 450ns
 template <fl::u8 DATA_PIN, EOrder RGB_ORDER = RGB>
-class UCS1903BController800Khz : public ClocklessController<DATA_PIN, C_NS(400), C_NS(450), C_NS(450), RGB_ORDER> {};
+class UCS1903BController800Khz : public FASTLED_CLOCKLESS_CONTROLLER<DATA_PIN, C_NS(400), C_NS(450), C_NS(450), RGB_ORDER> {};
 
 // UCS1904 - 400ns, 400ns, 450ns
 template <fl::u8 DATA_PIN, EOrder RGB_ORDER = RGB>
-class UCS1904Controller800Khz : public ClocklessController<DATA_PIN, C_NS(400), C_NS(400), C_NS(450), RGB_ORDER> {};
+class UCS1904Controller800Khz : public FASTLED_CLOCKLESS_CONTROLLER<DATA_PIN, C_NS(400), C_NS(400), C_NS(450), RGB_ORDER> {};
 
 // UCS2903 - 250ns, 750ns, 250ns
 template <fl::u8 DATA_PIN, EOrder RGB_ORDER = RGB>
-class UCS2903Controller : public ClocklessController<DATA_PIN, C_NS(250), C_NS(750), C_NS(250), RGB_ORDER> {};
+class UCS2903Controller : public FASTLED_CLOCKLESS_CONTROLLER<DATA_PIN, C_NS(250), C_NS(750), C_NS(250), RGB_ORDER> {};
 
 // TM1809 - 350ns, 350ns, 550ns
 template <fl::u8 DATA_PIN, EOrder RGB_ORDER = RGB>
-class TM1809Controller800Khz : public ClocklessController<DATA_PIN, C_NS(350), C_NS(350), C_NS(450), RGB_ORDER> {};
+class TM1809Controller800Khz : public FASTLED_CLOCKLESS_CONTROLLER<DATA_PIN, C_NS(350), C_NS(350), C_NS(450), RGB_ORDER> {};
 
 // WS2811 - 320ns, 320ns, 640ns
 template <fl::u8 DATA_PIN, EOrder RGB_ORDER = GRB>
-class WS2811Controller800Khz : public ClocklessController<DATA_PIN, C_NS_WS2811(320), C_NS_WS2811(320), C_NS_WS2811(640), RGB_ORDER> {};
+class WS2811Controller800Khz : public FASTLED_CLOCKLESS_CONTROLLER<DATA_PIN, C_NS_WS2811(320), C_NS_WS2811(320), C_NS_WS2811(640), RGB_ORDER> {};
 
 // WS2813 - 320ns, 320ns, 640ns
 template <fl::u8 DATA_PIN, EOrder RGB_ORDER = GRB>
-class WS2813Controller : public ClocklessController<DATA_PIN, C_NS_WS2813(320), C_NS_WS2813(320), C_NS_WS2813(640), RGB_ORDER> {};
+class WS2813Controller : public FASTLED_CLOCKLESS_CONTROLLER<DATA_PIN, C_NS_WS2813(320), C_NS_WS2813(320), C_NS_WS2813(640), RGB_ORDER> {};
 
 #ifndef FASTLED_WS2812_T1
 #define FASTLED_WS2812_T1 250
@@ -1073,7 +1078,7 @@ class WS2812Controller800Khz:
 #else
 // WS2812 - 250ns, 625ns, 375ns
 template <fl::u8 DATA_PIN, EOrder RGB_ORDER = GRB>
-class WS2812Controller800Khz : public ClocklessController<
+class WS2812Controller800Khz : public FASTLED_CLOCKLESS_CONTROLLER<
 	DATA_PIN,
 	C_NS_WS2812(FASTLED_WS2812_T1),
 	C_NS_WS2812(FASTLED_WS2812_T2),
@@ -1084,43 +1089,43 @@ class WS2812Controller800Khz : public ClocklessController<
 
 // WS2811@400khz - 800ns, 800ns, 900ns
 template <fl::u8 DATA_PIN, EOrder RGB_ORDER = GRB>
-class WS2811Controller400Khz : public ClocklessController<DATA_PIN, C_NS_WS2811(800), C_NS_WS2811(800), C_NS_WS2811(900), RGB_ORDER> {};
+class WS2811Controller400Khz : public FASTLED_CLOCKLESS_CONTROLLER<DATA_PIN, C_NS_WS2811(800), C_NS_WS2811(800), C_NS_WS2811(900), RGB_ORDER> {};
 
 template <fl::u8 DATA_PIN, EOrder RGB_ORDER = GRB>
-class WS2815Controller : public ClocklessController<DATA_PIN, C_NS_WS2815(250), C_NS_WS2815(1090), C_NS_WS2815(550), RGB_ORDER> {};
+class WS2815Controller : public FASTLED_CLOCKLESS_CONTROLLER<DATA_PIN, C_NS_WS2815(250), C_NS_WS2815(1090), C_NS_WS2815(550), RGB_ORDER> {};
 
 // 750NS, 750NS, 750NS
 template <fl::u8 DATA_PIN, EOrder RGB_ORDER = RGB>
-class TM1803Controller400Khz : public ClocklessController<DATA_PIN, C_NS(700), C_NS(1100), C_NS(700), RGB_ORDER> {};
+class TM1803Controller400Khz : public FASTLED_CLOCKLESS_CONTROLLER<DATA_PIN, C_NS(700), C_NS(1100), C_NS(700), RGB_ORDER> {};
 
 template <fl::u8 DATA_PIN, EOrder RGB_ORDER = RGB>
-class TM1829Controller800Khz : public ClocklessController<DATA_PIN, C_NS(340), C_NS(340), C_NS(550), RGB_ORDER, 0, true, 500> {};
+class TM1829Controller800Khz : public FASTLED_CLOCKLESS_CONTROLLER<DATA_PIN, C_NS(340), C_NS(340), C_NS(550), RGB_ORDER, 0, true, 500> {};
 
 template <fl::u8 DATA_PIN, EOrder RGB_ORDER = RGB>
-class TM1829Controller1600Khz : public ClocklessController<DATA_PIN, C_NS(100), C_NS(300), C_NS(200), RGB_ORDER, 0, true, 500> {};
+class TM1829Controller1600Khz : public FASTLED_CLOCKLESS_CONTROLLER<DATA_PIN, C_NS(100), C_NS(300), C_NS(200), RGB_ORDER, 0, true, 500> {};
 
 template <fl::u8 DATA_PIN, EOrder RGB_ORDER = RGB>
-class LPD1886Controller1250Khz : public ClocklessController<DATA_PIN, C_NS(200), C_NS(400), C_NS(200), RGB_ORDER, 4> {};
+class LPD1886Controller1250Khz : public FASTLED_CLOCKLESS_CONTROLLER<DATA_PIN, C_NS(200), C_NS(400), C_NS(200), RGB_ORDER, 4> {};
 
 template <fl::u8 DATA_PIN, EOrder RGB_ORDER = RGB>
-class LPD1886Controller1250Khz_8bit : public ClocklessController<DATA_PIN, C_NS(200), C_NS(400), C_NS(200), RGB_ORDER> {};
+class LPD1886Controller1250Khz_8bit : public FASTLED_CLOCKLESS_CONTROLLER<DATA_PIN, C_NS(200), C_NS(400), C_NS(200), RGB_ORDER> {};
 
 
 template <fl::u8 DATA_PIN, EOrder RGB_ORDER = RGB>
-class SK6822Controller : public ClocklessController<DATA_PIN, C_NS_SK6822(375), C_NS_SK6822(1000), C_NS_SK6822(375), RGB_ORDER> {};
+class SK6822Controller : public FASTLED_CLOCKLESS_CONTROLLER<DATA_PIN, C_NS_SK6822(375), C_NS_SK6822(1000), C_NS_SK6822(375), RGB_ORDER> {};
 
 template <fl::u8 DATA_PIN, EOrder RGB_ORDER = RGB>
-class SK6812Controller : public ClocklessController<DATA_PIN, C_NS_SK6812(300), C_NS_SK6812(300), C_NS_SK6812(600), RGB_ORDER> {};
+class SK6812Controller : public FASTLED_CLOCKLESS_CONTROLLER<DATA_PIN, C_NS_SK6812(300), C_NS_SK6812(300), C_NS_SK6812(600), RGB_ORDER> {};
 
 template <fl::u8 DATA_PIN, EOrder RGB_ORDER = RGB>
-class SM16703Controller : public ClocklessController<DATA_PIN, C_NS(300), C_NS(600), C_NS(300), RGB_ORDER> {};
+class SM16703Controller : public FASTLED_CLOCKLESS_CONTROLLER<DATA_PIN, C_NS(300), C_NS(600), C_NS(300), RGB_ORDER> {};
 
 template <fl::u8 DATA_PIN, EOrder RGB_ORDER = RGB>
-class PL9823Controller : public ClocklessController<DATA_PIN, C_NS(350), C_NS(1010), C_NS(350), RGB_ORDER> {};
+class PL9823Controller : public FASTLED_CLOCKLESS_CONTROLLER<DATA_PIN, C_NS(350), C_NS(1010), C_NS(350), RGB_ORDER> {};
 
 // UCS1912 - Note, never been tested, this is according to the datasheet
 template <fl::u8 DATA_PIN, EOrder RGB_ORDER = RGB>
-class UCS1912Controller : public ClocklessController<DATA_PIN, C_NS(250), C_NS(1000), C_NS(350), RGB_ORDER> {};
+class UCS1912Controller : public FASTLED_CLOCKLESS_CONTROLLER<DATA_PIN, C_NS(250), C_NS(1000), C_NS(350), RGB_ORDER> {};
 
 // NEW LED! Help us test it!
 // Under developement.
@@ -1131,7 +1136,7 @@ class UCS1912Controller : public ClocklessController<DATA_PIN, C_NS(250), C_NS(1
 //   * T1L: .3
 //   * TRST: 200
 template <fl::u8 DATA_PIN, EOrder RGB_ORDER = RGB>
-class SM16824EController : public ClocklessController<DATA_PIN, C_NS(300), C_NS(900), C_NS(100), RGB_ORDER, 0, false, 200> {};
+class SM16824EController : public FASTLED_CLOCKLESS_CONTROLLER<DATA_PIN, C_NS(300), C_NS(900), C_NS(100), RGB_ORDER, 0, false, 200> {};
 #endif
 /// @} ClocklessChipsets
 

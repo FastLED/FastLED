@@ -41,9 +41,8 @@ FASTLED_NAMESPACE_BEGIN
 
 #if defined(FASTLED_STUB_IMPL)
 
-
 template<fl::u8 _DATA_PIN, fl::u8 _CLOCK_PIN, fl::u32 _SPI_CLOCK_DIVIDER>
-class SPIOutput : public StubSPIOutput {};
+class SPIOutput : public fl::StubSPIOutput {};
 
 
 #else
