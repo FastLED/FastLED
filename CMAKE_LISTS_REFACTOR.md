@@ -34,6 +34,33 @@
 ### 🎯 **NEXT PRIORITY**
 Replace manual test target creation with modular `create_test_executable()` function calls to eliminate the remaining ~100 lines of manual target configuration.
 
+### 🔬 **A/B TESTING SETUP**
+**CRITICAL**: The original working CMakeLists.txt is preserved for comparison testing:
+
+| File | Purpose | Status |
+|------|---------|--------|
+| `tests/CMakeLists.txt` | 🔄 **REFACTORED VERSION** | In-progress modular refactor (~460 lines, 21KB) |
+| `tests/CMakeLists.txt.previous` | ✅ **BASELINE REFERENCE** | Original 812-line working version (34KB) |
+
+**Usage for A/B Testing:**
+```bash
+# Test refactored version (current)
+bash test test_vector --clean --gcc
+
+# Test original version (backup)
+mv tests/CMakeLists.txt tests/CMakeLists.txt.new
+mv tests/CMakeLists.txt.previous tests/CMakeLists.txt
+bash test test_vector --clean --gcc
+mv tests/CMakeLists.txt tests/CMakeLists.txt.previous  
+mv tests/CMakeLists.txt.new tests/CMakeLists.txt
+```
+
+**Why This Matters:**
+- 🛡️ **Safety net** - Can always revert to known working configuration
+- 🔍 **Comparison testing** - Verify identical behavior between old/new systems
+- 🐛 **Debugging** - Isolate whether issues are from refactor or other changes
+- 📊 **Validation** - Prove the refactor maintains all original functionality
+
 ---
 
 ## Overview
