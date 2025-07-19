@@ -1,6 +1,7 @@
 #pragma once
 
 #include "fl/thread.h"
+#include "fl/int.h"
 
 #if FASTLED_MULTITHREADED
 #include <atomic>
@@ -22,6 +23,8 @@ using atomic = AtomicFake<T>;
 using atomic_bool = atomic<bool>;
 using atomic_int = atomic<int>;
 using atomic_uint = atomic<unsigned int>;
+using atomic_u32 = atomic<fl::u32>;
+using atomic_i32 = atomic<fl::i32>;
 
 ///////////////////// IMPLEMENTATION //////////////////////////////////////
 

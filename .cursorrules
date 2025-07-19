@@ -389,6 +389,56 @@ bash lint
 
 **Before using any standard library functionality, check if there's a `fl::` equivalent in the `src/fl/` directory first.**
 
+### Compiler Warning Suppression
+**ALWAYS use the FastLED compiler control macros from `fl/compiler_control.h` for warning suppression.** This ensures consistent cross-compiler support and proper handling of platform differences.
+
+**Correct Warning Suppression Pattern:**
+```cpp
+#include "fl/compiler_control.h"
+
+// Suppress specific warning around problematic code
+FL_DISABLE_WARNING_PUSH
+FL_DISABLE_FORMAT_TRUNCATION  // Use specific warning macros
+// ... code that triggers warnings ...
+FL_DISABLE_WARNING_POP
+```
+
+**Available Warning Suppression Macros:**
+- ✅ `FL_DISABLE_WARNING_PUSH` / `FL_DISABLE_WARNING_POP` - Standard push/pop pattern
+- ✅ `FL_DISABLE_WARNING(warning_name)` - Generic warning suppression (use sparingly)
+- ✅ `FL_DISABLE_WARNING_GLOBAL_CONSTRUCTORS` - Clang global constructor warnings
+- ✅ `FL_DISABLE_WARNING_SELF_ASSIGN_OVERLOADED` - Clang self-assignment warnings  
+- ✅ `FL_DISABLE_FORMAT_TRUNCATION` - GCC format truncation warnings
+
+**What NOT to do:**
+- ❌ **NEVER use raw `#pragma` directives** - they don't handle compiler differences
+- ❌ **NEVER write manual `#ifdef __clang__` / `#ifdef __GNUC__` blocks** - use the macros
+- ❌ **NEVER ignore warnings without suppression** - fix the issue or suppress appropriately
+
+**Examples:**
+```cpp
+// ✅ CORRECT - Using FastLED macros
+#include "fl/compiler_control.h"
+
+FL_DISABLE_WARNING_PUSH
+FL_DISABLE_FORMAT_TRUNCATION
+// Code that triggers format truncation warnings
+sprintf(small_buffer, "Very long format string %d", value);
+FL_DISABLE_WARNING_POP
+
+// ❌ INCORRECT - Raw pragma directives
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wformat-truncation"
+sprintf(small_buffer, "Very long format string %d", value);
+#pragma GCC diagnostic pop
+```
+
+**Why:** The FastLED compiler control system automatically handles:
+- **Compiler detection** (GCC vs Clang vs MSVC)  
+- **Version compatibility** (warnings that don't exist on older compilers)
+- **Platform specifics** (AVR, ESP32, ARM, etc.)
+- **Consistent naming** across different compiler warning systems
+
 ### Debug Printing
 **Use `FL_WARN` for debug printing throughout the codebase.** This ensures consistent debug output that works in both unit tests and live application testing.
 

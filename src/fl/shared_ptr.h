@@ -6,6 +6,7 @@
 #include "fl/stdint.h"
 #include "fl/cstddef.h"
 #include "fl/bit_cast.h"
+#include "fl/atomic.h"
 
 namespace fl {
 
@@ -20,8 +21,8 @@ struct make_shared_tag {};
 
 // Simple control block structure - just manages reference counts
 struct ControlBlockBase {
-    volatile uint32_t shared_count;
-    volatile uint32_t weak_count;
+    fl::atomic_u32 shared_count;
+    fl::atomic_u32 weak_count;
     
     ControlBlockBase() : shared_count(1), weak_count(1) {}
     virtual ~ControlBlockBase() = default;
