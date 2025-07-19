@@ -397,6 +397,17 @@ file(GLOB TEST_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/test_*.cpp")
 foreach(TEST_SOURCE ${TEST_SOURCES})
     get_filename_component(TEST_NAME ${TEST_SOURCE} NAME_WE)
     
+    # If SPECIFIC_TEST is defined, only create that test target
+    if(DEFINED SPECIFIC_TEST)
+        # Check if this is the specific test we want to build
+        string(REPLACE "test_" "" CURRENT_TEST_NAME ${TEST_NAME})
+        if(NOT CURRENT_TEST_NAME STREQUAL SPECIFIC_TEST)
+            # Skip this test, it's not the one we want
+            continue()
+        endif()
+        message(STATUS "Building specific test: ${TEST_NAME}")
+    endif()
+    
     # Create executable that links to static library
     add_executable(${TEST_NAME} ${TEST_SOURCE})
     target_link_libraries(${TEST_NAME} fastled test_shared_static)
@@ -463,7 +474,11 @@ endforeach()
 get_property(ALL_TARGETS DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY BUILDSYSTEM_TARGETS)
 list(FILTER ALL_TARGETS INCLUDE REGEX "^test_")
 list(LENGTH ALL_TARGETS TARGET_COUNT)
-message(STATUS "Build summary: Created ${TARGET_COUNT} executable targets (full build mode)")
+if(DEFINED SPECIFIC_TEST)
+    message(STATUS "Build summary: Created ${TARGET_COUNT} executable targets (specific test mode)")
+else()
+    message(STATUS "Build summary: Created ${TARGET_COUNT} executable targets (full build mode)")
+endif()
 
 # Add verbose output for tests
 set(CMAKE_CTEST_ARGUMENTS "--output-on-failure")

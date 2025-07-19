@@ -186,9 +186,19 @@ def compile_fastled(specific_test: str | None = None) -> None:
             ]
         )
 
+    # Pass specific test name to CMake if specified
+    if specific_test is not None:
+        # Remove test_ prefix if present
+        if specific_test.startswith("test_"):
+            test_name = specific_test[5:]
+        else:
+            test_name = specific_test
+        cmake_configure_command_list.append(f"-DSPECIFIC_TEST={test_name}")
+
     cmake_configure_command = subprocess.list2cmdline(cmake_configure_command_list)
     run_command(cmake_configure_command, cwd=BUILD_DIR)
 
+    # Normalize test name for build command
     if specific_test is not None and specific_test.startswith("test_"):
         specific_test = specific_test[5:]
 
