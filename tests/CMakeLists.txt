@@ -17,6 +17,7 @@ project(FastLED_Tests)
 # ============================================================================
 # PHASE 1: Include all modules
 # ============================================================================
+include(cmake/BuildOptions.cmake)
 include(cmake/CompilerDetection.cmake)
 include(cmake/CompilerFlags.cmake) 
 include(cmake/LinkerCompatibility.cmake)
@@ -32,33 +33,9 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # ============================================================================
-# PHASE 2: Build options and validation
+# PHASE 2: Build options and validation (REFACTORED)
 # ============================================================================
-
-# Option to disable thin optimizations (archives + LTO) for debugging or compatibility
-option(NO_THIN_LTO "Disable thin optimizations (archives and LTO)" OFF)
-
-# Option to disable dead code elimination for debugging or compatibility
-option(NO_DEAD_CODE_ELIMINATION "Disable dead code elimination (function/data sections + gc-sections)" OFF)
-
-# Build phase control options
-option(NO_LINK "Compile object files but skip linking executables" OFF)
-option(NO_BUILD "Skip compilation but perform linking (requires existing object files)" OFF)
-
-# Validate build phase options
-if(NO_LINK AND NO_BUILD)
-    message(FATAL_ERROR "NO_LINK and NO_BUILD cannot both be enabled simultaneously")
-endif()
-
-if(NO_LINK)
-    message(STATUS "Build mode: Compile-only (NO_LINK enabled)")
-    message(STATUS "  Object files will be created but executables will not be linked")
-elseif(NO_BUILD)
-    message(STATUS "Build mode: Link-only (NO_BUILD enabled)")
-    message(STATUS "  Existing object files will be linked but no compilation will occur")
-else()
-    message(STATUS "Build mode: Full build (compile + link)")
-endif()
+configure_build_options()
 
 # ============================================================================
 # PHASE 3: Detection and capability assessment
