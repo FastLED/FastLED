@@ -65,68 +65,7 @@ endif()
 # ============================================================================
 detect_compiler_capabilities()
 
-# Try to find libunwind, but make it optional (from working old version)
-find_package(PkgConfig QUIET)
-if(PKG_CONFIG_FOUND)
-    pkg_check_modules(LIBUNWIND QUIET libunwind)
-endif()
-
-# If pkg-config didn't work, try manual search
-if(NOT LIBUNWIND_FOUND)
-    find_path(LIBUNWIND_INCLUDE_DIR 
-        NAMES libunwind.h
-        PATHS /usr/include /usr/local/include /opt/homebrew/include
-    )
-
-    find_library(LIBUNWIND_LIBRARY 
-        NAMES unwind
-        PATHS /usr/lib /usr/local/lib /opt/homebrew/lib /usr/lib/x86_64-linux-gnu
-    )
-
-    find_library(LIBUNWIND_X86_64_LIBRARY 
-        NAMES unwind-x86_64
-        PATHS /usr/lib /usr/local/lib /opt/homebrew/lib /usr/lib/x86_64-linux-gnu
-    )
-
-    # Check if both header and library are found
-    if(LIBUNWIND_INCLUDE_DIR AND LIBUNWIND_LIBRARY)
-        set(LIBUNWIND_FOUND TRUE)
-        if(LIBUNWIND_X86_64_LIBRARY)
-            set(LIBUNWIND_LIBRARIES ${LIBUNWIND_LIBRARY} ${LIBUNWIND_X86_64_LIBRARY})
-        else()
-            set(LIBUNWIND_LIBRARIES ${LIBUNWIND_LIBRARY})
-        endif()
-        set(LIBUNWIND_INCLUDE_DIRS ${LIBUNWIND_INCLUDE_DIR})
-    endif()
-endif()
-
-# Set the final flag based on what we found
-if(LIBUNWIND_FOUND)
-    set(USE_LIBUNWIND TRUE)
-    # For x86_64 systems, we need both libunwind and libunwind-x86_64
-    if(CMAKE_SYSTEM_PROCESSOR STREQUAL "x86_64")
-        set(LIBUNWIND_LIBRARIES unwind unwind-x86_64 lzma)
-        message(STATUS "LibUnwind found for x86_64: ${LIBUNWIND_LIBRARIES}")
-    else()
-        # Use pkg-config results if available, otherwise use manual search
-        if(PKG_CONFIG_FOUND AND LIBUNWIND_STATIC_LIBRARIES)
-            set(LIBUNWIND_LIBRARIES ${LIBUNWIND_STATIC_LIBRARIES})
-            set(LIBUNWIND_INCLUDE_DIRS ${LIBUNWIND_STATIC_INCLUDE_DIRS})
-            message(STATUS "LibUnwind found via pkg-config: ${LIBUNWIND_LIBRARIES}")
-        elseif(LIBUNWIND_LIBRARIES AND LIBUNWIND_INCLUDE_DIRS)
-            # Add x86_64 library if available
-            if(LIBUNWIND_X86_64_LIBRARY)
-                list(APPEND LIBUNWIND_LIBRARIES ${LIBUNWIND_X86_64_LIBRARY})
-            endif()
-            message(STATUS "LibUnwind found manually: ${LIBUNWIND_LIBRARIES}")
-        endif()
-    endif()
-    message(STATUS "LibUnwind headers: ${LIBUNWIND_INCLUDE_DIRS}")
-else()
-    set(USE_LIBUNWIND FALSE)
-    message(STATUS "LibUnwind not found. Falling back to basic stack traces with execinfo.")
-endif()
-
+# Dependency detection is now handled by the DependencyManagement module
 find_and_configure_dependencies()
 
 # ============================================================================
@@ -427,10 +366,16 @@ foreach(TEST_SOURCE ${TEST_SOURCES})
         target_link_options(${TEST_NAME} PRIVATE -static-libgcc -static-libstdc++)
     endif()
     
-    # Add libunwind for executables
+    # Add libunwind for executables (handled by TargetCreation module)
+    # This is now handled by the apply_test_settings function from TargetCreation module
     if(USE_LIBUNWIND)
-        target_link_libraries(${TEST_NAME} ${LIBUNWIND_LIBRARIES})
-        target_include_directories(${TEST_NAME} PRIVATE ${LIBUNWIND_INCLUDE_DIRS})
+        target_compile_definitions(${TEST_NAME} PRIVATE USE_LIBUNWIND)
+        if(LIBUNWIND_LIBRARIES)
+            target_link_libraries(${TEST_NAME} ${LIBUNWIND_LIBRARIES})
+        endif()
+        if(LIBUNWIND_INCLUDE_DIRS)
+            target_include_directories(${TEST_NAME} PRIVATE ${LIBUNWIND_INCLUDE_DIRS})
+        endif()
     endif()
     
     # Configure common properties
