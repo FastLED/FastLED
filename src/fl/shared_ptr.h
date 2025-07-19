@@ -257,36 +257,7 @@ public:
     
     explicit operator bool() const noexcept { return ptr_ != nullptr; }
     
-    // Comparison operators
-    template<typename Y>
-    bool operator==(const shared_ptr<Y>& other) const noexcept {
-        return ptr_ == other.ptr_;
-    }
-    
-    template<typename Y>
-    bool operator!=(const shared_ptr<Y>& other) const noexcept {
-        return ptr_ != other.ptr_;
-    }
-    
-    template<typename Y>
-    bool operator<(const shared_ptr<Y>& other) const noexcept {
-        return ptr_ < other.ptr_;
-    }
-    
-    template<typename Y>
-    bool operator<=(const shared_ptr<Y>& other) const noexcept {
-        return ptr_ <= other.ptr_;
-    }
-    
-    template<typename Y>
-    bool operator>(const shared_ptr<Y>& other) const noexcept {
-        return ptr_ > other.ptr_;
-    }
-    
-    template<typename Y>
-    bool operator>=(const shared_ptr<Y>& other) const noexcept {
-        return ptr_ >= other.ptr_;
-    }
+    // Comparison operators for nullptr only (to avoid ambiguity with non-member operators)
     
     bool operator==(fl::nullptr_t) const noexcept {
         return ptr_ == nullptr;
