@@ -198,31 +198,10 @@ if (CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR DEFINED ENV{FASTLED_ALL_SRC})
     add_compile_definitions(FASTLED_ALL_SRC=1)
 endif()
 
-# Apply global compile definitions
-set(COMMON_COMPILE_DEFINITIONS
-    DEBUG
-    FASTLED_FORCE_NAMESPACE=1
-    FASTLED_USE_JSON_UI=1
-    FASTLED_NO_AUTO_NAMESPACE
-    FASTLED_TESTING
-    ENABLE_CRASH_HANDLER
-    FASTLED_STUB_IMPL
-    FASTLED_NO_PINMAP
-    HAS_HARDWARE_PIN_SUPPORT
-    _GLIBCXX_DEBUG
-    _GLIBCXX_DEBUG_PEDANTIC
-)
-
-# Fix for Microsoft STL version check with older Clang versions on Windows
-if(WIN32 AND CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-    list(APPEND COMMON_COMPILE_DEFINITIONS _ALLOW_COMPILER_AND_STL_VERSION_MISMATCH)
-endif()
-
-# Apply compile definitions globally
-add_compile_definitions(${COMMON_COMPILE_DEFINITIONS})
+# Compile definitions are already set above, removing duplicate
 
 # ============================================================================
-# 🚨 BUILD FLAGS SUMMARY - Show all flags sent to every compilation unit
+# 🚨 BUILD FLAGS SUMMARY - Show all flags sent to every compilation unit (REFACTORED)
 # ============================================================================
 
 message(STATUS "")
@@ -231,76 +210,43 @@ message(STATUS "🚨                                  BUILD FLAGS SUMMARY       
 message(STATUS "🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨")
 message(STATUS "")
 
-# Display FastLED Library Flags
-message(STATUS "📚 FASTLED LIBRARY COMPILATION FLAGS:")
-message(STATUS "  Compiler: ${CMAKE_CXX_COMPILER_ID}")
+# Display Build Configuration
+message(STATUS "📚 BUILD CONFIGURATION (MODULAR SYSTEM):")
+message(STATUS "  Compiler: ${CMAKE_CXX_COMPILER_ID} ${CMAKE_CXX_COMPILER_VERSION}")
 message(STATUS "  C++ Standard: ${CMAKE_CXX_STANDARD}")
 message(STATUS "  Build Type: ${CMAKE_BUILD_TYPE}")
+message(STATUS "  Platform: ${CMAKE_SYSTEM_NAME}")
 message(STATUS "")
 
-# Show all flags that will be applied to FastLED library
-string(REPLACE ";" " " COMMON_COMPILE_FLAGS_STR "${COMMON_COMPILE_FLAGS}")
-message(STATUS "  📌 C/C++ Common Flags (FastLED Library):")
-message(STATUS "     ${COMMON_COMPILE_FLAGS_STR}")
+# Show current CMAKE compiler flags (applied globally via modules)
+message(STATUS "  📌 Global CMAKE_CXX_FLAGS (applied to all C++ files):")
+message(STATUS "      ${CMAKE_CXX_FLAGS}")
+message(STATUS "")
+message(STATUS "  📌 Global CMAKE_C_FLAGS (applied to all C files):")
+message(STATUS "      ${CMAKE_C_FLAGS}")
 message(STATUS "")
 
-string(REPLACE ";" " " CXX_SPECIFIC_FLAGS_STR "${CXX_SPECIFIC_FLAGS}")
-message(STATUS "  📌 C++ Only Flags (FastLED Library):")
-message(STATUS "     ${CXX_SPECIFIC_FLAGS_STR}")
-message(STATUS "")
-
+# Show compile definitions
 string(REPLACE ";" " " COMMON_COMPILE_DEFINITIONS_STR "${COMMON_COMPILE_DEFINITIONS}")
-message(STATUS "  📌 Preprocessor Definitions (FastLED Library):")
-message(STATUS "     ${COMMON_COMPILE_DEFINITIONS_STR}")
+message(STATUS "  📌 Preprocessor Definitions:")
+message(STATUS "      ${COMMON_COMPILE_DEFINITIONS_STR}")
 message(STATUS "")
 
-# Show current CMAKE compiler flags (these are applied globally)
-message(STATUS "  📌 Final CMAKE_CXX_FLAGS (applied to all C++ files):")
-message(STATUS "     ${CMAKE_CXX_FLAGS}")
-message(STATUS "")
-message(STATUS "  📌 Final CMAKE_C_FLAGS (applied to all C files):")
-message(STATUS "     ${CMAKE_C_FLAGS}")
-message(STATUS "")
-
-# Display Test Compilation Flags
-message(STATUS "🧪 TEST COMPILATION FLAGS:")
-string(REPLACE ";" " " UNIT_TEST_COMPILE_FLAGS_STR "${UNIT_TEST_COMPILE_FLAGS}")
-message(STATUS "  📌 Unit Test C/C++ Common Flags:")
-message(STATUS "     ${UNIT_TEST_COMPILE_FLAGS_STR}")
-message(STATUS "")
-
-string(REPLACE ";" " " UNIT_TEST_CXX_FLAGS_STR "${UNIT_TEST_CXX_FLAGS}")
-message(STATUS "  📌 Unit Test C++ Only Flags:")
-message(STATUS "     ${UNIT_TEST_CXX_FLAGS_STR}")
-message(STATUS "")
-
-# Display Linker Flags
+# Show linker flags
 message(STATUS "🔗 LINKER FLAGS:")
 message(STATUS "  📌 CMAKE_EXE_LINKER_FLAGS (executables):")
-message(STATUS "     ${CMAKE_EXE_LINKER_FLAGS}")
-message(STATUS "")
-message(STATUS "  📌 CMAKE_SHARED_LINKER_FLAGS (shared libraries):")
-message(STATUS "     ${CMAKE_SHARED_LINKER_FLAGS}")
-message(STATUS "")
-message(STATUS "  📌 CMAKE_MODULE_LINKER_FLAGS (modules):")
-message(STATUS "     ${CMAKE_MODULE_LINKER_FLAGS}")
+message(STATUS "      ${CMAKE_EXE_LINKER_FLAGS}")
 message(STATUS "")
 
-# Additional configuration info
-if(USE_LIBUNWIND)
-    message(STATUS "🔧 LIBUNWIND CONFIGURATION:")
-    message(STATUS "  📌 Libraries: ${LIBUNWIND_LIBRARIES}")
-    message(STATUS "  📌 Include Dirs: ${LIBUNWIND_INCLUDE_DIRS}")
-    message(STATUS "")
-endif()
+# Additional debug information (module-managed configurations)
+message(STATUS "🔧 MODULAR CONFIGURATION:")
+message(STATUS "  📌 All compiler flags and dependencies managed by modules")
+message(STATUS "  📌 Libunwind: Handled by DependencyManagement module")  
+message(STATUS "  📌 Dead Code Elimination: Handled by OptimizationSettings module")
+message(STATUS "")
 
-# Dead code elimination info
-if(NOT NO_DEAD_CODE_ELIMINATION)
-    string(REPLACE ";" " " DEAD_CODE_ELIMINATION_FLAGS_STR "${DEAD_CODE_ELIMINATION_FLAGS}")
-    message(STATUS "🗑️  DEAD CODE ELIMINATION:")
-    message(STATUS "  📌 Compiler Flags: ${DEAD_CODE_ELIMINATION_FLAGS_STR}")
-    message(STATUS "")
-endif()
+message(STATUS "🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨")
+message(STATUS "")
 
 # ============================================================================
 # PHASE 7: Set output directories
