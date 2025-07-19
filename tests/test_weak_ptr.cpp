@@ -274,7 +274,7 @@ TEST_CASE("fl::weak_ptr self-assignment safety") {
     
     // Self-assignment should not change anything
     FL_DISABLE_WARNING_PUSH
-    FL_DISABLE_WARNING(self-assign-overloaded)
+    FL_DISABLE_WARNING_SELF_ASSIGN_OVERLOADED
     weak = weak;  // Test self-assignment
     FL_DISABLE_WARNING_POP
     CHECK_EQ(weak.use_count(), 1);
