@@ -180,10 +180,10 @@ def compile_fastled(specific_test: str | None = None) -> None:
             # Set environment variable for AR similar to Clang
             os.environ["AR"] = ar
 
-        # Add equivalent verbose flags for GCC (similar to Clang's -ferror-limit=1)
-        # GCC doesn't have -ferror-limit, but we can add other useful flags
-        os.environ["CXXFLAGS"] = os.environ.get("CXXFLAGS", "") + " -fmax-errors=1"
-        os.environ["CFLAGS"] = os.environ.get("CFLAGS", "") + " -fmax-errors=1"
+            # Add equivalent verbose flags for GCC (similar to Clang's -ferror-limit=1)
+            # GCC doesn't have -ferror-limit, but we can add other useful flags
+            os.environ["CXXFLAGS"] = os.environ.get("CXXFLAGS", "") + " -fmax-errors=10"
+    os.environ["CFLAGS"] = os.environ.get("CFLAGS", "") + " -fmax-errors=10"
 
     cmake_configure_command_list: list[str] = [
         "cmake",
