@@ -40,7 +40,7 @@ void Blend2d::add(Fx2dPtr layer, const Params &p) {
 }
 
 void Blend2d::add(Fx2d &layer, const Params &p) {
-    Fx2dPtr fx = Fx2dPtr::NoTracking(layer);
+    Fx2dPtr fx = fl::make_shared_no_tracking(layer);
     this->add(fx, p);
 }
 
@@ -111,7 +111,7 @@ bool Blend2d::setParams(Fx2dPtr fx, const Params &p) {
 
 bool Blend2d::setParams(Fx2d &fx, const Params &p) {
 
-    Fx2dPtr fxPtr = Fx2dPtr::NoTracking(fx);
+    Fx2dPtr fxPtr = fl::make_shared_no_tracking(fx);
     return setParams(fxPtr, p);
 }
 

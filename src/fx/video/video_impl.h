@@ -19,7 +19,7 @@ FASTLED_SMART_PTR(VideoImpl);
 FASTLED_SMART_PTR(FrameInterpolator);
 FASTLED_SMART_PTR(PixelStream)
 
-class VideoImpl : public fl::Referent {
+class VideoImpl {
   public:
     enum {
         kSizeRGB8 = 3,

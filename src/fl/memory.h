@@ -10,24 +10,29 @@ namespace fl {
 
 // FastLED equivalent of std::intrusive_ptr<T>
 // Alias for fl::Ptr<T> to provide familiar intrusive pointer naming
+// NOTE: This is deprecated - use fl::shared_ptr<T> instead
 template <typename T>
 using intrusive_ptr = fl::Ptr<T>;
 
 // FastLED equivalent of std::make_intrusive<T>
-// Creates a new object of type T and returns it wrapped in a fl::Ptr<T>
+// NOW DELEGATES TO make_shared<T> for migration compatibility
 // 
 // Usage:
 //   auto ptr = fl::make_intrusive<MyClass>(arg1, arg2, ...);
-//
-// This is equivalent to:
-//   fl::Ptr<MyClass> ptr = fl::make_intrusive<MyClass>(arg1, arg2, ...);
+//   // This now creates a fl::shared_ptr<MyClass> instead of fl::Ptr<MyClass>
 //
 // Requirements:
-//   - T must inherit from fl::Referent
+//   - T no longer needs to inherit from fl::Referent
 //   - T must have a constructor that accepts the provided arguments
 template <typename T, typename... Args>
-fl::Ptr<T> make_intrusive(Args&&... args) {
-    return fl::NewPtr<T>(fl::forward<Args>(args)...);
+fl::shared_ptr<T> make_intrusive(Args&&... args) {
+    return fl::make_shared<T>(fl::forward<Args>(args)...);
+}
+
+// Convenience factory for the new pattern - equivalent to make_shared
+template <typename T, typename... Args>
+fl::shared_ptr<T> make_shared_ptr(Args&&... args) {
+    return fl::make_shared<T>(fl::forward<Args>(args)...);
 }
 
 // Add make_unique function for consistency with std::make_unique

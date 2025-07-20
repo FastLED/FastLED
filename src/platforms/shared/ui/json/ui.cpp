@@ -104,7 +104,8 @@ void addJsonUiComponent(fl::WeakPtr<JsonUiInternal> component) {
 
 void removeJsonUiComponent(fl::WeakPtr<JsonUiInternal> component) {
     // Check if we have an internal manager first
-    JsonUiInternalPtr ptr = component.lock();
+    auto locked_ptr = component.lock();
+    JsonUiInternalPtr ptr(locked_ptr); // Convert from Ptr to shared_ptr
     if (ptr) {
         ptr->clearFunctions();
     }

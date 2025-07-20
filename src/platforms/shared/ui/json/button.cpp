@@ -22,11 +22,11 @@ JsonButtonImpl::JsonButtonImpl(const string &name) : mPressed(false) {
         });
     mInternal = fl::make_intrusive<JsonUiInternal>(name, fl::move(updateFunc),
                                      fl::move(toJsonFunc));
-    addJsonUiComponent(mInternal);
+    addJsonUiComponent(fl::WeakPtr<JsonUiInternal>(mInternal));
     mUpdater.init(this);
 }
 
-JsonButtonImpl::~JsonButtonImpl() { removeJsonUiComponent(mInternal); }
+JsonButtonImpl::~JsonButtonImpl() { removeJsonUiComponent(fl::WeakPtr<JsonUiInternal>(mInternal)); }
 
 JsonButtonImpl &JsonButtonImpl::Group(const fl::string &name) {
     mInternal->setGroup(name);

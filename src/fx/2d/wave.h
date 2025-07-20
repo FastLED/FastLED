@@ -140,7 +140,7 @@ class WaveFx : public Fx2d {
     // This will now own the crgbMap.
     void setCrgbMap(WaveCrgbMapPtr crgbMap) {
         // Set a custom CRGB mapping function.
-        mCrgbMap.reset(crgbMap);
+        mCrgbMap = crgbMap;
     }
 
     void draw(DrawContext context) override {

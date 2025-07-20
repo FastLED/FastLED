@@ -91,7 +91,7 @@ class StringFormatter {
     static void appendFloat(const float &val, StrN<FASTLED_STR_INLINED_SIZE> *dst);
 };
 
-class StringHolder : public fl::Referent {
+class StringHolder {
   public:
     StringHolder(const char *str);
     StringHolder(fl::size length);
@@ -100,7 +100,7 @@ class StringHolder : public fl::Referent {
     StringHolder &operator=(const StringHolder &other) = delete;
     ~StringHolder();
 
-    bool isShared() const { return ref_count() > 1; }
+
     void grow(fl::size newLength);
     bool hasCapacity(fl::size newLength) const { return newLength <= mCapacity; }
     const char *data() const { return mData; }
@@ -153,7 +153,7 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
             memcpy(mInlineData, str, len + 1);
             mHeapData.reset();
         } else {
-            if (mHeapData && !mHeapData->isShared()) {
+            if (mHeapData && mHeapData.use_count() == 1) {
                 // We are the sole owners of this data so we can modify it
                 mHeapData->copy(str, len);
                 return;
@@ -222,7 +222,7 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
 
     fl::size write(const char *str, fl::size n) {
         fl::size newLen = mLength + n;
-        if (mHeapData && !mHeapData->isShared()) {
+        if (mHeapData && mHeapData.use_count() == 1) {
             if (!mHeapData->hasCapacity(newLen)) {
                 fl::size grow_length = MAX(3, newLen * 3 / 2);
                 mHeapData->grow(grow_length); // Grow by 50%
@@ -338,7 +338,7 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
 
         // If we already have unshared heap data with sufficient capacity, do
         // nothing
-        if (mHeapData && !mHeapData->isShared() &&
+        if (mHeapData && mHeapData.use_count() == 1 &&
             mHeapData->hasCapacity(newCapacity)) {
             return;
         }
@@ -649,12 +649,12 @@ class string : public StrN<FASTLED_STR_INLINED_SIZE> {
     
     
     template <typename T> string &append(const WeakPtr<T> &val) {
-        intrusive_ptr<T> ptr = val.lock();
+        fl::shared_ptr<T> ptr = val.lock();
         append(ptr);
         return *this;
     }
 
-    template <typename T> string &append(const intrusive_ptr<T>& val) {
+    template <typename T> string &append(const fl::shared_ptr<T>& val) {
         // append(val->toString());
         if (!val) {
             append("null");

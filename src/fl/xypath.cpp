@@ -154,7 +154,7 @@ XYPathPtr XYPath::NewLinePath(float x0, float y0, float x1, float y1) {
     return fl::make_intrusive<XYPath>(path);
 }
 
-XYPathPtr XYPath::NewLinePath(const intrusive_ptr<LinePathParams> &params) {
+XYPathPtr XYPath::NewLinePath(const fl::shared_ptr<LinePathParams> &params) {
     auto path = fl::make_intrusive<LinePath>(params);
     return fl::make_intrusive<XYPath>(path);
 }
@@ -197,7 +197,7 @@ XYPathPtr XYPath::NewArchimedeanSpiralPath() {
 }
 
 XYPathPtr XYPath::NewRosePath(u16 width, u16 height,
-                              const intrusive_ptr<RosePathParams> &params) {
+                                                                  const fl::shared_ptr<RosePathParams> &params) {
     RosePathPtr path = fl::make_intrusive<RosePath>(params);
     XYPathPtr out = fl::make_intrusive<XYPath>(path);
     if (width > 0 && height > 0) {
@@ -207,7 +207,7 @@ XYPathPtr XYPath::NewRosePath(u16 width, u16 height,
 }
 
 XYPathPtr XYPath::NewPhyllotaxisPath(u16 width, u16 height,
-                                     const intrusive_ptr<PhyllotaxisParams> &args) {
+                                                                            const fl::shared_ptr<PhyllotaxisParams> &args) {
     PhyllotaxisPathPtr path = fl::make_intrusive<PhyllotaxisPath>(args);
     XYPathPtr out = fl::make_intrusive<XYPath>(path);
     if (width > 0 && height > 0) {
@@ -217,7 +217,7 @@ XYPathPtr XYPath::NewPhyllotaxisPath(u16 width, u16 height,
 }
 
 XYPathPtr XYPath::NewGielisCurvePath(u16 width, u16 height,
-                                     const intrusive_ptr<GielisCurveParams> &params) {
+                                                                             const fl::shared_ptr<GielisCurveParams> &params) {
     GielisCurvePathPtr path = fl::make_intrusive<GielisCurvePath>(params);
     XYPathPtr out = fl::make_intrusive<XYPath>(path);
     if (width > 0 && height > 0) {
@@ -227,7 +227,7 @@ XYPathPtr XYPath::NewGielisCurvePath(u16 width, u16 height,
 }
 
 XYPathPtr XYPath::NewCatmullRomPath(u16 width, u16 height,
-                                    const intrusive_ptr<CatmullRomParams> &params) {
+                                                                           const fl::shared_ptr<CatmullRomParams> &params) {
     CatmullRomPathPtr path = fl::make_intrusive<CatmullRomPath>(params);
     XYPathPtr out = fl::make_intrusive<XYPath>(path);
     if (width > 0 && height > 0) {

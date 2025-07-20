@@ -15,7 +15,7 @@ namespace fl {
 FASTLED_SMART_PTR(Fx);
 
 // Abstract base class for effects on a strip/grid of LEDs.
-class Fx : public fl::Referent {
+class Fx {
   public:
     // Alias DrawContext for use within Fx
     using DrawContext = _DrawContext;

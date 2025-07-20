@@ -118,7 +118,7 @@ fl::vector<JsonUiInternalPtr> JsonUiManager::getComponents() {
     fl::vector<JsonUiInternalPtr> out;
     for (auto &component : mComponents) {
         if (auto ptr = component.lock()) {
-            out.push_back(ptr);
+            out.push_back(JsonUiInternalPtr(ptr)); // Convert from Ptr to shared_ptr
             //FL_WARN("*** Added component to output: id=" << ptr->id() << " name=" << ptr->name());
         } else {
             FL_WARN("*** WARNING: Component weak_ptr is expired, skipping");

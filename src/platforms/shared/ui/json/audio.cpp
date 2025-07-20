@@ -30,10 +30,10 @@ JsonAudioImpl::JsonAudioImpl(const fl::string &name) {
     mInternal = fl::make_intrusive<JsonUiInternal>(name, fl::move(updateFunc),
                                        fl::move(toJsonFunc));
     mUpdater.init(this);
-    addJsonUiComponent(mInternal);
+    addJsonUiComponent(fl::WeakPtr<JsonUiInternal>(mInternal));
 }
 
-JsonAudioImpl::~JsonAudioImpl() { removeJsonUiComponent(mInternal); }
+JsonAudioImpl::~JsonAudioImpl() { removeJsonUiComponent(fl::WeakPtr<JsonUiInternal>(mInternal)); }
 
 JsonAudioImpl &JsonAudioImpl::Group(const fl::string &name) {
     mInternal->setGroup(name);
@@ -199,10 +199,10 @@ void JsonAudioImpl::updateInternal(
 }
 
 AudioSample JsonAudioImpl::next() {
-    intrusive_ptr<AudioSampleImpl> out;
+    fl::shared_ptr<AudioSampleImpl> out;
     if (mAudioSampleImpls.empty()) {
         // FASTLED_WARN("No audio samples available");
-        return out;
+        return AudioSample(); // Return empty AudioSample
     }
     // auto sample = mAudioSampleImpls.back();
     // mAudioSampleImpls.pop_back();

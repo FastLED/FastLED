@@ -20,10 +20,10 @@ JsonCheckboxImpl::JsonCheckboxImpl(const fl::string &name, bool value)
         });
     mInternal = fl::make_intrusive<JsonUiInternal>(name, fl::move(updateFunc),
                                      fl::move(toJsonFunc));
-    addJsonUiComponent(mInternal);
+    addJsonUiComponent(fl::WeakPtr<JsonUiInternal>(mInternal));
 }
 
-JsonCheckboxImpl::~JsonCheckboxImpl() { removeJsonUiComponent(mInternal); }
+JsonCheckboxImpl::~JsonCheckboxImpl() { removeJsonUiComponent(fl::WeakPtr<JsonUiInternal>(mInternal)); }
 
 JsonCheckboxImpl &JsonCheckboxImpl::Group(const fl::string &name) {
     mInternal->setGroup(name);

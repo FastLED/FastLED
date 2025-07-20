@@ -22,7 +22,7 @@ void JsonDropdownImpl::commonInit(const fl::string &name) {
         });
     mInternal = fl::make_intrusive<JsonUiInternal>(name, fl::move(updateFunc),
                                      fl::move(toJsonFunc));
-    addJsonUiComponent(mInternal);
+    addJsonUiComponent(fl::WeakPtr<JsonUiInternal>(mInternal));
 }
 
 // Constructor with array of options and count
@@ -52,7 +52,7 @@ JsonDropdownImpl::JsonDropdownImpl(const fl::string &name, fl::initializer_list<
     commonInit(name);
 }
 
-JsonDropdownImpl::~JsonDropdownImpl() { removeJsonUiComponent(mInternal); }
+JsonDropdownImpl::~JsonDropdownImpl() { removeJsonUiComponent(fl::WeakPtr<JsonUiInternal>(mInternal)); }
 
 JsonDropdownImpl &JsonDropdownImpl::Group(const fl::string &name) {
     mInternal->setGroup(name);

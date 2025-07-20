@@ -26,7 +26,7 @@ FASTLED_SMART_PTR(JsonConsole);
  * - If the component identifier can be converted to an integer, it's used as ID
  * - Otherwise, the string key is used to lookup the component by name
  */
-class JsonConsole : public fl::Referent {
+class JsonConsole {
 public:
     // Callback types for serial interface
     using ReadAvailableCallback = fl::function<int()>;        // Returns number of bytes available (like Serial.available())

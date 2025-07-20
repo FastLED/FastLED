@@ -158,7 +158,7 @@ bool Video::rewind() {
     return mImpl->rewind();
 }
 
-VideoFxWrapper::VideoFxWrapper(intrusive_ptr<Fx> fx) : Fx1d(fx->getNumLeds()), mFx(fx) {
+VideoFxWrapper::VideoFxWrapper(fl::shared_ptr<Fx> fx) : Fx1d(fx->getNumLeds()), mFx(fx) {
     if (!mFx->hasFixedFrameRate(&mFps)) {
         FASTLED_WARN("VideoFxWrapper: Fx does not have a fixed frame rate, "
                      "assuming 30fps.");

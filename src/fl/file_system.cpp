@@ -64,7 +64,7 @@ class NullFileSystem : public FsImpl {
 
     FileHandlePtr openRead(const char *_path) override {
         FASTLED_UNUSED(_path);
-        FileHandlePtr out = FileHandlePtr::TakeOwnership(new NullFileHandle());
+        FileHandlePtr out = fl::make_shared<NullFileHandle>();
         return out;
     }
 };
@@ -191,7 +191,7 @@ namespace fl {
 // Weak fallback implementation when SD library is not available
 __attribute__((weak)) FsImplPtr make_sdcard_filesystem(int cs_pin) {
     FASTLED_UNUSED(cs_pin);
-    FsImplPtr out = FsImplPtr::TakeOwnership(new NullFileSystem());
+    FsImplPtr out = fl::make_shared<NullFileSystem>();
     return out;
 }
 #endif

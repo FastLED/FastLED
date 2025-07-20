@@ -1,5 +1,7 @@
 #pragma once
 
+#include "fl/shared_ptr.h"  // For migration compatibility
+
 // FastLED smart pointer.
 //
 //   * Make your subclasses inherit from fl::Referent.
@@ -26,17 +28,19 @@
 #include "fl/int.h"
 
 // Declares a smart pointer. FASTLED_SMART_PTR(Foo) will declare a class FooPtr
-// which will be a typedef of Ptr<Foo>. After this fl::make_intrusive<Foo>(...args) can be
-// used to create a new instance of Ptr<Foo>.
+// which will be a typedef of shared_ptr<Foo>. After this fl::make_intrusive<Foo>(...args) can be
+// used to create a new instance of shared_ptr<Foo>.
+// 
+// MIGRATION NOTE: These macros now create shared_ptr instead of Ptr typedefs
 #define FASTLED_SMART_PTR(type)                                                \
     class type;                                                                \
-    using type##Ptr = fl::Ptr<type>;
+    using type##Ptr = fl::shared_ptr<type>;
 
 #define FASTLED_SMART_PTR_STRUCT(type)                                         \
-    class type;                                                                \
-    using type##Ptr = fl::Ptr<type>;
+    struct type;                                                               \
+    using type##Ptr = fl::shared_ptr<type>;
 
-#define FASTLED_SMART_PTR_NO_FWD(type) using type##Ptr = fl::Ptr<type>;
+#define FASTLED_SMART_PTR_NO_FWD(type) using type##Ptr = fl::shared_ptr<type>;
 
 // If you have an interface class that you want to create a smart pointer for,
 // then you need to use this to bind it to a constructor.
@@ -129,6 +133,15 @@ template <typename T> class Ptr : public PtrTraits<T> {
     template <typename U, typename = fl::is_derived<T, U>>
     Ptr(const Ptr<U> &refptr);
 
+    // MIGRATION: Allow conversion from shared_ptr to Ptr for compatibility
+    // This enables migration from intrusive_ptr to shared_ptr while maintaining existing code
+    template <typename U, typename = fl::is_derived<T, U>>
+    Ptr(const fl::shared_ptr<U> &shared_ptr) : referent_(shared_ptr.get()) {
+        if (referent_) {
+            referent_->ref();
+        }
+    }
+
     Ptr() : referent_(nullptr) {}
 
     // Forbidden to convert a raw pointer to a Referent into a Ptr, because
@@ -142,6 +155,19 @@ template <typename T> class Ptr : public PtrTraits<T> {
 
     Ptr &operator=(const Ptr &other);
     Ptr &operator=(Ptr &&other) noexcept;
+    
+    // MIGRATION: Allow assignment from shared_ptr to Ptr for compatibility  
+    template <typename U, typename = fl::is_derived<T, U>>
+    Ptr &operator=(const fl::shared_ptr<U> &shared_ptr) {
+        if (referent_) {
+            referent_->unref();
+        }
+        referent_ = shared_ptr.get();
+        if (referent_) {
+            referent_->ref();
+        }
+        return *this;
+    }
 
     // Either returns the weakptr if it exists, or an empty weakptr.
     WeakPtr<T> weakRefNoCreate() const;

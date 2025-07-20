@@ -24,10 +24,10 @@ JsonNumberFieldImpl::JsonNumberFieldImpl(const fl::string &name, double value,
         });
     mInternal = fl::make_intrusive<JsonUiInternal>(name, fl::move(updateFunc),
                                      fl::move(toJsonFunc));
-    addJsonUiComponent(mInternal);
+    addJsonUiComponent(fl::WeakPtr<JsonUiInternal>(mInternal));
 }
 
-JsonNumberFieldImpl::~JsonNumberFieldImpl() { removeJsonUiComponent(mInternal); }
+JsonNumberFieldImpl::~JsonNumberFieldImpl() { removeJsonUiComponent(fl::WeakPtr<JsonUiInternal>(mInternal)); }
 
 JsonNumberFieldImpl &JsonNumberFieldImpl::Group(const fl::string &name) {
     mInternal->setGroup(name);

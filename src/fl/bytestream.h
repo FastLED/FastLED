@@ -13,7 +13,7 @@ namespace fl {
 FASTLED_SMART_PTR(ByteStream);
 
 // An abstract class that represents a stream of bytes.
-class ByteStream : public fl::Referent {
+class ByteStream {
   public:
     virtual ~ByteStream() {}
     virtual bool available(fl::size) const = 0;

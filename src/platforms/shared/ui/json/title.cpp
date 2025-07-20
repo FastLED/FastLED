@@ -17,7 +17,7 @@ JsonTitleImpl::JsonTitleImpl(const string &text) : mText(text) {
             static_cast<JsonTitleImpl *>(this)->toJson(json);
         });
     mInternal = fl::make_intrusive<JsonUiInternal>("title", update_fcn, to_json_fcn);
-    addJsonUiComponent(mInternal);
+    addJsonUiComponent(fl::WeakPtr<JsonUiInternal>(mInternal));
 }
 
 JsonTitleImpl::~JsonTitleImpl() {}

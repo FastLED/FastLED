@@ -39,8 +39,8 @@ TEST_CASE("test_fx_engine") {
     FxEngine engine(NUM_LEDS, false);
     CRGB leds[NUM_LEDS];
 
-    Ptr<MockFx> redFx = fl::make_intrusive<MockFx>(NUM_LEDS, CRGB::Red);
-    Ptr<MockFx> blueFx = fl::make_intrusive<MockFx>(NUM_LEDS, CRGB::Blue);
+    fl::shared_ptr<MockFx> redFx = fl::make_intrusive<MockFx>(NUM_LEDS, CRGB::Red);
+    fl::shared_ptr<MockFx> blueFx = fl::make_intrusive<MockFx>(NUM_LEDS, CRGB::Blue);
 
     int id0 = engine.addFx(redFx);
     int id1 = engine.addFx(blueFx);

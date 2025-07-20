@@ -19,7 +19,7 @@ FASTLED_SMART_PTR(PixelStream);
 // PixelStream takes either a file handle or a byte stream
 // and reads frames from it in order to serve data to the
 // video system.
-class PixelStream : public fl::Referent {
+class PixelStream {
   public:
     enum Type {
         kStreaming,
@@ -56,7 +56,7 @@ class PixelStream : public fl::Referent {
     fl::ByteStreamPtr mByteStream;
     bool mUsingByteStream;
 
-  protected:
+  public:
     virtual ~PixelStream();
 };
 

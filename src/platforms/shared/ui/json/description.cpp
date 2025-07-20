@@ -17,7 +17,7 @@ JsonDescriptionImpl::JsonDescriptionImpl(const string &text): mText(text) {
             static_cast<JsonDescriptionImpl *>(this)->toJson(json);
         });
     mInternal = fl::make_intrusive<JsonUiInternal>("description", update_fcn, to_json_fcn);
-    addJsonUiComponent(mInternal);
+    addJsonUiComponent(fl::WeakPtr<JsonUiInternal>(mInternal));
 }
 
 JsonDescriptionImpl::~JsonDescriptionImpl() {}
