@@ -84,7 +84,7 @@ class DigitalPinImpl : public Referent {
 
 
 DigitalPin::DigitalPin(int DigitalPin) {
-    mImpl = fl::make_intrusive<DigitalPinImpl>(DigitalPin);
+    mImpl = fl::make_shared<DigitalPinImpl>(DigitalPin);
 }
 DigitalPin::~DigitalPin() = default;
 DigitalPin::DigitalPin(const DigitalPin &other) = default;

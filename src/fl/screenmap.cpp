@@ -170,7 +170,7 @@ void ScreenMap::toJsonStr(const FixedMap<string, ScreenMap, 16> &segmentMaps,
 
 ScreenMap::ScreenMap(u32 length, float mDiameter)
     : length(length), mDiameter(mDiameter) {
-    mLookUpTable = fl::make_intrusive<LUTXYFLOAT>(length);
+    mLookUpTable = fl::make_shared<LUTXYFLOAT>(length);
     LUTXYFLOAT &lut = *mLookUpTable.get();
     vec2f *data = lut.getDataMutable();
     for (u32 x = 0; x < length; x++) {
@@ -180,7 +180,7 @@ ScreenMap::ScreenMap(u32 length, float mDiameter)
 
 ScreenMap::ScreenMap(const vec2f *lut, u32 length, float diameter)
     : length(length), mDiameter(diameter) {
-    mLookUpTable = fl::make_intrusive<LUTXYFLOAT>(length);
+    mLookUpTable = fl::make_shared<LUTXYFLOAT>(length);
     LUTXYFLOAT &lut16xy = *mLookUpTable.get();
     vec2f *data = lut16xy.getDataMutable();
     for (u32 x = 0; x < length; x++) {

@@ -12,7 +12,7 @@ FASTLED_SMART_PTR(TimeFunction);
 FASTLED_SMART_PTR(TimeWarp);
 
 // Interface for time generation and time manipulation.
-class TimeFunction : public fl::Referent {
+class TimeFunction {
   public:
     virtual ~TimeFunction() {}
     virtual fl::u32

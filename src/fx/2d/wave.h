@@ -85,7 +85,7 @@ class WaveFx : public Fx2d {
         // Initialize the wave simulation with the given parameters.
         if (args.crgbMap == nullptr) {
             // Use the default CRGB mapping function.
-            mCrgbMap = fl::make_intrusive<WaveCrgbMapDefault>();
+            mCrgbMap = fl::make_shared<WaveCrgbMapDefault>();
         } else {
             // Set a custom CRGB mapping function.
             mCrgbMap = args.crgbMap;
@@ -140,7 +140,7 @@ class WaveFx : public Fx2d {
     // This will now own the crgbMap.
     void setCrgbMap(WaveCrgbMapPtr crgbMap) {
         // Set a custom CRGB mapping function.
-        mCrgbMap.reset(crgbMap);
+        mCrgbMap = crgbMap;
     }
 
     void draw(DrawContext context) override {

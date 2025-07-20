@@ -99,7 +99,7 @@ class SoundLevelMeter {
 };
 
 // Implementation details.
-class AudioSampleImpl : public fl::Referent {
+class AudioSampleImpl {
   public:
     using VectorPCM = fl::vector<fl::i16>;
     ~AudioSampleImpl() {}

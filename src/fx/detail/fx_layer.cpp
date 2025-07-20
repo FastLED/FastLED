@@ -9,7 +9,7 @@
 
 namespace fl {
 
-void FxLayer::setFx(fl::intrusive_ptr<Fx> newFx) {
+void FxLayer::setFx(fl::shared_ptr<Fx> newFx) {
     if (newFx != fx) {
         release();
         fx = newFx;
@@ -19,7 +19,7 @@ void FxLayer::setFx(fl::intrusive_ptr<Fx> newFx) {
 void FxLayer::draw(fl::u32 now) {
     // assert(fx);
     if (!frame) {
-        frame = fl::make_intrusive<Frame>(fx->getNumLeds());
+        frame = fl::make_shared<Frame>(fx->getNumLeds());
     }
 
     if (!running) {
@@ -44,7 +44,7 @@ void FxLayer::release() {
     fx.reset();
 }
 
-fl::intrusive_ptr<Fx> FxLayer::getFx() { 
+fl::shared_ptr<Fx> FxLayer::getFx() { 
     return fx; 
 }
 

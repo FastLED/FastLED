@@ -26,25 +26,25 @@
 #include "fl/int.h"
 
 // Declares a smart pointer. FASTLED_SMART_PTR(Foo) will declare a class FooPtr
-// which will be a typedef of Ptr<Foo>. After this fl::make_intrusive<Foo>(...args) can be
-// used to create a new instance of Ptr<Foo>.
+// which will be a typedef of shared_ptr<Foo>. After this fl::make_intrusive<Foo>(...args) can be
+// used to create a new instance of shared_ptr<Foo>.
 #define FASTLED_SMART_PTR(type)                                                \
     class type;                                                                \
-    using type##Ptr = fl::Ptr<type>;
+    using type##Ptr = fl::shared_ptr<type>;
 
 #define FASTLED_SMART_PTR_STRUCT(type)                                         \
-    class type;                                                                \
-    using type##Ptr = fl::Ptr<type>;
+    struct type;                                                               \
+    using type##Ptr = fl::shared_ptr<type>;
 
-#define FASTLED_SMART_PTR_NO_FWD(type) using type##Ptr = fl::Ptr<type>;
+#define FASTLED_SMART_PTR_NO_FWD(type) using type##Ptr = fl::shared_ptr<type>;
 
 // If you have an interface class that you want to create a smart pointer for,
 // then you need to use this to bind it to a constructor.
 #define FASTLED_SMART_PTR_CONSTRUCTOR(type, constructor)                       \
     template <> class PtrTraits<type> {                                        \
       public:                                                                  \
-        template <typename... Args> static Ptr<type> New(Args... args) {       \
-            fl::Ptr<type> ptr = constructor(args...);                          \
+        template <typename... Args> static shared_ptr<type> New(Args... args) {       \
+            fl::shared_ptr<type> ptr = constructor(args...);                          \
             return ptr;                                                        \
         }                                                                      \
     };

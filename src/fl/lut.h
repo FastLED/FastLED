@@ -32,7 +32,7 @@ FASTLED_SMART_PTR_NO_FWD(LUTXYFLOAT);
 FASTLED_SMART_PTR_NO_FWD(LUTXYZFLOAT);
 
 // Templated lookup table.
-template <typename T> class LUT : public fl::Referent {
+template <typename T> class LUT {
   public:
     LUT(u32 length) : length(length) {
         T *ptr = PSRamAllocator<T>::Alloc(length);

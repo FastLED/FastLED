@@ -57,7 +57,7 @@ struct Transform16 {
 class TransformFloatImpl : public Referent {
   public:
     static TransformFloatImplPtr Identity() {
-        TransformFloatImplPtr tx = fl::make_intrusive<TransformFloatImpl>();
+        TransformFloatImplPtr tx = fl::make_shared<TransformFloatImpl>();
         return tx;
     }
     TransformFloatImpl() = default;

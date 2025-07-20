@@ -17,7 +17,7 @@ struct FFT_Args;
 //   auto sample = SINE WAVE OF 512 SAMPLES
 //   fft.run(buffer, &out);
 //   FASTLED_WARN("FFTImpl output: " << out);  // 16 bands of output.
-class FFTImpl : public fl::Referent {
+class FFTImpl {
   public:
     // Result indicating success or failure of the FFTImpl run (in which case
     // there will be an error message).

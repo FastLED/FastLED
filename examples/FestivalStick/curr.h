@@ -345,13 +345,13 @@ void setup() {
     waveArgs.speed = 0.16f;                          // Wave propagation speed
     waveArgs.dampening = 6.0f;                       // Wave energy loss
     waveArgs.x_cyclical = true;                      // Enable cylindrical wrapping!
-    waveArgs.crgbMap = fl::make_intrusive<WaveCrgbGradientMap>(waveBluepal); // Default color palette
+    waveArgs.crgbMap = fl::make_shared<WaveCrgbGradientMap>(waveBluepal); // Default color palette
     
     // Create wave effect with cylindrical mapping
-    waveFx = fl::make_intrusive<WaveFx>(xyRect, waveArgs);
+    waveFx = fl::make_shared<WaveFx>(xyRect, waveArgs);
     
     // Create blender for wave effects (allows multiple wave layers in future)
-    waveBlend = fl::make_intrusive<Blend2d>(xyRect);
+    waveBlend = fl::make_shared<Blend2d>(xyRect);
     waveBlend->add(waveFx);
     
     // Initialize Animartrix effect
@@ -716,7 +716,7 @@ void drawWave(uint32_t now) {
     
     // Update wave color palette
     CRGBPalette16 currentPalette = getWavePalette();
-    WaveCrgbMapPtr newCrgbMap = fl::make_intrusive<WaveCrgbGradientMap>(currentPalette);
+    WaveCrgbMapPtr newCrgbMap = fl::make_shared<WaveCrgbGradientMap>(currentPalette);
     waveFx->setCrgbMap(newCrgbMap);
     
     // Apply blur settings to the wave blend (for smoother wave effects)

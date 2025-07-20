@@ -12,7 +12,9 @@
 
 namespace fl {
 
-FASTLED_SMART_PTR(JsonUiInternal);
+// JSON UI components use the old intrusive_ptr system for WeakPtr compatibility
+class JsonUiInternal;
+using JsonUiInternalPtr = fl::intrusive_ptr<JsonUiInternal>;
 
 class JsonUiInternal : public fl::Referent {
   public:

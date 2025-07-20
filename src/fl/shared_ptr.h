@@ -19,15 +19,41 @@ namespace detail {
 // Tag type for make_shared constructor
 struct make_shared_tag {};
 
-// Simple control block structure - just manages reference counts
+// No-tracking tag for make_shared_no_tracking
+struct no_tracking_tag {};
+
+// Enhanced control block structure with no-tracking support using special value
 struct ControlBlockBase {
     fl::atomic_u32 shared_count;
     fl::atomic_u32 weak_count;
     
-    ControlBlockBase() : shared_count(1), weak_count(1) {}
+    // Special value indicating no-tracking mode
+    static constexpr fl::u32 NO_TRACKING_VALUE = 0xffffffff;
+    
+    ControlBlockBase(bool track = true) 
+        : shared_count(track ? 1 : NO_TRACKING_VALUE), weak_count(1) {}
     virtual ~ControlBlockBase() = default;
     virtual void destroy_object() = 0;
     virtual void destroy_control_block() = 0;
+    
+    // NEW: No-tracking aware increment/decrement
+    void add_shared_ref() {
+        if (shared_count != NO_TRACKING_VALUE) {
+            ++shared_count;
+        }
+    }
+    
+    bool remove_shared_ref() {
+        if (shared_count == NO_TRACKING_VALUE) {
+            return false;  // Never destroy in no-tracking mode
+        }
+        return (--shared_count == 0);
+    }
+    
+    // Check if this control block is in no-tracking mode
+    bool is_no_tracking() const {
+        return shared_count == NO_TRACKING_VALUE;
+    }
 };
 
 // Default deleter implementation
@@ -38,16 +64,25 @@ struct default_delete {
     }
 };
 
-// Control block for external objects (via constructor)
+// Deleter that does nothing (for stack/static objects)
+template<typename T>
+struct no_op_deleter {
+    void operator()(T*) const {
+        // Intentionally do nothing - object lifetime managed externally
+    }
+};
+
+// Enhanced control block for external objects with no-tracking support
 template<typename T, typename Deleter = default_delete<T>>
 struct ControlBlock : public ControlBlockBase {
     T* ptr;
     Deleter deleter;
     
-    ControlBlock(T* p, Deleter d) : ptr(p), deleter(d) {}
+    ControlBlock(T* p, Deleter d, bool track = true) 
+        : ControlBlockBase(track), ptr(p), deleter(d) {}
     
     void destroy_object() override {
-        if (ptr) {
+        if (ptr && !is_no_tracking()) {  // Only delete if tracking
             deleter(ptr);
             ptr = nullptr;
         }
@@ -100,10 +135,16 @@ private:
         : ptr_(ptr), control_block_(control_block) {
         // Control block was created with reference count 1, no need to increment
     }
+    
+    // Internal constructor for no-tracking
+    shared_ptr(T* ptr, detail::ControlBlockBase* control_block, detail::no_tracking_tag) 
+        : ptr_(ptr), control_block_(control_block) {
+        // Control block created with no_tracking=true, no reference increment needed
+    }
         
     void release() {
         if (control_block_) {
-            if (--control_block_->shared_count == 0) {
+            if (control_block_->remove_shared_ref()) {
                 control_block_->destroy_object();
                 if (--control_block_->weak_count == 0) {
                     control_block_->destroy_control_block();
@@ -114,7 +155,7 @@ private:
     
     void acquire() {
         if (control_block_) {
-            ++control_block_->shared_count;
+            control_block_->add_shared_ref();
         }
     }
 
@@ -130,7 +171,7 @@ public:
     template<typename Y>
     explicit shared_ptr(Y* ptr) : ptr_(ptr) {
         if (ptr_) {
-            control_block_ = new detail::ControlBlock<Y>(ptr_, detail::default_delete<Y>{});
+            control_block_ = new detail::ControlBlock<Y>(ptr, detail::default_delete<Y>{});
         } else {
             control_block_ = nullptr;
         }
@@ -250,13 +291,23 @@ public:
     
     T& operator[](ptrdiff_t idx) const { return ptr_[idx]; }
     
+    // NEW: use_count returns 0 for no-tracking shared_ptrs
     long use_count() const noexcept {
-        return control_block_ ? static_cast<long>(control_block_->shared_count) : 0;
+        if (!control_block_) return 0;
+        if (control_block_->shared_count == detail::ControlBlockBase::NO_TRACKING_VALUE) {
+            return 0;
+        }
+        return static_cast<long>(control_block_->shared_count);
     }
     
     bool unique() const noexcept { return use_count() == 1; }
     
     explicit operator bool() const noexcept { return ptr_ != nullptr; }
+    
+    // NEW: Check if this is a no-tracking shared_ptr
+    bool is_no_tracking() const noexcept {
+        return control_block_ && control_block_->is_no_tracking();
+    }
     
     // Comparison operators for nullptr only (to avoid ambiguity with non-member operators)
     
@@ -277,6 +328,9 @@ private:
     
     template<typename Y, typename A, typename... Args>
     friend shared_ptr<Y> allocate_shared(const A& alloc, Args&&... args);
+    
+    template<typename Y>
+    friend shared_ptr<Y> make_shared_no_tracking(Y& obj);
 };
 
 // Factory functions
@@ -288,6 +342,15 @@ shared_ptr<T> make_shared(Args&&... args) {
     new(control->get_object()) T(fl::forward<Args>(args)...);
     control->object_constructed = true;
     return shared_ptr<T>(control->get_object(), control, detail::make_shared_tag{});
+}
+
+// NEW: Creates a shared_ptr that does not modify the reference count
+// The shared_ptr and any copies will not affect object lifetime
+template<typename T>
+shared_ptr<T> make_shared_no_tracking(T& obj) {
+    auto* control = new detail::ControlBlock<T, detail::no_op_deleter<T>>(
+        &obj, detail::no_op_deleter<T>{}, false);  // track = false (enables no-tracking mode)
+    return shared_ptr<T>(&obj, control, detail::no_tracking_tag{});
 }
 
 // allocate_shared (simplified version without full allocator support for now)

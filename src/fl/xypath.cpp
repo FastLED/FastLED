@@ -69,7 +69,7 @@ TransformFloat &XYPath::transform() { return mPathRenderer->transform(); }
 
 XYPath::XYPath(XYPathGeneratorPtr path, TransformFloat transform)
     : mPath(path) {
-    mPathRenderer = fl::make_intrusive<XYPathRenderer>(path, transform);
+    mPathRenderer = fl::make_shared<XYPathRenderer>(path, transform);
 }
 
 XYPath::~XYPath() {}
@@ -139,67 +139,67 @@ vec2f XYPathRenderer::at(float alpha, const TransformFloat &tx) {
 }
 
 XYPathPtr XYPath::NewPointPath(float x, float y) {
-    auto path = fl::make_intrusive<PointPath>(x, y);
-    return fl::make_intrusive<XYPath>(path);
+    auto path = fl::make_shared<PointPath>(x, y);
+    return fl::make_shared<XYPath>(path);
 }
 
 XYPathPtr XYPath::NewLinePath(float x0, float y0, float x1, float y1) {
-    LinePathParamsPtr p = fl::make_intrusive<LinePathParams>();
+    LinePathParamsPtr p = fl::make_shared<LinePathParams>();
     auto &params = *p;
     params.x0 = x0;
     params.y0 = y0;
     params.x1 = x1;
     params.y1 = y1;
-    auto path = fl::make_intrusive<LinePath>(p);
-    return fl::make_intrusive<XYPath>(path);
+    auto path = fl::make_shared<LinePath>(p);
+    return fl::make_shared<XYPath>(path);
 }
 
-XYPathPtr XYPath::NewLinePath(const intrusive_ptr<LinePathParams> &params) {
-    auto path = fl::make_intrusive<LinePath>(params);
-    return fl::make_intrusive<XYPath>(path);
+XYPathPtr XYPath::NewLinePath(const fl::shared_ptr<LinePathParams> &params) {
+    auto path = fl::make_shared<LinePath>(params);
+    return fl::make_shared<XYPath>(path);
 }
 
 XYPathPtr XYPath::NewCirclePath() {
-    auto path = fl::make_intrusive<CirclePath>();
-    return fl::make_intrusive<XYPath>(path);
+    auto path = fl::make_shared<CirclePath>();
+    return fl::make_shared<XYPath>(path);
 }
 
 XYPathPtr XYPath::NewCirclePath(u16 width, u16 height) {
-    CirclePathPtr path = fl::make_intrusive<CirclePath>();
-    XYPathPtr out = fl::make_intrusive<XYPath>(path);
+    CirclePathPtr path = fl::make_shared<CirclePath>();
+    XYPathPtr out = fl::make_shared<XYPath>(path);
     out->setDrawBounds(width, height);
     return out;
 }
 
 XYPathPtr XYPath::NewHeartPath() {
-    HeartPathPtr path = fl::make_intrusive<HeartPath>();
-    return fl::make_intrusive<XYPath>(path);
+    HeartPathPtr path = fl::make_shared<HeartPath>();
+    return fl::make_shared<XYPath>(path);
 }
 
 XYPathPtr XYPath::NewHeartPath(u16 width, u16 height) {
-    HeartPathPtr path = fl::make_intrusive<HeartPath>();
-    XYPathPtr out = fl::make_intrusive<XYPath>(path);
+    HeartPathPtr path = fl::make_shared<HeartPath>();
+    XYPathPtr out = fl::make_shared<XYPath>(path);
     out->setDrawBounds(width, height);
     return out;
 }
 
 XYPathPtr XYPath::NewArchimedeanSpiralPath(u16 width, u16 height) {
-    ArchimedeanSpiralPathPtr path = fl::make_intrusive<ArchimedeanSpiralPath>();
-    XYPathPtr out = fl::make_intrusive<XYPath>(path);
+    ArchimedeanSpiralPathPtr path = fl::make_shared<ArchimedeanSpiralPath>();
+    XYPathPtr out = fl::make_shared<XYPath>(path);
     out->setDrawBounds(width, height);
     return out;
 }
 
 XYPathPtr XYPath::NewArchimedeanSpiralPath() {
-    ArchimedeanSpiralPathPtr path = fl::make_intrusive<ArchimedeanSpiralPath>();
-    XYPathPtr out = fl::make_intrusive<XYPath>(path);
+    ArchimedeanSpiralPathPtr path = fl::make_shared<ArchimedeanSpiralPath>();
+    XYPathPtr out = fl::make_shared<XYPath>(path);
     return out;
 }
 
 XYPathPtr XYPath::NewRosePath(u16 width, u16 height,
-                              const intrusive_ptr<RosePathParams> &params) {
-    RosePathPtr path = fl::make_intrusive<RosePath>(params);
-    XYPathPtr out = fl::make_intrusive<XYPath>(path);
+                              const fl::shared_ptr<RosePathParams> &params) {
+    RosePathPtr path = fl::make_shared<RosePath>(params);
+    XYPathPtr out = fl::make_shared<XYPath>(path);
     if (width > 0 && height > 0) {
         out->setDrawBounds(width, height);
     }
@@ -207,9 +207,9 @@ XYPathPtr XYPath::NewRosePath(u16 width, u16 height,
 }
 
 XYPathPtr XYPath::NewPhyllotaxisPath(u16 width, u16 height,
-                                     const intrusive_ptr<PhyllotaxisParams> &args) {
-    PhyllotaxisPathPtr path = fl::make_intrusive<PhyllotaxisPath>(args);
-    XYPathPtr out = fl::make_intrusive<XYPath>(path);
+                                     const fl::shared_ptr<PhyllotaxisParams> &args) {
+    PhyllotaxisPathPtr path = fl::make_shared<PhyllotaxisPath>(args);
+    XYPathPtr out = fl::make_shared<XYPath>(path);
     if (width > 0 && height > 0) {
         out->setDrawBounds(width, height);
     }
@@ -217,9 +217,9 @@ XYPathPtr XYPath::NewPhyllotaxisPath(u16 width, u16 height,
 }
 
 XYPathPtr XYPath::NewGielisCurvePath(u16 width, u16 height,
-                                     const intrusive_ptr<GielisCurveParams> &params) {
-    GielisCurvePathPtr path = fl::make_intrusive<GielisCurvePath>(params);
-    XYPathPtr out = fl::make_intrusive<XYPath>(path);
+                                     const fl::shared_ptr<GielisCurveParams> &params) {
+    GielisCurvePathPtr path = fl::make_shared<GielisCurvePath>(params);
+    XYPathPtr out = fl::make_shared<XYPath>(path);
     if (width > 0 && height > 0) {
         out->setDrawBounds(width, height);
     }
@@ -227,9 +227,9 @@ XYPathPtr XYPath::NewGielisCurvePath(u16 width, u16 height,
 }
 
 XYPathPtr XYPath::NewCatmullRomPath(u16 width, u16 height,
-                                    const intrusive_ptr<CatmullRomParams> &params) {
-    CatmullRomPathPtr path = fl::make_intrusive<CatmullRomPath>(params);
-    XYPathPtr out = fl::make_intrusive<XYPath>(path);
+                                    const fl::shared_ptr<CatmullRomParams> &params) {
+    CatmullRomPathPtr path = fl::make_shared<CatmullRomPath>(params);
+    XYPathPtr out = fl::make_shared<XYPath>(path);
     if (width > 0 && height > 0) {
         out->setDrawBounds(width, height);
     }
@@ -241,12 +241,12 @@ XYPathPtr XYPath::NewCustomPath(const fl::function<vec2f(float)> &f,
                                 const TransformFloat &transform,
                                 const char *name) {
 
-    XYPathFunctionPtr path = fl::make_intrusive<XYPathFunction>(f);
+    XYPathFunctionPtr path = fl::make_shared<XYPathFunction>(f);
     path->setName(name);
     if (!drawbounds.empty()) {
         path->setDrawBounds(drawbounds);
     }
-    XYPathPtr out = fl::make_intrusive<XYPath>(path);
+    XYPathPtr out = fl::make_shared<XYPath>(path);
     if (!transform.is_identity()) {
         out->setTransform(transform);
     }

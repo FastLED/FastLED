@@ -28,7 +28,7 @@ Video::Video() : Fx1d(0) {}
 
 Video::Video(size_t pixelsPerFrame, float fps, size_t frame_history_count)
     : Fx1d(pixelsPerFrame) {
-    mImpl = fl::make_intrusive<VideoImpl>(pixelsPerFrame, fps, frame_history_count);
+    mImpl = fl::make_shared<VideoImpl>(pixelsPerFrame, fps, frame_history_count);
 }
 
 void Video::setFade(fl::u32 fadeInTime, fl::u32 fadeOutTime) {
@@ -158,14 +158,14 @@ bool Video::rewind() {
     return mImpl->rewind();
 }
 
-VideoFxWrapper::VideoFxWrapper(intrusive_ptr<Fx> fx) : Fx1d(fx->getNumLeds()), mFx(fx) {
+VideoFxWrapper::VideoFxWrapper(fl::shared_ptr<Fx> fx) : Fx1d(fx->getNumLeds()), mFx(fx) {
     if (!mFx->hasFixedFrameRate(&mFps)) {
         FASTLED_WARN("VideoFxWrapper: Fx does not have a fixed frame rate, "
                      "assuming 30fps.");
         mFps = 30.0f;
     }
-    mVideo = fl::make_intrusive<VideoImpl>(mFx->getNumLeds(), mFps, 2);
-    mByteStream = fl::make_intrusive<ByteStreamMemory>(mFx->getNumLeds() * sizeof(CRGB));
+    mVideo = fl::make_shared<VideoImpl>(mFx->getNumLeds(), mFps, 2);
+    mByteStream = fl::make_shared<ByteStreamMemory>(mFx->getNumLeds() * sizeof(CRGB));
     mVideo->beginStream(mByteStream);
 }
 

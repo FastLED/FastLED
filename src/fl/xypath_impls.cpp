@@ -15,7 +15,7 @@
 namespace fl {
 
 LinePath::LinePath(float x0, float y0, float x1, float y1) {
-    mParams = fl::make_intrusive<LinePathParams>();
+    mParams = fl::make_shared<LinePathParams>();
     params().x0 = x0;
     params().y0 = y0;
     params().x1 = x1;
@@ -104,7 +104,7 @@ vec2f ArchimedeanSpiralPath::compute(float alpha) {
 }
 
 RosePath::RosePath(u8 n, u8 d) {
-    mParams = fl::make_intrusive<RosePathParams>();
+    mParams = fl::make_shared<RosePathParams>();
     params().n = n;
     params().d = d;
 }
@@ -230,7 +230,7 @@ void RosePath::setN(u8 n) { params().n = n; }
 
 void RosePath::setD(u8 d) { params().d = d; }
 
-RosePath::RosePath(const intrusive_ptr<RosePathParams> &p) : mParams(p) {}
+RosePath::RosePath(const fl::shared_ptr<RosePathParams> &p) : mParams(p) {}
 
 RosePathParams &RosePath::params() { return *mParams; }
 
@@ -238,14 +238,14 @@ const RosePathParams &RosePath::params() const { return *mParams; }
 
 const string PhyllotaxisPath::name() const { return "PhyllotaxisPath"; }
 
-PhyllotaxisPath::PhyllotaxisPath(const intrusive_ptr<PhyllotaxisParams> &p)
+PhyllotaxisPath::PhyllotaxisPath(const fl::shared_ptr<PhyllotaxisParams> &p)
     : mParams(p) {}
 
 PhyllotaxisParams &PhyllotaxisPath::params() { return *mParams; }
 
 const PhyllotaxisParams &PhyllotaxisPath::params() const { return *mParams; }
 
-GielisCurvePath::GielisCurvePath(const intrusive_ptr<GielisCurveParams> &p)
+GielisCurvePath::GielisCurvePath(const fl::shared_ptr<GielisCurveParams> &p)
     : mParams(p) {}
 
 const string GielisCurvePath::name() const { return "GielisCurvePath"; }
@@ -258,7 +258,7 @@ void GielisCurvePath::setN3(float n3) { params().n3 = n3; }
 GielisCurveParams &GielisCurvePath::params() { return *mParams; }
 const GielisCurveParams &GielisCurvePath::params() const { return *mParams; }
 
-CatmullRomPath::CatmullRomPath(const intrusive_ptr<CatmullRomParams> &p) : mParams(p) {}
+CatmullRomPath::CatmullRomPath(const fl::shared_ptr<CatmullRomParams> &p) : mParams(p) {}
 
 void CatmullRomPath::addPoint(vec2f p) { params().addPoint(p); }
 

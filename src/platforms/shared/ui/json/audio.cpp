@@ -186,7 +186,7 @@ void JsonAudioImpl::updateInternal(
         
         // Create one AudioSample per buffer object (preserve separation)
         if (!samples.empty()) {
-            AudioSampleImplPtr sample = fl::make_intrusive<AudioSampleImpl>();
+            AudioSampleImplPtr sample = fl::make_shared<AudioSampleImpl>();
             sample->assign(samples.begin(), samples.end(), timestamp);
             mAudioSampleImpls.push_back(sample);
             
@@ -199,7 +199,7 @@ void JsonAudioImpl::updateInternal(
 }
 
 AudioSample JsonAudioImpl::next() {
-    intrusive_ptr<AudioSampleImpl> out;
+    AudioSampleImplPtr out;
     if (mAudioSampleImpls.empty()) {
         // FASTLED_WARN("No audio samples available");
         return out;

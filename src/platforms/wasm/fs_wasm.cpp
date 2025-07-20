@@ -62,7 +62,7 @@ FASTLED_SMART_PTR(WasmFileHandle);
 // called.
 FASTLED_SMART_PTR(FileData);
 
-class FileData : public fl::Referent {
+class FileData {
   public:
     FileData(size_t capacity) : mCapacity(capacity) { mData.reserve(capacity); }
     FileData(const std::vector<uint8_t> &data, size_t len)
@@ -215,11 +215,11 @@ class FsImplWasm : public fl::FsImpl {
             auto it = gFileMap.find(path);
             if (it != gFileMap.end()) {
                 auto &data = it->second;
-                out = WasmFileHandlePtr::TakeOwnership(
+                out = fl::shared_ptr<WasmFileHandle>(
                     new WasmFileHandle(path, data));
                 // FASTLED_DBG("Opened file: " << _path);
             } else {
-                out = fl::FileHandlePtr::Null();
+                out = fl::FileHandlePtr();
                 FASTLED_DBG("File not found: " << _path);
             }
         }
@@ -233,7 +233,7 @@ FileDataPtr _findIfExists(const Str &path) {
     if (it != gFileMap.end()) {
         return it->second;
     }
-    return FileDataPtr::Null();
+    return FileDataPtr();
 }
 
 FileDataPtr _findOrCreate(const Str &path, size_t len) {
@@ -242,7 +242,7 @@ FileDataPtr _findOrCreate(const Str &path, size_t len) {
     if (it != gFileMap.end()) {
         return it->second;
     }
-    auto entry = fl::make_intrusive<FileData>(len);
+    auto entry = fl::make_shared<FileData>(len);
     gFileMap.insert(std::make_pair(path, entry));
     return entry;
 }
@@ -251,9 +251,9 @@ FileDataPtr _createIfNotExists(const Str &path, size_t len) {
     fl::lock_guard<fl::mutex> lock(gFileMapMutex);
     auto it = gFileMap.find(path);
     if (it != gFileMap.end()) {
-        return FileDataPtr::Null();
+        return FileDataPtr();
     }
-    auto entry = fl::make_intrusive<FileData>(len);
+    auto entry = fl::make_shared<FileData>(len);
     gFileMap.insert(std::make_pair(path, entry));
     return entry;
 }
@@ -332,7 +332,7 @@ EMSCRIPTEN_KEEPALIVE void fastled_declare_files(const char* jsonStr) {
 
 namespace fl {
 // Platforms eed to implement this to create an instance of the filesystem.
-FsImplPtr make_sdcard_filesystem(int cs_pin) { return fl::make_intrusive<FsImplWasm>(); }
+FsImplPtr make_sdcard_filesystem(int cs_pin) { return fl::make_shared<FsImplWasm>(); }
 } // namespace fl
 
 #endif // __EMSCRIPTEN__
