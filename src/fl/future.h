@@ -22,10 +22,17 @@
 /// future.complete_with_value(42);
 /// 
 /// // Check result non-blockingly (consumer side)
-/// if (future) { // operator bool() - true when ready
-///     auto result = future.try_result();
-///     if (!result.empty()) {
-///         int value = *result.ptr(); // value = 42
+/// if (future) { // operator bool() - true when ready OR error
+///     switch (future.state()) {
+///         case FutureState::READY:
+///             auto result = future.try_result();
+///             if (!result.empty()) {
+///                 int value = *result.ptr(); // value = 42
+///             }
+///             break;
+///         case FutureState::ERROR:
+///             handle_error(future.error_message());
+///             break;
 ///     }
 /// }
 /// @endcode
@@ -44,16 +51,32 @@
 /// 
 /// void loop() {
 ///     // Check futures non-blockingly  
-///     if (weather_future) { // Concise syntax using operator bool()
-///         auto result = weather_future.try_result();
-///         if (!result.empty()) process_weather(*result.ptr());
-///         weather_future.reset();
+///     if (weather_future) { // Something to process (ready or error)
+///         switch (weather_future.state()) {
+///             case FutureState::READY:
+///                 auto result = weather_future.try_result();
+///                 if (!result.empty()) process_weather(*result.ptr());
+///                 weather_future.clear();
+///                 break;
+///             case FutureState::ERROR:
+///                 handle_weather_error(weather_future.error_message());
+///                 weather_future.clear();
+///                 break;
+///         }
 ///     }
 ///     
-///     if (color_future) { // operator bool() returns true when ready
-///         auto result = color_future.try_result();
-///         if (!result.empty()) update_led_color(*result.ptr());
-///         color_future.reset();
+///     if (color_future) { // Something to process (ready or error)
+///         switch (color_future.state()) {
+///             case FutureState::READY:
+///                 auto result = color_future.try_result();
+///                 if (!result.empty()) update_led_color(*result.ptr());
+///                 color_future.clear();
+///                 break;
+///             case FutureState::ERROR:
+///                 handle_color_error(color_future.error_message());
+///                 color_future.clear();
+///                 break;
+///         }
 ///     }
 ///     
 ///     // LEDs update smoothly - never blocked!
@@ -68,10 +91,18 @@
 /// void loop() {
 ///     static auto api_request = http_client.get_async("http://api.example.com/data");
 ///     
-///     if (api_request) { // Simple boolean check - true when ready
-///         auto response = api_request.try_result();
-///         if (!response.empty()) update_leds_from_api(*response.ptr());
-///         api_request.reset();
+///     if (api_request) { // Something to process (ready or error)
+///         switch (api_request.state()) {
+///             case FutureState::READY:
+///                 auto response = api_request.try_result();
+///                 if (!response.empty()) update_leds_from_api(*response.ptr());
+///                 api_request.clear();
+///                 break;
+///             case FutureState::ERROR:
+///                 handle_network_error(api_request.error_message());
+///                 api_request.clear();
+///                 break;
+///         }
 ///     }
 ///     
 ///     FastLED.show(); // Never blocked by network I/O!
@@ -83,9 +114,16 @@
 /// auto future = fl::future<int>::create();
 /// future.complete_with_error("Network timeout");
 /// 
-/// if (future.has_error()) {
-///     fl::string error = future.error_message(); // "Network timeout"
-///     handle_error(error);
+/// if (future) { // Something to process
+///     switch (future.state()) {
+///         case FutureState::ERROR:
+///             fl::string error = future.error_message(); // "Network timeout"
+///             handle_error(error);
+///             break;
+///         case FutureState::READY:
+///             // Handle success case
+///             break;
+///     }
 /// }
 /// @endcode
 
@@ -97,6 +135,13 @@
 #include "fl/mutex.h"
 
 namespace fl {
+
+/// Future state enum - forces explicit handling of all cases
+enum class FutureState {
+    PENDING,  // Future is still pending completion
+    READY,    // Future completed successfully with value
+    ERROR     // Future completed with error
+};
 
 // Forward declaration for shared state
 namespace detail {
@@ -146,28 +191,18 @@ public:
         return mState != nullptr;
     }
     
-    /// Check if result is ready (non-blocking)
-    bool is_ready() const {
-        if (!valid()) return false;
-        return mState->is_ready();
+    /// Get the current state - forces explicit state handling!
+    FutureState state() const {
+        if (!valid()) return FutureState::PENDING;
+        return mState->get_state();
     }
     
-    /// Check if future has error
-    bool has_error() const {
-        if (!valid()) return false;
-        return mState->has_error();
-    }
-    
-    /// Check if future is still pending
-    bool is_pending() const {
-        if (!valid()) return false;
-        return mState->is_pending();
-    }
-    
-    /// Boolean conversion operator - returns true if future is ready
-    /// Allows for simple if (future) { ... } syntax
+    /// Boolean conversion - true if there's something to process (READY or ERROR)
+    /// Forces users to check state() and handle both success and error cases
     explicit operator bool() const {
-        return is_ready();
+        if (!valid()) return false;
+        FutureState s = state();
+        return s == FutureState::READY || s == FutureState::ERROR;
     }
     
     /// THE KEY METHOD - Non-blocking result access!
@@ -187,8 +222,8 @@ public:
         return mState->error_message();
     }
     
-    /// Reset future to invalid state (useful for reuse)
-    void reset() {
+    /// Clear future to invalid state (useful for reuse)
+    void clear() {
         mState.reset();
     }
     
@@ -261,30 +296,18 @@ namespace detail {
 template<typename T>
 class CompletableFutureState {
 public:
-    enum State { PENDING, READY, ERROR };
-    
-    CompletableFutureState() : mState(PENDING) {}
+    CompletableFutureState() : mState(FutureState::PENDING) {}
     
     /// Thread-safe state checking (consumer interface)
-    bool is_ready() const {
+    FutureState get_state() const {
         fl::lock_guard<fl::mutex> lock(mMutex);
-        return mState == READY;
-    }
-    
-    bool has_error() const {
-        fl::lock_guard<fl::mutex> lock(mMutex);
-        return mState == ERROR;
-    }
-    
-    bool is_pending() const {
-        fl::lock_guard<fl::mutex> lock(mMutex);
-        return mState == PENDING;
+        return mState;
     }
     
     /// Non-blocking result access - never blocks!
     fl::optional<T> try_get_result() const {
         fl::lock_guard<fl::mutex> lock(mMutex);
-        if (mState == READY) {
+        if (mState == FutureState::READY) {
             return fl::optional<T>(mResult);
         }
         return fl::optional<T>();
@@ -293,7 +316,7 @@ public:
     /// Get error message if in error state
     const fl::string& error_message() const {
         fl::lock_guard<fl::mutex> lock(mMutex);
-        if (mState == ERROR) {
+        if (mState == FutureState::ERROR) {
             return mErrorMessage;
         } else {
             static const fl::string empty_msg;
@@ -304,9 +327,9 @@ public:
     /// Complete the future with a result (producer interface)
     bool set_result(const T& result) {
         fl::lock_guard<fl::mutex> lock(mMutex);
-        if (mState == PENDING) {
+        if (mState == FutureState::PENDING) {
             mResult = result;
-            mState = READY;
+            mState = FutureState::READY;
             return true;
         }
         return false; // Already completed
@@ -314,9 +337,9 @@ public:
     
     bool set_result(T&& result) {
         fl::lock_guard<fl::mutex> lock(mMutex);
-        if (mState == PENDING) {
+        if (mState == FutureState::PENDING) {
             mResult = fl::move(result);
-            mState = READY;
+            mState = FutureState::READY;
             return true;
         }
         return false; // Already completed
@@ -325,9 +348,9 @@ public:
     /// Complete the future with an error (producer interface)
     bool set_error(const fl::string& message) {
         fl::lock_guard<fl::mutex> lock(mMutex);
-        if (mState == PENDING) {
+        if (mState == FutureState::PENDING) {
             mErrorMessage = message;
-            mState = ERROR;
+            mState = FutureState::ERROR;
             return true;
         }
         return false; // Already completed
@@ -335,9 +358,9 @@ public:
     
     bool set_error(const char* message) {
         fl::lock_guard<fl::mutex> lock(mMutex);
-        if (mState == PENDING) {
+        if (mState == FutureState::PENDING) {
             mErrorMessage = message;  // Implicit conversion to fl::string
-            mState = ERROR;
+            mState = FutureState::ERROR;
             return true;
         }
         return false; // Already completed
@@ -345,7 +368,7 @@ public:
     
 private:
     mutable fl::mutex mMutex;  // Mutable for const methods
-    State mState;
+    FutureState mState;
     T mResult;
     fl::string mErrorMessage;
 };
