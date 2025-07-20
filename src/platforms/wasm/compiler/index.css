@@ -7,7 +7,7 @@ body {
     color: #E0E0E0;
     /* Light gray text */
     margin: 0;
-    padding: 48px 0 0 0; /* Add padding-top for fixed menu bar */
+    padding: 60px 0 0 0; /* Add padding-top for fixed menu bar */
     font-family: 'Roboto Condensed', sans-serif;
     display: flex;
     flex-direction: column;
@@ -868,7 +868,7 @@ audio::-webkit-media-controls-mute-button {
     top: 0;
     left: 0;
     right: 0;
-    height: 48px; /* Increased height for larger text */
+    height: 60px; /* Appropriate height for h2-sized text */
     background: linear-gradient(135deg, 
         rgba(30, 30, 30, 0.95) 0%, 
         rgba(40, 40, 40, 0.95) 100%);
@@ -877,12 +877,12 @@ audio::-webkit-media-controls-mute-button {
     z-index: 1000;
     display: flex;
     align-items: center;
-    padding: 0 15px;
+    padding: 0 20px;
 }
 
 .menu-item {
     position: relative;
-    margin-right: 30px; /* Increased spacing for larger text */
+    margin-right: 35px; /* Appropriate spacing for h2-sized text */
 }
 
 .menu-label {
@@ -890,7 +890,7 @@ audio::-webkit-media-controls-mute-button {
     font-family: 'Roboto Condensed', sans-serif;
     font-size: 1.5em; /* Match h2 size */
     font-weight: 600;
-    padding: 8px 16px;
+    padding: 10px 18px;
     cursor: pointer;
     border-radius: 6px;
     transition: all 0.2s ease;
@@ -913,7 +913,7 @@ audio::-webkit-media-controls-mute-button {
     position: absolute;
     top: 100%;
     left: 0;
-    min-width: 160px;
+    min-width: 200px; /* Appropriate width for h2-sized items */
     background: linear-gradient(135deg, 
         rgba(20, 20, 20, 0.98) 0%, 
         rgba(30, 30, 30, 0.98) 100%);
@@ -937,13 +937,15 @@ audio::-webkit-media-controls-mute-button {
 }
 
 .menu-dropdown-item {
-    padding: 12px 18px;
+    padding: 14px 20px;
     color: #E0E0E0;
     cursor: pointer;
     transition: all 0.2s ease;
     font-family: 'Roboto Condensed', sans-serif;
-    font-size: 15px; /* Slightly larger to complement the bigger menu labels */
+    font-size: 1.5em; /* Match h2 size */
+    font-weight: 500;
     border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    letter-spacing: 0.5px;
 }
 
 .menu-dropdown-item:last-child {
