@@ -1,3 +1,6 @@
+/* Import JSON Inspector CSS */
+@import url('./modules/json_inspector.css');
+
 body {
     background-color: #121212;
     /* Dark gray background */
@@ -899,6 +902,24 @@ audio::-webkit-media-controls-mute-button {
     width: 20px;
     height: 20px;
     transition: transform 0.2s ease;
+}
+
+/* Inspector button styles */
+.inspector-button {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #E0E0E0;
+    border-radius: 6px;
+    padding: 8px;
+    cursor: pointer;
+    font-size: 16px;
+    margin-left: 8px;
+    transition: all 0.2s ease;
+}
+
+.inspector-button:hover {
+    background: rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.3);
 }
 
 .gear-dropdown {

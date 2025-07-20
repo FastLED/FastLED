@@ -849,6 +849,11 @@ export class JsonUiManager {
    */
   updateUiComponents(jsonString) {
     // console.log('*** C++→JS: Backend update received:', jsonString);
+    
+    // Log the inbound update to the inspector
+    if (window.jsonInspector) {
+      window.jsonInspector.logInboundEvent(jsonString, 'C++ → JS');
+    }
 
     try {
       const updates = JSON.parse(jsonString);
@@ -1136,6 +1141,11 @@ export class JsonUiManager {
         });
       }
 
+      // Log outbound changes to the inspector
+      if (window.jsonInspector) {
+        window.jsonInspector.logOutboundEvent(transformedChanges, 'JS → C++');
+      }
+      
       // Return the transformed format
       return transformedChanges;
     }

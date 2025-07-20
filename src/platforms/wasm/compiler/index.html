@@ -42,6 +42,13 @@
                         <div class="gear-dropdown-item" data-value="gfx-bloom">gfx - bloom</div>
                     </div>
                 </div>
+                <!-- JSON Inspector Button -->
+                <div id="json-inspector-container">
+                    <button id="json-inspector-button" class="inspector-button" 
+                            aria-label="JSON Inspector" title="JSON UI Inspector">
+                        📊
+                    </button>
+                </div>
             </div>
             <div id="ui-controls"></div>
             <div id="ui-controls-2" style="display: none;"></div>
@@ -286,5 +293,21 @@
     setTimeout(loadFastLedOnce, 100);
 </script>
 
+<!-- JSON Inspector Popup -->
+<div class="inspector-popup-overlay" id="inspector-popup-overlay"></div>
+<div class="inspector-popup" id="json-inspector-popup">
+    <div class="inspector-header">
+        <span class="inspector-title">JSON UI Inspector</span>
+        <button class="inspector-close" id="inspector-close-btn">&times;</button>
+    </div>
+    <div class="inspector-content">
+        <div class="inspector-controls">
+            <button id="inspector-clear">Clear</button>
+            <button id="inspector-pause">Pause</button>
+            <span class="event-counter">Events: <span id="event-count">0</span></span>
+        </div>
+        <div class="inspector-log" id="inspector-log"></div>
+    </div>
+</div>
 
 </html>

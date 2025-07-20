@@ -24,6 +24,7 @@ import { JsonUiManager } from './modules/ui_manager.js';
 import { GraphicsManager } from './modules/graphics_manager.js';
 import { GraphicsManagerThreeJS } from './modules/graphics_manager_threejs.js';
 import { isDenseGrid } from './modules/graphics_utils.js';
+import { JsonInspector } from './modules/json_inspector.js';
 
 /** URL parameters for runtime configuration */
 const urlParams = new URLSearchParams(window.location.search);
@@ -509,11 +510,18 @@ function FastLED_onStripAdded(stripId, stripLength) {
 function FastLED_onFrame(frameData, uiUpdateCallback) {
   // uiUpdateCallback is a function from FastLED that will parse a json string
   // representing the changes to the UI that FastLED will need to respond to.
+  
+  // Wrap the UI update callback to log outbound events
+  let wrappedCallback = uiUpdateCallback;
+  if (window.jsonInspector) {
+    wrappedCallback = window.jsonInspector.wrapUiUpdateCallback(uiUpdateCallback);
+  }
+  
   // uses global variables.
   const changesJson = uiManager.processUiChanges();
   if (changesJson !== null) {
     const changesJsonStr = JSON.stringify(changesJson);
-    uiUpdateCallback(changesJsonStr);
+    wrappedCallback(changesJsonStr);
   }
   if (frameData.length === 0) {
     console.warn('Received empty frame data, skipping update');
@@ -529,6 +537,11 @@ function FastLED_onFrame(frameData, uiUpdateCallback) {
  * @param {Object} jsonData - UI element configuration data
  */
 function FastLED_onUiElementsAdded(jsonData) {
+  // Log the inbound event to the inspector
+  if (window.jsonInspector) {
+    window.jsonInspector.logInboundEvent(jsonData);
+  }
+  
   // uses global variables.
   uiManager.addUiElements(jsonData);
 }
@@ -742,6 +755,9 @@ async function localLoadFastLed(options) {
     console.log('Loading FastLED with options:', options);
     frameRate = options.frameRate || DEFAULT_FRAME_RATE_60FPS;
     uiManager = new JsonUiManager(uiControlsId);
+
+    // Initialize JSON Inspector
+    const jsonInspector = new JsonInspector();
 
     // Expose UI manager globally for debug functions and C++ module
     window.uiManager = uiManager;

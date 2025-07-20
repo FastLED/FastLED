@@ -1,0 +1,243 @@
+/* JSON Inspector Styles */
+
+.inspector-button.active {
+    background: rgba(100, 150, 255, 0.3);
+    border-color: rgba(100, 150, 255, 0.5);
+    color: #6495ff;
+}
+
+.inspector-popup-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 9999;
+}
+
+.inspector-popup {
+    display: none;
+    position: fixed;
+    top: 50px;
+    left: 50px;
+    width: 800px;
+    height: 600px;
+    max-width: 90vw;
+    max-height: 90vh;
+    background: #1A1A1A;
+    border: 1px solid #333;
+    border-radius: 8px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+    z-index: 10000;
+    overflow: hidden;
+    resize: both;
+    min-width: 400px;
+    min-height: 300px;
+}
+
+.inspector-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    background: #2A2A2A;
+    border-bottom: 1px solid #333;
+    cursor: move;
+    user-select: none;
+}
+
+.inspector-title {
+    font-weight: bold;
+    color: #E0E0E0;
+}
+
+.inspector-close {
+    background: none;
+    border: none;
+    color: #E0E0E0;
+    font-size: 20px;
+    cursor: pointer;
+    padding: 0;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    transition: background-color 0.2s ease;
+}
+
+.inspector-close:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.inspector-content {
+    display: flex;
+    flex-direction: column;
+    height: calc(100% - 49px);
+}
+
+.inspector-controls {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    background: #222;
+    border-bottom: 1px solid #333;
+}
+
+.inspector-controls button {
+    background: #333;
+    border: 1px solid #555;
+    color: #E0E0E0;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    transition: all 0.2s ease;
+}
+
+.inspector-controls button:hover {
+    background: #444;
+    border-color: #666;
+}
+
+.inspector-controls button.paused {
+    background: #ff6b35;
+    border-color: #ff8c42;
+}
+
+.event-counter {
+    color: #999;
+    font-size: 12px;
+    margin-left: auto;
+}
+
+.inspector-log {
+    flex: 1;
+    overflow-y: auto;
+    padding: 8px;
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    line-height: 1.4;
+}
+
+.inspector-event {
+    margin-bottom: 12px;
+    border: 1px solid #333;
+    border-radius: 4px;
+    overflow: hidden;
+    background: #1E1E1E;
+}
+
+.inspector-event.inbound {
+    border-left: 4px solid #4CAF50;
+}
+
+.inspector-event.outbound {
+    border-left: 4px solid #2196F3;
+}
+
+.event-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 12px;
+    background: #2A2A2A;
+    border-bottom: 1px solid #333;
+    font-size: 11px;
+}
+
+.event-direction {
+    font-weight: bold;
+    color: #E0E0E0;
+    min-width: 80px;
+}
+
+.event-timestamp {
+    color: #999;
+    min-width: 80px;
+}
+
+.event-type {
+    color: #6495ff;
+    background: rgba(100, 149, 237, 0.1);
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 10px;
+}
+
+.event-id {
+    color: #666;
+    margin-left: auto;
+}
+
+.event-data {
+    padding: 8px 12px;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.event-data pre {
+    margin: 0;
+    color: #E0E0E0;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    font-size: 11px;
+    line-height: 1.3;
+}
+
+/* JSON Syntax Highlighting */
+.event-data pre .json-key {
+    color: #6495ff;
+}
+
+.event-data pre .json-string {
+    color: #90EE90;
+}
+
+.event-data pre .json-number {
+    color: #FFD700;
+}
+
+.event-data pre .json-boolean {
+    color: #FF6347;
+}
+
+.event-data pre .json-null {
+    color: #999;
+}
+
+/* Scrollbar styling for webkit browsers */
+.inspector-log::-webkit-scrollbar,
+.event-data::-webkit-scrollbar {
+    width: 8px;
+}
+
+.inspector-log::-webkit-scrollbar-track,
+.event-data::-webkit-scrollbar-track {
+    background: #1A1A1A;
+}
+
+.inspector-log::-webkit-scrollbar-thumb,
+.event-data::-webkit-scrollbar-thumb {
+    background: #444;
+    border-radius: 4px;
+}
+
+.inspector-log::-webkit-scrollbar-thumb:hover,
+.event-data::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+/* Responsive adjustments */
+@media (max-width: 900px) {
+    .inspector-popup {
+        width: 95vw;
+        height: 80vh;
+        top: 10vh;
+        left: 2.5vw;
+    }
+} 
