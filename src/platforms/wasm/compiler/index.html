@@ -15,6 +15,24 @@
 </head>
 
 <body>
+    <!-- Menu Bar -->
+    <div id="menu-bar">
+        <div class="menu-item">
+            <span class="menu-label">File</span>
+            <div class="menu-dropdown">
+                <div class="menu-dropdown-item" data-action="save">Save</div>
+            </div>
+        </div>
+        <div class="menu-item">
+            <span class="menu-label">Settings</span>
+            <div class="menu-dropdown">
+                <div class="menu-dropdown-item" data-value="gfx-simple">gfx 0</div>
+                <div class="menu-dropdown-item" data-value="gfx-bloom">gfx 1</div>
+                <div class="menu-dropdown-item" data-value="ui-events">UI Events</div>
+            </div>
+        </div>
+    </div>
+
     <!-- Row 1: Title (always full width) -->
     <h1>FastLED</h1>
     
@@ -29,20 +47,6 @@
             <div id="canvas-container">
                 <canvas id="myCanvas" width="16" height="16"></canvas>
                 <div id="canvas-label">stdout</div>
-                <!-- Gear icon and dropdown menu -->
-                <div id="gear-menu-container">
-                    <button id="gear-icon" class="gear-button" aria-label="Graphics Options">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <circle cx="12" cy="12" r="3"></circle>
-                            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1 1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v.07a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
-                        </svg>
-                    </button>
-                    <div id="gear-dropdown" class="gear-dropdown">
-                        <div class="gear-dropdown-item" data-value="gfx-simple">gfx 0</div>
-                        <div class="gear-dropdown-item" data-value="gfx-bloom">gfx 1</div>
-                        <div class="gear-dropdown-item" data-value="ui-events">UI Events</div>
-                    </div>
-                </div>
                 <!-- JSON Inspector Button - Removed, now in gear menu -->
             </div>
             <div id="ui-controls"></div>
@@ -162,47 +166,47 @@
         });
     });
 
-    // Gear menu functionality
-    const gearIcon = document.getElementById('gear-icon');
-    const gearDropdown = document.getElementById('gear-dropdown');
-    let isDropdownOpen = false;
-
-    // Toggle dropdown when gear icon is clicked
-    gearIcon.addEventListener('click', function(e) {
-        e.stopPropagation();
-        isDropdownOpen = !isDropdownOpen;
-        
-        if (isDropdownOpen) {
-            gearDropdown.classList.add('show');
-        } else {
-            gearDropdown.classList.remove('show');
-        }
+    // Menu bar functionality
+    const menuItems = document.querySelectorAll('.menu-item');
+    
+    // Handle File menu items
+    const fileMenuItems = document.querySelectorAll('.menu-item:first-child .menu-dropdown-item');
+    fileMenuItems.forEach(item => {
+        item.addEventListener('click', function(e) {
+            e.stopPropagation();
+            const action = this.getAttribute('data-action');
+            console.log('File action selected:', action);
+            
+            // Handle file actions
+            handleFileAction(action);
+        });
     });
 
-    // Handle dropdown item clicks
-    const dropdownItems = document.querySelectorAll('.gear-dropdown-item');
-    dropdownItems.forEach(item => {
+    // Handle Settings menu items (formerly gear dropdown items)
+    const settingsMenuItems = document.querySelectorAll('.menu-item:last-child .menu-dropdown-item');
+    settingsMenuItems.forEach(item => {
         item.addEventListener('click', function(e) {
             e.stopPropagation();
             const selectedValue = this.getAttribute('data-value');
-            console.log('Graphics option selected:', selectedValue);
-            
-            // Close dropdown
-            isDropdownOpen = false;
-            gearDropdown.classList.remove('show');
+            console.log('Settings option selected:', selectedValue);
             
             // Handle the selected option
             handleGraphicsOptionChange(selectedValue);
         });
     });
 
-    // Close dropdown when clicking outside
-    document.addEventListener('click', function(e) {
-        if (!gearIcon.contains(e.target) && !gearDropdown.contains(e.target)) {
-            isDropdownOpen = false;
-            gearDropdown.classList.remove('show');
+    // Handle file actions
+    function handleFileAction(action) {
+        if (action === 'save') {
+            // Implement save functionality
+            console.log('Save action triggered');
+            // You can add save functionality here, such as:
+            // - Saving current state to localStorage
+            // - Downloading configuration as JSON
+            // - Saving to browser storage
+            alert('Save functionality not yet implemented');
         }
-    });
+    }
 
     // Handle graphics option changes
     function handleGraphicsOptionChange(option) {
