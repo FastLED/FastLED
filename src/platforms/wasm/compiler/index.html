@@ -38,17 +38,12 @@
                         </svg>
                     </button>
                     <div id="gear-dropdown" class="gear-dropdown">
-                        <div class="gear-dropdown-item" data-value="gfx-simple">gfx - simple</div>
-                        <div class="gear-dropdown-item" data-value="gfx-bloom">gfx - bloom</div>
+                        <div class="gear-dropdown-item" data-value="gfx-simple">gfx 0</div>
+                        <div class="gear-dropdown-item" data-value="gfx-bloom">gfx 1</div>
+                        <div class="gear-dropdown-item" data-value="ui-events">UI Events</div>
                     </div>
                 </div>
-                <!-- JSON Inspector Button -->
-                <div id="json-inspector-container">
-                    <button id="json-inspector-button" class="inspector-button" 
-                            aria-label="JSON Inspector" title="JSON UI Inspector">
-                        📊
-                    </button>
-                </div>
+                <!-- JSON Inspector Button - Removed, now in gear menu -->
             </div>
             <div id="ui-controls"></div>
             <div id="ui-controls-2" style="display: none;"></div>
@@ -211,6 +206,16 @@
 
     // Handle graphics option changes
     function handleGraphicsOptionChange(option) {
+        if (option === 'ui-events') {
+            // Handle UI Events (JSON Inspector) without page reload
+            if (window.jsonInspector) {
+                window.jsonInspector.toggle();
+            } else {
+                console.warn('JSON Inspector not available yet');
+            }
+            return;
+        }
+        
         // Determine URL parameter based on selection
         let gfxParam = '';
         if (option === 'gfx-simple') {

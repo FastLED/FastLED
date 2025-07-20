@@ -23,8 +23,8 @@ export class JsonInspector {
     }
 
     initializeDOM() {
-        // Get DOM elements
-        this.button = document.getElementById('json-inspector-button');
+        // Get DOM elements (button is now accessed via gear menu, so it's optional)
+        this.button = document.getElementById('json-inspector-button'); // May be null - now in gear menu
         this.popup = document.getElementById('json-inspector-popup');
         this.overlay = document.getElementById('inspector-popup-overlay');
         this.closeBtn = document.getElementById('inspector-close-btn');
@@ -35,8 +35,10 @@ export class JsonInspector {
     }
 
     setupEventListeners() {
-        // Button click to show/hide
-        this.button.addEventListener('click', () => this.toggle());
+        // Button click to show/hide (only if button exists - now handled via gear menu)
+        if (this.button) {
+            this.button.addEventListener('click', () => this.toggle());
+        }
         
         // Close button only (removed overlay click to allow interaction with UI below)
         this.closeBtn.addEventListener('click', () => this.hide());
