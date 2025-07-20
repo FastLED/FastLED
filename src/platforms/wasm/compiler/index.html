@@ -198,13 +198,9 @@
     // Handle file actions
     function handleFileAction(action) {
         if (action === 'save') {
-            // Implement save functionality
-            console.log('Save action triggered');
-            // You can add save functionality here, such as:
-            // - Saving current state to localStorage
-            // - Downloading configuration as JSON
-            // - Saving to browser storage
-            alert('Save functionality not yet implemented');
+            console.log('Save action triggered - forwarding to /save endpoint');
+            // Forward to /save endpoint on the server
+            window.location.href = '/save';
         }
     }
 
