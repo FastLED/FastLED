@@ -27,12 +27,12 @@ JsonSliderImpl::JsonSliderImpl(const fl::string &name, float value, float min,
         JsonUiInternal::ToJsonFunction([this](FLArduinoJson::JsonObject &json) {
             static_cast<JsonSliderImpl *>(this)->toJson(json);
         });
-    mInternal = fl::make_intrusive<JsonUiInternal>(name, fl::move(updateFunc),
+    mInternal = fl::make_shared<JsonUiInternal>(name, fl::move(updateFunc),
                                        fl::move(toJsonFunc));
-    addJsonUiComponent(mInternal);
+    addJsonUiComponent(fl::weak_ptr<JsonUiInternal>(mInternal));
 }
 
-JsonSliderImpl::~JsonSliderImpl() { removeJsonUiComponent(mInternal); }
+JsonSliderImpl::~JsonSliderImpl() { removeJsonUiComponent(fl::weak_ptr<JsonUiInternal>(mInternal)); }
 
 JsonSliderImpl &JsonSliderImpl::Group(const fl::string &name) {
     mInternal->setGroup(name);

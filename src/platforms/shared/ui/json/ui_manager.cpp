@@ -37,7 +37,7 @@ JsonUiManager::~JsonUiManager() {
     fl::EngineEvents::removeListener(this);
 }
 
-void JsonUiManager::addComponent(fl::WeakPtr<JsonUiInternal> component) {
+void JsonUiManager::addComponent(fl::weak_ptr<JsonUiInternal> component) {
     //FL_WARN("*** JsonUiManager::addComponent ENTRY ***");
     fl::lock_guard<fl::mutex> lock(mMutex);
     mComponents.insert(component);
@@ -50,7 +50,7 @@ void JsonUiManager::addComponent(fl::WeakPtr<JsonUiInternal> component) {
     }
 }
 
-void JsonUiManager::removeComponent(fl::WeakPtr<JsonUiInternal> component) {
+void JsonUiManager::removeComponent(fl::weak_ptr<JsonUiInternal> component) {
     fl::lock_guard<fl::mutex> lock(mMutex);
     mComponents.erase(component);
 }

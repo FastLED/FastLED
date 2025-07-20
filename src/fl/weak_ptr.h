@@ -159,6 +159,25 @@ public:
     bool owner_before(const shared_ptr<Y>& other) const noexcept {
         return control_block_ < other.control_block_;
     }
+    
+    // Comparison operators (for compatibility with VectorSet)
+    bool operator==(const weak_ptr& other) const noexcept {
+        return ptr_ == other.ptr_ && control_block_ == other.control_block_;
+    }
+    
+    bool operator!=(const weak_ptr& other) const noexcept {
+        return !(*this == other);
+    }
+    
+    template<typename Y>
+    bool operator==(const weak_ptr<Y>& other) const noexcept {
+        return ptr_ == other.ptr_ && control_block_ == other.control_block_;
+    }
+    
+    template<typename Y>
+    bool operator!=(const weak_ptr<Y>& other) const noexcept {
+        return !(*this == other);
+    }
 
 private:
     void release() {

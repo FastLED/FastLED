@@ -22,12 +22,12 @@ JsonNumberFieldImpl::JsonNumberFieldImpl(const fl::string &name, double value,
         JsonUiInternal::ToJsonFunction([this](FLArduinoJson::JsonObject &json) {
             static_cast<JsonNumberFieldImpl *>(this)->toJson(json);
         });
-    mInternal = fl::make_intrusive<JsonUiInternal>(name, fl::move(updateFunc),
+    mInternal = fl::make_shared<JsonUiInternal>(name, fl::move(updateFunc),
                                      fl::move(toJsonFunc));
-    addJsonUiComponent(mInternal);
+    addJsonUiComponent(fl::weak_ptr<JsonUiInternal>(mInternal));
 }
 
-JsonNumberFieldImpl::~JsonNumberFieldImpl() { removeJsonUiComponent(mInternal); }
+JsonNumberFieldImpl::~JsonNumberFieldImpl() { removeJsonUiComponent(fl::weak_ptr<JsonUiInternal>(mInternal)); }
 
 JsonNumberFieldImpl &JsonNumberFieldImpl::Group(const fl::string &name) {
     mInternal->setGroup(name);

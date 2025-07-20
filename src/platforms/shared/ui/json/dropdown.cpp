@@ -20,9 +20,9 @@ void JsonDropdownImpl::commonInit(const fl::string &name) {
         JsonUiInternal::ToJsonFunction([this](FLArduinoJson::JsonObject &json) {
             static_cast<JsonDropdownImpl *>(this)->toJson(json);
         });
-    mInternal = fl::make_intrusive<JsonUiInternal>(name, fl::move(updateFunc),
+    mInternal = fl::make_shared<JsonUiInternal>(name, fl::move(updateFunc),
                                      fl::move(toJsonFunc));
-    addJsonUiComponent(mInternal);
+    addJsonUiComponent(fl::weak_ptr<JsonUiInternal>(mInternal));
 }
 
 // Constructor with array of options and count
@@ -52,7 +52,7 @@ JsonDropdownImpl::JsonDropdownImpl(const fl::string &name, fl::initializer_list<
     commonInit(name);
 }
 
-JsonDropdownImpl::~JsonDropdownImpl() { removeJsonUiComponent(mInternal); }
+JsonDropdownImpl::~JsonDropdownImpl() { removeJsonUiComponent(fl::weak_ptr<JsonUiInternal>(mInternal)); }
 
 JsonDropdownImpl &JsonDropdownImpl::Group(const fl::string &name) {
     mInternal->setGroup(name);

@@ -20,13 +20,13 @@ JsonButtonImpl::JsonButtonImpl(const string &name) : mPressed(false) {
         JsonUiInternal::ToJsonFunction([this](FLArduinoJson::JsonObject &json) {
             static_cast<JsonButtonImpl *>(this)->toJson(json);
         });
-    mInternal = fl::make_intrusive<JsonUiInternal>(name, fl::move(updateFunc),
+    mInternal = fl::make_shared<JsonUiInternal>(name, fl::move(updateFunc),
                                      fl::move(toJsonFunc));
-    addJsonUiComponent(mInternal);
+    addJsonUiComponent(fl::weak_ptr<JsonUiInternal>(mInternal));
     mUpdater.init(this);
 }
 
-JsonButtonImpl::~JsonButtonImpl() { removeJsonUiComponent(mInternal); }
+JsonButtonImpl::~JsonButtonImpl() { removeJsonUiComponent(fl::weak_ptr<JsonUiInternal>(mInternal)); }
 
 JsonButtonImpl &JsonButtonImpl::Group(const fl::string &name) {
     mInternal->setGroup(name);

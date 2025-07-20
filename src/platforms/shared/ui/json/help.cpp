@@ -16,11 +16,11 @@ JsonHelpImpl::JsonHelpImpl(const string &markdownContent): mMarkdownContent(mark
         JsonUiInternal::ToJsonFunction([this](FLArduinoJson::JsonObject &json) {
             static_cast<JsonHelpImpl *>(this)->toJson(json);
         });
-    mInternal = fl::make_intrusive<JsonUiInternal>("help", update_fcn, to_json_fcn);
-    addJsonUiComponent(mInternal);
+    mInternal = fl::make_shared<JsonUiInternal>("help", update_fcn, to_json_fcn);
+    addJsonUiComponent(fl::weak_ptr<JsonUiInternal>(mInternal));
 }
 
-JsonHelpImpl::~JsonHelpImpl() { removeJsonUiComponent(mInternal); }
+JsonHelpImpl::~JsonHelpImpl() { removeJsonUiComponent(fl::weak_ptr<JsonUiInternal>(mInternal)); }
 
 JsonHelpImpl &JsonHelpImpl::Group(const fl::string &name) {
     mInternal->setGroup(name);

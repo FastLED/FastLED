@@ -12,11 +12,11 @@
 
 namespace fl {
 
-// JSON UI components use the old intrusive_ptr system for WeakPtr compatibility
+// JSON UI components migrated to shared_ptr system
 class JsonUiInternal;
-using JsonUiInternalPtr = fl::intrusive_ptr<JsonUiInternal>;
+using JsonUiInternalPtr = fl::shared_ptr<JsonUiInternal>;
 
-class JsonUiInternal : public fl::Referent {
+class JsonUiInternal {
   public:
     using UpdateFunction =
         fl::function<void(const FLArduinoJson::JsonVariantConst &)>;

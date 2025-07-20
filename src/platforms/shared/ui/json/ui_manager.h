@@ -19,8 +19,8 @@ class JsonUiManager : fl::EngineEvents::Listener {
     JsonUiManager(Callback updateJs);
     ~JsonUiManager();
 
-    void addComponent(fl::WeakPtr<JsonUiInternal> component);
-    void removeComponent(fl::WeakPtr<JsonUiInternal> component);
+    void addComponent(fl::weak_ptr<JsonUiInternal> component);
+    void removeComponent(fl::weak_ptr<JsonUiInternal> component);
 
     // Force immediate processing of any pending updates (for testing)
     void processPendingUpdates();
@@ -38,7 +38,7 @@ class JsonUiManager : fl::EngineEvents::Listener {
 
   private:
     
-    typedef fl::VectorSet<fl::WeakPtr<JsonUiInternal>> JsonUIRefSet;
+    typedef fl::VectorSet<fl::weak_ptr<JsonUiInternal>> JsonUIRefSet;
 
     void onEndFrame() override;
 

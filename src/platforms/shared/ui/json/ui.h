@@ -5,7 +5,7 @@
 namespace fl {
 
 template<typename T>
-class WeakPtr;
+class weak_ptr;
 // Forward declare the JsonUiInternal class.
 class JsonUiInternal;
 class JsonUiManager;
@@ -27,17 +27,17 @@ JsonUiUpdateInput setJsonUiHandlers(const JsonUiUpdateOutput& updateJsHandler);
 /**
  * Add a UI component to the global component registry.
  * 
- * @param component WeakPtr to the JsonUiInternal component to add
+ * @param component weak_ptr to the JsonUiInternal component to add
  */
-void addJsonUiComponent(fl::WeakPtr<JsonUiInternal> component);
+void addJsonUiComponent(fl::weak_ptr<JsonUiInternal> component);
 
 
 /**
  * Remove a UI component from the global component registry.
  * 
- * @param component WeakPtr to the JsonUiInternal component to remove
+ * @param component weak_ptr to the JsonUiInternal component to remove
  */
-void removeJsonUiComponent(fl::WeakPtr<JsonUiInternal> component);
+void removeJsonUiComponent(fl::weak_ptr<JsonUiInternal> component);
 
 /**
  * Force immediate processing of any pending UI updates (for testing).

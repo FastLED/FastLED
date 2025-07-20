@@ -27,13 +27,13 @@ JsonAudioImpl::JsonAudioImpl(const fl::string &name) {
         JsonUiInternal::ToJsonFunction([this](FLArduinoJson::JsonObject &json) {
             static_cast<JsonAudioImpl *>(this)->toJson(json);
         });
-    mInternal = fl::make_intrusive<JsonUiInternal>(name, fl::move(updateFunc),
+    mInternal = fl::make_shared<JsonUiInternal>(name, fl::move(updateFunc),
                                        fl::move(toJsonFunc));
     mUpdater.init(this);
-    addJsonUiComponent(mInternal);
+    addJsonUiComponent(fl::weak_ptr<JsonUiInternal>(mInternal));
 }
 
-JsonAudioImpl::~JsonAudioImpl() { removeJsonUiComponent(mInternal); }
+JsonAudioImpl::~JsonAudioImpl() { removeJsonUiComponent(fl::weak_ptr<JsonUiInternal>(mInternal)); }
 
 JsonAudioImpl &JsonAudioImpl::Group(const fl::string &name) {
     mInternal->setGroup(name);

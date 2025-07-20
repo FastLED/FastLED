@@ -10,8 +10,8 @@
 namespace fl {
 
 // Temporary storage for UI components that arrive before handlers are set
-static fl::vector_inlined<fl::WeakPtr<JsonUiInternal>, 32>& getPendingComponents() {
-    static fl::vector_inlined<fl::WeakPtr<JsonUiInternal>, 32> pending;
+static fl::vector_inlined<fl::weak_ptr<JsonUiInternal>, 32>& getPendingComponents() {
+    static fl::vector_inlined<fl::weak_ptr<JsonUiInternal>, 32> pending;
     return pending;
 }
 
@@ -45,7 +45,7 @@ JsonUiUpdateInput setJsonUiHandlers(const JsonUiUpdateOutput& updateJsHandler) {
             FL_WARN("Flushing " << pending.size() << " pending UI components to internal JsonUiManager");
             for (const auto& component : pending) {
                 // Only add components that are still valid (not destroyed)
-                if (component) {
+                if (!component.expired()) {
                     manager->addComponent(component);
                 }
             }
@@ -81,7 +81,7 @@ JsonUiUpdateInput setJsonUiHandlers(const JsonUiUpdateOutput& updateJsHandler) {
     }
 }
 
-void addJsonUiComponent(fl::WeakPtr<JsonUiInternal> component) {
+void addJsonUiComponent(fl::weak_ptr<JsonUiInternal> component) {
     // FL_WARN("addJsonUiComponent: ENTRY - component=" << component);
     
     // Check if we have an internal manager first
@@ -102,7 +102,7 @@ void addJsonUiComponent(fl::WeakPtr<JsonUiInternal> component) {
     // FL_WARN("addJsonUiComponent: no manager exists, component stored in pending list: " << component);
 }
 
-void removeJsonUiComponent(fl::WeakPtr<JsonUiInternal> component) {
+void removeJsonUiComponent(fl::weak_ptr<JsonUiInternal> component) {
     // Check if we have an internal manager first
     JsonUiInternalPtr ptr = component.lock();
     if (ptr) {
@@ -117,8 +117,11 @@ void removeJsonUiComponent(fl::WeakPtr<JsonUiInternal> component) {
     
     // No manager exists, try to remove from pending list
     auto& pending = getPendingComponents();
-    auto it = pending.find_if([&component](const fl::WeakPtr<JsonUiInternal>& pending_component) {
-        return pending_component == component;
+    auto it = pending.find_if([&component](const fl::weak_ptr<JsonUiInternal>& pending_component) {
+        // Compare the weak_ptrs by checking if they refer to the same object
+        auto comp_locked = component.lock();
+        auto pending_locked = pending_component.lock();
+        return comp_locked && pending_locked && comp_locked == pending_locked;
     });
     
     if (it != pending.end()) {

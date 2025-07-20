@@ -16,8 +16,8 @@ JsonTitleImpl::JsonTitleImpl(const string &text) : mText(text) {
         JsonUiInternal::ToJsonFunction([this](FLArduinoJson::JsonObject &json) {
             static_cast<JsonTitleImpl *>(this)->toJson(json);
         });
-    mInternal = fl::make_intrusive<JsonUiInternal>("title", update_fcn, to_json_fcn);
-    addJsonUiComponent(mInternal);
+    mInternal = fl::make_shared<JsonUiInternal>("title", update_fcn, to_json_fcn);
+    addJsonUiComponent(fl::weak_ptr<JsonUiInternal>(mInternal));
 }
 
 JsonTitleImpl::~JsonTitleImpl() {}
