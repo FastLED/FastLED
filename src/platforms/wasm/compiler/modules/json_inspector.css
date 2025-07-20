@@ -137,16 +137,7 @@
     border-left: 4px solid #2196F3;
 }
 
-.direction-header {
-    font-weight: bold;
-    color: #E0E0E0;
-    font-size: 10px;
-    padding: 2px 8px;
-    background: #2A2A2A;
-    border-bottom: 1px solid #333;
-}
-
-.event-row {
+.direction-info-row {
     display: flex;
     align-items: center;
     padding: 2px 8px;
@@ -155,6 +146,15 @@
     line-height: 1.2;
     gap: 8px;
     min-height: 20px;
+    background: #2A2A2A;
+    border-bottom: 1px solid #333;
+}
+
+.direction-text {
+    font-weight: bold;
+    color: #E0E0E0;
+    min-width: 80px;
+    flex-shrink: 0;
 }
 
 .event-id {
@@ -175,12 +175,13 @@
     flex-shrink: 0;
 }
 
-.event-data {
+.json-row {
+    padding: 2px 8px;
     color: #E0E0E0;
-    flex: 1;
+    font-family: 'Courier New', monospace;
+    font-size: 11px;
+    line-height: 1.2;
     white-space: pre;
-    overflow: hidden;
-    text-overflow: ellipsis;
 }
 
 /* JSON Syntax Highlighting */

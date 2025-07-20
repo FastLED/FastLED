@@ -183,18 +183,29 @@ export class JsonInspector {
         
         // Only show direction if it's different from the last direction, or if it's the first event
         const showDirection = this.lastDirection === null || this.lastDirection !== event.direction;
-        const directionHeader = showDirection ? `<div class="direction-header">${event.direction}</div>` : '';
         
-        eventElement.innerHTML = `
-            ${directionHeader}
-            <div class="event-row">
-                <span class="event-id">#${event.id}</span>
-                <span class="separator">|</span>
-                <span class="event-timestamp">${event.timestamp.toLocaleTimeString()}</span>
-                <span class="separator">|</span>
-                <span class="event-data">${this.formatJson(event.data)}</span>
-            </div>
-        `;
+        if (showDirection) {
+            // Direction change: show direction + info on first row, JSON on second row
+            eventElement.innerHTML = `
+                <div class="direction-info-row">
+                    <span class="direction-text">${event.direction}</span>
+                    <span class="separator">|</span>
+                    <span class="event-id">#${event.id}</span>
+                    <span class="separator">|</span>
+                    <span class="event-timestamp">${event.timestamp.toLocaleTimeString()}</span>
+                </div>
+                <div class="json-row">
+                    ${this.formatJson(event.data)}
+                </div>
+            `;
+        } else {
+            // Same direction: just show the JSON data left-aligned
+            eventElement.innerHTML = `
+                <div class="json-row">
+                    ${this.formatJson(event.data)}
+                </div>
+            `;
+        }
         
         // Update last direction
         this.lastDirection = event.direction;
