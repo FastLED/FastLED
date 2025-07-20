@@ -1,10 +1,106 @@
 import os
+import re
 import subprocess
 import sys
 import tempfile
 import threading
 import time
+import urllib.parse
 from pathlib import Path
+
+
+def normalize_error_warning_paths(line: str) -> str:
+    r"""
+    Normalize compiler output paths to use consistent separators.
+
+    CONSTRAINT: Only process lines containing "error:" or "warning:"
+    (Ignore -I include paths and other compiler flags)
+
+    Fixes:
+    - Mixed path separators (/ and \) in error/warning messages
+    - URL encoding (%3A -> :) in error/warning messages
+    - Relative path issues with .. in error/warning messages
+
+    Args:
+        line (str): Raw compiler output line
+
+    Returns:
+        str: Normalized line with fixed paths (only if it contains error/warning)
+    """
+    # Only process error and warning lines - ignore build command lines
+    if not any(keyword in line.lower() for keyword in ["error:", "warning:", "note:"]):
+        return line
+
+    try:
+        # Step 1: Decode URL encoding (e.g., %3A -> :)
+        decoded_line = urllib.parse.unquote(line)
+
+        # Step 2: Fix mixed path separators
+        normalized_line = fix_path_separators(decoded_line)
+
+        # Step 3: Resolve relative paths where beneficial
+        resolved_line = resolve_relative_paths(normalized_line)
+
+        return resolved_line
+
+    except Exception:
+        # If normalization fails for any reason, return original line
+        # This ensures we never break the build output
+        return line
+
+
+def fix_path_separators(text: str) -> str:
+    """
+    Convert paths to use native OS separators consistently.
+
+    This function identifies path-like strings and normalizes their separators
+    while being careful not to modify non-path content.
+    """
+    # Pattern to match path-like strings (drive letters, directories, files)
+    # Matches: C:\path\to\file, /path/to/file, .\relative\path, ../relative/path
+    path_pattern = (
+        r'(?:[A-Za-z]:[\\\/]|[.]{0,2}[\\\/])[^\s:;"\'<>|*?]*[\\\/][^\s:;"\'<>|*?]*'
+    )
+
+    def normalize_path_match(match):
+        path_str = match.group(0)
+        try:
+            # Use pathlib to normalize the path separators for the current OS
+            normalized = str(
+                Path(path_str).as_posix() if os.name != "nt" else Path(path_str)
+            )
+            return normalized
+        except (ValueError, OSError):
+            # If pathlib can't handle it, do simple separator replacement
+            if os.name == "nt":
+                return path_str.replace("/", "\\")
+            else:
+                return path_str.replace("\\", "/")
+
+    return re.sub(path_pattern, normalize_path_match, text)
+
+
+def resolve_relative_paths(text: str) -> str:
+    """
+    Resolve .. and other relative path components where beneficial.
+
+    This is conservative and only resolves paths that clearly benefit from it.
+    """
+    # Pattern to match paths with .. that can be resolved
+    # Example: /some/path/../other -> /some/other
+    relative_pattern = r'([A-Za-z]:[\\\/](?:[^\\\/\s:;"\'<>|*?]+[\\\/])*)[^\\\/\s:;"\'<>|*?]+[\\\/]\.\.[\\\/]([^\\\/\s:;"\'<>|*?]+(?:[\\\/][^\\\/\s:;"\'<>|*?]+)*)'
+
+    def resolve_path_match(match):
+        try:
+            full_path = match.group(0)
+            # Use pathlib to resolve the path
+            resolved = str(Path(full_path).resolve())
+            return resolved
+        except (ValueError, OSError):
+            # If resolution fails, return original
+            return match.group(0)
+
+    return re.sub(relative_pattern, resolve_path_match, text)
 
 
 # Configure console for UTF-8 output on Windows
@@ -150,18 +246,24 @@ class RunningProcess:
                         break
                     linestr = line.decode("utf-8", errors="ignore")
                     linestr = linestr.rstrip()
+
+                    # Apply path normalization to error and warning lines
+                    normalized_linestr = normalize_error_warning_paths(linestr)
+
                     if self.echo:
                         # Handle Unicode output properly on Windows
                         try:
-                            print(linestr)  # Print to console in real time
+                            print(
+                                normalized_linestr
+                            )  # Print normalized output to console in real time
                         except UnicodeEncodeError:
                             # Fallback: encode to utf-8 bytes and decode with errors='replace'
                             print(
-                                linestr.encode("utf-8", errors="replace").decode(
+                                normalized_linestr.encode(
                                     "utf-8", errors="replace"
-                                )
+                                ).decode("utf-8", errors="replace")
                             )
-                    self.buffer.append(linestr)
+                    self.buffer.append(normalized_linestr)
             finally:
                 if self.proc and self.proc.stdout:
                     self.proc.stdout.close()

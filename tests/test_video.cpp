@@ -66,7 +66,7 @@ TEST_CASE("video with memory stream") {
     Video video(LEDS_PER_FRAME, FPS, 1);
     video.setFade(0, 0);
     ByteStreamMemoryPtr memoryStream =
-        fl::make_intrusive<ByteStreamMemory>(LEDS_PER_FRAME * 3);
+        fl::make_shared<ByteStreamMemory>(LEDS_PER_FRAME * 3);
     CRGB testData[LEDS_PER_FRAME] = {};
     for (uint32_t i = 0; i < LEDS_PER_FRAME; i++) {
         testData[i] = i % 2 == 0 ? CRGB::Red : CRGB::Black;
@@ -95,7 +95,7 @@ TEST_CASE("video with memory stream, interpolated") {
     Video video(LEDS_PER_FRAME, 1);
     video.setFade(0, 0);
     ByteStreamMemoryPtr memoryStream =
-        fl::make_intrusive<ByteStreamMemory>(LEDS_PER_FRAME * sizeof(CRGB) * 2);
+        fl::make_shared<ByteStreamMemory>(LEDS_PER_FRAME * sizeof(CRGB) * 2);
     CRGB testData[LEDS_PER_FRAME] = {};
     for (uint32_t i = 0; i < LEDS_PER_FRAME; i++) {
         testData[i] = CRGB::Red;
@@ -126,7 +126,7 @@ TEST_CASE("video with file handle") {
     // Video video(LEDS_PER_FRAME, FPS);
     Video video(LEDS_PER_FRAME, FPS);
     video.setFade(0, 0);
-    FakeFileHandlePtr fileHandle = fl::make_intrusive<FakeFileHandle>();
+    FakeFileHandlePtr fileHandle = fl::make_shared<FakeFileHandle>();
     CRGB led_frame[LEDS_PER_FRAME];
     // alternate between red and black
     for (uint32_t i = 0; i < LEDS_PER_FRAME; i++) {
@@ -151,7 +151,7 @@ TEST_CASE("video with file handle") {
 
 TEST_CASE("Video duration") {
     Video video(LEDS_PER_FRAME, FPS);
-    FakeFileHandlePtr fileHandle = fl::make_intrusive<FakeFileHandle>();
+    FakeFileHandlePtr fileHandle = fl::make_shared<FakeFileHandle>();
     CRGB led_frame[LEDS_PER_FRAME];
     // just set all the leds to white
 
@@ -173,7 +173,7 @@ TEST_CASE("Video duration") {
 TEST_CASE("video with end frame fadeout") {
     Video video(LEDS_PER_FRAME, FPS);
     video.setFade(0, 1000);
-    FakeFileHandlePtr fileHandle = fl::make_intrusive<FakeFileHandle>();
+    FakeFileHandlePtr fileHandle = fl::make_shared<FakeFileHandle>();
     CRGB led_frame[LEDS_PER_FRAME];
     // just set all the leds to white
 

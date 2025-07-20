@@ -39,8 +39,8 @@ TEST_CASE("LinePath") {
 
 TEST_CASE("LinePath at_subpixel") {
     // Tests that we can get the correct subpixel values at center point 0,0
-    LinePath line(-1.0f, -1.0f, 1.0f, -1.0f);
-    XYPath path(NewPtrNoTracking(line));
+    auto line = fl::make_shared<LinePath>(-1.0f, -1.0f, 1.0f, -1.0f);
+    XYPath path(line);
     path.setDrawBounds(2,2);
     Tile2x2_u8 tile = path.at_subpixel(0);
     REQUIRE_EQ(vec2<uint16_t>(0, 0), tile.origin());
@@ -50,8 +50,8 @@ TEST_CASE("LinePath at_subpixel") {
 
 TEST_CASE("LinePath simple float sweep") {
     // Tests that we can get the correct gaussian values at center point 0,0
-    LinePath point(0, 1.f, 1.f, 1.f);
-    XYPath path(NewPtrNoTracking(point));
+    auto point = fl::make_shared<LinePath>(0, 1.f, 1.f, 1.f);
+    XYPath path(point);
     auto xy = path.at(0);
     //MESSAGE_TILE(tile);
     REQUIRE_EQ(xy, vec2f(0.0f, 1.f));
@@ -61,8 +61,8 @@ TEST_CASE("LinePath simple float sweep") {
 
 TEST_CASE("Point at exactly the middle") {
     // Tests that we can get the correct gaussian values at center point 0,0
-    PointPath point(0.0, 0.0);  // Right in middle.
-    XYPath path(NewPtrNoTracking(point));
+    auto point = fl::make_shared<PointPath>(0.0, 0.0);  // Right in middle.
+    XYPath path(point);
     path.setDrawBounds(2,2);
     // auto xy = path.at(0);
     fl::Tile2x2_u8 sp = path.at_subpixel(0);
@@ -86,8 +86,8 @@ TEST_CASE("Point at exactly the middle") {
 
 TEST_CASE("LinePath simple sweep in draw bounds") {
     // Tests that we can get the correct gaussian values at center point 0,0
-    LinePath point(-1.f, -1.f, 1.f, -1.f);
-    XYPath path(NewPtrNoTracking(point));
+    auto point = fl::make_shared<LinePath>(-1.f, -1.f, 1.f, -1.f);
+    XYPath path(point);
     int width = 2;
     path.setDrawBounds(width, width);
     auto begin = path.at(0);
@@ -98,8 +98,8 @@ TEST_CASE("LinePath simple sweep in draw bounds") {
 
 TEST_CASE("LinePath at_subpixel moves x") {
     // Tests that we can get the correct subpixel.
-    LinePath point(-1.f, -1.f, 1.f, -1.f);
-    XYPath path(NewPtrNoTracking(point));
+    auto point = fl::make_shared<LinePath>(-1.f, -1.f, 1.f, -1.f);
+    XYPath path(point);
     path.setDrawBounds(3, 3);
     Tile2x2_u8 tile = path.at_subpixel(0.0f);
     // MESSAGE_TILE(tile);
@@ -112,7 +112,7 @@ TEST_CASE("LinePath at_subpixel moves x") {
 
 
 TEST_CASE("Test HeartPath") {
-    HeartPathPtr heart = fl::make_intrusive<HeartPath>();
+    HeartPathPtr heart = fl::make_shared<HeartPath>();
     
     // Track min and max values to help with scaling
     float min_x = 1.0f;
@@ -151,7 +151,7 @@ TEST_CASE("Test HeartPath") {
 }
 
 TEST_CASE("Test ArchimedeanSpiralPath") {
-    ArchimedeanSpiralPathPtr spiral = fl::make_intrusive<ArchimedeanSpiralPath>(3, 1.0f);
+    ArchimedeanSpiralPathPtr spiral = fl::make_shared<ArchimedeanSpiralPath>(3, 1.0f);
     
     // Track min and max values to help with scaling
     float min_x = 1.0f;
@@ -192,7 +192,7 @@ TEST_CASE("Test ArchimedeanSpiralPath") {
 TEST_CASE("Test RosePath") {
     // Test with different petal configurations
     SUBCASE("3-petal rose") {
-        RosePathPtr rose = fl::make_intrusive<RosePath>(3, 1);
+        RosePathPtr rose = fl::make_shared<RosePath>(3, 1);
         
         // Track min and max values to help with scaling
         float min_x = 1.0f;
@@ -231,7 +231,7 @@ TEST_CASE("Test RosePath") {
     }
     
     SUBCASE("4-petal rose") {
-        RosePathPtr rose = fl::make_intrusive<RosePath>(2, 1);  // n=2 gives 4 petals
+        RosePathPtr rose = fl::make_shared<RosePath>(2, 1);  // n=2 gives 4 petals
         
         // Track min and max values to help with scaling
         float min_x = 1.0f;

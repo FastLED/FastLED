@@ -26,8 +26,8 @@ TEST_CASE("no updateJs handler") {
     // Create a mock component for testing
     auto updateFunc = [](const FLArduinoJson::JsonVariantConst&) { /* do nothing */ };
     auto toJsonFunc = [](FLArduinoJson::JsonObject&) { /* do nothing */ };
-    auto mockComponent = fl::NewPtr<fl::JsonUiInternal>("test_id", updateFunc, toJsonFunc);
-    fl::WeakPtr<fl::JsonUiInternal> weakComponent(mockComponent);
+    auto mockComponent = fl::make_shared<fl::JsonUiInternal>("test_id", updateFunc, toJsonFunc);
+    fl::weak_ptr<fl::JsonUiInternal> weakComponent(mockComponent);
     
     // Test addJsonUiComponent - should go to pending since no manager
     fl::addJsonUiComponent(weakComponent);
@@ -53,8 +53,8 @@ TEST_CASE("internal manager with updateJs") {
     // Create a mock component for testing
     auto updateFunc = [](const FLArduinoJson::JsonVariantConst&) { /* do nothing */ };
     auto toJsonFunc = [](FLArduinoJson::JsonObject&) { /* do nothing */ };
-    auto mockComponent = fl::NewPtr<fl::JsonUiInternal>("test_id", updateFunc, toJsonFunc);
-    fl::WeakPtr<fl::JsonUiInternal> weakComponent(mockComponent);
+    auto mockComponent = fl::make_shared<fl::JsonUiInternal>("test_id", updateFunc, toJsonFunc);
+    fl::weak_ptr<fl::JsonUiInternal> weakComponent(mockComponent);
     
     // Test addJsonUiComponent - should add to internal manager
     fl::addJsonUiComponent(weakComponent);
@@ -76,10 +76,10 @@ TEST_CASE("pending component storage without updateJs") {
     auto updateFunc = [](const FLArduinoJson::JsonVariantConst&) { /* do nothing */ };
     auto toJsonFunc = [](FLArduinoJson::JsonObject&) { /* do nothing */ };
     
-    auto mockComponent1 = fl::NewPtr<fl::JsonUiInternal>("test_id_1", updateFunc, toJsonFunc);
-    auto mockComponent2 = fl::NewPtr<fl::JsonUiInternal>("test_id_2", updateFunc, toJsonFunc);
-    fl::WeakPtr<fl::JsonUiInternal> weakComponent1(mockComponent1);
-    fl::WeakPtr<fl::JsonUiInternal> weakComponent2(mockComponent2);
+    auto mockComponent1 = fl::make_shared<fl::JsonUiInternal>("test_id_1", updateFunc, toJsonFunc);
+    auto mockComponent2 = fl::make_shared<fl::JsonUiInternal>("test_id_2", updateFunc, toJsonFunc);
+    fl::weak_ptr<fl::JsonUiInternal> weakComponent1(mockComponent1);
+    fl::weak_ptr<fl::JsonUiInternal> weakComponent2(mockComponent2);
     
     // Add components before handlers are set - should go to pending storage
     fl::addJsonUiComponent(weakComponent1);
@@ -110,10 +110,10 @@ TEST_CASE("pending component storage with updateJs") {
     auto updateFunc = [](const FLArduinoJson::JsonVariantConst&) { /* do nothing */ };
     auto toJsonFunc = [](FLArduinoJson::JsonObject&) { /* do nothing */ };
     
-    auto mockComponent1 = fl::NewPtr<fl::JsonUiInternal>("test_id_1", updateFunc, toJsonFunc);
-    auto mockComponent2 = fl::NewPtr<fl::JsonUiInternal>("test_id_2", updateFunc, toJsonFunc);
-    fl::WeakPtr<fl::JsonUiInternal> weakComponent1(mockComponent1);
-    fl::WeakPtr<fl::JsonUiInternal> weakComponent2(mockComponent2);
+    auto mockComponent1 = fl::make_shared<fl::JsonUiInternal>("test_id_1", updateFunc, toJsonFunc);
+    auto mockComponent2 = fl::make_shared<fl::JsonUiInternal>("test_id_2", updateFunc, toJsonFunc);
+    fl::weak_ptr<fl::JsonUiInternal> weakComponent1(mockComponent1);
+    fl::weak_ptr<fl::JsonUiInternal> weakComponent2(mockComponent2);
     
     // Add components before handlers are set - should go to pending storage
     fl::addJsonUiComponent(weakComponent1);
@@ -144,8 +144,8 @@ TEST_CASE("pending component cleanup with destroyed components") {
     {
         auto updateFunc = [](const FLArduinoJson::JsonVariantConst&) { /* do nothing */ };
         auto toJsonFunc = [](FLArduinoJson::JsonObject&) { /* do nothing */ };
-        auto mockComponent = fl::NewPtr<fl::JsonUiInternal>("test_id_destroyed", updateFunc, toJsonFunc);
-        fl::WeakPtr<fl::JsonUiInternal> weakComponent(mockComponent);
+        auto mockComponent = fl::make_shared<fl::JsonUiInternal>("test_id_destroyed", updateFunc, toJsonFunc);
+        fl::weak_ptr<fl::JsonUiInternal> weakComponent(mockComponent);
         
         // Add component to pending
         fl::addJsonUiComponent(weakComponent);
@@ -159,8 +159,8 @@ TEST_CASE("pending component cleanup with destroyed components") {
     // Create a valid component
     auto updateFunc = [](const FLArduinoJson::JsonVariantConst&) { /* do nothing */ };
     auto toJsonFunc = [](FLArduinoJson::JsonObject&) { /* do nothing */ };
-    auto validComponent = fl::NewPtr<fl::JsonUiInternal>("test_id_valid", updateFunc, toJsonFunc);
-    fl::WeakPtr<fl::JsonUiInternal> weakValidComponent(validComponent);
+    auto validComponent = fl::make_shared<fl::JsonUiInternal>("test_id_valid", updateFunc, toJsonFunc);
+    fl::weak_ptr<fl::JsonUiInternal> weakValidComponent(validComponent);
     fl::addJsonUiComponent(weakValidComponent);
     
     // Set handler with updateJs - should only flush valid components to internal manager
@@ -185,8 +185,8 @@ TEST_CASE("null handlers behavior") {
     // Create a mock component for testing
     auto updateFunc = [](const FLArduinoJson::JsonVariantConst&) { /* do nothing */ };
     auto toJsonFunc = [](FLArduinoJson::JsonObject&) { /* do nothing */ };
-    auto mockComponent = fl::NewPtr<fl::JsonUiInternal>("test_id", updateFunc, toJsonFunc);
-    fl::WeakPtr<fl::JsonUiInternal> weakComponent(mockComponent);
+    auto mockComponent = fl::make_shared<fl::JsonUiInternal>("test_id", updateFunc, toJsonFunc);
+    fl::weak_ptr<fl::JsonUiInternal> weakComponent(mockComponent);
     
     // These should not crash and should produce warnings (components go to pending)
     fl::addJsonUiComponent(weakComponent);
@@ -210,8 +210,8 @@ TEST_CASE("updateEngineState function behavior") {
     // Create and add a component to the internal manager
     auto updateFunc = [](const FLArduinoJson::JsonVariantConst&) { /* do nothing */ };
     auto toJsonFunc = [](FLArduinoJson::JsonObject&) { /* do nothing */ };
-    auto mockComponent = fl::NewPtr<fl::JsonUiInternal>("test_component", updateFunc, toJsonFunc);
-    fl::WeakPtr<fl::JsonUiInternal> weakComponent(mockComponent);
+    auto mockComponent = fl::make_shared<fl::JsonUiInternal>("test_component", updateFunc, toJsonFunc);
+    fl::weak_ptr<fl::JsonUiInternal> weakComponent(mockComponent);
     fl::addJsonUiComponent(weakComponent);
     
     // Test calling the updateEngineState function
@@ -236,8 +236,8 @@ TEST_CASE("manager replacement") {
     // Add a component to the first manager
     auto updateFunc = [](const FLArduinoJson::JsonVariantConst&) { /* do nothing */ };
     auto toJsonFunc = [](FLArduinoJson::JsonObject&) { /* do nothing */ };
-    auto mockComponent = fl::NewPtr<fl::JsonUiInternal>("test_id", updateFunc, toJsonFunc);
-    fl::WeakPtr<fl::JsonUiInternal> weakComponent(mockComponent);
+    auto mockComponent = fl::make_shared<fl::JsonUiInternal>("test_id", updateFunc, toJsonFunc);
+    fl::weak_ptr<fl::JsonUiInternal> weakComponent(mockComponent);
     fl::addJsonUiComponent(weakComponent);
     
     // Replace with a different handler

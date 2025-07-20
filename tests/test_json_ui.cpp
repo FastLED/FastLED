@@ -41,7 +41,7 @@ TEST_CASE("JsonUiInternal creation and basic operations") {
     };
     
     fl::string name = "test_component";
-    JsonUiInternalPtr internal = fl::make_intrusive<JsonUiInternal>(name, updateFunc, toJsonFunc);
+    JsonUiInternalPtr internal = fl::make_shared<JsonUiInternal>(name, updateFunc, toJsonFunc);
     
     REQUIRE(internal != nullptr);
     CHECK(internal->name() == name);
@@ -73,7 +73,7 @@ TEST_CASE("JsonUiInternal JSON operations") {
         json["type"] = "slider";
     };
     
-    JsonUiInternalPtr internal = fl::make_intrusive<JsonUiInternal>("test", updateFunc, toJsonFunc);
+    JsonUiInternalPtr internal = fl::make_shared<JsonUiInternal>("test", updateFunc, toJsonFunc);
     
     // Test JSON update
     FLArduinoJson::JsonDocument doc;

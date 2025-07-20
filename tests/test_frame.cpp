@@ -29,7 +29,7 @@ TEST_CASE("test frame custom allocator") {
     // Set our custom allocator
     SetPSRamAllocator(custom_malloc, custom_free);
     
-    FramePtr frame = fl::make_intrusive<Frame>(100);  // 100 pixels.
+    FramePtr frame = fl::make_shared<Frame>(100);  // 100 pixels.
     CHECK(allocation_count == 1);  // One for RGB.
     frame.reset();
 
@@ -40,7 +40,7 @@ TEST_CASE("test frame custom allocator") {
 
 TEST_CASE("test blend by black") {
     SetPSRamAllocator(custom_malloc, custom_free);
-    FramePtr frame = fl::make_intrusive<Frame>(1);  // 1 pixels.
+    FramePtr frame = fl::make_shared<Frame>(1);  // 1 pixels.
     frame->rgb()[0] = CRGB(255, 0, 0);  // Red
     CRGB out;
     frame->draw(&out, DRAW_MODE_BLEND_BY_MAX_BRIGHTNESS);
