@@ -17,10 +17,11 @@ namespace fl {
 
 FASTLED_SMART_PTR(XYPathGenerator);
 
-class XYPathRenderer : public Referent {
+class XYPathRenderer {
   public:
     XYPathRenderer(XYPathGeneratorPtr path,
                    TransformFloat transform = TransformFloat());
+    virtual ~XYPathRenderer() = default; // Add virtual destructor for proper cleanup
     vec2f at(float alpha);
 
     Tile2x2_u8 at_subpixel(float alpha);

@@ -43,7 +43,7 @@ template <typename> class function;
 template <typename R, typename... Args>
 class function<R(Args...)> {
 private:
-    struct CallableBase : public Referent {
+    struct CallableBase {
         virtual R invoke(Args... args) = 0;
         virtual ~CallableBase() = default;
     };

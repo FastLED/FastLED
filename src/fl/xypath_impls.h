@@ -44,7 +44,7 @@ FASTLED_SMART_PTR(CatmullRomPath);
 // BaseClasses.
 // Controllable parameter base class. Each subtype has a transform and
 // brightness.
-class XYPathParams : public Referent {
+class XYPathParams {
   public:
     // Reserved for future use.
     TransformFloat transform;
@@ -52,8 +52,9 @@ class XYPathParams : public Referent {
 };
 
 // Base class for the actual path generator.
-class XYPathGenerator : public Referent {
+class XYPathGenerator {
   public:
+    virtual ~XYPathGenerator() = default; // Add virtual destructor for proper cleanup
     virtual const string name() const = 0;
     virtual vec2f compute(float alpha) = 0;
     // No writes when returning false.

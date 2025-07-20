@@ -3,19 +3,19 @@
 #include "fl/ptr.h"
 #include "fl/shared_ptr.h"
 #include "fl/weak_ptr.h"
-#include "fl/unique_ptr.h"  // Add this line
+#include "fl/unique_ptr.h"
 #include "fl/type_traits.h"
 
 namespace fl {
 
 // FastLED equivalent of std::intrusive_ptr<T>
-// Kept as original fl::Ptr<T> for JSON UI compatibility  
+// NOTE: This is legacy - new code should use fl::shared_ptr<T> instead
 template <typename T>
 using intrusive_ptr = fl::Ptr<T>;
 
 // FastLED equivalent of std::make_intrusive<T>
-// Creates a new object of type T and returns it wrapped in a fl::shared_ptr<T>
-// 
+// NOTE: This is legacy - new code should use fl::make_shared<T>(...) instead
+//
 // Usage:
 //   auto ptr = fl::make_intrusive<MyClass>(arg1, arg2, ...);
 //

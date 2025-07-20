@@ -29,49 +29,52 @@ class WeakReferent {
   protected:
     WeakReferent(const WeakReferent &) = default;
     WeakReferent &operator=(const WeakReferent &) = default;
-    WeakReferent(WeakReferent &&) = default;
-    WeakReferent &operator=(WeakReferent &&) = default;
 
   private:
-    mutable int mRefCount;
+    int mRefCount;
     Referent *mReferent;
 };
 
-// Objects that inherit this class can be reference counted and put into
-// a Ptr object. They can also be put into a WeakPtr object.
+// Base class for reference counted objects.
+// NOTE: This is legacy - new code should use regular classes with fl::shared_ptr<T>
 class Referent {
   public:
-    virtual int ref_count() const;
+    Referent() : mRefCount(1), mWeakReferent(nullptr) {}
 
-  protected:
-    Referent();
-    virtual ~Referent();
-    Referent(const Referent &);
-    Referent &operator=(const Referent &);
-    Referent(Referent &&);
-    Referent &operator=(Referent &&);
+    Referent(const Referent &) : mRefCount(1), mWeakReferent(nullptr) {}
 
-    // Lifetime management has to be marked const.
-    virtual void ref() const;
-    virtual void unref() const;
-    virtual void destroy() const;
+    // Assignment does not change reference count
+    Referent &operator=(const Referent &) { return *this; }
 
-  private:
-    friend class WeakReferent;
-    template <typename T> friend class Ptr;
-    template <typename T> friend class WeakPtr;
-    void setWeakPtr(WeakReferent* weakRefNoCreate) {
-        if (mWeakPtr) {
-            mWeakPtr->unref();
-        }
-        mWeakPtr = weakRefNoCreate;
-        if (mWeakPtr) {
-            mWeakPtr->ref();
+    virtual ~Referent() {
+        if (mWeakReferent) {
+            mWeakReferent->setReferent(nullptr);
+            mWeakReferent->unref();
         }
     }
-    WeakReferent* getWeakPtr() const { return mWeakPtr; }
-    mutable int mRefCount;
-    mutable WeakReferent* mWeakPtr; // Optional weak reference to this object.
+
+    void ref() { mRefCount++; }
+
+    int ref_count() const { return mRefCount; }
+
+    void unref() {
+        if (--mRefCount == 0) {
+            delete this;
+        }
+    }
+
+    WeakReferent *getWeakReferent() {
+        if (!mWeakReferent) {
+            mWeakReferent = new WeakReferent();
+            mWeakReferent->setReferent(this);
+            mWeakReferent->ref();
+        }
+        return mWeakReferent;
+    }
+
+  protected:
+    int mRefCount;
+    WeakReferent *mWeakReferent;
 };
 
 } // namespace fl

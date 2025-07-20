@@ -54,13 +54,14 @@ struct Transform16 {
 };
 
 // This transform assumes the coordinates are in the range [0,1].
-class TransformFloatImpl : public Referent {
+class TransformFloatImpl {
   public:
     static TransformFloatImplPtr Identity() {
         TransformFloatImplPtr tx = fl::make_shared<TransformFloatImpl>();
         return tx;
     }
     TransformFloatImpl() = default;
+    virtual ~TransformFloatImpl() = default; // Add virtual destructor for proper cleanup
     float scale_x = 1.0f;
     float scale_y = 1.0f;
     float offset_x = 0.0f;

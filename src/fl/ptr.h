@@ -24,6 +24,7 @@
 #include "fl/referent.h"
 #include "fl/bit_cast.h"
 #include "fl/int.h"
+#include "fl/deprecated.h"
 
 // Declares a smart pointer. FASTLED_SMART_PTR(Foo) will declare a class FooPtr
 // which will be a typedef of shared_ptr<Foo>. After this fl::make_intrusive<Foo>(...args) can be
@@ -108,27 +109,33 @@ template <typename T> class PtrTraits {
 //   };
 //   FASTLED_SMART_PTR_CONSTRUCTOR(Foo, FooSubclass::New);
 //   FooPtr foo = fl::make_intrusive<Foo>(1, 2);  // this will now work.
+// NOTE: This is legacy - new code should use fl::shared_ptr<T> instead
 template <typename T> class Ptr : public PtrTraits<T> {
   public:
     friend class PtrTraits<T>;
 
-    template <typename... Args> static Ptr<T> New(Args... args);
+    template <typename... Args> 
+    static Ptr<T> New(Args... args);
     
     // Used for low level allocations, typically for pointer to an
     // implementation where it needs to convert to a Ptr of a base class.
+    // NOTE: Legacy method - use fl::shared_ptr<T> constructor or fl::make_shared<T>() instead
     static Ptr TakeOwnership(T *ptr) { return Ptr(ptr, true); }
 
     // Used for low level allocations, typically to handle memory that is
     // statically allocated where the destructor should not be called when
     // the refcount reaches 0.
+    // NOTE: Legacy method - use fl::make_shared_no_tracking<T>() instead
     static Ptr NoTracking(T &referent) { return Ptr(&referent, false); }
 
     static Ptr Null() { return Ptr<T>(); }
 
     // Allow upcasting of Refs.
     template <typename U, typename = fl::is_derived<T, U>>
+    // NOTE: Legacy constructor - use fl::shared_ptr<T> instead of fl::Ptr<T>
     Ptr(const Ptr<U> &refptr);
 
+    // NOTE: Legacy constructor - use fl::shared_ptr<T> instead of fl::Ptr<T>
     Ptr() : referent_(nullptr) {}
 
     // Forbidden to convert a raw pointer to a Referent into a Ptr, because
@@ -136,11 +143,15 @@ template <typename T> class Ptr : public PtrTraits<T> {
     Ptr(T *referent) = delete;
     Ptr &operator=(T *referent) = delete;
 
+    // NOTE: Legacy constructor - use fl::shared_ptr<T> instead of fl::Ptr<T>
     Ptr(const Ptr &other);
+    // NOTE: Legacy constructor - use fl::shared_ptr<T> instead of fl::Ptr<T>
     Ptr(Ptr &&other) noexcept;
     ~Ptr();
 
+    // NOTE: Legacy assignment - use fl::shared_ptr<T> instead of fl::Ptr<T>
     Ptr &operator=(const Ptr &other);
+    // NOTE: Legacy assignment - use fl::shared_ptr<T> instead of fl::Ptr<T>
     Ptr &operator=(Ptr &&other) noexcept;
 
     // Either returns the weakptr if it exists, or an empty weakptr.
@@ -172,19 +183,27 @@ template <typename T> class Ptr : public PtrTraits<T> {
     T *referent_;
 };
 
+// NOTE: This is legacy - new code should use fl::weak_ptr<T> instead
 template <typename T> class WeakPtr {
   public:
+    // NOTE: Legacy constructor - use fl::weak_ptr<T> instead of fl::WeakPtr<T>
     WeakPtr() : mWeakPtr(nullptr) {}
 
+    // NOTE: Legacy constructor - use fl::weak_ptr<T> instead of fl::WeakPtr<T>
     WeakPtr(const Ptr<T> &ptr);
 
-    template <typename U> WeakPtr(const Ptr<U> &ptr);
+    template <typename U> 
+    // NOTE: Legacy constructor - use fl::weak_ptr<T> instead of fl::WeakPtr<T>
+    WeakPtr(const Ptr<U> &ptr);
 
+    // NOTE: Legacy constructor - use fl::weak_ptr<T> instead of fl::WeakPtr<T>
     WeakPtr(const WeakPtr &other);
 
     template <typename U>
+    // NOTE: Legacy constructor - use fl::weak_ptr<T> instead of fl::WeakPtr<T>
     WeakPtr(const WeakPtr<U> &other);
 
+    // NOTE: Legacy constructor - use fl::weak_ptr<T> instead of fl::WeakPtr<T>
     WeakPtr(WeakPtr &&other) noexcept;
 
     ~WeakPtr();
@@ -214,9 +233,13 @@ template <typename T> class WeakPtr {
     WeakReferent* mWeakPtr;
 };
 
-template <typename T, typename... Args> Ptr<T> NewPtr(Args... args);
+template <typename T, typename... Args> 
+// NOTE: Legacy function - use fl::make_shared<T>(...) instead of fl::NewPtr<T>(...)
+Ptr<T> NewPtr(Args... args);
 
-template <typename T> Ptr<T> NewPtrNoTracking(T &obj);
+template <typename T> 
+// NOTE: Legacy function - use fl::make_shared_no_tracking<T>() instead of fl::NewPtrNoTracking<T>()
+Ptr<T> NewPtrNoTracking(T &obj);
 
 } // namespace fl
 

@@ -20,7 +20,7 @@ FASTLED_SMART_PTR(WaveCrgbMap);
 FASTLED_SMART_PTR(WaveCrgbMapDefault);
 FASTLED_SMART_PTR(WaveCrgbGradientMap);
 
-class WaveCrgbMap : public Referent {
+class WaveCrgbMap {
   public:
     virtual ~WaveCrgbMap() = default;
     virtual void mapWaveToLEDs(const XYMap &xymap, WaveSimulation2D &waveSim,

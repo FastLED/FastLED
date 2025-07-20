@@ -35,7 +35,7 @@ namespace xypath_detail {
 fl::string unique_missing_name(const char *prefix = "XYCustomPath: ");
 } // namespace xypath_detail
 
-class XYPath : public Referent {
+class XYPath {
   public:
     /////////////////////////////////////////////
     // Begin pre-baked paths.
