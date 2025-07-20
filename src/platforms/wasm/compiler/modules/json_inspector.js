@@ -13,6 +13,7 @@ export class JsonInspector {
         this.maxBufferSize = 1000;
         this.eventCounter = 0;
         this.dragData = null;
+        this.lastDirection = null; // Track last direction for label optimization
         
         this.initializeDOM();
         this.setupEventListeners();
@@ -112,6 +113,7 @@ export class JsonInspector {
     clear() {
         this.eventBuffer = [];
         this.eventCounter = 0;
+        this.lastDirection = null;
         this.logContainer.innerHTML = '';
         this.updateEventCounter();
     }
@@ -178,9 +180,14 @@ export class JsonInspector {
     renderEvent(event) {
         const eventElement = document.createElement('div');
         eventElement.className = `inspector-event ${event.direction.includes('IN') ? 'inbound' : 'outbound'}`;
+        
+        // Only show direction if it's different from the last direction, or if it's the first event
+        const showDirection = this.lastDirection === null || this.lastDirection !== event.direction;
+        const directionText = showDirection ? event.direction : '';
+        
         eventElement.innerHTML = `
             <div class="event-header">
-                <span class="event-direction">${event.direction}</span>
+                <span class="event-direction">${directionText}</span>
                 <span class="event-timestamp">${event.timestamp.toLocaleTimeString()}</span>
                 <span class="event-type">${event.type}</span>
                 <span class="event-id">#${event.id}</span>
@@ -190,13 +197,24 @@ export class JsonInspector {
             </div>
         `;
         
+        // Update last direction
+        this.lastDirection = event.direction;
+        
         this.logContainer.appendChild(eventElement);
     }
 
     formatJson(data) {
         try {
             const parsed = typeof data === 'string' ? JSON.parse(data) : data;
-            return JSON.stringify(parsed, null, 2);
+            const jsonString = JSON.stringify(parsed);
+            
+            // For small JSON objects (under 100 chars), keep on one line
+            // For larger objects, use pretty printing
+            if (jsonString.length < 100) {
+                return jsonString;
+            } else {
+                return JSON.stringify(parsed, null, 2);
+            }
         } catch {
             return data;
         }

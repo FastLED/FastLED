@@ -118,14 +118,14 @@
 .inspector-log {
     flex: 1;
     overflow-y: auto;
-    padding: 8px;
+    padding: 4px;
     font-family: 'Courier New', monospace;
     font-size: 12px;
-    line-height: 1.4;
+    line-height: 1.3;
 }
 
 .inspector-event {
-    margin-bottom: 12px;
+    margin-bottom: 4px;
     border: 1px solid #333;
     border-radius: 4px;
     overflow: hidden;
@@ -143,11 +143,12 @@
 .event-header {
     display: flex;
     align-items: center;
-    gap: 12px;
-    padding: 8px 12px;
+    gap: 8px;
+    padding: 4px 8px;
     background: #2A2A2A;
     border-bottom: 1px solid #333;
     font-size: 11px;
+    min-height: 24px;
 }
 
 .event-direction {
@@ -175,8 +176,8 @@
 }
 
 .event-data {
-    padding: 8px 12px;
-    max-height: 300px;
+    padding: 4px 8px;
+    max-height: 200px;
     overflow-y: auto;
 }
 
@@ -186,7 +187,7 @@
     white-space: pre-wrap;
     word-wrap: break-word;
     font-size: 11px;
-    line-height: 1.3;
+    line-height: 1.2;
 }
 
 /* JSON Syntax Highlighting */
