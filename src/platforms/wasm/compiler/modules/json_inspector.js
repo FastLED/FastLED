@@ -139,7 +139,7 @@ export class JsonInspector {
         
         this.renderEvent(event);
         this.updateEventCounter();
-        this.scrollToBottom();
+        // Removed scrollToBottom() - newest events now appear at top
     }
 
     logInboundEvent(data, source = 'C++') {
@@ -219,7 +219,7 @@ export class JsonInspector {
         // Update last direction
         this.lastDirection = event.direction;
         
-        this.logContainer.appendChild(eventElement);
+        this.logContainer.insertBefore(eventElement, this.logContainer.firstChild);
     }
 
     formatJson(data) {
