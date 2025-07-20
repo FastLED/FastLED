@@ -137,15 +137,11 @@
     border-left: 4px solid #2196F3;
 }
 
-.direction-info-row {
-    display: flex;
-    align-items: center;
-    padding: 2px 8px;
-    font-family: 'Courier New', monospace;
+.direction-header {
+    font-weight: bold;
+    color: #E0E0E0;
     font-size: 11px;
-    line-height: 1.2;
-    gap: 8px;
-    min-height: 20px;
+    padding: 2px 8px;
     background: #2A2A2A;
     border-bottom: 1px solid #333;
 }
@@ -158,19 +154,19 @@
 }
 
 .event-id {
-    color: #666;
+    color: #BBB;
     font-weight: bold;
     min-width: 30px;
     flex-shrink: 0;
 }
 
 .separator {
-    color: #555;
+    color: #888;
     flex-shrink: 0;
 }
 
 .event-timestamp {
-    color: #999;
+    color: #CCC;
     min-width: 70px;
     flex-shrink: 0;
 }
@@ -181,6 +177,24 @@
     font-family: 'Courier New', monospace;
     font-size: 11px;
     line-height: 1.2;
+    white-space: pre;
+}
+
+.event-info-row {
+    display: flex;
+    align-items: center;
+    padding: 2px 8px;
+    font-family: 'Courier New', monospace;
+    font-size: 11px;
+    line-height: 1.2;
+    gap: 8px;
+    min-height: 20px;
+    margin-top: 4px;
+}
+
+.json-data {
+    color: #E0E0E0;
+    flex: 1;
     white-space: pre;
 }
 

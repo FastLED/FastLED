@@ -38,9 +38,8 @@ export class JsonInspector {
         // Button click to show/hide
         this.button.addEventListener('click', () => this.toggle());
         
-        // Close button and overlay
+        // Close button only (removed overlay click to allow interaction with UI below)
         this.closeBtn.addEventListener('click', () => this.hide());
-        this.overlay.addEventListener('click', () => this.hide());
         
         // Control buttons
         this.clearBtn.addEventListener('click', () => this.clear());
@@ -142,11 +141,15 @@ export class JsonInspector {
     }
 
     logInboundEvent(data, source = 'C++') {
-        this.logEvent(data, `IN ← ${source}`);
+        // If source already contains direction arrows, use it directly
+        const direction = source.includes('→') || source.includes('←') ? source : `IN ← ${source}`;
+        this.logEvent(data, direction);
     }
 
     logOutboundEvent(data, target = 'C++') {
-        this.logEvent(data, `OUT → ${target}`);
+        // If target already contains direction arrows, use it directly
+        const direction = target.includes('→') || target.includes('←') ? target : `OUT → ${target}`;
+        this.logEvent(data, direction);
     }
 
     getEventType(data) {
@@ -185,24 +188,28 @@ export class JsonInspector {
         const showDirection = this.lastDirection === null || this.lastDirection !== event.direction;
         
         if (showDirection) {
-            // Direction change: show direction + info on first row, JSON on second row
+            // Direction change: show direction on first row, then count + time + JSON on second row
             eventElement.innerHTML = `
-                <div class="direction-info-row">
-                    <span class="direction-text">${event.direction}</span>
-                    <span class="separator">|</span>
+                <div class="direction-header">
+                    ${event.direction}
+                </div>
+                <div class="event-info-row">
                     <span class="event-id">#${event.id}</span>
                     <span class="separator">|</span>
                     <span class="event-timestamp">${event.timestamp.toLocaleTimeString()}</span>
-                </div>
-                <div class="json-row">
-                    ${this.formatJson(event.data)}
+                    <span class="separator">|</span>
+                    <span class="json-data">${this.formatJson(event.data)}</span>
                 </div>
             `;
         } else {
-            // Same direction: just show the JSON data left-aligned
+            // Same direction: show count + time + JSON on one row
             eventElement.innerHTML = `
-                <div class="json-row">
-                    ${this.formatJson(event.data)}
+                <div class="event-info-row">
+                    <span class="event-id">#${event.id}</span>
+                    <span class="separator">|</span>
+                    <span class="event-timestamp">${event.timestamp.toLocaleTimeString()}</span>
+                    <span class="separator">|</span>
+                    <span class="json-data">${this.formatJson(event.data)}</span>
                 </div>
             `;
         }
