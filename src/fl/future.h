@@ -21,19 +21,15 @@
 /// // Complete with value (producer side)
 /// future.complete_with_value(42);
 /// 
-/// // Check result non-blockingly (consumer side)
-/// if (future) { // operator bool() - true when ready OR error
-///     switch (future.state()) {
-///         case FutureState::READY:
-///             auto result = future.try_result();
-///             if (!result.empty()) {
-///                 int value = *result.ptr(); // value = 42
-///             }
-///             break;
-///         case FutureState::ERROR:
-///             handle_error(future.error_message());
-///             break;
-///     }
+/// // Check result non-blockingly (consumer side) 
+/// auto result = future.try_get_result();
+/// if (result.is<int>()) {
+///     int value = *result.ptr<int>(); // value = 42
+/// } else if (result.is<fl::FutureError>()) {
+///     auto error = *result.ptr<fl::FutureError>();
+///     handle_error(error.message);
+/// } else {
+///     // Still pending
 /// }
 /// @endcode
 ///
@@ -50,33 +46,24 @@
 /// }
 /// 
 /// void loop() {
-///     // Check futures non-blockingly  
-///     if (weather_future) { // Something to process (ready or error)
-///         switch (weather_future.state()) {
-///             case FutureState::READY:
-///                 auto result = weather_future.try_result();
-///                 if (!result.empty()) process_weather(*result.ptr());
-///                 weather_future.clear();
-///                 break;
-///             case FutureState::ERROR:
-///                 handle_weather_error(weather_future.error_message());
-///                 weather_future.clear();
-///                 break;
-///         }
+///     // Check weather future non-blockingly
+///     auto weather_result = weather_future.try_get_result();
+///     if (weather_result.is<fl::string>()) {
+///         process_weather(*weather_result.ptr<fl::string>());
+///         weather_future.clear();
+///     } else if (weather_result.is<fl::FutureError>()) {
+///         handle_weather_error(weather_result.ptr<fl::FutureError>()->message);
+///         weather_future.clear();
 ///     }
 ///     
-///     if (color_future) { // Something to process (ready or error)
-///         switch (color_future.state()) {
-///             case FutureState::READY:
-///                 auto result = color_future.try_result();
-///                 if (!result.empty()) update_led_color(*result.ptr());
-///                 color_future.clear();
-///                 break;
-///             case FutureState::ERROR:
-///                 handle_color_error(color_future.error_message());
-///                 color_future.clear();
-///                 break;
-///         }
+///     // Check color future non-blockingly
+///     auto color_result = color_future.try_get_result();
+///     if (color_result.is<CRGB>()) {
+///         update_led_color(*color_result.ptr<CRGB>());
+///         color_future.clear();
+///     } else if (color_result.is<fl::FutureError>()) {
+///         handle_color_error(color_result.ptr<fl::FutureError>()->message);
+///         color_future.clear();
 ///     }
 ///     
 ///     // LEDs update smoothly - never blocked!
@@ -91,19 +78,15 @@
 /// void loop() {
 ///     static auto api_request = http_client.get_async("http://api.example.com/data");
 ///     
-///     if (api_request) { // Something to process (ready or error)
-///         switch (api_request.state()) {
-///             case FutureState::READY:
-///                 auto response = api_request.try_result();
-///                 if (!response.empty()) update_leds_from_api(*response.ptr());
-///                 api_request.clear();
-///                 break;
-///             case FutureState::ERROR:
-///                 handle_network_error(api_request.error_message());
-///                 api_request.clear();
-///                 break;
-///         }
+///     auto response = api_request.try_get_result();
+///     if (response.is<fl::string>()) {
+///         update_leds_from_api(*response.ptr<fl::string>());
+///         api_request.clear();
+///     } else if (response.is<fl::FutureError>()) {
+///         handle_network_error(response.ptr<fl::FutureError>()->message);
+///         api_request.clear();
 ///     }
+///     // else: still pending, try again next loop
 ///     
 ///     FastLED.show(); // Never blocked by network I/O!
 /// }
@@ -114,17 +97,39 @@
 /// auto future = fl::future<int>::create();
 /// future.complete_with_error("Network timeout");
 /// 
-/// if (future) { // Something to process
-///     switch (future.state()) {
-///         case FutureState::ERROR:
-///             fl::string error = future.error_message(); // "Network timeout"
-///             handle_error(error);
-///             break;
-///         case FutureState::READY:
-///             // Handle success case
-///             break;
-///     }
+/// auto result = future.try_get_result();
+/// if (result.is<fl::FutureError>()) {
+///     fl::string error = result.ptr<fl::FutureError>()->message; // "Network timeout"
+///     handle_error(error);
+/// } else if (result.is<int>()) {
+///     int value = *result.ptr<int>();
+///     // Handle success case
 /// }
+/// // else: still pending
+/// @endcode
+///
+/// @section Visitor Pattern Support
+/// For complex state handling, use the visitor pattern:
+/// @code
+/// auto result = future.try_get_result();
+/// 
+/// struct FutureVisitor {
+///     void accept(const int& value) {
+///         // Handle successful result
+///         update_display(value);
+///     }
+///     void accept(const fl::FutureError& error) {
+///         // Handle error case
+///         show_error_message(error.message);
+///     }
+///     void accept(const fl::FuturePending& pending) {
+///         // Handle pending case
+///         show_loading_indicator();
+///     }
+/// };
+/// 
+/// FutureVisitor visitor;
+/// result.visit(visitor);
 /// @endcode
 
 #include "fl/namespace.h"
@@ -133,8 +138,26 @@
 #include "fl/optional.h"
 #include "fl/move.h"
 #include "fl/mutex.h"
+#include "fl/variant.h"
 
 namespace fl {
+
+/// Tag type representing a pending future
+struct FuturePending {};
+
+/// Error type for futures
+struct FutureError {
+    fl::string message;
+    
+    FutureError() = default;
+    FutureError(const fl::string& msg) : message(msg) {}
+    FutureError(const char* msg) : message(msg) {}
+    FutureError(fl::string&& msg) : message(fl::move(msg)) {}
+};
+
+/// Result type that combines value, error, or pending state in one variant
+template<typename T>
+using FutureResult = fl::Variant<T, FutureError, FuturePending>;
 
 /// Future state enum - forces explicit handling of all cases
 enum class FutureState {
@@ -205,12 +228,20 @@ public:
         return s == FutureState::READY || s == FutureState::ERROR;
     }
     
-    /// THE KEY METHOD - Non-blocking result access!
+    /// THE KEY METHOD - Non-blocking result access with variant!
+    /// Returns FutureResult<T> - contains T, FutureError, or FuturePending
+    /// This is FastLED's ergonomic answer to std::future::get() - never blocks!
+    FutureResult<T> try_get_result() const {
+        if (!valid()) return FutureResult<T>(FuturePending{});
+        return mState->try_get_result();
+    }
+    
+    /// Legacy method - Non-blocking result access!
     /// Returns optional<T> - empty if not ready, value if ready
-    /// This is FastLED's answer to std::future::get() - never blocks!
+    /// @deprecated Use try_get_result() instead for better error handling
     fl::optional<T> try_result() const {
         if (!valid()) return fl::optional<T>();
-        return mState->try_get_result();
+        return mState->try_get_result_legacy();
     }
     
     /// Get error message if in error state
@@ -304,8 +335,20 @@ public:
         return mState;
     }
     
-    /// Non-blocking result access - never blocks!
-    fl::optional<T> try_get_result() const {
+    /// Non-blocking result access with variant - never blocks!
+    FutureResult<T> try_get_result() const {
+        fl::lock_guard<fl::mutex> lock(mMutex);
+        if (mState == FutureState::READY) {
+            return FutureResult<T>(mResult);
+        } else if (mState == FutureState::ERROR) {
+            return FutureResult<T>(FutureError(mErrorMessage));
+        } else {
+            return FutureResult<T>(FuturePending{});
+        }
+    }
+    
+    /// Legacy non-blocking result access - never blocks!
+    fl::optional<T> try_get_result_legacy() const {
         fl::lock_guard<fl::mutex> lock(mMutex);
         if (mState == FutureState::READY) {
             return fl::optional<T>(mResult);
