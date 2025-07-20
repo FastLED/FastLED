@@ -2,7 +2,6 @@
 
 #include "fl/networking/socket.h"
 #include "fl/hash.h"
-#include "fl/function.h"
 
 namespace fl {
 
@@ -33,6 +32,7 @@ struct SocketOptions {
 };
 
 /// Socket factory for creating platform-specific socket implementations
+/// Each platform provides implementations of these functions directly
 class SocketFactory {
 public:
     /// Create client socket for outgoing connections
@@ -46,14 +46,21 @@ public:
     static bool supports_tls();
     static bool supports_non_blocking_connect();
     static bool supports_socket_reuse();
-    
-    /// Platform-specific factory registration
-    static void register_platform_factory(fl::function<fl::shared_ptr<Socket>(const SocketOptions&)> client_factory,
-                                          fl::function<fl::shared_ptr<ServerSocket>(const SocketOptions&)> server_factory);
-    
-private:
-    static fl::function<fl::shared_ptr<Socket>(const SocketOptions&)> sClientFactory;
-    static fl::function<fl::shared_ptr<ServerSocket>(const SocketOptions&)> sServerFactory;
 };
+
+// Platform-specific implementations - each platform provides these
+// These are declared here but implemented in platform-specific files
+// Only the platform being compiled will provide these symbols
+
+/// Platform-specific socket creation functions
+/// Each platform implements these directly - no registration needed
+fl::shared_ptr<Socket> create_platform_socket(const SocketOptions& options);
+fl::shared_ptr<ServerSocket> create_platform_server_socket(const SocketOptions& options);
+
+/// Platform capability queries
+bool platform_supports_ipv6();
+bool platform_supports_tls();
+bool platform_supports_non_blocking_connect();
+bool platform_supports_socket_reuse();
 
 } // namespace fl 

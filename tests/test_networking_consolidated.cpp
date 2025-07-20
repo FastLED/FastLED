@@ -125,15 +125,32 @@ private:
     int mPort;
 };
 
-void register_test_factories() {
-    SocketFactory::register_platform_factory(
-        [](const SocketOptions& options) -> fl::shared_ptr<Socket> {
-            (void)options; return fl::make_shared<TestSocket>();
-        },
-        [](const SocketOptions& options) -> fl::shared_ptr<ServerSocket> {
-            (void)options; return fl::make_shared<TestServerSocket>();
-        }
-    );
+// Platform-specific test implementations for testing
+// These override the stub implementations during tests
+fl::shared_ptr<Socket> create_platform_socket(const SocketOptions& options) {
+    (void)options;
+    return fl::make_shared<TestSocket>();
+}
+
+fl::shared_ptr<ServerSocket> create_platform_server_socket(const SocketOptions& options) {
+    (void)options;
+    return fl::make_shared<TestServerSocket>();
+}
+
+bool platform_supports_ipv6() {
+    return false;  // Test implementation doesn't support IPv6
+}
+
+bool platform_supports_tls() {
+    return false;  // Test implementation doesn't support TLS
+}
+
+bool platform_supports_non_blocking_connect() {
+    return true;  // Test implementation supports non-blocking
+}
+
+bool platform_supports_socket_reuse() {
+    return true;  // Test implementation supports socket reuse
 }
 
 TEST_CASE("Socket factory capabilities") {
@@ -143,11 +160,11 @@ TEST_CASE("Socket factory capabilities") {
     bool non_blocking_support = SocketFactory::supports_non_blocking_connect();
     bool socket_reuse_support = SocketFactory::supports_socket_reuse();
     
-    // Validate stub implementation capabilities
-    REQUIRE(!ipv6_support);  // Stub doesn't support IPv6
-    REQUIRE(!tls_support);   // Stub doesn't support TLS
-    REQUIRE(non_blocking_support);  // Stub supports non-blocking
-    REQUIRE(socket_reuse_support);  // Stub supports socket reuse
+    // Validate test implementation capabilities
+    REQUIRE(!ipv6_support);  // Test doesn't support IPv6
+    REQUIRE(!tls_support);   // Test doesn't support TLS
+    REQUIRE(non_blocking_support);  // Test supports non-blocking
+    REQUIRE(socket_reuse_support);  // Test supports socket reuse
 }
 
 TEST_CASE("Socket options configuration") {
@@ -186,18 +203,25 @@ TEST_CASE("Socket enum validation") {
     REQUIRE_NE(static_cast<int>(IpVersion::IPV4_ONLY), static_cast<int>(IpVersion::IPV6_ONLY));
 }
 
-TEST_CASE("Socket creation without factory") {
-    // Validate behavior when no factory is registered
+TEST_CASE("Socket creation with platform functions") {
+    // Validate that platform functions provide valid sockets
     auto client_socket = SocketFactory::create_client_socket();
     auto server_socket = SocketFactory::create_server_socket();
     
-    REQUIRE(client_socket == nullptr);
-    REQUIRE(server_socket == nullptr);
+    REQUIRE(client_socket != nullptr);
+    REQUIRE(server_socket != nullptr);
 }
 
 TEST_CASE("Complete networking integration") {
     // Register test factories for end-to-end testing
-    register_test_factories();
+    // SocketFactory::register_platform_factory(
+    //     [](const SocketOptions& options) -> fl::shared_ptr<Socket> {
+    //         (void)options; return fl::make_shared<TestSocket>();
+    //     },
+    //     [](const SocketOptions& options) -> fl::shared_ptr<ServerSocket> {
+    //         (void)options; return fl::make_shared<TestServerSocket>();
+    //     }
+    // );
     
     // Create client and server sockets
     auto client = SocketFactory::create_client_socket();

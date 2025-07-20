@@ -423,18 +423,35 @@ int StubServerSocket::generate_server_socket_handle() {
 }
 
 //=============================================================================
-// Factory Registration
+// Platform-specific implementations
 //=============================================================================
 
-void register_stub_socket_factories() {
-    SocketFactory::register_platform_factory(
-        [](const SocketOptions& options) -> fl::shared_ptr<Socket> {
-            return fl::make_shared<StubSocket>(options);
-        },
-        [](const SocketOptions& options) -> fl::shared_ptr<ServerSocket> {
-            return fl::make_shared<StubServerSocket>(options);
-        }
-    );
+fl::shared_ptr<Socket> create_platform_socket(const SocketOptions& options) {
+    return fl::make_shared<StubSocket>(options);
+}
+
+fl::shared_ptr<ServerSocket> create_platform_server_socket(const SocketOptions& options) {
+    return fl::make_shared<StubServerSocket>(options);
+}
+
+bool platform_supports_ipv6() {
+    // Stub implementation doesn't support IPv6 for simplicity
+    return false;
+}
+
+bool platform_supports_tls() {
+    // Stub implementation doesn't support TLS
+    return false;
+}
+
+bool platform_supports_non_blocking_connect() {
+    // Stub implementation supports non-blocking operations
+    return true;
+}
+
+bool platform_supports_socket_reuse() {
+    // Stub implementation supports socket reuse simulation
+    return true;
 }
 
 } // namespace fl 

@@ -163,7 +163,4 @@ private:
     static int generate_server_socket_handle();
 };
 
-/// Register stub socket factories for testing
-void register_stub_socket_factories();
-
 } // namespace fl 
