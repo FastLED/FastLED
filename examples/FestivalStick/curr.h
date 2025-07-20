@@ -673,13 +673,17 @@ void triggerWaveRipple() {
     int min_y = perc * height;
     int max_y = (1 - perc) * height;
     
-    int x = random(min_x, max_x);
-    int y = random(min_y, max_y);
+    int x = random8(min_x, max_x);
+    int y = random8(min_y, max_y);
     
-    // Trigger a wave ripple at this position
-    waveFx->setf(x, y, 1.0f);
+    // Trigger a 2x2 wave ripple for more punch (compensates for blur reduction)
+    float ripple_strength = 1.5f; // Higher value for more impact
+    waveFx->setf(x, y, ripple_strength);
+    waveFx->setf(x + 1, y, ripple_strength);
+    waveFx->setf(x, y + 1, ripple_strength);
+    waveFx->setf(x + 1, y + 1, ripple_strength);
     
-    FL_WARN("Wave ripple triggered at (" << x << ", " << y << ")");
+    FL_WARN("Wave ripple triggered at (" << x << ", " << y << ") with 2x2 pattern");
 }
 
 void processWaveAutoTrigger(uint32_t now) {
@@ -690,15 +694,15 @@ void processWaveAutoTrigger(uint32_t now) {
             
             // Calculate next trigger time based on speed
             float speed = 1.0f - waveTriggerSpeed.value();
-            uint32_t min_interval = 500 * speed;   // Minimum 500ms * speed
-            uint32_t max_interval = 3000 * speed;  // Maximum 3000ms * speed
+            uint32_t min_interval = (uint32_t)(500 * speed);   // Minimum 500ms * speed
+            uint32_t max_interval = (uint32_t)(3000 * speed);  // Maximum 3000ms * speed
             
             // Ensure valid range
             uint32_t min = MIN(min_interval, max_interval);
             uint32_t max = MAX(min_interval, max_interval);
-            if (min == max) max += 1;
+            if (min >= max) max = min + 1;
             
-            nextWaveTrigger = now + random(min, max);
+            nextWaveTrigger = now + random16(min, max);
         }
     }
 }
