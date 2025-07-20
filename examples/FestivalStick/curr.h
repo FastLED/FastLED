@@ -70,7 +70,7 @@ UIDescription festivalStickDescription(
     "- Uses `Corkscrew.toScreenMap()` for accurate web interface visualization\n"
     "- Multiple render modes: **Noise**, **Position**, **Fire**, **Wave**, and **Animartrix** effects\n"
     "- Real-time cylindrical surface mapping\n"
-    "- **Wave mode**: Cylindrical 2D wave simulation with ripple effects\n"
+    "- **Wave mode**: Cylindrical 2D wave simulation with ripple effects and configurable blur\n"
     "- **Animartrix mode**: Advanced 2D animation effects with polar coordinate patterns\n\n"
     "## How It Works\n"
     "1. Draws patterns into a rectangular grid (`frameBuffer`)\n"
@@ -182,7 +182,11 @@ UICheckbox waveHalfDuplex("Wave Half Duplex", true);
 UICheckbox waveAutoTrigger("Wave Auto Trigger", true);
 UISlider waveTriggerSpeed("Wave Trigger Speed", 0.5f, 0.0f, 1.0f, 0.01f);
 UIButton waveTriggerButton("Trigger Wave");
-UINumberField wavePalette("Wave Palette", 0, 0, 2);             
+UINumberField wavePalette("Wave Palette", 0, 0, 2);
+
+// Wave blur controls (added for smoother wave effects)
+UISlider waveBlurAmount("Wave Blur Amount", 50, 0, 172, 1);
+UISlider waveBlurPasses("Wave Blur Passes", 1, 1, 10, 1);             
 
 // Fire color palettes (from FireCylinder)
 DEFINE_GRADIENT_PALETTE(firepal){
@@ -234,7 +238,7 @@ DEFINE_GRADIENT_PALETTE(waveRainbowpal){
 // This automatically assigns all specified controls to the "Noise Controls" group
 UIGroup noiseGroup("Noise Controls", noiseScale, noiseSpeed, paletteDropdown);
 UIGroup fireGroup("Fire Controls", fireScaleXY, fireSpeedY, fireScaleX, fireInvSpeedZ, firePalette);
-UIGroup waveGroup("Wave Controls", waveSpeed, waveDampening, waveHalfDuplex, waveAutoTrigger, waveTriggerSpeed, waveTriggerButton, wavePalette);
+UIGroup waveGroup("Wave Controls", waveSpeed, waveDampening, waveHalfDuplex, waveAutoTrigger, waveTriggerSpeed, waveTriggerButton, wavePalette, waveBlurAmount, waveBlurPasses);
 UIGroup renderGroup("Render Options", renderModeDropdown, splatRendering, allWhite, brightness);
 UIGroup colorBoostGroup("Color Boost", saturationFunction, luminanceFunction);
 UIGroup pointGraphicsGroup("Point Graphics Mode", speed, positionCoarse, positionFine, positionExtraFine, autoAdvance);
@@ -710,6 +714,10 @@ void drawWave(uint32_t now) {
     CRGBPalette16 currentPalette = getWavePalette();
     WaveCrgbMapPtr newCrgbMap = fl::make_intrusive<WaveCrgbGradientMap>(currentPalette);
     waveFx->setCrgbMap(newCrgbMap);
+    
+    // Apply blur settings to the wave blend (for smoother wave effects)
+    waveBlend->setGlobalBlurAmount(waveBlurAmount.value());
+    waveBlend->setGlobalBlurPasses(waveBlurPasses.value());
     
     // Check if manual trigger button was pressed
     if (waveTriggerButton.value()) {
