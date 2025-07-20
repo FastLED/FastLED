@@ -7,7 +7,7 @@ body {
     color: #E0E0E0;
     /* Light gray text */
     margin: 0;
-    padding: 32px 0 0 0; /* Add padding-top for fixed menu bar */
+    padding: 48px 0 0 0; /* Add padding-top for fixed menu bar */
     font-family: 'Roboto Condensed', sans-serif;
     display: flex;
     flex-direction: column;
@@ -868,7 +868,7 @@ audio::-webkit-media-controls-mute-button {
     top: 0;
     left: 0;
     right: 0;
-    height: 32px;
+    height: 48px; /* Increased height for larger text */
     background: linear-gradient(135deg, 
         rgba(30, 30, 30, 0.95) 0%, 
         rgba(40, 40, 40, 0.95) 100%);
@@ -877,25 +877,26 @@ audio::-webkit-media-controls-mute-button {
     z-index: 1000;
     display: flex;
     align-items: center;
-    padding: 0 10px;
+    padding: 0 15px;
 }
 
 .menu-item {
     position: relative;
-    margin-right: 20px;
+    margin-right: 30px; /* Increased spacing for larger text */
 }
 
 .menu-label {
     color: #E0E0E0;
     font-family: 'Roboto Condensed', sans-serif;
-    font-size: 14px;
-    font-weight: 500;
-    padding: 6px 12px;
+    font-size: 1.5em; /* Match h2 size */
+    font-weight: 600;
+    padding: 8px 16px;
     cursor: pointer;
-    border-radius: 4px;
+    border-radius: 6px;
     transition: all 0.2s ease;
     display: block;
     user-select: none;
+    letter-spacing: 0.5px;
 }
 
 .menu-label:hover {
@@ -936,12 +937,12 @@ audio::-webkit-media-controls-mute-button {
 }
 
 .menu-dropdown-item {
-    padding: 10px 16px;
+    padding: 12px 18px;
     color: #E0E0E0;
     cursor: pointer;
     transition: all 0.2s ease;
     font-family: 'Roboto Condensed', sans-serif;
-    font-size: 13px;
+    font-size: 15px; /* Slightly larger to complement the bigger menu labels */
     border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
