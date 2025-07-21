@@ -1,6 +1,6 @@
 #ifdef FASTLED_HAS_NETWORKING
 
-#include "fl/networking/socket_factory.h"
+#include "fl/net/socket_factory.h"
 
 namespace fl {
 

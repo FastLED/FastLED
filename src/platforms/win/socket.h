@@ -1,21 +1,26 @@
 #pragma once
 
-#ifdef FASTLED_HAS_NETWORKING
+#if defined(FASTLED_HAS_NETWORKING) && defined(_WIN32) && !defined(FASTLED_STUB_IMPL)
 
-#include "fl/networking/socket.h"
-#include "fl/networking/socket_factory.h"
+#include "fl/net/socket.h"
+#include "fl/net/socket_factory.h"
 #include "fl/vector.h"
-#include "fl/deque.h"
 #include "fl/string.h"
 #include "fl/mutex.h"
+#include "fl/future.h"
 
 namespace fl {
 
-/// Stub socket implementation for testing (no actual network I/O)
-class StubSocket : public Socket {
+// Forward declarations and platform-neutral types
+// Platform-specific details are handled in the implementation
+using socket_handle_t = int;  // Platform-neutral socket handle type
+static constexpr socket_handle_t INVALID_SOCKET_HANDLE = -1;
+
+/// Windows-specific socket implementation using WinSock
+class WinSocket : public Socket {
 public:
-    explicit StubSocket(const SocketOptions& options = {});
-    ~StubSocket() override = default;
+    explicit WinSocket(const SocketOptions& options = {});
+    ~WinSocket() override;
     
     // Socket interface implementation
     fl::future<SocketError> connect(const fl::string& host, int port) override;
@@ -52,64 +57,44 @@ public:
     
     int get_socket_handle() const override;
     
-    /// Test control methods
-    void set_mock_response(fl::span<const fl::u8> data);
-    void set_mock_error(SocketError error, const fl::string& message = "");
-    void set_mock_connection_delay(fl::u32 delay_ms);
-    void simulate_connection_loss();
-    void simulate_slow_network(fl::u32 bytes_per_second);
-    
-    /// Test inspection methods
-    fl::vector<fl::u8> get_sent_data() const;
-    fl::size get_bytes_sent() const;
-    fl::size get_bytes_received() const;
-    fl::size get_connection_attempts() const;
-    
-    /// Connect two stub sockets for loopback testing
-    void connect_to_peer(fl::shared_ptr<StubSocket> peer);
-    
 protected:
     void set_state(SocketState state) override;
     void set_error(SocketError error, const fl::string& message = "") override;
     
 private:
     const SocketOptions mOptions;
+    socket_handle_t mSocket = INVALID_SOCKET_HANDLE;
     SocketState mState = SocketState::CLOSED;
     SocketError mLastError = SocketError::SUCCESS;
     fl::string mErrorMessage;
     fl::string mRemoteHost;
     int mRemotePort = 0;
-    fl::string mLocalAddress = "127.0.0.1";
+    fl::string mLocalAddress;
     int mLocalPort = 0;
-    int mSocketHandle = -1;
     bool mIsNonBlocking = false;
     fl::u32 mTimeout = 5000;
     
-    // Mock data and peer connection
-    fl::deque<fl::u8> mMockResponse;
-    fl::deque<fl::u8> mSentData;
-    fl::deque<fl::u8> mReceiveBuffer;
-    fl::shared_ptr<StubSocket> mPeer;
-    fl::u32 mConnectionDelay = 0;
-    fl::u32 mBytesPerSecond = 0;  // 0 = unlimited
+    // Platform-specific helpers
+    static bool initialize_networking();
+    static void cleanup_networking();
+    static fl::string get_socket_error_string(int error_code);
+    static SocketError translate_socket_error(int error_code);
     
-    // Test statistics
-    fl::size mConnectionAttempts = 0;
-    fl::size mBytesSent = 0;
-    fl::size mBytesReceived = 0;
+    SocketError connect_internal(const fl::string& host, int port);
+    bool setup_socket_options();
+    fl::string resolve_hostname(const fl::string& hostname);
     
-    // Mock behavior helpers
-    void simulate_network_delay();
-    fl::size calculate_transfer_rate(fl::size requested_bytes);
-    void write_to_peer(fl::span<const fl::u8> data);
-    static int generate_socket_handle();
+    // Static initialization tracking
+    static bool s_networking_initialized;
+    static int s_instance_count;
+    static fl::mutex s_init_mutex;
 };
 
-/// Stub server socket implementation for testing
-class StubServerSocket : public ServerSocket {
+/// Windows-specific server socket implementation
+class WinServerSocket : public ServerSocket {
 public:
-    explicit StubServerSocket(const SocketOptions& options = {});
-    ~StubServerSocket() override = default;
+    explicit WinServerSocket(const SocketOptions& options = {});
+    ~WinServerSocket() override;
     
     // ServerSocket interface implementation
     SocketError bind(const fl::string& address, int port) override;
@@ -135,36 +120,32 @@ public:
     
     int get_socket_handle() const override;
     
-    /// Test control methods
-    void add_pending_connection(fl::shared_ptr<StubSocket> client_socket);
-    void set_mock_error(SocketError error, const fl::string& message = "");
-    void simulate_connection_limit();
-    
-    /// Test inspection methods
-    fl::size get_total_connections_accepted() const;
-    fl::size get_pending_connection_count() const;
-    
 protected:
     void set_error(SocketError error, const fl::string& message = "") override;
     
 private:
     const SocketOptions mOptions;
+    socket_handle_t mSocket = INVALID_SOCKET_HANDLE;
     bool mIsListening = false;
-    fl::string mBoundAddress = "127.0.0.1";
+    fl::string mBoundAddress;
     int mBoundPort = 0;
     int mBacklog = 5;
     SocketError mLastError = SocketError::SUCCESS;
     fl::string mErrorMessage;
-    int mSocketHandle = -1;
     bool mIsNonBlocking = false;
-    
-    fl::vector<fl::shared_ptr<StubSocket>> mPendingConnections;
-    fl::size mTotalConnectionsAccepted = 0;
-    bool mSimulateConnectionLimit = false;
-    
-    static int generate_server_socket_handle();
+    fl::size mCurrentConnections = 0;
 };
 
-} // namespace fl 
+// Platform-specific socket creation functions (required by socket_factory.cpp)
+fl::shared_ptr<Socket> create_platform_socket(const SocketOptions& options);
+fl::shared_ptr<ServerSocket> create_platform_server_socket(const SocketOptions& options);
 
-#endif // FASTLED_HAS_NETWORKING 
+// Platform capability queries
+bool platform_supports_ipv6();
+bool platform_supports_tls();
+bool platform_supports_non_blocking_connect();
+bool platform_supports_socket_reuse();
+
+} // namespace fl
+
+#endif // defined(FASTLED_HAS_NETWORKING) && defined(_WIN32) && !defined(FASTLED_STUB_IMPL) 

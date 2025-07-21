@@ -2,8 +2,8 @@
 
 #ifdef FASTLED_HAS_NETWORKING
 
-#include "fl/networking/http_types.h"
-#include "fl/networking/socket.h"
+#include "fl/net/http/types.h"
+#include "fl/net/socket.h"
 #include "fl/function.h"
 #include "fl/future.h"
 #include "fl/shared_ptr.h"

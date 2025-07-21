@@ -1,6 +1,8 @@
-#ifdef FASTLED_HAS_NETWORKING
+#if defined(FASTLED_HAS_NETWORKING)
+// Stub sockets are the "real" implementation for the stub platform
+// They provide mock networking functionality for testing purposes
 
-#include "stub_socket.h"
+#include "socket.h"
 
 #include "fl/shared_ptr.h"
 
@@ -297,14 +299,14 @@ SocketError StubServerSocket::bind(const fl::string& address, int port) {
 }
 
 SocketError StubServerSocket::listen(int backlog) {
-    if (mBoundPort == 0) {
-        set_error(SocketError::SOCKET_ERROR, "Must bind before listen");
-        return mLastError;
+    if (!mIsListening) {
+        mBacklog = backlog;
+        mIsListening = true;
+        return SocketError::SUCCESS;
     }
     
-    mBacklog = backlog;
-    mIsListening = true;
-    return SocketError::SUCCESS;
+    set_error(SocketError::UNKNOWN_ERROR, "Must bind before listen");
+    return mLastError;
 }
 
 void StubServerSocket::close() {

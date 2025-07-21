@@ -1,6 +1,6 @@
 #include "test.h"
-#include "fl/networking/socket.h"
-#include "fl/networking/socket_factory.h"
+#include "fl/net/socket.h"
+#include "fl/net/socket_factory.h"
 #include "fl/string.h"
 #include "fl/vector.h"
 #include "fl/shared_ptr.h"

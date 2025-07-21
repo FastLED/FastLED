@@ -2,7 +2,7 @@
 
 #ifdef FASTLED_HAS_NETWORKING
 
-#include "fl/networking/socket.h"
+#include "fl/net/socket.h"
 #include "fl/string.h"
 #include "fl/shared_ptr.h"
 

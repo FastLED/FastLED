@@ -11,8 +11,8 @@
 #ifdef FASTLED_HAS_NETWORKING
 
 // Include all networking functionality when enabled
-#include "fl/networking/socket.h"
-#include "fl/networking/socket_factory.h"
+#include "fl/net/socket.h"
+#include "fl/net/socket_factory.h"
 
 namespace fl {
 

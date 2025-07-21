@@ -64,6 +64,12 @@ function(setup_fastled_source_directory)
     # Include FastLED source directory
     include_directories(${FASTLED_SOURCE_DIR}/src)
     
+    # Pass networking configuration to FastLED library
+    if(FASTLED_HAS_NETWORKING)
+        # When networking is enabled, it's always real - no FASTLED_REAL_NETWORKING flag needed
+        message(STATUS "FASTLED_HAS_NETWORKING enabled - real networking will be used automatically")
+    endif()
+    
     # Delegate source file computation to src/CMakeLists.txt
     add_subdirectory(${FASTLED_SOURCE_DIR}/src ${CMAKE_BINARY_DIR}/fastled)
     

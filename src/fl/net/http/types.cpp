@@ -1,6 +1,6 @@
 #ifdef FASTLED_HAS_NETWORKING
 
-#include "fl/networking/http_types.h"
+#include "fl/net/http/types.h"
 #include "fl/algorithm.h"
 #include "fl/string.h"
 #include "fl/sstream.h"

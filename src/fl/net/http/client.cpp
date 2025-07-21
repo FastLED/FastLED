@@ -1,9 +1,9 @@
 #ifdef FASTLED_HAS_NETWORKING
 
-#include "fl/networking/http_client.h"
-#include "fl/networking/http_transport.h"
-#include "fl/networking/socket_factory.h"
-#include "fl/networking/socket.h"
+#include "fl/net/http/client.h"
+#include "fl/net/http/transport.h"
+#include "fl/net/socket_factory.h"
+#include "fl/net/socket.h"
 #include "fl/future.h"
 #include "fl/string.h"
 #include "fl/sstream.h"
@@ -189,7 +189,7 @@ fl::future<Response> HttpClient::send_internal(const Request& request) {
     }
     
     // TODO: Add statistics tracking
-    auto start_time = fl::time();
+    //auto start_time = fl::time();
     auto response_future = mTransport->send_request(request);
     
     // For now, just return the future directly

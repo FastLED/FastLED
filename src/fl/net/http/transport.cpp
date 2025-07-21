@@ -1,7 +1,7 @@
 #ifdef FASTLED_HAS_NETWORKING
 
-#include "fl/networking/http_transport.h"
-#include "fl/networking/socket_factory.h"
+#include "fl/net/http/transport.h"
+#include "fl/net/socket_factory.h"
 #include "fl/algorithm.h"
 
 namespace fl {
