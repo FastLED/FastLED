@@ -3,6 +3,16 @@
 
 #include "socket_posix.h"
 
+// Additional POSIX socket includes for implementation
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <errno.h>
+#include <sys/select.h>
+#include <sys/ioctl.h>
+#include <cstdarg>  // For va_list in fcntl and ioctl
+
 namespace fl {
 
 //=============================================================================

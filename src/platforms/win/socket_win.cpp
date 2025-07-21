@@ -3,6 +3,78 @@
 
 #include "socket_win.h"
 
+// Additional Windows header isolation for implementation
+#ifndef NOMSG
+#define NOMSG
+#endif
+#ifndef NOWINSTYLES
+#define NOWINSTYLES
+#endif
+#ifndef NOSYSMETRICS
+#define NOSYSMETRICS
+#endif
+#ifndef NOCLIPBOARD
+#define NOCLIPBOARD
+#endif
+#ifndef NOCOLOR
+#define NOCOLOR
+#endif
+#ifndef NOKERNEL
+#define NOKERNEL
+#endif
+#ifndef NONLS
+#define NONLS
+#endif
+#ifndef NOMEMMGR
+#define NOMEMMGR
+#endif
+#ifndef NOMETAFILE
+#define NOMETAFILE
+#endif
+#ifndef NOOPENFILE
+#define NOOPENFILE
+#endif
+#ifndef NOSCROLL
+#define NOSCROLL
+#endif
+#ifndef NOTEXTMETRIC
+#define NOTEXTMETRIC
+#endif
+#ifndef NOWH
+#define NOWH
+#endif
+#ifndef NOWINOFFSETS
+#define NOWINOFFSETS
+#endif
+#ifndef NOKANJI
+#define NOKANJI
+#endif
+#ifndef NOICONS
+#define NOICONS
+#endif
+#ifndef NORASTEROPS
+#define NORASTEROPS
+#endif
+#ifndef NOSHOWWINDOW
+#define NOSHOWWINDOW
+#endif
+#ifndef OEMRESOURCE
+#define OEMRESOURCE
+#endif
+#ifndef NOATOM
+#define NOATOM
+#endif
+#ifndef NOCTLMGR
+#define NOCTLMGR
+#endif
+#ifndef NODRAWTEXT
+#define NODRAWTEXT
+#endif
+
+// Additional includes for implementation
+#include <sys/types.h>
+#include <cstdarg>  // For va_list in fcntl emulation
+
 namespace fl {
 
 //=============================================================================

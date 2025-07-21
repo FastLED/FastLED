@@ -1,0 +1,370 @@
+Auto-enabled --cpp mode for specific test: net
+Windows detected: defaulting to Clang compiler (use --gcc to override)
+Stack trace dumping enabled for test timeouts
+Compilation failed:
+Current directory: C:\Users\niteris\dev\fastled\ci
+Cleaning build directory...
+Build directory cleaned.
+USING CLANG COMPILER
+CC: C:\Program Files\LLVM\bin\clang.EXE
+CXX: C:\Program Files\LLVM\bin\clang++.EXE
+AR: C:\Program Files\LLVM\bin\llvm-ar.EXE
+-- === CMAKE STARTING ===
+-- 🎯 SPECIFIC_TEST IS SET TO: net
+-- ======================
+-- The C compiler identification is Clang 19.1.0 with GNU-like command-line
+-- The CXX compiler identification is Clang 19.1.0 with GNU-like command-line
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Check for working C compiler: C:/Program Files/LLVM/bin/clang.exe - skipped
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: C:/Program Files/LLVM/bin/clang++.exe - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- BuildOptions: FASTLED_HAS_NETWORKING forced to ON for comprehensive test coverage
+-- BuildOptions: Build options declared
+-- BuildOptions: Build options validated - no conflicts detected
+-- BuildOptions: Build mode: Full build (compile + link)
+-- BuildOptions: NO_LINK variable acknowledged (set to: OFF)
+-- BuildOptions: NO_BUILD variable acknowledged (set to: OFF)
+-- BuildOptions: NO_THIN_LTO variable acknowledged (set to: OFF)
+-- BuildOptions: NO_DEAD_CODE_ELIMINATION variable acknowledged (set to: OFF)
+-- BuildOptions: FASTLED_HAS_NETWORKING variable acknowledged (set to: ON)
+-- Compiler Detection Results:
+--   Compiler:
+--   Platform:
+--   Linker:
+--   LTO Support:
+--   Dead Code Elimination:
+--   Stack Trace Support:
+--   Fast Math:
+--   Parallel Compilation:
+--   Debug Symbols:
+-- === Dependency Detection ===
+-- LibUnwind not found. Falling back to basic stack traces with execinfo.
+-- Using sccache (Python): C:/Users/niteris/dev/fastled/.venv/Scripts/sccache.exe
+-- Configuring sccache for optimal performance
+-- sccache: Compiler caching active - builds will show cache hits/misses
+-- Configuring Windows debug libraries (dbghelp, psapi)
+-- Windows debug libraries configured
+-- === Dependency Detection Complete ===
+-- OptimizationSettings: Configuring Debug/non-Release build (Debug)
+-- Build type: Debug
+-- Debug symbols: FULL (DWARF + CodeView for Windows)
+-- Optimizations disabled for debugging
+-- Stack traces enabled
+-- Debug build configured with level: FULL
+-- Optimization: Level 0 (no optimization)
+-- LinkerCompatibility: Using MSVC-style dead code elimination for lld-link
+-- Dead code elimination enabled: -Xlinker;/OPT:REF;-Xlinker;/OPT:ICF
+-- === Build Performance Optimization ===
+-- Detected 16 CPU cores
+-- Setting parallel build level to 32 (16 CPU cores * 2)
+-- Enabled parallel compilation optimizations
+-- Using sccache (Python): C:/Users/niteris/dev/fastled/.venv/Scripts/sccache.exe
+-- Configuring sccache for optimal performance
+-- sccache: Compiler caching active - builds will show cache hits/misses
+-- Using lld-link linker: C:/Program Files/LLVM/bin/lld-link.exe
+-- Using fast debug info generation for faster builds
+-- === Build Performance Optimization Complete ===
+-- Build type: Debug
+-- 🚨 UNIVERSAL RTTI ENFORCEMENT - ensuring RTTI is disabled on ALL platforms
+-- ✅ RTTI enforcement complete: -fno-rtti confirmed in filtered flags
+-- Applied Windows calling convention fixes for Clang
+-- Applied test compiler flags (inherited from library, LTO disabled) for Clang
+-- Networking: FASTLED_HAS_NETWORKING enabled - networking functionality will be available
+-- Clang compiler detected: enabling FASTLED_ALL_SRC for unified compilation testing
+-- Applied test compile definitions: Clang
+--
+-- 🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨
+-- 🚨                                  BUILD FLAGS SUMMARY                                 🚨
+-- 🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨
+--
+-- 📚 BUILD CONFIGURATION (MODULAR SYSTEM):
+--   Compiler: Clang 19.1.0
+--   C++ Standard: 17
+--   Build Type: Debug
+--   Platform: Windows
+--
+--   📌 Global CMAKE_CXX_FLAGS (applied to all C++ files):
+--       -ferror-limit=1 -Xclang -fms-compatibility
+--
+--   📌 Global CMAKE_C_FLAGS (applied to all C files):
+--       -ferror-limit=1 -fmax-errors=10 -Xclang -fms-compatibility
+--
+--   📌 Preprocessor Definitions:
+--       DEBUG FASTLED_TESTING ENABLE_CRASH_HANDLER _GLIBCXX_DEBUG _GLIBCXX_DEBUG_PEDANTIC _ALLOW_COMPILER_AND_STL_VERSION_MISMATCH _WIN32_WINNT=0x0601 DEBUG FASTLED_FORCE_NAMESPACE=1 FASTLED_USE_JSON_UI=1 FASTLED_NO_AUTO_NAMESPACE FASTLED_TESTING ENABLE_CRASH_HANDLER FASTLED_STUB_IMPL FASTLED_NO_PINMAP HAS_HARDWARE_PIN_SUPPORT _GLIBCXX_DEBUG _GLIBCXX_DEBUG_PEDANTIC FASTLED_HAS_NETWORKING=1 _ALLOW_COMPILER_AND_STL_VERSION_MISMATCH FASTLED_ALL_SRC=1
+--
+-- 🔗 LINKER FLAGS:
+--   📌 CMAKE_EXE_LINKER_FLAGS (executables):
+--
+--
+-- 🔧 MODULAR CONFIGURATION:
+--   📌 All compiler flags and dependencies managed by modules
+--   📌 Libunwind: Handled by DependencyManagement module
+--   📌 Dead Code Elimination: Handled by OptimizationSettings module
+--
+-- 🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨
+--
+-- Build output directories configured:
+--   Libraries: C:/Users/niteris/dev/fastled/tests/.build/lib
+--   Executables: C:/Users/niteris/dev/fastled/tests/.build/bin
+-- FASTLED_HAS_NETWORKING enabled - real networking will be used automatically
+CMake Deprecation Warning at C:/Users/niteris/dev/fastled/src/CMakeLists.txt:6 (cmake_minimum_required):
+  Compatibility with CMake < 3.10 will be removed from a future version of
+  CMake.
+
+  Update the VERSION argument <min> value.  Or, use the <min>...<max> syntax
+  to tell CMake that the project requires at least <min> but has been updated
+  to work with policies introduced by <max> or earlier.
+
+
+-- FASTLED_SOURCE_DIR: C:/Users/niteris/dev/fastled/src
+-- CMAKE_CXX_STANDARD already defined as: 17
+-- Using compile flags from parent CMakeLists.txt
+-- COMMON_COMPILE_FLAGS:
+-- COMMON_COMPILE_DEFINITIONS:
+CMake Warning (dev) at C:/Users/niteris/dev/fastled/src/CMakeLists.txt:34 (option):
+  Policy CMP0077 is not set: option() honors normal variables.  Run "cmake
+  --help-policy CMP0077" for policy details.  Use the cmake_policy command to
+  set the policy and suppress this warning.
+
+  For compatibility with older versions of CMake, option is clearing the
+  normal variable 'FASTLED_ALL_SRC'.
+This warning is for project developers.  Use -Wno-dev to suppress it.
+
+-- FASTLED_ALL_SRC=ON: Using unified compilation mode
+-- Found 120 .cpp files for unified compilation
+-- === UNIFIED COMPILATION FILE BREAKDOWN ===
+-- Root src/ files (14):
+--   FastLED.cpp
+--   bitswap.cpp
+--   cled_controller.cpp
+--   colorpalettes.cpp
+--   crgb.cpp
+--   hsv2rgb.cpp
+--   lib8tion.cpp
+--   noise.cpp
+--   platforms.cpp
+--   power_mgt.cpp
+--   rgbw.cpp
+--   simplex.cpp
+--   transpose8x1_noinline.cpp
+--   wiring.cpp
+-- FL library files (60):
+--   fl/allocator.cpp
+--   fl/audio.cpp
+--   fl/audio_reactive.cpp
+--   fl/bitset.cpp
+--   fl/blur.cpp
+--   fl/bytestreammemory.cpp
+--   fl/colorutils.cpp
+--   fl/corkscrew.cpp
+--   fl/crgb_hsv16.cpp
+--   fl/downscale.cpp
+--   fl/ease.cpp
+--   fl/engine_events.cpp
+--   fl/fft.cpp
+--   fl/fft_impl.cpp
+--   fl/file_system.cpp
+--   fl/fill.cpp
+--   fl/gamma.cpp
+--   fl/gradient.cpp
+--   fl/hsv16.cpp
+--   fl/io.cpp
+--   fl/istream.cpp
+--   fl/json.cpp
+--   fl/json_console.cpp
+--   fl/leds.cpp
+--   fl/line_simplification.cpp
+--   fl/net/http/client.cpp
+--   fl/net/http/tcp_transport.cpp
+--   fl/net/http/tls_transport.cpp
+--   fl/net/http/transport.cpp
+--   fl/net/http/types.cpp
+--   fl/net/server_socket.cpp
+--   fl/net/socket_factory.cpp
+--   fl/noise_woryley.cpp
+--   fl/ostream.cpp
+--   fl/ptr.cpp
+--   fl/random.cpp
+--   fl/raster_sparse.cpp
+--   fl/rectangular_draw_buffer.cpp
+--   fl/referent.cpp
+--   fl/screenmap.cpp
+--   fl/sin32.cpp
+--   fl/splat.cpp
+--   fl/str.cpp
+--   fl/str_ui.cpp
+--   fl/strstream.cpp
+--   fl/stub_main.cpp
+--   fl/tile2x2.cpp
+--   fl/time.cpp
+--   fl/time_alpha.cpp
+--   fl/transform.cpp
+--   fl/type_traits.cpp
+--   fl/ui.cpp
+--   fl/upscale.cpp
+--   fl/wave_simulation.cpp
+--   fl/wave_simulation_real.cpp
+--   fl/xmap.cpp
+--   fl/xymap.cpp
+--   fl/xypath.cpp
+--   fl/xypath_impls.cpp
+--   fl/xypath_renderer.cpp
+-- FX library files (13):
+--   fx/2d/blend.cpp
+--   fx/2d/noisepalette.cpp
+--   fx/2d/scale_up.cpp
+--   fx/2d/wave.cpp
+--   fx/detail/fx_layer.cpp
+--   fx/frame.cpp
+--   fx/fx_engine.cpp
+--   fx/time.cpp
+--   fx/video.cpp
+--   fx/video/frame_interpolator.cpp
+--   fx/video/frame_tracker.cpp
+--   fx/video/pixel_stream.cpp
+--   fx/video/video_impl.cpp
+-- Sensors library files (3):
+--   sensors/button.cpp
+--   sensors/digital_pin.cpp
+--   sensors/pir.cpp
+-- Platforms library files (26):
+--   platforms/compile_test.cpp
+--   platforms/posix/socket_posix.cpp
+--   platforms/shared/ui/json/audio.cpp
+--   platforms/shared/ui/json/button.cpp
+--   platforms/shared/ui/json/checkbox.cpp
+--   platforms/shared/ui/json/description.cpp
+--   platforms/shared/ui/json/dropdown.cpp
+--   platforms/shared/ui/json/help.cpp
+--   platforms/shared/ui/json/number_field.cpp
+--   platforms/shared/ui/json/slider.cpp
+--   platforms/shared/ui/json/title.cpp
+--   platforms/shared/ui/json/ui.cpp
+--   platforms/shared/ui/json/ui_internal.cpp
+--   platforms/shared/ui/json/ui_manager.cpp
+--   platforms/stub/led_sysdefs_stub.cpp
+--   platforms/stub/net/socket.cpp
+--   platforms/wasm/active_strip_data.cpp
+--   platforms/wasm/compiler/Arduino.cpp
+--   platforms/wasm/engine_listener.cpp
+--   platforms/wasm/fastspi_wasm.cpp
+--   platforms/wasm/fs_wasm.cpp
+--   platforms/wasm/js.cpp
+--   platforms/wasm/js_bindings.cpp
+--   platforms/wasm/timer.cpp
+--   platforms/wasm/ui.cpp
+--   platforms/win/socket_win.cpp
+-- Third party library files (4):
+--   third_party/cq_kernel/cq_kernel.cpp
+--   third_party/cq_kernel/kiss_fft.cpp
+--   third_party/cq_kernel/kiss_fftr.cpp
+--   third_party/object_fled/src/OjectFLED.cpp
+-- === TOTAL: 120 files combined into unified compilation ===
+-- Generated unified source file: C:/Users/niteris/dev/fastled/tests/.build/bin/fastled/fastled_unified.cpp
+-- Created fastled library with unified compilation (120 .cpp files combined into 1 compilation unit)
+-- FastLED source directory configured: C:/Users/niteris/dev/fastled/tests/..
+-- Test timeouts configured: Default 300s, Quick 60s, Long 600s
+-- Test parallelization enabled: 16 parallel jobs (CPU count)
+-- Test output formatting configured
+-- CTest configuration complete
+-- Applied test settings to target: test_shared_static
+-- 🚨 Universal target-level RTTI enforcement for: test_shared_static
+-- ✅ Universal RTTI disabled for target: test_shared_static
+-- Applied unit test flags to target: test_shared_static (✅ RTTI disabled)
+-- Created test infrastructure library: test_shared_static
+-- 🔍 Looking for specific test file: C:/Users/niteris/dev/fastled/tests/test_net.cpp
+-- ✅ Building ONLY specific test: test_net
+-- Processing specific test: test_net
+--
+-- 🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪
+-- 🧪                        MODULAR TEST CREATION: test_net                       🧪
+-- 🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪
+--
+--   📁 Source File: C:/Users/niteris/dev/fastled/tests/test_net.cpp
+--   🎯 Target Name: test_net
+--
+--   🔧 Modular Target Creation:
+--      - Using create_test_executable() from TargetCreation module
+--      - Automatic Windows configuration via configure_windows_executable()
+--      - Standard test settings via apply_test_settings()
+--      - Unit test flags via apply_unit_test_flags()
+--      - CTest registration via register_test_executable()
+--
+--   📌 Modular system will automatically provide:
+--      - FastLED library linking
+--      - Test infrastructure (test_shared_static) linking
+--      - C++17 standard compliance
+--      - Platform-specific debugging libraries (Windows: dbghelp, psapi)
+--      - Stack unwinding support (if available)
+--      - Static runtime linking (GNU on non-Apple platforms)
+--      - Consistent compile definitions and flags
+--
+-- 🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪
+-- 🧪                       END MODULAR TEST CREATION: test_net                    🧪
+-- 🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪
+--
+-- LinkerCompatibility: Using comprehensive Windows debug build flags
+-- LinkerCompatibility: Using MSVC-style subsystem flags for lld-link
+-- Applied Windows executable settings to: test_net
+-- LinkerCompatibility: Skipping static runtime linking for non-GNU compiler: Clang
+-- Created test executable: test_net
+-- Applied test settings to target: test_net
+-- 🚨 Universal target-level RTTI enforcement for: test_net
+-- ✅ Universal RTTI disabled for target: test_net
+-- Applied unit test flags to target: test_net (✅ RTTI disabled)
+-- Registered test: test_net
+--
+-- 🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗
+-- 🔗                        FINAL LINKER FLAGS: test_net                         🔗
+-- 🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗
+--
+--   📌 Target-specific Link Flags:
+--      -Xlinker /SUBSYSTEM:CONSOLE -Xlinker /SUBSYSTEM:CONSOLE -Xlinker /DEBUG:FULL -Xlinker /OPT:NOREF -Xlinker /OPT:NOICF
+--
+--   📌 Global Executable Linker Flags:
+--      CMAKE_EXE_LINKER_FLAGS:
+--
+--   📌 Windows-specific Configuration:
+--      WIN32_EXECUTABLE: FALSE
+--      - Console subsystem enforced
+--      - Debug symbols included
+--
+-- 🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗
+-- 🔗                      END FINAL LINKER FLAGS: test_net                       🔗
+-- 🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗🔗
+--
+-- Build summary: Created 2 executable targets (specific test mode)
+-- Configuring done (2.2s)
+-- Generating done (0.0s)
+-- Build files have been written to: C:/Users/niteris/dev/fastled/tests/.build
+Building with 32 parallel jobs (16 CPU cores)
+Building specific test: test_net
+Change Dir: 'C:/Users/niteris/dev/fastled/tests/.build'
+
+Run Build Command(s): C:/Users/niteris/dev/fastled/.venv/Scripts/ninja.exe -v -j 32 test_net
+[1/6] C:\PROGRA~1\LLVM\bin\CLANG_~1.EXE -DDEBUG -DENABLE_CRASH_HANDLER -DFASTLED_ALL_SRC=1 -DFASTLED_CHECK_NO_RTTI=1 -DFASTLED_FIVE_BIT_HD_GAMMA_FUNCTION_2_8 -DFASTLED_FORCE_NAMESPACE=1 -DFASTLED_HAS_NETWORKING=1 -DFASTLED_NO_AUTO_NAMESPACE -DFASTLED_NO_PINMAP -DFASTLED_STUB_IMPL -DFASTLED_TESTING -DFASTLED_USE_JSON_UI=1 -DHAS_HARDWARE_PIN_SUPPORT -DPROGMEM="" -D_ALLOW_COMPILER_AND_STL_VERSION_MISMATCH -D_DEBUG -D_GLIBCXX_DEBUG -D_GLIBCXX_DEBUG_PEDANTIC -D_WIN32_WINNT=0x0601 -IC:/Users/niteris/dev/fastled/tests/../src -IC:/Users/niteris/dev/fastled/tests -ferror-limit=1 -Xclang -fms-compatibility -O0 -g -Xclang -gcodeview -D_DEBUG -D_DLL -D_MT -Xclang --dependent-lib=msvcrtd -std=gnu++17 -g3 -gdwarf-4 -gcodeview -O0 -fno-omit-frame-pointer -fno-rtti -Wall -funwind-tables -Werror=return-type -Werror=missing-declarations -Werror=init-self -Werror=date-time -Werror=uninitialized -Werror=array-bounds -Werror=null-dereference -Werror=deprecated-declarations -Wno-comment -Werror=suggest-override -Werror=non-virtual-dtor -Werror=switch-enum -Werror=delete-non-virtual-dtor -MD -MT CMakeFiles/test_net.dir/test_net.cpp.obj -MF CMakeFiles\test_net.dir\test_net.cpp.obj.d -o CMakeFiles/test_net.dir/test_net.cpp.obj -c C:/Users/niteris/dev/fastled/tests/test_net.cpp
+[2/6] C:\PROGRA~1\LLVM\bin\CLANG_~1.EXE -DDEBUG -DENABLE_CRASH_HANDLER -DFASTLED_ALL_SRC=1 -DFASTLED_FIVE_BIT_HD_GAMMA_FUNCTION_2_8 -DFASTLED_FORCE_NAMESPACE=1 -DFASTLED_HAS_NETWORKING=1 -DFASTLED_NO_AUTO_NAMESPACE -DFASTLED_NO_PINMAP -DFASTLED_STUB_IMPL -DFASTLED_TESTING -DFASTLED_USE_JSON_UI=1 -DHAS_HARDWARE_PIN_SUPPORT -DPROGMEM="" -D_ALLOW_COMPILER_AND_STL_VERSION_MISMATCH -D_GLIBCXX_DEBUG -D_GLIBCXX_DEBUG_PEDANTIC -D_WIN32_WINNT=0x0601 -IC:/Users/niteris/dev/fastled/tests/../src -IC:/Users/niteris/dev/fastled/src -ferror-limit=1 -Xclang -fms-compatibility -O0 -g -Xclang -gcodeview -D_DEBUG -D_DLL -D_MT -Xclang --dependent-lib=msvcrtd -std=gnu++17 -Wall -funwind-tables -g -fno-exceptions -fno-rtti -ffunction-sections -fdata-sections -Werror=return-type -Werror=missing-declarations -Werror=uninitialized -Werror=array-bounds -Werror=null-dereference -Werror=deprecated-declarations -Wno-comment -Werror=suggest-override -Werror=non-virtual-dtor -Werror=switch-enum -Werror=delete-non-virtual-dtor -MD -MT bin/fastled/CMakeFiles/fastled.dir/fastled_unified.cpp.obj -MF bin\fastled\CMakeFiles\fastled.dir\fastled_unified.cpp.obj.d -o bin/fastled/CMakeFiles/fastled.dir/fastled_unified.cpp.obj -c C:/Users/niteris/dev/fastled/tests/.build/bin/fastled/fastled_unified.cpp
+FAILED: bin/fastled/CMakeFiles/fastled.dir/fastled_unified.cpp.obj
+C:\PROGRA~1\LLVM\bin\CLANG_~1.EXE -DDEBUG -DENABLE_CRASH_HANDLER -DFASTLED_ALL_SRC=1 -DFASTLED_FIVE_BIT_HD_GAMMA_FUNCTION_2_8 -DFASTLED_FORCE_NAMESPACE=1 -DFASTLED_HAS_NETWORKING=1 -DFASTLED_NO_AUTO_NAMESPACE -DFASTLED_NO_PINMAP -DFASTLED_STUB_IMPL -DFASTLED_TESTING -DFASTLED_USE_JSON_UI=1 -DHAS_HARDWARE_PIN_SUPPORT -DPROGMEM="" -D_ALLOW_COMPILER_AND_STL_VERSION_MISMATCH -D_GLIBCXX_DEBUG -D_GLIBCXX_DEBUG_PEDANTIC -D_WIN32_WINNT=0x0601 -IC:/Users/niteris/dev/fastled/tests/../src -IC:/Users/niteris/dev/fastled/src -ferror-limit=1 -Xclang -fms-compatibility -O0 -g -Xclang -gcodeview -D_DEBUG -D_DLL -D_MT -Xclang --dependent-lib=msvcrtd -std=gnu++17 -Wall -funwind-tables -g -fno-exceptions -fno-rtti -ffunction-sections -fdata-sections -Werror=return-type -Werror=missing-declarations -Werror=uninitialized -Werror=array-bounds -Werror=null-dereference -Werror=deprecated-declarations -Wno-comment -Werror=suggest-override -Werror=non-virtual-dtor -Werror=switch-enum -Werror=delete-non-virtual-dtor -MD -MT bin/fastled/CMakeFiles/fastled.dir/fastled_unified.cpp.obj -MF bin\fastled\CMakeFiles\fastled.dir\fastled_unified.cpp.obj.d -o bin/fastled/CMakeFiles/fastled.dir/fastled_unified.cpp.obj -c C:/Users/niteris/dev/fastled/tests/.build/bin/fastled/fastled_unified.cpp
+In file included from C:/Users/niteris/dev/fastled/tests/.build/bin/fastled/fastled_unified.cpp:36:
+In file included from C:/Users/niteris/dev/fastled/tests/../src\fl/net/http/tcp_transport.cpp:12:
+In file included from C:/Users/niteris/dev/fastled/tests/../src\platforms/socket_platform.h:21:
+In file included from C:/Users/niteris/dev/fastled/tests/../src\platforms\win/socket_win.h:17:
+In file included from C:\Program Files (x86)\Windows Kits\10\Include\10.0.19041.0\um\winsock2.h:53:
+In file included from C:\Program Files (x86)\Windows Kits\10\Include\10.0.19041.0\um\windows.h:174:
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.19041.0\um\winuser.h:6129:2: error: expected ';' after struct
+ 6129 | } INPUT, *PINPUT, FAR* LPINPUT;
+      |  ^
+fatal error: too many errors emitted, stopping now [-ferror-limit=]
+2 errors generated.
+[3/6] C:\PROGRA~1\LLVM\bin\CLANG_~1.EXE -DDEBUG -DENABLE_CRASH_HANDLER -DFASTLED_ALL_SRC=1 -DFASTLED_CHECK_NO_RTTI=1 -DFASTLED_FIVE_BIT_HD_GAMMA_FUNCTION_2_8 -DFASTLED_FORCE_NAMESPACE=1 -DFASTLED_HAS_NETWORKING=1 -DFASTLED_NO_AUTO_NAMESPACE -DFASTLED_NO_PINMAP -DFASTLED_STUB_IMPL -DFASTLED_TESTING -DFASTLED_USE_JSON_UI=1 -DHAS_HARDWARE_PIN_SUPPORT -DPROGMEM="" -D_ALLOW_COMPILER_AND_STL_VERSION_MISMATCH -D_GLIBCXX_DEBUG -D_GLIBCXX_DEBUG_PEDANTIC -D_WIN32_WINNT=0x0601 -IC:/Users/niteris/dev/fastled/tests/../src -IC:/Users/niteris/dev/fastled/tests -ferror-limit=1 -Xclang -fms-compatibility -O0 -g -Xclang -gcodeview -D_DEBUG -D_DLL -D_MT -Xclang --dependent-lib=msvcrtd -std=gnu++17 -fno-rtti -Wall -funwind-tables -Werror=return-type -Werror=missing-declarations -Werror=init-self -Werror=date-time -Werror=uninitialized -Werror=array-bounds -Werror=null-dereference -Werror=deprecated-declarations -Wno-comment -Werror=suggest-override -Werror=non-virtual-dtor -Werror=switch-enum -Werror=delete-non-virtual-dtor -MD -MT CMakeFiles/test_shared_static.dir/doctest_main.cpp.obj -MF CMakeFiles\test_shared_static.dir\doctest_main.cpp.obj.d -o CMakeFiles/test_shared_static.dir/doctest_main.cpp.obj -c C:/Users/niteris/dev/fastled/tests/doctest_main.cpp
+ninja: build stopped: subcommand failed.
+
+cpp_test_compile.py: Error executing command: cmake --build C:\Users\niteris\dev\fastled\tests\.build --target test_net --parallel 32
+Command failed: uv run ci/cpp_test_run.py --clang --test net

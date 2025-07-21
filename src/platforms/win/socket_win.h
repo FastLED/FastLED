@@ -7,90 +7,23 @@
 #include "fl/string.h"
 #include "fl/stdint.h"
 
-// Include Windows base headers first with strict isolation
+// Essential Windows header isolation
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
 #endif
 #ifndef NOMINMAX
 #define NOMINMAX
 #endif
-#ifndef NOUSER
-#define NOUSER
-#endif
-#ifndef NOMSG
-#define NOMSG
-#endif
-#ifndef NOWINSTYLES
-#define NOWINSTYLES
-#endif
-#ifndef NOSYSMETRICS
-#define NOSYSMETRICS
-#endif
-#ifndef NOCLIPBOARD
-#define NOCLIPBOARD
-#endif
-#ifndef NOCOLOR
-#define NOCOLOR
-#endif
-#ifndef NOKERNEL
-#define NOKERNEL
-#endif
-#ifndef NONLS
-#define NONLS
-#endif
-#ifndef NOMEMMGR
-#define NOMEMMGR
-#endif
-#ifndef NOMETAFILE
-#define NOMETAFILE
-#endif
-#ifndef NOOPENFILE
-#define NOOPENFILE
-#endif
-#ifndef NOSCROLL
-#define NOSCROLL
-#endif
-#ifndef NOTEXTMETRIC
-#define NOTEXTMETRIC
-#endif
-#ifndef NOWH
-#define NOWH
-#endif
-#ifndef NOWINOFFSETS
-#define NOWINOFFSETS
-#endif
-#ifndef NOKANJI
-#define NOKANJI
-#endif
-#ifndef NOICONS
-#define NOICONS
-#endif
-#ifndef NORASTEROPS
-#define NORASTEROPS
-#endif
-#ifndef NOSHOWWINDOW
-#define NOSHOWWINDOW
-#endif
-#ifndef OEMRESOURCE
-#define OEMRESOURCE
-#endif
-#ifndef NOATOM
-#define NOATOM
-#endif
-#ifndef NOCTLMGR
-#define NOCTLMGR
-#endif
-#ifndef NODRAWTEXT
-#define NODRAWTEXT
-#endif
 #ifndef NOGDI
 #define NOGDI
 #endif
+#ifndef NOUSER
+#define NOUSER
+#endif
 
+// Minimal Windows includes for type definitions
 #include <winsock2.h>
 #include <ws2tcpip.h>
-#include <sys/types.h>
-#include <cstdarg>  // For va_list in fcntl emulation
 
 namespace fl {
 
@@ -112,8 +45,8 @@ using ::in_addr;
 using ::in6_addr;
 
 // Type aliases for consistency with POSIX
-using sa_family_t = ADDRESS_FAMILY;
-using in_port_t = USHORT;
+using sa_family_t = unsigned short;  // Same as ADDRESS_FAMILY
+using in_port_t = unsigned short;    // Same as USHORT
 
 //=============================================================================
 // POSIX Socket Constants (Windows Normalization)

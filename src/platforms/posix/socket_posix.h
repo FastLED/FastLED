@@ -7,18 +7,10 @@
 #include "fl/string.h"
 #include "fl/stdint.h"
 
-// Standard POSIX socket includes
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <unistd.h>
-#include <fcntl.h>
-#include <errno.h>
-#include <sys/select.h>
-#include <netdb.h>
-#include <sys/ioctl.h>
-#include <sys/types.h>
-#include <cstdarg>  // For va_list in fcntl and ioctl
+// Minimal POSIX includes for function declarations
+#include <sys/types.h>    // For ssize_t, socklen_t
+#include <sys/socket.h>   // For struct sockaddr, struct msghdr  
+#include <netdb.h>        // For struct addrinfo
 
 namespace fl {
 
