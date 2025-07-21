@@ -32,6 +32,7 @@
 
 #include "fl/stdint.h"
 #include <thread>
+#include <cmath>  // For fmod function
 
 #include <emscripten.h>
 #include <emscripten/html5.h>
@@ -45,8 +46,26 @@ namespace {
 // after a rollover after 50 days. We will need to think about this more in the
 // future to make multiple devices sync up to just one clock. Otherwise this may
 // just be something the user has to do themselves.
-double gStartTime = emscripten_performance_now();
-double get_time_since_epoch() { return emscripten_get_now() - gStartTime; }
+double gStartTime = emscripten_get_now();  // Use emscripten_get_now() for consistency
+
+double get_time_since_epoch() {
+    double now = emscripten_get_now();
+    double elapsed = now - gStartTime;
+    
+    // Debug output to track the timing issue
+    //FASTLED_WARN("gStartTime: " << gStartTime);
+    //FASTLED_WARN("now: " << now);
+    //FASTLED_WARN("elapsed: " << elapsed);
+    
+    // Ensure we return a reasonable positive elapsed time
+    if (elapsed < 0 || elapsed == 0xffffffff) {
+        FASTLED_WARN("WARNING: Negative elapsed time detected, resetting start time");
+        gStartTime = now;
+        elapsed = 0;
+    }
+    
+    return elapsed;
+}
 } // namespace
 
 // Needed or the wasm compiler will strip them out.
@@ -55,13 +74,32 @@ extern "C" {
 
 // Replacement for 'millis' in WebAssembly context
 EMSCRIPTEN_KEEPALIVE uint32_t millis() {
-    return uint32_t(get_time_since_epoch());
+    double elapsed_ms = get_time_since_epoch();
+    
+    // Handle potential overflow - Arduino millis() wraps around every ~49.7 days
+    // This matches Arduino behavior where millis() overflows back to 0
+    if (elapsed_ms >= UINT32_MAX) {
+        elapsed_ms = fmod(elapsed_ms, UINT32_MAX);
+    }
+    
+    uint32_t result = uint32_t(elapsed_ms);
+    FASTLED_WARN("millis() returning: " << result);
+    return result;
 }
 
 // Replacement for 'micros' in WebAssembly context
 EMSCRIPTEN_KEEPALIVE uint32_t micros() {
-    uint64_t out = uint64_t(get_time_since_epoch() * 1000);
-    return uint32_t(out & 0xFFFFFFFF);
+    double elapsed_ms = get_time_since_epoch();
+    double elapsed_micros = elapsed_ms * 1000.0;
+    
+    // Handle potential overflow - Arduino micros() wraps around every ~71.6 minutes
+    // This matches Arduino behavior where micros() overflows back to 0
+    if (elapsed_micros >= UINT32_MAX) {
+        elapsed_micros = fmod(elapsed_micros, UINT32_MAX);
+    }
+    
+    uint32_t result = uint32_t(elapsed_micros);
+    return result;
 }
 
 // Replacement for 'delay' in WebAssembly context
