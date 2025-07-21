@@ -104,27 +104,24 @@ EMSCRIPTEN_KEEPALIVE uint32_t micros() {
 
 // Replacement for 'delay' in WebAssembly context
 EMSCRIPTEN_KEEPALIVE void delay(int ms) {
-    // Keep in mind this is NOT ASYNC as of 2024-12, and will block the main
-    // thread. If you do delay(10000) it will result in a 10 second block on the
-    // main thread and the browser may kill your app. Using async sleep was
-    // looked at but the emscripten documentation says it will add a TON of
-    // overhead and is not recommended unless compiling with -O3, which we do
-    // NOT want to do since emscripten builds must be as fast as possible for
-    // the quick build path and must be as small as possible to reduce web
-    // compiler upload times back to the client.
-    std::this_thread::sleep_for(std::chrono::milliseconds(ms));
+    // Use emscripten_sleep which yields to the event loop instead of blocking
+    // the main thread. This allows the browser to handle events and prevents
+    // the browser from killing the app due to main thread blocking.
+    emscripten_sleep(ms);
 }
 
 EMSCRIPTEN_KEEPALIVE void delayMicroseconds(int micros) {
-    // Keep in mind this is NOT ASYNC as of 2024-12, and will block the main
-    // thread. If you do delay(10000) it will result in a 10 second block on the
-    // main thread and the browser may kill your app. Using async sleep was
-    // looked at but the emscripten documentation says it will add a TON of
-    // overhead and is not recommended unless compiling with -O3, which we do
-    // NOT want to do since emscripten builds must be as fast as possible for
-    // the quick build path and must be as small as possible to reduce web
-    // compiler upload times back to the client.
+    
+    
+    if (micros > 1000) {
+        uint32_t ms = micros / 1000;
+        micros = micros % 1000;
+        emscripten_sleep(ms);
+    }
     std::this_thread::sleep_for(std::chrono::microseconds(micros));
+
+
+
 }
 
 // Replacement for 'yield' in WebAssembly context
