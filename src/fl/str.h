@@ -87,6 +87,8 @@ class StringFormatter {
         return c == ' ' || c == '\t' || c == '\n' || c == '\r';
     }
     static float parseFloat(const char *str, fl::size len);
+    static int parseInt(const char *str, fl::size len);
+    static int parseInt(const char *str);
     static bool isDigit(char c) { return c >= '0' && c <= '9'; }
     static void appendFloat(const float &val, StrN<FASTLED_STR_INLINED_SIZE> *dst);
 };
@@ -433,6 +435,62 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
     template<fl::size M>
     fl::size find(const StrN<M>& other, fl::size start_pos) const {
         return find(other.c_str(), start_pos);
+    }
+
+    // Contains methods for C++23 compatibility
+    bool contains(const char* substr) const {
+        return find(substr) != npos;
+    }
+
+    bool contains(char c) const {
+        return find(c) != npos;
+    }
+
+    template<fl::size M>
+    bool contains(const StrN<M>& other) const {
+        return find(other.c_str()) != npos;
+    }
+
+    // Starts with methods for C++20 compatibility
+    bool starts_with(const char* prefix) const {
+        if (!prefix) {
+            return true;  // Empty prefix matches any string
+        }
+        fl::size prefix_len = strlen(prefix);
+        if (prefix_len > mLength) {
+            return false;
+        }
+        return strncmp(c_str(), prefix, prefix_len) == 0;
+    }
+
+    bool starts_with(char c) const {
+        return mLength > 0 && c_str()[0] == c;
+    }
+
+    template<fl::size M>
+    bool starts_with(const StrN<M>& prefix) const {
+        return starts_with(prefix.c_str());
+    }
+
+    // Ends with methods for C++20 compatibility
+    bool ends_with(const char* suffix) const {
+        if (!suffix) {
+            return true;  // Empty suffix matches any string
+        }
+        fl::size suffix_len = strlen(suffix);
+        if (suffix_len > mLength) {
+            return false;
+        }
+        return strncmp(c_str() + mLength - suffix_len, suffix, suffix_len) == 0;
+    }
+
+    bool ends_with(char c) const {
+        return mLength > 0 && c_str()[mLength - 1] == c;
+    }
+
+    template<fl::size M>
+    bool ends_with(const StrN<M>& suffix) const {
+        return ends_with(suffix.c_str());
     }
 
     StrN substring(fl::size start, fl::size end) const {

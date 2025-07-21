@@ -24,6 +24,7 @@ template <typename T> class Optional {
     Optional(const T &value) : mValue(value) {}
     ~Optional() { mValue.reset(); }
     bool empty() const { return !mValue.template is<T>(); }
+    bool has_value() const { return !empty(); }  // std::optional compatibility
     T *ptr() { return mValue.template ptr<T>(); }
     const T *ptr() const { return mValue.template ptr<T>(); }
 

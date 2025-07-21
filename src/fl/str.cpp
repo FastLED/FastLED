@@ -232,6 +232,15 @@ float StringFormatter::parseFloat(const char *str, fl::size len) {
     return string_functions::atoff(str, len);
 }
 
+int StringFormatter::parseInt(const char *str, fl::size len) {
+    float f = parseFloat(str, len);
+    return static_cast<int>(f);
+}
+
+int StringFormatter::parseInt(const char *str) {
+    return parseInt(str, strlen(str));
+}
+
 int string::strcmp(const string& a, const string& b) {
     return ::strcmp(a.c_str(), b.c_str());
 }
