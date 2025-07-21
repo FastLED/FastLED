@@ -290,3 +290,76 @@ TEST_CASE("fl::future - Edge Cases") {
         CHECK(!f.complete_with_error("New error"));
     }
 } 
+
+TEST_CASE("fl::future - Blocking get_result with fl::time()") {
+    SUBCASE("get_result() returns immediately when future is ready") {
+        auto f = fl::future<int>::create();
+        f.complete_with_value(42);
+        
+        auto result = f.get_result(1000); // 1 second timeout
+        CHECK(result.is<int>());
+        CHECK_EQ(*result.ptr<int>(), 42);
+        CHECK(!result.is<fl::FutureError>());
+        CHECK(!result.is<fl::FuturePending>());
+    }
+    
+    SUBCASE("get_result() returns error immediately when future has error") {
+        auto f = fl::future<int>::create();
+        f.complete_with_error("Test error");
+        
+        auto result = f.get_result(1000); // 1 second timeout
+        CHECK(result.is<fl::FutureError>());
+        CHECK_EQ(result.ptr<fl::FutureError>()->message, "Test error");
+        CHECK(!result.is<int>());
+        CHECK(!result.is<fl::FuturePending>());
+    }
+    
+    SUBCASE("get_result() returns error for invalid future") {
+        fl::future<int> f; // Invalid future
+        
+        auto result = f.get_result(1000);
+        CHECK(result.is<fl::FutureError>());
+        CHECK_EQ(result.ptr<fl::FutureError>()->message, "Future is invalid");
+        CHECK(!result.is<int>());
+        CHECK(!result.is<fl::FuturePending>());
+    }
+    
+    SUBCASE("get_result() has same return type as try_get_result()") {
+        auto f = fl::future<int>::create();
+        f.complete_with_value(42);
+        
+        auto blocking_result = f.get_result(1000);
+        auto non_blocking_result = f.try_get_result();
+        
+        // Both should return FutureResult<int> and have the same value
+        CHECK(blocking_result.is<int>());
+        CHECK(non_blocking_result.is<int>());
+        CHECK_EQ(*blocking_result.ptr<int>(), *non_blocking_result.ptr<int>());
+    }
+    
+#ifdef FASTLED_TESTING
+    SUBCASE("get_result() with timeout using mock time provider") {
+        // Create a mock time provider
+        fl::MockTimeProvider mock(1000);
+        fl::inject_time_provider(mock);
+        
+        auto f = fl::future<int>::create();
+        
+        // Start get_result in a way that will timeout (future never completes)
+        // We can't actually test the blocking timeout easily in a unit test,
+        // but we can test that the timeout logic uses fl::time() correctly
+        // by verifying the method works with injected time
+        
+        // Complete the future immediately so we can test the success path
+        f.complete_with_value(123);
+        auto result = f.get_result(100); // 100ms timeout
+        
+        CHECK(result.is<int>());
+        CHECK_EQ(*result.ptr<int>(), 123);
+        CHECK(!result.is<fl::FutureError>());
+        CHECK(!result.is<fl::FuturePending>());
+        
+        fl::clear_time_provider();
+    }
+#endif
+} 

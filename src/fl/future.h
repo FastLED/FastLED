@@ -109,28 +109,24 @@
 /// @endcode
 ///
 /// @section Blocking Result Access
-/// For cases where you need to wait for a result, use get_result() with a timing callback:
+/// For cases where you need to wait for a result, use get_result() with timeout:
 /// @code
 /// auto future = fl::future<int>::create();
 /// 
-/// // Provide a timing callback (e.g., millis function)
-/// auto timing_callback = []() -> fl::u32 { return millis(); };
-/// 
-/// // Wait up to 5 seconds for result
-/// auto result = future.get_result(timing_callback, 5000);
+/// // Wait up to 5 seconds for result (same return type as try_get_result())
+/// auto result = future.get_result(5000);
 /// if (result.is<int>()) {
 ///     int value = *result.ptr<int>();
 ///     // Handle success
 /// } else if (result.is<fl::FutureError>()) {
 ///     fl::string error = result.ptr<fl::FutureError>()->message;
 ///     // Handle error or timeout
+/// } else if (result.is<fl::FuturePending>()) {
+///     // This should never happen with get_result(), but included for completeness
 /// }
 /// 
 /// // Wait forever (no timeout)
-/// auto result2 = future.get_result(timing_callback);
-/// 
-/// // Without callback - returns error immediately
-/// auto result3 = future.get_result(); // Returns blocking error
+/// auto result2 = future.get_result();
 /// @endcode
 ///
 /// @section Visitor Pattern Support
@@ -166,6 +162,7 @@
 #include "fl/variant.h"
 #include "fl/function.h"
 #include "fl/int.h"
+#include "fl/time.h"
 
 namespace fl {
 
@@ -286,24 +283,19 @@ public:
     }
     
     /// BLOCKING result access with timeout support!
-    /// Returns fl::Variant<T, FutureError> - contains T or FutureError (no pending state)
+    /// Returns FutureResult<T> - same as try_get_result() for API consistency
     /// This method will block until result is available or timeout occurs
     /// 
-    /// @param pump_callback Optional callback function to check/pump the system that will put in the value (e.g., millis)
     /// @param timeout_ms Timeout in milliseconds. -1 (default) means wait forever
-    /// @return Variant containing either the result T or a FutureError
-    fl::Variant<T, FutureError> get_result(fl::function<fl::u32()> pump_callback = {}, fl::i32 timeout_ms = -1) const {
+    /// @return FutureResult<T> containing either the result T, FutureError, or FuturePending (never actually returns pending)
+    /// @note Uses fl::time() for timing. Time injection is available in tests via fl::inject_time_provider()
+    FutureResult<T> get_result(fl::i32 timeout_ms = -1) const {
         if (!valid()) {
-            return fl::Variant<T, FutureError>(FutureError("Future is invalid"));
-        }
-        
-        // If no callback provided, this is a blocking operation that cannot proceed
-        if (!pump_callback) {
-            return fl::Variant<T, FutureError>(FutureError("Future is blocking and cannot invoke wait on it from the main thread"));
+            return FutureResult<T>(FutureError("Future is invalid"));
         }
         
         // Record start time for timeout calculation
-        fl::u32 start_time = pump_callback();
+        fl::u32 start_time = fl::time();
         
         // Loop until we get a result or timeout
         while (true) {
@@ -314,25 +306,25 @@ public:
                 // Get the result - we know it's ready
                 auto result = try_get_result();
                 if (result.template is<T>()) {
-                    return fl::Variant<T, FutureError>(*result.template ptr<T>());
+                    return FutureResult<T>(*result.template ptr<T>());
                 }
                 // This should never happen if state is READY, but handle it
-                return fl::Variant<T, FutureError>(FutureError("Internal error: state was READY but no value available"));
+                return FutureResult<T>(FutureError("Internal error: state was READY but no value available"));
             }
             
             if (current_state == FutureState::ERROR) {
                 // Get the error - we know it's an error
                 auto result = try_get_result();
                 if (result.template is<FutureError>()) {
-                    return fl::Variant<T, FutureError>(*result.template ptr<FutureError>());
+                    return FutureResult<T>(*result.template ptr<FutureError>());
                 }
                 // Fallback to the error message from the state
-                return fl::Variant<T, FutureError>(FutureError(error_message()));
+                return FutureResult<T>(FutureError(error_message()));
             }
             
             // Still pending - check for timeout
             if (timeout_ms >= 0) {
-                fl::u32 current_time = pump_callback();
+                fl::u32 current_time = fl::time();
                 fl::u32 elapsed = current_time - start_time;
                 
                 // Handle timer rollover (millis() rolls over every ~49 days)
@@ -342,18 +334,13 @@ public:
                 }
                 
                 if (elapsed >= static_cast<fl::u32>(timeout_ms)) {
-                    return fl::Variant<T, FutureError>(FutureError("Timeout waiting for future result"));
+                    return FutureResult<T>(FutureError("Timeout waiting for future result"));
                 }
             }
             
-            // Give the system a chance to process - this is the "pump" operation
-            // The callback serves dual purpose: timing AND system pumping
-            pump_callback();
-            
             // Small delay to prevent busy-waiting from consuming too much CPU
             // Note: This is platform-specific and could be configurable
-            // For now, we'll just yield by calling the pump again
-            // Real implementations might want to add a small delay here
+            // In practice, the system should be processing in background
         }
     }
     
