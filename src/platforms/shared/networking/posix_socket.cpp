@@ -9,12 +9,8 @@
 #include <stdio.h>   // For snprintf
 #include <string.h>  // For strerror
 
-// Include platform-specific implementations
-#if defined(_WIN32)
-    #include "real_socket_win.hpp"
-#else
-    #include "real_socket_bsd.hpp"
-#endif
+// POSIX socket implementation - no additional platform-specific includes needed
+// This implementation uses standard POSIX socket APIs directly
 
 namespace fl {
 

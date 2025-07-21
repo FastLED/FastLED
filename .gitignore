@@ -63,3 +63,4 @@ tmp.*
 
 .pio_cache
 compile_commands.json
+tests/.build/

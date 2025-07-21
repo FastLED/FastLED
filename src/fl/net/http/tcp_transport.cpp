@@ -9,13 +9,7 @@
 
 // Include platform-specific socket implementation when networking is enabled
 // FastLED networking is always real networking - no stubs when FASTLED_HAS_NETWORKING is enabled
-#if defined(_WIN32) && !defined(FASTLED_STUB_IMPL)
-    #include "platforms/win/socket.h"
-#elif defined(FASTLED_STUB_IMPL)
-    #include "platforms/stub/net/socket.h"
-#else
-    #include "platforms/bsd/socket.h"
-#endif
+#include "platforms/socket_platform.h"
 
 namespace fl {
 
