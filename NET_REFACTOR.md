@@ -92,11 +92,25 @@ private:
 
 ### Platform Socket Functions
 
-The platform-specific logic moves to platform_* functions (similar to existing socket.hpp pattern):
+The platform-specific logic moves to platform_* functions (similar to existing socket.hpp pattern). **Critical**: Platform files contain **only low-level POSIX-style socket API functions** - no ServerSocket classes or high-level logic.
 
 #### Platform Function Interface
 
+Platform files should follow the **existing low-level socket API pattern**. Current client functions in `src/platforms/win/socket.hpp`:
+
 ```cpp
+// EXISTING CLIENT FUNCTIONS (already implemented)
+inline socket_t platform_create_socket();
+inline int platform_connect_socket(socket_t sock, const sockaddr* addr, int addr_len);
+inline int platform_send_data(socket_t sock, const char* data, int len);
+inline int platform_recv_data(socket_t sock, char* buffer, int len);
+inline void platform_close_socket(socket_t sock);
+```
+
+**ADD these server functions** following the same low-level pattern:
+
+```cpp
+// NEW SERVER FUNCTIONS (to be added)
 // Platform-specific server socket functions
 // Each platform implements these directly
 
@@ -127,7 +141,7 @@ int platform_get_server_socket_bound_port(socket_handle_t socket);
 
 #### Platform Implementation Examples
 
-**Windows Platform** (`src/platforms/win/server_socket.hpp`):
+**Windows Platform** (`src/platforms/win/socket.hpp`):
 ```cpp
 namespace fl {
 
@@ -174,7 +188,7 @@ socket_handle_t platform_accept_connection(socket_handle_t server_handle) {
 } // namespace fl
 ```
 
-**POSIX Platform** (`src/platforms/posix/posix_server_socket.hpp`):
+**POSIX Platform** (`src/platforms/posix/posix_socket.h`):
 ```cpp
 namespace fl {
 
@@ -346,15 +360,20 @@ src/fl/net/
 
 ```
 src/platforms/win/
-└── socket.hpp               # ADD server platform functions to existing file
+└── socket.hpp               # ADD low-level server platform functions (platform_bind_server_socket, etc.)
 
 src/platforms/posix/
-└── posix_socket.h           # ADD server platform functions (MOVE from shared/networking/)
+└── posix_socket.h           # ADD low-level server platform functions (MOVE from shared/networking/)
 ```
 
 **Platform Reorganization Needed**: POSIX files are currently mislocated in `src/platforms/shared/networking/` but should be moved to `src/platforms/posix/` to match the pattern of other platforms (win/, stub/, esp/, etc.). POSIX is a specific platform, not a shared implementation.
 
 **Note**: We deliberately DO NOT create separate server socket files. Server platform functions are added to the existing platform files alongside the current client socket functions.
+
+**🎯 CRITICAL SEPARATION OF CONCERNS:**
+- **Platform files** (`src/platforms/win/socket.hpp`, `src/platforms/posix/posix_socket.h`) = **ONLY low-level POSIX-style socket API functions** (`platform_*` functions)
+- **ServerSocket class** (`src/fl/net/server_socket.h/.cpp`) = **ONLY high-level server logic** that delegates to platform functions
+- **NO ServerSocket implementations** in platform files - only raw socket API wrappers
 
 ### Files to Remove
 
