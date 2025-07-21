@@ -51,6 +51,15 @@
             </div>
             <div id="ui-controls"></div>
             <div id="ui-controls-2" style="display: none;"></div>
+            <!-- FastLED Async Controls -->
+            <div id="fastled-async-controls" style="margin-top: 10px; padding: 10px; border: 1px solid #333; border-radius: 5px; background: rgba(0,0,0,0.1);">
+                <div style="margin-bottom: 5px; font-weight: bold; color: #fff;">FastLED Async Controls:</div>
+                <button id="start-btn" style="margin-right: 5px; padding: 5px 10px; background: #4CAF50; color: white; border: none; border-radius: 3px; cursor: pointer;">Start</button>
+                <button id="stop-btn" style="margin-right: 5px; padding: 5px 10px; background: #f44336; color: white; border: none; border-radius: 3px; cursor: pointer;">Stop</button>
+                <button id="toggle-btn" style="margin-right: 10px; padding: 5px 10px; background: #2196F3; color: white; border: none; border-radius: 3px; cursor: pointer;">Toggle</button>
+                <span id="fps-display" style="color: #fff; font-family: monospace;">FPS: --</span>
+                <div id="error-display" style="color: #ff6b6b; margin-top: 5px; font-size: 12px;"></div>
+            </div>
         </div>
         
         <div id="container"></div>

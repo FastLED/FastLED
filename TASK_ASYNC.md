@@ -11,6 +11,8 @@ This document outlines the changes necessary to modify the JavaScript integratio
 - `-sASYNCIFY_STACK_SIZE=16384` - 16KB stack for async operations  
 - `-sASYNCIFY_EXPORTS=['_extern_setup','_extern_loop']` - Main FastLED functions are async-enabled
 
+⚠️ **Known Issue**: The default 16KB asyncify stack size may be insufficient for complex FastLED sketches, causing "RuntimeError: unreachable" errors.
+
 ## Required JavaScript Changes
 
 ### 1. Update Module Loading and Initialization
@@ -371,12 +373,317 @@ describe('FastLED Async Integration', () => {
 ### Issue: Performance Degradation
 **Solution**: Use performance monitoring and adaptive frame rates as shown in the examples above.
 
+## Troubleshooting Current Implementation
+
+### "RuntimeError: unreachable" - Alternative Causes
+
+**Error Message:**
+```
+fastled.js:73 Uncaught RuntimeError: Aborted(RuntimeError: unreachable). 
+"unreachable" may be due to ASYNCIFY_STACK_SIZE not being large enough (try increasing it)
+```
+
+**Important Note:** If your ASYNCIFY_STACK_SIZE is already large (e.g., 250MB), the issue is **NOT** stack size. The error message can be misleading.
+
+### 🚨 **Immediate Diagnosis (Run This Now)**
+
+Since your stack size is 250MB, paste this diagnostic code into your browser console to identify the actual problem:
+
+```javascript
+// === FastLED WASM Async Diagnostic Tool ===
+console.log("🔍 Starting FastLED WASM diagnostic...");
+
+// Check 1: Module state
+console.log("📦 Module status:", {
+  moduleLoaded: typeof Module !== 'undefined',
+  externSetup: typeof Module?._extern_setup,
+  externLoop: typeof Module?._extern_loop,
+  stackSize: "250MB (confirmed - not the issue)"
+});
+
+// Check 2: Controller state  
+console.log("🎮 Controller status:", {
+  controllerExists: !!window.fastLEDController,
+  setupCompleted: window.fastLEDController?.setupCompleted,
+  running: window.fastLEDController?.running,
+  frameCount: window.fastLEDController?.frameCount
+});
+
+// Check 3: Test single function calls
+async function testFunctions() {
+  if (!Module?._extern_setup) {
+    console.error("❌ _extern_setup not found - module loading issue");
+    return;
+  }
+  
+  try {
+    console.log("🧪 Testing _extern_setup...");
+    const setupResult = Module._extern_setup();
+    if (setupResult instanceof Promise) {
+      console.log("⏳ Setup returned Promise, awaiting...");
+      await setupResult;
+      console.log("✅ Setup completed successfully");
+    } else {
+      console.log("✅ Setup completed synchronously");
+    }
+  } catch (error) {
+    console.error("❌ Setup failed:", error);
+    console.error("This suggests the issue is in your setup() function");
+    return;
+  }
+  
+  try {
+    console.log("🧪 Testing single _extern_loop call...");
+    const loopResult = Module._extern_loop();
+    if (loopResult instanceof Promise) {
+      console.log("⏳ Loop returned Promise, awaiting...");
+      await loopResult;
+      console.log("✅ Single loop call succeeded");
+    } else {
+      console.log("✅ Single loop call succeeded (sync)");
+    }
+  } catch (error) {
+    console.error("❌ Single loop call failed:", error);
+    console.error("This suggests the issue is in your loop() function");
+  }
+}
+
+// Check 4: Memory state
+console.log("💾 Memory status:", {
+  wasmMemory: Module?.HEAPU8?.length ? `${(Module.HEAPU8.length / 1024 / 1024).toFixed(1)}MB` : 'Unknown',
+  jsMemory: performance.memory ? {
+    used: `${(performance.memory.usedJSHeapSize / 1024 / 1024).toFixed(1)}MB`,
+    total: `${(performance.memory.totalJSHeapSize / 1024 / 1024).toFixed(1)}MB`
+  } : 'Not available'
+});
+
+// Run the test
+testFunctions().then(() => {
+  console.log("🔍 Diagnostic complete. Check results above.");
+}).catch(error => {
+  console.error("💥 Diagnostic failed:", error);
+});
+```
+
+**Run this now and share the console output** - it will tell us exactly where the problem is occurring.
+
+### When Stack Size Is NOT The Issue (Stack Size > 32MB)
+
+If your stack size is already very large (250MB), the "unreachable" error is likely caused by:
+
+#### **Root Cause 1: Infinite Loop in Async Code**
+**Problem:** The FastLED sketch contains an infinite loop that never yields control back to the browser.
+
+**Debugging:**
+```javascript
+// Add this to debug infinite loops
+let loopCount = 0;
+const originalLoop = window.fastLEDController?.moduleInstance?._extern_loop;
+if (originalLoop) {
+  window.fastLEDController.moduleInstance._extern_loop = function() {
+    console.log(`Loop call #${++loopCount}`);
+    if (loopCount > 1000) {
+      console.error('Possible infinite loop detected!');
+      return;
+    }
+    return originalLoop.call(this);
+  };
+}
+```
+
+**Solutions:**
+- Add `yield()` or `delay(1)` calls in tight loops
+- Check for `while(true)` loops without delays
+- Ensure `loop()` function exits normally
+
+#### **Root Cause 2: Memory Corruption or Invalid Access**
+**Problem:** The sketch is accessing invalid memory or causing heap corruption.
+
+**Debugging:**
+```cpp
+// Add bounds checking in your FastLED sketch
+void loop() {
+  // Check array bounds before accessing
+  if (ledIndex < NUM_LEDS) {
+    leds[ledIndex] = CRGB::Red;
+  }
+  
+  // Add debug output
+  Serial.print("Loop iteration: ");
+  Serial.println(millis());
+  
+  FastLED.show();
+  delay(20);  // Important: yield control
+}
+```
+
+**Solutions:**
+- Check all array access for bounds
+- Verify `NUM_LEDS` matches actual LED count
+- Use smaller test arrays initially
+- Add memory debugging to your sketch
+
+#### **Root Cause 3: Incorrect Asyncify Function Exports**
+**Problem:** Functions being called aren't properly marked as async-capable.
+
+**Check Current Exports:**
+```javascript
+// In browser console, check what functions are asyncified
+console.log('Module exports:', Object.keys(Module));
+console.log('_extern_setup type:', typeof Module._extern_setup);
+console.log('_extern_loop type:', typeof Module._extern_loop);
+```
+
+**Expected:** Both should be functions that can return Promises.
+
+#### **Root Cause 4: WebAssembly Module Compilation Issues**
+**Problem:** The WASM module itself has compilation errors or corruption.
+
+**Solutions:**
+1. **Recompile with Debug Info:**
+   ```bash
+   # If using fastled compiler
+   fastled --debug examples/wasm
+   
+   # Or add debug flags to compilation
+   -g -O1  # Lower optimization, more debug info
+   ```
+
+2. **Test with Minimal Sketch:**
+   ```cpp
+   #include <FastLED.h>
+   
+   #define NUM_LEDS 10
+   #define DATA_PIN 3
+   
+   CRGB leds[NUM_LEDS];
+   
+   void setup() {
+     FastLED.addLeds<NEOPIXEL, DATA_PIN>(leds, NUM_LEDS);
+   }
+   
+   void loop() {
+     static uint8_t hue = 0;
+     leds[0] = CHSV(hue++, 255, 255);
+     FastLED.show();
+     delay(100);  // Critical: must yield
+   }
+   ```
+
+### Debugging Steps for Large Stack Size Scenarios
+
+#### **Step 1: Isolate the Problem**
+```javascript
+// Test if setup() works independently
+try {
+  await window.fastLEDController.moduleInstance._extern_setup();
+  console.log('✅ Setup completed successfully');
+} catch (error) {
+  console.error('❌ Setup failed:', error);
+}
+
+// Test if a single loop() call works
+try {
+  const result = window.fastLEDController.moduleInstance._extern_loop();
+  if (result instanceof Promise) {
+    const awaited = await result;
+    console.log('✅ Single loop call succeeded:', awaited);
+  } else {
+    console.log('✅ Single loop call succeeded (sync):', result);
+  }
+} catch (error) {
+  console.error('❌ Single loop call failed:', error);
+}
+```
+
+#### **Step 2: Enable Verbose Logging**
+```javascript
+// Add comprehensive logging to AsyncFastLEDController
+window.fastLEDController.safeCall = async function(funcName, func, ...args) {
+  console.log(`🔄 Calling ${funcName}...`);
+  try {
+    const startTime = performance.now();
+    const result = func(...args);
+    
+    if (result instanceof Promise) {
+      console.log(`⏳ ${funcName} returned Promise, awaiting...`);
+      const awaited = await result;
+      const duration = performance.now() - startTime;
+      console.log(`✅ ${funcName} completed async in ${duration.toFixed(2)}ms:`, awaited);
+      return awaited;
+    } else {
+      const duration = performance.now() - startTime;
+      console.log(`✅ ${funcName} completed sync in ${duration.toFixed(2)}ms:`, result);
+      return result;
+    }
+  } catch (error) {
+    console.error(`❌ ${funcName} failed:`, error);
+    console.error('Error stack:', error.stack);
+    throw error;
+  }
+};
+```
+
+#### **Step 3: Check for Memory Leaks**
+```javascript
+// Monitor memory usage
+function monitorMemory() {
+  if (performance.memory) {
+    const mem = performance.memory;
+    console.log('Memory usage:', {
+      used: (mem.usedJSHeapSize / 1024 / 1024).toFixed(2) + ' MB',
+      total: (mem.totalJSHeapSize / 1024 / 1024).toFixed(2) + ' MB',
+      limit: (mem.jsHeapSizeLimit / 1024 / 1024).toFixed(2) + ' MB'
+    });
+  }
+}
+
+// Run every 5 seconds
+setInterval(monitorMemory, 5000);
+```
+
+### Advanced Debugging: WebAssembly Inspection
+
+If the above steps don't help, the issue might be deeper in the WebAssembly module:
+
+```javascript
+// Check if the module is properly loaded
+console.log('Module ready:', !!Module);
+console.log('Module instance exports:', Module.asm ? Object.keys(Module.asm) : 'No asm exports');
+
+// Check memory state
+console.log('WASM Memory size:', Module.HEAPU8?.length || 'Unknown');
+console.log('WASM stack pointer:', Module.stackSave?.() || 'Unknown');
+```
+
+### When to File a Bug Report
+
+File a bug report with the FastLED WASM compiler if:
+1. ✅ Stack size is large (>32MB) 
+2. ✅ Minimal sketch still fails
+3. ✅ No infinite loops in your code
+4. ✅ Memory usage appears normal
+5. ✅ Setup() works but loop() fails immediately
+
+**Include in your bug report:**
+- Exact FastLED sketch code (minimal reproduction case)
+- Browser console output with verbose logging enabled
+- WebAssembly module inspection results
+- Platform details (OS, browser, FastLED compiler version)
+- Confirmation that stack size is large (250MB in your case)
+
 ## Next Steps
 
-1. Implement the `AsyncFastLEDController` class in your FastLED web project
-2. Update existing `setInterval` loops to use the new async pattern  
-3. Add performance monitoring and error handling
-4. Test with complex FastLED sketches that use `delay()`
-5. Consider adding UI controls for start/stop/performance monitoring
+1. ✅ **JavaScript Integration Complete**: The `AsyncFastLEDController` class has been implemented in `src/platforms/wasm/compiler/index.js`
+2. ✅ **Async Loop Pattern**: Updated `FastLED_SetupAndLoop` to use async/await pattern  
+3. ✅ **Error Handling**: Added comprehensive error handling for async operations
+4. ✅ **Performance Monitoring**: Added FPS tracking and adaptive frame rates
+5. ✅ **UI Controls**: Added start/stop/toggle controls in the web interface
+
+**Remaining Tasks:**
+1. **Increase ASYNCIFY_STACK_SIZE**: Work with FastLED WASM compiler maintainers to increase default stack size
+2. **Test Complex Sketches**: Validate the async implementation with complex FastLED animations
+3. **Documentation**: Update FastLED documentation to include async best practices
+4. **Performance Optimization**: Fine-tune adaptive frame rate algorithms for better performance
 
 The asyncify integration enables FastLED sketches to work seamlessly in web browsers without blocking the main thread, providing a much better user experience for LED control applications. 
