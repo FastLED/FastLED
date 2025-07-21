@@ -65,6 +65,8 @@ struct ParsedUrl {
     ParsedUrl() : port(80), valid(false) {}
 };
 
+FL_DISABLE_WARNING_PUSH
+FL_DISABLE_WARNING(unused-function)
 static ParsedUrl parse_url_internal(const fl::string& url) {
     ParsedUrl result;
     
@@ -118,6 +120,7 @@ static ParsedUrl parse_url_internal(const fl::string& url) {
     result.valid = !result.host.empty();
     return result;
 }
+FL_DISABLE_WARNING_POP
 
 
 
