@@ -113,6 +113,67 @@ struct SerialEmulation {
     void begin(int) {}
     template <typename T> void print(T val) { PrintHelper<T>::print(val); }
     template <typename T> void println(T val) { PrintHelper<T>::println(val); }
+    
+    // Two-argument print overloads for formatting
+    void print(float val, int digits) { 
+        // Clamp digits to reasonable range
+        digits = digits < 0 ? 0 : (digits > 9 ? 9 : digits);
+        
+        // Use literal format strings to avoid linter warnings
+        switch(digits) {
+            case 0: printf("%.0f", val); break;
+            case 1: printf("%.1f", val); break;
+            case 2: printf("%.2f", val); break;
+            case 3: printf("%.3f", val); break;
+            case 4: printf("%.4f", val); break;
+            case 5: printf("%.5f", val); break;
+            case 6: printf("%.6f", val); break;
+            case 7: printf("%.7f", val); break;
+            case 8: printf("%.8f", val); break;
+            case 9: printf("%.9f", val); break;
+        }
+    }
+    void print(double val, int digits) { 
+        // Clamp digits to reasonable range
+        digits = digits < 0 ? 0 : (digits > 9 ? 9 : digits);
+        
+        // Use literal format strings to avoid linter warnings
+        switch(digits) {
+            case 0: printf("%.0f", val); break;
+            case 1: printf("%.1f", val); break;
+            case 2: printf("%.2f", val); break;
+            case 3: printf("%.3f", val); break;
+            case 4: printf("%.4f", val); break;
+            case 5: printf("%.5f", val); break;
+            case 6: printf("%.6f", val); break;
+            case 7: printf("%.7f", val); break;
+            case 8: printf("%.8f", val); break;
+            case 9: printf("%.9f", val); break;
+        }
+    }
+    void print(int val, int base) {
+        if (base == 16) printf("%x", val);
+        else if (base == 8) printf("%o", val);
+        else if (base == 2) {
+            // Binary output
+            for (int i = 31; i >= 0; i--) {
+                printf("%d", (val >> i) & 1);
+            }
+        }
+        else printf("%d", val);
+    }
+    void print(unsigned int val, int base) {
+        if (base == 16) printf("%x", val);
+        else if (base == 8) printf("%o", val);
+        else if (base == 2) {
+            // Binary output
+            for (int i = 31; i >= 0; i--) {
+                printf("%d", (val >> i) & 1);
+            }
+        }
+        else printf("%u", val);
+    }
+    
     void println() { printf("\n"); }
     int available() { return 0; }
     int read() { return 0; }
