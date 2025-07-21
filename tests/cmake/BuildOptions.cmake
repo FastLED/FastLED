@@ -13,6 +13,9 @@ function(declare_build_options)
     option(NO_LINK "Compile object files but skip linking executables" OFF)
     option(NO_BUILD "Skip compilation but perform linking (requires existing object files)" OFF)
     
+    # Feature control options
+    option(FASTLED_HAS_NETWORKING "Enable FastLED networking functionality" ON)
+    
     message(STATUS "BuildOptions: Build options declared")
 endfunction()
 
@@ -61,6 +64,11 @@ function(mark_variables_as_used)
     if(DEFINED NO_DEAD_CODE_ELIMINATION)
         # Variable is used in linker configuration
         message(STATUS "BuildOptions: NO_DEAD_CODE_ELIMINATION variable acknowledged (set to: ${NO_DEAD_CODE_ELIMINATION})")
+    endif()
+    
+    if(DEFINED FASTLED_HAS_NETWORKING)
+        # Variable is used to conditionally enable networking functionality
+        message(STATUS "BuildOptions: FASTLED_HAS_NETWORKING variable acknowledged (set to: ${FASTLED_HAS_NETWORKING})")
     endif()
 endfunction()
 

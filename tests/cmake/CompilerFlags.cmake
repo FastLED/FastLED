@@ -316,6 +316,14 @@ function(apply_test_compile_definitions)
         _GLIBCXX_DEBUG_PEDANTIC
     )
     
+    # Conditional feature definitions
+    if(FASTLED_HAS_NETWORKING)
+        list(APPEND TEST_DEFINITIONS FASTLED_HAS_NETWORKING=1)
+        message(STATUS "Networking: FASTLED_HAS_NETWORKING enabled - networking functionality will be available")
+    else()
+        message(STATUS "Networking: FASTLED_HAS_NETWORKING disabled - networking functionality will be unavailable (default)")
+    endif()
+    
     # Platform-specific definitions
     if(WIN32 AND CMAKE_CXX_COMPILER_ID MATCHES "Clang")
         list(APPEND TEST_DEFINITIONS _ALLOW_COMPILER_AND_STL_VERSION_MISMATCH)
