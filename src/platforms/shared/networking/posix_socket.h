@@ -1,6 +1,6 @@
 #pragma once
 
-#ifdef FASTLED_HAS_NETWORKING
+#if defined(FASTLED_HAS_NETWORKING) && !defined(_WIN32) && !defined(FASTLED_STUB_IMPL)
 
 #include "fl/net/socket.h"
 #include "fl/net/socket_factory.h"
@@ -148,4 +148,4 @@ bool platform_supports_socket_reuse();
 
 } // namespace fl
 
-#endif // FASTLED_HAS_NETWORKING 
+#endif // defined(FASTLED_HAS_NETWORKING) && !defined(_WIN32) && !defined(FASTLED_STUB_IMPL) 

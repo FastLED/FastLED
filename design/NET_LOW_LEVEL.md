@@ -222,10 +222,10 @@ private:
 namespace fl {
 
 /// Native BSD socket implementation (Linux/macOS/Windows)
-class BsdSocket : public Socket {
+class PosixSocket : public Socket {
 public:
-    explicit BsdSocket(const SocketOptions& options = {});
-    ~BsdSocket() override;
+    explicit PosixSocket(const SocketOptions& options = {});
+    ~PosixSocket() override;
     
     // Socket interface implementation
     SocketError connect(const fl::string& host, int port) override;

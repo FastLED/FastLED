@@ -1,6 +1,6 @@
-#if defined(FASTLED_HAS_NETWORKING) && !defined(FASTLED_STUB_IMPL)
-// Real sockets for actual platforms (Linux, Windows, ESP32, etc.)
-// Not used on the stub platform which has its own mock implementation
+#if defined(FASTLED_HAS_NETWORKING) && !defined(_WIN32) && !defined(FASTLED_STUB_IMPL)
+// Real sockets for POSIX platforms (Linux, BSD, macOS, etc.)
+// Not used on Windows or stub platforms which have their own implementations
 
 #include "posix_socket.h"
 #include "fl/str.h"
@@ -517,4 +517,4 @@ bool platform_supports_socket_reuse() {
 
 } // namespace fl
 
-#endif // defined(FASTLED_HAS_NETWORKING) && !defined(FASTLED_STUB_IMPL) 
+#endif // defined(FASTLED_HAS_NETWORKING) && !defined(_WIN32) && !defined(FASTLED_STUB_IMPL) 
