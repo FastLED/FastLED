@@ -226,6 +226,79 @@ void HttpClient::apply_config_to_request(Request& request) const {
 
 
 
+// Configuration method implementations
+void HttpClient::set_timeout(fl::u32 timeout_ms) {
+    mConfig.timeout_ms = timeout_ms;
+}
+
+fl::u32 HttpClient::get_timeout() const {
+    return mConfig.timeout_ms;
+}
+
+void HttpClient::set_user_agent(const fl::string& user_agent) {
+    mConfig.user_agent = user_agent;
+}
+
+const fl::string& HttpClient::get_user_agent() const {
+    return mConfig.user_agent;
+}
+
+void HttpClient::set_connect_timeout(fl::u32 timeout_ms) {
+    mConfig.connect_timeout_ms = timeout_ms;
+}
+
+fl::u32 HttpClient::get_connect_timeout() const {
+    return mConfig.connect_timeout_ms;
+}
+
+void HttpClient::set_follow_redirects(bool follow) {
+    mConfig.follow_redirects = follow;
+}
+
+void HttpClient::set_max_redirects(fl::size max_redirects) {
+    mConfig.max_redirects = max_redirects;
+}
+
+bool HttpClient::get_follow_redirects() const {
+    return mConfig.follow_redirects;
+}
+
+fl::size HttpClient::get_max_redirects() const {
+    return mConfig.max_redirects;
+}
+
+void HttpClient::set_header(const fl::string& name, const fl::string& value) {
+    // Find existing header and replace, or add new one
+    for (auto& header : mConfig.default_headers) {
+        if (header.first == name) {
+            header.second = value;
+            return;
+        }
+    }
+    mConfig.default_headers.push_back(fl::make_pair(name, value));
+}
+
+void HttpClient::set_headers(const fl::vector<fl::pair<fl::string, fl::string>>& headers) {
+    mConfig.default_headers = headers;
+}
+
+void HttpClient::remove_header(const fl::string& name) {
+    auto it = fl::remove_if(mConfig.default_headers.begin(), mConfig.default_headers.end(),
+        [&name](const fl::pair<fl::string, fl::string>& header) {
+            return header.first == name;
+        });
+    mConfig.default_headers.erase(it, mConfig.default_headers.end());
+}
+
+void HttpClient::clear_headers() {
+    mConfig.default_headers.clear();
+}
+
+fl::span<const fl::pair<fl::string, fl::string>> HttpClient::get_headers() const {
+    return fl::span<const fl::pair<fl::string, fl::string>>(
+        mConfig.default_headers.data(), mConfig.default_headers.size());
+}
+
 // Stub implementations for methods not yet implemented
 fl::future<Response> HttpClient::put(const fl::string& url, fl::span<const fl::u8> data, const fl::string& content_type) {
     (void)url; (void)data; (void)content_type;
