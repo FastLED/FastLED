@@ -162,6 +162,11 @@ void Request::set_body(const fl::string& text) {
     mBody.assign(u8_data, u8_data + text.size());
 }
 
+void Request::set_body(const char* text) {
+    // Delegate to the fl::string overload - resolves ambiguity with string literals
+    set_body(fl::string(text));
+}
+
 void Request::set_body(const fl::vector<fl::u8>& data) {
     mBody = data;
 }
@@ -354,6 +359,11 @@ void Response::set_body(const fl::string& text) {
     const char* text_data = text.c_str();
     const fl::u8* u8_data = reinterpret_cast<const fl::u8*>(text_data);
     mBody.assign(u8_data, u8_data + text.size());
+}
+
+void Response::set_body(const char* text) {
+    // Delegate to the fl::string overload - resolves ambiguity with string literals
+    set_body(fl::string(text));
 }
 
 void Response::set_body(const fl::vector<fl::u8>& data) {

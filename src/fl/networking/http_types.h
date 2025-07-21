@@ -128,6 +128,7 @@ public:
     /// Body access
     void set_body(fl::span<const fl::u8> data);
     void set_body(const fl::string& text);
+    void set_body(const char* text);  // Resolves ambiguity with string literals
     void set_body(const fl::vector<fl::u8>& data);
     const fl::vector<fl::u8>& get_body() const { return mBody; }
     fl::span<const fl::u8> get_body_span() const;
@@ -266,6 +267,7 @@ public:
     /// Body access
     void set_body(fl::span<const fl::u8> data);
     void set_body(const fl::string& text);
+    void set_body(const char* text);  // Resolves ambiguity with string literals
     void set_body(const fl::vector<fl::u8>& data);
     const fl::vector<fl::u8>& get_body() const { return mBody; }
     fl::span<const fl::u8> get_body_span() const;

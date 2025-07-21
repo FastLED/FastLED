@@ -130,6 +130,9 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
     StringHolderPtr mHeapData;
 
   public:
+    // Static constants (like std::string)
+    static constexpr fl::size npos = static_cast<fl::size>(-1);
+
     // Constructors
     StrN() = default;
 
@@ -377,26 +380,58 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
                 return i;
             }
         }
-        return static_cast<fl::size>(-1);
+        return npos;
     }
 
     // Find substring (string literal support)
     fl::size find(const char* substr) const {
         if (!substr) {
-            return static_cast<fl::size>(-1);
+            return npos;
         }
         auto begin = c_str();
         const char* found = strstr(begin, substr);
         if (found) {
             return found - begin;
         }
-        return static_cast<fl::size>(-1);
+        return npos;
     }
 
     // Find another string
     template<fl::size M>
     fl::size find(const StrN<M>& other) const {
         return find(other.c_str());
+    }
+
+    // Find single character starting from position (like std::string)
+    fl::size find(const char &value, fl::size start_pos) const {
+        if (start_pos >= mLength) {
+            return npos;
+        }
+        for (fl::size i = start_pos; i < mLength; ++i) {
+            if (c_str()[i] == value) {
+                return i;
+            }
+        }
+        return npos;
+    }
+
+    // Find substring starting from position (like std::string)
+    fl::size find(const char* substr, fl::size start_pos) const {
+        if (!substr || start_pos >= mLength) {
+            return npos;
+        }
+        auto begin = c_str() + start_pos;
+        const char* found = strstr(begin, substr);
+        if (found) {
+            return found - c_str();
+        }
+        return npos;
+    }
+
+    // Find another string starting from position (like std::string)
+    template<fl::size M>
+    fl::size find(const StrN<M>& other, fl::size start_pos) const {
+        return find(other.c_str(), start_pos);
     }
 
     StrN substring(fl::size start, fl::size end) const {
