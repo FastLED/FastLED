@@ -24,7 +24,7 @@
     // Note: stub socket.hpp doesn't exist yet - uses inline stubs
 #else
     // POSIX platforms (Linux, macOS, etc.)
-    #include "posix/posix_socket.hpp"
+    #include "posix/socket_posix.h"
 #endif
 
 #endif // FASTLED_HAS_NETWORKING 
