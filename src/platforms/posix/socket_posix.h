@@ -60,7 +60,7 @@ ssize_t recvmsg(int sockfd, struct msghdr *msg, int flags);
 
 // Connection Teardown - direct passthrough to POSIX API
 int shutdown(int sockfd, int how);
-int close(int fd);
+int close(int fd);  // Keep close() - it's emulated on WASM
 
 // Socket Options - direct passthrough to POSIX API
 int setsockopt(int sockfd, int level, int optname, const void *optval, socklen_t optlen);
@@ -89,6 +89,13 @@ int ioctl(int fd, unsigned long request, ...);
 
 // Error handling - direct access to errno
 int get_errno();
+
+// WASM CONSTRAINTS: The following functions are blocking calls and are 
+// DISALLOWED and NOT AVAILABLE on WASM due to proxying limitations:
+// - select()  
+// - poll()
+// These functions are not declared in this API and MUST NOT be used.
+// Use per-call non-blocking flags like MSG_DONTWAIT instead.
 
 // POSIX socket constants and errno values are already defined correctly
 // No need to redefine AF_INET, SOCK_STREAM, ECONNREFUSED, etc.

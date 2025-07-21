@@ -1,6 +1,8 @@
 #if defined(FASTLED_HAS_NETWORKING)
 // Stub sockets are the "real" implementation for the stub platform
 // They provide mock networking functionality for testing purposes
+// ONLY compile when not on real platforms (WASM, Windows, POSIX)
+#if !defined(__EMSCRIPTEN__) && !defined(_WIN32) && defined(FASTLED_STUB_IMPL)
 
 #include "socket.h"
 
@@ -308,4 +310,5 @@ bool platform_supports_socket_reuse() {
 
 } // namespace fl
 
-#endif // defined(FASTLED_HAS_NETWORKING) && defined(FASTLED_STUB_IMPL)
+#endif // !defined(__EMSCRIPTEN__) && !defined(_WIN32) && defined(FASTLED_STUB_IMPL)
+#endif // defined(FASTLED_HAS_NETWORKING)

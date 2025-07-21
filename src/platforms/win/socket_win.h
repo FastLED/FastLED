@@ -164,6 +164,14 @@ int fcntl(int fd, int cmd, ...);
 // Error handling
 int get_errno();
 
+// WASM CONSTRAINTS: The following functions are blocking calls and are 
+// DISALLOWED and NOT AVAILABLE on WASM due to proxying limitations:
+// - select()  
+// - poll()
+// These functions are not declared in this API and MUST NOT be used.
+// Use per-call non-blocking flags like MSG_DONTWAIT instead.
+// (Note: This constraint applies to WASM builds only - Windows builds are not affected)
+
 // POSIX errno constants for Windows
 #ifndef EWOULDBLOCK
 #define EWOULDBLOCK     WSAEWOULDBLOCK

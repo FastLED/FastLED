@@ -1,5 +1,5 @@
 #ifdef FASTLED_HAS_NETWORKING
-// Only compile WASM socket implementation for Emscripten
+// Real WASM POSIX socket implementation for Emscripten
 #if defined(__EMSCRIPTEN__)
 
 #include "socket_wasm.h"
@@ -7,101 +7,51 @@
 #include <cstring>
 #include <cstdlib>
 #include <cstdio>  // For snprintf
+#include <errno.h>
 
-// Add missing network byte order functions for pure WASM environments only
-#if !defined(__EMSCRIPTEN__) && !defined(_WIN32)
-    // For pure WASM (not Emscripten, not Windows)
-    static inline unsigned short htons(unsigned short x) { return (x >> 8) | (x << 8); }
-    static inline unsigned short ntohs(unsigned short x) { return htons(x); }
-    static inline unsigned long htonl(unsigned long x) { return (x >> 24) | ((x & 0x00FF0000) >> 8) | ((x & 0x0000FF00) << 8) | (x << 24); }
-    static inline unsigned long ntohl(unsigned long x) { return htonl(x); }
-    
-    #define EAI_BADFLAGS    -1
-    #define EAI_NONAME      -2
-    #define EAI_MEMORY      -10
-    #define EAI_FAIL        -4
-    #define EAI_FAMILY      -6
-    #define ENOPROTOOPT     109
-    #define EBADF           9
-    #define EFAULT          14
-#endif
+// Include real POSIX socket headers for Emscripten
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <netdb.h>
+#include <fcntl.h>
+#include <sys/ioctl.h>
+#include <unistd.h>
 
 namespace fl {
 
 //=============================================================================
-// WASM Socket State Management (Fake Implementation)
+// WASM Socket State Management (Real Implementation)
 //=============================================================================
 
-// Global state for WASM socket simulation
-static int g_next_socket_fd = 1000;  // Start with high numbers to avoid conflicts
+// Global state for WASM socket management
 static bool g_initialized = false;
-static bool g_mock_should_fail = false;
-static int g_mock_error_code = ECONNREFUSED;
 
 // Statistics tracking
 static WasmSocketStats g_stats = {};
 
-// Simple socket registry to track "open" sockets
-static bool g_socket_registry[256] = {};  // Track up to 256 fake sockets
-
 //=============================================================================
-// Helper Functions for WASM Socket Simulation
+// Helper Functions for WASM Socket Management
 //=============================================================================
 
-static int allocate_socket_fd() {
-    g_stats.total_sockets_created++;
-    
-    // Find next available slot in registry
-    for (int i = 0; i < 256; i++) {
-        int fd = 1000 + i;
-        if (!g_socket_registry[i]) {
-            g_socket_registry[i] = true;
-            return fd;
-        }
+static void set_socket_nonblocking_with_timeout(int sockfd, int timeout_ms) {
+    // Set receive timeout using SO_RCVTIMEO since we can't use select/poll
+    if (timeout_ms > 0) {
+        struct timeval tv;
+        tv.tv_sec = timeout_ms / 1000;
+        tv.tv_usec = (timeout_ms % 1000) * 1000;
+        ::setsockopt(sockfd, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv));
+        ::setsockopt(sockfd, SOL_SOCKET, SO_SNDTIMEO, &tv, sizeof(tv));
     }
-    
-    // If no slots available, just increment counter
-    return g_next_socket_fd++;
 }
 
 static bool is_valid_socket_fd(int sockfd) {
-    if (sockfd < 1000 || sockfd >= 1256) {
-        return false;
-    }
-    return g_socket_registry[sockfd - 1000];
-}
-
-static void deallocate_socket_fd(int sockfd) {
-    if (sockfd >= 1000 && sockfd < 1256) {
-        g_socket_registry[sockfd - 1000] = false;
-    }
-}
-
-static void set_mock_errno(int error_code) {
-    // WASM doesn't have real errno, so we just track it internally
-    g_mock_error_code = error_code;
-}
-
-static void fill_mock_sockaddr_in(struct sockaddr_in* addr, const char* ip, int port) {
-    if (!addr) return;
-    
-    addr->sin_family = AF_INET;
-    addr->sin_port = htons(port);
-    
-    // Simple IP parsing for common cases
-    if (strcmp(ip, "127.0.0.1") == 0 || strcmp(ip, "localhost") == 0) {
-        addr->sin_addr.s_addr = htonl(0x7F000001);  // 127.0.0.1
-    } else if (strcmp(ip, "fastled.io") == 0) {
-        addr->sin_addr.s_addr = htonl(0x5DB8D822);  // Fake IP for fastled.io
-    } else {
-        addr->sin_addr.s_addr = htonl(0xC0A80001);  // 192.168.0.1 default
-    }
-    
-    memset(addr->sin_zero, 0, 8);
+    // Basic validation - real socket descriptors are typically small positive integers
+    return sockfd >= 0;
 }
 
 //=============================================================================
-// Core Socket Operations (Fake Implementation)
+// Core Socket Operations (Real POSIX Implementation)
 //=============================================================================
 
 int socket(int domain, int type, int protocol) {
@@ -109,516 +59,426 @@ int socket(int domain, int type, int protocol) {
         initialize_wasm_sockets();
     }
     
-    // Validate parameters
-    if (domain != AF_INET && domain != AF_INET6) {
-        set_mock_errno(EAFNOSUPPORT);
-        return -1;
+    // Call real POSIX socket function
+    int sockfd = ::socket(domain, type, protocol);
+    
+    if (sockfd >= 0) {
+        g_stats.total_sockets_created++;
+        
+        // Set default timeout for WASM - manual polling approach
+        set_socket_nonblocking_with_timeout(sockfd, 5000);  // 5 second default
     }
     
-    if (type != SOCK_STREAM && type != SOCK_DGRAM) {
-        set_mock_errno(EINVAL);
-        return -1;
-    }
-    
-    if (g_mock_should_fail) {
-        set_mock_errno(g_mock_error_code);
-        return -1;
-    }
-    
-    return allocate_socket_fd();
+    return sockfd;
 }
 
 int socketpair(int domain, int type, int protocol, int sv[2]) {
-    // WASM doesn't support socketpair - return error
-    (void)domain; (void)type; (void)protocol; (void)sv;
-    set_mock_errno(EAFNOSUPPORT);
+    // WASM/Emscripten doesn't support socketpair - return appropriate error
+    errno = EAFNOSUPPORT;
     return -1;
 }
 
 //=============================================================================
-// Addressing Operations (Fake Implementation)
+// Addressing Operations (Real POSIX Implementation)
 //=============================================================================
 
 int bind(int sockfd, const struct sockaddr *addr, socklen_t addrlen) {
     if (!is_valid_socket_fd(sockfd)) {
-        set_mock_errno(EBADF);
+        errno = EBADF;
         return -1;
     }
     
-    if (!addr || addrlen < sizeof(struct sockaddr)) {
-        set_mock_errno(EINVAL);
-        return -1;
-    }
-    
-    if (g_mock_should_fail) {
-        set_mock_errno(g_mock_error_code);
-        return -1;
-    }
-    
-    // Simulate successful bind
-    return 0;
+    // Call real POSIX bind function
+    return ::bind(sockfd, addr, addrlen);
 }
 
 int connect(int sockfd, const struct sockaddr *addr, socklen_t addrlen) {
     if (!is_valid_socket_fd(sockfd)) {
-        set_mock_errno(EBADF);
-        return -1;
-    }
-    
-    if (!addr || addrlen < sizeof(struct sockaddr)) {
-        set_mock_errno(EINVAL);
+        errno = EBADF;
         return -1;
     }
     
     g_stats.total_connections_attempted++;
     
-    if (g_mock_should_fail) {
-        set_mock_errno(g_mock_error_code);
-        return -1;
+    // Call real POSIX connect function
+    int result = ::connect(sockfd, addr, addrlen);
+    
+    if (result == 0) {
+        // Connection successful
+        g_stats.total_connections_successful++;
     }
     
-    // Simulate successful connection
-    return 0;
+    return result;
 }
 
 int listen(int sockfd, int backlog) {
     if (!is_valid_socket_fd(sockfd)) {
-        set_mock_errno(EBADF);
+        errno = EBADF;
         return -1;
     }
     
-    if (backlog < 0) {
-        set_mock_errno(EINVAL);
-        return -1;
-    }
-    
-    if (g_mock_should_fail) {
-        set_mock_errno(g_mock_error_code);
-        return -1;
-    }
-    
-    // Simulate successful listen
-    return 0;
+    // Call real POSIX listen function
+    return ::listen(sockfd, backlog);
 }
 
 int accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen) {
     if (!is_valid_socket_fd(sockfd)) {
-        set_mock_errno(EBADF);
+        errno = EBADF;
         return -1;
     }
     
-    if (g_mock_should_fail) {
-        set_mock_errno(g_mock_error_code);
-        return -1;
-    }
+    // Call real POSIX accept function
+    int client_fd = ::accept(sockfd, addr, addrlen);
     
-    // Simulate accepted connection
-    int client_fd = allocate_socket_fd();
-    
-    // Fill in mock client address if requested
-    if (addr && addrlen && *addrlen >= sizeof(struct sockaddr_in)) {
-        fill_mock_sockaddr_in((struct sockaddr_in*)addr, "127.0.0.1", 12345);
-        *addrlen = sizeof(struct sockaddr_in);
+    if (client_fd >= 0) {
+        // Set default timeout for accepted connection
+        set_socket_nonblocking_with_timeout(client_fd, 5000);
     }
     
     return client_fd;
 }
 
 //=============================================================================
-// Data Transfer Operations (Fake Implementation)
+// Data Transfer Operations (Real POSIX Implementation)
 //=============================================================================
 
 ssize_t send(int sockfd, const void *buf, size_t len, int flags) {
     if (!is_valid_socket_fd(sockfd)) {
-        set_mock_errno(EBADF);
+        errno = EBADF;
         return -1;
     }
     
     if (!buf && len > 0) {
-        set_mock_errno(EFAULT);
+        errno = EFAULT;
         return -1;
     }
     
-    if (g_mock_should_fail) {
-        set_mock_errno(g_mock_error_code);
-        return -1;
+    // Call real POSIX send function
+    ssize_t result = ::send(sockfd, buf, len, flags);
+    
+    if (result > 0) {
+        g_stats.total_bytes_sent += result;
     }
     
-    // Simulate successful send of all data
-    g_stats.total_bytes_sent += len;
-    return static_cast<ssize_t>(len);
+    return result;
 }
 
 ssize_t recv(int sockfd, void *buf, size_t len, int flags) {
     if (!is_valid_socket_fd(sockfd)) {
-        set_mock_errno(EBADF);
+        errno = EBADF;
         return -1;
     }
     
     if (!buf && len > 0) {
-        set_mock_errno(EFAULT);
+        errno = EFAULT;
         return -1;
     }
     
-    if (g_mock_should_fail) {
-        set_mock_errno(g_mock_error_code);
-        return -1;
+    // Call real POSIX recv function
+    ssize_t result = ::recv(sockfd, buf, len, flags);
+    
+    if (result > 0) {
+        g_stats.total_bytes_received += result;
     }
     
-    // Simulate receiving mock data
-    const char* mock_response = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nServer: WASM-Mock\r\n\r\nMock response from WASM socket";
-    size_t response_len = strlen(mock_response);
-    size_t copy_len = (len < response_len) ? len : response_len;
-    
-    memcpy(buf, mock_response, copy_len);
-    g_stats.total_bytes_received += copy_len;
-    
-    return static_cast<ssize_t>(copy_len);
+    return result;
 }
 
 ssize_t sendto(int sockfd, const void *buf, size_t len, int flags,
                const struct sockaddr *dest_addr, socklen_t addrlen) {
-    // For UDP sockets - just delegate to send for simplicity
-    (void)dest_addr; (void)addrlen;
-    return send(sockfd, buf, len, flags);
+    if (!is_valid_socket_fd(sockfd)) {
+        errno = EBADF;
+        return -1;
+    }
+    
+    // Call real POSIX sendto function
+    ssize_t result = ::sendto(sockfd, buf, len, flags, dest_addr, addrlen);
+    
+    if (result > 0) {
+        g_stats.total_bytes_sent += result;
+    }
+    
+    return result;
 }
 
 ssize_t recvfrom(int sockfd, void *buf, size_t len, int flags,
                  struct sockaddr *src_addr, socklen_t *addrlen) {
-    // For UDP sockets - delegate to recv and fill mock source address
-    ssize_t result = recv(sockfd, buf, len, flags);
+    if (!is_valid_socket_fd(sockfd)) {
+        errno = EBADF;
+        return -1;
+    }
     
-    if (result > 0 && src_addr && addrlen && *addrlen >= sizeof(struct sockaddr_in)) {
-        fill_mock_sockaddr_in((struct sockaddr_in*)src_addr, "192.168.1.100", 54321);
-        *addrlen = sizeof(struct sockaddr_in);
+    // Call real POSIX recvfrom function
+    ssize_t result = ::recvfrom(sockfd, buf, len, flags, src_addr, addrlen);
+    
+    if (result > 0) {
+        g_stats.total_bytes_received += result;
     }
     
     return result;
 }
 
 ssize_t sendmsg(int sockfd, const struct msghdr *msg, int flags) {
-    // Simplified implementation - just count total bytes in iovec
     if (!is_valid_socket_fd(sockfd) || !msg) {
-        set_mock_errno(EBADF);
+        errno = EBADF;
         return -1;
     }
     
-    size_t total_len = 0;
-    for (size_t i = 0; i < msg->msg_iovlen; i++) {
-        total_len += msg->msg_iov[i].iov_len;
+    // Call real POSIX sendmsg function
+    ssize_t result = ::sendmsg(sockfd, msg, flags);
+    
+    if (result > 0) {
+        g_stats.total_bytes_sent += result;
     }
     
-    return send(sockfd, nullptr, total_len, flags);
+    return result;
 }
 
 ssize_t recvmsg(int sockfd, struct msghdr *msg, int flags) {
-    // Simplified implementation
-    if (!is_valid_socket_fd(sockfd) || !msg || msg->msg_iovlen == 0) {
-        set_mock_errno(EBADF);
+    if (!is_valid_socket_fd(sockfd) || !msg) {
+        errno = EBADF;
         return -1;
     }
     
-    // Just fill first iovec with mock data
-    return recv(sockfd, msg->msg_iov[0].iov_base, msg->msg_iov[0].iov_len, flags);
+    // Call real POSIX recvmsg function
+    ssize_t result = ::recvmsg(sockfd, msg, flags);
+    
+    if (result > 0) {
+        g_stats.total_bytes_received += result;
+    }
+    
+    return result;
 }
 
 //=============================================================================
-// Connection Teardown (Fake Implementation)
+// Connection Teardown (Real POSIX Implementation - Using shutdown, NOT close)
 //=============================================================================
 
 int shutdown(int sockfd, int how) {
     if (!is_valid_socket_fd(sockfd)) {
-        set_mock_errno(EBADF);
+        errno = EBADF;
         return -1;
     }
     
-    if (how < SHUT_RD || how > SHUT_RDWR) {
-        set_mock_errno(EINVAL);
-        return -1;
-    }
-    
-    // Simulate successful shutdown
-    return 0;
+    // Call real POSIX shutdown function
+    // This is the ONLY way to close connections in WASM since close() doesn't work
+    return ::shutdown(sockfd, how);
 }
 
 int close(int fd) {
-    if (fd >= 1000 && fd < 1256) {
-        deallocate_socket_fd(fd);
-        return 0;
+    // WASM WARNING: close() doesn't work properly for sockets due to proxying
+    // We should use shutdown() instead, but this function exists for compatibility
+    // with non-socket file descriptors
+    
+    if (is_valid_socket_fd(fd)) {
+        // For sockets, use shutdown instead
+        return shutdown(fd, SHUT_RDWR);
     }
     
-    // For non-socket file descriptors, just return success
-    return 0;
+    // For non-socket file descriptors, attempt real close
+    return ::close(fd);
 }
 
 //=============================================================================
-// Socket Options (Fake Implementation)
+// Socket Options (Real POSIX Implementation)
 //=============================================================================
 
 int setsockopt(int sockfd, int level, int optname, const void *optval, socklen_t optlen) {
     if (!is_valid_socket_fd(sockfd)) {
-        set_mock_errno(EBADF);
+        errno = EBADF;
         return -1;
     }
     
-    if (!optval && optlen > 0) {
-        set_mock_errno(EFAULT);
-        return -1;
-    }
-    
-    // Simulate successful socket option setting
-    return 0;
+    // Call real POSIX setsockopt function
+    return ::setsockopt(sockfd, level, optname, optval, optlen);
 }
 
 int getsockopt(int sockfd, int level, int optname, void *optval, socklen_t *optlen) {
     if (!is_valid_socket_fd(sockfd)) {
-        set_mock_errno(EBADF);
+        errno = EBADF;
         return -1;
     }
     
-    if (!optval || !optlen) {
-        set_mock_errno(EFAULT);
-        return -1;
-    }
-    
-    // Return mock values for common socket options
-    if (level == SOL_SOCKET && optname == SO_REUSEADDR && *optlen >= sizeof(int)) {
-        *((int*)optval) = 1;
-        *optlen = sizeof(int);
-        return 0;
-    }
-    
-    set_mock_errno(ENOPROTOOPT);
-    return -1;
+    // Call real POSIX getsockopt function
+    return ::getsockopt(sockfd, level, optname, optval, optlen);
 }
 
 //=============================================================================
-// Address Retrieval (Fake Implementation)
+// Peer & Local Address Retrieval (Real POSIX Implementation)
 //=============================================================================
 
 int getpeername(int sockfd, struct sockaddr *addr, socklen_t *addrlen) {
     if (!is_valid_socket_fd(sockfd)) {
-        set_mock_errno(EBADF);
+        errno = EBADF;
         return -1;
     }
     
-    if (!addr || !addrlen || *addrlen < sizeof(struct sockaddr_in)) {
-        set_mock_errno(EFAULT);
-        return -1;
-    }
-    
-    // Fill mock peer address
-    fill_mock_sockaddr_in((struct sockaddr_in*)addr, "93.184.216.34", 80);  // example.com IP
-    *addrlen = sizeof(struct sockaddr_in);
-    
-    return 0;
+    // Call real POSIX getpeername function
+    return ::getpeername(sockfd, addr, addrlen);
 }
 
 int getsockname(int sockfd, struct sockaddr *addr, socklen_t *addrlen) {
     if (!is_valid_socket_fd(sockfd)) {
-        set_mock_errno(EBADF);
+        errno = EBADF;
         return -1;
     }
     
-    if (!addr || !addrlen || *addrlen < sizeof(struct sockaddr_in)) {
-        set_mock_errno(EFAULT);
-        return -1;
-    }
-    
-    // Fill mock local address
-    fill_mock_sockaddr_in((struct sockaddr_in*)addr, "127.0.0.1", 12345);
-    *addrlen = sizeof(struct sockaddr_in);
-    
-    return 0;
+    // Call real POSIX getsockname function
+    return ::getsockname(sockfd, addr, addrlen);
 }
 
 //=============================================================================
-// Name Resolution (Fake Implementation)
+// Name and Service Translation (Real POSIX Implementation)
 //=============================================================================
 
 int getaddrinfo(const char *node, const char *service, 
                 const struct addrinfo *hints, struct addrinfo **res) {
-    if (!res) {
-        return EAI_BADFLAGS;
-    }
-    
-    *res = nullptr;
-    
-    if (!node && !service) {
-        return EAI_NONAME;
-    }
-    
-    // Allocate mock addrinfo structure
-    struct addrinfo *ai = (struct addrinfo*)malloc(sizeof(struct addrinfo));
-    struct sockaddr_in *sin = (struct sockaddr_in*)malloc(sizeof(struct sockaddr_in));
-    
-    if (!ai || !sin) {
-        free(ai);
-        free(sin);
-        return EAI_MEMORY;
-    }
-    
-    // Fill mock addrinfo
-    ai->ai_flags = 0;
-    ai->ai_family = AF_INET;
-    ai->ai_socktype = SOCK_STREAM;
-    ai->ai_protocol = IPPROTO_TCP;
-    ai->ai_addrlen = sizeof(struct sockaddr_in);
-    ai->ai_addr = (struct sockaddr*)sin;
-    ai->ai_canonname = nullptr;
-    ai->ai_next = nullptr;
-    
-    // Fill mock address
-    const char* ip = "127.0.0.1";
-    if (node) {
-        if (strcmp(node, "fastled.io") == 0) {
-            ip = "93.184.216.34";  // Mock IP for fastled.io
-        } else if (strcmp(node, "localhost") == 0) {
-            ip = "127.0.0.1";
-        }
-    }
-    
-    int port = 80;
-    if (service) {
-        if (strcmp(service, "http") == 0) port = 80;
-        else if (strcmp(service, "https") == 0) port = 443;
-        else port = atoi(service);
-    }
-    
-    fill_mock_sockaddr_in(sin, ip, port);
-    
-    *res = ai;
-    return 0;
+    // Call real POSIX getaddrinfo function
+    return ::getaddrinfo(node, service, hints, res);
 }
 
 void freeaddrinfo(struct addrinfo *res) {
-    while (res) {
-        struct addrinfo *next = res->ai_next;
-        free(res->ai_addr);
-        free(res->ai_canonname);
-        free(res);
-        res = next;
-    }
+    // Call real POSIX freeaddrinfo function
+    ::freeaddrinfo(res);
 }
 
 int getnameinfo(const struct sockaddr *sa, socklen_t salen,
                 char *host, socklen_t hostlen, char *serv, socklen_t servlen, int flags) {
-    if (!sa || salen < sizeof(struct sockaddr)) {
-        return EAI_FAIL;
-    }
-    
-    if (sa->sa_family == AF_INET && salen >= sizeof(struct sockaddr_in)) {
-        const struct sockaddr_in *sin = (const struct sockaddr_in*)sa;
-        
-        if (host && hostlen > 0) {
-            strncpy(host, "mock.wasm.host", hostlen - 1);
-            host[hostlen - 1] = '\0';
-        }
-        
-        if (serv && servlen > 0) {
-            snprintf(serv, servlen, "%d", ntohs(sin->sin_port));
-        }
-        
-        return 0;
-    }
-    
-    return EAI_FAMILY;
+    // Call real POSIX getnameinfo function
+    return ::getnameinfo(sa, salen, host, hostlen, serv, servlen, flags);
 }
 
 //=============================================================================
-// Address Conversion (Fake Implementation)
+// Address Conversion (Real POSIX Implementation)
 //=============================================================================
 
 int inet_pton(int af, const char *src, void *dst) {
-    if (!src || !dst) {
-        return 0;
-    }
-    
-    if (af == AF_INET) {
-        // Simple IP parsing for testing
-        unsigned long addr = 0;
-        if (strcmp(src, "127.0.0.1") == 0) {
-            addr = htonl(0x7F000001);
-        } else if (strcmp(src, "192.168.1.1") == 0) {
-            addr = htonl(0xC0A80101);
-        } else if (strcmp(src, "93.184.216.34") == 0) {
-            addr = htonl(0x5DB8D822);
-        } else {
-            return 0;  // Invalid address
-        }
-        
-        *((unsigned long*)dst) = addr;
-        return 1;
-    }
-    
-    return 0;  // Unsupported address family
+    // Call real POSIX inet_pton function
+    return ::inet_pton(af, src, dst);
 }
 
 const char* inet_ntop(int af, const void *src, char *dst, socklen_t size) {
-    if (!src || !dst || size == 0) {
-        return nullptr;
-    }
-    
-    if (af == AF_INET && size >= 16) {  // INET_ADDRSTRLEN
-        unsigned long addr = *((const unsigned long*)src);
-        addr = ntohl(addr);
-        
-        snprintf(dst, size, "%lu.%lu.%lu.%lu",
-                (addr >> 24) & 0xFF,
-                (addr >> 16) & 0xFF,
-                (addr >> 8) & 0xFF,
-                addr & 0xFF);
-        
-        return dst;
-    }
-    
-    return nullptr;
+    // Call real POSIX inet_ntop function
+    return ::inet_ntop(af, src, dst, size);
 }
 
 //=============================================================================
-// File Control (Fake Implementation)
+// File Control (Real POSIX Implementation with WASM limitations)
 //=============================================================================
 
 int fcntl(int fd, int cmd, ...) {
     if (!is_valid_socket_fd(fd)) {
-        set_mock_errno(EBADF);
+        errno = EBADF;
         return -1;
     }
     
-    // Handle common fcntl operations
+    // For WASM, we support limited fcntl operations
+    // Mainly for getting/setting O_NONBLOCK flag
+    va_list args;
+    va_start(args, cmd);
+    
+    int result = -1;
+    
     switch (cmd) {
-        case F_GETFL:
-            return 0;  // Return no flags set
-            
-        case F_SETFL:
-            return 0;  // Simulate successful flag setting
-            
+        case F_GETFL: {
+            // Return current flags - for WASM we'll assume blocking by default
+            result = 0;  // No flags set initially
+            break;
+        }
+        case F_SETFL: {
+            int flags = va_arg(args, int);
+            // We use SO_RCVTIMEO/SO_SNDTIMEO for timeout behavior instead of O_NONBLOCK
+            // since select/poll don't work properly in WASM
+            if (flags & O_NONBLOCK) {
+                // Set very short timeout to simulate non-blocking
+                set_socket_nonblocking_with_timeout(fd, 1);  // 1ms timeout
+            } else {
+                // Set longer timeout for blocking behavior  
+                set_socket_nonblocking_with_timeout(fd, 5000);  // 5s timeout
+            }
+            result = 0;
+            break;
+        }
         default:
-            set_mock_errno(EINVAL);
-            return -1;
+            errno = EINVAL;
+            result = -1;
+            break;
     }
+    
+    va_end(args);
+    return result;
 }
 
 //=============================================================================
-// I/O Control (Fake Implementation)
+// I/O Control (Real POSIX Implementation with WASM limitations)
 //=============================================================================
 
 int ioctl(int fd, unsigned long request, ...) {
     if (!is_valid_socket_fd(fd)) {
-        set_mock_errno(EBADF);
+        errno = EBADF;
         return -1;
     }
     
-    // Simulate successful ioctl
-    return 0;
+    // For WASM, we support limited ioctl operations
+    va_list args;
+    va_start(args, request);
+    
+    int result = -1;
+    
+    switch (request) {
+        case FIONBIO: {
+            // Set non-blocking I/O mode
+            int *argp = va_arg(args, int*);
+            if (argp) {
+                if (*argp) {
+                    // Enable non-blocking mode with short timeout
+                    set_socket_nonblocking_with_timeout(fd, 1);
+                } else {
+                    // Disable non-blocking mode with longer timeout
+                    set_socket_nonblocking_with_timeout(fd, 5000);
+                }
+                result = 0;
+            } else {
+                errno = EFAULT;
+            }
+            break;
+        }
+        case FIONREAD: {
+            // Get number of bytes available to read
+            // In WASM, we'll try MSG_PEEK to check available data
+            int *argp = va_arg(args, int*);
+            if (argp) {
+                char peek_buf[1];
+                ssize_t peek_result = ::recv(fd, peek_buf, 1, MSG_PEEK | MSG_DONTWAIT);
+                if (peek_result > 0) {
+                    *argp = 1;  // At least 1 byte available
+                } else if (peek_result == 0) {
+                    *argp = 0;  // EOF
+                } else {
+                    *argp = 0;  // No data or error
+                }
+                result = 0;
+            } else {
+                errno = EFAULT;
+            }
+            break;
+        }
+        default:
+            errno = EINVAL;
+            result = -1;
+            break;
+    }
+    
+    va_end(args);
+    return result;
 }
 
 //=============================================================================
-// Error Handling (Fake Implementation)
+// Error handling (Real Implementation)
 //=============================================================================
 
 int get_errno() {
-    return g_mock_error_code;
+    return errno;
 }
 
 //=============================================================================
@@ -630,9 +490,8 @@ bool initialize_wasm_sockets() {
         return true;
     }
     
-    // Initialize state
-    memset(g_socket_registry, 0, sizeof(g_socket_registry));
-    memset(&g_stats, 0, sizeof(g_stats));
+    // Initialize statistics
+    fl::memfill(&g_stats, 0, sizeof(g_stats));
     
     g_initialized = true;
     return true;
@@ -643,21 +502,14 @@ void cleanup_wasm_sockets() {
         return;
     }
     
-    // Close all open sockets
-    for (int i = 0; i < 256; i++) {
-        if (g_socket_registry[i]) {
-            g_socket_registry[i] = false;
-        }
-    }
-    
+    // Nothing special to cleanup for real POSIX sockets
     g_initialized = false;
 }
 
 void set_wasm_socket_mock_behavior(bool should_fail, int error_code) {
-    g_mock_should_fail = should_fail;
-    g_mock_error_code = error_code;
-    g_stats.mock_mode_enabled = should_fail;
-    g_stats.mock_error_code = error_code;
+    // Not applicable for real implementation - this was for fake/mock behavior
+    (void)should_fail;
+    (void)error_code;
 }
 
 WasmSocketStats get_wasm_socket_stats() {
@@ -665,9 +517,396 @@ WasmSocketStats get_wasm_socket_stats() {
 }
 
 void reset_wasm_socket_stats() {
-    memset(&g_stats, 0, sizeof(g_stats));
-    g_stats.mock_mode_enabled = g_mock_should_fail;
-    g_stats.mock_error_code = g_mock_error_code;
+    fl::memfill(&g_stats, 0, sizeof(g_stats));
+}
+
+//=============================================================================
+// WASM Socket Class Implementation (Real POSIX Sockets)
+//=============================================================================
+
+WasmSocket::WasmSocket(const SocketOptions& options) 
+    : mOptions(options), mTimeout(options.read_timeout_ms) {
+    // Create real POSIX socket
+    mSocketHandle = fl::socket(AF_INET, SOCK_STREAM, 0);
+    if (mSocketHandle == -1) {
+        set_error(SocketError::UNKNOWN_ERROR, "Failed to create socket");
+        return;
+    }
+    
+    setup_socket_options();
+}
+
+fl::future<SocketError> WasmSocket::connect(const fl::string& host, int port) {
+    if (mSocketHandle == -1) {
+        return fl::make_ready_future(SocketError::UNKNOWN_ERROR);
+    }
+    
+    set_state(SocketState::CONNECTING);
+    
+    // Resolve hostname using real getaddrinfo
+    struct addrinfo hints = {};
+    hints.ai_family = AF_INET;  // IPv4 for now
+    hints.ai_socktype = SOCK_STREAM;
+    
+    struct addrinfo* result = nullptr;
+    fl::string port_str = fl::to_string(port);
+    
+    int gai_result = fl::getaddrinfo(host.c_str(), port_str.c_str(), &hints, &result);
+    if (gai_result != 0) {
+        set_error(SocketError::INVALID_ADDRESS, "Failed to resolve hostname");
+        return fl::make_ready_future(SocketError::INVALID_ADDRESS);
+    }
+    
+    // Attempt connection using real connect
+    int connect_result = fl::connect(mSocketHandle, result->ai_addr, result->ai_addrlen);
+    fl::freeaddrinfo(result);
+    
+    if (connect_result == 0) {
+        // Connection successful
+        mRemoteHost = host;
+        mRemotePort = port;
+        set_state(SocketState::CONNECTED);
+        return fl::make_ready_future(SocketError::SUCCESS);
+    } else {
+        // Connection failed
+        int error = fl::get_errno();
+        SocketError socket_error = translate_errno_to_socket_error(error);
+        set_error(socket_error, "Connection failed");
+        set_state(SocketState::ERROR);
+        return fl::make_ready_future(socket_error);
+    }
+}
+
+fl::future<SocketError> WasmSocket::connect_async(const fl::string& host, int port) {
+    // For WASM, async connect is the same as sync for now
+    return connect(host, port);
+}
+
+void WasmSocket::disconnect() {
+    if (mSocketHandle != -1) {
+        // WASM: Use shutdown instead of close for sockets
+        fl::shutdown(mSocketHandle, SHUT_RDWR);
+        mSocketHandle = -1;
+    }
+    
+    set_state(SocketState::CLOSED);
+    mRemoteHost = "";
+    mRemotePort = 0;
+}
+
+bool WasmSocket::is_connected() const {
+    return mState == SocketState::CONNECTED && mSocketHandle != -1;
+}
+
+SocketState WasmSocket::get_state() const {
+    return mState;
+}
+
+fl::size WasmSocket::read(fl::span<fl::u8> buffer) {
+    if (!is_connected() || buffer.empty()) {
+        return 0;
+    }
+    
+    // Use real POSIX recv
+    ssize_t bytes_read = fl::recv(mSocketHandle, buffer.data(), buffer.size(), 0);
+    
+    if (bytes_read > 0) {
+        return static_cast<fl::size>(bytes_read);
+    } else if (bytes_read == 0) {
+        // Connection closed by peer
+        set_state(SocketState::CLOSED);
+        return 0;
+    } else {
+        // Error occurred
+        int error = fl::get_errno();
+        if (error == EWOULDBLOCK || error == EAGAIN) {
+            // No data available (non-blocking mode)
+            return 0;
+        } else {
+            // Real error
+            SocketError socket_error = translate_errno_to_socket_error(error);
+            set_error(socket_error, "Read failed");
+            set_state(SocketState::ERROR);
+            return 0;
+        }
+    }
+}
+
+fl::size WasmSocket::write(fl::span<const fl::u8> data) {
+    if (!is_connected() || data.empty()) {
+        return 0;
+    }
+    
+    // Use real POSIX send
+    ssize_t bytes_sent = fl::send(mSocketHandle, data.data(), data.size(), 0);
+    
+    if (bytes_sent > 0) {
+        return static_cast<fl::size>(bytes_sent);
+    } else if (bytes_sent == 0) {
+        // Connection issue
+        return 0;
+    } else {
+        // Error occurred
+        int error = fl::get_errno();
+        if (error == EWOULDBLOCK || error == EAGAIN) {
+            // Would block (non-blocking mode)
+            return 0;
+        } else {
+            // Real error
+            SocketError socket_error = translate_errno_to_socket_error(error);
+            set_error(socket_error, "Write failed");
+            set_state(SocketState::ERROR);
+            return 0;
+        }
+    }
+}
+
+fl::size WasmSocket::available() const {
+    if (!is_connected()) {
+        return 0;
+    }
+    
+    // Use FIONREAD ioctl to get available bytes
+    int available_bytes = 0;
+    if (fl::ioctl(mSocketHandle, FIONREAD, &available_bytes) == 0) {
+        return static_cast<fl::size>(available_bytes);
+    }
+    
+    return 0;
+}
+
+void WasmSocket::flush() {
+    // For TCP sockets, flush doesn't have much meaning
+    // Data is sent immediately by the kernel
+}
+
+bool WasmSocket::has_data_available() const {
+    return available() > 0;
+}
+
+bool WasmSocket::can_write() const {
+    return is_connected();
+}
+
+void WasmSocket::set_non_blocking(bool non_blocking) {
+    if (mSocketHandle == -1) {
+        return;
+    }
+    
+    // Use fcntl to set/clear O_NONBLOCK flag
+    int flags = fl::fcntl(mSocketHandle, F_GETFL, 0);
+    if (flags != -1) {
+        if (non_blocking) {
+            flags |= O_NONBLOCK;
+        } else {
+            flags &= ~O_NONBLOCK;
+        }
+        fl::fcntl(mSocketHandle, F_SETFL, flags);
+        mIsNonBlocking = non_blocking;
+    }
+}
+
+bool WasmSocket::is_non_blocking() const {
+    return mIsNonBlocking;
+}
+
+void WasmSocket::set_timeout(fl::u32 timeout_ms) {
+    mTimeout = timeout_ms;
+    
+    if (mSocketHandle != -1) {
+        // Set socket timeouts using SO_RCVTIMEO and SO_SNDTIMEO
+        struct timeval tv;
+        tv.tv_sec = timeout_ms / 1000;
+        tv.tv_usec = (timeout_ms % 1000) * 1000;
+        
+        fl::setsockopt(mSocketHandle, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv));
+        fl::setsockopt(mSocketHandle, SOL_SOCKET, SO_SNDTIMEO, &tv, sizeof(tv));
+    }
+}
+
+fl::u32 WasmSocket::get_timeout() const {
+    return mTimeout;
+}
+
+void WasmSocket::set_keep_alive(bool enable) {
+    if (mSocketHandle != -1) {
+        int optval = enable ? 1 : 0;
+        fl::setsockopt(mSocketHandle, SOL_SOCKET, SO_KEEPALIVE, &optval, sizeof(optval));
+    }
+}
+
+void WasmSocket::set_nodelay(bool enable) {
+    if (mSocketHandle != -1) {
+        int optval = enable ? 1 : 0;
+        fl::setsockopt(mSocketHandle, IPPROTO_TCP, TCP_NODELAY, &optval, sizeof(optval));
+    }
+}
+
+fl::string WasmSocket::remote_address() const {
+    if (mSocketHandle == -1 || !is_connected()) {
+        return "";
+    }
+    
+    sockaddr_in addr = {};
+    socklen_t addr_len = sizeof(addr);
+    
+    if (fl::getpeername(mSocketHandle, reinterpret_cast<sockaddr*>(&addr), &addr_len) == 0) {
+        char addr_str[INET_ADDRSTRLEN];
+        if (fl::inet_ntop(AF_INET, &addr.sin_addr, addr_str, sizeof(addr_str))) {
+            return fl::string(addr_str);
+        }
+    }
+    
+    return mRemoteHost;  // Fallback to stored host
+}
+
+int WasmSocket::remote_port() const {
+    if (mSocketHandle == -1 || !is_connected()) {
+        return 0;
+    }
+    
+    sockaddr_in addr = {};
+    socklen_t addr_len = sizeof(addr);
+    
+    if (fl::getpeername(mSocketHandle, reinterpret_cast<sockaddr*>(&addr), &addr_len) == 0) {
+        return ntohs(addr.sin_port);
+    }
+    
+    return mRemotePort;  // Fallback to stored port
+}
+
+fl::string WasmSocket::local_address() const {
+    if (mSocketHandle == -1) {
+        return "127.0.0.1";
+    }
+    
+    sockaddr_in addr = {};
+    socklen_t addr_len = sizeof(addr);
+    
+    if (fl::getsockname(mSocketHandle, reinterpret_cast<sockaddr*>(&addr), &addr_len) == 0) {
+        char addr_str[INET_ADDRSTRLEN];
+        if (fl::inet_ntop(AF_INET, &addr.sin_addr, addr_str, sizeof(addr_str))) {
+            return fl::string(addr_str);
+        }
+    }
+    
+    return mLocalAddress.empty() ? "127.0.0.1" : mLocalAddress;
+}
+
+int WasmSocket::local_port() const {
+    if (mSocketHandle == -1) {
+        return 0;
+    }
+    
+    sockaddr_in addr = {};
+    socklen_t addr_len = sizeof(addr);
+    
+    if (fl::getsockname(mSocketHandle, reinterpret_cast<sockaddr*>(&addr), &addr_len) == 0) {
+        return ntohs(addr.sin_port);
+    }
+    
+    return mLocalPort;
+}
+
+SocketError WasmSocket::get_last_error() const {
+    return mLastError;
+}
+
+fl::string WasmSocket::get_error_message() const {
+    return mErrorMessage;
+}
+
+bool WasmSocket::set_socket_option(int level, int option, const void* value, fl::size value_size) {
+    if (mSocketHandle == -1 || !value) {
+        return false;
+    }
+    
+    return fl::setsockopt(mSocketHandle, level, option, value, static_cast<socklen_t>(value_size)) == 0;
+}
+
+bool WasmSocket::get_socket_option(int level, int option, void* value, fl::size* value_size) {
+    if (mSocketHandle == -1 || !value || !value_size) {
+        return false;
+    }
+    
+    socklen_t len = static_cast<socklen_t>(*value_size);
+    int result = fl::getsockopt(mSocketHandle, level, option, value, &len);
+    *value_size = static_cast<fl::size>(len);
+    
+    return result == 0;
+}
+
+int WasmSocket::get_socket_handle() const {
+    return mSocketHandle;
+}
+
+void WasmSocket::set_state(SocketState state) {
+    mState = state;
+}
+
+void WasmSocket::set_error(SocketError error, const fl::string& message) {
+    mLastError = error;
+    mErrorMessage = message;
+}
+
+SocketError WasmSocket::translate_errno_to_socket_error(int error_code) {
+    switch (error_code) {
+        case ECONNREFUSED: return SocketError::CONNECTION_REFUSED;
+        case ETIMEDOUT: return SocketError::CONNECTION_TIMEOUT;
+        case ENETUNREACH: return SocketError::NETWORK_UNREACHABLE;
+        case EACCES: return SocketError::PERMISSION_DENIED;
+        case EADDRINUSE: return SocketError::ADDRESS_IN_USE;
+        case EINVAL: return SocketError::INVALID_ADDRESS;
+        default: return SocketError::UNKNOWN_ERROR;
+    }
+}
+
+bool WasmSocket::setup_socket_options() {
+    if (mSocketHandle == -1) {
+        return false;
+    }
+    
+    // Set default socket options based on SocketOptions
+    if (mOptions.enable_keepalive) {
+        set_keep_alive(true);
+    }
+    
+    if (mOptions.enable_nodelay) {
+        set_nodelay(true);
+    }
+    
+    // Set timeouts
+    set_timeout(mTimeout);
+    
+    return true;
+}
+
+//=============================================================================
+// Platform-specific functions (required by socket_factory.cpp)
+//=============================================================================
+
+fl::shared_ptr<Socket> create_platform_socket(const SocketOptions& options) {
+    return fl::make_shared<WasmSocket>(options);
+}
+
+bool platform_supports_ipv6() {
+    // WASM/Emscripten supports IPv6 through the browser
+    return true;
+}
+
+bool platform_supports_tls() {
+    // TLS would need to be implemented at a higher level for WASM
+    return false;
+}
+
+bool platform_supports_non_blocking_connect() {
+    // WASM supports non-blocking operations through timeouts
+    return true;
+}
+
+bool platform_supports_socket_reuse() {
+    // WASM supports SO_REUSEADDR through Emscripten
+    return true;
 }
 
 } // namespace fl

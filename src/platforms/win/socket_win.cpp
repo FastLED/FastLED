@@ -3,6 +3,9 @@
 
 #include "socket_win.h"
 
+// Additional includes for platform functions
+#include "fl/shared_ptr.h"
+
 // Additional Windows header isolation for implementation
 #ifndef NOMSG
 #define NOMSG
@@ -276,6 +279,37 @@ int fcntl(int fd, int cmd, ...) {
 // Error handling
 int get_errno() {
     return translate_windows_error(WSAGetLastError());
+}
+
+//=============================================================================
+// Platform-specific functions (required by socket_factory.cpp)
+//=============================================================================
+
+fl::shared_ptr<Socket> create_platform_socket(const SocketOptions& options) {
+    // Windows doesn't have a specific Socket implementation class yet
+    // Return nullptr for now - this will need a Windows Socket class implementation
+    (void)options;
+    return nullptr;
+}
+
+bool platform_supports_ipv6() {
+    // Windows supports IPv6
+    return true;
+}
+
+bool platform_supports_tls() {
+    // TLS would need to be implemented at a higher level for Windows
+    return false;
+}
+
+bool platform_supports_non_blocking_connect() {
+    // Windows supports non-blocking operations
+    return true;
+}
+
+bool platform_supports_socket_reuse() {
+    // Windows supports SO_REUSEADDR
+    return true;
 }
 
 } // namespace fl

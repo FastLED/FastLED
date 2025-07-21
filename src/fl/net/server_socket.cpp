@@ -2,31 +2,20 @@
 
 #include "fl/net/server_socket.h"
 
-// Include platform-specific normalized API
-#if defined(_WIN32)
+// Include platform-specific normalized API ONLY
+// These headers provide the fl:: namespace functions we need
+#if defined(__EMSCRIPTEN__)
+    #include "platforms/wasm/socket_wasm.h"
+#elif defined(_WIN32)
     #include "platforms/win/socket_win.h"
 #else
     #include "platforms/posix/socket_posix.h"
 #endif
 
-// Additional includes needed for implementation
-#if defined(_WIN32)
-    // Windows-specific includes
-    #include <winsock2.h>
-    #include <ws2tcpip.h>
-    #ifndef INET_ADDRSTRLEN
-    #define INET_ADDRSTRLEN 16
-    #endif
-#else
-    // POSIX-specific includes
-    #include <sys/socket.h>
-    #include <netinet/in.h>
-    #include <arpa/inet.h>
-    #include <sys/select.h>
-    #include <unistd.h>
-    #include <fcntl.h>
-    #include <errno.h>
-#endif
+// NO DIRECT POSIX OR SOCKET HEADERS!
+// All socket functions MUST go through the fl:: namespace API
+// provided by the platform-specific implementations above
+// NO EXCETIONS!
 
 namespace fl {
 
@@ -45,6 +34,7 @@ SocketError translate_errno_to_socket_error(int error_code) {
         default: return SocketError::UNKNOWN_ERROR;
     }
 }
+
 
 //=============================================================================
 // ServerSocket Implementation
@@ -173,15 +163,25 @@ bool ServerSocket::has_pending_connections() const {
         return false;
     }
     
-    // Use select() to check for pending connections
-    fd_set read_fds;
-    FD_ZERO(&read_fds);
-    FD_SET(mSocket, &read_fds);
+    // WASM COMPATIBLE: Use per-call non-blocking recv() with MSG_DONTWAIT
+    // fcntl() is NOT proxied in WASM, so we must use per-call flags
     
-    struct timeval timeout = {0, 0};  // Non-blocking check
-    int result = select(mSocket + 1, &read_fds, nullptr, nullptr, &timeout);
+    // Define MSG_DONTWAIT for platforms where it's missing (like Windows)
+    #ifndef MSG_DONTWAIT
+    #define MSG_DONTWAIT 0x40  // Standard Linux value
+    #endif
     
-    return result > 0 && FD_ISSET(mSocket, &read_fds);
+    char dummy;
+    ssize_t result = fl::recv(mSocket, &dummy, 0, MSG_PEEK | MSG_DONTWAIT);
+    
+    if (result >= 0) {
+        // Pending connection available
+        return true;
+    } else {
+        // Check errno - EAGAIN/EWOULDBLOCK means no pending connections
+        int error = fl::get_errno();
+        return (error != EWOULDBLOCK && error != EAGAIN);
+    }
 }
 
 void ServerSocket::set_reuse_address(bool enable) {
@@ -201,15 +201,17 @@ void ServerSocket::set_reuse_port(bool enable) {
 
 void ServerSocket::set_non_blocking(bool non_blocking) {
     if (mSocket != -1) {
-        // Set non-blocking mode using normalized fl:: API
-        int flags = fl::fcntl(mSocket, F_GETFL, 0);
-        if (non_blocking) {
-            flags |= O_NONBLOCK;
-        } else {
-            flags &= ~O_NONBLOCK;
-        }
-        fl::fcntl(mSocket, F_SETFL, flags);
+        // WASM COMPATIBLE: Cannot use fcntl() to set socket modes in WASM
+        // fcntl() is not proxied and doesn't work properly
+        // Instead, rely on per-call non-blocking flags like MSG_DONTWAIT
+        
+        // Just track the intended state - actual non-blocking behavior
+        // is achieved through per-call flags in WASM-compatible methods
         mIsNonBlocking = non_blocking;
+        
+        // Note: On WASM, socket blocking mode is handled through:
+        // - MSG_DONTWAIT flag for recv/send operations  
+        // - SO_RCVTIMEO/SO_SNDTIMEO timeouts via setsockopt()
     }
 }
 
