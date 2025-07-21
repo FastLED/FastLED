@@ -1,7 +1,7 @@
 #if defined(FASTLED_HAS_NETWORKING) && defined(_WIN32) && !defined(FASTLED_STUB_IMPL)
 
 #include "socket.h"
-#include "socket_impl.hpp"
+#include "socket.hpp"
 #include "fl/str.h"
 
 // Standard includes
