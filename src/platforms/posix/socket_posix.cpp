@@ -1,5 +1,5 @@
 #ifdef FASTLED_HAS_NETWORKING
-#if !defined(_WIN32)
+#if !defined(_WIN32) && !defined(__EMSCRIPTEN__)
 
 #include "socket_posix.h"
 
@@ -148,5 +148,5 @@ int get_errno() {
 
 } // namespace fl
 
-#endif // !defined(_WIN32)
+#endif // !defined(_WIN32) && !defined(__EMSCRIPTEN__)
 #endif // FASTLED_HAS_NETWORKING 

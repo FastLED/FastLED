@@ -1,6 +1,6 @@
 #ifdef FASTLED_HAS_NETWORKING
-// Only compile WASM socket implementation for WASM targets
-#if defined(__EMSCRIPTEN__) || defined(__wasm__) || defined(__wasm32__)
+// Only compile WASM socket implementation for Emscripten
+#if defined(__EMSCRIPTEN__)
 
 #include "socket_wasm.h"
 #include "fl/str.h"
@@ -672,5 +672,5 @@ void reset_wasm_socket_stats() {
 
 } // namespace fl
 
-#endif // WASM platform
+#endif // __EMSCRIPTEN__
 #endif // FASTLED_HAS_NETWORKING 
