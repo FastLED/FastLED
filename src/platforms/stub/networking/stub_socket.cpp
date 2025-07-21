@@ -1,6 +1,6 @@
-#include "stub_socket.h"
-
 #ifdef FASTLED_HAS_NETWORKING
+
+#include "stub_socket.h"
 
 #include "fl/shared_ptr.h"
 

@@ -6,6 +6,10 @@
 
 namespace fl {
 
+// nullopt support for compatibility with std::optional patterns
+struct nullopt_t {};
+constexpr nullopt_t nullopt{};
+
 template <typename T> class Optional;
 template <typename T> using optional = Optional<T>;
 
@@ -15,6 +19,7 @@ template <typename T> class Optional {
 
   public:
     Optional() : mValue(Empty()) {}
+    Optional(nullopt_t) : mValue(Empty()) {}
     Optional(const Optional &other) : mValue(other.mValue) {}
     Optional(const T &value) : mValue(value) {}
     ~Optional() { mValue.reset(); }
@@ -31,6 +36,11 @@ template <typename T> class Optional {
         return *this;
     }
 
+    Optional &operator=(nullopt_t) {
+        mValue = Empty();
+        return *this;
+    }
+
     Optional &operator=(const T &value) {
         mValue = value;
         return *this;
@@ -38,6 +48,9 @@ template <typename T> class Optional {
 
     bool operator()() const { return !empty(); }
     bool operator!() const { return empty(); }
+
+    // Explicit conversion to bool for contextual boolean evaluation
+    explicit operator bool() const { return !empty(); }
 
     bool operator==(const Optional &other) const {
         if (empty() && other.empty()) {
@@ -57,6 +70,15 @@ template <typename T> class Optional {
         }
         return *ptr() == value;
     }
+
+    bool operator==(nullopt_t) const { return empty(); }
+    bool operator!=(nullopt_t) const { return !empty(); }
+
+    // Dereference operators for compatibility with std::optional
+    T& operator*() { return *ptr(); }
+    const T& operator*() const { return *ptr(); }
+    T* operator->() { return ptr(); }
+    const T* operator->() const { return ptr(); }
 
     template <typename TT, typename UU>
     bool operator==(const Variant<TT, UU> &other) const {
@@ -81,5 +103,16 @@ template <typename T> class Optional {
   private:
     fl::Variant<T, Empty> mValue;
 };
+
+// Helper function to create optionals
+template <typename T>
+optional<T> make_optional(const T& value) {
+    return optional<T>(value);
+}
+
+template <typename T>
+optional<T> make_optional(T&& value) {
+    return optional<T>(fl::move(value));
+}
 
 } // namespace fl

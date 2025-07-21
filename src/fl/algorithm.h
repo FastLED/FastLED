@@ -201,6 +201,36 @@ Iterator find_if_not(Iterator first, Iterator last, UnaryPredicate pred) {
     return last;
 }
 
+template <typename Iterator, typename T>
+Iterator remove(Iterator first, Iterator last, const T& value) {
+    Iterator result = first;
+    while (first != last) {
+        if (!(*first == value)) {
+            if (result != first) {
+                *result = fl::move(*first);
+            }
+            ++result;
+        }
+        ++first;
+    }
+    return result;
+}
+
+template <typename Iterator, typename UnaryPredicate>
+Iterator remove_if(Iterator first, Iterator last, UnaryPredicate pred) {
+    Iterator result = first;
+    while (first != last) {
+        if (!pred(*first)) {
+            if (result != first) {
+                *result = fl::move(*first);
+            }
+            ++result;
+        }
+        ++first;
+    }
+    return result;
+}
+
 namespace detail {
 
 // Insertion sort implementation for small arrays

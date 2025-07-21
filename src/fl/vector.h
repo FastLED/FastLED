@@ -394,6 +394,12 @@ template <typename T, typename Allocator = fl::allocator<T>> class HeapVector {
         assign(begin, end);
     }
 
+    // emplace back
+    template <typename... Args>
+    void emplace_back(Args&&... args) {
+        push_back(T(fl::forward<Args>(args)...));
+    }
+
     // Initializer list constructor (C++11 and later) - uses fl::initializer_list
     HeapVector(fl::initializer_list<T> init) {
         reserve(init.size());

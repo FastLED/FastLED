@@ -1,11 +1,12 @@
 #pragma once
 
+#ifdef FASTLED_HAS_NETWORKING
+
 #include "fl/stdint.h"
 #include "fl/string.h"
 #include "fl/span.h"
+#include "fl/optional.h"
 #include "fl/shared_ptr.h"
-#include "fl/vector.h"
-#include "fl/function.h"
 #include "fl/future.h"
 
 namespace fl {
@@ -155,3 +156,5 @@ protected:
 };
 
 } // namespace fl 
+
+#endif // FASTLED_HAS_NETWORKING 

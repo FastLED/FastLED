@@ -1,5 +1,7 @@
 #pragma once
 
+#ifdef FASTLED_HAS_NETWORKING
+
 #include "fl/networking/socket.h"
 #include "fl/networking/socket_factory.h"
 #include "fl/vector.h"
@@ -164,3 +166,5 @@ private:
 };
 
 } // namespace fl 
+
+#endif // FASTLED_HAS_NETWORKING 

@@ -39,28 +39,10 @@ template <typename T1, typename T2> struct pair {
     pair(const pair &other) = default;
     pair &operator=(const pair &other) = default;
     pair(pair &&other) noexcept : first(fl::move(other.first)), second(fl::move(other.second)) {}
-    pair &operator=(pair &&other) noexcept {
-        if (this != &other) {
-            first = fl::move(other.first);
-            second = fl::move(other.second);
-        }
-        return *this;
-    }
+    pair &operator=(pair &&other) = default;
     
-    // Assignment from different pair types
-    template <typename U1, typename U2>
-    pair &operator=(const pair<U1, U2> &other) {
-        first = other.first;
-        second = other.second;
-        return *this;
-    }
-    
-    template <typename U1, typename U2>
-    pair &operator=(pair<U1, U2> &&other) {
-        first = fl::move(other.first);
-        second = fl::move(other.second);
-        return *this;
-    }
+    // Note: Template assignment operators removed to avoid issues with const members
+    // The default copy and move assignment operators will handle same-type assignments
     
     // Swap member function
     void swap(pair &other) noexcept {

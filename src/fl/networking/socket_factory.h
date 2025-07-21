@@ -1,7 +1,10 @@
 #pragma once
 
+#ifdef FASTLED_HAS_NETWORKING
+
 #include "fl/networking/socket.h"
-#include "fl/hash.h"
+#include "fl/string.h"
+#include "fl/shared_ptr.h"
 
 namespace fl {
 
@@ -64,3 +67,5 @@ bool platform_supports_non_blocking_connect();
 bool platform_supports_socket_reuse();
 
 } // namespace fl 
+
+#endif // FASTLED_HAS_NETWORKING 

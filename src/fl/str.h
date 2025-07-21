@@ -315,6 +315,14 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
 
     bool empty() const { return mLength == 0; }
 
+    // Iterator support for range-based for loops
+    char* begin() { return c_str_mutable(); }
+    char* end() { return c_str_mutable() + mLength; }
+    const char* begin() const { return c_str(); }
+    const char* end() const { return c_str() + mLength; }
+    const char* cbegin() const { return c_str(); }
+    const char* cend() const { return c_str() + mLength; }
+
     // Append method
 
     bool operator<(const StrN &other) const {
@@ -410,7 +418,7 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
         return out;
     }
 
-     StrN substr(fl::size start, fl::size end) {
+     StrN substr(fl::size start, fl::size end) const {
         return substring(start, end);
     }
 
@@ -444,6 +452,9 @@ class string : public StrN<FASTLED_STR_INLINED_SIZE> {
     
     string() : StrN<FASTLED_STR_INLINED_SIZE>() {}
     string(const char *str) : StrN<FASTLED_STR_INLINED_SIZE>(str) {}
+    string(const char *str, fl::size len) : StrN<FASTLED_STR_INLINED_SIZE>() {
+        copy(str, len);
+    }
     string(const string &other) : StrN<FASTLED_STR_INLINED_SIZE>(other) {}
     template <fl::size M>
     string(const StrN<M> &other) : StrN<FASTLED_STR_INLINED_SIZE>(other) {}
