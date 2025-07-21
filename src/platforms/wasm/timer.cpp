@@ -83,7 +83,6 @@ EMSCRIPTEN_KEEPALIVE uint32_t millis() {
     }
     
     uint32_t result = uint32_t(elapsed_ms);
-    FASTLED_WARN("millis() returning: " << result);
     return result;
 }
 
