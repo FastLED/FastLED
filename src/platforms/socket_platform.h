@@ -18,7 +18,7 @@
 // These headers provide platform_* functions for socket operations
 
 #if defined(_WIN32)
-    #include "win/socket.hpp"
+    #include "win/socket_win.h"
 #elif defined(FASTLED_STUB_IMPL)
     // Stub implementation for testing
     // Note: stub socket.hpp doesn't exist yet - uses inline stubs
