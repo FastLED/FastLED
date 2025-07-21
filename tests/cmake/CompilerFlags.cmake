@@ -321,7 +321,8 @@ function(apply_test_compile_definitions)
         list(APPEND TEST_DEFINITIONS FASTLED_HAS_NETWORKING=1)
         message(STATUS "Networking: FASTLED_HAS_NETWORKING enabled - networking functionality will be available")
     else()
-        message(STATUS "Networking: FASTLED_HAS_NETWORKING disabled - networking functionality will be unavailable (default)")
+        message(STATUS "Networking: FASTLED_HAS_NETWORKING disabled - networking functionality will be unavailable")
+        message(STATUS "Networking: Note - This should not happen in test builds where networking is force-enabled")
     endif()
     
     # Platform-specific definitions

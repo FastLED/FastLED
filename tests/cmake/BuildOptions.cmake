@@ -14,7 +14,12 @@ function(declare_build_options)
     option(NO_BUILD "Skip compilation but perform linking (requires existing object files)" OFF)
     
     # Feature control options
-    option(FASTLED_HAS_NETWORKING "Enable FastLED networking functionality" ON)
+    option(FASTLED_HAS_NETWORKING "Enable FastLED networking functionality" OFF)
+    
+    # Force networking to be enabled for tests regardless of default setting
+    # The test suite should test all functionality including networking
+    set(FASTLED_HAS_NETWORKING ON CACHE BOOL "Force networking enabled for tests" FORCE)
+    message(STATUS "BuildOptions: FASTLED_HAS_NETWORKING forced to ON for comprehensive test coverage")
     
     message(STATUS "BuildOptions: Build options declared")
 endfunction()

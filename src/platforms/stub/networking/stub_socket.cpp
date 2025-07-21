@@ -1,4 +1,7 @@
 #include "stub_socket.h"
+
+#ifdef FASTLED_HAS_NETWORKING
+
 #include "fl/shared_ptr.h"
 
 namespace fl {
@@ -454,4 +457,6 @@ bool platform_supports_socket_reuse() {
     return true;
 }
 
-} // namespace fl 
+} // namespace fl
+
+#endif // FASTLED_HAS_NETWORKING

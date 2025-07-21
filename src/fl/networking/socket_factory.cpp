@@ -1,5 +1,7 @@
 #include "fl/networking/socket_factory.h"
 
+#ifdef FASTLED_HAS_NETWORKING
+
 namespace fl {
 
 fl::shared_ptr<Socket> SocketFactory::create_client_socket(const SocketOptions& options) {
@@ -26,4 +28,6 @@ bool SocketFactory::supports_socket_reuse() {
     return platform_supports_socket_reuse();
 }
 
-} // namespace fl 
+} // namespace fl
+
+#endif // FASTLED_HAS_NETWORKING
