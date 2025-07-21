@@ -105,66 +105,15 @@ private:
     static int generate_socket_handle();
 };
 
-/// Stub server socket implementation for testing
-class StubServerSocket : public ServerSocket {
-public:
-    explicit StubServerSocket(const SocketOptions& options = {});
-    ~StubServerSocket() override = default;
-    
-    // ServerSocket interface implementation
-    SocketError bind(const fl::string& address, int port) override;
-    SocketError listen(int backlog = 5) override;
-    void close() override;
-    bool is_listening() const override;
-    
-    fl::shared_ptr<Socket> accept() override;
-    fl::vector<fl::shared_ptr<Socket>> accept_multiple(fl::size max_connections = 10) override;
-    bool has_pending_connections() const override;
-    
-    void set_reuse_address(bool enable) override;
-    void set_reuse_port(bool enable) override;
-    void set_non_blocking(bool non_blocking) override;
-    
-    fl::string bound_address() const override;
-    int bound_port() const override;
-    fl::size max_connections() const override;
-    fl::size current_connections() const override;
-    
-    SocketError get_last_error() const override;
-    fl::string get_error_message() const override;
-    
-    int get_socket_handle() const override;
-    
-    /// Test control methods
-    void add_pending_connection(fl::shared_ptr<StubSocket> client_socket);
-    void set_mock_error(SocketError error, const fl::string& message = "");
-    void simulate_connection_limit();
-    
-    /// Test inspection methods
-    fl::size get_total_connections_accepted() const;
-    fl::size get_pending_connection_count() const;
-    
-protected:
-    void set_error(SocketError error, const fl::string& message = "") override;
-    
-private:
-    const SocketOptions mOptions;
-    bool mIsListening = false;
-    fl::string mBoundAddress = "127.0.0.1";
-    int mBoundPort = 0;
-    int mBacklog = 5;
-    SocketError mLastError = SocketError::SUCCESS;
-    fl::string mErrorMessage;
-    int mSocketHandle = -1;
-    bool mIsNonBlocking = false;
-    
-    fl::vector<fl::shared_ptr<StubSocket>> mPendingConnections;
-    fl::size mTotalConnectionsAccepted = 0;
-    bool mSimulateConnectionLimit = false;
-    
-    static int generate_server_socket_handle();
-};
+// Platform-specific socket creation functions (required by socket_factory.cpp)
+fl::shared_ptr<Socket> create_platform_socket(const SocketOptions& options);
 
-} // namespace fl 
+// Platform capability queries  
+bool platform_supports_ipv6();
+bool platform_supports_tls();
+bool platform_supports_non_blocking_connect();
+bool platform_supports_socket_reuse();
 
-#endif // FASTLED_HAS_NETWORKING 
+} // namespace fl
+
+#endif // defined(FASTLED_HAS_NETWORKING) && defined(FASTLED_STUB_IMPL) 

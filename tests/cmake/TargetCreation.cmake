@@ -162,6 +162,9 @@ function(configure_windows_executable target)
         # Add Windows debugging libraries for crash handler
         target_link_libraries(${target} dbghelp psapi)
         
+        # Add Windows socket libraries for networking support
+        target_link_libraries(${target} ws2_32 wsock32)
+        
         # Windows subsystem settings
         if(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
             set_target_properties(${target} PROPERTIES

@@ -14,22 +14,17 @@
 
 #ifdef FASTLED_HAS_NETWORKING
 
-// Platform-specific socket implementation selection
-#if defined(WIN32) && defined(FASTLED_STUB_IMPL)
-    // Windows with stub implementation enabled
-    #include "win/socket.h"
-#elif defined(FASTLED_STUB_IMPL) && !defined(WIN32)
-    // Stub implementation on non-Windows platforms (uses POSIX)
-    #include "shared/networking/posix_socket.h"
-#elif defined(_WIN32) && !defined(FASTLED_STUB_IMPL)
-    // Standard Windows implementation
-    #include "win/socket.h"
+// Platform-specific socket implementations
+// These headers provide platform_* functions for socket operations
+
+#if defined(_WIN32)
+    #include "win/socket.hpp"
 #elif defined(FASTLED_STUB_IMPL)
-    // Stub implementation (testing/development)
-    #include "stub/net/socket.h"
+    // Stub implementation for testing
+    // Note: stub socket.hpp doesn't exist yet - uses inline stubs
 #else
-    // Default POSIX implementation for all other platforms
-    #include "shared/networking/posix_socket.h"
+    // POSIX platforms (Linux, macOS, etc.)
+    #include "posix/posix_socket.hpp"
 #endif
 
 #endif // FASTLED_HAS_NETWORKING 

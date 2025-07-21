@@ -90,55 +90,8 @@ private:
     static fl::mutex s_init_mutex;
 };
 
-/// Windows-specific server socket implementation
-class WinServerSocket : public ServerSocket {
-public:
-    explicit WinServerSocket(const SocketOptions& options = {});
-    ~WinServerSocket() override;
-    
-    // ServerSocket interface implementation
-    SocketError bind(const fl::string& address, int port) override;
-    SocketError listen(int backlog = 5) override;
-    void close() override;
-    bool is_listening() const override;
-    
-    fl::shared_ptr<Socket> accept() override;
-    fl::vector<fl::shared_ptr<Socket>> accept_multiple(fl::size max_connections = 10) override;
-    bool has_pending_connections() const override;
-    
-    void set_reuse_address(bool enable) override;
-    void set_reuse_port(bool enable) override;
-    void set_non_blocking(bool non_blocking) override;
-    
-    fl::string bound_address() const override;
-    int bound_port() const override;
-    fl::size max_connections() const override;
-    fl::size current_connections() const override;
-    
-    SocketError get_last_error() const override;
-    fl::string get_error_message() const override;
-    
-    int get_socket_handle() const override;
-    
-protected:
-    void set_error(SocketError error, const fl::string& message = "") override;
-    
-private:
-    const SocketOptions mOptions;
-    socket_handle_t mSocket = INVALID_SOCKET_HANDLE;
-    bool mIsListening = false;
-    fl::string mBoundAddress;
-    int mBoundPort = 0;
-    int mBacklog = 5;
-    SocketError mLastError = SocketError::SUCCESS;
-    fl::string mErrorMessage;
-    bool mIsNonBlocking = false;
-    fl::size mCurrentConnections = 0;
-};
-
 // Platform-specific socket creation functions (required by socket_factory.cpp)
 fl::shared_ptr<Socket> create_platform_socket(const SocketOptions& options);
-fl::shared_ptr<ServerSocket> create_platform_server_socket(const SocketOptions& options);
 
 // Platform capability queries
 bool platform_supports_ipv6();

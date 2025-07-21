@@ -281,184 +281,31 @@ int StubSocket::generate_socket_handle() {
 }
 
 //=============================================================================
-// StubServerSocket Implementation
-//=============================================================================
-
-StubServerSocket::StubServerSocket(const SocketOptions& options) 
-    : mOptions(options), mSocketHandle(generate_server_socket_handle()) {
-}
-
-SocketError StubServerSocket::bind(const fl::string& address, int port) {
-    if (mLastError != SocketError::SUCCESS) {
-        return mLastError;
-    }
-    
-    mBoundAddress = address;
-    mBoundPort = port;
-    return SocketError::SUCCESS;
-}
-
-SocketError StubServerSocket::listen(int backlog) {
-    if (!mIsListening) {
-        mBacklog = backlog;
-        mIsListening = true;
-        return SocketError::SUCCESS;
-    }
-    
-    set_error(SocketError::UNKNOWN_ERROR, "Must bind before listen");
-    return mLastError;
-}
-
-void StubServerSocket::close() {
-    mIsListening = false;
-    mPendingConnections.clear();
-}
-
-bool StubServerSocket::is_listening() const {
-    return mIsListening;
-}
-
-fl::shared_ptr<Socket> StubServerSocket::accept() {
-    if (!mIsListening) {
-        return nullptr;
-    }
-    
-    if (mPendingConnections.empty()) {
-        return nullptr;  // No pending connections
-    }
-    
-    auto client = mPendingConnections[0];
-    mPendingConnections.erase(mPendingConnections.begin());
-    mTotalConnectionsAccepted++;
-    
-    // Return the client socket as a Socket* (upcast)
-    return fl::shared_ptr<Socket>(client);
-}
-
-fl::vector<fl::shared_ptr<Socket>> StubServerSocket::accept_multiple(fl::size max_connections) {
-    fl::vector<fl::shared_ptr<Socket>> result;
-    
-    for (fl::size i = 0; i < max_connections && !mPendingConnections.empty(); i++) {
-        auto client = accept();
-        if (client) {
-            result.push_back(client);
-        }
-    }
-    
-    return result;
-}
-
-bool StubServerSocket::has_pending_connections() const {
-    return !mPendingConnections.empty();
-}
-
-void StubServerSocket::set_reuse_address(bool enable) {
-    // Stub implementation - just store the setting
-    (void)enable;
-}
-
-void StubServerSocket::set_reuse_port(bool enable) {
-    // Stub implementation - just store the setting
-    (void)enable;
-}
-
-void StubServerSocket::set_non_blocking(bool non_blocking) {
-    mIsNonBlocking = non_blocking;
-}
-
-fl::string StubServerSocket::bound_address() const {
-    return mBoundAddress;
-}
-
-int StubServerSocket::bound_port() const {
-    return mBoundPort;
-}
-
-fl::size StubServerSocket::max_connections() const {
-    return static_cast<fl::size>(mBacklog);
-}
-
-fl::size StubServerSocket::current_connections() const {
-    return mPendingConnections.size();
-}
-
-SocketError StubServerSocket::get_last_error() const {
-    return mLastError;
-}
-
-fl::string StubServerSocket::get_error_message() const {
-    return mErrorMessage;
-}
-
-int StubServerSocket::get_socket_handle() const {
-    return mSocketHandle;
-}
-
-void StubServerSocket::add_pending_connection(fl::shared_ptr<StubSocket> client_socket) {
-    if (mSimulateConnectionLimit && mPendingConnections.size() >= static_cast<fl::size>(mBacklog)) {
-        return;  // Connection limit reached
-    }
-    
-    mPendingConnections.push_back(client_socket);
-}
-
-void StubServerSocket::set_mock_error(SocketError error, const fl::string& message) {
-    set_error(error, message);
-}
-
-void StubServerSocket::simulate_connection_limit() {
-    mSimulateConnectionLimit = true;
-}
-
-fl::size StubServerSocket::get_total_connections_accepted() const {
-    return mTotalConnectionsAccepted;
-}
-
-fl::size StubServerSocket::get_pending_connection_count() const {
-    return mPendingConnections.size();
-}
-
-void StubServerSocket::set_error(SocketError error, const fl::string& message) {
-    mLastError = error;
-    mErrorMessage = message;
-}
-
-int StubServerSocket::generate_server_socket_handle() {
-    return s_next_server_socket_handle++;
-}
-
-//=============================================================================
-// Platform-specific implementations
+// Platform-specific socket creation functions (required by socket_factory.cpp)
 //=============================================================================
 
 fl::shared_ptr<Socket> create_platform_socket(const SocketOptions& options) {
-    return fl::make_shared<StubSocket>(options);
+    (void)options;
+    return fl::make_shared<StubSocket>();
 }
 
-fl::shared_ptr<ServerSocket> create_platform_server_socket(const SocketOptions& options) {
-    return fl::make_shared<StubServerSocket>(options);
-}
-
+// Platform capability queries  
 bool platform_supports_ipv6() {
-    // Stub implementation doesn't support IPv6 for simplicity
-    return false;
+    return false; // Stub implementation
 }
 
 bool platform_supports_tls() {
-    // Stub implementation doesn't support TLS
-    return false;
+    return false; // Stub implementation
 }
 
 bool platform_supports_non_blocking_connect() {
-    // Stub implementation supports non-blocking operations
-    return true;
+    return false; // Stub implementation
 }
 
 bool platform_supports_socket_reuse() {
-    // Stub implementation supports socket reuse simulation
-    return true;
+    return false; // Stub implementation
 }
 
 } // namespace fl
 
-#endif // FASTLED_HAS_NETWORKING
+#endif // defined(FASTLED_HAS_NETWORKING) && defined(FASTLED_STUB_IMPL)

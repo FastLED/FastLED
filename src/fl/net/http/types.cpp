@@ -4,6 +4,20 @@
 #include "fl/algorithm.h"
 #include "fl/string.h"
 #include "fl/sstream.h"
+#include "fl/str.h"
+
+// Windows header pollution protection
+#ifdef _WIN32
+    #ifdef DELETE
+        #undef DELETE
+    #endif
+    #ifdef IGNORE
+        #undef IGNORE
+    #endif
+    #ifdef ERROR
+        #undef ERROR
+    #endif
+#endif
 
 namespace fl {
 

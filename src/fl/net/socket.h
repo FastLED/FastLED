@@ -116,44 +116,6 @@ protected:
     virtual void set_error(SocketError error, const fl::string& message = "") = 0;
 };
 
-/// Server socket interface for accepting connections
-class ServerSocket {
-public:
-    virtual ~ServerSocket() = default;
-    
-    /// Server lifecycle
-    virtual SocketError bind(const fl::string& address, int port) = 0;
-    virtual SocketError listen(int backlog = 5) = 0;
-    virtual void close() = 0;
-    virtual bool is_listening() const = 0;
-    
-    /// Accept connections
-    virtual fl::shared_ptr<Socket> accept() = 0;
-    virtual fl::vector<fl::shared_ptr<Socket>> accept_multiple(fl::size max_connections = 10) = 0;
-    virtual bool has_pending_connections() const = 0;
-    
-    /// Server configuration
-    virtual void set_reuse_address(bool enable) = 0;
-    virtual void set_reuse_port(bool enable) = 0;  // Linux/BSD only
-    virtual void set_non_blocking(bool non_blocking) = 0;
-    
-    /// Server info
-    virtual fl::string bound_address() const = 0;
-    virtual int bound_port() const = 0;
-    virtual fl::size max_connections() const = 0;
-    virtual fl::size current_connections() const = 0;
-    
-    /// Error handling
-    virtual SocketError get_last_error() const = 0;
-    virtual fl::string get_error_message() const = 0;
-    
-    /// Platform-specific handle access
-    virtual int get_socket_handle() const = 0;
-    
-protected:
-    virtual void set_error(SocketError error, const fl::string& message = "") = 0;
-};
-
 } // namespace fl 
 
 #endif // FASTLED_HAS_NETWORKING 

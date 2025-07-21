@@ -1,103 +1,18 @@
 #pragma once
 
 #ifdef FASTLED_HAS_NETWORKING
-#ifdef _WIN32
+#if !defined(_WIN32) && !defined(FASTLED_STUB_IMPL)
 
 #include "fl/str.h"
-#include <stdio.h>   // For snprintf
-#include <string.h>  // For strerror
-
-// Include Windows base headers first with strict isolation
-#ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
-#endif
-#ifndef NOMINMAX
-#define NOMINMAX
-#endif
-#ifndef NOUSER
-#define NOUSER
-#endif
-#ifndef NOMSG
-#define NOMSG
-#endif
-#ifndef NOWINSTYLES
-#define NOWINSTYLES
-#endif
-#ifndef NOSYSMETRICS
-#define NOSYSMETRICS
-#endif
-#ifndef NOCLIPBOARD
-#define NOCLIPBOARD
-#endif
-#ifndef NOCOLOR
-#define NOCOLOR
-#endif
-#ifndef NOKERNEL
-#define NOKERNEL
-#endif
-#ifndef NONLS
-#define NONLS
-#endif
-#ifndef NOMEMMGR
-#define NOMEMMGR
-#endif
-#ifndef NOMETAFILE
-#define NOMETAFILE
-#endif
-#ifndef NOOPENFILE
-#define NOOPENFILE
-#endif
-#ifndef NOSCROLL
-#define NOSCROLL
-#endif
-#ifndef NOTEXTMETRIC
-#define NOTEXTMETRIC
-#endif
-#ifndef NOWH
-#define NOWH
-#endif
-#ifndef NOWINOFFSETS
-#define NOWINOFFSETS
-#endif
-#ifndef NOKANJI
-#define NOKANJI
-#endif
-#ifndef NOICONS
-#define NOICONS
-#endif
-#ifndef NORASTEROPS
-#define NORASTEROPS
-#endif
-#ifndef NOSHOWWINDOW
-#define NOSHOWWINDOW
-#endif
-#ifndef OEMRESOURCE
-#define OEMRESOURCE
-#endif
-#ifndef NOATOM
-#define NOATOM
-#endif
-#ifndef NOCTLMGR
-#define NOCTLMGR
-#endif
-#ifndef NODRAWTEXT
-#define NODRAWTEXT
-#endif
-#ifndef NOGDI
-#define NOGDI
-#endif
-#ifndef NOUSER
-#define NOUSER
-#endif
-
-#include <winsock2.h>
-#include <ws2tcpip.h>
-#include <sys/types.h>
-
-// Windows doesn't define TCP_NODELAY in a separate header
-#ifndef TCP_NODELAY
-#define TCP_NODELAY 1
-#endif
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <errno.h>
+#include <sys/select.h>
+#include <netdb.h>
+#include <sys/ioctl.h>
 
 namespace fl {
 
@@ -105,15 +20,13 @@ namespace fl {
 enum class SocketError;
 
 // Platform-neutral socket handle type
-using socket_handle_t = SOCKET;
-static constexpr socket_handle_t INVALID_SOCKET_HANDLE = INVALID_SOCKET;
+using socket_handle_t = int;
+static constexpr socket_handle_t INVALID_SOCKET_HANDLE = -1;
 
-// Windows socket type definitions
-using socket_t = SOCKET;
-static const socket_t INVALID_SOCKET_VALUE = INVALID_SOCKET;
-static const int SOCKET_ERROR_VALUE = SOCKET_ERROR;
-
-// Note: No macro redefinition needed - we use the native function names directly
+// POSIX socket type definitions
+using socket_t = int;
+static const socket_t INVALID_SOCKET_VALUE = -1;
+static const int SOCKET_ERROR_VALUE = -1;
 
 // Platform-specific helper functions
 inline socket_t to_platform_socket(socket_handle_t handle) {
@@ -125,49 +38,40 @@ inline socket_handle_t from_platform_socket(socket_t sock) {
 }
 
 inline bool platform_initialize_networking() {
-    WSADATA wsaData;
-    int result = WSAStartup(MAKEWORD(2, 2), &wsaData);
-    return result == 0;
+    // POSIX doesn't require explicit network initialization
+    return true;
 }
 
 inline void platform_cleanup_networking() {
-    WSACleanup();
+    // POSIX doesn't require explicit network cleanup
 }
 
 inline fl::string platform_get_socket_error_string(int error_code) {
-    char buffer[256];
-    if (FormatMessageA(FORMAT_MESSAGE_FROM_SYSTEM, nullptr, error_code, 0, 
-                       buffer, sizeof(buffer), nullptr)) {
-        return fl::string(buffer);
-    }
-    // Simple integer to string conversion
-    char error_str[16];
-    snprintf(error_str, sizeof(error_str), "%d", error_code);
-    return fl::string("Unknown error ") + fl::string(error_str);
+    return fl::string(strerror(error_code));
 }
 
 inline SocketError platform_translate_socket_error(int error_code) {
     switch (error_code) {
-        case WSAECONNREFUSED: return SocketError::CONNECTION_REFUSED;
-        case WSAETIMEDOUT: return SocketError::CONNECTION_TIMEOUT;
-        case WSAENETUNREACH: return SocketError::NETWORK_UNREACHABLE;
-        case WSAEACCES: return SocketError::PERMISSION_DENIED;
-        case WSAEADDRINUSE: return SocketError::ADDRESS_IN_USE;
-        case WSAEINVAL: return SocketError::INVALID_ADDRESS;
+        case ECONNREFUSED: return SocketError::CONNECTION_REFUSED;
+        case ETIMEDOUT: return SocketError::CONNECTION_TIMEOUT;
+        case ENETUNREACH: return SocketError::NETWORK_UNREACHABLE;
+        case EACCES: return SocketError::PERMISSION_DENIED;
+        case EADDRINUSE: return SocketError::ADDRESS_IN_USE;
+        case EINVAL: return SocketError::INVALID_ADDRESS;
         default: return SocketError::UNKNOWN_ERROR;
     }
 }
 
 inline int platform_get_last_socket_error() {
-    return WSAGetLastError();
+    return errno;
 }
 
 inline bool platform_would_block(int error_code) {
-    return error_code == WSAEWOULDBLOCK;
+    return error_code == EAGAIN || error_code == EWOULDBLOCK;
 }
 
 inline socket_t platform_create_socket() {
-    return socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+    return socket(AF_INET, SOCK_STREAM, 0);
 }
 
 inline int platform_connect_socket(socket_t sock, const sockaddr* addr, int addr_len) {
@@ -183,26 +87,35 @@ inline int platform_recv_data(socket_t sock, char* buffer, int len) {
 }
 
 inline void platform_close_socket(socket_t sock) {
-    ::closesocket(sock);
+    ::close(sock);
 }
 
 inline bool platform_set_socket_timeout(socket_t sock, fl::u32 timeout_ms) {
-    DWORD timeout = timeout_ms;
-    bool recv_ok = setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, 
-                             reinterpret_cast<const char*>(&timeout), sizeof(timeout)) == 0;
-    bool send_ok = setsockopt(sock, SOL_SOCKET, SO_SNDTIMEO, 
-                             reinterpret_cast<const char*>(&timeout), sizeof(timeout)) == 0;
+    struct timeval timeout;
+    timeout.tv_sec = timeout_ms / 1000;
+    timeout.tv_usec = (timeout_ms % 1000) * 1000;
+    
+    bool recv_ok = setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout)) == 0;
+    bool send_ok = setsockopt(sock, SOL_SOCKET, SO_SNDTIMEO, &timeout, sizeof(timeout)) == 0;
     return recv_ok && send_ok;
 }
 
 inline bool platform_set_socket_non_blocking(socket_t sock, bool non_blocking) {
-    u_long mode = non_blocking ? 1 : 0;
-    return ioctlsocket(sock, FIONBIO, &mode) == 0;
+    int flags = fcntl(sock, F_GETFL, 0);
+    if (flags == -1) return false;
+    
+    if (non_blocking) {
+        flags |= O_NONBLOCK;
+    } else {
+        flags &= ~O_NONBLOCK;
+    }
+    
+    return fcntl(sock, F_SETFL, flags) == 0;
 }
 
 inline fl::size platform_get_available_bytes(socket_t sock) {
-    u_long bytes_available = 0;
-    if (ioctlsocket(sock, FIONREAD, &bytes_available) == 0) {
+    int bytes_available = 0;
+    if (ioctl(sock, FIONREAD, &bytes_available) == 0) {
         return static_cast<fl::size>(bytes_available);
     }
     return 0;
@@ -210,14 +123,13 @@ inline fl::size platform_get_available_bytes(socket_t sock) {
 
 inline bool platform_set_socket_option(socket_t sock, int level, int option, 
                                        const void* value, fl::size value_size) {
-    return setsockopt(sock, level, option, reinterpret_cast<const char*>(value), 
-                      static_cast<int>(value_size)) == 0;
+    return setsockopt(sock, level, option, value, static_cast<socklen_t>(value_size)) == 0;
 }
 
 inline bool platform_get_socket_option(socket_t sock, int level, int option, 
                                        void* value, fl::size* value_size) {
-    int size = static_cast<int>(*value_size);
-    bool result = getsockopt(sock, level, option, reinterpret_cast<char*>(value), &size) == 0;
+    socklen_t size = static_cast<socklen_t>(*value_size);
+    bool result = getsockopt(sock, level, option, value, &size) == 0;
     *value_size = static_cast<fl::size>(size);
     return result;
 }
@@ -231,7 +143,7 @@ inline bool platform_inet_pton(const char* src, void* dst) {
 //=============================================================================
 
 inline socket_t platform_create_server_socket() {
-    return socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+    return socket(AF_INET, SOCK_STREAM, 0);
 }
 
 inline SocketError platform_bind_server_socket(socket_handle_t handle, const fl::string& address, int port) {
@@ -240,12 +152,12 @@ inline SocketError platform_bind_server_socket(socket_handle_t handle, const fl:
     addr.sin_family = AF_INET;
     addr.sin_port = htons(static_cast<uint16_t>(port));
     
-    if (!platform_inet_pton(address.c_str(), &addr.sin_addr)) {
+    if (inet_pton(AF_INET, address.c_str(), &addr.sin_addr) != 1) {
         return SocketError::INVALID_ADDRESS;
     }
     
-    if (::bind(sock, reinterpret_cast<sockaddr*>(&addr), sizeof(addr)) == SOCKET_ERROR) {
-        return platform_translate_socket_error(WSAGetLastError());
+    if (::bind(sock, reinterpret_cast<sockaddr*>(&addr), sizeof(addr)) == -1) {
+        return platform_translate_socket_error(errno);
     }
     
     return SocketError::SUCCESS;
@@ -253,8 +165,8 @@ inline SocketError platform_bind_server_socket(socket_handle_t handle, const fl:
 
 inline SocketError platform_listen_server_socket(socket_handle_t handle, int backlog) {
     socket_t sock = to_platform_socket(handle);
-    if (::listen(sock, backlog) == SOCKET_ERROR) {
-        return platform_translate_socket_error(WSAGetLastError());
+    if (::listen(sock, backlog) == -1) {
+        return platform_translate_socket_error(errno);
     }
     return SocketError::SUCCESS;
 }
@@ -262,7 +174,7 @@ inline SocketError platform_listen_server_socket(socket_handle_t handle, int bac
 inline socket_handle_t platform_accept_connection(socket_handle_t server_handle) {
     socket_t server_sock = to_platform_socket(server_handle);
     sockaddr_in client_addr = {};
-    int addr_len = sizeof(client_addr);
+    socklen_t addr_len = sizeof(client_addr);
     
     socket_t client_sock = ::accept(server_sock, reinterpret_cast<sockaddr*>(&client_addr), &addr_len);
     return from_platform_socket(client_sock);
@@ -271,28 +183,32 @@ inline socket_handle_t platform_accept_connection(socket_handle_t server_handle)
 inline void platform_close_server_socket(socket_handle_t handle) {
     socket_t sock = to_platform_socket(handle);
     if (sock != INVALID_SOCKET_VALUE) {
-        ::closesocket(sock);
+        ::close(sock);
     }
 }
 
 inline bool platform_set_server_socket_reuse_address(socket_handle_t handle, bool enable) {
     socket_t sock = to_platform_socket(handle);
     int optval = enable ? 1 : 0;
-    return setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, 
-                     reinterpret_cast<const char*>(&optval), sizeof(optval)) == 0;
+    return setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval)) == 0;
 }
 
 inline bool platform_set_server_socket_reuse_port(socket_handle_t handle, bool enable) {
-    // SO_REUSEPORT is not supported on Windows - return false
+#ifdef SO_REUSEPORT
+    socket_t sock = to_platform_socket(handle);
+    int optval = enable ? 1 : 0;
+    return setsockopt(sock, SOL_SOCKET, SO_REUSEPORT, &optval, sizeof(optval)) == 0;
+#else
+    // SO_REUSEPORT not available on this platform
     (void)handle;
     (void)enable;
     return false;
+#endif
 }
 
 inline bool platform_set_server_socket_non_blocking(socket_handle_t handle, bool non_blocking) {
     socket_t sock = to_platform_socket(handle);
-    u_long mode = non_blocking ? 1 : 0;
-    return ioctlsocket(sock, FIONBIO, &mode) == 0;
+    return platform_set_socket_non_blocking(sock, non_blocking);
 }
 
 inline bool platform_server_socket_has_pending_connections(socket_handle_t handle) {
@@ -301,13 +217,13 @@ inline bool platform_server_socket_has_pending_connections(socket_handle_t handl
     FD_ZERO(&read_fds);
     FD_SET(sock, &read_fds);
     
-    timeval timeout = {0, 0};  // Non-blocking check
-    int result = select(0, &read_fds, nullptr, nullptr, &timeout);
+    struct timeval timeout = {0, 0};  // Non-blocking check
+    int result = select(sock + 1, &read_fds, nullptr, nullptr, &timeout);
     return result > 0 && FD_ISSET(sock, &read_fds);
 }
 
 inline fl::size platform_get_server_socket_pending_count(socket_handle_t handle) {
-    // Windows doesn't provide a direct way to get pending connection count
+    // POSIX doesn't provide a direct way to get pending connection count
     // Return 1 if there are pending connections, 0 otherwise
     return platform_server_socket_has_pending_connections(handle) ? 1 : 0;
 }
@@ -315,7 +231,7 @@ inline fl::size platform_get_server_socket_pending_count(socket_handle_t handle)
 inline fl::string platform_get_server_socket_bound_address(socket_handle_t handle) {
     socket_t sock = to_platform_socket(handle);
     sockaddr_in addr = {};
-    int addr_len = sizeof(addr);
+    socklen_t addr_len = sizeof(addr);
     
     if (getsockname(sock, reinterpret_cast<sockaddr*>(&addr), &addr_len) == 0) {
         char addr_str[INET_ADDRSTRLEN];
@@ -329,7 +245,7 @@ inline fl::string platform_get_server_socket_bound_address(socket_handle_t handl
 inline int platform_get_server_socket_bound_port(socket_handle_t handle) {
     socket_t sock = to_platform_socket(handle);
     sockaddr_in addr = {};
-    int addr_len = sizeof(addr);
+    socklen_t addr_len = sizeof(addr);
     
     if (getsockname(sock, reinterpret_cast<sockaddr*>(&addr), &addr_len) == 0) {
         return ntohs(addr.sin_port);
@@ -339,5 +255,5 @@ inline int platform_get_server_socket_bound_port(socket_handle_t handle) {
 
 } // namespace fl
 
-#endif // _WIN32
+#endif // !defined(_WIN32) && !defined(FASTLED_STUB_IMPL)
 #endif // FASTLED_HAS_NETWORKING 

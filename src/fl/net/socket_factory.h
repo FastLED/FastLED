@@ -41,9 +41,6 @@ public:
     /// Create client socket for outgoing connections
     static fl::shared_ptr<Socket> create_client_socket(const SocketOptions& options = {});
     
-    /// Create server socket for accepting connections
-    static fl::shared_ptr<ServerSocket> create_server_socket(const SocketOptions& options = {});
-    
     /// Check platform capabilities
     static bool supports_ipv6();
     static bool supports_tls();
@@ -58,7 +55,6 @@ public:
 /// Platform-specific socket creation functions
 /// Each platform implements these directly - no registration needed
 fl::shared_ptr<Socket> create_platform_socket(const SocketOptions& options);
-fl::shared_ptr<ServerSocket> create_platform_server_socket(const SocketOptions& options);
 
 /// Platform capability queries
 bool platform_supports_ipv6();
