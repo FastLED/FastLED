@@ -2,7 +2,7 @@
 
 ## 🎯 Objective
 
-Eliminate multiple platform-specific ServerSocket implementations and consolidate them into a single, non-polymorphic ServerSocket class. The polymorphic code should remain in the platform_socket layer for low-level socket operations.
+Eliminate multiple platform-specific ServerSocket implementations and consolidate them into a single, non-polymorphic ServerSocket class that uses a **normalized POSIX-style socket API**. Each platform provides low-level socket API wrappers that expose the same POSIX interface, allowing ServerSocket to use identical code across all platforms.
 
 ## 🚨 Current Architecture Problems
 
@@ -37,9 +37,87 @@ public:
 
 ## ✅ Proposed Solution
 
-### Single ServerSocket Class
+### Normalized POSIX-Style Socket API
 
-Replace the polymorphic ServerSocket hierarchy with a single, non-polymorphic class that delegates to platform-specific functions:
+Each platform provides a **normalized POSIX-style socket API** in the `fl` namespace. All platforms expose identical function signatures, allowing ServerSocket to use the same implementation code everywhere.
+
+**Platform Socket API** (`socket_win.h`, `socket_posix.h`):
+
+```cpp
+// src/platforms/win/socket_win.h
+// src/platforms/posix/socket_posix.h
+// All platforms expose identical API in fl namespace
+
+namespace fl {
+
+// Core Socket Operations
+int socket(int domain, int type, int protocol);
+int socketpair(int domain, int type, int protocol, int sv[2]);
+
+// Addressing
+int bind(int sockfd, const struct sockaddr *addr, socklen_t addrlen);
+int connect(int sockfd, const struct sockaddr *addr, socklen_t addrlen);
+int listen(int sockfd, int backlog);
+int accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen);
+
+// Data Transfer
+ssize_t send(int sockfd, const void *buf, size_t len, int flags);
+ssize_t recv(int sockfd, void *buf, size_t len, int flags);
+ssize_t sendto(int sockfd, const void *buf, size_t len, int flags,
+               const struct sockaddr *dest_addr, socklen_t addrlen);
+ssize_t recvfrom(int sockfd, void *buf, size_t len, int flags,
+                 struct sockaddr *src_addr, socklen_t *addrlen);
+ssize_t sendmsg(int sockfd, const struct msghdr *msg, int flags);
+ssize_t recvmsg(int sockfd, struct msghdr *msg, int flags);
+
+// Connection Teardown
+int shutdown(int sockfd, int how);
+int close(int fd);
+
+// Socket Options
+int setsockopt(int sockfd, int level, int optname, const void *optval, socklen_t optlen);
+int getsockopt(int sockfd, int level, int optname, void *optval, socklen_t *optlen);
+
+// Peer & Local Address Retrieval
+int getpeername(int sockfd, struct sockaddr *addr, socklen_t *addrlen);
+int getsockname(int sockfd, struct sockaddr *addr, socklen_t *addrlen);
+
+// Name-and-Service Translation
+int getaddrinfo(const char *node, const char *service, 
+                const struct addrinfo *hints, struct addrinfo **res);
+void freeaddrinfo(struct addrinfo *res);
+int getnameinfo(const struct sockaddr *sa, socklen_t salen,
+                char *host, socklen_t hostlen, char *serv, socklen_t servlen, int flags);
+
+// Supporting Types (platform-normalized)
+typedef unsigned long socklen_t;
+
+struct sockaddr {
+    sa_family_t sa_family;
+    char sa_data[14];
+};
+
+struct sockaddr_in {           // IPv4
+    sa_family_t sin_family;    // AF_INET
+    in_port_t sin_port;        // htons(port)
+    struct in_addr sin_addr;   // IPv4 address
+    unsigned char sin_zero[8];
+};
+
+struct sockaddr_in6 {          // IPv6
+    sa_family_t sin6_family;   // AF_INET6
+    in_port_t sin6_port;       // htons(port)
+    uint32_t sin6_flowinfo;
+    struct in6_addr sin6_addr; // IPv6 address
+    uint32_t sin6_scope_id;
+};
+
+} // namespace fl
+```
+
+### Single ServerSocket Implementation
+
+ServerSocket uses the normalized POSIX API directly - **no platform-specific implementations**:
 
 ```cpp
 // src/fl/net/server_socket.h
@@ -48,7 +126,7 @@ public:
     explicit ServerSocket(const SocketOptions& options = {});
     ~ServerSocket();
 
-    // No virtual methods - direct implementation
+    // No virtual methods - direct implementation using fl:: socket API
     SocketError bind(const fl::string& address, int port);
     SocketError listen(int backlog = 5);
     void close();
@@ -74,7 +152,7 @@ public:
 private:
     // Platform-neutral member variables
     SocketOptions mOptions;
-    socket_handle_t mSocket = INVALID_SOCKET_HANDLE;
+    int mSocket = -1;  // Standard POSIX file descriptor
     bool mIsListening = false;
     fl::string mBoundAddress;
     int mBoundPort = 0;
@@ -90,136 +168,7 @@ private:
 };
 ```
 
-### Platform Socket Functions
-
-The platform-specific logic moves to platform_* functions (similar to existing socket.hpp pattern). **Critical**: Platform files contain **only low-level POSIX-style socket API functions** - no ServerSocket classes or high-level logic.
-
-#### Platform Function Interface
-
-Platform files should follow the **existing low-level socket API pattern**. Current client functions in `src/platforms/win/socket.hpp`:
-
-```cpp
-// EXISTING CLIENT FUNCTIONS (already implemented)
-inline socket_t platform_create_socket();
-inline int platform_connect_socket(socket_t sock, const sockaddr* addr, int addr_len);
-inline int platform_send_data(socket_t sock, const char* data, int len);
-inline int platform_recv_data(socket_t sock, char* buffer, int len);
-inline void platform_close_socket(socket_t sock);
-```
-
-**ADD these server functions** following the same low-level pattern:
-
-```cpp
-// NEW SERVER FUNCTIONS (to be added)
-// Platform-specific server socket functions
-// Each platform implements these directly
-
-namespace fl {
-
-// Server socket lifecycle
-socket_handle_t platform_create_server_socket();
-SocketError platform_bind_server_socket(socket_handle_t socket, const fl::string& address, int port);
-SocketError platform_listen_server_socket(socket_handle_t socket, int backlog);
-socket_handle_t platform_accept_connection(socket_handle_t server_socket);
-void platform_close_server_socket(socket_handle_t socket);
-
-// Server socket configuration
-bool platform_set_server_socket_reuse_address(socket_handle_t socket, bool enable);
-bool platform_set_server_socket_reuse_port(socket_handle_t socket, bool enable);
-bool platform_set_server_socket_non_blocking(socket_handle_t socket, bool non_blocking);
-
-// Server socket status queries
-bool platform_server_socket_has_pending_connections(socket_handle_t socket);
-fl::size platform_get_server_socket_pending_count(socket_handle_t socket);
-
-// Socket information
-fl::string platform_get_server_socket_bound_address(socket_handle_t socket);
-int platform_get_server_socket_bound_port(socket_handle_t socket);
-
-} // namespace fl
-```
-
-#### Platform Implementation Examples
-
-**Windows Platform** (`src/platforms/win/socket.hpp`):
-```cpp
-namespace fl {
-
-socket_handle_t platform_create_server_socket() {
-    return from_platform_socket(socket(AF_INET, SOCK_STREAM, IPPROTO_TCP));
-}
-
-SocketError platform_bind_server_socket(socket_handle_t handle, const fl::string& address, int port) {
-    socket_t sock = to_platform_socket(handle);
-    sockaddr_in addr = {};
-    addr.sin_family = AF_INET;
-    addr.sin_port = htons(static_cast<uint16_t>(port));
-    
-    if (!platform_inet_pton(address.c_str(), &addr.sin_addr)) {
-        return SocketError::INVALID_ADDRESS;
-    }
-    
-    if (::bind(sock, reinterpret_cast<sockaddr*>(&addr), sizeof(addr)) == SOCKET_ERROR) {
-        return platform_translate_socket_error(WSAGetLastError());
-    }
-    
-    return SocketError::SUCCESS;
-}
-
-SocketError platform_listen_server_socket(socket_handle_t handle, int backlog) {
-    socket_t sock = to_platform_socket(handle);
-    if (::listen(sock, backlog) == SOCKET_ERROR) {
-        return platform_translate_socket_error(WSAGetLastError());
-    }
-    return SocketError::SUCCESS;
-}
-
-socket_handle_t platform_accept_connection(socket_handle_t server_handle) {
-    socket_t server_sock = to_platform_socket(server_handle);
-    sockaddr_in client_addr = {};
-    int addr_len = sizeof(client_addr);
-    
-    socket_t client_sock = ::accept(server_sock, reinterpret_cast<sockaddr*>(&client_addr), &addr_len);
-    return from_platform_socket(client_sock);
-}
-
-// ... other platform implementations
-
-} // namespace fl
-```
-
-**POSIX Platform** (`src/platforms/posix/posix_socket.h`):
-```cpp
-namespace fl {
-
-socket_handle_t platform_create_server_socket() {
-    return socket(AF_INET, SOCK_STREAM, 0);
-}
-
-SocketError platform_bind_server_socket(socket_handle_t socket, const fl::string& address, int port) {
-    sockaddr_in addr = {};
-    addr.sin_family = AF_INET;
-    addr.sin_port = htons(static_cast<uint16_t>(port));
-    
-    if (inet_pton(AF_INET, address.c_str(), &addr.sin_addr) != 1) {
-        return SocketError::INVALID_ADDRESS;
-    }
-    
-    if (::bind(socket, reinterpret_cast<sockaddr*>(&addr), sizeof(addr)) == -1) {
-        return posix_translate_socket_error(errno);
-    }
-    
-    return SocketError::SUCCESS;
-}
-
-// ... other platform implementations
-
-} // namespace fl
-```
-
-### ServerSocket Implementation
-
-The unified ServerSocket class delegates to platform functions:
+### ServerSocket Implementation Using Normalized API
 
 ```cpp
 // src/fl/net/server_socket.cpp
@@ -227,20 +176,19 @@ The unified ServerSocket class delegates to platform functions:
 
 #include "fl/net/server_socket.h"
 
-// Include platform-specific headers
+// Include platform-specific normalized API
 #if defined(_WIN32)
-    #include "platforms/win/server_socket.hpp"
+    #include "platforms/win/socket_win.h"
 #else
-    #include "platforms/posix/posix_server_socket.hpp"
+    #include "platforms/posix/socket_posix.h"
 #endif
-
-// Note: No stub implementation - tests use the real ServerSocket with real platform implementations
 
 namespace fl {
 
 ServerSocket::ServerSocket(const SocketOptions& options) : mOptions(options) {
-    mSocket = platform_create_server_socket();
-    if (mSocket == INVALID_SOCKET_HANDLE) {
+    // Use normalized fl:: socket API - same code on all platforms
+    mSocket = fl::socket(AF_INET, SOCK_STREAM, 0);
+    if (mSocket == -1) {
         set_error(SocketError::SOCKET_ERROR, "Failed to create server socket");
         return;
     }
@@ -253,49 +201,63 @@ ServerSocket::~ServerSocket() {
 }
 
 SocketError ServerSocket::bind(const fl::string& address, int port) {
-    if (mSocket == INVALID_SOCKET_HANDLE) {
+    if (mSocket == -1) {
         return SocketError::SOCKET_ERROR;
     }
     
-    SocketError result = platform_bind_server_socket(mSocket, address, port);
-    if (result == SocketError::SUCCESS) {
-        mBoundAddress = address;
-        mBoundPort = port;
-    } else {
-        set_error(result, "Failed to bind server socket");
+    // Use normalized fl:: socket API - same code on all platforms
+    sockaddr_in addr = {};
+    addr.sin_family = AF_INET;
+    addr.sin_port = htons(static_cast<uint16_t>(port));
+    
+    // Convert address string to binary form
+    if (fl::inet_pton(AF_INET, address.c_str(), &addr.sin_addr) != 1) {
+        set_error(SocketError::INVALID_ADDRESS, "Invalid address format");
+        return SocketError::INVALID_ADDRESS;
     }
     
-    return result;
+    // Same fl::bind() call on all platforms
+    if (fl::bind(mSocket, reinterpret_cast<sockaddr*>(&addr), sizeof(addr)) == -1) {
+        set_error(SocketError::BIND_ERROR, "Failed to bind server socket");
+        return SocketError::BIND_ERROR;
+    }
+    
+    mBoundAddress = address;
+    mBoundPort = port;
+    return SocketError::SUCCESS;
 }
 
 SocketError ServerSocket::listen(int backlog) {
-    if (mSocket == INVALID_SOCKET_HANDLE) {
+    if (mSocket == -1) {
         return SocketError::SOCKET_ERROR;
     }
     
-    SocketError result = platform_listen_server_socket(mSocket, backlog);
-    if (result == SocketError::SUCCESS) {
-        mIsListening = true;
-        mBacklog = backlog;
-    } else {
-        set_error(result, "Failed to listen on server socket");
+    // Same fl::listen() call on all platforms
+    if (fl::listen(mSocket, backlog) == -1) {
+        set_error(SocketError::LISTEN_ERROR, "Failed to listen on server socket");
+        return SocketError::LISTEN_ERROR;
     }
     
-    return result;
+    mIsListening = true;
+    mBacklog = backlog;
+    return SocketError::SUCCESS;
 }
 
 fl::shared_ptr<Socket> ServerSocket::accept() {
-    if (!mIsListening || mSocket == INVALID_SOCKET_HANDLE) {
+    if (!mIsListening || mSocket == -1) {
         return nullptr;
     }
     
-    socket_handle_t client_socket = platform_accept_connection(mSocket);
-    if (client_socket == INVALID_SOCKET_HANDLE) {
+    // Same fl::accept() call on all platforms
+    sockaddr_in client_addr = {};
+    socklen_t addr_len = sizeof(client_addr);
+    
+    int client_socket = fl::accept(mSocket, reinterpret_cast<sockaddr*>(&client_addr), &addr_len);
+    if (client_socket == -1) {
         return nullptr;
     }
     
     // Create client socket from the accepted connection
-    // This uses the existing Socket factory pattern
     auto client = SocketFactory::create_client_socket(mOptions);
     // TODO: Initialize client socket with the accepted socket handle
     
@@ -304,45 +266,145 @@ fl::shared_ptr<Socket> ServerSocket::accept() {
 }
 
 void ServerSocket::close() {
-    if (mSocket != INVALID_SOCKET_HANDLE) {
-        platform_close_server_socket(mSocket);
-        mSocket = INVALID_SOCKET_HANDLE;
+    if (mSocket != -1) {
+        // Same fl::close() call on all platforms
+        fl::close(mSocket);
+        mSocket = -1;
     }
     mIsListening = false;
     mCurrentConnections = 0;
 }
 
-bool ServerSocket::has_pending_connections() const {
-    if (!mIsListening || mSocket == INVALID_SOCKET_HANDLE) {
-        return false;
-    }
-    return platform_server_socket_has_pending_connections(mSocket);
-}
-
 void ServerSocket::set_reuse_address(bool enable) {
-    if (mSocket != INVALID_SOCKET_HANDLE) {
-        platform_set_server_socket_reuse_address(mSocket, enable);
-    }
-}
-
-void ServerSocket::set_reuse_port(bool enable) {
-    if (mSocket != INVALID_SOCKET_HANDLE) {
-        platform_set_server_socket_reuse_port(mSocket, enable);
+    if (mSocket != -1) {
+        int optval = enable ? 1 : 0;
+        // Same fl::setsockopt() call on all platforms
+        fl::setsockopt(mSocket, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval));
     }
 }
 
 void ServerSocket::set_non_blocking(bool non_blocking) {
-    if (mSocket != INVALID_SOCKET_HANDLE) {
-        platform_set_server_socket_non_blocking(mSocket, non_blocking);
+    if (mSocket != -1) {
+        // Platform-normalized non-blocking setup via fl:: API
+        int flags = fl::fcntl(mSocket, F_GETFL, 0);
+        if (non_blocking) {
+            flags |= O_NONBLOCK;
+        } else {
+            flags &= ~O_NONBLOCK;
+        }
+        fl::fcntl(mSocket, F_SETFL, flags);
         mIsNonBlocking = non_blocking;
     }
 }
 
-// ... other method implementations
+// ... other method implementations using normalized fl:: socket API
 
 } // namespace fl
 
 #endif // FASTLED_HAS_NETWORKING
+```
+
+### Platform Implementation Examples
+
+**Windows Platform** (`src/platforms/win/socket_win.h`):
+```cpp
+// Windows-specific implementation that exposes POSIX-style API
+namespace fl {
+
+// Normalize Windows sockets to POSIX-style API
+int socket(int domain, int type, int protocol) {
+    SOCKET sock = ::socket(domain, type, protocol);
+    return (sock == INVALID_SOCKET) ? -1 : static_cast<int>(sock);
+}
+
+int bind(int sockfd, const struct sockaddr *addr, socklen_t addrlen) {
+    SOCKET sock = static_cast<SOCKET>(sockfd);
+    int result = ::bind(sock, addr, addrlen);
+    return (result == SOCKET_ERROR) ? -1 : 0;
+}
+
+int listen(int sockfd, int backlog) {
+    SOCKET sock = static_cast<SOCKET>(sockfd);
+    int result = ::listen(sock, backlog);
+    return (result == SOCKET_ERROR) ? -1 : 0;
+}
+
+int accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen) {
+    SOCKET server_sock = static_cast<SOCKET>(sockfd);
+    SOCKET client_sock = ::accept(server_sock, addr, addrlen);
+    return (client_sock == INVALID_SOCKET) ? -1 : static_cast<int>(client_sock);
+}
+
+int close(int fd) {
+    SOCKET sock = static_cast<SOCKET>(fd);
+    int result = ::closesocket(sock);
+    return (result == SOCKET_ERROR) ? -1 : 0;
+}
+
+ssize_t send(int sockfd, const void *buf, size_t len, int flags) {
+    SOCKET sock = static_cast<SOCKET>(sockfd);
+    int result = ::send(sock, static_cast<const char*>(buf), static_cast<int>(len), flags);
+    return (result == SOCKET_ERROR) ? -1 : static_cast<ssize_t>(result);
+}
+
+ssize_t recv(int sockfd, void *buf, size_t len, int flags) {
+    SOCKET sock = static_cast<SOCKET>(sockfd);
+    int result = ::recv(sock, static_cast<char*>(buf), static_cast<int>(len), flags);
+    return (result == SOCKET_ERROR) ? -1 : static_cast<ssize_t>(result);
+}
+
+int setsockopt(int sockfd, int level, int optname, const void *optval, socklen_t optlen) {
+    SOCKET sock = static_cast<SOCKET>(sockfd);
+    int result = ::setsockopt(sock, level, optname, static_cast<const char*>(optval), optlen);
+    return (result == SOCKET_ERROR) ? -1 : 0;
+}
+
+// ... all other POSIX socket functions normalized for Windows
+
+} // namespace fl
+```
+
+**POSIX Platform** (`src/platforms/posix/socket_posix.h`):
+```cpp
+// POSIX implementation - direct passthrough to system calls
+namespace fl {
+
+// Direct passthrough to POSIX socket API
+inline int socket(int domain, int type, int protocol) {
+    return ::socket(domain, type, protocol);
+}
+
+inline int bind(int sockfd, const struct sockaddr *addr, socklen_t addrlen) {
+    return ::bind(sockfd, addr, addrlen);
+}
+
+inline int listen(int sockfd, int backlog) {
+    return ::listen(sockfd, backlog);
+}
+
+inline int accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen) {
+    return ::accept(sockfd, addr, addrlen);
+}
+
+inline int close(int fd) {
+    return ::close(fd);
+}
+
+inline ssize_t send(int sockfd, const void *buf, size_t len, int flags) {
+    return ::send(sockfd, buf, len, flags);
+}
+
+inline ssize_t recv(int sockfd, void *buf, size_t len, int flags) {
+    return ::recv(sockfd, buf, len, flags);
+}
+
+inline int setsockopt(int sockfd, int level, int optname, const void *optval, socklen_t optlen) {
+    return ::setsockopt(sockfd, level, optname, optval, optlen);
+}
+
+// ... all other POSIX socket functions (direct passthrough)
+
+} // namespace fl
 ```
 
 ## 🗂️ File Organization
@@ -351,41 +413,40 @@ void ServerSocket::set_non_blocking(bool non_blocking) {
 
 ```
 src/fl/net/
-├── server_socket.h           # Non-polymorphic ServerSocket class
-├── server_socket.cpp         # ServerSocket implementation
+├── server_socket.h           # Single non-polymorphic ServerSocket class
+├── server_socket.cpp         # ServerSocket implementation using fl:: socket API
 └── socket_factory.h          # Updated to remove ServerSocket factory methods
 ```
 
-### Files to Extend (Add server functions to existing platform files)
+### Files to Create (Platform Socket API)
 
 ```
 src/platforms/win/
-└── socket.hpp               # ADD low-level server platform functions (platform_bind_server_socket, etc.)
+└── socket_win.h              # Windows POSIX-style socket API wrappers
 
 src/platforms/posix/
-└── posix_socket.h           # ADD low-level server platform functions (MOVE from shared/networking/)
+└── socket_posix.h            # POSIX socket API passthrough (MOVE from shared/networking/)
 ```
 
-**Platform Reorganization Needed**: POSIX files are currently mislocated in `src/platforms/shared/networking/` but should be moved to `src/platforms/posix/` to match the pattern of other platforms (win/, stub/, esp/, etc.). POSIX is a specific platform, not a shared implementation.
+**Platform Reorganization**: POSIX files are currently mislocated in `src/platforms/shared/networking/` but should be moved to `src/platforms/posix/` to match the pattern of other platforms. POSIX is a specific platform, not a shared implementation.
 
-**Note**: We deliberately DO NOT create separate server socket files. Server platform functions are added to the existing platform files alongside the current client socket functions.
-
-**🎯 CRITICAL SEPARATION OF CONCERNS:**
-- **Platform files** (`src/platforms/win/socket.hpp`, `src/platforms/posix/posix_socket.h`) = **ONLY low-level POSIX-style socket API functions** (`platform_*` functions)
-- **ServerSocket class** (`src/fl/net/server_socket.h/.cpp`) = **ONLY high-level server logic** that delegates to platform functions
-- **NO ServerSocket implementations** in platform files - only raw socket API wrappers
+**🎯 CRITICAL ARCHITECTURE:**
+- **Platform files** = **ONLY normalized POSIX-style socket API** (`fl::socket()`, `fl::bind()`, `fl::listen()`, etc.)
+- **ServerSocket class** = **ONLY high-level server logic** using the normalized `fl::` socket API
+- **NO platform-specific ServerSocket implementations** - single ServerSocket works on all platforms
+- **NO stub implementations** - real ServerSocket uses real platform socket APIs
 
 ### Files to Remove
 
 ```
 src/platforms/shared/networking/posix_socket.h    # Remove PosixServerSocket class
-src/platforms/win/socket.h                        # Remove WinServerSocket class
-src/platforms/stub/net/socket.h                   # Remove ENTIRE StubServerSocket class - NO stub implementations
+src/platforms/win/socket.h                        # Remove WinServerSocket class  
+src/platforms/stub/net/socket.h                   # Remove ENTIRE StubServerSocket class
 src/platforms/stub/net/socket.cpp                 # Remove StubServerSocket implementation
-tests/test_networking_consolidated.cpp            # Remove TestServerSocket - use real implementations instead
+tests/test_networking_consolidated.cpp            # Remove TestServerSocket - use real implementations
 ```
 
-**Critical**: We are eliminating ALL stub/fake ServerSocket implementations. The new design uses real ServerSocket instances with real platform implementations, not fake ServerSocket classes.
+**Critical**: We are eliminating ALL platform-specific ServerSocket implementations. The new design uses a single ServerSocket class that works identically on all platforms via the normalized socket API.
 
 ### Files to Update
 
@@ -397,58 +458,60 @@ tests/test_networking_consolidated.cpp            # Update tests for new archite
 
 ## 🚀 Migration Strategy
 
-### Phase 1: Extend Platform Functions
+### Phase 1: Create Normalized Socket API
 
-**✅ ALREADY COMPLETED**: The platform function interface pattern is already established and working:
-- `platform_create_socket()`, `platform_connect_socket()`, `platform_send_data()`, etc.
-- Pattern exists in `src/platforms/win/socket.hpp`, should be in `src/platforms/posix/posix_socket.h`
-- Consistent across Windows, POSIX, and other platforms
+**🔧 IMPLEMENTATION TASKS**:
+1. **Create platform socket API headers**:
+   - `src/platforms/win/socket_win.h` - Windows-to-POSIX socket API normalization
+   - `src/platforms/posix/socket_posix.h` - POSIX socket API passthrough (moved from shared/networking/)
+2. **Implement all POSIX socket functions** in `fl` namespace on each platform
+3. **Ensure identical function signatures** across all platforms
+4. **Test normalized API** functions individually
 
-**🔧 REMAINING WORK**:
-1. **Extend existing pattern** to include server-specific operations:
-   - `platform_create_server_socket()`, `platform_bind_server_socket()`, `platform_listen_server_socket()`, `platform_accept_connection()`
-2. **Add server functions** to existing `.hpp` files (don't create new files)
-3. **Test new server functions** individually with unit tests
+### Phase 2: Implement Single ServerSocket
 
-### Phase 2: Implement Unified ServerSocket
-
-1. **Create non-polymorphic ServerSocket** class
-2. **Implement delegation** to platform functions
+1. **Create non-polymorphic ServerSocket** class using `fl::` socket API
+2. **Implement server logic** using normalized socket calls
 3. **Update SocketFactory** to remove ServerSocket creation methods
+4. **Test ServerSocket** with real platform socket implementations
 
-### Phase 3: Remove Old Implementations
+### Phase 3: Remove Platform-Specific Implementations
 
 1. **Remove abstract ServerSocket** base class from `socket.h`
-2. **Remove platform-specific** ServerSocket classes
+2. **Remove ALL platform-specific** ServerSocket classes (Win, POSIX, Stub)
 3. **Update all references** to use new ServerSocket class
+4. **Remove ServerSocket factory methods**
 
 ### Phase 4: Update Tests
 
-1. **Migrate existing tests** to use new ServerSocket API
-2. **Add tests for platform functions** directly
-3. **Validate cross-platform** behavior consistency
+1. **Remove TestServerSocket** and stub implementations
+2. **Migrate tests** to use real ServerSocket with real platform APIs
+3. **Add tests for normalized socket API** functions
+4. **Validate cross-platform** behavior consistency
 
 ## ✅ Benefits
 
-### Performance Improvements
+### Architecture Benefits
+
+- **Single Implementation**: One ServerSocket class instead of multiple platform-specific implementations
+- **Normalized API**: All platforms expose identical POSIX-style socket interface
+- **Zero Virtual Dispatch**: Direct function calls to platform socket wrappers
+- **Platform Isolation**: Socket platform differences isolated to normalization layer
+
+### Performance Benefits
 
 - **No Virtual Dispatch**: Direct function calls instead of virtual method lookups
-- **Better Inlining**: Compiler can inline platform functions across translation units
+- **Better Inlining**: Compiler can inline platform socket wrappers
 - **Reduced Memory**: Single ServerSocket class instead of multiple implementations
+- **Faster Builds**: Less template instantiation and virtual function overhead
 
-### Maintenance Improvements
+### Maintenance Benefits
 
 - **Single Source of Truth**: One ServerSocket implementation to maintain
-- **Consistent Behavior**: Platform differences isolated to platform_* functions
-- **Easier Testing**: Platform functions can be tested independently
+- **Consistent Behavior**: Platform differences isolated to socket API normalization
+- **Easier Testing**: Platform socket functions can be tested independently
 - **Simpler Factory**: No need for platform-specific ServerSocket factories
-
-### Code Quality Improvements
-
-- **Reduced Duplication**: Common server logic implemented once
-- **Clear Separation**: Business logic (ServerSocket) vs platform details (platform_*)
-- **Better Documentation**: Single class to document instead of multiple implementations
-- **Easier Debugging**: Single call stack path for server operations
+- **Clear Separation**: Business logic (ServerSocket) vs platform API (socket wrappers)
 
 ## 🔍 Compatibility Notes
 
@@ -460,54 +523,48 @@ tests/test_networking_consolidated.cpp            # Update tests for new archite
 
 ### Platform Compatibility
 
-- **All platforms supported**: Windows, POSIX, Stub implementations provided
+- **All platforms supported**: Windows, POSIX implementations provided
 - **Feature parity maintained**: All current ServerSocket features preserved
-- **Platform-specific features**: Handled through platform_* function variations
+- **POSIX normalization**: Windows socket API normalized to POSIX-style interface
 
 ### Testing Compatibility
 
 - **No more fake ServerSocket classes**: TestServerSocket and StubServerSocket eliminated
-- **Real platform implementations**: Tests use actual platform implementations instead of fake classes
-- **Real ServerSocket instances**: Tests use actual ServerSocket implementation with real platform layer
-- **Improved testability**: Platform functions can be tested in isolation
-- **Real implementation testing**: Tests use actual platform implementations, no fakes
+- **Real platform implementations**: Tests use actual platform socket APIs
+- **Real ServerSocket instances**: Tests use actual ServerSocket implementation
+- **Platform API testing**: Normalized socket functions can be tested in isolation
 
-**Critical Change**: We eliminate all fake/stub ServerSocket implementations (TestServerSocket, StubServerSocket) because ServerSocket is no longer polymorphic. Tests should use real platform implementations instead of creating fake ServerSocket subclasses.
+**Critical Change**: We eliminate all fake/stub ServerSocket implementations because ServerSocket is no longer polymorphic. ServerSocket uses real platform socket APIs instead of platform-specific ServerSocket classes.
 
 ## 📋 Implementation Checklist
 
-### ✅ What's Already Completed
-- [x] **Phase 1**: Platform function interface pattern (see `platform_create_socket()`, `platform_connect_socket()`, etc. in `src/platforms/win/socket.hpp`)
-
-### ❌ What Still Needs Implementation  
-- [ ] **Phase 1**: Reorganize POSIX platform files:
-  - [ ] Move `src/platforms/shared/networking/posix_socket.h/.cpp` to `src/platforms/posix/posix_socket.h/.cpp`
-  - [ ] Update include paths and platform selection logic in `src/platforms/socket_platform.h`
-- [ ] **Phase 1**: Add server socket platform functions to existing platform files:
-  - [ ] Add `platform_create_server_socket()`, `platform_bind_server_socket()`, `platform_listen_server_socket()`, `platform_accept_connection()` to `src/platforms/win/socket.hpp`
-  - [ ] Add same functions to `src/platforms/posix/posix_socket.h` (after reorganization)
-  - [ ] Note: No stub platform functions needed per design
-- [ ] **Phase 2**: Create unified ServerSocket class (`src/fl/net/server_socket.h/.cpp`) 
-- [ ] **Phase 2**: Update SocketFactory to remove `create_server_socket()` method (currently in `src/fl/net/socket_factory.h/.cpp`)
+### ❌ What Needs Implementation  
+- [ ] **Phase 1**: Create normalized socket API platform files:
+  - [ ] Create `src/platforms/win/socket_win.h` with Windows-to-POSIX socket API normalization
+  - [ ] Move and update `src/platforms/shared/networking/posix_socket.h` to `src/platforms/posix/socket_posix.h` with POSIX passthrough
+  - [ ] Implement all POSIX socket functions (`fl::socket()`, `fl::bind()`, `fl::listen()`, `fl::accept()`, `fl::close()`, `fl::send()`, `fl::recv()`, `fl::setsockopt()`, etc.)
+  - [ ] Ensure identical function signatures across platforms
+- [ ] **Phase 2**: Create single ServerSocket implementation (`src/fl/net/server_socket.h/.cpp`) using `fl::` socket API
+- [ ] **Phase 2**: Update SocketFactory to remove `create_server_socket()` method
 - [ ] **Phase 3**: Remove abstract ServerSocket base class (currently in `src/fl/net/socket.h`)
-- [ ] **Phase 3**: Remove platform-specific ServerSocket implementations:
-  - [ ] Remove `WinServerSocket` class from `src/platforms/win/socket.h/.cpp`
-  - [ ] Remove `PosixServerSocket` class from `src/platforms/posix/posix_socket.h/.cpp` (MOVE from shared/networking/) 
-  - [ ] Remove `StubServerSocket` class from `src/platforms/stub/net/socket.h/.cpp`
+- [ ] **Phase 3**: Remove ALL platform-specific ServerSocket implementations:
+  - [ ] Remove `WinServerSocket` class 
+  - [ ] Remove `PosixServerSocket` class
+  - [ ] Remove `StubServerSocket` class
 - [ ] **Phase 4**: Update test architecture:
-  - [ ] Remove `TestServerSocket` class from `tests/test_networking_consolidated.cpp`
-  - [ ] Remove `create_platform_server_socket()` test factory function
-  - [ ] Add tests that use real platform implementations instead of fake ServerSocket classes
-- [ ] **Phase 4**: Add platform function unit tests
+  - [ ] Remove `TestServerSocket` class
+  - [ ] Remove platform ServerSocket factory functions
+  - [ ] Add tests using real ServerSocket with real platform socket APIs
+- [ ] **Phase 4**: Add normalized socket API unit tests
 - [ ] **Phase 4**: Validate cross-platform compatibility
 
 ### 📊 Current Reality Check
 **None of the refactor has been implemented yet.** The codebase still has:
 - Abstract `ServerSocket` base class with virtual methods
 - Platform-specific `WinServerSocket`, `PosixServerSocket`, `StubServerSocket` classes
-- Factory pattern creating ServerSocket instances via `create_platform_server_socket()`
+- Factory pattern creating ServerSocket instances
 - Test fakes using `TestServerSocket` inheritance
 
 ---
 
-**🎯 Success Criteria**: Single ServerSocket class with no virtual methods, delegating to platform_* functions for all platform-specific operations, maintaining full API compatibility while improving performance and maintainability. 
+**🎯 Success Criteria**: Single ServerSocket class using normalized `fl::` socket API, with platform files providing POSIX-style socket wrappers, maintaining full API compatibility while improving performance and maintainability. 
