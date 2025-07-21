@@ -194,7 +194,8 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
     void copy(const char *str, fl::size len) {
         mLength = len;
         if (len + 1 <= SIZE) {
-            memcpy(mInlineData, str, len + 1);
+            fl::memcopy(mInlineData, str, len);  // Copy only len characters, not len+1
+            mInlineData[len] = '\0';        // Add null terminator manually
             mHeapData.reset();
         } else {
             mHeapData = fl::make_shared<StringHolder>(str, len);
@@ -453,7 +454,12 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
         return out;
     }
 
-     StrN substr(fl::size start, fl::size end) const {
+     StrN substr(fl::size start, fl::size length) const {
+        // Standard substr(pos, length) behavior - convert to substring(start, end)
+        fl::size end = start + length;
+        if (end > mLength) {
+            end = mLength;
+        }
         return substring(start, end);
     }
 

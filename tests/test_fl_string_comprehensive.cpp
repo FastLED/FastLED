@@ -233,6 +233,45 @@ TEST_CASE("fl::string - Modifiers") {
     }
 }
 
+TEST_CASE("fl::string - Substring Operations") {
+    SUBCASE("substr() - standard behavior") {
+        string original("http://fastled.io");
+        
+        // Standard substr(pos, length) behavior
+        // substr(0, 4) should return "http"
+        string scheme = original.substr(0, 4);
+        CHECK(strcmp(scheme.c_str(), "http") == 0);
+        
+        // substr(7, 7) should return "fastled" (7 chars starting at pos 7)
+        string host_part = original.substr(7, 7);
+        CHECK(strcmp(host_part.c_str(), "fastled") == 0);
+        
+        // substr(7) should return everything from position 7 onwards
+        string from_host = original.substr(7);
+        CHECK(strcmp(from_host.c_str(), "fastled.io") == 0);
+    }
+
+    SUBCASE("substr() - edge cases") {
+        string original("http://fastled.io");
+        
+        // Start beyond end
+        string empty = original.substr(100, 5);
+        CHECK(empty.empty());
+        
+        // Length beyond end
+        string partial = original.substr(15, 100);
+        CHECK(strcmp(partial.c_str(), "io") == 0);
+        
+        // Zero length
+        string zero_len = original.substr(5, 0);
+        CHECK(zero_len.empty());
+        
+        // Entire string
+        string full = original.substr(0);
+        CHECK(full == original);
+    }
+}
+
 TEST_CASE("fl::string - String Operations") {
     SUBCASE("find() - character") {
         string s("Hello World");
@@ -249,6 +288,22 @@ TEST_CASE("fl::string - String Operations") {
         CHECK(s.find("World") == 6);
         CHECK(s.find("xyz") == string::npos);
         CHECK(s.find("") == 0); // empty string found at position 0
+    }
+
+    SUBCASE("find() - with position parameter") {
+        string url("http://fastled.io");
+        
+        // Test find operations that were working during debug
+        auto scheme_end = url.find("://");
+        CHECK_EQ(4, scheme_end);  // Position of "://"
+        
+        auto path_start = url.find('/', 7);  // Find '/' after position 7
+        CHECK_EQ(string::npos, path_start);  // No path in this URL
+        
+        // Test with URL that has a path
+        string url_with_path("http://example.com/path");
+        auto path_pos = url_with_path.find('/', 7);
+        CHECK_EQ(18, path_pos);  // Position of '/' in path
     }
 
     SUBCASE("find() - edge cases") {
@@ -275,6 +330,34 @@ TEST_CASE("fl::string - Comparison Operators") {
         CHECK_FALSE(s1 == s3);
         CHECK_FALSE(s1 != s2);
         CHECK(s1 != s3);
+    }
+
+    SUBCASE("Equality operators - bug fix tests") {
+        // Test basic string equality that was broken
+        string str1("http");
+        string str2("http");
+        string str3("https");
+        
+        // These should return true but were returning false
+        CHECK(str1 == str2);
+        CHECK_FALSE(str1 == str3);
+        
+        // Test with const char*
+        CHECK(str1 == "http");
+        CHECK_FALSE(str1 == "https");
+        
+        // Test edge cases
+        string empty1;
+        string empty2;
+        CHECK(empty1 == empty2);
+        
+        string single1("a");
+        string single2("a");
+        CHECK(single1 == single2);
+        
+        // Test inequality operator
+        CHECK_FALSE(str1 != str2);
+        CHECK(str1 != str3);
     }
 
     SUBCASE("Relational operators") {
@@ -307,6 +390,39 @@ TEST_CASE("fl::string - Comparison Operators") {
         CHECK(s1 == s2);
         CHECK(s1 < s3);
         CHECK_FALSE(s3 < s1);
+    }
+}
+
+TEST_CASE("fl::string - Stream Operations") {
+    SUBCASE("Stream output") {
+        string test_str("http");
+        
+        // Test stream output - should show characters, not ASCII values
+        fl::StrStream oss;
+        oss << test_str;
+        string result = oss.str();
+        
+        // Should be "http", not "104116116112" (ASCII values)
+        CHECK(strcmp(result.c_str(), "http") == 0);
+        
+        // Test with special characters
+        string special("://");
+        fl::StrStream oss2;
+        oss2 << special;
+        string result2 = oss2.str();
+        CHECK(strcmp(result2.c_str(), "://") == 0);
+    }
+
+    SUBCASE("Stream output - complex") {
+        // Test combining stream operations
+        string scheme("https");
+        string host("192.0.2.0");
+        string path("/test");
+        
+        fl::StrStream oss;
+        oss << "Scheme: " << scheme << ", Host: " << host << ", Path: " << path;
+        string full_output = oss.str();
+        CHECK(strcmp(full_output.c_str(), "Scheme: https, Host: 192.0.2.0, Path: /test") == 0);
     }
 }
 
@@ -581,5 +697,72 @@ TEST_CASE("fl::string - Integration with FastLED types") {
         s.clear();
         s.append(false);
         CHECK(s == "false");
+    }
+}
+
+TEST_CASE("fl::string - Comprehensive Integration Tests") {
+    SUBCASE("URL parsing scenario") {
+        // Comprehensive test combining all operations
+        string url("https://192.0.2.0/test");
+        
+        // Extract scheme
+        string scheme = url.substr(0, 5);  // "https"
+        CHECK(strcmp(scheme.c_str(), "https") == 0);
+        CHECK(scheme == "https");
+        
+        // Extract protocol separator  
+        string proto_sep = url.substr(5, 3);  // "://"
+        CHECK(strcmp(proto_sep.c_str(), "://") == 0);
+        CHECK(proto_sep == "://");
+        
+        // Extract host
+        string host = url.substr(8, 9);  // "192.0.2.0"
+        CHECK(strcmp(host.c_str(), "192.0.2.0") == 0);
+        CHECK(host == "192.0.2.0");
+        
+        // Extract path
+        string path = url.substr(17);  // "/test"
+        CHECK(strcmp(path.c_str(), "/test") == 0);
+        CHECK(path == "/test");
+        
+        // Stream output test
+        fl::StrStream oss;
+        oss << "Scheme: " << scheme << ", Host: " << host << ", Path: " << path;
+        string full_output = oss.str();
+        CHECK(strcmp(full_output.c_str(), "Scheme: https, Host: 192.0.2.0, Path: /test") == 0);
+    }
+}
+
+TEST_CASE("fl::string - Regression Tests and Debug Scenarios") {
+    SUBCASE("Debug scenario - exact networking code failure") {
+        // Test the exact scenario that was failing in the networking code
+        string test_url("http://fastled.io");
+        
+        // Debug: Check individual character access
+        CHECK_EQ('h', test_url[0]);
+        CHECK_EQ('t', test_url[1]);
+        CHECK_EQ('t', test_url[2]);
+        CHECK_EQ('p', test_url[3]);
+        
+        // Debug: Check length
+        CHECK_EQ(17, test_url.size());  // "http://fastled.io" is 17 characters
+        
+        // Debug: Check find operation
+        auto pos = test_url.find("://");
+        CHECK_EQ(4, pos);
+        
+        // Debug: Check substring extraction (the failing operation)
+        string scheme = test_url.substr(0, 4);
+        CHECK_EQ(4, scheme.size());
+        CHECK(strcmp(scheme.c_str(), "http") == 0);
+        
+        // The critical test: equality comparison
+        CHECK(scheme == "http");
+        
+        // Manual character comparison that was working
+        bool manual_check = (scheme.size() == 4 && 
+                            scheme[0] == 'h' && scheme[1] == 't' && 
+                            scheme[2] == 't' && scheme[3] == 'p');
+        CHECK(manual_check);
     }
 }
