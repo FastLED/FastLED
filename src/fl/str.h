@@ -457,6 +457,22 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
         return substring(start, end);
     }
 
+    StrN substr(fl::size start) const {
+        auto end = mLength;
+        return substring(start, end);
+    }
+
+    void push_back(char c) {
+        write(c);
+    }
+
+    void pop_back() {
+        if (mLength > 0) {
+            mLength--;
+            c_str_mutable()[mLength] = '\0';
+        }
+    }
+
     StrN trim() const {
         StrN out;
         fl::size start = 0;
