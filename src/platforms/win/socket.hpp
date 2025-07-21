@@ -227,115 +227,11 @@ inline bool platform_inet_pton(const char* src, void* dst) {
 }
 
 //=============================================================================
-// Server socket platform functions
+// Server socket platform functions - REMOVED
 //=============================================================================
-
-inline socket_t platform_create_server_socket() {
-    return socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-}
-
-inline SocketError platform_bind_server_socket(socket_handle_t handle, const fl::string& address, int port) {
-    socket_t sock = to_platform_socket(handle);
-    sockaddr_in addr = {};
-    addr.sin_family = AF_INET;
-    addr.sin_port = htons(static_cast<uint16_t>(port));
-    
-    if (!platform_inet_pton(address.c_str(), &addr.sin_addr)) {
-        return SocketError::INVALID_ADDRESS;
-    }
-    
-    if (::bind(sock, reinterpret_cast<sockaddr*>(&addr), sizeof(addr)) == SOCKET_ERROR) {
-        return platform_translate_socket_error(WSAGetLastError());
-    }
-    
-    return SocketError::SUCCESS;
-}
-
-inline SocketError platform_listen_server_socket(socket_handle_t handle, int backlog) {
-    socket_t sock = to_platform_socket(handle);
-    if (::listen(sock, backlog) == SOCKET_ERROR) {
-        return platform_translate_socket_error(WSAGetLastError());
-    }
-    return SocketError::SUCCESS;
-}
-
-inline socket_handle_t platform_accept_connection(socket_handle_t server_handle) {
-    socket_t server_sock = to_platform_socket(server_handle);
-    sockaddr_in client_addr = {};
-    int addr_len = sizeof(client_addr);
-    
-    socket_t client_sock = ::accept(server_sock, reinterpret_cast<sockaddr*>(&client_addr), &addr_len);
-    return from_platform_socket(client_sock);
-}
-
-inline void platform_close_server_socket(socket_handle_t handle) {
-    socket_t sock = to_platform_socket(handle);
-    if (sock != INVALID_SOCKET_VALUE) {
-        ::closesocket(sock);
-    }
-}
-
-inline bool platform_set_server_socket_reuse_address(socket_handle_t handle, bool enable) {
-    socket_t sock = to_platform_socket(handle);
-    int optval = enable ? 1 : 0;
-    return setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, 
-                     reinterpret_cast<const char*>(&optval), sizeof(optval)) == 0;
-}
-
-inline bool platform_set_server_socket_reuse_port(socket_handle_t handle, bool enable) {
-    // SO_REUSEPORT is not supported on Windows - return false
-    (void)handle;
-    (void)enable;
-    return false;
-}
-
-inline bool platform_set_server_socket_non_blocking(socket_handle_t handle, bool non_blocking) {
-    socket_t sock = to_platform_socket(handle);
-    u_long mode = non_blocking ? 1 : 0;
-    return ioctlsocket(sock, FIONBIO, &mode) == 0;
-}
-
-inline bool platform_server_socket_has_pending_connections(socket_handle_t handle) {
-    socket_t sock = to_platform_socket(handle);
-    fd_set read_fds;
-    FD_ZERO(&read_fds);
-    FD_SET(sock, &read_fds);
-    
-    timeval timeout = {0, 0};  // Non-blocking check
-    int result = select(0, &read_fds, nullptr, nullptr, &timeout);
-    return result > 0 && FD_ISSET(sock, &read_fds);
-}
-
-inline fl::size platform_get_server_socket_pending_count(socket_handle_t handle) {
-    // Windows doesn't provide a direct way to get pending connection count
-    // Return 1 if there are pending connections, 0 otherwise
-    return platform_server_socket_has_pending_connections(handle) ? 1 : 0;
-}
-
-inline fl::string platform_get_server_socket_bound_address(socket_handle_t handle) {
-    socket_t sock = to_platform_socket(handle);
-    sockaddr_in addr = {};
-    int addr_len = sizeof(addr);
-    
-    if (getsockname(sock, reinterpret_cast<sockaddr*>(&addr), &addr_len) == 0) {
-        char addr_str[INET_ADDRSTRLEN];
-        if (inet_ntop(AF_INET, &addr.sin_addr, addr_str, sizeof(addr_str))) {
-            return fl::string(addr_str);
-        }
-    }
-    return fl::string("0.0.0.0");
-}
-
-inline int platform_get_server_socket_bound_port(socket_handle_t handle) {
-    socket_t sock = to_platform_socket(handle);
-    sockaddr_in addr = {};
-    int addr_len = sizeof(addr);
-    
-    if (getsockname(sock, reinterpret_cast<sockaddr*>(&addr), &addr_len) == 0) {
-        return ntohs(addr.sin_port);
-    }
-    return 0;
-}
+// The old platform-specific server socket functions have been removed.
+// ServerSocket now uses the unified implementation with normalized fl:: socket API.
+// See src/platforms/win/socket_win.h for the new normalized socket functions.
 
 } // namespace fl
 

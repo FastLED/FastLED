@@ -8,19 +8,16 @@
 #include "fl/shared_ptr.h"
 #include "fl/vector.h"
 
-// Include platform-specific socket headers to get socket_handle_t type
-#include "platforms/socket_platform.h"
-
 namespace fl {
 
 /// Unified non-polymorphic ServerSocket class
-/// Delegates to platform-specific functions for all operations
+/// Uses normalized fl:: socket API for all operations - same code on all platforms
 class ServerSocket {
 public:
     explicit ServerSocket(const SocketOptions& options = {});
     ~ServerSocket();
 
-    // No virtual methods - direct implementation
+    // No virtual methods - direct implementation using fl:: socket API
     SocketError bind(const fl::string& address, int port);
     SocketError listen(int backlog = 5);
     void close();
@@ -44,9 +41,9 @@ public:
     int get_socket_handle() const;
 
 private:
-    // Platform-neutral member variables
+    // Platform-neutral member variables using standard POSIX file descriptors
     SocketOptions mOptions;
-    socket_handle_t mSocket = INVALID_SOCKET_HANDLE;
+    int mSocket = -1;  // Standard POSIX file descriptor (-1 = invalid)
     bool mIsListening = false;
     fl::string mBoundAddress;
     int mBoundPort = 0;

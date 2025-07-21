@@ -387,107 +387,11 @@ fl::string WinSocket::resolve_hostname(const fl::string& hostname) {
 }
 
 //=============================================================================
-// WinServerSocket Implementation  
-//=============================================================================
-
-WinServerSocket::WinServerSocket(const SocketOptions& options) : mOptions(options) {
-    // Server socket implementation would go here
-    // For now, just basic initialization
-}
-
-WinServerSocket::~WinServerSocket() {
-    this->close();
-}
-
-SocketError WinServerSocket::bind(const fl::string& address, int port) {
-    // Server socket bind implementation
-    mBoundAddress = address;
-    mBoundPort = port;
-    return SocketError::SUCCESS;
-}
-
-SocketError WinServerSocket::listen(int backlog) {
-    mBacklog = backlog;
-    mIsListening = true;
-    return SocketError::SUCCESS;
-}
-
-void WinServerSocket::close() {
-    mIsListening = false;
-}
-
-bool WinServerSocket::is_listening() const {
-    return mIsListening;
-}
-
-fl::shared_ptr<Socket> WinServerSocket::accept() {
-    // Accept implementation would go here
-    return nullptr;
-}
-
-fl::vector<fl::shared_ptr<Socket>> WinServerSocket::accept_multiple(fl::size max_connections) {
-    return fl::vector<fl::shared_ptr<Socket>>();
-}
-
-bool WinServerSocket::has_pending_connections() const {
-    return false;
-}
-
-void WinServerSocket::set_reuse_address(bool enable) {
-    (void)enable;
-}
-
-void WinServerSocket::set_reuse_port(bool enable) {
-    (void)enable;
-}
-
-void WinServerSocket::set_non_blocking(bool non_blocking) {
-    mIsNonBlocking = non_blocking;
-}
-
-fl::string WinServerSocket::bound_address() const {
-    return mBoundAddress;
-}
-
-int WinServerSocket::bound_port() const {
-    return mBoundPort;
-}
-
-fl::size WinServerSocket::max_connections() const {
-    return static_cast<fl::size>(mBacklog);
-}
-
-fl::size WinServerSocket::current_connections() const {
-    return mCurrentConnections;
-}
-
-SocketError WinServerSocket::get_last_error() const {
-    return mLastError;
-}
-
-fl::string WinServerSocket::get_error_message() const {
-    return mErrorMessage;
-}
-
-int WinServerSocket::get_socket_handle() const {
-    return static_cast<int>(mSocket);
-}
-
-void WinServerSocket::set_error(SocketError error, const fl::string& message) {
-    mLastError = error;
-    mErrorMessage = message;
-}
-
-//=============================================================================
 // Platform-specific factory functions
 //=============================================================================
 
 fl::shared_ptr<Socket> create_platform_socket(const SocketOptions& options) {
     return fl::make_shared<WinSocket>(options);
-}
-
-fl::shared_ptr<ServerSocket> create_platform_server_socket(const SocketOptions& options) {
-    return fl::make_shared<WinServerSocket>(options);
 }
 
 bool platform_supports_ipv6() {

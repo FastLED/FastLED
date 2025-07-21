@@ -392,107 +392,11 @@ fl::string PosixSocket::resolve_hostname(const fl::string& hostname) {
 }
 
 //=============================================================================
-// PosixServerSocket Implementation  
-//=============================================================================
-
-PosixServerSocket::PosixServerSocket(const SocketOptions& options) : mOptions(options) {
-    // Server socket implementation would go here
-    // For now, just basic initialization
-}
-
-PosixServerSocket::~PosixServerSocket() {
-    this->close();
-}
-
-SocketError PosixServerSocket::bind(const fl::string& address, int port) {
-    // Server socket bind implementation
-    mBoundAddress = address;
-    mBoundPort = port;
-    return SocketError::SUCCESS;
-}
-
-SocketError PosixServerSocket::listen(int backlog) {
-    mBacklog = backlog;
-    mIsListening = true;
-    return SocketError::SUCCESS;
-}
-
-void PosixServerSocket::close() {
-    mIsListening = false;
-}
-
-bool PosixServerSocket::is_listening() const {
-    return mIsListening;
-}
-
-fl::shared_ptr<Socket> PosixServerSocket::accept() {
-    // Accept implementation would go here
-    return nullptr;
-}
-
-fl::vector<fl::shared_ptr<Socket>> PosixServerSocket::accept_multiple(fl::size max_connections) {
-    return fl::vector<fl::shared_ptr<Socket>>();
-}
-
-bool PosixServerSocket::has_pending_connections() const {
-    return false;
-}
-
-void PosixServerSocket::set_reuse_address(bool enable) {
-    (void)enable;
-}
-
-void PosixServerSocket::set_reuse_port(bool enable) {
-    (void)enable;
-}
-
-void PosixServerSocket::set_non_blocking(bool non_blocking) {
-    mIsNonBlocking = non_blocking;
-}
-
-fl::string PosixServerSocket::bound_address() const {
-    return mBoundAddress;
-}
-
-int PosixServerSocket::bound_port() const {
-    return mBoundPort;
-}
-
-fl::size PosixServerSocket::max_connections() const {
-    return static_cast<fl::size>(mBacklog);
-}
-
-fl::size PosixServerSocket::current_connections() const {
-    return mCurrentConnections;
-}
-
-SocketError PosixServerSocket::get_last_error() const {
-    return mLastError;
-}
-
-fl::string PosixServerSocket::get_error_message() const {
-    return mErrorMessage;
-}
-
-int PosixServerSocket::get_socket_handle() const {
-    return static_cast<int>(mSocket);
-}
-
-void PosixServerSocket::set_error(SocketError error, const fl::string& message) {
-    mLastError = error;
-    mErrorMessage = message;
-}
-
-//=============================================================================
 // Platform-specific factory functions
 //=============================================================================
 
 fl::shared_ptr<Socket> create_platform_socket(const SocketOptions& options) {
     return fl::make_shared<PosixSocket>(options);
-}
-
-fl::shared_ptr<ServerSocket> create_platform_server_socket(const SocketOptions& options) {
-    return fl::make_shared<PosixServerSocket>(options);
 }
 
 bool platform_supports_ipv6() {
