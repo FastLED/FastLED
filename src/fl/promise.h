@@ -1,16 +1,16 @@
 #pragma once
 
 /// @file promise.h
-/// @brief Promise-based fluent API for FastLED - a more ergonomic alternative to fl::future<T>
+/// @brief Promise-based fluent API for FastLED - standalone async primitives
 ///
-/// The fl::promise<T> API provides fluent .then() semantics that are more intuitive and chainable
-/// than the complex fl::future<T> pattern. This is the recommended API for HTTP requests and
-/// other async operations in FastLED.
+/// The fl::promise<T> API provides fluent .then() semantics that are intuitive and chainable
+/// for async operations in FastLED. This is a lightweight, standalone implementation
+/// that doesn't depend on fl::future.
 ///
 /// @section Key Features
 /// - **Fluent API**: Chainable .then() and .catch_() methods
 /// - **Non-Blocking**: Perfect for setup() + loop() programming model
-/// - **More Ergonomic**: Simpler than fl::future<T> with automatic callback handling
+/// - **Lightweight**: Standalone implementation without heavy dependencies
 /// - **JavaScript-Like**: Familiar Promise API patterns
 ///
 /// @section Basic Usage
@@ -44,13 +44,12 @@
 #include "fl/namespace.h"
 #include "fl/function.h"
 #include "fl/string.h"
-#include "fl/future.h"
 #include "fl/shared_ptr.h"
 #include "fl/move.h"
 
 namespace fl {
 
-/// Error type for promises - compatible with FutureError
+/// Error type for promises
 struct Error {
     fl::string message;
     
@@ -58,9 +57,6 @@ struct Error {
     Error(const fl::string& msg) : message(msg) {}
     Error(const char* msg) : message(msg) {}
     Error(fl::string&& msg) : message(fl::move(msg)) {}
-    
-    // Implicit conversion from FutureError for compatibility
-    Error(const FutureError& fut_err) : message(fut_err.message) {}
 };
 
 // Forward declaration for implementation
@@ -217,17 +213,6 @@ public:
         if (!valid()) return false;
         return mImpl->reject(Error(error_message));
     }
-    
-    /// Create a promise from an existing future
-    /// This allows integration with the existing fl::future<T> infrastructure
-    static promise<T> from_future(fl::future<T> future) {
-        auto p = create();
-        
-        // Store the future in the promise implementation for polling
-        p.mImpl->set_future(fl::move(future));
-        
-        return p;
-    }
 
 private:
     /// Constructor from shared implementation (used internally)
@@ -292,29 +277,8 @@ public:
         }
     }
     
-    /// Set future for integration with fl::future<T> infrastructure
-    void set_future(fl::future<T> future) {
-        mFuture = fl::move(future);
-    }
-    
-    /// Update promise state - polls future if present and processes callbacks
+    /// Update promise state - processes callbacks if needed
     void update() {
-        // If we have a future, poll it for results
-        if (mFuture.valid() && mState == PromiseState_t::PENDING) {
-            auto result = mFuture.try_get_result();
-            
-            if (result.template is<T>()) {
-                // Future completed successfully
-                mValue = *result.template ptr<T>();
-                mState = PromiseState_t::RESOLVED;
-            } else if (result.template is<FutureError>()) {
-                // Future completed with error
-                mError = Error(*result.template ptr<FutureError>());
-                mState = PromiseState_t::REJECTED;
-            }
-            // else: still pending
-        }
-        
         // Process callbacks if we're completed and haven't processed them yet
         if (is_completed() && !mCallbacksProcessed) {
             process_callbacks();
@@ -398,7 +362,6 @@ private:
     fl::function<void(const T&)> mThenCallback;
     fl::function<void(const Error&)> mCatchCallback;
     
-    fl::future<T> mFuture;  // For integration with existing infrastructure
     bool mCallbacksProcessed;
     
     /// Process pending callbacks
