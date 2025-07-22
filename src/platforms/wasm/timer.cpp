@@ -110,17 +110,28 @@ EMSCRIPTEN_KEEPALIVE void delay(int ms) {
 }
 
 EMSCRIPTEN_KEEPALIVE void delayMicroseconds(int micros) {
+    // For WebAssembly, convert all delays to milliseconds and use emscripten_sleep
+    // to avoid blocking the main thread. This is necessary for Asyncify compatibility.
     
-    
-    if (micros > 1000) {
+    if (micros >= 1000) {
+        // Convert to milliseconds for delays >= 1ms
         uint32_t ms = micros / 1000;
-        micros = micros % 1000;
+        int remaining_micros = micros % 1000;
+        
+        // Use emscripten_sleep for the millisecond portion (non-blocking)
         emscripten_sleep(ms);
+        
+        // For remaining microseconds < 1000, convert to milliseconds with rounding
+        if (remaining_micros > 0) {
+            // Round up to next millisecond to ensure minimum delay
+            emscripten_sleep(1);
+        }
+    } else if (micros > 0) {
+        // For very small delays < 1000 microseconds, use minimum 1ms delay
+        // This maintains compatibility while avoiding main thread blocking
+        emscripten_sleep(1);
     }
-    std::this_thread::sleep_for(std::chrono::microseconds(micros));
-
-
-
+    // For micros <= 0, do nothing (no delay)
 }
 
 // Replacement for 'yield' in WebAssembly context

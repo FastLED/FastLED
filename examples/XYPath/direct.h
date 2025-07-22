@@ -62,6 +62,14 @@ void setup() {
 
 void loop() {
     fl::clear(leds);
+    // EVERY_N_BSECONDS(5000) {
+    //     Serial.println("about to sleep");
+    //     delay(1000);
+    //     Serial.println("woke up");
+    // }
+    Serial.println("about to sleep");
+    delay(1000);    
+    Serial.println("woke up");
     // FASTLED_ASSERT(false, "This is a test");
     // leds(x,y) = CRGB(255, 0, 0);
     float from = offset;
