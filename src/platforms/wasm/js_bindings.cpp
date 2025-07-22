@@ -46,6 +46,11 @@ namespace fl {
 // Forward declarations for functions defined later in this file
 EMSCRIPTEN_KEEPALIVE void jsFillInMissingScreenMaps(ActiveStripData &active_strips);
 
+} // namespace fl
+
+// Exported C functions for JavaScript access
+extern "C" {
+
 /**
  * Pure C++ Frame Data Export Function
  * Exports frame data as JSON string with size information
@@ -53,11 +58,11 @@ EMSCRIPTEN_KEEPALIVE void jsFillInMissingScreenMaps(ActiveStripData &active_stri
  */
 EMSCRIPTEN_KEEPALIVE void* getFrameData(int* dataSize) {
     // Fill active strips data
-    ActiveStripData& active_strips = ActiveStripData::Instance();
-    jsFillInMissingScreenMaps(active_strips);
+    fl::ActiveStripData& active_strips = fl::ActiveStripData::Instance();
+    fl::jsFillInMissingScreenMaps(active_strips);
     
     // Serialize to JSON
-    Str json_str = active_strips.infoJsonString();
+    fl::Str json_str = active_strips.infoJsonString();
     
     // Allocate and return data pointer
     char* buffer = (char*)malloc(json_str.length() + 1);
@@ -76,6 +81,10 @@ EMSCRIPTEN_KEEPALIVE void freeFrameData(void* data) {
         free(data);
     }
 }
+
+} // extern "C"
+
+namespace fl {
 
 /**
  * Pure C++ Strip Update Data Export Function
