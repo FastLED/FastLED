@@ -5,6 +5,7 @@
 #include "fl/hash_map.h"
 #include "fl/mutex.h"
 #include "fl/singleton.h"
+#include "fl/optional.h"
 
 #ifdef __EMSCRIPTEN__
 #include <emscripten.h>
@@ -29,27 +30,27 @@ public:
         return mNextRequestId++;
     }
     
-    // Store callback for a request ID
-    void storeCallback(uint32_t request_id, const FetchResponseCallback& callback) {
+    // Store callback for a request ID (using move semantics)
+    void storeCallback(uint32_t request_id, FetchResponseCallback callback) {
         fl::lock_guard<fl::mutex> lock(mCallbacksMutex);
-        mPendingCallbacks[request_id] = new FetchResponseCallback(callback);
+        mPendingCallbacks[request_id] = fl::move(callback);
     }
     
-    // Retrieve and remove callback for a request ID
-    FetchResponseCallback* takeCallback(uint32_t request_id) {
+    // Retrieve and remove callback for a request ID (using move semantics)
+    fl::optional<FetchResponseCallback> takeCallback(uint32_t request_id) {
         fl::lock_guard<fl::mutex> lock(mCallbacksMutex);
         auto it = mPendingCallbacks.find(request_id);
         if (it != mPendingCallbacks.end()) {
-            FetchResponseCallback* callback = it->second;
+            FetchResponseCallback callback = fl::move(it->second);
             mPendingCallbacks.erase(it);
-            return callback;
+            return fl::make_optional(fl::move(callback));
         }
-        return nullptr;
+        return fl::nullopt;
     }
 
 private:
     // Thread-safe storage for pending callbacks using request IDs
-    fl::hash_map<uint32_t, FetchResponseCallback*> mPendingCallbacks;
+    fl::hash_map<uint32_t, FetchResponseCallback> mPendingCallbacks;
     fl::mutex mCallbacksMutex;
     uint32_t mNextRequestId;
 };
@@ -63,15 +64,14 @@ static FetchCallbackManager& getCallbackManager() {
 extern "C" EMSCRIPTEN_KEEPALIVE void js_fetch_success_callback(uint32_t request_id, const char* content) {
     FL_WARN("Fetch success callback received for request " << request_id << ", content length: " << strlen(content));
     
-    FetchResponseCallback* callback = getCallbackManager().takeCallback(request_id);
-    if (callback) {
+    auto callback_opt = getCallbackManager().takeCallback(request_id);
+    if (callback_opt) {
         // Create a successful response object
         fl::response response(200, "OK");
         response.set_text(fl::string(content));
         response.set_header("content-type", "text/html"); // Default content type
         
-        (*callback)(response);
-        delete callback;
+        (*callback_opt)(response);
     } else {
         FL_WARN("Warning: No pending callback found for fetch success request " << request_id);
     }
@@ -81,16 +81,15 @@ extern "C" EMSCRIPTEN_KEEPALIVE void js_fetch_success_callback(uint32_t request_
 extern "C" EMSCRIPTEN_KEEPALIVE void js_fetch_error_callback(uint32_t request_id, const char* error_message) {
     FL_WARN("Fetch error callback received for request " << request_id << ": " << error_message);
     
-    FetchResponseCallback* callback = getCallbackManager().takeCallback(request_id);
-    if (callback) {
+    auto callback_opt = getCallbackManager().takeCallback(request_id);
+    if (callback_opt) {
         // Create an error response object
         fl::response response(0, "Network Error");
         fl::string error_content = "Fetch Error: ";
         error_content += error_message;
         response.set_text(error_content);
         
-        (*callback)(response);
-        delete callback;
+        (*callback_opt)(response);
     } else {
         FL_WARN("Warning: No pending callback found for fetch error request " << request_id);
     }
@@ -128,8 +127,8 @@ void FetchRequest::response(const FetchResponseCallback& callback) {
     // Generate unique request ID for this request
     uint32_t request_id = getCallbackManager().generateRequestId();
     
-    // Store the callback for when JavaScript calls back
-    getCallbackManager().storeCallback(request_id, callback);
+    // Store the callback for when JavaScript calls back (using move semantics)
+    getCallbackManager().storeCallback(request_id, FetchResponseCallback(callback));
     
     FL_WARN("Stored callback for request ID: " << request_id);
     

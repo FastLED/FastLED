@@ -98,20 +98,20 @@ The fetch system uses a **unique request ID approach** with a **singleton callba
 
 1. **Request ID Generation**: Each `fetch.get().response()` call generates a unique `uint32_t` request ID
 2. **Singleton Management**: A private `FetchCallbackManager` singleton handles all callback storage using `fl::Singleton<T>`
-3. **Thread-Safe Storage**: Callbacks are stored in a `fl::hash_map<uint32_t, FetchResponseCallback*>` protected by mutex
+3. **Thread-Safe Storage**: Callbacks are stored directly in `fl::hash_map<uint32_t, FetchResponseCallback>` with move semantics
 4. **JavaScript Coordination**: The EM_JS function receives the request ID and passes it to the JavaScript fetch
 5. **Response Routing**: JavaScript calls back to C++ with the request ID, allowing proper callback retrieval
-6. **Atomic Cleanup**: `takeCallback()` atomically removes and returns the callback, preventing race conditions
+6. **Atomic Cleanup**: `takeCallback()` atomically moves and returns the callback via `fl::optional`, preventing race conditions
 
 ```cpp
 // Internal singleton class for managing fetch callbacks (private to .cpp file)
 class FetchCallbackManager {
 public:
     uint32_t generateRequestId();
-    void storeCallback(uint32_t request_id, const FetchResponseCallback& callback);
-    FetchResponseCallback* takeCallback(uint32_t request_id);
+    void storeCallback(uint32_t request_id, FetchResponseCallback callback);  // move semantics
+    fl::optional<FetchResponseCallback> takeCallback(uint32_t request_id);    // move semantics
 private:
-    fl::hash_map<uint32_t, FetchResponseCallback*> mPendingCallbacks;
+    fl::hash_map<uint32_t, FetchResponseCallback> mPendingCallbacks;  // direct storage
     fl::mutex mCallbacksMutex;
     uint32_t mNextRequestId;
 };
@@ -123,7 +123,8 @@ private:
 - ✅ **Unlimited concurrent requests** (was: only 1 at a time)
 - ✅ **No race conditions** (was: 2nd request deleted 1st callback)
 - ✅ **Thread-safe access** (was: unsafe global state)
-- ✅ **Proper memory management** (was: orphaned callbacks)
+- ✅ **Modern C++ memory management** (move semantics, no raw pointers/new/delete)
+- ✅ **Exception-safe** (RAII via fl::function and fl::optional)
 - ✅ **Same fluent API** (no breaking changes)
 
 ### JavaScript Integration
