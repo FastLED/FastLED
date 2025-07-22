@@ -26,6 +26,12 @@ import { GraphicsManagerThreeJS } from './modules/graphics_manager_threejs.js';
 import { isDenseGrid } from './modules/graphics_utils.js';
 import { JsonInspector } from './modules/json_inspector.js';
 
+// Import new pure JavaScript modules
+import { FastLEDAsyncController } from './modules/fastled_async_controller.js';
+import './modules/fastled_callbacks.js';
+import { fastLEDEvents, fastLEDPerformanceMonitor } from './modules/fastled_events.js';
+import { FASTLED_DEBUG_LOG, FASTLED_DEBUG_ERROR, FASTLED_DEBUG_TRACE } from './modules/fastled_debug_logger.js';
+
 /** URL parameters for runtime configuration */
 const urlParams = new URLSearchParams(window.location.search);
 
@@ -88,262 +94,20 @@ let containerId;
 let graphicsArgs = {};
 
 /**
- * AsyncFastLEDController - Handles Asyncify-enabled FastLED setup and loop functions
+ * NOTE: AsyncFastLEDController has been moved to fastled_async_controller.js
+ * This is now imported as a pure JavaScript module for better separation of concerns
+ * and to eliminate embedded JavaScript in C++ code.
  * 
- * This controller manages the async lifecycle of FastLED programs when Emscripten's
- * Asyncify feature is enabled. It handles both synchronous and asynchronous returns
- * from extern_setup and extern_loop functions, providing smooth animation loops
- * without blocking the browser's main thread.
- * 
- * @example Basic Usage:
- * ```javascript
- * // After WASM module is loaded
- * const controller = new AsyncFastLEDController(moduleInstance, 60);
- * await controller.setup();
- * controller.start();
- * 
- * // Monitor performance
- * setInterval(() => {
- *   console.log(`FPS: ${controller.getFPS().toFixed(1)}`);
- * }, 1000);
- * 
- * // Stop when needed
- * controller.stop();
- * ```
- * 
- * @example With Error Handling:
- * ```javascript
- * try {
- *   const controller = new AsyncFastLEDController(moduleInstance);
- *   await controller.setup();
- *   controller.start();
- *   
- *   // Add to global scope for debugging
- *   window.fastLEDController = controller;
- * } catch (error) {
- *   console.error('FastLED initialization failed:', error);
- *   document.getElementById('error-display').textContent = 
- *     'FastLED failed to start. Check console for details.';
- * }
- * ```
- * 
- * @example Performance Monitoring:
- * ```javascript
- * const controller = new AsyncFastLEDController(moduleInstance);
- * await controller.setup();
- * controller.start();
- * 
- * // Monitor performance stats
- * function updatePerformanceDisplay() {
- *   const stats = controller.getPerformanceStats();
- *   console.log('FastLED Performance:', {
- *     fps: stats.fps.toFixed(1),
- *     frameTime: stats.averageFrameTime.toFixed(2) + 'ms',
- *     totalFrames: stats.frameCount,
- *     running: stats.running
- *   });
- * }
- * setInterval(updatePerformanceDisplay, 2000);
- * ```
+ * The new FastLEDAsyncController provides:
+ * - Pure JavaScript async patterns with proper Asyncify integration
+ * - Clean data export/import with C++ via Module.cwrap
+ * - Event-driven architecture replacing callback chains
+ * - Proper error handling and performance monitoring
+ * - No embedded JavaScript - all async logic in JavaScript domain
  */
-class AsyncFastLEDController {
-  constructor(moduleInstance, frameRate = DEFAULT_FRAME_RATE_60FPS) {
-    this.moduleInstance = moduleInstance;
-    this.frameRate = frameRate;
-    this.running = false;
-    this.frameCount = 0;
-    this.frameTimes = [];
-    this.maxFrameTimeHistory = 60; // Track last 60 frames
-    this.setupCompleted = false;
-    this.lastFrameTime = 0;
-    this.frameInterval = 1000 / this.frameRate;
-    
-    // Bind functions to preserve 'this' context
-    this.loop = this.loop.bind(this);
-    this.stop = this.stop.bind(this);
-  }
 
-  /**
-   * Safely calls an async function, handling both sync and async returns
-   * @param {string} funcName - Name of the function for error reporting
-   * @param {Function} func - The function to call
-   * @param {...*} args - Arguments to pass to the function
-   * @returns {Promise<*>} Promise that resolves with the function result
-   */
-  async safeCall(funcName, func, ...args) {
-    try {
-      const result = func(...args);
-      
-      // Handle both async and sync returns from Asyncify
-      if (result instanceof Promise) {
-        return await result;
-      }
-      return result;
-      
-    } catch (error) {
-      if (error.name === 'ExitStatus') {
-        console.error(`FastLED function ${funcName} exited with code:`, error.status);
-      } else if (error.message && error.message.includes('unreachable')) {
-        console.error(`FastLED function ${funcName} hit unreachable code - possible memory corruption`);
-      } else {
-        console.error(`FastLED function ${funcName} error:`, error);
-      }
-      throw error;
-    }
-  }
-
-  /**
-   * Initializes the FastLED program by calling the async-aware setup function
-   * @returns {Promise<void>} Promise that resolves when setup is complete
-   */
-  async setup() {
-    if (this.setupCompleted) {
-      console.warn('FastLED setup already completed, skipping');
-      return;
-    }
-
-    console.log('Setting up FastLED with Asyncify support...');
-    try {
-      await this.safeCall('extern_setup', this.moduleInstance._extern_setup);
-      this.setupCompleted = true;
-      console.log('FastLED setup completed successfully');
-    } catch (error) {
-      console.error('FastLED setup failed:', error);
-      throw error;
-    }
-  }
-
-  /**
-   * Starts the async animation loop
-   * Uses requestAnimationFrame for smooth, non-blocking animation
-   */
-  start() {
-    if (this.running) {
-      console.warn('FastLED loop is already running');
-      return;
-    }
-
-    if (!this.setupCompleted) {
-      console.error('Cannot start loop: setup() must be called first');
-      return;
-    }
-
-    console.log('Starting FastLED async loop...');
-    this.running = true;
-    this.frameCount = 0;
-    this.lastFrameTime = performance.now();
-    requestAnimationFrame(this.loop);
-  }
-
-  /**
-   * Main animation loop function - handles async extern_loop calls
-   * @param {number} currentTime - Current timestamp from requestAnimationFrame
-   */
-  async loop(currentTime) {
-    if (!this.running) return;
-
-    // Maintain consistent frame rate
-    if (currentTime - this.lastFrameTime < this.frameInterval) {
-      requestAnimationFrame(this.loop);
-      return;
-    }
-
-    const frameStartTime = performance.now();
-    
-    try {
-      // Call the async-aware extern_loop function
-      await this.safeCall('extern_loop', this.moduleInstance._extern_loop);
-      
-      this.frameCount++;
-      this.lastFrameTime = currentTime;
-      
-      // Track performance
-      const frameEndTime = performance.now();
-      const frameTime = frameEndTime - frameStartTime;
-      this.trackFramePerformance(frameTime);
-      
-      // Schedule next frame
-      this.scheduleNextFrame(frameTime);
-      
-    } catch (error) {
-      console.error('Fatal error in FastLED async loop:', error);
-      this.stop();
-    }
-  }
-
-  /**
-   * Tracks frame performance and logs warnings for slow frames
-   * @param {number} frameTime - Time taken for this frame in milliseconds
-   */
-  trackFramePerformance(frameTime) {
-    this.frameTimes.push(frameTime);
-    if (this.frameTimes.length > this.maxFrameTimeHistory) {
-      this.frameTimes.shift();
-    }
-
-    // Log performance warnings for slow frames
-    if (frameTime > 32) { // Slower than ~30 FPS
-      console.warn(`Slow FastLED frame: ${frameTime.toFixed(2)}ms`);
-    }
-  }
-
-  /**
-   * Schedules the next animation frame with adaptive frame rate
-   * @param {number} frameTime - Time taken for the current frame
-   */
-  scheduleNextFrame(frameTime) {
-    const avgFrameTime = this.getAverageFrameTime();
-    
-    if (avgFrameTime > 16) {
-      // If we can't maintain 60fps, throttle to 30fps
-      setTimeout(() => requestAnimationFrame(this.loop), 16);
-    } else {
-      requestAnimationFrame(this.loop);
-    }
-  }
-
-  /**
-   * Stops the animation loop
-   */
-  stop() {
-    if (!this.running) return;
-    
-    console.log('Stopping FastLED async loop...');
-    this.running = false;
-  }
-
-  /**
-   * Gets the average frame time over recent frames
-   * @returns {number} Average frame time in milliseconds
-   */
-  getAverageFrameTime() {
-    if (this.frameTimes.length === 0) return 0;
-    return this.frameTimes.reduce((a, b) => a + b, 0) / this.frameTimes.length;
-  }
-
-  /**
-   * Gets the current frames per second
-   * @returns {number} Current FPS
-   */
-  getFPS() {
-    const avgFrameTime = this.getAverageFrameTime();
-    return avgFrameTime > 0 ? 1000 / avgFrameTime : 0;
-  }
-
-  /**
-   * Gets performance statistics
-   * @returns {Object} Performance stats object
-   */
-  getPerformanceStats() {
-    return {
-      frameCount: this.frameCount,
-      averageFrameTime: this.getAverageFrameTime(),
-      fps: this.getFPS(),
-      running: this.running,
-      setupCompleted: this.setupCompleted
-    };
-  }
-}
+// The AsyncFastLEDController is now imported from fastled_async_controller.js
+// Old implementation has been replaced with pure JavaScript architecture
 
 /**
  * Global reference to the current AsyncFastLEDController instance
@@ -612,25 +376,54 @@ function updateCanvas(frameData) {
 }
 
 /**
- * Main setup and loop execution function for FastLED programs (Asyncify-enabled)
+ * Main setup and loop execution function for FastLED programs (Pure JavaScript Architecture)
  * @async
  * @param {Object} moduleInstance - The WASM module instance
  * @param {number} frame_rate - Target frame rate for the animation loop
  * @returns {Promise<void>} Promise that resolves when setup is complete and loop is started
  */
 async function FastLED_SetupAndLoop(moduleInstance, frame_rate) {
+  FASTLED_DEBUG_TRACE('INDEX_JS', 'FastLED_SetupAndLoop', 'ENTER', { frame_rate });
+  
   try {
-    // Create the async controller
-    fastLEDController = new AsyncFastLEDController(moduleInstance, frame_rate);
+    FASTLED_DEBUG_LOG('INDEX_JS', 'Initializing FastLED with Pure JavaScript Architecture...');
+    console.log('Initializing FastLED with Pure JavaScript Architecture...');
+    
+    // Check if moduleInstance is valid
+    FASTLED_DEBUG_LOG('INDEX_JS', 'Checking moduleInstance', {
+      hasModule: !!moduleInstance,
+      hasExternSetup: !!(moduleInstance && moduleInstance._extern_setup),
+      hasExternLoop: !!(moduleInstance && moduleInstance._extern_loop),
+      hasCwrap: !!(moduleInstance && moduleInstance.cwrap)
+    });
+    
+    if (!moduleInstance) {
+      throw new Error('moduleInstance is null or undefined');
+    }
+    
+    // Create the pure JavaScript async controller
+    FASTLED_DEBUG_LOG('INDEX_JS', 'Creating FastLEDAsyncController...');
+    fastLEDController = new FastLEDAsyncController(moduleInstance, frame_rate);
+    FASTLED_DEBUG_LOG('INDEX_JS', 'FastLEDAsyncController created successfully');
     
     // Expose controller globally for debugging and external control
     window.fastLEDController = fastLEDController;
     
+    // Expose event system globally
+    window.fastLEDEvents = fastLEDEvents;
+    window.fastLEDPerformanceMonitor = fastLEDPerformanceMonitor;
+    
+    FASTLED_DEBUG_LOG('INDEX_JS', 'Globals exposed, calling controller.setup()...');
+    
     // Setup FastLED asynchronously
     await fastLEDController.setup();
     
+    FASTLED_DEBUG_LOG('INDEX_JS', 'Controller setup completed, starting animation loop...');
+    
     // Start the async animation loop
     fastLEDController.start();
+    
+    FASTLED_DEBUG_LOG('INDEX_JS', 'Animation loop started, setting up UI controls...');
     
     // Add UI controls for start/stop if elements exist
     const startBtn = document.getElementById('start-btn');
@@ -638,44 +431,101 @@ async function FastLED_SetupAndLoop(moduleInstance, frame_rate) {
     const toggleBtn = document.getElementById('toggle-btn');
     const fpsDisplay = document.getElementById('fps-display');
     
+    FASTLED_DEBUG_LOG('INDEX_JS', 'UI controls found', {
+      startBtn: !!startBtn,
+      stopBtn: !!stopBtn,
+      toggleBtn: !!toggleBtn,
+      fpsDisplay: !!fpsDisplay
+    });
+    
     if (startBtn) {
       startBtn.onclick = () => {
+        FASTLED_DEBUG_LOG('INDEX_JS', 'Start button clicked');
         if (fastLEDController.setupCompleted) {
           fastLEDController.start();
         } else {
           console.warn('FastLED setup not completed yet');
+          FASTLED_DEBUG_LOG('INDEX_JS', 'Start button clicked but setup not completed');
         }
       };
     }
     
     if (stopBtn) {
-      stopBtn.onclick = () => fastLEDController.stop();
+      stopBtn.onclick = () => {
+        FASTLED_DEBUG_LOG('INDEX_JS', 'Stop button clicked');
+        fastLEDController.stop();
+      };
     }
     
     if (toggleBtn) {
       toggleBtn.onclick = () => {
+        FASTLED_DEBUG_LOG('INDEX_JS', 'Toggle button clicked');
         const isRunning = toggleFastLED();
         toggleBtn.textContent = isRunning ? 'Pause' : 'Resume';
       };
     }
     
-    // Performance monitoring display
+    // Performance monitoring display with event system integration
     if (fpsDisplay) {
+      FASTLED_DEBUG_LOG('INDEX_JS', 'Setting up performance monitoring...');
       setInterval(() => {
         const fps = fastLEDController.getFPS();
-        fpsDisplay.textContent = `FPS: ${fps.toFixed(1)}`;
+        const frameTime = fastLEDController.getAverageFrameTime();
+        
+        // Record performance metrics
+        fastLEDPerformanceMonitor.recordFrameTime(frameTime);
+        
+        // Update display
+        fpsDisplay.textContent = `FPS: ${fps.toFixed(1)} | Frame: ${frameTime.toFixed(1)}ms`;
+        
+        // Monitor memory usage if available
+        if (performance.memory) {
+          fastLEDPerformanceMonitor.recordMemoryUsage(performance.memory.usedJSHeapSize);
+        }
       }, 1000);
     }
     
-    console.log('FastLED Asyncify integration initialized successfully');
+    // Set up event monitoring for debugging
+    if (window.fastLEDDebug) {
+      fastLEDEvents.setDebugMode(true);
+      FASTLED_DEBUG_LOG('INDEX_JS', 'Event debug mode enabled');
+    }
+    
+    FASTLED_DEBUG_LOG('INDEX_JS', 'Checking callback function availability...');
+    const callbackStatus = {
+      FastLED_onFrame: typeof globalThis.FastLED_onFrame,
+      FastLED_processUiUpdates: typeof globalThis.FastLED_processUiUpdates,
+      FastLED_onStripUpdate: typeof globalThis.FastLED_onStripUpdate,
+      FastLED_onStripAdded: typeof globalThis.FastLED_onStripAdded,
+      FastLED_onUiElementsAdded: typeof globalThis.FastLED_onUiElementsAdded
+    };
+    
+    FASTLED_DEBUG_LOG('INDEX_JS', 'Callback function status', callbackStatus);
+    
+    console.log('FastLED Pure JavaScript Architecture initialized successfully');
+    console.log('Available features:', {
+      asyncController: !!fastLEDController,
+      eventSystem: !!fastLEDEvents,
+      performanceMonitor: !!fastLEDPerformanceMonitor,
+      callbacks: callbackStatus
+    });
+    
+    FASTLED_DEBUG_LOG('INDEX_JS', 'FastLED_SetupAndLoop completed successfully');
+    FASTLED_DEBUG_TRACE('INDEX_JS', 'FastLED_SetupAndLoop', 'EXIT');
     
   } catch (error) {
-    console.error('Failed to initialize FastLED with Asyncify:', error);
+    FASTLED_DEBUG_ERROR('INDEX_JS', 'Failed to initialize FastLED with Pure JavaScript Architecture', error);
+    console.error('Failed to initialize FastLED with Pure JavaScript Architecture:', error);
+    
+    // Emit error event
+    if (fastLEDEvents) {
+      fastLEDEvents.emitError('initialization', error.message, { stack: error.stack });
+    }
     
     // Show user-friendly error message if error display element exists
     const errorDisplay = document.getElementById('error-display');
     if (errorDisplay) {
-      errorDisplay.textContent = 'Failed to load FastLED. Please refresh the page.';
+      errorDisplay.textContent = 'Failed to load FastLED with Pure JavaScript Architecture. Please refresh the page.';
     }
     
     throw error;
@@ -683,258 +533,21 @@ async function FastLED_SetupAndLoop(moduleInstance, frame_rate) {
 }
 
 /**
- * Async-aware handler for strip update events from the FastLED library
- * Processes screen mapping configuration and canvas setup
- * @async
- * @param {Object} jsonData - Strip update data from FastLED
- * @param {string} jsonData.event - Event type (e.g., 'set_canvas_map')
- * @param {number} jsonData.strip_id - ID of the LED strip
- * @param {Object} jsonData.map - Coordinate mapping data
- * @param {number} [jsonData.diameter] - LED diameter in mm (default: 0.2)
- * @returns {Promise<void>} Promise that resolves when strip update is processed
+ * NOTE: All callback functions have been moved to fastled_callbacks.js
+ * This provides better separation of concerns and eliminates embedded JavaScript.
+ * 
+ * The pure JavaScript callbacks include:
+ * - FastLED_onStripUpdate() - handles strip configuration changes
+ * - FastLED_onStripAdded() - handles new strip registration
+ * - FastLED_onFrame() - handles frame rendering
+ * - FastLED_processUiUpdates() - handles UI state collection
+ * - FastLED_onUiElementsAdded() - handles UI element addition
+ * - FastLED_onError() - handles error reporting
+ * 
+ * All callbacks are automatically available via the imported module.
  */
-async function FastLED_onStripUpdate(jsonData) {
-  try {
-    // Hooks into FastLED to receive updates from the FastLED library related
-    // to the strip state. This is where the ScreenMap will be effectively set.
-    // uses global variables.
-    console.log('Received async strip update:', jsonData);
-    const { event } = jsonData;
-    let width = 0;
-    let height = 0;
-    let eventHandled = false;
-    
-    if (event === 'set_canvas_map') {
-      eventHandled = true;
-      // Work in progress.
-      const { map } = jsonData;
-      console.log('Received map:', jsonData);
-      const [min, max] = minMax(map.x, map.y);
-      console.log('min', min, 'max', max);
 
-      const stripId = jsonData.strip_id;
-      const isUndefined = (value) => typeof value === 'undefined';
-      if (isUndefined(stripId)) {
-        throw new Error('strip_id is required for set_canvas_map event');
-      }
-
-      let diameter = jsonData.diameter;
-      if (diameter === undefined) {
-        const stripId = jsonData.strip_id;
-        console.warn(`Diameter was unset for strip ${stripId}, assuming default value of 2 mm.`);
-        diameter = 0.2;
-      }
-
-      screenMap.strips[stripId] = {
-        map,
-        min,
-        max,
-        diameter: diameter,
-      };
-      console.log('Screen map updated:', screenMap);
-      
-      // iterate through all the screenMaps and get the absolute min and max
-      const absMin = [Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY];
-      const absMax = [Number.NEGATIVE_INFINITY, Number.NEGATIVE_INFINITY];
-      let setAtLeastOnce = false;
-      for (const stripId in screenMap.strips) {
-        if (!Object.prototype.hasOwnProperty.call(screenMap.strips, stripId)) continue;
-        console.log('Processing strip ID', stripId);
-        const id = Number.parseInt(stripId, 10);
-        const stripData = screenMap.strips[id];
-        absMin[0] = Math.min(absMin[0], stripData.min[0]);
-        absMin[1] = Math.min(absMin[1], stripData.min[1]);
-        absMax[0] = Math.max(absMax[0], stripData.max[0]);
-        absMax[1] = Math.max(absMax[1], stripData.max[1]);
-        // if diff x = 0, expand by one on each direction.
-        if (absMin[0] === absMax[0]) {
-          absMin[0] = absMin[0] - 1;
-          absMax[0] = absMax[0] + 1;
-        }
-        // if diff y = 0, expand by one on each direction.
-        if (absMin[1] === absMax[1]) {
-          absMin[1] = absMin[1] - 1;
-          absMax[1] = absMax[1] + 1;
-        }
-        setAtLeastOnce = true;
-      }
-      
-      if (!setAtLeastOnce) {
-        console.error('No screen map data found, skipping canvas size update');
-        return; // Early return, but still async
-      }
-      
-      screenMap.absMin = absMin;
-      screenMap.absMax = absMax;
-      width = Number.parseInt(absMax[0] - absMin[0], 10) + 1;
-      height = Number.parseInt(absMax[1] - absMin[1], 10) + 1;
-      console.log('canvas updated with width and height', width, height);
-      
-      // now update the canvas size asynchronously
-      const canvas = document.getElementById(canvasId);
-      if (canvas) {
-        canvas.width = width;
-        canvas.height = height;
-        uiCanvasChanged = true;
-        console.log('Screen map updated:', screenMap);
-      } else {
-        console.warn('Canvas element not found:', canvasId);
-      }
-    }
-
-    if (!eventHandled) {
-      console.warn(`We do not support event ${event} yet.`);
-      return; // Early return, but still async
-    }
-    
-    if (receivedCanvas) {
-      console.warn(
-        'Canvas size has already been set, setting multiple canvas sizes is not supported yet and the previous one will be overwritten.',
-      );
-    }
-    
-    const canvas = document.getElementById(canvasId);
-    if (canvas) {
-      canvas.width = width;
-      canvas.height = height;
-
-      // Set display size (CSS pixels) to 640px width while maintaining aspect ratio
-      const displayWidth = 640;
-      const displayHeight = Math.round((height / width) * displayWidth);
-
-      // Set CSS display size while maintaining aspect ratio
-      canvas.style.width = `${displayWidth}px`;
-      canvas.style.height = `${displayHeight}px`;
-      console.log(
-        `Canvas size set to ${width}x${height}, displayed at ${canvas.style.width}x${canvas.style.height} `,
-      );
-    }
-    
-    // unconditionally delete the graphicsManager (async safe)
-    if (graphicsManager) {
-      graphicsManager.reset();
-      graphicsManager = null;
-    }
-    
-    // Yield to allow other async operations
-    await new Promise(resolve => setTimeout(resolve, 0));
-    
-  } catch (error) {
-    console.error('Error in async FastLED_onStripUpdate:', error);
-    throw error; // Re-throw to let C++ side handle the error
-  }
-}
-
-/**
- * Async-aware handler for new LED strip registration events
- * @async
- * @param {number} stripId - Unique identifier for the LED strip
- * @param {number} stripLength - Number of LEDs in the strip
- * @returns {Promise<void>} Promise that resolves when strip addition is processed
- */
-async function FastLED_onStripAdded(stripId, stripLength) {
-  try {
-    // uses global variables.
-    const output = document.getElementById(outputId);
-    if (output) {
-      output.textContent += `Strip added: ID ${stripId}, length ${stripLength}\n`;
-    }
-    
-    // Log for debugging
-    console.log(`FastLED Strip Added: ID ${stripId}, Length ${stripLength}`);
-    
-    // Yield to allow other async operations
-    await new Promise(resolve => setTimeout(resolve, 0));
-    
-  } catch (error) {
-    console.error('Error in async FastLED_onStripAdded:', error);
-    throw error; // Re-throw to let C++ side handle the error
-  }
-}
-
-/**
- * Async-aware main frame processing function called by FastLED for each animation frame
- * @async
- * @param {Array<Object>} frameData - Array of strip data with pixel colors
- * @param {Function} uiUpdateCallback - Async callback to send UI changes back to FastLED
- * @returns {Promise<void>} Promise that resolves when frame processing is complete
- */
-async function FastLED_onFrame(frameData, uiUpdateCallback) {
-  try {
-    // uiUpdateCallback is now an async function from FastLED that will parse a json string
-    // representing the changes to the UI that FastLED will need to respond to.
-    
-    // Create async-aware wrapped callback
-    let wrappedCallback = uiUpdateCallback;
-    if (window.jsonInspector) {
-      const originalCallback = uiUpdateCallback;
-      wrappedCallback = async function(jsonStr) {
-        // Log the event
-        window.jsonInspector.wrapUiUpdateCallback(originalCallback);
-        
-        // Call the original callback and handle async
-        const result = originalCallback(jsonStr);
-        if (result instanceof Promise) {
-          await result;
-        }
-        return result;
-      };
-    }
-    
-    // Process UI changes asynchronously
-    const changesJson = uiManager.processUiChanges();
-    if (changesJson !== null) {
-      const changesJsonStr = JSON.stringify(changesJson);
-      
-      // Call the async callback and await the result
-      const callbackResult = wrappedCallback(changesJsonStr);
-      if (callbackResult instanceof Promise) {
-        await callbackResult;
-      }
-    }
-    
-    if (frameData.length === 0) {
-      console.warn('Received empty frame data, skipping canvas update');
-      // Still process the frame but skip canvas update
-    } else {
-      frameData.screenMap = screenMap;
-      updateCanvas(frameData);
-    }
-    
-  } catch (error) {
-    console.error('Error in async FastLED_onFrame:', error);
-    throw error; // Re-throw to let C++ side handle the error
-  }
-}
-
-/**
- * Async-aware handler for UI element addition events from FastLED
- * @async
- * @param {Object} jsonData - UI element configuration data
- * @returns {Promise<void>} Promise that resolves when UI elements are added
- */
-async function FastLED_onUiElementsAdded(jsonData) {
-  try {
-    // Log the inbound event to the inspector
-    if (window.jsonInspector) {
-      window.jsonInspector.logInboundEvent(jsonData);
-    }
-    
-    // uses global variables.
-    if (uiManager && typeof uiManager.addUiElements === 'function') {
-      uiManager.addUiElements(jsonData);
-    } else {
-      console.warn('UI Manager not available or addUiElements method missing');
-    }
-    
-    // Yield to allow other async operations
-    await new Promise(resolve => setTimeout(resolve, 0));
-    
-  } catch (error) {
-    console.error('Error in async FastLED_onUiElementsAdded:', error);
-    throw error; // Re-throw to let C++ side handle the error
-  }
-}
+// Callback functions are now pure JavaScript modules - no embedded definitions needed
 
 /**
  * Main function to initialize and start the FastLED setup/loop cycle (Asyncify-enabled)
@@ -996,19 +609,23 @@ async function fastledLoadSetupLoop(
     }
   };
 
-  // Bind the async-aware functions to the global scope.
-  globalThis.FastLED_onUiElementsAdded = FastLED_onUiElementsAdded;
-  globalThis.FastLED_onFrame = FastLED_onFrame;
-  globalThis.FastLED_onStripAdded = FastLED_onStripAdded;
-  globalThis.FastLED_onStripUpdate = FastLED_onStripUpdate;
+  // NOTE: Callback functions are now automatically registered by importing fastled_callbacks.js
+  // No need to manually bind them here - they're pure JavaScript functions
   
-  // Add debugging info for async functions
-  console.log('Registered async FastLED callback functions:', {
+  // Verify that the pure JavaScript callbacks are properly loaded
+  console.log('FastLED Pure JavaScript callbacks verified:', {
     FastLED_onUiElementsAdded: typeof globalThis.FastLED_onUiElementsAdded,
     FastLED_onFrame: typeof globalThis.FastLED_onFrame,
     FastLED_onStripAdded: typeof globalThis.FastLED_onStripAdded,
-    FastLED_onStripUpdate: typeof globalThis.FastLED_onStripUpdate
+    FastLED_onStripUpdate: typeof globalThis.FastLED_onStripUpdate,
+    FastLED_processUiUpdates: typeof globalThis.FastLED_processUiUpdates,
+    FastLED_onError: typeof globalThis.FastLED_onError
   });
+  
+  // Initialize event system integration
+  if (fastLEDEvents) {
+    console.log('FastLED Event System ready with stats:', fastLEDEvents.getEventStats());
+  }
 
   // Come back to this later - we want to partition the files into immediate and streaming files
   // so that large projects don't try to download ALL the large files BEFORE setup/loop is called.

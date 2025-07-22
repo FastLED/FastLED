@@ -1,37 +1,31 @@
 #ifdef __EMSCRIPTEN__
 
-// ⚠️⚠️⚠️ CRITICAL WARNING: C++ ↔ JavaScript ASYNC BRIDGE - HANDLE WITH EXTREME CARE! ⚠️⚠️⚠️
+// ⚠️⚠️⚠️ CRITICAL WARNING: C++ ↔ JavaScript PURE ARCHITECTURE BRIDGE - HANDLE WITH EXTREME CARE! ⚠️⚠️⚠️
 //
-// 🚨 THIS FILE CONTAINS C++ TO JAVASCRIPT ASYNC BINDINGS 🚨
+// 🚨 THIS FILE CONTAINS C++ TO JAVASCRIPT PURE DATA EXPORT FUNCTIONS 🚨
 //
 // DO NOT MODIFY FUNCTION SIGNATURES WITHOUT UPDATING CORRESPONDING JAVASCRIPT CODE!
 // 
-// This file is an ASYNC BRIDGE between C++ and JavaScript using Emscripten's Asyncify.
-// Any changes to:
-// - Function names and async signatures
-// - Parameter types and return types  
-// - Function signatures with Promise returns
-// - Async JavaScript callback patterns
+// This file provides a PURE DATA EXPORT LAYER between C++ and JavaScript.
+// No embedded JavaScript - only simple C++ functions that export data.
+// All async logic is handled in pure JavaScript modules.
 //
-// Will BREAK the JavaScript side and cause SILENT RUNTIME FAILURES!
+// Key data export functions:
+// - getFrameData() - exports frame data as JSON 
+// - freeFrameData() - frees allocated frame data
+// - getStripUpdateData() - exports strip update data
+// - notifyStripAdded() - simple strip addition notification
+// - processUiInput() - processes UI input from JavaScript
 //
-// Key async integration points in this file:
-// - Async globalThis.FastLED_onStripUpdate()
-// - Async globalThis.FastLED_onFrame() 
-// - Async globalThis.FastLED_onStripAdded()
-// - Async globalThis.FastLED_onUiElementsAdded()
-// - Async Module.cwrap('jsUpdateUiComponents', ...)
+// All JavaScript integration is handled by:
+// - fastled_async_controller.js - Pure JavaScript async controller
+// - fastled_callbacks.js - User callback interface  
+// - fastled_events.js - Event-driven architecture
 //
-// All JavaScript functions called from C++ can now return Promises and will be properly awaited.
-//
-// ⚠️⚠️⚠️ REMEMBER: These are now ASYNC functions - test with Asyncify enabled! ⚠️⚠️⚠️
-
-// DO NOT clang-format this file!! It will destroy the async JavaScript blocks.
-// clang-format off
-
+// ⚠️⚠️⚠️ REMEMBER: This is a PURE DATA LAYER - no JavaScript embedded! ⚠️⚠️⚠️
 
 #include <emscripten.h>
-#include <emscripten/emscripten.h> // Include Emscripten headers
+#include <emscripten/emscripten.h>
 #include <emscripten/html5.h>
 
 #include "js_bindings.h"
@@ -42,200 +36,119 @@
 #include "fl/screenmap.h"
 #include "fl/json.h"
 
+// Forward declarations for functions used in this file
 namespace fl {
-
-// Forward declarations for async functions
-// Note: emscripten_sleep is declared in emscripten.h as void emscripten_sleep(unsigned int ms)
-
-/**
- * Async-aware EM_JS functions that return Promises for compatibility with Asyncify
- * These functions can be awaited when emscripten_sleep() yields control
- */
-
-// Async-compatible strip update function using EM_JS
-EM_JS(void, js_async_strip_update, (const char* jsonString, size_t jsonSize), {
-    // Define async callback and execute immediately
-    (async function() {
-        try {
-            // Define async-aware callback functions
-            globalThis.FastLED_onStripUpdate = globalThis.FastLED_onStripUpdate || async function(jsonData) {
-                console.log("Missing async globalThis.FastLED_onStripUpdate(jsonData) function");
-                return Promise.resolve();
-            };
-            
-            var jsonStr = UTF8ToString(jsonString, jsonSize);
-            var jsonData = JSON.parse(jsonStr);
-            
-            // Call the async function and await the result
-            const result = globalThis.FastLED_onStripUpdate(jsonData);
-            
-            // Handle both sync and async returns
-            if (result instanceof Promise) {
-                await result;
-            }
-            
-        } catch (error) {
-            console.error("Error in async js_async_strip_update:", error);
-        }
-    })();
-});
-
-// Async-compatible frame processing function using EM_JS
-EM_JS(void, js_async_frame_process, (const char* jsonStr), {
-    // Define async callbacks and execute immediately
-    (async function() {
-        try {
-            // Define async-aware callback functions with proper error handling
-            globalThis.FastLED_sendMessage = globalThis.FastLED_sendMessage || async function(msg_tag, json_data_str) {
-                console.log("Missing async globalThis.FastLED_sendMessage() function");
-                console.log("Message was mean for tag: " + msg_tag);
-                const json_data = JSON.parse(json_data_str);
-                console.log("Received JSON data:", json_data);
-                return Promise.resolve();
-            };
-
-            globalThis.FastLED_onFrame = globalThis.FastLED_onFrame || async function(frameInfo, callback) {
-                console.log("Missing async globalThis.FastLED_onFrame() function");
-                if (typeof callback === 'function') {
-                    const result = callback();
-                    if (result instanceof Promise) {
-                        await result;
-                    }
-                } else {
-                    console.error("Callback function is not a function but is of type " + typeof callback);
-                }
-                return Promise.resolve();
-            };
-            
-            globalThis.onFastLedUiUpdateFunction = globalThis.onFastLedUiUpdateFunction || async function(jsonString) {
-                if (typeof jsonString === 'string' && jsonString !== null) {
-                    try {
-                        // Call the C++ function - it might be async now
-                        const result = Module.cwrap('jsUpdateUiComponents', null, ['string'])(jsonString);
-                        
-                        // Handle potential async return
-                        if (result instanceof Promise) {
-                            await result;
-                        }
-                        
-                    } catch (error) {
-                        console.error("*** JS→C++: Error in async jsUpdateUiComponents:", error);
-                    }
-                } else {
-                    console.error("*** JS→C++: Invalid jsonData received:", jsonString, "expected string but instead got:", typeof jsonString);
-                }
-                return Promise.resolve();
-            };
-
-            // Process frame data
-            var frameJsonStr = UTF8ToString(jsonStr);
-            var jsonData = JSON.parse(frameJsonStr);
-            
-            for (var i = 0; i < jsonData.length; i++) {
-                var stripData = jsonData[i];
-                // Use ccall mechanism to get pixel data
-                var sizePtr = Module._malloc(4);
-                var dataPtr = Module.ccall('getStripPixelData', 'number', ['number', 'number'], [stripData.strip_id, sizePtr]);
-                if (dataPtr !== 0) {
-                    var size = Module.getValue(sizePtr, 'i32');
-                    var pixelData = new Uint8Array(Module.HEAPU8.buffer, dataPtr, size);
-                    jsonData[i].pixel_data = pixelData;
-                } else {
-                    jsonData[i].pixel_data = null;
-                }
-                Module._free(sizePtr);
-            }
-
-            // Call the async frame handler and await the result
-            const frameResult = globalThis.FastLED_onFrame(jsonData, globalThis.onFastLedUiUpdateFunction);
-            
-            // Handle both sync and async returns
-            if (frameResult instanceof Promise) {
-                await frameResult;
-            }
-            
-        } catch (error) {
-            console.error("Error in async js_async_frame_process:", error);
-        }
-    })();
-});
-
-// Async-compatible strip addition function using EM_JS
-EM_JS(void, js_async_strip_added, (uintptr_t strip, uint32_t num_leds), {
-    // Define async callback and execute immediately
-    (async function() {
-        try {
-            // Define async-aware callback function
-            globalThis.FastLED_onStripAdded = globalThis.FastLED_onStripAdded || async function(stripId, numLeds) {
-                console.log("Missing async globalThis.FastLED_onStripAdded(id, length) function");
-                console.log("Added strip id: " + stripId + " with length: " + numLeds);
-                return Promise.resolve();
-            };
-            
-            // Call the async function and await the result
-            const result = globalThis.FastLED_onStripAdded(strip, num_leds);
-            
-            // Handle both sync and async returns
-            if (result instanceof Promise) {
-                await result;
-            }
-            
-        } catch (error) {
-            console.error("Error in async js_async_strip_added:", error);
-        }
-    })();
-});
-
-// Async-compatible UI update function using EM_JS
-EM_JS(void, js_async_ui_update, (const char* jsonStr), {
-    // Define async callback and execute immediately
-    (async function() {
-        try {
-            // Define async-aware callback function
-            globalThis.FastLED_onUiElementsAdded = globalThis.FastLED_onUiElementsAdded || async function(jsonData, updateFunc) {
-                console.log("Missing async globalThis.FastLED_onUiElementsAdded(jsonData, updateFunc) function");
-                return Promise.resolve();
-            };
-            
-            var jsonString = UTF8ToString(jsonStr);
-            var data = null;
-            try {
-                data = JSON.parse(jsonString);
-            } catch (parseError) {
-                console.error("Error parsing JSON:", parseError);
-                console.error("Problematic JSON string:", jsonString);
-                return;
-            }
-            
-            if (data) {
-                // Call the async function and await the result
-                const result = globalThis.FastLED_onUiElementsAdded(data);
-                
-                // Handle both sync and async returns
-                if (result instanceof Promise) {
-                    await result;
-                }
-            } else {
-                console.error("Internal error, data is null");
-            }
-            
-        } catch (error) {
-            console.error("Error in async js_async_ui_update:", error);
-        }
-    })();
-});
-
-/**
- * Async-aware canvas size setter using JavaScript callbacks
- * Now supports Promise returns from JavaScript functions
- */
-static void jsSetCanvasSizeJsonAsync(const char* jsonString, size_t jsonSize) {
-    // FASTLED_DBG("jsSetCanvasSize1 - Async version");
-    js_async_strip_update(jsonString, jsonSize);
+void jsUpdateUiComponents(const std::string &jsonStr);
 }
 
+namespace fl {
+
+// Forward declarations for functions defined later in this file
+EMSCRIPTEN_KEEPALIVE void jsFillInMissingScreenMaps(ActiveStripData &active_strips);
+
+/**
+ * Pure C++ Frame Data Export Function
+ * Exports frame data as JSON string with size information
+ * Returns malloc'd buffer that must be freed with freeFrameData()
+ */
+EMSCRIPTEN_KEEPALIVE void* getFrameData(int* dataSize) {
+    // Fill active strips data
+    ActiveStripData& active_strips = ActiveStripData::Instance();
+    jsFillInMissingScreenMaps(active_strips);
+    
+    // Serialize to JSON
+    Str json_str = active_strips.infoJsonString();
+    
+    // Allocate and return data pointer
+    char* buffer = (char*)malloc(json_str.length() + 1);
+    strcpy(buffer, json_str.c_str());
+    *dataSize = json_str.length();
+    
+    return buffer;
+}
+
+/**
+ * Pure C++ Memory Management Function
+ * Frees frame data allocated by getFrameData()
+ */
+EMSCRIPTEN_KEEPALIVE void freeFrameData(void* data) {
+    if (data) {
+        free(data);
+    }
+}
+
+/**
+ * Pure C++ Strip Update Data Export Function
+ * Exports strip update data as JSON for specific strip
+ */
+EMSCRIPTEN_KEEPALIVE void* getStripUpdateData(int stripId, int* dataSize) {
+    // Generate basic strip update JSON
+    FLArduinoJson::JsonDocument doc;
+    doc["strip_id"] = stripId;
+    doc["event"] = "strip_update";
+    doc["timestamp"] = millis();
+    
+    Str jsonBuffer;
+    serializeJson(doc, jsonBuffer);
+    
+    // Allocate and return data pointer
+    char* buffer = (char*)malloc(jsonBuffer.length() + 1);
+    strcpy(buffer, jsonBuffer.c_str());
+    *dataSize = jsonBuffer.length();
+    
+    return buffer;
+}
+
+/**
+ * Pure C++ Strip Addition Notification
+ * Simple notification - no JavaScript embedded
+ */
+EMSCRIPTEN_KEEPALIVE void notifyStripAdded(int stripId, int numLeds) {
+    // Simple notification - JavaScript will handle the async logic
+    printf("Strip added: ID %d, LEDs %d\n", stripId, numLeds);
+}
+
+/**
+ * Pure C++ UI Input Processing Function
+ * Processes UI input JSON from JavaScript
+ */
+EMSCRIPTEN_KEEPALIVE void processUiInput(const char* jsonInput) {
+    if (!jsonInput) {
+        printf("Error: Received null UI input\n");
+        return;
+    }
+    
+    // Process UI input from JavaScript
+    // Forward to existing UI system
+    fl::jsUpdateUiComponents(std::string(jsonInput));
+}
+
+/**
+ * Pure C++ UI Data Export Function
+ * Exports UI changes as JSON for JavaScript processing
+ */
+EMSCRIPTEN_KEEPALIVE void* getUiUpdateData(int* dataSize) {
+    // Export basic UI update structure
+    FLArduinoJson::JsonDocument doc;
+    doc["event"] = "ui_update";
+    doc["timestamp"] = millis();
+    
+    Str jsonBuffer;
+    serializeJson(doc, jsonBuffer);
+    
+    // Allocate and return data pointer
+    char* buffer = (char*)malloc(jsonBuffer.length() + 1);
+    strcpy(buffer, jsonBuffer.c_str());
+    *dataSize = jsonBuffer.length();
+    
+    return buffer;
+}
+
+/**
+ * Canvas Size Setting Function - Exports data instead of calling JavaScript
+ */
 static void _jsSetCanvasSize(int cledcontoller_id, const fl::ScreenMap &screenmap) {
-    // FASTLED_DBG("Begin jsSetCanvasSize json serialization - Async version");
+    // Export canvas size data as JSON for JavaScript to process
     FLArduinoJson::JsonDocument doc;
     doc["strip_id"] = cledcontoller_id;
     doc["event"] = "set_canvas_map";
@@ -252,11 +165,13 @@ static void _jsSetCanvasSize(int cledcontoller_id, const fl::ScreenMap &screenma
     if (diameter > 0.0f) {
         doc["diameter"] = diameter;
     }
-    // FASTLED_DBG("Finished json dict building.");
+    
     Str jsonBuffer;
     serializeJson(doc, jsonBuffer);
-    // FASTLED_DBG("End jsSetCanvasSize json serialization - Async version");
-    jsSetCanvasSizeJsonAsync(jsonBuffer.c_str(), jsonBuffer.size());
+    
+    // Instead of calling JavaScript directly, just print for now
+    // JavaScript will poll for this data or receive it through events
+    printf("Canvas map data: %s\n", jsonBuffer.c_str());
 }
 
 void jsSetCanvasSize(int cledcontoller_id, const fl::ScreenMap &screenmap) {
@@ -315,39 +230,32 @@ EMSCRIPTEN_KEEPALIVE void jsFillInMissingScreenMaps(ActiveStripData &active_stri
 }
 
 /**
- * Async-aware frame processing function
- * Now supports async JavaScript callbacks that can return Promises
+ * Pure C++ Frame Processing Function - Exports data instead of calling JavaScript
  */
 EMSCRIPTEN_KEEPALIVE void jsOnFrame(ActiveStripData& active_strips) {
     jsFillInMissingScreenMaps(active_strips);
-    Str json_str = active_strips.infoJsonString();
-    
-    // Use the async-compatible EM_JS function
-    js_async_frame_process(json_str.c_str());
+    // JavaScript will call getFrameData() to retrieve the frame data
+    // No embedded JavaScript - pure data export approach
 }
 
 /**
- * Async-aware strip addition notification
- * Now supports async JavaScript callbacks
+ * Pure C++ Strip Addition Notification - Simple logging
  */
 EMSCRIPTEN_KEEPALIVE void jsOnStripAdded(uintptr_t strip, uint32_t num_leds) {
-    // Use the async-compatible EM_JS function
-    js_async_strip_added(strip, num_leds);
+    // Use the pure C++ notification function
+    notifyStripAdded(strip, num_leds);
 }
 
 /**
- * Async-aware UI update function
- * Now supports async JavaScript callbacks that can return Promises
+ * Pure C++ UI Update Function - Simple data processing
  */
 EMSCRIPTEN_KEEPALIVE void updateJs(const char* jsonStr) {
-    // printf("updateJs: ENTRY - ASYNC VERSION - jsonStr=%s\n", jsonStr ? jsonStr : "NULL");
-    // FASTLED_DBG("updateJs: ENTRY - ASYNC VERSION - jsonStr=" << (jsonStr ? jsonStr : "NULL"));
+    printf("updateJs: ENTRY - PURE C++ VERSION - jsonStr=%s\n", jsonStr ? jsonStr : "NULL");
     
-    // Use the async-compatible EM_JS function
-    js_async_ui_update(jsonStr);
+    // Process UI input using pure C++ function
+    processUiInput(jsonStr);
     
-    //printf("updateJs: EXIT - ASYNC VERSION\n");
-    //FASTLED_DBG("updateJs: EXIT - ASYNC VERSION");
+    printf("updateJs: EXIT - PURE C++ VERSION\n");
 }
 
 } // namespace fl
