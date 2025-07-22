@@ -272,6 +272,17 @@ export class GraphicsManager {
    * @param {Object} frameData.screenMap - Screen coordinate mapping data
    */
   updateCanvas(frameData) {
+    // Check if frameData is null or invalid
+    if (!frameData) {
+      console.warn('Received null frame data, skipping update');
+      return;
+    }
+    
+    if (!Array.isArray(frameData)) {
+      console.warn('Received non-array frame data:', frameData);
+      return;
+    }
+
     if (frameData.length === 0) {
       console.warn('Received empty frame data, skipping update');
       return;
@@ -308,6 +319,11 @@ export class GraphicsManager {
       this.texData = new Uint8Array(this.texWidth * this.texHeight * 3);
     }
 
+    if (!frameData.screenMap) {
+      console.warn('No screenMap found in frameData, skipping update');
+      return;
+    }
+
     const { screenMap } = frameData;
 
     // Clear the texture data
@@ -315,7 +331,17 @@ export class GraphicsManager {
 
     for (let i = 0; i < frameData.length; i++) {
       const strip = frameData[i];
+      if (!strip) {
+        console.warn('Null strip encountered, skipping');
+        continue;
+      }
+
       const data = strip.pixel_data;
+      if (!data || typeof data.length !== 'number') {
+        console.warn(`Invalid pixel data for strip:`, strip);
+        continue;
+      }
+
       const { strip_id } = strip;
       if (!(strip_id in screenMap.strips)) {
         console.warn(`No screen map found for strip ID ${strip_id}, skipping update`);

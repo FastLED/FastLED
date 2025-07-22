@@ -228,8 +228,8 @@ flags = [
     "-sEXPORTED_RUNTIME_METHODS=['ccall','cwrap','stringToUTF8','UTF8ToString','lengthBytesUTF8','HEAPU8','getValue']",
     
          # JavaScript Interop - C Functions
-     # Note: _extern_setup and _extern_loop are now compatibility functions; main() is the primary entry point
-     "-sEXPORTED_FUNCTIONS=['_malloc','_free','_extern_setup','_extern_loop','_fastled_declare_files','_getStripPixelData','_getFrameData','_getScreenMapData','_freeFrameData','_getFrameVersion','_hasNewFrameData']",
+     # Note: _extern_setup and _extern_loop are now compatibility functions; _main is the primary entry point
+     "-sEXPORTED_FUNCTIONS=['_malloc','_free','_main','_extern_setup','_extern_loop','_fastled_declare_files','_getStripPixelData','_getFrameData','_getScreenMapData','_freeFrameData','_getFrameVersion','_hasNewFrameData']",
     
     # Runtime Behavior
     "-sEXIT_RUNTIME=0",                      # Keep runtime alive after main() exits
@@ -242,12 +242,12 @@ flags = [
     # Networking Support (emulated POSIX TCP over WebSockets)
     "-lwebsocket.js",                        # Link WebSocket.js library for socket emulation
     "-sPROXY_POSIX_SOCKETS=1",              # Enable POSIX socket proxying over WebSockets
-    "-sPROXY_TO_PTHREAD",                   # Required: move main() off browser main thread to avoid socket proxy deadlock
+    "-sPROXY_TO_PTHREAD",                   # Required: move main() off browser main thread for socket proxy
     
     # Asyncify Support (enables async/await style coding with delay() functions)
     "-sASYNCIFY=1",                         # Enable Asyncify for async function support
     "-sASYNCIFY_STACK_SIZE=10485760",       # 10MB stack for asyncify operations (large for complex sketches)
-    "-sASYNCIFY_EXPORTS=['_extern_setup','_extern_loop']", # Allow main FastLED functions to be async
+    "-sASYNCIFY_EXPORTS=['_main','_extern_setup','_extern_loop']", # Allow main and extern FastLED functions to be async
 ]
 
 [linking.library]

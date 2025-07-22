@@ -117,22 +117,14 @@ void fastled_loop_once() {
 int main() {
     printf("FastLED WASM: Starting main() entry point...\n");
     
-    // Perform one-time setup
+    // Perform one-time setup only
     fl::fastled_setup_once();
     
-    printf("FastLED WASM: Entering main loop...\n");
+    printf("FastLED WASM: Setup complete, main() returning to JavaScript...\n");
     
-    // Main execution loop - runs indefinitely
-    while (true) {
-        fl::fastled_loop_once();
-        
-        // Yield control back to browser event loop
-        // This prevents blocking the browser and allows other events to process
-        emscripten_sleep(0);
-    }
-    
-    // This should never be reached in a typical WASM environment
-    printf("FastLED WASM: Main loop exited (unexpected).\n");
+    // Return control to JavaScript immediately after setup
+    // JavaScript will control the FastLED loop via extern_loop() calls
+    // Note: With PROXY_TO_PTHREAD, the main thread may continue running for socket proxy
     return 0;
 }
 

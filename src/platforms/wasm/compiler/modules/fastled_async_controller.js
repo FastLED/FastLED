@@ -119,6 +119,7 @@ class FastLEDAsyncController {
         
         // Verify all functions are available
         const functionStatus = {
+            mainFunction: typeof this.mainFunction,
             getFrameData: typeof this.getFrameData,
             freeFrameData: typeof this.freeFrameData,
             getStripPixelData: typeof this.getStripPixelData,
@@ -170,7 +171,9 @@ class FastLEDAsyncController {
         try {
             FASTLED_DEBUG_LOG('ASYNC_CONTROLLER', 'Setting up FastLED Async Controller...');
             
-            // Bind external functions using cwrap for better error handling
+            // Bind main function using cwrap - WITH async flag because main() uses Asyncify
+            this.mainFunction = this.module.cwrap('main', 'number', [], {async: true});
+            // Keep extern functions for compatibility testing
             this.externSetup = this.module.cwrap('extern_setup', 'number', [], {async: true});
             this.externLoop = this.module.cwrap('extern_loop', 'number', [], {async: true});
             this.getFrameData = this.module.cwrap('getFrameData', 'number', ['number']);
@@ -181,14 +184,19 @@ class FastLEDAsyncController {
             FASTLED_DEBUG_LOG('ASYNC_CONTROLLER', 'WASM functions bound successfully');
 
             // Test function availability
-            if (!this.externSetup || !this.externLoop) {
-                throw new Error('Required WASM functions not available');
+            if (!this.mainFunction) {
+                throw new Error('main() function not available - check WASM exports');
             }
 
-            // Call extern_setup to initialize FastLED
-            FASTLED_DEBUG_LOG('ASYNC_CONTROLLER', 'Calling extern_setup...');
-            const result = await this.safeCall('extern_setup', this.externSetup);
-            FASTLED_DEBUG_LOG('ASYNC_CONTROLLER', 'extern_setup completed with result:', result);
+            // Call main() once to initialize FastLED (it will return after setup)
+            console.log('🚀 USING HYBRID APPROACH: main() for setup, extern_loop() for pumping');
+            FASTLED_DEBUG_LOG('ASYNC_CONTROLLER', 'Calling main() for one-time initialization...');
+            console.log('📞 Calling main() function for one-time initialization (returns after setup)');
+            
+            // Call main() once for setup - it will return after initialization
+            await this.mainFunction();
+            console.log('✅ main() completed - FastLED initialized, ready for loop pumping');
+            FASTLED_DEBUG_LOG('ASYNC_CONTROLLER', 'main() completed successfully - ready for extern_loop() pumping');
 
             // Mark setup as completed
             this.setupCompleted = true;
@@ -273,24 +281,18 @@ class FastLEDAsyncController {
             });
         }
         
-        try {
-            // Step 1: Execute C++ loop (may call delay/emscripten_sleep)
+                try {
+            // Call extern_loop() to run one iteration of the FastLED loop
+            // This actively pumps the FastLED loop instead of relying on background main()
             if (shouldLog) {
-                FASTLED_DEBUG_LOG('ASYNC_CONTROLLER', 'Calling extern_loop...');
+                console.log('🔄 Calling extern_loop() to pump FastLED loop');
+                FASTLED_DEBUG_LOG('ASYNC_CONTROLLER', 'Calling extern_loop() to pump FastLED loop...');
             }
+
+            // Step 1: Call extern_loop() to run one FastLED loop iteration
+            await this.externLoop();
             
-            if (!this.externLoop) {
-                FASTLED_DEBUG_ERROR('ASYNC_CONTROLLER', 'externLoop function is not available', null);
-                throw new Error('externLoop function is not bound');
-            }
-            
-            await this.safeCall('extern_loop', this.externLoop);
-            
-            if (shouldLog) {
-                FASTLED_DEBUG_LOG('ASYNC_CONTROLLER', 'extern_loop completed, processing frame data...');
-            }
-            
-            // Step 2: Process frame data
+            // Step 2: Process the resulting frame data
             await this.processFrame();
             
             this.frameCount++;

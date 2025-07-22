@@ -645,6 +645,17 @@ export class GraphicsManagerThreeJS {
    * @param {Object} frameData - The frame data containing LED colors and positions
    */
   updateCanvas(frameData) {
+    // Check if frameData is null or invalid
+    if (!frameData) {
+      console.warn('Received null frame data, skipping update');
+      return;
+    }
+    
+    if (!Array.isArray(frameData)) {
+      console.warn('Received non-array frame data:', frameData);
+      return;
+    }
+
     if (frameData.length === 0) {
       // New experiment try to run anyway
       console.warn('Received empty frame data, skipping update');
@@ -658,7 +669,11 @@ export class GraphicsManagerThreeJS {
     const positionMap = this._collectLedColorData(frameData);
 
     // Update LED visuals
-    this._updateLedVisuals(positionMap, frameData.screenMap);
+    if (frameData.screenMap) {
+      this._updateLedVisuals(positionMap, frameData.screenMap);
+    } else {
+      console.warn('No screenMap available for LED visual updates');
+    }
 
     // Render the scene
     this.composer.render();
@@ -669,8 +684,21 @@ export class GraphicsManagerThreeJS {
    * @private
    */
   _checkAndInitializeScene(frameData) {
+    // Check if frameData is valid array
+    if (!frameData || !Array.isArray(frameData)) {
+      console.warn('Invalid frame data in _checkAndInitializeScene:', frameData);
+      return;
+    }
+
     const totalPixels = frameData.reduce(
-      (acc, strip) => acc + strip.pixel_data.length / 3,
+      (acc, strip) => {
+        // Check if strip and pixel_data exist and pixel_data has length property
+        if (!strip || !strip.pixel_data || typeof strip.pixel_data.length !== 'number') {
+          console.warn('Invalid strip data:', strip);
+          return acc;
+        }
+        return acc + strip.pixel_data.length / 3;
+      },
       0,
     );
 
@@ -690,24 +718,50 @@ export class GraphicsManagerThreeJS {
    * @returns {Map} - Map of LED positions to color data
    */
   _collectLedColorData(frameData) {
+    // Check if frameData has screenMap property
+    if (!frameData.screenMap) {
+      console.warn('No screenMap found in frameData:', frameData);
+      return new Map();
+    }
+
     const { screenMap } = frameData;
     const positionMap = new Map();
     const WARNING_COUNT = 10;
 
     // Process each strip
     frameData.forEach((strip) => {
+      if (!strip) {
+        console.warn('Null strip encountered, skipping');
+        return;
+      }
+
       const { strip_id } = strip;
-      if (!(strip_id in screenMap.strips)) {
+      if (!screenMap.strips || !(strip_id in screenMap.strips)) {
         console.warn(`No screen map found for strip ID ${strip_id}, skipping update`);
-        // return;
+        return;
       }
 
       const stripData = screenMap.strips[strip_id];
+      if (!stripData || !stripData.map) {
+        console.warn(`Invalid strip data for strip ID ${strip_id}:`, stripData);
+        return;
+      }
+
       const { map } = stripData;
       const data = strip.pixel_data;
+      if (!data || typeof data.length !== 'number') {
+        console.warn(`Invalid pixel data for strip ID ${strip_id}:`, data);
+        return;
+      }
+
       const pixelCount = data.length / 3;
       const x_array = stripData.map.x;
       const y_array = stripData.map.y;
+      if (!x_array || !y_array || typeof x_array.length !== 'number' || typeof y_array.length !== 'number') {
+        console.warn(`Invalid coordinate arrays for strip ID ${strip_id}:`, { x_array, y_array });
+        return;
+      }
+
       const length = Math.min(x_array.length, y_array.length);
 
       // Process each pixel in the strip
