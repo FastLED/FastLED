@@ -1,0 +1,155 @@
+# FastLED WASM Compilation Flags Configuration
+# This file centralizes all compilation flags used by both sketch compilation and libfastled compilation
+# to ensure they remain synchronized and compatible.
+
+[all]
+# Common compilation flags shared by both sketch and library compilation
+defines = [
+    "-DFASTLED_ENGINE_EVENTS_MAX_LISTENERS=50",
+    "-DFASTLED_FORCE_NAMESPACE=1", 
+    "-DFASTLED_USE_PROGMEM=0",
+    "-DUSE_OFFSET_CONVERTER=0",
+    "-DGL_ENABLE_GET_PROC_ADDRESS=0",
+    # Threading enabled for socket emulation
+    "-D_REENTRANT=1",
+    # Emscripten type name handling
+    "-DEMSCRIPTEN_HAS_UNBOUND_TYPE_NAMES=0",
+    # Networking support enabled
+    "-DFASTLED_HAS_NETWORKING=1",
+]
+
+compiler_flags = [
+    "-std=gnu++17",
+    "-fpermissive",
+    "-Wno-constant-logical-operand",
+    "-Wnon-c-typedef-for-linkage", 
+    "-Werror=bad-function-cast",
+    "-Werror=cast-function-type",
+    "-fno-threadsafe-statics",  # Disable thread-safe static initialization
+    "-fno-exceptions",  # Disable C++ exceptions for all targets
+    "-fno-rtti",  # Disable RTTI for all targets (consistent with library build)
+    "-pthread",  # Enable pthreads for socket emulation
+]
+
+include_flags = [
+    "-I.",
+    "-Isrc",
+    # FastLED source includes will be added dynamically based on installation path
+]
+
+[sketch]
+# Additional flags specific to sketch compilation only
+defines = [
+    "-DSKETCH_COMPILE=1",
+    "-DFASTLED_WASM_USE_CCALL",
+]
+
+compiler_flags = [
+    # Additional sketch-specific compiler flags (if any)
+]
+
+[library] 
+# Additional flags specific to libfastled compilation only
+defines = [
+    # Library-specific defines (if any)
+]
+
+compiler_flags = [
+    "-emit-llvm",  # Generate LLVM bitcode for library compilation
+    "-Wall",
+]
+
+[build_modes.debug]
+# Debug build mode flags
+flags = [
+    "-g3",
+    "-gsource-map",
+    "-ffile-prefix-map=/=sketchsource/",
+    "-fsanitize=address", 
+    "-fsanitize=undefined",
+    "-fno-inline",
+    "-O0",
+]
+
+# Debug-specific linking flags (applied only during linking in debug mode)
+link_flags = [
+    "-fsanitize=address",
+    "-fsanitize=undefined", 
+    "-sSEPARATE_DWARF_URL=fastled.wasm.dwarf",
+    "-sSTACK_OVERFLOW_CHECK=2",
+    "-sASSERTIONS=1",
+]
+
+[build_modes.quick]
+# Quick build mode flags  
+flags = [
+    "-flto=thin",
+    "-O0",
+    "-g0",
+    "-fno-inline-functions",
+    "-fno-vectorize", 
+    "-fno-unroll-loops",
+    "-fno-strict-aliasing",
+]
+
+[build_modes.release]
+# Release build mode flags
+flags = [
+    "-Oz",
+]
+
+[linking.base]
+# Base linking flags shared by both sketch and library linking
+flags = [
+    # Linker will be set dynamically: -fuse-ld={linker}
+    "-sWASM=1",
+    # Threading enabled for socket emulation (but no proxy to pthread)
+    "-pthread",
+    "-sUSE_PTHREADS=1",
+]
+
+[linking.sketch]
+# Sketch-specific linking flags
+flags = [
+    "--no-entry",
+    "--emit-symbol-map", 
+    "-sMODULARIZE=1",
+    "-sEXPORT_NAME=fastled",
+    "-sALLOW_MEMORY_GROWTH=1",
+    "-sINITIAL_MEMORY=134217728",  # 128 MB
+    "-sAUTO_NATIVE_LIBRARIES=0",
+    "-sEXPORTED_RUNTIME_METHODS=['ccall','cwrap','stringToUTF8','UTF8ToString','lengthBytesUTF8','HEAPU8','getValue']",
+    "-sEXPORTED_FUNCTIONS=['_malloc','_free','_extern_setup','_extern_loop','_fastled_declare_files','_getStripPixelData','_getFrameData','_freeFrameData']",
+    "-sEXIT_RUNTIME=0",
+    "-sFILESYSTEM=0",
+    "-Wl,--gc-sections",
+    "--source-map-base=http://localhost:8000/",
+    # Socket emulation flags (emulated POSIX TCP over WebSockets)
+    "-lwebsocket.js",
+    "-sPROXY_POSIX_SOCKETS=1",
+    # Asyncify support for async/await style coding with delay() functions
+    "-sASYNCIFY=1",
+    "-sASYNCIFY_STACK_SIZE=10485760",  # 10MB stack for asyncify operations
+    "-sASYNCIFY_EXPORTS=['_extern_setup','_extern_loop']",  # Allow main FastLED functions to be async
+]
+
+[linking.library]
+# Library-specific linking flags (currently none, but kept for future use)
+flags = [
+]
+
+[strict_mode]
+# Additional warning flags enabled in strict mode
+flags = [
+    "-Werror",
+    "-Wextra", 
+    "-Wconversion",
+    "-Wsign-conversion",
+    "-Wunused",
+    "-Wuninitialized",
+    "-Wdouble-promotion",
+    "-Wformat=2",
+    "-Wcast-align",
+    "-Wcast-qual",
+    "-Werror=return-type",
+] 

@@ -73,6 +73,7 @@ class FastLEDAsyncController {
         try {
             // Frame data functions
             this.getFrameData = this.module.cwrap('getFrameData', 'number', ['number']);
+            this.getScreenMapData = this.module.cwrap('getScreenMapData', 'number', ['number']);
             this.freeFrameData = this.module.cwrap('freeFrameData', null, ['number']);
             FASTLED_DEBUG_LOG('ASYNC_CONTROLLER', 'Frame data functions bound successfully');
         } catch (error) {
@@ -162,41 +163,40 @@ class FastLEDAsyncController {
     }
 
     /**
-     * Initializes the FastLED program by calling the async-aware setup function
+     * Setup function for initializing WASM module bindings
      * @returns {Promise<void>} Promise that resolves when setup is complete
      */
     async setup() {
-        FASTLED_DEBUG_TRACE('ASYNC_CONTROLLER', 'setup', 'ENTER');
-        
-        if (this.setupCompleted) {
-            console.warn('FastLED setup already completed, skipping');
-            FASTLED_DEBUG_LOG('ASYNC_CONTROLLER', 'Setup already completed, skipping');
-            return;
-        }
-
-        console.log('Setting up FastLED with pure JavaScript async controller...');
-        FASTLED_DEBUG_LOG('ASYNC_CONTROLLER', 'Setting up FastLED with pure JavaScript async controller...');
-        
-        // Verify externSetup function is available
-        if (!this.externSetup) {
-            FASTLED_DEBUG_ERROR('ASYNC_CONTROLLER', 'externSetup function is not available', null);
-            throw new Error('externSetup function is not bound');
-        }
-        
-        FASTLED_DEBUG_LOG('ASYNC_CONTROLLER', 'externSetup function verified, calling safeCall...');
-        
         try {
+            FASTLED_DEBUG_LOG('ASYNC_CONTROLLER', 'Setting up FastLED Async Controller...');
+            
+            // Bind external functions using cwrap for better error handling
+            this.externSetup = this.module.cwrap('extern_setup', 'number', [], {async: true});
+            this.externLoop = this.module.cwrap('extern_loop', 'number', [], {async: true});
+            this.getFrameData = this.module.cwrap('getFrameData', 'number', ['number']);
+            this.getScreenMapData = this.module.cwrap('getScreenMapData', 'number', ['number']);
+            this.getStripPixelData = this.module.cwrap('getStripPixelData', 'number', ['number', 'number']);
+            this.freeFrameData = this.module.cwrap('freeFrameData', 'null', ['number']);
+
+            FASTLED_DEBUG_LOG('ASYNC_CONTROLLER', 'WASM functions bound successfully');
+
+            // Test function availability
+            if (!this.externSetup || !this.externLoop) {
+                throw new Error('Required WASM functions not available');
+            }
+
+            // Call extern_setup to initialize FastLED
             FASTLED_DEBUG_LOG('ASYNC_CONTROLLER', 'Calling extern_setup...');
             const result = await this.safeCall('extern_setup', this.externSetup);
             FASTLED_DEBUG_LOG('ASYNC_CONTROLLER', 'extern_setup completed with result:', result);
-            
+
+            // Mark setup as completed
             this.setupCompleted = true;
-            console.log('FastLED setup completed successfully');
-            FASTLED_DEBUG_LOG('ASYNC_CONTROLLER', 'FastLED setup completed successfully');
-            FASTLED_DEBUG_TRACE('ASYNC_CONTROLLER', 'setup', 'EXIT');
+
+            FASTLED_DEBUG_LOG('ASYNC_CONTROLLER', 'Setup completed successfully');
+            
         } catch (error) {
-            console.error('FastLED setup failed:', error);
-            FASTLED_DEBUG_ERROR('ASYNC_CONTROLLER', 'FastLED setup failed', error);
+            FASTLED_DEBUG_ERROR('ASYNC_CONTROLLER', 'Setup failed', error);
             throw error;
         }
     }
@@ -329,11 +329,34 @@ class FastLEDAsyncController {
         const frameDataPtr = this.getFrameData(dataSize);
         const size = this.module.getValue(dataSize, 'i32');
         
+        let frameData = []; // Initialize as empty array in case of no data
+        
         if (frameDataPtr !== 0) {
             try {
                 // Step 2: Process frame data
                 const jsonStr = this.module.UTF8ToString(frameDataPtr, size);
-                const frameData = JSON.parse(jsonStr);
+                frameData = JSON.parse(jsonStr);
+                
+                // Step 2.5: Get and attach screenMap data
+                const screenMapSize = this.module._malloc(4);
+                const screenMapPtr = this.getScreenMapData(screenMapSize);
+                const screenMapSizeValue = this.module.getValue(screenMapSize, 'i32');
+                
+                if (screenMapPtr !== 0) {
+                    try {
+                        const screenMapJsonStr = this.module.UTF8ToString(screenMapPtr, screenMapSizeValue);
+                        const screenMapData = JSON.parse(screenMapJsonStr);
+                        
+                        // Attach screenMap as property to the array (JavaScript arrays can have properties)
+                        frameData.screenMap = screenMapData;
+                        
+                    } catch (screenMapError) {
+                        console.warn('Failed to parse screenMap data:', screenMapError);
+                    } finally {
+                        this.freeFrameData(screenMapPtr);
+                        this.module._free(screenMapSize);
+                    }
+                }
                 
                 // Step 3: Add pixel data to frame
                 await this.addPixelDataToFrame(frameData);
@@ -350,6 +373,15 @@ class FastLEDAsyncController {
                 // Step 6: Clean up
                 this.freeFrameData(frameDataPtr);
             }
+        } else {
+            // No frame data available - still process what we can
+            console.warn('No frame data available from C++');
+            
+            // Try to render with empty data
+            await this.renderFrame(frameData);
+            
+            // Process UI updates
+            await this.processUiUpdates();
         }
         
         this.module._free(dataSize);
@@ -397,8 +429,9 @@ class FastLEDAsyncController {
         // Get UI updates from user function
         if (globalThis.FastLED_processUiUpdates) {
             const uiJson = await globalThis.FastLED_processUiUpdates();
-            if (uiJson && uiJson !== "[]") {
-                // Send to C++ using pure data exchange
+            if (uiJson && uiJson !== "[]" && uiJson !== "{}" && uiJson.trim() !== "") {
+                // Only send non-empty, meaningful UI updates to C++
+                // Skip empty arrays, empty objects, and blank strings
                 this.processUiInput(uiJson);
             }
         }

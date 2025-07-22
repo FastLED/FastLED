@@ -24,13 +24,6 @@ import { JsonUiManager } from './modules/ui_manager.js';
 import { GraphicsManager } from './modules/graphics_manager.js';
 import { GraphicsManagerThreeJS } from './modules/graphics_manager_threejs.js';
 import { isDenseGrid } from './modules/graphics_utils.js';
-import { JsonInspector } from './modules/json_inspector.js';
-
-// Import new pure JavaScript modules
-import { FastLEDAsyncController } from './modules/fastled_async_controller.js';
-import './modules/fastled_callbacks.js';
-import { fastLEDEvents, fastLEDPerformanceMonitor } from './modules/fastled_events.js';
-import { FASTLED_DEBUG_LOG, FASTLED_DEBUG_ERROR, FASTLED_DEBUG_TRACE } from './modules/fastled_debug_logger.js';
 
 /** URL parameters for runtime configuration */
 const urlParams = new URLSearchParams(window.location.search);
@@ -92,28 +85,6 @@ let containerId;
 
 /** Graphics configuration arguments */
 let graphicsArgs = {};
-
-/**
- * NOTE: AsyncFastLEDController has been moved to fastled_async_controller.js
- * This is now imported as a pure JavaScript module for better separation of concerns
- * and to eliminate embedded JavaScript in C++ code.
- * 
- * The new FastLEDAsyncController provides:
- * - Pure JavaScript async patterns with proper Asyncify integration
- * - Clean data export/import with C++ via Module.cwrap
- * - Event-driven architecture replacing callback chains
- * - Proper error handling and performance monitoring
- * - No embedded JavaScript - all async logic in JavaScript domain
- */
-
-// The AsyncFastLEDController is now imported from fastled_async_controller.js
-// Old implementation has been replaced with pure JavaScript architecture
-
-/**
- * Global reference to the current AsyncFastLEDController instance
- * @type {AsyncFastLEDController|null}
- */
-let fastLEDController = null;
 
 /**
  * Stub FastLED loader function (replaced during initialization)
@@ -376,187 +347,204 @@ function updateCanvas(frameData) {
 }
 
 /**
- * Main setup and loop execution function for FastLED programs (Pure JavaScript Architecture)
- * @async
- * @param {Object} moduleInstance - The WASM module instance
+ * Main setup and loop execution function for FastLED programs
+ * @param {Function} extern_setup - Setup function from the WASM module
+ * @param {Function} extern_loop - Loop function from the WASM module
  * @param {number} frame_rate - Target frame rate for the animation loop
- * @returns {Promise<void>} Promise that resolves when setup is complete and loop is started
  */
-async function FastLED_SetupAndLoop(moduleInstance, frame_rate) {
-  FASTLED_DEBUG_TRACE('INDEX_JS', 'FastLED_SetupAndLoop', 'ENTER', { frame_rate });
-  
-  try {
-    FASTLED_DEBUG_LOG('INDEX_JS', 'Initializing FastLED with Pure JavaScript Architecture...');
-    console.log('Initializing FastLED with Pure JavaScript Architecture...');
-    
-    // Check if moduleInstance is valid
-    FASTLED_DEBUG_LOG('INDEX_JS', 'Checking moduleInstance', {
-      hasModule: !!moduleInstance,
-      hasExternSetup: !!(moduleInstance && moduleInstance._extern_setup),
-      hasExternLoop: !!(moduleInstance && moduleInstance._extern_loop),
-      hasCwrap: !!(moduleInstance && moduleInstance.cwrap)
-    });
-    
-    if (!moduleInstance) {
-      throw new Error('moduleInstance is null or undefined');
+function FastLED_SetupAndLoop(extern_setup, extern_loop, frame_rate) {
+  extern_setup();
+  console.log('Starting loop...');
+  const frameInterval = 1000 / frame_rate;
+  let lastFrameTime = 0;
+
+  /**
+   * Animation loop function that maintains consistent frame rate
+   * @param {number} currentTime - Current timestamp from requestAnimationFrame
+   */
+  function runLoop(currentTime) {
+    if (currentTime - lastFrameTime >= frameInterval) {
+      extern_loop();
+      lastFrameTime = currentTime;
     }
-    
-    // Create the pure JavaScript async controller
-    FASTLED_DEBUG_LOG('INDEX_JS', 'Creating FastLEDAsyncController...');
-    fastLEDController = new FastLEDAsyncController(moduleInstance, frame_rate);
-    FASTLED_DEBUG_LOG('INDEX_JS', 'FastLEDAsyncController created successfully');
-    
-    // Expose controller globally for debugging and external control
-    window.fastLEDController = fastLEDController;
-    
-    // Expose event system globally
-    window.fastLEDEvents = fastLEDEvents;
-    window.fastLEDPerformanceMonitor = fastLEDPerformanceMonitor;
-    
-    FASTLED_DEBUG_LOG('INDEX_JS', 'Globals exposed, calling controller.setup()...');
-    
-    // Setup FastLED asynchronously
-    await fastLEDController.setup();
-    
-    FASTLED_DEBUG_LOG('INDEX_JS', 'Controller setup completed, starting animation loop...');
-    
-    // Start the async animation loop
-    fastLEDController.start();
-    
-    FASTLED_DEBUG_LOG('INDEX_JS', 'Animation loop started, setting up UI controls...');
-    
-    // Add UI controls for start/stop if elements exist
-    const startBtn = document.getElementById('start-btn');
-    const stopBtn = document.getElementById('stop-btn');
-    const toggleBtn = document.getElementById('toggle-btn');
-    const fpsDisplay = document.getElementById('fps-display');
-    
-    FASTLED_DEBUG_LOG('INDEX_JS', 'UI controls found', {
-      startBtn: !!startBtn,
-      stopBtn: !!stopBtn,
-      toggleBtn: !!toggleBtn,
-      fpsDisplay: !!fpsDisplay
-    });
-    
-    if (startBtn) {
-      startBtn.onclick = () => {
-        FASTLED_DEBUG_LOG('INDEX_JS', 'Start button clicked');
-        if (fastLEDController.setupCompleted) {
-          fastLEDController.start();
-        } else {
-          console.warn('FastLED setup not completed yet');
-          FASTLED_DEBUG_LOG('INDEX_JS', 'Start button clicked but setup not completed');
-        }
-      };
+    requestAnimationFrame(runLoop);
+  }
+  requestAnimationFrame(runLoop);
+}
+
+/**
+ * Handles strip update events from the FastLED library
+ * Processes screen mapping configuration and canvas setup
+ * @param {Object} jsonData - Strip update data from FastLED
+ * @param {string} jsonData.event - Event type (e.g., 'set_canvas_map')
+ * @param {number} jsonData.strip_id - ID of the LED strip
+ * @param {Object} jsonData.map - Coordinate mapping data
+ * @param {number} [jsonData.diameter] - LED diameter in mm (default: 0.2)
+ */
+function FastLED_onStripUpdate(jsonData) {
+  // Hooks into FastLED to receive updates from the FastLED library related
+  // to the strip state. This is where the ScreenMap will be effectively set.
+  // uses global variables.
+  console.log('Received strip update:', jsonData);
+  const { event } = jsonData;
+  let width = 0;
+  let height = 0;
+  let eventHandled = false;
+  if (event === 'set_canvas_map') {
+    eventHandled = true;
+    // Work in progress.
+    const { map } = jsonData;
+    console.log('Received map:', jsonData);
+    const [min, max] = minMax(map.x, map.y);
+    console.log('min', min, 'max', max);
+
+    const stripId = jsonData.strip_id;
+    const isUndefined = (value) => typeof value === 'undefined';
+    if (isUndefined(stripId)) {
+      throw new Error('strip_id is required for set_canvas_map event');
     }
-    
-    if (stopBtn) {
-      stopBtn.onclick = () => {
-        FASTLED_DEBUG_LOG('INDEX_JS', 'Stop button clicked');
-        fastLEDController.stop();
-      };
+
+    let diameter = jsonData.diameter;
+    if (diameter === undefined) {
+      const stripId = jsonData.strip_id;
+      console.warn(`Diameter was unset for strip ${stripId}, assuming default value of 2 mm.`);
+      diameter = 0.2;
     }
-    
-    if (toggleBtn) {
-      toggleBtn.onclick = () => {
-        FASTLED_DEBUG_LOG('INDEX_JS', 'Toggle button clicked');
-        const isRunning = toggleFastLED();
-        toggleBtn.textContent = isRunning ? 'Pause' : 'Resume';
-      };
-    }
-    
-    // Performance monitoring display with event system integration
-    if (fpsDisplay) {
-      FASTLED_DEBUG_LOG('INDEX_JS', 'Setting up performance monitoring...');
-      setInterval(() => {
-        const fps = fastLEDController.getFPS();
-        const frameTime = fastLEDController.getAverageFrameTime();
-        
-        // Record performance metrics
-        fastLEDPerformanceMonitor.recordFrameTime(frameTime);
-        
-        // Update display
-        fpsDisplay.textContent = `FPS: ${fps.toFixed(1)} | Frame: ${frameTime.toFixed(1)}ms`;
-        
-        // Monitor memory usage if available
-        if (performance.memory) {
-          fastLEDPerformanceMonitor.recordMemoryUsage(performance.memory.usedJSHeapSize);
-        }
-      }, 1000);
-    }
-    
-    // Set up event monitoring for debugging
-    if (window.fastLEDDebug) {
-      fastLEDEvents.setDebugMode(true);
-      FASTLED_DEBUG_LOG('INDEX_JS', 'Event debug mode enabled');
-    }
-    
-    FASTLED_DEBUG_LOG('INDEX_JS', 'Checking callback function availability...');
-    const callbackStatus = {
-      FastLED_onFrame: typeof globalThis.FastLED_onFrame,
-      FastLED_processUiUpdates: typeof globalThis.FastLED_processUiUpdates,
-      FastLED_onStripUpdate: typeof globalThis.FastLED_onStripUpdate,
-      FastLED_onStripAdded: typeof globalThis.FastLED_onStripAdded,
-      FastLED_onUiElementsAdded: typeof globalThis.FastLED_onUiElementsAdded
+
+    screenMap.strips[stripId] = {
+      map,
+      min,
+      max,
+      diameter: diameter,
     };
-    
-    FASTLED_DEBUG_LOG('INDEX_JS', 'Callback function status', callbackStatus);
-    
-    console.log('FastLED Pure JavaScript Architecture initialized successfully');
-    console.log('Available features:', {
-      asyncController: !!fastLEDController,
-      eventSystem: !!fastLEDEvents,
-      performanceMonitor: !!fastLEDPerformanceMonitor,
-      callbacks: callbackStatus
-    });
-    
-    FASTLED_DEBUG_LOG('INDEX_JS', 'FastLED_SetupAndLoop completed successfully');
-    FASTLED_DEBUG_TRACE('INDEX_JS', 'FastLED_SetupAndLoop', 'EXIT');
-    
-  } catch (error) {
-    FASTLED_DEBUG_ERROR('INDEX_JS', 'Failed to initialize FastLED with Pure JavaScript Architecture', error);
-    console.error('Failed to initialize FastLED with Pure JavaScript Architecture:', error);
-    
-    // Emit error event
-    if (fastLEDEvents) {
-      fastLEDEvents.emitError('initialization', error.message, { stack: error.stack });
+    console.log('Screen map updated:', screenMap);
+    // iterate through all the screenMaps and get the absolute min and max
+    const absMin = [Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY];
+    const absMax = [Number.NEGATIVE_INFINITY, Number.NEGATIVE_INFINITY];
+    let setAtLeastOnce = false;
+    for (const stripId in screenMap.strips) {
+      if (!Object.prototype.hasOwnProperty.call(screenMap.strips, stripId)) continue;
+      console.log('Processing strip ID', stripId);
+      const id = Number.parseInt(stripId, 10);
+      const stripData = screenMap.strips[id];
+      absMin[0] = Math.min(absMin[0], stripData.min[0]);
+      absMin[1] = Math.min(absMin[1], stripData.min[1]);
+      absMax[0] = Math.max(absMax[0], stripData.max[0]);
+      absMax[1] = Math.max(absMax[1], stripData.max[1]);
+      // if diff x = 0, expand by one on each direction.
+      if (absMin[0] === absMax[0]) {
+        absMin[0] = absMin[0] - 1;
+        absMax[0] = absMax[0] + 1;
+      }
+      // if diff y = 0, expand by one on each direction.
+      if (absMin[1] === absMax[1]) {
+        absMin[1] = absMin[1] - 1;
+        absMax[1] = absMax[1] + 1;
+      }
+      setAtLeastOnce = true;
     }
-    
-    // Show user-friendly error message if error display element exists
-    const errorDisplay = document.getElementById('error-display');
-    if (errorDisplay) {
-      errorDisplay.textContent = 'Failed to load FastLED with Pure JavaScript Architecture. Please refresh the page.';
+    if (!setAtLeastOnce) {
+      console.error('No screen map data found, skipping canvas size update');
+      return;
     }
-    
-    throw error;
+    screenMap.absMin = absMin;
+    screenMap.absMax = absMax;
+    width = Number.parseInt(absMax[0] - absMin[0], 10) + 1;
+    height = Number.parseInt(absMax[1] - absMin[1], 10) + 1;
+    console.log('canvas updated with width and height', width, height);
+    // now update the canvas size.
+    const canvas = document.getElementById(canvasId);
+    canvas.width = width;
+    canvas.height = height;
+    uiCanvasChanged = true;
+    console.log('Screen map updated:', screenMap);
+  }
+
+  if (!eventHandled) {
+    console.warn(`We do not support event ${event} yet.`);
+    return;
+  }
+  if (receivedCanvas) {
+    console.warn(
+      'Canvas size has already been set, setting multiple canvas sizes is not supported yet and the previous one will be overwritten.',
+    );
+  }
+  const canvas = document.getElementById(canvasId);
+  canvas.width = width;
+  canvas.height = height;
+
+  // Set display size (CSS pixels) to 640px width while maintaining aspect ratio
+  const displayWidth = 640;
+  const displayHeight = Math.round((height / width) * displayWidth);
+
+  // Set CSS display size while maintaining aspect ratio
+  canvas.style.width = `${displayWidth}px`;
+  canvas.style.height = `${displayHeight}px`;
+  console.log(
+    `Canvas size set to ${width}x${height}, displayed at ${canvas.style.width}x${canvas.style.height} `,
+  );
+  // unconditionally delete the graphicsManager
+  if (graphicsManager) {
+    graphicsManager.reset();
+    graphicsManager = null;
   }
 }
 
 /**
- * NOTE: All callback functions have been moved to fastled_callbacks.js
- * This provides better separation of concerns and eliminates embedded JavaScript.
- * 
- * The pure JavaScript callbacks include:
- * - FastLED_onStripUpdate() - handles strip configuration changes
- * - FastLED_onStripAdded() - handles new strip registration
- * - FastLED_onFrame() - handles frame rendering
- * - FastLED_processUiUpdates() - handles UI state collection
- * - FastLED_onUiElementsAdded() - handles UI element addition
- * - FastLED_onError() - handles error reporting
- * 
- * All callbacks are automatically available via the imported module.
+ * Handles new LED strip registration events
+ * @param {number} stripId - Unique identifier for the LED strip
+ * @param {number} stripLength - Number of LEDs in the strip
  */
-
-// Callback functions are now pure JavaScript modules - no embedded definitions needed
+function FastLED_onStripAdded(stripId, stripLength) {
+  // uses global variables.
+  const output = document.getElementById(outputId);
+  output.textContent += `Strip added: ID ${stripId}, length ${stripLength}\n`;
+}
 
 /**
- * Main function to initialize and start the FastLED setup/loop cycle (Asyncify-enabled)
+ * Main frame processing function called by FastLED for each animation frame
+ * @param {Array<Object>} frameData - Array of strip data with pixel colors
+ * @param {Function} uiUpdateCallback - Callback to send UI changes back to FastLED
+ */
+function FastLED_onFrame(frameData, uiUpdateCallback) {
+  // uiUpdateCallback is a function from FastLED that will parse a json string
+  // representing the changes to the UI that FastLED will need to respond to.
+  // uses global variables.
+  const changesJson = uiManager.processUiChanges();
+  if (changesJson !== null) {
+    const changesJsonStr = JSON.stringify(changesJson);
+    uiUpdateCallback(changesJsonStr);
+  }
+  if (frameData.length === 0) {
+    console.warn('Received empty frame data, skipping update');
+    // New experiment try to run anyway.
+    // return;
+  }
+  frameData.screenMap = screenMap;
+  updateCanvas(frameData);
+}
+
+/**
+ * Handles UI element addition events from FastLED
+ * @param {Object} jsonData - UI element configuration data
+ */
+function FastLED_onUiElementsAdded(jsonData) {
+  // uses global variables.
+  uiManager.addUiElements(jsonData);
+}
+
+/**
+ * Main function to initialize and start the FastLED setup/loop cycle
  * @async
+ * @param {Function} extern_setup - Setup function from WASM module
+ * @param {Function} extern_loop - Loop function from WASM module
  * @param {number} frame_rate - Target frame rate for animations
  * @param {Object} moduleInstance - The loaded WASM module instance
  * @param {Array<Object>} filesJson - Array of files to load into the virtual filesystem
  */
 async function fastledLoadSetupLoop(
+  extern_setup,
+  extern_loop,
   frame_rate,
   moduleInstance,
   filesJson,
@@ -609,23 +597,11 @@ async function fastledLoadSetupLoop(
     }
   };
 
-  // NOTE: Callback functions are now automatically registered by importing fastled_callbacks.js
-  // No need to manually bind them here - they're pure JavaScript functions
-  
-  // Verify that the pure JavaScript callbacks are properly loaded
-  console.log('FastLED Pure JavaScript callbacks verified:', {
-    FastLED_onUiElementsAdded: typeof globalThis.FastLED_onUiElementsAdded,
-    FastLED_onFrame: typeof globalThis.FastLED_onFrame,
-    FastLED_onStripAdded: typeof globalThis.FastLED_onStripAdded,
-    FastLED_onStripUpdate: typeof globalThis.FastLED_onStripUpdate,
-    FastLED_processUiUpdates: typeof globalThis.FastLED_processUiUpdates,
-    FastLED_onError: typeof globalThis.FastLED_onError
-  });
-  
-  // Initialize event system integration
-  if (fastLEDEvents) {
-    console.log('FastLED Event System ready with stats:', fastLEDEvents.getEventStats());
-  }
+  // Bind the functions to the global scope.
+  globalThis.FastLED_onUiElementsAdded = FastLED_onUiElementsAdded;
+  globalThis.FastLED_onFrame = FastLED_onFrame;
+  globalThis.FastLED_onStripAdded = FastLED_onStripAdded;
+  globalThis.FastLED_onStripUpdate = FastLED_onStripUpdate;
 
   // Come back to this later - we want to partition the files into immediate and streaming files
   // so that large projects don't try to download ALL the large files BEFORE setup/loop is called.
@@ -652,8 +628,8 @@ async function fastledLoadSetupLoop(
     await Promise.any([delay, streamingFilesPromise]);
   }
 
-  console.log('Starting fastled with Asyncify support');
-  await FastLED_SetupAndLoop(moduleInstance, frame_rate);
+  console.log('Starting fastled');
+  FastLED_SetupAndLoop(extern_setup, extern_loop, frame_rate);
 }
 
 /**
@@ -665,13 +641,12 @@ function onModuleLoaded(fastLedLoader) {
   // Unpack the module functions and send them to the fastledLoadSetupLoop function
 
   /**
-   * Internal function to start FastLED with loaded module (Asyncify-enabled)
-   * @async
+   * Internal function to start FastLED with loaded module
    * @param {Object} moduleInstance - The loaded WASM module instance
    * @param {number} frameRate - Target frame rate for animations
    * @param {Array<Object>} filesJson - Files to load into virtual filesystem
    */
-  async function __fastledLoadSetupLoop(moduleInstance, frameRate, filesJson) {
+  function __fastledLoadSetupLoop(moduleInstance, frameRate, filesJson) {
     const exports_exist = moduleInstance && moduleInstance._extern_setup &&
       moduleInstance._extern_loop;
     if (!exports_exist) {
@@ -679,7 +654,9 @@ function onModuleLoaded(fastLedLoader) {
       return;
     }
 
-    await fastledLoadSetupLoop(
+    fastledLoadSetupLoop(
+      moduleInstance._extern_setup,
+      moduleInstance._extern_loop,
       frameRate,
       moduleInstance,
       filesJson,
@@ -725,7 +702,7 @@ function onModuleLoaded(fastLedLoader) {
           console.error('Error fetching files.json:', error);
           filesJson = {};
         }
-        await __fastledLoadSetupLoop(instance, frameRate, filesJson);
+        __fastledLoadSetupLoop(instance, frameRate, filesJson);
       }).catch((err) => {
         console.error('Error loading fastled as a module:', err);
       });
@@ -766,9 +743,6 @@ async function localLoadFastLed(options) {
     frameRate = options.frameRate || DEFAULT_FRAME_RATE_60FPS;
     uiManager = new JsonUiManager(uiControlsId);
 
-    // Initialize JSON Inspector
-    const jsonInspector = new JsonInspector();
-
     // Expose UI manager globally for debug functions and C++ module
     window.uiManager = uiManager;
     window.uiManagerInstance = uiManager;
@@ -799,122 +773,3 @@ async function localLoadFastLed(options) {
 
 /** Replace the stub loader with the actual implementation */
 _loadFastLED = localLoadFastLed;
-
-/**
- * Global debugging and control functions for AsyncFastLEDController
- * These functions are exposed to window for external access and debugging
- */
-
-/**
- * Gets the current FastLED controller instance
- * @returns {AsyncFastLEDController|null} Current controller instance or null
- */
-function getFastLEDController() {
-  return fastLEDController;
-}
-
-/**
- * Gets performance statistics from the current controller
- * @returns {Object|null} Performance stats or null if no controller
- */
-function getFastLEDPerformanceStats() {
-  return fastLEDController ? fastLEDController.getPerformanceStats() : null;
-}
-
-/**
- * Starts the FastLED animation loop (for external control)
- * @returns {boolean} True if started successfully, false otherwise
- */
-function startFastLED() {
-  if (!fastLEDController) {
-    console.error('FastLED controller not initialized');
-    return false;
-  }
-  fastLEDController.start();
-  return true;
-}
-
-/**
- * Stops the FastLED animation loop (for external control)
- * @returns {boolean} True if stopped successfully, false otherwise
- */
-function stopFastLED() {
-  if (!fastLEDController) {
-    console.error('FastLED controller not initialized');
-    return false;
-  }
-  fastLEDController.stop();
-  return true;
-}
-
-/**
- * Toggles the FastLED animation loop
- * @returns {boolean} True if now running, false if now stopped
- */
-function toggleFastLED() {
-  if (!fastLEDController) {
-    console.error('FastLED controller not initialized');
-    return false;
-  }
-  
-  if (fastLEDController.running) {
-    fastLEDController.stop();
-    return false;
-  } else {
-    fastLEDController.start();
-    return true;
-  }
-}
-
-/**
- * Sets up global error handlers for unhandled promise rejections
- * This helps catch async errors that might otherwise be silent
- */
-function setupGlobalErrorHandlers() {
-  // Handle unhandled promise rejections
-  window.addEventListener('unhandledrejection', (event) => {
-    console.error('Unhandled promise rejection in FastLED:', event.reason);
-    
-    // Check if this is a FastLED-related error
-    if (event.reason && (
-      event.reason.message?.includes('FastLED') ||
-      event.reason.message?.includes('extern_setup') ||
-      event.reason.message?.includes('extern_loop') ||
-      event.reason.stack?.includes('AsyncFastLEDController')
-    )) {
-      console.error('FastLED async error detected - stopping animation loop');
-      if (fastLEDController) {
-        fastLEDController.stop();
-      }
-      
-      // Show user-friendly error message
-      const errorDisplay = document.getElementById('error-display');
-      if (errorDisplay) {
-        errorDisplay.textContent = 'FastLED encountered an error. Animation stopped.';
-      }
-    }
-  });
-
-  // Handle general errors
-  window.addEventListener('error', (event) => {
-    if (event.error && event.error.stack?.includes('AsyncFastLEDController')) {
-      console.error('FastLED error detected:', event.error);
-      if (fastLEDController) {
-        fastLEDController.stop();
-      }
-    }
-  });
-}
-
-// Expose debugging functions globally
-window.getFastLEDController = getFastLEDController;
-window.getFastLEDPerformanceStats = getFastLEDPerformanceStats;
-window.startFastLED = startFastLED;
-window.stopFastLED = stopFastLED;
-window.toggleFastLED = toggleFastLED;
-
-// Expose rendering function globally
-window.updateCanvas = updateCanvas;
-
-// Set up global error handlers
-setupGlobalErrorHandlers();

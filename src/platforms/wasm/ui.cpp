@@ -134,8 +134,39 @@ void ensureWasmUiSystemInitialized() {
                 return; // Early return on error
             }
             
-            // Call the async-aware updateJs function
-            fl::updateJs(jsonStr);
+            // Detect if this is UI element definitions (JSON array) or UI state updates (JSON object)
+            if (jsonStr[0] == '[') {
+                // This is a JSON array of UI element definitions - route directly to UI manager
+                FL_WARN("*** ROUTING UI ELEMENT DEFINITIONS DIRECTLY TO UI MANAGER");
+                
+                // Call UI manager directly to avoid circular event loops
+                EM_ASM({
+                    try {
+                        const jsonStr = UTF8ToString($0);
+                        const uiElements = JSON.parse(jsonStr);
+                        
+                        // Log the inbound event to the inspector if available
+                        if (window.jsonInspector) {
+                            window.jsonInspector.logInboundEvent(uiElements, 'C++ → JS (Direct)');
+                        }
+                        
+                        // Add UI elements directly using UI manager (bypass callback to avoid loops)
+                        if (window.uiManager && typeof window.uiManager.addUiElements === 'function') {
+                            window.uiManager.addUiElements(uiElements);
+                            console.log('UI elements added directly by C++ routing:', uiElements);
+                        } else {
+                            console.warn('UI Manager not available for direct routing');
+                        }
+                        
+                    } catch (error) {
+                        console.error('Error in direct UI element routing:', error);
+                    }
+                }, jsonStr);
+            } else {
+                // This is a JSON object of UI state updates - route to update system
+                FL_WARN("*** ROUTING UI STATE UPDATES TO updateJs");
+                fl::updateJs(jsonStr);
+            }
         };
         
         // Initialize with error checking via early return

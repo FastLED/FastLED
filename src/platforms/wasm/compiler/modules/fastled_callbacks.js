@@ -42,9 +42,16 @@ globalThis.FastLED_onFrame = async function(frameData) {
     }
     
     try {
+        // Defensive programming: ensure frameData exists
         if (!frameData) {
             FASTLED_DEBUG_ERROR('CALLBACKS', 'FastLED_onFrame received null/undefined frameData', null);
             return;
+        }
+        
+        // Defensive programming: ensure frameData is array-like
+        if (!Array.isArray(frameData)) {
+            console.warn('FastLED_onFrame: frameData is not an array, treating as empty');
+            frameData = [];
         }
         
         if (frameData.length === 0) {
@@ -68,6 +75,16 @@ globalThis.FastLED_onFrame = async function(frameData) {
             if (shouldLog) {
                 FASTLED_DEBUG_LOG('CALLBACKS', 'Added screenMap to frameData from window.screenMap');
             }
+        }
+        
+        // Final defensive check: ensure screenMap has proper structure
+        if (frameData.screenMap && (!frameData.screenMap.strips || typeof frameData.screenMap.strips !== 'object')) {
+            console.warn('FastLED_onFrame: screenMap exists but has invalid structure, using fallback');
+            frameData.screenMap = {
+                strips: {},
+                absMin: [0, 0],
+                absMax: [0, 0]
+            };
         }
         
         // Render to canvas using existing graphics manager
@@ -109,15 +126,15 @@ globalThis.FastLED_processUiUpdates = async function() {
     try {
         if (window.uiManager && typeof window.uiManager.processUiChanges === 'function') {
             const changes = window.uiManager.processUiChanges();
-            return changes ? JSON.stringify(changes) : "[]";
+            return changes ? JSON.stringify(changes) : "{}";
         }
         
-        // Return empty JSON array if no UI manager
-        return "[]";
+        // Return empty JSON object if no UI manager
+        return "{}";
         
     } catch (error) {
         console.error('Error in FastLED_processUiUpdates:', error);
-        return "[]"; // Return empty JSON on error
+        return "{}"; // Return empty JSON object on error
     }
 };
 

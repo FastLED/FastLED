@@ -28,6 +28,7 @@ class ActiveStripData : public fl::EngineEvents::Listener {
     fl::string infoJsonString();
 
     const StripDataMap &getData() const { return mStripMap; }
+    const ScreenMapMap &getScreenMaps() const { return mScreenMap; }
 
     ~ActiveStripData() { fl::EngineEvents::removeListener(this); }
 

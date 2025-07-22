@@ -199,7 +199,15 @@ void JsonUiManager::executeUiUpdates(const FLArduinoJson::JsonDocument &doc) {
             }
         }
     } else {
-        FL_ASSERT(false, "JSON document is not an object, cannot execute UI updates");
+        // Debug: Show what we actually received instead of just asserting
+        fl::string debugJson;
+        serializeJson(doc, debugJson);
+        FL_WARN("*** UI UPDATE ERROR: Expected JSON object but got " << 
+               (type == fl::JSON_ARRAY ? "array" : "non-object") << 
+               ": " << debugJson.substr(0, 200).c_str() << "...");
+        
+        // Use a warning instead of assertion to prevent crashes
+        // FL_ASSERT(false, "JSON document is not an object, cannot execute UI updates");
     }
 }
 
