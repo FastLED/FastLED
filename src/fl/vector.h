@@ -572,10 +572,18 @@ template <typename T, typename Allocator = fl::allocator<T>> class HeapVector {
     }
 
     // Iterator methods
-    iterator begin() { return &mArray[0]; }
-    const_iterator begin() const { return &mArray[0]; }
-    iterator end() { return &mArray[mSize]; }
-    const_iterator end() const { return &mArray[mSize]; }
+    iterator begin() { 
+        return mArray ? &mArray[0] : nullptr; 
+    }
+    const_iterator begin() const { 
+        return mArray ? &mArray[0] : nullptr; 
+    }
+    iterator end() { 
+        return mArray ? &mArray[mSize] : nullptr; 
+    }
+    const_iterator end() const { 
+        return mArray ? &mArray[mSize] : nullptr; 
+    }
 
     reverse_iterator rbegin() { return reverse_iterator(end()); }
 
