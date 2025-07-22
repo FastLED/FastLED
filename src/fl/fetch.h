@@ -6,6 +6,9 @@
 /// This API provides both simple callback-based and JavaScript-like promise-based interfaces
 /// for HTTP requests. Works on WASM/browser platforms with real fetch, provides stubs on embedded.
 ///
+/// **WASM Optimization:** On WASM platforms, `delay()` automatically pumps fetch requests 
+/// in 1ms intervals, making delay time useful for processing async operations.
+///
 /// @section Simple Callback Usage
 /// @code
 /// #include "fl/fetch.h"
@@ -40,9 +43,11 @@
 /// }
 /// 
 /// void loop() {
-///     // Update all pending promises (non-blocking)
-///     fl::fetch_update();
+///     // Fetch promises are automatically updated through FastLED's engine events!
+///     // On WASM platforms, delay() also pumps fetch requests automatically.
+///     // No manual fl::fetch_update() needed - just use normal FastLED loop
 ///     FastLED.show();
+///     delay(16); // delay() automatically pumps fetch requests on WASM
 /// }
 /// @endcode
 
@@ -54,6 +59,7 @@
 #include "fl/hash_map.h"
 #include "fl/optional.h"
 #include "fl/function.h"
+#include "fl/ptr.h"
 
 namespace fl {
 
@@ -221,6 +227,9 @@ private:
     friend class FetchManager;
 };
 
+// Forward declaration for engine listener
+class FetchEngineListener;
+
 /// Internal fetch manager for promise tracking
 class FetchManager {
 public:
@@ -233,6 +242,7 @@ public:
 
 private:
     fl::vector<fl::promise<Response>> mActivePromises;
+    fl::unique_ptr<FetchEngineListener> mEngineListener;
 };
 
 // ========== Simple Callback API (Backward Compatible) ==========
@@ -278,7 +288,7 @@ FetchRequest fetch_patch(const fl::string& url);
 /// Generic request with options (like fetch(url, options))
 fl::promise<Response> fetch_request(const fl::string& url, const RequestOptions& options = RequestOptions());
 
-/// Update all active promises (call in loop())
+/// Manual update for active promises (automatic updates happen via engine events)
 void fetch_update();
 
 /// Get number of active requests

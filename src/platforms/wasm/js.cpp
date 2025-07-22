@@ -4,21 +4,8 @@
 // FASTLED WASM JAVASCRIPT UTILITY FUNCTIONS
 // ================================================================================================
 //
-// This file is reserved for future WASM-specific JavaScript utility functions.
-// The main entry point and setup/loop functionality has been moved to entry_point.cpp.
-//
-// Previously this file contained:
-// - extern_setup() and extern_loop() functions (now in entry_point.cpp)
-// - EndFrameListener implementation (now in entry_point.cpp) 
-// - setup_once() function (now in entry_point.cpp as fastled_setup_once())
-//
-// Current purpose:
-// - Reserved for future WASM-specific utility functions
-// - JavaScript interop helper functions (if needed)
-// - WASM-specific debugging or diagnostic functions
-//
-// Note: The main application lifecycle is now handled by the main() function
-// in entry_point.cpp, which provides a proper C program entry point.
+// This file provides WASM-specific utility functions, including an optimized delay()
+// implementation that pumps fetch requests during delay periods.
 // ================================================================================================
 
 #include <emscripten.h>
@@ -44,11 +31,79 @@
 extern void setup();
 extern void loop();
 
+// Forward declaration for fetch update function
+namespace fl {
+    void fetch_update();
+}
+
+//////////////////////////////////////////////////////////////////////////
+// WASM-SPECIFIC UTILITY FUNCTIONS
+//////////////////////////////////////////////////////////////////////////
+
+extern "C" {
+
+/// @brief Custom delay implementation for WASM that pumps fetch requests
+/// @param ms Number of milliseconds to delay
+/// 
+/// This optimized delay() breaks the delay period into 1ms chunks and pumps
+/// fetch requests during each interval, making delay time useful for processing
+/// async operations instead of just blocking.
+void delay(int ms) {
+    if (ms <= 0) {
+        return;
+    }
+    
+    // Break delay into 1ms chunks and pump fetch requests
+    for (int i = 0; i < ms; i++) {
+        // Update fetch promises during delay
+        fl::fetch_update();
+        
+        // Sleep for 1ms using Emscripten's sleep
+        emscripten_sleep(1);
+    }
+}
+
+/// @brief Microsecond delay implementation for WASM  
+/// @param micros Number of microseconds to delay
+///
+/// For microsecond delays, we use Emscripten's busywait since pumping
+/// fetch requests every microsecond would be too expensive.
+void delayMicroseconds(int micros) {
+    if (micros <= 0) {
+        return;
+    }
+    
+    // For microsecond precision, use busy wait
+    // Converting microseconds to milliseconds for emscripten_sleep would lose precision
+    double start = emscripten_get_now();
+    double target = start + (micros / 1000.0); // Convert to milliseconds
+    
+    while (emscripten_get_now() < target) {
+        // Busy wait for microsecond precision
+        // No fetch pumping here as it would be too expensive
+    }
+}
+
+/// @brief Get current time in milliseconds since program start
+/// @return Current time in milliseconds
+uint32_t millis() {
+    return (uint32_t)emscripten_get_now();
+}
+
+/// @brief Get current time in microseconds since program start  
+/// @return Current time in microseconds
+uint32_t micros() {
+    return (uint32_t)(emscripten_get_now() * 1000.0);
+}
+
+} // extern "C"
+
 namespace fl {
 
 //////////////////////////////////////////////////////////////////////////
 // NOTE: All setup/loop functionality has been moved to entry_point.cpp
-// This file is now reserved for future WASM-specific utility functions
+// This file now provides WASM-specific utility functions including
+// an optimized delay() that pumps fetch requests
 
 } // namespace fl
 

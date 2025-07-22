@@ -1,15 +1,22 @@
 #include "fl/fetch.h"
 #include "fl/warn.h"
+#include "fl/str.h"
+#include "fl/mutex.h"
+#include "fl/singleton.h"
+#include "fl/engine_events.h"
 
 #ifdef __EMSCRIPTEN__
-// Include WASM-specific implementation
-#include "platforms/wasm/js_fetch.h"
+#include <emscripten.h>
+#include <emscripten/val.h>
 #endif
 
 namespace fl {
 
 #ifdef __EMSCRIPTEN__
-// ========== WASM Implementation using existing js_fetch.h ==========
+// ========== WASM Implementation using JavaScript fetch ==========
+
+// Include WASM-specific implementation
+#include "platforms/wasm/js_fetch.h"
 
 // Use existing WASM fetch infrastructure
 void fetch(const fl::string& url, const FetchCallback& callback) {
@@ -71,13 +78,14 @@ fl::promise<Response> FetchRequest::catch_(fl::function<void(const fl::Error&)> 
 }
 
 #else
-// ========== Non-WASM platforms: Stub implementation ==========
+// ========== Embedded/Stub Implementation ==========
 
 void fetch(const fl::string& url, const FetchCallback& callback) {
-    // Immediate error response for non-WASM platforms
-    response error_response(501, "Not Implemented");
-    error_response.set_text("HTTP fetch is only available in WASM/browser builds. Attempted URL: " + url);
-    callback(error_response);
+    (void)url; // Unused in stub implementation
+    // For embedded platforms, immediately call callback with a "not supported" response
+    response resp(501, "Not Implemented");
+    resp.set_text("HTTP fetch not supported on this platform");
+    callback(resp);
 }
 
 fl::promise<Response> FetchRequest::then(fl::function<void(const Response&)> callback) {
@@ -109,19 +117,38 @@ fl::promise<Response> FetchRequest::catch_(fl::function<void(const fl::Error&)> 
     return promise;
 }
 
-#endif // __EMSCRIPTEN__
+#endif
 
-// ========== Common Implementation (both WASM and non-WASM) ==========
+// ========== Engine Events Integration ==========
+
+/// Internal engine listener for automatic fetch updates
+class FetchEngineListener : public EngineEvents::Listener {
+public:
+    FetchEngineListener() = default;
+    ~FetchEngineListener() override {
+        // Listener base class automatically removes itself
+    }
+    
+    void onEndFrame() override {
+        // Update all fetch promises at the end of each frame
+        FetchManager::instance().update();
+    }
+};
+
+// ========== Promise-Based API Implementation ==========
 
 FetchManager& FetchManager::instance() {
-    static FetchManager instance;
-    return instance;
+    return fl::Singleton<FetchManager>::instance();
 }
 
 void FetchManager::register_promise(const fl::promise<Response>& promise) {
-    if (promise.valid()) {
-        mActivePromises.push_back(promise);
+    // Auto-register engine listener on first promise
+    if (mActivePromises.empty() && !mEngineListener) {
+        mEngineListener = fl::make_unique<FetchEngineListener>();
+        EngineEvents::addListener(mEngineListener.get());
     }
+    
+    mActivePromises.push_back(promise);
 }
 
 void FetchManager::update() {
@@ -134,6 +161,12 @@ void FetchManager::update() {
     
     // Then clean up completed/invalid promises in a separate pass
     cleanup_completed_promises();
+    
+    // Auto-remove engine listener when no more promises
+    if (mActivePromises.empty() && mEngineListener) {
+        EngineEvents::removeListener(mEngineListener.get());
+        mEngineListener.reset();
+    }
 }
 
 fl::size FetchManager::active_requests() const {
@@ -182,14 +215,23 @@ FetchRequest fetch_patch(const fl::string& url) {
 }
 
 fl::promise<Response> fetch_request(const fl::string& url, const RequestOptions& options) {
-    FetchRequest req(url, options);
-    return req.then([](const Response& resp) {
-        // Default success handler - just complete the promise
-        (void)resp;
-    });
+    (void)url; // TODO: Use url parameter when implementing actual HTTP request
+    (void)options; // TODO: Use options parameter when implementing actual HTTP request
+    
+    auto promise = fl::promise<Response>::create();
+    
+    // Register the promise for automatic updates
+    FetchManager::instance().register_promise(promise);
+    
+    // TODO: Implement actual HTTP request logic here
+    // For now, complete with a stub response
+    promise.complete_with_value(Response(501, "Not Implemented"));
+    
+    return promise;
 }
 
 void fetch_update() {
+    // Manual update still available for backwards compatibility
     FetchManager::instance().update();
 }
 
