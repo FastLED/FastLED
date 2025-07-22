@@ -101,38 +101,8 @@ EMSCRIPTEN_KEEPALIVE uint32_t micros() {
     return result;
 }
 
-// Replacement for 'delay' in WebAssembly context
-EMSCRIPTEN_KEEPALIVE void delay(int ms) {
-    // Use emscripten_sleep which yields to the event loop instead of blocking
-    // the main thread. This allows the browser to handle events and prevents
-    // the browser from killing the app due to main thread blocking.
-    emscripten_sleep(ms);
-}
-
-EMSCRIPTEN_KEEPALIVE void delayMicroseconds(int micros) {
-    // For WebAssembly, convert all delays to milliseconds and use emscripten_sleep
-    // to avoid blocking the main thread. This is necessary for Asyncify compatibility.
-    
-    if (micros >= 1000) {
-        // Convert to milliseconds for delays >= 1ms
-        uint32_t ms = micros / 1000;
-        int remaining_micros = micros % 1000;
-        
-        // Use emscripten_sleep for the millisecond portion (non-blocking)
-        emscripten_sleep(ms);
-        
-        // For remaining microseconds < 1000, convert to milliseconds with rounding
-        if (remaining_micros > 0) {
-            // Round up to next millisecond to ensure minimum delay
-            emscripten_sleep(1);
-        }
-    } else if (micros > 0) {
-        // For very small delays < 1000 microseconds, use minimum 1ms delay
-        // This maintains compatibility while avoiding main thread blocking
-        emscripten_sleep(1);
-    }
-    // For micros <= 0, do nothing (no delay)
-}
+// NOTE: delay() and delayMicroseconds() are implemented in js.cpp
+// with async task pumping for better performance during delays
 
 // Replacement for 'yield' in WebAssembly context
 EMSCRIPTEN_KEEPALIVE void yield() {

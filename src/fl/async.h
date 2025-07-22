@@ -46,6 +46,14 @@
 #include "fl/vector.h"
 #include "fl/function.h"
 #include "fl/ptr.h"
+#include "fl/variant.h"
+#include "fl/promise.h"
+#include "fl/promise_result.h"
+
+// Forward declarations for WASM platform
+#ifdef __EMSCRIPTEN__
+extern "C" void emscripten_sleep(int ms);
+#endif
 
 namespace fl {
 
@@ -109,5 +117,83 @@ size_t async_active_tasks();
 /// @brief Check if any async systems have active tasks
 /// @return True if any async tasks are running
 bool async_has_tasks();
+
+/// @brief Synchronously wait for a promise to complete
+/// @tparam T The type of value the promise resolves to (automatically deduced)
+/// @param promise The promise to wait for
+/// @return A PromiseResult containing either the resolved value T or an Error
+/// 
+/// This function blocks until the promise is either resolved or rejected,
+/// then returns a PromiseResult that can be checked with ok() for success/failure.
+/// While waiting, it continuously calls asyncrun() to pump async tasks.
+///
+/// **Type Deduction**: The template parameter T is automatically deduced from the 
+/// promise parameter, so you don't need to specify it explicitly.
+///
+/// @section Usage
+/// @code
+/// auto promise = fl::fetch_get("http://example.com");
+/// auto result = fl::await(promise);  // Type automatically deduced!
+/// 
+/// if (result.ok()) {
+///     const Response& resp = result.value();
+///     FL_WARN("Success: " << resp.text());
+/// } else {
+///     FL_WARN("Error: " << result.error().message);
+/// }
+/// 
+/// // Or use operator bool
+/// if (result) {
+///     FL_WARN("Got response: " << result.value().status());
+/// }
+/// 
+/// // You can still specify the type explicitly if needed:
+/// auto explicit_result = fl::await<Response>(promise);
+/// @endcode
+template<typename T>
+fl::PromiseResult<T> await(fl::promise<T> promise) {
+    // Handle invalid promises
+    if (!promise.valid()) {
+        return fl::PromiseResult<T>(Error("Invalid promise"));
+    }
+    
+    // If already completed, return immediately
+    if (promise.is_completed()) {
+        if (promise.is_resolved()) {
+            return fl::PromiseResult<T>(promise.value());
+        } else {
+            return fl::PromiseResult<T>(promise.error());
+        }
+    }
+    
+    // Wait for promise to complete while pumping async tasks
+    while (!promise.is_completed()) {
+        // Pump all async tasks
+        asyncrun();
+        
+        // Platform-specific sleep/yield
+#ifdef __EMSCRIPTEN__
+        // Use emscripten_sleep for WASM platform (declared at top of file)
+        emscripten_sleep(1); // Sleep for 1ms
+#else
+        // For non-WASM platforms, use a simple yield
+        // This allows other async tasks to run without blocking
+        for (int i = 0; i < 5; ++i) {
+            // Simple busy wait with yields
+            asyncrun(); // Give other async tasks a chance
+        }
+#endif
+        
+        // Update the promise (in case it's not managed by async system)
+        promise.update();
+    }
+    
+    // Return the result
+    if (promise.is_resolved()) {
+        return fl::PromiseResult<T>(promise.value());
+    } else {
+        return fl::PromiseResult<T>(promise.error());
+    }
+}
 
 } // namespace fl 
