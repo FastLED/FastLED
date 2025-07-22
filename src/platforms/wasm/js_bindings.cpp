@@ -33,6 +33,7 @@
 #include "js_bindings.h"
 
 #include "active_strip_data.h"
+#include "frame_buffer_manager.h"
 #include "fl/dbg.h"
 #include "fl/math.h"
 #include "fl/screenmap.h"
@@ -54,125 +55,25 @@ EMSCRIPTEN_KEEPALIVE void jsFillInMissingScreenMaps(ActiveStripData &active_stri
 extern "C" {
 
 /**
- * Pure C++ Frame Data Export Function
- * Exports frame data as JSON string with size information
+ * Thread-safe Frame Data Export Function
+ * Gets atomic snapshot of current frame data via FrameBufferManager
  * Returns malloc'd buffer that must be freed with freeFrameData()
  */
 EMSCRIPTEN_KEEPALIVE void* getFrameData(int* dataSize) {
-    // Fill active strips data
-    fl::ActiveStripData& active_strips = fl::ActiveStripData::Instance();
-    fl::jsFillInMissingScreenMaps(active_strips);
-    
-    // Serialize to JSON
-    fl::Str json_str = active_strips.infoJsonString();
-    
-    // Allocate and return data pointer
-    char* buffer = (char*)malloc(json_str.length() + 1);
-    strcpy(buffer, json_str.c_str());
-    *dataSize = json_str.length();
-    
-    return buffer;
+    // Get thread-safe frame data copy from FrameBufferManager
+    fl::FrameBufferManager& frameManager = fl::FrameBufferManager::Instance();
+    return frameManager.getFrameDataCopy(dataSize);
 }
 
 /**
- * Pure C++ ScreenMap Export Function
- * Exports screenMap data as JSON string with size information
+ * Thread-safe ScreenMap Export Function  
+ * Gets atomic snapshot of current screen map data via FrameBufferManager
  * Returns malloc'd buffer that must be freed with freeFrameData()
  */
 EMSCRIPTEN_KEEPALIVE void* getScreenMapData(int* dataSize) {
-    // Get active strips data
-    fl::ActiveStripData& active_strips = fl::ActiveStripData::Instance();
-    
-    // Create screenMap JSON with expected structure (legacy-compatible)
-    FLArduinoJson::JsonDocument doc;
-    auto root = doc.to<FLArduinoJson::JsonObject>();
-    auto stripsObj = root["strips"].to<FLArduinoJson::JsonObject>();
-    
-    // Track global bounds for absMax/absMin calculation
-    float globalMinX = FLT_MAX, globalMinY = FLT_MAX;
-    float globalMaxX = -FLT_MAX, globalMaxY = -FLT_MAX;
-    bool hasData = false;
-    
-    // Get screenMap data
-    for (const auto &[stripIndex, screenMap] : active_strips.getScreenMaps()) {
-        // Create strip object with expected structure (legacy-compatible)
-        // Use numeric keys instead of string keys for compatibility
-        auto stripMapObj = stripsObj[std::to_string(stripIndex)].to<FLArduinoJson::JsonObject>();
-        
-        auto mapObj = stripMapObj["map"].to<FLArduinoJson::JsonObject>();
-        auto xArray = mapObj["x"].to<FLArduinoJson::JsonArray>();
-        auto yArray = mapObj["y"].to<FLArduinoJson::JsonArray>();
-        
-        // Track strip-specific bounds for min/max arrays
-        float stripMinX = FLT_MAX, stripMinY = FLT_MAX;
-        float stripMaxX = -FLT_MAX, stripMaxY = -FLT_MAX;
-        
-        for (uint32_t i = 0; i < screenMap.getLength(); i++) {
-            float x = screenMap[i].x;
-            float y = screenMap[i].y;
-            
-            xArray.add(x);
-            yArray.add(y);
-            
-            // Update strip bounds
-            if (x < stripMinX) stripMinX = x;
-            if (x > stripMaxX) stripMaxX = x;
-            if (y < stripMinY) stripMinY = y;
-            if (y > stripMaxY) stripMaxY = y;
-            
-            // Update global bounds
-            if (x < globalMinX) globalMinX = x;
-            if (x > globalMaxX) globalMaxX = x;
-            if (y < globalMinY) globalMinY = y;
-            if (y > globalMaxY) globalMaxY = y;
-            hasData = true;
-        }
-        
-        // Add legacy-compatible min/max arrays for this strip
-        if (screenMap.getLength() > 0) {
-            auto minArray = stripMapObj["min"].to<FLArduinoJson::JsonArray>();
-            auto maxArray = stripMapObj["max"].to<FLArduinoJson::JsonArray>();
-            
-            minArray.add(stripMinX);
-            minArray.add(stripMinY);
-            maxArray.add(stripMaxX);
-            maxArray.add(stripMaxY);
-        }
-        
-        // Add diameter
-        stripMapObj["diameter"] = screenMap.getDiameter();
-    }
-    
-    // Add global absMin and absMax arrays if we have data
-    if (hasData) {
-        auto absMinArray = root["absMin"].to<FLArduinoJson::JsonArray>();
-        auto absMaxArray = root["absMax"].to<FLArduinoJson::JsonArray>();
-        
-        absMinArray.add(globalMinX);
-        absMinArray.add(globalMinY);
-        absMaxArray.add(globalMaxX);
-        absMaxArray.add(globalMaxY);
-    } else {
-        // Provide default bounds if no data
-        auto absMinArray = root["absMin"].to<FLArduinoJson::JsonArray>();
-        auto absMaxArray = root["absMax"].to<FLArduinoJson::JsonArray>();
-        
-        absMinArray.add(0.0f);
-        absMinArray.add(0.0f);
-        absMaxArray.add(0.0f);
-        absMaxArray.add(0.0f);
-    }
-    
-    // Serialize to JSON
-    fl::Str json_str;
-    serializeJson(doc, json_str);
-    
-    // Allocate and return data pointer
-    char* buffer = (char*)malloc(json_str.length() + 1);
-    strcpy(buffer, json_str.c_str());
-    *dataSize = json_str.length();
-    
-    return buffer;
+    // Get thread-safe screen map data copy from FrameBufferManager
+    fl::FrameBufferManager& frameManager = fl::FrameBufferManager::Instance();
+    return frameManager.getScreenMapDataCopy(dataSize);
 }
 
 /**
@@ -183,6 +84,24 @@ EMSCRIPTEN_KEEPALIVE void freeFrameData(void* data) {
     if (data) {
         free(data);
     }
+}
+
+/**
+ * Thread-safe Frame Version Function
+ * Gets current frame version number for JavaScript polling
+ */
+EMSCRIPTEN_KEEPALIVE uint32_t getFrameVersion() {
+    fl::FrameBufferManager& frameManager = fl::FrameBufferManager::Instance();
+    return frameManager.getFrameVersion();
+}
+
+/**
+ * Thread-safe New Frame Data Check Function
+ * Checks if new frame data is available since last known version
+ */
+EMSCRIPTEN_KEEPALIVE bool hasNewFrameData(uint32_t lastKnownVersion) {
+    fl::FrameBufferManager& frameManager = fl::FrameBufferManager::Instance();
+    return frameManager.hasNewFrameData(lastKnownVersion);
 }
 
 /**
