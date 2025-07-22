@@ -41,8 +41,9 @@ public:
         fl::lock_guard<fl::mutex> lock(mCallbacksMutex);
         auto it = mPendingCallbacks.find(request_id);
         if (it != mPendingCallbacks.end()) {
-            FetchResponseCallback callback = fl::move(it->second);
-            mPendingCallbacks.erase(it);
+            // Extract the callback value and erase by key to avoid iterator issues  
+            FetchResponseCallback callback = fl::move(mPendingCallbacks[request_id]);
+            mPendingCallbacks.erase(request_id);
             return fl::make_optional(fl::move(callback));
         }
         return fl::nullopt;

@@ -1,15 +1,28 @@
-#include "fl/fetch_api.h"
+#include "fl/fetch.h"
 #include "fl/warn.h"
 
 #ifdef __EMSCRIPTEN__
-// For WASM builds: Use the existing JavaScript fetch bridge
+// Include WASM-specific implementation
 #include "platforms/wasm/js_fetch.h"
 #endif
 
 namespace fl {
 
 #ifdef __EMSCRIPTEN__
-// ========== WASM Implementation using existing JavaScript fetch ==========
+// ========== WASM Implementation using existing js_fetch.h ==========
+
+// Use existing WASM fetch infrastructure
+void fetch(const fl::string& url, const FetchCallback& callback) {
+    // Use the existing WASM fetch implementation, convert response types
+    wasm_fetch.get(url).response([callback](const wasm_response& wasm_resp) {
+        // Convert wasm_response to simple response
+        response simple_resp(wasm_resp.status(), wasm_resp.status_text());
+        simple_resp.set_text(wasm_resp.text());
+        
+        // Call the callback
+        callback(simple_resp);
+    });
+}
 
 fl::promise<Response> FetchRequest::then(fl::function<void(const Response&)> callback) {
     // Create a promise for this request
@@ -57,51 +70,15 @@ fl::promise<Response> FetchRequest::catch_(fl::function<void(const fl::Error&)> 
     return promise;
 }
 
-FetchManager& FetchManager::instance() {
-    static FetchManager instance;
-    return instance;
-}
-
-void FetchManager::register_promise(const fl::promise<Response>& promise) {
-    if (promise.valid()) {
-        mActivePromises.push_back(promise);
-    }
-}
-
-void FetchManager::update() {
-    // Update all active promises and clean up completed ones
-    for (auto it = mActivePromises.begin(); it != mActivePromises.end(); ) {
-        auto& promise = *it;
-        if (promise.valid()) {
-            promise.update();
-            
-            // Remove completed promises for automatic cleanup
-            if (promise.is_completed()) {
-                it = mActivePromises.erase(it);
-            } else {
-                ++it;
-            }
-        } else {
-            // Remove invalid promises
-            it = mActivePromises.erase(it);
-        }
-    }
-}
-
-fl::size FetchManager::active_requests() const {
-    return mActivePromises.size();
-}
-
-void FetchManager::cleanup_completed_promises() {
-    auto new_end = fl::remove_if(mActivePromises.begin(), mActivePromises.end(),
-        [](const fl::promise<Response>& p) {
-            return !p.valid() || p.is_completed();
-        });
-    mActivePromises.erase(new_end, mActivePromises.end());
-}
-
 #else
 // ========== Non-WASM platforms: Stub implementation ==========
+
+void fetch(const fl::string& url, const FetchCallback& callback) {
+    // Immediate error response for non-WASM platforms
+    response error_response(501, "Not Implemented");
+    error_response.set_text("HTTP fetch is only available in WASM/browser builds. Attempted URL: " + url);
+    callback(error_response);
+}
 
 fl::promise<Response> FetchRequest::then(fl::function<void(const Response&)> callback) {
     FL_WARN("HTTP fetch is not supported on non-WASM platforms. URL: " << mUrl);
@@ -132,29 +109,47 @@ fl::promise<Response> FetchRequest::catch_(fl::function<void(const fl::Error&)> 
     return promise;
 }
 
+#endif // __EMSCRIPTEN__
+
+// ========== Common Implementation (both WASM and non-WASM) ==========
+
 FetchManager& FetchManager::instance() {
     static FetchManager instance;
     return instance;
 }
 
 void FetchManager::register_promise(const fl::promise<Response>& promise) {
-    (void)promise;
-    // Nothing to do on non-WASM platforms
+    if (promise.valid()) {
+        mActivePromises.push_back(promise);
+    }
 }
 
 void FetchManager::update() {
-    // Nothing to do on non-WASM platforms
+    // Update all active promises first
+    for (auto& promise : mActivePromises) {
+        if (promise.valid()) {
+            promise.update();
+        }
+    }
+    
+    // Then clean up completed/invalid promises in a separate pass
+    cleanup_completed_promises();
 }
 
 fl::size FetchManager::active_requests() const {
-    return 0;
+    return mActivePromises.size();
 }
 
 void FetchManager::cleanup_completed_promises() {
-    // Nothing to do on non-WASM platforms
+    // Rebuild vector without completed promises
+    fl::vector<fl::promise<Response>> active_promises;
+    for (const auto& promise : mActivePromises) {
+        if (promise.valid() && !promise.is_completed()) {
+            active_promises.push_back(promise);
+        }
+    }
+    mActivePromises = fl::move(active_promises);
 }
-
-#endif // __EMSCRIPTEN__
 
 // ========== Public API Functions ==========
 

@@ -304,6 +304,11 @@ class HashMap {
         return idx == npos ? end() : const_iterator(this, idx);
     }
 
+    bool contains(const Key &key) const {
+        auto idx = find_index(key);
+        return idx != npos;
+    }
+
     // access or default-construct
     T &operator[](const Key &key) {
         fl::size idx;

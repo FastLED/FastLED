@@ -19,7 +19,7 @@
 
 #include "fl/warn.h"
 #include <FastLED.h>
-#include "fl/fetch_api.h"
+#include "fl/fetch.h"
 
 using namespace fl;
 
