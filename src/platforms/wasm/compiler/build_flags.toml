@@ -46,7 +46,7 @@ defines = [
     "-DEMSCRIPTEN_HAS_UNBOUND_TYPE_NAMES=0",    # Disable unbound type name reflection
     
     # Feature Enablement
-    "-DFASTLED_HAS_NETWORKING=1",               # Enable networking support for socket emulation
+    "-DFASTLED_HAS_NETWORKING=1",               # Enable networking support
 ]
 
 # Core compiler flags that control compilation behavior
@@ -66,7 +66,7 @@ compiler_flags = [
     "-fno-exceptions",                         # Disable C++ exceptions for all targets (size/performance)
     "-fno-rtti",                              # Disable RTTI for all targets (size/performance, consistent)
     
-    # Threading Support (for socket emulation)
+    # Threading Support
     "-pthread",                               # Enable POSIX threads support
 ]
 
@@ -200,9 +200,10 @@ flags = [
     # WebAssembly Configuration
     "-sWASM=1",                                # Generate WebAssembly output (not asm.js)
     
-    # Threading Support (for socket emulation, not full pthread proxying)
+    # Threading Support
     "-pthread",                               # Enable POSIX threads support
     "-sUSE_PTHREADS=1",                       # Use Emscripten's pthread implementation
+    "-sPROXY_TO_PTHREAD",                     # Run main() on a pthread
 ]
 
 [linking.sketch]
@@ -213,9 +214,9 @@ flags = [
 # module that can be loaded in browsers with full FastLED functionality and networking support.
 
 flags = [
-         # Entry Point and Module Configuration
-     # Note: Uses proper main() entry point from src/platforms/wasm/entry_point.cpp
-     "--emit-symbol-map",                     # Generate symbol map for debugging
+    # Entry Point and Module Configuration
+    # Note: Uses proper main() entry point from src/platforms/wasm/entry_point.cpp
+    "--emit-symbol-map",                     # Generate symbol map for debugging
     "-sMODULARIZE=1",                        # Create a factory function (not global)
     "-sEXPORT_NAME=fastled",                 # Name of the exported factory function
     
@@ -227,9 +228,9 @@ flags = [
     # JavaScript Interop - Runtime Methods
     "-sEXPORTED_RUNTIME_METHODS=['ccall','cwrap','stringToUTF8','UTF8ToString','lengthBytesUTF8','HEAPU8','getValue']",
     
-         # JavaScript Interop - C Functions
-     # Note: _extern_setup and _extern_loop are now compatibility functions; _main is the primary entry point
-     "-sEXPORTED_FUNCTIONS=['_malloc','_free','_main','_extern_setup','_extern_loop','_fastled_declare_files','_getStripPixelData','_getFrameData','_getScreenMapData','_freeFrameData','_getFrameVersion','_hasNewFrameData']",
+    # JavaScript Interop - C Functions
+    # Note: _extern_setup and _extern_loop are now compatibility functions; _main is the primary entry point
+    "-sEXPORTED_FUNCTIONS=['_malloc','_free','_main','_extern_setup','_extern_loop','_fastled_declare_files','_getStripPixelData','_getFrameData','_getScreenMapData','_freeFrameData','_getFrameVersion','_hasNewFrameData','_js_fetch_success_callback','_js_fetch_error_callback']",
     
     # Runtime Behavior
     "-sEXIT_RUNTIME=0",                      # Keep runtime alive after main() exits
@@ -238,12 +239,6 @@ flags = [
     # Optimization and Debugging
     "-Wl,--gc-sections",                     # Remove unused code sections
     "--source-map-base=http://localhost:8000/", # Base URL for source map files
-    
-    # Networking Support (emulated POSIX TCP over WebSockets)
-    "-lwebsocket.js",                        # Link WebSocket.js library for socket emulation
-    "-sWEBSOCKET_SUBPROTOCOL=binary",       # Use binary subprotocol (required by Flask WebSocket proxy)
-    "-sWEBSOCKET_URL='ws://localhost:8089/wss_socket_proxy'",   
-    # Note: WebSocket URL configured at runtime via Module.websockifyURL
     
     # Asyncify Support (enables async/await style coding with delay() functions)
     "-sASYNCIFY=1",                         # Enable Asyncify for async function support

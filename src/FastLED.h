@@ -47,6 +47,7 @@
 #include "platforms/wasm/js.h"
 #include "platforms/wasm/led_sysdefs_wasm.h"
 #include "platforms/wasm/compiler/Arduino.h"
+#include "platforms/wasm/js_fetch.h"
 #endif
 
 #ifdef SmartMatrix_h
