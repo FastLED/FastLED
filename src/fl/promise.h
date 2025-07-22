@@ -231,13 +231,13 @@ promise<T> make_resolved_promise(T value) {
 /// Convenience function to create a rejected promise
 template<typename T>
 promise<T> make_rejected_promise(const fl::string& error_message) {
-    return promise<T>::reject(error_message);
+    return promise<T>::reject(Error(error_message));
 }
 
 /// Convenience function to create a rejected promise (const char* overload)
 template<typename T>
 promise<T> make_rejected_promise(const char* error_message) {
-    return promise<T>::reject(error_message);
+    return promise<T>::reject(Error(error_message));
 }
 
 // ============================================================================
