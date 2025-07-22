@@ -52,7 +52,7 @@
 
 // Forward declarations for WASM platform
 #ifdef __EMSCRIPTEN__
-extern "C" void emscripten_sleep(int ms);
+extern "C" void emscripten_sleep(unsigned int ms);
 #endif
 
 namespace fl {

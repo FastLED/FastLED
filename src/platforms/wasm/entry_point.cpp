@@ -31,6 +31,7 @@
 #include "active_strip_data.h"
 #include "engine_listener.h"
 // #include "frame_buffer_manager.h"  // Temporarily commented for testing
+#include "fl/async.h"
 #include "fl/dbg.h"
 #include "fl/namespace.h"
 #include "fl/warn.h"
@@ -131,12 +132,15 @@ int main() {
     // - JavaScript uses requestAnimationFrame for proper 60fps timing
     // - Avoids race conditions between main() loop and JavaScript loop
     
-    printf("FastLED WASM: main() entering sleep loop - JavaScript controls FastLED via extern functions...\n");
+    printf("FastLED WASM: main() entering async platform pump - JavaScript controls FastLED via extern functions...\n");
     
     while (true) {
-        // Stay alive for extern function calls from JavaScript
-        // Use longer sleep since we're not doing any work here
-        emscripten_sleep(100); // 100ms - just keeping pthread alive
+        // Platform pump for async operations - update all async tasks
+        fl::asyncrun();
+        
+        // Yield control to the browser more frequently for responsive async processing
+        // Use 1ms sleep to maintain responsiveness while allowing other threads to work
+        emscripten_sleep(1); // 1ms - frequent yielding for async pump
     }
     
     return 0; // Never reached

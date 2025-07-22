@@ -90,17 +90,8 @@ void delayMicroseconds(int micros) {
     }
 }
 
-/// @brief Get current time in milliseconds since program start
-/// @return Current time in milliseconds
-uint32_t millis() {
-    return (uint32_t)emscripten_get_now();
-}
-
-/// @brief Get current time in microseconds since program start  
-/// @return Current time in microseconds
-uint32_t micros() {
-    return (uint32_t)(emscripten_get_now() * 1000.0);
-}
+// NOTE: millis() and micros() functions are defined in timer.cpp with EMSCRIPTEN_KEEPALIVE
+// to avoid duplicate definitions in unified builds
 
 } // extern "C"
 
