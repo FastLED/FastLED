@@ -6,8 +6,10 @@ This module provides a simple, fluent HTTP fetch API for FastLED WASM applicatio
 
 ## Features
 
-- **Fluent API**: Clean, chainable interface (`fetch.get(url).response(callback)`)
-- **Concurrent Requests**: Full support for multiple simultaneous HTTP requests
+- **Cross-Platform API**: Unified `fl/fetch.h` header works on WASM and Arduino platforms
+- **Simple Function Interface**: `fl::fetch(url, callback)` - no platform-specific code needed
+- **Fluent API**: Advanced `fetch.get(url).response(callback)` interface for WASM builds
+- **Concurrent Requests**: Full support for multiple simultaneous HTTP requests (WASM only)
 - **Thread Safety**: Uses mutex-protected request ID system for safe concurrent access
 - **JavaScript Native**: Uses browser's native `fetch()` for maximum compatibility
 - **Async Callbacks**: JavaScript can call back into C++ async functions
@@ -17,22 +19,40 @@ This module provides a simple, fluent HTTP fetch API for FastLED WASM applicatio
 
 ## Usage
 
-### Basic Example
+### Cross-Platform API (Recommended)
 
 ```cpp
-#include "FastLED.h"
+#include "fl/fetch.h"
 
 void setup() {
-    // Make an HTTP GET request
-    fl::fetch.get("https://httpbin.org/json")
-        .response([](const fl::string& content) {
-            FL_WARN("Response received: " << content);
-        });
+    // Simple cross-platform fetch - works on WASM and Arduino!
+    fl::fetch("https://httpbin.org/json", [](const fl::response& resp) {
+        if (resp.ok()) {
+            FL_WARN("✅ Success: " << resp.text());
+        } else {
+            FL_WARN("❌ Error: " << resp.text());
+        }
+    });
 }
 
 void loop() {
     // FastLED loop continues normally
-    // Fetch responses are handled asynchronously via JavaScript callbacks
+    // On WASM: Fetch responses are handled asynchronously via JavaScript
+    // On Arduino: Immediate error response (no network blocking)
+}
+```
+
+### WASM-Specific API (Advanced)
+
+```cpp
+#include "platforms/wasm/js_fetch.h"  // WASM only
+
+void setup() {
+    // WASM-only fluent API
+    fl::fetch.get("https://httpbin.org/json")
+        .response([](const fl::response& resp) {
+            FL_WARN("Response received: " << resp.text());
+        });
 }
 ```
 
