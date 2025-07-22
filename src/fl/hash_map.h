@@ -343,6 +343,36 @@ class alignas(8) HashMap {
         fl::pair<fl::size, bool> p = find_slot(key);
         idx = p.first;
         is_new = p.second;
+        
+        // Check if find_slot failed to find a valid slot (HashMap is full)
+        if (idx == npos) {
+            // Need to resize to make room
+            if (needs_rehash()) {
+                // if half the buckets are tombstones, rehash inline to prevent
+                // memory growth. Otherwise, double the size.
+                if (_tombstones >= _buckets.size() / 2) {
+                    rehash_inline_no_resize();
+                } else {
+                    rehash(_buckets.size() * 2);
+                }
+            } else {
+                // Force a rehash with double size if needs_rehash() doesn't detect the issue
+                rehash(_buckets.size() * 2);
+            }
+            
+            // Try find_slot again after resize
+            p = find_slot(key);
+            idx = p.first;
+            is_new = p.second;
+            
+            // If still npos after resize, something is seriously wrong
+            if (idx == npos) {
+                // This should never happen after a successful resize
+                static T default_value{};
+                return default_value;
+            }
+        }
+        
         if (is_new) {
             _buckets[idx].key = key;
             _buckets[idx].value = T{};
