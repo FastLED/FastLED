@@ -683,176 +683,257 @@ async function FastLED_SetupAndLoop(moduleInstance, frame_rate) {
 }
 
 /**
- * Handles strip update events from the FastLED library
+ * Async-aware handler for strip update events from the FastLED library
  * Processes screen mapping configuration and canvas setup
+ * @async
  * @param {Object} jsonData - Strip update data from FastLED
  * @param {string} jsonData.event - Event type (e.g., 'set_canvas_map')
  * @param {number} jsonData.strip_id - ID of the LED strip
  * @param {Object} jsonData.map - Coordinate mapping data
  * @param {number} [jsonData.diameter] - LED diameter in mm (default: 0.2)
+ * @returns {Promise<void>} Promise that resolves when strip update is processed
  */
-function FastLED_onStripUpdate(jsonData) {
-  // Hooks into FastLED to receive updates from the FastLED library related
-  // to the strip state. This is where the ScreenMap will be effectively set.
-  // uses global variables.
-  console.log('Received strip update:', jsonData);
-  const { event } = jsonData;
-  let width = 0;
-  let height = 0;
-  let eventHandled = false;
-  if (event === 'set_canvas_map') {
-    eventHandled = true;
-    // Work in progress.
-    const { map } = jsonData;
-    console.log('Received map:', jsonData);
-    const [min, max] = minMax(map.x, map.y);
-    console.log('min', min, 'max', max);
+async function FastLED_onStripUpdate(jsonData) {
+  try {
+    // Hooks into FastLED to receive updates from the FastLED library related
+    // to the strip state. This is where the ScreenMap will be effectively set.
+    // uses global variables.
+    console.log('Received async strip update:', jsonData);
+    const { event } = jsonData;
+    let width = 0;
+    let height = 0;
+    let eventHandled = false;
+    
+    if (event === 'set_canvas_map') {
+      eventHandled = true;
+      // Work in progress.
+      const { map } = jsonData;
+      console.log('Received map:', jsonData);
+      const [min, max] = minMax(map.x, map.y);
+      console.log('min', min, 'max', max);
 
-    const stripId = jsonData.strip_id;
-    const isUndefined = (value) => typeof value === 'undefined';
-    if (isUndefined(stripId)) {
-      throw new Error('strip_id is required for set_canvas_map event');
-    }
-
-    let diameter = jsonData.diameter;
-    if (diameter === undefined) {
       const stripId = jsonData.strip_id;
-      console.warn(`Diameter was unset for strip ${stripId}, assuming default value of 2 mm.`);
-      diameter = 0.2;
+      const isUndefined = (value) => typeof value === 'undefined';
+      if (isUndefined(stripId)) {
+        throw new Error('strip_id is required for set_canvas_map event');
+      }
+
+      let diameter = jsonData.diameter;
+      if (diameter === undefined) {
+        const stripId = jsonData.strip_id;
+        console.warn(`Diameter was unset for strip ${stripId}, assuming default value of 2 mm.`);
+        diameter = 0.2;
+      }
+
+      screenMap.strips[stripId] = {
+        map,
+        min,
+        max,
+        diameter: diameter,
+      };
+      console.log('Screen map updated:', screenMap);
+      
+      // iterate through all the screenMaps and get the absolute min and max
+      const absMin = [Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY];
+      const absMax = [Number.NEGATIVE_INFINITY, Number.NEGATIVE_INFINITY];
+      let setAtLeastOnce = false;
+      for (const stripId in screenMap.strips) {
+        if (!Object.prototype.hasOwnProperty.call(screenMap.strips, stripId)) continue;
+        console.log('Processing strip ID', stripId);
+        const id = Number.parseInt(stripId, 10);
+        const stripData = screenMap.strips[id];
+        absMin[0] = Math.min(absMin[0], stripData.min[0]);
+        absMin[1] = Math.min(absMin[1], stripData.min[1]);
+        absMax[0] = Math.max(absMax[0], stripData.max[0]);
+        absMax[1] = Math.max(absMax[1], stripData.max[1]);
+        // if diff x = 0, expand by one on each direction.
+        if (absMin[0] === absMax[0]) {
+          absMin[0] = absMin[0] - 1;
+          absMax[0] = absMax[0] + 1;
+        }
+        // if diff y = 0, expand by one on each direction.
+        if (absMin[1] === absMax[1]) {
+          absMin[1] = absMin[1] - 1;
+          absMax[1] = absMax[1] + 1;
+        }
+        setAtLeastOnce = true;
+      }
+      
+      if (!setAtLeastOnce) {
+        console.error('No screen map data found, skipping canvas size update');
+        return; // Early return, but still async
+      }
+      
+      screenMap.absMin = absMin;
+      screenMap.absMax = absMax;
+      width = Number.parseInt(absMax[0] - absMin[0], 10) + 1;
+      height = Number.parseInt(absMax[1] - absMin[1], 10) + 1;
+      console.log('canvas updated with width and height', width, height);
+      
+      // now update the canvas size asynchronously
+      const canvas = document.getElementById(canvasId);
+      if (canvas) {
+        canvas.width = width;
+        canvas.height = height;
+        uiCanvasChanged = true;
+        console.log('Screen map updated:', screenMap);
+      } else {
+        console.warn('Canvas element not found:', canvasId);
+      }
     }
 
-    screenMap.strips[stripId] = {
-      map,
-      min,
-      max,
-      diameter: diameter,
-    };
-    console.log('Screen map updated:', screenMap);
-    // iterate through all the screenMaps and get the absolute min and max
-    const absMin = [Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY];
-    const absMax = [Number.NEGATIVE_INFINITY, Number.NEGATIVE_INFINITY];
-    let setAtLeastOnce = false;
-    for (const stripId in screenMap.strips) {
-      if (!Object.prototype.hasOwnProperty.call(screenMap.strips, stripId)) continue;
-      console.log('Processing strip ID', stripId);
-      const id = Number.parseInt(stripId, 10);
-      const stripData = screenMap.strips[id];
-      absMin[0] = Math.min(absMin[0], stripData.min[0]);
-      absMin[1] = Math.min(absMin[1], stripData.min[1]);
-      absMax[0] = Math.max(absMax[0], stripData.max[0]);
-      absMax[1] = Math.max(absMax[1], stripData.max[1]);
-      // if diff x = 0, expand by one on each direction.
-      if (absMin[0] === absMax[0]) {
-        absMin[0] = absMin[0] - 1;
-        absMax[0] = absMax[0] + 1;
-      }
-      // if diff y = 0, expand by one on each direction.
-      if (absMin[1] === absMax[1]) {
-        absMin[1] = absMin[1] - 1;
-        absMax[1] = absMax[1] + 1;
-      }
-      setAtLeastOnce = true;
+    if (!eventHandled) {
+      console.warn(`We do not support event ${event} yet.`);
+      return; // Early return, but still async
     }
-    if (!setAtLeastOnce) {
-      console.error('No screen map data found, skipping canvas size update');
-      return;
+    
+    if (receivedCanvas) {
+      console.warn(
+        'Canvas size has already been set, setting multiple canvas sizes is not supported yet and the previous one will be overwritten.',
+      );
     }
-    screenMap.absMin = absMin;
-    screenMap.absMax = absMax;
-    width = Number.parseInt(absMax[0] - absMin[0], 10) + 1;
-    height = Number.parseInt(absMax[1] - absMin[1], 10) + 1;
-    console.log('canvas updated with width and height', width, height);
-    // now update the canvas size.
+    
     const canvas = document.getElementById(canvasId);
-    canvas.width = width;
-    canvas.height = height;
-    uiCanvasChanged = true;
-    console.log('Screen map updated:', screenMap);
-  }
+    if (canvas) {
+      canvas.width = width;
+      canvas.height = height;
 
-  if (!eventHandled) {
-    console.warn(`We do not support event ${event} yet.`);
-    return;
-  }
-  if (receivedCanvas) {
-    console.warn(
-      'Canvas size has already been set, setting multiple canvas sizes is not supported yet and the previous one will be overwritten.',
-    );
-  }
-  const canvas = document.getElementById(canvasId);
-  canvas.width = width;
-  canvas.height = height;
+      // Set display size (CSS pixels) to 640px width while maintaining aspect ratio
+      const displayWidth = 640;
+      const displayHeight = Math.round((height / width) * displayWidth);
 
-  // Set display size (CSS pixels) to 640px width while maintaining aspect ratio
-  const displayWidth = 640;
-  const displayHeight = Math.round((height / width) * displayWidth);
-
-  // Set CSS display size while maintaining aspect ratio
-  canvas.style.width = `${displayWidth}px`;
-  canvas.style.height = `${displayHeight}px`;
-  console.log(
-    `Canvas size set to ${width}x${height}, displayed at ${canvas.style.width}x${canvas.style.height} `,
-  );
-  // unconditionally delete the graphicsManager
-  if (graphicsManager) {
-    graphicsManager.reset();
-    graphicsManager = null;
+      // Set CSS display size while maintaining aspect ratio
+      canvas.style.width = `${displayWidth}px`;
+      canvas.style.height = `${displayHeight}px`;
+      console.log(
+        `Canvas size set to ${width}x${height}, displayed at ${canvas.style.width}x${canvas.style.height} `,
+      );
+    }
+    
+    // unconditionally delete the graphicsManager (async safe)
+    if (graphicsManager) {
+      graphicsManager.reset();
+      graphicsManager = null;
+    }
+    
+    // Yield to allow other async operations
+    await new Promise(resolve => setTimeout(resolve, 0));
+    
+  } catch (error) {
+    console.error('Error in async FastLED_onStripUpdate:', error);
+    throw error; // Re-throw to let C++ side handle the error
   }
 }
 
 /**
- * Handles new LED strip registration events
+ * Async-aware handler for new LED strip registration events
+ * @async
  * @param {number} stripId - Unique identifier for the LED strip
  * @param {number} stripLength - Number of LEDs in the strip
+ * @returns {Promise<void>} Promise that resolves when strip addition is processed
  */
-function FastLED_onStripAdded(stripId, stripLength) {
-  // uses global variables.
-  const output = document.getElementById(outputId);
-  output.textContent += `Strip added: ID ${stripId}, length ${stripLength}\n`;
+async function FastLED_onStripAdded(stripId, stripLength) {
+  try {
+    // uses global variables.
+    const output = document.getElementById(outputId);
+    if (output) {
+      output.textContent += `Strip added: ID ${stripId}, length ${stripLength}\n`;
+    }
+    
+    // Log for debugging
+    console.log(`FastLED Strip Added: ID ${stripId}, Length ${stripLength}`);
+    
+    // Yield to allow other async operations
+    await new Promise(resolve => setTimeout(resolve, 0));
+    
+  } catch (error) {
+    console.error('Error in async FastLED_onStripAdded:', error);
+    throw error; // Re-throw to let C++ side handle the error
+  }
 }
 
 /**
- * Main frame processing function called by FastLED for each animation frame
+ * Async-aware main frame processing function called by FastLED for each animation frame
+ * @async
  * @param {Array<Object>} frameData - Array of strip data with pixel colors
- * @param {Function} uiUpdateCallback - Callback to send UI changes back to FastLED
+ * @param {Function} uiUpdateCallback - Async callback to send UI changes back to FastLED
+ * @returns {Promise<void>} Promise that resolves when frame processing is complete
  */
-function FastLED_onFrame(frameData, uiUpdateCallback) {
-  // uiUpdateCallback is a function from FastLED that will parse a json string
-  // representing the changes to the UI that FastLED will need to respond to.
-  
-  // Wrap the UI update callback to log outbound events
-  let wrappedCallback = uiUpdateCallback;
-  if (window.jsonInspector) {
-    wrappedCallback = window.jsonInspector.wrapUiUpdateCallback(uiUpdateCallback);
+async function FastLED_onFrame(frameData, uiUpdateCallback) {
+  try {
+    // uiUpdateCallback is now an async function from FastLED that will parse a json string
+    // representing the changes to the UI that FastLED will need to respond to.
+    
+    // Create async-aware wrapped callback
+    let wrappedCallback = uiUpdateCallback;
+    if (window.jsonInspector) {
+      const originalCallback = uiUpdateCallback;
+      wrappedCallback = async function(jsonStr) {
+        // Log the event
+        window.jsonInspector.wrapUiUpdateCallback(originalCallback);
+        
+        // Call the original callback and handle async
+        const result = originalCallback(jsonStr);
+        if (result instanceof Promise) {
+          await result;
+        }
+        return result;
+      };
+    }
+    
+    // Process UI changes asynchronously
+    const changesJson = uiManager.processUiChanges();
+    if (changesJson !== null) {
+      const changesJsonStr = JSON.stringify(changesJson);
+      
+      // Call the async callback and await the result
+      const callbackResult = wrappedCallback(changesJsonStr);
+      if (callbackResult instanceof Promise) {
+        await callbackResult;
+      }
+    }
+    
+    if (frameData.length === 0) {
+      console.warn('Received empty frame data, skipping canvas update');
+      // Still process the frame but skip canvas update
+    } else {
+      frameData.screenMap = screenMap;
+      updateCanvas(frameData);
+    }
+    
+  } catch (error) {
+    console.error('Error in async FastLED_onFrame:', error);
+    throw error; // Re-throw to let C++ side handle the error
   }
-  
-  // uses global variables.
-  const changesJson = uiManager.processUiChanges();
-  if (changesJson !== null) {
-    const changesJsonStr = JSON.stringify(changesJson);
-    wrappedCallback(changesJsonStr);
-  }
-  if (frameData.length === 0) {
-    console.warn('Received empty frame data, skipping update');
-    // New experiment try to run anyway.
-    // return;
-  }
-  frameData.screenMap = screenMap;
-  updateCanvas(frameData);
 }
 
 /**
- * Handles UI element addition events from FastLED
+ * Async-aware handler for UI element addition events from FastLED
+ * @async
  * @param {Object} jsonData - UI element configuration data
+ * @returns {Promise<void>} Promise that resolves when UI elements are added
  */
-function FastLED_onUiElementsAdded(jsonData) {
-  // Log the inbound event to the inspector
-  if (window.jsonInspector) {
-    window.jsonInspector.logInboundEvent(jsonData);
+async function FastLED_onUiElementsAdded(jsonData) {
+  try {
+    // Log the inbound event to the inspector
+    if (window.jsonInspector) {
+      window.jsonInspector.logInboundEvent(jsonData);
+    }
+    
+    // uses global variables.
+    if (uiManager && typeof uiManager.addUiElements === 'function') {
+      uiManager.addUiElements(jsonData);
+    } else {
+      console.warn('UI Manager not available or addUiElements method missing');
+    }
+    
+    // Yield to allow other async operations
+    await new Promise(resolve => setTimeout(resolve, 0));
+    
+  } catch (error) {
+    console.error('Error in async FastLED_onUiElementsAdded:', error);
+    throw error; // Re-throw to let C++ side handle the error
   }
-  
-  // uses global variables.
-  uiManager.addUiElements(jsonData);
 }
 
 /**
@@ -915,11 +996,19 @@ async function fastledLoadSetupLoop(
     }
   };
 
-  // Bind the functions to the global scope.
+  // Bind the async-aware functions to the global scope.
   globalThis.FastLED_onUiElementsAdded = FastLED_onUiElementsAdded;
   globalThis.FastLED_onFrame = FastLED_onFrame;
   globalThis.FastLED_onStripAdded = FastLED_onStripAdded;
   globalThis.FastLED_onStripUpdate = FastLED_onStripUpdate;
+  
+  // Add debugging info for async functions
+  console.log('Registered async FastLED callback functions:', {
+    FastLED_onUiElementsAdded: typeof globalThis.FastLED_onUiElementsAdded,
+    FastLED_onFrame: typeof globalThis.FastLED_onFrame,
+    FastLED_onStripAdded: typeof globalThis.FastLED_onStripAdded,
+    FastLED_onStripUpdate: typeof globalThis.FastLED_onStripUpdate
+  });
 
   // Come back to this later - we want to partition the files into immediate and streaming files
   // so that large projects don't try to download ALL the large files BEFORE setup/loop is called.
