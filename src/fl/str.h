@@ -189,6 +189,18 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
     }
     // cppcheck-suppress-end
 
+    void assign(const char* str, fl::size len) {
+        mLength = len;
+        if (len + 1 <= SIZE) {
+            memcpy(mInlineData, str, len + 1);
+            mHeapData.reset();
+        } else {
+            mHeapData = fl::make_shared<StringHolder>(str, len);
+            mHeapData->copy(str, len);
+            mHeapData->data()[len] = '\0';
+        }
+    }
+
     bool operator==(const StrN &other) const {
         return strcmp(c_str(), other.c_str()) == 0;
     }

@@ -1,4 +1,4 @@
-#ifdef FASTLED_HAS_NETWORKING
+#if defined(FASTLED_HAS_NETWORKING) && 0
 #ifdef _WIN32
 
 #include "socket_win.h"

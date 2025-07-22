@@ -1,4 +1,4 @@
-#ifdef FASTLED_HAS_NETWORKING
+#if defined(FASTLED_HAS_NETWORKING) && 0
 #if !defined(_WIN32) && !defined(__EMSCRIPTEN__)
 
 #include "socket_posix.h"

@@ -1,6 +1,6 @@
 #pragma once
 
-#ifdef FASTLED_HAS_NETWORKING
+#ifdef FASTLED_HAS_NETWORKING && 0
 #ifdef _WIN32
 
 #include "fl/net/socket.h"  // For SocketError enum

@@ -8,17 +8,17 @@
 
 namespace fl {
 
-/// Forward declaration for fetch request
-class FetchRequest;
+/// Forward declaration for WASM fetch request
+class WasmFetchRequest;
 
-/// Simple HTTP response for fetch API
-class response {
+/// Simple HTTP response for WASM fetch API
+class wasm_response {
 public:
     /// Default constructor
-    response() : mStatusCode(200), mStatusText("OK") {}
+    wasm_response() : mStatusCode(200), mStatusText("OK") {}
     
     /// Constructor with status code and status text
-    response(int status_code, const fl::string& status_text) 
+    wasm_response(int status_code, const fl::string& status_text) 
         : mStatusCode(status_code), mStatusText(status_text) {}
     
     /// Status code access
@@ -62,33 +62,33 @@ private:
 };
 
 /// Simple fetch response callback type
-using FetchResponseCallback = fl::function<void(const response&)>;
+using FetchResponseCallback = fl::function<void(const wasm_response&)>;
 
-/// Fetch request object for fluent API
-class FetchRequest {
+/// WASM fetch request object for fluent API
+class WasmFetchRequest {
 private:
     fl::string mUrl;
     
 public:
-    explicit FetchRequest(const fl::string& url) : mUrl(url) {}
+    explicit WasmFetchRequest(const fl::string& url) : mUrl(url) {}
     
     /// Execute the fetch request and call the response callback
     /// @param callback Function to call with the response object
     void response(const FetchResponseCallback& callback);
 };
 
-/// Main fetch object for fluent API
-class Fetch {
+/// Internal WASM fetch object (renamed to avoid conflicts)
+class WasmFetch {
 public:
     /// Create a GET request
     /// @param url The URL to fetch
-    /// @returns FetchRequest object for chaining
-    FetchRequest get(const fl::string& url) {
-        return FetchRequest(url);
+    /// @returns WasmFetchRequest object for chaining
+    WasmFetchRequest get(const fl::string& url) {
+        return WasmFetchRequest(url);
     }
 };
 
-/// Global fetch object for easy access
-extern Fetch fetch;
+/// Internal WASM fetch object for low-level access
+extern WasmFetch wasm_fetch;
 
 } // namespace fl 

@@ -14,15 +14,15 @@
 
 namespace fl {
 
-Fetch fetch;
+WasmFetch wasm_fetch;
 
 #ifdef __EMSCRIPTEN__
 // WASM version using JavaScript fetch API
 
-// Internal singleton class for managing fetch callbacks
-class FetchCallbackManager {
+// Internal singleton class for managing WASM fetch callbacks
+class WasmFetchCallbackManager {
 public:
-    FetchCallbackManager() : mNextRequestId(1) {}
+    WasmFetchCallbackManager() : mNextRequestId(1) {}
     
     // Generate unique request ID
     uint32_t generateRequestId() {
@@ -56,8 +56,8 @@ private:
 };
 
 // Get singleton instance
-static FetchCallbackManager& getCallbackManager() {
-    return fl::Singleton<FetchCallbackManager>::instance();
+static WasmFetchCallbackManager& getCallbackManager() {
+    return fl::Singleton<WasmFetchCallbackManager>::instance();
 }
 
 // C++ callback function that JavaScript can call when fetch completes
@@ -67,7 +67,7 @@ extern "C" EMSCRIPTEN_KEEPALIVE void js_fetch_success_callback(uint32_t request_
     auto callback_opt = getCallbackManager().takeCallback(request_id);
     if (callback_opt) {
         // Create a successful response object
-        fl::response response(200, "OK");
+        fl::wasm_response response(200, "OK");
         response.set_text(fl::string(content));
         response.set_header("content-type", "text/html"); // Default content type
         
@@ -84,7 +84,7 @@ extern "C" EMSCRIPTEN_KEEPALIVE void js_fetch_error_callback(uint32_t request_id
     auto callback_opt = getCallbackManager().takeCallback(request_id);
     if (callback_opt) {
         // Create an error response object
-        fl::response response(0, "Network Error");
+        fl::wasm_response response(0, "Network Error");
         fl::string error_content = "Fetch Error: ";
         error_content += error_message;
         response.set_text(error_content);
@@ -121,7 +121,7 @@ EM_JS(void, js_fetch_async, (uint32_t request_id, const char* url), {
         });
 });
 
-void FetchRequest::response(const FetchResponseCallback& callback) {
+void WasmFetchRequest::response(const FetchResponseCallback& callback) {
     FL_WARN("Starting JavaScript-based fetch request to: " << mUrl);
     
     // Generate unique request ID for this request
@@ -139,11 +139,11 @@ void FetchRequest::response(const FetchResponseCallback& callback) {
 #else
 // Non-WASM platforms: HTTP fetch is not supported
 
-void FetchRequest::response(const FetchResponseCallback& callback) {
+void WasmFetchRequest::response(const FetchResponseCallback& callback) {
     FL_WARN("HTTP fetch is not supported on non-WASM platforms (Arduino/embedded). URL: " << mUrl);
     
     // Return immediate error response
-    fl::response error_response(501, "Not Implemented");
+    fl::wasm_response error_response(501, "Not Implemented");
     error_response.set_text("HTTP fetch is only available in WASM/browser builds. This platform does not support network requests.");
     error_response.set_header("content-type", "text/plain");
     

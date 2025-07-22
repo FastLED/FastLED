@@ -171,6 +171,72 @@ The `bash lint` command now includes:
 - Use the MCP server tools for common tasks
 - Check examples when making API changes
 
+### Memory Management with Smart Pointers and Moveable Objects
+**🚨 CRITICAL: Always use proper RAII patterns - smart pointers, moveable objects, or wrapper classes instead of raw pointers for resource management.**
+
+**Resource Management Options:**
+- ✅ **PREFERRED**: `fl::shared_ptr<T>` for shared ownership (multiple references to same object)
+- ✅ **PREFERRED**: `fl::unique_ptr<T>` for exclusive ownership (single owner, automatic cleanup)
+- ✅ **PREFERRED**: Moveable wrapper objects (like `fl::promise<T>`) for safe copying and transferring of unique resources
+- ✅ **ACCEPTABLE**: `fl::vector<T>` storing objects by value when objects support move/copy semantics
+- ❌ **AVOID**: `fl::vector<T*>` storing raw pointers - use `fl::vector<fl::shared_ptr<T>>` or `fl::vector<fl::unique_ptr<T>>`
+- ❌ **AVOID**: Manual `new`/`delete` - use `fl::make_shared<T>()` or `fl::make_unique<T>()`
+
+**Moveable Wrapper Pattern:**
+When you have a unique resource (like a future, file handle, or network connection) that needs to be passed around easily, create a moveable wrapper class that:
+- Internally manages the unique resource (often with `fl::unique_ptr<T>` or similar)
+- Provides copy semantics through shared implementation details
+- Maintains clear ownership semantics
+- Allows safe transfer between contexts
+
+**Examples:**
+```cpp
+// ✅ GOOD - Using smart pointers
+fl::vector<fl::shared_ptr<HttpClient>> mActiveClients;
+auto client = fl::make_shared<HttpClient>();
+mActiveClients.push_back(client);
+
+// ✅ GOOD - Using unique_ptr for exclusive ownership
+fl::unique_ptr<HttpClient> client = fl::make_unique<HttpClient>();
+
+// ✅ GOOD - Moveable wrapper objects (fl::promise example)
+fl::vector<fl::promise<Response>> mActivePromises;  // Copyable wrapper around unique future
+fl::promise<Response> promise = fetch.get(url).execute();
+mActivePromises.push_back(promise);  // Safe copy, shared internal state
+
+// ✅ GOOD - Objects stored by value (if copyable/moveable)
+fl::vector<Request> mRequests;  // When Request supports copy/move
+
+// ❌ BAD - Raw pointers require manual memory management
+fl::vector<Promise*> mActivePromises;  // Memory leaks possible
+Promise* promise = new Promise();      // Who calls delete?
+```
+
+**fl::promise<T> as Moveable Wrapper Example:**
+```cpp
+// fl::promise<T> wraps a unique fl::future<T> but provides copyable semantics
+class promise<T> {
+    fl::shared_ptr<future<T>> mImpl;  // Shared wrapper around unique resource
+public:
+    promise(const promise& other) : mImpl(other.mImpl) {}  // Safe copying
+    promise(promise&& other) : mImpl(fl::move(other.mImpl)) {}  // Move support
+    // ... wrapper delegates to internal future
+};
+
+// Usage - can be copied and passed around safely
+fl::promise<Response> promise = http_get_promise("https://api.example.com");
+someContainer.push_back(promise);  // Copy is safe
+processAsync(promise);  // Can pass to multiple places
+```
+
+**Why This Pattern:**
+- **Automatic cleanup** - No memory leaks from forgotten `delete` calls
+- **Exception safety** - Resources automatically freed even if exceptions occur
+- **Clear ownership** - Code clearly shows who owns what objects
+- **Thread safety** - Smart pointers provide atomic reference counting
+- **Easy sharing** - Moveable wrappers allow safe copying of unique resources
+- **API flexibility** - Can pass resources between different contexts safely
+
 ## 🔧 CMAKE BUILD SYSTEM ARCHITECTURE
 
 ### Build System Overview
