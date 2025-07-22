@@ -7,11 +7,13 @@ This module provides a simple, fluent HTTP fetch API for FastLED WASM applicatio
 ## Features
 
 - **Fluent API**: Clean, chainable interface (`fetch.get(url).response(callback)`)
+- **Concurrent Requests**: Full support for multiple simultaneous HTTP requests
+- **Thread Safety**: Uses mutex-protected request ID system for safe concurrent access
 - **JavaScript Native**: Uses browser's native `fetch()` for maximum compatibility
 - **Async Callbacks**: JavaScript can call back into C++ async functions
 - **Error Handling**: Comprehensive error reporting for network and HTTP errors
 - **CORS Support**: Works with CORS-enabled endpoints
-- **Memory Safe**: Automatic cleanup of callbacks and resources
+- **Memory Safe**: Automatic cleanup of callbacks and resources with no race conditions
 
 ## Usage
 
@@ -34,15 +36,41 @@ void loop() {
 }
 ```
 
+### Concurrent Requests
+
+```cpp
+void setup() {
+    // Multiple requests can be made simultaneously - each gets a unique ID
+    
+    fl::fetch.get("https://httpbin.org/json")
+        .response([](const fl::response& resp) {
+            FL_WARN("Request 1 completed: " << resp.text());
+        });
+    
+    fl::fetch.get("https://fastled.io")
+        .response([](const fl::response& resp) {
+            FL_WARN("Request 2 completed: " << resp.text());
+        });
+    
+    fl::fetch.get("https://httpbin.org/uuid")
+        .response([](const fl::response& resp) {
+            FL_WARN("Request 3 completed: " << resp.text());
+        });
+    
+    // All three requests run concurrently - responses can arrive in any order
+    // No race conditions or lost callbacks!
+}
+```
+
 ### Error Handling
 
 ```cpp
 fl::fetch.get("https://invalid-url-that-fails.com/test")
-    .response([](const fl::string& content) {
-        if (content.startsWith("Fetch Error:")) {
-            FL_WARN("Request failed: " << content);
+    .response([](const fl::response& resp) {
+        if (!resp.ok()) {
+            FL_WARN("Request failed: " << resp.text());
         } else {
-            FL_WARN("Request succeeded: " << content);
+            FL_WARN("Request succeeded: " << resp.text());
         }
     });
 ```
@@ -60,9 +88,43 @@ fl::fetch.get("https://invalid-url-that-fails.com/test")
 
 - **`js_fetch.h`**: Header with fluent API classes (`Fetch`, `FetchRequest`)
 - **`js_fetch.cpp`**: Implementation with EM_JS bridge and C++ callbacks
-- **`js_fetch_async()`**: EM_JS function that performs JavaScript fetch
-- **`js_fetch_success_callback()`**: C++ function called by JavaScript on success
-- **`js_fetch_error_callback()`**: C++ function called by JavaScript on error
+- **`js_fetch_async()`**: EM_JS function that performs JavaScript fetch with request ID
+- **`js_fetch_success_callback()`**: C++ function called by JavaScript on success (with request ID)
+- **`js_fetch_error_callback()`**: C++ function called by JavaScript on error (with request ID)
+
+### Concurrent Request Architecture
+
+The fetch system uses a **unique request ID approach** with a **singleton callback manager** to enable multiple simultaneous requests:
+
+1. **Request ID Generation**: Each `fetch.get().response()` call generates a unique `uint32_t` request ID
+2. **Singleton Management**: A private `FetchCallbackManager` singleton handles all callback storage using `fl::Singleton<T>`
+3. **Thread-Safe Storage**: Callbacks are stored in a `fl::hash_map<uint32_t, FetchResponseCallback*>` protected by mutex
+4. **JavaScript Coordination**: The EM_JS function receives the request ID and passes it to the JavaScript fetch
+5. **Response Routing**: JavaScript calls back to C++ with the request ID, allowing proper callback retrieval
+6. **Atomic Cleanup**: `takeCallback()` atomically removes and returns the callback, preventing race conditions
+
+```cpp
+// Internal singleton class for managing fetch callbacks (private to .cpp file)
+class FetchCallbackManager {
+public:
+    uint32_t generateRequestId();
+    void storeCallback(uint32_t request_id, const FetchResponseCallback& callback);
+    FetchResponseCallback* takeCallback(uint32_t request_id);
+private:
+    fl::hash_map<uint32_t, FetchResponseCallback*> mPendingCallbacks;
+    fl::mutex mCallbacksMutex;
+    uint32_t mNextRequestId;
+};
+
+// Accessed via: fl::Singleton<FetchCallbackManager>::instance()
+```
+
+**Benefits over Global Callback:**
+- ✅ **Unlimited concurrent requests** (was: only 1 at a time)
+- ✅ **No race conditions** (was: 2nd request deleted 1st callback)
+- ✅ **Thread-safe access** (was: unsafe global state)
+- ✅ **Proper memory management** (was: orphaned callbacks)
+- ✅ **Same fluent API** (no breaking changes)
 
 ### JavaScript Integration
 
@@ -119,11 +181,16 @@ The following Emscripten flags are required in `build_flags.toml`:
 
 - **`examples/NetTest/NetTest.ino`**: Comprehensive network testing with multiple fetch scenarios
 
+## Platform Support
+
+- **WASM/Browser Only**: HTTP fetch is only available in WASM builds running in web browsers
+- **Arduino/Embedded**: Returns immediate error response (HTTP 501 "Not Implemented")
+
 ## Limitations
 
 - **GET requests only**: Currently supports only HTTP GET method
 - **Text responses**: Optimized for text/JSON responses (binary support possible)
-- **Single request**: One request at a time per instance (by design for simplicity)
+- **WASM builds only**: No HTTP functionality on Arduino or other embedded platforms
 - **CORS dependent**: Cross-origin requests require proper CORS headers
 
 ## Error Types
