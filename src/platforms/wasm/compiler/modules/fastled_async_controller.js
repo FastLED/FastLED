@@ -30,6 +30,7 @@ class FastLEDAsyncController {
         this.frameTimes = [];
         this.maxFrameTimeHistory = 60;
         this.setupCompleted = false;
+        this.fastledSetupCalled = false;  // Track if extern_setup() has been called
         this.lastFrameTime = 0;
         this.frameInterval = 1000 / this.frameRate;
         
@@ -103,31 +104,21 @@ class FastLEDAsyncController {
             throw error;
         }
         
-        FASTLED_DEBUG_LOG('ASYNC_CONTROLLER', 'Binding core setup/loop functions...');
-        try {
-            // Core setup/loop functions (with async support for Asyncify)
-            this.externSetup = this.module.cwrap('extern_setup', 'number', [], {async: true});
-            this.externLoop = this.module.cwrap('extern_loop', 'number', [], {async: true});
-            FASTLED_DEBUG_LOG('ASYNC_CONTROLLER', 'Core setup/loop functions bound successfully with async support');
-        } catch (error) {
-            FASTLED_DEBUG_ERROR('ASYNC_CONTROLLER', 'Failed to bind core setup/loop functions', error);
-            throw error;
-        }
+        // NOTE: externSetup and externLoop are now bound in setup() method with async flag
+        // due to ASYNCIFY_EXPORTS requirement
         
         console.log('C++ functions bound successfully via cwrap');
-        FASTLED_DEBUG_LOG('ASYNC_CONTROLLER', 'All C++ functions bound successfully via cwrap');
+        FASTLED_DEBUG_LOG('ASYNC_CONTROLLER', 'C++ functions bound successfully via cwrap (async extern functions bound in setup)');
         
-        // Verify all functions are available
+        // Verify all functions are available (extern functions will be bound in setup())
         const functionStatus = {
-            mainFunction: typeof this.mainFunction,
             getFrameData: typeof this.getFrameData,
             freeFrameData: typeof this.freeFrameData,
             getStripPixelData: typeof this.getStripPixelData,
             notifyStripAdded: typeof this.notifyStripAdded,
             processUiInput: typeof this.processUiInput,
             getUiUpdateData: typeof this.getUiUpdateData,
-            externSetup: typeof this.externSetup,
-            externLoop: typeof this.externLoop
+            // externSetup and externLoop will be bound in setup() method
         };
         
         FASTLED_DEBUG_LOG('ASYNC_CONTROLLER', 'Function binding verification', functionStatus);
@@ -165,15 +156,17 @@ class FastLEDAsyncController {
 
     /**
      * Setup function for initializing WASM module bindings
-     * @returns {Promise<void>} Promise that resolves when setup is complete
+     * @returns {void} Synchronous setup since extern functions are now synchronous
      */
-    async setup() {
+    setup() {
         try {
             FASTLED_DEBUG_LOG('ASYNC_CONTROLLER', 'Setting up FastLED Async Controller...');
             
-            // Bind main function using cwrap - WITH async flag because main() uses Asyncify
-            this.mainFunction = this.module.cwrap('main', 'number', [], {async: true});
-            // Keep extern functions for compatibility testing
+            // In PROXY_TO_PTHREAD mode, main() runs automatically on a pthread
+            // We only need to bind extern functions for JavaScript control
+            console.log('🔄 PROXY_TO_PTHREAD MODE: main() runs automatically on pthread, binding extern functions only');
+            
+            // Bind extern functions as ASYNC - they are in ASYNCIFY_EXPORTS list
             this.externSetup = this.module.cwrap('extern_setup', 'number', [], {async: true});
             this.externLoop = this.module.cwrap('extern_loop', 'number', [], {async: true});
             this.getFrameData = this.module.cwrap('getFrameData', 'number', ['number']);
@@ -184,19 +177,18 @@ class FastLEDAsyncController {
             FASTLED_DEBUG_LOG('ASYNC_CONTROLLER', 'WASM functions bound successfully');
 
             // Test function availability
-            if (!this.mainFunction) {
-                throw new Error('main() function not available - check WASM exports');
+            if (!this.externSetup || !this.externLoop) {
+                throw new Error('extern_setup() or extern_loop() functions not available - check WASM exports');
             }
 
-            // Call main() once to initialize FastLED (it will return after setup)
-            console.log('🚀 USING HYBRID APPROACH: main() for setup, extern_loop() for pumping');
-            FASTLED_DEBUG_LOG('ASYNC_CONTROLLER', 'Calling main() for one-time initialization...');
-            console.log('📞 Calling main() function for one-time initialization (returns after setup)');
+            // In PROXY_TO_PTHREAD mode:
+            // - main() is automatically called by Emscripten on a pthread 
+            // - Socket proxy functionality is handled automatically
+            // - We control FastLED via extern_setup() and extern_loop() calls
+            // - extern functions are async due to ASYNCIFY_EXPORTS
             
-            // Call main() once for setup - it will return after initialization
-            await this.mainFunction();
-            console.log('✅ main() completed - FastLED initialized, ready for loop pumping');
-            FASTLED_DEBUG_LOG('ASYNC_CONTROLLER', 'main() completed successfully - ready for extern_loop() pumping');
+            console.log('✅ PROXY_TO_PTHREAD setup complete - main() pthread ready, async extern functions bound');
+            FASTLED_DEBUG_LOG('ASYNC_CONTROLLER', 'PROXY_TO_PTHREAD setup complete - ready for async extern function calls');
 
             // Mark setup as completed
             this.setupCompleted = true;
@@ -222,11 +214,7 @@ class FastLEDAsyncController {
             return;
         }
 
-        if (!this.setupCompleted) {
-            console.error('Cannot start loop: setup() must be called first');
-            FASTLED_DEBUG_ERROR('ASYNC_CONTROLLER', 'Cannot start loop: setup() must be called first', null);
-            return;
-        }
+        // No need to check setupCompleted - setup is handled by the loop itself via extern_setup()
 
         console.log('Starting FastLED pure JavaScript async loop...');
         FASTLED_DEBUG_LOG('ASYNC_CONTROLLER', 'Starting FastLED pure JavaScript async loop...');
@@ -282,15 +270,26 @@ class FastLEDAsyncController {
         }
         
                 try {
+            // Call extern_setup() once if it hasn't been called yet
+            if (!this.fastledSetupCalled) {
+                if (shouldLog) {
+                    console.log('🔧 Calling extern_setup() for first-time initialization (async)');
+                    FASTLED_DEBUG_LOG('ASYNC_CONTROLLER', 'Calling extern_setup() for first-time initialization (async)...');
+                }
+                await this.externSetup(); // Now async call
+                this.fastledSetupCalled = true;
+                console.log('✅ extern_setup() completed - FastLED initialized');
+                FASTLED_DEBUG_LOG('ASYNC_CONTROLLER', 'extern_setup() completed successfully');
+            }
+
             // Call extern_loop() to run one iteration of the FastLED loop
-            // This actively pumps the FastLED loop instead of relying on background main()
             if (shouldLog) {
-                console.log('🔄 Calling extern_loop() to pump FastLED loop');
-                FASTLED_DEBUG_LOG('ASYNC_CONTROLLER', 'Calling extern_loop() to pump FastLED loop...');
+                console.log('🔄 Calling extern_loop() to pump FastLED loop (async)');
+                FASTLED_DEBUG_LOG('ASYNC_CONTROLLER', 'Calling extern_loop() to pump FastLED loop (async)...');
             }
 
             // Step 1: Call extern_loop() to run one FastLED loop iteration
-            await this.externLoop();
+            await this.externLoop(); // Now async call
             
             // Step 2: Process the resulting frame data
             await this.processFrame();

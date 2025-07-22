@@ -415,8 +415,8 @@ async function FastLED_SetupAndLoop(moduleInstance, frame_rate) {
     
     FASTLED_DEBUG_LOG('INDEX_JS', 'Globals exposed, calling controller.setup()...');
     
-    // Setup FastLED asynchronously
-    await fastLEDController.setup();
+    // Setup FastLED synchronously
+    fastLEDController.setup();
     
     FASTLED_DEBUG_LOG('INDEX_JS', 'Controller setup completed, starting animation loop...');
     

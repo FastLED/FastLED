@@ -4,24 +4,24 @@
 // FASTLED WASM ENTRY POINT
 // ================================================================================================
 // 
-// This file provides a proper main() entry point for WASM builds, allowing us to remove the
-// --no-entry linker flag. This follows the standard Arduino setup()/loop() pattern but runs
-// as a proper C program with a main() function.
+// This file provides a proper main() entry point for WASM builds with PROXY_TO_PTHREAD support.
+// When PROXY_TO_PTHREAD is enabled, Emscripten automatically moves main() to run on a pthread,
+// while the browser main thread handles events and proxying.
 //
 // Key Features:
-// - Provides main() entry point for WASM module
+// - Provides main() entry point that runs on a pthread (via PROXY_TO_PTHREAD)
 // - Calls setup() once during initialization  
 // - Calls loop() repeatedly in main execution loop
 // - Integrates with FastLED engine events and listeners
 // - Maintains compatibility with existing extern_setup/extern_loop JavaScript bridges
 //
-// Architecture:
-// - main() serves as the primary entry point
-// - setup() is called once for initialization
-// - loop() is called repeatedly for the main execution cycle
-// - Engine events are properly managed throughout the lifecycle
+// Architecture with PROXY_TO_PTHREAD:
+// - Browser main thread: Handles events, DOM, and message proxying
+// - pthread (this main): Runs Arduino-style setup()/loop() cycle
+// - JavaScript controls timing via extern_setup()/extern_loop() calls
+// - Socket proxy thread: Handled automatically by Emscripten
 //
-// This replaces the need for --no-entry and manual JavaScript-driven execution cycles.
+// This enables proper socket proxying while allowing JavaScript to control FastLED timing.
 // ================================================================================================
 
 #include <emscripten.h>
@@ -111,20 +111,28 @@ void fastled_loop_once() {
 } // namespace fl
 
 // ================================================================================================
-// MAIN ENTRY POINT
+// MAIN ENTRY POINT (PROXY_TO_PTHREAD PATTERN)
 // ================================================================================================
 
 int main() {
-    printf("FastLED WASM: Starting main() entry point...\n");
+    printf("FastLED WASM: Starting main() on pthread (PROXY_TO_PTHREAD mode)...\n");
     
-    // Perform one-time setup only
-    fl::fastled_setup_once();
+    // In PROXY_TO_PTHREAD mode:
+    // - This main() function runs on a pthread, not the browser main thread
+    // - The browser main thread handles DOM events and message proxying
+    // - Socket proxy functionality is handled automatically by Emscripten
+    // - JavaScript controls FastLED setup/loop timing via extern_setup()/extern_loop()
     
-    printf("FastLED WASM: Setup complete, main() returning to JavaScript...\n");
+    printf("FastLED WASM: main() pthread ready - waiting for JavaScript control...\n");
     
-    // Return control to JavaScript immediately after setup
-    // JavaScript will control the FastLED loop via extern_loop() calls
-    // Note: With PROXY_TO_PTHREAD, the main thread may continue running for socket proxy
+    // Don't call fastled_setup_once() here - let JavaScript control when setup happens
+    // This allows the JavaScript animation loop to control timing properly
+    
+    // In PROXY_TO_PTHREAD mode, main() should return normally after basic initialization
+    // The pthread will remain alive and available for extern function calls from JavaScript
+    
+    printf("FastLED WASM: main() pthread initialization complete.\n");
+    
     return 0;
 }
 
@@ -133,8 +141,8 @@ int main() {
 // ================================================================================================
 // 
 // These functions maintain compatibility with existing JavaScript code that expects
-// extern_setup and extern_loop functions. They can be called from JavaScript if needed,
-// but the main() function above handles the primary execution flow.
+// extern_setup and extern_loop functions. They are the primary interface for JavaScript
+// to control FastLED execution in PROXY_TO_PTHREAD mode.
 
 extern "C" {
 
