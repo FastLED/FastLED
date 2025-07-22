@@ -1,16 +1,19 @@
-#ifdef __EMSCRIPTEN__
-
-#include <emscripten.h>
-#include <emscripten/val.h>
-
 #include "js_fetch.h"
 #include "fl/warn.h"
 #include "fl/str.h"
 #include "fl/function.h"
 
+#ifdef __EMSCRIPTEN__
+#include <emscripten.h>
+#include <emscripten/val.h>
+#endif
+
 namespace fl {
 
 Fetch fetch;
+
+#ifdef __EMSCRIPTEN__
+// WASM version using JavaScript fetch API
 
 // Global storage for pending callbacks
 static FetchResponseCallback* g_pending_callback = nullptr;
@@ -85,6 +88,29 @@ void FetchRequest::response(const FetchResponseCallback& callback) {
     js_fetch_async(mUrl.c_str());
 }
 
-} // namespace fl
+#else
+// Non-WASM version using mock data
 
-#endif // __EMSCRIPTEN__ 
+void FetchRequest::response(const FetchResponseCallback& callback) {
+    FL_WARN("Mock fetch request to: " << mUrl);
+    
+    // Create mock response data based on the URL
+    fl::string mock_response;
+    
+    if (mUrl.find("fastled.io") != fl::string::npos) {
+        mock_response = "<!DOCTYPE html><html><head><title>FastLED</title></head><body><h1>Welcome to FastLED</h1><p>This is a mock response for non-WASM platforms. FastLED is a library for driving addressable LED strips.</p></body></html>";
+    } else if (mUrl.find("httpbin.org") != fl::string::npos) {
+        mock_response = "{\"slideshow\":{\"author\":\"Yours Truly\",\"date\":\"date of publication\",\"slides\":[{\"title\":\"Wake up to WonderWidgets!\",\"type\":\"all\"},{\"title\":\"Overview\",\"type\":\"all\"}],\"title\":\"Sample Slide Show\"}}";
+    } else {
+        mock_response = "Mock HTTP response for URL: " + mUrl + "\nThis is a simulated response for non-WASM platforms.\nContent-Length: 123\nContent-Type: text/plain";
+    }
+    
+    FL_WARN("Mock response length: " << mock_response.length());
+    
+    // Immediately call the callback with mock data
+    callback(mock_response);
+}
+
+#endif // __EMSCRIPTEN__
+
+} // namespace fl 

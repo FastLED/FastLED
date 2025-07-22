@@ -225,6 +225,14 @@ void StringFormatter::append(uint64_t val, StrN<64> *dst) {
     string_functions::utoa64(val, buf, 10);
     dst->write(buf, strlen(buf));
 }
+
+void StringFormatter::append(i16 val, StrN<64> *dst) {
+    append(static_cast<i32>(val), dst);
+}
+
+void StringFormatter::append(u16 val, StrN<64> *dst) {
+    append(static_cast<u32>(val), dst);
+}
 StringHolder::StringHolder(const char *str) {
     mLength = strlen(str);   // Don't include null terminator in length
     mCapacity = mLength + 1; // Capacity includes null terminator

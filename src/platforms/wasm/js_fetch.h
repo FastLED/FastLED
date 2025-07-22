@@ -1,7 +1,5 @@
 #pragma once
 
-#ifdef __EMSCRIPTEN__
-
 #include "fl/string.h"
 #include "fl/function.h"
 
@@ -40,6 +38,4 @@ public:
 /// Global fetch object for easy access
 extern Fetch fetch;
 
-} // namespace fl
-
-#endif // __EMSCRIPTEN__ 
+} // namespace fl 

@@ -85,6 +85,8 @@ class StringFormatter {
     static void append(i32 val, StrN<FASTLED_STR_INLINED_SIZE> *dst);
     static void append(u32 val, StrN<FASTLED_STR_INLINED_SIZE> *dst);
     static void append(uint64_t val, StrN<FASTLED_STR_INLINED_SIZE> *dst);
+    static void append(i16 val, StrN<FASTLED_STR_INLINED_SIZE> *dst);
+    static void append(u16 val, StrN<FASTLED_STR_INLINED_SIZE> *dst);
     static bool isSpace(char c) {
         return c == ' ' || c == '\t' || c == '\n' || c == '\r';
     }
