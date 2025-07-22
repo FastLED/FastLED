@@ -243,6 +243,8 @@ flags = [
     "-lwebsocket.js",                        # Link WebSocket.js library for socket emulation
     "-sPROXY_POSIX_SOCKETS=1",              # Enable POSIX socket proxying over WebSockets
     "-sPROXY_TO_PTHREAD",                   # Required: move main() off browser main thread for socket proxy
+    "-sWEBSOCKET_SUBPROTOCOL=binary",       # Use binary subprotocol (required by Flask WebSocket proxy)
+    # Note: WebSocket URL configured at runtime via Module.websockifyURL
     
     # Asyncify Support (enables async/await style coding with delay() functions)
     "-sASYNCIFY=1",                         # Enable Asyncify for async function support

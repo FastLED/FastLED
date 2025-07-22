@@ -32,6 +32,9 @@ import './modules/fastled_callbacks.js';
 import { fastLEDEvents, fastLEDPerformanceMonitor } from './modules/fastled_events.js';
 import { FASTLED_DEBUG_LOG, FASTLED_DEBUG_ERROR, FASTLED_DEBUG_TRACE } from './modules/fastled_debug_logger.js';
 
+// Import WebSocket configuration (auto-configures on load)
+import './websocket_config.js';
+
 /** URL parameters for runtime configuration */
 const urlParams = new URLSearchParams(window.location.search);
 
