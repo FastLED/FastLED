@@ -41,7 +41,7 @@ struct is_function_pointer<R(*)(Args...)> {
 template <typename> class function;
 
 template <typename R, typename... Args>
-class function<R(Args...)> {
+class alignas(8) function<R(Args...)> {
 private:
     struct CallableBase {
         virtual R invoke(Args... args) = 0;
@@ -74,7 +74,7 @@ private:
     struct InlinedLambda {
         // Storage for the lambda/functor object
         // Use aligned storage to ensure proper alignment for any type
-        union Storage {
+        union alignas(8) Storage {
             char bytes[kInlineLambdaSize];
             void* alignment_dummy;  // Ensure proper alignment
             long double align_max;  // Ensure maximum alignment

@@ -43,11 +43,15 @@ fl::promise<Response> execute_fetch_request(const fl::string& url, const FetchRe
     // Convert our request to the existing WASM fetch system
     auto wasm_request = WasmFetchRequest(fetch_url);
     
-    // Create a shared copy of the promise for capture
-    auto promise_ptr = fl::make_shared<fl::promise<Response>>(promise);
+    // Capture the promise directly - no need for shared_ptr wrapper since promises are copyable
+    // and already manage their state with shared_ptr internally
+    auto promise_copy = promise;
     
     // Use the existing JavaScript fetch infrastructure
-    wasm_request.response([promise_ptr](const wasm_response& wasm_resp) {
+    wasm_request.response([promise_copy](const wasm_response& wasm_resp) {
+        // Remove const-ness to allow modification of the captured promise
+        auto& mutable_promise = const_cast<fl::promise<Response>&>(promise_copy);
+        
         // Convert WASM response to our Response type
         Response response(wasm_resp.status(), wasm_resp.status_text());
         response.set_body(wasm_resp.text());
@@ -58,7 +62,7 @@ fl::promise<Response> execute_fetch_request(const fl::string& url, const FetchRe
         }
         
         // Complete the promise
-        promise_ptr->complete_with_value(response);
+        mutable_promise.complete_with_value(response);
     });
     
     // Register with fetch manager

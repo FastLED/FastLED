@@ -324,6 +324,129 @@ TEST_CASE("Variant") {
     REQUIRE_EQ(visitor.result, 42);
 }
 
+TEST_CASE("Variant alignment requirements") {
+    // This test verifies that the Variant class alignment fix resolves WASM runtime errors
+    // like "constructor call on misaligned address ... which requires 8 byte alignment"
+    // 
+    // The fix adds alignas(max_align<Types...>::value) to the Variant class declaration
+    // to ensure the entire Variant object (not just its internal storage) is aligned
+    // to the strictest alignment requirement of any contained type.
+    //
+    // Previously, while _storage was aligned within the class, the Variant object itself
+    // could be misaligned, causing &_storage to also be misaligned.
+    
+    // Test types with different alignment requirements
+    struct Align1 { char c; };
+    struct Align2 { short s; };  
+    struct Align4 { int i; };
+    struct alignas(8) Align8 { double d; };
+    struct alignas(16) Align16 { long double ld; };
+    
+    // Test that the Variant class itself is aligned to the maximum requirement
+    {
+        using VariantAlign1 = fl::Variant<Align1>;
+        using VariantAlign2 = fl::Variant<Align1, Align2>;
+        using VariantAlign4 = fl::Variant<Align1, Align2, Align4>;
+        using VariantAlign8 = fl::Variant<Align1, Align2, Align4, Align8>;
+        using VariantAlign16 = fl::Variant<Align1, Align2, Align4, Align8, Align16>;
+        
+        // Verify the class alignment matches the maximum alignment of contained types
+        REQUIRE_EQ(alignof(VariantAlign1), alignof(Align1));
+        REQUIRE_EQ(alignof(VariantAlign2), alignof(Align2));
+        REQUIRE_EQ(alignof(VariantAlign4), alignof(Align4));
+        REQUIRE_EQ(alignof(VariantAlign8), alignof(Align8));
+        REQUIRE_EQ(alignof(VariantAlign16), alignof(Align16));
+    }
+    
+    // Test that Variant instances are actually aligned properly in memory
+    {
+        using VariantAlign8 = fl::Variant<Align1, Align8>;
+        
+        VariantAlign8 v1;
+        VariantAlign8 v2;
+        
+        // Check that the variant objects themselves are properly aligned
+        REQUIRE_EQ(reinterpret_cast<uintptr_t>(&v1) % alignof(Align8), 0);
+        REQUIRE_EQ(reinterpret_cast<uintptr_t>(&v2) % alignof(Align8), 0);
+        
+        // Test storing and retrieving aligned types
+        v1 = Align8{3.14159};
+        REQUIRE(v1.is<Align8>());
+        REQUIRE_EQ(v1.get<Align8>().d, 3.14159);
+        
+        // Check that the stored object's address is properly aligned
+        Align8* ptr = v1.ptr<Align8>();
+        REQUIRE_NE(ptr, nullptr);
+        REQUIRE_EQ(reinterpret_cast<uintptr_t>(ptr) % alignof(Align8), 0);
+    }
+    
+    // Test the specific case that was failing - function objects requiring 8-byte alignment
+    {
+        using CallbackFunction = fl::function<void(int)>;
+        using VariantWithCallback = fl::Variant<int, CallbackFunction>;
+        
+        VariantWithCallback v;
+        
+        // Verify class alignment
+        REQUIRE_GE(alignof(VariantWithCallback), alignof(CallbackFunction));
+        
+        // Test storing a function that requires alignment
+        CallbackFunction func = [](int x) { 
+            // Simple lambda to test alignment
+            (void)x;
+        };
+        
+        v = fl::move(func);
+        REQUIRE(v.is<CallbackFunction>());
+        
+        // Verify the stored function's address is properly aligned
+        CallbackFunction* func_ptr = v.ptr<CallbackFunction>();
+        REQUIRE_NE(func_ptr, nullptr);
+        REQUIRE_EQ(reinterpret_cast<uintptr_t>(func_ptr) % alignof(CallbackFunction), 0);
+        
+        // Test that the function can be called without alignment errors
+        (*func_ptr)(42); // Should not crash or trigger alignment errors
+    }
+    
+    // Test array of variants to ensure consistent alignment
+    {
+        using VariantAlign8 = fl::Variant<int, Align8>;
+        
+        VariantAlign8 variants[10];
+        
+        // Each variant in the array should be properly aligned
+        for (int i = 0; i < 10; ++i) {
+            REQUIRE_EQ(reinterpret_cast<uintptr_t>(&variants[i]) % alignof(Align8), 0);
+            
+            variants[i] = Align8{static_cast<double>(i) * 3.14159};
+            REQUIRE(variants[i].is<Align8>());
+            
+            Align8* ptr = variants[i].ptr<Align8>();
+            REQUIRE_NE(ptr, nullptr);
+            REQUIRE_EQ(reinterpret_cast<uintptr_t>(ptr) % alignof(Align8), 0);
+        }
+    }
+    
+    // Test heap-allocated variants maintain alignment
+    {
+        using VariantAlign16 = fl::Variant<char, Align16>;
+        
+        auto* heap_variant = new VariantAlign16();
+        
+        // Even heap-allocated variants should be properly aligned
+        REQUIRE_EQ(reinterpret_cast<uintptr_t>(heap_variant) % alignof(Align16), 0);
+        
+        *heap_variant = Align16{1.23456789L};
+        REQUIRE(heap_variant->is<Align16>());
+        
+        Align16* ptr = heap_variant->ptr<Align16>();
+        REQUIRE_NE(ptr, nullptr);
+        REQUIRE_EQ(reinterpret_cast<uintptr_t>(ptr) % alignof(Align16), 0);
+        
+        delete heap_variant;
+    }
+}
+
 
 // TEST_CASE("Optional") {
 //     Optional<int> opt;

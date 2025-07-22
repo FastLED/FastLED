@@ -19,15 +19,19 @@
 namespace fl {
 
 // Aligned memory block for inlined data structures.
-template <typename T, fl::size N> struct InlinedMemoryBlock {
+template <typename T, fl::size N> 
+struct alignas(8) InlinedMemoryBlock {
     // using MemoryType = uinptr_t;
     typedef fl::uptr MemoryType;
     enum {
         kTotalBytes = N * sizeof(T),
-        kAlign = sizeof(MemoryType),
+        // Force 8-byte alignment to match alignas(8) declaration
+        kAlign = 8,
         kExtraSize =
             (kTotalBytes % kAlign) ? (kAlign - (kTotalBytes % kAlign)) : 0,
-        kBlockSize = kTotalBytes / sizeof(MemoryType) + kExtraSize,
+        // Fix: calculate total bytes first, then convert to MemoryType units
+        kTotalBytesAligned = kTotalBytes + kExtraSize,
+        kBlockSize = (kTotalBytesAligned + sizeof(MemoryType) - 1) / sizeof(MemoryType),
     };
 
     InlinedMemoryBlock() {
@@ -71,7 +75,8 @@ template <typename T, fl::size N> struct InlinedMemoryBlock {
 // Because of this limitation, this vector is not a drop in replacement for
 // std::vector. However it used for vector_inlined<T, N> which allows spill over
 // to a heap vector when size > N.
-template <typename T, fl::size N> class FixedVector {
+template <typename T, fl::size N> 
+class alignas(8) FixedVector {
   private:
     InlinedMemoryBlock<T, N> mMemoryBlock;
 
@@ -337,7 +342,8 @@ template <typename T, fl::size N> class FixedVector {
     fl::size current_size = 0;
 };
 
-template <typename T, typename Allocator = fl::allocator<T>> class HeapVector {
+template <typename T, typename Allocator = fl::allocator<T>> 
+class alignas(8) HeapVector {
   private:
     T* mArray = nullptr;
     fl::size mCapacity = 0;
@@ -734,7 +740,8 @@ template <typename T, typename Allocator = fl::allocator<T>> class HeapVector {
     }
 };
 
-template <typename T, typename LessThan = fl::less<T>> class SortedHeapVector {
+template <typename T, typename LessThan = fl::less<T>> 
+class alignas(8) SortedHeapVector {
   private:
     HeapVector<T> mArray;
     LessThan mLess;
@@ -874,7 +881,8 @@ template <typename T, typename LessThan = fl::less<T>> class SortedHeapVector {
     const T *data() const { return mArray.data(); }
 };
 
-template <typename T, fl::size INLINED_SIZE> class InlinedVector {
+template <typename T, fl::size INLINED_SIZE> 
+class alignas(8) InlinedVector {
   public:
     using iterator = typename FixedVector<T, INLINED_SIZE>::iterator;
     using const_iterator =

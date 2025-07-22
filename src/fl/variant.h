@@ -7,7 +7,8 @@
 namespace fl {
 
 // A variant that can hold any of N different types
-template <typename... Types> class Variant {
+template <typename... Types> 
+class alignas(max_align<Types...>::value) Variant {
   public:
     using Tag = u8;
     static constexpr Tag Empty = 0;
