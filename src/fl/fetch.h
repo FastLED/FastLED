@@ -6,8 +6,8 @@
 /// This API provides both simple callback-based and JavaScript-like promise-based interfaces
 /// for HTTP requests. Works on WASM/browser platforms with real fetch, provides stubs on embedded.
 ///
-/// **WASM Optimization:** On WASM platforms, `delay()` automatically pumps fetch requests 
-/// in 1ms intervals, making delay time useful for processing async operations.
+/// **WASM Optimization:** On WASM platforms, `delay()` automatically pumps all async tasks 
+/// (fetch, timers, etc.) in 1ms intervals, making delay time useful for processing async operations.
 ///
 /// @section Simple Callback Usage
 /// @code
@@ -44,10 +44,10 @@
 /// 
 /// void loop() {
 ///     // Fetch promises are automatically updated through FastLED's engine events!
-///     // On WASM platforms, delay() also pumps fetch requests automatically.
-///     // No manual fl::fetch_update() needed - just use normal FastLED loop
+///     // On WASM platforms, delay() also pumps all async tasks automatically.
+///     // No manual updates needed - just use normal FastLED loop
 ///     FastLED.show();
-///     delay(16); // delay() automatically pumps fetch requests on WASM
+///     delay(16); // delay() automatically pumps all async tasks on WASM
 /// }
 /// @endcode
 
@@ -60,6 +60,7 @@
 #include "fl/optional.h"
 #include "fl/function.h"
 #include "fl/ptr.h"
+#include "fl/async.h"
 
 namespace fl {
 
@@ -231,12 +232,18 @@ private:
 class FetchEngineListener;
 
 /// Internal fetch manager for promise tracking
-class FetchManager {
+class FetchManager : public AsyncRunner {
 public:
     static FetchManager& instance();
     
     void register_promise(const fl::promise<Response>& promise);
-    void update();
+    
+    // AsyncRunner interface
+    void update() override;
+    bool has_active_tasks() const override;
+    size_t active_task_count() const override;
+    
+    // Legacy API
     fl::size active_requests() const;
     void cleanup_completed_promises();
 
@@ -288,7 +295,8 @@ FetchRequest fetch_patch(const fl::string& url);
 /// Generic request with options (like fetch(url, options))
 fl::promise<Response> fetch_request(const fl::string& url, const RequestOptions& options = RequestOptions());
 
-/// Manual update for active promises (automatic updates happen via engine events)
+/// Legacy manual update for fetch promises (use fl::asyncrun() for new code)
+/// @deprecated Use fl::asyncrun() instead - this calls asyncrun() internally
 void fetch_update();
 
 /// Get number of active requests

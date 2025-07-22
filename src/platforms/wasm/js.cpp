@@ -31,9 +31,9 @@
 extern void setup();
 extern void loop();
 
-// Forward declaration for fetch update function
+// Forward declaration for async update function
 namespace fl {
-    void fetch_update();
+    void asyncrun();
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -42,23 +42,27 @@ namespace fl {
 
 extern "C" {
 
-/// @brief Custom delay implementation for WASM that pumps fetch requests
+/// @brief Custom delay implementation for WASM that pumps async tasks
 /// @param ms Number of milliseconds to delay
 /// 
 /// This optimized delay() breaks the delay period into 1ms chunks and pumps
-/// fetch requests during each interval, making delay time useful for processing
-/// async operations instead of just blocking.
+/// all async tasks (fetch, timers, etc.) during each interval, making delay 
+/// time useful for processing async operations instead of just blocking.
 void delay(int ms) {
     if (ms <= 0) {
         return;
     }
-
+    
     uint32_t end = millis() + ms;
     
-    // Break delay into 1ms chunks and pump fetch requests
+    // Break delay into 1ms chunks and pump all async tasks
     while (millis() < end) {
-        // Update fetch promises during delay
-        fl::fetch_update();
+        // Update all async tasks (fetch, timers, etc.) during delay
+        fl::asyncrun();
+
+        if (millis() >= end) {
+            break;
+        }
         
         // Sleep for 1ms using Emscripten's sleep
         emscripten_sleep(1);

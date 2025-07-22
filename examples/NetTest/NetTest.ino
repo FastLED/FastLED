@@ -38,9 +38,9 @@ void setup() {
 }
 
 void loop() {
-    // Note: fetch promises are automatically updated through FastLED's engine events!
-    // On WASM platforms, delay() also pumps fetch requests in 1ms intervals.
-    // No manual fl::fetch_update() needed - everything happens automatically.
+    // Note: fetch promises are automatically updated through FastLED's async system!
+    // On WASM platforms, delay() also pumps all async tasks in 1ms intervals.
+    // No manual updates needed - everything happens automatically.
 
     EVERY_N_MILLISECONDS(2000) {
         // Test 1: Simple GET request (like JavaScript fetch)
@@ -90,8 +90,8 @@ void loop() {
         // Keep LEDs updated
         FastLED.show();
         
-        // This delay will automatically pump fetch requests on WASM platforms!
-        // The delay is broken into 1ms chunks with fetch pumping between each chunk.
+        // This delay will automatically pump all async tasks on WASM platforms!
+        // The delay is broken into 1ms chunks with async task pumping between each chunk.
         delay(10);
     }
 }

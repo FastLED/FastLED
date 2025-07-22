@@ -4,6 +4,7 @@
 #include "fl/mutex.h"
 #include "fl/singleton.h"
 #include "fl/engine_events.h"
+#include "fl/async.h"
 
 #ifdef __EMSCRIPTEN__
 #include <emscripten.h>
@@ -121,7 +122,7 @@ fl::promise<Response> FetchRequest::catch_(fl::function<void(const fl::Error&)> 
 
 // ========== Engine Events Integration ==========
 
-/// Internal engine listener for automatic fetch updates
+/// Internal engine listener for automatic async updates
 class FetchEngineListener : public EngineEvents::Listener {
 public:
     FetchEngineListener() = default;
@@ -130,8 +131,8 @@ public:
     }
     
     void onEndFrame() override {
-        // Update all fetch promises at the end of each frame
-        FetchManager::instance().update();
+        // Update all async tasks (fetch, timers, etc.) at the end of each frame
+        fl::asyncrun();
     }
 };
 
@@ -142,10 +143,14 @@ FetchManager& FetchManager::instance() {
 }
 
 void FetchManager::register_promise(const fl::promise<Response>& promise) {
-    // Auto-register engine listener on first promise
-    if (mActivePromises.empty() && !mEngineListener) {
-        mEngineListener = fl::make_unique<FetchEngineListener>();
-        EngineEvents::addListener(mEngineListener.get());
+    // Auto-register with async system and engine listener on first promise
+    if (mActivePromises.empty()) {
+        AsyncManager::instance().register_runner(this);
+        
+        if (!mEngineListener) {
+            mEngineListener = fl::make_unique<FetchEngineListener>();
+            EngineEvents::addListener(mEngineListener.get());
+        }
     }
     
     mActivePromises.push_back(promise);
@@ -162,11 +167,23 @@ void FetchManager::update() {
     // Then clean up completed/invalid promises in a separate pass
     cleanup_completed_promises();
     
-    // Auto-remove engine listener when no more promises
-    if (mActivePromises.empty() && mEngineListener) {
-        EngineEvents::removeListener(mEngineListener.get());
-        mEngineListener.reset();
+    // Auto-unregister from async system when no more promises
+    if (mActivePromises.empty()) {
+        AsyncManager::instance().unregister_runner(this);
+        
+        if (mEngineListener) {
+            EngineEvents::removeListener(mEngineListener.get());
+            mEngineListener.reset();
+        }
     }
+}
+
+bool FetchManager::has_active_tasks() const {
+    return !mActivePromises.empty();
+}
+
+size_t FetchManager::active_task_count() const {
+    return mActivePromises.size();
 }
 
 fl::size FetchManager::active_requests() const {
@@ -231,8 +248,9 @@ fl::promise<Response> fetch_request(const fl::string& url, const RequestOptions&
 }
 
 void fetch_update() {
-    // Manual update still available for backwards compatibility
-    FetchManager::instance().update();
+    // Legacy function - use fl::asyncrun() for new code
+    // This provides backwards compatibility for existing code
+    fl::asyncrun();
 }
 
 fl::size fetch_active_requests() {
