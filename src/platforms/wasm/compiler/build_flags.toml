@@ -244,6 +244,7 @@ flags = [
     "-sASYNCIFY=1",                         # Enable Asyncify for async function support
     "-sASYNCIFY_STACK_SIZE=10485760",       # 10MB stack for asyncify operations (large for complex sketches)
     "-sASYNCIFY_EXPORTS=['_main','_extern_setup','_extern_loop']", # Allow main and extern FastLED functions to be async
+    "-sASYNCIFY_IMPORTS=['js_fetch_async']", # JavaScript functions that use Asyncify.handleAsync
 ]
 
 [linking.library]
