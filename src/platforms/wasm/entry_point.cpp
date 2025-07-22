@@ -123,17 +123,23 @@ int main() {
     // - Socket proxy functionality is handled automatically by Emscripten
     // - JavaScript controls FastLED setup/loop timing via extern_setup()/extern_loop()
     
-    printf("FastLED WASM: main() pthread ready - waiting for JavaScript control...\n");
+    printf("FastLED WASM: main() pthread ready - staying alive for extern function calls...\n");
     
-    // Don't call fastled_setup_once() here - let JavaScript control when setup happens
-    // This allows the JavaScript animation loop to control timing properly
+    // Option A: Stay alive but let JavaScript control everything
+    // - Don't call setup() or loop() here - let JavaScript control timing
+    // - Keep pthread alive so extern_setup()/extern_loop() can execute
+    // - JavaScript uses requestAnimationFrame for proper 60fps timing
+    // - Avoids race conditions between main() loop and JavaScript loop
     
-    // In PROXY_TO_PTHREAD mode, main() should return normally after basic initialization
-    // The pthread will remain alive and available for extern function calls from JavaScript
+    printf("FastLED WASM: main() entering sleep loop - JavaScript controls FastLED via extern functions...\n");
     
-    printf("FastLED WASM: main() pthread initialization complete.\n");
+    while (true) {
+        // Stay alive for extern function calls from JavaScript
+        // Use longer sleep since we're not doing any work here
+        emscripten_sleep(100); // 100ms - just keeping pthread alive
+    }
     
-    return 0;
+    return 0; // Never reached
 }
 
 // ================================================================================================
