@@ -217,9 +217,11 @@ public:
         return *this;
     }
     
-    /// Execute request and return promise (like JavaScript fetch())
-    fl::promise<Response> then(fl::function<void(const Response&)> callback);
-    fl::promise<Response> catch_(fl::function<void(const fl::Error&)> callback);
+    /// Get the URL for this request
+    const fl::string& url() const { return mUrl; }
+    
+    /// Get the options for this request  
+    const RequestOptions& options() const { return mOptions; }
 
 private:
     fl::string mUrl;
@@ -272,25 +274,25 @@ inline void fetch(const char* url, const FetchCallback& callback) {
 // ========== Promise-Based API (JavaScript-like) ==========
 
 /// HTTP GET request
-FetchRequest fetch_get(const fl::string& url);
+fl::promise<Response> fetch_get(const fl::string& url, const FetchRequest& request = FetchRequest(""));
 
 /// HTTP POST request
-FetchRequest fetch_post(const fl::string& url);
+fl::promise<Response> fetch_post(const fl::string& url, const FetchRequest& request = FetchRequest(""));
 
 /// HTTP PUT request
-FetchRequest fetch_put(const fl::string& url);
+fl::promise<Response> fetch_put(const fl::string& url, const FetchRequest& request = FetchRequest(""));
 
 /// HTTP DELETE request
-FetchRequest fetch_delete(const fl::string& url);
+fl::promise<Response> fetch_delete(const fl::string& url, const FetchRequest& request = FetchRequest(""));
 
 /// HTTP HEAD request
-FetchRequest fetch_head(const fl::string& url);
+fl::promise<Response> fetch_head(const fl::string& url, const FetchRequest& request = FetchRequest(""));
 
 /// HTTP OPTIONS request
-FetchRequest fetch_options(const fl::string& url);
+fl::promise<Response> fetch_options(const fl::string& url, const FetchRequest& request = FetchRequest(""));
 
 /// HTTP PATCH request
-FetchRequest fetch_patch(const fl::string& url);
+fl::promise<Response> fetch_patch(const fl::string& url, const FetchRequest& request = FetchRequest(""));
 
 /// Generic request with options (like fetch(url, options))
 fl::promise<Response> fetch_request(const fl::string& url, const RequestOptions& options = RequestOptions());

@@ -52,7 +52,7 @@
 
 namespace fl {
 
-// Forward declaration
+// Forward declarations
 class AsyncManager;
 
 /// @brief Generic asynchronous task runner interface

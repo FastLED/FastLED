@@ -249,6 +249,28 @@ private:
 public:
     function() = default;
     
+    // Copy constructor - properly handle Variant alignment
+    function(const function& other) : storage_(other.storage_) {}
+    
+    // Move constructor - properly handle Variant alignment  
+    function(function&& other) noexcept : storage_(fl::move(other.storage_)) {}
+    
+    // Copy assignment
+    function& operator=(const function& other) {
+        if (this != &other) {
+            storage_ = other.storage_;
+        }
+        return *this;
+    }
+    
+    // Move assignment
+    function& operator=(function&& other) noexcept {
+        if (this != &other) {
+            storage_ = fl::move(other.storage_);
+        }
+        return *this;
+    }
+    
     // 1) Free function constructor - stored inline!
     function(R (*fp)(Args...)) {
         storage_ = FreeFunctionCallable(fp);

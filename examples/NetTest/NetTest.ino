@@ -12,6 +12,16 @@
 /// The example toggles between these two approaches every 10 seconds to demonstrate
 /// both patterns working with the same underlying fetch API.
 ///
+/// NEW API STRUCTURE:
+/// - FetchRequest is now a pure data type that holds request configuration
+/// - fetch_get() and similar functions return fl::promise<Response> directly
+/// - FetchRequest can be passed as a second parameter to configure the request
+///
+/// Examples:
+/// - fl::fetch_get("http://example.com")  // Simple GET with defaults
+/// - fl::fetch_get("http://example.com", request)  // GET with custom FetchRequest config
+/// - FetchRequest request(""); request.timeout(5000).header("User-Agent", "FastLED");
+///
 /// For WASM:
 /// 1. Install FastLED: `pip install fastled`
 /// 2. cd into this examples directory
@@ -56,6 +66,7 @@ void setup() {
 void test_promise_approach() {
     FL_WARN("🔄 APPROACH 1: Using Promise-based pattern (.then/.catch_)");
     
+    // Example 1: Simple fetch with default FetchRequest
     fl::fetch_get("http://fastled.io")
         .then([](const fl::Response &response) {
             if (response.ok()) {
@@ -102,8 +113,13 @@ void test_promise_approach() {
 void test_await_approach() {
     FL_WARN("🔄 APPROACH 2: Using fl::await pattern");
     
+    // Example: Using FetchRequest as a data type to configure the request
+    fl::FetchRequest request("");
+    request.timeout(5000)  // 5 second timeout
+           .header("User-Agent", "FastLED/NetTest");
+    
     // Use fl::await to handle the async fetch in a synchronous style
-    auto promise = fl::fetch_get("http://fastled.io");
+    auto promise = fl::fetch_get("http://fastled.io", request);
     auto result = fl::await(promise);  // Type automatically deduced!
     
     if (result.ok()) {

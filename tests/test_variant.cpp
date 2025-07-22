@@ -5,9 +5,199 @@
 #include "fl/variant.h"
 #include "fl/optional.h"
 #include "fl/str.h"
+#include "fl/shared_ptr.h"
+#include "fl/function.h"
 
 using namespace fl;
 
+// Test object that tracks construction/destruction for move semantics testing
+struct TrackedObject {
+    static int construction_count;
+    static int destruction_count;
+    static int move_construction_count;
+    static int copy_construction_count;
+    
+    int value;
+    bool moved_from;
+    
+    TrackedObject(int v = 0) : value(v), moved_from(false) {
+        construction_count++;
+    }
+    
+    TrackedObject(const TrackedObject& other) : value(other.value), moved_from(false) {
+        copy_construction_count++;
+    }
+    
+    TrackedObject(TrackedObject&& other) noexcept : value(other.value), moved_from(false) {
+        other.moved_from = true;
+        move_construction_count++;
+    }
+    
+    TrackedObject& operator=(const TrackedObject& other) {
+        if (this != &other) {
+            value = other.value;
+            moved_from = false;
+        }
+        return *this;
+    }
+    
+    TrackedObject& operator=(TrackedObject&& other) noexcept {
+        if (this != &other) {
+            value = other.value;
+            moved_from = false;
+            other.moved_from = true;
+        }
+        return *this;
+    }
+    
+    ~TrackedObject() {
+        destruction_count++;
+    }
+    
+    static void reset_counters() {
+        construction_count = 0;
+        destruction_count = 0;
+        move_construction_count = 0;
+        copy_construction_count = 0;
+    }
+};
+
+// Static member definitions
+int TrackedObject::construction_count = 0;
+int TrackedObject::destruction_count = 0;
+int TrackedObject::move_construction_count = 0;
+int TrackedObject::copy_construction_count = 0;
+
+TEST_CASE("Variant move semantics and RAII") {
+    // Test the core issue: moved-from variants should be empty and not destroy moved-from objects
+    TrackedObject::reset_counters();
+    
+    // Test 1: Verify moved-from variant is empty
+    {
+        Variant<int, TrackedObject> source(TrackedObject(42));
+        CHECK(source.is<TrackedObject>());
+        
+        // Move construct - this is where the bug was
+        Variant<int, TrackedObject> destination(fl::move(source));
+        
+        // Critical test: source should be empty after move
+        CHECK(source.empty());
+        CHECK(!source.is<TrackedObject>());
+        CHECK(!source.is<int>());
+        
+        // destination should have the object
+        CHECK(destination.is<TrackedObject>());
+        CHECK_EQ(destination.ptr<TrackedObject>()->value, 42);
+    }
+    
+    TrackedObject::reset_counters();
+    
+    // Test 2: Verify moved-from variant via assignment is empty
+    {
+        Variant<int, TrackedObject> source(TrackedObject(100));
+        Variant<int, TrackedObject> destination;
+        
+        CHECK(source.is<TrackedObject>());
+        CHECK(destination.empty());
+        
+        // Move assign - this is where the bug was
+        destination = fl::move(source);
+        
+        // Critical test: source should be empty after move
+        CHECK(source.empty());
+        CHECK(!source.is<TrackedObject>());
+        CHECK(!source.is<int>());
+        
+        // destination should have the object
+        CHECK(destination.is<TrackedObject>());
+        CHECK_EQ(destination.ptr<TrackedObject>()->value, 100);
+    }
+    
+    TrackedObject::reset_counters();
+    
+    // Test 3: Simulate the original fetch callback scenario
+    // The key issue was that function objects containing shared_ptr were being destroyed
+    // after being moved, causing use-after-free in the shared_ptr reference counting
+    {
+        using MockCallback = fl::function<void()>;
+        auto shared_resource = fl::make_shared<TrackedObject>(999);
+        
+        // Create callback that captures shared_ptr (like fetch callbacks did)
+        MockCallback callback = [shared_resource]() {
+            // Use the resource
+            FL_WARN("Using resource with value: " << shared_resource->value);
+        };
+        
+        // Store in variant (like WasmFetchCallbackManager did)
+        Variant<int, MockCallback> callback_variant(fl::move(callback));
+        CHECK(callback_variant.is<MockCallback>());
+        
+        // Extract via move (like takeCallback did) - this was causing heap-use-after-free
+        Variant<int, MockCallback> extracted_callback(fl::move(callback_variant));
+        
+        // Original variant should be empty - this is the key fix
+        CHECK(callback_variant.empty());
+        CHECK(!callback_variant.is<MockCallback>());
+        
+        // Extracted callback should work and shared_ptr should be valid
+        CHECK(extracted_callback.is<MockCallback>());
+        CHECK_EQ(shared_resource.use_count(), 2); // One in extracted callback, one local
+        
+        // Call the extracted callback - should not crash
+        if (auto* cb = extracted_callback.ptr<MockCallback>()) {
+            (*cb)();
+        }
+        
+        // Shared resource should still be valid
+        CHECK_EQ(shared_resource.use_count(), 2);
+    }
+}
+
+TEST_CASE("HashMap iterator-based erase") {
+    fl::hash_map<int, fl::string> map;
+    
+    // Fill the map with some data
+    map[1] = "one";
+    map[2] = "two";
+    map[3] = "three";
+    map[4] = "four";
+    map[5] = "five";
+    
+    CHECK_EQ(map.size(), 5);
+    
+    // Test iterator-based erase
+    auto it = map.find(3);
+    CHECK(it != map.end());
+    CHECK_EQ(it->second, "three");
+    
+    // Erase using iterator - should return iterator to next element
+    auto next_it = map.erase(it);
+    CHECK_EQ(map.size(), 4);
+    CHECK(map.find(3) == map.end()); // Element should be gone
+    
+    // Verify all other elements are still there
+    CHECK(map.find(1) != map.end());
+    CHECK(map.find(2) != map.end());
+    CHECK(map.find(4) != map.end());
+    CHECK(map.find(5) != map.end());
+    
+    // Test erasing at end
+    auto end_it = map.find(999); // Non-existent key
+    CHECK(end_it == map.end());
+    auto result_it = map.erase(end_it); // Should handle gracefully
+    CHECK(result_it == map.end());
+    CHECK_EQ(map.size(), 4); // Size should be unchanged
+    
+    // Test erasing all remaining elements using iterators
+    while (!map.empty()) {
+        auto first = map.begin();
+        map.erase(first);
+    }
+    CHECK_EQ(map.size(), 0);
+    CHECK(map.empty());
+}
+
+// Test the original test cases
 TEST_CASE("Variant tests") {
     // 1) Default is empty
     Variant<int, fl::string> v;

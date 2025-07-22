@@ -23,6 +23,7 @@ and removals.
 #include "fl/vector.h"
 #include "fl/warn.h"
 #include "fl/compiler_control.h"
+#include "fl/math_macros.h"
 
 namespace fl {
 
@@ -71,7 +72,7 @@ class HashMap {
     struct iterator {
         // Standard iterator typedefs
         // using difference_type = std::ptrdiff_t;
-        using value_type = pair<const Key, T>;
+        using value_type = pair<const Key, T>;  // Keep const Key as per standard
         using pointer = value_type *;
         using reference = value_type &;
         // using iterator_category = std::forward_iterator_tag;
@@ -87,7 +88,12 @@ class HashMap {
         }
 
         pointer operator->() {
-            _cached_value = operator*();
+            // Use reinterpret_cast since pair<const Key, T> and pair<Key, T> are different types
+            // but have the same memory layout, then destroy/reconstruct to avoid assignment issues
+            using mutable_value_type = pair<Key, T>;
+            auto& mutable_cached = *reinterpret_cast<mutable_value_type*>(&_cached_value);
+            mutable_cached.~mutable_value_type();
+            new (&mutable_cached) mutable_value_type(operator*());
             return &_cached_value;
         }
 
@@ -120,6 +126,7 @@ class HashMap {
         HashMap *_map;
         fl::size _idx;
         mutable value_type _cached_value;
+        friend class HashMap;
     };
 
     struct const_iterator {
@@ -142,10 +149,12 @@ class HashMap {
         }
 
         pointer operator->() const {
-            // Reconstruct cached value to avoid assignment to const member
-            auto &e = _map->_buckets[_idx];
-            _cached_value.~value_type();
-            new (&_cached_value) value_type(e.key, e.value);
+            // Use reinterpret_cast since pair<const Key, T> and pair<Key, T> are different types
+            // but have the same memory layout, then destroy/reconstruct to avoid assignment issues
+            using mutable_value_type = pair<Key, T>;
+            auto& mutable_cached = *reinterpret_cast<mutable_value_type*>(&_cached_value);
+            mutable_cached.~mutable_value_type();
+            new (&mutable_cached) mutable_value_type(operator*());
             return &_cached_value;
         }
 
@@ -276,6 +285,23 @@ class HashMap {
 
     bool erase(const Key &key) { return remove(key); }
 
+    // Iterator-based erase - more efficient when you already have the iterator position
+    iterator erase(iterator it) {
+        if (it == end() || it._map != this) {
+            return end(); // Invalid iterator
+        }
+        
+        // Mark the current position as deleted
+        mark_deleted(it._idx);
+        --_size;
+        ++_tombstones;
+        
+        // Advance to next valid element and return iterator to it
+        ++it._idx;
+        it.advance_to_occupied();
+        return it;
+    }
+
     void clear() {
         _buckets.assign(_buckets.size(), Entry{});
         _occupied.reset();
@@ -357,7 +383,7 @@ class HashMap {
         _deleted.reset(idx);
     }
 
-    struct Entry {
+    struct alignas(fl::max_align<Key, T>::value) Entry {
         Key key;
         T value;
         void swap(Entry &other) {

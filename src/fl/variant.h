@@ -2,6 +2,7 @@
 
 #include "fl/inplacenew.h"  // for fl::move, fl::forward, in‐place new
 #include "fl/type_traits.h" // for fl::enable_if, fl::is_same, etc.
+#include "fl/bit_cast.h"    // for safe type-punning
 
 namespace fl {
 
@@ -36,7 +37,8 @@ template <typename... Types> class Variant {
     Variant(Variant &&other) noexcept : _tag(Empty) {
         if (!other.empty()) {
             move_construct_from(other);
-            other.reset();
+            // After moving, mark other as empty to prevent destructor calls on moved-from objects
+            other._tag = Empty;
         }
     }
 
@@ -57,7 +59,8 @@ template <typename... Types> class Variant {
             reset();
             if (!other.empty()) {
                 move_construct_from(other);
-                other.reset();
+                // After moving, mark other as empty to prevent destructor calls on moved-from objects
+                other._tag = Empty;
             }
         }
         return *this;
@@ -105,24 +108,16 @@ template <typename... Types> class Variant {
 
     template <typename T> T *ptr() {
         if (!is<T>()) return nullptr;
-        // Safe approach using union to avoid strict aliasing violations
-        union {
-            char* char_ptr;
-            T* typed_ptr;
-        } converter;
-        converter.char_ptr = &_storage[0];
-        return converter.typed_ptr;
+        // Use bit_cast_ptr for safe type-punning on properly aligned storage
+        // The storage is guaranteed to be properly aligned by alignas(max_align<Types...>::value)
+        return fl::bit_cast_ptr<T>(&_storage[0]);
     }
 
     template <typename T> const T *ptr() const {
         if (!is<T>()) return nullptr;
-        // Safe approach using union to avoid strict aliasing violations
-        union {
-            const char* char_ptr;
-            const T* typed_ptr;
-        } converter;
-        converter.char_ptr = &_storage[0];
-        return converter.typed_ptr;
+        // Use bit_cast_ptr for safe type-punning on properly aligned storage
+        // The storage is guaranteed to be properly aligned by alignas(max_align<Types...>::value)
+        return fl::bit_cast_ptr<const T>(&_storage[0]);
     }
 
     /// @brief Get a reference to the stored value of type T
@@ -191,24 +186,18 @@ template <typename... Types> class Variant {
     // –– helper for the visit table
     template <typename T, typename Visitor>
     static void visit_fn(void *storage, Visitor &v) {
-        // Safe approach using union to avoid strict aliasing violations
-        union {
-            void* void_ptr;
-            T* typed_ptr;
-        } converter;
-        converter.void_ptr = storage;
-        v.accept(*converter.typed_ptr);
+        // Use bit_cast_ptr for safe type-punning on properly aligned storage
+        // The storage is guaranteed to be properly aligned by alignas(max_align<Types...>::value)
+        T* typed_ptr = fl::bit_cast_ptr<T>(storage);
+        v.accept(*typed_ptr);
     }
 
     template <typename T, typename Visitor>
     static void visit_fn_const(const void *storage, Visitor &v) {
-        // Safe approach using union to avoid strict aliasing violations
-        union {
-            const void* void_ptr;
-            const T* typed_ptr;
-        } converter;
-        converter.void_ptr = storage;
-        v.accept(*converter.typed_ptr);
+        // Use bit_cast_ptr for safe type-punning on properly aligned storage
+        // The storage is guaranteed to be properly aligned by alignas(max_align<Types...>::value)
+        const T* typed_ptr = fl::bit_cast_ptr<const T>(storage);
+        v.accept(*typed_ptr);
     }
 
     // –– destroy via table
@@ -221,13 +210,10 @@ template <typename... Types> class Variant {
     }
 
     template <typename T> static void destroy_fn(void *storage) {
-        // Safe approach using union to avoid strict aliasing violations
-        union {
-            void* void_ptr;
-            T* typed_ptr;
-        } converter;
-        converter.void_ptr = storage;
-        converter.typed_ptr->~T();
+        // Use bit_cast_ptr for safe type-punning on properly aligned storage
+        // The storage is guaranteed to be properly aligned by alignas(max_align<Types...>::value)
+        T* typed_ptr = fl::bit_cast_ptr<T>(storage);
+        typed_ptr->~T();
     }
 
     // –– copy‐construct via table
@@ -240,13 +226,10 @@ template <typename... Types> class Variant {
 
     template <typename T>
     static void copy_fn(void *storage, const Variant &other) {
-        // Safe approach using union to avoid strict aliasing violations
-        union {
-            const char* char_ptr;
-            const T* typed_ptr;
-        } converter;
-        converter.char_ptr = &other._storage[0];
-        new (storage) T(*converter.typed_ptr);
+        // Use bit_cast_ptr for safe type-punning on properly aligned storage
+        // The storage is guaranteed to be properly aligned by alignas(max_align<Types...>::value)
+        const T* source_ptr = fl::bit_cast_ptr<const T>(&other._storage[0]);
+        new (storage) T(*source_ptr);
     }
 
     // –– move‐construct via table
@@ -259,13 +242,10 @@ template <typename... Types> class Variant {
     }
 
     template <typename T> static void move_fn(void *storage, Variant &other) {
-        // Safe approach using union to avoid strict aliasing violations
-        union {
-            char* char_ptr;
-            T* typed_ptr;
-        } converter;
-        converter.char_ptr = &other._storage[0];
-        new (storage) T(fl::move(*converter.typed_ptr));
+        // Use bit_cast_ptr for safe type-punning on properly aligned storage
+        // The storage is guaranteed to be properly aligned by alignas(max_align<Types...>::value)
+        T* source_ptr = fl::bit_cast_ptr<T>(&other._storage[0]);
+        new (storage) T(fl::move(*source_ptr));
     }
 
     // –– everything below here (type_traits, construct<T>, type_to_tag,

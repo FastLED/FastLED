@@ -32,15 +32,22 @@ void fetch(const fl::string& url, const FetchCallback& callback) {
     });
 }
 
-fl::promise<Response> FetchRequest::then(fl::function<void(const Response&)> callback) {
+// Internal helper to execute a fetch request and return a promise
+fl::promise<Response> execute_fetch_request(const fl::string& url, const FetchRequest& request) {
     // Create a promise for this request
     auto promise = fl::promise<Response>::create();
     
+    // Get the actual URL to use (use request URL if provided, otherwise use parameter URL)
+    fl::string fetch_url = request.url().empty() ? url : request.url();
+    
     // Convert our request to the existing WASM fetch system
-    auto wasm_request = WasmFetchRequest(mUrl);
+    auto wasm_request = WasmFetchRequest(fetch_url);
+    
+    // Create a shared copy of the promise for capture
+    auto promise_ptr = fl::make_shared<fl::promise<Response>>(promise);
     
     // Use the existing JavaScript fetch infrastructure
-    wasm_request.response([promise, callback](const wasm_response& wasm_resp) mutable {
+    wasm_request.response([promise_ptr](const wasm_response& wasm_resp) {
         // Convert WASM response to our Response type
         Response response(wasm_resp.status(), wasm_resp.status_text());
         response.set_body(wasm_resp.text());
@@ -51,12 +58,7 @@ fl::promise<Response> FetchRequest::then(fl::function<void(const Response&)> cal
         }
         
         // Complete the promise
-        promise.complete_with_value(response);
-        
-        // Call the user callback if provided
-        if (callback) {
-            callback(response);
-        }
+        promise_ptr->complete_with_value(response);
     });
     
     // Register with fetch manager
@@ -65,18 +67,7 @@ fl::promise<Response> FetchRequest::then(fl::function<void(const Response&)> cal
     return promise;
 }
 
-fl::promise<Response> FetchRequest::catch_(fl::function<void(const fl::Error&)> callback) {
-    // Create a promise and execute the request
-    auto promise = then([](const Response& resp) {
-        // Success case is handled by then() - nothing to do here
-        (void)resp;
-    });
-    
-    // Add error handling
-    promise.catch_(callback);
-    
-    return promise;
-}
+
 
 #else
 // ========== Embedded/Stub Implementation ==========
@@ -89,8 +80,10 @@ void fetch(const fl::string& url, const FetchCallback& callback) {
     callback(resp);
 }
 
-fl::promise<Response> FetchRequest::then(fl::function<void(const Response&)> callback) {
-    FL_WARN("HTTP fetch is not supported on non-WASM platforms. URL: " << mUrl);
+// Internal helper to execute a fetch request and return a promise
+fl::promise<Response> execute_fetch_request(const fl::string& url, const FetchRequest& request) {
+    (void)request; // Unused in stub implementation
+    FL_WARN("HTTP fetch is not supported on non-WASM platforms. URL: " << url);
     
     // Create error response
     Response error_response(501, "Not Implemented");
@@ -99,24 +92,10 @@ fl::promise<Response> FetchRequest::then(fl::function<void(const Response&)> cal
     // Create resolved promise with error response
     auto promise = fl::promise<Response>::resolve(error_response);
     
-    // Call callback immediately if provided
-    if (callback) {
-        callback(error_response);
-    }
-    
     return promise;
 }
 
-fl::promise<Response> FetchRequest::catch_(fl::function<void(const fl::Error&)> callback) {
-    // For non-WASM platforms, always return an error
-    auto promise = fl::promise<Response>::reject(fl::Error("HTTP requests not supported on this platform"));
-    
-    if (callback) {
-        callback(fl::Error("HTTP requests not supported on this platform"));
-    }
-    
-    return promise;
-}
+
 
 #endif
 
@@ -203,48 +182,131 @@ void FetchManager::cleanup_completed_promises() {
 
 // ========== Public API Functions ==========
 
-FetchRequest fetch_get(const fl::string& url) {
-    return FetchRequest(url, RequestOptions("GET"));
+fl::promise<Response> fetch_get(const fl::string& url, const FetchRequest& request) {
+    // Create a new request with GET method
+    FetchRequest get_request(url, RequestOptions("GET"));
+    
+    // Apply any additional options from the provided request
+    const auto& opts = request.options();
+    get_request.timeout(opts.timeout_ms);
+    for (const auto& header : opts.headers) {
+        get_request.header(header.first, header.second);
+    }
+    if (!opts.body.empty()) {
+        get_request.body(opts.body);
+    }
+    
+    return execute_fetch_request(url, get_request);
 }
 
-FetchRequest fetch_post(const fl::string& url) {
-    return FetchRequest(url, RequestOptions("POST"));
+fl::promise<Response> fetch_post(const fl::string& url, const FetchRequest& request) {
+    // Create a new request with POST method
+    FetchRequest post_request(url, RequestOptions("POST"));
+    
+    // Apply any additional options from the provided request
+    const auto& opts = request.options();
+    post_request.timeout(opts.timeout_ms);
+    for (const auto& header : opts.headers) {
+        post_request.header(header.first, header.second);
+    }
+    if (!opts.body.empty()) {
+        post_request.body(opts.body);
+    }
+    
+    return execute_fetch_request(url, post_request);
 }
 
-FetchRequest fetch_put(const fl::string& url) {
-    return FetchRequest(url, RequestOptions("PUT"));
+fl::promise<Response> fetch_put(const fl::string& url, const FetchRequest& request) {
+    // Create a new request with PUT method
+    FetchRequest put_request(url, RequestOptions("PUT"));
+    
+    // Apply any additional options from the provided request
+    const auto& opts = request.options();
+    put_request.timeout(opts.timeout_ms);
+    for (const auto& header : opts.headers) {
+        put_request.header(header.first, header.second);
+    }
+    if (!opts.body.empty()) {
+        put_request.body(opts.body);
+    }
+    
+    return execute_fetch_request(url, put_request);
 }
 
-FetchRequest fetch_delete(const fl::string& url) {
-    return FetchRequest(url, RequestOptions("DELETE"));
+fl::promise<Response> fetch_delete(const fl::string& url, const FetchRequest& request) {
+    // Create a new request with DELETE method
+    FetchRequest delete_request(url, RequestOptions("DELETE"));
+    
+    // Apply any additional options from the provided request
+    const auto& opts = request.options();
+    delete_request.timeout(opts.timeout_ms);
+    for (const auto& header : opts.headers) {
+        delete_request.header(header.first, header.second);
+    }
+    if (!opts.body.empty()) {
+        delete_request.body(opts.body);
+    }
+    
+    return execute_fetch_request(url, delete_request);
 }
 
-FetchRequest fetch_head(const fl::string& url) {
-    return FetchRequest(url, RequestOptions("HEAD"));
+fl::promise<Response> fetch_head(const fl::string& url, const FetchRequest& request) {
+    // Create a new request with HEAD method
+    FetchRequest head_request(url, RequestOptions("HEAD"));
+    
+    // Apply any additional options from the provided request
+    const auto& opts = request.options();
+    head_request.timeout(opts.timeout_ms);
+    for (const auto& header : opts.headers) {
+        head_request.header(header.first, header.second);
+    }
+    if (!opts.body.empty()) {
+        head_request.body(opts.body);
+    }
+    
+    return execute_fetch_request(url, head_request);
 }
 
-FetchRequest fetch_options(const fl::string& url) {
-    return FetchRequest(url, RequestOptions("OPTIONS"));
+fl::promise<Response> fetch_options(const fl::string& url, const FetchRequest& request) {
+    // Create a new request with OPTIONS method
+    FetchRequest options_request(url, RequestOptions("OPTIONS"));
+    
+    // Apply any additional options from the provided request
+    const auto& opts = request.options();
+    options_request.timeout(opts.timeout_ms);
+    for (const auto& header : opts.headers) {
+        options_request.header(header.first, header.second);
+    }
+    if (!opts.body.empty()) {
+        options_request.body(opts.body);
+    }
+    
+    return execute_fetch_request(url, options_request);
 }
 
-FetchRequest fetch_patch(const fl::string& url) {
-    return FetchRequest(url, RequestOptions("PATCH"));
+fl::promise<Response> fetch_patch(const fl::string& url, const FetchRequest& request) {
+    // Create a new request with PATCH method
+    FetchRequest patch_request(url, RequestOptions("PATCH"));
+    
+    // Apply any additional options from the provided request
+    const auto& opts = request.options();
+    patch_request.timeout(opts.timeout_ms);
+    for (const auto& header : opts.headers) {
+        patch_request.header(header.first, header.second);
+    }
+    if (!opts.body.empty()) {
+        patch_request.body(opts.body);
+    }
+    
+    return execute_fetch_request(url, patch_request);
 }
 
 fl::promise<Response> fetch_request(const fl::string& url, const RequestOptions& options) {
-    (void)url; // TODO: Use url parameter when implementing actual HTTP request
-    (void)options; // TODO: Use options parameter when implementing actual HTTP request
+    // Create a FetchRequest with the provided options
+    FetchRequest request(url, options);
     
-    auto promise = fl::promise<Response>::create();
-    
-    // Register the promise for automatic updates
-    FetchManager::instance().register_promise(promise);
-    
-    // TODO: Implement actual HTTP request logic here
-    // For now, complete with a stub response
-    promise.complete_with_value(Response(501, "Not Implemented"));
-    
-    return promise;
+    // Use the helper function to execute the request
+    return execute_fetch_request(url, request);
 }
 
 void fetch_update() {
