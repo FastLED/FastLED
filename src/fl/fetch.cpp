@@ -5,6 +5,7 @@
 #include "fl/singleton.h"
 #include "fl/engine_events.h"
 #include "fl/async.h"
+#include "fl/hash_map.h"
 
 #ifdef __EMSCRIPTEN__
 #include <emscripten.h>
@@ -18,6 +19,11 @@ namespace fl {
 
 // Include WASM-specific implementation
 #include "platforms/wasm/js_fetch.h"
+
+// Static storage for promises to avoid lambda capture issues
+static fl::hash_map<fl::string, fl::promise<Response>> pending_promises;
+static fl::mutex promises_mutex;
+static uint32_t next_request_id = 1;
 
 // Use existing WASM fetch infrastructure
 void fetch(const fl::string& url, const FetchCallback& callback) {
@@ -37,20 +43,39 @@ fl::promise<Response> execute_fetch_request(const fl::string& url, const FetchRe
     // Create a promise for this request
     auto promise = fl::promise<Response>::create();
     
+    // Register with fetch manager to ensure it's tracked
+    FetchManager::instance().register_promise(promise);
+    
     // Get the actual URL to use (use request URL if provided, otherwise use parameter URL)
     fl::string fetch_url = request.url().empty() ? url : request.url();
     
     // Convert our request to the existing WASM fetch system
     auto wasm_request = WasmFetchRequest(fetch_url);
     
-    // Capture the promise directly - no need for shared_ptr wrapper since promises are copyable
-    // and already manage their state with shared_ptr internally
-    auto promise_copy = promise;
+    // Generate a unique ID and store the promise safely
+    fl::string request_id;
+    {
+        fl::lock_guard<fl::mutex> lock(promises_mutex);
+        request_id = fl::string("req_");
+        request_id.append(next_request_id++);
+        pending_promises[request_id] = promise;
+    }
     
-    // Use the existing JavaScript fetch infrastructure
-    wasm_request.response([promise_copy](const wasm_response& wasm_resp) {
-        // Remove const-ness to allow modification of the captured promise
-        auto& mutable_promise = const_cast<fl::promise<Response>&>(promise_copy);
+    // Use lambda that captures only the request ID, not the promise
+    wasm_request.response([request_id](const wasm_response& wasm_resp) {
+        // Retrieve the promise from storage
+        fl::promise<Response> stored_promise;
+        {
+            fl::lock_guard<fl::mutex> lock(promises_mutex);
+            auto it = pending_promises.find(request_id);
+            if (it != pending_promises.end()) {
+                stored_promise = it->second;
+                pending_promises.erase(it);
+            } else {
+                // Promise not found - this shouldn't happen but handle gracefully
+                return;
+            }
+        }
         
         // Convert WASM response to our Response type
         Response response(wasm_resp.status(), wasm_resp.status_text());
@@ -62,11 +87,8 @@ fl::promise<Response> execute_fetch_request(const fl::string& url, const FetchRe
         }
         
         // Complete the promise
-        mutable_promise.complete_with_value(response);
+        stored_promise.complete_with_value(response);
     });
-    
-    // Register with fetch manager
-    FetchManager::instance().register_promise(promise);
     
     return promise;
 }
