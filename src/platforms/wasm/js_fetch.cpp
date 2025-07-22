@@ -23,8 +23,12 @@ extern "C" EMSCRIPTEN_KEEPALIVE void js_fetch_success_callback(const char* conte
     FL_WARN("Fetch success callback received, content length: " << strlen(content));
     
     if (g_pending_callback) {
-        fl::string response_content(content);
-        (*g_pending_callback)(response_content);
+        // Create a successful response object
+        fl::response response(200, "OK");
+        response.set_text(fl::string(content));
+        response.set_header("content-type", "text/html"); // Default content type
+        
+        (*g_pending_callback)(response);
         delete g_pending_callback;
         g_pending_callback = nullptr;
     } else {
@@ -37,9 +41,13 @@ extern "C" EMSCRIPTEN_KEEPALIVE void js_fetch_error_callback(const char* error_m
     FL_WARN("Fetch error callback received: " << error_message);
     
     if (g_pending_callback) {
+        // Create an error response object
+        fl::response response(0, "Network Error");
         fl::string error_content = "Fetch Error: ";
         error_content += error_message;
-        (*g_pending_callback)(error_content);
+        response.set_text(error_content);
+        
+        (*g_pending_callback)(response);
         delete g_pending_callback;
         g_pending_callback = nullptr;
     } else {
@@ -107,8 +115,19 @@ void FetchRequest::response(const FetchResponseCallback& callback) {
     
     FL_WARN("Mock response length: " << mock_response.length());
     
-    // Immediately call the callback with mock data
-    callback(mock_response);
+    // Create a mock response object  
+    fl::response response(200, "OK");
+    response.set_text(mock_response);
+    
+    // Set appropriate content type based on URL
+    if (mUrl.find("httpbin.org") != fl::string::npos) {
+        response.set_header("content-type", "application/json");
+    } else {
+        response.set_header("content-type", "text/html");
+    }
+    
+    // Immediately call the callback with mock response
+    callback(response);
 }
 
 #endif // __EMSCRIPTEN__

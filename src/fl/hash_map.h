@@ -142,7 +142,10 @@ class HashMap {
         }
 
         pointer operator->() const {
-            _cached_value = operator*();
+            // Reconstruct cached value to avoid assignment to const member
+            auto &e = _map->_buckets[_idx];
+            _cached_value.~value_type();
+            new (&_cached_value) value_type(e.key, e.value);
             return &_cached_value;
         }
 

@@ -40,12 +40,27 @@ void setup() {
 void loop() {
     EVERY_N_SECONDS(5) {
         fl::fetch.get("http://fastled.io")
-            .response([](const fl::string &content) {
-                if (content.length() >= 100) {
-                    FL_WARN("First 100 characters: " << content.substr(0, 100));
+            .response([](const fl::response &response) {
+                if (response.ok()) {
+                    FL_WARN("Fetch successful! Status: " << response.status() << " " << response.status_text());
+                    
+                    // Show content type if available
+                    auto content_type = response.content_type();
+                    if (content_type.has_value()) {
+                        FL_WARN("Content-Type: " << *content_type);
+                    }
+                    
+                    // Show response content
+                    const fl::string& content = response.text();
+                    if (content.length() >= 100) {
+                        FL_WARN("First 100 characters: " << content.substr(0, 100));
+                    } else {
+                        FL_WARN("Response (" << content.length()
+                                             << " chars): " << content);
+                    }
                 } else {
-                    FL_WARN("Response (" << content.length()
-                                         << " chars): " << content);
+                    FL_WARN("Fetch failed! Status: " << response.status() << " " << response.status_text());
+                    FL_WARN("Error content: " << response.text());
                 }
             });
     }
