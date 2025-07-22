@@ -125,19 +125,27 @@ template <typename... Types> class Variant {
         return converter.typed_ptr;
     }
 
-    // template <typename T> T &get() {
-    //     if (auto p = ptr<T>())
-    //         return *p;
-    //     static T dummy;
-    //     return dummy;
-    // }
+    /// @brief Get a reference to the stored value of type T
+    /// @tparam T The type to retrieve
+    /// @return Reference to the stored value
+    /// @note Asserts if the variant doesn't contain type T. Use is<T>() to check first.
+    /// @warning Will crash if called with wrong type - this is intentional for fast failure
+    template <typename T> T &get() {
+        // Dereference ptr() directly - will crash with null pointer access if wrong type
+        // This provides fast failure semantics similar to std::variant
+        return *ptr<T>();
+    }
 
-    // template <typename T> const T &get() const {
-    //     if (auto p = ptr<T>())
-    //         return *p;
-    //     static const T dummy{};
-    //     return dummy;
-    // }
+    /// @brief Get a const reference to the stored value of type T
+    /// @tparam T The type to retrieve  
+    /// @return Const reference to the stored value
+    /// @note Asserts if the variant doesn't contain type T. Use is<T>() to check first.
+    /// @warning Will crash if called with wrong type - this is intentional for fast failure
+    template <typename T> const T &get() const {
+        // Dereference ptr() directly - will crash with null pointer access if wrong type
+        // This provides fast failure semantics similar to std::variant
+        return *ptr<T>();
+    }
 
     template <typename T> bool equals(const T &other) const {
         if (auto p = ptr<T>()) {
