@@ -106,6 +106,52 @@ static int itoa(int value, char *sp, int radix) {
     return len;
 }
 
+static int utoa32(uint32_t value, char *sp, int radix) {
+    char tmp[16]; // be careful with the length of the buffer
+    char *tp = tmp;
+    int i;
+    uint32_t v = value;
+
+    while (v || tp == tmp) {
+        i = v % radix;
+        v = radix ? v / radix : 0;
+        if (i < 10)
+            *tp++ = i + '0';
+        else
+            *tp++ = i + 'a' - 10;
+    }
+
+    int len = tp - tmp;
+
+    while (tp > tmp)
+        *sp++ = *--tp;
+
+    return len;
+}
+
+static int utoa64(uint64_t value, char *sp, int radix) {
+    char tmp[32]; // larger buffer for 64-bit values
+    char *tp = tmp;
+    int i;
+    uint64_t v = value;
+
+    while (v || tp == tmp) {
+        i = v % radix;
+        v = radix ? v / radix : 0;
+        if (i < 10)
+            *tp++ = i + '0';
+        else
+            *tp++ = i + 'a' - 10;
+    }
+
+    int len = tp - tmp;
+
+    while (tp > tmp)
+        *sp++ = *--tp;
+
+    return len;
+}
+
 static float atoff(const char *str, fl::size len) {
     float result = 0.0f;   // The resulting number
     float sign = 1.0f;     // Positive or negative
@@ -165,6 +211,18 @@ static float atoff(const char *str, fl::size len) {
 void StringFormatter::append(i32 val, StrN<64> *dst) {
     char buf[63] = {0};
     string_functions::itoa(val, buf, 10);
+    dst->write(buf, strlen(buf));
+}
+
+void StringFormatter::append(u32 val, StrN<64> *dst) {
+    char buf[63] = {0};
+    string_functions::utoa32(val, buf, 10);
+    dst->write(buf, strlen(buf));
+}
+
+void StringFormatter::append(uint64_t val, StrN<64> *dst) {
+    char buf[63] = {0};
+    string_functions::utoa64(val, buf, 10);
     dst->write(buf, strlen(buf));
 }
 StringHolder::StringHolder(const char *str) {

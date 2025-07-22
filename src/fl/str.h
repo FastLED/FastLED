@@ -83,6 +83,8 @@ FASTLED_SMART_PTR(StringHolder);
 class StringFormatter {
   public:
     static void append(i32 val, StrN<FASTLED_STR_INLINED_SIZE> *dst);
+    static void append(u32 val, StrN<FASTLED_STR_INLINED_SIZE> *dst);
+    static void append(uint64_t val, StrN<FASTLED_STR_INLINED_SIZE> *dst);
     static bool isSpace(char c) {
         return c == ' ' || c == '\t' || c == '\n' || c == '\r';
     }
@@ -271,6 +273,12 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
     }
 
     fl::size write(const u32 &val) {
+        StrN<FASTLED_STR_INLINED_SIZE> dst;
+        StringFormatter::append(val, &dst); // Inlined size should suffice
+        return write(dst.c_str(), dst.size());
+    }
+
+    fl::size write(const uint64_t &val) {
         StrN<FASTLED_STR_INLINED_SIZE> dst;
         StringFormatter::append(val, &dst); // Inlined size should suffice
         return write(dst.c_str(), dst.size());
@@ -726,6 +734,10 @@ class string : public StrN<FASTLED_STR_INLINED_SIZE> {
         return *this;
     }
     string &append(const u32 &val) {
+        write(val);
+        return *this;
+    }
+    string &append(const uint64_t &val) {
         write(val);
         return *this;
     }
