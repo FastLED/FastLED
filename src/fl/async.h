@@ -50,11 +50,6 @@
 #include "fl/promise.h"
 #include "fl/promise_result.h"
 
-// Forward declarations for WASM platform
-#ifdef __EMSCRIPTEN__
-extern "C" void emscripten_sleep(unsigned int ms);
-#endif
-
 namespace fl {
 
 // Forward declaration
@@ -99,6 +94,15 @@ private:
     fl::vector<AsyncRunner*> mRunners;
 };
 
+/// @brief Platform-specific async yield function
+/// 
+/// This function pumps all async tasks and yields control appropriately for the platform:
+/// - WASM: calls asyncrun() then emscripten_sleep(1) to yield to browser
+/// - Other platforms: calls asyncrun() multiple times with simple yielding
+/// 
+/// This centralizes platform-specific async behavior instead of having #ifdef in generic code.
+void async_yield();
+
 /// @brief Run all registered async tasks once
 /// 
 /// This function updates all registered async runners (fetch, timers, etc.)
@@ -125,7 +129,7 @@ bool async_has_tasks();
 /// 
 /// This function blocks until the promise is either resolved or rejected,
 /// then returns a PromiseResult that can be checked with ok() for success/failure.
-/// While waiting, it continuously calls asyncrun() to pump async tasks.
+/// While waiting, it continuously calls async_yield() to pump async tasks and yield appropriately.
 ///
 /// **Type Deduction**: The template parameter T is automatically deduced from the 
 /// promise parameter, so you don't need to specify it explicitly.
@@ -168,21 +172,8 @@ fl::PromiseResult<T> await(fl::promise<T> promise) {
     
     // Wait for promise to complete while pumping async tasks
     while (!promise.is_completed()) {
-        // Pump all async tasks
-        asyncrun();
-        
-        // Platform-specific sleep/yield
-#ifdef __EMSCRIPTEN__
-        // Use emscripten_sleep for WASM platform (declared at top of file)
-        emscripten_sleep(1); // Sleep for 1ms
-#else
-        // For non-WASM platforms, use a simple yield
-        // This allows other async tasks to run without blocking
-        for (int i = 0; i < 5; ++i) {
-            // Simple busy wait with yields
-            asyncrun(); // Give other async tasks a chance
-        }
-#endif
+        // Platform-agnostic async pump and yield
+        async_yield();
         
         // Update the promise (in case it's not managed by async system)
         promise.update();

@@ -2,6 +2,11 @@
 #include "fl/singleton.h"
 #include "fl/algorithm.h"
 
+// Platform-specific includes
+#ifdef __EMSCRIPTEN__
+extern "C" void emscripten_sleep(unsigned int ms);
+#endif
+
 namespace fl {
 
 AsyncManager& AsyncManager::instance() {
@@ -53,6 +58,20 @@ size_t AsyncManager::total_active_tasks() const {
 
 void asyncrun() {
     AsyncManager::instance().update_all();
+}
+
+void async_yield() {
+    // Always pump all async tasks first
+    asyncrun();
+    
+    // Platform-specific yielding behavior
+#ifdef __EMSCRIPTEN__
+    // WASM: Use emscripten_sleep to yield control to browser event loop
+    emscripten_sleep(1); // Sleep for 1ms to yield to browser
+#endif
+    for (int i = 0; i < 5; ++i) {
+        asyncrun(); // Give other async tasks a chance
+    }
 }
 
 size_t async_active_tasks() {

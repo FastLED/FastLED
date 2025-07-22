@@ -32,6 +32,8 @@ To use the MCP server, run: `uv run mcp_server.py`
 
 **🌐 FOR INTERACTIVE DEVELOPMENT:** The MCP server includes a `run_fastled_web_compiler` tool that:
 
+**Note:** For direct command-line WASM compilation, see the **WASM Sketch Compilation** section below.
+
 - **Compiles Arduino sketches to WASM** for browser execution
 - **Captures console.log output** with playwright automation  
 - **Takes screenshots** of running visualizations
@@ -113,6 +115,9 @@ The tool follows the pattern established in `ci/wasm_test.py` and `ci/ci/scraper
   - For example (esp32dev): `uv run ci/ci-compile.py esp32dev --examples Blink`
   - For example (esp8266): `uv run ci/ci-compile.py esp01 --examples Blink`
   - For example (teensy31): `uv run ci/ci-compile.py teensy31 --examples Blink`
+- **WASM Compilation** - Compile Arduino sketches to run in web browsers:
+  - `uv run ci/wasm_compile.py examples/Blink -b --open` - Compile Blink to WASM and open browser
+  - `uv run ci/wasm_compile.py path/to/your/sketch -b --open` - Compile any sketch to WASM
 - **Symbol Analysis** - Analyze binary size and optimization opportunities:
   - `uv run ci/ci/symbol_analysis.py --board uno` - Analyze UNO platform
   - `uv run ci/ci/symbol_analysis.py --board esp32dev` - Analyze ESP32 platform
@@ -781,6 +786,153 @@ The FastLED project includes WebAssembly (WASM) bindings that bridge C++ and Jav
 5. **Update documentation** and interface specs
 
 **Remember: The bindings are a CONTRACT between C++ and JavaScript. Breaking this contract causes silent failures and mysterious bugs that are extremely difficult to debug.**
+
+## 🚨 WASM PLATFORM SPECIFIC RULES 🚨
+
+### WASM Unified Build Awareness
+
+**🚨 CRITICAL: WASM builds use unified compilation when `FASTLED_ALL_SRC=1` is enabled (automatic for Clang builds)**
+
+**Root Cause**: Multiple .cpp files are compiled together in a single compilation unit, causing:
+- Duplicate function definitions
+- Type signature conflicts  
+- Symbol redefinition errors
+
+**MANDATORY RULES:**
+- **ALWAYS check for unified builds** when modifying WASM platform files
+- **NEVER create duplicate function definitions** across WASM .cpp files
+- **USE `EMSCRIPTEN_KEEPALIVE` functions as canonical implementations**
+- **MATCH Emscripten header signatures exactly** for external C functions
+- **REMOVE conflicting implementations** and add explanatory comments
+
+**Fix Pattern Example:**
+```cpp
+// In timer.cpp (CANONICAL)
+extern "C" {
+EMSCRIPTEN_KEEPALIVE uint32_t millis() {
+    // Implementation
+}
+}
+
+// In js.cpp (FIXED)
+extern "C" {
+// NOTE: millis() and micros() functions are defined in timer.cpp with EMSCRIPTEN_KEEPALIVE  
+// to avoid duplicate definitions in unified builds
+}
+```
+
+### WASM Async Platform Pump Pattern
+
+**🚨 CRITICAL: Avoid long blocking sleeps that prevent responsive async processing**
+
+**MANDATORY RULES:**
+- **AVOID long blocking sleeps** (e.g., `emscripten_sleep(100)`) in main loops
+- **USE short sleep intervals** (1ms) for responsive yielding in main loops
+- **ALLOW JavaScript to control timing** via extern functions rather than blocking C++ loops
+
+**Correct Implementation:**
+```cpp
+// ✅ GOOD - responsive yielding without blocking
+while (true) {
+    // Keep pthread alive for extern function calls
+    // Use short sleep for responsiveness
+    emscripten_sleep(1);    // 1ms yield for responsiveness
+}
+```
+
+**Why This Matters:**
+- Long blocking sleeps prevent responsive browser interaction
+- JavaScript should control FastLED timing via requestAnimationFrame
+- Short sleep intervals maintain responsiveness while allowing other threads to work
+
+### WASM Function Signature Matching
+
+**🚨 CRITICAL: External C function declarations must match Emscripten headers exactly**
+
+**Common Error Pattern:**
+```cpp
+// ❌ WRONG - causes compilation error
+extern "C" void emscripten_sleep(int ms);
+
+// ✅ CORRECT - matches official Emscripten header  
+extern "C" void emscripten_sleep(unsigned int ms);
+```
+
+**MANDATORY RULES:**
+- **ALWAYS verify against official Emscripten header signatures**
+- **NEVER assume parameter types** - check the actual headers
+- **UPDATE signatures immediately** when compilation errors occur
+
+### WASM Sketch Compilation
+
+**🎯 HOW TO COMPILE ANY ARDUINO SKETCH TO WASM:**
+
+**Basic Compilation Commands:**
+```bash
+# Compile any sketch directory to WASM
+uv run ci/wasm_compile.py path/to/your/sketch
+
+# Compile with build and open browser automatically
+uv run ci/wasm_compile.py path/to/your/sketch -b --open
+
+# Compile examples/Blink to WASM
+uv run ci/wasm_compile.py examples/Blink -b --open
+
+# Compile examples/DemoReel100 to WASM  
+uv run ci/wasm_compile.py examples/DemoReel100 -b --open
+```
+
+**Output:** Creates `fastled_js/` folder with:
+- `fastled.js` - JavaScript loader
+- `fastled.wasm` - WebAssembly binary
+- `index.html` - HTML page to run the sketch
+
+**Run in Browser:**
+```bash
+# Simple HTTP server to test
+cd fastled_js
+python -m http.server 8000
+# Open http://localhost:8000
+```
+
+**🚨 REQUIREMENTS:**
+- **Docker must be installed and running**
+- **Internet connection** (for Docker image download on first run)
+- **~1GB RAM** for Docker container during compilation
+
+### WASM Testing Requirements
+
+**🚨 MANDATORY: Always test WASM compilation after platform file changes**
+
+**Platform Testing Commands:**
+```bash
+# Test WASM platform changes (for platform developers)
+uv run ci/wasm_compile.py -b examples/wasm
+
+# Quick test without full build
+uv run ci/wasm_compile.py examples/wasm --quick
+```
+
+**Watch For These Error Patterns:**
+- `error: conflicting types for 'function_name'`
+- `error: redefinition of 'function_name'`  
+- `warning: attribute declaration must precede definition`
+- `RuntimeError: unreachable` (often async-related)
+
+**MANDATORY RULES:**
+- **ALWAYS test WASM compilation** after modifying any WASM platform files
+- **USE `uv run ci/wasm_compile.py` for validation**
+- **WATCH for unified build conflicts** in compilation output
+- **VERIFY async operations work properly** in browser environment
+
+### WASM Platform File Organization
+
+**Best Practices for WASM platform files:**
+- ✅ **Use `timer.cpp` for canonical timing functions** with `EMSCRIPTEN_KEEPALIVE`
+- ✅ **Use `entry_point.cpp` for main() and setup/loop coordination** with async pumping
+- ✅ **Use `js.cpp` for JavaScript utility functions** without duplicating timer functions
+- ✅ **Include proper async infrastructure** (`fl/async.h`) in entry points
+- ✅ **Comment when removing duplicate implementations** to explain unified build conflicts
 
 ## Testing
 The project uses a comprehensive test suite including:
