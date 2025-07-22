@@ -30,7 +30,7 @@
 
 #include "active_strip_data.h"
 #include "engine_listener.h"
-#include "frame_buffer_manager.h"
+// #include "frame_buffer_manager.h"  // Temporarily commented for testing
 #include "fl/dbg.h"
 #include "fl/namespace.h"
 #include "fl/warn.h"
@@ -77,8 +77,8 @@ void fastled_setup_once() {
     EngineListener::Init();
     EngineEvents::addListener(&gEndFrameListener);
     
-    // Initialize thread-safe frame buffer manager
-    fl::FrameBufferManager::Instance();
+    // Note: Thread-safe frame buffer manager not needed in WASM single-threaded environment
+    // Using existing ActiveStripData system for frame data management
     
     printf("FastLED WASM: Calling user setup()...\n");
     
