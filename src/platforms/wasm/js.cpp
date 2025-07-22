@@ -52,9 +52,11 @@ void delay(int ms) {
     if (ms <= 0) {
         return;
     }
+
+    uint32_t end = millis() + ms;
     
     // Break delay into 1ms chunks and pump fetch requests
-    for (int i = 0; i < ms; i++) {
+    while (millis() < end) {
         // Update fetch promises during delay
         fl::fetch_update();
         
