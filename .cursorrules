@@ -890,6 +890,56 @@ void processData(const uint8_t* data, size_t len) {
 
 **Why:** Many embedded platforms (especially Arduino-compatible boards) don't support C++ exceptions or have them disabled to save memory and improve performance. FastLED must work reliably across all supported platforms.
 
+### JSON Usage - Ideal API Patterns
+**🎯 PREFERRED: Use the modern `fl::Json` class for all JSON operations.** FastLED provides an ideal JSON API that prioritizes type safety, ergonomics, and crash-proof operation.
+
+**✅ IDIOMATIC JSON USAGE:**
+```cpp
+// NEW: Clean, safe, idiomatic API
+fl::Json json = fl::Json::parse(jsonStr);
+int brightness = json["config"]["brightness"] | 128;  // Gets value or 128 default
+string name = json["device"]["name"] | string("default");  // Type-safe with default
+bool enabled = json["features"]["networking"] | false;  // Never crashes
+
+// Array operations
+if (json["effects"].contains("rainbow")) {
+    // Safe array checking
+}
+```
+
+**❌ DISCOURAGED: Verbose legacy API:**
+```cpp
+// OLD: Verbose, error-prone API (still works, but not recommended)
+fl::JsonDocument doc;
+fl::string error;
+fl::parseJson(jsonStr, &doc, &error);
+int brightness = doc["config"]["brightness"].as<int>();  // Can crash if missing
+```
+
+**Key Benefits of Ideal API:**
+- **🛡️ Type Safety** - No crashes on missing fields or type mismatches
+- **🎯 Default Values** - Clean `json["key"] | default` syntax
+- **📖 Readable Code** - 50% less boilerplate for common operations
+- **🚀 Testing** - Easy test data construction with `JsonBuilder`
+
+**📚 Reference Example:** See `examples/Json/Json.ino` for comprehensive usage patterns and API comparison.
+
+**Testing with JsonBuilder:**
+```cpp
+// Easy test data construction
+auto json = JsonBuilder()
+    .set("brightness", 128)
+    .set("enabled", true)
+    .set("name", "test_device")
+    .build();
+
+// Type-safe testing
+CHECK_EQ(json["brightness"] | 0, 128);
+CHECK(json["enabled"] | false);
+```
+
+**🎯 GUIDELINE:** Always prefer the ideal `fl::Json` API for new code. The legacy `fl::parseJson` API remains available for backward compatibility but should be avoided in new implementations.
+
 ## ⚠️ CRITICAL WARNING: C++ ↔ JavaScript Bindings
 
 **🚨 EXTREMELY IMPORTANT: DO NOT MODIFY FUNCTION SIGNATURES IN WEBASSEMBLY BINDINGS WITHOUT EXTREME CAUTION! 🚨**
