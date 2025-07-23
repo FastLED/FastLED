@@ -96,24 +96,21 @@ void JsonUiManager::processPendingUpdates() {
             }
         }
         
+        // Build JSON array using proper fl::JsonDocument array initialization
         fl::JsonDocument doc;
         auto jsonArray = doc.to<FLArduinoJson::JsonArray>();
         
-        // Build JSON array directly using ideal API - no longer calling legacy toJson method
+        // Add each component to the array
         auto components = getComponents();
         for (auto &component : components) {
             auto componentJson = component->toJson();
             if (componentJson.is_object()) {
-                // Add component JSON directly to array using ideal patterns
-                auto obj = jsonArray.add<FLArduinoJson::JsonObject>();
-                const auto& variant = componentJson.variant();
-                if (variant.is<FLArduinoJson::JsonObjectConst>()) {
-                    obj.set(variant.as<FLArduinoJson::JsonObjectConst>());
-                }
+                // Use the variant to add to array - this is the intended usage
+                jsonArray.add(componentJson.variant());
             }
         }
         
-        string jsonStr = doc.serialize();
+        fl::string jsonStr = doc.serialize();
         //FL_WARN("*** SENDING UI TO FRONTEND: " << jsonStr.substr(0, 100).c_str() << "...");
         mUpdateJs(jsonStr.c_str());
     }
@@ -194,23 +191,30 @@ void JsonUiManager::executeUiUpdates(const fl::JsonDocument &doc) {
     auto type = getJsonType(doc);
     
     if (type == fl::JSON_OBJECT) {
-        auto obj = doc.as<FLArduinoJson::JsonObjectConst>();
+        // Use fl::Json wrapper - eliminate FLArduinoJson iteration by checking known components
+        fl::Json rootJson(const_cast<fl::JsonDocument&>(doc));
         
-        // Iterate through all keys in the JSON object
-        for (auto kv : obj) {
-            const char* id_or_name = kv.key().c_str();
+        // Instead of iterating through JSON keys, iterate through known components
+        // and check if they exist in the JSON - this eliminates FLArduinoJson usage
+        auto components = getComponents();
+        for (auto &component : components) {
+            const fl::string& componentName = component->name();
             
-            //FL_WARN("*** Checking for component with ID: " << idStr);
+            // Check if this component name exists in the JSON
+            fl::Json valueJson = rootJson[componentName];
+            if (valueJson.has_value()) {
+                component->update(valueJson);
+                //FL_WARN("*** Updated component: " << componentName.c_str());
+            }
             
-            auto component = findUiComponent(id_or_name);
-            if (component) {
-                // Create mutable JsonVariant from const one by casting to base class
-                ::FLArduinoJson::JsonVariant mutableVariant = const_cast<::FLArduinoJson::JsonDocument&>(static_cast<const ::FLArduinoJson::JsonDocument&>(doc))[id_or_name];
-                fl::Json json(mutableVariant);
-                component->update(json);
-                //FL_WARN("*** Updated component with ID " << idStr);
-            } else {
-                FL_WARN("*** ERROR: could not find component with ID or name: " << id_or_name);
+            // Also check by ID if different from name
+            fl::string componentId = to_string(component->id());
+            if (componentId != componentName) {
+                fl::Json valueByIdJson = rootJson[componentId];
+                if (valueByIdJson.has_value()) {
+                    component->update(valueByIdJson);
+                    //FL_WARN("*** Updated component by ID: " << componentId.c_str());
+                }
             }
         }
     } else {
