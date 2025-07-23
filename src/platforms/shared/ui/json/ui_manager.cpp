@@ -96,28 +96,25 @@ void JsonUiManager::processPendingUpdates() {
             }
         }
         
-        // IDEAL API ENHANCEMENT NEEDED: JsonBuilder should support vector<Json> for object arrays
-        // For now, use object-wrapper approach which works with current ideal API
-        
-        fl::JsonBuilder builder;
-        builder.set("type", "ui_update");
-        builder.set("count", static_cast<int>(getComponents().size()));
-        
-        // Serialize each component and collect as strings for now
+        // Send JSON array directly to frontend (not wrapped in components_serialized)
+        // Frontend expects: [{"name":"title","type":"title",...}, {"name":"slider",...}, ...]
         auto components = getComponents();
-        fl::vector<fl::string> componentStrings;
+        
+        // Build JSON array manually using proper structure the frontend expects
+        fl::string jsonStr = "[";
+        bool first = true;
         for (auto &component : components) {
             auto componentJson = component->toJson();
             if (componentJson.is_object()) {
-                componentStrings.push_back(componentJson.serialize());
+                if (!first) {
+                    jsonStr += ",";
+                }
+                first = false;
+                jsonStr += componentJson.serialize();
             }
         }
+        jsonStr += "]";
         
-        // Store serialized components - frontend will need to parse these
-        builder.set("components_serialized", componentStrings);
-        
-        fl::Json wrapperJson = builder.build();
-        fl::string jsonStr = wrapperJson.serialize();
         //FL_WARN("*** SENDING UI TO FRONTEND: " << jsonStr.substr(0, 100).c_str() << "...");
         mUpdateJs(jsonStr.c_str());
     }
