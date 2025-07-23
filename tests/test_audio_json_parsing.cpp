@@ -69,41 +69,42 @@ static void parseJsonToAudioBuffers(const fl::string &jsonStr,
                                     fl::vector<AudioBuffer> *audioBuffers) {
     audioBuffers->clear();
     
-    // Parse JSON string using ideal API
-    fl::Json json = fl::Json::parse(jsonStr.c_str());
+    // Parse JSON string first - convert to std::string for ArduinoJson
+    std::string stdJsonStr(jsonStr.c_str());
+    FLArduinoJson::JsonDocument doc;
+    deserializeJson(doc, stdJsonStr);
     
-    if (!json.is_array()) {
+    if (!doc.is<FLArduinoJson::JsonArray>()) {
         return;
     }
     
-    for (size_t i = 0; i < json.size(); ++i) {
-        fl::Json item = json[i];
-        if (!item.is_object()) {
+    FLArduinoJson::JsonArray array = doc.as<FLArduinoJson::JsonArray>();
+    
+    for (FLArduinoJson::JsonVariant item : array) {
+        if (!item.is<FLArduinoJson::JsonObject>()) {
             continue;
         }
         
+        FLArduinoJson::JsonObject obj = item.as<FLArduinoJson::JsonObject>();
         AudioBuffer buffer;
         
-        // Extract timestamp - use get<uint32_t> for large values
-        auto timestampOpt = item["timestamp"].get<uint32_t>();
-        if (timestampOpt.has_value()) {
-            buffer.timestamp = *timestampOpt;
-        } else {
-            buffer.timestamp = 0;
+        // Use JSON parser to extract timestamp using proper type checking
+        auto timestampVar = obj["timestamp"];
+        if (fl::getJsonType(timestampVar) == fl::JSON_INTEGER) {
+            buffer.timestamp = timestampVar.as<uint32_t>();
         }
         
-        // Extract samples array
-        fl::Json samplesJson = item["samples"];
-        if (samplesJson.is_array()) {
-            for (size_t j = 0; j < samplesJson.size(); ++j) {
-                int16_t sample = samplesJson[j] | 0;
-                buffer.samples.push_back(sample);
-            }
+        // Use JSON parser to extract samples array as string, then parse manually
+        auto samplesVar = obj["samples"];
+        if (fl::getJsonType(samplesVar) == fl::JSON_ARRAY) {
+            fl::string samplesStr;
+            serializeJson(samplesVar, samplesStr);
+            parsePcmSamplesString(samplesStr, &buffer.samples);
         }
         
-        // Only add buffer if it has samples (matches original behavior)
+        // Add buffer if it has samples
         if (!buffer.samples.empty()) {
-            audioBuffers->push_back(buffer);
+            audioBuffers->push_back(fl::move(buffer));
         }
     }
 }
@@ -304,25 +305,6 @@ TEST_CASE("AudioJsonParsing - Large buffer preserved without chunking") {
     CHECK(buffers[0].samples[0] == 0);
     CHECK(buffers[0].samples[511] == 511);  // This would be in a separate chunk with old behavior
     CHECK(buffers[0].samples[1023] == 1023);
-}
-
-TEST_CASE("JSON Audio: serialize JSON audio samples to string") {
-    fl::vector<int16_t> samples = {1000, -1500, 2000, -2500, 3000};
-    uint32_t timestamp = 12345;
-    
-    // Manual JSON construction since JsonBuilder doesn't support vector<int16_t> yet
-    fl::JsonDocument doc;
-    doc["timestamp"] = timestamp;
-    auto samplesArray = doc["samples"].to<FLArduinoJson::JsonArray>();
-    for (auto sample : samples) {
-        samplesArray.add(sample);
-    }
-    
-    fl::string jsonStr = doc.serialize();
-    
-    CHECK(!jsonStr.empty());
-    CHECK(jsonStr.find("1000") != fl::string::npos);
-    CHECK(jsonStr.find("-1500") != fl::string::npos);
 }
 
 #endif // FASTLED_ENABLE_JSON 

@@ -14,13 +14,13 @@ JsonNumberFieldImpl::JsonNumberFieldImpl(const fl::string &name, double value,
                                         double min, double max)
     : mValue(value), mMin(min), mMax(max) {
     auto updateFunc = JsonUiInternal::UpdateFunction(
-        [this](const fl::Json &json) {
-            static_cast<JsonNumberFieldImpl *>(this)->updateInternal(json);
+        [this](const FLArduinoJson::JsonVariantConst &value) {
+            static_cast<JsonNumberFieldImpl *>(this)->updateInternal(value);
         });
 
     auto toJsonFunc =
-        JsonUiInternal::ToJsonFunction([this]() -> fl::Json {
-            return static_cast<JsonNumberFieldImpl *>(this)->toJson();
+        JsonUiInternal::ToJsonFunction([this](FLArduinoJson::JsonObject &json) {
+            static_cast<JsonNumberFieldImpl *>(this)->toJson(json);
         });
     mInternal = fl::make_shared<JsonUiInternal>(name, fl::move(updateFunc),
                                      fl::move(toJsonFunc));
@@ -36,18 +36,14 @@ JsonNumberFieldImpl &JsonNumberFieldImpl::Group(const fl::string &name) {
 
 const fl::string &JsonNumberFieldImpl::name() const { return mInternal->name(); }
 
-fl::Json JsonNumberFieldImpl::toJson() const {
-    auto builder = fl::JsonBuilder()
-        .set("name", name())
-        .set("group", mInternal->groupName())
-        .set("type", "number")
-        .set("id", mInternal->id());
-    
-    builder.set("value", static_cast<float>(mValue));
-    builder.set("min", static_cast<float>(mMin));
-    builder.set("max", static_cast<float>(mMax));
-    
-    return builder.build();
+void JsonNumberFieldImpl::toJson(FLArduinoJson::JsonObject &json) const {
+    json["name"] = name();
+    json["group"] = mInternal->groupName().c_str();
+    json["type"] = "number";
+    json["id"] = mInternal->id();
+    json["value"] = mValue;
+    json["min"] = mMin;
+    json["max"] = mMax;
 }
 
 double JsonNumberFieldImpl::value() const { return mValue; }
@@ -99,13 +95,15 @@ bool JsonNumberFieldImpl::operator!=(double v) const { return !ALMOST_EQUAL_FLOA
 
 bool JsonNumberFieldImpl::operator!=(int v) const { return !ALMOST_EQUAL_FLOAT(value(), static_cast<double>(v)); }
 
-void JsonNumberFieldImpl::updateInternal(const fl::Json &json) {
-    // Use ideal JSON API directly with flexible numeric access - handles both int and double
-    auto maybeValue = json.get_flexible<double>();
-    if (maybeValue.has_value()) {
-        setValueInternal(*maybeValue);  // Use internal method to avoid change notification
+void JsonNumberFieldImpl::updateInternal(
+    const FLArduinoJson::JsonVariantConst &value) {
+    if (value.is<double>()) {
+        double newValue = value.as<double>();
+        setValueInternal(newValue);  // Use internal method to avoid change notification
+    } else if (value.is<int>()) {
+        int newValue = value.as<int>();
+        setValueInternal(static_cast<double>(newValue));  // Use internal method to avoid change notification
     }
-    // If not a number, keep current value unchanged
 }
 
 } // namespace fl

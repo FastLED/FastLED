@@ -51,7 +51,7 @@ public:
 
 private:
     // Thread-safe storage for pending callbacks using request IDs
-    fl::hash_map<uint32_t, FetchResponseCallback, fl::Hash<uint32_t>, fl::EqualTo<uint32_t>> mPendingCallbacks;
+    fl::hash_map<uint32_t, FetchResponseCallback> mPendingCallbacks;
     fl::mutex mCallbacksMutex;
     uint32_t mNextRequestId;
 };
@@ -63,7 +63,7 @@ static WasmFetchCallbackManager& getCallbackManager() {
 
 // C++ callback function that JavaScript can call when fetch completes
 extern "C" EMSCRIPTEN_KEEPALIVE void js_fetch_success_callback(uint32_t request_id, const char* content) {
-    // NOTE: Removed FL_WARN logging to prevent stack overflow during print operations
+    FL_WARN("Fetch success callback received for request " << request_id << ", content length: " << strlen(content));
     
     auto callback_opt = getCallbackManager().takeCallback(request_id);
     if (callback_opt) {
@@ -73,13 +73,14 @@ extern "C" EMSCRIPTEN_KEEPALIVE void js_fetch_success_callback(uint32_t request_
         response.set_header("content-type", "text/html"); // Default content type
         
         (*callback_opt)(response);
+    } else {
+        FL_WARN("Warning: No pending callback found for fetch success request " << request_id);
     }
-    // NOTE: Removed warning logging to prevent stack overflow
 }
 
 // C++ error callback function that JavaScript can call when fetch fails
 extern "C" EMSCRIPTEN_KEEPALIVE void js_fetch_error_callback(uint32_t request_id, const char* error_message) {
-    // NOTE: Removed FL_WARN logging to prevent stack overflow during print operations
+    FL_WARN("Fetch error callback received for request " << request_id << ": " << error_message);
     
     auto callback_opt = getCallbackManager().takeCallback(request_id);
     if (callback_opt) {
@@ -90,45 +91,39 @@ extern "C" EMSCRIPTEN_KEEPALIVE void js_fetch_error_callback(uint32_t request_id
         response.set_text(error_content);
         
         (*callback_opt)(response);
+    } else {
+        FL_WARN("Warning: No pending callback found for fetch error request " << request_id);
     }
-    // NOTE: Removed warning logging to prevent stack overflow
 }
 
-// JavaScript function that performs the actual fetch using async await pattern
+// JavaScript function that performs the actual fetch and calls back to C++
 EM_JS(void, js_fetch_async, (uint32_t request_id, const char* url), {
     var urlString = UTF8ToString(url);
     console.log('🌐 JavaScript fetch starting for request', request_id, 'URL:', urlString);
     
-    // Define async callback pattern for fetch
-    globalThis.FastLED_fetch_callback = globalThis.FastLED_fetch_callback || async function(request_id, url) {
-        try {
-            const response = await fetch(url);
+    // Use native JavaScript fetch API
+    fetch(urlString)
+        .then(response => {
             console.log('🌐 Fetch response received for request', request_id, 'status:', response.status);
-            
             if (!response.ok) {
                 throw new Error('HTTP ' + response.status + ': ' + response.statusText);
             }
-            
-            const text = await response.text();
+            return response.text();
+        })
+        .then(text => {
             console.log('🌐 Fetch text received for request', request_id, 'length:', text.length);
-            
             // Call back into C++ success callback with request ID
             Module._js_fetch_success_callback(request_id, stringToUTF8OnStack(text));
-        } catch (error) {
+        })
+        .catch(error => {
             console.error('🌐 Fetch error for request', request_id, ':', error.message);
-            // Call back into C++ error callback with request ID  
+            // Call back into C++ error callback with request ID
             Module._js_fetch_error_callback(request_id, stringToUTF8OnStack(error.message));
-        }
-    };
-    
-    // Execute with Asyncify handling to fix RuntimeError: unreachable
-    return Asyncify.handleAsync(async () => {
-        await globalThis.FastLED_fetch_callback(request_id, urlString);
-    });
+        });
 });
 
 void WasmFetchRequest::response(const FetchResponseCallback& callback) {
-    // NOTE: Removed FL_WARN logging to prevent stack overflow during fetch operations
+    FL_WARN("Starting JavaScript-based fetch request to: " << mUrl);
     
     // Generate unique request ID for this request
     uint32_t request_id = getCallbackManager().generateRequestId();
@@ -136,7 +131,7 @@ void WasmFetchRequest::response(const FetchResponseCallback& callback) {
     // Store the callback for when JavaScript calls back (using move semantics)
     getCallbackManager().storeCallback(request_id, FetchResponseCallback(callback));
     
-    // NOTE: Removed FL_WARN logging to prevent stack overflow during fetch operations
+    FL_WARN("Stored callback for request ID: " << request_id);
     
     // Start the JavaScript fetch (non-blocking) with request ID
     js_fetch_async(request_id, mUrl.c_str());

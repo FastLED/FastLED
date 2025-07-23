@@ -16,7 +16,7 @@ class JsonHelpImpl {
     const fl::string &markdownContent() const;
 
     const fl::string &name() const;
-    fl::Json toJson() const;
+    void toJson(FLArduinoJson::JsonObject &json) const;
     const fl::string &groupName() const;
     
     // Method to allow parent UIElement class to set the group

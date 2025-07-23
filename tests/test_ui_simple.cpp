@@ -111,13 +111,20 @@ TEST_CASE("JsonConsole polling system test") {
     
     // Generate the component JSON based on the actual JsonSliderImpl component
     // Use the slider's toJson method to get the correct component information
-    auto componentJson = slider.toJson();
+    FLArduinoJson::JsonDocument componentDoc;
+    auto componentObj = componentDoc.to<FLArduinoJson::JsonObject>();
+    slider.toJson(componentObj);
     
-    // Convert to string for processing using ideal JSON API
-    fl::string componentJsonStr = componentJson.serialize();
+    // Create array containing the component
+    FLArduinoJson::JsonDocument arrayDoc;
+    auto componentArray = arrayDoc.to<FLArduinoJson::JsonArray>();
+    componentArray.add(componentObj);
+    
+    fl::string componentJson;
+    serializeJson(arrayDoc, componentJson);
     
     // Call the processJsonFromUI method directly to simulate what the UI system should do
-    console->processJsonFromUI(componentJsonStr.c_str());
+    console->processJsonFromUI(componentJson.c_str());
     
     FL_WARN("Testing JsonConsole executeCommand...");
     bool result = console->executeCommand("test_slider: 75");

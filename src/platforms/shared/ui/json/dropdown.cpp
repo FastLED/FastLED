@@ -13,12 +13,12 @@ namespace fl {
 // Common initialization function
 void JsonDropdownImpl::commonInit(const fl::string &name) {
     auto updateFunc = JsonUiInternal::UpdateFunction(
-        [this](const fl::Json &json) {
-            static_cast<JsonDropdownImpl *>(this)->updateInternal(json);
+        [this](const FLArduinoJson::JsonVariantConst &value) {
+            static_cast<JsonDropdownImpl *>(this)->updateInternal(value);
         });
     auto toJsonFunc =
-        JsonUiInternal::ToJsonFunction([this]() -> fl::Json {
-            return static_cast<JsonDropdownImpl *>(this)->toJson();
+        JsonUiInternal::ToJsonFunction([this](FLArduinoJson::JsonObject &json) {
+            static_cast<JsonDropdownImpl *>(this)->toJson(json);
         });
     mInternal = fl::make_shared<JsonUiInternal>(name, fl::move(updateFunc),
                                      fl::move(toJsonFunc));
@@ -61,22 +61,17 @@ JsonDropdownImpl &JsonDropdownImpl::Group(const fl::string &name) {
 
 const fl::string &JsonDropdownImpl::name() const { return mInternal->name(); }
 
-fl::Json JsonDropdownImpl::toJson() const {
-    auto builder = fl::JsonBuilder()
-        .set("name", name())
-        .set("group", mInternal->groupName())
-        .set("type", "dropdown")
-        .set("id", mInternal->id())
-        .set("value", static_cast<int>(mSelectedIndex));
+void JsonDropdownImpl::toJson(FLArduinoJson::JsonObject &json) const {
+    json["name"] = name();
+    json["group"] = mInternal->groupName().c_str();
+    json["type"] = "dropdown";
+    json["id"] = mInternal->id();
+    json["value"] = static_cast<int>(mSelectedIndex);
     
-    // Add options array
-    fl::vector<fl::string> options_copy;
+    FLArduinoJson::JsonArray optionsArray = json["options"].to<FLArduinoJson::JsonArray>();
     for (const auto &option : mOptions) {
-        options_copy.push_back(option);
+        optionsArray.add(option.c_str());
     }
-    builder.set("options", options_copy);
-    
-    return builder.build();
 }
 
 fl::string JsonDropdownImpl::value() const {
@@ -114,13 +109,12 @@ JsonDropdownImpl &JsonDropdownImpl::operator=(int index) {
     return *this;
 }
 
-void JsonDropdownImpl::updateInternal(const fl::Json &json) {
-    // Use ideal JSON API directly with type-safe default - allows flexible numeric access
-    auto maybeIndex = json.get_flexible<int>();
-    if (maybeIndex.has_value() && *maybeIndex >= 0) {
-        setSelectedIndex(*maybeIndex);
+void JsonDropdownImpl::updateInternal(
+    const FLArduinoJson::JsonVariantConst &value) {
+    if (value.is<int>()) {
+        int newIndex = value.as<int>();
+        setSelectedIndex(newIndex);
     }
-    // If maybeIndex is invalid or negative, keep current selection unchanged
 }
 
 } // namespace fl

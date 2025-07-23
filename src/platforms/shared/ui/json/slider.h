@@ -16,7 +16,7 @@ class JsonSliderImpl {
     JsonSliderImpl &Group(const fl::string &name);
 
     const fl::string &name() const;
-    fl::Json toJson() const;
+    void toJson(FLArduinoJson::JsonObject &json) const;
     float value() const;
     float value_normalized() const;
     float getMax() const;
@@ -39,7 +39,7 @@ class JsonSliderImpl {
     JsonSliderImpl &operator=(int value);
 
   private:
-    void updateInternal(const fl::Json &json);
+    void updateInternal(const FLArduinoJson::JsonVariantConst &value);
     void setValueInternal(float value);  // Internal method for UI updates - no change notification
 
     JsonUiInternalPtr mInternal;

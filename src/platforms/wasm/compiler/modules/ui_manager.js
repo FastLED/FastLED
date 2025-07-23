@@ -1264,13 +1264,13 @@ export class JsonUiManager {
     // Mark elements that might benefit from wider layouts
     if (
       data.type === 'audio' ||
-      (data.type === 'slider' && data.name && data.name.toLowerCase().includes('spectrum'))
+      data.type === 'slider' && data.name.toLowerCase().includes('spectrum')
     ) {
       data._layoutHint = 'wide';
     }
 
     // Mark elements that should always be full width
-    if (data.type === 'help' || (data.name && data.name.toLowerCase().includes('debug'))) {
+    if (data.type === 'help' || data.name.toLowerCase().includes('debug')) {
       data._layoutHint = 'full-width';
     }
   }

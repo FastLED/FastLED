@@ -12,12 +12,11 @@ namespace fl {
 
 JsonHelpImpl::JsonHelpImpl(const string &markdownContent): mMarkdownContent(markdownContent) {
     JsonUiInternal::UpdateFunction update_fcn;
-    auto toJsonFunc =
-        JsonUiInternal::ToJsonFunction([this]() -> fl::Json {
-            return static_cast<JsonHelpImpl *>(this)->toJson();
+    JsonUiInternal::ToJsonFunction to_json_fcn =
+        JsonUiInternal::ToJsonFunction([this](FLArduinoJson::JsonObject &json) {
+            static_cast<JsonHelpImpl *>(this)->toJson(json);
         });
-    mInternal = fl::make_shared<JsonUiInternal>("help", update_fcn,
-                                       fl::move(toJsonFunc));
+    mInternal = fl::make_shared<JsonUiInternal>("help", update_fcn, to_json_fcn);
     addJsonUiComponent(fl::weak_ptr<JsonUiInternal>(mInternal));
 }
 
@@ -30,14 +29,12 @@ JsonHelpImpl &JsonHelpImpl::Group(const fl::string &name) {
 
 const fl::string &JsonHelpImpl::markdownContent() const { return mMarkdownContent; }
 
-fl::Json JsonHelpImpl::toJson() const {
-    return fl::JsonBuilder()
-        .set("name", mInternal->name())
-        .set("type", "help")
-        .set("group", mInternal->groupName())
-        .set("id", mInternal->id())
-        .set("markdownContent", markdownContent())
-        .build();
+void JsonHelpImpl::toJson(FLArduinoJson::JsonObject &json) const {
+    json["name"] = mInternal->name();
+    json["type"] = "help";
+    json["group"] = mInternal->groupName().c_str();
+    json["id"] = mInternal->id();
+    json["markdownContent"] = markdownContent();
 }
 
 const string &JsonHelpImpl::name() const { return mInternal->name(); }

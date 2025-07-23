@@ -66,7 +66,7 @@ EMSCRIPTEN_KEEPALIVE void* getFrameData(int* dataSize) {
     fl::jsFillInMissingScreenMaps(active_strips);
     
     // Serialize to JSON
-    fl::string json_str = active_strips.infoJsonString();
+    fl::Str json_str = active_strips.infoJsonString();
     
     // Allocate and return data pointer
     char* buffer = (char*)malloc(json_str.length() + 1);
@@ -165,7 +165,7 @@ EMSCRIPTEN_KEEPALIVE void* getScreenMapData(int* dataSize) {
     }
     
     // Serialize to JSON
-    fl::string json_str;
+    fl::Str json_str;
     serializeJson(doc, json_str);
     
     // Allocate and return data pointer
@@ -233,12 +233,13 @@ namespace fl {
  */
 EMSCRIPTEN_KEEPALIVE void* getStripUpdateData(int stripId, int* dataSize) {
     // Generate basic strip update JSON
-    fl::JsonDocument doc;
+    FLArduinoJson::JsonDocument doc;
     doc["strip_id"] = stripId;
     doc["event"] = "strip_update";
     doc["timestamp"] = millis();
     
-    fl::string jsonBuffer = doc.serialize();
+    Str jsonBuffer;
+    serializeJson(doc, jsonBuffer);
     
     // Allocate and return data pointer
     char* buffer = (char*)malloc(jsonBuffer.length() + 1);
@@ -263,11 +264,12 @@ EMSCRIPTEN_KEEPALIVE void notifyStripAdded(int stripId, int numLeds) {
  */
 EMSCRIPTEN_KEEPALIVE void* getUiUpdateData(int* dataSize) {
     // Export basic UI update structure
-    fl::JsonDocument doc;
+    FLArduinoJson::JsonDocument doc;
     doc["event"] = "ui_update";
     doc["timestamp"] = millis();
     
-    fl::string jsonBuffer = doc.serialize();
+    Str jsonBuffer;
+    serializeJson(doc, jsonBuffer);
     
     // Allocate and return data pointer
     char* buffer = (char*)malloc(jsonBuffer.length() + 1);
@@ -282,7 +284,7 @@ EMSCRIPTEN_KEEPALIVE void* getUiUpdateData(int* dataSize) {
  */
 static void _jsSetCanvasSize(int cledcontoller_id, const fl::ScreenMap &screenmap) {
     // Export canvas size data as JSON for JavaScript to process
-    fl::JsonDocument doc;
+    FLArduinoJson::JsonDocument doc;
     doc["strip_id"] = cledcontoller_id;
     doc["event"] = "set_canvas_map";
     auto map = doc["map"].to<FLArduinoJson::JsonObject>();
@@ -299,7 +301,8 @@ static void _jsSetCanvasSize(int cledcontoller_id, const fl::ScreenMap &screenma
         doc["diameter"] = diameter;
     }
     
-    fl::string jsonBuffer = doc.serialize();
+    Str jsonBuffer;
+    serializeJson(doc, jsonBuffer);
     
     // Instead of calling JavaScript directly, just print for now
     // JavaScript will poll for this data or receive it through events

@@ -31,18 +31,17 @@ JsonUiInternal::~JsonUiInternal() {
 }
 
 const string &JsonUiInternal::name() const { return mName; }
-void JsonUiInternal::update(const fl::Json &json) {
+void JsonUiInternal::update(const FLArduinoJson::JsonVariantConst &json) {
     fl::lock_guard<fl::mutex> lock(mMutex);
     if (mUpdateFunc) {
         mUpdateFunc(json);
     }
 }
-fl::Json JsonUiInternal::toJson() const {
+void JsonUiInternal::toJson(FLArduinoJson::JsonObject &json) const {
     fl::lock_guard<fl::mutex> lock(mMutex);
     if (mtoJsonFunc) {
-        return mtoJsonFunc();
+        mtoJsonFunc(json);
     }
-    return fl::Json();  // Return empty Json if no function
 }
 int JsonUiInternal::id() const { return mId; }
 

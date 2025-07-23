@@ -19,13 +19,13 @@ JsonSliderImpl::JsonSliderImpl(const fl::string &name, float value, float min,
         mStep = (mMax - mMin) / 100.0f;
     }
     auto updateFunc = JsonUiInternal::UpdateFunction(
-        [this](const fl::Json &json) {
-            static_cast<JsonSliderImpl *>(this)->updateInternal(json);
+        [this](const FLArduinoJson::JsonVariantConst &value) {
+            static_cast<JsonSliderImpl *>(this)->updateInternal(value);
         });
 
     auto toJsonFunc =
-        JsonUiInternal::ToJsonFunction([this]() -> fl::Json {
-            return static_cast<JsonSliderImpl *>(this)->toJson();
+        JsonUiInternal::ToJsonFunction([this](FLArduinoJson::JsonObject &json) {
+            static_cast<JsonSliderImpl *>(this)->toJson(json);
         });
     mInternal = fl::make_shared<JsonUiInternal>(name, fl::move(updateFunc),
                                        fl::move(toJsonFunc));
@@ -41,21 +41,17 @@ JsonSliderImpl &JsonSliderImpl::Group(const fl::string &name) {
 
 const fl::string &JsonSliderImpl::name() const { return mInternal->name(); }
 
-fl::Json JsonSliderImpl::toJson() const {
-    auto builder = fl::JsonBuilder()
-        .set("name", name())
-        .set("group", mInternal->groupName())
-        .set("type", "slider")
-        .set("id", mInternal->id())
-        .set("value", mValue)
-        .set("min", mMin)
-        .set("max", mMax);
-    
+void JsonSliderImpl::toJson(FLArduinoJson::JsonObject &json) const {
+    json["name"] = name();
+    json["group"] = mInternal->groupName().c_str();
+    json["type"] = "slider";
+    json["id"] = mInternal->id();
+    json["value"] = mValue;
+    json["min"] = mMin;
+    json["max"] = mMax;
     if (mStep > 0) {
-        builder.set("step", mStep);
+        json["step"] = mStep;
     }
-    
-    return builder.build();
 }
 
 float JsonSliderImpl::value() const { return mValue; }
@@ -101,16 +97,18 @@ JsonSliderImpl &JsonSliderImpl::operator=(int value) {
 }
 
 
-void JsonSliderImpl::updateInternal(const fl::Json &json) {
-    // Use ideal JSON API directly with flexible numeric access - handles both int and float
-    auto maybeValue = json.get_flexible<float>();
-    if (maybeValue.has_value()) {
-        setValue(*maybeValue);
+void JsonSliderImpl::updateInternal(
+    const FLArduinoJson::JsonVariantConst &value) {
+    if (value.is<float>()) {
+        float newValue = value.as<float>();
+        setValue(newValue);
+    } else if (value.is<int>()) {
+        int newValue = value.as<int>();
+        setValue(static_cast<float>(newValue));
     } else {
-        // Fallback: if it's not a number, log the type and keep current value
         FL_ASSERT(false, "*** SLIDER UPDATE ERROR: "
-                    << name() << " " << json.type_str()
-                    << " is not a numeric value.");
+                    << name() << " " << fl::getJsonTypeStr(value)
+                    << " is not a float or int.");
     }
 }
 

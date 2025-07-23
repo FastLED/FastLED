@@ -96,28 +96,12 @@ void JsonUiManager::processPendingUpdates() {
             }
         }
         
-        // Send JSON array directly to frontend (not wrapped in components_serialized)
-        // Frontend expects: [{"name":"title","type":"title",...}, {"name":"slider",...}, ...]
-        auto components = getComponents();
-        
-        // Create a JSON document and convert it to an array
-        fl::JsonDocument arrayDoc;
-        arrayDoc.to<::FLArduinoJson::JsonArray>();
-        
-        // Add each component's JSON to the array
-        for (auto &component : components) {
-            auto componentJson = component->toJson();
-            if (componentJson.has_value()) {
-                // Add the component's JSON variant directly to the array
-                arrayDoc.add(componentJson.variant());
-            }
-        }
-        
-        // Serialize the array document
-        fl::string jsonStr;
-        fl::toJson(arrayDoc, &jsonStr);
-        
-        //FL_WARN("*** SENDING UI TO FRONTEND: " << jsonStr.substr(0, 200).c_str() << "...");
+        FLArduinoJson::JsonDocument doc;
+        auto json = doc.to<FLArduinoJson::JsonArray>();
+        toJson(json);
+        string jsonStr;
+        serializeJson(doc, jsonStr);
+        //FL_WARN("*** SENDING UI TO FRONTEND: " << jsonStr.substr(0, 100).c_str() << "...");
         mUpdateJs(jsonStr.c_str());
     }
 
@@ -183,7 +167,7 @@ void JsonUiManager::updateUiComponents(const char* jsonStr) {
     // FL_WARN("*** JsonUiManager pointer: " << this);
     // FL_WARN("*** BEFORE: mHasPendingUpdate=" << (mHasPendingUpdate ? "true" : "false"));
     
-    fl::JsonDocument doc;
+    FLArduinoJson::JsonDocument doc;
     deserializeJson(doc, jsonStr);
     
     mPendingJsonUpdate = fl::move(doc);
@@ -193,39 +177,31 @@ void JsonUiManager::updateUiComponents(const char* jsonStr) {
 }
 
 
-void JsonUiManager::executeUiUpdates(const fl::JsonDocument &doc) {
+void JsonUiManager::executeUiUpdates(const FLArduinoJson::JsonDocument &doc) {
     auto type = getJsonType(doc);
     
     if (type == fl::JSON_OBJECT) {
-        // Use fl::Json wrapper - eliminate FLArduinoJson iteration by checking known components
-        fl::Json rootJson(const_cast<fl::JsonDocument&>(doc));
+        auto obj = doc.as<FLArduinoJson::JsonObjectConst>();
         
-        // Instead of iterating through JSON keys, iterate through known components
-        // and check if they exist in the JSON - this eliminates FLArduinoJson usage
-        auto components = getComponents();
-        for (auto &component : components) {
-            const fl::string& componentName = component->name();
+        // Iterate through all keys in the JSON object
+        for (auto kv : obj) {
+            const char* id_or_name = kv.key().c_str();
             
-            // Check if this component name exists in the JSON
-            fl::Json valueJson = rootJson[componentName];
-            if (valueJson.has_value()) {
-                component->update(valueJson);
-                //FL_WARN("*** Updated component: " << componentName.c_str());
-            }
+            //FL_WARN("*** Checking for component with ID: " << idStr);
             
-            // Also check by ID if different from name
-            fl::string componentId = to_string(component->id());
-            if (componentId != componentName) {
-                fl::Json valueByIdJson = rootJson[componentId];
-                if (valueByIdJson.has_value()) {
-                    component->update(valueByIdJson);
-                    //FL_WARN("*** Updated component by ID: " << componentId.c_str());
-                }
+            auto component = findUiComponent(id_or_name);
+            if (component) {
+                const FLArduinoJson::JsonVariantConst v = kv.value();
+                component->update(v);
+                //FL_WARN("*** Updated component with ID " << idStr);
+            } else {
+                FL_WARN("*** ERROR: could not find component with ID or name: " << id_or_name);
             }
         }
     } else {
         // Debug: Show what we actually received instead of just asserting
-        fl::string debugJson = doc.serialize();
+        fl::string debugJson;
+        serializeJson(doc, debugJson);
         FL_WARN("*** UI UPDATE ERROR: Expected JSON object but got " << 
                (type == fl::JSON_ARRAY ? "array" : "non-object") << 
                ": " << debugJson.substr(0, 200).c_str() << "...");
@@ -239,7 +215,13 @@ void JsonUiManager::onEndFrame() {
     processPendingUpdates();
 }
 
-// REMOVED: Legacy toJson method no longer needed after FLArduinoJson elimination
+void JsonUiManager::toJson(FLArduinoJson::JsonArray &json) {
+    auto components = getComponents();
+    for (auto &component : components) {
+        auto obj = json.add<FLArduinoJson::JsonObject>();
+        component->toJson(obj);
+    }
+}
 
 
 } // namespace fl

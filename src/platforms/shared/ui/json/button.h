@@ -15,7 +15,7 @@ class JsonButtonImpl {
     JsonButtonImpl &Group(const fl::string &name);
 
     const fl::string &name() const;
-    fl::Json toJson() const;
+    void toJson(FLArduinoJson::JsonObject &json) const;
     bool isPressed() const;
     bool clicked() const;
     int clickedCount() const;
@@ -40,7 +40,7 @@ class JsonButtonImpl {
 
     Updater mUpdater;
 
-    void updateInternal(const fl::Json &json);
+    void updateInternal(const FLArduinoJson::JsonVariantConst &value);
 
     JsonUiInternalPtr mInternal;
     bool mPressed = false;

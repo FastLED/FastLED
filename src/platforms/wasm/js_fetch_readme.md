@@ -106,7 +106,7 @@ fl::fetch.get("https://invalid-url-that-fails.com/test")
 
 ### Implementation Components
 
-- **`js_fetch.h`**: Header with fluent API classes (`Fetch`, `fetch_options`)
+- **`js_fetch.h`**: Header with fluent API classes (`Fetch`, `FetchRequest`)
 - **`js_fetch.cpp`**: Implementation with EM_JS bridge and C++ callbacks
 - **`js_fetch_async()`**: EM_JS function that performs JavaScript fetch with request ID
 - **`js_fetch_success_callback()`**: C++ function called by JavaScript on success (with request ID)

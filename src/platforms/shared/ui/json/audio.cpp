@@ -19,13 +19,13 @@ namespace {
 
 JsonAudioImpl::JsonAudioImpl(const fl::string &name) {
     auto updateFunc = JsonUiInternal::UpdateFunction(
-        [this](const fl::Json &json) {
-            static_cast<JsonAudioImpl *>(this)->updateInternal(json);
+        [this](const FLArduinoJson::JsonVariantConst &value) {
+            static_cast<JsonAudioImpl *>(this)->updateInternal(value);
         });
 
     auto toJsonFunc =
-        JsonUiInternal::ToJsonFunction([this]() -> fl::Json {
-            return static_cast<JsonAudioImpl *>(this)->toJson();
+        JsonUiInternal::ToJsonFunction([this](FLArduinoJson::JsonObject &json) {
+            static_cast<JsonAudioImpl *>(this)->toJson(json);
         });
     mInternal = fl::make_shared<JsonUiInternal>(name, fl::move(updateFunc),
                                        fl::move(toJsonFunc));
@@ -59,18 +59,14 @@ JsonAudioImpl::Updater::~Updater() { fl::EngineEvents::removeListener(this); }
 
 void JsonAudioImpl::Updater::onPlatformPreLoop2() {}
 
-fl::Json JsonAudioImpl::toJson() const {
-    auto builder = fl::JsonBuilder()
-        .set("name", name())
-        .set("group", mInternal->groupName())
-        .set("type", "audio")
-        .set("id", mInternal->id());
-    
+void JsonAudioImpl::toJson(FLArduinoJson::JsonObject &json) const {
+    json["name"] = name();
+    json["group"] = mInternal->groupName().c_str();
+    json["type"] = "audio";
+    json["id"] = mInternal->id();
     if (!mSerializeBuffer.empty()) {
-        builder.set("audioData", mSerializeBuffer);
+        json["audioData"] = mSerializeBuffer.c_str();
     }
-    
-    return builder.build();
 }
 
 static bool isdigit(char c) { return c >= '0' && c <= '9'; }
@@ -173,11 +169,8 @@ static void parseJsonToAudioBuffers(const FLArduinoJson::JsonVariantConst &jsonV
     }
 }
 
-void JsonAudioImpl::updateInternal(const fl::Json &json) {
-    // For complex parsing, we need to access the underlying FLArduinoJson variant
-    // This is acceptable since it's isolated within the implementation
-    const ::FLArduinoJson::JsonVariant& value = json.variant();
-    
+void JsonAudioImpl::updateInternal(
+    const FLArduinoJson::JsonVariantConst &value) {
     // FASTLED_WARN("Unimplemented jsAudioImpl::updateInternal");
     mSerializeBuffer.clear();
     serializeJson(value, mSerializeBuffer);

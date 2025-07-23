@@ -18,16 +18,17 @@ using JsonUiInternalPtr = fl::shared_ptr<JsonUiInternal>;
 
 class JsonUiInternal {
   public:
-    using UpdateFunction = fl::function<void(const fl::Json &)>;
-    using ToJsonFunction = fl::function<fl::Json()>;
+    using UpdateFunction =
+        fl::function<void(const FLArduinoJson::JsonVariantConst &)>;
+    using ToJsonFunction = fl::function<void(FLArduinoJson::JsonObject &)>;
 
     JsonUiInternal(const fl::string &name, UpdateFunction updateFunc,
                  ToJsonFunction toJsonFunc);
     ~JsonUiInternal();
 
     const fl::string &name() const;
-    void update(const fl::Json &json);
-    fl::Json toJson() const;
+    void update(const FLArduinoJson::JsonVariantConst &json);
+    void toJson(FLArduinoJson::JsonObject &json) const;
     int id() const;
 
     // Group functionality

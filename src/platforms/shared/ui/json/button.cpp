@@ -12,13 +12,13 @@ namespace fl {
 
 JsonButtonImpl::JsonButtonImpl(const string &name) : mPressed(false) {
     auto updateFunc = JsonUiInternal::UpdateFunction(
-        [this](const fl::Json &json) {
-            static_cast<JsonButtonImpl *>(this)->updateInternal(json);
+        [this](const FLArduinoJson::JsonVariantConst &value) {
+            static_cast<JsonButtonImpl *>(this)->updateInternal(value);
         });
 
     auto toJsonFunc =
-        JsonUiInternal::ToJsonFunction([this]() -> fl::Json {
-            return static_cast<JsonButtonImpl *>(this)->toJson();
+        JsonUiInternal::ToJsonFunction([this](FLArduinoJson::JsonObject &json) {
+            static_cast<JsonButtonImpl *>(this)->toJson(json);
         });
     mInternal = fl::make_shared<JsonUiInternal>(name, fl::move(updateFunc),
                                      fl::move(toJsonFunc));
@@ -37,14 +37,12 @@ bool JsonButtonImpl::clicked() const { return mClickedHappened; }
 
 const string &JsonButtonImpl::name() const { return mInternal->name(); }
 
-fl::Json JsonButtonImpl::toJson() const {
-    return fl::JsonBuilder()
-        .set("name", name())
-        .set("group", mInternal->groupName())
-        .set("type", "button")
-        .set("id", mInternal->id())
-        .set("pressed", mPressed)
-        .build();
+void JsonButtonImpl::toJson(FLArduinoJson::JsonObject &json) const {
+    json["name"] = name();
+    json["group"] = mInternal->groupName().c_str();
+    json["type"] = "button";
+    json["id"] = mInternal->id();
+    json["pressed"] = mPressed;
 }
 
 bool JsonButtonImpl::isPressed() const {
@@ -74,10 +72,13 @@ void JsonButtonImpl::Updater::onPlatformPreLoop2() {
         mOwner->mClickedCount++;
     }
 }
-void JsonButtonImpl::updateInternal(const fl::Json &json) {
-    // Use ideal JSON API directly - no conversion needed!
-    bool newPressed = json | false;  // Gets bool value or false default
-    mPressed = newPressed;
+
+void JsonButtonImpl::updateInternal(
+    const FLArduinoJson::JsonVariantConst &value) {
+    if (value.is<bool>()) {
+        bool newPressed = value.as<bool>();
+        mPressed = newPressed;
+    }
 }
 
 } // namespace fl

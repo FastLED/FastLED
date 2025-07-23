@@ -12,12 +12,11 @@ namespace fl {
 
 JsonTitleImpl::JsonTitleImpl(const string &text) : mText(text) {
     JsonUiInternal::UpdateFunction update_fcn;
-    auto toJsonFunc =
-        JsonUiInternal::ToJsonFunction([this]() -> fl::Json {
-            return static_cast<JsonTitleImpl *>(this)->toJson();
+    JsonUiInternal::ToJsonFunction to_json_fcn =
+        JsonUiInternal::ToJsonFunction([this](FLArduinoJson::JsonObject &json) {
+            static_cast<JsonTitleImpl *>(this)->toJson(json);
         });
-    mInternal = fl::make_shared<JsonUiInternal>("title", update_fcn,
-                                       fl::move(toJsonFunc));
+    mInternal = fl::make_shared<JsonUiInternal>("title", update_fcn, to_json_fcn);
     addJsonUiComponent(fl::weak_ptr<JsonUiInternal>(mInternal));
 }
 
@@ -28,14 +27,12 @@ JsonTitleImpl &JsonTitleImpl::Group(const fl::string &name) {
     return *this;
 }
 
-fl::Json JsonTitleImpl::toJson() const {
-    return fl::JsonBuilder()
-        .set("name", mInternal->name())
-        .set("type", "title")
-        .set("group", mInternal->groupName())
-        .set("id", mInternal->id())
-        .set("text", text())
-        .build();
+void JsonTitleImpl::toJson(FLArduinoJson::JsonObject &json) const {
+    json["name"] = mInternal->name();
+    json["type"] = "title";
+    json["group"] = mInternal->groupName().c_str();
+    json["id"] = mInternal->id();
+    json["text"] = text();
 }
 
 const string &JsonTitleImpl::name() const { return mInternal->name(); }

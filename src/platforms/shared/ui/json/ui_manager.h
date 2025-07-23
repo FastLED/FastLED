@@ -27,7 +27,7 @@ class JsonUiManager : fl::EngineEvents::Listener {
 
     // Internal representation.
     void updateUiComponents(const char *jsonStr);
-    void executeUiUpdates(const fl::JsonDocument &doc);
+    void executeUiUpdates(const FLArduinoJson::JsonDocument &doc);
 
     void resetCallback(Callback updateJs) {
       mUpdateJs = updateJs;
@@ -43,7 +43,7 @@ class JsonUiManager : fl::EngineEvents::Listener {
     void onEndFrame() override;
 
     fl::vector<JsonUiInternalPtr> getComponents();
-    // REMOVED: Legacy toJson method no longer needed after FLArduinoJson elimination
+    void toJson(FLArduinoJson::JsonArray &json);
     JsonUiInternalPtr findUiComponent(const fl::string& idStr);
 
     Callback mUpdateJs;
@@ -51,7 +51,7 @@ class JsonUiManager : fl::EngineEvents::Listener {
     fl::mutex mMutex;
 
     bool mItemsAdded = false;
-    fl::JsonDocument mPendingJsonUpdate;
+    FLArduinoJson::JsonDocument mPendingJsonUpdate;
     bool mHasPendingUpdate = false;
 };
 
