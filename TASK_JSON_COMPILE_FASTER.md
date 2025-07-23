@@ -39,9 +39,26 @@ Our header complexity analysis revealed that **ArduinoJSON is the #1 PCH build p
 ### ⚠️ **REMAINING PERFORMANCE OPPORTUNITY:**
 
 #### **ArduinoJSON Still in Headers** ⚠️ OPTIMIZATION PENDING
-- **`src/fl/json.h` lines 12-15**: Still includes `third_party/arduinojson/json.h`  
+- **`src/fl/json.h` lines 20-23**: Still includes `third_party/arduinojson/json.h`  
 - **Impact**: 251KB ArduinoJSON still loaded in every compilation unit
 - **Note**: Compilation works, but build performance gains pending header cleanup
+
+### 🚨 **CRITICAL WARNING: DO NOT REMOVE ARDUINOJSON INCLUDES YET!**
+
+**❌ ATTEMPTED TOO EARLY (2024-12-19):** Tried to remove ArduinoJSON includes from `json.h` but this caused compilation errors because:
+
+1. **Legacy `getJsonType()` functions still depend on ArduinoJSON types** in header
+2. **Template functions still use `::FLArduinoJson::JsonObjectConst` etc.**
+3. **JsonDocument class still inherits from ArduinoJSON classes**
+
+**✅ PREREQUISITES BEFORE ATTEMPTING AGAIN:**
+- [ ] Implement actual `JsonImpl::parseWithRootDetection()` in `json_impl.cpp`
+- [ ] Remove or isolate `getJsonType()` template functions that use ArduinoJSON types
+- [ ] Convert `JsonDocument` to pure PIMPL pattern
+- [ ] Ensure all ArduinoJSON namespace references are removed from header
+- [ ] Test that `fl::Json` functionality works without ArduinoJSON in header
+
+**🎯 THIS IS THE FINAL OPTIMIZATION STEP - NOT THE NEXT STEP!**
 
 ### 🎉 **CURRENT COMPILATION STATUS:**
 - **✅ Core FastLED**: Compiles successfully (11.55s build time)
@@ -536,10 +553,10 @@ TEST_CASE("UI JSON - No Regression After Changes") {
 - **Target**: Remove ArduinoJSON from headers for maximum PCH performance gains
 
 ### 🎯 **IMMEDIATE NEXT STEPS:**
-1. **Remove ArduinoJSON includes** from `json.h` header for performance gains
-2. **Implement real JSON parsing** in `JsonImpl::parseWithRootDetection()`
-3. **Add comprehensive JSON array support** for root-level arrays
-4. **Create UI JSON regression tests** before any UI modifications
+1. **Implement real JSON parsing** in `JsonImpl::parseWithRootDetection()` in `json_impl.cpp`
+2. **Add comprehensive JSON array support** for root-level arrays in JsonImpl
+3. **Create UI JSON regression tests** before any UI modifications  
+4. **Remove ArduinoJSON includes** from `json.h` header (**FINAL STEP ONLY** after prerequisites met)
 
 ### 📈 **PROGRESS METRICS:**
 - **Foundation**: ✅ 100% complete (JsonImpl with namespace conflict resolution)
