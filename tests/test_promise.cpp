@@ -491,7 +491,7 @@ TEST_CASE("fl::promise - Complex Types") {
     }
 }
 
-TEST_CASE("fl::PromiseResult - Basic Construction") {
+TEST_CASE("fl::result - Basic Construction") {
     SUBCASE("construct with success value") {
         PromiseResult<int> result(42);
         
@@ -520,7 +520,7 @@ TEST_CASE("fl::PromiseResult - Basic Construction") {
     }
 }
 
-TEST_CASE("fl::PromiseResult - Value Access") {
+TEST_CASE("fl::result - Value Access") {
     SUBCASE("safe value access on success") {
         PromiseResult<int> result(100);
         
@@ -567,7 +567,7 @@ TEST_CASE("fl::PromiseResult - Value Access") {
     }
 }
 
-TEST_CASE("fl::PromiseResult - Error Access") {
+TEST_CASE("fl::result - Error Access") {
     SUBCASE("safe error access on error") {
         Error original_error("Network timeout");
         PromiseResult<int> result(original_error);
@@ -603,7 +603,7 @@ TEST_CASE("fl::PromiseResult - Error Access") {
     }
 }
 
-TEST_CASE("fl::PromiseResult - Type Conversions") {
+TEST_CASE("fl::result - Type Conversions") {
     SUBCASE("boolean conversion") {
         PromiseResult<int> success(42);
         PromiseResult<int> failure(Error("Error"));
@@ -635,7 +635,7 @@ TEST_CASE("fl::PromiseResult - Type Conversions") {
     }
 }
 
-TEST_CASE("fl::PromiseResult - Helper Functions") {
+TEST_CASE("fl::result - Helper Functions") {
     SUBCASE("make_success") {
         auto result1 = make_success(42);
         CHECK(result1.ok());
@@ -666,7 +666,7 @@ TEST_CASE("fl::PromiseResult - Helper Functions") {
     }
 }
 
-TEST_CASE("fl::PromiseResult - Complex Types") {
+TEST_CASE("fl::result - Complex Types") {
     SUBCASE("custom struct") {
         struct TestStruct {
             int x;
@@ -697,7 +697,7 @@ TEST_CASE("fl::PromiseResult - Complex Types") {
     }
 }
 
-TEST_CASE("fl::PromiseResult - Copy and Move Semantics") {
+TEST_CASE("fl::result - Copy and Move Semantics") {
     SUBCASE("copy construction") {
         PromiseResult<int> original(42);
         PromiseResult<int> copy(original);

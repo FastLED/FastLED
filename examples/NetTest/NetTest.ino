@@ -17,7 +17,7 @@
 /// - Non-blocking, event-driven pattern
 ///
 /// APPROACH 2: fl::await_top_level() pattern for synchronous-style async code
-/// - Uses explicit types: fl::promise<T>, fl::PromiseResult<T>, fl::optional<T>
+/// - Uses explicit types: fl::promise<T>, fl::result<T>, fl::optional<T>
 /// - Blocks until async operation completes (only safe in Arduino loop()!)
 /// - More traditional imperative programming style
 ///
@@ -28,7 +28,7 @@
 /// 
 /// Key Types You'll Learn:
 /// * fl::promise<T>        - Represents a future value of type T
-/// * fl::PromiseResult<T>  - Wraps either a successful T value or an Error
+/// * fl::result<T>  - Wraps either a successful T value or an Error
 /// * fl::response          - HTTP response with status, headers, and body
 /// * fl::FetchRequest      - Configuration object for HTTP requests
 /// * fl::optional<T>       - May or may not contain a value of type T
@@ -52,7 +52,7 @@
 /// Await-based approach:
 /// ```cpp
 /// fl::promise<fl::response> promise = fl::fetch_get("http://example.com");
-/// fl::PromiseResult<fl::response> result = fl::await_top_level(promise);
+/// fl::result<fl::response> result = fl::await_top_level(promise);
 /// if (result.ok()) {
 ///     const fl::response& response = result.value();
 ///     // Use response...
@@ -176,14 +176,14 @@ void test_await_approach() {
     // This promise represents the future HTTP response
     fl::promise<fl::response> http_promise = fl::fetch_get("http://fastled.io", request_config);
     
-    // TUTORIAL: await_top_level() returns fl::PromiseResult<fl::response>
-    // PromiseResult wraps either a successful Response OR an Error - never both!
+    // TUTORIAL: await_top_level() returns fl::result<fl::response>
+    // result wraps either a successful response OR an Error - never both!
     // CRITICAL: await_top_level() blocks until completion - ONLY safe in Arduino loop()!
-    fl::PromiseResult<fl::response> result = fl::await_top_level(http_promise);
+    fl::result<fl::response> result = fl::await_top_level(http_promise);
     
     // TUTORIAL: Check if the result contains a successful response
     if (result.ok()) {
-        // TUTORIAL: Extract the Response from the PromiseResult
+        // TUTORIAL: Extract the response from the result
         // result.value() returns const fl::response& - the actual HTTP response
         const fl::response& http_response = result.value();
         

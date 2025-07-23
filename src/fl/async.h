@@ -161,21 +161,21 @@ bool async_has_tasks();
 /// }
 /// 
 /// // You can still specify the type explicitly if needed:
-/// auto explicit_result = fl::await_top_level<Response>(promise);
+/// auto explicit_result = fl::await_top_level<response>(promise);
 /// @endcode
 template<typename T>
-fl::PromiseResult<T> await_top_level(fl::promise<T> promise) {
+fl::result<T> await_top_level(fl::promise<T> promise) {
     // Handle invalid promises
     if (!promise.valid()) {
-        return fl::PromiseResult<T>(Error("Invalid promise"));
+        return fl::result<T>(Error("Invalid promise"));
     }
     
     // If already completed, return immediately
     if (promise.is_completed()) {
         if (promise.is_resolved()) {
-            return fl::PromiseResult<T>(promise.value());
+            return fl::result<T>(promise.value());
         } else {
-            return fl::PromiseResult<T>(promise.error());
+            return fl::result<T>(promise.error());
         }
     }
     
@@ -190,9 +190,9 @@ fl::PromiseResult<T> await_top_level(fl::promise<T> promise) {
     
     // Return the result
     if (promise.is_resolved()) {
-        return fl::PromiseResult<T>(promise.value());
+        return fl::result<T>(promise.value());
     } else {
-        return fl::PromiseResult<T>(promise.error());
+        return fl::result<T>(promise.error());
     }
 }
 
