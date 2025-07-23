@@ -24,6 +24,99 @@ This document outlines the design for an **ideal JSON fetch API** for FastLED th
 ⏳ **vec2f and coordinate types** (planned)
 ⏳ **Color palette support** (planned)
 
+### 🚨 **CRITICAL API GAP IDENTIFIED: JsonBuilder Array-of-Objects Support**
+
+**Status: MISSING FUNCTIONALITY - High Priority Enhancement Needed**
+
+During FLArduinoJson elimination, we discovered a fundamental limitation in the ideal API:
+
+**❌ MISSING:** `JsonBuilder` support for `vector<Json>` objects (arrays of JSON objects)
+**✅ AVAILABLE:** `JsonBuilder` support for `vector<string>` (creates string literals, not objects)
+
+#### Real-World Impact
+
+This gap forces workarounds when building JSON arrays containing objects:
+
+```cpp
+// ❌ CURRENT LIMITATION: Cannot do this with JsonBuilder
+fl::vector<fl::Json> componentObjects;
+for (auto &component : components) {
+    componentObjects.push_back(component->toJson());
+}
+builder.set("components", componentObjects);  // ❌ Not supported
+
+// 😞 CURRENT WORKAROUND: Must use awkward patterns
+builder.set("components_serialized", vector<string>{"...", "..."});  // Creates string literals
+// Frontend must parse each string separately - defeats purpose of JSON API
+```
+
+#### Required Enhancement
+
+**JsonBuilder needs this method:**
+
+```cpp
+/// @brief Set array of Json objects at path
+JsonBuilder& set(const string& path, const vector<Json>& objects) {
+    auto array = mDoc[path.c_str()].to<::FLArduinoJson::JsonArray>();
+    for (const auto& obj : objects) {
+        array.add(obj.variant());
+    }
+    return *this;
+}
+```
+
+#### Target Usage Pattern
+
+```cpp
+// ✅ SHOULD WORK: Clean array-of-objects construction
+auto json = JsonBuilder()
+    .set("ui_components", vector<Json>{
+        component1->toJson(),
+        component2->toJson(), 
+        component3->toJson()
+    })
+    .set("metadata", "ui_update")
+    .build();
+
+// Results in proper JSON: {"ui_components": [{...}, {...}, {...}], "metadata": "ui_update"}
+```
+
+#### Alternative API Approaches
+
+**Option 1: Fluent Array Builder**
+```cpp
+auto json = JsonBuilder()
+    .begin_array("components")
+        .add_object(component1->toJson())
+        .add_object(component2->toJson())
+    .end_array()
+    .build();
+```
+
+**Option 2: Dedicated Array Methods**
+```cpp
+auto json = JsonBuilder()
+    .set_object_array("components", {comp1->toJson(), comp2->toJson()})
+    .build();
+```
+
+**Option 3: Template Specialization**
+```cpp
+// Extend existing set() method with Json specialization
+template<>
+JsonBuilder& set(const string& path, const vector<Json>& values);
+```
+
+#### Priority Level: **🚨 HIGH**
+
+This limitation affects:
+- **UI component serialization** (current blocker)
+- **Complex data structure construction** 
+- **API consistency and ergonomics**
+- **Migration from legacy FLArduinoJson patterns**
+
+Without this enhancement, developers must use verbose workarounds that defeat the purpose of the ideal API.
+
 ### 🎯 **PHASE 3: COMPLETED - JSON UI Integration & FLArduinoJson Elimination**
 ✅ **🆕 COMPLETE FLARDUINOJSON ELIMINATION** - All legacy FLArduinoJson usage converted to fl::Json
 ✅ **All UI components converted** to use fl::Json instead of FLArduinoJson types
@@ -492,7 +585,7 @@ auto jsonStr = json.serialize();               // Clean serialization
 
 ## Conclusion
 
-**All phases of the Ideal JSON API are now complete and production-ready.** The FastLED JSON system now provides industry-leading ergonomics, type safety, and flexibility.
+**The Ideal JSON API is largely complete and production-ready, with one critical enhancement needed.** The FastLED JSON system now provides industry-leading ergonomics, type safety, and flexibility, with a documented path forward for the remaining limitation.
 
 **Phase 1 (Core JSON API)**: ✅ **COMPLETE** - Ideal JSON API with enhanced string number conversion and clean serialization.
 
@@ -511,5 +604,7 @@ auto jsonStr = json.serialize();               // Clean serialization
 **Phase 4 (Fetch Integration)**: ⏳ **PLANNED** - Future development for network integration.
 
 **Current Status**: The JSON system represents a major architectural improvement for FastLED. All JSON operations now provide a modern, type-safe, crash-proof interface with automatic string number conversion and clean serialization. The system significantly improves developer experience while maintaining optimal performance and full backward compatibility.
+
+**📝 Known Limitation**: JsonBuilder currently lacks support for `vector<Json>` objects, requiring workarounds for array-of-objects construction. This is documented as a high-priority enhancement with clear implementation paths outlined above.
 
 **Immediate Value**: The enhanced ideal JSON API provides immediate benefits for FastLED developers working with JSON data, UI components, and testing, while the architectural foundation supports future enhancements including advanced UI features and network integration. The complete elimination of legacy patterns ensures a clean, maintainable codebase for years to come. 

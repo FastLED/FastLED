@@ -96,21 +96,28 @@ void JsonUiManager::processPendingUpdates() {
             }
         }
         
-        // Build JSON array using proper fl::JsonDocument array initialization
-        fl::JsonDocument doc;
-        auto jsonArray = doc.to<FLArduinoJson::JsonArray>();
+        // IDEAL API ENHANCEMENT NEEDED: JsonBuilder should support vector<Json> for object arrays
+        // For now, use object-wrapper approach which works with current ideal API
         
-        // Add each component to the array
+        fl::JsonBuilder builder;
+        builder.set("type", "ui_update");
+        builder.set("count", static_cast<int>(getComponents().size()));
+        
+        // Serialize each component and collect as strings for now
         auto components = getComponents();
+        fl::vector<fl::string> componentStrings;
         for (auto &component : components) {
             auto componentJson = component->toJson();
             if (componentJson.is_object()) {
-                // Use the variant to add to array - this is the intended usage
-                jsonArray.add(componentJson.variant());
+                componentStrings.push_back(componentJson.serialize());
             }
         }
         
-        fl::string jsonStr = doc.serialize();
+        // Store serialized components - frontend will need to parse these
+        builder.set("components_serialized", componentStrings);
+        
+        fl::Json wrapperJson = builder.build();
+        fl::string jsonStr = wrapperJson.serialize();
         //FL_WARN("*** SENDING UI TO FRONTEND: " << jsonStr.substr(0, 100).c_str() << "...");
         mUpdateJs(jsonStr.c_str());
     }
