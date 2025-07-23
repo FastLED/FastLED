@@ -5,7 +5,7 @@
  * All log calls use FASTLED_DEBUG_LOG() so they can be easily searched and replaced.
  */
 
-let FASTLED_DEBUG_ENABLED = true;
+let FASTLED_DEBUG_ENABLED = false;
 let FASTLED_DEBUG_PREFIX = '[FASTLED_DEBUG]';
 
 /**
