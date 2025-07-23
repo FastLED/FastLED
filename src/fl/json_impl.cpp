@@ -284,4 +284,35 @@ Json Json::operator[](int index) const {
     return result;
 }
 
+// Value getters
+fl::string Json::getStringValue() const {
+    return mImpl ? mImpl->getStringValue() : fl::string("");
+}
+
+int Json::getIntValue() const {
+    return mImpl ? mImpl->getIntValue() : 0;
+}
+
+float Json::getFloatValue() const {
+    return mImpl ? mImpl->getFloatValue() : 0.0f;
+}
+
+bool Json::getBoolValue() const {
+    return mImpl ? mImpl->getBoolValue() : false;
+}
+
+bool Json::isNull() const {
+    return !mImpl || mImpl->isNull();
+}
+
+// Array/Object size
+size_t Json::getSize() const {
+    return mImpl ? mImpl->getSize() : 0;
+}
+
+// Serialization
+fl::string Json::serialize() const {
+    return mImpl ? mImpl->serialize() : fl::string("{}");
+}
+
 } // namespace fl 

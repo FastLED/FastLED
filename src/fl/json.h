@@ -78,6 +78,19 @@ public:
         // Implementation will be added later - for now just return default
         return defaultValue;
     }
+    
+    // Value getters  
+    fl::string getStringValue() const;
+    int getIntValue() const;
+    float getFloatValue() const;
+    bool getBoolValue() const;
+    bool isNull() const;
+    
+    // Array/Object size
+    size_t getSize() const;
+    
+    // Serialization
+    fl::string serialize() const;
 };
 
 // Enum for JSON types
