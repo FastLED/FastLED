@@ -176,6 +176,95 @@ The `bash lint` command now includes:
 - Use the MCP server tools for common tasks
 - Check examples when making API changes
 
+## 🚨 CRITICAL: .INO FILE CREATION RULES 🚨
+
+### ⚠️ THINK BEFORE CREATING .INO FILES ⚠️
+
+**.ino files should be created SPARINGLY and ONLY when truly justified.**
+
+### 🚫 WHEN NOT TO CREATE .INO FILES:
+- **Testing minor code changes** - Use existing test files or unit tests
+- **Quick API validation** - Use unit tests or modify existing examples
+- **Debugging specific functions** - Use test files, not new sketches
+- **One-off experiments** - Create temporary test files instead
+- **Small feature tests** - Extend existing relevant examples
+
+### ✅ WHEN TO CREATE .INO FILES:
+
+#### 1. **Temporary Testing (.ino)**
+**Use Pattern:** `temp_<feature>.ino` or `test_<api>.ino`
+```cpp
+// temp_json_api.ino - Testing new JSON fetch functionality
+// test_networking.ino - Validating network stack changes
+```
+- ✅ **FOR:** Testing new APIs during development
+- ✅ **FOR:** Quick prototyping and validation
+- ✅ **DELETE AFTER USE** - These are temporary by design
+
+#### 2. **Significant New Feature Examples**
+**Use Pattern:** `examples/<FeatureName>/<FeatureName>.ino`
+```cpp
+// examples/JsonFetchApi/JsonFetchApi.ino - Comprehensive JSON API example
+// examples/NetworkStack/NetworkStack.ino - Major networking features
+```
+- ✅ **FOR:** Large, comprehensive new features
+- ✅ **FOR:** APIs that warrant dedicated examples
+- ✅ **FOR:** Features that users will commonly implement
+- ✅ **PERMANENT** - These become part of the example library
+
+### 📋 CREATION CHECKLIST:
+
+**Before creating ANY .ino file, ask:**
+
+1. **🤔 Is this testing a new API?**
+   - YES → Create `temp_<name>.ino`, delete after testing
+   - NO → Consider alternatives
+
+2. **🤔 Is this a significant new feature that users will commonly use?**
+   - YES → Create `examples/<FeatureName>/<FeatureName>.ino`
+   - NO → Use existing examples or test files
+
+3. **🤔 Can I modify an existing example instead?**
+   - YES → Extend existing example rather than creating new
+   - NO → Proceed with creation
+
+4. **🤔 Is this just for debugging/validation?**
+   - YES → Use unit tests or temporary test files
+   - NO → Consider if it meets the "significant feature" criteria
+
+### 🔍 REVIEW CRITERIA:
+
+**For Feature Examples (.ino files that stay):**
+- ✅ **Demonstrates complete, real-world usage patterns**
+- ✅ **Covers multiple aspects of the feature comprehensively**  
+- ✅ **Provides educational value for users**
+- ✅ **Shows best practices and common use cases**
+- ✅ **Is likely to be referenced by multiple users**
+
+**For Temporary Testing (.ino files that get deleted):**
+- ✅ **Clearly named as temporary (temp_*, test_*)**
+- ✅ **Focused on specific API validation**
+- ✅ **Will be deleted after development cycle**
+- ✅ **Too complex for unit test framework**
+
+### ❌ EXAMPLES OF WHAT NOT TO CREATE:
+- `test_basic_led.ino` - Use existing Blink example
+- `debug_colors.ino` - Use existing ColorPalette example  
+- `quick_brightness.ino` - Use unit tests or modify existing example
+- `validate_pins.ino` - Use PinTest example or unit tests
+
+### ✅ EXAMPLES OF JUSTIFIED CREATIONS:
+- `temp_new_wifi_api.ino` - Testing major new WiFi functionality (temporary)
+- `examples/MachineLearning/MachineLearning.ino` - New ML integration feature (permanent)
+- `temp_performance_test.ino` - Validating optimization changes (temporary)
+
+### 🧹 CLEANUP RESPONSIBILITY:
+- **Temporary files:** Creator must delete when testing is complete
+- **Feature examples:** Must be maintained and updated as API evolves
+- **Abandoned files:** Regular cleanup reviews to remove unused examples
+
+**Remember: The examples directory is user-facing documentation. Every .ino file should provide clear value to FastLED users.**
+
 ### Memory Management with Smart Pointers and Moveable Objects
 **🚨 CRITICAL: Always use proper RAII patterns - smart pointers, moveable objects, or wrapper classes instead of raw pointers for resource management.**
 
