@@ -31,7 +31,7 @@ JsonUiInternal::~JsonUiInternal() {
 }
 
 const string &JsonUiInternal::name() const { return mName; }
-void JsonUiInternal::update(const FLArduinoJson::JsonVariantConst &json) {
+void JsonUiInternal::update(const fl::Json &json) {
     fl::lock_guard<fl::mutex> lock(mMutex);
     if (mUpdateFunc) {
         mUpdateFunc(json);

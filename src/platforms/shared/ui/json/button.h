@@ -40,7 +40,7 @@ class JsonButtonImpl {
 
     Updater mUpdater;
 
-    void updateInternal(const FLArduinoJson::JsonVariantConst &value);
+    void updateInternal(const fl::Json &json);
 
     JsonUiInternalPtr mInternal;
     bool mPressed = false;

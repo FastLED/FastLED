@@ -28,10 +28,11 @@ TEST_CASE("JsonUiInternal creation and basic operations") {
     float updateValue = 0.0f;
     bool toJsonCalled = false;
     
-    auto updateFunc = [&](const FLArduinoJson::JsonVariantConst &json) {
+    auto updateFunc = [&](const fl::Json &json) {
         updateCalled = true;
-        if (json.is<float>()) {
-            updateValue = json.as<float>();
+        auto maybeValue = json.get<float>();
+        if (maybeValue.has_value()) {
+            updateValue = *maybeValue;
         }
     };
     
@@ -60,10 +61,11 @@ TEST_CASE("JsonUiInternal JSON operations") {
     bool updateCalled = false;
     float receivedValue = 0.0f;
     
-    auto updateFunc = [&](const FLArduinoJson::JsonVariantConst &json) {
+    auto updateFunc = [&](const fl::Json &json) {
         updateCalled = true;
-        if (json.is<float>()) {
-            receivedValue = json.as<float>();
+        auto maybeValue = json.get<float>();
+        if (maybeValue.has_value()) {
+            receivedValue = *maybeValue;
         }
     };
     
@@ -75,10 +77,9 @@ TEST_CASE("JsonUiInternal JSON operations") {
     
     JsonUiInternalPtr internal = fl::make_shared<JsonUiInternal>("test", updateFunc, toJsonFunc);
     
-    // Test JSON update
-    FLArduinoJson::JsonDocument doc;
-    doc.set(123.456f);
-    internal->update(doc.as<FLArduinoJson::JsonVariantConst>());
+    // Test JSON update using ideal API
+    fl::Json json = fl::Json::parse("123.456");
+    internal->update(json);
     
     CHECK(updateCalled);
     CHECK_CLOSE(receivedValue, 123.456f, 0.001f);

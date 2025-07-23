@@ -43,7 +43,7 @@ class JsonAudioImpl {
 
     Updater mUpdater;
 
-    void updateInternal(const FLArduinoJson::JsonVariantConst &value);
+    void updateInternal(const fl::Json &json);
 
     JsonUiInternalPtr mInternal;
     fl::vector<AudioSampleImplPtr> mAudioSampleImpls;

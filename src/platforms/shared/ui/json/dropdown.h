@@ -51,7 +51,7 @@ JsonDropdownImpl(const fl::string &name, fl::span<fl::string> options);
     // Private constructor with array of options and count (used by template constructor)
     JsonDropdownImpl(const fl::string &name, const fl::string* options, size_t count);
     
-    void updateInternal(const FLArduinoJson::JsonVariantConst &value);
+    void updateInternal(const fl::Json &json);
     void commonInit(const fl::string &name);
 
     JsonUiInternalPtr mInternal;

@@ -19,8 +19,8 @@ namespace {
 
 JsonAudioImpl::JsonAudioImpl(const fl::string &name) {
     auto updateFunc = JsonUiInternal::UpdateFunction(
-        [this](const FLArduinoJson::JsonVariantConst &value) {
-            static_cast<JsonAudioImpl *>(this)->updateInternal(value);
+        [this](const fl::Json &json) {
+            static_cast<JsonAudioImpl *>(this)->updateInternal(json);
         });
 
     auto toJsonFunc =
@@ -169,8 +169,11 @@ static void parseJsonToAudioBuffers(const FLArduinoJson::JsonVariantConst &jsonV
     }
 }
 
-void JsonAudioImpl::updateInternal(
-    const FLArduinoJson::JsonVariantConst &value) {
+void JsonAudioImpl::updateInternal(const fl::Json &json) {
+    // For complex parsing, we need to access the underlying FLArduinoJson variant
+    // This is acceptable since it's isolated within the implementation
+    const ::FLArduinoJson::JsonVariant& value = json.variant();
+    
     // FASTLED_WARN("Unimplemented jsAudioImpl::updateInternal");
     mSerializeBuffer.clear();
     serializeJson(value, mSerializeBuffer);

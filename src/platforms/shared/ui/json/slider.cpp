@@ -19,8 +19,8 @@ JsonSliderImpl::JsonSliderImpl(const fl::string &name, float value, float min,
         mStep = (mMax - mMin) / 100.0f;
     }
     auto updateFunc = JsonUiInternal::UpdateFunction(
-        [this](const FLArduinoJson::JsonVariantConst &value) {
-            static_cast<JsonSliderImpl *>(this)->updateInternal(value);
+        [this](const fl::Json &json) {
+            static_cast<JsonSliderImpl *>(this)->updateInternal(json);
         });
 
     auto toJsonFunc =
@@ -97,18 +97,16 @@ JsonSliderImpl &JsonSliderImpl::operator=(int value) {
 }
 
 
-void JsonSliderImpl::updateInternal(
-    const FLArduinoJson::JsonVariantConst &value) {
-    if (value.is<float>()) {
-        float newValue = value.as<float>();
-        setValue(newValue);
-    } else if (value.is<int>()) {
-        int newValue = value.as<int>();
-        setValue(static_cast<float>(newValue));
+void JsonSliderImpl::updateInternal(const fl::Json &json) {
+    // Use ideal JSON API directly with flexible numeric access - handles both int and float
+    auto maybeValue = json.get_flexible<float>();
+    if (maybeValue.has_value()) {
+        setValue(*maybeValue);
     } else {
+        // Fallback: if it's not a number, log the type and keep current value
         FL_ASSERT(false, "*** SLIDER UPDATE ERROR: "
-                    << name() << " " << fl::getJsonTypeStr(value)
-                    << " is not a float or int.");
+                    << name() << " " << json.type_str()
+                    << " is not a numeric value.");
     }
 }
 

@@ -12,8 +12,8 @@ namespace fl {
 
 JsonButtonImpl::JsonButtonImpl(const string &name) : mPressed(false) {
     auto updateFunc = JsonUiInternal::UpdateFunction(
-        [this](const FLArduinoJson::JsonVariantConst &value) {
-            static_cast<JsonButtonImpl *>(this)->updateInternal(value);
+        [this](const fl::Json &json) {
+            static_cast<JsonButtonImpl *>(this)->updateInternal(json);
         });
 
     auto toJsonFunc =
@@ -72,13 +72,10 @@ void JsonButtonImpl::Updater::onPlatformPreLoop2() {
         mOwner->mClickedCount++;
     }
 }
-
-void JsonButtonImpl::updateInternal(
-    const FLArduinoJson::JsonVariantConst &value) {
-    if (value.is<bool>()) {
-        bool newPressed = value.as<bool>();
-        mPressed = newPressed;
-    }
+void JsonButtonImpl::updateInternal(const fl::Json &json) {
+    // Use ideal JSON API directly - no conversion needed!
+    bool newPressed = json | false;  // Gets bool value or false default
+    mPressed = newPressed;
 }
 
 } // namespace fl

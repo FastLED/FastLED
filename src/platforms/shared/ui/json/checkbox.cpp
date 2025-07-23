@@ -10,8 +10,8 @@ namespace fl {
 JsonCheckboxImpl::JsonCheckboxImpl(const fl::string &name, bool value)
     : mValue(value) {
     auto updateFunc = JsonUiInternal::UpdateFunction(
-        [this](const FLArduinoJson::JsonVariantConst &value) {
-            static_cast<JsonCheckboxImpl *>(this)->updateInternal(value);
+        [this](const fl::Json &json) {
+            static_cast<JsonCheckboxImpl *>(this)->updateInternal(json);
         });
 
     auto toJsonFunc =
@@ -71,12 +71,10 @@ JsonCheckboxImpl &JsonCheckboxImpl::operator=(int value) {
     return *this;
 }
 
-void JsonCheckboxImpl::updateInternal(
-    const FLArduinoJson::JsonVariantConst &value) {
-    if (value.is<bool>()) {
-        bool newValue = value.as<bool>();
-        setValueInternal(newValue);  // Use internal method to avoid change notification
-    }
+void JsonCheckboxImpl::updateInternal(const fl::Json &json) {
+    // Use ideal JSON API directly with type-safe default
+    bool newValue = json | false;  // Gets bool value or false default
+    setValueInternal(newValue);  // Use internal method to avoid change notification
 }
 
 } // namespace fl

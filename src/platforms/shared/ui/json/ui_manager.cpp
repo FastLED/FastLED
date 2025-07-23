@@ -192,7 +192,10 @@ void JsonUiManager::executeUiUpdates(const FLArduinoJson::JsonDocument &doc) {
             auto component = findUiComponent(id_or_name);
             if (component) {
                 const FLArduinoJson::JsonVariantConst v = kv.value();
-                component->update(v);
+                // Create mutable JsonVariant from const one by copying through the document
+                ::FLArduinoJson::JsonVariant mutableVariant = const_cast<FLArduinoJson::JsonDocument&>(doc)[id_or_name];
+                fl::Json json(mutableVariant);
+                component->update(json);
                 //FL_WARN("*** Updated component with ID " << idStr);
             } else {
                 FL_WARN("*** ERROR: could not find component with ID or name: " << id_or_name);

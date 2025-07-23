@@ -38,7 +38,7 @@ class JsonNumberFieldImpl {
     bool operator!=(int v) const;
 
   private:
-    void updateInternal(const FLArduinoJson::JsonVariantConst &value);
+    void updateInternal(const fl::Json &json);
     void setValueInternal(double value);  // Internal method for UI updates - no change notification
 
     JsonUiInternalPtr mInternal;

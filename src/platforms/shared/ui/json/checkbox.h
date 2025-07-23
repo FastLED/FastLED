@@ -29,7 +29,7 @@ class JsonCheckboxImpl {
     JsonCheckboxImpl &operator=(int value);
 
   private:
-    void updateInternal(const FLArduinoJson::JsonVariantConst &value);
+    void updateInternal(const fl::Json &json);
     void setValueInternal(bool value);
 
     JsonUiInternalPtr mInternal;
