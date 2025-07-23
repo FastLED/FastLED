@@ -12,6 +12,12 @@
 # - Dynamic DWARF source resolution with ~1 second reload interval
 # - Consistent flags across CMake builds (Docker) and native builds (direct emcc)
 #
+# Performance Optimization Override:
+# - Set FASTLED_FORCE_BUILTIN_FLAGS=1 to force using this optimized configuration
+# - This bypasses any build_flags.toml in the FastLED source tree
+# - Useful for testing performance optimizations or when FastLED source has older config
+# - Example: export FASTLED_FORCE_BUILTIN_FLAGS=1 && your-build-command
+#
 # Architecture:
 # - [all] section: Common flags shared by ALL compilation targets
 # - [sketch] section: Additional flags specific to sketch compilation only  
@@ -151,27 +157,88 @@ link_flags = [
     "-sASSERTIONS=1",                        # Enable runtime assertions
 ]
 
+[build_modes.fast_debug]
+# ================================================================================================
+# FAST DEBUG BUILD MODE
+# ================================================================================================
+# Optimized for rapid development iteration with essential debugging features but faster builds.
+# Trades off some runtime safety checks and detailed debug info for significantly faster compilation.
+# Ideal for: frequent rebuilds, development iteration, basic debugging needs.
+
+# Fast debug compilation flags
+flags = [
+    # Debug Information Generation - Reduced for speed
+    "-g2",                                   # Standard debug info (faster than g3, excludes macros)
+    "-gsource-map",                         # Generate source maps for browser debugging
+    # Note: -ffile-prefix-map flag is generated dynamically from [dwarf] config for path mapping
+    
+    # Optimization Control - Minimal optimization for speed
+    "-O1",                                  # Light optimization (much faster than O0, still debuggable)
+    "-fno-inline-functions",                # Disable automatic function inlining (preserve call stack)
+    
+    # Runtime Safety - Essential checks only
+    # Note: Sanitizers removed for faster compilation - add back with environment variable if needed
+    # Set FASTLED_DEBUG_SANITIZERS=1 to enable sanitizers when needed for specific debugging
+]
+
+# Fast debug linking flags - minimal overhead
+link_flags = [
+    # Debug Info - Inline instead of separate for faster linking
+    # Note: No separate DWARF file for faster builds
+    
+    # Error Detection - Essential only
+    "-sSTACK_OVERFLOW_CHECK=1",             # Basic stack overflow detection (faster than level 2)
+    "-sASSERTIONS=1",                       # Keep runtime assertions for error detection
+]
+
 [build_modes.quick]
 # ================================================================================================
-# QUICK BUILD MODE
+# QUICK BUILD MODE  
 # ================================================================================================
-# Balanced mode for fast iteration during development. Uses thin LTO for reasonable performance
-# while maintaining fast compilation times. Minimal debug info and disabled optimizations.
+# Optimized for fastest iteration during development. Prioritizes compilation and linking speed
+# over runtime performance. Uses minimal LTO and aggressive build-time optimizations.
 
 # Quick build compilation flags
 flags = [
-    # Link-Time Optimization
-    "-flto=thin",                            # Thin LTO for cross-module optimization (faster than full LTO)
+    # Link-Time Optimization - REDUCED for faster linking
+    # Note: Removed -flto=thin as it significantly slows linking (~2+ seconds)
+    # Can be re-enabled with: "-flto=thin" if cross-module optimization is critical
     
-    # Optimization Control
-    "-O0",                                   # No optimization (fastest compilation)
+    # Optimization Control - Optimized for build speed
+    "-O1",                                   # Light optimization (faster than O0 with better performance)
     "-g0",                                   # No debug info (fastest compilation, smallest size)
     
-    # Specific Optimization Disabling
+    # Aggressive Build Speed Optimizations
     "-fno-inline-functions",                 # Disable function inlining
     "-fno-vectorize",                       # Disable vectorization optimizations 
     "-fno-unroll-loops",                    # Disable loop unrolling
     "-fno-strict-aliasing",                 # Disable strict aliasing assumptions
+    "-fno-merge-constants",                 # Don't merge identical constants (faster linking)
+    "-fno-merge-all-constants",             # Don't merge all constants (faster linking)
+    
+    # Template and Instantiation Optimizations  
+    "-fno-delayed-template-parsing",        # Parse templates immediately (faster compilation)
+    "-fmax-type-align=4",                   # Limit type alignment (smaller object files)
+    
+    # Code Generation Optimizations for Speed
+    "-ffast-math",                          # Enable fast math optimizations (if acceptable)
+    "-fno-math-errno",                      # Don't set errno for math functions
+    "-fno-exceptions",                      # Explicitly disable exceptions (already in base but emphasize)
+    "-fno-rtti",                           # Explicitly disable RTTI (already in base but emphasize)
+]
+
+# Quick build linking flags - optimized for fastest linking
+link_flags = [
+    # Reduce memory for faster startup (override base setting)
+    "-sINITIAL_MEMORY=67108864",            # Reduce initial memory to 64MB (faster startup)
+    
+    # Disable Non-Essential Runtime Features for Speed
+    "-sASSERTIONS=0",                       # Disable runtime assertions
+    "-sSTACK_OVERFLOW_CHECK=0",             # Disable stack overflow checking
+    
+    # Compatibility and Performance Options
+    "-sWASM_BIGINT=0",                      # Disable BigInt for faster execution
+    "-sERROR_ON_UNDEFINED_SYMBOLS=0",       # Allow undefined symbols (faster linking)
 ]
 
 [build_modes.release]
