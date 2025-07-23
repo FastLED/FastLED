@@ -64,6 +64,8 @@ public:
     
     // Static factory methods
     static Json parse(const char* jsonStr);
+    static Json createArray();
+    static Json createObject();
     
     // Basic type checks
     bool has_value() const;
@@ -73,6 +75,15 @@ public:
     // Access operators
     Json operator[](const char* key) const;
     Json operator[](int index) const;
+    
+    // Modification methods for creating JSON
+    void push_back(const Json& element); // For arrays
+    void set(const char* key, const Json& value); // For objects
+    void set(const char* key, int value); // For objects
+    void set(const char* key, const char* value); // For objects
+    void set(const char* key, const fl::string& value); // For objects
+    void set(const char* key, float value); // For objects
+    void set(const char* key, bool value); // For objects
     
     // Safe access with defaults (template in header for convenience)
     template<typename T>

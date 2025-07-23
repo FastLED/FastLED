@@ -345,4 +345,70 @@ fl::string Json::serialize() const {
     return mImpl ? mImpl->serialize() : fl::string("{}");
 }
 
+// Static factory methods
+Json Json::createArray() {
+    Json result;
+    result.mImpl = fl::make_shared<JsonImpl>(JsonImpl::createArray());
+    return result;
+}
+
+Json Json::createObject() {
+    Json result;
+    result.mImpl = fl::make_shared<JsonImpl>(JsonImpl::createObject());
+    return result;
+}
+
+// Modification methods for creating JSON
+void Json::push_back(const Json& element) {
+    if (mImpl && element.mImpl) {
+        mImpl->appendArrayElement(*element.mImpl);
+    }
+}
+
+void Json::set(const char* key, const Json& value) {
+    if (mImpl && value.mImpl) {
+        mImpl->setObjectField(key, *value.mImpl);
+    }
+}
+
+void Json::set(const char* key, int value) {
+    if (mImpl) {
+        JsonImpl valueImpl = JsonImpl::createObject();
+        valueImpl.setValue(value);
+        mImpl->setObjectField(key, valueImpl);
+    }
+}
+
+void Json::set(const char* key, const char* value) {
+    if (mImpl) {
+        JsonImpl valueImpl = JsonImpl::createObject();
+        valueImpl.setValue(value);
+        mImpl->setObjectField(key, valueImpl);
+    }
+}
+
+void Json::set(const char* key, const fl::string& value) {
+    if (mImpl) {
+        JsonImpl valueImpl = JsonImpl::createObject();
+        valueImpl.setValue(value);
+        mImpl->setObjectField(key, valueImpl);
+    }
+}
+
+void Json::set(const char* key, float value) {
+    if (mImpl) {
+        JsonImpl valueImpl = JsonImpl::createObject();
+        valueImpl.setValue(value);
+        mImpl->setObjectField(key, valueImpl);
+    }
+}
+
+void Json::set(const char* key, bool value) {
+    if (mImpl) {
+        JsonImpl valueImpl = JsonImpl::createObject();
+        valueImpl.setValue(value);
+        mImpl->setObjectField(key, valueImpl);
+    }
+}
+
 } // namespace fl 
