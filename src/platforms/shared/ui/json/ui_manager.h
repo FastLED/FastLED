@@ -27,7 +27,7 @@ class JsonUiManager : fl::EngineEvents::Listener {
 
     // Internal representation.
     void updateUiComponents(const char *jsonStr);
-    void executeUiUpdates(const FLArduinoJson::JsonDocument &doc);
+    void executeUiUpdates(const fl::JsonDocument &doc);
 
     void resetCallback(Callback updateJs) {
       mUpdateJs = updateJs;
@@ -51,7 +51,7 @@ class JsonUiManager : fl::EngineEvents::Listener {
     fl::mutex mMutex;
 
     bool mItemsAdded = false;
-    FLArduinoJson::JsonDocument mPendingJsonUpdate;
+    fl::JsonDocument mPendingJsonUpdate;
     bool mHasPendingUpdate = false;
 };
 

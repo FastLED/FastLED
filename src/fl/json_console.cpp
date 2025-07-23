@@ -253,8 +253,7 @@ bool JsonConsole::setSliderValue(const fl::string& name, float value) {
         .build();
     
     // Convert to string and send to engine
-    fl::string jsonStr;
-    serializeJson(jsonObj.variant(), jsonStr);
+    fl::string jsonStr = jsonObj.serialize();
     
     FL_WARN("JsonConsole: Sending JSON to engine: " << jsonStr.c_str());
     mUpdateEngineState(jsonStr.c_str());

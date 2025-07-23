@@ -113,9 +113,8 @@ TEST_CASE("JsonConsole polling system test") {
     // Use the slider's toJson method to get the correct component information
     auto componentJson = slider.toJson();
     
-    // Convert to string for processing using ArduinoJson serialization
-    fl::string componentJsonStr;
-    serializeJson(componentJson.variant(), componentJsonStr);
+    // Convert to string for processing using ideal JSON API
+    fl::string componentJsonStr = componentJson.serialize();
     
     // Call the processJsonFromUI method directly to simulate what the UI system should do
     console->processJsonFromUI(componentJsonStr.c_str());

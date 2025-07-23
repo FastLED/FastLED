@@ -222,6 +222,81 @@ TEST_CASE("JSON type detection - example from user request") {
     }
 }
 
+TEST_CASE("JSON get_flexible - string number conversion") {
+    // Test that get_flexible can convert string numbers to numeric types
+    fl::JsonDocument doc;
+    doc["string_int"] = "123";
+    doc["string_float"] = "45.67";
+    doc["string_negative"] = "-89";
+    doc["string_zero"] = "0";
+    doc["invalid_string"] = "not_a_number";
+    doc["actual_int"] = 456;
+    doc["actual_float"] = 78.9f;
+    
+    fl::Json json(doc);
+    
+    // Test string to int conversion
+    auto string_int = json["string_int"].get_flexible<int>();
+    CHECK(string_int.has_value());
+    CHECK(*string_int == 123);
+    
+    // Test string to float conversion
+    auto string_float = json["string_float"].get_flexible<float>();
+    CHECK(string_float.has_value());
+    CHECK_EQ(*string_float, 45.67f);
+    
+    // Test negative string number
+    auto string_negative = json["string_negative"].get_flexible<int>();
+    CHECK(string_negative.has_value());
+    CHECK(*string_negative == -89);
+    
+    // Test zero string
+    auto string_zero = json["string_zero"].get_flexible<int>();
+    CHECK(string_zero.has_value());
+    CHECK(*string_zero == 0);
+    
+    // Test invalid string (should return nullopt)
+    auto invalid_string = json["invalid_string"].get_flexible<int>();
+    CHECK_FALSE(invalid_string.has_value());
+    
+    // Test that regular numeric types still work
+    auto actual_int = json["actual_int"].get_flexible<int>();
+    CHECK(actual_int.has_value());
+    CHECK(*actual_int == 456);
+    
+    auto actual_float = json["actual_float"].get_flexible<float>();
+    CHECK(actual_float.has_value());
+    CHECK_EQ(*actual_float, 78.9f);
+    
+    FL_WARN("String number conversion tests completed");
+}
+
+TEST_CASE("JSON get_flexible - user example") {
+    // Test the exact user example: {"key": "1"} should convert to int(1) and float(1)
+    const char* jsonStr = R"({"key": "1"})";
+    
+    fl::JsonDocument doc;
+    fl::string error;
+    bool success = fl::parseJson(jsonStr, &doc, &error);
+    
+    CHECK(success);
+    CHECK(error.empty());
+    
+    fl::Json json(doc);
+    
+    // Test conversion to int
+    auto as_int = json["key"].get_flexible<int>();
+    CHECK(as_int.has_value());
+    CHECK(*as_int == 1);
+    
+    // Test conversion to float  
+    auto as_float = json["key"].get_flexible<float>();
+    CHECK(as_float.has_value());
+    CHECK_EQ(*as_float, 1.0f);
+    
+    FL_WARN("User example: {\"key\": \"1\"} successfully converts to int(1) and float(1.0)");
+}
+
 #else
 
 TEST_CASE("JSON type detection - disabled") {

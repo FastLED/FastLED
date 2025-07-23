@@ -184,7 +184,15 @@ namespace fl {
 #if !FASTLED_ENABLE_JSON
 class JsonDocument {};
 #else
-class JsonDocument : public ::FLArduinoJson::JsonDocument {};
+class JsonDocument : public ::FLArduinoJson::JsonDocument {
+public:
+    /// @brief Serialize JSON document to string (ideal API)
+    string serialize() const {
+        string result;
+        serializeJson(*this, result);
+        return result;
+    }
+};
 #endif
 
 // Enum for JSON types
@@ -341,7 +349,7 @@ public:
         return make_optional(mVariant.as<T>());
     }
     
-    /// @brief Flexible numeric value extraction - allows int/float cross-access
+    /// @brief Flexible numeric value extraction - allows int/float cross-access and string parsing
     template<typename T>
     optional<T> get_flexible() const {
         if (mVariant.isNull()) {
@@ -355,12 +363,49 @@ public:
             return make_optional(mVariant.as<T>());
         }
         
+        // Try string to numeric conversion if T is a numeric type
+        if (mVariant.is<const char*>()) {
+            const char* str = mVariant.as<const char*>();
+            if (str && *str) {  // Check for non-null, non-empty string
+                return try_parse_numeric<T>(str);
+            }
+            return nullopt;
+        }
+        
         // For non-numeric types, use strict checking
         if (!mVariant.is<T>()) {
             return nullopt;
         }
         return make_optional(mVariant.as<T>());
     }
+
+private:
+    /// @brief Helper to parse string to numeric type
+    template<typename T>
+    optional<T> try_parse_numeric(const char* str) const {
+        if (!str || !*str) return nullopt;
+        
+        char* endptr;
+        
+        // Handle integer types
+        if (fl::is_same<T, int>::value || fl::is_same<T, long>::value) {
+            long val = strtol(str, &endptr, 10);
+            if (endptr != str && *endptr == '\0') {  // Successful conversion
+                return make_optional(static_cast<T>(val));
+            }
+        }
+        // Handle floating point types
+        else if (fl::is_same<T, float>::value || fl::is_same<T, double>::value) {
+            double val = strtod(str, &endptr);
+            if (endptr != str && *endptr == '\0') {  // Successful conversion
+                return make_optional(static_cast<T>(val));
+            }
+        }
+        
+        return nullopt;
+    }
+
+public:
     
     /// @brief Default value operator - returns value or default
     template<typename T>
@@ -422,6 +467,13 @@ public:
     /// @brief Get string representation of the type
     const char* type_str() const {
         return getJsonTypeStr(mVariant);
+    }
+    
+    /// @brief Serialize JSON to string (ideal API)
+    string serialize() const {
+        string result;
+        serializeJson(mVariant, result);
+        return result;
     }
     
     /// @brief Access underlying ArduinoJson variant (for advanced usage)

@@ -96,11 +96,10 @@ void JsonUiManager::processPendingUpdates() {
             }
         }
         
-        FLArduinoJson::JsonDocument doc;
+        fl::JsonDocument doc;
         auto json = doc.to<FLArduinoJson::JsonArray>();
         toJson(json);
-        string jsonStr;
-        serializeJson(doc, jsonStr);
+        string jsonStr = doc.serialize();
         //FL_WARN("*** SENDING UI TO FRONTEND: " << jsonStr.substr(0, 100).c_str() << "...");
         mUpdateJs(jsonStr.c_str());
     }
@@ -167,7 +166,7 @@ void JsonUiManager::updateUiComponents(const char* jsonStr) {
     // FL_WARN("*** JsonUiManager pointer: " << this);
     // FL_WARN("*** BEFORE: mHasPendingUpdate=" << (mHasPendingUpdate ? "true" : "false"));
     
-    FLArduinoJson::JsonDocument doc;
+    fl::JsonDocument doc;
     deserializeJson(doc, jsonStr);
     
     mPendingJsonUpdate = fl::move(doc);
@@ -177,7 +176,7 @@ void JsonUiManager::updateUiComponents(const char* jsonStr) {
 }
 
 
-void JsonUiManager::executeUiUpdates(const FLArduinoJson::JsonDocument &doc) {
+void JsonUiManager::executeUiUpdates(const fl::JsonDocument &doc) {
     auto type = getJsonType(doc);
     
     if (type == fl::JSON_OBJECT) {
@@ -191,8 +190,8 @@ void JsonUiManager::executeUiUpdates(const FLArduinoJson::JsonDocument &doc) {
             
             auto component = findUiComponent(id_or_name);
             if (component) {
-                // Create mutable JsonVariant from const one by copying through the document
-                ::FLArduinoJson::JsonVariant mutableVariant = const_cast<FLArduinoJson::JsonDocument&>(doc)[id_or_name];
+                // Create mutable JsonVariant from const one by casting to base class
+                ::FLArduinoJson::JsonVariant mutableVariant = const_cast<::FLArduinoJson::JsonDocument&>(static_cast<const ::FLArduinoJson::JsonDocument&>(doc))[id_or_name];
                 fl::Json json(mutableVariant);
                 component->update(json);
                 //FL_WARN("*** Updated component with ID " << idStr);
@@ -202,8 +201,7 @@ void JsonUiManager::executeUiUpdates(const FLArduinoJson::JsonDocument &doc) {
         }
     } else {
         // Debug: Show what we actually received instead of just asserting
-        fl::string debugJson;
-        serializeJson(doc, debugJson);
+        fl::string debugJson = doc.serialize();
         FL_WARN("*** UI UPDATE ERROR: Expected JSON object but got " << 
                (type == fl::JSON_ARRAY ? "array" : "non-object") << 
                ": " << debugJson.substr(0, 200).c_str() << "...");
