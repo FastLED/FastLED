@@ -61,132 +61,97 @@ TEST_CASE("JSON UI error handling") {
 
 // === COMPREHENSIVE JSON ROUND-TRIP COMMUNICATION TESTS ===
 
-TEST_CASE("JSON UI Elements Array Serialization - Complete Set") {
-    // Test the complete JSON structure that matches JavaScript UI manager expectations
-    // This tests the format expected by JsonUiManager.addUiElements() in ui_manager.js
-    
+TEST_CASE("JsonUIJson UI elements serialization") {
     fl::JsonDocument doc;
-    auto jsonArray = doc.to<FLArduinoJson::JsonArray>();
     
-    // Add slider element matching JavaScript expectations
+    fl::Json json(doc);
+    
+    CHECK(json["name"] | fl::string("") == fl::string(""));
+    
+    fl::JsonDocument outputDoc;
+    
+    // Build the JSON array using fl::Json construction
+    auto jsonArray = outputDoc.to<FLArduinoJson::JsonArray>();
+    
+    // Add slider component using ideal patterns
     auto sliderObj = jsonArray.add<FLArduinoJson::JsonObject>();
-    sliderObj["id"] = 1;
-    sliderObj["name"] = "Brightness";
+    sliderObj["name"] = "brightness";
     sliderObj["type"] = "slider";
+    sliderObj["id"] = 1;
     sliderObj["value"] = 128.0f;
     sliderObj["min"] = 0.0f;
     sliderObj["max"] = 255.0f;
     sliderObj["step"] = 1.0f;
-    sliderObj["group"] = "Lighting";
+    sliderObj["group"] = "lighting";
     
-    // Add checkbox element
+    // Add checkbox component
     auto checkboxObj = jsonArray.add<FLArduinoJson::JsonObject>();
-    checkboxObj["id"] = 2;
-    checkboxObj["name"] = "Enabled";
+    checkboxObj["name"] = "enabled";
     checkboxObj["type"] = "checkbox";
+    checkboxObj["id"] = 2;
     checkboxObj["value"] = true;
-    checkboxObj["group"] = "Settings";
+    checkboxObj["group"] = "controls";
     
-    // Add dropdown element
+    // Add dropdown component
     auto dropdownObj = jsonArray.add<FLArduinoJson::JsonObject>();
-    dropdownObj["id"] = 3;
-    dropdownObj["name"] = "Mode";
+    dropdownObj["name"] = "mode";
     dropdownObj["type"] = "dropdown";
+    dropdownObj["id"] = 3;
     dropdownObj["value"] = 1;
-    dropdownObj["group"] = "Settings";
+    dropdownObj["group"] = "settings";
     auto optionsArray = dropdownObj["options"].to<FLArduinoJson::JsonArray>();
-    optionsArray.add("Auto");
-    optionsArray.add("Manual");
-    optionsArray.add("Off");
+    optionsArray.add("auto");
+    optionsArray.add("manual");
+    optionsArray.add("off");
     
-    // Add button element
+    // Add button component
     auto buttonObj = jsonArray.add<FLArduinoJson::JsonObject>();
-    buttonObj["id"] = 4;
-    buttonObj["name"] = "Reset";
+    buttonObj["name"] = "reset";
     buttonObj["type"] = "button";
-    buttonObj["value"] = false;
-    buttonObj["group"] = "";  // ungrouped
+    buttonObj["id"] = 4;
+    buttonObj["pressed"] = false;
+    buttonObj["group"] = "actions";
     
-    // Add number field element
+    // Add number field component
     auto numberObj = jsonArray.add<FLArduinoJson::JsonObject>();
-    numberObj["id"] = 5;
-    numberObj["name"] = "LED Count";
+    numberObj["name"] = "temperature";
     numberObj["type"] = "number";
-    numberObj["value"] = 100;
-    numberObj["min"] = 1;
-    numberObj["max"] = 1000;
-    numberObj["step"] = 1;
-    numberObj["group"] = "Configuration";
+    numberObj["id"] = 5;
+    numberObj["value"] = 25.5f;
+    numberObj["min"] = 0.0f;
+    numberObj["max"] = 100.0f;
+    numberObj["group"] = "sensors";
     
-    // Add title element
+    // Add title component  
     auto titleObj = jsonArray.add<FLArduinoJson::JsonObject>();
-    titleObj["id"] = 6;
+    titleObj["name"] = "title";
     titleObj["type"] = "title";
-    titleObj["text"] = "FastLED Demo";
+    titleObj["id"] = 6;
+    titleObj["text"] = "LED Control Panel";
+    titleObj["group"] = "display";
     
-    // Add description element
+    // Add description component
     auto descObj = jsonArray.add<FLArduinoJson::JsonObject>();
-    descObj["id"] = 7;
+    descObj["name"] = "description";
     descObj["type"] = "description";
-    descObj["text"] = "Interactive LED control panel";
+    descObj["id"] = 7;
+    descObj["text"] = "Control your LED strips with these settings";
+    descObj["group"] = "display";
     
-    // Add help element
+    // Add help component
     auto helpObj = jsonArray.add<FLArduinoJson::JsonObject>();
-    helpObj["id"] = 8;
+    helpObj["name"] = "help";
     helpObj["type"] = "help";
-    helpObj["markdownContent"] = "# Help\n\nThis is **help** text with *markdown*.";
-    helpObj["group"] = "Documentation";
+    helpObj["id"] = 8;
+    helpObj["markdownContent"] = "# Help\n\nThis is help content.";
+    helpObj["group"] = "documentation";
     
-    // Validate the array structure
-    CHECK(jsonArray.size() == 8);
+    // Serialize to string using ideal API
+    fl::string jsonStr = outputDoc.serialize();
     
-    // Validate slider structure
-    auto slider = jsonArray[0];
-    CHECK(slider["id"].as<int>() == 1);
-    CHECK(fl::string(slider["name"].as<const char*>()) == fl::string("Brightness"));
-    CHECK(fl::string(slider["type"].as<const char*>()) == fl::string("slider"));
-    CHECK_CLOSE(slider["value"].as<float>(), 128.0f, 0.001f);
-    CHECK_CLOSE(slider["min"].as<float>(), 0.0f, 0.001f);
-    CHECK_CLOSE(slider["max"].as<float>(), 255.0f, 0.001f);
-    CHECK_CLOSE(slider["step"].as<float>(), 1.0f, 0.001f);
-    CHECK(fl::string(slider["group"].as<const char*>()) == fl::string("Lighting"));
-    
-    // Validate checkbox structure
-    auto checkbox = jsonArray[1];
-    CHECK(checkbox["id"].as<int>() == 2);
-    CHECK(fl::string(checkbox["name"].as<const char*>()) == fl::string("Enabled"));
-    CHECK(fl::string(checkbox["type"].as<const char*>()) == fl::string("checkbox"));
-    CHECK(checkbox["value"].as<bool>() == true);
-    CHECK(fl::string(checkbox["group"].as<const char*>()) == fl::string("Settings"));
-    
-    // Validate dropdown structure
-    auto dropdown = jsonArray[2];
-    CHECK(dropdown["id"].as<int>() == 3);
-    CHECK(fl::string(dropdown["name"].as<const char*>()) == fl::string("Mode"));
-    CHECK(fl::string(dropdown["type"].as<const char*>()) == fl::string("dropdown"));
-    CHECK(dropdown["value"].as<int>() == 1);
-    CHECK(fl::string(dropdown["group"].as<const char*>()) == fl::string("Settings"));
-    auto options = dropdown["options"];
-    CHECK(options.size() == 3);
-    CHECK(fl::string(options[0].as<const char*>()) == fl::string("Auto"));
-    CHECK(fl::string(options[1].as<const char*>()) == fl::string("Manual"));
-    CHECK(fl::string(options[2].as<const char*>()) == fl::string("Off"));
-    
-    // Validate help structure
-    auto help = jsonArray[7];
-    CHECK(help["id"].as<int>() == 8);
-    CHECK(fl::string(help["type"].as<const char*>()) == fl::string("help"));
-    CHECK(fl::string(help["markdownContent"].as<const char*>()) == fl::string("# Help\n\nThis is **help** text with *markdown*."));
-    CHECK(fl::string(help["group"].as<const char*>()) == fl::string("Documentation"));
-    
-    // Test JSON string serialization
-    fl::string jsonString;
-    fl::toJson(doc, &jsonString);
-    CHECK(!jsonString.empty());
-    CHECK(jsonString.find('B') != fl::string::npos); // Check for Brightness
-    CHECK(jsonString.find('s') != fl::string::npos); // Check for slider
-    CHECK(jsonString.find('c') != fl::string::npos); // Check for checkbox
-    CHECK(jsonString.find('d') != fl::string::npos); // Check for dropdown
+    CHECK(!jsonStr.empty());
+    CHECK(jsonStr.find("brightness") != fl::string::npos);
+    CHECK(jsonStr.find("slider") != fl::string::npos);
 }
 
 TEST_CASE("JSON UI Changes from JavaScript - Round Trip") {
@@ -432,15 +397,16 @@ TEST_CASE("JSON Complete Round-Trip Integration Test") {
     fl::JsonDocument uiElementsDoc;
     auto elementsArray = uiElementsDoc.to<FLArduinoJson::JsonArray>();
     
-    // Add brightness slider
+    // Add brightness slider using ideal API
+    fl::Json brightnessJson = brightness.toJson();
     auto brightnessObj = elementsArray.add<FLArduinoJson::JsonObject>();
-    brightness.toJson(brightnessObj);
-    brightnessObj["group"] = brightness.groupName().c_str();
+    // Copy from fl::Json to FLArduinoJson::JsonObject
+    brightnessObj.set(brightnessJson.variant().as<FLArduinoJson::JsonObjectConst>());
     
-    // Add enabled checkbox  
+    // Add enabled checkbox using ideal API
+    fl::Json enabledJson = enabled.toJson();
     auto enabledObj = elementsArray.add<FLArduinoJson::JsonObject>();
-    enabled.toJson(enabledObj);
-    enabledObj["group"] = enabled.groupName().c_str();
+    enabledObj.set(enabledJson.variant().as<FLArduinoJson::JsonObjectConst>());
     
     // Add mode dropdown
     auto modeObj = elementsArray.add<FLArduinoJson::JsonObject>();

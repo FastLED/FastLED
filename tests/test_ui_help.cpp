@@ -57,15 +57,13 @@ Visit our [documentation](https://fastled.io) for more details!)";
     JsonHelpImpl help(markdownContent);
     help.Group("getting-started");
     
-    FLArduinoJson::JsonDocument doc;
-    auto jsonObj = doc.to<FLArduinoJson::JsonObject>();
-    help.toJson(jsonObj);
+    fl::Json json = help.toJson();
     
-    CHECK(fl::string(jsonObj["name"].as<const char*>()) == fl::string("help"));
-    CHECK(fl::string(jsonObj["type"].as<const char*>()) == fl::string("help"));
-    CHECK(fl::string(jsonObj["group"].as<const char*>()) == fl::string("getting-started"));
-    CHECK(jsonObj["id"].as<int>() >= 0);
-    CHECK(fl::string(jsonObj["markdownContent"].as<const char*>()) == markdownContent);
+    CHECK(json["name"] | fl::string("") == fl::string("help"));
+    CHECK(json["type"] | fl::string("") == fl::string("help"));
+    CHECK(json["group"] | fl::string("") == fl::string("getting-started"));
+    CHECK(json["id"] | -1 >= 0);
+    CHECK(json["markdownContent"] | fl::string("") == markdownContent);
 }
 
 TEST_CASE("UIHelp wrapper functionality") {
@@ -132,13 +130,11 @@ And some Unicode: ★ ♪ ⚡)";
     
     JsonHelpImpl help(complexMarkdown);
     
-    FLArduinoJson::JsonDocument doc;
-    auto jsonObj = doc.to<FLArduinoJson::JsonObject>();
-    help.toJson(jsonObj);
+    fl::Json json = help.toJson();
     
     // Verify the markdown content is preserved exactly
-    CHECK(fl::string(jsonObj["markdownContent"].as<const char*>()) == complexMarkdown);
-    CHECK(fl::string(jsonObj["type"].as<const char*>()) == fl::string("help"));
+    CHECK(json["markdownContent"] | fl::string("") == complexMarkdown);
+    CHECK(json["type"] | fl::string("") == fl::string("help"));
 }
 
 TEST_CASE("UIHelp edge cases") {
@@ -162,10 +158,8 @@ TEST_CASE("UIHelp edge cases") {
     CHECK(longHelp.markdownContent() == longContent);
     
     // Verify JSON serialization works with long content
-    FLArduinoJson::JsonDocument doc;
-    auto jsonObj = doc.to<FLArduinoJson::JsonObject>();
-    longHelp.toJson(jsonObj);
-    CHECK(fl::string(jsonObj["markdownContent"].as<const char*>()) == longContent);
+    fl::Json json = longHelp.toJson();
+    CHECK(json["markdownContent"] | fl::string("") == longContent);
 }
 
 TEST_CASE("UIHelp group operations") {

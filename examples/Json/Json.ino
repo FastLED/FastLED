@@ -104,12 +104,14 @@ void basicJsonParsingExample() {
             Serial.println(enabled ? "true" : "false");
         }
         
-        if (doc["effects"].is<FLArduinoJson::JsonArray>()) {
-            auto effects = doc["effects"].as<FLArduinoJson::JsonArray>();
-            Serial.print("Available effects: ");
-            for (auto effect : effects) {
-                Serial.print(effect.as<const char*>());
-                Serial.print(" ");
+        // Access arrays using ideal API
+        if (doc["effects"].is_array()) {
+            fl::Json effects = doc["effects"];
+            Serial.print("Effects available: ");
+            for (size_t i = 0; i < effects.size(); i++) {
+                fl::string effect = effects[i] | fl::string("unknown");
+                Serial.print(effect.c_str());
+                if (i < effects.size() - 1) Serial.print(", ");
             }
             Serial.println();
         }

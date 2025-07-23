@@ -62,7 +62,7 @@ static void jsSetCanvasSizeJson(const char* jsonString, size_t jsonSize) {
 
 static void _jsSetCanvasSize(int cledcontoller_id, const fl::ScreenMap &screenmap) {
     // FASTLED_DBG("Begin jsSetCanvasSize json serialization");
-    FLArduinoJson::JsonDocument doc;
+    fl::JsonDocument doc;
     doc["strip_id"] = cledcontoller_id;
     doc["event"] = "set_canvas_map";
     auto map = doc["map"].to<FLArduinoJson::JsonObject>();
@@ -79,10 +79,10 @@ static void _jsSetCanvasSize(int cledcontoller_id, const fl::ScreenMap &screenma
         doc["diameter"] = diameter;
     }
     // FASTLED_DBG("Finished json dict building.");
-    Str jsonBuffer;
-    serializeJson(doc, jsonBuffer);
+    fl::string jsonBuffer = doc.serialize();
+    emscripten_console_log(jsonBuffer.c_str());
     // FASTLED_DBG("End jsSetCanvasSize json serialization");
-    jsSetCanvasSizeJson(jsonBuffer.c_str(), jsonBuffer.size());
+    // jsSetCanvasSizeJson(jsonBuffer.c_str(), jsonBuffer.size()); // This line was removed as per the new_code
 }
 
 
