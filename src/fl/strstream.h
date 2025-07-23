@@ -195,10 +195,11 @@ class StrStream {
         return *this;
     }
 
-    StrStream &operator<<(const uint64_t &n) {
+    StrStream &operator<<(const fl::u64 &n) {
         mStr.append(n);
         return *this;
     }
+
 
     // Unified handler for fl:: namespace size-like unsigned integer types and int
     // This handles fl::size, fl::u16 from the fl:: namespace, and int type
