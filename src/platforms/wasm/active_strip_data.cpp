@@ -66,7 +66,7 @@ void ActiveStripData::updateScreenMap(int id, const ScreenMap &screenmap) {
 }
 
 Str ActiveStripData::infoJsonString() {
-    FLArduinoJson::JsonDocument doc;
+    fl::JsonDocument doc;
     auto array = doc.to<FLArduinoJson::JsonArray>();
 
     for (const auto &[stripIndex, stripData] : mStripMap) {
@@ -75,8 +75,7 @@ Str ActiveStripData::infoJsonString() {
         obj["type"] = "r8g8b8";
     }
 
-    Str jsonBuffer;
-    serializeJson(doc, jsonBuffer);
+    fl::string jsonBuffer = doc.serialize();
     return jsonBuffer;
 }
 
