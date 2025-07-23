@@ -187,4 +187,22 @@ fl::PromiseResult<T> await(fl::promise<T> promise) {
     }
 }
 
+/// @brief Alias for await() with explicit "top level" naming for educational clarity
+/// @tparam T The type of value the promise resolves to (automatically deduced)
+/// @param promise The promise to wait for
+/// @return A PromiseResult containing either the resolved value T or an Error
+/// 
+/// This is an educational alias for fl::await() that emphasizes this function
+/// should only be called from top-level code (like Arduino loop() function)
+/// and never from callback contexts or nested async operations.
+///
+/// **Educational Purpose**: The "_top_level" suffix helps teach developers
+/// that this blocking operation is only safe in certain contexts.
+///
+/// @see await() for the underlying implementation and full documentation
+template<typename T>
+fl::PromiseResult<T> await_top_level(fl::promise<T> promise) {
+    return await(promise);
+}
+
 } // namespace fl 
