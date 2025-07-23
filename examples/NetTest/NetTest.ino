@@ -30,12 +30,12 @@
 /// * fl::promise<T>        - Represents a future value of type T
 /// * fl::result<T>  - Wraps either a successful T value or an Error
 /// * fl::response          - HTTP response with status, headers, and body
-/// * fl::FetchRequest      - Configuration object for HTTP requests
+/// * fl::fetch_options      - Configuration object for HTTP requests
 /// * fl::optional<T>       - May or may not contain a value of type T
 /// * fl::Error             - Error information with message and context
 ///
 /// NEW FETCH API STRUCTURE:
-/// * FetchRequest is a pure data configuration object
+/// * fetch_options is a pure data configuration object
 /// * fetch_get() returns fl::promise<fl::response> (not auto!)
 /// * Promises can be handled with .then()/.catch_() OR await_top_level()
 /// * All async operations integrate with FastLED's engine automatically
@@ -166,9 +166,9 @@ void test_promise_approach() {
 void test_await_approach() {
     FL_WARN("APPROACH 2: await_top_level pattern with explicit types");
     
-    // TUTORIAL: Create a FetchRequest object to configure the HTTP request
-    // FetchRequest is a data container - you can set timeout, headers, etc.
-    fl::FetchRequest request_config("");  // Empty URL - will use the URL passed to fetch_get()
+    // TUTORIAL: Create a fetch_options object to configure the HTTP request
+    // fetch_options is a data container - you can set timeout, headers, etc.
+    fl::fetch_options request_config("");  // Empty URL - will use the URL passed to fetch_get()
     request_config.timeout(5000)          // 5 second timeout
                   .header("User-Agent", "FastLED/NetTest-Tutorial");  // Custom user agent
     
@@ -238,8 +238,10 @@ void loop() {
     // TUTORIAL: Demonstrate the chosen async approach every 2 seconds
     EVERY_N_MILLISECONDS(2000) {
         if (use_await_pattern) {
+            // Blocking call to test_await_approach()
             test_await_approach();
         } else {
+            // Non-blocking call to test_promise_approach()
             test_promise_approach();
         }
 

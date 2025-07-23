@@ -66,7 +66,7 @@
 namespace fl {
 
 // Forward declarations
-class FetchRequest;
+class fetch_options;
 class FetchManager;
 
 #ifdef __EMSCRIPTEN__
@@ -162,40 +162,40 @@ struct RequestOptions {
     RequestOptions(const fl::string& method_name) : method(method_name) {}
 };
 
-/// Fetch request builder (fluent interface)
-class FetchRequest {
+/// Fetch options builder (fluent interface)
+class fetch_options {
 public:
-    explicit FetchRequest(const fl::string& url) : mUrl(url) {}
-    FetchRequest(const fl::string& url, const RequestOptions& options) 
+    explicit fetch_options(const fl::string& url) : mUrl(url) {}
+    fetch_options(const fl::string& url, const RequestOptions& options) 
         : mUrl(url), mOptions(options) {}
     
     /// Set HTTP method
-    FetchRequest& method(const fl::string& http_method) {
+    fetch_options& method(const fl::string& http_method) {
         mOptions.method = http_method;
         return *this;
     }
     
     /// Add header
-    FetchRequest& header(const fl::string& name, const fl::string& value) {
+    fetch_options& header(const fl::string& name, const fl::string& value) {
         mOptions.headers[name] = value;
         return *this;
     }
     
     /// Set request body
-    FetchRequest& body(const fl::string& data) {
+    fetch_options& body(const fl::string& data) {
         mOptions.body = data;
         return *this;
     }
     
     /// Set JSON body with proper content type
-    FetchRequest& json(const fl::string& json_data) {
+    fetch_options& json(const fl::string& json_data) {
         mOptions.body = json_data;
         mOptions.headers["Content-Type"] = "application/json";
         return *this;
     }
     
     /// Set timeout in milliseconds
-    FetchRequest& timeout(int timeout_ms) {
+    fetch_options& timeout(int timeout_ms) {
         mOptions.timeout_ms = timeout_ms;
         return *this;
     }
@@ -266,25 +266,25 @@ inline void fetch(const char* url, const FetchCallback& callback) {
 // ========== Promise-Based API (JavaScript-like) ==========
 
 /// HTTP GET request
-fl::promise<response> fetch_get(const fl::string& url, const FetchRequest& request = FetchRequest(""));
+fl::promise<response> fetch_get(const fl::string& url, const fetch_options& request = fetch_options(""));
 
 /// HTTP POST request
-fl::promise<response> fetch_post(const fl::string& url, const FetchRequest& request = FetchRequest(""));
+fl::promise<response> fetch_post(const fl::string& url, const fetch_options& request = fetch_options(""));
 
 /// HTTP PUT request
-fl::promise<response> fetch_put(const fl::string& url, const FetchRequest& request = FetchRequest(""));
+fl::promise<response> fetch_put(const fl::string& url, const fetch_options& request = fetch_options(""));
 
 /// HTTP DELETE request
-fl::promise<response> fetch_delete(const fl::string& url, const FetchRequest& request = FetchRequest(""));
+fl::promise<response> fetch_delete(const fl::string& url, const fetch_options& request = fetch_options(""));
 
 /// HTTP HEAD request
-fl::promise<response> fetch_head(const fl::string& url, const FetchRequest& request = FetchRequest(""));
+fl::promise<response> fetch_head(const fl::string& url, const fetch_options& request = fetch_options(""));
 
 /// HTTP OPTIONS request
-fl::promise<response> fetch_options(const fl::string& url, const FetchRequest& request = FetchRequest(""));
+fl::promise<response> fetch_http_options(const fl::string& url, const fetch_options& request = fetch_options(""));
 
 /// HTTP PATCH request
-fl::promise<response> fetch_patch(const fl::string& url, const FetchRequest& request = FetchRequest(""));
+fl::promise<response> fetch_patch(const fl::string& url, const fetch_options& request = fetch_options(""));
 
 /// Generic request with options (like fetch(url, options))
 fl::promise<response> fetch_request(const fl::string& url, const RequestOptions& options = RequestOptions());

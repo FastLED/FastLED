@@ -36,7 +36,7 @@ void fetch(const fl::string& url, const FetchCallback& callback) {
 }
 
 // Internal helper to execute a fetch request and return a promise
-fl::promise<response> execute_fetch_request(const fl::string& url, const FetchRequest& request) {
+fl::promise<response> execute_fetch_request(const fl::string& url, const fetch_options& request) {
     // Create a promise for this request
     auto promise = fl::promise<response>::create();
     
@@ -91,7 +91,7 @@ void fetch(const fl::string& url, const FetchCallback& callback) {
 }
 
 // Internal helper to execute a fetch request and return a promise
-fl::promise<response> execute_fetch_request(const fl::string& url, const FetchRequest& request) {
+fl::promise<response> execute_fetch_request(const fl::string& url, const fetch_options& request) {
     (void)request; // Unused in stub implementation
     FL_WARN("HTTP fetch is not supported on non-WASM platforms. URL: " << url);
     
@@ -212,9 +212,9 @@ fl::promise<response> FetchManager::retrieve_pending_promise(const fl::string& r
 
 // ========== Public API Functions ==========
 
-fl::promise<response> fetch_get(const fl::string& url, const FetchRequest& request) {
+fl::promise<response> fetch_get(const fl::string& url, const fetch_options& request) {
     // Create a new request with GET method
-    FetchRequest get_request(url, RequestOptions("GET"));
+    fetch_options get_request(url, RequestOptions("GET"));
     
     // Apply any additional options from the provided request
     const auto& opts = request.options();
@@ -229,9 +229,9 @@ fl::promise<response> fetch_get(const fl::string& url, const FetchRequest& reque
     return execute_fetch_request(url, get_request);
 }
 
-fl::promise<response> fetch_post(const fl::string& url, const FetchRequest& request) {
+fl::promise<response> fetch_post(const fl::string& url, const fetch_options& request) {
     // Create a new request with POST method
-    FetchRequest post_request(url, RequestOptions("POST"));
+    fetch_options post_request(url, RequestOptions("POST"));
     
     // Apply any additional options from the provided request
     const auto& opts = request.options();
@@ -246,9 +246,9 @@ fl::promise<response> fetch_post(const fl::string& url, const FetchRequest& requ
     return execute_fetch_request(url, post_request);
 }
 
-fl::promise<response> fetch_put(const fl::string& url, const FetchRequest& request) {
+fl::promise<response> fetch_put(const fl::string& url, const fetch_options& request) {
     // Create a new request with PUT method
-    FetchRequest put_request(url, RequestOptions("PUT"));
+    fetch_options put_request(url, RequestOptions("PUT"));
     
     // Apply any additional options from the provided request
     const auto& opts = request.options();
@@ -263,9 +263,9 @@ fl::promise<response> fetch_put(const fl::string& url, const FetchRequest& reque
     return execute_fetch_request(url, put_request);
 }
 
-fl::promise<response> fetch_delete(const fl::string& url, const FetchRequest& request) {
+fl::promise<response> fetch_delete(const fl::string& url, const fetch_options& request) {
     // Create a new request with DELETE method
-    FetchRequest delete_request(url, RequestOptions("DELETE"));
+    fetch_options delete_request(url, RequestOptions("DELETE"));
     
     // Apply any additional options from the provided request
     const auto& opts = request.options();
@@ -280,9 +280,9 @@ fl::promise<response> fetch_delete(const fl::string& url, const FetchRequest& re
     return execute_fetch_request(url, delete_request);
 }
 
-fl::promise<response> fetch_head(const fl::string& url, const FetchRequest& request) {
+fl::promise<response> fetch_head(const fl::string& url, const fetch_options& request) {
     // Create a new request with HEAD method
-    FetchRequest head_request(url, RequestOptions("HEAD"));
+    fetch_options head_request(url, RequestOptions("HEAD"));
     
     // Apply any additional options from the provided request
     const auto& opts = request.options();
@@ -297,9 +297,9 @@ fl::promise<response> fetch_head(const fl::string& url, const FetchRequest& requ
     return execute_fetch_request(url, head_request);
 }
 
-fl::promise<response> fetch_options(const fl::string& url, const FetchRequest& request) {
+fl::promise<response> fetch_http_options(const fl::string& url, const fetch_options& request) {
     // Create a new request with OPTIONS method
-    FetchRequest options_request(url, RequestOptions("OPTIONS"));
+    fetch_options options_request(url, RequestOptions("OPTIONS"));
     
     // Apply any additional options from the provided request
     const auto& opts = request.options();
@@ -314,9 +314,9 @@ fl::promise<response> fetch_options(const fl::string& url, const FetchRequest& r
     return execute_fetch_request(url, options_request);
 }
 
-fl::promise<response> fetch_patch(const fl::string& url, const FetchRequest& request) {
+fl::promise<response> fetch_patch(const fl::string& url, const fetch_options& request) {
     // Create a new request with PATCH method
-    FetchRequest patch_request(url, RequestOptions("PATCH"));
+    fetch_options patch_request(url, RequestOptions("PATCH"));
     
     // Apply any additional options from the provided request
     const auto& opts = request.options();
@@ -332,8 +332,8 @@ fl::promise<response> fetch_patch(const fl::string& url, const FetchRequest& req
 }
 
 fl::promise<response> fetch_request(const fl::string& url, const RequestOptions& options) {
-    // Create a FetchRequest with the provided options
-    FetchRequest request(url, options);
+    // Create a fetch_options with the provided options
+    fetch_options request(url, options);
     
     // Use the helper function to execute the request
     return execute_fetch_request(url, request);

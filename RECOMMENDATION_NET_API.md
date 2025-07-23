@@ -124,15 +124,15 @@ http_get("http://fastled.io")
 
 namespace fl {
 
-class FetchRequest {
+class fetch_options {
 public:
-    FetchRequest(const fl::string& url) : mUrl(url) {}
+    fetch_options(const fl::string& url) : mUrl(url) {}
     
     // Fluent configuration
-    FetchRequest& method(const fl::string& method);
-    FetchRequest& header(const fl::string& name, const fl::string& value);  
-    FetchRequest& body(const fl::string& data);
-    FetchRequest& timeout(fl::u32 ms);
+    fetch_options& method(const fl::string& method);
+    fetch_options& header(const fl::string& name, const fl::string& value);  
+    fetch_options& body(const fl::string& data);
+    fetch_options& timeout(fl::u32 ms);
     
     // Promise-like completion using your backend
     void then(fl::function<void(const response&)> callback);
@@ -149,9 +149,9 @@ private:
 
 class Fetch {
 public:
-    FetchRequest get(const fl::string& url) { return FetchRequest(url); }
-    FetchRequest post(const fl::string& url) { 
-        return FetchRequest(url).method("POST"); 
+    fetch_options get(const fl::string& url) { return fetch_options(url); }
+    fetch_options post(const fl::string& url) { 
+        return fetch_options(url).method("POST"); 
     }
 };
 
@@ -187,7 +187,7 @@ fl::fetch.post("http://api.example.com/data")
 
 1. ✅ **Keep your Transport/Socket code** - it's architecturally sound
 2. ✅ **Keep your HttpClient classes** - move to `fl::detail` namespace  
-3. ✅ **Add fluent FetchRequest/Fetch classes** - use your backend internally
+3. ✅ **Add fluent fetch_options/Fetch classes** - use your backend internally
 4. ✅ **Replace fl::future with promise-like .then()** - much more ergonomic
 
 ### Phase 2: Deprecate Complex APIs (1 week)
@@ -236,7 +236,7 @@ fl::fetch.post("http://api.example.com/data")
 Your HTTP client/server work from yesterday is **architecturally sound** - the transport abstraction, socket factory, and error handling are all well-designed. But the frontend API can be much more ergonomic.
 
 **Implementation plan:**
-1. **Add fluent `FetchRequest`/`Fetch` classes** that use your Transport infrastructure internally
+1. **Add fluent `fetch_options`/`Fetch` classes** that use your Transport infrastructure internally
 2. **Replace `fl::future<Response>` with `.then(callback)` pattern** 
 3. **Keep your backend** - it's good work, just needs a better frontend API
 4. **Make NetTest.ino pattern the primary API** - it's more ergonomic
