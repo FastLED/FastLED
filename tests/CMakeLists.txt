@@ -28,6 +28,7 @@ include(cmake/ParallelBuild.cmake)
 include(cmake/TargetCreation.cmake)
 include(cmake/TestConfiguration.cmake)
 include(cmake/TestSourceDiscovery.cmake)
+include(cmake/StaticAnalysis.cmake)
 
 # Enforce C++17 globally for all targets.
 set(CMAKE_CXX_STANDARD 17)
@@ -45,6 +46,9 @@ detect_compiler_capabilities()
 
 # Dependency detection is now handled by the DependencyManagement module
 find_and_configure_dependencies()
+
+# Configure static analysis tools (IWYU, clang-tidy, etc.)
+configure_static_analysis()
 
 # ============================================================================
 # PHASE 4: Configure build settings based on build type (REFACTORED)
