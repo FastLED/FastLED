@@ -6,6 +6,7 @@
 #include "fl/optional.h"
 #include "fl/vector.h"
 #include "fl/printf.h"
+#include "fl/memory.h"
 
 /// @file json.h
 /// @brief FastLED JSON API - Type-safe, ergonomic JSON processing
@@ -294,6 +295,7 @@ class JsonBuilder;
 class Json {
 private:
     ::FLArduinoJson::JsonVariant mVariant;
+    fl::shared_ptr<fl::JsonDocument> mDocument; // Keep document alive
 
 public:
     /// @brief Default constructor - creates null Json
@@ -301,6 +303,10 @@ public:
     
     /// @brief Construct from ArduinoJson variant
     Json(::FLArduinoJson::JsonVariant variant) : mVariant(variant) {}
+    
+    /// @brief Construct from ArduinoJson variant with shared document
+    Json(::FLArduinoJson::JsonVariant variant, fl::shared_ptr<fl::JsonDocument> doc) 
+        : mVariant(variant), mDocument(doc) {}
     
     /// @brief Construct from JsonDocument
     Json(fl::JsonDocument& doc) : mVariant(doc.as<::FLArduinoJson::JsonVariant>()) {}
@@ -310,11 +316,11 @@ public:
     /// @param error Optional error string output
     /// @return Json object, or invalid Json if parsing failed
     static Json parse(const char* jsonStr, string* error = nullptr) {
-        static fl::JsonDocument doc;
-        doc.clear();
+        // Each parse creates its own document to avoid shared state
+        auto doc = fl::make_shared<fl::JsonDocument>();
         
-        if (fl::parseJson(jsonStr, &doc, error)) {
-            return Json(doc.as<::FLArduinoJson::JsonVariant>());
+        if (fl::parseJson(jsonStr, doc.get(), error)) {
+            return Json(doc->as<::FLArduinoJson::JsonVariant>(), doc);
         }
         return Json(::FLArduinoJson::JsonVariant());
     }
@@ -545,6 +551,15 @@ public:
         return *this;
     }
     
+    /// @brief Set array of Json objects at path
+    JsonBuilder& set(const string& path, const vector<Json>& objects) {
+        auto array = mDoc[path.c_str()].to<::FLArduinoJson::JsonArray>();
+        for (const auto& obj : objects) {
+            array.add(obj.variant());
+        }
+        return *this;
+    }
+    
     
     /// @brief Build the final Json object
     Json build() {
@@ -599,6 +614,7 @@ public:
     JsonBuilder& set(const string&, const string&) { return *this; }
     JsonBuilder& set(const string&, const char*) { return *this; }
     JsonBuilder& set(const string&, const vector<string>&) { return *this; }
+    JsonBuilder& set(const string&, const vector<Json>&) { return *this; }
     
     Json build() { return Json(); }
     string to_string() { return "{}"; }
