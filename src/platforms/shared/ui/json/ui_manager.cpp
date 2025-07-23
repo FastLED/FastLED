@@ -191,7 +191,6 @@ void JsonUiManager::executeUiUpdates(const FLArduinoJson::JsonDocument &doc) {
             
             auto component = findUiComponent(id_or_name);
             if (component) {
-                const FLArduinoJson::JsonVariantConst v = kv.value();
                 // Create mutable JsonVariant from const one by copying through the document
                 ::FLArduinoJson::JsonVariant mutableVariant = const_cast<FLArduinoJson::JsonDocument&>(doc)[id_or_name];
                 fl::Json json(mutableVariant);
@@ -221,8 +220,15 @@ void JsonUiManager::onEndFrame() {
 void JsonUiManager::toJson(FLArduinoJson::JsonArray &json) {
     auto components = getComponents();
     for (auto &component : components) {
-        auto obj = json.add<FLArduinoJson::JsonObject>();
-        component->toJson(obj);
+        auto componentJson = component->toJson();
+        if (componentJson.is_object()) {
+            // Convert fl::Json to FLArduinoJson::JsonObject for compatibility
+            auto obj = json.add<FLArduinoJson::JsonObject>();
+            const auto& variant = componentJson.variant();
+            if (variant.is<FLArduinoJson::JsonObjectConst>()) {
+                obj.set(variant.as<FLArduinoJson::JsonObjectConst>());
+            }
+        }
     }
 }
 

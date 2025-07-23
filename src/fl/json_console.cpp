@@ -245,18 +245,16 @@ bool JsonConsole::setSliderValue(const fl::string& name, float value) {
     }
     
     // Create JSON to update the component
-    FLArduinoJson::JsonDocument doc;
-    auto root = doc.to<FLArduinoJson::JsonObject>();
-    
     fl::string idStr;
     idStr += componentId;
     
-    // Send the value directly, not wrapped in a "value" object
-    root[idStr.c_str()] = value;
+    auto jsonObj = fl::JsonBuilder()
+        .set(idStr, value)
+        .build();
     
     // Convert to string and send to engine
     fl::string jsonStr;
-    serializeJson(doc, jsonStr);
+    serializeJson(jsonObj.variant(), jsonStr);
     
     FL_WARN("JsonConsole: Sending JSON to engine: " << jsonStr.c_str());
     mUpdateEngineState(jsonStr.c_str());
@@ -275,9 +273,8 @@ void JsonConsole::updateComponentMapping(const char* jsonStr) {
         return;
     }
     
-    FLArduinoJson::JsonDocument doc;
-    auto result = deserializeJson(doc, jsonStr);
-    if (result != FLArduinoJson::DeserializationError::Ok) {
+    auto doc = fl::Json::parse(jsonStr);
+    if (!doc.has_value()) {
         return; // Invalid JSON
     }
     
@@ -285,16 +282,17 @@ void JsonConsole::updateComponentMapping(const char* jsonStr) {
     mComponentNameToId.clear();
     
     // Parse component array and build name->ID mapping
-    if (doc.is<FLArduinoJson::JsonArray>()) {
-        auto array = doc.as<FLArduinoJson::JsonArrayConst>();
-        for (auto component : array) {
+    if (doc.is_array()) {
+        auto arraySize = doc.size();
+        for (size_t i = 0; i < arraySize; ++i) {
+            auto component = doc[i];
             // Direct access to component fields (more reliable than type checking)
-            bool hasName = component["name"].is<const char*>();
-            bool hasId = component["id"].is<int>();
+            auto nameOpt = component["name"].get<fl::string>();
+            auto idOpt = component["id"].get<int>();
             
-            if (hasName && hasId) {
-                fl::string name = component["name"].as<const char*>();
-                int id = component["id"].as<int>();
+            if (nameOpt.has_value() && idOpt.has_value()) {
+                fl::string name = *nameOpt;
+                int id = *idOpt;
                 mComponentNameToId[name] = id;
             }
         }

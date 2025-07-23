@@ -24,8 +24,8 @@ JsonSliderImpl::JsonSliderImpl(const fl::string &name, float value, float min,
         });
 
     auto toJsonFunc =
-        JsonUiInternal::ToJsonFunction([this](FLArduinoJson::JsonObject &json) {
-            static_cast<JsonSliderImpl *>(this)->toJson(json);
+        JsonUiInternal::ToJsonFunction([this]() -> fl::Json {
+            return static_cast<JsonSliderImpl *>(this)->toJson();
         });
     mInternal = fl::make_shared<JsonUiInternal>(name, fl::move(updateFunc),
                                        fl::move(toJsonFunc));
@@ -41,17 +41,21 @@ JsonSliderImpl &JsonSliderImpl::Group(const fl::string &name) {
 
 const fl::string &JsonSliderImpl::name() const { return mInternal->name(); }
 
-void JsonSliderImpl::toJson(FLArduinoJson::JsonObject &json) const {
-    json["name"] = name();
-    json["group"] = mInternal->groupName().c_str();
-    json["type"] = "slider";
-    json["id"] = mInternal->id();
-    json["value"] = mValue;
-    json["min"] = mMin;
-    json["max"] = mMax;
+fl::Json JsonSliderImpl::toJson() const {
+    auto builder = fl::JsonBuilder()
+        .set("name", name())
+        .set("group", mInternal->groupName())
+        .set("type", "slider")
+        .set("id", mInternal->id())
+        .set("value", mValue)
+        .set("min", mMin)
+        .set("max", mMax);
+    
     if (mStep > 0) {
-        json["step"] = mStep;
+        builder.set("step", mStep);
     }
+    
+    return builder.build();
 }
 
 float JsonSliderImpl::value() const { return mValue; }

@@ -19,8 +19,8 @@ JsonNumberFieldImpl::JsonNumberFieldImpl(const fl::string &name, double value,
         });
 
     auto toJsonFunc =
-        JsonUiInternal::ToJsonFunction([this](FLArduinoJson::JsonObject &json) {
-            static_cast<JsonNumberFieldImpl *>(this)->toJson(json);
+        JsonUiInternal::ToJsonFunction([this]() -> fl::Json {
+            return static_cast<JsonNumberFieldImpl *>(this)->toJson();
         });
     mInternal = fl::make_shared<JsonUiInternal>(name, fl::move(updateFunc),
                                      fl::move(toJsonFunc));
@@ -36,14 +36,18 @@ JsonNumberFieldImpl &JsonNumberFieldImpl::Group(const fl::string &name) {
 
 const fl::string &JsonNumberFieldImpl::name() const { return mInternal->name(); }
 
-void JsonNumberFieldImpl::toJson(FLArduinoJson::JsonObject &json) const {
-    json["name"] = name();
-    json["group"] = mInternal->groupName().c_str();
-    json["type"] = "number";
-    json["id"] = mInternal->id();
-    json["value"] = mValue;
-    json["min"] = mMin;
-    json["max"] = mMax;
+fl::Json JsonNumberFieldImpl::toJson() const {
+    auto builder = fl::JsonBuilder()
+        .set("name", name())
+        .set("group", mInternal->groupName())
+        .set("type", "number")
+        .set("id", mInternal->id());
+    
+    builder.set("value", static_cast<float>(mValue));
+    builder.set("min", static_cast<float>(mMin));
+    builder.set("max", static_cast<float>(mMax));
+    
+    return builder.build();
 }
 
 double JsonNumberFieldImpl::value() const { return mValue; }

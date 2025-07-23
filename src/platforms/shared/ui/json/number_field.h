@@ -17,7 +17,7 @@ class JsonNumberFieldImpl {
     JsonNumberFieldImpl &Group(const fl::string &name);
 
     const fl::string &name() const;
-    void toJson(FLArduinoJson::JsonObject &json) const;
+    fl::Json toJson() const;
     double value() const;
     void setValue(double value);
     const fl::string &groupName() const;

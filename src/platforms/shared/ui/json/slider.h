@@ -16,7 +16,7 @@ class JsonSliderImpl {
     JsonSliderImpl &Group(const fl::string &name);
 
     const fl::string &name() const;
-    void toJson(FLArduinoJson::JsonObject &json) const;
+    fl::Json toJson() const;
     float value() const;
     float value_normalized() const;
     float getMax() const;

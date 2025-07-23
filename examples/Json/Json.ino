@@ -18,7 +18,7 @@
 fl::CRGB leds[NUM_LEDS];
 
 // Forward declaration
-void checkJsonType(FLArduinoJson::JsonVariant value, const char* fieldName);
+void checkJsonType(const fl::Json& value, const char* fieldName);
 
 void setup() {
     Serial.begin(115200);
@@ -141,13 +141,14 @@ void jsonTypeInspectionExample() {
     if (fl::parseJson(jsonStr, &doc, &error)) {
         Serial.println("Inspecting JSON value types:");
         
-        // Inspect each field type
-        checkJsonType(doc["name"], "name");
-        checkJsonType(doc["version"], "version");
-        checkJsonType(doc["stable"], "stable");
-        checkJsonType(doc["features"], "features");
-        checkJsonType(doc["metadata"], "metadata");
-        checkJsonType(doc["empty"], "empty");
+        // Inspect each field type using fl::Json wrapper for ideal API
+        auto jsonWrapper = fl::Json(doc);
+        checkJsonType(jsonWrapper["name"], "name");
+        checkJsonType(jsonWrapper["version"], "version");
+        checkJsonType(jsonWrapper["stable"], "stable");
+        checkJsonType(jsonWrapper["features"], "features");
+        checkJsonType(jsonWrapper["metadata"], "metadata");
+        checkJsonType(jsonWrapper["empty"], "empty");
         
     } else {
         Serial.print("JSON parsing failed: ");
@@ -155,9 +156,9 @@ void jsonTypeInspectionExample() {
     }
 }
 
-void checkJsonType(FLArduinoJson::JsonVariant value, const char* fieldName) {
-    fl::JsonType type = fl::getJsonType(value);
-    const char* typeStr = fl::getJsonTypeStr(value);
+void checkJsonType(const fl::Json& value, const char* fieldName) {
+    fl::JsonType type = value.type();
+    const char* typeStr = value.type_str();
     
     Serial.print("Field '");
     Serial.print(fieldName);
@@ -166,38 +167,40 @@ void checkJsonType(FLArduinoJson::JsonVariant value, const char* fieldName) {
     
     // Show some type-specific processing
     switch (type) {
-        case fl::JSON_STRING:
+        case fl::JSON_STRING: {
             Serial.print("  String value: ");
-            Serial.println(value.as<const char*>());
+            auto strOpt = value.get<fl::string>();
+            if (strOpt.has_value()) {
+                Serial.println(strOpt->c_str());
+            }
             break;
-            
-        case fl::JSON_INTEGER:
+        }
+        case fl::JSON_INTEGER: {
             Serial.print("  Integer value: ");
-            Serial.println(value.as<int>());
+            auto intOpt = value.get<int>();
+            if (intOpt.has_value()) {
+                Serial.println(*intOpt);
+            }
             break;
-            
-        case fl::JSON_FLOAT:
+        }
+        case fl::JSON_FLOAT: {
             Serial.print("  Float value: ");
-            Serial.println(value.as<float>());
+            auto floatOpt = value.get<float>();
+            if (floatOpt.has_value()) {
+                Serial.println(*floatOpt);
+            }
             break;
-            
-        case fl::JSON_BOOLEAN:
-            Serial.print("  Boolean value: ");
-            Serial.println(value.as<bool>() ? "true" : "false");
-            break;
-            
+        }
         case fl::JSON_ARRAY:
             Serial.print("  Array size: ");
-            Serial.println(value.as<FLArduinoJson::JsonArray>().size());
+            Serial.println(value.size());
             break;
-            
         case fl::JSON_OBJECT:
             Serial.print("  Object size: ");
-            Serial.println(value.as<FLArduinoJson::JsonObject>().size());
+            Serial.println(value.size());
             break;
-            
-        case fl::JSON_NULL:
-            Serial.println("  Null value");
+        default:
+            Serial.println("  (no additional info)");
             break;
     }
 }

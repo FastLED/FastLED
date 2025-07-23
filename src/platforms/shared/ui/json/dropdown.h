@@ -30,7 +30,9 @@ JsonDropdownImpl(const fl::string &name, fl::span<fl::string> options);
     JsonDropdownImpl &Group(const fl::string &name);
 
     const fl::string &name() const;
-    void toJson(FLArduinoJson::JsonObject &json) const;
+    int selectedIndex() const;
+    fl::Json toJson() const;
+    void addOption(const fl::string &option);
     fl::string value() const;
     int value_int() const;
     void setSelectedIndex(int index);

@@ -13,8 +13,9 @@ class JsonCheckboxImpl {
     JsonCheckboxImpl &Group(const fl::string &name);
 
     const fl::string &name() const;
-    void toJson(FLArduinoJson::JsonObject &json) const;
-    bool value() const;
+    fl::Json toJson() const;
+    bool isChecked() const;
+    bool value() const;  // backward compatibility
     void setValue(bool value);
     const fl::string &groupName() const;
     

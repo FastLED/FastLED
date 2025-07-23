@@ -17,8 +17,8 @@ JsonButtonImpl::JsonButtonImpl(const string &name) : mPressed(false) {
         });
 
     auto toJsonFunc =
-        JsonUiInternal::ToJsonFunction([this](FLArduinoJson::JsonObject &json) {
-            static_cast<JsonButtonImpl *>(this)->toJson(json);
+        JsonUiInternal::ToJsonFunction([this]() -> fl::Json {
+            return static_cast<JsonButtonImpl *>(this)->toJson();
         });
     mInternal = fl::make_shared<JsonUiInternal>(name, fl::move(updateFunc),
                                      fl::move(toJsonFunc));
@@ -37,12 +37,14 @@ bool JsonButtonImpl::clicked() const { return mClickedHappened; }
 
 const string &JsonButtonImpl::name() const { return mInternal->name(); }
 
-void JsonButtonImpl::toJson(FLArduinoJson::JsonObject &json) const {
-    json["name"] = name();
-    json["group"] = mInternal->groupName().c_str();
-    json["type"] = "button";
-    json["id"] = mInternal->id();
-    json["pressed"] = mPressed;
+fl::Json JsonButtonImpl::toJson() const {
+    return fl::JsonBuilder()
+        .set("name", name())
+        .set("group", mInternal->groupName())
+        .set("type", "button")
+        .set("id", mInternal->id())
+        .set("pressed", mPressed)
+        .build();
 }
 
 bool JsonButtonImpl::isPressed() const {

@@ -37,11 +37,12 @@ void JsonUiInternal::update(const fl::Json &json) {
         mUpdateFunc(json);
     }
 }
-void JsonUiInternal::toJson(FLArduinoJson::JsonObject &json) const {
+fl::Json JsonUiInternal::toJson() const {
     fl::lock_guard<fl::mutex> lock(mMutex);
     if (mtoJsonFunc) {
-        mtoJsonFunc(json);
+        return mtoJsonFunc();
     }
+    return fl::Json();  // Return empty Json if no function
 }
 int JsonUiInternal::id() const { return mId; }
 

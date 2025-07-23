@@ -15,8 +15,8 @@ JsonCheckboxImpl::JsonCheckboxImpl(const fl::string &name, bool value)
         });
 
     auto toJsonFunc =
-        JsonUiInternal::ToJsonFunction([this](FLArduinoJson::JsonObject &json) {
-            static_cast<JsonCheckboxImpl *>(this)->toJson(json);
+        JsonUiInternal::ToJsonFunction([this]() -> fl::Json {
+            return static_cast<JsonCheckboxImpl *>(this)->toJson();
         });
     mInternal = fl::make_shared<JsonUiInternal>(name, fl::move(updateFunc),
                                      fl::move(toJsonFunc));
@@ -32,13 +32,17 @@ JsonCheckboxImpl &JsonCheckboxImpl::Group(const fl::string &name) {
 
 const fl::string &JsonCheckboxImpl::name() const { return mInternal->name(); }
 
-void JsonCheckboxImpl::toJson(FLArduinoJson::JsonObject &json) const {
-    json["name"] = name();
-    json["group"] = mInternal->groupName().c_str();
-    json["type"] = "checkbox";
-    json["id"] = mInternal->id();
-    json["value"] = mValue;
+fl::Json JsonCheckboxImpl::toJson() const {
+    return fl::JsonBuilder()
+        .set("name", name())
+        .set("group", mInternal->groupName())
+        .set("type", "checkbox")
+        .set("id", mInternal->id())
+        .set("value", mValue)
+        .build();
 }
+
+bool JsonCheckboxImpl::isChecked() const { return mValue; }
 
 bool JsonCheckboxImpl::value() const { return mValue; }
 

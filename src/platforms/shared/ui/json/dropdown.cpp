@@ -17,8 +17,8 @@ void JsonDropdownImpl::commonInit(const fl::string &name) {
             static_cast<JsonDropdownImpl *>(this)->updateInternal(json);
         });
     auto toJsonFunc =
-        JsonUiInternal::ToJsonFunction([this](FLArduinoJson::JsonObject &json) {
-            static_cast<JsonDropdownImpl *>(this)->toJson(json);
+        JsonUiInternal::ToJsonFunction([this]() -> fl::Json {
+            return static_cast<JsonDropdownImpl *>(this)->toJson();
         });
     mInternal = fl::make_shared<JsonUiInternal>(name, fl::move(updateFunc),
                                      fl::move(toJsonFunc));
@@ -61,17 +61,22 @@ JsonDropdownImpl &JsonDropdownImpl::Group(const fl::string &name) {
 
 const fl::string &JsonDropdownImpl::name() const { return mInternal->name(); }
 
-void JsonDropdownImpl::toJson(FLArduinoJson::JsonObject &json) const {
-    json["name"] = name();
-    json["group"] = mInternal->groupName().c_str();
-    json["type"] = "dropdown";
-    json["id"] = mInternal->id();
-    json["value"] = static_cast<int>(mSelectedIndex);
+fl::Json JsonDropdownImpl::toJson() const {
+    auto builder = fl::JsonBuilder()
+        .set("name", name())
+        .set("group", mInternal->groupName())
+        .set("type", "dropdown")
+        .set("id", mInternal->id())
+        .set("value", static_cast<int>(mSelectedIndex));
     
-    FLArduinoJson::JsonArray optionsArray = json["options"].to<FLArduinoJson::JsonArray>();
+    // Add options array
+    fl::vector<fl::string> options_copy;
     for (const auto &option : mOptions) {
-        optionsArray.add(option.c_str());
+        options_copy.push_back(option);
     }
+    builder.set("options", options_copy);
+    
+    return builder.build();
 }
 
 fl::string JsonDropdownImpl::value() const {

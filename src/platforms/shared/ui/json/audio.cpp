@@ -24,8 +24,8 @@ JsonAudioImpl::JsonAudioImpl(const fl::string &name) {
         });
 
     auto toJsonFunc =
-        JsonUiInternal::ToJsonFunction([this](FLArduinoJson::JsonObject &json) {
-            static_cast<JsonAudioImpl *>(this)->toJson(json);
+        JsonUiInternal::ToJsonFunction([this]() -> fl::Json {
+            return static_cast<JsonAudioImpl *>(this)->toJson();
         });
     mInternal = fl::make_shared<JsonUiInternal>(name, fl::move(updateFunc),
                                        fl::move(toJsonFunc));
@@ -59,14 +59,18 @@ JsonAudioImpl::Updater::~Updater() { fl::EngineEvents::removeListener(this); }
 
 void JsonAudioImpl::Updater::onPlatformPreLoop2() {}
 
-void JsonAudioImpl::toJson(FLArduinoJson::JsonObject &json) const {
-    json["name"] = name();
-    json["group"] = mInternal->groupName().c_str();
-    json["type"] = "audio";
-    json["id"] = mInternal->id();
+fl::Json JsonAudioImpl::toJson() const {
+    auto builder = fl::JsonBuilder()
+        .set("name", name())
+        .set("group", mInternal->groupName())
+        .set("type", "audio")
+        .set("id", mInternal->id());
+    
     if (!mSerializeBuffer.empty()) {
-        json["audioData"] = mSerializeBuffer.c_str();
+        builder.set("audioData", mSerializeBuffer);
     }
+    
+    return builder.build();
 }
 
 static bool isdigit(char c) { return c >= '0' && c <= '9'; }
