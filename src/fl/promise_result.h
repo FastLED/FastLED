@@ -22,7 +22,7 @@ namespace fl {
 ///
 /// @section Usage
 /// @code
-/// auto result = fl::await<int>(some_promise);
+/// auto result = fl::await_top_level<int>(some_promise);
 /// 
 /// if (result.ok()) {
 ///     int value = result.value();  // Safe access

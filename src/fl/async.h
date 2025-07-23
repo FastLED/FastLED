@@ -122,7 +122,7 @@ size_t async_active_tasks();
 /// @return True if any async tasks are running
 bool async_has_tasks();
 
-/// @brief Synchronously wait for a promise to complete
+/// @brief Synchronously wait for a promise to complete (ONLY safe in top-level contexts)
 /// @tparam T The type of value the promise resolves to (automatically deduced)
 /// @param promise The promise to wait for
 /// @return A PromiseResult containing either the resolved value T or an Error
@@ -131,13 +131,22 @@ bool async_has_tasks();
 /// then returns a PromiseResult that can be checked with ok() for success/failure.
 /// While waiting, it continuously calls async_yield() to pump async tasks and yield appropriately.
 ///
+/// **SAFETY WARNING**: This function should ONLY be called from top-level contexts
+/// like Arduino loop() function. Never call this from:
+/// - Promise callbacks (.then, .catch_)
+/// - Nested async operations  
+/// - Interrupt handlers
+/// - Library initialization code
+///
+/// The "_top_level" suffix emphasizes this safety requirement.
+///
 /// **Type Deduction**: The template parameter T is automatically deduced from the 
 /// promise parameter, so you don't need to specify it explicitly.
 ///
 /// @section Usage
 /// @code
 /// auto promise = fl::fetch_get("http://example.com");
-/// auto result = fl::await(promise);  // Type automatically deduced!
+/// auto result = fl::await_top_level(promise);  // Type automatically deduced!
 /// 
 /// if (result.ok()) {
 ///     const Response& resp = result.value();
@@ -152,10 +161,10 @@ bool async_has_tasks();
 /// }
 /// 
 /// // You can still specify the type explicitly if needed:
-/// auto explicit_result = fl::await<Response>(promise);
+/// auto explicit_result = fl::await_top_level<Response>(promise);
 /// @endcode
 template<typename T>
-fl::PromiseResult<T> await(fl::promise<T> promise) {
+fl::PromiseResult<T> await_top_level(fl::promise<T> promise) {
     // Handle invalid promises
     if (!promise.valid()) {
         return fl::PromiseResult<T>(Error("Invalid promise"));
@@ -185,24 +194,6 @@ fl::PromiseResult<T> await(fl::promise<T> promise) {
     } else {
         return fl::PromiseResult<T>(promise.error());
     }
-}
-
-/// @brief Alias for await() with explicit "top level" naming for educational clarity
-/// @tparam T The type of value the promise resolves to (automatically deduced)
-/// @param promise The promise to wait for
-/// @return A PromiseResult containing either the resolved value T or an Error
-/// 
-/// This is an educational alias for fl::await() that emphasizes this function
-/// should only be called from top-level code (like Arduino loop() function)
-/// and never from callback contexts or nested async operations.
-///
-/// **Educational Purpose**: The "_top_level" suffix helps teach developers
-/// that this blocking operation is only safe in certain contexts.
-///
-/// @see await() for the underlying implementation and full documentation
-template<typename T>
-fl::PromiseResult<T> await_top_level(fl::promise<T> promise) {
-    return await(promise);
 }
 
 } // namespace fl 
