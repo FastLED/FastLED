@@ -97,8 +97,22 @@ void JsonUiManager::processPendingUpdates() {
         }
         
         fl::JsonDocument doc;
-        auto json = doc.to<FLArduinoJson::JsonArray>();
-        toJson(json);
+        auto jsonArray = doc.to<FLArduinoJson::JsonArray>();
+        
+        // Build JSON array directly using ideal API - no longer calling legacy toJson method
+        auto components = getComponents();
+        for (auto &component : components) {
+            auto componentJson = component->toJson();
+            if (componentJson.is_object()) {
+                // Add component JSON directly to array using ideal patterns
+                auto obj = jsonArray.add<FLArduinoJson::JsonObject>();
+                const auto& variant = componentJson.variant();
+                if (variant.is<FLArduinoJson::JsonObjectConst>()) {
+                    obj.set(variant.as<FLArduinoJson::JsonObjectConst>());
+                }
+            }
+        }
+        
         string jsonStr = doc.serialize();
         //FL_WARN("*** SENDING UI TO FRONTEND: " << jsonStr.substr(0, 100).c_str() << "...");
         mUpdateJs(jsonStr.c_str());
@@ -215,20 +229,7 @@ void JsonUiManager::onEndFrame() {
     processPendingUpdates();
 }
 
-void JsonUiManager::toJson(FLArduinoJson::JsonArray &json) {
-    auto components = getComponents();
-    for (auto &component : components) {
-        auto componentJson = component->toJson();
-        if (componentJson.is_object()) {
-            // Convert fl::Json to FLArduinoJson::JsonObject for compatibility
-            auto obj = json.add<FLArduinoJson::JsonObject>();
-            const auto& variant = componentJson.variant();
-            if (variant.is<FLArduinoJson::JsonObjectConst>()) {
-                obj.set(variant.as<FLArduinoJson::JsonObjectConst>());
-            }
-        }
-    }
-}
+// REMOVED: Legacy toJson method no longer needed after FLArduinoJson elimination
 
 
 } // namespace fl

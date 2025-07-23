@@ -43,7 +43,7 @@ class JsonUiManager : fl::EngineEvents::Listener {
     void onEndFrame() override;
 
     fl::vector<JsonUiInternalPtr> getComponents();
-    void toJson(FLArduinoJson::JsonArray &json);
+    // REMOVED: Legacy toJson method no longer needed after FLArduinoJson elimination
     JsonUiInternalPtr findUiComponent(const fl::string& idStr);
 
     Callback mUpdateJs;
