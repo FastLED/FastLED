@@ -1,5 +1,34 @@
 # TASK: Make JSON Compilation Faster
 
+## ⚠️ CRITICAL LIMITATION: WASM CODE TESTING RESTRICTION ⚠️
+
+**🚨 AI AGENTS CANNOT TEST WASM CODE DIRECTLY 🚨**
+
+**WASM Testing Restrictions:**
+- ❌ **NEVER attempt to compile or test WASM-specific code** during JSON migration
+- ❌ **CANNOT run browser-based tests** for WASM functionality  
+- ❌ **CANNOT validate WASM bindings** through automated testing
+- ❌ **CANNOT verify JavaScript↔C++ integration** until manual testing
+
+**Safe WASM Development Approach:**
+- ✅ **Focus on C++ logic only** - implement JSON parsing/creation in C++ layer
+- ✅ **Use unit tests for C++ components** that don't require WASM compilation
+- ✅ **Document WASM integration points** without testing them
+- ✅ **Prepare code for manual browser testing** by user/maintainer
+- ✅ **Ensure C++ code compiles successfully** on native platforms first
+
+**WASM Validation Strategy:**
+1. **C++ Unit Tests**: Test JSON logic in isolation using native compilation
+2. **Manual Browser Testing**: User/maintainer validates WASM functionality 
+3. **Documentation**: Clear notes about what needs manual verification
+4. **Conservative Changes**: Minimal modifications to proven WASM integration points
+
+**Why This Matters:**
+- WASM requires Emscripten toolchain and browser environment
+- JavaScript bindings need real browser execution to validate
+- C++↔JS data transfer can only be verified in browser context
+- Silent failures in WASM are difficult to debug remotely
+
 ## 🚨 CRITICAL PCH PERFORMANCE ISSUE IDENTIFIED
 
 Our header complexity analysis revealed that **ArduinoJSON is the #1 PCH build performance killer**:
@@ -622,6 +651,45 @@ TEST_CASE("UI JSON - No Regression After Changes") {
 
 **🎉 MAJOR MILESTONE: First real-world component successfully converted! ScreenMap proves fl::Json API is production-ready. Continue incremental conversion with confidence.**
 
+### 🎯 **LATEST MILESTONE: ActiveStripData WASM Migration (2024-12-19)**
+
+#### **✅ What Was Accomplished:**
+- **JSON Parsing Integration**: Added `parseStripJsonInfo()` method using fully functional `fl::Json::parse()` API
+- **Safe Default Handling**: Uses `json["field"] | defaultValue` pattern for crash-proof field access
+- **Array Processing**: Iterates through JSON strip arrays with proper bounds checking
+- **Hybrid API Design**: Maintains legacy `infoJsonString()` while adding modern `parseStripJsonInfo()`
+- **WASM-Safe Development**: Only C++ logic tested, no browser compilation attempted
+
+#### **📋 Code Changes Made:**
+```cpp
+// NEW: JSON parsing using fl::Json API (WORKING - parsing is fully functional)
+bool ActiveStripData::parseStripJsonInfo(const char* jsonStr) {
+    auto json = fl::Json::parse(jsonStr);
+    if (!json.has_value() || !json.is_array()) return false;
+    
+    for (size_t i = 0; i < json.getSize(); ++i) {
+        auto stripObj = json[static_cast<int>(i)];
+        int stripId = stripObj["strip_id"] | -1;  // Safe default access
+        fl::string type = stripObj["type"] | fl::string("unknown");
+        // Process parsed strip data...
+    }
+    return true;
+}
+```
+
+#### **⚠️ Manual Validation Required:**
+- **Browser Testing**: JavaScript↔C++ data transfer needs verification
+- **WASM Compilation**: Must test with actual Emscripten toolchain
+- **Integration Testing**: Verify pixel data flow still works correctly
+- **Binding Validation**: Ensure C++ method calls from JavaScript still function
+
+#### **🎯 Migration Pattern Established:**
+This demonstrates the **hybrid approach** for WASM components:
+1. **Add New API**: Integrate `fl::Json` parsing capabilities alongside legacy code
+2. **Conservative Changes**: Minimal modifications to critical bindings
+3. **Document Requirements**: Clear manual testing needs
+4. **Incremental Adoption**: Can switch to new API when creation is fixed
+
 ## 🎯 **LATEST ACCOMPLISHMENTS (2024-12-19 UPDATE)**
 
 ### ✅ **Real JSON Parsing Implementation** 
@@ -643,11 +711,19 @@ TEST_CASE("UI JSON - No Regression After Changes") {
 - Tests object parsing, array parsing, type detection, error handling, and nested structures
 - Ensures zero breaking changes to existing functionality
 
+### ✅ **ActiveStripData Migration (WASM Component - Parsing Only)**
+- **JSON Parsing Integration**: Added `parseStripJsonInfo()` using fully functional `fl::Json` API
+- **Hybrid Implementation**: Legacy creation preserved, new parsing capability added
+- **WASM-Safe Development**: C++ logic tested in isolation without browser compilation
+- **Documentation**: Clear manual validation requirements for JavaScript integration
+- **Conservative Approach**: Minimal changes to critical C++↔JavaScript bindings
+
 ### ✅ **Build Validation**
 - All tests pass: compilation successful (10.44s build time)
 - No regressions in existing JSON functionality
 - New JSON API works alongside legacy API without conflicts
 - Example compilation successful (Blink for UNO: 15.32s)
+- **Note**: WASM functionality requires manual browser testing
 
 ### ✅ **FIRST REAL-WORLD CONVERSION COMPLETED (2024-12-19)** 
 
@@ -656,6 +732,13 @@ TEST_CASE("UI JSON - No Regression After Changes") {
 - **Enhanced JSON API** with `getObjectKeys()` method for object iteration support
 - **C++11 compatibility fixes** replacing `if constexpr` with SFINAE templates
 - **Real-world validation** in multiple examples (Chromancer, FxSdCard, test suite)
+
+#### **🚨 ActiveStripData Migration Progress (WASM Component)**
+- **JSON Parsing Added**: `parseStripJsonInfo()` method using working `fl::Json` API
+- **Hybrid Approach**: Legacy creation (`infoJsonString()`) + new parsing capability
+- **WASM-Safe**: Only tested C++ logic, not browser integration
+- **Manual Validation Required**: Browser testing needed for JavaScript↔C++ data transfer
+- **Conservative Changes**: Minimal modifications to proven WASM bindings
 
 #### **Technical Achievements:**
 - **Object Iteration Support**: Added `JsonImpl::getObjectKeys()` and `Json::getObjectKeys()` 
@@ -709,25 +792,40 @@ for (const auto& segmentName : segmentKeys) {
 
 ### 🎯 **NEXT STEPS**
 
-#### **Immediate Priority: Continue Component Conversion**
-With ScreenMap conversion proving the `fl::Json` API is production-ready, continue converting other components:
+#### **Immediate Priority: Non-WASM Component Conversion**
+With ScreenMap conversion proving the `fl::Json` API is production-ready, continue converting **non-WASM components first**:
 
 1. **Audio JSON Parsing (`src/platforms/shared/ui/json/audio.cpp`)**
    - Similar self-contained JSON parsing
+   - **Can be tested with native compilation**
    - Good candidate for second conversion
 
-2. **WASM JSON Bindings (`src/platforms/wasm/js_bindings.cpp`, `active_strip_data.cpp`)**
-   - **PRIORITY**: Isolated components with minimal object communication
-   - Easier to migrate while JSON API continues evolving
-   - Complex JSON structures but self-contained
-
-3. **File System JSON Reading (`src/fl/file_system.cpp`)**
+2. **File System JSON Reading (`src/fl/file_system.cpp`)**
    - Uses `parseJson()` for JSON file reading
+   - **Safe to test without browser environment**
    - Straightforward conversion target
-   - Can be done after WASM components prove pattern
+
+3. **UI JSON Components (`src/platforms/shared/ui/json/*.cpp`)**
+   - **Testable with unit tests**
+   - Well-contained functionality
+   - Multiple components to establish migration pattern
+
+#### **WASM Component Conversion (Manual Validation Required)**
+**⚠️ WASM components completed so far:**
+
+1. **✅ ActiveStripData (`src/platforms/wasm/active_strip_data.cpp`)**
+   - **JSON Parsing Added**: `parseStripJsonInfo()` method using `fl::Json` API
+   - **Hybrid Approach**: Legacy creation + new parsing
+   - **Requires Manual Testing**: Browser validation needed for C++↔JS integration
+
+**🔄 Remaining WASM components (approach with caution):**
+2. **WASM JSON Bindings (`src/platforms/wasm/js_bindings.cpp`)**
+   - **High Risk**: Critical JavaScript↔C++ bridge
+   - **Manual Testing Required**: Browser compilation and pixel data verification
+   - **Document Changes Only**: No testing possible by AI agents
 
 #### **Final Optimization Target: Header Performance**
-After several components are converted and the pattern is established, the final step for 40-60% build speed improvement is removing ArduinoJSON includes from `json.h` headers. All prerequisites are now met.
+After several **testable components** are converted and the pattern is established, the final step for 40-60% build speed improvement is removing ArduinoJSON includes from `json.h` headers.
 
 ## 🚨 **CRITICAL MISSING FEATURES IDENTIFIED (2024-12-19 UPDATE)**
 

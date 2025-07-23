@@ -25,8 +25,13 @@ class ActiveStripData : public fl::EngineEvents::Listener {
     void update(int id, uint32_t now, const uint8_t *pixel_data, size_t size);
     void updateScreenMap(int id, const ScreenMap &screenmap);
 
-    fl::string infoJsonString();
+    // JSON creation methods
+    fl::string infoJsonString(); // Legacy implementation (working)
+    fl::string infoJsonStringNew(); // New fl::Json API (when creation is fixed)
 
+    // JSON parsing methods (NEW - using working fl::Json parsing API)
+    bool parseStripJsonInfo(const char* jsonStr); // Parse strip configuration from JSON
+    
     const StripDataMap &getData() const { return mStripMap; }
     const ScreenMapMap &getScreenMaps() const { return mScreenMap; }
 

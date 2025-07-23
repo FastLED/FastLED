@@ -88,6 +88,10 @@ bool JsonImpl::parseWithRootDetection(const char* jsonStr, fl::string* error) {
 
 bool JsonImpl::isArray() const { 
 #if FASTLED_ENABLE_JSON
+    if (!mVariant && mDocument) {
+        // Access document root directly for factory-created objects
+        return mDocument->doc.as<::FLArduinoJson::JsonVariant>().is<::FLArduinoJson::JsonArray>();
+    }
     if (!mVariant) return mIsRootArray;
     auto* variant = static_cast<::FLArduinoJson::JsonVariant*>(mVariant);
     return variant->is<::FLArduinoJson::JsonArray>();
@@ -98,6 +102,10 @@ bool JsonImpl::isArray() const {
 
 bool JsonImpl::isObject() const { 
 #if FASTLED_ENABLE_JSON
+    if (!mVariant && mDocument) {
+        // Access document root directly for factory-created objects
+        return mDocument->doc.as<::FLArduinoJson::JsonVariant>().is<::FLArduinoJson::JsonObject>();
+    }
     if (!mVariant) return !mIsRootArray && mDocument != nullptr;
     auto* variant = static_cast<::FLArduinoJson::JsonVariant*>(mVariant);
     return variant->is<::FLArduinoJson::JsonObject>();
@@ -108,6 +116,10 @@ bool JsonImpl::isObject() const {
 
 bool JsonImpl::isNull() const { 
 #if FASTLED_ENABLE_JSON
+    if (!mVariant && mDocument) {
+        // Factory-created objects are never null
+        return false;
+    }
     if (!mVariant) return mDocument == nullptr;
     auto* variant = static_cast<::FLArduinoJson::JsonVariant*>(mVariant);
     return variant->isNull();
@@ -230,14 +242,15 @@ fl::string JsonImpl::serialize() const {
     return "{}";
 }
 
-// Factory methods implementation
+// Factory methods implementation - use document root directly
 JsonImpl JsonImpl::createArray() { 
     JsonImpl impl;
 #if FASTLED_ENABLE_JSON
     impl.mDocument = new JsonDocumentImpl();
     impl.mOwnsDocument = true;
-    auto root = impl.mDocument->doc.to<::FLArduinoJson::JsonArray>();
-    impl.mVariant = new ::FLArduinoJson::JsonVariant(root);
+    impl.mDocument->doc.to<::FLArduinoJson::JsonArray>();
+    // No mVariant needed - access document root directly when needed
+    impl.mVariant = nullptr;
     impl.mIsRootArray = true;
 #else
     impl.mIsRootArray = true;
@@ -250,8 +263,9 @@ JsonImpl JsonImpl::createObject() {
 #if FASTLED_ENABLE_JSON
     impl.mDocument = new JsonDocumentImpl();
     impl.mOwnsDocument = true;
-    auto root = impl.mDocument->doc.to<::FLArduinoJson::JsonObject>();
-    impl.mVariant = new ::FLArduinoJson::JsonVariant(root);
+    impl.mDocument->doc.to<::FLArduinoJson::JsonObject>();
+    // No mVariant needed - access document root directly when needed
+    impl.mVariant = nullptr;
     impl.mIsRootArray = false;
 #endif
     return impl;
@@ -355,8 +369,19 @@ void JsonImpl::setNull() {
 // Convenience methods for setting object field values directly
 void JsonImpl::setObjectFieldValue(const char* key, int value) {
 #if FASTLED_ENABLE_JSON
-    if (!mVariant || mIsRootArray || !key) return;
+    if (mIsRootArray || !key) return;
     
+    if (!mVariant && mDocument) {
+        // Access document root directly for factory-created objects
+        auto root = mDocument->doc.as<::FLArduinoJson::JsonVariant>();
+        if (root.is<::FLArduinoJson::JsonObject>()) {
+            auto obj = root.as<::FLArduinoJson::JsonObject>();
+            obj[key] = value;
+        }
+        return;
+    }
+    
+    if (!mVariant) return;
     auto* variant = static_cast<::FLArduinoJson::JsonVariant*>(mVariant);
     if (!variant->is<::FLArduinoJson::JsonObject>()) return;
     
@@ -367,8 +392,19 @@ void JsonImpl::setObjectFieldValue(const char* key, int value) {
 
 void JsonImpl::setObjectFieldValue(const char* key, const char* value) {
 #if FASTLED_ENABLE_JSON
-    if (!mVariant || mIsRootArray || !key || !value) return;
+    if (mIsRootArray || !key || !value) return;
     
+    if (!mVariant && mDocument) {
+        // Access document root directly for factory-created objects
+        auto root = mDocument->doc.as<::FLArduinoJson::JsonVariant>();
+        if (root.is<::FLArduinoJson::JsonObject>()) {
+            auto obj = root.as<::FLArduinoJson::JsonObject>();
+            obj[key] = value;
+        }
+        return;
+    }
+    
+    if (!mVariant) return;
     auto* variant = static_cast<::FLArduinoJson::JsonVariant*>(mVariant);
     if (!variant->is<::FLArduinoJson::JsonObject>()) return;
     
@@ -379,8 +415,19 @@ void JsonImpl::setObjectFieldValue(const char* key, const char* value) {
 
 void JsonImpl::setObjectFieldValue(const char* key, const fl::string& value) {
 #if FASTLED_ENABLE_JSON
-    if (!mVariant || mIsRootArray || !key) return;
+    if (mIsRootArray || !key) return;
     
+    if (!mVariant && mDocument) {
+        // Access document root directly for factory-created objects
+        auto root = mDocument->doc.as<::FLArduinoJson::JsonVariant>();
+        if (root.is<::FLArduinoJson::JsonObject>()) {
+            auto obj = root.as<::FLArduinoJson::JsonObject>();
+            obj[key] = value.c_str();
+        }
+        return;
+    }
+    
+    if (!mVariant) return;
     auto* variant = static_cast<::FLArduinoJson::JsonVariant*>(mVariant);
     if (!variant->is<::FLArduinoJson::JsonObject>()) return;
     
@@ -391,8 +438,19 @@ void JsonImpl::setObjectFieldValue(const char* key, const fl::string& value) {
 
 void JsonImpl::setObjectFieldValue(const char* key, float value) {
 #if FASTLED_ENABLE_JSON
-    if (!mVariant || mIsRootArray || !key) return;
+    if (mIsRootArray || !key) return;
     
+    if (!mVariant && mDocument) {
+        // Access document root directly for factory-created objects
+        auto root = mDocument->doc.as<::FLArduinoJson::JsonVariant>();
+        if (root.is<::FLArduinoJson::JsonObject>()) {
+            auto obj = root.as<::FLArduinoJson::JsonObject>();
+            obj[key] = value;
+        }
+        return;
+    }
+    
+    if (!mVariant) return;
     auto* variant = static_cast<::FLArduinoJson::JsonVariant*>(mVariant);
     if (!variant->is<::FLArduinoJson::JsonObject>()) return;
     
@@ -403,8 +461,19 @@ void JsonImpl::setObjectFieldValue(const char* key, float value) {
 
 void JsonImpl::setObjectFieldValue(const char* key, bool value) {
 #if FASTLED_ENABLE_JSON
-    if (!mVariant || mIsRootArray || !key) return;
+    if (mIsRootArray || !key) return;
     
+    if (!mVariant && mDocument) {
+        // Access document root directly for factory-created objects
+        auto root = mDocument->doc.as<::FLArduinoJson::JsonVariant>();
+        if (root.is<::FLArduinoJson::JsonObject>()) {
+            auto obj = root.as<::FLArduinoJson::JsonObject>();
+            obj[key] = value;
+        }
+        return;
+    }
+    
+    if (!mVariant) return;
     auto* variant = static_cast<::FLArduinoJson::JsonVariant*>(mVariant);
     if (!variant->is<::FLArduinoJson::JsonObject>()) return;
     
