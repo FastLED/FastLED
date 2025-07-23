@@ -43,7 +43,6 @@ TEST_CASE("StripIdMap Simple Test") {
     CHECK(id == 0);
     CLEDController *owner = StripIdMap::getOwner(id);
     CLEDController *match = &fake_controller;
-    printf("Owner: %p, Match: %p\n", owner, match);
     CHECK_EQ(owner, match);
     CHECK(StripIdMap::getId(&fake_controller) == 0);
     id = StripIdMap::getOrFindByAddress(reinterpret_cast<uintptr_t>(&fake_controller));
