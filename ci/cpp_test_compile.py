@@ -226,7 +226,8 @@ def compile_fastled(
         cmake_configure_command_list.extend(
             ["-DFASTLED_ENABLE_IWYU=ON", "-DFASTLED_ENABLE_CLANG_TIDY=ON"]
         )
-        print("Static analysis tools enabled: IWYU and clang-tidy")
+        print("🔍 Static analysis requested: IWYU and clang-tidy")
+        print("   (CMake will check if tools are installed and warn if missing)")
 
     cmake_configure_command = subprocess.list2cmdline(cmake_configure_command_list)
     run_command(cmake_configure_command, cwd=BUILD_DIR)
