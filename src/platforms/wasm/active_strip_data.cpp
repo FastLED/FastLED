@@ -66,19 +66,51 @@ void ActiveStripData::updateScreenMap(int id, const ScreenMap &screenmap) {
 }
 
 Str ActiveStripData::infoJsonString() {
+    // LEGACY API - WORKING: Create strip info JSON using ArduinoJSON
     FLArduinoJson::JsonDocument doc;
     auto array = doc.to<FLArduinoJson::JsonArray>();
+
+    // Debug: Log how many strips we have
+    printf("DEBUG: ActiveStripData has %zu strips\n", mStripMap.size());
 
     for (const auto &[stripIndex, stripData] : mStripMap) {
         auto obj = array.add<FLArduinoJson::JsonObject>();
         obj["strip_id"] = stripIndex;
         obj["type"] = "r8g8b8";
+        printf("DEBUG: Added strip %d to JSON\n", stripIndex);
     }
 
     Str jsonBuffer;
     serializeJson(doc, jsonBuffer);
+    
+    // Debug: Log the final JSON
+    printf("DEBUG: Generated JSON: %s\n", jsonBuffer.c_str());
+    
+    // Ensure we always return a valid JSON array, even if empty
+    if (jsonBuffer.empty()) {
+        printf("DEBUG: JSON buffer was empty, returning []\n");
+        return Str("[]");
+    }
+    
+    // Verify the JSON starts with [ to ensure it's an array
+    if (jsonBuffer.length() == 0 || jsonBuffer[0] != '[') {
+        printf("DEBUG: JSON doesn't start with [, returning []\n");
+        return Str("[]");
+    }
+    
+    // TODO: NEW API - Once fl::Json serialization is implemented, this should work:
+    // auto json = fl::Json::createArray();
+    // for (const auto &[stripIndex, stripData] : mStripMap) {
+    //     auto obj = fl::Json::createObject();
+    //     obj.set("strip_id", stripIndex);
+    //     obj.set("type", "r8g8b8");
+    //     json.push_back(obj);
+    // }
+    // Str jsonBuffer = json.serialize();
+    
     return jsonBuffer;
 }
+
 
 /// WARNING: For some reason the following code must be here, when
 /// it was moved to embind.cpp frame data stopped being updated.
