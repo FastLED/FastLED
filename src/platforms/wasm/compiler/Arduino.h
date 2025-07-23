@@ -3,6 +3,12 @@
 
 #pragma once
 
+// Standard Arduino define - indicates Arduino environment and version
+// Using a modern Arduino IDE version number (1.8.19 = 10819)
+#ifndef ARDUINO
+#define ARDUINO "FastLED Arduino Wasm Stub"
+#endif
+
 #include "fl/str.h"
 #include <algorithm>
 #include <random>
