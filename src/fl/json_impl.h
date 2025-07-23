@@ -3,10 +3,9 @@
 #include "fl/compiler_control.h"
 #include "fl/str.h"
 
-// Forward declarations to avoid including ArduinoJSON in header
-namespace FLArduinoJson {
-    class JsonDocument;
-    class JsonVariant;
+// Forward declarations for PIMPL pattern
+namespace fl {
+    class JsonDocumentImpl; // Wrapper around FLArduinoJson::JsonDocument
 }
 
 namespace fl {
@@ -20,7 +19,7 @@ namespace fl {
 class JsonImpl {
 public:
     JsonImpl();
-    JsonImpl(::FLArduinoJson::JsonVariant variant, bool isRootArray = false);
+    // JsonVariant constructor temporarily removed due to namespace versioning issues
     ~JsonImpl();
     
     // Copy constructor and assignment
@@ -67,8 +66,8 @@ public:
     static JsonImpl createObject();
     
 private:
-    ::FLArduinoJson::JsonDocument* mDocument;
-    ::FLArduinoJson::JsonVariant* mVariant;
+    JsonDocumentImpl* mDocument; // Wrapper around FLArduinoJson::JsonDocument
+    void* mVariant; // JsonVariant* - using void* to avoid namespace issues
     bool mIsRootArray;
     bool mOwnsDocument; // Track if this instance owns the document
     

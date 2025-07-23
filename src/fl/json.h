@@ -3,9 +3,16 @@
 #include "fl/warn.h"
 #include "fl/str.h"
 #include "fl/compiler_control.h"
+#include "fl/ptr.h"
+
+#include "fl/sketch_macros.h"
 
 #ifndef FASTLED_ENABLE_JSON
+#ifdef SKETCH_HAS_LOTS_OF_MEMORY
 #define FASTLED_ENABLE_JSON 1
+#else
+#define FASTLED_ENABLE_JSON 0
+#endif
 #endif
 
 #if FASTLED_ENABLE_JSON
@@ -35,12 +42,43 @@ template <typename T, typename U> void serializeJson(T &doc, U &buff) {}
 namespace fl {
 
 class string;
+class JsonImpl; // Forward declaration for PIMPL
 
 #if !FASTLED_ENABLE_JSON
 class JsonDocument {};
 #else
 class JsonDocument : public ::FLArduinoJson::JsonDocument {};
 #endif
+
+// Modern PIMPL-based JSON class for better build performance
+class Json {
+private:
+    fl::shared_ptr<JsonImpl> mImpl;
+    
+public:
+    Json();
+    Json(const Json& other) = default;
+    Json& operator=(const Json& other) = default;
+    
+    // Static factory methods
+    static Json parse(const char* jsonStr);
+    
+    // Basic type checks
+    bool has_value() const;
+    bool is_object() const;
+    bool is_array() const;
+    
+    // Access operators
+    Json operator[](const char* key) const;
+    Json operator[](int index) const;
+    
+    // Safe access with defaults (template in header for convenience)
+    template<typename T>
+    T operator|(const T& defaultValue) const {
+        // Implementation will be added later - for now just return default
+        return defaultValue;
+    }
+};
 
 // Enum for JSON types
 enum JsonType {
