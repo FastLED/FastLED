@@ -179,4 +179,9 @@ result<T> make_error(const char* message) {
     return result<T>(Error(message));
 }
 
+/// @brief Type alias for backwards compatibility
+/// @deprecated Use result<T> instead of PromiseResult<T>
+template<typename T>
+using PromiseResult = result<T>;
+
 } // namespace fl 
