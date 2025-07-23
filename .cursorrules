@@ -1183,6 +1183,60 @@ CHECK("expected" == actual_string);     // Wrong comparison type
 - **Consistent debugging** across all test failures
 - **Type safety** for different comparison types
 
+### Test File Creation Guidelines
+**🚨 CRITICAL: Minimize test file proliferation - Consolidate tests whenever possible**
+
+**PREFERRED APPROACH:**
+- ✅ **CONSOLIDATE:** Add new test cases to existing related test files
+- ✅ **EXTEND:** Expand existing `TEST_CASE()` blocks with additional scenarios
+- ✅ **REUSE:** Leverage existing test infrastructure and helper functions
+- ✅ **COMPREHENSIVE:** Create single comprehensive test files that cover entire feature areas
+
+**CREATE NEW TEST FILES ONLY WHEN:**
+- ✅ **Testing completely new subsystems** with no existing related tests
+- ✅ **Isolated feature areas** that don't fit logically into existing test structure
+- ✅ **Complex integration tests** that require dedicated setup/teardown
+
+**AVOID:**
+- ❌ **Creating new test files for minor bug fixes** - add to existing tests
+- ❌ **One test case per file** - consolidate related functionality
+- ❌ **Duplicate test patterns** across multiple files
+- ❌ **Scattered feature testing** - keep related tests together
+
+**EXAMPLES:**
+
+**✅ GOOD - Consolidation:**
+```cpp
+// Add to existing tests/test_json_comprehensive.cpp
+TEST_CASE("JSON - New Feature Addition") {
+    // Add new functionality tests to existing comprehensive file
+}
+```
+
+**❌ BAD - Proliferation:**
+```cpp
+// Don't create tests/test_json_new_feature.cpp for minor additions
+// Instead add to existing comprehensive test file
+```
+
+**DEVELOPMENT WORKFLOW:**
+1. **During Development/Bug Fixing:** Temporary test files are acceptable for rapid iteration
+2. **Near Completion:** **MANDATORY** - Consolidate temporary tests into existing files
+3. **Final Review:** Remove temporary test files and ensure comprehensive coverage in main test files
+
+**CONSOLIDATION CHECKLIST:**
+- [ ] Can this test be added to an existing `TEST_CASE` in the same file?
+- [ ] Does an existing test file cover the same functional area?
+- [ ] Would this test fit better as a sub-section of a comprehensive test?
+- [ ] Are there duplicate test patterns that can be eliminated?
+
+**Why:** Maintaining a clean, consolidated test suite:
+- **Easier maintenance** - fewer files to manage and update
+- **Better organization** - related functionality tested together
+- **Faster builds** - fewer compilation units
+- **Cleaner repository** - less file clutter
+- **Improved discoverability** - easier to find existing test coverage
+
 ### Test Execution Format
 **🚨 CRITICAL: Always use the correct test execution format:**
 - ✅ **CORRECT**: `bash test <test_name>` (e.g., `bash test audio_json_parsing`)
