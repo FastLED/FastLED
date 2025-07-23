@@ -619,6 +619,56 @@ sprintf(small_buffer, "Very long format string %d", value);
 
 **Why:** `FL_WARN` provides a unified logging interface that works across all platforms and testing environments, including unit tests and Arduino sketches.
 
+### Emoticon and Emoji Usage Policy
+**NO emoticons or emoji characters are allowed in C++ source files.** This ensures professional, maintainable code that works correctly across all platforms and development environments.
+
+**Prohibited in C++ Files:**
+- ❌ **C++ source files** (*.cpp, *.c)
+- ❌ **C++ header files** (*.h, *.hpp)
+- ❌ **Comments in C++ files** - use clear text instead
+- ❌ **String literals in C++ code** - use descriptive text
+- ❌ **Log messages in C++ code** - use text prefixes like "SUCCESS:", "ERROR:", "WARNING:"
+
+**Examples of what NOT to do in C++ files:**
+```cpp
+// ❌ BAD - Emoticons in comments
+// 🎯 This function handles user input
+
+// ❌ BAD - Emoticons in log messages  
+FL_WARN("✅ Operation successful!");
+FL_WARN("❌ Error occurred: " << error_msg);
+
+// ❌ BAD - Emoticons in string literals
+const char* status = "🔄 Processing...";
+```
+
+**Examples of correct alternatives in C++ files:**
+```cpp
+// ✅ GOOD - Clear text in comments
+// TUTORIAL: This function handles user input
+
+// ✅ GOOD - Text prefixes in log messages
+FL_WARN("SUCCESS: Operation completed successfully!");
+FL_WARN("ERROR: Failed to process request: " << error_msg);
+
+// ✅ GOOD - Descriptive text in string literals  
+const char* status = "PROCESSING: Request in progress...";
+```
+
+**Allowed in Python Files:**
+- ✅ **Python source files** (*.py) - emoticons are acceptable for build scripts, tools, and utilities
+- ✅ **Python comments and docstrings** - can use emoticons for clarity in development tools
+- ✅ **Python log messages** - emoticons OK in build/test output for visual distinction
+
+**Why:** 
+- **Cross-platform compatibility** - Some compilers/platforms have issues with Unicode characters
+- **Professional codebase** - Maintains serious, enterprise-grade appearance
+- **Accessibility** - Screen readers and text-based tools work better with plain text
+- **Consistency** - Ensures uniform code style across all C++ files
+- **Debugging** - Text-based prefixes are easier to search and filter in logs
+
+**Before adding any visual indicators to C++ code, use text-based alternatives like "TODO:", "NOTE:", "WARNING:", "SUCCESS:", "ERROR:" prefixes.**
+
 ### Naming Conventions
 **Follow these naming conventions for consistency across the codebase:**
 
