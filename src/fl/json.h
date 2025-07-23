@@ -4,6 +4,8 @@
 #include "fl/str.h"
 #include "fl/compiler_control.h"
 #include "fl/ptr.h"
+#include "fl/vector.h"
+#include "fl/type_traits.h"
 
 #include "fl/sketch_macros.h"
 
@@ -75,9 +77,49 @@ public:
     // Safe access with defaults (template in header for convenience)
     template<typename T>
     T operator|(const T& defaultValue) const {
-        // Implementation will be added later - for now just return default
+        if (!has_value() || isNull()) {
+            return defaultValue;
+        }
+        return getValueOrDefault(defaultValue);
+    }
+
+private:
+    // Type-specific helper methods for operator|
+    template<typename T>
+    typename fl::enable_if<fl::is_same<T, fl::string>::value, T>::type 
+    getValueOrDefault(const T& defaultValue) const {
+        return getStringValue();
+    }
+    
+    template<typename T>
+    typename fl::enable_if<fl::is_same<T, int>::value, T>::type 
+    getValueOrDefault(const T& defaultValue) const {
+        return getIntValue();
+    }
+    
+    template<typename T>
+    typename fl::enable_if<fl::is_same<T, float>::value, T>::type 
+    getValueOrDefault(const T& defaultValue) const {
+        return getFloatValue();
+    }
+    
+    template<typename T>
+    typename fl::enable_if<fl::is_same<T, bool>::value, T>::type 
+    getValueOrDefault(const T& defaultValue) const {
+        return getBoolValue();
+    }
+    
+    // Fallback for unsupported types
+    template<typename T>
+    typename fl::enable_if<!fl::is_same<T, fl::string>::value && 
+                          !fl::is_same<T, int>::value && 
+                          !fl::is_same<T, float>::value && 
+                          !fl::is_same<T, bool>::value, T>::type 
+    getValueOrDefault(const T& defaultValue) const {
         return defaultValue;
     }
+
+public:
     
     // Value getters  
     fl::string getStringValue() const;
@@ -88,6 +130,9 @@ public:
     
     // Array/Object size
     size_t getSize() const;
+    
+    // Object iteration support (needed for screenmap conversion)
+    fl::vector<fl::string> getObjectKeys() const;
     
     // Serialization
     fl::string serialize() const;

@@ -2,6 +2,7 @@
 
 #include "fl/compiler_control.h"
 #include "fl/str.h"
+#include "fl/vector.h"
 
 // Forward declarations for PIMPL pattern
 namespace fl {
@@ -40,6 +41,9 @@ public:
     JsonImpl getObjectField(const char* key) const;
     void setObjectField(const char* key, const JsonImpl& value);
     bool hasField(const char* key) const;
+    
+    // Object iteration support (needed for screenmap conversion)
+    fl::vector<fl::string> getObjectKeys() const;
     
     // Value operations - use explicit overloads instead of templates to keep header minimal
     void setValue(const char* value);

@@ -56,37 +56,59 @@ bool ScreenMap::ParseJson(const char *jsonStrScreenMap,
     }
     return false;
 #else
-    JsonDocument doc;
     string _err;
     if (!err) {
         err = &_err;
     }
 
-    bool ok = parseJson(jsonStrScreenMap, &doc, err);
-    if (!ok) {
+    // Use new fl::Json API instead of legacy parseJson
+    fl::Json json = fl::Json::parse(jsonStrScreenMap);
+    if (!json.has_value()) {
+        *err = "Failed to parse JSON";
         FASTLED_WARN("Failed to parse json: " << err->c_str());
         return false;
     }
-    auto map = doc["map"];
-    for (auto kv : map.as<FLArduinoJson::JsonObject>()) {
-        auto segment = kv.value();
-        auto x = segment["x"];
-        auto y = segment["y"];
-        auto obj = segment["diameter"];
-        float diameter = -1.0f;
-        if (obj.is<float>()) {
-            float d = obj.as<float>();
-            if (d > 0.0f) {
-                diameter = d;
-            }
-        }
-        auto n = x.size();
-        ScreenMap segment_map(n, diameter);
-        for (u16 j = 0; j < n; j++) {
-            segment_map.set(j, vec2f{x[j], y[j]});
-        }
-        segmentMaps->insert(kv.key().c_str(), segment_map);
+
+    auto mapJson = json["map"];
+    if (!mapJson.is_object()) {
+        *err = "Missing or invalid 'map' object in JSON";
+        FASTLED_WARN("Failed to parse json: " << err->c_str());
+        return false;
     }
+
+    // Iterate over all segment keys in the map object
+    auto segmentKeys = mapJson.getObjectKeys();
+    for (const auto& segmentName : segmentKeys) {
+        auto segment = mapJson[segmentName.c_str()];
+        
+        auto xArray = segment["x"];
+        auto yArray = segment["y"];
+        
+        if (!xArray.is_array() || !yArray.is_array()) {
+            continue; // Skip invalid segments
+        }
+        
+        size_t arraySize = xArray.getSize();
+        if (arraySize != yArray.getSize()) {
+            continue; // Skip segments with mismatched array sizes
+        }
+        
+        // Get diameter with safe default access
+        float diameter = segment["diameter"] | -1.0f;
+        
+        // Create ScreenMap for this segment
+        ScreenMap segment_map(arraySize, diameter);
+        
+        // Fill in the coordinates
+        for (size_t j = 0; j < arraySize; j++) {
+            float x = xArray[static_cast<int>(j)] | 0.0f;
+            float y = yArray[static_cast<int>(j)] | 0.0f;
+            segment_map.set(j, vec2f{x, y});
+        }
+        
+        segmentMaps->insert(segmentName, segment_map);
+    }
+    
     return true;
 #endif
 }

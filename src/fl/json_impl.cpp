@@ -151,6 +151,24 @@ JsonImpl JsonImpl::getObjectField(const char* key) const {
 #endif
 }
 
+fl::vector<fl::string> JsonImpl::getObjectKeys() const {
+#if FASTLED_ENABLE_JSON
+    fl::vector<fl::string> keys;
+    if (!mVariant) return keys;
+    
+    auto* variant = static_cast<::FLArduinoJson::JsonVariant*>(mVariant);
+    if (!variant->is<::FLArduinoJson::JsonObject>()) return keys;
+    
+    auto obj = variant->as<::FLArduinoJson::JsonObject>();
+    for (auto kv : obj) {
+        keys.push_back(fl::string(kv.key().c_str()));
+    }
+    return keys;
+#else
+    return fl::vector<fl::string>();
+#endif
+}
+
 JsonImpl JsonImpl::getArrayElement(int index) const {
 #if FASTLED_ENABLE_JSON
     JsonImpl result;
@@ -249,7 +267,14 @@ void JsonImpl::setValue(int value) {}
 void JsonImpl::setValue(float value) {}
 void JsonImpl::setValue(bool value) {}
 void JsonImpl::setNull() {}
-float JsonImpl::getFloatValue() const { return 0.0f; }
+float JsonImpl::getFloatValue() const {
+#if FASTLED_ENABLE_JSON
+    if (!mVariant) return 0.0f;
+    auto* variant = static_cast<::FLArduinoJson::JsonVariant*>(mVariant);
+    return variant->as<float>();
+#endif
+    return 0.0f;
+}
 
 // Json class implementation with real parsing
 Json::Json() : mImpl(fl::make_shared<JsonImpl>()) {}
@@ -308,6 +333,11 @@ bool Json::isNull() const {
 // Array/Object size
 size_t Json::getSize() const {
     return mImpl ? mImpl->getSize() : 0;
+}
+
+// Object iteration support
+fl::vector<fl::string> Json::getObjectKeys() const {
+    return mImpl ? mImpl->getObjectKeys() : fl::vector<fl::string>();
 }
 
 // Serialization
