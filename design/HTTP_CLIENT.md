@@ -395,14 +395,14 @@ void test_stub_responses() {
     auto http_result = http_future.try_get_result();
     auto https_result = https_future.try_get_result();
     
-    if (http_result.is<fl::Response>()) {
-        auto response = *http_result.ptr<fl::Response>();
+    if (http_result.is<fl::response>()) {
+        auto response = *http_result.ptr<fl::response>();
         FL_WARN("HTTP Response: " << response.get_body_text());
         // Output: "Stub HTTP response from TCP transport"
     }
     
-    if (https_result.is<fl::Response>()) {
-        auto response = *https_result.ptr<fl::Response>();
+    if (https_result.is<fl::response>()) {
+        auto response = *https_result.ptr<fl::response>();
         FL_WARN("HTTPS Response: " << response.get_body_text());
         // Output: "Stub HTTPS response from TLS transport"
     }
@@ -420,8 +420,8 @@ void fetch_weather_data() {
     
     // Check result in main loop
     auto result = weather_future.try_get_result();
-    if (result.is<fl::Response>()) {
-        auto response = *result.ptr<fl::Response>();
+    if (result.is<fl::response>()) {
+        auto response = *result.ptr<fl::response>();
         if (response.is_success()) {
             fl::string weather_json = response.get_body_text();
             FL_WARN("Weather data: " << weather_json);
@@ -440,8 +440,8 @@ void send_sensor_data() {
     
     // Check result
     auto result = upload_future.try_get_result();
-    if (result.is<fl::Response>()) {
-        auto response = *result.ptr<fl::Response>();
+    if (result.is<fl::response>()) {
+        auto response = *result.ptr<fl::response>();
         if (response.get_status_code() == fl::HttpStatusCode::CREATED) {
             FL_WARN("Sensor data sent successfully");
         }
@@ -478,8 +478,8 @@ public:
         auto weather_future = mClient->get("http://api.weather.com/current?location=Seattle");
         
         auto result = weather_future.try_get_result();
-        if (result.is<fl::Response>()) {
-            auto response = *result.ptr<fl::Response>();
+        if (result.is<fl::response>()) {
+            auto response = *result.ptr<fl::response>();
             if (response.is_success()) {
                 process_weather_data(response.get_body_text());
             }
@@ -505,8 +505,8 @@ The implemented `fl::future<T>` system perfectly integrates with FastLED's event
 ```cpp
 class NetworkManager {
 private:
-    fl::future<fl::Response> mWeatherRequest;
-    fl::future<fl::Response> mSensorUpload;
+    fl::future<fl::response> mWeatherRequest;
+    fl::future<fl::response> mSensorUpload;
     
 public:
     void setup() {
@@ -520,8 +520,8 @@ public:
     void loop() {
         // Check weather request non-blockingly
         auto weather_result = mWeatherRequest.try_get_result();
-        if (weather_result.is<fl::Response>()) {
-            auto response = *weather_result.ptr<fl::Response>();
+        if (weather_result.is<fl::response>()) {
+            auto response = *weather_result.ptr<fl::response>();
             update_weather_leds(response.get_body_text());
             mWeatherRequest.clear(); // Mark as processed
         } else if (weather_result.is<fl::FutureError>()) {
@@ -531,7 +531,7 @@ public:
         
         // Check sensor upload non-blockingly  
         auto upload_result = mSensorUpload.try_get_result();
-        if (upload_result.is<fl::Response>()) {
+        if (upload_result.is<fl::response>()) {
             FL_WARN("Sensor upload complete");
             mSensorUpload.clear();
         } else if (upload_result.is<fl::FutureError>()) {

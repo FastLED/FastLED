@@ -236,8 +236,8 @@ void simple_get_example() {
     // Check in loop() for completion
     if (response_future.is_ready()) {
         auto result = response_future.try_get_result();
-        if (result.is<fl::Response>()) {
-            auto response = *result.ptr<fl::Response>();
+        if (result.is<fl::response>()) {
+            auto response = *result.ptr<fl::response>();
             if (response.is_success()) {
                 FL_WARN("GitHub API response: " << response.get_body_text());
             }
@@ -263,7 +263,7 @@ public:
             .header("Authorization", "Bearer " + get_api_key())
             .timeout(10000)
             .send()
-            .then([](fl::Response response) -> fl::string {
+            .then([](fl::response response) -> fl::string {
                 if (response.is_success()) {
                     return response.get_body_text();
                 }
@@ -279,7 +279,7 @@ public:
             "}";
             
         return mClient.post_json("https://api.iot.com/sensors", json_data)
-            .then([](fl::Response response) -> bool {
+            .then([](fl::response response) -> bool {
                 return response.is_success();
             });
     }

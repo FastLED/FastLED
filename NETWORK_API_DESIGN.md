@@ -2780,7 +2780,7 @@ void handle_large_response(const Response& resp) {
 // - Perfect for streaming processing from external memory
 ```
 
-## **Complete fl::Response Interface with fl::deque**
+## **Complete fl::response Interface with fl::deque**
 
 ### **Usage Examples (Starting Simple → Advanced)**
 
@@ -3046,7 +3046,7 @@ void mixed_access_example() {
 }
 ```
 
-### **Complete fl::Response Interface Specification**
+### **Complete fl::response Interface Specification**
 
 ```cpp
 namespace fl {
@@ -5484,7 +5484,7 @@ void handle_large_response(const Response& resp) {
 // - Perfect for streaming processing from external memory
 ```
 
-## **Complete fl::Response Interface with fl::deque**
+## **Complete fl::response Interface with fl::deque**
 
 ### **Usage Examples (Starting Simple → Advanced)**
 
@@ -5750,7 +5750,7 @@ void mixed_access_example() {
 }
 ```
 
-### **Complete fl::Response Interface Specification**
+### **Complete fl::response Interface Specification**
 
 ```cpp
 namespace fl {

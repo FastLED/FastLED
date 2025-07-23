@@ -30,7 +30,7 @@
 /// void setup() {
 ///     // JavaScript-like fetch with promises
 ///     fl::fetch_get("http://fastled.io")
-///         .then([](const fl::Response& resp) {
+///         .then([](const fl::response& resp) {
 ///             if (resp.ok()) {
 ///                 FL_WARN("Success: " << resp.text());
 ///             } else {
@@ -78,43 +78,22 @@ using FetchResponseCallback = fl::function<void(const wasm_response&)>;
 extern WasmFetch wasm_fetch;
 #endif
 
-/// Simple HTTP response class (backward compatible interface)
+/// HTTP response class (unified interface)
 class response {
 public:
     response() : mStatusCode(200), mStatusText("OK") {}
+    response(int status_code) : mStatusCode(status_code), mStatusText(get_default_status_text(status_code)) {}
     response(int status_code, const fl::string& status_text) 
         : mStatusCode(status_code), mStatusText(status_text) {}
     
-    int status() const { return mStatusCode; }
-    const fl::string& status_text() const { return mStatusText; }
-    bool ok() const { return mStatusCode >= 200 && mStatusCode < 300; }
-    const fl::string& text() const { return mBody; }
-    void set_text(const fl::string& body) { mBody = body; }
-    
-    void set_status(int status_code) { mStatusCode = status_code; }
-    void set_status_text(const fl::string& status_text) { mStatusText = status_text; }
-
-private:
-    int mStatusCode;
-    fl::string mStatusText;
-    fl::string mBody;
-};
-
-/// Enhanced HTTP response class (promise-based API)
-class Response {
-public:
-    Response() : mStatus(200), mStatusText("OK") {}
-    Response(int status) : mStatus(status), mStatusText(get_default_status_text(status)) {}
-    Response(int status, const fl::string& status_text) : mStatus(status), mStatusText(status_text) {}
-    
     /// HTTP status code (like JavaScript response.status)
-    int status() const { return mStatus; }
+    int status() const { return mStatusCode; }
     
     /// HTTP status text (like JavaScript response.statusText)
     const fl::string& status_text() const { return mStatusText; }
     
     /// Check if response is successful (like JavaScript response.ok)
-    bool ok() const { return mStatus >= 200 && mStatus < 300; }
+    bool ok() const { return mStatusCode >= 200 && mStatusCode < 300; }
     
     /// Response body as text (like JavaScript response.text())
     const fl::string& text() const { return mBody; }
@@ -137,15 +116,16 @@ public:
     const fl::string& get_body_text() const { return mBody; }
     
     /// Set methods (internal use)
-    void set_status(int status) { mStatus = status; }
+    void set_status(int status_code) { mStatusCode = status_code; }
     void set_status_text(const fl::string& status_text) { mStatusText = status_text; }
+    void set_text(const fl::string& body) { mBody = body; }  // Backward compatibility
     void set_body(const fl::string& body) { mBody = body; }
     void set_header(const fl::string& name, const fl::string& value) {
         mHeaders[name] = value;
     }
 
 private:
-    int mStatus;
+    int mStatusCode;
     fl::string mStatusText;
     fl::string mBody;
     fl_map<fl::string, fl::string> mHeaders;
@@ -165,6 +145,8 @@ private:
         }
     }
 };
+
+
 
 /// Callback type for simple fetch responses (backward compatible)
 using FetchCallback = fl::function<void(const response&)>;
@@ -239,7 +221,7 @@ class FetchManager : public AsyncRunner {
 public:
     static FetchManager& instance();
     
-    void register_promise(const fl::promise<Response>& promise);
+    void register_promise(const fl::promise<response>& promise);
     
     // AsyncRunner interface
     void update() override;
@@ -251,15 +233,15 @@ public:
     void cleanup_completed_promises();
     
     // WASM promise management
-    fl::string register_pending_promise(const fl::promise<Response>& promise);
-    fl::promise<Response> retrieve_pending_promise(const fl::string& request_id);
+    fl::string register_pending_promise(const fl::promise<response>& promise);
+    fl::promise<response> retrieve_pending_promise(const fl::string& request_id);
 
 private:
-    fl::vector<fl::promise<Response>> mActivePromises;
+    fl::vector<fl::promise<response>> mActivePromises;
     fl::unique_ptr<FetchEngineListener> mEngineListener;
     
     // WASM-specific promise tracking (moved from static variables)
-    fl::hash_map<fl::string, fl::promise<Response>> mPendingPromises;
+    fl::hash_map<fl::string, fl::promise<response>> mPendingPromises;
     fl::mutex mPromisesMutex;
     uint32_t mNextRequestId = 1;
 };
@@ -284,28 +266,28 @@ inline void fetch(const char* url, const FetchCallback& callback) {
 // ========== Promise-Based API (JavaScript-like) ==========
 
 /// HTTP GET request
-fl::promise<Response> fetch_get(const fl::string& url, const FetchRequest& request = FetchRequest(""));
+fl::promise<response> fetch_get(const fl::string& url, const FetchRequest& request = FetchRequest(""));
 
 /// HTTP POST request
-fl::promise<Response> fetch_post(const fl::string& url, const FetchRequest& request = FetchRequest(""));
+fl::promise<response> fetch_post(const fl::string& url, const FetchRequest& request = FetchRequest(""));
 
 /// HTTP PUT request
-fl::promise<Response> fetch_put(const fl::string& url, const FetchRequest& request = FetchRequest(""));
+fl::promise<response> fetch_put(const fl::string& url, const FetchRequest& request = FetchRequest(""));
 
 /// HTTP DELETE request
-fl::promise<Response> fetch_delete(const fl::string& url, const FetchRequest& request = FetchRequest(""));
+fl::promise<response> fetch_delete(const fl::string& url, const FetchRequest& request = FetchRequest(""));
 
 /// HTTP HEAD request
-fl::promise<Response> fetch_head(const fl::string& url, const FetchRequest& request = FetchRequest(""));
+fl::promise<response> fetch_head(const fl::string& url, const FetchRequest& request = FetchRequest(""));
 
 /// HTTP OPTIONS request
-fl::promise<Response> fetch_options(const fl::string& url, const FetchRequest& request = FetchRequest(""));
+fl::promise<response> fetch_options(const fl::string& url, const FetchRequest& request = FetchRequest(""));
 
 /// HTTP PATCH request
-fl::promise<Response> fetch_patch(const fl::string& url, const FetchRequest& request = FetchRequest(""));
+fl::promise<response> fetch_patch(const fl::string& url, const FetchRequest& request = FetchRequest(""));
 
 /// Generic request with options (like fetch(url, options))
-fl::promise<Response> fetch_request(const fl::string& url, const RequestOptions& options = RequestOptions());
+fl::promise<response> fetch_request(const fl::string& url, const RequestOptions& options = RequestOptions());
 
 /// Legacy manual update for fetch promises (use fl::asyncrun() for new code)
 /// @deprecated Use fl::asyncrun() instead - this calls asyncrun() internally
