@@ -39,6 +39,24 @@ class FailedTest:
     stdout: str
 
 
+def check_iwyu_available() -> bool:
+    """Check if include-what-you-use is available in the system"""
+    try:
+        result = subprocess.run(
+            ["include-what-you-use", "--version"],
+            capture_output=True,
+            text=True,
+            timeout=10,
+        )
+        return result.returncode == 0
+    except (
+        subprocess.CalledProcessError,
+        FileNotFoundError,
+        subprocess.TimeoutExpired,
+    ):
+        return False
+
+
 def run_command(command, use_gdb=False) -> tuple[int, str]:
     captured_lines = []
     if use_gdb:
@@ -136,6 +154,18 @@ def compile_tests(
         print(output)  # Always show output on failure
         sys.exit(1)
     print("Compilation successful.")
+
+    # Check if static analysis was requested and warn about IWYU availability
+    if "--check" in unknown_args:
+        if not check_iwyu_available():
+            print(
+                "⚠️  WARNING: IWYU (include-what-you-use) not found - static analysis will be limited"
+            )
+            print("   Install IWYU to enable include analysis:")
+            print("     Windows: Install via LLVM or build from source")
+            print("     Ubuntu/Debian: sudo apt install iwyu")
+            print("     macOS: brew install include-what-you-use")
+            print("     Or build from source: https://include-what-you-use.org/")
 
 
 def run_tests(specific_test: str | None = None) -> None:
