@@ -258,15 +258,161 @@ JsonImpl JsonImpl::createObject() {
 }
 
 // Remaining stub methods (can be implemented incrementally)
-void JsonImpl::appendArrayElement(const JsonImpl& element) {}
-void JsonImpl::setObjectField(const char* key, const JsonImpl& value) {}
-bool JsonImpl::hasField(const char* key) const { return false; }
-void JsonImpl::setValue(const char* value) {}
-void JsonImpl::setValue(const fl::string& value) {}
-void JsonImpl::setValue(int value) {}
-void JsonImpl::setValue(float value) {}
-void JsonImpl::setValue(bool value) {}
-void JsonImpl::setNull() {}
+void JsonImpl::appendArrayElement(const JsonImpl& element) {
+#if FASTLED_ENABLE_JSON
+    if (!mVariant || !mIsRootArray) return;
+    
+    auto* variant = static_cast<::FLArduinoJson::JsonVariant*>(mVariant);
+    if (!variant->is<::FLArduinoJson::JsonArray>()) return;
+    
+    auto array = variant->as<::FLArduinoJson::JsonArray>();
+    
+    if (element.mVariant) {
+        auto* elementVariant = static_cast<::FLArduinoJson::JsonVariant*>(element.mVariant);
+        array.add(*elementVariant);
+    }
+#endif
+}
+
+void JsonImpl::setObjectField(const char* key, const JsonImpl& value) {
+#if FASTLED_ENABLE_JSON
+    if (!mVariant || mIsRootArray || !key) return;
+    
+    auto* variant = static_cast<::FLArduinoJson::JsonVariant*>(mVariant);
+    if (!variant->is<::FLArduinoJson::JsonObject>()) return;
+    
+    auto obj = variant->as<::FLArduinoJson::JsonObject>();
+    
+    if (value.mVariant) {
+        auto* valueVariant = static_cast<::FLArduinoJson::JsonVariant*>(value.mVariant);
+        obj[key] = *valueVariant;
+    }
+#endif
+}
+
+bool JsonImpl::hasField(const char* key) const { 
+#if FASTLED_ENABLE_JSON
+    if (!mVariant || mIsRootArray || !key) return false;
+    
+    auto* variant = static_cast<::FLArduinoJson::JsonVariant*>(mVariant);
+    if (!variant->is<::FLArduinoJson::JsonObject>()) return false;
+    
+    auto obj = variant->as<::FLArduinoJson::JsonObject>();
+    return !obj[key].isNull();
+#else
+    return false;
+#endif
+}
+
+void JsonImpl::setValue(const char* value) {
+#if FASTLED_ENABLE_JSON
+    if (!mVariant || !value) return;
+    auto* variant = static_cast<::FLArduinoJson::JsonVariant*>(mVariant);
+    variant->set(value);
+#endif
+}
+
+void JsonImpl::setValue(const fl::string& value) {
+#if FASTLED_ENABLE_JSON
+    if (!mVariant) return;
+    auto* variant = static_cast<::FLArduinoJson::JsonVariant*>(mVariant);
+    variant->set(value.c_str());
+#endif
+}
+
+void JsonImpl::setValue(int value) {
+#if FASTLED_ENABLE_JSON
+    if (!mVariant) return;
+    auto* variant = static_cast<::FLArduinoJson::JsonVariant*>(mVariant);
+    variant->set(value);
+#endif
+}
+
+void JsonImpl::setValue(float value) {
+#if FASTLED_ENABLE_JSON
+    if (!mVariant) return;
+    auto* variant = static_cast<::FLArduinoJson::JsonVariant*>(mVariant);
+    variant->set(value);
+#endif
+}
+
+void JsonImpl::setValue(bool value) {
+#if FASTLED_ENABLE_JSON
+    if (!mVariant) return;
+    auto* variant = static_cast<::FLArduinoJson::JsonVariant*>(mVariant);
+    variant->set(value);
+#endif
+}
+
+void JsonImpl::setNull() {
+#if FASTLED_ENABLE_JSON
+    if (!mVariant) return;
+    auto* variant = static_cast<::FLArduinoJson::JsonVariant*>(mVariant);
+    variant->set(nullptr);
+#endif
+}
+
+// Convenience methods for setting object field values directly
+void JsonImpl::setObjectFieldValue(const char* key, int value) {
+#if FASTLED_ENABLE_JSON
+    if (!mVariant || mIsRootArray || !key) return;
+    
+    auto* variant = static_cast<::FLArduinoJson::JsonVariant*>(mVariant);
+    if (!variant->is<::FLArduinoJson::JsonObject>()) return;
+    
+    auto obj = variant->as<::FLArduinoJson::JsonObject>();
+    obj[key] = value;
+#endif
+}
+
+void JsonImpl::setObjectFieldValue(const char* key, const char* value) {
+#if FASTLED_ENABLE_JSON
+    if (!mVariant || mIsRootArray || !key || !value) return;
+    
+    auto* variant = static_cast<::FLArduinoJson::JsonVariant*>(mVariant);
+    if (!variant->is<::FLArduinoJson::JsonObject>()) return;
+    
+    auto obj = variant->as<::FLArduinoJson::JsonObject>();
+    obj[key] = value;
+#endif
+}
+
+void JsonImpl::setObjectFieldValue(const char* key, const fl::string& value) {
+#if FASTLED_ENABLE_JSON
+    if (!mVariant || mIsRootArray || !key) return;
+    
+    auto* variant = static_cast<::FLArduinoJson::JsonVariant*>(mVariant);
+    if (!variant->is<::FLArduinoJson::JsonObject>()) return;
+    
+    auto obj = variant->as<::FLArduinoJson::JsonObject>();
+    obj[key] = value.c_str();
+#endif
+}
+
+void JsonImpl::setObjectFieldValue(const char* key, float value) {
+#if FASTLED_ENABLE_JSON
+    if (!mVariant || mIsRootArray || !key) return;
+    
+    auto* variant = static_cast<::FLArduinoJson::JsonVariant*>(mVariant);
+    if (!variant->is<::FLArduinoJson::JsonObject>()) return;
+    
+    auto obj = variant->as<::FLArduinoJson::JsonObject>();
+    obj[key] = value;
+#endif
+}
+
+void JsonImpl::setObjectFieldValue(const char* key, bool value) {
+#if FASTLED_ENABLE_JSON
+    if (!mVariant || mIsRootArray || !key) return;
+    
+    auto* variant = static_cast<::FLArduinoJson::JsonVariant*>(mVariant);
+    if (!variant->is<::FLArduinoJson::JsonObject>()) return;
+    
+    auto obj = variant->as<::FLArduinoJson::JsonObject>();
+    obj[key] = value;
+#endif
+}
+
 float JsonImpl::getFloatValue() const {
 #if FASTLED_ENABLE_JSON
     if (!mVariant) return 0.0f;
@@ -373,41 +519,31 @@ void Json::set(const char* key, const Json& value) {
 
 void Json::set(const char* key, int value) {
     if (mImpl) {
-        JsonImpl valueImpl = JsonImpl::createObject();
-        valueImpl.setValue(value);
-        mImpl->setObjectField(key, valueImpl);
+        mImpl->setObjectFieldValue(key, value);
     }
 }
 
 void Json::set(const char* key, const char* value) {
     if (mImpl) {
-        JsonImpl valueImpl = JsonImpl::createObject();
-        valueImpl.setValue(value);
-        mImpl->setObjectField(key, valueImpl);
+        mImpl->setObjectFieldValue(key, value);
     }
 }
 
 void Json::set(const char* key, const fl::string& value) {
     if (mImpl) {
-        JsonImpl valueImpl = JsonImpl::createObject();
-        valueImpl.setValue(value);
-        mImpl->setObjectField(key, valueImpl);
+        mImpl->setObjectFieldValue(key, value);
     }
 }
 
 void Json::set(const char* key, float value) {
     if (mImpl) {
-        JsonImpl valueImpl = JsonImpl::createObject();
-        valueImpl.setValue(value);
-        mImpl->setObjectField(key, valueImpl);
+        mImpl->setObjectFieldValue(key, value);
     }
 }
 
 void Json::set(const char* key, bool value) {
     if (mImpl) {
-        JsonImpl valueImpl = JsonImpl::createObject();
-        valueImpl.setValue(value);
-        mImpl->setObjectField(key, valueImpl);
+        mImpl->setObjectFieldValue(key, value);
     }
 }
 

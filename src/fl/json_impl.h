@@ -42,6 +42,13 @@ public:
     void setObjectField(const char* key, const JsonImpl& value);
     bool hasField(const char* key) const;
     
+    // Convenience methods for setting object field values directly
+    void setObjectFieldValue(const char* key, int value);
+    void setObjectFieldValue(const char* key, const char* value);
+    void setObjectFieldValue(const char* key, const fl::string& value);
+    void setObjectFieldValue(const char* key, float value);
+    void setObjectFieldValue(const char* key, bool value);
+    
     // Object iteration support (needed for screenmap conversion)
     fl::vector<fl::string> getObjectKeys() const;
     
