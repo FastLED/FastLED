@@ -728,3 +728,329 @@ With ScreenMap conversion proving the `fl::Json` API is production-ready, contin
 
 #### **Final Optimization Target: Header Performance**
 After several components are converted and the pattern is established, the final step for 40-60% build speed improvement is removing ArduinoJSON includes from `json.h` headers. All prerequisites are now met.
+
+## 🚨 **CRITICAL MISSING FEATURES IDENTIFIED (2024-12-19 UPDATE)**
+
+### **⚠️ JSON CREATION AND MODIFICATION API INCOMPLETE**
+
+**Testing revealed that while JSON parsing is fully functional, JSON creation and modification features are only partially implemented:**
+
+#### **❌ BROKEN: Factory Methods Return Wrong Types**
+```cpp
+// Current implementation in JsonImpl:
+static JsonImpl createArray() {
+    JsonImpl impl;
+    impl.mIsRootArray = true;  
+    return impl;  // ❌ PROBLEM: No actual ArduinoJSON array created
+}
+
+static JsonImpl createObject() {
+    JsonImpl impl;
+    impl.mIsRootArray = false;
+    return impl;  // ❌ PROBLEM: No actual ArduinoJSON object created
+}
+```
+
+**Test Results:**
+```cpp
+auto json = fl::Json::createArray();
+CHECK(json.is_array());  // ❌ FAILS: Returns false, should be true
+CHECK_EQ(json.getSize(), 0);  // ❌ FAILS: Returns wrong size
+```
+
+#### **❌ BROKEN: Modification Methods Are Stubs**
+```cpp
+// Current implementation in JsonImpl:
+bool setObjectField(const char* key, const string& value) {
+    // ❌ EMPTY STUB - No implementation
+    return false;
+}
+
+bool appendArrayElement(const JsonImpl& element) {
+    // ❌ EMPTY STUB - No implementation  
+    return false;
+}
+```
+
+**Test Results:**
+```cpp
+auto json = fl::Json::createObject();
+json.set("key", "value");  // ❌ SILENTLY FAILS: No actual storage
+fl::string output = json.serialize();  // ❌ RETURNS: "{}" instead of {"key":"value"}
+```
+
+#### **❌ BROKEN: Incomplete Serialization Integration**
+```cpp
+fl::string serialize() const {
+    // ✅ WORKS for parsed JSON (has real ArduinoJSON data)
+    // ❌ FAILS for created JSON (no backing ArduinoJSON document)
+    if (mDocument) {
+        return serializeArduinoJson(*mDocument);  // ✅ Works
+    }
+    return "{}";  // ❌ Default fallback, loses all data
+}
+```
+
+### **🎯 IMPLEMENTATION REQUIREMENTS**
+
+#### **1. Fix Factory Method Implementation**
+
+**Target Implementation in `src/fl/json_impl.cpp`:**
+```cpp
+static JsonImpl createArray() {
+    JsonImpl impl;
+    impl.mDocument = fl::make_shared<JsonDocumentImpl>();
+    impl.mDocument->doc.to<FLArduinoJson::JsonArray>();  // Create real array
+    impl.mIsRootArray = true;
+    impl.mOwnsDocument = true;
+    return impl;
+}
+
+static JsonImpl createObject() {
+    JsonImpl impl;
+    impl.mDocument = fl::make_shared<JsonDocumentImpl>();
+    impl.mDocument->doc.to<FLArduinoJson::JsonObject>();  // Create real object
+    impl.mIsRootArray = false;
+    impl.mOwnsDocument = true;
+    return impl;
+}
+```
+
+#### **2. Implement Object Modification Methods**
+
+**Target Implementation:**
+```cpp
+bool setObjectField(const char* key, const string& value) {
+    if (!mDocument || mIsRootArray) return false;
+    
+    auto obj = mDocument->doc.as<FLArduinoJson::JsonObject>();
+    obj[key] = value.c_str();
+    return true;
+}
+
+bool setObjectField(const char* key, int value) {
+    if (!mDocument || mIsRootArray) return false;
+    
+    auto obj = mDocument->doc.as<FLArduinoJson::JsonObject>();
+    obj[key] = value;
+    return true;
+}
+
+bool setObjectField(const char* key, bool value) {
+    if (!mDocument || mIsRootArray) return false;
+    
+    auto obj = mDocument->doc.as<FLArduinoJson::JsonObject>();
+    obj[key] = value;
+    return true;
+}
+```
+
+#### **3. Implement Array Modification Methods**
+
+**Target Implementation:**
+```cpp
+bool appendArrayElement(const JsonImpl& element) {
+    if (!mDocument || !mIsRootArray) return false;
+    
+    auto array = mDocument->doc.as<FLArduinoJson::JsonArray>();
+    
+    if (element.mDocument) {
+        // Copy the element's JSON data to our array
+        array.add(element.mDocument->doc.as<FLArduinoJson::JsonVariant>());
+        return true;
+    }
+    return false;
+}
+
+bool appendArrayElement(const string& value) {
+    if (!mDocument || !mIsRootArray) return false;
+    
+    auto array = mDocument->doc.as<FLArduinoJson::JsonArray>();
+    array.add(value.c_str());
+    return true;
+}
+
+bool appendArrayElement(int value) {
+    if (!mDocument || !mIsRootArray) return false;
+    
+    auto array = mDocument->doc.as<FLArduinoJson::JsonArray>();
+    array.add(value);
+    return true;
+}
+```
+
+#### **4. Fix fl::Json Wrapper Methods**
+
+**Target Implementation in `src/fl/json.h`:**
+```cpp
+// Object modification
+void set(const char* key, const string& value) {
+    if (mImpl) {
+        mImpl->setObjectField(key, value);
+    }
+}
+
+void set(const char* key, int value) {
+    if (mImpl) {
+        mImpl->setObjectField(key, value);
+    }
+}
+
+void set(const char* key, bool value) {
+    if (mImpl) {
+        mImpl->setObjectField(key, value);
+    }
+}
+
+// Array modification
+void push_back(const Json& item) {
+    if (mImpl && item.mImpl) {
+        mImpl->appendArrayElement(*item.mImpl);
+    }
+}
+
+void push_back(const string& value) {
+    if (mImpl) {
+        mImpl->appendArrayElement(value);
+    }
+}
+
+void push_back(int value) {
+    if (mImpl) {
+        mImpl->appendArrayElement(value);
+    }
+}
+```
+
+### **🧪 VALIDATION TESTS REQUIRED**
+
+**Add to `tests/test_json_legacy_vs_new.cpp`:**
+```cpp
+TEST_CASE("JSON Creation API - Factory Methods") {
+    SUBCASE("Array creation should work") {
+        auto json = fl::Json::createArray();
+        CHECK(json.has_value());
+        CHECK(json.is_array());
+        CHECK_FALSE(json.is_object());
+        CHECK_EQ(json.getSize(), 0);
+    }
+    
+    SUBCASE("Object creation should work") {
+        auto json = fl::Json::createObject();
+        CHECK(json.has_value());
+        CHECK(json.is_object());
+        CHECK_FALSE(json.is_array());
+        CHECK_EQ(json.getSize(), 0);
+    }
+}
+
+TEST_CASE("JSON Modification API - Object Building") {
+    auto json = fl::Json::createObject();
+    
+    json.set("name", "test");
+    json.set("count", 42);
+    json.set("enabled", true);
+    
+    fl::string output = json.serialize();
+    
+    // Verify the JSON is properly constructed
+    CHECK(output.find("\"name\":\"test\"") != fl::string::npos);
+    CHECK(output.find("\"count\":42") != fl::string::npos);
+    CHECK(output.find("\"enabled\":true") != fl::string::npos);
+    
+    // Verify it can be parsed back
+    auto reparsed = fl::Json::parse(output.c_str());
+    CHECK_EQ(reparsed["name"] | fl::string(""), fl::string("test"));
+    CHECK_EQ(reparsed["count"] | 0, 42);
+    CHECK_EQ(reparsed["enabled"] | false, true);
+}
+
+TEST_CASE("JSON Modification API - Array Building") {
+    auto json = fl::Json::createArray();
+    
+    json.push_back("item1");
+    json.push_back(123);
+    json.push_back(true);
+    
+    CHECK_EQ(json.getSize(), 3);
+    
+    fl::string output = json.serialize();
+    
+    // Verify array structure
+    CHECK(output[0] == '[');
+    CHECK(output.find("\"item1\"") != fl::string::npos);
+    CHECK(output.find("123") != fl::string::npos);
+    CHECK(output.find("true") != fl::string::npos);
+    
+    // Verify it can be parsed back
+    auto reparsed = fl::Json::parse(output.c_str());
+    CHECK(reparsed.is_array());
+    CHECK_EQ(reparsed.getSize(), 3);
+}
+
+TEST_CASE("JSON Strip Data Building - Real World Pattern") {
+    // Test building the exact JSON that ActiveStripData needs to create
+    auto json = fl::Json::createArray();
+    
+    for (int stripId : {0, 2, 5}) {
+        auto stripObj = fl::Json::createObject();
+        stripObj.set("strip_id", stripId);
+        stripObj.set("type", "r8g8b8");
+        json.push_back(stripObj);
+    }
+    
+    fl::string output = json.serialize();
+    FL_WARN("Built strip JSON: " << output);
+    
+    // Should produce: [{"strip_id":0,"type":"r8g8b8"},{"strip_id":2,"type":"r8g8b8"},{"strip_id":5,"type":"r8g8b8"}]
+    
+    // Verify parsing works
+    auto reparsed = fl::Json::parse(output.c_str());
+    CHECK(reparsed.is_array());
+    CHECK_EQ(reparsed.getSize(), 3);
+    CHECK_EQ(reparsed[0]["strip_id"] | -1, 0);
+    CHECK_EQ(reparsed[1]["strip_id"] | -1, 2);
+    CHECK_EQ(reparsed[2]["strip_id"] | -1, 5);
+}
+```
+
+### **🎯 IMPLEMENTATION PRIORITY**
+
+1. **✅ COMPLETED**: JSON parsing (reading) - Fully functional
+2. **🚨 URGENT**: JSON creation factories (`createArray`, `createObject`) - Required for strip data building  
+3. **🚨 URGENT**: JSON modification methods (`set`, `push_back`) - Required for building JSON structures
+4. **✅ WORKING**: JSON serialization - Works for parsed JSON, needs creation integration
+5. **⭐ FUTURE**: Enhanced type safety and error handling
+
+### **💡 WHY THIS MATTERS FOR STRIP JSON**
+
+**ActiveStripData currently can only produce JSON (serialization works with legacy API), but cannot consume JSON using the new API for building responses.**
+
+**With these fixes, ActiveStripData could:**
+```cpp
+// ✅ CURRENT: Reading JSON (works with new API)
+bool ActiveStripData::parseStripJsonInfo(const char* jsonStr) {
+    auto json = fl::Json::parse(jsonStr);  // ✅ Works
+    // ... process parsed data
+}
+
+// ❌ MISSING: Building JSON (needs creation API fixes)
+fl::string ActiveStripData::infoJsonStringNew() {
+    auto json = fl::Json::createArray();  // ❌ Broken - returns wrong type
+    
+    for (const auto &[stripIndex, stripData] : mStripMap) {
+        auto obj = fl::Json::createObject();  // ❌ Broken - returns wrong type
+        obj.set("strip_id", stripIndex);     // ❌ Broken - stub implementation
+        obj.set("type", "r8g8b8");           // ❌ Broken - stub implementation
+        json.push_back(obj);                 // ❌ Broken - stub implementation
+    }
+    
+    return json.serialize();  // ❌ Returns "{}" instead of proper JSON
+}
+```
+
+**Once fixed, both directions work with new API:**
+- ✅ **Reading**: `parseStripJsonInfo()` with new API  
+- ✅ **Writing**: `infoJsonString()` with new API
+
+This completes the transition from legacy ArduinoJSON to the new `fl::Json` API.
