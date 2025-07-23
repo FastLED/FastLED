@@ -81,6 +81,11 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Disable stack trace dumping on timeout",
     )
+    parser.add_argument(
+        "--check",
+        action="store_true",
+        help="Enable static analysis (IWYU, clang-tidy) - auto-enables --cpp and --clang",
+    )
 
     args = parser.parse_args()
 
@@ -88,6 +93,15 @@ def parse_args() -> argparse.Namespace:
     if args.test and not args.cpp:
         args.cpp = True
         print(f"Auto-enabled --cpp mode for specific test: {args.test}")
+
+    # Auto-enable --cpp and --clang when --check is provided
+    if args.check:
+        if not args.cpp:
+            args.cpp = True
+            print("Auto-enabled --cpp mode for static analysis (--check)")
+        if not args.clang and not args.gcc:
+            args.clang = True
+            print("Auto-enabled --clang compiler for static analysis (--check)")
 
     # Default to Clang on Windows unless --gcc is explicitly passed
     if sys.platform == "win32" and not args.gcc and not args.clang:
@@ -312,6 +326,8 @@ def main() -> None:
             cmd_list.append("--clean")
         if args.verbose:
             cmd_list.append("--verbose")
+        if args.check:
+            cmd_list.append("--check")
 
         cmd_str_cpp = subprocess.list2cmdline(cmd_list)
 

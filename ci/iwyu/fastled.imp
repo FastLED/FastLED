@@ -1,0 +1,57 @@
+# FastLED Include What You Use Mapping File
+# This file tells IWYU about FastLED's specific include patterns and structure
+
+[
+  # FastLED main headers - these are the public API
+  { include: ['"FastLED.h"', 'public', '"FastLED.h"', 'public'] },
+  { include: ['"fastled.h"', 'public', '"FastLED.h"', 'public'] },
+  
+  # Core FastLED headers that should be included directly
+  { include: ['"lib8tion.h"', 'public', '"lib8tion.h"', 'public'] },
+  { include: ['"pixeltypes.h"', 'public', '"pixeltypes.h"', 'public'] },
+  { include: ['"hsv2rgb.h"', 'public', '"hsv2rgb.h"', 'public'] },
+  { include: ['"colorutils.h"', 'public', '"colorutils.h"', 'public'] },
+  { include: ['"colorpalettes.h"', 'public', '"colorpalettes.h"', 'public'] },
+  
+  # Platform-specific headers should not be suggested directly
+  { include: ['"platforms/*/fastled_*.h"', 'private', '"FastLED.h"', 'public'] },
+  { include: ['"platforms/*/clockless_*.h"', 'private', '"FastLED.h"', 'public'] },
+  { include: ['"platforms/*/*"', 'private', '"FastLED.h"', 'public'] },
+  
+  # Internal headers should redirect to public API
+  { include: ['"controller.h"', 'private', '"FastLED.h"', 'public'] },
+  { include: ['"led_sysdefs.h"', 'private', '"FastLED.h"', 'public'] },
+  { include: ['"fastled_config.h"', 'private', '"FastLED.h"', 'public'] },
+  { include: ['"fastled_delay.h"', 'private', '"FastLED.h"', 'public'] },
+  { include: ['"fastled_progmem.h"', 'private', '"FastLED.h"', 'public'] },
+  
+  # fl/ namespace headers - the modern FastLED API
+  { include: ['"fl/namespace.h"', 'public', '"fl/namespace.h"', 'public'] },
+  { include: ['"fl/ptr.h"', 'public', '"fl/ptr.h"', 'public'] },
+  { include: ['"fl/vector.h"', 'public', '"fl/vector.h"', 'public'] },
+  { include: ['"fl/allocator.h"', 'public', '"fl/allocator.h"', 'public'] },
+  { include: ['"fl/math.h"', 'public', '"fl/math.h"', 'public'] },
+  { include: ['"fl/force_inline.h"', 'public', '"fl/force_inline.h"', 'public'] },
+  
+  # FX headers - effects system
+  { include: ['"fx/fx.h"', 'public', '"fx/fx.h"', 'public'] },
+  { include: ['"fx/fx_engine.h"', 'public', '"fx/fx_engine.h"', 'public'] },
+  { include: ['"fx/frame.h"', 'public', '"fx/frame.h"', 'public'] },
+  { include: ['"fx/detail/*"', 'private', '"fx/fx.h"', 'public'] },
+  
+  # Third-party headers should not be suggested for user code
+  { include: ['"third_party/*/*"', 'private', '"FastLED.h"', 'public'] },
+  
+  # Arduino-specific headers
+  { include: ['<Arduino.h>', 'public', '<Arduino.h>', 'public'] },
+  { include: ['<avr/pgmspace.h>', 'public', '<avr/pgmspace.h>', 'public'] },
+  
+  # Chipset-specific headers redirect to main header
+  { include: ['"chipsets.h"', 'private', '"FastLED.h"', 'public'] },
+  { include: ['"ws2812_controller.h"', 'private', '"FastLED.h"', 'public'] },
+  { include: ['"apa102_controller.h"', 'private', '"FastLED.h"', 'public'] },
+  
+  # Testing headers - keep as-is for test files
+  { include: ['"test_*.h"', 'public', '"test_*.h"', 'public'] },
+  { include: ['"doctest.h"', 'public', '"doctest.h"', 'public'] },
+]

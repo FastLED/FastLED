@@ -1,0 +1,67 @@
+# Standard Library Include What You Use Mapping File
+# This file provides standard library header mappings for better IWYU suggestions
+
+[
+  # C++ standard library headers
+  { include: ['<cstdint>', 'public', '<cstdint>', 'public'] },
+  { include: ['<cstddef>', 'public', '<cstddef>', 'public'] },
+  { include: ['<cstring>', 'public', '<cstring>', 'public'] },
+  { include: ['<cstdlib>', 'public', '<cstdlib>', 'public'] },
+  { include: ['<cmath>', 'public', '<cmath>', 'public'] },
+  { include: ['<cassert>', 'public', '<cassert>', 'public'] },
+  { include: ['<climits>', 'public', '<climits>', 'public'] },
+  { include: ['<cfloat>', 'public', '<cfloat>', 'public'] },
+  
+  # C++ containers and algorithms
+  { include: ['<vector>', 'public', '<vector>', 'public'] },
+  { include: ['<array>', 'public', '<array>', 'public'] },
+  { include: ['<string>', 'public', '<string>', 'public'] },
+  { include: ['<algorithm>', 'public', '<algorithm>', 'public'] },
+  { include: ['<memory>', 'public', '<memory>', 'public'] },
+  { include: ['<functional>', 'public', '<functional>', 'public'] },
+  { include: ['<utility>', 'public', '<utility>', 'public'] },
+  { include: ['<type_traits>', 'public', '<type_traits>', 'public'] },
+  
+  # I/O headers
+  { include: ['<iostream>', 'public', '<iostream>', 'public'] },
+  { include: ['<iomanip>', 'public', '<iomanip>', 'public'] },
+  { include: ['<sstream>', 'public', '<sstream>', 'public'] },
+  { include: ['<fstream>', 'public', '<fstream>', 'public'] },
+  
+  # Common type mappings
+  { symbol: ['std::uint8_t', 'public', '<cstdint>', 'public'] },
+  { symbol: ['std::uint16_t', 'public', '<cstdint>', 'public'] },
+  { symbol: ['std::uint32_t', 'public', '<cstdint>', 'public'] },
+  { symbol: ['std::uint64_t', 'public', '<cstdint>', 'public'] },
+  { symbol: ['std::int8_t', 'public', '<cstdint>', 'public'] },
+  { symbol: ['std::int16_t', 'public', '<cstdint>', 'public'] },
+  { symbol: ['std::int32_t', 'public', '<cstdint>', 'public'] },
+  { symbol: ['std::int64_t', 'public', '<cstdint>', 'public'] },
+  { symbol: ['std::size_t', 'public', '<cstddef>', 'public'] },
+  { symbol: ['std::ptrdiff_t', 'public', '<cstddef>', 'public'] },
+  
+  # Common functions
+  { symbol: ['std::memcpy', 'public', '<cstring>', 'public'] },
+  { symbol: ['std::memset', 'public', '<cstring>', 'public'] },
+  { symbol: ['std::strlen', 'public', '<cstring>', 'public'] },
+  { symbol: ['std::malloc', 'public', '<cstdlib>', 'public'] },
+  { symbol: ['std::free', 'public', '<cstdlib>', 'public'] },
+  { symbol: ['std::abs', 'public', '<cmath>', 'public'] },
+  { symbol: ['std::sin', 'public', '<cmath>', 'public'] },
+  { symbol: ['std::cos', 'public', '<cmath>', 'public'] },
+  { symbol: ['std::sqrt', 'public', '<cmath>', 'public'] },
+  
+  # C standard library compatibility (prefer C++ versions)
+  { include: ['<stdint.h>', 'public', '<cstdint>', 'public'] },
+  { include: ['<stddef.h>', 'public', '<cstddef>', 'public'] },
+  { include: ['<string.h>', 'public', '<cstring>', 'public'] },
+  { include: ['<stdlib.h>', 'public', '<cstdlib>', 'public'] },
+  { include: ['<math.h>', 'public', '<cmath>', 'public'] },
+  { include: ['<assert.h>', 'public', '<cassert>', 'public'] },
+  { include: ['<limits.h>', 'public', '<climits>', 'public'] },
+  { include: ['<float.h>', 'public', '<cfloat>', 'public'] },
+  
+  # Platform-specific but common headers
+  { include: ['<sys/types.h>', 'public', '<sys/types.h>', 'public'] },
+  { include: ['<unistd.h>', 'public', '<unistd.h>', 'public'] },
+]

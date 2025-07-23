@@ -315,6 +315,11 @@ def parse_args() -> argparse.Namespace:
         help="Use GCC compiler (default on non-Windows)",
         action="store_true",
     )
+    parser.add_argument(
+        "--check",
+        action="store_true",
+        help="Enable static analysis (IWYU, clang-tidy)",
+    )
 
     args, unknown = parser.parse_known_args()
     args.unknown = unknown
@@ -340,6 +345,8 @@ def main() -> None:
         passthrough_args = args.unknown
         if use_clang:
             passthrough_args.append("--use-clang")
+        if args.check:
+            passthrough_args.append("--check")
         # Note: --gcc is handled by not passing --use-clang (GCC is the default in cpp_test_compile.py)
         compile_tests(
             clean=args.clean, unknown_args=passthrough_args, specific_test=specific_test

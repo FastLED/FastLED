@@ -146,7 +146,9 @@ def run_command(command: str, cwd: Path | None = None) -> None:
         sys.exit(1)
 
 
-def compile_fastled(specific_test: str | None = None) -> None:
+def compile_fastled(
+    specific_test: str | None = None, enable_static_analysis: bool = False
+) -> None:
     if USE_ZIG:
         print("USING ZIG COMPILER")
         rtn = subprocess.run(
@@ -219,6 +221,13 @@ def compile_fastled(specific_test: str | None = None) -> None:
             test_name = specific_test
         cmake_configure_command_list.append(f"-DSPECIFIC_TEST={test_name}")
 
+    # Enable static analysis tools if requested
+    if enable_static_analysis:
+        cmake_configure_command_list.extend(
+            ["-DFASTLED_ENABLE_IWYU=ON", "-DFASTLED_ENABLE_CLANG_TIDY=ON"]
+        )
+        print("Static analysis tools enabled: IWYU and clang-tidy")
+
     cmake_configure_command = subprocess.list2cmdline(cmake_configure_command_list)
     run_command(cmake_configure_command, cwd=BUILD_DIR)
 
@@ -266,6 +275,11 @@ def parse_arguments():
     parser.add_argument(
         "--test",
         help="Specific test to compile (without test_ prefix)",
+    )
+    parser.add_argument(
+        "--check",
+        action="store_true",
+        help="Enable static analysis (IWYU, clang-tidy)",
     )
     return parser.parse_args()
 
@@ -376,7 +390,7 @@ def main() -> None:
     if args.clean or should_clean_build(build_info):
         clean_build_directory()
 
-    compile_fastled(args.test)
+    compile_fastled(args.test, enable_static_analysis=args.check)
     update_build_info(build_info)
     print("FastLED library compiled successfully.")
 

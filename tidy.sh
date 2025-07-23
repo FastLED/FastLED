@@ -37,3 +37,19 @@ for folder in "${folders[@]}"; do
         --quiet
     done
 done
+
+# Run include-what-you-use analysis
+echo ""
+echo "Running include-what-you-use analysis..."
+echo "========================================="
+
+# Check if IWYU is available
+if command -v include-what-you-use >/dev/null 2>&1; then
+    echo "Running IWYU on C++ test suite..."
+    uv run ci/ci-iwyu.py --verbose
+else
+    echo "⚠️  include-what-you-use not found. Install with:"
+    echo "   Ubuntu/Debian: sudo apt install iwyu"
+    echo "   macOS: brew install include-what-you-use"
+    echo "   Or build from source: https://include-what-you-use.org/"
+fi
