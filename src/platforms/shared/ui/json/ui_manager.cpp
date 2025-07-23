@@ -100,22 +100,24 @@ void JsonUiManager::processPendingUpdates() {
         // Frontend expects: [{"name":"title","type":"title",...}, {"name":"slider",...}, ...]
         auto components = getComponents();
         
-        // Build JSON array manually using proper structure the frontend expects
-        fl::string jsonStr = "[";
-        bool first = true;
+        // Create a JSON document and convert it to an array
+        fl::JsonDocument arrayDoc;
+        arrayDoc.to<::FLArduinoJson::JsonArray>();
+        
+        // Add each component's JSON to the array
         for (auto &component : components) {
             auto componentJson = component->toJson();
-            if (componentJson.is_object()) {
-                if (!first) {
-                    jsonStr += ",";
-                }
-                first = false;
-                jsonStr += componentJson.serialize();
+            if (componentJson.has_value()) {
+                // Add the component's JSON variant directly to the array
+                arrayDoc.add(componentJson.variant());
             }
         }
-        jsonStr += "]";
         
-        //FL_WARN("*** SENDING UI TO FRONTEND: " << jsonStr.substr(0, 100).c_str() << "...");
+        // Serialize the array document
+        fl::string jsonStr;
+        fl::toJson(arrayDoc, &jsonStr);
+        
+        //FL_WARN("*** SENDING UI TO FRONTEND: " << jsonStr.substr(0, 200).c_str() << "...");
         mUpdateJs(jsonStr.c_str());
     }
 
