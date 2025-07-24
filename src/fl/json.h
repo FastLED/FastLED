@@ -72,7 +72,100 @@ public:
     bool is_object() const;
     bool is_array() const;
     
-    // Additional type checks to match FLArduinoJson API patterns
+    // Template is<T>() method for 1:1 FLArduinoJson API compatibility
+    template<typename T>
+    bool is() const {
+        return isTypeMatch<T>();
+    }
+    
+private:
+    // Type matching implementations (SFINAE-based for C++11 compatibility)
+    template<typename T>
+    typename fl::enable_if<fl::is_same<T, int>::value, bool>::type 
+    isTypeMatch() const { return is_int(); }
+    
+    template<typename T>
+    typename fl::enable_if<fl::is_same<T, float>::value, bool>::type 
+    isTypeMatch() const { return is_float(); }
+    
+    template<typename T>
+    typename fl::enable_if<fl::is_same<T, double>::value, bool>::type 
+    isTypeMatch() const { return is_float(); }  // Treat double as float
+    
+    template<typename T>
+    typename fl::enable_if<fl::is_same<T, bool>::value, bool>::type 
+    isTypeMatch() const { return is_bool(); }
+    
+    template<typename T>
+    typename fl::enable_if<fl::is_same<T, const char*>::value, bool>::type 
+    isTypeMatch() const { return is_string(); }
+    
+    template<typename T>
+    typename fl::enable_if<fl::is_same<T, char*>::value, bool>::type 
+    isTypeMatch() const { return is_string(); }
+    
+    // For FLArduinoJson type compatibility (when migrating existing code)
+    template<typename T>
+    typename fl::enable_if<fl::is_same<T, JsonDocument>::value, bool>::type 
+    isTypeMatch() const { return is_object(); }  // Treat JsonDocument as object
+    
+#if FASTLED_ENABLE_JSON
+    // FLArduinoJson type specializations for perfect API compatibility
+    template<typename T>
+    typename fl::enable_if<fl::is_same<T, ::FLArduinoJson::JsonObject>::value, bool>::type 
+    isTypeMatch() const { return is_object(); }
+    
+    template<typename T>
+    typename fl::enable_if<fl::is_same<T, ::FLArduinoJson::JsonObjectConst>::value, bool>::type 
+    isTypeMatch() const { return is_object(); }
+    
+    template<typename T>
+    typename fl::enable_if<fl::is_same<T, ::FLArduinoJson::JsonArray>::value, bool>::type 
+    isTypeMatch() const { return is_array(); }
+    
+    template<typename T>
+    typename fl::enable_if<fl::is_same<T, ::FLArduinoJson::JsonArrayConst>::value, bool>::type 
+    isTypeMatch() const { return is_array(); }
+    
+    template<typename T>
+    typename fl::enable_if<fl::is_same<T, ::FLArduinoJson::JsonString>::value, bool>::type 
+    isTypeMatch() const { return is_string(); }
+#endif
+    
+    // Additional integer types that FLArduinoJson supports
+    template<typename T>
+    typename fl::enable_if<fl::is_same<T, long>::value, bool>::type 
+    isTypeMatch() const { return is_int(); }
+    
+    template<typename T>
+    typename fl::enable_if<fl::is_same<T, long long>::value, bool>::type 
+    isTypeMatch() const { return is_int(); }
+    
+    template<typename T>
+    typename fl::enable_if<fl::is_same<T, unsigned int>::value, bool>::type 
+    isTypeMatch() const { return is_int(); }
+    
+    template<typename T>
+    typename fl::enable_if<fl::is_same<T, unsigned long>::value, bool>::type 
+    isTypeMatch() const { return is_int(); }
+    
+    template<typename T>
+    typename fl::enable_if<fl::is_same<T, unsigned long long>::value, bool>::type 
+    isTypeMatch() const { return is_int(); }
+    
+    // Fallback for unknown types
+    template<typename T>
+    typename fl::enable_if<!fl::is_same<T, int>::value && 
+                          !fl::is_same<T, float>::value &&
+                          !fl::is_same<T, double>::value && 
+                          !fl::is_same<T, bool>::value &&
+                          !fl::is_same<T, const char*>::value &&
+                          !fl::is_same<T, char*>::value &&
+                          !fl::is_same<T, JsonDocument>::value, bool>::type 
+    isTypeMatch() const { return false; }
+
+public:
+    // Keep individual methods for internal use and additional clarity
     bool is_string() const;
     bool is_int() const;
     bool is_float() const;

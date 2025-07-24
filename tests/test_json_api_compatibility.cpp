@@ -2,45 +2,79 @@
 #include "fl/json.h"
 
 TEST_CASE("JSON API Compatibility - FLArduinoJson Pattern Matching") {
-    SUBCASE("Type checking methods match FLArduinoJson patterns") {
-        // Test value.is<type>() → value.is_type() conversions
+    SUBCASE("Template is<T>() methods - Perfect 1:1 API compatibility") {
+        // Test template is<T>() matches FLArduinoJson patterns exactly (NO search & replace needed!)
+        fl::Json json = fl::Json::parse(R"({"string":"hello","int":42,"float":3.14,"bool":true,"null":null})");
+        
+        // Template type checking - matches FLArduinoJson exactly
+        auto stringValue = json["string"];
+        CHECK(stringValue.is<const char*>());  // ✅ EXACT match: value.is<const char*>()
+        CHECK_FALSE(stringValue.is<int>());
+        CHECK_FALSE(stringValue.is<float>());
+        CHECK_FALSE(stringValue.is<bool>());
+        
+        // Integer type checking  
+        auto intValue = json["int"];
+        CHECK(intValue.is<int>());  // ✅ EXACT match: value.is<int>()
+        CHECK_FALSE(intValue.is<const char*>());
+        CHECK_FALSE(intValue.is<float>());
+        CHECK_FALSE(intValue.is<bool>());
+        
+        // Float type checking
+        auto floatValue = json["float"];
+        CHECK(floatValue.is<float>());  // ✅ EXACT match: value.is<float>()
+        CHECK(floatValue.is<double>());  // ✅ Also works for double
+        CHECK_FALSE(floatValue.is<const char*>());
+        CHECK_FALSE(floatValue.is<int>());
+        CHECK_FALSE(floatValue.is<bool>());
+        
+        // Boolean type checking
+        auto boolValue = json["bool"];
+        CHECK(boolValue.is<bool>());  // ✅ EXACT match: value.is<bool>()
+        CHECK_FALSE(boolValue.is<const char*>());
+        CHECK_FALSE(boolValue.is<int>());
+        CHECK_FALSE(boolValue.is<float>());
+        
+        // Null type checking
+        auto nullValue = json["null"];
+        CHECK(nullValue.isNull());
+        CHECK_FALSE(nullValue.is<const char*>());
+        CHECK_FALSE(nullValue.is<int>());
+        CHECK_FALSE(nullValue.is<float>());
+        CHECK_FALSE(nullValue.is<bool>());
+    }
+    
+    SUBCASE("Individual type checking methods (for comparison)") {
+        // Test individual methods still work (but template is preferred for compatibility)
         fl::Json json = fl::Json::parse(R"({"string":"hello","int":42,"float":3.14,"bool":true,"null":null})");
         
         // String type checking
         auto stringValue = json["string"];
-        CHECK(stringValue.is_string());  // matches value.is<const char*>()
+        CHECK(stringValue.is_string());  // Still works but template is<const char*>() is preferred
         CHECK_FALSE(stringValue.is_int());
         CHECK_FALSE(stringValue.is_float());
         CHECK_FALSE(stringValue.is_bool());
         
         // Integer type checking  
         auto intValue = json["int"];
-        CHECK(intValue.is_int());  // matches value.is<int>()
+        CHECK(intValue.is_int());  // Still works but template is<int>() is preferred
         CHECK_FALSE(intValue.is_string());
         CHECK_FALSE(intValue.is_float());
         CHECK_FALSE(intValue.is_bool());
         
         // Float type checking
         auto floatValue = json["float"];
-        CHECK(floatValue.is_float());  // matches value.is<float>()
+        CHECK(floatValue.is_float());  // Still works but template is<float>() is preferred
         CHECK_FALSE(floatValue.is_string());
         CHECK_FALSE(floatValue.is_int());
         CHECK_FALSE(floatValue.is_bool());
         
         // Boolean type checking
         auto boolValue = json["bool"];
-        CHECK(boolValue.is_bool());  // matches value.is<bool>()
+        CHECK(boolValue.is_bool());  // Still works but template is<bool>() is preferred
         CHECK_FALSE(boolValue.is_string());
         CHECK_FALSE(boolValue.is_int());
         CHECK_FALSE(boolValue.is_float());
-        
-        // Null type checking
-        auto nullValue = json["null"];
-        CHECK(nullValue.isNull());
-        CHECK_FALSE(nullValue.is_string());
-        CHECK_FALSE(nullValue.is_int());
-        CHECK_FALSE(nullValue.is_float());
-        CHECK_FALSE(nullValue.is_bool());
     }
     
     SUBCASE("as<T>() methods for value extraction") {
