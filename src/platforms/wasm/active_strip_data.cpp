@@ -25,20 +25,7 @@
 #include "platforms/shared/active_strip_data/active_strip_data.h"
 #include "fl/id_tracker.h"
 
-namespace fl {
-
-// WASM-specific implementation of onCanvasUiSet that uses IdTracker
-void ActiveStripData::onCanvasUiSet(CLEDController *strip,
-                                   const ScreenMap &screenmap) {
-    int id = getIdTracker().getOrCreateId(static_cast<void*>(strip));
-    updateScreenMap(id, screenmap);
-}
-
-} // namespace fl
-
-/// WASM-SPECIFIC: Early initialization using GCC constructor attribute
-/// WARNING: For some reason the following code must be here, when
-/// it was moved elsewhere, frame data stopped being updated.
+/// WASM-SPECIFIC: Early initialization using GCC constructor attribute.
 __attribute__((constructor)) void __init_ActiveStripData() {
     fl::ActiveStripData::Instance();
 }
