@@ -17,7 +17,13 @@
             "request": "launch",
             "map": {
                 "tests/*.cpp": "C++: Debug Test (Tests Directory)",
+                "tests/**/*.cpp": "C++: Debug Test (Tests Directory)",
+                "**/tests/*.cpp": "C++: Debug Test (Tests Directory)",
+                "**/tests/**/*.cpp": "C++: Debug Test (Tests Directory)",
+                "tests\\*.cpp": "C++: Debug Test (Tests Directory)",
+                "tests\\**\\*.cpp": "C++: Debug Test (Tests Directory)",
                 "tests/*.h": "C++: Debug Test (Tests Directory)",
+                "tests/**/*.h": "C++: Debug Test (Tests Directory)",
                 "*.py": "Python: Current File (UV)",
                 "test.py": "Python: FastLED Tests (UV)",
                 "ci/ci-compile.py": "Python: CI Compile (UV)",
