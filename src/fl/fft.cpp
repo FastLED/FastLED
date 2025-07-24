@@ -14,7 +14,7 @@ template <> struct Hash<FFT_Args> {
     }
 };
 
-struct FFT::HashMap : public fl::HashMapLru<FFT_Args, fl::shared_ptr<FFTImpl>> {
+struct FFT::HashMap : public HashMapLru<FFT_Args, fl::shared_ptr<FFTImpl>> {
     HashMap(fl::size max_size)
         : fl::HashMapLru<FFT_Args, fl::shared_ptr<FFTImpl>>(max_size) {}
 };

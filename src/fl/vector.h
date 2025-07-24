@@ -15,18 +15,18 @@
 #include "fl/scoped_ptr.h"
 #include "fl/type_traits.h"
 #include "inplacenew.h"
+#include "fl/align.h"
 
 namespace fl {
 
 // Aligned memory block for inlined data structures.
 template <typename T, fl::size N> 
-struct alignas(8) InlinedMemoryBlock {
+struct FL_ALIGN InlinedMemoryBlock {
     // using MemoryType = uinptr_t;
     typedef fl::uptr MemoryType;
     enum {
         kTotalBytes = N * sizeof(T),
-        // Force 8-byte alignment to match alignas(8) declaration
-        kAlign = 8,
+        kAlign = FL_ALIGN_BYTES,
         kExtraSize =
             (kTotalBytes % kAlign) ? (kAlign - (kTotalBytes % kAlign)) : 0,
         // Fix: calculate total bytes first, then convert to MemoryType units
@@ -76,7 +76,7 @@ struct alignas(8) InlinedMemoryBlock {
 // std::vector. However it used for vector_inlined<T, N> which allows spill over
 // to a heap vector when size > N.
 template <typename T, fl::size N> 
-class alignas(8) FixedVector {
+class FL_ALIGN FixedVector {
   private:
     InlinedMemoryBlock<T, N> mMemoryBlock;
 
@@ -343,7 +343,7 @@ class alignas(8) FixedVector {
 };
 
 template <typename T, typename Allocator = fl::allocator<T>> 
-class alignas(8) HeapVector {
+class FL_ALIGN HeapVector {
   private:
     T* mArray = nullptr;
     fl::size mCapacity = 0;
@@ -741,7 +741,7 @@ class alignas(8) HeapVector {
 };
 
 template <typename T, typename LessThan = fl::less<T>> 
-class alignas(8) SortedHeapVector {
+class FL_ALIGN SortedHeapVector {
   private:
     HeapVector<T> mArray;
     LessThan mLess;
@@ -882,7 +882,7 @@ class alignas(8) SortedHeapVector {
 };
 
 template <typename T, fl::size INLINED_SIZE> 
-class alignas(8) InlinedVector {
+class FL_ALIGN InlinedVector {
   public:
     using iterator = typename FixedVector<T, INLINED_SIZE>::iterator;
     using const_iterator =

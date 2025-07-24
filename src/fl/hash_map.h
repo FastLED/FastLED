@@ -22,6 +22,7 @@ and removals.
 #include "fl/type_traits.h"
 #include "fl/vector.h"
 #include "fl/warn.h"
+#include "fl/align.h"
 #include "fl/compiler_control.h"
 #include "fl/math_macros.h"
 
@@ -51,7 +52,7 @@ FL_DISABLE_WARNING_POP
 template <typename Key, typename T, typename Hash = Hash<Key>,
           typename KeyEqual = EqualTo<Key>,
           int INLINED_COUNT = FASTLED_HASHMAP_INLINED_COUNT>
-class alignas(8) HashMap {
+class FL_ALIGN HashMap {
   public:
     HashMap() : HashMap(FASTLED_HASHMAP_INLINED_COUNT, 0.7f) {}
     HashMap(fl::size initial_capacity) : HashMap(initial_capacity, 0.7f) {}

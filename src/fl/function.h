@@ -7,6 +7,7 @@
 #include "fl/type_traits.h"
 #include "fl/inplacenew.h"
 #include "fl/bit_cast.h"
+#include "fl/align.h"
 
 #ifndef FASTLED_INLINE_LAMBDA_SIZE
 #define FASTLED_INLINE_LAMBDA_SIZE 64
@@ -40,8 +41,10 @@ struct is_function_pointer<R(*)(Args...)> {
 //----------------------------------------------------------------------------
 template <typename> class function;
 
+
+
 template <typename R, typename... Args>
-class alignas(8) function<R(Args...)> {
+class FL_ALIGN function<R(Args...)> {
 private:
     struct CallableBase {
         virtual R invoke(Args... args) = 0;
@@ -74,7 +77,7 @@ private:
     struct InlinedLambda {
         // Storage for the lambda/functor object
         // Use aligned storage to ensure proper alignment for any type
-        union alignas(8) Storage {
+        union FL_ALIGN Storage {
             char bytes[kInlineLambdaSize];
             void* alignment_dummy;  // Ensure proper alignment
             long double align_max;  // Ensure maximum alignment
