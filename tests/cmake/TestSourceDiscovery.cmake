@@ -73,5 +73,24 @@ function(setup_fastled_source_directory)
     # Delegate source file computation to src/CMakeLists.txt
     add_subdirectory(${FASTLED_SOURCE_DIR}/src ${CMAKE_BINARY_DIR}/fastled)
     
+    # 🔧 OVERRIDE FastLED library debug symbols for tests
+    configure_fastled_debug_symbols()
+    
     message(STATUS "FastLED source directory configured: ${FASTLED_SOURCE_DIR}")
+endfunction()
+
+# Function to configure debug symbols for FastLED library in test builds
+function(configure_fastled_debug_symbols)
+    # 🔧 FULL DEBUG SYMBOLS for stepping into FastLED code
+    if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+        target_compile_options(fastled PRIVATE 
+            # Override the basic -g with full debug symbols
+            -g3                      # Maximum debug information
+            -gdwarf-4               # DWARF debug format (for GDB)
+            -gcodeview              # CodeView debug format (for Windows)
+            -O0                     # No optimization
+            -fno-omit-frame-pointer # Keep frame pointers for stack traces
+        )
+        message(STATUS "🔧 Applied full debug symbols to FastLED library for stepping in debugger")
+    endif()
 endfunction() 
