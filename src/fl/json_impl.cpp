@@ -63,6 +63,15 @@ public:
     bool isArray() const { return variant.is<::FLArduinoJson::JsonArray>(); }
     bool isObject() const { return variant.is<::FLArduinoJson::JsonObject>(); }
     bool isNull() const { return variant.isNull(); }
+    
+    // Additional type checks
+    bool isString() const { return variant.is<const char*>() || variant.is<::FLArduinoJson::JsonString>(); }
+    bool isInt() const { 
+        return variant.is<int>() || variant.is<long>() || variant.is<long long>() || 
+               variant.is<unsigned int>() || variant.is<unsigned long>() || variant.is<unsigned long long>();
+    }
+    bool isFloat() const { return variant.is<float>() || variant.is<double>(); }
+    bool isBool() const { return variant.is<bool>(); }
     size_t size() const {
         if (variant.is<::FLArduinoJson::JsonArray>()) {
             return variant.as<::FLArduinoJson::JsonArray>().size();
@@ -154,6 +163,36 @@ public:
         arr.add(element->variant);
     }
     
+    void appendElement(int value) {
+        if (!variant.is<::FLArduinoJson::JsonArray>()) return;
+        auto arr = variant.as<::FLArduinoJson::JsonArray>();
+        arr.add(value);
+    }
+    
+    void appendElement(float value) {
+        if (!variant.is<::FLArduinoJson::JsonArray>()) return;
+        auto arr = variant.as<::FLArduinoJson::JsonArray>();
+        arr.add(value);
+    }
+    
+    void appendElement(bool value) {
+        if (!variant.is<::FLArduinoJson::JsonArray>()) return;
+        auto arr = variant.as<::FLArduinoJson::JsonArray>();
+        arr.add(value);
+    }
+    
+    void appendElement(const char* value) {
+        if (!variant.is<::FLArduinoJson::JsonArray>() || !value) return;
+        auto arr = variant.as<::FLArduinoJson::JsonArray>();
+        arr.add(value);
+    }
+    
+    void appendElement(const fl::string& value) {
+        if (!variant.is<::FLArduinoJson::JsonArray>()) return;
+        auto arr = variant.as<::FLArduinoJson::JsonArray>();
+        arr.add(value.c_str());
+    }
+    
     fl::vector<fl::string> getObjectKeys() const {
         fl::vector<fl::string> keys;
         if (!variant.is<::FLArduinoJson::JsonObject>()) return keys;
@@ -181,6 +220,10 @@ public:
     bool isArray() const { return isRootArray; }
     bool isObject() const { return !isRootArray; }
     bool isNull() const { return false; }
+    bool isString() const { return false; }
+    bool isInt() const { return false; }
+    bool isFloat() const { return false; }
+    bool isBool() const { return false; }
     size_t size() const { return 0; }
     fl::shared_ptr<ProxyVariant> getField(const char*) const { return nullptr; }
     fl::shared_ptr<ProxyVariant> getElement(int) const { return nullptr; }
@@ -195,6 +238,11 @@ public:
     void setField(const char*, float) {}
     void setField(const char*, bool) {}
     void appendElement(fl::shared_ptr<ProxyVariant>) {}
+    void appendElement(int) {}
+    void appendElement(float) {}
+    void appendElement(bool) {}
+    void appendElement(const char*) {}
+    void appendElement(const fl::string&) {}
     fl::vector<fl::string> getObjectKeys() const { return fl::vector<fl::string>(); }
 #endif
 };
@@ -246,6 +294,22 @@ bool JsonImpl::isObject() const {
 
 bool JsonImpl::isNull() const { 
     return !mProxy || mProxy->isNull();
+}
+
+bool JsonImpl::isString() const { 
+    return mProxy ? mProxy->isString() : false;
+}
+
+bool JsonImpl::isInt() const { 
+    return mProxy ? mProxy->isInt() : false;
+}
+
+bool JsonImpl::isFloat() const { 
+    return mProxy ? mProxy->isFloat() : false;
+}
+
+bool JsonImpl::isBool() const { 
+    return mProxy ? mProxy->isBool() : false;
 }
 
 size_t JsonImpl::getSize() const { 
@@ -311,6 +375,36 @@ JsonImpl JsonImpl::createObject() {
 void JsonImpl::appendArrayElement(const JsonImpl& element) {
     if (mProxy && element.mProxy) {
         mProxy->appendElement(element.mProxy);
+    }
+}
+
+void JsonImpl::appendArrayElement(int value) {
+    if (mProxy) {
+        mProxy->appendElement(value);
+    }
+}
+
+void JsonImpl::appendArrayElement(float value) {
+    if (mProxy) {
+        mProxy->appendElement(value);
+    }
+}
+
+void JsonImpl::appendArrayElement(bool value) {
+    if (mProxy) {
+        mProxy->appendElement(value);
+    }
+}
+
+void JsonImpl::appendArrayElement(const char* value) {
+    if (mProxy) {
+        mProxy->appendElement(value);
+    }
+}
+
+void JsonImpl::appendArrayElement(const fl::string& value) {
+    if (mProxy) {
+        mProxy->appendElement(value);
     }
 }
 
@@ -401,6 +495,11 @@ Json Json::parse(const char* jsonStr) {
 bool Json::has_value() const { return mImpl && !mImpl->isNull(); }
 bool Json::is_object() const { return mImpl && mImpl->isObject(); }
 bool Json::is_array() const { return mImpl && mImpl->isArray(); }
+
+bool Json::is_string() const { return mImpl && mImpl->isString(); }
+bool Json::is_int() const { return mImpl && mImpl->isInt(); }
+bool Json::is_float() const { return mImpl && mImpl->isFloat(); }
+bool Json::is_bool() const { return mImpl && mImpl->isBool(); }
 
 Json Json::operator[](const char* key) const {
     Json result;
@@ -508,6 +607,66 @@ void Json::set(const char* key, bool value) {
     if (mImpl) {
         mImpl->setObjectFieldValue(key, value);
     }
+}
+
+// Additional array methods for compatibility
+void Json::push_back(int value) {
+    if (mImpl) {
+        mImpl->appendArrayElement(value);
+    }
+}
+
+void Json::push_back(float value) {
+    if (mImpl) {
+        mImpl->appendArrayElement(value);
+    }
+}
+
+void Json::push_back(bool value) {
+    if (mImpl) {
+        mImpl->appendArrayElement(value);
+    }
+}
+
+void Json::push_back(const char* value) {
+    if (mImpl) {
+        mImpl->appendArrayElement(value);
+    }
+}
+
+void Json::push_back(const fl::string& value) {
+    if (mImpl) {
+        mImpl->appendArrayElement(value);
+    }
+}
+
+// Nested object/array creation (FLArduinoJson compatibility)
+Json Json::createNestedObject(const char* key) {
+    Json nested = createObject();
+    if (mImpl && key) {
+        mImpl->setObjectField(key, *nested.mImpl);
+    }
+    return nested;
+}
+
+Json Json::createNestedArray(const char* key) {
+    Json nested = createArray();
+    if (mImpl && key) {
+        mImpl->setObjectField(key, *nested.mImpl);
+    }
+    return nested;
+}
+
+Json Json::createNestedObject() {
+    Json nested = createObject();
+    push_back(nested);
+    return nested;
+}
+
+Json Json::createNestedArray() {
+    Json nested = createArray();
+    push_back(nested);
+    return nested;
 }
 
 } // namespace fl 

@@ -33,10 +33,23 @@ public:
     bool isObject() const;
     bool isNull() const;
     
-    // Array-specific operations
+    // Additional type checks to match FLArduinoJson API patterns
+    bool isString() const;
+    bool isInt() const;
+    bool isFloat() const;
+    bool isBool() const;
+    
+    // Array-specific operations  
     size_t getSize() const;
     JsonImpl getArrayElement(int index) const;
     void appendArrayElement(const JsonImpl& element);
+    
+    // Additional array element types
+    void appendArrayElement(int value);
+    void appendArrayElement(float value);
+    void appendArrayElement(bool value);
+    void appendArrayElement(const char* value);
+    void appendArrayElement(const fl::string& value);
     
     // Object-specific operations  
     JsonImpl getObjectField(const char* key) const;

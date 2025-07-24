@@ -72,6 +72,24 @@ public:
     bool is_object() const;
     bool is_array() const;
     
+    // Additional type checks to match FLArduinoJson API patterns
+    bool is_string() const;
+    bool is_int() const;
+    bool is_float() const;
+    bool is_bool() const;
+    
+    // FLArduinoJson compatibility - as<T>() methods (inline for template compatibility)
+    template<typename T>
+    T as() const {
+        return (*this) | T{};
+    }
+    
+    // Helper methods for type-specific access
+    fl::string as_string() const { return getStringValue(); }
+    int as_int() const { return getIntValue(); }
+    float as_float() const { return getFloatValue(); }
+    bool as_bool() const { return getBoolValue(); }
+    
     // Access operators
     Json operator[](const char* key) const;
     Json operator[](int index) const;
@@ -84,6 +102,27 @@ public:
     void set(const char* key, const fl::string& value); // For objects
     void set(const char* key, float value); // For objects
     void set(const char* key, bool value); // For objects
+    
+    // Additional array methods for compatibility
+    void push_back(int value);
+    void push_back(float value);
+    void push_back(bool value);
+    void push_back(const char* value);
+    void push_back(const fl::string& value);
+    
+    // Array element access by value (for simple addition)
+    void add(const Json& element) { push_back(element); }
+    void add(int value) { push_back(value); }
+    void add(float value) { push_back(value); }
+    void add(bool value) { push_back(value); }
+    void add(const char* value) { push_back(value); }
+    void add(const fl::string& value) { push_back(value); }
+    
+    // Nested object/array creation (FLArduinoJson compatibility)
+    Json createNestedObject(const char* key);
+    Json createNestedArray(const char* key);
+    Json createNestedObject(); // For arrays
+    Json createNestedArray();  // For arrays
     
     // Safe access with defaults (template in header for convenience)
     template<typename T>
