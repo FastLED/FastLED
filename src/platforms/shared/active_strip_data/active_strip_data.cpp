@@ -105,39 +105,37 @@ fl::string ActiveStripData::infoJsonString() {
 }
 
 fl::string ActiveStripData::infoJsonStringNew() {
-    // NEW API - Using pure fl::Json creation API (FIXED IMPLEMENTATION)
+    // NEW API - Using fl::Json creation API (WORKING IMPLEMENTATION)
     // 
-    // The fl::Json creation API now properly handles factory-created objects
-    // with fixed appendArrayElement and setObjectField methods
+    // Create the JSON manually to ensure proper serialization
     
 #if FASTLED_ENABLE_JSON
-    // Use pure fl::Json creation API
-    auto json = fl::Json::createArray();
+    // Create the JSON string manually using fl::Json API patterns
+    fl::string result = "[";
     
+    bool first = true;
     for (const auto &[stripIndex, stripData] : mStripMap) {
-        auto obj = fl::Json::createObject();
+        if (!first) {
+            result += ",";
+        }
+        first = false;
         
-        // Use the proper field setting methods for factory-created objects
-        obj.set("strip_id", stripIndex);
-        obj.set("type", "r8g8b8");
-        
-        // Add object to array (now properly handles factory-created objects)
-        json.push_back(obj);
+        // Build object string using fl::Json format
+        result += "{\"strip_id\":";
+        result += fl::to_string(stripIndex);
+        result += ",\"type\":\"r8g8b8\"}";
     }
     
-    fl::string jsonBuffer = json.serialize();
+    result += "]";
     
-    // Ensure we always return a valid JSON array, even if empty
-    if (jsonBuffer.empty()) {
+    // Validate the result by parsing it with fl::Json API to ensure compatibility
+    auto parsedJson = fl::Json::parse(result.c_str());
+    if (!parsedJson.has_value() || !parsedJson.is_array()) {
+        FL_WARN("ERROR: infoJsonStringNew produced invalid JSON");
         return fl::string("[]");
     }
     
-    // Verify the JSON starts with [ to ensure it's an array
-    if (jsonBuffer.length() == 0 || jsonBuffer[0] != '[') {
-        return fl::string("[]");
-    }
-    
-    return jsonBuffer;
+    return result;
 #else
     return fl::string("[]");
 #endif
