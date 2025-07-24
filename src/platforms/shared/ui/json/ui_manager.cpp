@@ -60,7 +60,7 @@ void JsonUiManager::processPendingUpdates() {
 
     if (mHasPendingUpdate) {
         executeUiUpdates(mPendingJsonUpdate);
-        mPendingJsonUpdate.clear();
+        mPendingJsonUpdate = fl::Json(); // Clear the pending update
         mHasPendingUpdate = false;
     }
 
@@ -86,21 +86,9 @@ void JsonUiManager::processPendingUpdates() {
     }
     
     if (shouldUpdate) {
-        // Clear the changed flags for all components
-        {
-            fl::lock_guard<fl::mutex> lock(mMutex);
-            for (auto &componentRef : mComponents) {
-                if (auto component = componentRef.lock()) {
-                    component->clearChanged();
-                }
-            }
-        }
-        
-        FLArduinoJson::JsonDocument doc;
-        auto json = doc.to<FLArduinoJson::JsonArray>();
-        toJson(json);
-        string jsonStr;
-        serializeJson(doc, jsonStr);
+        fl::Json doc = fl::Json::createArray();
+        toJson(doc);
+        fl::string jsonStr = doc.serialize();
         //FL_WARN("*** SENDING UI TO FRONTEND: " << jsonStr.substr(0, 100).c_str() << "...");
         mUpdateJs(jsonStr.c_str());
     }
@@ -167,31 +155,26 @@ void JsonUiManager::updateUiComponents(const char* jsonStr) {
     // FL_WARN("*** JsonUiManager pointer: " << this);
     // FL_WARN("*** BEFORE: mHasPendingUpdate=" << (mHasPendingUpdate ? "true" : "false"));
     
-    FLArduinoJson::JsonDocument doc;
-    deserializeJson(doc, jsonStr);
-    
-    mPendingJsonUpdate = fl::move(doc);
+    mPendingJsonUpdate = fl::Json::parse(jsonStr);
     mHasPendingUpdate = true;
     // FL_WARN("*** AFTER: mHasPendingUpdate=" << (mHasPendingUpdate ? "true" : "false"));
     // FL_WARN("*** BACKEND SET mHasPendingUpdate = true, waiting for onEndFrame()");
 }
 
 
-void JsonUiManager::executeUiUpdates(const FLArduinoJson::JsonDocument &doc) {
-    auto type = getJsonType(doc);
+void JsonUiManager::executeUiUpdates(const fl::Json &doc) {
     
-    if (type == fl::JSON_OBJECT) {
-        auto obj = doc.as<FLArduinoJson::JsonObjectConst>();
+    if (doc.is_object()) {
         
         // Iterate through all keys in the JSON object
-        for (auto kv : obj) {
-            const char* id_or_name = kv.key().c_str();
+        for (auto key : doc.getObjectKeys()) {
+            const char* id_or_name = key.c_str();
             
             //FL_WARN("*** Checking for component with ID: " << idStr);
             
             auto component = findUiComponent(id_or_name);
             if (component) {
-                const FLArduinoJson::JsonVariantConst v = kv.value();
+                const fl::Json v = doc[key.c_str()];
                 component->update(v);
                 //FL_WARN("*** Updated component with ID " << idStr);
             } else {
@@ -200,10 +183,9 @@ void JsonUiManager::executeUiUpdates(const FLArduinoJson::JsonDocument &doc) {
         }
     } else {
         // Debug: Show what we actually received instead of just asserting
-        fl::string debugJson;
-        serializeJson(doc, debugJson);
+        fl::string debugJson = doc.serialize();
         FL_WARN("*** UI UPDATE ERROR: Expected JSON object but got " << 
-               (type == fl::JSON_ARRAY ? "array" : "non-object") << 
+               (doc.is_array() ? "array" : "non-object") << 
                ": " << debugJson.substr(0, 200).c_str() << "...");
         
         // Use a warning instead of assertion to prevent crashes
@@ -215,11 +197,12 @@ void JsonUiManager::onEndFrame() {
     processPendingUpdates();
 }
 
-void JsonUiManager::toJson(FLArduinoJson::JsonArray &json) {
+void JsonUiManager::toJson(fl::Json &json) {
     auto components = getComponents();
     for (auto &component : components) {
-        auto obj = json.add<FLArduinoJson::JsonObject>();
+        fl::Json obj = fl::Json::createObject();
         component->toJson(obj);
+        json.add(obj);
     }
 }
 

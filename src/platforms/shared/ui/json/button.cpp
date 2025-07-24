@@ -12,12 +12,12 @@ namespace fl {
 
 JsonButtonImpl::JsonButtonImpl(const string &name) : mPressed(false) {
     auto updateFunc = JsonUiInternal::UpdateFunction(
-        [this](const FLArduinoJson::JsonVariantConst &value) {
+        [this](const fl::Json &value) {
             static_cast<JsonButtonImpl *>(this)->updateInternal(value);
         });
 
     auto toJsonFunc =
-        JsonUiInternal::ToJsonFunction([this](FLArduinoJson::JsonObject &json) {
+        JsonUiInternal::ToJsonFunction([this](fl::Json &json) {
             static_cast<JsonButtonImpl *>(this)->toJson(json);
         });
     mInternal = fl::make_shared<JsonUiInternal>(name, fl::move(updateFunc),
@@ -37,12 +37,12 @@ bool JsonButtonImpl::clicked() const { return mClickedHappened; }
 
 const string &JsonButtonImpl::name() const { return mInternal->name(); }
 
-void JsonButtonImpl::toJson(FLArduinoJson::JsonObject &json) const {
-    json["name"] = name();
-    json["group"] = mInternal->groupName().c_str();
-    json["type"] = "button";
-    json["id"] = mInternal->id();
-    json["pressed"] = mPressed;
+void JsonButtonImpl::toJson(fl::Json &json) const {
+    json.set("name", name());
+    json.set("group", mInternal->groupName());
+    json.set("type", "button");
+    json.set("id", mInternal->id());
+    json.set("pressed", mPressed);
 }
 
 bool JsonButtonImpl::isPressed() const {
@@ -74,11 +74,8 @@ void JsonButtonImpl::Updater::onPlatformPreLoop2() {
 }
 
 void JsonButtonImpl::updateInternal(
-    const FLArduinoJson::JsonVariantConst &value) {
-    if (value.is<bool>()) {
-        bool newPressed = value.as<bool>();
-        mPressed = newPressed;
-    }
+    const fl::Json &value) {
+    mPressed = value | false;
 }
 
 } // namespace fl

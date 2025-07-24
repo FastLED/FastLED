@@ -14,12 +14,12 @@ JsonNumberFieldImpl::JsonNumberFieldImpl(const fl::string &name, double value,
                                         double min, double max)
     : mValue(value), mMin(min), mMax(max) {
     auto updateFunc = JsonUiInternal::UpdateFunction(
-        [this](const FLArduinoJson::JsonVariantConst &value) {
+        [this](const fl::Json &value) {
             static_cast<JsonNumberFieldImpl *>(this)->updateInternal(value);
         });
 
     auto toJsonFunc =
-        JsonUiInternal::ToJsonFunction([this](FLArduinoJson::JsonObject &json) {
+        JsonUiInternal::ToJsonFunction([this](fl::Json &json) {
             static_cast<JsonNumberFieldImpl *>(this)->toJson(json);
         });
     mInternal = fl::make_shared<JsonUiInternal>(name, fl::move(updateFunc),
@@ -36,14 +36,14 @@ JsonNumberFieldImpl &JsonNumberFieldImpl::Group(const fl::string &name) {
 
 const fl::string &JsonNumberFieldImpl::name() const { return mInternal->name(); }
 
-void JsonNumberFieldImpl::toJson(FLArduinoJson::JsonObject &json) const {
-    json["name"] = name();
-    json["group"] = mInternal->groupName().c_str();
-    json["type"] = "number";
-    json["id"] = mInternal->id();
-    json["value"] = mValue;
-    json["min"] = mMin;
-    json["max"] = mMax;
+void JsonNumberFieldImpl::toJson(fl::Json &json) const {
+    json.set("name", name());
+    json.set("group", mInternal->groupName());
+    json.set("type", "number");
+    json.set("id", mInternal->id());
+    json.set("value", static_cast<float>(mValue));
+    json.set("min", static_cast<float>(mMin));
+    json.set("max", static_cast<float>(mMax));
 }
 
 double JsonNumberFieldImpl::value() const { return mValue; }
@@ -96,14 +96,8 @@ bool JsonNumberFieldImpl::operator!=(double v) const { return !ALMOST_EQUAL_FLOA
 bool JsonNumberFieldImpl::operator!=(int v) const { return !ALMOST_EQUAL_FLOAT(value(), static_cast<double>(v)); }
 
 void JsonNumberFieldImpl::updateInternal(
-    const FLArduinoJson::JsonVariantConst &value) {
-    if (value.is<double>()) {
-        double newValue = value.as<double>();
-        setValueInternal(newValue);  // Use internal method to avoid change notification
-    } else if (value.is<int>()) {
-        int newValue = value.as<int>();
-        setValueInternal(static_cast<double>(newValue));  // Use internal method to avoid change notification
-    }
+    const fl::Json &value) {
+    setValueInternal(value | 0.0);  // Use internal method to avoid change notification
 }
 
 } // namespace fl

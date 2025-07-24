@@ -1,7 +1,5 @@
 #pragma once
 
-
-
 #include "fl/function.h"
 #include "fl/json.h"
 #include "fl/namespace.h"
@@ -19,16 +17,16 @@ using JsonUiInternalPtr = fl::shared_ptr<JsonUiInternal>;
 class JsonUiInternal {
   public:
     using UpdateFunction =
-        fl::function<void(const FLArduinoJson::JsonVariantConst &)>;
-    using ToJsonFunction = fl::function<void(FLArduinoJson::JsonObject &)>;
+        fl::function<void(const fl::Json &)>;
+    using ToJsonFunction = fl::function<void(fl::Json &)>;
 
     JsonUiInternal(const fl::string &name, UpdateFunction updateFunc,
                  ToJsonFunction toJsonFunc);
     ~JsonUiInternal();
 
     const fl::string &name() const;
-    void update(const FLArduinoJson::JsonVariantConst &json);
-    void toJson(FLArduinoJson::JsonObject &json) const;
+    void update(const fl::Json &json);
+    void toJson(fl::Json &json) const;
     int id() const;
 
     // Group functionality

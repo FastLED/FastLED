@@ -57,15 +57,19 @@ Visit our [documentation](https://fastled.io) for more details!)";
     JsonHelpImpl help(markdownContent);
     help.Group("getting-started");
     
-    FLArduinoJson::JsonDocument doc;
-    auto jsonObj = doc.to<FLArduinoJson::JsonObject>();
+    fl::Json jsonObj = fl::Json::createObject();
     help.toJson(jsonObj);
     
-    CHECK(fl::string(jsonObj["name"].as<const char*>()) == fl::string("help"));
-    CHECK(fl::string(jsonObj["type"].as<const char*>()) == fl::string("help"));
-    CHECK(fl::string(jsonObj["group"].as<const char*>()) == fl::string("getting-started"));
-    CHECK(jsonObj["id"].as<int>() >= 0);
-    CHECK(fl::string(jsonObj["markdownContent"].as<const char*>()) == markdownContent);
+    fl::string name = jsonObj["name"] | fl::string("");
+    CHECK(name == fl::string("help"));
+    fl::string type = jsonObj["type"] | fl::string("");
+    CHECK(type == fl::string("help"));
+    fl::string group = jsonObj["group"] | fl::string("");
+    CHECK(group == fl::string("getting-started"));
+    int id = jsonObj["id"] | -1;
+    CHECK(id >= 0);
+    fl::string content = jsonObj["markdownContent"] | fl::string("");
+    CHECK(content == markdownContent);
 }
 
 TEST_CASE("UIHelp wrapper functionality") {
@@ -106,25 +110,12 @@ Ordered list:
 Check out [FastLED GitHub](https://github.com/FastLED/FastLED) for source code.
 
 ```cpp
-#include <FastLED.h>
-
-#define NUM_LEDS 60
-#define DATA_PIN 6
-
-CRGB leds[NUM_LEDS];
-
-void setup() {
-    FastLED.addLeds<WS2812, DATA_PIN, GRB>(leds, NUM_LEDS);
-}
-
-void loop() {
-    // Your animation code here
+// Example code
+void rainbow() {
+    fill_rainbow(leds, NUM_LEDS, gHue, 7);
     FastLED.show();
-    delay(30);
 }
 ```
-
-### Special Characters
 
 Testing special characters: < > & " ' 
 
@@ -132,13 +123,14 @@ And some Unicode: ★ ♪ ⚡)";
     
     JsonHelpImpl help(complexMarkdown);
     
-    FLArduinoJson::JsonDocument doc;
-    auto jsonObj = doc.to<FLArduinoJson::JsonObject>();
+    fl::Json jsonObj = fl::Json::createObject();
     help.toJson(jsonObj);
     
     // Verify the markdown content is preserved exactly
-    CHECK(fl::string(jsonObj["markdownContent"].as<const char*>()) == complexMarkdown);
-    CHECK(fl::string(jsonObj["type"].as<const char*>()) == fl::string("help"));
+    fl::string content = jsonObj["markdownContent"] | fl::string("");
+    CHECK(content == complexMarkdown);
+    fl::string type = jsonObj["type"] | fl::string("");
+    CHECK(type == fl::string("help"));
 }
 
 TEST_CASE("UIHelp edge cases") {
@@ -162,10 +154,10 @@ TEST_CASE("UIHelp edge cases") {
     CHECK(longHelp.markdownContent() == longContent);
     
     // Verify JSON serialization works with long content
-    FLArduinoJson::JsonDocument doc;
-    auto jsonObj = doc.to<FLArduinoJson::JsonObject>();
+    fl::Json jsonObj = fl::Json::createObject();
     longHelp.toJson(jsonObj);
-    CHECK(fl::string(jsonObj["markdownContent"].as<const char*>()) == longContent);
+    fl::string content = jsonObj["markdownContent"] | fl::string("");
+    CHECK(content == longContent);
 }
 
 TEST_CASE("UIHelp group operations") {
@@ -187,4 +179,4 @@ TEST_CASE("UIHelp group operations") {
     CHECK(help.groupName().empty());
 }
 
-#endif // FASTLED_ENABLE_JSON 
+#endif // FASTLED_ENABLE_JSON

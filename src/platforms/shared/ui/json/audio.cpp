@@ -17,14 +17,15 @@ namespace {
     }
 }
 
+
 JsonAudioImpl::JsonAudioImpl(const fl::string &name) {
     auto updateFunc = JsonUiInternal::UpdateFunction(
-        [this](const FLArduinoJson::JsonVariantConst &value) {
+        [this](const fl::Json &value) {
             static_cast<JsonAudioImpl *>(this)->updateInternal(value);
         });
 
     auto toJsonFunc =
-        JsonUiInternal::ToJsonFunction([this](FLArduinoJson::JsonObject &json) {
+        JsonUiInternal::ToJsonFunction([this](fl::Json &json) {
             static_cast<JsonAudioImpl *>(this)->toJson(json);
         });
     mInternal = fl::make_shared<JsonUiInternal>(name, fl::move(updateFunc),
@@ -59,13 +60,13 @@ JsonAudioImpl::Updater::~Updater() { fl::EngineEvents::removeListener(this); }
 
 void JsonAudioImpl::Updater::onPlatformPreLoop2() {}
 
-void JsonAudioImpl::toJson(FLArduinoJson::JsonObject &json) const {
-    json["name"] = name();
-    json["group"] = mInternal->groupName().c_str();
-    json["type"] = "audio";
-    json["id"] = mInternal->id();
+void JsonAudioImpl::toJson(fl::Json &json) const {
+    json.set("name", name());
+    json.set("group", mInternal->groupName());
+    json.set("type", "audio");
+    json.set("id", mInternal->id());
     if (!mSerializeBuffer.empty()) {
-        json["audioData"] = mSerializeBuffer.c_str();
+        json.set("audioData", mSerializeBuffer);
     }
 }
 
@@ -127,38 +128,33 @@ static void parsePcmSamplesString(const fl::string &samplesStr, fl::vector<int16
     }
 }
 
-static void parseJsonToAudioBuffers(const FLArduinoJson::JsonVariantConst &jsonValue,
+static void parseJsonToAudioBuffers(const fl::Json &jsonValue,
                                     fl::vector<AudioBuffer> *audioBuffers) {
     audioBuffers->clear();
     
     // Use JSON parser to extract array of audio buffer objects
-    if (!jsonValue.is<FLArduinoJson::JsonArrayConst>()) {
+    if (!jsonValue.is_array()) {
         return;
     }
     
-    FLArduinoJson::JsonArrayConst array = jsonValue.as<FLArduinoJson::JsonArrayConst>();
-    
-    for (FLArduinoJson::JsonVariantConst item : array) {
-        if (!item.is<FLArduinoJson::JsonObjectConst>()) {
+    for (int i = 0; i < jsonValue.getSize(); ++i) {
+        fl::Json item = jsonValue[i];
+        if (!item.is_object()) {
             continue;
         }
         
-        FLArduinoJson::JsonObjectConst obj = item.as<FLArduinoJson::JsonObjectConst>();
         AudioBuffer buffer;
         buffer.timestamp = 0; // Initialize timestamp to prevent uninitialized warning
         
         // Use JSON parser to extract timestamp using proper type checking
-        auto timestampVar = obj["timestamp"];
-        if (fl::getJsonType(timestampVar) == fl::JSON_INTEGER) {
-            buffer.timestamp = timestampVar.as<uint32_t>();
-        }
+        buffer.timestamp = item["timestamp"] | 0u;
         
         // Use JSON parser to extract samples array as string, then parse manually
-        auto samplesVar = obj["samples"];
-        if (fl::getJsonType(samplesVar) == fl::JSON_ARRAY) {
+        auto samplesVar = item["samples"];
+        if (samplesVar.is_array()) {
             fl::string& samplesStr = scratchBuffer();
             samplesStr.clear();
-            serializeJson(samplesVar, samplesStr);
+            samplesStr = samplesVar.serialize();
             parsePcmSamplesString(samplesStr, &buffer.samples);
         }
         
@@ -170,10 +166,10 @@ static void parseJsonToAudioBuffers(const FLArduinoJson::JsonVariantConst &jsonV
 }
 
 void JsonAudioImpl::updateInternal(
-    const FLArduinoJson::JsonVariantConst &value) {
+    const fl::Json &value) {
     // FASTLED_WARN("Unimplemented jsAudioImpl::updateInternal");
     mSerializeBuffer.clear();
-    serializeJson(value, mSerializeBuffer);
+    mSerializeBuffer = value.serialize();
     
     // Parse audio buffers with timestamps using hybrid JSON/manual parsing
     fl::vector<AudioBuffer> audioBuffers;
@@ -197,6 +193,7 @@ void JsonAudioImpl::updateInternal(
         }
     }
 }
+
 
 AudioSample JsonAudioImpl::next() {
     AudioSampleImplPtr out;

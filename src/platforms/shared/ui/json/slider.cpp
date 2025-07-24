@@ -19,12 +19,12 @@ JsonSliderImpl::JsonSliderImpl(const fl::string &name, float value, float min,
         mStep = (mMax - mMin) / 100.0f;
     }
     auto updateFunc = JsonUiInternal::UpdateFunction(
-        [this](const FLArduinoJson::JsonVariantConst &value) {
+        [this](const fl::Json &value) {
             static_cast<JsonSliderImpl *>(this)->updateInternal(value);
         });
 
     auto toJsonFunc =
-        JsonUiInternal::ToJsonFunction([this](FLArduinoJson::JsonObject &json) {
+        JsonUiInternal::ToJsonFunction([this](fl::Json &json) {
             static_cast<JsonSliderImpl *>(this)->toJson(json);
         });
     mInternal = fl::make_shared<JsonUiInternal>(name, fl::move(updateFunc),
@@ -41,16 +41,16 @@ JsonSliderImpl &JsonSliderImpl::Group(const fl::string &name) {
 
 const fl::string &JsonSliderImpl::name() const { return mInternal->name(); }
 
-void JsonSliderImpl::toJson(FLArduinoJson::JsonObject &json) const {
-    json["name"] = name();
-    json["group"] = mInternal->groupName().c_str();
-    json["type"] = "slider";
-    json["id"] = mInternal->id();
-    json["value"] = mValue;
-    json["min"] = mMin;
-    json["max"] = mMax;
+void JsonSliderImpl::toJson(fl::Json &json) const {
+    json.set("name", name());
+    json.set("group", mInternal->groupName());
+    json.set("type", "slider");
+    json.set("id", mInternal->id());
+    json.set("value", mValue);
+    json.set("min", mMin);
+    json.set("max", mMax);
     if (mStep > 0) {
-        json["step"] = mStep;
+        json.set("step", mStep);
     }
 }
 
@@ -98,18 +98,8 @@ JsonSliderImpl &JsonSliderImpl::operator=(int value) {
 
 
 void JsonSliderImpl::updateInternal(
-    const FLArduinoJson::JsonVariantConst &value) {
-    if (value.is<float>()) {
-        float newValue = value.as<float>();
-        setValue(newValue);
-    } else if (value.is<int>()) {
-        int newValue = value.as<int>();
-        setValue(static_cast<float>(newValue));
-    } else {
-        FL_ASSERT(false, "*** SLIDER UPDATE ERROR: "
-                    << name() << " " << fl::getJsonTypeStr(value)
-                    << " is not a float or int.");
-    }
+    const fl::Json &value) {
+    setValue(value | 0.0f);
 }
 
 } // namespace fl

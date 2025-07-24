@@ -13,7 +13,7 @@ namespace fl {
 JsonDescriptionImpl::JsonDescriptionImpl(const string &text): mText(text) {
     JsonUiInternal::UpdateFunction update_fcn;
     JsonUiInternal::ToJsonFunction to_json_fcn =
-        JsonUiInternal::ToJsonFunction([this](FLArduinoJson::JsonObject &json) {
+        JsonUiInternal::ToJsonFunction([this](fl::Json &json) {
             static_cast<JsonDescriptionImpl *>(this)->toJson(json);
         });
     mInternal = fl::make_shared<JsonUiInternal>("description", update_fcn, to_json_fcn);
@@ -29,12 +29,12 @@ JsonDescriptionImpl &JsonDescriptionImpl::Group(const fl::string &name) {
 
 const fl::string &JsonDescriptionImpl::text() const { return mText; }
 
-void JsonDescriptionImpl::toJson(FLArduinoJson::JsonObject &json) const {
-    json["name"] = mInternal->name();
-    json["type"] = "description";
-    json["group"] = mInternal->groupName().c_str();
-    json["id"] = mInternal->id();
-    json["text"] = text();
+void JsonDescriptionImpl::toJson(fl::Json &json) const {
+    json.set("name", mInternal->name());
+    json.set("type", "description");
+    json.set("group", mInternal->groupName());
+    json.set("id", mInternal->id());
+    json.set("text", text());
 }
 
 const string &JsonDescriptionImpl::name() const { return mInternal->name(); }

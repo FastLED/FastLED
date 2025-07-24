@@ -13,7 +13,7 @@ namespace fl {
 JsonHelpImpl::JsonHelpImpl(const string &markdownContent): mMarkdownContent(markdownContent) {
     JsonUiInternal::UpdateFunction update_fcn;
     JsonUiInternal::ToJsonFunction to_json_fcn =
-        JsonUiInternal::ToJsonFunction([this](FLArduinoJson::JsonObject &json) {
+        JsonUiInternal::ToJsonFunction([this](fl::Json &json) {
             static_cast<JsonHelpImpl *>(this)->toJson(json);
         });
     mInternal = fl::make_shared<JsonUiInternal>("help", update_fcn, to_json_fcn);
@@ -29,12 +29,12 @@ JsonHelpImpl &JsonHelpImpl::Group(const fl::string &name) {
 
 const fl::string &JsonHelpImpl::markdownContent() const { return mMarkdownContent; }
 
-void JsonHelpImpl::toJson(FLArduinoJson::JsonObject &json) const {
-    json["name"] = mInternal->name();
-    json["type"] = "help";
-    json["group"] = mInternal->groupName().c_str();
-    json["id"] = mInternal->id();
-    json["markdownContent"] = markdownContent();
+void JsonHelpImpl::toJson(fl::Json &json) const {
+    json.set("name", mInternal->name());
+    json.set("type", "help");
+    json.set("group", mInternal->groupName());
+    json.set("id", mInternal->id());
+    json.set("markdownContent", markdownContent());
 }
 
 const string &JsonHelpImpl::name() const { return mInternal->name(); }

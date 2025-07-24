@@ -7,6 +7,7 @@
 #include "fl/str.h"
 #include "platforms/shared/ui/json/ui_internal.h"
 #include "fl/vector.h"
+#include "fl/json.h"
 
 namespace fl {
 
@@ -21,7 +22,7 @@ class JsonAudioImpl {
     JsonAudioImpl &Group(const fl::string &name);
 
     const fl::string &name() const;
-    void toJson(FLArduinoJson::JsonObject &json) const;
+    void toJson(fl::Json &json) const;
     AudioSample next();
     bool hasNext();
     const fl::string &groupName() const;
@@ -43,7 +44,7 @@ class JsonAudioImpl {
 
     Updater mUpdater;
 
-    void updateInternal(const FLArduinoJson::JsonVariantConst &value);
+    void updateInternal(const fl::Json &value);
 
     JsonUiInternalPtr mInternal;
     fl::vector<AudioSampleImplPtr> mAudioSampleImpls;

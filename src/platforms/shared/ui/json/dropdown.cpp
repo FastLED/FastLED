@@ -13,11 +13,11 @@ namespace fl {
 // Common initialization function
 void JsonDropdownImpl::commonInit(const fl::string &name) {
     auto updateFunc = JsonUiInternal::UpdateFunction(
-        [this](const FLArduinoJson::JsonVariantConst &value) {
+        [this](const fl::Json &value) {
             static_cast<JsonDropdownImpl *>(this)->updateInternal(value);
         });
     auto toJsonFunc =
-        JsonUiInternal::ToJsonFunction([this](FLArduinoJson::JsonObject &json) {
+        JsonUiInternal::ToJsonFunction([this](fl::Json &json) {
             static_cast<JsonDropdownImpl *>(this)->toJson(json);
         });
     mInternal = fl::make_shared<JsonUiInternal>(name, fl::move(updateFunc),
@@ -61,17 +61,18 @@ JsonDropdownImpl &JsonDropdownImpl::Group(const fl::string &name) {
 
 const fl::string &JsonDropdownImpl::name() const { return mInternal->name(); }
 
-void JsonDropdownImpl::toJson(FLArduinoJson::JsonObject &json) const {
-    json["name"] = name();
-    json["group"] = mInternal->groupName().c_str();
-    json["type"] = "dropdown";
-    json["id"] = mInternal->id();
-    json["value"] = static_cast<int>(mSelectedIndex);
+void JsonDropdownImpl::toJson(fl::Json &json) const {
+    json.set("name", name());
+    json.set("group", mInternal->groupName());
+    json.set("type", "dropdown");
+    json.set("id", mInternal->id());
+    json.set("value", static_cast<int>(mSelectedIndex));
     
-    FLArduinoJson::JsonArray optionsArray = json["options"].to<FLArduinoJson::JsonArray>();
+    fl::Json optionsArray = fl::Json::createArray();
     for (const auto &option : mOptions) {
-        optionsArray.add(option.c_str());
+        optionsArray.add(option);
     }
+    json.set("options", optionsArray);
 }
 
 fl::string JsonDropdownImpl::value() const {
@@ -110,11 +111,8 @@ JsonDropdownImpl &JsonDropdownImpl::operator=(int index) {
 }
 
 void JsonDropdownImpl::updateInternal(
-    const FLArduinoJson::JsonVariantConst &value) {
-    if (value.is<int>()) {
-        int newIndex = value.as<int>();
-        setSelectedIndex(newIndex);
-    }
+    const fl::Json &value) {
+    setSelectedIndex(value | 0);
 }
 
 } // namespace fl

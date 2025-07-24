@@ -13,7 +13,7 @@ namespace fl {
 JsonTitleImpl::JsonTitleImpl(const string &text) : mText(text) {
     JsonUiInternal::UpdateFunction update_fcn;
     JsonUiInternal::ToJsonFunction to_json_fcn =
-        JsonUiInternal::ToJsonFunction([this](FLArduinoJson::JsonObject &json) {
+        JsonUiInternal::ToJsonFunction([this](fl::Json &json) {
             static_cast<JsonTitleImpl *>(this)->toJson(json);
         });
     mInternal = fl::make_shared<JsonUiInternal>("title", update_fcn, to_json_fcn);
@@ -27,12 +27,12 @@ JsonTitleImpl &JsonTitleImpl::Group(const fl::string &name) {
     return *this;
 }
 
-void JsonTitleImpl::toJson(FLArduinoJson::JsonObject &json) const {
-    json["name"] = mInternal->name();
-    json["type"] = "title";
-    json["group"] = mInternal->groupName().c_str();
-    json["id"] = mInternal->id();
-    json["text"] = text();
+void JsonTitleImpl::toJson(fl::Json &json) const {
+    json.set("name", mInternal->name());
+    json.set("type", "title");
+    json.set("group", mInternal->groupName());
+    json.set("id", mInternal->id());
+    json.set("text", text());
 }
 
 const string &JsonTitleImpl::name() const { return mInternal->name(); }

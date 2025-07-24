@@ -13,7 +13,7 @@ class JsonCheckboxImpl {
     JsonCheckboxImpl &Group(const fl::string &name);
 
     const fl::string &name() const;
-    void toJson(FLArduinoJson::JsonObject &json) const;
+    void toJson(fl::Json &json) const;
     bool value() const;
     void setValue(bool value);
     const fl::string &groupName() const;
@@ -29,7 +29,7 @@ class JsonCheckboxImpl {
     JsonCheckboxImpl &operator=(int value);
 
   private:
-    void updateInternal(const FLArduinoJson::JsonVariantConst &value);
+    void updateInternal(const fl::Json &value);
     void setValueInternal(bool value);
 
     JsonUiInternalPtr mInternal;
