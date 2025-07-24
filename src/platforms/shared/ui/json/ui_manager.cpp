@@ -91,6 +91,14 @@ void JsonUiManager::processPendingUpdates() {
         fl::string jsonStr = doc.serialize();
         //FL_WARN("*** SENDING UI TO FRONTEND: " << jsonStr.substr(0, 100).c_str() << "...");
         mUpdateJs(jsonStr.c_str());
+
+        // Clear the changed flag for all components after sending the update
+        fl::lock_guard<fl::mutex> lock(mMutex); // Acquire lock again for modifying mComponents
+        for (auto &componentRef : mComponents) {
+            if (auto component = componentRef.lock()) {
+                component->clearChanged();
+            }
+        }
     }
 
 

@@ -42,7 +42,7 @@ JsonUiUpdateInput setJsonUiHandlers(const JsonUiUpdateOutput& updateJsHandler) {
         // Flush any pending components to the internal manager
         auto& pending = getPendingComponents();
         if (!pending.empty()) {
-            FL_WARN("Flushing " << pending.size() << " pending UI components to internal JsonUiManager");
+            // FL_WARN("Flushing " << pending.size() << " pending UI components to internal JsonUiManager");
             for (const auto& component : pending) {
                 // Only add components that are still valid (not destroyed)
                 if (!component.expired()) {
