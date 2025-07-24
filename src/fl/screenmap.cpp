@@ -145,22 +145,21 @@ bool ScreenMap::ParseJson(const char *jsonStrScreenMap,
 }
 
 void ScreenMap::toJson(const FixedMap<string, ScreenMap, 16> &segmentMaps,
-                       JsonDocument *_doc) {
+                       fl::Json *doc) {
 
 #if !FASTLED_ENABLE_JSON
     return;
 #else
-    if (!_doc) {
-        FASTLED_WARN("ScreenMap::toJson called with nullptr _doc");
+    if (!doc) {
+        FASTLED_WARN("ScreenMap::toJson called with nullptr doc");
         return;
     }
-    auto &doc = *_doc;
-    auto map = doc["map"].to<FLArduinoJson::JsonObject>();
+    auto map = doc->createNestedObject("map");
     if (!segmentMaps.empty()) {
         for (auto kv : segmentMaps) {
-            auto segment = map[kv.first].to<FLArduinoJson::JsonObject>();
-            auto x_array = segment["x"].to<FLArduinoJson::JsonArray>();
-            auto y_array = segment["y"].to<FLArduinoJson::JsonArray>();
+            auto segment = map.createNestedObject(kv.first.c_str());
+            auto x_array = segment.createNestedArray("x");
+            auto y_array = segment.createNestedArray("y");
             for (u16 i = 0; i < kv.second.getLength(); i++) {
                 const vec2f &xy = kv.second[i];
                 x_array.add(xy.x);
@@ -184,9 +183,9 @@ void ScreenMap::toJsonStr(const FixedMap<string, ScreenMap, 16> &segmentMaps,
 #if !FASTLED_ENABLE_JSON
     return;
 #else
-    JsonDocument doc;
+    fl::Json doc;
     toJson(segmentMaps, &doc);
-    fl::toJson(doc, jsonBuffer);
+    *jsonBuffer = doc.serialize();
 #endif
 }
 

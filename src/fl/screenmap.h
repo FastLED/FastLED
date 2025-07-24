@@ -19,7 +19,7 @@
 namespace fl {
 
 class string;
-class JsonDocument;
+class Json;
 
 // ScreenMap screen map maps strip indexes to x,y coordinates for a ui
 // canvas in float format.
@@ -85,7 +85,7 @@ class ScreenMap {
 
     static void toJsonStr(const FixedMap<string, ScreenMap, 16> &,
                           string *jsonBuffer);
-    static void toJson(const FixedMap<string, ScreenMap, 16> &, JsonDocument *doc);
+    static void toJson(const FixedMap<string, ScreenMap, 16> &, fl::Json *doc);
 
   private:
     static const vec2f &empty();
