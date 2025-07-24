@@ -34,7 +34,7 @@
 
 #include "js_bindings.h"
 
-#include "active_strip_data.h"
+#include "platforms/shared/active_strip_data/active_strip_data.h"
 #include "fl/dbg.h"
 #include "fl/math.h"
 #include "fl/screenmap.h"
@@ -391,6 +391,37 @@ EMSCRIPTEN_KEEPALIVE void updateJs(const char* jsonStr) {
     ::processUiInput(jsonStr);
     
     printf("updateJs: EXIT - PURE C++ VERSION\n");
+}
+
+/**
+ * Strip Pixel Data Access - Critical JavaScript Bridge
+ * 
+ * ⚠️⚠️⚠️ CRITICAL WARNING: C++ ↔ JavaScript STRIP DATA BRIDGE ⚠️⚠️⚠️
+ * 
+ * This function provides direct access to LED strip pixel data for JavaScript.
+ * Any changes to the function signature will BREAK JavaScript pixel data access!
+ * 
+ * JavaScript usage:
+ *   let sizePtr = Module._malloc(4);
+ *   let dataPtr = Module.ccall('getStripPixelData', 'number', ['number', 'number'], [stripIndex, sizePtr]);
+ *   if (dataPtr !== 0) {
+ *       let size = Module.getValue(sizePtr, 'i32');
+ *       let pixelData = new Uint8Array(Module.HEAPU8.buffer, dataPtr, size);
+ *   }
+ *   Module._free(sizePtr);
+ */
+extern "C" EMSCRIPTEN_KEEPALIVE 
+uint8_t* getStripPixelData(int stripIndex, int* outSize) {
+    ActiveStripData& instance = ActiveStripData::Instance();
+    ActiveStripData::StripDataMap::mapped_type stripData;
+    
+    if (instance.getData().get(stripIndex, &stripData)) {
+        if (outSize) *outSize = static_cast<int>(stripData.size());
+        return const_cast<uint8_t*>(stripData.data());
+    }
+    
+    if (outSize) *outSize = 0;
+    return nullptr;
 }
 
 } // namespace fl

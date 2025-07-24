@@ -274,6 +274,25 @@ JsonImpl JsonImpl::createObject() {
 // Remaining stub methods (can be implemented incrementally)
 void JsonImpl::appendArrayElement(const JsonImpl& element) {
 #if FASTLED_ENABLE_JSON
+    // Handle factory-created arrays (mVariant = nullptr, use document root)
+    if (!mVariant && mDocument && mIsRootArray) {
+        auto root = mDocument->doc.as<::FLArduinoJson::JsonVariant>();
+        if (root.is<::FLArduinoJson::JsonArray>()) {
+            auto array = root.as<::FLArduinoJson::JsonArray>();
+            
+            // Handle element access - factory-created objects use document root
+            if (!element.mVariant && element.mDocument) {
+                auto elementRoot = element.mDocument->doc.as<::FLArduinoJson::JsonVariant>();
+                array.add(elementRoot);
+            } else if (element.mVariant) {
+                auto* elementVariant = static_cast<::FLArduinoJson::JsonVariant*>(element.mVariant);
+                array.add(*elementVariant);
+            }
+        }
+        return;
+    }
+    
+    // Handle parsed arrays (mVariant set up)
     if (!mVariant || !mIsRootArray) return;
     
     auto* variant = static_cast<::FLArduinoJson::JsonVariant*>(mVariant);
@@ -290,6 +309,25 @@ void JsonImpl::appendArrayElement(const JsonImpl& element) {
 
 void JsonImpl::setObjectField(const char* key, const JsonImpl& value) {
 #if FASTLED_ENABLE_JSON
+    // Handle factory-created objects (mVariant = nullptr, use document root)
+    if (!mVariant && mDocument && !mIsRootArray && key) {
+        auto root = mDocument->doc.as<::FLArduinoJson::JsonVariant>();
+        if (root.is<::FLArduinoJson::JsonObject>()) {
+            auto obj = root.as<::FLArduinoJson::JsonObject>();
+            
+            // Handle value access - factory-created objects use document root
+            if (!value.mVariant && value.mDocument) {
+                auto valueRoot = value.mDocument->doc.as<::FLArduinoJson::JsonVariant>();
+                obj[key] = valueRoot;
+            } else if (value.mVariant) {
+                auto* valueVariant = static_cast<::FLArduinoJson::JsonVariant*>(value.mVariant);
+                obj[key] = *valueVariant;
+            }
+        }
+        return;
+    }
+    
+    // Handle parsed objects (mVariant set up)
     if (!mVariant || mIsRootArray || !key) return;
     
     auto* variant = static_cast<::FLArduinoJson::JsonVariant*>(mVariant);
