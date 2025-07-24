@@ -7,6 +7,7 @@
 // Forward declarations for PIMPL pattern
 namespace fl {
     class JsonDocumentImpl; // Wrapper around FLArduinoJson::JsonDocument
+    class ProxyVariant;     // Proxy for FLArduinoJson::JsonVariant
 }
 
 namespace fl {
@@ -77,10 +78,7 @@ public:
     static JsonImpl createObject();
     
 private:
-    JsonDocumentImpl* mDocument; // Wrapper around FLArduinoJson::JsonDocument
-    void* mVariant; // JsonVariant* - using void* to avoid namespace issues
-    bool mIsRootArray;
-    bool mOwnsDocument; // Track if this instance owns the document
+    fl::shared_ptr<ProxyVariant> mProxy; // Proxy that handles all ArduinoJSON operations
     
     void copyFrom(const JsonImpl& other);
     void cleanup();
