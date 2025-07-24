@@ -67,14 +67,7 @@ compiler_flags = [
     "-Werror=bad-function-cast",               # Error on bad function casts
     "-Werror=cast-function-type",              # Error on function type cast issues
     
-    # Precompiled Header Configuration
-    # ChatGPT identified include path mismatch between PCH creation and usage:
-    # - PCH creation: -I/git/fastled/src
-    # - PCH usage: -Isrc (different location)
-    # This causes size mismatches, so disable ALL PCH validation
-    "-Xclang -fno-pch-timestamp",          # Disable PCH timestamp checking
-    
-    "-Xclang -fno-validate-pch",           # Disable ALL PCH validation (size/content checks)
+
     
     # Thread Safety and Runtime Behavior
     "-fno-threadsafe-statics",                 # Disable thread-safe static initialization (performance)
