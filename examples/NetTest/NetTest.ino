@@ -112,11 +112,10 @@ void test_promise_approach() {
     
     // TUTORIAL: fetch_get() returns fl::promise<fl::response> (not auto!)
     // The promise represents a future HTTP response that may succeed or fail
-    fl::promise<fl::response> fetch_promise = fl::fetch_get("http://fastled.io");
-    
-    // TUTORIAL: Chain .then() for success handling
-    // The lambda receives a const fl::response& when the fetch succeeds
-    fetch_promise.then([](const fl::response& response) {
+    // Chain .then() for success handling and the lambda receives a
+    // const fl::response& when the fetch succeeds. error_ will handle network device
+    // failures (no connection, DNS failure, etc, but not HTTP errors like 404, 500, etc.)
+    fl::fetch_get("http://fastled.io").then([](const fl::response& response) {
         // TUTORIAL: Check if HTTP request was successful
         if (response.ok()) {
             FL_WARN("SUCCESS [Promise] HTTP fetch successful! Status: "
@@ -224,16 +223,6 @@ void loop() {
     // * On all platforms: FastLED.show() triggers async updates via engine events
     // * No manual async updates needed - everything happens behind the scenes!
 
-    uint32_t current_time = millis();
-    
-    // Toggle between the two async approaches for educational comparison
-    if (current_time - last_toggle_time >= TOGGLE_INTERVAL) {
-        use_await_pattern = !use_await_pattern;
-        last_toggle_time = current_time;
-        
-        FL_WARN("SWITCHING to " << (use_await_pattern ? "await_top_level" : "Promise") << " approach");
-        FL_WARN("WATCH LEDs: Green=Promise success, Blue=Await success, Red=Error");
-    }
 
     // TUTORIAL: Demonstrate the chosen async approach every 2 seconds
     EVERY_N_MILLISECONDS(2000) {
@@ -247,9 +236,16 @@ void loop() {
 
         // Always update LED strip after color changes
         FastLED.show();
+        use_await_pattern = !use_await_pattern;
         
-        // TUTORIAL: This delay automatically pumps async tasks on WASM!
-        // The delay is broken into 1ms chunks with async processing between chunks
-        delay(10);
+
     }
+
+    // TUTORIAL: This delay automatically pumps async tasks on WASM!
+    // The delay is broken into 1ms chunks with async processing between chunks.
+    // This isn't necessary when calling the await approach, but is critical
+    // the standard promise.then() approach.
+    // Note: In the future loop() may become a macro to inject auto pumping
+    // of the async tasks.
+    delay(10);
 }
