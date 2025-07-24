@@ -25,6 +25,13 @@ JsonImpl::~JsonImpl() {
 
 void JsonImpl::cleanup() {
 #if FASTLED_ENABLE_JSON
+    // Clean up variant pointer (always allocated by this class)
+    if (mVariant) {
+        delete static_cast<::FLArduinoJson::JsonVariant*>(mVariant);
+        mVariant = nullptr;
+    }
+    
+    // Clean up document if we own it
     if (mOwnsDocument && mDocument) {
         delete mDocument;
         mDocument = nullptr;
@@ -242,16 +249,24 @@ fl::string JsonImpl::serialize() const {
     return "{}";
 }
 
-// Factory methods implementation - use document root directly
+// Factory methods implementation - use actual parsing to ensure proper initialization
 JsonImpl JsonImpl::createArray() { 
     JsonImpl impl;
 #if FASTLED_ENABLE_JSON
-    impl.mDocument = new JsonDocumentImpl();
-    impl.mOwnsDocument = true;
-    impl.mDocument->doc.to<::FLArduinoJson::JsonArray>();
-    // No mVariant needed - access document root directly when needed
-    impl.mVariant = nullptr;
-    impl.mIsRootArray = true;
+    // Use actual JSON parsing to ensure proper document structure
+    fl::string error;
+    if (impl.parseWithRootDetection("[]", &error)) {
+        // parseWithRootDetection already sets up mDocument, mVariant, mIsRootArray, etc.
+        return impl;
+    } else {
+        // Fallback to manual initialization if parsing fails
+        impl.mDocument = new JsonDocumentImpl();
+        impl.mOwnsDocument = true;
+        impl.mDocument->doc.to<::FLArduinoJson::JsonArray>();
+        auto root = impl.mDocument->doc.as<::FLArduinoJson::JsonVariant>();
+        impl.mVariant = new ::FLArduinoJson::JsonVariant(root);
+        impl.mIsRootArray = true;
+    }
 #else
     impl.mIsRootArray = true;
 #endif
@@ -261,11 +276,21 @@ JsonImpl JsonImpl::createArray() {
 JsonImpl JsonImpl::createObject() { 
     JsonImpl impl;
 #if FASTLED_ENABLE_JSON
-    impl.mDocument = new JsonDocumentImpl();
-    impl.mOwnsDocument = true;
-    impl.mDocument->doc.to<::FLArduinoJson::JsonObject>();
-    // No mVariant needed - access document root directly when needed
-    impl.mVariant = nullptr;
+    // Use actual JSON parsing to ensure proper document structure
+    fl::string error;
+    if (impl.parseWithRootDetection("{}", &error)) {
+        // parseWithRootDetection already sets up mDocument, mVariant, mIsRootArray, etc.
+        return impl;
+    } else {
+        // Fallback to manual initialization if parsing fails
+        impl.mDocument = new JsonDocumentImpl();
+        impl.mOwnsDocument = true;
+        impl.mDocument->doc.to<::FLArduinoJson::JsonObject>();
+        auto root = impl.mDocument->doc.as<::FLArduinoJson::JsonVariant>();
+        impl.mVariant = new ::FLArduinoJson::JsonVariant(root);
+        impl.mIsRootArray = false;
+    }
+#else
     impl.mIsRootArray = false;
 #endif
     return impl;

@@ -105,37 +105,24 @@ fl::string ActiveStripData::infoJsonString() {
 }
 
 fl::string ActiveStripData::infoJsonStringNew() {
-    // NEW API - Using fl::Json creation API (WORKING IMPLEMENTATION)
+    // NEW API - Using fl::Json creation API (PROPER IMPLEMENTATION)
     // 
-    // Create the JSON manually to ensure proper serialization
+    // This is the target implementation that the JSON creation API must support
     
 #if FASTLED_ENABLE_JSON
-    // Create the JSON string manually using fl::Json API patterns
-    fl::string result = "[";
+    // Create a JSON array using the new fl::Json API
+    auto json = fl::Json::createArray();
     
-    bool first = true;
+    // Add each strip as an object to the array
     for (const auto &[stripIndex, stripData] : mStripMap) {
-        if (!first) {
-            result += ",";
-        }
-        first = false;
-        
-        // Build object string using fl::Json format
-        result += "{\"strip_id\":";
-        result += fl::to_string(stripIndex);
-        result += ",\"type\":\"r8g8b8\"}";
+        auto stripObj = fl::Json::createObject();
+        stripObj.set("strip_id", stripIndex);
+        stripObj.set("type", "r8g8b8");
+        json.push_back(stripObj);
     }
     
-    result += "]";
-    
-    // Validate the result by parsing it with fl::Json API to ensure compatibility
-    auto parsedJson = fl::Json::parse(result.c_str());
-    if (!parsedJson.has_value() || !parsedJson.is_array()) {
-        FL_WARN("ERROR: infoJsonStringNew produced invalid JSON");
-        return fl::string("[]");
-    }
-    
-    return result;
+    // Serialize the JSON structure
+    return json.serialize();
 #else
     return fl::string("[]");
 #endif
