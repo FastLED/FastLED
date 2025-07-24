@@ -52,7 +52,7 @@ FL_DISABLE_WARNING_POP
 template <typename Key, typename T, typename Hash = Hash<Key>,
           typename KeyEqual = EqualTo<Key>,
           int INLINED_COUNT = FASTLED_HASHMAP_INLINED_COUNT>
-class FL_ALIGN HashMap {
+class FL_ALIGN_AS(Entry) HashMap {
   public:
     HashMap() : HashMap(FASTLED_HASHMAP_INLINED_COUNT, 0.7f) {}
     HashMap(fl::size initial_capacity) : HashMap(initial_capacity, 0.7f) {}

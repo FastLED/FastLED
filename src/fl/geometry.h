@@ -180,8 +180,8 @@ using vec3f = vec3<float>; // Full precision but slow.
 template <typename T> struct vec2 {
     // value_type
     using value_type = T;
-    T x = 0;
-    T y = 0;
+    value_type x = 0;
+    value_type y = 0;
     constexpr vec2() = default;
     constexpr vec2(T x, T y) : x(x), y(y) {}
 

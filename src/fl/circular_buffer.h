@@ -7,6 +7,9 @@
 
 namespace fl {
 
+// TODO:
+// ERROR bit to indicate over flow.
+
 template <typename T> class CircularBuffer {
   public:
     CircularBuffer(fl::size capacity)

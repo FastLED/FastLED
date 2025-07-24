@@ -49,7 +49,7 @@ ScreenMap ScreenMap::Circle(int numLeds, float cm_between_leds,
 }
 
 bool ScreenMap::ParseJson(const char *jsonStrScreenMap,
-                          FixedMap<string, ScreenMap, 16> *segmentMaps, string *err) {
+                          fl::fl_map<string, ScreenMap> *segmentMaps, string *err) {
 #if !FASTLED_ENABLE_JSON
     if (err) {
         *err = "JSON not enabled";
@@ -106,7 +106,7 @@ bool ScreenMap::ParseJson(const char *jsonStrScreenMap,
             segment_map.set(j, vec2f{x, y});
         }
         
-        segmentMaps->insert(segmentName, segment_map);
+        (*segmentMaps)[segmentName] = segment_map;
     }
     
     return true;
@@ -122,7 +122,7 @@ bool ScreenMap::ParseJson(const char *jsonStrScreenMap,
     }
     return false;
 #else
-    FixedMap<string, ScreenMap, 16> segmentMaps;
+    fl::fl_map<string, ScreenMap> segmentMaps;
     bool ok = ParseJson(jsonStrScreenMap, &segmentMaps, err);
     if (!ok) {
         return false;
@@ -130,7 +130,7 @@ bool ScreenMap::ParseJson(const char *jsonStrScreenMap,
     if (segmentMaps.size() == 0) {
         return false;
     }
-    if (segmentMaps.has(screenMapName)) {
+    if (segmentMaps.contains(screenMapName)) {
         *screenmap = segmentMaps[screenMapName];
         return true;
     }
@@ -144,7 +144,7 @@ bool ScreenMap::ParseJson(const char *jsonStrScreenMap,
 #endif
 }
 
-void ScreenMap::toJson(const FixedMap<string, ScreenMap, 16> &segmentMaps,
+void ScreenMap::toJson(const fl::fl_map<string, ScreenMap> &segmentMaps,
                        fl::Json *doc) {
 
 #if !FASTLED_ENABLE_JSON
@@ -167,18 +167,17 @@ void ScreenMap::toJson(const FixedMap<string, ScreenMap, 16> &segmentMaps,
             }
             float diameter = kv.second.getDiameter();
             if (diameter < 0.0f) {
-                diameter = .5f; // 5mm.
+                diameter = .15f; // 1.5mm.
             }
             if (diameter > 0.0f) {
                 segment["diameter"] = diameter;
             }
         }
     }
-
 #endif
 }
 
-void ScreenMap::toJsonStr(const FixedMap<string, ScreenMap, 16> &segmentMaps,
+void ScreenMap::toJsonStr(const fl::fl_map<string, ScreenMap> &segmentMaps,
                           string *jsonBuffer) {
 #if !FASTLED_ENABLE_JSON
     return;
@@ -213,6 +212,13 @@ ScreenMap::ScreenMap(const ScreenMap &other) {
     mDiameter = other.mDiameter;
     length = other.length;
     mLookUpTable = other.mLookUpTable;
+}
+
+ScreenMap::ScreenMap(ScreenMap&& other) {
+    mDiameter = other.mDiameter;
+    length = other.length;
+    fl::swap(mLookUpTable, other.mLookUpTable);
+    other.mLookUpTable.reset();
 }
 
 void ScreenMap::set(u16 index, const vec2f &p) {

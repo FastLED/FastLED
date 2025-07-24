@@ -755,6 +755,12 @@ template <typename T, typename... Rest> struct max_align<T, Rest...> {
                                         : max_align<Rest...>::value;
 };
 
+// alignment_of trait
+template <typename T>
+struct alignment_of {
+    static constexpr fl::size value = alignof(T);
+};
+
 
 
 } // namespace fl

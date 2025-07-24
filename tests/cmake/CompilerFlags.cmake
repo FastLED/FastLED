@@ -205,15 +205,16 @@ function(apply_test_compiler_flags)
             -Wglobal-constructors 
             -Werror=global-constructors
             -Wno-comment
+            -Wno-gnu-alignof-expression
         )
     endif()
     
     # 🚨 CRITICAL: Universal RTTI enforcement - ensure -fno-rtti is always included
-    message(STATUS "🚨 UNIVERSAL RTTI ENFORCEMENT - ensuring RTTI is disabled on ALL platforms")
+    message(STATUS "🚨 CRITICAL: Universal RTTI enforcement - ensuring RTTI is disabled on ALL platforms")
     # Force -fno-rtti to be included regardless of compiler or platform detection
     list(FIND ALL_GNU_FLAGS "-fno-rtti" rtti_flag_idx)
     if(rtti_flag_idx EQUAL -1)
-        message(STATUS "🚨 CRITICAL: Adding missing -fno-rtti to build flags")
+        message(STATUS "🚨 CRITICAL: Universal RTTI enforcement - ensuring RTTI is disabled on ALL platforms")
         list(APPEND ALL_GNU_FLAGS "-fno-rtti")
     endif()
     # Always add compile-time RTTI check
@@ -371,6 +372,7 @@ function(apply_fastled_library_flags)
             -Wglobal-constructors 
             -Werror=global-constructors
             -Wno-comment
+            -Wno-gnu-alignof-expression
         )
     endif()
     

@@ -77,25 +77,21 @@ private:
     struct InlinedLambda {
         // Storage for the lambda/functor object
         // Use aligned storage to ensure proper alignment for any type
-        union FL_ALIGN Storage {
-            char bytes[kInlineLambdaSize];
-            void* alignment_dummy;  // Ensure proper alignment
-            long double align_max;  // Ensure maximum alignment
-        } storage;
+        alignas(max_align_t) char bytes[kInlineLambdaSize];
         
         // Type-erased invoker and destructor function pointers
-        R (*invoker)(const Storage& storage, Args... args);
-        void (*destructor)(Storage& storage);
+        R (*invoker)(const InlinedLambda& storage, Args... args);
+        void (*destructor)(InlinedLambda& storage);
         
         template <typename Function>
         InlinedLambda(Function f) {
             static_assert(sizeof(Function) <= kInlineLambdaSize, 
                          "Lambda/functor too large for inline storage");
-            static_assert(alignof(Function) <= alignof(Storage), 
+            static_assert(alignof(Function) <= alignof(max_align_t), 
                          "Lambda/functor requires stricter alignment than storage provides");
             
             // Construct the lambda/functor in-place
-            new (storage.bytes) Function(fl::move(f));
+            new (bytes) Function(fl::move(f));
             
             // Set up type-erased function pointers
             invoker = &invoke_lambda<Function>;
@@ -107,25 +103,25 @@ private:
             : invoker(other.invoker), destructor(other.destructor) {
             // This is tricky - we need to copy the stored object
             // For now, we'll use memcopy (works for trivially copyable types)
-            fl::memcopy(storage.bytes, other.storage.bytes, kInlineLambdaSize);
+            fl::memcopy(bytes, other.bytes, kInlineLambdaSize);
         }
         
         // Move constructor
         InlinedLambda(InlinedLambda&& other) 
             : invoker(other.invoker), destructor(other.destructor) {
-            fl::memcopy(storage.bytes, other.storage.bytes, kInlineLambdaSize);
+            fl::memcopy(bytes, other.bytes, kInlineLambdaSize);
             // Reset the other object to prevent double destruction
             other.destructor = nullptr;
         }
         
         ~InlinedLambda() {
             if (destructor) {
-                destructor(storage);
+                destructor(*this);
             }
         }
         
         template <typename FUNCTOR>
-        static R invoke_lambda(const Storage& storage, Args... args) {
+        static R invoke_lambda(const InlinedLambda& storage, Args... args) {
             // Use placement new to safely access the stored lambda
             alignas(FUNCTOR) char temp_storage[sizeof(FUNCTOR)];
             // Copy the lambda from storage
@@ -137,7 +133,7 @@ private:
         }
         
         template <typename FUNCTOR>
-        static void destroy_lambda(Storage& storage) {
+        static void destroy_lambda(InlinedLambda& storage) {
             // For destruction, we need to call the destructor on the actual object
             // that was constructed with placement new in storage.bytes
             // We use the standard library approach: create a properly typed pointer
@@ -150,7 +146,7 @@ private:
         }
         
         R invoke(Args... args) const {
-            return invoker(storage, args...);
+            return invoker(*this, args...);
         }
     };
 

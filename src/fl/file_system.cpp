@@ -106,7 +106,7 @@ bool FileSystem::readJson(const char *path, JsonDocument *doc) {
 }
 
 bool FileSystem::readScreenMaps(const char *path,
-                                FixedMap<string, ScreenMap, 16> *out, string *error) {
+                                fl::fl_map<string, ScreenMap> *out, string *error) {
     string text;
     if (!readText(path, &text)) {
         FASTLED_WARN("Failed to read file: " << path);

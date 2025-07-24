@@ -1,4 +1,4 @@
-#include "fl/json_impl.h"
+#include "fl/detail/json_impl.h"
 #include "fl/json.h"
 
 #if FASTLED_ENABLE_JSON
@@ -463,7 +463,7 @@ void JsonImpl::setValue(bool value) {
     if (mProxy) {
         mProxy->setValue(value);
     } else {
-        mProxy = ProxyVariant::fromParsed(fl::to_string(value).c_str());
+         mProxy = ProxyVariant::fromParsed(fl::to_string(value).c_str());
     }
 }
 

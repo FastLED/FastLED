@@ -1,6 +1,6 @@
 #include "fl/json.h"
+#include "fl/detail/json_impl.h"
 #include "fl/str.h"
-#include "fl/json_impl.h"
 
 namespace fl {
 
@@ -28,58 +28,63 @@ void toJson(const fl::JsonDocument &doc, string *jsonBuffer) {
 #endif
 }
 
-Json& Json::operator=(int value) {
-    #if FASTLED_ENABLE_JSON
+Json &Json::operator=(int value) {
+#if FASTLED_ENABLE_JSON
     if (mImpl) {
         mImpl->setValue(value);
     } else {
-        FASTLED_WARN("Attempted to assign int to uninitialized fl::Json object.");
+        FASTLED_WARN(
+            "Attempted to assign int to uninitialized fl::Json object.");
     }
-    #endif
+#endif
     return *this;
 }
 
-Json& Json::operator=(float value) {
-    #if FASTLED_ENABLE_JSON
+Json &Json::operator=(float value) {
+#if FASTLED_ENABLE_JSON
     if (mImpl) {
         mImpl->setValue(value);
     } else {
-        FASTLED_WARN("Attempted to assign float to uninitialized fl::Json object.");
+        FASTLED_WARN(
+            "Attempted to assign float to uninitialized fl::Json object.");
     }
-    #endif
+#endif
     return *this;
 }
 
-Json& Json::operator=(bool value) {
-    #if FASTLED_ENABLE_JSON
+Json &Json::operator=(bool value) {
+#if FASTLED_ENABLE_JSON
     if (mImpl) {
         mImpl->setValue(value);
     } else {
-        FASTLED_WARN("Attempted to assign bool to uninitialized fl::Json object.");
+        FASTLED_WARN(
+            "Attempted to assign bool to uninitialized fl::Json object.");
     }
-    #endif
+#endif
     return *this;
 }
 
-Json& Json::operator=(const char* value) {
-    #if FASTLED_ENABLE_JSON
+Json &Json::operator=(const char *value) {
+#if FASTLED_ENABLE_JSON
     if (mImpl) {
         mImpl->setValue(value);
     } else {
-        FASTLED_WARN("Attempted to assign const char* to uninitialized fl::Json object.");
+        FASTLED_WARN("Attempted to assign const char* to uninitialized "
+                     "fl::Json object.");
     }
-    #endif
+#endif
     return *this;
 }
 
-Json& Json::operator=(const fl::string& value) {
-    #if FASTLED_ENABLE_JSON
+Json &Json::operator=(const fl::string &value) {
+#if FASTLED_ENABLE_JSON
     if (mImpl) {
         mImpl->setValue(value);
     } else {
-        FASTLED_WARN("Attempted to assign fl::string to uninitialized fl::Json object.");
+        FASTLED_WARN(
+            "Attempted to assign fl::string to uninitialized fl::Json object.");
     }
-    #endif
+#endif
     return *this;
 }
 

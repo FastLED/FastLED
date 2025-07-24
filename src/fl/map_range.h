@@ -7,6 +7,7 @@
 #include "fl/force_inline.h"
 #include "fl/math_macros.h"
 #include "fl/compiler_control.h"
+#include "fl/geometry.h"
 
 FL_DISABLE_WARNING_PUSH
 FL_DISABLE_WARNING(float-equal)

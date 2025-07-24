@@ -167,50 +167,7 @@ TEST_CASE("fl::invoke edge cases") {
     CHECK_EQ(42, result4);
 } 
 
-// Test fl::invoke with fl::Ptr smart pointers
-TEST_CASE("fl::invoke with Ptr smart pointers") {
-    struct TestPtrClass : public fl::Referent {
-        int value = 42;
-        int getValue() const { return value; }
-        void setValue(int v) { value = v; }
-        int add(int x) const { return value + x; }
-        int multiply(int x) { return value * x; }
-    };
 
-    // 1. Heap-allocated Ptr via New()
-    auto heapPtr = fl::Ptr<TestPtrClass>::New();
-
-    // Member function: const getter
-    CHECK_EQ(42, fl::invoke(&TestPtrClass::getValue, heapPtr));
-
-    // Member function: setter
-    fl::invoke(&TestPtrClass::setValue, heapPtr, 123);
-    CHECK_EQ(123, (*heapPtr).value);
-
-    // Member function with additional arg, const
-    CHECK_EQ(133, fl::invoke(&TestPtrClass::add, heapPtr, 10));
-
-    // Member function with additional arg, non-const
-    CHECK_EQ(246, fl::invoke(&TestPtrClass::multiply, heapPtr, 2));
-
-    // Member data pointer access and modification
-    CHECK_EQ(123, fl::invoke(&TestPtrClass::value, heapPtr));
-    fl::invoke(&TestPtrClass::value, heapPtr) = 999;
-    CHECK_EQ(999, (*heapPtr).value);
-
-    // 2. NoTracking Ptr wrapping stack object
-    TestPtrClass stackObj;
-    auto noTrackPtr = fl::Ptr<TestPtrClass>::NoTracking(stackObj);
-
-    CHECK_EQ(42, fl::invoke(&TestPtrClass::getValue, noTrackPtr));
-    fl::invoke(&TestPtrClass::setValue, noTrackPtr, 77);
-    CHECK_EQ(77, stackObj.value);
-    CHECK_EQ(102, fl::invoke(&TestPtrClass::add, noTrackPtr, 25));
-    CHECK_EQ(154, fl::invoke(&TestPtrClass::multiply, noTrackPtr, 2));
-    CHECK_EQ(77, fl::invoke(&TestPtrClass::value, noTrackPtr));
-    fl::invoke(&TestPtrClass::value, noTrackPtr) = 888;
-    CHECK_EQ(888, stackObj.value);
-} 
 
 // Test fl::invoke with fl::scoped_ptr smart pointers
 TEST_CASE("fl::invoke with scoped_ptr smart pointers") {

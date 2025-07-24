@@ -48,6 +48,7 @@ class ScreenMap {
         : ScreenMap(lut, N, diameter) {}
 
     ScreenMap(const ScreenMap &other);
+    ScreenMap(ScreenMap&& other);
 
     const vec2f &operator[](u32 x) const;
 
@@ -76,16 +77,16 @@ class ScreenMap {
     vec2f getBounds() const;
 
     static bool ParseJson(const char *jsonStrScreenMap,
-                          FixedMap<string, ScreenMap, 16> *segmentMaps,
+                          fl::fl_map<string, ScreenMap> *segmentMaps,
                           string *err = nullptr);
 
     static bool ParseJson(const char *jsonStrScreenMap,
                           const char *screenMapName, ScreenMap *screenmap,
                           string *err = nullptr);
 
-    static void toJsonStr(const FixedMap<string, ScreenMap, 16> &,
+    static void toJsonStr(const fl::fl_map<string, ScreenMap> &,
                           string *jsonBuffer);
-    static void toJson(const FixedMap<string, ScreenMap, 16> &, fl::Json *doc);
+    static void toJson(const fl::fl_map<string, ScreenMap> &, fl::Json *doc);
 
   private:
     static const vec2f &empty();

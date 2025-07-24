@@ -9,6 +9,7 @@
 #include "fl/memory.h"
 #include "fl/str.h"
 #include "fx/video.h"
+#include "fl/screenmap.h"
 
 namespace fl {
 
@@ -49,7 +50,7 @@ class FileSystem {
               fl::size nFrameHistory = 0); // Null if video could not be opened.
     bool readText(const char *path, string *out);
     bool readJson(const char *path, JsonDocument *doc);
-    bool readScreenMaps(const char *path, FixedMap<string, ScreenMap, 16> *out,
+    bool readScreenMaps(const char *path, fl::fl_map<string, ScreenMap> *out,
                         string *error = nullptr);
     bool readScreenMap(const char *path, const char *name, ScreenMap *out,
                        string *error = nullptr);
