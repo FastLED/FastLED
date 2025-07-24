@@ -84,6 +84,320 @@ Our header complexity analysis revealed that **ArduinoJSON is the #1 PCH build p
 - **Cross-Platform Tested**: Arduino UNO, ESP32DEV compilation successful
 - **Production Ready**: API proven in real-world usage with complex JSON parsing
 
+## 📋 **FASTLED ↔ ARDUINOJSON TYPE MAPPING REFERENCE**
+
+### **🏗️ Core Document Storage**
+
+| **FastLED Class** | **ArduinoJSON Equivalent** | **Purpose** |
+|---|---|---|
+| `JsonDocument` (legacy) | `::FLArduinoJson::JsonDocument` | **Direct inheritance** - Legacy API exposes ArduinoJSON directly |
+| `JsonDocumentImpl` (PIMPL) | `::FLArduinoJson::JsonDocument` | **PIMPL wrapper** - Hides ArduinoJSON in implementation |
+
+```cpp
+// Legacy API (DIRECT EXPOSURE)
+class JsonDocument : public ::FLArduinoJson::JsonDocument {};
+
+// New PIMPL API (HIDDEN IMPLEMENTATION)  
+class JsonDocumentImpl {
+    ::FLArduinoJson::JsonDocument doc;  // ✅ Hidden in .cpp file
+};
+```
+
+### **🎯 Value References and Access**
+
+| **FastLED Class** | **ArduinoJSON Equivalent** | **Usage Pattern** |
+|---|---|---|
+| `fl::Json` | `::FLArduinoJson::JsonVariant` | **Any JSON value** - objects, arrays, primitives |
+| `ProxyVariant` (internal) | `::FLArduinoJson::JsonVariant` | **PIMPL proxy** - handles all ArduinoJSON operations |
+
+```cpp
+// fl::Json wraps any JSON value through ProxyVariant
+class ProxyVariant {
+    ::FLArduinoJson::JsonVariant variant;  // ✅ Can be any JSON type
+    // variant.is<::FLArduinoJson::JsonObject>()  -> JSON object
+    // variant.is<::FLArduinoJson::JsonArray>()   -> JSON array  
+    // variant.as<const char*>()                  -> JSON string
+    // variant.as<int>()                          -> JSON number
+    // variant.as<bool>()                         -> JSON boolean
+};
+```
+
+### **🔧 Specialized Type Access**
+
+| **ArduinoJSON Type** | **FastLED Equivalent** | **When Used** |
+|---|---|---|
+| `::FLArduinoJson::JsonObject` | `variant.as<JsonObject>()` | When `fl::Json` represents an object |
+| `::FLArduinoJson::JsonArray` | `variant.as<JsonArray>()` | When `fl::Json` represents an array |
+| `::FLArduinoJson::JsonVariantConst` | **`fl::Json` (read-only access)** | **Const access handled internally** |
+
+### **🏛️ Architecture Hierarchy**
+
+```
+📱 PUBLIC API (Headers)
+├── fl::Json                    // ✅ Clean public interface
+└── JsonDocument (legacy)       // ❌ Exposes ::FLArduinoJson::JsonDocument
+
+🔧 PIMPL IMPLEMENTATION (.cpp files)  
+├── JsonImpl                    // ✅ PIMPL interface
+├── ProxyVariant               // ✅ ArduinoJSON operations proxy
+└── JsonDocumentImpl           // ✅ Document wrapper
+
+🏗️ ARDUINOJSON LAYER (Hidden)
+├── ::FLArduinoJson::JsonDocument      // Root JSON document
+├── ::FLArduinoJson::JsonVariant       // Any JSON value (mutable)
+├── ::FLArduinoJson::JsonVariantConst  // Any JSON value (const)
+├── ::FLArduinoJson::JsonObject        // JSON object access
+├── ::FLArduinoJson::JsonArray         // JSON array access
+└── ::FLArduinoJson::JsonObjectConst   // Const object access
+```
+
+### **🎯 Key Mapping Patterns**
+
+#### **1. Document Creation**
+```cpp
+// ✅ NEW API (PIMPL)
+fl::Json json = fl::Json::parse("{\"key\":\"value\"}");
+// Maps to: ProxyVariant->JsonDocumentImpl->JsonDocument
+
+// ❌ LEGACY API (DIRECT)
+JsonDocument doc;
+parseJson("{\"key\":\"value\"}", &doc, &error);
+// Maps to: JsonDocument inherits from ::FLArduinoJson::JsonDocument
+```
+
+#### **2. Value Access**
+```cpp
+// ✅ NEW API
+fl::Json value = json["key"];
+// Maps to: ProxyVariant->JsonVariant (child reference)
+
+// ❌ LEGACY API  
+auto value = doc["key"];
+// Maps to: ::FLArduinoJson::JsonVariant directly
+```
+
+#### **3. Type Detection**
+```cpp
+// ✅ NEW API
+if (json.is_object()) { /* ... */ }
+// Maps to: variant.is<::FLArduinoJson::JsonObject>()
+
+// ❌ LEGACY API
+if (value.is<FLArduinoJson::JsonObject>()) { /* ... */ }
+// Maps to: Direct ArduinoJSON type checking
+```
+
+### **🚨 Critical Type Equivalencies**
+
+| **Common Question** | **FastLED Equivalent** |
+|---|---|
+| `JsonDocument` → ? | `JsonDocumentImpl` (PIMPL) or `JsonDocument` (legacy) |
+| `FLArduinoJson::VariantConst` → ? | **`fl::Json` (read-only access)** |
+
+**`FLArduinoJson::VariantConst` maps to `fl::Json` when used for read-only operations:**
+
+```cpp
+// ArduinoJSON const variant access
+::FLArduinoJson::JsonVariantConst constVariant = doc["key"];
+int value = constVariant.as<int>();
+
+// FastLED equivalent  
+fl::Json json = fl::Json::parse(jsonStr);
+int value = json["key"] | 0;  // ✅ Safe const-like access with default
+```
+
+### **🎉 Benefits of PIMPL Mapping**
+
+1. **🛡️ Type Safety**: `fl::Json` never crashes on missing fields (`operator|` with defaults)
+2. **📦 Header Cleanliness**: ArduinoJSON types completely hidden from public headers  
+3. **🔄 API Consistency**: Single `fl::Json` type handles all JSON values uniformly
+4. **⚡ Performance**: Eliminates 251KB ArduinoJSON template expansion in every compilation unit
+5. **🎯 Simplicity**: No need to understand ArduinoJSON type hierarchy
+
+**The PIMPL pattern successfully abstracts away the entire ArduinoJSON type system while preserving all functionality!**
+
+## 🔄 **DIRECT API CONVERSION TABLE FOR SEARCH & REPLACE**
+
+### **📋 Function Signatures & Type Definitions**
+
+| **❌ FLArduinoJson API** | **✅ fl::Json API** |
+|---|---|
+| `fl::function<void(const FLArduinoJson::JsonVariantConst &)>` | `fl::function<void(const fl::Json &)>` |
+| `fl::function<void(FLArduinoJson::JsonObject &)>` | `fl::function<void(fl::Json &)>` |
+| `void updateInternal(const FLArduinoJson::JsonVariantConst &value)` | `void updateInternal(const fl::Json &value)` |
+| `void toJson(FLArduinoJson::JsonObject &json) const` | `void toJson(fl::Json &json) const` |
+| `void update(const FLArduinoJson::JsonVariantConst &json)` | `void update(const fl::Json &json)` |
+
+### **🎯 Type Checking Operations**
+
+| **❌ FLArduinoJson API** | **✅ fl::Json API** |
+|---|---|
+| `value.is<float>()` | `value.is_float()` ⚠️ *Need to implement* |
+| `value.is<int>()` | `value.is_int()` ⚠️ *Need to implement* |
+| `value.is<bool>()` | `value.is_bool()` ⚠️ *Need to implement* |
+| `value.is<const char*>()` | `value.is_string()` ⚠️ *Need to implement* |
+| `value.is<FLArduinoJson::JsonObject>()` | `value.is_object()` ✅ *Implemented* |
+| `value.is<FLArduinoJson::JsonArray>()` | `value.is_array()` ✅ *Implemented* |
+| `value.is<FLArduinoJson::JsonObjectConst>()` | `value.is_object()` ✅ *Implemented* |
+| `value.is<FLArduinoJson::JsonArrayConst>()` | `value.is_array()` ✅ *Implemented* |
+| `fl::getJsonType(value) == fl::JSON_INTEGER` | `value.is_int()` ⚠️ *Need to implement* |
+| `fl::getJsonType(value) == fl::JSON_ARRAY` | `value.is_array()` ✅ *Implemented* |
+| `fl::getJsonType(value) == fl::JSON_OBJECT` | `value.is_object()` ✅ *Implemented* |
+
+### **📤 Value Extraction (Safe with Defaults)**
+
+| **❌ FLArduinoJson API** | **✅ fl::Json API** |
+|---|---|
+| `value.as<float>()` | `value \| 0.0f` ✅ *Implemented* |
+| `value.as<int>()` | `value \| 0` ✅ *Implemented* |
+| `value.as<bool>()` | `value \| false` ✅ *Implemented* |
+| `value.as<uint32_t>()` | `value \| 0u` ✅ *Implemented* |
+| `value.as<const char*>()` | `value \| fl::string("")` ✅ *Implemented* |
+
+### **🔧 Object Field Assignment (toJson methods)**
+
+| **❌ FLArduinoJson API** | **✅ fl::Json API** |
+|---|---|
+| `json["name"] = name();` | `json.set("name", name());` ⚠️ *Need to implement* |
+| `json["group"] = mInternal->groupName().c_str();` | `json.set("group", mInternal->groupName());` ⚠️ *Need to implement* |
+| `json["type"] = "slider";` | `json.set("type", "slider");` ⚠️ *Need to implement* |
+| `json["id"] = mInternal->id();` | `json.set("id", mInternal->id());` ⚠️ *Need to implement* |
+| `json["value"] = mValue;` | `json.set("value", mValue);` ⚠️ *Need to implement* |
+| `json["min"] = mMin;` | `json.set("min", mMin);` ⚠️ *Need to implement* |
+| `json["enabled"] = true;` | `json.set("enabled", true);` ⚠️ *Need to implement* |
+
+### **📊 Array Operations**
+
+| **❌ FLArduinoJson API** | **✅ fl::Json API** |
+|---|---|
+| `FLArduinoJson::JsonArrayConst array = value.as<FLArduinoJson::JsonArrayConst>();` | `// Use value directly if is_array()` ✅ *Implemented* |
+| `for (FLArduinoJson::JsonVariantConst item : array)` | `for (int i = 0; i < value.getSize(); ++i) { fl::Json item = value[i]; }` ✅ *Implemented* |
+| `FLArduinoJson::JsonObject obj = json.createNestedObject();` | `fl::Json obj = fl::Json::createObject();` ⚠️ *Need to implement* |
+| `json.add(item);` | `json.push_back(item);` ⚠️ *Need to implement* |
+
+### **🏗️ Object Access & Iteration**
+
+| **❌ FLArduinoJson API** | **✅ fl::Json API** |
+|---|---|
+| `FLArduinoJson::JsonObjectConst obj = item.as<FLArduinoJson::JsonObjectConst>();` | `// Use item directly if is_object()` ✅ *Implemented* |
+| `auto timestampVar = obj["timestamp"];` | `fl::Json timestampVar = obj["timestamp"];` ✅ *Implemented* |
+| `auto samplesVar = obj["samples"];` | `fl::Json samplesVar = obj["samples"];` ✅ *Implemented* |
+
+### **📝 Serialization Operations**
+
+| **❌ FLArduinoJson API** | **✅ fl::Json API** |
+|---|---|
+| `serializeJson(value, buffer);` | `buffer = value.serialize();` ✅ *Implemented* |
+| `serializeJson(samplesVar, samplesStr);` | `samplesStr = samplesVar.serialize();` ✅ *Implemented* |
+
+### **🚨 Complex Patterns Requiring Manual Conversion**
+
+#### **Array Iteration Pattern:**
+```cpp
+// ❌ OLD
+FLArduinoJson::JsonArrayConst array = jsonValue.as<FLArduinoJson::JsonArrayConst>();
+for (FLArduinoJson::JsonVariantConst item : array) {
+    if (!item.is<FLArduinoJson::JsonObjectConst>()) {
+        continue;
+    }
+    FLArduinoJson::JsonObjectConst obj = item.as<FLArduinoJson::JsonObjectConst>();
+    // Process obj...
+}
+
+// ✅ NEW
+if (jsonValue.is_array()) {
+    for (int i = 0; i < jsonValue.getSize(); ++i) {
+        fl::Json item = jsonValue[i];
+        if (!item.is_object()) {
+            continue;
+        }
+        // Process item directly...
+    }
+}
+```
+
+#### **UI Manager Array Creation Pattern:**
+```cpp
+// ❌ OLD
+void JsonUiManager::toJson(FLArduinoJson::JsonArray &json) {
+    for (auto& weakComponent : mChangedComponents) {
+        if (auto component = weakComponent.lock()) {
+            FLArduinoJson::JsonObject obj = json.createNestedObject();
+            component->toJson(obj);
+        }
+    }
+}
+
+// ✅ NEW
+void JsonUiManager::toJson(fl::Json &json) {
+    // Caller must create json as array: fl::Json::createArray()
+    for (auto& weakComponent : mChangedComponents) {
+        if (auto component = weakComponent.lock()) {
+            fl::Json obj = fl::Json::createObject();
+            component->toJson(obj);
+            json.push_back(obj);
+        }
+    }
+}
+```
+
+### **🛠️ Automated Search & Replace Commands**
+
+#### **Phase 1: Type Definitions**
+```bash
+# Function type definitions
+find src/platforms/shared/ui/json/ -name "*.h" -exec sed -i 's/fl::function<void(const FLArduinoJson::JsonVariantConst &)>/fl::function<void(const fl::Json &)>/g' {} \;
+find src/platforms/shared/ui/json/ -name "*.h" -exec sed -i 's/fl::function<void(FLArduinoJson::JsonObject &)>/fl::function<void(fl::Json &)>/g' {} \;
+```
+
+#### **Phase 2: Function Signatures**
+```bash
+# Function parameter types
+find src/platforms/shared/ui/json/ -name "*.cpp" -o -name "*.h" -exec sed -i 's/const FLArduinoJson::JsonVariantConst &/const fl::Json &/g' {} \;
+find src/platforms/shared/ui/json/ -name "*.cpp" -o -name "*.h" -exec sed -i 's/FLArduinoJson::JsonObject &/fl::Json &/g' {} \;
+```
+
+#### **Phase 3: Type Checking**
+```bash
+# Type checking methods
+find src/platforms/shared/ui/json/ -name "*.cpp" -exec sed -i 's/value\.is<float>()/value.is_float()/g' {} \;
+find src/platforms/shared/ui/json/ -name "*.cpp" -exec sed -i 's/value\.is<int>()/value.is_int()/g' {} \;
+find src/platforms/shared/ui/json/ -name "*.cpp" -exec sed -i 's/value\.is<bool>()/value.is_bool()/g' {} \;
+find src/platforms/shared/ui/json/ -name "*.cpp" -exec sed -i 's/value\.is<const char\*>()/value.is_string()/g' {} \;
+find src/platforms/shared/ui/json/ -name "*.cpp" -exec sed -i 's/value\.is<FLArduinoJson::JsonArrayConst>()/value.is_array()/g' {} \;
+find src/platforms/shared/ui/json/ -name "*.cpp" -exec sed -i 's/value\.is<FLArduinoJson::JsonObjectConst>()/value.is_object()/g' {} \;
+```
+
+#### **Phase 4: Value Extraction**
+```bash
+# Safe value extraction with defaults
+find src/platforms/shared/ui/json/ -name "*.cpp" -exec sed -i 's/value\.as<float>()/value | 0.0f/g' {} \;
+find src/platforms/shared/ui/json/ -name "*.cpp" -exec sed -i 's/value\.as<int>()/value | 0/g' {} \;
+find src/platforms/shared/ui/json/ -name "*.cpp" -exec sed -i 's/value\.as<bool>()/value | false/g' {} \;
+find src/platforms/shared/ui/json/ -name "*.cpp" -exec sed -i 's/value\.as<uint32_t>()/value | 0u/g' {} \;
+```
+
+#### **Phase 5: Object Assignment**
+```bash
+# Object field assignment
+find src/platforms/shared/ui/json/ -name "*.cpp" -exec sed -i 's/json\["\([^"]*\)"\] = \([^;]*\);/json.set("\1", \2);/g' {} \;
+```
+
+#### **Phase 6: Serialization**
+```bash
+# JSON serialization calls
+find src/platforms/shared/ui/json/ -name "*.cpp" -exec sed -i 's/serializeJson(\([^,]*\), \([^)]*\))/\2 = \1.serialize()/g' {} \;
+```
+
+### **⚠️ Missing fl::Json Methods That Must Be Implemented First**
+
+Before running the search & replace operations, these methods are required:
+
+1. **Type Checking**: `is_float()`, `is_int()`, `is_bool()`, `is_string()`
+2. **Object Modification**: `set(key, value)` for string, int, float, bool values
+3. **Array Modification**: `push_back(item)` for adding elements
+4. **Creation Methods**: `createObject()`, `createArray()` (these exist but may need fixes)
+
 ### ⚠️ **REMAINING PERFORMANCE OPPORTUNITY:**
 
 #### **ArduinoJSON Still in Headers** ⚠️ OPTIMIZATION PENDING
