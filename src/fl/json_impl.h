@@ -73,7 +73,7 @@ public:
     void setValue(float value);
     void setValue(bool value);
     void setNull();
-    
+
     // Value getting
     fl::string getStringValue() const;
     int getIntValue() const;

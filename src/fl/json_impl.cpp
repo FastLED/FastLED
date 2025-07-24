@@ -203,6 +203,13 @@ public:
         }
         return keys;
     }
+
+    void setValue(const char* value) { variant.set(value); }
+    void setValue(const fl::string& value) { variant.set(value.c_str()); }
+    void setValue(int value) { variant.set(value); }
+    void setValue(float value) { variant.set(value); }
+    void setValue(bool value) { variant.set(value); }
+    void setNull() { variant.set(nullptr); }
 #else
 public:
     bool isRootArray = false;
@@ -420,28 +427,52 @@ bool JsonImpl::hasField(const char* key) const {
 }
 
 void JsonImpl::setValue(const char* value) {
-    // For simple values, we'd need to recreate the proxy
-    // This is more complex in the proxy pattern
+    if (mProxy) {
+        mProxy->setValue(value);
+    } else {
+        // If no proxy, create a new one for this value
+        mProxy = ProxyVariant::fromParsed(fl::string(value).c_str());
+    }
 }
 
 void JsonImpl::setValue(const fl::string& value) {
-    // Similar complexity
+    if (mProxy) {
+        mProxy->setValue(value);
+    } else {
+        mProxy = ProxyVariant::fromParsed(value.c_str());
+    }
 }
 
 void JsonImpl::setValue(int value) {
-    // Similar complexity  
+    if (mProxy) {
+        mProxy->setValue(value);
+    } else {
+        mProxy = ProxyVariant::fromParsed(fl::to_string(value).c_str());
+    }
 }
 
 void JsonImpl::setValue(float value) {
-    // Similar complexity
+    if (mProxy) {
+        mProxy->setValue(value);
+    } else {
+        mProxy = ProxyVariant::fromParsed(fl::to_string(value).c_str());
+    }
 }
 
 void JsonImpl::setValue(bool value) {
-    // Similar complexity
+    if (mProxy) {
+        mProxy->setValue(value);
+    } else {
+        mProxy = ProxyVariant::fromParsed(fl::to_string(value).c_str());
+    }
 }
 
 void JsonImpl::setNull() {
-    mProxy = nullptr;
+    if (mProxy) {
+        mProxy->setNull();
+    } else {
+        // If no proxy, it's already null
+    }
 }
 
 // Convenience methods for setting object field values directly

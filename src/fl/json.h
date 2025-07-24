@@ -61,6 +61,13 @@ public:
     Json();
     Json(const Json& other) = default;
     Json& operator=(const Json& other) = default;
+
+    // Assignment operators for primitive types
+    Json& operator=(int value);
+    Json& operator=(float value);
+    Json& operator=(bool value);
+    Json& operator=(const char* value);
+    Json& operator=(const fl::string& value);
     
     // Static factory methods
     static Json parse(const char* jsonStr);
