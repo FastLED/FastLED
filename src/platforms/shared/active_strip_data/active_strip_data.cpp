@@ -115,14 +115,14 @@ fl::string ActiveStripData::infoJsonStringNew() {
     
 #if FASTLED_ENABLE_JSON
     // Create a JSON array using the new fl::Json API
-    auto json = fl::JsonValue(fl::JsonArray());
+    auto json = fl::Json::createArray();
     
     // Add each strip as an object to the array
     for (const auto &[stripIndex, stripData] : mStripMap) {
         auto stripObj = fl::Json::createObject();
         stripObj["strip_id"] = stripIndex;
         stripObj["type"] = "r8g8b8";
-        json.add(stripObj);
+        json.push_back(JsonValue(stripObj.as<JsonObject>()));
     }
     
     // Serialize the JSON structure

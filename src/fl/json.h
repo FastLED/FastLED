@@ -215,11 +215,12 @@ public:
     static Json parse(const char* jsonString);
     static fl::string parseJson(const char* jsonString, Json* doc);
 
-    Json() = default;
-    Json(const Json& other) = default;
-    Json(Json&& other) noexcept = default;
-    Json& operator=(const Json& other) = default;
-    Json& operator=(Json&& other) noexcept = default;
+    Json();
+    Json(const JsonValue& value);
+    Json(const Json& other);
+    Json(Json&& other) noexcept;
+    Json& operator=(const Json& other);
+    Json& operator=(Json&& other) noexcept;
 
 
     bool has_value() const;
@@ -276,6 +277,9 @@ public:
 
     Json createNestedObject();
     Json createNestedArray();
+
+    void push_back(const JsonValue& value);
+    void push_back(JsonValue&& value);
 
     fl::string serialize() const;
 

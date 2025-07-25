@@ -73,7 +73,7 @@ JsonCheckboxImpl &JsonCheckboxImpl::operator=(int value) {
 
 void JsonCheckboxImpl::updateInternal(
     const fl::Json &value) {
-    setValueInternal(value | false);  // Use internal method to avoid change notification
+    setValueInternal(value.value_or(false));  // Use internal method to avoid change notification
 }
 
 } // namespace fl

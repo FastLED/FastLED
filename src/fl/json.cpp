@@ -462,6 +462,8 @@ fl::string JsonArray::to_string() const {
 
 // This is a placeholder. A real JSON parser would be much more complex.
 // For now, we'll just return an empty Json object.
+Json::Json(const JsonValue& value) : root_(value) {}
+
 Json Json::parse(const char* jsonString) {
     // In a real scenario, this would parse the JSON string.
     // For the purpose of making the test compile and allowing further development,
@@ -496,6 +498,8 @@ Json Json::parse(const char* jsonString) {
 
     return json_obj;
 }
+
+
 
 fl::string Json::parseJson(const char* jsonString, Json* doc) {
     // For now, we'll just populate the doc with the hardcoded JSON structure
@@ -559,6 +563,24 @@ Json Json::createNestedArray() {
         root_ = new_arr.root_;
     }
     return new_arr;
+}
+
+void Json::push_back(const JsonValue& value) {
+    if (!root_.has_value()) {
+        root_ = JsonArray(); // Initialize as an empty array if not set
+    }
+    if (root_->is_array()) {
+        root_->push_back(value);
+    }
+}
+
+void Json::push_back(JsonValue&& value) {
+    if (!root_.has_value()) {
+        root_ = JsonArray(); // Initialize as an empty array if not set
+    }
+    if (root_->is_array()) {
+        root_->push_back(fl::move(value));
+    }
 }
 
 fl::string Json::serialize() const {

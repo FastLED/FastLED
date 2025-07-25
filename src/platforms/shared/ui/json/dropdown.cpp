@@ -72,7 +72,7 @@ void JsonDropdownImpl::toJson(fl::Json &json) const {
     for (const auto &option : mOptions) {
         optionsArray.push_back(option);
     }
-    json["options"] = optionsArray;
+    json["options"] = JsonValue(optionsArray.as<JsonArray>());
 }
 
 fl::string JsonDropdownImpl::value() const {
@@ -112,7 +112,7 @@ JsonDropdownImpl &JsonDropdownImpl::operator=(int index) {
 
 void JsonDropdownImpl::updateInternal(
     const fl::Json &value) {
-    setSelectedIndex(value | 0);
+    setSelectedIndex(value.value_or(0));
 }
 
 } // namespace fl

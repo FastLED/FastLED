@@ -99,7 +99,7 @@ JsonSliderImpl &JsonSliderImpl::operator=(int value) {
 
 void JsonSliderImpl::updateInternal(
     const fl::Json &value) {
-    setValue(value | 0.0f);
+    setValue(value.value_or(0.0f));
 }
 
 } // namespace fl

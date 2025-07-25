@@ -97,7 +97,7 @@ bool JsonNumberFieldImpl::operator!=(int v) const { return !ALMOST_EQUAL_FLOAT(v
 
 void JsonNumberFieldImpl::updateInternal(
     const fl::Json &value) {
-    setValueInternal(value | 0.0);  // Use internal method to avoid change notification
+    setValueInternal(value.value_or(0.0));  // Use internal method to avoid change notification
 }
 
 } // namespace fl

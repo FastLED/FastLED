@@ -75,7 +75,7 @@ void JsonButtonImpl::Updater::onPlatformPreLoop2() {
 
 void JsonButtonImpl::updateInternal(
     const fl::Json &value) {
-    mPressed = value | false;
+    mPressed = value.value_or(false);
 }
 
 } // namespace fl

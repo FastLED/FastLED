@@ -8,7 +8,7 @@
 
 #if FASTLED_ENABLE_JSON
 
-#error "FASTLED_ENABLE_JSON is not defined"
+
 
 
 
@@ -143,7 +143,7 @@ static void parseJsonToAudioBuffers(const fl::Json &jsonValue,
     }
     
     for (int i = 0; i < jsonValue.getSize(); ++i) {
-        fl::Json item = jsonValue[i];
+        fl::JsonValue item = jsonValue[i];
         if (!item.is_object()) {
             continue;
         }
@@ -159,7 +159,7 @@ static void parseJsonToAudioBuffers(const fl::Json &jsonValue,
         if (samplesVar.is_array()) {
             fl::string& samplesStr = scratchBuffer();
             samplesStr.clear();
-            samplesStr = samplesVar.serialize();
+            samplesStr = fl::Json(samplesVar).serialize();
             parsePcmSamplesString(samplesStr, &buffer.samples);
         }
         
