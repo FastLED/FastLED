@@ -282,7 +282,10 @@ public:
     size_t getSize() const;
     
     // Object iteration support (needed for screenmap conversion)
-    fl::vector<fl::string> getObjectKeys() const;
+    fl::vector<fl::string> keys() const;
+    
+    // Backward compatibility method
+    fl::vector<fl::string> getObjectKeys() const { return keys(); }
     
     // Serialization
     fl::string serialize() const;

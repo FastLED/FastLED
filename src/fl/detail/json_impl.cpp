@@ -334,7 +334,7 @@ JsonImpl JsonImpl::getObjectField(const char* key) const {
     return result;
 }
 
-fl::vector<fl::string> JsonImpl::getObjectKeys() const {
+fl::vector<fl::string> JsonImpl::keys() const {
     return mProxy ? mProxy->getObjectKeys() : fl::vector<fl::string>();
 }
 
@@ -575,8 +575,8 @@ size_t Json::getSize() const {
 }
 
 // Object iteration support
-fl::vector<fl::string> Json::getObjectKeys() const {
-    return mImpl ? mImpl->getObjectKeys() : fl::vector<fl::string>();
+fl::vector<fl::string> Json::keys() const {
+    return mImpl ? mImpl->keys() : fl::vector<fl::string>();
 }
 
 // Serialization

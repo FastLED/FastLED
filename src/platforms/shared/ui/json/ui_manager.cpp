@@ -175,7 +175,7 @@ void JsonUiManager::executeUiUpdates(const fl::Json &doc) {
     if (doc.is_object()) {
         
         // Iterate through all keys in the JSON object
-        for (auto key : doc.getObjectKeys()) {
+        for (auto key : doc.keys()) {
             const char* id_or_name = key.c_str();
             
             //FL_WARN("*** Checking for component with ID: " << idStr);

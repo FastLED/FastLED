@@ -865,6 +865,30 @@ class string : public StrN<FASTLED_STR_INLINED_SIZE> {
 
     void swap(string &other);
 
+    // Resize methods to match std::string interface
+    void resize(fl::size count) {
+        resize(count, char());
+    }
+
+    void resize(fl::size count, char ch) {
+        if (count < mLength) {
+            // Truncate the string
+            mLength = count;
+            c_str_mutable()[mLength] = '\0';
+        } else if (count > mLength) {
+            // Extend the string with the specified character
+            fl::size additional_chars = count - mLength;
+            reserve(count); // Ensure enough capacity
+            char* data_ptr = c_str_mutable();
+            for (fl::size i = 0; i < additional_chars; ++i) {
+                data_ptr[mLength + i] = ch;
+            }
+            mLength = count;
+            data_ptr[mLength] = '\0';
+        }
+        // If count == mLength, do nothing
+    }
+
   private:
     enum {
         // Bake the size into the string class so we can issue a compile time

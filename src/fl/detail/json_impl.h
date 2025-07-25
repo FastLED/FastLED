@@ -64,7 +64,10 @@ public:
     void setObjectFieldValue(const char* key, bool value);
     
     // Object iteration support (needed for screenmap conversion)
-    fl::vector<fl::string> getObjectKeys() const;
+    fl::vector<fl::string> keys() const;
+    
+    // Backward compatibility method
+    fl::vector<fl::string> getObjectKeys() const { return keys(); }
     
     // Value operations - use explicit overloads instead of templates to keep header minimal
     void setValue(const char* value);
