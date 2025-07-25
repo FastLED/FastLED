@@ -538,7 +538,7 @@ Json Json::createNestedObject() {
             // an object or null.
         } else if (root_->is_array()) {
             // If current is an array, add the new object to the array
-            root_->push_back(new_obj.root_.value());
+            root_->push_back(*new_obj.root_);
         }
     } else {
         root_ = new_obj.root_;
@@ -553,8 +553,7 @@ Json Json::createNestedArray() {
         if (root_->is_object()) {
             // If current is an object, we need a key to add the nested array
         } else if (root_->is_array()) {
-            // If current is an array, add the new array to the array
-            root_->push_back(new_arr.root_.value());
+            root_->push_back(*new_arr.root_);
         }
     } else {
         root_ = new_arr.root_;

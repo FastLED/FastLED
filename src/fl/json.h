@@ -237,6 +237,14 @@ public:
         }
         return T(); // Return default-constructed T if no value
     }
+    
+    template<typename T>
+    T value_or(T defaultValue) const {
+        if (root_.has_value()) {
+            return (*root_).value_or<T>(defaultValue);
+        }
+        return defaultValue;
+    }
         
     Json operator[](const fl::string& key);
     const Json operator[](const fl::string& key) const;
@@ -246,29 +254,17 @@ public:
     const Json operator[](size_t index) const;
     fl::size getSize() const { return root_.has_value() ? (*root_).size() : 0; }
 
+    template<typename T>
+    T operator|(T defaultValue) const {
+        return value_or(defaultValue);
+    }
+
     Json createNestedObject();
     Json createNestedArray();
 
 private:
     fl::optional<JsonValue> root_;
 };
-
-
-
-    if (is_null()) {
-        return defaultValue;
-    }
-    // Attempt to get the value; if type mismatch, get() will return default-constructed T
-    // which might not be what we want if T{} is not equivalent to defaultValue.
-    // A more robust implementation would check type compatibility before calling get().
-    // For now, rely on get()'s default return for type mismatch.
-    T value = get<T>();
-    // If get() returns a default value that is not defaultValue, it means
-    // the type was mismatched and get() couldn't convert.
-    // This logic needs refinement based on desired behavior for type mismatches vs null.
-    // For the test case, we assume get() returns a sensible default for mismatch.
-    return value;
-}
 
 fl::vector<fl::string> JsonValue::getObjectKeys() const {
     return fl::vector<fl::string>();
