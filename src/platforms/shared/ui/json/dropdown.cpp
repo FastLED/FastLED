@@ -62,17 +62,17 @@ JsonDropdownImpl &JsonDropdownImpl::Group(const fl::string &name) {
 const fl::string &JsonDropdownImpl::name() const { return mInternal->name(); }
 
 void JsonDropdownImpl::toJson(fl::Json &json) const {
-    json.set("name", name());
-    json.set("group", mInternal->groupName());
-    json.set("type", "dropdown");
-    json.set("id", mInternal->id());
-    json.set("value", static_cast<int>(mSelectedIndex));
+    json["name"] = name();
+    json["group"] = mInternal->groupName();
+    json["type"] = "dropdown";
+    json["id"] = mInternal->id();
+    json["value"] = static_cast<int>(mSelectedIndex);
     
     fl::Json optionsArray = fl::Json::createArray();
     for (const auto &option : mOptions) {
-        optionsArray.add(option);
+        optionsArray.push_back(option);
     }
-    json.set("options", optionsArray);
+    json["options"] = optionsArray;
 }
 
 fl::string JsonDropdownImpl::value() const {

@@ -66,12 +66,12 @@ JsonAudioImpl::Updater::~Updater() { fl::EngineEvents::removeListener(this); }
 void JsonAudioImpl::Updater::onPlatformPreLoop2() {}
 
 void JsonAudioImpl::toJson(fl::Json &json) const {
-    json.set("name", name());
-    json.set("group", mInternal->groupName());
-    json.set("type", "audio");
-    json.set("id", mInternal->id());
+    json["name"] = name();
+    json["group"] = mInternal->groupName();
+    json["type"] = "audio";
+    json["id"] = mInternal->id();
     if (!mSerializeBuffer.empty()) {
-        json.set("audioData", mSerializeBuffer);
+        json["audioData"] = mSerializeBuffer;
     }
 }
 

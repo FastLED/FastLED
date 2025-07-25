@@ -166,11 +166,17 @@ class JsonValue {
     
         // String conversion (for debugging/serialization)
         fl::string to_string() const;
+
+        template<typename T>
+        T operator|(T defaultValue) const {
+            return value_or(defaultValue);
+        }
     
     private:
         fl::unique_ptr<JsonVariant> data_;
     
-        // Helper to get a mutable reference to the underlying object/array
+    // Helper to get a mutable reference to the underlying object/array
+    public:
         JsonObject& get_object_mut();
         JsonArray& get_array_mut();
     };
@@ -246,21 +252,32 @@ public:
         return defaultValue;
     }
         
-    Json& operator[](const fl::string& key);
-    const Json& operator[](const fl::string& key) const;
+    JsonValue& operator[](const fl::string& key);
+    const JsonValue& operator[](const fl::string& key) const;
 
     // Operator for array access at the root level
-    Json operator[](size_t index);
-    const Json operator[](size_t index) const;
+    JsonValue& operator[](size_t index);
+    const JsonValue& operator[](size_t index) const;
     fl::size getSize() const { return root_.has_value() ? (*root_).size() : 0; }
 
-    template<typename T>
-    T operator|(T defaultValue) const {
-        return value_or(defaultValue);
+    
+
+    static Json createArray() {
+        Json result;
+        result.root_ = fl::make_optional<JsonValue>(fl::JsonArray());
+        return result;
+    }
+
+    static Json createObject() {
+        Json result;
+        result.root_ = fl::make_optional<JsonValue>(fl::JsonObject());
+        return result;
     }
 
     Json createNestedObject();
     Json createNestedArray();
+
+    fl::string serialize() const;
 
 private:
     fl::optional<JsonValue> root_;

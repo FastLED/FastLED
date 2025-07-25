@@ -52,7 +52,7 @@ bool ActiveStripData::parseStripJsonInfo(const char* jsonStr) {
     
     // Parse each strip in the array
     for (size_t i = 0; i < json.getSize(); ++i) {
-        auto stripObj = json[static_cast<int>(i)];
+        auto stripObj = fl::Json::createObject();
         
         if (!stripObj.is_object()) {
             continue;
@@ -115,14 +115,14 @@ fl::string ActiveStripData::infoJsonStringNew() {
     
 #if FASTLED_ENABLE_JSON
     // Create a JSON array using the new fl::Json API
-    auto json = fl::Json::createArray();
+    auto json = fl::JsonValue(fl::JsonArray());
     
     // Add each strip as an object to the array
     for (const auto &[stripIndex, stripData] : mStripMap) {
         auto stripObj = fl::Json::createObject();
-        stripObj.set("strip_id", stripIndex);
-        stripObj.set("type", "r8g8b8");
-        json.push_back(stripObj);
+        stripObj["strip_id"] = stripIndex;
+        stripObj["type"] = "r8g8b8";
+        json.add(stripObj);
     }
     
     // Serialize the JSON structure

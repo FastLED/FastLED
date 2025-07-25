@@ -30,11 +30,11 @@ JsonHelpImpl &JsonHelpImpl::Group(const fl::string &name) {
 const fl::string &JsonHelpImpl::markdownContent() const { return mMarkdownContent; }
 
 void JsonHelpImpl::toJson(fl::Json &json) const {
-    json.set("name", mInternal->name());
-    json.set("type", "help");
-    json.set("group", mInternal->groupName());
-    json.set("id", mInternal->id());
-    json.set("markdownContent", markdownContent());
+    json["name"] = mInternal->name();
+    json["type"] = "help";
+    json["group"] = mInternal->groupName();
+    json["id"] = mInternal->id();
+    json["markdownContent"] = markdownContent();
 }
 
 const string &JsonHelpImpl::name() const { return mInternal->name(); }

@@ -42,15 +42,15 @@ JsonSliderImpl &JsonSliderImpl::Group(const fl::string &name) {
 const fl::string &JsonSliderImpl::name() const { return mInternal->name(); }
 
 void JsonSliderImpl::toJson(fl::Json &json) const {
-    json.set("name", name());
-    json.set("group", mInternal->groupName());
-    json.set("type", "slider");
-    json.set("id", mInternal->id());
-    json.set("value", mValue);
-    json.set("min", mMin);
-    json.set("max", mMax);
+    json["name"] = name();
+    json["group"] = mInternal->groupName();
+    json["type"] = "slider";
+    json["id"] = mInternal->id();
+    json["value"] = mValue;
+    json["min"] = mMin;
+    json["max"] = mMax;
     if (mStep > 0) {
-        json.set("step", mStep);
+        json["step"] = mStep;
     }
 }
 

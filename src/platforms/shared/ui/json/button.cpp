@@ -38,11 +38,11 @@ bool JsonButtonImpl::clicked() const { return mClickedHappened; }
 const string &JsonButtonImpl::name() const { return mInternal->name(); }
 
 void JsonButtonImpl::toJson(fl::Json &json) const {
-    json.set("name", name());
-    json.set("group", mInternal->groupName());
-    json.set("type", "button");
-    json.set("id", mInternal->id());
-    json.set("pressed", mPressed);
+    json["name"] = name();
+    json["group"] = mInternal->groupName();
+    json["type"] = "button";
+    json["id"] = mInternal->id();
+    json["pressed"] = mPressed;
 }
 
 bool JsonButtonImpl::isPressed() const {

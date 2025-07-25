@@ -41,10 +41,10 @@ TEST_CASE("Json.ino example as a test case [json]") {
     REQUIRE(json.has_value() == true); // Assert that JSON parsing was successful
 
     // NEW: Clean syntax with default values - no more verbose error checking!
-    int numLeds = json["strip"]["num_leds"] | 100;      // Gets 150, or 100 if missing
-    int pin = json["strip"]["pin"] | 3;                 // Gets 5, or 3 if missing
-    fl::string type = json["strip"]["type"] | fl::string("WS2812");  // Gets "WS2812B"
-    int brightness = json["strip"]["brightness"] | 64;  // Gets 200, or 64 if missing
+    int numLeds = json["strip"]["num_leds"].value_or(100);      // Gets 150, or 100 if missing
+    int pin = json["strip"]["pin"].value_or(3);                 // Gets 5, or 3 if missing
+    fl::string type = json["strip"]["type"].value_or(fl::string("WS2812"));  // Gets "WS2812B"
+    int brightness = json["strip"]["brightness"].value_or(64);  // Gets 200, or 64 if missing
 
     // Safe access to missing values - no crashes!
     int missing = json["non_existent"]["missing"] | 999;  // Gets 999

@@ -561,6 +561,13 @@ Json Json::createNestedArray() {
     return new_arr;
 }
 
+fl::string Json::serialize() const {
+    if (root_.has_value()) {
+        return root_->to_string();
+    }
+    return "";
+}
+
 JsonValue& Json::operator[](const fl::string& key) {
     if (!root_.has_value()) {
         root_ = JsonObject(); // Initialize as an empty object if not set

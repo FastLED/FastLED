@@ -28,11 +28,11 @@ JsonTitleImpl &JsonTitleImpl::Group(const fl::string &name) {
 }
 
 void JsonTitleImpl::toJson(fl::Json &json) const {
-    json.set("name", mInternal->name());
-    json.set("type", "title");
-    json.set("group", mInternal->groupName());
-    json.set("id", mInternal->id());
-    json.set("text", text());
+    json["name"] = mInternal->name();
+    json["type"] = "title";
+    json["group"] = mInternal->groupName();
+    json["id"] = mInternal->id();
+    json["text"] = text();
 }
 
 const string &JsonTitleImpl::name() const { return mInternal->name(); }

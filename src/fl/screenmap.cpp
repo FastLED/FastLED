@@ -154,16 +154,16 @@ void ScreenMap::toJson(const fl::fl_map<string, ScreenMap> &segmentMaps,
         FASTLED_WARN("ScreenMap::toJson called with nullptr doc");
         return;
     }
-    auto map = doc->createNestedObject("map");
+    JsonObject& map = (*doc)["map"].get_object_mut();
     if (!segmentMaps.empty()) {
         for (auto kv : segmentMaps) {
-            auto segment = map.createNestedObject(kv.first.c_str());
-            auto x_array = segment.createNestedArray("x");
-            auto y_array = segment.createNestedArray("y");
+            JsonObject& segment = map[kv.first.c_str()].get_object_mut();
+            JsonArray& x_array = segment["x"].get_array_mut();
+            JsonArray& y_array = segment["y"].get_array_mut();
             for (u16 i = 0; i < kv.second.getLength(); i++) {
                 const vec2f &xy = kv.second[i];
-                x_array.add(xy.x);
-                y_array.add(xy.y);
+                x_array.push_back(xy.x);
+                y_array.push_back(xy.y);
             }
             float diameter = kv.second.getDiameter();
             if (diameter < 0.0f) {

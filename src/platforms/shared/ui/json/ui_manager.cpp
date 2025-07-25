@@ -86,7 +86,7 @@ void JsonUiManager::processPendingUpdates() {
     }
     
     if (shouldUpdate) {
-        fl::Json doc = fl::Json::createArray();
+                fl::Json doc = fl::Json::createArray();
         toJson(doc);
         fl::string jsonStr = doc.serialize();
         //FL_WARN("*** SENDING UI TO FRONTEND: " << jsonStr.substr(0, 100).c_str() << "...");
@@ -208,7 +208,7 @@ void JsonUiManager::onEndFrame() {
 void JsonUiManager::toJson(fl::Json &json) {
     auto components = getComponents();
     for (auto &component : components) {
-        fl::Json obj = fl::Json::createObject();
+        fl::Json obj = fl::JsonValue(fl::JsonObject());
         component->toJson(obj);
         json.add(obj);
     }

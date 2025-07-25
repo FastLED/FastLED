@@ -33,11 +33,11 @@ JsonCheckboxImpl &JsonCheckboxImpl::Group(const fl::string &name) {
 const fl::string &JsonCheckboxImpl::name() const { return mInternal->name(); }
 
 void JsonCheckboxImpl::toJson(fl::Json &json) const {
-    json.set("name", name());
-    json.set("group", mInternal->groupName());
-    json.set("type", "checkbox");
-    json.set("id", mInternal->id());
-    json.set("value", mValue);
+    json["name"] = name();
+    json["group"] = mInternal->groupName();
+    json["type"] = "checkbox";
+    json["id"] = mInternal->id();
+    json["value"] = mValue;
 }
 
 bool JsonCheckboxImpl::value() const { return mValue; }

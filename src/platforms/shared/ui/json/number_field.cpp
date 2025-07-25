@@ -37,13 +37,13 @@ JsonNumberFieldImpl &JsonNumberFieldImpl::Group(const fl::string &name) {
 const fl::string &JsonNumberFieldImpl::name() const { return mInternal->name(); }
 
 void JsonNumberFieldImpl::toJson(fl::Json &json) const {
-    json.set("name", name());
-    json.set("group", mInternal->groupName());
-    json.set("type", "number");
-    json.set("id", mInternal->id());
-    json.set("value", static_cast<float>(mValue));
-    json.set("min", static_cast<float>(mMin));
-    json.set("max", static_cast<float>(mMax));
+    json["name"] = name();
+    json["group"] = mInternal->groupName();
+    json["type"] = "number";
+    json["id"] = mInternal->id();
+    json["value"] = static_cast<float>(mValue);
+    json["min"] = static_cast<float>(mMin);
+    json["max"] = static_cast<float>(mMax);
 }
 
 double JsonNumberFieldImpl::value() const { return mValue; }

@@ -30,11 +30,11 @@ JsonDescriptionImpl &JsonDescriptionImpl::Group(const fl::string &name) {
 const fl::string &JsonDescriptionImpl::text() const { return mText; }
 
 void JsonDescriptionImpl::toJson(fl::Json &json) const {
-    json.set("name", mInternal->name());
-    json.set("type", "description");
-    json.set("group", mInternal->groupName());
-    json.set("id", mInternal->id());
-    json.set("text", text());
+    json["name"] = mInternal->name();
+    json["type"] = "description";
+    json["group"] = mInternal->groupName();
+    json["id"] = mInternal->id();
+    json["text"] = text();
 }
 
 const string &JsonDescriptionImpl::name() const { return mInternal->name(); }
