@@ -58,14 +58,14 @@ TEST_CASE("Json.ino example as a test case [json]") {
 
     // Effect configuration with safe defaults
     fl::string effect = json["effects"]["current"] | fl::string("solid");
-    int speed = json["effects"]["speed"] | 50;
+    int speed = json["effects"]["speed"].value_or(50);
 
     REQUIRE(effect == "rainbow");
     REQUIRE(speed == 75);
 
     // Accessing nested objects with defaults
-    long duration = json["animation_settings"]["duration_ms"] | 1000;
-    bool loop = json["animation_settings"]["loop"] | false;
+    long duration = json["animation_settings"]["duration_ms"].value_or(1000L);
+    bool loop = json["animation_settings"]["loop"].value_or(false);
 
     REQUIRE(duration == 5000);
     REQUIRE(loop == true);

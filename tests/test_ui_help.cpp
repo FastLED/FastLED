@@ -66,9 +66,9 @@ Visit our [documentation](https://fastled.io) for more details!)";
     CHECK(type == fl::string("help"));
     fl::string group = jsonObj["group"] | fl::string("");
     CHECK(group == fl::string("getting-started"));
-    int id = jsonObj["id"] | -1;
+    int id = jsonObj["id"].value_or(-1);
     CHECK(id >= 0);
-    fl::string content = jsonObj["markdownContent"] | fl::string("");
+    fl::string content = jsonObj["markdownContent"].value_or(fl::string(""));
     CHECK(content == markdownContent);
 }
 
@@ -127,7 +127,7 @@ And some Unicode: ★ ♪ ⚡)";
     help.toJson(jsonObj);
     
     // Verify the markdown content is preserved exactly
-    fl::string content = jsonObj["markdownContent"] | fl::string("");
+    fl::string content = jsonObj["markdownContent"].value_or(fl::string(""));
     CHECK(content == complexMarkdown);
     fl::string type = jsonObj["type"] | fl::string("");
     CHECK(type == fl::string("help"));
@@ -156,7 +156,7 @@ TEST_CASE("UIHelp edge cases") {
     // Verify JSON serialization works with long content
     fl::Json jsonObj = fl::Json();
     longHelp.toJson(jsonObj);
-    fl::string content = jsonObj["markdownContent"] | fl::string("");
+    fl::string content = jsonObj["markdownContent"].value_or(fl::string(""));
     CHECK(content == longContent);
 }
 

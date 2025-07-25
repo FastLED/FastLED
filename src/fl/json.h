@@ -67,7 +67,7 @@ struct JsonVariant {
         }
 
         template<typename T>
-        T operator|(T defaultValue) const;
+        T value_or(T defaultValue) const;
 
         template<typename T>
         T& get_mut() {
@@ -151,7 +151,7 @@ class JsonValue {
     
         // Operator for default values (e.g., json["key"] | defaultValue)
         template<typename T>
-        T operator|(T defaultValue) const;
+        T value_or(T defaultValue) const;
     
         // Accessors for object and array types
         JsonValue& operator[](const fl::string& key);
@@ -207,6 +207,7 @@ private:
 class Json {
 public:
     static Json parse(const char* jsonString);
+    static fl::string parseJson(const char* jsonString, Json* doc);
 
     Json() = default;
     Json(const Json& other) = default;
@@ -229,22 +230,31 @@ public:
 
     size_t size() const { return root_.has_value() ? (*root_).size() : 0; }
 
+    template<typename T>
+    T as() const {
+        if (root_.has_value()) {
+            return (*root_).get<T>();
+        }
+        return T(); // Return default-constructed T if no value
+    }
         
-    JsonValue& operator[](const fl::string& key);
-    const JsonValue& operator[](const fl::string& key) const;
+    Json operator[](const fl::string& key);
+    const Json operator[](const fl::string& key) const;
 
     // Operator for array access at the root level
-    JsonValue& operator[](size_t index);
-    const JsonValue& operator[](size_t index) const;
+    Json operator[](size_t index);
+    const Json operator[](size_t index) const;
     fl::size getSize() const { return root_.has_value() ? (*root_).size() : 0; }
+
+    Json createNestedObject();
+    Json createNestedArray();
 
 private:
     fl::optional<JsonValue> root_;
 };
 
 
-template<typename T>
-T JsonValue::operator|(T defaultValue) const {
+
     if (is_null()) {
         return defaultValue;
     }
