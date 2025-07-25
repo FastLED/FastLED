@@ -1,12 +1,12 @@
-/// @file JsonNew.ino
-/// @brief Demonstrates the improved fluid JSON API with FastLED
+/// @file JsonFluid.ino
+/// @brief Demonstrates the fluid JSON API with FastLED
 ///
-/// This example showcases the improved JSON API for FastLED,
+/// This example showcases the fluid JSON API for FastLED,
 /// emphasizing clean syntax, type safety, default values, and robust
 /// handling of missing fields.
 
 #include "FastLED.h"
-#include "fl/json_new.h" // Using the improved JSON API
+#include "fl/json_fluid.h" // Using the fluid JSON API
 
 #define NUM_LEDS 100
 #define DATA_PIN 3
@@ -20,7 +20,7 @@ void setup() {
     FastLED.addLeds<WS2812, DATA_PIN, GRB>(leds, NUM_LEDS);
     FastLED.setBrightness(64);
 
-    Serial.println("FastLED Improved JSON API Demo Starting...");
+    Serial.println("FastLED Fluid JSON API Demo Starting...");
 
     // Example JSON string with LED configuration
     const char* configJson = R"({
@@ -40,42 +40,42 @@ void setup() {
         }
     })";
 
-    // Parse using the improved API
+    // Parse using the fluid API
     fl::Json json = fl::Json::parse(fl::string(configJson));
 
     if (!json.is_null()) {
-        Serial.println("JSON parsed successfully with improved API!");
+        Serial.println("JSON parsed successfully with fluid API!");
 
         // Clean syntax with default values - no more verbose error checking!
-        int64_t numLeds = json["strip"]["num_leds"] | int64_t(100);      // Gets 150, or 100 if missing
-        int64_t pin = json["strip"]["pin"] | int64_t(3);                 // Gets 5, or 3 if missing
+        int numLeds = json["strip"]["num_leds"] | 100;      // Gets 150, or 100 if missing
+        int pin = json["strip"]["pin"] | 3;                 // Gets 5, or 3 if missing
         fl::string type = json["strip"]["type"] | fl::string("WS2812");  // Gets "WS2812B"
-        int64_t brightness = json["strip"]["brightness"] | int64_t(64);  // Gets 200, or 64 if missing
+        int brightness = json["strip"]["brightness"] | 64;  // Gets 200, or 64 if missing
 
         // Safe access to missing values - no crashes!
-        int64_t missing = json["non_existent"]["missing"] | int64_t(999);  // Gets 999
+        int missing = json["non_existent"]["missing"] | 999;  // Gets 999
 
         Serial.println("LED Strip Configuration:");
-        Serial.print("  LEDs: "); Serial.println(static_cast<int>(numLeds));
-        Serial.print("  Pin: "); Serial.println(static_cast<int>(pin));
+        Serial.print("  LEDs: "); Serial.println(numLeds);
+        Serial.print("  Pin: "); Serial.println(pin);
         Serial.print("  Type: "); Serial.println(type.c_str());
-        Serial.print("  Brightness: "); Serial.println(static_cast<int>(brightness));
-        Serial.print("  Missing field default: "); Serial.println(static_cast<int>(missing));
+        Serial.print("  Brightness: "); Serial.println(brightness);
+        Serial.print("  Missing field default: "); Serial.println(missing);
 
         // Effect configuration with safe defaults
         fl::string effect = json["effects"]["current"] | fl::string("solid");
-        int64_t speed = json["effects"]["speed"] | int64_t(50);
+        int speed = json["effects"]["speed"] | 50;
 
         Serial.println("Effect Configuration:");
         Serial.print("  Current: "); Serial.println(effect.c_str());
-        Serial.print("  Speed: "); Serial.println(static_cast<int>(speed));
+        Serial.print("  Speed: "); Serial.println(speed);
 
         // Accessing nested objects with defaults
-        int64_t duration = json["animation_settings"]["duration_ms"] | int64_t(1000);
+        long duration = json["animation_settings"]["duration_ms"] | 1000L;
         bool loop = json["animation_settings"]["loop"] | false;
 
         Serial.println("Animation Settings:");
-        Serial.print("  Duration (ms): "); Serial.println(static_cast<int>(duration));
+        Serial.print("  Duration (ms): "); Serial.println(duration);
         Serial.print("  Loop: "); Serial.println(loop ? "true" : "false");
 
         // Check if keys exist
@@ -88,7 +88,7 @@ void setup() {
         Serial.println("Serialized JSON:");
         Serial.println(serialized.c_str());
 
-        Serial.println("\nImproved API provides:");
+        Serial.println("\nFluid API provides:");
         Serial.println("  ✓ Type safety");
         Serial.println("  ✓ Default values");
         Serial.println("  ✓ No crashes on missing fields");
@@ -96,9 +96,10 @@ void setup() {
         Serial.println("  ✓ Significantly less code for common operations");
         Serial.println("  ✓ Direct construction from various types");
         Serial.println("  ✓ Contains methods for checking key/index existence");
+        Serial.println("  ✓ Array and object creation helpers");
 
     } else {
-        Serial.println("JSON parsing failed with improved API");
+        Serial.println("JSON parsing failed with fluid API");
     }
 }
 

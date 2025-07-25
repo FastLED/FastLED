@@ -76,17 +76,16 @@ bool ActiveStripData::parseStripJsonInfo(const char* jsonStr) {
 fl::string ActiveStripData::infoJsonString() {
     // LEGACY API - WORKING: Create strip info JSON using ArduinoJSON
 #if FASTLED_ENABLE_JSON
-    FLArduinoJson::JsonDocument doc;
-    auto array = doc.to<FLArduinoJson::JsonArray>();
+    auto json = fl::Json::createArray();
 
     for (const auto &[stripIndex, stripData] : mStripMap) {
-        auto obj = array.add<FLArduinoJson::JsonObject>();
-        obj["strip_id"] = stripIndex;
-        obj["type"] = "r8g8b8";
+        auto obj = fl::Json::createObject();
+        obj.set("strip_id", stripIndex);
+        obj.set("type", "r8g8b8");
+        json.push_back(obj);
     }
 
-    fl::string jsonBuffer;
-    serializeJson(doc, jsonBuffer);
+    fl::string jsonBuffer = json.serialize();
     
     // Ensure we always return a valid JSON array, even if empty
     if (jsonBuffer.empty()) {

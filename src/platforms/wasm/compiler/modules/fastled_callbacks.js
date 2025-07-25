@@ -79,7 +79,7 @@ globalThis.FastLED_onFrame = async function(frameData) {
         
         // Final defensive check: ensure screenMap has proper structure
         if (frameData.screenMap && (!frameData.screenMap.strips || typeof frameData.screenMap.strips !== 'object')) {
-            console.warn('FastLED_onFrame: screenMap exists but has invalid structure, using fallback');
+            console.warn('FastLED_onFrame: screenMap exists but has invalid structure, using fallback:', frameData.screenMap);
             frameData.screenMap = {
                 strips: {},
                 absMin: [0, 0],

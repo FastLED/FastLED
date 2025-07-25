@@ -200,6 +200,11 @@ class StrStream {
         return *this;
     }
 
+    StrStream &operator<<(const long long &n) {
+        mStr.append(static_cast<fl::i64>(n));
+        return *this;
+    }
+
 
     // Unified handler for fl:: namespace size-like unsigned integer types and int
     // This handles fl::size, fl::u16 from the fl:: namespace, and int type

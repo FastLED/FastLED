@@ -298,27 +298,33 @@ EMSCRIPTEN_KEEPALIVE bool jsDeclareFile(const char *path, size_t len) {
 }
 
 EMSCRIPTEN_KEEPALIVE void fastled_declare_files(const char* jsonStr) {
-    fl::JsonDocument doc;
-    fl::parseJson(jsonStr, &doc);
-    auto files = doc["files"];
-    if (files.isNull()) {
+    auto json = fl::Json::parse(jsonStr);
+    if (!json.has_value()) {
         return;
     }
-    auto files_array = files.as<FLArduinoJson::JsonArray>();
-    if (files_array.isNull()) {
+    
+    auto files = json["files"];
+    if (!files.is_array()) {
         return;
     }
-
-    for (auto file : files_array) {
+    
+    for (size_t i = 0; i < files.getSize(); ++i) {
+        auto file = files[static_cast<int>(i)];
+        if (!file.is_object()) {
+            continue;
+        }
+        
         auto size_obj = file["size"];
-        if (size_obj.isNull()) {
+        if (!size_obj.is_int()) {
             continue;
         }
         auto size = size_obj.as<int>();
+        
         auto path_obj = file["path"];
-        if (path_obj.isNull()) {
+        if (!path_obj.is_string()) {
             continue;
         }
+        
         printf("Declaring file %s with size %d. These will become available as "
                "File system paths within the app.\n",
                path_obj.as<const char *>(), size);

@@ -1,5 +1,6 @@
 #include "fl/detail/json_impl.h"
 #include "fl/json.h"
+#include "fl/json_compact.h"
 
 #if FASTLED_ENABLE_JSON
 #include "third_party/arduinojson/json.h"
@@ -64,13 +65,26 @@ public:
     bool isObject() const { return variant.is<::FLArduinoJson::JsonObject>(); }
     bool isNull() const { return variant.isNull(); }
     
-    // Additional type checks
-    bool isString() const { return variant.is<const char*>() || variant.is<::FLArduinoJson::JsonString>(); }
-    bool isInt() const { 
-        return variant.is<int>() || variant.is<long>() || variant.is<long long>() || 
-               variant.is<unsigned int>() || variant.is<unsigned long>() || variant.is<unsigned long long>();
+    // Additional type checks with stricter type checking to avoid overlap
+    bool isString() const { 
+        // Check for string type but not numeric types
+        return (variant.is<const char*>() || variant.is<::FLArduinoJson::JsonString>()) && 
+               !variant.is<int>() && !variant.is<long>() && !variant.is<long long>() && 
+               !variant.is<unsigned int>() && !variant.is<unsigned long>() && !variant.is<unsigned long long>() &&
+               !variant.is<float>() && !variant.is<double>();
     }
-    bool isFloat() const { return variant.is<float>() || variant.is<double>(); }
+    bool isInt() const { 
+        // Check for integer type but not float
+        return (variant.is<int>() || variant.is<long>() || variant.is<long long>() || 
+                variant.is<unsigned int>() || variant.is<unsigned long>() || variant.is<unsigned long long>()) &&
+                !variant.is<float>() && !variant.is<double>();
+    }
+    bool isFloat() const { 
+        // Check for float type but not integer
+        return (variant.is<float>() || variant.is<double>()) &&
+               !variant.is<int>() && !variant.is<long>() && !variant.is<long long>() && 
+               !variant.is<unsigned int>() && !variant.is<unsigned long>() && !variant.is<unsigned long long>();
+    }
     bool isBool() const { return variant.is<bool>(); }
     size_t size() const {
         if (variant.is<::FLArduinoJson::JsonArray>()) {
@@ -515,8 +529,16 @@ Json::Json() : mImpl(fl::make_shared<JsonImpl>()) {}
 
 Json Json::parse(const char* jsonStr) {
     Json result;
+    if (!jsonStr) {
+        // Return null Json on null input
+        return result;
+    }
+    
+    // Compact the JSON string to remove whitespace
+    fl::string compactedJson = fl::compactJsonString(jsonStr);
+    
     fl::string error;
-    if (!result.mImpl->parseWithRootDetection(jsonStr, &error)) {
+    if (!result.mImpl->parseWithRootDetection(compactedJson.c_str(), &error)) {
         // Return null Json on parse error
         result.mImpl = fl::make_shared<JsonImpl>();
     }
