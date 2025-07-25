@@ -83,6 +83,12 @@ public:
             deleter_(ptr_);
         }
     }
+
+    void swap(unique_ptr& u) noexcept {
+        using fl::swap;
+        swap(ptr_, u.ptr_);
+        swap(deleter_, u.deleter_);
+    }
     
     // Observers
     pointer get() const noexcept { return ptr_; }
@@ -101,7 +107,11 @@ public:
         return tmp;
     }
     
-    void reset(pointer p = nullptr) noexcept {
+    void reset() noexcept {
+        reset(nullptr);
+    }
+    
+    void reset(pointer p) noexcept {
         pointer old_ptr = ptr_;
         ptr_ = p;
         if (old_ptr) {
@@ -109,11 +119,7 @@ public:
         }
     }
     
-    void swap(unique_ptr& u) noexcept {
-        using fl::swap;
-        swap(ptr_, u.ptr_);
-        swap(deleter_, u.deleter_);
-    }
+
 };
 
 // Array specialization for scoped_array consolidation

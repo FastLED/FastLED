@@ -309,6 +309,7 @@ function(apply_test_compile_definitions)
     # Standard test definitions for all targets
     set(TEST_DEFINITIONS
         DEBUG
+        FASTLED_ENABLE_JSON=1
         FASTLED_FORCE_NAMESPACE=1
         FASTLED_USE_JSON_UI=1
         FASTLED_NO_AUTO_NAMESPACE

@@ -427,277 +427,287 @@ bool JsonImpl::hasField(const char* key) const {
 }
 
 void JsonImpl::setValue(const char* value) {
+    #if FASTLED_ENABLE_JSON
     if (mProxy) {
         mProxy->setValue(value);
     } else {
         // If no proxy, create a new one for this value
         mProxy = ProxyVariant::fromParsed(fl::string(value).c_str());
     }
+    #endif
 }
 
 void JsonImpl::setValue(const fl::string& value) {
+    #if FASTLED_ENABLE_JSON
     if (mProxy) {
         mProxy->setValue(value);
     } else {
         mProxy = ProxyVariant::fromParsed(value.c_str());
     }
+    #endif
 }
 
 void JsonImpl::setValue(int value) {
+    #if FASTLED_ENABLE_JSON
     if (mProxy) {
         mProxy->setValue(value);
     } else {
         mProxy = ProxyVariant::fromParsed(fl::to_string(value).c_str());
     }
+    #endif
 }
 
 void JsonImpl::setValue(float value) {
+    #if FASTLED_ENABLE_JSON
     if (mProxy) {
         mProxy->setValue(value);
     } else {
         mProxy = ProxyVariant::fromParsed(fl::to_string(value).c_str());
     }
+    #endif
 }
 
 void JsonImpl::setValue(bool value) {
+    #if FASTLED_ENABLE_JSON
     if (mProxy) {
         mProxy->setValue(value);
     } else {
          mProxy = ProxyVariant::fromParsed(fl::to_string(value).c_str());
     }
+    #endif
 }
 
 void JsonImpl::setNull() {
+    #if FASTLED_ENABLE_JSON
     if (mProxy) {
         mProxy->setNull();
     } else {
         // If no proxy, it's already null
     }
+    #endif
 }
 
 // Convenience methods for setting object field values directly
 void JsonImpl::setObjectFieldValue(const char* key, int value) {
+    #if FASTLED_ENABLE_JSON
     if (mProxy) {
         mProxy->setField(key, value);
     }
+    #endif
 }
 
 void JsonImpl::setObjectFieldValue(const char* key, const char* value) {
+    #if FASTLED_ENABLE_JSON
     if (mProxy) {
         mProxy->setField(key, value);
     }
+    #endif
 }
 
 void JsonImpl::setObjectFieldValue(const char* key, const fl::string& value) {
+    #if FASTLED_ENABLE_JSON
     if (mProxy) {
         mProxy->setField(key, value);
     }
+    #endif
 }
 
 void JsonImpl::setObjectFieldValue(const char* key, float value) {
+    #if FASTLED_ENABLE_JSON
     if (mProxy) {
         mProxy->setField(key, value);
     }
+    #endif
 }
 
 void JsonImpl::setObjectFieldValue(const char* key, bool value) {
+    #if FASTLED_ENABLE_JSON
     if (mProxy) {
         mProxy->setField(key, value);
     }
+    #endif
 }
 
 float JsonImpl::getFloatValue() const {
+    #if FASTLED_ENABLE_JSON
     return mProxy ? mProxy->getFloatValue() : 0.0f;
+    #else
+    return 0.0f;
+    #endif
 }
 
-// Json class implementation with real parsing
-Json::Json() : mImpl(fl::make_shared<JsonImpl>()) {}
 
-Json Json::parse(const char* jsonStr) {
-    Json result;
-    fl::string error;
-    if (!result.mImpl->parseWithRootDetection(jsonStr, &error)) {
-        // Return null Json on parse error
-        result.mImpl = fl::make_shared<JsonImpl>();
-    }
-    return result;
-}
 
-bool Json::has_value() const { return mImpl && !mImpl->isNull(); }
-bool Json::is_object() const { return mImpl && mImpl->isObject(); }
-bool Json::is_array() const { return mImpl && mImpl->isArray(); }
+bool Json::has_value() const { return root_ && !root_->is_null(); }
 
-bool Json::is_string() const { return mImpl && mImpl->isString(); }
-bool Json::is_int() const { return mImpl && mImpl->isInt(); }
-bool Json::is_float() const { return mImpl && mImpl->isFloat(); }
-bool Json::is_bool() const { return mImpl && mImpl->isBool(); }
 
-Json Json::operator[](const char* key) const {
-    Json result;
-    if (mImpl) {
-        result.mImpl = fl::make_shared<JsonImpl>(mImpl->getObjectField(key));
-    }
-    return result;
-}
 
-Json Json::operator[](int index) const {
-    Json result;
-    if (mImpl) {
-        result.mImpl = fl::make_shared<JsonImpl>(mImpl->getArrayElement(index));
-    }
-    return result;
-}
+// Json Json::operator[](const char* key) const {
+//     Json result;
+//     if (root_) {
+//         result.root_ = fl::make_shared<JsonImpl>(root_->getObjectField(key));
+//     }
+//     return result;
+// }
 
-// Value getters
-fl::string Json::getStringValue() const {
-    return mImpl ? mImpl->getStringValue() : fl::string("");
-}
+// Json Json::operator[](int index) const {
+//     Json result;
+//     if (root_) {
+//         result.root_ = fl::make_shared<JsonImpl>(root_->getArrayElement(index));
+//     }
+//     return result;
+// }
 
-int Json::getIntValue() const {
-    return mImpl ? mImpl->getIntValue() : 0;
-}
+// // Value getters
+// fl::string Json::getStringValue() const {
+//     return root_ ? root_->getStringValue() : fl::string("");
+// }
 
-float Json::getFloatValue() const {
-    return mImpl ? mImpl->getFloatValue() : 0.0f;
-}
+// int Json::getIntValue() const {
+//     return root_ ? root_->getIntValue() : 0;
+// }
 
-bool Json::getBoolValue() const {
-    return mImpl ? mImpl->getBoolValue() : false;
-}
+// float Json::getFloatValue() const {
+//     return root_ ? root_->getFloatValue() : 0.0f;
+// }
 
-bool Json::isNull() const {
-    return !mImpl || mImpl->isNull();
-}
+// bool Json::getBoolValue() const {
+//     return root_ ? root_->getBoolValue() : false;
+// }
 
-// Array/Object size
-size_t Json::getSize() const {
-    return mImpl ? mImpl->getSize() : 0;
-}
+// bool Json::isNull() const {
+//     return !root_ || root_->isNull();
+// }
 
-// Object iteration support
-fl::vector<fl::string> Json::getObjectKeys() const {
-    return mImpl ? mImpl->getObjectKeys() : fl::vector<fl::string>();
-}
+// // Array/Object size
+// size_t Json::getSize() const {
+//     return root_ ? root_->getSize() : 0;
+// }
+
+// // Object iteration support
+// fl::vector<fl::string> Json::getObjectKeys() const {
+//     return root_ ? root_->getObjectKeys() : fl::vector<fl::string>();
+// }
 
 // Serialization
-fl::string Json::serialize() const {
-    return mImpl ? mImpl->serialize() : fl::string("{}");
-}
+// fl::string Json::serialize() const {
+//     return root_ ? root_->serialize() : fl::string("{}");
+// }
 
 // Static factory methods
-Json Json::createArray() {
-    Json result;
-    result.mImpl = fl::make_shared<JsonImpl>(JsonImpl::createArray());
-    return result;
-}
+// Json Json::createArray() {
+//     Json result;
+//     result.root_ = fl::make_shared<JsonImpl>(JsonImpl::createArray());
+//     return result;
+// }
 
-Json Json::createObject() {
-    Json result;
-    result.mImpl = fl::make_shared<JsonImpl>(JsonImpl::createObject());
-    return result;
-}
+// // Json Json::createObject() {
+// //     Json result;
+// //     result.root_ = fl::make_shared<JsonImpl>(JsonImpl::createObject());
+// //     return result;
+// // }
 
-// Modification methods for creating JSON
-void Json::push_back(const Json& element) {
-    if (mImpl && element.mImpl) {
-        mImpl->appendArrayElement(*element.mImpl);
-    }
-}
+// // Modification methods for creating JSON
+// void Json::push_back(const Json& element) {
+//     if (root_ && element.root_) {
+//         root_->appendArrayElement(*element.root_);
+//     }
+// }
 
-void Json::set(const char* key, const Json& value) {
-    if (mImpl && value.mImpl) {
-        mImpl->setObjectField(key, *value.mImpl);
-    }
-}
+// void Json::set(const char* key, const Json& value) {
+//     if (root_ && value.root_) {
+//         root_->setObjectField(key, *value.root_);
+//     }
+// }
 
-void Json::set(const char* key, int value) {
-    if (mImpl) {
-        mImpl->setObjectFieldValue(key, value);
-    }
-}
+// void Json::set(const char* key, int value) {
+//     if (root_) {
+//         root_->setObjectFieldValue(key, value);
+//     }
+// }
 
-void Json::set(const char* key, const char* value) {
-    if (mImpl) {
-        mImpl->setObjectFieldValue(key, value);
-    }
-}
+// void Json::set(const char* key, const char* value) {
+//     if (root_) {
+//         root_->setObjectFieldValue(key, value);
+//     }
+// }
 
-void Json::set(const char* key, const fl::string& value) {
-    if (mImpl) {
-        mImpl->setObjectFieldValue(key, value);
-    }
-}
+// void Json::set(const char* key, const fl::string& value) {
+//     if (root_) {
+//         root_->setObjectFieldValue(key, value);
+//     }
+// }
 
-void Json::set(const char* key, float value) {
-    if (mImpl) {
-        mImpl->setObjectFieldValue(key, value);
-    }
-}
+// void Json::set(const char* key, float value) {
+//     if (root_) {
+//         root_->setObjectFieldValue(key, value);
+//     }
+// }
 
-void Json::set(const char* key, bool value) {
-    if (mImpl) {
-        mImpl->setObjectFieldValue(key, value);
-    }
-}
+// void Json::set(const char* key, bool value) {
+//     if (root_) {
+//         root_->setObjectFieldValue(key, value);
+//     }
+// }
 
-// Additional array methods for compatibility
-void Json::push_back(int value) {
-    if (mImpl) {
-        mImpl->appendArrayElement(value);
-    }
-}
+// // Additional array methods for compatibility
+// void Json::push_back(int value) {
+//     if (root_) {
+//         root_->appendArrayElement(value);
+//     }
+// }
 
-void Json::push_back(float value) {
-    if (mImpl) {
-        mImpl->appendArrayElement(value);
-    }
-}
+// void Json::push_back(float value) {
+//     if (root_) {
+//         root_->appendArrayElement(value);
+//     }
+// }
 
-void Json::push_back(bool value) {
-    if (mImpl) {
-        mImpl->appendArrayElement(value);
-    }
-}
+// void Json::push_back(bool value) {
+//     if (root_) {
+//         root_->appendArrayElement(value);
+//     }
+// }
 
-void Json::push_back(const char* value) {
-    if (mImpl) {
-        mImpl->appendArrayElement(value);
-    }
-}
+// void Json::push_back(const char* value) {
+//     if (root_) {
+//         root_->appendArrayElement(value);
+//     }
+// }
 
-void Json::push_back(const fl::string& value) {
-    if (mImpl) {
-        mImpl->appendArrayElement(value);
-    }
-}
+// void Json::push_back(const fl::string& value) {
+//     if (root_) {
+//         root_->appendArrayElement(value);
+//     }
+// }
 
-// Nested object/array creation (FLArduinoJson compatibility)
-Json Json::createNestedObject(const char* key) {
-    Json nested = createObject();
-    if (mImpl && key) {
-        mImpl->setObjectField(key, *nested.mImpl);
-    }
-    return nested;
-}
+// // Nested object/array creation (FLArduinoJson compatibility)
+// Json Json::createNestedObject(const char* key) {
+//     Json nested = createObject();
+//     if (root_ && key) {
+//         root_->setObjectField(key, *nested.root_);
+//     }
+//     return nested;
+// }
 
-Json Json::createNestedArray(const char* key) {
-    Json nested = createArray();
-    if (mImpl && key) {
-        mImpl->setObjectField(key, *nested.mImpl);
-    }
-    return nested;
-}
+// Json Json::createNestedArray(const char* key) {
+//     Json nested = createArray();
+//     if (root_ && key) {
+//         root_->setObjectField(key, *nested.root_);
+//     }
+//     return nested;
+// }
 
-Json Json::createNestedObject() {
-    Json nested = createObject();
-    push_back(nested);
-    return nested;
-}
+// Json Json::createNestedObject() {
+//     Json nested = createObject();
+//     push_back(nested);
+//     return nested;
+// }
 
-Json Json::createNestedArray() {
-    Json nested = createArray();
-    push_back(nested);
-    return nested;
-}
+// Json Json::createNestedArray() {
+//     Json nested = createArray();
+//     push_back(nested);
+//     return nested;
+// }
 
 } // namespace fl 

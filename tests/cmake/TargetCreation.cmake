@@ -19,6 +19,7 @@ function(apply_test_settings target)
     # Apply common compile definitions
     target_compile_definitions(${target} PRIVATE 
         DEBUG
+        FASTLED_ENABLE_JSON=1
         FASTLED_FORCE_NAMESPACE=1
         FASTLED_USE_JSON_UI=1
         FASTLED_NO_AUTO_NAMESPACE

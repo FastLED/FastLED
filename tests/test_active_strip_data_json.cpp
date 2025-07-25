@@ -72,11 +72,11 @@ TEST_CASE("ActiveStripData JSON Round-Trip Test") {
     
     CHECK(parsed.has_value());
     CHECK(parsed.is_array());
-    CHECK_EQ(parsed.getSize(), 2);
+    CHECK_EQ(parsed.size(), 2);
     
     // Verify strip data
     bool found10 = false, found20 = false;
-    for (size_t i = 0; i < parsed.getSize(); ++i) {
+    for (size_t i = 0; i < parsed.size(); ++i) {
         auto strip = parsed[static_cast<int>(i)];
         int id = strip["strip_id"] | -1;
         fl::string type = strip["type"] | fl::string("missing");

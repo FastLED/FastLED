@@ -6,6 +6,7 @@
 #include "fl/vector.h"
 #include "fl/unique_ptr.h"
 #include "fl/function.h"
+#include "fl/json.h"
 
 namespace fl {
 
@@ -22,6 +23,7 @@ static fl::unique_ptr<JsonUiManager>& getInternalManager() {
 }
 
 JsonUiUpdateInput setJsonUiHandlers(const JsonUiUpdateOutput& updateJsHandler) {
+    #if FASTLED_ENABLE_JSON
     // FL_WARN("setJsonUiHandlers: ENTRY - updateJsHandler is " << (updateJsHandler ? "VALID" : "NULL/EMPTY"));
     
     // Create internal JsonUiManager only if updateJsHandler is valid (not empty)
@@ -79,6 +81,9 @@ JsonUiUpdateInput setJsonUiHandlers(const JsonUiUpdateOutput& updateJsHandler) {
         manager.reset(); // Clear the internal manager
         return fl::function<void(const char*)>{};
     }
+    #else
+    return fl::function<void(const char*)>{};
+    #endif
 }
 
 void addJsonUiComponent(fl::weak_ptr<JsonUiInternal> component) {

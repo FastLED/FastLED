@@ -8,6 +8,11 @@
 
 #if FASTLED_ENABLE_JSON
 
+#error "FASTLED_ENABLE_JSON is not defined"
+
+
+
+
 
 namespace fl {
 namespace {

@@ -37,6 +37,7 @@ void ActiveStripData::onCanvasUiSet(CLEDController *strip,
 
 // NEW: JSON parsing using fl::Json API (WORKING - parsing is fully functional)
 bool ActiveStripData::parseStripJsonInfo(const char* jsonStr) {
+    #if FASTLED_ENABLE_JSON
     if (!jsonStr) return false;
     
     // Use the working fl::Json parsing API
@@ -71,6 +72,9 @@ bool ActiveStripData::parseStripJsonInfo(const char* jsonStr) {
     }
     
     return true;
+    #else
+    return false;
+    #endif
 }
 
 fl::string ActiveStripData::infoJsonString() {

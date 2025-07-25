@@ -69,7 +69,7 @@ bool ScreenMap::ParseJson(const char *jsonStrScreenMap,
         return false;
     }
 
-    auto mapJson = json["map"];
+    JsonValue& mapJson = json["map"];
     if (!mapJson.is_object()) {
         *err = "Missing or invalid 'map' object in JSON";
         FASTLED_WARN("Failed to parse json: " << err->c_str());
@@ -77,7 +77,7 @@ bool ScreenMap::ParseJson(const char *jsonStrScreenMap,
     }
 
     // Iterate over all segment keys in the map object
-    auto segmentKeys = mapJson.getObjectKeys();
+    fl::vector<fl::string> segmentKeys = mapJson.getObjectKeys();
     for (const auto& segmentName : segmentKeys) {
         auto segment = mapJson[segmentName.c_str()];
         

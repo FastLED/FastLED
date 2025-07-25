@@ -1,15 +1,17 @@
 #pragma once
 
+#include "fl/json.h"
+
 #ifndef FASTLED_USE_JSON_UI
 #ifdef __EMSCRIPTEN__
 #define FASTLED_USE_JSON_UI 1
 #else
-#define FASTLED_USE_JSON_UI 0
+#define FASTLED_USE_JSON_UI FASTLED_ENABLE_JSON
 #endif  // __EMSCRIPTEN__
 #endif  // FASTLED_USE_JSON_UI
 
 
-#if FASTLED_USE_JSON_UI
+#if FASTLED_USE_JSON_UI 
 #include "platforms/wasm/js_bindings.h"
 #include "platforms/shared/ui/json/audio.h"
 #include "platforms/shared/ui/json/button.h"

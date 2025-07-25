@@ -57,7 +57,7 @@ Visit our [documentation](https://fastled.io) for more details!)";
     JsonHelpImpl help(markdownContent);
     help.Group("getting-started");
     
-    fl::Json jsonObj = fl::Json::createObject();
+    fl::Json jsonObj = fl::Json();
     help.toJson(jsonObj);
     
     fl::string name = jsonObj["name"] | fl::string("");
@@ -123,7 +123,7 @@ And some Unicode: ★ ♪ ⚡)";
     
     JsonHelpImpl help(complexMarkdown);
     
-    fl::Json jsonObj = fl::Json::createObject();
+    fl::Json jsonObj = fl::Json();
     help.toJson(jsonObj);
     
     // Verify the markdown content is preserved exactly
@@ -154,7 +154,7 @@ TEST_CASE("UIHelp edge cases") {
     CHECK(longHelp.markdownContent() == longContent);
     
     // Verify JSON serialization works with long content
-    fl::Json jsonObj = fl::Json::createObject();
+    fl::Json jsonObj = fl::Json();
     longHelp.toJson(jsonObj);
     fl::string content = jsonObj["markdownContent"] | fl::string("");
     CHECK(content == longContent);
