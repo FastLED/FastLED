@@ -240,9 +240,13 @@ function(apply_test_compiler_flags)
     endforeach()
     
     # 🚨 CRITICAL: Double-check RTTI enforcement after filtering
-    list(FIND filtered_flags "-fno-rtti" rtti_flag_index)
+    if(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
+        list(FIND filtered_flags "/GR-" rtti_flag_index)
+    else()
+        list(FIND filtered_flags "-fno-rtti" rtti_flag_index)
+    endif()
     if(rtti_flag_index EQUAL -1)
-        message(FATAL_ERROR "🚨 CRITICAL: -fno-rtti flag was filtered out! This should never happen. RTTI must be disabled.")
+        message(FATAL_ERROR "🚨 CRITICAL: RTTI flag was filtered out! This should never happen. RTTI must be disabled.")
     endif()
     
     # 🚨 CRITICAL: Triple-check by adding -fno-rtti again to be absolutely sure
