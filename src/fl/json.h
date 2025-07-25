@@ -18,6 +18,7 @@ namespace fl {
 
 class JsonObject;
 class JsonArray;
+class JsonValue;
 struct JsonVariantImpl;
 
 
@@ -29,6 +30,7 @@ void get_value_impl(const JsonVariantImpl* data, double& value);
 void get_value_impl(const JsonVariantImpl* data, fl::string& value);
 void get_value_impl(const JsonVariantImpl* data, JsonObject& value);
 void get_value_impl(const JsonVariantImpl* data, JsonArray& value);
+void get_value_impl(const JsonVariantImpl* data, JsonValue& value);
 
 void get_value_impl_mut(JsonVariantImpl* data, int** value);
 void get_value_impl_mut(JsonVariantImpl* data, long** value);
@@ -186,6 +188,7 @@ public:
     JsonValue& operator[](const fl::string& key);
     const JsonValue& operator[](const fl::string& key) const;
     fl::string to_string() const; // For serialization
+    fl::vector<fl::string> getObjectKeys() const;
 
 private:
     fl::hash_map<fl::string, JsonValue> members_;
@@ -237,12 +240,20 @@ public:
 
     size_t size() const { return root_.has_value() ? (*root_).size() : 0; }
 
-    template<typename T>
+    template<typename T, typename fl::enable_if<!fl::is_same<T, JsonValue>::value, int>::type = 0>
     T as() const {
         if (root_.has_value()) {
             return (*root_).get<T>();
         }
         return T(); // Return default-constructed T if no value
+    }
+
+    template<typename T, typename fl::enable_if<fl::is_same<T, JsonValue>::value, int>::type = 0>
+    JsonValue as() const {
+        if (root_.has_value()) {
+            return (*root_);
+        }
+        return JsonValue(); // Return default-constructed JsonValue if no value
     }
     
     template<typename T>
@@ -283,13 +294,11 @@ public:
 
     fl::string serialize() const;
 
+    fl::vector<fl::string> getObjectKeys() const;
+
 private:
     fl::optional<JsonValue> root_;
 };
-
-fl::vector<fl::string> JsonValue::getObjectKeys() const {
-    return fl::vector<fl::string>();
-}
 
 
 } // namespace fl

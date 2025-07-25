@@ -71,18 +71,7 @@ fl::unique_ptr<JsonVariant>&& JsonValueNew(JsonVariant&& other) {
 }
 
 
-void JsonVariantConstruct(fl::unique_ptr<JsonVariant>* data);
-void JsonVariantConstruct(bool value, fl::unique_ptr<JsonVariant>* data);
-void JsonVariantConstruct(int value, fl::unique_ptr<JsonVariant>* data);
-void JsonVariantConstruct(long value, fl::unique_ptr<JsonVariant>* data);
-void JsonVariantConstruct(double value, fl::unique_ptr<JsonVariant>* data);
-void JsonVariantConstruct(const fl::string& value, fl::unique_ptr<JsonVariant>* data);
-void JsonVariantConstruct(const JsonObject& value, fl::unique_ptr<JsonVariant>* data);
-void JsonVariantConstruct(const JsonArray& value, fl::unique_ptr<JsonVariant>* data);
-void JsonVariantConstruct(JsonObject&& value, fl::unique_ptr<JsonVariant>* data);
-void JsonVariantConstruct(JsonArray&& value, fl::unique_ptr<JsonVariant>* data);
-void JsonVariantConstruct(const JsonVariant& other, fl::unique_ptr<JsonVariant>* data);
-void JsonVariantConstruct(JsonVariant&& other, fl::unique_ptr<JsonVariant>* data);
+
 void JsonVariantConstruct(fl::unique_ptr<JsonVariantImpl>* data);
 void JsonVariantConstruct(bool value, fl::unique_ptr<JsonVariantImpl>* data);
 void JsonVariantConstruct(int value, fl::unique_ptr<JsonVariantImpl>* data);
@@ -148,6 +137,17 @@ bool JsonValue::is_string() const { return data_->is_string(); }
 bool JsonValue::is_object() const { return data_->is_object(); }
 bool JsonValue::is_array() const { return data_->is_array(); }
 
+#endif
+
+bool JsonVariant::is_null() const { return data_->is_null(); }
+bool JsonVariant::is_bool() const { return data_->is_bool(); }
+bool JsonVariant::is_int() const { return data_->is_int(); }
+bool JsonVariant::is_long() const { return data_->is_long(); }
+bool JsonVariant::is_double() const { return data_->is_double(); }
+bool JsonVariant::is_string() const { return data_->is_string(); }
+bool JsonVariant::is_object() const { return data_->is_object(); }
+bool JsonVariant::is_array() const { return data_->is_array(); }
+
 #else
 bool JsonValue::is_null() const { return true; }
 bool JsonValue::is_bool() const { return false; }
@@ -157,6 +157,15 @@ bool JsonValue::is_double() const { return false; }
 bool JsonValue::is_string() const { return false; }
 bool JsonValue::is_object() const { return false; }
 bool JsonValue::is_array() const { return false; }
+
+bool JsonVariant::is_null() const { return true; }
+bool JsonVariant::is_bool() const { return false; }
+bool JsonVariant::is_int() const { return false; }
+bool JsonVariant::is_long() const { return false; }
+bool JsonVariant::is_double() const { return false; }
+bool JsonVariant::is_string() const { return false; }
+bool JsonVariant::is_object() const { return false; }
+bool JsonVariant::is_array() const { return false; }
 
 #endif
 
@@ -210,6 +219,48 @@ inline fl::string JsonValue::value_or<fl::string>(fl::string defaultValue) const
         return data_->get<fl::string>();
     }
     return defaultValue; // Return default if not a string
+}
+
+template<>
+inline int JsonValue::value_or<int>(int defaultValue) const {
+    if (is_null()) {
+        return defaultValue;
+    }
+    if (is_int()) {
+        return data_->get<int>();
+    }
+    if (is_long()) {
+        return static_cast<int>(data_->get<long>());
+    }
+    if (is_double()) {
+        return static_cast<int>(data_->get<double>());
+    }
+    return defaultValue;
+}
+
+template<>
+inline long JsonValue::value_or<long>(long defaultValue) const {
+    if (is_null()) {
+        return defaultValue;
+    }
+    if (is_long()) {
+        return data_->get<long>();
+    }
+    if (is_int()) {
+        return static_cast<long>(data_->get<int>());
+    }
+    return defaultValue;
+}
+
+template<>
+inline bool JsonValue::value_or<bool>(bool defaultValue) const {
+    if (is_null()) {
+        return defaultValue;
+    }
+    if (is_bool()) {
+        return data_->get<bool>();
+    }
+    return defaultValue;
 }
 
 
@@ -417,6 +468,8 @@ fl::string JsonObject::to_string() const {
     return s;
 }
 
+
+
 // --- JsonArray Implementations ---
 
 JsonValue& JsonArray::operator[](size_t index) {
@@ -588,6 +641,13 @@ fl::string Json::serialize() const {
         return root_->to_string();
     }
     return "";
+}
+
+fl::vector<fl::string> Json::getObjectKeys() const {
+    if (root_.has_value() && root_->is_object()) {
+        return root_->getObjectKeys();
+    }
+    return fl::vector<fl::string>();
 }
 
 JsonValue& Json::operator[](const fl::string& key) {
@@ -1027,6 +1087,10 @@ void get_value_impl(const JsonVariantImpl* data, JsonObject& value) {
 
 void get_value_impl(const JsonVariantImpl* data, JsonArray& value) {
     value = data->get<JsonArray>();
+}
+
+void get_value_impl(const JsonVariantImpl* data, JsonValue& value) {
+    value = data->get<JsonValue>();
 }
 #endif // FASTLED_ENABLE_JSON
 } // namespace fl
