@@ -246,8 +246,8 @@ public:
         return defaultValue;
     }
         
-    Json operator[](const fl::string& key);
-    const Json operator[](const fl::string& key) const;
+    Json& operator[](const fl::string& key);
+    const Json& operator[](const fl::string& key) const;
 
     // Operator for array access at the root level
     Json operator[](size_t index);
