@@ -53,6 +53,11 @@ using fl::blur2d;
 using fl::nblend;
 using fl::applyGamma_video;
 
+// TGradientDirectionCode values.
+using fl::SHORTEST_HUES;
+using fl::LONGEST_HUES;
+using fl::FORWARD_HUES;
+using fl::BACKWARD_HUES;
 
 // TBlendType values.
 using fl::NOBLEND;
