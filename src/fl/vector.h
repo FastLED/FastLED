@@ -75,7 +75,7 @@ struct FL_ALIGN InlinedMemoryBlock {
 // std::vector. However it used for vector_inlined<T, N> which allows spill over
 // to a heap vector when size > N.
 template <typename T, fl::size N> 
-class FL_ALIGN_AS(T) FixedVector {
+class FL_ALIGN FixedVector {
   private:
     InlinedMemoryBlock<T, N> mMemoryBlock;
 
@@ -342,7 +342,7 @@ class FL_ALIGN_AS(T) FixedVector {
 };
 
 template <typename T, typename Allocator = fl::allocator<T>> 
-class alignas(8) HeapVector {
+class FL_ALIGN HeapVector {
   private:
     T* mArray = nullptr;
     fl::size mCapacity = 0;
@@ -740,7 +740,7 @@ class alignas(8) HeapVector {
 };
 
 template <typename T, typename LessThan = fl::less<T>> 
-class FL_ALIGN_AS(T) SortedHeapVector {
+class FL_ALIGN SortedHeapVector {
   private:
     HeapVector<T> mArray;
     LessThan mLess;
@@ -881,7 +881,7 @@ class FL_ALIGN_AS(T) SortedHeapVector {
 };
 
 template <typename T, fl::size INLINED_SIZE> 
-class FL_ALIGN_AS(T) InlinedVector {
+class FL_ALIGN InlinedVector {
   public:
     using iterator = typename FixedVector<T, INLINED_SIZE>::iterator;
     using const_iterator =
