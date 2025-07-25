@@ -6,9 +6,6 @@
 #include "test.h"
 #include "FastLED.h"
 
-#include "fl/namespace.h"
-FASTLED_USING_NAMESPACE
-
 #define NUM_LEDS 1000
 #define DATA_PIN 2
 #define CLOCK_PIN 3
