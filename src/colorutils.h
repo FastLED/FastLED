@@ -53,6 +53,9 @@ using fl::blur2d;
 using fl::nblend;
 using fl::applyGamma_video;
 
+using fl::fill_gradient_RGB;
+using fl::fill_gradient_HSV;
+
 // TGradientDirectionCode values.
 using fl::SHORTEST_HUES;
 using fl::LONGEST_HUES;
