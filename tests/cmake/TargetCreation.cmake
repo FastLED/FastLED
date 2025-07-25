@@ -55,7 +55,7 @@ function(apply_test_settings target)
         endif()
     endif()
     
-    message(STATUS "Applied test settings to target: ${target}")
+    # message(STATUS "Applied test settings to target: ${target}")
 endfunction()
 
 # Function to apply unit test compiler flags to a target
@@ -83,12 +83,12 @@ function(apply_unit_test_flags target)
     endif()
     
     # 🚨 CRITICAL: Universal RTTI enforcement at target level (all platforms)
-    message(STATUS "🚨 Universal target-level RTTI enforcement for: ${target}")
+    #message(STATUS "🚨 Universal target-level RTTI enforcement for: ${target}")
     # Add -fno-rtti multiple times and with different approaches to ensure it sticks
     list(APPEND UNIT_TEST_FLAGS "-fno-rtti")  # Add again to be absolutely sure
     target_compile_options(${target} PRIVATE "-fno-rtti")  # Apply directly to target
     target_compile_definitions(${target} PRIVATE "FASTLED_CHECK_NO_RTTI=1")  # Enable compile-time check
-    message(STATUS "✅ Universal RTTI disabled for target: ${target}")
+    #message(STATUS "✅ Universal RTTI disabled for target: ${target}")
     
     # Add GCC-specific unit test warning flags
     if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
@@ -107,7 +107,7 @@ function(apply_unit_test_flags target)
     target_compile_options(${target} PRIVATE ${UNIT_TEST_FLAGS})
     target_compile_options(${target} PRIVATE $<$<COMPILE_LANGUAGE:CXX>:${UNIT_TEST_CXX_FLAGS}>)
     
-    message(STATUS "Applied unit test flags to target: ${target} (✅ RTTI disabled)")
+    #message(STATUS "Applied unit test flags to target: ${target} (✅ RTTI disabled)")
 endfunction()
 
 # Function to create a test executable with standard settings
@@ -135,7 +135,7 @@ function(create_test_executable name sources)
         # Apply platform-specific static runtime linking
         apply_static_runtime_linking(${name})
         
-        message(STATUS "Created test executable: ${name}")
+        #message(STATUS "Created test executable: ${name}")
     endif()
     
     # Apply common test settings and flags
@@ -203,7 +203,7 @@ function(configure_windows_executable target)
         # Ensure debug information is preserved for all compilers
         target_compile_definitions(${target} PRIVATE _DEBUG)
         
-        message(STATUS "Applied Windows executable settings to: ${target}")
+        # message(STATUS "Applied Windows executable settings to: ${target}")
     endif()
 endfunction()
 

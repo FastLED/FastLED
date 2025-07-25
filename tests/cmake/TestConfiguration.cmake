@@ -39,7 +39,7 @@ function(register_test_executable target)
             WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
         )
         
-        message(STATUS "Registered test: ${target}")
+        # message(STATUS "Registered test: ${target}")
     endif()
 endfunction()
 

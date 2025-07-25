@@ -3,16 +3,29 @@
 # gcc. This allows the unit tests to be compiled across different platforms
 # without having to worry about the underlying compiler.
 
-message(STATUS "=== CMAKE STARTING ===")
-if(DEFINED SPECIFIC_TEST)
-    message(STATUS "🎯 SPECIFIC_TEST IS SET TO: ${SPECIFIC_TEST}")
-else()
-    message(STATUS "🌐 SPECIFIC_TEST IS NOT DEFINED - BUILDING ALL TESTS")
-endif()
-message(STATUS "======================")
-
 cmake_minimum_required(VERSION 3.10)
 project(FastLED_Tests)
+
+# ============================================================================
+# Logging Control
+# ============================================================================
+option(FASTLED_ENABLE_CMAKE_LOGGING "Enable verbose CMake logging" OFF)
+
+# Custom logging function to reduce verbosity unless enabled
+function(log_message)
+    if(FASTLED_ENABLE_CMAKE_LOGGING)
+        message(STATUS ${ARGN})
+    endif()
+endfunction()
+
+log_message("=== CMAKE STARTING ===")
+if(DEFINED SPECIFIC_TEST)
+    log_message("🎯 SPECIFIC_TEST IS SET TO: ${SPECIFIC_TEST}")
+else()
+    log_message("🌐 SPECIFIC_TEST IS NOT DEFINED - BUILDING ALL TESTS")
+endif()
+log_message("======================")
+
 
 # ============================================================================
 # PHASE 1: Include all modules
@@ -66,7 +79,7 @@ optimize_build_performance()
 
 # Set build type to Debug
 set(CMAKE_BUILD_TYPE Debug CACHE STRING "Choose the type of build." FORCE)
-message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
+log_message("Build type: ${CMAKE_BUILD_TYPE}")
 
 # Apply compiler flags and definitions using the CompilerFlags module
 apply_test_compiler_flags()              # Sets CMAKE_C_FLAGS and CMAKE_CXX_FLAGS globally

@@ -86,7 +86,7 @@ function(apply_linker_compatibility)
     if(WIN32 AND CMAKE_CXX_COMPILER_ID MATCHES "Clang")
         find_program(LLDLINK_EXECUTABLE lld-link)
         if(LLDLINK_EXECUTABLE)
-            message(STATUS "LinkerCompatibility: Applying GNU→MSVC flag translation for lld-link")
+            #message(STATUS "LinkerCompatibility: Applying GNU→MSVC flag translation for lld-link")
             
             # Example usage: translate common GNU flags to MSVC equivalents
             set(gnu_style_flags 
@@ -189,12 +189,12 @@ function(get_subsystem_flags output_var subsystem)
             else()
                 set(flags "-Xlinker" "/SUBSYSTEM:CONSOLE")  # Default to console
             endif()
-            message(STATUS "LinkerCompatibility: Using MSVC-style subsystem flags for lld-link")
+            #message(STATUS "LinkerCompatibility: Using MSVC-style subsystem flags for lld-link")
         else()
             # GNU-style linkers don't typically need explicit subsystem flags on Windows
             # MinGW handles this automatically based on entry point
             set(flags "")
-            message(STATUS "LinkerCompatibility: Subsystem handled automatically by GNU linker")
+            #message(STATUS "LinkerCompatibility: Subsystem handled automatically by GNU linker")
         endif()
     else()
         # Non-Windows platforms don't use subsystem flags
@@ -336,18 +336,18 @@ function(get_windows_debug_build_flags output_compiler_flags output_linker_flags
                 "-Xlinker" "/OPT:NOICF"          # Don't merge identical functions
             )
             
-            message(STATUS "LinkerCompatibility: Using comprehensive Windows debug build flags")
+            #message(STATUS "LinkerCompatibility: Using comprehensive Windows debug build flags")
         else()
             # Fallback to GNU-style flags
             set(compiler_flags "-g3" "-O0" "-fno-omit-frame-pointer")
             set(linker_flags "")
-            message(STATUS "LinkerCompatibility: Using GNU-style debug build flags")
+            #message(STATUS "LinkerCompatibility: Using GNU-style debug build flags")
         endif()
     else()
         # Non-Windows or non-Clang
         set(compiler_flags "-g3" "-O0" "-fno-omit-frame-pointer")
         set(linker_flags "")
-        message(STATUS "LinkerCompatibility: Using standard debug build flags")
+        #message(STATUS "LinkerCompatibility: Using standard debug build flags")
     endif()
     
     set(${output_compiler_flags} ${compiler_flags} PARENT_SCOPE)
@@ -500,12 +500,12 @@ function(apply_static_runtime_linking target)
     # Apple platforms handle static linking differently and this can cause issues
     if(NOT APPLE AND CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
         target_link_options(${target} PRIVATE -static-libgcc -static-libstdc++)
-        message(STATUS "LinkerCompatibility: Applied static runtime linking to ${target} (GNU on non-Apple)")
+        #message(STATUS "LinkerCompatibility: Applied static runtime linking to ${target} (GNU on non-Apple)")
     else()
         if(APPLE)
-            message(STATUS "LinkerCompatibility: Skipping static runtime linking on Apple platform for ${target}")
+            #message(STATUS "LinkerCompatibility: Skipping static runtime linking on Apple platform for ${target}")
         elseif(NOT CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-            message(STATUS "LinkerCompatibility: Skipping static runtime linking for non-GNU compiler: ${CMAKE_CXX_COMPILER_ID}")
+            #message(STATUS "LinkerCompatibility: Skipping static runtime linking for non-GNU compiler: ${CMAKE_CXX_COMPILER_ID}")
         endif()
     endif()
 endfunction()
