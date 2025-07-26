@@ -6,13 +6,13 @@ fastled_async_controller.js:317 Fatal error in FastLED pure JavaScript async loo
     at fastled.wasm.fl::AtomicFake<unsigned int>::load() const (http://localhost:8142/fastled.wasm:wasm-function[83]:0xa712)
     at fastled.wasm.fl::AtomicFake<unsigned int>::operator unsigned int() const (http://localhost:8142/fastled.wasm:wasm-function[82]:0xa6a0)
     at fastled.wasm.fl::detail::ControlBlockBase::remove_shared_ref() (http://localhost:8142/fastled.wasm:wasm-function[80]:0xa52c)
-    at fastled.wasm.fl::shared_ptr<fl::json2::Value>::release() (http://localhost:8142/fastled.wasm:wasm-function[1164]:0x719bf)
-    at fastled.wasm.fl::shared_ptr<fl::json2::Value>::operator=(fl::shared_ptr<fl::json2::Value> const&) (http://localhost:8142/fastled.wasm:wasm-function[1161]:0x712b4)
-    at fastled.wasm.fl::json2::Json::operator=(fl::json2::Json const&) (http://localhost:8142/fastled.wasm:wasm-function[1156]:0x70682)
-    at fastled.wasm.fl::json2::Json::set(fl::string const&, fl::json2::Json const&) (http://localhost:8142/fastled.wasm:wasm-function[3915]:0x17200f)
-    at fastled.wasm.fl::json2::Json::set(fl::string const&, fl::string const&) (http://localhost:8142/fastled.wasm:wasm-function[4077]:0x17eca0)
-    at fastled.wasm.fl::JsonTitleImpl::toJson(fl::json2::Json&) const (http://localhost:8142/fastled.wasm:wasm-function[4171]:0x18a2d3)
-    at fastled.wasm.fl::JsonTitleImpl::JsonTitleImpl(fl::string const&)::$_0::operator()(fl::json2::Json&) const (http://localhost:8142/fastled.wasm:wasm-function[4170]:0x189f10)
+    at fastled.wasm.fl::shared_ptr<fl::Json::Value>::release() (http://localhost:8142/fastled.wasm:wasm-function[1164]:0x719bf)
+    at fastled.wasm.fl::shared_ptr<fl::Json::Value>::operator=(fl::shared_ptr<fl::Json::Value> const&) (http://localhost:8142/fastled.wasm:wasm-function[1161]:0x712b4)
+    at fastled.wasm.fl::Json::operator=(fl::Json const&) (http://localhost:8142/fastled.wasm:wasm-function[1156]:0x70682)
+    at fastled.wasm.fl::Json::set(fl::string const&, fl::Json const&) (http://localhost:8142/fastled.wasm:wasm-function[3915]:0x17200f)
+    at fastled.wasm.fl::Json::set(fl::string const&, fl::string const&) (http://localhost:8142/fastled.wasm:wasm-function[4077]:0x17eca0)
+    at fastled.wasm.fl::JsonTitleImpl::toJson(fl::Json&) const (http://localhost:8142/fastled.wasm:wasm-function[4171]:0x18a2d3)
+    at fastled.wasm.fl::JsonTitleImpl::JsonTitleImpl(fl::string const&)::$_0::operator()(fl::Json&) const (http://localhost:8142/fastled.wasm:wasm-function[4170]:0x189f10)
 ```
 
 ### Root Cause Analysis
@@ -25,7 +25,7 @@ Key components involved:
 3. JSON UI components in `src/platforms/shared/ui/json/` - Particularly `JsonTitleImpl` which uses `shared_ptr`
 4. The JSON implementation also uses `Variant`, `optional`, and other complex data structures
 
-The issue is happening during the `JsonTitleImpl::toJson()` method where it calls `json.set()` with string values. This eventually leads to a copy assignment of `shared_ptr<fl::json2::Value>` which triggers the reference counting mechanism.
+The issue is happening during the `JsonTitleImpl::toJson()` method where it calls `json.set()` with string values. This eventually leads to a copy assignment of `shared_ptr<fl::Json::Value>` which triggers the reference counting mechanism.
 
 The problem appears to be a memory access out of bounds error when the `AtomicFake::load()` method tries to access memory that has already been deallocated or is outside the valid memory range.
 

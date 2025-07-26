@@ -14,7 +14,7 @@ namespace fl {
 JsonHelpImpl::JsonHelpImpl(const string &markdownContent): mMarkdownContent(markdownContent) {
     JsonUiInternal::UpdateFunction update_fcn;
     JsonUiInternal::ToJsonFunction to_json_fcn =
-        JsonUiInternal::ToJsonFunction([this](fl::json2::Json &json) {
+        JsonUiInternal::ToJsonFunction([this](fl::Json &json) {
             this->toJson(json);
         });
     mInternal = fl::make_shared<JsonUiInternal>("help", update_fcn, to_json_fcn);
@@ -30,7 +30,7 @@ JsonHelpImpl &JsonHelpImpl::Group(const fl::string &name) {
 
 const fl::string &JsonHelpImpl::markdownContent() const { return mMarkdownContent; }
 
-void JsonHelpImpl::toJson(fl::json2::Json &json) const {
+void JsonHelpImpl::toJson(fl::Json &json) const {
     json.set("name", mInternal->name());
     json.set("type", "help");
     json.set("group", mInternal->groupName());

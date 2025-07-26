@@ -17,7 +17,7 @@ class JsonSliderImpl {
     JsonSliderImpl &Group(const fl::string &name);
 
     const fl::string &name() const;
-    void toJson(fl::json2::Json &json) const;
+    void toJson(fl::Json &json) const;
     float value() const;
     float value_normalized() const;
     float getMax() const;
@@ -37,7 +37,7 @@ class JsonSliderImpl {
     JsonSliderImpl &operator=(int value);
 
   private:
-    void updateInternal(const fl::json2::Json &value);
+    void updateInternal(const fl::Json &value);
 
     JsonUiInternalPtr mInternal;
     float mMin;

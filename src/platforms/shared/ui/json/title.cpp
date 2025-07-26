@@ -14,7 +14,7 @@ namespace fl {
 JsonTitleImpl::JsonTitleImpl(const string &text) : mText(text) {
     JsonUiInternal::UpdateFunction update_fcn;
     JsonUiInternal::ToJsonFunction to_json_fcn =
-        JsonUiInternal::ToJsonFunction([this](fl::json2::Json &json) {
+        JsonUiInternal::ToJsonFunction([this](fl::Json &json) {
             this->toJson(json);
         });
     mInternal = fl::make_shared<JsonUiInternal>("title", update_fcn, to_json_fcn);
@@ -28,7 +28,7 @@ JsonTitleImpl &JsonTitleImpl::Group(const fl::string &name) {
     return *this;
 }
 
-void JsonTitleImpl::toJson(fl::json2::Json &json) const {
+void JsonTitleImpl::toJson(fl::Json &json) const {
     // This method is no longer used directly since we've moved the implementation
     // to the lambda in the constructor, but we'll keep it for API compatibility
     json.set("name", mInternal->name());

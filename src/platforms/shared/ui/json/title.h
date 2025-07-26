@@ -15,7 +15,7 @@ class JsonTitleImpl {
     JsonTitleImpl &Group(const fl::string &name);
 
     const fl::string &name() const;
-    void toJson(fl::json2::Json &json) const;
+    void toJson(fl::Json &json) const;
     const fl::string &groupName() const;
     const fl::string &text() const;
     

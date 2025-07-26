@@ -98,14 +98,14 @@ void FileSystem::end() {
     }
 }
 
-bool FileSystem::readJson(const char *path, json2::Json *doc) {
+bool FileSystem::readJson(const char *path, Json *doc) {
     string text;
     if (!readText(path, &text)) {
         return false;
     }
     
-    // Parse using the new json2::Json class
-    *doc = fl::json2::Json::parse(text);
+    // Parse using the new Json class
+    *doc = fl::Json::parse(text);
     return !doc->is_null();
 }
 

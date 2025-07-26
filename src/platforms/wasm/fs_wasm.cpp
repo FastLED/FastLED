@@ -297,7 +297,7 @@ EMSCRIPTEN_KEEPALIVE bool jsDeclareFile(const char *path, size_t len) {
 }
 
 EMSCRIPTEN_KEEPALIVE void fastled_declare_files(const char* jsonStr) {
-    fl::json2::Json doc = fl::json2::Json::parse(fl::string(jsonStr));
+    fl::Json doc = fl::Json::parse(fl::string(jsonStr));
     if (!doc.is_object() || !doc.contains("files")) {
         return;
     }

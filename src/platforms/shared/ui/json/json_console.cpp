@@ -245,8 +245,8 @@ bool JsonConsole::setSliderValue(const fl::string& name, float value) {
         FL_WARN("JsonConsole: Found component ID: " << componentId);
     }
     
-    // Create JSON to update the component using new json2::Json
-    fl::json2::Json doc = fl::json2::Json::object();
+    // Create JSON to update the component using new Json
+    fl::Json doc = fl::Json::object();
     
     fl::string idStr;
     idStr += componentId;
@@ -274,8 +274,8 @@ void JsonConsole::updateComponentMapping(const char* jsonStr) {
         return;
     }
     
-    // Parse using new json2::Json
-    auto doc = fl::json2::Json::parse(jsonStr);
+    // Parse using new Json
+    auto doc = fl::Json::parse(jsonStr);
     if (doc.is_null()) {
         return; // Invalid JSON
     }

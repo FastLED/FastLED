@@ -21,7 +21,7 @@
 
 
 namespace fl {
-namespace json2 {
+
 
 // Forward declarations
 struct Value;
@@ -723,5 +723,4 @@ public:
     static fl::string normalizeJsonString(const char* jsonStr);
 };
 
-} // namespace json2
 } // namespace fl

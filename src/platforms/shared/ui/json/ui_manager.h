@@ -28,7 +28,7 @@ class JsonUiManager : fl::EngineEvents::Listener {
 
     // Internal representation.
     void updateUiComponents(const char *jsonStr);
-    void executeUiUpdates(const fl::json2::Json &doc);
+    void executeUiUpdates(const fl::Json &doc);
 
     void resetCallback(Callback updateJs) {
       mUpdateJs = updateJs;
@@ -44,7 +44,7 @@ class JsonUiManager : fl::EngineEvents::Listener {
     void onEndFrame() override;
 
     fl::vector<JsonUiInternalPtr> getComponents();
-    void toJson(fl::json2::Json &json);
+    void toJson(fl::Json &json);
     JsonUiInternalPtr findUiComponent(const fl::string& idStr);
 
     Callback mUpdateJs;
@@ -52,7 +52,7 @@ class JsonUiManager : fl::EngineEvents::Listener {
     fl::mutex mMutex;
 
     bool mItemsAdded = false;
-    fl::json2::Json mPendingJsonUpdate;
+    fl::Json mPendingJsonUpdate;
     bool mHasPendingUpdate = false;
 };
 

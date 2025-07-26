@@ -15,12 +15,12 @@ JsonNumberFieldImpl::JsonNumberFieldImpl(const fl::string &name, double value,
                                         double min, double max)
     : mValue(value), mMin(min), mMax(max) {
     auto updateFunc = JsonUiInternal::UpdateFunction(
-        [this](const fl::json2::Json &value) {
+        [this](const fl::Json &value) {
             this->updateInternal(value);
         });
 
     auto toJsonFunc =
-        JsonUiInternal::ToJsonFunction([this](fl::json2::Json &json) {
+        JsonUiInternal::ToJsonFunction([this](fl::Json &json) {
             this->toJson(json);
         });
     mInternal = fl::make_shared<JsonUiInternal>(name, fl::move(updateFunc),
@@ -37,7 +37,7 @@ JsonNumberFieldImpl &JsonNumberFieldImpl::Group(const fl::string &name) {
 
 const fl::string &JsonNumberFieldImpl::name() const { return mInternal->name(); }
 
-void JsonNumberFieldImpl::toJson(fl::json2::Json &json) const {
+void JsonNumberFieldImpl::toJson(fl::Json &json) const {
     json.set("name", name());
     json.set("group", mInternal->groupName());
     json.set("type", "number");
@@ -97,7 +97,7 @@ bool JsonNumberFieldImpl::operator!=(double v) const { return !ALMOST_EQUAL_FLOA
 bool JsonNumberFieldImpl::operator!=(int v) const { return !ALMOST_EQUAL_FLOAT(value(), static_cast<double>(v)); }
 
 void JsonNumberFieldImpl::updateInternal(
-    const fl::json2::Json &value) {
+    const fl::Json &value) {
     setValueInternal(value | 0.0);  // Use internal method to avoid change notification
 }
 

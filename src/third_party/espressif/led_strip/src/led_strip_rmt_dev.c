@@ -50,6 +50,7 @@ typedef struct {
     led_strip_t base;
     rmt_channel_handle_t rmt_chan;
     rmt_encoder_handle_t strip_encoder;
+    rmt_transmit_config_t tx_conf; /*!< Transmit configuration, stored in the object to prevent stack access in interrupts */
     uint32_t strip_len;
     uint8_t bytes_per_pixel;
     led_color_component_format_t component_fmt;
@@ -97,13 +98,10 @@ static esp_err_t led_strip_rmt_set_pixel_rgbw(led_strip_t *strip, uint32_t index
 static esp_err_t led_strip_rmt_refresh_async(led_strip_t *strip)
 {
     led_strip_rmt_obj *rmt_strip = __containerof(strip, led_strip_rmt_obj, base);
-    rmt_transmit_config_t tx_conf = {
-        .loop_count = 0,
-    };
 
     ESP_RETURN_ON_ERROR(rmt_enable(rmt_strip->rmt_chan), TAG, "enable RMT channel failed");
     ESP_RETURN_ON_ERROR(rmt_transmit(rmt_strip->rmt_chan, rmt_strip->strip_encoder, rmt_strip->pixel_buf,
-                                     rmt_strip->strip_len * rmt_strip->bytes_per_pixel, &tx_conf), TAG, "transmit pixels by RMT failed");
+                                     rmt_strip->strip_len * rmt_strip->bytes_per_pixel, &rmt_strip->tx_conf), TAG, "transmit pixels by RMT failed");
     return ESP_OK;
 }
 
@@ -215,6 +213,9 @@ esp_err_t led_strip_new_rmt_device(const led_strip_config_t *led_config, const l
     rmt_strip->component_fmt = component_fmt;
     rmt_strip->bytes_per_pixel = bytes_per_pixel;
     rmt_strip->strip_len = led_config->max_leds;
+    rmt_strip->tx_conf = (rmt_transmit_config_t){
+        .loop_count = 0,
+    };
     rmt_strip->base.set_pixel = led_strip_rmt_set_pixel;
     rmt_strip->base.set_pixel_rgbw = led_strip_rmt_set_pixel_rgbw;
     rmt_strip->base.refresh = led_strip_rmt_refresh;

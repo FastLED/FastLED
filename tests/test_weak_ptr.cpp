@@ -125,7 +125,7 @@ TEST_CASE("fl::weak_ptr expiration when shared_ptr destroyed") {
     fl::weak_ptr<TestClass> weak;
     
     {
-        fl::shared_ptr<TestClass> shared(new TestClass(42, &destructor_called));
+        fl::shared_ptr<TestClass> shared = fl::make_shared<TestClass>(42, &destructor_called);
         weak = shared;
         CHECK(!weak.expired());
         CHECK_EQ(weak.use_count(), 1);
@@ -323,7 +323,8 @@ TEST_CASE("fl::weak_ptr dead memory safety - basic scenario") {
     // Create shared_ptr and weak_ptr in a scope
     {
         auto shared = fl::make_shared<TestClass>(42);
-        shared = fl::shared_ptr<TestClass>(new TestClass(100, &destructor_called));
+        //shared = fl::shared_ptr<TestClass>(new TestClass(100, &destructor_called));
+        shared = fl::make_shared<TestClass>(100, &destructor_called);
         weak = shared;
         
         CHECK(!weak.expired());
@@ -352,7 +353,8 @@ TEST_CASE("fl::weak_ptr dead memory safety - multiple weak_ptrs") {
     fl::weak_ptr<TestClass> weak1, weak2, weak3;
     
     {
-        auto shared = fl::shared_ptr<TestClass>(new TestClass(42, &destructor_called));
+        //auto shared = fl::shared_ptr<TestClass>(new TestClass(42, &destructor_called));
+        auto shared = fl::make_shared<TestClass>(42, &destructor_called);
         weak1 = shared;
         weak2 = weak1;
         weak3 = shared;
@@ -380,7 +382,8 @@ TEST_CASE("fl::weak_ptr dead memory safety - repeated lock attempts") {
     fl::weak_ptr<TestClass> weak;
     
     {
-        auto shared = fl::shared_ptr<TestClass>(new TestClass(42, &destructor_called));
+        //auto shared = fl::shared_ptr<TestClass>(new TestClass(42, &destructor_called));
+        auto shared = fl::make_shared<TestClass>(42, &destructor_called);
         weak = shared;
     }
     
@@ -399,8 +402,10 @@ TEST_CASE("fl::weak_ptr circular reference - basic linked list") {
     bool nodeB_destroyed = false;
     
     {
-        auto nodeA = fl::shared_ptr<Node>(new Node(1, &nodeA_destroyed));
-        auto nodeB = fl::shared_ptr<Node>(new Node(2, &nodeB_destroyed));
+        //auto nodeA = fl::shared_ptr<Node>(new Node(1, &nodeA_destroyed));
+        auto nodeA = fl::make_shared<Node>(1, &nodeA_destroyed);
+        //auto nodeB = fl::shared_ptr<Node>(new Node(2, &nodeB_destroyed));
+        auto nodeB = fl::make_shared<Node>(2, &nodeB_destroyed);
         
         // Create circular reference: A -> B -> A
         nodeA->setNext(nodeB);
@@ -422,8 +427,10 @@ TEST_CASE("fl::weak_ptr circular reference - broken with weak_ptr") {
     bool nodeB_destroyed = false;
     
     {
-        auto nodeA = fl::shared_ptr<Node>(new Node(1, &nodeA_destroyed));
-        auto nodeB = fl::shared_ptr<Node>(new Node(2, &nodeB_destroyed));
+        //auto nodeA = fl::shared_ptr<Node>(new Node(1, &nodeA_destroyed));
+        auto nodeA = fl::make_shared<Node>(1, &nodeA_destroyed);
+        //auto nodeB = fl::shared_ptr<Node>(new Node(2, &nodeB_destroyed));
+        auto nodeB = fl::make_shared<Node>(2, &nodeB_destroyed);
         
         // Create non-circular reference: A -> B, A <- weak B
         nodeA->setNext(nodeB);
@@ -444,8 +451,10 @@ TEST_CASE("fl::weak_ptr self-assignment safety - a = b scenario") {
     bool nodeA_destroyed = false;
     bool nodeB_destroyed = false;
     
-    auto nodeA = fl::shared_ptr<Node>(new Node(1, &nodeA_destroyed));
-    auto nodeB = fl::shared_ptr<Node>(new Node(2, &nodeB_destroyed));
+    //auto nodeA = fl::shared_ptr<Node>(new Node(1, &nodeA_destroyed));
+    auto nodeA = fl::make_shared<Node>(1, &nodeA_destroyed);
+    //auto nodeB = fl::shared_ptr<Node>(new Node(2, &nodeB_destroyed));
+    auto nodeB = fl::make_shared<Node>(2, &nodeB_destroyed);
     
     // Test the scenario: a -> b, and we have a, and a = b
     nodeA->setNext(nodeB);
@@ -509,9 +518,12 @@ TEST_CASE("fl::weak_ptr complex circular scenario with weak references") {
     fl::weak_ptr<Node> weakA, weakB, weakC;
     
     {
-        auto nodeA = fl::shared_ptr<Node>(new Node(1, &nodeA_destroyed));
-        auto nodeB = fl::shared_ptr<Node>(new Node(2, &nodeB_destroyed));
-        auto nodeC = fl::shared_ptr<Node>(new Node(3, &nodeC_destroyed));
+        //auto nodeA = fl::shared_ptr<Node>(new Node(1, &nodeA_destroyed));
+        auto nodeA = fl::make_shared<Node>(1, &nodeA_destroyed);
+        //auto nodeB = fl::shared_ptr<Node>(new Node(2, &nodeB_destroyed));
+        auto nodeB = fl::make_shared<Node>(2, &nodeB_destroyed);
+        //auto nodeC = fl::shared_ptr<Node>(new Node(3, &nodeC_destroyed));
+        auto nodeC = fl::make_shared<Node>(3, &nodeC_destroyed);
         
         // Create complex references: A -> B -> C, with weak back-references
         nodeA->setNext(nodeB);

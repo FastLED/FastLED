@@ -20,12 +20,12 @@ JsonSliderImpl::JsonSliderImpl(const fl::string &name, float value, float min,
         mStep = (mMax - mMin) / 100.0f;
     }
     auto updateFunc =
-        JsonUiInternal::UpdateFunction([this](const fl::json2::Json &value) {
+        JsonUiInternal::UpdateFunction([this](const fl::Json &value) {
             this->updateInternal(value);
         });
 
     auto toJsonFunc =
-        JsonUiInternal::ToJsonFunction([this](fl::json2::Json &json) {
+        JsonUiInternal::ToJsonFunction([this](fl::Json &json) {
             this->toJson(json);
         });
     mInternal = fl::make_shared<JsonUiInternal>(name, fl::move(updateFunc),
@@ -44,7 +44,7 @@ JsonSliderImpl &JsonSliderImpl::Group(const fl::string &name) {
 
 const fl::string &JsonSliderImpl::name() const { return mInternal->name(); }
 
-void JsonSliderImpl::toJson(fl::json2::Json &json) const {
+void JsonSliderImpl::toJson(fl::Json &json) const {
     json.set("name", name());
     json.set("group", mInternal->groupName());
     json.set("type", "slider");
@@ -99,7 +99,7 @@ JsonSliderImpl &JsonSliderImpl::operator=(int value) {
     return *this;
 }
 
-void JsonSliderImpl::updateInternal(const fl::json2::Json &value) {
+void JsonSliderImpl::updateInternal(const fl::Json &value) {
     setValue(value | 0.0f);
 }
 

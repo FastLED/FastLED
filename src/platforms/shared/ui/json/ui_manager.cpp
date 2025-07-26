@@ -61,7 +61,7 @@ void JsonUiManager::processPendingUpdates() {
 
     if (mHasPendingUpdate) {
         executeUiUpdates(mPendingJsonUpdate);
-        mPendingJsonUpdate = fl::json2::Json(); // Clear the pending update
+        mPendingJsonUpdate = fl::Json(); // Clear the pending update
         mHasPendingUpdate = false;
     }
 
@@ -87,7 +87,7 @@ void JsonUiManager::processPendingUpdates() {
     }
     
     if (shouldUpdate) {
-        fl::json2::Json doc = fl::json2::Json::array();
+        fl::Json doc = fl::Json::array();
         toJson(doc);
         fl::string jsonStr = doc.to_string();
         //FL_WARN("*** SENDING UI TO FRONTEND: " << jsonStr.substr(0, 100).c_str() << "...");
@@ -165,14 +165,14 @@ void JsonUiManager::updateUiComponents(const char* jsonStr) {
     // FL_WARN("*** JsonUiManager pointer: " << this);
     // FL_WARN("*** BEFORE: mHasPendingUpdate=" << (mHasPendingUpdate ? "true" : "false"));
     
-    mPendingJsonUpdate = fl::json2::Json::parse(jsonStr);
+    mPendingJsonUpdate = fl::Json::parse(jsonStr);
     mHasPendingUpdate = true;
     // FL_WARN("*** AFTER: mHasPendingUpdate=" << (mHasPendingUpdate ? "true" : "false"));
     // FL_WARN("*** BACKEND SET mHasPendingUpdate = true, waiting for onEndFrame()");
 }
 
 
-void JsonUiManager::executeUiUpdates(const fl::json2::Json &doc) {
+void JsonUiManager::executeUiUpdates(const fl::Json &doc) {
     
     if (doc.is_object()) {
         
@@ -184,7 +184,7 @@ void JsonUiManager::executeUiUpdates(const fl::json2::Json &doc) {
             
             auto component = findUiComponent(id_or_name);
             if (component) {
-                const fl::json2::Json v = doc[key.c_str()];
+                const fl::Json v = doc[key.c_str()];
                 component->update(v);
                 //FL_WARN("*** Updated component with ID " << idStr);
             } else {
@@ -207,10 +207,10 @@ void JsonUiManager::onEndFrame() {
     processPendingUpdates();
 }
 
-void JsonUiManager::toJson(fl::json2::Json &doc) {
+void JsonUiManager::toJson(fl::Json &doc) {
     auto components = getComponents();
     for (const auto &component : components) {
-        fl::json2::Json componentJson = fl::json2::Json::object();
+        fl::Json componentJson = fl::Json::object();
         component->toJson(componentJson);
         doc.push_back(componentJson);
     }

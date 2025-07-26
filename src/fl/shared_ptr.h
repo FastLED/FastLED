@@ -115,16 +115,16 @@ private:
         // Control block created with no_tracking=true, no reference increment needed
     }
         
-    void release() {
-        if (control_block_) {
-            if (control_block_->remove_shared_ref()) {
-                control_block_->destroy_object();
-                if (--control_block_->weak_count == 0) {
-                    control_block_->destroy_control_block();
-                }
-            }
-        }
-    }
+    // void release() {
+    //     if (control_block_) {
+    //         if (control_block_->remove_shared_ref()) {
+    //             control_block_->destroy_object();
+    //             if (--control_block_->weak_count == 0) {
+    //                 control_block_->destroy_control_block();
+    //             }
+    //         }
+    //     }
+    // }
     
     void acquire() {
         if (control_block_) {
@@ -172,13 +172,13 @@ public:
     
     // Destructor
     ~shared_ptr() {
-        release();
+        reset();
     }
     
     // Assignment operators
     shared_ptr& operator=(const shared_ptr& other) {
         if (this != &other) {
-            release();
+            reset();
             ptr_ = other.ptr_;
             control_block_ = other.control_block_;
             acquire();
@@ -188,7 +188,7 @@ public:
     
     template<typename Y>
     shared_ptr& operator=(const shared_ptr<Y>& other) {
-        release();
+        reset();
         ptr_ = other.ptr_;
         control_block_ = other.control_block_;
         acquire();
@@ -197,7 +197,7 @@ public:
     
     shared_ptr& operator=(shared_ptr&& other) noexcept {
         if (this != &other) {
-            release();
+            reset();
             ptr_ = other.ptr_;
             control_block_ = other.control_block_;
             other.ptr_ = nullptr;
@@ -208,7 +208,7 @@ public:
     
     template<typename Y>
     shared_ptr& operator=(shared_ptr<Y>&& other) noexcept {
-        release();
+        reset();
         ptr_ = other.ptr_;
         control_block_ = other.control_block_;
         other.ptr_ = nullptr;
@@ -218,20 +218,32 @@ public:
     
     // Modifiers
     void reset() noexcept {
-        release();
+        if (control_block_) {
+            if (control_block_->remove_shared_ref()) {
+                control_block_->destroy_object();
+                if (--control_block_->weak_count == 0) {
+                    control_block_->destroy_control_block();
+                }
+            }
+        }
         ptr_ = nullptr;
         control_block_ = nullptr;
     }
-    
-    template<typename Y>
-    void reset(Y* ptr) {
-        shared_ptr(ptr).swap(*this);
+
+    void reset(shared_ptr&& other) noexcept {
+        this->swap(other);
+        other.reset();
     }
     
-    template<typename Y, typename Deleter>
-    void reset(Y* ptr, Deleter d) {
-        shared_ptr(ptr, d).swap(*this);
-    }
+    // template<typename Y>
+    // void reset(Y* ptr) {
+    //     shared_ptr(ptr).swap(*this);
+    // }
+    
+    // template<typename Y, typename Deleter>
+    // void reset(Y* ptr, Deleter d) {
+    //     shared_ptr(ptr, d).swap(*this);
+    // }
     
     void swap(shared_ptr& other) noexcept {
         fl::swap(ptr_, other.ptr_);
@@ -301,6 +313,9 @@ private:
     
     template<typename Y, typename... Args>
     friend shared_ptr<Y> make_shared(Args&&... args);
+
+    template<typename Y, typename Deleter, typename... Args>
+    friend shared_ptr<Y> make_shared_with_deleter(Deleter d, Args&&... args);
     
     template<typename Y, typename A, typename... Args>
     friend shared_ptr<Y> allocate_shared(const A& alloc, Args&&... args);
@@ -316,6 +331,15 @@ template<typename T, typename... Args>
 shared_ptr<T> make_shared(Args&&... args) {
     T* obj = new T(fl::forward<Args>(args)...);
     auto* control = new detail::ControlBlock<T>(obj);
+    //new(control->get_object()) T(fl::forward<Args>(args)...);
+    //control->object_constructed = true;
+    return shared_ptr<T>(obj, control, detail::make_shared_tag{});
+}
+
+template<typename T, typename Deleter, typename... Args>
+shared_ptr<T> make_shared_with_deleter(Deleter d, Args&&... args) {
+    T* obj = new T(fl::forward<Args>(args)...);
+    auto* control = new detail::ControlBlock<T, Deleter>(obj, d);
     //new(control->get_object()) T(fl::forward<Args>(args)...);
     //control->object_constructed = true;
     return shared_ptr<T>(obj, control, detail::make_shared_tag{});

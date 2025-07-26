@@ -12,7 +12,10 @@
 #include "platforms/shared/ui/json/description.h"
 #include "platforms/shared/ui/json/audio.h"
 #include "platforms/shared/ui/json/help.h"
-#include "fl/json_console.h"
+#include "platforms/shared/ui/json/button.h"
+#include "platforms/shared/ui/json/slider.h"
+#include "platforms/shared/ui/json/checkbox.h"
+#include "platforms/shared/ui/json/json_console.h"
 #include "fl/sstream.h"
 #include <cstring>
 #include "fl/json.h"
@@ -329,15 +332,15 @@ TEST_CASE("complex ui element serialization") {
     checkbox.Group("group2");
     fl::JsonNumberFieldImpl numberField("myNumberField", 123, 0, 1000);
     numberField.Group("group3");
-    fl::JsonDropdownImpl dropdown("myDropdown", "option2", {"option1", "option2", "option3"});
+    fl::JsonDropdownImpl dropdown("myDropdown", {"option1", "option2", "option3"});
     dropdown.Group("group3");
-    fl::JsonTitleImpl title("myTitle", "My Awesome UI");
+    fl::JsonTitleImpl title("myTitle");
     title.Group("group4");
-    fl::JsonDescriptionImpl description("myDescription", "This is a description of the UI.");
+    fl::JsonDescriptionImpl description( "This is a description of the UI.");
     description.Group("group4");
-    fl::JsonAudioImpl audio("myAudio", 440.0f, 0.5f);
+    fl::JsonAudioImpl audio("Audio");
     audio.Group("group5");
-    fl::JsonHelpImpl help("myHelp", "This is a help message.");
+    fl::JsonHelpImpl help("This is a help message.");
     help.Group("group5");
 
     // 3. Register components (they are automatically added to the manager via their constructors)
@@ -421,7 +424,7 @@ TEST_CASE("complex ui element serialization") {
 ])";
 
     // 6. Verify the captured JSON output against the expected string
-    CHECK_EQ(fl::json2::Json::normalizeJsonString(expectedJsonString), fl::json2::Json::normalizeJsonString(capturedJsonOutput.c_str()));
+    CHECK_EQ(fl::Json::normalizeJsonString(expectedJsonString), fl::Json::normalizeJsonString(capturedJsonOutput.c_str()));
 
     // Clean up components (they are automatically removed via their destructors when they go out of scope)
 }

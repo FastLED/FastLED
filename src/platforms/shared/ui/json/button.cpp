@@ -13,12 +13,12 @@ namespace fl {
 
 JsonButtonImpl::JsonButtonImpl(const string &name) : mPressed(false) {
     auto updateFunc = JsonUiInternal::UpdateFunction(
-        [this](const fl::json2::Json &value) {
+        [this](const fl::Json &value) {
             this->updateInternal(value);
         });
 
     auto toJsonFunc =
-        JsonUiInternal::ToJsonFunction([this](fl::json2::Json &json) {
+        JsonUiInternal::ToJsonFunction([this](fl::Json &json) {
             this->toJson(json);
         });
     mInternal = fl::make_shared<JsonUiInternal>(name, fl::move(updateFunc),
@@ -38,7 +38,7 @@ bool JsonButtonImpl::clicked() const { return mClickedHappened; }
 
 const string &JsonButtonImpl::name() const { return mInternal->name(); }
 
-void JsonButtonImpl::toJson(fl::json2::Json &json) const {
+void JsonButtonImpl::toJson(fl::Json &json) const {
     json.set("name", name());
     json.set("group", mInternal->groupName());
     json.set("type", "button");
@@ -75,7 +75,7 @@ void JsonButtonImpl::Updater::onPlatformPreLoop2() {
 }
 
 void JsonButtonImpl::updateInternal(
-    const fl::json2::Json &value) {
+    const fl::Json &value) {
     mPressed = value | false;
 }
 

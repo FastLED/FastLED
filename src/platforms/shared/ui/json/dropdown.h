@@ -12,7 +12,7 @@ class JsonDropdownImpl {
   public:
 
     // Constructor with fl::span<fl::string> for arrays and containers.
-JsonDropdownImpl(const fl::string &name, fl::span<fl::string> options);
+    JsonDropdownImpl(const fl::string &name, fl::span<fl::string> options);
 
     // Constructor with initializer_list (FastLED requires C++11 support)
     JsonDropdownImpl(const fl::string &name, fl::initializer_list<fl::string> options);
@@ -30,7 +30,7 @@ JsonDropdownImpl(const fl::string &name, fl::span<fl::string> options);
     JsonDropdownImpl &Group(const fl::string &name);
 
     const fl::string &name() const;
-    void toJson(fl::json2::Json &json) const;
+    void toJson(fl::Json &json) const;
     fl::string value() const;
     int value_int() const;
     void setSelectedIndex(int index);
@@ -51,7 +51,7 @@ JsonDropdownImpl(const fl::string &name, fl::span<fl::string> options);
     // Private constructor with array of options and count (used by template constructor)
     JsonDropdownImpl(const fl::string &name, const fl::string* options, size_t count);
     
-    void updateInternal(const fl::json2::Json &value);
+    void updateInternal(const fl::Json &value);
     void commonInit(const fl::string &name);
 
     JsonUiInternalPtr mInternal;

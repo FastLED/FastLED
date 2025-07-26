@@ -1,12 +1,12 @@
 # JSON Parsing with FLArduinoJson
 
-This document outlines the new JSON parsing strategy for `fl::json2::Json` and `fl::json2::Value` classes, leveraging the `FLArduinoJson` library. The existing native parsing functions will be renamed to `parse_native` for backward compatibility and to clearly distinguish them from the new `FLArduinoJson`-based parsing.
+This document outlines the new JSON parsing strategy for `fl::Json` and `fl::Json::Value` classes, leveraging the `FLArduinoJson` library. The existing native parsing functions will be renamed to `parse_native` for backward compatibility and to clearly distinguish them from the new `FLArduinoJson`-based parsing.
 
 ## Motivation
 
-The existing native JSON parser in `fl::json2` is a custom implementation. While functional, `FLArduinoJson` (ArduinoJson library) is a robust and widely-used JSON parser that offers better performance, error handling, and compliance with JSON standards. By integrating `FLArduinoJson`, we aim to improve the reliability and efficiency of JSON parsing within the FastLED project.
+The existing native JSON parser in `fl::Json` is a custom implementation. While functional, `FLArduinoJson` (ArduinoJson library) is a robust and widely-used JSON parser that offers better performance, error handling, and compliance with JSON standards. By integrating `FLArduinoJson`, we aim to improve the reliability and efficiency of JSON parsing within the FastLED project.
 
-The `FLArduinoJson` API can be verbose. This new parsing strategy will use `FLArduinoJson` internally to populate the `fl::json2::Json` and `fl::json2::Value` structures, providing a cleaner and more idiomatic API for FastLED users.
+The `FLArduinoJson` API can be verbose. This new parsing strategy will use `FLArduinoJson` internally to populate the `fl::Json` and `fl::Json::Value` structures, providing a cleaner and more idiomatic API for FastLED users.
 
 ## Proposed Changes
 
@@ -38,7 +38,7 @@ fl::shared_ptr<Value> Value::parse_native(const fl::string& txt) {
 
 ### 2. Implement New `Value::parse` using `FLArduinoJson`
 
-A new `Value::parse` static method will be implemented. This method will utilize `FLArduinoJson` to parse the input JSON string and then recursively build the `fl::json2::Value` structure.
+A new `Value::parse` static method will be implemented. This method will utilize `FLArduinoJson` to parse the input JSON string and then recursively build the `fl::Json::Value` structure.
 
 **`src/fl/json2.h` (add to `Value` class):**
 
@@ -65,17 +65,17 @@ namespace json2 {
 // NOTE - YOU MUST USE EXHAUSTIVE SEARCHES FOR THE INTEGER TYPES, FLOATS AND DOUBLES.
 // This is particularly important for Arduino platforms where different numeric types
 // have specific memory and performance characteristics. When implementing the conversion
-// from FLArduinoJson::JsonVariantConst to fl::json2::Value, we must explicitly check
+// from FLArduinoJson::JsonVariantConst to fl::Json::Value, we must explicitly check
 // for all possible numeric types to ensure correct type handling on constrained platforms.
 
-// Helper function to convert FLArduinoJson::JsonVariantConst to fl::json2::Value
+// Helper function to convert FLArduinoJson::JsonVariantConst to fl::Json::Value
 // (Implementation notes - to be completed during actual implementation)
 fl::shared_ptr<Value> convert_arduinojson_to_fljson2(const FLArduinoJson::JsonVariantConst& src) {
     // Implementation will need to handle:
     // 1. All integer types (int8_t, int16_t, int32_t, int64_t, uint32_t, etc.)
     // 2. Floating point types (float, double)
     // 3. Other JSON types (null, bool, string, array, object)
-    // 4. Proper type conversion between FLArduinoJson and fl::json2 types
+    // 4. Proper type conversion between FLArduinoJson and fl::Json types
     // 
     // Example structure (to be implemented):
     /*
@@ -119,7 +119,7 @@ fl::shared_ptr<Value> Value::parse(const fl::string& txt) {
     // 1. Determine the size of the JsonDocument needed.
     // 2. For embedded systems, consider using StaticJsonDocument with calculated size.
     // 3. Handle deserialization errors appropriately.
-    // 4. Convert the parsed result to fl::json2::Value structure.
+    // 4. Convert the parsed result to fl::Json::Value structure.
     // 
     // Example structure (to be implemented):
     /*
@@ -233,7 +233,7 @@ The following test structure should be implemented when the actual parser is dev
 TEST_CASE("FLArduinoJson Integration Tests") {
     SUBCASE("Integer Type Exhaustiveness") {
         // Test various integer representations
-        // fl::json2::Json int64Json = fl::json2::Json::parse("9223372036854775807"); // Max int64
+        // fl::Json int64Json = fl::Json::parse("9223372036854775807"); // Max int64
         // REQUIRE(int64Json.is_int());
         // CHECK_EQ(int64Json | int64_t(0), 9223372036854775807LL);
         // 
@@ -242,7 +242,7 @@ TEST_CASE("FLArduinoJson Integration Tests") {
     
     SUBCASE("Float Type Exhaustiveness") {
         // Test various float representations
-        // fl::json2::Json doubleJson = fl::json2::Json::parse("3.141592653589793");
+        // fl::Json doubleJson = fl::Json::parse("3.141592653589793");
         // REQUIRE(doubleJson.is_double());
         // CHECK_EQ(doubleJson | 0.0, 3.141592653589793);
         //
@@ -253,10 +253,10 @@ TEST_CASE("FLArduinoJson Integration Tests") {
         // const char* testJson = "{\"name\":\"FastLED\",\"version\":4,\"features\":[\"colors\",\"effects\"]}";
         // 
         // Parse with new FLArduinoJson-based parser
-        // fl::json2::Json newParserResult = fl::json2::Json::parse(testJson);
+        // fl::Json newParserResult = fl::Json::parse(testJson);
         // 
         // Parse with native parser (for comparison)
-        // fl::json2::Json nativeParserResult = fl::json2::Json::parse_native(testJson);
+        // fl::Json nativeParserResult = fl::Json::parse_native(testJson);
         // 
         // Verify they produce equivalent results
         // CHECK(newParserResult.to_string() == nativeParserResult.to_string());
@@ -264,11 +264,11 @@ TEST_CASE("FLArduinoJson Integration Tests") {
     
     SUBCASE("Error Handling") {
         // Test malformed JSON
-        // fl::json2::Json malformed = fl::json2::Json::parse("{ invalid json }");
+        // fl::Json malformed = fl::Json::parse("{ invalid json }");
         // CHECK(malformed.is_null());
         // 
         // Test truncated JSON
-        // fl::json2::Json truncated = fl::json2::Json::parse("{\"incomplete\":");
+        // fl::Json truncated = fl::Json::parse("{\"incomplete\":");
         // CHECK(truncated.is_null());
     }
 }

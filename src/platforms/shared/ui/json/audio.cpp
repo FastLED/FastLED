@@ -20,12 +20,12 @@ namespace fl {
 
 JsonAudioImpl::JsonAudioImpl(const fl::string &name) {
     auto updateFunc = JsonUiInternal::UpdateFunction(
-        [this](const fl::json2::Json &value) {
+        [this](const fl::Json &value) {
             this->updateInternal(value);
         });
 
     auto toJsonFunc =
-        JsonUiInternal::ToJsonFunction([this](fl::json2::Json &json) {
+        JsonUiInternal::ToJsonFunction([this](fl::Json &json) {
             this->toJson(json);
         });
     mInternal = fl::make_shared<JsonUiInternal>(name, fl::move(updateFunc),
@@ -60,7 +60,7 @@ JsonAudioImpl::Updater::~Updater() { fl::EngineEvents::removeListener(this); }
 
 void JsonAudioImpl::Updater::onPlatformPreLoop2() {}
 
-void JsonAudioImpl::toJson(fl::json2::Json &json) const {
+void JsonAudioImpl::toJson(fl::Json &json) const {
     json.set("name", name());
     json.set("group", mInternal->groupName());
     json.set("type", "audio");
@@ -128,7 +128,7 @@ static void parsePcmSamplesString(const fl::string &samplesStr, fl::vector<int16
     }
 }
 
-static void parseJsonToAudioBuffers(const fl::json2::Json &json2_obj,
+static void parseJsonToAudioBuffers(const fl::Json &json2_obj,
                                     fl::vector<AudioBuffer> *audioBuffers) {
     audioBuffers->clear();
 
@@ -137,20 +137,20 @@ static void parseJsonToAudioBuffers(const fl::json2::Json &json2_obj,
     }
     
     // Create a non-const copy for indexing
-    fl::json2::Json array_copy = json2_obj;
+    fl::Json array_copy = json2_obj;
     
     for (size_t i = 0; i < array_copy.size(); ++i) {
-        fl::json2::Json item = array_copy[i];
+        fl::Json item = array_copy[i];
         if (!item.is_object()) {
             continue;
         }
         
         AudioBuffer buffer;
         // Create a non-const copy for indexing
-        fl::json2::Json item_copy = item;
+        fl::Json item_copy = item;
         buffer.timestamp = item_copy["timestamp"] | 0u;
         
-        fl::json2::Json samples_json2 = item_copy["samples"];
+        fl::Json samples_json2 = item_copy["samples"];
         if (samples_json2.is_array()) {
             fl::string samples_str = samples_json2.to_string();
             parsePcmSamplesString(samples_str, &buffer.samples);
@@ -163,7 +163,7 @@ static void parseJsonToAudioBuffers(const fl::json2::Json &json2_obj,
 }
 
 void JsonAudioImpl::updateInternal(
-    const fl::json2::Json &value) {
+    const fl::Json &value) {
     // FASTLED_WARN("Unimplemented jsAudioImpl::updateInternal");
     mSerializeBuffer.clear();
     mSerializeBuffer = value.to_string();
@@ -171,7 +171,7 @@ void JsonAudioImpl::updateInternal(
     // Parse audio buffers with timestamps using hybrid JSON/manual parsing
     fl::vector<AudioBuffer> audioBuffers;
     // Create a non-const copy for parsing
-    fl::json2::Json value_copy = value;
+    fl::Json value_copy = value;
     parseJsonToAudioBuffers(value_copy, &audioBuffers);
     
     // Convert each audio buffer to a single AudioSample object (no chunking)

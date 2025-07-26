@@ -4,7 +4,6 @@
 #include "platforms/shared/ui/json/title.h"
 
 using namespace fl;
-using namespace fl::json2;
 
 TEST_CASE("JsonTitleImpl const char* test") {
     SUBCASE("JsonTitleImpl with const char*") {
@@ -15,7 +14,7 @@ TEST_CASE("JsonTitleImpl const char* test") {
         fl::JsonTitleImpl title(titleText);
         
         // Convert to Json and verify
-        fl::json2::Json json;
+        fl::Json json;
         title.toJson(json);
         
         // Check if the text field is correctly stored

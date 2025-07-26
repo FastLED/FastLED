@@ -176,7 +176,7 @@ TEST_CASE("UIHelp group operations") {
     
     // Test setting empty group
     help.setGroup("");
-    CHECK(help.groupName().empty());
+    CHECK(help.groupName().empty()); 
 }
 
 #endif // FASTLED_ENABLE_JSON

@@ -11,12 +11,12 @@ namespace fl {
 JsonCheckboxImpl::JsonCheckboxImpl(const fl::string &name, bool value)
     : mValue(value) {
     auto updateFunc = JsonUiInternal::UpdateFunction(
-        [this](const fl::json2::Json &value) {
+        [this](const fl::Json &value) {
             this->updateInternal(value);
         });
 
     auto toJsonFunc =
-        JsonUiInternal::ToJsonFunction([this](fl::json2::Json &json) {
+        JsonUiInternal::ToJsonFunction([this](fl::Json &json) {
             this->toJson(json);
         });
     mInternal = fl::make_shared<JsonUiInternal>(name, fl::move(updateFunc),
@@ -33,7 +33,7 @@ JsonCheckboxImpl &JsonCheckboxImpl::Group(const fl::string &name) {
 
 const fl::string &JsonCheckboxImpl::name() const { return mInternal->name(); }
 
-void JsonCheckboxImpl::toJson(fl::json2::Json &json) const {
+void JsonCheckboxImpl::toJson(fl::Json &json) const {
     json.set("name", name());
     json.set("group", mInternal->groupName());
     json.set("type", "checkbox");
@@ -73,7 +73,7 @@ JsonCheckboxImpl &JsonCheckboxImpl::operator=(int value) {
 }
 
 void JsonCheckboxImpl::updateInternal(
-    const fl::json2::Json &value) {
+    const fl::Json &value) {
     setValueInternal(value | false);  // Use internal method to avoid change notification
 }
 

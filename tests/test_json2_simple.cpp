@@ -6,19 +6,19 @@ using fl::string;
 
 TEST_CASE("Simple JSON2 test") {
     // Test creating a simple JSON object
-    fl::json2::Json obj = fl::json2::Json::object();
+    fl::Json obj = fl::Json::object();
     obj.set("key1", "value1");
     obj.set("key2", 42);
     obj.set("key3", 3.14);
     
     // Test creating a JSON array
-    fl::json2::Json arr = fl::json2::Json::array();
+    fl::Json arr = fl::Json::array();
     arr.push_back("item1");
     arr.push_back(123);
     arr.push_back(2.71);
     
     // Test nested objects
-    fl::json2::Json nested = fl::json2::Json::object();
+    fl::Json nested = fl::Json::object();
     nested.set("array", arr);
     nested.set("value", "nested_value");
     
@@ -29,7 +29,7 @@ TEST_CASE("Simple JSON2 test") {
     CHECK_FALSE(jsonStr.empty());
     
     // Test parsing
-    fl::json2::Json parsed = fl::json2::Json::parse(jsonStr);
+    fl::Json parsed = fl::Json::parse(jsonStr);
     CHECK(parsed.has_value());
     CHECK(parsed.is_object());
     

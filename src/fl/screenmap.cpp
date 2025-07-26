@@ -19,7 +19,7 @@
 namespace fl {
 
 // Helper function to extract a vector of floats from a JSON array
-fl::vector<float> jsonArrayToFloatVector(const fl::json2::Json& jsonArray) {
+fl::vector<float> jsonArrayToFloatVector(const fl::Json& jsonArray) {
     fl::vector<float> result;
     
     if (!jsonArray.has_value() || !jsonArray.is_array()) {
@@ -38,7 +38,7 @@ fl::vector<float> jsonArrayToFloatVector(const fl::json2::Json& jsonArray) {
         }
         
         // Create Json object from shared_ptr
-        fl::json2::Json itemJson(item);
+        fl::Json itemJson(item);
         if (!itemJson.has_value()) {
             continue;
         }
@@ -101,7 +101,7 @@ bool ScreenMap::ParseJson(const char *jsonStrScreenMap,
         err = &_err;
     }
 
-    auto jsonDoc = fl::json2::Json::parse(jsonStrScreenMap);
+    auto jsonDoc = fl::Json::parse(jsonStrScreenMap);
     if (!jsonDoc.has_value()) {
         *err = "Failed to parse JSON";
         FL_WARN("Failed to parse JSON");
@@ -149,7 +149,7 @@ bool ScreenMap::ParseJson(const char *jsonStrScreenMap,
         }
         
         // Create Json object directly from shared_ptr
-        fl::json2::Json val(kv.second);
+        fl::Json val(kv.second);
         if (!val.has_value()) {
             *err = "Invalid value for segment " + name;
             return false;
@@ -240,7 +240,7 @@ bool ScreenMap::ParseJson(const char *jsonStrScreenMap,
 }
 
 void ScreenMap::toJson(const fl::fl_map<string, ScreenMap> &segmentMaps,
-                       fl::json2::Json *doc) {
+                       fl::Json *doc) {
 
     if (!doc) {
         FL_WARN("ScreenMap::toJson called with nullptr doc");
@@ -308,12 +308,12 @@ void ScreenMap::toJson(const fl::fl_map<string, ScreenMap> &segmentMaps,
     FASTLED_ASSERT(false, "force debug");
     
     // Parse the manually built string
-    *doc = fl::json2::Json::parse(jsonStr);
+    *doc = fl::Json::parse(jsonStr);
 }
 
 void ScreenMap::toJsonStr(const fl::fl_map<string, ScreenMap> &segmentMaps,
                           string *jsonBuffer) {
-    fl::json2::Json doc;
+    fl::Json doc;
     toJson(segmentMaps, &doc);
     *jsonBuffer = doc.to_string();
 }

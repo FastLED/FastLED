@@ -22,7 +22,7 @@ class JsonAudioImpl {
     JsonAudioImpl &Group(const fl::string &name);
 
     const fl::string &name() const;
-    void toJson(fl::json2::Json &json) const;
+    void toJson(fl::Json &json) const;
     AudioSample next();
     bool hasNext();
     const fl::string &groupName() const;
@@ -44,7 +44,7 @@ class JsonAudioImpl {
 
     Updater mUpdater;
 
-    void updateInternal(const fl::json2::Json &value);
+    void updateInternal(const fl::Json &value);
 
     JsonUiInternalPtr mInternal;
     fl::vector<AudioSampleImplPtr> mAudioSampleImpls;

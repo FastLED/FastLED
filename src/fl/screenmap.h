@@ -90,7 +90,7 @@ class ScreenMap {
 
     static void toJsonStr(const fl::fl_map<string, ScreenMap> &,
                           string *jsonBuffer);
-    static void toJson(const fl::fl_map<string, ScreenMap> &, fl::json2::Json *doc);
+    static void toJson(const fl::fl_map<string, ScreenMap> &, fl::Json *doc);
 
   private:
     static const vec2f &empty();

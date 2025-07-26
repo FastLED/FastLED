@@ -16,7 +16,7 @@ FL_DISABLE_WARNING_POP
 
 
 namespace fl {
-namespace json2 {
+
 
 Value& get_null_value() {
     static Value null_value;
@@ -34,7 +34,7 @@ fl::shared_ptr<Value> Value::parse(const fl::string& txt) {
         return fl::make_shared<Value>(nullptr); // Return null on error
     }
 
-    // Helper function to convert FLArduinoJson::JsonVariantConst to fl::json2::Value
+    // Helper function to convert FLArduinoJson::JsonVariantConst to fl::Json::Value
     struct Converter {
         static fl::shared_ptr<Value> convert(const FLArduinoJson::JsonVariantConst& src) {
             if (src.isNull()) {
@@ -86,7 +86,7 @@ fl::string Json::to_string_native() const {
     // Create a JsonDocument to hold our data
     FLArduinoJson::JsonDocument doc;
     
-    // Helper function to convert fl::json2::Value to FLArduinoJson::JsonVariant
+    // Helper function to convert fl::Json::Value to FLArduinoJson::JsonVariant
     struct Converter {
         static void convert(const Value& src, FLArduinoJson::JsonVariant dst) {
             if (src.is_null()) {
@@ -145,11 +145,6 @@ fl::string Json::to_string_native() const {
 // Forward declaration for the serializeValue function
 fl::string serializeValue(const Value& value);
 
-} // namespace json2
-} // namespace fl
-
-namespace fl {
-namespace json2 {
 
 fl::string Json::normalizeJsonString(const char* jsonStr) {
     fl::string result;
@@ -166,7 +161,6 @@ fl::string Json::normalizeJsonString(const char* jsonStr) {
     return result;
 }
 
-} // namespace json2
 } // namespace fl
 
 

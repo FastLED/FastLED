@@ -58,8 +58,11 @@ TEST_CASE("fl::string - Construction and Assignment") {
 
     SUBCASE("Self-assignment") {
         string s("Self assignment test");
-        // Test self-assignment (suppress warning with extra parentheses)
-        (s = s);
+        // Test self-assignment (suppress warning with compiler control macros)
+        FL_DISABLE_WARNING_PUSH
+        FL_DISABLE_WARNING_SELF_ASSIGN_OVERLOADED
+        s = s;
+        FL_DISABLE_WARNING_POP
         CHECK(strcmp(s.c_str(), "Self assignment test") == 0);
     }
 }

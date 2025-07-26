@@ -8,47 +8,46 @@
 #include "fl/map.h"
 
 using namespace fl;
-using namespace fl::json2;
 
 TEST_CASE("Json2 Tests") {
     // Test creating JSON values of different types
     SUBCASE("Basic value creation") {
-        fl::json2::Json nullJson;
+        fl::Json nullJson;
         CHECK(nullJson.is_null());
 
-        fl::json2::Json boolJson(true);
+        fl::Json boolJson(true);
         CHECK(boolJson.is_bool());
         auto boolOpt = boolJson.as_bool();
         REQUIRE(boolOpt.has_value());
         CHECK_EQ(*boolOpt, true);
 
-        fl::json2::Json intJson(42);
+        fl::Json intJson(42);
         CHECK(intJson.is_int());
         
-        fl::json2::Json doubleJson(3.14);
+        fl::Json doubleJson(3.14);
         CHECK(doubleJson.is_double());
         
-        fl::json2::Json stringJson("hello");
+        fl::Json stringJson("hello");
         CHECK(stringJson.is_string());
     }
 
     // Test parsing JSON strings
     SUBCASE("Parsing JSON strings") {
         // Parse a simple object
-        fl::json2::Json obj = fl::json2::Json::parse("{\"value\": 30}");
+        fl::Json obj = fl::Json::parse("{\"value\": 30}");
         CHECK(obj.is_object());
         CHECK(obj.contains("value"));
 
         // Parse an array
-        fl::json2::Json arr = fl::json2::Json::parse("[1, 2, 3]");
+        fl::Json arr = fl::Json::parse("[1, 2, 3]");
         CHECK(arr.is_array());
         CHECK_EQ(arr.size(), 3);
     }
 
     // Test contains method
     SUBCASE("Contains method") {
-        fl::json2::Json obj = fl::json2::Json::parse("{\"key1\": \"value1\", \"key2\": 123}");
-        fl::json2::Json arr = fl::json2::Json::parse("[10, 20, 30]");
+        fl::Json obj = fl::Json::parse("{\"key1\": \"value1\", \"key2\": 123}");
+        fl::Json arr = fl::Json::parse("[10, 20, 30]");
 
         CHECK(obj.contains("key1"));
         CHECK(obj.contains("key2"));
@@ -62,29 +61,29 @@ TEST_CASE("Json2 Tests") {
     
     // Test array and object creation
     SUBCASE("Array and object creation") {
-        fl::json2::Json arr = fl::json2::Json::array();
+        fl::Json arr = fl::Json::array();
         CHECK(arr.is_array());
         
-        fl::json2::Json obj = fl::json2::Json::object();
+        fl::Json obj = fl::Json::object();
         CHECK(obj.is_object());
     }
     
     // Test array of integers (simplified)
     SUBCASE("Array of integers") {
         // Create an array and verify it's an array
-        fl::json2::Json arr = fl::json2::Json::array();
+        fl::Json arr = fl::Json::array();
         CHECK(arr.is_array());
         
         // Add integers to the array using push_back
-        arr.push_back(fl::json2::Json(10));
-        arr.push_back(fl::json2::Json(20));
-        arr.push_back(fl::json2::Json(30));
+        arr.push_back(fl::Json(10));
+        arr.push_back(fl::Json(20));
+        arr.push_back(fl::Json(30));
         
         // Check that the array has the correct size
         CHECK_EQ(arr.size(), 3);
         
         // Parse an array of integers from string
-        fl::json2::Json parsedArr = fl::json2::Json::parse("[100, 200, 300]");
+        fl::Json parsedArr = fl::Json::parse("[100, 200, 300]");
         CHECK(parsedArr.is_array());
         CHECK_EQ(parsedArr.size(), 3);
         
@@ -98,7 +97,7 @@ TEST_CASE("Json2 Tests") {
     // Test parsing array of integers structure
     SUBCASE("Parse array of integers structure") {
         // Parse an array of integers from string
-        fl::json2::Json arr = fl::json2::Json::parse("[5, 15, 25, 35]");
+        fl::Json arr = fl::Json::parse("[5, 15, 25, 35]");
         CHECK(arr.is_array());
         CHECK_EQ(arr.size(), 4);
         
@@ -113,7 +112,7 @@ TEST_CASE("Json2 Tests") {
     // Test parsing nested array one level deep structure
     SUBCASE("Parse nested array one level deep structure") {
         // Parse an object with a nested array
-        fl::json2::Json obj = fl::json2::Json::parse("{\"key\": [1, 2, 3, 4]}");
+        fl::Json obj = fl::Json::parse("{\"key\": [1, 2, 3, 4]}");
         CHECK(obj.is_object());
         CHECK(obj.contains("key"));
         
@@ -125,7 +124,7 @@ TEST_CASE("Json2 Tests") {
     // Test parsing mixed-type object
     SUBCASE("Parse mixed-type object") {
         // Parse an object with different value types
-        fl::json2::Json obj = fl::json2::Json::parse("{\"strKey\": \"stringValue\", \"intKey\": 42, \"floatKey\": 3.14, \"arrayKey\": [1, 2, 3]}");
+        fl::Json obj = fl::Json::parse("{\"strKey\": \"stringValue\", \"intKey\": 42, \"floatKey\": 3.14, \"arrayKey\": [1, 2, 3]}");
         CHECK(obj.is_object());
         
         // Check that all keys exist
@@ -153,20 +152,20 @@ TEST_CASE("Json2 Tests") {
         segmentMaps["strip2"] = strip2;
         
         // Serialize to JSON using new json2 implementation
-        fl::json2::Json doc;
+        fl::Json doc;
         ScreenMap::toJson(segmentMaps, &doc);
         
         // First verify that the serialized JSON has the correct structure
         CHECK(doc.is_object());
         CHECK(doc.contains("map"));
         
-        fl::json2::Json mapObj = doc["map"];
+        fl::Json mapObj = doc["map"];
         CHECK(mapObj.is_object());
         CHECK(mapObj.contains("strip1"));
         CHECK(mapObj.contains("strip2"));
         
-        fl::json2::Json strip1Obj = mapObj["strip1"];
-        fl::json2::Json strip2Obj = mapObj["strip2"];
+        fl::Json strip1Obj = mapObj["strip1"];
+        fl::Json strip2Obj = mapObj["strip2"];
         CHECK(strip1Obj.is_object());
         CHECK(strip2Obj.is_object());
         
@@ -179,7 +178,7 @@ TEST_CASE("Json2 Tests") {
         
         // Also test with string serialization
         fl::string jsonBuffer = doc.to_string();
-        fl::json2::Json parsedJson = fl::json2::Json::parse(jsonBuffer.c_str());
+        fl::Json parsedJson = fl::Json::parse(jsonBuffer.c_str());
         CHECK(parsedJson.is_object());
         CHECK(parsedJson.contains("map"));
         
