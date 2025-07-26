@@ -2,7 +2,24 @@
 #include "fl/json2.h"
 #include "fl/string.h"
 #include "fl/vector.h"
-#include "fl/json.h"  // For FLArduinoJson::JsonDocument
+#include "fl/sketch_macros.h"
+
+#ifndef FASTLED_ENABLE_JSON
+#ifdef SKETCH_HAS_LOTS_OF_MEMORY
+#define FASTLED_ENABLE_JSON 1
+#else
+#define FASTLED_ENABLE_JSON 0
+#endif
+#endif
+
+#if FASTLED_ENABLE_JSON
+
+FL_DISABLE_WARNING_PUSH
+FL_DISABLE_WARNING(null-dereference)
+#include "third_party/arduinojson/json.h"
+FL_DISABLE_WARNING_POP
+
+
 
 namespace fl {
 namespace json2 {
@@ -157,3 +174,6 @@ fl::string Json::normalizeJsonString(const char* jsonStr) {
 
 } // namespace json2
 } // namespace fl
+
+
+#endif  // FASTLED_ENABLE_JSON
