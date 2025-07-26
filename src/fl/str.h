@@ -749,7 +749,7 @@ class string : public StrN<FASTLED_STR_INLINED_SIZE> {
         return *this;
     }
     string &append(const u8 &c) {
-        write(u16(c));
+        write(static_cast<char>(c));
         return *this;
     }
     string &append(const u16 &val) {
