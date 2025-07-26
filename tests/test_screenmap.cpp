@@ -6,6 +6,7 @@
 #include "test.h"
 #include "fl/screenmap.h"
 
+
 #include "fl/namespace.h"
 FASTLED_USING_NAMESPACE
 
@@ -83,7 +84,7 @@ TEST_CASE("ScreenMap JSON parsing") {
 
 TEST_CASE("ScreenMap multiple strips JSON serialization") {
     // Create a map with multiple strips
-    fl::fl_map<Str, ScreenMap> originalMaps;
+    fl::fl_map<fl::string, ScreenMap> originalMaps;
     
     // First strip
     ScreenMap strip1(2, 2.0f);
@@ -99,11 +100,11 @@ TEST_CASE("ScreenMap multiple strips JSON serialization") {
     originalMaps["strip2"] = strip2;
 
     // Serialize to JSON string
-    Str jsonStr;
+    fl::string jsonStr;
     ScreenMap::toJsonStr(originalMaps, &jsonStr);
 
     // Deserialize back to a new map
-    fl::fl_map<Str, ScreenMap> deserializedMaps;
+    fl::fl_map<fl::string, ScreenMap> deserializedMaps;
     ScreenMap::ParseJson(jsonStr.c_str(), &deserializedMaps);
 
     // Verify first strip

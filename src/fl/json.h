@@ -6,6 +6,7 @@
 #include "fl/ptr.h"
 #include "fl/vector.h"
 #include "fl/type_traits.h"
+#include "fl/json_compact.h"
 
 #include "fl/sketch_macros.h"
 

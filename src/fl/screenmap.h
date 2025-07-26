@@ -9,12 +9,16 @@
 #include "fl/map.h"
 #include "fl/namespace.h"
 #include "fl/str.h"
+#include "fl/json2.h"
 
 /* Screenmap maps strip indexes to x,y coordinates. This is used for FastLED Web
  * to map the 1D strip to a 2D screen. Note that the strip can have arbitrary
  * size. this was first motivated by the effort to port theChromancer project to
  * FastLED for the browser.
  */
+
+ // CONVERT JSON TO JSON2
+ // DON'T USE JSON
 
 namespace fl {
 
@@ -86,7 +90,7 @@ class ScreenMap {
 
     static void toJsonStr(const fl::fl_map<string, ScreenMap> &,
                           string *jsonBuffer);
-    static void toJson(const fl::fl_map<string, ScreenMap> &, fl::Json *doc);
+    static void toJson(const fl::fl_map<string, ScreenMap> &, fl::json2::Json *doc);
 
   private:
     static const vec2f &empty();
