@@ -104,7 +104,9 @@ static esp_err_t led_strip_spi_set_pixel_rgbw(led_strip_t *strip, uint32_t index
     return ESP_OK;
 }
 
-
+// There's a bug in here:
+// https://github.com/espressif/esp-idf/issues/16188
+// The tx_conf needs to be accesssible by the interrupt, which it's not right now because it's a local variable.
 static esp_err_t spi_led_strip_refresh_async(led_strip_t *strip)
 {
     led_strip_spi_obj *spi_strip = __containerof(strip, led_strip_spi_obj, base);
