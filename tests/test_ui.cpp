@@ -15,7 +15,7 @@
 #include "fl/json_console.h"
 #include "fl/sstream.h"
 #include <cstring>
-#include "fl/json2.h"
+#include "fl/json.h"
 
 #include "fl/namespace.h"
 FASTLED_USING_NAMESPACE

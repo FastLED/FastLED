@@ -6,7 +6,7 @@
 
 #include "fl/screenmap.h"
 
-#include "fl/json2.h"
+#include "fl/json.h"
 #include "fl/map.h"
 #include "fl/math.h"
 #include "fl/math_macros.h"

@@ -1,5 +1,5 @@
 #include "test.h"
-#include "fl/json2.h"
+#include "fl/json.h"
 #include "fl/math.h" // for fabs
 
 TEST_CASE("FLArduinoJson Integration Tests") {

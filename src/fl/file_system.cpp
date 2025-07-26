@@ -13,7 +13,7 @@
 #define FASTLED_HAS_SDCARD 0
 #endif
 
-#include "fl/json2.h"
+#include "fl/json.h"
 #include "fl/namespace.h"
 #include "fl/screenmap.h"
 #include "fl/unused.h"

@@ -3,10 +3,10 @@
 #if SKETCH_HAS_LOTS_OF_MEMORY
 
 
-#include "fl/json_console.h"
+#include "platforms/shared/ui/json/json_console.h"
 #include "fl/warn.h"
-#include "fl/json2.h"
-#include "fl/json2.h"
+#include "fl/json.h"
+#include "fl/json.h"
 #include "fl/algorithm.h"
 #include "fl/stdint.h"
 #include "platforms/shared/ui/json/ui.h"

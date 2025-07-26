@@ -3,7 +3,7 @@
 
 #include "test.h"
 
-#include "fl/json2.h"
+#include "fl/json.h"
 #include "fl/screenmap.h"
 #include "fl/map.h"
 

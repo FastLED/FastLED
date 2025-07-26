@@ -3,7 +3,7 @@
 #include "fl/map.h"
 #include "fl/namespace.h"
 #include "fl/str.h"
-#include "fl/json2.h"
+#include "fl/json.h"
 
 // CLEDController is forward declared in header - no include needed
 
