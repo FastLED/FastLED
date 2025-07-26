@@ -45,6 +45,8 @@ typedef struct {
     uint32_t strip_len;
     uint8_t bytes_per_pixel;
     led_color_component_format_t component_fmt;
+    spi_transaction_t tx_trans;  // Transaction object stored in the controller
+    bool trans_pending;          // Flag to track if transaction is pending
     uint8_t pixel_buf[];
 } led_strip_spi_obj;
 
@@ -104,29 +106,46 @@ static esp_err_t led_strip_spi_set_pixel_rgbw(led_strip_t *strip, uint32_t index
     return ESP_OK;
 }
 
-// There's a bug in here:
-// https://github.com/espressif/esp-idf/issues/16188
-// The tx_conf needs to be accesssible by the interrupt, which it's not right now because it's a local variable.
 static esp_err_t spi_led_strip_refresh_async(led_strip_t *strip)
 {
     led_strip_spi_obj *spi_strip = __containerof(strip, led_strip_spi_obj, base);
-    spi_transaction_t tx_conf;
-    memset(&tx_conf, 0, sizeof(tx_conf));
-
-    tx_conf.length = spi_strip->strip_len * spi_strip->bytes_per_pixel * SPI_BITS_PER_COLOR_BYTE;
-    tx_conf.tx_buffer = spi_strip->pixel_buf;
-    tx_conf.rx_buffer = NULL;
-    spi_device_queue_trans(spi_strip->spi_device, &tx_conf, portMAX_DELAY);
-    return ESP_OK;
+    
+    // Wait for any pending transaction to complete before starting a new one
+    if (spi_strip->trans_pending) {
+        spi_transaction_t* trans_ptr;
+        spi_device_get_trans_result(spi_strip->spi_device, &trans_ptr, pdMS_TO_TICKS(1000));
+        spi_strip->trans_pending = false;
+    }
+    
+    // Initialize the transaction object stored in the controller
+    memset(&spi_strip->tx_trans, 0, sizeof(spi_strip->tx_trans));
+    spi_strip->tx_trans.length = spi_strip->strip_len * spi_strip->bytes_per_pixel * SPI_BITS_PER_COLOR_BYTE;
+    spi_strip->tx_trans.tx_buffer = spi_strip->pixel_buf;
+    spi_strip->tx_trans.rx_buffer = NULL;
+    
+    // Queue the transaction
+    esp_err_t ret = spi_device_queue_trans(spi_strip->spi_device, &spi_strip->tx_trans, portMAX_DELAY);
+    if (ret == ESP_OK) {
+        spi_strip->trans_pending = true;
+    }
+    
+    return ret;
 }
 
 static esp_err_t spi_led_strip_refresh_wait_done(led_strip_t *strip)
 {
     led_strip_spi_obj *spi_strip = __containerof(strip, led_strip_spi_obj, base);
-    spi_transaction_t* tx_conf = 0;
-    #if !FASTLED_ESP32_SPI_HACK_NO_TRANSACTION_WAIT
-    spi_device_get_trans_result(spi_strip->spi_device, &tx_conf, portMAX_DELAY);
-    #endif
+    
+    // Only wait if there's a pending transaction
+    if (spi_strip->trans_pending) {
+        spi_transaction_t* trans_ptr;
+        esp_err_t ret = spi_device_get_trans_result(spi_strip->spi_device, &trans_ptr, pdMS_TO_TICKS(1000));
+        if (ret == ESP_OK) {
+            spi_strip->trans_pending = false;
+        }
+        return ret;
+    }
+    
     return ESP_OK;
 }
 
@@ -155,6 +174,13 @@ static esp_err_t led_strip_spi_clear(led_strip_t *strip)
 static esp_err_t led_strip_spi_del(led_strip_t *strip)
 {
     led_strip_spi_obj *spi_strip = __containerof(strip, led_strip_spi_obj, base);
+
+    // Wait for any pending transaction to complete before destroying the strip
+    if (spi_strip->trans_pending) {
+        spi_transaction_t* trans_ptr;
+        spi_device_get_trans_result(spi_strip->spi_device, &trans_ptr, pdMS_TO_TICKS(1000));
+        spi_strip->trans_pending = false;
+    }
 
     ESP_RETURN_ON_ERROR(spi_bus_remove_device(spi_strip->spi_device), TAG, "delete spi device failed");
     ESP_RETURN_ON_ERROR(spi_bus_free(spi_strip->spi_host), TAG, "free spi bus failed");
@@ -246,6 +272,7 @@ esp_err_t led_strip_new_spi_device(const led_strip_config_t *led_config, const l
     spi_strip->component_fmt = component_fmt;
     spi_strip->bytes_per_pixel = bytes_per_pixel;
     spi_strip->strip_len = led_config->max_leds;
+    spi_strip->trans_pending = false;  // Initialize transaction pending flag
     spi_strip->base.set_pixel = led_strip_spi_set_pixel;
     spi_strip->base.set_pixel_rgbw = led_strip_spi_set_pixel_rgbw;
     spi_strip->base.refresh = led_strip_spi_refresh;
