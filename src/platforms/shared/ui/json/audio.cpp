@@ -134,7 +134,7 @@ static void parseJsonToAudioBuffers(const fl::Json &jsonValue,
     audioBuffers->clear();
     
     fl::string json_str = jsonValue.serialize();
-    fl::json2::Json json2_obj = fl::json2::Json::parse(json_str.c_str());
+    fl::json2::Json json2_obj = fl::json2::Json::parse(json_str);
 
     if (!json2_obj.is_array()) {
         return;

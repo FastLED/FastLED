@@ -101,7 +101,7 @@ JsonSliderImpl &JsonSliderImpl::operator=(int value) {
 void JsonSliderImpl::updateInternal(
     const fl::Json &value) {
     fl::string str = value.serialize();
-    fl::json2::Json json2_obj = fl::json2::Json::parse(str.c_str());
+    fl::json2::Json json2_obj = fl::json2::Json::parse(str);
     setValue(json2_obj | 0.0f);
 }
 
