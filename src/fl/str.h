@@ -552,6 +552,11 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
         write(c);
     }
 
+    // Push ASCII character without numeric conversion for display
+    void push_ascii(char c) {
+        write(c);
+    }
+
     void pop_back() {
         if (mLength > 0) {
             mLength--;
@@ -591,6 +596,9 @@ class string : public StrN<FASTLED_STR_INLINED_SIZE> {
     string(const char *str) : StrN<FASTLED_STR_INLINED_SIZE>(str) {}
     string(const char *str, fl::size len) : StrN<FASTLED_STR_INLINED_SIZE>() {
         copy(str, len);
+    }
+    string(fl::size len, char c) : StrN<FASTLED_STR_INLINED_SIZE>() {
+        resize(len, c);
     }
     string(const string &other) : StrN<FASTLED_STR_INLINED_SIZE>(other) {}
     template <fl::size M>
@@ -684,6 +692,11 @@ class string : public StrN<FASTLED_STR_INLINED_SIZE> {
             return '\0';
         }
         return c_str()[size() - 1];
+    }
+
+    // Push ASCII character without numeric conversion for display
+    void push_ascii(char c) {
+        write(c);
     }
 
     // Generic integral append: only enabled if T is an integral type. This is
