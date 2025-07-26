@@ -367,9 +367,6 @@ struct Value {
     // Visitor-based serialization helper
     friend class SerializerVisitor;
 
-    // Parsing factory (native implementation)
-    static fl::shared_ptr<Value> parse_native(const fl::string &txt);
-    
     // Parsing factory (FLArduinoJson implementation)
     static fl::shared_ptr<Value> parse(const fl::string &txt);
 };
@@ -593,17 +590,6 @@ public:
     // Parsing factory method
     static Json parse(const fl::string &txt) {
         auto parsed = Value::parse(txt);
-        if (parsed) {
-            Json result;
-            result.m_value = parsed;
-            return result;
-        }
-        return Json(nullptr);
-    }
-    
-    // Parsing factory method (native implementation)
-    static Json parse_native(const fl::string &txt) {
-        auto parsed = Value::parse_native(txt);
         if (parsed) {
             Json result;
             result.m_value = parsed;
