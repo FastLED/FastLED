@@ -298,31 +298,36 @@ EMSCRIPTEN_KEEPALIVE bool jsDeclareFile(const char *path, size_t len) {
 }
 
 EMSCRIPTEN_KEEPALIVE void fastled_declare_files(const char* jsonStr) {
-    fl::JsonDocument doc;
-    fl::parseJson(jsonStr, &doc);
+    fl::json2::Json doc = fl::json2::Json::parse(fl::string(jsonStr));
+    if (!doc.is_object() || !doc.contains("files")) {
+        return;
+    }
+    
     auto files = doc["files"];
-    if (files.isNull()) {
+    if (!files.is_array()) {
         return;
     }
-    auto files_array = files.as<FLArduinoJson::JsonArray>();
-    if (files_array.isNull()) {
-        return;
-    }
-
-    for (auto file : files_array) {
-        auto size_obj = file["size"];
-        if (size_obj.isNull()) {
+    
+    size_t fileCount = files.size();
+    for (size_t i = 0; i < fileCount; i++) {
+        auto file = files[i];
+        if (!file.is_object()) {
             continue;
         }
-        auto size = size_obj.as<int>();
-        auto path_obj = file["path"];
-        if (path_obj.isNull()) {
+        
+        if (!file.contains("size") || !file.contains("path")) {
             continue;
         }
-        printf("Declaring file %s with size %d. These will become available as "
-               "File system paths within the app.\n",
-               path_obj.as<const char *>(), size);
-        jsDeclareFile(path_obj.as<const char *>(), size);
+        
+        int size = file["size"] | 0;
+        fl::string path = file["path"] | fl::string("");
+        
+        if (size > 0 && !path.empty()) {
+            printf("Declaring file %s with size %d. These will become available as "
+                   "File system paths within the app.\n",
+                   path.c_str(), size);
+            jsDeclareFile(path.c_str(), size);
+        }
     }
 }
 
