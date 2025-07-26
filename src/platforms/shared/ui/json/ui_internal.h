@@ -1,7 +1,7 @@
 #pragma once
 
 #include "fl/function.h"
-#include "fl/json.h"
+#include "fl/json2.h"
 #include "fl/json2.h"
 #include "fl/namespace.h"
 #include "fl/memory.h"

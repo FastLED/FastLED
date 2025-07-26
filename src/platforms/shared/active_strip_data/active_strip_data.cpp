@@ -3,7 +3,7 @@
 #include "fl/map.h"
 #include "fl/namespace.h"
 #include "fl/str.h"
-#include "fl/json.h"
+#include "fl/json2.h"
 
 // CLEDController is forward declared in header - no include needed
 
@@ -40,7 +40,7 @@ bool ActiveStripData::parseStripJsonInfo(const char* jsonStr) {
     if (!jsonStr) return false;
     
     // Use the working fl::Json parsing API
-    auto json = fl::Json::parse(jsonStr);
+    auto json = fl::json2::Json::parse(jsonStr);
     
     if (!json.has_value() || !json.is_array()) {
         return false;

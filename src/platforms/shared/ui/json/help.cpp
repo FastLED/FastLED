@@ -2,7 +2,7 @@
 #include "ui_internal.h"
 #include "platforms/shared/ui/json/ui.h"
 
-#include "fl/json.h"
+#include "fl/json2.h"
 #include "fl/json2.h"
 
 #if FASTLED_ENABLE_JSON

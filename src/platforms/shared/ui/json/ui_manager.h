@@ -7,7 +7,7 @@
 #include "fl/set.h"
 #include "fl/engine_events.h"
 
-#include "fl/json.h"
+#include "fl/json2.h"
 #include "fl/json2.h"
 #include "fl/function.h"
 #include "platforms/shared/ui/json/ui_internal.h"

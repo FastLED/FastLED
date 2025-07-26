@@ -8,6 +8,7 @@
 #include "fl/unique_ptr.h"
 #include "fl/shared_ptr.h"
 #include "fl/functional.h"
+#include "fl/json.h"
 
 namespace fl {
 namespace json2 {

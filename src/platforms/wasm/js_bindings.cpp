@@ -38,7 +38,7 @@
 #include "fl/dbg.h"
 #include "fl/math.h"
 #include "fl/screenmap.h"
-#include "fl/json.h"
+#include "fl/json2.h"
 
 // Forward declarations for functions used in this file
 namespace fl {
