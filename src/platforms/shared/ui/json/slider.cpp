@@ -1,5 +1,6 @@
 #include "platforms/shared/ui/json/slider.h"
 #include "fl/json.h"
+#include "fl/json2.h"
 #include "fl/math_macros.h"
 #include "fl/namespace.h"
 #include "platforms/shared/ui/json/ui.h"
@@ -99,7 +100,9 @@ JsonSliderImpl &JsonSliderImpl::operator=(int value) {
 
 void JsonSliderImpl::updateInternal(
     const fl::Json &value) {
-    setValue(value | 0.0f);
+    fl::string str = value.serialize();
+    fl::json2::Json json2_obj = fl::json2::Json::parse(str.c_str());
+    setValue(json2_obj | 0.0f);
 }
 
 } // namespace fl
