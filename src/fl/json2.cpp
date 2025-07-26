@@ -260,6 +260,35 @@ fl::string Json::to_string_native() const {
     return serializeValue(*m_value);
 }
 
+fl::string serializeValue(const Value& value);
+
+} // namespace json2
+} // namespace fl
+
+namespace fl {
+namespace json2 {
+
+fl::string Json::normalizeJsonString(const char* jsonStr) {
+    fl::string result;
+    if (!jsonStr) {
+        return result;
+    }
+    size_t len = strlen(jsonStr);
+    for (size_t i = 0; i < len; ++i) {
+        char c = jsonStr[i];
+        if (c != ' ' && c != '	' && c != '\n' && c != '\r') {
+            result += c;
+        }
+    }
+    return result;
+}
+
+} // namespace json2
+} // namespace fl
+
+namespace fl {
+namespace json2 {
+
 fl::string serializeValue(const Value& value) {
     if (value.is_null()) {
         return "null";

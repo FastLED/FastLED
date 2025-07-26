@@ -108,19 +108,19 @@ void JsonUiManager::processPendingUpdates() {
 }
 
 fl::vector<JsonUiInternalPtr> JsonUiManager::getComponents() {
-    //FL_WARN("*** JsonUiManager::getComponents ENTRY ***");
     fl::lock_guard<fl::mutex> lock(mMutex);
-    //FL_WARN("*** mComponents.size() = " << mComponents.size());
     fl::vector<JsonUiInternalPtr> out;
     for (auto &component : mComponents) {
         if (auto ptr = component.lock()) {
             out.push_back(ptr);
-            //FL_WARN("*** Added component to output: id=" << ptr->id() << " name=" << ptr->name());
         } else {
             FL_WARN("*** WARNING: Component weak_ptr is expired, skipping");
         }
     }
-    //FL_WARN("*** Returning " << out.size() << " components");
+    // Sort components by ID to ensure consistent serialization order
+    fl::sort(out.begin(), out.end(), [](const JsonUiInternalPtr& a, const JsonUiInternalPtr& b) {
+        return a->id() < b->id();
+    });
     return out;
 }
 

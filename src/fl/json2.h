@@ -589,6 +589,9 @@ public:
     
     // Serialize method for compatibility
     fl::string serialize() const { return to_string(); }
+
+    // Helper function to normalize JSON string (remove whitespace)
+    static fl::string normalizeJsonString(const char* jsonStr);
 };
 
 // Helper function to serialize a json2::Value

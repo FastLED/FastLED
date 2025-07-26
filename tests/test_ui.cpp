@@ -9,6 +9,7 @@
 #include "fl/json_console.h"
 #include "fl/sstream.h"
 #include <cstring>
+#include "fl/json2.h"
 
 #include "fl/namespace.h"
 FASTLED_USING_NAMESPACE
@@ -254,6 +255,111 @@ TEST_CASE("manager replacement") {
     
     // Clean up component to avoid destructor warning
     fl::removeJsonUiComponent(weakComponent);
+}
+
+TEST_CASE("full ui json flow test") {
+    // Test variables to track handler calls and component updates
+    int updateJsCallCount = 0;
+    bool componentUpdated = false;
+    bool updatedValue = false;
+
+    // 1. Set up handler with updateJs callback
+    auto updateEngineState = fl::setJsonUiHandlers(
+        [&](const char* jsonStr) {
+            updateJsCallCount++;
+            // In a real scenario, this would send JSON to JS UI
+            // For this test, we just count calls
+        }
+    );
+    CHECK(updateEngineState);
+
+    // 2. Create a mock component that sets a flag when updated
+    auto updateFunc = [&](const fl::Json& value) {
+        componentUpdated = true;
+        updatedValue = value | false; // Extract boolean value
+    };
+    auto toJsonFunc = [](fl::Json&) { /* do nothing */ };
+    auto mockComponent = fl::make_shared<fl::JsonUiInternal>("test_component_full_flow", updateFunc, toJsonFunc);
+    fl::weak_ptr<fl::JsonUiInternal> weakComponent(mockComponent);
+    fl::addJsonUiComponent(weakComponent);
+
+    // 3. Simulate an incoming JSON update string for the component
+    const char* incomingJson = "{\"test_component_full_flow\": true}";
+    updateEngineState(incomingJson);
+
+    // 4. Verify that the component's updateInternal method was called with the correct value
+    CHECK(componentUpdated);
+    CHECK(updatedValue == true);
+
+    // Simulate another update with a different value
+    componentUpdated = false;
+    updatedValue = false;
+    const char* incomingJson2 = "{\"test_component_full_flow\": false}";
+    updateEngineState(incomingJson2);
+
+    CHECK(componentUpdated);
+    CHECK(updatedValue == false);
+
+    // Clean up component
+    fl::removeJsonUiComponent(weakComponent);
+}
+
+TEST_CASE("complex ui element serialization") {
+    // 1. Set up handler with a mock updateJs callback to capture serialized JSON
+    fl::string capturedJsonOutput;
+    auto updateEngineState = fl::setJsonUiHandlers(
+        [&](const char* jsonStr) {
+            capturedJsonOutput = jsonStr;
+        }
+    );
+    CHECK(updateEngineState);
+
+    // 2. Create various UI components
+    fl::JsonButtonImpl button("myButton");
+    button.Group("group1");
+    fl::JsonSliderImpl slider("mySlider", 0.5f, 0.0f, 1.0f, 0.1f);
+    slider.Group("group1");
+    fl::JsonCheckboxImpl checkbox("myCheckbox", true);
+    checkbox.Group("group2");
+
+    // 3. Register components (they are automatically added to the manager via their constructors)
+    //    No explicit addJsonUiComponent calls needed here as they are handled by the constructors
+
+    // 4. Trigger serialization by processing pending updates
+    fl::processJsonUiPendingUpdates();
+
+    // 5. Define the expected JSON string as a constant literal
+    const char* expectedJsonString = R"([
+  {
+    "name": "myButton",
+    "group": "group1",
+    "type": "button",
+    "id": 0,
+    "pressed": false
+  },
+  {
+    "name": "mySlider",
+    "group": "group1",
+    "type": "slider",
+    "id": 1,
+    "value": 0.50,
+    "min": 0.00,
+    "max": 1.00,
+    "step": 0.10
+  },
+  {
+    "name": "myCheckbox",
+    "group": "group2",
+    "type": "checkbox",
+    "id": 2,
+    "value": true
+  }
+])";
+
+    // 6. Verify the captured JSON output against the expected string
+    CHECK_EQ(fl::json2::Json::normalizeJsonString(expectedJsonString), fl::json2::Json::normalizeJsonString(capturedJsonOutput.c_str()));
+
+    // Clean up components (they are automatically removed via their destructors when they go out of scope)
 }
 
 #ifdef SKETCH_HAS_LOTS_OF_MEMORY
