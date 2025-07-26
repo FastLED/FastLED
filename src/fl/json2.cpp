@@ -1,6 +1,7 @@
 #include "fl/json2.h"
 #include "fl/string.h"
 #include "fl/vector.h"
+#include "fl/json.h"  // For FLArduinoJson::JsonDocument
 
 namespace fl {
 namespace json2 {
@@ -20,10 +21,10 @@ namespace {
     }
     
     // Parse a JSON value from string
-    fl::shared_ptr<Value> parse_value(const fl::string& str, size_t& pos);
+    fl::shared_ptr<Value> parse_value_native(const fl::string& str, size_t& pos);
     
     // Parse a JSON string
-    fl::string parse_string(const fl::string& str, size_t& pos) {
+    fl::string parse_string_native(const fl::string& str, size_t& pos) {
         if (pos >= str.length() || str[pos] != '"') {
             return "";
         }
@@ -61,7 +62,7 @@ namespace {
     }
     
     // Parse a JSON number
-    fl::shared_ptr<Value> parse_number(const fl::string& str, size_t& pos) {
+    fl::shared_ptr<Value> parse_number_native(const fl::string& str, size_t& pos) {
         size_t start = pos;
         if (pos < str.length() && (str[pos] == '-' || str[pos] == '+')) {
             ++pos;
@@ -107,7 +108,7 @@ namespace {
     }
     
     // Parse a JSON boolean
-    fl::shared_ptr<Value> parse_boolean(const fl::string& str, size_t& pos) {
+    fl::shared_ptr<Value> parse_boolean_native(const fl::string& str, size_t& pos) {
         if (pos + 4 <= str.length() && str.substr(pos, 4) == "true") {
             pos += 4;
             return fl::make_shared<Value>(true);
@@ -119,7 +120,7 @@ namespace {
     }
     
     // Parse a JSON null
-    fl::shared_ptr<Value> parse_null(const fl::string& str, size_t& pos) {
+    fl::shared_ptr<Value> parse_null_native(const fl::string& str, size_t& pos) {
         if (pos + 4 <= str.length() && str.substr(pos, 4) == "null") {
             pos += 4;
             return fl::make_shared<Value>(nullptr);
@@ -128,7 +129,7 @@ namespace {
     }
     
     // Parse a JSON array
-    fl::shared_ptr<Value> parse_array(const fl::string& str, size_t& pos) {
+    fl::shared_ptr<Value> parse_array_native(const fl::string& str, size_t& pos) {
         if (pos >= str.length() || str[pos] != '[') {
             return fl::make_shared<Value>(Array{});
         }
@@ -143,7 +144,7 @@ namespace {
         }
         
         while (pos < str.length() && str[pos] != ']') {
-            auto value = parse_value(str, pos);
+            auto value = parse_value_native(str, pos);
             if (value) {
                 array.push_back(value);
             }
@@ -163,7 +164,7 @@ namespace {
     }
     
     // Parse a JSON object
-    fl::shared_ptr<Value> parse_object(const fl::string& str, size_t& pos) {
+    fl::shared_ptr<Value> parse_object_native(const fl::string& str, size_t& pos) {
         if (pos >= str.length() || str[pos] != '{') {
             return fl::make_shared<Value>(Object{});
         }
@@ -181,7 +182,7 @@ namespace {
             skip_whitespace(str, pos);
             
             // Parse key
-            fl::string key = parse_string(str, pos);
+            fl::string key = parse_string_native(str, pos);
             
             skip_whitespace(str, pos);
             
@@ -191,7 +192,7 @@ namespace {
                 skip_whitespace(str, pos);
                 
                 // Parse value
-                auto value = parse_value(str, pos);
+                auto value = parse_value_native(str, pos);
                 if (value) {
                     object[key] = value;
                 }
@@ -212,7 +213,7 @@ namespace {
     }
     
     // Parse a JSON value
-    fl::shared_ptr<Value> parse_value(const fl::string& str, size_t& pos) {
+    fl::shared_ptr<Value> parse_value_native(const fl::string& str, size_t& pos) {
         skip_whitespace(str, pos);
         
         if (pos >= str.length()) {
@@ -222,16 +223,16 @@ namespace {
         char c = str[pos];
         switch (c) {
             case '{':
-                return parse_object(str, pos);
+                return parse_object_native(str, pos);
             case '[':
-                return parse_array(str, pos);
+                return parse_array_native(str, pos);
             case '"':
-                return fl::make_shared<Value>(parse_string(str, pos));
+                return fl::make_shared<Value>(parse_string_native(str, pos));
             case 't':
             case 'f':
-                return parse_boolean(str, pos);
+                return parse_boolean_native(str, pos);
             case 'n':
-                return parse_null(str, pos);
+                return parse_null_native(str, pos);
             case '-':
             case '+':
             case '0':
@@ -244,16 +245,73 @@ namespace {
             case '7':
             case '8':
             case '9':
-                return parse_number(str, pos);
+                return parse_number_native(str, pos);
             default:
                 return fl::make_shared<Value>(nullptr);
         }
     }
 }
 
-fl::shared_ptr<Value> Value::parse(const fl::string& txt) {
+fl::shared_ptr<Value> Value::parse_native(const fl::string& txt) {
     size_t pos = 0;
-    return parse_value(txt, pos);
+    return parse_value_native(txt, pos);
+}
+
+fl::shared_ptr<Value> Value::parse(const fl::string& txt) {
+
+    
+    // Determine the size of the JsonDocument needed.
+    FLArduinoJson::JsonDocument doc;
+
+    FLArduinoJson::DeserializationError error = FLArduinoJson::deserializeJson(doc, txt.c_str());
+
+    if (error) {
+        FL_WARN("JSON parsing failed: " << error.c_str());
+        return fl::make_shared<Value>(nullptr); // Return null on error
+    }
+
+    // Helper function to convert FLArduinoJson::JsonVariantConst to fl::json2::Value
+    struct Converter {
+        static fl::shared_ptr<Value> convert(const FLArduinoJson::JsonVariantConst& src) {
+            if (src.isNull()) {
+                return fl::make_shared<Value>(nullptr);
+            } else if (src.is<bool>()) {
+                return fl::make_shared<Value>(src.as<bool>());
+            } else if (src.is<int64_t>()) {
+                // Handle 64-bit integers
+                return fl::make_shared<Value>(src.as<int64_t>());
+            } else if (src.is<int32_t>()) {
+                // Handle 32-bit integers explicitly for platform compatibility
+                return fl::make_shared<Value>(static_cast<int64_t>(src.as<int32_t>()));
+            } else if (src.is<uint32_t>()) {
+                // Handle unsigned 32-bit integers
+                return fl::make_shared<Value>(static_cast<int64_t>(src.as<uint32_t>()));
+            } else if (src.is<double>()) {
+                // Handle double precision floats
+                return fl::make_shared<Value>(src.as<double>());
+            } else if (src.is<float>()) {
+                // Handle single precision floats explicitly
+                return fl::make_shared<Value>(static_cast<double>(src.as<float>()));
+            } else if (src.is<const char*>()) {
+                return fl::make_shared<Value>(fl::string(src.as<const char*>()));
+            } else if (src.is<FLArduinoJson::JsonArrayConst>()) {
+                Array arr;
+                for (const auto& item : src.as<FLArduinoJson::JsonArrayConst>()) {
+                    arr.push_back(convert(item));
+                }
+                return fl::make_shared<Value>(fl::move(arr));
+            } else if (src.is<FLArduinoJson::JsonObjectConst>()) {
+                Object obj;
+                for (const auto& kv : src.as<FLArduinoJson::JsonObjectConst>()) {
+                    obj[fl::string(kv.key().c_str())] = convert(kv.value());
+                }
+                return fl::make_shared<Value>(fl::move(obj));
+            }
+            return fl::make_shared<Value>(nullptr); // Should not happen
+        }
+    };
+
+    return Converter::convert(doc.as<FLArduinoJson::JsonVariantConst>());
 }
 
 fl::string Json::to_string_native() const {

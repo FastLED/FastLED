@@ -7,6 +7,7 @@
 #include "fl/optional.h"
 #include "fl/unique_ptr.h"
 #include "fl/shared_ptr.h"
+#include "fl/functional.h"
 
 namespace fl {
 namespace json2 {
@@ -125,6 +126,11 @@ struct DefaultValueVisitor {
     template<typename U>
     void operator()(const U&) {
         // Do nothing for other types
+    }
+    
+    // Special handling for nullptr_t
+    void operator()(const fl::nullptr_t&) {
+        // Do nothing - will return fallback
     }
 };
 
@@ -307,7 +313,7 @@ struct Value {
         return *obj[key];
     }
 
-    // Default-value operator (pipe) - visitor-based implementation
+    // Default-value operator (pipe)
     template<typename T>
     T operator|(const T& fallback) const {
         DefaultValueVisitor<T> visitor(fallback);
@@ -361,7 +367,10 @@ struct Value {
     // Visitor-based serialization helper
     friend class SerializerVisitor;
 
-    // Parsing factory
+    // Parsing factory (native implementation)
+    static fl::shared_ptr<Value> parse_native(const fl::string &txt);
+    
+    // Parsing factory (FLArduinoJson implementation)
     static fl::shared_ptr<Value> parse(const fl::string &txt);
 };
 
@@ -584,6 +593,17 @@ public:
     // Parsing factory method
     static Json parse(const fl::string &txt) {
         auto parsed = Value::parse(txt);
+        if (parsed) {
+            Json result;
+            result.m_value = parsed;
+            return result;
+        }
+        return Json(nullptr);
+    }
+    
+    // Parsing factory method (native implementation)
+    static Json parse_native(const fl::string &txt) {
+        auto parsed = Value::parse_native(txt);
         if (parsed) {
             Json result;
             result.m_value = parsed;
