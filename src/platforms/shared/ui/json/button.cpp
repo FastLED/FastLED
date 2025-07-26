@@ -1,4 +1,5 @@
 #include "fl/json.h"
+#include "fl/json2.h"
 #include "fl/namespace.h"
 
 #include "platforms/shared/ui/json/button.h"
@@ -75,7 +76,9 @@ void JsonButtonImpl::Updater::onPlatformPreLoop2() {
 
 void JsonButtonImpl::updateInternal(
     const fl::Json &value) {
-    mPressed = value | false;
+    fl::string str = value.serialize();
+    fl::json2::Json json2_obj = fl::json2::Json::parse(str.c_str());
+    mPressed = json2_obj | false;
 }
 
 } // namespace fl

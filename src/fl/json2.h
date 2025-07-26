@@ -109,14 +109,22 @@ struct DefaultValueVisitor {
 
     DefaultValueVisitor(const T& fb) : fallback(fb) {}
 
-    const T& operator()(const T& value) {
-        result = &value;
-        return value;
+    // This is the method that fl::Variant expects
+    template<typename U>
+    void accept(const U& value) {
+        // Dispatch to the correct operator() overload
+        (*this)(value);
     }
 
+    // Specific overload for the type T
+    void operator()(const T& value) {
+        result = &value;
+    }
+
+    // Generic overload for all other types
     template<typename U>
-    const T& operator()(const U&) {
-        return fallback;
+    void operator()(const U&) {
+        // Do nothing for other types
     }
 };
 
