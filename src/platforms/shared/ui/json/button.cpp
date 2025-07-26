@@ -13,12 +13,12 @@ namespace fl {
 
 JsonButtonImpl::JsonButtonImpl(const string &name) : mPressed(false) {
     auto updateFunc = JsonUiInternal::UpdateFunction(
-        [this](const fl::Json &value) {
+        [this](const fl::json2::Json &value) {
             static_cast<JsonButtonImpl *>(this)->updateInternal(value);
         });
 
     auto toJsonFunc =
-        JsonUiInternal::ToJsonFunction([this](fl::Json &json) {
+        JsonUiInternal::ToJsonFunction([this](fl::json2::Json &json) {
             static_cast<JsonButtonImpl *>(this)->toJson(json);
         });
     mInternal = fl::make_shared<JsonUiInternal>(name, fl::move(updateFunc),
@@ -38,7 +38,7 @@ bool JsonButtonImpl::clicked() const { return mClickedHappened; }
 
 const string &JsonButtonImpl::name() const { return mInternal->name(); }
 
-void JsonButtonImpl::toJson(fl::Json &json) const {
+void JsonButtonImpl::toJson(fl::json2::Json &json) const {
     json.set("name", name());
     json.set("group", mInternal->groupName());
     json.set("type", "button");
@@ -75,10 +75,8 @@ void JsonButtonImpl::Updater::onPlatformPreLoop2() {
 }
 
 void JsonButtonImpl::updateInternal(
-    const fl::Json &value) {
-    fl::string str = value.serialize();
-    fl::json2::Json json2_obj = fl::json2::Json::parse(str);
-    mPressed = json2_obj | false;
+    const fl::json2::Json &value) {
+    mPressed = value | false;
 }
 
 } // namespace fl

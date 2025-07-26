@@ -3,6 +3,7 @@
 #include "fl/engine_events.h"
 #include "fl/str.h"
 #include "platforms/shared/ui/json/ui_internal.h"
+#include "fl/json2.h"
 
 namespace fl {
 
@@ -13,7 +14,7 @@ class JsonCheckboxImpl {
     JsonCheckboxImpl &Group(const fl::string &name);
 
     const fl::string &name() const;
-    void toJson(fl::Json &json) const;
+    void toJson(fl::json2::Json &json) const;
     bool value() const;
     void setValue(bool value);
     const fl::string &groupName() const;
@@ -29,7 +30,7 @@ class JsonCheckboxImpl {
     JsonCheckboxImpl &operator=(int value);
 
   private:
-    void updateInternal(const fl::Json &value);
+    void updateInternal(const fl::json2::Json &value);
     void setValueInternal(bool value);
 
     JsonUiInternalPtr mInternal;

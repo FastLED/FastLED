@@ -1,5 +1,6 @@
 #include "platforms/shared/ui/json/dropdown.h"
 #include "fl/json.h"
+#include "fl/json2.h"
 #include "platforms/shared/ui/json/ui.h"
 #include <string.h>
 #include "fl/span.h"
@@ -13,11 +14,11 @@ namespace fl {
 // Common initialization function
 void JsonDropdownImpl::commonInit(const fl::string &name) {
     auto updateFunc = JsonUiInternal::UpdateFunction(
-        [this](const fl::Json &value) {
+        [this](const fl::json2::Json &value) {
             static_cast<JsonDropdownImpl *>(this)->updateInternal(value);
         });
     auto toJsonFunc =
-        JsonUiInternal::ToJsonFunction([this](fl::Json &json) {
+        JsonUiInternal::ToJsonFunction([this](fl::json2::Json &json) {
             static_cast<JsonDropdownImpl *>(this)->toJson(json);
         });
     mInternal = fl::make_shared<JsonUiInternal>(name, fl::move(updateFunc),
@@ -61,16 +62,16 @@ JsonDropdownImpl &JsonDropdownImpl::Group(const fl::string &name) {
 
 const fl::string &JsonDropdownImpl::name() const { return mInternal->name(); }
 
-void JsonDropdownImpl::toJson(fl::Json &json) const {
+void JsonDropdownImpl::toJson(fl::json2::Json &json) const {
     json.set("name", name());
     json.set("group", mInternal->groupName());
     json.set("type", "dropdown");
     json.set("id", mInternal->id());
     json.set("value", static_cast<int>(mSelectedIndex));
     
-    fl::Json optionsArray = fl::Json::createArray();
+    fl::json2::Json optionsArray = fl::json2::Json::array();
     for (const auto &option : mOptions) {
-        optionsArray.add(option);
+        optionsArray.push_back(option);
     }
     json.set("options", optionsArray);
 }
@@ -111,7 +112,7 @@ JsonDropdownImpl &JsonDropdownImpl::operator=(int index) {
 }
 
 void JsonDropdownImpl::updateInternal(
-    const fl::Json &value) {
+    const fl::json2::Json &value) {
     setSelectedIndex(value | 0);
 }
 

@@ -3,7 +3,7 @@
 #include "fl/engine_events.h"
 #include "fl/str.h"
 #include "platforms/shared/ui/json/ui_internal.h"
-#include "fl/json.h"
+#include "fl/json2.h"
 
 namespace fl {
 
@@ -16,7 +16,7 @@ class JsonDescriptionImpl {
     const fl::string &text() const;
 
     const fl::string &name() const;
-    void toJson(fl::Json &json) const;
+    void toJson(fl::json2::Json &json) const;
     const fl::string &groupName() const;
     
     // Method to allow parent UIElement class to set the group

@@ -328,6 +328,21 @@ struct Value {
         return ptr && ptr->find(key) != ptr->end();
     }
 
+    // Object iteration support (needed for screenmap conversion)
+    fl::vector<fl::string> keys() const {
+        fl::vector<fl::string> result;
+        if (is_object()) {
+            for (auto it = begin(); it != end(); ++it) {
+                auto keyValue = *it;
+                result.push_back(keyValue.first);
+            }
+        }
+        return result;
+    }
+    
+    // Backward compatibility method
+    fl::vector<fl::string> getObjectKeys() const { return keys(); }
+
     // Size methods
     size_t size() const {
         if (is_array()) {
@@ -483,6 +498,21 @@ public:
         return ConstObjectIterator::from_iterator(m_value->end().get_iter()); 
     }
 
+    // Object iteration support (needed for screenmap conversion)
+    fl::vector<fl::string> keys() const {
+        fl::vector<fl::string> result;
+        if (m_value && m_value->is_object()) {
+            for (auto it = begin(); it != end(); ++it) {
+                auto keyValue = *it;
+                result.push_back(keyValue.first);
+            }
+        }
+        return result;
+    }
+    
+    // Backward compatibility method
+    fl::vector<fl::string> getObjectKeys() const { return keys(); }
+
     // Indexing for fluid chaining
     Json& operator[](size_t idx) {
         if (!m_value) {
@@ -491,11 +521,33 @@ public:
         return *reinterpret_cast<Json*>(&(*m_value)[idx]);
     }
     
+    const Json operator[](size_t idx) const {
+        if (!m_value || !m_value->is_array()) {
+            return Json(nullptr);
+        }
+        auto arr = m_value->as_array();
+        if (arr && idx < arr->size()) {
+            return Json((*arr)[idx]);
+        }
+        return Json(nullptr);
+    }
+    
     Json& operator[](const fl::string &key) {
         if (!m_value) {
             m_value = fl::make_shared<Value>(Object{});
         }
         return *reinterpret_cast<Json*>(&(*m_value)[key]);
+    }
+    
+    const Json operator[](const fl::string &key) const {
+        if (!m_value || !m_value->is_object()) {
+            return Json(nullptr);
+        }
+        auto obj = m_value->as_object();
+        if (obj && obj->find(key) != obj->end()) {
+            return Json((*obj)[key]);
+        }
+        return Json(nullptr);
     }
 
     // Contains methods for checking existence

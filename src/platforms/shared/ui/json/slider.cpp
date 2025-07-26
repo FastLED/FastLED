@@ -19,21 +19,23 @@ JsonSliderImpl::JsonSliderImpl(const fl::string &name, float value, float min,
     if (ALMOST_EQUAL_FLOAT(mStep, -1.f)) {
         mStep = (mMax - mMin) / 100.0f;
     }
-    auto updateFunc = JsonUiInternal::UpdateFunction(
-        [this](const fl::Json &value) {
+    auto updateFunc =
+        JsonUiInternal::UpdateFunction([this](const fl::json2::Json &value) {
             static_cast<JsonSliderImpl *>(this)->updateInternal(value);
         });
 
     auto toJsonFunc =
-        JsonUiInternal::ToJsonFunction([this](fl::Json &json) {
+        JsonUiInternal::ToJsonFunction([this](fl::json2::Json &json) {
             static_cast<JsonSliderImpl *>(this)->toJson(json);
         });
     mInternal = fl::make_shared<JsonUiInternal>(name, fl::move(updateFunc),
-                                       fl::move(toJsonFunc));
+                                                fl::move(toJsonFunc));
     addJsonUiComponent(fl::weak_ptr<JsonUiInternal>(mInternal));
 }
 
-JsonSliderImpl::~JsonSliderImpl() { removeJsonUiComponent(fl::weak_ptr<JsonUiInternal>(mInternal)); }
+JsonSliderImpl::~JsonSliderImpl() {
+    removeJsonUiComponent(fl::weak_ptr<JsonUiInternal>(mInternal));
+}
 
 JsonSliderImpl &JsonSliderImpl::Group(const fl::string &name) {
     mInternal->setGroup(name);
@@ -42,7 +44,7 @@ JsonSliderImpl &JsonSliderImpl::Group(const fl::string &name) {
 
 const fl::string &JsonSliderImpl::name() const { return mInternal->name(); }
 
-void JsonSliderImpl::toJson(fl::Json &json) const {
+void JsonSliderImpl::toJson(fl::json2::Json &json) const {
     json.set("name", name());
     json.set("group", mInternal->groupName());
     json.set("type", "slider");
@@ -97,12 +99,8 @@ JsonSliderImpl &JsonSliderImpl::operator=(int value) {
     return *this;
 }
 
-
-void JsonSliderImpl::updateInternal(
-    const fl::Json &value) {
-    fl::string str = value.serialize();
-    fl::json2::Json json2_obj = fl::json2::Json::parse(str);
-    setValue(json2_obj | 0.0f);
+void JsonSliderImpl::updateInternal(const fl::json2::Json &value) {
+    setValue(value | 0.0f);
 }
 
 } // namespace fl

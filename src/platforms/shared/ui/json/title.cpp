@@ -3,6 +3,7 @@
 #include "platforms/shared/ui/json/ui.h"
 
 #include "fl/json.h"
+#include "fl/json2.h"
 
 #if FASTLED_ENABLE_JSON
 
@@ -13,7 +14,7 @@ namespace fl {
 JsonTitleImpl::JsonTitleImpl(const string &text) : mText(text) {
     JsonUiInternal::UpdateFunction update_fcn;
     JsonUiInternal::ToJsonFunction to_json_fcn =
-        JsonUiInternal::ToJsonFunction([this](fl::Json &json) {
+        JsonUiInternal::ToJsonFunction([this](fl::json2::Json &json) {
             static_cast<JsonTitleImpl *>(this)->toJson(json);
         });
     mInternal = fl::make_shared<JsonUiInternal>("title", update_fcn, to_json_fcn);
@@ -27,7 +28,7 @@ JsonTitleImpl &JsonTitleImpl::Group(const fl::string &name) {
     return *this;
 }
 
-void JsonTitleImpl::toJson(fl::Json &json) const {
+void JsonTitleImpl::toJson(fl::json2::Json &json) const {
     json.set("name", mInternal->name());
     json.set("type", "title");
     json.set("group", mInternal->groupName());

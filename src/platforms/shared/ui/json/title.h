@@ -3,7 +3,7 @@
 #include "fl/engine_events.h"
 #include "fl/str.h"
 #include "platforms/shared/ui/json/ui_internal.h"
-#include "fl/json.h"
+#include "fl/json2.h"
 
 
 namespace fl {
@@ -15,7 +15,7 @@ class JsonTitleImpl {
     JsonTitleImpl &Group(const fl::string &name);
 
     const fl::string &name() const;
-    void toJson(fl::Json &json) const;
+    void toJson(fl::json2::Json &json) const;
     const fl::string &groupName() const;
     const fl::string &text() const;
     

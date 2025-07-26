@@ -1,10 +1,9 @@
 #pragma once
 
-#include "fl/stdint.h"
-
 #include "fl/engine_events.h"
 #include "fl/str.h"
 #include "platforms/shared/ui/json/ui_internal.h"
+#include "fl/json2.h"
 
 namespace fl {
 
@@ -15,7 +14,7 @@ class JsonButtonImpl {
     JsonButtonImpl &Group(const fl::string &name);
 
     const fl::string &name() const;
-    void toJson(fl::Json &json) const;
+    void toJson(fl::json2::Json &json) const;
     bool isPressed() const;
     bool clicked() const;
     int clickedCount() const;
@@ -40,7 +39,7 @@ class JsonButtonImpl {
 
     Updater mUpdater;
 
-    void updateInternal(const fl::Json &value);
+    void updateInternal(const fl::json2::Json &value);
 
     JsonUiInternalPtr mInternal;
     bool mPressed = false;

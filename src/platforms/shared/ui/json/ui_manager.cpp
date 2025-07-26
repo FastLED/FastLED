@@ -1,4 +1,5 @@
 #include "fl/json.h"
+#include "fl/json2.h"
 #include "fl/map.h"
 #include "fl/mutex.h"
 #include "fl/namespace.h"
@@ -60,7 +61,7 @@ void JsonUiManager::processPendingUpdates() {
 
     if (mHasPendingUpdate) {
         executeUiUpdates(mPendingJsonUpdate);
-        mPendingJsonUpdate = fl::Json(); // Clear the pending update
+        mPendingJsonUpdate = fl::json2::Json(); // Clear the pending update
         mHasPendingUpdate = false;
     }
 
@@ -86,9 +87,9 @@ void JsonUiManager::processPendingUpdates() {
     }
     
     if (shouldUpdate) {
-        fl::Json doc = fl::Json::createArray();
+        fl::json2::Json doc = fl::json2::Json::array();
         toJson(doc);
-        fl::string jsonStr = doc.serialize();
+        fl::string jsonStr = doc.to_string();
         //FL_WARN("*** SENDING UI TO FRONTEND: " << jsonStr.substr(0, 100).c_str() << "...");
         mUpdateJs(jsonStr.c_str());
 
@@ -100,6 +101,7 @@ void JsonUiManager::processPendingUpdates() {
             }
         }
     }
+
 
 
 
@@ -163,14 +165,14 @@ void JsonUiManager::updateUiComponents(const char* jsonStr) {
     // FL_WARN("*** JsonUiManager pointer: " << this);
     // FL_WARN("*** BEFORE: mHasPendingUpdate=" << (mHasPendingUpdate ? "true" : "false"));
     
-    mPendingJsonUpdate = fl::Json::parse(jsonStr);
+    mPendingJsonUpdate = fl::json2::Json::parse(jsonStr);
     mHasPendingUpdate = true;
     // FL_WARN("*** AFTER: mHasPendingUpdate=" << (mHasPendingUpdate ? "true" : "false"));
     // FL_WARN("*** BACKEND SET mHasPendingUpdate = true, waiting for onEndFrame()");
 }
 
 
-void JsonUiManager::executeUiUpdates(const fl::Json &doc) {
+void JsonUiManager::executeUiUpdates(const fl::json2::Json &doc) {
     
     if (doc.is_object()) {
         
@@ -182,7 +184,7 @@ void JsonUiManager::executeUiUpdates(const fl::Json &doc) {
             
             auto component = findUiComponent(id_or_name);
             if (component) {
-                const fl::Json v = doc[key.c_str()];
+                const fl::json2::Json v = doc[key.c_str()];
                 component->update(v);
                 //FL_WARN("*** Updated component with ID " << idStr);
             } else {
@@ -191,7 +193,7 @@ void JsonUiManager::executeUiUpdates(const fl::Json &doc) {
         }
     } else {
         // Debug: Show what we actually received instead of just asserting
-        fl::string debugJson = doc.serialize();
+        fl::string debugJson = doc.to_string();
         FL_WARN("*** UI UPDATE ERROR: Expected JSON object but got " << 
                (doc.is_array() ? "array" : "non-object") << 
                ": " << debugJson.substr(0, 200).c_str() << "...");
@@ -205,15 +207,15 @@ void JsonUiManager::onEndFrame() {
     processPendingUpdates();
 }
 
-void JsonUiManager::toJson(fl::Json &json) {
+void JsonUiManager::toJson(fl::json2::Json &doc) {
     auto components = getComponents();
-    for (auto &component : components) {
-        fl::Json obj = fl::Json::createObject();
-        component->toJson(obj);
-        json.add(obj);
+    for (const auto &component : components) {
+        fl::json2::Json componentJson = fl::json2::Json::object();
+        component->toJson(componentJson);
+        doc.push_back(componentJson);
     }
 }
 
-
 } // namespace fl
-#endif // FASTLED_ENABLE_JSON
+
+#endif

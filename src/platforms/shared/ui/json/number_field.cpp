@@ -1,4 +1,5 @@
 #include "fl/json.h"
+#include "fl/json2.h"
 #include "fl/math_macros.h"
 #include "fl/namespace.h"
 #include "platforms/shared/ui/json/number_field.h"
@@ -14,12 +15,12 @@ JsonNumberFieldImpl::JsonNumberFieldImpl(const fl::string &name, double value,
                                         double min, double max)
     : mValue(value), mMin(min), mMax(max) {
     auto updateFunc = JsonUiInternal::UpdateFunction(
-        [this](const fl::Json &value) {
+        [this](const fl::json2::Json &value) {
             static_cast<JsonNumberFieldImpl *>(this)->updateInternal(value);
         });
 
     auto toJsonFunc =
-        JsonUiInternal::ToJsonFunction([this](fl::Json &json) {
+        JsonUiInternal::ToJsonFunction([this](fl::json2::Json &json) {
             static_cast<JsonNumberFieldImpl *>(this)->toJson(json);
         });
     mInternal = fl::make_shared<JsonUiInternal>(name, fl::move(updateFunc),
@@ -36,7 +37,7 @@ JsonNumberFieldImpl &JsonNumberFieldImpl::Group(const fl::string &name) {
 
 const fl::string &JsonNumberFieldImpl::name() const { return mInternal->name(); }
 
-void JsonNumberFieldImpl::toJson(fl::Json &json) const {
+void JsonNumberFieldImpl::toJson(fl::json2::Json &json) const {
     json.set("name", name());
     json.set("group", mInternal->groupName());
     json.set("type", "number");
@@ -96,7 +97,7 @@ bool JsonNumberFieldImpl::operator!=(double v) const { return !ALMOST_EQUAL_FLOA
 bool JsonNumberFieldImpl::operator!=(int v) const { return !ALMOST_EQUAL_FLOAT(value(), static_cast<double>(v)); }
 
 void JsonNumberFieldImpl::updateInternal(
-    const fl::Json &value) {
+    const fl::json2::Json &value) {
     setValueInternal(value | 0.0);  // Use internal method to avoid change notification
 }
 
