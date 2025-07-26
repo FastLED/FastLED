@@ -14,6 +14,13 @@ def parse_args() -> Tuple[argparse.Namespace, list[str]]:
     )
     # return parser.parse_args()
     known_args, unknown_args = parser.parse_known_args()
+    # if -b or --build is in the unknown_args, remove it
+    if "--build" in unknown_args:
+        print("WARNING: --build is no longer supported. It will be ignored.")
+        unknown_args.remove("--build")
+    if "-b" in unknown_args:
+        print("WARNING: -b is no longer supported. It will be ignored.")
+        unknown_args.remove("-b")
     return known_args, unknown_args
 
 
@@ -31,7 +38,7 @@ def main() -> int:
     args, unknown_args = parse_args()
 
     # First run the build command
-    build_cmd = ["fastled", args.sketch_dir, "--build"] + unknown_args
+    build_cmd = ["fastled", args.sketch_dir] + unknown_args
     build_result = run_command(build_cmd)
 
     # Then run the compile command
