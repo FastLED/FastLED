@@ -6,6 +6,12 @@
 #include "fl/ui.h"
 #include "platforms/shared/ui/json/ui.h"
 #include "platforms/shared/ui/json/ui_internal.h"
+#include "platforms/shared/ui/json/number_field.h"
+#include "platforms/shared/ui/json/dropdown.h"
+#include "platforms/shared/ui/json/title.h"
+#include "platforms/shared/ui/json/description.h"
+#include "platforms/shared/ui/json/audio.h"
+#include "platforms/shared/ui/json/help.h"
 #include "fl/json_console.h"
 #include "fl/sstream.h"
 #include <cstring>
@@ -321,6 +327,18 @@ TEST_CASE("complex ui element serialization") {
     slider.Group("group1");
     fl::JsonCheckboxImpl checkbox("myCheckbox", true);
     checkbox.Group("group2");
+    fl::JsonNumberFieldImpl numberField("myNumberField", 123, 0, 1000);
+    numberField.Group("group3");
+    fl::JsonDropdownImpl dropdown("myDropdown", "option2", {"option1", "option2", "option3"});
+    dropdown.Group("group3");
+    fl::JsonTitleImpl title("myTitle", "My Awesome UI");
+    title.Group("group4");
+    fl::JsonDescriptionImpl description("myDescription", "This is a description of the UI.");
+    description.Group("group4");
+    fl::JsonAudioImpl audio("myAudio", 440.0f, 0.5f);
+    audio.Group("group5");
+    fl::JsonHelpImpl help("myHelp", "This is a help message.");
+    help.Group("group5");
 
     // 3. Register components (they are automatically added to the manager via their constructors)
     //    No explicit addJsonUiComponent calls needed here as they are handled by the constructors
@@ -353,6 +371,52 @@ TEST_CASE("complex ui element serialization") {
     "type": "checkbox",
     "id": 2,
     "value": true
+  },
+  {
+    "name": "myNumberField",
+    "group": "group3",
+    "type": "number_field",
+    "id": 3,
+    "value": 123,
+    "min": 0,
+    "max": 1000
+  },
+  {
+    "name": "myDropdown",
+    "group": "group3",
+    "type": "dropdown",
+    "id": 4,
+    "value": "option2",
+    "options": ["option1", "option2", "option3"]
+  },
+  {
+    "name": "myTitle",
+    "group": "group4",
+    "type": "title",
+    "id": 5,
+    "value": "My Awesome UI"
+  },
+  {
+    "name": "myDescription",
+    "group": "group4",
+    "type": "description",
+    "id": 6,
+    "value": "This is a description of the UI."
+  },
+  {
+    "name": "myAudio",
+    "group": "group5",
+    "type": "audio",
+    "id": 7,
+    "frequency": 440.00,
+    "amplitude": 0.50
+  },
+  {
+    "name": "myHelp",
+    "group": "group5",
+    "type": "help",
+    "id": 8,
+    "value": "This is a help message."
   }
 ])";
 
