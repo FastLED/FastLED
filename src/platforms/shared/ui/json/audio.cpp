@@ -1,5 +1,6 @@
 #include "platforms/shared/ui/json/audio.h"
 #include "fl/json.h"
+#include "fl/json2.h"
 #include "fl/string.h"
 #include "fl/thread_local.h"
 #include "fl/warn.h"
@@ -132,33 +133,28 @@ static void parseJsonToAudioBuffers(const fl::Json &jsonValue,
                                     fl::vector<AudioBuffer> *audioBuffers) {
     audioBuffers->clear();
     
-    // Use JSON parser to extract array of audio buffer objects
-    if (!jsonValue.is_array()) {
+    fl::string json_str = jsonValue.serialize();
+    fl::json2::Json json2_obj = fl::json2::Json::parse(json_str.c_str());
+
+    if (!json2_obj.is_array()) {
         return;
     }
     
-    for (int i = 0; i < jsonValue.getSize(); ++i) {
-        fl::Json item = jsonValue[i];
+    for (size_t i = 0; i < json2_obj.size(); ++i) {
+        fl::json2::Json item = json2_obj[i];
         if (!item.is_object()) {
             continue;
         }
         
         AudioBuffer buffer;
-        buffer.timestamp = 0; // Initialize timestamp to prevent uninitialized warning
-        
-        // Use JSON parser to extract timestamp using proper type checking
         buffer.timestamp = item["timestamp"] | 0u;
         
-        // Use JSON parser to extract samples array as string, then parse manually
-        auto samplesVar = item["samples"];
-        if (samplesVar.is_array()) {
-            fl::string& samplesStr = scratchBuffer();
-            samplesStr.clear();
-            samplesStr = samplesVar.serialize();
-            parsePcmSamplesString(samplesStr, &buffer.samples);
+        fl::json2::Json samples_json2 = item["samples"];
+        if (samples_json2.is_array()) {
+            fl::string samples_str = samples_json2.to_string();
+            parsePcmSamplesString(samples_str, &buffer.samples);
         }
         
-        // Add buffer if it has samples
         if (!buffer.samples.empty()) {
             audioBuffers->push_back(fl::move(buffer));
         }
