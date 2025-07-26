@@ -652,8 +652,5 @@ public:
     static fl::string normalizeJsonString(const char* jsonStr);
 };
 
-// Helper function to serialize a json2::Value
-fl::string serializeValue(const Value& value);
-
 } // namespace json2
 } // namespace fl

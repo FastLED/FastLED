@@ -68,9 +68,70 @@ fl::shared_ptr<Value> Value::parse(const fl::string& txt) {
 }
 
 fl::string Json::to_string_native() const {
-    return serializeValue(*m_value);
+    if (!m_value) {
+        return "null";
+    }
+    
+    // Create a JsonDocument to hold our data
+    FLArduinoJson::JsonDocument doc;
+    
+    // Helper function to convert fl::json2::Value to FLArduinoJson::JsonVariant
+    struct Converter {
+        static void convert(const Value& src, FLArduinoJson::JsonVariant dst) {
+            if (src.is_null()) {
+                dst.set(nullptr);
+            } else if (src.is_bool()) {
+                auto opt = src.as_bool();
+                if (opt) dst.set(*opt);
+            } else if (src.is_int()) {
+                auto opt = src.as_int();
+                if (opt) dst.set(*opt);
+            } else if (src.is_double()) {
+                auto opt = src.as_double();
+                if (opt) dst.set(*opt);
+            } else if (src.is_string()) {
+                auto opt = src.as_string();
+                if (opt) dst.set(opt->c_str());
+            } else if (src.is_array()) {
+                auto opt = src.as_array();
+                if (opt) {
+                    FLArduinoJson::JsonArray arr = dst.to<FLArduinoJson::JsonArray>();
+                    for (const auto& item : *opt) {
+                        if (item) {
+                            FLArduinoJson::JsonVariant var = arr.add<FLArduinoJson::JsonVariant>();
+                            convert(*item, var);
+                        } else {
+                            arr.add(nullptr);
+                        }
+                    }
+                }
+            } else if (src.is_object()) {
+                auto opt = src.as_object();
+                if (opt) {
+                    FLArduinoJson::JsonObject obj = dst.to<FLArduinoJson::JsonObject>();
+                    for (const auto& kv : *opt) {
+                        if (kv.second) {
+                            FLArduinoJson::JsonVariant var = obj[kv.first.c_str()];
+                            convert(*kv.second, var);
+                        } else {
+                            obj[kv.first.c_str()] = nullptr;
+                        }
+                    }
+                }
+            }
+        }
+    };
+    
+    // Convert our Value to JsonDocument
+    Converter::convert(*m_value, doc);
+    
+    // Serialize to string
+    fl::string output;
+    FLArduinoJson::serializeJson(doc, output);
+    return output;
 }
 
+// Forward declaration for the serializeValue function
 fl::string serializeValue(const Value& value);
 
 } // namespace json2
@@ -92,96 +153,6 @@ fl::string Json::normalizeJsonString(const char* jsonStr) {
         }
     }
     return result;
-}
-
-} // namespace json2
-} // namespace fl
-
-namespace fl {
-namespace json2 {
-
-fl::string serializeValue(const Value& value) {
-    if (value.is_null()) {
-        return "null";
-    } else if (value.is_bool()) {
-        auto opt = value.as_bool();
-        if (opt) {
-            return *opt ? "true" : "false";
-        }
-    } else if (value.is_int()) {
-        auto opt = value.as_int();
-        if (opt) {
-            return fl::to_string(*opt);
-        }
-    } else if (value.is_double()) {
-        auto opt = value.as_double();
-        if (opt) {
-            return fl::to_string(*opt);
-        }
-    } else if (value.is_string()) {
-        auto opt = value.as_string();
-        if (opt) {
-            // Escape special characters in the string
-            fl::string escaped = "\"";
-            for (char c : *opt) {
-                switch (c) {
-                    case '"': escaped += "\\\""; break;
-                    case '\\': escaped += "\\\\"; break;
-                    case '\b': escaped += "\\b"; break;
-                    case '\f': escaped += "\\f"; break;
-                    case '\n': escaped += "\\n"; break;
-                    case '\r': escaped += "\\r"; break;
-                    case '\t': escaped += "\\t"; break;
-                    default: escaped += c; break;
-                }
-            }
-            escaped += "\"";
-            return escaped;
-        }
-    } else if (value.is_array()) {
-        auto opt = value.as_array();
-        if (opt) {
-            fl::string result = "[";
-            bool first = true;
-            for (const auto& item : *opt) {
-                if (!first) {
-                    result += ",";
-                }
-                // Check for null pointer
-                if (item) {
-                    result += serializeValue(*item);
-                } else {
-                    result += "null";
-                }
-                first = false;
-            }
-            result += "]";
-            return result;
-        }
-    } else if (value.is_object()) {
-        auto opt = value.as_object();
-        if (opt) {
-            fl::string result = "{";
-            bool first = true;
-            for (const auto& kv : *opt) {
-                if (!first) {
-                    result += ",";
-                }
-                result += "\"" + kv.first + "\":"; 
-                // Check for null pointer
-                if (kv.second) {
-                    result += serializeValue(*kv.second);
-                } else {
-                    result += "null";
-                }
-                first = false;
-            }
-            result += "}";
-            return result;
-        }
-    }
-    
-    return "null";
 }
 
 } // namespace json2
