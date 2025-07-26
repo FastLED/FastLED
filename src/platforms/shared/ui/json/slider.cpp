@@ -21,12 +21,12 @@ JsonSliderImpl::JsonSliderImpl(const fl::string &name, float value, float min,
     }
     auto updateFunc =
         JsonUiInternal::UpdateFunction([this](const fl::json2::Json &value) {
-            static_cast<JsonSliderImpl *>(this)->updateInternal(value);
+            this->updateInternal(value);
         });
 
     auto toJsonFunc =
         JsonUiInternal::ToJsonFunction([this](fl::json2::Json &json) {
-            static_cast<JsonSliderImpl *>(this)->toJson(json);
+            this->toJson(json);
         });
     mInternal = fl::make_shared<JsonUiInternal>(name, fl::move(updateFunc),
                                                 fl::move(toJsonFunc));

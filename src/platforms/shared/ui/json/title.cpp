@@ -15,7 +15,7 @@ JsonTitleImpl::JsonTitleImpl(const string &text) : mText(text) {
     JsonUiInternal::UpdateFunction update_fcn;
     JsonUiInternal::ToJsonFunction to_json_fcn =
         JsonUiInternal::ToJsonFunction([this](fl::json2::Json &json) {
-            static_cast<JsonTitleImpl *>(this)->toJson(json);
+            this->toJson(json);
         });
     mInternal = fl::make_shared<JsonUiInternal>("title", update_fcn, to_json_fcn);
     addJsonUiComponent(fl::weak_ptr<JsonUiInternal>(mInternal));

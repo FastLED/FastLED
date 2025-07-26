@@ -15,11 +15,11 @@ namespace fl {
 void JsonDropdownImpl::commonInit(const fl::string &name) {
     auto updateFunc = JsonUiInternal::UpdateFunction(
         [this](const fl::json2::Json &value) {
-            static_cast<JsonDropdownImpl *>(this)->updateInternal(value);
+            this->updateInternal(value);
         });
     auto toJsonFunc =
         JsonUiInternal::ToJsonFunction([this](fl::json2::Json &json) {
-            static_cast<JsonDropdownImpl *>(this)->toJson(json);
+            this->toJson(json);
         });
     mInternal = fl::make_shared<JsonUiInternal>(name, fl::move(updateFunc),
                                      fl::move(toJsonFunc));

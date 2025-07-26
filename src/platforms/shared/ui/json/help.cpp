@@ -15,7 +15,7 @@ JsonHelpImpl::JsonHelpImpl(const string &markdownContent): mMarkdownContent(mark
     JsonUiInternal::UpdateFunction update_fcn;
     JsonUiInternal::ToJsonFunction to_json_fcn =
         JsonUiInternal::ToJsonFunction([this](fl::json2::Json &json) {
-            static_cast<JsonHelpImpl *>(this)->toJson(json);
+            this->toJson(json);
         });
     mInternal = fl::make_shared<JsonUiInternal>("help", update_fcn, to_json_fcn);
     addJsonUiComponent(fl::weak_ptr<JsonUiInternal>(mInternal));
