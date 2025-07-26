@@ -63,17 +63,38 @@ namespace json2 {
 // ... existing native parsing functions (renamed to parse_value_native, etc.) ...
 
 // NOTE - YOU MUST USE EXHAUSTIVE SEARCHES FOR THE INTEGER TYPES, FLOATS AND DOUBLES.
+// This is particularly important for Arduino platforms where different numeric types
+// have specific memory and performance characteristics. When implementing the conversion
+// from FLArduinoJson::JsonVariantConst to fl::json2::Value, we must explicitly check
+// for all possible numeric types to ensure correct type handling on constrained platforms.
 
 // Helper function to convert FLArduinoJson::JsonVariantConst to fl::json2::Value
+// (Implementation notes - to be completed during actual implementation)
 fl::shared_ptr<Value> convert_arduinojson_to_fljson2(const FLArduinoJson::JsonVariantConst& src) {
+    // Implementation will need to handle:
+    // 1. All integer types (int8_t, int16_t, int32_t, int64_t, uint32_t, etc.)
+    // 2. Floating point types (float, double)
+    // 3. Other JSON types (null, bool, string, array, object)
+    // 4. Proper type conversion between FLArduinoJson and fl::json2 types
+    // 
+    // Example structure (to be implemented):
+    /*
     if (src.isNull()) {
         return fl::make_shared<Value>(nullptr);
     } else if (src.is<bool>()) {
         return fl::make_shared<Value>(src.as<bool>());
     } else if (src.is<int64_t>()) {
+        // Handle 64-bit integers
         return fl::make_shared<Value>(src.as<int64_t>());
+    } else if (src.is<int32_t>()) {
+        // Handle 32-bit integers explicitly for platform compatibility
+        return fl::make_shared<Value>(static_cast<int64_t>(src.as<int32_t>()));
     } else if (src.is<double>()) {
+        // Handle double precision floats
         return fl::make_shared<Value>(src.as<double>());
+    } else if (src.is<float>()) {
+        // Handle single precision floats explicitly
+        return fl::make_shared<Value>(static_cast<double>(src.as<float>()));
     } else if (src.is<const char*>()) {
         return fl::make_shared<Value>(fl::string(src.as<const char*>()));
     } else if (src.is<FLArduinoJson::JsonArrayConst>()) {
@@ -89,16 +110,20 @@ fl::shared_ptr<Value> convert_arduinojson_to_fljson2(const FLArduinoJson::JsonVa
         }
         return fl::make_shared<Value>(fl::move(obj));
     }
+    */
     return fl::make_shared<Value>(nullptr); // Should not happen
 }
 
 fl::shared_ptr<Value> Value::parse(const fl::string& txt) {
+    // Implementation notes:
+    // 1. Determine the size of the JsonDocument needed.
+    // 2. For embedded systems, consider using StaticJsonDocument with calculated size.
+    // 3. Handle deserialization errors appropriately.
+    // 4. Convert the parsed result to fl::json2::Value structure.
+    // 
+    // Example structure (to be implemented):
+    /*
     // Determine the size of the JsonDocument needed.
-    // This is a critical step for ArduinoJson to avoid memory issues.
-    // For simplicity, we'll use a DynamicJsonDocument for now, but for production
-    // code, a StaticJsonDocument with a pre-calculated size is preferred.
-    // A good starting point for DynamicJsonDocument size is 1.5x the input string length,
-    // but for complex JSON, it might need more.
     FLArduinoJson::DynamicJsonDocument doc(txt.length() * 2); // Heuristic size
 
     FLArduinoJson::DeserializationError error = FLArduinoJson::deserializeJson(doc, txt.c_str());
@@ -109,6 +134,8 @@ fl::shared_ptr<Value> Value::parse(const fl::string& txt) {
     }
 
     return convert_arduinojson_to_fljson2(doc.as<FLArduinoJson::JsonVariantConst>());
+    */
+    return fl::shared_ptr<Value>(); // Placeholder
 }
 
 // ... rest of the file ...
@@ -138,11 +165,120 @@ The `Json::parse` static method will be updated to simply delegate to the new `V
     }
 ```
 
+## Testing Strategy
+
+A comprehensive testing strategy is essential to ensure the new FLArduinoJson-based parser works correctly and maintains backward compatibility with the existing native parser.
+
+### 1. Unit Tests for Basic Types
+
+Create tests that cover all basic JSON types:
+- Null values
+- Boolean values (true/false)
+- Integer types (positive, negative, zero, various sizes)
+- Floating-point types (positive, negative, zero, scientific notation)
+- String values (empty, with escape sequences, Unicode)
+- Arrays (empty, with various element types)
+- Objects (empty, with various value types)
+
+### 2. Type Exhaustiveness Tests
+
+Create specific tests to verify that all numeric types are correctly handled:
+- Test with various integer sizes (int8_t, int16_t, int32_t, int64_t, uint32_t, etc.)
+- Test with different floating-point representations (float, double)
+- Verify type preservation during parsing and conversion
+- Test edge cases for each numeric type (maximum/minimum values)
+
+### 3. Backward Compatibility Tests
+
+Ensure that the new parser produces results that are structurally and semantically equivalent to the native parser:
+- Parse identical JSON strings with both parsers
+- Compare the resulting structures
+- Verify that all accessor methods work the same way
+- Test round-trip serialization/deserialization
+
+### 4. Error Handling Tests
+
+Test various error conditions:
+- Malformed JSON strings
+- Invalid escape sequences
+- Truncated input
+- Memory exhaustion scenarios
+- Unicode handling edge cases
+- Type conversion errors
+
+### 5. Performance Tests
+
+Benchmark the new parser against the native implementation:
+- Parsing time for various JSON sizes
+- Memory usage during parsing
+- Comparison with existing test cases
+
+### 6. Integration Tests
+
+Test the parser in real-world scenarios:
+- Parsing configuration files
+- Handling API responses
+- Round-trip serialization/deserialization
+- Edge cases from existing FastLED code
+
+### Sample Test Implementation Plan
+
+The following test structure should be implemented when the actual parser is developed:
+
+```cpp
+// In tests/test_json2_arduinojson.cpp
+#include "test.h"
+#include "fl/json2.h"
+
+TEST_CASE("FLArduinoJson Integration Tests") {
+    SUBCASE("Integer Type Exhaustiveness") {
+        // Test various integer representations
+        // fl::json2::Json int64Json = fl::json2::Json::parse("9223372036854775807"); // Max int64
+        // REQUIRE(int64Json.is_int());
+        // CHECK_EQ(int64Json | int64_t(0), 9223372036854775807LL);
+        // 
+        // Additional tests for other integer types...
+    }
+    
+    SUBCASE("Float Type Exhaustiveness") {
+        // Test various float representations
+        // fl::json2::Json doubleJson = fl::json2::Json::parse("3.141592653589793");
+        // REQUIRE(doubleJson.is_double());
+        // CHECK_EQ(doubleJson | 0.0, 3.141592653589793);
+        //
+        // Additional tests for other float types...
+    }
+    
+    SUBCASE("Backward Compatibility") {
+        // const char* testJson = "{\"name\":\"FastLED\",\"version\":4,\"features\":[\"colors\",\"effects\"]}";
+        // 
+        // Parse with new FLArduinoJson-based parser
+        // fl::json2::Json newParserResult = fl::json2::Json::parse(testJson);
+        // 
+        // Parse with native parser (for comparison)
+        // fl::json2::Json nativeParserResult = fl::json2::Json::parse_native(testJson);
+        // 
+        // Verify they produce equivalent results
+        // CHECK(newParserResult.to_string() == nativeParserResult.to_string());
+    }
+    
+    SUBCASE("Error Handling") {
+        // Test malformed JSON
+        // fl::json2::Json malformed = fl::json2::Json::parse("{ invalid json }");
+        // CHECK(malformed.is_null());
+        // 
+        // Test truncated JSON
+        // fl::json2::Json truncated = fl::json2::Json::parse("{\"incomplete\":");
+        // CHECK(truncated.is_null());
+    }
+}
+```
+
 ## Considerations and Future Work
 
-*   **Memory Management for `FLArduinoJson`:** The current implementation uses `FLArduinoJson::DynamicJsonDocument` with a heuristic size. For optimal performance and memory usage, especially on embedded systems, it's highly recommended to use `FLArduinoJson::StaticJsonDocument` with a pre-calculated size. This would require a mechanism to estimate the required document size or to allow the user to specify it.
-*   **Error Handling:** The current error handling simply logs a warning and returns a null `Value`. More granular error reporting could be implemented if needed.
-*   **Unicode Escapes:** The native parser's `parse_string` has a `TODO` for unicode escapes. `FLArduinoJson` handles this automatically, so this is no longer a concern for the new `parse` method.
-*   **Performance Benchmarking:** After implementation, it would be beneficial to benchmark the new `FLArduinoJson`-based parser against the `parse_native` functions to quantify the performance improvements.
+*   **Memory Management for `FLArduinoJson`:** The implementation should use `FLArduinoJson::StaticJsonDocument` with a pre-calculated size when possible, especially for embedded systems. This requires a mechanism to estimate the required document size or to allow the user to specify it.
+*   **Error Handling:** The implementation should provide more granular error reporting than simply returning a null `Value`.
+*   **Unicode Support:** `FLArduinoJson` handles Unicode escapes automatically, which improves upon the native parser's current limitations.
+*   **Performance Benchmarking:** After implementation, benchmark the new `FLArduinoJson`-based parser against the `parse_native` functions to quantify the performance improvements.
 
 This new parsing strategy will significantly enhance the JSON capabilities of FastLED by leveraging a robust and well-tested library while maintaining a clean and user-friendly API.
