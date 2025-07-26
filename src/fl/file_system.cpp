@@ -97,12 +97,15 @@ void FileSystem::end() {
     }
 }
 
-bool FileSystem::readJson(const char *path, JsonDocument *doc) {
+bool FileSystem::readJson(const char *path, json2::Json *doc) {
     string text;
     if (!readText(path, &text)) {
         return false;
     }
-    return parseJson(text.c_str(), doc);
+    
+    // Parse using the new json2::Json class
+    *doc = fl::json2::Json::parse(text);
+    return !doc->is_null();
 }
 
 bool FileSystem::readScreenMaps(const char *path,

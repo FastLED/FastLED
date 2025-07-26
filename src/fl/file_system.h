@@ -33,7 +33,9 @@ FASTLED_SMART_PTR(FileHandle);
 class Video;
 template <typename Key, typename Value, fl::size N> class FixedMap;
 
-class JsonDocument;
+namespace json2 {
+class Json;
+}
 
 class FileSystem {
   public:
@@ -49,7 +51,7 @@ class FileSystem {
     openVideo(const char *path, fl::size pixelsPerFrame, float fps = 30.0f,
               fl::size nFrameHistory = 0); // Null if video could not be opened.
     bool readText(const char *path, string *out);
-    bool readJson(const char *path, JsonDocument *doc);
+    bool readJson(const char *path, json2::Json *doc);
     bool readScreenMaps(const char *path, fl::fl_map<string, ScreenMap> *out,
                         string *error = nullptr);
     bool readScreenMap(const char *path, const char *name, ScreenMap *out,
