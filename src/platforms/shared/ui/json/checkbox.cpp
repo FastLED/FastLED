@@ -1,5 +1,6 @@
 #include "platforms/shared/ui/json/checkbox.h"
 #include "fl/json.h"
+#include "fl/json2.h"
 #include "platforms/shared/ui/json/ui.h"
 #include <string.h>
 
@@ -73,7 +74,9 @@ JsonCheckboxImpl &JsonCheckboxImpl::operator=(int value) {
 
 void JsonCheckboxImpl::updateInternal(
     const fl::Json &value) {
-    setValueInternal(value | false);  // Use internal method to avoid change notification
+    fl::string str = value.serialize();
+    fl::json2::Json json2_obj = fl::json2::Json::parse(str.c_str());
+    setValueInternal(json2_obj | false);  // Use internal method to avoid change notification
 }
 
 } // namespace fl
