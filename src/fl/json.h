@@ -166,11 +166,63 @@ struct Value {
     Value(bool b) noexcept : data(b) {}
     Value(int64_t i) noexcept : data(i) {}
     Value(double d) noexcept : data(d) {}
-    Value(fl::string s) : data(fl::move(s)) {
+    Value(const fl::string& s) : data(s) {
         FASTLED_WARN("Created Value with string, is_string: " << is_string() << ", is_int: " << is_int());
     }
-    Value(Array a) : data(fl::move(a)) {}
-    Value(Object o) : data(fl::move(o)) {}
+    Value(const Array& a) : data(a) {
+
+    }
+    Value(const Object& o) : data(o) {
+
+    }
+
+    Value& operator=(const Value& other) {
+        data = other.data;
+        return *this;
+    }
+
+    Value& operator=(Value&& other) {
+        data = fl::move(other.data);
+        return *this;
+    }
+
+    template<typename T>
+    Value& operator=(T&& value) {
+        data = fl::forward<T>(value);
+        return *this;
+    }
+
+    Value& operator=(fl::nullptr_t) {
+        data = nullptr;
+        return *this;
+    }
+
+    Value& operator=(bool b) {
+        data = b;
+        return *this;
+    }
+
+    Value& operator=(int64_t i) {
+        data = i;
+        return *this;
+    }
+
+    Value& operator=(double d) {
+        data = d;
+        return *this;
+    }
+
+    Value& operator=(fl::string s) {
+        data = fl::move(s);
+        return *this;
+    }
+
+    Value& operator=(Array a) {
+        data = fl::move(a);
+        return *this;
+    }
+
+
     
     // Special constructor for char values
     static fl::shared_ptr<Value> from_char(char c) {
@@ -400,7 +452,7 @@ public:
     Json(float f) : m_value(fl::make_shared<Value>(static_cast<double>(f))) {}
     Json(double d) : m_value(fl::make_shared<Value>(d)) {}
     Json(const fl::string& s) : m_value(fl::make_shared<Value>(s)) {}
-    Json(const char* s) : m_value(fl::make_shared<Value>(fl::string(s))) {}
+    Json(const char* s): Json(fl::string(s)) {}
     Json(Array a) : m_value(fl::make_shared<Value>(fl::move(a))) {}
     Json(Object o) : m_value(fl::make_shared<Value>(fl::move(o))) {}
     // Constructor from shared_ptr<Value>
@@ -431,8 +483,16 @@ public:
 
     // Assignment operator
     Json& operator=(const Json& other) {
+        FL_WARN("Json& operator=(const Json& other): " << other.m_value.get());
         if (this != &other) {
             m_value = other.m_value;
+        }
+        return *this;
+    }
+
+    Json& operator=(Json&& other) {
+        if (this != &other) {
+            m_value = fl::move(other.m_value);
         }
         return *this;
     }

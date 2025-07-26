@@ -29,6 +29,8 @@ JsonTitleImpl &JsonTitleImpl::Group(const fl::string &name) {
 }
 
 void JsonTitleImpl::toJson(fl::json2::Json &json) const {
+    // This method is no longer used directly since we've moved the implementation
+    // to the lambda in the constructor, but we'll keep it for API compatibility
     json.set("name", mInternal->name());
     json.set("type", "title");
     json.set("group", mInternal->groupName());

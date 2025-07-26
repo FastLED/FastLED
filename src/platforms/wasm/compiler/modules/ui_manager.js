@@ -1262,17 +1262,22 @@ export class JsonUiManager {
    */
   addElementLayoutHints(data) {
     // Mark elements that might benefit from wider layouts
-    if (
-      data.type === 'audio' ||
-      data.type === 'slider' && data.name.toLowerCase().includes('spectrum')
-    ) {
-      data._layoutHint = 'wide';
+    try {
+      if (
+        data.type === 'audio' ||
+        data.type === 'slider' && data.name.toLowerCase().includes('spectrum')
+      ) {
+        data._layoutHint = 'wide';
+      }
+  
+      // Mark elements that should always be full width
+      if (data.type === 'help' || data.name.toLowerCase().includes('debug')) {
+        data._layoutHint = 'full-width';
+      }
+    } catch (e) {
+      console.log('Error adding element layout hints:', e, data);
     }
 
-    // Mark elements that should always be full width
-    if (data.type === 'help' || data.name.toLowerCase().includes('debug')) {
-      data._layoutHint = 'full-width';
-    }
   }
 
   /**

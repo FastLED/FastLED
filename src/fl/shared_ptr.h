@@ -78,7 +78,7 @@ struct ControlBlock : public ControlBlockBase {
     T* ptr;
     Deleter deleter;
     
-    ControlBlock(T* p, Deleter d, bool track = true) 
+    ControlBlock(T* p, Deleter d = Deleter(), bool track = true) 
         : ControlBlockBase(track), ptr(p), deleter(d) {}
     
     void destroy_object() override {
@@ -93,33 +93,6 @@ struct ControlBlock : public ControlBlockBase {
     }
 };
 
-// Optimized control block for make_shared (object inlined)
-template<typename T>
-struct InlinedControlBlock : public ControlBlockBase {
-    alignas(T) char object_storage[sizeof(T)];
-    bool object_constructed;
-    
-    InlinedControlBlock() : object_constructed(false) {}
-    
-    T* get_object() { 
-        return fl::bit_cast_ptr<T>(object_storage); 
-    }
-    
-    const T* get_object() const { 
-        return fl::bit_cast_ptr<T>(object_storage); 
-    }
-    
-    void destroy_object() override {
-        if (object_constructed) {
-            get_object()->~T();
-            object_constructed = false;
-        }
-    }
-    
-    void destroy_control_block() override {
-        delete this;
-    }
-};
 
 } // namespace detail
 
@@ -167,25 +140,7 @@ public:
     shared_ptr() noexcept : ptr_(nullptr), control_block_(nullptr) {}
     shared_ptr(fl::nullptr_t) noexcept : ptr_(nullptr), control_block_(nullptr) {}
     
-    // Constructor from raw pointer with default deleter
-    template<typename Y>
-    explicit shared_ptr(Y* ptr) : ptr_(ptr) {
-        if (ptr_) {
-            control_block_ = new detail::ControlBlock<Y>(ptr, detail::default_delete<Y>{});
-        } else {
-            control_block_ = nullptr;
-        }
-    }
-    
-    // Constructor from raw pointer with custom deleter
-    template<typename Y, typename Deleter>
-    shared_ptr(Y* ptr, Deleter d) : ptr_(ptr) {
-        if (ptr_) {
-            control_block_ = new detail::ControlBlock<Y, Deleter>(ptr_, d);
-        } else {
-            control_block_ = nullptr;
-        }
-    }
+
     
     // Copy constructor
     shared_ptr(const shared_ptr& other) : ptr_(other.ptr_), control_block_(other.control_block_) {
@@ -320,6 +275,27 @@ public:
     }
 
 private:
+
+    // Constructor from raw pointer with default deleter
+    template<typename Y>
+    explicit shared_ptr(Y* ptr) : ptr_(ptr) {
+        if (ptr_) {
+            control_block_ = new detail::ControlBlock<Y>(ptr, detail::default_delete<Y>{});
+        } else {
+            control_block_ = nullptr;
+        }
+    }
+    
+    // Constructor from raw pointer with custom deleter
+    template<typename Y, typename Deleter>
+    shared_ptr(Y* ptr, Deleter d) : ptr_(ptr) {
+        if (ptr_) {
+            control_block_ = new detail::ControlBlock<Y, Deleter>(ptr_, d);
+        } else {
+            control_block_ = nullptr;
+        }
+    }
+
     template<typename Y> friend class shared_ptr;
     template<typename Y> friend class weak_ptr;
     
@@ -338,18 +314,27 @@ private:
 // make_shared with optimized inlined storage
 template<typename T, typename... Args>
 shared_ptr<T> make_shared(Args&&... args) {
-    auto* control = new detail::InlinedControlBlock<T>();
-    new(control->get_object()) T(fl::forward<Args>(args)...);
-    control->object_constructed = true;
-    return shared_ptr<T>(control->get_object(), control, detail::make_shared_tag{});
+    T* obj = new T(fl::forward<Args>(args)...);
+    auto* control = new detail::ControlBlock<T>(obj);
+    //new(control->get_object()) T(fl::forward<Args>(args)...);
+    //control->object_constructed = true;
+    return shared_ptr<T>(obj, control, detail::make_shared_tag{});
+}
+
+namespace detail {
+    template<typename T>
+    struct NoDeleter {
+        void operator()(T*) const {
+            // Intentionally do nothing - object lifetime managed externally
+        }
+    };
 }
 
 // NEW: Creates a shared_ptr that does not modify the reference count
 // The shared_ptr and any copies will not affect object lifetime
 template<typename T>
 shared_ptr<T> make_shared_no_tracking(T& obj) {
-    auto* control = new detail::ControlBlock<T, detail::no_op_deleter<T>>(
-        &obj, detail::no_op_deleter<T>{}, false);  // track = false (enables no-tracking mode)
+    auto* control = new detail::ControlBlock<T, detail::NoDeleter<T>>(&obj, detail::NoDeleter<T>{}, false);  // track = false (enables no-tracking mode)
     return shared_ptr<T>(&obj, control, detail::no_tracking_tag{});
 }
 

@@ -215,8 +215,7 @@ class FsImplWasm : public fl::FsImpl {
             auto it = gFileMap.find(path);
             if (it != gFileMap.end()) {
                 auto &data = it->second;
-                out = fl::shared_ptr<WasmFileHandle>(
-                    new WasmFileHandle(path, data));
+                out = fl::make_shared<WasmFileHandle>(path, data);
                 // FASTLED_DBG("Opened file: " << _path);
             } else {
                 out = fl::FileHandlePtr();
