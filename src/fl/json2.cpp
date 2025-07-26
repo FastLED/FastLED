@@ -4,13 +4,7 @@
 #include "fl/vector.h"
 #include "fl/sketch_macros.h"
 
-#ifndef FASTLED_ENABLE_JSON
-#ifdef SKETCH_HAS_LOTS_OF_MEMORY
-#define FASTLED_ENABLE_JSON 1
-#else
-#define FASTLED_ENABLE_JSON 0
-#endif
-#endif
+
 
 #if FASTLED_ENABLE_JSON
 

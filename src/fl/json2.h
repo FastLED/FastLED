@@ -8,7 +8,17 @@
 #include "fl/unique_ptr.h"
 #include "fl/shared_ptr.h"
 #include "fl/functional.h"
-#include "fl/json.h"
+
+#include "fl/sketch_macros.h"
+
+#ifndef FASTLED_ENABLE_JSON
+#ifdef SKETCH_HAS_LOTS_OF_MEMORY
+#define FASTLED_ENABLE_JSON 1
+#else
+#define FASTLED_ENABLE_JSON 0
+#endif
+#endif
+
 
 namespace fl {
 namespace json2 {

@@ -8,7 +8,7 @@
 #include "fl/type_traits.h"
 #include "fl/json_compact.h"
 
-#include "fl/sketch_macros.h"
+
 
 #ifndef FASTLED_ENABLE_JSON
 #ifdef SKETCH_HAS_LOTS_OF_MEMORY
