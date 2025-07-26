@@ -77,7 +77,7 @@ void JsonButtonImpl::Updater::onPlatformPreLoop2() {
 void JsonButtonImpl::updateInternal(
     const fl::Json &value) {
     fl::string str = value.serialize();
-    fl::json2::Json json2_obj = fl::json2::Json::parse(str.c_str());
+    fl::json2::Json json2_obj = fl::json2::Json::parse(str);
     mPressed = json2_obj | false;
 }
 

@@ -6,7 +6,7 @@
 
 
 TEST_CASE("JSON roundtrip test fl::Json <-> fl::json2::Json") {
-    const char* initialJson = "{\"map\":{\"strip1\":{\"x\":[0,1,2,3],\"y\":[0,1,2,3]}}}\"";
+    const char* initialJson = "{\"map\":{\"strip1\":{\"x\":[0,1,2,3],\"y\":[0,1,2,3]}}}";
 
     // 1. Deserialize with fl::Json
     fl::Json json = fl::Json::parse(initialJson);
@@ -16,7 +16,7 @@ TEST_CASE("JSON roundtrip test fl::Json <-> fl::json2::Json") {
     fl::string json_string = json.serialize();
 
     // 3. Deserialize with json2
-    fl::json2::Json json2_obj = fl::json2::Json::parse(json_string.c_str());
+    fl::json2::Json json2_obj = fl::json2::Json::parse(json_string);
     CHECK(json2_obj.has_value());
 
     // 4. Serialize with json2

@@ -75,7 +75,7 @@ JsonCheckboxImpl &JsonCheckboxImpl::operator=(int value) {
 void JsonCheckboxImpl::updateInternal(
     const fl::Json &value) {
     fl::string str = value.serialize();
-    fl::json2::Json json2_obj = fl::json2::Json::parse(str.c_str());
+    fl::json2::Json json2_obj = fl::json2::Json::parse(str);
     setValueInternal(json2_obj | false);  // Use internal method to avoid change notification
 }
 
