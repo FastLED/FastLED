@@ -1130,6 +1130,8 @@ The project uses a comprehensive test suite including:
 - Code quality checks (ruff, clang-format)
 - Example compilation verification
 
+**🚨 CRITICAL: Manual compiling of tests should never be attempted.** Always put tests in `tests/test_<name>.cpp` and run with `bash test <name>`.
+
 ### Test Assertion Macros
 **🚨 CRITICAL: Always use the proper assertion macros for better error messages and debugging:**
 
@@ -1242,6 +1244,7 @@ TEST_CASE("JSON - New Feature Addition") {
 - ✅ **CORRECT**: `bash test <test_name>` (e.g., `bash test audio_json_parsing`)
 - ❌ **INCORRECT**: `./.build/bin/test_<test_name>.exe`
 - ❌ **INCORRECT**: Running executables directly
+- ❌ **INCORRECT**: Manual compilation of tests
 
 **Examples:**
 - `bash test` - Run all tests (includes debug symbols)
