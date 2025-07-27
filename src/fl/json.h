@@ -601,6 +601,9 @@ struct JsonValue {
     class iterator;
     class const_iterator;
     
+    // Friend declarations
+    friend class Json;
+    
     // The variant holds exactly one of these alternatives
     using variant_t = fl::Variant<
         fl::nullptr_t,   // null
@@ -1813,6 +1816,11 @@ public:
     // has_value method for compatibility
     bool has_value() const { 
         return m_value && !m_value->is_null(); 
+    }
+
+    // Method to set the internal value (for JsonValue::to_string())
+    void set_value(const fl::shared_ptr<JsonValue>& value) {
+        m_value = value;
     }
 
     // Serialization - now delegates to native implementation
