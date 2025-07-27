@@ -995,12 +995,29 @@ using namespace fl;
 //
 // It's possible to hijack the loop() via a macro so that
 // extra code can be injected at the start of every frame.
+// When FASTLED_LOOP_RUNS_ASYNC == 1
+// then use loop() to also run the async.
+// 
+// EXAMPLE:
+// #define FASTLED_LOOP_RUNS_ASYNC 1
+// #include "FastLED.h"
+// void loop() {
+//     FASTLED_WARN("async will run in the loop");
+//     delay(500);
+// }
 
-#if 0
+#ifndef FASTLED_LOOP_RUNS_ASYNC
+#define FASTLED_LOOP_RUNS_ASYNC 0
+#endif
+
+#if FASTLED_LOOP_RUNS_ASYNC == 1
+#include "fl/async.h"
+// The loop is set as a macro that re-defines the user loop function
+// to sketch_loop()
 #define loop() \
-     real_loop(); \
-     void loop() { FASTLED_WARN("hijacked the loop"); real_loop(); } \
-     void real_loop()
+     sketch_loop(); \
+     void loop() { sketch_loop(); fl::asyncrun(); } \
+     void sketch_loop()
 #endif
 
 

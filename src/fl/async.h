@@ -52,6 +52,7 @@
 #include "fl/singleton.h"
 
 #include "fl/task.h"
+#include "fl/time.h"
 
 namespace fl {
 
@@ -106,6 +107,7 @@ private:
 /// This centralizes platform-specific async behavior instead of having #ifdef in generic code.
 void async_yield();
 
+
 /// @brief Run all registered async tasks once
 /// 
 /// This function updates all registered async runners (fetch, timers, etc.)
@@ -116,6 +118,8 @@ void async_yield();
 ///
 /// @note This replaces the old fetch_update() function with a generic approach
 void asyncrun();
+
+
 
 /// @brief Get the number of active async tasks across all systems
 /// @return Total number of active async tasks
