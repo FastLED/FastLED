@@ -1,3 +1,5 @@
+// allow-include-after-namespace
+
 #pragma once
 
 

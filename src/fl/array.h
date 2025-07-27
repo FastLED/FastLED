@@ -1,3 +1,5 @@
+// allow-include-after-namespace
+
 #pragma once
 
 #include <string.h>
@@ -8,6 +10,8 @@
 #include "fl/bit_cast.h"
 
 #include "fl/initializer_list.h"
+
+ 
 
 namespace fl {
 

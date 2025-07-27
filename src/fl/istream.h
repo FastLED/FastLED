@@ -1,3 +1,5 @@
+// allow-include-after-namespace
+
 #pragma once
 
 // Forward declarations to avoid pulling in fl/io.h and causing fl/io.cpp to be compiled

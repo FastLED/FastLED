@@ -1,5 +1,7 @@
 #pragma once
 
+// allow-include-after-namespace
+
 #ifndef FASTLED_TEENSY_USE_PRINTF
 // DISABLED: printf causes ~5KB memory bloat for simple applications like Blink
 // Users can manually enable with #define FASTLED_TEENSY_USE_PRINTF 1 if needed

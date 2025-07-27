@@ -1,3 +1,4 @@
+// allow-include-after-namespace
 #pragma once
 
 // FastLED smart pointer.

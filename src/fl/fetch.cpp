@@ -5,20 +5,21 @@
 #include "fl/singleton.h"
 #include "fl/engine_events.h"
 #include "fl/async.h"
-#include "fl/hash_map.h"
 
 #ifdef __EMSCRIPTEN__
 #include <emscripten.h>
 #include <emscripten/val.h>
 #endif
 
+// Include WASM-specific implementation
+#include "platforms/wasm/js_fetch.h"
+
 namespace fl {
 
 #ifdef __EMSCRIPTEN__
 // ========== WASM Implementation using JavaScript fetch ==========
 
-// Include WASM-specific implementation
-#include "platforms/wasm/js_fetch.h"
+
 
 // Promise storage moved to FetchManager singleton
 
@@ -111,21 +112,25 @@ fl::promise<response> execute_fetch_request(const fl::string& url, const fetch_o
 
 // ========== Engine Events Integration ==========
 
-/// Internal engine listener for automatic async updates
+
+
+// ========== Promise-Based API Implementation ==========
+
 class FetchEngineListener : public EngineEvents::Listener {
 public:
-    FetchEngineListener() = default;
+    FetchEngineListener() {
+        EngineEvents::addListener(this);
+    };
     ~FetchEngineListener() override {
         // Listener base class automatically removes itself
+        EngineEvents::removeListener(this);
     }
-    
+
     void onEndFrame() override {
         // Update all async tasks (fetch, timers, etc.) at the end of each frame
         fl::asyncrun();
     }
 };
-
-// ========== Promise-Based API Implementation ==========
 
 FetchManager& FetchManager::instance() {
     return fl::Singleton<FetchManager>::instance();

@@ -213,7 +213,6 @@ private:
     friend class FetchManager;
 };
 
-// Forward declaration for engine listener
 class FetchEngineListener;
 
 /// Internal fetch manager for promise tracking
