@@ -26,6 +26,13 @@ FASTLED_USING_NAMESPACE
 TEST_CASE("compile ui test") {
 }
 
+class MockJsonUiInternal : public fl::JsonUiInternal {
+public:
+    MockJsonUiInternal(const fl::string& name) : fl::JsonUiInternal(name) {}
+    void toJson(fl::Json& json) const override {}
+    void updateInternal(const fl::Json& json) override {}
+};
+
 TEST_CASE("no updateJs handler") {
     // Set up handler WITHOUT updateJs callback - should return empty function
     auto updateEngineState = fl::setJsonUiHandlers(fl::function<void(const char*)>{});
@@ -34,9 +41,7 @@ TEST_CASE("no updateJs handler") {
     CHECK(!updateEngineState);
     
     // Create a mock component for testing
-    auto updateFunc = [](const fl::Json&) { /* do nothing */ };
-    auto toJsonFunc = [](fl::Json&) { /* do nothing */ };
-    auto mockComponent = fl::make_shared<fl::JsonUiInternal>("test_id", updateFunc, toJsonFunc);
+    auto mockComponent = fl::make_shared<MockJsonUiInternal>("test_id");
     fl::weak_ptr<fl::JsonUiInternal> weakComponent(mockComponent);
     
     // Test addJsonUiComponent - should go to pending since no manager
@@ -61,9 +66,13 @@ TEST_CASE("internal manager with updateJs") {
     CHECK(updateEngineState);
     
     // Create a mock component for testing
-    auto updateFunc = [](const fl::Json&) { /* do nothing */ };
-    auto toJsonFunc = [](fl::Json&) { /* do nothing */ };
-    auto mockComponent = fl::make_shared<fl::JsonUiInternal>("test_id", updateFunc, toJsonFunc);
+    class MockJsonUiInternal : public fl::JsonUiInternal {
+    public:
+        MockJsonUiInternal(const fl::string& name) : fl::JsonUiInternal(name) {}
+        void toJson(fl::Json& json) const override {}
+        void updateInternal(const fl::Json& json) override {}
+    };
+    auto mockComponent = fl::make_shared<MockJsonUiInternal>("test_id");
     fl::weak_ptr<fl::JsonUiInternal> weakComponent(mockComponent);
     
     // Test addJsonUiComponent - should add to internal manager
@@ -83,11 +92,8 @@ TEST_CASE("pending component storage without updateJs") {
     CHECK(!updateEngineState); // Should return empty function
     
     // Create mock components for testing
-    auto updateFunc = [](const fl::Json&) { /* do nothing */ };
-    auto toJsonFunc = [](fl::Json&) { /* do nothing */ };
-    
-    auto mockComponent1 = fl::make_shared<fl::JsonUiInternal>("test_id_1", updateFunc, toJsonFunc);
-    auto mockComponent2 = fl::make_shared<fl::JsonUiInternal>("test_id_2", updateFunc, toJsonFunc);
+    auto mockComponent1 = fl::make_shared<MockJsonUiInternal>("test_id_1");
+    auto mockComponent2 = fl::make_shared<MockJsonUiInternal>("test_id_2");
     fl::weak_ptr<fl::JsonUiInternal> weakComponent1(mockComponent1);
     fl::weak_ptr<fl::JsonUiInternal> weakComponent2(mockComponent2);
     
@@ -117,11 +123,8 @@ TEST_CASE("pending component storage with updateJs") {
     CHECK(!updateEngineState); // Should return empty function
     
     // Create mock components for testing
-    auto updateFunc = [](const fl::Json&) { /* do nothing */ };
-    auto toJsonFunc = [](fl::Json&) { /* do nothing */ };
-    
-    auto mockComponent1 = fl::make_shared<fl::JsonUiInternal>("test_id_1", updateFunc, toJsonFunc);
-    auto mockComponent2 = fl::make_shared<fl::JsonUiInternal>("test_id_2", updateFunc, toJsonFunc);
+    auto mockComponent1 = fl::make_shared<MockJsonUiInternal>("test_id_1");
+    auto mockComponent2 = fl::make_shared<MockJsonUiInternal>("test_id_2");
     fl::weak_ptr<fl::JsonUiInternal> weakComponent1(mockComponent1);
     fl::weak_ptr<fl::JsonUiInternal> weakComponent2(mockComponent2);
     
@@ -152,9 +155,13 @@ TEST_CASE("pending component cleanup with destroyed components") {
     
     // Create scope for component that will be destroyed
     {
-        auto updateFunc = [](const fl::Json&) { /* do nothing */ };
-        auto toJsonFunc = [](fl::Json&) { /* do nothing */ };
-        auto mockComponent = fl::make_shared<fl::JsonUiInternal>("test_id_destroyed", updateFunc, toJsonFunc);
+        class MockJsonUiInternal : public fl::JsonUiInternal {
+        public:
+            MockJsonUiInternal(const fl::string& name) : fl::JsonUiInternal(name) {}
+            void toJson(fl::Json& json) const override {}
+            void updateInternal(const fl::Json& json) override {}
+        };
+        auto mockComponent = fl::make_shared<MockJsonUiInternal>("test_id_destroyed");
         fl::weak_ptr<fl::JsonUiInternal> weakComponent(mockComponent);
         
         // Add component to pending
@@ -167,9 +174,7 @@ TEST_CASE("pending component cleanup with destroyed components") {
     }
     
     // Create a valid component
-    auto updateFunc = [](const fl::Json&) { /* do nothing */ };
-    auto toJsonFunc = [](fl::Json&) { /* do nothing */ };
-    auto validComponent = fl::make_shared<fl::JsonUiInternal>("test_id_valid", updateFunc, toJsonFunc);
+    auto validComponent = fl::make_shared<MockJsonUiInternal>("test_id_valid");
     fl::weak_ptr<fl::JsonUiInternal> weakValidComponent(validComponent);
     fl::addJsonUiComponent(weakValidComponent);
     
@@ -193,9 +198,13 @@ TEST_CASE("null handlers behavior") {
     CHECK(!updateEngineState);
     
     // Create a mock component for testing
-    auto updateFunc = [](const fl::Json&) { /* do nothing */ };
-    auto toJsonFunc = [](fl::Json&) { /* do nothing */ };
-    auto mockComponent = fl::make_shared<fl::JsonUiInternal>("test_id", updateFunc, toJsonFunc);
+    class MockJsonUiInternal : public fl::JsonUiInternal {
+    public:
+        MockJsonUiInternal(const fl::string& name) : fl::JsonUiInternal(name) {}
+        void toJson(fl::Json& json) const override {}
+        void updateInternal(const fl::Json& json) override {}
+    };
+    auto mockComponent = fl::make_shared<MockJsonUiInternal>("test_id");
     fl::weak_ptr<fl::JsonUiInternal> weakComponent(mockComponent);
     
     // These should not crash and should produce warnings (components go to pending)
@@ -218,9 +227,7 @@ TEST_CASE("updateEngineState function behavior") {
     CHECK(updateEngineState);
     
     // Create and add a component to the internal manager
-    auto updateFunc = [](const fl::Json&) { /* do nothing */ };
-    auto toJsonFunc = [](fl::Json&) { /* do nothing */ };
-    auto mockComponent = fl::make_shared<fl::JsonUiInternal>("test_component", updateFunc, toJsonFunc);
+    auto mockComponent = fl::make_shared<MockJsonUiInternal>("test_component");
     fl::weak_ptr<fl::JsonUiInternal> weakComponent(mockComponent);
     fl::addJsonUiComponent(weakComponent);
     
@@ -244,9 +251,13 @@ TEST_CASE("manager replacement") {
     CHECK(updateEngineState1);
     
     // Add a component to the first manager
-    auto updateFunc = [](const fl::Json&) { /* do nothing */ };
-    auto toJsonFunc = [](fl::Json&) { /* do nothing */ };
-    auto mockComponent = fl::make_shared<fl::JsonUiInternal>("test_id", updateFunc, toJsonFunc);
+    class MockJsonUiInternal : public fl::JsonUiInternal {
+    public:
+        MockJsonUiInternal(const fl::string& name) : fl::JsonUiInternal(name) {}
+        void toJson(fl::Json& json) const override {}
+        void updateInternal(const fl::Json& json) override {}
+    };
+    auto mockComponent = fl::make_shared<MockJsonUiInternal>("test_id");
     fl::weak_ptr<fl::JsonUiInternal> weakComponent(mockComponent);
     fl::addJsonUiComponent(weakComponent);
     
@@ -283,12 +294,7 @@ TEST_CASE("full ui json flow test") {
     CHECK(updateEngineState);
 
     // 2. Create a mock component that sets a flag when updated
-    auto updateFunc = [&](const fl::Json& value) {
-        componentUpdated = true;
-        updatedValue = value | false; // Extract boolean value
-    };
-    auto toJsonFunc = [](fl::Json&) { /* do nothing */ };
-    auto mockComponent = fl::make_shared<fl::JsonUiInternal>("test_component_full_flow", updateFunc, toJsonFunc);
+    auto mockComponent = fl::make_shared<MockJsonUiInternal>("test_component_full_flow");
     fl::weak_ptr<fl::JsonUiInternal> weakComponent(mockComponent);
     fl::addJsonUiComponent(weakComponent);
 
@@ -334,7 +340,7 @@ TEST_CASE("complex ui element serialization") {
     numberField.Group("group3");
     fl::JsonDropdownImpl dropdown("myDropdown", {"option1", "option2", "option3"});
     dropdown.Group("group3");
-    fl::JsonTitleImpl title("myTitle");
+    fl::JsonTitleImpl title("myTitle", "myTitle");
     title.Group("group4");
     fl::JsonDescriptionImpl description( "This is a description of the UI.");
     description.Group("group4");

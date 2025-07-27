@@ -131,6 +131,10 @@ TEST_CASE("__builtin_five_bit_hd_gamma_bitshift") {
 
 #define CHECK_NEAR(a, b, c) CHECK_LT(abs(a - b), c)
 
+// Forward declarations for helper functions
+float ideal_gamma_correct(uint8_t rgb8);
+float apa102_to_linear(uint8_t rgb8_out, uint8_t brightness_5bit);
+
 // Helper function to apply ideal gamma correction (gamma = 2.0)
 float ideal_gamma_correct(uint8_t rgb8) {
     float normalized = rgb8 / 255.0f;

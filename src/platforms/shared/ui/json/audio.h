@@ -6,14 +6,19 @@
 #include "fl/engine_events.h"
 #include "fl/str.h"
 #include "platforms/shared/ui/json/ui_internal.h"
+
 #include "fl/vector.h"
 #include "fl/json.h"
+
+#include "platforms/shared/ui/json/audio_internal.h"
 
 namespace fl {
 
 enum {
     kJsAudioSamples = 512,
 };
+
+
 
 class JsonAudioImpl {
   public:
@@ -22,7 +27,6 @@ class JsonAudioImpl {
     JsonAudioImpl &Group(const fl::string &name);
 
     const fl::string &name() const;
-    void toJson(fl::Json &json) const;
     AudioSample next();
     bool hasNext();
     const fl::string &groupName() const;
@@ -35,20 +39,16 @@ class JsonAudioImpl {
     }
 
   private:
+    fl::shared_ptr<JsonUiAudioInternal> mInternal;
     struct Updater : fl::EngineEvents::Listener {
         void init(JsonAudioImpl *owner);
         ~Updater();
         void onPlatformPreLoop2() override;
         JsonAudioImpl *mOwner = nullptr;
     };
-
     Updater mUpdater;
-
-    void updateInternal(const fl::Json &value);
-
-    JsonUiInternalPtr mInternal;
-    fl::vector<AudioSampleImplPtr> mAudioSampleImpls;
-    fl::string mSerializeBuffer;
 };
+
+    
 
 } // namespace fl

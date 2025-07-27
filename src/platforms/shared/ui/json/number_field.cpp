@@ -8,27 +8,77 @@
 
 #if FASTLED_ENABLE_JSON
 
-
 namespace fl {
 
-JsonNumberFieldImpl::JsonNumberFieldImpl(const fl::string &name, double value,
-                                        double min, double max)
-    : mValue(value), mMin(min), mMax(max) {
-    auto updateFunc = JsonUiInternal::UpdateFunction(
-        [this](const fl::Json &value) {
-            this->updateInternal(value);
-        });
+// Definition of the internal class that was previously in number_field_internal.h
+class JsonUiNumberFieldInternal : public JsonUiInternal {
+private:
+    double mValue;
+    double mMin;
+    double mMax;
 
-    auto toJsonFunc =
-        JsonUiInternal::ToJsonFunction([this](fl::Json &json) {
-            this->toJson(json);
-        });
-    mInternal = fl::make_shared<JsonUiInternal>(name, fl::move(updateFunc),
-                                     fl::move(toJsonFunc));
-    addJsonUiComponent(fl::weak_ptr<JsonUiInternal>(mInternal));
+public:
+    // Constructor: Initializes the base JsonUiInternal with name, and sets initial values.
+    JsonUiNumberFieldInternal(const fl::string& name, double value, double min, double max)
+        : JsonUiInternal(name), mValue(value), mMin(min), mMax(max) {}
+
+    // Override toJson to serialize the number field's data directly.
+    void toJson(fl::Json& json) const override {
+        json.set("name", name());
+        json.set("type", "number");
+        json.set("group", groupName());
+        json.set("id", id());
+        json.set("value", static_cast<float>(mValue));
+        json.set("min", static_cast<float>(mMin));
+        json.set("max", static_cast<float>(mMax));
+    }
+
+    // Override updateInternal to handle updates from JSON.
+    void updateInternal(const fl::Json& json) override {
+        double value = json | 0.0;
+        if (value < mMin) {
+            value = mMin;
+        } else if (value > mMax) {
+            value = mMax;
+        }
+        mValue = value;
+    }
+
+    // Accessors for the number field values.
+    double value() const { return mValue; }
+    double min() const { return mMin; }
+    double max() const { return mMax; }
+    
+    void setValue(double value) { 
+        if (value < mMin) {
+            value = mMin;
+        } else if (value > mMax) {
+            value = mMax;
+        }
+        mValue = value;
+    }
+    
+    void setMin(double min) { mMin = min; }
+    void setMax(double max) { mMax = max; }
+};
+
+JsonNumberFieldImpl::JsonNumberFieldImpl(const fl::string &name, double value,
+                                        double min, double max) {
+    // Create an instance of the new internal class
+    mInternal = fl::make_shared<JsonUiNumberFieldInternal>(name, value, min, max);
+
+    // Register the component with the JsonUiManager
+    addJsonUiComponent(mInternal);
 }
 
-JsonNumberFieldImpl::~JsonNumberFieldImpl() { removeJsonUiComponent(fl::weak_ptr<JsonUiInternal>(mInternal)); }
+JsonNumberFieldImpl::~JsonNumberFieldImpl() { 
+    // Ensure the component is removed from the global registry
+    removeJsonUiComponent(fl::weak_ptr<JsonUiInternal>(mInternal));
+}
+
+int JsonNumberFieldImpl::id() const {
+    return mInternal->id();
+}
 
 JsonNumberFieldImpl &JsonNumberFieldImpl::Group(const fl::string &name) {
     mInternal->setGroup(name);
@@ -38,40 +88,19 @@ JsonNumberFieldImpl &JsonNumberFieldImpl::Group(const fl::string &name) {
 const fl::string &JsonNumberFieldImpl::name() const { return mInternal->name(); }
 
 void JsonNumberFieldImpl::toJson(fl::Json &json) const {
-    json.set("name", name());
-    json.set("group", mInternal->groupName());
-    json.set("type", "number");
-    json.set("id", mInternal->id());
-    json.set("value", static_cast<float>(mValue));
-    json.set("min", static_cast<float>(mMin));
-    json.set("max", static_cast<float>(mMax));
+    mInternal->toJson(json);
 }
 
-double JsonNumberFieldImpl::value() const { return mValue; }
+double JsonNumberFieldImpl::value() const { return mInternal->value(); }
 
 void JsonNumberFieldImpl::setValue(double value) {
-    if (value < mMin) {
-        value = mMin;
-    } else if (value > mMax) {
-        value = mMax;
-    }
-    double oldValue = mValue;
-    mValue = value;
+    double oldValue = mInternal->value();
+    mInternal->setValue(value);
     
     // If value actually changed, mark this component as changed for polling
-    if (!ALMOST_EQUAL_FLOAT(mValue, oldValue)) {
+    if (!ALMOST_EQUAL_FLOAT(mInternal->value(), oldValue)) {
         mInternal->markChanged();
     }
-}
-
-void JsonNumberFieldImpl::setValueInternal(double value) {
-    // Internal method for updates from JSON UI system - no change notification
-    if (value < mMin) {
-        value = mMin;
-    } else if (value > mMax) {
-        value = mMax;
-    }
-    mValue = value;
 }
 
 const fl::string &JsonNumberFieldImpl::groupName() const { return mInternal->groupName(); }
@@ -96,11 +125,6 @@ bool JsonNumberFieldImpl::operator!=(double v) const { return !ALMOST_EQUAL_FLOA
 
 bool JsonNumberFieldImpl::operator!=(int v) const { return !ALMOST_EQUAL_FLOAT(value(), static_cast<double>(v)); }
 
-void JsonNumberFieldImpl::updateInternal(
-    const fl::Json &value) {
-    setValueInternal(value | 0.0);  // Use internal method to avoid change notification
-}
-
 } // namespace fl
 
-#endif // __EMSCRIPTEN__
+#endif // FASTLED_ENABLE_JSON

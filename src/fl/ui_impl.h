@@ -213,7 +213,6 @@ class UIDescriptionImpl {
 #endif
 
 #if !FASTLED_HAS_UI_HELP
-
 class UIHelpImpl {
   public:
     UIHelpImpl(const char *markdownContent) : mContent(markdownContent) { FASTLED_UNUSED(markdownContent); }
@@ -257,11 +256,11 @@ class UIDropdownImpl {
   public:
     // Constructor with array of options (size determined automatically)
     template<fl::size N>
-    UIDropdownImpl(const char *name, const fl::string (&options)[N]) 
+    UIDropdownImpl(const fl::string &name, const fl::string (&options)[N]) 
         : UIDropdownImpl(name, options, N) {}
     
     // Constructor with fl::vector of options
-    UIDropdownImpl(const char *name, const fl::vector<fl::string>& options) 
+    UIDropdownImpl(const fl::string &name, const fl::vector<fl::string>& options) 
         : mSelectedIndex(0) {
         FASTLED_UNUSED(name);
         for (fl::size i = 0; i < options.size(); ++i) {
@@ -273,7 +272,7 @@ class UIDropdownImpl {
     }
 
     template<typename Iterator>
-    UIDropdownImpl(const char *name, Iterator begin, Iterator end)
+    UIDropdownImpl(const fl::string &name, Iterator begin, Iterator end)
         : mSelectedIndex(0) {
         FASTLED_UNUSED(name);
         for (Iterator it = begin; it != end; ++it) {
@@ -285,7 +284,7 @@ class UIDropdownImpl {
     }
 
     // Constructor with fl::span<fl::string>
-    UIDropdownImpl(const char *name, fl::span<fl::string> options) 
+    UIDropdownImpl(const fl::string &name, fl::span<fl::string> options) 
         : mSelectedIndex(0) {
         FASTLED_UNUSED(name);
         for (fl::size i = 0; i < options.size(); ++i) {
@@ -297,7 +296,7 @@ class UIDropdownImpl {
     }
 
     // Constructor with initializer_list (only available if C++11 support exists)
-    UIDropdownImpl(const char *name, fl::initializer_list<fl::string> options) 
+    UIDropdownImpl(const fl::string &name, fl::initializer_list<fl::string> options) 
         : mSelectedIndex(0) {
         FASTLED_UNUSED(name);
         for (const auto& option : options) {
@@ -338,7 +337,7 @@ class UIDropdownImpl {
 
   private:
     // Private constructor with array of options and count (used by template constructor)
-    UIDropdownImpl(const char *name, const fl::string* options, fl::size count) 
+    UIDropdownImpl(const fl::string &name, const fl::string* options, fl::size count) 
         : mSelectedIndex(0) {
         FASTLED_UNUSED(name);
         for (fl::size i = 0; i < count; ++i) {

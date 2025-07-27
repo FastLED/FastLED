@@ -13,27 +13,84 @@ FL_DISABLE_WARNING(deprecated-declarations)
 
 namespace fl {
 
+// Definition of the internal class that was previously in slider_internal.h
+class JsonUiSliderInternal : public JsonUiInternal {
+private:
+    float mMin;
+    float mMax;
+    float mValue;
+    float mStep;
+
+public:
+    // Constructor: Initializes the base JsonUiInternal with name, and sets initial values.
+    JsonUiSliderInternal(const fl::string& name, float value, float min, float max, float step = -1)
+        : JsonUiInternal(name), mMin(min), mMax(max), mValue(value), mStep(step) {
+        if (ALMOST_EQUAL_FLOAT(mStep, -1.f) && mMax > mMin) {
+            mStep = (mMax - mMin) / 255.0f;
+        }
+    }
+
+    // Override toJson to serialize the slider's data directly.
+    void toJson(fl::Json& json) const override {
+        json.set("name", name());
+        json.set("type", "slider");
+        json.set("group", groupName());
+        json.set("id", id());
+        json.set("value", mValue);
+        json.set("min", mMin);
+        json.set("max", mMax);
+        if (mStep > 0) {
+            json.set("step", mStep);
+        }
+    }
+
+    // Override updateInternal to handle updates from JSON.
+    void updateInternal(const fl::Json& json) override {
+        float value = json | 0.0f;
+        if (value < mMin) {
+            value = mMin;
+        } else if (value > mMax) {
+            value = mMax;
+        }
+        mValue = value;
+    }
+
+    // Accessors for the slider values.
+    float value() const { return mValue; }
+    float min() const { return mMin; }
+    float max() const { return mMax; }
+    float step() const { return mStep; }
+    
+    void setValue(float value) { 
+        if (value < mMin) {
+            value = mMin;
+        } else if (value > mMax) {
+            value = mMax;
+        }
+        mValue = value;
+    }
+    
+    float value_normalized() const {
+        if (ALMOST_EQUAL(mMax, mMin, 0.0001f)) {
+            return 0;
+        }
+        return (mValue - mMin) / (mMax - mMin);
+    }
+    
+    void setMin(float min) { mMin = min; }
+    void setMax(float max) { mMax = max; }
+    void setStep(float step) { mStep = step; }
+};
+
 JsonSliderImpl::JsonSliderImpl(const fl::string &name, float value, float min,
                                float max, float step)
-    : mMin(min), mMax(max), mValue(value), mStep(step) {
-    if (ALMOST_EQUAL_FLOAT(mStep, -1.f)) {
-        mStep = (mMax - mMin) / 100.0f;
-    }
-    auto updateFunc =
-        JsonUiInternal::UpdateFunction([this](const fl::Json &value) {
-            this->updateInternal(value);
-        });
-
-    auto toJsonFunc =
-        JsonUiInternal::ToJsonFunction([this](fl::Json &json) {
-            this->toJson(json);
-        });
-    mInternal = fl::make_shared<JsonUiInternal>(name, fl::move(updateFunc),
-                                                fl::move(toJsonFunc));
-    addJsonUiComponent(fl::weak_ptr<JsonUiInternal>(mInternal));
+    : mInternal(fl::make_shared<JsonUiSliderInternal>(name, value, min, max, step)) {
+    // Register the component with the JsonUiManager
+    addJsonUiComponent(mInternal);
 }
 
 JsonSliderImpl::~JsonSliderImpl() {
+    // Ensure the component is removed from the global registry
     removeJsonUiComponent(fl::weak_ptr<JsonUiInternal>(mInternal));
 }
 
@@ -45,38 +102,21 @@ JsonSliderImpl &JsonSliderImpl::Group(const fl::string &name) {
 const fl::string &JsonSliderImpl::name() const { return mInternal->name(); }
 
 void JsonSliderImpl::toJson(fl::Json &json) const {
-    json.set("name", name());
-    json.set("group", mInternal->groupName());
-    json.set("type", "slider");
-    json.set("id", mInternal->id());
-    json.set("value", mValue);
-    json.set("min", mMin);
-    json.set("max", mMax);
-    if (mStep > 0) {
-        json.set("step", mStep);
-    }
+    mInternal->toJson(json);
 }
 
-float JsonSliderImpl::value() const { return mValue; }
+float JsonSliderImpl::value() const { return mInternal->value(); }
 
 float JsonSliderImpl::value_normalized() const {
-    if (ALMOST_EQUAL(mMax, mMin, 0.0001f)) {
-        return 0;
-    }
-    return (mValue - mMin) / (mMax - mMin);
+    return mInternal->value_normalized();
 }
 
-float JsonSliderImpl::getMax() const { return mMax; }
+float JsonSliderImpl::getMax() const { return mInternal->max(); }
 
-float JsonSliderImpl::getMin() const { return mMin; }
+float JsonSliderImpl::getMin() const { return mInternal->min(); }
 
 void JsonSliderImpl::setValue(float value) {
-    if (value < mMin) {
-        value = mMin;
-    } else if (value > mMax) {
-        value = mMax;
-    }
-    mValue = value;
+    mInternal->setValue(value);
 }
 
 const fl::string &JsonSliderImpl::groupName() const {
@@ -87,7 +127,7 @@ void JsonSliderImpl::setGroup(const fl::string &groupName) {
     mInternal->setGroup(groupName);
 }
 
-int JsonSliderImpl::as_int() const { return static_cast<int>(mValue); }
+int JsonSliderImpl::as_int() const { return static_cast<int>(mInternal->value()); }
 
 JsonSliderImpl &JsonSliderImpl::operator=(float value) {
     setValue(value);
@@ -99,10 +139,10 @@ JsonSliderImpl &JsonSliderImpl::operator=(int value) {
     return *this;
 }
 
-void JsonSliderImpl::updateInternal(const fl::Json &value) {
-    setValue(value | 0.0f);
+int JsonSliderImpl::id() const {
+    return mInternal->id();
 }
 
 } // namespace fl
 
-#endif // __EMSCRIPTEN__
+#endif // FASTLED_ENABLE_JSON

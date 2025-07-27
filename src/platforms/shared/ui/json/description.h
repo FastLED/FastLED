@@ -4,8 +4,12 @@
 #include "fl/str.h"
 #include "platforms/shared/ui/json/ui_internal.h"
 #include "fl/json.h"
+#include "fl/ptr.h" // For fl::shared_ptr
 
 namespace fl {
+
+// Forward declaration of the internal class
+class JsonUiDescriptionInternal;
 
 class JsonDescriptionImpl {
   public:
@@ -22,13 +26,11 @@ class JsonDescriptionImpl {
     // Method to allow parent UIElement class to set the group
     void setGroup(const fl::string &groupName);
 
-    int id() const {
-      return mInternal->id();
-    }
+    int id() const;
 
   private:
-    JsonUiInternalPtr mInternal;
-    fl::string mText;
+    // Change to use the specific internal implementation
+    fl::shared_ptr<JsonUiDescriptionInternal> mInternal;
 };
 
 } // namespace fl

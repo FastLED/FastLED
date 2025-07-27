@@ -1,48 +1,82 @@
 #include "description.h"
-#include "ui_internal.h"
 #include "platforms/shared/ui/json/ui.h"
+#include "ui_internal.h"
 
-#include "fl/json.h"
 #include "fl/json.h"
 
 #if FASTLED_ENABLE_JSON
 
-
-
 namespace fl {
 
-JsonDescriptionImpl::JsonDescriptionImpl(const string &text): mText(text) {
-    JsonUiInternal::UpdateFunction update_fcn;
-    JsonUiInternal::ToJsonFunction to_json_fcn =
-        JsonUiInternal::ToJsonFunction([this](fl::Json &json) {
-            this->toJson(json);
-        });
-    mInternal = fl::make_shared<JsonUiInternal>("description", update_fcn, to_json_fcn);
+class JsonUiDescriptionInternal : public JsonUiInternal {
+  private:
+    fl::string mText;
+
+  public:
+    // Constructor: Initializes the base JsonUiInternal with name, and sets the
+    // description text.
+    JsonUiDescriptionInternal(const fl::string &name, const fl::string &text)
+        : JsonUiInternal(name), mText(text) {}
+
+    // Override toJson to serialize the description's data directly.
+    void toJson(fl::Json &json) const override {
+        json.set("name", name());
+        json.set("type", "description");
+        json.set("group", groupName());
+        json.set("id", id());
+        json.set("text", mText);
+    }
+
+    // Override updateInternal. Descriptions typically don't have update
+    // functionality from the UI, so this can be a no-op.
+    void updateInternal(const fl::Json &json) override {
+        // No update needed for description components
+    }
+
+    // Accessors for the description text.
+    const fl::string &text() const { return mText; }
+    void setText(const fl::string &text) { mText = text; }
+};
+
+JsonDescriptionImpl::JsonDescriptionImpl(const string &text) {
+    // Create an instance of the new internal class
+    mInternal = fl::make_shared<JsonUiDescriptionInternal>("description", text);
+
+    // Register the component with the JsonUiManager
     addJsonUiComponent(fl::weak_ptr<JsonUiInternal>(mInternal));
 }
 
-JsonDescriptionImpl::~JsonDescriptionImpl() {}
+JsonDescriptionImpl::~JsonDescriptionImpl() {
+    // Ensure the component is removed from the global registry
+    removeJsonUiComponent(fl::weak_ptr<JsonUiInternal>(mInternal));
+}
 
 JsonDescriptionImpl &JsonDescriptionImpl::Group(const fl::string &name) {
     mInternal->setGroup(name);
     return *this;
 }
 
-const fl::string &JsonDescriptionImpl::text() const { return mText; }
+const fl::string &JsonDescriptionImpl::text() const {
+    return mInternal->text();
+}
 
 void JsonDescriptionImpl::toJson(fl::Json &json) const {
-    json.set("name", mInternal->name());
-    json.set("type", "description");
-    json.set("group", mInternal->groupName());
-    json.set("id", mInternal->id());
-    json.set("text", text());
+    mInternal->toJson(json);
 }
 
 const string &JsonDescriptionImpl::name() const { return mInternal->name(); }
 
-const fl::string &JsonDescriptionImpl::groupName() const { return mInternal->groupName(); }
+const fl::string &JsonDescriptionImpl::groupName() const {
+    return mInternal->groupName();
+}
 
-void JsonDescriptionImpl::setGroup(const fl::string &groupName) { mInternal->setGroup(groupName); }
+void JsonDescriptionImpl::setGroup(const fl::string &groupName) {
+    mInternal->setGroup(groupName);
+}
+
+int JsonDescriptionImpl::id() const {
+    return mInternal->id();
+}
 
 } // namespace fl
 

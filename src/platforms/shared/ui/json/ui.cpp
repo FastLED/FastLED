@@ -104,10 +104,7 @@ void addJsonUiComponent(fl::weak_ptr<JsonUiInternal> component) {
 
 void removeJsonUiComponent(fl::weak_ptr<JsonUiInternal> component) {
     // Check if we have an internal manager first
-    JsonUiInternalPtr ptr = component.lock();
-    if (ptr) {
-        ptr->clearFunctions();
-    }
+    // No longer need to clear functions as we're not using lambda captures anymore
 
     auto& manager = getInternalManager();
     if (manager) {

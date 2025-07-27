@@ -1,48 +1,86 @@
 #include "help.h"
-#include "ui_internal.h"
 #include "platforms/shared/ui/json/ui.h"
+#include "ui_internal.h"
 
-#include "fl/json.h"
 #include "fl/json.h"
 
 #if FASTLED_ENABLE_JSON
 
-
-
 namespace fl {
 
-JsonHelpImpl::JsonHelpImpl(const string &markdownContent): mMarkdownContent(markdownContent) {
-    JsonUiInternal::UpdateFunction update_fcn;
-    JsonUiInternal::ToJsonFunction to_json_fcn =
-        JsonUiInternal::ToJsonFunction([this](fl::Json &json) {
-            this->toJson(json);
-        });
-    mInternal = fl::make_shared<JsonUiInternal>("help", update_fcn, to_json_fcn);
+class JsonUiHelpInternal : public JsonUiInternal {
+  private:
+    fl::string mMarkdownContent;
+    fl::string mGroup;
+
+  public:
+    // Constructor: Initializes the base JsonUiInternal with name, and sets the
+    // help content.
+    JsonUiHelpInternal(const fl::string &name,
+                       const fl::string &markdownContent)
+        : JsonUiInternal(name), mMarkdownContent(markdownContent) {}
+
+    // Override toJson to serialize the help's data directly.
+    void toJson(fl::Json &json) const override {
+        json.set("name", name());
+        json.set("type", "help");
+        json.set("group", groupName());
+        json.set("id", id());
+        json.set("markdownContent", mMarkdownContent);
+    }
+
+    // Override updateInternal. Help components typically don't have update
+    // functionality from the UI, so this can be a no-op.
+    void updateInternal(const fl::Json &json) override {
+        // No update needed for help components
+    }
+
+    // Accessors for the help content.
+    const fl::string &markdownContent() const { return mMarkdownContent; }
+    void setMarkdownContent(const fl::string &markdownContent) {
+        mMarkdownContent = markdownContent;
+    }
+
+    void setGroup(const fl::string &groupName) {
+        mGroup = groupName;
+    }
+};
+
+JsonHelpImpl::JsonHelpImpl(const string &markdownContent) {
+    // Create an instance of the new internal class
+    mInternal = fl::make_shared<JsonUiHelpInternal>("help", markdownContent);
+
+    // Register the component with the JsonUiManager
     addJsonUiComponent(fl::weak_ptr<JsonUiInternal>(mInternal));
 }
 
-JsonHelpImpl::~JsonHelpImpl() { removeJsonUiComponent(fl::weak_ptr<JsonUiInternal>(mInternal)); }
+JsonHelpImpl::~JsonHelpImpl() {
+    // Ensure the component is removed from the global registry
+    removeJsonUiComponent(fl::weak_ptr<JsonUiInternal>(mInternal));
+}
 
 JsonHelpImpl &JsonHelpImpl::Group(const fl::string &name) {
     mInternal->setGroup(name);
     return *this;
 }
 
-const fl::string &JsonHelpImpl::markdownContent() const { return mMarkdownContent; }
-
-void JsonHelpImpl::toJson(fl::Json &json) const {
-    json.set("name", mInternal->name());
-    json.set("type", "help");
-    json.set("group", mInternal->groupName());
-    json.set("id", mInternal->id());
-    json.set("markdownContent", markdownContent());
+const fl::string &JsonHelpImpl::markdownContent() const {
+    return mInternal->markdownContent();
 }
+
+void JsonHelpImpl::toJson(fl::Json &json) const { mInternal->toJson(json); }
 
 const string &JsonHelpImpl::name() const { return mInternal->name(); }
 
-const fl::string &JsonHelpImpl::groupName() const { return mInternal->groupName(); }
+const fl::string &JsonHelpImpl::groupName() const {
+    return mInternal->groupName();
+}
 
-void JsonHelpImpl::setGroup(const fl::string &groupName) { mInternal->setGroup(groupName); }
+void JsonHelpImpl::setGroup(const fl::string &groupName) {
+    mInternal->setGroup(groupName);
+}
+
+int JsonHelpImpl::id() const { return mInternal->id(); }
 
 } // namespace fl
 
