@@ -2,6 +2,7 @@
 
 #include "fl/thread.h"
 #include "fl/int.h"
+#include "fl/align.h"
 
 #if FASTLED_MULTITHREADED
 #include <atomic>
@@ -153,7 +154,7 @@ template <typename T> class AtomicFake {
     }
     
   private:
-    T mValue;
+    FL_ALIGN_AS(T) T mValue;
 };
 
 } // namespace fl
