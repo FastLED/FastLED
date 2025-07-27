@@ -19,11 +19,11 @@
 namespace fl {
 
 // Helper function to extract a vector of floats from a JSON array
-fl::vector<float>&& jsonArrayToFloatVector(const fl::Json& jsonArray) {
+fl::vector<float> jsonArrayToFloatVector(const fl::Json& jsonArray) {
     fl::vector<float> result;
     
     if (!jsonArray.has_value() || !jsonArray.is_array()) {
-        return fl::move(result);
+        return result;
     }
     auto begin_float =  jsonArray.begin_array<float>();
     auto end_float = jsonArray.end_array<float>();
@@ -45,7 +45,7 @@ fl::vector<float>&& jsonArrayToFloatVector(const fl::Json& jsonArray) {
         }
     }
     
-    return fl::move(result);
+    return result;
 }
 
 ScreenMap ScreenMap::Circle(int numLeds, float cm_between_leds,
@@ -108,14 +108,15 @@ bool ScreenMap::ParseJson(const char *jsonStrScreenMap,
         return false;
     }
     
-    // Make sure we're working with a valid object
-    if (!jsonDoc["map"].has_value() || !jsonDoc["map"].is_object()) {
+    // Get the map object
+    auto mapObj = jsonDoc["map"];
+    if (!mapObj.has_value() || !mapObj.is_object()) {
         *err = "Invalid 'map' object in JSON";
         FL_WARN("Invalid 'map' object in JSON");
         return false;
     }
     
-    auto jsonMapOpt = jsonDoc["map"].as_object();
+    auto jsonMapOpt = mapObj.as_object();
     if (!jsonMapOpt || jsonMapOpt->empty()) {
         *err = "Failed to parse map from JSON or map is empty";
         FL_WARN("Failed to parse map from JSON or map is empty");
@@ -251,8 +252,6 @@ void ScreenMap::toJson(const fl::fl_map<string, ScreenMap> &segmentMaps,
         auto& segment = kv.second;
         float diameter = segment.getDiameter();
         
-
-        
         // Create x array
         fl::Json xArray = fl::Json::array();
         for (u16 i = 0; i < segment.getLength(); i++) {
@@ -278,6 +277,10 @@ void ScreenMap::toJson(const fl::fl_map<string, ScreenMap> &segmentMaps,
     
     // Add map object to root
     doc->set("map", mapObj);
+    
+    // Debug output
+    fl::string debugStr = doc->to_string();
+    FL_WARN("ScreenMap::toJson generated JSON: " << debugStr);
 }
 
 void ScreenMap::toJsonStr(const fl::fl_map<string, ScreenMap> &segmentMaps,

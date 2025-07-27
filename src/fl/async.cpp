@@ -60,6 +60,7 @@ size_t AsyncManager::total_active_tasks() const {
 // Public API functions
 
 void asyncrun() {
+    fl::Scheduler::instance().update();
     AsyncManager::instance().update_all();
 }
 
