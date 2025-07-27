@@ -3,14 +3,19 @@
 #include "fl/string.h"
 #include "fl/vector.h"
 #include "fl/sketch_macros.h"
+#include "fl/math.h" // For floor function
 
-// Define INT16_MIN and INT16_MAX if not already defined
+// Define INT16_MIN, INT16_MAX, and UINT8_MAX if not already defined
 #ifndef INT16_MIN
 #define INT16_MIN (-32768)
 #endif
 
 #ifndef INT16_MAX
 #define INT16_MAX 32767
+#endif
+
+#ifndef UINT8_MAX
+#define UINT8_MAX 255
 #endif
 
 #if FASTLED_ENABLE_JSON
@@ -73,30 +78,103 @@ fl::shared_ptr<JsonValue> JsonValue::parse(const fl::string& txt) {
                     return fl::make_shared<JsonValue>(JsonArray{});
                 }
                 
-                // Check if all elements are integers that fit in int16_t
+                // Check what type of optimization we can apply
+                bool allUint8 = true;
                 bool allInt16 = true;
+                bool allBoolean = true;
+                
+                // First pass: determine what types are present
                 for (const auto& item : arr) {
-                    if (!item.is<int32_t>() && !item.is<int64_t>()) {
+                    // Check if all items are numeric
+                    if (!item.is<int32_t>() && !item.is<int64_t>() && !item.is<double>()) {
+                        // Non-numeric value found, no optimization possible
+                        allUint8 = false;
                         allInt16 = false;
+                        allBoolean = false;
                         break;
                     }
-                    int64_t val = item.is<int32_t>() ? item.as<int32_t>() : item.as<int64_t>();
-                    if (val < INT16_MIN || val > INT16_MAX) {
-                        allInt16 = false;
-                        break;
+                    
+                    // Check if all items are integers
+                    if (item.is<double>()) {
+                        allBoolean = false;
+                        
+                        // Check if this float value is actually 1.0 or 0.0 (could be boolean)
+                        double val = item.as<double>();
+                        if (val != 0.0 && val != 1.0) {
+                            allBoolean = false;
+                        }
+                        
+                        // Check if this could fit in integer types
+                        if (val < 0 || val > UINT8_MAX || val != floor(val)) {
+                            allUint8 = false;
+                        }
+                        if (val < INT16_MIN || val > INT16_MAX || val != floor(val)) {
+                            allInt16 = false;
+                        }
+                    } else {
+                        // Integer value
+                        int64_t val = item.is<int32_t>() ? item.as<int32_t>() : item.as<int64_t>();
+                        
+                        // Check boolean (0 or 1)
+                        if (val != 0 && val != 1) {
+                            allBoolean = false;
+                        }
+                        
+                        // Check uint8 range
+                        if (val < 0 || val > UINT8_MAX) {
+                            allUint8 = false;
+                        }
+                        
+                        // Check int16 range
+                        if (val < INT16_MIN || val > INT16_MAX) {
+                            allInt16 = false;
+                        }
                     }
                 }
                 
-                if (allInt16) {
-                    // Create specialized int16_t vector for audio data
+                // Apply the most appropriate optimization
+                if (allBoolean && arr.size() > 1) {
+                    // All values are 0 or 1 - use a compact bit representation
+                    // For now, we'll use uint8_t vector for boolean arrays
+                    fl::vector<uint8_t> byteData;
+                    for (const auto& item : arr) {
+                        if (item.is<double>()) {
+                            double val = item.as<double>();
+                            byteData.push_back(static_cast<uint8_t>(val));
+                        } else {
+                            int64_t val = item.is<int32_t>() ? item.as<int32_t>() : item.as<int64_t>();
+                            byteData.push_back(static_cast<uint8_t>(val));
+                        }
+                    }
+                    return fl::make_shared<JsonValue>(fl::move(byteData));
+                } else if (allUint8) {
+                    // All values fit in uint8_t - most compact representation
+                    fl::vector<uint8_t> byteData;
+                    for (const auto& item : arr) {
+                        if (item.is<double>()) {
+                            double val = item.as<double>();
+                            byteData.push_back(static_cast<uint8_t>(val));
+                        } else {
+                            int64_t val = item.is<int32_t>() ? item.as<int32_t>() : item.as<int64_t>();
+                            byteData.push_back(static_cast<uint8_t>(val));
+                        }
+                    }
+                    return fl::make_shared<JsonValue>(fl::move(byteData));
+                } else if (allInt16) {
+                    // All values fit in int16_t - good compression
                     fl::vector<int16_t> audioData;
                     for (const auto& item : arr) {
-                        int64_t val = item.is<int32_t>() ? item.as<int32_t>() : item.as<int64_t>();
-                        audioData.push_back(static_cast<int16_t>(val));
+                        if (item.is<double>()) {
+                            double val = item.as<double>();
+                            audioData.push_back(static_cast<int16_t>(val));
+                        } else {
+                            int64_t val = item.is<int32_t>() ? item.as<int32_t>() : item.as<int64_t>();
+                            audioData.push_back(static_cast<int16_t>(val));
+                        }
                     }
                     return fl::make_shared<JsonValue>(fl::move(audioData));
                 } else {
-                    // Regular array conversion
+                    // No optimization possible - use regular array
                     JsonArray regularArr;
                     for (const auto& item : arr) {
                         regularArr.push_back(convert(item));

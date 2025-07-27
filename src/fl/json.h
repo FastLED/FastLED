@@ -8,6 +8,7 @@
 #include "fl/unique_ptr.h"
 #include "fl/shared_ptr.h"
 #include "fl/functional.h"
+#include "fl/str.h" // For StringFormatter
 
 #include "fl/sketch_macros.h"
 
@@ -99,13 +100,28 @@ struct IntConversionVisitor {
     
     void operator()(const fl::string& str) {
         // NEW INSTRUCTIONS: AUTO CONVERT STRING TO INT
-        // Try to parse the string as an integer
-        char* endptr = nullptr;
-        // Use strtoll for maximum range support
-        long long val = strtoll(str.c_str(), &endptr, 10);
-        // Check if the entire string was consumed (valid integer)
-        if (endptr != str.c_str() && *endptr == '\0') {
-            result = static_cast<IntType>(val);
+        // Try to parse the string as an integer using FastLED's StringFormatter
+        // Validate by checking if string contains only digits (and optional +/- sign)
+        bool isValidInt = true;
+        fl::size startPos = 0;
+        
+        // Check for sign
+        if (str.length() > 0 && (str[0] == '+' || str[0] == '-')) {
+            startPos = 1;
+        }
+        
+        // Check that all remaining characters are digits
+        for (fl::size i = startPos; i < str.length(); i++) {
+            if (!StringFormatter::isDigit(str[i])) {
+                isValidInt = false;
+                break;
+            }
+        }
+        
+        // If it looks like a valid integer, try to parse it
+        if (isValidInt && str.length() > 0) {
+            int parsed = StringFormatter::parseInt(str.c_str(), str.length());
+            result = static_cast<IntType>(parsed);
         }
     }
     
@@ -141,13 +157,28 @@ struct IntConversionVisitor<int64_t> {
     
     void operator()(const fl::string& str) {
         // NEW INSTRUCTIONS: AUTO CONVERT STRING TO INT
-        // Try to parse the string as an integer
-        char* endptr = nullptr;
-        // Use strtoll for maximum range support
-        long long val = strtoll(str.c_str(), &endptr, 10);
-        // Check if the entire string was consumed (valid integer)
-        if (endptr != str.c_str() && *endptr == '\0') {
-            result = static_cast<int64_t>(val);
+        // Try to parse the string as an integer using FastLED's StringFormatter
+        // Validate by checking if string contains only digits (and optional +/- sign)
+        bool isValidInt = true;
+        fl::size startPos = 0;
+        
+        // Check for sign
+        if (str.length() > 0 && (str[0] == '+' || str[0] == '-')) {
+            startPos = 1;
+        }
+        
+        // Check that all remaining characters are digits
+        for (fl::size i = startPos; i < str.length(); i++) {
+            if (!StringFormatter::isDigit(str[i])) {
+                isValidInt = false;
+                break;
+            }
+        }
+        
+        // If it looks like a valid integer, try to parse it
+        if (isValidInt && str.length() > 0) {
+            int parsed = StringFormatter::parseInt(str.c_str(), str.length());
+            result = static_cast<int64_t>(parsed);
         }
     }
     
@@ -190,13 +221,55 @@ struct FloatConversionVisitor {
     
     void operator()(const fl::string& str) {
         // NEW INSTRUCTIONS: AUTO CONVERT STRING TO FLOAT
-        // Try to parse the string as a float
-        char* endptr = nullptr;
-        // Use strtod for maximum precision support
-        double val = strtod(str.c_str(), &endptr);
-        // Check if the entire string was consumed (valid float)
-        if (endptr != str.c_str() && *endptr == '\0') {
-            result = static_cast<FloatType>(val);
+        // Try to parse the string as a float using FastLED's StringFormatter
+        // Validate by checking if string contains valid float characters
+        bool isValidFloat = true;
+        bool hasDecimal = false;
+        fl::size startPos = 0;
+        
+        // Check for sign
+        if (str.length() > 0 && (str[0] == '+' || str[0] == '-')) {
+            startPos = 1;
+        }
+        
+        // Check that all remaining characters are valid for a float
+        for (fl::size i = startPos; i < str.length(); i++) {
+            char c = str[i];
+            if (c == '.') {
+                if (hasDecimal) {
+                    // Multiple decimal points
+                    isValidFloat = false;
+                    break;
+                }
+                hasDecimal = true;
+            } else if (!StringFormatter::isDigit(c) && c != 'e' && c != 'E') {
+                isValidFloat = false;
+                break;
+            }
+        }
+        
+        // If it looks like a valid float, try to parse it
+        if (isValidFloat && str.length() > 0) {
+            // For simple cases, we can use a more precise approach
+            // Check if it's a simple decimal number
+            bool isSimpleDecimal = true;
+            for (fl::size i = startPos; i < str.length(); i++) {
+                char c = str[i];
+                if (c != '.' && !StringFormatter::isDigit(c)) {
+                    isSimpleDecimal = false;
+                    break;
+                }
+            }
+            
+            if (isSimpleDecimal) {
+                // For simple decimals, we can do a more direct conversion
+                float parsed = StringFormatter::parseFloat(str.c_str(), str.length());
+                result = static_cast<FloatType>(parsed);
+            } else {
+                // For complex floats (with exponents), use the standard approach
+                float parsed = StringFormatter::parseFloat(str.c_str(), str.length());
+                result = static_cast<FloatType>(parsed);
+            }
         }
     }
     
@@ -232,13 +305,55 @@ struct FloatConversionVisitor<double> {
     
     void operator()(const fl::string& str) {
         // NEW INSTRUCTIONS: AUTO CONVERT STRING TO FLOAT
-        // Try to parse the string as a float
-        char* endptr = nullptr;
-        // Use strtod for maximum precision support
-        double val = strtod(str.c_str(), &endptr);
-        // Check if the entire string was consumed (valid float)
-        if (endptr != str.c_str() && *endptr == '\0') {
-            result = val;
+        // Try to parse the string as a float using FastLED's StringFormatter
+        // Validate by checking if string contains valid float characters
+        bool isValidFloat = true;
+        bool hasDecimal = false;
+        fl::size startPos = 0;
+        
+        // Check for sign
+        if (str.length() > 0 && (str[0] == '+' || str[0] == '-')) {
+            startPos = 1;
+        }
+        
+        // Check that all remaining characters are valid for a float
+        for (fl::size i = startPos; i < str.length(); i++) {
+            char c = str[i];
+            if (c == '.') {
+                if (hasDecimal) {
+                    // Multiple decimal points
+                    isValidFloat = false;
+                    break;
+                }
+                hasDecimal = true;
+            } else if (!StringFormatter::isDigit(c) && c != 'e' && c != 'E') {
+                isValidFloat = false;
+                break;
+            }
+        }
+        
+        // If it looks like a valid float, try to parse it
+        if (isValidFloat && str.length() > 0) {
+            // For simple cases, we can use a more precise approach
+            // Check if it's a simple decimal number
+            bool isSimpleDecimal = true;
+            for (fl::size i = startPos; i < str.length(); i++) {
+                char c = str[i];
+                if (c != '.' && !StringFormatter::isDigit(c)) {
+                    isSimpleDecimal = false;
+                    break;
+                }
+            }
+            
+            if (isSimpleDecimal) {
+                // For simple decimals, we can do a more direct conversion
+                float parsed = StringFormatter::parseFloat(str.c_str(), str.length());
+                result = static_cast<double>(parsed);
+            } else {
+                // For complex floats (with exponents), use the standard approach
+                float parsed = StringFormatter::parseFloat(str.c_str(), str.length());
+                result = static_cast<double>(parsed);
+            }
         }
     }
     
@@ -303,7 +418,8 @@ struct JsonValue {
         fl::string,      // string
         JsonArray,           // array
         JsonObject,          // object
-        fl::vector<int16_t>  // audio data (specialized array of int16_t)
+        fl::vector<int16_t>, // audio data (specialized array of int16_t)
+        fl::vector<uint8_t>  // byte data (specialized array of uint8_t)
     >;
 
     typedef JsonValue::iterator iterator;
@@ -335,6 +451,14 @@ struct JsonValue {
     
     JsonValue(fl::vector<int16_t>&& audio) : data(fl::move(audio)) {
         FASTLED_WARN("Created JsonValue with moved audio data");
+    }
+    
+    JsonValue(const fl::vector<uint8_t>& bytes) : data(bytes) {
+        FASTLED_WARN("Created JsonValue with byte data");
+    }
+    
+    JsonValue(fl::vector<uint8_t>&& bytes) : data(fl::move(bytes)) {
+        FASTLED_WARN("Created JsonValue with moved byte data");
     }
 
     JsonValue& operator=(const JsonValue& other) {
@@ -385,6 +509,11 @@ struct JsonValue {
     
     JsonValue& operator=(fl::vector<int16_t> audio) {
         data = fl::move(audio);
+        return *this;
+    }
+    
+    JsonValue& operator=(fl::vector<uint8_t> bytes) {
+        data = fl::move(bytes);
         return *this;
     }
 
@@ -439,6 +568,10 @@ struct JsonValue {
         FASTLED_WARN("is_audio called, tag=" << data.tag());
         return data.is<fl::vector<int16_t>>();
     }
+    bool is_bytes() const noexcept {
+        FASTLED_WARN("is_bytes called, tag=" << data.tag());
+        return data.is<fl::vector<uint8_t>>();
+    }
 
     // Safe extractors (return optional values, not references)
     fl::optional<bool> as_bool() {
@@ -491,6 +624,11 @@ struct JsonValue {
         auto ptr = data.ptr<fl::vector<int16_t>>();
         return ptr ? fl::optional<fl::vector<int16_t>>(*ptr) : fl::nullopt;
     }
+    
+    fl::optional<fl::vector<uint8_t>> as_bytes() {
+        auto ptr = data.ptr<fl::vector<uint8_t>>();
+        return ptr ? fl::optional<fl::vector<uint8_t>>(*ptr) : fl::nullopt;
+    }
 
     // Const overloads
     fl::optional<bool> as_bool() const {
@@ -542,6 +680,11 @@ struct JsonValue {
     fl::optional<fl::vector<int16_t>> as_audio() const {
         auto ptr = data.ptr<fl::vector<int16_t>>();
         return ptr ? fl::optional<fl::vector<int16_t>>(*ptr) : fl::nullopt;
+    }
+    
+    fl::optional<fl::vector<uint8_t>> as_bytes() const {
+        auto ptr = data.ptr<fl::vector<uint8_t>>();
+        return ptr ? fl::optional<fl::vector<uint8_t>>(*ptr) : fl::nullopt;
     }
     
     // Generic getter template method
@@ -911,6 +1054,7 @@ public:
     bool is_array() const { return m_value && m_value->is_array(); }
     bool is_object() const { return m_value && m_value->is_object(); }
     bool is_audio() const { return m_value && m_value->is_audio(); }
+    bool is_bytes() const { return m_value && m_value->is_bytes(); }
 
     // Safe extractors
     fl::optional<bool> as_bool() const { return m_value ? m_value->as_bool() : fl::nullopt; }
@@ -942,6 +1086,7 @@ public:
     fl::optional<JsonArray> as_array() const { return m_value ? m_value->as_array() : fl::nullopt; }
     fl::optional<JsonObject> as_object() const { return m_value ? m_value->as_object() : fl::nullopt; }
     fl::optional<fl::vector<int16_t>> as_audio() const { return m_value ? m_value->as_audio() : fl::nullopt; }
+    fl::optional<fl::vector<uint8_t>> as_bytes() const { return m_value ? m_value->as_bytes() : fl::nullopt; }
 
     template<typename T>
     fl::optional<T> as() {

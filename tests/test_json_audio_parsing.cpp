@@ -5,12 +5,13 @@ using namespace fl;
 
 TEST_CASE("Json Audio Data Parsing") {
     SUBCASE("Array of int16 values should become audio data") {
-        // Create JSON with array of values that fit in int16_t
+        // Create JSON with array of values that fit in int16_t but not uint8_t
         fl::string jsonStr = "[100, -200, 32767, -32768, 0]";
         Json json = Json::parse(jsonStr);
         
         CHECK(json.is_audio());
         CHECK_FALSE(json.is_array()); // Should not be regular array anymore
+        CHECK_FALSE(json.is_bytes()); // Should not be byte data
         CHECK_FALSE(json.is_int());
         CHECK_FALSE(json.is_double());
         CHECK_FALSE(json.is_string());
@@ -28,6 +29,27 @@ TEST_CASE("Json Audio Data Parsing") {
         CHECK_EQ((*audioData)[4], 0);
     }
     
+    SUBCASE("Array with boolean values should become byte data, not audio") {
+        // Create JSON with array of boolean values (0s and 1s)
+        fl::string jsonStr = "[1, 0, 1, 1, 0]";
+        Json json = Json::parse(jsonStr);
+        
+        // Should become byte data, not audio data
+        CHECK(json.is_bytes());
+        CHECK_FALSE(json.is_audio());
+        CHECK_FALSE(json.is_array()); // Should not be regular array anymore
+        CHECK_FALSE(json.is_int());
+        CHECK_FALSE(json.is_double());
+        CHECK_FALSE(json.is_string());
+        CHECK_FALSE(json.is_bool());
+        CHECK_FALSE(json.is_null());
+        
+        // Test extraction of byte data
+        fl::optional<fl::vector<uint8_t>> byteData = json.as_bytes();
+        REQUIRE(byteData);
+        CHECK_EQ(byteData->size(), 5);
+    }
+    
     SUBCASE("Array with values outside int16 range should remain regular array") {
         // Create JSON with array containing values outside int16_t range
         fl::string jsonStr = "[100, -200, 32768, -32769, 0]"; // 32768 and -32769 exceed int16_t range
@@ -35,6 +57,7 @@ TEST_CASE("Json Audio Data Parsing") {
         
         CHECK(json.is_array());
         CHECK_FALSE(json.is_audio());
+        CHECK_FALSE(json.is_bytes());
         CHECK_FALSE(json.is_int());
         CHECK_FALSE(json.is_double());
         CHECK_FALSE(json.is_string());
@@ -54,6 +77,7 @@ TEST_CASE("Json Audio Data Parsing") {
         
         CHECK(json.is_array());
         CHECK_FALSE(json.is_audio());
+        CHECK_FALSE(json.is_bytes());
         CHECK_FALSE(json.is_int());
         CHECK_FALSE(json.is_double());
         CHECK_FALSE(json.is_string());
@@ -73,6 +97,7 @@ TEST_CASE("Json Audio Data Parsing") {
         
         CHECK(json.is_array());
         CHECK_FALSE(json.is_audio());
+        CHECK_FALSE(json.is_bytes());
         CHECK_FALSE(json.is_int());
         CHECK_FALSE(json.is_double());
         CHECK_FALSE(json.is_string());
@@ -92,6 +117,7 @@ TEST_CASE("Json Audio Data Parsing") {
         
         CHECK(json.is_array());
         CHECK_FALSE(json.is_audio());
+        CHECK_FALSE(json.is_bytes());
         CHECK_FALSE(json.is_int());
         CHECK_FALSE(json.is_double());
         CHECK_FALSE(json.is_string());
