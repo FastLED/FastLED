@@ -25,8 +25,6 @@ namespace fl {
 
 // Forward declarations
 struct Value;
-class ObjectIterator;
-class ConstObjectIterator;
 
 // Define Array and Object as pointers to avoid incomplete type issues
 // We'll use heap-allocated containers for these to avoid alignment issues
@@ -35,105 +33,6 @@ using Object = fl::HashMap<fl::string, fl::shared_ptr<Value>>;
 
 // Function to get a reference to a static null Value
 Value& get_null_value();
-
-// Iterator for JSON objects
-class ObjectIterator {
-private:
-    Object::iterator m_iter;
-    
-public:
-    ObjectIterator() = default;
-    ObjectIterator(Object::iterator iter) : m_iter(iter) {}
-    
-    // Getter for const iterator conversion
-    Object::iterator get_iter() const { return m_iter; }
-    
-    ObjectIterator& operator++() {
-        ++m_iter;
-        return *this;
-    }
-    
-    ObjectIterator operator++(int) {
-        ObjectIterator tmp(*this);
-        ++(*this);
-        return tmp;
-    }
-    
-    bool operator!=(const ObjectIterator& other) const {
-        return m_iter != other.m_iter;
-    }
-    
-    bool operator==(const ObjectIterator& other) const {
-        return m_iter == other.m_iter;
-    }
-    
-    struct KeyValue {
-        fl::string first;
-        Value& second;
-        
-        KeyValue(const fl::string& key, fl::shared_ptr<Value>& value_ptr) 
-            : first(key), second(value_ptr ? *value_ptr : get_null_value()) {}
-    };
-    
-    KeyValue operator*() const {
-        return KeyValue(m_iter->first, m_iter->second);
-    }
-    
-    // Remove operator-> to avoid static variable issues
-};
-
-// Iterator for JSON objects (const version)
-class ConstObjectIterator {
-private:
-    Object::const_iterator m_iter;
-    
-public:
-    ConstObjectIterator() = default;
-    ConstObjectIterator(Object::const_iterator iter) : m_iter(iter) {}
-    
-    // Factory method for conversion from ObjectIterator
-    static ConstObjectIterator from_object_iterator(const ObjectIterator& other) {
-        return ConstObjectIterator(other.get_iter());
-    }
-    
-    // Factory method for conversion from Object::iterator
-    static ConstObjectIterator from_iterator(Object::const_iterator iter) {
-        return ConstObjectIterator(iter);
-    }
-    
-    ConstObjectIterator& operator++() {
-        ++m_iter;
-        return *this;
-    }
-    
-    ConstObjectIterator operator++(int) {
-        ConstObjectIterator tmp(*this);
-        ++(*this);
-        return tmp;
-    }
-    
-    bool operator!=(const ConstObjectIterator& other) const {
-        return m_iter != other.m_iter;
-    }
-    
-    bool operator==(const ConstObjectIterator& other) const {
-        return m_iter == other.m_iter;
-    }
-    
-    struct KeyValue {
-        fl::string first;
-        const Value& second;
-        
-        KeyValue(const fl::string& key, const fl::shared_ptr<Value>& value_ptr) 
-            : first(key), second(value_ptr ? *value_ptr : get_null_value()) {}
-    };
-    
-    KeyValue operator*() const {
-        return KeyValue(m_iter->first, m_iter->second);
-    }
-    
-    // Remove operator-> to avoid static variable issues
-};
 
 // AI - pay attention to this - implementing visitor pattern
 template<typename T>
@@ -169,6 +68,10 @@ struct DefaultValueVisitor {
 
 // The JSON node
 struct Value {
+    // Forward declarations for nested iterator classes
+    class iterator;
+    class const_iterator;
+    
     // The variant holds exactly one of these alternatives
     using variant_t = fl::Variant<
         fl::nullptr_t,   // null
@@ -179,6 +82,9 @@ struct Value {
         Array,           // array
         Object           // object
     >;
+
+    typedef Value::iterator iterator;
+    typedef Value::const_iterator const_iterator;
 
     variant_t data;
 
@@ -347,41 +253,49 @@ struct Value {
     }
 
     // Iterator support for objects
-    ObjectIterator begin() {
+    iterator begin() {
         if (!is_object()) {
             static Object empty_obj;
-            return ObjectIterator(empty_obj.begin());
+            return iterator(empty_obj.begin());
         }
         auto ptr = data.ptr<Object>();
-        return ObjectIterator(ptr->begin());
+        return iterator(ptr->begin());
     }
     
-    ObjectIterator end() {
+    iterator end() {
         if (!is_object()) {
             static Object empty_obj;
-            return ObjectIterator(empty_obj.end());
+            return iterator(empty_obj.end());
         }
         auto ptr = data.ptr<Object>();
-        return ObjectIterator(ptr->end());
+        return iterator(ptr->end());
     }
     
-    ConstObjectIterator begin() const {
+    const_iterator begin() const {
         if (!is_object()) {
             static Object empty_obj;
-            return ConstObjectIterator::from_iterator(empty_obj.begin());
+            return const_iterator::from_iterator(empty_obj.begin());
         }
-        auto ptr = data.ptr<Object>();
-        return ConstObjectIterator::from_iterator(ptr->begin());
+        auto ptr = data.ptr<const Object>();
+        if (!ptr) return const_iterator::from_iterator(Object().begin());
+        return const_iterator::from_iterator(ptr->begin());
     }
     
-    ConstObjectIterator end() const {
+    const_iterator end() const {
         if (!is_object()) {
             static Object empty_obj;
-            return ConstObjectIterator::from_iterator(empty_obj.end());
+            return const_iterator::from_iterator(empty_obj.end());
         }
-        auto ptr = data.ptr<Object>();
-        return ConstObjectIterator::from_iterator(ptr->end());
+        auto ptr = data.ptr<const Object>();
+        if (!ptr) return const_iterator::from_iterator(Object().end());
+        return const_iterator::from_iterator(ptr->end());
     }
+    
+    // Free functions for range-based for loops
+    friend iterator begin(Value& v) { return v.begin(); }
+    friend iterator end(Value& v) { return v.end(); }
+    friend const_iterator begin(const Value& v) { return v.begin(); }
+    friend const_iterator end(const Value& v) { return v.end(); }
 
     // Indexing for fluid chaining
     Value& operator[](size_t idx) {
@@ -475,6 +389,106 @@ struct Value {
 
     // Parsing factory (FLArduinoJson implementation)
     static fl::shared_ptr<Value> parse(const fl::string &txt);
+    
+    // Iterator support for objects
+    class iterator {
+    private:
+        Object::iterator m_iter;
+        
+    public:
+        iterator() = default;
+        iterator(Object::iterator iter) : m_iter(iter) {}
+        
+        // Getter for const iterator conversion
+        Object::iterator get_iter() const { return m_iter; }
+        
+        iterator& operator++() {
+            ++m_iter;
+            return *this;
+        }
+        
+        iterator operator++(int) {
+            iterator tmp(*this);
+            ++(*this);
+            return tmp;
+        }
+        
+        bool operator!=(const iterator& other) const {
+            return m_iter != other.m_iter;
+        }
+        
+        bool operator==(const iterator& other) const {
+            return m_iter == other.m_iter;
+        }
+        
+        struct KeyValue {
+            fl::string first;
+            Value& second;
+            
+            KeyValue(const fl::string& key, const fl::shared_ptr<Value>& value_ptr) 
+                : first(key), second(value_ptr ? *value_ptr : get_null_value()) {}
+        };
+        
+        KeyValue operator*() const {
+            return KeyValue(m_iter->first, m_iter->second);
+        }
+        
+        // Remove operator-> to avoid static variable issues
+    };
+    
+    // Iterator for JSON objects (const version)
+    class const_iterator {
+    private:
+        Object::const_iterator m_iter;
+        
+    public:
+        const_iterator() = default;
+        const_iterator(Object::const_iterator iter) : m_iter(iter) {}
+        
+        // Factory method for conversion from iterator
+        static const_iterator from_object_iterator(const iterator& other) {
+            Object::const_iterator const_iter(other.get_iter());
+            return const_iterator(const_iter);
+        }
+        
+        // Factory method for conversion from Object::iterator
+        static const_iterator from_iterator(Object::const_iterator iter) {
+            return const_iterator(iter);
+        }
+        
+        const_iterator& operator++() {
+            ++m_iter;
+            return *this;
+        }
+        
+        const_iterator operator++(int) {
+            const_iterator tmp(*this);
+            ++(*this);
+            return tmp;
+        }
+        
+        bool operator!=(const const_iterator& other) const {
+            return m_iter != other.m_iter;
+        }
+        
+        bool operator==(const const_iterator& other) const {
+            return m_iter == other.m_iter;
+        }
+        
+        struct KeyValue {
+            fl::string first;
+            const Value& second;
+            
+            KeyValue(const fl::string& key, const fl::shared_ptr<Value>& value_ptr) 
+                : first(key), second(value_ptr ? *value_ptr : get_null_value()) {}
+        };
+        
+        KeyValue operator*() const {
+            return KeyValue(m_iter->first, m_iter->second);
+        }
+        
+        // Remove operator-> to avoid static variable issues
+    };
 };
 
 // Function to get a reference to a static null Value
@@ -606,22 +620,28 @@ public:
     }
 
     // Iterator support for objects
-    ObjectIterator begin() { 
-        if (!m_value) return ObjectIterator(Object{}.begin());
+    Value::iterator begin() { 
+        if (!m_value) return Value::iterator(Object().begin());
         return m_value->begin(); 
     }
-    ObjectIterator end() { 
-        if (!m_value) return ObjectIterator(Object{}.end());
+    Value::iterator end() { 
+        if (!m_value) return Value::iterator(Object().end());
         return m_value->end(); 
     }
-    ConstObjectIterator begin() const { 
-        if (!m_value) return ConstObjectIterator::from_iterator(Object{}.begin());
-        return ConstObjectIterator::from_iterator(m_value->begin().get_iter()); 
+    Value::const_iterator begin() const { 
+        if (!m_value) return Value::const_iterator::from_iterator(Object().begin());
+        return Value::const_iterator::from_object_iterator(m_value->begin()); 
     }
-    ConstObjectIterator end() const { 
-        if (!m_value) return ConstObjectIterator::from_iterator(Object{}.end());
-        return ConstObjectIterator::from_iterator(m_value->end().get_iter()); 
+    Value::const_iterator end() const { 
+        if (!m_value) return Value::const_iterator::from_iterator(Object().end());
+        return Value::const_iterator::from_object_iterator(m_value->end()); 
     }
+    
+    // Free functions for range-based for loops
+    friend Value::iterator begin(Json& j) { return j.begin(); }
+    friend Value::iterator end(Json& j) { return j.end(); }
+    friend Value::const_iterator begin(const Json& j) { return j.begin(); }
+    friend Value::const_iterator end(const Json& j) { return j.end(); }
 
     // Object iteration support (needed for screenmap conversion)
     fl::vector<fl::string> keys() const {

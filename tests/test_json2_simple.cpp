@@ -28,10 +28,20 @@ TEST_CASE("Simple JSON test") {
     string jsonStr = obj.to_string();
     CHECK_FALSE(jsonStr.empty());
     
+    // Print the serialized JSON for debugging
+    printf("Serialized JSON: %s\n", jsonStr.c_str());
+    
     // Test parsing
     fl::Json parsed = fl::Json::parse(jsonStr);
     CHECK(parsed.has_value());
     CHECK(parsed.is_object());
+    
+    // Print parsed object keys for debugging
+    auto keys = parsed.keys();
+    printf("Parsed object has %zu keys:\n", keys.size());
+    for (const auto& key : keys) {
+        printf("  %s\n", key.c_str());
+    }
     
     // Test accessing values
     CHECK(parsed.contains("key1"));
