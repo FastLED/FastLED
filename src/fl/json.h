@@ -66,6 +66,30 @@ struct DefaultValueVisitor {
     }
 };
 
+// Visitor for converting values to int
+struct IntConversionVisitor {
+    fl::optional<int64_t> result;
+    
+    template<typename U>
+    void accept(const U& value) {
+        // Dispatch to the correct operator() overload
+        (*this)(value);
+    }
+    
+    void operator()(const int64_t& value) {
+        result = value;
+    }
+    
+    void operator()(const bool& value) {
+        result = value ? 1 : 0;
+    }
+    
+    template<typename T>
+    void operator()(const T&) {
+        // Do nothing for other types
+    }
+};
+
 // The JSON node
 struct JsonValue {
     // Forward declarations for nested iterator classes
@@ -182,7 +206,7 @@ struct JsonValue {
     }
     bool is_int() const noexcept { 
         FASTLED_WARN("is_int called, tag=" << data.tag());
-        return data.is<int64_t>(); 
+        return data.is<int64_t>() || data.is<bool>(); 
     }
     bool is_double() const noexcept { 
         FASTLED_WARN("is_double called, tag=" << data.tag());
@@ -208,8 +232,9 @@ struct JsonValue {
     }
     
     fl::optional<int64_t> as_int() {
-        auto ptr = data.ptr<int64_t>();
-        return ptr ? fl::optional<int64_t>(*ptr) : fl::nullopt;
+        IntConversionVisitor visitor;
+        data.visit(visitor);
+        return visitor.result;
     }
     
     fl::optional<double> as_double() {
@@ -239,8 +264,9 @@ struct JsonValue {
     }
     
     fl::optional<int64_t> as_int() const {
-        auto ptr = data.ptr<int64_t>();
-        return ptr ? fl::optional<int64_t>(*ptr) : fl::nullopt;
+        IntConversionVisitor visitor;
+        data.visit(visitor);
+        return visitor.result;
     }
     
     fl::optional<double> as_double() const {
@@ -624,7 +650,7 @@ public:
     // Type queries
     bool is_null() const { return m_value ? m_value->is_null() : true; }
     bool is_bool() const { return m_value && m_value->is_bool(); }
-    bool is_int() const { return m_value && m_value->is_int(); }
+    bool is_int() const { return m_value && (m_value->is_int() || m_value->is_bool()); }
     bool is_double() const { return m_value && m_value->is_double(); }
     bool is_string() const { return m_value && m_value->is_string(); }
     bool is_array() const { return m_value && m_value->is_array(); }
@@ -632,7 +658,10 @@ public:
 
     // Safe extractors
     fl::optional<bool> as_bool() const { return m_value ? m_value->as_bool() : fl::nullopt; }
-    fl::optional<int64_t> as_int() const { return m_value ? m_value->as_int() : fl::nullopt; }
+    fl::optional<int64_t> as_int() const { 
+        if (!m_value) return fl::nullopt;
+        return m_value->as_int(); 
+    }
     fl::optional<double> as_double() const { return m_value ? m_value->as_double() : fl::nullopt; }
     fl::optional<fl::string> as_string() const { return m_value ? m_value->as_string() : fl::nullopt; }
     fl::optional<JsonArray> as_array() const { return m_value ? m_value->as_array() : fl::nullopt; }
