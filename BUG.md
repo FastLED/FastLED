@@ -1,3 +1,47 @@
+# Bug Investigation: JSON Not Reaching Browser UI
+
+After analyzing the codebase and logs, here are three possible causes for why JSON is not reaching the browser UI:
+
+## 1. UI System Initialization Issue
+
+The logs show that UI elements are being processed in the C++ code (`src/platforms/wasm/ui.cpp`), but they're appearing as empty objects. The `ensureWasmUiSystemInitialized()` function in `ui.cpp` is responsible for setting up the UI system, but there may be an issue with its initialization or with the async-aware UI update handler it creates.
+
+Key areas to check:
+- Whether `ensureWasmUiSystemInitialized()` is being called at the right time
+- Whether the `JsonUiUpdateOutput` handler is properly registered
+- Whether the system is correctly detecting UI element definitions vs. state updates
+
+## 2. JSON Parsing/Format Problem
+
+The logs in BUG.md show that UI elements are being passed as empty objects (`[{}, {}, {}, {}, {}]`). This suggests that the JSON data being constructed in the C++ code before being sent to JavaScript may be malformed or missing the expected structure.
+
+Key areas to check:
+- How UI elements are serialized in the C++ code before being sent via `jsUpdateUiComponents`
+- Whether the JSON structure matches what the JavaScript `addUiElements` function expects
+- Whether there's a mismatch in how groups and individual elements are being serialized
+
+## 3. Callback Registration Issue
+
+The `FastLED_onUiElementsAdded` callback in JavaScript (`src/platforms/wasm/compiler/modules/fastled_callbacks.js`) might not be properly registered or called. This could be due to timing issues or a mismatch in function signatures.
+
+Key areas to check:
+- Whether `globalThis.FastLED_onUiElementsAdded` is properly assigned before the C++ code tries to call it
+- Whether the callback signature matches what the C++ code expects
+- Whether there are any errors in the JavaScript console that might indicate why the callback isn't working properly
+
+## Recommendation
+
+To resolve this issue, I recommend:
+
+1. Adding more detailed logging in the C++ code to see exactly what JSON is being constructed and sent
+2. Verifying that the UI elements are properly populated before being converted to JSON
+3. Checking the JavaScript console for any errors during UI element processing
+4. Ensuring that the callback registration happens before any UI elements are sent from C++
+
+
+############# RAW LOG ###################
+
+
 0.4s src/platforms/wasm/ui.cpp(140): *** ROUTING UI ELEMENT DEFINITIONS DIRECTLY TO UI MANAGER
 0.5s UI elements added: [{},{},{},{},{}]
 0.5s data: {}
