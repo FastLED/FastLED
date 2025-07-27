@@ -42,6 +42,7 @@ private:
     Object::iterator m_iter;
     
 public:
+    ObjectIterator() = default;
     ObjectIterator(Object::iterator iter) : m_iter(iter) {}
     
     // Getter for const iterator conversion
@@ -52,8 +53,18 @@ public:
         return *this;
     }
     
+    ObjectIterator operator++(int) {
+        ObjectIterator tmp(*this);
+        ++(*this);
+        return tmp;
+    }
+    
     bool operator!=(const ObjectIterator& other) const {
         return m_iter != other.m_iter;
+    }
+    
+    bool operator==(const ObjectIterator& other) const {
+        return m_iter == other.m_iter;
     }
     
     struct KeyValue {
@@ -77,6 +88,7 @@ private:
     Object::const_iterator m_iter;
     
 public:
+    ConstObjectIterator() = default;
     ConstObjectIterator(Object::const_iterator iter) : m_iter(iter) {}
     
     // Factory method for conversion from ObjectIterator
@@ -94,8 +106,18 @@ public:
         return *this;
     }
     
+    ConstObjectIterator operator++(int) {
+        ConstObjectIterator tmp(*this);
+        ++(*this);
+        return tmp;
+    }
+    
     bool operator!=(const ConstObjectIterator& other) const {
         return m_iter != other.m_iter;
+    }
+    
+    bool operator==(const ConstObjectIterator& other) const {
+        return m_iter == other.m_iter;
     }
     
     struct KeyValue {
@@ -310,6 +332,19 @@ struct Value {
         auto ptr = data.ptr<Object>();
         return ptr ? fl::optional<Object>(*ptr) : fl::nullopt;
     }
+    
+    // Generic getter template method
+    template<typename T>
+    fl::optional<T> get() const {
+        auto ptr = data.ptr<T>();
+        return ptr ? fl::optional<T>(*ptr) : fl::nullopt;
+    }
+    
+    template<typename T>
+    fl::optional<T> get() {
+        auto ptr = data.ptr<T>();
+        return ptr ? fl::optional<T>(*ptr) : fl::nullopt;
+    }
 
     // Iterator support for objects
     ObjectIterator begin() {
@@ -386,7 +421,7 @@ struct Value {
     
     // Explicit method for default values (alternative to operator|)
     template<typename T>
-    T value_or(const T& fallback) const {
+    T as_or(const T& fallback) const {
         DefaultValueVisitor<T> visitor(fallback);
         data.visit(visitor);
         return visitor.result ? *visitor.result : fallback;
@@ -565,6 +600,11 @@ public:
     fl::optional<Array> as_array() const { return m_value ? m_value->as_array() : fl::nullopt; }
     fl::optional<Object> as_object() const { return m_value ? m_value->as_object() : fl::nullopt; }
 
+    template<typename T>
+    fl::optional<T> as() {
+        return m_value ? m_value->get<T>() : fl::nullopt;
+    }
+
     // Iterator support for objects
     ObjectIterator begin() { 
         if (!m_value) return ObjectIterator(Object{}.begin());
@@ -657,9 +697,9 @@ public:
     
     // Explicit method for default values (alternative to operator|)
     template<typename T>
-    T value_or(const T& fallback) const {
+    T as_or(const T& fallback) const {
         if (!m_value) return fallback;
-        return m_value->value_or(fallback);
+        return m_value->as_or(fallback);
     }
 
     // has_value method for compatibility
