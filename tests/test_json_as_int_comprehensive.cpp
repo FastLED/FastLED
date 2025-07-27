@@ -44,14 +44,17 @@ TEST_CASE("Json as_int Comprehensive Conversion") {
         CHECK_FALSE(value);
     }
     
-    SUBCASE("Double to integer (should fail)") {
+    SUBCASE("Double to integer (should succeed)") {
+        // NEW INSTRUCTIONS: AUTO CONVERT FLOAT TO INT
         Json json(3.14);
         CHECK(json.is_double());
         CHECK_FALSE(json.is_int());
         CHECK_FALSE(json.is_bool());
         
         fl::optional<int64_t> value = json.as_int();
-        CHECK_FALSE(value);
+        CHECK(value);
+        CHECK_EQ(*value, 3);
+        
     }
     
     SUBCASE("Null to integer (should fail)") {

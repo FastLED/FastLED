@@ -67,7 +67,45 @@ struct DefaultValueVisitor {
 };
 
 // Visitor for converting values to int
+template<typename IntType = int64_t>
 struct IntConversionVisitor {
+    fl::optional<IntType> result;
+    
+    template<typename U>
+    void accept(const U& value) {
+        // Dispatch to the correct operator() overload
+        (*this)(value);
+    }
+    
+    void operator()(const IntType& value) {
+        result = value;
+    }
+    
+    // Special handling to avoid conflict when IntType is int64_t
+    template<typename T = IntType>
+    typename fl::enable_if<!fl::is_same<T, int64_t>::value, void>::type
+    operator()(const int64_t& value) {
+        result = static_cast<IntType>(value);
+    }
+    
+    void operator()(const bool& value) {
+        result = static_cast<IntType>(value ? 1 : 0);
+    }
+    
+    void operator()(const double& value) {
+        // NEW INSTRUCTIONS: AUTO CONVERT FLOAT TO INT
+        result = static_cast<IntType>(value);
+    }
+    
+    template<typename T>
+    void operator()(const T&) {
+        // Do nothing for other types
+    }
+};
+
+// Specialization for int64_t to avoid template conflicts
+template<>
+struct IntConversionVisitor<int64_t> {
     fl::optional<int64_t> result;
     
     template<typename U>
@@ -82,6 +120,11 @@ struct IntConversionVisitor {
     
     void operator()(const bool& value) {
         result = value ? 1 : 0;
+    }
+    
+    void operator()(const double& value) {
+        // NEW INSTRUCTIONS: AUTO CONVERT FLOAT TO INT
+        result = static_cast<int64_t>(value);
     }
     
     template<typename T>
@@ -232,7 +275,14 @@ struct JsonValue {
     }
     
     fl::optional<int64_t> as_int() {
-        IntConversionVisitor visitor;
+        IntConversionVisitor<int64_t> visitor;
+        data.visit(visitor);
+        return visitor.result;
+    }
+    
+    template<typename IntType>
+    fl::optional<IntType> as_int() {
+        IntConversionVisitor<IntType> visitor;
         data.visit(visitor);
         return visitor.result;
     }
@@ -264,7 +314,14 @@ struct JsonValue {
     }
     
     fl::optional<int64_t> as_int() const {
-        IntConversionVisitor visitor;
+        IntConversionVisitor<int64_t> visitor;
+        data.visit(visitor);
+        return visitor.result;
+    }
+    
+    template<typename IntType>
+    fl::optional<IntType> as_int() const {
+        IntConversionVisitor<IntType> visitor;
         data.visit(visitor);
         return visitor.result;
     }
@@ -662,6 +719,13 @@ public:
         if (!m_value) return fl::nullopt;
         return m_value->as_int(); 
     }
+    
+    template<typename IntType>
+    fl::optional<IntType> as_int() const { 
+        if (!m_value) return fl::nullopt;
+        return m_value->template as_int<IntType>(); 
+    }
+    
     fl::optional<double> as_double() const { return m_value ? m_value->as_double() : fl::nullopt; }
     fl::optional<fl::string> as_string() const { return m_value ? m_value->as_string() : fl::nullopt; }
     fl::optional<JsonArray> as_array() const { return m_value ? m_value->as_array() : fl::nullopt; }
