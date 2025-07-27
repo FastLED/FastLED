@@ -10,24 +10,9 @@
 
 #if FASTLED_ENABLE_JSON
 
-
 namespace fl {
 
-// Constructor: Initializes the base JsonUiInternal with name.
-JsonUiInternal::JsonUiInternal(const fl::string &name)
-    : mName(name), mId(nextId()), mGroup(), mMutex(), mHasChanged(false) {}
-
-JsonUiInternal::~JsonUiInternal() {}
-
 const fl::string &JsonUiInternal::name() const { return mName; }
-
-void JsonUiInternal::updateInternal(const fl::Json &json) {
-    // Default no-op implementation
-}
-
-void JsonUiInternal::toJson(fl::Json &json) const {
-    // Default no-op implementation
-}
 
 int JsonUiInternal::id() const { return mId; }
 

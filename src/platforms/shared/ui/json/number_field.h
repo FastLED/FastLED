@@ -5,9 +5,12 @@
 #include "platforms/shared/ui/json/ui_internal.h"
 #include "fl/math_macros.h"
 #include "fl/json.h"
-
+#include "fl/ptr.h" // For fl::shared_ptr
 
 namespace fl {
+
+// Forward declaration of the internal class
+class JsonUiNumberFieldInternal;
 
 class JsonNumberFieldImpl {
   public:
@@ -24,9 +27,7 @@ class JsonNumberFieldImpl {
     // Method to allow parent UIElement class to set the group
     void setGroup(const fl::string &groupName);
 
-    int id() const {
-      return mInternal->id();
-    }
+    int id() const;
 
     JsonNumberFieldImpl &operator=(double value);
     JsonNumberFieldImpl &operator=(int value);
@@ -37,13 +38,8 @@ class JsonNumberFieldImpl {
     bool operator!=(int v) const;
 
   private:
-    void updateInternal(const fl::Json &value);
-    void setValueInternal(double value);  // Internal method for UI updates - no change notification
-
-    JsonUiInternalPtr mInternal;
-    double mValue;
-    double mMin;
-    double mMax;
+    // Change to use the specific internal implementation
+    fl::shared_ptr<JsonUiNumberFieldInternal> mInternal;
 };
 
 } // namespace fl

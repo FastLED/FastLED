@@ -4,8 +4,12 @@
 #include "fl/str.h"
 #include "platforms/shared/ui/json/ui_internal.h"
 #include "fl/json.h"
+#include "fl/ptr.h" // For fl::shared_ptr
 
 namespace fl {
+
+// Forward declaration of the internal class
+class JsonUiButtonInternal;
 
 class JsonButtonImpl {
   public:
@@ -25,9 +29,7 @@ class JsonButtonImpl {
 
     void click();
 
-    int id() const {
-      return mInternal->id();
-    }
+    int id() const;
 
   private:
     struct Updater : fl::EngineEvents::Listener {
@@ -39,10 +41,8 @@ class JsonButtonImpl {
 
     Updater mUpdater;
 
-    void updateInternal(const fl::Json &value);
-
-    JsonUiInternalPtr mInternal;
-    bool mPressed = false;
+    // Change to use the specific internal implementation
+    fl::shared_ptr<JsonUiButtonInternal> mInternal;
     bool mPressedLast = false;
     bool mClickedHappened = false;
     int mClickedCount = 0;

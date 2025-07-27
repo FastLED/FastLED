@@ -8,23 +8,47 @@
 
 namespace fl {
 
-JsonCheckboxImpl::JsonCheckboxImpl(const fl::string &name, bool value)
-    : mValue(value) {
-    auto updateFunc = JsonUiInternal::UpdateFunction(
-        [this](const fl::Json &value) {
-            this->updateInternal(value);
-        });
+// Definition of the internal class that was previously in checkbox_internal.h
+class JsonUiCheckboxInternal : public JsonUiInternal {
+private:
+    bool mValue;
 
-    auto toJsonFunc =
-        JsonUiInternal::ToJsonFunction([this](fl::Json &json) {
-            this->toJson(json);
-        });
-    mInternal = fl::make_shared<JsonUiInternal>(name, fl::move(updateFunc),
-                                     fl::move(toJsonFunc));
-    addJsonUiComponent(fl::weak_ptr<JsonUiInternal>(mInternal));
+public:
+    // Constructor: Initializes the base JsonUiInternal with name, and sets initial value.
+    JsonUiCheckboxInternal(const fl::string& name, bool value = false)
+        : JsonUiInternal(name), mValue(value) {}
+
+    // Override toJson to serialize the checkbox's data directly.
+    void toJson(fl::Json& json) const override {
+        json.set("name", name());
+        json.set("type", "checkbox");
+        json.set("group", groupName());
+        json.set("id", id());
+        json.set("value", mValue);
+    }
+
+    // Override updateInternal to handle updates from JSON.
+    void updateInternal(const fl::Json& json) override {
+        mValue = json | false;
+    }
+
+    // Accessors for the checkbox value.
+    bool value() const { return mValue; }
+    void setValue(bool value) { mValue = value; }
+};
+
+JsonCheckboxImpl::JsonCheckboxImpl(const fl::string &name, bool value) {
+    // Create an instance of the new internal class
+    mInternal = fl::make_shared<JsonUiCheckboxInternal>(name, value);
+
+    // Register the component with the JsonUiManager
+    addJsonUiComponent(mInternal);
 }
 
-JsonCheckboxImpl::~JsonCheckboxImpl() { removeJsonUiComponent(fl::weak_ptr<JsonUiInternal>(mInternal)); }
+JsonCheckboxImpl::~JsonCheckboxImpl() { 
+    // Ensure the component is removed from the global registry
+    removeJsonUiComponent(fl::weak_ptr<JsonUiInternal>(mInternal));
+}
 
 JsonCheckboxImpl &JsonCheckboxImpl::Group(const fl::string &name) {
     mInternal->setGroup(name);
@@ -34,28 +58,19 @@ JsonCheckboxImpl &JsonCheckboxImpl::Group(const fl::string &name) {
 const fl::string &JsonCheckboxImpl::name() const { return mInternal->name(); }
 
 void JsonCheckboxImpl::toJson(fl::Json &json) const {
-    json.set("name", name());
-    json.set("group", mInternal->groupName());
-    json.set("type", "checkbox");
-    json.set("id", mInternal->id());
-    json.set("value", mValue);
+    mInternal->toJson(json);
 }
 
-bool JsonCheckboxImpl::value() const { return mValue; }
+bool JsonCheckboxImpl::value() const { return mInternal->value(); }
 
 void JsonCheckboxImpl::setValue(bool value) { 
-    bool oldValue = mValue;
-    mValue = value; 
+    bool oldValue = mInternal->value();
+    mInternal->setValue(value); 
     
     // If value actually changed, mark this component as changed for polling
-    if (mValue != oldValue) {
+    if (mInternal->value() != oldValue) {
         mInternal->markChanged();
     }
-}
-
-void JsonCheckboxImpl::setValueInternal(bool value) {
-    // Internal method for updates from JSON UI system - no change notification
-    mValue = value;
 }
 
 const fl::string &JsonCheckboxImpl::groupName() const { return mInternal->groupName(); }
@@ -72,11 +87,10 @@ JsonCheckboxImpl &JsonCheckboxImpl::operator=(int value) {
     return *this;
 }
 
-void JsonCheckboxImpl::updateInternal(
-    const fl::Json &value) {
-    setValueInternal(value | false);  // Use internal method to avoid change notification
+int JsonCheckboxImpl::id() const {
+    return mInternal->id();
 }
 
 } // namespace fl
 
-#endif // __EMSCRIPTEN__
+#endif // FASTLED_ENABLE_JSON

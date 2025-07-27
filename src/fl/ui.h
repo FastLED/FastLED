@@ -355,7 +355,11 @@ class UINumberField : public UIElement {
 class UITitle : public UIElement {
   public:
     FL_NO_COPY(UITitle);
-    UITitle(const char *name) : mImpl(name, name) {}
+#if FASTLED_USE_JSON_UI
+    UITitle(const char *name) : mImpl(fl::string(name), fl::string(name)) {}
+#else
+    UITitle(const char *name) : mImpl(name) {}
+#endif
     ~UITitle() {}
     
     // Override setGroup to also update the implementation

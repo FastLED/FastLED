@@ -5,8 +5,12 @@
 #include "fl/vector.h"
 #include "platforms/shared/ui/json/ui_internal.h"
 #include "fl/json.h"
+#include "fl/ptr.h" // For fl::shared_ptr
 
 namespace fl {
+
+// Forward declaration of the internal class
+class JsonUiDropdownInternal;
 
 class JsonDropdownImpl {
   public:
@@ -16,7 +20,6 @@ class JsonDropdownImpl {
 
     // Constructor with initializer_list (FastLED requires C++11 support)
     JsonDropdownImpl(const fl::string &name, fl::initializer_list<fl::string> options);
-    
     
     
     ~JsonDropdownImpl();
@@ -34,9 +37,7 @@ class JsonDropdownImpl {
     // Method to allow parent UIElement class to set the group
     void setGroup(const fl::string &groupName);
 
-    int id() const {
-      return mInternal->id();
-    }
+    int id() const;
 
     JsonDropdownImpl &operator=(int index);
 
@@ -44,12 +45,8 @@ class JsonDropdownImpl {
     // Private constructor with array of options and count (used by template constructor)
     JsonDropdownImpl(const fl::string &name, const fl::string* options, size_t count);
     
-    void updateInternal(const fl::Json &value);
-    void commonInit(const fl::string &name);
-
-    JsonUiInternalPtr mInternal;
-    fl::vector<fl::string> mOptions;
-    size_t mSelectedIndex;
+    // Change to use the specific internal implementation
+    fl::shared_ptr<JsonUiDropdownInternal> mInternal;
 };
 
 } // namespace fl
