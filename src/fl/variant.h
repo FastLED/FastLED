@@ -165,7 +165,11 @@ class alignas(max_align<Types...>::value) Variant {
             &Variant::template visit_fn<Types, Visitor>...};
 
         // _tag is 1-based, so dispatch in O(1) via one indirect call:
-        table[_tag - 1](&_storage, visitor);
+        // Check bounds to prevent out-of-bounds access
+        size_t index = _tag - 1;
+        if (index < sizeof...(Types)) {
+            table[index](&_storage, visitor);
+        }
     }
 
     template <typename Visitor> void visit(Visitor &visitor) const {
@@ -180,7 +184,11 @@ class alignas(max_align<Types...>::value) Variant {
             &Variant::template visit_fn_const<Types, Visitor>...};
 
         // _tag is 1-based, so dispatch in O(1) via one indirect call:
-        table[_tag - 1](&_storage, visitor);
+        // Check bounds to prevent out-of-bounds access
+        size_t index = _tag - 1;
+        if (index < sizeof...(Types)) {
+            table[index](&_storage, visitor);
+        }
     }
 
   private:

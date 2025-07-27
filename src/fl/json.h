@@ -604,6 +604,7 @@ struct JsonValue {
     // Friend declarations
     friend class Json;
     
+    
     // The variant holds exactly one of these alternatives
     using variant_t = fl::Variant<
         fl::nullptr_t,   // null
@@ -832,6 +833,11 @@ struct JsonValue {
     }
     
     fl::optional<int64_t> as_int() {
+        // Check if we have a valid value first
+        if (data.empty()) {
+            return fl::nullopt;
+        }
+        
         IntConversionVisitor<int64_t> visitor;
         data.visit(visitor);
         return visitor.result;
@@ -839,24 +845,44 @@ struct JsonValue {
     
     template<typename IntType>
     fl::optional<IntType> as_int() {
+        // Check if we have a valid value first
+        if (data.empty()) {
+            return fl::nullopt;
+        }
+        
         IntConversionVisitor<IntType> visitor;
         data.visit(visitor);
         return visitor.result;
     }
     
     fl::optional<double> as_double() {
+        // Check if we have a valid value first
+        if (data.empty()) {
+            return fl::nullopt;
+        }
+        
         auto ptr = data.ptr<double>();
         return ptr ? fl::optional<double>(*ptr) : fl::nullopt;
     }
     
     template<typename FloatType>
     fl::optional<FloatType> as_float() {
+        // Check if we have a valid value first
+        if (data.empty()) {
+            return fl::nullopt;
+        }
+        
         FloatConversionVisitor<FloatType> visitor;
         data.visit(visitor);
         return visitor.result;
     }
     
     fl::optional<fl::string> as_string() {
+        // Check if we have a valid value first
+        if (data.empty()) {
+            return fl::nullopt;
+        }
+        
         StringConversionVisitor visitor;
         data.visit(visitor);
         return visitor.result;
@@ -924,6 +950,11 @@ struct JsonValue {
     }
     
     fl::optional<int64_t> as_int() const {
+        // Check if we have a valid value first
+        if (data.empty()) {
+            return fl::nullopt;
+        }
+        
         IntConversionVisitor<int64_t> visitor;
         data.visit(visitor);
         return visitor.result;
@@ -931,24 +962,44 @@ struct JsonValue {
     
     template<typename IntType>
     fl::optional<IntType> as_int() const {
+        // Check if we have a valid value first
+        if (data.empty()) {
+            return fl::nullopt;
+        }
+        
         IntConversionVisitor<IntType> visitor;
         data.visit(visitor);
         return visitor.result;
     }
     
     fl::optional<double> as_double() const {
+        // Check if we have a valid value first
+        if (data.empty()) {
+            return fl::nullopt;
+        }
+        
         auto ptr = data.ptr<double>();
         return ptr ? fl::optional<double>(*ptr) : fl::nullopt;
     }
     
     template<typename FloatType>
     fl::optional<FloatType> as_float() const {
+        // Check if we have a valid value first
+        if (data.empty()) {
+            return fl::nullopt;
+        }
+        
         FloatConversionVisitor<FloatType> visitor;
         data.visit(visitor);
         return visitor.result;
     }
     
     fl::optional<fl::string> as_string() const {
+        // Check if we have a valid value first
+        if (data.empty()) {
+            return fl::nullopt;
+        }
+        
         StringConversionVisitor visitor;
         data.visit(visitor);
         return visitor.result;
@@ -1518,6 +1569,13 @@ public:
     // Constructor from shared_ptr<JsonValue>
     Json(const fl::shared_ptr<JsonValue>& value) : m_value(value) {}
     
+    // Factory method to create a Json from a JsonValue
+    static Json from_value(const JsonValue& value) {
+        Json result;
+        result.m_value = fl::make_shared<JsonValue>(value);
+        return result;
+    }
+    
     // Constructor for fl::vector<float> - converts to JSON array
     Json(const fl::vector<float>& vec) : m_value(fl::make_shared<JsonValue>(JsonArray{})) {
         auto ptr = m_value->data.ptr<JsonArray>();
@@ -1625,7 +1683,10 @@ public:
         return m_value->template as_int<IntType>(); 
     }
     
-    fl::optional<double> as_double() const { return m_value ? m_value->as_double() : fl::nullopt; }
+    fl::optional<double> as_double() const { 
+        if (!m_value) return fl::nullopt;
+        return m_value->as_double(); 
+    }
     
     fl::optional<double> as_float() const { 
         if (!m_value) return fl::nullopt;
@@ -1638,7 +1699,10 @@ public:
         return m_value->template as_float<FloatType>(); 
     }
     
-    fl::optional<fl::string> as_string() const { return m_value ? m_value->as_string() : fl::nullopt; }
+    fl::optional<fl::string> as_string() const { 
+        if (!m_value) return fl::nullopt;
+        return m_value->as_string(); 
+    }
     fl::optional<JsonArray> as_array() const { return m_value ? m_value->as_array() : fl::nullopt; }
     fl::optional<JsonObject> as_object() const { return m_value ? m_value->as_object() : fl::nullopt; }
     fl::optional<fl::vector<int16_t>> as_audio() const { return m_value ? m_value->as_audio() : fl::nullopt; }
