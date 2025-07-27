@@ -252,6 +252,42 @@ fl::shared_ptr<JsonValue> JsonValue::parse(const fl::string& txt) {
     #endif
 }
 
+fl::string JsonValue::to_string() const {
+    // For a native implementation without external libraries, we'd need to implement
+    // a custom serializer. For now, we'll delegate to Json::to_string_native() 
+    // by creating a temporary Json object.
+    Json temp;
+    // Actually, let's implement a minimal version that handles basic types
+    // since we don't want to rely on the ArduinoJson library for this method.
+    
+    if (is_null()) {
+        return "null";
+    } else if (is_bool()) {
+        auto opt = as_bool();
+        return opt ? (*opt ? "true" : "false") : "null";
+    } else if (is_int()) {
+        auto opt = as_int();
+        return opt ? fl::to_string(*opt) : "null";
+    } else if (is_double()) {
+        auto opt = as_double();
+        return opt ? fl::to_string(*opt) : "null";
+    } else if (is_string()) {
+        auto opt = as_string();
+        return opt ? "\"" + *opt + "\"" : "null";
+    } else if (is_array()) {
+        return "[array]";
+    } else if (is_object()) {
+        return "{object}";
+    } else if (is_audio()) {
+        return "[audio]";
+    } else if (is_bytes()) {
+        return "[bytes]";
+    } else if (is_floats()) {
+        return "[floats]";
+    }
+    return "null";
+}
+
 fl::string Json::to_string_native() const {
     #if !FASTLED_ENABLE_JSON
     return m_value ? m_value->to_string() : "null";
@@ -266,6 +302,7 @@ fl::string Json::to_string_native() const {
     // Helper function to convert fl::Json::JsonValue to FLArduinoJson::JsonVariant
     struct Converter {
         static void convert(const JsonValue& src, FLArduinoJson::JsonVariant dst) {
+            FL_WARN("*** Json::to_string_native: Converting JsonValue to FLArduinoJson::JsonVariant");
             if (src.is_null()) {
                 dst.set(nullptr);
             } else if (src.is_bool()) {
@@ -306,6 +343,8 @@ fl::string Json::to_string_native() const {
                         }
                     }
                 }
+            } else {
+                FL_WARN("*** Json::to_string_native: Unknown JsonValue type" << src.to_string());
             }
         }
     };
@@ -316,6 +355,8 @@ fl::string Json::to_string_native() const {
     // Serialize to string
     fl::string output;
     FLArduinoJson::serializeJson(doc, output);
+
+
     return output;
     #endif
 }

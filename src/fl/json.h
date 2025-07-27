@@ -126,11 +126,7 @@
 #include "fl/sketch_macros.h"
 
 #ifndef FASTLED_ENABLE_JSON
-#ifdef SKETCH_HAS_LOTS_OF_MEMORY
-#define FASTLED_ENABLE_JSON 1
-#else
-#define FASTLED_ENABLE_JSON 0
-#endif
+#define FASTLED_ENABLE_JSON SKETCH_HAS_LOTS_OF_MEMORY
 #endif
 
 
@@ -591,39 +587,39 @@ struct JsonValue {
     JsonValue(int64_t i) noexcept : data(i) {}
     JsonValue(double d) noexcept : data(d) {}
     JsonValue(const fl::string& s) : data(s) {
-        FASTLED_WARN("Created JsonValue with string: '" << s << "'");
-        FASTLED_WARN("Tag value: " << data.tag());
-        FASTLED_WARN("Is string: " << is_string());
-        FASTLED_WARN("Is int: " << is_int());
+        //FASTLED_WARN("Created JsonValue with string: '" << s << "'");
+        //FASTLED_WARN("Tag value: " << data.tag());
+        //FASTLED_WARN("Is string: " << is_string());
+        //FASTLED_WARN("Is int: " << is_int());
     }
     JsonValue(const JsonArray& a) : data(a) {
-        FASTLED_WARN("Created JsonValue with array");
+        //FASTLED_WARN("Created JsonValue with array");
     }
     JsonValue(const JsonObject& o) : data(o) {
-        FASTLED_WARN("Created JsonValue with object");
+        //FASTLED_WARN("Created JsonValue with object");
     }
     JsonValue(const fl::vector<int16_t>& audio) : data(audio) {
-        FASTLED_WARN("Created JsonValue with audio data");
+        //FASTLED_WARN("Created JsonValue with audio data");
     }
     
     JsonValue(fl::vector<int16_t>&& audio) : data(fl::move(audio)) {
-        FASTLED_WARN("Created JsonValue with moved audio data");
+        //FASTLED_WARN("Created JsonValue with moved audio data");
     }
     
     JsonValue(const fl::vector<uint8_t>& bytes) : data(bytes) {
-        FASTLED_WARN("Created JsonValue with byte data");
+        //FASTLED_WARN("Created JsonValue with byte data");
     }
     
     JsonValue(fl::vector<uint8_t>&& bytes) : data(fl::move(bytes)) {
-        FASTLED_WARN("Created JsonValue with moved byte data");
+        //FASTLED_WARN("Created JsonValue with moved byte data");
     }
     
     JsonValue(const fl::vector<float>& floats) : data(floats) {
-        FASTLED_WARN("Created JsonValue with float data");
+        //FASTLED_WARN("Created JsonValue with float data");
     }
     
     JsonValue(fl::vector<float>&& floats) : data(fl::move(floats)) {
-        FASTLED_WARN("Created JsonValue with moved float data");
+        //FASTLED_WARN("Created JsonValue with moved float data");
     }
 
     // Copy constructor
@@ -710,23 +706,23 @@ struct JsonValue {
 
     // Type queries - using is<T>() instead of index() for fl::Variant
     bool is_null() const noexcept { 
-        FASTLED_WARN("is_null called, tag=" << data.tag());
+        //FASTLED_WARN("is_null called, tag=" << data.tag());
         return data.is<fl::nullptr_t>(); 
     }
     bool is_bool() const noexcept { 
-        FASTLED_WARN("is_bool called, tag=" << data.tag());
+        //FASTLED_WARN("is_bool called, tag=" << data.tag());
         return data.is<bool>(); 
     }
     bool is_int() const noexcept { 
-        FASTLED_WARN("is_int called, tag=" << data.tag());
+        //FASTLED_WARN("is_int called, tag=" << data.tag());
         return data.is<int64_t>() || data.is<bool>(); 
     }
     bool is_double() const noexcept { 
-        FASTLED_WARN("is_double called, tag=" << data.tag());
+        //FASTLED_WARN("is_double called, tag=" << data.tag());
         return data.is<double>(); 
     }
     bool is_string() const noexcept { 
-        FASTLED_WARN("is_string called, tag=" << data.tag());
+        //FASTLED_WARN("is_string called, tag=" << data.tag());
         return data.is<fl::string>(); 
     }
     // Visitor for array type checking
@@ -764,25 +760,25 @@ struct JsonValue {
     };
     
     bool is_array() const noexcept { 
-        FASTLED_WARN("is_array called, tag=" << data.tag());
+        //FASTLED_WARN("is_array called, tag=" << data.tag());
         IsArrayVisitor visitor;
         data.visit(visitor);
         return visitor.result;
     }
     bool is_object() const noexcept { 
-        FASTLED_WARN("is_object called, tag=" << data.tag());
+        //FASTLED_WARN("is_object called, tag=" << data.tag());
         return data.is<JsonObject>(); 
     }
     bool is_audio() const noexcept {
-        FASTLED_WARN("is_audio called, tag=" << data.tag());
+        //FASTLED_WARN("is_audio called, tag=" << data.tag());
         return data.is<fl::vector<int16_t>>();
     }
     bool is_bytes() const noexcept {
-        FASTLED_WARN("is_bytes called, tag=" << data.tag());
+        //FASTLED_WARN("is_bytes called, tag=" << data.tag());
         return data.is<fl::vector<uint8_t>>();
     }
     bool is_floats() const noexcept {
-        FASTLED_WARN("is_floats called, tag=" << data.tag());
+        //FASTLED_WARN("is_floats called, tag=" << data.tag());
         return data.is<fl::vector<float>>();
     }
 
@@ -1493,9 +1489,9 @@ public:
     static Json from_char(char c) {
         Json result;
         auto value = fl::make_shared<JsonValue>(fl::string(1, c));
-        FASTLED_WARN("Created JsonValue with string: " << value->is_string() << ", int: " << value->is_int());
+        //FASTLED_WARN("Created JsonValue with string: " << value->is_string() << ", int: " << value->is_int());
         result.m_value = value;
-        FASTLED_WARN("Json has string: " << result.is_string() << ", int: " << result.is_int());
+        //FASTLED_WARN("Json has string: " << result.is_string() << ", int: " << result.is_int());
         return result;
     }
 
@@ -1504,7 +1500,7 @@ public:
 
     // Assignment operator
     Json& operator=(const Json& other) {
-        FL_WARN("Json& operator=(const Json& other): " << (other.m_value ? other.m_value.get() : 0));
+        //FL_WARN("Json& operator=(const Json& other): " << (other.m_value ? other.m_value.get() : 0));
         if (this != &other) {
             m_value = other.m_value;
         }
@@ -1723,7 +1719,7 @@ public:
         if (!m_value || !m_value->is_object()) {
             m_value = fl::make_shared<JsonValue>(JsonObject{});
         }
-        FASTLED_WARN("Accessing key '" << key << "' in object");
+        //FASTLED_WARN("Accessing key '" << key << "' in object");
         // Get reference to the JsonValue
         JsonValue& value = (*m_value)[key];
         // Create a new Json object that shares the same JsonValue
