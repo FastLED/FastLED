@@ -9,6 +9,9 @@
 
 # Feature Enhancements
 
+  [ ] Adafruit converter driver
+  [ ] NeoPixel converter driver
+
   * I2S driver for ESP32 WS2812
     * https://github.com/hpwit/I2SClocklessLedDriver
       * Our copy is here: https://github.com/FastLED/FastLED/blob/master/src/platforms/esp/32/clockless_i2s_esp32.h
