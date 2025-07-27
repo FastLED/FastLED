@@ -248,6 +248,46 @@ struct FloatConversionVisitor<double> {
     }
 };
 
+// Visitor for converting values to string
+struct StringConversionVisitor {
+    fl::optional<fl::string> result;
+    
+    template<typename U>
+    void accept(const U& value) {
+        // Dispatch to the correct operator() overload
+        (*this)(value);
+    }
+    
+    void operator()(const fl::string& value) {
+        result = value;
+    }
+    
+    void operator()(const int64_t& value) {
+        // Convert integer to string
+        result = fl::to_string(value);
+    }
+    
+    void operator()(const double& value) {
+        // Convert double to string
+        result = fl::to_string(value);
+    }
+    
+    void operator()(const bool& value) {
+        // Convert bool to string
+        result = value ? "true" : "false";
+    }
+    
+    void operator()(const fl::nullptr_t&) {
+        // Convert null to string
+        result = "null";
+    }
+    
+    template<typename T>
+    void operator()(const T&) {
+        // Do nothing for other types (arrays, objects)
+    }
+};
+
 // The JSON node
 struct JsonValue {
     // Forward declarations for nested iterator classes
@@ -415,8 +455,9 @@ struct JsonValue {
     }
     
     fl::optional<fl::string> as_string() {
-        auto ptr = data.ptr<fl::string>();
-        return ptr ? fl::optional<fl::string>(*ptr) : fl::nullopt;
+        StringConversionVisitor visitor;
+        data.visit(visitor);
+        return visitor.result;
     }
     
     fl::optional<JsonArray> as_array() {
@@ -461,8 +502,9 @@ struct JsonValue {
     }
     
     fl::optional<fl::string> as_string() const {
-        auto ptr = data.ptr<fl::string>();
-        return ptr ? fl::optional<fl::string>(*ptr) : fl::nullopt;
+        StringConversionVisitor visitor;
+        data.visit(visitor);
+        return visitor.result;
     }
     
     fl::optional<JsonArray> as_array() const {
