@@ -302,7 +302,8 @@ struct JsonValue {
         double,          // floating-point
         fl::string,      // string
         JsonArray,           // array
-        JsonObject           // object
+        JsonObject,          // object
+        fl::vector<int16_t>  // audio data (specialized array of int16_t)
     >;
 
     typedef JsonValue::iterator iterator;
@@ -327,6 +328,13 @@ struct JsonValue {
     }
     JsonValue(const JsonObject& o) : data(o) {
         FASTLED_WARN("Created JsonValue with object");
+    }
+    JsonValue(const fl::vector<int16_t>& audio) : data(audio) {
+        FASTLED_WARN("Created JsonValue with audio data");
+    }
+    
+    JsonValue(fl::vector<int16_t>&& audio) : data(fl::move(audio)) {
+        FASTLED_WARN("Created JsonValue with moved audio data");
     }
 
     JsonValue& operator=(const JsonValue& other) {
@@ -372,6 +380,11 @@ struct JsonValue {
 
     JsonValue& operator=(JsonArray a) {
         data = fl::move(a);
+        return *this;
+    }
+    
+    JsonValue& operator=(fl::vector<int16_t> audio) {
+        data = fl::move(audio);
         return *this;
     }
 
@@ -422,6 +435,10 @@ struct JsonValue {
         FASTLED_WARN("is_object called, tag=" << data.tag());
         return data.is<JsonObject>(); 
     }
+    bool is_audio() const noexcept {
+        FASTLED_WARN("is_audio called, tag=" << data.tag());
+        return data.is<fl::vector<int16_t>>();
+    }
 
     // Safe extractors (return optional values, not references)
     fl::optional<bool> as_bool() {
@@ -469,6 +486,11 @@ struct JsonValue {
         auto ptr = data.ptr<JsonObject>();
         return ptr ? fl::optional<JsonObject>(*ptr) : fl::nullopt;
     }
+    
+    fl::optional<fl::vector<int16_t>> as_audio() {
+        auto ptr = data.ptr<fl::vector<int16_t>>();
+        return ptr ? fl::optional<fl::vector<int16_t>>(*ptr) : fl::nullopt;
+    }
 
     // Const overloads
     fl::optional<bool> as_bool() const {
@@ -515,6 +537,11 @@ struct JsonValue {
     fl::optional<JsonObject> as_object() const {
         auto ptr = data.ptr<JsonObject>();
         return ptr ? fl::optional<JsonObject>(*ptr) : fl::nullopt;
+    }
+    
+    fl::optional<fl::vector<int16_t>> as_audio() const {
+        auto ptr = data.ptr<fl::vector<int16_t>>();
+        return ptr ? fl::optional<fl::vector<int16_t>>(*ptr) : fl::nullopt;
     }
     
     // Generic getter template method
@@ -883,6 +910,7 @@ public:
     bool is_string() const { return m_value && m_value->is_string(); }
     bool is_array() const { return m_value && m_value->is_array(); }
     bool is_object() const { return m_value && m_value->is_object(); }
+    bool is_audio() const { return m_value && m_value->is_audio(); }
 
     // Safe extractors
     fl::optional<bool> as_bool() const { return m_value ? m_value->as_bool() : fl::nullopt; }
@@ -913,6 +941,7 @@ public:
     fl::optional<fl::string> as_string() const { return m_value ? m_value->as_string() : fl::nullopt; }
     fl::optional<JsonArray> as_array() const { return m_value ? m_value->as_array() : fl::nullopt; }
     fl::optional<JsonObject> as_object() const { return m_value ? m_value->as_object() : fl::nullopt; }
+    fl::optional<fl::vector<int16_t>> as_audio() const { return m_value ? m_value->as_audio() : fl::nullopt; }
 
     template<typename T>
     fl::optional<T> as() {

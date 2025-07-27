@@ -4,7 +4,14 @@
 #include "fl/vector.h"
 #include "fl/sketch_macros.h"
 
+// Define INT16_MIN and INT16_MAX if not already defined
+#ifndef INT16_MIN
+#define INT16_MIN (-32768)
+#endif
 
+#ifndef INT16_MAX
+#define INT16_MAX 32767
+#endif
 
 #if FASTLED_ENABLE_JSON
 
@@ -59,11 +66,43 @@ fl::shared_ptr<JsonValue> JsonValue::parse(const fl::string& txt) {
             } else if (src.is<const char*>()) {
                 return fl::make_shared<JsonValue>(fl::string(src.as<const char*>()));
             } else if (src.is<FLArduinoJson::JsonArrayConst>()) {
-                JsonArray arr;
-                for (const auto& item : src.as<FLArduinoJson::JsonArrayConst>()) {
-                    arr.push_back(convert(item));
+                FLArduinoJson::JsonArrayConst arr = src.as<FLArduinoJson::JsonArrayConst>();
+                
+                // Empty arrays should remain regular arrays
+                if (arr.size() == 0) {
+                    return fl::make_shared<JsonValue>(JsonArray{});
                 }
-                return fl::make_shared<JsonValue>(fl::move(arr));
+                
+                // Check if all elements are integers that fit in int16_t
+                bool allInt16 = true;
+                for (const auto& item : arr) {
+                    if (!item.is<int32_t>() && !item.is<int64_t>()) {
+                        allInt16 = false;
+                        break;
+                    }
+                    int64_t val = item.is<int32_t>() ? item.as<int32_t>() : item.as<int64_t>();
+                    if (val < INT16_MIN || val > INT16_MAX) {
+                        allInt16 = false;
+                        break;
+                    }
+                }
+                
+                if (allInt16) {
+                    // Create specialized int16_t vector for audio data
+                    fl::vector<int16_t> audioData;
+                    for (const auto& item : arr) {
+                        int64_t val = item.is<int32_t>() ? item.as<int32_t>() : item.as<int64_t>();
+                        audioData.push_back(static_cast<int16_t>(val));
+                    }
+                    return fl::make_shared<JsonValue>(fl::move(audioData));
+                } else {
+                    // Regular array conversion
+                    JsonArray regularArr;
+                    for (const auto& item : arr) {
+                        regularArr.push_back(convert(item));
+                    }
+                    return fl::make_shared<JsonValue>(fl::move(regularArr));
+                }
             } else if (src.is<FLArduinoJson::JsonObjectConst>()) {
                 JsonObject obj;
                 for (const auto& kv : src.as<FLArduinoJson::JsonObjectConst>()) {
