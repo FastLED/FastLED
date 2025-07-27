@@ -76,6 +76,9 @@ compiler_flags = [
     
     # Threading Support
     "-pthread",                               # Enable POSIX threads support
+    
+    # Thin PCH Support (Emscripten/Clang feature)
+    "-fpch-instantiate-templates",            # Required for proper Thin PCH template handling
 ]
 
 # Include directory flags (paths added dynamically by build system)
@@ -135,11 +138,8 @@ flags = [
     # Debug Information Generation
     "-g3",                                     # Maximum debug info (includes macros and preprocessor info)
     "-gsource-map",                           # Generate source maps for browser debugging
+    "--profiling-funcs",                     # Enable function profiling in debug builds
     # Note: -ffile-prefix-map flag is generated dynamically from [dwarf] config for path mapping
-    
-    # Runtime Safety and Sanitization
-    "-fsanitize=address",                     # Address sanitizer (detects memory errors)
-    "-fsanitize=undefined",                   # Undefined behavior sanitizer (detects UB)
     
     # Optimization Control
     "-fno-inline",                           # Disable function inlining for clearer debugging
@@ -148,10 +148,6 @@ flags = [
 
 # Debug-specific linking flags (applied only during final linking in debug mode)
 link_flags = [
-    # Runtime Sanitizers (must match compilation flags)
-    "-fsanitize=address",                     # Address sanitizer linking support
-    "-fsanitize=undefined",                   # Undefined behavior sanitizer linking support
-    
     # Debug Info and Error Detection
     "-sSEPARATE_DWARF_URL=fastled.wasm.dwarf", # Separate DWARF debug info file
     "-sSTACK_OVERFLOW_CHECK=2",              # Maximum stack overflow detection
@@ -208,6 +204,7 @@ flags = [
     # Optimization Control - Optimized for build speed
     "-O1",                                   # Light optimization (faster than O0 with better performance)
     "-g0",                                   # No debug info (fastest compilation, smallest size)
+    "--profiling-funcs",                     # Enable function profiling in quick builds
     
     # Aggressive Build Speed Optimizations
     "-fno-inline-functions",                 # Disable function inlining

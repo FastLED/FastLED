@@ -1,115 +1,69 @@
-# JsonUi Title Component "this" Pointer Invalidation Bug - UPDATE
+fastled_async_controller.js:317 Fatal error in FastLED pure JavaScript async loop: RuntimeError: memory access out of bounds
+    at fastled.wasm.fl::AtomicFake<unsigned int>::load() const (http://localhost:8145/fastled.wasm:wasm-function[83]:0xa7c3)
+    at fastled.wasm.fl::AtomicFake<unsigned int>::operator unsigned int() const (http://localhost:8145/fastled.wasm:wasm-function[82]:0xa751)
+    at fastled.wasm.fl::detail::ControlBlockBase::remove_shared_ref() (http://localhost:8145/fastled.wasm:wasm-function[80]:0xa5c4)
+    at fastled.wasm.fl::shared_ptr<fl::Value>::reset() (http://localhost:8145/fastled.wasm:wasm-function[1171]:0x72284)
+    at fastled.wasm.fl::shared_ptr<fl::Value>::operator=(fl::shared_ptr<fl::Value> const&) (http://localhost:8145/fastled.wasm:wasm-function[1166]:0x71956)
+    at fastled.wasm.fl::Json::operator=(fl::Json const&) (http://localhost:8145/fastled.wasm:wasm-function[3842]:0x1708b5)
+    at fastled.wasm.fl::Json::set(fl::string const&, fl::Json const&) (http://localhost:8145/fastled.wasm:wasm-function[3838]:0x16fad3)
+    at fastled.wasm.fl::Json::set(fl::string const&, fl::string const&) (http://localhost:8145/fastled.wasm:wasm-function[3852]:0x172138)
+    at fastled.wasm.fl::JsonUiTitleInternal::toJson(fl::Json&) const (http://localhost:8145/fastled.wasm:wasm-function[3968]:0x17f129)
+    at fastled.wasm.fl::JsonUiManager::toJson(fl::Json&) (http://localhost:8145/fastled.wasm:wasm-function[1956]:0xb4802)
 
-## Problem Description
+## Analysis of WASM-only Crash
 
-The JsonUi system had a critical bug where UI components like `JsonTitleImpl` could crash when their `JsonUiInternal` objects outlived the parent component. This happened because the lambdas stored in `JsonUiInternal` captured `this` pointers to the parent components, which could become invalid.
+After analyzing the code, I've identified three likely factors causing this crash to occur specifically in the WebAssembly environment:
 
-Specifically, in the previous implementation of `title.cpp`:
+### 1. Memory Alignment Issues with Atomic Types in WASM
+
+The `ControlBlockBase` structure contains two `fl::atomic_u32` members:
 ```cpp
-JsonUiInternal::ToJsonFunction to_json_fcn =
-    JsonUiInternal::ToJsonFunction([this](fl::Json &json) {
-        this->toJson(json);
-    });
-```
-
-When `JsonTitleImpl` was destroyed but its `JsonUiInternal` object persisted in the `JsonUiManager`, calling the lambda resulted in accessing invalid memory through the captured `this` pointer.
-
-## Current Status - FIXED
-
-The refactoring has been successfully implemented. The system now uses a class-based approach with virtual functions rather than lambda captures, completely eliminating the "this" pointer invalidation issue.
-
-### New Implementation Pattern
-
-The solution involved creating specific subclasses of `JsonUiInternal` for each component type, with the data and methods contained directly in those classes rather than captured through lambdas.
-
-For example, `JsonUiTitleInternal` in `title.h`:
-```cpp
-class JsonUiTitleInternal : public JsonUiInternal {
-private:
-    fl::string mText;
-
-public:
-    // Constructor: Initializes the base JsonUiInternal with name, and sets the title text.
-    JsonUiTitleInternal(const fl::string& name, const fl::string& text)
-        : JsonUiInternal(name), mText(text) {}
-
-    // Override toJson to serialize the title's data directly.
-    // This function will be called by JsonUiManager to get the component's state.
-    void toJson(fl::Json& json) const override {
-        json.set("name", name());
-        json.set("type", "title");
-        json.set("group", groupName()); // Accessible from base
-        json.set("id", id());           // Accessible from base
-        json.set("text", mText);
-    }
-
-    // Override updateInternal. Titles typically don't have update functionality
-    // from the UI, so this can be a no-op.
-    void updateInternal(const fl::Json& json) override {
-        // No update needed for title components
-    }
-
-    // Accessors for the title text.
-    const fl::string& text() const { return mText; }
-    void setText(const fl::string& text) { mText = text; }
+struct ControlBlockBase {
+    fl::atomic_u32 shared_count;
+    fl::atomic_u32 weak_count;
+    // ...
 };
 ```
 
-And the updated `JsonTitleImpl` in `title.h`:
+According to `fl/align.h`, when compiling for Emscripten/WASM:
 ```cpp
-class JsonTitleImpl {
-private:
-    // Change to use the specific internal implementation
-    fl::shared_ptr<JsonUiTitleInternal> mInternal;
+#ifdef __EMSCRIPTEN__
+#define FL_ALIGN_BYTES 8
+#define FL_ALIGN alignas(FL_ALIGN_BYTES)
+#define FL_ALIGN_AS(T) alignas(alignof(T))
+#else
+#define FL_ALIGN_BYTES 1
+#define FL_ALIGN
+#define FL_ALIGN_AS(T)
+#endif
+```
 
-public:
-    // Constructor: Now takes the text directly and creates JsonUiTitleInternal.
-    JsonTitleImpl(const fl::string& name, const fl::string& text);
-
-    // Destructor: Handles cleanup of the internal component.
-    ~JsonTitleImpl();
-    
-    // ... other methods
+However, the `AtomicFake<T>` class doesn't use any alignment directives:
+```cpp
+template <typename T> class AtomicFake {
+  private:
+    T mValue;  // No alignment specified
 };
 ```
 
-The implementation in `title.cpp`:
-```cpp
-// Constructor implementation
-JsonTitleImpl::JsonTitleImpl(const fl::string& name, const fl::string& text) {
-    // Create an instance of the new internal class
-    mInternal = fl::make_shared<JsonUiTitleInternal>(name, text);
+In WASM, atomic operations require proper alignment (4-byte alignment for `uint32_t`), but the `AtomicFake` class doesn't enforce this. This could cause the "memory access out of bounds" error when trying to access the atomic value in WASM, which has stricter alignment requirements than native platforms.
 
-    // Register the component with the JsonUiManager
-    addJsonUiComponent(mInternal);
-}
+### 2. WebAssembly Memory Model Differences
 
-// Destructor implementation
-JsonTitleImpl::~JsonTitleImpl() {
-    // Ensure the component is removed from the global registry
-    removeJsonUiComponent(fl::weak_ptr<JsonUiInternal>(mInternal));
-    
-    // No need to clear functions anymore as there are no lambdas capturing 'this'
-}
-```
+In WASM:
+- Linear memory is laid out differently than in native environments
+- Bounds checking is more strict
+- Memory access patterns that work in native code might fail in WASM due to how memory pages are allocated and protected
 
-## Key Changes Made
+When a `ControlBlockBase` is allocated and later deallocated, the memory might be marked as inaccessible. If there's a dangling reference to this memory (due to a bug in shared_ptr reference counting), accessing it in native code might just return garbage values, but in WASM it triggers a hard "memory access out of bounds" error.
 
-1. Created specific subclasses of `JsonUiInternal` for each component type (e.g., `JsonUiTitleInternal`)
-2. Moved data payloads into these subclasses
-3. Implemented virtual `toJson` and `updateInternal` methods directly in the subclasses
-4. Updated component classes to use these specific internal classes instead of generic `JsonUiInternal`
-5. Removed all lambda captures of `this` pointers
-6. Maintained the same external API for component classes
+### 3. Initialization Order Issues with Static UI Components
 
-## Verification
+The crash occurs during UI serialization (`JsonUiTitleInternal::toJson`), which suggests it's related to static UI components. In WASM:
+- Global/static object initialization order can be different than in native environments
+- Objects might be accessed before they're fully constructed
+- The WASM module instantiation process might have different timing characteristics
 
-The fix has been verified by:
-1. Checking that the new implementation eliminates lambda captures
-2. Ensuring proper component registration and deregistration with the `JsonUiManager`
-3. Confirming that the virtual function approach works correctly
-4. Verifying that the external API remains unchanged for existing code
+The `JsonUiManager` maintains a collection of UI components, and during serialization, it's trying to access a component that might not be properly initialized in the WASM environment, leading to the crash when its shared_ptr tries to access a deallocated control block.
 
-## Remaining Work
-
-While the title component has been successfully refactored, other components in the system may still be using the old lambda-based pattern. These should be updated following the same pattern as `JsonTitleImpl` to ensure consistency and eliminate all potential "this" pointer invalidation bugs.
+These factors explain why the same code works fine in native environments but crashes specifically in WASM - it's a combination of alignment requirements, memory model differences, and initialization timing issues that are unique to the WebAssembly execution environment.
