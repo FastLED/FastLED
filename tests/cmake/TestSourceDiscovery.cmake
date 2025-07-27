@@ -83,14 +83,33 @@ endfunction()
 function(configure_fastled_debug_symbols)
     # 🔧 FULL DEBUG SYMBOLS for stepping into FastLED code
     if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-        target_compile_options(fastled PRIVATE 
-            # Override the basic -g with full debug symbols
+        # Define base debug flags that work for all compilers
+        set(debug_flags
             -g3                      # Maximum debug information
-            -gdwarf-4               # DWARF debug format (for GDB)
-            -gcodeview              # CodeView debug format (for Windows)
             -O0                     # No optimization
             -fno-omit-frame-pointer # Keep frame pointers for stack traces
         )
-        message(STATUS "🔧 Applied full debug symbols to FastLED library for stepping in debugger")
+        
+        # Add compiler-specific debug flags
+        if(WIN32 AND CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+            # For Clang on Windows, add both DWARF and CodeView formats
+            list(APPEND debug_flags 
+                -gdwarf-4               # DWARF debug format (for GDB)
+                -gcodeview              # CodeView debug format (for Windows)
+            )
+            message(STATUS "🔧 Applied full debug symbols to FastLED library (DWARF + CodeView for Clang on Windows)")
+        else()
+            # For GCC or non-Windows, use standard DWARF debug info
+            list(APPEND debug_flags
+                -gdwarf-4               # DWARF debug format
+            )
+            if(WIN32 AND CMAKE_CXX_COMPILER_ID MATCHES "GNU")
+                message(STATUS "🔧 Applied full debug symbols to FastLED library (DWARF format for GCC on Windows)")
+            else()
+                message(STATUS "🔧 Applied full debug symbols to FastLED library (DWARF format)")
+            endif()
+        endif()
+        
+        target_compile_options(fastled PRIVATE ${debug_flags})
     endif()
 endfunction() 
