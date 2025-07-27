@@ -1,5 +1,117 @@
 #pragma once
 
+/**
+ * @file fl/json.h
+ * @brief FastLED's Elegant JSON Library: `fl::Json`
+ *
+ * @details
+ *
+ * The `fl::Json` library provides a lightweight, type-safe, and highly ergonomic
+ * interface for both parsing and generating JSON data within the FastLED ecosystem.
+ *
+ * Key Features & Design Principles:
+ * ------------------------------------
+ * - **Fluid Chaining**: Effortlessly navigate nested JSON structures using
+ *   `json["key"]["nested_key"]` or `json["array_key"][index]`.
+ * - **Default Values (`operator|`)**: The cornerstone of robust parsing. Safely
+ *   extract values with a fallback, preventing crashes from missing keys or
+ *   type mismatches: `int value = json["path"]["to"]["key"] | 123;`
+ * - **Type Safety**: Methods return `fl::optional<T>` for explicit handling of
+ *   potential absence or type errors, ensuring predictable behavior.
+ * - **Unified API**: A consistent and intuitive interface for both reading
+ *   and writing JSON data.
+ * - **Explicit Creation**: Clearly define JSON objects and arrays using
+ *   `fl::Json::object()` and `fl::Json::array()`.
+ *
+ * Parsing JSON Data - The Clean Way:
+ * ------------------------------------
+ * Parse a JSON string and extract values with graceful defaults.
+ *
+ * @code
+ * #include "fl/json.h"
+ * #include "fl/warn.h" // For FL_WARN
+ *
+ * const char* jsonStr = R"({
+ *   "config": {
+ *     "brightness": 128,
+ *     "enabled": true,
+ *     "name": "my_device"
+ *   },
+ *   "status": "active"
+ * })";
+ *
+ * fl::Json jsonDoc = fl::Json::parse(jsonStr);
+ *
+ * // Accessing an integer with a default value
+ * int brightness = jsonDoc["config"]["brightness"] | 255; // Result: 128
+ * FL_WARN("Brightness: " << brightness);
+ *
+ * // Accessing a boolean with a default value
+ * bool enabled = jsonDoc["config"]["enabled"] | false;    // Result: true
+ * FL_WARN("Enabled: " << enabled);
+ *
+ * // Accessing a string with a default value
+ * fl::string deviceName = jsonDoc["config"]["name"] | fl::string("unknown"); // Result: "my_device"
+ * FL_WARN("Device Name: " << deviceName);
+ *
+ * // Accessing a non-existent key with a default value
+ * int nonExistent = jsonDoc["config"]["non_existent_key"] | 0; // Result: 0
+ * FL_WARN("Non-existent: " << nonExistent);
+ * @endcode
+ *
+ * Generating JSON Data - Build with Ease:
+ * -----------------------------------------
+ * Construct complex JSON objects and arrays programmatically.
+ *
+ * @code
+ * #include "fl/json.h"
+ * #include "fl/string.h"
+ * #include "fl/vector.h"
+ * #include "fl/warn.h"
+ *
+ * // Create a root JSON object
+ * fl::Json newJson = fl::Json::object();
+ *
+ * // Set primitive values
+ * newJson.set("version", 1.0);
+ * newJson.set("isActive", true);
+ * newJson.set("message", "Hello, FastLED!");
+ *
+ * // Create and set a nested object
+ * fl::Json settings = fl::Json::object();
+ * settings.set("mode", "dynamic");
+ * settings.set("speed", 50);
+ * newJson.set("settings", settings);
+ *
+ * // Create and set a nested array
+ * fl::Json colors = fl::Json::array();
+ * colors.push_back(fl::Json("red"));
+ * colors.push_back(fl::Json("green"));
+ * colors.push_back(fl::Json("blue"));
+ * newJson.set("colors", colors);
+ *
+ * // Convert the entire JSON object to a string
+ * fl::string jsonString = newJson.to_string();
+ * FL_WARN("Generated JSON:\n" << jsonString);
+ * // Expected output (formatting may vary):
+ * // {"version":1.0,"isActive":true,"message":"Hello, FastLED!","settings":{"mode":"dynamic","speed":50},"colors":["red","green","blue"]}
+ * @endcode
+ *
+ * Important Considerations:
+ * ---------------------------
+ * - **Error Handling**: While `operator|` is powerful, for critical parsing
+ *   steps (e.g., validating the root object), always use `has_value()` and
+ *   `is_object()`/`is_array()` checks.
+ * - **Memory Management**: `fl::Json` leverages `fl::shared_ptr` internally,
+ *   simplifying memory management. You typically won't need manual `new`/`delete`.
+ * - **`fl::` Namespace**: Adhere to FastLED's convention; always use the `fl::`
+ *   prefix for library components (e.g., `fl::Json`, `fl::string`, `fl::vector`).
+ *   Avoid `std::` equivalents.
+ *
+ */
+
+
+
 #include "fl/string.h"
 #include "fl/vector.h"
 #include "fl/hash_map.h"
