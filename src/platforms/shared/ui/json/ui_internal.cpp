@@ -7,43 +7,28 @@
 #include "ui_internal.h"
 
 #include "fl/json.h"
-#include "fl/json.h"
 
 #if FASTLED_ENABLE_JSON
 
 
 namespace fl {
 
-JsonUiInternal::JsonUiInternal(const string &name, UpdateFunction updateFunc,
-                           ToJsonFunction toJsonFunc)
-    : mName(name), mUpdateFunc(updateFunc), mtoJsonFunc(toJsonFunc),
-      mId(nextId()), mGroup(), mMutex(), mHasChanged(false) {}
+// Constructor: Initializes the base JsonUiInternal with name.
+JsonUiInternal::JsonUiInternal(const fl::string &name)
+    : mName(name), mId(nextId()), mGroup(), mMutex(), mHasChanged(false) {}
 
-JsonUiInternal::~JsonUiInternal() {
-    const bool functions_exist = mUpdateFunc || mtoJsonFunc;
-    if (functions_exist) {
-        clearFunctions();
-        // printf("Warning: %s: The owner of the JsonUiInternal should clear "
-        //        "the functions, not this destructor.\n",
-        //        mName.c_str());
-        FL_WARN("Warning: " << mName << ": The owner of the JsonUiInternal should clear "
-               "the functions, not this destructor.");
-    }
+JsonUiInternal::~JsonUiInternal() {}
+
+const fl::string &JsonUiInternal::name() const { return mName; }
+
+void JsonUiInternal::updateInternal(const fl::Json &json) {
+    // Default no-op implementation
 }
 
-const string &JsonUiInternal::name() const { return mName; }
-void JsonUiInternal::update(const fl::Json &json) {
-    fl::lock_guard<fl::mutex> lock(mMutex);
-    if (mUpdateFunc) {
-        mUpdateFunc(json);
-    }
-}
 void JsonUiInternal::toJson(fl::Json &json) const {
-    fl::lock_guard<fl::mutex> lock(mMutex);
-    if (mtoJsonFunc) {
-        mtoJsonFunc(json);
-    }
+    // Default no-op implementation
 }
+
 int JsonUiInternal::id() const { return mId; }
 
 void JsonUiInternal::setGroup(const fl::string &groupName) { 
@@ -54,14 +39,6 @@ void JsonUiInternal::setGroup(const fl::string &groupName) {
 const fl::string &JsonUiInternal::groupName() const { 
     fl::lock_guard<fl::mutex> lock(mMutex);
     return mGroup; 
-}
-
-bool JsonUiInternal::clearFunctions() {
-    fl::lock_guard<fl::mutex> lock(mMutex);
-    bool wasCleared = !mUpdateFunc || !mtoJsonFunc;
-    mUpdateFunc = UpdateFunction();
-    mtoJsonFunc = ToJsonFunction();
-    return wasCleared;
 }
 
 bool JsonUiInternal::hasChanged() const {

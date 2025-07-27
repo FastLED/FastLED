@@ -241,7 +241,7 @@ This approach completely eliminates the need for lambdas that capture `this` poi
 
 To fully upgrade `JsonTitleImpl` to the new style, eliminating `this` pointer captures and using a dedicated `JsonUiTitleInternal` subclass, follow these steps:
 
-### Step 1: Define `JsonUiTitleInternal` Class
+### Step 1: Define `JsonUiTitleInternal` Class (COMPLETED)
 
 First, define the `JsonUiTitleInternal` class in `title.h`. This class will inherit from `JsonUiInternal` and hold the specific data for a title component (the text) and implement the `toJson` and `updateInternal` virtual functions directly.
 
@@ -283,7 +283,7 @@ public:
 };
 ```
 
-### Step 2: Modify `JsonTitleImpl` to Use `JsonUiTitleInternal`
+### Step 2: Modify `JsonTitleImpl` to Use `JsonUiTitleInternal` (COMPLETED)
 
 Next, modify the `JsonTitleImpl` class in `title.h` and `title.cpp` to create and manage an instance of `JsonUiTitleInternal` instead of relying on lambdas.
 
@@ -362,11 +362,11 @@ void JsonTitleImpl::setText(const fl::string& text) {
 }
 ```
 
-### Step 3: Update `JsonUiManager` (if necessary)
+### Step 3: Update `JsonUiManager` (COMPLETED)
 
 Ensure that `JsonUiManager` and any other parts of the system that interact with `JsonUiInternal` objects are compatible with the new virtual function approach. The existing `addJsonUiComponent` and `removeJsonUiComponent` functions should still work as they operate on `fl::shared_ptr<JsonUiInternal>`, which `JsonUiTitleInternal` inherits from.
 
-### Step 4: Remove Old Code
+### Step 4: Remove Old Code (COMPLETED)
 
 After verifying the new implementation works correctly, remove any old, unused code related to the lambda-based `toJson` and `updateInternal` functions from `JsonTitleImpl` and `JsonUiInternal` (if they were specific to `JsonTitleImpl`'s old implementation).
 

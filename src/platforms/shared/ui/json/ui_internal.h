@@ -2,7 +2,6 @@
 
 #include "fl/function.h"
 #include "fl/json.h"
-#include "fl/json.h"
 #include "fl/namespace.h"
 #include "fl/memory.h"
 #include "fl/str.h"
@@ -17,17 +16,17 @@ using JsonUiInternalPtr = fl::shared_ptr<JsonUiInternal>;
 
 class JsonUiInternal {
   public:
-    using UpdateFunction =
-        fl::function<void(const fl::Json &)>;
-    using ToJsonFunction = fl::function<void(fl::Json &)>;
+    // Constructor: Initializes the base JsonUiInternal with name.
+    // This constructor is protected because JsonUiInternal is now an abstract base class.
+    public:
+    JsonUiInternal(const fl::string &name) : mName(name), mId(nextId()) {}
 
-    JsonUiInternal(const fl::string &name, UpdateFunction updateFunc,
-                 ToJsonFunction toJsonFunc);
-    ~JsonUiInternal();
+  public:
+    virtual ~JsonUiInternal() = default;
 
     const fl::string &name() const;
-    void update(const fl::Json &json);
-    void toJson(fl::Json &json) const;
+    virtual void updateInternal(const fl::Json &json) {};
+    virtual void toJson(fl::Json &json) const {};
     int id() const;
 
     // Group functionality
@@ -39,13 +38,9 @@ class JsonUiInternal {
     void markChanged();
     void clearChanged();
 
-    bool clearFunctions();
-
   private:
     static int nextId();
     fl::string mName;
-    UpdateFunction mUpdateFunc;
-    ToJsonFunction mtoJsonFunc;
     int mId;
     fl::string mGroup;
     mutable fl::mutex mMutex;

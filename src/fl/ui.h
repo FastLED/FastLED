@@ -355,7 +355,7 @@ class UINumberField : public UIElement {
 class UITitle : public UIElement {
   public:
     FL_NO_COPY(UITitle);
-    UITitle(const char *name) : mImpl(name) {}
+    UITitle(const char *name) : mImpl(name, name) {}
     ~UITitle() {}
     
     // Override setGroup to also update the implementation
@@ -429,13 +429,11 @@ class UIDropdown : public UIElement {
   public:
     FL_NO_COPY(UIDropdown)
 
-    template<typename Iterator>
-    UIDropdown(const char *name, Iterator begin, Iterator end)
-        : mImpl(name, begin, end), mListener(this) {}
+    
 
     // Constructor with fl::span<fl::string> for arrays and containers.
     UIDropdown(const char *name, fl::span<fl::string> options)
-        : mImpl(name, options), mListener(this) {}
+        : mImpl(fl::string(name), options), mListener(this) {}
 
     // Constructor with initializer_list
     UIDropdown(const char *name, fl::initializer_list<fl::string> options)

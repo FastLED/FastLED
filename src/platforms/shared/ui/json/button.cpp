@@ -5,10 +5,6 @@
 #include "platforms/shared/ui/json/button.h"
 #include "platforms/shared/ui/json/ui.h"
 
-#if FASTLED_ENABLE_JSON
-
-
-
 namespace fl {
 
 JsonButtonImpl::JsonButtonImpl(const string &name) : mPressed(false) {
