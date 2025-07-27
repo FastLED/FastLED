@@ -107,18 +107,18 @@ template <typename T> class allocator {
     }
     
     // Construct an object at the specified address
-    template <typename U, typename... Args>
-    void construct(U* p, Args&&... args) {
-        if (p == nullptr) return;
-        new(static_cast<void*>(p)) U(fl::forward<Args>(args)...);
-    }
-    
-    // Destroy an object at the specified address
-    template <typename U>
-    void destroy(U* p) {
-        if (p == nullptr) return;
-        p->~U();
-    }
+        template <typename U, typename... Args>
+        void construct(U* p, Args&&... args) {
+            if (p == nullptr) return;
+            new(static_cast<void*>(p)) U(fl::forward<Args>(args)...);
+        }
+        
+        // Destroy an object at the specified address
+        template <typename U>
+        void destroy(U* p) {
+            if (p == nullptr) return;
+            p->~U();
+        }
 };
 
 template <typename T> class allocator_psram {

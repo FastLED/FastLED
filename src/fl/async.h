@@ -49,6 +49,9 @@
 #include "fl/variant.h"
 #include "fl/promise.h"
 #include "fl/promise_result.h"
+#include "fl/singleton.h"
+
+#include "fl/task.h"
 
 namespace fl {
 
@@ -195,5 +198,23 @@ fl::result<T> await_top_level(fl::promise<T> promise) {
         return fl::result<T>(promise.error());
     }
 }
+
+class Scheduler {
+public:
+    static Scheduler& instance();
+
+    int add_task(fl::unique_ptr<task> t);
+    void update();
+
+private:
+    friend class fl::Singleton<Scheduler>;
+    Scheduler() : mTasks() {}
+
+    void warn_no_then(int task_id, const fl::unique_ptr<fl::string>& trace_label);
+    void warn_no_catch(int task_id, const fl::unique_ptr<fl::string>& trace_label, const Error& error);
+
+    fl::vector<unique_ptr<task>> mTasks;
+    int mNextTaskId = 1;
+};
 
 } // namespace fl 

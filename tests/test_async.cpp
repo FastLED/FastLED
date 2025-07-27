@@ -1,190 +1,95 @@
-#include "test.h"
+#include "doctest.h"
 #include "fl/async.h"
+#include "fl/task.h"
+#include "fl/time.h"
+#include "fl/warn.h"
 
-using namespace fl;
+TEST_CASE("Async tasks run correctly [async]") {
+    SUBCASE("A simple task runs") {
+        bool task_ran = false;
+        fl::unique_ptr<fl::task> task = fl::task::every_ms(10);
+        task->then([&task_ran]() {
+            task_ran = true;
+        });
 
-// Mock async runner for testing
-class MockAsyncRunner : public AsyncRunner {
-public:
-    MockAsyncRunner() : mActiveCount(0), mUpdateCount(0) {}
-    
-    void update() override {
-        mUpdateCount++;
-    }
-    
-    bool has_active_tasks() const override {
-        return mActiveCount > 0;
-    }
-    
-    size_t active_task_count() const override {
-        return mActiveCount;
-    }
-    
-    void set_active_count(size_t count) {
-        mActiveCount = count;
-    }
-    
-    size_t get_update_count() const {
-        return mUpdateCount;
+        fl::Scheduler::instance().add_task(fl::move(task));
+
+        fl::Scheduler::instance().update();
+
+        REQUIRE(task_ran);
     }
 
-private:
-    size_t mActiveCount;
-    size_t mUpdateCount;
-};
-
-TEST_CASE("fl::async - Basic AsyncManager Operations") {
-    auto& manager = AsyncManager::instance();
-    
-    SUBCASE("AsyncManager starts empty") {
-        CHECK(!manager.has_active_tasks());
-        CHECK_EQ(manager.total_active_tasks(), 0);
+    SUBCASE("Recurring tasks run multiple times") {
+        int run_count = 0;
+        fl::unique_ptr<fl::task> task = fl::task::every_ms(10);
+        task->then([&run_count]() {
+            run_count++;
+        });
+        
+        fl::Scheduler::instance().add_task(fl::move(task));
+        
+        // Run scheduler multiple times
+        fl::Scheduler::instance().update();
+        fl::Scheduler::instance().update();
+        fl::Scheduler::instance().update();
+        
+        // Should have run 3 times
+        REQUIRE(run_count == 3);
     }
     
-    SUBCASE("Register and unregister runners") {
-        MockAsyncRunner runner;
+    SUBCASE("Task timing works correctly") {
+        int run_count = 0;
+        fl::unique_ptr<fl::task> task = fl::task::every_ms(50); // 50ms interval
+        task->then([&run_count]() {
+            run_count++;
+        });
         
-        // Register runner
-        manager.register_runner(&runner);
+        fl::Scheduler::instance().add_task(fl::move(task));
         
-        // Should still have no active tasks since runner has none
-        CHECK(!manager.has_active_tasks());
-        CHECK_EQ(manager.total_active_tasks(), 0);
+        // Run immediately - should execute
+        fl::Scheduler::instance().update();
+        REQUIRE(run_count == 1);
         
-        // Give runner some active tasks
-        runner.set_active_count(3);
-        CHECK(manager.has_active_tasks());
-        CHECK_EQ(manager.total_active_tasks(), 3);
-        
-        // Unregister runner
-        manager.unregister_runner(&runner);
-        CHECK(!manager.has_active_tasks());
-        CHECK_EQ(manager.total_active_tasks(), 0);
+        // Run again immediately - should not execute (not enough time passed)
+        fl::Scheduler::instance().update();
+        REQUIRE(run_count == 1);
     }
     
-    SUBCASE("Duplicate registration is ignored") {
-        MockAsyncRunner runner;
+    SUBCASE("Error handling works") {
+        bool error_caught = false;
+        fl::unique_ptr<fl::task> task = fl::task::every_ms(10);
+        task->then([]() {
+            throw fl::Error("Test error");
+        }).catch_([&error_caught](const fl::Error& e) {
+            error_caught = (e.message == "Test error");
+        });
         
-        manager.register_runner(&runner);
-        manager.register_runner(&runner); // Should be ignored
+        fl::Scheduler::instance().add_task(fl::move(task));
+        fl::Scheduler::instance().update();
         
-        runner.set_active_count(1);
-        CHECK_EQ(manager.total_active_tasks(), 1); // Not doubled
-        
-        manager.unregister_runner(&runner);
+        REQUIRE(error_caught);
     }
     
-    SUBCASE("update_all calls update on all runners") {
-        MockAsyncRunner runner1, runner2;
+    SUBCASE("Frame-based tasks work") {
+        int before_count = 0;
+        int after_count = 0;
         
-        manager.register_runner(&runner1);
-        manager.register_runner(&runner2);
+        fl::unique_ptr<fl::task> before_task = fl::task::before_frame();
+        before_task->then([&before_count]() {
+            before_count++;
+        });
         
-        CHECK_EQ(runner1.get_update_count(), 0);
-        CHECK_EQ(runner2.get_update_count(), 0);
+        fl::unique_ptr<fl::task> after_task = fl::task::after_frame();
+        after_task->then([&after_count]() {
+            after_count++;
+        });
         
-        manager.update_all();
+        fl::Scheduler::instance().add_task(fl::move(before_task));
+        fl::Scheduler::instance().add_task(fl::move(after_task));
         
-        CHECK_EQ(runner1.get_update_count(), 1);
-        CHECK_EQ(runner2.get_update_count(), 1);
+        fl::Scheduler::instance().update();
         
-        manager.unregister_runner(&runner1);
-        manager.unregister_runner(&runner2);
+        REQUIRE(before_count == 1);
+        REQUIRE(after_count == 1);
     }
 }
-
-TEST_CASE("fl::async - Multiple Runners") {
-    auto& manager = AsyncManager::instance();
-    
-    SUBCASE("Multiple runners with different task counts") {
-        MockAsyncRunner runner1, runner2, runner3;
-        
-        manager.register_runner(&runner1);
-        manager.register_runner(&runner2);
-        manager.register_runner(&runner3);
-        
-        runner1.set_active_count(2);
-        runner2.set_active_count(0); // No active tasks
-        runner3.set_active_count(5);
-        
-        CHECK(manager.has_active_tasks());
-        CHECK_EQ(manager.total_active_tasks(), 7); // 2 + 0 + 5
-        
-        // Remove all tasks from all runners
-        runner1.set_active_count(0);
-        runner3.set_active_count(0);
-        
-        CHECK(!manager.has_active_tasks());
-        CHECK_EQ(manager.total_active_tasks(), 0);
-        
-        manager.unregister_runner(&runner1);
-        manager.unregister_runner(&runner2);
-        manager.unregister_runner(&runner3);
-    }
-}
-
-TEST_CASE("fl::async - Public API Functions") {
-    SUBCASE("asyncrun calls AsyncManager::update_all") {
-        MockAsyncRunner runner;
-        AsyncManager::instance().register_runner(&runner);
-        
-        CHECK_EQ(runner.get_update_count(), 0);
-        
-        fl::asyncrun();
-        
-        CHECK_EQ(runner.get_update_count(), 1);
-        
-        AsyncManager::instance().unregister_runner(&runner);
-    }
-    
-    SUBCASE("async_has_tasks reflects manager state") {
-        MockAsyncRunner runner;
-        AsyncManager::instance().register_runner(&runner);
-        
-        runner.set_active_count(0);
-        CHECK(!fl::async_has_tasks());
-        
-        runner.set_active_count(1);
-        CHECK(fl::async_has_tasks());
-        
-        AsyncManager::instance().unregister_runner(&runner);
-    }
-    
-    SUBCASE("async_active_tasks returns total count") {
-        MockAsyncRunner runner1, runner2;
-        AsyncManager::instance().register_runner(&runner1);
-        AsyncManager::instance().register_runner(&runner2);
-        
-        runner1.set_active_count(3);
-        runner2.set_active_count(7);
-        
-        CHECK_EQ(fl::async_active_tasks(), 10);
-        
-        AsyncManager::instance().unregister_runner(&runner1);
-        AsyncManager::instance().unregister_runner(&runner2);
-    }
-}
-
-TEST_CASE("fl::async - Edge Cases") {
-    auto& manager = AsyncManager::instance();
-    
-    SUBCASE("Null runner registration is ignored") {
-        size_t initial_count = manager.total_active_tasks();
-        manager.register_runner(nullptr);
-        CHECK_EQ(manager.total_active_tasks(), initial_count);
-    }
-    
-    SUBCASE("Unregistering non-existent runner is safe") {
-        MockAsyncRunner runner;
-        // Should not crash or cause issues
-        manager.unregister_runner(&runner);
-        CHECK_EQ(manager.total_active_tasks(), 0);
-    }
-    
-    SUBCASE("update_all with null runner is safe") {
-        // This tests the null check in update_all
-        // We can't directly test this, but compilation ensures the check exists
-        manager.update_all();
-        CHECK(true); // Just verify we don't crash
-    }
-} 

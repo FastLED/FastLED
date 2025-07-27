@@ -21,7 +21,10 @@ template <typename T> class Optional {
     Optional() : mValue(Empty()) {}
     Optional(nullopt_t) : mValue(Empty()) {}
     Optional(const Optional &other) : mValue(other.mValue) {}
+    Optional(Optional &&other) noexcept : mValue(fl::move(other.mValue)) {}
+    
     Optional(const T &value) : mValue(value) {}
+    Optional(T &&value) : mValue(fl::move(value)) {}
     ~Optional() { mValue.reset(); }
     bool empty() const { return !mValue.template is<T>(); }
     bool has_value() const { return !empty(); }  // std::optional compatibility
@@ -33,6 +36,13 @@ template <typename T> class Optional {
     Optional &operator=(const Optional &other) {
         if (this != &other) {
             mValue = other.mValue;
+        }
+        return *this;
+    }
+
+    Optional &operator=(Optional &&other) noexcept {
+        if (this != &other) {
+            mValue = fl::move(other.mValue);
         }
         return *this;
     }

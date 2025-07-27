@@ -86,6 +86,9 @@ public:
     response(int status_code, const fl::string& status_text) 
         : mStatusCode(status_code), mStatusText(status_text) {}
     
+    // Forward declarations for internal functions that are only defined in the .cpp file
+    fl::promise<response> execute_fetch_request(const fl::string& url, const fetch_options& request);
+    
     /// HTTP status code (like JavaScript response.status)
     int status() const { return mStatusCode; }
     

@@ -366,8 +366,11 @@ class FL_ALIGN HeapVector {
         }
     };
 
-    // Constructor
-    HeapVector(fl::size size = 0, const T &value = T()) : mCapacity(size), mSize(size) {
+    // Default constructor
+    HeapVector() : mCapacity(0), mSize(0), mArray(nullptr) {}
+    
+    // Constructor with size and value
+    HeapVector(fl::size size, const T &value = T()) : mCapacity(size), mSize(size) {
         if (size > 0) {
             // mArray.reset(size);
             mArray = mAlloc.allocate(size);

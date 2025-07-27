@@ -25,6 +25,9 @@ namespace fl {
 class string;
 class Json;
 
+// Forward declaration for internal helper function
+fl::vector<float> jsonArrayToFloatVector(const fl::Json& jsonArray);
+
 // ScreenMap screen map maps strip indexes to x,y coordinates for a ui
 // canvas in float format.
 // This class is cheap to copy as it uses smart pointers for shared data.
