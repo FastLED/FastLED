@@ -332,6 +332,22 @@ def main() -> None:
         cmd_str_cpp = subprocess.list2cmdline(cmd_list)
 
         if args.cpp:
+            # Run the namespace check before C++ tests
+            print("Running namespace check...")
+            namespace_check_proc = RunningProcess(
+                "uv run python ci/tests/no_using_namespace_fl_in_headers.py",
+                echo=True,
+                auto_run=True,
+                enable_stack_trace=enable_stack_trace,
+            )
+            namespace_check_proc.wait()
+            if namespace_check_proc.returncode != 0:
+                print(
+                    f"Namespace check failed with return code {namespace_check_proc.returncode}"
+                )
+                sys.exit(namespace_check_proc.returncode)
+            print("Namespace check passed.")
+
             # Compile and run C++ tests
             start_time = time.time()
 
@@ -356,6 +372,22 @@ def main() -> None:
 
             print(f"Time elapsed: {time.time() - start_time:.2f}s")
             return
+
+        # Run the namespace check before C++ tests
+        print("Running namespace check...")
+        namespace_check_proc = RunningProcess(
+            "uv run python ci/tests/no_using_namespace_fl_in_headers.py",
+            echo=True,
+            auto_run=True,
+            enable_stack_trace=enable_stack_trace,
+        )
+        namespace_check_proc.wait()
+        if namespace_check_proc.returncode != 0:
+            print(
+                f"Namespace check failed with return code {namespace_check_proc.returncode}"
+            )
+            sys.exit(namespace_check_proc.returncode)
+        print("Namespace check passed.")
 
         cmd_list = _make_pio_check_cmd()
         if not _PIO_CHECK_ENABLED:
