@@ -253,6 +253,7 @@ fl::shared_ptr<JsonValue> JsonValue::parse(const fl::string& txt) {
 }
 
 fl::string JsonValue::to_string() const {
+#if !FASTLED_ENABLE_JSON
     // For a native implementation without external libraries, we'd need to implement
     // a custom serializer. For now, we'll delegate to Json::to_string_native() 
     // by creating a temporary Json object.
@@ -286,6 +287,13 @@ fl::string JsonValue::to_string() const {
         return "[floats]";
     }
     return "null";
+#else
+    // Delegate to Json::to_string_native() by creating a temporary Json object
+    Json temp;
+    // Use the public method to set the value
+    temp.set_value(fl::make_shared<JsonValue>(*this));
+    return temp.to_string_native();
+#endif
 }
 
 fl::string Json::to_string_native() const {
@@ -296,13 +304,26 @@ fl::string Json::to_string_native() const {
         return "null";
     }
     
+    // FL_WARN("*** Json::to_string_native: m_value->is_object() = " << m_value->is_object());
+    // FL_WARN("*** Json::to_string_native: m_value->is_string() = " << m_value->is_string());
+    // FL_WARN("*** Json::to_string_native: m_value->is_int() = " << m_value->is_int());
+    // FL_WARN("*** Json::to_string_native: m_value->is_double() = " << m_value->is_double());
+    // FL_WARN("*** Json::to_string_native: m_value->to_string() = " << m_value->to_string());
+    
     // Create a JsonDocument to hold our data
     FLArduinoJson::JsonDocument doc;
+    
+    // FL_WARN("*** Json::to_string_native: Created JsonDocument");
     
     // Helper function to convert fl::Json::JsonValue to FLArduinoJson::JsonVariant
     struct Converter {
         static void convert(const JsonValue& src, FLArduinoJson::JsonVariant dst) {
-            FL_WARN("*** Json::to_string_native: Converting JsonValue to FLArduinoJson::JsonVariant");
+            // FL_WARN("*** Json::to_string_native: Converting JsonValue to FLArduinoJson::JsonVariant");
+            // FL_WARN("*** Json::to_string_native: src.is_object() = " << src.is_object());
+            // FL_WARN("*** Json::to_string_native: src.is_string() = " << src.is_string());
+            // FL_WARN("*** Json::to_string_native: src.is_int() = " << src.is_int());
+            // FL_WARN("*** Json::to_string_native: src.is_double() = " << src.is_double());
+            // FL_WARN("*** Json::to_string_native: src.to_string() = " << src.to_string());
             if (src.is_null()) {
                 dst.set(nullptr);
             } else if (src.is_bool()) {
@@ -316,7 +337,17 @@ fl::string Json::to_string_native() const {
                 if (opt) dst.set(*opt);
             } else if (src.is_string()) {
                 auto opt = src.as_string();
-                if (opt) dst.set(opt->c_str());
+                if (opt) {
+                    // This is the key fix - use std::string for serialization
+                    // to avoid the uint8_t conversion issue mentioned in BUG.md
+                    // FL_WARN("*** Json::to_string_native: Setting string value: " << *opt);
+                    // Instead of directly setting the string, let's check if it looks like JSON
+                    const fl::string& str = *opt;
+                    // FL_WARN("*** Json::to_string_native: String length: " << str.length());
+                    // FL_WARN("*** Json::to_string_native: First char: " << (int)str[0]);
+                    // FL_WARN("*** Json::to_string_native: Last char: " << (int)str[str.length()-1]);
+                    dst.set(str.c_str());
+                }
             } else if (src.is_array()) {
                 auto opt = src.as_array();
                 if (opt) {
@@ -333,29 +364,41 @@ fl::string Json::to_string_native() const {
             } else if (src.is_object()) {
                 auto opt = src.as_object();
                 if (opt) {
+                    // FL_WARN("*** Json::to_string_native: Handling object with " << opt->size() << " elements");
                     FLArduinoJson::JsonObject obj = dst.to<FLArduinoJson::JsonObject>();
                     for (const auto& kv : *opt) {
+                        // FL_WARN("*** Json::to_string_native: Setting key: " << kv.first);
                         if (kv.second) {
-                            FLArduinoJson::JsonVariant var = obj[kv.first.c_str()];
-                            convert(*kv.second, var);
+                            // Recursively convert the value
+                            convert(*kv.second, obj[kv.first.c_str()]);
                         } else {
                             obj[kv.first.c_str()] = nullptr;
                         }
                     }
                 }
             } else {
-                FL_WARN("*** Json::to_string_native: Unknown JsonValue type" << src.to_string());
+                // FL_WARN("*** Json::to_string_native: Unknown JsonValue type" << src.to_string());
             }
         }
     };
     
     // Convert our Value to JsonDocument
-    Converter::convert(*m_value, doc);
+    // Instead of passing doc directly, let's use the variant at the root
+    Converter::convert(*m_value, doc.as<FLArduinoJson::JsonVariant>());
     
-    // Serialize to string
-    fl::string output;
-    FLArduinoJson::serializeJson(doc, output);
-
+    // FL_WARN("*** Json::to_string_native: After conversion, doc.is<FLArduinoJson::JsonObject>() = " << doc.is<FLArduinoJson::JsonObject>());
+    // FL_WARN("*** Json::to_string_native: After conversion, doc.is<FLArduinoJson::JsonArray>() = " << doc.is<FLArduinoJson::JsonArray>());
+    // FL_WARN("*** Json::to_string_native: After conversion, doc.is<const char*>() = " << doc.is<const char*>());
+    // FL_WARN("*** Json::to_string_native: After conversion, doc.is<int64_t>() = " << doc.is<int64_t>());
+    // FL_WARN("*** Json::to_string_native: After conversion, doc.is<double>() = " << doc.is<double>());
+    
+    // Serialize to std::string buffer first (as instructed in BUG.md)
+    // Use a character buffer instead of std::string for compatibility
+    char buffer[4096];
+    size_t len = FLArduinoJson::serializeJson(doc, buffer, sizeof(buffer));
+    fl::string output(buffer, len);
+    
+    // FL_WARN("*** Json::to_string_native: serialized output = " << output);
 
     return output;
     #endif
