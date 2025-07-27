@@ -186,10 +186,50 @@ struct DefaultValueVisitor {
     void operator()(const T& value) {
         result = &value;
     }
+    
+    // Special handling for integer conversions
+    template<typename U>
+    typename fl::enable_if<fl::is_integral<T>::value && fl::is_integral<U>::value, void>::type
+    operator()(const U& value) {
+        // Convert between integer types
+        T converted = static_cast<T>(value);
+        // We need to store this somewhere - using a static variable for now
+        // In a real implementation, we might want to avoid this
+        static T storage;
+        storage = converted;
+        result = &storage;
+    }
+    
+    // Special handling for floating point to integer conversion
+    template<typename U>
+    typename fl::enable_if<fl::is_integral<T>::value && fl::is_floating_point<U>::value, void>::type
+    operator()(const U& value) {
+        // Convert float to integer
+        T converted = static_cast<T>(value);
+        static T storage;
+        storage = converted;
+        result = &storage;
+    }
+    
+    // Special handling for integer to floating point conversion
+    template<typename U>
+    typename fl::enable_if<fl::is_floating_point<T>::value && fl::is_integral<U>::value, void>::type
+    operator()(const U& value) {
+        // Convert integer to float
+        T converted = static_cast<T>(value);
+        static T storage;
+        storage = converted;
+        result = &storage;
+    }
 
     // Generic overload for all other types
     template<typename U>
-    void operator()(const U&) {
+    typename fl::enable_if<
+        !(fl::is_integral<T>::value && fl::is_integral<U>::value) &&
+        !(fl::is_integral<T>::value && fl::is_floating_point<U>::value) &&
+        !(fl::is_floating_point<T>::value && fl::is_integral<U>::value),
+        void>::type
+    operator()(const U&) {
         // Do nothing for other types
     }
     
@@ -1719,12 +1759,16 @@ public:
         if (!m_value || !m_value->is_object()) {
             m_value = fl::make_shared<JsonValue>(JsonObject{});
         }
-        //FASTLED_WARN("Accessing key '" << key << "' in object");
         // Get reference to the JsonValue
-        JsonValue& value = (*m_value)[key];
-        // Create a new Json object that shares the same JsonValue
+        auto objPtr = m_value->data.ptr<JsonObject>();
+        if (objPtr && objPtr->find(key) != objPtr->end()) {
+            static thread_local Json result;
+            result.m_value = (*objPtr)[key];
+            return result;
+        }
+        // Key doesn't exist, create a new null value
         static thread_local Json result;
-        result.m_value = fl::make_shared<JsonValue>(value);
+        result.m_value = fl::make_shared<JsonValue>(nullptr);
         return result;
     }
     
