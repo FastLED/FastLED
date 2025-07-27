@@ -383,6 +383,14 @@ struct Value {
         data.visit(visitor);
         return visitor.result ? *visitor.result : fallback;
     }
+    
+    // Explicit method for default values (alternative to operator|)
+    template<typename T>
+    T value_or(const T& fallback) const {
+        DefaultValueVisitor<T> visitor(fallback);
+        data.visit(visitor);
+        return visitor.result ? *visitor.result : fallback;
+    }
 
     // Contains methods for checking existence
     bool contains(size_t idx) const {
@@ -645,6 +653,13 @@ public:
     T operator|(const T& fallback) const {
         if (!m_value) return fallback;
         return (*m_value) | fallback;
+    }
+    
+    // Explicit method for default values (alternative to operator|)
+    template<typename T>
+    T value_or(const T& fallback) const {
+        if (!m_value) return fallback;
+        return m_value->value_or(fallback);
     }
 
     // has_value method for compatibility

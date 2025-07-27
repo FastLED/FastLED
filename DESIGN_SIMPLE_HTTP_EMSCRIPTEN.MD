@@ -146,7 +146,7 @@ fl::future<Response> WasmHttpClient::send_request(const fl::string& url, const R
     emscripten_fetch_attr_init(&attr);
     
     // Set HTTP method
-    HttpMethod method = options.method.value_or(HttpMethod::GET);
+    HttpMethod method = options.method.or(HttpMethod::GET);
     strcpy(attr.requestMethod, to_string(method).c_str());
     
     // Configure attributes

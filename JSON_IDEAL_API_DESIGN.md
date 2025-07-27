@@ -59,7 +59,7 @@ public:
     T get() const;
     
     template<typename T>
-    T value_or(T defaultValue) const;
+    T or(T defaultValue) const;
     
     // Operator for default values (e.g., json["key"] | defaultValue)
     template<typename T>

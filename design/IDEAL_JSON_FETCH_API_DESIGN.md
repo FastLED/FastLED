@@ -245,13 +245,13 @@ auto json = JsonBuilder()
     .build();
 
 // ✅ WORKING: CRGB parsing
-auto color = json["color"].get<CRGB>().value_or(CRGB::Black);
+auto color = json["color"].get<CRGB>().or(CRGB::Black);
 
 // ⏳ PLANNED: Array to CRGB palette
-auto palette = json["colors"].get<vector<CRGB>>().value_or({CRGB::Red, CRGB::Blue});
+auto palette = json["colors"].get<vector<CRGB>>().or({CRGB::Red, CRGB::Blue});
 
 // ⏳ PLANNED: Coordinate parsing for screen maps
-auto point = json["position"].get<vec2f>().value_or({0.0f, 0.0f});
+auto point = json["position"].get<vec2f>().or({0.0f, 0.0f});
 ```
 
 ### ✅ IMPLEMENTED: Builder Pattern for Test Construction
@@ -271,7 +271,7 @@ auto json = JsonBuilder()
 CHECK_EQ(json["brightness"] | 0, 128);
 CHECK(json["enabled"] | false);
 CHECK_EQ(json["name"] | string(""), "test_device");
-CHECK_EQ(json["count"].get_flexible<int>().value_or(0), 456);  // String "456" -> int 456
+CHECK_EQ(json["count"].get_flexible<int>().or(0), 456);  // String "456" -> int 456
 ```
 
 ## 🎯 COMPLETED: JSON UI Integration & FLArduinoJson Elimination
@@ -435,8 +435,8 @@ TEST_CASE("JSON LED Configuration - Ideal API Enhanced") {
     CHECK_EQ(json["strip"]["type"] | "", "WS2812");
     
     // ✅ NEW: String numbers automatically convert
-    CHECK_EQ(json["strip"]["pin"].get_flexible<int>().value_or(0), 3);
-    CHECK_EQ(json["strip"]["brightness"].get_flexible<int>().value_or(0), 128);
+    CHECK_EQ(json["strip"]["pin"].get_flexible<int>().or(0), 3);
+    CHECK_EQ(json["strip"]["brightness"].get_flexible<int>().or(0), 128);
     
     // ✅ Enhanced: Cross-type access works seamlessly
     auto brightness_as_float = json["strip"]["brightness"].get_flexible<float>();

@@ -60,16 +60,20 @@ Visit our [documentation](https://fastled.io) for more details!)";
     fl::Json jsonObj = fl::Json::createObject();
     help.toJson(jsonObj);
     
-    fl::string name = jsonObj["name"] | fl::string("");
+    fl::string name = jsonObj["name"].or(fl::string(""));
     CHECK(name == fl::string("help"));
-    fl::string type = jsonObj["type"] | fl::string("");
+    fl::string type = jsonObj["type"].or(fl::string(""));
     CHECK(type == fl::string("help"));
-    fl::string group = jsonObj["group"] | fl::string("");
+    fl::string group = jsonObj["group"].or(fl::string(""));
     CHECK(group == fl::string("getting-started"));
-    int id = jsonObj["id"] | -1;
+    int id = jsonObj["id"].or(-1);
     CHECK(id >= 0);
-    fl::string content = jsonObj["markdownContent"] | fl::string("");
+    fl::string content = jsonObj["markdownContent"].or(fl::string(""));
     CHECK(content == markdownContent);
+    
+    // Also test that operator| still works
+    fl::string name2 = jsonObj["name"] | fl::string("");
+    CHECK(name2 == fl::string("help"));
 }
 
 TEST_CASE("UIHelp wrapper functionality") {
@@ -127,10 +131,14 @@ And some Unicode: ★ ♪ ⚡)";
     help.toJson(jsonObj);
     
     // Verify the markdown content is preserved exactly
-    fl::string content = jsonObj["markdownContent"] | fl::string("");
+    fl::string content = jsonObj["markdownContent"].or(fl::string(""));
     CHECK(content == complexMarkdown);
-    fl::string type = jsonObj["type"] | fl::string("");
+    fl::string type = jsonObj["type"].or(fl::string(""));
     CHECK(type == fl::string("help"));
+    
+    // Also test operator|
+    fl::string content2 = jsonObj["markdownContent"] | fl::string("");
+    CHECK(content2 == complexMarkdown);
 }
 
 TEST_CASE("UIHelp edge cases") {
@@ -156,8 +164,12 @@ TEST_CASE("UIHelp edge cases") {
     // Verify JSON serialization works with long content
     fl::Json jsonObj = fl::Json::createObject();
     longHelp.toJson(jsonObj);
-    fl::string content = jsonObj["markdownContent"] | fl::string("");
+    fl::string content = jsonObj["markdownContent"].or(fl::string(""));
     CHECK(content == longContent);
+    
+    // Also test operator|
+    fl::string content2 = jsonObj["markdownContent"] | fl::string("");
+    CHECK(content2 == longContent);
 }
 
 TEST_CASE("UIHelp group operations") {
