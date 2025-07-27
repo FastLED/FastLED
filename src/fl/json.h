@@ -1886,6 +1886,9 @@ public:
     void set_value(const fl::shared_ptr<JsonValue>& value) {
         m_value = value;
     }
+    
+    // Public method to access to_string_native for JsonValue::to_string()
+    fl::string to_string_native_public() const { return to_string_native(); }
 
     // Serialization - now delegates to native implementation
     fl::string to_string() const { return to_string_native(); }
