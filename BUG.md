@@ -1,47 +1,173 @@
-## Memory Access Out of Bounds in WASM Build
+# JsonUi Title Component "this" Pointer Invalidation Bug
 
-### Error Details
-```
-fastled_async_controller.js:317 Fatal error in FastLED pure JavaScript async loop: RuntimeError: memory access out of bounds
-    at fastled.wasm.fl::AtomicFake<unsigned int>::load() const (http://localhost:8142/fastled.wasm:wasm-function[83]:0xa712)
-    at fastled.wasm.fl::AtomicFake<unsigned int>::operator unsigned int() const (http://localhost:8142/fastled.wasm:wasm-function[82]:0xa6a0)
-    at fastled.wasm.fl::detail::ControlBlockBase::remove_shared_ref() (http://localhost:8142/fastled.wasm:wasm-function[80]:0xa52c)
-    at fastled.wasm.fl::shared_ptr<fl::Json::Value>::release() (http://localhost:8142/fastled.wasm:wasm-function[1164]:0x719bf)
-    at fastled.wasm.fl::shared_ptr<fl::Json::Value>::operator=(fl::shared_ptr<fl::Json::Value> const&) (http://localhost:8142/fastled.wasm:wasm-function[1161]:0x712b4)
-    at fastled.wasm.fl::Json::operator=(fl::Json const&) (http://localhost:8142/fastled.wasm:wasm-function[1156]:0x70682)
-    at fastled.wasm.fl::Json::set(fl::string const&, fl::Json const&) (http://localhost:8142/fastled.wasm:wasm-function[3915]:0x17200f)
-    at fastled.wasm.fl::Json::set(fl::string const&, fl::string const&) (http://localhost:8142/fastled.wasm:wasm-function[4077]:0x17eca0)
-    at fastled.wasm.fl::JsonTitleImpl::toJson(fl::Json&) const (http://localhost:8142/fastled.wasm:wasm-function[4171]:0x18a2d3)
-    at fastled.wasm.fl::JsonTitleImpl::JsonTitleImpl(fl::string const&)::$_0::operator()(fl::Json&) const (http://localhost:8142/fastled.wasm:wasm-function[4170]:0x189f10)
+## Problem Description
+
+The JsonUi system has a critical bug where UI components like `JsonTitleImpl` can crash when their `JsonUiInternal` objects outlive the parent component. This happens because the lambdas stored in `JsonUiInternal` capture `this` pointers to the parent components, which can become invalid.
+
+Specifically, in `title.cpp`:
+```cpp
+JsonUiInternal::ToJsonFunction to_json_fcn =
+    JsonUiInternal::ToJsonFunction([this](fl::Json &json) {
+        this->toJson(json);
+    });
 ```
 
-### Root Cause Analysis
+When `JsonTitleImpl` is destroyed but its `JsonUiInternal` object persists in the `JsonUiManager`, calling the lambda results in accessing invalid memory through the captured `this` pointer.
 
-The error occurs when using `shared_ptr` in a WASM environment. The stack trace shows that the issue happens during reference counting operations in `AtomicFake<unsigned int>::load()`.
+## Current Component Implementations
 
-Key components involved:
-1. `AtomicFake` class in `src/fl/atomic.h` - Provides a non-atomic implementation of atomic operations for single-threaded environments
-2. `shared_ptr` implementation in `src/fl/shared_ptr.h` - Uses `AtomicFake` for reference counting
-3. JSON UI components in `src/platforms/shared/ui/json/` - Particularly `JsonTitleImpl` which uses `shared_ptr`
-4. The JSON implementation also uses `Variant`, `optional`, and other complex data structures
+Looking at several component implementations:
 
-The issue is happening during the `JsonTitleImpl::toJson()` method where it calls `json.set()` with string values. This eventually leads to a copy assignment of `shared_ptr<fl::Json::Value>` which triggers the reference counting mechanism.
+1. `title.cpp` - Captures `this` in lambda for `toJson` function
+2. `slider.cpp` - Captures `this` in lambdas for both `updateInternal` and `toJson` functions
+3. Other components (`button.cpp`, `checkbox.cpp`, etc.) follow similar patterns
 
-The problem appears to be a memory access out of bounds error when the `AtomicFake::load()` method tries to access memory that has already been deallocated or is outside the valid memory range.
+## Root Cause
 
-It's particularly concerning that we're using variants, optional types, and complex data structures that may have intricate memory management requirements. It's possible that the code is accessing data from a dead object that it shouldn't be deleting, especially given the complex interplay between JSON values, shared pointers, and variant types.
+The issue occurs because:
+1. UI components create `JsonUiInternal` objects with lambdas that capture `this`
+2. These objects are registered with the global `JsonUiManager` via `addJsonUiComponent`
+3. When a UI component is destroyed, it doesn't always ensure its `JsonUiInternal` is removed from the manager
+4. The `JsonUiInternal` object can outlive its parent component
+5. Later, when the manager calls the stored lambdas, they access the invalid `this` pointer
 
-### Potential Solutions
+## Planned Refactoring
 
-1. **Check for invalid use of fl::variant/fl::optional**: These will not protect the user from accessing memory when they use some operations. This is the most likely cause.
-1. **Check for null control block**: Add null checks in `AtomicFake::load()` before accessing `mValue`
-2. **Verify control block lifetime**: Ensure that `ControlBlockBase` objects have proper lifetime management
-3. **Use no-tracking shared_ptr**: Consider using `make_shared_no_tracking()` for UI components that don't need reference counting
-4. **Memory alignment issues**: Check for potential memory alignment issues in WASM environment
+To address this issue, `JsonUiInternal` will be broken up into a base class with virtual functions for reading and writing values between JSON and internal state. The internal state will be contained in subclasses for specific component types.
 
-### Next Steps
+For example:
+```cpp
+class JSUiInternalBase {
+public:
+    virtual ~JSUiInternalBase() = default;
+    virtual void toJson(fl::Json& json) const = 0;
+    virtual void updateInternal(const fl::Json& json) = 0;
+};
 
-1. Add additional null checks in the `AtomicFake` and `shared_ptr` implementations
-2. Investigate the lifetime of `JsonUiInternal` objects and their associated control blocks
-3. Consider using the no-tracking mode for UI components that have static lifetime
-4. Test with memory debugging tools in the WASM environment
+class JSUIInternalButton : public JSUiInternalBase {
+private:
+    // Data payload specific to button component
+    bool mPressed;
+    string mLabel;
+    
+public:
+    void toJson(fl::Json& json) const override;
+    void updateInternal(const fl::Json& json) override;
+    
+    // Accessors for the data payload
+    bool isPressed() const { return mPressed; }
+    void setPressed(bool pressed) { mPressed = pressed; }
+    const string& getLabel() const { return mLabel; }
+    void setLabel(const string& label) { mLabel = label; }
+};
+```
+
+This approach will eliminate the need for lambdas that capture `this` pointers, as each component will directly implement the serialization methods with access to their own data.
+
+## Proposed Solutions
+
+### Solution 1: Clear Functions in Destructor (Recommended for interim fix)
+
+Modify all UI component destructors to explicitly clear the functions in their `JsonUiInternal` objects before destruction:
+
+```cpp
+// In JsonTitleImpl destructor
+JsonTitleImpl::~JsonTitleImpl() {
+    removeJsonUiComponent(fl::weak_ptr<JsonUiInternal>(mInternal));
+    if (mInternal) {
+        mInternal->clearFunctions(); // Clear lambdas that capture 'this'
+    }
+}
+```
+
+This approach ensures that even if the `JsonUiInternal` object persists, its lambdas won't try to access the invalid `this` pointer.
+
+### Solution 2: Weak Pointer Pattern with Validation
+
+Modify the lambda implementations to use weak pointers and validate before accessing:
+
+```cpp
+JsonTitleImpl::JsonTitleImpl(const string &text) : mText(text) {
+    // Store a weak pointer to self
+    fl::weak_ptr<JsonTitleImpl> weakSelf = shared_from_this(); // Requires inheriting from shared_from_this
+    
+    JsonUiInternal::UpdateFunction update_fcn;
+    JsonUiInternal::ToJsonFunction to_json_fcn =
+        JsonUiInternal::ToJsonFunction([weakSelf](fl::Json &json) {
+            if (auto self = weakSelf.lock()) {
+                self->toJson(json);
+            }
+        });
+    // ... rest of implementation
+}
+```
+
+However, this requires changing the inheritance hierarchy of all UI components.
+
+### Solution 3: Data-Only Callbacks
+
+Instead of capturing `this`, pass all necessary data to the `JsonUiInternal` object and use that data in the callbacks:
+
+```cpp
+JsonTitleImpl::JsonTitleImpl(const string &text) : mText(text) {
+    JsonUiInternal::UpdateFunction update_fcn;
+    JsonUiInternal::ToJsonFunction to_json_fcn =
+        JsonUiInternal::ToJsonFunction([text](fl::Json &json) { // Capture by value
+            // Reimplement toJson logic directly without 'this'
+            json.set("type", "title");
+            json.set("text", text);
+            // ... other fields
+        });
+    // ... rest of implementation
+}
+```
+
+This approach requires duplicating some logic but completely eliminates the `this` pointer dependency.
+
+## Recommended Implementation Plan
+
+1. Implement Solution 1 as it's the least invasive and most reliable:
+   - Modify all UI component destructors to call `clearFunctions()` on their `mInternal` objects
+   - Ensure `removeJsonUiComponent` is always called in destructors
+   - Add debug checks to verify proper cleanup
+
+2. Add safety checks in `JsonUiInternal::toJson` and `JsonUiInternal::update` methods:
+   ```cpp
+   void JsonUiInternal::toJson(fl::Json &json) const {
+       fl::lock_guard<fl::mutex> lock(mMutex);
+       if (mtoJsonFunc) {
+           // Add a try-catch or validation here if possible
+           mtoJsonFunc(json);
+       }
+   }
+   ```
+
+3. Begin implementing the planned refactoring to eliminate the lambda capture pattern entirely:
+   - Create `JSUiInternalBase` with virtual functions for JSON serialization
+   - Create specific subclasses for each component type (e.g., `JSUIInternalButton`)
+   - Move data payloads into these subclasses
+   - Replace lambda-based approach with direct virtual function calls
+
+4. Add documentation to warn developers about this pattern.
+
+## Example Fix for JsonTitleImpl
+
+```cpp
+// title.h - Add clearFunctions declaration to JsonUiInternalPtr
+// (already exists in ui_internal.h)
+
+// title.cpp - Modified destructor
+JsonTitleImpl::~JsonTitleImpl() {
+    // Ensure the component is removed from the global registry
+    removeJsonUiComponent(fl::weak_ptr<JsonUiInternal>(mInternal));
+    
+    // Clear the functions that captured 'this' to prevent crashes
+    if (mInternal) {
+        mInternal->clearFunctions();
+    }
+}
+```
+
+Similar changes would be applied to all other UI component implementations (`slider.cpp`, `button.cpp`, etc.).
+
+This approach ensures that even if the `JsonUiInternal` object persists in the manager after its parent is destroyed, attempts to call its lambdas will be safe because the functions have been cleared.
