@@ -386,20 +386,8 @@ def main() -> None:
         if specific_test:
             run_tests(specific_test)
         else:
-            cmd = "ctest --test-dir tests/.build"
-            if not _VERBOSE:
-                # Show progress, and output on failure by default
-                cmd += " --progress --output-on-failure"
-            else:
-                # Full verbose mode when explicitly requested
-                cmd += " --verbose --progress --output-on-failure"
-            if only_run_failed_test:
-                cmd += " --rerun-failed"
-            rtn, stdout = run_command(cmd)
-            if rtn != 0:
-                print("Failed tests:")
-                print(stdout)
-                sys.exit(1)
+            # Use our own test runner instead of CTest since CTest integration is broken
+            run_tests(None)
 
 
 if __name__ == "__main__":
