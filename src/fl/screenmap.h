@@ -70,6 +70,7 @@ class ScreenMap {
 
     // define the assignment operator
     ScreenMap &operator=(const ScreenMap &other);
+    ScreenMap &operator=(ScreenMap &&other);
 
     vec2f mapToIndex(u32 x) const;
 

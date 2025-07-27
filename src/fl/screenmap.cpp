@@ -19,46 +19,33 @@
 namespace fl {
 
 // Helper function to extract a vector of floats from a JSON array
-fl::vector<float> jsonArrayToFloatVector(const fl::Json& jsonArray) {
+fl::vector<float>&& jsonArrayToFloatVector(const fl::Json& jsonArray) {
     fl::vector<float> result;
     
     if (!jsonArray.has_value() || !jsonArray.is_array()) {
-        return result;
+        return fl::move(result);
     }
+    auto begin_float =  jsonArray.begin_array<float>();
+    auto end_float = jsonArray.end_array<float>();
+
+    using T = decltype(*begin_float);
+    static_assert(fl::is_same<T, fl::ParseResult<float>>::value, "Value type must be ParseResult<float>");
     
-    auto arrayOpt = jsonArray.as_array();
-    if (!arrayOpt) {
-        return result;
-    }
-    
-    for (const auto& item : *arrayOpt) {
-        // Check that item is not null before creating Json object
-        if (!item) {
-            continue;
-        }
-        
-        // Create Json object from shared_ptr
-        fl::Json itemJson(item);
-        if (!itemJson.has_value()) {
-            continue;
-        }
-        
-        // Try to get as double first (more common for JSON numbers)
-        auto doubleVal = itemJson.as_double();
-        if (doubleVal) {
-            result.push_back(static_cast<float>(*doubleVal));
-            continue;
-        }
-        
-        // If that fails, try as int
-        auto intVal = itemJson.as_int();
-        if (intVal) {
-            result.push_back(static_cast<float>(*intVal));
-            continue;
+    // Use explicit array iterator style as demonstrated in FEATURE.md
+    // DO NOT CHANGE THIS CODE. FIX THE IMPLIMENTATION IF NECESSARY.
+    for (auto it = begin_float; it != end_float; ++it) {
+        // assert that the value type is ParseResult<float>
+
+        // get the name of the type
+        auto parseResult = *it;
+        if (!parseResult.has_error()) {
+            result.push_back(parseResult.get_value());
+        } else {
+            FL_WARN("jsonArrayToFloatVector: ParseResult<float> has error: " << parseResult.get_error().message);
         }
     }
     
-    return result;
+    return fl::move(result);
 }
 
 ScreenMap ScreenMap::Circle(int numLeds, float cm_between_leds,
@@ -209,7 +196,7 @@ bool ScreenMap::ParseJson(const char *jsonStrScreenMap,
         for (size_t i = 0; i < n; i++) {
             segment_map.set(i, vec2f{x_array[i], y_array[i]});
         }
-        (*segmentMaps)[name] = segment_map;
+        (*segmentMaps)[name] = fl::move(segment_map);
     }
     return true;
 }
@@ -269,13 +256,13 @@ void ScreenMap::toJson(const fl::fl_map<string, ScreenMap> &segmentMaps,
         // Create x array
         fl::Json xArray = fl::Json::array();
         for (u16 i = 0; i < segment.getLength(); i++) {
-            xArray.push_back(fl::Json(segment[i].x));
+            xArray.push_back(fl::Json(static_cast<double>(segment[i].x)));
         }
         
         // Create y array
         fl::Json yArray = fl::Json::array();
         for (u16 i = 0; i < segment.getLength(); i++) {
-            yArray.push_back(fl::Json(segment[i].y));
+            yArray.push_back(fl::Json(static_cast<double>(segment[i].y)));
         }
         
         // Create segment object
@@ -283,7 +270,7 @@ void ScreenMap::toJson(const fl::fl_map<string, ScreenMap> &segmentMaps,
         // Add arrays and diameter to segment object
         segmentObj.set("x", xArray);
         segmentObj.set("y", yArray);
-        segmentObj.set("diameter", fl::Json(diameter));
+        segmentObj.set("diameter", fl::Json(static_cast<double>(diameter)));
         
         // Add segment to map object
         mapObj.set(name, segmentObj);
@@ -302,11 +289,13 @@ void ScreenMap::toJsonStr(const fl::fl_map<string, ScreenMap> &segmentMaps,
 
 ScreenMap::ScreenMap(u32 length, float mDiameter)
     : length(length), mDiameter(mDiameter) {
-    mLookUpTable = fl::make_shared<LUTXYFLOAT>(length);
-    LUTXYFLOAT &lut = *mLookUpTable.get();
-    vec2f *data = lut.getDataMutable();
-    for (u32 x = 0; x < length; x++) {
-        data[x] = {0, 0};
+    if (length > 0) {
+        mLookUpTable = fl::make_shared<LUTXYFLOAT>(length);
+        LUTXYFLOAT &lut = *mLookUpTable.get();
+        vec2f *data = lut.getDataMutable();
+        for (u32 x = 0; x < length; x++) {
+            data[x] = {0, 0};
+        }
     }
 }
 
@@ -412,6 +401,17 @@ ScreenMap &ScreenMap::operator=(const ScreenMap &other) {
         mDiameter = other.mDiameter;
         length = other.length;
         mLookUpTable = other.mLookUpTable;
+    }
+    return *this;
+}
+
+ScreenMap &ScreenMap::operator=(ScreenMap &&other) {
+    if (this != &other) {
+        mDiameter = other.mDiameter;
+        length = other.length;
+        mLookUpTable = fl::move(other.mLookUpTable);
+        other.length = 0;
+        other.mDiameter = -1.0f;
     }
     return *this;
 }
