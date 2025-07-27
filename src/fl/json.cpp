@@ -18,12 +18,12 @@ FL_DISABLE_WARNING_POP
 namespace fl {
 
 
-Value& get_null_value() {
-    static Value null_value;
+JsonValue& get_null_value() {
+    static JsonValue null_value;
     return null_value;
 }
 
-fl::shared_ptr<Value> Value::parse(const fl::string& txt) {
+fl::shared_ptr<JsonValue> JsonValue::parse(const fl::string& txt) {
     // Determine the size of the JsonDocument needed.
     FLArduinoJson::JsonDocument doc;
 
@@ -31,47 +31,47 @@ fl::shared_ptr<Value> Value::parse(const fl::string& txt) {
 
     if (error) {
         FL_WARN("JSON parsing failed: " << error.c_str());
-        return fl::make_shared<Value>(nullptr); // Return null on error
+        return fl::make_shared<JsonValue>(nullptr); // Return null on error
     }
 
-    // Helper function to convert FLArduinoJson::JsonVariantConst to fl::Json::Value
+    // Helper function to convert FLArduinoJson::JsonVariantConst to fl::Json::JsonValue
     struct Converter {
-        static fl::shared_ptr<Value> convert(const FLArduinoJson::JsonVariantConst& src) {
+        static fl::shared_ptr<JsonValue> convert(const FLArduinoJson::JsonVariantConst& src) {
             if (src.isNull()) {
-                return fl::make_shared<Value>(nullptr);
+                return fl::make_shared<JsonValue>(nullptr);
             } else if (src.is<bool>()) {
-                return fl::make_shared<Value>(src.as<bool>());
+                return fl::make_shared<JsonValue>(src.as<bool>());
             } else if (src.is<int64_t>()) {
                 // Handle 64-bit integers
-                return fl::make_shared<Value>(src.as<int64_t>());
+                return fl::make_shared<JsonValue>(src.as<int64_t>());
             } else if (src.is<int32_t>()) {
                 // Handle 32-bit integers explicitly for platform compatibility
-                return fl::make_shared<Value>(static_cast<int64_t>(src.as<int32_t>()));
+                return fl::make_shared<JsonValue>(static_cast<int64_t>(src.as<int32_t>()));
             } else if (src.is<uint32_t>()) {
                 // Handle unsigned 32-bit integers
-                return fl::make_shared<Value>(static_cast<int64_t>(src.as<uint32_t>()));
+                return fl::make_shared<JsonValue>(static_cast<int64_t>(src.as<uint32_t>()));
             } else if (src.is<double>()) {
                 // Handle double precision floats
-                return fl::make_shared<Value>(src.as<double>());
+                return fl::make_shared<JsonValue>(src.as<double>());
             } else if (src.is<float>()) {
                 // Handle single precision floats explicitly
-                return fl::make_shared<Value>(static_cast<double>(src.as<float>()));
+                return fl::make_shared<JsonValue>(static_cast<double>(src.as<float>()));
             } else if (src.is<const char*>()) {
-                return fl::make_shared<Value>(fl::string(src.as<const char*>()));
+                return fl::make_shared<JsonValue>(fl::string(src.as<const char*>()));
             } else if (src.is<FLArduinoJson::JsonArrayConst>()) {
-                Array arr;
+                JsonArray arr;
                 for (const auto& item : src.as<FLArduinoJson::JsonArrayConst>()) {
                     arr.push_back(convert(item));
                 }
-                return fl::make_shared<Value>(fl::move(arr));
+                return fl::make_shared<JsonValue>(fl::move(arr));
             } else if (src.is<FLArduinoJson::JsonObjectConst>()) {
-                Object obj;
+                JsonObject obj;
                 for (const auto& kv : src.as<FLArduinoJson::JsonObjectConst>()) {
                     obj[fl::string(kv.key().c_str())] = convert(kv.value());
                 }
-                return fl::make_shared<Value>(fl::move(obj));
+                return fl::make_shared<JsonValue>(fl::move(obj));
             }
-            return fl::make_shared<Value>(nullptr); // Should not happen
+            return fl::make_shared<JsonValue>(nullptr); // Should not happen
         }
     };
 
@@ -86,9 +86,9 @@ fl::string Json::to_string_native() const {
     // Create a JsonDocument to hold our data
     FLArduinoJson::JsonDocument doc;
     
-    // Helper function to convert fl::Json::Value to FLArduinoJson::JsonVariant
+    // Helper function to convert fl::Json::JsonValue to FLArduinoJson::JsonVariant
     struct Converter {
-        static void convert(const Value& src, FLArduinoJson::JsonVariant dst) {
+        static void convert(const JsonValue& src, FLArduinoJson::JsonVariant dst) {
             if (src.is_null()) {
                 dst.set(nullptr);
             } else if (src.is_bool()) {
@@ -143,7 +143,7 @@ fl::string Json::to_string_native() const {
 }
 
 // Forward declaration for the serializeValue function
-fl::string serializeValue(const Value& value);
+fl::string serializeValue(const JsonValue& value);
 
 
 fl::string Json::normalizeJsonString(const char* jsonStr) {

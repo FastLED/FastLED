@@ -24,15 +24,15 @@ namespace fl {
 
 
 // Forward declarations
-struct Value;
+struct JsonValue;
 
 // Define Array and Object as pointers to avoid incomplete type issues
 // We'll use heap-allocated containers for these to avoid alignment issues
-using Array = fl::vector<fl::shared_ptr<Value>>;
-using Object = fl::HashMap<fl::string, fl::shared_ptr<Value>>;
+using JsonArray = fl::vector<fl::shared_ptr<JsonValue>>;
+using JsonObject = fl::HashMap<fl::string, fl::shared_ptr<JsonValue>>;
 
-// Function to get a reference to a static null Value
-Value& get_null_value();
+// Function to get a reference to a static null JsonValue
+JsonValue& get_null_value();
 
 // AI - pay attention to this - implementing visitor pattern
 template<typename T>
@@ -67,7 +67,7 @@ struct DefaultValueVisitor {
 };
 
 // The JSON node
-struct Value {
+struct JsonValue {
     // Forward declarations for nested iterator classes
     class iterator;
     class const_iterator;
@@ -79,73 +79,76 @@ struct Value {
         int64_t,         // integer
         double,          // floating-point
         fl::string,      // string
-        Array,           // array
-        Object           // object
+        JsonArray,           // array
+        JsonObject           // object
     >;
 
-    typedef Value::iterator iterator;
-    typedef Value::const_iterator const_iterator;
+    typedef JsonValue::iterator iterator;
+    typedef JsonValue::const_iterator const_iterator;
 
     variant_t data;
 
     // Constructors
-    Value() noexcept : data(nullptr) {}
-    Value(fl::nullptr_t) noexcept : data(nullptr) {}
-    Value(bool b) noexcept : data(b) {}
-    Value(int64_t i) noexcept : data(i) {}
-    Value(double d) noexcept : data(d) {}
-    Value(const fl::string& s) : data(s) {
-        FASTLED_WARN("Created Value with string, is_string: " << is_string() << ", is_int: " << is_int());
+    JsonValue() noexcept : data(nullptr) {}
+    JsonValue(fl::nullptr_t) noexcept : data(nullptr) {}
+    JsonValue(bool b) noexcept : data(b) {}
+    JsonValue(int64_t i) noexcept : data(i) {}
+    JsonValue(double d) noexcept : data(d) {}
+    JsonValue(const fl::string& s) : data(s) {
+        FASTLED_WARN("Created JsonValue with string: '" << s << "'");
+        FASTLED_WARN("Tag value: " << data.tag());
+        FASTLED_WARN("Is string: " << is_string());
+        FASTLED_WARN("Is int: " << is_int());
     }
-    Value(const Array& a) : data(a) {
-
+    JsonValue(const JsonArray& a) : data(a) {
+        FASTLED_WARN("Created JsonValue with array");
     }
-    Value(const Object& o) : data(o) {
-
+    JsonValue(const JsonObject& o) : data(o) {
+        FASTLED_WARN("Created JsonValue with object");
     }
 
-    Value& operator=(const Value& other) {
+    JsonValue& operator=(const JsonValue& other) {
         data = other.data;
         return *this;
     }
 
-    Value& operator=(Value&& other) {
+    JsonValue& operator=(JsonValue&& other) {
         data = fl::move(other.data);
         return *this;
     }
 
     template<typename T>
-    Value& operator=(T&& value) {
+    JsonValue& operator=(T&& value) {
         data = fl::forward<T>(value);
         return *this;
     }
 
-    Value& operator=(fl::nullptr_t) {
+    JsonValue& operator=(fl::nullptr_t) {
         data = nullptr;
         return *this;
     }
 
-    Value& operator=(bool b) {
+    JsonValue& operator=(bool b) {
         data = b;
         return *this;
     }
 
-    Value& operator=(int64_t i) {
+    JsonValue& operator=(int64_t i) {
         data = i;
         return *this;
     }
 
-    Value& operator=(double d) {
+    JsonValue& operator=(double d) {
         data = d;
         return *this;
     }
 
-    Value& operator=(fl::string s) {
+    JsonValue& operator=(fl::string s) {
         data = fl::move(s);
         return *this;
     }
 
-    Value& operator=(Array a) {
+    JsonValue& operator=(JsonArray a) {
         data = fl::move(a);
         return *this;
     }
@@ -153,8 +156,8 @@ struct Value {
 
     
     // Special constructor for char values
-    static fl::shared_ptr<Value> from_char(char c) {
-        return fl::make_shared<Value>(fl::string(1, c));
+    static fl::shared_ptr<JsonValue> from_char(char c) {
+        return fl::make_shared<JsonValue>(fl::string(1, c));
     }
     
     // Visitor pattern implementation
@@ -169,13 +172,34 @@ struct Value {
     }
 
     // Type queries - using is<T>() instead of index() for fl::Variant
-    bool is_null() const noexcept { return data.is<fl::nullptr_t>(); }
-    bool is_bool() const noexcept { return data.is<bool>(); }
-    bool is_int() const noexcept { return data.is<int64_t>(); }
-    bool is_double() const noexcept { return data.is<double>(); }
-    bool is_string() const noexcept { return data.is<fl::string>(); }
-    bool is_array() const noexcept { return data.is<Array>(); }
-    bool is_object() const noexcept { return data.is<Object>(); }
+    bool is_null() const noexcept { 
+        FASTLED_WARN("is_null called, tag=" << data.tag());
+        return data.is<fl::nullptr_t>(); 
+    }
+    bool is_bool() const noexcept { 
+        FASTLED_WARN("is_bool called, tag=" << data.tag());
+        return data.is<bool>(); 
+    }
+    bool is_int() const noexcept { 
+        FASTLED_WARN("is_int called, tag=" << data.tag());
+        return data.is<int64_t>(); 
+    }
+    bool is_double() const noexcept { 
+        FASTLED_WARN("is_double called, tag=" << data.tag());
+        return data.is<double>(); 
+    }
+    bool is_string() const noexcept { 
+        FASTLED_WARN("is_string called, tag=" << data.tag());
+        return data.is<fl::string>(); 
+    }
+    bool is_array() const noexcept { 
+        FASTLED_WARN("is_array called, tag=" << data.tag());
+        return data.is<JsonArray>(); 
+    }
+    bool is_object() const noexcept { 
+        FASTLED_WARN("is_object called, tag=" << data.tag());
+        return data.is<JsonObject>(); 
+    }
 
     // Safe extractors (return optional values, not references)
     fl::optional<bool> as_bool() {
@@ -198,14 +222,14 @@ struct Value {
         return ptr ? fl::optional<fl::string>(*ptr) : fl::nullopt;
     }
     
-    fl::optional<Array> as_array() {
-        auto ptr = data.ptr<Array>();
-        return ptr ? fl::optional<Array>(*ptr) : fl::nullopt;
+    fl::optional<JsonArray> as_array() {
+        auto ptr = data.ptr<JsonArray>();
+        return ptr ? fl::optional<JsonArray>(*ptr) : fl::nullopt;
     }
     
-    fl::optional<Object> as_object() {
-        auto ptr = data.ptr<Object>();
-        return ptr ? fl::optional<Object>(*ptr) : fl::nullopt;
+    fl::optional<JsonObject> as_object() {
+        auto ptr = data.ptr<JsonObject>();
+        return ptr ? fl::optional<JsonObject>(*ptr) : fl::nullopt;
     }
 
     // Const overloads
@@ -229,14 +253,14 @@ struct Value {
         return ptr ? fl::optional<fl::string>(*ptr) : fl::nullopt;
     }
     
-    fl::optional<Array> as_array() const {
-        auto ptr = data.ptr<Array>();
-        return ptr ? fl::optional<Array>(*ptr) : fl::nullopt;
+    fl::optional<JsonArray> as_array() const {
+        auto ptr = data.ptr<JsonArray>();
+        return ptr ? fl::optional<JsonArray>(*ptr) : fl::nullopt;
     }
     
-    fl::optional<Object> as_object() const {
-        auto ptr = data.ptr<Object>();
-        return ptr ? fl::optional<Object>(*ptr) : fl::nullopt;
+    fl::optional<JsonObject> as_object() const {
+        auto ptr = data.ptr<JsonObject>();
+        return ptr ? fl::optional<JsonObject>(*ptr) : fl::nullopt;
     }
     
     // Generic getter template method
@@ -255,72 +279,72 @@ struct Value {
     // Iterator support for objects
     iterator begin() {
         if (!is_object()) {
-            static Object empty_obj;
+                static JsonObject empty_obj;
             return iterator(empty_obj.begin());
         }
-        auto ptr = data.ptr<Object>();
+        auto ptr = data.ptr<JsonObject>();
         return iterator(ptr->begin());
     }
     
     iterator end() {
         if (!is_object()) {
-            static Object empty_obj;
+            static JsonObject empty_obj;
             return iterator(empty_obj.end());
         }
-        auto ptr = data.ptr<Object>();
+        auto ptr = data.ptr<JsonObject>();
         return iterator(ptr->end());
     }
     
     const_iterator begin() const {
         if (!is_object()) {
-            static Object empty_obj;
+            static JsonObject empty_obj;
             return const_iterator::from_iterator(empty_obj.begin());
         }
-        auto ptr = data.ptr<const Object>();
-        if (!ptr) return const_iterator::from_iterator(Object().begin());
+        auto ptr = data.ptr<const JsonObject>();
+        if (!ptr) return const_iterator::from_iterator(JsonObject().begin());
         return const_iterator::from_iterator(ptr->begin());
     }
     
     const_iterator end() const {
         if (!is_object()) {
-            static Object empty_obj;
+            static JsonObject empty_obj;
             return const_iterator::from_iterator(empty_obj.end());
         }
-        auto ptr = data.ptr<const Object>();
-        if (!ptr) return const_iterator::from_iterator(Object().end());
+        auto ptr = data.ptr<const JsonObject>();
+        if (!ptr) return const_iterator::from_iterator(JsonObject().end());
         return const_iterator::from_iterator(ptr->end());
     }
     
     // Free functions for range-based for loops
-    friend iterator begin(Value& v) { return v.begin(); }
-    friend iterator end(Value& v) { return v.end(); }
-    friend const_iterator begin(const Value& v) { return v.begin(); }
-    friend const_iterator end(const Value& v) { return v.end(); }
+    friend iterator begin(JsonValue& v) { return v.begin(); }
+    friend iterator end(JsonValue& v) { return v.end(); }
+    friend const_iterator begin(const JsonValue& v) { return v.begin(); }
+    friend const_iterator end(const JsonValue& v) { return v.end(); }
 
     // Indexing for fluid chaining
-    Value& operator[](size_t idx) {
-        if (!is_array()) data = Array{};
-        auto ptr = data.ptr<Array>();
+    JsonValue& operator[](size_t idx) {
+        if (!is_array()) data = JsonArray{};
+        auto ptr = data.ptr<JsonArray>();
         if (!ptr) return get_null_value(); // Handle error case
         auto &arr = *ptr;
         if (idx >= arr.size()) {
             // Resize array and fill with null values
             for (size_t i = arr.size(); i <= idx; i++) {
-                arr.push_back(fl::make_shared<Value>());
+                arr.push_back(fl::make_shared<JsonValue>());
             }
         }
         if (idx >= arr.size()) return get_null_value(); // Handle error case
         return *arr[idx];
     }
     
-    Value& operator[](const fl::string &key) {
-        if (!is_object()) data = Object{};
-        auto ptr = data.ptr<Object>();
+    JsonValue& operator[](const fl::string &key) {
+        if (!is_object()) data = JsonObject{};
+        auto ptr = data.ptr<JsonObject>();
         if (!ptr) return get_null_value(); // Handle error case
         auto &obj = *ptr;
         if (obj.find(key) == obj.end()) {
             // Create a new entry if key doesn't exist
-            obj[key] = fl::make_shared<Value>();
+            obj[key] = fl::make_shared<JsonValue>();
         }
         return *obj[key];
     }
@@ -344,13 +368,13 @@ struct Value {
     // Contains methods for checking existence
     bool contains(size_t idx) const {
         if (!is_array()) return false;
-        auto ptr = data.ptr<Array>();
+        auto ptr = data.ptr<JsonArray>();
         return ptr && idx < ptr->size();
     }
     
     bool contains(const fl::string &key) const {
         if (!is_object()) return false;
-        auto ptr = data.ptr<Object>();
+        auto ptr = data.ptr<JsonObject>();
         return ptr && ptr->find(key) != ptr->end();
     }
 
@@ -372,10 +396,10 @@ struct Value {
     // Size methods
     size_t size() const {
         if (is_array()) {
-            auto ptr = data.ptr<Array>();
+            auto ptr = data.ptr<JsonArray>();
             return ptr ? ptr->size() : 0;
         } else if (is_object()) {
-            auto ptr = data.ptr<Object>();
+            auto ptr = data.ptr<JsonObject>();
             return ptr ? ptr->size() : 0;
         }
         return 0;
@@ -388,19 +412,19 @@ struct Value {
     friend class SerializerVisitor;
 
     // Parsing factory (FLArduinoJson implementation)
-    static fl::shared_ptr<Value> parse(const fl::string &txt);
+    static fl::shared_ptr<JsonValue> parse(const fl::string &txt);
     
     // Iterator support for objects
     class iterator {
     private:
-        Object::iterator m_iter;
+        JsonObject::iterator m_iter;
         
     public:
         iterator() = default;
-        iterator(Object::iterator iter) : m_iter(iter) {}
+        iterator(JsonObject::iterator iter) : m_iter(iter) {}
         
         // Getter for const iterator conversion
-        Object::iterator get_iter() const { return m_iter; }
+        JsonObject::iterator get_iter() const { return m_iter; }
         
         iterator& operator++() {
             ++m_iter;
@@ -423,9 +447,9 @@ struct Value {
         
         struct KeyValue {
             fl::string first;
-            Value& second;
+            JsonValue& second;
             
-            KeyValue(const fl::string& key, const fl::shared_ptr<Value>& value_ptr) 
+            KeyValue(const fl::string& key, const fl::shared_ptr<JsonValue>& value_ptr) 
                 : first(key), second(value_ptr ? *value_ptr : get_null_value()) {}
         };
         
@@ -439,20 +463,20 @@ struct Value {
     // Iterator for JSON objects (const version)
     class const_iterator {
     private:
-        Object::const_iterator m_iter;
+        JsonObject::const_iterator m_iter;
         
     public:
         const_iterator() = default;
-        const_iterator(Object::const_iterator iter) : m_iter(iter) {}
+        const_iterator(JsonObject::const_iterator iter) : m_iter(iter) {}
         
         // Factory method for conversion from iterator
         static const_iterator from_object_iterator(const iterator& other) {
-            Object::const_iterator const_iter(other.get_iter());
+            JsonObject::const_iterator const_iter(other.get_iter());
             return const_iterator(const_iter);
         }
         
         // Factory method for conversion from Object::iterator
-        static const_iterator from_iterator(Object::const_iterator iter) {
+        static const_iterator from_iterator(JsonObject::const_iterator iter) {
             return const_iterator(iter);
         }
         
@@ -477,9 +501,9 @@ struct Value {
         
         struct KeyValue {
             fl::string first;
-            const Value& second;
+            const JsonValue& second;
             
-            KeyValue(const fl::string& key, const fl::shared_ptr<Value>& value_ptr) 
+            KeyValue(const fl::string& key, const fl::shared_ptr<JsonValue>& value_ptr) 
                 : first(key), second(value_ptr ? *value_ptr : get_null_value()) {}
         };
         
@@ -491,36 +515,36 @@ struct Value {
     };
 };
 
-// Function to get a reference to a static null Value
-Value& get_null_value();
+// Function to get a reference to a static null JsonValue
+JsonValue& get_null_value();
 
 // Main Json class that provides a more fluid and user-friendly interface
 class Json {
 private:
-    fl::shared_ptr<Value> m_value;
+    fl::shared_ptr<JsonValue> m_value;
 
 public:
     // Constructors
     Json() : m_value() {}  // Default initialize to nullptr
-    Json(fl::nullptr_t) : m_value(fl::make_shared<Value>(nullptr)) {}
-    Json(bool b) : m_value(fl::make_shared<Value>(b)) {}
-    Json(int i) : m_value(fl::make_shared<Value>(static_cast<int64_t>(i))) {}
-    Json(int64_t i) : m_value(fl::make_shared<Value>(i)) {}
-    Json(float f) : m_value(fl::make_shared<Value>(static_cast<double>(f))) {}
-    Json(double d) : m_value(fl::make_shared<Value>(d)) {}
-    Json(const fl::string& s) : m_value(fl::make_shared<Value>(s)) {}
+    Json(fl::nullptr_t) : m_value(fl::make_shared<JsonValue>(nullptr)) {}
+    Json(bool b) : m_value(fl::make_shared<JsonValue>(b)) {}
+    Json(int i) : m_value(fl::make_shared<JsonValue>(static_cast<int64_t>(i))) {}
+    Json(int64_t i) : m_value(fl::make_shared<JsonValue>(i)) {}
+    Json(float f) : m_value(fl::make_shared<JsonValue>(static_cast<double>(f))) {}
+    Json(double d) : m_value(fl::make_shared<JsonValue>(d)) {}
+    Json(const fl::string& s) : m_value(fl::make_shared<JsonValue>(s)) {}
     Json(const char* s): Json(fl::string(s)) {}
-    Json(Array a) : m_value(fl::make_shared<Value>(fl::move(a))) {}
-    Json(Object o) : m_value(fl::make_shared<Value>(fl::move(o))) {}
-    // Constructor from shared_ptr<Value>
-    Json(const fl::shared_ptr<Value>& value) : m_value(value) {}
+    Json(JsonArray a) : m_value(fl::make_shared<JsonValue>(fl::move(a))) {}
+    Json(JsonObject o) : m_value(fl::make_shared<JsonValue>(fl::move(o))) {}
+    // Constructor from shared_ptr<JsonValue>
+    Json(const fl::shared_ptr<JsonValue>& value) : m_value(value) {}
     
     // Constructor for fl::vector<float> - converts to JSON array
-    Json(const fl::vector<float>& vec) : m_value(fl::make_shared<Value>(Array{})) {
-        auto ptr = m_value->data.ptr<Array>();
+    Json(const fl::vector<float>& vec) : m_value(fl::make_shared<JsonValue>(JsonArray{})) {
+        auto ptr = m_value->data.ptr<JsonArray>();
         if (ptr) {
             for (const auto& item : vec) {
-                ptr->push_back(fl::make_shared<Value>(static_cast<double>(item)));
+                ptr->push_back(fl::make_shared<JsonValue>(static_cast<double>(item)));
             }
         }
     }
@@ -528,8 +552,8 @@ public:
     // Special constructor for char values
     static Json from_char(char c) {
         Json result;
-        auto value = fl::make_shared<Value>(fl::string(1, c));
-        FASTLED_WARN("Created Value with string: " << value->is_string() << ", int: " << value->is_int());
+        auto value = fl::make_shared<JsonValue>(fl::string(1, c));
+        FASTLED_WARN("Created JsonValue with string: " << value->is_string() << ", int: " << value->is_int());
         result.m_value = value;
         FASTLED_WARN("Json has string: " << result.is_string() << ", int: " << result.is_int());
         return result;
@@ -540,7 +564,7 @@ public:
 
     // Assignment operator
     Json& operator=(const Json& other) {
-        FL_WARN("Json& operator=(const Json& other): " << other.m_value.get());
+        FL_WARN("Json& operator=(const Json& other): " << (other.m_value ? other.m_value.get() : 0));
         if (this != &other) {
             m_value = other.m_value;
         }
@@ -556,42 +580,42 @@ public:
     
     // Assignment operators for primitive types to avoid ambiguity
     Json& operator=(bool value) {
-        m_value = fl::make_shared<Value>(value);
+        m_value = fl::make_shared<JsonValue>(value);
         return *this;
     }
     
     Json& operator=(int value) {
-        m_value = fl::make_shared<Value>(static_cast<int64_t>(value));
+        m_value = fl::make_shared<JsonValue>(static_cast<int64_t>(value));
         return *this;
     }
     
     Json& operator=(float value) {
-        m_value = fl::make_shared<Value>(static_cast<double>(value));
+        m_value = fl::make_shared<JsonValue>(static_cast<double>(value));
         return *this;
     }
     
     Json& operator=(double value) {
-        m_value = fl::make_shared<Value>(value);
+        m_value = fl::make_shared<JsonValue>(value);
         return *this;
     }
     
     Json& operator=(const fl::string& value) {
-        m_value = fl::make_shared<Value>(value);
+        m_value = fl::make_shared<JsonValue>(value);
         return *this;
     }
     
     Json& operator=(const char* value) {
-        m_value = fl::make_shared<Value>(fl::string(value));
+        m_value = fl::make_shared<JsonValue>(fl::string(value));
         return *this;
     }
     
     // Assignment operator for fl::vector<float>
     Json& operator=(fl::vector<float> vec) {
-        m_value = fl::make_shared<Value>(Array{});
-        auto ptr = m_value->data.ptr<Array>();
+        m_value = fl::make_shared<JsonValue>(JsonArray{});
+        auto ptr = m_value->data.ptr<JsonArray>();
         if (ptr) {
             for (const auto& item : vec) {
-                ptr->push_back(fl::make_shared<Value>(static_cast<double>(item)));
+                ptr->push_back(fl::make_shared<JsonValue>(static_cast<double>(item)));
             }
         }
         return *this;
@@ -611,8 +635,8 @@ public:
     fl::optional<int64_t> as_int() const { return m_value ? m_value->as_int() : fl::nullopt; }
     fl::optional<double> as_double() const { return m_value ? m_value->as_double() : fl::nullopt; }
     fl::optional<fl::string> as_string() const { return m_value ? m_value->as_string() : fl::nullopt; }
-    fl::optional<Array> as_array() const { return m_value ? m_value->as_array() : fl::nullopt; }
-    fl::optional<Object> as_object() const { return m_value ? m_value->as_object() : fl::nullopt; }
+    fl::optional<JsonArray> as_array() const { return m_value ? m_value->as_array() : fl::nullopt; }
+    fl::optional<JsonObject> as_object() const { return m_value ? m_value->as_object() : fl::nullopt; }
 
     template<typename T>
     fl::optional<T> as() {
@@ -620,28 +644,28 @@ public:
     }
 
     // Iterator support for objects
-    Value::iterator begin() { 
-        if (!m_value) return Value::iterator(Object().begin());
+    JsonValue::iterator begin() { 
+        if (!m_value) return JsonValue::iterator(JsonObject().begin());
         return m_value->begin(); 
     }
-    Value::iterator end() { 
-        if (!m_value) return Value::iterator(Object().end());
+    JsonValue::iterator end() { 
+        if (!m_value) return JsonValue::iterator(JsonObject().end());
         return m_value->end(); 
     }
-    Value::const_iterator begin() const { 
-        if (!m_value) return Value::const_iterator::from_iterator(Object().begin());
-        return Value::const_iterator::from_object_iterator(m_value->begin()); 
+    JsonValue::const_iterator begin() const { 
+        if (!m_value) return JsonValue::const_iterator::from_iterator(JsonObject().begin());
+        return JsonValue::const_iterator::from_object_iterator(m_value->begin()); 
     }
-    Value::const_iterator end() const { 
-        if (!m_value) return Value::const_iterator::from_iterator(Object().end());
-        return Value::const_iterator::from_object_iterator(m_value->end()); 
+    JsonValue::const_iterator end() const { 
+        if (!m_value) return JsonValue::const_iterator::from_iterator(JsonObject().end());
+        return JsonValue::const_iterator::from_object_iterator(m_value->end()); 
     }
     
     // Free functions for range-based for loops
-    friend Value::iterator begin(Json& j) { return j.begin(); }
-    friend Value::iterator end(Json& j) { return j.end(); }
-    friend Value::const_iterator begin(const Json& j) { return j.begin(); }
-    friend Value::const_iterator end(const Json& j) { return j.end(); }
+    friend JsonValue::iterator begin(Json& j) { return j.begin(); }
+    friend JsonValue::iterator end(Json& j) { return j.end(); }
+    friend JsonValue::const_iterator begin(const Json& j) { return j.begin(); }
+    friend JsonValue::const_iterator end(const Json& j) { return j.end(); }
 
     // Object iteration support (needed for screenmap conversion)
     fl::vector<fl::string> keys() const {
@@ -661,7 +685,7 @@ public:
     // Indexing for fluid chaining
     Json& operator[](size_t idx) {
         if (!m_value) {
-            m_value = fl::make_shared<Value>(Array{});
+            m_value = fl::make_shared<JsonValue>(JsonArray{});
         }
         return *reinterpret_cast<Json*>(&(*m_value)[idx]);
     }
@@ -679,8 +703,9 @@ public:
     
     Json& operator[](const fl::string &key) {
         if (!m_value) {
-            m_value = fl::make_shared<Value>(Object{});
+            m_value = fl::make_shared<JsonValue>(JsonObject{});
         }
+        FASTLED_WARN("Accessing key '" << key << "' in object");
         return *reinterpret_cast<Json*>(&(*m_value)[key]);
     }
     
@@ -735,7 +760,7 @@ public:
 
     // Parsing factory method
     static Json parse(const fl::string &txt) {
-        auto parsed = Value::parse(txt);
+        auto parsed = JsonValue::parse(txt);
         if (parsed) {
             Json result;
             result.m_value = parsed;
@@ -746,11 +771,11 @@ public:
 
     // Convenience methods for creating arrays and objects
     static Json array() {
-        return Json(Array{});
+        return Json(JsonArray{});
     }
 
     static Json object() {
-        return Json(Object{});
+        return Json(JsonObject{});
     }
     
     // Compatibility with existing API for array/object access
@@ -759,9 +784,17 @@ public:
     // Set methods for building objects
     void set(const fl::string& key, const Json& value) {
         if (!m_value || !m_value->is_object()) {
-            m_value = fl::make_shared<Value>(Object{});
+            m_value = fl::make_shared<JsonValue>(JsonObject{});
         }
-        (*this)[key] = value;
+        // Directly assign the value to the object without going through Json::operator[]
+        auto objPtr = m_value->data.ptr<JsonObject>();
+        if (objPtr) {
+            FASTLED_WARN("Setting key '" << key << "' in object");
+            FASTLED_WARN("Value is_string: " << value.is_string());
+            FASTLED_WARN("Value is_int: " << value.is_int());
+            // Create or update the entry directly
+            (*objPtr)[key] = value.m_value;
+        }
     }
     
     void set(const fl::string& key, bool value) { set(key, Json(value)); }
@@ -777,11 +810,11 @@ public:
     // Array push_back methods
     void push_back(const Json& value) {
         if (!m_value || !m_value->is_array()) {
-            m_value = fl::make_shared<Value>(Array{});
+            m_value = fl::make_shared<JsonValue>(JsonArray{});
         }
         // For arrays, we need to manually handle the insertion since our indexing
         // mechanism auto-creates elements
-        auto ptr = m_value->data.ptr<Array>();
+        auto ptr = m_value->data.ptr<JsonArray>();
         if (ptr) {
             ptr->push_back(value.m_value);
         }
