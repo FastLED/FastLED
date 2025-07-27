@@ -1132,6 +1132,8 @@ The project uses a comprehensive test suite including:
 
 **🚨 CRITICAL: Manual compiling of tests should never be attempted.** Always put tests in `tests/test_<name>.cpp` and run with `bash test <name>`.
 
+The `bash test` command now automatically detects when test files are added or removed and will clean the build accordingly.
+
 ### Test Assertion Macros
 **🚨 CRITICAL: Always use the proper assertion macros for better error messages and debugging:**
 

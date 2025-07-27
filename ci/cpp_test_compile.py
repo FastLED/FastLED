@@ -5,7 +5,7 @@ import shutil
 import subprocess
 import sys
 from pathlib import Path
-from typing import Tuple
+from typing import Set, Tuple
 
 from ci.paths import PROJECT_ROOT
 from ci.running_process import RunningProcess
@@ -13,6 +13,57 @@ from ci.running_process import RunningProcess
 
 BUILD_DIR = PROJECT_ROOT / "tests" / ".build"
 BUILD_DIR.mkdir(parents=True, exist_ok=True)
+CACHE_DIR = PROJECT_ROOT / ".cache"
+CACHE_DIR.mkdir(parents=True, exist_ok=True)
+TEST_FILES_LIST = CACHE_DIR / "test_files_list.txt"
+
+
+def get_test_files() -> Set[str]:
+    """Get a set of all test files"""
+    test_files = set()
+    tests_dir = PROJECT_ROOT / "tests"
+    if tests_dir.exists():
+        for file_path in tests_dir.rglob("test_*.cpp"):
+            # Store relative paths for consistency
+            test_files.add(str(file_path.relative_to(PROJECT_ROOT)))
+    return test_files
+
+
+def check_test_files_changed() -> bool:
+    """Check if test files have changed since last run"""
+    try:
+        current_files = get_test_files()
+
+        if TEST_FILES_LIST.exists():
+            # Read previous file list
+            with open(TEST_FILES_LIST, "r") as f:
+                previous_files = set(line.strip() for line in f if line.strip())
+
+            # Compare file sets
+            if current_files == previous_files:
+                return False  # No changes
+            else:
+                print("Test files have changed, cleaning build directory...")
+                return True  # Files changed
+        else:
+            # No previous file list, need to clean
+            return True
+    except Exception as e:
+        print(f"Warning: Error checking test file changes: {e}")
+        return True  # Default to cleaning on error
+
+
+def save_test_files_list() -> None:
+    """Save current test file list"""
+    try:
+        current_files = get_test_files()
+        with open(TEST_FILES_LIST, "w") as f:
+            for file_path in sorted(current_files):
+                f.write(f"{file_path}\n")
+    except KeyboardInterrupt:
+        raise
+    except Exception as e:
+        print(f"Warning: Failed to save test file list: {e}")
 
 
 def clean_build_directory():
@@ -387,9 +438,22 @@ def main() -> None:
     os.chdir(str(HERE))
     print(f"Current directory: {Path('.').absolute()}")
 
+    # Auto-detection for --clean based on test file changes
+    need_clean = args.clean
+    if not need_clean:
+        # Only check for changes if --clean wasn't explicitly specified
+        need_clean = check_test_files_changed()
+
     build_info = get_build_info(args)
-    if args.clean or should_clean_build(build_info):
+    if need_clean or should_clean_build(build_info):
         clean_build_directory()
+        # Save the file list after cleaning
+        save_test_files_list()
+    elif args.clean:
+        # If --clean was explicitly specified but not needed according to build info,
+        # still clean and save file list
+        clean_build_directory()
+        save_test_files_list()
 
     compile_fastled(args.test, enable_static_analysis=args.check)
     update_build_info(build_info)
