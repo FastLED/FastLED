@@ -97,6 +97,18 @@ struct IntConversionVisitor {
         result = static_cast<IntType>(value);
     }
     
+    void operator()(const fl::string& str) {
+        // NEW INSTRUCTIONS: AUTO CONVERT STRING TO INT
+        // Try to parse the string as an integer
+        char* endptr = nullptr;
+        // Use strtoll for maximum range support
+        long long val = strtoll(str.c_str(), &endptr, 10);
+        // Check if the entire string was consumed (valid integer)
+        if (endptr != str.c_str() && *endptr == '\0') {
+            result = static_cast<IntType>(val);
+        }
+    }
+    
     template<typename T>
     void operator()(const T&) {
         // Do nothing for other types
@@ -125,6 +137,85 @@ struct IntConversionVisitor<int64_t> {
     void operator()(const double& value) {
         // NEW INSTRUCTIONS: AUTO CONVERT FLOAT TO INT
         result = static_cast<int64_t>(value);
+    }
+    
+    void operator()(const fl::string& str) {
+        // NEW INSTRUCTIONS: AUTO CONVERT STRING TO INT
+        // Try to parse the string as an integer
+        char* endptr = nullptr;
+        // Use strtoll for maximum range support
+        long long val = strtoll(str.c_str(), &endptr, 10);
+        // Check if the entire string was consumed (valid integer)
+        if (endptr != str.c_str() && *endptr == '\0') {
+            result = static_cast<int64_t>(val);
+        }
+    }
+    
+    template<typename T>
+    void operator()(const T&) {
+        // Do nothing for other types
+    }
+};
+
+// Visitor for converting values to float
+template<typename FloatType = double>
+struct FloatConversionVisitor {
+    fl::optional<FloatType> result;
+    
+    template<typename U>
+    void accept(const U& value) {
+        // Dispatch to the correct operator() overload
+        (*this)(value);
+    }
+    
+    void operator()(const FloatType& value) {
+        result = value;
+    }
+    
+    // Special handling to avoid conflict when FloatType is double
+    template<typename T = FloatType>
+    typename fl::enable_if<!fl::is_same<T, double>::value, void>::type
+    operator()(const double& value) {
+        result = static_cast<FloatType>(value);
+    }
+    
+    void operator()(const int64_t& value) {
+        // NEW INSTRUCTIONS: AUTO CONVERT INT TO FLOAT
+        result = static_cast<FloatType>(value);
+    }
+    
+    void operator()(const bool& value) {
+        result = static_cast<FloatType>(value ? 1.0 : 0.0);
+    }
+    
+    template<typename T>
+    void operator()(const T&) {
+        // Do nothing for other types
+    }
+};
+
+// Specialization for double to avoid template conflicts
+template<>
+struct FloatConversionVisitor<double> {
+    fl::optional<double> result;
+    
+    template<typename U>
+    void accept(const U& value) {
+        // Dispatch to the correct operator() overload
+        (*this)(value);
+    }
+    
+    void operator()(const double& value) {
+        result = value;
+    }
+    
+    void operator()(const int64_t& value) {
+        // NEW INSTRUCTIONS: AUTO CONVERT INT TO FLOAT
+        result = static_cast<double>(value);
+    }
+    
+    void operator()(const bool& value) {
+        result = value ? 1.0 : 0.0;
     }
     
     template<typename T>
@@ -292,6 +383,13 @@ struct JsonValue {
         return ptr ? fl::optional<double>(*ptr) : fl::nullopt;
     }
     
+    template<typename FloatType>
+    fl::optional<FloatType> as_float() {
+        FloatConversionVisitor<FloatType> visitor;
+        data.visit(visitor);
+        return visitor.result;
+    }
+    
     fl::optional<fl::string> as_string() {
         auto ptr = data.ptr<fl::string>();
         return ptr ? fl::optional<fl::string>(*ptr) : fl::nullopt;
@@ -329,6 +427,13 @@ struct JsonValue {
     fl::optional<double> as_double() const {
         auto ptr = data.ptr<double>();
         return ptr ? fl::optional<double>(*ptr) : fl::nullopt;
+    }
+    
+    template<typename FloatType>
+    fl::optional<FloatType> as_float() const {
+        FloatConversionVisitor<FloatType> visitor;
+        data.visit(visitor);
+        return visitor.result;
     }
     
     fl::optional<fl::string> as_string() const {
@@ -727,6 +832,18 @@ public:
     }
     
     fl::optional<double> as_double() const { return m_value ? m_value->as_double() : fl::nullopt; }
+    
+    fl::optional<double> as_float() const { 
+        if (!m_value) return fl::nullopt;
+        return m_value->as_float<double>(); 
+    }
+    
+    template<typename FloatType>
+    fl::optional<FloatType> as_float() const { 
+        if (!m_value) return fl::nullopt;
+        return m_value->template as_float<FloatType>(); 
+    }
+    
     fl::optional<fl::string> as_string() const { return m_value ? m_value->as_string() : fl::nullopt; }
     fl::optional<JsonArray> as_array() const { return m_value ? m_value->as_array() : fl::nullopt; }
     fl::optional<JsonObject> as_object() const { return m_value ? m_value->as_object() : fl::nullopt; }
