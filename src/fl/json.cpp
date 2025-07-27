@@ -51,6 +51,9 @@ JsonValue& get_null_value() {
 }
 
 fl::shared_ptr<JsonValue> JsonValue::parse(const fl::string& txt) {
+    #if !FASTLED_ENABLE_JSON
+    return fl::make_shared<JsonValue>(fl::string(txt));
+    #else
     // Determine the size of the JsonDocument needed.
     FLArduinoJson::JsonDocument doc;
 
@@ -113,14 +116,14 @@ fl::shared_ptr<JsonValue> JsonValue::parse(const fl::string& txt) {
                         isUint8 = false;
                         isInt16 = false;
                         isFloat = false;
-                        FASTLED_WARN("Non-numeric value found, no optimization possible");
+                        // FASTLED_WARN("Non-numeric value found, no optimization possible");
                         break;
                     }
                     
                     // Update type flags based on item type
                     if (item.is<double>()) {
                         double val = item.as<double>();
-                        FASTLED_WARN("Checking float value: " << val);
+                        // FASTLED_WARN("Checking float value: " << val);
                         
                         // Check if this can be exactly represented as a float
                         if (!canBeRepresentedAsFloat(val)) {
@@ -130,21 +133,21 @@ fl::shared_ptr<JsonValue> JsonValue::parse(const fl::string& txt) {
                         // Check if this could fit in integer types
                         if (val < 0 || val > UINT8_MAX || val != floor(val)) {
                             isUint8 = false;
-                            FASTLED_WARN("Value " << val << " does not fit in uint8_t");
+                            // FASTLED_WARN("Value " << val << " does not fit in uint8_t");
                         }
                         if (val < INT16_MIN || val > INT16_MAX || val != floor(val)) {
                             isInt16 = false;
-                            FASTLED_WARN("Value " << val << " does not fit in int16_t");
+                            // FASTLED_WARN("Value " << val << " does not fit in int16_t");
                         }
                     } else {
                         // Integer value
                         int64_t val = item.is<int32_t>() ? item.as<int32_t>() : item.as<int64_t>();
-                        FASTLED_WARN("Checking integer value: " << val);
+                        // FASTLED_WARN("Checking integer value: " << val);
                         
                         // Check uint8 range
                         if (val < 0 || val > UINT8_MAX) {
                             isUint8 = false;
-                            FASTLED_WARN("Value " << val << " does not fit in uint8_t");
+                            // FASTLED_WARN("Value " << val << " does not fit in uint8_t");
                         }
                         
                         // Check int16 range
@@ -157,7 +160,7 @@ fl::shared_ptr<JsonValue> JsonValue::parse(const fl::string& txt) {
                         // All integers within the range of float precision can be exactly represented
                         if (val < -16777216 || val > 16777216) { // 2^24, beyond which floats lose precision
                             isFloat = false;
-                            FASTLED_WARN("Value " << val << " cannot be exactly represented as float");
+                            // FASTLED_WARN("Value " << val << " cannot be exactly represented as float");
                         }
                     }
                 }
@@ -246,9 +249,13 @@ fl::shared_ptr<JsonValue> JsonValue::parse(const fl::string& txt) {
     };
 
     return Converter::convert(doc.as<FLArduinoJson::JsonVariantConst>());
+    #endif
 }
 
 fl::string Json::to_string_native() const {
+    #if !FASTLED_ENABLE_JSON
+    return m_value ? m_value->to_string() : "null";
+    #else
     if (!m_value) {
         return "null";
     }
@@ -310,6 +317,7 @@ fl::string Json::to_string_native() const {
     fl::string output;
     FLArduinoJson::serializeJson(doc, output);
     return output;
+    #endif
 }
 
 // Forward declaration for the serializeValue function
