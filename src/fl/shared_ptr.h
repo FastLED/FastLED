@@ -8,6 +8,7 @@
 #include "fl/bit_cast.h"
 #include "fl/atomic.h"
 
+
 namespace fl {
 
 // Forward declarations
@@ -44,10 +45,14 @@ struct ControlBlockBase {
     }
     
     bool remove_shared_ref() {
+        //FASTLED_WARN("ControlBlockBase::remove_shared_ref() called: this=" << this);
         if (shared_count == NO_TRACKING_VALUE) {
+            //FASTLED_WARN("In no-tracking mode, returning false");
             return false;  // Never destroy in no-tracking mode
         }
-        return (--shared_count == 0);
+        bool result = (--shared_count == 0);
+        //FASTLED_WARN("After decrement, returning: " << result);
+        return result;
     }
     
     // Check if this control block is in no-tracking mode
@@ -162,8 +167,8 @@ public:
     // Converting move constructor
     template<typename Y>
     shared_ptr(shared_ptr<Y>&& other) noexcept : ptr_(other.ptr_), control_block_(other.control_block_) {
-        other.ptr_ = nullptr;
-        other.control_block_ = nullptr;
+        this->swap(other);
+        other.reset();
     }
     
     // Constructor from weak_ptr
@@ -172,6 +177,8 @@ public:
     
     // Destructor
     ~shared_ptr() {
+        //FASTLED_WARN("shared_ptr destructor called, ptr_=" << ptr_ 
+        //          << ", control_block_=" << control_block_);
         reset();
     }
     
@@ -196,32 +203,29 @@ public:
     }
     
     shared_ptr& operator=(shared_ptr&& other) noexcept {
-        if (this != &other) {
-            reset();
-            ptr_ = other.ptr_;
-            control_block_ = other.control_block_;
-            other.ptr_ = nullptr;
-            other.control_block_ = nullptr;
-        }
+        this->swap(other);
+        other.reset();
         return *this;
     }
     
     template<typename Y>
     shared_ptr& operator=(shared_ptr<Y>&& other) noexcept {
-        reset();
-        ptr_ = other.ptr_;
-        control_block_ = other.control_block_;
-        other.ptr_ = nullptr;
-        other.control_block_ = nullptr;
+        this->swap(other);
+        other.reset();
         return *this;
     }
     
     // Modifiers
     void reset() noexcept {
+        //FASTLED_WARN("shared_ptr::reset() called: ptr_=" << ptr_ 
+        //          << ", control_block_=" << control_block_);
         if (control_block_) {
+            //FASTLED_WARN("control_block exists, calling remove_shared_ref()");
             if (control_block_->remove_shared_ref()) {
+                //FASTLED_WARN("control_block_->remove_shared_ref() returned true, destroying object");
                 control_block_->destroy_object();
                 if (--control_block_->weak_count == 0) {
+                    //FASTLED_WARN("weak_count reached 0, destroying control block");
                     control_block_->destroy_control_block();
                 }
             }
@@ -234,6 +238,18 @@ public:
         this->swap(other);
         other.reset();
     }
+
+    void swap(shared_ptr& other) noexcept {
+        fl::swap(ptr_, other.ptr_);
+        fl::swap(control_block_, other.control_block_);
+    }
+
+    void swap(shared_ptr&& other) noexcept {
+        fl::swap(ptr_, other.ptr_);
+        fl::swap(control_block_, other.control_block_);
+    }
+
+
     
     // template<typename Y>
     // void reset(Y* ptr) {
@@ -245,10 +261,7 @@ public:
     //     shared_ptr(ptr, d).swap(*this);
     // }
     
-    void swap(shared_ptr& other) noexcept {
-        fl::swap(ptr_, other.ptr_);
-        fl::swap(control_block_, other.control_block_);
-    }
+
     
     // Observers
     T* get() const noexcept { return ptr_; }
@@ -331,6 +344,8 @@ template<typename T, typename... Args>
 shared_ptr<T> make_shared(Args&&... args) {
     T* obj = new T(fl::forward<Args>(args)...);
     auto* control = new detail::ControlBlock<T>(obj);
+    //FASTLED_WARN("make_shared created object at " << obj 
+    //          << " with control block at " << control);
     //new(control->get_object()) T(fl::forward<Args>(args)...);
     //control->object_constructed = true;
     return shared_ptr<T>(obj, control, detail::make_shared_tag{});
