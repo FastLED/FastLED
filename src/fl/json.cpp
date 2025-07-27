@@ -18,6 +18,21 @@
 #define UINT8_MAX 255
 #endif
 
+// Helper function to check if a double can be exactly represented as a float
+static bool canBeRepresentedAsFloat(double value) {
+    // Check for special values
+    if (isnan(value) || isinf(value)) {
+        return true; // These can be represented as float
+    }
+    
+    // Convert to float and back to double
+    float f = static_cast<float>(value);
+    double d = static_cast<double>(f);
+    
+    // Check if they're equal
+    return (value == d);
+}
+
 #if FASTLED_ENABLE_JSON
 
 FL_DISABLE_WARNING_PUSH
@@ -78,108 +93,146 @@ fl::shared_ptr<JsonValue> JsonValue::parse(const fl::string& txt) {
                     return fl::make_shared<JsonValue>(JsonArray{});
                 }
                 
-                // Check what type of optimization we can apply
-                bool allUint8 = true;
-                bool allInt16 = true;
-                bool allBoolean = true;
+                // Enum to represent array optimization types
+                enum ArrayType {
+                    ALL_UINT8,
+                    ALL_INT16,
+                    ALL_FLOATS,
+                    GENERIC_ARRAY
+                };
                 
-                // First pass: determine what types are present
+                // Single pass: determine the optimal array type
+                bool isUint8 = true;
+                bool isInt16 = true;
+                bool isFloat = true;
+                
                 for (const auto& item : arr) {
                     // Check if all items are numeric
                     if (!item.is<int32_t>() && !item.is<int64_t>() && !item.is<double>()) {
                         // Non-numeric value found, no optimization possible
-                        allUint8 = false;
-                        allInt16 = false;
-                        allBoolean = false;
+                        isUint8 = false;
+                        isInt16 = false;
+                        isFloat = false;
+                        FASTLED_WARN("Non-numeric value found, no optimization possible");
                         break;
                     }
                     
-                    // Check if all items are integers
+                    // Update type flags based on item type
                     if (item.is<double>()) {
-                        allBoolean = false;
-                        
-                        // Check if this float value is actually 1.0 or 0.0 (could be boolean)
                         double val = item.as<double>();
-                        if (val != 0.0 && val != 1.0) {
-                            allBoolean = false;
+                        FASTLED_WARN("Checking float value: " << val);
+                        
+                        // Check if this can be exactly represented as a float
+                        if (!canBeRepresentedAsFloat(val)) {
+                            isFloat = false;
                         }
                         
                         // Check if this could fit in integer types
                         if (val < 0 || val > UINT8_MAX || val != floor(val)) {
-                            allUint8 = false;
+                            isUint8 = false;
+                            FASTLED_WARN("Value " << val << " does not fit in uint8_t");
                         }
                         if (val < INT16_MIN || val > INT16_MAX || val != floor(val)) {
-                            allInt16 = false;
+                            isInt16 = false;
+                            FASTLED_WARN("Value " << val << " does not fit in int16_t");
                         }
                     } else {
                         // Integer value
                         int64_t val = item.is<int32_t>() ? item.as<int32_t>() : item.as<int64_t>();
-                        
-                        // Check boolean (0 or 1)
-                        if (val != 0 && val != 1) {
-                            allBoolean = false;
-                        }
+                        FASTLED_WARN("Checking integer value: " << val);
                         
                         // Check uint8 range
                         if (val < 0 || val > UINT8_MAX) {
-                            allUint8 = false;
+                            isUint8 = false;
+                            FASTLED_WARN("Value " << val << " does not fit in uint8_t");
                         }
                         
                         // Check int16 range
                         if (val < INT16_MIN || val > INT16_MAX) {
-                            allInt16 = false;
+                            isInt16 = false;
+                            FASTLED_WARN("Value " << val << " does not fit in int16_t");
+                        }
+                        
+                        // Check if this integer can be exactly represented as a float
+                        // All integers within the range of float precision can be exactly represented
+                        if (val < -16777216 || val > 16777216) { // 2^24, beyond which floats lose precision
+                            isFloat = false;
+                            FASTLED_WARN("Value " << val << " cannot be exactly represented as float");
                         }
                     }
                 }
                 
-                // Apply the most appropriate optimization
-                if (allBoolean && arr.size() > 1) {
-                    // All values are 0 or 1 - use a compact bit representation
-                    // For now, we'll use uint8_t vector for boolean arrays
-                    fl::vector<uint8_t> byteData;
-                    for (const auto& item : arr) {
-                        if (item.is<double>()) {
-                            double val = item.as<double>();
-                            byteData.push_back(static_cast<uint8_t>(val));
-                        } else {
-                            int64_t val = item.is<int32_t>() ? item.as<int32_t>() : item.as<int64_t>();
-                            byteData.push_back(static_cast<uint8_t>(val));
+                // Special handling for float arrays - always prefer float arrays for ScreenMap use case
+                // Check if all values are numeric (even if they don't fit in smaller types)
+                bool allNumeric = true;
+                for (const auto& item : arr) {
+                    if (!item.is<int32_t>() && !item.is<int64_t>() && !item.is<double>()) {
+                        allNumeric = false;
+                        break;
+                    }
+                }
+                
+                // Determine the optimal array type based on the flags
+                ArrayType arrayType = GENERIC_ARRAY;
+                if (isUint8 && arr.size() > 0) {
+                    arrayType = ALL_UINT8;
+                } else if (isInt16 && arr.size() > 0) {
+                    arrayType = ALL_INT16;
+                } else if ((isFloat || allNumeric) && arr.size() > 0) {
+                    // For ScreenMap use case, prefer float arrays when we have numeric values
+                    arrayType = ALL_FLOATS;
+                }
+                
+                // Apply the most appropriate optimization based on determined type
+                switch (arrayType) {
+                    case ALL_UINT8: {
+                        // All values fit in uint8_t - most compact representation
+                        fl::vector<uint8_t> byteData;
+                        for (const auto& item : arr) {
+                            if (item.is<double>()) {
+                                byteData.push_back(static_cast<uint8_t>(item.as<double>()));
+                            } else {
+                                int64_t val = item.is<int32_t>() ? item.as<int32_t>() : item.as<int64_t>();
+                                byteData.push_back(static_cast<uint8_t>(val));
+                            }
                         }
+                        return fl::make_shared<JsonValue>(fl::move(byteData));
                     }
-                    return fl::make_shared<JsonValue>(fl::move(byteData));
-                } else if (allUint8) {
-                    // All values fit in uint8_t - most compact representation
-                    fl::vector<uint8_t> byteData;
-                    for (const auto& item : arr) {
-                        if (item.is<double>()) {
-                            double val = item.as<double>();
-                            byteData.push_back(static_cast<uint8_t>(val));
-                        } else {
-                            int64_t val = item.is<int32_t>() ? item.as<int32_t>() : item.as<int64_t>();
-                            byteData.push_back(static_cast<uint8_t>(val));
+                    case ALL_INT16: {
+                        // All values fit in int16_t - good compression
+                        fl::vector<int16_t> intData;
+                        for (const auto& item : arr) {
+                            if (item.is<double>()) {
+                                intData.push_back(static_cast<int16_t>(item.as<double>()));
+                            } else {
+                                int64_t val = item.is<int32_t>() ? item.as<int32_t>() : item.as<int64_t>();
+                                intData.push_back(static_cast<int16_t>(val));
+                            }
                         }
+                        return fl::make_shared<JsonValue>(fl::move(intData));
                     }
-                    return fl::make_shared<JsonValue>(fl::move(byteData));
-                } else if (allInt16) {
-                    // All values fit in int16_t - good compression
-                    fl::vector<int16_t> audioData;
-                    for (const auto& item : arr) {
-                        if (item.is<double>()) {
-                            double val = item.as<double>();
-                            audioData.push_back(static_cast<int16_t>(val));
-                        } else {
-                            int64_t val = item.is<int32_t>() ? item.as<int32_t>() : item.as<int64_t>();
-                            audioData.push_back(static_cast<int16_t>(val));
+                    case ALL_FLOATS: {
+                        // All values can be exactly represented as floats - use float vector
+                        fl::vector<float> floatData;
+                        for (const auto& item : arr) {
+                            if (item.is<double>()) {
+                                floatData.push_back(static_cast<float>(item.as<double>()));
+                            } else {
+                                int64_t val = item.is<int32_t>() ? item.as<int32_t>() : item.as<int64_t>();
+                                floatData.push_back(static_cast<float>(val));
+                            }
                         }
+                        return fl::make_shared<JsonValue>(fl::move(floatData));
                     }
-                    return fl::make_shared<JsonValue>(fl::move(audioData));
-                } else {
-                    // No optimization possible - use regular array
-                    JsonArray regularArr;
-                    for (const auto& item : arr) {
-                        regularArr.push_back(convert(item));
+                    case GENERIC_ARRAY:
+                    default: {
+                        // No optimization possible - use regular array
+                        JsonArray regularArr;
+                        for (const auto& item : arr) {
+                            regularArr.push_back(convert(item));
+                        }
+                        return fl::make_shared<JsonValue>(fl::move(regularArr));
                     }
-                    return fl::make_shared<JsonValue>(fl::move(regularArr));
                 }
             } else if (src.is<FLArduinoJson::JsonObjectConst>()) {
                 JsonObject obj;

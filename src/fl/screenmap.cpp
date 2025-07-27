@@ -247,68 +247,50 @@ void ScreenMap::toJson(const fl::fl_map<string, ScreenMap> &segmentMaps,
         return;
     }
 
-    // Build the JSON string manually to avoid shared_ptr issues
-    fl::string jsonStr = "{\"map\":{";
+    // Create the root object
+    *doc = fl::Json::object();
     
-    bool firstSegment = true;
+    // Create the map object
+    fl::Json mapObj = fl::Json::object();
+    
+    // Populate the map object with segments
     for (const auto& kv : segmentMaps) {
         if (kv.second.getLength() == 0) {
             FL_WARN("ScreenMap::toJson called with empty segment: " << fl::string(kv.first));   
             continue;
         }
         
-        if (!firstSegment) {
-            jsonStr += ",";
-        }
-        
         auto& name = kv.first;
         auto& segment = kv.second;
         float diameter = segment.getDiameter();
         
-        // Escape the name for JSON
-        jsonStr += "\"" + name + "\":{";
+
         
-        // Add x array
-        jsonStr += "\"x\":[";
-        bool firstX = true;
+        // Create x array
+        fl::Json xArray = fl::Json::array();
         for (u16 i = 0; i < segment.getLength(); i++) {
-            if (!firstX) {
-                jsonStr += ",";
-            }
-            jsonStr += fl::to_string(segment[i].x);
-            firstX = false;
+            xArray.push_back(fl::Json(segment[i].x));
         }
-        jsonStr += "],";
         
-        // Add y array
-        jsonStr += "\"y\":[";
-        bool firstY = true;
+        // Create y array
+        fl::Json yArray = fl::Json::array();
         for (u16 i = 0; i < segment.getLength(); i++) {
-            if (!firstY) {
-                jsonStr += ",";
-            }
-            jsonStr += fl::to_string(segment[i].y);
-            firstY = false;
+            yArray.push_back(fl::Json(segment[i].y));
         }
-        jsonStr += "],";
         
-        // Add diameter
-        jsonStr += "\"diameter\":" + fl::to_string(diameter);
+        // Create segment object
+        fl::Json segmentObj = fl::Json::object();
+        // Add arrays and diameter to segment object
+        segmentObj.set("x", xArray);
+        segmentObj.set("y", yArray);
+        segmentObj.set("diameter", fl::Json(diameter));
         
-        jsonStr += "}";
-        firstSegment = false;
+        // Add segment to map object
+        mapObj.set(name, segmentObj);
     }
     
-    jsonStr += "}}";
-
-    
-
-
-    FL_WARN("ScreenMap::toJson: " << jsonStr);
-    FASTLED_ASSERT(false, "force debug");
-    
-    // Parse the manually built string
-    *doc = fl::Json::parse(jsonStr);
+    // Add map object to root
+    doc->set("map", mapObj);
 }
 
 void ScreenMap::toJsonStr(const fl::fl_map<string, ScreenMap> &segmentMaps,

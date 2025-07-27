@@ -57,6 +57,7 @@ struct Error {
     Error(const fl::string& msg) : message(msg) {}
     Error(const char* msg) : message(msg) {}
     Error(fl::string&& msg) : message(fl::move(msg)) {}
+    bool is_empty() const { return message.empty(); }
 };
 
 // Forward declaration for implementation
