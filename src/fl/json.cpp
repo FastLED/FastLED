@@ -254,7 +254,7 @@ fl::shared_ptr<JsonValue> JsonValue::parse(const fl::string& txt) {
 }
 
 fl::string JsonValue::to_string() const {
-#if !FASTLED_ENABLE_JSON
+#if !FASTLED_ENABLE_JSON || 1
     // For a native implementation without external libraries, we'd need to implement
     // a custom serializer. For now, we'll delegate to Json::to_string_native() 
     // by creating a temporary Json object.
@@ -277,9 +277,40 @@ fl::string JsonValue::to_string() const {
         auto opt = as_string();
         return opt ? "\"" + *opt + "\"" : "null";
     } else if (is_array()) {
-        return "[]";
+        fl::string result = "[";
+        auto opt = as_array();
+        if (opt) {
+            bool first = true;
+            for (const auto& item : *opt) {
+                if (!first) result += ",";
+                first = false;
+                if (item) {
+                    result += item->to_string();
+                } else {
+                    result += "null";
+                }
+            }
+        }
+        result += "]";
+        return result;
     } else if (is_object()) {
-        return "{}";
+        fl::string result = "{";
+        auto opt = as_object();
+        if (opt) {
+            bool first = true;
+            for (const auto& kv : *opt) {
+                if (!first) result += ",";
+                first = false;
+                result += "\"" + kv.first + "\":";
+                if (kv.second) {
+                    result += kv.second->to_string();
+                } else {
+                    result += "null";
+                }
+            }
+        }
+        result += "}";
+        return result;
     } else if (is_audio()) {
         return "[audio]";
     } else if (is_bytes()) {
@@ -347,9 +378,12 @@ fl::string Json::to_string_native() const {
                 }
             } else if (src.is_object()) {
                 auto opt = src.as_object();
+                FASTLED_WARN("Converting object - as_object() returned: " << (opt ? "valid" : "null"));
                 if (opt) {
+                    FASTLED_WARN("Object has " << opt->size() << " keys");
                     FLArduinoJson::JsonObject obj = dst.to<FLArduinoJson::JsonObject>();
                     for (const auto& kv : *opt) {
+                        FASTLED_WARN("Converting key: " << kv.first);
                         if (kv.second) {
                             convert(*kv.second, obj[kv.first.c_str()]);
                         } else {
@@ -391,10 +425,20 @@ fl::string Json::to_string_native() const {
     // Convert our Value to JsonDocument
     Converter::convert(*m_value, doc);
     
+    FASTLED_WARN("About to serialize ArduinoJson document");
+    
     // Serialize to std::string buffer first (as instructed in BUG.md)
     // Use a character buffer instead of std::string for compatibility
     char buffer[4096];
     size_t len = FLArduinoJson::serializeJson(doc, buffer, sizeof(buffer));
+    FASTLED_WARN("ArduinoJson serializeJson returned length: " << len);
+    
+    if (len > 0) {
+        FASTLED_WARN("First 50 chars of serialized JSON: " << fl::string(buffer, (len < 50) ? len : 50));
+    } else {
+        FASTLED_WARN("ArduinoJson serializeJson returned empty!");
+    }
+    
     fl::string output(buffer, len);
 
     return output;

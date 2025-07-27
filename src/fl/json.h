@@ -1779,7 +1779,7 @@ public:
     fl::vector<fl::string> getObjectKeys() const { return keys(); }
 
     // Indexing for fluid chaining
-    Json& operator[](size_t idx) {
+    Json operator[](size_t idx) {
         if (!m_value) {
             m_value = fl::make_shared<JsonValue>(JsonArray{});
         }
@@ -1794,7 +1794,20 @@ public:
                 m_value = fl::make_shared<JsonValue>(fl::move(*arr));
             }
         }
-        return *reinterpret_cast<Json*>(&(*m_value)[idx]);
+        // Get the shared_ptr directly from the JsonArray to maintain reference semantics
+        if (m_value->data.is<JsonArray>()) {
+            auto arr = m_value->as_array();
+            if (arr) {
+                // Ensure the array is large enough
+                if (idx >= arr->size()) {
+                    for (size_t i = arr->size(); i <= idx; i++) {
+                        arr->push_back(fl::make_shared<JsonValue>(nullptr));
+                    }
+                }
+                return Json((*arr)[idx]);
+            }
+        }
+        return Json(nullptr);
     }
     
     const Json operator[](size_t idx) const {
@@ -1822,21 +1835,23 @@ public:
         return Json(nullptr);
     }
     
-    Json& operator[](const fl::string &key) {
+    Json operator[](const fl::string &key) {
         if (!m_value || !m_value->is_object()) {
             m_value = fl::make_shared<JsonValue>(JsonObject{});
         }
         // Get reference to the JsonValue
         auto objPtr = m_value->data.ptr<JsonObject>();
-        if (objPtr && objPtr->find(key) != objPtr->end()) {
-            static thread_local Json result;
-            result.m_value = (*objPtr)[key];
-            return result;
+        if (objPtr) {
+            // If key doesn't exist, create a new JsonValue and insert it
+            if (objPtr->find(key) == objPtr->end()) {
+                (*objPtr)[key] = fl::make_shared<JsonValue>(nullptr);
+            }
+            // Return a new Json object that wraps the shared_ptr to the JsonValue
+            return Json((*objPtr)[key]);
         }
-        // Key doesn't exist, create a new null value
-        static thread_local Json result;
-        result.m_value = fl::make_shared<JsonValue>(nullptr);
-        return result;
+        // Should not happen if m_value is properly initialized as an object
+        //return *reinterpret_cast<Json*>(&get_null_value());
+        return Json(nullptr);
     }
     
     const Json operator[](const fl::string &key) const {
