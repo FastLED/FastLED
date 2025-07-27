@@ -188,6 +188,18 @@ struct FloatConversionVisitor {
         result = static_cast<FloatType>(value ? 1.0 : 0.0);
     }
     
+    void operator()(const fl::string& str) {
+        // NEW INSTRUCTIONS: AUTO CONVERT STRING TO FLOAT
+        // Try to parse the string as a float
+        char* endptr = nullptr;
+        // Use strtod for maximum precision support
+        double val = strtod(str.c_str(), &endptr);
+        // Check if the entire string was consumed (valid float)
+        if (endptr != str.c_str() && *endptr == '\0') {
+            result = static_cast<FloatType>(val);
+        }
+    }
+    
     template<typename T>
     void operator()(const T&) {
         // Do nothing for other types
@@ -216,6 +228,18 @@ struct FloatConversionVisitor<double> {
     
     void operator()(const bool& value) {
         result = value ? 1.0 : 0.0;
+    }
+    
+    void operator()(const fl::string& str) {
+        // NEW INSTRUCTIONS: AUTO CONVERT STRING TO FLOAT
+        // Try to parse the string as a float
+        char* endptr = nullptr;
+        // Use strtod for maximum precision support
+        double val = strtod(str.c_str(), &endptr);
+        // Check if the entire string was consumed (valid float)
+        if (endptr != str.c_str() && *endptr == '\0') {
+            result = val;
+        }
     }
     
     template<typename T>
