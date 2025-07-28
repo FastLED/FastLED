@@ -216,6 +216,12 @@ def compile_fastled(
     else:
         # Using default GCC compiler - add verbose output similar to Clang
         print("USING GCC COMPILER (DEFAULT)")
+        print(
+            "⚠️  WARNING: GCC builds are ~5x slower than Clang due to poor unified compilation performance"
+        )
+        print("    Expected build time: 40+ seconds (vs 7 seconds for Clang)")
+        print("    To use faster Clang: bash test --clang")
+        print("    To force unified compilation: export FASTLED_ALL_SRC=1")
         # Display compiler paths similar to use_clang_compiler()
         gcc = shutil.which("gcc")
         gpp = shutil.which("g++")
@@ -233,9 +239,17 @@ def compile_fastled(
             # Set environment variable for AR similar to Clang
             os.environ["AR"] = ar
 
-            # Add equivalent verbose flags for GCC (similar to Clang's -ferror-limit=1)
-            # GCC doesn't have -ferror-limit, but we can add other useful flags
-            os.environ["CXXFLAGS"] = os.environ.get("CXXFLAGS", "") + " -fmax-errors=10"
+            # Add GCC performance optimization flags to improve compilation speed
+            # These flags significantly reduce compilation time for large unified builds
+            gcc_perf_flags = (
+                " -fmax-errors=10 -pipe -fno-var-tracking -fno-debug-types-section"
+            )
+            os.environ["CXXFLAGS"] = os.environ.get("CXXFLAGS", "") + gcc_perf_flags
+            print(
+                "Applied GCC performance optimizations: -pipe, -fno-var-tracking, -fno-debug-types-section"
+            )
+
+    # Apply CFLAGS for both GCC and other compilers
     os.environ["CFLAGS"] = os.environ.get("CFLAGS", "") + " -fmax-errors=10"
 
     cmake_configure_command_list: list[str] = [
@@ -300,6 +314,9 @@ def compile_fastled(
         parallel_jobs = cpu_count * 2  # Use 2x CPU cores for better I/O utilization
         print(f"Building with {parallel_jobs} parallel jobs ({cpu_count} CPU cores)")
 
+    # Add build timing and progress indicators
+    import time
+
     if specific_test:
         print(f"Building specific test: test_{specific_test}")
         cmake_build_command = f"cmake --build {BUILD_DIR} --target test_{specific_test} --parallel {parallel_jobs}"
@@ -307,9 +324,29 @@ def compile_fastled(
         print("Building all tests")
         cmake_build_command = f"cmake --build {BUILD_DIR} --parallel {parallel_jobs}"
 
-    run_command(cmake_build_command)
+    # Show expected timing for GCC builds
+    if not USE_CLANG and not USE_ZIG:
+        print(
+            "🕐 GCC build starting - this may take 40+ seconds due to unified compilation overhead..."
+        )
+        print("    Progress indicators will show build steps as they complete")
 
-    print("FastLED library compiled successfully.")
+    build_start_time = time.time()
+    run_command(cmake_build_command)
+    build_end_time = time.time()
+
+    build_duration = build_end_time - build_start_time
+    print(f"✅ FastLED library compiled successfully in {build_duration:.1f} seconds.")
+
+    # Provide performance feedback
+    if not USE_CLANG and not USE_ZIG and build_duration > 30:
+        print(
+            f"💡 Consider using Clang for faster builds: bash test --clang (expected ~7s vs {build_duration:.1f}s)"
+        )
+    elif build_duration > 60:
+        print(
+            f"⚠️  Build took longer than expected ({build_duration:.1f}s). Consider using --no-stack-trace if timeouts occur."
+        )
 
 
 def parse_arguments():

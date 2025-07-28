@@ -45,14 +45,26 @@ endfunction()
 
 # Function to configure test timeouts
 function(configure_test_timeouts)
-    # Default timeout for all tests (5 minutes)
-    set(CTEST_TEST_TIMEOUT 300 CACHE INTERNAL "Default test timeout")
-    
-    # Set different timeouts for different test types
-    set(QUICK_TEST_TIMEOUT 60 CACHE INTERNAL "Quick test timeout")     # 1 minute for quick tests
-    set(LONG_TEST_TIMEOUT 600 CACHE INTERNAL "Long test timeout")     # 10 minutes for long tests
-    
-    message(STATUS "Test timeouts configured: Default 300s, Quick 60s, Long 600s")
+    # Compiler-specific timeouts based on performance characteristics
+    if(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
+        # GCC builds are 5x slower due to poor unified compilation performance
+        set(CTEST_TEST_TIMEOUT 900 CACHE INTERNAL "GCC test timeout (15 minutes)")      # 15 minutes for GCC
+        set(QUICK_TEST_TIMEOUT 120 CACHE INTERNAL "GCC quick test timeout")             # 2 minutes for quick tests
+        set(LONG_TEST_TIMEOUT 1200 CACHE INTERNAL "GCC long test timeout")              # 20 minutes for long tests
+        message(STATUS "Test timeouts configured for GCC: Default 900s, Quick 120s, Long 1200s")
+    elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+        # Clang builds are fast with unified compilation
+        set(CTEST_TEST_TIMEOUT 300 CACHE INTERNAL "Clang test timeout (5 minutes)")     # 5 minutes for Clang
+        set(QUICK_TEST_TIMEOUT 60 CACHE INTERNAL "Clang quick test timeout")            # 1 minute for quick tests
+        set(LONG_TEST_TIMEOUT 600 CACHE INTERNAL "Clang long test timeout")             # 10 minutes for long tests
+        message(STATUS "Test timeouts configured for Clang: Default 300s, Quick 60s, Long 600s")
+    else()
+        # Default timeout for other compilers (5 minutes)
+        set(CTEST_TEST_TIMEOUT 300 CACHE INTERNAL "Default test timeout")
+        set(QUICK_TEST_TIMEOUT 60 CACHE INTERNAL "Quick test timeout")                  # 1 minute for quick tests
+        set(LONG_TEST_TIMEOUT 600 CACHE INTERNAL "Long test timeout")                   # 10 minutes for long tests
+        message(STATUS "Test timeouts configured: Default 300s, Quick 60s, Long 600s")
+    endif()
 endfunction()
 
 # Function to enable test parallelization

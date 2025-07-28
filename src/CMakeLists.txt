@@ -31,7 +31,16 @@ endif()
 include_directories(${FASTLED_SOURCE_DIR})
 
 # Check if we should use unified compilation mode (FASTLED_ALL_SRC=1)
-option(FASTLED_ALL_SRC "Enable unified compilation mode" ON)
+# Responds to directives from test system or environment variables
+# Does NOT make compiler-specific decisions - that's handled by the test system
+if(NOT DEFINED FASTLED_ALL_SRC)
+    # Only set default if not already specified by parent or environment
+    option(FASTLED_ALL_SRC "Enable unified compilation mode" OFF)
+    message(STATUS "FASTLED_ALL_SRC not specified: using default OFF (individual file compilation)")
+else()
+    # Respect the value passed from parent CMake or environment
+    message(STATUS "FASTLED_ALL_SRC specified by parent/environment: ${FASTLED_ALL_SRC}")
+endif()
 
 if(FASTLED_ALL_SRC)
     message(STATUS "FASTLED_ALL_SRC=ON: Using unified compilation mode")

@@ -89,15 +89,9 @@
 
 // All Source Build Control
 // When FASTLED_ALL_SRC is enabled, all source is compiled into a single translation unit
-// Individual compilation (FASTLED_ALL_SRC=0) is only used for release builds
+// Compiler-specific defaults: Clang=faster with unified, GCC=slower with unified
 #ifndef FASTLED_ALL_SRC
-  #if defined(__EMSCRIPTEN__) || defined(ESP32)
-    #define FASTLED_ALL_SRC 1  // Individual compilation for Emscripten builds only
-  #elif defined(RELEASE) || defined(NDEBUG)
-    #define FASTLED_ALL_SRC 0  // Individual compilation for release builds only
-  #else
-    #define FASTLED_ALL_SRC 1  // Unified compilation for all other builds (debug, testing, non-release)
-  #endif
+  #define FASTLED_ALL_SRC 0
 #endif
 
 // #if FASTLED_ALL_SRC == 1

@@ -335,16 +335,8 @@ function(apply_test_compile_definitions)
         list(APPEND TEST_DEFINITIONS _ALLOW_COMPILER_AND_STL_VERSION_MISMATCH)
     endif()
     
-    # Unified compilation for Clang builds or when explicitly requested
-    if(CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR DEFINED ENV{FASTLED_ALL_SRC})
-        if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-            message(STATUS "Clang compiler detected: enabling FASTLED_ALL_SRC for unified compilation testing")
-        else()
-            message(STATUS "FASTLED_ALL_SRC environment variable set: enabling unified compilation testing")
-        endif()
-        set(FASTLED_ALL_SRC 1 PARENT_SCOPE)
-        list(APPEND TEST_DEFINITIONS FASTLED_ALL_SRC=1)
-    endif()
+    # FASTLED_ALL_SRC unified compilation mode is now set centrally by the test system
+    # before including src/CMakeLists.txt - no duplicate logic needed here
     
     # Apply definitions globally
     add_compile_definitions(${TEST_DEFINITIONS})

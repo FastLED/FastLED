@@ -402,8 +402,18 @@ def main() -> None:
             auto_run=not _IS_GITHUB,
             enable_stack_trace=enable_stack_trace,
         )
+        # Set compiler-specific timeout for C++ tests
+        # GCC builds are 5x slower due to poor unified compilation performance
+        cpp_test_timeout = (
+            900 if args.gcc else 300
+        )  # 15 minutes for GCC, 5 minutes for Clang/default
+        if args.gcc:
+            print(
+                f"Using extended timeout for GCC builds: {cpp_test_timeout} seconds (15 minutes)"
+            )
+
         cpp_test_proc = RunningProcess(
-            cmd_str_cpp, enable_stack_trace=enable_stack_trace
+            cmd_str_cpp, enable_stack_trace=enable_stack_trace, timeout=cpp_test_timeout
         )
         compile_native_proc = RunningProcess(
             "uv run ci/ci-compile-native.py",

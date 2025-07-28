@@ -38,10 +38,9 @@ function(apply_test_settings target)
         target_compile_definitions(${target} PRIVATE _ALLOW_COMPILER_AND_STL_VERSION_MISMATCH)
     endif()
     
-    # Set FASTLED_ALL_SRC=1 for clang builds or when explicitly requested
-    if(CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR DEFINED ENV{FASTLED_ALL_SRC})
-        target_compile_definitions(${target} PRIVATE FASTLED_ALL_SRC=1)
-    endif()
+    # FASTLED_ALL_SRC unified compilation mode is now set centrally by the test system
+    # before including src/CMakeLists.txt - no need to duplicate the logic here
+    # The source build system will handle the unified vs individual compilation decision
     
     # Add libunwind support if available
     if(USE_LIBUNWIND)

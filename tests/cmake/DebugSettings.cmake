@@ -82,12 +82,16 @@ function(configure_debug_symbols level)
         
     elseif(level STREQUAL "FULL")
         if(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
-            set(debug_flags "-g3")
+            # GCC performance optimization: Use -g1 instead of -g3 to reduce debug overhead
+            # This significantly improves compilation time for large unified compilation units
+            set(debug_flags "-g1" "-gdwarf-4")
+            # Add GCC-specific optimizations for faster compilation
+            list(APPEND debug_flags "-fno-var-tracking" "-fno-debug-types-section")
             # For GCC on Windows, we still use standard DWARF debug info
             if(WIN32)
-                message(STATUS "Debug symbols: FULL (DWARF format for GCC on Windows)")
+                message(STATUS "Debug symbols: FULL (Optimized for GCC performance - g1, no var tracking)")
             else()
-                message(STATUS "Debug symbols: FULL (DWARF format)")
+                message(STATUS "Debug symbols: FULL (Optimized for GCC performance - g1, no var tracking)")
             endif()
         elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
             set(debug_flags "-g3")

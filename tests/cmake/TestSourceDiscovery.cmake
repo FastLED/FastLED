@@ -70,6 +70,25 @@ function(setup_fastled_source_directory)
         message(STATUS "FASTLED_HAS_NETWORKING enabled - real networking will be used automatically")
     endif()
     
+    # Set unified compilation mode based on compiler before including source
+    # This ensures src/CMakeLists.txt receives the directive instead of making its own decision
+    if(CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR DEFINED ENV{FASTLED_ALL_SRC})
+        set(FASTLED_ALL_SRC ON)
+        if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+            message(STATUS "Test system directive: enabling FASTLED_ALL_SRC for Clang (better performance)")
+        else()
+            message(STATUS "Test system directive: enabling FASTLED_ALL_SRC from environment variable")
+        endif()
+    else()
+        set(FASTLED_ALL_SRC OFF)
+        if(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
+            message(STATUS "Test system directive: disabling FASTLED_ALL_SRC for GCC (better performance)")
+            message(STATUS "  Note: GCC builds 5x slower with unified compilation. Use FASTLED_ALL_SRC=1 to override.")
+        else()
+            message(STATUS "Test system directive: disabling FASTLED_ALL_SRC for unknown compiler")
+        endif()
+    endif()
+    
     # Delegate source file computation to src/CMakeLists.txt
     add_subdirectory(${FASTLED_SOURCE_DIR}/src ${CMAKE_BINARY_DIR}/fastled)
     
