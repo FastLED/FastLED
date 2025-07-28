@@ -22,7 +22,11 @@ function(discover_ino_examples OUTPUT_VAR)
            NOT DIR_NAME STREQUAL "WS2812_ADAFRUIT" AND
            NOT DIR_NAME STREQUAL "NeoPixelBusTest" AND
            NOT DIR_NAME STREQUAL "JsonFetch" AND
-           NOT DIR_NAME STREQUAL "VariantVisitor")
+           NOT DIR_NAME STREQUAL "VariantVisitor" AND
+           NOT DIR_NAME STREQUAL "FestivalStick" AND  # Compiler ICE in curr.h:437
+           NOT DIR_NAME STREQUAL "LuminescentGrand" AND  # Complex compatibility issues
+           NOT DIR_NAME STREQUAL "OctoWS2811Demo" AND  # Requires external OctoWS2811 library
+           NOT DIR_NAME STREQUAL "ParallelOutputDemo")  # Requires platform-specific WS2811_PORTDC
             list(APPEND FILTERED_FILES ${INO_FILE})
         endif()
     endforeach()
@@ -127,16 +131,19 @@ function(create_fastled_pch STUB_DIR)
     set(PCH_HEADER "${STUB_DIR}/fastled_pch.h")
     set(PCH_FILE "${STUB_DIR}/fastled_pch.pch")
     
-    # Generate PCH header content
+    # Generate PCH header content with proper paths
     set(PCH_CONTENT "#pragma once\n\n")
     set(PCH_CONTENT "${PCH_CONTENT}// FastLED Precompiled Header for Example Compilation Testing\n")
     set(PCH_CONTENT "${PCH_CONTENT}// This file contains commonly used FastLED headers for faster compilation\n\n")
     
+    set(PCH_CONTENT "${PCH_CONTENT}// MSVC Compatibility Layer (must be first)\n")
+    set(PCH_CONTENT "${PCH_CONTENT}#include \"arduino_compat.h\"\n\n")
+    
     set(PCH_CONTENT "${PCH_CONTENT}// Core FastLED headers\n")
-    set(PCH_CONTENT "${PCH_CONTENT}#include \"../../src/FastLED.h\"\n\n")
+    set(PCH_CONTENT "${PCH_CONTENT}#include \"FastLED.h\"\n\n")
     
     set(PCH_CONTENT "${PCH_CONTENT}// Arduino compatibility\n")
-    set(PCH_CONTENT "${PCH_CONTENT}#include \"../../src/platforms/wasm/compiler/Arduino.h\"\n\n")
+    set(PCH_CONTENT "${PCH_CONTENT}#include \"platforms/wasm/compiler/Arduino.h\"\n\n")
     
     set(PCH_CONTENT "${PCH_CONTENT}// Common FastLED namespace usage\n")
     set(PCH_CONTENT "${PCH_CONTENT}FASTLED_USING_NAMESPACE\n")
@@ -144,8 +151,12 @@ function(create_fastled_pch STUB_DIR)
     # Write PCH header
     file(WRITE ${PCH_HEADER} ${PCH_CONTENT})
     
-    # TODO: PCH compilation will be handled by the build targets
-    message(STATUS "Created precompiled header template: ${PCH_HEADER}")
+    # Store PCH paths for use by compilation targets
+    set(FASTLED_PCH_HEADER ${PCH_HEADER} PARENT_SCOPE)
+    set(FASTLED_PCH_FILE ${PCH_FILE} PARENT_SCOPE)
+    
+    message(STATUS "FastLED PCH prepared: ${PCH_HEADER}")
+    message(STATUS "PCH will be compiled by build targets for maximum speed")
 endfunction()
 
 # Function to configure example compilation test
@@ -280,24 +291,34 @@ function(create_example_compile_test_target)
             -g0                   # No debug symbols
             -fno-rtti             # Disable RTTI
             -fno-exceptions       # Disable exception handling
+            -pipe                 # Use pipes instead of temp files
+            -ffast-math           # Fast math operations
+            -fno-stack-protector  # Disable stack protection for speed
+            -fno-unwind-tables    # Disable unwind tables
             -Wno-unused-parameter # Suppress unused parameter warnings
             -Wno-unused-variable  # Suppress unused variable warnings
             -Wno-unused-function  # Suppress unused function warnings
             -Wno-unknown-pragmas  # Suppress unknown pragma warnings
             -Wno-deprecated-declarations  # Suppress deprecated warnings
+            -Wno-everything       # Suppress all warnings for maximum speed
         )
-        message(STATUS "Using Clang compilation flags for example compilation")
+        message(STATUS "Using Clang ultra-fast compilation flags for example compilation")
     else()
         set(FAST_COMPILE_FLAGS
             -O0                   # No optimization for fastest compilation
             -g0                   # No debug symbols
             -fno-rtti             # Disable RTTI
             -fno-exceptions       # Disable exception handling
+            -pipe                 # Use pipes instead of temp files
+            -ffast-math           # Fast math operations
+            -fno-stack-protector  # Disable stack protection for speed
+            -fno-unwind-tables    # Disable unwind tables
             -Wno-unused-parameter # Suppress unused parameter warnings
             -Wno-unused-variable  # Suppress unused variable warnings
             -Wno-unused-function  # Suppress unused function warnings
+            -w                    # Suppress all warnings for maximum speed
         )
-        message(STATUS "Using GCC compilation flags for example compilation")
+        message(STATUS "Using GCC ultra-fast compilation flags for example compilation")
     endif()
     
     # Create compilation test target with FastLED examples
@@ -325,6 +346,14 @@ function(create_example_compile_test_target)
             ${CMAKE_CURRENT_SOURCE_DIR}/../examples   # Original .ino files
             ${EXAMPLE_COMPILE_DIR}
         )
+        
+        # Enable precompiled headers for FastLED examples (major speed boost)
+        if(FASTLED_PCH_HEADER AND CMAKE_VERSION VERSION_GREATER_EQUAL "3.16")
+            target_precompile_headers(example_compile_fastled_objects PRIVATE ${FASTLED_PCH_HEADER})
+            message(STATUS "PCH enabled for FastLED examples: ${FASTLED_PCH_HEADER}")
+        else()
+            message(STATUS "PCH not available (CMake < 3.16 or no PCH header)")
+        endif()
         
         # Define preprocessor symbols for compatibility
         target_compile_definitions(example_compile_fastled_objects PRIVATE

@@ -108,11 +108,16 @@ def parse_args() -> argparse.Namespace:
             args.clang = True
             print("Auto-enabled --clang compiler for static analysis (--check)")
 
-    # Auto-enable --cpp when --examples is provided
+    # Auto-enable --cpp and --quick when --examples is provided
     if args.examples:
         if not args.cpp:
             args.cpp = True
             print("Auto-enabled --cpp mode for example compilation (--examples)")
+        if not args.quick:
+            args.quick = True
+            print(
+                "Auto-enabled --quick mode for faster example compilation (--examples)"
+            )
 
     # Default to Clang on Windows unless --gcc is explicitly passed
     if sys.platform == "win32" and not args.gcc and not args.clang:
