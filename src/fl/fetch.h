@@ -265,18 +265,9 @@ public:
     fl::size active_requests() const;
     void cleanup_completed_promises();
     
-    // WASM promise management
-    fl::string register_pending_promise(const fl::promise<response>& promise);
-    fl::promise<response> retrieve_pending_promise(const fl::string& request_id);
-
 private:
     fl::vector<fl::promise<response>> mActivePromises;
     fl::unique_ptr<FetchEngineListener> mEngineListener;
-    
-    // WASM-specific promise tracking (moved from static variables)
-    fl::hash_map<fl::string, fl::promise<response>> mPendingPromises;
-    fl::mutex mPromisesMutex;
-    uint32_t mNextRequestId = 1;
 };
 
 // ========== Simple Callback API (Backward Compatible) ==========

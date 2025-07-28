@@ -187,7 +187,7 @@ void setup() {
     Serial.println("JSON SCREENMAP");
     Serial.println(JSON_SCREEN_MAP);
 
-    FixedMap<Str, ScreenMap, 16> segmentMaps;
+    fl::fl_map<fl::string, ScreenMap> segmentMaps;
     ScreenMap::ParseJson(JSON_SCREEN_MAP, &segmentMaps);
 
     printf("Parsed %d segment maps\n", int(segmentMaps.size()));
@@ -201,10 +201,22 @@ void setup() {
     // ScreenMap screenmaps[4];
     ScreenMap red, black, green, blue;
     bool ok = true;
-    ok = segmentMaps.get("red_segment", &red) && ok;
-    ok = segmentMaps.get("back_segment", &black) && ok;
-    ok = segmentMaps.get("green_segment", &green) && ok;
-    ok = segmentMaps.get("blue_segment", &blue) && ok;
+    
+    auto red_it = segmentMaps.find("red_segment");
+    ok = (red_it != segmentMaps.end()) && ok;
+    if (red_it != segmentMaps.end()) red = red_it->second;
+    
+    auto black_it = segmentMaps.find("back_segment");
+    ok = (black_it != segmentMaps.end()) && ok;
+    if (black_it != segmentMaps.end()) black = black_it->second;
+    
+    auto green_it = segmentMaps.find("green_segment");
+    ok = (green_it != segmentMaps.end()) && ok;
+    if (green_it != segmentMaps.end()) green = green_it->second;
+    
+    auto blue_it = segmentMaps.find("blue_segment");
+    ok = (blue_it != segmentMaps.end()) && ok;
+    if (blue_it != segmentMaps.end()) blue = blue_it->second;
     if (!ok) {
         Serial.println("Failed to get all segment maps");
         return;

@@ -126,8 +126,8 @@ private:
             alignas(FUNCTOR) char temp_storage[sizeof(FUNCTOR)];
             // Copy the lambda from storage
             fl::memcopy(temp_storage, storage.bytes, sizeof(FUNCTOR));
-            // Get a properly typed pointer to the copied lambda
-            const FUNCTOR* f = static_cast<const FUNCTOR*>(static_cast<const void*>(temp_storage));
+            // Get a properly typed pointer to the copied lambda (non-const for mutable lambdas)
+            FUNCTOR* f = static_cast<FUNCTOR*>(static_cast<void*>(temp_storage));
             // Invoke the lambda
             return (*f)(args...);
         }

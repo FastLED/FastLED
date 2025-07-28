@@ -43,20 +43,13 @@ fl::promise<response> execute_fetch_request(const fl::string& url, const fetch_o
     // Convert our request to the existing WASM fetch system
     auto wasm_request = WasmFetchRequest(fetch_url);
     
-    // Generate a unique ID and store the promise safely using the singleton
-    fl::string request_id = FetchManager::instance().register_pending_promise(promise);
-    
-    // Use lambda that captures only the request ID, not the promise
-    wasm_request.response([request_id](const response& resp) {
-        // Retrieve the promise from storage
-        fl::promise<response> stored_promise = FetchManager::instance().retrieve_pending_promise(request_id);
-        if (!stored_promise.valid()) {
-            // Promise not found - this shouldn't happen but handle gracefully
-            return;
+    // Use lambda that captures the promise directly (shared_ptr is safe to copy)
+    // Make the lambda mutable so we can call non-const methods on the captured promise
+    wasm_request.response([promise](const response& resp) mutable {
+        // Complete the promise directly - no need for double storage
+        if (promise.valid()) {
+            promise.complete_with_value(resp);
         }
-        
-        // No conversion needed - directly use the response
-        stored_promise.complete_with_value(resp);
     });
     
     return promise;
@@ -179,25 +172,8 @@ void FetchManager::cleanup_completed_promises() {
     mActivePromises = fl::move(active_promises);
 }
 
-fl::string FetchManager::register_pending_promise(const fl::promise<response>& promise) {
-    fl::lock_guard<fl::mutex> lock(mPromisesMutex);
-    fl::string request_id = fl::string("req_");
-    request_id.append(mNextRequestId++);
-    mPendingPromises[request_id] = promise;
-    return request_id;
-}
-
-fl::promise<response> FetchManager::retrieve_pending_promise(const fl::string& request_id) {
-    fl::lock_guard<fl::mutex> lock(mPromisesMutex);
-    auto it = mPendingPromises.find(request_id);
-    if (it != mPendingPromises.end()) {
-        fl::promise<response> stored_promise = it->second;
-        mPendingPromises.erase(it);
-        return stored_promise;
-    }
-    // Return an invalid promise if not found
-    return fl::promise<response>();
-}
+// WASM promise management methods removed - no longer needed
+// Promises are now handled directly via shared_ptr capture in callbacks
 
 // ========== Public API Functions ==========
 
