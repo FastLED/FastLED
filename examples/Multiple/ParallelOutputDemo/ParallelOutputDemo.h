@@ -6,5 +6,5 @@
 #if defined(CORE_TEENSY) && defined(TEENSYDUINO) && defined(HAS_PORTDC)
 #include "ParallelOutputDemo.h"
 #else
-#include "../../../src/platforms/sketch_fake.hpp"
+platforms/sketch_fake.hpp
 #endif

@@ -6,5 +6,5 @@
 #if defined(__AVR__) || (defined(__arm__) && defined(TEENSYDUINO))
 #include "Pintest.h"
 #else
-#include "../../src/platforms/sketch_fake.hpp"
+platforms/sketch_fake.hpp
 #endif

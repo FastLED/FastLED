@@ -6,5 +6,5 @@
 #if defined(__arm__) && defined(TEENSYDUINO)
 #include "PJRCSpectrumAnalyzer.h"
 #else
-#include "../../../src/platforms/sketch_fake.hpp"
+platforms/sketch_fake.hpp
 #endif
