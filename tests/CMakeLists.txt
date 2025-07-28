@@ -28,6 +28,11 @@ include(cmake/ParallelBuild.cmake)
 include(cmake/TargetCreation.cmake)
 include(cmake/TestConfiguration.cmake)
 include(cmake/TestSourceDiscovery.cmake)
+# Example compilation testing - optional feature
+option(FASTLED_ENABLE_EXAMPLE_TESTS "Enable example compilation testing" OFF)
+if(FASTLED_ENABLE_EXAMPLE_TESTS)
+    include(cmake/ExampleCompileTest.cmake)
+endif()
 include(cmake/StaticAnalysis.cmake)
 
 # Enforce C++17 globally for all targets.
@@ -106,6 +111,13 @@ setup_fastled_source_directory()
 # Configure CTest system and create test infrastructure
 configure_ctest()
 create_test_infrastructure()
+
+# Configure example compilation testing - only if enabled
+if(FASTLED_ENABLE_EXAMPLE_TESTS)
+    configure_example_compile_test()
+    create_example_compile_test_target()
+    create_example_compilation_test_executable()
+endif()
 
 # Process test targets using modular approach (handled by TestSourceDiscovery module)
 process_test_targets()

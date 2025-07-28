@@ -86,6 +86,11 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Enable static analysis (IWYU, clang-tidy) - auto-enables --cpp and --clang",
     )
+    parser.add_argument(
+        "--examples",
+        action="store_true",
+        help="Run example compilation tests - auto-enables --cpp mode",
+    )
 
     args = parser.parse_args()
 
@@ -102,6 +107,12 @@ def parse_args() -> argparse.Namespace:
         if not args.clang and not args.gcc:
             args.clang = True
             print("Auto-enabled --clang compiler for static analysis (--check)")
+
+    # Auto-enable --cpp when --examples is provided
+    if args.examples:
+        if not args.cpp:
+            args.cpp = True
+            print("Auto-enabled --cpp mode for example compilation (--examples)")
 
     # Default to Clang on Windows unless --gcc is explicitly passed
     if sys.platform == "win32" and not args.gcc and not args.clang:
@@ -332,6 +343,30 @@ def main() -> None:
         cmd_str_cpp = subprocess.list2cmdline(cmd_list)
 
         if args.cpp:
+            # Handle --examples flag specifically
+            if args.examples:
+                print("Running example compilation tests")
+                start_time = time.time()
+
+                # Run the example compilation test script
+                proc = RunningProcess(
+                    "uv run ci/test_example_compilation.py",
+                    echo=True,
+                    auto_run=True,
+                    enable_stack_trace=enable_stack_trace,
+                )
+                proc.wait()
+                if proc.returncode != 0:
+                    print(
+                        f"Example compilation test failed with return code {proc.returncode}"
+                    )
+                    sys.exit(proc.returncode)
+
+                print(
+                    f"Example compilation test completed successfully in {time.time() - start_time:.2f}s"
+                )
+                return
+
             # Run the namespace check before C++ tests
             print("Running namespace check...")
             namespace_check_proc = RunningProcess(
