@@ -4,7 +4,7 @@ namespace fl {
 
 int IdTracker::getOrCreateId(void* ptr) {
     if (!ptr) {
-        return 0;  // Invalid pointer gets invalid ID
+        return -1;  // Invalid pointer gets invalid ID
     }
     
     // Lock for thread safety
@@ -73,7 +73,7 @@ void IdTracker::clear() {
     mMutex.lock();
     
     mPointerToId.clear();
-    mNextId = 1;  // Reset ID counter
+    mNextId = 0;  // Reset ID counter to start at 0
     
     mMutex.unlock();
 }

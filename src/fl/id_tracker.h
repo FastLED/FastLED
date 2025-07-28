@@ -90,7 +90,7 @@ private:
     
     // ID mapping and counter
     fl::hash_map<void*, int> mPointerToId;
-    int mNextId = 1;  // Start IDs at 1 (0 can be used as "invalid ID")
+    int mNextId = 0;  // Start IDs at 0 to match StripIdMap behavior
 };
 
 } // namespace fl 
