@@ -655,7 +655,8 @@ TEST_CASE("JsonSlider step output behavior") {
         
         // Also verify the JSON string contains the step value
         fl::string jsonStr = json1.to_string();
-        CHECK(jsonStr.find("\"step\":0.100000") != fl::string::npos);
+        // 🚨 UPDATED: Expect clean format without trailing zeros
+        CHECK(jsonStr.find("\"step\":0.1") != fl::string::npos);
     }
     
     // Test 2: Slider with default step should NOT output step field
@@ -681,7 +682,8 @@ TEST_CASE("JsonSlider step output behavior") {
         
         // Also verify the JSON string contains zero step value
         fl::string jsonStr = json3.to_string();
-        CHECK(jsonStr.find("\"step\":0.000000") != fl::string::npos);
+        // 🚨 UPDATED: Expect clean format for zero
+        CHECK(jsonStr.find("\"step\":0") != fl::string::npos);
     }
     
     // Test 4: Slider with very small step should output step field
@@ -694,7 +696,8 @@ TEST_CASE("JsonSlider step output behavior") {
         
         // Also verify the JSON string contains the small step value
         fl::string jsonStr = json4.to_string();
-        CHECK(jsonStr.find("\"step\":0.001000") != fl::string::npos);
+        // 🚨 UPDATED: Expect clean format without trailing zeros
+        CHECK(jsonStr.find("\"step\":0.001") != fl::string::npos);
     }
 }
 

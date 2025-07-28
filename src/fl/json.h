@@ -622,7 +622,7 @@ struct JsonValue {
         fl::nullptr_t,   // null
         bool,            // true/false
         int64_t,         // integer
-        double,          // floating-point
+        float,           // floating-point (changed from double to float)
         fl::string,      // string
         JsonArray,           // array
         JsonObject,          // object
@@ -641,7 +641,7 @@ struct JsonValue {
     JsonValue(fl::nullptr_t) noexcept : data(nullptr) {}
     JsonValue(bool b) noexcept : data(b) {}
     JsonValue(int64_t i) noexcept : data(i) {}
-    JsonValue(double d) noexcept : data(d) {}
+    JsonValue(float f) noexcept : data(f) {}  // Changed from double to float
     JsonValue(const fl::string& s) : data(s) {
         //FASTLED_WARN("Created JsonValue with string: '" << s << "'");
         //FASTLED_WARN("Tag value: " << data.tag());
@@ -713,7 +713,12 @@ struct JsonValue {
     }
 
     JsonValue& operator=(double d) {
-        data = d;
+        data = static_cast<float>(d);
+        return *this;
+    }
+    
+    JsonValue& operator=(float f) {
+        data = f;
         return *this;
     }
 
@@ -775,7 +780,10 @@ struct JsonValue {
     }
     bool is_double() const noexcept { 
         //FASTLED_WARN("is_double called, tag=" << data.tag());
-        return data.is<double>(); 
+        return data.is<float>(); 
+    }
+    bool is_float() const noexcept { 
+        return data.is<float>(); 
     }
     bool is_string() const noexcept { 
         //FASTLED_WARN("is_string called, tag=" << data.tag());
@@ -882,20 +890,25 @@ struct JsonValue {
             return fl::nullopt;
         }
         
-        auto ptr = data.ptr<double>();
-        return ptr ? fl::optional<double>(*ptr) : fl::nullopt;
+        auto ptr = data.ptr<float>();
+        return ptr ? fl::optional<double>(static_cast<double>(*ptr)) : fl::nullopt;
     }
     
-    template<typename FloatType>
-    fl::optional<FloatType> as_float() {
+    fl::optional<float> as_float() {
         // Check if we have a valid value first
         if (data.empty()) {
             return fl::nullopt;
         }
         
-        FloatConversionVisitor<FloatType> visitor;
-        data.visit(visitor);
-        return visitor.result;
+        auto ptr = data.ptr<float>();
+        return ptr ? fl::optional<float>(*ptr) : fl::nullopt;
+    }
+    
+    template<typename FloatType>
+    fl::optional<FloatType> as_float() {
+        // Convert from internal float to requested type
+        auto opt = as_float();
+        return opt ? fl::optional<FloatType>(static_cast<FloatType>(*opt)) : fl::nullopt;
     }
     
     fl::optional<fl::string> as_string() {
@@ -936,7 +949,7 @@ struct JsonValue {
             auto floatPtr = data.ptr<fl::vector<float>>();
             JsonArray result;
             for (const auto& item : *floatPtr) {
-                result.push_back(fl::make_shared<JsonValue>(static_cast<double>(item)));
+                result.push_back(fl::make_shared<JsonValue>(item));  // Use float directly
             }
             return fl::optional<JsonArray>(result);
         }
@@ -999,20 +1012,25 @@ struct JsonValue {
             return fl::nullopt;
         }
         
-        auto ptr = data.ptr<double>();
-        return ptr ? fl::optional<double>(*ptr) : fl::nullopt;
+        auto ptr = data.ptr<float>();
+        return ptr ? fl::optional<double>(static_cast<double>(*ptr)) : fl::nullopt;
     }
     
-    template<typename FloatType>
-    fl::optional<FloatType> as_float() const {
+    fl::optional<float> as_float() const {
         // Check if we have a valid value first
         if (data.empty()) {
             return fl::nullopt;
         }
         
-        FloatConversionVisitor<FloatType> visitor;
-        data.visit(visitor);
-        return visitor.result;
+        auto ptr = data.ptr<float>();
+        return ptr ? fl::optional<float>(*ptr) : fl::nullopt;
+    }
+    
+    template<typename FloatType>
+    fl::optional<FloatType> as_float() const {
+        // Convert from internal float to requested type
+        auto opt = as_float();
+        return opt ? fl::optional<FloatType>(static_cast<FloatType>(*opt)) : fl::nullopt;
     }
     
     fl::optional<fl::string> as_string() const {
@@ -1053,7 +1071,7 @@ struct JsonValue {
             auto floatPtr = data.ptr<fl::vector<float>>();
             JsonArray result;
             for (const auto& item : *floatPtr) {
-                result.push_back(fl::make_shared<JsonValue>(static_cast<double>(item)));
+                result.push_back(fl::make_shared<JsonValue>(item));  // Use float directly
             }
             return fl::optional<JsonArray>(result);
         }
@@ -1583,8 +1601,8 @@ public:
     Json(bool b) : m_value(fl::make_shared<JsonValue>(b)) {}
     Json(int i) : m_value(fl::make_shared<JsonValue>(static_cast<int64_t>(i))) {}
     Json(int64_t i) : m_value(fl::make_shared<JsonValue>(i)) {}
-    Json(float f) : m_value(fl::make_shared<JsonValue>(static_cast<double>(f))) {}
-    Json(double d) : m_value(fl::make_shared<JsonValue>(d)) {}
+    Json(float f) : m_value(fl::make_shared<JsonValue>(f)) {}  // Use float directly
+    Json(double d) : m_value(fl::make_shared<JsonValue>(static_cast<float>(d))) {}  // Convert double to float
     Json(const fl::string& s) : m_value(fl::make_shared<JsonValue>(s)) {}
     Json(const char* s): Json(fl::string(s)) {}
     Json(JsonArray a) : m_value(fl::make_shared<JsonValue>(fl::move(a))) {}
@@ -1604,7 +1622,7 @@ public:
         auto ptr = m_value->data.ptr<JsonArray>();
         if (ptr) {
             for (const auto& item : vec) {
-                ptr->push_back(fl::make_shared<JsonValue>(static_cast<double>(item)));
+                ptr->push_back(fl::make_shared<JsonValue>(item));  // Use float directly
             }
         }
     }
@@ -1650,12 +1668,12 @@ public:
     }
     
     Json& operator=(float value) {
-        m_value = fl::make_shared<JsonValue>(static_cast<double>(value));
+        m_value = fl::make_shared<JsonValue>(value);
         return *this;
     }
     
     Json& operator=(double value) {
-        m_value = fl::make_shared<JsonValue>(value);
+        m_value = fl::make_shared<JsonValue>(static_cast<float>(value));
         return *this;
     }
     
@@ -1675,7 +1693,7 @@ public:
         auto ptr = m_value->data.ptr<JsonArray>();
         if (ptr) {
             for (const auto& item : vec) {
-                ptr->push_back(fl::make_shared<JsonValue>(static_cast<double>(item)));
+                ptr->push_back(fl::make_shared<JsonValue>(item));  // Use float directly
             }
         }
         return *this;
@@ -1712,9 +1730,9 @@ public:
         return m_value->as_double(); 
     }
     
-    fl::optional<double> as_float() const { 
+    fl::optional<float> as_float() const { 
         if (!m_value) return fl::nullopt;
-        return m_value->as_float<double>(); 
+        return m_value->as_float();
     }
     
     template<typename FloatType>

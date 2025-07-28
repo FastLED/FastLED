@@ -88,11 +88,11 @@ fl::shared_ptr<JsonValue> JsonValue::parse(const fl::string& txt) {
                 // Handle unsigned 32-bit integers
                 return fl::make_shared<JsonValue>(static_cast<int64_t>(src.as<uint32_t>()));
             } else if (src.is<double>()) {
-                // Handle double precision floats
-                return fl::make_shared<JsonValue>(src.as<double>());
+                // Handle double precision floats - convert to float
+                return fl::make_shared<JsonValue>(static_cast<float>(src.as<double>()));
             } else if (src.is<float>()) {
                 // Handle single precision floats explicitly
-                return fl::make_shared<JsonValue>(static_cast<double>(src.as<float>()));
+                return fl::make_shared<JsonValue>(src.as<float>());
             } else if (src.is<const char*>()) {
                 return fl::make_shared<JsonValue>(fl::string(src.as<const char*>()));
             } else if (src.is<FLArduinoJson::JsonArrayConst>()) {
@@ -414,10 +414,11 @@ fl::string Json::to_string_native() const {
                 append_string("null");
             }
         } else if (value.is_double()) {
-            auto opt = value.as_double();
+            auto opt = value.as_float();
             if (opt) {
                 fl::string num_str;
-                num_str.append(static_cast<float>(*opt));
+                // Use fl::string::append which already handles float formatting correctly
+                num_str.append(*opt);
                 append_fl_string(num_str);
             } else {
                 append_string("null");

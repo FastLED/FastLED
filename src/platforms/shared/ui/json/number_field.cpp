@@ -13,13 +13,13 @@ namespace fl {
 // Definition of the internal class that was previously in number_field_internal.h
 class JsonUiNumberFieldInternal : public JsonUiInternal {
 private:
-    double mValue;
-    double mMin;
-    double mMax;
+    float mValue;
+    float mMin;
+    float mMax;
 
 public:
     // Constructor: Initializes the base JsonUiInternal with name, and sets initial values.
-    JsonUiNumberFieldInternal(const fl::string& name, double value, double min, double max)
+    JsonUiNumberFieldInternal(const fl::string& name, float value, float min, float max)
         : JsonUiInternal(name), mValue(value), mMin(min), mMax(max) {}
 
     // Override toJson to serialize the number field's data directly.
@@ -28,14 +28,14 @@ public:
         json.set("type", "number");
         json.set("group", groupName());
         json.set("id", id());
-        json.set("value", static_cast<float>(mValue));
-        json.set("min", static_cast<float>(mMin));
-        json.set("max", static_cast<float>(mMax));
+        json.set("value", mValue);
+        json.set("min", mMin);
+        json.set("max", mMax);
     }
 
     // Override updateInternal to handle updates from JSON.
     void updateInternal(const fl::Json& json) override {
-        double value = json | 0.0;
+        float value = json | 0.0f;
         if (value < mMin) {
             value = mMin;
         } else if (value > mMax) {
@@ -45,11 +45,11 @@ public:
     }
 
     // Accessors for the number field values.
-    double value() const { return mValue; }
-    double min() const { return mMin; }
-    double max() const { return mMax; }
+    float value() const { return mValue; }
+    float min() const { return mMin; }
+    float max() const { return mMax; }
     
-    void setValue(double value) { 
+    void setValue(float value) { 
         if (value < mMin) {
             value = mMin;
         } else if (value > mMax) {
@@ -58,12 +58,12 @@ public:
         mValue = value;
     }
     
-    void setMin(double min) { mMin = min; }
-    void setMax(double max) { mMax = max; }
+    void setMin(float min) { mMin = min; }
+    void setMax(float max) { mMax = max; }
 };
 
-JsonNumberFieldImpl::JsonNumberFieldImpl(const fl::string &name, double value,
-                                        double min, double max) {
+JsonNumberFieldImpl::JsonNumberFieldImpl(const fl::string &name, float value,
+                                        float min, float max) {
     // Create an instance of the new internal class
     mInternal = fl::make_shared<JsonUiNumberFieldInternal>(name, value, min, max);
 
@@ -91,10 +91,10 @@ void JsonNumberFieldImpl::toJson(fl::Json &json) const {
     mInternal->toJson(json);
 }
 
-double JsonNumberFieldImpl::value() const { return mInternal->value(); }
+float JsonNumberFieldImpl::value() const { return mInternal->value(); }
 
-void JsonNumberFieldImpl::setValue(double value) {
-    double oldValue = mInternal->value();
+void JsonNumberFieldImpl::setValue(float value) {
+    float oldValue = mInternal->value();
     mInternal->setValue(value);
     
     // If value actually changed, mark this component as changed for polling
@@ -107,23 +107,23 @@ const fl::string &JsonNumberFieldImpl::groupName() const { return mInternal->gro
 
 void JsonNumberFieldImpl::setGroup(const fl::string &groupName) { mInternal->setGroup(groupName); }
 
-JsonNumberFieldImpl &JsonNumberFieldImpl::operator=(double value) {
+JsonNumberFieldImpl &JsonNumberFieldImpl::operator=(float value) {
     setValue(value);
     return *this;
 }
 
 JsonNumberFieldImpl &JsonNumberFieldImpl::operator=(int value) {
-    setValue(static_cast<double>(value));
+    setValue(static_cast<float>(value));
     return *this;
 }
 
-bool JsonNumberFieldImpl::operator==(double v) const { return ALMOST_EQUAL_FLOAT(value(), v); }
+bool JsonNumberFieldImpl::operator==(float v) const { return ALMOST_EQUAL_FLOAT(value(), v); }
 
-bool JsonNumberFieldImpl::operator==(int v) const { return ALMOST_EQUAL_FLOAT(value(), static_cast<double>(v)); }
+bool JsonNumberFieldImpl::operator==(int v) const { return ALMOST_EQUAL_FLOAT(value(), static_cast<float>(v)); }
 
-bool JsonNumberFieldImpl::operator!=(double v) const { return !ALMOST_EQUAL_FLOAT(value(), v); }
+bool JsonNumberFieldImpl::operator!=(float v) const { return !ALMOST_EQUAL_FLOAT(value(), v); }
 
-bool JsonNumberFieldImpl::operator!=(int v) const { return !ALMOST_EQUAL_FLOAT(value(), static_cast<double>(v)); }
+bool JsonNumberFieldImpl::operator!=(int v) const { return !ALMOST_EQUAL_FLOAT(value(), static_cast<float>(v)); }
 
 } // namespace fl
 

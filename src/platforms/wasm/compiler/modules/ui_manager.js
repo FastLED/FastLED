@@ -269,7 +269,14 @@ function createSlider(element) {
   slider.min = Number.parseFloat(element.min);
   slider.max = Number.parseFloat(element.max);
   slider.value = Number.parseFloat(element.value);
-  slider.step = Number.parseFloat(element.step);
+  
+  // Check if element.step exists and is not undefined/null
+  if (element.step !== undefined && element.step !== null) {
+    slider.step = Number.parseFloat(element.step);
+  } else {
+    // Set a default step
+    slider.step = 'any';
+  }
 
   // Create the overlay label div
   const overlayDiv = document.createElement('div');

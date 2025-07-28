@@ -14,14 +14,14 @@ class JsonUiNumberFieldInternal;
 
 class JsonNumberFieldImpl {
   public:
-    JsonNumberFieldImpl(const fl::string &name, double value, double min, double max);
+    JsonNumberFieldImpl(const fl::string &name, float value, float min, float max);
     ~JsonNumberFieldImpl();
     JsonNumberFieldImpl &Group(const fl::string &name);
 
     const fl::string &name() const;
     void toJson(fl::Json &json) const;
-    double value() const;
-    void setValue(double value);
+    float value() const;
+    void setValue(float value);
     const fl::string &groupName() const;
     
     // Method to allow parent UIElement class to set the group
@@ -29,12 +29,12 @@ class JsonNumberFieldImpl {
 
     int id() const;
 
-    JsonNumberFieldImpl &operator=(double value);
+    JsonNumberFieldImpl &operator=(float value);
     JsonNumberFieldImpl &operator=(int value);
     // Use ALMOST_EQUAL_FLOAT for floating-point comparison
-    bool operator==(double v) const;
+    bool operator==(float v) const;
     bool operator==(int v) const;
-    bool operator!=(double v) const;
+    bool operator!=(float v) const;
     bool operator!=(int v) const;
 
   private:
