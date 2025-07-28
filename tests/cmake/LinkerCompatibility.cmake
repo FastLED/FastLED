@@ -555,15 +555,31 @@ function(get_windows_crt_libraries output_var)
             # 🚨 CRITICAL FIX: Use ONLY dynamic runtime libraries to avoid MT vs MD conflicts
             # The previous approach mixed static and dynamic libraries which caused linker errors
             # This approach uses exclusively dynamic runtime libraries for consistency
+            
+            # 🚨 NEW: Support both Debug and Release runtime libraries based on build type
+            if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+                # Debug mode: Use debug runtime libraries
+                message(STATUS "LinkerCompatibility: Using DEBUG runtime libraries for Debug build")
+                list(APPEND crt_libs
+                    # Microsoft Visual C++ DYNAMIC DEBUG runtime libraries
+                    "msvcrtd.lib"       # C runtime library (debug, dynamic linking)
+                    "vcruntimed.lib"    # Visual C++ runtime support (debug)
+                    "ucrtd.lib"         # Universal C runtime (debug)
+                )
+            else()
+                # Release/Quick/other modes: Use release runtime libraries
+                message(STATUS "LinkerCompatibility: Using RELEASE runtime libraries for ${CMAKE_BUILD_TYPE} build")
+                list(APPEND crt_libs
+                    # Microsoft Visual C++ DYNAMIC RELEASE runtime libraries
+                    "msvcrt.lib"        # C runtime library (release, dynamic linking)
+                    "vcruntime.lib"     # Visual C++ runtime support (release)
+                    "ucrt.lib"          # Universal C runtime (release)
+                )
+            endif()
+            
+            # Common libraries for both Debug and Release
             list(APPEND crt_libs
-                # Microsoft Visual C++ DYNAMIC runtime libraries ONLY
-                "msvcrt.lib"        # C runtime library (dynamic linking) - provides memset, memcpy, strlen  
-                "vcruntime.lib"     # Visual C++ runtime support - provides __CxxFrameHandler3
-                "ucrt.lib"          # Universal C runtime - provides modern C runtime functions
-                
-                # 🚨 CRITICAL: DO NOT include msvcprt.lib as it conflicts with static libraries
-                # msvcprt.lib provides C++ standard library functions but has MD_DynamicRelease
-                # which conflicts with any remaining static libraries that have MT_StaticRelease
+                # 🚨 CRITICAL: DO NOT include msvcprt.lib/msvcprtd.lib as they conflict with static libraries
                 # The /NODEFAULTLIB flags will prevent static libraries from being linked
                 
                 # Additional Windows runtime support 
