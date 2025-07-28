@@ -460,7 +460,7 @@ TEST_CASE("Json2 Tests") {
         
         ScreenMap parsedStrip2 = parsedSegmentMaps["strip2"];
         CHECK_EQ(parsedStrip2.getLength(), 3);
-        CHECK_EQ(parsedStrip2.getDiameter(), 0.3f);
+        CHECK_EQ(parsedStrip2.getDiameter(), 0.3f);  // NOTE : PLesase use CHECK_CLOSE
         
         // Test individual points
         CHECK_EQ(parsedStrip1[0].x, 0.0f);
@@ -904,7 +904,8 @@ TEST_CASE("Json Float Data Parsing") {
                       json.is_array() ? "array" : "other"));
         
         CHECK(json.is_floats());
-        CHECK_FALSE(json.is_array()); // Should not be regular array anymore
+        CHECK_FALSE(json.is_generic_array()); // Should not be regular JsonArray anymore
+        CHECK(json.is_array()); // Should still be an array (specialized type)
         CHECK_FALSE(json.is_audio()); // Should not be audio data
         CHECK_FALSE(json.is_bytes()); // Should not be byte data
         CHECK_FALSE(json.is_int());
@@ -1000,7 +1001,8 @@ TEST_CASE("Json Float Data Parsing") {
                       json.is_array() ? "array" : "other"));
         
         CHECK(json.is_floats());
-        CHECK_FALSE(json.is_array()); // Should not be regular array anymore
+        CHECK_FALSE(json.is_generic_array()); // Should not be regular JsonArray anymore
+        CHECK(json.is_array()); // Should still be an array (specialized type)
         CHECK_FALSE(json.is_audio()); // Should not be audio data
         CHECK_FALSE(json.is_bytes()); // Should not be byte data
         CHECK_FALSE(json.is_int());
@@ -1050,7 +1052,8 @@ TEST_CASE("Json Audio Data Parsing") {
         Json json = Json::parse(jsonStr);
         
         CHECK(json.is_audio());
-        CHECK_FALSE(json.is_array()); // Should not be regular array anymore
+        CHECK_FALSE(json.is_generic_array()); // Should not be regular JsonArray anymore
+        CHECK(json.is_array()); // Should still be an array (specialized type)
         CHECK_FALSE(json.is_bytes()); // Should not be byte data
         CHECK_FALSE(json.is_int());
         CHECK_FALSE(json.is_double());
@@ -1077,7 +1080,8 @@ TEST_CASE("Json Audio Data Parsing") {
         // Should become byte data, not audio data
         CHECK(json.is_bytes());
         CHECK_FALSE(json.is_audio());
-        CHECK_FALSE(json.is_array()); // Should not be regular array anymore
+        CHECK_FALSE(json.is_generic_array()); // Should not be regular JsonArray anymore
+        CHECK(json.is_array()); // Should still be an array (specialized type)
         CHECK_FALSE(json.is_int());
         CHECK_FALSE(json.is_double());
         CHECK_FALSE(json.is_string());

@@ -779,22 +779,22 @@ struct JsonValue {
             (*this)(value);
         }
         
-        // Only JsonArray should be considered a regular array
+        // JsonArray is an array
         void operator()(const JsonArray&) {
             result = true;
         }
         
-        // Specialized array types should NOT be considered regular arrays
+        // Specialized array types ARE arrays
         void operator()(const fl::vector<int16_t>&) {
-            result = false;  // This is audio data, not a regular array
+            result = true;  // Audio data is still an array
         }
         
         void operator()(const fl::vector<uint8_t>&) {
-            result = false;  // This is byte data, not a regular array
+            result = true;  // Byte data is still an array
         }
         
         void operator()(const fl::vector<float>&) {
-            result = false;  // This is float data, not a regular array
+            result = true;  // Float data is still an array
         }
         
         // Generic handler for all other types
@@ -811,9 +811,15 @@ struct JsonValue {
         return visitor.result;
     }
     
+    // Returns true only for JsonArray (not specialized array types)
+    bool is_generic_array() const noexcept {
+        return data.is<JsonArray>();
+    }
+    
     // Returns true for both regular arrays AND specialized array types
     bool is_array_like() const noexcept {
-        return is_array() || is_floats() || is_audio() || is_bytes();
+        // Now that is_array() returns true for all array types, this is equivalent
+        return is_array();
     }
     
     bool is_object() const noexcept { 
@@ -1371,17 +1377,13 @@ struct JsonValue {
 
     // Contains methods for checking existence
     bool contains(size_t idx) const {
-        if (is_array()) {
-            // Handle regular JsonArray
-            if (data.is<JsonArray>()) {
-                auto ptr = data.ptr<JsonArray>();
-                return ptr && idx < ptr->size();
-            }
-            // This should not happen since is_array() only returns true for JsonArray
-            return false;
+        // Handle regular JsonArray first
+        if (data.is<JsonArray>()) {
+            auto ptr = data.ptr<JsonArray>();
+            return ptr && idx < ptr->size();
         }
         
-        // Handle specialized array types (these return false for is_array())
+        // Handle specialized array types
         if (data.is<fl::vector<int16_t>>()) {
             auto ptr = data.ptr<fl::vector<int16_t>>();
             return ptr && idx < ptr->size();
@@ -1420,17 +1422,13 @@ struct JsonValue {
 
     // Size methods
     size_t size() const {
-        if (is_array()) {
-            // Handle regular JsonArray
-            if (data.is<JsonArray>()) {
-                auto ptr = data.ptr<JsonArray>();
-                return ptr ? ptr->size() : 0;
-            }
-            // This should not happen since is_array() only returns true for JsonArray
-            return 0;
+        // Handle regular JsonArray first
+        if (data.is<JsonArray>()) {
+            auto ptr = data.ptr<JsonArray>();
+            return ptr ? ptr->size() : 0;
         }
         
-        // Handle specialized array types (these return false for is_array())
+        // Handle specialized array types
         if (data.is<fl::vector<int16_t>>()) {
             auto ptr = data.ptr<fl::vector<int16_t>>();
             return ptr ? ptr->size() : 0;
@@ -1681,6 +1679,7 @@ public:
     bool is_double() const { return m_value && m_value->is_double(); }
     bool is_string() const { return m_value && m_value->is_string(); }
     bool is_array() const { return m_value && m_value->is_array(); }
+    bool is_generic_array() const { return m_value && m_value->is_generic_array(); }
     bool is_array_like() const { return m_value && m_value->is_array_like(); }
     bool is_object() const { return m_value && m_value->is_object(); }
     bool is_audio() const { return m_value && m_value->is_audio(); }
