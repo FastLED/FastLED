@@ -1,14 +1,14 @@
-/// @file    DemoReel100.ino
-/// @brief   FastLED "100 lines of code" demo reel, showing off some effects
-/// @example DemoReel100.ino
-
-
-#include "fx/2d/animartrix.hpp"
+/// @file    ANIMartRIX.hpp
+/// @brief   Animartrix demo example
+/// @example ANIMartRIX.hpp
 
 #include <Arduino.h>
-#include "FastLED.h"
+#include <FastLED.h>
+#include "fx/2d/animartrix.hpp"
 
 #include <iostream>
+
+using namespace fl;
 
 #define WIDTH 22                      // how many columns?
 #define HEIGHT  22                       // how many rows?
@@ -24,7 +24,7 @@
 CRGB leds[NUM_LED];               // framebuffer
 
 XYMap xyMap(WIDTH, HEIGHT, SERPENTINE);
-AnimartrixPtr fxAnimator = AnimartrixPtr::New(xyMap, POLAR_WAVES);
+AnimartrixPtr fxAnimator = fl::make_shared<Animartrix>(xyMap, POLAR_WAVES);
 
 void setup() {
   FastLED.addLeds<WS2811, 2, GRB>(leds, NUM_LED);   
@@ -42,7 +42,7 @@ void loop() {
   EVERY_N_SECONDS(CYCLE_THROUGH_ANIMATIONS) {
     fxAnimator->fxNext();
     #if DEBUG_PRINT
-    std::cout << "New animation: " << fxAnimator.fxName() << std::endl;
+    std::cout << "New animation: " << fxAnimator->fxName() << std::endl;
     #endif
   }
   #endif
