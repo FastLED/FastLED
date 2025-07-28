@@ -4,6 +4,7 @@ FastLED Example Compilation Testing Script
 Ultra-fast compilation testing of Arduino .ino examples
 """
 
+import argparse
 import os
 import subprocess
 import sys
@@ -11,7 +12,7 @@ import time
 from pathlib import Path
 
 
-def run_example_compilation_test():
+def run_example_compilation_test(specific_examples=None):
     """Run the example compilation test using CMake."""
     print("==> FastLED Example Compilation Test (QUICK BUILD MODE)")
     print("=" * 50)
@@ -76,6 +77,12 @@ def run_example_compilation_test():
             "-DCMAKE_SKIP_PACKAGE_ALL_DEPENDENCY=ON",  # Skip package dependencies
         ]
 
+        # Add specific examples filter if provided
+        if specific_examples:
+            examples_list = ";".join(specific_examples)
+            cmake_cmd.append(f"-DFASTLED_SPECIFIC_EXAMPLES={examples_list}")
+            print(f"[CONFIG] Filtering to specific examples: {examples_list}")
+
         # Try to configure, if it fails due to cache issues, clean and retry
         try:
             configure_result = subprocess.run(
@@ -135,16 +142,43 @@ def run_example_compilation_test():
         print("\n[BUILD] Building example compilation targets...")
         build_start = time.time()
 
+        # Check which targets exist by querying make targets
+        try:
+            targets_result = subprocess.run(
+                ["make", "help"],
+                capture_output=True,
+                text=True,
+                encoding="utf-8",
+                errors="replace",
+                env=env,
+            )
+            available_targets = targets_result.stdout
+        except:
+            # Fallback if make help fails
+            available_targets = ""
+
+        # Determine which targets to build based on what exists
+        targets_to_build = []
+        if "example_compile_fastled_objects" in available_targets:
+            targets_to_build.append("example_compile_fastled_objects")
+        if "example_compile_basic_objects" in available_targets:
+            targets_to_build.append("example_compile_basic_objects")
+
+        # If no targets found via help, try the standard targets (fallback)
+        if not targets_to_build:
+            targets_to_build = [
+                "example_compile_fastled_objects",
+                "example_compile_basic_objects",
+            ]
+            print("[BUILD] Could not determine available targets, using fallback list")
+        else:
+            print(f"[BUILD] Building targets: {', '.join(targets_to_build)}")
+
         # Try to build the compilation targets using make with optimal parallelism
         # Use Popen for real-time streaming output instead of subprocess.run
 
         build_process = subprocess.Popen(
-            [
-                "make",
-                "example_compile_fastled_objects",
-                "example_compile_basic_objects",
-                f"-j{parallel_jobs}",  # Use detected optimal parallel job count
-            ],
+            ["make"] + targets_to_build + [f"-j{parallel_jobs}"],
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,  # Merge stderr into stdout for unified output
             text=True,
@@ -207,27 +241,32 @@ def run_example_compilation_test():
             print(f"[PERF] Performance: {total_time:.2f}s total execution time")
             return 0
         else:
-            print("\n[PARTIAL] EXAMPLE COMPILATION TEST: PARTIAL SUCCESS")
-            print("[SUCCESS] Example discovery and processing completed")
-            print("[SUCCESS] CMake infrastructure working correctly")
-            print("[WARNING] Full compilation not yet operational (expected)")
-            print("\n[BUILD] Build output:")
-            if build_result.stdout:
-                print(build_result.stdout)
-            if build_result.stderr:
-                print("Errors:")
-                print(build_result.stderr)
-
-            # Still run the test executable to show infrastructure status
-            test_exe = Path("bin/test_example_compilation")
-            if test_exe.exists():
-                print("\n[TEST] Running validation test...")
-                subprocess.run([str(test_exe)], check=True)
-
-            print(
-                f"\n[READY] Example compilation infrastructure is ready for completion!"
+            # Check if this is the expected "no basic objects" error vs a real failure
+            build_output = build_result.stdout
+            is_no_basic_objects_error = (
+                "No rule to make target `example_compile_basic_objects'" in build_output
+                and "Built target example_compile_fastled_objects" in build_output
             )
-            return 0  # Return success since infrastructure is working
+
+            if is_no_basic_objects_error:
+                # This is expected when only FastLED examples are compiled
+                print("\n[SUCCESS] EXAMPLE COMPILATION TEST: SUCCESS")
+                print("[SUCCESS] All requested examples compiled successfully")
+                print("[INFO] No basic (non-FastLED) examples to compile")
+                print(f"\n[READY] Example compilation completed successfully!")
+                print(f"[PERF] Performance: {total_time:.2f}s total execution time")
+                return 0
+            else:
+                # This is a real build failure
+                print("\n[FAILED] EXAMPLE COMPILATION TEST: FAILED")
+                print("[ERROR] Build failed with errors")
+                print("\n[BUILD] Build output:")
+                if build_result.stdout:
+                    print(build_result.stdout)
+                if build_result.stderr:
+                    print("Errors:")
+                    print(build_result.stderr)
+                return 1
 
     except subprocess.CalledProcessError as e:
         print(f"\n[FAILED] EXAMPLE COMPILATION TEST: FAILED")
@@ -246,4 +285,17 @@ def run_example_compilation_test():
 
 
 if __name__ == "__main__":
-    sys.exit(run_example_compilation_test())
+    parser = argparse.ArgumentParser(
+        description="FastLED Example Compilation Testing Script"
+    )
+    parser.add_argument(
+        "examples",
+        nargs="*",
+        help="Specific examples to compile (if none specified, compile all examples)",
+    )
+
+    args = parser.parse_args()
+
+    # Pass specific examples to the test function
+    specific_examples = args.examples if args.examples else None
+    sys.exit(run_example_compilation_test(specific_examples))

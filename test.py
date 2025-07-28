@@ -88,8 +88,8 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--examples",
-        action="store_true",
-        help="Run example compilation tests - auto-enables --cpp mode",
+        nargs="*",
+        help="Run example compilation tests (optionally specify example names) - auto-enables --cpp mode",
     )
 
     args = parser.parse_args()
@@ -109,7 +109,7 @@ def parse_args() -> argparse.Namespace:
             print("Auto-enabled --clang compiler for static analysis (--check)")
 
     # Auto-enable --cpp and --quick when --examples is provided
-    if args.examples:
+    if args.examples is not None:
         if not args.cpp:
             args.cpp = True
             print("Auto-enabled --cpp mode for example compilation (--examples)")
@@ -349,13 +349,24 @@ def main() -> None:
 
         if args.cpp:
             # Handle --examples flag specifically
-            if args.examples:
-                print("Running example compilation tests")
+            if args.examples is not None:
+                if args.examples:
+                    # Specific examples provided
+                    examples_str = " ".join(args.examples)
+                    print(f"Running example compilation tests for: {examples_str}")
+                else:
+                    # No specific examples, run all
+                    print("Running example compilation tests")
                 start_time = time.time()
+
+                # Build command with optional example names
+                cmd = ["uv", "run", "ci/test_example_compilation.py"]
+                if args.examples:
+                    cmd.extend(args.examples)
 
                 # Run the example compilation test script
                 proc = RunningProcess(
-                    "uv run ci/test_example_compilation.py",
+                    cmd,
                     echo=True,
                     auto_run=True,
                     enable_stack_trace=enable_stack_trace,

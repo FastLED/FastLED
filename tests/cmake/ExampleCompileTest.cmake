@@ -24,10 +24,20 @@ function(discover_ino_examples OUTPUT_VAR)
            NOT DIR_NAME STREQUAL "JsonFetch" AND
            NOT DIR_NAME STREQUAL "VariantVisitor" AND
            NOT DIR_NAME STREQUAL "FestivalStick" AND  # Compiler ICE in curr.h:437
-           NOT DIR_NAME STREQUAL "LuminescentGrand" AND  # Complex compatibility issues
            NOT DIR_NAME STREQUAL "OctoWS2811Demo" AND  # Requires external OctoWS2811 library
            NOT DIR_NAME STREQUAL "ParallelOutputDemo")  # Requires platform-specific WS2811_PORTDC
-            list(APPEND FILTERED_FILES ${INO_FILE})
+            
+            # Check if specific examples are requested
+            if(DEFINED FASTLED_SPECIFIC_EXAMPLES AND FASTLED_SPECIFIC_EXAMPLES)
+                # Convert semicolon-separated list to CMake list
+                string(REPLACE ";" "|" SPECIFIC_EXAMPLES_REGEX "${FASTLED_SPECIFIC_EXAMPLES}")
+                if(DIR_NAME MATCHES "^(${SPECIFIC_EXAMPLES_REGEX})$")
+                    list(APPEND FILTERED_FILES ${INO_FILE})
+                endif()
+            else()
+                # No specific examples requested, include all valid examples
+                list(APPEND FILTERED_FILES ${INO_FILE})
+            endif()
         endif()
     endforeach()
     
