@@ -18,6 +18,7 @@
 #include "fl/xypath.h"
 #include "fl/xypath_renderer.h"
 
+#include "fl/atomic.h"
 #include "fl/thread_local.h"
 
 namespace fl {
@@ -33,8 +34,8 @@ XYRasterU8Sparse &get_tls_raster() {
 
 namespace xypath_detail {
 fl::string unique_missing_name(const char *prefix) {
-    static int sUniqueName = 0;
-    int id = ++sUniqueName;
+    static fl::atomic<u32> sUniqueName(0);
+    u32 id = ++sUniqueName;
     string name = prefix;
     name += id;
     return name;
