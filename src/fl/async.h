@@ -209,6 +209,9 @@ public:
 
     int add_task(fl::unique_ptr<task> t);
     void update();
+    
+    // For testing: clear all tasks
+    void clear_all_tasks() { mTasks.clear(); mNextTaskId = 1; }
 
 private:
     friend class fl::Singleton<Scheduler>;

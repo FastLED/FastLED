@@ -203,15 +203,19 @@ public:
     }
     
     shared_ptr& operator=(shared_ptr&& other) noexcept {
-        this->swap(other);
-        other.reset();
+        if (this != &other) {
+            this->swap(other);
+            other.reset();
+        }
         return *this;
     }
     
     template<typename Y>
     shared_ptr& operator=(shared_ptr<Y>&& other) noexcept {
-        this->swap(other);
-        other.reset();
+        if (static_cast<void*>(this) != static_cast<void*>(&other)) {
+            this->swap(other);
+            other.reset();
+        }
         return *this;
     }
     

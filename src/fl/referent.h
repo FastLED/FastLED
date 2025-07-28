@@ -39,9 +39,11 @@ class WeakReferent {
 // NOTE: This is legacy - new code should use regular classes with fl::shared_ptr<T>
 class Referent {
   public:
-    Referent() : mRefCount(1), mWeakReferent(nullptr) {}
+    // NOTE: Start with ref count 0, TakeOwnership() will call ref() to make it 1
+    Referent() : mRefCount(0), mWeakReferent(nullptr) {}
 
-    Referent(const Referent &) : mRefCount(1), mWeakReferent(nullptr) {}
+    // NOTE: Copy constructor also starts with ref count 0 for new object
+    Referent(const Referent &) : mRefCount(0), mWeakReferent(nullptr) {}
 
     // Assignment does not change reference count
     Referent &operator=(const Referent &) { return *this; }

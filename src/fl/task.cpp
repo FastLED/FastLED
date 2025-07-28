@@ -20,7 +20,7 @@ task::task(TaskType type, int interval_ms)
       mTraceLabel(nullptr),
       mHasThen(false),
       mHasCatch(false),
-      mLastRunTime(0) {
+      mLastRunTime(UINT32_MAX) {  // Use UINT32_MAX to indicate "never run"
 }
 
 task::task(TaskType type, int interval_ms, const fl::TracePoint& trace)
@@ -30,7 +30,7 @@ task::task(TaskType type, int interval_ms, const fl::TracePoint& trace)
       mTraceLabel(make_trace_label(trace)),
       mHasThen(false),
       mHasCatch(false),
-      mLastRunTime(0) {
+      mLastRunTime(UINT32_MAX) {  // Use UINT32_MAX to indicate "never run"
 }
 
 task::task(TaskType type, int interval_ms, fl::unique_ptr<fl::string> trace_label)
@@ -40,7 +40,7 @@ task::task(TaskType type, int interval_ms, fl::unique_ptr<fl::string> trace_labe
       mTraceLabel(fl::move(trace_label)),
       mHasThen(false),
       mHasCatch(false),
-      mLastRunTime(0) {
+      mLastRunTime(UINT32_MAX) {  // Use UINT32_MAX to indicate "never run"
 }
 
 fl::unique_ptr<task> task::every_ms(int interval_ms) {
@@ -115,8 +115,8 @@ bool task::ready_to_run(uint32_t current_time) const {
         return true;
     }
     
-    // If this is the first run, run immediately
-    if (mLastRunTime == 0) {
+    // Use UINT32_MAX to indicate "never run" instead of 0 to handle cases where time() returns 0
+    if (mLastRunTime == UINT32_MAX) {
         return true;
     }
     
