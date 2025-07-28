@@ -816,11 +816,7 @@ struct JsonValue {
         return data.is<JsonArray>();
     }
     
-    // Returns true for both regular arrays AND specialized array types
-    bool is_array_like() const noexcept {
-        // Now that is_array() returns true for all array types, this is equivalent
-        return is_array();
-    }
+
     
     bool is_object() const noexcept { 
         //FASTLED_WARN("is_object called, tag=" << data.tag());
@@ -1680,7 +1676,6 @@ public:
     bool is_string() const { return m_value && m_value->is_string(); }
     bool is_array() const { return m_value && m_value->is_array(); }
     bool is_generic_array() const { return m_value && m_value->is_generic_array(); }
-    bool is_array_like() const { return m_value && m_value->is_array_like(); }
     bool is_object() const { return m_value && m_value->is_object(); }
     bool is_audio() const { return m_value && m_value->is_audio(); }
     bool is_bytes() const { return m_value && m_value->is_bytes(); }
@@ -1957,9 +1952,6 @@ public:
         // Directly assign the value to the object without going through Json::operator[]
         auto objPtr = m_value->data.ptr<JsonObject>();
         if (objPtr) {
-            FASTLED_WARN("Setting key '" << key << "' in object");
-            FASTLED_WARN("Value is_string: " << value.is_string());
-            FASTLED_WARN("Value is_int: " << value.is_int());
             // Create or update the entry directly
             (*objPtr)[key] = value.m_value;
         }

@@ -30,7 +30,7 @@ template <> struct StrStreamHelper<fl::u8> {
 };
 
 template <> struct StrStreamHelper<char> {
-    static void append(string &str, const char &n) { str.append(fl::u16(n)); }
+    static void append(string &str, const char &n) { str.append(n); }  // Append as character, not number
 };
 
 template <> struct StrStreamHelper<unsigned int> {
@@ -247,7 +247,7 @@ class StrStream {
 
   private:
     string mStr;
-    bool mTreatCharAsInt = true;
+    bool mTreatCharAsInt = false;  // Default to ASCII mode for readable text output
 };
 
 class FakeStrStream {

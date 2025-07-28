@@ -6,7 +6,6 @@
 #include "fl/function.h"
 #include "fl/sketch_macros.h"
 #include "fl/math.h" // For floor function
-#include <string> // ok include
 
 // Define INT16_MIN, INT16_MAX, and UINT8_MAX if not already defined
 #ifndef INT16_MIN

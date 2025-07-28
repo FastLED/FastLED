@@ -10,17 +10,19 @@ void JsonUiAudioInternal::toJson(fl::Json &json) const {
     json.set("group", groupName());
     json.set("type", "audio");
     json.set("id", id());
-    if (!mSerializeBuffer.empty()) {
-        json.set("audioData", mSerializeBuffer);
+    if (!mAudioDataArray.is_null() && mAudioDataArray.is_array()) {
+        json.set("audioData", mAudioDataArray);
     }
 }
 
 void JsonUiAudioInternal::updateInternal(const fl::Json &value) {
-    mSerializeBuffer.clear();
-    mSerializeBuffer = value.to_string();
-
+    mAudioDataArray = fl::Json();  // Clear the stored audio data
+    
     if (value.contains("audioData")) {
         fl::Json audioDataArray = value["audioData"];
+        // Store the actual JSON array, not a string representation
+        mAudioDataArray = audioDataArray;
+        
         if (audioDataArray.is_array()) {
             for (size_t i = 0; i < audioDataArray.size(); ++i) {
                 fl::Json bufferJson = audioDataArray[i];

@@ -20,13 +20,16 @@ private:
     float mMax;
     float mValue;
     float mStep;
+    bool mStepExplicitlySet;
 
 public:
     // Constructor: Initializes the base JsonUiInternal with name, and sets initial values.
     JsonUiSliderInternal(const fl::string& name, float value, float min, float max, float step = -1)
-        : JsonUiInternal(name), mMin(min), mMax(max), mValue(value), mStep(step) {
+        : JsonUiInternal(name), mMin(min), mMax(max), mValue(value), mStep(step), mStepExplicitlySet(false) {
         if (ALMOST_EQUAL_FLOAT(mStep, -1.f) && mMax > mMin) {
             mStep = (mMax - mMin) / 255.0f;
+        } else if (!ALMOST_EQUAL_FLOAT(mStep, -1.f)) {
+            mStepExplicitlySet = true;
         }
     }
 
@@ -39,7 +42,8 @@ public:
         json.set("value", mValue);
         json.set("min", mMin);
         json.set("max", mMax);
-        if (mStep > 0) {
+        // Only output step if it was explicitly set by the user
+        if (mStepExplicitlySet) {
             json.set("step", mStep);
         }
     }
@@ -79,7 +83,10 @@ public:
     
     void setMin(float min) { mMin = min; }
     void setMax(float max) { mMax = max; }
-    void setStep(float step) { mStep = step; }
+    void setStep(float step) { 
+        mStep = step; 
+        mStepExplicitlySet = true;
+    }
 };
 
 JsonSliderImpl::JsonSliderImpl(const fl::string &name, float value, float min,

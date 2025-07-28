@@ -11,7 +11,6 @@ namespace fl {
 class JsonUiHelpInternal : public JsonUiInternal {
   private:
     fl::string mMarkdownContent;
-    fl::string mGroup;
 
   public:
     // Constructor: Initializes the base JsonUiInternal with name, and sets the
@@ -39,10 +38,6 @@ class JsonUiHelpInternal : public JsonUiInternal {
     const fl::string &markdownContent() const { return mMarkdownContent; }
     void setMarkdownContent(const fl::string &markdownContent) {
         mMarkdownContent = markdownContent;
-    }
-
-    void setGroup(const fl::string &groupName) {
-        mGroup = groupName;
     }
 };
 

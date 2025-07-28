@@ -11,7 +11,7 @@ namespace fl {
 
 class JsonUiAudioInternal : public JsonUiInternal {
 private:
-    fl::string mSerializeBuffer;
+    fl::Json mAudioDataArray;  // Store actual JSON array instead of string
     fl::vector<AudioSampleImplPtr> mAudioSampleImpls;
 
 public:

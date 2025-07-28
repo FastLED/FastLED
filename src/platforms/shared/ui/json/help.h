@@ -30,6 +30,10 @@ class JsonHelpImpl {
 
     int id() const;
 
+    bool operator==(const fl::string& other) const { return groupName() == other; }
+    bool operator!=(const fl::string& other) const { return groupName() != other; }
+
+
   private:
     // Change to use the specific internal implementation
     fl::shared_ptr<JsonUiHelpInternal> mInternal;
