@@ -25,15 +25,8 @@ namespace fl {
 
 // Use existing WASM fetch infrastructure
 void fetch(const fl::string& url, const FetchCallback& callback) {
-    // Use the existing WASM fetch implementation, convert response types
-    wasm_fetch.get(url).response([callback](const wasm_response& wasm_resp) {
-        // Convert wasm_response to simple response
-        response simple_resp(wasm_resp.status(), wasm_resp.status_text());
-        simple_resp.set_text(wasm_resp.text());
-        
-        // Call the callback
-        callback(simple_resp);
-    });
+    // Use the existing WASM fetch implementation - no conversion needed since both use fl::response
+    wasm_fetch.get(url).response(callback);
 }
 
 // Internal helper to execute a fetch request and return a promise
@@ -54,7 +47,7 @@ fl::promise<response> execute_fetch_request(const fl::string& url, const fetch_o
     fl::string request_id = FetchManager::instance().register_pending_promise(promise);
     
     // Use lambda that captures only the request ID, not the promise
-    wasm_request.response([request_id](const wasm_response& wasm_resp) {
+    wasm_request.response([request_id](const response& resp) {
         // Retrieve the promise from storage
         fl::promise<response> stored_promise = FetchManager::instance().retrieve_pending_promise(request_id);
         if (!stored_promise.valid()) {
@@ -62,17 +55,8 @@ fl::promise<response> execute_fetch_request(const fl::string& url, const fetch_o
             return;
         }
         
-        // Convert WASM response to our response type
-        response response(wasm_resp.status(), wasm_resp.status_text());
-        response.set_body(wasm_resp.text());
-        
-        // Copy headers if available
-        if (auto content_type = wasm_resp.content_type()) {
-            response.set_header("content-type", *content_type);
-        }
-        
-        // Complete the promise
-        stored_promise.complete_with_value(response);
+        // No conversion needed - directly use the response
+        stored_promise.complete_with_value(resp);
     });
     
     return promise;
@@ -352,6 +336,22 @@ void fetch_update() {
 
 fl::size fetch_active_requests() {
     return FetchManager::instance().active_requests();
+}
+
+// ========== Response Class Method Implementations ==========
+
+fl::Json response::json() const {
+    if (!mJsonParsed) {
+        if (is_json() || mBody.find("{") != fl::string::npos || mBody.find("[") != fl::string::npos) {
+            mCachedJson = parse_json_body();
+        } else {
+            FL_WARN("Response is not JSON: " << mBody);
+            mCachedJson = fl::Json(nullptr);  // Not JSON content
+        }
+        mJsonParsed = true;
+    }
+    
+    return mCachedJson.has_value() ? *mCachedJson : fl::Json(nullptr);
 }
 
 } // namespace fl 

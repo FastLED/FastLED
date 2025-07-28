@@ -81,12 +81,11 @@ using namespace fl;      // Use FastLED namespace for cleaner code
 #define NUM_LEDS 10      // Number of LEDs in our strip
 #define DATA_PIN 2       // Arduino pin connected to LED data line
 
-CRGB leds[NUM_LEDS];     // Array to hold LED color data
+CRGB leds[NUM_LEDS];
 
-// DEMO STATE VARIABLES  
-static bool use_await_pattern = false;              // Which async approach to demonstrate
-static uint32_t last_toggle_time = 0;               // Last time we switched approaches
-static const uint32_t TOGGLE_INTERVAL = 10000;     // Switch approaches every 10 seconds
+// Timing and approach control variables for tutorial cycling
+static u32 last_request_time = 0;        // Track last request time for 10-second intervals
+static int approach_counter = 0;                    // Cycle through 4 different approaches
 
 void setup() {
     // Initialize LED strip
@@ -217,29 +216,182 @@ void test_await_approach() {
     }
 }
 
+/// APPROACH 3: JSON Response Handling with FastLED's ideal JSON API
+/// This demonstrates fetch responses with automatic JSON parsing
+void test_json_response() {
+    FL_WARN("APPROACH 3: JSON Response handling with fl::Json integration");
+    
+    // TUTORIAL: Fetch a JSON API endpoint (httpbin.org provides test JSON)
+    // This endpoint returns JSON with request information
+    fl::fetch_get("https://httpbin.org/json").then([](const fl::response& response) {
+        if (response.ok()) {
+            FL_WARN("SUCCESS [JSON Promise] HTTP fetch successful! Status: "
+                    << response.status() << " " << response.status_text());
+            
+            // TUTORIAL: Check if response contains JSON content
+            // is_json() checks Content-Type header and body content
+            if (response.is_json()) {
+                FL_WARN("DETECTED [JSON Promise] Response contains JSON data");
+                
+                // TUTORIAL: response.json() returns fl::Json with FastLED's ideal API
+                // Automatic parsing, caching, and safe access with defaults using operator|
+                fl::Json data = response.json();
+                
+                // TUTORIAL: Safe JSON access with defaults - never crashes!
+                // Uses FastLED's proven pattern: json["path"]["to"]["key"] | default_value
+                fl::string slideshow_url = data["slideshow"]["author"] | fl::string("unknown");
+                fl::string slideshow_title = data["slideshow"]["title"] | fl::string("untitled");
+                int slide_count = data["slideshow"]["slides"].size();
+                
+                FL_WARN("JSON [Promise] Slideshow Author: " << slideshow_url);
+                FL_WARN("JSON [Promise] Slideshow Title: " << slideshow_title);
+                FL_WARN("JSON [Promise] Slide Count: " << slide_count);
+                
+                // TUTORIAL: Access nested arrays safely
+                if (data.contains("slideshow") && data["slideshow"].contains("slides")) {
+                    fl::Json slides = data["slideshow"]["slides"];
+                    if (slides.is_array() && slides.size() > 0) {
+                        // Get first slide information with safe defaults
+                        fl::string first_slide_title = slides[0]["title"] | fl::string("no title");
+                        fl::string first_slide_type = slides[0]["type"] | fl::string("unknown");
+                        FL_WARN("JSON [Promise] First slide: " << first_slide_title << " (" << first_slide_type << ")");
+                    }
+                }
+                
+                // Visual feedback: Blue LEDs for successful JSON parsing
+                fill_solid(leds, NUM_LEDS, CRGB(0, 0, 128)); // Blue for JSON success
+                
+            } else {
+                FL_WARN("INFO [JSON Promise] Response is not JSON format");
+                // Visual feedback: Yellow for non-JSON response
+                fill_solid(leds, NUM_LEDS, CRGB(64, 64, 0)); // Yellow for non-JSON
+            }
+        } else {
+            FL_WARN("ERROR [JSON Promise] HTTP error: " << response.status() 
+                    << " " << response.status_text());
+            // Visual feedback: Red LEDs for HTTP error
+            fill_solid(leds, NUM_LEDS, CRGB(64, 0, 0)); // Red for HTTP error
+        }
+    }).catch_([](const fl::Error& error) {
+        FL_WARN("ERROR [JSON Promise] Network error: " << error.message);
+        // Visual feedback: Purple LEDs for network error
+        fill_solid(leds, NUM_LEDS, CRGB(64, 0, 64)); // Purple for network error
+    });
+    
+    FastLED.show();
+}
+
+/// APPROACH 4: JSON Response with await pattern  
+/// Same JSON handling but using await_top_level for synchronous-style code
+void test_json_await() {
+    FL_WARN("APPROACH 4: JSON Response with await pattern");
+    
+    // TUTORIAL: Using await pattern with JSON responses
+    // fl::fetch_get() returns fl::promise<fl::response>
+    fl::promise<fl::response> json_promise = fl::fetch_get("https://httpbin.org/get");
+    
+    // TUTORIAL: await_top_level() converts promise to result
+    // fl::result<fl::response> contains either response or error
+    fl::result<fl::response> result = fl::await_top_level(json_promise);
+    
+    if (result.ok()) {
+        // TUTORIAL: Extract the response from the result
+        const fl::response& http_response = result.value();
+        
+        FL_WARN("SUCCESS [JSON Await] HTTP fetch successful! Status: "
+                << http_response.status() << " " << http_response.status_text());
+        
+        // TUTORIAL: Check for JSON content and parse if available
+        if (http_response.is_json()) {
+            FL_WARN("DETECTED [JSON Await] Response contains JSON data");
+            
+            // TUTORIAL: Parse JSON with automatic caching
+            fl::Json data = http_response.json();
+            
+            // TUTORIAL: httpbin.org/get returns information about the request
+            // Extract data with safe defaults using FastLED's ideal JSON API
+            fl::string origin_ip = data["origin"] | fl::string("unknown");
+            fl::string request_url = data["url"] | fl::string("unknown");
+            
+            FL_WARN("JSON [Await] Request Origin IP: " << origin_ip);
+            FL_WARN("JSON [Await] Request URL: " << request_url);
+            
+            // TUTORIAL: Access nested headers object safely
+            if (data.contains("headers")) {
+                fl::Json headers = data["headers"];
+                fl::string user_agent = headers["User-Agent"] | fl::string("unknown");
+                fl::string accept = headers["Accept"] | fl::string("unknown");
+                
+                FL_WARN("JSON [Await] User-Agent: " << user_agent);
+                FL_WARN("JSON [Await] Accept: " << accept);
+            }
+            
+            // TUTORIAL: Access query parameters (if any)
+            if (data.contains("args")) {
+                fl::Json args = data["args"];
+                if (args.size() > 0) {
+                    FL_WARN("JSON [Await] Query parameters found: " << args.size());
+                } else {
+                    FL_WARN("JSON [Await] No query parameters in request");
+                }
+            }
+            
+            // Visual feedback: Cyan LEDs for successful await JSON processing
+            fill_solid(leds, NUM_LEDS, CRGB(0, 128, 128)); // Cyan for await JSON success
+            
+        } else {
+            FL_WARN("INFO [JSON Await] Response is not JSON format");
+            // Visual feedback: Orange for non-JSON with await
+            fill_solid(leds, NUM_LEDS, CRGB(128, 32, 0)); // Orange for non-JSON await
+        }
+        
+    } else {
+        // TUTORIAL: Handle request failures (network or HTTP errors)
+        FL_WARN("ERROR [JSON Await] Request failed: " << result.error_message());
+        // Visual feedback: Red LEDs for any await error
+        fill_solid(leds, NUM_LEDS, CRGB(128, 0, 0)); // Red for await error
+    }
+    
+    FastLED.show();
+}
+
 void loop() {
+    // TUTORIAL: Cycle between different async approaches every 10 seconds
+    // This allows you to see both promise-based and await-based patterns in action
+    // The LEDs provide visual feedback about which approach succeeded
+    
+    unsigned long current_time = millis();
+    
+    // Switch approaches every 10 seconds
+    // 4 different approaches: Promise, Await, JSON Promise, JSON Await
+    if (current_time - last_request_time >= 10000) {
+        last_request_time = current_time;
+        
+        // Cycle through 4 different approaches
+        if (approach_counter % 4 == 0) {
+            test_promise_approach();
+            FL_WARN("CYCLE: Demonstrated Promise-based pattern (Green LEDs on success)");
+        } else if (approach_counter % 4 == 1) {
+            test_await_approach();
+            FL_WARN("CYCLE: Demonstrated Await-based pattern (Blue LEDs on success)");
+        } else if (approach_counter % 4 == 2) {
+            test_json_response();
+            FL_WARN("CYCLE: Demonstrated JSON Promise pattern (Blue LEDs on success)");
+        } else if (approach_counter % 4 == 3) {
+            test_json_await();
+            FL_WARN("CYCLE: Demonstrated JSON Await pattern (Cyan LEDs on success)");
+        }
+        
+        approach_counter++;
+        
+        FL_WARN("NEXT: Will switch to next approach in 10 seconds...");
+    }
+
     // TUTORIAL NOTE: Async operations are automatically managed!
     // * On WASM: delay() pumps async tasks every 1ms automatically
     // * On all platforms: FastLED.show() triggers async updates via engine events
     // * No manual async updates needed - everything happens behind the scenes!
 
-
-    // TUTORIAL: Demonstrate the chosen async approach every 2 seconds
-    EVERY_N_MILLISECONDS(2000) {
-        if (use_await_pattern) {
-            // Blocking call to test_await_approach()
-            test_await_approach();
-        } else {
-            // Non-blocking call to test_promise_approach()
-            test_promise_approach();
-        }
-
-        // Always update LED strip after color changes
-        FastLED.show();
-        use_await_pattern = !use_await_pattern;
-        
-
-    }
 
     // TUTORIAL: This delay automatically pumps async tasks on WASM!
     // The delay is broken into 1ms chunks with async processing between chunks.

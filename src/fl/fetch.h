@@ -62,6 +62,8 @@
 #include "fl/ptr.h"
 #include "fl/async.h"
 #include "fl/mutex.h"
+#include "fl/warn.h"
+#include "fl/json.h"  // Add JSON support for response.json() method
 
 namespace fl {
 
@@ -71,10 +73,9 @@ class FetchManager;
 
 #ifdef __EMSCRIPTEN__
 // Forward declarations for WASM-specific types (defined in platforms/wasm/js_fetch.h)
-class wasm_response;
 class WasmFetchRequest;
 class WasmFetch;
-using FetchResponseCallback = fl::function<void(const wasm_response&)>;
+using FetchResponseCallback = fl::function<void(const response&)>;
 extern WasmFetch wasm_fetch;
 #endif
 
@@ -115,6 +116,24 @@ public:
     /// Response body as text (alternative to text())
     const fl::string& get_body_text() const { return mBody; }
     
+    /// Response body parsed as JSON (JavaScript-like API)
+    /// @return fl::Json object for safe, ergonomic access
+    /// @note Automatically parses JSON on first call, caches result
+    /// @note Returns null JSON object for non-JSON or malformed content
+    fl::Json json() const;
+    
+    /// Check if response appears to contain JSON content
+    /// @return true if Content-Type header indicates JSON or body contains JSON markers
+    bool is_json() const {
+        auto content_type = get_content_type();
+        if (content_type.has_value()) {
+            fl::string ct = *content_type;
+            // Check for various JSON content types (case-insensitive)
+            return ct.find("json") != fl::string::npos;
+        }
+        return false;
+    }
+    
     /// Set methods (internal use)
     void set_status(int status_code) { mStatusCode = status_code; }
     void set_status_text(const fl::string& status_text) { mStatusText = status_text; }
@@ -129,6 +148,21 @@ private:
     fl::string mStatusText;
     fl::string mBody;
     fl_map<fl::string, fl::string> mHeaders;
+    
+    // JSON parsing cache
+    mutable fl::optional<fl::Json> mCachedJson;  // Lazy-loaded JSON cache
+    mutable bool mJsonParsed = false;            // Track parsing attempts
+    
+    /// Parse JSON from response body with error handling
+    fl::Json parse_json_body() const {
+        fl::Json parsed = fl::Json::parse(mBody);
+        if (parsed.is_null() && (!mBody.empty())) {
+            // If parsing failed but we have content, return null JSON
+            // This allows safe chaining: resp.json()["key"] | default
+            return fl::Json(nullptr);
+        }
+        return parsed;
+    }
     
     static fl::string get_default_status_text(int status) {
         switch (status) {

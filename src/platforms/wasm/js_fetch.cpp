@@ -1,4 +1,5 @@
 #include "js_fetch.h"
+#include "fl/fetch.h"  // Include for fl::response definition
 #include "fl/warn.h"
 #include "fl/str.h"
 #include "fl/function.h"
@@ -67,9 +68,9 @@ extern "C" EMSCRIPTEN_KEEPALIVE void js_fetch_success_callback(uint32_t request_
     
     auto callback_opt = getCallbackManager().takeCallback(request_id);
     if (callback_opt) {
-        // Create a successful response object
-        fl::wasm_response response(200, "OK");
-        response.set_text(fl::string(content));
+        // Create a successful response object using unified fl::response
+        fl::response response(200, "OK");
+        response.set_body(fl::string(content));
         response.set_header("content-type", "text/html"); // Default content type
         
         (*callback_opt)(response);
@@ -84,11 +85,11 @@ extern "C" EMSCRIPTEN_KEEPALIVE void js_fetch_error_callback(uint32_t request_id
     
     auto callback_opt = getCallbackManager().takeCallback(request_id);
     if (callback_opt) {
-        // Create an error response object
-        fl::wasm_response response(0, "Network Error");
+        // Create an error response object using unified fl::response
+        fl::response response(0, "Network Error");
         fl::string error_content = "Fetch Error: ";
         error_content += error_message;
-        response.set_text(error_content);
+        response.set_body(error_content);
         
         (*callback_opt)(response);
     } else {
@@ -143,9 +144,9 @@ void WasmFetchRequest::response(const FetchResponseCallback& callback) {
 void WasmFetchRequest::response(const FetchResponseCallback& callback) {
     FL_WARN("HTTP fetch is not supported on non-WASM platforms (Arduino/embedded). URL: " << mUrl);
     
-    // Return immediate error response
-    fl::wasm_response error_response(501, "Not Implemented");
-    error_response.set_text("HTTP fetch is only available in WASM/browser builds. This platform does not support network requests.");
+    // Return immediate error response using unified fl::response
+    fl::response error_response(501, "Not Implemented");
+    error_response.set_body("HTTP fetch is only available in WASM/browser builds. This platform does not support network requests.");
     error_response.set_header("content-type", "text/plain");
     
     // Immediately call the callback with error

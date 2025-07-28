@@ -50,6 +50,7 @@
 #include "fl/promise.h"
 #include "fl/promise_result.h"
 #include "fl/singleton.h"
+#include "fl/thread_local.h"
 
 #include "fl/task.h"
 #include "fl/time.h"
@@ -186,13 +187,38 @@ fl::result<T> await_top_level(fl::promise<T> promise) {
         }
     }
     
+    // Track recursion depth to prevent infinite loops
+    static fl::ThreadLocal<int> await_depth(0);
+    if (await_depth.access() > 10) {
+        return fl::result<T>(Error("await_top_level recursion limit exceeded - possible infinite loop"));
+    }
+    
+    ++await_depth.access();
+    
     // Wait for promise to complete while pumping async tasks
-    while (!promise.is_completed()) {
+    int pump_count = 0;
+    const int max_pump_iterations = 10000; // Safety limit
+    
+    while (!promise.is_completed() && pump_count < max_pump_iterations) {
+        // Update the promise first (in case it's not managed by async system)
+        promise.update();
+        
+        // Check if completed after update
+        if (promise.is_completed()) {
+            break;
+        }
+        
         // Platform-agnostic async pump and yield
         async_yield();
         
-        // Update the promise (in case it's not managed by async system)
-        promise.update();
+        ++pump_count;
+    }
+    
+    --await_depth.access();
+    
+    // Check for timeout
+    if (pump_count >= max_pump_iterations) {
+        return fl::result<T>(Error("await_top_level timeout - promise did not complete"));
     }
     
     // Return the result
