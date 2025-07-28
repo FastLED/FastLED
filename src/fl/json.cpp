@@ -62,6 +62,11 @@ JsonValue& get_null_value() {
     return null_value;
 }
 
+JsonObject& get_empty_json_object() {
+    static JsonObject empty_object;
+    return empty_object;
+}
+
 fl::shared_ptr<JsonValue> JsonValue::parse(const fl::string& txt) {
     #if !FASTLED_ENABLE_JSON
     return fl::make_shared<JsonValue>(fl::string(txt));

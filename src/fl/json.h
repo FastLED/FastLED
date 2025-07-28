@@ -168,6 +168,9 @@ struct ParseResult {
 // Function to get a reference to a static null JsonValue
 JsonValue& get_null_value();
 
+// Function to get a reference to a static empty JsonObject
+JsonObject& get_empty_json_object();
+
 // AI - pay attention to this - implementing visitor pattern
 template<typename T>
 struct DefaultValueVisitor {
@@ -1113,8 +1116,8 @@ struct JsonValue {
             auto ptr = data.ptr<JsonObject>();
             return iterator(ptr->begin());
         }
-        static JsonObject empty_obj;
-        return iterator(empty_obj.begin());
+        // Use temporary empty object to avoid static initialization conflicts with Teensy
+        return iterator(JsonObject().begin());
     }
     
     iterator end() {
@@ -1122,8 +1125,8 @@ struct JsonValue {
             auto ptr = data.ptr<JsonObject>();
             return iterator(ptr->end());
         }
-        static JsonObject empty_obj;
-        return iterator(empty_obj.end());
+        // Use temporary empty object to avoid static initialization conflicts with Teensy
+        return iterator(JsonObject().end());
     }
     
     const_iterator begin() const {
@@ -1132,8 +1135,8 @@ struct JsonValue {
             if (!ptr) return const_iterator::from_iterator(JsonObject().begin());
             return const_iterator::from_iterator(ptr->begin());
         }
-        static JsonObject empty_obj;
-        return const_iterator::from_iterator(empty_obj.begin());
+        // Use temporary empty object to avoid static initialization conflicts with Teensy
+        return const_iterator::from_iterator(JsonObject().begin());
     }
     
     
@@ -1143,8 +1146,8 @@ struct JsonValue {
             if (!ptr) return const_iterator::from_iterator(JsonObject().end());
             return const_iterator::from_iterator(ptr->end());
         }
-        static JsonObject empty_obj;
-        return const_iterator::from_iterator(empty_obj.end());
+        // Use temporary empty object to avoid static initialization conflicts with Teensy
+        return const_iterator::from_iterator(JsonObject().end());
     }
     
     // Iterator support for packed arrays
