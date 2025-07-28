@@ -149,13 +149,13 @@ public:
         if (!file.open(name, O_READ)) {
             return FileHandlePtr();
         }
-        return fl::shared_ptr<FileHandle>(new SdFatFileHandle(fl::move(file), name));
+        return fl::make_shared<SdFatFileHandle>(fl::move(file), name);
 #else
         File file = SD.open(name, FILE_READ);
         if (!file) {
             return FileHandlePtr();
         }
-        return fl::shared_ptr<FileHandle>(new SDFileHandle(fl::move(file), name));
+        return fl::make_shared<SDFileHandle>(fl::move(file), name);
 #endif
     }
 
