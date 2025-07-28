@@ -16,6 +16,9 @@ bool gReverseDirection = false;
 
 CRGB leds[NUM_LEDS];
 
+// Forward declaration
+void Fire2012();
+
 void setup() {
   delay(3000); // sanity delay
   FastLED.addLeds<CHIPSET, LED_PIN, COLOR_ORDER>(leds, NUM_LEDS).setCorrection( TypicalLEDStrip );
@@ -106,4 +109,3 @@ void Fire2012()
       leds[pixelnumber] = color;
     }
 }
-

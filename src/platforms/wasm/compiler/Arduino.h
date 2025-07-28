@@ -61,6 +61,14 @@ inline int analogRead(int) { return random(0, 1023); }
 
 inline long random(long max) { return random(0, max); }
 
+// Arduino-compatible random() with no parameters - returns full range random long
+inline long random() { 
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_int_distribution<long> dis;
+    return dis(gen);
+}
+
 template <typename T> struct PrintHelper {};
 
 #define DEFINE_PRINT_HELPER(type, format)                                      \
