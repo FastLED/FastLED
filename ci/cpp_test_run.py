@@ -220,7 +220,10 @@ def run_tests(specific_test: str | None = None) -> None:
                 print("Test output:")
                 print(stdout)
             if return_code == 0:
-                print("Test passed")
+                if specific_test or _VERBOSE:
+                    print("Test passed")
+                else:
+                    print(f"Success running {test_file}")
             elif is_crash:
                 if failure_match:
                     print(
