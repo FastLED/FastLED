@@ -78,10 +78,57 @@ void setup() {
         Serial.print("  Duration (ms): "); Serial.println(static_cast<int32_t>(duration));
         Serial.print("  Loop: "); Serial.println(loop ? "true" : "false");
 
+        Serial.println("\n=== NEW ERGONOMIC API DEMONSTRATION ===");
+        
+        // Example JSON with mixed data types including strings that can be converted
+        const char* mixedJson = R"({
+            "config": {
+                "brightness": "128",
+                "timeout": "5.5",
+                "enabled": true,
+                "name": "LED Strip"
+            }
+        })";
+        
+        fl::Json config = fl::Json::parse(mixedJson);
+        
+        Serial.println("\nThree New Conversion Methods:");
+        
+        // Method 1: try_as<T>() - Explicit optional handling
+        Serial.println("\n1. try_as<T>() - When you need explicit error handling:");
+        auto maybeBrightness = config["config"]["brightness"].try_as<int>();
+        if (maybeBrightness.has_value()) {
+            Serial.print("   Brightness converted from string: ");
+            Serial.println(*maybeBrightness);
+        } else {
+            Serial.println("   Brightness conversion failed");
+        }
+        
+        // Method 2: value<T>() - Direct conversion with sensible defaults
+        Serial.println("\n2. value<T>() - When you want defaults and don't care about failure:");
+        int brightnessDirect = config["config"]["brightness"].value<int>();
+        int missingDirect = config["missing_field"].value<int>();
+        Serial.print("   Brightness (from string): ");
+        Serial.println(brightnessDirect);
+        Serial.print("   Missing field (default 0): ");
+        Serial.println(missingDirect);
+        
+        // Method 3: as_or<T>(default) - Custom defaults
+        Serial.println("\n3. as_or<T>(default) - When you want custom defaults:");
+        int customBrightness = config["config"]["brightness"].as_or<int>(255);
+        int customMissing = config["missing_field"].as_or<int>(100);
+        double timeout = config["config"]["timeout"].as_or<double>(10.0);
+        Serial.print("   Brightness with custom default: ");
+        Serial.println(customBrightness);
+        Serial.print("   Missing with custom default: ");
+        Serial.println(customMissing);
+        Serial.print("   Timeout (string to double): ");
+        Serial.println(timeout);
+        
         Serial.println("\nNew API provides:");
-        Serial.println("  ✓ Type safety");
-        Serial.println("  ✓ Default values");
-        Serial.println("  ✓ No crashes on missing fields");
+        Serial.println("  ✓ Type safety with automatic string-to-number conversion");
+        Serial.println("  ✓ Three distinct patterns for different use cases");
+        Serial.println("  ✓ Backward compatibility with existing as<T>() API");
         Serial.println("  ✓ Clean, readable syntax");
         Serial.println("  ✓ Significantly less code for common operations");
 

@@ -1232,3 +1232,131 @@ TEST_CASE("Json ergonomic as<T>() API") {
         CHECK_EQ(*newWay, 12345);
     }
 }
+
+TEST_CASE("Json NEW ergonomic API - try_as<T>(), value<T>(), as_or<T>()") {
+    // Test the THREE distinct ergonomic conversion methods
+    
+    SUBCASE("try_as<T>() - Explicit optional handling") {
+        fl::Json validJson(42);
+        fl::Json nullJson; // null JSON
+        
+        // try_as<T>() should return fl::optional<T>
+        auto validResult = validJson.try_as<int>();
+        REQUIRE(validResult.has_value());
+        CHECK_EQ(*validResult, 42);
+        
+        auto nullResult = nullJson.try_as<int>();
+        CHECK_FALSE(nullResult.has_value());
+        
+        // Test string conversion
+        fl::Json stringJson("5");
+        auto stringToInt = stringJson.try_as<int>();
+        REQUIRE(stringToInt.has_value());
+        CHECK_EQ(*stringToInt, 5);
+        
+        // Test failed conversion
+        fl::Json invalidJson("hello");
+        auto failedConversion = invalidJson.try_as<int>();
+        CHECK_FALSE(failedConversion.has_value());
+    }
+    
+    SUBCASE("value<T>() - Direct conversion with sensible defaults") {
+        fl::Json validJson(42);
+        fl::Json nullJson; // null JSON
+        
+        // value<T>() should return T directly with defaults on failure
+        int validValue = validJson.value<int>();
+        CHECK_EQ(validValue, 42);
+        
+        int nullValue = nullJson.value<int>();
+        CHECK_EQ(nullValue, 0); // Default for int
+        
+        // Test different types with their defaults
+        CHECK_EQ(nullJson.value<bool>(), false);
+        CHECK_EQ(nullJson.value<float>(), 0.0f);
+        CHECK_EQ(nullJson.value<double>(), 0.0);
+        CHECK_EQ(nullJson.value<fl::string>(), fl::string(""));
+        
+        // Test string conversion with defaults
+        fl::Json stringJson("5");
+        CHECK_EQ(stringJson.value<int>(), 5);
+        
+        fl::Json invalidJson("hello");
+        CHECK_EQ(invalidJson.value<int>(), 0); // Default on failed conversion
+    }
+    
+    SUBCASE("as_or<T>(default) - Conversion with custom defaults") {
+        fl::Json validJson(42);
+        fl::Json nullJson; // null JSON
+        
+        // as_or<T>() should return T with custom defaults
+        CHECK_EQ(validJson.as_or<int>(999), 42);
+        CHECK_EQ(nullJson.as_or<int>(999), 999);
+        
+        // Test different types with custom defaults
+        CHECK_EQ(nullJson.as_or<bool>(true), true);
+        CHECK_CLOSE(nullJson.as_or<float>(3.14f), 3.14f, 0.001f);
+        CHECK_CLOSE(nullJson.as_or<double>(2.718), 2.718, 0.001);
+        CHECK_EQ(nullJson.as_or<fl::string>("default"), fl::string("default"));
+        
+        // Test string conversion with custom defaults
+        fl::Json stringJson("5");
+        CHECK_EQ(stringJson.as_or<int>(999), 5);
+        
+        fl::Json invalidJson("hello");
+        CHECK_EQ(invalidJson.as_or<int>(999), 999); // Custom default on failed conversion
+    }
+    
+    SUBCASE("API usage patterns demonstration") {
+        fl::Json config = fl::Json::parse(R"({
+            "brightness": 128,
+            "enabled": true,
+            "name": "test_device",
+            "timeout": "5.5",
+            "missing_field": null
+        })");
+        
+        // Pattern 1: try_as<T>() when you need explicit error handling
+        auto maybeBrightness = config["brightness"].try_as<int>();
+        if (maybeBrightness.has_value()) {
+            CHECK_EQ(*maybeBrightness, 128);
+        } else {
+            // Handle conversion failure
+        }
+        
+        // Pattern 2: value<T>() when you want defaults and don't care about failure
+        int brightness = config["brightness"].value<int>(); // Gets 128
+        int missingValue = config["nonexistent"].value<int>(); // Gets 0 (default)
+        CHECK_EQ(brightness, 128);
+        CHECK_EQ(missingValue, 0);
+        
+        // Pattern 3: as_or<T>(default) when you want custom defaults
+        int ledCount = config["led_count"].as_or<int>(100); // Gets 100 (custom default)
+        bool enabled = config["enabled"].as_or<bool>(false); // Gets true (from JSON)
+        fl::string deviceName = config["name"].as_or<fl::string>("Unknown"); // Gets "test_device"
+        CHECK_EQ(ledCount, 100);
+        CHECK_EQ(enabled, true);
+        CHECK_EQ(deviceName, fl::string("test_device"));
+        
+        // String to number conversion
+        double timeout = config["timeout"].as_or<double>(10.0); // Converts "5.5" to 5.5
+        CHECK_CLOSE(timeout, 5.5, 0.001);
+    }
+    
+    SUBCASE("Backward compatibility with existing as<T>()") {
+        fl::Json json(42);
+        
+        // Old as<T>() still returns fl::optional<T> for backward compatibility
+        fl::optional<int> result = json.as<int>();
+        REQUIRE(result.has_value());
+        CHECK_EQ(*result, 42);
+        
+        // New try_as<T>() does the same thing (they're equivalent)
+        fl::optional<int> tryResult = json.try_as<int>();
+        REQUIRE(tryResult.has_value());
+        CHECK_EQ(*tryResult, 42);
+        
+        // Both should be identical
+        CHECK_EQ(*result, *tryResult);
+    }
+}

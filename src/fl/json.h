@@ -1746,13 +1746,29 @@ public:
     fl::optional<fl::vector<uint8_t>> as_bytes() const { return m_value ? m_value->as_bytes() : fl::nullopt; }
     fl::optional<fl::vector<float>> as_floats() const { return m_value ? m_value->as_floats() : fl::nullopt; }
 
-    // Universal type conversion method using SFINAE for dispatch
+    // NEW ERGONOMIC API: try_as<T>() - Explicit optional handling
+    // Use when you need to explicitly handle conversion failure
     template<typename T>
-    fl::optional<T> as() const {
+    fl::optional<T> try_as() const {
         if (!m_value) {
             return fl::nullopt;
         }
         return as_impl<T>();
+    }
+
+    // BACKWARD COMPATIBILITY: Keep existing as<T>() that returns fl::optional<T>
+    // This maintains compatibility with existing code
+    template<typename T>
+    fl::optional<T> as() const {
+        return try_as<T>();
+    }
+
+    // NEW ERGONOMIC API: value<T>() - Direct conversion with sensible defaults
+    // Use when you want a value immediately with reasonable defaults on failure
+    template<typename T>
+    T value() const {
+        auto result = try_as<T>();
+        return result.has_value() ? *result : get_default_value<T>();
     }
 
 private:
@@ -1816,6 +1832,61 @@ private:
     typename fl::enable_if<fl::is_same<T, fl::vector<float>>::value, fl::optional<T>>::type
     as_impl() const {
         return m_value->as_floats();
+    }
+
+    // Helper methods for getting default values for each type
+    template<typename T>
+    typename fl::enable_if<fl::is_integral<T>::value && !fl::is_same<T, bool>::value, T>::type
+    get_default_value() const {
+        return T(0);  // All integer types default to 0
+    }
+    
+    template<typename T>
+    typename fl::enable_if<fl::is_same<T, bool>::value, T>::type
+    get_default_value() const {
+        return false;  // Boolean defaults to false
+    }
+    
+    template<typename T>
+    typename fl::enable_if<fl::is_floating_point<T>::value, T>::type
+    get_default_value() const {
+        return T(0.0);  // Floating point types default to 0.0
+    }
+    
+    template<typename T>
+    typename fl::enable_if<fl::is_same<T, fl::string>::value, T>::type
+    get_default_value() const {
+        return fl::string();  // String defaults to empty string
+    }
+    
+    template<typename T>
+    typename fl::enable_if<fl::is_same<T, JsonArray>::value, T>::type
+    get_default_value() const {
+        return JsonArray();  // Array defaults to empty array
+    }
+    
+    template<typename T>
+    typename fl::enable_if<fl::is_same<T, JsonObject>::value, T>::type
+    get_default_value() const {
+        return JsonObject();  // Object defaults to empty object
+    }
+    
+    template<typename T>
+    typename fl::enable_if<fl::is_same<T, fl::vector<int16_t>>::value, T>::type
+    get_default_value() const {
+        return fl::vector<int16_t>();  // Audio vector defaults to empty
+    }
+    
+    template<typename T>
+    typename fl::enable_if<fl::is_same<T, fl::vector<uint8_t>>::value, T>::type
+    get_default_value() const {
+        return fl::vector<uint8_t>();  // Bytes vector defaults to empty
+    }
+    
+    template<typename T>
+    typename fl::enable_if<fl::is_same<T, fl::vector<float>>::value, T>::type
+    get_default_value() const {
+        return fl::vector<float>();  // Float vector defaults to empty
     }
 
 public:
@@ -1990,11 +2061,13 @@ public:
         return (*m_value) | fallback;
     }
     
-    // Explicit method for default values (alternative to operator|)
+    // NEW ERGONOMIC API: as_or<T>(default) - Conversion with custom defaults
+    // Use when you want to specify your own default value
+    // This method uses try_as<T>() for proper string-to-number conversion
     template<typename T>
     T as_or(const T& fallback) const {
-        if (!m_value) return fallback;
-        return m_value->as_or(fallback);
+        auto result = try_as<T>();
+        return result.has_value() ? *result : fallback;
     }
 
     // has_value method for compatibility
