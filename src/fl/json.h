@@ -701,7 +701,8 @@ struct JsonValue {
     }
 
     template<typename T>
-    JsonValue& operator=(T&& value) {
+    typename fl::enable_if<!fl::is_same<typename fl::remove_cv<typename fl::remove_reference<T>::type>::type, JsonValue>::value, JsonValue&>::type
+    operator=(T&& value) {
         data = fl::forward<T>(value);
         return *this;
     }
