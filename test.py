@@ -363,6 +363,8 @@ def main() -> None:
                 cmd = ["uv", "run", "ci/test_example_compilation.py"]
                 if args.examples:
                     cmd.extend(args.examples)
+                if args.clean:
+                    cmd.append("--clean")
 
                 # Run the example compilation test script
                 proc = RunningProcess(

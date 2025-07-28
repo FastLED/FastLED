@@ -12,18 +12,59 @@ import time
 from pathlib import Path
 
 
-def run_example_compilation_test(specific_examples=None):
+def run_example_compilation_test(specific_examples=None, clean_build=False):
     """Run the example compilation test using CMake."""
     print("==> FastLED Example Compilation Test (QUICK BUILD MODE)")
     print("=" * 50)
 
     # Change to tests directory
     tests_dir = Path(__file__).parent.parent / "tests"
-    build_dir = tests_dir / ".build-examples"
+
+    # Create configuration-specific build directory for PCH caching
+    if specific_examples:
+        # Hash the specific examples list for unique directory
+        import hashlib
+
+        examples_str = ";".join(sorted(specific_examples))
+        config_hash = hashlib.md5(examples_str.encode()).hexdigest()[:8]
+        build_dir = tests_dir / f".build-examples-{config_hash}"
+        print(f"[CACHE] Using config-specific build dir: .build-examples-{config_hash}")
+        print(f"[CACHE] Specific examples: {examples_str}")
+    else:
+        # Use standard build directory for all examples
+        build_dir = tests_dir / ".build-examples-all"
+        print(f"[CACHE] Using standard build dir: .build-examples-all")
+        print(f"[CACHE] Building all examples")
+
+    # Handle clean build request
+    if clean_build:
+        if build_dir.exists():
+            import shutil
+
+            print(f"[CLEAN] Removing cached build directory: {build_dir}")
+            shutil.rmtree(build_dir)
+        print(f"[CLEAN] Clean build requested - will rebuild from scratch")
 
     # Create build directory if it doesn't exist
     build_dir.mkdir(exist_ok=True)
     os.chdir(build_dir)
+
+    # Check for existing PCH to determine if we can skip expensive rebuild
+    pch_file = (
+        build_dir
+        / "CMakeFiles"
+        / "example_compile_fastled_objects.dir"
+        / "cmake_pch.hxx.gch"
+    )
+    pch_exists = pch_file.exists()
+
+    if pch_exists:
+        pch_size_mb = pch_file.stat().st_size / (1024 * 1024)
+        print(
+            f"[CACHE] Found existing PCH: {pch_size_mb:.1f}MB - will reuse if source unchanged"
+        )
+    else:
+        print(f"[CACHE] No existing PCH found - will build from scratch")
 
     start_time = time.time()
 
@@ -83,28 +124,63 @@ def run_example_compilation_test(specific_examples=None):
             cmake_cmd.append(f"-DFASTLED_SPECIFIC_EXAMPLES={examples_list}")
             print(f"[CONFIG] Filtering to specific examples: {examples_list}")
 
-        # Try to configure, if it fails due to cache issues, clean and retry
-        try:
-            configure_result = subprocess.run(
-                cmake_cmd,
-                capture_output=True,  # Hide CMake output for clean builds
-                text=True,
-                encoding="utf-8",
-                errors="replace",
-                check=True,
-                env=env,
-            )
-        except subprocess.CalledProcessError as cache_error:
-            if "could not load cache" in str(cache_error.stderr):
-                print("[CONFIG] Cache error detected, cleaning and retrying...")
-                # Remove problematic cache files
-                cache_files = ["CMakeCache.txt", "cmake_install.cmake", "Makefile"]
-                for cache_file in cache_files:
-                    cache_path = build_dir / cache_file
-                    if cache_path.exists():
-                        cache_path.unlink()
+        # Check if CMake configuration is needed (incremental build support)
+        cmake_cache = build_dir / "CMakeCache.txt"
+        makefile = build_dir / "Makefile"
+        needs_configure = True
 
-                # Retry configuration
+        if cmake_cache.exists() and makefile.exists():
+            # Check if configuration is still valid by looking at cached variables
+            try:
+                cache_content = cmake_cache.read_text()
+                # Look for our key configuration variables in cache
+                current_config_valid = True
+
+                if specific_examples:
+                    expected_examples = ";".join(specific_examples)
+                    # Check both STRING and UNINITIALIZED types for the cached variable
+                    if (
+                        f"FASTLED_SPECIFIC_EXAMPLES:STRING={expected_examples}"
+                        not in cache_content
+                        and f"FASTLED_SPECIFIC_EXAMPLES:UNINITIALIZED={expected_examples}"
+                        not in cache_content
+                    ):
+                        current_config_valid = False
+                        print(
+                            f"[CONFIG] Example filter changed, reconfiguration needed"
+                        )
+                else:
+                    # For "all examples" builds, check that FASTLED_SPECIFIC_EXAMPLES is not set or empty
+                    if (
+                        "FASTLED_SPECIFIC_EXAMPLES:STRING=" in cache_content
+                        and "FASTLED_SPECIFIC_EXAMPLES:STRING=\n" not in cache_content
+                    ) or (
+                        "FASTLED_SPECIFIC_EXAMPLES:UNINITIALIZED=" in cache_content
+                        and "FASTLED_SPECIFIC_EXAMPLES:UNINITIALIZED=\n"
+                        not in cache_content
+                    ):
+                        current_config_valid = False
+                        print(
+                            f"[CONFIG] Switching from specific to all examples, reconfiguration needed"
+                        )
+
+                if current_config_valid:
+                    needs_configure = False
+                    print(
+                        f"[CONFIG] Existing configuration is valid, skipping CMake configure"
+                    )
+                    print(
+                        f"[CONFIG] Using cached build - PCH will be preserved if sources unchanged"
+                    )
+
+            except Exception as e:
+                print(f"[CONFIG] Error reading cache, will reconfigure: {e}")
+                needs_configure = True
+
+        if needs_configure:
+            print(f"[CONFIG] Running CMake configuration...")
+            # Try to configure, if it fails due to cache issues, clean and retry
+            try:
                 configure_result = subprocess.run(
                     cmake_cmd,
                     capture_output=True,  # Hide CMake output for clean builds
@@ -114,8 +190,37 @@ def run_example_compilation_test(specific_examples=None):
                     check=True,
                     env=env,
                 )
-            else:
-                raise  # Re-raise if it's not a cache error
+            except subprocess.CalledProcessError as cache_error:
+                if "could not load cache" in str(cache_error.stderr):
+                    print("[CONFIG] Cache error detected, cleaning and retrying...")
+                    # Remove problematic cache files
+                    cache_files = ["CMakeCache.txt", "cmake_install.cmake", "Makefile"]
+                    for cache_file in cache_files:
+                        cache_path = build_dir / cache_file
+                        if cache_path.exists():
+                            cache_path.unlink()
+
+                    # Retry configuration
+                    configure_result = subprocess.run(
+                        cmake_cmd,
+                        capture_output=True,  # Hide CMake output for clean builds
+                        text=True,
+                        encoding="utf-8",
+                        errors="replace",
+                        check=True,
+                        env=env,
+                    )
+                else:
+                    raise  # Re-raise if it's not a cache error
+        else:
+            # Create a dummy result for skipped configuration
+            class DummyResult:
+                def __init__(self):
+                    self.stdout = "-- Configuration skipped (using cache)\n-- Using existing build configuration"
+                    self.stderr = ""
+                    self.returncode = 0
+
+            configure_result = DummyResult()
 
         cmake_config_time = time.time() - cmake_config_start
         print(f"[CONFIG] CMake configuration completed in {cmake_config_time:.2f}s")
@@ -142,37 +247,33 @@ def run_example_compilation_test(specific_examples=None):
         print("\n[BUILD] Building example compilation targets...")
         build_start = time.time()
 
-        # Check which targets exist by querying make targets
-        try:
-            targets_result = subprocess.run(
-                ["make", "help"],
-                capture_output=True,
-                text=True,
-                encoding="utf-8",
-                errors="replace",
-                env=env,
-            )
-            available_targets = targets_result.stdout
-        except:
-            # Fallback if make help fails
-            available_targets = ""
+        # Only build the FastLED example compilation target for maximum speed
+        # Skip basic examples and unit tests for this focused test
+        targets_to_build = ["example_compile_fastled_objects"]
 
-        # Determine which targets to build based on what exists
-        targets_to_build = []
-        if "example_compile_fastled_objects" in available_targets:
-            targets_to_build.append("example_compile_fastled_objects")
-        if "example_compile_basic_objects" in available_targets:
-            targets_to_build.append("example_compile_basic_objects")
+        # Only add basic examples target if we're not filtering to specific examples
+        # (specific examples are likely all FastLED examples anyway)
+        if not specific_examples:
+            # Check if basic examples target exists
+            try:
+                targets_result = subprocess.run(
+                    ["make", "help"],
+                    capture_output=True,
+                    text=True,
+                    encoding="utf-8",
+                    errors="replace",
+                    env=env,
+                    timeout=5,  # Quick timeout for target discovery
+                )
+                available_targets = targets_result.stdout
+                if "example_compile_basic_objects" in available_targets:
+                    targets_to_build.append("example_compile_basic_objects")
+            except:
+                # If we can't check targets quickly, skip basic examples for speed
+                pass
 
-        # If no targets found via help, try the standard targets (fallback)
-        if not targets_to_build:
-            targets_to_build = [
-                "example_compile_fastled_objects",
-                "example_compile_basic_objects",
-            ]
-            print("[BUILD] Could not determine available targets, using fallback list")
-        else:
-            print(f"[BUILD] Building targets: {', '.join(targets_to_build)}")
+        print(f"[BUILD] Building targets: {', '.join(targets_to_build)}")
+        print(f"[BUILD] Using {parallel_jobs} parallel jobs for optimal speed")
 
         # Try to build the compilation targets using make with optimal parallelism
         # Use Popen for real-time streaming output instead of subprocess.run
@@ -294,9 +395,14 @@ if __name__ == "__main__":
         nargs="*",
         help="Specific examples to compile (if none specified, compile all examples)",
     )
+    parser.add_argument(
+        "--clean",
+        action="store_true",
+        help="Force a clean build by removing existing build directories.",
+    )
 
     args = parser.parse_args()
 
     # Pass specific examples to the test function
     specific_examples = args.examples if args.examples else None
-    sys.exit(run_example_compilation_test(specific_examples))
+    sys.exit(run_example_compilation_test(specific_examples, args.clean))

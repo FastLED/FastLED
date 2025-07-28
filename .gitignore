@@ -66,6 +66,7 @@ compile_commands.json
 tests/.build/
 tests/cmake_install.cmake
 tests/.build-examples/
+tests/.build-examples-*/
 tests/example_compile_direct/
 tests/example_compile_fastled_objects.dir/
 tests/x64/
