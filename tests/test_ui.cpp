@@ -366,7 +366,7 @@ TEST_CASE("complex ui element serialization") {
     bool hasNumberField = false, hasDropdown = false, hasTitle = false;
     bool hasDescription = false, hasAudio = false, hasHelp = false;
     
-    for (int i = 0; i < parsedOutput.size(); i++) {
+    for (size_t i = 0; i < parsedOutput.size(); i++) {
         fl::Json component = parsedOutput[i];
         fl::string type = component["type"].as_or(fl::string(""));
         
