@@ -44,6 +44,10 @@ configure_build_options()
 # ============================================================================
 detect_compiler_capabilities()
 
+# 🚨 CRITICAL FIX: Configure dynamic runtime libraries for Windows Clang builds
+# This must be done BEFORE any targets are created to ensure consistency
+configure_dynamic_runtime_libraries()
+
 # Dependency detection is now handled by the DependencyManagement module
 find_and_configure_dependencies()
 

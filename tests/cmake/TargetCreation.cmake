@@ -186,6 +186,11 @@ function(configure_windows_executable target)
         # Add Windows socket libraries for networking support
         target_link_libraries(${target} ws2_32 wsock32)
         
+        # 🚨 CRITICAL FIX: Apply C runtime library fix for nostartfiles/nostdlib issues
+        # This addresses the missing symbols like memset, memcpy, strlen, mainCRTStartup
+        # that occur when Clang automatically adds -nostartfiles -nostdlib flags
+        apply_crt_runtime_fix(${target})
+        
         # Windows subsystem settings
         if(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
             set_target_properties(${target} PROPERTIES
@@ -244,6 +249,10 @@ function(create_test_infrastructure)
     # Apply test settings
     apply_test_settings(test_shared_static)
     apply_unit_test_flags(test_shared_static)
+    
+    # 🚨 CRITICAL FIX: Apply CRT runtime fix to test infrastructure library
+    # This ensures test_shared_static uses the same runtime as test executables
+    apply_crt_runtime_fix(test_shared_static)
     
     message(STATUS "Created test infrastructure library: test_shared_static")
 endfunction()

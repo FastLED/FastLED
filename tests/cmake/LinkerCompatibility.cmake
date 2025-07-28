@@ -509,3 +509,124 @@ function(apply_static_runtime_linking target)
         endif()
     endif()
 endfunction()
+
+# Function to configure dynamic runtime library usage for all targets
+function(configure_dynamic_runtime_libraries)
+    if(WIN32 AND CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+        find_program(LLDLINK_EXECUTABLE lld-link)
+        if(LLDLINK_EXECUTABLE)
+            # When nostartfiles/nostdlib are used, we need dynamic runtime consistency
+            message(STATUS "LinkerCompatibility: Configuring dynamic runtime libraries for all targets")
+            
+            # 🚨 CRITICAL: Set both CMake properties AND compiler flags for Clang compatibility
+            # CMake properties alone don't work reliably with Clang on Windows
+            set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreadedDLL" PARENT_SCOPE)
+            
+            # 🚨 CRITICAL: Use Clang-compatible flags instead of /MD
+            # Clang on Windows doesn't recognize /MD, so use -D_DLL for dynamic linking
+            set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -D_DLL -D_MT" PARENT_SCOPE)
+            set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D_DLL -D_MT" PARENT_SCOPE)
+            
+            # 🚨 NEW: Add global linker flags to exclude static runtime libraries
+            # This prevents the linker from trying to link both static and dynamic runtimes
+            set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Xlinker /NODEFAULTLIB:libcmt.lib -Xlinker /NODEFAULTLIB:libcpmt.lib" PARENT_SCOPE)
+            set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Xlinker /NODEFAULTLIB:libcmt.lib -Xlinker /NODEFAULTLIB:libcpmt.lib" PARENT_SCOPE)
+            set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} -Xlinker /NODEFAULTLIB:libcmt.lib -Xlinker /NODEFAULTLIB:libcpmt.lib" PARENT_SCOPE)
+            
+            message(STATUS "LinkerCompatibility: Configured dynamic runtime library setting for all targets")
+            message(STATUS "LinkerCompatibility: Added -D_DLL -D_MT compiler flags and /NODEFAULTLIB linker flags")
+        endif()
+    endif()
+endfunction()
+
+# Function to get Windows C runtime libraries when nostartfiles/nostdlib are used
+function(get_windows_crt_libraries output_var)
+    set(crt_libs "")
+    
+    if(WIN32 AND CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+        find_program(LLDLINK_EXECUTABLE lld-link)
+        if(LLDLINK_EXECUTABLE)
+            # When using -nostartfiles -nostdlib with lld-link, we need to manually link
+            # the essential C runtime libraries to provide missing symbols like:
+            # memset, memcpy, strlen, mainCRTStartup, __CxxFrameHandler3, etc.
+            
+            message(STATUS "LinkerCompatibility: Adding Windows C runtime libraries for Clang + lld-link")
+            
+            # 🚨 CRITICAL FIX: Use ONLY dynamic runtime libraries to avoid MT vs MD conflicts
+            # The previous approach mixed static and dynamic libraries which caused linker errors
+            # This approach uses exclusively dynamic runtime libraries for consistency
+            list(APPEND crt_libs
+                # Microsoft Visual C++ DYNAMIC runtime libraries ONLY
+                "msvcrt.lib"        # C runtime library (dynamic linking) - provides memset, memcpy, strlen  
+                "vcruntime.lib"     # Visual C++ runtime support - provides __CxxFrameHandler3
+                "ucrt.lib"          # Universal C runtime - provides modern C runtime functions
+                
+                # 🚨 CRITICAL: DO NOT include msvcprt.lib as it conflicts with static libraries
+                # msvcprt.lib provides C++ standard library functions but has MD_DynamicRelease
+                # which conflicts with any remaining static libraries that have MT_StaticRelease
+                # The /NODEFAULTLIB flags will prevent static libraries from being linked
+                
+                # Additional Windows runtime support 
+                "legacy_stdio_definitions.lib"  # For older stdio functions compatibility
+            )
+            
+            message(STATUS "LinkerCompatibility: Using DYNAMIC runtime libraries ONLY to avoid MT/MD conflicts")
+            message(STATUS "LinkerCompatibility: CRT libraries: ${crt_libs}")
+        endif()
+    endif()
+    
+    set(${output_var} ${crt_libs} PARENT_SCOPE)
+endfunction()
+
+# 🚨 NEW FUNCTION: Force dynamic runtime and prevent static runtime linking
+function(force_dynamic_runtime_linking target)
+    if(WIN32 AND CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+        find_program(LLDLINK_EXECUTABLE lld-link)
+        if(LLDLINK_EXECUTABLE)
+            # 🚨 CRITICAL: Add target-specific compiler flags to force dynamic runtime
+            # This ensures the target uses dynamic runtime even if global flags don't work
+            target_compile_options(${target} PRIVATE 
+                "-D_DLL"      # Force dynamic runtime (MultiThreaded DLL)
+            )
+            
+            # Apply dynamic runtime library property to the target
+            set_target_properties(${target} PROPERTIES
+                MSVC_RUNTIME_LIBRARY "MultiThreadedDLL"
+            )
+            
+            message(STATUS "LinkerCompatibility: Forced dynamic runtime linking for target: ${target}")
+        endif()
+    endif()
+endfunction()
+
+# Function to apply C runtime fix for nostartfiles/nostdlib builds
+function(apply_crt_runtime_fix target)
+    if(WIN32 AND CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+        find_program(LLDLINK_EXECUTABLE lld-link)
+        if(LLDLINK_EXECUTABLE)
+            # Get the target's current link flags to check if nostartfiles/nostdlib are present
+            get_target_property(current_link_flags ${target} LINK_FLAGS)
+            if(NOT current_link_flags)
+                set(current_link_flags "")
+            endif()
+            
+            # Check if the problematic flags are present (they might be set globally)
+            # Since we can't easily detect these flags, we'll apply the fix universally
+            # for Windows Clang builds as a safety measure
+            
+            # 🚨 CRITICAL: Apply dynamic runtime configuration FIRST
+            force_dynamic_runtime_linking(${target})
+            
+            # Apply dynamic runtime library setting to this specific target
+            set_target_properties(${target} PROPERTIES
+                MSVC_RUNTIME_LIBRARY "MultiThreadedDLL"
+            )
+            
+            get_windows_crt_libraries(crt_libs)
+            if(crt_libs)
+                target_link_libraries(${target} ${crt_libs})
+                message(STATUS "LinkerCompatibility: Applied CRT runtime fix to target: ${target}")
+            endif()
+        endif()
+    endif()
+endfunction()
