@@ -18,7 +18,7 @@ function(discover_and_process_test_sources)
         # Find all test source files for full build
         file(GLOB TEST_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/test_*.cpp")
         list(LENGTH TEST_SOURCES TEST_COUNT)
-        message(STATUS "🌐 Building ALL tests - found ${TEST_COUNT} test files")
+        message(STATUS "[ALL] Building ALL tests - found ${TEST_COUNT} test files")
     endif()
     
     # Set the TEST_SOURCES variable in parent scope

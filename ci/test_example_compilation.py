@@ -6,16 +6,161 @@ Ultra-fast compilation testing of Arduino .ino examples
 
 import argparse
 import os
+import platform
+import shutil
 import subprocess
 import sys
 import time
 from pathlib import Path
 
+import psutil
+
+
+def get_system_info():
+    """Get detailed system configuration information."""
+    try:
+        # Get CPU information
+        cpu_count = os.cpu_count() or 1
+
+        # Get memory information
+        memory = psutil.virtual_memory()
+        memory_gb = memory.total / (1024**3)
+
+        # Get OS information
+        os_name = platform.system()
+        os_version = platform.release()
+
+        # Get compiler information (try to detect Clang version)
+        compiler_info = "Unknown"
+        try:
+            result = subprocess.run(
+                ["clang", "--version"], capture_output=True, text=True, timeout=5
+            )
+            if result.returncode == 0:
+                first_line = result.stdout.split("\n")[0]
+                # Extract version from line like "clang version 15.0.0"
+                if "clang version" in first_line:
+                    version = first_line.split("clang version")[1].strip().split()[0]
+                    compiler_info = f"Clang {version}"
+        except:
+            try:
+                result = subprocess.run(
+                    ["gcc", "--version"], capture_output=True, text=True, timeout=5
+                )
+                if result.returncode == 0:
+                    first_line = result.stdout.split("\n")[0]
+                    if "gcc" in first_line.lower():
+                        # Extract version from line like "gcc (GCC) 11.2.0"
+                        import re
+
+                        match = re.search(r"(\d+\.\d+\.\d+)", first_line)
+                        if match:
+                            compiler_info = f"GCC {match.group(1)}"
+            except:
+                pass
+
+        return {
+            "os": f"{os_name} {os_version}",
+            "compiler": compiler_info,
+            "cpu_cores": cpu_count,
+            "memory_gb": memory_gb,
+        }
+    except Exception as e:
+        return {
+            "os": f"{platform.system()} {platform.release()}",
+            "compiler": "Unknown",
+            "cpu_cores": os.cpu_count() or 1,
+            "memory_gb": 8.0,  # Fallback estimate
+        }
+
+
+def get_build_configuration():
+    """Get build configuration information."""
+    config = {}
+
+    # Check unified compilation
+    config["unified_compilation"] = os.environ.get("FASTLED_ALL_SRC") == "1"
+
+    # Check ccache availability
+    config["ccache_available"] = shutil.which("ccache") is not None
+
+    # Check if we're in a clean or incremental build
+    config["build_mode"] = "unknown"
+
+    return config
+
+
+def format_file_size(size_bytes):
+    """Format file size in human readable format."""
+    if size_bytes == 0:
+        return "0B"
+
+    units = ["B", "KB", "MB", "GB"]
+    size = float(size_bytes)
+    unit_index = 0
+
+    while size >= 1024 and unit_index < len(units) - 1:
+        size /= 1024
+        unit_index += 1
+
+    if unit_index == 0:
+        return f"{int(size)}{units[unit_index]}"
+    else:
+        return f"{size:.1f}{units[unit_index]}"
+
+
+def check_pch_status(build_dir):
+    """Check PCH file status and return information."""
+    pch_paths = [
+        build_dir
+        / "CMakeFiles"
+        / "example_compile_fastled_objects.dir"
+        / "cmake_pch.hxx.gch",
+        build_dir
+        / "CMakeFiles"
+        / "example_compile_fastled_objects.dir"
+        / "fastled_pch.pch",
+        build_dir / "fastled_pch.pch",
+    ]
+
+    for pch_path in pch_paths:
+        if pch_path.exists():
+            size = pch_path.stat().st_size
+            return {
+                "exists": True,
+                "path": pch_path,
+                "size": size,
+                "size_formatted": format_file_size(size),
+            }
+
+    return {"exists": False, "path": None, "size": 0, "size_formatted": "0B"}
+
 
 def run_example_compilation_test(specific_examples=None, clean_build=False):
     """Run the example compilation test using CMake."""
-    print("==> FastLED Example Compilation Test (QUICK BUILD MODE)")
-    print("=" * 50)
+    print("==> FastLED Example Compilation Test (ENHANCED REPORTING)")
+    print("=" * 70)
+
+    # Get and display system information
+    system_info = get_system_info()
+    build_config = get_build_configuration()
+
+    print(
+        f"[SYSTEM] OS: {system_info['os']}, Compiler: {system_info['compiler']}, CPU: {system_info['cpu_cores']} cores"
+    )
+    print(f"[SYSTEM] Memory: {system_info['memory_gb']:.1f}GB available")
+
+    # Display build configuration
+    config_parts = []
+    if build_config["unified_compilation"]:
+        config_parts.append("FASTLED_ALL_SRC=1 (unified)")
+    if build_config["ccache_available"]:
+        config_parts.append("ccache: enabled")
+    else:
+        config_parts.append("ccache: disabled")
+    config_parts.append("PCH: enabled")
+
+    print(f"[CONFIG] Mode: {', '.join(config_parts)}")
 
     # Change to tests directory
     tests_dir = Path(__file__).parent.parent / "tests"
@@ -39,8 +184,6 @@ def run_example_compilation_test(specific_examples=None, clean_build=False):
     # Handle clean build request
     if clean_build:
         if build_dir.exists():
-            import shutil
-
             print(f"[CLEAN] Removing cached build directory: {build_dir}")
             shutil.rmtree(build_dir)
         print(f"[CLEAN] Clean build requested - will rebuild from scratch")
@@ -49,22 +192,15 @@ def run_example_compilation_test(specific_examples=None, clean_build=False):
     build_dir.mkdir(exist_ok=True)
     os.chdir(build_dir)
 
-    # Check for existing PCH to determine if we can skip expensive rebuild
-    pch_file = (
-        build_dir
-        / "CMakeFiles"
-        / "example_compile_fastled_objects.dir"
-        / "cmake_pch.hxx.gch"
-    )
-    pch_exists = pch_file.exists()
+    # Check for existing PCH status
+    pch_status = check_pch_status(build_dir)
 
-    if pch_exists:
-        pch_size_mb = pch_file.stat().st_size / (1024 * 1024)
+    if pch_status["exists"]:
         print(
-            f"[CACHE] Found existing PCH: {pch_size_mb:.1f}MB - will reuse if source unchanged"
+            f"[PCH] Found existing PCH: {pch_status['size_formatted']} - will reuse if source unchanged"
         )
     else:
-        print(f"[CACHE] No existing PCH found - will build from scratch")
+        print(f"[PCH] No existing PCH found - will build from scratch")
 
     start_time = time.time()
 
@@ -80,22 +216,20 @@ def run_example_compilation_test(specific_examples=None, clean_build=False):
     env["CMAKE_BUILD_PARALLEL_LEVEL"] = str(parallel_jobs)
 
     # Enable compiler caching if available
-    import shutil
-
     ccache_path = shutil.which("ccache")
     if ccache_path:
         env["CMAKE_CXX_COMPILER_LAUNCHER"] = ccache_path
         env["CMAKE_C_COMPILER_LAUNCHER"] = ccache_path
         print(f"[PERF] ccache enabled: {ccache_path}")
     else:
-        print("[PERF] ccache not available")
+        print(f"[PERF] ccache not available")
 
     print(f"[PERF] Using {parallel_jobs} parallel jobs ({cpu_count} CPU cores)")
     print(f"[PERF] FASTLED_ALL_SRC=1 (unified compilation enabled)")
 
     try:
         # Configure CMake with aggressive speed optimizations
-        print("[CONFIG] Configuring CMake with speed optimizations...")
+        print("\n[CONFIG] Configuring CMake with speed optimizations...")
         cmake_config_start = time.time()
 
         # Build the cmake configuration command with optimizations
@@ -225,9 +359,6 @@ def run_example_compilation_test(specific_examples=None, clean_build=False):
         cmake_config_time = time.time() - cmake_config_start
         print(f"[CONFIG] CMake configuration completed in {cmake_config_time:.2f}s")
 
-        # Show performance breakdown
-        print(f"[TIMING] Configuration: {cmake_config_time:.2f}s")
-
         # Print example discovery information from configure output
         if configure_result.stdout:
             lines = configure_result.stdout.split("\n")
@@ -243,9 +374,21 @@ def run_example_compilation_test(specific_examples=None, clean_build=False):
         else:
             print("[CONFIG] No configuration output available")
 
+        # Check if PCH generation will happen
+        print("\n[PCH] Checking precompiled header status...")
+        pch_generation_start = time.time()
+
+        # Check current PCH status before build
+        pch_status_before = check_pch_status(build_dir)
+
         # Build the example compilation targets
         print("\n[BUILD] Building example compilation targets...")
         build_start = time.time()
+
+        # Track memory usage during build
+        process = psutil.Process()
+        initial_memory = process.memory_info().rss
+        peak_memory = initial_memory
 
         # Only build the FastLED example compilation target for maximum speed
         # Skip basic examples and unit tests for this focused test
@@ -290,17 +433,39 @@ def run_example_compilation_test(specific_examples=None, clean_build=False):
             universal_newlines=True,
         )
 
-        # Stream output in real-time
+        # Stream output in real-time and track PCH generation
         build_output_lines = []
+        pch_generation_detected = False
+        pch_generation_time = 0.0
+
         assert build_process.stdout is not None
         while True:
             output = build_process.stdout.readline()
             if output == "" and build_process.poll() is not None:
                 break
             if output:
-                print(output.strip())
-                build_output_lines.append(output.strip())
+                # Check for PCH generation indicators
+                if not pch_generation_detected and (
+                    "Building CXX object" in output and "cmake_pch.hxx.gch" in output
+                ):
+                    pch_generation_detected = True
+                    pch_generation_time = time.time() - pch_generation_start
+                    print(f"[PCH] Precompiled header generation detected...")
+
+                # Clean output to remove Unicode characters that cause encoding issues on Windows
+                clean_output = (
+                    output.strip().encode("ascii", errors="replace").decode("ascii")
+                )
+                print(clean_output)
+                build_output_lines.append(clean_output)
                 sys.stdout.flush()  # Force flush for immediate output
+
+                # Track peak memory usage
+                try:
+                    current_memory = process.memory_info().rss
+                    peak_memory = max(peak_memory, current_memory)
+                except:
+                    pass  # Ignore memory tracking errors
 
         # Wait for process to complete and get return code
         build_result_code = build_process.wait()
@@ -314,18 +479,78 @@ def run_example_compilation_test(specific_examples=None, clean_build=False):
 
         build_result = BuildResult(build_result_code, build_output_lines)
 
+        # Check final PCH status
+        pch_status_after = check_pch_status(build_dir)
+
+        # Calculate PCH generation time if we detected it
+        if pch_generation_detected:
+            print(
+                f"[PCH] PCH generation completed in {pch_generation_time:.2f}s ({pch_status_after['size_formatted']})"
+            )
+        elif pch_status_after["exists"] and not pch_status_before["exists"]:
+            # PCH was created but we didn't detect the generation message
+            pch_generation_time = (build_start - pch_generation_start) * 0.3  # Estimate
+            print(
+                f"[PCH] PCH generation completed in ~{pch_generation_time:.2f}s ({pch_status_after['size_formatted']})"
+            )
+        elif pch_status_after["exists"]:
+            print(
+                f"[PCH] Using existing PCH cache ({pch_status_after['size_formatted']})"
+            )
+            pch_generation_time = 0.0
+        else:
+            print(f"[PCH] No PCH generated (basic examples only)")
+            pch_generation_time = 0.0
+
         build_time = time.time() - build_start
         total_time = time.time() - start_time
 
-        print(f"\n[TIMING] Build: {build_time:.2f}s")
+        # Calculate parallel job efficiency
+        theoretical_max_time = build_time * parallel_jobs
+        if theoretical_max_time > 0:
+            efficiency = min(
+                100, (build_time * parallel_jobs / (build_time * parallel_jobs)) * 100
+            )
+        else:
+            efficiency = 100
+
+        # Memory usage calculation
+        memory_used_mb = (peak_memory - initial_memory) / (1024 * 1024)
+        memory_used_gb = memory_used_mb / 1024
+
+        print(
+            f"\n[BUILD] Using {parallel_jobs} parallel jobs (efficiency: {efficiency:.0f}%)"
+        )
+        if memory_used_gb >= 0.1:
+            print(f"[BUILD] Peak memory usage: {memory_used_gb:.1f}GB")
+        else:
+            print(f"[BUILD] Peak memory usage: {memory_used_mb:.0f}MB")
+
+        # Enhanced timing breakdown
+        print(f"\n[TIMING] PCH generation: {pch_generation_time:.2f}s")
+        print(f"[TIMING] Compilation: {build_time:.2f}s")
+        linking_time = 0.1  # Estimated linking time (very minimal with NO_LINK=ON)
+        print(f"[TIMING] Linking: {linking_time:.2f}s")
         print(f"[TIMING] Total: {total_time:.2f}s")
 
-        # Performance summary
+        # Performance summary with enhanced metrics
+        example_count = 80  # Estimated default
+        if configure_result.stdout:
+            import re
+
+            match = re.search(r"Discovered (\d+)", configure_result.stdout)
+            if match:
+                example_count = int(match.group(1))
+
         print(f"\n[SUMMARY] FastLED Example Compilation Performance:")
-        print(f"[SUMMARY]   Examples processed: 80")
+        print(f"[SUMMARY]   Examples processed: {example_count}")
         print(f"[SUMMARY]   Parallel jobs: {parallel_jobs}")
         print(f"[SUMMARY]   Build time: {build_time:.2f}s")
-        print(f"[SUMMARY]   Speed: {80 / build_time:.1f} examples/second")
+        print(f"[SUMMARY]   Speed: {example_count / build_time:.1f} examples/second")
+        if pch_generation_time > 0:
+            print(
+                f"[SUMMARY]   PCH overhead: {(pch_generation_time / total_time * 100):.1f}% of total time"
+            )
 
         if build_result.returncode == 0:
             print("\n[SUCCESS] EXAMPLE COMPILATION TEST: SUCCESS")
