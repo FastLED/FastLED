@@ -51,22 +51,32 @@ find_and_configure_dependencies()
 configure_static_analysis()
 
 # ============================================================================
-# PHASE 4: Configure build settings based on build type (REFACTORED)
+# PHASE 4: Set build type based on whether we're building individual tests or all tests
+# ============================================================================
+if(DEFINED SPECIFIC_TEST)
+    # When building individual tests, use full debug mode
+    set(CMAKE_BUILD_TYPE Debug CACHE STRING "Choose the type of build." FORCE)
+    message(STATUS "Using debug mode when compiling individual tests")
+    message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
+else()
+    # For building all tests, use quick build mode as default for gcc
+    set(CMAKE_BUILD_TYPE Quick CACHE STRING "Choose the type of build." FORCE)
+    message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
+endif()
+
+# ============================================================================
+# PHASE 5: Configure build settings based on build type (REFACTORED)
 # ============================================================================
 configure_build_type_settings()
 
 # ============================================================================
-# PHASE 5: Configure build performance and parallelization
+# PHASE 6: Configure build performance and parallelization
 # ============================================================================
 optimize_build_performance()
 
 # ============================================================================
-# PHASE 6: Apply compiler flags using modules (REFACTORED)
+# PHASE 7: Apply compiler flags using modules (REFACTORED)
 # ============================================================================
-
-# Set build type to Debug
-set(CMAKE_BUILD_TYPE Debug CACHE STRING "Choose the type of build." FORCE)
-message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
 
 # Apply compiler flags and definitions using the CompilerFlags module
 apply_test_compiler_flags()              # Sets CMAKE_C_FLAGS and CMAKE_CXX_FLAGS globally

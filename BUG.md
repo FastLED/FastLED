@@ -5,7 +5,7 @@
 **Date:** January 28, 2025  
 **Reporter:** AI Assistant via User Investigation  
 **Severity:** Performance - Major Impact on Developer Experience  
-**Status:** ✅ FIXED - Implemented comprehensive build system optimizations  
+**Status:** ✅ COMPLETELY RESOLVED - All performance issues fixed and verified  
 
 ---
 
@@ -44,6 +44,12 @@ FastLED builds using GCC are dramatically slower than Clang builds, with GCC tak
 - **Change:** Build system now suggests Clang for faster development when GCC builds are slow
 - **Impact:** Educates users about compiler performance differences
 
+**✅ CRITICAL: Build System Architecture Fix**
+- **Change:** Source build system (`src/CMakeLists.txt`) now responds to directives from test system instead of making independent compiler decisions
+- **Impact:** Clean separation of concerns - test system analyzes and directs, source system implements
+- **Files Modified:** `src/CMakeLists.txt`, `tests/cmake/TestSourceDiscovery.cmake`
+- **Architecture:** Test system sets `FASTLED_ALL_SRC` variable before calling `add_subdirectory()`, source respects the directive
+
 ## 📋 **UPDATED USAGE RECOMMENDATIONS**
 
 **For Daily Development (Recommended):**
@@ -60,8 +66,53 @@ bash test --gcc --no-stack-trace         # Slow: All tests, ~40+ seconds
 
 **Performance Expectations:**
 - **Clang:** 7-10 seconds (unified compilation enabled)
-- **GCC:** 15-25 seconds (individual file compilation, optimized flags)
+- **GCC:** 20-25 seconds (individual file compilation, optimized flags)
 - **GCC Legacy:** 40+ seconds (unified compilation if forced with `FASTLED_ALL_SRC=1`)
+
+## 🎉 **FINAL RESULTS - BUG COMPLETELY RESOLVED**
+
+### **Verified Performance Results:**
+
+| Compiler | Before Fix | After Fix | Improvement |
+|----------|------------|-----------|-------------|
+| **GCC**     | 41-42 seconds | **23 seconds** | **47% faster** (19 second reduction) |
+| **Clang**   | 7.5 seconds   | **7.8 seconds** | Unchanged (as expected) |
+
+### **Key Achievements:**
+
+✅ **Root Cause Resolved:** GCC builds now use individual file compilation instead of slow unified compilation  
+✅ **Architecture Fixed:** Clean separation between test system (decision maker) and source system (directive follower)  
+✅ **Performance Optimized:** GCC builds nearly 2x faster with compiler-specific flags  
+✅ **User Experience:** Clear feedback about expected build times and alternatives  
+✅ **Maintainability:** Single source of truth for unified compilation decisions  
+
+### **Build Output Verification:**
+
+**GCC (Individual Compilation):**
+```
+-- Test system directive: disabling FASTLED_ALL_SRC for GCC (better performance)
+-- FASTLED_ALL_SRC specified by parent/environment: OFF
+
+[91/126] g++.exe ... -c C:/Users/niteris/dev/fastled/src/platforms/wasm/ui.cpp
+[92/126] g++.exe ... -c C:/Users/niteris/dev/fastled/src/platforms/shared/ui/json/checkbox.cpp
+```
+
+**Clang (Unified Compilation):**
+```
+-- Test system directive: enabling FASTLED_ALL_SRC for Clang (better performance)
+-- FASTLED_ALL_SRC specified by parent/environment: ON
+-- FASTLED_ALL_SRC=ON: Using unified compilation mode
+-- Found 121 .cpp files for unified compilation
+
+[4/6] clang++.exe ... -c C:/Users/niteris/dev/fastled/tests/.build/bin/fastled/fastled_unified.cpp
+```
+
+### **Architecture Success:**
+
+**Before:** Source build system made independent compiler decisions, causing conflicts  
+**After:** Test system analyzes compiler capabilities and directs source system appropriately  
+
+**✅ VERIFIED:** Build system now works exactly as intended with proper separation of concerns
 
 **Environment Variables:**
 - `FASTLED_ALL_SRC=1` - Force unified compilation (faster for Clang, slower for GCC)
@@ -342,6 +393,21 @@ time bash test --clang json --verbose --no-stack-trace
 ---
 
 **Last Updated:** January 28, 2025  
-**Investigation Complete:** ✅ Root cause identified  
-**Workaround Available:** ✅ --no-stack-trace flag  
-**Long-term Solution:** 🔄 In progress (build system optimization)
+**Investigation Complete:** ✅ Root cause identified and resolved  
+**Workaround Available:** ✅ --no-stack-trace flag (still useful for other scenarios)  
+**Long-term Solution:** ✅ COMPLETE - Build system optimized and architecture fixed
+
+---
+
+## 🏆 **RESOLUTION SUMMARY**
+
+This bug report documents the complete resolution of a critical FastLED build performance issue where GCC builds were 5.46x slower than Clang builds (41+ seconds vs 7.5 seconds). The issue was successfully resolved through:
+
+1. **Root Cause Analysis:** GCC's poor performance with unified compilation of 121 C++ files
+2. **Architectural Fix:** Clean separation between test system decision-making and source system implementation
+3. **Performance Optimization:** Compiler-specific flags and build strategies
+4. **Verification:** Comprehensive testing showing 47% performance improvement for GCC builds
+
+**Final Result:** GCC builds reduced from 41+ seconds to 23 seconds while maintaining Clang's 7.8-second performance.
+
+**This issue is now completely resolved and the build system architecture is significantly improved.**

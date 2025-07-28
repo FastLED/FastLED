@@ -282,8 +282,14 @@ function(configure_build_type_settings)
             message(STATUS "OptimizationSettings: LTO disabled by NO_THIN_LTO option")
         endif()
         configure_dead_code_elimination()
+    elseif(CMAKE_BUILD_TYPE STREQUAL "Quick")
+        # Quick builds: optimized for fast compilation with minimal optimization
+        message(STATUS "OptimizationSettings: Configuring Quick build")
+        configure_debug_build()
+        set_optimization_level("O1")  # Basic optimization for faster builds
+        configure_dead_code_elimination()
     else()
-        # Debug, Quick, and other builds: optimized for compilation speed and debugging
+        # Debug and other builds: optimized for debugging
         message(STATUS "OptimizationSettings: Configuring Debug/non-Release build (${CMAKE_BUILD_TYPE})")
         configure_debug_build()
         set_optimization_level("O0")
