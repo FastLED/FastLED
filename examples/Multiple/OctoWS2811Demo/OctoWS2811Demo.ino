@@ -2,6 +2,9 @@
 /// @brief   Demonstrates how to use OctoWS2811 output
 /// @example OctoWS2811Demo.ino
 
+// Only compile this example on Teensy platforms with OctoWS2811 support
+#if defined(__arm__) && defined(TEENSYDUINO)
+
 #define USE_OCTOWS2811
 #include <OctoWS2811.h>
 #include <FastLED.h>
@@ -39,3 +42,19 @@ void loop() {
   FastLED.show();
   FastLED.delay(10);
 }
+
+#else
+// Fallback for non-Teensy platforms
+#include <FastLED.h>
+
+void setup() {
+  // This example requires Teensy with OctoWS2811 library
+  // No hardware initialization on non-Teensy platforms
+}
+
+void loop() {
+  // No-op on non-Teensy platforms
+  delay(1000);
+}
+
+#endif // defined(__arm__) && defined(TEENSYDUINO)
