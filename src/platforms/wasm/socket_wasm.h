@@ -2,7 +2,7 @@
 
 #ifdef FASTLED_HAS_NETWORKING
 
-#include "fl/networking/socket.h"  // For SocketError enum
+#include "fl/networking.h"  // For SocketError enum
 #include "fl/string.h"
 #include "fl/stdint.h"
 
