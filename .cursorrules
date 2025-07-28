@@ -1061,14 +1061,17 @@ extern "C" void emscripten_sleep(unsigned int ms);
 # Compile any sketch directory to WASM
 uv run ci/wasm_compile.py path/to/your/sketch
 
-# Compile with build and open browser automatically
-uv run ci/wasm_compile.py path/to/your/sketch -b --open
+# Quick compile test (compile only, no browser)
+uv run ci/wasm_compile.py path/to/your/sketch --just-compile
 
 # Compile examples/Blink to WASM
-uv run ci/wasm_compile.py examples/Blink -b --open
+uv run ci/wasm_compile.py examples/Blink --just-compile
+
+# Compile examples/NetTest to WASM (test fetch API)
+uv run ci/wasm_compile.py examples/NetTest --just-compile
 
 # Compile examples/DemoReel100 to WASM  
-uv run ci/wasm_compile.py examples/DemoReel100 -b --open
+uv run ci/wasm_compile.py examples/DemoReel100 --just-compile
 ```
 
 **Output:** Creates `fastled_js/` folder with:
@@ -1096,7 +1099,13 @@ python -m http.server 8000
 **Platform Testing Commands:**
 ```bash
 # Test WASM platform changes (for platform developers)
-uv run ci/wasm_compile.py -b examples/wasm
+uv run ci/wasm_compile.py examples/wasm --just-compile
+
+# Quick compile test for any sketch (compile only, no browser)
+uv run ci/wasm_compile.py examples/Blink --just-compile
+
+# Quick compile test for NetTest example  
+uv run ci/wasm_compile.py examples/NetTest --just-compile
 
 # Quick test without full build
 uv run ci/wasm_compile.py examples/wasm --quick
