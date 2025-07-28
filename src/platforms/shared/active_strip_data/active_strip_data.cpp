@@ -28,10 +28,8 @@ void ActiveStripData::updateScreenMap(int id, const ScreenMap &screenmap) {
 
 void ActiveStripData::onCanvasUiSet(CLEDController *strip,
                                    const ScreenMap &screenmap) {
-    // Platform-specific strip ID mapping should be handled by the platform layer
-    // For now, we'll use a simple pointer-to-int conversion
-    // TODO: Implement proper strip ID mapping in platform-specific code
-    int id = reinterpret_cast<intptr_t>(strip);  // Simple ID generation
+    // Use the IdTracker for consistent strip ID management across all platforms
+    int id = mIdTracker.getOrCreateId(strip);
     updateScreenMap(id, screenmap);
 }
 
