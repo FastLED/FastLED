@@ -216,8 +216,9 @@ def run_tests(specific_test: str | None = None) -> None:
                 print(f"Cause: {crash_info.cause}")
                 print(f"Stack: {crash_info.stack}")
 
-            print("Test output:")
-            print(stdout)
+            if _VERBOSE or return_code != 0 or specific_test:
+                print("Test output:")
+                print(stdout)
             if return_code == 0:
                 print("Test passed")
             elif is_crash:
@@ -228,13 +229,17 @@ def run_tests(specific_test: str | None = None) -> None:
                 else:
                     print(f"Test {test_file} crashed with return code {return_code}")
                 # Always show crash output, even in non-verbose mode
-                print("Test output:")
-                print(stdout)
+                if (
+                    not _VERBOSE and not specific_test
+                ):  # Only show again if we didn't show it above
+                    print("Test output:")
+                    print(stdout)
             else:
                 print(f"Test {test_file} failed with return code {return_code}")
-
-                print("Test output:")
-                print(stdout)  # Show output on failure even in non-verbose mode
+                # Only show again if we didn't show it above
+                if not _VERBOSE and not specific_test:
+                    print("Test output:")
+                    print(stdout)  # Show output on failure even in non-verbose mode
 
             print("-" * 40)
             if return_code != 0:
