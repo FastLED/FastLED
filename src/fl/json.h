@@ -779,21 +779,22 @@ struct JsonValue {
             (*this)(value);
         }
         
-        // Specializations for array types
+        // Only JsonArray should be considered a regular array
         void operator()(const JsonArray&) {
             result = true;
         }
         
+        // Specialized array types should NOT be considered regular arrays
         void operator()(const fl::vector<int16_t>&) {
-            result = true;
+            result = false;  // This is audio data, not a regular array
         }
         
         void operator()(const fl::vector<uint8_t>&) {
-            result = true;
+            result = false;  // This is byte data, not a regular array
         }
         
         void operator()(const fl::vector<float>&) {
-            result = true;
+            result = false;  // This is float data, not a regular array
         }
         
         // Generic handler for all other types

@@ -2,6 +2,8 @@
 #include "fl/json.h"
 #include "fl/string.h"
 #include "fl/vector.h"
+#include "fl/deque.h"
+#include "fl/function.h"
 #include "fl/sketch_macros.h"
 #include "fl/math.h" // For floor function
 #include <string> // ok include
@@ -97,6 +99,11 @@ fl::shared_ptr<JsonValue> JsonValue::parse(const fl::string& txt) {
                     return fl::make_shared<JsonValue>(JsonArray{});
                 }
                 
+                // Track optimization flags for array types
+                bool isUint8 = true;  // Can all values fit in uint8_t?
+                bool isInt16 = true;  // Can all values fit in int16_t?
+                bool isFloat = true;  // Can all values be exactly represented as floats?
+                
                 // Enum to represent array optimization types
                 enum ArrayType {
                     ALL_UINT8,
@@ -105,10 +112,7 @@ fl::shared_ptr<JsonValue> JsonValue::parse(const fl::string& txt) {
                     GENERIC_ARRAY
                 };
                 
-                // Single pass: determine the optimal array type
-                bool isUint8 = true;
-                bool isInt16 = true;
-                bool isFloat = true;
+                FASTLED_WARN("Array conversion: processing " << arr.size() << " items");
                 
                 for (const auto& item : arr) {
                     // Check if all items are numeric
@@ -117,18 +121,21 @@ fl::shared_ptr<JsonValue> JsonValue::parse(const fl::string& txt) {
                         isUint8 = false;
                         isInt16 = false;
                         isFloat = false;
-                        // FASTLED_WARN("Non-numeric value found, no optimization possible");
+                        FASTLED_WARN("Non-numeric value found, no optimization possible");
                         break;
                     }
                     
                     // Update type flags based on item type
                     if (item.is<double>()) {
                         double val = item.as<double>();
-                        // FASTLED_WARN("Checking float value: " << val);
+                        FASTLED_WARN("Processing double value: " << val);
                         
                         // Check if this can be exactly represented as a float
                         if (!canBeRepresentedAsFloat(val)) {
                             isFloat = false;
+                            FASTLED_WARN("Value " << val << " cannot be exactly represented as float");
+                        } else {
+                            FASTLED_WARN("Value " << val << " CAN be exactly represented as float");
                         }
                         
                         // Check if this could fit in integer types
@@ -182,8 +189,9 @@ fl::shared_ptr<JsonValue> JsonValue::parse(const fl::string& txt) {
                     arrayType = ALL_UINT8;
                 } else if (isInt16 && arr.size() > 0) {
                     arrayType = ALL_INT16;
-                } else if ((isFloat || allNumeric) && arr.size() > 0) {
-                    // For ScreenMap use case, prefer float arrays when we have numeric values
+                } else if (isFloat && arr.size() > 0) {
+                    // Only convert to float arrays when ALL values can be exactly represented as floats
+                    // Don't convert just because values are numeric - precision matters
                     arrayType = ALL_FLOATS;
                 }
                 
@@ -254,7 +262,7 @@ fl::shared_ptr<JsonValue> JsonValue::parse(const fl::string& txt) {
 }
 
 fl::string JsonValue::to_string() const {
-#if !FASTLED_ENABLE_JSON || 1
+#if !FASTLED_ENABLE_JSON
     // For a native implementation without external libraries, we'd need to implement
     // a custom serializer. For now, we'll delegate to Json::to_string_native() 
     // by creating a temporary Json object.
@@ -341,107 +349,197 @@ fl::string Json::to_string_native() const {
         return "null";
     }
     
-    // Create a JsonDocument to hold our data
-    FLArduinoJson::JsonDocument doc;
+    // 🚨 NEW APPROACH: Use fl::deque for memory-efficient JSON serialization
+    // This avoids memory fragmentation and bypasses broken ArduinoJson integration
+    fl::deque<char> json_chars;
     
-    // Helper function to convert fl::Json::JsonValue to FLArduinoJson::JsonVariant
-    struct Converter {
-        static void convert(const JsonValue& src, FLArduinoJson::JsonVariant dst) {
-            if (src.is_null()) {
-                dst.set(nullptr);
-            } else if (src.is_bool()) {
-                auto opt = src.as_bool();
-                if (opt) dst.set(*opt);
-            } else if (src.is_int()) {
-                auto opt = src.as_int();
-                if (opt) dst.set(*opt);
-            } else if (src.is_double()) {
-                auto opt = src.as_double();
-                if (opt) dst.set(*opt);
-            } else if (src.is_string()) {
-                auto opt = src.as_string();
-                if (opt) {
-                    dst.set(opt->c_str());
-                }
-            } else if (src.is_array()) {
-                auto opt = src.as_array();
-                if (opt) {
-                    FLArduinoJson::JsonArray arr = dst.to<FLArduinoJson::JsonArray>();
-                    for (const auto& item : *opt) {
-                        if (item) {
-                            FLArduinoJson::JsonVariant var = arr.add<FLArduinoJson::JsonVariant>();
-                            convert(*item, var);
-                        } else {
-                            arr.add(nullptr);
-                        }
+    // Helper lambda for appending strings to deque
+    auto append_string = [&json_chars](const char* str) {
+        while (*str) {
+            json_chars.push_back(*str);
+            ++str;
+        }
+    };
+    
+    // Helper lambda for appending fl::string to deque
+    auto append_fl_string = [&json_chars](const fl::string& str) {
+        for (size_t i = 0; i < str.size(); ++i) {
+            json_chars.push_back(str[i]);
+        }
+    };
+    
+    // Helper lambda for appending escaped strings
+    auto append_escaped_string = [&](const fl::string& str) {
+        json_chars.push_back('"');
+        for (size_t i = 0; i < str.size(); ++i) {
+            char c = str[i];
+            switch (c) {
+                case '"':  append_string("\\\""); break;
+                case '\\': append_string("\\\\"); break;
+                case '\n': append_string("\\n"); break;
+                case '\r': append_string("\\r"); break;
+                case '\t': append_string("\\t"); break;
+                case '\b': append_string("\\b"); break;
+                case '\f': append_string("\\f"); break;
+                default:
+                    json_chars.push_back(c);
+                    break;
+            }
+        }
+        json_chars.push_back('"');
+    };
+    
+    // Recursive function to serialize JsonValue to deque
+    fl::function<void(const JsonValue&)> serialize_value = [&](const JsonValue& value) {
+        if (value.is_null()) {
+            append_string("null");
+        } else if (value.is_bool()) {
+            auto opt = value.as_bool();
+            if (opt) {
+                append_string(*opt ? "true" : "false");
+            } else {
+                append_string("null");
+            }
+        } else if (value.is_int()) {
+            auto opt = value.as_int();
+            if (opt) {
+                fl::string num_str;
+                num_str.append(*opt);
+                append_fl_string(num_str);
+            } else {
+                append_string("null");
+            }
+        } else if (value.is_double()) {
+            auto opt = value.as_double();
+            if (opt) {
+                fl::string num_str;
+                num_str.append(static_cast<float>(*opt));
+                append_fl_string(num_str);
+            } else {
+                append_string("null");
+            }
+        } else if (value.is_string()) {
+            auto opt = value.as_string();
+            if (opt) {
+                append_escaped_string(*opt);
+            } else {
+                append_string("null");
+            }
+        } else if (value.is_array()) {
+            auto opt = value.as_array();
+            if (opt) {
+                json_chars.push_back('[');
+                bool first = true;
+                for (const auto& item : *opt) {
+                    if (!first) {
+                        json_chars.push_back(',');
+                    }
+                    first = false;
+                    if (item) {
+                        serialize_value(*item);
+                    } else {
+                        append_string("null");
                     }
                 }
-            } else if (src.is_object()) {
-                auto opt = src.as_object();
-                FASTLED_WARN("Converting object - as_object() returned: " << (opt ? "valid" : "null"));
-                if (opt) {
-                    FASTLED_WARN("Object has " << opt->size() << " keys");
-                    FLArduinoJson::JsonObject obj = dst.to<FLArduinoJson::JsonObject>();
-                    for (const auto& kv : *opt) {
-                        FASTLED_WARN("Converting key: " << kv.first);
-                        if (kv.second) {
-                            convert(*kv.second, obj[kv.first.c_str()]);
-                        } else {
-                            obj[kv.first.c_str()] = nullptr;
-                        }
+                json_chars.push_back(']');
+            } else {
+                append_string("null");
+            }
+        } else if (value.is_object()) {
+            auto opt = value.as_object();
+            if (opt) {
+                json_chars.push_back('{');
+                bool first = true;
+                for (const auto& kv : *opt) {
+                    if (!first) {
+                        json_chars.push_back(',');
                     }
+                    first = false;
+                    append_escaped_string(kv.first);
+                    json_chars.push_back(':');
+                    if (kv.second) {
+                        serialize_value(*kv.second);
+                    } else {
+                        append_string("null");
+                    }
+                }
+                json_chars.push_back('}');
+            } else {
+                append_string("null");
+            }
+        } else {
+            // Handle specialized array types
+            if (value.is_audio()) {
+                auto audioOpt = value.as_audio();
+                if (audioOpt) {
+                    json_chars.push_back('[');
+                    bool first = true;
+                    for (const auto& item : *audioOpt) {
+                        if (!first) {
+                            json_chars.push_back(',');
+                        }
+                        first = false;
+                        fl::string num_str;
+                        num_str.append(static_cast<int>(item));
+                        append_fl_string(num_str);
+                    }
+                    json_chars.push_back(']');
+                } else {
+                    append_string("null");
+                }
+            } else if (value.is_bytes()) {
+                auto bytesOpt = value.as_bytes();
+                if (bytesOpt) {
+                    json_chars.push_back('[');
+                    bool first = true;
+                    for (const auto& item : *bytesOpt) {
+                        if (!first) {
+                            json_chars.push_back(',');
+                        }
+                        first = false;
+                        fl::string num_str;
+                        num_str.append(static_cast<int>(item));
+                        append_fl_string(num_str);
+                    }
+                    json_chars.push_back(']');
+                } else {
+                    append_string("null");
+                }
+            } else if (value.is_floats()) {
+                auto floatsOpt = value.as_floats();
+                if (floatsOpt) {
+                    json_chars.push_back('[');
+                    bool first = true;
+                    for (const auto& item : *floatsOpt) {
+                        if (!first) {
+                            json_chars.push_back(',');
+                        }
+                        first = false;
+                                                 fl::string num_str;
+                         num_str.append(static_cast<float>(item));
+                        append_fl_string(num_str);
+                    }
+                    json_chars.push_back(']');
+                } else {
+                    append_string("null");
                 }
             } else {
-                // Handle specialized array types
-                if (src.is_audio()) {
-                    auto audioOpt = src.as_audio();
-                    if (audioOpt) {
-                        FLArduinoJson::JsonArray arr = dst.to<FLArduinoJson::JsonArray>();
-                        for (const auto& item : *audioOpt) {
-                            arr.add(static_cast<int>(item));
-                        }
-                    }
-                } else if (src.is_bytes()) {
-                    auto bytesOpt = src.as_bytes();
-                    if (bytesOpt) {
-                        FLArduinoJson::JsonArray arr = dst.to<FLArduinoJson::JsonArray>();
-                        for (const auto& item : *bytesOpt) {
-                            arr.add(static_cast<int>(item));
-                        }
-                    }
-                } else if (src.is_floats()) {
-                    auto floatsOpt = src.as_floats();
-                    if (floatsOpt) {
-                        FLArduinoJson::JsonArray arr = dst.to<FLArduinoJson::JsonArray>();
-                        for (const auto& item : *floatsOpt) {
-                            arr.add(static_cast<double>(item));
-                        }
-                    }
-                }
+                append_string("null");
             }
         }
     };
     
-    // Convert our Value to JsonDocument
-    Converter::convert(*m_value, doc);
+    // Serialize the root value
+    serialize_value(*m_value);
     
-    FASTLED_WARN("About to serialize ArduinoJson document");
-    
-    // Serialize to std::string buffer first (as instructed in BUG.md)
-    // Use a character buffer instead of std::string for compatibility
-    char buffer[4096];
-    size_t len = FLArduinoJson::serializeJson(doc, buffer, sizeof(buffer));
-    FASTLED_WARN("ArduinoJson serializeJson returned length: " << len);
-    
-    if (len > 0) {
-        FASTLED_WARN("First 50 chars of serialized JSON: " << fl::string(buffer, (len < 50) ? len : 50));
-    } else {
-        FASTLED_WARN("ArduinoJson serializeJson returned empty!");
+    // Convert deque to fl::string efficiently
+    fl::string result;
+    if (!json_chars.empty()) {
+        // Get pointer to the underlying data and construct string directly
+        result.assign(&json_chars[0], json_chars.size());
     }
     
-    fl::string output(buffer, len);
-
-    return output;
+    return result;
     #endif
 }
 
