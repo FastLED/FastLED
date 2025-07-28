@@ -14,6 +14,7 @@
 #include "i2s_esp32dev.h"
 #include "fl/namespace.h"
 #include "fl/stdint.h"
+#include "fl/memfill.h"
 #include <string.h> // for memset
 
 #include "platforms/esp/esp_version.h"
@@ -22,7 +23,6 @@
 // Patches the i2s driver for compatibility with ESP-IDF v5.0.
 // This has only been compile tested. If there are issues then please file a bug.
 #include "soc/gpio_periph.h"
-#include "fl/memfill.h"
 #define gpio_matrix_out esp_rom_gpio_connect_out_signal
 #endif
 
