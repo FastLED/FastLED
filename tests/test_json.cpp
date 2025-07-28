@@ -98,8 +98,8 @@ TEST_CASE("Json as_or test") {
     
     fl::Json doubleJson(3.14);
     CHECK(doubleJson.is_double());
-    CHECK(doubleJson.as_or(0.0) == 3.14);
-    CHECK(doubleJson.as_or(9.9) == 3.14); // Should still be 3.14, not fallback
+    CHECK_CLOSE(doubleJson.as_or(0.0), 3.14, 1e-6);
+    CHECK_CLOSE(doubleJson.as_or(9.9), 3.14, 1e-6); // Should still be 3.14, not fallback
     
     fl::Json stringJson("hello");
     CHECK(stringJson.is_string());
@@ -116,7 +116,7 @@ TEST_CASE("Json as_or test") {
     CHECK(nullJson.is_null());
     CHECK(nullJson.as_or(int64_t(100)) == 100); // Should use fallback
     CHECK(nullJson.as_or(string("default")) == "default"); // Should use fallback
-    CHECK(nullJson.as_or(5.5) == 5.5); // Should use fallback
+    CHECK_CLOSE(nullJson.as_or(5.5), 5.5, 1e-6); // Should use fallback
     CHECK(nullJson.as_or(false) == false); // Should use fallback
     
     // Test operator| still works the same way
@@ -129,21 +129,21 @@ TEST_CASE("FLArduinoJson Integration Tests") {
         // Test various integer representations
         fl::Json int64Json = fl::Json::parse("9223372036854775807"); // Max int64
         REQUIRE(int64Json.is_int());
-        auto int64Value = int64Json.as_int();
+        auto int64Value = int64Json.as<int64_t>();
         REQUIRE(int64Value.has_value());
         CHECK_EQ(*int64Value, 9223372036854775807LL);
         
         // Test negative integers
         fl::Json negativeIntJson = fl::Json::parse("-9223372036854775807");
         REQUIRE(negativeIntJson.is_int());
-        auto negativeIntValue = negativeIntJson.as_int();
+        auto negativeIntValue = negativeIntJson.as<int64_t>();
         REQUIRE(negativeIntValue.has_value());
         CHECK_EQ(*negativeIntValue, -9223372036854775807LL);
         
         // Test zero
         fl::Json zeroJson = fl::Json::parse("0");
         REQUIRE(zeroJson.is_int());
-        auto zeroValue = zeroJson.as_int();
+        auto zeroValue = zeroJson.as<int64_t>();
         REQUIRE(zeroValue.has_value());
         CHECK_EQ(*zeroValue, 0);
     }
@@ -154,7 +154,7 @@ TEST_CASE("FLArduinoJson Integration Tests") {
         REQUIRE(doubleJson.is_double());
         auto doubleValue = doubleJson.as_double();
         REQUIRE(doubleValue.has_value());
-        CHECK(*doubleValue == 3.141592653589793);
+        CHECK_CLOSE(*doubleValue, 3.141592653589793, 1e-6);
         
         // Test scientific notation
         fl::Json scientificJson = fl::Json::parse("1.23e-4");
@@ -169,7 +169,7 @@ TEST_CASE("FLArduinoJson Integration Tests") {
         REQUIRE(negativeFloatJson.is_double());
         auto negativeFloatValue = negativeFloatJson.as_double();
         REQUIRE(negativeFloatValue.has_value());
-        CHECK(*negativeFloatValue == -2.5);
+        CHECK_CLOSE(*negativeFloatValue, -2.5, 1e-6);
     }
     
     SUBCASE("String Parsing") {
@@ -214,7 +214,7 @@ TEST_CASE("FLArduinoJson Integration Tests") {
         CHECK_EQ(arrayJson.size(), 5);
         
         // Check individual elements using as_* methods
-        auto firstElement = arrayJson[0].as_int();
+        auto firstElement = arrayJson[0].as<int64_t>();
         REQUIRE(firstElement.has_value());
         CHECK_EQ(*firstElement, 1);
         
@@ -240,7 +240,7 @@ TEST_CASE("FLArduinoJson Integration Tests") {
         CHECK_EQ(objJson.size(), 5);
         
         // Check individual elements using as_* methods
-        auto intElement = objJson["int"].as_int();
+        auto intElement = objJson["int"].as<int64_t>();
         REQUIRE(intElement.has_value());
         CHECK_EQ(*intElement, 42);
         
@@ -598,32 +598,32 @@ TEST_CASE("Json String to Number Conversion") {
         CHECK_FALSE(json.is_int());
         CHECK_FALSE(json.is_double());
         
-        // Test conversion to int64_t
-        fl::optional<int64_t> value64 = json.as_int();
+        // Test conversion to int64_t using new ergonomic API
+        fl::optional<int64_t> value64 = json.as<int64_t>();
         REQUIRE(value64);
         CHECK_EQ(*value64, 5);
         
-        // Test conversion to int32_t
-        fl::optional<int32_t> value32 = json.as_int<int32_t>();
+        // Test conversion to int32_t using new ergonomic API
+        fl::optional<int32_t> value32 = json.as<int32_t>();
         REQUIRE(value32);
         CHECK_EQ(*value32, 5);
         
-        // Test conversion to int16_t
-        fl::optional<int16_t> value16 = json.as_int<int16_t>();
+        // Test conversion to int16_t using new ergonomic API
+        fl::optional<int16_t> value16 = json.as<int16_t>();
         REQUIRE(value16);
         CHECK_EQ(*value16, 5);
         
-        // Test conversion to double
-        fl::optional<double> valued = json.as_float();
+        // Test conversion to double using new ergonomic API
+        fl::optional<double> valued = json.as<double>();
         REQUIRE(valued);
         // Use a simple comparison for floating-point values
-        CHECK(*valued == 5.0);
+        CHECK_CLOSE(*valued, 5.0, 1e-6);
         
-        // Test conversion to float
-        fl::optional<float> valuef = json.as_float<float>();
+        // Test conversion to float using new ergonomic API
+        fl::optional<float> valuef = json.as<float>();
         REQUIRE(valuef);
         // Use a simple comparison for floating-point values
-        CHECK(*valuef == 5.0f);
+        CHECK_CLOSE(*valuef, 5.0f, 1e-6);
     }
     
     SUBCASE("String integer to int") {
@@ -632,18 +632,18 @@ TEST_CASE("Json String to Number Conversion") {
         CHECK_FALSE(json.is_int());
         CHECK_FALSE(json.is_double());
         
-        // Test conversion to int64_t
-        fl::optional<int64_t> value64 = json.as_int();
+        // Test conversion to int64_t using new ergonomic API
+        fl::optional<int64_t> value64 = json.as<int64_t>();
         REQUIRE(value64);
         CHECK_EQ(*value64, 42);
         
-        // Test conversion to int32_t
-        fl::optional<int32_t> value32 = json.as_int<int32_t>();
+        // Test conversion to int32_t using new ergonomic API
+        fl::optional<int32_t> value32 = json.as<int32_t>();
         REQUIRE(value32);
         CHECK_EQ(*value32, 42);
         
-        // Test conversion to int16_t
-        fl::optional<int16_t> value16 = json.as_int<int16_t>();
+        // Test conversion to int16_t using new ergonomic API
+        fl::optional<int16_t> value16 = json.as<int16_t>();
         REQUIRE(value16);
         CHECK_EQ(*value16, 42);
     }
@@ -654,14 +654,14 @@ TEST_CASE("Json String to Number Conversion") {
         CHECK_FALSE(json.is_int());
         CHECK_FALSE(json.is_double());
         
-        // Test conversion to double
-        fl::optional<double> valued = json.as_float();
+        // Test conversion to double using new ergonomic API
+        fl::optional<double> valued = json.as<double>();
         REQUIRE(valued);
         // Use a simple comparison for floating-point values
         CHECK(*valued == 42.0);
         
-        // Test conversion to float
-        fl::optional<float> valuef = json.as_float<float>();
+        // Test conversion to float using new ergonomic API
+        fl::optional<float> valuef = json.as<float>();
         REQUIRE(valuef);
         // Use a simple comparison for floating-point values
         CHECK(*valuef == 42.0f);
@@ -673,12 +673,12 @@ TEST_CASE("Json String to Number Conversion") {
         CHECK_FALSE(json.is_int());
         CHECK_FALSE(json.is_double());
         
-        // Test conversion to int64_t (should fail - can't convert float string to int)
-        fl::optional<int64_t> value64 = json.as_int();
+        // Test conversion to int64_t (should fail - can't convert float string to int) using new ergonomic API
+        fl::optional<int64_t> value64 = json.as<int64_t>();
         CHECK_FALSE(value64);
         
-        // Test conversion to int32_t (should fail - can't convert float string to int)
-        fl::optional<int32_t> value32 = json.as_int<int32_t>();
+        // Test conversion to int32_t (should fail - can't convert float string to int) using new ergonomic API
+        fl::optional<int32_t> value32 = json.as<int32_t>();
         CHECK_FALSE(value32);
     }
     
@@ -688,14 +688,14 @@ TEST_CASE("Json String to Number Conversion") {
         CHECK_FALSE(json.is_int());
         CHECK_FALSE(json.is_double());
         
-        // Test conversion to double
-        fl::optional<double> valued = json.as_float();
+        // Test conversion to double using new ergonomic API
+        fl::optional<double> valued = json.as<double>();
         REQUIRE(valued);
         // Use a simple comparison for floating-point values
         CHECK(*valued == 5.5);
         
-        // Test conversion to float
-        fl::optional<float> valuef = json.as_float<float>();
+        // Test conversion to float using new ergonomic API
+        fl::optional<float> valuef = json.as<float>();
         REQUIRE(valuef);
         // Use a simple comparison for floating-point values
         CHECK(*valuef == 5.5f);
@@ -707,12 +707,12 @@ TEST_CASE("Json String to Number Conversion") {
         CHECK_FALSE(json.is_int());
         CHECK_FALSE(json.is_double());
         
-        // Test conversion to int64_t (should fail)
-        fl::optional<int64_t> value64 = json.as_int();
+        // Test conversion to int64_t (should fail) using new ergonomic API
+        fl::optional<int64_t> value64 = json.as<int64_t>();
         CHECK_FALSE(value64);
         
-        // Test conversion to double (should fail)
-        fl::optional<double> valued = json.as_float();
+        // Test conversion to double (should fail) using new ergonomic API
+        fl::optional<double> valued = json.as<double>();
         CHECK_FALSE(valued);
     }
     
@@ -722,13 +722,13 @@ TEST_CASE("Json String to Number Conversion") {
         CHECK_FALSE(json.is_int());
         CHECK_FALSE(json.is_double());
         
-        // Test conversion to int64_t
-        fl::optional<int64_t> value64 = json.as_int();
+        // Test conversion to int64_t using new ergonomic API
+        fl::optional<int64_t> value64 = json.as<int64_t>();
         REQUIRE(value64);
         CHECK_EQ(*value64, -5);
         
-        // Test conversion to double
-        fl::optional<double> valued = json.as_float();
+        // Test conversion to double using new ergonomic API
+        fl::optional<double> valued = json.as<double>();
         REQUIRE(valued);
         // Use a simple comparison for floating-point values
         CHECK(*valued == -5.0);
@@ -740,12 +740,12 @@ TEST_CASE("Json String to Number Conversion") {
         CHECK_FALSE(json.is_int());
         CHECK_FALSE(json.is_double());
         
-        // Test conversion to int64_t (should fail - spaces not allowed)
-        fl::optional<int64_t> value64 = json.as_int();
+        // Test conversion to int64_t (should fail - spaces not allowed) using new ergonomic API
+        fl::optional<int64_t> value64 = json.as<int64_t>();
         CHECK_FALSE(value64);
         
-        // Test conversion to double (should fail - spaces not allowed)
-        fl::optional<double> valued = json.as_float();
+        // Test conversion to double (should fail - spaces not allowed) using new ergonomic API
+        fl::optional<double> valued = json.as<double>();
         CHECK_FALSE(valued);
     }
 }
@@ -1172,5 +1172,63 @@ TEST_CASE("Json Audio Data Parsing") {
         fl::optional<JsonArray> arrayData = json.as_array();
         REQUIRE(arrayData);
         CHECK_EQ(arrayData->size(), 3);
+    }
+}
+
+TEST_CASE("Json ergonomic as<T>() API") {
+    // Test the new ergonomic as<T>() API that replaces the verbose as_int<T>() and as_float<T>() methods
+    
+    SUBCASE("Integer types") {
+        fl::Json json(42);
+        
+        // Test all integer types using the ergonomic API
+        CHECK_EQ(*json.as<int8_t>(), 42);
+        CHECK_EQ(*json.as<int16_t>(), 42);
+        CHECK_EQ(*json.as<int32_t>(), 42);
+        CHECK_EQ(*json.as<int64_t>(), 42);
+        CHECK_EQ(*json.as<uint8_t>(), 42);
+        CHECK_EQ(*json.as<uint16_t>(), 42);
+        CHECK_EQ(*json.as<uint32_t>(), 42);
+        CHECK_EQ(*json.as<uint64_t>(), 42);
+    }
+    
+    SUBCASE("Floating point types") {
+        fl::Json json(3.14f);
+        
+        // Test floating point types using the ergonomic API
+        CHECK_CLOSE(*json.as<float>(), 3.14f, 0.001f);
+        CHECK_CLOSE(*json.as<double>(), 3.14, 0.001);
+    }
+    
+    SUBCASE("Boolean type") {
+        fl::Json jsonTrue(true);
+        fl::Json jsonFalse(false);
+        
+        // Test boolean type using the ergonomic API
+        CHECK_EQ(*jsonTrue.as<bool>(), true);
+        CHECK_EQ(*jsonFalse.as<bool>(), false);
+    }
+    
+    SUBCASE("String type") {
+        fl::Json json(fl::string("hello"));
+        
+        // Test string type using the ergonomic API
+        CHECK_EQ(*json.as<fl::string>(), fl::string("hello"));
+    }
+    
+    SUBCASE("API comparison - old vs new") {
+        fl::Json json(12345);
+        
+        // Old verbose API (still works for backward compatibility)
+        fl::optional<int32_t> oldWay = json.as_int<int32_t>();
+        
+        // New ergonomic API (preferred)
+        fl::optional<int32_t> newWay = json.as<int32_t>();
+        
+        // Both should give the same result
+        REQUIRE(oldWay.has_value());
+        REQUIRE(newWay.has_value());
+        CHECK_EQ(*oldWay, *newWay);
+        CHECK_EQ(*newWay, 12345);
     }
 }

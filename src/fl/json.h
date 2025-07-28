@@ -122,6 +122,7 @@
 #include "fl/functional.h"
 #include "fl/str.h" // For StringFormatter
 #include "fl/promise.h" // For Error type
+#include "fl/warn.h" // For FL_WARN
 
 #include "fl/sketch_macros.h"
 
@@ -172,6 +173,7 @@ template<typename T>
 struct DefaultValueVisitor {
     const T& fallback;
     const T* result = nullptr;
+    T storage; // Use instance storage instead of static
 
     DefaultValueVisitor(const T& fb) : fallback(fb) {}
 
@@ -192,11 +194,7 @@ struct DefaultValueVisitor {
     typename fl::enable_if<fl::is_integral<T>::value && fl::is_integral<U>::value, void>::type
     operator()(const U& value) {
         // Convert between integer types
-        T converted = static_cast<T>(value);
-        // We need to store this somewhere - using a static variable for now
-        // In a real implementation, we might want to avoid this
-        static T storage;
-        storage = converted;
+        storage = static_cast<T>(value);
         result = &storage;
     }
     
@@ -205,9 +203,7 @@ struct DefaultValueVisitor {
     typename fl::enable_if<fl::is_integral<T>::value && fl::is_floating_point<U>::value, void>::type
     operator()(const U& value) {
         // Convert float to integer
-        T converted = static_cast<T>(value);
-        static T storage;
-        storage = converted;
+        storage = static_cast<T>(value);
         result = &storage;
     }
     
@@ -216,9 +212,7 @@ struct DefaultValueVisitor {
     typename fl::enable_if<fl::is_floating_point<T>::value && fl::is_integral<U>::value, void>::type
     operator()(const U& value) {
         // Convert integer to float
-        T converted = static_cast<T>(value);
-        static T storage;
-        storage = converted;
+        storage = static_cast<T>(value);
         result = &storage;
     }
     
@@ -227,11 +221,11 @@ struct DefaultValueVisitor {
     typename fl::enable_if<fl::is_floating_point<T>::value && fl::is_floating_point<U>::value && !fl::is_same<T, U>::value, void>::type
     operator()(const U& value) {
         // Convert between floating point types (e.g., double to float)
-        T converted = static_cast<T>(value);
-        static T storage;
-        storage = converted;
+        storage = static_cast<T>(value);
         result = &storage;
     }
+    
+
 
     // Generic overload for all other types
     template<typename U>
@@ -414,6 +408,13 @@ struct FloatConversionVisitor {
         result = static_cast<FloatType>(value);
     }
     
+    // Special handling to avoid conflict when FloatType is float
+    template<typename T = FloatType>
+    typename fl::enable_if<!fl::is_same<T, float>::value, void>::type
+    operator()(const float& value) {
+        result = static_cast<FloatType>(value);
+    }
+    
     void operator()(const int64_t& value) {
         // NEW INSTRUCTIONS: AUTO CONVERT INT TO FLOAT
         result = static_cast<FloatType>(value);
@@ -496,6 +497,10 @@ struct FloatConversionVisitor<double> {
     
     void operator()(const double& value) {
         result = value;
+    }
+    
+    void operator()(const float& value) {
+        result = static_cast<double>(value);
     }
     
     void operator()(const int64_t& value) {
@@ -591,6 +596,11 @@ struct StringConversionVisitor {
         result = fl::to_string(value);
     }
     
+    void operator()(const float& value) {
+        // Convert float to string
+        result = fl::to_string(value);
+    }
+    
     void operator()(const bool& value) {
         // Convert bool to string
         result = value ? "true" : "false";
@@ -643,10 +653,6 @@ struct JsonValue {
     JsonValue(int64_t i) noexcept : data(i) {}
     JsonValue(float f) noexcept : data(f) {}  // Changed from double to float
     JsonValue(const fl::string& s) : data(s) {
-        //FASTLED_WARN("Created JsonValue with string: '" << s << "'");
-        //FASTLED_WARN("Tag value: " << data.tag());
-        //FASTLED_WARN("Is string: " << is_string());
-        //FASTLED_WARN("Is int: " << is_int());
     }
     JsonValue(const JsonArray& a) : data(a) {
         //FASTLED_WARN("Created JsonValue with array");
@@ -884,31 +890,31 @@ struct JsonValue {
         return visitor.result;
     }
     
-    fl::optional<double> as_double() {
+    fl::optional<double> as_double() const {
         // Check if we have a valid value first
         if (data.empty()) {
             return fl::nullopt;
         }
         
-        auto ptr = data.ptr<float>();
-        return ptr ? fl::optional<double>(static_cast<double>(*ptr)) : fl::nullopt;
+        FloatConversionVisitor<double> visitor;
+        data.visit(visitor);
+        return visitor.result;
     }
     
     fl::optional<float> as_float() {
-        // Check if we have a valid value first
-        if (data.empty()) {
-            return fl::nullopt;
-        }
-        
-        auto ptr = data.ptr<float>();
-        return ptr ? fl::optional<float>(*ptr) : fl::nullopt;
+        return as_float<float>();
     }
     
     template<typename FloatType>
     fl::optional<FloatType> as_float() {
-        // Convert from internal float to requested type
-        auto opt = as_float();
-        return opt ? fl::optional<FloatType>(static_cast<FloatType>(*opt)) : fl::nullopt;
+        // Check if we have a valid value first
+        if (data.empty()) {
+            return fl::nullopt;
+        }
+        
+        FloatConversionVisitor<FloatType> visitor;
+        data.visit(visitor);
+        return visitor.result;
     }
     
     fl::optional<fl::string> as_string() {
@@ -1006,31 +1012,20 @@ struct JsonValue {
         return visitor.result;
     }
     
-    fl::optional<double> as_double() const {
-        // Check if we have a valid value first
-        if (data.empty()) {
-            return fl::nullopt;
-        }
-        
-        auto ptr = data.ptr<float>();
-        return ptr ? fl::optional<double>(static_cast<double>(*ptr)) : fl::nullopt;
-    }
-    
     fl::optional<float> as_float() const {
-        // Check if we have a valid value first
-        if (data.empty()) {
-            return fl::nullopt;
-        }
-        
-        auto ptr = data.ptr<float>();
-        return ptr ? fl::optional<float>(*ptr) : fl::nullopt;
+        return as_float<float>();
     }
     
     template<typename FloatType>
     fl::optional<FloatType> as_float() const {
-        // Convert from internal float to requested type
-        auto opt = as_float();
-        return opt ? fl::optional<FloatType>(static_cast<FloatType>(*opt)) : fl::nullopt;
+        // Check if we have a valid value first
+        if (data.empty()) {
+            return fl::nullopt;
+        }
+        
+        FloatConversionVisitor<FloatType> visitor;
+        data.visit(visitor);
+        return visitor.result;
     }
     
     fl::optional<fl::string> as_string() const {
@@ -1751,10 +1746,79 @@ public:
     fl::optional<fl::vector<uint8_t>> as_bytes() const { return m_value ? m_value->as_bytes() : fl::nullopt; }
     fl::optional<fl::vector<float>> as_floats() const { return m_value ? m_value->as_floats() : fl::nullopt; }
 
+    // Universal type conversion method using SFINAE for dispatch
     template<typename T>
-    fl::optional<T> as() {
-        return m_value ? m_value->get<T>() : fl::nullopt;
+    fl::optional<T> as() const {
+        if (!m_value) {
+            return fl::nullopt;
+        }
+        return as_impl<T>();
     }
+
+private:
+    // Integer types (excluding bool)
+    template<typename T>
+    typename fl::enable_if<fl::is_integral<T>::value && !fl::is_same<T, bool>::value, fl::optional<T>>::type
+    as_impl() const {
+        return m_value->template as_int<T>();
+    }
+    
+    // Boolean type
+    template<typename T>
+    typename fl::enable_if<fl::is_same<T, bool>::value, fl::optional<T>>::type
+    as_impl() const {
+        return m_value->as_bool();
+    }
+    
+    // Floating point types
+    template<typename T>
+    typename fl::enable_if<fl::is_floating_point<T>::value, fl::optional<T>>::type
+    as_impl() const {
+        // Force template call by explicitly using the templated method
+        return m_value->template as_float<T>();
+    }
+    
+    // String type
+    template<typename T>
+    typename fl::enable_if<fl::is_same<T, fl::string>::value, fl::optional<T>>::type
+    as_impl() const {
+        return m_value->as_string();
+    }
+    
+    // Array type
+    template<typename T>
+    typename fl::enable_if<fl::is_same<T, JsonArray>::value, fl::optional<T>>::type
+    as_impl() const {
+        return m_value->as_array();
+    }
+    
+    // Object type
+    template<typename T>
+    typename fl::enable_if<fl::is_same<T, JsonObject>::value, fl::optional<T>>::type
+    as_impl() const {
+        return m_value->as_object();
+    }
+    
+    // Specialized vector types
+    template<typename T>
+    typename fl::enable_if<fl::is_same<T, fl::vector<int16_t>>::value, fl::optional<T>>::type
+    as_impl() const {
+        return m_value->as_audio();
+    }
+    
+    template<typename T>
+    typename fl::enable_if<fl::is_same<T, fl::vector<uint8_t>>::value, fl::optional<T>>::type
+    as_impl() const {
+        return m_value->as_bytes();
+    }
+    
+    template<typename T>
+    typename fl::enable_if<fl::is_same<T, fl::vector<float>>::value, fl::optional<T>>::type
+    as_impl() const {
+        return m_value->as_floats();
+    }
+
+public:
 
     // Iterator support for objects
     JsonValue::iterator begin() { 

@@ -109,7 +109,7 @@ TEST_CASE("ActiveStripData JSON Round-Trip Test") {
     CHECK_EQ(legacyParsed.size(), newParsed.size());
     
     // Verify each element has the same content (regardless of field order)
-    for (int i = 0; i < legacyParsed.size(); i++) {
+    for (fl::size_t i = 0; i < legacyParsed.size(); i++) {
         fl::Json legacyItem = legacyParsed[i];
         fl::Json newItem = newParsed[i];
         

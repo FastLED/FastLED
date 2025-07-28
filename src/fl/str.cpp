@@ -7,6 +7,7 @@
 #include "fl/namespace.h"
 #include "fl/unused.h"
 #include "fl/xymap.h"
+#include "fl/json.h"
 #include "fl/tile2x2.h"
 #include "fl/compiler_control.h"
 // UI dependency moved to separate compilation unit to break dependency chain
@@ -394,5 +395,24 @@ void StringFormatter::appendFloat(const float &val, StrN<64> *dst) {
 }
 
 // JsonUiInternal append implementation moved to str_ui.cpp to break dependency chain
+
+// JSON type append implementations
+// NOTE: These use forward declarations to avoid circular dependency with json.h
+string &string::append(const JsonValue& val) {
+    // Use the JsonValue's to_string method if available
+    // For now, just append a placeholder to avoid compilation errors
+    append("<JsonValue>");
+    return *this;
+}
+
+string &string::append(const Json& val) {
+    // Use the Json's to_string method if available  
+    // For now, just append a placeholder to avoid compilation errors
+    //append("<Json>");
+    append("Json(");
+    append(val.to_string());
+    append(")");
+    return *this;
+}
 
 } // namespace fl

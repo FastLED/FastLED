@@ -15,6 +15,7 @@
 #include "fl/math_macros.h"
 #include "fl/namespace.h"
 #include "fl/memory.h"
+#include "fl/optional.h"
 #include "fl/type_traits.h"
 #include "fl/vector.h"
 #include "fl/span.h"
@@ -35,6 +36,10 @@ class string;
 using Str = fl::string;  // backwards compatibility
 class Tile2x2_u8_wrap;
 class JsonUiInternal;
+
+// Forward declarations for JSON types
+struct JsonValue;
+class Json;
 
 template <typename T> struct rect;
 template <typename T> struct vec2;
@@ -630,6 +635,7 @@ class string : public StrN<FASTLED_STR_INLINED_SIZE> {
 
 
 
+
     bool operator>(const string &other) const {
         return strcmp(c_str(), other.c_str()) > 0;
     }
@@ -742,6 +748,10 @@ class string : public StrN<FASTLED_STR_INLINED_SIZE> {
         write(str, len);
         return *this;
     }
+    string &append(long long val) {
+        write(i32(val));
+        return *this;
+    }
     // string& append(char c) { write(&c, 1); return *this; }
     string &append(const i8 &c) {
         const char *str = fl::bit_cast_ptr<const char>(static_cast<const void*>(&c));
@@ -822,15 +832,21 @@ class string : public StrN<FASTLED_STR_INLINED_SIZE> {
     template <typename T> string &append(const fl::shared_ptr<T>& val) {
         // append(val->toString());
         if (!val) {
-            append("null");
+            append("shared_ptr(null)");
         } else {
             T* ptr = val.get();
+            append("shared_ptr(");
             append(*ptr);
+            append(")");
         }
         return *this;
     }
 
     string &append(const JsonUiInternal& val);
+    
+    // JSON type append methods - implementations in str.cpp
+    string &append(const JsonValue& val);
+    string &append(const Json& val);
 
     template <typename T, fl::size N>
     string &append(const fl::FixedVector<T, N> &vec) {
@@ -871,6 +887,17 @@ class string : public StrN<FASTLED_STR_INLINED_SIZE> {
             append(p.first);
         }
         append("}");
+        return *this;
+    }
+
+    // Support for fl::optional<T> types
+    template <typename T>
+    string &append(const fl::optional<T> &opt) {
+        if (opt.has_value()) {
+            append(*opt);
+        } else {
+            append("nullopt");
+        }
         return *this;
     }
 
