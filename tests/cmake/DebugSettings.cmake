@@ -35,6 +35,30 @@ function(configure_debug_build)
     message(STATUS "Debug build configured with level: ${FASTLED_DEBUG_LEVEL}")
 endfunction()
 
+# Function to configure quick build
+function(configure_quick_build)
+    set(CMAKE_BUILD_TYPE Quick CACHE STRING "Choose the type of build." FORCE)
+    message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
+    
+    # Set quick-specific optimizations - minimal debug symbols for fast compilation
+    configure_debug_symbols("MINIMAL")  # Keep minimal symbols for stack traces
+    enable_stack_traces()
+    
+    # Add quick-specific compile definitions
+    add_compile_definitions(
+        DEBUG
+        FASTLED_TESTING
+        ENABLE_CRASH_HANDLER
+    )
+    
+    # Fix for Microsoft STL version check with older Clang versions on Windows
+    if(WIN32 AND CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+        add_compile_definitions(_ALLOW_COMPILER_AND_STL_VERSION_MISMATCH)
+    endif()
+    
+    message(STATUS "Quick build configured with minimal debug symbols")
+endfunction()
+
 # Function to configure release build
 function(configure_release_build)
     set(CMAKE_BUILD_TYPE Release CACHE STRING "Choose the type of build." FORCE)

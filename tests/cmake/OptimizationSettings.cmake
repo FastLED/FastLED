@@ -285,7 +285,7 @@ function(configure_build_type_settings)
     elseif(CMAKE_BUILD_TYPE STREQUAL "Quick")
         # Quick builds: optimized for fast compilation with minimal optimization
         message(STATUS "OptimizationSettings: Configuring Quick build")
-        configure_debug_build()
+        configure_quick_build()
         set_optimization_level("O1")  # Basic optimization for faster builds
         configure_dead_code_elimination()
     else()

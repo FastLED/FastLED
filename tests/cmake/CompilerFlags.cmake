@@ -317,9 +317,10 @@ function(apply_test_compile_definitions)
         FASTLED_STUB_IMPL
         FASTLED_NO_PINMAP
         HAS_HARDWARE_PIN_SUPPORT
-        _GLIBCXX_DEBUG
-        _GLIBCXX_DEBUG_PEDANTIC
     )
+    
+    # Note: _GLIBCXX_DEBUG and _GLIBCXX_DEBUG_PEDANTIC are now handled
+    # per-target based on build type in TargetCreation.cmake
     
     # Conditional feature definitions
     if(FASTLED_HAS_NETWORKING)
@@ -330,7 +331,7 @@ function(apply_test_compile_definitions)
         message(STATUS "Networking: Note - This should not happen in test builds where networking is force-enabled")
     endif()
     
-    # Platform-specific definitions
+    # Fix for Microsoft STL version check with older Clang versions on Windows
     if(WIN32 AND CMAKE_CXX_COMPILER_ID MATCHES "Clang")
         list(APPEND TEST_DEFINITIONS _ALLOW_COMPILER_AND_STL_VERSION_MISMATCH)
     endif()

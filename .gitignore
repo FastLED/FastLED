@@ -64,3 +64,4 @@ tmp.*
 .pio_cache
 compile_commands.json
 tests/.build/
+tests/cmake_install.cmake

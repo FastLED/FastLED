@@ -4,6 +4,27 @@
 # Global target settings
 set(FASTLED_TARGET_SETTINGS_APPLIED FALSE)
 
+# Function to apply debug iterator settings based on build type
+function(apply_debug_iterator_settings target)
+    if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+        # Full debug mode: enable debug iterators for comprehensive checking
+        target_compile_definitions(${target} PRIVATE 
+            _GLIBCXX_DEBUG
+            _GLIBCXX_DEBUG_PEDANTIC
+        )
+        message(VERBOSE "Applied full debug iterator settings to target: ${target}")
+    elseif(CMAKE_BUILD_TYPE STREQUAL "Quick")
+        # Quick mode: no debug iterators for faster compilation
+        message(VERBOSE "Skipped debug iterator settings for Quick build: ${target}")
+    elseif(CMAKE_BUILD_TYPE STREQUAL "Release")
+        # Release mode: no debug iterators for performance
+        message(VERBOSE "Skipped debug iterator settings for Release build: ${target}")
+    else()
+        # Unknown build type: default to no debug iterators for safety
+        message(VERBOSE "Unknown build type ${CMAKE_BUILD_TYPE}, skipping debug iterators: ${target}")
+    endif()
+endfunction()
+
 # Function to apply test settings to a target
 function(apply_test_settings target)
     # Set C++17 standard
@@ -16,7 +37,7 @@ function(apply_test_settings target)
     # Include current source directory for tests
     target_include_directories(${target} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
     
-    # Apply common compile definitions
+    # Apply common compile definitions (without debug iterator settings)
     target_compile_definitions(${target} PRIVATE 
         DEBUG
         FASTLED_FORCE_NAMESPACE=1
@@ -27,8 +48,6 @@ function(apply_test_settings target)
         FASTLED_STUB_IMPL
         FASTLED_NO_PINMAP
         HAS_HARDWARE_PIN_SUPPORT
-        _GLIBCXX_DEBUG
-        _GLIBCXX_DEBUG_PEDANTIC
         FASTLED_FIVE_BIT_HD_GAMMA_FUNCTION_2_8
         PROGMEM=
     )
@@ -37,6 +56,9 @@ function(apply_test_settings target)
     if(WIN32 AND CMAKE_CXX_COMPILER_ID MATCHES "Clang")
         target_compile_definitions(${target} PRIVATE _ALLOW_COMPILER_AND_STL_VERSION_MISMATCH)
     endif()
+    
+    # Apply debug iterator settings based on build type
+    apply_debug_iterator_settings(${target})
     
     # FASTLED_ALL_SRC unified compilation mode is now set centrally by the test system
     # before including src/CMakeLists.txt - no need to duplicate the logic here
@@ -198,8 +220,17 @@ function(configure_windows_executable target)
             # MinGW automatically uses console subsystem for non-WIN32 executables
         endif()
         
-        # Ensure debug information is preserved for all compilers
-        target_compile_definitions(${target} PRIVATE _DEBUG)
+        # Ensure debug information is preserved for Debug builds only
+        if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+            target_compile_definitions(${target} PRIVATE _DEBUG)
+            message(VERBOSE "Applied _DEBUG definition to ${target} for Debug build")
+        elseif(CMAKE_BUILD_TYPE STREQUAL "Quick")
+            # Quick builds avoid _DEBUG to prevent _ITERATOR_DEBUG_LEVEL mismatch
+            message(VERBOSE "Skipped _DEBUG definition for ${target} in Quick build mode")
+        else()
+            # Release and other builds
+            message(VERBOSE "Skipped _DEBUG definition for ${target} in ${CMAKE_BUILD_TYPE} build mode")
+        endif()
         
         message(STATUS "Applied Windows executable settings to: ${target}")
     endif()
