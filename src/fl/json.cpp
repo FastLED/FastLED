@@ -159,25 +159,25 @@ fl::shared_ptr<JsonValue> JsonValue::parse(const fl::string& txt) {
                     } else {
                         // Integer value
                         int64_t val = item.is<int32_t>() ? item.as<int32_t>() : item.as<int64_t>();
-                        // FASTLED_WARN("Checking integer value: " << val);
+                        FASTLED_WARN("Checking integer value: " << static_cast<fl::u64>(val));
                         
                         // Check uint8 range
                         if (val < 0 || val > UINT8_MAX) {
                             isUint8 = false;
-                            // FASTLED_WARN("Value " << val << " does not fit in uint8_t");
+                            FASTLED_WARN("Value " << static_cast<fl::i16>(val) << " does not fit in uint8_t");
                         }
                         
                         // Check int16 range
                         if (val < INT16_MIN || val > INT16_MAX) {
                             isInt16 = false;
-                            FASTLED_WARN("Value " << val << " does not fit in int16_t");
+                            FASTLED_WARN("Value " << static_cast<fl::u64>(val) << " does not fit in int16_t");
                         }
                         
                         // Check if this integer can be exactly represented as a float
                         // All integers within the range of float precision can be exactly represented
                         if (val < -16777216 || val > 16777216) { // 2^24, beyond which floats lose precision
                             isFloat = false;
-                            // FASTLED_WARN("Value " << val << " cannot be exactly represented as float");
+                            FASTLED_WARN("Value " << static_cast<fl::u64>(val) << " cannot be exactly represented as float");
                         }
                     }
                 }
