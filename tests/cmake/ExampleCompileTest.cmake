@@ -15,17 +15,9 @@ function(discover_ino_examples OUTPUT_VAR)
         get_filename_component(INO_DIR ${INO_FILE} DIRECTORY)
         get_filename_component(DIR_NAME ${INO_DIR} NAME)
         
-        # Skip temporary test files and some problematic examples
+        # Skip temporary test files only
         if(NOT INO_NAME MATCHES "^temp_" AND 
-           NOT DIR_NAME MATCHES "^temp_" AND
-           NOT DIR_NAME STREQUAL "TclColors" AND
-           NOT DIR_NAME STREQUAL "WS2812_ADAFRUIT" AND
-           NOT DIR_NAME STREQUAL "NeoPixelBusTest" AND
-           NOT DIR_NAME STREQUAL "JsonFetch" AND
-           NOT DIR_NAME STREQUAL "VariantVisitor" AND
-           NOT DIR_NAME STREQUAL "FestivalStick" AND  # Compiler ICE in curr.h:437
-           NOT DIR_NAME STREQUAL "OctoWS2811Demo" AND  # Requires external OctoWS2811 library
-           NOT DIR_NAME STREQUAL "ParallelOutputDemo")  # Requires platform-specific WS2811_PORTDC
+           NOT DIR_NAME MATCHES "^temp_")
             
             # Check if specific examples are requested
             if(DEFINED FASTLED_SPECIFIC_EXAMPLES AND FASTLED_SPECIFIC_EXAMPLES)
@@ -74,6 +66,37 @@ function(detect_function_overrides INO_FILE OUTPUT_VAR)
     endif()
 endfunction()
 
+# Function to extract function declarations from .ino file for forward declarations
+function(extract_function_prototypes INO_FILE OUTPUT_VAR)
+    file(READ ${INO_FILE} FILE_CONTENT)
+    
+    # Find function definitions (simple regex for common patterns)
+    # Look for patterns like "type function_name(" where type is void, int, float, etc.
+    set(PROTOTYPES "")
+    
+    # Split content into lines for processing
+    string(REPLACE "\n" ";" LINES ${FILE_CONTENT})
+    
+    foreach(LINE ${LINES})
+        # Skip comments and blank lines
+        string(REGEX REPLACE "^[ \t]*//.*$" "" LINE "${LINE}")
+        string(REGEX REPLACE "/\\*.*\\*/" "" LINE "${LINE}")
+        string(STRIP "${LINE}" LINE)
+        
+        # Look for function definitions (basic pattern)
+        if(LINE MATCHES "^(void|int|float|double|bool|uint8_t|uint16_t|uint32_t|char|CRGB|CHSV)[ \t]+([a-zA-Z_][a-zA-Z0-9_]*)[ \t]*\\(.*\\)[ \t]*\\{?[ \t]*$")
+            # Extract the function signature without the opening brace
+            string(REGEX REPLACE "[ \t]*\\{.*$" "" PROTOTYPE "${LINE}")
+            # Skip setup() and loop() as they're already declared in arduino_compat.h
+            if(NOT PROTOTYPE MATCHES "setup[ \t]*\\(" AND NOT PROTOTYPE MATCHES "loop[ \t]*\\(")
+                set(PROTOTYPES "${PROTOTYPES}${PROTOTYPE};\n")
+            endif()
+        endif()
+    endforeach()
+    
+    set(${OUTPUT_VAR} "${PROTOTYPES}" PARENT_SCOPE)
+endfunction()
+
 # Function to prepare .ino file for direct compilation
 function(prepare_ino_for_compilation INO_FILE COMPILE_DIR HAS_FASTLED OUTPUT_VAR)
     get_filename_component(INO_NAME ${INO_FILE} NAME_WE)
@@ -96,14 +119,14 @@ function(prepare_ino_for_compilation INO_FILE COMPILE_DIR HAS_FASTLED OUTPUT_VAR
     set(WRAPPER_CONTENT "${WRAPPER_CONTENT}#include \"arduino_compat.h\"  // MSVC compatibility fixes\n\n")
     
     if(HAS_FASTLED AND NOT HAS_OVERRIDES)
-        set(WRAPPER_CONTENT "${WRAPPER_CONTENT}// FastLED-enabled example\n")
-        set(WRAPPER_CONTENT "${WRAPPER_CONTENT}#include \"FastLED.h\"\n\n")
+        set(WRAPPER_CONTENT "${WRAPPER_CONTENT}// FastLED-enabled example (FastLED.h included via PCH)\n\n")
     elseif(HAS_OVERRIDES)
         set(WRAPPER_CONTENT "${WRAPPER_CONTENT}// FastLED example with function overrides - include .ino first\n")
         set(WRAPPER_CONTENT "${WRAPPER_CONTENT}// The .ino file defines overrides before including FastLED.h\n\n")
     else()
         set(WRAPPER_CONTENT "${WRAPPER_CONTENT}// Basic Arduino example (no FastLED)\n\n")
     endif()
+    
     
     # Include the original .ino file
     set(WRAPPER_CONTENT "${WRAPPER_CONTENT}// Include original .ino file\n")
@@ -224,6 +247,8 @@ function(configure_example_compile_test)
     set(EXAMPLE_FASTLED_WRAPPER_FILES ${FASTLED_WRAPPER_FILES} PARENT_SCOPE)
     set(EXAMPLE_NON_FASTLED_WRAPPER_FILES ${NON_FASTLED_WRAPPER_FILES} PARENT_SCOPE)
     set(EXAMPLE_COMPILE_DIR ${COMPILE_DIR} PARENT_SCOPE)
+    set(FASTLED_PCH_HEADER ${FASTLED_PCH_HEADER} PARENT_SCOPE)
+    set(FASTLED_PCH_FILE ${FASTLED_PCH_FILE} PARENT_SCOPE)
     
     list(LENGTH INO_FILES TOTAL_COUNT)
     message(STATUS "Example compilation prepared:")
@@ -331,6 +356,16 @@ function(create_example_compile_test_target)
         message(STATUS "Using GCC ultra-fast compilation flags for example compilation")
     endif()
     
+    # Debug: Show compilation flags being used
+    message(STATUS "=== EXAMPLE COMPILATION FLAGS DEBUG ===")
+    message(STATUS "Compiler: ${EXAMPLE_COMPILER}")
+    message(STATUS "Use Clang-CL: ${USE_CLANG_CL}")
+    string(REPLACE ";" " " FAST_COMPILE_FLAGS_STR "${FAST_COMPILE_FLAGS}")
+    message(STATUS "Fast compile flags: ${FAST_COMPILE_FLAGS_STR}")
+    message(STATUS "CMAKE_CXX_FLAGS: ${CMAKE_CXX_FLAGS}")
+    message(STATUS "CMAKE_BUILD_TYPE: ${CMAKE_BUILD_TYPE}")
+    message(STATUS "=========================================")
+    
     # Create compilation test target with FastLED examples
     if(EXAMPLE_FASTLED_WRAPPER_FILES)
         add_library(example_compile_fastled_objects OBJECT ${EXAMPLE_FASTLED_WRAPPER_FILES})
@@ -360,9 +395,9 @@ function(create_example_compile_test_target)
         # Enable precompiled headers for FastLED examples (major speed boost)
         if(FASTLED_PCH_HEADER AND CMAKE_VERSION VERSION_GREATER_EQUAL "3.16")
             target_precompile_headers(example_compile_fastled_objects PRIVATE ${FASTLED_PCH_HEADER})
-            message(STATUS "PCH enabled for FastLED examples: ${FASTLED_PCH_HEADER}")
+            message(STATUS "✅ PCH enabled for FastLED examples (major speed boost!)")
         else()
-            message(STATUS "PCH not available (CMake < 3.16 or no PCH header)")
+            message(STATUS "❌ PCH not available (CMake < 3.16 or no PCH header)")
         endif()
         
         # Define preprocessor symbols for compatibility

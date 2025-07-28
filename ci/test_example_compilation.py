@@ -87,7 +87,7 @@ def run_example_compilation_test(specific_examples=None):
         try:
             configure_result = subprocess.run(
                 cmake_cmd,
-                capture_output=True,
+                capture_output=True,  # Hide CMake output for clean builds
                 text=True,
                 encoding="utf-8",
                 errors="replace",
@@ -107,7 +107,7 @@ def run_example_compilation_test(specific_examples=None):
                 # Retry configuration
                 configure_result = subprocess.run(
                     cmake_cmd,
-                    capture_output=True,
+                    capture_output=True,  # Hide CMake output for clean builds
                     text=True,
                     encoding="utf-8",
                     errors="replace",
@@ -191,6 +191,7 @@ def run_example_compilation_test(specific_examples=None):
 
         # Stream output in real-time
         build_output_lines = []
+        assert build_process.stdout is not None
         while True:
             output = build_process.stdout.readline()
             if output == "" and build_process.poll() is not None:
