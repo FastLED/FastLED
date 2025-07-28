@@ -7,6 +7,10 @@
    This SmartMatrix library is only available on Teensy boards at the moment.
    It can be found at https://github.com/pixelmatix/SmartMatrix
 */
+
+// Only compile this example on Teensy platforms with SmartMatrix library support
+#if defined(TEENSYDUINO)
+
 #include <SmartMatrix.h>
 #include <FastLED.h>
 
@@ -128,3 +132,35 @@ void loop() {
   FastLED.show();
   // delay(10);
 }
+
+#else
+// Fallback for non-Teensy platforms
+#include <FastLED.h>
+
+#define kMatrixWidth  8
+#define kMatrixHeight 8
+#define NUM_LEDS (kMatrixWidth * kMatrixHeight)
+
+CRGB leds[NUM_LEDS];
+
+void setup() {
+  Serial.begin(9600);
+  Serial.println("SmartMatrix demo - fallback mode (requires Teensy with SmartMatrix library)");
+  // Use a simple strip layout for non-Teensy platforms
+  FastLED.addLeds<WS2812, 2, GRB>(leds, NUM_LEDS);
+  FastLED.setBrightness(60);
+}
+
+void loop() {
+  // Simple noise pattern for non-Teensy platforms
+  static uint8_t ihue = 0;
+  for(int i = 0; i < NUM_LEDS; i++) {
+    uint8_t index = inoise8(i*30, millis()/10);
+    leds[i] = ColorFromPalette(RainbowColors_p, index, 255, LINEARBLEND);
+  }
+  FastLED.show();
+  delay(20);
+  ihue++;
+}
+
+#endif // defined(__arm__) && defined(TEENSYDUINO)

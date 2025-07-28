@@ -13,6 +13,14 @@
 #define VOLTS          12
 #define MAX_MA       4000
 
+// Forward declarations
+void chooseNextColorPalette(CRGBPalette16& pal);
+void drawTwinkles(fl::CRGBSet& L);
+fl::CRGB computeOneTwinkle(uint32_t ms, uint8_t salt);
+uint8_t attackDecayWave8(uint8_t i);
+void coolLikeIncandescent(fl::CRGB& c, uint8_t phase);
+
+
 //  TwinkleFOX: Twinkling 'holiday' lights that fade in and out.
 //  Colors are chosen from a palette; a few palettes are provided.
 //
