@@ -4,7 +4,7 @@ import sys
 import time
 from pathlib import Path
 
-from playwright.async_api import async_playwright  # type: ignore
+from playwright.async_api import ConsoleMessage, async_playwright  # type: ignore
 
 
 HERE = Path(__file__).parent
@@ -59,7 +59,7 @@ async def main() -> None:
                 await page.goto(f"http://localhost:{port}", timeout=30000)
 
                 # Listen for console messages
-                def console_log_handler(msg):
+                def console_log_handler(msg: ConsoleMessage) -> None:
                     if "INVALID_OPERATION" in msg.text:
                         print(
                             "INVALID_OPERATION detected in console log", file=sys.stderr

@@ -12,7 +12,7 @@ from pathlib import Path
 from ci.esp32_symbol_analysis import main as esp32_symbol_analysis
 
 
-def is_esp32_board(board_name):
+def is_esp32_board(board_name: str) -> bool:
     """Check if the board is ESP32-based"""
     esp32_boards = [
         "esp32dev",

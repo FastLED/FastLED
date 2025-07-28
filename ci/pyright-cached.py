@@ -112,7 +112,7 @@ def has_files_changed() -> bool:
 def run_pyright(args: List[str]) -> int:
     """Run pyright with the given arguments."""
     env = os.environ.copy()
-    env["PYRIGHT_PYTHON_FORCE_VERSION"] = "latest"
+    # env["PYRIGHT_PYTHON_FORCE_VERSION"] = "latest"
     env["PYRIGHT_PYTHON_CACHE_DIR"] = ".cache/pyright"
 
     cmd = ["uv", "run", "pyright"] + args
