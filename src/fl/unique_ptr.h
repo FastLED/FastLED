@@ -216,13 +216,13 @@ void swap(unique_ptr<T, Deleter>& lhs, unique_ptr<T, Deleter>& rhs) noexcept {
 }
 
 // Comparison operators using FL equivalents
-template<typename T1, typename D1, typename T2, typename D2>
-bool operator==(const unique_ptr<T1, D1>& lhs, const unique_ptr<T2, D2>& rhs) {
+template<typename T1, typename Deleter1, typename T2, typename Deleter2>
+bool operator==(const unique_ptr<T1, Deleter1>& lhs, const unique_ptr<T2, Deleter2>& rhs) {
     return lhs.get() == rhs.get();
 }
 
-template<typename T1, typename D1, typename T2, typename D2>
-bool operator!=(const unique_ptr<T1, D1>& lhs, const unique_ptr<T2, D2>& rhs) {
+template<typename T1, typename Deleter1, typename T2, typename Deleter2>
+bool operator!=(const unique_ptr<T1, Deleter1>& lhs, const unique_ptr<T2, Deleter2>& rhs) {
     return !(lhs == rhs);
 }
 
