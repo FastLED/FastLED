@@ -460,7 +460,7 @@ TEST_CASE("Json2 Tests") {
         
         ScreenMap parsedStrip2 = parsedSegmentMaps["strip2"];
         CHECK_EQ(parsedStrip2.getLength(), 3);
-        CHECK_EQ(parsedStrip2.getDiameter(), 0.3f);  // NOTE : PLesase use CHECK_CLOSE
+        CHECK_CLOSE(parsedStrip2.getDiameter(), 0.3f, 0.001f);  // Use CHECK_CLOSE for floating-point comparison
         
         // Test individual points
         CHECK_EQ(parsedStrip1[0].x, 0.0f);
