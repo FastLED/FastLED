@@ -32,8 +32,8 @@ fl::string easeOptions[] = {
     "Out Sine", 
     "In-Out Sine"
 };
-UIDropdown saturationFunction("Saturation Function", easeOptions, 10);
-UIDropdown luminanceFunction("Luminance Function", easeOptions, 10);
+UIDropdown saturationFunction("Saturation Function", easeOptions);
+UIDropdown luminanceFunction("Luminance Function", easeOptions);
 
 // Group related color boost UI elements using UIGroup template multi-argument constructor
 UIGroup colorBoostControls("Color Boost", satSlider, saturationFunction, luminanceFunction);

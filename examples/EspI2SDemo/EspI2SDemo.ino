@@ -4,6 +4,7 @@
 //   To use this example, you MUST downgrade to Arduino Core < 3.0.0
 //   or it won't work on Arduino.
 
+#ifdef ESP32
 
 #define FASTLED_ESP32_I2S
 #include <FastLED.h>
@@ -44,3 +45,28 @@ void loop() {
     value++;
   }
 }
+
+#else  // ESP32
+
+// Non-ESP32 platform - provide minimal example for compilation testing
+#include <FastLED.h>
+
+#define NUM_LEDS 1
+#define DATA_PIN 3
+
+CRGB leds[NUM_LEDS];
+
+void setup() { 
+    FastLED.addLeds<NEOPIXEL, DATA_PIN>(leds, NUM_LEDS);
+}
+
+void loop() { 
+    leds[0] = CRGB::Red;
+    FastLED.show();
+    delay(500);
+    leds[0] = CRGB::Black;
+    FastLED.show();
+    delay(500);
+}
+
+#endif  // ESP32

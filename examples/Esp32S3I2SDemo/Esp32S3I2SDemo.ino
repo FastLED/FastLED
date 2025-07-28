@@ -38,6 +38,8 @@
 
 #define FASTLED_USES_ESP32S3_I2S  // Must define this before including FastLED.h
 
+#ifdef ESP32
+
 #include "FastLED.h"
 #include "fl/assert.h"
 
@@ -179,3 +181,25 @@ void loop() {
     FastLED.show();
     
 }
+
+#else  // ESP32
+
+// Non-ESP32 platform - provide minimal example for compilation testing
+#include "FastLED.h"
+
+#define NUM_LEDS 16
+#define DATA_PIN 3
+
+CRGB leds[NUM_LEDS];
+
+void setup() {
+    FastLED.addLeds<NEOPIXEL, DATA_PIN>(leds, NUM_LEDS);
+}
+
+void loop() {
+    fill_rainbow(leds, NUM_LEDS, 0, 7);
+    FastLED.show();
+    delay(50);
+}
+
+#endif  // ESP32
