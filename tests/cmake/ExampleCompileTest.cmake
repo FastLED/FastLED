@@ -66,6 +66,51 @@ function(detect_function_overrides INO_FILE OUTPUT_VAR)
     endif()
 endfunction()
 
+# Function to detect if a .ino file has defines before FastLED inclusion
+function(detect_defines_before_fastled INO_FILE OUTPUT_VAR)
+    file(READ ${INO_FILE} FILE_CONTENT)
+    
+    # Split content into lines for processing
+    string(REPLACE "\n" ";" LINES ${FILE_CONTENT})
+    
+    set(FOUND_DEFINE_BEFORE_FASTLED FALSE)
+    set(FOUND_FASTLED FALSE)
+    
+    foreach(LINE ${LINES})
+        # Remove leading whitespace for easier matching
+        string(STRIP "${LINE}" CLEAN_LINE)
+        
+        # Skip empty lines and comments
+        if(CLEAN_LINE STREQUAL "" OR CLEAN_LINE MATCHES "^//.*" OR CLEAN_LINE MATCHES "^/\\*.*")
+            continue()
+        endif()
+        
+        # Check if this line is a #define
+        if(CLEAN_LINE MATCHES "^#define")
+            if(NOT FOUND_FASTLED)
+                set(FOUND_DEFINE_BEFORE_FASTLED TRUE)
+                # Extract the define name for logging
+                string(REGEX REPLACE "^#define[ \t]+([A-Za-z_][A-Za-z0-9_]*).*" "\\1" DEFINE_NAME "${CLEAN_LINE}")
+                message(STATUS "Found #define before FastLED in ${INO_FILE}: ${DEFINE_NAME}")
+            endif()
+        endif()
+        
+        # Check if this line includes FastLED
+        if(CLEAN_LINE MATCHES "#include.*[Ff]ast[Ll][Ee][Dd]\\.h")
+            set(FOUND_FASTLED TRUE)
+            # If we already found a define before this, we can stop checking
+            if(FOUND_DEFINE_BEFORE_FASTLED)
+                break()
+            endif()
+        endif()
+    endforeach()
+    
+    set(${OUTPUT_VAR} ${FOUND_DEFINE_BEFORE_FASTLED} PARENT_SCOPE)
+    if(FOUND_DEFINE_BEFORE_FASTLED)
+        message(STATUS "[PCH-INCOMPATIBLE] File detected: ${INO_FILE} (has #define before FastLED.h)")
+    endif()
+endfunction()
+
 # Function to extract function declarations from .ino file for forward declarations
 function(extract_function_prototypes INO_FILE OUTPUT_VAR)
     file(READ ${INO_FILE} FILE_CONTENT)
@@ -219,10 +264,25 @@ function(configure_example_compile_test)
     set(NON_FASTLED_WRAPPER_FILES)
     set(FASTLED_COUNT 0)
     set(NON_FASTLED_COUNT 0)
+    set(PCH_INCOMPATIBLE_FILES)
+    set(HAS_PCH_INCOMPATIBLE_FILES FALSE)
     
     foreach(INO_FILE ${INO_FILES})
         # Detect FastLED inclusion
         detect_fastled_inclusion(${INO_FILE} HAS_FASTLED)
+        
+        # Detect defines before FastLED inclusion
+        detect_defines_before_fastled(${INO_FILE} IS_PCH_INCOMPATIBLE)
+        
+        # Track PCH incompatible files (files with defines before FastLED OR files without FastLED)
+        if(IS_PCH_INCOMPATIBLE OR NOT HAS_FASTLED)
+            list(APPEND PCH_INCOMPATIBLE_FILES ${INO_FILE})
+            set(HAS_PCH_INCOMPATIBLE_FILES TRUE)
+            if(NOT HAS_FASTLED)
+                get_filename_component(FILE_NAME ${INO_FILE} NAME)
+                message(STATUS "[PCH-INCOMPATIBLE] File without FastLED: ${FILE_NAME}")
+            endif()
+        endif()
         
         # Prepare wrapper file for compilation
         prepare_ino_for_compilation(${INO_FILE} ${COMPILE_DIR} ${HAS_FASTLED} WRAPPER_FILE)
@@ -240,6 +300,17 @@ function(configure_example_compile_test)
         endif()
     endforeach()
     
+    # Report PCH incompatible files
+    if(HAS_PCH_INCOMPATIBLE_FILES)
+        list(LENGTH PCH_INCOMPATIBLE_FILES PCH_INCOMPATIBLE_COUNT)
+        message(STATUS "[PCH-DISABLE] Found ${PCH_INCOMPATIBLE_COUNT} PCH-incompatible file(s) - PCH will be disabled")
+        message(STATUS "   Reasons: #define before FastLED.h OR no FastLED inclusion")
+        foreach(INCOMPATIBLE_FILE ${PCH_INCOMPATIBLE_FILES})
+            get_filename_component(FILE_NAME ${INCOMPATIBLE_FILE} NAME)
+            message(STATUS "   -> ${FILE_NAME}")
+        endforeach()
+    endif()
+    
     # Store results for use by other functions
     set(EXAMPLE_COMPILE_INO_FILES ${COMPILE_INO_FILES} PARENT_SCOPE)
     set(EXAMPLE_FASTLED_INO_FILES ${FASTLED_INO_FILES} PARENT_SCOPE)
@@ -249,6 +320,7 @@ function(configure_example_compile_test)
     set(EXAMPLE_COMPILE_DIR ${COMPILE_DIR} PARENT_SCOPE)
     set(FASTLED_PCH_HEADER ${FASTLED_PCH_HEADER} PARENT_SCOPE)
     set(FASTLED_PCH_FILE ${FASTLED_PCH_FILE} PARENT_SCOPE)
+    set(HAS_PCH_INCOMPATIBLE_FILES ${HAS_PCH_INCOMPATIBLE_FILES} PARENT_SCOPE)
     
     list(LENGTH INO_FILES TOTAL_COUNT)
     message(STATUS "Example compilation prepared:")
@@ -393,11 +465,16 @@ function(create_example_compile_test_target)
         )
         
         # Enable precompiled headers for FastLED examples (major speed boost)
-        if(FASTLED_PCH_HEADER AND CMAKE_VERSION VERSION_GREATER_EQUAL "3.16")
+        # But disable PCH if any examples have #define before FastLED.h inclusion
+        if(FASTLED_PCH_HEADER AND CMAKE_VERSION VERSION_GREATER_EQUAL "3.16" AND NOT HAS_PCH_INCOMPATIBLE_FILES)
             target_precompile_headers(example_compile_fastled_objects PRIVATE ${FASTLED_PCH_HEADER})
-            message(STATUS "✅ PCH enabled for FastLED examples (major speed boost!)")
+            message(STATUS "[PCH-ENABLED] PCH enabled for FastLED examples (major speed boost!)")
+        elseif(HAS_PCH_INCOMPATIBLE_FILES)
+            message(STATUS "[PCH-DISABLED] PCH disabled - examples have #define before FastLED.h (causes compilation conflicts)")
+        elseif(NOT CMAKE_VERSION VERSION_GREATER_EQUAL "3.16")
+            message(STATUS "[PCH-UNAVAILABLE] PCH not available (CMake < 3.16)")
         else()
-            message(STATUS "❌ PCH not available (CMake < 3.16 or no PCH header)")
+            message(STATUS "[PCH-UNAVAILABLE] PCH not available (no PCH header)")
         endif()
         
         # Define preprocessor symbols for compatibility
