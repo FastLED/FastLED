@@ -7,6 +7,7 @@
 #include "fl/sketch_macros.h"
 #include "fl/math.h" // For floor function
 #include "fl/compiler_control.h"
+#include "fl/thread_local.h"
 
 // Define INT16_MIN, INT16_MAX, and UINT8_MAX if not already defined
 #ifndef INT16_MIN
@@ -58,13 +59,14 @@ namespace fl {
 
 
 JsonValue& get_null_value() {
-    static JsonValue null_value;
-    return null_value;
+    static ThreadLocal<JsonValue> null_value;
+    return null_value.access();
 }
 
 JsonObject& get_empty_json_object() {
-    static JsonObject empty_object;
-    return empty_object;
+    // thread_local JsonObject empty_object;
+    static ThreadLocal<JsonObject> empty_object;
+    return empty_object.access();
 }
 
 fl::shared_ptr<JsonValue> JsonValue::parse(const fl::string& txt) {
