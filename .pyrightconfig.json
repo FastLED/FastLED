@@ -44,12 +44,12 @@
     "reportMissingSuperCall": false,
     "reportUninitializedInstanceVariable": false,
     "reportInvalidStringEscapeSequence": true,
-    "reportUnknownParameterType": false,
+    "reportUnknownParameterType": "error",
     "reportUnknownArgumentType": false,
-    "reportUnknownLambdaType": false,
+    "reportUnknownLambdaType": "error",
     "reportUnknownVariableType": false,
     "reportUnknownMemberType": false,
-    "reportMissingParameterType": false,
+    "reportMissingParameterType": "error",
     "reportMissingTypeArgument": false,
     "reportInvalidTypeVarUse": true,
     "reportCallInDefaultInitializer": false,
@@ -70,6 +70,8 @@
     "reportUnusedExpression": false,
     "reportUnnecessaryTypeIgnoreComment": false,
     "reportMatchNotExhaustive": true,
+    "analyzeUnannotatedFunctions": true,
+    "strictParameterNoneValue": true,
     "pythonVersion": "3.11",
     "pythonPlatform": "All",
     "executionEnvironments": [
@@ -79,7 +81,7 @@
             "pythonPlatform": "All"
         }
     ],
-    "typeCheckingMode": "basic",
+    "typeCheckingMode": "strict",
     "useLibraryCodeForTypes": true,
     "verboseOutput": false,
     "autoImportCompletions": false,

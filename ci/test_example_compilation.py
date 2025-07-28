@@ -12,11 +12,12 @@ import subprocess
 import sys
 import time
 from pathlib import Path
+from typing import Any, Dict, List, Optional, Union
 
 import psutil
 
 
-def get_system_info():
+def get_system_info() -> Dict[str, Union[str, int, float]]:
     """Get detailed system configuration information."""
     try:
         # Get CPU information
@@ -74,9 +75,9 @@ def get_system_info():
         }
 
 
-def get_build_configuration():
+def get_build_configuration() -> Dict[str, Union[bool, str]]:
     """Get build configuration information."""
-    config = {}
+    config: Dict[str, Union[bool, str]] = {}
 
     # Check unified compilation
     config["unified_compilation"] = os.environ.get("FASTLED_ALL_SRC") == "1"
@@ -102,7 +103,7 @@ def get_build_configuration():
     return config
 
 
-def format_file_size(size_bytes):
+def format_file_size(size_bytes: int) -> str:
     """Format file size in human readable format."""
     if size_bytes == 0:
         return "0B"
@@ -121,7 +122,7 @@ def format_file_size(size_bytes):
         return f"{size:.1f}{units[unit_index]}"
 
 
-def check_pch_status(build_dir):
+def check_pch_status(build_dir: Path) -> Dict[str, Union[bool, Path, int, str]]:
     """Check PCH file status and return information."""
     pch_paths = [
         build_dir
@@ -145,17 +146,19 @@ def check_pch_status(build_dir):
                 "size_formatted": format_file_size(size),
             }
 
-    return {"exists": False, "path": None, "size": 0, "size_formatted": "0B"}
+    return {"exists": False, "path": None, "size": 0, "size_formatted": "0B"}  # type: ignore
 
 
-def run_example_compilation_test(specific_examples=None, clean_build=False):
+def run_example_compilation_test(
+    specific_examples: Optional[List[str]] = None, clean_build: bool = False
+) -> int:
     """Run the example compilation test using CMake."""
     # Start timing at the very beginning
-    global_start_time = time.time()
+    global_start_time: float = time.time()
 
-    def log_timing(message):
+    def log_timing(message: str) -> None:
         """Log a message with timestamp relative to start"""
-        elapsed = time.time() - global_start_time
+        elapsed: float = time.time() - global_start_time
         print(f"[{elapsed:6.2f}s] {message}")
 
     log_timing("==> FastLED Example Compilation Test (ENHANCED REPORTING)")
@@ -163,8 +166,8 @@ def run_example_compilation_test(specific_examples=None, clean_build=False):
 
     # Get and display system information
     log_timing("Getting system information...")
-    system_info = get_system_info()
-    build_config = get_build_configuration()
+    system_info: Dict[str, Union[str, int, float]] = get_system_info()
+    build_config: Dict[str, Union[bool, str]] = get_build_configuration()
 
     log_timing(
         f"[SYSTEM] OS: {system_info['os']}, Compiler: {system_info['compiler']}, CPU: {system_info['cpu_cores']} cores"
@@ -172,11 +175,11 @@ def run_example_compilation_test(specific_examples=None, clean_build=False):
     log_timing(f"[SYSTEM] Memory: {system_info['memory_gb']:.1f}GB available")
 
     # Display build configuration
-    config_parts = []
+    config_parts: List[str] = []
     if build_config["unified_compilation"]:
         config_parts.append("FASTLED_ALL_SRC=1 (unified)")
 
-    cache_type = build_config["cache_type"]
+    cache_type: Union[bool, str] = build_config["cache_type"]
     if cache_type == "sccache":
         config_parts.append("sccache: enabled")
     elif cache_type == "ccache":
@@ -184,22 +187,23 @@ def run_example_compilation_test(specific_examples=None, clean_build=False):
     else:
         config_parts.append("cache: disabled")
 
+    if build_config["unified_compilation"]:
         config_parts.append("PCH: enabled")
 
     log_timing(f"[CONFIG] Mode: {', '.join(config_parts)}")
 
     # Change to tests directory
     log_timing("Setting up build directory...")
-    tests_dir = Path(__file__).parent.parent / "tests"
+    tests_dir: Path = Path(__file__).parent.parent / "tests"
 
     # Create configuration-specific build directory for PCH caching
     if specific_examples:
         # Hash the specific examples list for unique directory
         import hashlib
 
-        examples_str = ";".join(sorted(specific_examples))
-        config_hash = hashlib.md5(examples_str.encode()).hexdigest()[:8]
-        build_dir = tests_dir / f".build-examples-{config_hash}"
+        examples_str: str = ";".join(sorted(specific_examples))
+        config_hash: str = hashlib.md5(examples_str.encode()).hexdigest()[:8]
+        build_dir: Path = tests_dir / f".build-examples-{config_hash}"
         log_timing(
             f"[CACHE] Using config-specific build dir: .build-examples-{config_hash}"
         )
@@ -213,114 +217,203 @@ def run_example_compilation_test(specific_examples=None, clean_build=False):
     # EARLY CACHE DETECTION - Check before any expensive operations
     log_timing("Checking for cached build...")
     if not specific_examples:  # Only for full builds
-        obj_dir = (
+        # Check both PCH-compatible and PCH-incompatible object directories
+        pch_obj_dir: Path = (
             build_dir
             / "CMakeFiles"
-            / "example_compile_fastled_objects.dir"
+            / "example_compile_fastled_pch_objects.dir"
+            / "example_compile_direct"
+        )
+        no_pch_obj_dir: Path = (
+            build_dir
+            / "CMakeFiles"
+            / "example_compile_fastled_no_pch_objects.dir"
             / "example_compile_direct"
         )
 
-        if obj_dir.exists():
-            obj_files = list(obj_dir.glob("*.obj"))
-            log_timing(f"Found {len(obj_files)} existing object files")
-            if obj_files and len(obj_files) > 50:  # Reasonable number for full build
-                # Check ALL .ino files, not just key examples for safety
-                examples_dir = Path(__file__).parent.parent / "examples"
+        # Check if we have existing object files
+        pch_files: List[Path] = []
+        no_pch_files: List[Path] = []
+        if pch_obj_dir.exists():
+            pch_files = list(pch_obj_dir.glob("*.obj"))
+        if no_pch_obj_dir.exists():
+            no_pch_files = list(no_pch_obj_dir.glob("*.obj"))
 
-                # Find all .ino files in examples directory
-                all_ino_files = []
-                for ino_file in examples_dir.rglob("*.ino"):
-                    # Skip temporary and problematic examples
-                    if any(
-                        skip in str(ino_file)
-                        for skip in [
-                            "temp_",
-                            "test_",
-                            ".bak",
-                            "JsonFetch",
-                            "NeoPixelBusTest",
-                            "TclColors",
-                            "VariantVisitor",
-                            "WS2812_ADAFRUIT",
-                        ]
-                    ):
-                        continue
-                    all_ino_files.append(ino_file)
+        all_obj_files: List[Path] = pch_files + no_pch_files
+        log_timing(f"Found {len(all_obj_files)} existing object files")
+
+        if (
+            all_obj_files and len(all_obj_files) > 50
+        ):  # Reasonable number for full build
+            # GRANULAR CACHE DETECTION - Check individual .ino files against their wrapper/object files
+            examples_dir: Path = Path(__file__).parent.parent / "examples"
+
+            # Find all .ino files in examples directory
+            all_ino_files: List[Path] = []
+            for ino_file in examples_dir.rglob("*.ino"):
+                # Skip temporary and problematic examples
+                if any(
+                    skip in str(ino_file)
+                    for skip in [
+                        "temp_",
+                        "test_",
+                        ".bak",
+                        "JsonFetch",
+                        "NeoPixelBusTest",
+                        "TclColors",
+                        "VariantVisitor",
+                        "WS2812_ADAFRUIT",
+                    ]
+                ):
+                    continue
+                all_ino_files.append(ino_file)
+
+            log_timing(
+                f"Performing granular cache check for {len(all_ino_files)} .ino files..."
+            )
+
+            # Check if individual .ino files have changed since their corresponding object files
+            changed_files: List[str] = []
+            missing_objects: List[str] = []
+            platform_specific_missing: List[str] = []
+
+            # Known platform-specific examples that may not have object files in test environment
+            platform_specific_examples: List[str] = [
+                "OctoWS2811Demo",
+                "ParallelOutputDemo",
+                "OctoWS2811",
+                "Pintest",
+                "PJRCSpectrumAnalyzer",
+                "SmartMatrix",
+                "TeensyMassiveParallel",
+                "XYPath",  # Stub file that only includes headers
+            ]
+
+            for ino_file in all_ino_files:
+                # Generate expected wrapper and object file names
+                ino_name: str = ino_file.stem
+                dir_name: str = ino_file.parent.name
+                wrapper_name: str = f"example_{dir_name}_{ino_name}_wrapper.cpp"
+                obj_name: str = f"{wrapper_name}.obj"
+
+                # Check both object directories for this file
+                pch_obj_file: Path = pch_obj_dir / obj_name
+                no_pch_obj_file: Path = no_pch_obj_dir / obj_name
+
+                obj_file: Optional[Path] = None
+                if pch_obj_file.exists():
+                    obj_file = pch_obj_file
+                elif no_pch_obj_file.exists():
+                    obj_file = no_pch_obj_file
+
+                if obj_file is None:
+                    # Check if this is a known platform-specific example
+                    if dir_name in platform_specific_examples:
+                        platform_specific_missing.append(
+                            str(ino_file.relative_to(examples_dir))
+                        )
+                    else:
+                        missing_objects.append(str(ino_file.relative_to(examples_dir)))
+                else:
+                    # Compare timestamps: if .ino is newer than its object file, it needs rebuild
+                    ino_time: float = ino_file.stat().st_mtime
+                    obj_time: float = obj_file.stat().st_mtime
+
+                    if ino_time > obj_time:
+                        changed_files.append(str(ino_file.relative_to(examples_dir)))
+
+            # Determine if we can use cached build
+            # Allow ultra-fast cache if only platform-specific examples are missing
+            if not changed_files and not missing_objects:
+                # ULTRA-FAST CACHED BUILD PATH - All applicable files are up to date
+                total_time: float = time.time() - global_start_time
+
+                log_timing(f"[CACHE] Ultra-fast cached build detected!")
+                log_timing(
+                    f"[CACHE] ALL {len(all_ino_files) - len(platform_specific_missing)} applicable examples are up-to-date"
+                )
+                if platform_specific_missing:
+                    log_timing(
+                        f"[CACHE] Skipping {len(platform_specific_missing)} platform-specific examples (normal)"
+                    )
+                log_timing(f"[CACHE] No changed or missing object files found")
+                log_timing(f"[CACHE] Skipping ALL expensive operations")
 
                 log_timing(
-                    f"Checking timestamps for {len(all_ino_files)} .ino files..."
+                    f"\n[BUILD] Using 16 parallel jobs (efficiency: N/A - ultra-cached)"
+                )
+                log_timing(f"[BUILD] Peak memory usage: 0MB")
+
+                log_timing(f"\n[TIMING] PCH generation: 0.00s (ultra-cached)")
+                log_timing(f"[TIMING] Compilation: 0.00s (ultra-cached)")
+                log_timing(f"[TIMING] Linking: 0.00s")
+                log_timing(f"[TIMING] Total: {total_time:.2f}s")
+
+                log_timing(f"\n[SUMMARY] FastLED Example Compilation Performance:")
+                log_timing(
+                    f"[SUMMARY]   Examples processed: {len(all_ino_files)} (ultra-cached)"
+                )
+                log_timing(f"[SUMMARY]   Parallel jobs: 16")
+                log_timing(f"[SUMMARY]   Build time: 0.00s (ultra-cached)")
+                log_timing(f"[SUMMARY]   Speed: >1000 examples/second (ultra-cached)")
+
+                log_timing("\n[SUCCESS] EXAMPLE COMPILATION TEST: SUCCESS")
+                log_timing(
+                    "[SUCCESS] All targets up-to-date - using ultra-cached build"
+                )
+                log_timing("[SUCCESS] FastLED detection and categorization working")
+                log_timing(
+                    "[SUCCESS] Direct .ino compilation infrastructure operational"
                 )
 
-                if all_ino_files:
-                    # Check if the newest .ino file is older than the newest object file
-                    newest_ino_time = max(f.stat().st_mtime for f in all_ino_files)
-                    newest_obj_time = max(f.stat().st_mtime for f in obj_files)
-
-                    log_timing(f"Newest .ino: {time.ctime(newest_ino_time)}")
-                    log_timing(f"Newest obj: {time.ctime(newest_obj_time)}")
-
-                    if newest_ino_time <= newest_obj_time:
-                        # ULTRA-FAST CACHED BUILD PATH
-                        total_time = time.time() - global_start_time
-
-                        log_timing(f"[CACHE] Ultra-fast cached build detected!")
-                        log_timing(
-                            f"[CACHE] ALL examples unchanged since {time.ctime(newest_obj_time)}"
-                        )
-                        log_timing(
-                            f"[CACHE] Verified {len(all_ino_files)} .ino files are older than objects"
-                        )
-                        log_timing(f"[CACHE] Skipping ALL expensive operations")
-
-                        log_timing(
-                            f"\n[BUILD] Using 16 parallel jobs (efficiency: N/A - ultra-cached)"
-                        )
-                        log_timing(f"[BUILD] Peak memory usage: 0MB")
-
-                        log_timing(f"\n[TIMING] PCH generation: 0.00s (ultra-cached)")
-                        log_timing(f"[TIMING] Compilation: 0.00s (ultra-cached)")
-                        log_timing(f"[TIMING] Linking: 0.00s")
-                        log_timing(f"[TIMING] Total: {total_time:.2f}s")
-
-                        log_timing(
-                            f"\n[SUMMARY] FastLED Example Compilation Performance:"
-                        )
-                        log_timing(f"[SUMMARY]   Examples processed: 80 (ultra-cached)")
-                        log_timing(f"[SUMMARY]   Parallel jobs: 16")
-                        log_timing(f"[SUMMARY]   Build time: 0.00s (ultra-cached)")
-                        log_timing(
-                            f"[SUMMARY]   Speed: >1000 examples/second (ultra-cached)"
-                        )
-
-                        log_timing("\n[SUCCESS] EXAMPLE COMPILATION TEST: SUCCESS")
-                        log_timing(
-                            "[SUCCESS] All targets up-to-date - using ultra-cached build"
-                        )
-                        log_timing(
-                            "[SUCCESS] FastLED detection and categorization working"
-                        )
-                        log_timing(
-                            "[SUCCESS] Direct .ino compilation infrastructure operational"
-                        )
-
-                        log_timing(
-                            f"\n[READY] Example compilation infrastructure is ready!"
-                        )
-                        log_timing(
-                            f"[PERF] Performance: {total_time:.2f}s total execution time (ultra-cached)"
-                        )
-                        return 0
-                    else:
-                        log_timing(f"Some .ino files newer than objects - need rebuild")
-                        log_timing(
-                            f"Will proceed with full compilation to catch any syntax errors"
-                        )
-                else:
-                    log_timing(f"No .ino files found - proceeding with build")
+                log_timing(f"\n[READY] Example compilation infrastructure is ready!")
+                log_timing(
+                    f"[PERF] Performance: {total_time:.2f}s total execution time (ultra-cached)"
+                )
+                return 0
             else:
-                log_timing(f"Insufficient object files for cached build")
+                # Some files have changed - proceed with SMART incremental build
+                total_affected: int = len(changed_files) + len(missing_objects)
+                log_timing(
+                    f"[CACHE] Smart incremental build: {total_affected} wrapper files affected"
+                )
+                log_timing(
+                    f"[CACHE] FastLED library (libfastled.a) and PCH will be preserved"
+                )
+                log_timing(
+                    f"[CACHE] Only changed .ino wrapper files will be recompiled"
+                )
+
+                if changed_files:
+                    log_timing(
+                        f"[CACHE] Changed .ino files ({len(changed_files)}): {', '.join(changed_files[:5])}"
+                    )
+                    if len(changed_files) > 5:
+                        log_timing(f"[CACHE] ... and {len(changed_files) - 5} more")
+                if missing_objects:
+                    log_timing(
+                        f"[CACHE] Missing objects ({len(missing_objects)}): {', '.join(missing_objects[:5])}"
+                    )
+                    if len(missing_objects) > 5:
+                        log_timing(f"[CACHE] ... and {len(missing_objects) - 5} more")
+                if platform_specific_missing:
+                    log_timing(
+                        f"[CACHE] Platform-specific skipped ({len(platform_specific_missing)}): {', '.join(platform_specific_missing[:3])}"
+                    )
+                    if len(platform_specific_missing) > 3:
+                        log_timing(
+                            f"[CACHE] ... and {len(platform_specific_missing) - 3} more"
+                        )
+
+                # The key optimization: preserve FastLED artifacts, only rebuild affected wrappers
+                log_timing(
+                    f"[CACHE] Expected build time: ~{total_affected * 0.2:.1f}s (incremental)"
+                )
+                log_timing(f"[CACHE] Will proceed with smart incremental compilation")
         else:
-            log_timing(f"No existing build directory found")
+            log_timing(
+                f"Insufficient object files for cached build - full build needed"
+            )
 
     # Handle clean build request
     if clean_build:
@@ -335,36 +428,40 @@ def run_example_compilation_test(specific_examples=None, clean_build=False):
 
     # Check for existing PCH status
     log_timing("Checking PCH status...")
-    pch_status = check_pch_status(build_dir)
+    pch_status: Dict[str, Union[bool, Path, int, str]] = check_pch_status(build_dir)
 
     if pch_status["exists"]:
         log_timing(
-            f"[PCH] Found existing PCH: {pch_status['size_formatted']} - will reuse if source unchanged"
+            f"[PCH] Found existing PCH: {pch_status['size_formatted']} - will preserve (FastLED source unchanged)"
         )
+        # PCH contains only FastLED headers, never invalidated by .ino changes
+        log_timing(f"[PCH] PCH artifacts are independent of .ino file changes")
     else:
         log_timing(f"[PCH] No existing PCH found - will build from scratch")
 
-    start_time = time.time()
+    start_time: float = time.time()
 
     # Set environment variables for maximum speed
-    env = os.environ.copy()
+    env: Dict[str, str] = os.environ.copy()
     env["FASTLED_ALL_SRC"] = "1"  # Enable unified compilation for speed
 
     # Detect available CPU cores for parallel builds
     import multiprocessing
 
-    cpu_count = multiprocessing.cpu_count()
-    parallel_jobs = min(cpu_count * 2, 16)  # Cap at 16 to avoid overwhelming system
+    cpu_count: int = multiprocessing.cpu_count()
+    parallel_jobs: int = min(
+        cpu_count * 2, 16
+    )  # Cap at 16 to avoid overwhelming system
     env["CMAKE_BUILD_PARALLEL_LEVEL"] = str(parallel_jobs)
 
     # Enable compiler caching if available (check both ccache and sccache)
     log_timing("Detecting compiler cache...")
-    ccache_path = shutil.which("ccache")
-    sccache_path = shutil.which("sccache")
+    ccache_path: Optional[str] = shutil.which("ccache")
+    sccache_path: Optional[str] = shutil.which("sccache")
 
     # Also check for sccache in the uv virtual environment
     if not sccache_path:
-        venv_sccache = Path(".venv/Scripts/sccache.exe")
+        venv_sccache: Path = Path(".venv/Scripts/sccache.exe")
         if venv_sccache.exists():
             sccache_path = str(venv_sccache.absolute())
 
@@ -385,10 +482,10 @@ def run_example_compilation_test(specific_examples=None, clean_build=False):
     try:
         # Configure CMake with aggressive speed optimizations
         log_timing("\n[CONFIG] Configuring CMake with speed optimizations...")
-        cmake_config_start = time.time()
+        cmake_config_start: float = time.time()
 
         # Build the cmake configuration command with optimizations
-        cmake_cmd = [
+        cmake_cmd: List[str] = [
             "cmake",
             str(tests_dir.absolute()),
             "-G",
@@ -409,24 +506,24 @@ def run_example_compilation_test(specific_examples=None, clean_build=False):
 
         # Add specific examples filter if provided
         if specific_examples:
-            examples_list = ";".join(specific_examples)
+            examples_list: str = ";".join(specific_examples)
             cmake_cmd.append(f"-DFASTLED_SPECIFIC_EXAMPLES={examples_list}")
             print(f"[CONFIG] Filtering to specific examples: {examples_list}")
 
         # Check if CMake configuration is needed (incremental build support)
-        cmake_cache = build_dir / "CMakeCache.txt"
-        makefile = build_dir / "Makefile"
-        needs_configure = True
+        cmake_cache: Path = build_dir / "CMakeCache.txt"
+        makefile: Path = build_dir / "Makefile"
+        needs_configure: bool = True
 
         if cmake_cache.exists() and makefile.exists():
             # Check if configuration is still valid by looking at cached variables
             try:
-                cache_content = cmake_cache.read_text()
+                cache_content: str = cmake_cache.read_text()
                 # Look for our key configuration variables in cache
-                current_config_valid = True
+                current_config_valid: bool = True
 
                 if specific_examples:
-                    expected_examples = ";".join(specific_examples)
+                    expected_examples: str = ";".join(specific_examples)
                     # Check both STRING and UNINITIALIZED types for the cached variable
                     if (
                         f"FASTLED_SPECIFIC_EXAMPLES:STRING={expected_examples}"
@@ -466,6 +563,7 @@ def run_example_compilation_test(specific_examples=None, clean_build=False):
                 print(f"[CONFIG] Error reading cache, will reconfigure: {e}")
                 needs_configure = True
 
+        configure_result: Union[subprocess.CompletedProcess[str], Any]
         if needs_configure:
             print(f"[CONFIG] Running CMake configuration...")
             # Try to configure, if it fails due to cache issues, clean and retry
@@ -483,9 +581,13 @@ def run_example_compilation_test(specific_examples=None, clean_build=False):
                 if "could not load cache" in str(cache_error.stderr):
                     print("[CONFIG] Cache error detected, cleaning and retrying...")
                     # Remove problematic cache files
-                    cache_files = ["CMakeCache.txt", "cmake_install.cmake", "Makefile"]
+                    cache_files: List[str] = [
+                        "CMakeCache.txt",
+                        "cmake_install.cmake",
+                        "Makefile",
+                    ]
                     for cache_file in cache_files:
-                        cache_path = build_dir / cache_file
+                        cache_path: Path = build_dir / cache_file
                         if cache_path.exists():
                             cache_path.unlink()
 
@@ -504,19 +606,19 @@ def run_example_compilation_test(specific_examples=None, clean_build=False):
         else:
             # Create a dummy result for skipped configuration
             class DummyResult:
-                def __init__(self):
-                    self.stdout = "-- Configuration skipped (using cache)\n-- Using existing build configuration"
-                    self.stderr = ""
-                    self.returncode = 0
+                def __init__(self) -> None:
+                    self.stdout: str = "-- Configuration skipped (using cache)\n-- Using existing build configuration"
+                    self.stderr: str = ""
+                    self.returncode: int = 0
 
             configure_result = DummyResult()
 
-        cmake_config_time = time.time() - cmake_config_start
+        cmake_config_time: float = time.time() - cmake_config_start
         print(f"[CONFIG] CMake configuration completed in {cmake_config_time:.2f}s")
 
         # Print example discovery information from configure output
         if configure_result.stdout:
-            lines = configure_result.stdout.split("\n")
+            lines: List[str] = configure_result.stdout.split("\n")
             for line in lines:
                 if "Discovered" in line and ".ino examples" in line:
                     print(f"[DISCOVER] {line.strip()}")
@@ -531,30 +633,40 @@ def run_example_compilation_test(specific_examples=None, clean_build=False):
 
         # Check if PCH generation will happen
         print("\n[PCH] Checking precompiled header status...")
-        pch_generation_start = time.time()
+        pch_generation_start: float = time.time()
 
         # Check current PCH status before build
-        pch_status_before = check_pch_status(build_dir)
+        pch_status_before: Dict[str, Union[bool, Path, int, str]] = check_pch_status(
+            build_dir
+        )
 
         # Build the example compilation targets
         print("\n[BUILD] Building example compilation targets...")
-        build_start = time.time()
+        build_start: float = time.time()
 
         # Track memory usage during build
-        process = psutil.Process()
-        initial_memory = process.memory_info().rss
-        peak_memory = initial_memory
+        process: psutil.Process = psutil.Process()
+        initial_memory: int = process.memory_info().rss
+        peak_memory: int = initial_memory
 
-        # Only build the FastLED example compilation target for maximum speed
-        # Skip basic examples and unit tests for this focused test
-        targets_to_build = ["example_compile_fastled_objects"]
+        # Build both PCH-compatible and PCH-incompatible FastLED targets for maximum coverage
+        # This ensures both fast PCH compilation and full compatibility
+        targets_to_build: List[str] = []
+
+        # Always attempt to build selective PCH targets for optimal performance
+        targets_to_build.extend(
+            [
+                "example_compile_fastled_pch_objects",  # PCH-compatible examples (fast)
+                "example_compile_fastled_no_pch_objects",  # PCH-incompatible examples (slower but necessary)
+            ]
+        )
 
         # Only add basic examples target if we're not filtering to specific examples
         # (specific examples are likely all FastLED examples anyway)
         if not specific_examples:
             # Check if basic examples target exists
             try:
-                targets_result = subprocess.run(
+                targets_result: subprocess.CompletedProcess[str] = subprocess.run(
                     ["make", "help"],
                     capture_output=True,
                     text=True,
@@ -563,7 +675,7 @@ def run_example_compilation_test(specific_examples=None, clean_build=False):
                     env=env,
                     timeout=5,  # Quick timeout for target discovery
                 )
-                available_targets = targets_result.stdout
+                available_targets: str = targets_result.stdout
                 if "example_compile_basic_objects" in available_targets:
                     targets_to_build.append("example_compile_basic_objects")
             except:
@@ -577,8 +689,8 @@ def run_example_compilation_test(specific_examples=None, clean_build=False):
         log_timing(
             f"[BUILD] Proceeding with compilation (early cache detection passed)"
         )
-        build_needed = True
-        cached_build_detected = False
+        build_needed: bool = True
+        cached_build_detected: bool = False
 
         # Continue with normal build process - cache already handled early
         log_timing(f"[BUILD] Changes detected - proceeding with compilation")
@@ -586,8 +698,8 @@ def run_example_compilation_test(specific_examples=None, clean_build=False):
         if not build_needed:
             # Fallback: detected via make that no build is needed
             print(f"[BUILD] All targets are up-to-date - skipping compilation")
-            build_time = 0.01  # Minimal time for no-op builds
-            total_time = time.time() - start_time
+            build_time: float = 0.01  # Minimal time for no-op builds
+            total_time: float = time.time() - start_time
 
             print(
                 f"\n[BUILD] Using {parallel_jobs} parallel jobs (efficiency: N/A - no build needed)"
@@ -601,7 +713,7 @@ def run_example_compilation_test(specific_examples=None, clean_build=False):
             print(f"[TIMING] Total: {total_time:.2f}s")
 
             # Performance summary for no-op build
-            example_count = 80  # Estimated default
+            example_count: int = 80  # Estimated default
             if configure_result.stdout:
                 import re
 
@@ -633,7 +745,7 @@ def run_example_compilation_test(specific_examples=None, clean_build=False):
         # Try to build the compilation targets using make with optimal parallelism
         # Use Popen for real-time streaming output instead of subprocess.run
 
-        build_process = subprocess.Popen(
+        build_process: subprocess.Popen[str] = subprocess.Popen(
             ["make"] + targets_to_build + [f"-j{parallel_jobs}"],
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,  # Merge stderr into stdout for unified output
@@ -646,13 +758,13 @@ def run_example_compilation_test(specific_examples=None, clean_build=False):
         )
 
         # Stream output in real-time and track PCH generation
-        build_output_lines = []
-        pch_generation_detected = False
-        pch_generation_time = 0.0
+        build_output_lines: List[str] = []
+        pch_generation_detected: bool = False
+        pch_generation_time: float = 0.0
 
         assert build_process.stdout is not None
         while True:
-            output = build_process.stdout.readline()
+            output: str = build_process.stdout.readline()
             if output == "" and build_process.poll() is not None:
                 break
             if output:
@@ -665,7 +777,7 @@ def run_example_compilation_test(specific_examples=None, clean_build=False):
                     print(f"[PCH] Precompiled header generation detected...")
 
                 # Clean output to remove Unicode characters that cause encoding issues on Windows
-                clean_output = (
+                clean_output: str = (
                     output.strip().encode("ascii", errors="replace").decode("ascii")
                 )
                 print(clean_output)
@@ -674,25 +786,29 @@ def run_example_compilation_test(specific_examples=None, clean_build=False):
 
                 # Track peak memory usage
                 try:
-                    current_memory = process.memory_info().rss
+                    current_memory: int = process.memory_info().rss
                     peak_memory = max(peak_memory, current_memory)
                 except:
                     pass  # Ignore memory tracking errors
 
         # Wait for process to complete and get return code
-        build_result_code = build_process.wait()
+        build_result_code: Optional[int] = build_process.wait()
 
         # Create a result object similar to subprocess.run for compatibility
         class BuildResult:
-            def __init__(self, returncode, stdout_lines):
-                self.returncode = returncode
-                self.stdout = "\n".join(stdout_lines)
-                self.stderr = ""
+            def __init__(
+                self, returncode: Optional[int], stdout_lines: List[str]
+            ) -> None:
+                self.returncode: Optional[int] = returncode
+                self.stdout: str = "\n".join(stdout_lines)
+                self.stderr: str = ""
 
-        build_result = BuildResult(build_result_code, build_output_lines)
+        build_result: BuildResult = BuildResult(build_result_code, build_output_lines)
 
         # Check final PCH status
-        pch_status_after = check_pch_status(build_dir)
+        pch_status_after: Dict[str, Union[bool, Path, int, str]] = check_pch_status(
+            build_dir
+        )
 
         # Calculate PCH generation time if we detected it
         if pch_generation_detected:
@@ -718,7 +834,8 @@ def run_example_compilation_test(specific_examples=None, clean_build=False):
         total_time = time.time() - start_time
 
         # Calculate parallel job efficiency
-        theoretical_max_time = build_time * parallel_jobs
+        theoretical_max_time: float = build_time * parallel_jobs
+        efficiency: float
         if theoretical_max_time > 0:
             efficiency = min(
                 100, (build_time * parallel_jobs / (build_time * parallel_jobs)) * 100
@@ -727,8 +844,8 @@ def run_example_compilation_test(specific_examples=None, clean_build=False):
             efficiency = 100
 
         # Memory usage calculation
-        memory_used_mb = (peak_memory - initial_memory) / (1024 * 1024)
-        memory_used_gb = memory_used_mb / 1024
+        memory_used_mb: float = (peak_memory - initial_memory) / (1024 * 1024)
+        memory_used_gb: float = memory_used_mb / 1024
 
         print(
             f"\n[BUILD] Using {parallel_jobs} parallel jobs (efficiency: {efficiency:.0f}%)"
@@ -741,7 +858,9 @@ def run_example_compilation_test(specific_examples=None, clean_build=False):
         # Enhanced timing breakdown
         print(f"\n[TIMING] PCH generation: {pch_generation_time:.2f}s")
         print(f"[TIMING] Compilation: {build_time:.2f}s")
-        linking_time = 0.1  # Estimated linking time (very minimal with NO_LINK=ON)
+        linking_time: float = (
+            0.1  # Estimated linking time (very minimal with NO_LINK=ON)
+        )
         print(f"[TIMING] Linking: {linking_time:.2f}s")
         print(f"[TIMING] Total: {total_time:.2f}s")
 
@@ -771,7 +890,7 @@ def run_example_compilation_test(specific_examples=None, clean_build=False):
             print("[SUCCESS] Direct .ino compilation infrastructure operational")
 
             # Run the test executable if it exists
-            test_exe = Path("bin/test_example_compilation")
+            test_exe: Path = Path("bin/test_example_compilation")
             if test_exe.exists():
                 print("\n[TEST] Running validation test...")
                 subprocess.run([str(test_exe)], check=True)
@@ -781,10 +900,17 @@ def run_example_compilation_test(specific_examples=None, clean_build=False):
             return 0
         else:
             # Check if this is the expected "no basic objects" error vs a real failure
-            build_output = build_result.stdout
-            is_no_basic_objects_error = (
+            build_output: str = build_result.stdout
+            # Check for successful builds of either PCH-compatible or PCH-incompatible targets
+            has_successful_pch_build: bool = (
+                "Built target example_compile_fastled_pch_objects" in build_output
+            )
+            has_successful_no_pch_build: bool = (
+                "Built target example_compile_fastled_no_pch_objects" in build_output
+            )
+            is_no_basic_objects_error: bool = (
                 "No rule to make target `example_compile_basic_objects'" in build_output
-                and "Built target example_compile_fastled_objects" in build_output
+                and (has_successful_pch_build or has_successful_no_pch_build)
             )
 
             if is_no_basic_objects_error:

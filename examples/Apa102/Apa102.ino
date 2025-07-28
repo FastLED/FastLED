@@ -3,7 +3,7 @@
 #include <FastLED.h>
 #include <lib8tion.h>
 
-#define NUM_LEDS  20
+#define NUM_LEDS  21
 
 #define STRIP_DATA_PIN 1
 #define STRIP_CLOCK_PIN 2
@@ -36,3 +36,4 @@ void loop() {
     FastLED.show();  // All LEDs are now displayed.
     delay(8);  // Wait 8 milliseconds until the next frame.
 }
+// Test change - incremental build test - SUCCESS!

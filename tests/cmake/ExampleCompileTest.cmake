@@ -262,8 +262,12 @@ function(configure_example_compile_test)
     set(NON_FASTLED_INO_FILES)
     set(FASTLED_WRAPPER_FILES)
     set(NON_FASTLED_WRAPPER_FILES)
+    set(FASTLED_PCH_COMPATIBLE_FILES)
+    set(FASTLED_PCH_INCOMPATIBLE_FILES)
     set(FASTLED_COUNT 0)
     set(NON_FASTLED_COUNT 0)
+    set(PCH_COMPATIBLE_COUNT 0)
+    set(PCH_INCOMPATIBLE_COUNT 0)
     set(PCH_INCOMPATIBLE_FILES)
     set(HAS_PCH_INCOMPATIBLE_FILES FALSE)
     
@@ -288,11 +292,20 @@ function(configure_example_compile_test)
         prepare_ino_for_compilation(${INO_FILE} ${COMPILE_DIR} ${HAS_FASTLED} WRAPPER_FILE)
         list(APPEND COMPILE_INO_FILES ${WRAPPER_FILE})
         
-        # Separate FastLED and non-FastLED files for different compilation settings
+        # Separate FastLED files into PCH-compatible and PCH-incompatible
         if(HAS_FASTLED)
             list(APPEND FASTLED_INO_FILES ${INO_FILE})
             list(APPEND FASTLED_WRAPPER_FILES ${WRAPPER_FILE})
             math(EXPR FASTLED_COUNT "${FASTLED_COUNT} + 1")
+            
+            # Further separate by PCH compatibility
+            if(IS_PCH_INCOMPATIBLE)
+                list(APPEND FASTLED_PCH_INCOMPATIBLE_FILES ${WRAPPER_FILE})
+                math(EXPR PCH_INCOMPATIBLE_COUNT "${PCH_INCOMPATIBLE_COUNT} + 1")
+            else()
+                list(APPEND FASTLED_PCH_COMPATIBLE_FILES ${WRAPPER_FILE})
+                math(EXPR PCH_COMPATIBLE_COUNT "${PCH_COMPATIBLE_COUNT} + 1")
+            endif()
         else()
             list(APPEND NON_FASTLED_INO_FILES ${INO_FILE})
             list(APPEND NON_FASTLED_WRAPPER_FILES ${WRAPPER_FILE})
@@ -302,13 +315,18 @@ function(configure_example_compile_test)
     
     # Report PCH incompatible files
     if(HAS_PCH_INCOMPATIBLE_FILES)
-        list(LENGTH PCH_INCOMPATIBLE_FILES PCH_INCOMPATIBLE_COUNT)
-        message(STATUS "[PCH-DISABLE] Found ${PCH_INCOMPATIBLE_COUNT} PCH-incompatible file(s) - PCH will be disabled")
-        message(STATUS "   Reasons: #define before FastLED.h OR no FastLED inclusion")
+        list(LENGTH PCH_INCOMPATIBLE_FILES TOTAL_PCH_INCOMPATIBLE_COUNT)
+        message(STATUS "[PCH-ANALYSIS] Found ${TOTAL_PCH_INCOMPATIBLE_COUNT} PCH-incompatible file(s) - using selective PCH")
+        message(STATUS "   FastLED PCH-compatible: ${PCH_COMPATIBLE_COUNT} examples (will use PCH for speed)")
+        message(STATUS "   FastLED PCH-incompatible: ${PCH_INCOMPATIBLE_COUNT} examples (will compile without PCH)")
+        message(STATUS "   Non-FastLED: ${NON_FASTLED_COUNT} examples (will compile without PCH)")
+        message(STATUS "   Reasons for PCH incompatibility: #define before FastLED.h OR no FastLED inclusion")
         foreach(INCOMPATIBLE_FILE ${PCH_INCOMPATIBLE_FILES})
             get_filename_component(FILE_NAME ${INCOMPATIBLE_FILE} NAME)
             message(STATUS "   -> ${FILE_NAME}")
         endforeach()
+    else()
+        message(STATUS "[PCH-ANALYSIS] All ${FASTLED_COUNT} FastLED examples are PCH-compatible (optimal performance)")
     endif()
     
     # Store results for use by other functions
@@ -317,18 +335,21 @@ function(configure_example_compile_test)
     set(EXAMPLE_NON_FASTLED_INO_FILES ${NON_FASTLED_INO_FILES} PARENT_SCOPE)
     set(EXAMPLE_FASTLED_WRAPPER_FILES ${FASTLED_WRAPPER_FILES} PARENT_SCOPE)
     set(EXAMPLE_NON_FASTLED_WRAPPER_FILES ${NON_FASTLED_WRAPPER_FILES} PARENT_SCOPE)
+    set(EXAMPLE_FASTLED_PCH_COMPATIBLE_FILES ${FASTLED_PCH_COMPATIBLE_FILES} PARENT_SCOPE)
+    set(EXAMPLE_FASTLED_PCH_INCOMPATIBLE_FILES ${FASTLED_PCH_INCOMPATIBLE_FILES} PARENT_SCOPE)
     set(EXAMPLE_COMPILE_DIR ${COMPILE_DIR} PARENT_SCOPE)
+    set(HAS_PCH_INCOMPATIBLE_FILES ${HAS_PCH_INCOMPATIBLE_FILES} PARENT_SCOPE)
+    set(PCH_COMPATIBLE_COUNT ${PCH_COMPATIBLE_COUNT} PARENT_SCOPE)
+    set(PCH_INCOMPATIBLE_COUNT ${PCH_INCOMPATIBLE_COUNT} PARENT_SCOPE)
     set(FASTLED_PCH_HEADER ${FASTLED_PCH_HEADER} PARENT_SCOPE)
     set(FASTLED_PCH_FILE ${FASTLED_PCH_FILE} PARENT_SCOPE)
-    set(HAS_PCH_INCOMPATIBLE_FILES ${HAS_PCH_INCOMPATIBLE_FILES} PARENT_SCOPE)
     
-    list(LENGTH INO_FILES TOTAL_COUNT)
-    message(STATUS "Example compilation prepared:")
-    message(STATUS "  Total examples: ${TOTAL_COUNT}")
-    message(STATUS "  With FastLED: ${FASTLED_COUNT}")
-    message(STATUS "  Without FastLED: ${NON_FASTLED_COUNT}")
-    message(STATUS "  Compile directory: ${COMPILE_DIR}")
-    message(STATUS "  Method: Direct .ino compilation (no stub files needed)")
+    message(STATUS "-- Discovered ${FASTLED_COUNT} .ino examples for compilation testing")
+    message(STATUS "--   Total examples: ${FASTLED_COUNT}")
+    message(STATUS "--   With FastLED: ${FASTLED_COUNT}")
+    message(STATUS "--   Without FastLED: ${NON_FASTLED_COUNT}")
+    message(STATUS "--   PCH-compatible: ${PCH_COMPATIBLE_COUNT}")
+    message(STATUS "--   PCH-incompatible: ${PCH_INCOMPATIBLE_COUNT}")
 endfunction()
 
 # Function to create example compilation test target using direct .ino compilation
@@ -438,25 +459,25 @@ function(create_example_compile_test_target)
     message(STATUS "CMAKE_BUILD_TYPE: ${CMAKE_BUILD_TYPE}")
     message(STATUS "=========================================")
     
-    # Create compilation test target with FastLED examples
-    if(EXAMPLE_FASTLED_WRAPPER_FILES)
-        add_library(example_compile_fastled_objects OBJECT ${EXAMPLE_FASTLED_WRAPPER_FILES})
+    # Create compilation test target with PCH-compatible FastLED examples
+    if(EXAMPLE_FASTLED_PCH_COMPATIBLE_FILES)
+        add_library(example_compile_fastled_pch_objects OBJECT ${EXAMPLE_FASTLED_PCH_COMPATIBLE_FILES})
         
         # Set compiler for this target if using Clang-CL
         if(USE_CLANG_CL)
-            set_target_properties(example_compile_fastled_objects PROPERTIES
+            set_target_properties(example_compile_fastled_pch_objects PROPERTIES
                 CXX_COMPILER_LAUNCHER ""
             )
             # Use CMAKE_CXX_COMPILER_LAUNCHER to override compiler
-            set_property(TARGET example_compile_fastled_objects PROPERTY 
+            set_property(TARGET example_compile_fastled_pch_objects PROPERTY 
                 CXX_COMPILER "${EXAMPLE_COMPILER}")
         endif()
         
         # Apply fast compilation flags
-        target_compile_options(example_compile_fastled_objects PRIVATE ${FAST_COMPILE_FLAGS})
+        target_compile_options(example_compile_fastled_pch_objects PRIVATE ${FAST_COMPILE_FLAGS})
         
         # Set include directories - arduino_compat.h available in cmake directory
-        target_include_directories(example_compile_fastled_objects PRIVATE
+        target_include_directories(example_compile_fastled_pch_objects PRIVATE
             ${CMAKE_CURRENT_SOURCE_DIR}/cmake         # arduino_compat.h
             ${CMAKE_CURRENT_SOURCE_DIR}/../src        # FastLED headers
             ${CMAKE_CURRENT_SOURCE_DIR}/../src/platforms/wasm/compiler
@@ -464,13 +485,10 @@ function(create_example_compile_test_target)
             ${EXAMPLE_COMPILE_DIR}
         )
         
-        # Enable precompiled headers for FastLED examples (major speed boost)
-        # But disable PCH if any examples have #define before FastLED.h inclusion
-        if(FASTLED_PCH_HEADER AND CMAKE_VERSION VERSION_GREATER_EQUAL "3.16" AND NOT HAS_PCH_INCOMPATIBLE_FILES)
-            target_precompile_headers(example_compile_fastled_objects PRIVATE ${FASTLED_PCH_HEADER})
-            message(STATUS "[PCH-ENABLED] PCH enabled for FastLED examples (major speed boost!)")
-        elseif(HAS_PCH_INCOMPATIBLE_FILES)
-            message(STATUS "[PCH-DISABLED] PCH disabled - examples have #define before FastLED.h (causes compilation conflicts)")
+        # Enable precompiled headers for PCH-compatible FastLED examples (major speed boost)
+        if(FASTLED_PCH_HEADER AND CMAKE_VERSION VERSION_GREATER_EQUAL "3.16")
+            target_precompile_headers(example_compile_fastled_pch_objects PRIVATE ${FASTLED_PCH_HEADER})
+            message(STATUS "[PCH-ENABLED] PCH enabled for ${PCH_COMPATIBLE_COUNT} FastLED examples (major speed boost!)")
         elseif(NOT CMAKE_VERSION VERSION_GREATER_EQUAL "3.16")
             message(STATUS "[PCH-UNAVAILABLE] PCH not available (CMake < 3.16)")
         else()
@@ -478,7 +496,7 @@ function(create_example_compile_test_target)
         endif()
         
         # Define preprocessor symbols for compatibility
-        target_compile_definitions(example_compile_fastled_objects PRIVATE
+        target_compile_definitions(example_compile_fastled_pch_objects PRIVATE
             FASTLED_EXAMPLE_COMPILE_TEST=1
             ARDUINO_ARCH_WASM=1
             FASTLED_WASM=1
@@ -486,10 +504,50 @@ function(create_example_compile_test_target)
             FASTLED_STUB_IMPL=1
         )
         
-        # Note: We're now compiling wrapper .cpp files, not .ino files directly
+        list(LENGTH EXAMPLE_FASTLED_PCH_COMPATIBLE_FILES PCH_COMPATIBLE_COUNT_LOCAL)
+        message(STATUS "Created PCH-compatible FastLED target: example_compile_fastled_pch_objects (${PCH_COMPATIBLE_COUNT_LOCAL} files)")
+    endif()
+    
+    # Create compilation test target with PCH-incompatible FastLED examples
+    if(EXAMPLE_FASTLED_PCH_INCOMPATIBLE_FILES)
+        add_library(example_compile_fastled_no_pch_objects OBJECT ${EXAMPLE_FASTLED_PCH_INCOMPATIBLE_FILES})
         
-        list(LENGTH EXAMPLE_FASTLED_WRAPPER_FILES FASTLED_COUNT)
-        message(STATUS "Created FastLED example compilation target: example_compile_fastled_objects (${FASTLED_COUNT} files)")
+        # Set compiler for this target if using Clang-CL
+        if(USE_CLANG_CL)
+            set_target_properties(example_compile_fastled_no_pch_objects PROPERTIES
+                CXX_COMPILER_LAUNCHER ""
+            )
+            # Use CMAKE_CXX_COMPILER_LAUNCHER to override compiler
+            set_property(TARGET example_compile_fastled_no_pch_objects PROPERTY 
+                CXX_COMPILER "${EXAMPLE_COMPILER}")
+        endif()
+        
+        # Apply fast compilation flags
+        target_compile_options(example_compile_fastled_no_pch_objects PRIVATE ${FAST_COMPILE_FLAGS})
+        
+        # Set include directories - arduino_compat.h available in cmake directory
+        target_include_directories(example_compile_fastled_no_pch_objects PRIVATE
+            ${CMAKE_CURRENT_SOURCE_DIR}/cmake         # arduino_compat.h
+            ${CMAKE_CURRENT_SOURCE_DIR}/../src        # FastLED headers
+            ${CMAKE_CURRENT_SOURCE_DIR}/../src/platforms/wasm/compiler
+            ${CMAKE_CURRENT_SOURCE_DIR}/../examples   # Original .ino files
+            ${EXAMPLE_COMPILE_DIR}
+        )
+        
+        # NO PCH for these examples (they have #define before FastLED.h)
+        message(STATUS "[PCH-SKIPPED] PCH skipped for ${PCH_INCOMPATIBLE_COUNT} FastLED examples (have #define before FastLED.h)")
+        
+        # Define preprocessor symbols for compatibility
+        target_compile_definitions(example_compile_fastled_no_pch_objects PRIVATE
+            FASTLED_EXAMPLE_COMPILE_TEST=1
+            ARDUINO_ARCH_WASM=1
+            FASTLED_WASM=1
+            ARDUINO=10819
+            FASTLED_STUB_IMPL=1
+        )
+        
+        list(LENGTH EXAMPLE_FASTLED_PCH_INCOMPATIBLE_FILES PCH_INCOMPATIBLE_COUNT_LOCAL)
+        message(STATUS "Created PCH-incompatible FastLED target: example_compile_fastled_no_pch_objects (${PCH_INCOMPATIBLE_COUNT_LOCAL} files)")
     endif()
     
     # Create compilation test target with non-FastLED examples

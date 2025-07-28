@@ -611,46 +611,104 @@ This enhancement has been successfully implemented and significantly improves th
 
 ## 🎯 DIRECTIVE FOR NEXT AGENT
 
-### ✅ STATUS: FEATURE COMPLETE - NO FURTHER WORK NEEDED
+### 🚨 CRITICAL PERFORMANCE ISSUE DISCOVERED - PCH COMPLETELY DISABLED
 
-The Enhanced Example Compilation Test Reporting feature is **FULLY OPERATIONAL** and requires no additional development. All objectives have been achieved:
+**URGENT**: The Enhanced Example Compilation Test Reporting feature has **CATASTROPHIC PERFORMANCE ISSUES** due to a flawed PCH (Precompiled Headers) implementation.
 
-1. **✅ Ultra-Fast Caching**: 0.10s cached builds (300x performance improvement)
-2. **✅ Comprehensive Error Detection**: Validates all 80 .ino files, catches syntax errors
-3. **✅ Detailed Timing**: Timestamped logging for complete visibility
-4. **✅ Robust Cache Logic**: Fixed timestamp comparison bug, works reliably
-5. **✅ System Information**: OS, compiler, CPU, memory reporting
-6. **✅ sccache Integration**: Proper detection and utilization
+### 🐛 **ROOT CAUSE IDENTIFIED**
 
-### 🚀 PERFORMANCE VERIFICATION
+**Problem**: 17 out of 80 examples have `#define` statements before `#include <FastLED.h>`, causing the CMake build system to **completely disable PCH for ALL 80 examples**.
 
-**To verify the feature works correctly:**
-
-```bash
-# First run (should take ~17-20s)
-bash test --examples
-
-# Second run (should take ~0.10s)  
-bash test --examples
+**Evidence from CMake output**:
+```
+-- [PCH-DISABLE] Found 17 PCH-incompatible file(s) - PCH will be disabled
+--    Reasons: #define before FastLED.h OR no FastLED inclusion
+-- [PCH-DISABLED] PCH disabled - examples have #define before FastLED.h
 ```
 
-**Expected output for cached build:**
-```
-[  0.10s] [CACHE] Ultra-fast cached build detected!
-[  0.10s] [CACHE] ALL examples unchanged since [timestamp]
-[  0.10s] [TIMING] Total: 0.10s
+**Impact**: 
+- ❌ **WITHOUT PCH**: 87+ seconds compilation (current)
+- ✅ **WITH PCH**: ~5-10 seconds compilation (expected)
+- 🔥 **Performance loss**: 8-17x slower than designed!
+
+### 📋 **EXAMPLES CAUSING PCH TO BE DISABLED**
+
+Based on CMake detection, these examples have `#define` before FastLED:
+- `Animartrix.ino` - `FL_ANIMARTRIX_USES_FAST_MATH`
+- `Apa102HDOverride.ino` - `FASTLED_FIVE_BIT_HD_BITSHIFT_FUNCTION_OVERRIDE`
+- `Esp32S3I2SDemo.ino` - `FASTLED_USES_ESP32S3_I2S`
+- `EspI2SDemo.ino` - `FASTLED_ESP32_I2S`
+- `FxGfx2Video.ino` - `COMPILE_VIDEO_STREAM`
+- `FxPacifica.ino` - `FASTLED_ALLOW_INTERRUPTS`
+- `LuminescentGrand.ino` - Multiple defines
+- `Pacifica.ino` - `FASTLED_ALLOW_INTERRUPTS`
+- `TeensyMassiveParallel.ino` - `FASTLED_USES_OBJECTFLED`
+- `TeensyParallel.ino` - `FASTLED_USES_OBJECTFLED`
+- And 7 examples without FastLED
+
+### 🎯 **SOLUTION REQUIRED**
+
+**The next agent MUST implement a selective PCH system**:
+
+1. **✅ Enable PCH for compatible examples** (~63 examples without defines)
+2. **✅ Disable PCH only for incompatible examples** (~17 examples with defines)  
+3. **✅ Create separate build targets** with different PCH configurations
+
+**Implementation Strategy**:
+```cmake
+# GOOD - Selective approach
+if(NOT HAS_PCH_INCOMPATIBLE_FILES OR ACCEPTABLE_PCH_INCOMPATIBLE_COUNT)
+    target_precompile_headers(example_compile_fastled_pch_objects PRIVATE ${FASTLED_PCH_HEADER})
+    # 63 compatible examples with PCH - FAST compilation
+endif()
+
+# Separate target for incompatible examples
+add_library(example_compile_fastled_no_pch_objects OBJECT ${INCOMPATIBLE_WRAPPER_FILES})
+# 17 incompatible examples without PCH - slower but necessary
 ```
 
-### 📋 IF WORKING ON RELATED FEATURES
-
-**Only continue development if:**
-- User explicitly requests NEW features beyond current scope
-- Performance regressions are discovered (current: 0.10s cached, 17-20s fresh)
-- Cache detection fails (verified working with comprehensive file checking)
+### 🚨 **MANDATORY REQUIREMENTS**
 
 **DO NOT:**
-- Modify cache detection logic (now working correctly)
-- Change timestamp comparison (fixed to use newest-vs-newest)  
-- Optimize further without user request (already 300x faster)
+- ❌ Modify any `.ino` files (they are user examples)
+- ❌ Remove `#define` statements (they are functional requirements)
+- ❌ Keep the current "all-or-nothing" PCH logic
+
+**DO:**
+- ✅ Split examples into PCH-compatible and PCH-incompatible groups
+- ✅ Create separate compilation targets with different PCH settings
+- ✅ Verify that compatible examples get PCH benefits
+- ✅ Ensure timing reports show PCH generation (should be >0.0s)
+- ✅ Target: <10 seconds total compilation time for normal builds
+
+### 🎯 **SUCCESS CRITERIA**
+
+**Before Fix** (Current):
+```
+[TIMING] PCH generation: 0.00s
+[TIMING] Compilation: 87.38s
+[TIMING] Total: 92.05s
+```
+
+**After Fix** (Target):
+```
+[TIMING] PCH generation: 2.1s
+[TIMING] Compilation: 8.2s
+[TIMING] Total: 10.5s
+```
+
+**Verification Commands**:
+```bash
+# Should show PCH being generated and used
+rm -rf tests/.build-examples-all
+bash test --examples  # Should see PCH generation timing >0.0s
+```
+
+### 📍 **CRITICAL FILES TO MODIFY**
+
+- `tests/cmake/ExampleCompileTest.cmake` - Lines 305, 472 (PCH disable logic)
+- `ci/test_example_compilation.py` - Update timing detection logic
+
+**STATUS**: This is a **CRITICAL BLOCKER** for production use. The current 87-second build time makes the feature unusable for development workflows. Fix immediately.
 
 The system is production-ready and performing optimally.
