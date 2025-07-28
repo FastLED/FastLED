@@ -1,4 +1,5 @@
 
+#ifdef ESP32
 
 /// The Yves ESP32_S3 I2S driver is a driver that uses the I2S peripheral on the ESP32-S3 to drive leds.
 /// Originally from: https://github.com/hpwit/I2SClockLessLedDriveresp32s3
@@ -38,7 +39,6 @@
 
 #define FASTLED_USES_ESP32S3_I2S  // Must define this before including FastLED.h
 
-#ifdef ESP32
 
 #include "FastLED.h"
 #include "fl/assert.h"

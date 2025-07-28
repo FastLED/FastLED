@@ -19,7 +19,10 @@ Workflow:
 
 */
 
+
 #include "FastLED.h"
+#include "fl/compiler_control.h"
+
 
 #include "fl/assert.h"
 #include "fl/corkscrew.h"
@@ -416,11 +419,13 @@ void setup() {
     });
 }
 
+
+FL_OPTIMIZATION_LEVEL_O0_BEGIN // Works around a compile bug in clang 19
 float get_position(uint32_t now) {
     if (autoAdvance.value()) {
         // Check if auto-advance was just enabled
         // Auto-advance mode: increment smoothly from current position
-        float elapsedSeconds = (now - lastUpdateTime) / 1000.0f;
+        float elapsedSeconds = float(now - lastUpdateTime) / 1000.0f;
         float increment = elapsedSeconds * speed.value() *
                           0.3f; // Make it 1/20th the original speed
         currentPosition = fmodf(currentPosition + increment, 1.0f);
@@ -435,6 +440,7 @@ float get_position(uint32_t now) {
         return combinedPosition;
     }
 }
+FL_OPTIMIZATION_LEVEL_O0_END
 
 void fillFrameBufferNoise() {
     // Get current UI values

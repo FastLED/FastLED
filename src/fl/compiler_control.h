@@ -84,6 +84,24 @@
   #define FL_OPTIMIZATION_LEVEL_O3_END   /* nothing */
 #endif
 
+// Optimization Level O0 (Debug/No optimization)
+#if defined(__clang__)
+  #define FL_OPTIMIZATION_LEVEL_O0_BEGIN \
+    _Pragma("clang diagnostic push")
+
+  #define FL_OPTIMIZATION_LEVEL_O0_END   _Pragma("clang diagnostic pop")
+
+#elif defined(__GNUC__)
+  #define FL_OPTIMIZATION_LEVEL_O0_BEGIN \
+    _Pragma("GCC push_options") \
+    _Pragma("GCC optimize (\"O0\")")
+
+  #define FL_OPTIMIZATION_LEVEL_O0_END   _Pragma("GCC pop_options")
+#else
+  #define FL_OPTIMIZATION_LEVEL_O0_BEGIN /* nothing */
+  #define FL_OPTIMIZATION_LEVEL_O0_END   /* nothing */
+#endif
+
 // 6/29/2025 - Differences in all src vs individual compilation was 35 to 39 seconds.
 // #define FASTLED_ALL_SRC 0
 
