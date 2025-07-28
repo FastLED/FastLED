@@ -165,8 +165,8 @@ EaseType getEaseType(fl::string value) {
 }
 
 // Color boost controls
-UIDropdown saturationFunction("Saturation Function", easeInfo.begin(), easeInfo.end());
-UIDropdown luminanceFunction("Luminance Function", easeInfo.begin(), easeInfo.end());
+UIDropdown saturationFunction("Saturation Function", easeInfo);
+UIDropdown luminanceFunction("Luminance Function", easeInfo);
 
 // Fire-related UI controls (added for cylindrical fire effect)
 UISlider fireScaleXY("Fire Scale", 8, 1, 100, 1);              
