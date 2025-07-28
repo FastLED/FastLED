@@ -810,6 +810,12 @@ struct JsonValue {
         data.visit(visitor);
         return visitor.result;
     }
+    
+    // Returns true for both regular arrays AND specialized array types
+    bool is_array_like() const noexcept {
+        return is_array() || is_floats() || is_audio() || is_bytes();
+    }
+    
     bool is_object() const noexcept { 
         //FASTLED_WARN("is_object called, tag=" << data.tag());
         return data.is<JsonObject>(); 
@@ -1365,13 +1371,17 @@ struct JsonValue {
 
     // Contains methods for checking existence
     bool contains(size_t idx) const {
-        if (!is_array()) return false;
-        // Handle regular JsonArray
-        if (data.is<JsonArray>()) {
-            auto ptr = data.ptr<JsonArray>();
-            return ptr && idx < ptr->size();
+        if (is_array()) {
+            // Handle regular JsonArray
+            if (data.is<JsonArray>()) {
+                auto ptr = data.ptr<JsonArray>();
+                return ptr && idx < ptr->size();
+            }
+            // This should not happen since is_array() only returns true for JsonArray
+            return false;
         }
-        // Handle specialized array types
+        
+        // Handle specialized array types (these return false for is_array())
         if (data.is<fl::vector<int16_t>>()) {
             auto ptr = data.ptr<fl::vector<int16_t>>();
             return ptr && idx < ptr->size();
@@ -1416,20 +1426,25 @@ struct JsonValue {
                 auto ptr = data.ptr<JsonArray>();
                 return ptr ? ptr->size() : 0;
             }
-            // Handle specialized array types
-            if (data.is<fl::vector<int16_t>>()) {
-                auto ptr = data.ptr<fl::vector<int16_t>>();
-                return ptr ? ptr->size() : 0;
-            }
-            if (data.is<fl::vector<uint8_t>>()) {
-                auto ptr = data.ptr<fl::vector<uint8_t>>();
-                return ptr ? ptr->size() : 0;
-            }
-            if (data.is<fl::vector<float>>()) {
-                auto ptr = data.ptr<fl::vector<float>>();
-                return ptr ? ptr->size() : 0;
-            }
-        } else if (is_object()) {
+            // This should not happen since is_array() only returns true for JsonArray
+            return 0;
+        }
+        
+        // Handle specialized array types (these return false for is_array())
+        if (data.is<fl::vector<int16_t>>()) {
+            auto ptr = data.ptr<fl::vector<int16_t>>();
+            return ptr ? ptr->size() : 0;
+        }
+        if (data.is<fl::vector<uint8_t>>()) {
+            auto ptr = data.ptr<fl::vector<uint8_t>>();
+            return ptr ? ptr->size() : 0;
+        }
+        if (data.is<fl::vector<float>>()) {
+            auto ptr = data.ptr<fl::vector<float>>();
+            return ptr ? ptr->size() : 0;
+        }
+        
+        if (is_object()) {
             auto ptr = data.ptr<JsonObject>();
             return ptr ? ptr->size() : 0;
         }
@@ -1666,6 +1681,7 @@ public:
     bool is_double() const { return m_value && m_value->is_double(); }
     bool is_string() const { return m_value && m_value->is_string(); }
     bool is_array() const { return m_value && m_value->is_array(); }
+    bool is_array_like() const { return m_value && m_value->is_array_like(); }
     bool is_object() const { return m_value && m_value->is_object(); }
     bool is_audio() const { return m_value && m_value->is_audio(); }
     bool is_bytes() const { return m_value && m_value->is_bytes(); }
@@ -1784,11 +1800,10 @@ public:
         if (!m_value) {
             m_value = fl::make_shared<JsonValue>(JsonArray{});
         }
-        // If we're indexing into a packed array, convert it to regular JsonArray first
-        if (m_value->is_array() && 
-            (m_value->data.is<fl::vector<int16_t>>() || 
-             m_value->data.is<fl::vector<uint8_t>>() || 
-             m_value->data.is<fl::vector<float>>())) {
+        // If we're indexing into a specialized array, convert it to regular JsonArray first
+        if (m_value->data.is<fl::vector<int16_t>>() || 
+            m_value->data.is<fl::vector<uint8_t>>() || 
+            m_value->data.is<fl::vector<float>>()) {
             // Convert to regular JsonArray
             auto arr = m_value->as_array();
             if (arr) {
@@ -1812,7 +1827,7 @@ public:
     }
     
     const Json operator[](size_t idx) const {
-        if (!m_value || !m_value->is_array()) {
+        if (!m_value) {
             return Json(nullptr);
         }
         // Handle regular JsonArray
@@ -1822,7 +1837,7 @@ public:
                 return Json((*arr)[idx]);
             }
         }
-        // For packed arrays, we need to convert them to regular arrays first
+        // For specialized arrays, we need to convert them to regular arrays first
         // This is needed for compatibility with existing code that expects JsonArray
         if (m_value->data.is<fl::vector<int16_t>>() || 
             m_value->data.is<fl::vector<uint8_t>>() || 

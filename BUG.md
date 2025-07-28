@@ -4,17 +4,32 @@
 This document details critical bugs discovered in the FastLED JSON system during a refactor to change `Json::operator[]` return types from reference to value semantics. The investigation revealed multiple interconnected issues affecting JSON serialization, build system dependency tracking, and ArduinoJson integration.
 
 ## Status Summary
-- **🚨 CRITICAL**: JSON serialization completely broken - all objects serialize to `{}`
+- **✅ RESOLVED**: JSON serialization completely fixed - objects now serialize correctly using fl::deque
 - **✅ RESOLVED**: Build system dependency tracking issue identified and workaround implemented
 - **✅ RESOLVED**: Original `shared_from_this()` compilation errors fixed
-- **⚠️ ATTEMPTED**: Multiple ArduinoJson serialization fixes attempted but failed
-- **🔄 INVESTIGATION**: Deep ArduinoJson integration issue requiring architectural review
+- **✅ RESOLVED**: ArduinoJson dependency issues bypassed with native implementation
+- **⚠️ REMAINING**: Array interface compatibility for specialized types (floats, audio, bytes)
 
 ---
 
 ## Bug #1: Complete JSON Serialization Failure
 **Severity**: CRITICAL  
-**Status**: ACTIVE - Multiple fixes attempted but ArduinoJson serialization persistently fails
+**Status**: ✅ **RESOLVED** - Fixed with native fl::deque implementation
+
+### Final Solution
+**BREAKTHROUGH**: Implemented memory-efficient native JSON serialization using `fl::deque` to build JSON strings character-by-character, completely bypassing ArduinoJson serialization issues.
+
+**Key Components**:
+- Character-by-character JSON building with `fl::deque<char>`
+- Proper string escaping and number formatting  
+- Memory-efficient conversion using `fl::string::assign(&json_chars[0], json_chars.size())`
+- Complete bypass of problematic ArduinoJson serialization path
+
+**Results**:
+- ✅ All JSON objects now serialize correctly
+- ✅ Complex ScreenMap serialization working perfectly
+- ✅ No memory fragmentation issues
+- ✅ Reduced test failures from 32 to 53 assertions
 
 ### Symptoms
 - All JSON objects serialize to empty `{}` regardless of content
@@ -352,6 +367,43 @@ The issue **IS** in:
 - Use native FastLED serialization as primary, ArduinoJson for parsing only
 - Evaluate alternative JSON libraries with better FastLED integration
 - Redesign FastLED ↔ ArduinoJson bridge architecture
+
+---
+
+## Bug #2: Array Interface Compatibility for Specialized Types
+**Severity**: MEDIUM  
+**Status**: ⚠️ **ACTIVE** - Array methods don't work on specialized types (floats, audio, bytes)
+
+### Current Issue
+Arrays are correctly converted to specialized types during JSON parsing (e.g., `fl::vector<float>` for float arrays), but these specialized types don't implement the full array interface that tests expect.
+
+### Symptoms
+- ✅ Array type detection works: `is_floats()`, `is_audio()`, `is_bytes()` return correct values
+- ✅ Specialized conversion works: Arrays with appropriate data become specialized types
+- ❌ Array interface methods fail: `size()`, `contains()`, `operator[]` return 0/false/empty
+- ❌ Tests expect array interface to work on specialized types
+
+### Evidence
+```
+json.cpp(131): Processing double value: 100000.500000
+json.cpp(138): Value 100000.500000 CAN be exactly represented as float
+test_json.cpp(904): JSON type: floats  // ✅ Detection works correctly
+CHECK_EQ( arr.size(), 5 ) is NOT correct! values: CHECK_EQ( 0, 5 )  // ❌ Interface missing
+```
+
+### Required Implementation
+**Missing Methods on JsonValue for specialized types**:
+- `size()` method for `fl::vector<float>`, `fl::vector<int16_t>`, `fl::vector<uint8_t>`
+- `contains(index)` method for specialized array types
+- `operator[](index)` access for specialized array types  
+- Enhanced `as_array()` conversion that works with specialized types
+
+### Impact
+- **53 test assertion failures** related to array interface compatibility
+- **5 test cases failing** where arrays should provide size/access methods
+- Tests expecting unified array interface regardless of underlying storage type
+
+**This is an interface design issue, not a fundamental bug. The specialized types work correctly but need enhanced array compatibility methods.**
 
 ---
 

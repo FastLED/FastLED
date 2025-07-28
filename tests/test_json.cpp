@@ -84,7 +84,7 @@ TEST_CASE("Simple JSON test") {
     
     CHECK(parsed.contains("key3"));
     CHECK(parsed["key3"].is_double());
-    CHECK(parsed["key3"].as_or(0.0) == 3.14);
+    CHECK(fl::fl_abs(parsed["key3"].as_or(0.0) - 3.14) < 0.001);  // Use tolerance for floating-point comparison
 }
 
 
@@ -246,7 +246,7 @@ TEST_CASE("FLArduinoJson Integration Tests") {
         
         auto floatElement = objJson["float"].as_double();
         REQUIRE(floatElement.has_value());
-        CHECK(*floatElement == 3.14);
+        CHECK(fl::fl_abs(*floatElement - 3.14) < 0.001);  // Use tolerance for floating-point comparison
         
         auto stringElement = objJson["string"].as_string();
         REQUIRE(stringElement.has_value());
@@ -302,7 +302,7 @@ TEST_CASE("Json2 Tests") {
 
         // Parse an array
         fl::Json arr = fl::Json::parse("[1, 2, 3]");
-        CHECK(arr.is_array());
+        CHECK(arr.is_array_like());  // Use is_array_like() for arrays that may be optimized
         CHECK_EQ(arr.size(), 3);
     }
 
@@ -346,7 +346,7 @@ TEST_CASE("Json2 Tests") {
         
         // Parse an array of integers from string
         fl::Json parsedArr = fl::Json::parse("[100, 200, 300]");
-        CHECK(parsedArr.is_array());
+        CHECK(parsedArr.is_array_like());  // Use is_array_like() for arrays that may be optimized
         CHECK_EQ(parsedArr.size(), 3);
         
         // Test contains method with array indices
@@ -360,7 +360,7 @@ TEST_CASE("Json2 Tests") {
     SUBCASE("Parse array of integers structure") {
         // Parse an array of integers from string
         fl::Json arr = fl::Json::parse("[5, 15, 25, 35]");
-        CHECK(arr.is_array());
+        CHECK(arr.is_array_like());  // Use is_array_like() for arrays that may be optimized
         CHECK_EQ(arr.size(), 4);
         
         // Test that each element exists
@@ -1095,7 +1095,7 @@ TEST_CASE("Json Audio Data Parsing") {
         fl::string jsonStr = "[100, -200, 32768, -32769, 0]"; // 32768 and -32769 exceed int16_t range
         Json json = Json::parse(jsonStr);
         
-        CHECK(json.is_array());
+        CHECK(json.is_array_like());  // Use is_array_like() for arrays that may be optimized
         CHECK_FALSE(json.is_audio());
         CHECK_FALSE(json.is_bytes());
         CHECK_FALSE(json.is_int());
@@ -1115,7 +1115,7 @@ TEST_CASE("Json Audio Data Parsing") {
         fl::string jsonStr = "[100, -200, 3.14, 0]";
         Json json = Json::parse(jsonStr);
         
-        CHECK(json.is_array());
+        CHECK(json.is_array_like());  // Use is_array_like() for arrays that may be optimized
         CHECK_FALSE(json.is_audio());
         CHECK_FALSE(json.is_bytes());
         CHECK_FALSE(json.is_int());

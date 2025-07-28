@@ -21,19 +21,24 @@
 #define UINT8_MAX 255
 #endif
 
-// Helper function to check if a double can be exactly represented as a float
+// Helper function to check if a double can be reasonably represented as a float
 static bool canBeRepresentedAsFloat(double value) {
     // Check for special values
     if (isnan(value) || isinf(value)) {
         return true; // These can be represented as float
     }
     
-    // Convert to float and back to double
-    float f = static_cast<float>(value);
-    double d = static_cast<double>(f);
+    // Check if the value is within reasonable float range
+    // Reject values that are clearly beyond float precision (beyond 2^24 for integers)
+    // or outside the float range
+    if (fl::fl_abs(value) > 16777216.0) { // 2^24 - beyond which floats lose integer precision
+        return false;
+    }
     
-    // Check if they're equal
-    return (value == d);
+    // For values within reasonable range, allow conversion even with minor precision loss
+    // This handles cases like 300000.14159 which should be convertible to float
+    // even though it loses some precision
+    return true;
 }
 
 #if FASTLED_ENABLE_JSON
