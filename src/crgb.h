@@ -712,7 +712,76 @@ struct CRGB {
         FairyLight=0xFFE42D,           ///< @htmlcolorblock{FFE42D}
 
         // If you are using no color correction, use this
-        FairyLightNCC=0xFF9D2A         ///< @htmlcolorblock{FFE42D}
+        FairyLightNCC=0xFF9D2A,         ///< @htmlcolorblock{FFE42D}
+
+        // TCL Color Extensions - Essential additions for LED programming
+        // These colors provide useful grayscale levels and color variants
+        
+        // Essential grayscale levels (0-100 scale for precise dimming)
+        Gray0=0x000000,                ///< TCL grayscale 0% @htmlcolorblock{000000}
+        Gray10=0x1A1A1A,               ///< TCL grayscale 10% @htmlcolorblock{1A1A1A}
+        Gray25=0x404040,               ///< TCL grayscale 25% @htmlcolorblock{404040}
+        Gray50=0x7F7F7F,               ///< TCL grayscale 50% @htmlcolorblock{7F7F7F}
+        Gray75=0xBFBFBF,               ///< TCL grayscale 75% @htmlcolorblock{BFBFBF}
+        Gray100=0xFFFFFF,              ///< TCL grayscale 100% @htmlcolorblock{FFFFFF}
+        
+        // Alternative grey spellings
+        Grey0=0x000000,                ///< TCL grayscale 0% @htmlcolorblock{000000}
+        Grey10=0x1A1A1A,               ///< TCL grayscale 10% @htmlcolorblock{1A1A1A}
+        Grey25=0x404040,               ///< TCL grayscale 25% @htmlcolorblock{404040}
+        Grey50=0x7F7F7F,               ///< TCL grayscale 50% @htmlcolorblock{7F7F7F}
+        Grey75=0xBFBFBF,               ///< TCL grayscale 75% @htmlcolorblock{BFBFBF}
+        Grey100=0xFFFFFF,              ///< TCL grayscale 100% @htmlcolorblock{FFFFFF}
+        
+        // Primary color variants (1-4 intensity levels)
+        Red1=0xFF0000,                 ///< TCL red variant 1 (brightest) @htmlcolorblock{FF0000}
+        Red2=0xEE0000,                 ///< TCL red variant 2 @htmlcolorblock{EE0000}
+        Red3=0xCD0000,                 ///< TCL red variant 3 @htmlcolorblock{CD0000}
+        Red4=0x8B0000,                 ///< TCL red variant 4 (darkest) @htmlcolorblock{8B0000}
+        
+        Green1=0x00FF00,               ///< TCL green variant 1 (brightest) @htmlcolorblock{00FF00}
+        Green2=0x00EE00,               ///< TCL green variant 2 @htmlcolorblock{00EE00}
+        Green3=0x00CD00,               ///< TCL green variant 3 @htmlcolorblock{00CD00}
+        Green4=0x008B00,               ///< TCL green variant 4 (darkest) @htmlcolorblock{008B00}
+        
+        Blue1=0x0000FF,                ///< TCL blue variant 1 (brightest) @htmlcolorblock{0000FF}
+        Blue2=0x0000EE,                ///< TCL blue variant 2 @htmlcolorblock{0000EE}
+        Blue3=0x0000CD,                ///< TCL blue variant 3 @htmlcolorblock{0000CD}
+        Blue4=0x00008B,                ///< TCL blue variant 4 (darkest) @htmlcolorblock{00008B}
+        
+        // Useful warm color variants for LED ambience
+        Orange1=0xFFA500,              ///< TCL orange variant 1 @htmlcolorblock{FFA500}
+        Orange2=0xEE9A00,              ///< TCL orange variant 2 @htmlcolorblock{EE9A00}
+        Orange3=0xCD8500,              ///< TCL orange variant 3 @htmlcolorblock{CD8500}
+        Orange4=0x8B5A00,              ///< TCL orange variant 4 @htmlcolorblock{8B5A00}
+        
+        Yellow1=0xFFFF00,              ///< TCL yellow variant 1 @htmlcolorblock{FFFF00}
+        Yellow2=0xEEEE00,              ///< TCL yellow variant 2 @htmlcolorblock{EEEE00}
+        Yellow3=0xCDCD00,              ///< TCL yellow variant 3 @htmlcolorblock{CDCD00}
+        Yellow4=0x8B8B00,              ///< TCL yellow variant 4 @htmlcolorblock{8B8B00}
+        
+        // Popular LED colors for effects
+        Cyan1=0x00FFFF,                ///< TCL cyan variant 1 @htmlcolorblock{00FFFF}
+        Cyan2=0x00EEEE,                ///< TCL cyan variant 2 @htmlcolorblock{00EEEE}
+        Cyan3=0x00CDCD,                ///< TCL cyan variant 3 @htmlcolorblock{00CDCD}
+        Cyan4=0x008B8B,                ///< TCL cyan variant 4 @htmlcolorblock{008B8B}
+        
+        Magenta1=0xFF00FF,             ///< TCL magenta variant 1 @htmlcolorblock{FF00FF}
+        Magenta2=0xEE00EE,             ///< TCL magenta variant 2 @htmlcolorblock{EE00EE}
+        Magenta3=0xCD00CD,             ///< TCL magenta variant 3 @htmlcolorblock{CD00CD}
+        Magenta4=0x8B008B,             ///< TCL magenta variant 4 @htmlcolorblock{8B008B}
+        
+        // Additional useful colors for LED programming
+        VioletRed=0xD02090,            ///< TCL violet red @htmlcolorblock{D02090}
+        DeepPink1=0xFF1493,            ///< TCL deep pink variant 1 @htmlcolorblock{FF1493}
+        DeepPink2=0xEE1289,            ///< TCL deep pink variant 2 @htmlcolorblock{EE1289}
+        DeepPink3=0xCD1076,            ///< TCL deep pink variant 3 @htmlcolorblock{CD1076}
+        DeepPink4=0x8B0A50,            ///< TCL deep pink variant 4 @htmlcolorblock{8B0A50}
+        
+        Gold1=0xFFD700,                ///< TCL gold variant 1 @htmlcolorblock{FFD700}
+        Gold2=0xEEC900,                ///< TCL gold variant 2 @htmlcolorblock{EEC900}
+        Gold3=0xCDAD00,                ///< TCL gold variant 3 @htmlcolorblock{CDAD00}
+        Gold4=0x8B7500                 ///< TCL gold variant 4 @htmlcolorblock{8B7500}
 
     } HTMLColorCode;
 };
