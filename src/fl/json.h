@@ -221,13 +221,25 @@ struct DefaultValueVisitor {
         storage = converted;
         result = &storage;
     }
+    
+    // Special handling for floating point to floating point conversion
+    template<typename U>
+    typename fl::enable_if<fl::is_floating_point<T>::value && fl::is_floating_point<U>::value && !fl::is_same<T, U>::value, void>::type
+    operator()(const U& value) {
+        // Convert between floating point types (e.g., double to float)
+        T converted = static_cast<T>(value);
+        static T storage;
+        storage = converted;
+        result = &storage;
+    }
 
     // Generic overload for all other types
     template<typename U>
     typename fl::enable_if<
         !(fl::is_integral<T>::value && fl::is_integral<U>::value) &&
         !(fl::is_integral<T>::value && fl::is_floating_point<U>::value) &&
-        !(fl::is_floating_point<T>::value && fl::is_integral<U>::value),
+        !(fl::is_floating_point<T>::value && fl::is_integral<U>::value) &&
+        !(fl::is_floating_point<T>::value && fl::is_floating_point<U>::value && !fl::is_same<T, U>::value),
         void>::type
     operator()(const U&) {
         // Do nothing for other types
