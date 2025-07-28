@@ -6,6 +6,7 @@
 #include "fl/function.h"
 #include "fl/sketch_macros.h"
 #include "fl/math.h" // For floor function
+#include "fl/compiler_control.h"
 
 // Define INT16_MIN, INT16_MAX, and UINT8_MAX if not already defined
 #ifndef INT16_MIN
@@ -21,6 +22,9 @@
 #endif
 
 // Helper function to check if a double can be reasonably represented as a float
+// Used for debug logging - may appear unused in release builds
+FL_DISABLE_WARNING_PUSH
+FL_DISABLE_WARNING(unused-function)
 static bool canBeRepresentedAsFloat(double value) {
     // Check for special values
     if (isnan(value) || isinf(value)) {
@@ -39,6 +43,7 @@ static bool canBeRepresentedAsFloat(double value) {
     // even though it loses some precision
     return true;
 }
+FL_DISABLE_WARNING_POP
 
 #if FASTLED_ENABLE_JSON
 
@@ -178,14 +183,6 @@ fl::shared_ptr<JsonValue> JsonValue::parse(const fl::string& txt) {
                 }
                 
                 // Special handling for float arrays - always prefer float arrays for ScreenMap use case
-                // Check if all values are numeric (even if they don't fit in smaller types)
-                bool allNumeric = true;
-                for (const auto& item : arr) {
-                    if (!item.is<int32_t>() && !item.is<int64_t>() && !item.is<double>()) {
-                        allNumeric = false;
-                        break;
-                    }
-                }
                 
                 // Determine the optimal array type based on the flags
                 ArrayType arrayType = GENERIC_ARRAY;
