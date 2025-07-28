@@ -11,6 +11,13 @@ FastLED 3.10.2
     * Uses 16-bit precision internally, returns 8-bit values for drop-in replacement
     * Alternative noise patterns with different coordinate scaling characteristics
     * FxNoiseRing example updated to demonstrate usage
+  * **Adafruit_NeoPixel Integration**: Optional Adafruit_NeoPixel clockless controller support
+    * Enable with `#define FASTLED_USE_ADAFRUIT_NEOPIXEL 1` before including FastLED
+    * Provides modular `AdafruitLikeClocklessT` template driver for extensibility
+    * Leverages Adafruit_NeoPixel's proven platform-specific optimizations within FastLED ecosystem
+    * Drop-in replacement for standard FastLED clockless controllers with identical template signature
+    * Requires Adafruit_NeoPixel library to be included before FastLED
+    * Useful for environments where Adafruit_NeoPixel provides better platform compatibility
   * New LED chipset: SM16824E
     * 3-Wire
     * See also: https://github.com/FastLED/FastLED/issues/1941#issuecomment-2981643952
