@@ -39,9 +39,9 @@ def test_clang_accessibility_class():
     compiler = FastLEDClangCompiler(settings)
 
     # Test 1: Version check
-    success, version, error = compiler.check_clang_version()
-    assert success, f"Version check failed: {error}"
-    print(f"[OK] clang++ version: {version}")
+    version_result = compiler.check_clang_version()
+    assert version_result.success, f"Version check failed: {version_result.error}"
+    print(f"[OK] clang++ version: {version_result.version}")
 
     # Test 2: Find .ino files
     ino_files = compiler.find_ino_files(
@@ -113,12 +113,14 @@ def test_compiler_configuration():
         compiler = FastLEDClangCompiler(settings)
 
         # Just test version check for each config
-        success, version, error = compiler.check_clang_version()
-        if success:
-            print(f"[OK] {test_config['name']}: {version}")
+        version_result = compiler.check_clang_version()
+        if version_result.success:
+            print(f"[OK] {test_config['name']}: {version_result.version}")
         else:
-            print(f"[FAIL] {test_config['name']}: {error}")
-            assert False, f"Configuration {test_config['name']} failed: {error}"
+            print(f"[FAIL] {test_config['name']}: {version_result.error}")
+            assert False, (
+                f"Configuration {test_config['name']} failed: {version_result.error}"
+            )
 
 
 if __name__ == "__main__":

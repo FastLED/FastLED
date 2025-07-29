@@ -49,6 +49,17 @@ class CompileResult:
     command: list[str]
 
 
+@dataclass
+class VersionCheckResult:
+    """
+    Result of a clang version check.
+    """
+
+    success: bool
+    version: str
+    error: str
+
+
 class FastLEDClangCompiler:
     """
     FastLED-specific clang++ compiler wrapper for .ino files.
@@ -68,12 +79,12 @@ class FastLEDClangCompiler:
         self.settings: CompilerSettings = settings
         self.compiler: str = "clang++"
 
-    def check_clang_version(self) -> tuple[bool, str, str]:
+    def check_clang_version(self) -> VersionCheckResult:
         """
         Check that clang++ is accessible and return version information.
 
         Returns:
-            tuple: (success: bool, version: str, error: str)
+            VersionCheckResult: Result containing success status, version string, and error message
         """
         # Test uv run access first
         try:
@@ -89,7 +100,9 @@ class FastLEDClangCompiler:
                     if len(result.stdout.split()) > 2
                     else "unknown"
                 )
-                return True, f"uv:{version}", ""
+                return VersionCheckResult(
+                    success=True, version=f"uv:{version}", error=""
+                )
         except Exception as e:
             pass  # Try direct access
 
@@ -104,11 +117,19 @@ class FastLEDClangCompiler:
                     if len(result.stdout.split()) > 2
                     else "unknown"
                 )
-                return True, f"direct:{version}", ""
+                return VersionCheckResult(
+                    success=True, version=f"direct:{version}", error=""
+                )
             else:
-                return False, "", f"clang++ version check failed: {result.stderr}"
+                return VersionCheckResult(
+                    success=False,
+                    version="",
+                    error=f"clang++ version check failed: {result.stderr}",
+                )
         except Exception as e:
-            return False, "", f"clang++ not accessible: {str(e)}"
+            return VersionCheckResult(
+                success=False, version="", error=f"clang++ not accessible: {str(e)}"
+            )
 
     def compile(
         self,
@@ -291,11 +312,11 @@ class FastLEDClangCompiler:
         print("Testing clang++ accessibility...")
 
         # Test 1: Check clang++ version
-        success, version, error = self.check_clang_version()
-        if not success:
-            print(f"X clang++ version check failed: {error}")
+        version_result = self.check_clang_version()
+        if not version_result.success:
+            print(f"X clang++ version check failed: {version_result.error}")
             return False
-        print(f"[OK] clang++ version: {version}")
+        print(f"[OK] clang++ version: {version_result.version}")
 
         # Test 2: Simple compilation test with Blink example
         print("Testing Blink.ino compilation...")
@@ -354,7 +375,8 @@ def _get_default_compiler() -> FastLEDClangCompiler:
 def check_clang_version() -> tuple[bool, str, str]:
     """Backward compatibility wrapper."""
     compiler = _get_default_compiler()
-    return compiler.check_clang_version()
+    result = compiler.check_clang_version()
+    return result.success, result.version, result.error
 
 
 def compile_ino_file(
@@ -413,10 +435,12 @@ def main() -> bool:
     compiler = FastLEDClangCompiler(settings)
 
     # Test version check
-    success, version, error = compiler.check_clang_version()
-    print(f"Version check: success={success}, version={version}")
-    if not success:
-        print(f"Error: {error}")
+    version_result = compiler.check_clang_version()
+    print(
+        f"Version check: success={version_result.success}, version={version_result.version}"
+    )
+    if not version_result.success:
+        print(f"Error: {version_result.error}")
         return False
 
     # Test finding ino files
