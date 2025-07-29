@@ -37,6 +37,7 @@ class TestArgs:
     examples: Optional[list[str]] = None
     no_pch: bool = False
     cache: bool = False
+    unity: bool = False
 
 
 @typechecked
@@ -171,6 +172,11 @@ def parse_args() -> TestArgs:
         action="store_true",
         help="Enable sccache/ccache when running example compilation tests (disabled by default for faster clean builds)",
     )
+    parser.add_argument(
+        "--unity",
+        action="store_true",
+        help="Enable UNITY build mode for examples - compile all source files as a single unit for improved performance",
+    )
 
     args = parser.parse_args()
 
@@ -192,6 +198,7 @@ def parse_args() -> TestArgs:
         examples=args.examples,
         no_pch=args.no_pch,
         cache=args.cache,
+        unity=args.unity,
     )
 
     # Auto-enable --cpp when a specific test is provided
@@ -467,6 +474,8 @@ def run_examples_tests(args: TestArgs, enable_stack_trace: bool) -> None:
         cmd.append("--no-pch")
     if args.cache:
         cmd.append("--cache")
+    if args.unity:
+        cmd.append("--unity")
 
     # Run the example compilation test script
     proc = RunningProcess(

@@ -12,7 +12,7 @@ import tempfile
 from concurrent.futures import Future, ThreadPoolExecutor
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import cast
+from typing import Sequence, cast
 
 
 def cpu_count() -> int:
@@ -37,11 +37,13 @@ class LibarchiveOptions:
 
 
 @dataclass
-class CompilerSettings:
+class CompilerOptions:
     """
-    Shared compiler settings for FastLED compilation.
+    Configuration options for compilation operations.
+    Merged from former CompileOptions and CompilerSettings.
     """
 
+    # Core compiler settings (formerly CompilerSettings)
     include_path: str
     compiler: str = "clang++"
     defines: list[str] | None = None
@@ -56,6 +58,11 @@ class CompilerSettings:
     # Archive generation settings
     archiver: str = "ar"  # Default archiver tool
     archiver_args: list[str] = field(default_factory=list)
+
+    # Compilation operation settings (formerly CompileOptions, unity options removed)
+    additional_flags: list[str] = field(default_factory=list)  # Extra compiler flags
+    parallel: bool = True  # Enable parallel compilation
+    temp_dir: str | Path | None = None  # Custom temporary directory
 
 
 @dataclass
@@ -99,7 +106,7 @@ class Compiler:
     Compiler wrapper for FastLED .ino file compilation.
     """
 
-    def __init__(self, settings: CompilerSettings):
+    def __init__(self, settings: CompilerOptions):
         self.settings = settings
         self._pch_file_path: Path | None = None
         self._pch_header_path: Path | None = None
@@ -825,6 +832,217 @@ class Compiler:
             # If we can't analyze the file, err on the side of caution and disable PCH
             return False
 
+    def compile_unity(
+        self,
+        compile_options: CompilerOptions,
+        list_of_cpp_files: Sequence[str | Path],
+        unity_output_path: str | Path | None = None,
+    ) -> Future[Result]:
+        """
+        Compile multiple .cpp files as a unity build.
+
+        Generates a single unity.cpp file that includes all specified .cpp files,
+        then compiles this single file for improved compilation speed and optimization.
+
+        Args:
+            compile_options: Configuration for the compilation
+            list_of_cpp_files: List of .cpp file paths to include in unity build
+            unity_output_path: Custom unity.cpp output path. If None, uses temp file.
+
+        Returns:
+            Future[Result]: Future that will contain compilation result
+        """
+        return _EXECUTOR.submit(
+            self._compile_unity_sync,
+            compile_options,
+            list_of_cpp_files,
+            unity_output_path,
+        )
+
+    def _compile_unity_sync(
+        self,
+        compile_options: CompilerOptions,
+        list_of_cpp_files: Sequence[str | Path],
+        unity_output_path: str | Path | None = None,
+    ) -> Result:
+        """
+        Synchronous implementation of unity compilation.
+
+        Args:
+            compile_options: Configuration for the compilation
+            list_of_cpp_files: List of .cpp file paths to include in unity build
+            unity_output_path: Custom unity.cpp output path. If None, uses temp file.
+
+        Returns:
+            Result: Success status and command output
+        """
+        if not list_of_cpp_files:
+            return Result(
+                ok=False,
+                stdout="",
+                stderr="No .cpp files provided for unity compilation",
+                return_code=1,
+            )
+
+        # Convert to Path objects and validate all files exist
+        cpp_paths: list[Path] = []
+        for cpp_file in list_of_cpp_files:
+            cpp_path = Path(cpp_file).resolve()
+            if not cpp_path.exists():
+                return Result(
+                    ok=False,
+                    stdout="",
+                    stderr=f"Source file not found: {cpp_path}",
+                    return_code=1,
+                )
+            if not cpp_path.suffix == ".cpp":
+                return Result(
+                    ok=False,
+                    stdout="",
+                    stderr=f"File is not a .cpp file: {cpp_path}",
+                    return_code=1,
+                )
+            cpp_paths.append(cpp_path)
+
+        # Determine unity.cpp output path
+        if unity_output_path:
+            unity_path = Path(unity_output_path).resolve()
+            cleanup_unity = False
+        else:
+            # Create temporary unity.cpp file
+            temp_dir = compile_options.temp_dir or tempfile.gettempdir()
+            temp_file = tempfile.NamedTemporaryFile(
+                suffix=".cpp", prefix="unity_", dir=temp_dir, delete=False
+            )
+            unity_path = Path(temp_file.name)
+            temp_file.close()
+            cleanup_unity = True
+
+        # Generate unity.cpp content
+        try:
+            unity_content = self._generate_unity_content(cpp_paths)
+
+            # Check if file already exists with identical content to avoid unnecessary modifications
+            should_write = True
+            if unity_path.exists():
+                try:
+                    existing_content = unity_path.read_text(encoding="utf-8")
+                    if existing_content == unity_content:
+                        should_write = False
+                        # File already has identical content, skip writing
+                except (IOError, UnicodeDecodeError):
+                    # If we can't read the existing file, proceed with writing
+                    should_write = True
+
+            if should_write:
+                unity_path.write_text(unity_content, encoding="utf-8")
+        except Exception as e:
+            if cleanup_unity and unity_path.exists():
+                try:
+                    unity_path.unlink()
+                except:
+                    pass
+            return Result(
+                ok=False,
+                stdout="",
+                stderr=f"Failed to generate unity.cpp: {e}",
+                return_code=1,
+            )
+
+        # Determine output object file path
+        if cleanup_unity:
+            # If unity file is temporary, create temporary object file too
+            temp_obj_file = tempfile.NamedTemporaryFile(suffix=".o", delete=False)
+            output_path = temp_obj_file.name
+            temp_obj_file.close()
+            cleanup_obj = True
+        else:
+            # If unity file is permanent, create object file alongside it
+            output_path = unity_path.with_suffix(".o")
+            cleanup_obj = False
+
+        try:
+            # Compile the unity.cpp file
+            result = self._compile_cpp_file_sync(
+                unity_path,
+                output_path,
+                compile_options.additional_flags,
+                compile_options.use_pch,
+            )
+
+            # Clean up temporary files on failure
+            if not result.ok:
+                if cleanup_unity and unity_path.exists():
+                    try:
+                        unity_path.unlink()
+                    except:
+                        pass
+                if cleanup_obj and output_path and os.path.exists(output_path):
+                    try:
+                        os.unlink(output_path)
+                    except:
+                        pass
+
+            return result
+
+        except Exception as e:
+            # Clean up temporary files on exception
+            if cleanup_unity and unity_path.exists():
+                try:
+                    unity_path.unlink()
+                except:
+                    pass
+            if cleanup_obj and output_path and os.path.exists(output_path):
+                try:
+                    os.unlink(output_path)
+                except:
+                    pass
+
+            return Result(
+                ok=False,
+                stdout="",
+                stderr=f"Unity compilation failed: {e}",
+                return_code=-1,
+            )
+
+    def _generate_unity_content(self, cpp_paths: list[Path]) -> str:
+        """
+        Generate the content for unity.cpp file.
+
+        Args:
+            cpp_paths: List of .cpp file paths to include
+
+        Returns:
+            str: Content for unity.cpp file
+        """
+        lines = [
+            "// Unity build file generated by FastLED CI system",
+            "// This file includes all source .cpp files for unified compilation",
+            "//",
+            f"// Generated for {len(cpp_paths)} source files:",
+        ]
+
+        # Add comment listing all included files
+        for cpp_path in cpp_paths:
+            lines.append(f"//   - {cpp_path}")
+
+        lines.extend(
+            [
+                "//",
+                "",
+                "// Include all source files",
+            ]
+        )
+
+        # Add #include statements for all .cpp files
+        for cpp_path in cpp_paths:
+            # Use absolute paths to avoid include path issues
+            lines.append(f'#include "{cpp_path}"')
+
+        lines.append("")  # Final newline
+
+        return "\n".join(lines)
+
     def create_archive(
         self,
         object_files: list[Path],
@@ -869,7 +1087,7 @@ class Compiler:
 # Convenience functions for backward compatibility
 
 # Default settings for backward compatibility
-_DEFAULT_SETTINGS = CompilerSettings(
+_DEFAULT_SETTINGS = CompilerOptions(
     include_path="./src", defines=["STUB_PLATFORM"], std_version="c++17"
 )
 
@@ -953,7 +1171,7 @@ def main() -> bool:
     print("=== Testing Compiler class ===")
 
     # Create compiler instance with custom settings
-    settings = CompilerSettings(
+    settings = CompilerOptions(
         include_path="./src", defines=["STUB_PLATFORM"], std_version="c++17"
     )
     compiler = Compiler(settings)
@@ -994,7 +1212,7 @@ def main() -> bool:
 
     # Test compiler_args
     print("\n=== Testing compiler_args ===")
-    settings_with_args = CompilerSettings(
+    settings_with_args = CompilerOptions(
         include_path="./src",
         defines=["STUB_PLATFORM"],
         std_version="c++17",

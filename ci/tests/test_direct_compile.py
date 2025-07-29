@@ -15,7 +15,11 @@ from typing import cast
 
 from ci.clang_compiler import (
     Compiler,
-    CompilerSettings,
+    CompilerOptions,
+    Result,
+    check_clang_version,
+    compile_ino_file,
+    find_ino_files,
     test_clang_accessibility,
 )
 
@@ -33,7 +37,7 @@ def test_clang_accessibility_class():
     print("\n=== Testing class-based clang accessibility ===")
 
     # Create compiler with default settings
-    settings = CompilerSettings(
+    settings = CompilerOptions(
         include_path="./src", defines=["STUB_PLATFORM"], std_version="c++17"
     )
     compiler = Compiler(settings)
@@ -78,10 +82,10 @@ def test_compiler_configuration():
     print("\n=== Testing compiler configuration options ===")
 
     # Test with different configurations
-    configs: list[dict[str, str | CompilerSettings]] = [
+    configs: list[dict[str, str | CompilerOptions]] = [
         {
             "name": "Default",
-            "settings": CompilerSettings(
+            "settings": CompilerOptions(
                 include_path="./src",
                 defines=["STUB_PLATFORM"],
                 std_version="c++17",
@@ -89,7 +93,7 @@ def test_compiler_configuration():
         },
         {
             "name": "C++20",
-            "settings": CompilerSettings(
+            "settings": CompilerOptions(
                 include_path="./src",
                 defines=["STUB_PLATFORM"],
                 std_version="c++20",
@@ -97,7 +101,7 @@ def test_compiler_configuration():
         },
         {
             "name": "Custom Platform",
-            "settings": CompilerSettings(
+            "settings": CompilerOptions(
                 include_path="./src",
                 defines=["CUSTOM_PLATFORM"],
                 std_version="c++17",
@@ -108,7 +112,7 @@ def test_compiler_configuration():
     for test_config in configs:
         print(f"Testing {test_config['name']} configuration...")
         settings = test_config["settings"]
-        assert isinstance(settings, CompilerSettings), (
+        assert isinstance(settings, CompilerOptions), (
             f"Invalid settings type: {type(settings)}"
         )
         compiler = Compiler(settings)

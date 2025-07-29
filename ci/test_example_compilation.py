@@ -16,18 +16,19 @@ import platform
 import shutil
 import subprocess
 import sys
+import tempfile
 import time
 import tomllib
 from concurrent.futures import Future, as_completed
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Callable, Dict, List, Optional, Union
 
 import psutil
 import toml  # type: ignore
 
 # Import the proven Compiler infrastructure
-from ci.clang_compiler import Compiler, CompilerSettings, Result
+from ci.clang_compiler import Compiler, CompilerOptions, Result
 
 
 # Color output functions using ANSI escape codes
@@ -354,7 +355,7 @@ def create_fastled_compiler(use_pch: bool = True, use_sccache: bool = True) -> C
     # Combine cache args with other args (cache args go first)
     final_args = cache_args + all_args
 
-    settings = CompilerSettings(
+    settings = CompilerOptions(
         include_path=src_path,
         defines=[
             "STUB_PLATFORM",
@@ -373,7 +374,7 @@ def compile_examples_simple(
     compiler: Compiler,
     ino_files: List[Path],
     pch_compatible_files: set[Path],
-    log_timing: Any,
+    log_timing: Callable[[str], None],
 ) -> CompilationResult:
     """
     Compile examples using the simple build system (Compiler class).
@@ -519,11 +520,192 @@ def compile_examples_simple(
     )
 
 
+def compile_examples_unity(
+    compiler: Compiler,
+    ino_files: list[Path],
+    log_timing: Callable[[str], None],
+    unity_custom_output: Optional[str] = None,
+    unity_additional_flags: Optional[List[str]] = None,
+) -> CompilationResult:
+    """
+    Compile FastLED examples using UNITY build approach.
+
+    Creates a single unity.cpp file containing all .ino examples and their
+    associated .cpp files, then compiles everything as one unit.
+    """
+    log_timing("[UNITY] Starting UNITY build compilation...")
+
+    compile_start = time.time()
+
+    # Collect all .cpp files from examples
+    all_cpp_files: list[Path] = []
+
+    for ino_file in ino_files:
+        # Convert .ino to .cpp (we'll create a temporary .cpp file)
+        ino_cpp = ino_file.with_suffix(".cpp")
+
+        # Create temporary .cpp file from .ino
+        try:
+            ino_content = ino_file.read_text(encoding="utf-8", errors="ignore")
+            cpp_content = f"""#include "FastLED.h"
+{ino_content}
+"""
+            # Create temporary .cpp file
+            temp_cpp = Path(tempfile.gettempdir()) / f"unity_{ino_file.stem}.cpp"
+            temp_cpp.write_text(cpp_content, encoding="utf-8")
+            all_cpp_files.append(temp_cpp)
+
+            # Also find any additional .cpp files in the example directory
+            example_dir = ino_file.parent
+            additional_cpp_files = compiler.find_cpp_files_for_example(ino_file)
+            all_cpp_files.extend(additional_cpp_files)
+
+        except Exception as e:
+            log_timing(f"[UNITY] ERROR: Failed to process {ino_file.name}: {e}")
+            return CompilationResult(
+                successful_count=0,
+                failed_count=len(ino_files),
+                compile_time=0.0,
+                failed_examples=[
+                    {
+                        "file": ino_file.name,
+                        "path": str(ino_file.relative_to(Path("examples"))),
+                        "success": False,
+                        "stderr": f"Failed to prepare for UNITY build: {e}",
+                    }
+                ],
+            )
+
+    if not all_cpp_files:
+        log_timing("[UNITY] ERROR: No .cpp files to compile")
+        return CompilationResult(
+            successful_count=0,
+            failed_count=len(ino_files),
+            compile_time=0.0,
+            failed_examples=[
+                {
+                    "file": "unity_build",
+                    "path": "unity_build",
+                    "success": False,
+                    "stderr": "No .cpp files found for UNITY build",
+                }
+            ],
+        )
+
+    log_timing(f"[UNITY] Collected {len(all_cpp_files)} .cpp files for UNITY build")
+
+    # Log advanced unity options if used
+    if unity_custom_output:
+        log_timing(f"[UNITY] Using custom output path: {unity_custom_output}")
+    if unity_additional_flags:
+        log_timing(
+            f"[UNITY] Using additional flags: {' '.join(unity_additional_flags)}"
+        )
+
+    # Parse additional flags properly - handle both "flag1 flag2" and ["flag1", "flag2"] formats
+    additional_flags = ["-c"]  # Compile only, don't link
+    if unity_additional_flags:
+        for flag_group in unity_additional_flags:
+            # Split space-separated flags into individual flags
+            additional_flags.extend(flag_group.split())
+
+    # Create CompilerOptions for unity compilation (reuse the same settings as the main compiler)
+    unity_options = CompilerOptions(
+        include_path=compiler.settings.include_path,
+        compiler=compiler.settings.compiler,
+        defines=compiler.settings.defines,
+        std_version=compiler.settings.std_version,
+        compiler_args=compiler.settings.compiler_args,
+        use_pch=False,  # Unity builds don't typically need PCH
+        additional_flags=additional_flags,
+    )
+
+    try:
+        # Perform UNITY compilation - pass unity_output_path as parameter
+        unity_future = compiler.compile_unity(
+            unity_options, all_cpp_files, unity_custom_output
+        )
+        unity_result = unity_future.result()
+
+        compile_time = time.time() - compile_start
+
+        # Clean up temporary .cpp files
+        for cpp_file in all_cpp_files:
+            if cpp_file.name.startswith("unity_") and cpp_file.parent == Path(
+                tempfile.gettempdir()
+            ):
+                try:
+                    cpp_file.unlink()
+                except:
+                    pass  # Ignore cleanup errors
+
+        if unity_result.ok:
+            log_timing(
+                f"[UNITY] UNITY build completed successfully in {compile_time:.2f}s"
+            )
+            log_timing(f"[UNITY] All {len(ino_files)} examples compiled as single unit")
+
+            return CompilationResult(
+                successful_count=len(ino_files),
+                failed_count=0,
+                compile_time=compile_time,
+                failed_examples=[],
+            )
+        else:
+            log_timing(f"[UNITY] UNITY build failed: {unity_result.stderr}")
+
+            return CompilationResult(
+                successful_count=0,
+                failed_count=len(ino_files),
+                compile_time=compile_time,
+                failed_examples=[
+                    {
+                        "file": "unity_build",
+                        "path": "unity_build",
+                        "success": False,
+                        "stderr": unity_result.stderr,
+                    }
+                ],
+            )
+
+    except Exception as e:
+        compile_time = time.time() - compile_start
+
+        # Clean up temporary .cpp files on error
+        for cpp_file in all_cpp_files:
+            if cpp_file.name.startswith("unity_") and cpp_file.parent == Path(
+                tempfile.gettempdir()
+            ):
+                try:
+                    cpp_file.unlink()
+                except:
+                    pass  # Ignore cleanup errors
+
+        log_timing(f"[UNITY] UNITY build failed with exception: {e}")
+
+        return CompilationResult(
+            successful_count=0,
+            failed_count=len(ino_files),
+            compile_time=compile_time,
+            failed_examples=[
+                {
+                    "file": "unity_build",
+                    "path": "unity_build",
+                    "success": False,
+                    "stderr": f"UNITY build exception: {e}",
+                }
+            ],
+        )
+
+
 def run_example_compilation_test(
     specific_examples: Optional[List[str]] = None,
     clean_build: bool = False,
     disable_pch: bool = False,
     disable_sccache: bool = True,  # Default to disabled for faster clean builds
+    unity_build: bool = False,
+    unity_custom_output: Optional[str] = None,
+    unity_additional_flags: Optional[List[str]] = None,
 ) -> int:
     """Run the example compilation test using enhanced simple build system."""
     # Start timing at the very beginning
@@ -550,7 +732,11 @@ def run_example_compilation_test(
     # Display build configuration
     config_parts: List[str] = []
     config_parts.append("Simple Build System: enabled")
-    config_parts.append("Direct .ino compilation: enabled")
+
+    if unity_build:
+        config_parts.append("UNITY build: enabled")
+    else:
+        config_parts.append("Direct .ino compilation: enabled")
 
     cache_type: Union[bool, str] = build_config["cache_type"]
     if disable_sccache:
@@ -616,7 +802,10 @@ def run_example_compilation_test(
         pch_compatible_files: set[Path] = set()
         pch_incompatible_files: List[str] = []
 
-        if compiler.settings.use_pch:
+        if unity_build:
+            log_timing("[UNITY] PCH disabled for UNITY builds (not needed)")
+            config_parts.append("PCH: disabled (UNITY mode)")
+        elif compiler.settings.use_pch:
             log_timing("[PCH] Analyzing examples for PCH compatibility...")
 
             for ino_file in ino_files:
@@ -651,7 +840,11 @@ def run_example_compilation_test(
 
         # Create PCH for faster compilation (only if there are compatible files)
         pch_time = 0.0
-        if compiler.settings.use_pch and len(pch_compatible_files) > 0:
+        if (
+            not unity_build
+            and compiler.settings.use_pch
+            and len(pch_compatible_files) > 0
+        ):
             pch_start = time.time()
             pch_success = compiler.create_pch_file()
             pch_time = time.time() - pch_start
@@ -743,9 +936,19 @@ def run_example_compilation_test(
         log_timing(f"[BUILD] Target examples: {len(ino_files)}")
         log_timing(f"[BUILD] Parallel workers: {parallel_jobs}")
 
-        result = compile_examples_simple(
-            compiler, ino_files, pch_compatible_files, log_timing
-        )
+        if unity_build:
+            result = compile_examples_unity(
+                compiler,
+                ino_files,
+                log_timing,
+                unity_custom_output=unity_custom_output,
+                unity_additional_flags=unity_additional_flags,
+            )
+        else:
+            result = compile_examples_simple(
+                compiler, ino_files, pch_compatible_files, log_timing
+            )
+
         successful_count = result.successful_count
         failed_count = result.failed_count
         compile_time = result.compile_time
@@ -845,6 +1048,21 @@ if __name__ == "__main__":
         action="store_true",
         help="Enable sccache/ccache for compilation (disabled by default for faster clean builds).",
     )
+    parser.add_argument(
+        "--unity",
+        action="store_true",
+        help="Enable UNITY build mode - compile all source files as a single unit for improved performance and optimization.",
+    )
+    parser.add_argument(
+        "--custom-output",
+        type=str,
+        help="Custom output path for unity.cpp file (only used with --unity)",
+    )
+    parser.add_argument(
+        "--additional-flags",
+        nargs="+",
+        help="Additional compiler flags to pass to unity build (only used with --unity)",
+    )
 
     args = parser.parse_args()
 
@@ -856,5 +1074,8 @@ if __name__ == "__main__":
             args.clean,
             disable_pch=args.no_pch,
             disable_sccache=not args.cache,
+            unity_build=args.unity,
+            unity_custom_output=args.custom_output,
+            unity_additional_flags=args.additional_flags,
         )
     )
