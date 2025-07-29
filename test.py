@@ -755,8 +755,10 @@ def main() -> None:
             run_examples_tests(args, enable_stack_trace)
             run_python_tests(args, enable_stack_trace)
         else:
-            # Default behavior: run all tests in parallel
-            run_all_tests(args, test_categories, enable_stack_trace, src_code_change)
+            # All tests enabled: run unit, examples, and Python sequentially
+            run_unit_tests(args, enable_stack_trace)
+            run_examples_tests(args, enable_stack_trace)
+            run_python_tests(args, enable_stack_trace)
 
         # Force exit daemon thread remains at the end
         def force_exit():
