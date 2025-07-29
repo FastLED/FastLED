@@ -30,6 +30,7 @@ void setup() {
   FastLED.setBrightness(BRIGHTNESS);
 }
 
+void pride();
 
 void loop()
 {
