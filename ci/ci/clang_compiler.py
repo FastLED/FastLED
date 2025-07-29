@@ -92,6 +92,34 @@ class Compiler:
         """
         self.settings: CompilerSettings = settings
 
+    def get_compiler_args(self) -> list[str]:
+        """
+        Get a copy of the complete compiler arguments that would be used for compilation.
+
+        Returns:
+            list[str]: Copy of compiler arguments including compiler, flags, defines, and settings
+        """
+        cmd = [
+            self.settings.compiler,
+            "-x",
+            "c++",  # Force C++ compilation of .ino files
+            f"-std={self.settings.std_version}",
+            f"-I{self.settings.include_path}",  # FastLED include path
+        ]
+
+        # Add defines if specified
+        if self.settings.defines:
+            for define in self.settings.defines:
+                cmd.append(f"-D{define}")
+
+        # Add additional compiler args
+        cmd.extend(self.settings.compiler_args)
+
+        # Add standard compilation flags
+        cmd.extend(["-c"])
+
+        return cmd.copy()  # Return a copy to prevent modification
+
     def check_clang_version(self) -> VersionCheckResult:
         """
         Check that clang++ is accessible and return version information.
