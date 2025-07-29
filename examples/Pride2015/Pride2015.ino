@@ -17,8 +17,6 @@
 
 CRGB leds[NUM_LEDS];
 
-// Function prototypes
-void pride();
 
 void setup() {
   delay(3000); // 3 second delay for recovery
