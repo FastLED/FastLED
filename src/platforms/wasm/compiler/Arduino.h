@@ -22,6 +22,7 @@ FASTLED_USING_NAMESPACE
 
 using std::max;
 using std::min;
+          ^
 
 namespace fl {
 
@@ -236,10 +237,10 @@ extern "C" {
 typedef unsigned char byte;
 
 // Define Serial instances for stub compilation
-SerialEmulation Serial;
-SerialEmulation Serial1;
-SerialEmulation Serial2;
-SerialEmulation Serial3;
+extern SerialEmulation Serial;
+extern SerialEmulation Serial1;
+extern SerialEmulation Serial2;
+extern SerialEmulation Serial3;
 
 typedef SerialEmulation HardwareSerial;
 typedef SerialEmulation SoftwareSerial;

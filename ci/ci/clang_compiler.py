@@ -383,12 +383,6 @@ class Compiler:
         else:
             cleanup_temp = False
 
-        with tempfile.NamedTemporaryFile(
-            mode="w", suffix=".cpp", delete=False
-        ) as tmp_cpp:
-            tmp_cpp.write(f'#include "{ino_file_path}"')
-            temp_cpp_path = Path(tmp_cpp.name)
-
         # Build compiler command
         cmd = [self.settings.compiler]
 
@@ -437,7 +431,7 @@ class Compiler:
         cmd.extend(
             [
                 "-c",
-                str(temp_cpp_path),
+                str(ino_file_path),  # Compile .ino file directly
                 "-o",
                 str(output_path),
             ]
@@ -471,8 +465,6 @@ class Compiler:
                     pass
 
             return Result(ok=False, stdout="", stderr=str(e), return_code=-1)
-        finally:
-            os.unlink(temp_cpp_path)
 
     def compile_cpp_file(
         self,
