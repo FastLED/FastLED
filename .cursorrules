@@ -615,10 +615,12 @@ def get_config(...) -> dict:
     return {"name": "test", "enabled": True}
 ```
 
-**✅ CORRECT - Using dataclass structs:**
+**✅ CORRECT - Using @typechecked dataclass structs:**
 ```python
 from dataclasses import dataclass
+from typeguard import typechecked
 
+@typechecked
 @dataclass
 class Args:
     val: int
@@ -626,13 +628,9 @@ class Args:
     enabled: bool
     
     def __post_init__(self):
-        # Type checking and validation
-        if not isinstance(self.val, int):
-            raise TypeError(f"val must be int, got {type(self.val)}")
+        # Only business logic validation - types are auto-validated by @typechecked!
         if self.val < 0:
             raise ValueError("val must be non-negative")
-        if not isinstance(self.name, str):
-            raise TypeError(f"name must be str, got {type(self.name)}")
 
 def parse_args(...) -> Args:
     # Use argparse here, then convert to Args dataclass
@@ -643,6 +641,7 @@ def parse_args(...) -> Args:
         enabled=parsed.enabled
     )
 
+@typechecked
 @dataclass 
 class Config:
     name: str
@@ -650,6 +649,7 @@ class Config:
     timeout: int = 30  # Default value
     
     def __post_init__(self):
+        # Only business logic validation - types are auto-validated by @typechecked!
         if not self.name:
             raise ValueError("name cannot be empty")
         if self.timeout <= 0:
@@ -659,9 +659,10 @@ def get_config(...) -> Config:
     return Config(name="test", enabled=True)
 ```
 
-**Benefits of dataclass approach:**
-- ✅ **Type safety** - Clear parameter and return types
-- ✅ **Runtime validation** - Use `__post_init__` for type and value checking
+**Benefits of @typechecked dataclass approach:**
+- ✅ **Automatic type safety** - `@typechecked` validates all types at runtime automatically
+- ✅ **Minimal boilerplate** - No manual `isinstance()` checks needed
+- ✅ **Clear separation** - `__post_init__` only for business logic, not type validation
 - ✅ **IDE support** - Better autocomplete and type hints
 - ✅ **Documentation** - Self-documenting parameter structure
 - ✅ **Refactoring safety** - Changes to structure are caught at compile time
@@ -673,8 +674,15 @@ def get_config(...) -> Config:
 - ✅ **Configuration dictionaries** from external sources (but convert to dataclass ASAP)
 - ✅ **Dynamic data** where the keys are not known at design time
 
-**Type checking in `__post_init__`:**
+### @typechecked Decorator Usage
+
+**🚨 MANDATORY: Use @typechecked decorator for all dataclasses with type annotations**
+
 ```python
+from dataclasses import dataclass
+from typeguard import typechecked
+
+@typechecked
 @dataclass
 class CompilerSettings:
     compiler_path: str
@@ -683,17 +691,7 @@ class CompilerSettings:
     include_paths: list[str]
     
     def __post_init__(self):
-        # Type validation
-        if not isinstance(self.compiler_path, str):
-            raise TypeError(f"compiler_path must be str, got {type(self.compiler_path)}")
-        if not isinstance(self.optimization_level, int):
-            raise TypeError(f"optimization_level must be int, got {type(self.optimization_level)}")
-        if not isinstance(self.debug_symbols, bool):
-            raise TypeError(f"debug_symbols must be bool, got {type(self.debug_symbols)}")
-        if not isinstance(self.include_paths, list):
-            raise TypeError(f"include_paths must be list, got {type(self.include_paths)}")
-            
-        # Value validation
+        # Only business logic validation - NO manual type checking needed!
         if not self.compiler_path:
             raise ValueError("compiler_path cannot be empty")
         if self.optimization_level not in [0, 1, 2, 3]:
@@ -702,12 +700,39 @@ class CompilerSettings:
             raise TypeError("include_paths must contain only strings")
 ```
 
+**Key Benefits:**
+- ✅ **Zero boilerplate** - No manual `isinstance()` checks
+- ✅ **Automatic validation** - All type annotations enforced at runtime
+- ✅ **Better error messages** - Clear type mismatch errors from typeguard
+- ✅ **Focus on business logic** - `__post_init__` only for domain validation
+
+**Example Type Validation:**
+```python
+# ✅ This works
+settings = CompilerSettings(
+    compiler_path="/usr/bin/gcc",
+    optimization_level=2,
+    debug_symbols=True,
+    include_paths=["/usr/include", "/opt/local/include"]
+)
+
+# ❌ This raises TypeError automatically
+settings = CompilerSettings(
+    compiler_path="/usr/bin/gcc",
+    optimization_level="O2",  # TypeError: should be int
+    debug_symbols=True,
+    include_paths=["/usr/include"]
+)
+```
+
 **Migration strategy for existing code:**
 1. **Identify functions returning dict** - prioritize public APIs first
-2. **Create equivalent dataclass** with same fields and validation
-3. **Update function signature** to return dataclass
-4. **Add conversion logic** from internal dict to dataclass
-5. **Update callers** to use dataclass fields instead of dict keys
+2. **Create equivalent @typechecked dataclass** with same fields
+3. **Add @typechecked decorator** and remove manual type validation
+4. **Update function signature** to return dataclass
+5. **Add conversion logic** from internal dict to dataclass
+6. **Update callers** to use dataclass fields instead of dict keys
+7. **Simplify __post_init__** to only business logic validation
 
 ### parse_args Function Signature Requirements
 **🚨 CRITICAL: All `parse_args` functions MUST accept an optional `list[str]` parameter for custom argument parsing.**
@@ -756,6 +781,108 @@ args = parse_args(["--config", config_file, "--debug"])
 ```
 
 **Why:** This pattern enables flexible argument parsing for testing, scripting, and programmatic usage while maintaining backward compatibility with existing code that relies on sys.argv parsing.
+
+### Python Exception Handling Rules
+
+**🚨 MANDATORY: All Python try-catch blocks must follow these requirements:**
+
+1. **NO BARE EXCEPTIONS** - Always specify the exception type
+2. **KEYBOARD INTERRUPT HANDLER** - Must handle `KeyboardInterrupt` with proper cleanup
+3. **PROPER EXCEPTION ORDER** - `KeyboardInterrupt` first, then specific exceptions
+
+**✅ CORRECT Exception Handling Pattern:**
+```python
+import _thread
+
+def risky_operation():
+    try:
+        # Your code that might raise exceptions
+        result = some_operation()
+        return result
+    except KeyboardInterrupt:
+        # MANDATORY: Handle Ctrl+C gracefully
+        print("Operation interrupted by user")
+        _thread.interrupt_main()  # Propagate interrupt to main thread
+        raise  # Re-raise to ensure proper cleanup
+    except FileNotFoundError as e:
+        # Specific exception handling
+        print(f"File not found: {e}")
+        return None
+    except ValueError as e:
+        # Another specific exception
+        print(f"Invalid value: {e}")
+        return None
+    except Exception as e:
+        # Generic handler (only if absolutely necessary)
+        print(f"Unexpected error: {e}")
+        raise  # Re-raise unknown exceptions
+```
+
+**❌ FORBIDDEN Exception Patterns:**
+```python
+try:
+    some_operation()
+except:  # ❌ NO BARE EXCEPTIONS
+    pass
+
+try:
+    some_operation()
+except Exception:  # ❌ MISSING KeyboardInterrupt HANDLER
+    pass
+
+try:
+    some_operation()
+except Exception as e:  # ❌ WRONG ORDER - KeyboardInterrupt should come first
+    handle_error(e)
+except KeyboardInterrupt:
+    cleanup()
+```
+
+**Key Requirements:**
+- ✅ **Import `_thread`** when using `KeyboardInterrupt` handler
+- ✅ **Call `_thread.interrupt_main()`** in `KeyboardInterrupt` handler
+- ✅ **Handle `KeyboardInterrupt` FIRST** before other exceptions
+- ✅ **Specify exact exception types** instead of bare `except:`
+- ✅ **Re-raise `KeyboardInterrupt`** after cleanup to maintain interrupt behavior
+
+**Complex Exception Handling Example:**
+```python
+import _thread
+import sys
+
+def complex_operation():
+    try:
+        with open("config.json") as f:
+            data = json.load(f)
+        
+        for item in data:
+            process_item(item)
+            
+    except KeyboardInterrupt:
+        print("⚠️  Operation interrupted by user - cleaning up...")
+        cleanup_resources()
+        _thread.interrupt_main()
+        raise
+    except FileNotFoundError:
+        print("❌ Configuration file not found")
+        sys.exit(1)
+    except json.JSONDecodeError as e:
+        print(f"❌ Invalid JSON in config file: {e}")
+        sys.exit(1)
+    except ValueError as e:
+        print(f"❌ Invalid configuration value: {e}")
+        sys.exit(1)
+    except Exception as e:
+        print(f"❌ Unexpected error during operation: {e}")
+        cleanup_resources()
+        raise
+```
+
+**Why These Rules:**
+- **Keyboard interrupt handling** ensures graceful shutdown when user presses Ctrl+C
+- **No bare exceptions** prevents masking unexpected errors and makes debugging easier
+- **Proper exception order** ensures interrupt signals are handled before other error conditions
+- **`_thread.interrupt_main()`** ensures the main thread receives the interrupt signal for proper cleanup
 
 ### Avoid std:: Prefixed Functions
 **DO NOT use `std::` prefixed functions or headers in the codebase.** This project provides its own STL-equivalent implementations under the `fl::` namespace.
