@@ -30,6 +30,22 @@ import toml  # type: ignore
 from ci.clang_compiler import Compiler, CompilerSettings, Result
 
 
+# Color output functions using ANSI escape codes
+def red_text(text: str) -> str:
+    """Return text in red color."""
+    return f"\033[31m{text}\033[0m"
+
+
+def green_text(text: str) -> str:
+    """Return text in green color."""
+    return f"\033[32m{text}\033[0m"
+
+
+def orange_text(text: str) -> str:
+    """Return text in orange color."""
+    return f"\033[33m{text}\033[0m"
+
+
 @dataclass
 class CompilationResult:
     """Results from compiling a set of examples."""
@@ -371,8 +387,6 @@ def compile_examples_simple(
     Returns:
         CompilationResult: Results from compilation including counts and failed examples
     """
-    log_timing("[SIMPLE] Starting direct .ino compilation...")
-
     compile_start = time.time()
     results: List[Dict[str, Any]] = []
 
@@ -759,10 +773,6 @@ def run_example_compilation_test(
         log_timing(
             f"\n[BUILD] Using {parallel_jobs} parallel workers (efficiency: {efficiency:.0f}%)"
         )
-        if memory_used_gb >= 0.1:
-            log_timing(f"[BUILD] Peak memory usage: {memory_used_gb:.1f}GB")
-        else:
-            log_timing(f"[BUILD] Peak memory usage: {memory_used_mb:.0f}MB")
 
         # Enhanced timing breakdown
         log_timing(
@@ -791,30 +801,22 @@ def run_example_compilation_test(
             log_timing(
                 f"[SUCCESS] {successful_count}/{len(ino_files)} examples compiled successfully"
             )
-            log_timing("[SUCCESS] FastLED simple build system operational")
-            log_timing("[SUCCESS] Direct .ino compilation infrastructure working")
 
-            log_timing(f"\n[READY] Simple build system is ready!")
-            log_timing(f"[PERF] Performance: {total_time:.2f}s total execution time")
+            print(green_text("### SUCCESS ###"))
             return 0
         else:
-            # Extract just the example names that failed for clear reporting
-            failed_example_names = [failure["path"] for failure in failed]
-            failed_list_str = ", ".join(failed_example_names)
-
-            log_timing("\n[FAILED] EXAMPLE COMPILATION TEST: FAILED")
-            log_timing(
-                f"[FAILED] {successful_count}/{len(ino_files)} examples compiled successfully"
-            )
-            log_timing(f"[FAILED] {failed_count} examples failed")
-            log_timing(f"THERE WERE BUILD FAILURES:\n{failed_list_str}")
-
-            log_timing(f"\n[PERF] Performance: {total_time:.2f}s total execution time")
+            # Show failed examples in the requested format
+            print(f"\n{red_text('### ERROR ###')}")
+            for failure in failed:
+                # Convert backslashes to forward slashes for consistent path format
+                path = failure["path"].replace("\\", "/")
+                print(f"  {orange_text(f'examples/{path}')}")
             return 1
 
     except Exception as e:
         log_timing(f"\n[ERROR] EXAMPLE COMPILATION TEST: ERROR")
         log_timing(f"Unexpected error: {e}")
+        print(red_text("### ERROR ###"))
         return 1
 
 
