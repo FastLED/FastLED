@@ -11,9 +11,12 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
+from typeguard import typechecked
+
 from ci.running_process import RunningProcess
 
 
+@typechecked
 @dataclass
 class TestArgs:
     """Type-safe test arguments"""
@@ -35,54 +38,8 @@ class TestArgs:
     no_pch: bool = False
     cache: bool = False
 
-    def __post_init__(self):
-        # Type validation
-        if not isinstance(self.cpp, bool):
-            raise TypeError(f"cpp must be bool, got {type(self.cpp)}")
-        if not isinstance(self.unit, bool):
-            raise TypeError(f"unit must be bool, got {type(self.unit)}")
-        if not isinstance(self.py, bool):
-            raise TypeError(f"py must be bool, got {type(self.py)}")
-        if self.test is not None and not isinstance(self.test, str):
-            raise TypeError(f"test must be str or None, got {type(self.test)}")
-        if not isinstance(self.clang, bool):
-            raise TypeError(f"clang must be bool, got {type(self.clang)}")
-        if not isinstance(self.gcc, bool):
-            raise TypeError(f"gcc must be bool, got {type(self.gcc)}")
-        if not isinstance(self.clean, bool):
-            raise TypeError(f"clean must be bool, got {type(self.clean)}")
-        if not isinstance(self.no_interactive, bool):
-            raise TypeError(
-                f"no_interactive must be bool, got {type(self.no_interactive)}"
-            )
-        if not isinstance(self.interactive, bool):
-            raise TypeError(f"interactive must be bool, got {type(self.interactive)}")
-        if not isinstance(self.verbose, bool):
-            raise TypeError(f"verbose must be bool, got {type(self.verbose)}")
-        if not isinstance(self.quick, bool):
-            raise TypeError(f"quick must be bool, got {type(self.quick)}")
-        if not isinstance(self.no_stack_trace, bool):
-            raise TypeError(
-                f"no_stack_trace must be bool, got {type(self.no_stack_trace)}"
-            )
-        if not isinstance(self.check, bool):
-            raise TypeError(f"check must be bool, got {type(self.check)}")
-        if self.examples is not None and not isinstance(self.examples, list):
-            raise TypeError(f"examples must be list or None, got {type(self.examples)}")
-        if not isinstance(self.no_pch, bool):
-            raise TypeError(f"no_pch must be bool, got {type(self.no_pch)}")
-        if not isinstance(self.cache, bool):
-            raise TypeError(f"cache must be bool, got {type(self.cache)}")
 
-        # Value validation
-        if self.test is not None and not self.test.strip():
-            raise ValueError("test name cannot be empty")
-        if self.examples is not None and not all(
-            isinstance(ex, str) for ex in self.examples
-        ):
-            raise TypeError("examples list must contain only strings")
-
-
+@typechecked
 @dataclass
 class TestCategories:
     """Type-safe test category flags"""
@@ -109,6 +66,7 @@ class TestCategories:
                 raise TypeError(f"{field_name} must be bool, got {type(value)}")
 
 
+@typechecked
 @dataclass
 class FingerprintResult:
     """Type-safe fingerprint result"""
@@ -116,23 +74,6 @@ class FingerprintResult:
     hash: str
     elapsed_seconds: Optional[str] = None
     status: Optional[str] = None
-
-    def __post_init__(self):
-        # Type validation
-        if not isinstance(self.hash, str):
-            raise TypeError(f"hash must be str, got {type(self.hash)}")
-        if self.elapsed_seconds is not None and not isinstance(
-            self.elapsed_seconds, str
-        ):
-            raise TypeError(
-                f"elapsed_seconds must be str or None, got {type(self.elapsed_seconds)}"
-            )
-        if self.status is not None and not isinstance(self.status, str):
-            raise TypeError(f"status must be str or None, got {type(self.status)}")
-
-        # Value validation
-        if not self.hash:
-            raise ValueError("hash cannot be empty")
 
 
 _PIO_CHECK_ENABLED = False

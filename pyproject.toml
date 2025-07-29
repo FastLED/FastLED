@@ -28,6 +28,7 @@ dependencies = [
     "sccache>=0.10.0",
     "psutil",
     "toml>=0.10.2",
+    "typeguard>=4.4.4",
 ]
 
 [build-system]
