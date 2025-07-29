@@ -35,7 +35,7 @@ namespace fl {
 // // end using declarations for stl compatibility
 
 FL_DISABLE_WARNING_PUSH
-FL_DISABLE_WARNING(null-dereference)
+FL_DISABLE_WARNING_NULL_DEREFERENCE
 template <typename T> struct EqualTo {
     bool operator()(const T &a, const T &b) const { return a == b; }
 };
@@ -599,7 +599,7 @@ class FL_ALIGN HashMap {
 
     // Rehash the inline buckets without resizing
     FL_DISABLE_WARNING_PUSH
-    FL_DISABLE_WARNING(null-dereference)
+    FL_DISABLE_WARNING_NULL_DEREFERENCE
     void rehash_inline_no_resize() {
         // filter out tombstones and compact
         fl::size cap = _buckets.size();

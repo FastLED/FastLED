@@ -142,7 +142,7 @@ public:
 
 	/// Set the pin state to `HIGH`
 	FL_DISABLE_WARNING_PUSH
-	FL_DISABLE_WARNING(null-dereference)
+	FL_DISABLE_WARNING_NULL_DEREFERENCE
 	inline void hi() __attribute__ ((always_inline)) { *mPort |= mPinMask; }
 	/// Set the pin state to `LOW`
 	inline void lo() __attribute__ ((always_inline)) { *mPort &= ~mPinMask; }
@@ -240,7 +240,7 @@ public:
 
 	/// Set the pin state to `HIGH`
 	FL_DISABLE_WARNING_PUSH
-	FL_DISABLE_WARNING(null-dereference)
+	FL_DISABLE_WARNING_NULL_DEREFERENCE
 	inline void hi() __attribute__ ((always_inline)) { *mPort |= mPinMask; }
 	/// Set the pin state to `LOW`
 	inline void lo() __attribute__ ((always_inline)) { *mPort &= ~mPinMask; }

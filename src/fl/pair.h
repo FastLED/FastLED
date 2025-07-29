@@ -19,7 +19,7 @@ template <typename T1, typename T2> struct pair {
     
     // Constructor from values
     FL_DISABLE_WARNING_PUSH
-    FL_DISABLE_WARNING(null-dereference)
+    FL_DISABLE_WARNING_NULL_DEREFERENCE
     pair(const T1 &k, const T2 &v) : first(k), second(v) {}
     FL_DISABLE_WARNING_POP
     

@@ -4,11 +4,13 @@
 #define FL_STRINGIFY2(x) #x
 #define FL_STRINGIFY(x) FL_STRINGIFY2(x)
 
+// BEGIN BASE MACROS
 #if defined(__clang__)
   #define FL_DISABLE_WARNING_PUSH         _Pragma("clang diagnostic push")
   #define FL_DISABLE_WARNING_POP          _Pragma("clang diagnostic pop")
   // Usage: FL_DISABLE_WARNING(float-equal)
   #define FL_DISABLE_WARNING(warning)     _Pragma(FL_STRINGIFY(clang diagnostic ignored "-W" #warning))
+
 #elif defined(__GNUC__)
   #define FL_DISABLE_WARNING_PUSH         _Pragma("GCC diagnostic push")
   #define FL_DISABLE_WARNING_POP          _Pragma("GCC diagnostic pop")
@@ -19,7 +21,9 @@
   #define FL_DISABLE_WARNING_POP
   #define FL_DISABLE_WARNING(warning)
 #endif
+// END BASE MACROS
 
+// WARNING SPECIFIC MACROS THAT MAY NOT BE UNIVERSAL.
 #if defined(__clang__)
   #define FL_DISABLE_WARNING_GLOBAL_CONSTRUCTORS \
     FL_DISABLE_WARNING(global-constructors)
@@ -27,6 +31,7 @@
     FL_DISABLE_WARNING(self-assign-overloaded)
   // Clang doesn't have format-truncation warning, use no-op
   #define FL_DISABLE_FORMAT_TRUNCATION
+  #define FL_DISABLE_WARNING_NULL_DEREFERENCE FL_DISABLE_WARNING(null-dereference)
 #elif defined(__GNUC__)
   // GCC doesn't have global-constructors warning, use no-op
   #define FL_DISABLE_WARNING_GLOBAL_CONSTRUCTORS
@@ -35,11 +40,13 @@
   // GCC has format-truncation warning
   #define FL_DISABLE_FORMAT_TRUNCATION \
     FL_DISABLE_WARNING(format-truncation)
+  #define FL_DISABLE_WARNING_NULL_DEREFERENCE
 #else
   #define FL_DISABLE_WARNING_GLOBAL_CONSTRUCTORS
   #define FL_DISABLE_WARNING_SELF_ASSIGN_OVERLOADED
   #define FL_DISABLE_FORMAT_TRUNCATION
 #endif
+// END WARNING SPECIFIC MACROS THAT MAY NOT BE UNIVERSAL.
 
 // Fast math optimization controls with additional aggressive flags
 #if defined(__clang__)

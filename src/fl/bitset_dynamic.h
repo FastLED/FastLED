@@ -88,7 +88,7 @@ class bitset_dynamic {
 
     // Assign n bits to the value specified
     FL_DISABLE_WARNING_PUSH
-    FL_DISABLE_WARNING(null-dereference)
+    FL_DISABLE_WARNING_NULL_DEREFERENCE
     void assign(fl::size n, bool value) {
         if (n > _size) {
             resize(n);
@@ -116,7 +116,7 @@ class bitset_dynamic {
 
     // Resize the bitset
     FL_DISABLE_WARNING_PUSH
-    FL_DISABLE_WARNING(null-dereference)
+    FL_DISABLE_WARNING_NULL_DEREFERENCE
     void resize(fl::u32 new_size) {
         if (new_size == _size)
             return;
@@ -160,7 +160,7 @@ class bitset_dynamic {
 
     // Reset all bits to 0
     FL_DISABLE_WARNING_PUSH
-    FL_DISABLE_WARNING(null-dereference)
+    FL_DISABLE_WARNING_NULL_DEREFERENCE
     void reset() noexcept {
         if (_blocks && _block_count > 0) {
             fl::memfill(_blocks, 0, _block_count * sizeof(block_type));
@@ -170,7 +170,7 @@ class bitset_dynamic {
 
     // Reset a specific bit to 0
     FL_DISABLE_WARNING_PUSH
-    FL_DISABLE_WARNING(null-dereference)
+    FL_DISABLE_WARNING_NULL_DEREFERENCE
     void reset(fl::u32 pos) noexcept {
         if (_blocks && pos < _size) {
             const fl::u32 idx = pos / bits_per_block;
@@ -182,7 +182,7 @@ class bitset_dynamic {
 
     // Set a specific bit to 1
     FL_DISABLE_WARNING_PUSH
-    FL_DISABLE_WARNING(null-dereference)
+    FL_DISABLE_WARNING_NULL_DEREFERENCE
     void set(fl::u32 pos) noexcept {
         if (_blocks && pos < _size) {
             const fl::u32 idx = pos / bits_per_block;
@@ -203,7 +203,7 @@ class bitset_dynamic {
 
     // Flip a specific bit
     FL_DISABLE_WARNING_PUSH
-    FL_DISABLE_WARNING(null-dereference)
+    FL_DISABLE_WARNING_NULL_DEREFERENCE
     void flip(fl::u32 pos) noexcept {
         if (_blocks && pos < _size) {
             const fl::u32 idx = pos / bits_per_block;
@@ -233,7 +233,7 @@ class bitset_dynamic {
 
     // Test if a bit is set
     FL_DISABLE_WARNING_PUSH
-    FL_DISABLE_WARNING(null-dereference)
+    FL_DISABLE_WARNING_NULL_DEREFERENCE
     bool test(fl::u32 pos) const noexcept {
         if (_blocks && pos < _size) {
             const fl::u32 idx = pos / bits_per_block;
@@ -294,7 +294,7 @@ class bitset_dynamic {
 
     // Get the size of the bitset
     FL_DISABLE_WARNING_PUSH
-    FL_DISABLE_WARNING(null-dereference)
+    FL_DISABLE_WARNING_NULL_DEREFERENCE
     fl::u32 size() const noexcept { 
         // Note: _size is a member variable, not a pointer, so this should be safe
         // but we add this comment to clarify for static analysis
