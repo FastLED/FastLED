@@ -8,9 +8,20 @@ Supports the simple build system approach outlined in FEATURE.md.
 import os
 import subprocess
 import tempfile
+from concurrent.futures import Future, ThreadPoolExecutor
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import cast
+
+
+def cpu_count() -> int:
+    # get the nubmer of cpus on the machine
+    import multiprocessing
+
+    return multiprocessing.cpu_count() or 1
+
+
+_EXECUTOR = ThreadPoolExecutor(max_workers=cpu_count() * 2)
 
 
 @dataclass
@@ -137,9 +148,32 @@ class FastLEDClangCompiler:
         ino_path: str | Path,
         output_path: str | Path | None = None,
         additional_flags: list[str] | None = None,
-    ) -> Result:
+    ) -> Future[Result]:
         """
         Compile a single .ino file using clang++ with optional temporary output.
+
+        Args:
+            ino_path (str|Path): Path to the .ino file to compile
+            output_path (str|Path, optional): Output object file path. If None, uses temp file.
+            additional_flags (list, optional): Additional compiler flags
+
+        Returns:
+            Future[Result]: Future that will contain Result dataclass with subprocess execution details
+        """
+        # Submit the compilation task to a thread pool
+
+        return _EXECUTOR.submit(
+            self._compile_ino_file_sync, ino_path, output_path, additional_flags
+        )
+
+    def _compile_ino_file_sync(
+        self,
+        ino_path: str | Path,
+        output_path: str | Path | None = None,
+        additional_flags: list[str] | None = None,
+    ) -> Result:
+        """
+        Internal synchronous implementation of compile_ino_file.
 
         Args:
             ino_path (str|Path): Path to the .ino file to compile
@@ -257,7 +291,8 @@ class FastLEDClangCompiler:
 
         # Test 2: Simple compilation test with Blink example
         print("Testing Blink.ino compilation...")
-        result = self.compile_ino_file("examples/Blink/Blink.ino")
+        future_result = self.compile_ino_file("examples/Blink/Blink.ino")
+        result = future_result.result()  # Wait for completion and get result
 
         if not result.ok:
             print(f"X Blink compilation failed: {result.stderr}")
@@ -269,7 +304,8 @@ class FastLEDClangCompiler:
 
         # Test 3: Complex example compilation test with DemoReel100
         print("Testing DemoReel100.ino compilation...")
-        result = self.compile_ino_file("examples/DemoReel100/DemoReel100.ino")
+        future_result = self.compile_ino_file("examples/DemoReel100/DemoReel100.ino")
+        result = future_result.result()  # Wait for completion and get result
 
         if not result.ok:
             print(f"X DemoReel100 compilation failed: {result.stderr}")
@@ -323,7 +359,8 @@ def compile_ino_file(
 ) -> Result:
     """Backward compatibility wrapper."""
     compiler = _get_default_compiler()
-    return compiler.compile_ino_file(ino_path, output_path, additional_flags)
+    future_result = compiler.compile_ino_file(ino_path, output_path, additional_flags)
+    return future_result.result()  # Wait for completion and return result
 
 
 def test_clang_accessibility() -> bool:
@@ -394,7 +431,8 @@ def main() -> bool:
 
     if ino_files:
         # Test compile_ino_file function
-        result = compiler.compile_ino_file(ino_files[0])
+        future_result = compiler.compile_ino_file(ino_files[0])
+        result = future_result.result()  # Wait for completion and get result
         print(
             f"Compile {ino_files[0].name}: success={result.ok}, return_code={result.return_code}"
         )
@@ -404,7 +442,8 @@ def main() -> bool:
             print("[OK] Compilation successful")
 
         # Test compile_ino_file function with Result dataclass
-        result_dc = compiler.compile_ino_file(ino_files[0])
+        future_result_dc = compiler.compile_ino_file(ino_files[0])
+        result_dc = future_result_dc.result()  # Wait for completion and get result
         print(
             f"compile_ino_file {ino_files[0].name}: ok={result_dc.ok}, return_code={result_dc.return_code}"
         )
@@ -433,7 +472,8 @@ def main() -> bool:
         print("[OK] compiler_args correctly passed to compile command.")
 
         # Test actual compilation
-        result = compiler_with_args.compile_ino_file(ino_files[0])
+        future_result = compiler_with_args.compile_ino_file(ino_files[0])
+        result = future_result.result()  # Wait for completion and get result
         print(f"Compile {ino_files[0].name} with extra args: success={result.ok}")
         if not result.ok:
             print(f"Error: {result.stderr}")

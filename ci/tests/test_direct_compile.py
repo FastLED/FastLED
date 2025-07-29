@@ -56,7 +56,8 @@ def test_clang_accessibility_class():
     blink_files = [f for f in ino_files if f.name == "Blink.ino"]
     assert len(blink_files) > 0, "Blink.ino not found"
 
-    result = compiler.compile_ino_file(blink_files[0])
+    future_result = compiler.compile_ino_file(blink_files[0])
+    result = future_result.result()  # Wait for completion and get result
     assert result.ok, f"Blink compilation failed: {result.stderr}"
     print(f"[OK] Blink.ino compilation: return code {result.return_code}")
 
