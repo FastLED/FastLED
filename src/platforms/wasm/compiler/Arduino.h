@@ -22,7 +22,7 @@ FASTLED_USING_NAMESPACE
 
 using std::max;
 using std::min;
-          ^
+
 
 namespace fl {
 
