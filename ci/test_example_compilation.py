@@ -17,6 +17,7 @@ import shutil
 import subprocess
 import sys
 import time
+import tomllib
 from concurrent.futures import Future, as_completed
 from dataclasses import dataclass
 from pathlib import Path
@@ -36,6 +37,82 @@ class CompilationResult:
     failed_count: int
     compile_time: float
     failed_examples: List[Dict[str, Any]]
+
+
+def load_build_flags_toml(toml_path: str) -> Dict[str, Any]:
+    """Load and parse build_flags.toml file."""
+    try:
+        with open(toml_path, "rb") as f:
+            return tomllib.load(f)
+    except FileNotFoundError:
+        print(f"Warning: build_flags.toml not found at {toml_path}")
+        return {}
+    except Exception as e:
+        print(f"Warning: Failed to parse build_flags.toml: {e}")
+        return {}
+
+
+def create_simplified_build_flags(
+    original_config: Dict[str, Any], output_path: str
+) -> Dict[str, Any]:
+    """Create a simplified copy of build_flags.toml with only quick mode flags for stub compilation."""
+
+    # Use the original quick flags from the TOML file
+    quick_flags = []
+    if "build_modes" in original_config and isinstance(
+        original_config["build_modes"], dict
+    ):
+        build_modes = original_config["build_modes"]
+        if "quick" in build_modes and isinstance(build_modes["quick"], dict):
+            quick_section = build_modes["quick"]
+            if "flags" in quick_section and isinstance(quick_section["flags"], list):
+                quick_flags = quick_section["flags"]
+
+    # Create simplified config with only quick mode flags
+    simplified = {
+        "build_modes": {
+            "quick": {
+                "flags": quick_flags,
+            },
+        },
+    }
+
+    # Write simplified version to file
+    try:
+        import toml  # Use toml library for writing (tomllib is read-only)
+
+        with open(output_path, "w") as f:
+            toml.dump(simplified, f)
+        print(f"Created simplified build_flags.toml at {output_path}")
+    except ImportError:
+        # Fallback to manual TOML writing if toml package not available
+        with open(output_path, "w") as f:
+            f.write(
+                "# Simplified build_flags.toml for stub compilation (quick mode only)\\n\\n"
+            )
+            f.write("[build_modes.quick]\\n")
+            build_modes_section = simplified["build_modes"]
+            quick_section = build_modes_section["quick"]
+            f.write(f"flags = {quick_section['flags']}\\n")
+        print(f"Created simplified build_flags.toml at {output_path} (manual format)")
+
+    return simplified
+
+
+def extract_compiler_flags_from_toml(config: Dict[str, Any]) -> List[str]:
+    """Extract compiler flags from TOML config - only uses [build_modes.quick] flags."""
+    flags: List[str] = []
+
+    # Only use flags from [build_modes.quick] section for sketch compilation
+    if "build_modes" in config and isinstance(config["build_modes"], dict):
+        build_modes = config["build_modes"]
+        if "quick" in build_modes and isinstance(build_modes["quick"], dict):
+            quick_section = build_modes["quick"]
+
+            if "flags" in quick_section and isinstance(quick_section["flags"], list):
+                flags.extend(quick_section["flags"])
+
+    return flags
 
 
 def get_system_info() -> Dict[str, Union[str, int, float]]:
@@ -192,17 +269,41 @@ def create_fastled_compiler() -> Compiler:
         current_dir, "src", "platforms", "wasm", "compiler"
     )
 
+    # Try to load build_flags.toml configuration from stashed copy in ci/ directory
+    toml_path = os.path.join(os.path.dirname(__file__), "build_flags.toml")
+    build_config = load_build_flags_toml(toml_path)
+
+    # Create simplified copy for stub compilation
+    if build_config:
+        simplified_toml_path = os.path.join(current_dir, "build_flags_simple.toml")
+        simplified_config = create_simplified_build_flags(
+            build_config, simplified_toml_path
+        )
+
+        # Extract additional compiler flags from TOML
+        toml_flags = extract_compiler_flags_from_toml(simplified_config)
+        print(f"Loaded {len(toml_flags)} compiler flags from build_flags.toml")
+    else:
+        toml_flags = []
+        print("Using default compiler flags (build_flags.toml not available)")
+
+    # Base compiler settings
+    base_args = [
+        f"-I{arduino_stub_path}",  # Arduino.h stub for examples (absolute path)
+    ]
+
+    # Combine base args with TOML flags
+    all_args = base_args + toml_flags
+
     settings = CompilerSettings(
         include_path=src_path,
         defines=[
             "STUB_PLATFORM",
             "ARDUINO=10808",
         ],  # Define ARDUINO to enable Arduino.h include
-        std_version="c++17",
+        std_version="c++14",
         compiler="clang++",
-        compiler_args=[
-            f"-I{arduino_stub_path}",  # Arduino.h stub for examples (absolute path)
-        ],
+        compiler_args=all_args,
     )
     return Compiler(settings)
 

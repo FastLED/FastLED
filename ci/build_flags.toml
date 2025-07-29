@@ -1,0 +1,374 @@
+# ================================================================================================
+# FastLED WASM Compilation Flags Configuration
+# ================================================================================================
+# 
+# This file centralizes ALL compilation flags used by both sketch compilation and libfastled 
+# compilation to ensure they remain synchronized and compatible across the entire build system.
+#
+# Key Features:
+# - Single source of truth for all compiler flags, defines, and build settings
+# - Auto-regenerates cmake_flags.cmake when this file changes
+# - Supports fallback loading from FastLED source tree
+# - Dynamic DWARF source resolution with ~1 second reload interval
+# - Consistent flags across CMake builds (Docker) and native builds (direct emcc)
+#
+# Performance Optimization Override:
+# - Set FASTLED_FORCE_BUILTIN_FLAGS=1 to force using this optimized configuration
+# - This bypasses any build_flags.toml in the FastLED source tree
+# - Useful for testing performance optimizations or when FastLED source has older config
+# - Example: export FASTLED_FORCE_BUILTIN_FLAGS=1 && your-build-command
+#
+# Architecture:
+# - [all] section: Common flags shared by ALL compilation targets
+# - [sketch] section: Additional flags specific to sketch compilation only  
+# - [library] section: Additional flags specific to libfastled compilation only
+# - [build_modes.*] sections: Build-specific flags (debug/quick/release)
+# - [linking.*] sections: Linker-specific flags for different targets
+# - [dwarf] section: DWARF debug info and source path resolution settings
+# - [strict_mode] section: Additional warning flags for strict compilation
+#
+# ================================================================================================
+
+[all]
+# ================================================================================================
+# UNIVERSAL COMPILATION FLAGS
+# ================================================================================================
+# These flags are applied to ALL compilation targets (both sketch and library builds).
+# They provide the foundation for consistent compilation across the entire build system.
+
+# Core preprocessor defines that control FastLED behavior
+defines = [
+    # FastLED Engine Configuration
+    "-DFASTLED_ENGINE_EVENTS_MAX_LISTENERS=50",  # Max event listeners for FastLED engine
+    "-DFASTLED_FORCE_NAMESPACE=1",               # Force namespace usage to avoid conflicts
+    "-DFASTLED_USE_PROGMEM=0",                   # Disable PROGMEM usage (not needed in WASM)
+    "-DUSE_OFFSET_CONVERTER=0",                  # Disable offset converter optimization
+    "-DGL_ENABLE_GET_PROC_ADDRESS=0",           # Disable OpenGL proc address lookup
+    
+    # Threading and Concurrency Support
+    "-D_REENTRANT=1",                           # Enable reentrant library functions
+    
+    # Emscripten-Specific Configuration
+    "-DEMSCRIPTEN_HAS_UNBOUND_TYPE_NAMES=0",    # Disable unbound type name reflection
+    
+    # Feature Enablement
+    "-DFASTLED_HAS_NETWORKING=1",               # Enable networking support
+]
+
+# Core compiler flags that control compilation behavior
+compiler_flags = [
+    # Language Standard and Compatibility
+    "-std=gnu++17",                             # Use GNU C++17 standard with extensions
+    "-fpermissive",                             # Allow some non-conforming code patterns
+    
+    # Warning Configuration
+    "-Wno-constant-logical-operand",            # Suppress constant logical operand warnings
+    "-Wnon-c-typedef-for-linkage",             # Warn about non-C typedef issues
+    "-Werror=bad-function-cast",               # Error on bad function casts
+    "-Werror=cast-function-type",              # Error on function type cast issues
+    
+
+    
+    # Thread Safety and Runtime Behavior
+    "-fno-threadsafe-statics",                 # Disable thread-safe static initialization (performance)
+    "-fno-exceptions",                         # Disable C++ exceptions for all targets (size/performance)
+    "-fno-rtti",                              # Disable RTTI for all targets (size/performance, consistent)
+    
+    # Threading Support
+    "-pthread",                               # Enable POSIX threads support
+    
+    # Thin PCH Support (Emscripten/Clang feature)
+    "-fpch-instantiate-templates",            # Required for proper Thin PCH template handling
+]
+
+# Include directory flags (paths added dynamically by build system)
+include_flags = [
+    "-I.",                                    # Current directory
+    # Note: FastLED source includes are added dynamically based on installation path
+    # Additional includes: -I{fastled_src_path} and -I{fastled_src_path}/platforms/wasm/compiler
+]
+
+[sketch]
+# ================================================================================================
+# SKETCH-SPECIFIC COMPILATION FLAGS
+# ================================================================================================
+# These flags are ONLY applied to sketch compilation (user Arduino/FastLED sketches).
+# They enable sketch-specific features and JavaScript interop capabilities.
+
+# Sketch-specific preprocessor defines
+defines = [
+    "-DSKETCH_COMPILE=1",                       # Identifies this as sketch compilation (vs library)
+    "-DFASTLED_WASM_USE_CCALL",                # Enable JavaScript ccall interface for sketches
+]
+
+# Additional sketch-specific compiler flags
+compiler_flags = [
+    # Currently no additional sketch-specific compiler flags
+    # This section is ready for future sketch-specific compilation requirements
+]
+
+[library] 
+# ================================================================================================
+# LIBRARY-SPECIFIC COMPILATION FLAGS  
+# ================================================================================================
+# These flags are ONLY applied to libfastled compilation (the core FastLED library).
+# They enable LLVM bitcode generation and additional warnings for library builds.
+
+# Library-specific preprocessor defines
+defines = [
+    # Currently no library-specific defines
+    # This section is ready for future library-specific requirements
+]
+
+# Library-specific compiler flags
+compiler_flags = [
+    "-emit-llvm",                              # Generate LLVM bitcode for library compilation
+    "-Wall",                                   # Enable comprehensive warnings for library code
+]
+
+[build_modes.debug]
+# ================================================================================================
+# DEBUG BUILD MODE
+# ================================================================================================
+# Optimized for debugging experience with maximum debug information and runtime checking.
+# Includes address/undefined behavior sanitizers and comprehensive debug info generation.
+
+# Debug compilation flags
+flags = [
+    # Debug Information Generation
+    "-g3",                                     # Maximum debug info (includes macros and preprocessor info)
+    "-gsource-map",                           # Generate source maps for browser debugging
+    "--profiling-funcs",                     # Enable function profiling in debug builds
+    # Note: -ffile-prefix-map flag is generated dynamically from [dwarf] config for path mapping
+    
+    # Optimization Control
+    "-fno-inline",                           # Disable function inlining for clearer debugging
+    "-O0",                                   # No optimization (fastest compilation, clearest debugging)
+]
+
+# Debug-specific linking flags (applied only during final linking in debug mode)
+link_flags = [
+    # Debug Info and Error Detection
+    "-sSEPARATE_DWARF_URL=fastled.wasm.dwarf", # Separate DWARF debug info file
+    "-sSTACK_OVERFLOW_CHECK=2",              # Maximum stack overflow detection
+    "-sASSERTIONS=1",                        # Enable runtime assertions
+]
+
+[build_modes.fast_debug]
+# ================================================================================================
+# FAST DEBUG BUILD MODE
+# ================================================================================================
+# Optimized for rapid development iteration with essential debugging features but faster builds.
+# Trades off some runtime safety checks and detailed debug info for significantly faster compilation.
+# Ideal for: frequent rebuilds, development iteration, basic debugging needs.
+
+# Fast debug compilation flags
+flags = [
+    # Debug Information Generation - Reduced for speed
+    "-g2",                                   # Standard debug info (faster than g3, excludes macros)
+    "-gsource-map",                         # Generate source maps for browser debugging
+    # Note: -ffile-prefix-map flag is generated dynamically from [dwarf] config for path mapping
+    
+    # Optimization Control - Minimal optimization for speed
+    "-O1",                                  # Light optimization (much faster than O0, still debuggable)
+    "-fno-inline-functions",                # Disable automatic function inlining (preserve call stack)
+    
+    # Runtime Safety - Essential checks only
+    # Note: Sanitizers removed for faster compilation - add back with environment variable if needed
+    # Set FASTLED_DEBUG_SANITIZERS=1 to enable sanitizers when needed for specific debugging
+]
+
+# Fast debug linking flags - minimal overhead
+link_flags = [
+    # Debug Info - Inline instead of separate for faster linking
+    # Note: No separate DWARF file for faster builds
+    
+    # Error Detection - Essential only
+    "-sSTACK_OVERFLOW_CHECK=1",             # Basic stack overflow detection (faster than level 2)
+    "-sASSERTIONS=1",                       # Keep runtime assertions for error detection
+]
+
+[build_modes.quick]
+# ================================================================================================
+# QUICK BUILD MODE  
+# ================================================================================================
+# Optimized for fastest iteration during development. Prioritizes compilation and linking speed
+# over runtime performance. Uses minimal LTO and aggressive build-time optimizations.
+
+# Quick build compilation flags - removed Emscripten-specific flags for clang++ compatibility
+flags = [
+    # Optimization Control - Optimized for build speed
+    "-O1",                                   # Light optimization (faster than O0 with better performance)
+    "-g0",                                   # No debug info (fastest compilation, smallest size)
+    
+    # Aggressive Build Speed Optimizations
+    "-fno-inline-functions",                 # Disable function inlining
+    "-fno-vectorize",                       # Disable vectorization optimizations 
+    "-fno-unroll-loops",                    # Disable loop unrolling
+    "-fno-strict-aliasing",                 # Disable strict aliasing assumptions
+    
+    # Code Generation Optimizations for Speed
+    "-ffast-math",                          # Enable fast math optimizations (if acceptable)
+    "-fno-math-errno",                      # Don't set errno for math functions
+    "-fno-exceptions",                      # Explicitly disable exceptions (already in base but emphasize)
+    "-fno-rtti",                           # Explicitly disable RTTI (already in base but emphasize)
+]
+
+# Quick build linking flags - optimized for fastest linking
+link_flags = [
+    # Reduce memory for faster startup (override base setting)
+    "-sINITIAL_MEMORY=67108864",            # Reduce initial memory to 64MB (faster startup)
+    
+    # Disable Non-Essential Runtime Features for Speed
+    "-sASSERTIONS=0",                       # Disable runtime assertions
+    "-sSTACK_OVERFLOW_CHECK=0",             # Disable stack overflow checking
+    
+    # Compatibility and Performance Options
+    "-sWASM_BIGINT=0",                      # Disable BigInt for faster execution
+    "-sERROR_ON_UNDEFINED_SYMBOLS=0",       # Allow undefined symbols (faster linking)
+]
+
+[build_modes.release]
+# ================================================================================================
+# RELEASE BUILD MODE
+# ================================================================================================
+# Optimized for production deployment with maximum size and performance optimization.
+# Minimal debug info and aggressive optimization for smallest possible output.
+
+# Release compilation flags
+flags = [
+    # Size Optimization
+    "-Oz",                                   # Optimize aggressively for size (smaller than -Os)
+]
+
+[linking.base]
+# ================================================================================================
+# BASE LINKING FLAGS
+# ================================================================================================
+# Common linking flags shared by ALL linking operations (both sketch and library).
+# These provide the foundation for WASM generation and threading support.
+
+flags = [
+    # Note: Linker selection is set dynamically: -fuse-ld={linker} (mold/lld)
+    
+    # WebAssembly Configuration
+    "-sWASM=1",                                # Generate WebAssembly output (not asm.js)
+    
+    # Threading Support
+    "-pthread",                               # Enable POSIX threads support
+    "-sUSE_PTHREADS=1",                       # Use Emscripten's pthread implementation
+    "-sPROXY_TO_PTHREAD",                     # Run main() on a pthread
+]
+
+[linking.sketch]
+# ================================================================================================
+# SKETCH-SPECIFIC LINKING FLAGS
+# ================================================================================================
+# Linking flags ONLY applied to sketch compilation. These create the final JavaScript/WASM
+# module that can be loaded in browsers with full FastLED functionality and networking support.
+
+flags = [
+    # Entry Point and Module Configuration
+    # Note: Uses proper main() entry point from src/platforms/wasm/entry_point.cpp
+    "--emit-symbol-map",                     # Generate symbol map for debugging
+    "-sMODULARIZE=1",                        # Create a factory function (not global)
+    "-sEXPORT_NAME=fastled",                 # Name of the exported factory function
+    
+    # Memory Management
+    "-sALLOW_MEMORY_GROWTH=1",               # Allow WASM memory to grow dynamically
+    "-sINITIAL_MEMORY=134217728",            # Start with 128 MB memory (134,217,728 bytes)
+    "-sAUTO_NATIVE_LIBRARIES=0",             # Disable automatic native library inclusion
+    
+    # JavaScript Interop - Runtime Methods
+    "-sEXPORTED_RUNTIME_METHODS=['ccall','cwrap','stringToUTF8','UTF8ToString','lengthBytesUTF8','HEAPU8','getValue']",
+    
+    # JavaScript Interop - C Functions
+    # Note: _extern_setup and _extern_loop are now compatibility functions; _main is the primary entry point
+    "-sEXPORTED_FUNCTIONS=['_malloc','_free','_main','_extern_setup','_extern_loop','_fastled_declare_files','_getStripPixelData','_getFrameData','_getScreenMapData','_freeFrameData','_getFrameVersion','_hasNewFrameData','_js_fetch_success_callback','_js_fetch_error_callback']",
+    
+    # Runtime Behavior
+    "-sEXIT_RUNTIME=0",                      # Keep runtime alive after main() exits
+    "-sFILESYSTEM=0",                        # Disable filesystem support (not needed)
+    
+    # Optimization and Debugging
+    "-Wl,--gc-sections",                     # Remove unused code sections
+    "--source-map-base=http://localhost:8000/", # Base URL for source map files
+    
+    # Asyncify Support (enables async/await style coding with delay() functions)
+    "-sASYNCIFY=1",                         # Enable Asyncify for async function support
+    "-sASYNCIFY_STACK_SIZE=10485760",       # 10MB stack for asyncify operations (large for complex sketches)
+    "-sASYNCIFY_EXPORTS=['_main','_extern_setup','_extern_loop']", # Allow main and extern FastLED functions to be async
+    "-sASYNCIFY_IMPORTS=['js_fetch_async']", # JavaScript functions that use Asyncify.handleAsync
+]
+
+[linking.library]
+# ================================================================================================
+# LIBRARY-SPECIFIC LINKING FLAGS
+# ================================================================================================
+# Linking flags ONLY applied to libfastled compilation. Currently minimal but maintained
+# for future library-specific linking requirements.
+
+flags = [
+    # Currently no library-specific linking flags
+    # This section is ready for future library-specific linking requirements
+]
+
+[dwarf]
+# ================================================================================================
+# DWARF DEBUG INFO AND SOURCE RESOLUTION
+# ================================================================================================
+# Configuration for DWARF debug information generation and dynamic source path resolution.
+# This system supports hot-reloading (~1 second interval) for real-time debugging configuration.
+#
+# Key Features:
+# - Dynamic prefix resolution for source path mapping
+# - Periodic configuration reloading without restart
+# - Centralized debug path mapping control
+# - Cross-platform source path normalization
+
+# Source path resolution prefixes (reloaded every ~1 second)
+fastled_prefix = "fastledsource"                # Prefix for FastLED library sources in debug info
+sketch_prefix = "sketchsource"                  # Prefix for user sketch sources in debug info  
+dwarf_prefix = "dwarfsource"                    # Prefix for generic dwarf-resolved sources
+
+# Debug file naming
+dwarf_filename = "fastled.wasm.dwarf"           # Name of separate DWARF debug info file
+
+# File prefix mapping for source path resolution in debug info
+# This controls how absolute paths in the compilation environment are mapped to
+# relative paths in the debug information for consistent debugging experience
+# Format: -ffile-prefix-map=FROM=TO
+file_prefix_map_from = "/"                      # Map from root path
+file_prefix_map_to = "sketchsource/"            # Map to sketch source prefix
+
+[strict_mode]
+# ================================================================================================
+# STRICT MODE COMPILATION
+# ================================================================================================
+# Additional warning flags enabled in strict mode for enhanced code quality checking.
+# These flags catch common programming errors and enforce coding best practices.
+
+flags = [
+    # Error Escalation
+    "-Werror",                                  # Treat all warnings as errors (zero-tolerance)
+    
+    # Enhanced Warning Detection
+    "-Wextra",                                  # Enable extra warning checks beyond -Wall
+    
+    # Type Safety and Conversion Warnings
+    "-Wconversion",                             # Warn about implicit type conversions
+    "-Wsign-conversion",                        # Warn about signed/unsigned conversions
+    
+    # Code Quality Warnings
+    "-Wunused",                                 # Warn about unused variables, functions, etc.
+    "-Wuninitialized",                          # Warn about uninitialized variable usage
+    "-Wdouble-promotion",                       # Warn about float->double promotions
+    
+    # Format and Safety Warnings
+    "-Wformat=2",                               # Enhanced format string checking
+    "-Wcast-align",                             # Warn about alignment-breaking casts
+    "-Wcast-qual",                              # Warn about qualifier-removing casts
+    
+    # Critical Error Detection
+    "-Werror=return-type",                      # Always error on missing return statements
+] 
