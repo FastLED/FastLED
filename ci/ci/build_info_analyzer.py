@@ -13,8 +13,31 @@ Usage:
 
 import argparse
 import json
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
+
+
+@dataclass
+class CompilerInfo:
+    """Information about compilers and toolchain"""
+
+    cc_path: Optional[str] = None
+    cxx_path: Optional[str] = None
+    ar_path: Optional[str] = None
+    framework: Optional[str] = None
+    platform: Optional[str] = None
+    board: Optional[str] = None
+
+
+@dataclass
+class BuildInfo:
+    """Complete build information for a platform"""
+
+    board_name: str
+    defines: Dict[str, str] = field(default_factory=dict)
+    compiler_info: CompilerInfo = field(default_factory=CompilerInfo)
+    aliases: Dict[str, Optional[str]] = field(default_factory=dict)
 
 
 class BuildInfoAnalyzer:

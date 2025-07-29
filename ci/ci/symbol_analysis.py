@@ -11,11 +11,58 @@ import re
 import subprocess
 import sys
 from collections import defaultdict
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
 # Import board mapping system
 from ci.boards import get_board
+
+
+@dataclass
+class SymbolInfo:
+    """Represents a symbol in the binary"""
+
+    address: str
+    size: int
+    type: str
+    name: str
+    demangled_name: str
+    source: str = "unknown"
+
+
+@dataclass
+class TypeBreakdown:
+    """Breakdown of symbols by type"""
+
+    type: str
+    count: int
+    total_size: int
+
+
+@dataclass
+class CallStats:
+    """Statistics about function calls"""
+
+    functions_with_calls: int
+    functions_called_by_others: int
+    most_called: List[Tuple[str, int]] = field(default_factory=list)
+    most_calling: List[Tuple[str, int]] = field(default_factory=list)
+
+
+@dataclass
+class AnalysisReport:
+    """Complete symbol analysis report"""
+
+    board: str
+    total_symbols: int
+    total_size: int
+    largest_symbols: List[SymbolInfo] = field(default_factory=list)
+    type_breakdown: List[TypeBreakdown] = field(default_factory=list)
+    dependencies: Dict[str, List[str]] = field(default_factory=dict)
+    call_graph: Optional[Dict[str, List[str]]] = None
+    reverse_call_graph: Optional[Dict[str, List[str]]] = None
+    call_stats: Optional[CallStats] = None
 
 
 def run_command(cmd: str) -> str:
@@ -49,7 +96,7 @@ def demangle_symbol(mangled_name: str, cppfilt_path: str) -> str:
 
 def analyze_symbols(
     elf_file: str, nm_path: str, cppfilt_path: str, readelf_path: Optional[str] = None
-) -> List[Dict]:
+) -> List[SymbolInfo]:
     """Analyze ALL symbols in ELF file using both nm and readelf for comprehensive coverage"""
     print("Analyzing symbols with enhanced coverage...")
 
@@ -97,15 +144,14 @@ def analyze_symbols(
                             # Demangle the symbol name
                             demangled_name = demangle_symbol(name, cppfilt_path)
 
-                            symbol_info = {
-                                "address": addr,
-                                "size": size,
-                                "type": symbol_type[0].upper(),  # T, D, B, etc.
-                                "bind": bind,
-                                "name": name,
-                                "demangled_name": demangled_name,
-                                "source": "readelf",
-                            }
+                            symbol_info = SymbolInfo(
+                                address=addr,
+                                size=size,
+                                type=symbol_type[0].upper(),  # T, D, B, etc.
+                                name=name,
+                                demangled_name=demangled_name,
+                                source="readelf",
+                            )
 
                             symbols_dict[key] = symbol_info
 
@@ -135,21 +181,21 @@ def analyze_symbols(
 
                     # If we already have this symbol from readelf, update with accurate size
                     if key in symbols_dict:
-                        symbols_dict[key]["size"] = size
-                        symbols_dict[key]["type"] = symbol_type
-                        symbols_dict[key]["source"] = "nm+readelf"
+                        symbols_dict[key].size = size
+                        symbols_dict[key].type = symbol_type
+                        symbols_dict[key].source = "nm+readelf"
                     else:
                         # New symbol not found by readelf
                         demangled_name = demangle_symbol(name, cppfilt_path)
 
-                        symbol_info = {
-                            "address": addr,
-                            "size": size,
-                            "type": symbol_type,
-                            "name": name,
-                            "demangled_name": demangled_name,
-                            "source": "nm",
-                        }
+                        symbol_info = SymbolInfo(
+                            address=addr,
+                            size=size,
+                            type=symbol_type,
+                            name=name,
+                            demangled_name=demangled_name,
+                            source="nm",
+                        )
 
                         symbols_dict[key] = symbol_info
 
@@ -184,14 +230,14 @@ def analyze_symbols(
                         # New symbol not found by other methods
                         demangled_name = demangle_symbol(name, cppfilt_path)
 
-                        symbol_info = {
-                            "address": addr,
-                            "size": 0,  # nm -a doesn't provide size
-                            "type": symbol_type,
-                            "name": name,
-                            "demangled_name": demangled_name,
-                            "source": "nm-a",
-                        }
+                        symbol_info = SymbolInfo(
+                            address=addr,
+                            size=0,  # nm -a doesn't provide size
+                            type=symbol_type,
+                            name=name,
+                            demangled_name=demangled_name,
+                            source="nm-a",
+                        )
 
                         symbols_dict[key] = symbol_info
 
@@ -199,11 +245,11 @@ def analyze_symbols(
                     continue  # Skip malformed lines
 
     # Convert dict to list
-    symbols = list(symbols_dict.values())
+    symbols: List[SymbolInfo] = list(symbols_dict.values())
 
     print(f"Found {len(symbols)} total symbols using enhanced analysis")
-    print(f"  - Symbols with size info: {len([s for s in symbols if s['size'] > 0])}")
-    print(f"  - Symbols without size: {len([s for s in symbols if s['size'] == 0])}")
+    print(f"  - Symbols with size info: {len([s for s in symbols if s.size > 0])}")
+    print(f"  - Symbols without size: {len([s for s in symbols if s.size == 0])}")
 
     return symbols
 
@@ -220,8 +266,8 @@ def analyze_function_calls(
     symbol_output = run_command(cmd)
 
     # Build symbol address map for function symbols
-    symbol_map = {}  # address -> symbol_name
-    function_symbols = set()  # set of function names
+    symbol_map: Dict[str, str] = {}  # address -> symbol_name
+    function_symbols: set[str] = set()  # set of function names
 
     for line in symbol_output.strip().split("\n"):
         if not line.strip():
@@ -255,7 +301,9 @@ def analyze_function_calls(
         return {}
 
     # Parse disassembly to find function calls
-    call_graph = defaultdict(set)  # caller -> set of callees
+    call_graph: defaultdict[str, set[str]] = defaultdict(
+        set
+    )  # caller -> set of callees
     current_function = None
 
     # Common call instruction patterns for different architectures
@@ -359,12 +407,12 @@ def analyze_map_file(map_file: Path) -> Dict[str, List[str]]:
 
 def generate_report(
     board_name: str,
-    symbols: List[Dict],
+    symbols: List[SymbolInfo],
     dependencies: Dict[str, List[str]],
     call_graph: Optional[Dict[str, List[str]]] = None,
     reverse_call_graph: Optional[Dict[str, List[str]]] = None,
     enhanced_mode: bool = False,
-) -> Dict:
+) -> AnalysisReport:
     """Generate a comprehensive report with optional call graph analysis"""
     print("\n" + "=" * 80)
     if enhanced_mode and call_graph and reverse_call_graph:
@@ -375,9 +423,9 @@ def generate_report(
 
     # Summary statistics
     total_symbols = len(symbols)
-    total_size = sum(s["size"] for s in symbols)
-    symbols_with_size = [s for s in symbols if s["size"] > 0]
-    symbols_without_size = [s for s in symbols if s["size"] == 0]
+    total_size = sum(s.size for s in symbols)
+    symbols_with_size = [s for s in symbols if s.size > 0]
+    symbols_without_size = [s for s in symbols if s.size == 0]
 
     print("\nSUMMARY:")
     print(f"  Total symbols: {total_symbols}")
@@ -394,7 +442,7 @@ def generate_report(
     # Show source breakdown
     source_stats = {}
     for sym in symbols:
-        source = sym.get("source", "unknown")
+        source = sym.source
         if source not in source_stats:
             source_stats[source] = 0
         source_stats[source] += 1
@@ -405,12 +453,12 @@ def generate_report(
 
     # Largest symbols overall
     print("\nLARGEST SYMBOLS (all symbols, sorted by size):")
-    symbols_sorted = sorted(symbols, key=lambda x: x["size"], reverse=True)
+    symbols_sorted = sorted(symbols, key=lambda x: x.size, reverse=True)
 
     display_count = 30 if enhanced_mode else 50
     for i, sym in enumerate(symbols_sorted[:display_count]):
-        display_name = sym.get("demangled_name", sym["name"])
-        print(f"  {i + 1:2d}. {sym['size']:6d} bytes - {display_name}")
+        display_name = sym.demangled_name
+        print(f"  {i + 1:2d}. {sym.size:6d} bytes - {display_name}")
 
         # Show what functions call this symbol (if enhanced mode and it's a function)
         if enhanced_mode and reverse_call_graph and display_name in reverse_call_graph:
@@ -428,10 +476,10 @@ def generate_report(
         elif (
             not enhanced_mode
             and "demangled_name" in sym
-            and sym["demangled_name"] != sym["name"]
+            and sym.demangled_name != sym.name
         ):
             print(
-                f"      (mangled: {sym['name'][:80]}{'...' if len(sym['name']) > 80 else ''})"
+                f"      (mangled: {sym.name[:80]}{'...' if len(sym.name) > 80 else ''})"
             )
 
     # Initialize variables for enhanced mode data
@@ -487,17 +535,17 @@ def generate_report(
     print(section_title + "SYMBOL TYPE BREAKDOWN:")
     type_stats = {}
     for sym in symbols:
-        sym_type = sym["type"]
+        sym_type = sym.type
         if sym_type not in type_stats:
-            type_stats[sym_type] = {"count": 0, "size": 0}
-        type_stats[sym_type]["count"] += 1
-        type_stats[sym_type]["size"] += sym["size"]
+            type_stats[sym_type] = TypeBreakdown(type=sym_type, count=0, total_size=0)
+        type_stats[sym_type].count += 1
+        type_stats[sym_type].total_size += sym.size
 
     for sym_type, stats in sorted(
-        type_stats.items(), key=lambda x: x[1]["size"], reverse=True
+        type_stats.items(), key=lambda x: x.total_size, reverse=True
     ):
         print(
-            f"  {sym_type}: {stats['count']} symbols, {stats['size']} bytes ({stats['size'] / 1024:.1f} KB)"
+            f"  {sym_type}: {stats.count} symbols, {stats.total_size} bytes ({stats.total_size / 1024:.1f} KB)"
         )
 
     # Dependencies analysis
@@ -512,32 +560,24 @@ def generate_report(
                     print(f"    ... and {len(dependencies[module]) - 5} more")
 
     # Build return data
-    report_data = {
-        "board": board_name,
-        "total_symbols": total_symbols,
-        "total_size": total_size,
-        "largest_symbols": symbols_sorted[:20],
-        "type_breakdown": type_stats,
-        "dependencies": dependencies,
-    }
+    report_data = AnalysisReport(
+        board=board_name,
+        total_symbols=total_symbols,
+        total_size=total_size,
+        largest_symbols=symbols_sorted[:20],
+        type_breakdown=[TypeBreakdown(**stats) for stats in type_stats.values()],
+        dependencies=dependencies,
+    )
 
     # Add enhanced data if available
     if enhanced_mode and call_graph and reverse_call_graph:
-        report_data.update(
-            {
-                "call_graph": call_graph,
-                "reverse_call_graph": reverse_call_graph,
-                "call_stats": {
-                    "functions_with_calls": len(call_graph),
-                    "functions_called_by_others": len(reverse_call_graph),
-                    "most_called": [
-                        (func, len(callers)) for func, callers in most_called[:10]
-                    ],
-                    "most_calling": [
-                        (func, len(callees)) for func, callees in most_calling[:10]
-                    ],
-                },
-            }
+        report_data.call_graph = call_graph
+        report_data.reverse_call_graph = reverse_call_graph
+        report_data.call_stats = CallStats(
+            functions_with_calls=len(call_graph),
+            functions_called_by_others=len(reverse_call_graph),
+            most_called=most_called[:10],
+            most_calling=most_calling[:10],
         )
 
     return report_data
@@ -780,7 +820,7 @@ def main():
     detailed_data = {
         "summary": report,
         "all_symbols_sorted_by_size": sorted(
-            symbols, key=lambda x: x["size"], reverse=True
+            symbols, key=lambda x: x.size, reverse=True
         ),
         "dependencies": dependencies,
     }

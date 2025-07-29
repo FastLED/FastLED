@@ -123,18 +123,17 @@ class TestSymbolAnalysis(unittest.TestCase):
 
         # Verify symbol structure
         for symbol in symbols:
-            self.assertIn("address", symbol)
-            self.assertIn("size", symbol)
-            self.assertIn("type", symbol)
-            self.assertIn("name", symbol)
-            self.assertIn("demangled_name", symbol)
-            self.assertIsInstance(symbol["size"], int)
-            self.assertGreater(symbol["size"], 0, "Symbol size should be positive")
+            self.assertIsInstance(symbol.address, str)
+            self.assertIsInstance(symbol.size, int)
+            self.assertIsInstance(symbol.type, str)
+            self.assertIsInstance(symbol.name, str)
+            self.assertIsInstance(symbol.demangled_name, str)
+            self.assertGreater(symbol.size, 0, "Symbol size should be positive")
 
         print(f"Found {len(symbols)} symbols")
 
         # Check that we have some common symbols we'd expect in a compiled program
-        symbol_names = [s["demangled_name"] for s in symbols]
+        symbol_names = [s.demangled_name for s in symbols]
 
         # Should have main function
         main_symbols = [name for name in symbol_names if "main" in name.lower()]
@@ -162,7 +161,7 @@ class TestSymbolAnalysis(unittest.TestCase):
         self.assertGreater(len(symbols), 0, "Should find symbols")
 
         # Check that we have symbols with reasonable sizes
-        sizes = [s["size"] for s in symbols]
+        sizes = [s.size for s in symbols]
         self.assertTrue(
             all(size > 0 for size in sizes), "All symbols should have positive sizes"
         )

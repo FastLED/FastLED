@@ -5,6 +5,7 @@ import subprocess
 import time
 import warnings
 from pathlib import Path
+from typing import Any, Callable
 
 from ci.boards import Board  # type: ignore
 from ci.locked_print import locked_print
@@ -72,7 +73,7 @@ def insert_tool_aliases(meta_json: dict[str, dict]) -> None:
         meta_json[board]["aliases"] = aliases
 
 
-def remove_readonly(func, path, _):
+def remove_readonly(func: Callable[..., Any], path: str, _: Any) -> None:
     "Clear the readonly bit and reattempt the removal"
     if os.name == "nt":
         os.system(f"attrib -r {path}")

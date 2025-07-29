@@ -299,7 +299,7 @@ def compile_with_pio_ci(
 
     locked_print(f"*** Compiling examples for board {board_name} using pio ci ***")
 
-    errors = []
+    errors: list[str] = []
 
     for example_path in example_paths:
         locked_print(
