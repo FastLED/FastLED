@@ -20,7 +20,9 @@
    (C) Voidstar Lab 2021
 */
 
-#if defined(__AVR__) || defined(ARDUINO_ARCH_AVR) || defined(ARDUINO_ARCH_ESP8266) || defined(ARDUINO_ARCH_RP2040) || defined(ARDUINO_ARCH_RP2350) || defined(ARDUINO_ARCH_RP2040) || defined(ARDUINO_TEENSYLC)
+#include "fl/sketch_macros.h"
+
+#if !SKETCH_HAS_LOTS_OF_MEMORY
 // Platform does not have enough memory
 // Other platforms have weird issues. Will revisit this later.
 void setup() {}

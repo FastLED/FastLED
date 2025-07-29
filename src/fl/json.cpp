@@ -30,7 +30,7 @@ FL_DISABLE_WARNING(null-dereference)
 #include "third_party/arduinojson/json.h"
 FL_DISABLE_WARNING_POP
 
-
+#endif  // FASTLED_ENABLE_JSON
 
 namespace fl {
 
@@ -577,4 +577,3 @@ fl::string Json::normalizeJsonString(const char* jsonStr) {
 } // namespace fl
 
 
-#endif  // FASTLED_ENABLE_JSON
