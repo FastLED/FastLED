@@ -11,7 +11,7 @@
 // Fix for ATtiny1604 - provide weak timer_millis symbol when building normally.
 // When compiling using FASTLED_ALL_SRC, avr_millis_timer_null_counter.hpp already
 // provides this symbol, so we skip the definition here to avoid a duplicate.
-#if defined(__AVR_ATtiny1604__) && !defined(FASTLED_ALL_SRC)
+#if defined(__AVR_ATtiny1604__)
 #ifdef __cplusplus
 extern "C" {
 #endif

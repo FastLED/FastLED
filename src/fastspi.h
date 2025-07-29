@@ -170,9 +170,9 @@ class SPIOutput<SPI_DATA, SPI_CLOCK, SPI_SPEED> : public ArdunioCoreSPIOutput<SP
 #else
 #  if !defined(FASTLED_INTERNAL) && !defined(FASTLED_ALL_PINS_HARDWARE_SPI) && !defined(ESP32)
 #    ifdef FASTLED_HAS_PRAGMA_MESSAGE
-#      pragma message "WARNING: The SPI pins you chose have not been marked as hardware accelerated within the code base. Consult the data sheet for hardware spi pins designed for efficient SPI transfer, typically via DMA.  All SPI access will default to bitbanged output"
+#      pragma message "WARNING: The SPI pins you chose have not been marked as hardware accelerated within the code base. All SPI access will default to bitbanged output. Consult the data sheet for hardware spi pins designed for efficient SPI transfer, typically via DMA / MOSI / SCK / SS pin"
 #    else
-#      warning "WARNING: The SPI pins you chose have not been marked as hardware accelerated within the code base. Consult the data sheet for hardware spi pins designed for efficient SPI transfer, typically via DMA.  All SPI access will default to bitbanged output"
+#      warning "The SPI pins you chose have not been marked as hardware accelerated within the code base. All SPI access will default to bitbanged output. Consult the data sheet for hardware spi pins designed for efficient SPI transfer, typically via DMA / MOSI / SCK / SS pins"
 #    endif
 #  endif
 #endif
