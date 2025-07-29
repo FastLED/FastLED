@@ -322,7 +322,7 @@ def fingerprint_code_base(
         patterns = glob.split(",")
 
         # Get all matching files
-        all_files = []
+        all_files: list[Path] = []
         for pattern in patterns:
             pattern = pattern.strip()
             all_files.extend(sorted(start_directory.glob(pattern)))

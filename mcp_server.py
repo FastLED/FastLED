@@ -1,10 +1,5 @@
 #!/usr/bin/env -S uv run --script
-
-# /// script
-# dependencies = [
-#   "mcp>=1.0.0",
-# ]
-# ///
+# pyright: reportUnknownMemberType=false
 
 """
 FastLED MCP Server - Provides tools for working with the FastLED project
@@ -81,12 +76,12 @@ import shutil
 import tempfile
 import time
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Union
 
 try:
-    from mcp.server import Server
-    from mcp.server.stdio import stdio_server 
-    from mcp.types import (
+    from mcp.server import Server  # type: ignore
+    from mcp.server.stdio import stdio_server  # type: ignore
+    from mcp.types import (  # type: ignore
         CallToolResult,
         TextContent,
         Tool,
@@ -97,6 +92,8 @@ except ImportError:
     print("Please install it with: pip install mcp")
     print("Or with uv: uv add mcp")
     sys.exit(1)
+
+from ci.ci.build_info_analyzer import BuildInfoAnalyzer  # type: ignore
 
 # Initialize the MCP server
 server = Server("fastled-mcp-server")
@@ -511,7 +508,7 @@ async def list_tools() -> List[Tool]:
     ]
 
 @server.call_tool()
-async def call_tool(name: str, arguments: Dict[str, Any]) -> CallToolResult:
+async def call_tool(name: str, arguments: Dict[str, Any]) -> Any:
     """Handle tool calls."""
     
     project_root = Path(__file__).parent
@@ -620,7 +617,7 @@ async def list_test_cases(arguments: Dict[str, Any], project_root: Path) -> Call
             isError=True
         )
     
-    test_cases = {}
+    test_cases: Dict[str, List[str]] = {}
     
     if test_file:
         # Analyze specific test file
@@ -675,7 +672,7 @@ async def list_test_cases(arguments: Dict[str, Any], project_root: Path) -> Call
 
 def extract_test_cases(file_path: Path, search_pattern: str = "") -> List[str]:
     """Extract TEST_CASE names from a test file."""
-    test_cases = []
+    test_cases: List[str] = []
     
     try:
         with open(file_path, 'r', encoding='utf-8') as f:
@@ -1237,7 +1234,7 @@ async def setup_stack_traces(arguments: Dict[str, Any], project_root: Path) -> C
             except (OSError, IOError):
                 pass
             
-            install_commands = []
+            install_commands: List[str] = []
             
             if method in ["libunwind", "auto"]:
                 result_text += "## Installing LibUnwind (Enhanced Stack Traces)\n\n"
@@ -1394,11 +1391,11 @@ async def code_fingerprint(arguments: Dict[str, Any], project_root: Path) -> Cal
     fingerprint_data = calculate_fingerprint(target_dir)
     
     result_text = f"Code fingerprint for {directory}:\n"
-    result_text += f"Hash: {fingerprint_data.get('hash', 'N/A')}\n"
-    result_text += f"Elapsed time: {fingerprint_data.get('elapsed_seconds', 'N/A')}s\n"
+    result_text += f"Hash: {fingerprint_data.hash}\n"
+    result_text += f"Elapsed time: {fingerprint_data.elapsed_seconds or 'N/A'}s\n"
     
-    if "status" in fingerprint_data:
-        result_text += f"Status: {fingerprint_data['status']}\n"
+    if fingerprint_data.status:
+        result_text += f"Status: {fingerprint_data.status}\n"
     
     return CallToolResult(
         content=[TextContent(type="text", text=result_text)]
@@ -1410,7 +1407,7 @@ async def lint_code(arguments: Dict[str, Any], project_root: Path) -> CallToolRe
     agent_type = arguments.get("agent_type", "foreground")
     fix = arguments.get("fix", False)
     
-    results = []
+    results: List[str] = []
     
     # Provide guidance based on agent type
     if agent_type == "foreground" and tool != "bash_lint":
@@ -1481,7 +1478,7 @@ async def list_examples(arguments: Dict[str, Any], project_root: Path) -> CallTo
             isError=True
         )
     
-    examples = []
+    examples: List[str] = []
     for item in examples_dir.iterdir():
         if item.is_dir() and not item.name.startswith('.'):
             # Check if it has a .ino file
@@ -1502,7 +1499,7 @@ async def project_info(arguments: Dict[str, Any], project_root: Path) -> CallToo
     """Get project information."""
     include_git = arguments.get("include_git_status", True)
     
-    info = []
+    info: List[str] = []
     
     # Basic project info
     info.append("FastLED Project Information")
@@ -1639,15 +1636,8 @@ async def build_info_analysis(arguments: Dict[str, Any], project_root: Path) -> 
     output_json = arguments.get("output_json", False)
     
     # Import our build info analyzer
-    try:
-        import sys
-        sys.path.insert(0, str(project_root / "ci" / "ci"))
-        from build_info_analyzer import BuildInfoAnalyzer
-    except ImportError as e:
-        return CallToolResult(
-            content=[TextContent(type="text", text=f"Error importing build_info_analyzer: {e}")],
-            isError=True
-        )
+
+        
     
     analyzer = BuildInfoAnalyzer(str(project_root / ".build"))
     
@@ -1675,7 +1665,7 @@ async def build_info_analysis(arguments: Dict[str, Any], project_root: Path) -> 
     
     # Handle board comparison
     if compare_with:
-        success, comparison, error = analyzer.compare_defines(board, compare_with)
+        success, comparison, error = analyzer.compare_defines(board, compare_with)  # type: ignore
         if not success:
             return CallToolResult(
                 content=[TextContent(type="text", text=f"❌ Error: {error}")],
@@ -1691,7 +1681,7 @@ async def build_info_analysis(arguments: Dict[str, Any], project_root: Path) -> 
             
             result_text = f"🔍 Platform Defines Comparison:\n"
             result_text += "=" * 60 + "\n"
-            result_text += f"📊 {board1.upper()} vs {board2.upper()}\n"
+            result_text += f"📊 {board1.upper()} vs {board2.upper()}\n"  # type: ignore
             result_text += f"   {board1}: {comparison['board1_total']} defines\n"
             result_text += f"   {board2}: {comparison['board2_total']} defines\n"
             result_text += f"   Common: {comparison['common_count']} defines\n"
@@ -1716,7 +1706,7 @@ async def build_info_analysis(arguments: Dict[str, Any], project_root: Path) -> 
         )
     
     # Handle single board analysis
-    result_parts = []
+    result_parts: List[str] = []
     
     if show_defines or show_all:
         success, defines, error = analyzer.get_platform_defines(board)
@@ -1746,22 +1736,23 @@ async def build_info_analysis(arguments: Dict[str, Any], project_root: Path) -> 
         
         if output_json:
             import json
-            result_parts.append(json.dumps({"compiler": compiler_info}, indent=2))
+            from dataclasses import asdict
+            result_parts.append(json.dumps({"compiler": asdict(compiler_info)}, indent=2))
         else:
             result_parts.append(f"\n🔧 Compiler Information for {board.upper()}:")
             result_parts.append("=" * 50)
-            result_parts.append(f"Compiler Type: {compiler_info.get('compiler_type', 'Unknown')}")
-            result_parts.append(f"Build Type: {compiler_info.get('build_type', 'Unknown')}")
-            result_parts.append(f"C Compiler: {compiler_info.get('cc_path', 'Unknown')}")
-            result_parts.append(f"C++ Compiler: {compiler_info.get('cxx_path', 'Unknown')}")
+            result_parts.append(f"Compiler Type: {compiler_info.compiler_type or 'Unknown'}")
+            result_parts.append(f"Build Type: {compiler_info.build_type or 'Unknown'}")
+            result_parts.append(f"C Compiler: {compiler_info.cc_path or 'Unknown'}")
+            result_parts.append(f"C++ Compiler: {compiler_info.cxx_path or 'Unknown'}")
             
-            cc_flags = compiler_info.get('cc_flags', [])
+            cc_flags = compiler_info.cc_flags
             if cc_flags:
                 result_parts.append(f"\nC Flags ({len(cc_flags)}):")
                 for flag in cc_flags:
                     result_parts.append(f"  {flag}")
             
-            cxx_flags = compiler_info.get('cxx_flags', [])
+            cxx_flags = compiler_info.cxx_flags
             if cxx_flags:
                 result_parts.append(f"\nC++ Flags ({len(cxx_flags)}):")
                 for flag in cxx_flags:
@@ -1825,7 +1816,7 @@ async def esp32_symbol_analysis(arguments: Dict[str, Any], project_root: Path) -
         
         # Auto-detect board if needed
         if board == "auto":
-            detected_boards = []
+            detected_boards: List[str] = []
             for esp32_board in esp32_boards:
                 candidate_dir = build_dir / esp32_board
                 if candidate_dir.exists() and (candidate_dir / "build_info.json").exists():
@@ -1893,9 +1884,9 @@ async def esp32_symbol_analysis(arguments: Dict[str, Any], project_root: Path) -
             )
         
         # Parse symbol data
-        symbols = []
-        fastled_symbols = []
-        large_symbols = []
+        symbols: List[Dict[str, Any]] = []
+        fastled_symbols: List[Dict[str, Any]] = []
+        large_symbols: List[Dict[str, Any]] = []
         
         for line in nm_output.strip().split("\n"):
             if not line.strip():
@@ -1956,6 +1947,9 @@ async def esp32_symbol_analysis(arguments: Dict[str, Any], project_root: Path) -
         result_text += f"- Total symbols: {total_symbols}\n"
         result_text += f"- FastLED symbols: {total_fastled}\n"
         result_text += f"- Total FastLED size: {fastled_size} bytes ({fastled_size/1024:.1f} KB)\n\n"
+        
+        # Initialize fastled_sorted for later use
+        fastled_sorted: List[Dict[str, Any]] = []
         
         if focus_on_fastled and fastled_symbols:
             result_text += "## Largest FastLED Symbols (Optimization Targets)\n\n"
@@ -2145,8 +2139,8 @@ async def validate_arduino_includes(arguments: Dict[str, Any], project_root: Pat
         "src/FastLED.h": True,  # References WASM Arduino.h
     }
     
-    all_includes = []
-    violations = []
+    all_includes: List[Dict[str, Any]] = []
+    violations: List[Dict[str, Any]] = []
     approved_count = 0
     
     try:
@@ -2329,9 +2323,11 @@ async def run_fastled_web_compiler(arguments: Dict[str, Any], project_root: Path
     # Run fastled compiler
     result_text += f"\n🔧 Compiling {example_path} with FastLED...\n"
     
+    # Store original directory before trying operations
+    original_cwd = Path.cwd()
+    
     try:
         # Change to example directory
-        original_cwd = Path.cwd()
         os.chdir(example_dir)
         
         # Run fastled command
@@ -2397,8 +2393,8 @@ async def run_fastled_web_compiler(arguments: Dict[str, Any], project_root: Path
         result_text += f"✅ HTTP server started on port {port}\n"
         
         # Run playwright automation
-        console_logs = []
-        error_logs = []
+        console_logs: List[str] = []
+        error_logs: List[str] = []
         
         async def run_playwright():
             async with async_playwright() as p:
@@ -2406,7 +2402,7 @@ async def run_fastled_web_compiler(arguments: Dict[str, Any], project_root: Path
                 page = await browser.new_page()
                 
                 # Setup console log capture
-                def handle_console(msg):
+                def handle_console(msg: Any):
                     timestamp = time.strftime("%H:%M:%S")
                     log_entry = f"[{timestamp}] {msg.type}: {msg.text}"
                     console_logs.append(log_entry)
@@ -2520,11 +2516,11 @@ async def run_command(cmd: List[str], cwd: Path) -> str:
             *cmd,
             cwd=cwd,
             stdout=asyncio.subprocess.PIPE,
-            stderr=asyncio.subprocess.STDOUT,
-            text=True
+            stderr=asyncio.subprocess.STDOUT
         )
         
-        stdout, _ = await process.communicate()
+        stdout_bytes, _ = await process.communicate()
+        stdout = stdout_bytes.decode('utf-8', errors='replace') if stdout_bytes else ""
         
         if process.returncode != 0:
             return f"Command failed with exit code {process.returncode}:\n{stdout}"

@@ -602,6 +602,48 @@ bash lint
 ## Code Standards
 
 ### Python Function Return Types and Type Safety
+
+**🚨 FORBIDDEN: Partially unknown types - All variables must have explicit type annotations**
+
+**❌ WRONG - Implicit typing creates partially unknown types:**
+```python
+all_files = []                    # Type: list[Unknown]
+config = {}                       # Type: dict[Unknown, Unknown]  
+result = None                     # Type: None (loses type info)
+data = get_some_data()            # Type: Unknown
+```
+
+**✅ CORRECT - Explicit type annotations prevent unknown types:**
+```python
+all_files: list[str] = []         # Type: list[str]
+config: dict[str, Any] = {}       # Type: dict[str, Any]
+result: Optional[str] = None      # Type: str | None
+data: ResponseData = get_some_data()  # Type: ResponseData
+```
+
+**Why explicit types are mandatory:**
+- ✅ **IDE support** - Better autocomplete and error detection
+- ✅ **Type safety** - Catches type errors at development time
+- ✅ **Documentation** - Code is self-documenting with clear types
+- ✅ **Refactoring safety** - Type changes are caught throughout codebase
+- ✅ **Runtime validation** - Works with `@typechecked` decorator
+
+**Function signatures must also have explicit types:**
+```python
+# ❌ WRONG - Missing type annotations
+def process_files(files, config):
+    return []
+
+# ✅ CORRECT - Complete type annotations
+def process_files(files: list[str], config: dict[str, Any]) -> list[str]:
+    return []
+
+# ✅ CORRECT - With Optional and complex types
+from typing import Optional, Union
+def parse_data(data: str, timeout: Optional[int] = None) -> Union[dict[str, Any], None]:
+    return {}
+```
+
 **🚨 CRITICAL: Python functions SHOULD NOT return dict UNLESS ABSOLUTELY NECESSARY.**
 
 **Use dataclass structs for type-checked arguments and return values instead of raw dictionaries:**

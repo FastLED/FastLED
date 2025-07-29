@@ -48,8 +48,8 @@ echo "Running ruff format (formatting + import sorting)"
 uv run ruff format test.py
 uv run ruff format ci --exclude ci/tmp/ --exclude ci/wasm/
 uv run ruff format dev/dev.py
-echo "Running pyright ci"
-uv run pyright ci --threads
+echo "Running pyright (all configured files)"
+uv run pyright
 
 export CLANG_FORMAT_STYLE="{SortIncludes: false}"
 
