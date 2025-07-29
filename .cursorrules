@@ -441,11 +441,14 @@ endif()
 
 #### Python Code Execution:
 - ❌ **NEVER run Python code directly**
+- ❌ **NEVER cd to subdirectories like ci/ - ALWAYS stay in project root**
 - ✅ **ALWAYS create/modify tmp.py** with your code
-- ✅ **ALWAYS run: `uv run tmp.py`**
+- ✅ **ALWAYS run: `uv run python tmp.py`** (use full `uv run python`, not just `python`)
+- ✅ **ALWAYS use correct import paths: `from ci.module` NOT `from ci.ci.module`**
 
 #### Shell Command Execution:
 - ❌ **NEVER run shell commands directly**  
+- ❌ **NEVER cd to subdirectories** - commands should work from project root
 - ✅ **ALWAYS create/modify tmp.sh** with your commands
 - ✅ **ALWAYS run: `bash tmp.sh`**
 
@@ -453,22 +456,23 @@ endif()
 
 **Python Code Pattern:**
 ```python
-# tmp.py
+# tmp.py (created in project root, NOT in subdirectories)
+from ci.clang_compiler import Compiler  # CORRECT import path
 import subprocess
 result = subprocess.run(['git', 'status'], capture_output=True, text=True)
 print(result.stdout)
 ```
-Then run: `uv run tmp.py`
+Then run: `uv run python tmp.py` (from project root)
 
 **Shell Commands Pattern:**
 ```bash
-# tmp.sh
+# tmp.sh (created in project root)
 #!/bin/bash
 git status
 ls -la
-uv run ci/ci-compile.py uno --examples Blink
+uv run ci/ci-compile.py uno --examples Blink  # Use full paths from root
 ```
-Then run: `bash tmp.sh`
+Then run: `bash tmp.sh` (from project root)
 
 ### BACKGROUND AGENTS (Automated/CI Environments)
 
@@ -477,24 +481,27 @@ Then run: `bash tmp.sh`
 #### Python Code Execution:
 - ❌ **NEVER run Python code directly**
 - ❌ **NEVER create/use tmp.py files** (forbidden for background agents)
-- ✅ **ALWAYS use `uv run` with existing scripts** (e.g., `uv run test.py`, `uv run ci/ci-compile.py`)
+- ❌ **NEVER cd to subdirectories like ci/ - ALWAYS stay in project root**
+- ✅ **ALWAYS use `uv run python` with existing scripts** (e.g., `uv run python test.py`, `uv run python ci/ci-compile.py`)
+- ✅ **ALWAYS use correct import paths: `from ci.module` NOT `from ci.ci.module`** when testing
 - ✅ **ALWAYS use MCP server tools** for programmatic operations when available
 
 #### Shell Command Execution:
 - ❌ **NEVER run shell commands directly**
 - ❌ **NEVER create/use tmp.sh files** (forbidden for background agents)
+- ❌ **NEVER cd to subdirectories** - commands should work from project root
 - ✅ **ALWAYS use existing bash scripts** (e.g., `bash test`, `bash lint`)
-- ✅ **ALWAYS use `uv run` for Python scripts** with proper arguments
+- ✅ **ALWAYS use `uv run python` for Python scripts** with proper arguments from project root
 - ✅ **ALWAYS use MCP server tools** for complex operations when available
 
 #### Background Agent Command Examples:
 
-**✅ ALLOWED - Using existing scripts:**
+**✅ ALLOWED - Using existing scripts from project root:**
 ```bash
 bash test
 bash lint
-uv run test.py audio_json_parsing
-uv run ci/ci-compile.py uno --examples Blink
+uv run python test.py audio_json_parsing
+uv run python ci/ci-compile.py uno --examples Blink
 ```
 
 **❌ FORBIDDEN - Creating temporary files:**
@@ -506,9 +513,39 @@ bash tmp.sh
 
 **✅ PREFERRED - Using MCP server tools:**
 ```bash
-uv run mcp_server.py
+uv run python mcp_server.py
 # Then use appropriate MCP tools like: validate_completion, symbol_analysis, etc.
 ```
+
+### 🚨 CRITICAL CORRECTIONS FROM USER FEEDBACK 🚨
+
+**These corrections were identified through direct user feedback and MUST be followed:**
+
+#### 1. **Always Use `uv run python` - NEVER just `python` or `uv run`**
+- ❌ **WRONG**: `python -c "..."`
+- ❌ **WRONG**: `uv run -c "..."`  
+- ✅ **CORRECT**: `uv run python -c "..."`
+
+#### 2. **Correct Import Paths - NOT Nested Subdirectories**
+- ❌ **WRONG**: `from ci.ci.clang_compiler import ...`
+- ✅ **CORRECT**: `from ci.clang_compiler import ...`
+
+#### 3. **Never Change Directory - Always Work from Project Root**
+- ❌ **WRONG**: `cd ci && python ...`
+- ❌ **WRONG**: `cd ci/ci && python ...`
+- ✅ **CORRECT**: Stay in project root, use full paths: `uv run python ci/script.py`
+
+#### 4. **Testing Commands Must Use Correct Format**
+- ❌ **WRONG**: `python -c "from ci.ci.module import func; func()"`
+- ✅ **CORRECT**: `uv run python -c "from ci.module import func; func()"`
+
+**Example of CORRECT Command Pattern:**
+```bash
+# From project root directory
+uv run python -c "from ci.clang_compiler import detect_linker; print('Linker:', detect_linker())"
+```
+
+**These patterns were corrected through direct user feedback and must be followed exactly.**
 
 ### DELETE Operations - DANGER ZONE (ALL AGENTS):
 - 🚨 **STOP and ask for permission** before ANY delete operations
@@ -530,12 +567,12 @@ uv run mcp_server.py
 ```bash
 # Good - with leading space for git-bash compatibility
  bash test
- uv run test.py
+ uv run python test.py
  bash lint
 
 # Bad - may get truncated in git-bash
 bash test
-uv run test.py
+uv run python test.py
 bash lint
 ```
 
@@ -548,6 +585,18 @@ bash lint
 - **Maintains consistency across different agent types**
 - **Provides audit trail for all system modifications**
 - **Prevents background agents from creating unnecessary temporary files**
+
+### 📋 QUICK REFERENCE: CORRECTED COMMAND PATTERNS
+
+**User-Corrected Patterns (MANDATORY):**
+
+✅ **Python Testing**: `uv run python -c "from ci.module import func; func()"`
+✅ **Script Execution**: `uv run python ci/script.py` (from project root)
+✅ **Import Paths**: `from ci.clang_compiler import ...` (NOT `ci.ci.clang_compiler`)
+✅ **Working Directory**: Always stay in project root - never cd to subdirectories
+✅ **Git-Bash**: Use leading space: ` uv run python test.py`
+
+❌ **Never Do**: cd to ci/, python directly, wrong import paths, uv run without python
 
 **These command execution rules apply to ALL operations including but not limited to:**
 - File system operations (creating, modifying, deleting files)
