@@ -258,9 +258,10 @@ def check_pch_status(build_dir: Path) -> Dict[str, Union[bool, Path, int, str]]:
     return {"exists": False, "path": None, "size": 0, "size_formatted": "0B"}  # type: ignore
 
 
-def create_fastled_compiler() -> Compiler:
+def create_fastled_compiler(use_pch: bool = True) -> Compiler:
     """Create compiler with standard FastLED settings for simple build system."""
     import os
+    import tempfile
 
     # Get absolute paths to ensure they work from any working directory
     current_dir = os.getcwd()
@@ -295,6 +296,11 @@ def create_fastled_compiler() -> Compiler:
     # Combine base args with TOML flags
     all_args = base_args + toml_flags
 
+    # PCH output path in temp directory
+    pch_output_path = None
+    if use_pch:
+        pch_output_path = os.path.join(tempfile.gettempdir(), "fastled_pch.hpp.pch")
+
     settings = CompilerSettings(
         include_path=src_path,
         defines=[
@@ -304,15 +310,26 @@ def create_fastled_compiler() -> Compiler:
         std_version="c++14",
         compiler="clang++",
         compiler_args=all_args,
+        use_pch=use_pch,
+        pch_output_path=pch_output_path,
     )
     return Compiler(settings)
 
 
 def compile_examples_simple(
-    compiler: Compiler, ino_files: List[Path], log_timing: Any
+    compiler: Compiler,
+    ino_files: List[Path],
+    pch_compatible_files: set[Path],
+    log_timing: Any,
 ) -> CompilationResult:
     """
     Compile examples using the simple build system (Compiler class).
+
+    Args:
+        compiler: The Compiler instance to use
+        ino_files: List of .ino files to compile
+        pch_compatible_files: Set of files that are PCH compatible
+        log_timing: Logging function
 
     Returns:
         CompilationResult: Results from compilation including counts and failed examples
@@ -324,12 +341,27 @@ def compile_examples_simple(
 
     # Submit all compilation jobs with file tracking
     future_to_file: Dict[Future[Result], Path] = {}
+    pch_files_count = 0
+    direct_files_count = 0
+
     for ino_file in ino_files:
-        future = compiler.compile_ino_file(ino_file)
+        # Determine if this file should use PCH
+        use_pch_for_file = ino_file in pch_compatible_files
+        future = compiler.compile_ino_file(
+            ino_file, use_pch_for_this_file=use_pch_for_file
+        )
         future_to_file[future] = ino_file
+
+        if use_pch_for_file:
+            pch_files_count += 1
+        else:
+            direct_files_count += 1
 
     log_timing(
         f"[SIMPLE] Submitted {len(ino_files)} compilation jobs to ThreadPoolExecutor"
+    )
+    log_timing(
+        f"[SIMPLE] Using PCH for {pch_files_count} files, direct compilation for {direct_files_count} files"
     )
 
     # Collect results as they complete
@@ -397,7 +429,9 @@ def compile_examples_simple(
 
 
 def run_example_compilation_test(
-    specific_examples: Optional[List[str]] = None, clean_build: bool = False
+    specific_examples: Optional[List[str]] = None,
+    clean_build: bool = False,
+    disable_pch: bool = False,
 ) -> int:
     """Run the example compilation test using enhanced simple build system."""
     # Start timing at the very beginning
@@ -434,15 +468,13 @@ def run_example_compilation_test(
     else:
         config_parts.append("cache: disabled")
 
-    config_parts.append("PCH: not used (direct compilation)")
-
-    log_timing(f"[CONFIG] Mode: {', '.join(config_parts)}")
+    # PCH status will be determined after compatibility analysis
 
     # Initialize the simple build system
     log_timing("Initializing simple build system...")
 
     try:
-        compiler = create_fastled_compiler()
+        compiler = create_fastled_compiler(use_pch=not disable_pch)
 
         # Verify clang accessibility first
         version_result = compiler.check_clang_version()
@@ -483,6 +515,72 @@ def run_example_compilation_test(
             log_timing(
                 f"[DISCOVER] Found {len(ino_files)} total .ino examples in examples/"
             )
+
+        # Analyze files for PCH compatibility if PCH is enabled
+        pch_compatible_files: set[Path] = set()
+        pch_incompatible_files: List[str] = []
+
+        if compiler.settings.use_pch:
+            log_timing("[PCH] Analyzing examples for PCH compatibility...")
+
+            for ino_file in ino_files:
+                if compiler.analyze_ino_for_pch_compatibility(ino_file):
+                    pch_compatible_files.add(ino_file)
+                else:
+                    pch_incompatible_files.append(ino_file.name)
+
+            if pch_incompatible_files:
+                log_timing(
+                    f"[PCH] Found {len(pch_incompatible_files)} incompatible files (will use direct compilation):"
+                )
+                for filename in pch_incompatible_files[:5]:  # Show first 5
+                    log_timing(f"[PCH]   - {filename} (has code before FastLED.h)")
+                if len(pch_incompatible_files) > 5:
+                    log_timing(
+                        f"[PCH]   - ... and {len(pch_incompatible_files) - 5} more"
+                    )
+
+                log_timing(
+                    f"[PCH] {len(pch_compatible_files)} files are PCH compatible (will use PCH)"
+                )
+                config_parts.append(
+                    f"PCH: selective ({len(pch_compatible_files)} files)"
+                )
+            else:
+                log_timing(f"[PCH] All {len(ino_files)} files are PCH compatible")
+                config_parts.append("PCH: enabled (all files)")
+        else:
+            log_timing("[PCH] PCH disabled globally")
+            config_parts.append("PCH: disabled")
+
+        # Create PCH for faster compilation (only if there are compatible files)
+        pch_time = 0.0
+        if compiler.settings.use_pch and len(pch_compatible_files) > 0:
+            pch_start = time.time()
+            pch_success = compiler.create_pch_file()
+            pch_time = time.time() - pch_start
+
+            if pch_success:
+                log_timing(f"[PCH] Precompiled header created in {pch_time:.2f}s")
+                # PCH status already added above in compatibility analysis
+            else:
+                log_timing(
+                    f"[PCH] Precompiled header creation failed, using direct compilation for all files"
+                )
+                # Override the previous config message since PCH creation failed
+                config_parts = [
+                    part for part in config_parts if not part.startswith("PCH:")
+                ]
+                config_parts.append("PCH: failed (using direct compilation)")
+                pch_compatible_files.clear()  # No files can use PCH if creation failed
+        elif compiler.settings.use_pch and len(pch_compatible_files) == 0:
+            log_timing("[PCH] No PCH-compatible files found, skipping PCH creation")
+            # PCH status already added above as "PCH: selective (0 files)" or similar
+        elif disable_pch:
+            # PCH was disabled by --no-pch flag
+            pass  # Status already added above as "PCH: disabled"
+
+        log_timing(f"[CONFIG] Mode: {', '.join(config_parts)}")
 
         # Categorize examples (all are FastLED examples in simple build system)
         log_timing(
@@ -549,7 +647,9 @@ def run_example_compilation_test(
         log_timing(f"[BUILD] Target examples: {len(ino_files)}")
         log_timing(f"[BUILD] Parallel workers: {parallel_jobs}")
 
-        result = compile_examples_simple(compiler, ino_files, log_timing)
+        result = compile_examples_simple(
+            compiler, ino_files, pch_compatible_files, log_timing
+        )
         successful_count = result.successful_count
         failed_count = result.failed_count
         compile_time = result.compile_time
@@ -650,9 +750,18 @@ if __name__ == "__main__":
         action="store_true",
         help="Force a clean build (note: simple build system always performs clean builds).",
     )
+    parser.add_argument(
+        "--no-pch",
+        action="store_true",
+        help="Disable precompiled headers (PCH) for compilation - useful for debugging or compatibility issues.",
+    )
 
     args = parser.parse_args()
 
     # Pass specific examples to the test function
     specific_examples = args.examples if args.examples else None
-    sys.exit(run_example_compilation_test(specific_examples, args.clean))
+    sys.exit(
+        run_example_compilation_test(
+            specific_examples, args.clean, disable_pch=args.no_pch
+        )
+    )

@@ -36,6 +36,11 @@ class CompilerSettings:
     std_version: str = "c++17"
     compiler_args: list[str] = field(default_factory=list)
 
+    # PCH (Precompiled Headers) settings
+    use_pch: bool = False
+    pch_header_content: str | None = None
+    pch_output_path: str | None = None
+
 
 @dataclass
 class Result:
@@ -75,22 +80,14 @@ class VersionCheckResult:
 
 class Compiler:
     """
-    Generic compiler wrapper for .ino files.
-    Handles compilation, testing, and file discovery for FastLED examples.
-    Supports any compiler including clang++, gcc, sccache, etc.
+    Compiler wrapper for FastLED .ino file compilation.
     """
 
-    def __init__(
-        self,
-        settings: CompilerSettings,
-    ) -> None:
-        """
-        Initialize the compiler wrapper.
-
-        Args:
-            settings (CompilerSettings): Compiler settings including compiler path/command.
-        """
-        self.settings: CompilerSettings = settings
+    def __init__(self, settings: CompilerSettings):
+        self.settings = settings
+        self._pch_file_path: Path | None = None
+        self._pch_header_path: Path | None = None
+        self._pch_ready: bool = False
 
     def get_compiler_args(self) -> list[str]:
         """
@@ -115,10 +112,121 @@ class Compiler:
         # Add additional compiler args
         cmd.extend(self.settings.compiler_args)
 
+        # Add PCH flag if available
+        if self.settings.use_pch and self._pch_ready and self._pch_file_path:
+            cmd.extend(["-include-pch", str(self._pch_file_path)])
+
         # Add standard compilation flags
         cmd.extend(["-c"])
 
         return cmd.copy()  # Return a copy to prevent modification
+
+    def generate_pch_header(self) -> str:
+        """
+        Generate the default PCH header content with commonly used FastLED headers.
+
+        Returns:
+            str: PCH header content with common includes
+        """
+        if self.settings.pch_header_content:
+            return self.settings.pch_header_content
+
+        # Default PCH content based on common FastLED example includes
+        default_content = """// FastLED PCH - Common headers for faster compilation
+#pragma once
+
+// Core headers that are used in nearly all FastLED examples
+#include <Arduino.h>
+#include <FastLED.h>
+
+// Common C++ standard library headers
+#include <string>
+#include <vector>
+#include <stdio.h>
+"""
+        return default_content
+
+    def create_pch_file(self) -> bool:
+        """
+        Create a precompiled header file for faster compilation.
+
+        Returns:
+            bool: True if PCH creation was successful, False otherwise
+        """
+        if not self.settings.use_pch:
+            return False
+
+        try:
+            # Create PCH header content
+            pch_content = self.generate_pch_header()
+
+            # Create temporary PCH header file
+            pch_header_file = tempfile.NamedTemporaryFile(
+                mode="w", suffix=".hpp", delete=False
+            )
+            pch_header_file.write(pch_content)
+            pch_header_path = Path(pch_header_file.name)
+            pch_header_file.close()
+
+            # Create PCH output path
+            if self.settings.pch_output_path:
+                pch_output_path = Path(self.settings.pch_output_path)
+            else:
+                pch_output_path = pch_header_path.with_suffix(".hpp.pch")
+
+            # Build PCH compilation command
+            cmd = [
+                self.settings.compiler,
+                "-x",
+                "c++-header",
+                f"-std={self.settings.std_version}",
+                f"-I{self.settings.include_path}",
+            ]
+
+            # Add defines if specified
+            if self.settings.defines:
+                for define in self.settings.defines:
+                    cmd.append(f"-D{define}")
+
+            # Add additional compiler args - use ALL args to ensure PCH matches compilation
+            cmd.extend(self.settings.compiler_args)
+
+            cmd.extend([str(pch_header_path), "-o", str(pch_output_path)])
+
+            # Compile PCH
+            result = subprocess.run(cmd, capture_output=True, text=True, timeout=60)
+
+            if result.returncode == 0:
+                self._pch_file_path = pch_output_path
+                self._pch_header_path = (
+                    pch_header_path  # Keep track of header file for cleanup
+                )
+                self._pch_ready = True
+                return True
+            else:
+                # PCH compilation failed, clean up and continue without PCH
+                os.unlink(pch_header_path)
+                return False
+
+        except Exception:
+            # PCH creation failed, continue without PCH
+            return False
+
+    def cleanup_pch(self):
+        """Clean up PCH files."""
+        if self._pch_file_path and self._pch_file_path.exists():
+            try:
+                os.unlink(self._pch_file_path)
+            except:
+                pass
+        if self._pch_header_path and self._pch_header_path.exists():
+            try:
+                os.unlink(self._pch_header_path)
+            except:
+                pass
+        self._pch_file_path = None
+        self._pch_header_path = None
+        self._pch_ready = False
 
     def check_clang_version(self) -> VersionCheckResult:
         """
@@ -160,6 +268,7 @@ class Compiler:
         ino_path: str | Path,
         output_path: str | Path | None = None,
         additional_flags: list[str] | None = None,
+        use_pch_for_this_file: bool | None = None,
     ) -> Future[Result]:
         """
         Compile a single .ino file using clang++ with optional temporary output.
@@ -168,6 +277,8 @@ class Compiler:
             ino_path (str|Path): Path to the .ino file to compile
             output_path (str|Path, optional): Output object file path. If None, uses temp file.
             additional_flags (list, optional): Additional compiler flags
+            use_pch_for_this_file (bool, optional): Override PCH usage for this specific file.
+                If None, uses global PCH setting. If True/False, forces PCH on/off for this file.
 
         Returns:
             Future[Result]: Future that will contain Result dataclass with subprocess execution details
@@ -175,7 +286,11 @@ class Compiler:
         # Submit the compilation task to a thread pool
 
         return _EXECUTOR.submit(
-            self._compile_ino_file_sync, ino_path, output_path, additional_flags
+            self._compile_ino_file_sync,
+            ino_path,
+            output_path,
+            additional_flags,
+            use_pch_for_this_file,
         )
 
     def _compile_ino_file_sync(
@@ -183,6 +298,7 @@ class Compiler:
         ino_path: str | Path,
         output_path: str | Path | None = None,
         additional_flags: list[str] | None = None,
+        use_pch_for_this_file: bool | None = None,
     ) -> Result:
         """
         Internal synchronous implementation of compile_ino_file.
@@ -191,6 +307,8 @@ class Compiler:
             ino_path (str|Path): Path to the .ino file to compile
             output_path (str|Path, optional): Output object file path. If None, uses temp file.
             additional_flags (list, optional): Additional compiler flags
+            use_pch_for_this_file (bool, optional): Override PCH usage for this specific file.
+                If None, uses global PCH setting. If True/False, forces PCH on/off for this file.
 
         Returns:
             Result: Result dataclass containing subprocess execution details
@@ -226,6 +344,18 @@ class Compiler:
             for define in self.settings.defines:
                 cmd.append(f"-D{define}")
         cmd.extend(self.settings.compiler_args)
+
+        # Determine whether to use PCH for this specific file
+        should_use_pch = (
+            use_pch_for_this_file
+            if use_pch_for_this_file is not None
+            else self.settings.use_pch
+        )
+
+        # Add PCH flag if available and should be used for this file
+        if should_use_pch and self._pch_ready and self._pch_file_path:
+            cmd.extend(["-include-pch", str(self._pch_file_path)])
+
         cmd.extend(
             [
                 "-c",
@@ -340,6 +470,80 @@ class Compiler:
                 os.unlink(file_path)
         except:
             pass
+
+    def analyze_ino_for_pch_compatibility(self, ino_path: str | Path) -> bool:
+        """
+        Analyze a .ino file to determine if it's compatible with PCH.
+
+        PCH is incompatible if the file has any defines, includes, or other preprocessor
+        directives before including FastLED.h, as this can cause conflicts with the
+        precompiled header assumptions.
+
+        Args:
+            ino_path (str|Path): Path to the .ino file to analyze
+
+        Returns:
+            bool: True if compatible with PCH, False if PCH should be disabled
+        """
+        try:
+            ino_file_path = Path(ino_path).resolve()
+
+            with open(ino_file_path, "r", encoding="utf-8", errors="ignore") as f:
+                content = f.read()
+
+            lines = content.split("\n")
+            found_fastled_include = False
+
+            for line_num, line in enumerate(lines, 1):
+                # Strip whitespace and comments for analysis
+                stripped = line.strip()
+
+                # Skip empty lines
+                if not stripped:
+                    continue
+
+                # Skip single-line comments
+                if stripped.startswith("//"):
+                    continue
+
+                # Skip multi-line comment starts (basic detection)
+                if stripped.startswith("/*") and "*/" in stripped:
+                    continue
+
+                # Check for FastLED.h include (various formats)
+                if "#include" in stripped and (
+                    "FastLED.h" in stripped
+                    or '"FastLED.h"' in stripped
+                    or "<FastLED.h>" in stripped
+                ):
+                    found_fastled_include = True
+                    break
+
+                # Check for problematic constructs before FastLED.h
+                problematic_patterns = [
+                    stripped.startswith("#include"),  # Any other include
+                    stripped.startswith("#define"),  # Any define
+                    stripped.startswith("#ifdef"),  # Conditional compilation
+                    stripped.startswith("#ifndef"),  # Conditional compilation
+                    stripped.startswith("#if "),  # Conditional compilation
+                    stripped.startswith("#pragma"),  # Pragma directives
+                    stripped.startswith("using "),  # Using declarations
+                    stripped.startswith("namespace"),  # Namespace declarations
+                    "=" in stripped
+                    and not stripped.startswith("//"),  # Variable assignments
+                ]
+
+                if any(problematic_patterns):
+                    # Found problematic code before FastLED.h
+                    return False
+
+            # If we found FastLED.h and no problematic code before it, PCH is compatible
+            # If we didn't find FastLED.h at all, assume PCH is still ok (might be included indirectly)
+            return True
+
+        except Exception:
+            # If we can't analyze the file, err on the side of caution and disable PCH
+            return False
 
 
 # Convenience functions for backward compatibility

@@ -91,6 +91,11 @@ def parse_args() -> argparse.Namespace:
         nargs="*",
         help="Run example compilation tests (optionally specify example names) - auto-enables --cpp mode",
     )
+    parser.add_argument(
+        "--no-pch",
+        action="store_true",
+        help="Disable precompiled headers (PCH) when running example compilation tests",
+    )
 
     args = parser.parse_args()
 
@@ -365,6 +370,8 @@ def main() -> None:
                     cmd.extend(args.examples)
                 if args.clean:
                     cmd.append("--clean")
+                if args.no_pch:
+                    cmd.append("--no-pch")
 
                 # Run the example compilation test script
                 proc = RunningProcess(
