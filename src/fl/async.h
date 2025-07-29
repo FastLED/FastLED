@@ -233,7 +233,7 @@ class Scheduler {
 public:
     static Scheduler& instance();
 
-    int add_task(fl::unique_ptr<task> t);
+    int add_task(task t);
     void update();
     
     // For testing: clear all tasks
@@ -246,7 +246,7 @@ private:
     void warn_no_then(int task_id, const fl::string& trace_label);
     void warn_no_catch(int task_id, const fl::string& trace_label, const Error& error);
 
-    fl::vector<unique_ptr<task>> mTasks;
+    fl::vector<task> mTasks;
     int mNextTaskId = 1;
 };
 

@@ -91,10 +91,14 @@ Scheduler& Scheduler::instance() {
     return fl::Singleton<Scheduler>::instance();
 }
 
-int Scheduler::add_task(fl::unique_ptr<task> t) {
-    t->mTaskId = mNextTaskId++;
-    mTasks.push_back(fl::move(t));
-    return mTasks.back()->mTaskId;
+int Scheduler::add_task(task t) {
+    if (t.get_impl()) {
+        t.get_impl()->mTaskId = mNextTaskId++;
+        int task_id = t.get_impl()->mTaskId;
+        mTasks.push_back(fl::move(t));
+        return task_id;
+    }
+    return 0; // Invalid task
 }
 
 void Scheduler::update() {
@@ -102,30 +106,30 @@ void Scheduler::update() {
     
     // Use index-based iteration to avoid iterator invalidation issues
     for (fl::size i = 0; i < mTasks.size();) {
-        fl::unique_ptr<task>& t_ptr = mTasks[i];
-        task* t = t_ptr.get();
-
-        if (t->mCanceled) {
+        task& t = mTasks[i];
+        auto impl = t.get_impl();
+        
+        if (!impl || impl->is_canceled()) {
             // erase() returns bool in HeapVector, not iterator
             mTasks.erase(mTasks.begin() + i);
             // Don't increment i since we just removed an element
         } else {
             // Check if task is ready to run
-            bool should_run = t->ready_to_run(current_time);
+            bool should_run = impl->ready_to_run(current_time);
 
             if (should_run) {
                 // Update last run time for recurring tasks
-                t->set_last_run_time(current_time);
+                impl->set_last_run_time(current_time);
                 
                 // Execute the task
-                if (t->mThenCallback) {
-                    t->mThenCallback();
-                } else if (!t->has_then()) {
-                    warn_no_then(t->id(), t->trace_label());
+                if (impl->has_then()) {
+                    impl->execute_then();
+                } else {
+                    warn_no_then(impl->id(), impl->trace_label());
                 }
                 
                 // Remove one-shot tasks, keep recurring ones
-                bool is_recurring = (t->mType == TaskType::kEveryMs || t->mType == TaskType::kAtFramerate);
+                bool is_recurring = (impl->type() == TaskType::kEveryMs || impl->type() == TaskType::kAtFramerate);
                 if (is_recurring) {
                     ++i; // Keep recurring tasks
                 } else {

@@ -16,7 +16,8 @@ fl::string make_trace_label(const fl::TracePoint& trace) {
 }
 } // namespace
 
-task::task(TaskType type, int interval_ms)
+// TaskImpl implementation
+TaskImpl::TaskImpl(TaskType type, int interval_ms)
     : mType(type),
       mIntervalMs(interval_ms),
       mCanceled(false),
@@ -26,7 +27,7 @@ task::task(TaskType type, int interval_ms)
       mLastRunTime(UINT32_MAX) {  // Use UINT32_MAX to indicate "never run"
 }
 
-task::task(TaskType type, int interval_ms, const fl::TracePoint& trace)
+TaskImpl::TaskImpl(TaskType type, int interval_ms, const fl::TracePoint& trace)
     : mType(type),
       mIntervalMs(interval_ms),
       mCanceled(false),
@@ -36,70 +37,55 @@ task::task(TaskType type, int interval_ms, const fl::TracePoint& trace)
       mLastRunTime(UINT32_MAX) {  // Use UINT32_MAX to indicate "never run"
 }
 
-
-
-fl::unique_ptr<task> task::every_ms(int interval_ms) {
-    return fl::make_unique<task>(TaskType::kEveryMs, interval_ms);
+// TaskImpl static builders
+fl::shared_ptr<TaskImpl> TaskImpl::create_every_ms(int interval_ms) {
+    return fl::make_shared<TaskImpl>(TaskType::kEveryMs, interval_ms);
 }
 
-fl::unique_ptr<task> task::every_ms(int interval_ms, const fl::TracePoint& trace) {
-    return fl::make_unique<task>(TaskType::kEveryMs, interval_ms, trace);
+fl::shared_ptr<TaskImpl> TaskImpl::create_every_ms(int interval_ms, const fl::TracePoint& trace) {
+    return fl::make_shared<TaskImpl>(TaskType::kEveryMs, interval_ms, trace);
 }
 
-fl::unique_ptr<task> task::at_framerate(int fps) {
-    return fl::make_unique<task>(TaskType::kAtFramerate, 1000 / fps);
+fl::shared_ptr<TaskImpl> TaskImpl::create_at_framerate(int fps) {
+    return fl::make_shared<TaskImpl>(TaskType::kAtFramerate, 1000 / fps);
 }
 
-fl::unique_ptr<task> task::at_framerate(int fps, const fl::TracePoint& trace) {
-    return fl::make_unique<task>(TaskType::kAtFramerate, 1000 / fps, trace);
+fl::shared_ptr<TaskImpl> TaskImpl::create_at_framerate(int fps, const fl::TracePoint& trace) {
+    return fl::make_shared<TaskImpl>(TaskType::kAtFramerate, 1000 / fps, trace);
 }
 
-fl::unique_ptr<task> task::before_frame() {
-    return fl::make_unique<task>(TaskType::kBeforeFrame, 0);
+fl::shared_ptr<TaskImpl> TaskImpl::create_before_frame() {
+    return fl::make_shared<TaskImpl>(TaskType::kBeforeFrame, 0);
 }
 
-fl::unique_ptr<task> task::before_frame(const fl::TracePoint& trace) {
-    return fl::make_unique<task>(TaskType::kBeforeFrame, 0, trace);
+fl::shared_ptr<TaskImpl> TaskImpl::create_before_frame(const fl::TracePoint& trace) {
+    return fl::make_shared<TaskImpl>(TaskType::kBeforeFrame, 0, trace);
 }
 
-fl::unique_ptr<task> task::after_frame() {
-    return fl::make_unique<task>(TaskType::kAfterFrame, 0);
+fl::shared_ptr<TaskImpl> TaskImpl::create_after_frame() {
+    return fl::make_shared<TaskImpl>(TaskType::kAfterFrame, 0);
 }
 
-fl::unique_ptr<task> task::after_frame(const fl::TracePoint& trace) {
-    return fl::make_unique<task>(TaskType::kAfterFrame, 0, trace);
+fl::shared_ptr<TaskImpl> TaskImpl::create_after_frame(const fl::TracePoint& trace) {
+    return fl::make_shared<TaskImpl>(TaskType::kAfterFrame, 0, trace);
 }
 
-task& task::then(fl::function<void()> on_then) & {
+// TaskImpl fluent API
+void TaskImpl::set_then(fl::function<void()> on_then) {
     mThenCallback = fl::move(on_then);
     mHasThen = true;
-    return *this;
 }
 
-task&& task::then(fl::function<void()> on_then) && {
-    return fl::move(then(fl::move(on_then)));
-}
-
-task& task::catch_(fl::function<void(const Error&)> on_catch) & {
+void TaskImpl::set_catch(fl::function<void(const Error&)> on_catch) {
     mCatchCallback = fl::move(on_catch);
     mHasCatch = true;
-    return *this;
 }
 
-task&& task::catch_(fl::function<void(const Error&)> on_catch) && {
-    return fl::move(catch_(fl::move(on_catch)));
-}
-
-task& task::cancel() & {
+void TaskImpl::set_canceled() {
     mCanceled = true;
-    return *this;
 }
 
-task&& task::cancel() && {
-    return fl::move(cancel());
-}
-
-bool task::ready_to_run(uint32_t current_time) const {
+bool TaskImpl::ready_to_run(uint32_t current_time) const {
     // For frame-based tasks, they're always ready
     if (mType == TaskType::kBeforeFrame || mType == TaskType::kAfterFrame) {
         return true;
@@ -117,6 +103,115 @@ bool task::ready_to_run(uint32_t current_time) const {
     
     // Check if enough time has passed since last run
     return (current_time - mLastRunTime) >= static_cast<uint32_t>(mIntervalMs);
+}
+
+void TaskImpl::execute_then() {
+    if (mHasThen && mThenCallback) {
+        mThenCallback();
+    }
+}
+
+void TaskImpl::execute_catch(const Error& error) {
+    if (mHasCatch && mCatchCallback) {
+        mCatchCallback(error);
+    }
+}
+
+// task wrapper implementation
+task::task(shared_ptr<TaskImpl> impl) : mImpl(fl::move(impl)) {}
+
+// task static builders
+task task::every_ms(int interval_ms) {
+    return task(TaskImpl::create_every_ms(interval_ms));
+}
+
+task task::every_ms(int interval_ms, const fl::TracePoint& trace) {
+    return task(TaskImpl::create_every_ms(interval_ms, trace));
+}
+
+task task::at_framerate(int fps) {
+    return task(TaskImpl::create_at_framerate(fps));
+}
+
+task task::at_framerate(int fps, const fl::TracePoint& trace) {
+    return task(TaskImpl::create_at_framerate(fps, trace));
+}
+
+task task::before_frame() {
+    return task(TaskImpl::create_before_frame());
+}
+
+task task::before_frame(const fl::TracePoint& trace) {
+    return task(TaskImpl::create_before_frame(trace));
+}
+
+task task::after_frame() {
+    return task(TaskImpl::create_after_frame());
+}
+
+task task::after_frame(const fl::TracePoint& trace) {
+    return task(TaskImpl::create_after_frame(trace));
+}
+
+// task fluent API
+task& task::then(fl::function<void()> on_then) {
+    if (mImpl) {
+        mImpl->set_then(fl::move(on_then));
+    }
+    return *this;
+}
+
+task& task::catch_(fl::function<void(const Error&)> on_catch) {
+    if (mImpl) {
+        mImpl->set_catch(fl::move(on_catch));
+    }
+    return *this;
+}
+
+task& task::cancel() {
+    if (mImpl) {
+        mImpl->set_canceled();
+    }
+    return *this;
+}
+
+// task getters
+int task::id() const {
+    return mImpl ? mImpl->id() : 0;
+}
+
+bool task::has_then() const {
+    return mImpl ? mImpl->has_then() : false;
+}
+
+bool task::has_catch() const {
+    return mImpl ? mImpl->has_catch() : false;
+}
+
+string task::trace_label() const {
+    return mImpl ? mImpl->trace_label() : "";
+}
+
+TaskType task::type() const {
+    return mImpl ? mImpl->type() : TaskType::kEveryMs;
+}
+
+int task::interval_ms() const {
+    return mImpl ? mImpl->interval_ms() : 0;
+}
+
+uint32_t task::last_run_time() const {
+    return mImpl ? mImpl->last_run_time() : 0;
+}
+
+void task::set_last_run_time(uint32_t time) {
+    if (mImpl) {
+        mImpl->set_last_run_time(time);
+    }
+}
+
+bool task::ready_to_run(uint32_t current_time) const {
+    return mImpl ? mImpl->ready_to_run(current_time) : false;
 }
 
 } // namespace fl
