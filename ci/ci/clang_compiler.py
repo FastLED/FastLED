@@ -19,8 +19,8 @@ class CompilerSettings:
     Shared compiler settings for FastLED compilation.
     """
 
-    include_path: str = "./src"
-    platform_define: str = "STUB_PLATFORM"
+    include_path: str
+    platform_define: str
     std_version: str = "c++17"
 
 
@@ -36,6 +36,19 @@ class Result:
     return_code: int
 
 
+@dataclass
+class CompileResult:
+    """
+    Result of a compile operation.
+    """
+
+    success: bool
+    output_path: str
+    stderr: str
+    size: int
+    command: list[str]
+
+
 class FastLEDClangCompiler:
     """
     FastLED-specific clang++ compiler wrapper for .ino files.
@@ -44,18 +57,18 @@ class FastLEDClangCompiler:
 
     def __init__(
         self,
-        settings: CompilerSettings | None = None,
-    ):
+        settings: CompilerSettings,
+    ) -> None:
         """
         Initialize the FastLED clang compiler wrapper.
 
         Args:
             settings (CompilerSettings, optional): Compiler settings. Uses defaults if None.
         """
-        self.settings = settings or CompilerSettings()
-        self.compiler = "clang++"
+        self.settings: CompilerSettings = settings
+        self.compiler: str = "clang++"
 
-    def check_clang_version(self):
+    def check_clang_version(self) -> tuple[bool, str, str]:
         """
         Check that clang++ is accessible and return version information.
 
@@ -83,7 +96,7 @@ class FastLEDClangCompiler:
         # Test direct access
         try:
             result = subprocess.run(
-                [self.compiler, "--version"], capture_output=True, text=True, timeout=10
+                [self.compiler, "--version"], capture_output=True, text=True, timeout=30
             )
             if result.returncode == 0 and "clang version" in result.stdout:
                 version = (
@@ -102,7 +115,7 @@ class FastLEDClangCompiler:
         ino_file: str | Path,
         output_file: str | Path,
         additional_flags: list[str] | None = None,
-    ) -> dict[str, str | bool | int | list[str]]:
+    ) -> CompileResult:
         """
         Compile a single .ino file using clang++.
 
@@ -112,13 +125,7 @@ class FastLEDClangCompiler:
             additional_flags (list, optional): Additional compiler flags
 
         Returns:
-            dict: {
-                "success": bool,
-                "output_path": str,
-                "stderr": str,
-                "size": int (bytes, only if success=True),
-                "command": list (the command that was executed)
-            }
+            CompileResult: Result containing success status, output path, stderr, size, and command
         """
         ino_file = Path(ino_file)
         output_file = Path(output_file)
@@ -147,38 +154,38 @@ class FastLEDClangCompiler:
                 # Check if output file was created and get size
                 if os.path.exists(output_file):
                     size = os.path.getsize(output_file)
-                    return {
-                        "success": True,
-                        "output_path": str(output_file),
-                        "stderr": result.stderr,
-                        "size": size,
-                        "command": cmd,
-                    }
+                    return CompileResult(
+                        success=True,
+                        output_path=str(output_file),
+                        stderr=result.stderr,
+                        size=size,
+                        command=cmd,
+                    )
                 else:
-                    return {
-                        "success": False,
-                        "output_path": str(output_file),
-                        "stderr": "Object file was not created",
-                        "size": 0,
-                        "command": cmd,
-                    }
+                    return CompileResult(
+                        success=False,
+                        output_path=str(output_file),
+                        stderr="Object file was not created",
+                        size=0,
+                        command=cmd,
+                    )
             else:
-                return {
-                    "success": False,
-                    "output_path": str(output_file),
-                    "stderr": result.stderr,
-                    "size": 0,
-                    "command": cmd,
-                }
+                return CompileResult(
+                    success=False,
+                    output_path=str(output_file),
+                    stderr=result.stderr,
+                    size=0,
+                    command=cmd,
+                )
 
         except Exception as e:
-            return {
-                "success": False,
-                "output_path": str(output_file),
-                "stderr": str(e),
-                "size": 0,
-                "command": cmd,
-            }
+            return CompileResult(
+                success=False,
+                output_path=str(output_file),
+                stderr=str(e),
+                size=0,
+                command=cmd,
+            )
 
     def compile_ino_file(
         self,
@@ -273,7 +280,7 @@ class FastLEDClangCompiler:
 
         return ino_files
 
-    def test_clang_accessibility(self):
+    def test_clang_accessibility(self) -> bool:
         """
         Comprehensive test that clang++ is accessible and working properly.
         This is the foundational test for the simple build system approach.
@@ -326,9 +333,27 @@ class FastLEDClangCompiler:
 
 
 # Convenience functions for backward compatibility
+
+# Default settings for backward compatibility
+_DEFAULT_SETTINGS = CompilerSettings(
+    include_path="./src", platform_define="STUB_PLATFORM", std_version="c++17"
+)
+
+# Shared compiler instance for backward compatibility functions
+_default_compiler = None
+
+
+def _get_default_compiler() -> FastLEDClangCompiler:
+    """Get or create a shared compiler instance with default settings."""
+    global _default_compiler
+    if _default_compiler is None:
+        _default_compiler = FastLEDClangCompiler(_DEFAULT_SETTINGS)
+    return _default_compiler
+
+
 def check_clang_version() -> tuple[bool, str, str]:
     """Backward compatibility wrapper."""
-    compiler = FastLEDClangCompiler()
+    compiler = _get_default_compiler()
     return compiler.check_clang_version()
 
 
@@ -338,13 +363,13 @@ def compile_ino_file(
     additional_flags: list[str] | None = None,
 ) -> Result:
     """Backward compatibility wrapper."""
-    compiler = FastLEDClangCompiler()
+    compiler = _get_default_compiler()
     return compiler.compile_ino_file(ino_path, output_path, additional_flags)
 
 
 def test_clang_accessibility() -> bool:
     """Backward compatibility wrapper."""
-    compiler = FastLEDClangCompiler()
+    compiler = _get_default_compiler()
     return compiler.test_clang_accessibility()
 
 
@@ -352,7 +377,7 @@ def find_ino_files(
     examples_dir: str = "examples", filter_names: list[str] | None = None
 ) -> list[Path]:
     """Backward compatibility wrapper."""
-    compiler = FastLEDClangCompiler()
+    compiler = _get_default_compiler()
     return compiler.find_ino_files(examples_dir, filter_names=filter_names)
 
 
@@ -360,7 +385,7 @@ def get_fastled_compile_command(
     ino_file: str | Path, output_file: str | Path
 ) -> list[str]:
     """Backward compatibility wrapper - DEPRECATED: Use FastLEDClangCompiler.compile() instead."""
-    compiler = FastLEDClangCompiler()
+    compiler = _get_default_compiler()
     # This is a bit hacky since we removed get_compile_command, but needed for backward compatibility
     settings = compiler.settings
     return [
@@ -407,9 +432,9 @@ def main() -> bool:
 
         result = compiler.compile(ino_files[0], temp_output)
         print(
-            f"Compile {ino_files[0].name}: success={result['success']}, size={result['size']}"
+            f"Compile {ino_files[0].name}: success={result.success}, size={result.size}"
         )
-        print(f"Command used: {' '.join(cast(list[str], result['command']))}")
+        print(f"Command used: {' '.join(result.command)}")
 
         # Clean up
         if os.path.exists(temp_output):

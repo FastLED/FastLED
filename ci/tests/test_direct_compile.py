@@ -32,7 +32,11 @@ def test_clang_accessibility_class():
     """Test the class-based clang accessibility."""
     print("\n=== Testing class-based clang accessibility ===")
 
-    compiler = FastLEDClangCompiler()
+    # Create compiler with default settings
+    settings = CompilerSettings(
+        include_path="./src", platform_define="STUB_PLATFORM", std_version="c++17"
+    )
+    compiler = FastLEDClangCompiler(settings)
 
     # Test 1: Version check
     success, version, error = compiler.check_clang_version()
@@ -73,19 +77,37 @@ def test_compiler_configuration():
     print("\n=== Testing compiler configuration options ===")
 
     # Test with different configurations
-    configs: list[dict[str, str | CompilerSettings | None]] = [
-        {"name": "Default", "settings": None},
-        {"name": "C++20", "settings": CompilerSettings(std_version="c++20")},
+    configs: list[dict[str, str | CompilerSettings]] = [
+        {
+            "name": "Default",
+            "settings": CompilerSettings(
+                include_path="./src",
+                platform_define="STUB_PLATFORM",
+                std_version="c++17",
+            ),
+        },
+        {
+            "name": "C++20",
+            "settings": CompilerSettings(
+                include_path="./src",
+                platform_define="STUB_PLATFORM",
+                std_version="c++20",
+            ),
+        },
         {
             "name": "Custom Platform",
-            "settings": CompilerSettings(platform_define="CUSTOM_PLATFORM"),
+            "settings": CompilerSettings(
+                include_path="./src",
+                platform_define="CUSTOM_PLATFORM",
+                std_version="c++17",
+            ),
         },
     ]
 
     for test_config in configs:
         print(f"Testing {test_config['name']} configuration...")
         settings = test_config["settings"]
-        assert isinstance(settings, (CompilerSettings, type(None))), (
+        assert isinstance(settings, CompilerSettings), (
             f"Invalid settings type: {type(settings)}"
         )
         compiler = FastLEDClangCompiler(settings)
