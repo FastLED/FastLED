@@ -380,12 +380,37 @@ def compile_examples_simple(
     future_to_file: Dict[Future[Result], Path] = {}
     pch_files_count = 0
     direct_files_count = 0
+    total_cpp_files = 0
 
     for ino_file in ino_files:
+        # Find additional .cpp files in the same directory
+        cpp_files = compiler.find_cpp_files_for_example(ino_file)
+        if cpp_files:
+            total_cpp_files += len(cpp_files)
+            log_timing(
+                f"[SIMPLE] Found {len(cpp_files)} .cpp file(s) for {ino_file.name}: {[f.name for f in cpp_files]}"
+            )
+
+        # Find include directories for this example
+        include_dirs = compiler.find_include_dirs_for_example(ino_file)
+        if len(include_dirs) > 1:  # More than just the example root directory
+            log_timing(
+                f"[SIMPLE] Found {len(include_dirs)} include dir(s) for {ino_file.name}: {[Path(d).name for d in include_dirs]}"
+            )
+
+        # Build additional flags with include directories
+        additional_flags: list[str] = []
+        for include_dir in include_dirs:
+            additional_flags.append(f"-I{include_dir}")
+
         # Determine if this file should use PCH
         use_pch_for_file = ino_file in pch_compatible_files
+
+        # Compile the .ino file
         future = compiler.compile_ino_file(
-            ino_file, use_pch_for_this_file=use_pch_for_file
+            ino_file,
+            use_pch_for_this_file=use_pch_for_file,
+            additional_flags=additional_flags,
         )
         future_to_file[future] = ino_file
 
@@ -394,8 +419,23 @@ def compile_examples_simple(
         else:
             direct_files_count += 1
 
+        # Compile additional .cpp files in the same directory
+        for cpp_file in cpp_files:
+            cpp_future = compiler.compile_cpp_file(
+                cpp_file,
+                use_pch_for_this_file=use_pch_for_file,
+                additional_flags=additional_flags,
+            )
+            future_to_file[cpp_future] = cpp_file
+
+            if use_pch_for_file:
+                pch_files_count += 1
+            else:
+                direct_files_count += 1
+
+    total_files = len(ino_files) + total_cpp_files
     log_timing(
-        f"[SIMPLE] Submitted {len(ino_files)} compilation jobs to ThreadPoolExecutor"
+        f"[SIMPLE] Submitted {total_files} compilation jobs to ThreadPoolExecutor ({len(ino_files)} .ino + {total_cpp_files} .cpp)"
     )
     log_timing(
         f"[SIMPLE] Using PCH for {pch_files_count} files, direct compilation for {direct_files_count} files"
@@ -405,18 +445,18 @@ def compile_examples_simple(
     completed_count = 0
     for future in as_completed(future_to_file.keys()):
         result: Result = future.result()
-        ino_file: Path = future_to_file[future]
+        source_file: Path = future_to_file[future]
         completed_count += 1
 
         # Log progress every 10 completions
-        if completed_count % 10 == 0 or completed_count == len(ino_files):
+        if completed_count % 10 == 0 or completed_count == total_files:
             log_timing(
-                f"[SIMPLE] Completed {completed_count}/{len(ino_files)} compilations"
+                f"[SIMPLE] Completed {completed_count}/{total_files} compilations"
             )
 
         file_result: Dict[str, Any] = {
-            "file": str(ino_file.name),
-            "path": str(ino_file.relative_to(Path("examples"))),
+            "file": str(source_file.name),
+            "path": str(source_file.relative_to(Path("examples"))),
             "success": bool(result.ok),
             "stderr": str(result.stderr),
         }

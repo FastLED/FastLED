@@ -474,6 +474,149 @@ class Compiler:
         finally:
             os.unlink(temp_cpp_path)
 
+    def compile_cpp_file(
+        self,
+        cpp_path: str | Path,
+        output_path: str | Path | None = None,
+        additional_flags: list[str] | None = None,
+        use_pch_for_this_file: bool | None = None,
+    ) -> Future[Result]:
+        """
+        Compile a .cpp file asynchronously.
+
+        Args:
+            cpp_path (str|Path): Path to the .cpp file to compile
+            output_path (str|Path, optional): Output object file path. If None, uses temp file.
+            additional_flags (list, optional): Additional compiler flags
+            use_pch_for_this_file (bool, optional): Override PCH usage for this specific file.
+                If None, uses global PCH setting. If True/False, forces PCH on/off for this file.
+
+        Returns:
+            Future[Result]: Future object that will contain the compilation result
+        """
+        # Submit the compilation task to a thread pool
+        return _EXECUTOR.submit(
+            self._compile_cpp_file_sync,
+            cpp_path,
+            output_path,
+            additional_flags,
+            use_pch_for_this_file,
+        )
+
+    def _compile_cpp_file_sync(
+        self,
+        cpp_path: str | Path,
+        output_path: str | Path | None = None,
+        additional_flags: list[str] | None = None,
+        use_pch_for_this_file: bool | None = None,
+    ) -> Result:
+        """
+        Internal synchronous implementation of compile_cpp_file.
+
+        Args:
+            cpp_path (str|Path): Path to the .cpp file to compile
+            output_path (str|Path, optional): Output object file path. If None, uses temp file.
+            additional_flags (list, optional): Additional compiler flags
+            use_pch_for_this_file (bool, optional): Override PCH usage for this specific file.
+                If None, uses global PCH setting. If True/False, forces PCH on/off for this file.
+
+        Returns:
+            Result: Result dataclass containing subprocess execution details
+        """
+        cpp_file_path = Path(cpp_path).resolve()
+
+        # Create output path if not provided
+        if output_path is None:
+            temp_file = tempfile.NamedTemporaryFile(suffix=".o", delete=False)
+            output_path = temp_file.name
+            temp_file.close()
+            cleanup_temp = True
+        else:
+            cleanup_temp = False
+
+        # Build compiler command
+        cmd = [self.settings.compiler]
+
+        # Handle cache-wrapped compilers (sccache/ccache)
+        if (
+            len(self.settings.compiler_args) > 0
+            and self.settings.compiler_args[0] == "clang++"
+        ):
+            # This is a cache-wrapped compiler, add clang++ first, then remaining cache args
+            cmd.append("clang++")
+            # Skip the first "clang++" argument from compiler_args since we already added it
+            remaining_cache_args = self.settings.compiler_args[1:]
+        else:
+            # This is a direct compiler call, use all compiler_args as-is
+            remaining_cache_args = self.settings.compiler_args
+
+        # Add standard clang arguments
+        cmd.extend(
+            [
+                "-x",
+                "c++",  # Force C++ compilation
+                f"-std={self.settings.std_version}",
+                f"-I{self.settings.include_path}",  # FastLED include path
+            ]
+        )
+
+        # Add defines if specified
+        if self.settings.defines:
+            for define in self.settings.defines:
+                cmd.append(f"-D{define}")
+
+        # Add remaining compiler args (after skipping clang++ for cache-wrapped compilers)
+        cmd.extend(remaining_cache_args)
+
+        # Determine whether to use PCH for this specific file
+        should_use_pch = (
+            use_pch_for_this_file
+            if use_pch_for_this_file is not None
+            else self.settings.use_pch
+        )
+
+        # Add PCH flag if available and should be used for this file
+        if should_use_pch and self._pch_ready and self._pch_file_path:
+            cmd.extend(["-include-pch", str(self._pch_file_path)])
+
+        cmd.extend(
+            [
+                "-c",
+                str(cpp_file_path),  # Compile the .cpp file directly
+                "-o",
+                str(output_path),
+            ]
+        )
+
+        if additional_flags:
+            cmd.extend(additional_flags)
+
+        try:
+            result = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
+
+            # Clean up temp file on failure if we created it
+            if cleanup_temp and result.returncode != 0 and os.path.exists(output_path):
+                try:
+                    os.unlink(output_path)
+                except:
+                    pass
+
+            return Result(
+                ok=(result.returncode == 0),
+                stdout=result.stdout,
+                stderr=result.stderr,
+                return_code=result.returncode,
+            )
+
+        except Exception as e:
+            if cleanup_temp and os.path.exists(output_path):
+                try:
+                    os.unlink(output_path)
+                except:
+                    pass
+
+            return Result(ok=False, stdout="", stderr=str(e), return_code=-1)
+
     def find_ino_files(
         self, examples_dir: str | Path, filter_names: list[str] | None = None
     ) -> list[Path]:
@@ -495,6 +638,57 @@ class Compiler:
             ino_files = [f for f in ino_files if f.stem in filter_set]
 
         return ino_files
+
+    def find_cpp_files_for_example(self, ino_file: Path) -> list[Path]:
+        """
+        Find all .cpp files in the same directory as the given .ino file and its subdirectories.
+
+        Args:
+            ino_file (Path): Path to the .ino file
+
+        Returns:
+            list[Path]: List of .cpp file paths in the example directory tree
+        """
+        example_dir = ino_file.parent
+        # Search recursively for .cpp files in the example directory and all subdirectories
+        cpp_files = list(example_dir.rglob("*.cpp"))
+        return cpp_files
+
+    def find_include_dirs_for_example(self, ino_file: Path) -> list[str]:
+        """
+        Find all directories that should be added as include paths for the given example.
+        This includes the example root directory and any subdirectories that contain header files.
+
+        Args:
+            ino_file (Path): Path to the .ino file
+
+        Returns:
+            list[str]: List of directory paths that should be added as -I flags
+        """
+        example_dir = ino_file.parent
+        include_dirs: list[str] = []
+
+        # Always include the example root directory
+        include_dirs.append(str(example_dir))
+
+        # Check for header files in subdirectories
+        for subdir in example_dir.iterdir():
+            if subdir.is_dir() and subdir.name not in [
+                ".git",
+                "__pycache__",
+                ".pio",
+                ".vscode",
+            ]:
+                # Check if this directory contains header files
+                header_files = [
+                    f
+                    for f in subdir.rglob("*")
+                    if f.is_file() and f.suffix in [".h", ".hpp"]
+                ]
+                if header_files:
+                    include_dirs.append(str(subdir))
+
+        return include_dirs
 
     def test_clang_accessibility(self) -> bool:
         """

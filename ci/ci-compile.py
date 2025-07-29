@@ -468,6 +468,17 @@ def compile_with_pio_ci(
         # Use the first .ino file found
         ino_file = ino_files[0]
 
+        # Find all .cpp files in the example directory (in addition to .ino file)
+        cpp_files = list(example_path.glob("*.cpp"))
+
+        # Collect all source files to compile (.ino + .cpp)
+        source_files = [ino_file] + cpp_files
+
+        if cpp_files:
+            locked_print(
+                f"  Found {len(cpp_files)} additional .cpp file(s) to compile: {[f.name for f in cpp_files]}"
+            )
+
         # Get absolute path to FastLED library using platform's natural path format
         fastled_path = str(HERE.parent.absolute())
         lib_option = f"lib_deps=symlink://{fastled_path}"
