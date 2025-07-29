@@ -250,13 +250,13 @@ private:
 class FetchEngineListener;
 
 /// Internal fetch manager for promise tracking
-class FetchManager : public AsyncRunner {
+class FetchManager : public async_runner {
 public:
     static FetchManager& instance();
     
     void register_promise(const fl::promise<response>& promise);
     
-    // AsyncRunner interface
+    // async_runner interface
     void update() override;
     bool has_active_tasks() const override;
     size_t active_task_count() const override;
@@ -313,8 +313,8 @@ fl::promise<response> fetch_patch(const fl::string& url, const fetch_options& re
 /// Generic request with options (like fetch(url, options))
 fl::promise<response> fetch_request(const fl::string& url, const RequestOptions& options = RequestOptions());
 
-/// Legacy manual update for fetch promises (use fl::asyncrun() for new code)
-/// @deprecated Use fl::asyncrun() instead - this calls asyncrun() internally
+/// Legacy manual update for fetch promises (use fl::async_run() for new code)
+/// @deprecated Use fl::async_run() instead - this calls async_run() internally
 void fetch_update();
 
 /// Get number of active requests

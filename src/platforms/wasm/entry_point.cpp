@@ -136,7 +136,7 @@ int main() {
     
     while (true) {
         // Platform pump for async operations - update all async tasks
-        fl::asyncrun();
+        fl::async_run();
         
         // Yield control to the browser more frequently for responsive async processing
         // Use 1ms sleep to maintain responsiveness while allowing other threads to work

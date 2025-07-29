@@ -33,7 +33,7 @@ extern void loop();
 
 // Forward declaration for async update function
 namespace fl {
-    void asyncrun();
+    void async_run();
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -58,7 +58,7 @@ void delay(int ms) {
     // Break delay into 1ms chunks and pump all async tasks
     while (millis() < end) {
         // Update all async tasks (fetch, timers, etc.) during delay
-        fl::asyncrun();
+        fl::async_run();
 
         if (millis() >= end) {
             break;

@@ -16,13 +16,13 @@ AsyncManager& AsyncManager::instance() {
     return fl::Singleton<AsyncManager>::instance();
 }
 
-void AsyncManager::register_runner(AsyncRunner* runner) {
+void AsyncManager::register_runner(async_runner* runner) {
     if (runner && fl::find(mRunners.begin(), mRunners.end(), runner) == mRunners.end()) {
         mRunners.push_back(runner);
     }
 }
 
-void AsyncManager::unregister_runner(AsyncRunner* runner) {
+void AsyncManager::unregister_runner(async_runner* runner) {
     auto it = fl::find(mRunners.begin(), mRunners.end(), runner);
     if (it != mRunners.end()) {
         mRunners.erase(it);
@@ -59,14 +59,14 @@ size_t AsyncManager::total_active_tasks() const {
 
 // Public API functions
 
-void asyncrun() {
+void async_run() {
     fl::Scheduler::instance().update();
     AsyncManager::instance().update_all();
 }
 
 void async_yield() {
     // Always pump all async tasks first
-    asyncrun();
+    async_run();
     
     // Platform-specific yielding behavior
 #ifdef __EMSCRIPTEN__
@@ -74,7 +74,7 @@ void async_yield() {
     emscripten_sleep(1); // Sleep for 1ms to yield to browser
 #endif
     for (int i = 0; i < 5; ++i) {
-        asyncrun(); // Give other async tasks a chance
+        async_run(); // Give other async tasks a chance
     }
 }
 

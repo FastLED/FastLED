@@ -31,5 +31,5 @@ void setup() {
 
 void loop() {    
     // Yield to allow other operations to run
-    fl::asyncrun();
+    fl::async_run();
 }

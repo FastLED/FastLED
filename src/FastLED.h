@@ -1016,7 +1016,7 @@ using namespace fl;
 // to sketch_loop()
 #define loop() \
      sketch_loop(); \
-     void loop() { sketch_loop(); fl::asyncrun(); } \
+     void loop() { sketch_loop(); fl::async_run(); } \
      void sketch_loop()
 #endif
 

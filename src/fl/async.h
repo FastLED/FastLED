@@ -14,7 +14,7 @@
 /// #include "fl/async.h"
 /// 
 /// // Create a custom async runner
-/// class MyAsyncRunner : public fl::AsyncRunner {
+/// class Myasync_runner : public fl::async_runner {
 /// public:
 ///     void update() override {
 ///         // Process your async tasks here
@@ -32,13 +32,13 @@
 /// };
 /// 
 /// void setup() {
-///     MyAsyncRunner* runner = new MyAsyncRunner();
+///     Myasync_runner* runner = new Myasync_runner();
 ///     fl::AsyncManager::instance().register_runner(runner);
 ///     
 ///     // Now your async tasks will be automatically updated during:
 ///     // - FastLED.show() calls (via engine events)
 ///     // - delay() calls on WASM platforms
-///     // - Manual fl::asyncrun() calls
+///     // - Manual fl::async_run() calls
 /// }
 /// @endcode
 
@@ -61,9 +61,9 @@ namespace fl {
 class AsyncManager;
 
 /// @brief Generic asynchronous task runner interface
-class AsyncRunner {
+class async_runner {
 public:
-    virtual ~AsyncRunner() = default;
+    virtual ~async_runner() = default;
     
     /// Update this async runner (called during async pumping)
     virtual void update() = 0;
@@ -81,10 +81,10 @@ public:
     static AsyncManager& instance();
     
     /// Register an async runner
-    void register_runner(AsyncRunner* runner);
+    void register_runner(async_runner* runner);
     
     /// Unregister an async runner
-    void unregister_runner(AsyncRunner* runner);
+    void unregister_runner(async_runner* runner);
     
     /// Update all registered async runners
     void update_all();
@@ -96,14 +96,14 @@ public:
     size_t total_active_tasks() const;
 
 private:
-    fl::vector<AsyncRunner*> mRunners;
+    fl::vector<async_runner*> mRunners;
 };
 
 /// @brief Platform-specific async yield function
 /// 
 /// This function pumps all async tasks and yields control appropriately for the platform:
-/// - WASM: calls asyncrun() then emscripten_sleep(1) to yield to browser
-/// - Other platforms: calls asyncrun() multiple times with simple yielding
+/// - WASM: calls async_run() then emscripten_sleep(1) to yield to browser
+/// - Other platforms: calls async_run() multiple times with simple yielding
 /// 
 /// This centralizes platform-specific async behavior instead of having #ifdef in generic code.
 void async_yield();
@@ -118,7 +118,7 @@ void async_yield();
 /// - Manual calls for custom async pumping
 ///
 /// @note This replaces the old fetch_update() function with a generic approach
-void asyncrun();
+void async_run();
 
 
 
