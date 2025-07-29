@@ -14,8 +14,8 @@ from pathlib import Path
 from typing import cast
 
 from ci.clang_compiler import (
+    Compiler,
     CompilerSettings,
-    FastLEDClangCompiler,
     test_clang_accessibility,
 )
 
@@ -34,9 +34,9 @@ def test_clang_accessibility_class():
 
     # Create compiler with default settings
     settings = CompilerSettings(
-        include_path="./src", platform_define="STUB_PLATFORM", std_version="c++17"
+        include_path="./src", defines=["STUB_PLATFORM"], std_version="c++17"
     )
-    compiler = FastLEDClangCompiler(settings)
+    compiler = Compiler(settings)
 
     # Test 1: Version check
     version_result = compiler.check_clang_version()
@@ -83,7 +83,7 @@ def test_compiler_configuration():
             "name": "Default",
             "settings": CompilerSettings(
                 include_path="./src",
-                platform_define="STUB_PLATFORM",
+                defines=["STUB_PLATFORM"],
                 std_version="c++17",
             ),
         },
@@ -91,7 +91,7 @@ def test_compiler_configuration():
             "name": "C++20",
             "settings": CompilerSettings(
                 include_path="./src",
-                platform_define="STUB_PLATFORM",
+                defines=["STUB_PLATFORM"],
                 std_version="c++20",
             ),
         },
@@ -99,7 +99,7 @@ def test_compiler_configuration():
             "name": "Custom Platform",
             "settings": CompilerSettings(
                 include_path="./src",
-                platform_define="CUSTOM_PLATFORM",
+                defines=["CUSTOM_PLATFORM"],
                 std_version="c++17",
             ),
         },
@@ -111,7 +111,7 @@ def test_compiler_configuration():
         assert isinstance(settings, CompilerSettings), (
             f"Invalid settings type: {type(settings)}"
         )
-        compiler = FastLEDClangCompiler(settings)
+        compiler = Compiler(settings)
 
         # Just test version check for each config
         version_result = compiler.check_clang_version()

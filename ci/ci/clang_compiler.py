@@ -31,7 +31,8 @@ class CompilerSettings:
     """
 
     include_path: str
-    platform_define: str
+    compiler: str = "clang++"
+    defines: list[str] | None = None
     std_version: str = "c++17"
     compiler_args: list[str] = field(default_factory=list)
 
@@ -72,10 +73,11 @@ class VersionCheckResult:
     error: str
 
 
-class FastLEDClangCompiler:
+class Compiler:
     """
-    FastLED-specific clang++ compiler wrapper for .ino files.
+    Generic compiler wrapper for .ino files.
     Handles compilation, testing, and file discovery for FastLED examples.
+    Supports any compiler including clang++, gcc, sccache, etc.
     """
 
     def __init__(
@@ -83,13 +85,12 @@ class FastLEDClangCompiler:
         settings: CompilerSettings,
     ) -> None:
         """
-        Initialize the FastLED clang compiler wrapper.
+        Initialize the compiler wrapper.
 
         Args:
-            settings (CompilerSettings, optional): Compiler settings. Uses defaults if None.
+            settings (CompilerSettings): Compiler settings including compiler path/command.
         """
         self.settings: CompilerSettings = settings
-        self.compiler: str = "clang++"
 
     def check_clang_version(self) -> VersionCheckResult:
         """
@@ -101,7 +102,7 @@ class FastLEDClangCompiler:
         # Test uv run access first
         try:
             result = subprocess.run(
-                ["uv", "run", self.compiler, "--version"],
+                [self.settings.compiler, "--version"],
                 capture_output=True,
                 text=True,
                 timeout=10,
@@ -114,23 +115,6 @@ class FastLEDClangCompiler:
                 )
                 return VersionCheckResult(
                     success=True, version=f"uv:{version}", error=""
-                )
-        except Exception as e:
-            pass  # Try direct access
-
-        # Test direct access
-        try:
-            result = subprocess.run(
-                [self.compiler, "--version"], capture_output=True, text=True, timeout=30
-            )
-            if result.returncode == 0 and "clang version" in result.stdout:
-                version = (
-                    result.stdout.split()[2]
-                    if len(result.stdout.split()) > 2
-                    else "unknown"
-                )
-                return VersionCheckResult(
-                    success=True, version=f"direct:{version}", error=""
                 )
             else:
                 return VersionCheckResult(
@@ -202,13 +186,17 @@ class FastLEDClangCompiler:
 
         # Build compiler command
         cmd = [
-            self.compiler,
+            self.settings.compiler,
             "-x",
             "c++",  # Force C++ compilation of .ino files
             f"-std={self.settings.std_version}",
             f"-I{self.settings.include_path}",  # FastLED include path
-            f"-D{self.settings.platform_define}",  # Platform define
         ]
+
+        # Add defines if specified
+        if self.settings.defines:
+            for define in self.settings.defines:
+                cmd.append(f"-D{define}")
         cmd.extend(self.settings.compiler_args)
         cmd.extend(
             [
@@ -330,18 +318,18 @@ class FastLEDClangCompiler:
 
 # Default settings for backward compatibility
 _DEFAULT_SETTINGS = CompilerSettings(
-    include_path="./src", platform_define="STUB_PLATFORM", std_version="c++17"
+    include_path="./src", defines=["STUB_PLATFORM"], std_version="c++17"
 )
 
 # Shared compiler instance for backward compatibility functions
 _default_compiler = None
 
 
-def _get_default_compiler() -> FastLEDClangCompiler:
+def _get_default_compiler() -> Compiler:
     """Get or create a shared compiler instance with default settings."""
     global _default_compiler
     if _default_compiler is None:
-        _default_compiler = FastLEDClangCompiler(_DEFAULT_SETTINGS)
+        _default_compiler = Compiler(_DEFAULT_SETTINGS)
     return _default_compiler
 
 
@@ -385,13 +373,17 @@ def get_fastled_compile_command(
     # This is a bit hacky since we removed get_compile_command, but needed for backward compatibility
     settings = compiler.settings
     cmd = [
-        compiler.compiler,
+        settings.compiler,
         "-x",
         "c++",
         f"-std={settings.std_version}",
         f"-I{settings.include_path}",
-        f"-D{settings.platform_define}",
     ]
+
+    # Add defines if specified
+    if settings.defines:
+        for define in settings.defines:
+            cmd.append(f"-D{define}")
     cmd.extend(settings.compiler_args)
     cmd.extend(
         [
@@ -406,13 +398,13 @@ def get_fastled_compile_command(
 
 def main() -> bool:
     """Test all functions in the module using the class-based approach."""
-    print("=== Testing FastLEDClangCompiler class ===")
+    print("=== Testing Compiler class ===")
 
     # Create compiler instance with custom settings
     settings = CompilerSettings(
-        include_path="./src", platform_define="STUB_PLATFORM", std_version="c++17"
+        include_path="./src", defines=["STUB_PLATFORM"], std_version="c++17"
     )
-    compiler = FastLEDClangCompiler(settings)
+    compiler = Compiler(settings)
 
     # Test version check
     version_result = compiler.check_clang_version()
@@ -452,11 +444,11 @@ def main() -> bool:
     print("\n=== Testing compiler_args ===")
     settings_with_args = CompilerSettings(
         include_path="./src",
-        platform_define="STUB_PLATFORM",
+        defines=["STUB_PLATFORM"],
         std_version="c++17",
         compiler_args=["-Werror", "-Wall"],
     )
-    compiler_with_args = FastLEDClangCompiler(settings_with_args)
+    compiler_with_args = Compiler(settings_with_args)
     if ino_files:
         # Test that compiler_args are included in the command
         with tempfile.NamedTemporaryFile(suffix=".o", delete=False) as temp_file:
