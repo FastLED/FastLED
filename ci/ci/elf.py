@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 
-def run_command(command: list, show_output=False):
+def run_command(command: list[str], show_output: bool = False) -> str:
     """
     Run a command using subprocess and capture the output.
 

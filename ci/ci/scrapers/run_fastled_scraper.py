@@ -12,7 +12,9 @@ import sys
 from pathlib import Path
 
 
-def run_scraper(example_name="FestivalStick", headless=False, timeout=30):
+def run_scraper(
+    example_name: str = "FestivalStick", headless: bool = False, timeout: int = 30
+) -> int:
     """Run the FastLED web scraper with specified parameters"""
 
     script_path = Path(__file__).parent / "scrape_festival_stick.py"
@@ -50,7 +52,7 @@ def run_scraper(example_name="FestivalStick", headless=False, timeout=30):
         return 1
 
 
-def main():
+def main() -> int:
     parser = argparse.ArgumentParser(description="Run FastLED web scraper")
     parser.add_argument(
         "--example",

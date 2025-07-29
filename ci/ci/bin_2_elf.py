@@ -9,7 +9,7 @@ import subprocess
 from pathlib import Path
 
 
-def _run_command(command, show_output=False):
+def _run_command(command: list[str] | str, show_output: bool = False) -> str:
     """
     Run a command using subprocess and capture the output.
 
@@ -79,7 +79,7 @@ def _analyze_binary_structure(bin_file: Path, platform: str):
     with open(bin_file, "rb") as f:
         data = f.read()
 
-    analysis = {
+    analysis: dict[str, str | int | bytes | dict[str, str | int]] = {
         "platform": platform,
         "size": len(data),
         "header": data[:32] if len(data) >= 32 else data,
