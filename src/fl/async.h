@@ -236,6 +236,10 @@ public:
     int add_task(task t);
     void update();
     
+    // New methods for frame task handling
+    void update_before_frame_tasks();
+    void update_after_frame_tasks();
+    
     // For testing: clear all tasks
     void clear_all_tasks() { mTasks.clear(); mNextTaskId = 1; }
 
@@ -245,6 +249,9 @@ private:
 
     void warn_no_then(int task_id, const fl::string& trace_label);
     void warn_no_catch(int task_id, const fl::string& trace_label, const Error& error);
+    
+    // Helper method for running specific task types
+    void update_tasks_of_type(TaskType task_type);
 
     fl::vector<task> mTasks;
     int mNextTaskId = 1;

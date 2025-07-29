@@ -6,6 +6,7 @@ Supports the simple build system approach outlined in FEATURE.md.
 """
 
 import os
+import shutil
 import subprocess
 import tempfile
 from concurrent.futures import Future, ThreadPoolExecutor
@@ -25,6 +26,17 @@ _EXECUTOR = ThreadPoolExecutor(max_workers=cpu_count() * 2)
 
 
 @dataclass
+class LibarchiveOptions:
+    """Configuration options for static library archive generation."""
+
+    use_thin: bool = False  # Use thin archives (ar T flag) for faster linking
+    # Future expansion points:
+    # use_deterministic: bool = True  # Deterministic archives (ar D flag)
+    # symbol_table: bool = True       # Generate symbol table (ar s flag)
+    # verbose: bool = False          # Verbose output (ar v flag)
+
+
+@dataclass
 class CompilerSettings:
     """
     Shared compiler settings for FastLED compilation.
@@ -40,6 +52,10 @@ class CompilerSettings:
     use_pch: bool = False
     pch_header_content: str | None = None
     pch_output_path: str | None = None
+
+    # Archive generation settings
+    archiver: str = "ar"  # Default archiver tool
+    archiver_args: list[str] = field(default_factory=list)
 
 
 @dataclass
@@ -809,6 +825,46 @@ class Compiler:
             # If we can't analyze the file, err on the side of caution and disable PCH
             return False
 
+    def create_archive(
+        self,
+        object_files: list[Path],
+        output_archive: Path,
+        options: LibarchiveOptions = LibarchiveOptions(),
+    ) -> Future[Result]:
+        """
+        Create static library archive from object files.
+        Submits archive creation to thread pool for parallel execution.
+
+        Args:
+            object_files: List of .o files to include in archive
+            output_archive: Output .a file path
+            options: Archive generation options
+
+        Returns:
+            Future[Result]: Future object that will contain the archive creation result
+        """
+        return _EXECUTOR.submit(
+            self.create_archive_sync, object_files, output_archive, options
+        )
+
+    def create_archive_sync(
+        self, object_files: list[Path], output_archive: Path, options: LibarchiveOptions
+    ) -> Result:
+        """
+        Synchronous archive creation implementation.
+
+        Args:
+            object_files: List of .o files to include in archive
+            output_archive: Output .a file path
+            options: Archive generation options
+
+        Returns:
+            Result: Success status and command output
+        """
+        return create_archive_sync(
+            object_files, output_archive, options, self.settings.archiver
+        )
+
 
 # Convenience functions for backward compatibility
 
@@ -981,7 +1037,103 @@ def main() -> bool:
         f"Backward compatibility version check: success={success_compat}, version={version_compat}"
     )
 
-    return result
+    return result and success_compat
+
+
+def detect_archiver() -> str:
+    """
+    Detect available archiver tool.
+    Preference order: llvm-ar > ar
+
+    Returns:
+        str: Path to the detected archiver tool
+
+    Raises:
+        RuntimeError: If no archiver tool is found
+    """
+    llvm_ar = shutil.which("llvm-ar")
+    if llvm_ar:
+        return llvm_ar
+
+    ar = shutil.which("ar")
+    if ar:
+        return ar
+
+    raise RuntimeError("No archiver tool found (ar or llvm-ar required)")
+
+
+def create_archive_sync(
+    object_files: list[Path],
+    output_archive: Path,
+    options: LibarchiveOptions = LibarchiveOptions(),
+    archiver: str | None = None,
+) -> Result:
+    """
+    Create a static library archive (.a) from compiled object files.
+
+    Args:
+        object_files: List of .o files to include in archive
+        output_archive: Output .a file path
+        options: Archive generation options
+        archiver: Path to archiver tool (auto-detected if None)
+
+    Returns:
+        Result: Success status and command output
+    """
+    if not object_files:
+        return Result(
+            ok=False,
+            stdout="",
+            stderr="No object files provided for archive creation",
+            return_code=1,
+        )
+
+    # Validate all object files exist
+    for obj_file in object_files:
+        if not obj_file.exists():
+            return Result(
+                ok=False,
+                stdout="",
+                stderr=f"Object file not found: {obj_file}",
+                return_code=1,
+            )
+
+    # Auto-detect archiver if not provided
+    if archiver is None:
+        try:
+            archiver = detect_archiver()
+        except RuntimeError as e:
+            return Result(ok=False, stdout="", stderr=str(e), return_code=1)
+
+    # Build archive command
+    cmd = [archiver]
+
+    # Archive flags: r=insert, c=create if needed, s=write symbol table
+    flags = "rcs"
+    if options.use_thin:
+        flags += "T"  # Add thin archive flag
+
+    cmd.append(flags)
+    cmd.append(str(output_archive))
+    cmd.extend(str(obj) for obj in object_files)
+
+    # Ensure output directory exists
+    output_archive.parent.mkdir(parents=True, exist_ok=True)
+
+    # Execute archive command
+    try:
+        process = subprocess.run(cmd, capture_output=True, text=True, cwd=None)
+
+        return Result(
+            ok=process.returncode == 0,
+            stdout=process.stdout,
+            stderr=process.stderr,
+            return_code=process.returncode,
+        )
+    except Exception as e:
+        return Result(
+            ok=False, stdout="", stderr=f"Archive command failed: {e}", return_code=-1
+        )
 
 
 if __name__ == "__main__":

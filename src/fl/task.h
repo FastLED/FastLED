@@ -146,6 +146,7 @@ public:
     uint32_t last_run_time() const { return mLastRunTime; }
     void set_last_run_time(uint32_t time) { mLastRunTime = time; }
     bool ready_to_run(uint32_t current_time) const;
+    bool ready_to_run_frame_task(uint32_t current_time) const;  // New method for frame tasks
     bool is_canceled() const { return mCanceled; }
     bool is_auto_registered() const { return mAutoRegistered; }
 

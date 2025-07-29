@@ -92,9 +92,10 @@ void TaskImpl::auto_register_with_scheduler() {
 }
 
 bool TaskImpl::ready_to_run(uint32_t current_time) const {
-    // For frame-based tasks, they're always ready
+    // For frame-based tasks, they're only ready when explicitly called in frame context
+    // Regular scheduler updates should NOT run frame tasks
     if (mType == TaskType::kBeforeFrame || mType == TaskType::kAfterFrame) {
-        return true;
+        return false;  // Changed: frame tasks are not ready during regular updates
     }
     
     // For time-based tasks, check if enough time has passed
@@ -109,6 +110,16 @@ bool TaskImpl::ready_to_run(uint32_t current_time) const {
     
     // Check if enough time has passed since last run
     return (current_time - mLastRunTime) >= static_cast<uint32_t>(mIntervalMs);
+}
+
+// New method to check if frame tasks are ready (used only during frame events)
+bool TaskImpl::ready_to_run_frame_task(uint32_t current_time) const {
+    // Only frame-based tasks are ready in frame context
+    if (mType == TaskType::kBeforeFrame || mType == TaskType::kAfterFrame) {
+        return true;
+    }
+    // Non-frame tasks are not run in frame context
+    return false;
 }
 
 void TaskImpl::execute_then() {

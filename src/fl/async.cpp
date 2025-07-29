@@ -1,4 +1,5 @@
 #include "fl/async.h"
+#include "fl/functional.h"
 #include "fl/singleton.h"
 #include "fl/algorithm.h"
 #include "fl/task.h"
@@ -114,7 +115,7 @@ void Scheduler::update() {
             mTasks.erase(mTasks.begin() + i);
             // Don't increment i since we just removed an element
         } else {
-            // Check if task is ready to run
+            // Check if task is ready to run (frame tasks will return false here)
             bool should_run = impl->ready_to_run(current_time);
 
             if (should_run) {
@@ -140,6 +141,53 @@ void Scheduler::update() {
             } else {
                 ++i;
             }
+        }
+    }
+}
+
+void Scheduler::update_before_frame_tasks() {
+    update_tasks_of_type(TaskType::kBeforeFrame);
+}
+
+void Scheduler::update_after_frame_tasks() {
+    update_tasks_of_type(TaskType::kAfterFrame);
+}
+
+void Scheduler::update_tasks_of_type(TaskType task_type) {
+    uint32_t current_time = fl::time();
+    
+    // Use index-based iteration to avoid iterator invalidation issues
+    for (fl::size i = 0; i < mTasks.size();) {
+        task& t = mTasks[i];
+        auto impl = t.get_impl();
+        
+        if (!impl || impl->is_canceled()) {
+            // erase() returns bool in HeapVector, not iterator
+            mTasks.erase(mTasks.begin() + i);
+            // Don't increment i since we just removed an element
+        } else if (impl->type() == task_type) {
+            // This is a frame task of the type we're looking for
+            bool should_run = impl->ready_to_run_frame_task(current_time);
+
+            if (should_run) {
+                // Update last run time for frame tasks (though they don't use it)
+                impl->set_last_run_time(current_time);
+                
+                // Execute the task
+                if (impl->has_then()) {
+                    impl->execute_then();
+                } else {
+                    warn_no_then(impl->id(), impl->trace_label());
+                }
+                
+                // Frame tasks are always one-shot, so remove them after execution
+                mTasks.erase(mTasks.begin() + i);
+                // Don't increment i since we just removed an element
+            } else {
+                ++i;
+            }
+        } else {
+            ++i; // Not the task type we're looking for
         }
     }
 }
