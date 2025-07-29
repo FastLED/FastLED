@@ -147,6 +147,7 @@ public:
     void set_last_run_time(uint32_t time) { mLastRunTime = time; }
     bool ready_to_run(uint32_t current_time) const;
     bool is_canceled() const { return mCanceled; }
+    bool is_auto_registered() const { return mAutoRegistered; }
 
     // Execution
     void execute_then();
@@ -156,10 +157,14 @@ private:
     friend class Scheduler;
     friend class task;
 
+    // Auto-registration with scheduler
+    void auto_register_with_scheduler();
+
     int mTaskId = 0;
     TaskType mType;
     int mIntervalMs;
     bool mCanceled = false;
+    bool mAutoRegistered = false; // Track if task auto-registered with scheduler
     unique_ptr<string> mTraceLabel; // Optional trace label (default big so we put it in the heap)
     bool mHasThen = false;
     bool mHasCatch = false;

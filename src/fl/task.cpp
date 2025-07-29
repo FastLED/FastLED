@@ -85,6 +85,12 @@ void TaskImpl::set_canceled() {
     mCanceled = true;
 }
 
+void TaskImpl::auto_register_with_scheduler() {
+    // Auto-registration is now handled at the task wrapper level
+    // Mark as registered to prevent duplicate registrations
+    mAutoRegistered = true;
+}
+
 bool TaskImpl::ready_to_run(uint32_t current_time) const {
     // For frame-based tasks, they're always ready
     if (mType == TaskType::kBeforeFrame || mType == TaskType::kAfterFrame) {
@@ -157,6 +163,12 @@ task task::after_frame(const fl::TracePoint& trace) {
 task& task::then(fl::function<void()> on_then) {
     if (mImpl) {
         mImpl->set_then(fl::move(on_then));
+        
+        // Auto-register with scheduler when callback is set
+        if (!mImpl->is_auto_registered()) {
+            mImpl->auto_register_with_scheduler();
+            fl::Scheduler::instance().add_task(*this);
+        }
     }
     return *this;
 }

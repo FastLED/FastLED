@@ -1,11 +1,13 @@
 // @file examples/TaskExample/TaskExample.ino
 // @brief Example showing how to use the fl::task API
 
-#include <FastLED.h>
-#include <fl/task.h>
+#include "FastLED.h"
+#include "fl/task.h"
+#include "fl/async.h"
 
 #define NUM_LEDS 60
 #define DATA_PIN 5
+
 CRGB leds[NUM_LEDS];
 CRGB current_color = CRGB::Black;
 
@@ -25,16 +27,9 @@ void setup() {
           fill_solid(leds, NUM_LEDS, current_color);
           FastLED.show();
       });
-
-    // Add tasks to the scheduler
-    fl::Scheduler::instance().add_task(fl::move(colorPicker));
-    fl::Scheduler::instance().add_task(fl::move(displayTask));
 }
 
-void loop() {
-    // Run all scheduled tasks
-    fl::Scheduler::instance().update();
-    
+void loop() {    
     // Yield to allow other operations to run
-    fl::async_yield();
+    fl::asyncrun();
 }
