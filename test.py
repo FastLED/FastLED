@@ -96,6 +96,12 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Disable precompiled headers (PCH) when running example compilation tests",
     )
+    parser.add_argument(
+        "--cache",
+        "--sccache",
+        action="store_true",
+        help="Enable sccache/ccache when running example compilation tests (disabled by default for faster clean builds)",
+    )
 
     args = parser.parse_args()
 
@@ -372,6 +378,8 @@ def main() -> None:
                     cmd.append("--clean")
                 if args.no_pch:
                     cmd.append("--no-pch")
+                if args.cache:
+                    cmd.append("--cache")
 
                 # Run the example compilation test script
                 proc = RunningProcess(

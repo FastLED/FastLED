@@ -96,21 +96,38 @@ class Compiler:
         Returns:
             list[str]: Copy of compiler arguments including compiler, flags, defines, and settings
         """
-        cmd = [
-            self.settings.compiler,
-            "-x",
-            "c++",  # Force C++ compilation of .ino files
-            f"-std={self.settings.std_version}",
-            f"-I{self.settings.include_path}",  # FastLED include path
-        ]
+        cmd = [self.settings.compiler]
+
+        # Handle cache-wrapped compilers (sccache/ccache)
+        if (
+            len(self.settings.compiler_args) > 0
+            and self.settings.compiler_args[0] == "clang++"
+        ):
+            # This is a cache-wrapped compiler, add clang++ first, then remaining cache args
+            cmd.append("clang++")
+            # Skip the first "clang++" argument from compiler_args since we already added it
+            remaining_cache_args = self.settings.compiler_args[1:]
+        else:
+            # This is a direct compiler call, use all compiler_args as-is
+            remaining_cache_args = self.settings.compiler_args
+
+        # Add standard clang arguments
+        cmd.extend(
+            [
+                "-x",
+                "c++",  # Force C++ compilation of .ino files
+                f"-std={self.settings.std_version}",
+                f"-I{self.settings.include_path}",  # FastLED include path
+            ]
+        )
 
         # Add defines if specified
         if self.settings.defines:
             for define in self.settings.defines:
                 cmd.append(f"-D{define}")
 
-        # Add additional compiler args
-        cmd.extend(self.settings.compiler_args)
+        # Add remaining compiler args (after skipping clang++ for cache-wrapped compilers)
+        cmd.extend(remaining_cache_args)
 
         # Add PCH flag if available
         if self.settings.use_pch and self._pch_ready and self._pch_file_path:
@@ -150,6 +167,9 @@ class Compiler:
         """
         Create a precompiled header file for faster compilation.
 
+        IMPORTANT: PCH generation bypasses sccache and uses direct clang++ compilation
+        to avoid compatibility issues. Only the actual translation unit compiles go through sccache.
+
         Returns:
             bool: True if PCH creation was successful, False otherwise
         """
@@ -174,9 +194,12 @@ class Compiler:
             else:
                 pch_output_path = pch_header_path.with_suffix(".hpp.pch")
 
-            # Build PCH compilation command
+            # Build PCH compilation command - BYPASS sccache for PCH generation
+            # Use direct clang++ compiler, not the cache-wrapped version
+            direct_compiler = "clang++"
+
             cmd = [
-                self.settings.compiler,
+                direct_compiler,  # Always use direct clang++ for PCH
                 "-x",
                 "c++-header",
                 f"-std={self.settings.std_version}",
@@ -188,12 +211,32 @@ class Compiler:
                 for define in self.settings.defines:
                     cmd.append(f"-D{define}")
 
-            # Add additional compiler args - use ALL args to ensure PCH matches compilation
-            cmd.extend(self.settings.compiler_args)
+            # Add compiler args but skip cache-related args
+            # Filter out sccache/ccache wrapper arguments that don't apply to direct compilation
+            filtered_args: list[str] = []
+            skip_next = False
 
+            for arg in self.settings.compiler_args:
+                if skip_next:
+                    skip_next = False
+                    continue
+
+                # Skip cache wrapper arguments
+                if arg in ["clang++", "gcc", "g++"]:
+                    # These are cache wrapper args, skip them for direct PCH compilation
+                    continue
+                elif arg.startswith("-include-pch"):
+                    # Skip any existing PCH arguments
+                    skip_next = True  # Skip the PCH file path argument too
+                    continue
+                else:
+                    # Keep all other compiler arguments for PCH compatibility
+                    filtered_args.append(arg)
+
+            cmd.extend(filtered_args)
             cmd.extend([str(pch_header_path), "-o", str(pch_output_path)])
 
-            # Compile PCH
+            # Compile PCH with direct compiler (no sccache)
             result = subprocess.run(cmd, capture_output=True, text=True, timeout=60)
 
             if result.returncode == 0:
@@ -205,11 +248,15 @@ class Compiler:
                 return True
             else:
                 # PCH compilation failed, clean up and continue without PCH
+                # Print debug info to help diagnose PCH issues
+                print(f"[DEBUG] PCH compilation failed with command: {' '.join(cmd)}")
+                print(f"[DEBUG] PCH error output: {result.stderr}")
                 os.unlink(pch_header_path)
                 return False
 
-        except Exception:
+        except Exception as e:
             # PCH creation failed, continue without PCH
+            print(f"[DEBUG] PCH creation exception: {e}")
             return False
 
     def cleanup_pch(self):
@@ -231,14 +278,26 @@ class Compiler:
     def check_clang_version(self) -> VersionCheckResult:
         """
         Check that clang++ is accessible and return version information.
+        Handles cache-wrapped compilers (sccache/ccache) properly.
 
         Returns:
             VersionCheckResult: Result containing success status, version string, and error message
         """
         # Test uv run access first
         try:
+            # Determine the correct command to check clang version
+            if (
+                len(self.settings.compiler_args) > 0
+                and self.settings.compiler_args[0] == "clang++"
+            ):
+                # This is a cache-wrapped compiler (sccache/ccache clang++)
+                version_cmd = [self.settings.compiler, "clang++", "--version"]
+            else:
+                # This is a direct compiler call
+                version_cmd = [self.settings.compiler, "--version"]
+
             result = subprocess.run(
-                [self.settings.compiler, "--version"],
+                version_cmd,
                 capture_output=True,
                 text=True,
                 timeout=10,
@@ -331,19 +390,38 @@ class Compiler:
             temp_cpp_path = Path(tmp_cpp.name)
 
         # Build compiler command
-        cmd = [
-            self.settings.compiler,
-            "-x",
-            "c++",  # Force C++ compilation of .ino files
-            f"-std={self.settings.std_version}",
-            f"-I{self.settings.include_path}",  # FastLED include path
-        ]
+        cmd = [self.settings.compiler]
+
+        # Handle cache-wrapped compilers (sccache/ccache)
+        if (
+            len(self.settings.compiler_args) > 0
+            and self.settings.compiler_args[0] == "clang++"
+        ):
+            # This is a cache-wrapped compiler, add clang++ first, then remaining cache args
+            cmd.append("clang++")
+            # Skip the first "clang++" argument from compiler_args since we already added it
+            remaining_cache_args = self.settings.compiler_args[1:]
+        else:
+            # This is a direct compiler call, use all compiler_args as-is
+            remaining_cache_args = self.settings.compiler_args
+
+        # Add standard clang arguments
+        cmd.extend(
+            [
+                "-x",
+                "c++",  # Force C++ compilation of .ino files
+                f"-std={self.settings.std_version}",
+                f"-I{self.settings.include_path}",  # FastLED include path
+            ]
+        )
 
         # Add defines if specified
         if self.settings.defines:
             for define in self.settings.defines:
                 cmd.append(f"-D{define}")
-        cmd.extend(self.settings.compiler_args)
+
+        # Add remaining compiler args (after skipping clang++ for cache-wrapped compilers)
+        cmd.extend(remaining_cache_args)
 
         # Determine whether to use PCH for this specific file
         should_use_pch = (

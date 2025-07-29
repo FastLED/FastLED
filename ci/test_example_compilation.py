@@ -172,6 +172,26 @@ def get_system_info() -> Dict[str, Union[str, int, float]]:
         }
 
 
+def get_sccache_path() -> Optional[str]:
+    """Get the full path to sccache executable if available."""
+    # First check system PATH
+    sccache_path = shutil.which("sccache")
+    if sccache_path:
+        return sccache_path
+
+    # Check for sccache in the uv virtual environment
+    venv_sccache = Path(".venv/Scripts/sccache.exe")
+    if venv_sccache.exists():
+        return str(venv_sccache.absolute())
+
+    return None
+
+
+def get_ccache_path() -> Optional[str]:
+    """Get the full path to ccache executable if available."""
+    return shutil.which("ccache")
+
+
 def get_build_configuration() -> Dict[str, Union[bool, str]]:
     """Get build configuration information."""
     config: Dict[str, Union[bool, str]] = {}
@@ -180,19 +200,16 @@ def get_build_configuration() -> Dict[str, Union[bool, str]]:
     config["unified_compilation"] = False  # Simple build system uses direct compilation
 
     # Check compiler cache availability (ccache or sccache)
-    ccache_available = shutil.which("ccache") is not None
-    sccache_available = shutil.which("sccache") is not None
-
-    # Also check for sccache in the uv virtual environment
-    if not sccache_available:
-        venv_sccache = Path(".venv/Scripts/sccache.exe")
-        sccache_available = venv_sccache.exists()
+    sccache_path = get_sccache_path()
+    ccache_path = get_ccache_path()
 
     config["cache_type"] = "none"
-    if sccache_available:
+    if sccache_path:
         config["cache_type"] = "sccache"
-    elif ccache_available:
+        config["cache_path"] = sccache_path
+    elif ccache_path:
         config["cache_type"] = "ccache"
+        config["cache_path"] = ccache_path
 
     # Build mode for simple build system
     config["build_mode"] = "simple_direct"
@@ -257,7 +274,7 @@ def check_pch_status(build_dir: Path) -> Dict[str, Union[bool, Path, int, str]]:
     return {"exists": False, "path": None, "size": 0, "size_formatted": "0B"}  # type: ignore
 
 
-def create_fastled_compiler(use_pch: bool = True) -> Compiler:
+def create_fastled_compiler(use_pch: bool = True, use_sccache: bool = True) -> Compiler:
     """Create compiler with standard FastLED settings for simple build system."""
     import os
     import tempfile
@@ -300,6 +317,27 @@ def create_fastled_compiler(use_pch: bool = True) -> Compiler:
     if use_pch:
         pch_output_path = os.path.join(tempfile.gettempdir(), "fastled_pch.hpp.pch")
 
+    # Determine compiler command (with or without cache)
+    compiler_cmd = "clang++"
+    cache_args = []
+    if use_sccache:
+        sccache_path = get_sccache_path()
+        if sccache_path:
+            compiler_cmd = sccache_path
+            cache_args = ["clang++"]  # sccache clang++ [args...]
+            print(f"Using sccache: {sccache_path}")
+        else:
+            ccache_path = get_ccache_path()
+            if ccache_path:
+                compiler_cmd = ccache_path
+                cache_args = ["clang++"]  # ccache clang++ [args...]
+                print(f"Using ccache: {ccache_path}")
+            else:
+                print("No compiler cache available, using direct compilation")
+
+    # Combine cache args with other args (cache args go first)
+    final_args = cache_args + all_args
+
     settings = CompilerSettings(
         include_path=src_path,
         defines=[
@@ -307,8 +345,8 @@ def create_fastled_compiler(use_pch: bool = True) -> Compiler:
             "ARDUINO=10808",
         ],  # Define ARDUINO to enable Arduino.h include
         std_version="c++14",
-        compiler="clang++",
-        compiler_args=all_args,
+        compiler=compiler_cmd,
+        compiler_args=final_args,
         use_pch=use_pch,
         pch_output_path=pch_output_path,
     )
@@ -431,6 +469,7 @@ def run_example_compilation_test(
     specific_examples: Optional[List[str]] = None,
     clean_build: bool = False,
     disable_pch: bool = False,
+    disable_sccache: bool = True,  # Default to disabled for faster clean builds
 ) -> int:
     """Run the example compilation test using enhanced simple build system."""
     # Start timing at the very beginning
@@ -460,12 +499,14 @@ def run_example_compilation_test(
     config_parts.append("Direct .ino compilation: enabled")
 
     cache_type: Union[bool, str] = build_config["cache_type"]
-    if cache_type == "sccache":
-        config_parts.append("sccache: available")
+    if disable_sccache:
+        config_parts.append("cache: disabled (default)")
+    elif cache_type == "sccache":
+        config_parts.append("sccache: enabled")
     elif cache_type == "ccache":
-        config_parts.append("ccache: available")
+        config_parts.append("ccache: enabled")
     else:
-        config_parts.append("cache: disabled")
+        config_parts.append("cache: unavailable")
 
     # PCH status will be determined after compatibility analysis
 
@@ -473,7 +514,9 @@ def run_example_compilation_test(
     log_timing("Initializing simple build system...")
 
     try:
-        compiler = create_fastled_compiler(use_pch=not disable_pch)
+        compiler = create_fastled_compiler(
+            use_pch=not disable_pch, use_sccache=not disable_sccache
+        )
 
         # Verify clang accessibility first
         version_result = compiler.check_clang_version()
@@ -754,6 +797,12 @@ if __name__ == "__main__":
         action="store_true",
         help="Disable precompiled headers (PCH) for compilation - useful for debugging or compatibility issues.",
     )
+    parser.add_argument(
+        "--cache",
+        "--sccache",
+        action="store_true",
+        help="Enable sccache/ccache for compilation (disabled by default for faster clean builds).",
+    )
 
     args = parser.parse_args()
 
@@ -761,6 +810,9 @@ if __name__ == "__main__":
     specific_examples = args.examples if args.examples else None
     sys.exit(
         run_example_compilation_test(
-            specific_examples, args.clean, disable_pch=args.no_pch
+            specific_examples,
+            args.clean,
+            disable_pch=args.no_pch,
+            disable_sccache=not args.cache,
         )
     )
