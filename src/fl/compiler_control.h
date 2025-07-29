@@ -11,7 +11,7 @@
   // Usage: FL_DISABLE_WARNING(float-equal)
   #define FL_DISABLE_WARNING(warning)     _Pragma(FL_STRINGIFY(clang diagnostic ignored "-W" #warning))
 
-#elif defined(__GNUC__)
+#elif defined(__GNUC__) && (__GNUC__*100 + __GNUC_MINOR__) >= 406
   #define FL_DISABLE_WARNING_PUSH         _Pragma("GCC diagnostic push")
   #define FL_DISABLE_WARNING_POP          _Pragma("GCC diagnostic pop")
   // Usage: FL_DISABLE_WARNING(float-equal)
@@ -33,7 +33,7 @@
   #define FL_DISABLE_FORMAT_TRUNCATION
   #define FL_DISABLE_WARNING_NULL_DEREFERENCE FL_DISABLE_WARNING(null-dereference)
   #define FL_DISABLE_WARNING_IMPLICIT_FALLTHROUGH
-#elif defined(__GNUC__)
+#elif defined(__GNUC__) && (__GNUC__*100 + __GNUC_MINOR__) >= 406
   // GCC doesn't have global-constructors warning, use no-op
   #define FL_DISABLE_WARNING_GLOBAL_CONSTRUCTORS
   // GCC doesn't have self-assign-overloaded warning, use no-op

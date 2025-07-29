@@ -41,6 +41,9 @@ namespace fl {
 FL_DISABLE_WARNING_PUSH
 FL_DISABLE_WARNING(unused-function)
 static bool canBeRepresentedAsFloat(double value) {
+    auto isnan = [](double value) -> bool {
+        return value != value;
+    };
     // Check for special values
     if (isnan(value) || isinf(value)) {
         return true; // These can be represented as float
