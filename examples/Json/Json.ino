@@ -11,7 +11,7 @@
 #define NUM_LEDS 100
 #define DATA_PIN 3
 
-fl::CRGB leds[NUM_LEDS];
+CRGB leds[NUM_LEDS];
 
 void setup() {
     Serial.begin(115200);

@@ -18,6 +18,7 @@ import subprocess
 import sys
 import time
 from concurrent.futures import Future, as_completed
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
 
@@ -25,6 +26,16 @@ import psutil
 
 # Import the proven Compiler infrastructure
 from ci.clang_compiler import Compiler, CompilerSettings, Result
+
+
+@dataclass
+class CompilationResult:
+    """Results from compiling a set of examples."""
+
+    successful_count: int
+    failed_count: int
+    compile_time: float
+    failed_examples: List[Dict[str, Any]]
 
 
 def get_system_info() -> Dict[str, Union[str, int, float]]:
@@ -172,13 +183,25 @@ def check_pch_status(build_dir: Path) -> Dict[str, Union[bool, Path, int, str]]:
 
 def create_fastled_compiler() -> Compiler:
     """Create compiler with standard FastLED settings for simple build system."""
+    import os
+
+    # Get absolute paths to ensure they work from any working directory
+    current_dir = os.getcwd()
+    src_path = os.path.join(current_dir, "src")
+    arduino_stub_path = os.path.join(
+        current_dir, "src", "platforms", "wasm", "compiler"
+    )
+
     settings = CompilerSettings(
-        include_path="./src",
-        defines=["STUB_PLATFORM"],
+        include_path=src_path,
+        defines=[
+            "STUB_PLATFORM",
+            "ARDUINO=10808",
+        ],  # Define ARDUINO to enable Arduino.h include
         std_version="c++17",
         compiler="clang++",
         compiler_args=[
-            "-I./src/platforms/wasm/compiler",  # Arduino.h stub for examples
+            f"-I{arduino_stub_path}",  # Arduino.h stub for examples (absolute path)
         ],
     )
     return Compiler(settings)
@@ -186,12 +209,12 @@ def create_fastled_compiler() -> Compiler:
 
 def compile_examples_simple(
     compiler: Compiler, ino_files: List[Path], log_timing: Any
-) -> tuple[int, int, float]:
+) -> CompilationResult:
     """
     Compile examples using the simple build system (Compiler class).
 
     Returns:
-        tuple: (successful_count, failed_count, compile_time)
+        CompilationResult: Results from compilation including counts and failed examples
     """
     log_timing("[SIMPLE] Starting direct .ino compilation...")
 
@@ -260,14 +283,16 @@ def compile_examples_simple(
         )
         log_timing("[SIMPLE] First 10 failure summaries:")
         for failure in failed[:10]:
-            error_preview = (
-                failure["stderr"][:100].replace("\n", " ")
-                if failure["stderr"]
-                else "No error details"
-            )
+            err = "\n" + failure["stderr"]
+            error_preview = err if err.strip() else "No error details"
             log_timing(f"[SIMPLE]   {failure['path']}: {error_preview}...")
 
-    return len(successful), len(failed), compile_time
+    return CompilationResult(
+        successful_count=len(successful),
+        failed_count=len(failed),
+        compile_time=compile_time,
+        failed_examples=failed,
+    )
 
 
 def run_example_compilation_test(
@@ -423,9 +448,11 @@ def run_example_compilation_test(
         log_timing(f"[BUILD] Target examples: {len(ino_files)}")
         log_timing(f"[BUILD] Parallel workers: {parallel_jobs}")
 
-        successful_count, failed_count, compile_time = compile_examples_simple(
-            compiler, ino_files, log_timing
-        )
+        result = compile_examples_simple(compiler, ino_files, log_timing)
+        successful_count = result.successful_count
+        failed_count = result.failed_count
+        compile_time = result.compile_time
+        failed = result.failed_examples
 
         # Track peak memory usage (approximate)
         try:
@@ -476,7 +503,7 @@ def run_example_compilation_test(
             )
 
         # Determine success based on compilation results
-        if successful_count > 0:
+        if failed_count == 0:
             log_timing("\n[SUCCESS] EXAMPLE COMPILATION TEST: SUCCESS")
             log_timing(
                 f"[SUCCESS] {successful_count}/{len(ino_files)} examples compiled successfully"
@@ -486,16 +513,20 @@ def run_example_compilation_test(
 
             log_timing(f"\n[READY] Simple build system is ready!")
             log_timing(f"[PERF] Performance: {total_time:.2f}s total execution time")
-
-            # Return success if we have any successful compilations
-            # (Some examples are expected to fail due to platform-specific code)
             return 0
         else:
+            # Extract just the example names that failed for clear reporting
+            failed_example_names = [failure["path"] for failure in failed]
+            failed_list_str = ", ".join(failed_example_names)
+
             log_timing("\n[FAILED] EXAMPLE COMPILATION TEST: FAILED")
             log_timing(
-                f"[ERROR] No examples compiled successfully ({failed_count} failures)"
+                f"[FAILED] {successful_count}/{len(ino_files)} examples compiled successfully"
             )
-            log_timing("[ERROR] Simple build system may have configuration issues")
+            log_timing(f"[FAILED] {failed_count} examples failed")
+            log_timing(f"THERE WERE BUILD FAILURES:\n{failed_list_str}")
+
+            log_timing(f"\n[PERF] Performance: {total_time:.2f}s total execution time")
             return 1
 
     except Exception as e:

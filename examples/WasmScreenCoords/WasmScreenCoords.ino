@@ -21,7 +21,7 @@
 #include "fl/screenmap.h"
 #include "fl/math_macros.h"
 
-
+using fl::vec2f;
 
 #define LED_PIN 3
 #define BRIGHTNESS 96
@@ -32,10 +32,10 @@ CRGB leds[NUM_LEDS];
 CRGB leds2[NUM_LEDS];
 
 
-void make_map(int stepx, int stepy, int num, std::vector<vec2f>* _map) {
+void make_map(int stepx, int stepy, int num, fl::vector<vec2f>* _map) {
     float x = 0;
     float y = 0;
-    std::vector<vec2f>& map = *_map;
+    fl::vector<vec2f>& map = *_map;
     for (int16_t i = 0; i < num; i++) {
         map.push_back(vec2f{x, y});
         x += stepx;
@@ -51,13 +51,13 @@ void setup() {
         c = CRGB::Red;
     }
     FastLED.setBrightness(255);
-    std::vector<vec2f> map;
+    fl::vector<vec2f> map;
     make_map(1, 1, NUM_LEDS, &map);
-    ScreenMap screenmap = ScreenMap(map.data(), map.size());
+    fl::ScreenMap screenmap = fl::ScreenMap(map.data(), map.size());
 
-    std::vector<vec2f> map2;
+    fl::vector<fl::vec2f> map2;
     make_map(-1, -1, NUM_LEDS, &map2);
-    ScreenMap screenmap2 = ScreenMap(map2.data(), map2.size());
+    fl::ScreenMap screenmap2 = fl::ScreenMap(map2.data(), map2.size());
 
     FastLED.addLeds<WS2811, LED_PIN, COLOR_ORDER>(leds, NUM_LEDS)
         .setScreenMap(screenmap);
@@ -69,5 +69,3 @@ void setup() {
 void loop() {
     FastLED.show();
 }
-
-

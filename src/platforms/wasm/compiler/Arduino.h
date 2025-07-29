@@ -235,9 +235,11 @@ extern "C" {
 #define FL_PGM_READ_PTR_NEAR(addr) (*(addr))
 typedef unsigned char byte;
 
-extern SerialEmulation Serial;
-extern SerialEmulation Serial1;
-extern SerialEmulation Serial2;
-extern SerialEmulation Serial3;
+// Define Serial instances for stub compilation
+SerialEmulation Serial;
+SerialEmulation Serial1;
+SerialEmulation Serial2;
+SerialEmulation Serial3;
+
 typedef SerialEmulation HardwareSerial;
 typedef SerialEmulation SoftwareSerial;
