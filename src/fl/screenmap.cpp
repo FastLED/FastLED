@@ -16,6 +16,7 @@
 #include "fl/vector.h"
 #include "fl/warn.h"
 
+
 namespace fl {
 
 // Helper function to extract a vector of floats from a JSON array
@@ -81,6 +82,13 @@ ScreenMap ScreenMap::Circle(int numLeds, float cm_between_leds,
 bool ScreenMap::ParseJson(const char *jsonStrScreenMap,
                           fl::fl_map<string, ScreenMap> *segmentMaps, string *err) {
 
+#if FASTLED_NO_JSON
+    FL_WARN("ScreenMap::ParseJson called with FASTLED_NO_JSON");
+    if (err) {
+        *err = "JSON is not supported in this build";
+    }
+    return false;
+#else
     //FL_WARN_SCREENMAP("ParseJson called with JSON: " << jsonStrScreenMap);
     
     string _err;
@@ -200,6 +208,7 @@ bool ScreenMap::ParseJson(const char *jsonStrScreenMap,
         (*segmentMaps)[name] = fl::move(segment_map);
     }
     return true;
+#endif
 }
 
 bool ScreenMap::ParseJson(const char *jsonStrScreenMap,
@@ -230,6 +239,10 @@ bool ScreenMap::ParseJson(const char *jsonStrScreenMap,
 void ScreenMap::toJson(const fl::fl_map<string, ScreenMap> &segmentMaps,
                        fl::Json *doc) {
 
+#if FASTLED_NO_JSON
+    FL_WARN("ScreenMap::toJson called with FASTLED_NO_JSON");
+    return;
+#else
     if (!doc) {
         FL_WARN("ScreenMap::toJson called with nullptr doc");
         return;
@@ -281,6 +294,7 @@ void ScreenMap::toJson(const fl::fl_map<string, ScreenMap> &segmentMaps,
     // Debug output
     fl::string debugStr = doc->to_string();
     FL_WARN("ScreenMap::toJson generated JSON: " << debugStr);
+#endif
 }
 
 void ScreenMap::toJsonStr(const fl::fl_map<string, ScreenMap> &segmentMaps,
