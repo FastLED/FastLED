@@ -1192,6 +1192,30 @@ CHECK("expected" == actual_string);     // Wrong comparison type
 - **Consistent debugging** across all test failures
 - **Type safety** for different comparison types
 
+### Blank Test Template
+**✅ CORRECT blank test file structure:**
+
+```cpp
+// Unit tests for general allocator functionality and integration tests
+
+#include "test.h"
+#include "FastLED.h"
+
+using namespace fl;
+
+
+TEST_CASE("New test - fill in") {
+
+} 
+```
+
+**❌ WRONG patterns to avoid:**
+- Missing descriptive file header comment
+- Missing proper includes (`test.h`, `FastLED.h`)
+- Missing `using namespace fl;` declaration
+- Empty or non-descriptive test case names
+- Inconsistent formatting and spacing
+
 ### Test File Creation Guidelines
 **🚨 CRITICAL: Minimize test file proliferation - Consolidate tests whenever possible**
 
