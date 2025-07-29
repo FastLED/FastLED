@@ -622,7 +622,7 @@ template <
 	fl::u8 DATA_PIN,
 	fl::u8 CLOCK_PIN,
 	EOrder RGB_ORDER = RGB,
-	uint32_t SPI_SPEED = DATA_RATE_MHZ(40)\
+	uint32_t SPI_SPEED = DATA_RATE_MHZ(40)
 >
 class HD107HDController : public APA102ControllerHD<
 	DATA_PIN,
