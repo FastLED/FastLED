@@ -7,10 +7,13 @@
 #include "fl/force_inline.h"
 #include "fl/memfill.h"
 #include <string.h>
+#include "fl/compiler_control.h"
 
 namespace fl {
 
 template <typename T> struct vec2;
+
+
 
 //-----------------------------------------------------------------------------
 // MurmurHash3 x86 32-bit
@@ -19,8 +22,9 @@ template <typename T> struct vec2;
 // https://github.com/aappleby/smhasher/blob/master/src/MurmurHash3.cpp
 static inline u32 MurmurHash3_x86_32(const void *key, fl::size len,
                                           u32 seed = 0) {
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wimplicit-fallthrough"
+
+    FL_DISABLE_WARNING_PUSH;
+    FL_DISABLE_WARNING_IMPLICIT_FALLTHROUGH;
 
     const fl::u8 *data = static_cast<const fl::u8 *>(key);
     const int nblocks = int(len / 4);
@@ -69,7 +73,7 @@ static inline u32 MurmurHash3_x86_32(const void *key, fl::size len,
 
     return h1;
 
-#pragma GCC diagnostic pop
+    FL_DISABLE_WARNING_POP;
 }
 
 //-----------------------------------------------------------------------------
