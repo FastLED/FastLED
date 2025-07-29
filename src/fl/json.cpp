@@ -22,6 +22,20 @@
 #define UINT8_MAX 255
 #endif
 
+
+#if FASTLED_ENABLE_JSON
+
+FL_DISABLE_WARNING_PUSH
+FL_DISABLE_WARNING(null-dereference)
+#include "third_party/arduinojson/json.h"
+FL_DISABLE_WARNING_POP
+
+
+
+namespace fl {
+
+
+
 // Helper function to check if a double can be reasonably represented as a float
 // Used for debug logging - may appear unused in release builds
 FL_DISABLE_WARNING_PUSH
@@ -44,18 +58,7 @@ static bool canBeRepresentedAsFloat(double value) {
     // even though it loses some precision
     return true;
 }
-FL_DISABLE_WARNING_POP
-
-#if FASTLED_ENABLE_JSON
-
-FL_DISABLE_WARNING_PUSH
-FL_DISABLE_WARNING(null-dereference)
-#include "third_party/arduinojson/json.h"
-FL_DISABLE_WARNING_POP
-
-
-
-namespace fl {
+FL_DISABLE_WARNING_POP    
 
 
 JsonValue& get_null_value() {
