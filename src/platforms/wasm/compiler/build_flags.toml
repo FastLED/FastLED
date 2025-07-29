@@ -50,9 +50,6 @@ defines = [
     
     # Emscripten-Specific Configuration
     "-DEMSCRIPTEN_HAS_UNBOUND_TYPE_NAMES=0",    # Disable unbound type name reflection
-    
-    # Feature Enablement
-    "-DFASTLED_HAS_NETWORKING=1",               # Enable networking support
 ]
 
 # Core compiler flags that control compilation behavior

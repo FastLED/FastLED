@@ -39,20 +39,13 @@
 # Core preprocessor defines that control FastLED behavior
 defines = [
     # FastLED Engine Configuration
-    "-DFASTLED_ENGINE_EVENTS_MAX_LISTENERS=50",  # Max event listeners for FastLED engine
-    "-DFASTLED_FORCE_NAMESPACE=1",               # Force namespace usage to avoid conflicts
     "-DFASTLED_USE_PROGMEM=0",                   # Disable PROGMEM usage (not needed in WASM)
-    "-DUSE_OFFSET_CONVERTER=0",                  # Disable offset converter optimization
-    "-DGL_ENABLE_GET_PROC_ADDRESS=0",           # Disable OpenGL proc address lookup
-    
-    # Threading and Concurrency Support
-    "-D_REENTRANT=1",                           # Enable reentrant library functions
+    "-DFASTLED_REGISTER",              # Force register keyword usage
+
     
     # Emscripten-Specific Configuration
     "-DEMSCRIPTEN_HAS_UNBOUND_TYPE_NAMES=0",    # Disable unbound type name reflection
-    
-    # Feature Enablement
-    "-DFASTLED_HAS_NETWORKING=1",               # Enable networking support
+
 ]
 
 # Core compiler flags that control compilation behavior
