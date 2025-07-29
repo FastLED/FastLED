@@ -46,11 +46,6 @@ enum class TaskType {
     kAfterFrame
 };
 
-struct TaskTrace {
-    const char* file;
-    int line;
-};
-
 class task {
 private:
     // Constructors
