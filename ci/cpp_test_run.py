@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+# pyright: reportUnknownMemberType=false, reportMissingParameterType=false
 import argparse
 import os
 import re

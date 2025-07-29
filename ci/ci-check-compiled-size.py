@@ -1,9 +1,13 @@
+#!/usr/bin/env python3
+# pyright: reportUnknownMemberType=false
+
 import argparse
 import os
 import re
 import subprocess
 import sys
 from pathlib import Path
+from typing import Match
 
 
 HERE = Path(__file__).resolve().parent
@@ -13,7 +17,10 @@ IS_GITHUB = "GITHUB_ACTIONS" in os.environ
 
 
 def run_command(
-    cmd_list: list[str], shell: bool = False, check=False, capture_output: bool = False
+    cmd_list: list[str],
+    shell: bool = False,
+    check: bool = False,
+    capture_output: bool = False,
 ) -> str | None:
     check = check if check is not None else check
     cmd = cmd_list if not shell else subprocess.list2cmdline(cmd_list)

@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# pyright: reportUnknownMemberType=false, reportMissingParameterType=false, reportUnknownLambdaType=false, reportArgumentType=false
 """
 ESP32 Symbol Analysis Tool
 Analyzes the ESP32 ELF file to identify symbols that can be eliminated for binary size reduction.
@@ -7,10 +8,23 @@ Analyzes the ESP32 ELF file to identify symbols that can be eliminated for binar
 import json
 import subprocess
 import sys
+from dataclasses import dataclass
 from pathlib import Path
+from typing import Dict, List
 
 
-def run_command(cmd):
+@dataclass
+class SymbolInfo:
+    """Represents a symbol in the ESP32 binary"""
+
+    address: str
+    size: int
+    type: str
+    name: str
+    demangled_name: str
+
+
+def run_command(cmd: str) -> str:
     """Run a command and return stdout"""
     try:
         result = subprocess.run(
@@ -23,7 +37,7 @@ def run_command(cmd):
         return ""
 
 
-def demangle_symbol(mangled_name, cppfilt_path):
+def demangle_symbol(mangled_name: str, cppfilt_path: str) -> str:
     """Demangle a C++ symbol using c++filt"""
     try:
         cmd = f'echo "{mangled_name}" | "{cppfilt_path}"'
@@ -39,7 +53,9 @@ def demangle_symbol(mangled_name, cppfilt_path):
         return mangled_name
 
 
-def analyze_symbols(elf_file, nm_path, cppfilt_path):
+def analyze_symbols(
+    elf_file: str, nm_path: str, cppfilt_path: str
+) -> tuple[List[SymbolInfo], List[SymbolInfo], List[SymbolInfo]]:
     """Analyze symbols in ELF file using nm with C++ demangling"""
     print("Analyzing symbols...")
 
@@ -67,13 +83,13 @@ def analyze_symbols(elf_file, nm_path, cppfilt_path):
             # Demangle the symbol name
             demangled_name = demangle_symbol(mangled_name, cppfilt_path)
 
-            symbol_info = {
-                "address": addr,
-                "size": size,
-                "type": symbol_type,
-                "name": mangled_name,
-                "demangled_name": demangled_name,
-            }
+            symbol_info = SymbolInfo(
+                address=addr,
+                size=size,
+                type=symbol_type,
+                name=mangled_name,
+                demangled_name=demangled_name,
+            )
 
             symbols.append(symbol_info)
 
@@ -105,7 +121,7 @@ def analyze_symbols(elf_file, nm_path, cppfilt_path):
     return symbols, fastled_symbols, large_symbols
 
 
-def analyze_map_file(map_file):
+def analyze_map_file(map_file: str) -> Dict[str, List[str]]:
     """Analyze the map file to understand module dependencies"""
     print("Analyzing map file...")
 
@@ -152,7 +168,7 @@ def generate_report(symbols, fastled_symbols, large_symbols, dependencies):
     # Summary statistics
     total_symbols = len(symbols)
     total_fastled = len(fastled_symbols)
-    fastled_size = sum(s["size"] for s in fastled_symbols)
+    fastled_size = sum(s.size for s in fastled_symbols)
 
     print("\nSUMMARY:")
     print(f"  Total symbols: {total_symbols}")
@@ -161,13 +177,13 @@ def generate_report(symbols, fastled_symbols, large_symbols, dependencies):
 
     # Largest FastLED symbols
     print("\nLARGEST FASTLED SYMBOLS (potential elimination targets):")
-    fastled_sorted = sorted(fastled_symbols, key=lambda x: x["size"], reverse=True)
+    fastled_sorted = sorted(fastled_symbols, key=lambda x: x.size, reverse=True)
     for i, sym in enumerate(fastled_sorted[:20]):
-        display_name = sym.get("demangled_name", sym["name"])
-        print(f"  {i + 1:2d}. {sym['size']:6d} bytes - {display_name}")
-        if "demangled_name" in sym and sym["demangled_name"] != sym["name"]:
+        display_name = sym.demangled_name
+        print(f"  {i + 1:2d}. {sym.size:6d} bytes - {display_name}")
+        if sym.demangled_name != sym.name:
             print(
-                f"      (mangled: {sym['name'][:80]}{'...' if len(sym['name']) > 80 else ''})"
+                f"      (mangled: {sym.name[:80]}{'...' if len(sym.name) > 80 else ''})"
             )
 
     # FastLED modules analysis
@@ -191,15 +207,15 @@ def generate_report(symbols, fastled_symbols, large_symbols, dependencies):
         s
         for s in large_symbols
         if not any(
-            keyword in s.get("demangled_name", s["name"]).lower()
+            keyword in s.demangled_name.lower()
             for keyword in ["fastled", "cfastled", "crgb", "hsv"]
         )
     ]
-    non_fastled_sorted = sorted(non_fastled, key=lambda x: x["size"], reverse=True)
+    non_fastled_sorted = sorted(non_fastled, key=lambda x: x.size, reverse=True)
 
     for i, sym in enumerate(non_fastled_sorted[:15]):
-        display_name = sym.get("demangled_name", sym["name"])
-        print(f"  {i + 1:2d}. {sym['size']:6d} bytes - {display_name}")
+        display_name = sym.demangled_name
+        print(f"  {i + 1:2d}. {sym.size:6d} bytes - {display_name}")
 
     # Recommendations
     print("\nRECOMMENDATIONS FOR SIZE REDUCTION:")
@@ -219,12 +235,10 @@ def generate_report(symbols, fastled_symbols, large_symbols, dependencies):
 
     for feature, patterns in feature_patterns.items():
         feature_symbols = [
-            s
-            for s in fastled_symbols
-            if any(p in s.get("demangled_name", s["name"]) for p in patterns)
+            s for s in fastled_symbols if any(p in s.demangled_name for p in patterns)
         ]
         if feature_symbols:
-            total_size = sum(s["size"] for s in feature_symbols)
+            total_size = sum(s.size for s in feature_symbols)
             print(f"  - {feature}: {len(feature_symbols)} symbols, {total_size} bytes")
             if total_size > 1000:  # Only show features with >1KB
                 print(
@@ -232,8 +246,8 @@ def generate_report(symbols, fastled_symbols, large_symbols, dependencies):
                 )
                 # Show a few example symbols
                 for sym in feature_symbols[:3]:
-                    display_name = sym.get("demangled_name", sym["name"])[:60]
-                    print(f"      * {sym['size']} bytes: {display_name}")
+                    display_name = sym.demangled_name[:60]
+                    print(f"      * {sym.size} bytes: {display_name}")
                 if len(feature_symbols) > 3:
                     print(f"      ... and {len(feature_symbols) - 3} more")
 
@@ -333,13 +347,13 @@ def main():
     detailed_data = {
         "summary": report,
         "all_fastled_symbols": sorted(
-            fastled_symbols, key=lambda x: x["size"], reverse=True
+            fastled_symbols, key=lambda x: x.size, reverse=True
         ),
         "all_symbols_sorted_by_size": sorted(
-            symbols, key=lambda x: x["size"], reverse=True
+            symbols, key=lambda x: x.size, reverse=True
         )[:100],  # Top 100 largest symbols
         "dependencies": dependencies,
-        "large_symbols": sorted(large_symbols, key=lambda x: x["size"], reverse=True)[
+        "large_symbols": sorted(large_symbols, key=lambda x: x.size, reverse=True)[
             :50
         ],  # Top 50 largest symbols
     }

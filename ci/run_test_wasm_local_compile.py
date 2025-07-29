@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+# pyright: reportUnknownMemberType=false
 """
 Unit test file.
 """

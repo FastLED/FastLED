@@ -1,3 +1,8 @@
+# pyright: reportUnknownMemberType=false
+"""
+Compilation support for individual boards.
+"""
+
 import os
 import shutil
 import subprocess

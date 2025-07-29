@@ -1,3 +1,8 @@
+# pyright: reportUnknownMemberType=false
+"""
+Create build directory for project.
+"""
+
 import json
 import os
 import shutil

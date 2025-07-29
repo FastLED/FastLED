@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# pyright: reportUnknownMemberType=false
 """
 Demo script showing how to use the new generic symbol analysis functionality
 """

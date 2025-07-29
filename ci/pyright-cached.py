@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# pyright: reportUnknownMemberType=false
 """
 Caching wrapper for pyright that only runs if files have changed.
 This significantly speeds up repeated pyright runs during development.

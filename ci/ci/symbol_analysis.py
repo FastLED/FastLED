@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# pyright: reportUnknownMemberType=false, reportOperatorIssue=false, reportArgumentType=false
 """
 Enhanced Symbol Analysis Tool with Function Call Graph Analysis
 Analyzes ELF files to identify symbols and function call relationships.
@@ -11,7 +12,7 @@ import re
 import subprocess
 import sys
 from collections import defaultdict
-from dataclasses import dataclass, field
+from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
@@ -63,6 +64,48 @@ class AnalysisReport:
     call_graph: Optional[Dict[str, List[str]]] = None
     reverse_call_graph: Optional[Dict[str, List[str]]] = None
     call_stats: Optional[CallStats] = None
+
+
+@dataclass
+class DetailedAnalysisData:
+    """Complete detailed analysis data structure for JSON output"""
+
+    summary: AnalysisReport
+    all_symbols_sorted_by_size: List[SymbolInfo]
+    dependencies: Dict[str, List[str]]
+    call_graph: Optional[Dict[str, List[str]]] = None
+    reverse_call_graph: Optional[Dict[str, List[str]]] = None
+
+
+@dataclass
+class TypeStats:
+    """Statistics for symbol types with dictionary-like functionality"""
+
+    stats: Dict[str, TypeBreakdown] = field(default_factory=dict)
+
+    def add_symbol(self, symbol: SymbolInfo) -> None:
+        """Add a symbol to the type statistics"""
+        sym_type = symbol.type
+        if sym_type not in self.stats:
+            self.stats[sym_type] = TypeBreakdown(type=sym_type, count=0, total_size=0)
+        self.stats[sym_type].count += 1
+        self.stats[sym_type].total_size += symbol.size
+
+    def items(self):
+        """Return items for iteration, sorted by total_size descending"""
+        return sorted(self.stats.items(), key=lambda x: x[1].total_size, reverse=True)
+
+    def values(self):
+        """Return values for iteration"""
+        return self.stats.values()
+
+    def __getitem__(self, key: str) -> TypeBreakdown:
+        """Allow dictionary-style access"""
+        return self.stats[key]
+
+    def __contains__(self, key: str) -> bool:
+        """Allow 'in' operator"""
+        return key in self.stats
 
 
 def run_command(cmd: str) -> str:
@@ -533,17 +576,11 @@ def generate_report(
     # Symbol type breakdown
     section_title = "\n" + "=" * 80 + "\n" if enhanced_mode else "\n"
     print(section_title + "SYMBOL TYPE BREAKDOWN:")
-    type_stats = {}
+    type_stats = TypeStats()
     for sym in symbols:
-        sym_type = sym.type
-        if sym_type not in type_stats:
-            type_stats[sym_type] = TypeBreakdown(type=sym_type, count=0, total_size=0)
-        type_stats[sym_type].count += 1
-        type_stats[sym_type].total_size += sym.size
+        type_stats.add_symbol(sym)
 
-    for sym_type, stats in sorted(
-        type_stats.items(), key=lambda x: x.total_size, reverse=True
-    ):
+    for sym_type, stats in type_stats.items():
         print(
             f"  {sym_type}: {stats.count} symbols, {stats.total_size} bytes ({stats.total_size / 1024:.1f} KB)"
         )
@@ -565,7 +602,7 @@ def generate_report(
         total_symbols=total_symbols,
         total_size=total_size,
         largest_symbols=symbols_sorted[:20],
-        type_breakdown=[TypeBreakdown(**stats) for stats in type_stats.values()],
+        type_breakdown=list(type_stats.values()),
         dependencies=dependencies,
     )
 
@@ -817,22 +854,17 @@ def main():
         )
         output_file = Path(f"{board_name}{filename_suffix}")
 
-    detailed_data = {
-        "summary": report,
-        "all_symbols_sorted_by_size": sorted(
-            symbols, key=lambda x: x.size, reverse=True
-        ),
-        "dependencies": dependencies,
-    }
-
-    # Add enhanced data if available
-    if enhanced_mode and call_graph and reverse_call_graph:
-        detailed_data.update(
-            {"call_graph": call_graph, "reverse_call_graph": reverse_call_graph}
-        )
+    # Create detailed analysis data structure
+    detailed_data = DetailedAnalysisData(
+        summary=report,
+        all_symbols_sorted_by_size=sorted(symbols, key=lambda x: x.size, reverse=True),
+        dependencies=dependencies,
+        call_graph=call_graph if enhanced_mode else None,
+        reverse_call_graph=reverse_call_graph if enhanced_mode else None,
+    )
 
     with open(output_file, "w") as f:
-        json.dump(detailed_data, f, indent=2)
+        json.dump(asdict(detailed_data), f, indent=2)
 
     description = (
         "enhanced analysis with complete call graph"

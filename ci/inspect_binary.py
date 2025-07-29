@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+# pyright: reportUnknownMemberType=false
 import argparse
 import json
 import re

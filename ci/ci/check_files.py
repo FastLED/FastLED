@@ -1,3 +1,4 @@
+# pyright: reportUnknownMemberType=false
 import os
 from abc import ABC, abstractmethod
 from concurrent.futures import ThreadPoolExecutor

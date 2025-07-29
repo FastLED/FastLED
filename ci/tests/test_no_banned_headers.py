@@ -1,3 +1,4 @@
+# pyright: reportUnknownMemberType=false
 import os
 import unittest
 from typing import Callable, List

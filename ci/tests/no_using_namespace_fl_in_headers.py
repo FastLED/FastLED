@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+# pyright: reportUnknownMemberType=false, reportMissingParameterType=false
 import os
 import unittest
 from concurrent.futures import ThreadPoolExecutor

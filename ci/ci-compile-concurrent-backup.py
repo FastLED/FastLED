@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+# pyright: reportUnknownMemberType=false
 """
 BACKUP: Original concurrent build system - REPLACED by pio ci approach
 

@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+# pyright: reportUnknownMemberType=false
 """
 Runs the compilation process for examples on boards using pio ci command.
 This replaces the previous concurrent build system with a simpler pio ci approach.

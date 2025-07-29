@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# pyright: reportUnknownMemberType=false
 """
 Build Info Analyzer - Tool for extracting platform information from build_info.json files.
 
@@ -13,7 +14,7 @@ Usage:
 
 import argparse
 import json
-from dataclasses import dataclass, field
+from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
@@ -22,12 +23,12 @@ from typing import Dict, List, Optional, Tuple
 class CompilerInfo:
     """Information about compilers and toolchain"""
 
-    cc_path: Optional[str] = None
-    cxx_path: Optional[str] = None
-    ar_path: Optional[str] = None
-    framework: Optional[str] = None
-    platform: Optional[str] = None
-    board: Optional[str] = None
+    cc_path: str = ""
+    cxx_path: str = ""
+    cc_flags: List[str] = field(default_factory=list)
+    cxx_flags: List[str] = field(default_factory=list)
+    compiler_type: str = ""
+    build_type: str = ""
 
 
 @dataclass
@@ -160,7 +161,7 @@ class BuildInfoAnalyzer:
 
         return True, defines, ""
 
-    def get_compiler_info(self, board_name: str) -> Tuple[bool, Dict, str]:
+    def get_compiler_info(self, board_name: str) -> Tuple[bool, CompilerInfo, str]:
         """
         Get compiler information for a board.
 
@@ -168,26 +169,26 @@ class BuildInfoAnalyzer:
             board_name: Name of the board
 
         Returns:
-            Tuple of (success, compiler_info_dict, error_message)
+            Tuple of (success, compiler_info, error_message)
         """
         data = self.load_build_info(board_name)
         if not data:
-            return False, {}, f"Build info not found for {board_name}"
+            return False, CompilerInfo(), f"Build info not found for {board_name}"
 
         board_key = self.get_board_key_from_build_info(data, board_name)
         if not board_key:
-            return False, {}, "Board key not found in build_info.json"
+            return False, CompilerInfo(), "Board key not found in build_info.json"
 
         board_data = data[board_key]
 
-        compiler_info = {
-            "cc_path": board_data.get("cc_path", ""),
-            "cxx_path": board_data.get("cxx_path", ""),
-            "cc_flags": board_data.get("cc_flags", []),
-            "cxx_flags": board_data.get("cxx_flags", []),
-            "compiler_type": board_data.get("compiler_type", ""),
-            "build_type": board_data.get("build_type", ""),
-        }
+        compiler_info = CompilerInfo(
+            cc_path=board_data.get("cc_path", ""),
+            cxx_path=board_data.get("cxx_path", ""),
+            cc_flags=board_data.get("cc_flags", []),
+            cxx_flags=board_data.get("cxx_flags", []),
+            compiler_type=board_data.get("compiler_type", ""),
+            build_type=board_data.get("build_type", ""),
+        )
 
         return True, compiler_info, ""
 
@@ -281,25 +282,23 @@ def print_defines(defines: List[str], board_name: str):
     print(f"\nTotal: {len(defines)} defines")
 
 
-def print_compiler_info(compiler_info: Dict, board_name: str):
+def print_compiler_info(compiler_info: CompilerInfo, board_name: str):
     """Print compiler information in a formatted way."""
     print(f"\n🔧 Compiler Information for {board_name.upper()}:")
     print("=" * 50)
-    print(f"Compiler Type: {compiler_info.get('compiler_type', 'Unknown')}")
-    print(f"Build Type: {compiler_info.get('build_type', 'Unknown')}")
-    print(f"C Compiler: {compiler_info.get('cc_path', 'Unknown')}")
-    print(f"C++ Compiler: {compiler_info.get('cxx_path', 'Unknown')}")
+    print(f"Compiler Type: {compiler_info.compiler_type or 'Unknown'}")
+    print(f"Build Type: {compiler_info.build_type or 'Unknown'}")
+    print(f"C Compiler: {compiler_info.cc_path or 'Unknown'}")
+    print(f"C++ Compiler: {compiler_info.cxx_path or 'Unknown'}")
 
-    cc_flags = compiler_info.get("cc_flags", [])
-    if cc_flags:
-        print(f"\nC Flags ({len(cc_flags)}):")
-        for flag in cc_flags:
+    if compiler_info.cc_flags:
+        print(f"\nC Flags ({len(compiler_info.cc_flags)}):")
+        for flag in compiler_info.cc_flags:
             print(f"  {flag}")
 
-    cxx_flags = compiler_info.get("cxx_flags", [])
-    if cxx_flags:
-        print(f"\nC++ Flags ({len(cxx_flags)}):")
-        for flag in cxx_flags:
+    if compiler_info.cxx_flags:
+        print(f"\nC++ Flags ({len(compiler_info.cxx_flags)}):")
+        for flag in compiler_info.cxx_flags:
             print(f"  {flag}")
 
 
@@ -457,7 +456,7 @@ Examples:
             return 1
 
         if args.json:
-            print(json.dumps({"compiler": compiler_info}, indent=2))
+            print(json.dumps({"compiler": asdict(compiler_info)}, indent=2))
         else:
             print_compiler_info(compiler_info, args.board)
 

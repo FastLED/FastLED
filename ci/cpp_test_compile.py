@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+# pyright: reportUnknownMemberType=false, reportReturnType=false, reportMissingParameterType=false
 import argparse
 import json
 import os
@@ -133,26 +135,26 @@ def use_zig_compiler() -> Tuple[Path, Path, Path]:
     uv_path = Path(uv_path_str).resolve()
     zig_command = f'"{uv_path}" run python -m ziglang'
     # We are going to build up shell scripts that look like cc, c++, and ar. It will contain the actual build command.
-    CC_PATH = BUILD_DIR / "cc"
-    CXX_PATH = BUILD_DIR / "c++"
-    AR_PATH = BUILD_DIR / "ar"
+    cc_path = BUILD_DIR / "cc"
+    cxx_path = BUILD_DIR / "c++"
+    ar_path = BUILD_DIR / "ar"
     if sys.platform == "win32":
-        CC_PATH = CC_PATH.with_suffix(".cmd")
-        CXX_PATH = CXX_PATH.with_suffix(".cmd")
-        AR_PATH = AR_PATH.with_suffix(".cmd")
-        CC_PATH.write_text(f"@echo off\n{zig_command} cc %* 2>&1\n")
-        CXX_PATH.write_text(f"@echo off\n{zig_command} c++ %* 2>&1\n")
-        AR_PATH.write_text(f"@echo off\n{zig_command} ar %* 2>&1\n")
+        cc_path = cc_path.with_suffix(".cmd")
+        cxx_path = cxx_path.with_suffix(".cmd")
+        ar_path = ar_path.with_suffix(".cmd")
+        cc_path.write_text(f"@echo off\n{zig_command} cc %* 2>&1\n")
+        cxx_path.write_text(f"@echo off\n{zig_command} c++ %* 2>&1\n")
+        ar_path.write_text(f"@echo off\n{zig_command} ar %* 2>&1\n")
     else:
         cc_cmd = f'#!/bin/bash\n{zig_command} cc "$@"\n'
         cxx_cmd = f'#!/bin/bash\n{zig_command} c++ "$@"\n'
         ar_cmd = f'#!/bin/bash\n{zig_command} ar "$@"\n'
-        CC_PATH.write_text(cc_cmd)
-        CXX_PATH.write_text(cxx_cmd)
-        AR_PATH.write_text(ar_cmd)
-        CC_PATH.chmod(0o755)
-        CXX_PATH.chmod(0o755)
-        AR_PATH.chmod(0o755)
+        cc_path.write_text(cc_cmd)
+        cxx_path.write_text(cxx_cmd)
+        ar_path.write_text(ar_cmd)
+        cc_path.chmod(0o755)
+        cxx_path.chmod(0o755)
+        ar_path.chmod(0o755)
 
     # if WASM_BUILD:
     #     wasm_flags = [
@@ -168,7 +170,7 @@ def use_zig_compiler() -> Tuple[Path, Path, Path]:
     # os.environ["CFLAGS"] = " ".join(wasm_flags)
     # os.environ["CXXFLAGS"] = " ".join(wasm_flags)
 
-    cc, cxx = CC_PATH, CXX_PATH
+    cc, cxx = cc_path, cxx_path
     # use the system path, so on windows this looks like "C:\Program Files\Zig\zig.exe"
     cc_path: Path | str = cc.resolve()
     cxx_path: Path | str = cxx.resolve()
@@ -179,14 +181,14 @@ def use_zig_compiler() -> Tuple[Path, Path, Path]:
     # print out the paths
     print(f"CC: {cc_path}")
     print(f"CXX: {cxx_path}")
-    print(f"AR: {AR_PATH}")
+    print(f"AR: {ar_path}")
     # sys.exit(1)
 
     # Set environment variables for C and C++ compilers
     os.environ["CC"] = str(cc_path)
     os.environ["CXX"] = str(cxx_path)
-    os.environ["AR"] = str(AR_PATH)
-    return CC_PATH, CXX_PATH, AR_PATH
+    os.environ["AR"] = str(ar_path)
+    return cc_path, cxx_path, ar_path
 
 
 def run_command(command: str, cwd: Path | None = None) -> None:

@@ -7,6 +7,7 @@ from pathlib import Path
 
 from ci.paths import PROJECT_ROOT
 from ci.symbol_analysis import (
+    SymbolInfo,
     analyze_map_file,
     analyze_symbols,
     build_reverse_call_graph,
@@ -173,29 +174,29 @@ class TestSymbolAnalysis(unittest.TestCase):
         """Test report generation functionality."""
         print("Testing basic report generation...")
 
-        # Create some test symbols
+        # Create some test symbols using SymbolInfo dataclass
         test_symbols = [
-            {
-                "address": "0x1000",
-                "size": 1000,
-                "type": "T",
-                "name": "test_function_1",
-                "demangled_name": "test_function_1()",
-            },
-            {
-                "address": "0x2000",
-                "size": 500,
-                "type": "T",
-                "name": "_Z12test_func_2v",
-                "demangled_name": "test_function_2()",
-            },
-            {
-                "address": "0x3000",
-                "size": 200,
-                "type": "D",
-                "name": "test_data",
-                "demangled_name": "test_data",
-            },
+            SymbolInfo(
+                address="0x1000",
+                size=1000,
+                type="T",
+                name="test_function_1",
+                demangled_name="test_function_1()",
+            ),
+            SymbolInfo(
+                address="0x2000",
+                size=500,
+                type="T",
+                name="_Z12test_func_2v",
+                demangled_name="test_function_2()",
+            ),
+            SymbolInfo(
+                address="0x3000",
+                size=200,
+                type="D",
+                name="test_data",
+                demangled_name="test_data",
+            ),
         ]
 
         test_dependencies = {"test_module.o": ["test_function_1", "test_data"]}
@@ -203,24 +204,25 @@ class TestSymbolAnalysis(unittest.TestCase):
         # Generate report
         report = generate_report("TEST_BOARD", test_symbols, test_dependencies)
 
-        # Verify report structure
-        self.assertIn("board", report)
-        self.assertIn("total_symbols", report)
-        self.assertIn("total_size", report)
-        self.assertIn("largest_symbols", report)
-        self.assertIn("type_breakdown", report)
-        self.assertIn("dependencies", report)
+        # Verify report structure - use dataclass field access
+        self.assertIsInstance(report.board, str)
+        self.assertIsInstance(report.total_symbols, int)
+        self.assertIsInstance(report.total_size, int)
+        self.assertIsInstance(report.largest_symbols, list)
+        self.assertIsInstance(report.type_breakdown, list)
+        self.assertIsInstance(report.dependencies, dict)
 
         # Verify values
-        self.assertEqual(report["board"], "TEST_BOARD")
-        self.assertEqual(report["total_symbols"], 3)
-        self.assertEqual(report["total_size"], 1700)  # 1000 + 500 + 200
+        self.assertEqual(report.board, "TEST_BOARD")
+        self.assertEqual(report.total_symbols, 3)
+        self.assertEqual(report.total_size, 1700)  # 1000 + 500 + 200
 
-        # Verify type breakdown
-        self.assertIn("T", report["type_breakdown"])
-        self.assertIn("D", report["type_breakdown"])
-        self.assertEqual(report["type_breakdown"]["T"]["count"], 2)
-        self.assertEqual(report["type_breakdown"]["D"]["count"], 1)
+        # Verify type breakdown - it's now a list of TypeBreakdown dataclasses
+        type_breakdown_dict = {tb.type: tb for tb in report.type_breakdown}
+        self.assertIn("T", type_breakdown_dict)
+        self.assertIn("D", type_breakdown_dict)
+        self.assertEqual(type_breakdown_dict["T"].count, 2)
+        self.assertEqual(type_breakdown_dict["D"].count, 1)
 
         print("Report generation test passed")
 
@@ -326,26 +328,26 @@ class TestSymbolAnalysis(unittest.TestCase):
         # Generate report
         report = generate_report("UNO", symbols, dependencies)
 
-        # Verify the complete workflow produced valid results
-        self.assertGreater(report["total_symbols"], 0)
-        self.assertGreater(report["total_size"], 0)
-        self.assertGreater(len(report["largest_symbols"]), 0)
-        self.assertGreater(len(report["type_breakdown"]), 0)
+        # Verify the complete workflow produced valid results - use dataclass field access
+        self.assertGreater(report.total_symbols, 0)
+        self.assertGreater(report.total_size, 0)
+        self.assertGreater(len(report.largest_symbols), 0)
+        self.assertGreater(len(report.type_breakdown), 0)
 
         # Print summary for verification
         print("Complete analysis results:")
-        print(f"  Board: {report['board']}")
-        print(f"  Total symbols: {report['total_symbols']}")
+        print(f"  Board: {report.board}")
+        print(f"  Total symbols: {report.total_symbols}")
         print(
-            f"  Total size: {report['total_size']} bytes ({report['total_size'] / 1024:.1f} KB)"
+            f"  Total size: {report.total_size} bytes ({report.total_size / 1024:.1f} KB)"
         )
         print(
-            f"  Largest symbol: {report['largest_symbols'][0]['demangled_name']} ({report['largest_symbols'][0]['size']} bytes)"
+            f"  Largest symbol: {report.largest_symbols[0].demangled_name} ({report.largest_symbols[0].size} bytes)"
         )
 
         # Verify we have expected symbol types for a typical embedded program
-        type_breakdown = report["type_breakdown"]
-        self.assertIn("T", type_breakdown, "Should have text/code symbols")
+        type_breakdown_dict = {tb.type: tb for tb in report.type_breakdown}
+        self.assertIn("T", type_breakdown_dict, "Should have text/code symbols")
 
         print("Full workflow test completed successfully")
 

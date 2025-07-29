@@ -1,6 +1,7 @@
 import os
 import unittest
 from concurrent.futures import ThreadPoolExecutor
+from typing import List
 
 from ci.paths import PROJECT_ROOT
 
@@ -18,8 +19,8 @@ WRONG_DEFINES: dict[str, str] = {
 
 
 class TestWrongDefines(unittest.TestCase):
-    def check_file(self, file_path) -> list[str]:
-        failings = []
+    def check_file(self, file_path: str) -> List[str]:
+        failings: List[str] = []
         with open(file_path, "r", encoding="utf-8") as f:
             for line_number, line in enumerate(f, 1):
                 line = line.strip()
@@ -32,7 +33,7 @@ class TestWrongDefines(unittest.TestCase):
 
     def test_no_bad_defines(self) -> None:
         """Searches through the program files to check for banned headers, excluding src/platforms."""
-        files_to_check = []
+        files_to_check: List[str] = []
         for root, _, files in os.walk(SRC_ROOT):
             for file in files:
                 if file.endswith(
@@ -41,7 +42,7 @@ class TestWrongDefines(unittest.TestCase):
                     file_path = os.path.join(root, file)
                     files_to_check.append(file_path)
 
-        all_failings = []
+        all_failings: List[str] = []
         with ThreadPoolExecutor(max_workers=NUM_WORKERS) as executor:
             futures = [
                 executor.submit(self.check_file, file_path)

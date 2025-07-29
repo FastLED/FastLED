@@ -1,3 +1,8 @@
+# pyright: reportUnknownMemberType=false
+"""
+Tools for working with build info and tool paths.
+"""
+
 import json
 import os
 import sys

@@ -1,3 +1,4 @@
+# pyright: reportUnknownMemberType=false, reportMissingParameterType=false
 import os
 import re
 import subprocess

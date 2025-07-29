@@ -1,3 +1,6 @@
+# pyright: reportUnknownMemberType=false, reportMissingParameterType=false
+"""Test for checking namespace includes in C++ headers."""
+
 #!/usr/bin/env python3
 """
 Script to check for includes after namespace declarations in C++ files.

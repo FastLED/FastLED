@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+# pyright: reportUnknownMemberType=false
 """
 Runs the compilation process for examples on boards using pio ci command.
 This replaces the previous concurrent build system with a simpler pio ci approach.
@@ -183,8 +185,8 @@ def parse_args():
         args, unknown = parser.parse_known_args()
 
     # Handle unknown arguments intelligently - treat non-flag arguments as examples
-    unknown_examples = []
-    unknown_flags = []
+    unknown_examples: list[str] = []
+    unknown_flags: list[str] = []
     for arg in unknown:
         if arg.startswith("-"):
             unknown_flags.append(arg)
@@ -195,7 +197,9 @@ def parse_args():
     if unknown_examples:
         if not hasattr(args, "positional_examples") or args.positional_examples is None:
             args.positional_examples = []
-        args.positional_examples.extend(unknown_examples)
+        # Type assertion to help the type checker
+        positional_examples: list[str] = args.positional_examples
+        positional_examples.extend(unknown_examples)
 
     # Only warn about actual unknown flags, not examples
     if unknown_flags:
@@ -224,8 +228,8 @@ def parse_args():
 
 
 def remove_duplicates(items: list[str]) -> list[str]:
-    seen = set()
-    out = []
+    seen: set[str] = set()
+    out: list[str] = []
     for item in items:
         if item not in seen:
             seen.add(item)
