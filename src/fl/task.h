@@ -32,7 +32,6 @@ void loop() {
 */
 
 #include "fl/functional.h"
-#include "fl/memory.h"
 #include "fl/string.h"
 #include "fl/trace.h"
 #include "fl/promise.h"
@@ -57,7 +56,7 @@ private:
     // Constructors
     task(TaskType type, int interval_ms);
     task(TaskType type, int interval_ms, const fl::TracePoint& trace);
-    task(TaskType type, int interval_ms, unique_ptr<string> trace_label);
+
     
     // Friend declaration to allow make_unique to access private constructors
     template<typename T, typename... Args>
@@ -97,7 +96,7 @@ public:
     int id() const { return mTaskId; }
     bool has_then() const { return mHasThen; }
     bool has_catch() const { return mHasCatch; }
-    const unique_ptr<string>& trace_label() const { return mTraceLabel; }
+    string trace_label() const { return mTraceLabel? *mTraceLabel : ""; }
     TaskType type() const { return mType; }
     int interval_ms() const { return mIntervalMs; }
     uint32_t last_run_time() const { return mLastRunTime; }
@@ -111,7 +110,7 @@ private:
     TaskType mType;
     int mIntervalMs;
     bool mCanceled = false;
-    unique_ptr<string> mTraceLabel; // Optional trace label
+    unique_ptr<string> mTraceLabel; // Optional trace label (default big so we put it in the heap)
     bool mHasThen = false;
     bool mHasCatch = false;
     uint32_t mLastRunTime = 0; // Last time the task was run

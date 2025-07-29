@@ -140,19 +140,19 @@ void Scheduler::update() {
     }
 }
 
-void Scheduler::warn_no_then(int task_id, const fl::unique_ptr<fl::string>& trace_label) {
-    if (trace_label) {
-        FL_WARN(fl::string("[fl::task] Warning: no then() callback set for Task#") + fl::to_string(task_id) + " launched at " + trace_label->c_str());
+void Scheduler::warn_no_then(int task_id, const fl::string& trace_label) {
+    if (!trace_label.empty()) {
+        FL_WARN(fl::string("[fl::task] Warning: no then() callback set for Task#") << task_id << " launched at " << trace_label);
     } else {
-        FL_WARN(fl::string("[fl::task] Warning: no then() callback set for Task#") + fl::to_string(task_id));
+        FL_WARN(fl::string("[fl::task] Warning: no then() callback set for Task#") << task_id);
     }
 }
 
-void Scheduler::warn_no_catch(int task_id, const fl::unique_ptr<fl::string>& trace_label, const Error& error) {
-    if (trace_label) {
-        FL_WARN(fl::string("[fl::task] Warning: no catch_() callback set for Task#") + fl::to_string(task_id) + " launched at " + trace_label->c_str() + ". Error: " + error.message.c_str());
+void Scheduler::warn_no_catch(int task_id, const fl::string& trace_label, const Error& error) {
+        if (!trace_label.empty()) {
+        FL_WARN(fl::string("[fl::task] Warning: no catch_() callback set for Task#") << task_id << " launched at " << trace_label << ". Error: " << error.message);
     } else {
-        FL_WARN(fl::string("[fl/task] Warning: no catch_() callback set for Task#") + fl::to_string(task_id) + ". Error: " + error.message.c_str());
+        FL_WARN(fl::string("[fl/task] Warning: no catch_() callback set for Task#") << task_id << ". Error: " << error.message);
     }
 }
 

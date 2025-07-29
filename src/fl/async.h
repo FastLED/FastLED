@@ -243,8 +243,8 @@ private:
     friend class fl::Singleton<Scheduler>;
     Scheduler() : mTasks() {}
 
-    void warn_no_then(int task_id, const fl::unique_ptr<fl::string>& trace_label);
-    void warn_no_catch(int task_id, const fl::unique_ptr<fl::string>& trace_label, const Error& error);
+    void warn_no_then(int task_id, const fl::string& trace_label);
+    void warn_no_catch(int task_id, const fl::string& trace_label, const Error& error);
 
     fl::vector<unique_ptr<task>> mTasks;
     int mNextTaskId = 1;

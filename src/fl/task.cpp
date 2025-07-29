@@ -1,15 +1,18 @@
 #include "fl/task.h"
 #include "fl/async.h"
 #include "fl/time.h"
+#include "fl/sstream.h"
 
 namespace fl {
 
 namespace {
 // Helper to generate a trace label from a TracePoint
-fl::unique_ptr<fl::string> make_trace_label(const fl::TracePoint& trace) {
+fl::string make_trace_label(const fl::TracePoint& trace) {
     // Basic implementation: "file:line"
     // More advanced version could strip common path prefixes
-    return fl::make_unique<fl::string>(fl::string(fl::get<0>(trace)) + ":" + fl::to_string(fl::get<1>(trace)));
+    fl::sstream ss;
+    ss << fl::get<0>(trace) << ":" << fl::get<1>(trace);
+    return ss.str();
 }
 } // namespace
 
@@ -17,7 +20,7 @@ task::task(TaskType type, int interval_ms)
     : mType(type),
       mIntervalMs(interval_ms),
       mCanceled(false),
-      mTraceLabel(nullptr),
+      mTraceLabel(),
       mHasThen(false),
       mHasCatch(false),
       mLastRunTime(UINT32_MAX) {  // Use UINT32_MAX to indicate "never run"
@@ -27,21 +30,13 @@ task::task(TaskType type, int interval_ms, const fl::TracePoint& trace)
     : mType(type),
       mIntervalMs(interval_ms),
       mCanceled(false),
-      mTraceLabel(make_trace_label(trace)),
+      mTraceLabel(fl::make_unique<string>(make_trace_label(trace))),  // Optional. Put it in the heap.
       mHasThen(false),
       mHasCatch(false),
       mLastRunTime(UINT32_MAX) {  // Use UINT32_MAX to indicate "never run"
 }
 
-task::task(TaskType type, int interval_ms, fl::unique_ptr<fl::string> trace_label)
-    : mType(type),
-      mIntervalMs(interval_ms),
-      mCanceled(false),
-      mTraceLabel(fl::move(trace_label)),
-      mHasThen(false),
-      mHasCatch(false),
-      mLastRunTime(UINT32_MAX) {  // Use UINT32_MAX to indicate "never run"
-}
+
 
 fl::unique_ptr<task> task::every_ms(int interval_ms) {
     return fl::make_unique<task>(TaskType::kEveryMs, interval_ms);
