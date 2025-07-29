@@ -1,331 +1,258 @@
-# FastLED libarchive.a Generation Feature Design
+# Test.py Flag System Refactoring Plan
 
 ## Overview
 
-This document outlines the design for a new FastLED feature that generates static library archives (`.a` files) from compiled object files. This feature will be integrated into the existing compilation infrastructure to provide users with reusable static libraries.
+Refactor `test.py` to support granular test execution control with new flag system:
+- `--unit` - Run only C++ unit tests 
+- `--examples` - Run only example compilation tests
+- `--py` - Run only Python tests
+- No arguments - Run all tests (equivalent to `--unit --examples --py`)
+- `--cpp` - Modified behavior to default to `--unit --examples` (suppress Python tests)
 
-## Execution Path Analysis
+## Current State Analysis
 
-### `bash test --examples` Flow
+### Existing Flag Behavior
+- `--cpp` - Currently runs C++ tests only, but includes Python tests in default mode
+- `--examples` - Currently auto-enables `--cpp` mode and runs example compilation
+- No explicit Python test control flags
+- Default behavior runs all tests in parallel
 
-Based on code analysis, the execution path is:
+### Current Test Categories
+1. **C++ Unit Tests** (`cmd_str_cpp` via `ci/cpp_test_run.py`)
+2. **Example Compilation** (`ci/test_example_compilation.py`)  
+3. **Python Tests** (`pytest` via `ci/tests`)
+4. **Namespace Check** (`ci/tests/no_using_namespace_fl_in_headers.py`)
+5. **Native Compilation** (`ci/ci-compile-native.py`)
+6. **PIO Check** (`_make_pio_check_cmd()`)
+7. **UNO Compilation** (conditional based on source changes)
 
-1. **Entry Point**: `bash test --examples` → `test.py`
-2. **Test Script**: `test.py` (lines 362-401) detects `--examples` flag
-3. **Example Compilation**: Calls `ci/test_example_compilation.py` 
-4. **Compiler Infrastructure**: Uses `ci/ci/clang_compiler.py` → `Compiler` class
-5. **Build System**: Leverages `CompilerSettings` and object file compilation
+## Proposed Changes
 
-### Key Files in Execution Chain
+### 1. New Argument Parser Additions
 
-- `test.py` - Main test runner, handles `--examples` flag
-- `ci/test_example_compilation.py` - Example compilation orchestrator  
-- `ci/ci/clang_compiler.py` - Core compiler infrastructure with `Compiler` class
-- `ci/cpp_test_compile.py` - Contains archiver tool detection (`llvm-ar`, `ar`)
-
-### Existing Archiver Infrastructure
-
-Found existing archiver detection in `ci/cpp_test_compile.py`:
-- Line 87: `LLVM_AR = shutil.which("llvm-ar")`
-- Line 229: `ar = shutil.which("ar")`
-- Line 58: Toolchain aliases include `"ar"`
-
-## Proposed API Design
-
-### 1. LibarchiveOptions Dataclass
-
+Add new flags to `parse_args()`:
 ```python
-from dataclasses import dataclass
-
-@dataclass
-class LibarchiveOptions:
-    """Configuration options for static library archive generation."""
-    use_thin: bool = False  # Use thin archives (ar T flag) for faster linking
-    # Future expansion points:
-    # use_deterministic: bool = True  # Deterministic archives (ar D flag)
-    # symbol_table: bool = True       # Generate symbol table (ar s flag)
-    # verbose: bool = False          # Verbose output (ar v flag)
+parser.add_argument("--unit", action="store_true", help="Run C++ unit tests only")
+parser.add_argument("--py", action="store_true", help="Run Python tests only")
+# --examples already exists but will be modified
 ```
 
-### 2. Archive Generation Function
+### 2. Flag Processing Logic
 
-Add to `ci/ci/clang_compiler.py`:
-
+Add flag validation and default behavior logic:
 ```python
-def create_archive_sync(
-    object_files: List[Path],
-    output_archive: Path,
-    options: LibarchiveOptions = LibarchiveOptions()
-) -> Result:
-    """
-    Create a static library archive (.a) from compiled object files.
+def process_test_flags(args):
+    """Process and validate test execution flags"""
     
-    Args:
-        object_files: List of .o files to include in archive
-        output_archive: Output .a file path
-        options: Archive generation options
+    # Check for conflicting specific test flags
+    specific_flags = [args.unit, args.examples is not None, args.py]
+    specific_count = sum(bool(flag) for flag in specific_flags)
+    
+    # If --cpp is provided, default to --unit --examples (no Python)
+    if args.cpp and specific_count == 0:
+        args.unit = True
+        args.examples = []  # Empty list means run all examples
+        print("--cpp mode: Running unit tests and examples (Python tests suppressed)")
+        return args
+    
+    # If no specific flags, run everything (backward compatibility)
+    if specific_count == 0:
+        args.unit = True
+        args.examples = []  # Empty list means run all examples
+        args.py = True
+        print("No test flags specified: Running all tests")
+        return args
         
-    Returns:
-        Result: Success status and command output
-    """
+    return args
 ```
 
-### 3. Compiler Class Integration
+### 3. Test Execution Refactoring
 
-Extend the existing `Compiler` class in `ci/ci/clang_compiler.py`:
+#### Current Structure Issue
+Current code has two paths:
+- `if args.cpp:` - Handles C++ tests and early returns for examples
+- Default path - Runs all tests in parallel
+
+#### Proposed Structure
+Replace with clear test category execution:
 
 ```python
-class Compiler:
-    # ... existing methods ...
+def main():
+    # ... existing setup code ...
     
-    def create_archive(
-        self,
-        object_files: List[Path], 
-        output_archive: Path,
-        options: LibarchiveOptions = LibarchiveOptions()
-    ) -> Future[Result]:
-        """
-        Create static library archive from object files.
-        Submits archive creation to thread pool for parallel execution.
-        """
-        return _EXECUTOR.submit(
-            self.create_archive_sync,
-            object_files,
-            output_archive, 
-            options
-        )
+    args = parse_args()
+    args = process_test_flags(args)
     
-    def create_archive_sync(
-        self,
-        object_files: List[Path],
-        output_archive: Path, 
-        options: LibarchiveOptions
-    ) -> Result:
-        """Synchronous archive creation implementation."""
-        # Implementation details...
+    # Determine which test categories to run
+    test_categories = determine_test_categories(args)
+    
+    # Execute test categories
+    if test_categories['unit_only'] or test_categories['examples_only']:
+        run_cpp_tests(args, test_categories)
+    elif test_categories['py_only']:
+        run_python_tests(args)
+    else:
+        run_all_tests(args, test_categories)
+
+def determine_test_categories(args):
+    """Determine which test categories should run based on flags"""
+    return {
+        'unit': args.unit,
+        'examples': args.examples is not None,
+        'py': args.py,
+        'unit_only': args.unit and not args.examples and not args.py,
+        'examples_only': args.examples is not None and not args.unit and not args.py,
+        'py_only': args.py and not args.unit and not args.examples
+    }
 ```
 
-### 4. Archiver Tool Detection
+### 4. Test Execution Functions
 
-Add archiver detection to `CompilerSettings`:
-
+#### Unit Tests Function
 ```python
-@dataclass
-class CompilerSettings:
-    # ... existing fields ...
-    archiver: str = "ar"  # Default archiver tool
-    archiver_args: List[str] = field(default_factory=list)
+def run_unit_tests(args, enable_stack_trace):
+    """Run C++ unit tests only"""
+    print("Running C++ unit tests...")
+    
+    # Namespace check (always run with C++ tests)
+    run_namespace_check(enable_stack_trace)
+    
+    # Build and run unit tests
+    cmd_list = build_cpp_test_command(args)
+    proc = RunningProcess(cmd_list, enable_stack_trace=enable_stack_trace)
+    proc.wait()
+    if proc.returncode != 0:
+        sys.exit(proc.returncode)
 ```
 
-And detection logic:
-
+#### Examples Tests Function  
 ```python
-def detect_archiver() -> str:
-    """
-    Detect available archiver tool.
-    Preference order: llvm-ar > ar
-    """
-    llvm_ar = shutil.which("llvm-ar")
-    if llvm_ar:
-        return llvm_ar
+def run_examples_tests(args, enable_stack_trace):
+    """Run example compilation tests only"""
+    print("Running example compilation tests...")
     
-    ar = shutil.which("ar") 
-    if ar:
-        return ar
+    # Handle specific vs all examples
+    cmd = ["uv", "run", "ci/test_example_compilation.py"]
+    if args.examples:
+        cmd.extend(args.examples)
+    if args.clean:
+        cmd.append("--clean")
+    if args.no_pch:
+        cmd.append("--no-pch")
+    if args.cache:
+        cmd.append("--cache")
         
-    raise RuntimeError("No archiver tool found (ar or llvm-ar required)")
+    proc = RunningProcess(cmd, echo=True, auto_run=True, enable_stack_trace=enable_stack_trace)
+    proc.wait()
+    if proc.returncode != 0:
+        sys.exit(proc.returncode)
 ```
 
-## Implementation Strategy
-
-### Phase 1: Core Archive Generation
-
-1. **Add LibarchiveOptions dataclass** to `ci/ci/clang_compiler.py`
-2. **Implement create_archive_sync() function** with basic functionality
-3. **Add archiver detection** similar to existing compiler detection
-4. **Extend Compiler class** with archive creation methods
-5. **Add unit tests** for archive generation
-
-### Phase 2: Integration Points
-
-1. **Extend test_example_compilation.py** with archive generation option
-2. **Add command-line flags** (`--create-archive`, `--thin-archive`)
-3. **Integrate with existing compilation flow**
-4. **Add archive validation** (verify archive contents)
-
-### Phase 3: Enhanced Features
-
-1. **Archive analysis tools** (list contents, sizes)
-2. **Deterministic archive generation** (reproducible builds)
-3. **Symbol table optimization** 
-4. **Cross-platform compatibility testing**
-
-## Technical Implementation Details
-
-### Archive Command Generation
-
-```bash
-# Basic archive creation
-ar rcs libfastled.a file1.o file2.o file3.o
-
-# Thin archive (use_thin=True)  
-ar rcsT libfastled.a file1.o file2.o file3.o
-
-# Command structure:
-# r - Insert files into archive
-# c - Create archive if it doesn't exist  
-# s - Write symbol table
-# T - Create thin archive (optional)
+#### Python Tests Function
+```python
+def run_python_tests(args, enable_stack_trace):
+    """Run Python tests only"""
+    print("Running Python tests...")
+    
+    pytest_proc = RunningProcess(
+        "uv run pytest -s ci/tests -xvs --durations=0",
+        echo=True,
+        auto_run=True,
+        enable_stack_trace=enable_stack_trace
+    )
+    pytest_proc.wait()
+    if pytest_proc.returncode != 0:
+        sys.exit(pytest_proc.returncode)
 ```
+
+### 5. Modified --cpp Behavior
+
+Change `--cpp` flag behavior:
+- **OLD**: `--cpp` runs only C++ tests but still includes Python in default mode
+- **NEW**: `--cpp` defaults to `--unit --examples` (explicitly excludes Python)
+
+### 6. Backward Compatibility
+
+Ensure existing usage patterns continue to work:
+- `bash test` - Runs all tests (same as before)
+- `bash test specific_test` - Runs specific C++ test (same as before) 
+- `bash test --cpp` - Now suppresses Python tests (new behavior)
+- `bash test --examples` - Runs examples only (new capability)
+
+### 7. Help Text Updates
+
+Update argument parser help text to reflect new functionality:
+```python
+parser.add_argument("--cpp", action="store_true", 
+                   help="Run C++ tests only (equivalent to --unit --examples, suppresses Python tests)")
+parser.add_argument("--unit", action="store_true", 
+                   help="Run C++ unit tests only")
+parser.add_argument("--examples", nargs="*", 
+                   help="Run example compilation tests only (optionally specify example names)")
+parser.add_argument("--py", action="store_true", 
+                   help="Run Python tests only")
+```
+
+## Implementation Steps
+
+### Phase 1: Core Flag Processing
+1. Add new argument parser flags (`--unit`, `--py`)
+2. Implement `process_test_flags()` function
+3. Implement `determine_test_categories()` function
+4. Update help text
+
+### Phase 2: Test Execution Refactoring
+1. Extract current C++ test logic into `run_unit_tests()`
+2. Extract example compilation logic into `run_examples_tests()`
+3. Extract Python test logic into `run_python_tests()`
+4. Create `run_cpp_tests()` wrapper for C++ scenarios
+
+### Phase 3: Main Function Restructuring
+1. Replace existing `if args.cpp:` logic with category-based execution
+2. Implement single-category execution paths
+3. Maintain existing parallel execution for default behavior
+4. Ensure proper cleanup and error handling
+
+### Phase 4: Testing and Validation
+1. Test all new flag combinations
+2. Verify backward compatibility
+3. Update documentation and help text
+4. Validate performance characteristics
+
+## Expected Flag Behaviors
+
+| Command | Unit Tests | Examples | Python Tests | Notes |
+|---------|-----------|----------|--------------|-------|
+| `bash test` | ✓ | ✓ | ✓ | Default - all tests |
+| `bash test --unit` | ✓ | ✗ | ✗ | C++ unit tests only |
+| `bash test --examples` | ✗ | ✓ | ✗ | Example compilation only |
+| `bash test --py` | ✗ | ✗ | ✓ | Python tests only |
+| `bash test --cpp` | ✓ | ✓ | ✗ | **Modified behavior** |
+| `bash test --unit --py` | ✓ | ✗ | ✓ | Combined flags |
+| `bash test specific_test` | ✓ | ✗ | ✗ | Specific C++ test (auto-enables --unit) |
+
+## Benefits
+
+1. **Granular Control** - Developers can run specific test categories
+2. **Faster Iteration** - Skip lengthy test categories when not needed  
+3. **Clear Intent** - Explicit flags show exactly what's being tested
+4. **CI Optimization** - Allow CI to run test categories in parallel
+5. **Debugging** - Isolate test failures to specific categories
+6. **Backward Compatible** - Existing workflows continue to work
+
+## Additional Considerations
 
 ### Error Handling
+- Validate that at least one test category is specified
+- Provide clear error messages for invalid flag combinations
+- Ensure proper exit codes for each test category
 
-- **Missing archiver tool**: Clear error with installation instructions
-- **Object file not found**: Validate all inputs before archive creation
-- **Permission errors**: Handle read-only output directories
-- **Archive corruption**: Verify archive integrity after creation
+### Performance Impact
+- Single-category execution should be faster than full test suite
+- Maintain parallel execution for default behavior to preserve performance
+- Consider adding timing information for each test category
 
-### Integration with Existing Flow
-
-Archive generation will be **optional** and triggered by:
-- Command line flag: `bash test --examples --create-archive`
-- Programmatic API: `compiler.create_archive(object_files, output_path)`
-- Configuration option in compilation scripts
-
-### Output Structure
-
-```
-.build/
-├── {platform}/
-│   ├── build_info.json
-│   ├── firmware.elf  
-│   ├── objects/           # Object files directory
-│   │   ├── example1.o
-│   │   ├── example2.o
-│   │   └── fastled_core.o
-│   └── libfastled.a       # Generated archive
-```
-
-## Testing Strategy
-
-### Test Organization
-
-Based on existing FastLED test patterns, archive generation tests follow this structure:
-
-**Primary Test Locations:**
-- `tests/test_archive_generation.cpp` - C++ unit test for integration validation
-- `ci/tests/test_archive_creation.py` - Python test for compilation infrastructure
-
-### Test Structure
-
-#### 1. C++ Unit Test: `tests/test_archive_generation.cpp`
-
-Following the pattern of `test_example_compilation.cpp`, validates that the archive generation feature is operational:
-
-```cpp
-// test_archive_generation.cpp
-// Test runner for FastLED Archive Generation Feature
-
-#include <iostream>
-#include <string>
-
-int main() {
-    std::cout << "=== FastLED Archive Generation Testing Feature ===" << std::endl;
-    std::cout << "[OK] Static library archive creation from object files" << std::endl;
-    std::cout << "[OK] Archive tool detection (ar, llvm-ar)" << std::endl;
-    std::cout << "[OK] Thin archive support for faster linking" << std::endl;
-    std::cout << "[OK] Integration with existing compilation infrastructure" << std::endl;
-    std::cout << std::endl;
-    
-    std::cout << "Archive generation infrastructure validation:" << std::endl;
-    std::cout << "[OK] Archive creation API available" << std::endl;
-    std::cout << "[OK] Archive validation and integrity checking" << std::endl;
-    std::cout << "[OK] Cross-platform archiver tool detection" << std::endl;
-    std::cout << "[OK] Error handling for missing tools/files" << std::endl;
-    std::cout << std::endl;
-    
-    std::cout << "Feature Status: OPERATIONAL" << std::endl;
-    std::cout << "Ready for: bash test --examples --create-archive" << std::endl;
-    
-    return 0;
-}
-```
-
-#### 2. Python Infrastructure Test: `ci/tests/test_archive_creation.py`
-
-Following the pattern of `test_direct_compile.py` and `test_symbol_analysis.py`, tests actual archive creation functionality:
-
-**Key Test Methods:**
-- `test_archiver_detection()` - Verify ar/llvm-ar tool detection
-- `test_archive_creation_basic()` - Basic archive creation from object files
-- `test_archive_creation_thin()` - Thin archive creation
-- `test_compiler_class_integration()` - Archive creation through Compiler class
-- `test_error_handling_missing_objects()` - Error handling for missing files
-- `test_archive_validation()` - Archive content verification
-
-### Integration with Existing Test Framework
-
-#### CMake Integration
-```cmake
-# Archive generation test (conditional)
-option(FASTLED_ENABLE_ARCHIVE_TESTS "Enable archive generation testing" OFF)
-if(FASTLED_ENABLE_ARCHIVE_TESTS)
-    include(cmake/ArchiveGenerationTest.cmake)
-    configure_archive_generation_test()
-    create_archive_generation_test_target()
-endif()
-```
-
-#### Test Execution
-Following existing patterns:
-- **Unit test**: `bash test archive_generation`
-- **Infrastructure test**: `uv run ci/tests/test_archive_creation.py`
-- **Integration test**: `bash test --examples --create-archive` (when implemented)
-
-### Test Categories
-
-#### Unit Tests (C++)
-- Archive generation feature availability
-- API integration verification
-- Cross-platform compatibility markers
-
-#### Infrastructure Tests (Python)
-- Archive tool detection (`ar`, `llvm-ar`)
-- Archive creation with various options
-- Error handling for missing files/tools
-- Compiler class integration
-- Archive validation and integrity
-
-#### Integration Tests
-- End-to-end compilation → archive generation
-- Multiple object file scenarios
-- Platform-specific testing (when platforms are compiled)
-
-#### Validation Tests
-- Archive content verification
-- Symbol table presence
-- Thin vs regular archive comparison
-- File size and performance benchmarks
-
-## Future Enhancements
-
-### Advanced Options
-- **Deterministic builds**: Reproducible archives with consistent timestamps
-- **Symbol filtering**: Include/exclude specific symbols
-- **Debug information handling**: Strip or preserve debug symbols
-- **Compression**: Archive compression options
-
-### Integration Features
-- **PlatformIO integration**: Generate libraries for PlatformIO Library Manager
-- **CI/CD integration**: Automated archive generation in build pipelines
-- **Distribution packaging**: Prepare archives for release distribution
-
-## Conclusion
-
-This libarchive.a generation feature will provide FastLED users with:
-- **Reusable static libraries** for faster linking
-- **Optimized build workflows** with thin archives
-- **Cross-platform compatibility** with automatic tool detection
-- **Simple API integration** with existing compilation infrastructure
-
-The design leverages existing FastLED compilation infrastructure while providing a clean, extensible API for archive generation needs.
+### Future Enhancements
+- Add `--quick` support for individual test categories
+- Consider adding `--verbose` support for specific categories
+- Potential for test result caching based on category

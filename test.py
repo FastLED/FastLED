@@ -7,10 +7,132 @@ import subprocess
 import sys
 import threading
 import time
+from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 from ci.running_process import RunningProcess
+
+
+@dataclass
+class TestArgs:
+    """Type-safe test arguments"""
+
+    cpp: bool = False
+    unit: bool = False
+    py: bool = False
+    test: Optional[str] = None
+    clang: bool = False
+    gcc: bool = False
+    clean: bool = False
+    no_interactive: bool = False
+    interactive: bool = False
+    verbose: bool = False
+    quick: bool = False
+    no_stack_trace: bool = False
+    check: bool = False
+    examples: Optional[list[str]] = None
+    no_pch: bool = False
+    cache: bool = False
+
+    def __post_init__(self):
+        # Type validation
+        if not isinstance(self.cpp, bool):
+            raise TypeError(f"cpp must be bool, got {type(self.cpp)}")
+        if not isinstance(self.unit, bool):
+            raise TypeError(f"unit must be bool, got {type(self.unit)}")
+        if not isinstance(self.py, bool):
+            raise TypeError(f"py must be bool, got {type(self.py)}")
+        if self.test is not None and not isinstance(self.test, str):
+            raise TypeError(f"test must be str or None, got {type(self.test)}")
+        if not isinstance(self.clang, bool):
+            raise TypeError(f"clang must be bool, got {type(self.clang)}")
+        if not isinstance(self.gcc, bool):
+            raise TypeError(f"gcc must be bool, got {type(self.gcc)}")
+        if not isinstance(self.clean, bool):
+            raise TypeError(f"clean must be bool, got {type(self.clean)}")
+        if not isinstance(self.no_interactive, bool):
+            raise TypeError(
+                f"no_interactive must be bool, got {type(self.no_interactive)}"
+            )
+        if not isinstance(self.interactive, bool):
+            raise TypeError(f"interactive must be bool, got {type(self.interactive)}")
+        if not isinstance(self.verbose, bool):
+            raise TypeError(f"verbose must be bool, got {type(self.verbose)}")
+        if not isinstance(self.quick, bool):
+            raise TypeError(f"quick must be bool, got {type(self.quick)}")
+        if not isinstance(self.no_stack_trace, bool):
+            raise TypeError(
+                f"no_stack_trace must be bool, got {type(self.no_stack_trace)}"
+            )
+        if not isinstance(self.check, bool):
+            raise TypeError(f"check must be bool, got {type(self.check)}")
+        if self.examples is not None and not isinstance(self.examples, list):
+            raise TypeError(f"examples must be list or None, got {type(self.examples)}")
+        if not isinstance(self.no_pch, bool):
+            raise TypeError(f"no_pch must be bool, got {type(self.no_pch)}")
+        if not isinstance(self.cache, bool):
+            raise TypeError(f"cache must be bool, got {type(self.cache)}")
+
+        # Value validation
+        if self.test is not None and not self.test.strip():
+            raise ValueError("test name cannot be empty")
+        if self.examples is not None and not all(
+            isinstance(ex, str) for ex in self.examples
+        ):
+            raise TypeError("examples list must contain only strings")
+
+
+@dataclass
+class TestCategories:
+    """Type-safe test category flags"""
+
+    unit: bool
+    examples: bool
+    py: bool
+    unit_only: bool
+    examples_only: bool
+    py_only: bool
+
+    def __post_init__(self):
+        # Type validation
+        for field_name in [
+            "unit",
+            "examples",
+            "py",
+            "unit_only",
+            "examples_only",
+            "py_only",
+        ]:
+            value = getattr(self, field_name)
+            if not isinstance(value, bool):
+                raise TypeError(f"{field_name} must be bool, got {type(value)}")
+
+
+@dataclass
+class FingerprintResult:
+    """Type-safe fingerprint result"""
+
+    hash: str
+    elapsed_seconds: Optional[str] = None
+    status: Optional[str] = None
+
+    def __post_init__(self):
+        # Type validation
+        if not isinstance(self.hash, str):
+            raise TypeError(f"hash must be str, got {type(self.hash)}")
+        if self.elapsed_seconds is not None and not isinstance(
+            self.elapsed_seconds, str
+        ):
+            raise TypeError(
+                f"elapsed_seconds must be str or None, got {type(self.elapsed_seconds)}"
+            )
+        if self.status is not None and not isinstance(self.status, str):
+            raise TypeError(f"status must be str or None, got {type(self.status)}")
+
+        # Value validation
+        if not self.hash:
+            raise ValueError("hash cannot be empty")
 
 
 _PIO_CHECK_ENABLED = False
@@ -37,10 +159,16 @@ def run_command(cmd: List[str], **kwargs: Any) -> None:
         sys.exit(e.returncode)
 
 
-def parse_args() -> argparse.Namespace:
+def parse_args() -> TestArgs:
     """Parse command line arguments"""
     parser = argparse.ArgumentParser(description="Run FastLED tests")
-    parser.add_argument("--cpp", action="store_true", help="Run C++ tests only")
+    parser.add_argument(
+        "--cpp",
+        action="store_true",
+        help="Run C++ tests only (equivalent to --unit --examples, suppresses Python tests)",
+    )
+    parser.add_argument("--unit", action="store_true", help="Run C++ unit tests only")
+    parser.add_argument("--py", action="store_true", help="Run Python tests only")
     parser.add_argument(
         "test", type=str, nargs="?", default=None, help="Specific C++ test to run"
     )
@@ -89,7 +217,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--examples",
         nargs="*",
-        help="Run example compilation tests (optionally specify example names) - auto-enables --cpp mode",
+        help="Run example compilation tests only (optionally specify example names)",
     )
     parser.add_argument(
         "--no-pch",
@@ -105,41 +233,102 @@ def parse_args() -> argparse.Namespace:
 
     args = parser.parse_args()
 
+    # Convert argparse.Namespace to TestArgs dataclass
+    test_args = TestArgs(
+        cpp=args.cpp,
+        unit=args.unit,
+        py=args.py,
+        test=args.test,
+        clang=args.clang,
+        gcc=args.gcc,
+        clean=args.clean,
+        no_interactive=args.no_interactive,
+        interactive=args.interactive,
+        verbose=args.verbose,
+        quick=args.quick,
+        no_stack_trace=args.no_stack_trace,
+        check=args.check,
+        examples=args.examples,
+        no_pch=args.no_pch,
+        cache=args.cache,
+    )
+
     # Auto-enable --cpp when a specific test is provided
-    if args.test and not args.cpp:
-        args.cpp = True
-        print(f"Auto-enabled --cpp mode for specific test: {args.test}")
+    if test_args.test and not test_args.cpp:
+        test_args.cpp = True
+        print(f"Auto-enabled --cpp mode for specific test: {test_args.test}")
 
     # Auto-enable --cpp and --clang when --check is provided
-    if args.check:
-        if not args.cpp:
-            args.cpp = True
+    if test_args.check:
+        if not test_args.cpp:
+            test_args.cpp = True
             print("Auto-enabled --cpp mode for static analysis (--check)")
-        if not args.clang and not args.gcc:
-            args.clang = True
+        if not test_args.clang and not test_args.gcc:
+            test_args.clang = True
             print("Auto-enabled --clang compiler for static analysis (--check)")
 
     # Auto-enable --cpp and --quick when --examples is provided
-    if args.examples is not None:
-        if not args.cpp:
-            args.cpp = True
+    if test_args.examples is not None:
+        if not test_args.cpp:
+            test_args.cpp = True
             print("Auto-enabled --cpp mode for example compilation (--examples)")
-        if not args.quick:
-            args.quick = True
+        if not test_args.quick:
+            test_args.quick = True
             print(
                 "Auto-enabled --quick mode for faster example compilation (--examples)"
             )
 
     # Default to Clang on Windows unless --gcc is explicitly passed
-    if sys.platform == "win32" and not args.gcc and not args.clang:
-        args.clang = True
+    if sys.platform == "win32" and not test_args.gcc and not test_args.clang:
+        test_args.clang = True
         print("Windows detected: defaulting to Clang compiler (use --gcc to override)")
-    elif args.gcc:
+    elif test_args.gcc:
         print("Using GCC compiler")
-    elif args.clang:
+    elif test_args.clang:
         print("Using Clang compiler")
 
+    return test_args
+
+
+def process_test_flags(args: TestArgs) -> TestArgs:
+    """Process and validate test execution flags"""
+
+    # Check for conflicting specific test flags
+    specific_flags = [args.unit, args.examples is not None, args.py]
+    specific_count = sum(bool(flag) for flag in specific_flags)
+
+    # If --cpp is provided, default to --unit --examples (no Python)
+    if args.cpp and specific_count == 0:
+        args.unit = True
+        args.examples = []  # Empty list means run all examples
+        print("--cpp mode: Running unit tests and examples (Python tests suppressed)")
+        return args
+
+    # If no specific flags, run everything (backward compatibility)
+    if specific_count == 0:
+        args.unit = True
+        args.examples = []  # Empty list means run all examples
+        args.py = True
+        print("No test flags specified: Running all tests")
+        return args
+
     return args
+
+
+def determine_test_categories(args: TestArgs) -> TestCategories:
+    """Determine which test categories should run based on flags"""
+    unit_enabled = args.unit
+    examples_enabled = args.examples is not None
+    py_enabled = args.py
+
+    return TestCategories(
+        unit=unit_enabled,
+        examples=examples_enabled,
+        py=py_enabled,
+        unit_only=unit_enabled and not examples_enabled and not py_enabled,
+        examples_only=examples_enabled and not unit_enabled and not py_enabled,
+        py_only=py_enabled and not unit_enabled and not examples_enabled,
+    )
 
 
 def _make_pio_check_cmd() -> List[str]:
@@ -176,7 +365,7 @@ def make_compile_uno_test_process(enable_stack_trace: bool = True) -> RunningPro
 
 def fingerprint_code_base(
     start_directory: Path, glob: str = "**/*.h,**/*.cpp,**/*.hpp"
-) -> Dict[str, str]:
+) -> FingerprintResult:
     """
     Create a fingerprint of the code base by hashing file contents.
 
@@ -185,12 +374,8 @@ def fingerprint_code_base(
         glob: Comma-separated list of glob patterns to match files
 
     Returns:
-        A dictionary with hash and status
+        A FingerprintResult with hash and optional status
     """
-    result = {
-        "hash": "",
-    }
-
     try:
         hasher = hashlib.sha256()
         patterns = glob.split(",")
@@ -221,14 +406,12 @@ def fingerprint_code_base(
                     # If we can't read the file, include the error in the hash
                     hasher.update(f"ERROR:{str(e)}".encode("utf-8"))
 
-        result["hash"] = hasher.hexdigest()
-        return result
+        return FingerprintResult(hash=hasher.hexdigest())
     except Exception as e:
-        result["status"] = f"error: {str(e)}"
-        return result
+        return FingerprintResult(hash="", status=f"error: {str(e)}")
 
 
-def calculate_fingerprint(root_dir: Path | None = None) -> Dict[str, str]:
+def calculate_fingerprint(root_dir: Path | None = None) -> FingerprintResult:
     """
     Calculate the code base fingerprint.
 
@@ -236,7 +419,7 @@ def calculate_fingerprint(root_dir: Path | None = None) -> Dict[str, str]:
         root_dir: The root directory to start scanning from. If None, uses src directory.
 
     Returns:
-        The fingerprint result dictionary
+        The fingerprint result
     """
     if root_dir is None:
         root_dir = Path.cwd() / "src"
@@ -246,9 +429,258 @@ def calculate_fingerprint(root_dir: Path | None = None) -> Dict[str, str]:
     result = fingerprint_code_base(root_dir)
     elapsed_time = time.time() - start_time
     # Add timing information to the result
-    result["elapsed_seconds"] = f"{elapsed_time:.2f}"
+    result.elapsed_seconds = f"{elapsed_time:.2f}"
 
     return result
+
+
+def run_namespace_check(enable_stack_trace: bool) -> None:
+    """Run the namespace check"""
+    print("Running namespace check...")
+    namespace_check_proc = RunningProcess(
+        "uv run python ci/tests/no_using_namespace_fl_in_headers.py",
+        echo=True,
+        auto_run=True,
+        enable_stack_trace=enable_stack_trace,
+    )
+    namespace_check_proc.wait()
+    if namespace_check_proc.returncode != 0:
+        print(
+            f"Namespace check failed with return code {namespace_check_proc.returncode}"
+        )
+        sys.exit(namespace_check_proc.returncode)
+    print("Namespace check passed.")
+
+
+def build_cpp_test_command(args: TestArgs) -> str:
+    """Build the C++ test command based on arguments"""
+    cmd_list = ["uv", "run", "ci/cpp_test_run.py"]
+
+    if args.clang:
+        cmd_list.append("--clang")
+
+    if args.test:
+        cmd_list.append("--test")
+        cmd_list.append(args.test)
+    if args.clean:
+        cmd_list.append("--clean")
+    if args.verbose:
+        cmd_list.append("--verbose")
+    if args.check:
+        cmd_list.append("--check")
+
+    return subprocess.list2cmdline(cmd_list)
+
+
+def run_unit_tests(args: TestArgs, enable_stack_trace: bool) -> None:
+    """Run C++ unit tests only"""
+    print("Running C++ unit tests...")
+
+    # Namespace check (always run with C++ tests)
+    run_namespace_check(enable_stack_trace)
+
+    # Build and run unit tests
+    cmd_str_cpp = build_cpp_test_command(args)
+
+    # Set compiler-specific timeout for C++ tests
+    # GCC builds are 5x slower due to poor unified compilation performance
+    cpp_test_timeout = (
+        900 if args.gcc else 300
+    )  # 15 minutes for GCC, 5 minutes for Clang/default
+    if args.gcc:
+        print(
+            f"Using extended timeout for GCC builds: {cpp_test_timeout} seconds (15 minutes)"
+        )
+
+    start_time = time.time()
+    proc = RunningProcess(
+        cmd_str_cpp, enable_stack_trace=enable_stack_trace, timeout=cpp_test_timeout
+    )
+    proc.wait()
+    if proc.returncode != 0:
+        print(f"Command failed: {proc.command}")
+        sys.exit(proc.returncode)
+
+    print(f"C++ unit tests completed in {time.time() - start_time:.2f}s")
+
+
+def run_examples_tests(args: TestArgs, enable_stack_trace: bool) -> None:
+    """Run example compilation tests only"""
+    if args.examples:
+        # Specific examples provided
+        examples_str = " ".join(args.examples)
+        print(f"Running example compilation tests for: {examples_str}")
+    else:
+        # No specific examples, run all
+        print("Running example compilation tests")
+
+    start_time = time.time()
+
+    # Build command with optional example names
+    cmd = ["uv", "run", "ci/test_example_compilation.py"]
+    if args.examples:
+        cmd.extend(args.examples)
+    if args.clean:
+        cmd.append("--clean")
+    if args.no_pch:
+        cmd.append("--no-pch")
+    if args.cache:
+        cmd.append("--cache")
+
+    # Run the example compilation test script
+    proc = RunningProcess(
+        cmd,
+        echo=True,
+        auto_run=True,
+        enable_stack_trace=enable_stack_trace,
+    )
+    proc.wait()
+    if proc.returncode != 0:
+        print(f"Example compilation test failed with return code {proc.returncode}")
+        sys.exit(proc.returncode)
+
+    print(
+        f"Example compilation test completed successfully in {time.time() - start_time:.2f}s"
+    )
+
+
+def run_python_tests(args: TestArgs, enable_stack_trace: bool) -> None:
+    """Run Python tests only"""
+    print("Running Python tests...")
+
+    pytest_proc = RunningProcess(
+        "uv run pytest -s ci/tests -xvs --durations=0",
+        echo=True,
+        auto_run=True,
+        enable_stack_trace=enable_stack_trace,
+    )
+    pytest_proc.wait()
+    if pytest_proc.returncode != 0:
+        print(f"Python tests failed with return code {pytest_proc.returncode}")
+        sys.exit(pytest_proc.returncode)
+
+    print("Python tests completed successfully")
+
+
+def run_cpp_tests(
+    args: TestArgs, test_categories: TestCategories, enable_stack_trace: bool
+) -> None:
+    """Run C++ tests (unit and/or examples)"""
+    if test_categories.unit_only:
+        run_unit_tests(args, enable_stack_trace)
+    elif test_categories.examples_only:
+        run_examples_tests(args, enable_stack_trace)
+    else:
+        # Both unit and examples
+        run_unit_tests(args, enable_stack_trace)
+        run_examples_tests(args, enable_stack_trace)
+
+
+def run_all_tests(
+    args: TestArgs,
+    test_categories: TestCategories,
+    enable_stack_trace: bool,
+    src_code_change: bool,
+) -> None:
+    """Run all tests in parallel (original behavior)"""
+    print("Running all tests...")
+
+    # Namespace check first
+    run_namespace_check(enable_stack_trace)
+
+    # Build C++ test command
+    cmd_str_cpp = build_cpp_test_command(args)
+
+    # Build PIO check command
+    cmd_list = _make_pio_check_cmd()
+    if not _PIO_CHECK_ENABLED:
+        cmd_list = ["echo", "pio check is disabled"]
+    cmd_str = subprocess.list2cmdline(cmd_list)
+
+    print(f"Running command (in the background): {cmd_str}")
+    pio_process = RunningProcess(
+        cmd_str,
+        echo=False,
+        auto_run=not _IS_GITHUB,
+        enable_stack_trace=enable_stack_trace,
+    )
+
+    # Set compiler-specific timeout for C++ tests
+    # GCC builds are 5x slower due to poor unified compilation performance
+    cpp_test_timeout = (
+        900 if args.gcc else 300
+    )  # 15 minutes for GCC, 5 minutes for Clang/default
+    if args.gcc:
+        print(
+            f"Using extended timeout for GCC builds: {cpp_test_timeout} seconds (15 minutes)"
+        )
+
+    cpp_test_proc = RunningProcess(
+        cmd_str_cpp, enable_stack_trace=enable_stack_trace, timeout=cpp_test_timeout
+    )
+    compile_native_proc = RunningProcess(
+        "uv run ci/ci-compile-native.py",
+        echo=False,
+        auto_run=not _IS_GITHUB,
+        enable_stack_trace=enable_stack_trace,
+    )
+    pytest_proc = RunningProcess(
+        "uv run pytest -s ci/tests -xvs --durations=0",
+        echo=True,
+        auto_run=not _IS_GITHUB,
+        enable_stack_trace=enable_stack_trace,
+    )
+
+    tests = [
+        cpp_test_proc,
+        compile_native_proc,
+        pytest_proc,
+        pio_process,
+    ]
+    if src_code_change:
+        print("Source code changed, running uno tests")
+        tests += [make_compile_uno_test_process(enable_stack_trace)]
+
+    is_first = True
+    for test in tests:
+        was_first = is_first
+        is_first = False
+        sys.stdout.flush()
+        if not test.auto_run:
+            test.run()
+        print(f"Waiting for command: {test.command}")
+        # make a thread that will say waiting for test {test} to finish...<seconds>
+        # and then kill the test if it takes too long (> 120 seconds)
+        event_stopped = threading.Event()
+
+        def _runner() -> None:
+            start_time = time.time()
+            while not event_stopped.wait(1):
+                curr_time = time.time()
+                seconds = int(curr_time - start_time)
+                if (
+                    not was_first
+                ):  # skip printing for the first test since it echo's out.
+                    print(
+                        f"Waiting for command: {test.command} to finish...{seconds} seconds"
+                    )
+
+        runner_thread = threading.Thread(target=_runner, daemon=True)
+        runner_thread.start()
+        test.wait()
+        event_stopped.set()
+        runner_thread.join(timeout=1)
+        if not test.echo:
+            for line in test.stdout.splitlines():
+                print(line)
+        if test.returncode != 0:
+            [t.kill() for t in tests]
+            print(
+                f"\nCommand failed: {test.command} with return code {test.returncode}"
+            )
+            sys.exit(test.returncode)
+
+    print("All tests passed")
 
 
 def main() -> None:
@@ -265,6 +697,7 @@ def main() -> None:
         watchdog.start()
 
         args = parse_args()
+        args = process_test_flags(args)
 
         # Handle --no-interactive flag
         if args.no_interactive:
@@ -308,20 +741,31 @@ def main() -> None:
         cache_dir.mkdir(exist_ok=True)
         fingerprint_file = cache_dir / "fingerprint.json"
 
-        def write_fingerprint(fingerprint: Dict[str, str]) -> None:
+        def write_fingerprint(fingerprint: FingerprintResult) -> None:
+            # Convert dataclass to dict for JSON serialization
+            fingerprint_dict = {
+                "hash": fingerprint.hash,
+                "elapsed_seconds": fingerprint.elapsed_seconds,
+                "status": fingerprint.status,
+            }
             with open(fingerprint_file, "w") as f:
-                json.dump(fingerprint, f, indent=2)
+                json.dump(fingerprint_dict, f, indent=2)
 
-        def read_fingerprint() -> Dict[str, str] | None:
+        def read_fingerprint() -> FingerprintResult | None:
             if fingerprint_file.exists():
                 with open(fingerprint_file, "r") as f:
                     try:
-                        return json.load(f)
+                        data = json.load(f)
+                        return FingerprintResult(
+                            hash=data.get("hash", ""),
+                            elapsed_seconds=data.get("elapsed_seconds"),
+                            status=data.get("status"),
+                        )
                     except json.JSONDecodeError:
                         print("Invalid fingerprint file. Recalculating...")
             return None
 
-        prev_fingerprint: dict[str, str] | None = read_fingerprint()
+        prev_fingerprint = read_fingerprint()
         # Calculate fingerprint
         fingerprint_data = calculate_fingerprint()
         src_code_change: bool
@@ -329,8 +773,8 @@ def main() -> None:
             src_code_change = True
         else:
             try:
-                src_code_change = fingerprint_data["hash"] != prev_fingerprint["hash"]
-            except KeyError:
+                src_code_change = fingerprint_data.hash != prev_fingerprint.hash
+            except Exception:
                 print("Invalid fingerprint file. Recalculating...")
                 src_code_change = True
         # print(f"Fingerprint: {fingerprint_result['hash']}")
@@ -341,213 +785,39 @@ def main() -> None:
 
         write_fingerprint(fingerprint_data)
 
-        cmd_list = ["uv", "run", "ci/cpp_test_run.py"]
+        # Determine which test categories to run
+        test_categories = determine_test_categories(args)
 
-        if args.clang:
-            cmd_list.append("--clang")
+        # Execute test categories based on flags
+        if test_categories.unit_only:
+            run_unit_tests(args, enable_stack_trace)
+        elif test_categories.examples_only:
+            run_examples_tests(args, enable_stack_trace)
+        elif test_categories.py_only:
+            run_python_tests(args, enable_stack_trace)
+        elif (
+            test_categories.unit and test_categories.examples and not test_categories.py
+        ):
+            # C++ mode: unit + examples, no Python (sequential execution)
+            run_unit_tests(args, enable_stack_trace)
+            run_examples_tests(args, enable_stack_trace)
+        elif (
+            test_categories.unit and test_categories.py and not test_categories.examples
+        ):
+            # Unit + Python only
+            run_unit_tests(args, enable_stack_trace)
+            run_python_tests(args, enable_stack_trace)
+        elif (
+            test_categories.examples and test_categories.py and not test_categories.unit
+        ):
+            # Examples + Python only
+            run_examples_tests(args, enable_stack_trace)
+            run_python_tests(args, enable_stack_trace)
+        else:
+            # Default behavior: run all tests in parallel
+            run_all_tests(args, test_categories, enable_stack_trace, src_code_change)
 
-        if args.test:
-            cmd_list.append("--test")
-            cmd_list.append(args.test)
-        if args.clean:
-            cmd_list.append("--clean")
-        if args.verbose:
-            cmd_list.append("--verbose")
-        if args.check:
-            cmd_list.append("--check")
-
-        cmd_str_cpp = subprocess.list2cmdline(cmd_list)
-
-        if args.cpp:
-            # Handle --examples flag specifically
-            if args.examples is not None:
-                if args.examples:
-                    # Specific examples provided
-                    examples_str = " ".join(args.examples)
-                    print(f"Running example compilation tests for: {examples_str}")
-                else:
-                    # No specific examples, run all
-                    print("Running example compilation tests")
-                start_time = time.time()
-
-                # Build command with optional example names
-                cmd = ["uv", "run", "ci/test_example_compilation.py"]
-                if args.examples:
-                    cmd.extend(args.examples)
-                if args.clean:
-                    cmd.append("--clean")
-                if args.no_pch:
-                    cmd.append("--no-pch")
-                if args.cache:
-                    cmd.append("--cache")
-
-                # Run the example compilation test script
-                proc = RunningProcess(
-                    cmd,
-                    echo=True,
-                    auto_run=True,
-                    enable_stack_trace=enable_stack_trace,
-                )
-                proc.wait()
-                if proc.returncode != 0:
-                    print(
-                        f"Example compilation test failed with return code {proc.returncode}"
-                    )
-                    sys.exit(proc.returncode)
-
-                print(
-                    f"Example compilation test completed successfully in {time.time() - start_time:.2f}s"
-                )
-                return
-
-            # Run the namespace check before C++ tests
-            print("Running namespace check...")
-            namespace_check_proc = RunningProcess(
-                "uv run python ci/tests/no_using_namespace_fl_in_headers.py",
-                echo=True,
-                auto_run=True,
-                enable_stack_trace=enable_stack_trace,
-            )
-            namespace_check_proc.wait()
-            if namespace_check_proc.returncode != 0:
-                print(
-                    f"Namespace check failed with return code {namespace_check_proc.returncode}"
-                )
-                sys.exit(namespace_check_proc.returncode)
-            print("Namespace check passed.")
-
-            # Compile and run C++ tests
-            start_time = time.time()
-
-            if args.test:
-                # Run specific C++ test
-                proc = RunningProcess(
-                    cmd_str_cpp, enable_stack_trace=enable_stack_trace
-                )
-                proc.wait()
-                if proc.returncode != 0:
-                    print(f"Command failed: {proc.command}")
-                    sys.exit(proc.returncode)
-            else:
-                # Run all C++ tests
-                proc = RunningProcess(
-                    cmd_str_cpp, enable_stack_trace=enable_stack_trace
-                )
-                proc.wait()
-                if proc.returncode != 0:
-                    print(f"Command failed: {proc.command}")
-                    sys.exit(proc.returncode)
-
-            print(f"Time elapsed: {time.time() - start_time:.2f}s")
-            return
-
-        # Run the namespace check before C++ tests
-        print("Running namespace check...")
-        namespace_check_proc = RunningProcess(
-            "uv run python ci/tests/no_using_namespace_fl_in_headers.py",
-            echo=True,
-            auto_run=True,
-            enable_stack_trace=enable_stack_trace,
-        )
-        namespace_check_proc.wait()
-        if namespace_check_proc.returncode != 0:
-            print(
-                f"Namespace check failed with return code {namespace_check_proc.returncode}"
-            )
-            sys.exit(namespace_check_proc.returncode)
-        print("Namespace check passed.")
-
-        cmd_list = _make_pio_check_cmd()
-        if not _PIO_CHECK_ENABLED:
-            cmd_list = ["echo", "pio check is disabled"]
-
-        cmd_str = subprocess.list2cmdline(cmd_list)
-
-        print(f"Running command (in the background): {cmd_str}")
-        pio_process = RunningProcess(
-            cmd_str,
-            echo=False,
-            auto_run=not _IS_GITHUB,
-            enable_stack_trace=enable_stack_trace,
-        )
-        # Set compiler-specific timeout for C++ tests
-        # GCC builds are 5x slower due to poor unified compilation performance
-        cpp_test_timeout = (
-            900 if args.gcc else 300
-        )  # 15 minutes for GCC, 5 minutes for Clang/default
-        if args.gcc:
-            print(
-                f"Using extended timeout for GCC builds: {cpp_test_timeout} seconds (15 minutes)"
-            )
-
-        cpp_test_proc = RunningProcess(
-            cmd_str_cpp, enable_stack_trace=enable_stack_trace, timeout=cpp_test_timeout
-        )
-        compile_native_proc = RunningProcess(
-            "uv run ci/ci-compile-native.py",
-            echo=False,
-            auto_run=not _IS_GITHUB,
-            enable_stack_trace=enable_stack_trace,
-        )
-        pytest_proc = RunningProcess(
-            "uv run pytest -s ci/tests -xvs --durations=0",
-            echo=True,
-            auto_run=not _IS_GITHUB,
-            enable_stack_trace=enable_stack_trace,
-        )
-
-        tests = [
-            cpp_test_proc,
-            compile_native_proc,
-            pytest_proc,
-            pio_process,
-        ]
-        if src_code_change:
-            print("Source code changed, running uno tests")
-            tests += [make_compile_uno_test_process(enable_stack_trace)]
-
-        is_first = True
-        for test in tests:
-            was_first = is_first
-            is_first = False
-            sys.stdout.flush()
-            if not test.auto_run:
-                test.run()
-            print(f"Waiting for command: {test.command}")
-            # make a thread that will say waiting for test {test} to finish...<seconds>
-            # and then kill the test if it takes too long (> 120 seconds)
-            event_stopped = threading.Event()
-
-            def _runner() -> None:
-                start_time = time.time()
-                while not event_stopped.wait(1):
-                    curr_time = time.time()
-                    seconds = int(curr_time - start_time)
-                    if (
-                        not was_first
-                    ):  # skip printing for the first test since it echo's out.
-                        print(
-                            f"Waiting for command: {test.command} to finish...{seconds} seconds"
-                        )
-
-            runner_thread = threading.Thread(target=_runner, daemon=True)
-            runner_thread.start()
-            test.wait()
-            event_stopped.set()
-            runner_thread.join(timeout=1)
-            if not test.echo:
-                for line in test.stdout.splitlines():
-                    print(line)
-            if test.returncode != 0:
-                [t.kill() for t in tests]
-                print(
-                    f"\nCommand failed: {test.command} with return code {test.returncode}"
-                )
-                sys.exit(test.returncode)
-
-        print("All tests passed")
-
-        # Launch a force exit daemon thread that waits for 1 second until invoking os._exit(0)
+        # Force exit daemon thread remains at the end
         def force_exit():
             time.sleep(1)
             print("Force exit daemon thread invoked")

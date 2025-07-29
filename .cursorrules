@@ -601,6 +601,162 @@ bash lint
 
 ## Code Standards
 
+### Python Function Return Types and Type Safety
+**🚨 CRITICAL: Python functions SHOULD NOT return dict UNLESS ABSOLUTELY NECESSARY.**
+
+**Use dataclass structs for type-checked arguments and return values instead of raw dictionaries:**
+
+**❌ WRONG - Returning raw dict:**
+```python
+def parse_args(...) -> argparse.Namespace:
+    # Returns argparse namespace
+    
+def get_config(...) -> dict:
+    return {"name": "test", "enabled": True}
+```
+
+**✅ CORRECT - Using dataclass structs:**
+```python
+from dataclasses import dataclass
+
+@dataclass
+class Args:
+    val: int
+    name: str
+    enabled: bool
+    
+    def __post_init__(self):
+        # Type checking and validation
+        if not isinstance(self.val, int):
+            raise TypeError(f"val must be int, got {type(self.val)}")
+        if self.val < 0:
+            raise ValueError("val must be non-negative")
+        if not isinstance(self.name, str):
+            raise TypeError(f"name must be str, got {type(self.name)}")
+
+def parse_args(...) -> Args:
+    # Use argparse here, then convert to Args dataclass
+    parsed = parser.parse_args()
+    return Args(
+        val=parsed.val,
+        name=parsed.name,
+        enabled=parsed.enabled
+    )
+
+@dataclass 
+class Config:
+    name: str
+    enabled: bool
+    timeout: int = 30  # Default value
+    
+    def __post_init__(self):
+        if not self.name:
+            raise ValueError("name cannot be empty")
+        if self.timeout <= 0:
+            raise ValueError("timeout must be positive")
+
+def get_config(...) -> Config:
+    return Config(name="test", enabled=True)
+```
+
+**Benefits of dataclass approach:**
+- ✅ **Type safety** - Clear parameter and return types
+- ✅ **Runtime validation** - Use `__post_init__` for type and value checking
+- ✅ **IDE support** - Better autocomplete and type hints
+- ✅ **Documentation** - Self-documenting parameter structure
+- ✅ **Refactoring safety** - Changes to structure are caught at compile time
+- ✅ **Testing** - Easier to create test data with known structure
+
+**When dict IS acceptable:**
+- ✅ **Temporary internal data** that won't cross function boundaries
+- ✅ **JSON parsing results** that are immediately converted to dataclasses
+- ✅ **Configuration dictionaries** from external sources (but convert to dataclass ASAP)
+- ✅ **Dynamic data** where the keys are not known at design time
+
+**Type checking in `__post_init__`:**
+```python
+@dataclass
+class CompilerSettings:
+    compiler_path: str
+    optimization_level: int
+    debug_symbols: bool
+    include_paths: list[str]
+    
+    def __post_init__(self):
+        # Type validation
+        if not isinstance(self.compiler_path, str):
+            raise TypeError(f"compiler_path must be str, got {type(self.compiler_path)}")
+        if not isinstance(self.optimization_level, int):
+            raise TypeError(f"optimization_level must be int, got {type(self.optimization_level)}")
+        if not isinstance(self.debug_symbols, bool):
+            raise TypeError(f"debug_symbols must be bool, got {type(self.debug_symbols)}")
+        if not isinstance(self.include_paths, list):
+            raise TypeError(f"include_paths must be list, got {type(self.include_paths)}")
+            
+        # Value validation
+        if not self.compiler_path:
+            raise ValueError("compiler_path cannot be empty")
+        if self.optimization_level not in [0, 1, 2, 3]:
+            raise ValueError(f"optimization_level must be 0-3, got {self.optimization_level}")
+        if not all(isinstance(path, str) for path in self.include_paths):
+            raise TypeError("include_paths must contain only strings")
+```
+
+**Migration strategy for existing code:**
+1. **Identify functions returning dict** - prioritize public APIs first
+2. **Create equivalent dataclass** with same fields and validation
+3. **Update function signature** to return dataclass
+4. **Add conversion logic** from internal dict to dataclass
+5. **Update callers** to use dataclass fields instead of dict keys
+
+### parse_args Function Signature Requirements
+**🚨 CRITICAL: All `parse_args` functions MUST accept an optional `list[str]` parameter for custom argument parsing.**
+
+**Function signature pattern:**
+```python
+def parse_args(args: Optional[list[str]] = None) -> YourDataClass:
+    """Parse command line arguments
+    
+    Args:
+        args: Optional list of arguments to parse. If None, uses sys.argv
+        
+    Returns:
+        Parsed arguments as a dataclass
+    """
+    parser = argparse.ArgumentParser(description="Your description")
+    # ... configure parser ...
+    
+    # Parse from custom args or sys.argv
+    parsed = parser.parse_args(args)
+    
+    # Convert to dataclass
+    return YourDataClass(
+        field1=parsed.field1,
+        field2=parsed.field2,
+        # ... other fields
+    )
+```
+
+**Benefits of optional args parameter:**
+- ✅ **Testing flexibility** - Easy to test with custom argument lists
+- ✅ **Library usage** - Functions can be called programmatically with specific args
+- ✅ **Scripting integration** - Can be used in automation without modifying sys.argv
+- ✅ **Backward compatibility** - Default behavior (None) maintains existing functionality
+
+**Examples:**
+```python
+# Normal usage (uses sys.argv)
+args = parse_args()
+
+# Testing usage with custom arguments
+args = parse_args(["--verbose", "--output", "test.txt"])
+
+# Programmatic usage
+args = parse_args(["--config", config_file, "--debug"])
+```
+
+**Why:** This pattern enables flexible argument parsing for testing, scripting, and programmatic usage while maintaining backward compatibility with existing code that relies on sys.argv parsing.
+
 ### Avoid std:: Prefixed Functions
 **DO NOT use `std::` prefixed functions or headers in the codebase.** This project provides its own STL-equivalent implementations under the `fl::` namespace.
 
