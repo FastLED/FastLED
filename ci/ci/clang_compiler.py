@@ -8,7 +8,7 @@ Supports the simple build system approach outlined in FEATURE.md.
 import os
 import subprocess
 import tempfile
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import cast
 
@@ -22,6 +22,7 @@ class CompilerSettings:
     include_path: str
     platform_define: str
     std_version: str = "c++17"
+    compiler_args: list[str] = field(default_factory=list)
 
 
 @dataclass
@@ -131,83 +132,6 @@ class FastLEDClangCompiler:
                 success=False, version="", error=f"clang++ not accessible: {str(e)}"
             )
 
-    def compile(
-        self,
-        ino_file: str | Path,
-        output_file: str | Path,
-        additional_flags: list[str] | None = None,
-    ) -> CompileResult:
-        """
-        Compile a single .ino file using clang++.
-
-        Args:
-            ino_file (str|Path): Path to the .ino file to compile
-            output_file (str|Path): Path for the output object file
-            additional_flags (list, optional): Additional compiler flags
-
-        Returns:
-            CompileResult: Result containing success status, output path, stderr, size, and command
-        """
-        ino_file = Path(ino_file)
-        output_file = Path(output_file)
-
-        # Build compiler command
-        cmd = [
-            self.compiler,
-            "-x",
-            "c++",  # Force C++ compilation of .ino files
-            f"-std={self.settings.std_version}",
-            f"-I{self.settings.include_path}",  # FastLED include path
-            f"-D{self.settings.platform_define}",  # Platform define
-            "-c",
-            str(ino_file),
-            "-o",
-            str(output_file),
-        ]
-
-        if additional_flags:
-            cmd.extend(additional_flags)
-
-        try:
-            result = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
-
-            if result.returncode == 0:
-                # Check if output file was created and get size
-                if os.path.exists(output_file):
-                    size = os.path.getsize(output_file)
-                    return CompileResult(
-                        success=True,
-                        output_path=str(output_file),
-                        stderr=result.stderr,
-                        size=size,
-                        command=cmd,
-                    )
-                else:
-                    return CompileResult(
-                        success=False,
-                        output_path=str(output_file),
-                        stderr="Object file was not created",
-                        size=0,
-                        command=cmd,
-                    )
-            else:
-                return CompileResult(
-                    success=False,
-                    output_path=str(output_file),
-                    stderr=result.stderr,
-                    size=0,
-                    command=cmd,
-                )
-
-        except Exception as e:
-            return CompileResult(
-                success=False,
-                output_path=str(output_file),
-                stderr=str(e),
-                size=0,
-                command=cmd,
-            )
-
     def compile_ino_file(
         self,
         ino_path: str | Path,
@@ -225,7 +149,7 @@ class FastLEDClangCompiler:
         Returns:
             Result: Result dataclass containing subprocess execution details
         """
-        ino_path = Path(ino_path)
+        ino_file_path = Path(ino_path).resolve()
 
         # Create output path if not provided
         if output_path is None:
@@ -236,6 +160,12 @@ class FastLEDClangCompiler:
         else:
             cleanup_temp = False
 
+        with tempfile.NamedTemporaryFile(
+            mode="w", suffix=".cpp", delete=False
+        ) as tmp_cpp:
+            tmp_cpp.write(f'#include "{ino_file_path}"')
+            temp_cpp_path = Path(tmp_cpp.name)
+
         # Build compiler command
         cmd = [
             self.compiler,
@@ -244,11 +174,16 @@ class FastLEDClangCompiler:
             f"-std={self.settings.std_version}",
             f"-I{self.settings.include_path}",  # FastLED include path
             f"-D{self.settings.platform_define}",  # Platform define
-            "-c",
-            str(ino_path),
-            "-o",
-            str(output_path),
         ]
+        cmd.extend(self.settings.compiler_args)
+        cmd.extend(
+            [
+                "-c",
+                str(temp_cpp_path),
+                "-o",
+                str(output_path),
+            ]
+        )
 
         if additional_flags:
             cmd.extend(additional_flags)
@@ -278,6 +213,8 @@ class FastLEDClangCompiler:
                     pass
 
             return Result(ok=False, stdout="", stderr=str(e), return_code=-1)
+        finally:
+            os.unlink(temp_cpp_path)
 
     def find_ino_files(
         self, examples_dir: str | Path, filter_names: list[str] | None = None
@@ -410,18 +347,24 @@ def get_fastled_compile_command(
     compiler = _get_default_compiler()
     # This is a bit hacky since we removed get_compile_command, but needed for backward compatibility
     settings = compiler.settings
-    return [
+    cmd = [
         compiler.compiler,
         "-x",
         "c++",
         f"-std={settings.std_version}",
-        f"-I={settings.include_path}",
-        f"-D={settings.platform_define}",
-        "-c",
-        str(ino_file),
-        "-o",
-        str(output_file),
+        f"-I{settings.include_path}",
+        f"-D{settings.platform_define}",
     ]
+    cmd.extend(settings.compiler_args)
+    cmd.extend(
+        [
+            "-c",
+            str(ino_file),
+            "-o",
+            str(output_file),
+        ]
+    )
+    return cmd
 
 
 def main() -> bool:
@@ -450,25 +393,54 @@ def main() -> bool:
     print(f"Found {len(ino_files)} ino files: {[f.name for f in ino_files]}")
 
     if ino_files:
-        # Test compile function
-        with tempfile.NamedTemporaryFile(suffix=".o", delete=False) as temp_file:
-            temp_output = temp_file.name
-
-        result = compiler.compile(ino_files[0], temp_output)
+        # Test compile_ino_file function
+        result = compiler.compile_ino_file(ino_files[0])
         print(
-            f"Compile {ino_files[0].name}: success={result.success}, size={result.size}"
+            f"Compile {ino_files[0].name}: success={result.ok}, return_code={result.return_code}"
         )
-        print(f"Command used: {' '.join(result.command)}")
-
-        # Clean up
-        if os.path.exists(temp_output):
-            os.unlink(temp_output)
+        if not result.ok:
+            print(f"Error: {result.stderr}")
+        else:
+            print("[OK] Compilation successful")
 
         # Test compile_ino_file function with Result dataclass
         result_dc = compiler.compile_ino_file(ino_files[0])
         print(
             f"compile_ino_file {ino_files[0].name}: ok={result_dc.ok}, return_code={result_dc.return_code}"
         )
+
+    # Test compiler_args
+    print("\n=== Testing compiler_args ===")
+    settings_with_args = CompilerSettings(
+        include_path="./src",
+        platform_define="STUB_PLATFORM",
+        std_version="c++17",
+        compiler_args=["-Werror", "-Wall"],
+    )
+    compiler_with_args = FastLEDClangCompiler(settings_with_args)
+    if ino_files:
+        # Test that compiler_args are included in the command
+        with tempfile.NamedTemporaryFile(suffix=".o", delete=False) as temp_file:
+            temp_output = temp_file.name
+
+        # Get the command that would be executed
+        cmd = get_fastled_compile_command(ino_files[0], temp_output)
+        print(f"Command with compiler_args: {' '.join(cmd)}")
+
+        if "-Werror" not in cmd or "-Wall" not in cmd:
+            print("X compiler_args not found in command")
+            return False
+        print("[OK] compiler_args correctly passed to compile command.")
+
+        # Test actual compilation
+        result = compiler_with_args.compile_ino_file(ino_files[0])
+        print(f"Compile {ino_files[0].name} with extra args: success={result.ok}")
+        if not result.ok:
+            print(f"Error: {result.stderr}")
+
+        # Clean up
+        if os.path.exists(temp_output):
+            os.unlink(temp_output)
 
     # Test full accessibility test
     print("\n=== Running full accessibility test ===")
