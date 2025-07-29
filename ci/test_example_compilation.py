@@ -24,6 +24,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
 
 import psutil
+import toml  # type: ignore
 
 # Import the proven Compiler infrastructure
 from ci.clang_compiler import Compiler, CompilerSettings, Result
@@ -79,8 +80,6 @@ def create_simplified_build_flags(
 
     # Write simplified version to file
     try:
-        import toml  # Use toml library for writing (tomllib is read-only)
-
         with open(output_path, "w") as f:
             toml.dump(simplified, f)
         print(f"Created simplified build_flags.toml at {output_path}")
