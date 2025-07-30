@@ -38,6 +38,7 @@ class TestArgs:
     no_pch: bool = False
     cache: bool = False
     unity: bool = False
+    full: bool = False
 
 
 @typechecked
@@ -48,9 +49,11 @@ class TestCategories:
     unit: bool
     examples: bool
     py: bool
+    integration: bool
     unit_only: bool
     examples_only: bool
     py_only: bool
+    integration_only: bool
 
     def __post_init__(self):
         # Type validation
@@ -58,9 +61,11 @@ class TestCategories:
             "unit",
             "examples",
             "py",
+            "integration",
             "unit_only",
             "examples_only",
             "py_only",
+            "integration_only",
         ]:
             value = getattr(self, field_name)
             if not isinstance(value, bool):
@@ -159,7 +164,7 @@ def parse_args() -> TestArgs:
     parser.add_argument(
         "--examples",
         nargs="*",
-        help="Run example compilation tests only (optionally specify example names)",
+        help="Run example compilation tests only (optionally specify example names). Use with --full for complete compilation + linking + execution",
     )
     parser.add_argument(
         "--no-pch",
@@ -176,6 +181,11 @@ def parse_args() -> TestArgs:
         "--unity",
         action="store_true",
         help="Enable UNITY build mode for examples - compile all source files as a single unit for improved performance",
+    )
+    parser.add_argument(
+        "--full",
+        action="store_true",
+        help="Run full integration tests including compilation + linking + program execution",
     )
 
     args = parser.parse_args()
@@ -199,6 +209,7 @@ def parse_args() -> TestArgs:
         no_pch=args.no_pch,
         cache=args.cache,
         unity=args.unity,
+        full=args.full,
     )
 
     # Auto-enable --cpp when a specific test is provided
@@ -226,6 +237,18 @@ def parse_args() -> TestArgs:
                 "Auto-enabled --quick mode for faster example compilation (--examples)"
             )
 
+    # Handle --full flag behavior
+    if test_args.full:
+        if test_args.examples is not None:
+            # --examples --full: Run examples with full compilation+linking+execution
+            print("Full examples mode: compilation + linking + program execution")
+        else:
+            # --full alone: Run integration tests
+            if not test_args.cpp:
+                test_args.cpp = True
+                print("Auto-enabled --cpp mode for full integration tests (--full)")
+            print("Full integration tests: compilation + linking + program execution")
+
     # Default to Clang on Windows unless --gcc is explicitly passed
     if sys.platform == "win32" and not test_args.gcc and not test_args.clang:
         test_args.clang = True
@@ -241,8 +264,8 @@ def parse_args() -> TestArgs:
 def process_test_flags(args: TestArgs) -> TestArgs:
     """Process and validate test execution flags"""
 
-    # Check for conflicting specific test flags
-    specific_flags = [args.unit, args.examples is not None, args.py]
+    # Check which specific test flags are provided
+    specific_flags = [args.unit, args.examples is not None, args.py, args.full]
     specific_count = sum(bool(flag) for flag in specific_flags)
 
     # If --cpp is provided, default to --unit --examples (no Python)
@@ -252,12 +275,45 @@ def process_test_flags(args: TestArgs) -> TestArgs:
         print("--cpp mode: Running unit tests and examples (Python tests suppressed)")
         return args
 
+    # If any specific flags are provided, ONLY run those (exclusive behavior)
+    if specific_count > 0:
+        # When specific flags are provided, disable everything else unless explicitly set
+        if not args.unit:
+            # Unit was not explicitly set, so disable it
+            pass  # args.unit is already False
+        if args.examples is None:
+            # Examples was not explicitly set, so disable it
+            pass  # args.examples is already None
+        if not args.py:
+            # Python was not explicitly set, so disable it
+            pass  # args.py is already False
+        if not args.full:
+            # Full was not explicitly set, so disable it
+            pass  # args.full is already False
+
+        # Log what's running
+        enabled_tests: list[str] = []
+        if args.unit:
+            enabled_tests.append("unit tests")
+        if args.examples is not None:
+            enabled_tests.append("examples")
+        if args.py:
+            enabled_tests.append("Python tests")
+        if args.full:
+            if args.examples is not None:
+                enabled_tests.append("full example integration tests")
+            else:
+                enabled_tests.append("full integration tests")
+
+        print(f"Specific test flags provided: Running only {', '.join(enabled_tests)}")
+        return args
+
     # If no specific flags, run everything (backward compatibility)
     if specific_count == 0:
         args.unit = True
         args.examples = []  # Empty list means run all examples
         args.py = True
-        print("No test flags specified: Running all tests")
+        print("No test flags specified: Running all tests (unit, examples, Python)")
         return args
 
     return args
@@ -268,14 +324,30 @@ def determine_test_categories(args: TestArgs) -> TestCategories:
     unit_enabled = args.unit
     examples_enabled = args.examples is not None
     py_enabled = args.py
+    # Integration tests only run when --full is used alone (not with --examples)
+    integration_enabled = args.full and args.examples is None
 
     return TestCategories(
         unit=unit_enabled,
         examples=examples_enabled,
         py=py_enabled,
-        unit_only=unit_enabled and not examples_enabled and not py_enabled,
-        examples_only=examples_enabled and not unit_enabled and not py_enabled,
-        py_only=py_enabled and not unit_enabled and not examples_enabled,
+        integration=integration_enabled,
+        unit_only=unit_enabled
+        and not examples_enabled
+        and not py_enabled
+        and not integration_enabled,
+        examples_only=examples_enabled
+        and not unit_enabled
+        and not py_enabled
+        and not integration_enabled,
+        py_only=py_enabled
+        and not unit_enabled
+        and not examples_enabled
+        and not integration_enabled,
+        integration_only=integration_enabled
+        and not unit_enabled
+        and not examples_enabled
+        and not py_enabled,
     )
 
 
@@ -453,14 +525,20 @@ def run_unit_tests(args: TestArgs, enable_stack_trace: bool) -> None:
 
 
 def run_examples_tests(args: TestArgs, enable_stack_trace: bool) -> None:
-    """Run example compilation tests only"""
-    if args.examples:
+    """Run example compilation tests (with optional enhanced compilation for --full)"""
+    # Determine test mode
+    if args.full and args.examples is not None:
+        print("Running example tests with enhanced compilation (--full mode)...")
+        test_mode = "enhanced"
+    elif args.examples:
         # Specific examples provided
         examples_str = " ".join(args.examples)
         print(f"Running example compilation tests for: {examples_str}")
+        test_mode = "compilation"
     else:
         # No specific examples, run all
         print("Running example compilation tests")
+        test_mode = "compilation"
 
     start_time = time.time()
 
@@ -476,6 +554,8 @@ def run_examples_tests(args: TestArgs, enable_stack_trace: bool) -> None:
         cmd.append("--cache")
     if args.unity:
         cmd.append("--unity")
+    # Note: --full is not passed to the script as it doesn't support this flag
+    # Instead, --full just means "enhanced" example compilation mode
 
     # Run the example compilation test script
     proc = RunningProcess(
@@ -486,12 +566,20 @@ def run_examples_tests(args: TestArgs, enable_stack_trace: bool) -> None:
     )
     proc.wait()
     if proc.returncode != 0:
-        print(f"Example compilation test failed with return code {proc.returncode}")
+        test_type = (
+            "enhanced example tests"
+            if test_mode == "enhanced"
+            else "example compilation tests"
+        )
+        print(f"{test_type} failed with return code {proc.returncode}")
         sys.exit(proc.returncode)
 
-    print(
-        f"Example compilation test completed successfully in {time.time() - start_time:.2f}s"
+    test_type = (
+        "enhanced example tests"
+        if test_mode == "enhanced"
+        else "example compilation tests"
     )
+    print(f"{test_type} completed successfully in {time.time() - start_time:.2f}s")
 
 
 def run_python_tests(args: TestArgs, enable_stack_trace: bool) -> None:
@@ -510,6 +598,52 @@ def run_python_tests(args: TestArgs, enable_stack_trace: bool) -> None:
         sys.exit(pytest_proc.returncode)
 
     print("Python tests completed successfully")
+
+
+def run_integration_tests(args: TestArgs, enable_stack_trace: bool) -> None:
+    """Run full integration tests including compilation + linking + program execution"""
+
+    if args.examples is not None:
+        # When --examples --full is specified, only run example-related integration tests
+        print(
+            "Running example integration tests (compilation + linking + program execution)..."
+        )
+        test_filter = (
+            "TestFullProgramLinking"  # Only run the full program linking tests
+        )
+    else:
+        # When --full alone is specified, run all integration tests
+        print(
+            "Running full integration tests (compilation + linking + program execution)..."
+        )
+        test_filter = None
+
+    start_time = time.time()
+
+    # Run integration tests in the test_integration directory
+    cmd = ["uv", "run", "pytest", "-s", "ci/test_integration", "-xvs", "--durations=0"]
+
+    if test_filter:
+        cmd.extend(["-k", test_filter])
+
+    if args.verbose:
+        cmd.append("-v")
+
+    # Run the integration test script
+    proc = RunningProcess(
+        cmd,
+        echo=True,
+        auto_run=True,
+        enable_stack_trace=enable_stack_trace,
+    )
+    proc.wait()
+    if proc.returncode != 0:
+        test_type = "example integration tests" if test_filter else "integration tests"
+        print(f"{test_type} failed with return code {proc.returncode}")
+        sys.exit(proc.returncode)
+
+    test_type = "example integration tests" if test_filter else "integration tests"
+    print(f"{test_type} completed successfully in {time.time() - start_time:.2f}s")
 
 
 def run_cpp_tests(
@@ -739,35 +873,51 @@ def main() -> None:
         test_categories = determine_test_categories(args)
 
         # Execute test categories based on flags
-        if test_categories.unit_only:
+        if test_categories.integration_only:
+            run_integration_tests(args, enable_stack_trace)
+        elif test_categories.unit_only:
             run_unit_tests(args, enable_stack_trace)
         elif test_categories.examples_only:
             run_examples_tests(args, enable_stack_trace)
         elif test_categories.py_only:
             run_python_tests(args, enable_stack_trace)
         elif (
-            test_categories.unit and test_categories.examples and not test_categories.py
+            test_categories.unit
+            and test_categories.examples
+            and not test_categories.py
+            and not test_categories.integration
         ):
             # C++ mode: unit + examples, no Python (sequential execution)
             run_unit_tests(args, enable_stack_trace)
             run_examples_tests(args, enable_stack_trace)
         elif (
-            test_categories.unit and test_categories.py and not test_categories.examples
+            test_categories.unit
+            and test_categories.py
+            and not test_categories.examples
+            and not test_categories.integration
         ):
             # Unit + Python only
             run_unit_tests(args, enable_stack_trace)
             run_python_tests(args, enable_stack_trace)
         elif (
-            test_categories.examples and test_categories.py and not test_categories.unit
+            test_categories.examples
+            and test_categories.py
+            and not test_categories.unit
+            and not test_categories.integration
         ):
             # Examples + Python only
             run_examples_tests(args, enable_stack_trace)
             run_python_tests(args, enable_stack_trace)
         else:
-            # All tests enabled: run unit, examples, and Python sequentially
-            run_unit_tests(args, enable_stack_trace)
-            run_examples_tests(args, enable_stack_trace)
-            run_python_tests(args, enable_stack_trace)
+            # All tests enabled or complex combinations: run sequentially
+            if test_categories.unit:
+                run_unit_tests(args, enable_stack_trace)
+            if test_categories.examples:
+                run_examples_tests(args, enable_stack_trace)
+            if test_categories.py:
+                run_python_tests(args, enable_stack_trace)
+            if test_categories.integration:
+                run_integration_tests(args, enable_stack_trace)
 
         # Force exit daemon thread remains at the end
         def force_exit():
