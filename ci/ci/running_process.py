@@ -1,5 +1,6 @@
 # pyright: reportUnknownMemberType=false, reportMissingParameterType=false
 import os
+import queue
 import re
 import subprocess
 import sys
@@ -8,6 +9,8 @@ import threading
 import time
 import urllib.parse
 from pathlib import Path
+from queue import Queue
+from typing import Any
 
 
 def normalize_error_warning_paths(line: str) -> str:
@@ -128,7 +131,7 @@ class RunningProcess:
     A class to manage and stream output from a running subprocess.
 
     This class provides functionality to execute shell commands, stream their output
-    in real-time, and control the subprocess execution.
+    in real-time via a queue, and control the subprocess execution.
     """
 
     def __init__(
@@ -137,7 +140,6 @@ class RunningProcess:
         cwd: Path | None = None,
         check: bool = False,
         auto_run: bool = True,
-        echo: bool = True,
         timeout: int = 300,  # five minutes
         enable_stack_trace: bool = True,  # Enable stack trace dumping on timeout
     ):
@@ -149,7 +151,6 @@ class RunningProcess:
             cwd (Path | None): The working directory to execute the command in.
             check (bool): If True, raise an exception if the command returns a non-zero exit code.
             auto_run (bool): If True, automatically run the command when the instance is created.
-            echo (bool): If True, print the output of the command to the console in real-time.
             timeout (int): Timeout in seconds for process execution. Default 30 seconds.
             enable_stack_trace (bool): If True, dump stack trace when process times out.
         """
@@ -157,11 +158,10 @@ class RunningProcess:
             command = subprocess.list2cmdline(command)
         self.command = command
         self.cwd = str(cwd) if cwd is not None else None
-        self.buffer: list[str] = []
-        self.proc: subprocess.Popen | None = None
+        self.output_queue: Queue[str | None] = Queue()
+        self.proc: subprocess.Popen[Any] | None = None
         self.check = check
         self.auto_run = auto_run
-        self.echo = echo
         self.timeout = timeout
         self.enable_stack_trace = enable_stack_trace
         self.reader_thread: threading.Thread | None = None
@@ -218,23 +218,20 @@ class RunningProcess:
 
     def run(self) -> None:
         """
-        Execute the command and stream its output in real-time.
-
-        Returns:
-            str: The full output of the command.
+        Execute the command and stream its output to the queue.
 
         Raises:
             subprocess.CalledProcessError: If the command returns a non-zero exit code.
         """
-
         self.proc = subprocess.Popen(
             self.command,
             shell=True,
             cwd=self.cwd,
-            bufsize=256,
+            bufsize=1,  # Line buffered
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,  # Merge stderr into stdout
-            text=False,  # Automatically decode bytes to str
+            text=False,  # We'll handle decoding ourselves
+            encoding=None,  # Disable automatic decoding
         )
 
         def output_reader():
@@ -250,28 +247,34 @@ class RunningProcess:
 
                     # Apply path normalization to error and warning lines
                     normalized_linestr = normalize_error_warning_paths(linestr)
-
-                    if self.echo:
-                        # Handle Unicode output properly on Windows
-                        try:
-                            print(
-                                normalized_linestr
-                            )  # Print normalized output to console in real time
-                        except UnicodeEncodeError:
-                            # Fallback: encode to utf-8 bytes and decode with errors='replace'
-                            print(
-                                normalized_linestr.encode(
-                                    "utf-8", errors="replace"
-                                ).decode("utf-8", errors="replace")
-                            )
-                    self.buffer.append(normalized_linestr)
+                    self.output_queue.put(normalized_linestr)
             finally:
                 if self.proc and self.proc.stdout:
                     self.proc.stdout.close()
+                # Signal end of output with None
+                self.output_queue.put(None)
 
         # Start output reader thread
         self.reader_thread = threading.Thread(target=output_reader, daemon=True)
         self.reader_thread.start()
+
+    def get_next_line(self, timeout: float | None = None) -> str | None:
+        """
+        Get the next line of output from the process.
+
+        Args:
+            timeout: How long to wait for the next line in seconds.
+                    None means wait forever, 0 means don't wait.
+
+        Returns:
+            The next line of output, or None if no more output is available
+            or the timeout was reached.
+
+        Raises:
+            queue.Empty: If timeout is 0 or specified and no line is available
+        """
+
+        return self.output_queue.get(timeout=timeout)
 
     def wait(self) -> int:
         """
@@ -314,9 +317,28 @@ class RunningProcess:
                 )
             time.sleep(0.1)  # Check every 100ms
 
+        # Process has completed, get return code
+        assert self.proc is not None  # For type checker
         rtn = self.proc.returncode
-        assert self.reader_thread is not None
-        self.reader_thread.join(timeout=1)
+        assert rtn is not None  # Process has completed, so returncode exists
+
+        # Wait for reader thread to finish and cleanup
+        if self.reader_thread is not None:
+            self.reader_thread.join(timeout=1)
+            if self.reader_thread.is_alive():
+                # Reader thread didn't finish, force shutdown
+                self.shutdown.set()
+                self.reader_thread.join(timeout=1)
+
+        # Drain any remaining output
+        while True:
+            try:
+                line = self.output_queue.get_nowait()
+                if line is None:  # End of output marker
+                    break
+            except queue.Empty:
+                break
+
         return rtn
 
     def kill(self) -> None:
@@ -328,8 +350,25 @@ class RunningProcess:
         """
         if self.proc is None:
             return
+
+        # Signal reader thread to stop
         self.shutdown.set()
+
+        # Kill the process
         self.proc.kill()
+
+        # Wait for reader thread to finish
+        if self.reader_thread is not None:
+            self.reader_thread.join(timeout=1)
+
+        # Drain any remaining output
+        while True:
+            try:
+                line = self.output_queue.get_nowait()
+                if line is None:  # End of output marker
+                    break
+            except queue.Empty:
+                break
 
     def terminate(self) -> None:
         """
@@ -355,7 +394,20 @@ class RunningProcess:
         Get the complete stdout output of the process.
 
         Returns:
-            str: The complete stdout output as a string, or None if process hasn't completed.
+            str: The complete stdout output as a string.
         """
+        # Wait for process to complete
         self.wait()
-        return "\n".join(self.buffer)
+
+        # Collect all lines from the queue
+        lines: list[str] = []
+        while True:
+            try:
+                line = self.output_queue.get_nowait()
+                if line is None:  # End of output marker
+                    break
+                lines.append(line)
+            except queue.Empty:
+                break
+
+        return "\n".join(lines)

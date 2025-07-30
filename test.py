@@ -9,7 +9,7 @@ import threading
 import time
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, cast
 
 from typeguard import typechecked
 
@@ -386,7 +386,7 @@ def make_compile_uno_test_process(enable_stack_trace: bool = True) -> RunningPro
     # cmd = cmd + ['||'] + cmd
     # return RunningProcess(cmd, echo=False, auto_run=not _IS_GITHUB, shell=True)
     return RunningProcess(
-        cmd, echo=False, auto_run=not _IS_GITHUB, enable_stack_trace=enable_stack_trace
+        cmd, auto_run=not _IS_GITHUB, enable_stack_trace=enable_stack_trace
     )
 
 
@@ -466,7 +466,6 @@ def run_namespace_check(enable_stack_trace: bool) -> None:
     print("Running namespace check...")
     namespace_check_proc = RunningProcess(
         "uv run python ci/tests/no_using_namespace_fl_in_headers.py",
-        echo=True,
         auto_run=True,
         enable_stack_trace=enable_stack_trace,
     )
@@ -570,7 +569,6 @@ def run_examples_tests(args: TestArgs, enable_stack_trace: bool) -> None:
     # Run the example compilation test script
     proc = RunningProcess(
         cmd,
-        echo=True,
         auto_run=True,
         enable_stack_trace=enable_stack_trace,
     )
@@ -598,7 +596,6 @@ def run_python_tests(args: TestArgs, enable_stack_trace: bool) -> None:
 
     pytest_proc = RunningProcess(
         "uv run pytest -s ci/tests -xvs --durations=0",
-        echo=True,
         auto_run=True,
         enable_stack_trace=enable_stack_trace,
     )
@@ -642,7 +639,6 @@ def run_integration_tests(args: TestArgs, enable_stack_trace: bool) -> None:
     # Run the integration test script
     proc = RunningProcess(
         cmd,
-        echo=True,
         auto_run=True,
         enable_stack_trace=enable_stack_trace,
     )
@@ -708,7 +704,6 @@ def run_all_tests(
         processes.append(
             RunningProcess(
                 cmd_str,
-                echo=False,
                 auto_run=False,
                 enable_stack_trace=enable_stack_trace,
             )
@@ -750,7 +745,6 @@ def create_unit_test_process(
         enable_stack_trace=enable_stack_trace,
         timeout=cpp_test_timeout,
         auto_run=False,
-        echo=True,
     )
 
 
@@ -771,16 +765,13 @@ def create_examples_test_process(
         cmd.append("--unity")
     if args.full and args.examples is not None:
         cmd.append("--full")
-    return RunningProcess(
-        cmd, echo=True, auto_run=False, enable_stack_trace=enable_stack_trace
-    )
+    return RunningProcess(cmd, auto_run=False, enable_stack_trace=enable_stack_trace)
 
 
 def create_python_test_process(enable_stack_trace: bool) -> RunningProcess:
     """Create a Python test process"""
     return RunningProcess(
         "uv run pytest -s ci/tests -xvs --durations=0",
-        echo=True,
         auto_run=False,
         enable_stack_trace=enable_stack_trace,
     )
@@ -796,16 +787,13 @@ def create_integration_test_process(
         cmd.extend(["-k", "TestFullProgramLinking"])
     if args.verbose:
         cmd.append("-v")
-    return RunningProcess(
-        cmd, echo=True, auto_run=False, enable_stack_trace=enable_stack_trace
-    )
+    return RunningProcess(cmd, auto_run=False, enable_stack_trace=enable_stack_trace)
 
 
 def create_namespace_check_process(enable_stack_trace: bool) -> RunningProcess:
     """Create a namespace check process"""
     return RunningProcess(
         "uv run python ci/tests/no_using_namespace_fl_in_headers.py",
-        echo=True,
         auto_run=False,
         enable_stack_trace=enable_stack_trace,
     )
@@ -829,57 +817,70 @@ def run_tests_parallel(processes: list[RunningProcess]) -> None:
         proc.run()
         print(f"Started: {proc.command}")
 
-    # Wait for each process and handle output
-    for proc in processes:
-        try:
-            print(f"\nWaiting for: {proc.command}")
-            event_stopped = threading.Event()
+    # Monitor all processes for output and completion
+    active_processes = processes.copy()
+    while active_processes:
+        for proc in active_processes[:]:  # Copy list for safe modification
+            try:
+                # Check for new output
+                while True:
+                    line = proc.get_next_line()
+                    if line is None:
+                        break
+                    try:
+                        print(line)
+                    except UnicodeEncodeError:
+                        # Fallback: encode to utf-8 bytes and decode with errors='replace'
+                        print(
+                            line.encode("utf-8", errors="replace").decode(
+                                "utf-8", errors="replace"
+                            )
+                        )
 
-            def _progress_monitor() -> None:
-                start_time = time.time()
-                while not event_stopped.wait(1):
-                    curr_time = time.time()
-                    seconds = int(curr_time - start_time)
-                    print(f"Waiting for command to finish...{seconds} seconds")
+                # Check if process has finished
+                if (
+                    proc.proc is not None
+                    and cast(subprocess.Popen[Any], proc.proc).poll() is not None
+                ):
+                    # Process has finished, call wait() to ensure proper cleanup
+                    try:
+                        returncode = proc.wait()
+                        if returncode != 0:
+                            print(
+                                f"\nCommand failed: {proc.command} with return code {returncode}"
+                            )
+                            # Kill all remaining processes
+                            for p in active_processes:
+                                if (
+                                    p != proc
+                                ):  # Don't try to kill the already finished process
+                                    p.kill()
+                            sys.exit(returncode)
+                        active_processes.remove(proc)
+                    except TimeoutError:
+                        print(f"\nProcess timed out: {proc.command}")
+                        # Kill all processes on timeout
+                        for p in active_processes:
+                            p.kill()
+                        sys.exit(1)
+                    except Exception as e:
+                        print(f"\nError waiting for process: {proc.command}")
+                        print(f"Error: {e}")
+                        # Kill all processes on error
+                        for p in active_processes:
+                            p.kill()
+                        sys.exit(1)
 
-            # Start progress monitor thread
-            monitor = threading.Thread(target=_progress_monitor, daemon=True)
-            monitor.start()
+            except Exception as e:
+                print(f"\nError monitoring process: {proc.command}")
+                print(f"Error: {e}")
+                # Kill all processes on error
+                for p in active_processes:
+                    p.kill()
+                sys.exit(1)
 
-            # Wait for process
-            proc.wait()
-            event_stopped.set()
-            monitor.join(timeout=1)
-
-            # Print output for non-echoing processes
-            if not proc.echo:
-                for line in proc.stdout.splitlines():
-                    print(line)
-
-            # Check return code
-            if proc.returncode != 0:
-                print(
-                    f"\nCommand failed: {proc.command} with return code {proc.returncode}"
-                )
-                # Kill all remaining processes
-                for p in processes:
-                    if p != proc:  # Don't try to kill the already finished process
-                        p.kill()
-                sys.exit(proc.returncode)
-
-        except TimeoutError:
-            print(f"\nProcess timed out: {proc.command}")
-            # Kill all processes on timeout
-            for p in processes:
-                p.kill()
-            sys.exit(1)
-        except Exception as e:
-            print(f"\nError waiting for process: {proc.command}")
-            print(f"Error: {e}")
-            # Kill all processes on error
-            for p in processes:
-                p.kill()
-            sys.exit(1)
+        # Small sleep to prevent busy waiting
+        time.sleep(0.1)
 
     print("\nAll parallel tests completed successfully")
 
