@@ -376,6 +376,8 @@ def create_fastled_compiler(use_pch: bool = True, use_sccache: bool = True) -> C
             "STUB_PLATFORM",
             "ARDUINO=10808",
             "FASTLED_USE_STUB_ARDUINO",
+            "SKETCH_HAS_LOTS_OF_MEMORY=1",  # Enable memory-intensive features for STUB platform
+            "FASTLED_HAS_ENGINE_EVENTS=1",  # Enable EngineEvents for UI components
         ],  # Define ARDUINO to enable Arduino.h include
         std_version="c++14",
         compiler=compiler_cmd,
@@ -808,7 +810,17 @@ def create_fastled_library(
     # Compile each source file
     futures: List[tuple[Future[Result], Path, Path]] = []
     for cpp_file in fastled_sources:
-        obj_file = obj_dir / f"{cpp_file.stem}.o"
+        # Create unique object file name by including relative path to prevent collisions
+        # Convert path separators to underscores to create valid filename
+        src_dir = Path("src")
+        if cpp_file.is_relative_to(src_dir):
+            rel_path = cpp_file.relative_to(src_dir)
+        else:
+            rel_path = cpp_file
+
+        # Replace path separators with underscores for unique object file names
+        obj_name = str(rel_path.with_suffix(".o")).replace("/", "_").replace("\\", "_")
+        obj_file = obj_dir / obj_name
         future = compiler.compile_cpp_file(cpp_file, obj_file)
         futures.append((future, obj_file, cpp_file))
 
