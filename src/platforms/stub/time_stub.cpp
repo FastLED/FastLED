@@ -1,4 +1,5 @@
-#pragma once
+
+#ifdef FASTLED_STUB_IMPL  // Only use this if explicitly defined.
 
 #include "time_stub.h"
 #include <chrono>
@@ -65,3 +66,5 @@ void yield() {
 #endif // __EMSCRIPTEN__
 
 } // extern "C"
+
+#endif  // FASTLED_STUB_IMPL
