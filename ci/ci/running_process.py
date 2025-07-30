@@ -227,27 +227,31 @@ class RunningProcess:
             self.command,
             shell=True,
             cwd=self.cwd,
-            bufsize=1,  # Line buffered
+            bufsize=1,  # Line buffering
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,  # Merge stderr into stdout
-            text=False,  # We'll handle decoding ourselves
-            encoding=None,  # Disable automatic decoding
+            text=True,  # Use text mode
+            encoding="utf-8",  # Explicitly use UTF-8
+            errors="replace",  # Replace invalid chars instead of failing
         )
 
         def output_reader():
             try:
                 assert self.proc is not None
                 assert self.proc.stdout is not None
-                line: bytes
-                for line in iter(self.proc.stdout.readline, b""):
+
+                # In text mode, readline() returns str not bytes
+                for line in iter(self.proc.stdout.readline, ""):
                     if self.shutdown.is_set():
                         break
-                    linestr = line.decode("utf-8", errors="ignore")
-                    linestr = linestr.rstrip()
 
-                    # Apply path normalization to error and warning lines
-                    normalized_linestr = normalize_error_warning_paths(linestr)
-                    self.output_queue.put(normalized_linestr)
+                    # Line already comes as decoded str, just strip whitespace
+                    linestr = line.rstrip()
+                    if linestr:  # Skip empty lines
+                        # Apply path normalization to error and warning lines
+                        normalized_linestr = normalize_error_warning_paths(linestr)
+                        self.output_queue.put(normalized_linestr)
+
             finally:
                 if self.proc and self.proc.stdout:
                     self.proc.stdout.close()
@@ -275,6 +279,12 @@ class RunningProcess:
         """
 
         return self.output_queue.get(timeout=timeout)
+
+    def poll(self) -> int | None:
+        """
+        Check the return code of the process.
+        """
+        return self.proc.poll()
 
     def wait(self) -> int:
         """

@@ -9,7 +9,7 @@ import threading
 import time
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, List, Optional, cast
+from typing import Any, Dict, List, Optional, Protocol, cast
 
 from typeguard import typechecked
 
@@ -799,6 +799,10 @@ def create_namespace_check_process(enable_stack_trace: bool) -> RunningProcess:
     )
 
 
+class ReconfigurableIO(Protocol):
+    def reconfigure(self, *, encoding: str, errors: str) -> None: ...
+
+
 def run_tests_parallel(processes: list[RunningProcess]) -> None:
     """
     Run multiple test processes in parallel and wait for completion.
@@ -812,6 +816,17 @@ def run_tests_parallel(processes: list[RunningProcess]) -> None:
     if not processes:
         return
 
+    # Configure Windows console for UTF-8 output if needed
+    if os.name == "nt":  # Windows
+        if hasattr(sys.stdout, "reconfigure"):
+            cast(ReconfigurableIO, sys.stdout).reconfigure(
+                encoding="utf-8", errors="replace"
+            )
+        if hasattr(sys.stderr, "reconfigure"):
+            cast(ReconfigurableIO, sys.stderr).reconfigure(
+                encoding="utf-8", errors="replace"
+            )
+
     # Start all processes
     for proc in processes:
         proc.run()
@@ -821,63 +836,43 @@ def run_tests_parallel(processes: list[RunningProcess]) -> None:
     active_processes = processes.copy()
     while active_processes:
         for proc in active_processes[:]:  # Copy list for safe modification
-            try:
-                # Check for new output
-                while True:
-                    line = proc.get_next_line()
-                    if line is None:
-                        break
-                    try:
-                        print(line)
-                    except UnicodeEncodeError:
-                        # Fallback: encode to utf-8 bytes and decode with errors='replace'
+            # Check for new output
+            while True:
+                line = proc.get_next_line()
+                if line is None:
+                    break
+                # Print line - encoding handled by console configuration above
+                print(line)
+
+            if proc.poll() is not None:
+                # Process has finished, call wait() to ensure proper cleanup
+                try:
+                    returncode = proc.wait()
+                    if returncode != 0:
                         print(
-                            line.encode("utf-8", errors="replace").decode(
-                                "utf-8", errors="replace"
-                            )
+                            f"\nCommand failed: {proc.command} with return code {returncode}"
                         )
-
-                # Check if process has finished
-                if (
-                    proc.proc is not None
-                    and cast(subprocess.Popen[Any], proc.proc).poll() is not None
-                ):
-                    # Process has finished, call wait() to ensure proper cleanup
-                    try:
-                        returncode = proc.wait()
-                        if returncode != 0:
-                            print(
-                                f"\nCommand failed: {proc.command} with return code {returncode}"
-                            )
-                            # Kill all remaining processes
-                            for p in active_processes:
-                                if (
-                                    p != proc
-                                ):  # Don't try to kill the already finished process
-                                    p.kill()
-                            sys.exit(returncode)
-                        active_processes.remove(proc)
-                    except TimeoutError:
-                        print(f"\nProcess timed out: {proc.command}")
-                        # Kill all processes on timeout
+                        # Kill all remaining processes
                         for p in active_processes:
-                            p.kill()
-                        sys.exit(1)
-                    except Exception as e:
-                        print(f"\nError waiting for process: {proc.command}")
-                        print(f"Error: {e}")
-                        # Kill all processes on error
-                        for p in active_processes:
-                            p.kill()
-                        sys.exit(1)
-
-            except Exception as e:
-                print(f"\nError monitoring process: {proc.command}")
-                print(f"Error: {e}")
-                # Kill all processes on error
-                for p in active_processes:
-                    p.kill()
-                sys.exit(1)
+                            if (
+                                p != proc
+                            ):  # Don't try to kill the already finished process
+                                p.kill()
+                        sys.exit(returncode)
+                    active_processes.remove(proc)
+                except TimeoutError:
+                    print(f"\nProcess timed out: {proc.command}")
+                    # Kill all processes on timeout
+                    for p in active_processes:
+                        p.kill()
+                    sys.exit(1)
+                except Exception as e:
+                    print(f"\nError waiting for process: {proc.command}")
+                    print(f"Error: {e}")
+                    # Kill all processes on error
+                    for p in active_processes:
+                        p.kill()
+                    sys.exit(1)
 
         # Small sleep to prevent busy waiting
         time.sleep(0.1)
