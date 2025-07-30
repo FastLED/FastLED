@@ -4,7 +4,7 @@
 
 // Platform detection logic
 #if defined(__arm__) && defined(TEENSYDUINO)
-#include "OctoWS2811.h"
+#include "OctoWS2811_impl.h"
 #else
 #include "platforms/sketch_fake.hpp"
 #endif

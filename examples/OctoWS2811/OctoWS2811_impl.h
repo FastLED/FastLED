@@ -6,8 +6,11 @@
 // https://www.blinkylights.blog/2021/02/03/using-teensy-4-1-with-fastled/
 
 #include <OctoWS2811.h>
+
 #define USE_OCTOWS2811
 #include <FastLED.h>
+
+using namespace fl;
 
 #define NUM_LEDS  1920
 
@@ -24,9 +27,21 @@ CRGB leds[NUM_LEDS];
 void setup() {
   Serial.begin(9600);
   Serial.println("ColorWipe Using FastLED");
-  LEDS.addLeds<OCTOWS2811,GRB>(leds,NUM_LEDS/8);
-  LEDS.setBrightness(60);
+  FastLED.addLeds<OCTOWS2811,GRB>(leds,NUM_LEDS/8);
+  FastLED.setBrightness(60);
 }
+
+
+
+void colorWipe(int color, int wait)
+{
+  for (int i=0; i < NUM_LEDS; i++) {
+    leds[i] = color;
+    FastLED.show();
+    delayMicroseconds(wait);
+  }
+}
+
 
 void loop() {
   int microsec = 6000000 / NUM_LEDS;
@@ -37,13 +52,4 @@ void loop() {
   colorWipe(PINK, microsec);
   colorWipe(ORANGE, microsec);
   colorWipe(WHITE, microsec);
-}
-
-void colorWipe(int color, int wait)
-{
-  for (int i=0; i < NUM_LEDS; i++) {
-    leds[i] = color;
-    FastLED.show();
-    delayMicroseconds(wait);
-  }
 }
