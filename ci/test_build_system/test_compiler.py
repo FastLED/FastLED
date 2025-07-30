@@ -388,7 +388,13 @@ class FastLEDTestCompiler:
         fastled_objects: List[Path] = []
         for src_file in fastled_sources:
             src_path = self.project_root / src_file
-            obj_path = self.build_dir / f"{src_path.stem}_fastled.o"
+            # Create unique object file name including directory path to avoid collisions
+            # Convert path separators to underscores to create valid filename
+            relative_path = src_path.relative_to(self.project_root / "src")
+            safe_name = (
+                str(relative_path.with_suffix("")).replace("/", "_").replace("\\", "_")
+            )
+            obj_path = self.build_dir / f"{safe_name}_fastled.o"
 
             if not obj_path.exists():
                 future = self.compiler.compile_cpp_file(
@@ -402,6 +408,7 @@ class FastLEDTestCompiler:
                         "-DFASTLED_NO_PINMAP",  # Match CMake settings
                         "-DPROGMEM=",  # Match CMake settings
                         "-DHAS_HARDWARE_PIN_SUPPORT",  # Match CMake settings
+                        "-DFASTLED_ENABLE_JSON=1",  # Enable JSON UI functionality
                         "-fno-exceptions",  # Match CMake settings
                         "-fno-rtti",  # Match CMake settings
                     ],
