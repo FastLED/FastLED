@@ -10,8 +10,5 @@
 #include "platforms/stub/generic/led_sysdefs_generic.hpp"
 #endif
 
-// Always include timing functions when using stub
-#define FASTLED_STUB_TIME_IMPL
-#include "platforms/stub/time_stub.cpp"
 
 #endif  // FASTLED_STUB_IMPL
