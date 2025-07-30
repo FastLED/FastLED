@@ -1,5 +1,5 @@
 
-#if defined(FASTLED_USE_STUB_ARDUINO)
+#if defined(FASTLED_USE_STUB_ARDUINO) || defined(__EMSCRIPTEN__)
 // STUB platform implementation - excluded for WASM builds which provide their own Arduino.cpp
 
 #include "./Arduino.h"  // ok include
