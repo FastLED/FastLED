@@ -83,7 +83,7 @@ TEST_CASE("Simple JSON test") {
     CHECK(parsed["key2"].as_or(0) == 42);
     
     CHECK(parsed.contains("key3"));
-    CHECK(parsed["key3"].is_double());
+    CHECK(parsed["key3"].is_float());
     CHECK(fl::fl_abs(parsed["key3"].as_or(0.0) - 3.14) < 0.001);  // Use tolerance for floating-point comparison
 }
 

@@ -187,7 +187,7 @@ bool ScreenMap::ParseJson(const char *jsonStrScreenMap,
         // Get diameter (optional) with default value
         float diameter = -1.0f; // default value
         if (val.contains("diameter") && val["diameter"].has_value()) {
-            auto diameterOpt = val["diameter"].as_double();
+                            auto diameterOpt = val["diameter"].as_float();
             if (diameterOpt) {
                 diameter = static_cast<float>(*diameterOpt);
             }

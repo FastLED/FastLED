@@ -292,8 +292,8 @@ fl::string JsonValue::to_string() const {
     } else if (is_int()) {
         auto opt = as_int();
         return opt ? fl::to_string(*opt) : "null";
-    } else if (is_double()) {
-        auto opt = as_double();
+    } else if (is_float()) {
+        auto opt = as_float();
         return opt ? fl::to_string(*opt) : "null";
     } else if (is_string()) {
         auto opt = as_string();
@@ -423,7 +423,7 @@ fl::string Json::to_string_native() const {
             } else {
                 append_string("null");
             }
-        } else if (value.is_double()) {
+        } else if (value.is_float()) {
             auto opt = value.as_float();
             if (opt) {
                 fl::string num_str;
