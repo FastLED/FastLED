@@ -220,7 +220,7 @@ def _compile_tests_python(
     try:
         # Import the new test compiler system
         sys.path.insert(0, str(Path(__file__).parent))
-        from test_build_system.test_compiler import (
+        from compiler.test_compiler import (
             FastLEDTestCompiler,
             check_iwyu_available,
         )
@@ -329,7 +329,7 @@ def _run_tests_python(specific_test: str | None = None) -> None:
     try:
         # Import the new test compiler system
         sys.path.insert(0, str(Path(__file__).parent))
-        from test_build_system.test_compiler import FastLEDTestCompiler
+        from compiler.test_compiler import FastLEDTestCompiler
 
         # Get test executables from Python build system
         test_compiler = FastLEDTestCompiler.get_existing_instance()
