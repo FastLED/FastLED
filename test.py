@@ -679,102 +679,209 @@ def run_all_tests(
     """Run all tests in parallel (original behavior)"""
     print("Running all tests...")
 
-    # Namespace check first
-    run_namespace_check(enable_stack_trace)
+    # Create list of test processes
+    processes: list[RunningProcess] = []
 
-    # Build C++ test command
+    # Namespace check always runs first
+    namespace_proc = create_namespace_check_process(enable_stack_trace)
+    namespace_proc.run()
+    namespace_proc.wait()
+    if namespace_proc.returncode != 0:
+        print(f"Namespace check failed with return code {namespace_proc.returncode}")
+        sys.exit(namespace_proc.returncode)
+    print("Namespace check passed.")
+
+    # Add test processes based on categories
+    if test_categories.unit:
+        processes.append(create_unit_test_process(args, enable_stack_trace))
+    if test_categories.examples:
+        processes.append(create_examples_test_process(args, enable_stack_trace))
+    if test_categories.py:
+        processes.append(create_python_test_process(enable_stack_trace))
+    if test_categories.integration:
+        processes.append(create_integration_test_process(args, enable_stack_trace))
+
+    # Add PIO check process if enabled
+    if _PIO_CHECK_ENABLED:
+        cmd_list = _make_pio_check_cmd()
+        cmd_str = subprocess.list2cmdline(cmd_list)
+        processes.append(
+            RunningProcess(
+                cmd_str,
+                echo=False,
+                auto_run=False,
+                enable_stack_trace=enable_stack_trace,
+            )
+        )
+
+    # Add uno test process if source code changed
+    if src_code_change:
+        print("Source code changed, running uno tests")
+        processes.append(make_compile_uno_test_process(enable_stack_trace))
+
+    # Run all processes in parallel
+    run_tests_parallel(processes)
+
+
+@typechecked
+@dataclass
+class TestProcessConfig:
+    """Configuration for a test process"""
+
+    command: str | list[str]
+    echo: bool = True
+    auto_run: bool = False
+    timeout: int | None = None
+    enable_stack_trace: bool = True
+    description: str = ""
+
+
+def create_unit_test_process(
+    args: TestArgs, enable_stack_trace: bool
+) -> RunningProcess:
+    """Create a unit test process"""
     cmd_str_cpp = build_cpp_test_command(args)
-
-    # Build PIO check command
-    cmd_list = _make_pio_check_cmd()
-    if not _PIO_CHECK_ENABLED:
-        cmd_list = ["echo", "pio check is disabled"]
-    cmd_str = subprocess.list2cmdline(cmd_list)
-
-    print(f"Running command (in the background): {cmd_str}")
-    pio_process = RunningProcess(
-        cmd_str,
-        echo=False,
-        auto_run=not _IS_GITHUB,
-        enable_stack_trace=enable_stack_trace,
-    )
-
-    # Set compiler-specific timeout for C++ tests
     # GCC builds are 5x slower due to poor unified compilation performance
     cpp_test_timeout = (
         900 if args.gcc else 300
     )  # 15 minutes for GCC, 5 minutes for Clang/default
-    if args.gcc:
-        print(
-            f"Using extended timeout for GCC builds: {cpp_test_timeout} seconds (15 minutes)"
-        )
-
-    cpp_test_proc = RunningProcess(
-        cmd_str_cpp, enable_stack_trace=enable_stack_trace, timeout=cpp_test_timeout
-    )
-    compile_native_proc = RunningProcess(
-        "uv run ci/ci-compile-native.py",
-        echo=False,
-        auto_run=not _IS_GITHUB,
+    return RunningProcess(
+        cmd_str_cpp,
         enable_stack_trace=enable_stack_trace,
+        timeout=cpp_test_timeout,
+        auto_run=False,
+        echo=True,
     )
-    pytest_proc = RunningProcess(
+
+
+def create_examples_test_process(
+    args: TestArgs, enable_stack_trace: bool
+) -> RunningProcess:
+    """Create an examples test process"""
+    cmd = ["uv", "run", "python", "-m", "ci.compiler.test_example_compilation"]
+    if args.examples:
+        cmd.extend(args.examples)
+    if args.clean:
+        cmd.append("--clean")
+    if args.no_pch:
+        cmd.append("--no-pch")
+    if args.cache:
+        cmd.append("--cache")
+    if args.unity:
+        cmd.append("--unity")
+    if args.full and args.examples is not None:
+        cmd.append("--full")
+    return RunningProcess(
+        cmd, echo=True, auto_run=False, enable_stack_trace=enable_stack_trace
+    )
+
+
+def create_python_test_process(enable_stack_trace: bool) -> RunningProcess:
+    """Create a Python test process"""
+    return RunningProcess(
         "uv run pytest -s ci/tests -xvs --durations=0",
         echo=True,
-        auto_run=not _IS_GITHUB,
+        auto_run=False,
         enable_stack_trace=enable_stack_trace,
     )
 
-    tests = [
-        cpp_test_proc,
-        compile_native_proc,
-        pytest_proc,
-        pio_process,
-    ]
-    if src_code_change:
-        print("Source code changed, running uno tests")
-        tests += [make_compile_uno_test_process(enable_stack_trace)]
 
-    is_first = True
-    for test in tests:
-        was_first = is_first
-        is_first = False
-        sys.stdout.flush()
-        if not test.auto_run:
-            test.run()
-        print(f"Waiting for command: {test.command}")
-        # make a thread that will say waiting for test {test} to finish...<seconds>
-        # and then kill the test if it takes too long (> 120 seconds)
-        event_stopped = threading.Event()
+def create_integration_test_process(
+    args: TestArgs, enable_stack_trace: bool
+) -> RunningProcess:
+    """Create an integration test process"""
+    cmd = ["uv", "run", "pytest", "-s", "ci/test_integration", "-xvs", "--durations=0"]
+    if args.examples is not None:
+        # When --examples --full is specified, only run example-related integration tests
+        cmd.extend(["-k", "TestFullProgramLinking"])
+    if args.verbose:
+        cmd.append("-v")
+    return RunningProcess(
+        cmd, echo=True, auto_run=False, enable_stack_trace=enable_stack_trace
+    )
 
-        def _runner() -> None:
-            start_time = time.time()
-            while not event_stopped.wait(1):
-                curr_time = time.time()
-                seconds = int(curr_time - start_time)
-                if (
-                    not was_first
-                ):  # skip printing for the first test since it echo's out.
-                    print(
-                        f"Waiting for command: {test.command} to finish...{seconds} seconds"
-                    )
 
-        runner_thread = threading.Thread(target=_runner, daemon=True)
-        runner_thread.start()
-        test.wait()
-        event_stopped.set()
-        runner_thread.join(timeout=1)
-        if not test.echo:
-            for line in test.stdout.splitlines():
-                print(line)
-        if test.returncode != 0:
-            [t.kill() for t in tests]
-            print(
-                f"\nCommand failed: {test.command} with return code {test.returncode}"
-            )
-            sys.exit(test.returncode)
+def create_namespace_check_process(enable_stack_trace: bool) -> RunningProcess:
+    """Create a namespace check process"""
+    return RunningProcess(
+        "uv run python ci/tests/no_using_namespace_fl_in_headers.py",
+        echo=True,
+        auto_run=False,
+        enable_stack_trace=enable_stack_trace,
+    )
 
-    print("All tests passed")
+
+def run_tests_parallel(processes: list[RunningProcess]) -> None:
+    """
+    Run multiple test processes in parallel and wait for completion.
+
+    Args:
+        processes: List of RunningProcess instances to run
+
+    Raises:
+        SystemExit: If any process fails
+    """
+    if not processes:
+        return
+
+    # Start all processes
+    for proc in processes:
+        proc.run()
+        print(f"Started: {proc.command}")
+
+    # Wait for each process and handle output
+    for proc in processes:
+        try:
+            print(f"\nWaiting for: {proc.command}")
+            event_stopped = threading.Event()
+
+            def _progress_monitor() -> None:
+                start_time = time.time()
+                while not event_stopped.wait(1):
+                    curr_time = time.time()
+                    seconds = int(curr_time - start_time)
+                    print(f"Waiting for command to finish...{seconds} seconds")
+
+            # Start progress monitor thread
+            monitor = threading.Thread(target=_progress_monitor, daemon=True)
+            monitor.start()
+
+            # Wait for process
+            proc.wait()
+            event_stopped.set()
+            monitor.join(timeout=1)
+
+            # Print output for non-echoing processes
+            if not proc.echo:
+                for line in proc.stdout.splitlines():
+                    print(line)
+
+            # Check return code
+            if proc.returncode != 0:
+                print(
+                    f"\nCommand failed: {proc.command} with return code {proc.returncode}"
+                )
+                # Kill all remaining processes
+                for p in processes:
+                    if p != proc:  # Don't try to kill the already finished process
+                        p.kill()
+                sys.exit(proc.returncode)
+
+        except TimeoutError:
+            print(f"\nProcess timed out: {proc.command}")
+            # Kill all processes on timeout
+            for p in processes:
+                p.kill()
+            sys.exit(1)
+        except Exception as e:
+            print(f"\nError waiting for process: {proc.command}")
+            print(f"Error: {e}")
+            # Kill all processes on error
+            for p in processes:
+                p.kill()
+            sys.exit(1)
+
+    print("\nAll parallel tests completed successfully")
 
 
 def main() -> None:
@@ -897,37 +1004,37 @@ def main() -> None:
             and not test_categories.py
             and not test_categories.integration
         ):
-            # C++ mode: unit + examples, no Python (sequential execution)
-            run_unit_tests(args, enable_stack_trace)
-            run_examples_tests(args, enable_stack_trace)
+            # C++ mode: unit + examples in parallel
+            run_cpp_tests(args, test_categories, enable_stack_trace)
         elif (
             test_categories.unit
             and test_categories.py
             and not test_categories.examples
             and not test_categories.integration
         ):
-            # Unit + Python only
-            run_unit_tests(args, enable_stack_trace)
-            run_python_tests(args, enable_stack_trace)
+            # Unit + Python in parallel
+            processes = [
+                create_namespace_check_process(enable_stack_trace),
+                create_unit_test_process(args, enable_stack_trace),
+                create_python_test_process(enable_stack_trace),
+            ]
+            run_tests_parallel(processes)
         elif (
             test_categories.examples
             and test_categories.py
             and not test_categories.unit
             and not test_categories.integration
         ):
-            # Examples + Python only
-            run_examples_tests(args, enable_stack_trace)
-            run_python_tests(args, enable_stack_trace)
+            # Examples + Python in parallel
+            processes = [
+                create_namespace_check_process(enable_stack_trace),
+                create_examples_test_process(args, enable_stack_trace),
+                create_python_test_process(enable_stack_trace),
+            ]
+            run_tests_parallel(processes)
         else:
-            # All tests enabled or complex combinations: run sequentially
-            if test_categories.unit:
-                run_unit_tests(args, enable_stack_trace)
-            if test_categories.examples:
-                run_examples_tests(args, enable_stack_trace)
-            if test_categories.py:
-                run_python_tests(args, enable_stack_trace)
-            if test_categories.integration:
-                run_integration_tests(args, enable_stack_trace)
+            # All tests enabled or complex combinations: run in parallel
+            run_all_tests(args, test_categories, enable_stack_trace, src_code_change)
 
         # Force exit daemon thread remains at the end
         def force_exit():
