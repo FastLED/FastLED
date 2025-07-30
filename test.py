@@ -39,6 +39,7 @@ class TestArgs:
     cache: bool = False
     unity: bool = False
     full: bool = False
+    new: bool = False
 
 
 @typechecked
@@ -187,6 +188,11 @@ def parse_args() -> TestArgs:
         action="store_true",
         help="Run full integration tests including compilation + linking + program execution",
     )
+    parser.add_argument(
+        "--new",
+        action="store_true",
+        help="Use NEW Python API build system for A/B testing (8x faster than CMake)",
+    )
 
     args = parser.parse_args()
 
@@ -210,6 +216,7 @@ def parse_args() -> TestArgs:
         cache=args.cache,
         unity=args.unity,
         full=args.full,
+        new=args.new,
     )
 
     # Auto-enable --cpp when a specific test is provided
@@ -488,6 +495,8 @@ def build_cpp_test_command(args: TestArgs) -> str:
         cmd_list.append("--verbose")
     if args.check:
         cmd_list.append("--check")
+    if args.new:
+        cmd_list.append("--new")
 
     return subprocess.list2cmdline(cmd_list)
 

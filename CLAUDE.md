@@ -59,38 +59,41 @@ To use the MCP server, run: `uv run mcp_server.py`
 ### Building and Testing
 ```bash
 # Run comprehensive test suite (C++ unit tests + Python tests)
-bash test
-# Alternative: uv run test.py
+bash test                        # PREFERRED - handles UV internally
+uv run test.py                   # DIRECT - UV managed execution
 
 # Run specific C++ test
-bash test audio_json_parsing
-bash test xypath
-# Alternative: uv run test.py audio_json_parsing
+bash test audio_json_parsing     # PREFERRED - handles UV internally
+uv run test.py audio_json_parsing # DIRECT - UV managed execution
 
 # Quick C++ tests only (when no Python changes)
-bash test --quick --cpp
-# Alternative: uv run test.py --cpp
+bash test --quick --cpp          # PREFERRED - handles UV internally
+uv run test.py --cpp             # DIRECT - UV managed execution
 
 # Run comprehensive linting (Python, C++, JavaScript)
-bash lint
+bash lint                        # PREFERRED - handles UV internally
 
 # Compile examples for specific platforms
-bash compile uno --examples Blink
-# Alternative: uv run ci/ci-compile.py uno --examples Blink
-bash compile esp32dev --examples Blink,DemoReel100
-bash compile teensy31,esp32s3 --examples Blink
+bash compile uno --examples Blink                    # PREFERRED - handles UV internally
+uv run ci/ci-compile.py uno --examples Blink        # DIRECT - UV managed execution
+bash compile esp32dev --examples Blink,DemoReel100  # PREFERRED - handles UV internally
+bash compile teensy31,esp32s3 --examples Blink     # PREFERRED - handles UV internally
 ```
 
-### 🤖 AI AGENT LINTING GUIDELINES
+### 🤖 AI AGENT EXECUTION GUIDELINES
 
 **FOREGROUND AGENTS (Interactive Development):**
 - **🚨 ALWAYS USE `bash lint` - DO NOT RUN INDIVIDUAL LINTING SCRIPTS**
-- **✅ CORRECT:** `bash lint`
-- **❌ FORBIDDEN:** `./lint-js`, `./check-js`, individual tools
+- **🚨 ALWAYS USE `uv run` FOR DIRECT PYTHON EXECUTION**
+- **✅ CORRECT:** `bash lint`, `uv run test.py`, `uv run ci/symbol_analysis.py`
+- **❌ FORBIDDEN:** `python test.py`, `./lint-js`, `./check-js`, individual tools without UV
 
 **BACKGROUND AGENTS (Automated/CI Environments):**
+- **🚨 MUST USE `uv run` FOR ALL PYTHON SCRIPTS**
 - **CAN USE FINE-GRAINED LINTING FOR SPECIFIC NEEDS**
 - **BUT STILL PREFER `bash lint` FOR COMPREHENSIVE CHECKING**
+- **✅ CORRECT:** `uv run ci/cpp_test_run.py --test specific_test`
+- **❌ FORBIDDEN:** `python ci/cpp_test_run.py --test specific_test`
 
 ### Platform-Specific Development
 ```bash
@@ -117,14 +120,14 @@ uv run ci/wasm_compile.py examples/NetTest -b --open
 
 ### Advanced Analysis
 ```bash
-# Symbol analysis for binary optimization
-uv run ci/ci/symbol_analysis.py --board uno
-uv run ci/ci/symbol_analysis.py --board esp32dev
+# Symbol analysis for binary optimization (CORRECTED PATHS)
+uv run ci/symbol_analysis.py --board uno
+uv run ci/symbol_analysis.py --board esp32dev
 uv run ci/demo_symbol_analysis.py  # All platforms
 
-# Platform build information analysis
-uv run ci/ci/build_info_analyzer.py --board esp32dev --show-defines
-uv run ci/ci/build_info_analyzer.py --compare uno esp32dev
+# Platform build information analysis (CORRECTED PATHS)
+uv run ci/build_info_analyzer.py --board esp32dev --show-defines
+uv run ci/build_info_analyzer.py --compare uno esp32dev
 ```
 
 ## 🚨 CRITICAL REQUIREMENTS FOR BACKGROUND AGENTS 🚨
@@ -155,6 +158,70 @@ uv run ci/ci/build_info_analyzer.py --compare uno esp32dev
 - [ ] Only then indicate task completion
 
 **FAILURE TO FOLLOW THESE REQUIREMENTS WILL RESULT IN BROKEN CODE SUBMISSIONS.**
+
+## 🚨 CRITICAL: FORBIDDEN IMPORT PATTERNS 🚨
+
+### ABSOLUTELY FORBIDDEN: The nested `ci.ci.` import pattern - Use `ci.module` instead
+
+**🚨 NEVER use the double-nested import pattern `ci.ci.module_name` - This causes import failures:**
+
+**❌ FORBIDDEN PATTERNS:**
+```python
+from ci.ci.clang_compiler import Compiler          # WRONG - use ci.clang_compiler instead
+from ci.ci.symbol_analysis import analyze_symbols  # WRONG - use ci.symbol_analysis instead  
+from ci.ci.build_info_analyzer import get_info     # WRONG - use ci.build_info_analyzer instead
+import ci.ci.any_module                            # WRONG - nested import forbidden
+```
+
+**✅ CORRECT PATTERNS:**
+```python
+from ci.clang_compiler import Compiler             # CORRECT - single level import
+from ci.symbol_analysis import analyze_symbols     # CORRECT - clean architecture
+from ci.build_info_analyzer import get_info        # CORRECT - proper import path
+import ci.module_name                              # CORRECT - simple import
+```
+
+**Why this is critical:**
+- **The `ci.ci.` pattern is the #1 cause of import failures in this codebase**
+- **It breaks the clean architecture separation between `ci/` (scripts) and `ci/ci/` (internal modules)**  
+- **Creates "ModuleNotFoundError" that are difficult to debug**
+- **Violates the established import conventions used throughout the project**
+
+**🚨 BEFORE writing ANY import statement, verify it follows the single-level pattern: `ci.module_name` NOT `ci.ci.module_name`**
+
+This rule was added based on direct user feedback after repeated import errors caused by the nested pattern.
+
+## 🚨 CRITICAL: UV PROJECT EXECUTION REQUIREMENTS 🚨
+
+### ABSOLUTELY REQUIRED: Use `uv run` for ALL Python script execution
+
+**🚨 This is a UV project - NEVER execute Python scripts directly. Always use `uv run`:**
+
+**❌ FORBIDDEN PATTERNS:**
+```bash
+python test.py                    # WRONG - missing UV
+python3 ci/ci-compile.py         # WRONG - missing UV  
+./ci/cpp_test_run.py             # WRONG - missing UV
+python -m ci.symbol_analysis     # WRONG - missing UV
+```
+
+**✅ CORRECT PATTERNS:**
+```bash
+uv run test.py                   # CORRECT - UV managed execution
+uv run ci/ci-compile.py          # CORRECT - UV managed execution
+uv run ci/cpp_test_run.py        # CORRECT - UV managed execution
+uv run ci/symbol_analysis.py    # CORRECT - UV managed execution
+```
+
+**Why this is critical:**
+- **UV manages the Python environment and dependencies automatically**
+- **Direct Python execution will fail with `ModuleNotFoundError` due to missing UV virtual environment**
+- **UV ensures correct package versions and dependency resolution**
+- **The project's `pyproject.toml` defines the required UV-managed dependencies**
+
+**🚨 BEFORE executing ANY Python script, always prefix with `uv run`**
+
+**Exception:** Bash wrapper scripts like `bash test` and `bash lint` are acceptable as they handle UV execution internally.
 
 ## Code Architecture Guidelines
 
