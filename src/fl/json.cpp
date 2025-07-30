@@ -276,72 +276,6 @@ fl::shared_ptr<JsonValue> JsonValue::parse(const fl::string& txt) {
 }
 
 fl::string JsonValue::to_string() const {
-#if !FASTLED_ENABLE_JSON
-    // For a native implementation without external libraries, we'd need to implement
-    // a custom serializer. For now, we'll delegate to Json::to_string_native() 
-    // by creating a temporary Json object.
-    Json temp;
-    // Actually, let's implement a minimal version that handles basic types
-    // since we don't want to rely on the ArduinoJson library for this method.
-    
-    if (is_null()) {
-        return "null";
-    } else if (is_bool()) {
-        auto opt = as_bool();
-        return opt ? (*opt ? "true" : "false") : "null";
-    } else if (is_int()) {
-        auto opt = as_int();
-        return opt ? fl::to_string(*opt) : "null";
-    } else if (is_float()) {
-        auto opt = as_float();
-        return opt ? fl::to_string(*opt) : "null";
-    } else if (is_string()) {
-        auto opt = as_string();
-        return opt ? "\"" + *opt + "\"" : "null";
-    } else if (is_array()) {
-        fl::string result = "[";
-        auto opt = as_array();
-        if (opt) {
-            bool first = true;
-            for (const auto& item : *opt) {
-                if (!first) result += ",";
-                first = false;
-                if (item) {
-                    result += item->to_string();
-                } else {
-                    result += "null";
-                }
-            }
-        }
-        result += "]";
-        return result;
-    } else if (is_object()) {
-        fl::string result = "{";
-        auto opt = as_object();
-        if (opt) {
-            bool first = true;
-            for (const auto& kv : *opt) {
-                if (!first) result += ",";
-                first = false;
-                result += "\"" + kv.first + "\":";
-                if (kv.second) {
-                    result += kv.second->to_string();
-                } else {
-                    result += "null";
-                }
-            }
-        }
-        result += "}";
-        return result;
-    } else if (is_audio()) {
-        return "[audio]";
-    } else if (is_bytes()) {
-        return "[bytes]";
-    } else if (is_floats()) {
-        return "[floats]";
-    }
-    return "null";
-#else
     // Parse the JSON value to a string, then parse it back to a Json object,
     // and use the working to_string_native method
     // This is a workaround to avoid reimplementing the serialization logic
@@ -352,13 +286,9 @@ fl::string JsonValue::to_string() const {
     temp.set_value(fl::make_shared<JsonValue>(*this));
     // Use the working implementation
     return temp.to_string_native();
-#endif
 }
 
 fl::string Json::to_string_native() const {
-    #if !FASTLED_ENABLE_JSON
-    return m_value ? m_value->to_string() : "null";
-    #else
     if (!m_value) {
         return "null";
     }
@@ -556,7 +486,6 @@ fl::string Json::to_string_native() const {
     }
     
     return result;
-    #endif
 }
 
 // Forward declaration for the serializeValue function

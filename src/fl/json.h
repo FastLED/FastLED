@@ -4,6 +4,10 @@
  * @file fl/json.h
  * @brief FastLED's Elegant JSON Library: `fl::Json`
  *
+ * NOTE: ArduinoJson only is used for parsing. We use a custom serializer for converting to a json
+ * string. It's entirely possible that our json string serializer is not correct with respect to
+ * complex string encoding. If you see bugs, then file an issue at https://github.com/fastled/FastLED/issues
+ *
  * @details
  *
  * The `fl::Json` library provides a lightweight, type-safe, and highly ergonomic
