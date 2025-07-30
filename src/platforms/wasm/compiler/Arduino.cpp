@@ -1,7 +1,10 @@
 
-#ifdef __EMSCRIPTEN__
+#if defined(__EMSCRIPTEN__)
 
-#include "./Arduino.h"
+#ifdef __EMSCRIPTEN__
+// Non-WASM platforms use the generic stub Arduino.h  
+#include "platforms/stub/Arduino.h"  // ok include
+#endif
 
 SerialEmulation Serial;
 SerialEmulation Serial1;

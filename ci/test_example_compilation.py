@@ -316,9 +316,7 @@ def create_fastled_compiler(use_pch: bool = True, use_sccache: bool = True) -> C
     # Get absolute paths to ensure they work from any working directory
     current_dir = os.getcwd()
     src_path = os.path.join(current_dir, "src")
-    arduino_stub_path = os.path.join(
-        current_dir, "src", "platforms", "wasm", "compiler"
-    )
+    arduino_stub_path = os.path.join(current_dir, "src", "platforms", "stub")
 
     # Try to load build_flags.toml configuration from stashed copy in ci/ directory
     toml_path = os.path.join(os.path.dirname(__file__), "build_flags.toml")
@@ -377,6 +375,7 @@ def create_fastled_compiler(use_pch: bool = True, use_sccache: bool = True) -> C
         defines=[
             "STUB_PLATFORM",
             "ARDUINO=10808",
+            "FASTLED_USE_STUB_ARDUINO",
         ],  # Define ARDUINO to enable Arduino.h include
         std_version="c++14",
         compiler=compiler_cmd,
@@ -1364,8 +1363,13 @@ def run_example_compilation_test(
                 f"[SUMMARY]   Speed: {len(ino_files) / compile_time:.1f} examples/second"
             )
 
-        # Determine success based on compilation results
-        if failed_count == 0:
+        # Determine success based on compilation results and linking results (if applicable)
+        overall_success = failed_count == 0
+        if full_compilation:
+            # For full compilation mode, also check that linking succeeded
+            overall_success = overall_success and linking_failed_count == 0
+
+        if overall_success:
             if full_compilation:
                 log_timing("\n[SUCCESS] EXAMPLE COMPILATION + LINKING TEST: SUCCESS")
                 log_timing(
@@ -1382,10 +1386,22 @@ def run_example_compilation_test(
         else:
             # Show failed examples in the requested format
             print(f"\n{red_text('### ERROR ###')}")
-            for failure in failed:
-                # Convert backslashes to forward slashes for consistent path format
-                path = failure["path"].replace("\\", "/")
-                print(f"  {orange_text(f'examples/{path}')}")
+
+            # Report compilation failures
+            if failed_count > 0:
+                log_timing(f"[ERROR] {failed_count} compilation failures:")
+                for failure in failed:
+                    # Convert backslashes to forward slashes for consistent path format
+                    path = failure["path"].replace("\\", "/")
+                    print(f"  {orange_text(f'examples/{path}')}")
+
+            # Report linking failures in full compilation mode
+            if full_compilation and linking_failed_count > 0:
+                log_timing(f"[ERROR] {linking_failed_count} linking failures detected")
+                log_timing(
+                    "[ERROR] Test failed due to linker errors - see linking output above"
+                )
+
             return 1
 
     except Exception as e:
