@@ -554,8 +554,9 @@ def run_examples_tests(args: TestArgs, enable_stack_trace: bool) -> None:
         cmd.append("--cache")
     if args.unity:
         cmd.append("--unity")
-    # Note: --full is not passed to the script as it doesn't support this flag
-    # Instead, --full just means "enhanced" example compilation mode
+    if args.full and args.examples is not None:
+        cmd.append("--full")
+    # Note: --full is now passed to the script when examples and full are both specified
 
     # Run the example compilation test script
     proc = RunningProcess(
