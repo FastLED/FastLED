@@ -83,6 +83,7 @@ class FastLEDTestCompiler:
         self.build_dir = build_dir
         self.project_root = project_root
         self.compiled_tests: List[TestExecutable] = []
+        self.linking_failures: List[str] = []
         FastLEDTestCompiler._existing_instance = self
 
     @classmethod
@@ -265,13 +266,30 @@ class FastLEDTestCompiler:
         # Link each test to executable using proven linking API
         self.compiled_tests = self._link_tests(compiled_objects)
 
+        # Check for linking failures and add them to errors
+        if hasattr(self, "linking_failures") and self.linking_failures:
+            for failure in self.linking_failures:
+                # Parse the failure string to extract test name and error
+                if ":" in failure:
+                    test_name, error_msg = failure.split(":", 1)
+                    errors.append(
+                        CompileError(
+                            test_name=test_name.strip(),
+                            message=f"Linking failed: {error_msg.strip()}",
+                        )
+                    )
+
         duration = time.time() - compile_start
-        success = len(self.compiled_tests) > 0
+
+        # Success requires both compilation AND linking to succeed
+        success = len(errors) == 0 and len(self.compiled_tests) > 0
 
         if success:
             print(
                 f"SUCCESS: Compiled {len(self.compiled_tests)} tests in {duration:.2f}s"
             )
+        else:
+            print(f"FAILED: {len(errors)} total failures (compilation + linking)")
 
         return CompileResult(
             success=success,
@@ -308,6 +326,7 @@ class FastLEDTestCompiler:
         print(f"Compiled FastLED library and doctest_main")
 
         compiled_tests: List[TestExecutable] = []
+        linking_failures: List[str] = []
 
         # Link each test with the FastLED library
         for obj_path in compiled_objects:
@@ -315,39 +334,92 @@ class FastLEDTestCompiler:
             test_name = obj_path.stem.replace("test_", "")
             exe_path = self.build_dir / f"{test_name}_test.exe"
 
-            # Link with the FastLED library instead of individual objects
-            link_options = LinkOptions(
-                object_files=[obj_path, doctest_obj_path],  # Test object + doctest main
-                output_executable=exe_path,
-                linker_args=get_common_linker_args(debug=True)
-                + [
-                    str(fastled_lib_path),  # Link against the FastLED static library
-                    # Add necessary system libraries for Windows/Clang
-                    "msvcrt.lib",  # C runtime library (provides memset, memcpy, strlen, etc.)
-                    "legacy_stdio_definitions.lib",  # Legacy stdio functions
-                    "kernel32.lib",  # Windows kernel functions
-                    "user32.lib",  # Windows user interface
-                ],
-            )
+            # Check if this test has its own main() function
+            test_source = self.project_root / "tests" / f"test_{test_name}.cpp"
+            has_own_main = self._test_has_own_main(test_source)
+
+            if has_own_main:
+                # Link standalone test without doctest_main.o
+                link_options = LinkOptions(
+                    object_files=[obj_path],  # Only the test object file
+                    output_executable=exe_path,
+                    linker_args=get_common_linker_args(debug=True)
+                    + [
+                        str(
+                            fastled_lib_path
+                        ),  # Link against the FastLED static library
+                        # Add necessary system libraries for Windows/Clang
+                        "msvcrt.lib",  # C runtime library (provides memset, memcpy, strlen, etc.)
+                        "legacy_stdio_definitions.lib",  # Legacy stdio functions
+                        "kernel32.lib",  # Windows kernel functions
+                        "user32.lib",  # Windows user interface
+                    ],
+                )
+            else:
+                # Link with the FastLED library instead of individual objects
+                link_options = LinkOptions(
+                    object_files=[
+                        obj_path,
+                        doctest_obj_path,
+                    ],  # Test object + doctest main
+                    output_executable=exe_path,
+                    linker_args=get_common_linker_args(debug=True)
+                    + [
+                        str(
+                            fastled_lib_path
+                        ),  # Link against the FastLED static library
+                        # Add necessary system libraries for Windows/Clang
+                        "msvcrt.lib",  # C runtime library (provides memset, memcpy, strlen, etc.)
+                        "legacy_stdio_definitions.lib",  # Legacy stdio functions
+                        "kernel32.lib",  # Windows kernel functions
+                        "user32.lib",  # Windows user interface
+                    ],
+                )
 
             print(f"Linking test: {test_name}")
             link_result: Result = link_program_sync(link_options)
 
             if not link_result.ok:
-                print(f"  {test_name}: Linking failed: {link_result.stderr}")
+                error_msg = f"  {test_name}: Linking failed: {link_result.stderr}"
+                print(error_msg)
+                linking_failures.append(f"{test_name}: {link_result.stderr}")
                 continue
 
             print(f"  {test_name}: Linking successful")
-            # Find corresponding source file
-            test_source = self.project_root / "tests" / f"test_{test_name}.cpp"
 
             test_exe = TestExecutable(
                 name=test_name, executable_path=exe_path, test_source_path=test_source
             )
             compiled_tests.append(test_exe)
 
+        if linking_failures:
+            print(f"ERROR: {len(linking_failures)} linking failures:")
+            for failure in linking_failures:
+                print(f"  {failure}")
+            # Store linking failures for later reporting
+            self.linking_failures = linking_failures
+        else:
+            self.linking_failures = []
+
         print(f"Successfully linked {len(compiled_tests)} test executables")
         return compiled_tests
+
+    def _test_has_own_main(self, test_source_path: Path) -> bool:
+        """Check if a test file defines its own main() function"""
+        try:
+            if not test_source_path.exists():
+                return False
+
+            content = test_source_path.read_text(encoding="utf-8")
+            # Look for main function definition (simple pattern matching)
+            import re
+
+            # Match "int main(" allowing for whitespace and various formats
+            main_pattern = r"\bint\s+main\s*\("
+            return bool(re.search(main_pattern, content))
+        except Exception:
+            # If we can't read the file, assume it doesn't have main
+            return False
 
     def _build_fastled_library(self) -> Path:
         """Build a complete FastLED static library like CMake does"""
