@@ -944,13 +944,10 @@ class TestFullProgramLinking(unittest.TestCase):
         link_result = link_future.result()
 
         if not link_result.ok:
-            # This is expected to fail on some systems due to missing dependencies
-            # Log the failure but don't fail the test completely
-            print(
-                f"INFO: Program linking failed (expected on some systems): {link_result.stderr}"
+            # Linking should succeed - fail the test if it doesn't
+            self.fail(
+                f"Program linking failed - this needs to be fixed:\n{link_result.stderr}"
             )
-            print("SUCCESS: Full pipeline test - linking attempted successfully")
-            return
 
         self.assertTrue(executable_path.exists(), "Executable not created")
         self._verify_executable_properties(executable_path)
@@ -1031,8 +1028,8 @@ class TestFullProgramLinking(unittest.TestCase):
                     successful_links += 1
                     print(f"SUCCESS: {example_name} linked successfully")
                 else:
-                    print(
-                        f"INFO: {example_name} linking failed (expected on some systems)"
+                    self.fail(
+                        f"Linking failed for {example_name} - this needs to be fixed:\n{link_result.stderr}"
                     )
 
             except Exception as e:
@@ -1046,46 +1043,165 @@ class TestFullProgramLinking(unittest.TestCase):
         )
 
     def _compile_fastled_core(self, compiler: Compiler) -> list[Path]:
-        """Compile minimal FastLED core files to object files."""
+        """Compile all FastLED source files to object files."""
         fastled_objects: list[Path] = []
 
-        # Core FastLED files that should work with STUB platform
-        core_files = ["FastLED.cpp"]
+        # Glob all .cpp files in src/**
+        print("Compiling all FastLED source files from src/**")
+        cpp_files = list(self.src_dir.rglob("*.cpp"))
 
-        for core_file in core_files:
-            cpp_path = self.src_dir / core_file
-            if cpp_path.exists():
-                obj_file = self.temp_dir / f"{cpp_path.stem}_core.o"
-                compile_result = compiler.compile_cpp_file(cpp_path, obj_file).result()
+        # Sort for consistent compilation order
+        cpp_files.sort()
 
-                if compile_result.ok:
-                    fastled_objects.append(obj_file)
-                else:
-                    print(f"WARNING: Failed to compile {core_file}")
+        compiled_count = 0
+        for cpp_file in cpp_files:
+            # Create unique object file name based on relative path
+            rel_path = cpp_file.relative_to(self.src_dir)
+            obj_name = (
+                str(rel_path).replace("/", "_").replace("\\", "_").replace(".cpp", ".o")
+            )
+            obj_file = self.temp_dir / obj_name
 
-        # Add stub platform files
-        stub_dir = self.src_dir / "platforms" / "stub"
-        if stub_dir.exists():
-            for cpp_file in stub_dir.rglob("*.cpp"):
-                obj_file = self.temp_dir / f"{cpp_file.stem}_stub.o"
-                compile_result = compiler.compile_cpp_file(cpp_file, obj_file).result()
+            compile_result = compiler.compile_cpp_file(cpp_file, obj_file).result()
 
-                if compile_result.ok:
-                    fastled_objects.append(obj_file)
+            if compile_result.ok:
+                fastled_objects.append(obj_file)
+                compiled_count += 1
+            else:
+                print(f"WARNING: Failed to compile {rel_path}: {compile_result.stderr}")
 
+        # Compile STUB platform implementation (includes delay, millis, micros)
+        # This is a .hpp file with implementations that needs to be compiled
+        stub_impl_file = (
+            self.src_dir / "platforms" / "stub" / "generic" / "led_sysdefs_generic.hpp"
+        )
+        if stub_impl_file.exists():
+            # Create a temporary .cpp file that includes the .hpp implementation
+            temp_cpp = self.temp_dir / "stub_platform_impl.cpp"
+            temp_cpp.write_text(f'''
+#define FASTLED_STUB_IMPL
+#include "{stub_impl_file}"
+            ''')
+
+            obj_file = self.temp_dir / "stub_platform_impl.o"
+            compile_result = compiler.compile_cpp_file(temp_cpp, obj_file).result()
+
+            if compile_result.ok:
+                fastled_objects.append(obj_file)
+                compiled_count += 1
+                print(f"SUCCESS: Compiled STUB platform implementation")
+            else:
+                print(
+                    f"WARNING: Failed to compile STUB platform implementation: {compile_result.stderr}"
+                )
+
+        # Create main entry point for Arduino-style programs
+        # This provides the missing main() function that calls setup() and loop()
+        main_cpp = self.temp_dir / "arduino_main.cpp"
+        main_cpp.write_text("""
+// Arduino-style main entry point
+// Forward declarations for setup() and loop() functions from .ino file
+// Note: .ino files compile as C++, not C, so don't use extern "C"
+void setup();
+void loop();
+
+int main() {
+    // Call setup() once
+    setup();
+    
+    // Call loop() a few times (not infinite to avoid hanging in tests)
+    for (int i = 0; i < 3; ++i) {
+        loop();
+    }
+    
+    return 0;
+}
+        """)
+
+        obj_file = self.temp_dir / "arduino_main.o"
+        compile_result = compiler.compile_cpp_file(main_cpp, obj_file).result()
+
+        if compile_result.ok:
+            fastled_objects.append(obj_file)
+            compiled_count += 1
+            print(f"SUCCESS: Compiled Arduino main entry point")
+        else:
+            print(
+                f"WARNING: Failed to compile Arduino main entry point: {compile_result.stderr}"
+            )
+
+        print(f"Compiled {compiled_count} FastLED source files successfully")
         return fastled_objects
 
     def _get_platform_linker_args(self, executable_name: str) -> list[str]:
         """Get platform-appropriate linker arguments."""
         import platform
+        import subprocess
 
         args = get_common_linker_args(debug=True)
 
         if platform.system() == "Windows":
-            # Additional Windows-specific libraries for FastLED
-            add_system_libraries(args, ["kernel32", "user32"], "Windows")
+            # Check if we're using lld-link (Clang on Windows)
+            try:
+                result = subprocess.run(
+                    ["lld-link", "--version"], capture_output=True, text=True, timeout=5
+                )
+                using_lld_link = result.returncode == 0
+            except (subprocess.TimeoutExpired, FileNotFoundError):
+                using_lld_link = False
+
+            if using_lld_link:
+                # Comprehensive Windows + Clang + lld-link configuration
+                print(
+                    "Using lld-link: applying comprehensive Windows linking configuration"
+                )
+
+                # Clear basic args and replace with comprehensive lld-link configuration
+                args: list[str] = []
+
+                # Basic linker settings
+                basic_settings: list[str] = [
+                    "/SUBSYSTEM:CONSOLE",
+                    "/NOLOGO",
+                    "/DEBUG:FULL",
+                    "/OPT:NOREF",  # Don't remove unreferenced code for debugging
+                    "/OPT:NOICF",  # Don't merge identical functions for debugging
+                ]
+                args.extend(basic_settings)
+
+                # Essential Windows runtime libraries for lld-link
+                # These provide the missing CRT startup and runtime symbols
+                runtime_libs: list[str] = [
+                    "kernel32.lib",  # Windows kernel functions
+                    "user32.lib",  # Windows user interface
+                    "msvcrt.lib",  # C runtime library (dynamic)
+                    "vcruntime.lib",  # Visual C++ runtime support
+                    "ucrt.lib",  # Universal C runtime
+                    "legacy_stdio_definitions.lib",  # Older stdio compatibility
+                ]
+
+                for lib in runtime_libs:
+                    args.append(f"/DEFAULTLIB:{lib}")
+
+                # Prevent static runtime conflicts
+                nodefault_libs: list[str] = [
+                    "/NODEFAULTLIB:libcmt.lib",  # Exclude static C runtime
+                    "/NODEFAULTLIB:libcpmt.lib",  # Exclude static C++ runtime
+                ]
+                args.extend(nodefault_libs)
+
+                # Suppress common lld-link warnings
+                warning_suppression: list[str] = [
+                    "/ignore:4099",  # Suppress PDB warnings
+                    "/ignore:longsections",  # Suppress long section name warnings
+                ]
+                args.extend(warning_suppression)
+
+            else:
+                # Traditional Windows linking (MSVC link.exe)
+                add_system_libraries(args, ["kernel32", "user32"], "Windows")
         else:
-            # Additional Unix libraries for FastLED
+            # Unix-style systems
             add_system_libraries(args, ["pthread", "m"], platform.system())
 
         return args
