@@ -45,7 +45,7 @@ static bool canBeRepresentedAsFloat(double value) {
         return value != value;
     };
     // Check for special values
-    if (isnan(value) || isinf(value)) {
+    if (isnan(value)) {
         return true; // These can be represented as float
     }
     
