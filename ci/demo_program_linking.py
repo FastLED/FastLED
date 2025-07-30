@@ -24,7 +24,7 @@ from pathlib import Path
 _HERE = Path(__file__).parent
 _PROJECT_ROOT = _HERE.parent
 
-from ci.ci.clang_compiler import (
+from ci.compiler.clang_compiler import (
     Compiler,
     CompilerOptions,
     LinkOptions,
@@ -188,7 +188,7 @@ def demonstrate_linker_detection():
     print("LINKER DETECTION DEMONSTRATION")
     print("=" * 70)
 
-    from ci.ci.clang_compiler import detect_linker
+    from ci.compiler.clang_compiler import detect_linker
 
     try:
         linker = detect_linker()

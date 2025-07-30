@@ -12,7 +12,8 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from ci.ci.clang_compiler import (
+from ci.ci.paths import PROJECT_ROOT
+from ci.compiler.clang_compiler import (
     Compiler,
     CompilerOptions,
     LibarchiveOptions,
@@ -26,7 +27,6 @@ from ci.ci.clang_compiler import (
     get_common_linker_args,
     link_program_sync,
 )
-from ci.ci.paths import PROJECT_ROOT
 
 
 class TestRealArchiveCreation(unittest.TestCase):

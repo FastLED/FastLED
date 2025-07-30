@@ -29,7 +29,7 @@ import toml  # type: ignore
 
 # Add the parent directory to Python path for imports
 # Import the proven Compiler infrastructure
-from ci.ci.clang_compiler import (
+from ci.compiler.clang_compiler import (
     Compiler,
     CompilerOptions,
     LinkOptions,

@@ -184,7 +184,7 @@ def _compile_tests_cmake(
     """Legacy CMake compilation system (preserved for gradual migration)"""
     if _VERBOSE:
         print("Compiling tests using legacy CMake system...")
-    command = ["uv", "run", "-m", "ci.cpp_test_compile"]
+    command = ["uv", "run", "-m", "ci.compiler.cpp_test_compile"]
     if clean:
         command.append("--clean")
     if specific_test:
@@ -589,7 +589,7 @@ def main() -> None:
             passthrough_args.append("--use-clang")
         if args.check:
             passthrough_args.append("--check")
-        # Note: --gcc is handled by not passing --use-clang (GCC is the default in cpp_test_compile.py)
+        # Note: --gcc is handled by not passing --use-clang (GCC is the default in compiler/cpp_test_compile.py)
         compile_tests(
             clean=args.clean,
             unknown_args=passthrough_args,

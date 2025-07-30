@@ -27,7 +27,8 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-from ci.ci.clang_compiler import (
+from ci.ci.paths import PROJECT_ROOT
+from ci.compiler.clang_compiler import (
     Compiler,
     CompilerOptions,
     LinkOptions,
@@ -35,7 +36,6 @@ from ci.ci.clang_compiler import (
     get_common_linker_args,
     link_program_sync,
 )
-from ci.ci.paths import PROJECT_ROOT
 
 
 @dataclass
@@ -109,7 +109,7 @@ class FastLEDTestCompiler:
         if toml_path.exists():
             try:
                 # Import the proven flag extraction function
-                from ci.test_example_compilation import (
+                from ci.compiler.test_example_compilation import (
                     extract_compiler_flags_from_toml,
                     load_build_flags_toml,
                 )

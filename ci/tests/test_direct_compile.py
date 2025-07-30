@@ -9,7 +9,7 @@ import os
 import sys
 from pathlib import Path
 
-from ci.ci.clang_compiler import (
+from ci.compiler.clang_compiler import (
     Compiler,
     CompilerOptions,
     Result,

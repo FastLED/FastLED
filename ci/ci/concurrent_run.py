@@ -11,10 +11,10 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from ci.ci.boards import Board  # type: ignore
-from ci.ci.compile_for_board import compile_examples, errors_happened
 from ci.ci.cpu_count import cpu_count
 from ci.ci.create_build_dir import create_build_dir
 from ci.ci.locked_print import locked_print
+from ci.compiler.compile_for_board import compile_examples, errors_happened
 
 
 # Board initialization doesn't take a lot of memory or cpu so it's safe to run in parallel
