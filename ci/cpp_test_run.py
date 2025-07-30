@@ -9,7 +9,7 @@ import tempfile
 from dataclasses import dataclass
 from pathlib import Path
 
-from ci.paths import PROJECT_ROOT
+from ci.ci.paths import PROJECT_ROOT
 
 
 # Configure console for UTF-8 output on Windows
@@ -184,7 +184,7 @@ def _compile_tests_cmake(
     """Legacy CMake compilation system (preserved for gradual migration)"""
     if _VERBOSE:
         print("Compiling tests using legacy CMake system...")
-    command = ["uv", "run", "ci/cpp_test_compile.py"]
+    command = ["uv", "run", "python", "-m", "ci.cpp_test_compile"]
     if clean:
         command.append("--clean")
     if specific_test:
@@ -219,8 +219,7 @@ def _compile_tests_python(
 
     try:
         # Import the new test compiler system
-        sys.path.insert(0, str(Path(__file__).parent))
-        from compiler.test_compiler import (
+        from ci.compiler.test_compiler import (
             FastLEDTestCompiler,
             check_iwyu_available,
         )
@@ -328,8 +327,7 @@ def _run_tests_python(specific_test: str | None = None) -> None:
     """Run tests from new Python compiler API system"""
     try:
         # Import the new test compiler system
-        sys.path.insert(0, str(Path(__file__).parent))
-        from compiler.test_compiler import FastLEDTestCompiler
+        from ci.compiler.test_compiler import FastLEDTestCompiler
 
         # Get test executables from Python build system
         test_compiler = FastLEDTestCompiler.get_existing_instance()

@@ -444,7 +444,7 @@ endif()
 - ❌ **NEVER cd to subdirectories like ci/ - ALWAYS stay in project root**
 - ✅ **ALWAYS create/modify tmp.py** with your code
 - ✅ **ALWAYS run: `uv run python tmp.py`** (use full `uv run python`, not just `python`)
-- ✅ **ALWAYS use correct import paths: `from ci.module` NOT `from ci.ci.module`**
+- ✅ **ALWAYS use correct import paths: `from ci.ci.module` for ci.ci modules, `from ci.module` for top-level ci modules**
 
 #### Shell Command Execution:
 - ❌ **NEVER run shell commands directly**  
@@ -457,7 +457,7 @@ endif()
 **Python Code Pattern:**
 ```python
 # tmp.py (created in project root, NOT in subdirectories)
-from ci.clang_compiler import Compiler  # CORRECT import path
+from ci.ci.clang_compiler import Compiler  # CORRECT import path for ci.ci modules
 import subprocess
 result = subprocess.run(['git', 'status'], capture_output=True, text=True)
 print(result.stdout)
@@ -483,7 +483,7 @@ Then run: `bash tmp.sh` (from project root)
 - ❌ **NEVER create/use tmp.py files** (forbidden for background agents)
 - ❌ **NEVER cd to subdirectories like ci/ - ALWAYS stay in project root**
 - ✅ **ALWAYS use `uv run python` with existing scripts** (e.g., `uv run python test.py`, `uv run python ci/ci-compile.py`)
-- ✅ **ALWAYS use correct import paths: `from ci.module` NOT `from ci.ci.module`** when testing
+- ✅ **ALWAYS use correct import paths: `from ci.ci.module` for ci.ci modules, `from ci.module` for top-level ci modules** when testing
 - ✅ **ALWAYS use MCP server tools** for programmatic operations when available
 
 #### Shell Command Execution:
@@ -526,9 +526,9 @@ uv run python mcp_server.py
 - ❌ **WRONG**: `uv run -c "..."`  
 - ✅ **CORRECT**: `uv run python -c "..."`
 
-#### 2. **Correct Import Paths - NOT Nested Subdirectories**
-- ❌ **WRONG**: `from ci.ci.clang_compiler import ...`
-- ✅ **CORRECT**: `from ci.clang_compiler import ...`
+#### 2. **Correct Import Paths - Use Appropriate Module Structure**
+- ✅ **CORRECT**: `from ci.ci.clang_compiler import ...` (for ci.ci modules)
+- ✅ **CORRECT**: `from ci.clang_compiler import ...` (for top-level ci modules, if they exist)
 
 #### 3. **Never Change Directory - Always Work from Project Root**
 - ❌ **WRONG**: `cd ci && python ...`
@@ -536,13 +536,13 @@ uv run python mcp_server.py
 - ✅ **CORRECT**: Stay in project root, use full paths: `uv run python ci/script.py`
 
 #### 4. **Testing Commands Must Use Correct Format**
-- ❌ **WRONG**: `python -c "from ci.ci.module import func; func()"`
-- ✅ **CORRECT**: `uv run python -c "from ci.module import func; func()"`
+- ❌ **WRONG**: `python -c "from ci.ci.module import func; func()"` (missing uv run python)
+- ✅ **CORRECT**: `uv run python -c "from ci.ci.module import func; func()"` (for ci.ci modules)
 
 **Example of CORRECT Command Pattern:**
 ```bash
 # From project root directory
-uv run python -c "from ci.clang_compiler import detect_linker; print('Linker:', detect_linker())"
+uv run python -c "from ci.ci.clang_compiler import detect_linker; print('Linker:', detect_linker())"
 ```
 
 **These patterns were corrected through direct user feedback and must be followed exactly.**

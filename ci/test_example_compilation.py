@@ -27,8 +27,9 @@ from typing import Any, Callable, Dict, List, Optional, Union
 import psutil
 import toml  # type: ignore
 
+# Add the parent directory to Python path for imports
 # Import the proven Compiler infrastructure
-from ci.clang_compiler import (
+from ci.ci.clang_compiler import (
     Compiler,
     CompilerOptions,
     LinkOptions,

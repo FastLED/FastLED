@@ -22,9 +22,9 @@ import time
 import warnings
 from pathlib import Path
 
-from ci.boards import Board, get_board  # type: ignore
-from ci.concurrent_run import ConcurrentRunArgs, concurrent_run
-from ci.locked_print import locked_print
+from ci.ci.boards import Board, get_board  # type: ignore
+from ci.ci.concurrent_run import ConcurrentRunArgs, concurrent_run
+from ci.ci.locked_print import locked_print
 
 
 HERE = Path(__file__).parent.resolve()

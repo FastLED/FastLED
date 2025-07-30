@@ -263,7 +263,7 @@ done
 
 ```python
 # In your Python build script
-from ci.symbol_analysis import main as analyze_symbols
+from ci.ci.symbol_analysis import main as analyze_symbols
 import sys
 
 # Override arguments

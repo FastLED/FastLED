@@ -159,25 +159,28 @@ uv run ci/build_info_analyzer.py --compare uno esp32dev
 
 **FAILURE TO FOLLOW THESE REQUIREMENTS WILL RESULT IN BROKEN CODE SUBMISSIONS.**
 
-## 🚨 CRITICAL: FORBIDDEN IMPORT PATTERNS 🚨
+## 📝 IMPORT PATTERNS AND MODULE STRUCTURE
 
-### ABSOLUTELY FORBIDDEN: The nested `ci.ci.` import pattern - Use `ci.module` instead
+### SUPPORTED: The `ci.ci.` import pattern - Use appropriate module structure
 
-**🚨 NEVER use the double-nested import pattern `ci.ci.module_name` - This causes import failures:**
-
-**❌ FORBIDDEN PATTERNS:**
-```python
-from ci.ci.clang_compiler import Compiler          # WRONG - use ci.clang_compiler instead
-from ci.ci.symbol_analysis import analyze_symbols  # WRONG - use ci.symbol_analysis instead  
-from ci.ci.build_info_analyzer import get_info     # WRONG - use ci.build_info_analyzer instead
-import ci.ci.any_module                            # WRONG - nested import forbidden
-```
+**✅ The `ci.ci.module_name` import pattern is now supported - Use the correct module structure:**
 
 **✅ CORRECT PATTERNS:**
 ```python
-from ci.clang_compiler import Compiler             # CORRECT - single level import
-from ci.symbol_analysis import analyze_symbols     # CORRECT - clean architecture
-from ci.build_info_analyzer import get_info        # CORRECT - proper import path
+from ci.ci.clang_compiler import Compiler          # CORRECT - ci.ci modules are supported
+from ci.ci.symbol_analysis import analyze_symbols  # CORRECT - for ci.ci modules
+from ci.ci.build_info_analyzer import get_info     # CORRECT - for ci.ci modules
+import ci.ci.paths                                 # CORRECT - for ci.ci modules
+```
+
+**📝 MODULE STRUCTURE:**
+```python
+# For modules in ci/ci/ directory, use ci.ci prefix
+from ci.ci.clang_compiler import Compiler         # For ci/ci/clang_compiler.py
+from ci.ci.symbol_analysis import analyze_symbols # For ci/ci/symbol_analysis.py
+
+# For modules directly in ci/ directory, use ci prefix
+from ci.ci_compile import main                     # For ci/ci_compile.py (if exists)
 import ci.module_name                              # CORRECT - simple import
 ```
 

@@ -2,9 +2,9 @@ import subprocess
 import unittest
 from pathlib import Path
 
-from ci.elf import dump_symbol_sizes
-from ci.paths import PROJECT_ROOT
-from ci.tools import Tools, load_tools
+from ci.ci.elf import dump_symbol_sizes
+from ci.ci.paths import PROJECT_ROOT
+from ci.ci.tools import Tools, load_tools
 
 
 HERE = Path(__file__).resolve().parent.absolute()

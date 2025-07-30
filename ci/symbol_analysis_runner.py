@@ -8,7 +8,7 @@ import argparse
 import sys
 from pathlib import Path
 
-from ci.symbol_analysis import main as symbol_analysis
+from ci.ci.symbol_analysis import main as symbol_analysis
 
 
 def main():

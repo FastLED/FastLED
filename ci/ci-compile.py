@@ -14,8 +14,8 @@ import time
 import warnings
 from pathlib import Path
 
-from ci.boards import Board, get_board  # type: ignore
-from ci.locked_print import locked_print
+from ci.ci.boards import Board, get_board  # type: ignore
+from ci.ci.locked_print import locked_print
 
 
 HERE = Path(__file__).parent.resolve()
@@ -114,7 +114,7 @@ EXTRA_EXAMPLES: dict[Board, list[str]] = {
 
 def parse_args():
     parser = argparse.ArgumentParser(
-        description="Compile FastLED examples for various boards using pio ci."
+        description="Compile FastLED examples for various boards using pio ci.ci."
     )
     parser.add_argument(
         "boards",
@@ -369,8 +369,8 @@ def generate_build_info(
                 data = json.loads(metadata_result.stdout)
 
                 # Add tool aliases (from create_build_dir.py)
-                sys.path.insert(0, str(HERE))
-                from ci.create_build_dir import insert_tool_aliases
+
+                from ci.ci.create_build_dir import insert_tool_aliases
 
                 insert_tool_aliases(data)
 

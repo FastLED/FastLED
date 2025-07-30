@@ -10,8 +10,8 @@ import time
 from pathlib import Path
 from threading import Lock
 
-from ci.boards import Board  # type: ignore
-from ci.locked_print import locked_print
+from ci.ci.boards import Board  # type: ignore
+from ci.ci.locked_print import locked_print
 
 
 ERROR_HAPPENED = False

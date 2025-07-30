@@ -13,7 +13,7 @@ from typing import Any, Dict, List, Optional
 
 from typeguard import typechecked
 
-from ci.running_process import RunningProcess
+from ci.ci.running_process import RunningProcess
 
 
 @typechecked
@@ -481,7 +481,7 @@ def run_namespace_check(enable_stack_trace: bool) -> None:
 
 def build_cpp_test_command(args: TestArgs) -> str:
     """Build the C++ test command based on arguments"""
-    cmd_list = ["uv", "run", "ci/cpp_test_run.py"]
+    cmd_list = ["uv", "run", "python", "-m", "ci.cpp_test_run"]
 
     if args.clang:
         cmd_list.append("--clang")
@@ -552,7 +552,7 @@ def run_examples_tests(args: TestArgs, enable_stack_trace: bool) -> None:
     start_time = time.time()
 
     # Build command with optional example names
-    cmd = ["uv", "run", "ci/test_example_compilation.py"]
+    cmd = ["uv", "run", "python", "-m", "ci.test_example_compilation"]
     if args.examples:
         cmd.extend(args.examples)
     if args.clean:

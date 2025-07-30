@@ -12,14 +12,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-
-# Add the ci directory to the path to import our modules
-current_dir = Path(__file__).parent
-project_root = current_dir.parent.parent
-sys.path.insert(0, str(project_root))
-sys.path.insert(0, str(project_root / "ci"))
-
-from ci.clang_compiler import (
+from ci.ci.clang_compiler import (
     Compiler,
     CompilerOptions,
     LibarchiveOptions,
@@ -33,6 +26,7 @@ from ci.clang_compiler import (
     get_common_linker_args,
     link_program_sync,
 )
+from ci.ci.paths import PROJECT_ROOT
 
 
 class TestRealArchiveCreation(unittest.TestCase):
@@ -41,7 +35,7 @@ class TestRealArchiveCreation(unittest.TestCase):
     def setUp(self):
         """Set up test fixtures."""
         self.temp_dir = Path(tempfile.mkdtemp())
-        self.project_root = project_root
+        self.project_root = PROJECT_ROOT
 
         # Set working directory to project root
         os.chdir(self.project_root)
@@ -720,7 +714,7 @@ class TestProgramLinking(unittest.TestCase):
     def setUp(self):
         """Set up test fixtures."""
         self.temp_dir = Path(tempfile.mkdtemp())
-        self.project_root = project_root
+        self.project_root = PROJECT_ROOT
         os.chdir(self.project_root)
 
     def tearDown(self):
@@ -866,7 +860,7 @@ class TestFullProgramLinking(unittest.TestCase):
     def setUp(self):
         """Set up test environment with FastLED source."""
         self.temp_dir = Path(tempfile.mkdtemp())
-        self.project_root = project_root
+        self.project_root = PROJECT_ROOT
         self.src_dir = self.project_root / "src"
         self.examples_dir = self.project_root / "examples"
         os.chdir(self.project_root)

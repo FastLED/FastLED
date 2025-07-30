@@ -38,7 +38,7 @@ build-backend = "hatchling.build"
 [tool.hatch.build.targets.wheel]
 
 [tool.hatch.build]
-packages = ["ci/ci"]
+packages = ["ci"]
 
 [tool.ruff]
 exclude = ["ci/tmp", "ci/wasm"]
@@ -157,6 +157,6 @@ disableLanguageServices = false
 taskListTokens = ["TODO", "FIXME", "BUG", "HACK", "NOTE"]
 
 [[tool.pyright.executionEnvironments]]
-root = "ci"
+root = "."
 pythonVersion = "3.11"
 pythonPlatform = "All"

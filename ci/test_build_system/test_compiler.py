@@ -27,6 +27,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
+# Add the parent directory to Python path for imports
 from ci.ci.clang_compiler import (
     Compiler,
     CompilerOptions,

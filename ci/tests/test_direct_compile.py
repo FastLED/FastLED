@@ -9,11 +9,7 @@ import os
 import sys
 from pathlib import Path
 
-# Add ci directory to path for imports
-# sys.path.insert(0, str(Path(__file__).parent.parent))
-from typing import cast
-
-from ci.clang_compiler import (
+from ci.ci.clang_compiler import (
     Compiler,
     CompilerOptions,
     Result,

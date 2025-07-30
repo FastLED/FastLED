@@ -9,7 +9,7 @@ import os
 import sys
 from pathlib import Path
 
-from ci.esp32_symbol_analysis import main as esp32_symbol_analysis
+from ci.ci.esp32_symbol_analysis import main as esp32_symbol_analysis
 
 
 def is_esp32_board(board_name: str) -> bool:
