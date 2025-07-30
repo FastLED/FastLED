@@ -61,6 +61,17 @@ class CompilationResult:
     failed_count: int
     compile_time: float
     failed_examples: List[Dict[str, Any]]
+    object_file_map: Optional[Dict[Path, List[Path]]] = (
+        None  # For full compilation: ino_file -> [obj_files]
+    )
+
+
+@dataclass
+class LinkingResult:
+    """Results from linking examples into executable programs."""
+
+    linked_count: int
+    failed_count: int
 
 
 def load_build_flags_toml(toml_path: str) -> Dict[str, Any]:
@@ -381,6 +392,7 @@ def compile_examples_simple(
     ino_files: List[Path],
     pch_compatible_files: set[Path],
     log_timing: Callable[[str], None],
+    full_compilation: bool = False,
 ) -> CompilationResult:
     """
     Compile examples using the simple build system (Compiler class).
@@ -390,6 +402,7 @@ def compile_examples_simple(
         ino_files: List of .ino files to compile
         pch_compatible_files: Set of files that are PCH compatible
         log_timing: Logging function
+        full_compilation: If True, preserve object files for linking; if False, use temp files
 
     Returns:
         CompilationResult: Results from compilation including counts and failed examples
@@ -397,8 +410,17 @@ def compile_examples_simple(
     compile_start = time.time()
     results: List[Dict[str, Any]] = []
 
+    # Create build directory structure if full compilation is enabled
+    build_dir: Optional[Path] = None
+    if full_compilation:
+        build_dir = Path(".build/examples")
+        build_dir.mkdir(parents=True, exist_ok=True)
+        log_timing(f"[BUILD] Created build directory: {build_dir}")
+
     # Submit all compilation jobs with file tracking
     future_to_file: Dict[Future[Result], Path] = {}
+    # Track object files for linking (if full_compilation enabled)
+    object_file_map: Dict[Path, List[Path]] = {}  # ino_file -> [obj_files]
     pch_files_count = 0
     direct_files_count = 0
     total_cpp_files = 0
@@ -427,9 +449,24 @@ def compile_examples_simple(
         # Determine if this file should use PCH
         use_pch_for_file = ino_file in pch_compatible_files
 
+        # Set up object file paths for full compilation
+        ino_output_path: Optional[Path] = None
+        example_obj_files: List[Path] = []
+
+        if full_compilation and build_dir:
+            # Create example-specific build directory
+            example_name = ino_file.parent.name
+            example_build_dir = build_dir / example_name
+            example_build_dir.mkdir(exist_ok=True)
+
+            # Set specific output path for .ino file
+            ino_output_path = example_build_dir / f"{ino_file.stem}.o"
+            example_obj_files.append(ino_output_path)
+
         # Compile the .ino file
         future = compiler.compile_ino_file(
             ino_file,
+            output_path=ino_output_path,
             use_pch_for_this_file=use_pch_for_file,
             additional_flags=additional_flags,
         )
@@ -442,8 +479,17 @@ def compile_examples_simple(
 
         # Compile additional .cpp files in the same directory
         for cpp_file in cpp_files:
+            cpp_output_path: Optional[Path] = None
+
+            if full_compilation and build_dir:
+                example_name = ino_file.parent.name
+                example_build_dir = build_dir / example_name
+                cpp_output_path = example_build_dir / f"{cpp_file.stem}.o"
+                example_obj_files.append(cpp_output_path)
+
             cpp_future = compiler.compile_cpp_file(
                 cpp_file,
+                output_path=cpp_output_path,
                 use_pch_for_this_file=use_pch_for_file,
                 additional_flags=additional_flags,
             )
@@ -453,6 +499,10 @@ def compile_examples_simple(
                 pch_files_count += 1
             else:
                 direct_files_count += 1
+
+        # Track object files for this example (for linking)
+        if full_compilation and example_obj_files:
+            object_file_map[ino_file] = example_obj_files
 
     total_files = len(ino_files) + total_cpp_files
     log_timing(
@@ -523,6 +573,7 @@ def compile_examples_simple(
         failed_count=len(failed),
         compile_time=compile_time,
         failed_examples=failed,
+        object_file_map=object_file_map if full_compilation else None,
     )
 
 
@@ -704,6 +755,239 @@ def compile_examples_unity(
         )
 
 
+def get_fastled_core_sources() -> List[Path]:
+    """Get essential FastLED .cpp files for library creation."""
+    src_dir = Path("src")
+
+    # Core FastLED files that must be included
+    core_files: List[Path] = [
+        src_dir / "FastLED.cpp",
+        src_dir / "colorutils.cpp",
+        src_dir / "hsv2rgb.cpp",
+    ]
+
+    # Find all .cpp files in key directories
+    additional_sources: List[Path] = []
+    for pattern in ["*.cpp", "lib8tion/*.cpp", "platforms/stub/*.cpp"]:
+        additional_sources.extend(list(src_dir.glob(pattern)))
+
+    # Include essential .cpp files from nested directories
+    additional_sources.extend(list(src_dir.rglob("*.cpp")))
+
+    # Filter out duplicates and ensure files exist
+    all_sources: List[Path] = []
+    seen_files: set[Path] = set()
+
+    for cpp_file in core_files + additional_sources:
+        # Skip stub_main.cpp since we create individual main.cpp files for each example
+        if cpp_file.name == "stub_main.cpp":
+            continue
+
+        if cpp_file.exists() and cpp_file not in seen_files:
+            all_sources.append(cpp_file)
+            seen_files.add(cpp_file)
+
+    return all_sources
+
+
+def create_fastled_library(
+    compiler: Compiler, fastled_build_dir: Path, log_timing: Callable[[str], None]
+) -> Path:
+    """Create libfastled.a static library."""
+
+    log_timing("[LIBRARY] Creating FastLED static library...")
+
+    # Compile all FastLED sources to object files
+    fastled_sources = get_fastled_core_sources()
+    fastled_objects: List[Path] = []
+
+    obj_dir = fastled_build_dir / "obj"
+    obj_dir.mkdir(exist_ok=True)
+
+    log_timing(f"[LIBRARY] Compiling {len(fastled_sources)} FastLED source files...")
+
+    # Compile each source file
+    futures: List[tuple[Future[Result], Path, Path]] = []
+    for cpp_file in fastled_sources:
+        obj_file = obj_dir / f"{cpp_file.stem}.o"
+        future = compiler.compile_cpp_file(cpp_file, obj_file)
+        futures.append((future, obj_file, cpp_file))
+
+    # Wait for compilation to complete
+    compiled_count = 0
+    for future, obj_file, cpp_file in futures:
+        try:
+            result: Result = future.result()
+            if result.ok:
+                fastled_objects.append(obj_file)
+                compiled_count += 1
+            else:
+                log_timing(
+                    f"[LIBRARY] WARNING: Failed to compile {cpp_file.relative_to(Path('src'))}: {result.stderr[:100]}..."
+                )
+        except Exception as e:
+            log_timing(
+                f"[LIBRARY] WARNING: Exception compiling {cpp_file.relative_to(Path('src'))}: {e}"
+            )
+
+    log_timing(
+        f"[LIBRARY] Successfully compiled {compiled_count}/{len(fastled_sources)} FastLED sources"
+    )
+
+    if not fastled_objects:
+        raise Exception("No FastLED source files compiled successfully")
+
+    # Create static library using ar
+    lib_file = fastled_build_dir / "libfastled.a"
+    log_timing(f"[LIBRARY] Creating static library: {lib_file}")
+
+    archive_future = compiler.create_archive(fastled_objects, lib_file)
+    archive_result = archive_future.result()
+
+    if not archive_result.ok:
+        raise Exception(f"Library creation failed: {archive_result.stderr}")
+
+    log_timing(f"[LIBRARY] SUCCESS: FastLED library created: {lib_file}")
+    return lib_file
+
+
+def get_platform_linker_args() -> List[str]:
+    """Get platform-specific linker arguments for FastLED executables."""
+    import platform
+
+    system = platform.system()
+    if system == "Windows":
+        # Windows with lld-link - use MSVC-style linking
+        return [
+            "/SUBSYSTEM:CONSOLE",  # Console application
+            "/DEFAULTLIB:libcmt",  # Static C Runtime Library
+            "/DEFAULTLIB:libvcruntime",  # VC++ Runtime
+            "/DEFAULTLIB:libucrt",  # Universal CRT
+            "/NODEFAULTLIB:msvcrt",  # Avoid mixing runtimes
+            # Note: Windows FastLED executables use Windows APIs
+            # lld-link will automatically link to needed system libraries
+        ]
+    elif system == "Linux":
+        return [
+            "-pthread",  # Threading support
+            "-lm",  # Math library
+            "-ldl",  # Dynamic loading
+            "-lrt",  # Real-time extensions
+        ]
+    elif system == "Darwin":  # macOS
+        return [
+            "-pthread",  # Threading support
+            "-lm",  # Math library
+            "-framework",
+            "CoreFoundation",
+            "-framework",
+            "IOKit",
+        ]
+    else:
+        return [
+            "-pthread",  # Threading support
+            "-lm",  # Math library
+        ]
+
+
+def get_executable_name(example_name: str) -> str:
+    """Get platform-appropriate executable name."""
+    import platform
+
+    if platform.system() == "Windows":
+        return f"{example_name}.exe"
+    else:
+        return example_name
+
+
+def create_main_cpp_for_example(example_build_dir: Path) -> Path:
+    """Create a minimal main.cpp file that includes the stub_main.hpp."""
+    main_cpp_content = """// Auto-generated main.cpp for Arduino sketch
+// This file includes the FastLED stub main function
+
+#include "platforms/stub_main.hpp"
+"""
+
+    main_cpp_path = example_build_dir / "main.cpp"
+    main_cpp_path.write_text(main_cpp_content)
+    return main_cpp_path
+
+
+def link_examples(
+    object_file_map: Dict[Path, List[Path]],
+    fastled_lib: Path,
+    build_dir: Path,
+    compiler: Compiler,
+    log_timing: Callable[[str], None],
+) -> LinkingResult:
+    """Link all examples into executable programs."""
+
+    linked_count = 0
+    failed_count = 0
+
+    for ino_file, obj_files in object_file_map.items():
+        example_name = ino_file.parent.name
+        example_build_dir = build_dir / example_name
+
+        # Create executable name
+        executable_name = get_executable_name(example_name)
+        executable_path = example_build_dir / executable_name
+
+        # Validate that all object files exist
+        missing_objects = [obj for obj in obj_files if not obj.exists()]
+        if missing_objects:
+            log_timing(
+                f"[LINKING] FAILED: {executable_name}: Missing object files: {[str(obj) for obj in missing_objects]}"
+            )
+            failed_count += 1
+            continue
+
+        try:
+            # Create and compile main.cpp for this example
+            main_cpp_path = create_main_cpp_for_example(example_build_dir)
+            main_obj_path = example_build_dir / "main.o"
+
+            main_future = compiler.compile_cpp_file(main_cpp_path, main_obj_path)
+            main_result: Result = main_future.result()
+
+            if not main_result.ok:
+                log_timing(
+                    f"[LINKING] FAILED: {executable_name}: Failed to compile main.cpp: {main_result.stderr[:100]}..."
+                )
+                failed_count += 1
+                continue
+
+            # Add main.o to object files for linking
+            all_obj_files = obj_files + [main_obj_path]
+
+            # Set up linking options
+            link_options = LinkOptions(
+                output_executable=str(executable_path),
+                object_files=[str(obj) for obj in all_obj_files],
+                static_libraries=[str(fastled_lib)],
+                linker_args=get_platform_linker_args(),
+            )
+
+            # Perform linking
+            link_future = compiler.link_program(link_options)
+            link_result: Result = link_future.result()
+
+            if link_result.ok:
+                linked_count += 1
+                log_timing(f"[LINKING] SUCCESS: {executable_name}")
+            else:
+                failed_count += 1
+                log_timing(
+                    f"[LINKING] FAILED: {executable_name}: {link_result.stderr[:200]}..."
+                )
+
+        except Exception as e:
+            failed_count += 1
+            log_timing(f"[LINKING] FAILED: {executable_name}: Exception: {e}")
+
+    return LinkingResult(linked_count=linked_count, failed_count=failed_count)
+
+
 def run_example_compilation_test(
     specific_examples: Optional[List[str]] = None,
     clean_build: bool = False,
@@ -782,6 +1066,10 @@ def run_example_compilation_test(
     # Find examples to compile
     log_timing("Discovering .ino examples...")
 
+    def red_text(text: str) -> str:
+        """Return text with red ANSI color codes for error highlighting."""
+        return f"\033[91m{text}\033[0m"
+
     try:
         # Use the compiler's find_ino_files method with filtering
         filter_names = specific_examples if specific_examples else None
@@ -789,7 +1077,21 @@ def run_example_compilation_test(
 
         if not ino_files:
             if specific_examples:
-                log_timing(f"[ERROR] No .ino files found matching: {specific_examples}")
+                # Show detailed error with suggestions
+                print(red_text("### ERROR ###"))
+                print(red_text(f"No .ino files found matching: {specific_examples}"))
+
+                # Get all available examples for suggestions
+                all_ino_files = list(Path("examples").rglob("*.ino"))
+                if all_ino_files:
+                    available_names = sorted([f.stem for f in all_ino_files])
+                    print(
+                        f"\nAvailable examples include: {', '.join(available_names[:10])}..."
+                    )
+                    if len(available_names) > 10:
+                        print(f"  ... and {len(available_names) - 10} more examples")
+
+                print(red_text("### ERROR ###"))
                 return 1
             else:
                 log_timing("[ERROR] No .ino files found in examples directory")
@@ -953,7 +1255,7 @@ def run_example_compilation_test(
             )
         else:
             result = compile_examples_simple(
-                compiler, ino_files, pch_compatible_files, log_timing
+                compiler, ino_files, pch_compatible_files, log_timing, full_compilation
             )
 
         successful_count = result.successful_count
@@ -985,30 +1287,52 @@ def run_example_compilation_test(
         linked_count: int = 0
         linking_failed_count: int = 0
 
-        if full_compilation and failed_count == 0:
-            log_timing("\n[LINKING] Starting program linking for --full mode...")
+        if full_compilation and failed_count == 0 and result.object_file_map:
+            log_timing("\n[LINKING] Starting real program linking...")
             linking_start = time.time()
 
-            # For now, just simulate linking with a brief delay to show the difference
-            # TODO: Implement actual linking logic that:
-            # 1. Tracks object file locations from compilation
-            # 2. Creates FastLED static library from src/ files
-            # 3. Links each example's object file with FastLED library
-            # 4. Creates executable files
+            try:
+                # Phase 2: Create FastLED static library
+                log_timing("[LINKING] Creating FastLED static library...")
+                fastled_build_dir = Path(".build/fastled")
+                fastled_build_dir.mkdir(parents=True, exist_ok=True)
 
-            # Simulate linking time based on number of examples
-            simulated_linking_time = len(ino_files) * 0.01  # 10ms per example
-            time.sleep(simulated_linking_time)
+                fastled_lib = create_fastled_library(
+                    compiler, fastled_build_dir, log_timing
+                )
 
-            linked_count = (
-                successful_count  # Assume all successful compilations link successfully
-            )
-            linking_time = time.time() - linking_start
+                # Phase 3: Link examples
+                log_timing("[LINKING] Linking example programs...")
+                build_dir = Path(".build/examples")
+                linking_result = link_examples(
+                    result.object_file_map, fastled_lib, build_dir, compiler, log_timing
+                )
+                linked_count = linking_result.linked_count
+                linking_failed_count = linking_result.failed_count
 
+                linking_time = time.time() - linking_start
+
+                if linking_failed_count == 0:
+                    log_timing(
+                        f"[LINKING] SUCCESS: Successfully linked {linked_count} executable programs"
+                    )
+                else:
+                    log_timing(
+                        f"[LINKING] WARNING: Linked {linked_count} programs, {linking_failed_count} failed"
+                    )
+
+                log_timing(f"[LINKING] Real linking completed in {linking_time:.2f}s")
+
+            except Exception as e:
+                linking_time = time.time() - linking_start
+                log_timing(f"[LINKING] ERROR: Linking failed: {e}")
+                linking_failed_count = successful_count  # Mark all as failed
+                linked_count = 0
+
+        elif full_compilation and failed_count == 0:
             log_timing(
-                f"[LINKING] Successfully linked {linked_count} executable programs"
+                "[LINKING] ERROR: No object files available for linking (internal error)"
             )
-            log_timing(f"[LINKING] Linking completed in {linking_time:.2f}s")
         elif full_compilation:
             log_timing(
                 f"[LINKING] Skipping linking due to {failed_count} compilation failures"

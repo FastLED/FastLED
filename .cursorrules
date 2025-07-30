@@ -693,6 +693,59 @@ def parse_data(data: str, timeout: Optional[int] = None) -> Union[dict[str, Any]
     return {}
 ```
 
+**🚨 CRITICAL: TUPLES FOR MULTIPLE RETURN VALUES ARE FORBIDDEN**
+
+**NEVER use tuples for multiple return values - use dataclass structs instead:**
+
+**❌ WRONG - Tuples have no named fields:**
+```python
+def compile_examples() -> tuple[int, int, float]:
+    return successful_count, failed_count, compile_time
+
+def link_programs() -> tuple[int, int]:
+    return linked_count, failed_count
+
+# Usage becomes unclear and error-prone
+success, failed, time = compile_examples()  # Which is which?
+a, b = link_programs()  # What do a and b represent?
+```
+
+**✅ CORRECT - Dataclass structs with named fields:**
+```python
+@dataclass
+class CompilationResult:
+    successful_count: int
+    failed_count: int
+    compile_time: float
+
+@dataclass  
+class LinkingResult:
+    linked_count: int
+    failed_count: int
+
+def compile_examples() -> CompilationResult:
+    return CompilationResult(
+        successful_count=success,
+        failed_count=failed,
+        compile_time=time
+    )
+
+def link_programs() -> LinkingResult:
+    return LinkingResult(linked_count=linked, failed_count=failed)
+
+# Usage is clear and self-documenting
+result = compile_examples()
+print(f"Success: {result.successful_count}, Failed: {result.failed_count}")
+```
+
+**When tuples ARE acceptable:**
+- ✅ **Coordinates/positions**: `point: tuple[float, float]` (x, y coordinates)
+- ✅ **Immutable pairs**: `key_value: tuple[str, Any]` (dict items)
+- ✅ **Type annotations**: `Union[tuple[str, int], tuple[str, str]]` (variant types)
+- ✅ **Single conceptual unit**: `rgb: tuple[int, int, int]` (color components)
+
+**Key principle:** If the tuple elements have different semantic meanings, use a dataclass instead.
+
 **🚨 CRITICAL: Python functions SHOULD NOT return dict UNLESS ABSOLUTELY NECESSARY.**
 
 **Use dataclass structs for type-checked arguments and return values instead of raw dictionaries:**

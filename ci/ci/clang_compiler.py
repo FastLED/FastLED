@@ -664,7 +664,7 @@ class Compiler:
 
         Args:
             examples_dir (str|Path): Directory containing .ino files
-            filter_names (list, optional): Only include files with these stem names
+            filter_names (list, optional): Only include files with these stem names (case-insensitive)
 
         Returns:
             list[Path]: List of .ino file paths
@@ -673,8 +673,9 @@ class Compiler:
         ino_files = list(examples_dir.rglob("*.ino"))
 
         if filter_names:
-            filter_set = set(filter_names)
-            ino_files = [f for f in ino_files if f.stem in filter_set]
+            # Create case-insensitive mapping for better user experience
+            filter_lower = {name.lower() for name in filter_names}
+            ino_files = [f for f in ino_files if f.stem.lower() in filter_lower]
 
         return ino_files
 
