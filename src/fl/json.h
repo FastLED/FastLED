@@ -4,10 +4,6 @@
  * @file fl/json.h
  * @brief FastLED's Elegant JSON Library: `fl::Json`
  *
- * NOTE: ArduinoJson only is used for parsing. We use a custom serializer for converting to a json
- * string. It's entirely possible that our json string serializer is not correct with respect to
- * complex string encoding. If you see bugs, then file an issue at https://github.com/fastled/FastLED/issues
- *
  * @details
  *
  * The `fl::Json` library provides a lightweight, type-safe, and highly ergonomic
@@ -112,8 +108,38 @@
  *   prefix for library components (e.g., `fl::Json`, `fl::string`, `fl::vector`).
  *   Avoid `std::` equivalents.
  *
- */
-
+ * HIGH LEVEL: For platforms with a lot of memory, this parsing library (ArduinoJson) will automatically be included.
+ * Othweise you'll just get Json -> str encoding (and no parsing). You can check if you haee
+ * the full library by detecting if FASTLED_ENABLE_JSON is defined.
+ *
+ * It's important to note that ArduinoJson only is used for parsing. We use a custom serializer for
+ * output to string. But this is usually easy to do. For help serializing out, look at fl/sstream.h
+ * for converting a collection of values to a string.
+ *
+ * It's entirely possible that our json string output serializer is NOT 100% correct with respect to
+ * complex string encoding (for example an HTML document). If you see bugs, then file an issue at
+ * https://github.com/fastled/FastLED/issues
+ *
+ * for string parsing, we should be full featured when FASTLED_ENABLE_JSON is defined (automiatic for SKETCH_HAS_LOTS_OF_MEMORY).
+ * If there is some string that doesn't correctly parse, use b64 encoding. For example, you might get better luck b64 encoding
+ * 1024 elements of small ints then manually deserializing to a fl::vector<u8>. Infact, it's pretty much assured.
+ *
+ * That being said...
+ *
+ * This api is designed specifically to be fast for input <--> output of arrays of numbers in {u8, i16, float}.
+ * If you have a different encodings scheme, for example an array of tuples, then this library will be MUCH MUCH
+ * slower than Arduino Json. If you stick to the scheme we have optimized for (flat arrays of numbers
+ * and few dictionaries) then this api will be blazing fast. Otherwise? Expect pain: slowdowns and lots of memory consumption.
+ *
+ * Why?
+ *
+ * ArduinoJson only has a nice interface if you agree to bring in std::-everything. Ever bring in std::sstream?
+ * The amount of code that will be pulled for <sstream> will blow your mind. To keep things strict and tiny
+ * we have to take ArduinoJson and strip all the optional components out then seal the remaining api in cement and
+ * bolt on a nice fluid interface ontop. That's what fl/json.h is.
+ *
+ * And the good news is - it works great!! And if it doesn't? File a bug and we'll have it fixed in the next release.
+*/
 
 
 #include "fl/string.h"
