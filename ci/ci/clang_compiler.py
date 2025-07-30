@@ -6,6 +6,7 @@ Supports the simple build system approach outlined in FEATURE.md.
 """
 
 import os
+import platform
 import shutil
 import subprocess
 import tempfile
@@ -99,6 +100,29 @@ class VersionCheckResult:
     success: bool
     version: str
     error: str
+
+
+@dataclass
+class LinkOptions:
+    """Configuration options for program linking operations."""
+
+    # Output configuration
+    output_executable: str | Path  # Output executable path
+
+    # Input files
+    object_files: list[str | Path] = field(default_factory=list)  # .o files to link
+    static_libraries: list[str | Path] = field(default_factory=list)  # .a files to link
+
+    # Linker configuration
+    linker: str | None = None  # Custom linker path (auto-detected if None)
+    linker_args: list[str] = field(
+        default_factory=list
+    )  # All linker command line arguments
+
+    # Platform-specific defaults can be added via helper functions
+    temp_dir: str | Path | None = (
+        None  # Custom temporary directory for intermediate files
+    )
 
 
 class Compiler:
@@ -1083,6 +1107,251 @@ class Compiler:
             object_files, output_archive, options, self.settings.archiver
         )
 
+    def link_program(self, link_options: LinkOptions) -> Future[Result]:
+        """
+        Link object files and libraries into an executable program.
+
+        Args:
+            link_options: Configuration for the linking operation
+
+        Returns:
+            Future[Result]: Future that will contain linking result
+        """
+        return _EXECUTOR.submit(self._link_program_sync, link_options)
+
+    def _link_program_sync(self, link_options: LinkOptions) -> Result:
+        """
+        Synchronous implementation of program linking.
+
+        Args:
+            link_options: Configuration for the linking operation
+
+        Returns:
+            Result: Success status and command output
+        """
+        return link_program_sync(link_options)
+
+    def detect_linker(self) -> str:
+        """
+        Detect the best available linker for the current platform.
+        Preference order varies by platform:
+        - Windows: lld-link.exe > link.exe > ld.exe
+        - Linux: mold > lld > gold > ld
+        - macOS: ld64.lld > ld
+
+        Returns:
+            str: Path to the detected linker
+
+        Raises:
+            RuntimeError: If no suitable linker is found
+        """
+        system = platform.system()
+
+        if system == "Windows":
+            # Windows linker priority
+            for linker in [
+                "lld-link.exe",
+                "lld-link",
+                "link.exe",
+                "link",
+                "ld.exe",
+                "ld",
+            ]:
+                linker_path = shutil.which(linker)
+                if linker_path:
+                    return linker_path
+            raise RuntimeError("No linker found (lld-link, link, or ld required)")
+
+        elif system == "Linux":
+            # Linux linker priority
+            for linker in ["mold", "lld", "gold", "ld"]:
+                linker_path = shutil.which(linker)
+                if linker_path:
+                    return linker_path
+            raise RuntimeError("No linker found (mold, lld, gold, or ld required)")
+
+        elif system == "Darwin":  # macOS
+            # macOS linker priority
+            for linker in ["ld64.lld", "ld"]:
+                linker_path = shutil.which(linker)
+                if linker_path:
+                    return linker_path
+            raise RuntimeError("No linker found (ld64.lld or ld required)")
+
+        else:
+            # Default fallback for other platforms
+            linker_path = shutil.which("ld")
+            if linker_path:
+                return linker_path
+            raise RuntimeError(f"No linker found for platform {system}")
+
+
+def link_program_sync(link_options: LinkOptions) -> Result:
+    """
+    Link object files and libraries into an executable program.
+
+    Args:
+        link_options: Configuration for the linking operation
+
+    Returns:
+        Result: Success status and command output
+    """
+    if not link_options.object_files:
+        return Result(
+            ok=False,
+            stdout="",
+            stderr="No object files provided for linking",
+            return_code=1,
+        )
+
+    # Validate all object files exist
+    for obj_file in link_options.object_files:
+        obj_path = Path(obj_file)
+        if not obj_path.exists():
+            return Result(
+                ok=False,
+                stdout="",
+                stderr=f"Object file not found: {obj_path}",
+                return_code=1,
+            )
+
+    # Validate all static libraries exist
+    for lib_file in link_options.static_libraries:
+        lib_path = Path(lib_file)
+        if not lib_path.exists():
+            return Result(
+                ok=False,
+                stdout="",
+                stderr=f"Static library not found: {lib_path}",
+                return_code=1,
+            )
+
+    # Auto-detect linker if not provided
+    linker = link_options.linker
+    if linker is None:
+        try:
+            linker = detect_linker()
+        except RuntimeError as e:
+            return Result(ok=False, stdout="", stderr=str(e), return_code=1)
+
+    # Build linker command
+    cmd = [linker]
+
+    # Add platform-specific output flag first
+    system = platform.system()
+    output_path = Path(link_options.output_executable)
+
+    if system == "Windows" and ("lld-link" in linker or "link" in linker):
+        # Windows (lld-link/link) style
+        cmd.append(f"/OUT:{output_path}")
+    else:
+        # Unix-style (ld/mold/gold/etc.)
+        cmd.extend(["-o", str(output_path)])
+
+    # Add object files
+    cmd.extend(str(obj) for obj in link_options.object_files)
+
+    # Add static libraries
+    cmd.extend(str(lib) for lib in link_options.static_libraries)
+
+    # Add custom linker arguments
+    cmd.extend(link_options.linker_args)
+
+    # Ensure output directory exists
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+
+    # Execute linker command
+    try:
+        process = subprocess.run(cmd, capture_output=True, text=True, cwd=None)
+
+        return Result(
+            ok=process.returncode == 0,
+            stdout=process.stdout,
+            stderr=process.stderr,
+            return_code=process.returncode,
+        )
+    except Exception as e:
+        return Result(
+            ok=False, stdout="", stderr=f"Linker command failed: {e}", return_code=-1
+        )
+
+
+# Helper functions for common linker argument patterns
+
+
+def get_common_linker_args(
+    platform_name: str | None = None,
+    debug: bool = False,
+    optimize: bool = False,
+    static_runtime: bool = False,
+) -> list[str]:
+    """Generate common linker arguments for different platforms and configurations."""
+    if platform_name is None or platform_name == "auto":
+        platform_name = platform.system()
+
+    args: list[str] = []
+
+    if platform_name == "Windows":
+        # Windows (lld-link/link) arguments
+        args.append("/SUBSYSTEM:CONSOLE")
+        args.append("/NOLOGO")
+
+        if debug:
+            args.append("/DEBUG")
+
+        if optimize:
+            args.extend(["/OPT:REF", "/OPT:ICF"])
+
+        if static_runtime:
+            args.append("/MT")
+
+    else:
+        # Unix-style arguments (Linux/macOS)
+        if debug:
+            args.append("-g")
+
+        if optimize:
+            args.extend(["-O2", "-Wl,--gc-sections"])
+
+        if static_runtime:
+            args.extend(["-static-libgcc", "-static-libstdc++"])
+
+    return args
+
+
+def add_system_libraries(
+    linker_args: list[str], libraries: list[str], platform_name: str | None = None
+) -> None:
+    """Add system libraries to linker arguments with platform-appropriate flags."""
+    if platform_name is None or platform_name == "auto":
+        platform_name = platform.system()
+
+    for lib in libraries:
+        if platform_name == "Windows":
+            # Windows style
+            if not lib.endswith(".lib"):
+                lib += ".lib"
+            linker_args.append(f"/DEFAULTLIB:{lib}")
+        else:
+            # Unix style
+            linker_args.append(f"-l{lib}")
+
+
+def add_library_paths(
+    linker_args: list[str], paths: list[str], platform_name: str | None = None
+) -> None:
+    """Add library search paths to linker arguments with platform-appropriate flags."""
+    if platform_name is None or platform_name == "auto":
+        platform_name = platform.system()
+
+    for path in paths:
+        if platform_name == "Windows":
+            # Windows style
+            linker_args.append(f"/LIBPATH:{path}")
+        else:
+            # Unix style
+            linker_args.append(f"-L{path}")
+
 
 # Convenience functions for backward compatibility
 
@@ -1278,6 +1547,54 @@ def detect_archiver() -> str:
         return ar
 
     raise RuntimeError("No archiver tool found (ar or llvm-ar required)")
+
+
+def detect_linker() -> str:
+    """
+    Detect the best available linker for the current platform.
+    Preference order varies by platform:
+    - Windows: lld-link.exe > link.exe > ld.exe
+    - Linux: mold > lld > gold > ld
+    - macOS: ld64.lld > ld
+
+    Returns:
+        str: Path to the detected linker
+
+    Raises:
+        RuntimeError: If no suitable linker is found
+    """
+    system = platform.system()
+
+    if system == "Windows":
+        # Windows linker priority
+        for linker in ["lld-link.exe", "lld-link", "link.exe", "link", "ld.exe", "ld"]:
+            linker_path = shutil.which(linker)
+            if linker_path:
+                return linker_path
+        raise RuntimeError("No linker found (lld-link, link, or ld required)")
+
+    elif system == "Linux":
+        # Linux linker priority
+        for linker in ["mold", "lld", "gold", "ld"]:
+            linker_path = shutil.which(linker)
+            if linker_path:
+                return linker_path
+        raise RuntimeError("No linker found (mold, lld, gold, or ld required)")
+
+    elif system == "Darwin":  # macOS
+        # macOS linker priority
+        for linker in ["ld64.lld", "ld"]:
+            linker_path = shutil.which(linker)
+            if linker_path:
+                return linker_path
+        raise RuntimeError("No linker found (ld64.lld or ld required)")
+
+    else:
+        # Default fallback for other platforms
+        linker_path = shutil.which("ld")
+        if linker_path:
+            return linker_path
+        raise RuntimeError(f"No linker found for platform {system}")
 
 
 def create_archive_sync(

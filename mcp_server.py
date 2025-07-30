@@ -18,21 +18,21 @@ This is a NON-NEGOTIABLE REQUIREMENT to ensure code quality and prevent build fa
 ALL AGENTS MUST FOLLOW THESE COMMAND EXECUTION PATTERNS:
 
 ### Python Code Execution:
-- ❌ NEVER run Python code directly
-- ✅ ALWAYS create/modify tmp.py with your code
-- ✅ ALWAYS run: `uv run tmp.py`
+- [ERROR] NEVER run Python code directly
+- [OK] ALWAYS create/modify tmp.py with your code
+- [OK] ALWAYS run: `uv run tmp.py`
 
 ### Shell Command Execution:
-- ❌ NEVER run shell commands directly
-- ✅ ALWAYS create/modify tmp.sh with your commands
-- ✅ ALWAYS run: `bash tmp.sh`
+- [ERROR] NEVER run shell commands directly
+- [OK] ALWAYS create/modify tmp.sh with your commands
+- [OK] ALWAYS run: `bash tmp.sh`
 
 ### DELETE Operations - DANGER ZONE:
 - 🚨 STOP and ask for permission before ANY delete operations
-- ✅ EXCEPTION: Single files that you just created are OK to delete
-- ❌ NEVER delete multiple files without explicit permission
-- ❌ NEVER delete directories without explicit permission
-- ❌ NEVER delete system files or project files without permission
+- [OK] EXCEPTION: Single files that you just created are OK to delete
+- [ERROR] NEVER delete multiple files without explicit permission
+- [ERROR] NEVER delete directories without explicit permission
+- [ERROR] NEVER delete system files or project files without permission
 
 ### Examples:
 
@@ -710,13 +710,13 @@ FastLED uses the **doctest** framework for C++ unit testing. Tests are organized
 
 ### 🚨 CRITICAL: Always Use `bash test` Format
 
-**✅ CORRECT Format:**
+**[OK] CORRECT Format:**
 ```bash
 bash test                      # Run all tests
 bash test <test_name>         # Run specific test
 ```
 
-**❌ INCORRECT Format:**
+**[ERROR] INCORRECT Format:**
 ```bash
 ./.build/bin/test_<name>.exe  # DO NOT run executables directly
 ./tests/.build/bin/test_*     # DO NOT use this format
@@ -831,16 +831,16 @@ FastLED is designed for embedded systems like Arduino where:
 - Reliable operation across all platforms is required
 
 ## What to Avoid:
-❌ `try { ... } catch (const std::exception& e) { ... }`
-❌ `throw std::runtime_error("error message")`
-❌ `#include <exception>` or `#include <stdexcept>`
+[ERROR] `try { ... } catch (const std::exception& e) { ... }`
+[ERROR] `throw std::runtime_error("error message")`
+[ERROR] `#include <exception>` or `#include <stdexcept>`
 
 ## Use Instead:
-✅ **Return error codes:** `bool function() { return false; }`
-✅ **Optional types:** `fl::optional<T>`
-✅ **Assertions:** `FL_ASSERT(condition)`
-✅ **Early returns:** `if (!valid) return false;`
-✅ **Status objects:** Custom result types
+[OK] **Return error codes:** `bool function() { return false; }`
+[OK] **Optional types:** `fl::optional<T>`
+[OK] **Assertions:** `FL_ASSERT(condition)`
+[OK] **Early returns:** `if (!valid) return false;`
+[OK] **Status objects:** Custom result types
 
 ## Examples:
 ```cpp
@@ -871,10 +871,10 @@ fl::optional<float> calculateValue(int input) {
 FastLED provides its own STL-equivalent implementations under the `fl::` namespace.
 
 ## Common Replacements:
-- ❌ `#include <vector>` → ✅ `#include "fl/vector.h"`
-- ❌ `#include <algorithm>` → ✅ `#include "fl/algorithm.h"`
-- ❌ `std::move()` → ✅ `fl::move()`
-- ❌ `std::vector` → ✅ `fl::vector`
+- [ERROR] `#include <vector>` → [OK] `#include "fl/vector.h"`
+- [ERROR] `#include <algorithm>` → [OK] `#include "fl/algorithm.h"`
+- [ERROR] `std::move()` → [OK] `fl::move()`
+- [ERROR] `std::vector` → [OK] `fl::vector`
 
 **Always check if there's a `fl::` equivalent in `src/fl/` first!**
 """,
@@ -890,14 +890,14 @@ FastLED provides its own STL-equivalent implementations under the `fl::` namespa
 ## Member Variables and Functions:
 
 ### Complex Classes/Objects:
-✅ **Member variables:** Use `mVariableName` format (e.g., `mPixelCount`, `mBufferSize`, `mCurrentIndex`)
-✅ **Member functions:** Use camelCase (e.g., `getValue()`, `setPixelColor()`, `updateBuffer()`)
-❌ Avoid: `m_variable_name`, `variableName`, `GetValue()`, `set_pixel_color()`
+[OK] **Member variables:** Use `mVariableName` format (e.g., `mPixelCount`, `mBufferSize`, `mCurrentIndex`)
+[OK] **Member functions:** Use camelCase (e.g., `getValue()`, `setPixelColor()`, `updateBuffer()`)
+[ERROR] Avoid: `m_variable_name`, `variableName`, `GetValue()`, `set_pixel_color()`
 
 ### Simple Classes/Structs:
-✅ **Member variables:** Use lowercase snake_case (e.g., `x`, `y`, `width`, `height`, `pixel_count`)
-✅ **Member functions:** Use camelCase (e.g., `getValue()`, `setPosition()`, `normalize()`)
-❌ Avoid: `mX`, `mY`, `get_value()`, `set_position()`
+[OK] **Member variables:** Use lowercase snake_case (e.g., `x`, `y`, `width`, `height`, `pixel_count`)
+[OK] **Member functions:** Use camelCase (e.g., `getValue()`, `setPosition()`, `normalize()`)
+[ERROR] Avoid: `mX`, `mY`, `get_value()`, `set_position()`
 
 ## Examples:
 
@@ -905,32 +905,32 @@ FastLED provides its own STL-equivalent implementations under the `fl::` namespa
 // Complex class - use mVariableName for members
 class Controller {
 private:
-    int mPixelCount;           // ✅ Complex class member variable
-    uint8_t* mBuffer;          // ✅ Complex class member variable
-    bool mIsInitialized;       // ✅ Complex class member variable
+    int mPixelCount;           // [OK] Complex class member variable
+    uint8_t* mBuffer;          // [OK] Complex class member variable
+    bool mIsInitialized;       // [OK] Complex class member variable
     
 public:
-    void setPixelCount(int count);  // ✅ Complex class member function
-    int getPixelCount() const;      // ✅ Complex class member function
-    void updateBuffer();            // ✅ Complex class member function
+    void setPixelCount(int count);  // [OK] Complex class member function
+    int getPixelCount() const;      // [OK] Complex class member function
+    void updateBuffer();            // [OK] Complex class member function
 };
 
 // Simple struct - use snake_case for members
 struct vec2 {
-    int x;                     // ✅ Simple struct member variable
-    int y;                     // ✅ Simple struct member variable
+    int x;                     // [OK] Simple struct member variable
+    int y;                     // [OK] Simple struct member variable
     
-    float magnitude() const;   // ✅ Simple struct member function
-    void normalize();          // ✅ Simple struct member function
+    float magnitude() const;   // [OK] Simple struct member function
+    void normalize();          // [OK] Simple struct member function
 };
 
 struct point {
-    float x;                   // ✅ Simple struct member variable
-    float y;                   // ✅ Simple struct member variable
-    float z;                   // ✅ Simple struct member variable
+    float x;                   // [OK] Simple struct member variable
+    float y;                   // [OK] Simple struct member variable
+    float z;                   // [OK] Simple struct member variable
     
-    void setPosition(float x, float y, float z);  // ✅ Simple struct member function
-    float distanceTo(const point& other) const;   // ✅ Simple struct member function
+    void setPosition(float x, float y, float z);  // [OK] Simple struct member function
+    float distanceTo(const point& other) const;   // [OK] Simple struct member function
 };
 ```
 
@@ -941,14 +941,14 @@ struct point {
 # Member Variable and Function Naming Standards
 
 ## Complex Classes/Objects:
-✅ **Member variables:** Use `mVariableName` format (e.g., `mPixelCount`, `mBufferSize`, `mCurrentIndex`)
-✅ **Member functions:** Use camelCase (e.g., `getValue()`, `setPixelColor()`, `updateBuffer()`)
-❌ Avoid: `m_variable_name`, `variableName`, `GetValue()`, `set_pixel_color()`
+[OK] **Member variables:** Use `mVariableName` format (e.g., `mPixelCount`, `mBufferSize`, `mCurrentIndex`)
+[OK] **Member functions:** Use camelCase (e.g., `getValue()`, `setPixelColor()`, `updateBuffer()`)
+[ERROR] Avoid: `m_variable_name`, `variableName`, `GetValue()`, `set_pixel_color()`
 
 ## Simple Classes/Structs:
-✅ **Member variables:** Use lowercase snake_case (e.g., `x`, `y`, `width`, `height`, `pixel_count`)
-✅ **Member functions:** Use camelCase (e.g., `getValue()`, `setPosition()`, `normalize()`)
-❌ Avoid: `mX`, `mY`, `get_value()`, `set_position()`
+[OK] **Member variables:** Use lowercase snake_case (e.g., `x`, `y`, `width`, `height`, `pixel_count`)
+[OK] **Member functions:** Use camelCase (e.g., `getValue()`, `setPosition()`, `normalize()`)
+[ERROR] Avoid: `mX`, `mY`, `get_value()`, `set_position()`
 
 ## Examples:
 
@@ -956,32 +956,32 @@ struct point {
 // Complex class - use mVariableName for members
 class Controller {
 private:
-    int mPixelCount;           // ✅ Complex class member variable
-    uint8_t* mBuffer;          // ✅ Complex class member variable
-    bool mIsInitialized;       // ✅ Complex class member variable
+    int mPixelCount;           // [OK] Complex class member variable
+    uint8_t* mBuffer;          // [OK] Complex class member variable
+    bool mIsInitialized;       // [OK] Complex class member variable
     
 public:
-    void setPixelCount(int count);  // ✅ Complex class member function
-    int getPixelCount() const;      // ✅ Complex class member function
-    void updateBuffer();            // ✅ Complex class member function
+    void setPixelCount(int count);  // [OK] Complex class member function
+    int getPixelCount() const;      // [OK] Complex class member function
+    void updateBuffer();            // [OK] Complex class member function
 };
 
 // Simple struct - use snake_case for members
 struct vec2 {
-    int x;                     // ✅ Simple struct member variable
-    int y;                     // ✅ Simple struct member variable
+    int x;                     // [OK] Simple struct member variable
+    int y;                     // [OK] Simple struct member variable
     
-    float magnitude() const;   // ✅ Simple struct member function
-    void normalize();          // ✅ Simple struct member function
+    float magnitude() const;   // [OK] Simple struct member function
+    void normalize();          // [OK] Simple struct member function
 };
 
 struct point {
-    float x;                   // ✅ Simple struct member variable
-    float y;                   // ✅ Simple struct member variable
-    float z;                   // ✅ Simple struct member variable
+    float x;                   // [OK] Simple struct member variable
+    float y;                   // [OK] Simple struct member variable
+    float z;                   // [OK] Simple struct member variable
     
-    void setPosition(float x, float y, float z);  // ✅ Simple struct member function
-    float distanceTo(const point& other) const;   // ✅ Simple struct member function
+    void setPosition(float x, float y, float z);  // [OK] Simple struct member function
+    float distanceTo(const point& other) const;   // [OK] Simple struct member function
 };
 ```
 
@@ -993,8 +993,8 @@ struct point {
 
 **Prefer `fl::span<T>` over `fl::vector<T>` for function parameters**
 
-✅ `void processData(fl::span<const uint8_t> data)`
-❌ `void processData(fl::vector<uint8_t>& data)`
+[OK] `void processData(fl::span<const uint8_t> data)`
+[ERROR] `void processData(fl::vector<uint8_t>& data)`
 
 Benefits: automatic conversion, type safety, zero-cost abstraction
 """,
@@ -1004,8 +1004,8 @@ Benefits: automatic conversion, type safety, zero-cost abstraction
 
 **Use `FL_WARN` for debug printing throughout the codebase**
 
-✅ `FL_WARN("Debug message: " << message);`
-❌ `FL_WARN("Value: %d", value);`
+[OK] `FL_WARN("Debug message: " << message);`
+[ERROR] `FL_WARN("Value: %d", value);`
 
 Provides unified logging across all platforms and testing environments.
 """,
@@ -1032,17 +1032,17 @@ Changing signatures causes runtime errors that are extremely difficult to debug.
 **If you encounter weird linker errors after making changes, FIRST check if Arduino.h has been added anywhere:**
 
 ### Common Symptoms of Arduino.h-Related Linker Errors:
-- ❌ **Undefined reference errors** for standard functions
-- ❌ **Multiple definition errors** for common symbols
-- ❌ **Conflicting symbol errors** between Arduino and FastLED
-- ❌ **Missing library errors** that were not missing before
-- ❌ **Platform-specific compilation failures** that worked before
+- [ERROR] **Undefined reference errors** for standard functions
+- [ERROR] **Multiple definition errors** for common symbols
+- [ERROR] **Conflicting symbol errors** between Arduino and FastLED
+- [ERROR] **Missing library errors** that were not missing before
+- [ERROR] **Platform-specific compilation failures** that worked before
 
 ### Immediate Debugging Steps:
 1. **🔍 Search for new Arduino.h includes:** `grep -r "Arduino\.h" src/` and check if any new includes were added
 2. **📝 Check recent file changes** for any #include "Arduino.h" or #include <Arduino.h> statements  
 3. **🔄 Remove any new Arduino.h includes** and replace with FastLED platform abstractions
-4. **✅ Rebuild and test** to confirm the linker errors are resolved
+4. **[OK] Rebuild and test** to confirm the linker errors are resolved
 
 ### Why Arduino.h Causes Linker Issues:
 - **Path Conflicts:** Arduino.h includes can interfere with FastLED's custom path resolution
@@ -1051,16 +1051,16 @@ Changing signatures causes runtime errors that are extremely difficult to debug.
 - **Dependency Management:** FastLED manages Arduino compatibility through its own abstraction layer
 
 ## What to Avoid:
-❌ `#include "Arduino.h"`
-❌ `#include <Arduino.h"`
-❌ Adding new Arduino.h includes to existing files
-❌ Copying Arduino.h includes from other examples
+[ERROR] `#include "Arduino.h"`
+[ERROR] `#include <Arduino.h"`
+[ERROR] Adding new Arduino.h includes to existing files
+[ERROR] Copying Arduino.h includes from other examples
 
 ## Approved Alternatives:
-✅ Use existing FastLED platform abstractions in `src/platforms/`
-✅ Include specific FastLED headers that provide Arduino functionality
-✅ Use FastLED's `fl::` namespace equivalents for Arduino functions
-✅ Reference existing Arduino.h includes that are already marked as approved
+[OK] Use existing FastLED platform abstractions in `src/platforms/`
+[OK] Include specific FastLED headers that provide Arduino functionality
+[OK] Use FastLED's `fl::` namespace equivalents for Arduino functions
+[OK] Reference existing Arduino.h includes that are already marked as approved
 
 ## Existing Approved Includes:
 Some files already have Arduino.h includes marked with `// ok include` comments.
@@ -1093,18 +1093,18 @@ This rule prevents path conflicts and ensures consistent cross-platform compatib
 - **Documentation:** Variable names may be referenced in documentation and examples
 
 ## When Variable Name Changes Are Acceptable:
-✅ **Fixing misleading names** that don't match their actual purpose
-✅ **Following established naming conventions** when code is being substantially refactored
-✅ **Resolving naming conflicts** during integration or merging
-✅ **Compliance with coding standards** when specifically required
-✅ **Improving clarity** for genuinely confusing or cryptic names
+[OK] **Fixing misleading names** that don't match their actual purpose
+[OK] **Following established naming conventions** when code is being substantially refactored
+[OK] **Resolving naming conflicts** during integration or merging
+[OK] **Compliance with coding standards** when specifically required
+[OK] **Improving clarity** for genuinely confusing or cryptic names
 
 ## What to Avoid:
-❌ Changing names just for personal preference
-❌ "Improving" names that are already clear and consistent
-❌ Mass renaming operations without clear justification
-❌ Style-only changes to established, working variable names
-❌ Renaming in stable, public-facing APIs
+[ERROR] Changing names just for personal preference
+[ERROR] "Improving" names that are already clear and consistent
+[ERROR] Mass renaming operations without clear justification
+[ERROR] Style-only changes to established, working variable names
+[ERROR] Renaming in stable, public-facing APIs
 
 ## Best Practice:
 **If the existing variable name is clear and follows project conventions, leave it unchanged.**
@@ -1139,12 +1139,12 @@ char* ptr123;     // Confusing and non-descriptive
 - **Error Prevention:** Catches syntax errors and style issues early
 
 ## What Files This Applies To:
-✅ **All *.py files** in the project
-✅ **test.py** - Main test runner
-✅ **mcp_server.py** - MCP server implementation  
-✅ **ci/ci-compile.py** - CI compilation scripts
-✅ **ci/ci/*.py** - All CI utility scripts
-✅ **Any new Python files** you create
+[OK] **All *.py files** in the project
+[OK] **test.py** - Main test runner
+[OK] **mcp_server.py** - MCP server implementation  
+[OK] **ci/ci-compile.py** - CI compilation scripts
+[OK] **ci/ci/*.py** - All CI utility scripts
+[OK] **Any new Python files** you create
 
 ## Required Process:
 1. **Make your Python file changes**
@@ -1252,7 +1252,7 @@ async def setup_stack_traces(arguments: Dict[str, Any], project_root: Path) -> C
                 
             elif method == "execinfo":
                 result_text += "## Using Execinfo (Standard GCC Stack Traces)\n\n"
-                result_text += "✅ Execinfo is part of glibc - no additional packages needed!\n\n"
+                result_text += "[OK] Execinfo is part of glibc - no additional packages needed!\n\n"
                 
                 # Still need build tools
                 if "ubuntu" in distro_info or "debian" in distro_info:
@@ -1268,9 +1268,9 @@ async def setup_stack_traces(arguments: Dict[str, Any], project_root: Path) -> C
                 result_text += f"Running: `{cmd}`\n"
                 try:
                     _ = await run_command(cmd.split(), project_root)
-                    result_text += "✅ Success\n\n"
+                    result_text += "[OK] Success\n\n"
                 except Exception as e:
-                    result_text += f"❌ Error: {e}\n\n"
+                    result_text += f"[ERROR] Error: {e}\n\n"
                     return CallToolResult(
                         content=[TextContent(type="text", text=result_text)],
                         isError=True
@@ -1280,9 +1280,9 @@ async def setup_stack_traces(arguments: Dict[str, Any], project_root: Path) -> C
             result_text += "## Installing LibUnwind on macOS\n\n"
             try:
                 _ = await run_command(["brew", "install", "libunwind"], project_root)
-                result_text += "✅ LibUnwind installed via Homebrew\n\n"
+                result_text += "[OK] LibUnwind installed via Homebrew\n\n"
             except Exception as e:
-                result_text += f"❌ Error installing libunwind: {e}\n"
+                result_text += f"[ERROR] Error installing libunwind: {e}\n"
                 result_text += "Please install Homebrew first: https://brew.sh/\n\n"
                 
         else:
@@ -1301,7 +1301,7 @@ async def setup_stack_traces(arguments: Dict[str, Any], project_root: Path) -> C
                 _ = await run_command(["rm", "-f", "CMakeCache.txt"], tests_dir)
                 _ = await run_command(["cmake", "."], tests_dir)
                 _ = await run_command(["make", "-j4"], tests_dir)
-                result_text += "✅ FastLED test framework built successfully\n\n"
+                result_text += "[OK] FastLED test framework built successfully\n\n"
                 
                 # Test by running a simple unit test to verify stack traces work
                 result_text += "### Testing Stack Trace Integration\n"
@@ -1314,14 +1314,14 @@ async def setup_stack_traces(arguments: Dict[str, Any], project_root: Path) -> C
                         result_text += f"Testing with {test_name}...\n"
                         # Just run help to verify the executable works and crash handler is linked
                         _ = await run_command([first_test, "--help"], tests_dir)
-                        result_text += "✅ Stack trace system is properly integrated with test framework\n\n"
+                        result_text += "[OK] Stack trace system is properly integrated with test framework\n\n"
                     else:
                         result_text += "⚠️ No test executables found to verify integration\n\n"
                 except Exception as e:
                     result_text += f"⚠️ Could not verify integration: {e}\n\n"
                         
             except Exception as e:
-                result_text += f"❌ Error building test framework: {e}\n\n"
+                result_text += f"[ERROR] Error building test framework: {e}\n\n"
         
         # Add usage instructions
         result_text += "## Usage Instructions\n\n"
@@ -1425,7 +1425,7 @@ async def lint_code(arguments: Dict[str, Any], project_root: Path) -> CallToolRe
             results.append(f"🚀 Comprehensive Linting Results (bash lint):\n{result}")
         else:
             return CallToolResult(
-                content=[TextContent(type="text", text="❌ bash lint script not found")],
+                content=[TextContent(type="text", text="[ERROR] bash lint script not found")],
                 isError=True
             )
     
@@ -1453,7 +1453,7 @@ async def lint_code(arguments: Dict[str, Any], project_root: Path) -> CallToolRe
                 result = await run_command(["ci/js/check-js"], project_root)
                 results.append(f"🔍 JavaScript Type Checking:\n{result}")
         else:
-            results.append("❌ JavaScript linting tools not found. Run: uv run ci/setup-js-linting.py")
+            results.append("[ERROR] JavaScript linting tools not found. Run: uv run ci/setup-js-linting.py")
         
         if agent_type == "background":
             results.append("\n💡 Background Agent: Consider running 'bash_lint' for comprehensive coverage.")
@@ -1525,7 +1525,7 @@ async def project_info(arguments: Dict[str, Any], project_root: Path) -> CallToo
             if git_result.strip():
                 info.append(f"\n🔄 Git status: {len(git_result.strip().split())} files modified")
             else:
-                info.append("\n✅ Git status: Working tree clean")
+                info.append("\n[OK] Git status: Working tree clean")
         except Exception:
             info.append("\n❓ Git status: Unable to determine")
     
@@ -1567,11 +1567,11 @@ async def validate_completion(arguments: Dict[str, Any], project_root: Path) -> 
         
         if arduino_validation.isError:
             validation_failed = True
-            result_text += "❌ **ARDUINO.H VALIDATION FAILED**\n\n"
+            result_text += "[ERROR] **ARDUINO.H VALIDATION FAILED**\n\n"
             result_text += "New Arduino.h includes detected! This violates FastLED coding standards.\n"
             result_text += "Please remove Arduino.h includes and use FastLED's platform abstractions instead.\n\n"
         else:
-            result_text += "✅ **Arduino.h validation passed**\n\n"
+            result_text += "[OK] **Arduino.h validation passed**\n\n"
             
     except Exception as e:
         result_text += f"⚠️ **Arduino.h validation error:** {str(e)}\n\n"
@@ -1586,18 +1586,18 @@ async def validate_completion(arguments: Dict[str, Any], project_root: Path) -> 
             # Check if tests passed by looking for common failure indicators
             if "FAILED" in test_result or "ERROR" in test_result or "error:" in test_result.lower():
                 validation_failed = True
-                result_text += "❌ **VALIDATION FAILED - TESTS CONTAIN ERRORS**\n\n"
+                result_text += "[ERROR] **VALIDATION FAILED - TESTS CONTAIN ERRORS**\n\n"
                 result_text += "```\n" + test_result + "\n```\n\n"
                 result_text += "🚨 **BACKGROUND AGENT MUST NOT INDICATE COMPLETION**\n"
                 result_text += "🚨 **PLEASE FIX ALL ERRORS BEFORE COMPLETING THE TASK**\n\n"
             else:
                 result_text += "�� **ALL TESTS PASSED**\n\n"
                 result_text += "```\n" + test_result + "\n```\n\n"
-                result_text += "✅ **VALIDATION SUCCESSFUL - SAFE TO INDICATE COMPLETION**\n\n"
+                result_text += "[OK] **VALIDATION SUCCESSFUL - SAFE TO INDICATE COMPLETION**\n\n"
             
         except Exception as e:
             validation_failed = True
-            result_text += f"❌ **VALIDATION FAILED - ERROR RUNNING TESTS**\n\n"
+            result_text += f"[ERROR] **VALIDATION FAILED - ERROR RUNNING TESTS**\n\n"
             result_text += f"Error: {str(e)}\n\n"
             result_text += "🚨 **BACKGROUND AGENT MUST NOT INDICATE COMPLETION**\n"
             result_text += "🚨 **PLEASE RESOLVE TEST EXECUTION ISSUES BEFORE COMPLETING**\n\n"
@@ -1616,7 +1616,7 @@ async def validate_completion(arguments: Dict[str, Any], project_root: Path) -> 
             isError=True
         )
     else:
-        result_text += "✅ **SAFE TO INDICATE COMPLETION**\n"
+        result_text += "[OK] **SAFE TO INDICATE COMPLETION**\n"
         result_text += "- All tests are passing\n"
         result_text += "- Code changes have been validated\n"
         result_text += "- Background agent may now indicate task completion\n\n"
@@ -1645,7 +1645,7 @@ async def build_info_analysis(arguments: Dict[str, Any], project_root: Path) -> 
     if board == "list" or not board:
         boards = analyzer.list_available_boards()
         if not boards:
-            result_text = "❌ No boards with build_info.json found in .build directory\n"
+            result_text = "[ERROR] No boards with build_info.json found in .build directory\n"
             result_text += "   Try running a compilation first:\n"
             result_text += "   uv run ci/ci-compile.py uno --examples Blink\n"
             result_text += "   uv run ci/ci-compile.py esp32dev --examples Blink\n"
@@ -1655,7 +1655,7 @@ async def build_info_analysis(arguments: Dict[str, Any], project_root: Path) -> 
         
         result_text = f"📋 Available boards with build_info.json ({len(boards)}):\n"
         for board_name in boards:
-            result_text += f"  ✅ {board_name}\n"
+            result_text += f"  [OK] {board_name}\n"
         result_text += "\nUsage: Use 'board' parameter with any of these names to analyze platform information.\n"
         result_text += "Example: board='uno', show_defines=True\n"
         
@@ -1668,7 +1668,7 @@ async def build_info_analysis(arguments: Dict[str, Any], project_root: Path) -> 
         success, comparison, error = analyzer.compare_defines(board, compare_with)  # type: ignore
         if not success:
             return CallToolResult(
-                content=[TextContent(type="text", text=f"❌ Error: {error}")],
+                content=[TextContent(type="text", text=f"[ERROR] Error: {error}")],
                 isError=True
             )
         
@@ -1712,7 +1712,7 @@ async def build_info_analysis(arguments: Dict[str, Any], project_root: Path) -> 
         success, defines, error = analyzer.get_platform_defines(board)
         if not success:
             return CallToolResult(
-                content=[TextContent(type="text", text=f"❌ Error getting defines: {error}")],
+                content=[TextContent(type="text", text=f"[ERROR] Error getting defines: {error}")],
                 isError=True
             )
         
@@ -1730,7 +1730,7 @@ async def build_info_analysis(arguments: Dict[str, Any], project_root: Path) -> 
         success, compiler_info, error = analyzer.get_compiler_info(board)
         if not success:
             return CallToolResult(
-                content=[TextContent(type="text", text=f"❌ Error getting compiler info: {error}")],
+                content=[TextContent(type="text", text=f"[ERROR] Error getting compiler info: {error}")],
                 isError=True
             )
         
@@ -1762,7 +1762,7 @@ async def build_info_analysis(arguments: Dict[str, Any], project_root: Path) -> 
         success, aliases, error = analyzer.get_toolchain_aliases(board)
         if not success:
             return CallToolResult(
-                content=[TextContent(type="text", text=f"❌ Error getting toolchain aliases: {error}")],
+                content=[TextContent(type="text", text=f"[ERROR] Error getting toolchain aliases: {error}")],
                 isError=True
             )
         
@@ -2087,13 +2087,13 @@ async def symbol_analysis(arguments: Dict[str, Any], project_root: Path) -> Call
         result_text += "3. Run symbol analysis: `uv run ci/ci/symbol_analysis.py --board {board}`\n\n"
         
         result_text += "### Supported Platforms:\n"
-        result_text += "- ✅ UNO (AVR) - Small embedded platform\n"
-        result_text += "- ✅ ESP32DEV (Xtensa) - WiFi-enabled microcontroller\n" 
-        result_text += "- ✅ TEENSY31 (ARM Cortex-M4) - High-performance microcontroller\n"
-        result_text += "- ✅ TEENSYLC (ARM Cortex-M0+) - Low-cost ARM platform\n"
-        result_text += "- ✅ DIGIX (ARM Cortex-M3) - Arduino Due compatible\n"
-        result_text += "- ✅ STM32 (ARM Cortex-M3) - STMicroelectronics platform\n"
-        result_text += "- ✅ And many more! Works with any platform that generates build_info.json\n\n"
+        result_text += "- [OK] UNO (AVR) - Small embedded platform\n"
+        result_text += "- [OK] ESP32DEV (Xtensa) - WiFi-enabled microcontroller\n" 
+        result_text += "- [OK] TEENSY31 (ARM Cortex-M4) - High-performance microcontroller\n"
+        result_text += "- [OK] TEENSYLC (ARM Cortex-M0+) - Low-cost ARM platform\n"
+        result_text += "- [OK] DIGIX (ARM Cortex-M3) - Arduino Due compatible\n"
+        result_text += "- [OK] STM32 (ARM Cortex-M3) - STMicroelectronics platform\n"
+        result_text += "- [OK] And many more! Works with any platform that generates build_info.json\n\n"
         
         if output_json:
             result_text += "### JSON Output\n"
@@ -2214,7 +2214,7 @@ async def validate_arduino_includes(arguments: Dict[str, Any], project_root: Pat
         result_text += "The following files contain PROHIBITED Arduino.h includes:\n\n"
         
         for violation in violations:
-            result_text += f"❌ **{violation['file']}:{violation['line']}**\n"
+            result_text += f"[ERROR] **{violation['file']}:{violation['line']}**\n"
             result_text += f"   `{violation['content']}`\n\n"
         
         result_text += "## 🚨 IMMEDIATE ACTION REQUIRED 🚨\n\n"
@@ -2226,7 +2226,7 @@ async def validate_arduino_includes(arguments: Dict[str, Any], project_root: Pat
         
         is_error = True
     else:
-        result_text += "✅ **NO VIOLATIONS FOUND**\n\n"
+        result_text += "[OK] **NO VIOLATIONS FOUND**\n\n"
         result_text += "All Arduino.h includes are properly approved or commented out.\n\n"
         is_error = False
     
@@ -2236,7 +2236,7 @@ async def validate_arduino_includes(arguments: Dict[str, Any], project_root: Pat
         
         for include in all_includes:
             if include['approved']:
-                result_text += f"✅ {include['file']}:{include['line']}\n"
+                result_text += f"[OK] {include['file']}:{include['line']}\n"
                 result_text += f"   `{include['content']}`\n\n"
     
     result_text += "---\n\n"
@@ -2272,27 +2272,27 @@ async def run_fastled_web_compiler(arguments: Dict[str, Any], project_root: Path
     # Check if fastled command is available
     if not shutil.which("fastled"):
         return CallToolResult(
-            content=[TextContent(type="text", text="❌ FastLED command not found. Please install with: pip install fastled")],
+            content=[TextContent(type="text", text="[ERROR] FastLED command not found. Please install with: pip install fastled")],
             isError=True
         )
     
-    result_text += "✅ FastLED command found\n"
+    result_text += "[OK] FastLED command found\n"
     
     # Check if Docker is available (optional)
     docker_available = shutil.which("docker") is not None
     if docker_check:
         if docker_available:
-            result_text += "✅ Docker available (faster compilation)\n"
+            result_text += "[OK] Docker available (faster compilation)\n"
         else:
             result_text += "⚠️  Docker not available (slower compilation)\n"
     
     # Check if playwright is available
     try:
         from playwright.async_api import async_playwright
-        result_text += "✅ Playwright available\n"
+        result_text += "[OK] Playwright available\n"
     except ImportError:
         return CallToolResult(
-            content=[TextContent(type="text", text="❌ Playwright not found. Please install with: pip install playwright")],
+            content=[TextContent(type="text", text="[ERROR] Playwright not found. Please install with: pip install playwright")],
             isError=True
         )
     
@@ -2300,11 +2300,11 @@ async def run_fastled_web_compiler(arguments: Dict[str, Any], project_root: Path
     example_dir = project_root / example_path
     if not example_dir.exists():
         return CallToolResult(
-            content=[TextContent(type="text", text=f"❌ Example directory not found: {example_path}")],
+            content=[TextContent(type="text", text=f"[ERROR] Example directory not found: {example_path}")],
             isError=True
         )
     
-    result_text += f"✅ Example directory found: {example_path}\n\n"
+    result_text += f"[OK] Example directory found: {example_path}\n\n"
     
     # Install playwright browsers
     result_text += "📦 Installing Playwright browsers...\n"
@@ -2316,7 +2316,7 @@ async def run_fastled_web_compiler(arguments: Dict[str, Any], project_root: Path
         if install_result.returncode != 0:
             result_text += f"⚠️  Playwright browser installation warning: {install_result.stderr}\n"
         else:
-            result_text += "✅ Playwright browsers installed\n"
+            result_text += "[OK] Playwright browsers installed\n"
     except Exception as e:
         result_text += f"⚠️  Playwright browser installation error: {e}\n"
     
@@ -2339,11 +2339,11 @@ async def run_fastled_web_compiler(arguments: Dict[str, Any], project_root: Path
         if compile_result.returncode != 0:
             os.chdir(original_cwd)
             return CallToolResult(
-                content=[TextContent(type="text", text=f"❌ FastLED compilation failed:\n{compile_result.stderr}")],
+                content=[TextContent(type="text", text=f"[ERROR] FastLED compilation failed:\n{compile_result.stderr}")],
                 isError=True
             )
         
-        result_text += "✅ FastLED compilation successful\n"
+        result_text += "[OK] FastLED compilation successful\n"
         result_text += f"Compilation output:\n{compile_result.stdout}\n\n"
         
         # Check for generated files
@@ -2351,7 +2351,7 @@ async def run_fastled_web_compiler(arguments: Dict[str, Any], project_root: Path
         if not fastled_js_dir.exists():
             os.chdir(original_cwd)
             return CallToolResult(
-                content=[TextContent(type="text", text="❌ FastLED output directory not found: fastled_js")],
+                content=[TextContent(type="text", text="[ERROR] FastLED output directory not found: fastled_js")],
                 isError=True
             )
         
@@ -2360,11 +2360,11 @@ async def run_fastled_web_compiler(arguments: Dict[str, Any], project_root: Path
         if missing_files:
             os.chdir(original_cwd)
             return CallToolResult(
-                content=[TextContent(type="text", text=f"❌ Missing required files: {missing_files}")],
+                content=[TextContent(type="text", text=f"[ERROR] Missing required files: {missing_files}")],
                 isError=True
             )
         
-        result_text += f"✅ All required files generated in {fastled_js_dir}\n\n"
+        result_text += f"[OK] All required files generated in {fastled_js_dir}\n\n"
         
         # Start HTTP server and playwright
         result_text += "🌐 Starting web server and browser automation...\n"
@@ -2390,7 +2390,7 @@ async def run_fastled_web_compiler(arguments: Dict[str, Any], project_root: Path
         server_thread.daemon = True
         server_thread.start()
         
-        result_text += f"✅ HTTP server started on port {port}\n"
+        result_text += f"[OK] HTTP server started on port {port}\n"
         
         # Run playwright automation
         console_logs: List[str] = []
@@ -2475,12 +2475,12 @@ async def run_fastled_web_compiler(arguments: Dict[str, Any], project_root: Path
             result_text += "No console logs captured\n"
         
         if error_logs:
-            result_text += "\n❌ Errors/Warnings:\n"
+            result_text += "\n[ERROR] Errors/Warnings:\n"
             result_text += "-" * 40 + "\n"
             for error in error_logs:
                 result_text += f"{error}\n"
         
-        result_text += "\n✅ FastLED web compiler execution completed successfully!\n"
+        result_text += "\n[OK] FastLED web compiler execution completed successfully!\n"
         
         # Analysis
         if frame_count > 0:
@@ -2494,12 +2494,12 @@ async def run_fastled_web_compiler(arguments: Dict[str, Any], project_root: Path
         
     except subprocess.TimeoutExpired:
         return CallToolResult(
-            content=[TextContent(type="text", text="❌ FastLED compilation timed out (5 minutes)")],
+            content=[TextContent(type="text", text="[ERROR] FastLED compilation timed out (5 minutes)")],
             isError=True
         )
     except Exception as e:
         return CallToolResult(
-            content=[TextContent(type="text", text=f"❌ Error running FastLED web compiler: {str(e)}")],
+            content=[TextContent(type="text", text=f"[ERROR] Error running FastLED web compiler: {str(e)}")],
             isError=True
         )
     finally:
