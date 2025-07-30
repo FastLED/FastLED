@@ -15,6 +15,7 @@
 #include "fl/stdint.h"
 #include <stdio.h>
 #include <string>
+#include "fl/ostream.h"
 
 #include "fl/namespace.h"
 // Arduino timing functions - provided by time_stub.h
@@ -72,64 +73,66 @@ inline long random() {
     return dis(gen);
 }
 
-template <typename T> struct PrintHelper {};
 
-#define DEFINE_PRINT_HELPER(type, format)                                      \
-    template <> struct PrintHelper<type> {                                     \
-        static void print(type val) { printf(format, val); }                   \
-        static void println(type val) {                                        \
-            printf(format, val);                                               \
-            printf("\n");                                                      \
-        }                                                                      \
-    }
 
-#define DEFINE_PRINT_HELPER_EXT(type, format, val_opp)                         \
-    template <> struct PrintHelper<type> {                                     \
-        static void print(type val) { printf(format, val_opp); }               \
-        static void println(type val) {                                        \
-            printf(format, val_opp);                                           \
-            printf("\n");                                                      \
-        }                                                                      \
-    }
-
-// gcc push options
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wformat"
-
-DEFINE_PRINT_HELPER(double, "%f");
-DEFINE_PRINT_HELPER(float, "%f");
-DEFINE_PRINT_HELPER(const char *, "%s");
-DEFINE_PRINT_HELPER(uint64_t, "%lu");
-DEFINE_PRINT_HELPER(uint32_t, "%u");
-DEFINE_PRINT_HELPER(uint16_t, "%u");
-DEFINE_PRINT_HELPER(uint8_t, "%u");
-DEFINE_PRINT_HELPER(int64_t, "%ld");
-DEFINE_PRINT_HELPER(int32_t, "%d");
-DEFINE_PRINT_HELPER(int16_t, "%d");
-DEFINE_PRINT_HELPER(int8_t, "%d");
-DEFINE_PRINT_HELPER(bool, "%d");
-DEFINE_PRINT_HELPER_EXT(std::string, "%s", val.c_str());
-DEFINE_PRINT_HELPER_EXT(fl::string, "%s", val.c_str());
-DEFINE_PRINT_HELPER(unsigned long, "%lu"); // Required for compatibility
-
-#ifdef __EMSCRIPTEN__
-// Additional Emscripten-specific helpers if needed
+#ifndef A0
+#define A0 0
 #endif
 
-#define A0 0
+#ifndef A1
 #define A1 1
-#define A2 2
-#define A3 3
-#define A4 4
-#define A5 5
+#endif
 
-// gcc pop options
-#pragma GCC diagnostic pop
+#ifndef A2
+#define A2 2
+#endif
+
+#ifndef A3
+#define A3 3
+#endif
+
+#ifndef A4
+#define A4 4
+#endif
+
+#ifndef A5
+#define A5 5
+#endif
+
+#ifndef A6
+#define A6 6
+#endif
+
+#ifndef A7
+#define A7 7
+#endif
+
+#ifndef A8
+#define A8 8
+#endif
+
+#ifndef A9
+#define A9 9
+#endif
+
+#ifndef A10
+#define A10 10
+#endif
+
+#ifndef A11
+#define A11 11
+#endif
+
+
 
 struct SerialEmulation {
     void begin(int) {}
-    template <typename T> void print(T val) { PrintHelper<T>::print(val); }
-    template <typename T> void println(T val) { PrintHelper<T>::println(val); }
+    template <typename T> void print(T val) {
+        fl::cout << val;
+    }
+    template <typename T> void println(T val) {
+        fl::cout << val << fl::endl;
+    }
     
     // Two-argument print overloads for formatting
     void print(float val, int digits) { 

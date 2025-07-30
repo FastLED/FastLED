@@ -8,7 +8,7 @@ components/
 .build/
 build/
 out/
-
+emscripten/
 # Misc
 .DS_Store
 Thumbs.db
