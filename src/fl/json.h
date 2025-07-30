@@ -595,13 +595,13 @@ struct StringConversionVisitor {
     }
     
     void operator()(const double& value) {
-        // Convert double to string
-        result = fl::to_string(value);
+        // Convert double to string with higher precision for JSON representation
+        result = fl::to_string(static_cast<float>(value), 6);
     }
     
     void operator()(const float& value) {
-        // Convert float to string
-        result = fl::to_string(value);
+        // Convert float to string with higher precision for JSON representation
+        result = fl::to_string(value, 6);
     }
     
     void operator()(const bool& value) {
@@ -1703,6 +1703,7 @@ public:
     bool is_bool() const { return m_value && m_value->is_bool(); }
     bool is_int() const { return m_value && (m_value->is_int() || m_value->is_bool()); }
     bool is_float() const { return m_value && m_value->is_float(); }
+    bool is_double() const { return m_value && m_value->is_double(); }
     bool is_string() const { return m_value && m_value->is_string(); }
     bool is_array() const { return m_value && m_value->is_array(); }
     bool is_generic_array() const { return m_value && m_value->is_generic_array(); }
@@ -1727,6 +1728,11 @@ public:
     fl::optional<float> as_float() const { 
         if (!m_value) return fl::nullopt;
         return m_value->as_float();
+    }
+    
+    fl::optional<double> as_double() const { 
+        if (!m_value) return fl::nullopt;
+        return m_value->as_double();
     }
     
     template<typename FloatType>

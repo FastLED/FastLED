@@ -28,11 +28,9 @@ namespace string_functions {
 
 static void ftoa(float value, char *buffer, int precision = 2) {
 
-    FASTLED_UNUSED(precision);
-
 #ifdef FASTLED_TESTING
-    // use snprintf during testing
-    snprintf(buffer, 64, "%f", value);
+    // use snprintf during testing with precision
+    snprintf(buffer, 64, "%.*f", precision, value);
     return;
 
 #else
@@ -391,6 +389,12 @@ string &string::append(const CRGB &rgb) {
 void StringFormatter::appendFloat(const float &val, StrN<64> *dst) {
     char buf[64] = {0};
     string_functions::ftoa(val, buf);
+    dst->write(buf, strlen(buf));
+}
+
+void StringFormatter::appendFloat(const float &val, StrN<64> *dst, int precision) {
+    char buf[64] = {0};
+    string_functions::ftoa(val, buf, precision);
     dst->write(buf, strlen(buf));
 }
 

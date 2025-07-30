@@ -428,7 +428,8 @@ fl::string Json::to_string_native() const {
             if (opt) {
                 fl::string num_str;
                 // Use fl::string::append which already handles float formatting correctly
-                num_str.append(*opt);
+                //num_str.append(*opt);
+                num_str.append(static_cast<float>(*opt), 3);
                 append_fl_string(num_str);
             } else {
                 append_string("null");
@@ -530,8 +531,8 @@ fl::string Json::to_string_native() const {
                             json_chars.push_back(',');
                         }
                         first = false;
-                                                 fl::string num_str;
-                         num_str.append(static_cast<float>(item));
+                        fl::string num_str;
+                        num_str.append(static_cast<float>(item), 6);
                         append_fl_string(num_str);
                     }
                     json_chars.push_back(']');

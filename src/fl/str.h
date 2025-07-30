@@ -100,6 +100,7 @@ class StringFormatter {
     static int parseInt(const char *str);
     static bool isDigit(char c) { return c >= '0' && c <= '9'; }
     static void appendFloat(const float &val, StrN<FASTLED_STR_INLINED_SIZE> *dst);
+    static void appendFloat(const float &val, StrN<FASTLED_STR_INLINED_SIZE> *dst, int precision);
 };
 
 class StringHolder {
@@ -863,6 +864,11 @@ class string : public StrN<FASTLED_STR_INLINED_SIZE> {
         return *this;
     }
 
+    string &append(const float &_val, int precision) {
+        StringFormatter::appendFloat(_val, this, precision);
+        return *this;
+    }
+
     string &append(const double &val) { return append(float(val)); }
 
     string &append(const StrN &str) {
@@ -951,6 +957,13 @@ template<typename T>
 inline string to_string(T value) {
     string result;
     result.append(value);
+    return result;
+}
+
+// Specialized to_string for float with precision
+inline string to_string(float value, int precision) {
+    string result;
+    result.append(value, precision);
     return result;
 }
 
