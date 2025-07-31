@@ -331,7 +331,8 @@ def _run_process_with_output(process: RunningProcess, verbose: bool = False) -> 
             print(f"Test failed: {test_name}")
             sys.exit(returncode)
         else:
-            print(f"Process completed: {process.command}")
+            elapsed = time.time() - output_handler.epoch
+            print(f"Process completed: {process.command} (took {elapsed:.2f}s)")
             if isinstance(process.command, str) and process.command.endswith(".exe"):
                 print(f"Test {process.command} passed with return code {returncode}")
     except Exception as e:
@@ -549,6 +550,8 @@ def run_test_processes(
         return
 
     failed_tests: list[str] = []
+    output_handler = ProcessOutputHandler(verbose=verbose)
+    start_time = time.time()
 
     try:
         if parallel:
@@ -560,8 +563,9 @@ def run_test_processes(
                 _run_process_with_output(process, verbose)
 
         # If we get here, all tests passed
+        elapsed = time.time() - start_time
         print("\033[92m###### SUCCESS ######\033[0m")
-        print("All tests passed successfully!")
+        print(f"All tests passed successfully! (took {elapsed:.2f}s)")
 
     except SystemExit as e:
         # Tests failed - extract command name from the error
