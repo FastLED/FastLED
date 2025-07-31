@@ -35,10 +35,12 @@ class TestProcessConfig:
 class ProcessOutputHandler:
     """Handles capturing and displaying process output with simple indentation"""
 
-    def __init__(self, verbose: bool = False):
+    def __init__(self, verbose: bool = False, indent: int = 2):
         self.verbose = verbose
         self.current_command: str | None = None
         self.header_printed = False
+        self.indent = indent
+        self.epoch = time.time()
 
     def handle_output_line(self, line: str, process_name: str) -> None:
         """Process and display a single line of output with proper formatting"""
@@ -52,8 +54,9 @@ class ProcessOutputHandler:
             self.current_command = process_name
             self.header_printed = True
 
-        # Simply indent all lines under the command
-        print(f"  {line}")
+        # Indent all lines under the command and include time delta
+        delta = time.time() - self.epoch
+        print(f"{' ' * self.indent}{delta:.2f} {line}")
 
     def _should_always_display(self, line: str) -> bool:
         """Determine if a line should always be displayed regardless of verbosity"""
