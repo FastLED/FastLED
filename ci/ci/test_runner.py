@@ -236,14 +236,16 @@ def _run_process_with_output(process: RunningProcess, verbose: bool = False) -> 
     if isinstance(process.command, str) and process.command.endswith(".exe"):
         print(f"Running test: {process.command}")
 
+    # Create single output handler instance to maintain state
+    output_handler = ProcessOutputHandler(verbose=True)
+
     # Use event-driven processing with reasonable timeouts to prevent hanging
     while process.poll() is None:
         try:
             # Use longer timeout (1 second) to prevent race conditions like parallel version
             line = process.get_next_line(timeout=1.0)
             if line is not None:
-                # Use output handler for proper formatting
-                output_handler = ProcessOutputHandler(verbose=True)
+                # Use the shared output handler for proper formatting
                 output_handler.handle_output_line(line, process_name)
 
                 # After getting one line, quickly drain any additional available output
@@ -366,7 +368,7 @@ def _run_processes_parallel(
                 # Use longer timeout for event-driven waiting (1 second)
                 # This eliminates race conditions from very short timeouts
                 try:
-                    line = proc.get_next_line(timeout=1.0)
+                    line = proc.get_next_line(timeout=0.1)
                     if (
                         line is not None and line.strip()
                     ):  # Ensure we don't print empty lines
