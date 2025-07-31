@@ -6,6 +6,7 @@
 #include "fl/memory.h"
 #include "fl/str.h"
 #include "fl/mutex.h"
+#include "fl/unused.h"
 
 
 namespace fl {
@@ -25,8 +26,8 @@ class JsonUiInternal {
     virtual ~JsonUiInternal() = default;
 
     const fl::string &name() const;
-    virtual void updateInternal(const fl::Json &json) {};
-    virtual void toJson(fl::Json &json) const {};
+    virtual void updateInternal(const fl::Json &json) { FL_UNUSED(json); }
+    virtual void toJson(fl::Json &json) const { FL_UNUSED(json); }
     int id() const;
 
     // Group functionality

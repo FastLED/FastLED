@@ -1,6 +1,7 @@
 #include "test.h"
 #include "fl/promise.h"
 #include "fl/promise_result.h"
+#include "fl/unused.h"
 
 using namespace fl;
 
@@ -205,8 +206,10 @@ TEST_CASE("fl::promise - Callback Interface") {
         
         // Should be able to chain
         auto& ref = p.then([](const int& value) {
+            FL_UNUSED(value);
             // Success callback
         }).catch_([](const Error& err) {
+            FL_UNUSED(err);
             // Error callback  
         });
         
@@ -219,8 +222,10 @@ TEST_CASE("fl::promise - Callback Interface") {
         
         // Should be able to chain
         auto& ref = p.catch_([](const Error& err) {
+            FL_UNUSED(err);
             // Error callback
         }).then([](const int& value) {
+            FL_UNUSED(value);
             // Success callback
         });
         
@@ -235,8 +240,8 @@ TEST_CASE("fl::promise - Update and Callback Processing") {
         bool catch_called = false;
         
         auto p = fl::promise<int>::create();
-        p.then([&](const int& value) { then_called = true; });
-        p.catch_([&](const Error& err) { catch_called = true; });
+        p.then([&](const int& value) { FL_UNUSED(value); then_called = true; });
+        p.catch_([&](const Error& err) { FL_UNUSED(err); catch_called = true; });
         
         // Complete and then update
         p.complete_with_value(42);
@@ -257,7 +262,7 @@ TEST_CASE("fl::promise - Update and Callback Processing") {
         int call_count = 0;
         
         auto p = fl::promise<int>::create();
-        p.then([&](const int& value) { call_count++; });
+        p.then([&](const int& value) { FL_UNUSED(value); call_count++; });
         
         p.complete_with_value(42);
         CHECK_EQ(call_count, 1);
@@ -309,8 +314,14 @@ TEST_CASE("fl::promise - Copy Semantics") {
         auto p1 = fl::promise<int>::create();
         auto p2 = p1; // Copy
         
-        p1.then([&](const int& value) { callback1_called = true; });
-        p2.then([&](const int& value) { callback2_called = true; });
+        p1.then([&](const int& value) {
+            FL_UNUSED(value);   
+            callback1_called = true;
+        });
+        p2.then([&](const int& value) {
+            FL_UNUSED(value);
+            callback2_called = true;
+        });
         
         p1.complete_with_value(42);
         

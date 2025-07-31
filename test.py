@@ -3,6 +3,7 @@ import argparse
 import hashlib
 import json
 import os
+import queue
 import subprocess
 import sys
 import threading
@@ -491,7 +492,7 @@ def build_cpp_test_command(args: TestArgs) -> str:
     if args.clean:
         cmd_list.append("--clean")
     if args.verbose:
-        cmd_list.append("--verbose")
+        cmd_list.append("--verbose")  # Always pass verbose flag when enabled
     if args.check:
         cmd_list.append("--check")
     if args.new:
@@ -524,10 +525,22 @@ def run_unit_tests(args: TestArgs, enable_stack_trace: bool) -> None:
     proc = RunningProcess(
         cmd_str_cpp, enable_stack_trace=enable_stack_trace, timeout=cpp_test_timeout
     )
-    proc.wait()
-    if proc.returncode != 0:
+
+    # Stream output in real-time while the process is running
+    while proc.poll() is None:
+        try:
+            line = proc.get_next_line(timeout=0.1)
+            if line is not None:
+                print(line)
+        except queue.Empty:
+            # No output available right now, continue waiting
+            pass
+
+    # Process has completed, check return code
+    returncode = proc.returncode
+    if returncode != 0:
         print(f"Command failed: {proc.command}")
-        sys.exit(proc.returncode)
+        sys.exit(returncode)
 
     print(f"C++ unit tests completed in {time.time() - start_time:.2f}s")
 
@@ -838,7 +851,7 @@ def run_tests_parallel(processes: list[RunningProcess]) -> None:
         for proc in active_processes[:]:  # Copy list for safe modification
             # Check for new output
             while True:
-                line = proc.get_next_line()
+                line = proc.get_next_line(timeout=60)
                 if line is None:
                     break
                 # Print line - encoding handled by console configuration above

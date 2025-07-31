@@ -4,6 +4,7 @@
 #include "test.h"
 
 #include "fl/type_traits.h"
+#include "fl/unused.h"
 
 using namespace fl;
 
@@ -58,11 +59,13 @@ TEST_CASE("Test fl::move") {
         // Copy constructor
         MoveTracker(const MoveTracker &other) : moved_from(false) {
             // Regular copy
+            FL_UNUSED(other);
         }
 
         // Move constructor
         MoveTracker(MoveTracker &&other) : moved_from(false) {
             other.moved_from = true;
+            FL_UNUSED(other);
         }
 
         bool was_moved_from() const { return moved_from; }

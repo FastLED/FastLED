@@ -19,18 +19,16 @@
 #include "fl/sstream.h"
 #include <cstring>
 #include "fl/json.h"
+#include "fl/unused.h"
 
 #include "fl/namespace.h"
 FASTLED_USING_NAMESPACE
 
-TEST_CASE("compile ui test") {
-}
-
 class MockJsonUiInternal : public fl::JsonUiInternal {
 public:
     MockJsonUiInternal(const fl::string& name) : fl::JsonUiInternal(name) {}
-    void toJson(fl::Json& json) const override {}
-    void updateInternal(const fl::Json& json) override {}
+    void toJson(fl::Json& json) const override { FL_UNUSED(json); }
+    void updateInternal(const fl::Json& json) override { FL_UNUSED(json); }
 };
 
 TEST_CASE("no updateJs handler") {
@@ -69,8 +67,8 @@ TEST_CASE("internal manager with updateJs") {
     class MockJsonUiInternal : public fl::JsonUiInternal {
     public:
         MockJsonUiInternal(const fl::string& name) : fl::JsonUiInternal(name) {}
-        void toJson(fl::Json& json) const override {}
-        void updateInternal(const fl::Json& json) override {}
+        void toJson(fl::Json& json) const override { FL_UNUSED(json); }
+        void updateInternal(const fl::Json& json) override { FL_UNUSED(json); }
     };
     auto mockComponent = fl::make_shared<MockJsonUiInternal>("test_id");
     fl::weak_ptr<fl::JsonUiInternal> weakComponent(mockComponent);
@@ -158,8 +156,8 @@ TEST_CASE("pending component cleanup with destroyed components") {
         class MockJsonUiInternal : public fl::JsonUiInternal {
         public:
             MockJsonUiInternal(const fl::string& name) : fl::JsonUiInternal(name) {}
-            void toJson(fl::Json& json) const override {}
-            void updateInternal(const fl::Json& json) override {}
+            void toJson(fl::Json& json) const override { FL_UNUSED(json); }
+            void updateInternal(const fl::Json& json) override { FL_UNUSED(json); }
         };
         auto mockComponent = fl::make_shared<MockJsonUiInternal>("test_id_destroyed");
         fl::weak_ptr<fl::JsonUiInternal> weakComponent(mockComponent);
@@ -201,8 +199,8 @@ TEST_CASE("null handlers behavior") {
     class MockJsonUiInternal : public fl::JsonUiInternal {
     public:
         MockJsonUiInternal(const fl::string& name) : fl::JsonUiInternal(name) {}
-        void toJson(fl::Json& json) const override {}
-        void updateInternal(const fl::Json& json) override {}
+        void toJson(fl::Json& json) const override { FL_UNUSED(json); }
+        void updateInternal(const fl::Json& json) override { FL_UNUSED(json); }
     };
     auto mockComponent = fl::make_shared<MockJsonUiInternal>("test_id");
     fl::weak_ptr<fl::JsonUiInternal> weakComponent(mockComponent);
@@ -254,8 +252,8 @@ TEST_CASE("manager replacement") {
     class MockJsonUiInternal : public fl::JsonUiInternal {
     public:
         MockJsonUiInternal(const fl::string& name) : fl::JsonUiInternal(name) {}
-        void toJson(fl::Json& json) const override {}
-        void updateInternal(const fl::Json& json) override {}
+        void toJson(fl::Json& json) const override { FL_UNUSED(json); }
+        void updateInternal(const fl::Json& json) override { FL_UNUSED(json); }
     };
     auto mockComponent = fl::make_shared<MockJsonUiInternal>("test_id");
     fl::weak_ptr<fl::JsonUiInternal> weakComponent(mockComponent);

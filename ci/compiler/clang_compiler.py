@@ -10,6 +10,7 @@ import platform
 import shutil
 import subprocess
 import tempfile
+import time
 from concurrent.futures import Future, ThreadPoolExecutor
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -631,20 +632,59 @@ class Compiler:
             cmd.extend(additional_flags)
 
         try:
-            result = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
+            # Use Popen to stream output in real-time
+            process = subprocess.Popen(
+                cmd,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+                bufsize=1,  # Line buffered
+            )
+
+            stdout_lines: list[str] = []
+            stderr_lines: list[str] = []
+
+            # Read stdout and stderr in real-time
+            while True:
+                stdout_line = process.stdout.readline() if process.stdout else ""
+                stderr_line = process.stderr.readline() if process.stderr else ""
+
+                if stdout_line:
+                    print(stdout_line, end="", flush=True)  # Stream to console
+                    stdout_lines.append(stdout_line)
+                if stderr_line:
+                    print(stderr_line, end="", flush=True)  # Stream to console
+                    stderr_lines.append(stderr_line)
+
+                # Check if process has finished
+                if process.poll() is not None:
+                    # Read any remaining output
+                    remaining_stdout = process.stdout.read() if process.stdout else ""
+                    remaining_stderr = process.stderr.read() if process.stderr else ""
+                    if remaining_stdout:
+                        print(remaining_stdout, end="", flush=True)
+                        stdout_lines.append(remaining_stdout)
+                    if remaining_stderr:
+                        print(remaining_stderr, end="", flush=True)
+                        stderr_lines.append(remaining_stderr)
+                    break
+
+                if not stdout_line and not stderr_line:
+                    # No output available, sleep briefly to avoid busy waiting
+                    time.sleep(0.1)
 
             # Clean up temp file on failure if we created it
-            if cleanup_temp and result.returncode != 0 and os.path.exists(output_path):
+            if cleanup_temp and process.returncode != 0 and os.path.exists(output_path):
                 try:
                     os.unlink(output_path)
                 except:
                     pass
 
             return Result(
-                ok=(result.returncode == 0),
-                stdout=result.stdout,
-                stderr=result.stderr,
-                return_code=result.returncode,
+                ok=(process.returncode == 0),
+                stdout="".join(stdout_lines),
+                stderr="".join(stderr_lines),
+                return_code=process.returncode,
             )
 
         except Exception as e:
@@ -1263,14 +1303,54 @@ def link_program_sync(link_options: LinkOptions) -> Result:
 
     # Execute linker command
     try:
-        process = subprocess.run(cmd, capture_output=True, text=True, cwd=None)
+        # Use Popen to stream output in real-time
+        process = subprocess.Popen(
+            cmd,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            bufsize=1,  # Line buffered
+        )
+
+        stdout_lines: list[str] = []
+        stderr_lines: list[str] = []
+
+        # Read stdout and stderr in real-time
+        while True:
+            stdout_line = process.stdout.readline() if process.stdout else ""
+            stderr_line = process.stderr.readline() if process.stderr else ""
+
+            if stdout_line:
+                print(stdout_line, end="", flush=True)  # Stream to console
+                stdout_lines.append(stdout_line)
+            if stderr_line:
+                print(stderr_line, end="", flush=True)  # Stream to console
+                stderr_lines.append(stderr_line)
+
+            # Check if process has finished
+            if process.poll() is not None:
+                # Read any remaining output
+                remaining_stdout = process.stdout.read() if process.stdout else ""
+                remaining_stderr = process.stderr.read() if process.stderr else ""
+                if remaining_stdout:
+                    print(remaining_stdout, end="", flush=True)
+                    stdout_lines.append(remaining_stdout)
+                if remaining_stderr:
+                    print(remaining_stderr, end="", flush=True)
+                    stderr_lines.append(remaining_stderr)
+                break
+
+            if not stdout_line and not stderr_line:
+                # No output available, sleep briefly to avoid busy waiting
+                time.sleep(0.1)
 
         return Result(
             ok=process.returncode == 0,
-            stdout=process.stdout,
-            stderr=process.stderr,
+            stdout="".join(stdout_lines),
+            stderr="".join(stderr_lines),
             return_code=process.returncode,
         )
+
     except Exception as e:
         return Result(
             ok=False, stdout="", stderr=f"Linker command failed: {e}", return_code=-1

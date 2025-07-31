@@ -6,6 +6,7 @@ import re
 import subprocess
 import sys
 import tempfile
+import time  # Added for timing test execution
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -91,17 +92,18 @@ def run_command(command, use_gdb=False) -> tuple[int, str]:
                 break
             if line:
                 captured_lines.append(line.rstrip())
-                if _VERBOSE:
-                    try:
-                        print(line, end="")  # Only print in real-time if verbose
-                    except UnicodeEncodeError:
-                        # Fallback: replace problematic characters
-                        print(
-                            line.encode("utf-8", errors="replace").decode(
-                                "utf-8", errors="replace"
-                            ),
-                            end="",
-                        )
+                # Always print output in real-time for better feedback
+                try:
+                    print(line, end="", flush=True)
+                except UnicodeEncodeError:
+                    # Fallback: replace problematic characters
+                    print(
+                        line.encode("utf-8", errors="replace").decode(
+                            "utf-8", errors="replace"
+                        ),
+                        end="",
+                        flush=True,
+                    )
 
         os.unlink(gdb_script.name)
         output = "\n".join(captured_lines)
@@ -123,17 +125,18 @@ def run_command(command, use_gdb=False) -> tuple[int, str]:
                 break
             if line:
                 captured_lines.append(line.rstrip())
-                if _VERBOSE:
-                    try:
-                        print(line, end="")  # Only print in real-time if verbose
-                    except UnicodeEncodeError:
-                        # Fallback: replace problematic characters
-                        print(
-                            line.encode("utf-8", errors="replace").decode(
-                                "utf-8", errors="replace"
-                            ),
-                            end="",
-                        )
+                # Always print output in real-time for better feedback
+                try:
+                    print(line, end="", flush=True)
+                except UnicodeEncodeError:
+                    # Fallback: replace problematic characters
+                    print(
+                        line.encode("utf-8", errors="replace").decode(
+                            "utf-8", errors="replace"
+                        ),
+                        end="",
+                        flush=True,
+                    )
 
         output = "\n".join(captured_lines)
         return process.returncode, output
@@ -341,7 +344,14 @@ def _run_tests_python(specific_test: str | None = None) -> None:
             print(f"No test executables found for: {test_name}")
             sys.exit(1)
 
-        print("Running tests from Python API build...")
+        print(f"Running {len(test_executables)} tests from Python API build...")
+
+        # Print list of tests that will be executed
+        print("Tests to execute:")
+        for i, test_exec in enumerate(test_executables, 1):
+            print(f"  {i}. {test_exec.name} ({test_exec.executable_path})")
+        print("")
+
         failed_tests: list[FailedTest] = []
 
         # Convert to file list format for compatibility with existing logic
@@ -354,6 +364,7 @@ def _run_tests_python(specific_test: str | None = None) -> None:
             files.append(file_name)
             test_paths[file_name] = str(test_exec.executable_path)
 
+        print(f"Starting test execution for {len(files)} test files...")
         _execute_test_files(files, "", failed_tests, specific_test, test_paths)
         _handle_test_results(failed_tests)
 
@@ -380,7 +391,12 @@ def _execute_test_files(
         specific_test: Specific test name if filtering
         test_paths: Dict mapping file names to full paths (for Python API)
     """
-    for test_file in files:
+    total_tests = len(files)
+    successful_tests = 0
+
+    print(f"Executing {total_tests} test files...")
+
+    for i, test_file in enumerate(files, 1):
         if test_paths:
             # Python API - use provided paths
             test_path = test_paths[test_file]
@@ -389,8 +405,11 @@ def _execute_test_files(
             test_path = os.path.join(test_dir, test_file)
 
         if os.path.isfile(test_path) and os.access(test_path, os.X_OK):
-            print(f"Running test: {test_file}")
+            print(f"[{i}/{total_tests}] Running test: {test_file}")
+            print(f"  Command: {test_path}")
+            start_time = time.time()
             return_code, stdout = run_command(test_path)
+            elapsed_time = time.time() - start_time
 
             output = stdout
             failure_pattern = re.compile(r"Test .+ failed with return code (\d+)")
@@ -399,7 +418,7 @@ def _execute_test_files(
 
             # PRESERVE all existing GDB crash analysis functionality
             if is_crash:
-                print("Test crashed. Re-running with GDB to get stack trace...")
+                print(f"Test crashed. Re-running with GDB to get stack trace...")
                 _, gdb_stdout = run_command(test_path, use_gdb=True)
                 stdout += "\n--- GDB Output ---\n" + gdb_stdout
 
@@ -414,33 +433,37 @@ def _execute_test_files(
                 print("Test output:")
                 print(stdout)
             if return_code == 0:
+                successful_tests += 1
                 if specific_test or _VERBOSE:
-                    print("Test passed")
+                    print(f"Test {test_file} passed in {elapsed_time:.2f}s")
                 else:
-                    print(f"Success running {test_file}")
-            elif is_crash:
-                if failure_match:
-                    print(
-                        f"Test {test_file} crashed with return code {failure_match.group(1)}"
-                    )
-                else:
-                    print(f"Test {test_file} crashed with return code {return_code}")
-                # Always show crash output, even in non-verbose mode
-                if (
-                    not _VERBOSE and not specific_test
-                ):  # Only show again if we didn't show it above
-                    print("Test output:")
-                    print(stdout)
+                    print(f"  Test {test_file} passed in {elapsed_time:.2f}s")
             else:
-                print(f"Test {test_file} failed with return code {return_code}")
-                # Only show again if we didn't show it above
-                if not _VERBOSE and not specific_test:
-                    print("Test output:")
-                    print(stdout)  # Show output on failure even in non-verbose mode
+                failed_tests.append(
+                    FailedTest(name=test_file, return_code=return_code, stdout=stdout)
+                )
+                print(
+                    f"  Test {test_file} FAILED with return code {return_code} in {elapsed_time:.2f}s"
+                )
+        else:
+            print(
+                f"[{i}/{total_tests}] ERROR: Test file not found or not executable: {test_path}"
+            )
+            failed_tests.append(
+                FailedTest(
+                    name=test_file,
+                    return_code=1,
+                    stdout=f"Test file not found or not executable: {test_path}",
+                )
+            )
 
-            print("-" * 40)
-            if return_code != 0:
-                failed_tests.append(FailedTest(test_file, return_code, stdout))
+    print(
+        f"Test execution complete: {successful_tests} passed, {len(failed_tests)} failed"
+    )
+    if successful_tests == total_tests:
+        print("All tests passed successfully!")
+    else:
+        print(f"Some tests failed ({len(failed_tests)} of {total_tests})")
 
 
 def _handle_test_results(failed_tests: list) -> None:

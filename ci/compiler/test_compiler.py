@@ -218,13 +218,22 @@ class FastLEDTestCompiler:
             return CompileResult(success=True, compiled_count=0, duration=0.0)
 
         print(f"Compiling {len(test_files)} test files using proven Python API...")
+        print(f"Build directory: {self.build_dir}")
+
+        # Print list of test files being compiled
+        print("Test files to compile:")
+        for i, test_file in enumerate(test_files, 1):
+            print(f"  {i}. {test_file.name}")
+        print("")
 
         # Submit parallel compilation jobs (proven pattern from example compilation)
         future_to_test: Dict[Future[Result], Path] = {}
 
+        print("Starting parallel compilation of test files...")
         for test_file in test_files:
             # Compile to object file first
             obj_path = self.build_dir / f"{test_file.stem}.o"
+            print(f"Submitting compilation job for: {test_file.name} -> {obj_path}")
             compile_future = self.compiler.compile_cpp_file(
                 test_file,
                 output_path=obj_path,
@@ -236,6 +245,8 @@ class FastLEDTestCompiler:
         compiled_objects: List[Path] = []
         errors: List[CompileError] = []
         completed = 0
+
+        print(f"Waiting for {len(future_to_test)} compilation jobs to complete...")
 
         for future in as_completed(future_to_test.keys()):
             test_file = future_to_test[future]
@@ -259,9 +270,12 @@ class FastLEDTestCompiler:
 
         if errors:
             duration = time.time() - compile_start
+            print(f"Compilation failed with {len(errors)} errors in {duration:.2f}s")
             return CompileResult(
                 success=False, compiled_count=0, duration=duration, errors=errors
             )
+
+        print(f"All {len(compiled_objects)} object files compiled successfully")
 
         # Link each test to executable using proven linking API
         self.compiled_tests = self._link_tests(compiled_objects)
@@ -286,8 +300,12 @@ class FastLEDTestCompiler:
 
         if success:
             print(
-                f"SUCCESS: Compiled {len(self.compiled_tests)} tests in {duration:.2f}s"
+                f"SUCCESS: Compiled and linked {len(self.compiled_tests)} tests in {duration:.2f}s"
             )
+            # List all the successful test executables
+            print("Test executables created:")
+            for i, test in enumerate(self.compiled_tests, 1):
+                print(f"  {i}. {test.name} -> {test.executable_path}")
         else:
             print(f"FAILED: {len(errors)} total failures (compilation + linking)")
 
