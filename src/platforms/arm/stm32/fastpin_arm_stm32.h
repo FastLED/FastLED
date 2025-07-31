@@ -7,7 +7,9 @@
 #else
 
 #ifndef USE_NEW_STM32_PIN_DEFINITIONS
-#if defined(ARDUINO_BLUEPILL_F103C8) || defined(ARDUINO_MAPLE_MINI) || defined(ARDUINO_GENERIC_STM32F103T) || defined(STM32F103TBU6) || defined(STM32F103TB)
+// Use new pin definitions for all STM32F1 variants to fix pin mapping issues
+// The legacy definitions use incorrect Arduino pin numbers instead of STM32 pin names
+#if defined(ARDUINO_BLUEPILL_F103C8) || defined(ARDUINO_MAPLE_MINI) || defined(ARDUINO_GENERIC_STM32F103T) || defined(STM32F103TBU6) || defined(STM32F103TB) || defined(__STM32F1__) || defined(STM32F1) || defined(STM32F103C8) || defined(ARDUINO_GENERIC_STM32F103C8) || defined(ARDUINO_GENERIC_F103C8TX)
 #define USE_NEW_STM32_PIN_DEFINITIONS
 #endif
 #endif
