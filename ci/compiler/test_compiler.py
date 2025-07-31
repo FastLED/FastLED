@@ -196,15 +196,22 @@ class FastLEDTestCompiler:
 
             if specific_test:
                 # Handle both "test_name" and "name" formats for compatibility
+                # Also support partial matching for test names
                 test_stem = test_file.stem
-                if test_stem == specific_test or test_stem == f"test_{specific_test}":
+                test_name = test_stem.replace("test_", "")
+                if (
+                    test_stem == specific_test
+                    or test_stem == f"test_{specific_test}"
+                    or test_name == specific_test
+                    or specific_test in test_name
+                ):
                     test_files.append(test_file)
             else:
                 test_files.append(test_file)
 
         return test_files
 
-    def compile_all_tests(self) -> CompileResult:
+    def compile_all_tests(self, specific_test: str | None = None) -> CompileResult:
         """
         Compile all tests in parallel using proven API patterns.
 
@@ -212,7 +219,9 @@ class FastLEDTestCompiler:
         example compilation that deliver 4x+ performance improvements.
         """
         compile_start = time.time()
-        test_files = self.discover_test_files()
+
+        # If specific_test is not provided in the method call, use the one from discover_test_files
+        test_files = self.discover_test_files(specific_test)
 
         if not test_files:
             return CompileResult(success=True, compiled_count=0, duration=0.0)
@@ -548,10 +557,15 @@ class FastLEDTestCompiler:
     ) -> List[TestExecutable]:
         """Get compiled test executables with name filtering"""
         if specific_test:
+            # Support partial matching for test names
             return [
                 t
                 for t in self.compiled_tests
-                if t.name == specific_test or t.name == f"test_{specific_test}"
+                if (
+                    t.name == specific_test
+                    or t.name == f"test_{specific_test}"
+                    or specific_test in t.name
+                )
             ]
         return self.compiled_tests
 

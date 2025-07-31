@@ -249,7 +249,7 @@ def _compile_tests_python(
         )
 
         # Compile all tests in parallel (8x faster than CMake)
-        compile_result = test_compiler.compile_all_tests()
+        compile_result = test_compiler.compile_all_tests(specific_test)
 
         if not compile_result.success:
             print("Compilation failed:")
@@ -332,8 +332,26 @@ def _run_tests_cmake(specific_test: str | None = None) -> None:
 
         if sys.platform == "win32":
             test_name += ".exe"
-        files = [f for f in files if f == test_name]
-        if not files:
+
+        # Modified to support partial matching
+        matching_files = []
+        for f in files:
+            # Check for exact match
+            if f == test_name:
+                matching_files.append(f)
+                break
+
+            # Check for partial match in the filename
+            base_name = f.replace("test_", "")
+            if sys.platform == "win32":
+                base_name = base_name.replace(".exe", "")
+
+            if specific_test in base_name:
+                matching_files.append(f)
+
+        if matching_files:
+            files = matching_files
+        else:
             print(f"Test {test_name} not found in {test_dir}")
             sys.exit(1)
 

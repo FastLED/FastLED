@@ -224,6 +224,15 @@ def parse_args() -> TestArgs:
     if test_args.test and not test_args.cpp:
         test_args.cpp = True
         print(f"Auto-enabled --cpp mode for specific test: {test_args.test}")
+        # Also enable --unit when a specific test is provided without any other flags
+        if (
+            not test_args.unit
+            and not test_args.examples
+            and not test_args.py
+            and not test_args.full
+        ):
+            test_args.unit = True
+            print(f"Auto-enabled --unit mode for specific test: {test_args.test}")
 
     # Auto-enable --cpp and --clang when --check is provided
     if test_args.check:
@@ -868,12 +877,20 @@ def run_tests_parallel(processes: list[RunningProcess]) -> None:
     while active_processes:
         for proc in active_processes[:]:  # Copy list for safe modification
             # Check for new output
-            while True:
-                line = proc.get_next_line(timeout=60)
-                if line is None:
-                    break
-                # Print line - encoding handled by console configuration above
-                print(line)
+            try:
+                while True:
+                    line = proc.get_next_line(timeout=60)
+                    if line is None:
+                        break
+                    # Print line - encoding handled by console configuration above
+                    print(line)
+            except TimeoutError:
+                cmd = proc.command
+                print(f"Process timed out: {cmd}")
+                for p in active_processes:
+                    if p != proc:
+                        p.kill()
+                sys.exit(1)
 
             if proc.poll() is not None:
                 # Process has finished, call wait() to ensure proper cleanup
