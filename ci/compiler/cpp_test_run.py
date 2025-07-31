@@ -159,7 +159,7 @@ def compile_tests(
     clean: bool = False,
     unknown_args: list[str] = [],
     specific_test: str | None = None,
-    use_new_system: bool = False,
+    use_legacy_system: bool = False,
 ) -> None:
     """
     Compile C++ tests with A/B testing support between CMake and Python API systems.
@@ -169,22 +169,22 @@ def compile_tests(
     """
     os.chdir(str(PROJECT_ROOT))
 
-    # Determine build system: --new flag takes precedence, then environment variable
-    if use_new_system:
-        use_python_api = True
-        print("🆕 Using NEW Python API build system (--new flag)")
+    # Determine build system: --legacy flag takes precedence, then environment variable
+    if use_legacy_system:
+        use_python_api = False
+        print("🔧 Using LEGACY CMake build system (--legacy flag)")
     else:
-        # Check environment variable - USE_PYTHON_API=1 forces new system, default is legacy
-        use_python_env = os.environ.get("USE_PYTHON_API", "").lower() in (
+        # Check environment variable - USE_CMAKE=1 forces legacy system, default is new
+        use_cmake_env = os.environ.get("USE_CMAKE", "").lower() in (
             "1",
             "true",
             "yes",
         )
-        use_python_api = use_python_env
-        if use_python_env:
-            print("🆕 Using NEW Python API build system (USE_PYTHON_API env var)")
+        use_python_api = not use_cmake_env
+        if use_cmake_env:
+            print("🔧 Using LEGACY CMake build system (USE_CMAKE env var)")
         else:
-            print("🔧 Using LEGACY CMake build system (default)")
+            print("🆕 Using Python API build system (default)")
 
     if use_python_api:
         # New Python system (8x faster)
@@ -278,7 +278,9 @@ def _compile_tests_python(
         _compile_tests_cmake(clean, unknown_args, specific_test)
 
 
-def run_tests(specific_test: str | None = None, use_new_system: bool = False) -> None:
+def run_tests(
+    specific_test: str | None = None, use_legacy_system: bool = False
+) -> None:
     """
     Run compiled tests with GDB crash analysis support.
 
@@ -287,17 +289,17 @@ def run_tests(specific_test: str | None = None, use_new_system: bool = False) ->
     All existing GDB crash analysis functionality is preserved.
     """
 
-    # Determine which system to use: --new flag takes precedence, then environment variable
-    if use_new_system:
-        use_python_api = True
+    # Determine which system to use: --legacy flag takes precedence, then environment variable
+    if use_legacy_system:
+        use_python_api = False
     else:
-        # Check environment variable - USE_PYTHON_API=1 forces new system, default is legacy
-        use_python_env = os.environ.get("USE_PYTHON_API", "").lower() in (
+        # Check environment variable - USE_CMAKE=1 forces legacy system, default is new
+        use_cmake_env = os.environ.get("USE_CMAKE", "").lower() in (
             "1",
             "true",
             "yes",
         )
-        use_python_api = use_python_env
+        use_python_api = not use_cmake_env
 
     if use_python_api:
         # New Python system - try to get executables from test compiler
@@ -596,9 +598,9 @@ def parse_args() -> argparse.Namespace:
         help="Enable static analysis (IWYU, clang-tidy)",
     )
     parser.add_argument(
-        "--new",
+        "--legacy",
         action="store_true",
-        help="Use NEW Python API build system for A/B testing (8x faster than CMake)",
+        help="Use legacy CMake system instead of new Python API (8x slower)",
     )
 
     args, unknown = parser.parse_known_args()
@@ -619,7 +621,7 @@ def main() -> None:
     specific_test = args.test
     only_run_failed_test = args.only_run_failed_test
     use_clang = args.clang
-    use_new_system = args.new
+    use_legacy_system = args.legacy
     # use_gcc = args.gcc
 
     if not run_only:
@@ -633,15 +635,15 @@ def main() -> None:
             clean=args.clean,
             unknown_args=passthrough_args,
             specific_test=specific_test,
-            use_new_system=use_new_system,
+            use_legacy_system=use_legacy_system,
         )
 
     if not compile_only:
         if specific_test:
-            run_tests(specific_test, use_new_system=use_new_system)
+            run_tests(specific_test, use_legacy_system=use_legacy_system)
         else:
             # Use our own test runner instead of CTest since CTest integration is broken
-            run_tests(None, use_new_system=use_new_system)
+            run_tests(None, use_legacy_system=use_legacy_system)
 
 
 if __name__ == "__main__":

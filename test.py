@@ -40,7 +40,7 @@ class TestArgs:
     cache: bool = False
     unity: bool = False
     full: bool = False
-    new: bool = False
+    legacy: bool = False  # Use legacy CMake system instead of new Python API
 
 
 @typechecked
@@ -190,9 +190,9 @@ def parse_args() -> TestArgs:
         help="Run full integration tests including compilation + linking + program execution",
     )
     parser.add_argument(
-        "--new",
+        "--legacy",
         action="store_true",
-        help="Use NEW Python API build system for A/B testing (8x faster than CMake)",
+        help="Use legacy CMake system instead of new Python API (8x slower)",
     )
 
     args = parser.parse_args()
@@ -217,7 +217,7 @@ def parse_args() -> TestArgs:
         cache=args.cache,
         unity=args.unity,
         full=args.full,
-        new=args.new,
+        legacy=args.legacy,
     )
 
     # Auto-enable --cpp when a specific test is provided
@@ -495,8 +495,8 @@ def build_cpp_test_command(args: TestArgs) -> str:
         cmd_list.append("--verbose")  # Always pass verbose flag when enabled
     if args.check:
         cmd_list.append("--check")
-    if args.new:
-        cmd_list.append("--new")
+    if args.legacy:
+        cmd_list.append("--legacy")
 
     return subprocess.list2cmdline(cmd_list)
 
@@ -946,6 +946,14 @@ def main() -> None:
         if args.quick:
             os.environ["FASTLED_ALL_SRC"] = "1"
             print("Quick mode enabled. FASTLED_ALL_SRC=1")
+
+        # Handle legacy flag - set environment variable for subprocesses
+        if args.legacy:
+            os.environ["USE_CMAKE"] = "1"
+            print("Legacy mode enabled. Using CMake build system.")
+        else:
+            # Ensure USE_CMAKE is not set
+            os.environ.pop("USE_CMAKE", None)
 
         # Handle stack trace control
         enable_stack_trace = not args.no_stack_trace
