@@ -41,7 +41,7 @@ build-backend = "hatchling.build"
 packages = ["ci"]
 
 [tool.ruff]
-exclude = ["ci/tmp", "ci/wasm"]
+exclude = ["ci/tmp", "ci/wasm", "scripts", "native"]
 
 [tool.ruff.lint]
 # Enable import sorting (replaces isort)
@@ -66,6 +66,8 @@ include = ["ci", "*.py"]
 exclude = [
     "ci/tmp/",
     "ci/wasm/",
+    "scripts/",
+    "native/",
     "**/__pycache__",
     "**/.pytest_cache",
     "**/.ruff_cache",

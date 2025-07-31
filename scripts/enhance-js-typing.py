@@ -20,28 +20,42 @@ Usage:
 """
 
 import argparse
-import os
 import re
 import json
 import subprocess
 from pathlib import Path
-from typing import List, Dict, Tuple, Optional
+from typing import List, Dict, Match, TypedDict, Union
+
+class LintIssue(TypedDict):
+    """Type definition for a linting issue"""
+    rule: str
+    message: str
+    file: str
+    line: int
+    severity: int
+
+class LintResult(TypedDict, total=False):
+    """Type definition for lint analysis result"""
+    issues: List[LintIssue]
+    summary: str
+    raw_output: str
+    error: str
 
 class JSLintingEnhancer:
     """Comprehensive JavaScript linting and type enhancement tool"""
     
-    def __init__(self):
-        self.workspace_root = Path.cwd()
-        self.wasm_dir = self.workspace_root / "src" / "platforms" / "wasm"
-        self.js_files = []
+    def __init__(self) -> None:
+        self.workspace_root: Path = Path.cwd()
+        self.wasm_dir: Path = self.workspace_root / "src" / "platforms" / "wasm"
+        self.js_files: List[Path] = []
         self._discover_files()
     
-    def _discover_files(self):
+    def _discover_files(self) -> None:
         """Discover all JavaScript files in the WASM directory"""
         if self.wasm_dir.exists():
             self.js_files = list(self.wasm_dir.rglob("*.js"))
         
-    def analyze_current_linting(self) -> Dict:
+    def analyze_current_linting(self) -> LintResult:
         """Analyze current linting issues using fast ESLint"""
         print("🔍 Analyzing current linting issues...")
         
@@ -51,7 +65,7 @@ class JSLintingEnhancer:
             eslint_exe = ".js-tools/node_modules/.bin/eslint.cmd" if platform.system() == "Windows" else ".js-tools/node_modules/.bin/eslint"
             
             if not Path(eslint_exe).exists():
-                return {"issues": [], "summary": "Fast linting not available. Run: uv run ci/setup-js-linting-fast.py", "error": "eslint_not_found"}
+                return LintResult(issues=[], summary="Fast linting not available. Run: uv run ci/setup-js-linting-fast.py", error="eslint_not_found")
             
             # Run ESLint with JSON output
             result = subprocess.run(
@@ -65,38 +79,38 @@ class JSLintingEnhancer:
             
             if result.returncode == 0:
                 print("✅ No linting issues found!")
-                return {"issues": [], "summary": "clean"}
+                return LintResult(issues=[], summary="clean", raw_output="", error="")
             
             # Parse ESLint JSON output
-            issues = []
+            issues: List[LintIssue] = []
             if result.stdout:
                 try:
                     lint_data = json.loads(result.stdout)
                     for file_result in lint_data:
                         for message in file_result.get('messages', []):
-                            issues.append({
-                                "rule": message.get('ruleId', 'unknown'),
-                                "message": message.get('message', ''),
-                                "file": file_result.get('filePath', ''),
-                                "line": message.get('line', 0),
-                                "severity": message.get('severity', 1)
-                            })
+                            issues.append(LintIssue(
+                                rule=message.get('ruleId', 'unknown'),
+                                message=message.get('message', ''),
+                                file=file_result.get('filePath', ''),
+                                line=message.get('line', 0),
+                                severity=message.get('severity', 1)
+                            ))
                 except json.JSONDecodeError:
                     pass
             
-            return {
-                "issues": issues,
-                "summary": f"Found {len(issues)} linting issues",
-                "raw_output": result.stdout
-            }
-            
+            return LintResult(
+                issues=issues,
+                summary=f"Found {len(issues)} linting issues",
+                raw_output=result.stdout,
+                error=""
+            )
         except Exception as e:
             print(f"❌ Error running linter: {e}")
-            return {"issues": [], "summary": "error", "error": str(e)}
+            return LintResult(issues=[], summary="error", raw_output="", error=str(e))
     
-    def _parse_text_lint_output(self, output: str) -> List[Dict]:
+    def _parse_text_lint_output(self, output: str) -> List[LintIssue]:
         """Parse text-based lint output into structured format"""
-        issues = []
+        issues: List[LintIssue] = []
         lines = output.split('\n')
         
         current_issue = {}
@@ -111,28 +125,33 @@ class JSLintingEnhancer:
                 if rule_match:
                     rule_name = rule_match.group(1)
                     message = rule_match.group(2)
-                    current_issue = {
+                    current_issue: Dict[str, Union[str, int]] = {
                         "rule": rule_name,
                         "message": message,
                         "file": "",
-                        "line": 0
+                        "line": 0,
+                        "severity": 1
                     }
             elif 'at /' in line:
                 # Extract file and line info
                 match = re.search(r'at\s+([^:]+):(\d+)', line)
                 if match and current_issue:
-                    current_issue["file"] = match.group(1)
-                    current_issue["line"] = int(match.group(2))
-                    issues.append(current_issue.copy())
+                    issues.append(LintIssue(
+                        rule=str(current_issue["rule"]),
+                        message=str(current_issue["message"]),
+                        file=match.group(1),
+                        line=int(match.group(2)),
+                        severity=1
+                    ))
                     current_issue = {}
         
         return issues
     
-    def fix_await_in_loop_issues(self) -> List[str]:
+    def fix_await_in_loop_issues(self) -> List[Dict[str, Union[str, int]]]:
         """Identify and provide fixes for await-in-loop issues"""
         print("🔧 Analyzing await-in-loop issues...")
         
-        fixes = []
+        fixes: List[Dict[str, Union[str, int]]] = []
         for js_file in self.js_files:
             try:
                 content = js_file.read_text()
@@ -184,7 +203,7 @@ class JSLintingEnhancer:
         # Pattern for function declarations
         function_pattern = r'(function\s+(\w+)\s*\([^)]*\)\s*\{)'
         
-        def add_jsdoc(match):
+        def add_jsdoc(match: Match[str]) -> str:
             func_name = match.group(2)
             return f'''/**
  * {func_name} function
@@ -200,7 +219,7 @@ class JSLintingEnhancer:
         # Pattern for const/let declarations
         var_pattern = r'(const|let)\s+(\w+)\s*='
         
-        def add_type_comment(match):
+        def add_type_comment(match: Match[str]) -> str:
             return f'{match.group(0)} /** @type {{any}} */'
         
         return re.sub(var_pattern, add_type_comment, content)
@@ -210,7 +229,7 @@ class JSLintingEnhancer:
         # Pattern for class declarations
         class_pattern = r'(class\s+(\w+))'
         
-        def add_class_jsdoc(match):
+        def add_class_jsdoc(match: Match[str]) -> str:
             class_name = match.group(2)
             return f'''/**
  * {class_name} class
@@ -289,10 +308,10 @@ export {};
         return f"✅ Generated enhanced types: {types_file}"
     
     def create_linting_config_variants(self) -> List[str]:
-        """Create different ESLint configuration variants"""
+        """Create different ESLint configuration variants and return success messages"""
         print("⚙️  Creating ESLint configuration variants...")
         
-        configs = []
+        configs: List[str] = []
         
         # Strict ESLint config
         strict_config = '''module.exports = {
@@ -356,10 +375,10 @@ export {};
         return configs
     
     def run_summary(self) -> str:
-        """Generate comprehensive summary of JavaScript codebase"""
+        """Generate comprehensive summary of JavaScript codebase and return formatted report"""
         print("📊 Generating comprehensive JavaScript codebase summary...")
         
-        summary = []
+        summary: List[str] = []
         summary.append("=" * 80)
         summary.append("FASTLED JAVASCRIPT LINTING & TYPE SAFETY SUMMARY")
         summary.append("=" * 80)
@@ -383,15 +402,17 @@ export {};
         # Current linting status
         lint_result = self.analyze_current_linting()
         summary.append(f"\n🔍 CURRENT LINTING STATUS:")
-        summary.append(f"  • {lint_result['summary']}")
+        summary.append(f"  • {lint_result.get('summary', 'No summary available')}")
         
-        if lint_result['issues']:
-            rule_counts = {}
-            for issue in lint_result['issues']:
+        issues = lint_result.get('issues', [])
+        if issues:
+            rule_counts: Dict[str, int] = {}
+            for issue in issues:
                 rule = issue.get('rule', 'unknown')
                 rule_counts[rule] = rule_counts.get(rule, 0) + 1
             
             summary.append(f"  • Most common issues:")
+            # Sort by count
             for rule, count in sorted(rule_counts.items(), key=lambda x: x[1], reverse=True)[:5]:
                 summary.append(f"    - {rule}: {count} occurrences")
         
@@ -431,14 +452,15 @@ def main():
     elif args.approach == "linting":
         result = enhancer.analyze_current_linting()
         print(f"\n🔍 LINTING ANALYSIS:")
-        print(f"  {result['summary']}")
+        print(f"  {result.get('summary', 'No summary available')}")
         
-        if result['issues']:
+        issues = result.get('issues', [])
+        if issues:
             print(f"\n📋 ISSUES BREAKDOWN:")
-            for issue in result['issues'][:10]:  # Show first 10
+            for issue in issues[:10]:  # Show first 10
                 print(f"  • {issue.get('rule', 'unknown')}: {issue.get('message', 'No message')}")
                 if issue.get('file'):
-                    print(f"    File: {issue['file']}:{issue.get('line', '?')}")
+                    print(f"    File: {issue.get('file', '')}:{issue.get('line', '?')}")
         
     elif args.approach == "performance":
         fixes = enhancer.fix_await_in_loop_issues()
@@ -468,4 +490,4 @@ def main():
             print(config)
 
 if __name__ == "__main__":
-    main() 
+    main()

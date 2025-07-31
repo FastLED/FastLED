@@ -377,25 +377,37 @@ class FastLEDTestCompiler:
 
         print(f"Waiting for {len(future_to_test)} compilation jobs to complete...")
 
-        for future in as_completed(future_to_test.keys()):
-            test_file = future_to_test[future]
-            result: Result = future.result()
-            completed += 1
+        try:
+            for future in as_completed(future_to_test.keys()):
+                test_file = future_to_test[future]
+                result: Result = future.result()
+                completed += 1
 
-            if result.ok:
-                obj_path = self.build_dir / f"{test_file.stem}.o"
-                compiled_objects.append(obj_path)
-                print(f"[{completed}/{len(test_files)}] Compiled {test_file.name}")
-            else:
-                errors.append(
-                    CompileError(
-                        test_name=test_file.stem,
-                        message=result.stderr or result.stdout or "Compilation failed",
+                if result.ok:
+                    obj_path = self.build_dir / f"{test_file.stem}.o"
+                    compiled_objects.append(obj_path)
+                    print(f"[{completed}/{len(test_files)}] Compiled {test_file.name}")
+                else:
+                    errors.append(
+                        CompileError(
+                            test_name=test_file.stem,
+                            message=result.stderr
+                            or result.stdout
+                            or "Compilation failed",
+                        )
                     )
-                )
-                print(
-                    f"[{completed}/{len(test_files)}] FAILED {test_file.name}: {result.stderr}"
-                )
+                    print(
+                        f"[{completed}/{len(test_files)}] FAILED {test_file.name}: {result.stderr}"
+                    )
+        except KeyboardInterrupt:
+            print("\nKeyboard interrupt detected during compilation")
+            # Clean up any in-progress compilations
+            for future in future_to_test.keys():
+                future.cancel()
+            import _thread
+
+            _thread.interrupt_main()
+            raise
 
         if errors:
             duration = time.time() - compile_start
