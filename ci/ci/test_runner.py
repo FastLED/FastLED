@@ -276,7 +276,7 @@ def _run_process_with_output(process: RunningProcess, verbose: bool = False) -> 
         print(f"Running test: {process.command}")
 
     # Create single output handler instance to maintain state
-    output_handler = ProcessOutputHandler(verbose=True)
+    output_handler = ProcessOutputHandler(verbose=verbose)
 
     # Use event-driven processing with reasonable timeouts to prevent hanging
     while process.poll() is None:
@@ -354,7 +354,7 @@ def _run_processes_parallel(
         return
 
     # Create a shared output handler for formatting
-    output_handler = ProcessOutputHandler(verbose=True)
+    output_handler = ProcessOutputHandler(verbose=verbose)
 
     # Configure Windows console for UTF-8 output if needed
     if os.name == "nt":  # Windows

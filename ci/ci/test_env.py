@@ -32,9 +32,7 @@ def setup_environment(args: TestArgs) -> None:
         # Ensure USE_CMAKE is not set
         os.environ.pop("USE_CMAKE", None)
 
-    # Handle verbosity flags
-    if args.verbose:
-        os.environ["FASTLED_TEST_VERBOSE"] = "1"
+    # Handle build flags
     if args.show_compile:
         os.environ["FASTLED_TEST_SHOW_COMPILE"] = "1"
     if args.show_link:
