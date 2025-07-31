@@ -73,7 +73,8 @@ def main():
         cmd_list = [
             "uv",
             "run",
-            "ci/ci-compile.py",
+            "-m",
+            "ci.ci-compile.py",
             args.board,
             "--examples",
             args.example,
@@ -84,7 +85,7 @@ def main():
             run_command(cmd_list, shell=True, capture_output=False, check=True)
 
     output = run_command(
-        ["uv", "run", "ci/compiled_size.py", "--board", args.board],
+        ["uv", "run", "-m", "ci.compiled_size.py", "--board", args.board],
         capture_output=True,
     )
     size_match = re.search(r": *(\d+)", output)  # type: ignore

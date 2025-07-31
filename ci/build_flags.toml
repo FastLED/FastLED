@@ -56,6 +56,7 @@ compiler_flags = [
     
     # Warning Configuration
     "-Wno-constant-logical-operand",            # Suppress constant logical operand warnings
+    "-Wno-deprecated-register",                 # Suppress register keyword deprecation warnings
     "-Wnon-c-typedef-for-linkage",             # Warn about non-C typedef issues
     "-Werror=bad-function-cast",               # Error on bad function casts
     "-Werror=cast-function-type",              # Error on function type cast issues

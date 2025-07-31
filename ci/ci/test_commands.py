@@ -53,7 +53,8 @@ def make_compile_uno_test_process(enable_stack_trace: bool = True) -> RunningPro
     cmd = [
         "uv",
         "run",
-        "ci/ci-compile.py",
+        "-m",
+        "ci.ci-compile.py",
         "uno",
         "--examples",
         "Blink",
