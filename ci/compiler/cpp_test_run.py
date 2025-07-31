@@ -8,9 +8,48 @@ import sys
 import tempfile
 import time  # Added for timing test execution
 from dataclasses import dataclass
+from io import StringIO
 from pathlib import Path
+from queue import PriorityQueue
+from threading import Event, Lock, Thread
+from typing import Any, Dict, List, Optional, Tuple
 
 from ci.ci.paths import PROJECT_ROOT
+
+
+class OutputBuffer:
+    """Thread-safe output buffer with ordered output display"""
+
+    def __init__(self):
+        self.output_queue = PriorityQueue()
+        self.next_sequence = 0
+        self.sequence_lock = Lock()
+        self.stop_event = Event()
+        self.output_thread = Thread(target=self._output_worker, daemon=True)
+        self.output_thread.start()
+
+    def write(self, test_index: int, message: str) -> None:
+        """Write a message to the buffer with test index for ordering"""
+        with self.sequence_lock:
+            sequence = self.next_sequence
+            self.next_sequence += 1
+        self.output_queue.put((test_index, sequence, message))
+
+    def _output_worker(self) -> None:
+        """Worker thread that processes output in order"""
+        while not self.stop_event.is_set() or not self.output_queue.empty():
+            try:
+                test_index, _, message = self.output_queue.get(timeout=0.1)
+                print(message, flush=True)
+                self.output_queue.task_done()
+            except:
+                continue
+
+    def stop(self) -> None:
+        """Stop the output worker thread"""
+        self.stop_event.set()
+        if self.output_thread.is_alive():
+            self.output_thread.join()
 
 
 # Configure console for UTF-8 output on Windows
@@ -462,7 +501,7 @@ def _execute_test_files(
     test_paths: dict[str, str] | None = None,
 ) -> None:
     """
-    Execute test files with full GDB crash analysis (preserving all existing functionality).
+    Execute test files in parallel with full GDB crash analysis.
 
     Args:
         files: List of test file names
@@ -473,80 +512,165 @@ def _execute_test_files(
     """
     total_tests = len(files)
     successful_tests = 0
+    completed_tests = 0
 
-    print(f"Executing {total_tests} test files...")
+    # Initialize output buffer for ordered output
+    output_buffer = OutputBuffer()
+    output_buffer.write(0, f"Executing {total_tests} test files in parallel...")
 
-    for i, test_file in enumerate(files, 1):
+    # Determine number of workers based on configuration
+    import multiprocessing
+
+    import psutil
+
+    # Get configuration from args
+    args = parse_args()
+    if args.sequential:
+        max_workers = 1
+    elif args.parallel:
+        max_workers = args.parallel
+    else:
+        max_workers = max(1, multiprocessing.cpu_count() - 1)  # Leave one core free
+
+    # Check memory limit
+    if args.max_memory:
+        memory_limit = args.max_memory * 1024 * 1024  # Convert MB to bytes
+        available_memory = psutil.virtual_memory().available
+        if memory_limit > available_memory:
+            output_buffer.write(
+                0,
+                f"Warning: Requested memory limit {args.max_memory}MB exceeds available memory {available_memory / (1024 * 1024):.0f}MB",
+            )
+            output_buffer.write(
+                0, "Reducing number of parallel workers to stay within memory limits"
+            )
+            # Estimate memory per test based on previous runs or default to 100MB
+            memory_per_test = 100 * 1024 * 1024  # 100MB per test
+            max_parallel_by_memory = max(1, memory_limit // memory_per_test)
+            max_workers = min(max_workers, max_parallel_by_memory)
+
+    output_buffer.write(0, f"Using {max_workers} parallel workers")
+
+    # Thread-safe counter
+    counter_lock = Lock()
+
+    def run_single_test(
+        test_file: str, test_index: int
+    ) -> tuple[bool, float, str, int]:
+        """Run a single test and return its results"""
+        nonlocal completed_tests
+
         if test_paths:
-            # Python API - use provided paths
             test_path = test_paths[test_file]
         else:
-            # CMake - construct path from directory
             test_path = os.path.join(test_dir, test_file)
 
-        if os.path.isfile(test_path) and os.access(test_path, os.X_OK):
-            # Always print the test execution status
-            print(f"[{i}/{total_tests}] Running test: {test_file}")
+        if not (os.path.isfile(test_path) and os.access(test_path, os.X_OK)):
+            output_buffer.write(
+                test_index,
+                f"[{test_index}/{total_tests}] ERROR: Test file not found or not executable: {test_path}",
+            )
+            return False, 0.0, f"Test file not found or not executable: {test_path}", 1
 
-            # Only print command in verbose mode
-            if _VERBOSE:
-                print(f"  Command: {test_path}")
+        output_buffer.write(
+            test_index, f"[{test_index}/{total_tests}] Running test: {test_file}"
+        )
+        if _VERBOSE:
+            output_buffer.write(test_index, f"  Command: {test_path}")
 
-            start_time = time.time()
-            return_code, stdout = run_command(test_path)
-            elapsed_time = time.time() - start_time
+        start_time = time.time()
+        return_code, stdout = run_command(test_path)
+        elapsed_time = time.time() - start_time
 
-            output = stdout
-            failure_pattern = re.compile(r"Test .+ failed with return code (\d+)")
-            failure_match = failure_pattern.search(output)
-            is_crash = failure_match is not None
+        output = stdout
+        failure_pattern = re.compile(r"Test .+ failed with return code (\d+)")
+        failure_match = failure_pattern.search(output)
+        is_crash = failure_match is not None
 
-            # PRESERVE all existing GDB crash analysis functionality
-            if is_crash:
-                print(f"Test crashed. Re-running with GDB to get stack trace...")
-                _, gdb_stdout = run_command(test_path, use_gdb=True)
-                stdout += "\n--- GDB Output ---\n" + gdb_stdout
+        # Handle crashes with GDB (must be done synchronously)
+        if is_crash:
+            output_buffer.write(
+                test_index, f"Test crashed. Re-running with GDB to get stack trace..."
+            )
+            _, gdb_stdout = run_command(test_path, use_gdb=True)
+            stdout += "\n--- GDB Output ---\n" + gdb_stdout
 
-                # Extract crash information
-                crash_info = extract_crash_info(gdb_stdout)
-                print(f"Crash occurred at: {crash_info.file}:{crash_info.line}")
-                print(f"Cause: {crash_info.cause}")
-                print(f"Stack: {crash_info.stack}")
+            # Extract crash information
+            crash_info = extract_crash_info(gdb_stdout)
+            output_buffer.write(
+                test_index, f"Crash occurred at: {crash_info.file}:{crash_info.line}"
+            )
+            output_buffer.write(test_index, f"Cause: {crash_info.cause}")
+            output_buffer.write(test_index, f"Stack: {crash_info.stack}")
 
-            # Only print detailed test output in verbose mode or on failure
-            if _VERBOSE or return_code != 0:
-                print("Test output:")
-                print(stdout)
+        # Print output based on verbosity and status
+        if _VERBOSE or return_code != 0:
+            output_buffer.write(test_index, "Test output:")
+            output_buffer.write(test_index, stdout)
 
-            if return_code == 0:
-                successful_tests += 1
-                print(f"  Test {test_file} passed in {elapsed_time:.2f}s")
-            else:
-                failed_tests.append(
-                    FailedTest(name=test_file, return_code=return_code, stdout=stdout)
-                )
-                print(
-                    f"  Test {test_file} FAILED with return code {return_code} in {elapsed_time:.2f}s"
-                )
+        if return_code == 0:
+            output_buffer.write(
+                test_index, f"  Test {test_file} passed in {elapsed_time:.2f}s"
+            )
         else:
-            print(
-                f"[{i}/{total_tests}] ERROR: Test file not found or not executable: {test_path}"
-            )
-            failed_tests.append(
-                FailedTest(
-                    name=test_file,
-                    return_code=1,
-                    stdout=f"Test file not found or not executable: {test_path}",
-                )
+            output_buffer.write(
+                test_index,
+                f"  Test {test_file} FAILED with return code {return_code} in {elapsed_time:.2f}s",
             )
 
-    print(
-        f"Test execution complete: {successful_tests} passed, {len(failed_tests)} failed"
-    )
-    if successful_tests == total_tests:
-        print("All tests passed successfully!")
-    else:
-        print(f"Some tests failed ({len(failed_tests)} of {total_tests})")
+        with counter_lock:
+            completed_tests += 1
+
+        return return_code == 0, elapsed_time, stdout, return_code
+
+    try:
+        # Run tests in parallel using ThreadPoolExecutor
+        from concurrent.futures import ThreadPoolExecutor, as_completed
+
+        with ThreadPoolExecutor(max_workers=max_workers) as executor:
+            # Submit all tests
+            future_to_test = {
+                executor.submit(run_single_test, test_file, i + 1): test_file
+                for i, test_file in enumerate(files)
+            }
+
+            # Process results as they complete
+            for future in as_completed(future_to_test):
+                test_file = future_to_test[future]
+                try:
+                    success, elapsed_time, stdout, return_code = future.result()
+                    if success:
+                        with counter_lock:
+                            successful_tests += 1
+                    else:
+                        failed_tests.append(
+                            FailedTest(
+                                name=test_file, return_code=return_code, stdout=stdout
+                            )
+                        )
+                except Exception as e:
+                    output_buffer.write(
+                        0, f"ERROR: Test {test_file} failed with exception: {e}"
+                    )
+                    failed_tests.append(
+                        FailedTest(name=test_file, return_code=1, stdout=str(e))
+                    )
+
+        # Print final summary
+        output_buffer.write(
+            0,
+            f"Test execution complete: {successful_tests} passed, {len(failed_tests)} failed",
+        )
+        if successful_tests == total_tests:
+            output_buffer.write(0, "All tests passed successfully!")
+        else:
+            output_buffer.write(
+                0, f"Some tests failed ({len(failed_tests)} of {total_tests})"
+            )
+
+    finally:
+        # Ensure output buffer is stopped
+        output_buffer.stop()
 
 
 def _handle_test_results(failed_tests: list) -> None:
@@ -653,6 +777,21 @@ def parse_args() -> argparse.Namespace:
         "--show-link",
         action="store_true",
         help="Show linking commands and output",
+    )
+    parser.add_argument(
+        "--parallel",
+        type=int,
+        help="Number of parallel test processes to run (default: CPU count - 1)",
+    )
+    parser.add_argument(
+        "--sequential",
+        action="store_true",
+        help="Run tests sequentially (disables parallel execution)",
+    )
+    parser.add_argument(
+        "--max-memory",
+        type=int,
+        help="Maximum memory usage in MB for parallel test execution",
     )
 
     # Create mutually exclusive group for compiler selection
