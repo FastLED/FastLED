@@ -21,6 +21,7 @@ import os
 import subprocess
 import sys
 import tempfile
+import textwrap
 import time
 from concurrent.futures import Future, as_completed
 from dataclasses import dataclass, field
@@ -127,8 +128,8 @@ class FastLEDTestCompiler:
         - Parallel compilation with ThreadPoolExecutor
         """
 
-        # Set up build directory in .build for consistency
-        build_dir = project_root / ".build" / "fastled_test_build"
+        # Set up build directory in .build/fled/unit for consistency
+        build_dir = project_root / ".build" / "fled" / "unit"
         if clean_build and build_dir.exists():
             print("###########################")
             print("# CLEANING UNIT TEST BUILD DIR #")
@@ -274,6 +275,32 @@ class FastLEDTestCompiler:
         # Convert absolute path to relative for display
         rel_build_dir = os.path.relpath(self.build_dir)
         print(f"Build directory: {rel_build_dir}")
+
+        # Show build configuration when running a specific test
+        if specific_test:
+            print("\nFastLED Library Build Configuration:")
+            print("  ✅ Unity build enabled - Using glob pattern:")
+            print("    src/**/*.cpp")
+
+            print("\nPrecompiled header status:")
+            if self.compiler.settings.use_pch:
+                print(
+                    "  ✅ PCH enabled - Using precompiled headers for faster compilation"
+                )
+                print("  PCH content:")
+                print(textwrap.indent(self.compiler.generate_pch_header(), "    "))
+            else:
+                print("  ❌ PCH disabled - Not using precompiled headers")
+
+            print("\nCompiler flags:")
+            for flag in self.compiler.get_compiler_args():
+                print(f"  {flag}")
+            print("\nLinker flags:")
+            for flag in self._get_platform_linker_args(
+                self.build_dir / "libfastled.lib"
+            ):
+                print(f"  {flag}")
+            print("")
 
         # Print list of test files being compiled
         print("Test files to compile:")

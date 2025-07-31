@@ -437,11 +437,11 @@ def compile_with_pio_ci(
     board_name = board.board_name
     real_board_name = board.get_real_board_name()
 
-    # Set up build directory
+    # Set up build directory in .build/fled/examples/{board_name}
     if build_dir:
         board_build_dir = Path(build_dir) / board_name
     else:
-        board_build_dir = Path(".build") / board_name
+        board_build_dir = Path(".build") / "fled" / "examples" / board_name
 
     board_build_dir.mkdir(parents=True, exist_ok=True)
 
