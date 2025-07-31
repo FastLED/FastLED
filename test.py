@@ -877,6 +877,10 @@ def run_tests_parallel(processes: list[RunningProcess]) -> None:
     while active_processes:
         for proc in active_processes[:]:  # Copy list for safe modification
             # Check for new output
+            cmd = proc.command
+            print(
+                f"\n############################################\nWaiting for: {cmd}\n############################################"
+            )
             try:
                 while True:
                     line = proc.get_next_line(timeout=60)
@@ -885,7 +889,6 @@ def run_tests_parallel(processes: list[RunningProcess]) -> None:
                     # Print line - encoding handled by console configuration above
                     print(line)
             except TimeoutError:
-                cmd = proc.command
                 print(f"Process timed out: {cmd}")
                 for p in active_processes:
                     if p != proc:

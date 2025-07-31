@@ -196,16 +196,25 @@ class FastLEDTestCompiler:
 
             if specific_test:
                 # Handle both "test_name" and "name" formats for compatibility
-                # Also support partial matching for test names
                 test_stem = test_file.stem
                 test_name = test_stem.replace("test_", "")
-                if (
-                    test_stem == specific_test
-                    or test_stem == f"test_{specific_test}"
-                    or test_name == specific_test
-                    or specific_test in test_name
-                ):
-                    test_files.append(test_file)
+
+                # Check if we should do fuzzy matching (if there's a * in the name)
+                if "*" in specific_test:
+                    # Convert glob pattern to regex pattern
+                    import re
+
+                    pattern = specific_test.replace("*", ".*")
+                    if re.search(pattern, test_stem) or re.search(pattern, test_name):
+                        test_files.append(test_file)
+                else:
+                    # Exact matching - either the full name or with test_ prefix
+                    if (
+                        test_stem == specific_test
+                        or test_stem == f"test_{specific_test}"
+                        or test_name == specific_test
+                    ):
+                        test_files.append(test_file)
             else:
                 test_files.append(test_file)
 
@@ -557,16 +566,29 @@ class FastLEDTestCompiler:
     ) -> List[TestExecutable]:
         """Get compiled test executables with name filtering"""
         if specific_test:
-            # Support partial matching for test names
-            return [
-                t
-                for t in self.compiled_tests
-                if (
-                    t.name == specific_test
-                    or t.name == f"test_{specific_test}"
-                    or specific_test in t.name
-                )
-            ]
+            # Check if we should do fuzzy matching (if there's a * in the name)
+            if "*" in specific_test:
+                # Convert glob pattern to regex pattern
+                import re
+
+                pattern = specific_test.replace("*", ".*")
+                return [
+                    t
+                    for t in self.compiled_tests
+                    if re.search(pattern, t.name)
+                    or re.search(pattern, f"test_{t.name}")
+                ]
+            else:
+                # Exact matching - either the full name or with test_ prefix
+                return [
+                    t
+                    for t in self.compiled_tests
+                    if (
+                        t.name == specific_test
+                        or t.name == f"test_{specific_test}"
+                        or t.name == specific_test.replace("test_", "")
+                    )
+                ]
         return self.compiled_tests
 
     @classmethod
