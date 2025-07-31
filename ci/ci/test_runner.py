@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 import os
 import queue
+import re
 import sys
 import threading
 import time
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Callable, List, Optional, Protocol, cast
+from typing import Any, Callable, List, Optional, Pattern, Protocol, cast
 
 from typeguard import typechecked
 
@@ -32,16 +33,27 @@ class TestProcessConfig:
 
 
 class ProcessOutputHandler:
-    """Handles capturing and displaying process output"""
+    """Handles capturing and displaying process output with simple indentation"""
 
     def __init__(self, verbose: bool = False):
         self.verbose = verbose
+        self.current_command: str | None = None
+        self.header_printed = False
 
     def handle_output_line(self, line: str, process_name: str) -> None:
-        """Process and display a single line of output"""
-        # Apply filtering based on verbosity
-        if self.verbose or self._should_always_display(line):
-            print(f"[{process_name}] {line}")
+        """Process and display a single line of output with proper formatting"""
+        # Only process if verbose or should always display
+        if not (self.verbose or self._should_always_display(line)):
+            return
+
+        # Print command header if this is a new command
+        if process_name != self.current_command:
+            print(f"\n=== [{process_name}] ===")
+            self.current_command = process_name
+            self.header_printed = True
+
+        # Simply indent all lines under the command
+        print(f"  {line}")
 
     def _should_always_display(self, line: str) -> bool:
         """Determine if a line should always be displayed regardless of verbosity"""
@@ -230,8 +242,9 @@ def _run_process_with_output(process: RunningProcess, verbose: bool = False) -> 
             # Use longer timeout (1 second) to prevent race conditions like parallel version
             line = process.get_next_line(timeout=1.0)
             if line is not None:
-                # Always show test output
-                print(f"[{process_name}] {line}")
+                # Use output handler for proper formatting
+                output_handler = ProcessOutputHandler(verbose=True)
+                output_handler.handle_output_line(line, process_name)
 
                 # After getting one line, quickly drain any additional available output
                 # This maintains responsiveness while avoiding tight polling loops
@@ -242,7 +255,9 @@ def _run_process_with_output(process: RunningProcess, verbose: bool = False) -> 
                             timeout=0.01
                         )  # Very short timeout for draining
                         if additional_line is not None and additional_line.strip():
-                            print(f"[{process_name}] {additional_line}")
+                            output_handler.handle_output_line(
+                                additional_line, process_name
+                            )
                             lines_drained += 1
                         elif additional_line is None:
                             break  # No more output available
@@ -289,6 +304,9 @@ def _run_processes_parallel(
     """
     if not processes:
         return
+
+    # Create a shared output handler for formatting
+    output_handler = ProcessOutputHandler(verbose=True)
 
     # Configure Windows console for UTF-8 output if needed
     if os.name == "nt":  # Windows
@@ -352,7 +370,8 @@ def _run_processes_parallel(
                     if (
                         line is not None and line.strip()
                     ):  # Ensure we don't print empty lines
-                        print(f"[{cmd}] {line}")
+                        # Use the shared output handler for proper formatting
+                        output_handler.handle_output_line(line, cmd)
                         sys.stdout.flush()  # Immediately flush output for real-time visibility
                         any_activity = True
                         last_activity_time[proc] = time.time()  # Update activity time
@@ -369,7 +388,10 @@ def _run_processes_parallel(
                                     additional_line is not None
                                     and additional_line.strip()
                                 ):
-                                    print(f"[{cmd}] {additional_line}")
+                                    # Use the same handler for additional lines
+                                    output_handler.handle_output_line(
+                                        additional_line, cmd
+                                    )
                                     sys.stdout.flush()  # Immediately flush output for real-time visibility
                                     lines_drained += 1
                                 elif additional_line is None:
