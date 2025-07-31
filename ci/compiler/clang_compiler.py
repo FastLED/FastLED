@@ -1365,6 +1365,7 @@ def get_common_linker_args(
     debug: bool = False,
     optimize: bool = False,
     static_runtime: bool = False,
+    dynamic_linking: bool = False,
 ) -> list[str]:
     """Generate common linker arguments for different platforms and configurations."""
     if platform_name is None or platform_name == "auto":
@@ -1383,8 +1384,11 @@ def get_common_linker_args(
         if optimize:
             args.extend(["/OPT:REF", "/OPT:ICF"])
 
-        if static_runtime:
+        if static_runtime and not dynamic_linking:
             args.append("/MT")
+        elif dynamic_linking:
+            args.append("/MD")  # Use dynamic runtime for DLL
+            args.append("/DLL")  # Create DLL
 
     else:
         # Unix-style arguments (Linux/macOS)
@@ -1394,8 +1398,11 @@ def get_common_linker_args(
         if optimize:
             args.extend(["-O2", "-Wl,--gc-sections"])
 
-        if static_runtime:
+        if static_runtime and not dynamic_linking:
             args.extend(["-static-libgcc", "-static-libstdc++"])
+        elif dynamic_linking:
+            args.append("-shared")  # Create shared library
+            args.append("-fPIC")  # Position Independent Code
 
     return args
 
@@ -1410,8 +1417,8 @@ def add_system_libraries(
     for lib in libraries:
         if platform_name == "Windows":
             # Windows style
-            if not lib.endswith(".lib"):
-                lib += ".lib"
+            if lib.endswith(".lib"):
+                lib = lib[:-4]  # Remove .lib extension
             linker_args.append(f"/DEFAULTLIB:{lib}")
         else:
             # Unix style

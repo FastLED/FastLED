@@ -392,11 +392,15 @@ class FastLEDTestCompiler:
                         str(
                             fastled_lib_path
                         ),  # Link against the FastLED static library
+                        # Add Windows library paths
+                        "/LIBPATH:C:/Program Files (x86)/Windows Kits/10/Lib/10.0.19041.0/um/x64",
+                        "/LIBPATH:C:/Program Files (x86)/Windows Kits/10/Lib/10.0.19041.0/ucrt/x64",
+                        "/LIBPATH:C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.37.32822/lib/x64",
                         # Add necessary system libraries for Windows/Clang
-                        "msvcrt.lib",  # C runtime library (provides memset, memcpy, strlen, etc.)
-                        "legacy_stdio_definitions.lib",  # Legacy stdio functions
-                        "kernel32.lib",  # Windows kernel functions
-                        "user32.lib",  # Windows user interface
+                        "/DEFAULTLIB:msvcrt",  # C runtime library (provides memset, memcpy, strlen, etc.)
+                        "/DEFAULTLIB:legacy_stdio_definitions",  # Legacy stdio functions
+                        "/DEFAULTLIB:kernel32",  # Windows kernel functions
+                        "/DEFAULTLIB:user32",  # Windows user interface
                     ],
                 )
             else:
@@ -412,11 +416,15 @@ class FastLEDTestCompiler:
                         str(
                             fastled_lib_path
                         ),  # Link against the FastLED static library
+                        # Add Windows library paths
+                        "/LIBPATH:C:/Program Files (x86)/Windows Kits/10/Lib/10.0.19041.0/um/x64",
+                        "/LIBPATH:C:/Program Files (x86)/Windows Kits/10/Lib/10.0.19041.0/ucrt/x64",
+                        "/LIBPATH:C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.37.32822/lib/x64",
                         # Add necessary system libraries for Windows/Clang
-                        "msvcrt.lib",  # C runtime library (provides memset, memcpy, strlen, etc.)
-                        "legacy_stdio_definitions.lib",  # Legacy stdio functions
-                        "kernel32.lib",  # Windows kernel functions
-                        "user32.lib",  # Windows user interface
+                        "/DEFAULTLIB:msvcrt",  # C runtime library (provides memset, memcpy, strlen, etc.)
+                        "/DEFAULTLIB:legacy_stdio_definitions",  # Legacy stdio functions
+                        "/DEFAULTLIB:kernel32",  # Windows kernel functions
+                        "/DEFAULTLIB:user32",  # Windows user interface
                     ],
                 )
 
