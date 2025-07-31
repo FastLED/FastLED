@@ -75,7 +75,7 @@ def create_unit_test_process(
     args: TestArgs, enable_stack_trace: bool
 ) -> RunningProcess:
     """Create a unit test process without starting it"""
-    from test import build_cpp_test_command
+    from ci.ci.test_commands import build_cpp_test_command
 
     cmd_str_cpp = build_cpp_test_command(args)
     # GCC builds are 5x slower due to poor unified compilation performance
@@ -355,12 +355,13 @@ def run_test_processes(
             _run_process_with_output(process, verbose)
 
 
-def runner(args: TestArgs) -> None:
+def runner(args: TestArgs, src_code_change: bool = True) -> None:
     """
     Main test runner function that determines what to run and executes tests
 
     Args:
         args: Parsed command line arguments
+        src_code_change: Whether source code has changed since last run
     """
     # Determine test categories
     test_categories = TestCategories(
@@ -438,9 +439,6 @@ def runner(args: TestArgs) -> None:
         parallel = True
     else:
         # All tests or complex combinations
-        src_code_change = (
-            True  # This should be determined from fingerprint in the main script
-        )
         processes = get_all_test_processes(
             args, test_categories, enable_stack_trace, src_code_change
         )
