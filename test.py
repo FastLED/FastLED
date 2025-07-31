@@ -531,7 +531,25 @@ def run_unit_tests(args: TestArgs, enable_stack_trace: bool) -> None:
         try:
             line = proc.get_next_line(timeout=0.1)
             if line is not None:
-                print(line)
+                # Always show test execution status and build output
+                # Filter detailed test output unless verbose mode is enabled or it's an error
+                if (
+                    args.verbose
+                    or "FAILED" in line
+                    or "ERROR" in line
+                    or "Crash" in line
+                    or "Running test:" in line
+                    or "Test " in line
+                    and ("passed" in line or "FAILED" in line)
+                    or "Executing " in line
+                    or "Test execution complete" in line
+                    or "All tests passed" in line
+                    or "Some tests failed" in line
+                    or not line.startswith(
+                        "    "
+                    )  # Not indented lines are likely build output
+                ):
+                    print(line)
         except queue.Empty:
             # No output available right now, continue waiting
             pass

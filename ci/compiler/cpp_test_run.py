@@ -63,6 +63,17 @@ def check_iwyu_available() -> bool:
 
 def run_command(command, use_gdb=False) -> tuple[int, str]:
     captured_lines = []
+
+    # Check if this is a test execution command (not a build command)
+    is_test_execution = False
+    if isinstance(command, str):
+        # Check if command is running a test executable (not a compilation command)
+        is_test_execution = (
+            "/test_" in command.replace("\\", "/")
+            or ".build/bin/test_" in command.replace("\\", "/")
+            or command.endswith(".exe")
+        )
+
     if use_gdb:
         with tempfile.NamedTemporaryFile(mode="w+", delete=False) as gdb_script:
             gdb_script.write("set pagination off\n")
@@ -92,7 +103,7 @@ def run_command(command, use_gdb=False) -> tuple[int, str]:
                 break
             if line:
                 captured_lines.append(line.rstrip())
-                # Always print output in real-time for better feedback
+                # Always print GDB output (it's only used for crashes anyway)
                 try:
                     print(line, end="", flush=True)
                 except UnicodeEncodeError:
@@ -125,18 +136,20 @@ def run_command(command, use_gdb=False) -> tuple[int, str]:
                 break
             if line:
                 captured_lines.append(line.rstrip())
-                # Always print output in real-time for better feedback
-                try:
-                    print(line, end="", flush=True)
-                except UnicodeEncodeError:
-                    # Fallback: replace problematic characters
-                    print(
-                        line.encode("utf-8", errors="replace").decode(
-                            "utf-8", errors="replace"
-                        ),
-                        end="",
-                        flush=True,
-                    )
+                # For test execution, only print if verbose or it's a build command
+                should_print = (not is_test_execution) or _VERBOSE
+                if should_print:
+                    try:
+                        print(line, end="", flush=True)
+                    except UnicodeEncodeError:
+                        # Fallback: replace problematic characters
+                        print(
+                            line.encode("utf-8", errors="replace").decode(
+                                "utf-8", errors="replace"
+                            ),
+                            end="",
+                            flush=True,
+                        )
 
         output = "\n".join(captured_lines)
         return process.returncode, output
@@ -405,8 +418,13 @@ def _execute_test_files(
             test_path = os.path.join(test_dir, test_file)
 
         if os.path.isfile(test_path) and os.access(test_path, os.X_OK):
+            # Always print the test execution status
             print(f"[{i}/{total_tests}] Running test: {test_file}")
-            print(f"  Command: {test_path}")
+
+            # Only print command in verbose mode
+            if _VERBOSE:
+                print(f"  Command: {test_path}")
+
             start_time = time.time()
             return_code, stdout = run_command(test_path)
             elapsed_time = time.time() - start_time
@@ -428,16 +446,14 @@ def _execute_test_files(
                 print(f"Cause: {crash_info.cause}")
                 print(f"Stack: {crash_info.stack}")
 
-            # PRESERVE all existing output handling and failure reporting
-            if _VERBOSE or return_code != 0 or specific_test:
+            # Only print detailed test output in verbose mode or on failure
+            if _VERBOSE or return_code != 0:
                 print("Test output:")
                 print(stdout)
+
             if return_code == 0:
                 successful_tests += 1
-                if specific_test or _VERBOSE:
-                    print(f"Test {test_file} passed in {elapsed_time:.2f}s")
-                else:
-                    print(f"  Test {test_file} passed in {elapsed_time:.2f}s")
+                print(f"  Test {test_file} passed in {elapsed_time:.2f}s")
             else:
                 failed_tests.append(
                     FailedTest(name=test_file, return_code=return_code, stdout=stdout)
