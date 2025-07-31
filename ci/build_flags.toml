@@ -395,8 +395,7 @@ flags = [
 # Common linking flags shared by ALL test linking operations (unit tests).
 
 flags = [
-    # Threading Support
-    "-pthread",                                 # Enable POSIX threads support
+
 ]
 
 [linking.test_windows]
