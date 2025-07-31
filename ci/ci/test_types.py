@@ -3,10 +3,56 @@ import hashlib
 import json
 import time
 from dataclasses import dataclass
+from enum import Enum, auto
 from pathlib import Path
-from typing import List, Optional
+from typing import Any, Dict, List, Optional
 
 from typeguard import typechecked
+
+
+class TestResultType(Enum):
+    """Type of test result message"""
+
+    SUCCESS = auto()
+    ERROR = auto()
+    WARNING = auto()
+    INFO = auto()
+    DEBUG = auto()
+
+
+@typechecked
+@dataclass
+class TestResult:
+    """Structured test result"""
+
+    type: TestResultType
+    message: str
+    test_name: Optional[str] = None
+    details: Optional[Dict[str, Any]] = None
+    timestamp: float = 0.0
+
+    def __post_init__(self):
+        if not self.timestamp:
+            self.timestamp = time.time()
+
+
+@typechecked
+@dataclass
+class TestSuiteResult:
+    """Results for a test suite"""
+
+    name: str
+    results: List[TestResult]
+    start_time: float
+    end_time: Optional[float] = None
+    passed: bool = True
+
+    @property
+    def duration(self) -> float:
+        """Get test duration in seconds"""
+        if self.end_time is None:
+            return 0.0
+        return self.end_time - self.start_time
 
 
 @typechecked

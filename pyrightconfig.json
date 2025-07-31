@@ -1,0 +1,14 @@
+{
+    "include": [
+        "ci",
+        "scripts"
+    ],
+    "exclude": [
+        "**/node_modules",
+        "**/__pycache__",
+        "tmp.py"
+    ],
+    "typeCheckingMode": "strict",
+    "useLibraryCodeForTypes": true,
+    "reportMissingTypeStubs": false
+}

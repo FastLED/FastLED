@@ -1718,21 +1718,20 @@ def get_common_linker_args(
     args: list[str] = []
 
     if platform_name == "Windows":
-        # Windows (lld-link/link) arguments
-        args.append("/SUBSYSTEM:CONSOLE")
-        args.append("/NOLOGO")
+        # Windows (clang++) arguments
+        args.append("-Wl,--subsystem,console")
 
         if debug:
-            args.append("/DEBUG")
+            args.append("-g")
 
         if optimize:
-            args.extend(["/OPT:REF", "/OPT:ICF"])
+            args.extend(["-O2", "-Wl,--gc-sections"])
 
         if static_runtime and not dynamic_linking:
-            args.append("/MT")
+            args.extend(["-static-libgcc", "-static-libstdc++"])
         elif dynamic_linking:
-            args.append("/MD")  # Use dynamic runtime for DLL
-            args.append("/DLL")  # Create DLL
+            args.append("-shared")  # Create shared library
+            args.append("-fPIC")  # Position Independent Code
 
     else:
         # Unix-style arguments (Linux/macOS)

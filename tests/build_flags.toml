@@ -121,6 +121,44 @@ flags = [
     "-pthread",                                 # Enable POSIX threads support
 ]
 
+[linking.windows]
+# ================================================================================================
+# WINDOWS-SPECIFIC LINKING FLAGS
+# ================================================================================================
+# Linking flags specific to Windows builds using Clang/LLVM.
+
+flags = [
+    # Windows Subsystem and Entry Point
+    "-Wl,/SUBSYSTEM:CONSOLE",                  # Console application
+    "-Wl,/ENTRY:mainCRTStartup",               # Entry point
+    
+    # System Libraries
+    "-Wl,msvcrt.lib",                         # C runtime library
+    "-Wl,legacy_stdio_definitions.lib",        # Legacy stdio functions
+    "-Wl,kernel32.lib",                        # Windows kernel functions
+    "-Wl,user32.lib",                          # Windows user interface
+    "-Wl,libcmt.lib",                          # Static C Runtime Library
+    "-Wl,libvcruntime.lib",                    # VC++ Runtime
+    "-Wl,libucrt.lib"                          # Universal CRT
+]
+
+[linking.unix]
+# ================================================================================================
+# UNIX-SPECIFIC LINKING FLAGS
+# ================================================================================================
+# Linking flags specific to Unix-like systems (Linux, macOS).
+
+flags = [
+    # System Libraries
+    "-pthread",                                # POSIX threads support
+    "-ldl",                                    # Dynamic linking support
+    "-lm",                                     # Math library
+
+    # Debug Mode Only
+    "-fsanitize=address",                      # Address sanitizer (debug mode)
+    "-fsanitize=undefined"                     # Undefined behavior sanitizer (debug mode)
+]
+
 [strict_mode]
 # ================================================================================================
 # STRICT MODE COMPILATION

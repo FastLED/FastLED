@@ -23,6 +23,7 @@ import sys
 import tempfile
 import textwrap
 import time
+import tomllib
 from concurrent.futures import Future, as_completed
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -174,38 +175,77 @@ class FastLEDTestCompiler:
                         break
         build_dir.mkdir(parents=True, exist_ok=True)
 
-        # Essential platform defines beyond TOML
-        additional_defines = [
-            "ARDUINO=10808",  # Arduino compatibility version
-            "FASTLED_USE_STUB_ARDUINO",  # Proven Arduino emulation
-            "SKETCH_HAS_LOTS_OF_MEMORY=1",  # Enable memory-intensive features
-            "FASTLED_STUB_IMPL",  # Essential for STUB platform implementation
-            "FASTLED_USE_JSON_UI=1",  # Essential for JSON UI functions
-            "FASTLED_TESTING",  # Test-specific functionality
-            "FASTLED_NO_AUTO_NAMESPACE",  # Namespace control
-            "FASTLED_NO_PINMAP",  # Pin mapping control
-            "HAS_HARDWARE_PIN_SUPPORT",  # Hardware support flag
-            "FASTLED_DEBUG_LEVEL=1",  # Enable debug features for tests
-            "DOCTEST_CONFIG_NO_EXCEPTIONS_BUT_WITH_ALL_ASSERTS",  # Enable doctest without exceptions
-        ]
-
         # Additional compiler args beyond TOML
         additional_compiler_args = [
             f"-I{project_root}/src/platforms/stub",  # STUB platform headers
         ]
 
-        # Load TOML path and create compiler options
-        toml_path = project_root / "tests" / "build_flags.toml"
-        settings = create_compiler_options_from_toml(
-            toml_path=toml_path,
+        # Load TOML path and create compiler options using main build_flags.toml
+        toml_path = project_root / "ci" / "build_flags.toml"
+        with open(toml_path, "rb") as f:
+            config = tomllib.load(f)
+
+        # Get test-specific flags from TOML
+        test_defines = config.get("test", {}).get("defines", [])
+        test_compiler_flags = config.get("test", {}).get("compiler_flags", [])
+        test_include_flags = config.get("test", {}).get("include_flags", [])
+
+        # Get build mode specific flags (use test-specific debug mode)
+        mode = "quick" if quick_build else "test_debug"
+        mode_config = config.get("build_modes", {}).get(mode, {})
+        mode_flags = mode_config.get("flags", [])
+
+        # Get strict mode flags if enabled
+        strict_flags = (
+            config.get("strict_mode", {}).get("flags", []) if strict_mode else []
+        )
+
+        # Create compiler args from TOML flags
+        compiler_args: List[str] = []
+        compiler_args.extend(test_compiler_flags)
+        compiler_args.extend(test_include_flags)
+        compiler_args.extend(mode_flags)
+        compiler_args.extend(strict_flags)
+
+        # Add additional compiler args
+        if additional_compiler_args:
+            compiler_args.extend(additional_compiler_args)
+
+        # Extract defines without the "-D" prefix for CompilerOptions
+        defines: List[str] = []
+        for define in test_defines:
+            if define.startswith("-D"):
+                defines.append(define[2:])  # Remove "-D" prefix
+            else:
+                defines.append(define)
+
+        # Get tools configuration
+        tools_config = config.get("tools", {})
+        compiler_tool = tools_config.get("compiler", "clang++")
+        archiver_tool = tools_config.get("archiver", "ar")
+
+        # Create compiler options with TOML-loaded flags and tools
+        settings = CompilerOptions(
             include_path=str(project_root / "src"),
-            quick_build=quick_build,
-            strict_mode=strict_mode,
-            additional_defines=additional_defines,
-            additional_compiler_args=additional_compiler_args,
+            defines=defines,
+            compiler_args=compiler_args,
+            compiler=compiler_tool,  # Use TOML-specified compiler
+            archiver=archiver_tool,  # Use TOML-specified archiver
             std_version="c++17",
-            compiler="clang++",
             use_pch=True,
+            pch_header_content="""// FastLED PCH - Common headers for faster compilation
+#pragma once
+
+// Core headers that are used in nearly all FastLED examples
+#include <Arduino.h>
+#include <FastLED.h>
+
+// Common C++ standard library headers
+#include <string>
+#include <vector>
+#include <stdio.h>
+""",
+            pch_output_path=str(build_dir / "fastled_pch.hpp.pch"),
             parallel=True,
         )
 
@@ -441,7 +481,7 @@ class FastLEDTestCompiler:
         for obj_path in compiled_objects:
             # Derive test name from object file
             test_name = obj_path.stem.replace("test_", "")
-            exe_path = self.build_dir / f"{test_name}_test.exe"
+            exe_path = self.build_dir / f"test_{test_name}.exe"
 
             # Check if this test has its own main() function
             test_source = self.project_root / "tests" / f"test_{test_name}.cpp"
@@ -452,6 +492,7 @@ class FastLEDTestCompiler:
                 link_options = LinkOptions(
                     object_files=[obj_path],  # Only the test object file
                     output_executable=exe_path,
+                    linker="clang++",  # Use clang++ for linking
                     linker_args=self._get_platform_linker_args(fastled_lib_path),
                 )
             else:
@@ -462,6 +503,7 @@ class FastLEDTestCompiler:
                         doctest_obj_path,
                     ],  # Test object + doctest main
                     output_executable=exe_path,
+                    linker="clang++",  # Use clang++ for linking
                     linker_args=self._get_platform_linker_args(fastled_lib_path),
                 )
 
@@ -593,9 +635,11 @@ class FastLEDTestCompiler:
         print(f"Creating static library from {len(fastled_objects)} object files...")
 
         # Create static library using ar (archiver)
+        # First try llvm-ar since it's more likely to be available
         ar_cmd: List[str] = [
-            "llvm-lib",  # LLVM static library tool (works with Clang)
-            "/OUT:" + str(fastled_lib_path),
+            "llvm-ar",  # LLVM archiver tool (works with Clang)
+            "rcs",  # Create archive with symbol table
+            str(fastled_lib_path),
         ] + [str(obj) for obj in fastled_objects]
 
         try:
@@ -654,18 +698,25 @@ class FastLEDTestCompiler:
             ar_result = run_ar_command(ar_cmd)
             if ar_result.returncode != 0:
                 print(
-                    f"ERROR: Failed to create static library with llvm-lib: {ar_result.stderr}"
+                    f"ERROR: Failed to create static library with llvm-ar: {ar_result.stderr}"
                 )
-                # Fall back to llvm-ar if llvm-lib fails
-                ar_cmd = ["llvm-ar", "rcs", str(fastled_lib_path)] + [
-                    str(obj) for obj in fastled_objects
-                ]
+                # Fall back to llvm-lib if llvm-ar fails
+                ar_cmd = [
+                    "llvm-lib",  # LLVM static library tool (works with Clang)
+                    "/OUT:" + str(fastled_lib_path),
+                ] + [str(obj) for obj in fastled_objects]
 
                 ar_result = run_ar_command(ar_cmd)
                 if ar_result.returncode != 0:
-                    raise Exception(
-                        f"Failed to create static library with both llvm-lib and llvm-ar: {ar_result.stderr}"
-                    )
+                    # Try ar as a last resort
+                    ar_cmd = ["ar", "rcs", str(fastled_lib_path)] + [
+                        str(obj) for obj in fastled_objects
+                    ]
+                    ar_result = run_ar_command(ar_cmd)
+                    if ar_result.returncode != 0:
+                        raise Exception(
+                            f"Failed to create static library with llvm-ar, llvm-lib, and ar: {ar_result.stderr}"
+                        )
 
             # Convert absolute path to relative for display
             rel_lib_path = os.path.relpath(fastled_lib_path)
@@ -708,39 +759,28 @@ class FastLEDTestCompiler:
 
     def _get_platform_linker_args(self, fastled_lib_path: Path) -> List[str]:
         """Get platform-specific linker arguments"""
-        args = get_common_linker_args(debug=True)
+        # Load build flags from main TOML
+        toml_path = self.project_root / "ci" / "build_flags.toml"
+        with open(toml_path, "rb") as f:
+            config = tomllib.load(f)
+
+        # Start with test-specific base linking flags
+        args = config.get("linking", {}).get("test", {}).get("flags", []).copy()
+
+        # Add platform-specific test flags
+        platform_section = "test_windows" if sys.platform == "win32" else "test_unix"
+        platform_flags = (
+            config.get("linking", {}).get(platform_section, {}).get("flags", [])
+        )
+        args.extend(platform_flags)
+
+        # Add build mode specific flags (use test-specific debug mode)
+        mode = "quick" if self.quick_build else "test_debug"
+        mode_flags = config.get("build_modes", {}).get(mode, {}).get("link_flags", [])
+        args.extend(mode_flags)
+
+        # Add FastLED library
         args.append(str(fastled_lib_path))  # Link against the FastLED static library
-
-        if sys.platform == "win32":
-            # Windows-specific library paths and libraries
-            args.extend(
-                [
-                    "/LIBPATH:C:/Program Files (x86)/Windows Kits/10/Lib/10.0.19041.0/um/x64",
-                    "/LIBPATH:C:/Program Files (x86)/Windows Kits/10/Lib/10.0.19041.0/ucrt/x64",
-                    "/LIBPATH:C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.37.32822/lib/x64",
-                    "/DEFAULTLIB:msvcrt",  # C runtime library
-                    "/DEFAULTLIB:legacy_stdio_definitions",  # Legacy stdio functions
-                    "/DEFAULTLIB:kernel32",  # Windows kernel functions
-                    "/DEFAULTLIB:user32",  # Windows user interface
-                ]
-            )
-        else:
-            # Unix-like systems (Linux, macOS)
-            args.extend(
-                [
-                    "-pthread",  # POSIX threads support
-                    "-ldl",  # Dynamic linking support
-                    "-lm",  # Math library
-                ]
-            )
-
-            # Add sanitizer runtime libraries
-            args.extend(
-                [
-                    "-fsanitize=address",
-                    "-fsanitize=undefined",
-                ]
-            )
 
         return args
 

@@ -182,7 +182,7 @@ def run_command(
         return process.returncode, output
     else:
         process = subprocess.Popen(
-            command,
+            command if isinstance(command, str) else subprocess.list2cmdline(command),
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,  # Merge stderr into stdout
             shell=True,
@@ -624,7 +624,11 @@ def _execute_test_files(
             output_buffer.write(test_index, f"  Command: {test_path}")
 
         start_time = time.time()
-        return_code, stdout = run_command(test_path)
+        # Pass --minimal flag to doctest when not in verbose mode to suppress output unless tests fail
+        cmd = [test_path]
+        if not verbose:
+            cmd.append("--minimal")
+        return_code, stdout = run_command(cmd)
         elapsed_time = time.time() - start_time
 
         output = stdout

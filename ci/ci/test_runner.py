@@ -2,6 +2,7 @@
 import os
 import queue
 import re
+import subprocess
 import sys
 import threading
 import time
@@ -12,7 +13,92 @@ from typing import Any, Callable, List, Optional, Pattern, Protocol, cast
 from typeguard import typechecked
 
 from ci.ci.running_process import RunningProcess
-from ci.ci.test_types import TestArgs, TestCategories
+from ci.ci.test_types import (
+    TestArgs,
+    TestCategories,
+    TestResult,
+    TestResultType,
+    TestSuiteResult,
+)
+
+
+@typechecked
+class TestOutputFormatter:
+    """Formats test output in a consistent way"""
+
+    def __init__(self, verbose: bool = False):
+        self.verbose = verbose
+        self.current_suite: Optional[TestSuiteResult] = None
+        self._start_time = time.time()
+
+    def start_suite(self, name: str) -> None:
+        """Start a new test suite"""
+        self.current_suite = TestSuiteResult(
+            name=name, results=[], start_time=time.time()
+        )
+
+    def end_suite(self, passed: bool = True) -> None:
+        """End the current test suite"""
+        if self.current_suite:
+            self.current_suite.end_time = time.time()
+            self.current_suite.passed = passed
+
+    def add_result(self, result: TestResult) -> None:
+        """Add a test result to the current suite"""
+        if self.current_suite:
+            self.current_suite.results.append(result)
+            self._format_result(result)
+
+    def _format_result(self, result: TestResult) -> None:
+        """Format and display a test result"""
+        # Only show if verbose or important
+        if not (self.verbose or self._should_display(result)):
+            return
+
+        # Format timestamp
+        delta = result.timestamp - self._start_time
+
+        # Format message based on type
+        if result.type == TestResultType.SUCCESS:
+            color = "\033[92m"  # Green
+        elif result.type == TestResultType.ERROR:
+            color = "\033[91m"  # Red
+        elif result.type == TestResultType.WARNING:
+            color = "\033[93m"  # Yellow
+        else:
+            color = "\033[0m"  # Reset
+
+        # Build message
+        msg = f"{delta:.2f} "
+        if result.test_name:
+            msg += f"[{result.test_name}] "
+        msg += f"{color}{result.message}\033[0m"
+
+        # Print with indentation
+        print(f"  {msg}")
+
+    def _should_display(self, result: TestResult) -> bool:
+        """Determine if a result should be displayed"""
+        # Always show errors
+        if result.type == TestResultType.ERROR:
+            return True
+
+        # Always show final success/completion messages
+        if any(
+            marker in result.message
+            for marker in ["### SUCCESS", "### ERROR", "Test execution complete:"]
+        ):
+            return True
+
+        # Show warnings in verbose mode
+        if result.type == TestResultType.WARNING and self.verbose:
+            return True
+
+        # Show info/debug only in verbose mode
+        return self.verbose and result.type in [
+            TestResultType.INFO,
+            TestResultType.DEBUG,
+        ]
 
 
 @typechecked
@@ -33,43 +119,155 @@ class TestProcessConfig:
 
 
 class ProcessOutputHandler:
-    """Handles capturing and displaying process output with simple indentation"""
+    """Handles capturing and displaying process output with structured results"""
 
-    def __init__(self, verbose: bool = False, indent: int = 2):
-        self.verbose = verbose
+    def __init__(self, verbose: bool = False):
+        self.formatter = TestOutputFormatter(verbose=verbose)
         self.current_command: str | None = None
         self.header_printed = False
-        self.indent = indent
-        self.epoch = time.time()
 
     def handle_output_line(self, line: str, process_name: str) -> None:
-        """Process and display a single line of output with proper formatting"""
-        # Only process if verbose or should always display
-        if not (self.verbose or self._should_always_display(line)):
-            return
-
-        # Print command header if this is a new command
+        """Process a line of output and convert it to structured test results"""
+        # Start new test suite if command changes
         if process_name != self.current_command:
-            print(f"\n=== [{process_name}] ===")
+            if self.current_command:
+                self.formatter.end_suite()
+            self.formatter.start_suite(process_name)
             self.current_command = process_name
             self.header_printed = True
+            self.formatter.add_result(
+                TestResult(
+                    type=TestResultType.INFO,
+                    message=f"=== [{process_name}] ===",
+                    test_name=process_name,
+                )
+            )
 
-        # Indent all lines under the command and include time delta
-        delta = time.time() - self.epoch
-        print(f"{' ' * self.indent}{delta:.2f} {line}")
+        # Convert line to appropriate test result
+        result = self._parse_line_to_result(line, process_name)
+        if result:
+            self.formatter.add_result(result)
 
-    def _should_always_display(self, line: str) -> bool:
-        """Determine if a line should always be displayed regardless of verbosity"""
-        return any(
+    def _parse_line_to_result(
+        self, line: str, process_name: str
+    ) -> Optional[TestResult]:
+        """Parse a line of output into a structured test result"""
+        # Skip empty lines
+        if not line.strip():
+            return None
+
+        # Skip test output noise
+        if any(
+            noise in line
+            for noise in [
+                "doctest version is",
+                'run with "--help"',
+                "assertions:",
+                "test cases:",
+                "MESSAGE:",
+                "TEST CASE:",
+                "Test passed",
+                "Test execution",
+                "Test completed",
+                "Running test:",
+                "Process completed:",
+                "Command completed:",
+                "Command output:",
+                "Exit code:",
+                "All parallel tests",
+                "JSON parsing failed",
+                "readFrameAt failed",
+                "ByteStreamMemory",
+                "C:\\Users\\",
+                "\\dev\\fastled\\",
+                "\\tests\\",
+                "\\src\\",
+                "test line_simplification.exe",
+                "test noise_hires.exe",
+                "test mutex.exe",
+                "test rbtree.exe",
+                "test priority_queue.exe",
+                "test json_roundtrip.exe",
+                "test malloc_hooks.exe",
+                "test rectangular_buffer.exe",
+                "test ostream.exe",
+                "test active_strip_data_json.exe",
+                "test noise_range.exe",
+                "test json.exe",
+                "test point.exe",
+                "test screenmap.exe",
+                "test task.exe",
+                "test queue.exe",
+                "test promise.exe",
+                "test shared_ptr.exe",
+                "test screenmap_serialization.exe",
+                "test strstream.exe",
+                "test slice.exe",
+                "test hsv_conversion_accuracy.exe",
+                "test tile2x2.exe",
+                "test tuple.exe",
+                "test raster.exe",
+                "test transform.exe",
+                "test transition_ramp.exe",
+                "test thread_local.exe",
+                "test set_inlined.exe",
+                "test vector.exe",
+                "test strip_id_map.exe",
+                "test weak_ptr.exe",
+                "test variant.exe",
+                "test type_traits.exe",
+                "test splat.exe",
+                "test hsv16.exe",
+                "test ui_help.exe",
+                "test unordered_set.exe",
+                "test traverse_grid.exe",
+                "test ui_title_bug.exe",
+                "test videofx_wrapper.exe",
+                "test ui.exe",
+                "test video.exe",
+                "test xypath.exe",
+            ]
+        ):
+            return None
+
+        # Success messages
+        if "### SUCCESS" in line:
+            return TestResult(
+                type=TestResultType.SUCCESS, message=line, test_name=process_name
+            )
+
+        # Error messages
+        if any(
             marker in line
             for marker in [
+                "### ERROR",
                 "FAILED",
                 "ERROR",
                 "Crash",
-                "Running test:",
-                "Test passed",
                 "Test FAILED",
+                "Compilation failed",
+                "Build failed",
             ]
+        ):
+            return TestResult(
+                type=TestResultType.ERROR, message=line, test_name=process_name
+            )
+
+        # Warning messages
+        if any(marker in line.lower() for marker in ["warning:", "note:"]):
+            return TestResult(
+                type=TestResultType.WARNING, message=line, test_name=process_name
+            )
+
+        # Test completion messages
+        if "Test execution complete:" in line:
+            return TestResult(
+                type=TestResultType.INFO, message=line, test_name=process_name
+            )
+
+        # Default to info level for other lines
+        return TestResult(
+            type=TestResultType.INFO, message=line, test_name=process_name
         )
 
 
@@ -90,15 +288,46 @@ def create_unit_test_process(
     args: TestArgs, enable_stack_trace: bool
 ) -> RunningProcess:
     """Create a unit test process without starting it"""
-    from ci.ci.test_commands import build_cpp_test_command
+    # First compile the tests
+    compile_cmd = [
+        "uv",
+        "run",
+        "python",
+        "-m",
+        "ci.compiler.cpp_test_run",
+        "--compile-only",
+    ]
+    if args.test:
+        compile_cmd.extend(["--test", args.test])
+    if args.clean:
+        compile_cmd.append("--clean")
+    if args.verbose:
+        compile_cmd.append("--verbose")
+    if args.show_compile:
+        compile_cmd.append("--show-compile")
+    if args.show_link:
+        compile_cmd.append("--show-link")
+    if args.check:
+        compile_cmd.append("--check")
+    if args.legacy:
+        compile_cmd.append("--legacy")
+    if args.clang:
+        compile_cmd.append("--clang")
+    if args.gcc:
+        compile_cmd.append("--gcc")
+    subprocess.run(compile_cmd, check=True)
 
-    cmd_str_cpp = build_cpp_test_command(args)
-    # Balanced timeout for debugging and completion (was 900/300 seconds)
-    cpp_test_timeout = 120 if args.gcc else 60
+    # Then run the tests using our new test runner
+    test_cmd = ["uv", "run", "python", "-m", "ci.run_tests"]
+    if args.test:
+        test_cmd.extend(["--test", args.test])
+    if args.verbose:
+        test_cmd.append("--verbose")
+
     return RunningProcess(
-        cmd_str_cpp,
+        test_cmd,
         enable_stack_trace=enable_stack_trace,
-        timeout=cpp_test_timeout,
+        timeout=120,  # 2 minutes timeout
         auto_run=False,
     )
 
@@ -331,7 +560,7 @@ def _run_process_with_output(process: RunningProcess, verbose: bool = False) -> 
             print(f"Test failed: {test_name}")
             sys.exit(returncode)
         else:
-            elapsed = time.time() - output_handler.epoch
+            elapsed = time.time() - output_handler.formatter._start_time
             print(f"Process completed: {process.command} (took {elapsed:.2f}s)")
             if isinstance(process.command, str) and process.command.endswith(".exe"):
                 print(f"Test {process.command} passed with return code {returncode}")
@@ -562,10 +791,9 @@ def run_test_processes(
             for process in processes:
                 _run_process_with_output(process, verbose)
 
-        # If we get here, all tests passed
-        elapsed = time.time() - start_time
-        print("\033[92m###### SUCCESS ######\033[0m")
-        print(f"All tests passed successfully! (took {elapsed:.2f}s)")
+            # If we get here, all tests passed
+            elapsed = time.time() - start_time
+            print(f"\033[92m### SUCCESS ({elapsed:.2f}s) ###\033[0m")
 
     except SystemExit as e:
         # Tests failed - extract command name from the error

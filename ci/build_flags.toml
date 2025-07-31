@@ -57,6 +57,8 @@ compiler_flags = [
     # Warning Configuration
     "-Wno-constant-logical-operand",            # Suppress constant logical operand warnings
     "-Wno-deprecated-register",                 # Suppress register keyword deprecation warnings
+    "-Wno-register",                           # Additional register warning suppression
+    "-Wno-backslash-newline-escape",           # Suppress backslash newline escape warnings
     "-Wnon-c-typedef-for-linkage",             # Warn about non-C typedef issues
     "-Werror=bad-function-cast",               # Error on bad function casts
     "-Werror=cast-function-type",              # Error on function type cast issues
@@ -120,6 +122,61 @@ compiler_flags = [
     "-Wall",                                   # Enable comprehensive warnings for library code
 ]
 
+[test] 
+# ================================================================================================
+# TEST-SPECIFIC COMPILATION FLAGS  
+# ================================================================================================
+# These flags are ONLY applied to unit test compilation (test executables).
+# They enable test-specific features and stub platform support.
+
+# Test-specific preprocessor defines
+defines = [
+    # FastLED Test Configuration
+    "-DFASTLED_UNIT_TEST=1",                    # Identify as unit test build
+    "-DFASTLED_FORCE_NAMESPACE=1",              # Force namespace usage to avoid conflicts
+    "-DFASTLED_USE_PROGMEM=0",                  # Disable PROGMEM usage in tests
+    "-DSTUB_PLATFORM",                          # Use stub platform for testing
+    "-DARDUINO=10808",                          # Arduino version compatibility
+    "-DFASTLED_USE_STUB_ARDUINO",               # Use stub Arduino implementation
+    "-DSKETCH_HAS_LOTS_OF_MEMORY=1",            # Assume lots of memory available
+    "-DFASTLED_STUB_IMPL",                      # Use stub implementations
+    "-DFASTLED_USE_JSON_UI=1",                  # Enable JSON UI features
+    "-DFASTLED_TESTING",                        # Enable testing features
+    "-DFASTLED_NO_AUTO_NAMESPACE",              # Disable automatic namespace
+    "-DFASTLED_NO_PINMAP",                      # Disable pin mapping
+    "-DHAS_HARDWARE_PIN_SUPPORT",               # Enable hardware pin support
+    "-DFASTLED_DEBUG_LEVEL=1",                  # Set debug level
+    "-DDOCTEST_CONFIG_NO_EXCEPTIONS_BUT_WITH_ALL_ASSERTS", # Doctest configuration
+]
+
+# Test-specific compiler flags
+compiler_flags = [
+    # Language Standard and Compatibility
+    "-std=c++17",                               # Base C++17 standard
+    "-std=gnu++17",                             # Use GNU C++17 standard with extensions
+    "-fpermissive",                             # Allow some non-conforming code patterns
+    
+    # Warning Configuration
+    "-Wall",                                    # Enable all warnings
+    "-Wextra",                                  # Enable extra warnings
+    "-Werror=return-type",                      # Error on missing return statements
+    
+    # Thread Safety and Runtime Behavior
+    "-fno-threadsafe-statics",                  # Disable thread-safe static initialization
+    "-fno-exceptions",                          # Disable C++ exceptions
+    "-fno-rtti",                                # Disable RTTI
+    
+    # PCH Support
+    "-fpch-instantiate-templates",              # Required for proper PCH template handling
+]
+
+# Test-specific include flags
+include_flags = [
+    "-I.",                                      # Current directory
+    "-Isrc",                                    # FastLED source directory
+    "-Itests",                                  # Test directory
+]
+
 [build_modes.debug]
 # ================================================================================================
 # DEBUG BUILD MODE
@@ -146,6 +203,30 @@ link_flags = [
     "-sSEPARATE_DWARF_URL=fastled.wasm.dwarf", # Separate DWARF debug info file
     "-sSTACK_OVERFLOW_CHECK=2",              # Maximum stack overflow detection
     "-sASSERTIONS=1",                        # Enable runtime assertions
+]
+
+[build_modes.test_debug]
+# ================================================================================================
+# TEST DEBUG BUILD MODE
+# ================================================================================================
+# Optimized for debugging unit tests with clang++ compatible flags.
+
+# Test debug compilation flags
+flags = [
+    # Quick build mode - minimal debug info, light optimization
+    "-O1",                                   # Light optimization (faster than O0 with better performance)
+    "-g0",                                   # No debug info (fastest compilation, smallest size)
+    
+    # Build Speed Optimizations
+    "-fno-inline-functions",                 # Disable function inlining
+    "-fno-vectorize",                       # Disable vectorization optimizations 
+    "-fno-unroll-loops",                    # Disable loop unrolling
+    "-fno-strict-aliasing"                  # Disable strict aliasing assumptions
+]
+
+# Test debug linking flags (no WASM-specific flags)
+link_flags = [
+    # No debug info for faster linking and smaller binaries
 ]
 
 [build_modes.fast_debug]
@@ -305,6 +386,57 @@ flags = [
 flags = [
     # Currently no library-specific linking flags
     # This section is ready for future library-specific linking requirements
+]
+
+[linking.test]
+# ================================================================================================
+# TEST-SPECIFIC LINKING FLAGS
+# ================================================================================================
+# Common linking flags shared by ALL test linking operations (unit tests).
+
+flags = [
+    # Threading Support
+    "-pthread",                                 # Enable POSIX threads support
+]
+
+[linking.test_windows]
+# ================================================================================================
+# TEST WINDOWS-SPECIFIC LINKING FLAGS
+# ================================================================================================
+# Linking flags specific to Windows test builds using Clang/LLVM.
+
+flags = [
+    # Windows Subsystem and Entry Point
+    "-Wl,/SUBSYSTEM:CONSOLE",                  # Console application
+    "-Wl,/ENTRY:mainCRTStartup",               # Entry point
+    
+    # System Libraries
+    "-Wl,msvcrt.lib",                         # C runtime library
+    "-Wl,legacy_stdio_definitions.lib",        # Legacy stdio functions
+    "-Wl,kernel32.lib",                        # Windows kernel functions
+    "-Wl,user32.lib",                         # Windows user interface
+    "-Wl,shell32.lib",                        # Shell functions
+    "-Wl,advapi32.lib",                       # Advanced Windows services
+    "-Wl,/NODEFAULTLIB:libcmt",              # Exclude conflicting static CRT
+    "-Wl,/NODEFAULTLIB:libcmtd",             # Exclude debug static CRT
+    "-Wl,/NODEFAULTLIB:msvcrtd"              # Exclude debug dynamic CRT
+]
+
+[linking.test_unix]
+# ================================================================================================
+# TEST UNIX-SPECIFIC LINKING FLAGS
+# ================================================================================================
+# Linking flags specific to Unix-like test systems (Linux, macOS).
+
+flags = [
+    # System Libraries
+    "-pthread",                                # POSIX threads support
+    "-ldl",                                    # Dynamic linking support
+    "-lm",                                     # Math library
+
+    # Debug Mode Only
+    "-fsanitize=address",                      # Address sanitizer (debug mode)
+    "-fsanitize=undefined"                     # Undefined behavior sanitizer (debug mode)
 ]
 
 [dwarf]

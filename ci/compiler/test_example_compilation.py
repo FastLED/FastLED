@@ -572,8 +572,8 @@ def compile_examples_simple(
                 ok=False, stdout="", stderr=f"Compilation timeout: {e}", return_code=-1
             )
 
-        # Log progress every 10 completions
-        if completed_count % 10 == 0 or completed_count == total_files:
+        # Only log final completion
+        if completed_count == total_files:
             log_timing(
                 f"[SIMPLE] Completed {completed_count}/{total_files} compilations"
             )
