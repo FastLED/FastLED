@@ -10,12 +10,11 @@ import platform
 import shutil
 import subprocess
 import tempfile
-import time
 import tomllib
 from concurrent.futures import Future, ThreadPoolExecutor
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Dict, List, Sequence, cast
+from typing import Any, List, Sequence
 
 
 def cpu_count() -> int:
@@ -51,7 +50,7 @@ class CompilerOptions:
     compiler: str = "clang++"
     defines: list[str] | None = None
     std_version: str = "c++17"
-    compiler_args: list[str] = field(default_factory=list)
+    compiler_args: list[str] = field(default_factory=list[str])
 
     # PCH (Precompiled Headers) settings
     use_pch: bool = False
@@ -60,10 +59,12 @@ class CompilerOptions:
 
     # Archive generation settings
     archiver: str = "ar"  # Default archiver tool
-    archiver_args: list[str] = field(default_factory=list)
+    archiver_args: list[str] = field(default_factory=list[str])
 
     # Compilation operation settings (formerly CompileOptions, unity options removed)
-    additional_flags: list[str] = field(default_factory=list)  # Extra compiler flags
+    additional_flags: list[str] = field(
+        default_factory=list[str]
+    )  # Extra compiler flags
     parallel: bool = True  # Enable parallel compilation
     temp_dir: str | Path | None = None  # Custom temporary directory
 
@@ -112,13 +113,17 @@ class LinkOptions:
     output_executable: str | Path  # Output executable path
 
     # Input files
-    object_files: list[str | Path] = field(default_factory=list)  # .o files to link
-    static_libraries: list[str | Path] = field(default_factory=list)  # .a files to link
+    object_files: list[str | Path] = field(
+        default_factory=list[str | Path]
+    )  # .o files to link
+    static_libraries: list[str | Path] = field(
+        default_factory=list[str | Path]
+    )  # .a files to link
 
     # Linker configuration
     linker: str | None = None  # Custom linker path (auto-detected if None)
     linker_args: list[str] = field(
-        default_factory=list
+        default_factory=list[str]
     )  # All linker command line arguments
 
     # Platform-specific defaults can be added via helper functions
@@ -150,11 +155,11 @@ class BuildFlags:
     and serialize back to TOML format.
     """
 
-    defines: List[str] = field(default_factory=list)
-    compiler_flags: List[str] = field(default_factory=list)
-    include_flags: List[str] = field(default_factory=list)
-    link_flags: List[str] = field(default_factory=list)
-    strict_mode_flags: List[str] = field(default_factory=list)
+    defines: List[str] = field(default_factory=list[str])
+    compiler_flags: List[str] = field(default_factory=list[str])
+    include_flags: List[str] = field(default_factory=list[str])
+    link_flags: List[str] = field(default_factory=list[str])
+    strict_mode_flags: List[str] = field(default_factory=list[str])
     tools: BuildTools = field(default_factory=BuildTools)
 
     @classmethod
@@ -1190,9 +1195,8 @@ class Compiler:
                 content = f.read()
 
             lines = content.split("\n")
-            found_fastled_include = False
 
-            for line_num, line in enumerate(lines, 1):
+            for line in lines:
                 # Strip whitespace and comments for analysis
                 stripped = line.strip()
 
@@ -1214,8 +1218,7 @@ class Compiler:
                     or '"FastLED.h"' in stripped
                     or "<FastLED.h>" in stripped
                 ):
-                    found_fastled_include = True
-                    break
+                    return True
 
                 # Check for problematic constructs before FastLED.h
                 problematic_patterns = [
@@ -1950,7 +1953,7 @@ def main() -> bool:
 
     # Test backward compatibility functions
     print("\n=== Testing backward compatibility functions ===")
-    success_compat, version_compat, error_compat = check_clang_version()
+    success_compat, version_compat, _ = check_clang_version()
     print(
         f"Backward compatibility version check: success={success_compat}, version={version_compat}"
     )

@@ -62,11 +62,11 @@ skip-magic-trailing-comma = false
 line-ending = "auto"
 
 [tool.pyright]
-include = ["ci", "*.py"]
+include = ["ci", "ci/compiler"]
 exclude = [
     "ci/tmp/",
     "ci/wasm/",
-    "scripts/",
+    "ci/native/",
     "native/",
     "**/__pycache__",
     "**/.pytest_cache",
@@ -79,7 +79,8 @@ exclude = [
     "**/.pio_cache",
     "**/build",
     "**/dist",
-    "**/*.egg-info"
+    "**/*.egg-info",
+    "tmp.py"
 ]
 
 # Type checking configuration

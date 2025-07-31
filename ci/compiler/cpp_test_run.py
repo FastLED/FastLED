@@ -8,11 +8,9 @@ import sys
 import tempfile
 import time  # Added for timing test execution
 from dataclasses import dataclass
-from io import StringIO
 from pathlib import Path
-from queue import PriorityQueue
+from queue import Empty, PriorityQueue
 from threading import Event, Lock, Thread
-from typing import Any, Dict, List, Optional, Tuple
 
 from ci.ci.paths import PROJECT_ROOT
 
@@ -20,12 +18,12 @@ from ci.ci.paths import PROJECT_ROOT
 class OutputBuffer:
     """Thread-safe output buffer with ordered output display"""
 
-    def __init__(self):
-        self.output_queue = PriorityQueue()
-        self.next_sequence = 0
-        self.sequence_lock = Lock()
-        self.stop_event = Event()
-        self.output_thread = Thread(target=self._output_worker, daemon=True)
+    def __init__(self) -> None:
+        self.output_queue: PriorityQueue[tuple[int, int, str]] = PriorityQueue()
+        self.next_sequence: int = 0
+        self.sequence_lock: Lock = Lock()
+        self.stop_event: Event = Event()
+        self.output_thread: Thread = Thread(target=self._output_worker, daemon=True)
         self.output_thread.start()
 
     def write(self, test_index: int, message: str) -> None:
@@ -39,10 +37,14 @@ class OutputBuffer:
         """Worker thread that processes output in order"""
         while not self.stop_event.is_set() or not self.output_queue.empty():
             try:
-                test_index, _, message = self.output_queue.get(timeout=0.1)
+                item: tuple[int, int, str] = self.output_queue.get(timeout=0.1)
+                _, _, message = item
                 print(message, flush=True)
                 self.output_queue.task_done()
-            except:
+            except Empty:
+                continue
+            except Exception as e:
+                print(f"Error in output worker: {e}")
                 continue
 
     def stop(self) -> None:
@@ -110,9 +112,14 @@ def check_iwyu_available() -> bool:
 
 
 def run_command(
-    command, use_gdb=False, *, verbose=False, show_compile=False, show_link=False
+    command: str | list[str],
+    use_gdb: bool = False,
+    *,
+    verbose: bool = False,
+    show_compile: bool = False,
+    show_link: bool = False,
 ) -> tuple[int, str]:
-    captured_lines = []
+    captured_lines: list[str] = []
 
     # Determine command type
     is_test_execution = False
@@ -515,8 +522,8 @@ def _run_tests_python(
         failed_tests: list[FailedTest] = []
 
         # Convert to file list format for compatibility with existing logic
-        files = []
-        test_paths = {}
+        files: list[str] = []
+        test_paths: dict[str, str] = {}
         for test_exec in test_executables:
             file_name = test_exec.name
             if os.name == "nt" and not file_name.endswith(".exe"):
@@ -537,7 +544,7 @@ def _run_tests_python(
 def _execute_test_files(
     files: list[str],
     test_dir: str,
-    failed_tests: list,
+    failed_tests: list[FailedTest],
     specific_test: str | None,
     test_paths: dict[str, str] | None = None,
     *,
@@ -687,7 +694,7 @@ def _execute_test_files(
             for future in as_completed(future_to_test):
                 test_file = future_to_test[future]
                 try:
-                    success, elapsed_time, stdout, return_code = future.result()
+                    success, _, stdout, return_code = future.result()
                     if success:
                         with counter_lock:
                             successful_tests += 1
@@ -722,7 +729,9 @@ def _execute_test_files(
         output_buffer.stop()
 
 
-def _handle_test_results(failed_tests: list, *, verbose: bool = False) -> None:
+def _handle_test_results(
+    failed_tests: list[FailedTest], *, verbose: bool = False
+) -> None:
     """Handle test results and exit appropriately (preserving existing logic)"""
     if failed_tests:
         print("Failed tests summary:")
@@ -880,7 +889,8 @@ def main() -> None:
     run_only = args.run_only
     compile_only = args.compile_only
     specific_test = args.test
-    only_run_failed_test = args.only_run_failed_test
+    # only_run_failed_test feature to be implemented in future
+    _ = args.only_run_failed_test
     use_clang = args.clang
     use_legacy_system = args.legacy
     # use_gcc = args.gcc
