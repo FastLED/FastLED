@@ -36,16 +36,57 @@ namespace fl {
 
 
 
+// Cache for float representation checks
+struct FloatValidationCache {
+    static constexpr size_t CACHE_SIZE = 128;
+    struct CacheEntry {
+        double value;
+        bool canRepresent;
+        bool valid;
+    };
+    
+    static ThreadLocal<CacheEntry[CACHE_SIZE]> cache;
+    static ThreadLocal<size_t> cacheIndex;
+    
+    static bool lookup(double value, bool& result) {
+        auto& entries = cache.access();
+        for (size_t i = 0; i < CACHE_SIZE; ++i) {
+            if (entries[i].valid && entries[i].value == value) {
+                result = entries[i].canRepresent;
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    static void store(double value, bool canRepresent) {
+        auto& entries = cache.access();
+        auto& index = cacheIndex.access();
+        entries[index] = {value, canRepresent, true};
+        index = (index + 1) % CACHE_SIZE;
+    }
+};
+
+ThreadLocal<FloatValidationCache::CacheEntry[FloatValidationCache::CACHE_SIZE]> FloatValidationCache::cache;
+ThreadLocal<size_t> FloatValidationCache::cacheIndex;
+
 // Helper function to check if a double can be reasonably represented as a float
 // Used for debug logging - may appear unused in release builds
 FL_DISABLE_WARNING_PUSH
 FL_DISABLE_WARNING(unused-function)
 static bool canBeRepresentedAsFloat(double value) {
+    bool result;
+    if (FloatValidationCache::lookup(value, result)) {
+        return result;
+    }
+    
     auto isnan = [](double value) -> bool {
         return value != value;
     };
+    
     // Check for special values
     if (isnan(value)) {
+        FloatValidationCache::store(value, true);
         return true; // These can be represented as float
     }
     
@@ -53,12 +94,14 @@ static bool canBeRepresentedAsFloat(double value) {
     // Reject values that are clearly beyond float precision (beyond 2^24 for integers)
     // or outside the float range
     if (fl::fl_abs(value) > 16777216.0) { // 2^24 - beyond which floats lose integer precision
+        FloatValidationCache::store(value, false);
         return false;
     }
     
     // For values within reasonable range, allow conversion even with minor precision loss
     // This handles cases like 300000.14159 which should be convertible to float
     // even though it loses some precision
+    FloatValidationCache::store(value, true);
     return true;
 }
 FL_DISABLE_WARNING_POP    
@@ -121,11 +164,6 @@ fl::shared_ptr<JsonValue> JsonValue::parse(const fl::string& txt) {
                     return fl::make_shared<JsonValue>(JsonArray{});
                 }
                 
-                // Track optimization flags for array types
-                bool isUint8 = true;  // Can all values fit in uint8_t?
-                bool isInt16 = true;  // Can all values fit in int16_t?
-                bool isFloat = true;  // Can all values be exactly represented as floats?
-                
                 // Enum to represent array optimization types
                 enum ArrayType {
                     ALL_UINT8,
@@ -134,80 +172,81 @@ fl::shared_ptr<JsonValue> JsonValue::parse(const fl::string& txt) {
                     GENERIC_ARRAY
                 };
                 
+                // Helper struct to track array type info
+                struct ArrayTypeInfo {
+                    bool isUint8 = true;
+                    bool isInt16 = true;
+                    bool isFloat = true;
+                    
+                    void disableAll() {
+                        isUint8 = false;
+                        isInt16 = false;
+                        isFloat = false;
+                    }
+                    
+                    void checkNumericValue(double val) {
+                        // Check integer ranges in one pass
+                        bool isInteger = val == floor(val);
+                        if (!isInteger || val < 0 || val > UINT8_MAX) {
+                            isUint8 = false;
+                        }
+                        if (!isInteger || val < INT16_MIN || val > INT16_MAX) {
+                            isInt16 = false;
+                        }
+                        if (!canBeRepresentedAsFloat(val)) {
+                            isFloat = false;
+                        }
+                    }
+                    
+                    void checkIntegerValue(int64_t val) {
+                        // Check all ranges in one pass
+                        if (val < 0 || val > UINT8_MAX) {
+                            isUint8 = false;
+                        }
+                        if (val < INT16_MIN || val > INT16_MAX) {
+                            isInt16 = false;
+                        }
+                        if (val < -16777216 || val > 16777216) {
+                            isFloat = false;
+                        }
+                    }
+                    
+                    ArrayType getBestType() const {
+                        if (isUint8) return ALL_UINT8;
+                        if (isInt16) return ALL_INT16;
+                        if (isFloat) return ALL_FLOATS;
+                        return GENERIC_ARRAY;
+                    }
+                };
+                
+                ArrayTypeInfo typeInfo;
+                
+                #if FASTLED_DEBUG_LEVEL >= 2
                 FASTLED_WARN("Array conversion: processing " << arr.size() << " items");
+                #endif
                 
                 for (const auto& item : arr) {
                     // Check if all items are numeric
                     if (!item.is<int32_t>() && !item.is<int64_t>() && !item.is<double>()) {
-                        // Non-numeric value found, no optimization possible
-                        isUint8 = false;
-                        isInt16 = false;
-                        isFloat = false;
+                        typeInfo.disableAll();
+                        #if FASTLED_DEBUG_LEVEL >= 2
                         FASTLED_WARN("Non-numeric value found, no optimization possible");
+                        #endif
                         break;
                     }
                     
                     // Update type flags based on item type
                     if (item.is<double>()) {
                         double val = item.as<double>();
-                        FASTLED_WARN("Processing double value: " << val);
-                        
-                        // Check if this can be exactly represented as a float
-                        if (!canBeRepresentedAsFloat(val)) {
-                            isFloat = false;
-                            FASTLED_WARN("Value " << val << " cannot be exactly represented as float");
-                        } else {
-                            FASTLED_WARN("Value " << val << " CAN be exactly represented as float");
-                        }
-                        
-                        // Check if this could fit in integer types
-                        if (val < 0 || val > UINT8_MAX || val != floor(val)) {
-                            isUint8 = false;
-                            // FASTLED_WARN("Value " << val << " does not fit in uint8_t");
-                        }
-                        if (val < INT16_MIN || val > INT16_MAX || val != floor(val)) {
-                            isInt16 = false;
-                            // FASTLED_WARN("Value " << val << " does not fit in int16_t");
-                        }
+                        typeInfo.checkNumericValue(val);
                     } else {
-                        // Integer value
                         int64_t val = item.is<int32_t>() ? item.as<int32_t>() : item.as<int64_t>();
-                        FASTLED_WARN("Checking integer value: " << static_cast<fl::u64>(val));
-                        
-                        // Check uint8 range
-                        if (val < 0 || val > UINT8_MAX) {
-                            isUint8 = false;
-                            FASTLED_WARN("Value " << static_cast<fl::i16>(val) << " does not fit in uint8_t");
-                        }
-                        
-                        // Check int16 range
-                        if (val < INT16_MIN || val > INT16_MAX) {
-                            isInt16 = false;
-                            FASTLED_WARN("Value " << static_cast<fl::u64>(val) << " does not fit in int16_t");
-                        }
-                        
-                        // Check if this integer can be exactly represented as a float
-                        // All integers within the range of float precision can be exactly represented
-                        if (val < -16777216 || val > 16777216) { // 2^24, beyond which floats lose precision
-                            isFloat = false;
-                            FASTLED_WARN("Value " << static_cast<fl::u64>(val) << " cannot be exactly represented as float");
-                        }
+                        typeInfo.checkIntegerValue(val);
                     }
                 }
                 
-                // Special handling for float arrays - always prefer float arrays for ScreenMap use case
-                
                 // Determine the optimal array type based on the flags
-                ArrayType arrayType = GENERIC_ARRAY;
-                if (isUint8 && arr.size() > 0) {
-                    arrayType = ALL_UINT8;
-                } else if (isInt16 && arr.size() > 0) {
-                    arrayType = ALL_INT16;
-                } else if (isFloat && arr.size() > 0) {
-                    // Only convert to float arrays when ALL values can be exactly represented as floats
-                    // Don't convert just because values are numeric - precision matters
-                    arrayType = ALL_FLOATS;
-                }
+                ArrayType arrayType = arr.size() > 0 ? typeInfo.getBestType() : GENERIC_ARRAY;
                 
                 // Apply the most appropriate optimization based on determined type
                 switch (arrayType) {
