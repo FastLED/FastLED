@@ -340,8 +340,6 @@ def _compile_tests_python(
     show_link: bool = False,
 ) -> None:
     """New Python compiler API system (8x faster than CMake)"""
-    if verbose:
-        print("Compiling tests using proven Python API (8x faster)...")
 
     try:
         # Import the new test compiler system
@@ -509,7 +507,9 @@ def _run_tests_python(
         # Print list of tests that will be executed
         print("Tests to execute:")
         for i, test_exec in enumerate(test_executables, 1):
-            print(f"  {i}. {test_exec.name} ({test_exec.executable_path})")
+            # Convert absolute path to relative for display
+            rel_path = os.path.relpath(test_exec.executable_path)
+            print(f"  {i}. {test_exec.name} ({rel_path})")
         print("")
 
         failed_tests: list[FailedTest] = []

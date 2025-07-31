@@ -127,8 +127,8 @@ class FastLEDTestCompiler:
         - Parallel compilation with ThreadPoolExecutor
         """
 
-        # Set up build directory (use temp directory for faster I/O)
-        build_dir = Path(tempfile.gettempdir()) / "fastled_test_build"
+        # Set up build directory in .build for consistency
+        build_dir = project_root / ".build" / "fastled_test_build"
         if clean_build and build_dir.exists():
             print("###########################")
             print("# CLEANING UNIT TEST BUILD DIR #")
@@ -271,7 +271,9 @@ class FastLEDTestCompiler:
             return CompileResult(success=True, compiled_count=0, duration=0.0)
 
         print(f"Compiling {len(test_files)} test files using proven Python API...")
-        print(f"Build directory: {self.build_dir}")
+        # Convert absolute path to relative for display
+        rel_build_dir = os.path.relpath(self.build_dir)
+        print(f"Build directory: {rel_build_dir}")
 
         # Print list of test files being compiled
         print("Test files to compile:")
@@ -286,14 +288,18 @@ class FastLEDTestCompiler:
         for test_file in test_files:
             # Compile to object file first
             obj_path = self.build_dir / f"{test_file.stem}.o"
-            print(f"Submitting compilation job for: {test_file.name} -> {obj_path}")
+            # Convert absolute path to relative for display
+            rel_obj_path = os.path.relpath(obj_path)
+            print(f"Submitting compilation job for: {test_file.name} -> {rel_obj_path}")
             # Show compilation command if enabled
             if os.environ.get("FASTLED_TEST_SHOW_COMPILE", "").lower() in (
                 "1",
                 "true",
                 "yes",
             ):
-                print(f"[COMPILE] {test_file.name} -> {obj_path}")
+                # Convert absolute path to relative for display
+                rel_obj_path = os.path.relpath(obj_path)
+                print(f"[COMPILE] {test_file.name} -> {rel_obj_path}")
 
             compile_future = self.compiler.compile_cpp_file(
                 test_file,
@@ -366,7 +372,9 @@ class FastLEDTestCompiler:
             # List all the successful test executables
             print("Test executables created:")
             for i, test in enumerate(self.compiled_tests, 1):
-                print(f"  {i}. {test.name} -> {test.executable_path}")
+                # Convert absolute path to relative for display
+                rel_exe_path = os.path.relpath(test.executable_path)
+                print(f"  {i}. {test.name} -> {rel_exe_path}")
         else:
             print(f"FAILED: {len(errors)} total failures (compilation + linking)")
 
@@ -441,7 +449,9 @@ class FastLEDTestCompiler:
                 "true",
                 "yes",
             ):
-                print(f"[LINK] {test_name} -> {exe_path}")
+                # Convert absolute path to relative for display
+                rel_exe_path = os.path.relpath(exe_path)
+                print(f"[LINK] {test_name} -> {rel_exe_path}")
 
             print(f"Linking test: {test_name}")
             link_result: Result = link_program_sync(link_options)
@@ -497,7 +507,9 @@ class FastLEDTestCompiler:
 
         # If library already exists, return it (for faster rebuilds)
         if fastled_lib_path.exists():
-            print(f"Using existing FastLED library: {fastled_lib_path}")
+            # Convert absolute path to relative for display
+            rel_lib_path = os.path.relpath(fastled_lib_path)
+            print(f"Using existing FastLED library: {rel_lib_path}")
             return fastled_lib_path
 
         # Compile essential FastLED source files for STUB platform
@@ -633,7 +645,9 @@ class FastLEDTestCompiler:
                         f"Failed to create static library with both llvm-lib and llvm-ar: {ar_result.stderr}"
                     )
 
-            print(f"Successfully created FastLED library: {fastled_lib_path}")
+            # Convert absolute path to relative for display
+            rel_lib_path = os.path.relpath(fastled_lib_path)
+            print(f"Successfully created FastLED library: {rel_lib_path}")
             return fastled_lib_path
 
         except Exception as e:
