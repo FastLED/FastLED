@@ -650,7 +650,114 @@ bash lint
 
 ## Code Standards
 
-### Python Function Return Types and Type Safety
+### Python List Comprehensions
+
+**🚨 AVOID: List comprehensions in favor of explicit loops**
+
+**❌ WRONG - Using list comprehensions:**
+```python
+# Hard to read and debug
+files = [f for f in os.listdir() if f.endswith('.py')]
+results = [process(x) for x in data if is_valid(x)]
+nested = [(x, y) for x in range(5) for y in range(3)]
+```
+
+**✅ CORRECT - Using explicit loops:**
+```python
+# Clear and debuggable
+files = []
+for f in os.listdir():
+    if f.endswith('.py'):
+        files.append(f)
+
+results = []
+for x in data:
+    if is_valid(x):
+        results.append(process(x))
+
+nested = []
+for x in range(5):
+    for y in range(3):
+        nested.append((x, y))
+```
+
+**Why avoid list comprehensions:**
+- ✅ **Readability** - Explicit loops are easier to read and understand
+- ✅ **Debuggability** - Can set breakpoints and inspect variables in loops
+- ✅ **Maintainability** - Easier to modify and extend loop logic
+- ✅ **Error handling** - Can add try/except blocks in loops
+- ✅ **Step-by-step clarity** - Operations are clearly separated and ordered
+
+**When list comprehensions ARE acceptable:**
+- ✅ **Simple transformations**: `squares = [x * x for x in numbers]`
+- ✅ **Basic filtering**: `evens = [x for x in numbers if x % 2 == 0]`
+- ✅ **Single-purpose operations**: `names = [user.name for user in users]`
+
+**Key principle:** If the operation involves multiple conditions, transformations, or would benefit from step-by-step debugging, use an explicit loop instead.
+
+### Python Function Parameter and Return Types
+
+**🚨 MANDATORY: ALL function parameters MUST have explicit type annotations - NO EXCEPTIONS!**
+
+This rule applies to:
+- ✅ Regular function parameters
+- ✅ Method parameters (including self/cls)
+- ✅ Lambda parameters
+- ✅ Callback function parameters
+- ✅ Generator function parameters
+- ✅ Async function parameters
+- ✅ Protocol method parameters
+
+**Examples:**
+
+```python
+# ❌ WRONG - Missing parameter types
+def process_data(data):
+    return data
+
+# ❌ WRONG - Partial typing
+def validate_user(name: str, age):
+    return True
+
+# ✅ CORRECT - All parameters typed
+def process_data(data: bytes) -> bytes:
+    return data
+
+# ✅ CORRECT - Method parameters typed including self
+class DataProcessor:
+    def process(self, data: bytes) -> bytes:
+        return data
+
+# ✅ CORRECT - Lambda parameters typed
+callback: Callable[[int], None] = lambda x: None
+
+# ✅ CORRECT - Async function parameters typed
+async def fetch_data(url: str) -> bytes:
+    return await download(url)
+```
+
+**Protocol Method Parameters:**
+```python
+# ❌ WRONG - Protocol methods missing parameter types
+class DataHandler(Protocol):
+    def handle(self, data): ...
+    def process(self, input, count): ...
+
+# ✅ CORRECT - All Protocol method parameters typed
+class DataHandler(Protocol):
+    def handle(self, data: bytes) -> None: ...
+    def process(self, input: str, count: int) -> bool: ...
+```
+
+**Why This Rule Exists:**
+- Enables complete static type checking
+- Prevents type-related bugs
+- Improves code clarity and maintainability
+- Makes refactoring safer
+- Provides better IDE support
+- Ensures Protocol interfaces are fully typed
+
+### Python Variable Types and Type Safety
 
 **🚨 FORBIDDEN: Partially unknown types - All variables must have explicit type annotations**
 
@@ -1027,6 +1134,114 @@ def complex_operation():
 - **No bare exceptions** prevents masking unexpected errors and makes debugging easier
 - **Proper exception order** ensures interrupt signals are handled before other error conditions
 - **`_thread.interrupt_main()`** ensures the main thread receives the interrupt signal for proper cleanup
+
+### Python Thread Keyboard Interrupt Handling
+
+**🚨 MANDATORY: All Python threads MUST handle KeyboardInterrupt with thread identification and stack trace:**
+
+**✅ REQUIRED Thread Interrupt Pattern:**
+```python
+import _thread
+import threading
+import traceback
+
+def thread_worker():
+    """All thread functions must follow this pattern"""
+    thread_id = threading.current_thread().ident
+    thread_name = threading.current_thread().name
+    
+    try:
+        # Your thread work here
+        while True:
+            do_work()
+            
+    except KeyboardInterrupt:
+        # MANDATORY: Print thread identification and stack trace
+        print(f"🛑 Thread {thread_id} ({thread_name}) caught KeyboardInterrupt")
+        print(f"📍 Stack trace for thread {thread_id}:")
+        traceback.print_exc()
+        
+        # MANDATORY: Propagate interrupt to main thread
+        _thread.interrupt_main()
+        
+        # Optional: Thread-specific cleanup
+        cleanup_thread_resources()
+        
+        # MANDATORY: Re-raise to ensure proper shutdown
+        raise
+    except Exception as e:
+        # Handle other exceptions after KeyboardInterrupt
+        print(f"❌ Thread {thread_id} ({thread_name}) error: {e}")
+        traceback.print_exc()
+        raise
+
+# Example thread creation
+worker_thread = threading.Thread(target=thread_worker, name="WorkerThread", daemon=True)
+worker_thread.start()
+```
+
+**Key Thread Interrupt Requirements:**
+- ✅ **Thread identification** - Always print thread ID and name on interrupt
+- ✅ **Stack trace** - Always print full stack trace with `traceback.print_exc()`
+- ✅ **Main thread notification** - Always call `_thread.interrupt_main()`
+- ✅ **Proper cleanup** - Perform thread-specific cleanup before re-raising
+- ✅ **Re-raise interrupt** - Always re-raise KeyboardInterrupt for proper shutdown
+- ✅ **Daemon threads** - Use `daemon=True` for background threads
+
+**Thread Interrupt Example with Cleanup:**
+```python
+import _thread
+import threading
+import traceback
+import time
+
+def background_processor():
+    """Example background thread with proper interrupt handling"""
+    thread_id = threading.current_thread().ident
+    thread_name = threading.current_thread().name
+    
+    try:
+        print(f"🔄 Thread {thread_id} ({thread_name}) started")
+        
+        while True:
+            # Simulate work
+            process_data()
+            time.sleep(1)
+            
+    except KeyboardInterrupt:
+        print(f"🛑 Thread {thread_id} ({thread_name}) caught KeyboardInterrupt")
+        print(f"📍 Stack trace for thread {thread_id}:")
+        traceback.print_exc()
+        
+        # Thread-specific cleanup
+        print(f"🧹 Thread {thread_id} cleaning up resources...")
+        close_connections()
+        save_state()
+        
+        # Propagate to main thread
+        _thread.interrupt_main()
+        raise
+    except Exception as e:
+        print(f"❌ Thread {thread_id} ({thread_name}) unexpected error: {e}")
+        traceback.print_exc()
+        _thread.interrupt_main()
+        raise
+
+# Start background thread
+processor = threading.Thread(
+    target=background_processor, 
+    name="BackgroundProcessor", 
+    daemon=True
+)
+processor.start()
+```
+
+**Why Thread Interrupt Handling is Critical:**
+- **Debugging** - Thread ID and stack traces help identify where interrupts occur
+- **Clean shutdown** - Proper cleanup prevents resource leaks and corruption
+- **Signal propagation** - `_thread.interrupt_main()` ensures main thread gets interrupt
+- **Process coordination** - All threads must cooperate for graceful shutdown
+- **Error visibility** - Stack traces show exact execution context during interrupt
 
 ### Avoid std:: Prefixed Functions
 **DO NOT use `std::` prefixed functions or headers in the codebase.** This project provides its own STL-equivalent implementations under the `fl::` namespace.

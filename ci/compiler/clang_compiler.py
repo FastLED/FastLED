@@ -669,9 +669,9 @@ class Compiler:
                         stderr_lines.append(remaining_stderr)
                     break
 
-                if not stdout_line and not stderr_line:
-                    # No output available, sleep briefly to avoid busy waiting
-                    time.sleep(0.1)
+                # if not stdout_line and not stderr_line:
+                #     # No output available, sleep briefly to avoid busy waiting
+                #     time.sleep(0.1)
 
             # Clean up temp file on failure if we created it
             if cleanup_temp and process.returncode != 0 and os.path.exists(output_path):
@@ -1340,9 +1340,9 @@ def link_program_sync(link_options: LinkOptions) -> Result:
                     stderr_lines.append(remaining_stderr)
                 break
 
-            if not stdout_line and not stderr_line:
-                # No output available, sleep briefly to avoid busy waiting
-                time.sleep(0.1)
+            # if not stdout_line and not stderr_line:
+            #     # No output available, sleep briefly to avoid busy waiting
+            #     time.sleep(0.1)
 
         return Result(
             ok=process.returncode == 0,

@@ -252,6 +252,14 @@ class FastLEDTestCompiler:
             # Compile to object file first
             obj_path = self.build_dir / f"{test_file.stem}.o"
             print(f"Submitting compilation job for: {test_file.name} -> {obj_path}")
+            # Show compilation command if enabled
+            if os.environ.get("FASTLED_TEST_SHOW_COMPILE", "").lower() in (
+                "1",
+                "true",
+                "yes",
+            ):
+                print(f"[COMPILE] {test_file.name} -> {obj_path}")
+
             compile_future = self.compiler.compile_cpp_file(
                 test_file,
                 output_path=obj_path,
@@ -411,6 +419,14 @@ class FastLEDTestCompiler:
                         "user32.lib",  # Windows user interface
                     ],
                 )
+
+            # Show linking command if enabled
+            if os.environ.get("FASTLED_TEST_SHOW_LINK", "").lower() in (
+                "1",
+                "true",
+                "yes",
+            ):
+                print(f"[LINK] {test_name} -> {exe_path}")
 
             print(f"Linking test: {test_name}")
             link_result: Result = link_program_sync(link_options)

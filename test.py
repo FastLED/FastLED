@@ -2,11 +2,21 @@
 import json
 import os
 import sys
+import threading
+import time
+import traceback
 from pathlib import Path
+
+import psutil
 
 from ci.ci.test_args import parse_args
 from ci.ci.test_commands import run_command
-from ci.ci.test_env import setup_environment, setup_force_exit, setup_watchdog
+from ci.ci.test_env import (
+    get_process_tree_info,
+    setup_environment,
+    setup_force_exit,
+    setup_watchdog,
+)
 from ci.ci.test_runner import runner as test_runner
 from ci.ci.test_types import (
     FingerprintResult,
@@ -15,13 +25,50 @@ from ci.ci.test_types import (
 )
 
 
+_CANCEL_WATCHDOG = threading.Event()
+
+
+def dump_main_thread_stack() -> None:
+    """Dump stack trace of the main thread and process tree info"""
+    print("\n=== MAIN THREAD STACK TRACE ===")
+    for thread in threading.enumerate():
+        if thread.name == "MainThread":
+            print(f"\nThread {thread.name}:")
+            if thread.ident is not None:
+                frame = sys._current_frames().get(thread.ident)
+                if frame:
+                    traceback.print_stack(frame)
+    print("=== END STACK TRACE ===\n")
+
+    # Dump process tree information
+    print("\n=== PROCESS TREE INFO ===")
+    print(get_process_tree_info(os.getpid()))
+    print("=== END PROCESS TREE INFO ===\n")
+
+
+def make_watch_dog_thread(
+    seconds: int = 60,
+) -> threading.Thread:  # 60 seconds default timeout
+    def watchdog_timer() -> None:
+        time.sleep(seconds)
+        if _CANCEL_WATCHDOG.is_set():
+            return
+        dump_main_thread_stack()
+        print(f"Watchdog timer expired after {seconds} seconds - forcing exit")
+        os._exit(2)  # Exit with error code 2 to indicate timeout (SIGTERM)
+
+    thr = threading.Thread(target=watchdog_timer, daemon=True, name="WatchdogTimer")
+    thr.start()
+    return thr
+
+
 def main() -> None:
     try:
         # Change to script directory first
         os.chdir(Path(__file__).parent)
 
         # Set up watchdog timer
-        watchdog = setup_watchdog()
+        watchdog = make_watch_dog_thread()
 
         # Parse and process arguments
         args = parse_args()
@@ -100,6 +147,7 @@ def main() -> None:
 
         # Set up force exit daemon and exit
         daemon_thread = setup_force_exit()
+        _CANCEL_WATCHDOG.set()
         sys.exit(0)
 
     except KeyboardInterrupt:

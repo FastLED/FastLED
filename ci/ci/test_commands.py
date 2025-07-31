@@ -22,6 +22,10 @@ def build_cpp_test_command(args: TestArgs) -> str:
         cmd_list.append("--clean")
     if args.verbose:
         cmd_list.append("--verbose")  # Always pass verbose flag when enabled
+    if args.show_compile:
+        cmd_list.append("--show-compile")  # Pass show-compile flag
+    if args.show_link:
+        cmd_list.append("--show-link")  # Pass show-link flag
     if args.check:
         cmd_list.append("--check")
     if args.legacy:

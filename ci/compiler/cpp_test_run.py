@@ -32,8 +32,18 @@ if os.name == "nt":  # Windows
         pass
 
 
-# Global verbose flag
+# Global verbose flags
 _VERBOSE = False
+_SHOW_COMPILE = os.environ.get("FASTLED_TEST_SHOW_COMPILE", "").lower() in (
+    "1",
+    "true",
+    "yes",
+)
+_SHOW_LINK = os.environ.get("FASTLED_TEST_SHOW_LINK", "").lower() in (
+    "1",
+    "true",
+    "yes",
+)
 
 
 @dataclass
@@ -64,14 +74,25 @@ def check_iwyu_available() -> bool:
 def run_command(command, use_gdb=False) -> tuple[int, str]:
     captured_lines = []
 
-    # Check if this is a test execution command (not a build command)
+    # Determine command type
     is_test_execution = False
+    is_compile = False
+    is_link = False
     if isinstance(command, str):
-        # Check if command is running a test executable (not a compilation command)
+        cmd_lower = command.replace("\\", "/").lower()
+        # Check if running test executable
         is_test_execution = (
-            "/test_" in command.replace("\\", "/")
-            or ".build/bin/test_" in command.replace("\\", "/")
-            or command.endswith(".exe")
+            "/test_" in cmd_lower
+            or ".build/bin/test_" in cmd_lower
+            or cmd_lower.endswith(".exe")
+        )
+        # Check if compiling
+        is_compile = "-c" in cmd_lower and (".cpp" in cmd_lower or ".c" in cmd_lower)
+        # Check if linking
+        is_link = (
+            not is_compile
+            and not is_test_execution
+            and ("-o" in cmd_lower or "lib" in cmd_lower)
         )
 
     if use_gdb:
@@ -136,10 +157,36 @@ def run_command(command, use_gdb=False) -> tuple[int, str]:
                 break
             if line:
                 captured_lines.append(line.rstrip())
-                # For test execution, only print if verbose or it's a build command
-                should_print = (not is_test_execution) or _VERBOSE
+                # Determine if we should print this line
+                should_print = (
+                    _VERBOSE  # Always print in verbose mode
+                    or (is_compile and _SHOW_COMPILE)  # Print compilation if enabled
+                    or (is_link and _SHOW_LINK)  # Print linking if enabled
+                    or (not is_test_execution)  # Print non-test output
+                    or (
+                        is_test_execution and process.returncode != 0
+                    )  # Print failed test output
+                    or (
+                        is_test_execution
+                        and any(
+                            marker in line
+                            for marker in [
+                                "Running test:",
+                                "Test passed",
+                                "Test FAILED",
+                                "passed with return code",
+                                "Test output:",
+                            ]
+                        )
+                    )  # Print test status
+                )
                 if should_print:
                     try:
+                        # Add prefix for compile/link commands
+                        if is_compile and _SHOW_COMPILE:
+                            print("[COMPILE] ", end="", flush=True)
+                        elif is_link and _SHOW_LINK:
+                            print("[LINK] ", end="", flush=True)
                         print(line, end="", flush=True)
                     except UnicodeEncodeError:
                         # Fallback: replace problematic characters
@@ -597,6 +644,16 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Enable verbose output",
     )
+    parser.add_argument(
+        "--show-compile",
+        action="store_true",
+        help="Show compilation commands and output",
+    )
+    parser.add_argument(
+        "--show-link",
+        action="store_true",
+        help="Show linking commands and output",
+    )
 
     # Create mutually exclusive group for compiler selection
     compiler_group = parser.add_mutually_exclusive_group()
@@ -630,9 +687,11 @@ def parse_args() -> argparse.Namespace:
 def main() -> None:
     args = parse_args()
 
-    # Set global verbose flag
-    global _VERBOSE
+    # Set global verbose flags
+    global _VERBOSE, _SHOW_COMPILE, _SHOW_LINK
     _VERBOSE = args.verbose
+    _SHOW_COMPILE = args.show_compile
+    _SHOW_LINK = args.show_link
 
     run_only = args.run_only
     compile_only = args.compile_only

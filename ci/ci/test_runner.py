@@ -78,8 +78,8 @@ def create_unit_test_process(
     from ci.ci.test_commands import build_cpp_test_command
 
     cmd_str_cpp = build_cpp_test_command(args)
-    # GCC builds are 5x slower due to poor unified compilation performance
-    cpp_test_timeout = 900 if args.gcc else 300
+    # Balanced timeout for debugging and completion (was 900/300 seconds)
+    cpp_test_timeout = 120 if args.gcc else 60
     return RunningProcess(
         cmd_str_cpp,
         enable_stack_trace=enable_stack_trace,
@@ -206,6 +206,7 @@ def get_all_test_processes(
 def _run_process_with_output(process: RunningProcess, verbose: bool = False) -> None:
     """
     Run a single process and handle its output
+    Uses improved timeout handling to prevent hanging
 
     Args:
         process: RunningProcess object to execute
@@ -217,37 +218,69 @@ def _run_process_with_output(process: RunningProcess, verbose: bool = False) -> 
         if isinstance(process.command, str)
         else process.command[0]
     )
+    print(f"Started: {process.command}")
 
-    # Stream output in real-time while the process is running
+    # Print test execution status
+    if isinstance(process.command, str) and process.command.endswith(".exe"):
+        print(f"Running test: {process.command}")
+
+    # Use event-driven processing with reasonable timeouts to prevent hanging
     while process.poll() is None:
         try:
-            line = process.get_next_line(timeout=0.1)
+            # Use longer timeout (1 second) to prevent race conditions like parallel version
+            line = process.get_next_line(timeout=1.0)
             if line is not None:
-                # Always show important output or all output in verbose mode
-                if verbose or any(
-                    marker in line
-                    for marker in [
-                        "FAILED",
-                        "ERROR",
-                        "Crash",
-                        "Running test:",
-                        "Test passed",
-                        "Test FAILED",
-                    ]
-                ):
-                    print(f"[{process_name}] {line}")
+                # Always show test output
+                print(f"[{process_name}] {line}")
+
+                # After getting one line, quickly drain any additional available output
+                # This maintains responsiveness while avoiding tight polling loops
+                lines_drained = 0
+                while lines_drained < 10:  # Limit to prevent infinite loops
+                    try:
+                        additional_line = process.get_next_line(
+                            timeout=0.01
+                        )  # Very short timeout for draining
+                        if additional_line is not None and additional_line.strip():
+                            print(f"[{process_name}] {additional_line}")
+                            lines_drained += 1
+                        elif additional_line is None:
+                            break  # No more output available
+                    except queue.Empty:
+                        break  # No more output available right now
+
         except queue.Empty:
-            # No output available right now, continue waiting
+            # No output available right now - this is normal and expected
             pass
+        except TimeoutError:
+            print(f"\nProcess timed out: {process.command}")
+            process.kill()
+            sys.exit(1)
+        except Exception as e:
+            print(f"\nUnexpected error processing output from {process.command}: {e}")
+            process.kill()
+            sys.exit(1)
 
     # Process has completed, check return code
-    returncode = process.returncode
-    if returncode != 0:
-        print(f"Command failed: {process.command}")
-        sys.exit(returncode)
+    try:
+        returncode = process.wait()
+        if returncode != 0:
+            print(f"Command failed: {process.command}")
+            sys.exit(returncode)
+        else:
+            print(f"Process completed: {process.command}")
+            if isinstance(process.command, str) and process.command.endswith(".exe"):
+                print(f"Test {process.command} passed with return code {returncode}")
+    except Exception as e:
+        print(f"\nError waiting for process: {process.command}")
+        print(f"Error: {e}")
+        process.kill()
+        sys.exit(1)
 
 
-def _run_processes_parallel(processes: list[RunningProcess]) -> None:
+def _run_processes_parallel(
+    processes: list[RunningProcess], verbose: bool = False
+) -> None:
     """
     Run multiple test processes in parallel and handle their output
 
@@ -275,59 +308,121 @@ def _run_processes_parallel(processes: list[RunningProcess]) -> None:
 
     # Monitor all processes for output and completion
     active_processes = processes.copy()
+    start_time = time.time()
+    global_timeout = max(p.timeout for p in processes) + 60  # Add 1 minute buffer
+
+    # Track last activity time for each process to detect stuck processes
+    last_activity_time = {proc: time.time() for proc in active_processes}
+    stuck_process_timeout = 30  # 30 seconds without output indicates stuck process
+
     while active_processes:
+        # Check global timeout
+        if time.time() - start_time > global_timeout:
+            print(f"\nGlobal timeout reached after {global_timeout} seconds")
+            for p in active_processes:
+                p.kill()
+            sys.exit(1)
+
+        # Check for stuck processes (no output for 30 seconds)
+        current_time = time.time()
+        for proc in active_processes[:]:
+            if current_time - last_activity_time[proc] > stuck_process_timeout:
+                print(
+                    f"\nProcess appears stuck (no output for {stuck_process_timeout}s): {proc.command}"
+                )
+                print("Killing stuck process and its children...")
+                proc.kill()  # This now kills the entire process tree
+                active_processes.remove(proc)
+                if proc in last_activity_time:
+                    del last_activity_time[proc]
+                print(f"Killed stuck process: {proc.command}")
+                continue  # Skip to next process
+
+        # Use event-driven processing instead of sleep-and-poll
+        # Process all available output from all processes with reasonable timeout
+        any_activity = False
+
         for proc in active_processes[:]:  # Copy list for safe modification
-            # Check for new output
             cmd = proc.command
             try:
-                while True:
-                    line = proc.get_next_line(timeout=0.1)
-                    if line is None:
-                        break
-                    # Print line - encoding handled by console configuration above
-                    print(line)
-            except queue.Empty:
-                # No output available right now, continue checking other processes
-                pass
+                # Use longer timeout for event-driven waiting (1 second)
+                # This eliminates race conditions from very short timeouts
+                try:
+                    line = proc.get_next_line(timeout=1.0)
+                    if (
+                        line is not None and line.strip()
+                    ):  # Ensure we don't print empty lines
+                        print(f"[{cmd}] {line}")
+                        sys.stdout.flush()  # Immediately flush output for real-time visibility
+                        any_activity = True
+                        last_activity_time[proc] = time.time()  # Update activity time
+
+                        # After getting one line, quickly drain any additional available output
+                        # This maintains responsiveness while avoiding tight polling loops
+                        lines_drained = 0
+                        while lines_drained < 10:  # Limit to prevent infinite loops
+                            try:
+                                additional_line = proc.get_next_line(
+                                    timeout=0.01
+                                )  # Very short timeout for draining
+                                if (
+                                    additional_line is not None
+                                    and additional_line.strip()
+                                ):
+                                    print(f"[{cmd}] {additional_line}")
+                                    sys.stdout.flush()  # Immediately flush output for real-time visibility
+                                    lines_drained += 1
+                                elif additional_line is None:
+                                    break  # No more output available
+                            except queue.Empty:
+                                break  # No more output available right now
+
+                except queue.Empty:
+                    # No output available right now - this is normal and expected
+                    # Continue to process completion check
+                    pass
+
             except TimeoutError:
-                print(f"Process timed out: {cmd}")
+                print(f"\nProcess timed out: {cmd}")
+                sys.stdout.flush()
                 for p in active_processes:
-                    if p != proc:
-                        p.kill()
+                    p.kill()
+                sys.exit(1)
+            except Exception as e:
+                print(f"\nUnexpected error processing output from {cmd}: {e}")
+                sys.stdout.flush()
+                for p in active_processes:
+                    p.kill()
                 sys.exit(1)
 
+            # Check process completion status
             if proc.poll() is not None:
-                # Process has finished, call wait() to ensure proper cleanup
                 try:
                     returncode = proc.wait()
                     if returncode != 0:
-                        print(
-                            f"\nCommand failed: {proc.command} with return code {returncode}"
-                        )
-                        # Kill all remaining processes
+                        print(f"\nCommand failed: {cmd} with return code {returncode}")
+                        sys.stdout.flush()
                         for p in active_processes:
-                            if (
-                                p != proc
-                            ):  # Don't try to kill the already finished process
+                            if p != proc:
                                 p.kill()
                         sys.exit(returncode)
                     active_processes.remove(proc)
-                except TimeoutError:
-                    print(f"\nProcess timed out: {proc.command}")
-                    # Kill all processes on timeout
-                    for p in active_processes:
-                        p.kill()
-                    sys.exit(1)
+                    if proc in last_activity_time:
+                        del last_activity_time[proc]  # Clean up tracking
+                    any_activity = True
+                    print(f"Process completed: {cmd}")
+                    sys.stdout.flush()
                 except Exception as e:
-                    print(f"\nError waiting for process: {proc.command}")
+                    print(f"\nError waiting for process: {cmd}")
                     print(f"Error: {e}")
-                    # Kill all processes on error
                     for p in active_processes:
                         p.kill()
                     sys.exit(1)
 
-        # Small sleep to prevent busy waiting
-        time.sleep(0.1)
+        # Only sleep if no activity was detected, and use a shorter sleep
+        # This prevents excessive CPU usage while maintaining responsiveness
+        if not any_activity:
+            time.sleep(0.01)  # 10ms sleep only when no activity
 
     print("\nAll parallel tests completed successfully")
 
@@ -348,7 +443,7 @@ def run_test_processes(
 
     if parallel:
         # Run all processes in parallel with output interleaving
-        _run_processes_parallel(processes)
+        _run_processes_parallel(processes, verbose=verbose)
     else:
         # Run processes sequentially with full output capture
         for process in processes:

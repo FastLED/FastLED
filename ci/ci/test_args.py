@@ -51,6 +51,16 @@ def parse_args(args: Optional[list[str]] = None) -> TestArgs:
         help="Enable verbose output showing all test details",
     )
     parser.add_argument(
+        "--show-compile",
+        action="store_true",
+        help="Show compilation commands and output",
+    )
+    parser.add_argument(
+        "--show-link",
+        action="store_true",
+        help="Show linking commands and output",
+    )
+    parser.add_argument(
         "--quick", action="store_true", help="Enable quick mode with FASTLED_ALL_SRC=1"
     )
     parser.add_argument(
@@ -109,6 +119,8 @@ def parse_args(args: Optional[list[str]] = None) -> TestArgs:
         no_interactive=parsed_args.no_interactive,
         interactive=parsed_args.interactive,
         verbose=parsed_args.verbose,
+        show_compile=parsed_args.show_compile,
+        show_link=parsed_args.show_link,
         quick=parsed_args.quick,
         no_stack_trace=parsed_args.no_stack_trace,
         check=parsed_args.check,

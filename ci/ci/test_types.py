@@ -24,6 +24,8 @@ class TestArgs:
     no_interactive: bool = False
     interactive: bool = False
     verbose: bool = False
+    show_compile: bool = False
+    show_link: bool = False
     quick: bool = False
     no_stack_trace: bool = False
     check: bool = False

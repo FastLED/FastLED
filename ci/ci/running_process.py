@@ -140,7 +140,7 @@ class RunningProcess:
         cwd: Path | None = None,
         check: bool = False,
         auto_run: bool = True,
-        timeout: int = 300,  # five minutes
+        timeout: int = 60,  # sixty seconds
         enable_stack_trace: bool = True,  # Enable stack trace dumping on timeout
     ):
         """
@@ -223,11 +223,11 @@ class RunningProcess:
         Raises:
             subprocess.CalledProcessError: If the command returns a non-zero exit code.
         """
+        self._start_time = time.time()  # Track when the process started
         self.proc = subprocess.Popen(
             self.command,
             shell=True,
             cwd=self.cwd,
-            bufsize=1,  # Line buffering
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,  # Merge stderr into stdout
             text=True,  # Use text mode
@@ -236,27 +236,27 @@ class RunningProcess:
         )
 
         def output_reader():
+            """Continuously pump stdout to prevent subprocess from blocking on full pipe buffer"""
             try:
                 assert self.proc is not None
                 assert self.proc.stdout is not None
 
-                # In text mode, readline() returns str not bytes
+                # Continuously read lines to keep the stdout pipe drained
+                # This prevents the subprocess from blocking when its output buffer fills
                 for line in iter(self.proc.stdout.readline, ""):
                     if self.shutdown.is_set():
                         break
 
-                    # Line already comes as decoded str, just strip whitespace
-                    linestr = line.rstrip()
-                    if linestr:  # Skip empty lines
-                        # Apply path normalization to error and warning lines
-                        normalized_linestr = normalize_error_warning_paths(linestr)
-                        self.output_queue.put(normalized_linestr)
+                    # Strip whitespace and queue non-empty lines
+                    line_stripped = line.rstrip()
+                    if line_stripped:  # Only queue non-empty lines
+                        self.output_queue.put(line_stripped)
 
             finally:
+                # Clean shutdown: close stream and signal end
                 if self.proc and self.proc.stdout:
                     self.proc.stdout.close()
-                # Signal end of output with None
-                self.output_queue.put(None)
+                self.output_queue.put(None)  # End-of-stream marker
 
         # Start output reader thread
         self.reader_thread = threading.Thread(target=output_reader, daemon=True)
@@ -276,9 +276,34 @@ class RunningProcess:
 
         Raises:
             queue.Empty: If timeout is 0 or specified and no line is available
+            TimeoutError: If the process times out
         """
+        # Check if process has finished and queue is empty
+        if self.proc is not None and self.proc.poll() is not None:
+            try:
+                # Try to get any remaining output
+                line = self.output_queue.get_nowait()
+                if line is None:
+                    # End of output marker
+                    return None
+                return line
+            except queue.Empty:
+                return None
 
-        return self.output_queue.get(timeout=timeout)
+        # Process still running or queue not empty
+        try:
+            line = self.output_queue.get(timeout=timeout)
+            if line is None and self.proc is not None and self.proc.poll() is not None:
+                # Process finished and we got end marker
+                return None
+            return line
+        except queue.Empty:
+            if (
+                self.proc is not None
+                and time.time() - getattr(self, "_start_time", 0) > self.timeout
+            ):
+                raise TimeoutError(f"Process timed out after {self.timeout} seconds")
+            raise
 
     def poll(self) -> int | None:
         """
@@ -325,7 +350,7 @@ class RunningProcess:
                 raise TimeoutError(
                     f"Process timed out after {self.timeout} seconds: {self.command}"
                 )
-            time.sleep(0.1)  # Check every 100ms
+            time.sleep(0.01)  # Check every 10ms
 
         # Process has completed, get return code
         assert self.proc is not None  # For type checker
@@ -334,11 +359,13 @@ class RunningProcess:
 
         # Wait for reader thread to finish and cleanup
         if self.reader_thread is not None:
-            self.reader_thread.join(timeout=1)
+            self.reader_thread.join(
+                timeout=0.05
+            )  # 50ms should be plenty for thread cleanup
             if self.reader_thread.is_alive():
                 # Reader thread didn't finish, force shutdown
                 self.shutdown.set()
-                self.reader_thread.join(timeout=1)
+                self.reader_thread.join(timeout=0.05)  # 50ms for forced shutdown
 
         # Drain any remaining output
         while True:
@@ -353,7 +380,7 @@ class RunningProcess:
 
     def kill(self) -> None:
         """
-        Immediately terminate the process with SIGKILL.
+        Immediately terminate the process with SIGKILL and all child processes.
 
         Raises:
             ValueError: If the process hasn't been started.
@@ -364,12 +391,23 @@ class RunningProcess:
         # Signal reader thread to stop
         self.shutdown.set()
 
-        # Kill the process
-        self.proc.kill()
+        # Kill the entire process tree (parent + all children)
+        # This prevents orphaned clang++ processes from hanging the system
+        try:
+            from ci.ci.test_env import kill_process_tree
+
+            kill_process_tree(self.proc.pid)
+        except Exception as e:
+            # Fallback to simple kill if tree kill fails
+            print(f"Warning: Failed to kill process tree for {self.proc.pid}: {e}")
+            try:
+                self.proc.kill()
+            except Exception:
+                pass  # Process might already be dead
 
         # Wait for reader thread to finish
         if self.reader_thread is not None:
-            self.reader_thread.join(timeout=1)
+            self.reader_thread.join(timeout=0.05)  # 50ms should be plenty for cleanup
 
         # Drain any remaining output
         while True:
