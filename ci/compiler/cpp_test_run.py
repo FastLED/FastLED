@@ -71,8 +71,7 @@ if os.name == "nt":  # Windows
         pass
 
 
-# Global verbose flags
-_VERBOSE = False
+# Environment flags for backward compatibility
 _SHOW_COMPILE = os.environ.get("FASTLED_TEST_SHOW_COMPILE", "").lower() in (
     "1",
     "true",
@@ -110,7 +109,9 @@ def check_iwyu_available() -> bool:
         return False
 
 
-def run_command(command, use_gdb=False) -> tuple[int, str]:
+def run_command(
+    command, use_gdb=False, *, verbose=False, show_compile=False, show_link=False
+) -> tuple[int, str]:
     captured_lines = []
 
     # Determine command type
@@ -198,9 +199,9 @@ def run_command(command, use_gdb=False) -> tuple[int, str]:
                 captured_lines.append(line.rstrip())
                 # Determine if we should print this line
                 should_print = (
-                    _VERBOSE  # Always print in verbose mode
-                    or (is_compile and _SHOW_COMPILE)  # Print compilation if enabled
-                    or (is_link and _SHOW_LINK)  # Print linking if enabled
+                    verbose  # Always print in verbose mode
+                    or (is_compile and show_compile)  # Print compilation if enabled
+                    or (is_link and show_link)  # Print linking if enabled
                     or (not is_test_execution)  # Print non-test output
                     or (
                         is_test_execution and process.returncode != 0
@@ -222,9 +223,9 @@ def run_command(command, use_gdb=False) -> tuple[int, str]:
                 if should_print:
                     try:
                         # Add prefix for compile/link commands
-                        if is_compile and _SHOW_COMPILE:
+                        if is_compile and show_compile:
                             print("[COMPILE] ", end="", flush=True)
-                        elif is_link and _SHOW_LINK:
+                        elif is_link and show_link:
                             print("[LINK] ", end="", flush=True)
                         print(line, end="", flush=True)
                     except UnicodeEncodeError:
@@ -246,6 +247,10 @@ def compile_tests(
     unknown_args: list[str] = [],
     specific_test: str | None = None,
     use_legacy_system: bool = False,
+    *,
+    verbose: bool = False,
+    show_compile: bool = False,
+    show_link: bool = False,
 ) -> None:
     """
     Compile C++ tests with A/B testing support between CMake and Python API systems.
@@ -274,17 +279,30 @@ def compile_tests(
 
     if use_python_api:
         # New Python system (8x faster)
-        _compile_tests_python(clean, unknown_args, specific_test)
+        _compile_tests_python(
+            clean,
+            unknown_args,
+            specific_test,
+            verbose=verbose,
+            show_compile=show_compile,
+            show_link=show_link,
+        )
     else:
         # Legacy CMake system
         _compile_tests_cmake(clean, unknown_args, specific_test)
 
 
 def _compile_tests_cmake(
-    clean: bool = False, unknown_args: list[str] = [], specific_test: str | None = None
+    clean: bool = False,
+    unknown_args: list[str] = [],
+    specific_test: str | None = None,
+    *,
+    verbose: bool = False,
+    show_compile: bool = False,
+    show_link: bool = False,
 ) -> None:
     """Legacy CMake compilation system (preserved for gradual migration)"""
-    if _VERBOSE:
+    if verbose:
         print("Compiling tests using legacy CMake system...")
     command = ["uv", "run", "-m", "ci.compiler.cpp_test_compile"]
     if clean:
@@ -313,10 +331,16 @@ def _compile_tests_cmake(
 
 
 def _compile_tests_python(
-    clean: bool = False, unknown_args: list[str] = [], specific_test: str | None = None
+    clean: bool = False,
+    unknown_args: list[str] = [],
+    specific_test: str | None = None,
+    *,
+    verbose: bool = False,
+    show_compile: bool = False,
+    show_link: bool = False,
 ) -> None:
     """New Python compiler API system (8x faster than CMake)"""
-    if _VERBOSE:
+    if verbose:
         print("Compiling tests using proven Python API (8x faster)...")
 
     try:
@@ -365,7 +389,12 @@ def _compile_tests_python(
 
 
 def run_tests(
-    specific_test: str | None = None, use_legacy_system: bool = False
+    specific_test: str | None = None,
+    use_legacy_system: bool = False,
+    *,
+    verbose: bool = False,
+    show_compile: bool = False,
+    show_link: bool = False,
 ) -> None:
     """
     Run compiled tests with GDB crash analysis support.
@@ -395,7 +424,13 @@ def run_tests(
         _run_tests_cmake(specific_test)
 
 
-def _run_tests_cmake(specific_test: str | None = None) -> None:
+def _run_tests_cmake(
+    specific_test: str | None = None,
+    *,
+    verbose: bool = False,
+    show_compile: bool = False,
+    show_link: bool = False,
+) -> None:
     """Run tests from legacy CMake build system (preserving existing logic)"""
     test_dir = os.path.join("tests", ".build", "bin")
     if not os.path.exists(test_dir):
@@ -445,7 +480,13 @@ def _run_tests_cmake(specific_test: str | None = None) -> None:
     _handle_test_results(failed_tests)
 
 
-def _run_tests_python(specific_test: str | None = None) -> None:
+def _run_tests_python(
+    specific_test: str | None = None,
+    *,
+    verbose: bool = False,
+    show_compile: bool = False,
+    show_link: bool = False,
+) -> None:
     """Run tests from new Python compiler API system"""
     try:
         # Import the new test compiler system
@@ -499,6 +540,10 @@ def _execute_test_files(
     failed_tests: list,
     specific_test: str | None,
     test_paths: dict[str, str] | None = None,
+    *,
+    verbose: bool = False,
+    show_compile: bool = False,
+    show_link: bool = False,
 ) -> None:
     """
     Execute test files in parallel with full GDB crash analysis.
@@ -575,7 +620,7 @@ def _execute_test_files(
         output_buffer.write(
             test_index, f"[{test_index}/{total_tests}] Running test: {test_file}"
         )
-        if _VERBOSE:
+        if verbose:
             output_buffer.write(test_index, f"  Command: {test_path}")
 
         start_time = time.time()
@@ -604,7 +649,7 @@ def _execute_test_files(
             output_buffer.write(test_index, f"Stack: {crash_info.stack}")
 
         # Print output based on verbosity and status
-        if _VERBOSE or return_code != 0:
+        if verbose or return_code != 0:
             output_buffer.write(test_index, "Test output:")
             output_buffer.write(test_index, stdout)
 
@@ -673,7 +718,7 @@ def _execute_test_files(
         output_buffer.stop()
 
 
-def _handle_test_results(failed_tests: list) -> None:
+def _handle_test_results(failed_tests: list, *, verbose: bool = False) -> None:
     """Handle test results and exit appropriately (preserving existing logic)"""
     if failed_tests:
         print("Failed tests summary:")
@@ -693,7 +738,7 @@ def _handle_test_results(failed_tests: list) -> None:
             f"{tests_failed} test{'s' if tests_failed != 1 else ''} failed: {', '.join(failed_test_names)}"
         )
         sys.exit(1)
-    if _VERBOSE:
+    if verbose:
         print("All tests passed.")
 
 
@@ -826,11 +871,7 @@ def parse_args() -> argparse.Namespace:
 def main() -> None:
     args = parse_args()
 
-    # Set global verbose flags
-    global _VERBOSE, _SHOW_COMPILE, _SHOW_LINK
-    _VERBOSE = args.verbose
-    _SHOW_COMPILE = args.show_compile
-    _SHOW_LINK = args.show_link
+    # Get verbosity flags from args
 
     run_only = args.run_only
     compile_only = args.compile_only
@@ -852,14 +893,29 @@ def main() -> None:
             unknown_args=passthrough_args,
             specific_test=specific_test,
             use_legacy_system=use_legacy_system,
+            verbose=args.verbose,
+            show_compile=args.show_compile,
+            show_link=args.show_link,
         )
 
     if not compile_only:
         if specific_test:
-            run_tests(specific_test, use_legacy_system=use_legacy_system)
+            run_tests(
+                specific_test,
+                use_legacy_system=use_legacy_system,
+                verbose=args.verbose,
+                show_compile=args.show_compile,
+                show_link=args.show_link,
+            )
         else:
             # Use our own test runner instead of CTest since CTest integration is broken
-            run_tests(None, use_legacy_system=use_legacy_system)
+            run_tests(
+                None,
+                use_legacy_system=use_legacy_system,
+                verbose=args.verbose,
+                show_compile=args.show_compile,
+                show_link=args.show_link,
+            )
 
 
 if __name__ == "__main__":
