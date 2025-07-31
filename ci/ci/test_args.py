@@ -137,9 +137,10 @@ def parse_args(args: Optional[list[str]] = None) -> TestArgs:
         if not test_args.cpp:
             test_args.cpp = True
             print(f"Auto-enabled --cpp mode for specific test: {test_args.test}")
-        if not test_args.verbose:
-            test_args.verbose = True
-            print(f"Auto-enabled --verbose mode for specific test: {test_args.test}")
+        # Auto-enable verbose for specific tests (disabled)
+        # if not test_args.verbose:
+        #     test_args.verbose = True
+        #     print(f"Auto-enabled --verbose mode for specific test: {test_args.test}")
         # Also enable --unit when a specific test is provided without any other flags
         if (
             not test_args.unit
@@ -150,10 +151,10 @@ def parse_args(args: Optional[list[str]] = None) -> TestArgs:
             test_args.unit = True
             print(f"Auto-enabled --unit mode for specific test: {test_args.test}")
 
-    # Auto-enable --verbose when running unit tests
-    if test_args.unit and not test_args.verbose:
-        test_args.verbose = True
-        print("Auto-enabled --verbose mode for unit tests")
+    # Auto-enable --verbose when running unit tests (disabled)
+    # if test_args.unit and not test_args.verbose:
+    #     test_args.verbose = True
+    #     print("Auto-enabled --verbose mode for unit tests")
 
     # Auto-enable --cpp and --clang when --check is provided
     if test_args.check:

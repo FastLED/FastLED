@@ -243,19 +243,33 @@ class RunningProcess:
 
                 # Continuously read lines to keep the stdout pipe drained
                 # This prevents the subprocess from blocking when its output buffer fills
-                for line in iter(self.proc.stdout.readline, ""):
-                    if self.shutdown.is_set():
-                        break
+                try:
+                    for line in iter(self.proc.stdout.readline, ""):
+                        if self.shutdown.is_set():
+                            break
 
-                    # Strip whitespace and queue non-empty lines
-                    line_stripped = line.rstrip()
-                    if line_stripped:  # Only queue non-empty lines
-                        self.output_queue.put(line_stripped)
+                        # Strip whitespace and queue non-empty lines
+                        line_stripped = line.rstrip()
+                        if line_stripped:  # Only queue non-empty lines
+                            self.output_queue.put(line_stripped)
+                except (ValueError, OSError) as e:
+                    # Handle "I/O operation on closed file" and similar errors
+                    # This can happen if the process terminates while we're reading
+                    if "closed file" in str(e) or "Bad file descriptor" in str(e):
+                        # Normal shutdown - process stdout was closed
+                        pass
+                    else:
+                        # Unexpected error, log it but don't crash
+                        print(f"Warning: Output reader encountered error: {e}")
 
             finally:
                 # Clean shutdown: close stream and signal end
-                if self.proc and self.proc.stdout:
-                    self.proc.stdout.close()
+                if self.proc and self.proc.stdout and not self.proc.stdout.closed:
+                    try:
+                        self.proc.stdout.close()
+                    except (ValueError, OSError):
+                        # Already closed, ignore
+                        pass
                 self.output_queue.put(None)  # End-of-stream marker
 
         # Start output reader thread

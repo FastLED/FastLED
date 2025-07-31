@@ -17,6 +17,7 @@ Performance: 15-30s (CMake) → 2-4s (Python API) = 8x improvement
 Memory Usage: 2-4GB (CMake) → 200-500MB (Python API) = 80% reduction
 """
 
+import hashlib
 import os
 import shutil
 import subprocess
@@ -126,7 +127,7 @@ class FastLEDTestCompiler:
 
     def _load_build_flags(self) -> BuildFlags:
         """Load build flags from TOML configuration"""
-        toml_path = self.project_root / "tests" / "build_flags.toml"
+        toml_path = self.project_root / "ci" / "build_flags.toml"
         return BuildFlags.parse(toml_path, self.quick_build, self.strict_mode)
 
     @classmethod
@@ -143,7 +144,7 @@ class FastLEDTestCompiler:
         Create compiler configured for FastLED unit tests using TOML build flags.
 
         This configuration uses the new TOML-based build flag system:
-        - tests/build_flags.toml for centralized flag configuration
+        - ci/build_flags.toml for centralized flag configuration
         - Support for build modes (quick/debug) and strict mode
         - STUB platform for hardware-free testing
         - Precompiled headers for faster compilation
@@ -533,6 +534,8 @@ class FastLEDTestCompiler:
 
         compiled_tests: List[TestExecutable] = []
         linking_failures: List[str] = []
+        cache_hits = 0
+        cache_misses = 0
 
         # Link each test with the FastLED library
         for obj_path in compiled_objects:
@@ -544,13 +547,58 @@ class FastLEDTestCompiler:
             test_source = self.project_root / "tests" / f"test_{test_name}.cpp"
             has_own_main = self._test_has_own_main(test_source)
 
+            # Get linker args (needed for cache key calculation)
+            linker_args = self._get_platform_linker_args(fastled_lib_path)
+
+            # Calculate comprehensive cache key based on all linking inputs
+            if has_own_main:
+                # For standalone tests, only include test object file
+                cache_key = self._calculate_link_cache_key(
+                    obj_path, fastled_lib_path, linker_args
+                )
+            else:
+                # For doctest tests, include both test object and doctest_main object
+                # Calculate hashes for both object files and combine them
+                test_obj_hash = self._calculate_file_hash(obj_path)
+                doctest_obj_hash = self._calculate_file_hash(doctest_obj_path)
+                combined_obj_hash = hashlib.sha256(
+                    f"{test_obj_hash}+{doctest_obj_hash}".encode("utf-8")
+                ).hexdigest()
+
+                # Create a temporary cache key with combined object hash
+                fastled_hash = self._calculate_file_hash(fastled_lib_path)
+                linker_hash = self._calculate_linker_args_hash(linker_args)
+                combined = f"fastled:{fastled_hash}|test:{combined_obj_hash}|flags:{linker_hash}"
+                cache_key = hashlib.sha256(combined.encode("utf-8")).hexdigest()[:16]
+
+            # Check for cached executable based on comprehensive cache key
+            cached_exe = self._get_cached_executable(test_name, cache_key)
+            if cached_exe:
+                print(f"  {test_name}: Using cached executable (link cache hit)")
+                try:
+                    shutil.copy2(cached_exe, exe_path)
+                    cache_hits += 1
+
+                    test_exe = TestExecutable(
+                        name=test_name,
+                        executable_path=exe_path,
+                        test_source_path=test_source,
+                    )
+                    compiled_tests.append(test_exe)
+                    continue  # Skip linking, we have cached result
+                except Exception as e:
+                    print(
+                        f"  {test_name}: Warning - failed to copy cached executable, will relink: {e}"
+                    )
+                    # Fall through to linking logic
+
             if has_own_main:
                 # Link standalone test without doctest_main.o
                 link_options = LinkOptions(
                     object_files=[obj_path],  # Only the test object file
                     output_executable=exe_path,
                     linker="clang++",  # Use clang++ for linking
-                    linker_args=self._get_platform_linker_args(fastled_lib_path),
+                    linker_args=linker_args,  # Use pre-calculated args for consistency
                 )
             else:
                 # Link with the FastLED library instead of individual objects
@@ -561,7 +609,7 @@ class FastLEDTestCompiler:
                     ],  # Test object + doctest main
                     output_executable=exe_path,
                     linker="clang++",  # Use clang++ for linking
-                    linker_args=self._get_platform_linker_args(fastled_lib_path),
+                    linker_args=linker_args,  # Use pre-calculated args for consistency
                 )
 
             # Show linking command if enabled
@@ -584,6 +632,10 @@ class FastLEDTestCompiler:
                 continue
 
             print(f"  {test_name}: Linking successful")
+            cache_misses += 1
+
+            # Cache the newly linked executable for future use
+            self._cache_executable(test_name, cache_key, exe_path)
 
             test_exe = TestExecutable(
                 name=test_name, executable_path=exe_path, test_source_path=test_source
@@ -598,6 +650,14 @@ class FastLEDTestCompiler:
             self.linking_failures = linking_failures
         else:
             self.linking_failures = []
+
+        # Report link cache statistics
+        total_tests = cache_hits + cache_misses
+        if total_tests > 0:
+            hit_rate = (cache_hits / total_tests) * 100
+            print(
+                f"Link cache: {cache_hits} hits, {cache_misses} misses ({hit_rate:.1f}% hit rate) - caching by lib+test+flags"
+            )
 
         print(f"Successfully linked {len(compiled_tests)} test executables")
         return compiled_tests
@@ -814,6 +874,65 @@ class FastLEDTestCompiler:
                 ]
         return self.compiled_tests
 
+    @property
+    def link_cache_dir(self) -> Path:
+        """Get the link cache directory"""
+        cache_dir = self.build_dir / "link_cache"
+        cache_dir.mkdir(exist_ok=True)
+        return cache_dir
+
+    def _calculate_file_hash(self, file_path: Path) -> str:
+        """Calculate SHA256 hash of a file"""
+        if not file_path.exists():
+            return "no_file"
+
+        hash_sha256 = hashlib.sha256()
+        with open(file_path, "rb") as f:
+            # Read in chunks to handle large files efficiently
+            for chunk in iter(lambda: f.read(4096), b""):
+                hash_sha256.update(chunk)
+        return hash_sha256.hexdigest()
+
+    def _calculate_linker_args_hash(self, linker_args: List[str]) -> str:
+        """Calculate SHA256 hash of linker arguments"""
+        # Convert linker args to a stable string representation
+        args_str = "|".join(sorted(linker_args))
+        hash_sha256 = hashlib.sha256()
+        hash_sha256.update(args_str.encode("utf-8"))
+        return hash_sha256.hexdigest()
+
+    def _calculate_link_cache_key(
+        self, test_obj_path: Path, fastled_lib_path: Path, linker_args: List[str]
+    ) -> str:
+        """Calculate comprehensive cache key for linking"""
+        # Hash all the factors that affect linking output
+        fastled_hash = self._calculate_file_hash(fastled_lib_path)
+        test_obj_hash = self._calculate_file_hash(test_obj_path)
+        linker_hash = self._calculate_linker_args_hash(linker_args)
+
+        # Combine all hashes into a single cache key
+        combined = f"fastled:{fastled_hash}|test:{test_obj_hash}|flags:{linker_hash}"
+        final_hash = hashlib.sha256(combined.encode("utf-8")).hexdigest()
+
+        return final_hash[:16]  # Use first 16 chars for readability
+
+    def _get_cached_executable(self, test_name: str, cache_key: str) -> Optional[Path]:
+        """Check if a cached executable exists for this test and cache key"""
+        cached_exe = self.link_cache_dir / f"{test_name}_{cache_key}.exe"
+        return cached_exe if cached_exe.exists() else None
+
+    def _cache_executable(self, test_name: str, cache_key: str, exe_path: Path) -> None:
+        """Cache an executable with the given cache key"""
+        if not exe_path.exists():
+            return
+
+        cached_exe = self.link_cache_dir / f"{test_name}_{cache_key}.exe"
+        try:
+            shutil.copy2(exe_path, cached_exe)
+            print(f"  {test_name}: Cached executable for future use")
+        except Exception as e:
+            print(f"  {test_name}: Warning - failed to cache executable: {e}")
+
     def _get_platform_linker_args(self, fastled_lib_path: Path) -> List[str]:
         """Get platform-specific linker arguments"""
         # Load build flags from main TOML
@@ -825,7 +944,7 @@ class FastLEDTestCompiler:
         args = config.get("linking", {}).get("test", {}).get("flags", []).copy()
 
         # Add platform-specific test flags
-        platform_section = "test_windows" if sys.platform == "win32" else "test_unix"
+        platform_section = "windows" if sys.platform == "win32" else "unix"
         platform_flags = (
             config.get("linking", {}).get(platform_section, {}).get("flags", [])
         )

@@ -145,10 +145,10 @@ def process_test_flags(args: TestArgs) -> TestArgs:
             # Unit was not explicitly set, so disable it
             pass  # args.unit is already False
 
-        # Auto-enable verbose mode for unit tests
-        if args.unit and not args.verbose:
-            args.verbose = True
-            print("Auto-enabled --verbose mode for unit tests")
+        # Auto-enable verbose mode for unit tests (disabled)
+        # if args.unit and not args.verbose:
+        #     args.verbose = True
+        #     print("Auto-enabled --verbose mode for unit tests")
         if args.examples is None:
             # Examples was not explicitly set, so disable it
             pass  # args.examples is already None
@@ -183,10 +183,10 @@ def process_test_flags(args: TestArgs) -> TestArgs:
         args.py = True
         print("No test flags specified: Running all tests (unit, examples, Python)")
 
-        # Auto-enable verbose mode for unit tests
-        if args.unit and not args.verbose:
-            args.verbose = True
-            print("Auto-enabled --verbose mode for unit tests")
+        # Auto-enable verbose mode for unit tests (disabled)
+        # if args.unit and not args.verbose:
+        #     args.verbose = True
+        #     print("Auto-enabled --verbose mode for unit tests")
 
         return args
 

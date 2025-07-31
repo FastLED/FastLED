@@ -9,6 +9,7 @@
 #include "led_sysdefs.h"
 #include "fl/unused.h"
 #include "fl/int.h"
+#include "fl/register.h"
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wignored-qualifiers"

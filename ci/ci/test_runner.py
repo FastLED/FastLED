@@ -279,7 +279,7 @@ def create_namespace_check_process(enable_stack_trace: bool) -> RunningProcess:
     """Create a namespace check process without starting it"""
     return RunningProcess(
         "uv run python ci/tests/no_using_namespace_fl_in_headers.py",
-        auto_run=False,
+        auto_run=True,
         enable_stack_trace=enable_stack_trace,
     )
 
@@ -328,7 +328,7 @@ def create_unit_test_process(
         test_cmd,
         enable_stack_trace=enable_stack_trace,
         timeout=120,  # 2 minutes timeout
-        auto_run=False,
+        auto_run=True,
     )
 
 
@@ -349,14 +349,14 @@ def create_examples_test_process(
         cmd.append("--unity")
     if args.full and args.examples is not None:
         cmd.append("--full")
-    return RunningProcess(cmd, auto_run=False, enable_stack_trace=enable_stack_trace)
+    return RunningProcess(cmd, auto_run=True, enable_stack_trace=enable_stack_trace)
 
 
 def create_python_test_process(enable_stack_trace: bool) -> RunningProcess:
     """Create a Python test process without starting it"""
     return RunningProcess(
         "uv run pytest -s ci/tests -xvs --durations=0",
-        auto_run=False,
+        auto_run=True,
         enable_stack_trace=enable_stack_trace,
     )
 
@@ -371,7 +371,7 @@ def create_integration_test_process(
         cmd.extend(["-k", "TestFullProgramLinking"])
     if args.verbose:
         cmd.append("-v")
-    return RunningProcess(cmd, auto_run=False, enable_stack_trace=enable_stack_trace)
+    return RunningProcess(cmd, auto_run=True, enable_stack_trace=enable_stack_trace)
 
 
 def create_compile_uno_test_process(enable_stack_trace: bool = True) -> RunningProcess:
@@ -386,7 +386,7 @@ def create_compile_uno_test_process(enable_stack_trace: bool = True) -> RunningP
         "Blink",
         "--no-interactive",
     ]
-    return RunningProcess(cmd, auto_run=False, enable_stack_trace=enable_stack_trace)
+    return RunningProcess(cmd, auto_run=True, enable_stack_trace=enable_stack_trace)
 
 
 def get_cpp_test_processes(
