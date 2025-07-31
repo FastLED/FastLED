@@ -142,8 +142,46 @@ def main() -> None:
         )
         write_fingerprint(fingerprint_data)
 
-        # Run tests using the test runner
-        test_runner(args, src_code_change)
+        # Run tests using the test runner with sequential example compilation
+        # Check if we need to use sequential execution to avoid resource conflicts
+        if not args.unit and not args.examples and not args.py and args.full:
+            # Full test mode - use sequential execution for example compilation
+            from ci.ci.running_process import RunningProcess
+            from ci.ci.test_runner import (
+                create_examples_test_process,
+                create_python_test_process,
+            )
+
+            # Create Python test process (runs first)
+            python_process = create_python_test_process(not args.no_stack_trace)
+
+            # Create examples compilation process with auto_run=False
+            examples_process = create_examples_test_process(
+                args, not args.no_stack_trace
+            )
+            examples_process.auto_run = False
+
+            # Set up callback to start examples compilation after Python tests complete
+            def start_examples_compilation():
+                print("Python tests completed - starting examples compilation...")
+                examples_process.run()
+
+            python_process.on_complete = start_examples_compilation
+
+            # Wait for Python tests to complete (which will trigger examples compilation)
+            python_return_code = python_process.wait()
+            if python_return_code != 0:
+                sys.exit(python_return_code)
+
+            # Wait for examples compilation to complete
+            examples_return_code = examples_process.wait()
+            if examples_return_code != 0:
+                sys.exit(examples_return_code)
+
+            print("Sequential test execution completed successfully")
+        else:
+            # Use normal test runner for other cases
+            test_runner(args, src_code_change)
 
         # Set up force exit daemon and exit
         daemon_thread = setup_force_exit()
