@@ -215,6 +215,44 @@ def get_all_test_processes(
     return processes
 
 
+def _extract_test_name(command: str | list[str]) -> str:
+    """Extract a human-readable test name from a command"""
+    if isinstance(command, list):
+        command = " ".join(command)
+
+    # Extract test name patterns
+    if "--test " in command:
+        # Extract specific test name after --test flag
+        parts = command.split("--test ")
+        if len(parts) > 1:
+            test_name = parts[1].split()[0]
+            return test_name
+    elif ".exe" in command:
+        # Extract from executable name
+        for part in command.split():
+            if part.endswith(".exe"):
+                return part.replace(".exe", "")
+    elif "python" in command and "-m " in command:
+        # Extract module name
+        parts = command.split("-m ")
+        if len(parts) > 1:
+            module = parts[1].split()[0]
+            return module.replace("ci.compiler.", "").replace("ci.", "")
+    elif "python" in command and command.endswith(".py"):
+        # Extract script name
+        for part in command.split():
+            if part.endswith(".py"):
+                return part.split("/")[-1].replace(".py", "")
+
+    # Fallback to first meaningful part of command
+    parts = command.split()
+    for part in parts[1:]:  # Skip 'uv' or 'python'
+        if not part.startswith("-") and "python" not in part:
+            return part
+
+    return "unknown_test"
+
+
 def _run_process_with_output(process: RunningProcess, verbose: bool = False) -> None:
     """
     Run a single process and handle its output
@@ -282,15 +320,22 @@ def _run_process_with_output(process: RunningProcess, verbose: bool = False) -> 
     try:
         returncode = process.wait()
         if returncode != 0:
+            # Extract test name from command for better error reporting
+            test_name = _extract_test_name(process.command)
             print(f"Command failed: {process.command}")
+            print(f"\033[91m###### ERROR ######\033[0m")
+            print(f"Test failed: {test_name}")
             sys.exit(returncode)
         else:
             print(f"Process completed: {process.command}")
             if isinstance(process.command, str) and process.command.endswith(".exe"):
                 print(f"Test {process.command} passed with return code {returncode}")
     except Exception as e:
+        test_name = _extract_test_name(process.command)
         print(f"\nError waiting for process: {process.command}")
         print(f"Error: {e}")
+        print(f"\033[91m###### ERROR ######\033[0m")
+        print(f"Test error: {test_name}")
         process.kill()
         sys.exit(1)
 
@@ -424,7 +469,10 @@ def _run_processes_parallel(
                 try:
                     returncode = proc.wait()
                     if returncode != 0:
+                        test_name = _extract_test_name(cmd)
                         print(f"\nCommand failed: {cmd} with return code {returncode}")
+                        print(f"\033[91m###### ERROR ######\033[0m")
+                        print(f"Test failed: {test_name}")
                         sys.stdout.flush()
                         for p in active_processes:
                             if p != proc:
@@ -437,8 +485,11 @@ def _run_processes_parallel(
                     print(f"Process completed: {cmd}")
                     sys.stdout.flush()
                 except Exception as e:
+                    test_name = _extract_test_name(cmd)
                     print(f"\nError waiting for process: {cmd}")
                     print(f"Error: {e}")
+                    print(f"\033[91m###### ERROR ######\033[0m")
+                    print(f"Test error: {test_name}")
                     for p in active_processes:
                         p.kill()
                     sys.exit(1)
@@ -463,15 +514,31 @@ def run_test_processes(
         verbose: Whether to show all output
     """
     if not processes:
+        print("\033[92m###### SUCCESS ######\033[0m")
+        print("No tests to run")
         return
 
-    if parallel:
-        # Run all processes in parallel with output interleaving
-        _run_processes_parallel(processes, verbose=verbose)
-    else:
-        # Run processes sequentially with full output capture
-        for process in processes:
-            _run_process_with_output(process, verbose)
+    failed_tests: list[str] = []
+
+    try:
+        if parallel:
+            # Run all processes in parallel with output interleaving
+            _run_processes_parallel(processes, verbose=verbose)
+        else:
+            # Run processes sequentially with full output capture
+            for process in processes:
+                _run_process_with_output(process, verbose)
+
+        # If we get here, all tests passed
+        print("\033[92m###### SUCCESS ######\033[0m")
+        print("All tests passed successfully!")
+
+    except SystemExit as e:
+        # Tests failed - extract command name from the error
+        if e.code != 0:
+            print("\033[91m###### ERROR ######\033[0m")
+            print(f"Tests failed with exit code {e.code}")
+        raise
 
 
 def runner(args: TestArgs, src_code_change: bool = True) -> None:
