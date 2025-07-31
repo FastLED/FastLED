@@ -280,27 +280,27 @@ def _run_process_with_output(process: RunningProcess, verbose: bool = False) -> 
     # Use event-driven processing with reasonable timeouts to prevent hanging
     while process.poll() is None:
         try:
-            # Use longer timeout (1 second) to prevent race conditions like parallel version
-            line = process.get_next_line(timeout=1.0)
+            # Use consistent timeout for all output reading
+            line = process.get_next_line(timeout=0.1)  # 100ms timeout
             if line is not None:
                 # Use the shared output handler for proper formatting
                 output_handler.handle_output_line(line, process_name)
+                sys.stdout.flush()  # Ensure output is visible immediately
 
-                # After getting one line, quickly drain any additional available output
+                # After getting one line, quickly drain any additional output
                 # This maintains responsiveness while avoiding tight polling loops
-                lines_drained = 0
-                while lines_drained < 10:  # Limit to prevent infinite loops
+                while True:  # Keep draining until no more output
                     try:
                         additional_line = process.get_next_line(
                             timeout=0.01
-                        )  # Very short timeout for draining
-                        if additional_line is not None and additional_line.strip():
+                        )  # 10ms for draining
+                        if additional_line is None:
+                            break  # End of stream
+                        if additional_line.strip():  # Only print non-empty lines
                             output_handler.handle_output_line(
                                 additional_line, process_name
                             )
-                            lines_drained += 1
-                        elif additional_line is None:
-                            break  # No more output available
+                            sys.stdout.flush()
                     except queue.Empty:
                         break  # No more output available right now
 
@@ -380,11 +380,19 @@ def _run_processes_parallel(
     last_activity_time = {proc: time.time() for proc in active_processes}
     stuck_process_timeout = 30  # 30 seconds without output indicates stuck process
 
+    # Track failed processes for proper error reporting
+    failed_processes: list[str] = []
+
     while active_processes:
         # Check global timeout
         if time.time() - start_time > global_timeout:
             print(f"\nGlobal timeout reached after {global_timeout} seconds")
+            print("\033[91m###### ERROR ######\033[0m")
+            print("Tests failed due to global timeout")
             for p in active_processes:
+                failed_processes.append(
+                    p.command
+                )  # Track all active processes as failed
                 p.kill()
             sys.exit(1)
 
@@ -397,6 +405,10 @@ def _run_processes_parallel(
                 )
                 print("Killing stuck process and its children...")
                 proc.kill()  # This now kills the entire process tree
+
+                # Track this as a failure - CRITICAL FIX
+                failed_processes.append(proc.command)
+
                 active_processes.remove(proc)
                 if proc in last_activity_time:
                     del last_activity_time[proc]
@@ -410,39 +422,37 @@ def _run_processes_parallel(
         for proc in active_processes[:]:  # Copy list for safe modification
             cmd = proc.command
             try:
-                # Use longer timeout for event-driven waiting (1 second)
-                # This eliminates race conditions from very short timeouts
+                # Use consistent timeout for all output reading
                 try:
-                    line = proc.get_next_line(timeout=0.1)
-                    if (
-                        line is not None and line.strip()
-                    ):  # Ensure we don't print empty lines
-                        # Use the shared output handler for proper formatting
-                        output_handler.handle_output_line(line, cmd)
-                        sys.stdout.flush()  # Immediately flush output for real-time visibility
+                    line = proc.get_next_line(timeout=0.1)  # 100ms timeout
+                    if line is not None:
+                        if line.strip():  # Only print non-empty lines
+                            # Use the shared output handler for proper formatting
+                            output_handler.handle_output_line(line, cmd)
+                            sys.stdout.flush()  # Immediately flush output for real-time visibility
                         any_activity = True
                         last_activity_time[proc] = time.time()  # Update activity time
 
-                        # After getting one line, quickly drain any additional available output
+                        # After getting one line, quickly drain any additional output
                         # This maintains responsiveness while avoiding tight polling loops
-                        lines_drained = 0
-                        while lines_drained < 10:  # Limit to prevent infinite loops
+                        while True:  # Keep draining until no more output
                             try:
                                 additional_line = proc.get_next_line(
                                     timeout=0.01
-                                )  # Very short timeout for draining
+                                )  # 10ms for draining
+                                if additional_line is None:
+                                    break  # End of stream
                                 if (
-                                    additional_line is not None
-                                    and additional_line.strip()
-                                ):
-                                    # Use the same handler for additional lines
+                                    additional_line.strip()
+                                ):  # Only print non-empty lines
                                     output_handler.handle_output_line(
                                         additional_line, cmd
                                     )
-                                    sys.stdout.flush()  # Immediately flush output for real-time visibility
-                                    lines_drained += 1
-                                elif additional_line is None:
-                                    break  # No more output available
+                                    sys.stdout.flush()
+                                any_activity = True
+                                last_activity_time[proc] = (
+                                    time.time()
+                                )  # Update activity time
                             except queue.Empty:
                                 break  # No more output available right now
 
@@ -453,14 +463,20 @@ def _run_processes_parallel(
 
             except TimeoutError:
                 print(f"\nProcess timed out: {cmd}")
+                print("\033[91m###### ERROR ######\033[0m")
+                print(f"Test failed due to timeout: {_extract_test_name(cmd)}")
                 sys.stdout.flush()
                 for p in active_processes:
+                    failed_processes.append(p.command)  # Track all as failed
                     p.kill()
                 sys.exit(1)
             except Exception as e:
                 print(f"\nUnexpected error processing output from {cmd}: {e}")
+                print("\033[91m###### ERROR ######\033[0m")
+                print(f"Test failed due to unexpected error: {_extract_test_name(cmd)}")
                 sys.stdout.flush()
                 for p in active_processes:
+                    failed_processes.append(p.command)  # Track all as failed
                     p.kill()
                 sys.exit(1)
 
@@ -491,6 +507,7 @@ def _run_processes_parallel(
                     print(f"\033[91m###### ERROR ######\033[0m")
                     print(f"Test error: {test_name}")
                     for p in active_processes:
+                        failed_processes.append(p.command)  # Track all as failed
                         p.kill()
                     sys.exit(1)
 
@@ -498,6 +515,15 @@ def _run_processes_parallel(
         # This prevents excessive CPU usage while maintaining responsiveness
         if not any_activity:
             time.sleep(0.01)  # 10ms sleep only when no activity
+
+    # Check for failed processes - CRITICAL FIX
+    if failed_processes:
+        print(f"\n\033[91m###### ERROR ######\033[0m")
+        print(f"Tests failed due to {len(failed_processes)} killed process(es):")
+        for cmd in failed_processes:
+            print(f"  - {cmd}")
+        print("Processes were killed due to timeout/stuck detection")
+        sys.exit(1)  # Exit with error code to indicate failure
 
     print("\nAll parallel tests completed successfully")
 

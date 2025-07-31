@@ -11,10 +11,11 @@ import shutil
 import subprocess
 import tempfile
 import time
+import tomllib
 from concurrent.futures import Future, ThreadPoolExecutor
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Sequence, cast
+from typing import Any, Dict, List, Sequence, cast
 
 
 def cpu_count() -> int:
@@ -124,6 +125,252 @@ class LinkOptions:
     temp_dir: str | Path | None = (
         None  # Custom temporary directory for intermediate files
     )
+
+
+@dataclass
+class BuildTools:
+    """Build tool paths and configurations"""
+
+    compiler: str = "clang++"  # C++ compiler (maps to CompilerOptions.compiler)
+    archiver: str = "ar"  # Archive tool (maps to CompilerOptions.archiver)
+    linker: str | None = None  # Linker tool (maps to LinkOptions.linker)
+    c_compiler: str = "clang"  # C compiler (for mixed C/C++ projects)
+    objcopy: str = "objcopy"  # Object copy utility (for firmware/embedded)
+    nm: str = "nm"  # Symbol table utility (for analysis)
+    strip: str = "strip"  # Strip utility (for release builds)
+    ranlib: str = "ranlib"  # Archive indexer (for static libraries)
+
+
+@dataclass
+class BuildFlags:
+    """
+    Build flags loaded from TOML configuration with parsing and serialization capabilities.
+
+    This class represents the build flags structure and can parse from TOML files
+    and serialize back to TOML format.
+    """
+
+    defines: List[str] = field(default_factory=list)
+    compiler_flags: List[str] = field(default_factory=list)
+    include_flags: List[str] = field(default_factory=list)
+    link_flags: List[str] = field(default_factory=list)
+    strict_mode_flags: List[str] = field(default_factory=list)
+    tools: BuildTools = field(default_factory=BuildTools)
+
+    @classmethod
+    def parse(
+        cls, toml_path: Path, quick_build: bool = False, strict_mode: bool = False
+    ) -> "BuildFlags":
+        """
+        Parse build flags from TOML configuration file.
+
+        Args:
+            toml_path: Path to the build_flags.toml file
+            quick_build: Use quick build mode flags (default: debug mode)
+            strict_mode: Enable strict mode warning flags
+
+        Returns:
+            BuildFlags: Parsed build flags from TOML file
+        """
+        try:
+            with open(toml_path, "rb") as f:
+                config = tomllib.load(f)
+        except FileNotFoundError:
+            print(f"Warning: build_flags.toml not found at {toml_path}")
+            # Return minimal fallback configuration
+            return cls(
+                defines=["-DSTUB_PLATFORM", "-DFASTLED_UNIT_TEST=1"],
+                compiler_flags=["-std=gnu++17", "-Wall"],
+                include_flags=["-I.", "-Isrc", "-Itests"],
+                link_flags=["-pthread"],
+                strict_mode_flags=[],
+                tools=BuildTools(),  # Use default tools
+            )
+        except Exception as e:
+            print(f"Warning: Failed to parse build_flags.toml: {e}")
+            # Return minimal fallback configuration
+            return cls(
+                defines=["-DSTUB_PLATFORM", "-DFASTLED_UNIT_TEST=1"],
+                compiler_flags=["-std=gnu++17", "-Wall"],
+                include_flags=["-I.", "-Isrc", "-Itests"],
+                link_flags=["-pthread"],
+                strict_mode_flags=[],
+                tools=BuildTools(),  # Use default tools
+            )
+
+        # Extract tools configuration
+        tools_config = config.get("tools", {})
+        tools = BuildTools(
+            compiler=tools_config.get("compiler", "clang++"),
+            archiver=tools_config.get("archiver", "ar"),
+            linker=tools_config.get("linker"),
+            c_compiler=tools_config.get("c_compiler", "clang"),
+            objcopy=tools_config.get("objcopy", "objcopy"),
+            nm=tools_config.get("nm", "nm"),
+            strip=tools_config.get("strip", "strip"),
+            ranlib=tools_config.get("ranlib", "ranlib"),
+        )
+
+        # Extract base flags
+        base_flags = cls(
+            defines=config.get("all", {}).get("defines", []),
+            compiler_flags=config.get("all", {}).get("compiler_flags", []),
+            include_flags=config.get("all", {}).get("include_flags", []),
+            link_flags=config.get("linking", {}).get("base", {}).get("flags", []),
+            strict_mode_flags=config.get("strict_mode", {}).get("flags", []),
+            tools=tools,
+        )
+
+        # Add build mode specific flags
+        build_mode = "quick" if quick_build else "debug"
+        build_modes = config.get("build_modes", {})
+        if build_mode in build_modes:
+            mode_config = build_modes[build_mode]
+            if "flags" in mode_config:
+                base_flags.compiler_flags.extend(mode_config["flags"])
+            if "link_flags" in mode_config:
+                base_flags.link_flags.extend(mode_config["link_flags"])
+
+        return base_flags
+
+    def serialize(self) -> str:
+        """
+        Serialize build flags to TOML format string.
+
+        Returns:
+            str: TOML representation of the build flags
+        """
+        toml_content: List[str] = []
+
+        # Add header
+        header_lines: List[str] = [
+            "# ================================================================================================",
+            "# FastLED Build Flags Configuration",
+            "# ================================================================================================",
+            "# Generated build flags configuration",
+            "",
+        ]
+        toml_content.extend(header_lines)
+
+        # [all] section
+        all_section_lines: List[str] = [
+            "[all]",
+            "# Universal compilation flags",
+            "",
+        ]
+        toml_content.extend(all_section_lines)
+
+        # Add defines
+        if self.defines:
+            toml_content.append("defines = [")
+            for define in self.defines:
+                toml_content.append(f'    "{define}",')
+            toml_content.append("]")
+            toml_content.append("")
+
+        # Add compiler flags
+        if self.compiler_flags:
+            toml_content.append("compiler_flags = [")
+            for flag in self.compiler_flags:
+                toml_content.append(f'    "{flag}",')
+            toml_content.append("]")
+            toml_content.append("")
+
+        # Add include flags
+        if self.include_flags:
+            toml_content.append("include_flags = [")
+            for flag in self.include_flags:
+                toml_content.append(f'    "{flag}",')
+            toml_content.append("]")
+            toml_content.append("")
+
+        # [linking.base] section
+        if self.link_flags:
+            linking_section_lines: List[str] = [
+                "[linking.base]",
+                "# Base linking flags",
+                "",
+                "flags = [",
+            ]
+            toml_content.extend(linking_section_lines)
+            for flag in self.link_flags:
+                toml_content.append(f'    "{flag}",')
+            toml_content.append("]")
+            toml_content.append("")
+
+        # [strict_mode] section
+        if self.strict_mode_flags:
+            strict_section_lines: List[str] = [
+                "[strict_mode]",
+                "# Strict mode compilation flags",
+                "",
+                "flags = [",
+            ]
+            toml_content.extend(strict_section_lines)
+            for flag in self.strict_mode_flags:
+                toml_content.append(f'    "{flag}",')
+            toml_content.append("]")
+            toml_content.append("")
+
+        # [tools] section
+        tools_section_lines: List[str] = [
+            "[tools]",
+            "# Build tool configuration",
+            "",
+        ]
+        toml_content.extend(tools_section_lines)
+
+        # Add tools
+        toml_content.append(f'compiler = "{self.tools.compiler}"')
+        toml_content.append(f'archiver = "{self.tools.archiver}"')
+
+        # Only add linker if it's not None
+        if self.tools.linker is not None:
+            toml_content.append(f'linker = "{self.tools.linker}"')
+
+        toml_content.append(f'c_compiler = "{self.tools.c_compiler}"')
+        toml_content.append(f'objcopy = "{self.tools.objcopy}"')
+        toml_content.append(f'nm = "{self.tools.nm}"')
+        toml_content.append(f'strip = "{self.tools.strip}"')
+        toml_content.append(f'ranlib = "{self.tools.ranlib}"')
+        toml_content.append("")
+
+        return "\n".join(toml_content)
+
+    def to_toml_file(self, toml_path: Path) -> None:
+        """
+        Write build flags to TOML file.
+
+        Args:
+            toml_path: Path where to write the TOML file
+        """
+        toml_content = self.serialize()
+
+        # Ensure directory exists
+        toml_path.parent.mkdir(parents=True, exist_ok=True)
+
+        # Write to file
+        with open(toml_path, "w", encoding="utf-8") as f:
+            f.write(toml_content)
+
+    @classmethod
+    def from_toml_file(
+        cls, toml_path: Path, quick_build: bool = False, strict_mode: bool = False
+    ) -> "BuildFlags":
+        """
+        Convenience method to create BuildFlags from TOML file.
+
+        This is an alias for parse() method for better readability.
+
+        Args:
+            toml_path: Path to the build_flags.toml file
+            quick_build: Use quick build mode flags (default: debug mode)
+            strict_mode: Enable strict mode warning flags
+
+        Returns:
+            BuildFlags: Parsed build flags from TOML file
+        """
+        return cls.parse(toml_path, quick_build, strict_mode)
 
 
 class Compiler:
@@ -284,10 +531,44 @@ class Compiler:
             cmd.extend(filtered_args)
             cmd.extend([str(pch_header_path), "-o", str(pch_output_path)])
 
-            # Compile PCH with direct compiler (no sccache)
-            result = subprocess.run(cmd, capture_output=True, text=True, timeout=60)
+            # Compile PCH with direct compiler (no sccache) - use single stream to prevent buffer overflow
+            process = subprocess.Popen(
+                cmd,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,  # Merge stderr into stdout
+                text=True,
+                bufsize=1,  # Line buffered
+                encoding="utf-8",  # Explicitly use UTF-8
+                errors="replace",  # Replace invalid chars instead of failing
+            )
 
-            if result.returncode == 0:
+            stdout_lines: list[str] = []
+            stderr_lines: list[str] = []  # Keep separate for API compatibility
+
+            # Read only stdout (which contains both stdout and stderr)
+            while True:
+                output_line = process.stdout.readline() if process.stdout else ""
+
+                # Process output lines (both stdout and stderr combined)
+                if output_line:
+                    line_stripped = output_line.rstrip()
+                    # Add to both lists for API compatibility
+                    stdout_lines.append(line_stripped)
+                    stderr_lines.append(line_stripped)
+
+                # Check if process has finished
+                if process.poll() is not None:
+                    # Read any remaining output
+                    remaining_output = process.stdout.read() if process.stdout else ""
+
+                    if remaining_output:
+                        for line in remaining_output.splitlines():
+                            line_stripped = line.rstrip()
+                            stdout_lines.append(line_stripped)
+                            stderr_lines.append(line_stripped)
+                    break
+
+            if process.returncode == 0:
                 self._pch_file_path = pch_output_path
                 self._pch_header_path = (
                     pch_header_path  # Keep track of header file for cleanup
@@ -297,8 +578,9 @@ class Compiler:
             else:
                 # PCH compilation failed, clean up and continue without PCH
                 # Print debug info to help diagnose PCH issues
+                stderr_output = "\n".join(stderr_lines)
                 print(f"[DEBUG] PCH compilation failed with command: {' '.join(cmd)}")
-                print(f"[DEBUG] PCH error output: {result.stderr}")
+                print(f"[DEBUG] PCH error output: {stderr_output}")
                 os.unlink(pch_header_path)
                 return False
 
@@ -344,16 +626,47 @@ class Compiler:
                 # This is a direct compiler call
                 version_cmd = [self.settings.compiler, "--version"]
 
-            result = subprocess.run(
+            # Use Popen with stderr redirected to stdout to prevent buffer overflow
+            process = subprocess.Popen(
                 version_cmd,
-                capture_output=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,  # Merge stderr into stdout
                 text=True,
-                timeout=10,
+                bufsize=1,
+                encoding="utf-8",
+                errors="replace",
             )
-            if result.returncode == 0 and "clang version" in result.stdout:
+
+            stdout_lines: list[str] = []
+            stderr_lines: list[str] = []  # Keep separate for API compatibility
+
+            # Read only stdout (which contains both stdout and stderr)
+            while True:
+                output_line = process.stdout.readline() if process.stdout else ""
+
+                if output_line:
+                    line_stripped = output_line.rstrip()
+                    # Add to both lists for API compatibility
+                    stdout_lines.append(line_stripped)
+                    stderr_lines.append(line_stripped)
+
+                if process.poll() is not None:
+                    # Read remaining output
+                    remaining_output = process.stdout.read() if process.stdout else ""
+
+                    if remaining_output:
+                        for line in remaining_output.splitlines():
+                            line_stripped = line.rstrip()
+                            stdout_lines.append(line_stripped)
+                            stderr_lines.append(line_stripped)
+                    break
+
+            stdout_result = "\n".join(stdout_lines)
+            stderr_result = "\n".join(stderr_lines)
+            if process.returncode == 0 and "clang version" in stdout_result:
                 version = (
-                    result.stdout.split()[2]
-                    if len(result.stdout.split()) > 2
+                    stdout_result.split()[2]
+                    if len(stdout_result.split()) > 2
                     else "unknown"
                 )
                 return VersionCheckResult(
@@ -363,7 +676,7 @@ class Compiler:
                 return VersionCheckResult(
                     success=False,
                     version="",
-                    error=f"clang++ version check failed: {result.stderr}",
+                    error=f"clang++ version check failed: {stderr_result}",
                 )
         except Exception as e:
             return VersionCheckResult(
@@ -489,20 +802,55 @@ class Compiler:
             cmd.extend(additional_flags)
 
         try:
-            result = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
+            # Use Popen with stderr redirected to stdout for single stream pumping
+            process = subprocess.Popen(
+                cmd,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,  # Merge stderr into stdout
+                text=True,
+                bufsize=1,  # Line buffered
+                encoding="utf-8",  # Explicitly use UTF-8
+                errors="replace",  # Replace invalid chars instead of failing
+            )
+
+            stdout_lines: list[str] = []
+            stderr_lines: list[str] = []  # Keep separate for API compatibility
+
+            # Read only stdout (which contains both stdout and stderr)
+            while True:
+                output_line = process.stdout.readline() if process.stdout else ""
+
+                # Process output lines (both stdout and stderr combined)
+                if output_line:
+                    line_stripped = output_line.rstrip()
+                    # Add to both lists for API compatibility
+                    stdout_lines.append(line_stripped)
+                    stderr_lines.append(line_stripped)
+
+                # Check if process has finished
+                if process.poll() is not None:
+                    # Read any remaining output
+                    remaining_output = process.stdout.read() if process.stdout else ""
+
+                    if remaining_output:
+                        for line in remaining_output.splitlines():
+                            line_stripped = line.rstrip()
+                            stdout_lines.append(line_stripped)
+                            stderr_lines.append(line_stripped)
+                    break
 
             # Clean up temp file on failure if we created it
-            if cleanup_temp and result.returncode != 0 and os.path.exists(output_path):
+            if cleanup_temp and process.returncode != 0 and os.path.exists(output_path):
                 try:
                     os.unlink(output_path)
                 except:
                     pass
 
             return Result(
-                ok=(result.returncode == 0),
-                stdout=result.stdout,
-                stderr=result.stderr,
-                return_code=result.returncode,
+                ok=(process.returncode == 0),
+                stdout="\n".join(stdout_lines),
+                stderr="\n".join(stderr_lines),
+                return_code=process.returncode,
             )
 
         except Exception as e:
@@ -632,46 +980,44 @@ class Compiler:
             cmd.extend(additional_flags)
 
         try:
-            # Use Popen to stream output in real-time
+            # Use Popen with stderr redirected to stdout for single stream pumping
             process = subprocess.Popen(
                 cmd,
                 stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
+                stderr=subprocess.STDOUT,  # Merge stderr into stdout
                 text=True,
                 bufsize=1,  # Line buffered
+                encoding="utf-8",  # Explicitly use UTF-8
+                errors="replace",  # Replace invalid chars instead of failing
             )
 
             stdout_lines: list[str] = []
-            stderr_lines: list[str] = []
+            stderr_lines: list[str] = []  # Keep separate for API compatibility
 
-            # Read stdout and stderr in real-time
+            # Read only stdout (which contains both stdout and stderr)
             while True:
-                stdout_line = process.stdout.readline() if process.stdout else ""
-                stderr_line = process.stderr.readline() if process.stderr else ""
+                output_line = process.stdout.readline() if process.stdout else ""
 
-                if stdout_line:
-                    print(stdout_line, end="", flush=True)  # Stream to console
-                    stdout_lines.append(stdout_line)
-                if stderr_line:
-                    print(stderr_line, end="", flush=True)  # Stream to console
-                    stderr_lines.append(stderr_line)
+                # Process output lines (both stdout and stderr combined)
+                if output_line:
+                    line_stripped = output_line.rstrip()
+                    print(output_line, end="", flush=True)  # Stream to console
+                    # Add to both lists for API compatibility
+                    stdout_lines.append(line_stripped)
+                    stderr_lines.append(line_stripped)
 
                 # Check if process has finished
                 if process.poll() is not None:
                     # Read any remaining output
-                    remaining_stdout = process.stdout.read() if process.stdout else ""
-                    remaining_stderr = process.stderr.read() if process.stderr else ""
-                    if remaining_stdout:
-                        print(remaining_stdout, end="", flush=True)
-                        stdout_lines.append(remaining_stdout)
-                    if remaining_stderr:
-                        print(remaining_stderr, end="", flush=True)
-                        stderr_lines.append(remaining_stderr)
-                    break
+                    remaining_output = process.stdout.read() if process.stdout else ""
 
-                # if not stdout_line and not stderr_line:
-                #     # No output available, sleep briefly to avoid busy waiting
-                #     time.sleep(0.1)
+                    if remaining_output:
+                        print(remaining_output, end="", flush=True)
+                        for line in remaining_output.splitlines():
+                            line_stripped = line.rstrip()
+                            stdout_lines.append(line_stripped)
+                            stderr_lines.append(line_stripped)
+                    break
 
             # Clean up temp file on failure if we created it
             if cleanup_temp and process.returncode != 0 and os.path.exists(output_path):
@@ -1303,46 +1649,44 @@ def link_program_sync(link_options: LinkOptions) -> Result:
 
     # Execute linker command
     try:
-        # Use Popen to stream output in real-time
+        # Use Popen with stderr redirected to stdout for single stream pumping
         process = subprocess.Popen(
             cmd,
             stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
+            stderr=subprocess.STDOUT,  # Merge stderr into stdout
             text=True,
             bufsize=1,  # Line buffered
+            encoding="utf-8",  # Explicitly use UTF-8
+            errors="replace",  # Replace invalid chars instead of failing
         )
 
         stdout_lines: list[str] = []
-        stderr_lines: list[str] = []
+        stderr_lines: list[str] = []  # Keep separate for API compatibility
 
-        # Read stdout and stderr in real-time
+        # Read only stdout (which contains both stdout and stderr)
         while True:
-            stdout_line = process.stdout.readline() if process.stdout else ""
-            stderr_line = process.stderr.readline() if process.stderr else ""
+            output_line = process.stdout.readline() if process.stdout else ""
 
-            if stdout_line:
-                print(stdout_line, end="", flush=True)  # Stream to console
-                stdout_lines.append(stdout_line)
-            if stderr_line:
-                print(stderr_line, end="", flush=True)  # Stream to console
-                stderr_lines.append(stderr_line)
+            # Process output lines (both stdout and stderr combined)
+            if output_line:
+                line_stripped = output_line.rstrip()
+                print(output_line, end="", flush=True)  # Stream to console
+                # Add to both lists for API compatibility
+                stdout_lines.append(line_stripped)
+                stderr_lines.append(line_stripped)
 
             # Check if process has finished
             if process.poll() is not None:
                 # Read any remaining output
-                remaining_stdout = process.stdout.read() if process.stdout else ""
-                remaining_stderr = process.stderr.read() if process.stderr else ""
-                if remaining_stdout:
-                    print(remaining_stdout, end="", flush=True)
-                    stdout_lines.append(remaining_stdout)
-                if remaining_stderr:
-                    print(remaining_stderr, end="", flush=True)
-                    stderr_lines.append(remaining_stderr)
-                break
+                remaining_output = process.stdout.read() if process.stdout else ""
 
-            # if not stdout_line and not stderr_line:
-            #     # No output available, sleep briefly to avoid busy waiting
-            #     time.sleep(0.1)
+                if remaining_output:
+                    print(remaining_output, end="", flush=True)
+                    for line in remaining_output.splitlines():
+                        line_stripped = line.rstrip()
+                        stdout_lines.append(line_stripped)
+                        stderr_lines.append(line_stripped)
+                break
 
         return Result(
             ok=process.returncode == 0,
@@ -1743,20 +2087,140 @@ def create_archive_sync(
     # Ensure output directory exists
     output_archive.parent.mkdir(parents=True, exist_ok=True)
 
-    # Execute archive command
+    # Execute archive command with single stream to prevent buffer overflow
     try:
-        process = subprocess.run(cmd, capture_output=True, text=True, cwd=None)
+        process = subprocess.Popen(
+            cmd,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,  # Merge stderr into stdout
+            text=True,
+            bufsize=1,
+            encoding="utf-8",
+            errors="replace",
+            cwd=None,
+        )
+
+        stdout_lines: list[str] = []
+        stderr_lines: list[str] = []  # Keep separate for API compatibility
+
+        # Read only stdout (which contains both stdout and stderr)
+        while True:
+            output_line = process.stdout.readline() if process.stdout else ""
+
+            if output_line:
+                line_stripped = output_line.rstrip()
+                # Add to both lists for API compatibility
+                stdout_lines.append(line_stripped)
+                stderr_lines.append(line_stripped)
+
+            if process.poll() is not None:
+                # Read remaining output
+                remaining_output = process.stdout.read() if process.stdout else ""
+
+                if remaining_output:
+                    for line in remaining_output.splitlines():
+                        line_stripped = line.rstrip()
+                        stdout_lines.append(line_stripped)
+                        stderr_lines.append(line_stripped)
+                break
 
         return Result(
             ok=process.returncode == 0,
-            stdout=process.stdout,
-            stderr=process.stderr,
+            stdout="\n".join(stdout_lines),
+            stderr="\n".join(stderr_lines),
             return_code=process.returncode,
         )
     except Exception as e:
         return Result(
             ok=False, stdout="", stderr=f"Archive command failed: {e}", return_code=-1
         )
+
+
+def load_build_flags_from_toml(
+    toml_path: Path, quick_build: bool = False, strict_mode: bool = False
+) -> BuildFlags:
+    """
+    Load build flags from TOML configuration file.
+
+    This is a convenience function that delegates to BuildFlags.parse().
+
+    Args:
+        toml_path: Path to the build_flags.toml file
+        quick_build: Use quick build mode flags (default: debug mode)
+        strict_mode: Enable strict mode warning flags
+
+    Returns:
+        BuildFlags: Parsed build flags from TOML file
+    """
+    return BuildFlags.parse(toml_path, quick_build, strict_mode)
+
+
+def create_compiler_options_from_toml(
+    toml_path: Path,
+    include_path: str,
+    quick_build: bool = False,
+    strict_mode: bool = False,
+    additional_defines: List[str] | None = None,
+    additional_compiler_args: List[str] | None = None,
+    **kwargs: Any,
+) -> CompilerOptions:
+    """
+    Create CompilerOptions from TOML build flags configuration.
+
+    Args:
+        toml_path: Path to the build_flags.toml file
+        include_path: Base include path for compilation
+        quick_build: Use quick build mode flags (default: debug mode)
+        strict_mode: Enable strict mode warning flags
+        additional_defines: Extra defines to add beyond TOML
+        additional_compiler_args: Extra compiler args to add beyond TOML
+        **kwargs: Additional CompilerOptions parameters
+
+    Returns:
+        CompilerOptions: Configured compiler options with TOML flags
+    """
+    # Load build flags from TOML
+    build_flags = BuildFlags.parse(toml_path, quick_build, strict_mode)
+
+    # Create compiler args from TOML flags
+    compiler_args: List[str] = []
+    compiler_args.extend(build_flags.compiler_flags)
+    compiler_args.extend(build_flags.include_flags)
+
+    # Add strict mode flags if enabled
+    if strict_mode:
+        compiler_args.extend(build_flags.strict_mode_flags)
+
+    # Add additional compiler args if provided
+    if additional_compiler_args:
+        compiler_args.extend(additional_compiler_args)
+
+    # Extract defines without the "-D" prefix for CompilerOptions
+    defines: List[str] = []
+    for define in build_flags.defines:
+        if define.startswith("-D"):
+            defines.append(define[2:])  # Remove "-D" prefix
+        else:
+            defines.append(define)
+
+    # Add additional defines if provided
+    if additional_defines:
+        defines.extend(additional_defines)
+
+    # Remove conflicting tool parameters from kwargs (TOML tools take precedence)
+    filtered_kwargs = {
+        k: v for k, v in kwargs.items() if k not in ["compiler", "archiver"]
+    }
+
+    # Create CompilerOptions with TOML-loaded flags and tools
+    return CompilerOptions(
+        include_path=include_path,
+        defines=defines,
+        compiler_args=compiler_args,
+        compiler=build_flags.tools.compiler,  # Use TOML-specified compiler
+        archiver=build_flags.tools.archiver,  # Use TOML-specified archiver
+        **filtered_kwargs,
+    )
 
 
 if __name__ == "__main__":

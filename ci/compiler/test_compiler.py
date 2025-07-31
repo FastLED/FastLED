@@ -25,16 +25,21 @@ import time
 from concurrent.futures import Future, as_completed
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from types import TracebackType
+from typing import Any, Callable, Dict, List, Optional
 
 from ci.ci.paths import PROJECT_ROOT
 from ci.compiler.clang_compiler import (
+    BuildFlags,
+    BuildTools,
     Compiler,
     CompilerOptions,
     LinkOptions,
     Result,
+    create_compiler_options_from_toml,
     get_common_linker_args,
     link_program_sync,
+    load_build_flags_from_toml,
 )
 
 
@@ -78,13 +83,28 @@ class FastLEDTestCompiler:
     # Class variable to store existing instance for get_existing_instance()
     _existing_instance: Optional["FastLEDTestCompiler"] = None
 
-    def __init__(self, compiler: Compiler, build_dir: Path, project_root: Path):
+    def __init__(
+        self,
+        compiler: Compiler,
+        build_dir: Path,
+        project_root: Path,
+        quick_build: bool = False,
+        strict_mode: bool = False,
+    ):
         self.compiler = compiler
         self.build_dir = build_dir
         self.project_root = project_root
+        self.quick_build = quick_build
+        self.strict_mode = strict_mode
         self.compiled_tests: List[TestExecutable] = []
         self.linking_failures: List[str] = []
+        self.build_flags = self._load_build_flags()
         FastLEDTestCompiler._existing_instance = self
+
+    def _load_build_flags(self) -> BuildFlags:
+        """Load build flags from TOML configuration"""
+        toml_path = self.project_root / "tests" / "build_flags.toml"
+        return BuildFlags.parse(toml_path, self.quick_build, self.strict_mode)
 
     @classmethod
     def create_for_unit_tests(
@@ -93,90 +113,105 @@ class FastLEDTestCompiler:
         clean_build: bool = False,
         enable_static_analysis: bool = False,
         specific_test: str | None = None,
+        quick_build: bool = False,
+        strict_mode: bool = False,
     ) -> "FastLEDTestCompiler":
         """
-        Create compiler configured for FastLED unit tests using proven patterns.
+        Create compiler configured for FastLED unit tests using TOML build flags.
 
-        This configuration uses the same proven patterns from example compilation:
+        This configuration uses the new TOML-based build flag system:
+        - tests/build_flags.toml for centralized flag configuration
+        - Support for build modes (quick/debug) and strict mode
         - STUB platform for hardware-free testing
-        - build_flags.toml integration for optimized flags
         - Precompiled headers for faster compilation
         - Parallel compilation with ThreadPoolExecutor
         """
 
-        # Load proven build_flags.toml configuration (same as example compilation)
-        toml_path = project_root / "ci" / "build_flags.toml"
-        toml_flags: List[str] = []
-        if toml_path.exists():
-            try:
-                # Import the proven flag extraction function
-                from ci.compiler.test_example_compilation import (
-                    extract_compiler_flags_from_toml,
-                    load_build_flags_toml,
-                )
+        # Set up build directory (use temp directory for faster I/O)
+        build_dir = Path(tempfile.gettempdir()) / "fastled_test_build"
+        if clean_build and build_dir.exists():
+            print("###########################")
+            print("# CLEANING UNIT TEST BUILD DIR #")
+            print("###########################")
+            import errno
+            import os
+            import shutil
+            import stat
+            import time
 
-                toml_flags = extract_compiler_flags_from_toml(
-                    load_build_flags_toml(str(toml_path))
-                )
-            except ImportError:
-                # Fallback if import not available - use proven base flags
-                toml_flags = [
-                    "-std=gnu++17",
-                    "-fpermissive",
-                    "-fno-threadsafe-statics",
-                    "-fno-exceptions",
-                    "-fno-rtti",
-                    "-pthread",
-                ]
+            def handle_remove_readonly(
+                func: Callable[[str], None],
+                path: str,
+                exc: tuple[type[BaseException], BaseException, TracebackType | None],
+            ) -> None:
+                """Error handler for Windows readonly files"""
+                if hasattr(exc[1], "errno") and exc[1].errno == errno.EACCES:  # type: ignore
+                    os.chmod(path, stat.S_IWRITE)
+                    func(path)
+                else:
+                    raise
 
-        # Configure using proven patterns from example compilation
-        settings = CompilerOptions(
+            # Windows-compatible directory removal with retry
+            max_retries = 3
+            for attempt in range(max_retries):
+                try:
+                    # Use onerror parameter for compatibility across Python versions
+                    shutil.rmtree(build_dir, onerror=handle_remove_readonly)
+                    break
+                except (OSError, PermissionError) as e:
+                    if attempt < max_retries - 1:
+                        print(
+                            f"Warning: Failed to remove build directory (attempt {attempt + 1}): {e}"
+                        )
+                        time.sleep(0.1)  # Brief pause before retry
+                        continue
+                    else:
+                        print(
+                            f"Warning: Could not remove build directory after {max_retries} attempts: {e}"
+                        )
+                        print("Continuing with existing directory...")
+                        break
+        build_dir.mkdir(parents=True, exist_ok=True)
+
+        # Essential platform defines beyond TOML
+        additional_defines = [
+            "ARDUINO=10808",  # Arduino compatibility version
+            "FASTLED_USE_STUB_ARDUINO",  # Proven Arduino emulation
+            "SKETCH_HAS_LOTS_OF_MEMORY=1",  # Enable memory-intensive features
+            "FASTLED_STUB_IMPL",  # Essential for STUB platform implementation
+            "FASTLED_USE_JSON_UI=1",  # Essential for JSON UI functions
+            "FASTLED_TESTING",  # Test-specific functionality
+            "FASTLED_NO_AUTO_NAMESPACE",  # Namespace control
+            "FASTLED_NO_PINMAP",  # Pin mapping control
+            "HAS_HARDWARE_PIN_SUPPORT",  # Hardware support flag
+            "FASTLED_DEBUG_LEVEL=1",  # Enable debug features for tests
+            "DOCTEST_CONFIG_NO_EXCEPTIONS_BUT_WITH_ALL_ASSERTS",  # Enable doctest without exceptions
+        ]
+
+        # Additional compiler args beyond TOML
+        additional_compiler_args = [
+            f"-I{project_root}/src/platforms/stub",  # STUB platform headers
+        ]
+
+        # Load TOML path and create compiler options
+        toml_path = project_root / "tests" / "build_flags.toml"
+        settings = create_compiler_options_from_toml(
+            toml_path=toml_path,
             include_path=str(project_root / "src"),
-            defines=[
-                "STUB_PLATFORM",  # Proven platform identifier
-                "ARDUINO=10808",  # Arduino compatibility version
-                "FASTLED_USE_STUB_ARDUINO",  # Proven Arduino emulation
-                "SKETCH_HAS_LOTS_OF_MEMORY=1",  # Enable memory-intensive features
-                # CRITICAL: Missing CMake definitions found in CompilerFlags.cmake
-                "FASTLED_STUB_IMPL",  # Essential for STUB platform implementation
-                "FASTLED_USE_JSON_UI=1",  # Essential for JSON UI functions
-                "FASTLED_FORCE_NAMESPACE=1",  # Important for namespace handling
-                "FASTLED_TESTING",  # Test-specific functionality
-                "FASTLED_NO_AUTO_NAMESPACE",  # Namespace control
-                "FASTLED_NO_PINMAP",  # Pin mapping control
-                "HAS_HARDWARE_PIN_SUPPORT",  # Hardware support flag
-                # Additional testing-specific defines
-                "FASTLED_DEBUG_LEVEL=1",  # Enable debug features for tests
-                # Doctest configuration for working without exceptions
-                "DOCTEST_CONFIG_NO_EXCEPTIONS_BUT_WITH_ALL_ASSERTS",  # Enable doctest without exceptions
-            ],
-            std_version="c++17",  # C++17 for tests (proven setting)
-            compiler="clang++",  # Proven compiler choice
-            compiler_args=toml_flags
-            + [
-                # Proven include paths from STUB platform compilation
-                f"-I{project_root}/src/platforms/stub",  # STUB platform headers
-                f"-I{project_root}/tests",  # Test headers
-                # Additional warning flags for test quality
-                "-Wall",  # Enable comprehensive warnings
-                "-Wextra",  # Extra warning checks
-                "-g",  # Debug symbols for GDB compatibility
-            ],
-            use_pch=True,  # Leverage PCH optimization (proven)
-            parallel=True,  # Proven parallel compilation
+            quick_build=quick_build,
+            strict_mode=strict_mode,
+            additional_defines=additional_defines,
+            additional_compiler_args=additional_compiler_args,
+            std_version="c++17",
+            compiler="clang++",
+            use_pch=True,
+            parallel=True,
         )
 
         compiler = Compiler(settings)
 
-        # Set up build directory (use temp directory for faster I/O)
-        build_dir = Path(tempfile.gettempdir()) / "fastled_test_build"
-        if clean_build and build_dir.exists():
-            import shutil
-
-            shutil.rmtree(build_dir)
-        build_dir.mkdir(parents=True, exist_ok=True)
-
-        instance = cls(compiler, build_dir, project_root)
+        # Create final instance with proper compiler and flags
+        instance = cls(compiler, build_dir, project_root, quick_build, strict_mode)
         return instance
 
     def discover_test_files(self, specific_test: str | None = None) -> List[Path]:
@@ -387,21 +422,7 @@ class FastLEDTestCompiler:
                 link_options = LinkOptions(
                     object_files=[obj_path],  # Only the test object file
                     output_executable=exe_path,
-                    linker_args=get_common_linker_args(debug=True)
-                    + [
-                        str(
-                            fastled_lib_path
-                        ),  # Link against the FastLED static library
-                        # Add Windows library paths
-                        "/LIBPATH:C:/Program Files (x86)/Windows Kits/10/Lib/10.0.19041.0/um/x64",
-                        "/LIBPATH:C:/Program Files (x86)/Windows Kits/10/Lib/10.0.19041.0/ucrt/x64",
-                        "/LIBPATH:C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.37.32822/lib/x64",
-                        # Add necessary system libraries for Windows/Clang
-                        "/DEFAULTLIB:msvcrt",  # C runtime library (provides memset, memcpy, strlen, etc.)
-                        "/DEFAULTLIB:legacy_stdio_definitions",  # Legacy stdio functions
-                        "/DEFAULTLIB:kernel32",  # Windows kernel functions
-                        "/DEFAULTLIB:user32",  # Windows user interface
-                    ],
+                    linker_args=self._get_platform_linker_args(fastled_lib_path),
                 )
             else:
                 # Link with the FastLED library instead of individual objects
@@ -411,21 +432,7 @@ class FastLEDTestCompiler:
                         doctest_obj_path,
                     ],  # Test object + doctest main
                     output_executable=exe_path,
-                    linker_args=get_common_linker_args(debug=True)
-                    + [
-                        str(
-                            fastled_lib_path
-                        ),  # Link against the FastLED static library
-                        # Add Windows library paths
-                        "/LIBPATH:C:/Program Files (x86)/Windows Kits/10/Lib/10.0.19041.0/um/x64",
-                        "/LIBPATH:C:/Program Files (x86)/Windows Kits/10/Lib/10.0.19041.0/ucrt/x64",
-                        "/LIBPATH:C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.37.32822/lib/x64",
-                        # Add necessary system libraries for Windows/Clang
-                        "/DEFAULTLIB:msvcrt",  # C runtime library (provides memset, memcpy, strlen, etc.)
-                        "/DEFAULTLIB:legacy_stdio_definitions",  # Legacy stdio functions
-                        "/DEFAULTLIB:kernel32",  # Windows kernel functions
-                        "/DEFAULTLIB:user32",  # Windows user interface
-                    ],
+                    linker_args=self._get_platform_linker_args(fastled_lib_path),
                 )
 
             # Show linking command if enabled
@@ -558,9 +565,59 @@ class FastLEDTestCompiler:
         ] + [str(obj) for obj in fastled_objects]
 
         try:
-            ar_result: subprocess.CompletedProcess[str] = subprocess.run(
-                ar_cmd, capture_output=True, text=True, cwd=self.build_dir
-            )
+            # Use streaming to prevent buffer overflow
+            def run_ar_command(cmd: List[str]):
+                process = subprocess.Popen(
+                    cmd,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    text=True,
+                    bufsize=1,
+                    encoding="utf-8",
+                    errors="replace",
+                    cwd=self.build_dir,
+                )
+
+                stdout_lines: list[str] = []
+                stderr_lines: list[str] = []
+
+                while True:
+                    stdout_line = process.stdout.readline() if process.stdout else ""
+                    stderr_line = process.stderr.readline() if process.stderr else ""
+
+                    if stdout_line:
+                        stdout_lines.append(stdout_line.rstrip())
+                    if stderr_line:
+                        stderr_lines.append(stderr_line.rstrip())
+
+                    if process.poll() is not None:
+                        remaining_stdout = (
+                            process.stdout.read() if process.stdout else ""
+                        )
+                        remaining_stderr = (
+                            process.stderr.read() if process.stderr else ""
+                        )
+
+                        if remaining_stdout:
+                            for line in remaining_stdout.splitlines():
+                                stdout_lines.append(line.rstrip())
+                        if remaining_stderr:
+                            for line in remaining_stderr.splitlines():
+                                stderr_lines.append(line.rstrip())
+                        break
+
+                # Create simple result object
+                class ArResult:
+                    def __init__(self, returncode: int, stdout: str, stderr: str):
+                        self.returncode = returncode
+                        self.stdout = stdout
+                        self.stderr = stderr
+
+                return ArResult(
+                    process.returncode, "\n".join(stdout_lines), "\n".join(stderr_lines)
+                )
+
+            ar_result = run_ar_command(ar_cmd)
             if ar_result.returncode != 0:
                 print(
                     f"ERROR: Failed to create static library with llvm-lib: {ar_result.stderr}"
@@ -570,9 +627,7 @@ class FastLEDTestCompiler:
                     str(obj) for obj in fastled_objects
                 ]
 
-                ar_result = subprocess.run(
-                    ar_cmd, capture_output=True, text=True, cwd=self.build_dir
-                )
+                ar_result = run_ar_command(ar_cmd)
                 if ar_result.returncode != 0:
                     raise Exception(
                         f"Failed to create static library with both llvm-lib and llvm-ar: {ar_result.stderr}"
@@ -614,6 +669,44 @@ class FastLEDTestCompiler:
                     )
                 ]
         return self.compiled_tests
+
+    def _get_platform_linker_args(self, fastled_lib_path: Path) -> List[str]:
+        """Get platform-specific linker arguments"""
+        args = get_common_linker_args(debug=True)
+        args.append(str(fastled_lib_path))  # Link against the FastLED static library
+
+        if sys.platform == "win32":
+            # Windows-specific library paths and libraries
+            args.extend(
+                [
+                    "/LIBPATH:C:/Program Files (x86)/Windows Kits/10/Lib/10.0.19041.0/um/x64",
+                    "/LIBPATH:C:/Program Files (x86)/Windows Kits/10/Lib/10.0.19041.0/ucrt/x64",
+                    "/LIBPATH:C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.37.32822/lib/x64",
+                    "/DEFAULTLIB:msvcrt",  # C runtime library
+                    "/DEFAULTLIB:legacy_stdio_definitions",  # Legacy stdio functions
+                    "/DEFAULTLIB:kernel32",  # Windows kernel functions
+                    "/DEFAULTLIB:user32",  # Windows user interface
+                ]
+            )
+        else:
+            # Unix-like systems (Linux, macOS)
+            args.extend(
+                [
+                    "-pthread",  # POSIX threads support
+                    "-ldl",  # Dynamic linking support
+                    "-lm",  # Math library
+                ]
+            )
+
+            # Add sanitizer runtime libraries
+            args.extend(
+                [
+                    "-fsanitize=address",
+                    "-fsanitize=undefined",
+                ]
+            )
+
+        return args
 
     @classmethod
     def get_existing_instance(cls) -> Optional["FastLEDTestCompiler"]:

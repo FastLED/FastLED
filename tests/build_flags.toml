@@ -1,16 +1,3 @@
-# Unit Test Build Flags TOML Integration
-
-## Overview
-
-This feature adds first-class TOML configuration support for unit test compilation flags, enabling consistent and maintainable build configuration across different build modes (quick, debug).
-
-## Design
-
-### 1. TOML File Structure
-
-Create `tests/build_flags.toml` with the following structure:
-
-```toml
 # ================================================================================================
 # FastLED Unit Test Compilation Flags Configuration
 # ================================================================================================
@@ -86,17 +73,11 @@ flags = [
     "-g3",                                      # Maximum debug info
     "-fno-inline",                              # Disable function inlining for clearer debugging
     "-O0",                                      # No optimization for clearest debugging
-    
-    # Runtime Checking
-    "-fsanitize=address",                       # Enable address sanitizer
-    "-fsanitize=undefined",                     # Enable undefined behavior sanitizer
 ]
 
 link_flags = [
     # Debug Info and Error Detection
     "-g",                                       # Include debug symbols
-    "-fsanitize=address",                       # Link with address sanitizer
-    "-fsanitize=undefined",                     # Link with undefined behavior sanitizer
 ]
 
 [build_modes.quick]
@@ -167,116 +148,22 @@ flags = [
     "-Wcast-align",                             # Warn about alignment-breaking casts
     "-Wcast-qual",                              # Warn about qualifier-removing casts
 ]
-```
 
-### 2. FastLEDTestCompiler Integration
+# ================================================================================================
+# BUILD TOOLS CONFIGURATION
+# ================================================================================================
+# Configuration for build tools (compilers, archivers, linkers, utilities)
+# These tools can be customized for different platforms or build environments
 
-The `FastLEDTestCompiler` class will be enhanced to read and apply build flags from the TOML file:
+[tools]
+# Core build tools
+compiler = "clang++"           # C++ compiler (used by CompilerOptions)
+archiver = "ar"               # Archive tool for static libraries (used by CompilerOptions)
+# linker = "ld"               # Linker tool (optional, auto-detected if not specified)
 
-```python
-@dataclass
-class BuildFlags:
-    """Build flags loaded from TOML configuration"""
-    defines: list[str]
-    compiler_flags: list[str]
-    include_flags: list[str]
-    link_flags: list[str]
-    strict_mode_flags: list[str]
-
-class FastLEDTestCompiler:
-    """Test compiler with TOML build flag support"""
-    
-    def __init__(self, compiler: Compiler, build_dir: Path, project_root: Path):
-        self.compiler = compiler
-        self.build_dir = build_dir
-        self.project_root = project_root
-        self.build_flags = self._load_build_flags()
-    
-    def _load_build_flags(self) -> BuildFlags:
-        """Load build flags from TOML configuration"""
-        import tomli
-        
-        # Load TOML file
-        toml_path = self.project_root / "tests" / "build_flags.toml"
-        with open(toml_path, "rb") as f:
-            config = tomli.load(f)
-        
-        # Extract base flags
-        base_flags = BuildFlags(
-            defines=config["all"]["defines"],
-            compiler_flags=config["all"]["compiler_flags"],
-            include_flags=config["all"]["include_flags"],
-            link_flags=config["linking"]["base"]["flags"],
-            strict_mode_flags=config["strict_mode"]["flags"]
-        )
-        
-        # Add build mode specific flags
-        build_mode = "quick" if self.quick_build else "debug"
-        if f"build_modes.{build_mode}" in config:
-            mode_config = config[f"build_modes.{build_mode}"]
-            base_flags.compiler_flags.extend(mode_config["flags"])
-            base_flags.link_flags.extend(mode_config["link_flags"])
-        
-        return base_flags
-    
-    def _apply_build_flags(self, cmd: list[str]) -> list[str]:
-        """Apply loaded build flags to compilation command"""
-        flags = self.build_flags
-        
-        # Add defines
-        cmd.extend(flags.defines)
-        
-        # Add compiler flags
-        cmd.extend(flags.compiler_flags)
-        
-        # Add include paths
-        cmd.extend(flags.include_flags)
-        
-        # Add strict mode flags if enabled
-        if self.strict_mode:
-            cmd.extend(flags.strict_mode_flags)
-        
-        return cmd
-```
-
-### 3. Usage Example
-
-```python
-# Create compiler with TOML flag support
-compiler = FastLEDTestCompiler.create_for_unit_tests(
-    project_root=Path("."),
-    quick_build=True,  # Use quick build flags
-    strict_mode=False  # Don't enable strict mode flags
-)
-
-# Compile tests - flags are automatically loaded from TOML
-result = compiler.compile_all_tests()
-```
-
-## Benefits
-
-1. **Centralized Configuration**: All build flags are defined in one TOML file, making it easy to maintain and modify build settings.
-
-2. **Build Mode Support**: Clear separation between debug and quick build flags, with easy switching between modes.
-
-3. **Consistency**: All tests use the same base flags, ensuring consistent compilation behavior.
-
-4. **Maintainability**: TOML format is human-readable and well-documented, making it easy to understand and modify flags.
-
-5. **Extensibility**: Easy to add new build modes or flag categories by extending the TOML structure.
-
-## Implementation Plan
-
-1. Create `tests/build_flags.toml` with the defined structure
-2. Add TOML parsing support to FastLEDTestCompiler
-3. Modify compilation logic to use flags from TOML
-4. Update documentation to reflect TOML configuration
-5. Add tests to verify TOML flag loading and application
-
-## Future Enhancements
-
-1. **Platform-Specific Flags**: Add platform-specific sections for different OS/compiler combinations
-2. **Custom Build Modes**: Allow defining additional build modes beyond quick/debug
-3. **Environment Variables**: Support overriding flags via environment variables
-4. **Flag Validation**: Add validation to ensure required flags are present
-5. **IDE Integration**: Generate IDE configuration from TOML flags
+# Additional build tools for comprehensive build support
+c_compiler = "clang"          # C compiler (for mixed C/C++ projects)
+objcopy = "objcopy"          # Object copy utility (for firmware/embedded builds)
+nm = "nm"                    # Symbol table utility (for analysis and debugging)
+strip = "strip"              # Strip utility (for release builds)
+ranlib = "ranlib"            # Archive indexer (for static library optimization)

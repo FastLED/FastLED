@@ -138,9 +138,44 @@ def build_fastled_dynamic_library(build_dir: Path) -> Path:
         ]
 
     try:
-        link_result = subprocess.run(link_cmd, capture_output=True, text=True)
-        if link_result.returncode != 0:
-            raise Exception(f"Failed to create dynamic library: {link_result.stderr}")
+        # Use streaming to prevent buffer overflow
+        process = subprocess.Popen(
+            link_cmd,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            bufsize=1,
+            encoding="utf-8",
+            errors="replace",
+        )
+
+        stdout_lines: list[str] = []
+        stderr_lines: list[str] = []
+
+        while True:
+            stdout_line = process.stdout.readline() if process.stdout else ""
+            stderr_line = process.stderr.readline() if process.stderr else ""
+
+            if stdout_line:
+                stdout_lines.append(stdout_line.rstrip())
+            if stderr_line:
+                stderr_lines.append(stderr_line.rstrip())
+
+            if process.poll() is not None:
+                remaining_stdout = process.stdout.read() if process.stdout else ""
+                remaining_stderr = process.stderr.read() if process.stderr else ""
+
+                if remaining_stdout:
+                    for line in remaining_stdout.splitlines():
+                        stdout_lines.append(line.rstrip())
+                if remaining_stderr:
+                    for line in remaining_stderr.splitlines():
+                        stderr_lines.append(line.rstrip())
+                break
+
+        stderr_result = "\n".join(stderr_lines)
+        if process.returncode != 0:
+            raise Exception(f"Failed to create dynamic library: {stderr_result}")
 
         print(f"Successfully created dynamic library: {fastled_lib_path}")
         return fastled_lib_path

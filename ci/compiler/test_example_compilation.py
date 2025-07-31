@@ -166,22 +166,63 @@ def get_system_info() -> Dict[str, Union[str, int, float]]:
         # Get compiler information (try to detect Clang version)
         compiler_info = "Unknown"
         try:
-            result = subprocess.run(
-                ["clang", "--version"], capture_output=True, text=True, timeout=5
+            # Use streaming to prevent buffer overflow
+            process = subprocess.Popen(
+                ["clang", "--version"],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+                bufsize=1,
+                encoding="utf-8",
+                errors="replace",
             )
-            if result.returncode == 0:
-                first_line = result.stdout.split("\n")[0]
+
+            stdout_lines: list[str] = []
+            while True:
+                stdout_line = process.stdout.readline() if process.stdout else ""
+                if stdout_line:
+                    stdout_lines.append(stdout_line.rstrip())
+                if process.poll() is not None:
+                    remaining_stdout = process.stdout.read() if process.stdout else ""
+                    if remaining_stdout:
+                        for line in remaining_stdout.splitlines():
+                            stdout_lines.append(line.rstrip())
+                    break
+
+            if process.returncode == 0 and stdout_lines:
+                first_line = stdout_lines[0]
                 # Extract version from line like "clang version 15.0.0"
                 if "clang version" in first_line:
                     version = first_line.split("clang version")[1].strip().split()[0]
                     compiler_info = f"Clang {version}"
         except:
             try:
-                result = subprocess.run(
-                    ["gcc", "--version"], capture_output=True, text=True, timeout=5
+                # Use streaming to prevent buffer overflow
+                process = subprocess.Popen(
+                    ["gcc", "--version"],
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    text=True,
+                    bufsize=1,
+                    encoding="utf-8",
+                    errors="replace",
                 )
-                if result.returncode == 0:
-                    first_line = result.stdout.split("\n")[0]
+
+                stdout_lines: list[str] = []
+                while True:
+                    stdout_line = process.stdout.readline() if process.stdout else ""
+                    if stdout_line:
+                        stdout_lines.append(stdout_line.rstrip())
+                    if process.poll() is not None:
+                        remaining_stdout = (
+                            process.stdout.read() if process.stdout else ""
+                        )
+                        if remaining_stdout:
+                            for line in remaining_stdout.splitlines():
+                                stdout_lines.append(line.rstrip())
+                        break
+                if process.returncode == 0:
+                    first_line = stdout_lines[0]
                     if "gcc" in first_line.lower():
                         # Extract version from line like "gcc (GCC) 11.2.0"
                         import re
@@ -514,12 +555,22 @@ def compile_examples_simple(
         f"[SIMPLE] Using PCH for {pch_files_count} files, direct compilation for {direct_files_count} files"
     )
 
-    # Collect results as they complete
+    # Collect results as they complete with timeout to prevent hanging
     completed_count = 0
-    for future in as_completed(future_to_file.keys()):
-        result: Result = future.result()
-        source_file: Path = future_to_file[future]
-        completed_count += 1
+    for future in as_completed(
+        future_to_file.keys(), timeout=120
+    ):  # 2 minute total timeout
+        try:
+            result: Result = future.result(timeout=30)  # 30 second timeout per file
+            source_file: Path = future_to_file[future]
+            completed_count += 1
+        except Exception as e:
+            source_file: Path = future_to_file[future]
+            completed_count += 1
+            print(f"ERROR: Compilation timed out or failed for {source_file}: {e}")
+            result = Result(
+                ok=False, stdout="", stderr=f"Compilation timeout: {e}", return_code=-1
+            )
 
         # Log progress every 10 completions
         if completed_count % 10 == 0 or completed_count == total_files:
