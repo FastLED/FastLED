@@ -18,6 +18,7 @@ Memory Usage: 2-4GB (CMake) → 200-500MB (Python API) = 80% reduction
 """
 
 import os
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -43,6 +44,26 @@ from ci.compiler.clang_compiler import (
     link_program_sync,
     load_build_flags_from_toml,
 )
+
+
+def get_sccache_path() -> Optional[str]:
+    """Get the full path to sccache executable if available."""
+    # First check system PATH
+    sccache_path = shutil.which("sccache")
+    if sccache_path:
+        return sccache_path
+
+    # Check for sccache in the uv virtual environment
+    venv_sccache = Path(".venv/Scripts/sccache.exe")
+    if venv_sccache.exists():
+        return str(venv_sccache.absolute())
+
+    return None
+
+
+def get_ccache_path() -> Optional[str]:
+    """Get the full path to ccache executable if available."""
+    return shutil.which("ccache")
 
 
 @dataclass
@@ -221,15 +242,39 @@ class FastLEDTestCompiler:
 
         # Get tools configuration
         tools_config = config.get("tools", {})
-        compiler_tool = tools_config.get("compiler", "clang++")
         archiver_tool = tools_config.get("archiver", "ar")
+
+        # Always use clang++ as the actual compiler, regardless of TOML config
+        actual_compiler = "clang++"
+
+        # Determine compiler command (with or without cache)
+        compiler_cmd = actual_compiler
+        cache_args = []
+        sccache_path = get_sccache_path()
+        if sccache_path:
+            compiler_cmd = sccache_path
+            cache_args = [actual_compiler]  # sccache clang++ [args...]
+            print(f"Using sccache for unit tests: {sccache_path}")
+        else:
+            ccache_path = get_ccache_path()
+            if ccache_path:
+                compiler_cmd = ccache_path
+                cache_args = [actual_compiler]  # ccache clang++ [args...]
+                print(f"Using ccache for unit tests: {ccache_path}")
+            else:
+                print(
+                    "No compiler cache available for unit tests, using direct compilation"
+                )
+
+        # Combine cache args with compiler args (cache args go first for detection)
+        final_compiler_args = cache_args + compiler_args
 
         # Create compiler options with TOML-loaded flags and tools
         settings = CompilerOptions(
             include_path=str(project_root / "src"),
             defines=defines,
-            compiler_args=compiler_args,
-            compiler=compiler_tool,  # Use TOML-specified compiler
+            compiler_args=final_compiler_args,  # Use cache-aware compiler args
+            compiler=compiler_cmd,  # Use cache executable or direct compiler
             archiver=archiver_tool,  # Use TOML-specified archiver
             std_version="c++17",
             use_pch=True,
