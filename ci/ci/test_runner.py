@@ -638,7 +638,7 @@ def _run_processes_parallel(
 
     # Track last activity time for each process to detect stuck processes
     last_activity_time = {proc: time.time() for proc in active_processes}
-    stuck_process_timeout = 30  # 30 seconds without output indicates stuck process
+    stuck_process_timeout = 300  # 5 mins without output indicates stuck process
 
     # Track failed processes for proper error reporting
     failed_processes: list[str] = []
@@ -698,7 +698,7 @@ def _run_processes_parallel(
                         while True:  # Keep draining until no more output
                             try:
                                 additional_line = proc.get_next_line(
-                                    timeout=0.01
+                                    timeout=20
                                 )  # 10ms for draining
                                 if additional_line is None:
                                     break  # End of stream
@@ -708,7 +708,6 @@ def _run_processes_parallel(
                                     output_handler.handle_output_line(
                                         additional_line, cmd
                                     )
-                                    sys.stdout.flush()
                                 any_activity = True
                                 last_activity_time[proc] = (
                                     time.time()

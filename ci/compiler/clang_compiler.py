@@ -24,7 +24,17 @@ def cpu_count() -> int:
     return multiprocessing.cpu_count() or 1
 
 
-_EXECUTOR = ThreadPoolExecutor(max_workers=cpu_count() * 2)
+def get_max_workers() -> int:
+    # Check for NO_PARALLEL environment variable
+    import os
+
+    if os.environ.get("NO_PARALLEL"):
+        print("NO_PARALLEL environment variable set - forcing sequential compilation")
+        return 1
+    return cpu_count() * 2
+
+
+_EXECUTOR = ThreadPoolExecutor(max_workers=get_max_workers())
 
 
 @dataclass

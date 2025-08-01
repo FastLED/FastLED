@@ -15,6 +15,7 @@ import warnings
 from pathlib import Path
 
 from ci.boards import Board, get_board  # type: ignore
+from ci.create_build_dir import insert_tool_aliases
 from ci.locked_print import locked_print
 
 
@@ -333,6 +334,7 @@ def generate_build_info(
             cmd_list.append(f"--project-option=custom_sdkconfig={board.customsdk}")
 
         try:
+            print(f"Initializing temp project for {board_name} with cmd: {cmd_list}")
             # Initialize the project
             result = subprocess.run(
                 cmd_list,
@@ -370,8 +372,6 @@ def generate_build_info(
 
                 # Add tool aliases (from create_build_dir.py)
 
-                from ci.ci.create_build_dir import insert_tool_aliases
-
                 insert_tool_aliases(data)
 
                 # Save to build_info.json
@@ -394,7 +394,10 @@ def generate_build_info(
             )
             return False
         except Exception as e:
-            locked_print(
+            import traceback
+
+            traceback.print_exc()
+            warnings.warn(
                 f"Warning: Exception generating build_info.json for {board_name}: {e}"
             )
             return False

@@ -14,7 +14,10 @@ UNO = HERE / "uno"
 OUTPUT = HERE / "output"
 
 
-BUILD_INFO_PATH = PROJECT_ROOT / ".build" / "uno" / "build_info.json"
+BUILD_INFO_PATH = PROJECT_ROOT / ".build" / "examples" / "uno" / "build_info.json"
+BUILD_INFO_PATH2 = (
+    PROJECT_ROOT / ".build" / "fled" / "examples" / "uno" / "build_info.json"
+)
 
 DISABLED = True
 
@@ -43,7 +46,12 @@ class TestBinToElf(unittest.TestCase):
     def test_bin_to_elf_conversion(self) -> None:
         if DISABLED:
             return
-        tools: Tools = load_tools(BUILD_INFO_PATH)
+        tools: Tools
+        try:
+            tools = load_tools(BUILD_INFO_PATH)
+        except FileNotFoundError as e:
+            warnings.warn(f"Error while loading tools: {e}")
+            tools = load_tools(BUILD_INFO_PATH2)
         bin_file = UNO / "firmware.hex"
         map_file = UNO / "firmware.map"
         output_elf = OUTPUT / "output.elf"

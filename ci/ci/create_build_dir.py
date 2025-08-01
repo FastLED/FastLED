@@ -12,8 +12,8 @@ import warnings
 from pathlib import Path
 from typing import Any, Callable
 
-from ci.ci.boards import Board  # type: ignore
-from ci.ci.locked_print import locked_print
+from ci.boards import Board  # type: ignore
+from ci.locked_print import locked_print
 
 
 def _install_global_package(package: str) -> None:

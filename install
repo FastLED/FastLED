@@ -1,5 +1,5 @@
 #!/bin/bash
-set -e
+set -ex
 uv venv --python 3.11
 uv pip install -e . --refresh-package fastled
 # This is needed to force the installation to finalize.

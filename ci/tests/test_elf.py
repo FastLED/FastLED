@@ -1,5 +1,6 @@
 import subprocess
 import unittest
+import warnings
 from pathlib import Path
 
 from ci.ci.elf import dump_symbol_sizes
@@ -12,6 +13,9 @@ UNO = HERE / "uno"
 OUTPUT = HERE / "output"
 ELF_FILE = UNO / "firmware.elf"
 BUILD_INFO_PATH = PROJECT_ROOT / ".build" / "uno" / "build_info.json"
+BUILD_INFO_PATH2 = (
+    PROJECT_ROOT / ".build" / "fled" / "examples" / "uno" / "build_info.json"
+)
 
 
 PLATFORMIO_PATH = Path.home() / ".platformio"
@@ -40,7 +44,12 @@ def init() -> None:
 class TestBinToElf(unittest.TestCase):
     def test_bin_to_elf_conversion(self) -> None:
         init()
-        tools: Tools = load_tools(BUILD_INFO_PATH)
+        tools: Tools
+        try:
+            tools = load_tools(BUILD_INFO_PATH)
+        except Exception as e:
+            warnings.warn(f"Error while loading tools: {e}")
+            tools = load_tools(BUILD_INFO_PATH2)
         msg = dump_symbol_sizes(tools.nm_path, tools.cpp_filt_path, ELF_FILE)
         print(msg)
 

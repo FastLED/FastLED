@@ -96,6 +96,11 @@ def parse_args(args: Optional[list[str]] = None) -> TestArgs:
         help="Enable UNITY build mode for examples - compile all source files as a single unit for improved performance",
     )
     parser.add_argument(
+        "--no-unity",
+        action="store_true",
+        help="Disable unity builds for cpp tests and examples",
+    )
+    parser.add_argument(
         "--full",
         action="store_true",
         help="Run full integration tests including compilation + linking + program execution",
@@ -134,6 +139,7 @@ def parse_args(args: Optional[list[str]] = None) -> TestArgs:
         no_pch=parsed_args.no_pch,
         cache=parsed_args.cache,
         unity=parsed_args.unity,
+        no_unity=parsed_args.no_unity,
         full=parsed_args.full,
         legacy=parsed_args.legacy,
         no_parallel=parsed_args.no_parallel,

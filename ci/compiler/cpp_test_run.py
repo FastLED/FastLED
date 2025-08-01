@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # pyright: reportUnknownMemberType=false, reportMissingParameterType=false
 import argparse
+import multiprocessing
 import os
 import re
 import subprocess
@@ -11,6 +12,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from queue import Empty, PriorityQueue
 from threading import Event, Lock, Thread
+
+import psutil
 
 from ci.ci.paths import PROJECT_ROOT
 
@@ -571,13 +574,17 @@ def _execute_test_files(
     output_buffer.write(0, f"Executing {total_tests} test files in parallel...")
 
     # Determine number of workers based on configuration
-    import multiprocessing
-
-    import psutil
 
     # Get configuration from args
     args = parse_args()
-    if args.sequential:
+
+    # Force sequential execution if NO_PARALLEL is set
+    if os.environ.get("NO_PARALLEL"):
+        max_workers = 1
+        output_buffer.write(
+            0, "NO_PARALLEL environment variable set - forcing sequential execution"
+        )
+    elif args.sequential:
         max_workers = 1
     elif args.parallel:
         max_workers = args.parallel
