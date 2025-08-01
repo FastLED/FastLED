@@ -18,7 +18,7 @@ ranlib = "ranlib"
 [all]
 # Universal compilation flags
 compiler_flags = [
-    "clang++",  # Actual compiler after sccache
+    "python", "-m", "ziglang", "c++",  # Actual compiler after sccache
     "-std=gnu++17",
     "-fpermissive",
     "-Wall",

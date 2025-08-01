@@ -168,7 +168,7 @@ def get_system_info() -> Dict[str, Union[str, int, float]]:
         try:
             # Use streaming to prevent buffer overflow
             process = subprocess.Popen(
-                ["clang", "--version"],
+                ["python", "-m", "ziglang", "c++", "--version"],
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
                 text=True,
@@ -392,22 +392,9 @@ def create_fastled_compiler(use_pch: bool = True, use_sccache: bool = True) -> C
         pch_output_path = os.path.join(tempfile.gettempdir(), "fastled_pch.hpp.pch")
 
     # Determine compiler command (with or without cache)
-    compiler_cmd = "clang++"
+    compiler_cmd = "python -m ziglang c++"
     cache_args = []
-    if use_sccache:
-        sccache_path = get_sccache_path()
-        if sccache_path:
-            compiler_cmd = sccache_path
-            cache_args = ["clang++"]  # sccache clang++ [args...]
-            print(f"Using sccache: {sccache_path}")
-        else:
-            ccache_path = get_ccache_path()
-            if ccache_path:
-                compiler_cmd = ccache_path
-                cache_args = ["clang++"]  # ccache clang++ [args...]
-                print(f"Using ccache: {ccache_path}")
-            else:
-                print("No compiler cache available, using direct compilation")
+    print("Using direct compilation with ziglang c++")
 
     # Combine cache args with other args (cache args go first)
     final_args = cache_args + all_args

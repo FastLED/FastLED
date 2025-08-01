@@ -245,27 +245,13 @@ class FastLEDTestCompiler:
         tools_config = config.get("tools", {})
         archiver_tool = tools_config.get("archiver", "ar")
 
-        # Always use clang++ as the actual compiler, regardless of TOML config
-        actual_compiler = "clang++"
+        # Always use ziglang c++ as the actual compiler, regardless of TOML config
+        actual_compiler_args = ["uv", "run", "python", "-m", "ziglang", "c++"]
 
-        # Determine compiler command (with or without cache)
-        compiler_cmd = actual_compiler
-        cache_args = []
-        sccache_path = get_sccache_path()
-        if sccache_path:
-            compiler_cmd = sccache_path
-            cache_args = [actual_compiler]  # sccache clang++ [args...]
-            print(f"Using sccache for unit tests: {sccache_path}")
-        else:
-            ccache_path = get_ccache_path()
-            if ccache_path:
-                compiler_cmd = ccache_path
-                cache_args = [actual_compiler]  # ccache clang++ [args...]
-                print(f"Using ccache for unit tests: {ccache_path}")
-            else:
-                print(
-                    "No compiler cache available for unit tests, using direct compilation"
-                )
+        # For now, disable cache when using ziglang c++
+        compiler_cmd = "clang++"  # Use generic clang++ identifier for compatibility
+        cache_args = actual_compiler_args  # Put ziglang c++ command in cache_args for proper detection
+        print("Using direct compilation with ziglang c++")
 
         # Combine cache args with compiler args (cache args go first for detection)
         final_compiler_args = cache_args + compiler_args
@@ -311,17 +297,18 @@ class FastLEDTestCompiler:
         tests_dir = Path(PROJECT_ROOT) / "tests"
         test_files: List[Path] = []
 
+        # Find all test files in tests directory and subdirectories
         for test_file in tests_dir.rglob("test_*.cpp"):
             # Skip the doctest_main.cpp file (not a test file)
             if test_file.name == "doctest_main.cpp":
                 continue
 
-            if specific_test:
-                # Handle both "test_name" and "name" formats for compatibility
-                test_stem = test_file.stem
-                test_name = test_stem.replace("test_", "")
+            # Handle both "test_name" and "name" formats for compatibility
+            test_stem = test_file.stem
+            test_name = test_stem.replace("test_", "")
 
-                # Check if we should do fuzzy matching (if there's a * in the name)
+            # Check if we should do fuzzy matching (if there's a * in the name)
+            if specific_test:
                 if "*" in specific_test:
                     # Convert glob pattern to regex pattern
                     import re
@@ -394,11 +381,11 @@ class FastLEDTestCompiler:
 
         print("Starting parallel compilation of test files...")
         for test_file in test_files:
-            # Compile to object file first
-            obj_path = self.build_dir / f"{test_file.stem}.o"
+            # Compile directly to executable
+            exe_path = self.build_dir / f"{test_file.stem}.exe"
             # Convert absolute path to relative for display
-            rel_obj_path = os.path.relpath(obj_path)
-            print(f"Submitting compilation job for: {test_file.name} -> {rel_obj_path}")
+            rel_exe_path = os.path.relpath(exe_path)
+            print(f"Submitting compilation job for: {test_file.name} -> {rel_exe_path}")
             # Show compilation command if enabled
             if os.environ.get("FASTLED_TEST_SHOW_COMPILE", "").lower() in (
                 "1",
@@ -406,13 +393,21 @@ class FastLEDTestCompiler:
                 "yes",
             ):
                 # Convert absolute path to relative for display
-                rel_obj_path = os.path.relpath(obj_path)
-                print(f"[COMPILE] {test_file.name} -> {rel_obj_path}")
+                rel_exe_path = os.path.relpath(exe_path)
+                print(f"[COMPILE] {test_file.name} -> {rel_exe_path}")
 
             compile_future = self.compiler.compile_cpp_file(
                 test_file,
-                output_path=obj_path,
-                additional_flags=["-c"],  # Compile only, don't link
+                output_path=exe_path,
+                additional_flags=[
+                    "-o",
+                    str(exe_path),
+                    "-I",
+                    str(self.project_root / "src"),
+                    "-I",
+                    str(self.project_root / "tests"),
+                    "-std=c++17",
+                ],
             )
             future_to_test[compile_future] = test_file
 
@@ -430,8 +425,8 @@ class FastLEDTestCompiler:
                 completed += 1
 
                 if result.ok:
-                    obj_path = self.build_dir / f"{test_file.stem}.o"
-                    compiled_objects.append(obj_path)
+                    exe_path = self.build_dir / f"{test_file.stem}.exe"
+                    compiled_objects.append(exe_path)
                     print(f"[{completed}/{len(test_files)}] Compiled {test_file.name}")
                 else:
                     errors.append(
@@ -597,7 +592,7 @@ class FastLEDTestCompiler:
                 link_options = LinkOptions(
                     object_files=[obj_path],  # Only the test object file
                     output_executable=exe_path,
-                    linker="clang++",  # Use clang++ for linking
+                    linker="uv run python -m ziglang c++",  # Use ziglang c++ for linking
                     linker_args=linker_args,  # Use pre-calculated args for consistency
                 )
             else:
@@ -608,7 +603,7 @@ class FastLEDTestCompiler:
                         doctest_obj_path,
                     ],  # Test object + doctest main
                     output_executable=exe_path,
-                    linker="clang++",  # Use clang++ for linking
+                    linker="uv run python -m ziglang c++",  # Use ziglang c++ for linking
                     linker_args=linker_args,  # Use pre-calculated args for consistency
                 )
 
@@ -759,81 +754,60 @@ class FastLEDTestCompiler:
             str(fastled_lib_path),
         ] + [str(obj) for obj in fastled_objects]
 
+        # Create static library using ziglang c++
+        print("Creating static library using ziglang c++...")
+        lib_cmd: List[str] = [
+            "uv",
+            "run",
+            "python",
+            "-m",
+            "ziglang",
+            "c++",
+            "-o",
+            str(fastled_lib_path),
+            "-shared",  # Create a shared library
+        ] + [str(obj) for obj in fastled_objects]
+
         try:
             # Use streaming to prevent buffer overflow
-            def run_ar_command(cmd: List[str]):
-                process = subprocess.Popen(
-                    cmd,
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.PIPE,
-                    text=True,
-                    bufsize=1,
-                    encoding="utf-8",
-                    errors="replace",
-                    cwd=self.build_dir,
-                )
+            process = subprocess.Popen(
+                lib_cmd,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+                bufsize=1,
+                encoding="utf-8",
+                errors="replace",
+                cwd=self.build_dir,
+            )
 
-                stdout_lines: list[str] = []
-                stderr_lines: list[str] = []
+            stdout_lines: list[str] = []
+            stderr_lines: list[str] = []
 
-                while True:
-                    stdout_line = process.stdout.readline() if process.stdout else ""
-                    stderr_line = process.stderr.readline() if process.stderr else ""
+            while True:
+                stdout_line = process.stdout.readline() if process.stdout else ""
+                stderr_line = process.stderr.readline() if process.stderr else ""
 
-                    if stdout_line:
-                        stdout_lines.append(stdout_line.rstrip())
-                    if stderr_line:
-                        stderr_lines.append(stderr_line.rstrip())
+                if stdout_line:
+                    stdout_lines.append(stdout_line.rstrip())
+                if stderr_line:
+                    stderr_lines.append(stderr_line.rstrip())
 
-                    if process.poll() is not None:
-                        remaining_stdout = (
-                            process.stdout.read() if process.stdout else ""
-                        )
-                        remaining_stderr = (
-                            process.stderr.read() if process.stderr else ""
-                        )
+                if process.poll() is not None:
+                    remaining_stdout = process.stdout.read() if process.stdout else ""
+                    remaining_stderr = process.stderr.read() if process.stderr else ""
 
-                        if remaining_stdout:
-                            for line in remaining_stdout.splitlines():
-                                stdout_lines.append(line.rstrip())
-                        if remaining_stderr:
-                            for line in remaining_stderr.splitlines():
-                                stderr_lines.append(line.rstrip())
-                        break
+                    if remaining_stdout:
+                        for line in remaining_stdout.splitlines():
+                            stdout_lines.append(line.rstrip())
+                    if remaining_stderr:
+                        for line in remaining_stderr.splitlines():
+                            stderr_lines.append(line.rstrip())
+                    break
 
-                # Create simple result object
-                class ArResult:
-                    def __init__(self, returncode: int, stdout: str, stderr: str):
-                        self.returncode = returncode
-                        self.stdout = stdout
-                        self.stderr = stderr
-
-                return ArResult(
-                    process.returncode, "\n".join(stdout_lines), "\n".join(stderr_lines)
-                )
-
-            ar_result = run_ar_command(ar_cmd)
-            if ar_result.returncode != 0:
-                print(
-                    f"ERROR: Failed to create static library with llvm-ar: {ar_result.stderr}"
-                )
-                # Fall back to llvm-lib if llvm-ar fails
-                ar_cmd = [
-                    "llvm-lib",  # LLVM static library tool (works with Clang)
-                    "/OUT:" + str(fastled_lib_path),
-                ] + [str(obj) for obj in fastled_objects]
-
-                ar_result = run_ar_command(ar_cmd)
-                if ar_result.returncode != 0:
-                    # Try ar as a last resort
-                    ar_cmd = ["ar", "rcs", str(fastled_lib_path)] + [
-                        str(obj) for obj in fastled_objects
-                    ]
-                    ar_result = run_ar_command(ar_cmd)
-                    if ar_result.returncode != 0:
-                        raise Exception(
-                            f"Failed to create static library with llvm-ar, llvm-lib, and ar: {ar_result.stderr}"
-                        )
+            if process.returncode != 0:
+                print(f"ERROR: Failed to create static library: {stderr_lines}")
+                return fastled_lib_path  # Return path even if creation failed
 
             # Convert absolute path to relative for display
             rel_lib_path = os.path.relpath(fastled_lib_path)

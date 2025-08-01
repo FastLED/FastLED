@@ -440,7 +440,7 @@ def _run_tests_cmake(
     show_link: bool = False,
 ) -> None:
     """Run tests from legacy CMake build system (preserving existing logic)"""
-    test_dir = os.path.join("tests", ".build", "bin")
+    test_dir = os.path.join("tests")
     if not os.path.exists(test_dir):
         print(f"Test directory not found: {test_dir}")
         sys.exit(1)
@@ -448,8 +448,12 @@ def _run_tests_cmake(
     print("Running tests from CMake build...")
     failed_tests: list[FailedTest] = []
     files = os.listdir(test_dir)
-    # filter out all pdb files (windows) and only keep test_ executables
-    files = [f for f in files if not f.endswith(".pdb") and f.startswith("test_")]
+    # filter out all pdb files (windows) and only keep test_ cpp files
+    files = [
+        f
+        for f in files
+        if not f.endswith(".pdb") and f.startswith("test_") and f.endswith(".cpp")
+    ]
 
     # If specific test is specified, filter for just that test
     if specific_test:
@@ -623,6 +627,42 @@ def _execute_test_files(
             test_path = test_paths[test_file]
         else:
             test_path = os.path.join(test_dir, test_file)
+
+        # For .cpp files, compile them first
+        if test_path.endswith(".cpp"):
+            # Create a temporary directory for compilation
+            with tempfile.TemporaryDirectory() as temp_dir:
+                # Compile the test file
+                output_buffer.write(
+                    test_index,
+                    f"[{test_index}/{total_tests}] Compiling test: {test_file}",
+                )
+                compile_cmd = [
+                    "uv",
+                    "run",
+                    "python",
+                    "-m",
+                    "ziglang",
+                    "c++",
+                    "-o",
+                    os.path.join(temp_dir, "test.exe"),
+                    test_path,
+                    "-I",
+                    os.path.join(PROJECT_ROOT, "src"),
+                    "-I",
+                    os.path.join(PROJECT_ROOT, "tests"),
+                    "-std=c++17",
+                ]
+                return_code, stdout = run_command(compile_cmd)
+                if return_code != 0:
+                    output_buffer.write(
+                        test_index,
+                        f"[{test_index}/{total_tests}] ERROR: Failed to compile test: {test_file}",
+                    )
+                    return False, 0.0, f"Failed to compile test: {stdout}", return_code
+
+                # Update test_path to point to the compiled executable
+                test_path = os.path.join(temp_dir, "test.exe")
 
         if not (os.path.isfile(test_path) and os.access(test_path, os.X_OK)):
             output_buffer.write(

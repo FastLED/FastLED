@@ -57,7 +57,7 @@ class CompilerOptions:
 
     # Core compiler settings (formerly CompilerSettings)
     include_path: str
-    compiler: str = "clang++"
+    compiler: str = "uv run python -m ziglang c++"
     defines: list[str] | None = None
     std_version: str = "c++17"
     compiler_args: list[str] = field(default_factory=list[str])
@@ -406,22 +406,42 @@ class Compiler:
         Returns:
             list[str]: Copy of compiler arguments including compiler, flags, defines, and settings
         """
-        cmd = [self.settings.compiler]
-
-        # Handle cache-wrapped compilers (sccache/ccache)
-        if (
+        # Handle cache-wrapped compilers (sccache/ccache) or ziglang c++
+        if len(self.settings.compiler_args) > 0 and self.settings.compiler_args[
+            0:6
+        ] == ["uv", "run", "python", "-m", "ziglang", "c++"]:
+            # This is ziglang c++ in compiler_args, use it directly
+            cmd = self.settings.compiler_args[
+                0:6
+            ]  # Use ziglang c++ command from compiler_args
+            remaining_cache_args = self.settings.compiler_args[
+                6:
+            ]  # Skip the ziglang c++ part
+        elif (
             len(self.settings.compiler_args) > 0
             and self.settings.compiler_args[0] == "clang++"
         ):
-            # This is a cache-wrapped compiler, add clang++ first, then remaining cache args
-            cmd.append("clang++")
-            # Skip the first "clang++" argument from compiler_args since we already added it
+            # This is a cache-wrapped clang++, replace with ziglang c++
+            cmd = ["uv", "run", "python", "-m", "ziglang", "c++"]
             remaining_cache_args = self.settings.compiler_args[1:]
         else:
-            # This is a direct compiler call, use all compiler_args as-is
+            # This is a direct compiler call, use ziglang c++
+            if self.settings.compiler.startswith("sccache"):
+                # When using sccache, we need to pass -- before the compiler arguments
+                cmd = [
+                    self.settings.compiler,
+                    "--",
+                    "uv",
+                    "run",
+                    "python",
+                    "-m",
+                    "ziglang",
+                    "c++",
+                ]
+            else:
+                cmd = ["uv", "run", "python", "-m", "ziglang", "c++"]
             remaining_cache_args = self.settings.compiler_args
 
-        # Add standard clang arguments
         cmd.extend(
             [
                 "-x",
@@ -505,16 +525,26 @@ class Compiler:
                 pch_output_path = pch_header_path.with_suffix(".hpp.pch")
 
             # Build PCH compilation command - BYPASS sccache for PCH generation
-            # Use direct clang++ compiler, not the cache-wrapped version
-            direct_compiler = "clang++"
+            # Use direct ziglang cc compiler, not the cache-wrapped version
+            direct_compiler = "python -m ziglang c++"
 
-            cmd = [
-                direct_compiler,  # Always use direct clang++ for PCH
-                "-x",
-                "c++-header",
-                f"-std={self.settings.std_version}",
-                f"-I{self.settings.include_path}",
-            ]
+            cmd: list[str] = []
+            if self.settings.compiler.startswith("sccache"):
+                # When using sccache, we need to pass -- before the compiler arguments
+                cmd.extend(["--"])
+
+            cmd.extend(
+                [
+                    "python",
+                    "-m",
+                    "ziglang",
+                    "c++",  # Use ziglang c++ as the compiler
+                    "-x",
+                    "c++-header",
+                    f"-std={self.settings.std_version}",
+                    f"-I{self.settings.include_path}",
+                ]
+            )
 
             # Add defines if specified
             if self.settings.defines:
@@ -622,7 +652,7 @@ class Compiler:
 
     def check_clang_version(self) -> VersionCheckResult:
         """
-        Check that clang++ is accessible and return version information.
+        Check that ziglang c++ is accessible and return version information.
         Handles cache-wrapped compilers (sccache/ccache) properly.
 
         Returns:
@@ -630,16 +660,8 @@ class Compiler:
         """
         # Test uv run access first
         try:
-            # Determine the correct command to check clang version
-            if (
-                len(self.settings.compiler_args) > 0
-                and self.settings.compiler_args[0] == "clang++"
-            ):
-                # This is a cache-wrapped compiler (sccache/ccache clang++)
-                version_cmd = [self.settings.compiler, "clang++", "--version"]
-            else:
-                # This is a direct compiler call
-                version_cmd = [self.settings.compiler, "--version"]
+            # Always use uv run python -m ziglang cc
+            version_cmd = ["uv", "run", "python", "-m", "ziglang", "c++", "--version"]
 
             # Use Popen with stderr redirected to stdout to prevent buffer overflow
             process = subprocess.Popen(
@@ -685,17 +707,17 @@ class Compiler:
                     else "unknown"
                 )
                 return VersionCheckResult(
-                    success=True, version=f"uv:{version}", error=""
+                    success=True, version=f"ziglang:{version}", error=""
                 )
             else:
                 return VersionCheckResult(
                     success=False,
                     version="",
-                    error=f"clang++ version check failed: {stderr_result}",
+                    error=f"ziglang c++ version check failed: {stderr_result}",
                 )
         except Exception as e:
             return VersionCheckResult(
-                success=False, version="", error=f"clang++ not accessible: {str(e)}"
+                success=False, version="", error=f"ziglang c++ not accessible: {str(e)}"
             )
 
     def compile_ino_file(
@@ -760,19 +782,40 @@ class Compiler:
             cleanup_temp = False
 
         # Build compiler command
-        cmd = [self.settings.compiler]
-
-        # Handle cache-wrapped compilers (sccache/ccache)
-        if (
+        # Handle cache-wrapped compilers (sccache/ccache) or ziglang c++
+        if len(self.settings.compiler_args) > 0 and self.settings.compiler_args[
+            0:6
+        ] == ["uv", "run", "python", "-m", "ziglang", "c++"]:
+            # This is ziglang c++ in compiler_args, use it directly
+            cmd = self.settings.compiler_args[
+                0:6
+            ]  # Use ziglang c++ command from compiler_args
+            remaining_cache_args = self.settings.compiler_args[
+                6:
+            ]  # Skip the ziglang c++ part
+        elif (
             len(self.settings.compiler_args) > 0
             and self.settings.compiler_args[0] == "clang++"
         ):
-            # This is a cache-wrapped compiler, add clang++ first, then remaining cache args
-            cmd.append("clang++")
-            # Skip the first "clang++" argument from compiler_args since we already added it
+            # This is a cache-wrapped clang++, replace with ziglang c++
+            cmd = ["uv", "run", "python", "-m", "ziglang", "c++"]
             remaining_cache_args = self.settings.compiler_args[1:]
         else:
-            # This is a direct compiler call, use all compiler_args as-is
+            # This is a direct compiler call, use ziglang c++
+            if self.settings.compiler.startswith("sccache"):
+                # When using sccache, we need to pass -- before the compiler arguments
+                cmd = [
+                    self.settings.compiler,
+                    "--",
+                    "uv",
+                    "run",
+                    "python",
+                    "-m",
+                    "ziglang",
+                    "c++",
+                ]
+            else:
+                cmd = ["uv", "run", "python", "-m", "ziglang", "c++"]
             remaining_cache_args = self.settings.compiler_args
 
         # Add standard clang arguments
@@ -938,19 +981,40 @@ class Compiler:
             cleanup_temp = False
 
         # Build compiler command
-        cmd = [self.settings.compiler]
-
-        # Handle cache-wrapped compilers (sccache/ccache)
-        if (
+        # Handle cache-wrapped compilers (sccache/ccache) or ziglang c++
+        if len(self.settings.compiler_args) > 0 and self.settings.compiler_args[
+            0:6
+        ] == ["uv", "run", "python", "-m", "ziglang", "c++"]:
+            # This is ziglang c++ in compiler_args, use it directly
+            cmd = self.settings.compiler_args[
+                0:6
+            ]  # Use ziglang c++ command from compiler_args
+            remaining_cache_args = self.settings.compiler_args[
+                6:
+            ]  # Skip the ziglang c++ part
+        elif (
             len(self.settings.compiler_args) > 0
             and self.settings.compiler_args[0] == "clang++"
         ):
-            # This is a cache-wrapped compiler, add clang++ first, then remaining cache args
-            cmd.append("clang++")
-            # Skip the first "clang++" argument from compiler_args since we already added it
+            # This is a cache-wrapped clang++, replace with ziglang c++
+            cmd = ["uv", "run", "python", "-m", "ziglang", "c++"]
             remaining_cache_args = self.settings.compiler_args[1:]
         else:
-            # This is a direct compiler call, use all compiler_args as-is
+            # This is a direct compiler call, use ziglang c++
+            if self.settings.compiler.startswith("sccache"):
+                # When using sccache, we need to pass -- before the compiler arguments
+                cmd = [
+                    self.settings.compiler,
+                    "--",
+                    "uv",
+                    "run",
+                    "python",
+                    "-m",
+                    "ziglang",
+                    "c++",
+                ]
+            else:
+                cmd = ["uv", "run", "python", "-m", "ziglang", "c++"]
             remaining_cache_args = self.settings.compiler_args
 
         # Add standard clang arguments
@@ -1133,20 +1197,20 @@ class Compiler:
 
     def test_clang_accessibility(self) -> bool:
         """
-        Comprehensive test that clang++ is accessible and working properly.
+        Comprehensive test that ziglang c++ is accessible and working properly.
         This is the foundational test for the simple build system approach.
 
         Returns:
             bool: True if all tests pass, False otherwise
         """
-        print("Testing clang++ accessibility...")
+        print("Testing ziglang c++ accessibility...")
 
-        # Test 1: Check clang++ version
+        # Test 1: Check ziglang c++ version
         version_result = self.check_clang_version()
         if not version_result.success:
-            print(f"X clang++ version check failed: {version_result.error}")
+            print(f"X ziglang c++ version check failed: {version_result.error}")
             return False
-        print(f"[OK] clang++ version: {version_result.version}")
+        print(f"[OK] ziglang c++ version: {version_result.version}")
 
         # Test 2: Simple compilation test with Blink example
         print("Testing Blink.ino compilation...")
@@ -1172,7 +1236,7 @@ class Compiler:
 
         print(f"[OK] DemoReel100.ino compilation: return code {result.return_code}")
 
-        print("[INFO] All clang accessibility tests passed!")
+        print("[INFO] All ziglang c++ accessibility tests passed!")
         print("[OK] Implementation ready: Simple build system can proceed")
         return True
 
