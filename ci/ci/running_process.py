@@ -228,6 +228,7 @@ class RunningProcess:
         Raises:
             subprocess.CalledProcessError: If the command returns a non-zero exit code.
         """
+        assert self.proc is None
         self._start_time = time.time()  # Track when the process started
         self.proc = subprocess.Popen(
             self.command,
