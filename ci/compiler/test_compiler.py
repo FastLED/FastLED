@@ -187,7 +187,7 @@ class FastLEDTestCompiler:
                         print(
                             f"Warning: Failed to remove build directory (attempt {attempt + 1}): {e}"
                         )
-                        time.sleep(0.1)  # Brief pause before retry
+                        time.sleep(0.01)  # Brief pause before retry
                         continue
                     else:
                         print(
