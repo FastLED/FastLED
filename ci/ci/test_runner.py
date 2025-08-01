@@ -529,6 +529,7 @@ def _run_process_with_output(process: RunningProcess, verbose: bool = False) -> 
 
     # Create single output handler instance to maintain state
     output_handler = ProcessOutputHandler(verbose=verbose)
+    start_time = time.time()
 
     # Use event-driven processing with reasonable timeouts to prevent hanging
     while process.poll() is None:
@@ -536,9 +537,11 @@ def _run_process_with_output(process: RunningProcess, verbose: bool = False) -> 
             # Use consistent timeout for all output reading
             line = process.get_next_line(timeout=0.1)  # 100ms timeout
             if line is not None:
-                # Use the shared output handler for proper formatting
-                output_handler.handle_output_line(line, process_name)
-                sys.stdout.flush()  # Ensure output is visible immediately
+                # Indent and format output
+                diff = time.time() - start_time
+                diff_str = f"{diff:.2f} "
+                print(f"  {diff_str} {line}")  # Add two spaces of indentation
+                # Ensure output is visible immediately
 
                 # After getting one line, quickly drain any additional output
                 # This maintains responsiveness while avoiding tight polling loops
@@ -550,9 +553,9 @@ def _run_process_with_output(process: RunningProcess, verbose: bool = False) -> 
                         if additional_line is None:
                             break  # End of stream
                         if additional_line.strip():  # Only print non-empty lines
-                            output_handler.handle_output_line(
-                                additional_line, process_name
-                            )
+                            print(
+                                f"  {additional_line}"
+                            )  # Add two spaces of indentation
                             sys.stdout.flush()
                     except queue.Empty:
                         break  # No more output available right now
@@ -686,7 +689,7 @@ def _run_processes_parallel(
                         if line.strip():  # Only print non-empty lines
                             # Use the shared output handler for proper formatting
                             output_handler.handle_output_line(line, cmd)
-                            sys.stdout.flush()  # Immediately flush output for real-time visibility
+
                         any_activity = True
                         last_activity_time[proc] = time.time()  # Update activity time
 
@@ -793,9 +796,13 @@ def run_test_processes(
 
     Args:
         processes: List of RunningProcess objects to execute
-        parallel: Whether to run processes in parallel or sequentially
+        parallel: Whether to run processes in parallel or sequentially (ignored if NO_PARALLEL is set)
         verbose: Whether to show all output
     """
+    # Force sequential execution if NO_PARALLEL is set
+    if os.environ.get("NO_PARALLEL"):
+        parallel = False
+        print("NO_PARALLEL environment variable set - forcing sequential execution")
     if not processes:
         print("\033[92m###### SUCCESS ######\033[0m")
         print("No tests to run")
@@ -891,5 +898,9 @@ def runner(args: TestArgs, src_code_change: bool = True) -> None:
         print(f"  - {proc.command}")
     print()
 
-    # Run all processes in parallel
-    run_test_processes(processes, parallel=True, verbose=args.verbose)
+    # Run processes (parallel unless NO_PARALLEL is set)
+    run_test_processes(
+        processes,
+        parallel=not bool(os.environ.get("NO_PARALLEL")),
+        verbose=args.verbose,
+    )

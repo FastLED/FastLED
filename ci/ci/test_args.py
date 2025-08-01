@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import argparse
+import os
 import sys
 from typing import Optional
 
@@ -104,6 +105,11 @@ def parse_args(args: Optional[list[str]] = None) -> TestArgs:
         action="store_true",
         help="Use legacy CMake system instead of new Python API (8x slower)",
     )
+    parser.add_argument(
+        "--no-parallel",
+        action="store_true",
+        help="Force sequential test execution",
+    )
 
     parsed_args = parser.parse_args(args)
 
@@ -130,6 +136,7 @@ def parse_args(args: Optional[list[str]] = None) -> TestArgs:
         unity=parsed_args.unity,
         full=parsed_args.full,
         legacy=parsed_args.legacy,
+        no_parallel=parsed_args.no_parallel,
     )
 
     # Auto-enable --cpp and --verbose when a specific test is provided
@@ -204,5 +211,10 @@ def parse_args(args: Optional[list[str]] = None) -> TestArgs:
             file=sys.stderr,
         )
         sys.exit(1)
+
+    # Set NO_PARALLEL environment variable if --no-parallel is used
+    if test_args.no_parallel:
+        os.environ["NO_PARALLEL"] = "1"
+        print("Forcing sequential execution (NO_PARALLEL=1)")
 
     return test_args

@@ -81,6 +81,7 @@ class TestArgs:
     unity: bool = False
     full: bool = False
     legacy: bool = False  # Use legacy CMake system instead of new Python API
+    no_parallel: bool = False  # Force sequential test execution
 
 
 @typechecked

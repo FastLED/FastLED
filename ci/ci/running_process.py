@@ -164,7 +164,8 @@ class RunningProcess:
         self.output_queue: Queue[str | None] = Queue()
         self.proc: subprocess.Popen[Any] | None = None
         self.check = check
-        self.auto_run = auto_run
+        # Force auto_run to False if NO_PARALLEL is set
+        self.auto_run = False if os.environ.get("NO_PARALLEL") else auto_run
         self.timeout = timeout
         self.enable_stack_trace = enable_stack_trace
         self.on_complete = on_complete
