@@ -220,6 +220,23 @@ class BuildFlags:
             tools=tools,
         )
 
+        # Add platform-specific compiler flags if available
+        current_platform = platform.system().lower()
+        compiler_flags_config = config.get("compiler_flags", {})
+        if current_platform in compiler_flags_config:
+            platform_flags = compiler_flags_config[current_platform].get("flags", [])
+            if platform_flags:
+                # Replace base compiler flags with platform-specific ones
+                base_flags.compiler_flags = platform_flags
+
+        # Add platform-specific linking flags if available
+        linking_config = config.get("linking", {})
+        if current_platform in linking_config:
+            platform_link_flags = linking_config[current_platform].get("flags", [])
+            if platform_link_flags:
+                # Extend base linking flags with platform-specific ones
+                base_flags.link_flags.extend(platform_link_flags)
+
         # Add build mode specific flags
         build_mode = "quick" if quick_build else "debug"
         build_modes = config.get("build_modes", {})
