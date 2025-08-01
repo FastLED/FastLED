@@ -16,9 +16,8 @@ strip = "strip"
 ranlib = "ranlib"
 
 [all]
-# Universal compilation flags
+# Universal compilation flags (compiler command handled separately)
 compiler_flags = [
-    "python", "-m", "ziglang", "c++",  # Actual compiler after sccache
     "-std=gnu++17",
     "-fpermissive",
     "-Wall",
@@ -38,9 +37,45 @@ include_flags = [
     "-Itests",
 ]
 
+[windows]
+# ================================================================================================
+# WINDOWS-SPECIFIC BUILD FLAGS
+# ================================================================================================
+# Comprehensive Windows build configuration using Zig's bundled Clang with GNU target
+
+# C compiler flags for Windows
+cc_flags = [
+    "--target=x86_64-windows-gnu",     # Explicit target for MSYS2/MinGW compatibility
+    "-fuse-ld=lld",                       # Use Zig's bundled LLD linker
+    "-std=c17",                           # C17 standard
+    "-Wall",
+    "-Wextra",
+]
+
+# C++ compiler flags for Windows  
+cpp_flags = [
+    "--target=x86_64-windows-gnu",     # Explicit target for MSYS2/MinGW compatibility
+    "-fuse-ld=lld",                       # Use Zig's bundled LLD linker
+    "-std=c++17",                         # C++17 standard
+    "-Wall", 
+    "-Wextra",
+    "-fno-exceptions",
+    "-fno-rtti",
+]
+
+# Linker flags for Windows
+link_flags = [
+    "-mconsole",                          # Console application
+    "-lkernel32",                         # Windows kernel functions
+    "-luser32",                           # Windows user interface
+    "-lgdi32",                            # Graphics device interface
+    "-ladvapi32",                         # Advanced Windows API
+]
+
 [linking.base]
+# Base linking flags (Unix-like systems)
 flags = [
-    "-pthread",
+    "-pthread",    # POSIX threads (not used on Windows)
 ]
 
 [build_modes.quick]

@@ -220,22 +220,44 @@ class BuildFlags:
             tools=tools,
         )
 
-        # Add platform-specific compiler flags if available
+        # Add platform-specific flags if available
         current_platform = platform.system().lower()
-        compiler_flags_config = config.get("compiler_flags", {})
-        if current_platform in compiler_flags_config:
-            platform_flags = compiler_flags_config[current_platform].get("flags", [])
-            if platform_flags:
-                # Replace base compiler flags with platform-specific ones
-                base_flags.compiler_flags = platform_flags
 
-        # Add platform-specific linking flags if available
-        linking_config = config.get("linking", {})
-        if current_platform in linking_config:
-            platform_link_flags = linking_config[current_platform].get("flags", [])
-            if platform_link_flags:
-                # Extend base linking flags with platform-specific ones
-                base_flags.link_flags.extend(platform_link_flags)
+        # Check for new-style platform configuration (windows, linux, etc.)
+        if current_platform in config:
+            platform_config = config[current_platform]
+
+            # Use CPP flags for C++ compilation (most common case)
+            if "cpp_flags" in platform_config:
+                base_flags.compiler_flags = platform_config["cpp_flags"]
+
+            # Use platform-specific link flags
+            if "link_flags" in platform_config:
+                if current_platform == "windows":
+                    # On Windows, replace base linking flags entirely (avoid pthread conflicts)
+                    base_flags.link_flags = platform_config["link_flags"]
+                else:
+                    # On other platforms, extend base linking flags
+                    base_flags.link_flags.extend(platform_config["link_flags"])
+
+        # Fallback to old-style platform configuration for backward compatibility
+        else:
+            compiler_flags_config = config.get("compiler_flags", {})
+            if current_platform in compiler_flags_config:
+                platform_flags = compiler_flags_config[current_platform].get(
+                    "flags", []
+                )
+                if platform_flags:
+                    base_flags.compiler_flags = platform_flags
+
+            linking_config = config.get("linking", {})
+            if current_platform in linking_config:
+                platform_link_flags = linking_config[current_platform].get("flags", [])
+                if platform_link_flags:
+                    if current_platform == "windows":
+                        base_flags.link_flags = platform_link_flags
+                    else:
+                        base_flags.link_flags.extend(platform_link_flags)
 
         # Add build mode specific flags
         build_mode = "quick" if quick_build else "debug"
@@ -576,6 +598,12 @@ class Compiler:
 
             cmd.extend(filtered_args)
             cmd.extend([str(pch_header_path), "-o", str(pch_output_path)])
+
+            # DEBUG: Print the complete PCH compilation command
+            print("🔧 PCH Compilation Command:")
+            for i, arg in enumerate(cmd):
+                print(f"  {i}: {arg}")
+            print()
 
             # Compile PCH with direct compiler (no sccache) - use single stream to prevent buffer overflow
             process = subprocess.Popen(

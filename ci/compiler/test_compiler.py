@@ -201,32 +201,25 @@ class FastLEDTestCompiler:
             f"-I{project_root}/src/platforms/stub",  # STUB platform headers
         ]
 
-        # Load TOML path and create compiler options using main build_flags.toml
+        # Load build flags using BuildFlags.parse() to get platform-specific configuration
         toml_path = project_root / "ci" / "build_flags.toml"
+        build_flags = BuildFlags.parse(toml_path, quick_build, strict_mode)
+
+        # Load TOML config for test-specific flags that aren't in BuildFlags
         with open(toml_path, "rb") as f:
             config = tomllib.load(f)
 
-        # Get test-specific flags from TOML
+        # Get test-specific defines from TOML (not included in BuildFlags.parse)
         test_defines = config.get("test", {}).get("defines", [])
-        test_compiler_flags = config.get("test", {}).get("compiler_flags", [])
-        test_include_flags = config.get("test", {}).get("include_flags", [])
 
-        # Get build mode specific flags (use test-specific debug mode)
-        mode = "quick" if quick_build else "test_debug"
-        mode_config = config.get("build_modes", {}).get(mode, {})
-        mode_flags = mode_config.get("flags", [])
-
-        # Get strict mode flags if enabled
-        strict_flags = (
-            config.get("strict_mode", {}).get("flags", []) if strict_mode else []
-        )
-
-        # Create compiler args from TOML flags
+        # Create compiler args from BuildFlags (includes platform-specific flags)
         compiler_args: List[str] = []
-        compiler_args.extend(test_compiler_flags)
-        compiler_args.extend(test_include_flags)
-        compiler_args.extend(mode_flags)
-        compiler_args.extend(strict_flags)
+        compiler_args.extend(
+            build_flags.compiler_flags
+        )  # Platform-aware compiler flags
+        compiler_args.extend(build_flags.include_flags)  # Platform-aware include flags
+
+        # Add strict mode flags if enabled (already handled by BuildFlags.parse)
 
         # Add additional compiler args
         if additional_compiler_args:
@@ -358,6 +351,14 @@ class FastLEDTestCompiler:
             print("  ✅ PCH enabled - Using precompiled headers for faster compilation")
             print("  PCH content:")
             print(textwrap.indent(self.compiler.generate_pch_header(), "    "))
+
+            # Create PCH for faster compilation
+            print("\n🔧 Creating precompiled header...")
+            pch_success = self.compiler.create_pch_file()
+            if pch_success:
+                print("  ✅ PCH created successfully")
+            else:
+                print("  ❌ PCH creation failed - continuing with direct compilation")
         else:
             print("  ❌ PCH disabled - Not using precompiled headers")
 
@@ -901,21 +902,18 @@ class FastLEDTestCompiler:
             print(f"  {test_name}: Warning - failed to cache executable: {e}")
 
     def _get_platform_linker_args(self, fastled_lib_path: Path) -> List[str]:
-        """Get platform-specific linker arguments"""
-        # Load build flags from main TOML
+        """Get platform-specific linker arguments using BuildFlags"""
+        # Use the build_flags that includes platform-specific configuration
+        args = self.build_flags.link_flags.copy()
+
+        # Load TOML config for test-specific and build mode flags
         toml_path = self.project_root / "ci" / "build_flags.toml"
         with open(toml_path, "rb") as f:
             config = tomllib.load(f)
 
-        # Start with test-specific base linking flags
-        args = config.get("linking", {}).get("test", {}).get("flags", []).copy()
-
-        # Add platform-specific test flags
-        platform_section = "windows" if sys.platform == "win32" else "unix"
-        platform_flags = (
-            config.get("linking", {}).get(platform_section, {}).get("flags", [])
-        )
-        args.extend(platform_flags)
+        # Add test-specific linking flags if available
+        test_link_flags = config.get("linking", {}).get("test", {}).get("flags", [])
+        args.extend(test_link_flags)
 
         # Add build mode specific flags (use test-specific debug mode)
         mode = "quick" if self.quick_build else "test_debug"

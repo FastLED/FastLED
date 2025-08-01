@@ -32,6 +32,7 @@ class JsonUiTitleInternal : public JsonUiInternal {
     // from the UI, so this can be a no-op.
     void updateInternal(const fl::Json &json) override {
         // No update needed for title components
+        FL_UNUSED(json);
     }
 
     // Accessors for the title text.

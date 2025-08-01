@@ -115,6 +115,7 @@ bool TaskImpl::ready_to_run(uint32_t current_time) const {
 // New method to check if frame tasks are ready (used only during frame events)
 bool TaskImpl::ready_to_run_frame_task(uint32_t current_time) const {
     // Only frame-based tasks are ready in frame context
+    FL_UNUSED(current_time);
     if (mType == TaskType::kBeforeFrame || mType == TaskType::kAfterFrame) {
         return true;
     }
