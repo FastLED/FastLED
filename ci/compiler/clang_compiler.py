@@ -191,27 +191,11 @@ class BuildFlags:
             with open(toml_path, "rb") as f:
                 config = tomllib.load(f)
         except FileNotFoundError:
-            print(f"Warning: build_flags.toml not found at {toml_path}")
-            # Return minimal fallback configuration
-            return cls(
-                defines=["-DSTUB_PLATFORM", "-DFASTLED_UNIT_TEST=1"],
-                compiler_flags=["-std=gnu++17", "-Wall"],  # Default compiler flags
-                include_flags=["-I.", "-Isrc", "-Itests"],
-                link_flags=[],  # Empty - should come from TOML
-                strict_mode_flags=[],
-                tools=BuildTools(),  # Use default tools
+            raise FileNotFoundError(
+                f"Required build_flags.toml not found at {toml_path}"
             )
         except Exception as e:
-            print(f"Warning: Failed to parse build_flags.toml: {e}")
-            # Return minimal fallback configuration
-            return cls(
-                defines=["-DSTUB_PLATFORM", "-DFASTLED_UNIT_TEST=1"],
-                compiler_flags=["-std=gnu++17", "-Wall"],  # Default compiler flags
-                include_flags=["-I.", "-Isrc", "-Itests"],
-                link_flags=[],  # Empty - should come from TOML
-                strict_mode_flags=[],
-                tools=BuildTools(),  # Use default tools
-            )
+            raise RuntimeError(f"Failed to parse build_flags.toml: {e}")
 
         # Extract tools configuration
         tools_config = config.get("tools", {})
