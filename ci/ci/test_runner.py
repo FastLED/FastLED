@@ -529,51 +529,25 @@ def _run_process_with_output(process: RunningProcess, verbose: bool = False) -> 
         )
 
     # Print test execution status
-    if isinstance(process.command, str) and process.command.endswith(".exe"):
-        print(f"Running test: {process.command}")
+    print(f"Running test: {process.command}")
 
     # Create single output handler instance to maintain state
     output_handler = ProcessOutputHandler(verbose=verbose)
     start_time = time.time()
 
-    # Use event-driven processing with reasonable timeouts to prevent hanging
-    while process.poll() is None:
+    while True:
         try:
-            # Use consistent timeout for all output reading
-            line = process.get_next_line(timeout=0.1)  # 100ms timeout
-            if line is not None:
-                # Indent and format output
-                diff = time.time() - start_time
-                diff_str = f"{diff:.2f} "
-                print(f"  {diff_str} {line}")  # Add two spaces of indentation
-                # Ensure output is visible immediately
+            line = process.get_next_line(timeout=30)
+            if line is None:
+                break
+            print(f"  {line}")
+        except KeyboardInterrupt:
+            import _thread
 
-                # After getting one line, quickly drain any additional output
-                # This maintains responsiveness while avoiding tight polling loops
-                while True:  # Keep draining until no more output
-                    try:
-                        additional_line = process.get_next_line(
-                            timeout=0.01
-                        )  # 10ms for draining
-                        if additional_line is None:
-                            break  # End of stream
-                        if additional_line.strip():  # Only print non-empty lines
-                            print(
-                                f"  {additional_line}"
-                            )  # Add two spaces of indentation
-                            sys.stdout.flush()
-                    except queue.Empty:
-                        break  # No more output available right now
-
-        except queue.Empty:
-            # No output available right now - this is normal and expected
-            pass
-        except TimeoutError:
-            print(f"\nProcess timed out: {process.command}")
-            process.kill()
-            sys.exit(1)
+            _thread.interrupt_main()
+            break
         except Exception as e:
-            print(f"\nUnexpected error processing output from {process.command}: {e}")
+            print(f"Error processing output: {e}")
             process.kill()
             sys.exit(1)
 
