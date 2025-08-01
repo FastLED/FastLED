@@ -1366,7 +1366,7 @@ async def compile_examples(arguments: Dict[str, Any], project_root: Path) -> Cal
     examples = arguments.get("examples", ["Blink"])
     interactive = arguments.get("interactive", False)
     
-    cmd = ["uv", "run", "ci/ci-compile.py", platform]
+    cmd = ["uv", "run", "-m", "ci.ci-compile", platform]
     
     if examples:
         cmd.extend(["--examples"] + examples)
@@ -1647,8 +1647,8 @@ async def build_info_analysis(arguments: Dict[str, Any], project_root: Path) -> 
         if not boards:
             result_text = "[ERROR] No boards with build_info.json found in .build directory\n"
             result_text += "   Try running a compilation first:\n"
-            result_text += "   uv run ci/ci-compile.py uno --examples Blink\n"
-            result_text += "   uv run ci/ci-compile.py esp32dev --examples Blink\n"
+            result_text += "   uv run -m ci.ci-compile uno --examples Blink\n"
+            result_text += "   uv run -m ci.ci-compile esp32dev --examples Blink\n"
             return CallToolResult(
                 content=[TextContent(type="text", text=result_text)]
             )
@@ -2076,15 +2076,15 @@ async def symbol_analysis(arguments: Dict[str, Any], project_root: Path) -> Call
         # Add usage instructions
         result_text += "\n## How to Use Symbol Analysis\n\n"
         result_text += "### Available Commands:\n"
-        result_text += "- `uv run ci/ci/symbol_analysis.py --board uno` - Analyze UNO platform\n"
-        result_text += "- `uv run ci/ci/symbol_analysis.py --board esp32dev` - Analyze ESP32 platform\n"
-        result_text += "- `uv run ci/ci/symbol_analysis.py --board teensy31` - Analyze Teensy platform\n"
+        result_text += "- `uv run -m ci.ci.symbol_analysis --board uno` - Analyze UNO platform\n"
+        result_text += "- `uv run -m ci.ci.symbol_analysis --board esp32dev` - Analyze ESP32 platform\n"
+        result_text += "- `uv run -m ci.ci.symbol_analysis --board teensy31` - Analyze Teensy platform\n"
         result_text += "- `uv run ci/demo_symbol_analysis.py` - Analyze all available platforms\n\n"
         
         result_text += "### Prerequisites:\n"
-        result_text += "1. Compile platform first: `uv run ci/ci-compile.py {board} --examples Blink`\n"
+        result_text += "1. Compile platform first: `bash compile {board} --examples Blink`\n"
         result_text += "2. Ensure .build/{board}/build_info.json exists\n"
-        result_text += "3. Run symbol analysis: `uv run ci/ci/symbol_analysis.py --board {board}`\n\n"
+        result_text += "3. Run symbol analysis: `uv run -m ci.ci.symbol_analysis --board {board}`\n\n"
         
         result_text += "### Supported Platforms:\n"
         result_text += "- [OK] UNO (AVR) - Small embedded platform\n"

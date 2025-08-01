@@ -58,11 +58,11 @@ def init() -> None:
             print(f"Working directory: {PROJECT_ROOT}")
             try:
                 print(
-                    "Starting compilation command: uv run ci/ci-compile.py uno --examples Blink"
+                    "Starting compilation command: uv run -m ci.ci-compile uno --examples Blink"
                 )
                 start_time = time.time()
                 result = subprocess.run(
-                    "uv run ci/ci-compile.py uno --examples Blink",
+                    "uv run -m ci.ci-compile uno --examples Blink",
                     shell=True,
                     check=True,
                     cwd=str(PROJECT_ROOT),

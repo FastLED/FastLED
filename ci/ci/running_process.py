@@ -251,6 +251,7 @@ class RunningProcess:
                 try:
                     for line in iter(self.proc.stdout.readline, ""):
                         if self.shutdown.is_set():
+                            self.output_queue.put(None)
                             break
 
                         # Strip whitespace and queue non-empty lines
@@ -297,32 +298,9 @@ class RunningProcess:
             queue.Empty: If timeout is 0 or specified and no line is available
             TimeoutError: If the process times out
         """
-        # Check if process has finished and queue is empty
-        if self.proc is not None and self.proc.poll() is not None:
-            try:
-                # Try to get any remaining output
-                line = self.output_queue.get_nowait()
-                if line is None:
-                    # End of output marker
-                    return None
-                return line
-            except queue.Empty:
-                return None
 
-        # Process still running or queue not empty
-        try:
-            line = self.output_queue.get(timeout=timeout)
-            if line is None and self.proc is not None and self.proc.poll() is not None:
-                # Process finished and we got end marker
-                return None
-            return line
-        except queue.Empty:
-            if (
-                self.proc is not None
-                and time.time() - getattr(self, "_start_time", 0) > self.timeout
-            ):
-                raise TimeoutError(f"Process timed out after {self.timeout} seconds")
-            raise
+        assert self.proc is not None
+        return self.output_queue.get(timeout=timeout)
 
     def poll(self) -> int | None:
         """

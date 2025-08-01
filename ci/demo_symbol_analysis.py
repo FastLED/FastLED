@@ -87,7 +87,7 @@ def main():
     if not boards_to_analyze:
         print("❌ No boards with build_info.json found in .build directory")
         print(
-            "   Please compile some examples first using: uv run ci/ci-compile.py <board> --examples Blink"
+            "   Please compile some examples first using: uv run -m ci.ci-compile <board> --examples Blink"
         )
         sys.exit(1)
 

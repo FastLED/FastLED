@@ -30,7 +30,7 @@ def init() -> None:
         print("Uno build not found. Running compilation...")
         try:
             subprocess.run(
-                "uv run ci/ci-compile.py uno --examples Blink",
+                "uv run -m ci.ci-compile uno --examples Blink",
                 shell=True,
                 check=True,
                 cwd=str(PROJECT_ROOT),
