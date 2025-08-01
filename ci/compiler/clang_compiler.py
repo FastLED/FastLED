@@ -549,37 +549,42 @@ class Compiler:
 
             # Build PCH compilation command - BYPASS sccache for PCH generation
             # Use direct ziglang c++ compiler, not the cache-wrapped version
-            direct_compiler = "python -m ziglang c++"
-
-            cmd: list[str] = []
-            if self.settings.compiler.startswith("sccache"):
-                # When using sccache, we need to pass -- before the compiler arguments
-                cmd.extend(["--"])
-
-            cmd.extend(
-                [
-                    "python",
-                    "-m",
-                    "ziglang",
-                    "c++",  # Use ziglang c++ as the compiler
-                    "-x",
-                    "c++-header",
-                    f"-std={self.settings.std_version}",
-                    f"-I{self.settings.include_path}",
-                ]
-            )
+            # Always use direct ziglang compilation for PCH (no sccache/ccache)
+            cmd = [
+                "uv",
+                "run", 
+                "python",
+                "-m",
+                "ziglang",
+                "c++",  # Use ziglang c++ as the compiler
+                "-x",
+                "c++-header",
+                f"-std={self.settings.std_version}",
+                f"-I{self.settings.include_path}",
+            ]
 
             # Add defines if specified
             if self.settings.defines:
                 for define in self.settings.defines:
                     cmd.append(f"-D{define}")
 
-            # Add compiler args but skip cache-related args
-            # Filter out sccache/ccache wrapper arguments that don't apply to direct compilation
+            # Add compiler args but skip cache-related args and ziglang command parts
+            # Filter out sccache/ccache wrapper arguments and ziglang command components
             filtered_args: list[str] = []
             skip_next = False
+            
+            # Determine which compiler args to skip based on the compiler_args structure
+            remaining_args = self.settings.compiler_args
+            if (len(self.settings.compiler_args) >= 6 and 
+                self.settings.compiler_args[0:6] == ["uv", "run", "python", "-m", "ziglang", "c++"]):
+                # Skip the ziglang c++ command part since we're setting it up explicitly
+                remaining_args = self.settings.compiler_args[6:]
+            elif (len(self.settings.compiler_args) > 0 and 
+                  self.settings.compiler_args[0] == "clang++"):
+                # Skip the clang++ wrapper
+                remaining_args = self.settings.compiler_args[1:]
 
-            for arg in self.settings.compiler_args:
+            for arg in remaining_args:
                 if skip_next:
                     skip_next = False
                     continue
