@@ -341,7 +341,7 @@ def create_examples_test_process(
     args: TestArgs, enable_stack_trace: bool
 ) -> RunningProcess:
     """Create an examples test process without starting it"""
-    cmd = ["uv", "run", "python", "-m", "ci.compiler.test_example_compilation"]
+    cmd = ["uv", "run", "python", "ci/compiler/test_example_compilation.py"]
     if args.examples:
         cmd.extend(args.examples)
     if args.clean:
@@ -396,8 +396,8 @@ def create_compile_uno_test_process(enable_stack_trace: bool = True) -> RunningP
     cmd = [
         "uv",
         "run",
-        "-m",
-        "ci.ci-compile.py",
+        "python",
+        "ci/ci-compile.py",
         "uno",
         "--examples",
         "Blink",

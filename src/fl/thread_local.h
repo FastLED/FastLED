@@ -72,7 +72,7 @@ template <typename T> class ThreadLocalReal {
             storage = createStorage();
         }
         if (mHasDefault && !storage->initialized) {
-            storage->value = mDefaultValue;
+            copyValue(storage->value, mDefaultValue);
             storage->initialized = true;
         }
         return storage->value; 
@@ -84,7 +84,7 @@ template <typename T> class ThreadLocalReal {
             storage = createStorage();
         }
         if (mHasDefault && !storage->initialized) {
-            storage->value = mDefaultValue;
+            copyValue(storage->value, mDefaultValue);
             storage->initialized = true;
         }
         return storage->value; 
@@ -92,7 +92,7 @@ template <typename T> class ThreadLocalReal {
 
     // Set the value for this thread
     void set(const T& value) {
-        access() = value;
+        copyValue(access(), value);
     }
 
     // Convenience operators
@@ -105,6 +105,21 @@ template <typename T> class ThreadLocalReal {
     }
 
   private:
+    // Helper function to copy values, specialized for arrays
+    template<typename U>
+    static void copyValue(U& dest, const U& src) {
+        dest = src;  // Default behavior for non-array types
+    }
+
+    // Specialization for array types
+    template<typename U, size_t N>
+    static void copyValue(U (&dest)[N], const U (&src)[N]) {
+        for (size_t i = 0; i < N; ++i) {
+            copyValue(dest[i], src[i]);  // Recursively handle nested arrays
+        }
+    }
+
+    // Storage for thread-local data
     struct ThreadStorage {
         T value{};
         bool initialized = false;
