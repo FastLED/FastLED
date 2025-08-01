@@ -57,7 +57,7 @@ class CompilerOptions:
 
     # Core compiler settings (formerly CompilerSettings)
     include_path: str
-    compiler: str | list[str] = "uv run python -m ziglang c++"
+    compiler: str | list[str]
     defines: list[str] | None = None
     std_version: str = "c++17"
     compiler_args: list[str] = field(default_factory=list[str])
@@ -144,16 +144,16 @@ class LinkOptions:
 
 @dataclass
 class BuildTools:
-    """Build tool paths and configurations"""
+    """Build tool paths and configurations - all values must come from build_flags.toml"""
 
-    compiler: str | list[str] = "clang++"  # C++ compiler (maps to CompilerOptions.compiler)
-    archiver: str = "ar"  # Archive tool (maps to CompilerOptions.archiver)
-    linker: str | None = None  # Linker tool (maps to LinkOptions.linker)
-    c_compiler: str = "clang"  # C compiler (for mixed C/C++ projects)
-    objcopy: str = "objcopy"  # Object copy utility (for firmware/embedded)
-    nm: str = "nm"  # Symbol table utility (for analysis)
-    strip: str = "strip"  # Strip utility (for release builds)
-    ranlib: str = "ranlib"  # Archive indexer (for static libraries)
+    compiler: str | list[str]  # C++ compiler (maps to CompilerOptions.compiler)
+    archiver: str  # Archive tool (maps to CompilerOptions.archiver)
+    linker: str | None  # Linker tool (maps to LinkOptions.linker)
+    c_compiler: str  # C compiler (for mixed C/C++ projects)
+    objcopy: str  # Object copy utility (for firmware/embedded)
+    nm: str  # Symbol table utility (for analysis)
+    strip: str  # Strip utility (for release builds)
+    ranlib: str  # Archive indexer (for static libraries)
 
 
 @dataclass
@@ -197,17 +197,25 @@ class BuildFlags:
         except Exception as e:
             raise RuntimeError(f"Failed to parse build_flags.toml: {e}")
 
-        # Extract tools configuration
+        # Extract tools configuration - all tools must be defined in build_flags.toml
         tools_config = config.get("tools", {})
+        if not tools_config:
+            raise ValueError("tools section is required in build_flags.toml")
+        
+        required_tools = ["compiler", "archiver", "c_compiler", "objcopy", "nm", "strip", "ranlib"]
+        for tool in required_tools:
+            if tool not in tools_config:
+                raise ValueError(f"Required tool '{tool}' not found in build_flags.toml [tools] section")
+        
         tools = BuildTools(
-            compiler=tools_config.get("compiler", "clang++"),
-            archiver=tools_config.get("archiver", "ar"),
-            linker=tools_config.get("linker"),
-            c_compiler=tools_config.get("c_compiler", "clang"),
-            objcopy=tools_config.get("objcopy", "objcopy"),
-            nm=tools_config.get("nm", "nm"),
-            strip=tools_config.get("strip", "strip"),
-            ranlib=tools_config.get("ranlib", "ranlib"),
+            compiler=tools_config["compiler"],
+            archiver=tools_config["archiver"],
+            linker=tools_config.get("linker"),  # linker is optional
+            c_compiler=tools_config["c_compiler"],
+            objcopy=tools_config["objcopy"],
+            nm=tools_config["nm"],
+            strip=tools_config["strip"],
+            ranlib=tools_config["ranlib"],
         )
 
         # Extract base flags
@@ -425,62 +433,34 @@ class Compiler:
     def get_compiler_args(self) -> list[str]:
         """
         Get a copy of the complete compiler arguments that would be used for compilation.
+        All compiler configuration comes from build_flags.toml.
 
         Returns:
             list[str]: Copy of compiler arguments including compiler, flags, defines, and settings
         """
-        # Handle cache-wrapped compilers (sccache/ccache) or ziglang c++
-        if len(self.settings.compiler_args) > 0 and self.settings.compiler_args[
-            0:6
-        ] == ["uv", "run", "python", "-m", "ziglang", "c++"]:
-            # This is ziglang c++ in compiler_args, use it directly
-            cmd = self.settings.compiler_args[
-                0:6
-            ]  # Use ziglang c++ command from compiler_args
-            remaining_cache_args = self.settings.compiler_args[
-                6:
-            ]  # Skip the ziglang c++ part
-        elif (
-            len(self.settings.compiler_args) > 0
-            and self.settings.compiler_args[0] == "clang++"
-        ):
-            # This is a cache-wrapped clang++, replace with ziglang c++
-            cmd = ["uv", "run", "python", "-m", "ziglang", "c++"]
-            remaining_cache_args = self.settings.compiler_args[1:]
+        # Get compiler command from build_flags.toml settings
+        if isinstance(self.settings.compiler, list):
+            cmd = self.settings.compiler.copy()
+        elif isinstance(self.settings.compiler, str):
+            cmd = self.settings.compiler.split()
         else:
-            # This is a direct compiler call, use ziglang c++
-            if self.settings.compiler.startswith("sccache"):
-                # When using sccache, we need to pass -- before the compiler arguments
-                cmd = [
-                    self.settings.compiler,
-                    "--",
-                    "uv",
-                    "run",
-                    "python",
-                    "-m",
-                    "ziglang",
-                    "c++",
-                ]
-            else:
-                cmd = ["uv", "run", "python", "-m", "ziglang", "c++"]
-            remaining_cache_args = self.settings.compiler_args
+            cmd = [str(self.settings.compiler)]
 
-        cmd.extend(
-            [
-                "-x",
-                "c++",  # Force C++ compilation of .ino files
-                f"-std={self.settings.std_version}",
-                f"-I{self.settings.include_path}",  # FastLED include path
-            ]
-        )
+        # Add compilation mode and standard
+        cmd.extend([
+            "-x",
+            "c++",  # Force C++ compilation of .ino files
+            f"-std={self.settings.std_version}",
+            f"-I{self.settings.include_path}",  # FastLED include path
+        ])
 
         # Add defines if specified
         if self.settings.defines:
             for define in self.settings.defines:
                 cmd.append(f"-D{define}")
 
-        # Add remaining compiler args (after skipping clang++ for cache-wrapped compilers)
-        cmd.extend(remaining_cache_args)
+        # Add compiler args from build_flags.toml
+        cmd.extend(self.settings.compiler_args)
 
         # Add PCH flag if available
         if self.settings.use_pch and self._pch_ready and self._pch_file_path:

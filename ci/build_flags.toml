@@ -6,7 +6,7 @@
 # compilation to ensure they remain synchronized and compatible across the entire build system.
 
 [tools]
-# Build tool configuration
+# Build tool configuration - all tools must be specified
 compiler = ["sccache", "--", "uv", "run", "python", "-m", "ziglang", "c++"]
 archiver = "ar"
 c_compiler = "clang"
