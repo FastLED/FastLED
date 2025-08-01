@@ -195,7 +195,7 @@ class BuildFlags:
             # Return minimal fallback configuration
             return cls(
                 defines=["-DSTUB_PLATFORM", "-DFASTLED_UNIT_TEST=1"],
-                compiler_flags=[],  # Empty - should come from TOML
+                compiler_flags=["-std=gnu++17", "-Wall"],  # Default compiler flags
                 include_flags=["-I.", "-Isrc", "-Itests"],
                 link_flags=[],  # Empty - should come from TOML
                 strict_mode_flags=[],
@@ -206,7 +206,7 @@ class BuildFlags:
             # Return minimal fallback configuration
             return cls(
                 defines=["-DSTUB_PLATFORM", "-DFASTLED_UNIT_TEST=1"],
-                compiler_flags=[],  # Empty - should come from TOML
+                compiler_flags=["-std=gnu++17", "-Wall"],  # Default compiler flags
                 include_flags=["-I.", "-Isrc", "-Itests"],
                 link_flags=[],  # Empty - should come from TOML
                 strict_mode_flags=[],
