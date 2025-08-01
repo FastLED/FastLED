@@ -405,6 +405,7 @@ void StringFormatter::appendFloat(const float &val, StrN<64> *dst, int precision
 string &string::append(const JsonValue& val) {
     // Use the JsonValue's to_string method if available
     // For now, just append a placeholder to avoid compilation errors
+    FL_UNUSED(val);
     append("<JsonValue>");
     return *this;
 }

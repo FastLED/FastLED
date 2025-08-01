@@ -4,7 +4,7 @@
 #include "fl/namespace.h"
 #include "fl/str.h"
 #include "fl/json.h"
-
+#include "fl/unused.h"
 // CLEDController is forward declared in header - no include needed
 
 #if FASTLED_ENABLE_JSON
@@ -19,6 +19,7 @@ ActiveStripData &ActiveStripData::Instance() {
 
 void ActiveStripData::update(int id, uint32_t now, const uint8_t *pixel_data,
                              size_t size) {
+    FL_UNUSED(now);
     mStripMap.update(id, SliceUint8(pixel_data, size));
 }
 

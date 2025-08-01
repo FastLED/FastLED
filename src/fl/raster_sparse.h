@@ -45,7 +45,7 @@ class XYRasterU8Sparse {
     XYRasterU8Sparse(const XYRasterU8Sparse &) = default;
     XYRasterU8Sparse &operator=(XYRasterU8Sparse &&) = default;
     XYRasterU8Sparse(XYRasterU8Sparse &&) = default;
-    XYRasterU8Sparse &operator=(XYRasterU8Sparse &) = default;
+    XYRasterU8Sparse &operator=(const XYRasterU8Sparse &) = default;
 
     XYRasterU8Sparse &reset() {
         mSparseGrid.clear();
