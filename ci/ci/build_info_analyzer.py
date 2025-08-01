@@ -411,7 +411,7 @@ Examples:
             print("❌ No boards with build_info.json found in build directory")
             print(f"   Directory: {analyzer.build_dir}")
             print(
-                "   Try running a compilation first: uv run -m ci.ci-compile uno --examples Blink"
+                "   Try running a compilation first: uv run python -m ci.ci-compile uno --examples Blink"
             )
             return 1
 

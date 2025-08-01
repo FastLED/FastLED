@@ -1647,8 +1647,8 @@ async def build_info_analysis(arguments: Dict[str, Any], project_root: Path) -> 
         if not boards:
             result_text = "[ERROR] No boards with build_info.json found in .build directory\n"
             result_text += "   Try running a compilation first:\n"
-            result_text += "   uv run -m ci.ci-compile uno --examples Blink\n"
-            result_text += "   uv run -m ci.ci-compile esp32dev --examples Blink\n"
+            result_text += "   uv run python -m ci.ci-compile uno --examples Blink\n"
+            result_text += "   uv run python -m ci.ci-compile esp32dev --examples Blink\n"
             return CallToolResult(
                 content=[TextContent(type="text", text=result_text)]
             )
