@@ -331,10 +331,12 @@ processAsync(promise);  // Can pass to multiple places
 - **Easy sharing** - Moveable wrappers allow safe copying of unique resources
 - **API flexibility** - Can pass resources between different contexts safely
 
-## 🔧 CMAKE BUILD SYSTEM ARCHITECTURE
+## 🔧 CMAKE BUILD SYSTEM ARCHITECTURE (DEPRECATED - NO LONGER USED)
 
-### Build System Overview
-FastLED uses a sophisticated CMake build system located in `tests/cmake/` with modular configuration:
+**⚠️ IMPORTANT: CMake build system is no longer used. FastLED now uses a Python-based build system.**
+
+### Build System Overview (Historical Reference)
+FastLED previously used a sophisticated CMake build system located in `tests/cmake/` with modular configuration:
 
 **Core Build Files:**
 - `tests/CMakeLists.txt` - Main CMake entry point
@@ -1277,13 +1279,13 @@ uv run mcp_server.py
 **Ubuntu/Debian**:
 ```bash
 sudo apt-get update
-sudo apt-get install -y libunwind-dev build-essential cmake
+sudo apt-get install -y libunwind-dev build-essential
 ```
 
 **CentOS/RHEL/Fedora**:
 ```bash
-sudo yum install -y libunwind-devel gcc-c++ cmake  # CentOS/RHEL  
-sudo dnf install -y libunwind-devel gcc-c++ cmake  # Fedora
+sudo yum install -y libunwind-devel gcc-c++  # CentOS/RHEL  
+sudo dnf install -y libunwind-devel gcc-c++  # Fedora
 ```
 
 **macOS**:
@@ -1301,8 +1303,10 @@ The build system automatically detects and configures the best available option.
 
 ### Testing Stack Traces
 ```bash
+# Note: Stack trace testing now uses Python build system
+# CMake commands are deprecated
 cd tests
-cmake . && make crash_test_standalone crash_test_execinfo
+cmake . && make crash_test_standalone crash_test_execinfo  # DEPRECATED
 
 # Test libunwind version
 ./.build/bin/crash_test_standalone manual   # Manual stack trace

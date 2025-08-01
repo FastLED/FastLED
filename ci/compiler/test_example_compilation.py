@@ -34,7 +34,6 @@ from ci.compiler.clang_compiler import (
     CompilerOptions,
     LinkOptions,
     Result,
-    get_common_linker_args,
 )
 
 

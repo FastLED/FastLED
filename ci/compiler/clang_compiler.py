@@ -195,9 +195,9 @@ class BuildFlags:
             # Return minimal fallback configuration
             return cls(
                 defines=["-DSTUB_PLATFORM", "-DFASTLED_UNIT_TEST=1"],
-                compiler_flags=["-std=gnu++17", "-Wall"],
+                compiler_flags=[],  # Empty - should come from TOML
                 include_flags=["-I.", "-Isrc", "-Itests"],
-                link_flags=["-pthread"],
+                link_flags=[],  # Empty - should come from TOML
                 strict_mode_flags=[],
                 tools=BuildTools(),  # Use default tools
             )
@@ -206,9 +206,9 @@ class BuildFlags:
             # Return minimal fallback configuration
             return cls(
                 defines=["-DSTUB_PLATFORM", "-DFASTLED_UNIT_TEST=1"],
-                compiler_flags=["-std=gnu++17", "-Wall"],
+                compiler_flags=[],  # Empty - should come from TOML
                 include_flags=["-I.", "-Isrc", "-Itests"],
-                link_flags=["-pthread"],
+                link_flags=[],  # Empty - should come from TOML
                 strict_mode_flags=[],
                 tools=BuildTools(),  # Use default tools
             )
@@ -525,7 +525,7 @@ class Compiler:
                 pch_output_path = pch_header_path.with_suffix(".hpp.pch")
 
             # Build PCH compilation command - BYPASS sccache for PCH generation
-            # Use direct ziglang cc compiler, not the cache-wrapped version
+            # Use direct ziglang c++ compiler, not the cache-wrapped version
             direct_compiler = "python -m ziglang c++"
 
             cmd: list[str] = []
@@ -660,7 +660,7 @@ class Compiler:
         """
         # Test uv run access first
         try:
-            # Always use uv run python -m ziglang cc
+            # Always use uv run python -m ziglang c++
             version_cmd = ["uv", "run", "python", "-m", "ziglang", "c++", "--version"]
 
             # Use Popen with stderr redirected to stdout to prevent buffer overflow
@@ -1699,7 +1699,16 @@ def link_program_sync(link_options: LinkOptions) -> Result:
             return Result(ok=False, stdout="", stderr=str(e), return_code=1)
 
     # Build linker command
-    cmd = [linker]
+    cmd: list[str] = []
+    if isinstance(linker, str):
+        # Split linker string into individual arguments for subprocess
+        # Use shlex.split() to properly handle quoted strings and escaped characters
+        import shlex
+
+        cmd = shlex.split(linker)
+    else:
+        # linker should be str at this point due to detect_linker() call above
+        cmd = [str(linker)]
 
     # Add platform-specific output flag first
     system = platform.system()
@@ -1773,92 +1782,25 @@ def link_program_sync(link_options: LinkOptions) -> Result:
         )
 
     except Exception as e:
-        return Result(
-            ok=False, stdout="", stderr=f"Linker command failed: {e}", return_code=-1
+        # Create verbose error message with full command and exception details
+        cmd_str = " ".join(str(arg) for arg in cmd)
+        verbose_error = (
+            f"Linker command failed with exception: {type(e).__name__}: {e}\n"
+            f"Failed command: {cmd_str}\n"
+            f"Working directory: {Path.cwd()}\n"
+            f"Output executable: {link_options.output_executable}\n"
+            f"Object files: {link_options.object_files}\n"
+            f"Static libraries: {link_options.static_libraries}\n"
+            f"Linker args: {link_options.linker_args}"
         )
+        return Result(ok=False, stdout="", stderr=verbose_error, return_code=-1)
 
 
 # Helper functions for common linker argument patterns
 
 
-def get_common_linker_args(
-    platform_name: str | None = None,
-    debug: bool = False,
-    optimize: bool = False,
-    static_runtime: bool = False,
-    dynamic_linking: bool = False,
-) -> list[str]:
-    """Generate common linker arguments for different platforms and configurations."""
-    if platform_name is None or platform_name == "auto":
-        platform_name = platform.system()
-
-    args: list[str] = []
-
-    if platform_name == "Windows":
-        # Windows (clang++) arguments
-        args.append("-Wl,--subsystem,console")
-
-        if debug:
-            args.append("-g")
-
-        if optimize:
-            args.extend(["-O2", "-Wl,--gc-sections"])
-
-        if static_runtime and not dynamic_linking:
-            args.extend(["-static-libgcc", "-static-libstdc++"])
-        elif dynamic_linking:
-            args.append("-shared")  # Create shared library
-            args.append("-fPIC")  # Position Independent Code
-
-    else:
-        # Unix-style arguments (Linux/macOS)
-        if debug:
-            args.append("-g")
-
-        if optimize:
-            args.extend(["-O2", "-Wl,--gc-sections"])
-
-        if static_runtime and not dynamic_linking:
-            args.extend(["-static-libgcc", "-static-libstdc++"])
-        elif dynamic_linking:
-            args.append("-shared")  # Create shared library
-            args.append("-fPIC")  # Position Independent Code
-
-    return args
-
-
-def add_system_libraries(
-    linker_args: list[str], libraries: list[str], platform_name: str | None = None
-) -> None:
-    """Add system libraries to linker arguments with platform-appropriate flags."""
-    if platform_name is None or platform_name == "auto":
-        platform_name = platform.system()
-
-    for lib in libraries:
-        if platform_name == "Windows":
-            # Windows style
-            if lib.endswith(".lib"):
-                lib = lib[:-4]  # Remove .lib extension
-            linker_args.append(f"/DEFAULTLIB:{lib}")
-        else:
-            # Unix style
-            linker_args.append(f"-l{lib}")
-
-
-def add_library_paths(
-    linker_args: list[str], paths: list[str], platform_name: str | None = None
-) -> None:
-    """Add library search paths to linker arguments with platform-appropriate flags."""
-    if platform_name is None or platform_name == "auto":
-        platform_name = platform.system()
-
-    for path in paths:
-        if platform_name == "Windows":
-            # Windows style
-            linker_args.append(f"/LIBPATH:{path}")
-        else:
-            # Unix style
-            linker_args.append(f"-L{path}")
+# NOTE: Linker flag functions removed - all linker configuration now comes from build_flags.toml
+# Use BuildFlags.parse() to load linker flags from TOML configuration instead
 
 
 # Convenience functions for backward compatibility

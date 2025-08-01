@@ -20,6 +20,7 @@ from ci.ci.test_types import (
     TestResultType,
     TestSuiteResult,
 )
+from ci.ci.watchdog_state import clear_active_processes, set_active_processes
 
 
 @typechecked
@@ -622,6 +623,9 @@ def _run_processes_parallel(
     # Track failed processes for proper error reporting
     failed_processes: list[str] = []
 
+    # Update watchdog with current active processes
+    set_active_processes([proc.command for proc in active_processes])
+
     while active_processes:
         # Check global timeout
         if time.time() - start_time > global_timeout:
@@ -652,6 +656,10 @@ def _run_processes_parallel(
                 if proc in last_activity_time:
                     del last_activity_time[proc]
                 print(f"Killed stuck process: {proc.command}")
+
+                # Update watchdog with remaining active processes
+                set_active_processes([p.command for p in active_processes])
+
                 continue  # Skip to next process
 
         # Use event-driven processing instead of sleep-and-poll
@@ -737,6 +745,10 @@ def _run_processes_parallel(
                         del last_activity_time[proc]  # Clean up tracking
                     any_activity = True
                     print(f"Process completed: {cmd}")
+
+                    # Update watchdog with remaining active processes
+                    set_active_processes([p.command for p in active_processes])
+
                     sys.stdout.flush()
                 except Exception as e:
                     test_name = _extract_test_name(cmd)
@@ -762,6 +774,9 @@ def _run_processes_parallel(
             print(f"  - {cmd}")
         print("Processes were killed due to timeout/stuck detection")
         sys.exit(1)  # Exit with error code to indicate failure
+
+    # Clear watchdog state since all processes are done
+    clear_active_processes()
 
     print("\nAll parallel tests completed successfully")
 

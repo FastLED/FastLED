@@ -1,5 +1,7 @@
 # Bug Fix Design Document: Mixed Path Separators in Compiler Error Output
 
+**⚠️ DEPRECATED: This document refers to the old CMake build system. FastLED now uses a Python-based build system. This document is kept for historical reference only.**
+
 ## Problem Statement
 
 The command `bash test --cpp --quick` (when it errors) presents compiler error and warning messages with paths that are a problematic mix of:

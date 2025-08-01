@@ -6,6 +6,7 @@ import threading
 import time
 import traceback
 from pathlib import Path
+from typing import Optional
 
 import psutil
 
@@ -23,6 +24,7 @@ from ci.ci.test_types import (
     calculate_fingerprint,
     process_test_flags,
 )
+from ci.ci.watchdog_state import get_active_processes
 
 
 _CANCEL_WATCHDOG = threading.Event()
@@ -53,8 +55,20 @@ def make_watch_dog_thread(
         time.sleep(seconds)
         if _CANCEL_WATCHDOG.is_set():
             return
+
+        # Get current active processes to show which command is stuck
+        active_processes = get_active_processes()
+
         dump_main_thread_stack()
         print(f"Watchdog timer expired after {seconds} seconds - forcing exit")
+
+        if active_processes:
+            print(f"\n🚨 STUCK SUBPROCESS COMMANDS:")
+            for i, cmd in enumerate(active_processes, 1):
+                print(f"  {i}. {cmd}")
+        else:
+            print("\n🚨 NO ACTIVE SUBPROCESSES DETECTED - MAIN PROCESS LIKELY HUNG")
+
         os._exit(2)  # Exit with error code 2 to indicate timeout (SIGTERM)
 
     thr = threading.Thread(target=watchdog_timer, daemon=True, name="WatchdogTimer")

@@ -59,7 +59,7 @@ bash test --check
 This command:
 - Automatically enables `--cpp` and `--clang` modes
 - Runs both IWYU and clang-tidy
-- Uses the CMake integration for optimal analysis
+- Uses the Python build system integration for optimal analysis
 
 ### IWYU-Specific Commands
 
@@ -103,9 +103,18 @@ bash test --cpp --clang
 bash tidy.sh
 ```
 
-**CMake Integration:**
+**Python Build System Integration:**
 ```bash
-# Enable static analysis during CMake build
+# Static analysis is integrated into the current Python-based build system
+# Use the standard test commands which include static analysis checks
+bash test --cpp --clang
+bash lint
+```
+
+**⚠️ CMake Integration (DEPRECATED):**
+```bash
+# OLD: CMake build system is no longer used
+# This is kept for historical reference only
 cd tests
 cmake -B .build -DFASTLED_ENABLE_IWYU=ON -DFASTLED_ENABLE_CLANG_TIDY=ON
 cmake --build .build
@@ -138,11 +147,17 @@ uv run ci/ci-iwyu.py --mapping-file my-custom.imp
 uv run ci/ci-iwyu.py --max-line-length 120
 ```
 
-### CMake Options
+### Build System Configuration
 
-Available CMake options for static analysis:
+**Current Python Build System:**
+Static analysis is automatically integrated into the Python-based build system via:
+- `bash test` - Runs tests with integrated static analysis
+- `bash lint` - Runs comprehensive linting including static analysis
+- Configuration files in `ci/build_flags.toml`
 
+**⚠️ CMake Options (DEPRECATED):**
 ```cmake
+# OLD: CMake build system is no longer used
 -DFASTLED_ENABLE_IWYU=ON           # Enable IWYU
 -DFASTLED_ENABLE_CLANG_TIDY=ON     # Enable clang-tidy
 ```

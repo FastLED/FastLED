@@ -88,6 +88,7 @@ defines = [
     "-DFASTLED_NO_PINMAP",                      # Disable pin mapping
     "-DHAS_HARDWARE_PIN_SUPPORT",               # Enable hardware pin support
     "-DFASTLED_DEBUG_LEVEL=1",                  # Set debug level
+    "-DFASTLED_NO_ATEXIT=1",                    # Disable atexit to fix Windows lld-link errors
     "-DDOCTEST_CONFIG_NO_EXCEPTIONS_BUT_WITH_ALL_ASSERTS", # Doctest configuration
 ]
 
@@ -123,21 +124,24 @@ include_flags = [
 # ================================================================================================
 # WINDOWS-SPECIFIC LINKING FLAGS
 # ================================================================================================
-# Linking flags specific to Windows builds using Clang/LLVM.
+# Linking flags for Windows builds using ziglang c++ (uses lld-link in MSVC-compatibility mode).
+# Uses MSVC-style flags and libraries instead of GNU/MinGW style.
 
 flags = [
-    # Windows Subsystem and Entry Point
-    "-Wl,/SUBSYSTEM:CONSOLE",                  # Console application
-    "-Wl,/ENTRY:mainCRTStartup",               # Entry point
+    # Console subsystem (compatible with lld-link)
+    "-mconsole",                               # Console application
     
-    # System Libraries
-    "-Wl,msvcrt.lib",                         # C runtime library
-    "-Wl,legacy_stdio_definitions.lib",        # Legacy stdio functions
-    "-Wl,kernel32.lib",                        # Windows kernel functions
-    "-Wl,user32.lib",                          # Windows user interface
-    "-Wl,libcmt.lib",                          # Static C Runtime Library
-    "-Wl,libvcruntime.lib",                    # VC++ Runtime
-    "-Wl,libucrt.lib"                          # Universal CRT
+    # Runtime libraries are handled automatically by ziglang c++
+    # No explicit runtime library flags needed
+    
+    # Note: atexit symbol conflict with lld-link is a known issue
+    # FASTLED_NO_ATEXIT=1 flag is set but may not fully resolve lld-link specific errors
+    
+    # Windows system libraries (standard Windows libraries)
+    "-lkernel32",                              # Windows kernel functions
+    "-luser32",                                # Windows user interface
+    "-lgdi32",                                 # Graphics device interface
+    "-ladvapi32",                              # Advanced Windows API
 ]
 
 [linking.unix]

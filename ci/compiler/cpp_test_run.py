@@ -651,7 +651,7 @@ def _execute_test_files(
                     os.path.join(PROJECT_ROOT, "src"),
                     "-I",
                     os.path.join(PROJECT_ROOT, "tests"),
-                    "-std=c++17",
+                    # NOTE: Compiler flags now come from build_flags.toml
                 ]
                 return_code, stdout = run_command(compile_cmd)
                 if return_code != 0:

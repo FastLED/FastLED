@@ -19,12 +19,9 @@ from ci.compiler.clang_compiler import (
     LibarchiveOptions,
     LinkOptions,
     Result,
-    add_library_paths,
-    add_system_libraries,
     create_archive_sync,
     detect_archiver,
     detect_linker,
-    get_common_linker_args,
     link_program_sync,
 )
 
@@ -749,64 +746,6 @@ class TestProgramLinking(unittest.TestCase):
         self.assertEqual(len(options.linker_args), 1)
         print("LinkOptions dataclass test passed")
 
-    def test_common_linker_args_windows(self):
-        """Test Windows-specific linker argument generation."""
-        args = get_common_linker_args("Windows", debug=True, optimize=True)
-
-        self.assertIn("/SUBSYSTEM:CONSOLE", args)
-        self.assertIn("/NOLOGO", args)
-        self.assertIn("/DEBUG", args)
-        self.assertIn("/OPT:REF", args)
-        self.assertIn("/OPT:ICF", args)
-        print(f"Windows common args: {args}")
-
-    def test_common_linker_args_linux(self):
-        """Test Linux-specific linker argument generation."""
-        args = get_common_linker_args("Linux", debug=True, optimize=True)
-
-        self.assertIn("-g", args)
-        self.assertIn("-O2", args)
-        self.assertIn("-Wl,--gc-sections", args)
-        print(f"Linux common args: {args}")
-
-    def test_system_libraries_windows(self):
-        """Test Windows system library argument generation."""
-        args = []
-        add_system_libraries(args, ["kernel32", "user32", "gdi32"], "Windows")
-
-        expected = [
-            "/DEFAULTLIB:kernel32.lib",
-            "/DEFAULTLIB:user32.lib",
-            "/DEFAULTLIB:gdi32.lib",
-        ]
-        self.assertEqual(args, expected)
-        print(f"Windows system libs: {args}")
-
-    def test_system_libraries_linux(self):
-        """Test Linux system library argument generation."""
-        args = []
-        add_system_libraries(args, ["pthread", "m", "dl"], "Linux")
-
-        expected = ["-lpthread", "-lm", "-ldl"]
-        self.assertEqual(args, expected)
-        print(f"Linux system libs: {args}")
-
-    def test_library_paths(self):
-        """Test library search path argument generation."""
-        # Windows paths
-        win_args = []
-        add_library_paths(win_args, ["/usr/lib", "/opt/lib"], "Windows")
-        expected_win = ["/LIBPATH:/usr/lib", "/LIBPATH:/opt/lib"]
-        self.assertEqual(win_args, expected_win)
-
-        # Linux paths
-        linux_args = []
-        add_library_paths(linux_args, ["/usr/lib", "/opt/lib"], "Linux")
-        expected_linux = ["-L/usr/lib", "-L/opt/lib"]
-        self.assertEqual(linux_args, expected_linux)
-
-        print(f"Library paths - Windows: {win_args}, Linux: {linux_args}")
-
     def test_linking_validation_missing_objects(self):
         """Test validation of missing object files."""
         options = LinkOptions(
@@ -1128,77 +1067,9 @@ int main() {
         return fastled_objects
 
     def _get_platform_linker_args(self, executable_name: str) -> list[str]:
-        """Get platform-appropriate linker arguments."""
-        import platform
-        import subprocess
-
-        args = get_common_linker_args(debug=True)
-
-        if platform.system() == "Windows":
-            # Check if we're using lld-link (Clang on Windows)
-            try:
-                result = subprocess.run(
-                    ["lld-link", "--version"], capture_output=True, text=True, timeout=5
-                )
-                using_lld_link = result.returncode == 0
-            except (subprocess.TimeoutExpired, FileNotFoundError):
-                using_lld_link = False
-
-            if using_lld_link:
-                # Comprehensive Windows + Clang + lld-link configuration
-                print(
-                    "Using lld-link: applying comprehensive Windows linking configuration"
-                )
-
-                # Clear basic args and replace with comprehensive lld-link configuration
-                args: list[str] = []
-
-                # Basic linker settings
-                basic_settings: list[str] = [
-                    "/SUBSYSTEM:CONSOLE",
-                    "/NOLOGO",
-                    "/DEBUG:FULL",
-                    "/OPT:NOREF",  # Don't remove unreferenced code for debugging
-                    "/OPT:NOICF",  # Don't merge identical functions for debugging
-                ]
-                args.extend(basic_settings)
-
-                # Essential Windows runtime libraries for lld-link
-                # These provide the missing CRT startup and runtime symbols
-                runtime_libs: list[str] = [
-                    "kernel32.lib",  # Windows kernel functions
-                    "user32.lib",  # Windows user interface
-                    "msvcrt.lib",  # C runtime library (dynamic)
-                    "vcruntime.lib",  # Visual C++ runtime support
-                    "ucrt.lib",  # Universal C runtime
-                    "legacy_stdio_definitions.lib",  # Older stdio compatibility
-                ]
-
-                for lib in runtime_libs:
-                    args.append(f"/DEFAULTLIB:{lib}")
-
-                # Prevent static runtime conflicts
-                nodefault_libs: list[str] = [
-                    "/NODEFAULTLIB:libcmt.lib",  # Exclude static C runtime
-                    "/NODEFAULTLIB:libcpmt.lib",  # Exclude static C++ runtime
-                ]
-                args.extend(nodefault_libs)
-
-                # Suppress common lld-link warnings
-                warning_suppression: list[str] = [
-                    "/ignore:4099",  # Suppress PDB warnings
-                    "/ignore:longsections",  # Suppress long section name warnings
-                ]
-                args.extend(warning_suppression)
-
-            else:
-                # Traditional Windows linking (MSVC link.exe)
-                add_system_libraries(args, ["kernel32", "user32"], "Windows")
-        else:
-            # Unix-style systems
-            add_system_libraries(args, ["pthread", "m"], platform.system())
-
-        return args
+        """Get platform-appropriate linker arguments using build_flags.toml approach."""
+        # Use basic linking flags from build_flags.toml
+        return ["-pthread"]  # Basic linking flags from build_flags.toml [linking.base]
 
     def _verify_executable_properties(self, executable_path: Path):
         """Verify that the created executable has expected properties."""

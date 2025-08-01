@@ -49,17 +49,10 @@ def build_fastled_dynamic_library(build_dir: Path) -> Path:
         std_version="c++17",
         compiler="clang++",
         compiler_args=[
-            "-std=gnu++17",
-            "-fpermissive",
-            "-fno-threadsafe-statics",
-            "-fno-exceptions",
-            "-fno-rtti",
-            "-pthread",
+            # NOTE: All compiler flags should come from build_flags.toml
+            # Keep only platform-specific include paths and shared library flags
             "-I" + str(Path(PROJECT_ROOT) / "src/platforms/stub"),
             "-I" + str(Path(PROJECT_ROOT) / "tests"),
-            "-Wall",
-            "-Wextra",
-            "-g",
             # Add shared library flags - platform specific
             "-shared" if sys.platform != "win32" else "/DLL",
             "-fPIC" if sys.platform != "win32" else "",

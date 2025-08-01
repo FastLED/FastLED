@@ -41,7 +41,6 @@ from ci.compiler.clang_compiler import (
     LinkOptions,
     Result,
     create_compiler_options_from_toml,
-    get_common_linker_args,
     link_program_sync,
     load_build_flags_from_toml,
 )
@@ -381,11 +380,11 @@ class FastLEDTestCompiler:
 
         print("Starting parallel compilation of test files...")
         for test_file in test_files:
-            # Compile directly to executable
-            exe_path = self.build_dir / f"{test_file.stem}.exe"
+            # Compile to object file first (since compile_cpp_file uses -c flag)
+            obj_path = self.build_dir / f"{test_file.stem}.o"
             # Convert absolute path to relative for display
-            rel_exe_path = os.path.relpath(exe_path)
-            print(f"Submitting compilation job for: {test_file.name} -> {rel_exe_path}")
+            rel_obj_path = os.path.relpath(obj_path)
+            print(f"Submitting compilation job for: {test_file.name} -> {rel_obj_path}")
             # Show compilation command if enabled
             if os.environ.get("FASTLED_TEST_SHOW_COMPILE", "").lower() in (
                 "1",
@@ -393,20 +392,18 @@ class FastLEDTestCompiler:
                 "yes",
             ):
                 # Convert absolute path to relative for display
-                rel_exe_path = os.path.relpath(exe_path)
-                print(f"[COMPILE] {test_file.name} -> {rel_exe_path}")
+                rel_obj_path = os.path.relpath(obj_path)
+                print(f"[COMPILE] {test_file.name} -> {rel_obj_path}")
 
             compile_future = self.compiler.compile_cpp_file(
                 test_file,
-                output_path=exe_path,
+                output_path=obj_path,
                 additional_flags=[
-                    "-o",
-                    str(exe_path),
                     "-I",
                     str(self.project_root / "src"),
                     "-I",
                     str(self.project_root / "tests"),
-                    "-std=c++17",
+                    # NOTE: Compiler flags now come from build_flags.toml
                 ],
             )
             future_to_test[compile_future] = test_file
@@ -425,8 +422,8 @@ class FastLEDTestCompiler:
                 completed += 1
 
                 if result.ok:
-                    exe_path = self.build_dir / f"{test_file.stem}.exe"
-                    compiled_objects.append(exe_path)
+                    obj_path = self.build_dir / f"{test_file.stem}.o"
+                    compiled_objects.append(obj_path)
                     print(f"[{completed}/{len(test_files)}] Compiled {test_file.name}")
                 else:
                     errors.append(
@@ -621,8 +618,10 @@ class FastLEDTestCompiler:
             link_result: Result = link_program_sync(link_options)
 
             if not link_result.ok:
-                error_msg = f"  {test_name}: Linking failed: {link_result.stderr}"
+                # Create more detailed error message showing link command context
+                error_msg = f"  {test_name}: Linking failed - Linker: {link_options.linker}, Output: {link_options.output_executable}, Objects: {len(link_options.object_files)} files"
                 print(error_msg)
+                print(f"    Error details: {link_result.stderr}")
                 linking_failures.append(f"{test_name}: {link_result.stderr}")
                 continue
 
@@ -726,14 +725,8 @@ class FastLEDTestCompiler:
                     additional_flags=[
                         "-c",  # Compile only
                         "-DFASTLED_STUB_IMPL",  # Essential for STUB platform
-                        "-DFASTLED_FORCE_NAMESPACE=1",  # Match CMake settings
-                        "-DFASTLED_NO_AUTO_NAMESPACE",  # Match CMake settings
-                        "-DFASTLED_NO_PINMAP",  # Match CMake settings
-                        "-DPROGMEM=",  # Match CMake settings
-                        "-DHAS_HARDWARE_PIN_SUPPORT",  # Match CMake settings
-                        "-DFASTLED_ENABLE_JSON=1",  # Enable JSON UI functionality
-                        "-fno-exceptions",  # Match CMake settings
-                        "-fno-rtti",  # Match CMake settings
+                        # NOTE: All defines and compiler flags now come from build_flags.toml
+                        # Remove hardcoded defines - they should be in [test] section
                     ],
                 )
                 result: Result = future.result()

@@ -39,7 +39,14 @@ volatile fl::u32 fuckit;
 /// Called at program exit when run in a desktop environment. 
 /// Extra C definition that some environments may need. 
 /// @returns 0 to indicate success
+
+#ifndef FASTLED_NO_ATEXIT
+#define FASTLED_NO_ATEXIT 0
+#endif
+
+#if !FASTLED_NO_ATEXIT
 extern "C" __attribute__((weak)) int atexit(void (* /*func*/ )()) { return 0; }
+#endif
 
 #ifdef FASTLED_NEEDS_YIELD
 extern "C" void yield(void) { }
