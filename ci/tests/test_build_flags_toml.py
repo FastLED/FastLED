@@ -233,16 +233,14 @@ archiver = "custom-ar"
         self.assertEqual(parsed_flags.tools.c_compiler, original_flags.tools.c_compiler)
 
     def test_parse_missing_file(self) -> None:
-        """Test parsing non-existent TOML file returns fallback configuration"""
+        """Test parsing non-existent TOML file raises FileNotFoundError"""
         nonexistent_file = self.temp_dir / "does_not_exist.toml"
 
-        flags = BuildFlags.parse(nonexistent_file, quick_build=False, strict_mode=False)
-
-        # Should return fallback configuration with default tools
-        self.assertEqual(flags.defines, ["-DSTUB_PLATFORM", "-DFASTLED_UNIT_TEST=1"])
-        self.assertEqual(flags.compiler_flags, ["-std=gnu++17", "-Wall"])
-        self.assertEqual(flags.tools.compiler, "clang++")  # Default tools
-        self.assertEqual(flags.tools.archiver, "ar")
+        # Should raise FileNotFoundError when file is missing
+        with self.assertRaises(FileNotFoundError) as context:
+            BuildFlags.parse(nonexistent_file, quick_build=False, strict_mode=False)
+        
+        self.assertIn("Required build_flags.toml not found", str(context.exception))
 
     def test_from_toml_file_alias(self) -> None:
         """Test that from_toml_file() is an alias for parse()"""
