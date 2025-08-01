@@ -781,60 +781,8 @@ class Compiler:
         else:
             cleanup_temp = False
 
-        # Build compiler command
-        # Handle cache-wrapped compilers (sccache/ccache) or ziglang c++
-        if len(self.settings.compiler_args) > 0 and self.settings.compiler_args[
-            0:6
-        ] == ["uv", "run", "python", "-m", "ziglang", "c++"]:
-            # This is ziglang c++ in compiler_args, use it directly
-            cmd = self.settings.compiler_args[
-                0:6
-            ]  # Use ziglang c++ command from compiler_args
-            remaining_cache_args = self.settings.compiler_args[
-                6:
-            ]  # Skip the ziglang c++ part
-        elif (
-            len(self.settings.compiler_args) > 0
-            and self.settings.compiler_args[0] == "clang++"
-        ):
-            # This is a cache-wrapped clang++, replace with ziglang c++
-            cmd = ["uv", "run", "python", "-m", "ziglang", "c++"]
-            remaining_cache_args = self.settings.compiler_args[1:]
-        else:
-            # This is a direct compiler call, use ziglang c++
-            if self.settings.compiler.startswith("sccache"):
-                # When using sccache, we need to pass -- before the compiler arguments
-                cmd = [
-                    self.settings.compiler,
-                    "--",
-                    "uv",
-                    "run",
-                    "python",
-                    "-m",
-                    "ziglang",
-                    "c++",
-                ]
-            else:
-                cmd = ["uv", "run", "python", "-m", "ziglang", "c++"]
-            remaining_cache_args = self.settings.compiler_args
-
-        # Add standard clang arguments
-        cmd.extend(
-            [
-                "-x",
-                "c++",  # Force C++ compilation of .ino files
-                f"-std={self.settings.std_version}",
-                f"-I{self.settings.include_path}",  # FastLED include path
-            ]
-        )
-
-        # Add defines if specified
-        if self.settings.defines:
-            for define in self.settings.defines:
-                cmd.append(f"-D{define}")
-
-        # Add remaining compiler args (after skipping clang++ for cache-wrapped compilers)
-        cmd.extend(remaining_cache_args)
+        # Build compiler command using get_compiler_args (already handles TOML configuration)
+        cmd = self.get_compiler_args()
 
         # Determine whether to use PCH for this specific file
         should_use_pch = (
@@ -980,60 +928,8 @@ class Compiler:
         else:
             cleanup_temp = False
 
-        # Build compiler command
-        # Handle cache-wrapped compilers (sccache/ccache) or ziglang c++
-        if len(self.settings.compiler_args) > 0 and self.settings.compiler_args[
-            0:6
-        ] == ["uv", "run", "python", "-m", "ziglang", "c++"]:
-            # This is ziglang c++ in compiler_args, use it directly
-            cmd = self.settings.compiler_args[
-                0:6
-            ]  # Use ziglang c++ command from compiler_args
-            remaining_cache_args = self.settings.compiler_args[
-                6:
-            ]  # Skip the ziglang c++ part
-        elif (
-            len(self.settings.compiler_args) > 0
-            and self.settings.compiler_args[0] == "clang++"
-        ):
-            # This is a cache-wrapped clang++, replace with ziglang c++
-            cmd = ["uv", "run", "python", "-m", "ziglang", "c++"]
-            remaining_cache_args = self.settings.compiler_args[1:]
-        else:
-            # This is a direct compiler call, use ziglang c++
-            if self.settings.compiler.startswith("sccache"):
-                # When using sccache, we need to pass -- before the compiler arguments
-                cmd = [
-                    self.settings.compiler,
-                    "--",
-                    "uv",
-                    "run",
-                    "python",
-                    "-m",
-                    "ziglang",
-                    "c++",
-                ]
-            else:
-                cmd = ["uv", "run", "python", "-m", "ziglang", "c++"]
-            remaining_cache_args = self.settings.compiler_args
-
-        # Add standard clang arguments
-        cmd.extend(
-            [
-                "-x",
-                "c++",  # Force C++ compilation
-                f"-std={self.settings.std_version}",
-                f"-I{self.settings.include_path}",  # FastLED include path
-            ]
-        )
-
-        # Add defines if specified
-        if self.settings.defines:
-            for define in self.settings.defines:
-                cmd.append(f"-D{define}")
-
-        # Add remaining compiler args (after skipping clang++ for cache-wrapped compilers)
-        cmd.extend(remaining_cache_args)
+        # Build compiler command using get_compiler_args (already handles TOML configuration)
+        cmd = self.get_compiler_args()
 
         # Determine whether to use PCH for this specific file
         should_use_pch = (
@@ -1805,20 +1701,24 @@ def link_program_sync(link_options: LinkOptions) -> Result:
 
 # Convenience functions for backward compatibility
 
-# Default settings for backward compatibility
-_DEFAULT_SETTINGS = CompilerOptions(
-    include_path="./src", defines=["STUB_PLATFORM"], std_version="c++17"
-)
-
+# No default settings - all configuration must come from build_flags.toml
 # Shared compiler instance for backward compatibility functions
 _default_compiler = None
 
 
 def _get_default_compiler() -> Compiler:
-    """Get or create a shared compiler instance with default settings."""
+    """Get or create a shared compiler instance - requires build_flags.toml configuration."""
     global _default_compiler
     if _default_compiler is None:
-        _default_compiler = Compiler(_DEFAULT_SETTINGS)
+        # Load configuration from build_flags.toml - will fail if not available
+        from pathlib import Path
+        toml_path = Path(__file__).parent.parent / "build_flags.toml"
+        build_flags = BuildFlags.parse(toml_path)
+        settings = create_compiler_options_from_toml(
+            toml_path=toml_path,
+            include_path="./src"
+        )
+        _default_compiler = Compiler(settings)
     return _default_compiler
 
 
