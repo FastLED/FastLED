@@ -21,7 +21,7 @@ echo "Setting up C++ development environment..."
 
 # Build tests to generate compile_commands.json for clangd
 echo "Building C++ tests to generate compile_commands.json..."
-uv run ci/cpp_test_run.py --compile-only --clang --test test_function
+uv run -m ci.cpp_test_run.py --compile-only --clang --test test_function
 
 # Copy compile_commands.json to project root for clangd IntelliSense
 if [ -f tests/.build/compile_commands.json ]; then
