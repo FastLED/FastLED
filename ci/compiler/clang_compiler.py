@@ -547,61 +547,30 @@ class Compiler:
             else:
                 pch_output_path = pch_header_path.with_suffix(".hpp.pch")
 
-            # Build PCH compilation command - BYPASS sccache for PCH generation
-            # Use direct ziglang c++ compiler, not the cache-wrapped version
-            # Always use direct ziglang compilation for PCH (no sccache/ccache)
-            cmd = [
-                "uv",
-                "run", 
-                "python",
-                "-m",
-                "ziglang",
-                "c++",  # Use ziglang c++ as the compiler
-                "-x",
-                "c++-header",
-                f"-std={self.settings.std_version}",
-                f"-I{self.settings.include_path}",
-            ]
-
-            # Add defines if specified
-            if self.settings.defines:
-                for define in self.settings.defines:
-                    cmd.append(f"-D{define}")
-
-            # Add compiler args but skip cache-related args and ziglang command parts
-            # Filter out sccache/ccache wrapper arguments and ziglang command components
-            filtered_args: list[str] = []
-            skip_next = False
+            # Build PCH compilation command using the same logic as get_compiler_args()
+            # Get the base compiler command (this handles sccache, ziglang, etc.)
+            cmd = self.get_compiler_args()
             
-            # Determine which compiler args to skip based on the compiler_args structure
-            remaining_args = self.settings.compiler_args
-            if (len(self.settings.compiler_args) >= 6 and 
-                self.settings.compiler_args[0:6] == ["uv", "run", "python", "-m", "ziglang", "c++"]):
-                # Skip the ziglang c++ command part since we're setting it up explicitly
-                remaining_args = self.settings.compiler_args[6:]
-            elif (len(self.settings.compiler_args) > 0 and 
-                  self.settings.compiler_args[0] == "clang++"):
-                # Skip the clang++ wrapper
-                remaining_args = self.settings.compiler_args[1:]
-
-            for arg in remaining_args:
+            # Remove the default "-x c++" and replace with "-x c++-header" for PCH
+            # Find and replace the -x argument
+            for i, arg in enumerate(cmd):
+                if arg == "-x" and i + 1 < len(cmd):
+                    cmd[i + 1] = "c++-header"
+                    break
+            
+            # Remove any existing PCH include arguments to avoid conflicts
+            filtered_cmd = []
+            skip_next = False
+            for arg in cmd:
                 if skip_next:
                     skip_next = False
                     continue
-
-                # Skip cache wrapper arguments
-                if arg in ["clang++", "gcc", "g++"]:
-                    # These are cache wrapper args, skip them for direct PCH compilation
-                    continue
-                elif arg.startswith("-include-pch"):
-                    # Skip any existing PCH arguments
+                if arg.startswith("-include-pch"):
                     skip_next = True  # Skip the PCH file path argument too
                     continue
-                else:
-                    # Keep all other compiler arguments for PCH compatibility
-                    filtered_args.append(arg)
-
-            cmd.extend(filtered_args)
+                filtered_cmd.append(arg)
+            
+            cmd = filtered_cmd
             cmd.extend([str(pch_header_path), "-o", str(pch_output_path)])
 
             # DEBUG: Print the complete PCH compilation command
