@@ -14,9 +14,10 @@ import time
 import warnings
 from pathlib import Path
 
-from ci.ci.boards import Board, get_board  # type: ignore
-from ci.ci.create_build_dir import insert_tool_aliases
-from ci.ci.locked_print import locked_print
+# Import from the local ci directory
+from ci.boards import Board, get_board  # type: ignore
+from ci.create_build_dir import insert_tool_aliases
+from ci.locked_print import locked_print
 
 
 HERE = Path(__file__).parent.resolve()
