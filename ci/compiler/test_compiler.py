@@ -233,20 +233,14 @@ class FastLEDTestCompiler:
             else:
                 defines.append(define)
 
-        # Get tools configuration
-        tools_config = config.get("tools", {})
-        archiver_tool = tools_config.get("archiver", "ar")
+        # Get tools configuration from BuildFlags (respects build_flags.toml)
+        compiler_cmd = build_flags.tools.compiler
+        archiver_tool = build_flags.tools.archiver
+        
+        print(f"Using compiler from build_flags.toml: {compiler_cmd}")
 
-        # Always use ziglang c++ as the actual compiler, regardless of TOML config
-        actual_compiler_args = ["uv", "run", "python", "-m", "ziglang", "c++"]
-
-        # For now, disable cache when using ziglang c++
-        compiler_cmd = "clang++"  # Use generic clang++ identifier for compatibility
-        cache_args = actual_compiler_args  # Put ziglang c++ command in cache_args for proper detection
-        print("Using direct compilation with ziglang c++")
-
-        # Combine cache args with compiler args (cache args go first for detection)
-        final_compiler_args = cache_args + compiler_args
+        # Use compiler args as-is from TOML configuration
+        final_compiler_args = compiler_args
 
         # Create compiler options with TOML-loaded flags and tools
         settings = CompilerOptions(

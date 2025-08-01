@@ -6,8 +6,9 @@
 # compilation to ensure they remain synchronized and compatible across the entire build system.
 
 [tools]
-# Build tool configuration
-compiler = "sccache"
+# Build tool configuration - Full compiler command with arguments
+compiler_command = ["uv", "run", "python", "-m", "ziglang", "c++"]
+compiler = "ziglang"  # For compatibility
 archiver = "ar"
 c_compiler = "clang"
 objcopy = "objcopy"
