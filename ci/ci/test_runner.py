@@ -289,7 +289,7 @@ def create_unit_test_process(
 ) -> RunningProcess:
     """Create a unit test process without starting it"""
     # First compile the tests
-    compile_cmd = [
+    compile_cmd: list[str] = [
         "uv",
         "run",
         "python",
@@ -315,17 +315,22 @@ def create_unit_test_process(
         compile_cmd.append("--clang")
     if args.gcc:
         compile_cmd.append("--gcc")
-    subprocess.run(compile_cmd, check=True)
+    # subprocess.run(compile_cmd, check=True)
 
     # Then run the tests using our new test runner
     test_cmd = ["uv", "run", "python", "-m", "ci.run_tests"]
     if args.test:
-        test_cmd.extend(["--test", args.test])
+        test_cmd.extend(["--test", str(args.test)])
     if args.verbose:
         test_cmd.append("--verbose")
 
+    both_cmds: list[str] = []
+    both_cmds.extend(compile_cmd)
+    both_cmds.extend(["&&"])
+    both_cmds.extend(test_cmd)
+
     return RunningProcess(
-        test_cmd,
+        both_cmds,
         enable_stack_trace=enable_stack_trace,
         timeout=120,  # 2 minutes timeout
         auto_run=True,
