@@ -7,7 +7,7 @@
 
 [tools]
 # Build tool configuration
-compiler = "sccache"
+compiler = ["sccache", "--", "uv", "run", "python", "-m", "ziglang", "c++"]
 archiver = "ar"
 c_compiler = "clang"
 objcopy = "objcopy"

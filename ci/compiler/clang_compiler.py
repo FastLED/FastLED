@@ -57,7 +57,7 @@ class CompilerOptions:
 
     # Core compiler settings (formerly CompilerSettings)
     include_path: str
-    compiler: str = "uv run python -m ziglang c++"
+    compiler: str | list[str] = "uv run python -m ziglang c++"
     defines: list[str] | None = None
     std_version: str = "c++17"
     compiler_args: list[str] = field(default_factory=list[str])
@@ -146,7 +146,7 @@ class LinkOptions:
 class BuildTools:
     """Build tool paths and configurations"""
 
-    compiler: str = "clang++"  # C++ compiler (maps to CompilerOptions.compiler)
+    compiler: str | list[str] = "clang++"  # C++ compiler (maps to CompilerOptions.compiler)
     archiver: str = "ar"  # Archive tool (maps to CompilerOptions.archiver)
     linker: str | None = None  # Linker tool (maps to LinkOptions.linker)
     c_compiler: str = "clang"  # C compiler (for mixed C/C++ projects)
@@ -547,30 +547,47 @@ class Compiler:
             else:
                 pch_output_path = pch_header_path.with_suffix(".hpp.pch")
 
-            # Build PCH compilation command using the same logic as get_compiler_args()
-            # Get the base compiler command (this handles sccache, ziglang, etc.)
-            cmd = self.get_compiler_args()
+            # Build PCH compilation command using the configured compiler from build_flags.toml
+            # Get the compiler command (could be a list or string)
+            if isinstance(self.settings.compiler, list):
+                cmd = self.settings.compiler.copy()
+            elif isinstance(self.settings.compiler, str):
+                cmd = self.settings.compiler.split()
+            else:
+                cmd = [str(self.settings.compiler)]
             
-            # Remove the default "-x c++" and replace with "-x c++-header" for PCH
-            # Find and replace the -x argument
-            for i, arg in enumerate(cmd):
-                if arg == "-x" and i + 1 < len(cmd):
-                    cmd[i + 1] = "c++-header"
-                    break
-            
-            # Remove any existing PCH include arguments to avoid conflicts
-            filtered_cmd = []
+            # Add PCH-specific flags
+            cmd.extend([
+                "-x",
+                "c++-header",
+                f"-std={self.settings.std_version}",
+                f"-I{self.settings.include_path}",
+            ])
+
+            # Add defines if specified
+            if self.settings.defines:
+                for define in self.settings.defines:
+                    cmd.append(f"-D{define}")
+
+            # Add compiler args - use them as-is since they come from build_flags.toml
+            # Only filter out existing PCH-related arguments to avoid conflicts
+            filtered_args: list[str] = []
             skip_next = False
-            for arg in cmd:
+
+            for arg in self.settings.compiler_args:
                 if skip_next:
                     skip_next = False
                     continue
+
+                # Skip any existing PCH arguments to avoid conflicts
                 if arg.startswith("-include-pch"):
                     skip_next = True  # Skip the PCH file path argument too
                     continue
-                filtered_cmd.append(arg)
-            
-            cmd = filtered_cmd
+                else:
+                    # Keep all other compiler arguments from build_flags.toml
+                    filtered_args.append(arg)
+
+            cmd.extend(filtered_args)
             cmd.extend([str(pch_header_path), "-o", str(pch_output_path)])
 
             # DEBUG: Print the complete PCH compilation command
