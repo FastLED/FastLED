@@ -64,6 +64,9 @@ def make_watch_dog_thread(
 
 def main() -> None:
     try:
+        # Record start time
+        start_time = time.time()
+
         # Change to script directory first
         os.chdir(Path(__file__).parent)
 
@@ -186,6 +189,11 @@ def main() -> None:
         # Set up force exit daemon and exit
         daemon_thread = setup_force_exit()
         _CANCEL_WATCHDOG.set()
+
+        # Print total execution time
+        elapsed_time = time.time() - start_time
+        print(f"\nTotal execution time: {elapsed_time:.2f} seconds")
+
         sys.exit(0)
 
     except KeyboardInterrupt:
