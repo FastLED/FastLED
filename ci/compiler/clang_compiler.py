@@ -575,11 +575,21 @@ class Compiler:
                     cmd.append(f"-D{define}")
 
             # Add compiler args but skip cache-related args
-            # Filter out sccache/ccache wrapper arguments that don't apply to direct compilation
+            # Filter out sccache/ccache wrapper arguments and compiler commands that don't apply to direct compilation
             filtered_args: list[str] = []
             skip_next = False
+            
+            # Define the ziglang command sequence to skip
+            ziglang_command_sequence = ["uv", "run", "python", "-m", "ziglang", "c++"]
+            
+            # Check if compiler_args starts with the ziglang command sequence
+            args_to_process = self.settings.compiler_args[:]
+            if len(args_to_process) >= len(ziglang_command_sequence) and \
+               args_to_process[:len(ziglang_command_sequence)] == ziglang_command_sequence:
+                # Skip the ziglang command sequence
+                args_to_process = args_to_process[len(ziglang_command_sequence):]
 
-            for arg in self.settings.compiler_args:
+            for arg in args_to_process:
                 if skip_next:
                     skip_next = False
                     continue
