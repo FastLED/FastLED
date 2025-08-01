@@ -57,8 +57,8 @@ jobs:
       - name: Run Test
         run: |
           if [ "${{ matrix.compiler }}" = "clang" ]; then
-            ./test --clang --no-parallel --no-unity
+            ./test --clang --no-parallel --no-unity --unit
           else
-            ./test --no-parallel --no-unity
+            ./test --no-parallel --no-unity --unit
           fi
         shell: bash
