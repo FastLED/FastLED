@@ -279,7 +279,7 @@ def create_namespace_check_process(enable_stack_trace: bool) -> RunningProcess:
     """Create a namespace check process without starting it"""
     return RunningProcess(
         "uv run python ci/tests/no_using_namespace_fl_in_headers.py",
-        auto_run=True,
+        auto_run=False,  # Don't auto-start - will be started in parallel later
         enable_stack_trace=enable_stack_trace,
     )
 
@@ -349,15 +349,27 @@ def create_examples_test_process(
         cmd.append("--unity")
     if args.full and args.examples is not None:
         cmd.append("--full")
-    return RunningProcess(cmd, auto_run=True, enable_stack_trace=enable_stack_trace)
+    return RunningProcess(cmd, auto_run=False, enable_stack_trace=enable_stack_trace)
 
 
 def create_python_test_process(enable_stack_trace: bool) -> RunningProcess:
     """Create a Python test process without starting it"""
+    # Use list format for better environment handling
+    cmd = [
+        "uv",
+        "run",
+        "pytest",
+        "-s",  # Don't capture stdout/stderr
+        "-v",  # Verbose output
+        "--tb=short",  # Shorter traceback format
+        "--durations=0",  # Show all durations
+        "ci/tests",  # Test directory
+    ]
     return RunningProcess(
-        "uv run pytest -s ci/tests -xvs --durations=0",
-        auto_run=True,
+        cmd,
+        auto_run=False,  # Don't auto-start - will be started in parallel later
         enable_stack_trace=enable_stack_trace,
+        timeout=120,  # 2 minute timeout for Python tests
     )
 
 
@@ -371,7 +383,7 @@ def create_integration_test_process(
         cmd.extend(["-k", "TestFullProgramLinking"])
     if args.verbose:
         cmd.append("-v")
-    return RunningProcess(cmd, auto_run=True, enable_stack_trace=enable_stack_trace)
+    return RunningProcess(cmd, auto_run=False, enable_stack_trace=enable_stack_trace)
 
 
 def create_compile_uno_test_process(enable_stack_trace: bool = True) -> RunningProcess:
@@ -386,7 +398,7 @@ def create_compile_uno_test_process(enable_stack_trace: bool = True) -> RunningP
         "Blink",
         "--no-interactive",
     ]
-    return RunningProcess(cmd, auto_run=True, enable_stack_trace=enable_stack_trace)
+    return RunningProcess(cmd, auto_run=False, enable_stack_trace=enable_stack_trace)
 
 
 def get_cpp_test_processes(
@@ -495,13 +507,21 @@ def _run_process_with_output(process: RunningProcess, verbose: bool = False) -> 
         process: RunningProcess object to execute
         verbose: Whether to show all output
     """
-    process.run()
-    process_name = (
-        process.command.split()[0]
-        if isinstance(process.command, str)
-        else process.command[0]
-    )
-    print(f"Started: {process.command}")
+    # Only start the process if it's not already running
+    if process.proc is None:
+        process.run()
+        process_name = (
+            process.command.split()[0]
+            if isinstance(process.command, str)
+            else process.command[0]
+        )
+        print(f"Started: {process.command}")
+    else:
+        process_name = (
+            process.command.split()[0]
+            if isinstance(process.command, str)
+            else process.command[0]
+        )
 
     # Print test execution status
     if isinstance(process.command, str) and process.command.endswith(".exe"):
@@ -600,10 +620,13 @@ def _run_processes_parallel(
                 encoding="utf-8", errors="replace"
             )
 
-    # Start all processes
+    # Start processes that aren't already running
     for proc in processes:
-        proc.run()
-        print(f"Started: {proc.command}")
+        if proc.proc is None:  # Only start if not already running
+            proc.run()
+            print(f"Started: {proc.command}")
+        else:
+            print(f"Process already running: {proc.command}")
 
     # Monitor all processes for output and completion
     active_processes = processes.copy()
@@ -836,61 +859,37 @@ def runner(args: TestArgs, src_code_change: bool = True) -> None:
     )
     enable_stack_trace = not args.no_stack_trace
 
-    # Get processes to run based on test categories
+    # Build up unified list of all processes to run
     processes: list[RunningProcess] = []
-    parallel = False
 
-    if test_categories.integration_only:
-        processes = get_integration_test_processes(args, enable_stack_trace)
-        parallel = False
-    elif test_categories.unit_only:
-        processes = get_cpp_test_processes(args, test_categories, enable_stack_trace)
-        parallel = False
-    elif test_categories.examples_only:
-        processes = get_cpp_test_processes(args, test_categories, enable_stack_trace)
-        parallel = False
-    elif test_categories.py_only:
-        processes = get_python_test_processes(enable_stack_trace)
-        parallel = False
-    elif (
-        test_categories.unit
-        and test_categories.examples
-        and not test_categories.py
-        and not test_categories.integration
-    ):
-        # C++ mode: unit + examples
-        processes = get_cpp_test_processes(args, test_categories, enable_stack_trace)
-        parallel = True
-    elif (
-        test_categories.unit
-        and test_categories.py
-        and not test_categories.examples
-        and not test_categories.integration
-    ):
-        # Unit + Python
-        processes = []
-        processes.append(create_namespace_check_process(enable_stack_trace))
+    # Always start with namespace check
+    processes.append(create_namespace_check_process(enable_stack_trace))
+
+    # Add unit tests if needed
+    if test_categories.unit or test_categories.unit_only:
         processes.append(create_unit_test_process(args, enable_stack_trace))
-        processes.append(create_python_test_process(enable_stack_trace))
-        parallel = True
-    elif (
-        test_categories.examples
-        and test_categories.py
-        and not test_categories.unit
-        and not test_categories.integration
-    ):
-        # Examples + Python
-        processes = []
-        processes.append(create_namespace_check_process(enable_stack_trace))
-        processes.append(create_examples_test_process(args, enable_stack_trace))
-        processes.append(create_python_test_process(enable_stack_trace))
-        parallel = True
-    else:
-        # All tests or complex combinations
-        processes = get_all_test_processes(
-            args, test_categories, enable_stack_trace, src_code_change
-        )
-        parallel = True
 
-    # Run the processes
-    run_test_processes(processes, parallel=parallel, verbose=args.verbose)
+    # Add integration tests if needed
+    if test_categories.integration or test_categories.integration_only:
+        processes.append(create_integration_test_process(args, enable_stack_trace))
+
+    # Add uno compilation test if source changed
+    if src_code_change and not test_categories.py_only:
+        processes.append(create_compile_uno_test_process(enable_stack_trace))
+
+    # Add Python tests if needed
+    if test_categories.py or test_categories.py_only:
+        processes.append(create_python_test_process(enable_stack_trace))
+
+    # Add example tests if needed
+    if test_categories.examples or test_categories.examples_only:
+        processes.append(create_examples_test_process(args, enable_stack_trace))
+
+    # Print summary of what we're about to run
+    print(f"\nStarting {len(processes)} test processes in parallel:")
+    for proc in processes:
+        print(f"  - {proc.command}")
+    print()
+
+    # Run all processes in parallel
+    run_test_processes(processes, parallel=True, verbose=args.verbose)
