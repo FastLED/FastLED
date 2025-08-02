@@ -349,6 +349,7 @@ class FastLEDTestCompiler:
         example compilation that deliver 4x+ performance improvements.
         """
         compile_start = time.time()
+        print(f"⏱️  TIMING: Starting compilation phase")
 
         # If specific_test is not provided in the method call, use the one from discover_test_files
         test_files = self.discover_test_files(specific_test)
@@ -377,11 +378,13 @@ class FastLEDTestCompiler:
 
             # Create PCH for faster compilation
             print("\n🔧 Creating precompiled header...")
+            pch_start = time.time()
             pch_success = self.compiler.create_pch_file()
+            pch_time = time.time() - pch_start
             if pch_success:
-                print("  ✅ PCH created successfully")
+                print(f"  ✅ PCH created successfully in {pch_time:.2f}s")
             else:
-                print("  ❌ PCH creation failed - continuing with direct compilation")
+                print(f"  ❌ PCH creation failed in {pch_time:.2f}s - continuing with direct compilation")
         else:
             print("  ❌ PCH disabled - Not using precompiled headers")
 
@@ -407,6 +410,8 @@ class FastLEDTestCompiler:
             print("Starting sequential compilation of test files...")
         else:
             print("Starting parallel compilation of test files...")
+        
+        compilation_submit_start = time.time()
         for test_file in test_files:
             # Compile to object file first (since compile_cpp_file uses -c flag)
             obj_path = self.build_dir / f"{test_file.stem}.o"
@@ -441,8 +446,11 @@ class FastLEDTestCompiler:
         errors: List[CompileError] = []
         completed = 0
 
+        compilation_submit_time = time.time() - compilation_submit_start
+        print(f"⏱️  TIMING: Submitted {len(future_to_test)} compilation jobs in {compilation_submit_time:.2f}s")
         print(f"Waiting for {len(future_to_test)} compilation jobs to complete...")
 
+        compilation_wait_start = time.time()
         try:
             for future in as_completed(future_to_test.keys()):
                 test_file = future_to_test[future]
@@ -482,10 +490,15 @@ class FastLEDTestCompiler:
                 success=False, compiled_count=0, duration=duration, errors=errors
             )
 
-        print(f"All {len(compiled_objects)} object files compiled successfully")
+        compilation_wait_time = time.time() - compilation_wait_start
+        print(f"⏱️  TIMING: All {len(compiled_objects)} object files compiled successfully in {compilation_wait_time:.2f}s")
 
         # Link each test to executable using proven linking API
+        linking_start = time.time()
+        print(f"⏱️  TIMING: Starting linking phase")
         self.compiled_tests = self._link_tests(compiled_objects)
+        linking_time = time.time() - linking_start
+        print(f"⏱️  TIMING: Linking phase completed in {linking_time:.2f}s")
 
         # Check for linking failures and add them to errors
         if hasattr(self, "linking_failures") and self.linking_failures:
@@ -509,6 +522,12 @@ class FastLEDTestCompiler:
             print(
                 f"SUCCESS: Compiled and linked {len(self.compiled_tests)} tests in {duration:.2f}s"
             )
+            print(f"⏱️  TIMING BREAKDOWN:")
+            print(f"   - PCH creation: {pch_time:.2f}s" if 'pch_time' in locals() else "   - PCH creation: 0.00s (disabled)")
+            print(f"   - Job submission: {compilation_submit_time:.2f}s")
+            print(f"   - Compilation wait: {compilation_wait_time:.2f}s")
+            print(f"   - Linking: {linking_time:.2f}s")
+            print(f"   - Total: {duration:.2f}s")
             # List all the successful test executables
             print("Test executables created:")
             for i, test in enumerate(self.compiled_tests, 1):
@@ -530,7 +549,10 @@ class FastLEDTestCompiler:
         print(f"Linking {len(compiled_objects)} test executables...")
 
         # First, build a complete FastLED library similar to CMake approach
+        lib_build_start = time.time()
         fastled_lib_path = self._build_fastled_library()
+        lib_build_time = time.time() - lib_build_start
+        print(f"⏱️  TIMING: FastLED library build: {lib_build_time:.2f}s")
 
         # Compile doctest_main.cpp once for all tests (provides main function and doctest implementation)
         doctest_main_path = self.project_root / "tests" / "doctest_main.cpp"
@@ -680,9 +702,59 @@ class FastLEDTestCompiler:
             print(
                 f"Link cache: {cache_hits} hits, {cache_misses} misses ({hit_rate:.1f}% hit rate) - caching by lib+test+flags"
             )
+            print(f"⏱️  TIMING: Cache lookup saved ~{cache_hits * 0.5:.1f}s (estimated)")
 
         print(f"Successfully linked {len(compiled_tests)} test executables")
         return compiled_tests
+
+    def _is_fastled_library_current(self, library_path: Path) -> bool:
+        """Check if the FastLED library is current (no source files are newer)"""
+        try:
+            # Get library modification time
+            lib_mtime = library_path.stat().st_mtime
+            
+            # Get all FastLED source files
+            import glob
+            fastled_src_dir = self.project_root / "src"
+            all_cpp_files: List[str] = glob.glob(
+                str(fastled_src_dir / "**" / "*.cpp"), recursive=True
+            )
+            
+            # Check if any source file is newer than the library
+            for cpp_file in all_cpp_files:
+                source_path = Path(cpp_file)
+                if source_path.exists():
+                    source_mtime = source_path.stat().st_mtime
+                    if source_mtime > lib_mtime:
+                        return False  # Source file is newer, need rebuild
+            
+            # Also check header files for changes
+            all_header_files: List[str] = glob.glob(
+                str(fastled_src_dir / "**" / "*.h"), recursive=True
+            )
+            for header_file in all_header_files:
+                header_path = Path(header_file)
+                if header_path.exists():
+                    header_mtime = header_path.stat().st_mtime
+                    if header_mtime > lib_mtime:
+                        return False  # Header file is newer, need rebuild
+            
+            # Check build configuration files
+            build_config_files = [
+                self.project_root / "build_flags.toml",
+                self.project_root / "CMakeLists.txt",
+            ]
+            for config_file in build_config_files:
+                if config_file.exists():
+                    config_mtime = config_file.stat().st_mtime
+                    if config_mtime > lib_mtime:
+                        return False  # Config file is newer, need rebuild
+            
+            return True  # Library is current
+            
+        except (OSError, IOError):
+            # If we can't check timestamps, assume rebuild is needed
+            return False
 
     def _test_has_own_main(self, test_source_path: Path) -> bool:
         """Check if a test file defines its own main() function"""
@@ -708,12 +780,21 @@ class FastLEDTestCompiler:
         # Define library path
         fastled_lib_path = self.build_dir / "libfastled.lib"
 
-        # If library already exists, return it (for faster rebuilds)
+        # Intelligent cache checking - verify if rebuild is needed
         if fastled_lib_path.exists():
             # Convert absolute path to relative for display
             rel_lib_path = os.path.relpath(fastled_lib_path)
-            print(f"Using existing FastLED library: {rel_lib_path}")
-            return fastled_lib_path
+            
+            # Check if any source files are newer than the library
+            if self._is_fastled_library_current(fastled_lib_path):
+                print(f"Using existing FastLED library: {rel_lib_path} (cache hit)")
+                return fastled_lib_path
+            else:
+                print(f"FastLED library outdated, rebuilding: {rel_lib_path}")
+                # Remove outdated library
+                fastled_lib_path.unlink()
+        else:
+            print("FastLED library not found, building fresh")
 
         # Compile essential FastLED source files for STUB platform
         # User directive: Just glob ALL .cpp files in src/** - no exclusions needed
