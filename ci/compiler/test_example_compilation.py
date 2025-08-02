@@ -92,8 +92,8 @@ def load_build_flags_toml(toml_path: str) -> Dict[str, Any]:
         )
 
 
-def extract_compiler_flags_from_toml(config: Dict[str, Any]) -> List[str]:
-    """Extract compiler flags from TOML config - includes universal [all] flags and [build_modes.quick] flags."""
+def extract_compiler_flags_from_toml(config: Dict[str, Any], build_mode: str = "quick") -> List[str]:
+    """Extract compiler flags from TOML config - includes universal [all] flags and specified build mode flags."""
     flags: List[str] = []
 
     # First, extract universal compiler flags from [all] section
@@ -107,17 +107,19 @@ def extract_compiler_flags_from_toml(config: Dict[str, Any]) -> List[str]:
                 f"[CONFIG] Loaded {len(all_section['compiler_flags'])} universal compiler flags from [all] section"
             )
 
-    # Then, extract flags from [build_modes.quick] section for sketch compilation
+    # Then, extract flags from the specified build mode section
     if "build_modes" in config and isinstance(config["build_modes"], dict):
         build_modes = config["build_modes"]
-        if "quick" in build_modes and isinstance(build_modes["quick"], dict):
-            quick_section = build_modes["quick"]
+        if build_mode in build_modes and isinstance(build_modes[build_mode], dict):
+            mode_section = build_modes[build_mode]
 
-            if "flags" in quick_section and isinstance(quick_section["flags"], list):
-                flags.extend(quick_section["flags"])
+            if "flags" in mode_section and isinstance(mode_section["flags"], list):
+                flags.extend(mode_section["flags"])
                 print(
-                    f"[CONFIG] Loaded {len(quick_section['flags'])} quick mode flags from [build_modes.quick] section"
+                    f"[CONFIG] Loaded {len(mode_section['flags'])} {build_mode} mode flags from [build_modes.{build_mode}] section"
                 )
+        else:
+            print(f"[WARNING] Build mode '{build_mode}' not found in config, using universal flags only")
 
     return flags
 
@@ -324,7 +326,7 @@ def check_pch_status(build_dir: Path) -> Dict[str, Union[bool, Path, int, str]]:
 
 
 def create_fastled_compiler(
-    use_pch: bool, use_sccache: bool, parallel: bool
+    use_pch: bool, use_sccache: bool, parallel: bool, build_mode: str = "quick"
 ) -> Compiler:
     """Create compiler with standard FastLED settings for simple build system."""
     import os
@@ -345,7 +347,7 @@ def create_fastled_compiler(
 
     # Extract additional compiler flags from TOML (using ci/build_flags.toml directly)
     toml_flags = extract_compiler_flags_from_toml(
-        build_config
+        build_config, build_mode
     )  # Will raise RuntimeError if critical flags missing
     print(f"Loaded {len(toml_flags)} total compiler flags from build_flags.toml")
 
@@ -1063,6 +1065,7 @@ class CompilationTestConfig:
     full_compilation: bool
     no_parallel: bool
     verbose: bool
+    build_mode: str = "quick"
 
 
 @dataclass
@@ -1117,6 +1120,7 @@ class CompilationTestRunner:
                 use_pch=not self.config.disable_pch,
                 use_sccache=not self.config.disable_sccache,
                 parallel=not self.config.no_parallel,
+                build_mode=self.config.build_mode,
             )
 
             # Verify compiler accessibility
@@ -1466,6 +1470,7 @@ def run_example_compilation_test(
     full_compilation: bool,
     no_parallel: bool,
     verbose: bool = False,
+    build_mode: str = "quick",
 ) -> int:
     """Run the example compilation test using enhanced simple build system."""
     try:
@@ -1481,6 +1486,7 @@ def run_example_compilation_test(
             full_compilation=full_compilation,
             no_parallel=no_parallel,
             verbose=verbose,
+            build_mode=build_mode,
         )
 
         # Create test runner
@@ -1578,6 +1584,13 @@ if __name__ == "__main__":
         action="store_true",
         help="Enable verbose output showing detailed compilation commands and results",
     )
+    parser.add_argument(
+        "--build-mode",
+        type=str,
+        default="quick",
+        choices=["fast", "quick", "balanced", "optimized"],
+        help="Build optimization mode: fast (O0), quick (O1, default), balanced (O1+inlining), optimized (O2)",
+    )
 
     args = parser.parse_args()
 
@@ -1595,5 +1608,6 @@ if __name__ == "__main__":
             full_compilation=args.full,
             no_parallel=args.no_parallel,
             verbose=args.verbose,
+            build_mode=args.build_mode,
         )
     )

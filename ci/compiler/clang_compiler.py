@@ -585,11 +585,52 @@ class Compiler:
             else:
                 pch_output_path = pch_header_path.with_suffix(".hpp.pch")
 
-            # Build PCH compilation command using TOML configuration
-            # Use compiler_args from TOML without any filtering or hardcoding
-            cmd: list[str] = self.settings.compiler_args.copy()
+            # Build PCH compilation command using the same logic as compile_cpp_file
+            # Determine the base compiler command
+            if len(self.settings.compiler_args) > 0 and self.settings.compiler_args[
+                0:4
+            ] == ["python", "-m", "ziglang", "c++"]:
+                # This is optimized ziglang c++ in compiler_args, use it directly
+                cmd = self.settings.compiler_args[
+                    0:4
+                ]  # Use optimized ziglang c++ command from compiler_args
+                remaining_cache_args = self.settings.compiler_args[
+                    4:
+                ]  # Skip the ziglang c++ part
+            elif len(self.settings.compiler_args) > 0 and self.settings.compiler_args[
+                0:6
+            ] == ["uv", "run", "python", "-m", "ziglang", "c++"]:
+                # This is legacy ziglang c++ in compiler_args, use it directly
+                cmd = self.settings.compiler_args[
+                    0:6
+                ]  # Use ziglang c++ command from compiler_args
+                remaining_cache_args = self.settings.compiler_args[
+                    6:
+                ]  # Skip the ziglang c++ part
+            elif (
+                len(self.settings.compiler_args) > 0
+                and self.settings.compiler_args[0] == "clang++"
+            ):
+                # This is a cache-wrapped clang++, replace with optimized ziglang c++
+                cmd = ["python", "-m", "ziglang", "c++"]
+                remaining_cache_args = self.settings.compiler_args[1:]
+            else:
+                # This is a direct compiler call, use optimized ziglang c++
+                if self.settings.compiler.startswith("sccache"):
+                    # When using sccache, we need to pass -- before the compiler arguments
+                    cmd = [
+                        self.settings.compiler,
+                        "--",
+                        "python",
+                        "-m",
+                        "ziglang",
+                        "c++",
+                    ]
+                else:
+                    cmd = ["python", "-m", "ziglang", "c++"]
+                remaining_cache_args = self.settings.compiler_args
 
-            # Add PCH-specific flags (don't override std version - use what's in TOML)
+            # Add PCH-specific flags
             cmd.extend(
                 [
                     "-x",
@@ -597,6 +638,9 @@ class Compiler:
                     f"-I{self.settings.include_path}",
                 ]
             )
+
+            # Add remaining compiler args (after skipping the base compiler command)
+            cmd.extend(remaining_cache_args)
 
             # Add defines if specified
             if self.settings.defines:
