@@ -111,7 +111,7 @@ class FastLEDTestCompiler:
         compiler: Compiler,
         build_dir: Path,
         project_root: Path,
-        quick_build: bool = False,
+        quick_build: bool = True,
         strict_mode: bool = False,
         no_unity: bool = False,
     ):
@@ -138,7 +138,7 @@ class FastLEDTestCompiler:
         clean_build: bool = False,
         enable_static_analysis: bool = False,
         specific_test: str | None = None,
-        quick_build: bool = False,
+        quick_build: bool = True,
         strict_mode: bool = False,
         no_unity: bool = False,
     ) -> "FastLEDTestCompiler":

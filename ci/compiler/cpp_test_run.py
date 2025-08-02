@@ -257,7 +257,7 @@ def compile_tests(
     unknown_args: list[str] = [],
     specific_test: str | None = None,
     use_legacy_system: bool = False,
-    quick_build: bool = False,
+    quick_build: bool = True,
     *,
     verbose: bool = False,
     show_compile: bool = False,
@@ -346,7 +346,7 @@ def _compile_tests_python(
     clean: bool = False,
     unknown_args: list[str] = [],
     specific_test: str | None = None,
-    quick_build: bool = False,
+    quick_build: bool = True,
     *,
     verbose: bool = False,
     show_compile: bool = False,
@@ -935,9 +935,9 @@ def parse_args() -> argparse.Namespace:
         help="Disable unity builds for cpp tests",
     )
     parser.add_argument(
-        "--quick",
+        "--debug",
         action="store_true",
-        help="Use quick build mode with minimal debug info for faster compilation",
+        help="Use debug build mode with full debug symbols (default is quick mode with -g0)",
     )
 
     args, unknown = parser.parse_known_args()
@@ -959,7 +959,7 @@ def main() -> None:
     use_clang = args.clang
     use_legacy_system = args.legacy
     no_unity = args.no_unity
-    quick_build = args.quick
+    quick_build = not args.debug  # Default to quick mode unless --debug is specified
     # use_gcc = args.gcc
 
     if not run_only:
