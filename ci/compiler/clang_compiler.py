@@ -600,7 +600,7 @@ class Compiler:
             cmd = final_cmd
 
             # DEBUG: Print the complete PCH compilation command
-            print("🔧 PCH Compilation Command:")
+            print("[PCH] Compilation Command:")
             for i, arg in enumerate(cmd):
                 print(f"  {i}: {arg}")
             print()

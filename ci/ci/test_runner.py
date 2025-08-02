@@ -359,7 +359,15 @@ def create_examples_test_process(
         cmd.append("--no-parallel")
     if args.verbose:
         cmd.append("--verbose")
-    return RunningProcess(cmd, auto_run=False, enable_stack_trace=enable_stack_trace)
+
+    # Use longer timeout for no-parallel mode since sequential compilation takes much longer
+    timeout = (
+        1800 if args.no_parallel else 600
+    )  # 30 minutes for sequential, 10 minutes for parallel
+
+    return RunningProcess(
+        cmd, auto_run=False, enable_stack_trace=enable_stack_trace, timeout=timeout
+    )
 
 
 def create_python_test_process(enable_stack_trace: bool) -> RunningProcess:

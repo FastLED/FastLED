@@ -78,9 +78,13 @@ UISlider maxAnimation("Max Animation", 1.0f, 5.0f, 20.0f, 1.f);
 TimeClampedTransition shapeProgress(TIME_ANIMATION);
 
 void setupUiCallbacks() {
-    speed.onChanged([](float value) { time_warp.setSpeed(speed.value()); });
+    speed.onChanged([](UISlider& slider) {
+        time_warp.setSpeed(slider.value());
+    });
     maxAnimation.onChanged(
-        [](float value) { shapeProgress.set_max_clamp(maxAnimation.value()); });
+        [](UISlider& slider) {
+            shapeProgress.set_max_clamp(slider.value());
+        });
 
     trigger.onClicked([]() {
         // shapeProgress.trigger(millis());
@@ -148,8 +152,6 @@ void loop() {
         s_prev_alpha = curr_alpha;
     }
 
-    static uint32_t frame = 0;
-    frame++;
     clearLeds();
     const CRGB purple = CRGB(255, 0, 255);
     const int number_of_steps = numberOfSteps.value();
