@@ -43,11 +43,9 @@ echo "------------------"
 echo "Running ruff check (linting)"
 uv run ruff check --fix test.py
 uv run ruff check --fix ci --exclude ci/tmp/ --exclude ci/wasm/
-uv run ruff check --fix dev/dev.py
 echo "Running ruff format (formatting + import sorting)"
 uv run ruff format test.py
 uv run ruff format ci --exclude ci/tmp/ --exclude ci/wasm/
-uv run ruff format dev/dev.py
 echo "Running pyright (all configured files)"
 uv run pyright
 
