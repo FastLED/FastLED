@@ -9,7 +9,7 @@ from ci.ci.paths import PROJECT_ROOT
 SRC_ROOT = PROJECT_ROOT / "src"
 # PLATFORMS_DIR = os.path.join(SRC_ROOT, "platforms")
 
-NUM_WORKERS = (os.cpu_count() or 1) * 4
+NUM_WORKERS = 1 if os.environ.get("NO_PARALLEL") else (os.cpu_count() or 1) * 4
 
 WRONG_DEFINES: dict[str, str] = {
     "#if ESP32": "Use #ifdef ESP32 instead of #if ESP32",

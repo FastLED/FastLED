@@ -6,7 +6,7 @@ from concurrent.futures import ThreadPoolExecutor
 from ci.ci.paths import PROJECT_ROOT
 
 
-NUM_WORKERS = (os.cpu_count() or 1) * 4
+NUM_WORKERS = 1 if os.environ.get("NO_PARALLEL") else (os.cpu_count() or 1) * 4
 
 
 WASM_ROOT = PROJECT_ROOT / "src" / "platforms" / "wasm"
