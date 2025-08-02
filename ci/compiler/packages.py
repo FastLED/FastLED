@@ -4,20 +4,11 @@ from dataclasses import dataclass
 from typing import Any, Dict, List
 from urllib.request import urlopen
 
-
-try:
-    import emoji
-
-    EMOJI_AVAILABLE = True
-except ImportError:
-    emoji = None  # type: ignore
-    EMOJI_AVAILABLE = False
+import emoji
 
 
 def _can_use_emoji() -> bool:
     """Check if emoji can be used in the current environment"""
-    if not EMOJI_AVAILABLE or emoji is None:
-        return False
     # Check if stdout is a TTY (not redirected to file)
     return hasattr(sys.stdout, "isatty") and sys.stdout.isatty()
 
