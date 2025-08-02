@@ -49,16 +49,28 @@ from ci.ci.test_exceptions import (
 class OutputBuffer:
     """Thread-safe output buffer with ordered output display"""
 
-    def __init__(self) -> None:
-        self.output_queue: PriorityQueue[tuple[int, int, str]] = PriorityQueue()
-        self.next_sequence: int = 0
-        self.sequence_lock: Lock = Lock()
-        self.stop_event: Event = Event()
-        self.output_thread: Thread = Thread(target=self._output_worker, daemon=True)
-        self.output_thread.start()
+    def __init__(self, parallel_mode: bool = True) -> None:
+        self.parallel_mode = parallel_mode
+        if parallel_mode:
+            self.output_queue: PriorityQueue[tuple[int, int, str]] = PriorityQueue()
+            self.next_sequence: int = 0
+            self.sequence_lock: Lock = Lock()
+            self.stop_event: Event = Event()
+            self.output_thread: Thread = Thread(target=self._output_worker, daemon=True)
+            self.output_thread.start()
+        else:
+            # Simple mode for sequential execution - no threading overhead
+            self.simple_lock: Lock = Lock()
 
     def write(self, test_index: int, message: str) -> None:
         """Write a message to the buffer with test index for ordering"""
+        if not self.parallel_mode:
+            # Simple direct output for sequential execution
+            with self.simple_lock:
+                print(message, flush=True)
+            return
+            
+        # Full queue mode for parallel execution
         with self.sequence_lock:
             sequence = self.next_sequence
             self.next_sequence += 1
@@ -80,9 +92,10 @@ class OutputBuffer:
 
     def stop(self) -> None:
         """Stop the output worker thread"""
-        self.stop_event.set()
-        if self.output_thread.is_alive():
-            self.output_thread.join()
+        if self.parallel_mode:
+            self.stop_event.set()
+            if self.output_thread.is_alive():
+                self.output_thread.join()
 
 
 # Configure console for UTF-8 output on Windows
