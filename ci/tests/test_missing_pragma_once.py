@@ -8,7 +8,7 @@ from ci.ci.paths import PROJECT_ROOT
 
 SRC_ROOT = PROJECT_ROOT / "src"
 
-NUM_WORKERS = (os.cpu_count() or 1) * 4
+NUM_WORKERS = 1 if os.environ.get("NO_PARALLEL") else (os.cpu_count() or 1) * 4
 
 # Files that are allowed to not have #pragma once
 EXCLUDED_FILES = [

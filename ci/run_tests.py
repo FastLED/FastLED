@@ -154,7 +154,12 @@ def main() -> None:
         print(f"Filter: {args.test}")
 
     # Determine number of parallel jobs
-    if args.jobs:
+    if os.environ.get("NO_PARALLEL"):
+        max_workers = 1
+        print(
+            "NO_PARALLEL environment variable set - forcing sequential test execution"
+        )
+    elif args.jobs:
         max_workers = args.jobs
     else:
         import multiprocessing
