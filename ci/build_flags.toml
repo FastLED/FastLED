@@ -23,6 +23,7 @@ compiler_flags = [
     "-fpermissive",
     "-Wall",
     "-Wextra",
+    "-Wno-deprecated-register",  # Suppress 'register' keyword warnings for C++17 compatibility
     "-fno-exceptions",
     "-fno-rtti",
 ]

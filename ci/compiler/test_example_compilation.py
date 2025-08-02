@@ -76,65 +76,38 @@ def load_build_flags_toml(toml_path: str) -> Dict[str, Any]:
     """Load and parse build_flags.toml file."""
     try:
         with open(toml_path, "rb") as f:
-            return tomllib.load(f)
+            config = tomllib.load(f)
+            if not config:
+                raise RuntimeError(
+                    f"build_flags.toml at {toml_path} is empty or invalid"
+                )
+            return config
     except FileNotFoundError:
-        print(f"Warning: build_flags.toml not found at {toml_path}")
-        return {}
+        raise RuntimeError(
+            f"CRITICAL: build_flags.toml not found at {toml_path}. This file is required for proper compilation flags."
+        )
     except Exception as e:
-        print(f"Warning: Failed to parse build_flags.toml: {e}")
-        return {}
-
-
-def create_simplified_build_flags(
-    original_config: Dict[str, Any], output_path: str
-) -> Dict[str, Any]:
-    """Create a simplified copy of build_flags.toml with only quick mode flags for stub compilation."""
-
-    # Use the original quick flags from the TOML file
-    quick_flags = []
-    if "build_modes" in original_config and isinstance(
-        original_config["build_modes"], dict
-    ):
-        build_modes = original_config["build_modes"]
-        if "quick" in build_modes and isinstance(build_modes["quick"], dict):
-            quick_section = build_modes["quick"]
-            if "flags" in quick_section and isinstance(quick_section["flags"], list):
-                quick_flags = quick_section["flags"]
-
-    # Create simplified config with only quick mode flags
-    simplified = {
-        "build_modes": {
-            "quick": {
-                "flags": quick_flags,
-            },
-        },
-    }
-
-    # Write simplified version to file
-    try:
-        with open(output_path, "w") as f:
-            toml.dump(simplified, f)
-        print(f"Created simplified build_flags.toml at {output_path}")
-    except ImportError:
-        # Fallback to manual TOML writing if toml package not available
-        with open(output_path, "w") as f:
-            f.write(
-                "# Simplified build_flags.toml for stub compilation (quick mode only)\\n\\n"
-            )
-            f.write("[build_modes.quick]\\n")
-            build_modes_section = simplified["build_modes"]
-            quick_section = build_modes_section["quick"]
-            f.write(f"flags = {quick_section['flags']}\\n")
-        print(f"Created simplified build_flags.toml at {output_path} (manual format)")
-
-    return simplified
+        raise RuntimeError(
+            f"CRITICAL: Failed to parse build_flags.toml at {toml_path}: {e}"
+        )
 
 
 def extract_compiler_flags_from_toml(config: Dict[str, Any]) -> List[str]:
-    """Extract compiler flags from TOML config - only uses [build_modes.quick] flags."""
+    """Extract compiler flags from TOML config - includes universal [all] flags and [build_modes.quick] flags."""
     flags: List[str] = []
 
-    # Only use flags from [build_modes.quick] section for sketch compilation
+    # First, extract universal compiler flags from [all] section
+    if "all" in config and isinstance(config["all"], dict):
+        all_section = config["all"]
+        if "compiler_flags" in all_section and isinstance(
+            all_section["compiler_flags"], list
+        ):
+            flags.extend(all_section["compiler_flags"])
+            print(
+                f"[CONFIG] Loaded {len(all_section['compiler_flags'])} universal compiler flags from [all] section"
+            )
+
+    # Then, extract flags from [build_modes.quick] section for sketch compilation
     if "build_modes" in config and isinstance(config["build_modes"], dict):
         build_modes = config["build_modes"]
         if "quick" in build_modes and isinstance(build_modes["quick"], dict):
@@ -142,6 +115,9 @@ def extract_compiler_flags_from_toml(config: Dict[str, Any]) -> List[str]:
 
             if "flags" in quick_section and isinstance(quick_section["flags"], list):
                 flags.extend(quick_section["flags"])
+                print(
+                    f"[CONFIG] Loaded {len(quick_section['flags'])} quick mode flags from [build_modes.quick] section"
+                )
 
     return flags
 
@@ -359,23 +335,19 @@ def create_fastled_compiler(
     src_path = os.path.join(current_dir, "src")
     arduino_stub_path = os.path.join(current_dir, "src", "platforms", "stub")
 
-    # Try to load build_flags.toml configuration from stashed copy in ci/ directory
-    toml_path = os.path.join(os.path.dirname(__file__), "build_flags.toml")
-    build_config = load_build_flags_toml(toml_path)
+    # Load build_flags.toml configuration directly from ci/ directory
+    toml_path = os.path.join(
+        os.path.dirname(os.path.dirname(__file__)), "build_flags.toml"
+    )
+    build_config = load_build_flags_toml(
+        toml_path
+    )  # Will raise RuntimeError if not found
 
-    # Create simplified copy for stub compilation
-    if build_config:
-        simplified_toml_path = os.path.join(current_dir, "build_flags_simple.toml")
-        simplified_config = create_simplified_build_flags(
-            build_config, simplified_toml_path
-        )
-
-        # Extract additional compiler flags from TOML
-        toml_flags = extract_compiler_flags_from_toml(simplified_config)
-        print(f"Loaded {len(toml_flags)} compiler flags from build_flags.toml")
-    else:
-        toml_flags = []
-        print("Using default compiler flags (build_flags.toml not available)")
+    # Extract additional compiler flags from TOML (using ci/build_flags.toml directly)
+    toml_flags = extract_compiler_flags_from_toml(
+        build_config
+    )  # Will raise RuntimeError if critical flags missing
+    print(f"Loaded {len(toml_flags)} total compiler flags from build_flags.toml")
 
     # Base compiler settings
     base_args = [
@@ -423,6 +395,7 @@ def compile_examples_simple(
     pch_compatible_files: set[Path],
     log_timing: Callable[[str], None],
     full_compilation: bool,
+    verbose: bool = False,
 ) -> CompilationResult:
     """
     Compile examples using the simple build system (Compiler class).
@@ -494,6 +467,12 @@ def compile_examples_simple(
             example_obj_files.append(ino_output_path)
 
         # Compile the .ino file
+        if verbose:
+            pch_status = "with PCH" if use_pch_for_file else "direct compilation"
+            log_timing(
+                f"[VERBOSE] Compiling {ino_file.relative_to(Path('examples'))} ({pch_status})"
+            )
+
         future = compiler.compile_ino_file(
             ino_file,
             output_path=ino_output_path,
@@ -516,6 +495,12 @@ def compile_examples_simple(
                 example_build_dir = build_dir / example_name
                 cpp_output_path = example_build_dir / f"{cpp_file.stem}.o"
                 example_obj_files.append(cpp_output_path)
+
+            if verbose:
+                pch_status = "with PCH" if use_pch_for_file else "direct compilation"
+                log_timing(
+                    f"[VERBOSE] Compiling {cpp_file.relative_to(Path('examples'))} ({pch_status})"
+                )
 
             cpp_future = compiler.compile_cpp_file(
                 cpp_file,
@@ -559,11 +544,27 @@ def compile_examples_simple(
                 ok=False, stdout="", stderr=f"Compilation timeout: {e}", return_code=-1
             )
 
-        # Only log final completion
-        if completed_count == total_files:
+        # Show verbose completion status or only final completion
+        if verbose:
+            status = "SUCCESS" if result.ok else "FAILED"
+            log_timing(
+                f"[VERBOSE] {status}: {source_file.relative_to(Path('examples'))} ({completed_count}/{total_files})"
+            )
+        elif completed_count == total_files:
             log_timing(
                 f"[SIMPLE] Completed {completed_count}/{total_files} compilations"
             )
+
+        # Show compilation errors immediately for better debugging
+        if not result.ok and result.stderr.strip():
+            log_timing(
+                f"[ERROR] Compilation failed for {source_file.relative_to(Path('examples'))}:"
+            )
+            error_lines = result.stderr.strip().split("\n")
+            for line in error_lines[:20]:  # Limit to first 20 lines
+                log_timing(f"[ERROR]   {line}")
+            if len(error_lines) > 20:
+                log_timing(f"[ERROR]   ... ({len(error_lines) - 20} more lines)")
 
         file_result: Dict[str, Any] = {
             "file": str(source_file.name),
@@ -583,21 +584,26 @@ def compile_examples_simple(
         f"[SIMPLE] Compilation completed: {len(successful)} succeeded, {len(failed)} failed"
     )
 
-    # Report failures if any
-    if (
-        failed and len(failed) <= 10
-    ):  # Show full details for reasonable number of failures
-        log_timing("[SIMPLE] Failed examples with full error details:")
-        for failure in failed[:10]:
-            log_timing(f"[SIMPLE] === FAILED: {failure['path']} ===")
-            if failure["stderr"]:
-                # Show full error message, not just preview
-                error_lines = failure["stderr"].strip().split("\n")
-                for line in error_lines:
-                    log_timing(f"[SIMPLE]   {line}")
-            else:
-                log_timing(f"[SIMPLE]   No error details available")
-            log_timing(f"[SIMPLE] === END: {failure['path']} ===")
+    # Report failures summary if any (detailed errors already shown above)
+    if failed:
+        if verbose:
+            log_timing(
+                f"[SIMPLE] Failed examples summary: {[f['path'] for f in failed]}"
+            )
+        else:
+            # Show full details only in non-verbose mode since we didn't show them above
+            if len(failed) <= 10:
+                log_timing("[SIMPLE] Failed examples with full error details:")
+                for failure in failed[:10]:
+                    log_timing(f"[SIMPLE] === FAILED: {failure['path']} ===")
+                    if failure["stderr"]:
+                        # Show full error message, not just preview
+                        error_lines = failure["stderr"].strip().split("\n")
+                        for line in error_lines:
+                            log_timing(f"[SIMPLE]   {line}")
+                    else:
+                        log_timing(f"[SIMPLE]   No error details available")
+                    log_timing(f"[SIMPLE] === END: {failure['path']} ===")
     elif failed:
         log_timing(
             f"[SIMPLE] {len(failed)} examples failed (too many to list full details)"
@@ -1056,6 +1062,7 @@ class CompilationTestConfig:
     unity_additional_flags: Optional[List[str]]
     full_compilation: bool
     no_parallel: bool
+    verbose: bool
 
 
 @dataclass
@@ -1284,6 +1291,7 @@ class CompilationTestRunner:
                     pch_compatible_files,
                     self.log_timing,
                     self.config.full_compilation,
+                    self.config.verbose,
                 )
 
             compile_time = time.time() - start_time
@@ -1457,6 +1465,7 @@ def run_example_compilation_test(
     unity_additional_flags: Optional[List[str]],
     full_compilation: bool,
     no_parallel: bool,
+    verbose: bool = False,
 ) -> int:
     """Run the example compilation test using enhanced simple build system."""
     try:
@@ -1471,6 +1480,7 @@ def run_example_compilation_test(
             unity_additional_flags=unity_additional_flags,
             full_compilation=full_compilation,
             no_parallel=no_parallel,
+            verbose=verbose,
         )
 
         # Create test runner
@@ -1562,6 +1572,12 @@ if __name__ == "__main__":
         action="store_true",
         help="Disable parallel compilation - useful for debugging or single-threaded environments",
     )
+    parser.add_argument(
+        "--verbose",
+        "-v",
+        action="store_true",
+        help="Enable verbose output showing detailed compilation commands and results",
+    )
 
     args = parser.parse_args()
 
@@ -1578,5 +1594,6 @@ if __name__ == "__main__":
             unity_additional_flags=args.additional_flags,
             full_compilation=args.full,
             no_parallel=args.no_parallel,
+            verbose=args.verbose,
         )
     )
