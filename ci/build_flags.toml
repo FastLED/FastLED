@@ -112,7 +112,10 @@ flags = [
     "-Wextra",
     "-Wconversion",
     "-Wsign-conversion",
-    "-Wunused",
+    "-Werror=unused-variable",          # Force error on unused variables
+    "-Werror=unused-parameter",         # Force error on unused parameters
+    "-Werror=unused-function",          # Force error on unused functions
+    "-Werror=unused-but-set-variable",  # Force error on variables that are set but never used
     "-Wuninitialized",
     "-Wdouble-promotion",
     "-Wformat=2",
