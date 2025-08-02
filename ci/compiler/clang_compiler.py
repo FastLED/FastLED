@@ -9,6 +9,7 @@ import os
 import platform
 import shutil
 import subprocess
+import sys
 import tempfile
 import tomllib
 from concurrent.futures import Future, ThreadPoolExecutor
@@ -37,6 +38,26 @@ def get_max_workers() -> int:
 _EXECUTOR = ThreadPoolExecutor(max_workers=get_max_workers())
 
 
+def optimize_python_command(cmd: list[str]) -> list[str]:
+    """
+    Optimize command list by replacing 'python' with sys.executable for direct execution.
+
+    This avoids shell resolution overhead and ensures we use the exact Python interpreter
+    that's currently running, which is critical for virtual environments.
+
+    Args:
+        cmd: Command list that may contain 'python' as first element
+
+    Returns:
+        list[str]: Optimized command with 'python' replaced by sys.executable
+    """
+    if cmd and cmd[0] == "python":
+        # Replace 'python' with the current Python executable path
+        optimized_cmd = [sys.executable] + cmd[1:]
+        return optimized_cmd
+    return cmd
+
+
 @dataclass
 class LibarchiveOptions:
     """Configuration options for static library archive generation."""
@@ -57,7 +78,7 @@ class CompilerOptions:
 
     # Core compiler settings (formerly CompilerSettings)
     include_path: str
-    compiler: str = "uv run python -m ziglang c++"
+    compiler: str = "python -m ziglang c++"
     defines: list[str] | None = None
     std_version: str = "c++17"
     compiler_args: list[str] = field(default_factory=list[str])
@@ -207,7 +228,7 @@ class BuildFlags:
                 f"The [tools] section is required and must define all compiler tools.\n"
                 f"Example:\n"
                 f"[tools]\n"
-                f'compiler_command = ["uv", "run", "python", "-m", "ziglang", "c++"]\n'
+                f'compiler_command = ["python", "-m", "ziglang", "c++"]\n'
                 f'archiver = "ar"\n'
                 f'c_compiler = "clang"'
             )
@@ -216,7 +237,7 @@ class BuildFlags:
 
         # Validate required tools are present
         required_tools = {
-            "compiler_command": 'Full compiler command (e.g., ["uv", "run", "python", "-m", "ziglang", "c++"])',
+            "compiler_command": 'Full compiler command (e.g., ["python", "-m", "ziglang", "c++"])',
             "archiver": 'Archive tool (e.g., "ar")',
             "c_compiler": 'C compiler (e.g., "clang")',
         }
@@ -240,7 +261,7 @@ class BuildFlags:
             raise RuntimeError(
                 f"FATAL ERROR: tools.compiler_command must be a non-empty list in build_flags.toml at {toml_path}\n"
                 f"Got: {compiler_command} (type: {type(compiler_command).__name__})\n"
-                f'Expected: ["uv", "run", "python", "-m", "ziglang", "c++"]'
+                f'Expected: ["python", "-m", "ziglang", "c++"]'
             )
 
         tools = BuildTools(
@@ -687,14 +708,17 @@ class Compiler:
         Returns:
             VersionCheckResult: Result containing success status, version string, and error message
         """
-        # Test uv run access first
+        # Test python access first
         try:
-            # Always use uv run python -m ziglang c++
-            version_cmd = ["uv", "run", "python", "-m", "ziglang", "c++", "--version"]
+            # Use optimized python -m ziglang c++ (no uv run overhead)
+            version_cmd = ["python", "-m", "ziglang", "c++", "--version"]
+
+            # Optimize command to use sys.executable instead of shell 'python' resolution
+            python_exe = optimize_python_command(version_cmd)
 
             # Use Popen with stderr redirected to stdout to prevent buffer overflow
             process = subprocess.Popen(
-                version_cmd,
+                python_exe,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.STDOUT,  # Merge stderr into stdout
                 text=True,
@@ -813,9 +837,19 @@ class Compiler:
         # Build compiler command
         # Handle cache-wrapped compilers (sccache/ccache) or ziglang c++
         if len(self.settings.compiler_args) > 0 and self.settings.compiler_args[
+            0:4
+        ] == ["python", "-m", "ziglang", "c++"]:
+            # This is optimized ziglang c++ in compiler_args, use it directly
+            cmd = self.settings.compiler_args[
+                0:4
+            ]  # Use optimized ziglang c++ command from compiler_args
+            remaining_cache_args = self.settings.compiler_args[
+                4:
+            ]  # Skip the ziglang c++ part
+        elif len(self.settings.compiler_args) > 0 and self.settings.compiler_args[
             0:6
         ] == ["uv", "run", "python", "-m", "ziglang", "c++"]:
-            # This is ziglang c++ in compiler_args, use it directly
+            # This is legacy ziglang c++ in compiler_args, use it directly
             cmd = self.settings.compiler_args[
                 0:6
             ]  # Use ziglang c++ command from compiler_args
@@ -826,25 +860,23 @@ class Compiler:
             len(self.settings.compiler_args) > 0
             and self.settings.compiler_args[0] == "clang++"
         ):
-            # This is a cache-wrapped clang++, replace with ziglang c++
-            cmd = ["uv", "run", "python", "-m", "ziglang", "c++"]
+            # This is a cache-wrapped clang++, replace with optimized ziglang c++
+            cmd = ["python", "-m", "ziglang", "c++"]
             remaining_cache_args = self.settings.compiler_args[1:]
         else:
-            # This is a direct compiler call, use ziglang c++
+            # This is a direct compiler call, use optimized ziglang c++
             if self.settings.compiler.startswith("sccache"):
                 # When using sccache, we need to pass -- before the compiler arguments
                 cmd = [
                     self.settings.compiler,
                     "--",
-                    "uv",
-                    "run",
                     "python",
                     "-m",
                     "ziglang",
                     "c++",
                 ]
             else:
-                cmd = ["uv", "run", "python", "-m", "ziglang", "c++"]
+                cmd = ["python", "-m", "ziglang", "c++"]
             remaining_cache_args = self.settings.compiler_args
 
         # Add standard clang arguments
@@ -889,9 +921,12 @@ class Compiler:
             cmd.extend(additional_flags)
 
         try:
+            # Optimize command to use sys.executable instead of shell 'python' resolution
+            python_exe = optimize_python_command(cmd)
+
             # Use Popen with stderr redirected to stdout for single stream pumping
             process = subprocess.Popen(
-                cmd,
+                python_exe,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.STDOUT,  # Merge stderr into stdout
                 text=True,
@@ -1012,9 +1047,19 @@ class Compiler:
         # Build compiler command
         # Handle cache-wrapped compilers (sccache/ccache) or ziglang c++
         if len(self.settings.compiler_args) > 0 and self.settings.compiler_args[
+            0:4
+        ] == ["python", "-m", "ziglang", "c++"]:
+            # This is optimized ziglang c++ in compiler_args, use it directly
+            cmd = self.settings.compiler_args[
+                0:4
+            ]  # Use optimized ziglang c++ command from compiler_args
+            remaining_cache_args = self.settings.compiler_args[
+                4:
+            ]  # Skip the ziglang c++ part
+        elif len(self.settings.compiler_args) > 0 and self.settings.compiler_args[
             0:6
         ] == ["uv", "run", "python", "-m", "ziglang", "c++"]:
-            # This is ziglang c++ in compiler_args, use it directly
+            # This is legacy ziglang c++ in compiler_args, use it directly
             cmd = self.settings.compiler_args[
                 0:6
             ]  # Use ziglang c++ command from compiler_args
@@ -1025,25 +1070,23 @@ class Compiler:
             len(self.settings.compiler_args) > 0
             and self.settings.compiler_args[0] == "clang++"
         ):
-            # This is a cache-wrapped clang++, replace with ziglang c++
-            cmd = ["uv", "run", "python", "-m", "ziglang", "c++"]
+            # This is a cache-wrapped clang++, replace with optimized ziglang c++
+            cmd = ["python", "-m", "ziglang", "c++"]
             remaining_cache_args = self.settings.compiler_args[1:]
         else:
-            # This is a direct compiler call, use ziglang c++
+            # This is a direct compiler call, use optimized ziglang c++
             if self.settings.compiler.startswith("sccache"):
                 # When using sccache, we need to pass -- before the compiler arguments
                 cmd = [
                     self.settings.compiler,
                     "--",
-                    "uv",
-                    "run",
                     "python",
                     "-m",
                     "ziglang",
                     "c++",
                 ]
             else:
-                cmd = ["uv", "run", "python", "-m", "ziglang", "c++"]
+                cmd = ["python", "-m", "ziglang", "c++"]
             remaining_cache_args = self.settings.compiler_args
 
         # Add standard clang arguments
@@ -1088,9 +1131,12 @@ class Compiler:
             cmd.extend(additional_flags)
 
         try:
+            # Optimize command to use sys.executable instead of shell 'python' resolution
+            python_exe = optimize_python_command(cmd)
+
             # Use Popen with stderr redirected to stdout for single stream pumping
             process = subprocess.Popen(
-                cmd,
+                python_exe,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.STDOUT,  # Merge stderr into stdout
                 text=True,
@@ -1764,9 +1810,12 @@ def link_program_sync(link_options: LinkOptions) -> Result:
 
     # Execute linker command
     try:
+        # Optimize command to use sys.executable instead of shell 'python' resolution
+        python_exe = optimize_python_command(cmd)
+
         # Use Popen with stderr redirected to stdout for single stream pumping
         process = subprocess.Popen(
-            cmd,
+            python_exe,
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,  # Merge stderr into stdout
             text=True,

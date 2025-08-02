@@ -7,7 +7,8 @@
 
 [tools]
 # Build tool configuration - Full compiler command with arguments
-compiler_command = ["uv", "run", "python", "-m", "ziglang", "c++"]
+# Optimized: Use direct python instead of 'uv run' when already in uv environment
+compiler_command = ["python", "-m", "ziglang", "c++"]
 compiler = "ziglang"  # For compatibility
 archiver = "ar"
 c_compiler = "clang"

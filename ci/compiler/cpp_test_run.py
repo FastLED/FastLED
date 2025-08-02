@@ -16,6 +16,28 @@ from threading import Event, Lock, Thread
 import psutil
 
 from ci.ci.paths import PROJECT_ROOT
+
+
+def optimize_python_command(cmd: list[str]) -> list[str]:
+    """
+    Optimize command list by replacing 'python' with sys.executable for direct execution.
+
+    This avoids shell resolution overhead and ensures we use the exact Python interpreter
+    that's currently running, which is critical for virtual environments.
+
+    Args:
+        cmd: Command list that may contain 'python' as first element
+
+    Returns:
+        list[str]: Optimized command with 'python' replaced by sys.executable
+    """
+    if cmd and cmd[0] == "python":
+        # Replace 'python' with the current Python executable path
+        optimized_cmd = [sys.executable] + cmd[1:]
+        return optimized_cmd
+    return cmd
+
+
 from ci.ci.test_exceptions import (
     CompilationFailedException,
     TestExecutionFailedException,
@@ -197,13 +219,26 @@ def run_command(
         output = "\n".join(captured_lines)
         return process.returncode, output
     else:
-        process = subprocess.Popen(
-            command if isinstance(command, str) else subprocess.list2cmdline(command),
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,  # Merge stderr into stdout
-            shell=True,
-            text=False,
-        )
+        # Optimize list commands to avoid shell overhead
+        if isinstance(command, list):
+            # Optimize python commands and use shell=False for better performance
+            python_exe = optimize_python_command(command)
+            process = subprocess.Popen(
+                python_exe,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,  # Merge stderr into stdout
+                shell=False,  # Use shell=False for better performance with list commands
+                text=False,
+            )
+        else:
+            # String commands still need shell=True
+            process = subprocess.Popen(
+                command,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,  # Merge stderr into stdout
+                shell=True,
+                text=False,
+            )
         assert process.stdout is not None
         # Stream and capture output
         while True:
@@ -669,8 +704,6 @@ def _execute_test_files(
                     f"[{test_index}/{total_tests}] Compiling test: {test_file}",
                 )
                 compile_cmd = [
-                    "uv",
-                    "run",
                     "python",
                     "-m",
                     "ziglang",

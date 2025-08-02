@@ -31,6 +31,28 @@ from types import TracebackType
 from typing import Any, Callable, Dict, List, Optional
 
 from ci.ci.paths import PROJECT_ROOT
+
+
+def optimize_python_command(cmd: list[str]) -> list[str]:
+    """
+    Optimize command list by replacing 'python' with sys.executable for direct execution.
+
+    This avoids shell resolution overhead and ensures we use the exact Python interpreter
+    that's currently running, which is critical for virtual environments.
+
+    Args:
+        cmd: Command list that may contain 'python' as first element
+
+    Returns:
+        list[str]: Optimized command with 'python' replaced by sys.executable
+    """
+    if cmd and cmd[0] == "python":
+        # Replace 'python' with the current Python executable path
+        optimized_cmd = [sys.executable] + cmd[1:]
+        return optimized_cmd
+    return cmd
+
+
 from ci.compiler.clang_compiler import (
     BuildFlags,
     BuildTools,
@@ -595,7 +617,7 @@ class FastLEDTestCompiler:
                 link_options = LinkOptions(
                     object_files=[obj_path],  # Only the test object file
                     output_executable=exe_path,
-                    linker="uv run python -m ziglang c++",  # Use ziglang c++ for linking
+                    linker=f'"{sys.executable}" -m ziglang c++',  # Use optimized Python executable for linking
                     linker_args=linker_args,  # Use pre-calculated args for consistency
                 )
             else:
@@ -606,7 +628,7 @@ class FastLEDTestCompiler:
                         doctest_obj_path,
                     ],  # Test object + doctest main
                     output_executable=exe_path,
-                    linker="uv run python -m ziglang c++",  # Use ziglang c++ for linking
+                    linker=f'"{sys.executable}" -m ziglang c++',  # Use optimized Python executable for linking
                     linker_args=linker_args,  # Use pre-calculated args for consistency
                 )
 
@@ -761,8 +783,6 @@ class FastLEDTestCompiler:
         # Create static library using ziglang ar (archiver)
         print("Creating static library using ziglang ar...")
         lib_cmd: List[str] = [
-            "uv",
-            "run",
             "python",
             "-m",
             "ziglang",
@@ -772,9 +792,12 @@ class FastLEDTestCompiler:
         ] + [str(obj) for obj in fastled_objects]
 
         try:
+            # Optimize command to use sys.executable instead of shell 'python' resolution
+            python_exe = optimize_python_command(lib_cmd)
+
             # Use streaming to prevent buffer overflow
             process = subprocess.Popen(
-                lib_cmd,
+                python_exe,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
                 text=True,

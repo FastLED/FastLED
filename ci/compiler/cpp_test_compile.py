@@ -127,13 +127,11 @@ def use_clang_compiler() -> Tuple[Path, Path, Path]:
 
 
 def use_zig_compiler() -> Tuple[Path, Path, Path]:
-    assert 0 == os.system("uv run python -m ziglang version"), (
-        "Zig-clang compiler not found"
-    )
-    uv_path_str: str | None = shutil.which("uv")
-    assert uv_path_str is not None, "uv not found in PATH"
-    uv_path = Path(uv_path_str).resolve()
-    zig_command = f'"{uv_path}" run python -m ziglang'
+    assert 0 == os.system("python -m ziglang version"), "Zig-clang compiler not found"
+    python_path_str: str | None = shutil.which("python")
+    assert python_path_str is not None, "python not found in PATH"
+    python_path = Path(python_path_str).resolve()
+    zig_command = f'"{python_path}" -m ziglang'
     # We are going to build up shell scripts that look like cc, c++, and ar. It will contain the actual build command.
     cc_path = BUILD_DIR / "cc"
     cxx_path = BUILD_DIR / "c++"
