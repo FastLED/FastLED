@@ -24,6 +24,7 @@ compiler_flags = [
     "-Wall",
     "-Wextra",
     "-Wno-deprecated-register",  # Suppress 'register' keyword warnings for C++17 compatibility
+    "-Wno-backslash-newline-escape",  # Suppress backslash newline escape warnings
     "-fno-exceptions",
     "-fno-rtti",
 ]
