@@ -382,7 +382,11 @@ class FastLEDTestCompiler:
         # Submit parallel compilation jobs (proven pattern from example compilation)
         future_to_test: Dict[Future[Result], Path] = {}
 
-        print("Starting parallel compilation of test files...")
+        # Check if we're running in parallel or sequential mode
+        if os.environ.get("NO_PARALLEL"):
+            print("Starting sequential compilation of test files...")
+        else:
+            print("Starting parallel compilation of test files...")
         for test_file in test_files:
             # Compile to object file first (since compile_cpp_file uses -c flag)
             obj_path = self.build_dir / f"{test_file.stem}.o"
