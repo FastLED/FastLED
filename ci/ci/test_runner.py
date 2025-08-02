@@ -566,14 +566,30 @@ def _run_process_with_output(process: RunningProcess, verbose: bool = False) -> 
             _thread.interrupt_main()
             process.kill()
             return
-        except Exception as e:
-            print(f"Error processing output from {process.command}: {e}")
+        except queue.Empty:
+            # 120 second timeout occurred while waiting for output - this indicates a problem
+            print(f"Timeout: No output from {process.command} for 120 seconds")
             process.kill()
             failure = TestFailureInfo(
                 test_name=_extract_test_name(process.command),
                 command=str(process.command),
                 return_code=1,
-                output=str(e),
+                output="Process timed out after 120 seconds with no output",
+                error_type="process_timeout",
+            )
+            raise TestExecutionFailedException(
+                "Process timed out with no output", [failure]
+            )
+        except Exception as e:
+            print(f"Error processing output from {process.command}: {e}")
+            print(f"Exception type: {type(e).__name__}")
+            print(f"Exception details: {repr(e)}")
+            process.kill()
+            failure = TestFailureInfo(
+                test_name=_extract_test_name(process.command),
+                command=str(process.command),
+                return_code=1,
+                output=f"Exception: {type(e).__name__}: {e}",
                 error_type="process_error",
             )
             raise TestExecutionFailedException(
