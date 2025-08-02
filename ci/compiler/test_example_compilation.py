@@ -347,7 +347,9 @@ def check_pch_status(build_dir: Path) -> Dict[str, Union[bool, Path, int, str]]:
     return {"exists": False, "path": None, "size": 0, "size_formatted": "0B"}  # type: ignore
 
 
-def create_fastled_compiler(use_pch: bool = True, use_sccache: bool = True) -> Compiler:
+def create_fastled_compiler(
+    use_pch: bool, use_sccache: bool, parallel: bool
+) -> Compiler:
     """Create compiler with standard FastLED settings for simple build system."""
     import os
     import tempfile
@@ -410,6 +412,7 @@ def create_fastled_compiler(use_pch: bool = True, use_sccache: bool = True) -> C
         compiler_args=final_args,
         use_pch=use_pch,
         pch_output_path=pch_output_path,
+        parallel=parallel,
     )
     return Compiler(settings)
 
@@ -419,7 +422,7 @@ def compile_examples_simple(
     ino_files: List[Path],
     pch_compatible_files: set[Path],
     log_timing: Callable[[str], None],
-    full_compilation: bool = False,
+    full_compilation: bool,
 ) -> CompilationResult:
     """
     Compile examples using the simple build system (Compiler class).
@@ -1052,6 +1055,7 @@ class CompilationTestConfig:
     unity_custom_output: Optional[str]
     unity_additional_flags: Optional[List[str]]
     full_compilation: bool
+    no_parallel: bool
 
 
 @dataclass
@@ -1105,6 +1109,7 @@ class CompilationTestRunner:
             compiler = create_fastled_compiler(
                 use_pch=not self.config.disable_pch,
                 use_sccache=not self.config.disable_sccache,
+                parallel=not self.config.no_parallel,
             )
 
             # Verify compiler accessibility
@@ -1252,19 +1257,14 @@ class CompilationTestRunner:
         self, compiler: Compiler, ino_files: List[Path], pch_compatible_files: set[Path]
     ) -> CompilationTestResults:
         """Execute the compilation process."""
-        import multiprocessing
-
-        cpu_count = multiprocessing.cpu_count()
-        parallel_jobs = min(cpu_count * 2, 16)  # Cap at 16 to avoid overwhelming system
-
+        parallel_status = "disabled" if self.config.no_parallel else "enabled"
         self.log_timing(
-            f"[PERF] Using ThreadPoolExecutor with {parallel_jobs} max workers ({cpu_count} CPU cores)"
+            f"[PERF] Parallel compilation: {parallel_status} (managed by compiler)"
         )
         self.log_timing("[PERF] Direct compilation enabled (no CMake overhead)")
 
         self.log_timing(f"\n[BUILD] Starting example compilation...")
         self.log_timing(f"[BUILD] Target examples: {len(ino_files)}")
-        self.log_timing(f"[BUILD] Parallel workers: {parallel_jobs}")
 
         start_time = time.time()
 
@@ -1375,24 +1375,12 @@ class CompilationTestRunner:
         config_parts: List[str],
     ) -> int:
         """Generate the final report and return exit code."""
-        import multiprocessing
-
-        cpu_count = multiprocessing.cpu_count()
-        parallel_jobs = min(cpu_count * 2, 16)
-
-        # Calculate efficiency
-        if results.compile_time > 0:
-            efficiency = min(
-                100, (len(ino_files) / results.compile_time / parallel_jobs) * 100
-            )
-        else:
-            efficiency = 100
-
         total_time = results.compile_time + results.linking_time
+        parallel_status = "disabled" if self.config.no_parallel else "enabled"
 
         self.log_timing(f"[CONFIG] Mode: {', '.join(config_parts)}")
         self.log_timing(
-            f"\n[BUILD] Using {parallel_jobs} parallel workers (efficiency: {efficiency:.0f}%)"
+            f"\n[BUILD] Parallel compilation: {parallel_status} (managed by compiler)"
         )
 
         # Enhanced timing breakdown
@@ -1410,7 +1398,7 @@ class CompilationTestRunner:
         self.log_timing(f"[SUMMARY]   Examples processed: {len(ino_files)}")
         self.log_timing(f"[SUMMARY]   Successful: {results.successful_count}")
         self.log_timing(f"[SUMMARY]   Failed: {results.failed_count}")
-        self.log_timing(f"[SUMMARY]   Parallel workers: {parallel_jobs}")
+        self.log_timing(f"[SUMMARY]   Parallel compilation: {parallel_status}")
         self.log_timing(f"[SUMMARY]   Build time: {results.compile_time:.2f}s")
         if results.compile_time > 0:
             self.log_timing(
@@ -1468,6 +1456,7 @@ def run_example_compilation_test(
     unity_custom_output: Optional[str],
     unity_additional_flags: Optional[List[str]],
     full_compilation: bool,
+    no_parallel: bool,
 ) -> int:
     """Run the example compilation test using enhanced simple build system."""
     try:
@@ -1481,6 +1470,7 @@ def run_example_compilation_test(
             unity_custom_output=unity_custom_output,
             unity_additional_flags=unity_additional_flags,
             full_compilation=full_compilation,
+            no_parallel=no_parallel,
         )
 
         # Create test runner
@@ -1567,6 +1557,11 @@ if __name__ == "__main__":
         action="store_true",
         help="Enable full compilation mode: compile AND link examples into executable programs",
     )
+    parser.add_argument(
+        "--no-parallel",
+        action="store_true",
+        help="Disable parallel compilation - useful for debugging or single-threaded environments",
+    )
 
     args = parser.parse_args()
 
@@ -1582,5 +1577,6 @@ if __name__ == "__main__":
             unity_custom_output=args.custom_output,
             unity_additional_flags=args.additional_flags,
             full_compilation=args.full,
+            no_parallel=args.no_parallel,
         )
     )
