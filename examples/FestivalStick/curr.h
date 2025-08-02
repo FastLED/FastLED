@@ -301,6 +301,7 @@ Blend2dPtr waveBlend;
 // Animartrix effect objects - declared here but initialized in setup()
 fl::unique_ptr<Animartrix> animartrix;
 fl::unique_ptr<FxEngine> fxEngine;
+WaveCrgbGradientMapPtr crgMap = fl::make_shared<WaveCrgbGradientMap>();
 
 void setup() {
     // Use constexpr dimensions (computed at compile time)
@@ -417,6 +418,9 @@ void setup() {
             animartrix->setColorOrder(order);
         }
     });
+
+
+    waveFx->setCrgbMap(crgMap);
 }
 
 
@@ -713,6 +717,8 @@ void processWaveAutoTrigger(uint32_t now) {
     }
 }
 
+
+
 void drawWave(uint32_t now) {
     // Update wave parameters from UI
     waveFx->setSpeed(waveSpeed.value());
@@ -722,8 +728,9 @@ void drawWave(uint32_t now) {
     
     // Update wave color palette
     CRGBPalette16 currentPalette = getWavePalette();
-    WaveCrgbMapPtr newCrgbMap = fl::make_shared<WaveCrgbGradientMap>(currentPalette);
-    waveFx->setCrgbMap(newCrgbMap);
+    crgMap->setGradient(currentPalette);
+
+
     
     // Apply blur settings to the wave blend (for smoother wave effects)
     waveBlend->setGlobalBlurAmount(waveBlurAmount.value());
@@ -759,6 +766,7 @@ void drawAnimartrix(uint32_t now) {
 }
 
 void loop() {
+
     delay(4);
     uint32_t now = millis();
     clear(frameBuffer);
@@ -770,6 +778,7 @@ void loop() {
         }
     }
 
+
     // Update the corkscrew mapping with auto-advance or manual position control
     float combinedPosition = get_position(now);
     float pos = combinedPosition * (corkscrew.size() - 1);
@@ -780,12 +789,16 @@ void loop() {
     } else if (renderModeDropdown.value() == "Fire") {
         drawFire(now);
     } else if (renderModeDropdown.value() == "Wave") {
+
         drawWave(now);
     } else if (renderModeDropdown.value() == "Animartrix") {
         drawAnimartrix(now);
     } else {
         draw(pos);
     }
+
+
+
     
     // Use the new readFrom workflow:
     // 1. Read directly from the frameBuffer Grid into the corkscrew's internal buffer

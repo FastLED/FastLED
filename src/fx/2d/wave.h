@@ -49,9 +49,12 @@ class WaveCrgbGradientMap : public WaveCrgbMap {
   public:
     using Gradient = fl::GradientInlined;
     WaveCrgbGradientMap(const CRGBPalette16 &palette) : mGradient(palette) {}
+    WaveCrgbGradientMap() = default;
 
     void mapWaveToLEDs(const XYMap &xymap, WaveSimulation2D &waveSim,
                        CRGB *leds) override;
+
+    void setGradient(const Gradient &gradient) { mGradient = gradient; }
 
   private:
     Gradient mGradient;
