@@ -1,9 +1,5 @@
 #!/usr/bin/env -S uv run --script
-#
-# /// script
-# requires-python = ">=3.11"
-# dependencies = ["httpx", "pathspec"]
-# ///
+
 
 """
 Fast JavaScript linting setup for FastLED using Node.js + ESLint
@@ -33,7 +29,7 @@ if sys.platform.startswith("win"):
 
 # Configuration
 NODE_VERSION = "20.11.0"  # LTS version
-TOOLS_DIR = Path(".js-tools")
+TOOLS_DIR = Path(".cache/js-tools")
 NODE_DIR = TOOLS_DIR / "node"
 
 
@@ -245,7 +241,7 @@ NC='\\033[0m' # No Color
 echo -e "${{BLUE}}FAST FastLED JavaScript Linting (Node.js + ESLint - FAST!)${{NC}}"
 
 # Check if ESLint is installed
-if [ ! -f ".js-tools/node_modules/.bin/eslint{".cmd" if platform.system() == "Windows" else ""}" ]; then
+if [ ! -f ".cache/js-tools/node_modules/.bin/eslint{".cmd" if platform.system() == "Windows" else ""}" ]; then
     echo -e "${{RED}}ERROR: ESLint not found. Run: uv run ci/setup-js-linting-fast.py${{NC}}"
     exit 1
 fi
@@ -263,8 +259,8 @@ echo "$JS_FILES" | sed 's/^/  /'
 
 # Run ESLint
 echo -e "${{BLUE}}Running ESLint...${{NC}}"
-cd .js-tools
-if "./node_modules/.bin/eslint{".cmd" if platform.system() == "Windows" else ""}" --no-eslintrc --no-inline-config -c .eslintrc.js ../src/platforms/wasm/compiler/*.js ../src/platforms/wasm/compiler/modules/*.js; then
+cd .cache/js-tools
+if "./node_modules/.bin/eslint{".cmd" if platform.system() == "Windows" else ""}" --no-eslintrc --no-inline-config -c .eslintrc.js ../../src/platforms/wasm/compiler/*.js ../../src/platforms/wasm/compiler/modules/*.js; then
     echo -e "${{GREEN}}SUCCESS: JavaScript linting completed successfully${{NC}}"
 else
     echo -e "${{RED}}ERROR: JavaScript linting failed${{NC}}"

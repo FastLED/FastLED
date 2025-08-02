@@ -31,6 +31,7 @@ dependencies = [
     "typeguard>=4.4.4",
     "mcp>=1.12.2",
     "compiledb>=0.10.7",
+    "pathspec>=0.12.1",
 ]
 
 [build-system]

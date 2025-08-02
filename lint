@@ -85,9 +85,9 @@ NC='\033[0m' # No Color
 # Check if fast linting is available
 ESLINT_EXE=""
 if [[ "$OSTYPE" == "msys" || "$OSTYPE" == "cygwin" || "$OSTYPE" == "win32" ]]; then
-    ESLINT_EXE=".js-tools/node_modules/.bin/eslint.cmd"
+    ESLINT_EXE=".cache/js-tools/node_modules/.bin/eslint.cmd"
 else
-    ESLINT_EXE=".js-tools/node_modules/.bin/eslint"
+    ESLINT_EXE=".cache/js-tools/node_modules/.bin/eslint"
 fi
 
 if [ -f "ci/js/lint-js-fast" ] && [ -f "$ESLINT_EXE" ]; then

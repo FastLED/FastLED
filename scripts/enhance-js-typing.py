@@ -62,14 +62,14 @@ class JSLintingEnhancer:
         try:
             # Check if fast linting is available
             import platform
-            eslint_exe = ".js-tools/node_modules/.bin/eslint.cmd" if platform.system() == "Windows" else ".js-tools/node_modules/.bin/eslint"
+            eslint_exe = ".cache/js-tools/node_modules/.bin/eslint.cmd" if platform.system() == "Windows" else ".cache/js-tools/node_modules/.bin/eslint"
             
             if not Path(eslint_exe).exists():
                 return LintResult(issues=[], summary="Fast linting not available. Run: uv run ci/setup-js-linting-fast.py", error="eslint_not_found")
             
             # Run ESLint with JSON output
             result = subprocess.run(
-                [eslint_exe, "--format", "json", "--no-eslintrc", "--no-inline-config", "-c", ".js-tools/.eslintrc.js", 
+                [eslint_exe, "--format", "json", "--no-eslintrc", "--no-inline-config", "-c", ".cache/js-tools/.eslintrc.js", 
                  "src/platforms/wasm/compiler/*.js", "src/platforms/wasm/compiler/modules/*.js"],
                 capture_output=True,
                 text=True,
@@ -358,11 +358,11 @@ export {};
 };'''
         
         # Write config variants
-        strict_file = self.workspace_root / ".js-tools" / ".eslintrc.strict.js"
-        minimal_file = self.workspace_root / ".js-tools" / ".eslintrc.minimal.js"
+        strict_file = self.workspace_root / ".cache/js-tools" / ".eslintrc.strict.js"
+        minimal_file = self.workspace_root / ".cache/js-tools" / ".eslintrc.minimal.js"
         
-        # Ensure .js-tools directory exists
-        (self.workspace_root / ".js-tools").mkdir(exist_ok=True)
+        # Ensure .cache/js-tools directory exists
+        (self.workspace_root / ".cache/js-tools").mkdir(parents=True, exist_ok=True)
         
         strict_file.write_text(strict_config)
         minimal_file.write_text(minimal_config)
