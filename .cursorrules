@@ -1006,6 +1006,22 @@ result: Optional[str] = None      # Type: str | None
 data: ResponseData = get_some_data()  # Type: ResponseData
 ```
 
+**🚨 CRITICAL: Lists MUST be properly and fully typed**
+
+**❌ WRONG - Implicit list typing:**
+```python
+mylist = []                       # Type: list[Unknown] - BAD!
+items = []                        # Type: list[Unknown] - BAD!
+results = []                      # Type: list[Unknown] - BAD!
+```
+
+**✅ CORRECT - Explicit list typing:**
+```python
+mylist: list[str] = []            # Type: list[str] - GOOD!
+items: list[int] = []             # Type: list[int] - GOOD!
+results: list[dict[str, Any]] = [] # Type: list[dict[str, Any]] - GOOD!
+```
+
 **Why explicit types are mandatory:**
 - ✅ **IDE support** - Better autocomplete and error detection
 - ✅ **Type safety** - Catches type errors at development time
