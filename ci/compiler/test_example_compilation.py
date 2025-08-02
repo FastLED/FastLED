@@ -1037,6 +1037,346 @@ def link_examples(
     return LinkingResult(linked_count=linked_count, failed_count=failed_count)
 
 
+@dataclass
+class CompilationTestConfig:
+    """Configuration for the compilation test."""
+    specific_examples: Optional[List[str]] = None
+    clean_build: bool = False
+    disable_pch: bool = False
+    disable_sccache: bool = True
+    unity_build: bool = False
+    unity_custom_output: Optional[str] = None
+    unity_additional_flags: Optional[List[str]] = None
+    full_compilation: bool = False
+
+
+@dataclass 
+class CompilationTestResults:
+    """Results from compilation test."""
+    successful_count: int
+    failed_count: int
+    failed_examples: List[Dict[str, str]]
+    compile_time: float
+    linking_time: float = 0.0
+    linked_count: int = 0
+    linking_failed_count: int = 0
+    object_file_map: Optional[Dict[Path, Path]] = None
+
+
+class CompilationTestRunner:
+    """Handles the orchestration of FastLED example compilation tests."""
+    
+    def __init__(self, config: CompilationTestConfig):
+        self.config = config
+        self.global_start_time = time.time()
+        
+    def log_timing(self, message: str) -> None:
+        """Log a message with timestamp relative to start."""
+        elapsed = time.time() - self.global_start_time
+        print(f"[{elapsed:6.2f}s] {message}")
+    
+    def initialize_system(self) -> tuple[Compiler, Dict[str, Union[str, int, float]], Dict[str, Union[bool, str]]]:
+        """Initialize the compiler and get system information."""
+        self.log_timing("==> FastLED Example Compilation Test (SIMPLE BUILD SYSTEM)")
+        self.log_timing("=" * 70)
+        
+        # Get system information
+        self.log_timing("Getting system information...")
+        system_info = get_system_info()
+        build_config = get_build_configuration()
+        
+        self.log_timing(
+            f"[SYSTEM] OS: {system_info['os']}, Compiler: {system_info['compiler']}, CPU: {system_info['cpu_cores']} cores"
+        )
+        self.log_timing(f"[SYSTEM] Memory: {system_info['memory_gb']:.1f}GB available")
+        
+        # Initialize compiler
+        self.log_timing("Initializing simple build system...")
+        try:
+            compiler = create_fastled_compiler(
+                use_pch=not self.config.disable_pch,
+                use_sccache=not self.config.disable_sccache
+            )
+            
+            # Verify compiler accessibility
+            version_result = compiler.check_clang_version()
+            if not version_result.success:
+                raise RuntimeError(f"Compiler accessibility check failed: {version_result.error}")
+                
+            self.log_timing(f"[COMPILER] Using {version_result.version}")
+            return compiler, system_info, build_config
+            
+        except Exception as e:
+            raise RuntimeError(f"Failed to initialize simple build system: {e}")
+    
+    def discover_examples(self, compiler: Compiler) -> List[Path]:
+        """Discover and validate .ino examples to compile."""
+        self.log_timing("Discovering .ino examples...")
+        
+        try:
+            filter_names = self.config.specific_examples if self.config.specific_examples else None
+            ino_files = compiler.find_ino_files("examples", filter_names=filter_names)
+            
+            if not ino_files:
+                if self.config.specific_examples:
+                    # Show detailed error with suggestions
+                    all_ino_files = list(Path("examples").rglob("*.ino"))
+                    if all_ino_files:
+                        available_names = sorted([f.stem for f in all_ino_files])
+                        suggestion = f"\nAvailable examples include: {', '.join(available_names[:10])}..."
+                        if len(available_names) > 10:
+                            suggestion += f"\n  ... and {len(available_names) - 10} more examples"
+                    else:
+                        suggestion = ""
+                    
+                    raise ValueError(f"No .ino files found matching: {self.config.specific_examples}{suggestion}")
+                else:
+                    raise ValueError("No .ino files found in examples directory")
+            
+            # Report discovery results
+            if self.config.specific_examples:
+                self.log_timing(
+                    f"[DISCOVER] Found {len(ino_files)} specific examples: {', '.join([f.stem for f in ino_files])}"
+                )
+            else:
+                self.log_timing(
+                    f"[DISCOVER] Found {len(ino_files)} total .ino examples in examples/"
+                )
+                
+            return ino_files
+            
+        except Exception as e:
+            raise RuntimeError(f"Failed to discover examples: {e}")
+    
+    def analyze_pch_compatibility(self, compiler: Compiler, ino_files: List[Path]) -> tuple[set[Path], List[str], List[str]]:
+        """Analyze files for PCH compatibility and return configuration."""
+        config_parts = ["Simple Build System: enabled"]
+        
+        if self.config.unity_build:
+            config_parts.append("UNITY build: enabled")
+        else:
+            config_parts.append("Direct .ino compilation: enabled")
+        
+        # Handle caching configuration  
+        if self.config.disable_sccache:
+            config_parts.append("cache: disabled (default)")
+        else:
+            # Add cache info based on build config
+            config_parts.append("cache: enabled")
+        
+        pch_compatible_files: set[Path] = set()
+        pch_incompatible_files: List[str] = []
+        
+        if self.config.unity_build:
+            self.log_timing("[UNITY] PCH disabled for UNITY builds (not needed)")
+            config_parts.append("PCH: disabled (UNITY mode)")
+        elif compiler.settings.use_pch:
+            self.log_timing("[PCH] Analyzing examples for PCH compatibility...")
+            
+            for ino_file in ino_files:
+                if compiler.analyze_ino_for_pch_compatibility(ino_file):
+                    pch_compatible_files.add(ino_file)
+                else:
+                    pch_incompatible_files.append(ino_file.name)
+            
+            if pch_incompatible_files:
+                self.log_timing(
+                    f"[PCH] Found {len(pch_incompatible_files)} incompatible files (will use direct compilation):"
+                )
+                for filename in pch_incompatible_files[:5]:  # Show first 5
+                    self.log_timing(f"[PCH]   - {filename} (has code before FastLED.h)")
+                if len(pch_incompatible_files) > 5:
+                    self.log_timing(f"[PCH]   - ... and {len(pch_incompatible_files) - 5} more")
+                
+                config_parts.append(f"PCH: selective ({len(pch_compatible_files)} files)")
+            else:
+                self.log_timing(f"[PCH] All {len(ino_files)} files are PCH compatible")
+                config_parts.append("PCH: enabled (all files)")
+        else:
+            self.log_timing("[PCH] PCH disabled globally")
+            config_parts.append("PCH: disabled")
+        
+        return pch_compatible_files, pch_incompatible_files, config_parts
+    
+    def setup_pch(self, compiler: Compiler, pch_compatible_files: set[Path]) -> bool:
+        """Setup precompiled headers if applicable."""
+        if (not self.config.unity_build and 
+            compiler.settings.use_pch and 
+            len(pch_compatible_files) > 0):
+            
+            pch_start = time.time()
+            pch_success = compiler.create_pch_file()
+            pch_time = time.time() - pch_start
+            
+            if pch_success:
+                self.log_timing(f"[PCH] Precompiled header created in {pch_time:.2f}s")
+                return True
+            else:
+                self.log_timing(
+                    "[PCH] Precompiled header creation failed, using direct compilation for all files"
+                )
+                pch_compatible_files.clear()
+                return False
+        elif compiler.settings.use_pch and len(pch_compatible_files) == 0:
+            self.log_timing("[PCH] No PCH-compatible files found, skipping PCH creation")
+        
+        return True
+    
+    def compile_examples(self, compiler: Compiler, ino_files: List[Path], 
+                        pch_compatible_files: set[Path]) -> CompilationTestResults:
+        """Execute the compilation process."""
+        import multiprocessing
+        
+        cpu_count = multiprocessing.cpu_count()
+        parallel_jobs = min(cpu_count * 2, 16)  # Cap at 16 to avoid overwhelming system
+        
+        self.log_timing(f"[PERF] Using ThreadPoolExecutor with {parallel_jobs} max workers ({cpu_count} CPU cores)")
+        self.log_timing("[PERF] Direct compilation enabled (no CMake overhead)")
+        
+        self.log_timing(f"\n[BUILD] Starting example compilation...")
+        self.log_timing(f"[BUILD] Target examples: {len(ino_files)}")
+        self.log_timing(f"[BUILD] Parallel workers: {parallel_jobs}")
+        
+        start_time = time.time()
+        
+        try:
+            if self.config.unity_build:
+                result = compile_examples_unity(
+                    compiler,
+                    ino_files,
+                    self.log_timing,
+                    unity_custom_output=self.config.unity_custom_output,
+                    unity_additional_flags=self.config.unity_additional_flags,
+                )
+            else:
+                result = compile_examples_simple(
+                    compiler, ino_files, pch_compatible_files, self.log_timing, self.config.full_compilation
+                )
+            
+            compile_time = time.time() - start_time
+            
+            return CompilationTestResults(
+                successful_count=result.successful_count,
+                failed_count=result.failed_count,
+                failed_examples=result.failed_examples,
+                compile_time=compile_time,
+                object_file_map=getattr(result, 'object_file_map', None)
+            )
+            
+        except Exception as e:
+            raise RuntimeError(f"Compilation failed: {e}")
+    
+    def handle_linking(self, compiler: Compiler, results: CompilationTestResults) -> CompilationTestResults:
+        """Handle linking phase if full compilation is requested."""
+        if not self.config.full_compilation or results.failed_count > 0 or not results.object_file_map:
+            if self.config.full_compilation and results.failed_count > 0:
+                self.log_timing(f"[LINKING] Skipping linking due to {results.failed_count} compilation failures")
+            return results
+        
+        self.log_timing("\n[LINKING] Starting real program linking...")
+        linking_start = time.time()
+        
+        try:
+            # Create FastLED static library
+            self.log_timing("[LINKING] Creating FastLED static library...")
+            fastled_build_dir = Path(".build/fastled")
+            fastled_build_dir.mkdir(parents=True, exist_ok=True)
+            
+            fastled_lib = create_fastled_library(compiler, fastled_build_dir, self.log_timing)
+            
+            # Link examples
+            self.log_timing("[LINKING] Linking example programs...")
+            build_dir = Path(".build/examples")
+            linking_result = link_examples(
+                results.object_file_map, fastled_lib, build_dir, compiler, self.log_timing
+            )
+            
+            results.linked_count = linking_result.linked_count
+            results.linking_failed_count = linking_result.failed_count
+            results.linking_time = time.time() - linking_start
+            
+            if results.linking_failed_count == 0:
+                self.log_timing(f"[LINKING] SUCCESS: Successfully linked {results.linked_count} executable programs")
+            else:
+                self.log_timing(f"[LINKING] WARNING: Linked {results.linked_count} programs, {results.linking_failed_count} failed")
+            
+            self.log_timing(f"[LINKING] Real linking completed in {results.linking_time:.2f}s")
+            
+        except Exception as e:
+            results.linking_time = time.time() - linking_start
+            self.log_timing(f"[LINKING] ERROR: Linking failed: {e}")
+            results.linking_failed_count = results.successful_count  # Mark all as failed
+            results.linked_count = 0
+        
+        return results
+    
+    def report_results(self, ino_files: List[Path], results: CompilationTestResults, 
+                      config_parts: List[str]) -> int:
+        """Generate the final report and return exit code."""
+        import multiprocessing
+        
+        cpu_count = multiprocessing.cpu_count()
+        parallel_jobs = min(cpu_count * 2, 16)
+        
+        # Calculate efficiency
+        if results.compile_time > 0:
+            efficiency = min(100, (len(ino_files) / results.compile_time / parallel_jobs) * 100)
+        else:
+            efficiency = 100
+        
+        total_time = results.compile_time + results.linking_time
+        
+        self.log_timing(f"[CONFIG] Mode: {', '.join(config_parts)}")
+        self.log_timing(f"\n[BUILD] Using {parallel_jobs} parallel workers (efficiency: {efficiency:.0f}%)")
+        
+        # Enhanced timing breakdown
+        self.log_timing(f"\n[TIMING] Compilation: {results.compile_time:.2f}s")
+        linking_mode = "(with program generation)" if self.config.full_compilation and results.failed_count == 0 else "(compile-only mode)"
+        self.log_timing(f"[TIMING] Linking: {results.linking_time:.2f}s {linking_mode}")
+        self.log_timing(f"[TIMING] Total: {total_time:.2f}s")
+        
+        # Performance summary
+        self.log_timing(f"\n[SUMMARY] FastLED Example Compilation Performance:")
+        self.log_timing(f"[SUMMARY]   Examples processed: {len(ino_files)}")
+        self.log_timing(f"[SUMMARY]   Successful: {results.successful_count}")
+        self.log_timing(f"[SUMMARY]   Failed: {results.failed_count}")
+        self.log_timing(f"[SUMMARY]   Parallel workers: {parallel_jobs}")
+        self.log_timing(f"[SUMMARY]   Build time: {results.compile_time:.2f}s")
+        if results.compile_time > 0:
+            self.log_timing(f"[SUMMARY]   Speed: {len(ino_files) / results.compile_time:.1f} examples/second")
+        
+        # Determine success
+        overall_success = results.failed_count == 0
+        if self.config.full_compilation:
+            overall_success = overall_success and results.linking_failed_count == 0
+        
+        if overall_success:
+            if self.config.full_compilation:
+                self.log_timing("\n[SUCCESS] EXAMPLE COMPILATION + LINKING TEST: SUCCESS")
+                self.log_timing(f"[SUCCESS] {results.successful_count}/{len(ino_files)} examples compiled and {results.linked_count} linked successfully")
+            else:
+                self.log_timing("\n[SUCCESS] EXAMPLE COMPILATION TEST: SUCCESS")
+                self.log_timing(f"[SUCCESS] {results.successful_count}/{len(ino_files)} examples compiled successfully")
+            
+            print(green_text("### SUCCESS ###"))
+            return 0
+        else:
+            # Show failed examples
+            print(f"\n{red_text('### ERROR ###')}")
+            
+            if results.failed_count > 0:
+                self.log_timing(f"[ERROR] {results.failed_count} compilation failures:")
+                for failure in results.failed_examples:
+                    path = failure["path"].replace("\\", "/")
+                    print(f"  {orange_text(f'examples/{path}')}")
+            
+            if self.config.full_compilation and results.linking_failed_count > 0:
+                self.log_timing(f"[ERROR] {results.linking_failed_count} linking failures detected")
+                self.log_timing("[ERROR] Test failed due to linker errors - see linking output above")
+            
+            return 1
+
+
 def run_example_compilation_test(
     specific_examples: Optional[List[str]] = None,
     clean_build: bool = False,
@@ -1048,416 +1388,51 @@ def run_example_compilation_test(
     full_compilation: bool = False,
 ) -> int:
     """Run the example compilation test using enhanced simple build system."""
-    # Start timing at the very beginning
-    global_start_time: float = time.time()
-
-    def log_timing(message: str) -> None:
-        """Log a message with timestamp relative to start"""
-        elapsed: float = time.time() - global_start_time
-        print(f"[{elapsed:6.2f}s] {message}")
-
-    log_timing("==> FastLED Example Compilation Test (SIMPLE BUILD SYSTEM)")
-    log_timing("=" * 70)
-
-    # Get and display system information
-    log_timing("Getting system information...")
-    system_info: Dict[str, Union[str, int, float]] = get_system_info()
-    build_config: Dict[str, Union[bool, str]] = get_build_configuration()
-
-    log_timing(
-        f"[SYSTEM] OS: {system_info['os']}, Compiler: {system_info['compiler']}, CPU: {system_info['cpu_cores']} cores"
-    )
-    log_timing(f"[SYSTEM] Memory: {system_info['memory_gb']:.1f}GB available")
-
-    # Display build configuration
-    config_parts: List[str] = []
-    config_parts.append("Simple Build System: enabled")
-
-    if unity_build:
-        config_parts.append("UNITY build: enabled")
-    else:
-        config_parts.append("Direct .ino compilation: enabled")
-
-    cache_type: Union[bool, str] = build_config["cache_type"]
-    if disable_sccache:
-        config_parts.append("cache: disabled (default)")
-    elif cache_type == "sccache":
-        config_parts.append("sccache: enabled")
-    elif cache_type == "ccache":
-        config_parts.append("ccache: enabled")
-    else:
-        config_parts.append("cache: unavailable")
-
-    # PCH status will be determined after compatibility analysis
-
-    # Initialize the simple build system
-    log_timing("Initializing simple build system...")
-
     try:
-        compiler = create_fastled_compiler(
-            use_pch=not disable_pch, use_sccache=not disable_sccache
+        # Create configuration
+        config = CompilationTestConfig(
+            specific_examples=specific_examples,
+            clean_build=clean_build,
+            disable_pch=disable_pch,
+            disable_sccache=disable_sccache,
+            unity_build=unity_build,
+            unity_custom_output=unity_custom_output,
+            unity_additional_flags=unity_additional_flags,
+            full_compilation=full_compilation
         )
-
-        # Verify clang accessibility first
-        version_result = compiler.check_clang_version()
-        if not version_result.success:
-            log_timing(
-                f"[ERROR] Compiler accessibility check failed: {version_result.error}"
-            )
-            return 1
-
-        log_timing(f"[COMPILER] Using {version_result.version}")
-
-    except Exception as e:
-        log_timing(f"[ERROR] Failed to initialize simple build system: {e}")
-        return 1
-
-    # Find examples to compile
-    log_timing("Discovering .ino examples...")
-
-    def red_text(text: str) -> str:
-        """Return text with red ANSI color codes for error highlighting."""
-        return f"\033[91m{text}\033[0m"
-
-    try:
-        # Use the compiler's find_ino_files method with filtering
-        filter_names = specific_examples if specific_examples else None
-        ino_files = compiler.find_ino_files("examples", filter_names=filter_names)
-
-        if not ino_files:
-            if specific_examples:
-                # Show detailed error with suggestions
-                print(red_text("### ERROR ###"))
-                print(red_text(f"No .ino files found matching: {specific_examples}"))
-
-                # Get all available examples for suggestions
-                all_ino_files = list(Path("examples").rglob("*.ino"))
-                if all_ino_files:
-                    available_names = sorted([f.stem for f in all_ino_files])
-                    print(
-                        f"\nAvailable examples include: {', '.join(available_names[:10])}..."
-                    )
-                    if len(available_names) > 10:
-                        print(f"  ... and {len(available_names) - 10} more examples")
-
-                print(red_text("### ERROR ###"))
-                return 1
-            else:
-                log_timing("[ERROR] No .ino files found in examples directory")
-                return 1
-
-        # Report discovery results
-        if specific_examples:
-            log_timing(
-                f"[DISCOVER] Found {len(ino_files)} specific examples: {', '.join([f.stem for f in ino_files])}"
-            )
-        else:
-            log_timing(
-                f"[DISCOVER] Found {len(ino_files)} total .ino examples in examples/"
-            )
-
-        # Analyze files for PCH compatibility if PCH is enabled
-        pch_compatible_files: set[Path] = set()
-        pch_incompatible_files: List[str] = []
-
-        if unity_build:
-            log_timing("[UNITY] PCH disabled for UNITY builds (not needed)")
-            config_parts.append("PCH: disabled (UNITY mode)")
-        elif compiler.settings.use_pch:
-            log_timing("[PCH] Analyzing examples for PCH compatibility...")
-
-            for ino_file in ino_files:
-                if compiler.analyze_ino_for_pch_compatibility(ino_file):
-                    pch_compatible_files.add(ino_file)
-                else:
-                    pch_incompatible_files.append(ino_file.name)
-
-            if pch_incompatible_files:
-                log_timing(
-                    f"[PCH] Found {len(pch_incompatible_files)} incompatible files (will use direct compilation):"
-                )
-                for filename in pch_incompatible_files[:5]:  # Show first 5
-                    log_timing(f"[PCH]   - {filename} (has code before FastLED.h)")
-                if len(pch_incompatible_files) > 5:
-                    log_timing(
-                        f"[PCH]   - ... and {len(pch_incompatible_files) - 5} more"
-                    )
-
-                log_timing(
-                    f"[PCH] {len(pch_compatible_files)} files are PCH compatible (will use PCH)"
-                )
-                config_parts.append(
-                    f"PCH: selective ({len(pch_compatible_files)} files)"
-                )
-            else:
-                log_timing(f"[PCH] All {len(ino_files)} files are PCH compatible")
-                config_parts.append("PCH: enabled (all files)")
-        else:
-            log_timing("[PCH] PCH disabled globally")
-            config_parts.append("PCH: disabled")
-
-        # Create PCH for faster compilation (only if there are compatible files)
-        pch_time = 0.0
-        if (
-            not unity_build
-            and compiler.settings.use_pch
-            and len(pch_compatible_files) > 0
-        ):
-            pch_start = time.time()
-            pch_success = compiler.create_pch_file()
-            pch_time = time.time() - pch_start
-
-            if pch_success:
-                log_timing(f"[PCH] Precompiled header created in {pch_time:.2f}s")
-                # PCH status already added above in compatibility analysis
-            else:
-                log_timing(
-                    f"[PCH] Precompiled header creation failed, using direct compilation for all files"
-                )
-                # Override the previous config message since PCH creation failed
-                config_parts = [
-                    part for part in config_parts if not part.startswith("PCH:")
-                ]
-                config_parts.append("PCH: failed (using direct compilation)")
-                pch_compatible_files.clear()  # No files can use PCH if creation failed
-        elif compiler.settings.use_pch and len(pch_compatible_files) == 0:
-            log_timing("[PCH] No PCH-compatible files found, skipping PCH creation")
-            # PCH status already added above as "PCH: selective (0 files)" or similar
-        elif disable_pch:
-            # PCH was disabled by --no-pch flag
-            pass  # Status already added above as "PCH: disabled"
-
-        log_timing(f"[CONFIG] Mode: {', '.join(config_parts)}")
-
-        # Categorize examples (all are FastLED examples in simple build system)
-        log_timing(
-            f"[FASTLED] FastLED examples: {len(ino_files)} (simple build system treats all as FastLED)"
-        )
-        log_timing(
-            f"[BASIC] Basic examples: 0 (simple build system focuses on FastLED)"
-        )
-
-    except Exception as e:
-        log_timing(f"[ERROR] Failed to discover examples: {e}")
-        return 1
-
-    # Detect available CPU cores for parallel builds
-    import multiprocessing
-
-    cpu_count: int = multiprocessing.cpu_count()
-    parallel_jobs: int = min(
-        cpu_count * 2, 16
-    )  # Cap at 16 to avoid overwhelming system
-
-    log_timing(
-        f"[PERF] Using ThreadPoolExecutor with {parallel_jobs} max workers ({cpu_count} CPU cores)"
-    )
-    log_timing(f"[PERF] Direct compilation enabled (no CMake overhead)")
-
-    start_time: float = time.time()
-
-    try:
-        # Track memory usage during build
-        process: psutil.Process = psutil.Process()
-        initial_memory: int = process.memory_info().rss
-        peak_memory: int = initial_memory
-
-        # Dump compiler flags before compilation
-        log_timing("\n[COMPILER] Dumping compiler flags...")
+        
+        # Create test runner
+        runner = CompilationTestRunner(config)
+        
+        # Initialize system and compiler
+        compiler, system_info, build_config = runner.initialize_system()
+        
+        # Discover examples to compile
+        ino_files = runner.discover_examples(compiler)
+        
+        # Analyze PCH compatibility and configuration
+        pch_compatible_files, pch_incompatible_files, config_parts = runner.analyze_pch_compatibility(compiler, ino_files)
+        
+        # Setup PCH if needed
+        runner.setup_pch(compiler, pch_compatible_files)
+        
+        # Dump compiler information
+        runner.log_timing("\n[COMPILER] Dumping compiler flags...")
         compiler_args = compiler.get_compiler_args()
-        log_timing(
-            f"[COMPILER] Full command: {' '.join(compiler_args)} <input_file> -o <output_file>"
-        )
-        log_timing(f"[COMPILER] Compiler: {compiler_args[0]}")
-        log_timing(f"[COMPILER] Language: {compiler_args[1]} {compiler_args[2]}")
-        log_timing(f"[COMPILER] C++ Standard: {compiler_args[3]}")
-        log_timing(f"[COMPILER] Include Path: {compiler_args[4]}")
-
-        # Show defines
-        defines = [arg for arg in compiler_args if arg.startswith("-D")]
-        if defines:
-            log_timing(f"[COMPILER] Defines: {' '.join(defines)}")
-        else:
-            log_timing(f"[COMPILER] Defines: None")
-
-        # Show additional compiler args
-        additional_args = [
-            arg for arg in compiler_args[5:] if not arg.startswith("-D") and arg != "-c"
-        ]
-        if additional_args:
-            log_timing(f"[COMPILER] Additional args: {' '.join(additional_args)}")
-        else:
-            log_timing(f"[COMPILER] Additional args: None")
-
-        # Compile examples using simple build system
-        log_timing("\n[BUILD] Starting example compilation...")
-        log_timing(f"[BUILD] Target examples: {len(ino_files)}")
-        log_timing(f"[BUILD] Parallel workers: {parallel_jobs}")
-
-        if unity_build:
-            result = compile_examples_unity(
-                compiler,
-                ino_files,
-                log_timing,
-                unity_custom_output=unity_custom_output,
-                unity_additional_flags=unity_additional_flags,
-            )
-        else:
-            result = compile_examples_simple(
-                compiler, ino_files, pch_compatible_files, log_timing, full_compilation
-            )
-
-        successful_count = result.successful_count
-        failed_count = result.failed_count
-        compile_time = result.compile_time
-        failed = result.failed_examples
-
-        # Track peak memory usage (approximate)
-        try:
-            current_memory: int = process.memory_info().rss
-            peak_memory = max(peak_memory, current_memory)
-        except:
-            pass  # Ignore memory tracking errors
-
-        total_time = time.time() - start_time
-
-        # Calculate parallel job efficiency (estimated)
-        if compile_time > 0:
-            efficiency = min(100, (len(ino_files) / compile_time / parallel_jobs) * 100)
-        else:
-            efficiency = 100
-
-        # Memory usage calculation
-        memory_used_mb: float = (peak_memory - initial_memory) / (1024 * 1024)
-        memory_used_gb: float = memory_used_mb / 1024
-
-        # Handle linking for --full mode
-        linking_time: float = 0.01  # Default minimal linking time (compile-only)
-        linked_count: int = 0
-        linking_failed_count: int = 0
-
-        if full_compilation and failed_count == 0 and result.object_file_map:
-            log_timing("\n[LINKING] Starting real program linking...")
-            linking_start = time.time()
-
-            try:
-                # Phase 2: Create FastLED static library
-                log_timing("[LINKING] Creating FastLED static library...")
-                fastled_build_dir = Path(".build/fastled")
-                fastled_build_dir.mkdir(parents=True, exist_ok=True)
-
-                fastled_lib = create_fastled_library(
-                    compiler, fastled_build_dir, log_timing
-                )
-
-                # Phase 3: Link examples
-                log_timing("[LINKING] Linking example programs...")
-                build_dir = Path(".build/examples")
-                linking_result = link_examples(
-                    result.object_file_map, fastled_lib, build_dir, compiler, log_timing
-                )
-                linked_count = linking_result.linked_count
-                linking_failed_count = linking_result.failed_count
-
-                linking_time = time.time() - linking_start
-
-                if linking_failed_count == 0:
-                    log_timing(
-                        f"[LINKING] SUCCESS: Successfully linked {linked_count} executable programs"
-                    )
-                else:
-                    log_timing(
-                        f"[LINKING] WARNING: Linked {linked_count} programs, {linking_failed_count} failed"
-                    )
-
-                log_timing(f"[LINKING] Real linking completed in {linking_time:.2f}s")
-
-            except Exception as e:
-                linking_time = time.time() - linking_start
-                log_timing(f"[LINKING] ERROR: Linking failed: {e}")
-                linking_failed_count = successful_count  # Mark all as failed
-                linked_count = 0
-
-        elif full_compilation and failed_count == 0:
-            log_timing(
-                "[LINKING] ERROR: No object files available for linking (internal error)"
-            )
-        elif full_compilation:
-            log_timing(
-                f"[LINKING] Skipping linking due to {failed_count} compilation failures"
-            )
-
-        log_timing(
-            f"\n[BUILD] Using {parallel_jobs} parallel workers (efficiency: {efficiency:.0f}%)"
-        )
-
-        # Enhanced timing breakdown
-        log_timing(
-            f"\n[TIMING] PCH generation: 0.00s (not used in simple build system)"
-        )
-        log_timing(f"[TIMING] Compilation: {compile_time:.2f}s")
-        log_timing(
-            f"[TIMING] Linking: {linking_time:.2f}s {'(with program generation)' if full_compilation and failed_count == 0 else '(compile-only mode)'}"
-        )
-        log_timing(f"[TIMING] Total: {total_time:.2f}s")
-
-        # Performance summary with enhanced metrics
-        log_timing(f"\n[SUMMARY] FastLED Example Compilation Performance:")
-        log_timing(f"[SUMMARY]   Examples processed: {len(ino_files)}")
-        log_timing(f"[SUMMARY]   Successful: {successful_count}")
-        log_timing(f"[SUMMARY]   Failed: {failed_count}")
-        log_timing(f"[SUMMARY]   Parallel workers: {parallel_jobs}")
-        log_timing(f"[SUMMARY]   Build time: {compile_time:.2f}s")
-        if compile_time > 0:
-            log_timing(
-                f"[SUMMARY]   Speed: {len(ino_files) / compile_time:.1f} examples/second"
-            )
-
-        # Determine success based on compilation results and linking results (if applicable)
-        overall_success = failed_count == 0
-        if full_compilation:
-            # For full compilation mode, also check that linking succeeded
-            overall_success = overall_success and linking_failed_count == 0
-
-        if overall_success:
-            if full_compilation:
-                log_timing("\n[SUCCESS] EXAMPLE COMPILATION + LINKING TEST: SUCCESS")
-                log_timing(
-                    f"[SUCCESS] {successful_count}/{len(ino_files)} examples compiled and {linked_count} linked successfully"
-                )
-            else:
-                log_timing("\n[SUCCESS] EXAMPLE COMPILATION TEST: SUCCESS")
-                log_timing(
-                    f"[SUCCESS] {successful_count}/{len(ino_files)} examples compiled successfully"
-                )
-
-            print(green_text("### SUCCESS ###"))
-            return 0
-        else:
-            # Show failed examples in the requested format
-            print(f"\n{red_text('### ERROR ###')}")
-
-            # Report compilation failures
-            if failed_count > 0:
-                log_timing(f"[ERROR] {failed_count} compilation failures:")
-                for failure in failed:
-                    # Convert backslashes to forward slashes for consistent path format
-                    path = failure["path"].replace("\\", "/")
-                    print(f"  {orange_text(f'examples/{path}')}")
-
-            # Report linking failures in full compilation mode
-            if full_compilation and linking_failed_count > 0:
-                log_timing(f"[ERROR] {linking_failed_count} linking failures detected")
-                log_timing(
-                    "[ERROR] Test failed due to linker errors - see linking output above"
-                )
-
-            return 1
-
+        runner.log_timing(f"[COMPILER] Full command: {' '.join(compiler_args)} <input_file> -o <output_file>")
+        
+        # Compile examples
+        results = runner.compile_examples(compiler, ino_files, pch_compatible_files)
+        
+        # Handle linking if requested
+        results = runner.handle_linking(compiler, results)
+        
+        # Generate report and return exit code
+        return runner.report_results(ino_files, results, config_parts)
+        
     except Exception as e:
-        log_timing(f"\n[ERROR] EXAMPLE COMPILATION TEST: ERROR")
-        log_timing(f"Unexpected error: {e}")
-        print(red_text("### ERROR ###"))
+        print(f"\n{red_text('### ERROR ###')}")
+        print(f"Unexpected error: {e}")
         return 1
 
 
