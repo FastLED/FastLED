@@ -56,17 +56,32 @@ cc_flags = [
 # C++ compiler flags for Windows  
 cpp_flags = [
     "--target=x86_64-windows-gnu",     # Explicit target for MSYS2/MinGW compatibility
-    "-fuse-ld=lld",                       # Use Zig's bundled LLD linker
+    "-fuse-ld=lld-link",                  # Use lld-link (Windows MSVC-compatible linker)
     "-std=c++17",                         # C++17 standard
     "-Wall", 
     "-Wextra",
     "-fno-exceptions",
     "-fno-rtti",
+    
+    # Fix Arduino INPUT macro conflict with Windows headers
+    "-DNOMINMAX",                         # Prevent Windows min/max macros
+    "-DWIN32_LEAN_AND_MEAN",              # Reduce Windows header conflicts
 ]
 
 # Linker flags for Windows
 link_flags = [
     "-mconsole",                          # Console application
+    
+    # Prevent automatic library inclusion to avoid CRT collisions
+    "-nodefaultlibs",                     # Don't automatically include default libraries
+    
+    # Fix CRT collision between Zig/Clang and MSYS2/MinGW runtimes
+    # This prevents "atexit was replaced" errors from conflicting CRT implementations
+    # "-rtlib=compiler-rt",               # Removed - was causing conflicts
+    "-unwindlib=libunwind",               # Use Clang's libunwind (avoid MinGW unwind)
+    "-nostdlib++",                        # Don't auto-link standard C++ library
+    "-lc++",                              # Manually link libc++ (Clang's C++ standard library)
+    
     "-lkernel32",                         # Windows kernel functions
     "-luser32",                           # Windows user interface
     "-lgdi32",                            # Graphics device interface
@@ -156,29 +171,7 @@ include_flags = [
     "-Itests",                                  # Test directory
 ]
 
-[linking.windows]
-# ================================================================================================
-# WINDOWS-SPECIFIC LINKING FLAGS
-# ================================================================================================
-# Linking flags for Windows builds using ziglang c++ (uses lld-link in MSVC-compatibility mode).
-# Uses MSVC-style flags and libraries instead of GNU/MinGW style.
 
-flags = [
-    # Console subsystem (compatible with lld-link)
-    "-mconsole",                               # Console application
-    
-    # Runtime libraries are handled automatically by ziglang c++
-    # No explicit runtime library flags needed
-    
-    # Note: atexit symbol conflict with lld-link is a known issue
-    # FASTLED_NO_ATEXIT=1 flag is set but may not fully resolve lld-link specific errors
-    
-    # Windows system libraries (standard Windows libraries)
-    "-lkernel32",                              # Windows kernel functions
-    "-luser32",                                # Windows user interface
-    "-lgdi32",                                 # Graphics device interface
-    "-ladvapi32",                              # Advanced Windows API
-]
 
 [linking.unix]
 # ================================================================================================
@@ -195,4 +188,3 @@ flags = [
     # Platform-specific libraries (added as needed)
     # Note: Additional platform-specific flags can be added here
 ]
-

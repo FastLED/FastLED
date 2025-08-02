@@ -743,18 +743,17 @@ class FastLEDTestCompiler:
             str(fastled_lib_path),
         ] + [str(obj) for obj in fastled_objects]
 
-        # Create static library using ziglang c++
-        print("Creating static library using ziglang c++...")
+        # Create static library using ziglang ar (archiver)
+        print("Creating static library using ziglang ar...")
         lib_cmd: List[str] = [
             "uv",
             "run",
             "python",
             "-m",
             "ziglang",
-            "c++",
-            "-o",
+            "ar",
+            "rcs",  # Create archive with symbol table
             str(fastled_lib_path),
-            "-shared",  # Create a shared library
         ] + [str(obj) for obj in fastled_objects]
 
         try:

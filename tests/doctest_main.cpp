@@ -1,5 +1,17 @@
+// Fix INPUT macro conflict between Arduino and Windows headers
+#ifdef INPUT
+#define ARDUINO_INPUT_BACKUP INPUT
+#undef INPUT
+#endif
+
 #define DOCTEST_CONFIG_IMPLEMENT
 #include "doctest.h"
+
+// Restore Arduino INPUT macro after Windows headers
+#ifdef ARDUINO_INPUT_BACKUP
+#define INPUT ARDUINO_INPUT_BACKUP
+#undef ARDUINO_INPUT_BACKUP
+#endif
 
 #ifdef ENABLE_CRASH_HANDLER
 #include "crash_handler.h"
