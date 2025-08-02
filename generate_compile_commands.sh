@@ -15,7 +15,7 @@ fi
 # Check if compiledb is installed
 if ! command -v compiledb &> /dev/null; then
     echo "Installing compiledb..."
-    pip install compiledb
+    uv add compiledb
 fi
 
 # Build the tests to verify compilation works

@@ -30,6 +30,7 @@ dependencies = [
     "toml>=0.10.2",
     "typeguard>=4.4.4",
     "mcp>=1.12.2",
+    "compiledb>=0.10.7",
 ]
 
 [build-system]
