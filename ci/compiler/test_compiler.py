@@ -236,11 +236,12 @@ class FastLEDTestCompiler:
         # Get tools configuration from BuildFlags (respects build_flags.toml)
         compiler_cmd = build_flags.tools.compiler
         archiver_tool = build_flags.tools.archiver
+        compiler_command = build_flags.tools.compiler_command
         
-        print(f"Using compiler from build_flags.toml: {compiler_cmd}")
+        print(f"Using compiler from build_flags.toml: {compiler_command}")
 
-        # Use compiler args as-is from TOML configuration
-        final_compiler_args = compiler_args
+        # Use compiler command from TOML + flags as final compiler args
+        final_compiler_args = compiler_command + compiler_args
 
         # Create compiler options with TOML-loaded flags and tools
         settings = CompilerOptions(

@@ -154,6 +154,7 @@ class BuildTools:
     nm: str = "nm"  # Symbol table utility (for analysis)
     strip: str = "strip"  # Strip utility (for release builds)
     ranlib: str = "ranlib"  # Archive indexer (for static libraries)
+    compiler_command: list[str] = field(default_factory=list[str])  # Full compiler command with arguments
 
 
 @dataclass
@@ -197,17 +198,59 @@ class BuildFlags:
         except Exception as e:
             raise RuntimeError(f"Failed to parse build_flags.toml: {e}")
 
-        # Extract tools configuration
-        tools_config = config.get("tools", {})
+        # Extract tools configuration with validation
+        if "tools" not in config:
+            raise RuntimeError(
+                f"FATAL ERROR: [tools] section missing from build_flags.toml at {toml_path}\n"
+                f"The [tools] section is required and must define all compiler tools.\n"
+                f"Example:\n"
+                f"[tools]\n"
+                f"compiler_command = [\"uv\", \"run\", \"python\", \"-m\", \"ziglang\", \"c++\"]\n"
+                f"archiver = \"ar\"\n"
+                f"c_compiler = \"clang\""
+            )
+        
+        tools_config = config["tools"]
+        
+        # Validate required tools are present
+        required_tools = {
+            "compiler_command": "Full compiler command (e.g., [\"uv\", \"run\", \"python\", \"-m\", \"ziglang\", \"c++\"])",
+            "archiver": "Archive tool (e.g., \"ar\")",
+            "c_compiler": "C compiler (e.g., \"clang\")"
+        }
+        
+        missing_tools = []
+        for tool, description in required_tools.items():
+            if tool not in tools_config:
+                missing_tools.append(f"  - {tool}: {description}")
+        
+        if missing_tools:
+            raise RuntimeError(
+                f"FATAL ERROR: Required tools missing from [tools] section in build_flags.toml at {toml_path}\n"
+                f"Missing tools:\n" + "\n".join(missing_tools) + "\n\n"
+                f"All compiler tools must be explicitly defined in the TOML configuration.\n"
+                f"No defaults or hardcoded values are allowed."
+            )
+        
+        # Validate compiler_command is a list
+        compiler_command = tools_config["compiler_command"]
+        if not isinstance(compiler_command, list) or not compiler_command:
+            raise RuntimeError(
+                f"FATAL ERROR: tools.compiler_command must be a non-empty list in build_flags.toml at {toml_path}\n"
+                f"Got: {compiler_command} (type: {type(compiler_command).__name__})\n"
+                f"Expected: [\"uv\", \"run\", \"python\", \"-m\", \"ziglang\", \"c++\"]"
+            )
+        
         tools = BuildTools(
-            compiler=tools_config.get("compiler", "clang++"),
-            archiver=tools_config.get("archiver", "ar"),
+            compiler=tools_config.get("compiler", compiler_command[-1]),  # Use last element as fallback
+            archiver=tools_config["archiver"],
             linker=tools_config.get("linker"),
-            c_compiler=tools_config.get("c_compiler", "clang"),
+            c_compiler=tools_config["c_compiler"],
             objcopy=tools_config.get("objcopy", "objcopy"),
             nm=tools_config.get("nm", "nm"),
             strip=tools_config.get("strip", "strip"),
             ranlib=tools_config.get("ranlib", "ranlib"),
+            compiler_command=compiler_command,  # Add the full command
         )
 
         # Extract base flags
@@ -425,51 +468,20 @@ class Compiler:
     def get_compiler_args(self) -> list[str]:
         """
         Get a copy of the complete compiler arguments that would be used for compilation.
+        
+        Uses compiler_args from build_flags.toml without any hardcoded modifications.
 
         Returns:
-            list[str]: Copy of compiler arguments including compiler, flags, defines, and settings
+            list[str]: Copy of compiler arguments from TOML configuration
         """
-        # Handle cache-wrapped compilers (sccache/ccache) or ziglang c++
-        if len(self.settings.compiler_args) > 0 and self.settings.compiler_args[
-            0:6
-        ] == ["uv", "run", "python", "-m", "ziglang", "c++"]:
-            # This is ziglang c++ in compiler_args, use it directly
-            cmd = self.settings.compiler_args[
-                0:6
-            ]  # Use ziglang c++ command from compiler_args
-            remaining_cache_args = self.settings.compiler_args[
-                6:
-            ]  # Skip the ziglang c++ part
-        elif (
-            len(self.settings.compiler_args) > 0
-            and self.settings.compiler_args[0] == "clang++"
-        ):
-            # This is a cache-wrapped clang++, replace with ziglang c++
-            cmd = ["uv", "run", "python", "-m", "ziglang", "c++"]
-            remaining_cache_args = self.settings.compiler_args[1:]
-        else:
-            # This is a direct compiler call, use ziglang c++
-            if self.settings.compiler.startswith("sccache"):
-                # When using sccache, we need to pass -- before the compiler arguments
-                cmd = [
-                    self.settings.compiler,
-                    "--",
-                    "uv",
-                    "run",
-                    "python",
-                    "-m",
-                    "ziglang",
-                    "c++",
-                ]
-            else:
-                cmd = ["uv", "run", "python", "-m", "ziglang", "c++"]
-            remaining_cache_args = self.settings.compiler_args
-
+        # Use compiler args exactly as specified in build_flags.toml
+        cmd = self.settings.compiler_args.copy()
+        
+        # Add standard compilation requirements (don't override std version - use what's in TOML)
         cmd.extend(
             [
                 "-x",
                 "c++",  # Force C++ compilation of .ino files
-                f"-std={self.settings.std_version}",
                 f"-I{self.settings.include_path}",  # FastLED include path
             ]
         )
@@ -478,9 +490,6 @@ class Compiler:
         if self.settings.defines:
             for define in self.settings.defines:
                 cmd.append(f"-D{define}")
-
-        # Add remaining compiler args (after skipping clang++ for cache-wrapped compilers)
-        cmd.extend(remaining_cache_args)
 
         # Add PCH flag if available
         if self.settings.use_pch and self._pch_ready and self._pch_file_path:
@@ -547,24 +556,15 @@ class Compiler:
             else:
                 pch_output_path = pch_header_path.with_suffix(".hpp.pch")
 
-            # Build PCH compilation command - BYPASS sccache for PCH generation
-            # Use direct ziglang c++ compiler, not the cache-wrapped version
-            direct_compiler = "python -m ziglang c++"
+            # Build PCH compilation command using TOML configuration
+            # Use compiler_args from TOML without any filtering or hardcoding
+            cmd: list[str] = self.settings.compiler_args.copy()
 
-            cmd: list[str] = []
-            if self.settings.compiler.startswith("sccache"):
-                # When using sccache, we need to pass -- before the compiler arguments
-                cmd.extend(["--"])
-
+            # Add PCH-specific flags (don't override std version - use what's in TOML)
             cmd.extend(
                 [
-                    "python",
-                    "-m",
-                    "ziglang",
-                    "c++",  # Use ziglang c++ as the compiler
                     "-x",
                     "c++-header",
-                    f"-std={self.settings.std_version}",
                     f"-I{self.settings.include_path}",
                 ]
             )
@@ -574,40 +574,22 @@ class Compiler:
                 for define in self.settings.defines:
                     cmd.append(f"-D{define}")
 
-            # Add compiler args but skip cache-related args
-            # Filter out sccache/ccache wrapper arguments and compiler commands that don't apply to direct compilation
-            filtered_args: list[str] = []
+            # Skip existing PCH flags to avoid conflicts, but keep everything else
             skip_next = False
-            
-            # Define the ziglang command sequence to skip
-            ziglang_command_sequence = ["uv", "run", "python", "-m", "ziglang", "c++"]
-            
-            # Check if compiler_args starts with the ziglang command sequence
-            args_to_process = self.settings.compiler_args[:]
-            if len(args_to_process) >= len(ziglang_command_sequence) and \
-               args_to_process[:len(ziglang_command_sequence)] == ziglang_command_sequence:
-                # Skip the ziglang command sequence
-                args_to_process = args_to_process[len(ziglang_command_sequence):]
-
-            for arg in args_to_process:
+            final_cmd = []
+            for arg in cmd:
                 if skip_next:
                     skip_next = False
                     continue
-
-                # Skip cache wrapper arguments
-                if arg in ["clang++", "gcc", "g++"]:
-                    # These are cache wrapper args, skip them for direct PCH compilation
-                    continue
                 elif arg.startswith("-include-pch"):
-                    # Skip any existing PCH arguments
                     skip_next = True  # Skip the PCH file path argument too
                     continue
                 else:
-                    # Keep all other compiler arguments for PCH compatibility
-                    filtered_args.append(arg)
+                    final_cmd.append(arg)
 
-            cmd.extend(filtered_args)
-            cmd.extend([str(pch_header_path), "-o", str(pch_output_path)])
+            # Add the PCH file paths
+            final_cmd.extend([str(pch_header_path), "-o", str(pch_output_path)])
+            cmd = final_cmd
 
             # DEBUG: Print the complete PCH compilation command
             print("🔧 PCH Compilation Command:")
