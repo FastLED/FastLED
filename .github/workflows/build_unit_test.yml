@@ -62,7 +62,7 @@ jobs:
       
       - name: Run Example Blink
         run: |
-          ./test --no-parallel --no-unity --examples blink --no-pch --verbose
+          ./test --no-parallel --no-unity --examples Blink --no-pch --verbose
 
       - name: Run Unit Test Json
         run: |
@@ -71,7 +71,7 @@ jobs:
       - name: Run All Unit Tests
         run: |
           if [ "${{ matrix.compiler }}" = "clang" ]; then
-            ./test --clang --no-parallel --unit--verbose
+            ./test --clang --no-parallel --unit --verbose
           else
             ./test --no-parallel --unit --verbose
           fi
