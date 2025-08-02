@@ -571,8 +571,8 @@ def _run_process_with_output(process: RunningProcess, verbose: bool = False) -> 
             process.kill()
             return
         except queue.Empty:
-            # 120 second timeout occurred while waiting for output - this indicates a problem
-            print(f"Timeout: No output from {process.command} for 120 seconds")
+            # _TIMEOUT second timeout occurred while waiting for output - this indicates a problem
+            print(f"Timeout: No output from {process.command} for {_TIMEOUT} seconds")
             process.kill()
             failure = TestFailureInfo(
                 test_name=_extract_test_name(process.command),

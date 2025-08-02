@@ -27,6 +27,11 @@ from typing import Any, Callable, Dict, List, Optional, Union
 import psutil
 import toml  # type: ignore
 
+
+_IS_GITHUB_ACTIONS = os.getenv("GITHUB_ACTIONS") == "true"
+
+_TIMEOUT = 240 if _IS_GITHUB_ACTIONS else 120
+
 # Add the parent directory to Python path for imports
 # Import the proven Compiler infrastructure
 from ci.compiler.clang_compiler import (
@@ -530,7 +535,7 @@ def compile_examples_simple(
     # Collect results as they complete with timeout to prevent hanging
     completed_count = 0
     for future in as_completed(
-        future_to_file.keys(), timeout=120
+        future_to_file.keys(), timeout=_TIMEOUT
     ):  # 2 minute total timeout
         try:
             result: Result = future.result(timeout=30)  # 30 second timeout per file
