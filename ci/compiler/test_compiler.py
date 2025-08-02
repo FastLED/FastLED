@@ -13,8 +13,6 @@ Key Features:
 - GDB-compatible debug symbol generation
 - Consistent performance across all platforms
 
-Performance: 15-30s (CMake) → 2-4s (Python API) = 8x improvement
-Memory Usage: 2-4GB (CMake) → 200-500MB (Python API) = 80% reduction
 """
 
 import hashlib
