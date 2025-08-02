@@ -154,7 +154,9 @@ class BuildTools:
     nm: str = "nm"  # Symbol table utility (for analysis)
     strip: str = "strip"  # Strip utility (for release builds)
     ranlib: str = "ranlib"  # Archive indexer (for static libraries)
-    compiler_command: list[str] = field(default_factory=list[str])  # Full compiler command with arguments
+    compiler_command: list[str] = field(
+        default_factory=list[str]
+    )  # Full compiler command with arguments
 
 
 @dataclass
@@ -205,25 +207,25 @@ class BuildFlags:
                 f"The [tools] section is required and must define all compiler tools.\n"
                 f"Example:\n"
                 f"[tools]\n"
-                f"compiler_command = [\"uv\", \"run\", \"python\", \"-m\", \"ziglang\", \"c++\"]\n"
-                f"archiver = \"ar\"\n"
-                f"c_compiler = \"clang\""
+                f'compiler_command = ["uv", "run", "python", "-m", "ziglang", "c++"]\n'
+                f'archiver = "ar"\n'
+                f'c_compiler = "clang"'
             )
-        
+
         tools_config = config["tools"]
-        
+
         # Validate required tools are present
         required_tools = {
-            "compiler_command": "Full compiler command (e.g., [\"uv\", \"run\", \"python\", \"-m\", \"ziglang\", \"c++\"])",
-            "archiver": "Archive tool (e.g., \"ar\")",
-            "c_compiler": "C compiler (e.g., \"clang\")"
+            "compiler_command": 'Full compiler command (e.g., ["uv", "run", "python", "-m", "ziglang", "c++"])',
+            "archiver": 'Archive tool (e.g., "ar")',
+            "c_compiler": 'C compiler (e.g., "clang")',
         }
-        
-        missing_tools = []
+
+        missing_tools: List[str] = []
         for tool, description in required_tools.items():
             if tool not in tools_config:
                 missing_tools.append(f"  - {tool}: {description}")
-        
+
         if missing_tools:
             raise RuntimeError(
                 f"FATAL ERROR: Required tools missing from [tools] section in build_flags.toml at {toml_path}\n"
@@ -231,18 +233,20 @@ class BuildFlags:
                 f"All compiler tools must be explicitly defined in the TOML configuration.\n"
                 f"No defaults or hardcoded values are allowed."
             )
-        
+
         # Validate compiler_command is a list
         compiler_command = tools_config["compiler_command"]
         if not isinstance(compiler_command, list) or not compiler_command:
             raise RuntimeError(
                 f"FATAL ERROR: tools.compiler_command must be a non-empty list in build_flags.toml at {toml_path}\n"
                 f"Got: {compiler_command} (type: {type(compiler_command).__name__})\n"
-                f"Expected: [\"uv\", \"run\", \"python\", \"-m\", \"ziglang\", \"c++\"]"
+                f'Expected: ["uv", "run", "python", "-m", "ziglang", "c++"]'
             )
-        
+
         tools = BuildTools(
-            compiler=tools_config.get("compiler", compiler_command[-1]),  # Use last element as fallback
+            compiler=tools_config.get(
+                "compiler", compiler_command[-1]
+            ),  # Use last element as fallback
             archiver=tools_config["archiver"],
             linker=tools_config.get("linker"),
             c_compiler=tools_config["c_compiler"],
@@ -405,6 +409,10 @@ class BuildFlags:
         toml_content.append(f'compiler = "{self.tools.compiler}"')
         toml_content.append(f'archiver = "{self.tools.archiver}"')
 
+        # Add compiler_command if it exists
+        if self.tools.compiler_command:
+            toml_content.append(f"compiler_command = {self.tools.compiler_command!r}")
+
         # Only add linker if it's not None
         if self.tools.linker is not None:
             toml_content.append(f'linker = "{self.tools.linker}"')
@@ -468,7 +476,7 @@ class Compiler:
     def get_compiler_args(self) -> list[str]:
         """
         Get a copy of the complete compiler arguments that would be used for compilation.
-        
+
         Uses compiler_args from build_flags.toml without any hardcoded modifications.
 
         Returns:
@@ -476,7 +484,7 @@ class Compiler:
         """
         # Use compiler args exactly as specified in build_flags.toml
         cmd = self.settings.compiler_args.copy()
-        
+
         # Add standard compilation requirements (don't override std version - use what's in TOML)
         cmd.extend(
             [
@@ -576,7 +584,7 @@ class Compiler:
 
             # Skip existing PCH flags to avoid conflicts, but keep everything else
             skip_next = False
-            final_cmd = []
+            final_cmd: List[str] = []
             for arg in cmd:
                 if skip_next:
                     skip_next = False

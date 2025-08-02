@@ -12,9 +12,9 @@
 
 #include "fl/namespace.h"
 #include "fl/scoped_array.h"
+#include "fl/ostream.h"
 
 using namespace fl;
-using std::cout;
 
 // Simple test effect that fills with a solid color
 class SolidColorFx2d : public fl::Fx2d {
@@ -118,10 +118,10 @@ TEST_CASE("Test FX2d Layered with XYMap") {
         context.now = 0;
         blendFx.draw(context);
 
-        cout << "Layered Effect Output: " << led[0].toString().c_str() << std::endl;
-        cout << "Layered Effect Output: " << led[1].toString().c_str() << std::endl;
-        cout << "Layered Effect Output: " << led[2].toString().c_str() << std::endl;
-        cout << "Layered Effect Output: " << led[3].toString().c_str() << std::endl;
+        cout << "Layered Effect Output: " << led[0].toString().c_str() << endl;
+        cout << "Layered Effect Output: " << led[1].toString().c_str() << endl;
+        cout << "Layered Effect Output: " << led[2].toString().c_str() << endl;
+        cout << "Layered Effect Output: " << led[3].toString().c_str() << endl;
 
         // Verify the result - should be blue
         CHECK(led[0].r == 0);
@@ -161,10 +161,10 @@ TEST_CASE("Test FX2d Layered with XYMap") {
         context.now = 0;
         blendFx.draw(context);
 
-        cout << "Layered Effect Output: " << led[0].toString().c_str() << std::endl;
-        cout << "Layered Effect Output: " << led[1].toString().c_str() << std::endl;
-        cout << "Layered Effect Output: " << led[2].toString().c_str() << std::endl;
-        cout << "Layered Effect Output: " << led[3].toString().c_str() << std::endl;
+        cout << "Layered Effect Output: " << led[0].toString().c_str() << endl;
+        cout << "Layered Effect Output: " << led[1].toString().c_str() << endl;
+        cout << "Layered Effect Output: " << led[2].toString().c_str() << endl;
+        cout << "Layered Effect Output: " << led[3].toString().c_str() << endl;
 
         // Verify the result - should be blue
         CHECK(led[0].r == 0);

@@ -48,12 +48,17 @@ class TestBuildFlagsToml(unittest.TestCase):
         self.assertEqual(tools.ranlib, "ranlib")
 
     def test_parse_minimal_toml(self) -> None:
-        """Test parsing minimal TOML file without tools section"""
+        """Test parsing minimal TOML file with required tools section"""
         toml_content = """
 [all]
 defines = ["-DTEST=1"]
 compiler_flags = ["-Wall"]
 include_flags = ["-I."]
+
+[tools]
+compiler_command = ["uv", "run", "python", "-m", "ziglang", "c++"]
+archiver = "ar"
+c_compiler = "clang"
 
 [linking.base]
 flags = ["-pthread"]
@@ -72,9 +77,9 @@ flags = ["-Werror"]
         self.assertEqual(flags.link_flags, ["-pthread"])
         self.assertEqual(flags.strict_mode_flags, ["-Werror"])
 
-        # Check default tools (should use defaults since no [tools] section)
-        self.assertEqual(flags.tools.compiler, "clang++")
+        # Check tools (from [tools] section)
         self.assertEqual(flags.tools.archiver, "ar")
+        self.assertEqual(flags.tools.c_compiler, "clang")
         self.assertIsNone(flags.tools.linker)
 
     def test_parse_toml_with_tools(self) -> None:
@@ -86,6 +91,7 @@ compiler_flags = ["-Wall"]
 include_flags = ["-I."]
 
 [tools]
+compiler_command = ["g++"]
 compiler = "g++"
 archiver = "gcc-ar"
 linker = "ld.gold"
@@ -119,8 +125,10 @@ flags = ["-pthread"]
 defines = ["-DTEST=1"]
 
 [tools]
+compiler_command = ["custom-clang++"]
 compiler = "custom-clang++"
 archiver = "custom-ar"
+c_compiler = "clang"
 # Missing other tools - should use defaults
 """
 
@@ -148,6 +156,7 @@ archiver = "custom-ar"
             nm="arm-none-eabi-nm",
             strip="arm-none-eabi-strip",
             ranlib="arm-none-eabi-ranlib",
+            compiler_command=["arm-none-eabi-g++"],
         )
 
         flags = BuildFlags(
@@ -177,7 +186,12 @@ archiver = "custom-ar"
         """Test serializing BuildFlags when linker is None"""
         flags = BuildFlags(
             defines=["-DTEST=1"],
-            tools=BuildTools(linker=None),  # Explicitly set linker to None
+            tools=BuildTools(
+                linker=None,  # Explicitly set linker to None
+                compiler_command=["clang++"],
+                archiver="ar",
+                c_compiler="clang",
+            ),
         )
 
         toml_output = flags.serialize()
@@ -196,6 +210,7 @@ archiver = "custom-ar"
             archiver="test-ar",
             linker="test-ld",
             c_compiler="test-gcc",
+            compiler_command=["test-compiler"],
         )
 
         original_flags = BuildFlags(
@@ -249,6 +264,9 @@ archiver = "custom-ar"
 defines = ["-DALIAS_TEST=1"]
 
 [tools]
+compiler_command = ["alias-compiler"]
+archiver = "ar"
+c_compiler = "clang"
 compiler = "alias-compiler"
 """
 
