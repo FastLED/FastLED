@@ -73,8 +73,9 @@ def main():
         cmd_list = [
             "uv",
             "run",
+            "python",
             "-m",
-            "ci.ci-compile.py",
+            "ci.ci-compile",
             args.board,
             "--examples",
             args.example,
