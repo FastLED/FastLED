@@ -66,7 +66,7 @@ jobs:
 
       - name: Run Unit Test Json
         run: |
-          ./test --no-parallel --no-unity --unit --no-pch --verbose Json
+          ./test --no-parallel --no-unity --unit --no-pch --verbose json
 
       - name: Run All Unit Tests
         run: |
