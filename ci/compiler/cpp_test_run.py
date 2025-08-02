@@ -16,6 +16,12 @@ from threading import Event, Lock, Thread
 import psutil
 
 from ci.ci.paths import PROJECT_ROOT
+from ci.ci.test_exceptions import (
+    CompilationFailedException,
+    TestExecutionFailedException,
+    TestFailureInfo,
+    TestTimeoutException,
+)
 
 
 class OutputBuffer:
@@ -326,7 +332,14 @@ def _compile_tests_cmake(
     if return_code != 0:
         print("Compilation failed:")
         print(output)  # Always show output on failure
-        sys.exit(1)
+        failure = TestFailureInfo(
+            test_name="cmake_compilation",
+            command=" ".join(command),
+            return_code=return_code,
+            output=output,
+            error_type="cmake_compilation_error"
+        )
+        raise CompilationFailedException("CMake compilation failed", [failure])
     print("Compilation successful.")
 
     # Check if static analysis was requested and warn about IWYU availability
@@ -379,9 +392,17 @@ def _compile_tests_python(
 
         if not compile_result.success:
             print("Compilation failed:")
+            failures = []
             for error in compile_result.errors:
                 print(f"  {error.test_name}: {error.message}")
-            sys.exit(1)
+                failures.append(TestFailureInfo(
+                    test_name=error.test_name,
+                    command="compilation",
+                    return_code=1,
+                    output=error.message,
+                    error_type="compilation_error"
+                ))
+            raise CompilationFailedException("Python API compilation failed", failures)
 
         print(
             f"Compilation successful - {compile_result.compiled_count} tests in {compile_result.duration:.2f}s"
@@ -790,6 +811,7 @@ def _handle_test_results(
     """Handle test results and exit appropriately (preserving existing logic)"""
     if failed_tests:
         print("Failed tests summary:")
+        failures = []
         for failed_test in failed_tests:
             print(
                 f"Test {failed_test.name} failed with return code {failed_test.return_code}"
@@ -800,12 +822,21 @@ def _handle_test_results(
             for line in failed_test.stdout.splitlines():
                 print(f"  {line}")
             print()  # Add spacing between failed tests
+            
+            failures.append(TestFailureInfo(
+                test_name=failed_test.name,
+                command=f"test_{failed_test.name}",
+                return_code=failed_test.return_code,
+                output=failed_test.stdout,
+                error_type="test_execution_failure"
+            ))
+        
         tests_failed = len(failed_tests)
         failed_test_names = [test.name for test in failed_tests]
         print(
             f"{tests_failed} test{'s' if tests_failed != 1 else ''} failed: {', '.join(failed_test_names)}"
         )
-        sys.exit(1)
+        raise TestExecutionFailedException(f"{tests_failed} test(s) failed", failures)
     if verbose:
         print("All tests passed.")
 
@@ -947,59 +978,75 @@ def parse_args() -> argparse.Namespace:
 
 
 def main() -> None:
-    args = parse_args()
+    try:
+        args = parse_args()
 
-    # Get verbosity flags from args
+        # Get verbosity flags from args
 
-    run_only = args.run_only
-    compile_only = args.compile_only
-    specific_test = args.test
-    # only_run_failed_test feature to be implemented in future
-    _ = args.only_run_failed_test
-    use_clang = args.clang
-    use_legacy_system = args.legacy
-    no_unity = args.no_unity
-    quick_build = not args.debug  # Default to quick mode unless --debug is specified
-    # use_gcc = args.gcc
+        run_only = args.run_only
+        compile_only = args.compile_only
+        specific_test = args.test
+        # only_run_failed_test feature to be implemented in future
+        _ = args.only_run_failed_test
+        use_clang = args.clang
+        use_legacy_system = args.legacy
+        no_unity = args.no_unity
+        quick_build = not args.debug  # Default to quick mode unless --debug is specified
+        # use_gcc = args.gcc
 
-    if not run_only:
-        passthrough_args = args.unknown
-        if use_clang:
-            passthrough_args.append("--use-clang")
-        if args.check:
-            passthrough_args.append("--check")
-        if no_unity:
-            passthrough_args.append("--no-unity")
-        # Note: --gcc is handled by not passing --use-clang (GCC is the default in compiler/cpp_test_compile.py)
-        compile_tests(
-            clean=args.clean,
-            unknown_args=passthrough_args,
-            specific_test=specific_test,
-            use_legacy_system=use_legacy_system,
-            quick_build=quick_build,
-            verbose=args.verbose,
-            show_compile=args.show_compile,
-            show_link=args.show_link,
-        )
-
-    if not compile_only:
-        if specific_test:
-            run_tests(
-                specific_test,
+        if not run_only:
+            passthrough_args = args.unknown
+            if use_clang:
+                passthrough_args.append("--use-clang")
+            if args.check:
+                passthrough_args.append("--check")
+            if no_unity:
+                passthrough_args.append("--no-unity")
+            # Note: --gcc is handled by not passing --use-clang (GCC is the default in compiler/cpp_test_compile.py)
+            compile_tests(
+                clean=args.clean,
+                unknown_args=passthrough_args,
+                specific_test=specific_test,
                 use_legacy_system=use_legacy_system,
+                quick_build=quick_build,
                 verbose=args.verbose,
                 show_compile=args.show_compile,
                 show_link=args.show_link,
             )
+
+        if not compile_only:
+            if specific_test:
+                run_tests(
+                    specific_test,
+                    use_legacy_system=use_legacy_system,
+                    verbose=args.verbose,
+                    show_compile=args.show_compile,
+                    show_link=args.show_link,
+                )
+            else:
+                # Use our own test runner instead of CTest since CTest integration is broken
+                run_tests(
+                    None,
+                    use_legacy_system=use_legacy_system,
+                    verbose=args.verbose,
+                    show_compile=args.show_compile,
+                    show_link=args.show_link,
+                )
+    except (CompilationFailedException, TestExecutionFailedException, TestTimeoutException) as e:
+        # Print detailed failure information 
+        print("\n" + "="*60)
+        print("FASTLED TEST FAILURE DETAILS")
+        print("="*60)
+        print(e.get_detailed_failure_info())
+        print("="*60)
+        
+        # Exit with appropriate code
+        if e.failures:
+            # Use the return code from the first failure, or 1 if none available
+            exit_code = e.failures[0].return_code if e.failures[0].return_code != 0 else 1
         else:
-            # Use our own test runner instead of CTest since CTest integration is broken
-            run_tests(
-                None,
-                use_legacy_system=use_legacy_system,
-                verbose=args.verbose,
-                show_compile=args.show_compile,
-                show_link=args.show_link,
-            )
+            exit_code = 1
+        sys.exit(exit_code)
 
 
 if __name__ == "__main__":

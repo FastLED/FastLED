@@ -20,6 +20,11 @@ from ci.ci.test_types import (
     TestResultType,
     TestSuiteResult,
 )
+from ci.ci.test_exceptions import (
+    TestExecutionFailedException,
+    TestFailureInfo,
+    TestTimeoutException,
+)
 from ci.ci.watchdog_state import clear_active_processes, set_active_processes
 
 
@@ -564,7 +569,14 @@ def _run_process_with_output(process: RunningProcess, verbose: bool = False) -> 
         except Exception as e:
             print(f"Error processing output from {process.command}: {e}")
             process.kill()
-            sys.exit(1)
+            failure = TestFailureInfo(
+                test_name=_extract_test_name(process.command),
+                command=str(process.command),
+                return_code=1,
+                output=str(e),
+                error_type="process_error"
+            )
+            raise TestExecutionFailedException("Error processing test output", [failure])
 
     # Process has completed, check return code
     try:
@@ -575,7 +587,14 @@ def _run_process_with_output(process: RunningProcess, verbose: bool = False) -> 
             print(f"Command failed: {process.command}")
             print(f"\033[91m###### ERROR ######\033[0m")
             print(f"Test failed: {test_name}")
-            sys.exit(returncode)
+            failure = TestFailureInfo(
+                test_name=test_name,
+                command=str(process.command),
+                return_code=returncode,
+                output="Command failed with non-zero exit code",
+                error_type="command_failure"
+            )
+            raise TestExecutionFailedException("Test command failed", [failure])
         else:
             elapsed = time.time() - output_handler.formatter._start_time
             print(f"Process completed: {process.command} (took {elapsed:.2f}s)")
@@ -588,7 +607,14 @@ def _run_process_with_output(process: RunningProcess, verbose: bool = False) -> 
         print(f"\033[91m###### ERROR ######\033[0m")
         print(f"Test error: {test_name}")
         process.kill()
-        sys.exit(1)
+        failure = TestFailureInfo(
+            test_name=test_name,
+            command=str(process.command),
+            return_code=1,
+            output=str(e),
+            error_type="process_wait_error"
+        )
+        raise TestExecutionFailedException("Error waiting for process", [failure])
 
 
 def _run_processes_parallel(
@@ -646,12 +672,20 @@ def _run_processes_parallel(
             print(f"\nGlobal timeout reached after {global_timeout} seconds")
             print("\033[91m###### ERROR ######\033[0m")
             print("Tests failed due to global timeout")
+            failures = []
             for p in active_processes:
                 failed_processes.append(
                     p.command
                 )  # Track all active processes as failed
                 p.kill()
-            sys.exit(1)
+                failures.append(TestFailureInfo(
+                    test_name=_extract_test_name(p.command),
+                    command=str(p.command),
+                    return_code=1,
+                    output="Process killed due to global timeout",
+                    error_type="global_timeout"
+                ))
+            raise TestTimeoutException("Global timeout reached", failures)
 
         # Check for stuck processes (no output for 30 seconds)
         current_time = time.time()
@@ -726,19 +760,35 @@ def _run_processes_parallel(
                 print("\033[91m###### ERROR ######\033[0m")
                 print(f"Test failed due to timeout: {_extract_test_name(cmd)}")
                 sys.stdout.flush()
+                failures = []
                 for p in active_processes:
                     failed_processes.append(p.command)  # Track all as failed
                     p.kill()
-                sys.exit(1)
+                    failures.append(TestFailureInfo(
+                        test_name=_extract_test_name(p.command),
+                        command=str(p.command),
+                        return_code=1,
+                        output="Process killed due to timeout",
+                        error_type="process_timeout"
+                    ))
+                raise TestTimeoutException("Process timeout", failures)
             except Exception as e:
                 print(f"\nUnexpected error processing output from {cmd}: {e}")
                 print("\033[91m###### ERROR ######\033[0m")
                 print(f"Test failed due to unexpected error: {_extract_test_name(cmd)}")
                 sys.stdout.flush()
+                failures = []
                 for p in active_processes:
                     failed_processes.append(p.command)  # Track all as failed
                     p.kill()
-                sys.exit(1)
+                    failures.append(TestFailureInfo(
+                        test_name=_extract_test_name(p.command),
+                        command=str(p.command),
+                        return_code=1,
+                        output=str(e),
+                        error_type="unexpected_error"
+                    ))
+                raise TestExecutionFailedException("Unexpected error during test execution", failures)
 
             # Check process completion status
             if proc.poll() is not None:
@@ -753,7 +803,14 @@ def _run_processes_parallel(
                         for p in active_processes:
                             if p != proc:
                                 p.kill()
-                        sys.exit(returncode)
+                        failure = TestFailureInfo(
+                            test_name=test_name,
+                            command=str(cmd),
+                            return_code=returncode,
+                            output="Command failed with non-zero exit code",
+                            error_type="command_failure"
+                        )
+                        raise TestExecutionFailedException("Test command failed", [failure])
                     active_processes.remove(proc)
                     if proc in last_activity_time:
                         del last_activity_time[proc]  # Clean up tracking
@@ -770,10 +827,18 @@ def _run_processes_parallel(
                     print(f"Error: {e}")
                     print(f"\033[91m###### ERROR ######\033[0m")
                     print(f"Test error: {test_name}")
+                    failures = []
                     for p in active_processes:
                         failed_processes.append(p.command)  # Track all as failed
                         p.kill()
-                    sys.exit(1)
+                        failures.append(TestFailureInfo(
+                            test_name=_extract_test_name(p.command),
+                            command=str(p.command),
+                            return_code=1,
+                            output=str(e),
+                            error_type="process_wait_error"
+                        ))
+                    raise TestExecutionFailedException("Error waiting for process", failures)
 
         # Only sleep if no activity was detected, and use a shorter sleep
         # This prevents excessive CPU usage while maintaining responsiveness
@@ -787,7 +852,16 @@ def _run_processes_parallel(
         for cmd in failed_processes:
             print(f"  - {cmd}")
         print("Processes were killed due to timeout/stuck detection")
-        sys.exit(1)  # Exit with error code to indicate failure
+        failures = []
+        for cmd in failed_processes:
+            failures.append(TestFailureInfo(
+                test_name=_extract_test_name(cmd),
+                command=str(cmd),
+                return_code=1,
+                output="Process was killed due to timeout/stuck detection",
+                error_type="killed_process"
+            ))
+        raise TestExecutionFailedException("Processes were killed", failures)
 
     # Clear watchdog state since all processes are done
     clear_active_processes()
@@ -827,6 +901,14 @@ def run_test_processes(
             elapsed = time.time() - start_time
             print(f"\033[92m### SUCCESS ({elapsed:.2f}s) ###\033[0m")
 
+    except (TestExecutionFailedException, TestTimeoutException) as e:
+        # Tests failed - print detailed info and re-raise for proper handling
+        print("\n" + "="*60)
+        print("FASTLED TEST RUNNER FAILURE DETAILS")
+        print("="*60)
+        print(e.get_detailed_failure_info())
+        print("="*60)
+        raise
     except SystemExit as e:
         # Tests failed - extract command name from the error
         if e.code != 0:
@@ -843,70 +925,83 @@ def runner(args: TestArgs, src_code_change: bool = True) -> None:
         args: Parsed command line arguments
         src_code_change: Whether source code has changed since last run
     """
-    # Determine test categories
-    test_categories = TestCategories(
-        unit=args.unit,
-        examples=args.examples is not None,
-        py=args.py,
-        integration=args.full and args.examples is None,
-        unit_only=args.unit
-        and not args.examples
-        and not args.py
-        and not (args.full and args.examples is None),
-        examples_only=args.examples is not None
-        and not args.unit
-        and not args.py
-        and not (args.full and args.examples is None),
-        py_only=args.py
-        and not args.unit
-        and not args.examples
-        and not (args.full and args.examples is None),
-        integration_only=(args.full and args.examples is None)
-        and not args.unit
-        and not args.examples
-        and not args.py,
-    )
-    enable_stack_trace = not args.no_stack_trace
+    try:
+        # Determine test categories
+        test_categories = TestCategories(
+            unit=args.unit,
+            examples=args.examples is not None,
+            py=args.py,
+            integration=args.full and args.examples is None,
+            unit_only=args.unit
+            and not args.examples
+            and not args.py
+            and not (args.full and args.examples is None),
+            examples_only=args.examples is not None
+            and not args.unit
+            and not args.py
+            and not (args.full and args.examples is None),
+            py_only=args.py
+            and not args.unit
+            and not args.examples
+            and not (args.full and args.examples is None),
+            integration_only=(args.full and args.examples is None)
+            and not args.unit
+            and not args.examples
+            and not args.py,
+        )
+        enable_stack_trace = not args.no_stack_trace
 
-    # Build up unified list of all processes to run
-    processes: list[RunningProcess] = []
+        # Build up unified list of all processes to run
+        processes: list[RunningProcess] = []
 
-    # Always start with namespace check
-    processes.append(create_namespace_check_process(enable_stack_trace))
+        # Always start with namespace check
+        processes.append(create_namespace_check_process(enable_stack_trace))
 
-    # Add unit tests if needed
-    if test_categories.unit or test_categories.unit_only:
-        processes.append(create_unit_test_process(args, enable_stack_trace))
+        # Add unit tests if needed
+        if test_categories.unit or test_categories.unit_only:
+            processes.append(create_unit_test_process(args, enable_stack_trace))
 
-    # Add integration tests if needed
-    if test_categories.integration or test_categories.integration_only:
-        processes.append(create_integration_test_process(args, enable_stack_trace))
+        # Add integration tests if needed
+        if test_categories.integration or test_categories.integration_only:
+            processes.append(create_integration_test_process(args, enable_stack_trace))
 
-    # Add uno compilation test if source changed
-    if src_code_change and not test_categories.py_only:
-        processes.append(create_compile_uno_test_process(enable_stack_trace))
+        # Add uno compilation test if source changed
+        if src_code_change and not test_categories.py_only:
+            processes.append(create_compile_uno_test_process(enable_stack_trace))
 
-    # Add Python tests if needed
-    if test_categories.py or test_categories.py_only:
-        processes.append(create_python_test_process(enable_stack_trace))
+        # Add Python tests if needed
+        if test_categories.py or test_categories.py_only:
+            processes.append(create_python_test_process(enable_stack_trace))
 
-    # Add example tests if needed
-    if test_categories.examples or test_categories.examples_only:
-        processes.append(create_examples_test_process(args, enable_stack_trace))
+        # Add example tests if needed
+        if test_categories.examples or test_categories.examples_only:
+            processes.append(create_examples_test_process(args, enable_stack_trace))
 
-    # Determine if we'll run in parallel
-    will_run_parallel = not bool(os.environ.get("NO_PARALLEL"))
+        # Determine if we'll run in parallel
+        will_run_parallel = not bool(os.environ.get("NO_PARALLEL"))
 
-    # Print summary of what we're about to run
-    execution_mode = "in parallel" if will_run_parallel else "sequentially"
-    print(f"\nStarting {len(processes)} test processes {execution_mode}:")
-    for proc in processes:
-        print(f"  - {proc.command}")
-    print()
+        # Print summary of what we're about to run
+        execution_mode = "in parallel" if will_run_parallel else "sequentially"
+        print(f"\nStarting {len(processes)} test processes {execution_mode}:")
+        for proc in processes:
+            print(f"  - {proc.command}")
+        print()
 
-    # Run processes (parallel unless NO_PARALLEL is set)
-    run_test_processes(
-        processes,
-        parallel=will_run_parallel,
-        verbose=args.verbose,
-    )
+        # Run processes (parallel unless NO_PARALLEL is set)
+        run_test_processes(
+            processes,
+            parallel=will_run_parallel,
+            verbose=args.verbose,
+        )
+    except (TestExecutionFailedException, TestTimeoutException) as e:
+        # Print summary and exit with proper code
+        print(f"\n\033[91m###### ERROR ######\033[0m")
+        print(f"Tests failed with {len(e.failures)} failure(s)")
+        
+        # Exit with appropriate code
+        if e.failures:
+            # Use the return code from the first failure, or 1 if none available
+            exit_code = e.failures[0].return_code if e.failures[0].return_code != 0 else 1
+        else:
+            exit_code = 1
+        sys.exit(exit_code)
