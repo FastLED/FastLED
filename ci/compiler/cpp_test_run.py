@@ -497,20 +497,20 @@ def _run_tests_cmake(
         if sys.platform == "win32":
             test_name += ".exe"
 
-        # Modified to support partial matching
+        # Modified to support partial matching (case-insensitive)
         matching_files = []
         for f in files:
-            # Check for exact match
-            if f == test_name:
+            # Check for exact match (case-insensitive)
+            if f.lower() == test_name.lower():
                 matching_files.append(f)
                 break
 
-            # Check for partial match in the filename
-            base_name = f.replace("test_", "")
+            # Check for partial match in the filename (case-insensitive)
+            base_name = f.replace("test_", "").replace(".cpp", "")
             if sys.platform == "win32":
                 base_name = base_name.replace(".exe", "")
 
-            if specific_test in base_name:
+            if specific_test.lower() in base_name.lower():
                 matching_files.append(f)
 
         if matching_files:
