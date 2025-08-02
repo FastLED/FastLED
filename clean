@@ -28,3 +28,6 @@ rm -rf ci/.*_cache
 # remove any CMakeCache.txt files
 find . -name "CMakeCache.txt" -type f -delete
 rm -f uv.lock
+
+# Remove generated compile_commands.json
+rm -f compile_commands.json
