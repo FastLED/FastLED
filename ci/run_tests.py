@@ -14,6 +14,11 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import List, Optional
 
+from ci.ci.test_exceptions import (
+    TestExecutionFailedException,
+    TestFailureInfo,
+)
+
 
 @dataclass
 class TestResult:
@@ -129,101 +134,129 @@ def run_test(test_file: Path, verbose: bool = False) -> TestResult:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Run FastLED unit tests")
-    parser.add_argument("--test", help="Run specific test (without test_ prefix)")
-    parser.add_argument(
-        "--verbose", "-v", action="store_true", help="Show all test output"
-    )
-    parser.add_argument("--jobs", "-j", type=int, help="Number of parallel jobs")
-    args = parser.parse_args()
-
-    # Find build directory
-    build_dir = Path.cwd() / ".build"
-    if not build_dir.exists():
-        print("Error: Build directory not found. Run compilation first.")
-        sys.exit(1)
-
-    # Discover tests
-    test_files = discover_tests(build_dir, args.test)
-    if not test_files:
-        if args.test:
-            print(f"Error: No test found matching '{args.test}'")
-        else:
-            print("Error: No tests found")
-        sys.exit(1)
-
-    print(f"Running {len(test_files)} tests...")
-    if args.test:
-        print(f"Filter: {args.test}")
-
-    # Determine number of parallel jobs
-    if os.environ.get("NO_PARALLEL"):
-        max_workers = 1
-        print(
-            "NO_PARALLEL environment variable set - forcing sequential test execution"
+    try:
+        parser = argparse.ArgumentParser(description="Run FastLED unit tests")
+        parser.add_argument("--test", help="Run specific test (without test_ prefix)")
+        parser.add_argument(
+            "--verbose", "-v", action="store_true", help="Show all test output"
         )
-    elif args.jobs:
-        max_workers = args.jobs
-    else:
-        import multiprocessing
+        parser.add_argument("--jobs", "-j", type=int, help="Number of parallel jobs")
+        args = parser.parse_args()
 
-        max_workers = max(1, multiprocessing.cpu_count() - 1)
+        # Find build directory
+        build_dir = Path.cwd() / ".build"
+        if not build_dir.exists():
+            print("Error: Build directory not found. Run compilation first.")
+            sys.exit(1)
 
-    # Run tests in parallel
-    start_time = time.time()
-    results: List[TestResult] = []
-    failed_tests: List[TestResult] = []
+        # Discover tests
+        test_files = discover_tests(build_dir, args.test)
+        if not test_files:
+            if args.test:
+                print(f"Error: No test found matching '{args.test}'")
+            else:
+                print("Error: No tests found")
+            sys.exit(1)
 
-    with ThreadPoolExecutor(max_workers=max_workers) as executor:
-        future_to_test = {
-            executor.submit(run_test, test_file, args.verbose): test_file
-            for test_file in test_files
-        }
+        print(f"Running {len(test_files)} tests...")
+        if args.test:
+            print(f"Filter: {args.test}")
 
-        completed = 0
-        for future in as_completed(future_to_test):
-            test_file = future_to_test[future]
-            completed += 1
-            try:
-                result = future.result()
-                results.append(result)
+        # Determine number of parallel jobs
+        if os.environ.get("NO_PARALLEL"):
+            max_workers = 1
+            print(
+                "NO_PARALLEL environment variable set - forcing sequential test execution"
+            )
+        elif args.jobs:
+            max_workers = args.jobs
+        else:
+            import multiprocessing
 
-                # Show progress
-                status = "PASS" if result.success else "FAIL"
-                print(
-                    f"[{completed}/{len(test_files)}] {status} {result.name} ({result.duration:.2f}s)"
-                )
+            max_workers = max(1, multiprocessing.cpu_count() - 1)
 
-                # Show output for failures or in verbose mode
-                if not result.success or args.verbose:
-                    if result.output:
-                        print(result.output)
+        # Run tests in parallel
+        start_time = time.time()
+        results: List[TestResult] = []
+        failed_tests: List[TestResult] = []
 
-                if not result.success:
-                    failed_tests.append(result)
+        with ThreadPoolExecutor(max_workers=max_workers) as executor:
+            future_to_test = {
+                executor.submit(run_test, test_file, args.verbose): test_file
+                for test_file in test_files
+            }
 
-            except Exception as e:
-                print(f"Error running {test_file.name}: {e}")
-                failed_tests.append(
-                    TestResult(
-                        name=test_file.stem, success=False, duration=0.0, output=str(e)
+            completed = 0
+            for future in as_completed(future_to_test):
+                test_file = future_to_test[future]
+                completed += 1
+                try:
+                    result = future.result()
+                    results.append(result)
+
+                    # Show progress
+                    status = "PASS" if result.success else "FAIL"
+                    print(
+                        f"[{completed}/{len(test_files)}] {status} {result.name} ({result.duration:.2f}s)"
+                    )
+
+                    # Show output for failures or in verbose mode
+                    if not result.success or args.verbose:
+                        if result.output:
+                            print(result.output)
+
+                    if not result.success:
+                        failed_tests.append(result)
+
+                except Exception as e:
+                    print(f"Error running {test_file.name}: {e}")
+                    failed_tests.append(
+                        TestResult(
+                            name=test_file.stem,
+                            success=False,
+                            duration=0.0,
+                            output=str(e),
+                        )
+                    )
+
+        # Show summary
+        total_duration = time.time() - start_time
+        success_count = len(results) - len(failed_tests)
+
+        print("\nTest Summary:")
+        print(f"Total tests: {len(results)}")
+        print(f"Passed: {success_count}")
+        print(f"Failed: {len(failed_tests)}")
+        print(f"Total time: {total_duration:.2f}s")
+
+        if failed_tests:
+            print("\nFailed tests:")
+            failures: list[TestFailureInfo] = []
+            for test in failed_tests:
+                print(f"  {test.name}")
+                failures.append(
+                    TestFailureInfo(
+                        test_name=test.name,
+                        command=f"test_{test.name}",
+                        return_code=1,  # Failed tests get return code 1
+                        output=test.output,
+                        error_type="test_execution_failure",
                     )
                 )
 
-    # Show summary
-    total_duration = time.time() - start_time
-    success_count = len(results) - len(failed_tests)
+            raise TestExecutionFailedException(
+                f"{len(failed_tests)} test(s) failed", failures
+            )
 
-    print("\nTest Summary:")
-    print(f"Total tests: {len(results)}")
-    print(f"Passed: {success_count}")
-    print(f"Failed: {len(failed_tests)}")
-    print(f"Total time: {total_duration:.2f}s")
+    except TestExecutionFailedException as e:
+        # Print detailed failure information
+        print("\n" + "=" * 60)
+        print("FASTLED TEST EXECUTION FAILURE DETAILS")
+        print("=" * 60)
+        print(e.get_detailed_failure_info())
+        print("=" * 60)
 
-    if failed_tests:
-        print("\nFailed tests:")
-        for test in failed_tests:
-            print(f"  {test.name}")
+        # Exit with appropriate code
         sys.exit(1)
 
 
