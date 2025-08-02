@@ -329,11 +329,11 @@ class FastLEDTestCompiler:
                     if re.search(pattern, test_stem) or re.search(pattern, test_name):
                         test_files.append(test_file)
                 else:
-                    # Exact matching - either the full name or with test_ prefix
+                    # Exact matching - either the full name or with test_ prefix (case-insensitive)
                     if (
-                        test_stem == specific_test
-                        or test_stem == f"test_{specific_test}"
-                        or test_name == specific_test
+                        test_stem.lower() == specific_test.lower()
+                        or test_stem.lower() == f"test_{specific_test}".lower()
+                        or test_name.lower() == specific_test.lower()
                     ):
                         test_files.append(test_file)
             else:
@@ -862,14 +862,14 @@ class FastLEDTestCompiler:
                     or re.search(pattern, f"test_{t.name}")
                 ]
             else:
-                # Exact matching - either the full name or with test_ prefix
+                # Exact matching - either the full name or with test_ prefix (case-insensitive)
                 return [
                     t
                     for t in self.compiled_tests
                     if (
-                        t.name == specific_test
-                        or t.name == f"test_{specific_test}"
-                        or t.name == specific_test.replace("test_", "")
+                        t.name.lower() == specific_test.lower()
+                        or t.name.lower() == f"test_{specific_test}".lower()
+                        or t.name.lower() == specific_test.replace("test_", "").lower()
                     )
                 ]
         return self.compiled_tests
