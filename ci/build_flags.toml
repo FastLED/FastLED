@@ -109,6 +109,40 @@ flags = [
 
 link_flags = []
 
+[build_modes.fast]
+# Optimized build mode for fastest compilation
+flags = [
+    "-O0",                    # No optimization for fastest compilation
+    "-g0",                    # No debug symbols
+    "-fno-strict-aliasing",   # Keep this for safety
+]
+
+link_flags = []
+
+[build_modes.balanced]
+# Balanced optimization - some performance optimizations but still fast compilation
+flags = [
+    "-O1",                    # Basic optimization 
+    "-g0",                    # No debug symbols
+    "-finline-limit=0",       # Aggressive inlining control (no limit)
+    "-fno-vectorize",         # Keep vectorization disabled for consistency
+    "-fno-unroll-loops",      # Keep loop unrolling disabled for consistency
+    "-fno-strict-aliasing",   # Keep this for safety
+]
+
+link_flags = []
+
+[build_modes.optimized]
+# More aggressive optimization for better performance while maintaining reasonable compile times
+flags = [
+    "-O2",                    # Higher optimization level
+    "-g0",                    # No debug symbols  
+    "-finline-limit=10",      # Limited inlining
+    "-fno-strict-aliasing",   # Keep this for safety
+]
+
+link_flags = []
+
 [strict_mode]
 flags = [
     "-Werror",
