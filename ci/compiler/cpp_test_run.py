@@ -358,12 +358,16 @@ def _compile_tests_python(
             check_iwyu_available,
         )
 
+        # Check for --no-unity flag in unknown_args
+        no_unity = "--no-unity" in unknown_args
+
         # Initialize the proven compiler system
         test_compiler = FastLEDTestCompiler.create_for_unit_tests(
             project_root=Path(PROJECT_ROOT),
             clean_build=clean,
             enable_static_analysis="--check" in unknown_args,
             specific_test=specific_test,
+            no_unity=no_unity,
         )
 
         # Compile all tests in parallel (8x faster than CMake)
@@ -921,6 +925,11 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Use legacy CMake system instead of new Python API (8x slower)",
     )
+    parser.add_argument(
+        "--no-unity",
+        action="store_true",
+        help="Disable unity builds for cpp tests",
+    )
 
     args, unknown = parser.parse_known_args()
     args.unknown = unknown
@@ -940,6 +949,7 @@ def main() -> None:
     _ = args.only_run_failed_test
     use_clang = args.clang
     use_legacy_system = args.legacy
+    no_unity = args.no_unity
     # use_gcc = args.gcc
 
     if not run_only:
@@ -948,6 +958,8 @@ def main() -> None:
             passthrough_args.append("--use-clang")
         if args.check:
             passthrough_args.append("--check")
+        if no_unity:
+            passthrough_args.append("--no-unity")
         # Note: --gcc is handled by not passing --use-clang (GCC is the default in compiler/cpp_test_compile.py)
         compile_tests(
             clean=args.clean,

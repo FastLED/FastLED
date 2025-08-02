@@ -113,12 +113,14 @@ class FastLEDTestCompiler:
         project_root: Path,
         quick_build: bool = False,
         strict_mode: bool = False,
+        no_unity: bool = False,
     ):
         self.compiler = compiler
         self.build_dir = build_dir
         self.project_root = project_root
         self.quick_build = quick_build
         self.strict_mode = strict_mode
+        self.no_unity = no_unity
         self.compiled_tests: List[TestExecutable] = []
         self.linking_failures: List[str] = []
         self.build_flags = self._load_build_flags()
@@ -138,6 +140,7 @@ class FastLEDTestCompiler:
         specific_test: str | None = None,
         quick_build: bool = False,
         strict_mode: bool = False,
+        no_unity: bool = False,
     ) -> "FastLEDTestCompiler":
         """
         Create compiler configured for FastLED unit tests using TOML build flags.
@@ -271,7 +274,7 @@ class FastLEDTestCompiler:
         compiler = Compiler(settings)
 
         # Create final instance with proper compiler and flags
-        instance = cls(compiler, build_dir, project_root, quick_build, strict_mode)
+        instance = cls(compiler, build_dir, project_root, quick_build, strict_mode, no_unity)
         return instance
 
     def discover_test_files(self, specific_test: str | None = None) -> List[Path]:
@@ -338,8 +341,11 @@ class FastLEDTestCompiler:
 
         # Always show build configuration in unit test mode
         print("\nFastLED Library Build Configuration:")
-        print("  ✅ Unity build enabled - Using glob pattern:")
-        print("    src/**/*.cpp")
+        if self.no_unity:
+            print("  ❌ Unity build disabled - Compiling individual source files")
+        else:
+            print("  ✅ Unity build enabled - Using glob pattern:")
+            print("    src/**/*.cpp")
 
         print("\nPrecompiled header status:")
         if self.compiler.settings.use_pch:
@@ -698,9 +704,14 @@ class FastLEDTestCompiler:
             # Include ALL files - no filtering needed
             fastled_sources.append(Path(cpp_file))
 
-        print(
-            f"Unity build mode: Found {len(fastled_sources)} FastLED .cpp files for compilation"
-        )
+        if self.no_unity:
+            print(
+                f"Individual compilation: Found {len(fastled_sources)} FastLED .cpp files for compilation"
+            )
+        else:
+            print(
+                f"Unity build mode: Found {len(fastled_sources)} FastLED .cpp files for compilation"
+            )
 
         # Compile all FastLED source files to object files
         fastled_objects: List[Path] = []
