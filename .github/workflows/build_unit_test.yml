@@ -71,17 +71,17 @@ jobs:
       - name: Run All Unit Tests
         run: |
           if [ "${{ matrix.compiler }}" = "clang" ]; then
-            ./test --clang --no-parallel --no-unity --unit --no-pch --verbose
+            ./test --clang --no-parallel --unit--verbose
           else
-            ./test --no-parallel --no-unity --unit --no-pch --verbose
+            ./test --no-parallel --unit --verbose
           fi
         shell: bash
 
       - name: Run All Examples
         run: |
           if [ "${{ matrix.compiler }}" = "clang" ]; then
-            ./test --clang --no-parallel --no-unity --examples --no-pch --verbose
+            ./test --clang --no-parallel --examples --verbose
           else
-            ./test --no-parallel --no-unity --examples --no-pch --verbose
+            ./test --no-parallel --examples --verbose
           fi
         shell: bash
