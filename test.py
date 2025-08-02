@@ -6,6 +6,7 @@ import threading
 import time
 import traceback
 from pathlib import Path
+import warnings
 from typing import Optional
 
 import psutil
@@ -55,6 +56,8 @@ def make_watch_dog_thread(
         time.sleep(seconds)
         if _CANCEL_WATCHDOG.is_set():
             return
+        
+        warnings.warn(f"Watchdog timer expired after {seconds} seconds.")
 
         # Get current active processes to show which command is stuck
         active_processes = get_active_processes()
@@ -85,7 +88,7 @@ def main() -> None:
         os.chdir(Path(__file__).parent)
 
         # Set up watchdog timer
-        watchdog = make_watch_dog_thread()
+        watchdog = make_watch_dog_thread(seconds=300)
 
         # Parse and process arguments
         args = parse_args()

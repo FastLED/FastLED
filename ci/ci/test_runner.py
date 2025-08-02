@@ -539,7 +539,7 @@ def _run_process_with_output(process: RunningProcess, verbose: bool = False) -> 
 
     while True:
         try:
-            line = process.get_next_line(timeout=30)
+            line = process.get_next_line(timeout=120)
             if line is None:
                 break
             print(f"  {line}")
@@ -547,9 +547,10 @@ def _run_process_with_output(process: RunningProcess, verbose: bool = False) -> 
             import _thread
 
             _thread.interrupt_main()
-            break
+            process.kill()
+            return
         except Exception as e:
-            print(f"Error processing output: {e}")
+            print(f"Error processing output from {process.command}: {e}")
             process.kill()
             sys.exit(1)
 
