@@ -359,8 +359,8 @@ def create_fastled_compiler(
     src_path = os.path.join(current_dir, "src")
     arduino_stub_path = os.path.join(current_dir, "src", "platforms", "stub")
 
-    # Try to load build_flags.toml configuration from stashed copy in ci/ directory
-    toml_path = os.path.join(os.path.dirname(__file__), "build_flags.toml")
+    # Try to load build_flags.toml configuration from ci/ directory
+    toml_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "build_flags.toml")
     build_config = load_build_flags_toml(toml_path)
 
     # Create simplified copy for stub compilation

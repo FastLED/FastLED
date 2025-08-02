@@ -5,8 +5,9 @@
 /// using modern C++ where it's been removed entirely.
 
 #ifndef FASTLED_REGISTER
-// Always use empty FASTLED_REGISTER for modern C++ builds
-// The 'register' keyword is deprecated in C++11 and removed in C++17
-// Since FastLED now targets C++17+, we always use empty definition
-#define FASTLED_REGISTER
+#if (defined(_MSVC_LANG) ? _MSVC_LANG : __cplusplus) < 201703L
+  #define FASTLED_REGISTER register
+#else
+  #define FASTLED_REGISTER
+#endif
 #endif

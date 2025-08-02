@@ -1,2 +1,2 @@
 [build_modes.quick]
-flags = [ "-O1", "-g0", "-fno-inline-functions", "-fno-vectorize", "-fno-unroll-loops", "-fno-strict-aliasing", "-ffast-math", "-fno-math-errno", "-fno-exceptions", "-fno-rtti",]
+flags = [ "-O1", "-g0", "-fno-inline-functions", "-fno-vectorize", "-fno-unroll-loops", "-fno-strict-aliasing",]
