@@ -355,6 +355,10 @@ def create_examples_test_process(
         cmd.append("--unity")
     if args.full and args.examples is not None:
         cmd.append("--full")
+    if args.no_parallel:
+        cmd.append("--no-parallel")
+    if args.verbose:
+        cmd.append("--verbose")
     return RunningProcess(cmd, auto_run=False, enable_stack_trace=enable_stack_trace)
 
 
