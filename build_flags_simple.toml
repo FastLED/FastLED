@@ -1,2 +1,5 @@
+[all]
+compiler_flags = [ "-std=gnu++17", "-fpermissive", "-Wall", "-Wextra", "-Wno-deprecated-register", "-fno-exceptions", "-fno-rtti",]
+
 [build_modes.quick]
 flags = [ "-O1", "-g0", "-fno-inline-functions", "-fno-vectorize", "-fno-unroll-loops", "-fno-strict-aliasing",]

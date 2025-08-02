@@ -76,19 +76,27 @@ def load_build_flags_toml(toml_path: str) -> Dict[str, Any]:
     """Load and parse build_flags.toml file."""
     try:
         with open(toml_path, "rb") as f:
-            return tomllib.load(f)
+            config = tomllib.load(f)
+            if not config:
+                raise RuntimeError(f"build_flags.toml at {toml_path} is empty or invalid")
+            return config
     except FileNotFoundError:
-        print(f"Warning: build_flags.toml not found at {toml_path}")
-        return {}
+        raise RuntimeError(f"CRITICAL: build_flags.toml not found at {toml_path}. This file is required for proper compilation flags.")
     except Exception as e:
-        print(f"Warning: Failed to parse build_flags.toml: {e}")
-        return {}
+        raise RuntimeError(f"CRITICAL: Failed to parse build_flags.toml at {toml_path}: {e}")
 
 
 def create_simplified_build_flags(
     original_config: Dict[str, Any], output_path: str
 ) -> Dict[str, Any]:
-    """Create a simplified copy of build_flags.toml with only quick mode flags for stub compilation."""
+    """Create a simplified copy of build_flags.toml with universal [all] flags and quick mode flags for stub compilation."""
+
+    # Extract universal compiler flags from [all] section
+    universal_flags = []
+    if "all" in original_config and isinstance(original_config["all"], dict):
+        all_section = original_config["all"]
+        if "compiler_flags" in all_section and isinstance(all_section["compiler_flags"], list):
+            universal_flags = all_section["compiler_flags"]
 
     # Use the original quick flags from the TOML file
     quick_flags = []
@@ -101,8 +109,11 @@ def create_simplified_build_flags(
             if "flags" in quick_section and isinstance(quick_section["flags"], list):
                 quick_flags = quick_section["flags"]
 
-    # Create simplified config with only quick mode flags
+    # Create simplified config with universal flags and quick mode flags
     simplified = {
+        "all": {
+            "compiler_flags": universal_flags,
+        },
         "build_modes": {
             "quick": {
                 "flags": quick_flags,
@@ -119,8 +130,11 @@ def create_simplified_build_flags(
         # Fallback to manual TOML writing if toml package not available
         with open(output_path, "w") as f:
             f.write(
-                "# Simplified build_flags.toml for stub compilation (quick mode only)\\n\\n"
+                "# Simplified build_flags.toml for stub compilation (universal and quick mode flags)\\n\\n"
             )
+            f.write("[all]\\n")
+            all_section = simplified["all"]
+            f.write(f"compiler_flags = {all_section['compiler_flags']}\\n\\n")
             f.write("[build_modes.quick]\\n")
             build_modes_section = simplified["build_modes"]
             quick_section = build_modes_section["quick"]
@@ -131,10 +145,17 @@ def create_simplified_build_flags(
 
 
 def extract_compiler_flags_from_toml(config: Dict[str, Any]) -> List[str]:
-    """Extract compiler flags from TOML config - only uses [build_modes.quick] flags."""
+    """Extract compiler flags from TOML config - includes universal [all] flags and [build_modes.quick] flags."""
     flags: List[str] = []
 
-    # Only use flags from [build_modes.quick] section for sketch compilation
+    # First, extract universal compiler flags from [all] section
+    if "all" in config and isinstance(config["all"], dict):
+        all_section = config["all"]
+        if "compiler_flags" in all_section and isinstance(all_section["compiler_flags"], list):
+            flags.extend(all_section["compiler_flags"])
+            print(f"[CONFIG] Loaded {len(all_section['compiler_flags'])} universal compiler flags from [all] section")
+
+    # Then, extract flags from [build_modes.quick] section for sketch compilation
     if "build_modes" in config and isinstance(config["build_modes"], dict):
         build_modes = config["build_modes"]
         if "quick" in build_modes and isinstance(build_modes["quick"], dict):
@@ -142,6 +163,11 @@ def extract_compiler_flags_from_toml(config: Dict[str, Any]) -> List[str]:
 
             if "flags" in quick_section and isinstance(quick_section["flags"], list):
                 flags.extend(quick_section["flags"])
+                print(f"[CONFIG] Loaded {len(quick_section['flags'])} quick mode flags from [build_modes.quick] section")
+
+    # Verify that critical warning suppression flags are present
+    if "-Wno-deprecated-register" not in flags:
+        raise RuntimeError("CRITICAL: -Wno-deprecated-register flag missing from build_flags.toml. This flag is required to suppress C++17 register warnings.")
 
     return flags
 
@@ -361,21 +387,17 @@ def create_fastled_compiler(
 
     # Try to load build_flags.toml configuration from ci/ directory
     toml_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "build_flags.toml")
-    build_config = load_build_flags_toml(toml_path)
+    build_config = load_build_flags_toml(toml_path)  # Will raise RuntimeError if not found
 
     # Create simplified copy for stub compilation
-    if build_config:
-        simplified_toml_path = os.path.join(current_dir, "build_flags_simple.toml")
-        simplified_config = create_simplified_build_flags(
-            build_config, simplified_toml_path
-        )
+    simplified_toml_path = os.path.join(current_dir, "build_flags_simple.toml")
+    simplified_config = create_simplified_build_flags(
+        build_config, simplified_toml_path
+    )
 
-        # Extract additional compiler flags from TOML
-        toml_flags = extract_compiler_flags_from_toml(simplified_config)
-        print(f"Loaded {len(toml_flags)} compiler flags from build_flags.toml")
-    else:
-        toml_flags = []
-        print("Using default compiler flags (build_flags.toml not available)")
+    # Extract additional compiler flags from TOML
+    toml_flags = extract_compiler_flags_from_toml(simplified_config)  # Will raise RuntimeError if critical flags missing
+    print(f"Loaded {len(toml_flags)} total compiler flags from build_flags.toml")
 
     # Base compiler settings
     base_args = [
