@@ -137,6 +137,93 @@ process_data(data=my_data, validate=False, timeout=30)
 **ENFORCEMENT:**
 This policy should be enforced by linters and code review. Adding defaults to existing code without explicit justification is not allowed.
 
+## 🚨 CRITICAL: STRICT ENVIRONMENT HANDLING - NO SILENT FAILURES 🚨
+
+### MANDATORY: Fail Fast on Missing Environment Dependencies - NO EXCEPTIONS
+
+**🚨 ABSOLUTELY FORBIDDEN: Silent fallbacks for missing critical resources**
+
+**❌ NEVER DO SILENT FALLBACKS:**
+- Missing configuration files → throw error, don't use defaults
+- Missing environment variables → throw error, don't substitute defaults  
+- Missing build flags → throw error, don't continue with partial config
+- Missing required paths → throw error, don't create alternatives
+- Missing dependencies → throw error, don't skip functionality
+
+**✅ ALWAYS FAIL FAST AND EXPLICIT:**
+- Throw descriptive RuntimeError/ValueError for missing resources
+- Include the expected path/location in error message
+- Explain why the resource is required
+- Provide clear instructions for fixing the issue
+- Use explicit checks before proceeding with operations
+
+**WHY NO SILENT FALLBACKS:**
+- **Hidden failures** - Silent fallbacks mask configuration problems
+- **Inconsistent behavior** - Code works differently in different environments  
+- **Hard to debug** - Missing configs cause subtle bugs hours later
+- **Security risks** - Default values may be insecure or inappropriate
+- **Configuration drift** - Systems diverge silently when configs are missing
+
+**EXAMPLES:**
+
+```python
+# ❌ FORBIDDEN - Silent fallback hides missing config
+def load_config(config_path: str) -> Dict[str, Any]:
+    try:
+        with open(config_path) as f:
+            return json.load(f)
+    except FileNotFoundError:
+        print(f"Warning: {config_path} not found, using defaults")
+        return {"timeout": 30, "retries": 3}  # BAD: Silent defaults
+
+# ✅ CORRECT - Fail fast with clear error
+def load_config(config_path: str) -> Dict[str, Any]:
+    try:
+        with open(config_path) as f:
+            return json.load(f)
+    except FileNotFoundError:
+        raise RuntimeError(
+            f"CRITICAL: Configuration file not found at {config_path}. "
+            f"This file is required for proper operation. "
+            f"Please ensure the file exists and is readable."
+        )
+
+# ❌ FORBIDDEN - Silent environment variable fallback  
+def get_build_dir() -> str:
+    return os.environ.get("BUILD_DIR", "/tmp/default")  # BAD: Hidden default
+
+# ✅ CORRECT - Explicit environment requirement
+def get_build_dir() -> str:
+    build_dir = os.environ.get("BUILD_DIR")
+    if not build_dir:
+        raise RuntimeError(
+            "CRITICAL: BUILD_DIR environment variable is required but not set. "
+            "Please set BUILD_DIR to the target build directory."
+        )
+    return build_dir
+```
+
+**STRICT ENFORCEMENT AREAS:**
+- **Build configuration files** (build_flags.toml, CMakeLists.txt, etc.)
+- **Environment variables** required for compilation/testing
+- **Tool dependencies** (compilers, archivers, etc.)
+- **Input file paths** passed as parameters
+- **Required directories** for output/temporary files
+
+**RARE EXCEPTIONS (Require Explicit Justification):**
+- User-facing CLI tools where missing optional config is acceptable
+- Graceful degradation for non-critical features only
+- BUT: Core build/compilation functionality must NEVER have silent fallbacks
+
+**ERROR MESSAGE REQUIREMENTS:**
+- Start with "CRITICAL:" prefix for build/config errors
+- Include the exact path/variable name that was expected
+- Explain what the missing resource is used for
+- Provide actionable steps to fix the issue
+
+**ENFORCEMENT:**
+Any function that silently handles missing critical resources without throwing an explicit error is in violation of project requirements. Code review must catch and reject such patterns.
+
 ## Cursor Configuration
 
 ### Post-Change Hooks
