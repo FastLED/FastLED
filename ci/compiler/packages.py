@@ -5,6 +5,23 @@ from typing import Any, Dict, List
 from urllib.request import urlopen
 
 
+try:
+    import emoji
+
+    EMOJI_AVAILABLE = True
+except ImportError:
+    emoji = None  # type: ignore
+    EMOJI_AVAILABLE = False
+
+
+def _can_use_emoji() -> bool:
+    """Check if emoji can be used in the current environment"""
+    if not EMOJI_AVAILABLE or emoji is None:
+        return False
+    # Check if stdout is a TTY (not redirected to file)
+    return hasattr(sys.stdout, "isatty") and sys.stdout.isatty()
+
+
 @dataclass
 class Help:
     """Help information with online documentation links"""
@@ -241,47 +258,77 @@ def serialize_package_index(package_index: PackageIndex) -> str:
 
 def print_tree_header(title: str) -> None:
     """Print a beautiful tree-style header"""
-    border = "═" * (len(title) + 4)
-    print(f"\n┌{border}┐")
-    print(f"│  {title}  │")
-    print(f"└{border}┘")
+    border = "=" * (len(title) + 4)
+    print(f"\n+{border}+")
+    print(f"|  {title}  |")
+    print(f"+{border}+")
+
+
+def _calculate_indent(level: int) -> str:
+    """Calculate consistent indentation for tree structure"""
+    # Base indentation: 2 spaces per level
+    # When using emojis at level 0, add 2 extra spaces to align with emoji width
+    if _can_use_emoji() and level > 0:
+        return "  " * (level + 1)  # Add 1 extra level for emoji alignment
+    else:
+        return "  " * level
 
 
 def print_tree_section(title: str, level: int = 0) -> None:
     """Print a tree-style section header"""
     indent = "  " * level
-    if level == 0:
-        print(f"\n{indent}┌─ 📦 {title}")
+    if _can_use_emoji() and emoji is not None:
+        if level == 0:
+            icon = emoji.emojize(":package:")
+        else:
+            icon = emoji.emojize(":file_folder:")
+        print(f"\n{indent}{icon} {title}")
     else:
-        print(f"\n{indent}├─ 📁 {title}")
+        print(f"\n{indent}+-- {title}")
 
 
 def print_tree_item(
     label: str, value: str, level: int = 1, is_last: bool = False
 ) -> None:
     """Print a tree-style item"""
-    indent = "  " * level
-    connector = "└─" if is_last else "├─"
-    print(f"{indent}{connector} {label}: {value}")
+    indent = _calculate_indent(level)
+    if _can_use_emoji():
+        connector = "└── " if is_last else "├── "
+    else:
+        connector = "`-- " if is_last else "|-- "
+    print(f"{indent}{connector}{label}: {value}")
 
 
 def print_tree_list_header(title: str, count: int, level: int = 1) -> None:
     """Print a tree-style list header with count"""
-    indent = "  " * level
-    print(f"{indent}├─ 📋 {title} ({count} items)")
+    indent = _calculate_indent(level)
+    if _can_use_emoji() and emoji is not None:
+        icon = emoji.emojize(":clipboard:")
+        connector = "├── "
+        print(f"{indent}{connector}{icon} {title} ({count} items)")
+    else:
+        connector = "|-- "
+        print(f"{indent}{connector}{title} ({count} items)")
 
 
 def print_tree_list_item(item: str, level: int = 2, is_last: bool = False) -> None:
     """Print a tree-style list item"""
-    indent = "  " * level
-    connector = "└─" if is_last else "├─"
-    print(f"{indent}{connector} {item}")
+    indent = _calculate_indent(level)
+    if _can_use_emoji():
+        connector = "└── " if is_last else "├── "
+    else:
+        connector = "`-- " if is_last else "|-- "
+    print(f"{indent}{connector}{item}")
 
 
 def print_tree_close_section(level: int = 0) -> None:
     """Print a tree-style section closer"""
-    indent = "  " * level
-    print(f"{indent}└─ ✓")
+    indent = _calculate_indent(level)
+    if _can_use_emoji() and emoji is not None:
+        icon = emoji.emojize(":check_mark:")
+        print(f"{indent}└── {icon} COMPLETE")
+    else:
+        print(f"{indent}`-- [COMPLETE]")
 
 
 def analyze_esp32_packages_typed(package_index: PackageIndex) -> None:
@@ -408,19 +455,59 @@ def main() -> None:
         first_platform = first_package.platforms[0]
 
         print_tree_section("Data Sample")
-        print_tree_item("⚙️ Platform Name", first_platform.name, level=1)
-        print_tree_item("🔢 Platform Version", first_platform.version, level=1)
-        print_tree_item("📊 Board Count", str(len(first_platform.boards)), level=1)
-        print_tree_item(
-            "🔧 First Board", first_platform.boards[0].name, level=1, is_last=True
-        )
+        if _can_use_emoji() and emoji is not None:
+            gear_icon = emoji.emojize(":gear:")
+            hash_icon = emoji.emojize(":hash:")
+            chart_icon = emoji.emojize(":bar_chart:")
+            wrench_icon = emoji.emojize(":wrench:")
+            print_tree_item(f"{gear_icon} Platform Name", first_platform.name, level=1)
+            print_tree_item(
+                f"{hash_icon} Platform Version", first_platform.version, level=1
+            )
+            print_tree_item(
+                f"{chart_icon} Board Count", str(len(first_platform.boards)), level=1
+            )
+            print_tree_item(
+                f"{wrench_icon} First Board",
+                first_platform.boards[0].name,
+                level=1,
+                is_last=True,
+            )
+        else:
+            print_tree_item("Platform Name", first_platform.name, level=1)
+            print_tree_item("Platform Version", first_platform.version, level=1)
+            print_tree_item("Board Count", str(len(first_platform.boards)), level=1)
+            print_tree_item(
+                "First Board", first_platform.boards[0].name, level=1, is_last=True
+            )
 
         # Show the dataclass types in a beautiful format
         print_tree_section("Type Information")
-        print_tree_item("📦 PackageIndex", "Root container dataclass", level=1)
-        print_tree_item("🏢 Package", "ESP32 package dataclass", level=1)
-        print_tree_item("⚙️ Platform", "Platform version dataclass", level=1)
-        print_tree_item("🔧 Board", "Hardware board dataclass", level=1, is_last=True)
+        if _can_use_emoji() and emoji is not None:
+            package_icon = emoji.emojize(":package:")
+            building_icon = emoji.emojize(":office_building:")
+            gear_icon = emoji.emojize(":gear:")
+            wrench_icon = emoji.emojize(":wrench:")
+            print_tree_item(
+                f"{package_icon} PackageIndex", "Root container dataclass", level=1
+            )
+            print_tree_item(
+                f"{building_icon} Package", "ESP32 package dataclass", level=1
+            )
+            print_tree_item(
+                f"{gear_icon} Platform", "Platform version dataclass", level=1
+            )
+            print_tree_item(
+                f"{wrench_icon} Board",
+                "Hardware board dataclass",
+                level=1,
+                is_last=True,
+            )
+        else:
+            print_tree_item("PackageIndex", "Root container dataclass", level=1)
+            print_tree_item("Package", "ESP32 package dataclass", level=1)
+            print_tree_item("Platform", "Platform version dataclass", level=1)
+            print_tree_item("Board", "Hardware board dataclass", level=1, is_last=True)
 
         # Demonstrate round-trip serialization
         print_tree_section("Round-Trip Test")
@@ -431,21 +518,49 @@ def main() -> None:
         original_board_count = len(package_index.packages[0].platforms[0].boards)
         reparsed_board_count = len(reparsed_index.packages[0].platforms[0].boards)
 
-        print_tree_item("📤 Original Boards", str(original_board_count), level=1)
-        print_tree_item("📥 Reparsed Boards", str(reparsed_board_count), level=1)
-        success_status = (
-            "✅ SUCCESS"
-            if original_board_count == reparsed_board_count
-            else "❌ FAILED"
-        )
-        print_tree_item("🎯 Status", success_status, level=1)
+        if _can_use_emoji():
+            outbox_icon = emoji.emojize(":outbox_tray:")
+            inbox_icon = emoji.emojize(":inbox_tray:")
+            target_icon = emoji.emojize(":direct_hit:")
+            page_icon = emoji.emojize(":page_facing_up:")
+            check_icon = emoji.emojize(":check_mark:")
+            cross_icon = emoji.emojize(":cross_mark:")
 
-        # Show a compact snippet of the serialized JSON
-        json_lines = serialized_json.split("\n")[:4]  # First 4 lines
-        json_compact = " ".join(line.strip() for line in json_lines)
-        if len(json_compact) > 80:
-            json_compact = json_compact[:77] + "..."
-        print_tree_item("📄 JSON Sample", json_compact, level=1, is_last=True)
+            print_tree_item(
+                f"{outbox_icon} Original Boards", str(original_board_count), level=1
+            )
+            print_tree_item(
+                f"{inbox_icon} Reparsed Boards", str(reparsed_board_count), level=1
+            )
+            success_status = (
+                f"{check_icon} SUCCESS"
+                if original_board_count == reparsed_board_count
+                else f"{cross_icon} FAILED"
+            )
+            print_tree_item(f"{target_icon} Status", success_status, level=1)
+
+            # Show a compact snippet of the serialized JSON
+            json_lines = serialized_json.split("\n")[:4]  # First 4 lines
+            json_compact = " ".join(line.strip() for line in json_lines)
+            if len(json_compact) > 80:
+                json_compact = json_compact[:77] + "..."
+            print_tree_item(
+                f"{page_icon} JSON Sample", json_compact, level=1, is_last=True
+            )
+        else:
+            print_tree_item("Original Boards", str(original_board_count), level=1)
+            print_tree_item("Reparsed Boards", str(reparsed_board_count), level=1)
+            success_status = (
+                "SUCCESS" if original_board_count == reparsed_board_count else "FAILED"
+            )
+            print_tree_item("Status", success_status, level=1)
+
+            # Show a compact snippet of the serialized JSON
+            json_lines = serialized_json.split("\n")[:4]  # First 4 lines
+            json_compact = " ".join(line.strip() for line in json_lines)
+            if len(json_compact) > 80:
+                json_compact = json_compact[:77] + "..."
+            print_tree_item("JSON Sample", json_compact, level=1, is_last=True)
 
     except KeyboardInterrupt:
         print("Interrupted by user", file=sys.stderr)

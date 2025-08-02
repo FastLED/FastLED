@@ -32,6 +32,8 @@ dependencies = [
     "mcp>=1.12.2",
     "compiledb>=0.10.7",
     "pathspec>=0.12.1",
+    "rich>=14.1.0",
+    "emoji>=2.14.1",
 ]
 
 [build-system]
