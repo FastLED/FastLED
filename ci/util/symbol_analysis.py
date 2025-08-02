@@ -17,7 +17,7 @@ from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
 # Import board mapping system
-from ci.ci.boards import get_board
+from ci.util.boards import get_board
 
 
 @dataclass

@@ -2,7 +2,7 @@ import argparse
 import json
 from pathlib import Path
 
-from ci.ci.elf import dump_symbol_sizes
+from ci.util.elf import dump_symbol_sizes
 
 
 HERE = Path(__file__).resolve().parent

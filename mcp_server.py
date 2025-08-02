@@ -93,7 +93,7 @@ except ImportError:
     print("Or with uv: uv add mcp")
     sys.exit(1)
 
-from ci.ci.build_info_analyzer import BuildInfoAnalyzer  # type: ignore
+from ci.util.build_info_analyzer import BuildInfoAnalyzer  # type: ignore
 
 # Initialize the MCP server
 server = Server("fastled-mcp-server")
@@ -1142,8 +1142,8 @@ char* ptr123;     // Confusing and non-descriptive
 [OK] **All *.py files** in the project
 [OK] **test.py** - Main test runner
 [OK] **mcp_server.py** - MCP server implementation  
-[OK] **ci/ci-compile.py** - CI compilation scripts
-[OK] **ci/ci/*.py** - All CI utility scripts
+[OK] **ci/util-compile.py** - CI compilation scripts
+[OK] **ci/util/*.py** - All CI utility scripts
 [OK] **Any new Python files** you create
 
 ## Required Process:
@@ -2062,7 +2062,7 @@ async def symbol_analysis(arguments: Dict[str, Any], project_root: Path) -> Call
             # Run for specific board
             result_text += f"## Symbol Analysis for Platform: {board}\n\n"
             
-            cmd = ["uv", "run", "ci/ci/symbol_analysis.py", "--board", board]
+            cmd = ["uv", "run", "ci/util/symbol_analysis.py", "--board", board]
             
             try:
                 analysis_result = await run_command(cmd, project_root)
@@ -2076,15 +2076,15 @@ async def symbol_analysis(arguments: Dict[str, Any], project_root: Path) -> Call
         # Add usage instructions
         result_text += "\n## How to Use Symbol Analysis\n\n"
         result_text += "### Available Commands:\n"
-        result_text += "- `uv run -m ci.ci.symbol_analysis --board uno` - Analyze UNO platform\n"
-        result_text += "- `uv run -m ci.ci.symbol_analysis --board esp32dev` - Analyze ESP32 platform\n"
-        result_text += "- `uv run -m ci.ci.symbol_analysis --board teensy31` - Analyze Teensy platform\n"
+        result_text += "- `uv run -m ci.util.symbol_analysis --board uno` - Analyze UNO platform\n"
+        result_text += "- `uv run -m ci.util.symbol_analysis --board esp32dev` - Analyze ESP32 platform\n"
+        result_text += "- `uv run -m ci.util.symbol_analysis --board teensy31` - Analyze Teensy platform\n"
         result_text += "- `uv run ci/demo_symbol_analysis.py` - Analyze all available platforms\n\n"
         
         result_text += "### Prerequisites:\n"
         result_text += "1. Compile platform first: `bash compile {board} --examples Blink`\n"
         result_text += "2. Ensure .build/{board}/build_info.json exists\n"
-        result_text += "3. Run symbol analysis: `uv run -m ci.ci.symbol_analysis --board {board}`\n\n"
+        result_text += "3. Run symbol analysis: `uv run -m ci.util.symbol_analysis --board {board}`\n\n"
         
         result_text += "### Supported Platforms:\n"
         result_text += "- [OK] UNO (AVR) - Small embedded platform\n"

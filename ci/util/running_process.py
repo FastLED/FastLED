@@ -399,7 +399,7 @@ class RunningProcess:
         # Kill the entire process tree (parent + all children)
         # This prevents orphaned clang++ processes from hanging the system
         try:
-            from ci.ci.test_env import kill_process_tree
+            from ci.util.test_env import kill_process_tree
 
             kill_process_tree(self.proc.pid)
         except Exception as e:

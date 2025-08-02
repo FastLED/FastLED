@@ -3,10 +3,10 @@ import unittest
 import warnings
 from pathlib import Path
 
-from ci.ci.bin_2_elf import bin_to_elf
-from ci.ci.elf import dump_symbol_sizes
-from ci.ci.paths import PROJECT_ROOT
-from ci.ci.tools import Tools, load_tools
+from ci.util.bin_2_elf import bin_to_elf
+from ci.util.elf import dump_symbol_sizes
+from ci.util.paths import PROJECT_ROOT
+from ci.util.tools import Tools, load_tools
 
 
 HERE = Path(__file__).resolve().parent.absolute()

@@ -15,9 +15,9 @@ import warnings
 from pathlib import Path
 
 # Import from the local ci directory
-from ci.ci.boards import Board, get_board  # type: ignore
-from ci.ci.create_build_dir import insert_tool_aliases
-from ci.ci.locked_print import locked_print
+from ci.util.boards import Board, get_board  # type: ignore
+from ci.util.create_build_dir import insert_tool_aliases
+from ci.util.locked_print import locked_print
 
 
 HERE = Path(__file__).parent.resolve()
@@ -116,7 +116,7 @@ EXTRA_EXAMPLES: dict[Board, list[str]] = {
 
 def parse_args():
     parser = argparse.ArgumentParser(
-        description="Compile FastLED examples for various boards using pio ci.ci."
+        description="Compile FastLED examples for various boards using pio ci.util."
     )
     parser.add_argument(
         "boards",
@@ -873,7 +873,7 @@ def run_symbol_analysis(boards: list[Board]) -> None:
             cmd = [
                 "uv",
                 "run",
-                "ci/ci/symbol_analysis.py",
+                "ci/util/symbol_analysis.py",
                 "--board",
                 board.board_name,
             ]

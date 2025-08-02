@@ -9,8 +9,8 @@ import sys
 from pathlib import Path
 from typing import Set, Tuple
 
-from ci.ci.paths import PROJECT_ROOT
-from ci.ci.running_process import RunningProcess
+from ci.util.paths import PROJECT_ROOT
+from ci.util.running_process import RunningProcess
 
 
 BUILD_DIR = PROJECT_ROOT / "tests" / ".build"

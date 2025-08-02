@@ -3,7 +3,7 @@
 FastLED Test Build System - Python Compiler API Integration
 
 This module provides a high-performance test compilation system built on the proven
-ci.ci.ci.ci.clang_compiler API that delivers 8x faster build times compared to CMake.
+ci.util.ci.util.clang_compiler API that delivers 8x faster build times compared to CMake.
 
 Key Features:
 - Parallel test compilation using ThreadPoolExecutor
@@ -30,7 +30,7 @@ from pathlib import Path
 from types import TracebackType
 from typing import Any, Callable, Dict, List, Optional
 
-from ci.ci.paths import PROJECT_ROOT
+from ci.util.paths import PROJECT_ROOT
 
 
 def optimize_python_command(cmd: list[str]) -> list[str]:
@@ -117,7 +117,7 @@ class FastLEDTestCompiler:
     """
     Test compiler built on proven Compiler API for 8x faster builds.
 
-    This class leverages the proven ci.ci.ci.ci.clang_compiler.Compiler API that has already
+    This class leverages the proven ci.util.ci.util.clang_compiler.Compiler API that has already
     demonstrated 4x+ performance improvements in example compilation. By using the same
     proven patterns and configurations, we inherit the optimized build flags, caching,
     and parallel compilation capabilities.

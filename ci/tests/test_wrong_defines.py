@@ -3,7 +3,7 @@ import unittest
 from concurrent.futures import ThreadPoolExecutor
 from typing import List
 
-from ci.ci.paths import PROJECT_ROOT
+from ci.util.paths import PROJECT_ROOT
 
 
 SRC_ROOT = PROJECT_ROOT / "src"

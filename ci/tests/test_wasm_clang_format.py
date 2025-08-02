@@ -3,7 +3,7 @@ import os
 import unittest
 from concurrent.futures import ThreadPoolExecutor
 
-from ci.ci.paths import PROJECT_ROOT
+from ci.util.paths import PROJECT_ROOT
 
 
 NUM_WORKERS = 1 if os.environ.get("NO_PARALLEL") else (os.cpu_count() or 1) * 4

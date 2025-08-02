@@ -6,7 +6,7 @@ from typing import Optional
 
 from typeguard import typechecked
 
-from ci.ci.test_types import TestArgs
+from ci.util.test_types import TestArgs
 
 
 def parse_args(args: Optional[list[str]] = None) -> TestArgs:

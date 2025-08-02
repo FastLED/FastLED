@@ -5,8 +5,8 @@ import time
 import unittest
 from pathlib import Path
 
-from ci.ci.paths import PROJECT_ROOT
-from ci.ci.symbol_analysis import (
+from ci.util.paths import PROJECT_ROOT
+from ci.util.symbol_analysis import (
     SymbolInfo,
     analyze_map_file,
     analyze_symbols,
@@ -14,7 +14,7 @@ from ci.ci.symbol_analysis import (
     find_board_build_info,
     generate_report,
 )
-from ci.ci.tools import Tools, load_tools
+from ci.util.tools import Tools, load_tools
 
 
 HERE = Path(__file__).resolve().parent.absolute()

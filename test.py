@@ -11,21 +11,21 @@ from typing import Optional
 
 import psutil
 
-from ci.ci.test_args import parse_args
-from ci.ci.test_commands import run_command
-from ci.ci.test_env import (
+from ci.util.test_args import parse_args
+from ci.util.test_commands import run_command
+from ci.util.test_env import (
     get_process_tree_info,
     setup_environment,
     setup_force_exit,
     setup_watchdog,
 )
-from ci.ci.test_runner import runner as test_runner
-from ci.ci.test_types import (
+from ci.util.test_runner import runner as test_runner
+from ci.util.test_types import (
     FingerprintResult,
     calculate_fingerprint,
     process_test_flags,
 )
-from ci.ci.watchdog_state import get_active_processes
+from ci.util.watchdog_state import get_active_processes
 
 
 _CANCEL_WATCHDOG = threading.Event()
@@ -166,8 +166,8 @@ def main() -> None:
         # Check if we need to use sequential execution to avoid resource conflicts
         if not args.unit and not args.examples and not args.py and args.full:
             # Full test mode - use sequential execution for example compilation
-            from ci.ci.running_process import RunningProcess
-            from ci.ci.test_runner import (
+            from ci.util.running_process import RunningProcess
+            from ci.util.test_runner import (
                 create_examples_test_process,
                 create_python_test_process,
             )

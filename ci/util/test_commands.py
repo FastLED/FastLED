@@ -4,8 +4,8 @@ import sys
 from pathlib import Path
 from typing import Any, List
 
-from ci.ci.running_process import RunningProcess
-from ci.ci.test_types import TestArgs
+from ci.util.running_process import RunningProcess
+from ci.util.test_types import TestArgs
 
 
 def build_cpp_test_command(args: TestArgs) -> str:

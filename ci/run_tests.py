@@ -14,7 +14,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import List, Optional
 
-from ci.ci.test_exceptions import (
+from ci.util.test_exceptions import (
     TestExecutionFailedException,
     TestFailureInfo,
 )

@@ -22,9 +22,9 @@ import time
 import warnings
 from pathlib import Path
 
-from ci.ci.boards import Board, get_board  # type: ignore
-from ci.ci.concurrent_run import ConcurrentRunArgs, concurrent_run
-from ci.ci.locked_print import locked_print
+from ci.util.boards import Board, get_board  # type: ignore
+from ci.util.concurrent_run import ConcurrentRunArgs, concurrent_run
+from ci.util.locked_print import locked_print
 
 
 HERE = Path(__file__).parent.resolve()
@@ -371,7 +371,7 @@ def create_concurrent_run_args(args: argparse.Namespace) -> ConcurrentRunArgs:
     if args.extra_packages:
         extra_packages.extend(args.extra_packages.split(","))
     build_dir = args.build_dir
-    extra_scripts = "pre:lib/ci/ci-flags.py"
+    extra_scripts = "pre:lib/ci/util-flags.py"
     verbose = args.verbose
 
     out: ConcurrentRunArgs = ConcurrentRunArgs(

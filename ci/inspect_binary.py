@@ -8,9 +8,9 @@ import sys
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
-from ci.ci.bin_2_elf import bin_to_elf
-from ci.ci.elf import dump_symbol_sizes
-from ci.ci.map_dump import map_dump
+from ci.util.bin_2_elf import bin_to_elf
+from ci.util.elf import dump_symbol_sizes
+from ci.util.map_dump import map_dump
 
 
 def cpp_filt(cpp_filt_path: Path, input_text: str) -> str:

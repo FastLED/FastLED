@@ -1,7 +1,7 @@
 import unittest
 from pathlib import Path
 
-from ci.ci.map_dump import map_dump
+from ci.util.map_dump import map_dump
 
 
 HERE = Path(__file__).resolve().parent.absolute()

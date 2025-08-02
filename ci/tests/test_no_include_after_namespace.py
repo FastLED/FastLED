@@ -3,7 +3,7 @@ import re
 import unittest
 from typing import Dict, List, Tuple
 
-from ci.ci.paths import PROJECT_ROOT
+from ci.util.paths import PROJECT_ROOT
 
 
 SRC_ROOT = PROJECT_ROOT / "src"

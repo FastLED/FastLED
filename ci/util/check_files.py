@@ -5,7 +5,7 @@ from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
 from typing import Dict, List, Optional
 
-from ci.ci.paths import PROJECT_ROOT
+from ci.util.paths import PROJECT_ROOT
 
 
 SRC_ROOT = PROJECT_ROOT / "src"

@@ -10,12 +10,12 @@ import sys
 from pathlib import Path
 from typing import List
 
-from ci.ci.paths import PROJECT_ROOT
 from ci.compiler.clang_compiler import (
     Compiler,
     CompilerOptions,
     Result,
 )
+from ci.util.paths import PROJECT_ROOT
 
 
 def build_fastled_dynamic_library(build_dir: Path) -> Path:

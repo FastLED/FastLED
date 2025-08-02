@@ -9,7 +9,7 @@ import os
 import sys
 from pathlib import Path
 
-from ci.ci.esp32_symbol_analysis import main as esp32_symbol_analysis
+from ci.util.esp32_symbol_analysis import main as esp32_symbol_analysis
 
 
 def is_esp32_board(board_name: str) -> bool:
@@ -65,7 +65,7 @@ def main():
 
     try:
         # TODO - Remove this.
-        # Change to the ci/ci directory since the script expects to be run from there
+        # Change to the ci/util directory since the script expects to be run from there
         original_cwd = os.getcwd()
         ci_ci_dir = Path(__file__).parent / "ci"
         os.chdir(ci_ci_dir)

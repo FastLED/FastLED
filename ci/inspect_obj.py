@@ -5,8 +5,8 @@ import subprocess
 import sys
 from pathlib import Path
 
-from ci.ci.paths import BUILD
-from ci.ci.tools import load_tools
+from ci.util.paths import BUILD
+from ci.util.tools import load_tools
 
 
 def _list_builds() -> list[Path]:

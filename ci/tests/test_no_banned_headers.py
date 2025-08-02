@@ -3,14 +3,14 @@ import os
 import unittest
 from typing import Callable, List
 
-from ci.ci.check_files import (
+from ci.util.check_files import (
     EXCLUDED_FILES,
     FileContent,
     FileContentChecker,
     MultiCheckerFileProcessor,
     collect_files_to_check,
 )
-from ci.ci.paths import PROJECT_ROOT
+from ci.util.paths import PROJECT_ROOT
 
 
 SRC_ROOT = PROJECT_ROOT / "src"

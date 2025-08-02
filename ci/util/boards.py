@@ -102,7 +102,7 @@ class Board:
 
         # Add board-specific build cache directory pointing via symlink directive
         # here = Path(__file__).parent
-        # project_root = here.parent.parent  # Move from ci/ci/ to project root
+        # project_root = here.parent.parent  # Move from ci/util/ to project root
         # cache_dir = project_root / ".pio_cache" / self.board_name
         # absolute_cache_dir = cache_dir.resolve()
         # options.append(f"build_cache_dir=symlink://{absolute_cache_dir}")

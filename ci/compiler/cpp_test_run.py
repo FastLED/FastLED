@@ -15,7 +15,7 @@ from threading import Event, Lock, Thread
 
 import psutil
 
-from ci.ci.paths import PROJECT_ROOT
+from ci.util.paths import PROJECT_ROOT
 
 
 def optimize_python_command(cmd: list[str]) -> list[str]:
@@ -38,7 +38,7 @@ def optimize_python_command(cmd: list[str]) -> list[str]:
     return cmd
 
 
-from ci.ci.test_exceptions import (
+from ci.util.test_exceptions import (
     CompilationFailedException,
     TestExecutionFailedException,
     TestFailureInfo,

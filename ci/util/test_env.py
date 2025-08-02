@@ -10,7 +10,7 @@ from typing import Protocol, cast
 
 import psutil
 
-from ci.ci.test_types import TestArgs
+from ci.util.test_types import TestArgs
 
 
 class ReconfigurableIO(Protocol):

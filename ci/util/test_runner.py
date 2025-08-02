@@ -12,20 +12,20 @@ from typing import Any, Callable, List, Optional, Pattern, Protocol, cast
 
 from typeguard import typechecked
 
-from ci.ci.running_process import RunningProcess
-from ci.ci.test_exceptions import (
+from ci.util.running_process import RunningProcess
+from ci.util.test_exceptions import (
     TestExecutionFailedException,
     TestFailureInfo,
     TestTimeoutException,
 )
-from ci.ci.test_types import (
+from ci.util.test_types import (
     TestArgs,
     TestCategories,
     TestResult,
     TestResultType,
     TestSuiteResult,
 )
-from ci.ci.watchdog_state import clear_active_processes, set_active_processes
+from ci.util.watchdog_state import clear_active_processes, set_active_processes
 
 
 _IS_GITHUB_ACTIONS = os.getenv("GITHUB_ACTIONS") == "true"
