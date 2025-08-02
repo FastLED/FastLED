@@ -793,17 +793,12 @@ def run_test_processes(
         parallel: Whether to run processes in parallel or sequentially (ignored if NO_PARALLEL is set)
         verbose: Whether to show all output
     """
-    # Force sequential execution if NO_PARALLEL is set
-    if os.environ.get("NO_PARALLEL"):
-        parallel = False
-        print("NO_PARALLEL environment variable set - forcing sequential execution")
+    # Force sequential execution if NO_PARALLEL is setprint("NO_PARALLEL environment variable set - forcing sequential execution")
     if not processes:
         print("\033[92m###### SUCCESS ######\033[0m")
         print("No tests to run")
         return
 
-    failed_tests: list[str] = []
-    output_handler = ProcessOutputHandler(verbose=verbose)
     start_time = time.time()
 
     try:
@@ -886,8 +881,12 @@ def runner(args: TestArgs, src_code_change: bool = True) -> None:
     if test_categories.examples or test_categories.examples_only:
         processes.append(create_examples_test_process(args, enable_stack_trace))
 
+    # Determine if we'll run in parallel
+    will_run_parallel = not bool(os.environ.get("NO_PARALLEL"))
+
     # Print summary of what we're about to run
-    print(f"\nStarting {len(processes)} test processes in parallel:")
+    execution_mode = "in parallel" if will_run_parallel else "sequentially"
+    print(f"\nStarting {len(processes)} test processes {execution_mode}:")
     for proc in processes:
         print(f"  - {proc.command}")
     print()
@@ -895,6 +894,6 @@ def runner(args: TestArgs, src_code_change: bool = True) -> None:
     # Run processes (parallel unless NO_PARALLEL is set)
     run_test_processes(
         processes,
-        parallel=not bool(os.environ.get("NO_PARALLEL")),
+        parallel=will_run_parallel,
         verbose=args.verbose,
     )
