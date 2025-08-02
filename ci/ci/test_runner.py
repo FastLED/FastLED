@@ -28,6 +28,10 @@ from ci.ci.test_types import (
 from ci.ci.watchdog_state import clear_active_processes, set_active_processes
 
 
+_IS_GITHUB_ACTIONS = os.getenv("GITHUB_ACTIONS") == "true"
+_TIMEOUT = 240 if _IS_GITHUB_ACTIONS else 60
+
+
 @typechecked
 class TestOutputFormatter:
     """Formats test output in a consistent way"""
@@ -338,7 +342,7 @@ def create_unit_test_process(
     return RunningProcess(
         both_cmds,
         enable_stack_trace=enable_stack_trace,
-        timeout=120,  # 2 minutes timeout
+        timeout=_TIMEOUT,  # 2 minutes timeout
         auto_run=True,
     )
 
@@ -392,7 +396,7 @@ def create_python_test_process(enable_stack_trace: bool) -> RunningProcess:
         cmd,
         auto_run=False,  # Don't auto-start - will be started in parallel later
         enable_stack_trace=enable_stack_trace,
-        timeout=120,  # 2 minute timeout for Python tests
+        timeout=_TIMEOUT,  # 2 minute timeout for Python tests
     )
 
 
@@ -556,7 +560,7 @@ def _run_process_with_output(process: RunningProcess, verbose: bool = False) -> 
 
     while True:
         try:
-            line = process.get_next_line(timeout=120)
+            line = process.get_next_line(timeout=_TIMEOUT)
             if line is None:
                 break
             print(f"  {line}")
@@ -574,7 +578,7 @@ def _run_process_with_output(process: RunningProcess, verbose: bool = False) -> 
                 test_name=_extract_test_name(process.command),
                 command=str(process.command),
                 return_code=1,
-                output="Process timed out after 120 seconds with no output",
+                output="Process timed out after {_TIMEOUT} seconds with no output",
                 error_type="process_timeout",
             )
             raise TestExecutionFailedException(
