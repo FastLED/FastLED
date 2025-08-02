@@ -1,113 +1,389 @@
 import json
 import sys
+from dataclasses import dataclass
 from typing import Any, Dict, List
 from urllib.request import urlopen
 
 
-def print_separator(title: str) -> None:
-    """Print a formatted section separator"""
-    print(f"\n{'=' * 60}")
-    print(f" {title}")
-    print(f"{'=' * 60}")
+@dataclass
+class Help:
+    """Help information with online documentation links"""
+
+    online: str
 
 
-def print_subsection(title: str) -> None:
-    """Print a formatted subsection separator"""
-    print(f"\n{'-' * 40}")
-    print(f" {title}")
-    print(f"{'-' * 40}")
+@dataclass
+class Board:
+    """Supported board information"""
+
+    name: str
 
 
-def analyze_esp32_packages(data: Dict[str, Any]) -> None:
-    """Analyze and display the ESP32 package structure in a readable format"""
+@dataclass
+class ToolDependency:
+    """Tool dependency specification"""
 
-    print_separator("ESP32 PACKAGE INDEX ANALYSIS")
+    packager: str
+    name: str
+    version: str
 
-    # Top level structure
-    print("\nROOT STRUCTURE:")
-    packages = data.get("packages", [])
-    print(f"  Contains {len(packages)} package(s)")
 
-    if not packages:
-        print("  No packages found!")
+@dataclass
+class System:
+    """System-specific tool information"""
+
+    host: str
+    url: str
+    archiveFileName: str
+    checksum: str
+    size: str
+
+
+@dataclass
+class Tool:
+    """Tool specification with version and systems"""
+
+    name: str
+    version: str
+    systems: List[System]
+
+
+@dataclass
+class Platform:
+    """Platform specification with boards and dependencies"""
+
+    name: str
+    architecture: str
+    version: str
+    category: str
+    url: str
+    archiveFileName: str
+    checksum: str
+    size: str
+    help: Help
+    boards: List[Board]
+    toolsDependencies: List[ToolDependency]
+
+
+@dataclass
+class Package:
+    """ESP32 package containing platforms and tools"""
+
+    name: str
+    maintainer: str
+    websiteURL: str
+    email: str
+    help: Help
+    platforms: List[Platform]
+    tools: List[Tool]
+
+
+@dataclass
+class PackageIndex:
+    """Root package index structure"""
+
+    packages: List[Package]
+
+
+def parse_package_index(json_str: str) -> PackageIndex:
+    """Parse JSON string into typed PackageIndex structure"""
+    data = json.loads(json_str)
+
+    packages: List[Package] = []
+    for pkg_data in data["packages"]:
+        # Parse help
+        help_data = pkg_data["help"]
+        help_obj = Help(online=help_data["online"])
+
+        # Parse platforms
+        platforms: List[Platform] = []
+        for platform_data in pkg_data["platforms"]:
+            # Parse platform help
+            platform_help = Help(online=platform_data["help"]["online"])
+
+            # Parse boards
+            boards: List[Board] = []
+            for board_data in platform_data["boards"]:
+                boards.append(Board(name=board_data["name"]))
+
+            # Parse tool dependencies
+            tool_deps: List[ToolDependency] = []
+            for dep_data in platform_data["toolsDependencies"]:
+                tool_deps.append(
+                    ToolDependency(
+                        packager=dep_data["packager"],
+                        name=dep_data["name"],
+                        version=dep_data["version"],
+                    )
+                )
+
+            platforms.append(
+                Platform(
+                    name=platform_data["name"],
+                    architecture=platform_data["architecture"],
+                    version=platform_data["version"],
+                    category=platform_data["category"],
+                    url=platform_data["url"],
+                    archiveFileName=platform_data["archiveFileName"],
+                    checksum=platform_data["checksum"],
+                    size=platform_data["size"],
+                    help=platform_help,
+                    boards=boards,
+                    toolsDependencies=tool_deps,
+                )
+            )
+
+        # Parse tools
+        tools: List[Tool] = []
+        for tool_data in pkg_data["tools"]:
+            # Parse systems
+            systems: List[System] = []
+            for system_data in tool_data["systems"]:
+                systems.append(
+                    System(
+                        host=system_data["host"],
+                        url=system_data["url"],
+                        archiveFileName=system_data["archiveFileName"],
+                        checksum=system_data["checksum"],
+                        size=system_data["size"],
+                    )
+                )
+
+            tools.append(
+                Tool(
+                    name=tool_data["name"],
+                    version=tool_data["version"],
+                    systems=systems,
+                )
+            )
+
+        packages.append(
+            Package(
+                name=pkg_data["name"],
+                maintainer=pkg_data["maintainer"],
+                websiteURL=pkg_data["websiteURL"],
+                email=pkg_data["email"],
+                help=help_obj,
+                platforms=platforms,
+                tools=tools,
+            )
+        )
+
+    return PackageIndex(packages=packages)
+
+
+def serialize_package_index(package_index: PackageIndex) -> str:
+    """Serialize PackageIndex structure back to JSON string"""
+
+    def help_to_dict(help_obj: Help) -> Dict[str, str]:
+        return {"online": help_obj.online}
+
+    def board_to_dict(board: Board) -> Dict[str, str]:
+        return {"name": board.name}
+
+    def tool_dep_to_dict(tool_dep: ToolDependency) -> Dict[str, str]:
+        return {
+            "packager": tool_dep.packager,
+            "name": tool_dep.name,
+            "version": tool_dep.version,
+        }
+
+    def system_to_dict(system: System) -> Dict[str, str]:
+        return {
+            "host": system.host,
+            "url": system.url,
+            "archiveFileName": system.archiveFileName,
+            "checksum": system.checksum,
+            "size": system.size,
+        }
+
+    def tool_to_dict(tool: Tool) -> Dict[str, Any]:
+        return {
+            "name": tool.name,
+            "version": tool.version,
+            "systems": [system_to_dict(system) for system in tool.systems],
+        }
+
+    def platform_to_dict(platform: Platform) -> Dict[str, Any]:
+        return {
+            "name": platform.name,
+            "architecture": platform.architecture,
+            "version": platform.version,
+            "category": platform.category,
+            "url": platform.url,
+            "archiveFileName": platform.archiveFileName,
+            "checksum": platform.checksum,
+            "size": platform.size,
+            "help": help_to_dict(platform.help),
+            "boards": [board_to_dict(board) for board in platform.boards],
+            "toolsDependencies": [
+                tool_dep_to_dict(dep) for dep in platform.toolsDependencies
+            ],
+        }
+
+    def package_to_dict(package: Package) -> Dict[str, Any]:
+        return {
+            "name": package.name,
+            "maintainer": package.maintainer,
+            "websiteURL": package.websiteURL,
+            "email": package.email,
+            "help": help_to_dict(package.help),
+            "platforms": [platform_to_dict(platform) for platform in package.platforms],
+            "tools": [tool_to_dict(tool) for tool in package.tools],
+        }
+
+    result = {
+        "packages": [package_to_dict(package) for package in package_index.packages]
+    }
+
+    return json.dumps(result, indent=2)
+
+
+def print_tree_header(title: str) -> None:
+    """Print a beautiful tree-style header"""
+    border = "═" * (len(title) + 4)
+    print(f"\n┌{border}┐")
+    print(f"│  {title}  │")
+    print(f"└{border}┘")
+
+
+def print_tree_section(title: str, level: int = 0) -> None:
+    """Print a tree-style section header"""
+    indent = "  " * level
+    if level == 0:
+        print(f"\n{indent}┌─ 📦 {title}")
+    else:
+        print(f"\n{indent}├─ 📁 {title}")
+
+
+def print_tree_item(
+    label: str, value: str, level: int = 1, is_last: bool = False
+) -> None:
+    """Print a tree-style item"""
+    indent = "  " * level
+    connector = "└─" if is_last else "├─"
+    print(f"{indent}{connector} {label}: {value}")
+
+
+def print_tree_list_header(title: str, count: int, level: int = 1) -> None:
+    """Print a tree-style list header with count"""
+    indent = "  " * level
+    print(f"{indent}├─ 📋 {title} ({count} items)")
+
+
+def print_tree_list_item(item: str, level: int = 2, is_last: bool = False) -> None:
+    """Print a tree-style list item"""
+    indent = "  " * level
+    connector = "└─" if is_last else "├─"
+    print(f"{indent}{connector} {item}")
+
+
+def print_tree_close_section(level: int = 0) -> None:
+    """Print a tree-style section closer"""
+    indent = "  " * level
+    print(f"{indent}└─ ✓")
+
+
+def analyze_esp32_packages_typed(package_index: PackageIndex) -> None:
+    """Analyze ESP32 packages using beautiful tree-style output"""
+
+    print_tree_header("ESP32 PACKAGE INDEX")
+
+    # Root structure
+    print_tree_section("Package Index")
+    print_tree_item("Total Packages", str(len(package_index.packages)), level=1)
+
+    if not package_index.packages:
+        print_tree_item("Status", "No packages found!", level=1, is_last=True)
         return
 
     # Analyze first package (should be the ESP32 package)
-    package = packages[0]
-    print_subsection("PACKAGE INFORMATION")
+    package = package_index.packages[0]
 
-    # Basic package info
-    basic_info = ["name", "maintainer", "websiteURL", "email"]
-    for key in basic_info:
-        if key in package:
-            print(f"  {key}: {package[key]}")
+    print_tree_section("Package Details", level=1)
+    print_tree_item("Name", package.name, level=2)
+    print_tree_item("Maintainer", package.maintainer, level=2)
+    print_tree_item("Website", package.websiteURL, level=2)
+    print_tree_item("Email", package.email, level=2, is_last=True)
 
     # Platform analysis
-    platforms = package.get("platforms", [])
-    print_subsection(f"PLATFORMS ({len(platforms)} available)")
+    if package.platforms:
+        print_tree_section("Latest Platform", level=1)
+        platform = package.platforms[0]
+        size_mb = int(platform.size) / 1024 / 1024
 
-    if platforms:
-        # Show first platform details
-        platform = platforms[0]
-        print(
-            f"  Latest Platform: {platform.get('name', 'Unknown')} v{platform.get('version', 'Unknown')}"
+        print_tree_item("Name", platform.name, level=2)
+        print_tree_item("Version", platform.version, level=2)
+        print_tree_item("Architecture", platform.architecture, level=2)
+        print_tree_item("Category", platform.category, level=2)
+        print_tree_item("Archive Size", f"{size_mb:.1f} MB", level=2)
+
+        # Show boards in tree format
+        print_tree_list_header("Supported Boards", len(platform.boards), level=2)
+        for i, board in enumerate(platform.boards):
+            is_last_board = i == len(platform.boards) - 1
+            print_tree_list_item(board.name, level=3, is_last=is_last_board)
+
+        # Show tool dependencies in tree format
+        print_tree_list_header(
+            "Tool Dependencies", len(platform.toolsDependencies), level=2
         )
-        print(f"  Architecture: {platform.get('architecture', 'Unknown')}")
-        print(f"  Archive Size: {int(platform.get('size', 0)) / 1024 / 1024:.1f} MB")
-
-        # Show boards
-        boards = platform.get("boards", [])
-        print(f"\n  SUPPORTED BOARDS ({len(boards)} total):")
-        for board in boards:
-            board_name = board.get("name", "Unknown Board")
-            print(f"    - {board_name}")
-
-        # Show tool dependencies
-        tools = platform.get("toolsDependencies", [])
-        print(f"\n  TOOL DEPENDENCIES ({len(tools)} total):")
         tool_categories: Dict[str, List[str]] = {}
-        for tool in tools:
-            packager = tool.get("packager", "unknown")
-            tool_name = tool.get("name", "unknown")
-            if packager not in tool_categories:
-                tool_categories[packager] = []
-            tool_categories[packager].append(tool_name)
+        for tool_dep in platform.toolsDependencies:
+            if tool_dep.packager not in tool_categories:
+                tool_categories[tool_dep.packager] = []
+            tool_categories[tool_dep.packager].append(tool_dep.name)
 
-        for packager, tool_names in tool_categories.items():
-            print(f"    {packager} tools:")
-            for tool_name in tool_names:
-                print(f"      - {tool_name}")
+        packager_list = list(tool_categories.items())
+        for pkg_idx, (packager, tool_names) in enumerate(packager_list):
+            is_last_packager = pkg_idx == len(packager_list) - 1
+            print_tree_list_item(
+                f"{packager} ({len(tool_names)} tools)",
+                level=3,
+                is_last=is_last_packager,
+            )
+            for tool_idx, tool_name in enumerate(tool_names):
+                is_last_tool = tool_idx == len(tool_names) - 1
+                print_tree_list_item(tool_name, level=4, is_last=is_last_tool)
 
     # Tools analysis
-    tools = package.get("tools", [])
-    print_subsection(f"AVAILABLE TOOLS ({len(tools)} total)")
-
-    if tools:
+    if package.tools:
+        print_tree_section("Tool Categories", level=1)
         tool_types: Dict[str, int] = {}
-        for tool in tools:
-            tool_name = tool.get("name", "unknown")
-            if "gcc" in tool_name.lower():
+        for tool in package.tools:
+            if "gcc" in tool.name.lower():
                 category = "Compilers (GCC)"
-            elif "gdb" in tool_name.lower():
+            elif "gdb" in tool.name.lower():
                 category = "Debuggers (GDB)"
-            elif any(x in tool_name.lower() for x in ["esp", "tool", "util"]):
+            elif any(x in tool.name.lower() for x in ["esp", "tool", "util"]):
                 category = "ESP Tools"
             else:
                 category = "Other Tools"
 
             tool_types[category] = tool_types.get(category, 0) + 1
 
-        for category, count in tool_types.items():
-            print(f"  {category}: {count}")
+        categories = list(tool_types.items())
+        for cat_idx, (category, count) in enumerate(categories):
+            is_last_category = cat_idx == len(categories) - 1
+            print_tree_item(category, str(count), level=2, is_last=is_last_category)
 
     # Show version history for platforms
-    print_subsection("VERSION HISTORY")
-    version_count = min(len(platforms), 5)  # Show up to 5 recent versions
-    for i in range(version_count):
-        platform = platforms[i]
-        version = platform.get("version", "Unknown")
-        size_mb = int(platform.get("size", 0)) / 1024 / 1024
-        print(f"  v{version}: {size_mb:.1f} MB")
+    if len(package.platforms) > 1:
+        print_tree_section("Version History", level=1)
+        version_count = min(len(package.platforms), 5)  # Show up to 5 recent versions
+        for i in range(version_count):
+            platform = package.platforms[i]
+            size_mb = int(platform.size) / 1024 / 1024
+            is_last_version = i == version_count - 1
+            print_tree_item(
+                f"v{platform.version}",
+                f"{size_mb:.1f} MB",
+                level=2,
+                is_last=is_last_version,
+            )
+
+    # Close the main tree
+    print_tree_close_section()
 
 
 def main() -> None:
@@ -117,9 +393,59 @@ def main() -> None:
         print("Fetching ESP32 package index...")
         with urlopen(url) as response:
             content: bytes = response.read()
-            data: Dict[str, Any] = json.loads(content.decode("utf-8"))
+            json_str = content.decode("utf-8")
 
-        analyze_esp32_packages(data)
+        # Parse into typed structure
+        package_index = parse_package_index(json_str)
+
+        # Display using typed structure
+        analyze_esp32_packages_typed(package_index)
+
+        # Demonstrate serialization back to JSON
+        print_tree_header("SERIALIZATION DEMO")
+
+        first_package = package_index.packages[0]
+        first_platform = first_package.platforms[0]
+
+        print_tree_section("Data Sample")
+        print_tree_item("⚙️ Platform Name", first_platform.name, level=1)
+        print_tree_item("🔢 Platform Version", first_platform.version, level=1)
+        print_tree_item("📊 Board Count", str(len(first_platform.boards)), level=1)
+        print_tree_item(
+            "🔧 First Board", first_platform.boards[0].name, level=1, is_last=True
+        )
+
+        # Show the dataclass types in a beautiful format
+        print_tree_section("Type Information")
+        print_tree_item("📦 PackageIndex", "Root container dataclass", level=1)
+        print_tree_item("🏢 Package", "ESP32 package dataclass", level=1)
+        print_tree_item("⚙️ Platform", "Platform version dataclass", level=1)
+        print_tree_item("🔧 Board", "Hardware board dataclass", level=1, is_last=True)
+
+        # Demonstrate round-trip serialization
+        print_tree_section("Round-Trip Test")
+        serialized_json = serialize_package_index(package_index)
+        reparsed_index = parse_package_index(serialized_json)
+
+        # Verify the data survived round-trip
+        original_board_count = len(package_index.packages[0].platforms[0].boards)
+        reparsed_board_count = len(reparsed_index.packages[0].platforms[0].boards)
+
+        print_tree_item("📤 Original Boards", str(original_board_count), level=1)
+        print_tree_item("📥 Reparsed Boards", str(reparsed_board_count), level=1)
+        success_status = (
+            "✅ SUCCESS"
+            if original_board_count == reparsed_board_count
+            else "❌ FAILED"
+        )
+        print_tree_item("🎯 Status", success_status, level=1)
+
+        # Show a compact snippet of the serialized JSON
+        json_lines = serialized_json.split("\n")[:4]  # First 4 lines
+        json_compact = " ".join(line.strip() for line in json_lines)
+        if len(json_compact) > 80:
+            json_compact = json_compact[:77] + "..."
+        print_tree_item("📄 JSON Sample", json_compact, level=1, is_last=True)
 
     except KeyboardInterrupt:
         print("Interrupted by user", file=sys.stderr)
