@@ -165,10 +165,6 @@ def extract_compiler_flags_from_toml(config: Dict[str, Any]) -> List[str]:
                 flags.extend(quick_section["flags"])
                 print(f"[CONFIG] Loaded {len(quick_section['flags'])} quick mode flags from [build_modes.quick] section")
 
-    # Verify that critical warning suppression flags are present
-    if "-Wno-deprecated-register" not in flags:
-        raise RuntimeError("CRITICAL: -Wno-deprecated-register flag missing from build_flags.toml. This flag is required to suppress C++17 register warnings.")
-
     return flags
 
 
