@@ -1,5 +1,142 @@
 # FastLED Project Rules for Cursor
 
+## 🚨 CRITICAL: PYTHON EXECUTION REQUIREMENTS - NO EXCEPTIONS! 🚨
+
+### MANDATORY COMMAND EXECUTION RULES - ALL AGENTS MUST FOLLOW
+
+**🚨 ABSOLUTELY FORBIDDEN: Direct python/python3 execution**
+- ❌ **NEVER use:** `python3 <command>`
+- ❌ **NEVER use:** `python <command>`  
+- ❌ **NEVER use:** `./python`
+- ❌ **NEVER use:** Direct Python interpreter calls
+
+**✅ MANDATORY: Always use uv run**
+- ✅ **ALWAYS use:** `uv run python <command>`
+- ✅ **ALWAYS use:** `uv run python -c "..."`
+- ✅ **ALWAYS use:** `uv run python script.py`
+
+**NO EXCEPTIONS - ALL PYTHON CODE MUST RUN THROUGH UV:**
+
+```bash
+# ✅ CORRECT - Use uv run python
+uv run python test.py
+uv run python ci/ci-compile.py uno --examples Blink
+uv run python -c "from ci.ci.module import func; func()"
+uv run python ci/ci/build_info_analyzer.py --board uno --show-defines
+
+# ❌ FORBIDDEN - Direct python execution
+python3 test.py                    # NO!
+python ci/ci-compile.py            # NO!
+python3 -c "import something"      # NO!
+python3 script.py                  # NO!
+```
+
+**THIS RULE APPLIES TO:**
+- 🚨 **All test execution**
+- 🚨 **All script execution** 
+- 🚨 **All build commands**
+- 🚨 **All analysis tools**
+- 🚨 **All development commands**
+- 🚨 **ALL Python code execution without exception**
+
+**WHY:** The project uses UV for dependency management and execution environment. Direct python3 calls bypass the controlled environment and may use wrong Python versions or missing dependencies.
+
+**ENFORCEMENT:** Any agent using direct python3/python commands is in violation of project requirements.
+
+### 🚨 UV RUN MANDATE - FINAL WARNING 🚨
+
+**IF YOU SEE ANY COMMANDS IN THIS PROJECT DOCUMENTATION THAT USE `python3` OR `python` DIRECTLY:**
+
+1. **🚫 DO NOT COPY THEM** - They are legacy commands that must be updated
+2. **✅ ALWAYS REPLACE** `python3` with `uv run python` 
+3. **✅ ALWAYS REPLACE** `python` with `uv run python`
+4. **📝 UPDATE DOCUMENTATION** when you find python3 commands 
+
+**EXAMPLES OF MANDATORY REPLACEMENTS:**
+```bash
+# ❌ If you see this in docs (WRONG):
+python3 script.py
+
+# ✅ Always use this instead (CORRECT):
+uv run python script.py
+
+# ❌ If you see this in docs (WRONG):  
+python -c "import something"
+
+# ✅ Always use this instead (CORRECT):
+uv run python -c "import something"
+```
+
+**UV RUN IS NOT OPTIONAL - IT IS MANDATORY FOR ALL PYTHON EXECUTION.**
+
+## 🚨 CRITICAL: NO DEFAULT VALUES POLICY 🚨
+
+### MANDATORY: Explicit Parameter Policy - NO DEFAULTS ALLOWED
+
+**🚨 ABSOLUTELY FORBIDDEN: Default values in dataclasses and function parameters**
+
+**❌ NEVER USE DEFAULT VALUES:**
+- Function parameters with defaults
+- Dataclass fields with default values
+- Method parameters with defaults
+- Optional parameters with fallback values
+
+**✅ ALWAYS REQUIRE EXPLICIT VALUES:**
+- All function parameters must be explicitly provided by caller
+- All dataclass fields must be explicitly specified
+- Use Optional types for truly optional parameters, but no defaults
+- Force callers to handle every parameter consciously
+
+**WHY NO DEFAULTS:**
+- **Signature changes break compilation** - Adding/removing parameters forces all callers to update
+- **Prevents silent bugs** - Missing parameter updates become compile-time errors
+- **Explicit intent** - Every call site shows exactly what values are being passed
+- **Refactoring safety** - Internal changes are caught immediately by type checker
+- **Code clarity** - No hidden behavior from default values
+
+**EXAMPLES:**
+
+```python
+# ❌ FORBIDDEN - Default values hide signature changes
+@dataclass
+class Config:
+    name: str = "default"
+    enabled: bool = True
+    timeout: int = 30
+
+def process_data(data: bytes, validate: bool = True, timeout: int = 30):
+    pass
+
+# ✅ CORRECT - Explicit values required
+@dataclass  
+class Config:
+    name: str
+    enabled: bool
+    timeout: int
+
+def process_data(data: bytes, validate: bool, timeout: int):
+    pass
+
+# Usage requires all parameters
+config = Config(name="test", enabled=True, timeout=60)
+process_data(data=my_data, validate=False, timeout=30)
+```
+
+**BENEFITS:**
+- **Immediate feedback** when function signatures change
+- **No silent failures** from missed parameter updates
+- **Self-documenting code** - all parameters visible at call sites
+- **Safer refactoring** - type checker catches all usage sites
+- **Consistent behavior** - no surprising default value interactions
+
+**EXCEPTIONS (Use Sparingly):**
+- Constructor overloads where defaults truly make sense for usability
+- Public API methods where backwards compatibility is critical
+- BUT: Internal/private functions should NEVER have defaults
+
+**ENFORCEMENT:**
+This policy should be enforced by linters and code review. Adding defaults to existing code without explicit justification is not allowed.
+
 ## Cursor Configuration
 
 ### Post-Change Hooks
@@ -129,7 +266,7 @@ The tool follows the pattern established in `ci/wasm_test.py` and `ci/ci/scraper
 **🚨 ALWAYS USE `bash lint` - DO NOT RUN INDIVIDUAL LINTING SCRIPTS**
 
 - **✅ CORRECT:** `bash lint`
-- **❌ FORBIDDEN:** `./lint-js`, `./check-js`, `python3 scripts/enhance-js-typing.py`
+- **❌ FORBIDDEN:** `./lint-js`, `./check-js`, `uv run python scripts/enhance-js-typing.py`
 - **❌ FORBIDDEN:** `uv run ruff check`, `uv run black`, individual tools
 
 **WHY:** `bash lint` provides:
@@ -145,7 +282,7 @@ The tool follows the pattern established in `ci/wasm_test.py` and `ci/ci/scraper
 Background agents may use individual linting scripts when needed:
 - `./lint-js` - JavaScript-only linting
 - `./check-js` - JavaScript type checking
-- `python3 scripts/enhance-js-typing.py` - JavaScript enhancement analysis
+- `uv run python scripts/enhance-js-typing.py` - JavaScript enhancement analysis
 - `uv run ruff check` - Python linting only
 - MCP server `lint_code` tool - Programmatic access
 
@@ -698,15 +835,16 @@ for x in range(5):
 ### Python Function Parameter and Return Types
 
 **🚨 MANDATORY: ALL function parameters MUST have explicit type annotations - NO EXCEPTIONS!**
+**🚨 MANDATORY: NO DEFAULT VALUES in function parameters - NO EXCEPTIONS!**
 
 This rule applies to:
-- ✅ Regular function parameters
-- ✅ Method parameters (including self/cls)
-- ✅ Lambda parameters
-- ✅ Callback function parameters
-- ✅ Generator function parameters
-- ✅ Async function parameters
-- ✅ Protocol method parameters
+- ✅ Regular function parameters (no defaults)
+- ✅ Method parameters (including self/cls, no defaults)
+- ✅ Lambda parameters (no defaults)
+- ✅ Callback function parameters (no defaults)
+- ✅ Generator function parameters (no defaults)
+- ✅ Async function parameters (no defaults)
+- ✅ Protocol method parameters (no defaults)
 
 **Examples:**
 
@@ -715,12 +853,16 @@ This rule applies to:
 def process_data(data):
     return data
 
-# ❌ WRONG - Partial typing
-def validate_user(name: str, age):
+# ❌ WRONG - Partial typing and defaults
+def validate_user(name: str, age, enabled: bool = True):
     return True
 
-# ✅ CORRECT - All parameters typed
-def process_data(data: bytes) -> bytes:
+# ❌ WRONG - Has default values (even with types)
+def process_data(data: bytes, validate: bool = True) -> bytes:
+    return data
+
+# ✅ CORRECT - All parameters typed, no defaults
+def process_data(data: bytes, validate: bool) -> bytes:
     return data
 
 # ✅ CORRECT - Method parameters typed including self
@@ -2033,7 +2175,7 @@ This creates `.build/{platform}/build_info.json` with all platform information.
 **Get platform-specific preprocessor defines:**
 ```bash
 # Command line tool
-python3 ci/ci/build_info_analyzer.py --board uno --show-defines
+uv run python ci/ci/build_info_analyzer.py --board uno --show-defines
 
 # Via MCP server
 uv run mcp_server.py
@@ -2068,7 +2210,7 @@ uv run mcp_server.py
 **Compare defines between platforms:**
 ```bash
 # Command line
-python3 ci/ci/build_info_analyzer.py --compare uno esp32dev
+uv run python ci/ci/build_info_analyzer.py --compare uno esp32dev
 
 # Via MCP 
 # Use build_info_analysis tool with: board="uno", compare_with="esp32dev"
@@ -2083,25 +2225,25 @@ Shows differences and commonalities between platform defines.
 **Basic Usage:**
 ```bash
 # List available platforms
-python3 ci/ci/build_info_analyzer.py --list-boards
+uv run python ci/ci/build_info_analyzer.py --list-boards
 
 # Show platform defines
-python3 ci/ci/build_info_analyzer.py --board uno --show-defines
+uv run python ci/ci/build_info_analyzer.py --board uno --show-defines
 
 # Show compiler information
-python3 ci/ci/build_info_analyzer.py --board esp32dev --show-compiler
+uv run python ci/ci/build_info_analyzer.py --board esp32dev --show-compiler
 
 # Show toolchain aliases
-python3 ci/ci/build_info_analyzer.py --board teensy31 --show-toolchain
+uv run python ci/ci/build_info_analyzer.py --board teensy31 --show-toolchain
 
 # Show everything
-python3 ci/ci/build_info_analyzer.py --board digix --show-all
+uv run python ci/ci/build_info_analyzer.py --board digix --show-all
 
 # Compare platforms
-python3 ci/ci/build_info_analyzer.py --compare uno esp32dev
+uv run python ci/ci/build_info_analyzer.py --compare uno esp32dev
 
 # JSON output for automation
-python3 ci/ci/build_info_analyzer.py --board uno --show-defines --json
+uv run python ci/ci/build_info_analyzer.py --board uno --show-defines --json
 ```
 
 #### MCP Server Tool
@@ -2143,19 +2285,19 @@ The build info analysis works with **ANY platform** that generates a `build_info
 **Understanding Platform Differences:**
 ```bash
 # See what defines are available for conditional compilation
-python3 ci/ci/build_info_analyzer.py --board esp32dev --show-defines
+uv run python ci/ci/build_info_analyzer.py --board esp32dev --show-defines
 
 # Compare two platforms to understand differences
-python3 ci/ci/build_info_analyzer.py --compare uno esp32dev
+uv run python ci/ci/build_info_analyzer.py --compare uno esp32dev
 ```
 
 **Compiler and Toolchain Information:**
 ```bash
 # Get compiler paths and flags for debugging builds
-python3 ci/ci/build_info_analyzer.py --board teensy31 --show-compiler
+uv run python ci/ci/build_info_analyzer.py --board teensy31 --show-compiler
 
 # Get toolchain paths for symbol analysis
-python3 ci/ci/build_info_analyzer.py --board digix --show-toolchain
+uv run python ci/ci/build_info_analyzer.py --board digix --show-toolchain
 ```
 
 #### For Automation
@@ -2163,10 +2305,10 @@ python3 ci/ci/build_info_analyzer.py --board digix --show-toolchain
 **JSON output for scripts:**
 ```bash
 # Get defines as JSON for processing
-python3 ci/ci/build_info_analyzer.py --board uno --show-defines --json
+uv run python ci/ci/build_info_analyzer.py --board uno --show-defines --json
 
 # Get all build info as JSON
-python3 ci/ci/build_info_analyzer.py --board esp32dev --show-all --json
+uv run python ci/ci/build_info_analyzer.py --board esp32dev --show-all --json
 ```
 
 ### Integration with Other Tools
@@ -2185,7 +2327,7 @@ Build info analysis integrates with other FastLED tools:
    - **Solution:** Compile a platform first: `uv run ci/ci-compile.py {board} --examples Blink`
 
 2. **"Board key not found in build_info.json"**
-   - **Solution:** Check available boards: `python3 ci/ci/build_info_analyzer.py --list-boards`
+   - **Solution:** Check available boards: `uv run python ci/ci/build_info_analyzer.py --list-boards`
 
 3. **"Build info not found for platform"**
    - **Solution:** Ensure the platform compiled successfully and check `.build/{board}/build_info.json` exists
