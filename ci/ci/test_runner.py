@@ -69,10 +69,8 @@ class TestOutputFormatter:
         else:
             color = "\033[0m"  # Reset
 
-        # Build message
+        # Build message - only include timestamp, not command name
         msg = f"{delta:.2f} "
-        if result.test_name:
-            msg += f"[{result.test_name}] "
         msg += f"{color}{result.message}\033[0m"
 
         # Print with indentation
