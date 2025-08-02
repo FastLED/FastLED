@@ -69,6 +69,74 @@ uv run python -c "import something"
 
 **UV RUN IS NOT OPTIONAL - IT IS MANDATORY FOR ALL PYTHON EXECUTION.**
 
+## 🚨 CRITICAL: NO DEFAULT VALUES POLICY 🚨
+
+### MANDATORY: Explicit Parameter Policy - NO DEFAULTS ALLOWED
+
+**🚨 ABSOLUTELY FORBIDDEN: Default values in dataclasses and function parameters**
+
+**❌ NEVER USE DEFAULT VALUES:**
+- Function parameters with defaults
+- Dataclass fields with default values
+- Method parameters with defaults
+- Optional parameters with fallback values
+
+**✅ ALWAYS REQUIRE EXPLICIT VALUES:**
+- All function parameters must be explicitly provided by caller
+- All dataclass fields must be explicitly specified
+- Use Optional types for truly optional parameters, but no defaults
+- Force callers to handle every parameter consciously
+
+**WHY NO DEFAULTS:**
+- **Signature changes break compilation** - Adding/removing parameters forces all callers to update
+- **Prevents silent bugs** - Missing parameter updates become compile-time errors
+- **Explicit intent** - Every call site shows exactly what values are being passed
+- **Refactoring safety** - Internal changes are caught immediately by type checker
+- **Code clarity** - No hidden behavior from default values
+
+**EXAMPLES:**
+
+```python
+# ❌ FORBIDDEN - Default values hide signature changes
+@dataclass
+class Config:
+    name: str = "default"
+    enabled: bool = True
+    timeout: int = 30
+
+def process_data(data: bytes, validate: bool = True, timeout: int = 30):
+    pass
+
+# ✅ CORRECT - Explicit values required
+@dataclass  
+class Config:
+    name: str
+    enabled: bool
+    timeout: int
+
+def process_data(data: bytes, validate: bool, timeout: int):
+    pass
+
+# Usage requires all parameters
+config = Config(name="test", enabled=True, timeout=60)
+process_data(data=my_data, validate=False, timeout=30)
+```
+
+**BENEFITS:**
+- **Immediate feedback** when function signatures change
+- **No silent failures** from missed parameter updates
+- **Self-documenting code** - all parameters visible at call sites
+- **Safer refactoring** - type checker catches all usage sites
+- **Consistent behavior** - no surprising default value interactions
+
+**EXCEPTIONS (Use Sparingly):**
+- Constructor overloads where defaults truly make sense for usability
+- Public API methods where backwards compatibility is critical
+- BUT: Internal/private functions should NEVER have defaults
+
+**ENFORCEMENT:**
+This policy should be enforced by linters and code review. Adding defaults to existing code without explicit justification is not allowed.
+
 ## Cursor Configuration
 
 ### Post-Change Hooks
@@ -767,15 +835,16 @@ for x in range(5):
 ### Python Function Parameter and Return Types
 
 **🚨 MANDATORY: ALL function parameters MUST have explicit type annotations - NO EXCEPTIONS!**
+**🚨 MANDATORY: NO DEFAULT VALUES in function parameters - NO EXCEPTIONS!**
 
 This rule applies to:
-- ✅ Regular function parameters
-- ✅ Method parameters (including self/cls)
-- ✅ Lambda parameters
-- ✅ Callback function parameters
-- ✅ Generator function parameters
-- ✅ Async function parameters
-- ✅ Protocol method parameters
+- ✅ Regular function parameters (no defaults)
+- ✅ Method parameters (including self/cls, no defaults)
+- ✅ Lambda parameters (no defaults)
+- ✅ Callback function parameters (no defaults)
+- ✅ Generator function parameters (no defaults)
+- ✅ Async function parameters (no defaults)
+- ✅ Protocol method parameters (no defaults)
 
 **Examples:**
 
@@ -784,12 +853,16 @@ This rule applies to:
 def process_data(data):
     return data
 
-# ❌ WRONG - Partial typing
-def validate_user(name: str, age):
+# ❌ WRONG - Partial typing and defaults
+def validate_user(name: str, age, enabled: bool = True):
     return True
 
-# ✅ CORRECT - All parameters typed
-def process_data(data: bytes) -> bytes:
+# ❌ WRONG - Has default values (even with types)
+def process_data(data: bytes, validate: bool = True) -> bytes:
+    return data
+
+# ✅ CORRECT - All parameters typed, no defaults
+def process_data(data: bytes, validate: bool) -> bytes:
     return data
 
 # ✅ CORRECT - Method parameters typed including self

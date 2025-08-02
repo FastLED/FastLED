@@ -1040,14 +1040,14 @@ def link_examples(
 @dataclass
 class CompilationTestConfig:
     """Configuration for the compilation test."""
-    specific_examples: Optional[List[str]] = None
-    clean_build: bool = False
-    disable_pch: bool = False
-    disable_sccache: bool = True
-    unity_build: bool = False
-    unity_custom_output: Optional[str] = None
-    unity_additional_flags: Optional[List[str]] = None
-    full_compilation: bool = False
+    specific_examples: Optional[List[str]]
+    clean_build: bool
+    disable_pch: bool
+    disable_sccache: bool
+    unity_build: bool
+    unity_custom_output: Optional[str]
+    unity_additional_flags: Optional[List[str]]
+    full_compilation: bool
 
 
 @dataclass 
@@ -1057,10 +1057,10 @@ class CompilationTestResults:
     failed_count: int
     failed_examples: List[Dict[str, str]]
     compile_time: float
-    linking_time: float = 0.0
-    linked_count: int = 0
-    linking_failed_count: int = 0
-    object_file_map: Optional[Dict[Path, Path]] = None
+    linking_time: float
+    linked_count: int
+    linking_failed_count: int
+    object_file_map: Optional[Dict[Path, Path]]
 
 
 class CompilationTestRunner:
@@ -1260,6 +1260,9 @@ class CompilationTestRunner:
                 failed_count=result.failed_count,
                 failed_examples=result.failed_examples,
                 compile_time=compile_time,
+                linking_time=0.0,
+                linked_count=0,
+                linking_failed_count=0,
                 object_file_map=getattr(result, 'object_file_map', None)
             )
             
