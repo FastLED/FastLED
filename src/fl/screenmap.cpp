@@ -83,6 +83,9 @@ bool ScreenMap::ParseJson(const char *jsonStrScreenMap,
                           fl::fl_map<string, ScreenMap> *segmentMaps, string *err) {
 
 #if FASTLED_NO_JSON
+    FL_UNUSED(jsonStrScreenMap);
+    FL_UNUSED(segmentMaps);
+    FL_UNUSED(err);
     FL_WARN("ScreenMap::ParseJson called with FASTLED_NO_JSON");
     if (err) {
         *err = "JSON is not supported in this build";
