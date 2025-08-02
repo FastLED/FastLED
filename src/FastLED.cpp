@@ -21,6 +21,10 @@
 #endif  // __AVR__
 #endif  // MAX_CLED_CONTROLLERS
 
+#ifndef FASTLED_MANUAL_ENGINE_EVENTS
+#define FASTLED_MANUAL_ENGINE_EVENTS 0
+#endif
+
 #if defined(__SAM3X8E__)
 volatile fl::u32 fuckit;
 #endif
@@ -125,7 +129,7 @@ CLEDController &CFastLED::addLeds(CLEDController *pLed,
 static void* gControllersData[MAX_CLED_CONTROLLERS];
 
 void CFastLED::show(uint8_t scale) {
-#ifndef FASTLED_MANUAL_ENGINE_EVENTS
+#if !FASTLED_MANUAL_ENGINE_EVENTS
 	fl::EngineEvents::onBeginFrame();
 #endif
 	while(m_nMinMicros && ((micros()-lastshow) < m_nMinMicros));
@@ -171,7 +175,7 @@ void CFastLED::show(uint8_t scale) {
 	}
 	countFPS();
 	onEndFrame();
-#ifndef FASTLED_MANUAL_ENGINE_EVENTS
+#if !FASTLED_MANUAL_ENGINE_EVENTS
 	fl::EngineEvents::onEndShowLeds();
 #endif
 }

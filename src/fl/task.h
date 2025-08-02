@@ -52,6 +52,8 @@ class TaskImpl;
 
 class task {
 public:
+
+
     // Default constructor
     task() = default;
 
@@ -68,11 +70,18 @@ public:
     static task at_framerate(int fps);
     static task at_framerate(int fps, const fl::TracePoint& trace);
 
+    // For most cases you want after_frame() instead of before_frame(), unless you
+    // are doing operations that need to happen right before the frame is rendered.
+    // Most of the time for ui stuff (button clicks, etc) you want after_frame(), do it
+    // can be available for the next iteration of loop().
     static task before_frame();
     static task before_frame(const fl::TracePoint& trace);
 
     static task after_frame();
     static task after_frame(const fl::TracePoint& trace);
+    // Convenience methods for after_frame to prepopulate the then callback.
+    static task after_frame(function<void()> on_then);
+    static task after_frame(function<void()> on_then, const fl::TracePoint& trace);
 
     // Fluent API
     task& then(function<void()> on_then);

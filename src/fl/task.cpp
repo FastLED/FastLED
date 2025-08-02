@@ -66,6 +66,7 @@ fl::shared_ptr<TaskImpl> TaskImpl::create_after_frame() {
     return fl::make_shared<TaskImpl>(TaskType::kAfterFrame, 0);
 }
 
+
 fl::shared_ptr<TaskImpl> TaskImpl::create_after_frame(const fl::TracePoint& trace) {
     return fl::make_shared<TaskImpl>(TaskType::kAfterFrame, 0, trace);
 }
@@ -169,6 +170,18 @@ task task::after_frame() {
 
 task task::after_frame(const fl::TracePoint& trace) {
     return task(TaskImpl::create_after_frame(trace));
+}
+
+task task::after_frame(function<void()> on_then) {
+    task out = task::after_frame();
+    out.then(on_then);
+    return out;
+}
+
+task task::after_frame(function<void()> on_then, const fl::TracePoint& trace) {
+    task out = task::after_frame(trace);
+    out.then(on_then);
+    return out;
 }
 
 // task fluent API

@@ -50,7 +50,8 @@ class GradientInlined {
 
     template <typename T> GradientInlined(const T &palette) { set(palette); }
 
-    GradientInlined(const GradientInlined &other) : mVariant(other.mVariant) {}
+    GradientInlined(const GradientInlined &other) = default;
+    GradientInlined &operator=(const GradientInlined &other) = default;
 
     void set(const CRGBPalette16 &palette) { mVariant = palette; }
     void set(const CRGBPalette32 &palette) { mVariant = palette; }

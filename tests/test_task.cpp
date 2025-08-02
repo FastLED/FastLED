@@ -1,7 +1,4 @@
-// Force enable engine events for testing - must be defined before any FastLED includes
-#ifndef FASTLED_HAS_ENGINE_EVENTS
-#define FASTLED_HAS_ENGINE_EVENTS 1
-#endif
+
 
 #include "doctest.h"
 #include "fl/task.h"
