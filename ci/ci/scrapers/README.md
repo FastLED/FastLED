@@ -14,17 +14,17 @@ This directory contains web scraping tools for testing and capturing screenshots
 ### Run from project root:
 ```bash
 # Basic usage
-python3 ci/ci/scrapers/scrape_festival_stick.py
+uv run python ci/ci/scrapers/scrape_festival_stick.py
 
 # With utility script options
-python3 ci/ci/scrapers/run_fastled_scraper.py --headless --timeout 60
+uv run python ci/ci/scrapers/run_fastled_scraper.py --headless --timeout 60
 ```
 
 ### Run from scrapers directory:
 ```bash
 cd ci/ci/scrapers
-python3 scrape_festival_stick.py
-python3 run_fastled_scraper.py --help
+uv run python scrape_festival_stick.py
+uv run python run_fastled_scraper.py --help
 ```
 
 ## Features
