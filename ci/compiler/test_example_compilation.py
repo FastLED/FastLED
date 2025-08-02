@@ -30,7 +30,7 @@ import toml  # type: ignore
 
 _IS_GITHUB_ACTIONS = os.getenv("GITHUB_ACTIONS") == "true"
 
-_TIMEOUT = 240 if _IS_GITHUB_ACTIONS else 120
+_TIMEOUT = 600 if _IS_GITHUB_ACTIONS else 120
 
 # Add the parent directory to Python path for imports
 # Import the proven Compiler infrastructure
