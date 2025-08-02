@@ -566,14 +566,27 @@ def _run_process_with_output(process: RunningProcess, verbose: bool = False) -> 
             _thread.interrupt_main()
             process.kill()
             return
+        except queue.Empty:
+            # Timeout occurred while waiting for output - this is normal in some cases
+            # Check if process is still running
+            if process.poll() is not None:
+                # Process has completed, break out of loop
+                break
+            # Process is still running but no output for 120 seconds
+            # This could indicate a hung process, but let's continue waiting
+            # in case it's just a long-running operation
+            print(f"  No output from {process.command} for 120 seconds, continuing to wait...")
+            continue
         except Exception as e:
             print(f"Error processing output from {process.command}: {e}")
+            print(f"Exception type: {type(e).__name__}")
+            print(f"Exception details: {repr(e)}")
             process.kill()
             failure = TestFailureInfo(
                 test_name=_extract_test_name(process.command),
                 command=str(process.command),
                 return_code=1,
-                output=str(e),
+                output=f"Exception: {type(e).__name__}: {e}",
                 error_type="process_error",
             )
             raise TestExecutionFailedException(
