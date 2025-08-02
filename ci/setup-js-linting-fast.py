@@ -15,6 +15,7 @@ import io
 import json
 import os
 import platform
+import shutil
 import subprocess
 import sys
 import tarfile
@@ -70,6 +71,15 @@ def download_and_extract_node():
     url, filename, is_zip = get_node_download_info()
     download_path = TOOLS_DIR / filename
 
+    # Get architecture for extraction path
+    machine = platform.machine().lower()
+    if machine in ["x86_64", "amd64"]:
+        arch = "x64"
+    elif machine in ["aarch64", "arm64"]:
+        arch = "arm64"
+    else:
+        raise ValueError(f"Unsupported architecture: {machine}")
+
     print(f"Downloading Node.js v{NODE_VERSION}...")
     TOOLS_DIR.mkdir(exist_ok=True)
     NODE_DIR.mkdir(exist_ok=True)
@@ -96,10 +106,21 @@ def download_and_extract_node():
             with zipfile.ZipFile(download_path, "r") as zip_ref:
                 zip_ref.extractall(NODE_DIR)
             # Move contents from nested folder to NODE_DIR
-            nested_dir = NODE_DIR / f"node-v{NODE_VERSION}-win-x64"
+            nested_dir = NODE_DIR / f"node-v{NODE_VERSION}-win-{arch}"
             if nested_dir.exists():
                 for item in nested_dir.iterdir():
-                    item.rename(NODE_DIR / item.name)
+                    if item.is_dir():
+                        # For directories, move contents recursively
+                        target_dir = NODE_DIR / item.name
+                        if target_dir.exists():
+                            shutil.rmtree(target_dir)
+                        shutil.move(str(item), str(target_dir))
+                    else:
+                        # For files, move directly
+                        target_file = NODE_DIR / item.name
+                        if target_file.exists():
+                            target_file.unlink()
+                        item.rename(target_file)
                 nested_dir.rmdir()
         else:
             with tarfile.open(download_path, "r:*") as tar_ref:
