@@ -20,7 +20,7 @@ fi
 
 # Build the tests to ensure compile_commands.json is generated in tests/.build/
 echo "Building tests to generate compile_commands.json..."
-uv run ci/compiler/cpp_test_run.py --compile-only --clang --test test_function
+uv run -m ci.compiler.cpp_test_run --compile-only --clang --test test_function
 
 # Copy the generated compile_commands.json from tests/.build/
 if [ -f tests/.build/compile_commands.json ]; then

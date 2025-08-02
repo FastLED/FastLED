@@ -10,15 +10,8 @@ NC='\033[0m' # No Color
 
 echo -e "${BLUE}FAST FastLED JavaScript Linting (Node.js + ESLint - FAST!)${NC}"
 
-# Check if ESLint is installed (handle Windows .cmd extension)
-ESLINT_EXEC=""
-if [[ "$OSTYPE" == "msys" || "$OSTYPE" == "cygwin" || "$OSTYPE" == "win32" ]]; then
-    ESLINT_EXEC=".js-tools/node_modules/.bin/eslint.cmd"
-else
-    ESLINT_EXEC=".js-tools/node_modules/.bin/eslint"
-fi
-
-if [ ! -f "$ESLINT_EXEC" ]; then
+# Check if ESLint is installed
+if [ ! -f ".js-tools/node_modules/.bin/eslint" ]; then
     echo -e "${RED}ERROR: ESLint not found. Run: uv run ci/setup-js-linting-fast.py${NC}"
     exit 1
 fi
@@ -37,15 +30,7 @@ echo "$JS_FILES" | sed 's/^/  /'
 # Run ESLint
 echo -e "${BLUE}Running ESLint...${NC}"
 cd .js-tools
-
-# Use relative path from .js-tools directory
-if [[ "$OSTYPE" == "msys" || "$OSTYPE" == "cygwin" || "$OSTYPE" == "win32" ]]; then
-    ESLINT_LOCAL="./node_modules/.bin/eslint.cmd"
-else
-    ESLINT_LOCAL="./node_modules/.bin/eslint"
-fi
-
-if "$ESLINT_LOCAL" --no-eslintrc --no-inline-config -c .eslintrc.js ../src/platforms/wasm/compiler/*.js ../src/platforms/wasm/compiler/modules/*.js; then
+if "./node_modules/.bin/eslint" --no-eslintrc --no-inline-config -c .eslintrc.js ../src/platforms/wasm/compiler/*.js ../src/platforms/wasm/compiler/modules/*.js; then
     echo -e "${GREEN}SUCCESS: JavaScript linting completed successfully${NC}"
 else
     echo -e "${RED}ERROR: JavaScript linting failed${NC}"

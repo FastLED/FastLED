@@ -21,15 +21,18 @@ echo "Setting up C++ development environment..."
 
 # Build tests to generate compile_commands.json for clangd
 echo "Building C++ tests to generate compile_commands.json..."
-uv run -m ci.compiler.cpp_test_run.py --compile-only --clang --test test_function
+uv run -m ci.compiler.cpp_test_run --compile-only --clang --test test_function
 
 # Copy compile_commands.json to project root for clangd IntelliSense
 if [ -f tests/.build/compile_commands.json ]; then
     echo "Copying compile_commands.json for clangd support..."
     cp tests/.build/compile_commands.json compile_commands.json
     echo "✅ clangd support enabled - IntelliSense should work in VSCode"
+elif [ -f compile_commands.json ]; then
+    echo "✅ compile_commands.json already exists - clangd support enabled"
 else
     echo "⚠️  Warning: compile_commands.json not found. Tests may not have built successfully."
+    echo "    You can manually run './generate_compile_commands.sh' to create it."
 fi
 
 echo "Setting up JavaScript development environment..."
