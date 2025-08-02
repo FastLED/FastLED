@@ -1381,14 +1381,14 @@ class CompilationTestRunner:
 
 
 def run_example_compilation_test(
-    specific_examples: Optional[List[str]] = None,
-    clean_build: bool = False,
-    disable_pch: bool = False,
-    disable_sccache: bool = True,  # Default to disabled for faster clean builds
-    unity_build: bool = False,
-    unity_custom_output: Optional[str] = None,
-    unity_additional_flags: Optional[List[str]] = None,
-    full_compilation: bool = False,
+    specific_examples: Optional[List[str]],
+    clean_build: bool,
+    disable_pch: bool,
+    disable_sccache: bool,
+    unity_build: bool,
+    unity_custom_output: Optional[str],
+    unity_additional_flags: Optional[List[str]],
+    full_compilation: bool,
 ) -> int:
     """Run the example compilation test using enhanced simple build system."""
     try:
