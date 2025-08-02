@@ -257,6 +257,7 @@ def compile_tests(
     unknown_args: list[str] = [],
     specific_test: str | None = None,
     use_legacy_system: bool = False,
+    quick_build: bool = False,
     *,
     verbose: bool = False,
     show_compile: bool = False,
@@ -293,6 +294,7 @@ def compile_tests(
             clean,
             unknown_args,
             specific_test,
+            quick_build=quick_build,
             verbose=verbose,
             show_compile=show_compile,
             show_link=show_link,
@@ -344,6 +346,7 @@ def _compile_tests_python(
     clean: bool = False,
     unknown_args: list[str] = [],
     specific_test: str | None = None,
+    quick_build: bool = False,
     *,
     verbose: bool = False,
     show_compile: bool = False,
@@ -367,6 +370,7 @@ def _compile_tests_python(
             clean_build=clean,
             enable_static_analysis="--check" in unknown_args,
             specific_test=specific_test,
+            quick_build=quick_build,
             no_unity=no_unity,
         )
 
@@ -930,6 +934,11 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Disable unity builds for cpp tests",
     )
+    parser.add_argument(
+        "--quick",
+        action="store_true",
+        help="Use quick build mode with minimal debug info for faster compilation",
+    )
 
     args, unknown = parser.parse_known_args()
     args.unknown = unknown
@@ -950,6 +959,7 @@ def main() -> None:
     use_clang = args.clang
     use_legacy_system = args.legacy
     no_unity = args.no_unity
+    quick_build = args.quick
     # use_gcc = args.gcc
 
     if not run_only:
@@ -966,6 +976,7 @@ def main() -> None:
             unknown_args=passthrough_args,
             specific_test=specific_test,
             use_legacy_system=use_legacy_system,
+            quick_build=quick_build,
             verbose=args.verbose,
             show_compile=args.show_compile,
             show_link=args.show_link,
