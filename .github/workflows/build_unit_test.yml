@@ -54,7 +54,29 @@ jobs:
         run: ./install
         shell: bash
 
-      - name: Run Test
+      - name: No namespace after headers
+        run: |
+          uv run python ci/tests/no_using_namespace_fl_in_headers.py
+
+
+      
+      - name: Run Example Blink
+        run: |
+          ./test --no-parallel --no-unity --example blink --no-pch --verbose
+
+      - name: Run Unit Test Json
+        run: |
+          ./test --no-parallel --no-unity --unit --no-pch --verbose Json
+
+      - name: Run All Unit Tests
+        run: |
+          if [ "${{ matrix.compiler }}" = "clang" ]; then
+            ./test --clang --no-parallel --no-unity --unit --no-pch --verbose
+          else
+            ./test --no-parallel --no-unity --unit --no-pch --verbose
+          fi
+
+      - name: Run All Examples
         run: |
           if [ "${{ matrix.compiler }}" = "clang" ]; then
             ./test --clang --no-parallel --no-unity --unit --no-pch --verbose
