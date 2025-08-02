@@ -44,10 +44,13 @@ def discover_tests(build_dir: Path, specific_test: Optional[str] = None) -> List
         if test_file.suffix in [".o", ".obj", ".pdb"]:
             continue
         if specific_test:
-            # Support both "test_name" and "name" formats
+            # Support both "test_name" and "name" formats (case-insensitive)
             test_stem = test_file.stem
             test_name = test_stem.replace("test_", "")
-            if test_stem == specific_test or test_name == specific_test:
+            if (
+                test_stem.lower() == specific_test.lower()
+                or test_name.lower() == specific_test.lower()
+            ):
                 test_files.append(test_file)
         else:
             test_files.append(test_file)

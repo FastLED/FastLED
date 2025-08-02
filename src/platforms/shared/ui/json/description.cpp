@@ -3,6 +3,7 @@
 #include "ui_internal.h"
 
 #include "fl/json.h"
+#include "fl/unused.h"
 
 #if FASTLED_ENABLE_JSON
 
@@ -30,6 +31,7 @@ class JsonUiDescriptionInternal : public JsonUiInternal {
     // Override updateInternal. Descriptions typically don't have update
     // functionality from the UI, so this can be a no-op.
     void updateInternal(const fl::Json &json) override {
+        FL_UNUSED(json);
         // No update needed for description components
     }
 
