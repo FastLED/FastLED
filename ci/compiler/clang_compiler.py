@@ -587,7 +587,7 @@ class Compiler:
 
             # Build PCH compilation command using TOML configuration
             # Use compiler_args from TOML without any filtering or hardcoding
-            cmd: list[str] = self.settings.compiler_args.copy()
+            cmd: list[str] = optimize_python_command(self.settings.compiler_args.copy())
 
             # Add PCH-specific flags (don't override std version - use what's in TOML)
             cmd.extend(
