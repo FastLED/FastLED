@@ -167,23 +167,14 @@ class LinkOptions:
 class BuildTools:
     """Build tool paths and configurations"""
 
-    compiler: str = "clang++"  # C++ compiler (maps to CompilerOptions.compiler)
-    archiver: str = "ar"  # Archive tool (maps to CompilerOptions.archiver)
-    linker: str | None = None  # Linker tool (maps to LinkOptions.linker)
-    c_compiler: str = "clang"  # C compiler (for mixed C/C++ projects)
-    objcopy: str = "objcopy"  # Object copy utility (for firmware/embedded)
-    nm: str = "nm"  # Symbol table utility (for analysis)
-    strip: str = "strip"  # Strip utility (for release builds)
-    ranlib: str = "ranlib"  # Archive indexer (for static libraries)
-    compiler_command: list[str] = field(
-        default_factory=list[str]
-    )  # Full compiler command with arguments
-    linker_command: list[str] = field(
-        default_factory=list[str]
-    )  # Full linker command with arguments
-    archiver_command: list[str] = field(
-        default_factory=list[str]
-    )  # Full archiver command with arguments
+    cpp_compiler: list[str]  # C++ compiler (maps to CompilerOptions.compiler)
+    archiver: list[str]  # Archive tool (maps to CompilerOptions.archiver)
+    linker: list[str]  # Linker tool (maps to LinkOptions.linker)
+    c_compiler: list[str]  # C compiler (maps to CompilerOptions.c_compiler)
+    objcopy: list[str]  # Object copy utility (for firmware/embedded)
+    nm: list[str]  # Symbol table utility (for analysis)
+    strip: list[str]  # Strip utility (for release builds)
+    ranlib: list[str]  # Archive indexer (for static libraries)
 
 
 @dataclass
@@ -195,12 +186,12 @@ class BuildFlags:
     and serialize back to TOML format.
     """
 
-    defines: List[str] = field(default_factory=list[str])
-    compiler_flags: List[str] = field(default_factory=list[str])
-    include_flags: List[str] = field(default_factory=list[str])
-    link_flags: List[str] = field(default_factory=list[str])
-    strict_mode_flags: List[str] = field(default_factory=list[str])
-    tools: BuildTools = field(default_factory=BuildTools)
+    defines: List[str]
+    compiler_flags: List[str]
+    include_flags: List[str]
+    link_flags: List[str]
+    strict_mode_flags: List[str]
+    tools: BuildTools
 
     @classmethod
     def parse(
@@ -240,69 +231,82 @@ class BuildFlags:
 
         tools_config = config["tools"]
 
-        # Validate required tools are present
-        required_tools = {
-            "compiler_command": 'Full compiler command (e.g., ["python", "-m", "ziglang", "c++"])',
-            "c_compiler": 'C compiler (e.g., "clang")',
-        }
+        # # Extract linker_command and archiver_command with validation
+        # linker_command = tools_config.get("linker_command", [])
+        # archiver_command = tools_config.get("archiver_command", [])
 
-        missing_tools: List[str] = []
-        for tool, description in required_tools.items():
-            if tool not in tools_config:
-                missing_tools.append(f"  - {tool}: {description}")
+        # # Validate command fields if present
+        # if linker_command and not isinstance(linker_command, list):
+        #     raise RuntimeError(
+        #         f"FATAL ERROR: tools.linker_command must be a list in build_flags.toml at {toml_path}\n"
+        #         f"Got: {linker_command} (type: {type(linker_command).__name__})\n"
+        #         f'Expected: ["python", "-m", "ziglang", "c++"]'
+        #     )
 
-        if missing_tools:
-            raise RuntimeError(
-                f"FATAL ERROR: Required tools missing from [tools] section in build_flags.toml at {toml_path}\n"
-                f"Missing tools:\n" + "\n".join(missing_tools) + "\n\n"
-                f"All compiler tools must be explicitly defined in the TOML configuration.\n"
-                f"No defaults or hardcoded values are allowed."
-            )
+        # if archiver_command and not isinstance(archiver_command, list):
+        #     raise RuntimeError(
+        #         f"FATAL ERROR: tools.archiver_command must be a list in build_flags.toml at {toml_path}\n"
+        #         f"Got: {archiver_command} (type: {type(archiver_command).__name__})\n"
+        #         f'Expected: ["python", "-m", "ziglang", "ar"]'
+        #     )
 
-        # Validate compiler_command is a list
-        compiler_command = tools_config["compiler_command"]
-        if not isinstance(compiler_command, list) or not compiler_command:
-            raise RuntimeError(
-                f"FATAL ERROR: tools.compiler_command must be a non-empty list in build_flags.toml at {toml_path}\n"
-                f"Got: {compiler_command} (type: {type(compiler_command).__name__})\n"
-                f'Expected: ["python", "-m", "ziglang", "c++"]'
-            )
+        cpp_compiler = tools_config.get("compiler_command", None)
+        linker = tools_config.get("linker_command", None)
+        c_compiler = tools_config.get("c_compiler", None)
+        objcopy = tools_config.get("objcopy", None)
+        nm = tools_config.get("nm", None)
+        strip = tools_config.get("strip", None)
+        ranlib = tools_config.get("ranlib", None)
+        archiver = tools_config.get("archiver_command", None)
 
-        # Extract linker_command and archiver_command with validation
-        linker_command = tools_config.get("linker_command", [])
-        archiver_command = tools_config.get("archiver_command", [])
+        assert cpp_compiler is not None, (
+            f"FATAL ERROR: cpp_compiler is not set in build_flags.toml at {toml_path}"
+        )
+        assert linker is not None, (
+            f"FATAL ERROR: linker is not set in build_flags.toml at {toml_path}"
+        )
+        assert c_compiler is not None, (
+            f"FATAL ERROR: c_compiler is not set in build_flags.toml at {toml_path}"
+        )
+        assert objcopy is not None, (
+            f"FATAL ERROR: objcopy is not set in build_flags.toml at {toml_path}"
+        )
+        assert nm is not None, (
+            f"FATAL ERROR: nm is not set in build_flags.toml at {toml_path}"
+        )
+        assert strip is not None, (
+            f"FATAL ERROR: strip is not set in build_flags.toml at {toml_path}"
+        )
+        assert ranlib is not None, (
+            f"FATAL ERROR: ranlib is not set in build_flags.toml at {toml_path}"
+        )
+        assert archiver is not None, (
+            f"FATAL ERROR: archiver is not set in build_flags.toml at {toml_path}"
+        )
 
-        # Validate command fields if present
-        if linker_command and not isinstance(linker_command, list):
-            raise RuntimeError(
-                f"FATAL ERROR: tools.linker_command must be a list in build_flags.toml at {toml_path}\n"
-                f"Got: {linker_command} (type: {type(linker_command).__name__})\n"
-                f'Expected: ["python", "-m", "ziglang", "c++"]'
-            )
-
-        if archiver_command and not isinstance(archiver_command, list):
-            raise RuntimeError(
-                f"FATAL ERROR: tools.archiver_command must be a list in build_flags.toml at {toml_path}\n"
-                f"Got: {archiver_command} (type: {type(archiver_command).__name__})\n"
-                f'Expected: ["python", "-m", "ziglang", "ar"]'
-            )
+        # tools = BuildTools(
+        #     compiler=cpp_compiler,  # Use last element as fallback
+        #     archiver=archiver,  # Use fallback for deprecated field
+        #     linker=linker,
+        #     c_compiler=c_compiler,
+        #     objcopy=objcopy,
+        #     nm=nm,
+        #     strip=strip,
+        #     ranlib=ranlib,
+        #     compiler_command=compiler_command,  # Add the full command
+        #     linker_command=linker,  # Add the linker command
+        #     archiver_command=archiver,  # Add the archiver command
+        # )
 
         tools = BuildTools(
-            compiler=tools_config.get(
-                "compiler", compiler_command[-1]
-            ),  # Use last element as fallback
-            archiver=tools_config.get(
-                "archiver", "ar"
-            ),  # Use fallback for deprecated field
-            linker=tools_config.get("linker"),
-            c_compiler=tools_config["c_compiler"],
-            objcopy=tools_config.get("objcopy", "objcopy"),
-            nm=tools_config.get("nm", "nm"),
-            strip=tools_config.get("strip", "strip"),
-            ranlib=tools_config.get("ranlib", "ranlib"),
-            compiler_command=compiler_command,  # Add the full command
-            linker_command=linker_command,  # Add the linker command
-            archiver_command=archiver_command,  # Add the archiver command
+            cpp_compiler=cpp_compiler,
+            archiver=archiver,
+            linker=linker,
+            c_compiler=c_compiler,
+            objcopy=objcopy,
+            nm=nm,
+            strip=strip,
+            ranlib=ranlib,
         )
 
         # Extract base flags
@@ -456,26 +460,28 @@ class BuildFlags:
         # Add tools - using modern command-based fields only
 
         # Add compiler_command if it exists
-        if self.tools.compiler_command:
-            toml_content.append(f"compiler_command = {self.tools.compiler_command!r}")
+        if self.tools.cpp_compiler:
+            toml_content.append(f"cpp_compiler = {self.tools.cpp_compiler!r}")
 
         # Add linker_command if it exists
-        if self.tools.linker_command:
-            toml_content.append(f"linker_command = {self.tools.linker_command!r}")
+        if self.tools.linker:
+            toml_content.append(f"linker_command = {self.tools.linker!r}")
 
         # Add archiver_command if it exists
-        if self.tools.archiver_command:
-            toml_content.append(f"archiver_command = {self.tools.archiver_command!r}")
+        if self.tools.archiver:
+            toml_content.append(f"archiver_command = {self.tools.archiver!r}")
 
         # Only add linker if it's not None
         if self.tools.linker is not None:
             toml_content.append(f'linker = "{self.tools.linker}"')
 
         toml_content.append(f'c_compiler = "{self.tools.c_compiler}"')
+        toml_content.append(f'cpp_compiler = "{self.tools.cpp_compiler}"')
         toml_content.append(f'objcopy = "{self.tools.objcopy}"')
         toml_content.append(f'nm = "{self.tools.nm}"')
         toml_content.append(f'strip = "{self.tools.strip}"')
         toml_content.append(f'ranlib = "{self.tools.ranlib}"')
+        toml_content.append(f'c_compiler = "{self.tools.c_compiler}"')
         toml_content.append("")
 
         return "\n".join(toml_content)
@@ -521,9 +527,7 @@ class Compiler:
     Compiler wrapper for FastLED .ino file compilation.
     """
 
-    def __init__(
-        self, settings: CompilerOptions, build_flags: BuildFlags | None = None
-    ):
+    def __init__(self, settings: CompilerOptions, build_flags: BuildFlags):
         self.settings = settings
         self.build_flags = build_flags
         self._pch_file_path: Path | None = None
@@ -1765,18 +1769,15 @@ class Compiler:
             raise RuntimeError(f"No linker found for platform {system}")
 
 
-def get_configured_linker_command(build_flags_config: BuildFlags) -> list[str] | None:
+def get_configured_linker_command(build_flags_config: BuildFlags) -> list[str]:
     """Get linker command from build_flags.toml configuration."""
-    if build_flags_config.tools.linker_command:
-        return build_flags_config.tools.linker_command
-    elif build_flags_config.tools.compiler_command:
-        # Fallback: Use compiler_command for linking (common for Zig toolchain)
-        return build_flags_config.tools.compiler_command
-    return None
+    if build_flags_config.tools.linker:
+        return build_flags_config.tools.linker
+    assert False, "FATAL ERROR: linker is not set in build_flags.toml"
 
 
 def link_program_sync(
-    link_options: LinkOptions, build_flags_config: BuildFlags | None = None
+    link_options: LinkOptions, build_flags_config: BuildFlags
 ) -> Result:
     """
     Link object files and libraries into an executable program.

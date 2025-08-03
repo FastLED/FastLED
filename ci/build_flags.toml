@@ -11,11 +11,11 @@
 compiler_command = ["python", "-m", "ziglang", "c++"]
 linker_command = ["python", "-m", "ziglang", "c++"]  # Separate linker config for consistency
 archiver_command = ["python", "-m", "ziglang", "ar"]  # Ziglang archiver for unified toolchain
-c_compiler = "clang"
-objcopy = "objcopy"
-nm = "nm"
-strip = "strip"
-ranlib = "ranlib"
+c_compiler = ["python", "-m", "ziglang", "cc"]
+objcopy = ["python", "-m", "ziglang", "objcopy"]
+nm = ["python", "-m", "ziglang", "nm"]
+strip = ["python", "-m", "ziglang", "strip"]
+ranlib = ["python", "-m", "ziglang", "ranlib"]
 
 [all]
 # Universal compilation flags (compiler command handled separately)
