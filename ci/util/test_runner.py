@@ -352,7 +352,7 @@ def create_examples_test_process(
 ) -> RunningProcess:
     """Create an examples test process without starting it"""
     cmd = ["uv", "run", "python", "ci/compiler/test_example_compilation.py"]
-    if args.examples:
+    if args.examples is not None:
         cmd.extend(args.examples)
     if args.clean:
         cmd.append("--clean")
@@ -363,6 +363,9 @@ def create_examples_test_process(
     if args.unity:
         cmd.append("--unity")
     if args.full and args.examples is not None:
+        cmd.append("--full")
+    elif args.examples is not None:
+        # Auto-enable full mode for examples to include execution
         cmd.append("--full")
     if args.no_parallel:
         cmd.append("--no-parallel")
