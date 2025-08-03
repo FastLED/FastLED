@@ -258,7 +258,7 @@ class FastLEDTestCompiler:
 
         # Get tools configuration from BuildFlags (respects build_flags.toml)
         # Use modern command-based approach
-        compiler_command = build_flags.tools.compiler_command
+        compiler_command = build_flags.tools.cpp_compiler
 
         print(f"Using compiler from build_flags.toml: {compiler_command}")
 
@@ -273,7 +273,7 @@ class FastLEDTestCompiler:
             # Note: archiver and compiler fields are now handled via command-based approach
         )
 
-        compiler = Compiler(settings)
+        compiler = Compiler(settings, build_flags)
 
         # Create final instance with proper compiler and flags
         instance = cls(
@@ -625,7 +625,10 @@ class FastLEDTestCompiler:
                 print(f"[LINK] {test_name} -> {rel_exe_path}")
 
             print(f"Linking test: {test_name}")
-            link_result: Result = link_program_sync(link_options)
+            # STRICT: Provide explicit BuildFlags - NO defaults allowed
+            link_result: Result = link_program_sync(
+                link_options, self.compiler.build_flags
+            )
 
             if not link_result.ok:
                 # Create more detailed error message showing link command context

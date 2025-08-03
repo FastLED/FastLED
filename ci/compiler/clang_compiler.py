@@ -461,7 +461,7 @@ class BuildFlags:
 
         # Add compiler_command if it exists
         if self.tools.cpp_compiler:
-            toml_content.append(f"cpp_compiler = {self.tools.cpp_compiler!r}")
+            toml_content.append(f"compiler_command = {self.tools.cpp_compiler!r}")
 
         # Add linker_command if it exists
         if self.tools.linker:
@@ -471,17 +471,17 @@ class BuildFlags:
         if self.tools.archiver:
             toml_content.append(f"archiver_command = {self.tools.archiver!r}")
 
-        # Only add linker if it's not None
-        if self.tools.linker is not None:
-            toml_content.append(f'linker = "{self.tools.linker}"')
-
-        toml_content.append(f'c_compiler = "{self.tools.c_compiler}"')
-        toml_content.append(f'cpp_compiler = "{self.tools.cpp_compiler}"')
-        toml_content.append(f'objcopy = "{self.tools.objcopy}"')
-        toml_content.append(f'nm = "{self.tools.nm}"')
-        toml_content.append(f'strip = "{self.tools.strip}"')
-        toml_content.append(f'ranlib = "{self.tools.ranlib}"')
-        toml_content.append(f'c_compiler = "{self.tools.c_compiler}"')
+        # Add individual tool commands as strings (for backward compatibility)
+        if self.tools.c_compiler:
+            toml_content.append(f"c_compiler = {self.tools.c_compiler!r}")
+        if self.tools.objcopy:
+            toml_content.append(f"objcopy = {self.tools.objcopy!r}")
+        if self.tools.nm:
+            toml_content.append(f"nm = {self.tools.nm!r}")
+        if self.tools.strip:
+            toml_content.append(f"strip = {self.tools.strip!r}")
+        if self.tools.ranlib:
+            toml_content.append(f"ranlib = {self.tools.ranlib!r}")
         toml_content.append("")
 
         return "\n".join(toml_content)
@@ -2028,6 +2028,26 @@ def _get_default_settings() -> CompilerOptions:
 
 _DEFAULT_SETTINGS = _get_default_settings()
 
+
+def _get_default_build_flags() -> BuildFlags:
+    """Get default BuildFlags with MANDATORY configuration loading - NO FALLBACKS!"""
+    from pathlib import Path
+
+    # MANDATORY: Load build_flags.toml configuration - NO fallbacks allowed
+    current_dir = Path(__file__).parent
+    ci_dir = current_dir.parent
+    toml_path = ci_dir / "build_flags.toml"
+
+    if not toml_path.exists():
+        raise RuntimeError(
+            f"CRITICAL: build_flags.toml not found at {toml_path}. "
+            f"This file is MANDATORY for all compiler operations."
+        )
+
+    # Use BuildFlags.parse() method for proper type construction
+    return BuildFlags.parse(toml_path)
+
+
 # Shared compiler instance for backward compatibility functions
 _default_compiler = None
 
@@ -2036,7 +2056,9 @@ def _get_default_compiler() -> Compiler:
     """Get or create a shared compiler instance with default settings."""
     global _default_compiler
     if _default_compiler is None:
-        _default_compiler = Compiler(_DEFAULT_SETTINGS)
+        # STRICT: Both CompilerOptions AND BuildFlags are REQUIRED - NO DEFAULTS!
+        build_flags = _get_default_build_flags()
+        _default_compiler = Compiler(_DEFAULT_SETTINGS, build_flags)
     return _default_compiler
 
 
@@ -2111,7 +2133,9 @@ def main() -> bool:
     settings = CompilerOptions(
         include_path="./src", defines=["STUB_PLATFORM"], std_version="c++17"
     )
-    compiler = Compiler(settings)
+    # STRICT: Load BuildFlags explicitly - NO defaults allowed
+    build_flags = _get_default_build_flags()
+    compiler = Compiler(settings, build_flags)
 
     # Test version check
     version_result = compiler.check_clang_version()
@@ -2155,7 +2179,9 @@ def main() -> bool:
         std_version="c++17",
         compiler_args=["-Werror", "-Wall"],
     )
-    compiler_with_args = Compiler(settings_with_args)
+    # STRICT: Load BuildFlags explicitly - NO defaults allowed
+    build_flags_with_args = _get_default_build_flags()
+    compiler_with_args = Compiler(settings_with_args, build_flags_with_args)
     if ino_files:
         # Test that compiler_args are included in the command
         with tempfile.NamedTemporaryFile(suffix=".o", delete=False) as temp_file:
@@ -2245,12 +2271,12 @@ def detect_linker() -> str:
 
 def get_configured_archiver_command(build_flags_config: BuildFlags) -> list[str] | None:
     """Get archiver command from build_flags.toml configuration."""
-    if build_flags_config.tools.archiver_command:
-        return build_flags_config.tools.archiver_command
+    if build_flags_config.tools.archiver:
+        return build_flags_config.tools.archiver
     return None
 
 
-def detect_archiver(build_flags_config: BuildFlags | None = None) -> str:
+def detect_archiver(build_flags_config: BuildFlags | None) -> str:
     """Detect archiver with preference for configured tools."""
     if build_flags_config:
         configured_cmd = get_configured_archiver_command(build_flags_config)
@@ -2469,14 +2495,12 @@ def create_compiler_options_from_toml(
     # Get modern command-based tools with fallbacks for legacy CompilerOptions compatibility
     # Use the last element of command arrays as the tool name for backward compatibility
     compiler_tool = (
-        build_flags.tools.compiler_command[-1]
-        if build_flags.tools.compiler_command
-        else getattr(build_flags.tools, "compiler", "clang++")
+        build_flags.tools.cpp_compiler[-1]
+        if build_flags.tools.cpp_compiler
+        else "clang++"
     )
     archiver_tool = (
-        build_flags.tools.archiver_command[-1]
-        if build_flags.tools.archiver_command
-        else getattr(build_flags.tools, "archiver", "ar")
+        build_flags.tools.archiver[-1] if build_flags.tools.archiver else "ar"
     )
 
     # Create CompilerOptions with TOML-loaded flags and tools

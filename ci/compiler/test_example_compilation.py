@@ -35,6 +35,7 @@ _TIMEOUT = 600 if _IS_GITHUB_ACTIONS else 120
 # Add the parent directory to Python path for imports
 # Import the proven Compiler infrastructure
 from ci.compiler.clang_compiler import (
+    BuildFlags,
     Compiler,
     CompilerOptions,
     LinkOptions,
@@ -474,7 +475,14 @@ def create_fastled_compiler(
         pch_output_path=pch_output_path,
         parallel=parallel,
     )
-    return Compiler(settings)
+    # Load build flags from TOML
+    current_dir_path = Path(current_dir)
+    build_flags_path = current_dir_path / "ci" / "build_flags.toml"
+    build_flags = BuildFlags.parse(
+        build_flags_path, quick_build=False, strict_mode=False
+    )
+
+    return Compiler(settings, build_flags)
 
 
 def compile_examples_simple(

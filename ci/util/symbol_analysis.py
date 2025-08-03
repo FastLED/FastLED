@@ -29,7 +29,7 @@ class SymbolInfo:
     type: str
     name: str
     demangled_name: str
-    source: str = "unknown"
+    source: str  # STRICT: NO defaults - all callers must provide explicit source
 
 
 @dataclass

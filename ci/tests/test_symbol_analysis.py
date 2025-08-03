@@ -182,6 +182,7 @@ class TestSymbolAnalysis(unittest.TestCase):
                 type="T",
                 name="test_function_1",
                 demangled_name="test_function_1()",
+                source="test",
             ),
             SymbolInfo(
                 address="0x2000",
@@ -189,6 +190,7 @@ class TestSymbolAnalysis(unittest.TestCase):
                 type="T",
                 name="_Z12test_func_2v",
                 demangled_name="test_function_2()",
+                source="test",
             ),
             SymbolInfo(
                 address="0x3000",
@@ -196,6 +198,7 @@ class TestSymbolAnalysis(unittest.TestCase):
                 type="D",
                 name="test_data",
                 demangled_name="test_data",
+                source="test",
             ),
         ]
 

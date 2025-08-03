@@ -93,8 +93,19 @@ def configure_ccache(env: PlatformIOEnv) -> None:  # type: ignore # env is provi
     os.environ["CCACHE_MAXSIZE"] = "400M"
 
     # Wrap compiler commands with ccache
-    original_cc = env.get("CC", "gcc")
-    original_cxx = env.get("CXX", "g++")
+    # STRICT: CC and CXX must be explicitly set - NO fallbacks allowed
+    original_cc = env.get("CC")
+    if not original_cc:
+        raise RuntimeError(
+            "CRITICAL: CC environment variable is required but not set. "
+            "Please set CC to the C compiler path (e.g., gcc, clang)."
+        )
+    original_cxx = env.get("CXX")
+    if not original_cxx:
+        raise RuntimeError(
+            "CRITICAL: CXX environment variable is required but not set. "
+            "Please set CXX to the C++ compiler path (e.g., g++, clang++)."
+        )
 
     # Don't wrap if already wrapped
     if original_cc is not None and "ccache" not in original_cc:
