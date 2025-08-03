@@ -257,8 +257,7 @@ class FastLEDTestCompiler:
                 defines.append(define)
 
         # Get tools configuration from BuildFlags (respects build_flags.toml)
-        compiler_cmd = build_flags.tools.compiler
-        archiver_tool = build_flags.tools.archiver
+        # Use modern command-based approach
         compiler_command = build_flags.tools.compiler_command
 
         print(f"Using compiler from build_flags.toml: {compiler_command}")
@@ -271,24 +270,7 @@ class FastLEDTestCompiler:
             include_path=str(project_root / "src"),
             defines=defines,
             compiler_args=final_compiler_args,  # Use cache-aware compiler args
-            compiler=compiler_cmd,  # Use cache executable or direct compiler
-            archiver=archiver_tool,  # Use TOML-specified archiver
-            std_version="c++17",
-            use_pch=True,
-            pch_header_content="""// FastLED PCH - Common headers for faster compilation
-#pragma once
-
-// Core headers that are used in nearly all FastLED examples
-#include <Arduino.h>
-#include <FastLED.h>
-
-// Common C++ standard library headers
-#include <string>
-#include <vector>
-#include <stdio.h>
-""",
-            pch_output_path=str(build_dir / "fastled_pch.hpp.pch"),
-            parallel=True,
+            # Note: archiver and compiler fields are now handled via command-based approach
         )
 
         compiler = Compiler(settings)

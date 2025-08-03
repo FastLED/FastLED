@@ -235,7 +235,6 @@ class BuildFlags:
                 f"Example:\n"
                 f"[tools]\n"
                 f'compiler_command = ["python", "-m", "ziglang", "c++"]\n'
-                f'archiver = "ar"\n'
                 f'c_compiler = "clang"'
             )
 
@@ -244,7 +243,6 @@ class BuildFlags:
         # Validate required tools are present
         required_tools = {
             "compiler_command": 'Full compiler command (e.g., ["python", "-m", "ziglang", "c++"])',
-            "archiver": 'Archive tool (e.g., "ar")',
             "c_compiler": 'C compiler (e.g., "clang")',
         }
 
@@ -293,7 +291,7 @@ class BuildFlags:
             compiler=tools_config.get(
                 "compiler", compiler_command[-1]
             ),  # Use last element as fallback
-            archiver=tools_config["archiver"],
+            archiver=tools_config.get("archiver", "ar"),  # Use fallback for deprecated field
             linker=tools_config.get("linker"),
             c_compiler=tools_config["c_compiler"],
             objcopy=tools_config.get("objcopy", "objcopy"),
@@ -453,10 +451,8 @@ class BuildFlags:
         ]
         toml_content.extend(tools_section_lines)
 
-        # Add tools
-        toml_content.append(f'compiler = "{self.tools.compiler}"')
-        toml_content.append(f'archiver = "{self.tools.archiver}"')
-
+        # Add tools - using modern command-based fields only
+        
         # Add compiler_command if it exists
         if self.tools.compiler_command:
             toml_content.append(f"compiler_command = {self.tools.compiler_command!r}")
@@ -2467,13 +2463,26 @@ def create_compiler_options_from_toml(
         k: v for k, v in kwargs.items() if k not in ["compiler", "archiver"]
     }
 
+    # Get modern command-based tools with fallbacks for legacy CompilerOptions compatibility
+    # Use the last element of command arrays as the tool name for backward compatibility
+    compiler_tool = (
+        build_flags.tools.compiler_command[-1] 
+        if build_flags.tools.compiler_command 
+        else getattr(build_flags.tools, 'compiler', 'clang++')
+    )
+    archiver_tool = (
+        build_flags.tools.archiver_command[-1] 
+        if build_flags.tools.archiver_command 
+        else getattr(build_flags.tools, 'archiver', 'ar')
+    )
+
     # Create CompilerOptions with TOML-loaded flags and tools
     return CompilerOptions(
         include_path=include_path,
         defines=defines,
         compiler_args=compiler_args,
-        compiler=build_flags.tools.compiler,  # Use TOML-specified compiler
-        archiver=build_flags.tools.archiver,  # Use TOML-specified archiver
+        compiler=compiler_tool,  # Use command-based tool or fallback
+        archiver=archiver_tool,  # Use command-based tool or fallback
         **filtered_kwargs,
     )
 

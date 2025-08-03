@@ -11,8 +11,6 @@
 compiler_command = ["python", "-m", "ziglang", "c++"]
 linker_command = ["python", "-m", "ziglang", "c++"]  # Separate linker config for consistency
 archiver_command = ["python", "-m", "ziglang", "ar"]  # Ziglang archiver for unified toolchain
-compiler = "ziglang"  # For compatibility
-archiver = "ar"  # DEPRECATED: Use archiver_command instead
 c_compiler = "clang"
 objcopy = "objcopy"
 nm = "nm"
