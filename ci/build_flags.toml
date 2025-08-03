@@ -9,13 +9,12 @@
 # Build tool configuration - Full compiler command with arguments
 # Optimized: Use direct python instead of 'uv run' when already in uv environment
 compiler_command = ["python", "-m", "ziglang", "c++"]
-compiler = "ziglang"  # For compatibility
-archiver = "ar"
-c_compiler = "clang"
-objcopy = "objcopy"
-nm = "nm"
-strip = "strip"
-ranlib = "ranlib"
+c_compiler_command = ["python", "-m", "ziglang", "cc"]
+archiver_command = ["python", "-m", "ziglang", "ar"]
+objcopy_command = ["objcopy"]
+nm_command = ["nm"]
+strip_command = ["strip"]
+ranlib_command = ["ranlib"]
 
 [all]
 # Universal compilation flags (compiler command handled separately)
