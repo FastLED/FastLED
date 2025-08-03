@@ -3,11 +3,9 @@
 /// @file dll.h
 /// FastLED dynamic library interface - lightweight header for external callers
 
-
 #ifndef FASTLED_BUILD_EXPORTS
 #define FASTLED_BUILD_EXPORTS 0
 #endif
-
 
 #if FASTLED_BUILD_EXPORTS
 
