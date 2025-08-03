@@ -1533,12 +1533,22 @@ class CompilationTestRunner:
         execution_failed_count = 0
         build_dir = Path(".build/examples")
 
-        # Find all executables in the build directory
-        for example_dir in build_dir.iterdir():
+        # Only execute examples that were compiled and linked in this run
+        if not results.object_file_map:
+            self.log_timing(
+                "[EXECUTION] No object file map available - no examples to execute"
+            )
+            return results
+
+        # Execute only the examples from this compilation run
+        for ino_file in results.object_file_map.keys():
+            example_name = ino_file.parent.name
+            example_dir = build_dir / example_name
+            
             if not example_dir.is_dir():
                 continue
 
-            executable_name = get_executable_name(example_dir.name)
+            executable_name = get_executable_name(example_name)
             executable_path = example_dir / executable_name
 
             if not executable_path.exists():
@@ -1552,11 +1562,11 @@ class CompilationTestRunner:
 
                 # Run the executable with timeout
                 result = subprocess.run(
-                    [str(executable_path)],
+                    [str(executable_path.absolute())],
                     capture_output=True,
                     text=True,
                     timeout=30,  # 30 second timeout
-                    cwd=str(example_dir.parent),
+                    cwd=str(example_dir.absolute()),
                 )
 
                 if result.returncode == 0:
