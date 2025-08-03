@@ -19,6 +19,13 @@ from ci.compiler.clang_compiler import (
     test_clang_accessibility,
 )
 
+# MANDATORY: Import configuration functions - NO fallbacks allowed
+from ci.compiler.test_example_compilation import (
+    extract_stub_platform_defines_from_toml,
+    extract_stub_platform_include_paths_from_toml,
+    load_build_flags_toml,
+)
+
 
 def test_clang_accessibility_main():
     """Test that clang++ is accessible and working properly."""
@@ -32,9 +39,44 @@ def test_clang_accessibility_class():
     """Test the class-based clang accessibility."""
     print("\n=== Testing class-based clang accessibility ===")
 
-    # Create compiler with default settings
+    # Create compiler with stub platform defines from configuration
+    import os
+    import sys
+    from pathlib import Path
+
+    # Add the ci/compiler directory to path for imports
+    current_dir = Path(__file__).parent.parent
+    sys.path.insert(0, str(current_dir / "compiler"))
+
+    # MANDATORY: Load build_flags.toml configuration - NO fallbacks allowed
+    toml_path = current_dir / "build_flags.toml"
+    if not toml_path.exists():
+        raise RuntimeError(
+            f"CRITICAL: build_flags.toml not found at {toml_path}. "
+            f"This file is MANDATORY for all compiler operations."
+        )
+
+    # Load configuration with strict error handling - NO fallbacks
+    build_config = load_build_flags_toml(str(toml_path))
+    stub_defines = extract_stub_platform_defines_from_toml(build_config)
+    stub_include_paths = extract_stub_platform_include_paths_from_toml(build_config)
+
+    # Convert relative include paths to absolute and create compiler args
+    compiler_args: list[str] = []
+    for include_path in stub_include_paths:
+        if os.path.isabs(include_path):
+            compiler_args.append(f"-I{include_path}")
+        else:
+            # Convert relative path to absolute from project root
+            abs_path = os.path.join(os.getcwd(), include_path)
+            compiler_args.append(f"-I{abs_path}")
+
+    # Create compiler with proper stub platform settings from configuration
     settings = CompilerOptions(
-        include_path="./src", defines=["STUB_PLATFORM"], std_version="c++17"
+        include_path="./src",
+        defines=stub_defines,
+        std_version="c++17",
+        compiler_args=compiler_args,  # Include paths from configuration
     )
     compiler = Compiler(settings)
 
