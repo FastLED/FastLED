@@ -38,8 +38,12 @@ class TestBuildFlagsToml(unittest.TestCase):
         """Test BuildTools default values"""
         tools = BuildTools()
 
-        self.assertEqual(tools.compiler, "clang++")
-        self.assertEqual(tools.archiver, "ar")
+        # Test modern command-based fields (should be empty by default)
+        self.assertEqual(tools.compiler_command, [])
+        self.assertEqual(tools.archiver_command, [])
+        self.assertEqual(tools.linker_command, [])
+
+        # Test other important fields
         self.assertIsNone(tools.linker)
         self.assertEqual(tools.c_compiler, "clang")
         self.assertEqual(tools.objcopy, "objcopy")
@@ -57,7 +61,6 @@ include_flags = ["-I."]
 
 [tools]
 compiler_command = ["uv", "run", "python", "-m", "ziglang", "c++"]
-archiver = "ar"
 c_compiler = "clang"
 
 [linking.base]
@@ -77,10 +80,13 @@ flags = ["-Werror"]
         self.assertEqual(flags.link_flags, ["-pthread"])
         self.assertEqual(flags.strict_mode_flags, ["-Werror"])
 
-        # Check tools (from [tools] section)
-        self.assertEqual(flags.tools.archiver, "ar")
+        # Check tools (from [tools] section) - modern command-based approach
         self.assertEqual(flags.tools.c_compiler, "clang")
         self.assertIsNone(flags.tools.linker)
+        self.assertEqual(
+            flags.tools.compiler_command,
+            ["uv", "run", "python", "-m", "ziglang", "c++"],
+        )
 
     def test_parse_toml_with_tools(self) -> None:
         """Test parsing TOML file with [tools] section"""
@@ -92,8 +98,7 @@ include_flags = ["-I."]
 
 [tools]
 compiler_command = ["g++"]
-compiler = "g++"
-archiver = "gcc-ar"
+archiver_command = ["gcc-ar"]
 linker = "ld.gold"
 c_compiler = "gcc"
 objcopy = "arm-objcopy"
@@ -108,9 +113,9 @@ flags = ["-pthread"]
         test_file = self.create_test_toml(toml_content)
         flags = BuildFlags.parse(test_file, quick_build=False, strict_mode=False)
 
-        # Check that tools were parsed correctly
-        self.assertEqual(flags.tools.compiler, "g++")
-        self.assertEqual(flags.tools.archiver, "gcc-ar")
+        # Check that tools were parsed correctly - modern command-based approach
+        self.assertEqual(flags.tools.compiler_command, ["g++"])
+        self.assertEqual(flags.tools.archiver_command, ["gcc-ar"])
         self.assertEqual(flags.tools.linker, "ld.gold")
         self.assertEqual(flags.tools.c_compiler, "gcc")
         self.assertEqual(flags.tools.objcopy, "arm-objcopy")
@@ -126,8 +131,7 @@ defines = ["-DTEST=1"]
 
 [tools]
 compiler_command = ["custom-clang++"]
-compiler = "custom-clang++"
-archiver = "custom-ar"
+archiver_command = ["custom-ar"]
 c_compiler = "clang"
 # Missing other tools - should use defaults
 """
@@ -135,9 +139,9 @@ c_compiler = "clang"
         test_file = self.create_test_toml(toml_content)
         flags = BuildFlags.parse(test_file, quick_build=False, strict_mode=False)
 
-        # Check specified tools
-        self.assertEqual(flags.tools.compiler, "custom-clang++")
-        self.assertEqual(flags.tools.archiver, "custom-ar")
+        # Check specified tools - modern command-based approach
+        self.assertEqual(flags.tools.compiler_command, ["custom-clang++"])
+        self.assertEqual(flags.tools.archiver_command, ["custom-ar"])
 
         # Check default tools (not specified in TOML)
         self.assertIsNone(flags.tools.linker)  # Default is None
@@ -148,8 +152,6 @@ c_compiler = "clang"
         """Test serializing BuildFlags with tools to TOML"""
         # Create BuildFlags with custom tools
         custom_tools = BuildTools(
-            compiler="arm-none-eabi-g++",
-            archiver="arm-none-eabi-ar",
             linker="arm-none-eabi-ld",
             c_compiler="arm-none-eabi-gcc",
             objcopy="arm-none-eabi-objcopy",
@@ -157,6 +159,7 @@ c_compiler = "clang"
             strip="arm-none-eabi-strip",
             ranlib="arm-none-eabi-ranlib",
             compiler_command=["arm-none-eabi-g++"],
+            archiver_command=["arm-none-eabi-ar"],
         )
 
         flags = BuildFlags(
@@ -171,10 +174,10 @@ c_compiler = "clang"
         # Serialize to TOML
         toml_output = flags.serialize()
 
-        # Check that tools section is present
+        # Check that tools section is present with modern command-based fields
         self.assertIn("[tools]", toml_output)
-        self.assertIn('compiler = "arm-none-eabi-g++"', toml_output)
-        self.assertIn('archiver = "arm-none-eabi-ar"', toml_output)
+        self.assertIn("compiler_command = ['arm-none-eabi-g++']", toml_output)
+        self.assertIn("archiver_command = ['arm-none-eabi-ar']", toml_output)
         self.assertIn('linker = "arm-none-eabi-ld"', toml_output)
         self.assertIn('c_compiler = "arm-none-eabi-gcc"', toml_output)
         self.assertIn('objcopy = "arm-none-eabi-objcopy"', toml_output)
@@ -189,7 +192,6 @@ c_compiler = "clang"
             tools=BuildTools(
                 linker=None,  # Explicitly set linker to None
                 compiler_command=["clang++"],
-                archiver="ar",
                 c_compiler="clang",
             ),
         )
@@ -198,19 +200,17 @@ c_compiler = "clang"
 
         # Check that tools section is present but linker is omitted
         self.assertIn("[tools]", toml_output)
-        self.assertIn('compiler = "clang++"', toml_output)
-        self.assertIn('archiver = "ar"', toml_output)
+        self.assertIn("compiler_command = ['clang++']", toml_output)
         self.assertNotIn("linker =", toml_output)  # Should be omitted when None
 
     def test_round_trip_toml_parsing(self) -> None:
         """Test that parse -> serialize -> parse maintains data integrity"""
         # Create original flags
         original_tools = BuildTools(
-            compiler="test-compiler",
-            archiver="test-ar",
             linker="test-ld",
             c_compiler="test-gcc",
             compiler_command=["test-compiler"],
+            archiver_command=["test-ar"],
         )
 
         original_flags = BuildFlags(
@@ -241,9 +241,13 @@ c_compiler = "clang"
             parsed_flags.strict_mode_flags, original_flags.strict_mode_flags
         )
 
-        # Check tools
-        self.assertEqual(parsed_flags.tools.compiler, original_flags.tools.compiler)
-        self.assertEqual(parsed_flags.tools.archiver, original_flags.tools.archiver)
+        # Check tools - modern command-based approach
+        self.assertEqual(
+            parsed_flags.tools.compiler_command, original_flags.tools.compiler_command
+        )
+        self.assertEqual(
+            parsed_flags.tools.archiver_command, original_flags.tools.archiver_command
+        )
         self.assertEqual(parsed_flags.tools.linker, original_flags.tools.linker)
         self.assertEqual(parsed_flags.tools.c_compiler, original_flags.tools.c_compiler)
 
@@ -265,9 +269,7 @@ defines = ["-DALIAS_TEST=1"]
 
 [tools]
 compiler_command = ["alias-compiler"]
-archiver = "ar"
 c_compiler = "clang"
-compiler = "alias-compiler"
 """
 
         test_file = self.create_test_toml(toml_content)
@@ -280,8 +282,10 @@ compiler = "alias-compiler"
 
         # Should be identical
         self.assertEqual(flags_parse.defines, flags_alias.defines)
-        self.assertEqual(flags_parse.tools.compiler, flags_alias.tools.compiler)
-        self.assertEqual(flags_parse.tools.compiler, "alias-compiler")
+        self.assertEqual(
+            flags_parse.tools.compiler_command, flags_alias.tools.compiler_command
+        )
+        self.assertEqual(flags_parse.tools.compiler_command, ["alias-compiler"])
 
 
 if __name__ == "__main__":
