@@ -3,6 +3,7 @@
 #define __INC_FASTSPI_LED2_H
 
 #include "fl/stdint.h"
+#include "fl/dll.h"  // Will optionally compile in.
 
 /// @file FastLED.h
 /// central include file for FastLED, defines the CFastLED class/object
