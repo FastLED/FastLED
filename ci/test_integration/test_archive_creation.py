@@ -13,6 +13,7 @@ import unittest
 from pathlib import Path
 
 from ci.compiler.clang_compiler import (
+    BuildFlags,
     Compiler,
     CompilerOptions,
     LibarchiveOptions,

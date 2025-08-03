@@ -10,6 +10,7 @@ import sys
 from pathlib import Path
 
 from ci.compiler.clang_compiler import (
+    BuildFlags,
     Compiler,
     CompilerOptions,
     Result,
@@ -78,7 +79,10 @@ def test_clang_accessibility_class():
         std_version="c++17",
         compiler_args=compiler_args,  # Include paths from configuration
     )
-    compiler = Compiler(settings)
+    # Load build flags from TOML  
+    build_flags = BuildFlags.parse(toml_path, quick_build=False, strict_mode=False)
+    
+    compiler = Compiler(settings, build_flags)
 
     # Test 1: Version check
     version_result = compiler.check_clang_version()
@@ -119,6 +123,10 @@ def test_compiler_configuration():
     """
     print("\n=== Testing compiler configuration options ===")
 
+    # Get current directory path for build_flags.toml
+    current_dir = Path.cwd()
+    toml_path = current_dir / "build_flags.toml"
+    
     # Test with different configurations
     configs: list[dict[str, str | CompilerOptions]] = [
         {
@@ -153,7 +161,10 @@ def test_compiler_configuration():
         assert isinstance(settings, CompilerOptions), (
             f"Invalid settings type: {type(settings)}"
         )
-        compiler = Compiler(settings)
+        # Load build flags from TOML  
+        build_flags = BuildFlags.parse(toml_path, quick_build=False, strict_mode=False)
+        
+        compiler = Compiler(settings, build_flags)
 
         # Just test version check for each config
         version_result = compiler.check_clang_version()

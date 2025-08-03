@@ -461,7 +461,7 @@ class BuildFlags:
 
         # Add compiler_command if it exists
         if self.tools.cpp_compiler:
-            toml_content.append(f"cpp_compiler = {self.tools.cpp_compiler!r}")
+            toml_content.append(f"compiler_command = {self.tools.cpp_compiler!r}")
 
         # Add linker_command if it exists
         if self.tools.linker:
@@ -471,17 +471,17 @@ class BuildFlags:
         if self.tools.archiver:
             toml_content.append(f"archiver_command = {self.tools.archiver!r}")
 
-        # Only add linker if it's not None
-        if self.tools.linker is not None:
-            toml_content.append(f'linker = "{self.tools.linker}"')
-
-        toml_content.append(f'c_compiler = "{self.tools.c_compiler}"')
-        toml_content.append(f'cpp_compiler = "{self.tools.cpp_compiler}"')
-        toml_content.append(f'objcopy = "{self.tools.objcopy}"')
-        toml_content.append(f'nm = "{self.tools.nm}"')
-        toml_content.append(f'strip = "{self.tools.strip}"')
-        toml_content.append(f'ranlib = "{self.tools.ranlib}"')
-        toml_content.append(f'c_compiler = "{self.tools.c_compiler}"')
+        # Add individual tool commands as strings (for backward compatibility)
+        if self.tools.c_compiler:
+            toml_content.append(f"c_compiler = {self.tools.c_compiler!r}")
+        if self.tools.objcopy:
+            toml_content.append(f"objcopy = {self.tools.objcopy!r}")
+        if self.tools.nm:
+            toml_content.append(f"nm = {self.tools.nm!r}")
+        if self.tools.strip:
+            toml_content.append(f"strip = {self.tools.strip!r}")
+        if self.tools.ranlib:
+            toml_content.append(f"ranlib = {self.tools.ranlib!r}")
         toml_content.append("")
 
         return "\n".join(toml_content)
@@ -2245,8 +2245,8 @@ def detect_linker() -> str:
 
 def get_configured_archiver_command(build_flags_config: BuildFlags) -> list[str] | None:
     """Get archiver command from build_flags.toml configuration."""
-    if build_flags_config.tools.archiver_command:
-        return build_flags_config.tools.archiver_command
+    if build_flags_config.tools.archiver:
+        return build_flags_config.tools.archiver
     return None
 
 
@@ -2469,14 +2469,14 @@ def create_compiler_options_from_toml(
     # Get modern command-based tools with fallbacks for legacy CompilerOptions compatibility
     # Use the last element of command arrays as the tool name for backward compatibility
     compiler_tool = (
-        build_flags.tools.compiler_command[-1]
-        if build_flags.tools.compiler_command
-        else getattr(build_flags.tools, "compiler", "clang++")
+        build_flags.tools.cpp_compiler[-1]
+        if build_flags.tools.cpp_compiler
+        else "clang++"
     )
     archiver_tool = (
-        build_flags.tools.archiver_command[-1]
-        if build_flags.tools.archiver_command
-        else getattr(build_flags.tools, "archiver", "ar")
+        build_flags.tools.archiver[-1]
+        if build_flags.tools.archiver
+        else "ar"
     )
 
     # Create CompilerOptions with TOML-loaded flags and tools

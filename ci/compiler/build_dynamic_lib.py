@@ -11,6 +11,7 @@ from pathlib import Path
 from typing import List
 
 from ci.compiler.clang_compiler import (
+    BuildFlags,
     Compiler,
     CompilerOptions,
     Result,
@@ -61,7 +62,11 @@ def build_fastled_dynamic_library(build_dir: Path) -> Path:
         parallel=True,
     )
 
-    compiler = Compiler(settings)
+    # Load build flags from TOML
+    build_flags_path = Path(PROJECT_ROOT) / "ci" / "build_flags.toml"
+    build_flags = BuildFlags.parse(build_flags_path, quick_build=False, strict_mode=False)
+    
+    compiler = Compiler(settings, build_flags)
 
     # Compile all FastLED source files
     fastled_src_dir = Path(PROJECT_ROOT) / "src"
