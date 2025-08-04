@@ -161,7 +161,19 @@ compiler_args = [
 # ================================================================================================
 # Flags for creating static libraries (.a files) with deterministic builds.
 
+flags = "rcs"   # r=insert, c=create if needed, s=write symbol table (D=deterministic removed for macOS compatibility)
+
+[archive.linux]
+# Linux-specific archive flags - supports deterministic builds
 flags = "rcsD"  # r=insert, c=create if needed, s=write symbol table, D=deterministic (zero timestamps)
+
+[archive.windows]
+# Windows-specific archive flags
+flags = "rcsD"  # r=insert, c=create if needed, s=write symbol table, D=deterministic (zero timestamps)
+
+[archive.darwin]
+# macOS-specific archive flags - Apple's ar doesn't support D flag
+flags = "rcs"   # r=insert, c=create if needed, s=write symbol table (no D flag for Apple's ar)
 
 [linking.unix]
 # ================================================================================================

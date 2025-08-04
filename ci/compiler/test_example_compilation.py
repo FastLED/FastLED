@@ -93,22 +93,22 @@ class LinkingResult:
 
 
 def load_build_flags_toml(toml_path: str) -> Dict[str, Any]:
-    """Load and parse build_flags.toml file."""
+    """Load and parse build_example.toml file."""
     try:
         with open(toml_path, "rb") as f:
             config = tomllib.load(f)
             if not config:
                 raise RuntimeError(
-                    f"build_flags.toml at {toml_path} is empty or invalid"
+                    f"build_example.toml at {toml_path} is empty or invalid"
                 )
             return config
     except FileNotFoundError:
         raise RuntimeError(
-            f"CRITICAL: build_flags.toml not found at {toml_path}. This file is required for proper compilation flags."
+            f"CRITICAL: build_example.toml not found at {toml_path}. This file is required for proper compilation flags."
         )
     except Exception as e:
         raise RuntimeError(
-            f"CRITICAL: Failed to parse build_flags.toml at {toml_path}: {e}"
+            f"CRITICAL: Failed to parse build_example.toml at {toml_path}: {e}"
         )
 
 
@@ -161,7 +161,7 @@ def extract_stub_platform_defines_from_toml(config: Dict[str, Any]) -> List[str]
             )
     else:
         raise RuntimeError(
-            "CRITICAL: No [stub_platform] section found in build_flags.toml. "
+            "CRITICAL: No [stub_platform] section found in build_example.toml. "
             "This section is MANDATORY for stub platform compilation."
         )
 
@@ -204,7 +204,7 @@ def extract_stub_platform_include_paths_from_toml(config: Dict[str, Any]) -> Lis
             )
     else:
         raise RuntimeError(
-            "CRITICAL: No [stub_platform] section found in build_flags.toml. "
+            "CRITICAL: No [stub_platform] section found in build_example.toml. "
             "This section is MANDATORY for stub platform compilation."
         )
 
@@ -424,32 +424,32 @@ def create_fastled_compiler(
     src_path = os.path.join(current_dir, "src")
     arduino_stub_path = os.path.join(current_dir, "src", "platforms", "stub")
 
-    # Load build_flags.toml configuration directly from ci/ directory
+    # Load build_example.toml configuration directly from ci/ directory
     toml_path = os.path.join(
-        os.path.dirname(os.path.dirname(__file__)), "build_flags.toml"
+        os.path.dirname(os.path.dirname(__file__)), "build_example.toml"
     )
     build_config = load_build_flags_toml(
         toml_path
     )  # Will raise RuntimeError if not found
 
-    # Extract additional compiler flags from TOML (using ci/build_flags.toml directly)
+    # Extract additional compiler flags from TOML (using ci/build_example.toml directly)
     toml_flags = extract_compiler_flags_from_toml(
         build_config
     )  # Will raise RuntimeError if critical flags missing
-    print(f"Loaded {len(toml_flags)} total compiler flags from build_flags.toml")
+    print(f"Loaded {len(toml_flags)} total compiler flags from build_example.toml")
 
     # Extract stub platform defines from TOML configuration
     stub_defines = extract_stub_platform_defines_from_toml(
         build_config
     )  # Will raise RuntimeError if critical defines missing
-    print(f"Loaded {len(stub_defines)} stub platform defines from build_flags.toml")
+    print(f"Loaded {len(stub_defines)} stub platform defines from build_example.toml")
 
     # Extract stub platform include paths from TOML configuration
     stub_include_paths = extract_stub_platform_include_paths_from_toml(
         build_config
     )  # Will raise RuntimeError if critical paths missing
     print(
-        f"Loaded {len(stub_include_paths)} stub platform include paths from build_flags.toml"
+        f"Loaded {len(stub_include_paths)} stub platform include paths from build_example.toml"
     )
 
     # Base compiler settings - convert relative paths to absolute
@@ -493,7 +493,7 @@ def create_fastled_compiler(
     )
     # Load build flags from TOML
     current_dir_path = Path(current_dir)
-    build_flags_path = current_dir_path / "ci" / "build_flags.toml"
+    build_flags_path = current_dir_path / "ci" / "build_example.toml"
     build_flags = BuildFlags.parse(
         build_flags_path, quick_build=False, strict_mode=False
     )

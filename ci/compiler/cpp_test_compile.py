@@ -366,7 +366,7 @@ def create_unit_test_compiler(
     src_path = current_dir / "src"
 
     # Load build flags configuration
-    build_flags_path = current_dir / "ci" / "build_flags.toml"
+    build_flags_path = current_dir / "ci" / "build_unit.toml"
     build_flags = BuildFlags.parse(
         build_flags_path, quick_build=True, strict_mode=False
     )

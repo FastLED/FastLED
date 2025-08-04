@@ -8,7 +8,7 @@ ci.util.ci.util.clang_compiler API that delivers 8x faster build times compared 
 Key Features:
 - Parallel test compilation using ThreadPoolExecutor
 - 90%+ cache hit rates with proven compiler settings
-- Integration with build_flags.toml configuration
+- Integration with build_unit.toml configuration
 - Support for STUB platform testing without hardware dependencies
 - GDB-compatible debug symbol generation
 - Consistent performance across all platforms
@@ -148,7 +148,7 @@ class FastLEDTestCompiler:
 
     def _load_build_flags(self) -> BuildFlags:
         """Load build flags from TOML configuration"""
-        toml_path = self.project_root / "ci" / "build_flags.toml"
+        toml_path = self.project_root / "ci" / "build_unit.toml"
         return BuildFlags.parse(toml_path, self.quick_build, self.strict_mode)
 
     @classmethod
@@ -166,7 +166,7 @@ class FastLEDTestCompiler:
         Create compiler configured for FastLED unit tests using TOML build flags.
 
         This configuration uses the new TOML-based build flag system:
-        - ci/build_flags.toml for centralized flag configuration
+        - ci/build_unit.toml for centralized flag configuration
         - Support for build modes (quick/debug) and strict mode
         - STUB platform for hardware-free testing
         - Precompiled headers for faster compilation
@@ -225,7 +225,7 @@ class FastLEDTestCompiler:
         ]
 
         # Load build flags using BuildFlags.parse() to get platform-specific configuration
-        toml_path = project_root / "ci" / "build_flags.toml"
+        toml_path = project_root / "ci" / "build_unit.toml"
         build_flags = BuildFlags.parse(toml_path, quick_build, strict_mode)
 
         # Load TOML config for test-specific flags that aren't in BuildFlags
@@ -256,11 +256,11 @@ class FastLEDTestCompiler:
             else:
                 defines.append(define)
 
-        # Get tools configuration from BuildFlags (respects build_flags.toml)
+        # Get tools configuration from BuildFlags (respects build_unit.toml)
         # Use modern command-based approach
         compiler_command = build_flags.tools.cpp_compiler
 
-        print(f"Using compiler from build_flags.toml: {compiler_command}")
+        print(f"Using compiler from build_unit.toml: {compiler_command}")
 
         # Use compiler command from TOML + flags as final compiler args
         final_compiler_args = compiler_command + compiler_args
@@ -413,7 +413,7 @@ class FastLEDTestCompiler:
                     str(self.project_root / "src"),
                     "-I",
                     str(self.project_root / "tests"),
-                    # NOTE: Compiler flags now come from build_flags.toml
+                    # NOTE: Compiler flags now come from build_unit.toml
                 ],
             )
             future_to_test[compile_future] = test_file
@@ -743,7 +743,7 @@ class FastLEDTestCompiler:
                     additional_flags=[
                         "-c",  # Compile only
                         "-DFASTLED_STUB_IMPL",  # Essential for STUB platform
-                        # NOTE: All defines and compiler flags now come from build_flags.toml
+                        # NOTE: All defines and compiler flags now come from build_unit.toml
                         # Remove hardcoded defines - they should be in [test] section
                     ],
                 )
@@ -924,7 +924,7 @@ class FastLEDTestCompiler:
         args = self.build_flags.link_flags.copy()
 
         # Load TOML config for test-specific and build mode flags
-        toml_path = self.project_root / "ci" / "build_flags.toml"
+        toml_path = self.project_root / "ci" / "build_unit.toml"
         with open(toml_path, "rb") as f:
             config = tomllib.load(f)
 

@@ -50,7 +50,7 @@ def build_fastled_dynamic_library(build_dir: Path) -> Path:
         std_version="c++17",
         compiler="clang++",
         compiler_args=[
-            # NOTE: All compiler flags should come from build_flags.toml
+            # NOTE: All compiler flags should come from build_unit.toml
             # Keep only platform-specific include paths and shared library flags
             "-I" + str(Path(PROJECT_ROOT) / "src/platforms/stub"),
             "-I" + str(Path(PROJECT_ROOT) / "tests"),
@@ -63,7 +63,7 @@ def build_fastled_dynamic_library(build_dir: Path) -> Path:
     )
 
     # Load build flags from TOML
-    build_flags_path = Path(PROJECT_ROOT) / "ci" / "build_flags.toml"
+    build_flags_path = Path(PROJECT_ROOT) / "ci" / "build_unit.toml"
     build_flags = BuildFlags.parse(
         build_flags_path, quick_build=False, strict_mode=False
     )

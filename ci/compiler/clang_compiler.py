@@ -167,9 +167,19 @@ class LinkOptions:
 
 @dataclass
 class ArchiveOptions:
-    """Archive creation options loaded from build_flags.toml"""
+    """Archive creation options loaded from build configuration TOML"""
 
     flags: str  # Archive flags (e.g., "rcsD" for deterministic builds)
+    linux: Optional["ArchivePlatformOptions"] = None  # Linux-specific flags
+    windows: Optional["ArchivePlatformOptions"] = None  # Windows-specific flags
+    darwin: Optional["ArchivePlatformOptions"] = None  # macOS-specific flags
+
+
+@dataclass
+class ArchivePlatformOptions:
+    """Platform-specific archive options"""
+
+    flags: str  # Platform-specific archive flags
 
 
 @dataclass
@@ -211,7 +221,7 @@ class BuildFlags:
         Parse build flags from TOML configuration file.
 
         Args:
-            toml_path: Path to the build_flags.toml file
+            toml_path: Path to the build configuration TOML file (build_unit.toml or build_example.toml)
             quick_build: Use quick build mode flags (default: debug mode)
             strict_mode: Enable strict mode warning flags
 
@@ -332,14 +342,39 @@ class BuildFlags:
         archive_config = config["archive"]
         if "flags" not in archive_config:
             raise RuntimeError(
-                f"CRITICAL: archive.flags missing from build_flags.toml at {toml_path}\n"
+                f"CRITICAL: archive.flags missing from build configuration TOML at {toml_path}\n"
                 f"Archive flags are required for proper static library creation.\n"
                 f"Example:\n"
                 f"[archive]\n"
-                f'flags = "rcsD"  # r=insert, c=create, s=symbol table, D=deterministic'
+                f'flags = "rcs"  # r=insert, c=create, s=symbol table'
             )
 
-        archive_options = ArchiveOptions(flags=archive_config["flags"])
+        # Parse platform-specific archive configurations
+        linux_options = None
+        windows_options = None
+        darwin_options = None
+
+        if "linux" in archive_config and "flags" in archive_config["linux"]:
+            linux_options = ArchivePlatformOptions(
+                flags=archive_config["linux"]["flags"]
+            )
+
+        if "windows" in archive_config and "flags" in archive_config["windows"]:
+            windows_options = ArchivePlatformOptions(
+                flags=archive_config["windows"]["flags"]
+            )
+
+        if "darwin" in archive_config and "flags" in archive_config["darwin"]:
+            darwin_options = ArchivePlatformOptions(
+                flags=archive_config["darwin"]["flags"]
+            )
+
+        archive_options = ArchiveOptions(
+            flags=archive_config["flags"],
+            linux=linux_options,
+            windows=windows_options,
+            darwin=darwin_options,
+        )
 
         # Extract base flags
         base_flags = cls(
@@ -555,7 +590,7 @@ class BuildFlags:
         This is an alias for parse() method for better readability.
 
         Args:
-            toml_path: Path to the build_flags.toml file
+            toml_path: Path to the build configuration TOML file (build_unit.toml or build_example.toml)
             quick_build: Use quick build mode flags (default: debug mode)
             strict_mode: Enable strict mode warning flags
 
@@ -586,12 +621,12 @@ class Compiler:
         """
         Get a copy of the complete compiler arguments that would be used for compilation.
 
-        Uses compiler_args from build_flags.toml without any hardcoded modifications.
+        Uses compiler_args from build configuration TOML without any hardcoded modifications.
 
         Returns:
             list[str]: Copy of compiler arguments from TOML configuration
         """
-        # Use compiler args exactly as specified in build_flags.toml
+        # Use compiler args exactly as specified in build configuration TOML
         cmd = self.settings.compiler_args.copy()
 
         # Add standard compilation requirements (don't override std version - use what's in TOML)
@@ -1941,7 +1976,7 @@ class Compiler:
 
 
 def get_configured_linker_command(build_flags_config: BuildFlags) -> list[str]:
-    """Get linker command from build_flags.toml configuration."""
+    """Get linker command from build configuration TOML."""
     if build_flags_config.tools.linker:
         return build_flags_config.tools.linker
     assert False, "FATAL ERROR: linker is not set in build_flags.toml"
@@ -2140,7 +2175,7 @@ def link_program_sync(
 # Helper functions for common linker argument patterns
 
 
-# NOTE: Linker flag functions removed - all linker configuration now comes from build_flags.toml
+# NOTE: Linker flag functions removed - all linker configuration now comes from build configuration TOML
 # Use BuildFlags.parse() to load linker flags from TOML configuration instead
 
 
@@ -2160,11 +2195,11 @@ def _get_default_settings() -> CompilerOptions:
     # Add the ci/compiler directory to path for imports
     ci_dir = _HERE.parent
 
-    # MANDATORY: Load build_flags.toml configuration - NO fallbacks allowed
-    toml_path = ci_dir / "build_flags.toml"
+    # MANDATORY: Load build_unit.toml configuration - NO fallbacks allowed
+    toml_path = ci_dir / "build_unit.toml"
     if not toml_path.exists():
         raise RuntimeError(
-            f"CRITICAL: build_flags.toml not found at {toml_path}. "
+            f"CRITICAL: build_unit.toml not found at {toml_path}. "
             f"This file is MANDATORY for all compiler operations."
         )
 
@@ -2195,14 +2230,14 @@ def _get_default_build_flags() -> BuildFlags:
     """Get default BuildFlags with MANDATORY configuration loading - NO FALLBACKS!"""
     from pathlib import Path
 
-    # MANDATORY: Load build_flags.toml configuration - NO fallbacks allowed
+    # MANDATORY: Load build_unit.toml configuration - NO fallbacks allowed
     current_dir = Path(__file__).parent
     ci_dir = current_dir.parent
-    toml_path = ci_dir / "build_flags.toml"
+    toml_path = ci_dir / "build_unit.toml"
 
     if not toml_path.exists():
         raise RuntimeError(
-            f"CRITICAL: build_flags.toml not found at {toml_path}. "
+            f"CRITICAL: build_unit.toml not found at {toml_path}. "
             f"This file is MANDATORY for all compiler operations."
         )
 
@@ -2433,7 +2468,7 @@ def detect_linker() -> str:
 
 
 def get_configured_archiver_command(build_flags_config: BuildFlags) -> list[str] | None:
-    """Get archiver command from build_flags.toml configuration."""
+    """Get archiver command from build configuration TOML."""
     if build_flags_config.tools.archiver:
         return build_flags_config.tools.archiver
     return None
@@ -2441,19 +2476,29 @@ def get_configured_archiver_command(build_flags_config: BuildFlags) -> list[str]
 
 def detect_archiver(build_flags_config: BuildFlags | None) -> str:
     """Detect archiver with preference for configured tools."""
+    print(f"[ARCHIVER DETECT] Starting archiver detection...")
+
     if build_flags_config:
         configured_cmd = get_configured_archiver_command(build_flags_config)
         if configured_cmd:
             # Return the full command as a space-separated string for compatibility
-            return " ".join(configured_cmd)
+            archiver_cmd = " ".join(configured_cmd)
+            print(f"[ARCHIVER DETECT] Using configured archiver: {archiver_cmd}")
+            return archiver_cmd
+        else:
+            print(f"[ARCHIVER DETECT] No configured archiver found in build flags")
 
     # Fallback to system archiver detection
+    print(f"[ARCHIVER DETECT] Falling back to system archiver detection...")
+
     llvm_ar = shutil.which("llvm-ar")
     if llvm_ar:
+        print(f"[ARCHIVER DETECT] Found llvm-ar: {llvm_ar}")
         return llvm_ar
 
     ar = shutil.which("ar")
     if ar:
+        print(f"[ARCHIVER DETECT] Found system ar: {ar}")
         return ar
 
     raise RuntimeError(
@@ -2518,17 +2563,44 @@ def create_archive_sync(
     else:
         cmd = [archiver]
 
-    # Archive flags: MUST come from build_flags.toml - NO DEFAULTS
+    # Archive flags: MUST come from build configuration TOML - NO DEFAULTS
     if (
         not build_flags_config
         or not hasattr(build_flags_config, "archive")
         or not hasattr(build_flags_config.archive, "flags")
     ):
         raise RuntimeError(
-            "CRITICAL: Archive flags not found in build_flags.toml. "
+            "CRITICAL: Archive flags not found in build configuration TOML. "
             "Please ensure [archive] section with 'flags' is configured."
         )
-    flags = build_flags_config.archive.flags
+
+    # Get platform-specific archive flags if available
+    import platform
+
+    system = platform.system()
+    flags = build_flags_config.archive.flags  # Default flags
+
+    # Check for platform-specific archive flags
+    if system == "Darwin":  # macOS
+        if (
+            build_flags_config.archive.darwin
+            and build_flags_config.archive.darwin.flags
+        ):
+            flags = build_flags_config.archive.darwin.flags
+            print(f"[ARCHIVE] Using macOS-specific flags: {flags}")
+    elif system == "Linux":
+        if build_flags_config.archive.linux and build_flags_config.archive.linux.flags:
+            flags = build_flags_config.archive.linux.flags
+            print(f"[ARCHIVE] Using Linux-specific flags: {flags}")
+    elif system == "Windows":
+        if (
+            build_flags_config.archive.windows
+            and build_flags_config.archive.windows.flags
+        ):
+            flags = build_flags_config.archive.windows.flags
+            print(f"[ARCHIVE] Using Windows-specific flags: {flags}")
+
+    print(f"[ARCHIVE] Final flags selected: {flags}")
 
     if options.use_thin:
         flags += "T"  # Add thin archive flag
@@ -2539,6 +2611,11 @@ def create_archive_sync(
 
     # Ensure output directory exists
     output_archive.parent.mkdir(parents=True, exist_ok=True)
+
+    # Debug output for archiver command (helpful for diagnosing fallback issues)
+    print(f"[ARCHIVE] Using archiver command: {' '.join(cmd)}")
+    print(f"[ARCHIVE] Archive flags: {flags}")
+    print(f"[ARCHIVE] Platform: {system}")
 
     # Execute archive command with single stream to prevent buffer overflow
     try:
@@ -2584,9 +2661,9 @@ def create_archive_sync(
             return_code=process.returncode,
         )
     except Exception as e:
-        return Result(
-            ok=False, stdout="", stderr=f"Archive command failed: {e}", return_code=-1
-        )
+        error_msg = f"Archive command failed: {e}\nCommand was: {' '.join(cmd)}\nThis may indicate that the configured archiver is not available."
+        print(f"[ARCHIVE ERROR] {error_msg}")
+        return Result(ok=False, stdout="", stderr=error_msg, return_code=-1)
 
 
 def load_build_flags_from_toml(
@@ -2598,7 +2675,7 @@ def load_build_flags_from_toml(
     This is a convenience function that delegates to BuildFlags.parse().
 
     Args:
-        toml_path: Path to the build_flags.toml file
+        toml_path: Path to the build configuration TOML file (build_unit.toml or build_example.toml)
         quick_build: Use quick build mode flags (default: debug mode)
         strict_mode: Enable strict mode warning flags
 
@@ -2621,7 +2698,7 @@ def create_compiler_options_from_toml(
     Create CompilerOptions from TOML build flags configuration.
 
     Args:
-        toml_path: Path to the build_flags.toml file
+        toml_path: Path to the build configuration TOML file (build_unit.toml or build_example.toml)
         include_path: Base include path for compilation
         quick_build: Use quick build mode flags (default: debug mode)
         strict_mode: Enable strict mode warning flags

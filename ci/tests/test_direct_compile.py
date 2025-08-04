@@ -49,11 +49,11 @@ def test_clang_accessibility_class():
     current_dir = Path(__file__).parent.parent
     sys.path.insert(0, str(current_dir / "compiler"))
 
-    # MANDATORY: Load build_flags.toml configuration - NO fallbacks allowed
-    toml_path = current_dir / "build_flags.toml"
+    # MANDATORY: Load build_example.toml configuration - NO fallbacks allowed
+    toml_path = current_dir / "build_example.toml"
     if not toml_path.exists():
         raise RuntimeError(
-            f"CRITICAL: build_flags.toml not found at {toml_path}. "
+            f"CRITICAL: build_example.toml not found at {toml_path}. "
             f"This file is MANDATORY for all compiler operations."
         )
 
@@ -123,9 +123,9 @@ def test_compiler_configuration():
     """
     print("\n=== Testing compiler configuration options ===")
 
-    # Get correct path for build_flags.toml (in ci/ directory)
+    # Get correct path for build_example.toml (in ci/ directory)
     current_file_dir = Path(__file__).parent.parent
-    toml_path = current_file_dir / "build_flags.toml"
+    toml_path = current_file_dir / "build_example.toml"
 
     # Test with different configurations
     configs: list[dict[str, str | CompilerOptions]] = [

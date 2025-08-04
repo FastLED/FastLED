@@ -47,10 +47,10 @@ class TestRealArchiveCreation(unittest.TestCase):
 
     def _load_build_flags(self) -> BuildFlags:
         """STRICT: Load BuildFlags explicitly - NO defaults allowed."""
-        build_flags_path = Path(__file__).parent.parent / "build_flags.toml"
+        build_flags_path = Path(__file__).parent.parent / "build_unit.toml"
         if not build_flags_path.exists():
             raise RuntimeError(
-                f"CRITICAL: build_flags.toml not found at {build_flags_path}"
+                f"CRITICAL: build_unit.toml not found at {build_flags_path}"
             )
         return BuildFlags.parse(build_flags_path)
 
@@ -742,10 +742,10 @@ class TestProgramLinking(unittest.TestCase):
 
     def _load_build_flags(self) -> BuildFlags:
         """STRICT: Load BuildFlags explicitly - NO defaults allowed."""
-        build_flags_path = Path(__file__).parent.parent / "build_flags.toml"
+        build_flags_path = Path(__file__).parent.parent / "build_unit.toml"
         if not build_flags_path.exists():
             raise RuntimeError(
-                f"CRITICAL: build_flags.toml not found at {build_flags_path}"
+                f"CRITICAL: build_unit.toml not found at {build_flags_path}"
             )
         return BuildFlags.parse(build_flags_path)
 
@@ -848,10 +848,10 @@ class TestFullProgramLinking(unittest.TestCase):
 
     def _load_build_flags(self) -> BuildFlags:
         """STRICT: Load BuildFlags explicitly - NO defaults allowed."""
-        build_flags_path = Path(__file__).parent.parent / "build_flags.toml"
+        build_flags_path = Path(__file__).parent.parent / "build_unit.toml"
         if not build_flags_path.exists():
             raise RuntimeError(
-                f"CRITICAL: build_flags.toml not found at {build_flags_path}"
+                f"CRITICAL: build_unit.toml not found at {build_flags_path}"
             )
         return BuildFlags.parse(build_flags_path)
 
@@ -1109,9 +1109,9 @@ int main() {
         return fastled_objects
 
     def _get_platform_linker_args(self, executable_name: str) -> list[str]:
-        """Get platform-appropriate linker arguments using build_flags.toml approach."""
-        # Use basic linking flags from build_flags.toml
-        return ["-pthread"]  # Basic linking flags from build_flags.toml [linking.base]
+        """Get platform-appropriate linker arguments using build_unit.toml approach."""
+        # Use basic linking flags from build_unit.toml
+        return ["-pthread"]  # Basic linking flags from build_unit.toml [linking.base]
 
     def _verify_executable_properties(self, executable_path: Path):
         """Verify that the created executable has expected properties."""

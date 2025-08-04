@@ -188,7 +188,48 @@ include_flags = [
 # ================================================================================================
 # Flags for creating static libraries (.a files) with deterministic builds.
 
+flags = "rcs"   # r=insert, c=create if needed, s=write symbol table (D=deterministic removed for macOS compatibility)
+
+[archive.linux]
+# Linux-specific archive flags - supports deterministic builds
 flags = "rcsD"  # r=insert, c=create if needed, s=write symbol table, D=deterministic (zero timestamps)
+
+[archive.windows]
+# Windows-specific archive flags
+flags = "rcsD"  # r=insert, c=create if needed, s=write symbol table, D=deterministic (zero timestamps)
+
+[archive.darwin]
+# macOS-specific archive flags - Apple's ar doesn't support D flag
+flags = "rcs"   # r=insert, c=create if needed, s=write symbol table (no D flag for Apple's ar)
+
+[stub_platform]
+# ================================================================================================
+# STUB PLATFORM DEFINES FOR UNIT TEST COMPILATION
+# ================================================================================================
+# These defines are used when unit tests need to compile example code on the STUB platform
+# which provides Arduino-compatible functionality without hardware dependencies.
+
+defines = [
+    "STUB_PLATFORM",                        # Enable STUB platform
+    "ARDUINO=10808",                         # Arduino version compatibility
+    "FASTLED_USE_STUB_ARDUINO",             # Use stub Arduino implementation
+    "FASTLED_STUB_IMPL",                    # Enable STUB platform Arduino function implementations
+    "SKETCH_HAS_LOTS_OF_MEMORY=1",          # Enable memory-intensive features for STUB platform
+    "FASTLED_HAS_ENGINE_EVENTS=1",          # Enable EngineEvents for UI components
+    "FASTLED_UNIT_TEST=1",                  # Identify as unit test build
+    "FASTLED_FORCE_NAMESPACE=1",            # Force namespace usage for unit tests
+    "FASTLED_TESTING=1",                    # Enable testing features
+]
+
+# Include paths required for stub platform compilation in unit tests
+include_paths = [
+    "src/platforms/stub",                   # Arduino.h stub for examples
+]
+
+# Additional compiler arguments for stub platform
+compiler_args = [
+    # No additional args currently needed - all flags come from [all] and other sections
+]
 
 [linking.unix]
 # ================================================================================================
