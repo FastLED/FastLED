@@ -519,18 +519,37 @@ def compile_unit_tests_python_api(
     test_files = []
 
     if specific_test:
-        # Handle specific test
+        # Handle specific test with case-insensitive matching
         test_name = (
             specific_test
             if specific_test.startswith("test_")
             else f"test_{specific_test}"
         )
         test_file = tests_dir / f"{test_name}.cpp"
+        
+        # First try exact case match
         if test_file.exists():
             test_files = [test_file]
             print(f"Compiling specific test: {test_file.name}")
         else:
-            raise RuntimeError(f"Test file not found: {test_file}")
+            # Try case-insensitive matching for all test files
+            found_match = False
+            for existing_file in tests_dir.glob("test_*.cpp"):
+                # Check if the file matches case-insensitively
+                existing_stem = existing_file.stem
+                existing_name = existing_stem.replace("test_", "")
+                
+                if (
+                    existing_stem.lower() == test_name.lower()
+                    or existing_name.lower() == specific_test.lower()
+                ):
+                    test_files = [existing_file]
+                    print(f"Compiling specific test (case-insensitive match): {existing_file.name}")
+                    found_match = True
+                    break
+            
+            if not found_match:
+                raise RuntimeError(f"Test file not found: {test_file}")
     else:
         # Find all test files
         test_files = list(tests_dir.glob("test_*.cpp"))
