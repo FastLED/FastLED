@@ -32,9 +32,27 @@ class TestResult:
 
 def discover_tests(build_dir: Path, specific_test: Optional[str] = None) -> List[Path]:
     """Find test executables in the build directory"""
-    test_dir = build_dir / "fled" / "unit"
-    if not test_dir.exists():
-        print(f"Error: Test directory not found: {test_dir}")
+    # Check multiple possible test directories (legacy CMake vs optimized Python API)
+    possible_test_dirs = [
+        build_dir / "fled" / "unit",  # Legacy CMake system
+        Path("tests") / ".build" / "bin",  # Optimized Python API system
+    ]
+    
+    test_dir = None
+    for possible_dir in possible_test_dirs:
+        if possible_dir.exists():
+            # Check if this directory has actual executable test files (not just .o files)
+            test_pattern = "test_*.exe" if sys.platform == "win32" else "test_*"
+            executable_tests = [
+                f for f in possible_dir.glob(test_pattern) 
+                if f.is_file() and f.suffix not in [".o", ".obj", ".pdb"] and os.access(f, os.X_OK)
+            ]
+            if executable_tests:
+                test_dir = possible_dir
+                break
+    
+    if not test_dir:
+        print(f"Error: No test directory found. Checked: {possible_test_dirs}")
         sys.exit(1)
 
     test_files: List[Path] = []
@@ -43,10 +61,11 @@ def discover_tests(build_dir: Path, specific_test: Optional[str] = None) -> List
     for test_file in test_dir.glob(test_pattern):
         if not test_file.is_file():
             continue
-        if not os.access(test_file, os.X_OK):
-            continue
-        # Skip object files and PDB files
+        # Skip object files and PDB files first
         if test_file.suffix in [".o", ".obj", ".pdb"]:
+            continue
+        # Check if file is executable (for actual test executables vs object files)
+        if not os.access(test_file, os.X_OK):
             continue
         if specific_test:
             # Support both "test_name" and "name" formats (case-insensitive)
