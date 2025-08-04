@@ -401,35 +401,28 @@ def _compile_tests_python(
     show_link: bool = False,
 ) -> None:
     """Optimized Python API system with PCH (same as examples)"""
+    # Use the optimized cpp_test_compile system directly
+    import subprocess
 
-    try:
-        # Use the optimized cpp_test_compile system directly
-        import subprocess
+    cmd = ["uv", "run", "python", "-m", "ci.compiler.cpp_test_compile"]
 
-        cmd = ["uv", "run", "python", "-m", "ci.compiler.cpp_test_compile"]
+    if specific_test:
+        cmd.extend(["--test", specific_test])
+    if clean:
+        cmd.append("--clean")
+    if verbose:
+        cmd.append("--verbose")
+    if "--check" in unknown_args:
+        cmd.append("--check")
+    if "--no-pch" in unknown_args:
+        cmd.append("--no-pch")
 
-        if specific_test:
-            cmd.extend(["--test", specific_test])
-        if clean:
-            cmd.append("--clean")
-        if verbose:
-            cmd.append("--verbose")
-        if "--check" in unknown_args:
-            cmd.append("--check")
-        if "--no-pch" in unknown_args:
-            cmd.append("--no-pch")
-
-        print("🚀 Using optimized Python API with PCH optimization")
-        result = subprocess.run(cmd)
-        if result.returncode != 0:
-            raise RuntimeError(
-                f"Unit test compilation failed with return code {result.returncode}"
-            )
-
-    except Exception as e:
-        print(f"Failed to compile with optimized Python API: {e}")
-        print("Falling back to legacy CMake system...")
-        _compile_tests_cmake(clean, unknown_args, specific_test)
+    print("🚀 Using optimized Python API with PCH optimization")
+    result = subprocess.run(cmd)
+    if result.returncode != 0:
+        raise RuntimeError(
+            f"Unit test compilation failed with return code {result.returncode}"
+        )
 
 
 def run_tests(
@@ -536,52 +529,46 @@ def _run_tests_python(
     show_link: bool = False,
 ) -> None:
     """Run tests from new Python compiler API system"""
-    try:
-        # Import the new test compiler system
-        from ci.compiler.test_compiler import FastLEDTestCompiler
+    # Import the new test compiler system
+    from ci.compiler.test_compiler import FastLEDTestCompiler
 
-        # Get test executables from Python build system
-        test_compiler = FastLEDTestCompiler.get_existing_instance()
-        if not test_compiler:
-            print("No compiled tests found. Run compilation first.")
-            sys.exit(1)
+    # Get test executables from Python build system
+    test_compiler = FastLEDTestCompiler.get_existing_instance()
+    if not test_compiler:
+        print("No compiled tests found. Run compilation first.")
+        sys.exit(1)
 
-        test_executables = test_compiler.get_test_executables(specific_test)
-        if not test_executables:
-            test_name = specific_test or "any tests"
-            print(f"No test executables found for: {test_name}")
-            sys.exit(1)
+    test_executables = test_compiler.get_test_executables(specific_test)
+    if not test_executables:
+        test_name = specific_test or "any tests"
+        print(f"No test executables found for: {test_name}")
+        sys.exit(1)
 
-        print(f"Running {len(test_executables)} tests from Python API build...")
+    print(f"Running {len(test_executables)} tests from Python API build...")
 
-        # Print list of tests that will be executed
-        print("Tests to execute:")
-        for i, test_exec in enumerate(test_executables, 1):
-            # Convert absolute path to relative for display
-            rel_path = os.path.relpath(test_exec.executable_path)
-            print(f"  {i}. {test_exec.name} ({rel_path})")
-        print("")
+    # Print list of tests that will be executed
+    print("Tests to execute:")
+    for i, test_exec in enumerate(test_executables, 1):
+        # Convert absolute path to relative for display
+        rel_path = os.path.relpath(test_exec.executable_path)
+        print(f"  {i}. {test_exec.name} ({rel_path})")
+    print("")
 
-        failed_tests: list[FailedTest] = []
+    failed_tests: list[FailedTest] = []
 
-        # Convert to file list format for compatibility with existing logic
-        files: list[str] = []
-        test_paths: dict[str, str] = {}
-        for test_exec in test_executables:
-            file_name = test_exec.name
-            if os.name == "nt" and not file_name.endswith(".exe"):
-                file_name += ".exe"
-            files.append(file_name)
-            test_paths[file_name] = str(test_exec.executable_path)
+    # Convert to file list format for compatibility with existing logic
+    files: list[str] = []
+    test_paths: dict[str, str] = {}
+    for test_exec in test_executables:
+        file_name = test_exec.name
+        if os.name == "nt" and not file_name.endswith(".exe"):
+            file_name += ".exe"
+        files.append(file_name)
+        test_paths[file_name] = str(test_exec.executable_path)
 
-        print(f"Starting test execution for {len(files)} test files...")
-        _execute_test_files(files, "", failed_tests, specific_test, test_paths)
-        _handle_test_results(failed_tests)
-
-    except ImportError as e:
-        print(f"Failed to import Python test system: {e}")
-        print("Falling back to CMake test execution...")
-        _run_tests_cmake(specific_test)
+    print(f"Starting test execution for {len(files)} test files...")
+    _execute_test_files(files, "", failed_tests, specific_test, test_paths)
+    _handle_test_results(failed_tests)
 
 
 def _execute_test_files(

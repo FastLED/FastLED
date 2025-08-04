@@ -448,8 +448,12 @@ def compile_unit_tests_python_api(
     enable_static_analysis: bool = False,
     use_pch: bool = True,
     clean: bool = False,
-) -> None:
-    """Compile unit tests using the fast Python API instead of CMake."""
+) -> bool:
+    """Compile unit tests using the fast Python API instead of CMake.
+
+    Returns:
+        bool: True if all tests compiled and linked successfully, False otherwise
+    """
     from .clang_compiler import Compiler, LinkOptions
 
     print("=" * 60)
@@ -682,6 +686,14 @@ def compile_unit_tests_python_api(
     print(f"   Output directory: {bin_dir}")
     print(f"   Cache directory: {get_link_cache_dir()}")
 
+    # Return success only if ALL tests compiled and linked successfully
+    all_tests_successful = success_count == len(test_files)
+    if not all_tests_successful:
+        failed_count = len(test_files) - success_count
+        print(f"❌ {failed_count} test(s) failed to compile or link")
+
+    return all_tests_successful
+
 
 def parse_arguments():
     parser = argparse.ArgumentParser(
@@ -849,15 +861,21 @@ def main() -> None:
     )  # Default to PCH enabled unless --no-pch specified
 
     # Use the optimized Python API with PCH optimization (now default for unit tests)
-    compile_unit_tests_python_api(
+    compilation_successful = compile_unit_tests_python_api(
         specific_test=args.test,
         enable_static_analysis=args.check,
         use_pch=use_pch,
         clean=need_clean,
     )
 
-    update_build_info(build_info)
-    print("FastLED library compiled successfully.")
+    if compilation_successful:
+        update_build_info(build_info)
+        print("FastLED library compiled successfully.")
+    else:
+        print("❌ FastLED unit test compilation failed!")
+        import sys
+
+        sys.exit(1)
 
 
 if __name__ == "__main__":

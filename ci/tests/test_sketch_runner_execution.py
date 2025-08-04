@@ -31,12 +31,22 @@ class TestSketchRunnerExecution(unittest.TestCase):
         print("\n=== Testing Sketch Runner - Comprehensive Test ===")
 
         # First, try to use existing compiled Blink executable if available
-        blink_executable = (
-            self.project_root / ".build" / "examples" / "Blink" / "Blink.exe"
-        )
+        # Check for platform-appropriate executable (Windows: .exe, Linux/macOS: no extension)
+        blink_dir = self.project_root / ".build" / "examples" / "Blink"
+        blink_candidates = [
+            blink_dir / "Blink.exe",  # Windows
+            blink_dir / "Blink",  # Linux/macOS
+        ]
+
+        blink_executable = None
+        for candidate in blink_candidates:
+            if candidate.exists():
+                blink_executable = candidate
+                break
+
         used_existing_executable = False
 
-        if blink_executable.exists():
+        if blink_executable:
             used_existing_executable = True
             print(f"Found existing Blink executable: {blink_executable}")
             print("Testing sketch runner with existing compiled executable")
