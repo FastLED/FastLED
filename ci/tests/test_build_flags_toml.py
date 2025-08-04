@@ -10,7 +10,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from ci.compiler.clang_compiler import BuildFlags, BuildTools
+from ci.compiler.clang_compiler import ArchiveOptions, BuildFlags, BuildTools
 
 
 class TestBuildFlagsToml(unittest.TestCase):
@@ -204,6 +204,7 @@ ranlib = ["custom-ranlib"]
             link_flags=["-nostdlib"],
             strict_mode_flags=["-Werror"],
             tools=custom_tools,
+            archive=ArchiveOptions(flags="rcsD"),
         )
 
         # Serialize to TOML
@@ -238,6 +239,7 @@ ranlib = ["custom-ranlib"]
                 strip=[],
                 ranlib=[],
             ),
+            archive=ArchiveOptions(flags="rcsD"),
         )
 
         toml_output = flags.serialize()
@@ -268,6 +270,7 @@ ranlib = ["custom-ranlib"]
             link_flags=["-pthread"],
             strict_mode_flags=["-Werror"],
             tools=original_tools,
+            archive=ArchiveOptions(flags="rcsD"),
         )
 
         # Serialize to TOML
