@@ -162,6 +162,7 @@ class RunningProcess:
         self.command = command
         self.cwd = str(cwd) if cwd is not None else None
         self.output_queue: Queue[str | None] = Queue()
+        self.accumulated_output: list[str] = []  # Store all output for later retrieval
         self.proc: subprocess.Popen[Any] | None = None
         self.check = check
         # Force auto_run to False if NO_PARALLEL is set
@@ -261,6 +262,9 @@ class RunningProcess:
                         line_stripped = line.rstrip()
                         if line_stripped:  # Only queue non-empty lines
                             self.output_queue.put(line_stripped)
+                            self.accumulated_output.append(
+                                line_stripped
+                            )  # Also store for later retrieval
                 except (ValueError, OSError) as e:
                     # Handle "I/O operation on closed file" and similar errors
                     # This can happen if the process terminates while we're reading
@@ -481,18 +485,5 @@ class RunningProcess:
         Returns:
             str: The complete stdout output as a string.
         """
-        # Wait for process to complete
-        self.wait()
-
-        # Collect all lines from the queue
-        lines: list[str] = []
-        while True:
-            try:
-                line = self.output_queue.get_nowait()
-                if line is None:  # End of output marker
-                    break
-                lines.append(line)
-            except queue.Empty:
-                break
-
-        return "\n".join(lines)
+        # Return accumulated output (available even if process is still running)
+        return "\n".join(self.accumulated_output)
