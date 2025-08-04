@@ -205,6 +205,14 @@ compiler_args = [
     # No additional args currently needed - all flags come from [all] and [build_modes.quick] sections
 ]
 
+[archive]
+# ================================================================================================
+# ARCHIVE CREATION FLAGS
+# ================================================================================================
+# Flags for creating static libraries (.a files) with deterministic builds.
+
+flags = "rcsD"  # r=insert, c=create if needed, s=write symbol table, D=deterministic (zero timestamps)
+
 [linking.unix]
 # ================================================================================================
 # UNIX-SPECIFIC LINKING FLAGS
