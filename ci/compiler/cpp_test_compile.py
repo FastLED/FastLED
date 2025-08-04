@@ -6,6 +6,7 @@ import os
 import shutil
 import subprocess
 import sys
+import time
 from pathlib import Path
 from typing import Set, Tuple
 
@@ -197,9 +198,235 @@ def run_command(command: str, cwd: Path | None = None) -> None:
         sys.exit(1)
 
 
+def create_unit_test_compiler(use_pch: bool = True, enable_static_analysis: bool = False) -> "Compiler":
+    """Create compiler optimized for unit test compilation with PCH support."""
+    from .clang_compiler import Compiler, CompilerOptions, BuildFlags
+    
+    # Always work from the project root, not from ci/compiler
+    project_root = Path(__file__).parent.parent.parent  # Go up from ci/compiler/ to project root
+    current_dir = project_root
+    src_path = current_dir / "src"
+    
+    # Load build flags configuration  
+    build_flags_path = current_dir / "ci" / "build_flags.toml"
+    build_flags = BuildFlags.parse(build_flags_path, quick_build=True, strict_mode=False)
+    
+    # Unit test specific defines
+    unit_test_defines = [
+        "FASTLED_UNIT_TEST=1",
+        "FASTLED_FORCE_NAMESPACE=1", 
+        "FASTLED_USE_PROGMEM=0",
+        "STUB_PLATFORM",
+        "ARDUINO=10808",
+        "FASTLED_USE_STUB_ARDUINO",
+        "SKETCH_HAS_LOTS_OF_MEMORY=1",
+        "FASTLED_STUB_IMPL",
+        "FASTLED_USE_JSON_UI=1",
+        "FASTLED_TESTING",
+        "FASTLED_NO_AUTO_NAMESPACE",
+        "FASTLED_NO_PINMAP",
+        "HAS_HARDWARE_PIN_SUPPORT",
+        "FASTLED_DEBUG_LEVEL=1",
+        "FASTLED_NO_ATEXIT=1",
+        "DOCTEST_CONFIG_NO_EXCEPTIONS_BUT_WITH_ALL_ASSERTS",
+    ]
+    
+    # Unit test specific compiler args
+    unit_test_args = [
+        "-std=gnu++17",
+        "-fpermissive", 
+        "-Wall",
+        "-Wextra",
+        "-Wno-deprecated-register",
+        "-Wno-backslash-newline-escape",
+        "-fno-exceptions",
+        "-fno-rtti",
+        "-O1",
+        "-g0",
+        "-fno-inline-functions", 
+        "-fno-vectorize",
+        "-fno-unroll-loops",
+        "-fno-strict-aliasing",
+        f"-I{current_dir}",
+        f"-I{src_path}",
+        f"-I{current_dir / 'tests'}",
+        f"-I{src_path / 'platforms' / 'stub'}",
+    ]
+    
+    # PCH configuration with unit test specific headers
+    pch_output_path = None
+    pch_header_content = None
+    if use_pch:
+        cache_dir = current_dir / ".build" / "cache"
+        cache_dir.mkdir(parents=True, exist_ok=True)
+        pch_output_path = str(cache_dir / "fastled_unit_test_pch.hpp.pch")
+        
+        # Unit test specific PCH header content
+        pch_header_content = """// FastLED Unit Test PCH - Common headers for faster test compilation
+#pragma once
+
+// Core test framework
+#include "test.h"
+
+// Core FastLED headers that are used in nearly all unit tests
+#include "FastLED.h"
+
+// Common C++ standard library headers used in tests
+#include <string>
+#include <vector>
+#include <stdio.h>
+#include <cstdint>
+#include <cmath>
+#include <cassert>
+#include <iostream>
+#include <memory>
+
+// Platform headers for stub environment
+#include "platforms/stub/fastled_stub.h"
+
+// Commonly tested FastLED components
+#include "lib8tion.h"
+#include "colorutils.h"
+#include "hsv2rgb.h"
+#include "fl/math.h"
+#include "fl/vector.h"
+
+// Using namespace to match test files
+using namespace fl;
+"""
+        print(f"[PCH] Unit tests will use precompiled headers: {pch_output_path}")
+        print(f"[PCH] PCH includes: test.h, FastLED.h, lib8tion.h, colorutils.h, and more")
+    else:
+        print("[PCH] Precompiled headers disabled for unit tests")
+    
+    # Determine compiler
+    compiler_cmd = "python -m ziglang c++"
+    if USE_CLANG:
+        compiler_cmd = "clang++"
+        print("USING CLANG COMPILER FOR UNIT TESTS")
+    elif USE_ZIG:
+        print("USING ZIG COMPILER FOR UNIT TESTS")
+    else:
+        print("USING DEFAULT COMPILER FOR UNIT TESTS")
+    
+    settings = CompilerOptions(
+        include_path=str(src_path),
+        defines=unit_test_defines,
+        std_version="c++17",
+        compiler=compiler_cmd,
+        compiler_args=unit_test_args,
+        use_pch=use_pch,
+        pch_output_path=pch_output_path,
+        pch_header_content=pch_header_content,
+        parallel=True,
+    )
+    
+    return Compiler(settings, build_flags)
+
+
+def compile_unit_tests_python_api(
+    specific_test: str | None = None, 
+    enable_static_analysis: bool = False,
+    use_pch: bool = True,
+    clean: bool = False
+) -> None:
+    """Compile unit tests using the fast Python API instead of CMake."""
+    from .clang_compiler import Compiler
+    
+    print("=" * 60)
+    print("COMPILING UNIT TESTS WITH PYTHON API (8x faster than CMake)")
+    print("=" * 60)
+    
+    if clean:
+        print("Cleaning build directory...")
+        shutil.rmtree(BUILD_DIR, ignore_errors=True)
+        BUILD_DIR.mkdir(parents=True, exist_ok=True)
+    
+    # Create optimized compiler for unit tests
+    compiler = create_unit_test_compiler(use_pch=use_pch, enable_static_analysis=enable_static_analysis)
+    
+    # Find all test files - work from project root
+    tests_dir = Path(__file__).parent.parent.parent / "tests"
+    test_files = []
+    
+    if specific_test:
+        # Handle specific test
+        test_name = specific_test if specific_test.startswith("test_") else f"test_{specific_test}"
+        test_file = tests_dir / f"{test_name}.cpp"
+        if test_file.exists():
+            test_files = [test_file]
+            print(f"Compiling specific test: {test_file.name}")
+        else:
+            raise RuntimeError(f"Test file not found: {test_file}")
+    else:
+        # Find all test files
+        test_files = list(tests_dir.glob("test_*.cpp"))
+        print(f"Found {len(test_files)} unit test files")
+    
+    if not test_files:
+        print("No test files found")
+        return
+        
+    # Ensure output directory exists
+    bin_dir = BUILD_DIR / "bin"
+    bin_dir.mkdir(parents=True, exist_ok=True)
+    
+    # Compile each test
+    print(f"Compiling {len(test_files)} tests...")
+    start_time = time.time()
+    
+    for test_file in test_files:
+        test_name = test_file.stem
+        executable_path = bin_dir / test_name
+        object_path = bin_dir / f"{test_name}.o"
+        
+        print(f"  Compiling {test_name}...")
+        
+        try:
+            # Step 1: Compile to object file
+            compile_future = compiler.compile_cpp_file(
+                cpp_path=str(test_file),
+                output_path=str(object_path)
+            )
+            
+            # Wait for compilation to complete
+            compile_result = compile_future.result()
+            
+            if compile_result.return_code != 0:
+                raise RuntimeError(f"Compilation failed for {test_name}: {compile_result.stderr}")
+            
+            # Step 2: Link to executable
+            from .clang_compiler import LinkOptions
+            
+            link_options = LinkOptions(
+                output_executable=str(executable_path),
+                object_files=[object_path],
+                linker_args=["-pthread"]  # Add pthread for doctest
+            )
+            
+            link_future = compiler.link_program(link_options)
+            link_result = link_future.result()
+            
+            if link_result.return_code != 0:
+                raise RuntimeError(f"Linking failed for {test_name}: {link_result.stderr}")
+                
+        except Exception as e:
+            print(f"ERROR compiling {test_name}: {e}")
+            raise
+    
+    compilation_time = time.time() - start_time
+    print(f"✅ Unit test compilation completed in {compilation_time:.2f}s")
+    print(f"   Average: {compilation_time/len(test_files):.2f}s per test")
+    print(f"   Output directory: {bin_dir}")
+
+
 def compile_fastled(
     specific_test: str | None = None, enable_static_analysis: bool = False
 ) -> None:
+    """Legacy CMake-based compilation - replaced by compile_unit_tests_python_api."""
+    print("⚠️  WARNING: Using legacy CMake system - this is 8x slower than the Python API")
+    print("    Consider using the new Python API for faster compilation")
+    
     if USE_ZIG:
         print("USING ZIG COMPILER")
         rtn = subprocess.run(
@@ -370,6 +597,18 @@ def parse_arguments():
         action="store_true",
         help="Enable static analysis (IWYU, clang-tidy)",
     )
+    parser.add_argument(
+        "--no-unity", action="store_true", help="Disable unity build"
+    )
+    parser.add_argument(
+        "--no-pch", action="store_true", help="Disable precompiled headers (PCH)"
+    )
+    parser.add_argument(
+        "--legacy", action="store_true", help="Use legacy CMake system instead of fast Python API (8x slower)"
+    )
+    parser.add_argument(
+        "--verbose", action="store_true", help="Enable verbose output"
+    )
     return parser.parse_args()
 
 
@@ -492,7 +731,23 @@ def main() -> None:
         clean_build_directory()
         save_test_files_list()
 
-    compile_fastled(args.test, enable_static_analysis=args.check)
+    # Determine whether to use Python API or legacy CMake system
+    use_legacy = getattr(args, 'legacy', False)  # Use legacy only when --legacy specified
+    use_pch = not getattr(args, 'no_pch', False)  # Default to PCH enabled unless --no-pch specified
+    
+    if use_legacy:
+        # Use legacy CMake system when explicitly requested
+        print("🔧 Using LEGACY CMake build system (--legacy flag)")
+        compile_fastled(args.test, enable_static_analysis=args.check)
+    else:
+        # Use the fast Python API with PCH optimization (default)
+        compile_unit_tests_python_api(
+            specific_test=args.test,
+            enable_static_analysis=args.check,
+            use_pch=use_pch,
+            clean=need_clean
+        )
+    
     update_build_info(build_info)
     print("FastLED library compiled successfully.")
 

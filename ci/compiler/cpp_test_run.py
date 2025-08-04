@@ -1003,6 +1003,11 @@ def parse_args() -> argparse.Namespace:
         help="Disable unity builds for cpp tests",
     )
     parser.add_argument(
+        "--no-pch",
+        action="store_true",
+        help="Disable precompiled headers (PCH) for unit tests",
+    )
+    parser.add_argument(
         "--debug",
         action="store_true",
         help="Use debug build mode with full debug symbols (default is quick mode with -g0)",
@@ -1041,6 +1046,8 @@ def main() -> None:
                 passthrough_args.append("--check")
             if no_unity:
                 passthrough_args.append("--no-unity")
+            if args.no_pch:
+                passthrough_args.append("--no-pch")
             # Note: --gcc is handled by not passing --use-clang (GCC is the default in compiler/cpp_test_compile.py)
             compile_tests(
                 clean=args.clean,

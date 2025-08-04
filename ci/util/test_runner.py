@@ -334,6 +334,8 @@ def create_unit_test_process(
         compile_cmd.append("--gcc")
     if args.no_unity:
         compile_cmd.append("--no-unity")
+    if args.no_pch:
+        compile_cmd.append("--no-pch")
     # subprocess.run(compile_cmd, check=True)
 
     # Then run the tests using our new test runner
