@@ -11,6 +11,8 @@ ENHANCED with Simple Build System Integration:
 """
 
 import argparse
+import hashlib
+import json
 import os
 import platform
 import shutil
@@ -21,6 +23,7 @@ import time
 import tomllib
 from concurrent.futures import Future, as_completed
 from dataclasses import dataclass
+from datetime import datetime
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Union
 
@@ -41,6 +44,370 @@ from ci.compiler.clang_compiler import (
     LinkOptions,
     Result,
 )
+
+
+# ================================================================================================
+# FastLED Library Caching System Implementation
+# ================================================================================================
+
+
+def get_build_configuration_hash(
+    build_flags: BuildFlags, compiler_options: CompilerOptions
+) -> str:
+    """Generate comprehensive configuration hash for validation (not filename)."""
+
+    # Create comprehensive build signature from ALL configuration elements
+    config_elements: List[str] = []
+
+    # All compiler flags matter (not just optimization/debug)
+    config_elements.append(f"compiler_flags:{sorted(build_flags.compiler_flags)}")
+
+    # All preprocessor defines matter
+    config_elements.append(f"defines:{sorted(build_flags.defines)}")
+
+    # All linker flags matter
+    config_elements.append(f"link_flags:{sorted(build_flags.link_flags)}")
+
+    # Compiler path and version matter
+    config_elements.append(f"compiler:{compiler_options.compiler}")
+    config_elements.append(f"compiler_args:{sorted(compiler_options.compiler_args)}")
+
+    # Language standard and other critical settings
+    config_elements.append(f"std_version:{compiler_options.std_version}")
+    config_elements.append(f"include_path:{compiler_options.include_path}")
+    config_elements.append(f"defines_opt:{sorted(compiler_options.defines or [])}")
+
+    # Create stable hash from all elements
+    combined_config = "|".join(config_elements)
+    return hashlib.sha256(combined_config.encode("utf-8")).hexdigest()
+
+
+def get_build_configuration_name(
+    build_flags: BuildFlags, compiler_options: CompilerOptions
+) -> str:
+    """Generate stable cache filename based on semantic build type."""
+
+    # Determine build type from compiler flags for stable naming
+    is_debug = any(
+        flag in ["-g", "-ggdb", "-g3"] for flag in build_flags.compiler_flags
+    )
+    is_optimized = any(
+        flag.startswith("-O") and flag != "-O0" for flag in build_flags.compiler_flags
+    )
+    is_test = any(
+        "test" in define.lower() or "TEST" in define for define in build_flags.defines
+    )
+    is_stub = any("STUB" in define for define in build_flags.defines)
+
+    # Generate semantic name for cache file (gets overwritten, no accumulation)
+    if is_test and is_debug:
+        return "test-debug"
+    elif is_test and is_optimized:
+        return "test-release"
+    elif is_test:
+        return "test-default"
+    elif is_stub and is_debug:
+        return "stub-debug"
+    elif is_stub and is_optimized:
+        return "stub-release"
+    elif is_debug and not is_optimized:
+        return "debug"
+    elif is_optimized and not is_debug:
+        return "release"
+    elif is_optimized and is_debug:
+        return "release-debug"
+    else:
+        return "default"
+
+
+def calculate_file_hash(file_path: Path) -> str:
+    """Calculate SHA256 hash of a file for content validation."""
+    if not file_path.exists():
+        return "no_file"
+
+    hash_sha256 = hashlib.sha256()
+    try:
+        with open(file_path, "rb") as f:
+            for chunk in iter(lambda: f.read(4096), b""):
+                hash_sha256.update(chunk)
+        return hash_sha256.hexdigest()[:16]  # Short hash for efficiency
+    except (OSError, IOError):
+        return "error"
+
+
+def get_fastled_version() -> str:
+    """Get FastLED version/commit for cache validation."""
+    try:
+        import subprocess
+
+        result = subprocess.run(
+            ["git", "rev-parse", "--short", "HEAD"],
+            capture_output=True,
+            text=True,
+            timeout=5,
+        )
+        if result.returncode == 0:
+            return f"commit-{result.stdout.strip()}"
+    except Exception:
+        pass
+    return "unknown"
+
+
+def check_library_cache(
+    build_flags: BuildFlags, compiler_options: CompilerOptions, cache_dir: Path
+) -> Optional[Path]:
+    """Check if cached library exists and is valid using fast timestamp + hash fallback."""
+
+    try:
+        # Get stable cache name based on semantic build type
+        config_name = get_build_configuration_name(build_flags, compiler_options)
+
+        library_file = cache_dir / f"libfastled-{config_name}.a"
+        metadata_file = cache_dir / f"libfastled-{config_name}.json"
+
+        # Quick existence check
+        if not metadata_file.exists() or not library_file.exists():
+            return None
+
+        # Load metadata
+        try:
+            with open(metadata_file, "r", encoding="utf-8") as f:
+                metadata = json.load(f)
+        except (json.JSONDecodeError, OSError, IOError):
+            # Corrupted metadata - remove both files
+            metadata_file.unlink(missing_ok=True)
+            library_file.unlink(missing_ok=True)
+            return None
+
+        # Check if build configuration changed (ANY flags, defines, compiler settings)
+        cached_config_hash = metadata.get("config_hash", "")
+        current_config_hash = get_build_configuration_hash(
+            build_flags, compiler_options
+        )
+
+        if cached_config_hash != current_config_hash:
+            return None  # Build configuration changed
+
+        # Fast path: Check timestamp first
+        current_timestamp = int(library_file.stat().st_mtime)
+        cached_timestamp = metadata.get("library_timestamp", 0)
+
+        if current_timestamp == cached_timestamp:
+            return library_file  # Same timestamp = same file (fast!)
+
+        # Medium path: Timestamp differs, check hash
+        current_hash = calculate_file_hash(library_file)
+        cached_hash = metadata.get("library_hash", "")
+
+        if current_hash == cached_hash:
+            # Same content, update timestamp in metadata for next time
+            metadata["library_timestamp"] = current_timestamp
+            with open(metadata_file, "w", encoding="utf-8") as f:
+                json.dump(metadata, f, indent=2, sort_keys=True)
+            return library_file
+
+        # Hash differs = content changed = need rebuild
+        return None
+
+    except Exception as e:
+        print(f"Warning: Cache check failed: {e}")
+        return None
+
+
+def store_library_cache(
+    library_file: Path,
+    build_flags: BuildFlags,
+    compiler_options: CompilerOptions,
+    cache_dir: Path,
+    build_time: float,
+) -> bool:
+    """Store library in cache with stable naming."""
+
+    try:
+        config_name = get_build_configuration_name(build_flags, compiler_options)
+        cache_dir.mkdir(parents=True, exist_ok=True)
+
+        cached_library = cache_dir / f"libfastled-{config_name}.a"
+        metadata_file = cache_dir / f"libfastled-{config_name}.json"
+
+        # Copy library file
+        shutil.copy2(library_file, cached_library)
+
+        # Calculate hash and get timestamp of the cached library
+        library_hash = calculate_file_hash(cached_library)
+        library_timestamp = int(cached_library.stat().st_mtime)
+
+        # Calculate comprehensive config hash for validation
+        config_hash = get_build_configuration_hash(build_flags, compiler_options)
+
+        # Create metadata
+        metadata = {
+            "cache_name": f"libfastled-{config_name}",
+            "cache_version": "v2",
+            "created_at": datetime.now().isoformat(),
+            "library_hash": library_hash,
+            "library_timestamp": library_timestamp,
+            "config_hash": config_hash,  # Comprehensive configuration hash for validation
+            "library_size": cached_library.stat().st_size,
+            "build_time": build_time,
+            "fastled_version": get_fastled_version(),
+        }
+
+        # Write metadata
+        with open(metadata_file, "w", encoding="utf-8") as f:
+            json.dump(metadata, f, indent=2, sort_keys=True)
+
+        return True
+
+    except Exception as e:
+        print(f"Warning: Failed to store library cache: {e}")
+        return False
+
+
+def create_fastled_library_with_cache(
+    compiler: Compiler, fastled_build_dir: Path, log_timing: Callable[[str], None]
+) -> Path:
+    """Create libfastled.a static library with simple caching."""
+
+    # Check cache first
+    cache_dir = Path(".build/library_cache")
+    cached_library = check_library_cache(
+        compiler.build_flags, compiler.settings, cache_dir
+    )
+
+    config_name = get_build_configuration_name(compiler.build_flags, compiler.settings)
+    lib_file = fastled_build_dir / f"libfastled-{config_name}.a"
+
+    if cached_library:
+        try:
+            # Copy cached library to build directory
+            shutil.copy2(cached_library, lib_file)
+            log_timing(
+                f"[LIBRARY] CACHED: Using cached FastLED library: {cached_library.name}"
+            )
+            return lib_file
+        except (OSError, IOError) as e:
+            log_timing(
+                f"[LIBRARY] Warning: Failed to copy cached library, rebuilding: {e}"
+            )
+
+    # Cache miss - build library
+    build_start = time.time()
+    log_timing(f"[LIBRARY] Compiling FastLED sources (allsrc build)...")
+
+    # Use existing create_fastled_library function for actual compilation
+    lib_file = create_fastled_library_no_cache(compiler, fastled_build_dir, log_timing)
+
+    build_time = time.time() - build_start
+
+    # Store in cache for future builds
+    cache_success = store_library_cache(
+        lib_file, compiler.build_flags, compiler.settings, cache_dir, build_time
+    )
+
+    if cache_success:
+        log_timing(
+            f"[LIBRARY] SUCCESS: FastLED library created and cached: {lib_file.name}"
+        )
+    else:
+        log_timing(f"[LIBRARY] SUCCESS: FastLED library created: {lib_file.name}")
+
+    return lib_file
+
+
+def check_sketch_cache(
+    sketch_file: Path,
+    build_flags: BuildFlags,
+    compiler_options: CompilerOptions,
+    cache_dir: Path,
+) -> Optional[Path]:
+    """Check if cached sketch object exists and is valid."""
+
+    try:
+        # Generate cache name based on sketch + semantic build config
+        sketch_name = sketch_file.stem
+        config_name = get_build_configuration_name(build_flags, compiler_options)
+
+        cached_obj = cache_dir / f"{sketch_name}-{config_name}.o"
+        metadata_file = cache_dir / f"{sketch_name}-{config_name}.o.json"
+
+        # Quick existence check
+        if not cached_obj.exists() or not metadata_file.exists():
+            return None
+
+        # Load metadata
+        with open(metadata_file, "r", encoding="utf-8") as f:
+            metadata = json.load(f)
+
+        # Check if build configuration changed (comprehensive validation)
+        cached_config_hash = metadata.get("config_hash", "")
+        current_config_hash = get_build_configuration_hash(
+            build_flags, compiler_options
+        )
+
+        if cached_config_hash != current_config_hash:
+            return None  # Build configuration changed
+
+        # Fast path: Check sketch timestamp
+        current_timestamp = int(sketch_file.stat().st_mtime)
+        cached_timestamp = metadata.get("sketch_timestamp", 0)
+
+        if current_timestamp == cached_timestamp:
+            return cached_obj  # Same timestamp = same sketch
+
+        # Medium path: Check sketch hash
+        current_hash = calculate_file_hash(sketch_file)
+        cached_hash = metadata.get("sketch_hash", "")
+
+        if current_hash == cached_hash:
+            # Update timestamp in metadata
+            metadata["sketch_timestamp"] = current_timestamp
+            with open(metadata_file, "w", encoding="utf-8") as f:
+                json.dump(metadata, f, indent=2, sort_keys=True)
+            return cached_obj
+
+        return None  # Sketch changed
+
+    except Exception:
+        return None
+
+
+def store_sketch_cache(
+    sketch_file: Path,
+    obj_file: Path,
+    build_flags: BuildFlags,
+    compiler_options: CompilerOptions,
+    cache_dir: Path,
+    build_time: float,
+) -> None:
+    """Store sketch compilation metadata."""
+
+    try:
+        sketch_name = sketch_file.stem
+        config_name = get_build_configuration_name(build_flags, compiler_options)
+        config_hash = get_build_configuration_hash(build_flags, compiler_options)
+        metadata_file = cache_dir / f"{sketch_name}-{config_name}.o.json"
+        cache_dir.mkdir(parents=True, exist_ok=True)
+
+        metadata = {
+            "sketch_name": sketch_name,
+            "sketch_hash": calculate_file_hash(sketch_file),
+            "sketch_timestamp": int(sketch_file.stat().st_mtime),
+            "obj_file": obj_file.name,
+            "config_hash": config_hash,  # Comprehensive configuration hash for validation
+            "compiled_at": datetime.now().isoformat(),
+            "compile_time": build_time,
+        }
+
+        with open(metadata_file, "w", encoding="utf-8") as f:
+            json.dump(metadata, f, indent=2, sort_keys=True)
+    except Exception:
+        pass  # Ignore cache storage errors
+
+
+# ================================================================================================
+# End FastLED Library Caching System
+# ================================================================================================
 
 
 # Color output functions using ANSI escape codes
@@ -498,7 +865,7 @@ def create_fastled_compiler(
     return Compiler(settings, build_flags)
 
 
-def compile_examples_simple(
+def compile_examples_simple_with_cache(
     compiler: Compiler,
     ino_files: List[Path],
     pch_compatible_files: set[Path],
@@ -507,7 +874,7 @@ def compile_examples_simple(
     verbose: bool = False,
 ) -> CompilationResult:
     """
-    Compile examples using the simple build system (Compiler class).
+    Compile examples using the simple build system with sketch caching.
 
     Args:
         compiler: The Compiler instance to use
@@ -524,9 +891,11 @@ def compile_examples_simple(
 
     # Create build directory structure if full compilation is enabled
     build_dir: Optional[Path] = None
+    sketch_cache_dir = Path(".build/sketch_cache")
     if full_compilation:
         build_dir = Path(".build/examples")
         build_dir.mkdir(parents=True, exist_ok=True)
+        sketch_cache_dir.mkdir(parents=True, exist_ok=True)
         log_timing(f"[BUILD] Created build directory: {build_dir}")
 
     # Submit all compilation jobs with file tracking
@@ -536,6 +905,7 @@ def compile_examples_simple(
     pch_files_count = 0
     direct_files_count = 0
     total_cpp_files = 0
+    cached_sketch_count = 0
 
     for ino_file in ino_files:
         # Find additional .cpp files in the same directory
@@ -575,27 +945,87 @@ def compile_examples_simple(
             ino_output_path = example_build_dir / f"{ino_file.stem}.o"
             example_obj_files.append(ino_output_path)
 
-        # Compile the .ino file
-        if verbose:
-            pch_status = "with PCH" if use_pch_for_file else "direct compilation"
-            log_timing(
-                f"[VERBOSE] Compiling {ino_file.relative_to(Path('examples'))} ({pch_status})"
+            # Check sketch cache first
+            cached_sketch_obj = check_sketch_cache(
+                ino_file, compiler.build_flags, compiler.settings, sketch_cache_dir
             )
 
-        future = compiler.compile_ino_file(
-            ino_file,
-            output_path=ino_output_path,
-            use_pch_for_this_file=use_pch_for_file,
-            additional_flags=additional_flags,
-        )
-        future_to_file[future] = ino_file
+            if cached_sketch_obj and ino_output_path:
+                try:
+                    # Copy cached object to build directory
+                    shutil.copy2(cached_sketch_obj, ino_output_path)
+                    cached_sketch_count += 1
+                    if verbose:
+                        log_timing(
+                            f"[VERBOSE] CACHED: {ino_file.relative_to(Path('examples'))} (sketch cache hit)"
+                        )
 
-        if use_pch_for_file:
-            pch_files_count += 1
+                    # Create a successful result for this cached file
+                    file_result: Dict[str, Any] = {
+                        "file": str(ino_file.name),
+                        "path": str(ino_file.relative_to(Path("examples"))),
+                        "success": True,
+                        "stderr": "",
+                    }
+                    results.append(file_result)
+
+                    # Skip compilation for this file
+                    if use_pch_for_file:
+                        pch_files_count += 1
+                    else:
+                        direct_files_count += 1
+
+                    # Continue to cpp files compilation
+                except (OSError, IOError) as e:
+                    log_timing(
+                        f"[SIMPLE] Warning: Failed to copy cached sketch object, recompiling: {e}"
+                    )
+                    cached_sketch_obj = None  # Fall through to compilation
+
+            if not cached_sketch_obj:
+                # Compile the .ino file
+                if verbose:
+                    pch_status = (
+                        "with PCH" if use_pch_for_file else "direct compilation"
+                    )
+                    log_timing(
+                        f"[VERBOSE] Compiling {ino_file.relative_to(Path('examples'))} ({pch_status})"
+                    )
+
+                future = compiler.compile_ino_file(
+                    ino_file,
+                    output_path=ino_output_path,
+                    use_pch_for_this_file=use_pch_for_file,
+                    additional_flags=additional_flags,
+                )
+                future_to_file[future] = ino_file
+
+                if use_pch_for_file:
+                    pch_files_count += 1
+                else:
+                    direct_files_count += 1
         else:
-            direct_files_count += 1
+            # Non-full compilation, no caching
+            if verbose:
+                pch_status = "with PCH" if use_pch_for_file else "direct compilation"
+                log_timing(
+                    f"[VERBOSE] Compiling {ino_file.relative_to(Path('examples'))} ({pch_status})"
+                )
 
-        # Compile additional .cpp files in the same directory
+            future = compiler.compile_ino_file(
+                ino_file,
+                output_path=ino_output_path,
+                use_pch_for_this_file=use_pch_for_file,
+                additional_flags=additional_flags,
+            )
+            future_to_file[future] = ino_file
+
+            if use_pch_for_file:
+                pch_files_count += 1
+            else:
+                direct_files_count += 1
+
+        # Compile additional .cpp files in the same directory (no caching for these yet)
         for cpp_file in cpp_files:
             cpp_output_path: Optional[Path] = None
 
@@ -629,8 +1059,9 @@ def compile_examples_simple(
             object_file_map[ino_file] = example_obj_files
 
     total_files = len(ino_files) + total_cpp_files
+    actual_compilation_jobs = len(future_to_file)
     log_timing(
-        f"[SIMPLE] Submitted {total_files} compilation jobs to ThreadPoolExecutor ({len(ino_files)} .ino + {total_cpp_files} .cpp)"
+        f"[SIMPLE] Submitted {actual_compilation_jobs}/{total_files} compilation jobs to ThreadPoolExecutor ({len(ino_files) - cached_sketch_count} .ino + {total_cpp_files} .cpp, {cached_sketch_count} cached)"
     )
     log_timing(
         f"[SIMPLE] Using PCH for {pch_files_count} files, direct compilation for {direct_files_count} files"
@@ -657,12 +1088,29 @@ def compile_examples_simple(
         if verbose:
             status = "SUCCESS" if result.ok else "FAILED"
             log_timing(
-                f"[VERBOSE] {status}: {source_file.relative_to(Path('examples'))} ({completed_count}/{total_files})"
+                f"[VERBOSE] {status}: {source_file.relative_to(Path('examples'))} ({completed_count + len([r for r in results if r['success']])}/{total_files})"
             )
-        elif completed_count == total_files:
+        elif completed_count == actual_compilation_jobs:
             log_timing(
-                f"[SIMPLE] Completed {completed_count}/{total_files} compilations"
+                f"[SIMPLE] Completed {completed_count + len([r for r in results if r['success']])}/{total_files} compilations"
             )
+
+        # Store successful compilations in sketch cache
+        if result.ok and full_compilation and source_file.suffix == ".ino":
+            # Find the output path for this sketch
+            example_name = source_file.parent.name
+            example_build_dir = build_dir / example_name if build_dir else None
+            if example_build_dir:
+                ino_output_path = example_build_dir / f"{source_file.stem}.o"
+                if ino_output_path.exists():
+                    store_sketch_cache(
+                        source_file,
+                        ino_output_path,
+                        compiler.build_flags,
+                        compiler.settings,
+                        sketch_cache_dir,
+                        0.5,  # Approximate compile time
+                    )
 
         # Show compilation errors immediately for better debugging
         if not result.ok and result.stderr.strip():
@@ -692,6 +1140,10 @@ def compile_examples_simple(
     log_timing(
         f"[SIMPLE] Compilation completed: {len(successful)} succeeded, {len(failed)} failed"
     )
+    if cached_sketch_count > 0:
+        log_timing(
+            f"[SIMPLE] Sketch cache: {cached_sketch_count} hits, {len(ino_files) - cached_sketch_count} misses"
+        )
 
     # Report failures summary if any (detailed errors already shown above)
     if failed:
@@ -729,6 +1181,32 @@ def compile_examples_simple(
         compile_time=compile_time,
         failed_examples=failed,
         object_file_map=object_file_map if full_compilation else None,
+    )
+
+
+def compile_examples_simple(
+    compiler: Compiler,
+    ino_files: List[Path],
+    pch_compatible_files: set[Path],
+    log_timing: Callable[[str], None],
+    full_compilation: bool,
+    verbose: bool = False,
+) -> CompilationResult:
+    """
+    Compile examples using the simple build system with caching.
+
+    Args:
+        compiler: The Compiler instance to use
+        ino_files: List of .ino files to compile
+        pch_compatible_files: Set of files that are PCH compatible
+        log_timing: Logging function
+        full_compilation: If True, preserve object files for linking; if False, use temp files
+
+    Returns:
+        CompilationResult: Results from compilation including counts and failed examples
+    """
+    return compile_examples_simple_with_cache(
+        compiler, ino_files, pch_compatible_files, log_timing, full_compilation, verbose
     )
 
 
@@ -950,7 +1428,7 @@ def get_fastled_core_sources() -> List[Path]:
     return all_sources
 
 
-def create_fastled_library(
+def create_fastled_library_no_cache(
     compiler: Compiler, fastled_build_dir: Path, log_timing: Callable[[str], None]
 ) -> Path:
     """Create libfastled.a static library."""
@@ -1019,6 +1497,13 @@ def create_fastled_library(
 
     log_timing(f"[LIBRARY] SUCCESS: FastLED library created: {lib_file}")
     return lib_file
+
+
+def create_fastled_library(
+    compiler: Compiler, fastled_build_dir: Path, log_timing: Callable[[str], None]
+) -> Path:
+    """Create libfastled.a static library with caching."""
+    return create_fastled_library_with_cache(compiler, fastled_build_dir, log_timing)
 
 
 def get_platform_linker_args() -> List[str]:
