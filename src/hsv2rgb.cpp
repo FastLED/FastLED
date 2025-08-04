@@ -509,6 +509,13 @@ void hsv2rgb_fullspectrum( const struct CHSV& hsv, CRGB& rgb) {
   rgb.b = hsv.v - ((chroma * f(1, hsv.h)) >> 8);
 }
 
+/// Inline version of hsv2rgb_fullspectrum which returns a CRGB object.
+CRGB hsv2rgb_fullspectrum( const struct CHSV& hsv) {
+    CRGB rgb;
+    hsv2rgb_fullspectrum(hsv, rgb);
+    return rgb;
+}
+
 
 void hsv2rgb_raw(const struct CHSV * phsv, struct CRGB * prgb, int numLeds) {
     for(int i = 0; i < numLeds; ++i) {

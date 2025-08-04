@@ -13,6 +13,7 @@ import unittest
 from pathlib import Path
 
 from ci.compiler.clang_compiler import (
+    BuildFlags,
     Compiler,
     CompilerOptions,
     LibarchiveOptions,
@@ -44,10 +45,20 @@ class TestRealArchiveCreation(unittest.TestCase):
         if self.temp_dir.exists():
             shutil.rmtree(self.temp_dir)
 
+    def _load_build_flags(self) -> BuildFlags:
+        """STRICT: Load BuildFlags explicitly - NO defaults allowed."""
+        build_flags_path = Path(__file__).parent.parent / "build_flags.toml"
+        if not build_flags_path.exists():
+            raise RuntimeError(
+                f"CRITICAL: build_flags.toml not found at {build_flags_path}"
+            )
+        return BuildFlags.parse(build_flags_path)
+
     def test_archiver_detection_real(self):
         """Test real archiver detection on the system."""
         try:
-            archiver = detect_archiver()
+            build_flags = self._load_build_flags()
+            archiver = detect_archiver(build_flags)
             self.assertTrue(archiver)  # Should return a valid path
             self.assertTrue(Path(archiver).exists() or Path(archiver + ".exe").exists())
             print(f"Found archiver: {archiver}")
@@ -79,7 +90,8 @@ class TestRealArchiveCreation(unittest.TestCase):
             ],
         )
 
-        compiler = Compiler(settings)
+        build_flags = self._load_build_flags()
+        compiler = Compiler(settings, build_flags)
 
         # Create C++ file from .ino
         blink_cpp = self.temp_dir / "Blink.cpp"
@@ -206,7 +218,8 @@ void function{i}() {{
             ],
         )
 
-        compiler = Compiler(settings)
+        build_flags = self._load_build_flags()
+        compiler = Compiler(settings, build_flags)
 
         # Compile all files
         for i, cpp_file in enumerate(cpp_files):
@@ -253,7 +266,8 @@ void function{i}() {{
         archive_path = self.test_compile_and_archive_blink()
 
         # Use real archiver tool to list contents
-        archiver = detect_archiver()
+        build_flags = self._load_build_flags()
+        archiver = detect_archiver(build_flags)
 
         import subprocess
 
@@ -337,7 +351,8 @@ static int global_var_{i} = {i * 100};
             ],
         )
 
-        compiler = Compiler(settings)
+        build_flags = self._load_build_flags()
+        compiler = Compiler(settings, build_flags)
 
         # Test unity compilation
         unity_options = CompilerOptions(
@@ -398,7 +413,8 @@ static int global_var_{i} = {i * 100};
             std_version="c++17",
         )
 
-        compiler = Compiler(settings)
+        build_flags = self._load_build_flags()
+        compiler = Compiler(settings, build_flags)
 
         # Test with empty file list
         empty_options = CompilerOptions(
@@ -468,7 +484,8 @@ static const uint8_t test_data_{i}[] = {{1, 2, 3, {i}}};
             ],
         )
 
-        compiler = Compiler(settings)
+        build_flags = self._load_build_flags()
+        compiler = Compiler(settings, build_flags)
 
         # Unity compilation
         unity_obj_path = self.temp_dir / "integration_unity.o"
@@ -558,7 +575,8 @@ void flags_test_function_{i}() {{
             ],
         )
 
-        compiler = Compiler(settings)
+        build_flags = self._load_build_flags()
+        compiler = Compiler(settings, build_flags)
 
         # Test unity compilation with additional flags
         unity_options = CompilerOptions(
@@ -604,7 +622,8 @@ void identical_function_{i}() {{
             std_version="c++17",
         )
 
-        compiler = Compiler(settings)
+        build_flags = self._load_build_flags()
+        compiler = Compiler(settings, build_flags)
 
         # Custom unity.cpp path for testing
         unity_path = self.temp_dir / "test_identical_unity.cpp"
@@ -721,6 +740,15 @@ class TestProgramLinking(unittest.TestCase):
         if self.temp_dir.exists():
             shutil.rmtree(self.temp_dir)
 
+    def _load_build_flags(self) -> BuildFlags:
+        """STRICT: Load BuildFlags explicitly - NO defaults allowed."""
+        build_flags_path = Path(__file__).parent.parent / "build_flags.toml"
+        if not build_flags_path.exists():
+            raise RuntimeError(
+                f"CRITICAL: build_flags.toml not found at {build_flags_path}"
+            )
+        return BuildFlags.parse(build_flags_path)
+
     def test_linker_detection(self):
         """Test automatic linker detection."""
         try:
@@ -755,7 +783,8 @@ class TestProgramLinking(unittest.TestCase):
             linker_args=[],
         )
 
-        result = link_program_sync(options)
+        build_flags = self._load_build_flags()
+        result = link_program_sync(options, build_flags)
         self.assertFalse(result.ok)
         self.assertIn("Object file not found", result.stderr)
         print("Missing object file validation works")
@@ -773,7 +802,8 @@ class TestProgramLinking(unittest.TestCase):
             linker_args=[],
         )
 
-        result = link_program_sync(options)
+        build_flags = self._load_build_flags()
+        result = link_program_sync(options, build_flags)
         self.assertFalse(result.ok)
         self.assertIn("Static library not found", result.stderr)
         print("Missing library validation works")
@@ -787,7 +817,8 @@ class TestProgramLinking(unittest.TestCase):
             linker_args=[],
         )
 
-        result = link_program_sync(options)
+        build_flags = self._load_build_flags()
+        result = link_program_sync(options, build_flags)
         self.assertFalse(result.ok)
         self.assertIn("No object files provided", result.stderr)
         print("No object files validation works")
@@ -815,6 +846,15 @@ class TestFullProgramLinking(unittest.TestCase):
         if self.temp_dir.exists():
             shutil.rmtree(self.temp_dir)
 
+    def _load_build_flags(self) -> BuildFlags:
+        """STRICT: Load BuildFlags explicitly - NO defaults allowed."""
+        build_flags_path = Path(__file__).parent.parent / "build_flags.toml"
+        if not build_flags_path.exists():
+            raise RuntimeError(
+                f"CRITICAL: build_flags.toml not found at {build_flags_path}"
+            )
+        return BuildFlags.parse(build_flags_path)
+
     def test_link_blink_example_full_pipeline(self):
         """Test complete pipeline: Blink.ino + FastLED src to executable."""
 
@@ -828,7 +868,8 @@ class TestFullProgramLinking(unittest.TestCase):
                 f"-I{self.src_dir}/platforms/wasm/compiler",  # Arduino.h compatibility
             ],
         )
-        compiler = Compiler(compiler_options)
+        build_flags = self._load_build_flags()
+        compiler = Compiler(compiler_options, build_flags)
 
         # Step 2: Compile Blink.ino to object file
         blink_ino = self.examples_dir / "Blink" / "Blink.ino"
@@ -906,7 +947,8 @@ class TestFullProgramLinking(unittest.TestCase):
                 f"-I{self.src_dir}/platforms/wasm/compiler",  # Arduino.h compatibility
             ],
         )
-        compiler = Compiler(compiler_options)
+        build_flags = self._load_build_flags()
+        compiler = Compiler(compiler_options, build_flags)
 
         # Create FastLED library once
         fastled_objects = self._compile_fastled_core(compiler)

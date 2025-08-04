@@ -22,6 +22,7 @@ class SymbolInfo:
     type: str
     name: str
     demangled_name: str
+    source: str  # STRICT: NO defaults - all callers must provide explicit source
 
 
 def run_command(cmd: str) -> str:
@@ -89,6 +90,7 @@ def analyze_symbols(
                 type=symbol_type,
                 name=mangled_name,
                 demangled_name=demangled_name,
+                source="esp32_nm",
             )
 
             symbols.append(symbol_info)
