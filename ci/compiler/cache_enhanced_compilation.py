@@ -108,7 +108,7 @@ class CacheAwareCompiler:
             )
         else:
             log_fn("[CACHE] All files unchanged - no compilation needed!")
-            result = self._create_success_result(len(ino_files))
+            result = self._create_success_result(len(ino_files), ino_files, full_compilation)
 
         # Log final stats
         if total_files > 0:
@@ -165,16 +165,44 @@ class CacheAwareCompiler:
         finally:
             self.compiler.find_cpp_files_for_example = original_method
 
-    def _create_success_result(self, file_count: int):
+    def _create_success_result(self, file_count: int, ino_files: Optional[List[Path]] = None, full_compilation: bool = False):
         """Create a successful compilation result for cached files."""
         from ci.compiler.test_example_compilation import CompilationResult
+
+        object_file_map = {}
+        
+        # Rebuild object file map from existing files if full compilation is enabled
+        if full_compilation and ino_files:
+            build_dir = Path(".build/examples")
+            for ino_file in ino_files:
+                example_name = ino_file.parent.name
+                example_build_dir = build_dir / example_name
+                
+                # Check for existing object files
+                example_obj_files = []
+                
+                # Main .ino object file
+                ino_obj_path = example_build_dir / f"{ino_file.stem}.o"
+                if ino_obj_path.exists():
+                    example_obj_files.append(ino_obj_path)
+                
+                # Additional .cpp object files
+                cpp_files = self.compiler.find_cpp_files_for_example(ino_file)
+                for cpp_file in cpp_files:
+                    cpp_obj_path = example_build_dir / f"{cpp_file.stem}.o"
+                    if cpp_obj_path.exists():
+                        example_obj_files.append(cpp_obj_path)
+                
+                # Only add to map if we found object files
+                if example_obj_files:
+                    object_file_map[ino_file] = example_obj_files
 
         return CompilationResult(
             successful_count=file_count,
             failed_count=0,
             compile_time=0.0,
             failed_examples=[],
-            object_file_map={},
+            object_file_map=object_file_map,
         )
 
 
