@@ -1619,7 +1619,11 @@ class CompilationTestRunner:
         return True
 
     def compile_examples(
-        self, compiler: Compiler, ino_files: List[Path], pch_compatible_files: set[Path]
+        self, compiler: Compiler, ino_files: List[Path], pch_compatible_files: set[Path],
+        enable_fingerprint_cache: bool = False,
+        cache_file: str = ".build/fingerprint_cache.json",
+        cache_verbose: bool = False,
+        force_recompile: bool = False,
     ) -> CompilationTestResults:
         """Execute the compilation process."""
         parallel_status = "disabled" if self.config.no_parallel else "enabled"
@@ -1643,14 +1647,51 @@ class CompilationTestRunner:
                     unity_additional_flags=self.config.unity_additional_flags,
                 )
             else:
-                result = compile_examples_simple(
-                    compiler,
-                    ino_files,
-                    pch_compatible_files,
-                    self.log_timing,
-                    self.config.full_compilation,
-                    self.config.verbose,
-                )
+                # Check if fingerprint cache is enabled
+                if enable_fingerprint_cache:
+                    # Import cache-enhanced compiler
+                    from ci.compiler.cache_enhanced_compilation import create_cache_enhanced_compiler
+                    
+                    # Create cache-enhanced compiler
+                    cache_compiler = create_cache_enhanced_compiler(
+                        compiler,
+                        cache_file=Path(cache_file),
+                        enable_cache=True,
+                        cache_verbose=cache_verbose,
+                        force_recompile=force_recompile
+                    )
+                    
+                    # Use cache-enhanced compilation
+                    cache_result = cache_compiler.compile_examples_with_cache(
+                        ino_files,
+                        pch_compatible_files,
+                        self.log_timing,
+                        self.config.full_compilation,
+                        self.config.verbose,
+                    )
+                    
+                    # Extract compilation result from cache result
+                    result = cache_result['compilation_result']
+                    cache_stats = cache_result['cache_stats']
+                    
+                    # Log cache performance
+                    if cache_stats.total_files > 0:
+                        self.log_timing(f"\n[CACHE] Performance Summary:")
+                        self.log_timing(f"[CACHE]   Files processed: {cache_stats.total_files}")
+                        self.log_timing(f"[CACHE]   Files skipped: {cache_stats.files_skipped} ({cache_stats.skip_rate:.1f}%)")
+                        self.log_timing(f"[CACHE]   Cache hit rate: {cache_stats.cache_hit_rate:.1f}%")
+                        if cache_stats.time_saved_seconds > 0:
+                            self.log_timing(f"[CACHE]   Estimated time saved: {cache_stats.time_saved_seconds:.1f}s")
+                else:
+                    # Use standard compilation
+                    result = compile_examples_simple(
+                        compiler,
+                        ino_files,
+                        pch_compatible_files,
+                        self.log_timing,
+                        self.config.full_compilation,
+                        self.config.verbose,
+                    )
 
             compile_time = time.time() - start_time
 
@@ -1976,6 +2017,10 @@ def run_example_compilation_test(
     full_compilation: bool,
     no_parallel: bool,
     verbose: bool = False,
+    enable_fingerprint_cache: bool = False,
+    cache_file: str = ".build/fingerprint_cache.json",
+    cache_verbose: bool = False,
+    force_recompile: bool = False,
 ) -> int:
     """Run the example compilation test using enhanced simple build system."""
     try:
@@ -2018,7 +2063,15 @@ def run_example_compilation_test(
         )
 
         # Compile examples
-        results = runner.compile_examples(compiler, ino_files, pch_compatible_files)
+        results = runner.compile_examples(
+            compiler, 
+            ino_files, 
+            pch_compatible_files,
+            enable_fingerprint_cache=enable_fingerprint_cache,
+            cache_file=cache_file,
+            cache_verbose=cache_verbose,
+            force_recompile=force_recompile,
+        )
 
         # Handle linking if requested
         results = runner.handle_linking(compiler, results)
@@ -2091,6 +2144,27 @@ if __name__ == "__main__":
         action="store_true",
         help="Enable verbose output showing detailed compilation commands and results",
     )
+    parser.add_argument(
+        "--enable-fingerprint-cache",
+        action="store_true",
+        help="Enable fingerprint cache for faster incremental builds by skipping unchanged files",
+    )
+    parser.add_argument(
+        "--cache-file",
+        type=str,
+        default=".build/fingerprint_cache.json",
+        help="Path to fingerprint cache file (default: .build/fingerprint_cache.json)",
+    )
+    parser.add_argument(
+        "--cache-verbose",
+        action="store_true",
+        help="Enable verbose cache output showing which files are skipped or compiled",
+    )
+    parser.add_argument(
+        "--force-recompile",
+        action="store_true",
+        help="Force recompilation of all files, ignoring cache (useful for testing)",
+    )
 
     args = parser.parse_args()
 
@@ -2108,5 +2182,9 @@ if __name__ == "__main__":
             full_compilation=args.full,
             no_parallel=args.no_parallel,
             verbose=args.verbose,
+            enable_fingerprint_cache=args.enable_fingerprint_cache,
+            cache_file=args.cache_file,
+            cache_verbose=args.cache_verbose,
+            force_recompile=args.force_recompile,
         )
     )
