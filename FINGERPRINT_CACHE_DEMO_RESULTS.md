@@ -32,12 +32,13 @@ Successfully integrated the fingerprint cache feature into FastLED's build syste
 
 ### ✅ Build System Integration
 - **New command-line flags**:
-  - `--enable-fingerprint-cache`: Enable cache for faster incremental builds
+  - `--no-fingerprint-cache`: Disable cache (cache is enabled by default)
   - `--cache-file`: Specify cache file path (default: `.build/fingerprint_cache.json`)
   - `--cache-verbose`: Show detailed cache operations
   - `--force-recompile`: Ignore cache for testing
 - **Backward compatibility**: Existing builds work unchanged
 - **Smart integration**: Cache only affects compilation phase, not PCH or linking
+- **Default enabled**: Cache is enabled by default for optimal developer experience
 
 ### ✅ Real-World Performance Impact
 
@@ -55,26 +56,29 @@ Successfully integrated the fingerprint cache feature into FastLED's build syste
 
 ### Basic Usage
 ```bash
-# Enable cache for faster incremental builds
-uv run python ci/compiler/test_example_compilation.py Blink --enable-fingerprint-cache
+# Cache is enabled by default for faster incremental builds
+uv run python ci/compiler/test_example_compilation.py Blink
 
 # Verbose cache output
-uv run python ci/compiler/test_example_compilation.py Blink DemoReel100 --enable-fingerprint-cache --cache-verbose
+uv run python ci/compiler/test_example_compilation.py Blink DemoReel100 --cache-verbose
+
+# Disable cache (for debugging or benchmarking)
+uv run python ci/compiler/test_example_compilation.py Blink --no-fingerprint-cache
 
 # Force recompilation (ignore cache)
-uv run python ci/compiler/test_example_compilation.py Blink --enable-fingerprint-cache --force-recompile
+uv run python ci/compiler/test_example_compilation.py Blink --force-recompile
 ```
 
 ### Performance Comparison
 ```bash
-# Without cache (baseline)
+# Without cache (for baseline comparison)
+time uv run python ci/compiler/test_example_compilation.py Blink DemoReel100 Fire2012 --no-fingerprint-cache
+
+# With cache (default - first run may have some cache misses)
 time uv run python ci/compiler/test_example_compilation.py Blink DemoReel100 Fire2012
 
-# With cache (first run - some cache misses)
-time uv run python ci/compiler/test_example_compilation.py Blink DemoReel100 Fire2012 --enable-fingerprint-cache
-
-# With cache (second run - all cache hits) 
-time uv run python ci/compiler/test_example_compilation.py Blink DemoReel100 Fire2012 --enable-fingerprint-cache
+# With cache (second run - all cache hits)
+time uv run python ci/compiler/test_example_compilation.py Blink DemoReel100 Fire2012
 ```
 
 ## Technical Features

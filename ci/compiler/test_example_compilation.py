@@ -1620,7 +1620,7 @@ class CompilationTestRunner:
 
     def compile_examples(
         self, compiler: Compiler, ino_files: List[Path], pch_compatible_files: set[Path],
-        enable_fingerprint_cache: bool = False,
+        enable_fingerprint_cache: bool = True,
         cache_file: str = ".build/fingerprint_cache.json",
         cache_verbose: bool = False,
         force_recompile: bool = False,
@@ -2017,7 +2017,7 @@ def run_example_compilation_test(
     full_compilation: bool,
     no_parallel: bool,
     verbose: bool = False,
-    enable_fingerprint_cache: bool = False,
+    enable_fingerprint_cache: bool = True,
     cache_file: str = ".build/fingerprint_cache.json",
     cache_verbose: bool = False,
     force_recompile: bool = False,
@@ -2145,9 +2145,9 @@ if __name__ == "__main__":
         help="Enable verbose output showing detailed compilation commands and results",
     )
     parser.add_argument(
-        "--enable-fingerprint-cache",
+        "--no-fingerprint-cache",
         action="store_true",
-        help="Enable fingerprint cache for faster incremental builds by skipping unchanged files",
+        help="Disable fingerprint cache (cache is enabled by default for faster incremental builds)",
     )
     parser.add_argument(
         "--cache-file",
@@ -2182,7 +2182,7 @@ if __name__ == "__main__":
             full_compilation=args.full,
             no_parallel=args.no_parallel,
             verbose=args.verbose,
-            enable_fingerprint_cache=args.enable_fingerprint_cache,
+            enable_fingerprint_cache=not args.no_fingerprint_cache,
             cache_file=args.cache_file,
             cache_verbose=args.cache_verbose,
             force_recompile=args.force_recompile,
