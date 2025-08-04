@@ -35,6 +35,7 @@ _TIMEOUT = 600 if _IS_GITHUB_ACTIONS else 120
 # Add the parent directory to Python path for imports
 # Import the proven Compiler infrastructure
 from ci.compiler.clang_compiler import (
+    BuildFlags,
     Compiler,
     CompilerOptions,
     LinkOptions,
@@ -125,6 +126,75 @@ def extract_compiler_flags_from_toml(config: Dict[str, Any]) -> List[str]:
                 )
 
     return flags
+
+
+def extract_stub_platform_defines_from_toml(config: Dict[str, Any]) -> List[str]:
+    """Extract stub platform defines from TOML config - uses [stub_platform] section."""
+    defines: List[str] = []
+
+    # Extract defines from [stub_platform] section
+    if "stub_platform" in config and isinstance(config["stub_platform"], dict):
+        stub_section = config["stub_platform"]
+        if "defines" in stub_section and isinstance(stub_section["defines"], list):
+            defines.extend(stub_section["defines"])
+            print(
+                f"[CONFIG] Loaded {len(stub_section['defines'])} stub platform defines from [stub_platform] section"
+            )
+        else:
+            raise RuntimeError(
+                "CRITICAL: No 'defines' list found in [stub_platform] section. "
+                "This is required for stub platform compilation."
+            )
+    else:
+        raise RuntimeError(
+            "CRITICAL: No [stub_platform] section found in build_flags.toml. "
+            "This section is MANDATORY for stub platform compilation."
+        )
+
+    # Validate that all required defines are present
+    required_defines = [
+        "STUB_PLATFORM",
+        "ARDUINO=",  # Partial match for version number
+        "FASTLED_USE_STUB_ARDUINO",
+        "FASTLED_STUB_IMPL",
+    ]
+
+    for required in required_defines:
+        if not any(define.startswith(required) for define in defines):
+            raise RuntimeError(
+                f"CRITICAL: Required stub platform define '{required}' not found in configuration. "
+                f"Please ensure [stub_platform] section contains all required defines."
+            )
+
+    return defines
+
+
+def extract_stub_platform_include_paths_from_toml(config: Dict[str, Any]) -> List[str]:
+    """Extract stub platform include paths from TOML config - uses [stub_platform] section."""
+    include_paths: List[str] = []
+
+    # Extract include paths from [stub_platform] section
+    if "stub_platform" in config and isinstance(config["stub_platform"], dict):
+        stub_section = config["stub_platform"]
+        if "include_paths" in stub_section and isinstance(
+            stub_section["include_paths"], list
+        ):
+            include_paths.extend(stub_section["include_paths"])
+            print(
+                f"[CONFIG] Loaded {len(stub_section['include_paths'])} stub platform include paths from [stub_platform] section"
+            )
+        else:
+            raise RuntimeError(
+                "CRITICAL: No 'include_paths' list found in [stub_platform] section. "
+                "This is required for stub platform compilation."
+            )
+    else:
+        raise RuntimeError(
+            "CRITICAL: No [stub_platform] section found in build_flags.toml. "
+            "This section is MANDATORY for stub platform compilation."
+        )
+
+    return include_paths
 
 
 def get_system_info() -> Dict[str, Union[str, int, float]]:
@@ -354,10 +424,30 @@ def create_fastled_compiler(
     )  # Will raise RuntimeError if critical flags missing
     print(f"Loaded {len(toml_flags)} total compiler flags from build_flags.toml")
 
-    # Base compiler settings
-    base_args = [
-        f"-I{arduino_stub_path}",  # Arduino.h stub for examples (absolute path)
-    ]
+    # Extract stub platform defines from TOML configuration
+    stub_defines = extract_stub_platform_defines_from_toml(
+        build_config
+    )  # Will raise RuntimeError if critical defines missing
+    print(f"Loaded {len(stub_defines)} stub platform defines from build_flags.toml")
+
+    # Extract stub platform include paths from TOML configuration
+    stub_include_paths = extract_stub_platform_include_paths_from_toml(
+        build_config
+    )  # Will raise RuntimeError if critical paths missing
+    print(
+        f"Loaded {len(stub_include_paths)} stub platform include paths from build_flags.toml"
+    )
+
+    # Base compiler settings - convert relative paths to absolute
+    base_args: list[str] = []
+    for include_path in stub_include_paths:
+        if os.path.isabs(include_path):
+            base_args.append(f"-I{include_path}")
+        else:
+            # Convert relative path to absolute from project root
+            abs_path = os.path.join(current_dir, include_path)
+            base_args.append(f"-I{abs_path}")
+    print(f"[CONFIG] Added {len(base_args)} include paths from configuration")
 
     # Combine base args with TOML flags
     all_args = base_args + toml_flags
@@ -377,13 +467,7 @@ def create_fastled_compiler(
 
     settings = CompilerOptions(
         include_path=src_path,
-        defines=[
-            "STUB_PLATFORM",
-            "ARDUINO=10808",
-            "FASTLED_USE_STUB_ARDUINO",
-            "SKETCH_HAS_LOTS_OF_MEMORY=1",  # Enable memory-intensive features for STUB platform
-            "FASTLED_HAS_ENGINE_EVENTS=1",  # Enable EngineEvents for UI components
-        ],  # Define ARDUINO to enable Arduino.h include
+        defines=stub_defines,  # Use configuration-based defines instead of hardcoded ones
         std_version="c++14",
         compiler=compiler_cmd,
         compiler_args=final_args,
@@ -391,7 +475,14 @@ def create_fastled_compiler(
         pch_output_path=pch_output_path,
         parallel=parallel,
     )
-    return Compiler(settings)
+    # Load build flags from TOML
+    current_dir_path = Path(current_dir)
+    build_flags_path = current_dir_path / "ci" / "build_flags.toml"
+    build_flags = BuildFlags.parse(
+        build_flags_path, quick_build=False, strict_mode=False
+    )
+
+    return Compiler(settings, build_flags)
 
 
 def compile_examples_simple(
@@ -923,15 +1014,15 @@ def get_platform_linker_args() -> List[str]:
 
     system = platform.system()
     if system == "Windows":
-        # Windows with lld-link - use MSVC-style linking
+        # In this project, we use Zig toolchain which has GNU target
+        # The compiler is hardcoded to "python -m ziglang c++" in create_fastled_compiler()
+        # Zig toolchain uses GNU-style linking even on Windows
         return [
-            "/SUBSYSTEM:CONSOLE",  # Console application
-            "/DEFAULTLIB:libcmt",  # Static C Runtime Library
-            "/DEFAULTLIB:libvcruntime",  # VC++ Runtime
-            "/DEFAULTLIB:libucrt",  # Universal CRT
-            "/NODEFAULTLIB:msvcrt",  # Avoid mixing runtimes
-            # Note: Windows FastLED executables use Windows APIs
-            # lld-link will automatically link to needed system libraries
+            "-static-libgcc",  # Static link GCC runtime
+            "-static-libstdc++",  # Static link C++ runtime
+            "-lpthread",  # Threading support
+            "-lm",  # Math library
+            # Windows system libraries linked automatically
         ]
     elif system == "Linux":
         return [
@@ -973,6 +1064,11 @@ def create_main_cpp_for_example(example_build_dir: Path) -> Path:
 
 #include <stdio.h>
 
+#ifdef FASTLED_STUB_IMPL
+#include "platforms/stub/time_stub.h"
+#include "fl/function.h"
+#endif
+
 // Arduino sketch functions (provided by compiled .ino file)
 extern void setup();
 extern void loop();
@@ -991,6 +1087,14 @@ extern "C" {
 // Main function for direct execution
 int main() {
     printf("RUNNER: Starting sketch execution\\n");
+    
+#ifdef FASTLED_STUB_IMPL
+    // Override delay function to return immediately for fast testing
+    setDelayFunction([](uint32_t ms) {
+        // Fast delay override - do nothing for speed
+        (void)ms; // Suppress unused parameter warning
+    });
+#endif
     
     // Initialize sketch
     printf("RUNNER: Calling setup()\\n");
@@ -1442,54 +1546,83 @@ class CompilationTestRunner:
         execution_failed_count = 0
         build_dir = Path(".build/examples")
 
-        # Find all executables in the build directory
-        for example_dir in build_dir.iterdir():
+        # Only execute examples that were compiled and linked in this run
+        if not results.object_file_map:
+            self.log_timing(
+                "[EXECUTION] No object file map available - no examples to execute"
+            )
+            return results
+
+        # Execute only the examples from this compilation run
+        for ino_file in results.object_file_map.keys():
+            example_name = ino_file.parent.name
+            example_dir = build_dir / example_name
+
             if not example_dir.is_dir():
                 continue
-                
-            executable_name = get_executable_name(example_dir.name)
+
+            executable_name = get_executable_name(example_name)
             executable_path = example_dir / executable_name
-            
+
             if not executable_path.exists():
-                self.log_timing(f"[EXECUTION] SKIPPED: {executable_name}: Executable not found")
+                self.log_timing(
+                    f"[EXECUTION] SKIPPED: {executable_name}: Executable not found"
+                )
                 continue
 
             try:
                 self.log_timing(f"[EXECUTION] Running: {executable_name}")
-                
+
                 # Run the executable with timeout
                 result = subprocess.run(
-                    [str(executable_path)],
+                    [str(executable_path.absolute())],
                     capture_output=True,
                     text=True,
                     timeout=30,  # 30 second timeout
-                    cwd=str(example_dir.parent)
+                    cwd=str(example_dir.absolute()),
                 )
-                
+
                 if result.returncode == 0:
                     executed_count += 1
                     self.log_timing(f"[EXECUTION] SUCCESS: {executable_name}")
                     # Always show output from executed programs (not just in verbose mode)
+                    # Show both stdout and stderr as many platforms write to stderr
+                    output_shown = False
                     if result.stdout.strip():
                         self.log_timing(f"[EXECUTION] Output for {executable_name}:")
-                        for line in result.stdout.split('\n'):
+                        for line in result.stdout.split("\n"):
+                            if line.strip():
+                                self.log_timing(f"[EXECUTION]   {line}")
+                        output_shown = True
+                    if result.stderr.strip():
+                        if not output_shown:
+                            self.log_timing(
+                                f"[EXECUTION] Output for {executable_name}:"
+                            )
+                        for line in result.stderr.split("\n"):
                             if line.strip():
                                 self.log_timing(f"[EXECUTION]   {line}")
                 else:
                     execution_failed_count += 1
-                    self.log_timing(f"[EXECUTION] FAILED: {executable_name}: Exit code {result.returncode}")
+                    self.log_timing(
+                        f"[EXECUTION] FAILED: {executable_name}: Exit code {result.returncode}"
+                    )
                     if result.stderr:
                         self.log_timing(f"[EXECUTION] Error: {result.stderr[:200]}...")
-                        
+
             except subprocess.TimeoutExpired:
                 execution_failed_count += 1
-                self.log_timing(f"[EXECUTION] FAILED: {executable_name}: Execution timeout (30s)")
+                self.log_timing(
+                    f"[EXECUTION] FAILED: {executable_name}: Execution timeout (30s)"
+                )
             except Exception as e:
                 execution_failed_count += 1
-                self.log_timing(f"[EXECUTION] FAILED: {executable_name}: Exception: {e}")
+                self.log_timing(
+                    f"[EXECUTION] FAILED: {executable_name}: Exception: {e}"
+                )
 
         execution_time = time.time() - execution_start
-        
+
         if execution_failed_count == 0:
             self.log_timing(
                 f"[EXECUTION] SUCCESS: Successfully executed {executed_count} sketch programs"
@@ -1517,7 +1650,9 @@ class CompilationTestRunner:
         config_parts: List[str],
     ) -> int:
         """Generate the final report and return exit code."""
-        total_time = results.compile_time + results.linking_time + results.execution_time
+        total_time = (
+            results.compile_time + results.linking_time + results.execution_time
+        )
         parallel_status = "disabled" if self.config.no_parallel else "enabled"
 
         self.log_timing(f"[CONFIG] Mode: {', '.join(config_parts)}")
@@ -1534,7 +1669,9 @@ class CompilationTestRunner:
         )
         self.log_timing(f"[TIMING] Linking: {results.linking_time:.2f}s {linking_mode}")
         if self.config.full_compilation and results.execution_time > 0:
-            self.log_timing(f"[TIMING] Execution: {results.execution_time:.2f}s (sketch runner)")
+            self.log_timing(
+                f"[TIMING] Execution: {results.execution_time:.2f}s (sketch runner)"
+            )
         self.log_timing(f"[TIMING] Total: {total_time:.2f}s")
 
         # Performance summary
@@ -1544,9 +1681,13 @@ class CompilationTestRunner:
         self.log_timing(f"[SUMMARY]   Failed: {results.failed_count}")
         if self.config.full_compilation:
             self.log_timing(f"[SUMMARY]   Linked: {results.linked_count}")
-            self.log_timing(f"[SUMMARY]   Linking failed: {results.linking_failed_count}")
+            self.log_timing(
+                f"[SUMMARY]   Linking failed: {results.linking_failed_count}"
+            )
             self.log_timing(f"[SUMMARY]   Executed: {results.executed_count}")
-            self.log_timing(f"[SUMMARY]   Execution failed: {results.execution_failed_count}")
+            self.log_timing(
+                f"[SUMMARY]   Execution failed: {results.execution_failed_count}"
+            )
         self.log_timing(f"[SUMMARY]   Parallel compilation: {parallel_status}")
         self.log_timing(f"[SUMMARY]   Build time: {results.compile_time:.2f}s")
         if results.compile_time > 0:
@@ -1557,9 +1698,11 @@ class CompilationTestRunner:
         # Determine success
         overall_success = results.failed_count == 0
         if self.config.full_compilation:
-            overall_success = (overall_success 
-                             and results.linking_failed_count == 0 
-                             and results.execution_failed_count == 0)
+            overall_success = (
+                overall_success
+                and results.linking_failed_count == 0
+                and results.execution_failed_count == 0
+            )
 
         if overall_success:
             if self.config.full_compilation:

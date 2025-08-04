@@ -8,14 +8,14 @@
 [tools]
 # Build tool configuration - Full compiler command with arguments
 # Optimized: Use direct python instead of 'uv run' when already in uv environment
-compiler_command = ["python", "-m", "ziglang", "c++"]
-compiler = "ziglang"  # For compatibility
-archiver = "ar"
-c_compiler = "clang"
-objcopy = "objcopy"
-nm = "nm"
-strip = "strip"
-ranlib = "ranlib"
+cpp_compiler = ["python", "-m", "ziglang", "c++"]
+linker = ["python", "-m", "ziglang", "c++"]  # Separate linker config for consistency
+archiver = ["python", "-m", "ziglang", "ar"]  # Ziglang archiver for unified toolchain
+c_compiler = ["python", "-m", "ziglang", "cc"]
+objcopy = ["python", "-m", "ziglang", "objcopy"]
+nm = ["python", "-m", "ziglang", "nm"]
+strip = ["python", "-m", "ziglang", "strip"]
+ranlib = ["python", "-m", "ziglang", "ranlib"]
 
 [all]
 # Universal compilation flags (compiler command handled separately)
@@ -178,6 +178,32 @@ include_flags = [
 ]
 
 
+
+[stub_platform]
+# ================================================================================================
+# STUB PLATFORM DEFINES FOR TESTING AND EXAMPLE COMPILATION
+# ================================================================================================
+# These defines are used for compiling examples and tests on the STUB platform
+# which provides Arduino-compatible functionality without hardware dependencies.
+
+defines = [
+    "STUB_PLATFORM",                        # Enable STUB platform
+    "ARDUINO=10808",                         # Arduino version compatibility
+    "FASTLED_USE_STUB_ARDUINO",             # Use stub Arduino implementation
+    "FASTLED_STUB_IMPL",                    # Enable STUB platform Arduino function implementations
+    "SKETCH_HAS_LOTS_OF_MEMORY=1",          # Enable memory-intensive features for STUB platform
+    "FASTLED_HAS_ENGINE_EVENTS=1",          # Enable EngineEvents for UI components
+]
+
+# Include paths required for stub platform compilation
+include_paths = [
+    "src/platforms/stub",                   # Arduino.h stub for examples
+]
+
+# Additional compiler arguments for stub platform
+compiler_args = [
+    # No additional args currently needed - all flags come from [all] and [build_modes.quick] sections
+]
 
 [linking.unix]
 # ================================================================================================

@@ -91,7 +91,7 @@ def remove_readonly(func: Callable[..., Any], path: str, _: Any) -> None:
     func(path)
 
 
-def robust_rmtree(path: Path, max_retries: int = 5, delay: float = 0.1) -> bool:
+def robust_rmtree(path: Path, max_retries: int, delay: float) -> bool:
     """
     Robustly remove a directory tree, handling race conditions and concurrent access.
 
@@ -142,7 +142,7 @@ def robust_rmtree(path: Path, max_retries: int = 5, delay: float = 0.1) -> bool:
     return False
 
 
-def safe_file_removal(file_path: Path, max_retries: int = 3) -> bool:
+def safe_file_removal(file_path: Path, max_retries: int) -> bool:
     """
     Safely remove a file with retry logic.
 
@@ -234,7 +234,8 @@ def create_build_dir(
     srcdir = builddir / "lib"
     if srcdir.exists():
         locked_print(f"[Thread {thread_id}] Removing existing lib directory: {srcdir}")
-        if not robust_rmtree(srcdir):
+        # STRICT: Explicit retry parameters - NO defaults allowed
+        if not robust_rmtree(srcdir, max_retries=5, delay=0.1):
             locked_print(
                 f"[Thread {thread_id}] Warning: Failed to remove lib directory {srcdir}, continuing anyway"
             )
@@ -244,7 +245,8 @@ def create_build_dir(
         locked_print(
             f"[Thread {thread_id}] Removing existing platformio.ini: {platformio_ini}"
         )
-        if not safe_file_removal(platformio_ini):
+        # STRICT: Explicit retry parameter - NO defaults allowed
+        if not safe_file_removal(platformio_ini, max_retries=3):
             locked_print(
                 f"[Thread {thread_id}] Warning: Failed to remove {platformio_ini}, continuing anyway"
             )
@@ -259,7 +261,8 @@ def create_build_dir(
             locked_print(
                 f"[Thread {thread_id}] Removing existing boards directory: {dst_dir}"
             )
-            if not robust_rmtree(dst_dir):
+            # STRICT: Explicit retry parameters - NO defaults allowed
+            if not robust_rmtree(dst_dir, max_retries=5, delay=0.1):
                 locked_print(
                     f"[Thread {thread_id}] Error: Failed to remove boards directory {dst_dir}"
                 )
@@ -379,19 +382,44 @@ def configure_ccache(env):
 
     # Set up CCACHE environment variables if not already set
     if "CCACHE_DIR" not in os.environ:
-        ccache_dir = os.path.join(env.get("PROJECT_DIR", os.getcwd()), ".ccache")
+        # STRICT: PROJECT_DIR must be explicitly set - NO fallbacks allowed
+        project_dir_for_ccache = env.get("PROJECT_DIR")
+        if not project_dir_for_ccache:
+            raise RuntimeError(
+                "CRITICAL: PROJECT_DIR environment variable is required for CCACHE_DIR setup. "
+                "Please set PROJECT_DIR to the project root directory."
+            )
+        ccache_dir = os.path.join(project_dir_for_ccache, ".ccache")
         os.environ["CCACHE_DIR"] = ccache_dir
         Path(ccache_dir).mkdir(parents=True, exist_ok=True)
 
     # Configure CCACHE for this build
-    os.environ["CCACHE_BASEDIR"] = env.get("PROJECT_DIR", os.getcwd())
+    # STRICT: PROJECT_DIR must be explicitly set - NO fallbacks allowed
+    project_dir = env.get("PROJECT_DIR")
+    if not project_dir:
+        raise RuntimeError(
+            "CRITICAL: PROJECT_DIR environment variable is required but not set. "
+            "Please set PROJECT_DIR to the project root directory."
+        )
+    os.environ["CCACHE_BASEDIR"] = project_dir
     os.environ["CCACHE_COMPRESS"] = "true"
     os.environ["CCACHE_COMPRESSLEVEL"] = "6"
     os.environ["CCACHE_MAXSIZE"] = "400M"
 
     # Wrap compiler commands with ccache
-    original_cc = env.get("CC", "gcc")
-    original_cxx = env.get("CXX", "g++")
+    # STRICT: CC and CXX must be explicitly set - NO fallbacks allowed
+    original_cc = env.get("CC")
+    if not original_cc:
+        raise RuntimeError(
+            "CRITICAL: CC environment variable is required but not set. "
+            "Please set CC to the C compiler path (e.g., gcc, clang)."
+        )
+    original_cxx = env.get("CXX")
+    if not original_cxx:
+        raise RuntimeError(
+            "CRITICAL: CXX environment variable is required but not set. "
+            "Please set CXX to the C++ compiler path (e.g., g++, clang++)."
+        )
 
     # Don't wrap if already wrapped
     if "ccache" not in original_cc:

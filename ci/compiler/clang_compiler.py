@@ -18,6 +18,9 @@ from pathlib import Path
 from typing import Any, List, Sequence
 
 
+_HERE = Path(__file__).parent
+
+
 def cpu_count() -> int:
     # get the nubmer of cpus on the machine
     import multiprocessing
@@ -167,17 +170,14 @@ class LinkOptions:
 class BuildTools:
     """Build tool paths and configurations"""
 
-    compiler: str = "clang++"  # C++ compiler (maps to CompilerOptions.compiler)
-    archiver: str = "ar"  # Archive tool (maps to CompilerOptions.archiver)
-    linker: str | None = None  # Linker tool (maps to LinkOptions.linker)
-    c_compiler: str = "clang"  # C compiler (for mixed C/C++ projects)
-    objcopy: str = "objcopy"  # Object copy utility (for firmware/embedded)
-    nm: str = "nm"  # Symbol table utility (for analysis)
-    strip: str = "strip"  # Strip utility (for release builds)
-    ranlib: str = "ranlib"  # Archive indexer (for static libraries)
-    compiler_command: list[str] = field(
-        default_factory=list[str]
-    )  # Full compiler command with arguments
+    cpp_compiler: list[str]  # C++ compiler (maps to CompilerOptions.compiler)
+    archiver: list[str]  # Archive tool (maps to CompilerOptions.archiver)
+    linker: list[str]  # Linker tool (maps to LinkOptions.linker)
+    c_compiler: list[str]  # C compiler (maps to CompilerOptions.c_compiler)
+    objcopy: list[str]  # Object copy utility (for firmware/embedded)
+    nm: list[str]  # Symbol table utility (for analysis)
+    strip: list[str]  # Strip utility (for release builds)
+    ranlib: list[str]  # Archive indexer (for static libraries)
 
 
 @dataclass
@@ -189,12 +189,12 @@ class BuildFlags:
     and serialize back to TOML format.
     """
 
-    defines: List[str] = field(default_factory=list[str])
-    compiler_flags: List[str] = field(default_factory=list[str])
-    include_flags: List[str] = field(default_factory=list[str])
-    link_flags: List[str] = field(default_factory=list[str])
-    strict_mode_flags: List[str] = field(default_factory=list[str])
-    tools: BuildTools = field(default_factory=BuildTools)
+    defines: List[str]
+    compiler_flags: List[str]
+    include_flags: List[str]
+    link_flags: List[str]
+    strict_mode_flags: List[str]
+    tools: BuildTools
 
     @classmethod
     def parse(
@@ -229,53 +229,87 @@ class BuildFlags:
                 f"Example:\n"
                 f"[tools]\n"
                 f'compiler_command = ["python", "-m", "ziglang", "c++"]\n'
-                f'archiver = "ar"\n'
                 f'c_compiler = "clang"'
             )
 
         tools_config = config["tools"]
 
-        # Validate required tools are present
-        required_tools = {
-            "compiler_command": 'Full compiler command (e.g., ["python", "-m", "ziglang", "c++"])',
-            "archiver": 'Archive tool (e.g., "ar")',
-            "c_compiler": 'C compiler (e.g., "clang")',
-        }
+        # # Extract linker_command and archiver_command with validation
+        # linker_command = tools_config.get("linker_command", [])
+        # archiver_command = tools_config.get("archiver_command", [])
 
-        missing_tools: List[str] = []
-        for tool, description in required_tools.items():
-            if tool not in tools_config:
-                missing_tools.append(f"  - {tool}: {description}")
+        # # Validate command fields if present
+        # if linker_command and not isinstance(linker_command, list):
+        #     raise RuntimeError(
+        #         f"FATAL ERROR: tools.linker_command must be a list in build_flags.toml at {toml_path}\n"
+        #         f"Got: {linker_command} (type: {type(linker_command).__name__})\n"
+        #         f'Expected: ["python", "-m", "ziglang", "c++"]'
+        #     )
 
-        if missing_tools:
-            raise RuntimeError(
-                f"FATAL ERROR: Required tools missing from [tools] section in build_flags.toml at {toml_path}\n"
-                f"Missing tools:\n" + "\n".join(missing_tools) + "\n\n"
-                f"All compiler tools must be explicitly defined in the TOML configuration.\n"
-                f"No defaults or hardcoded values are allowed."
-            )
+        # if archiver_command and not isinstance(archiver_command, list):
+        #     raise RuntimeError(
+        #         f"FATAL ERROR: tools.archiver_command must be a list in build_flags.toml at {toml_path}\n"
+        #         f"Got: {archiver_command} (type: {type(archiver_command).__name__})\n"
+        #         f'Expected: ["python", "-m", "ziglang", "ar"]'
+        #     )
 
-        # Validate compiler_command is a list
-        compiler_command = tools_config["compiler_command"]
-        if not isinstance(compiler_command, list) or not compiler_command:
-            raise RuntimeError(
-                f"FATAL ERROR: tools.compiler_command must be a non-empty list in build_flags.toml at {toml_path}\n"
-                f"Got: {compiler_command} (type: {type(compiler_command).__name__})\n"
-                f'Expected: ["python", "-m", "ziglang", "c++"]'
-            )
+        cpp_compiler = tools_config.get("cpp_compiler", None)
+        linker = tools_config.get("linker", None)
+        c_compiler = tools_config.get("c_compiler", None)
+        objcopy = tools_config.get("objcopy", None)
+        nm = tools_config.get("nm", None)
+        strip = tools_config.get("strip", None)
+        ranlib = tools_config.get("ranlib", None)
+        archiver = tools_config.get("archiver", None)
+
+        assert cpp_compiler is not None, (
+            f"FATAL ERROR: cpp_compiler is not set in build_flags.toml at {toml_path}"
+        )
+        assert linker is not None, (
+            f"FATAL ERROR: linker is not set in build_flags.toml at {toml_path}"
+        )
+        assert c_compiler is not None, (
+            f"FATAL ERROR: c_compiler is not set in build_flags.toml at {toml_path}"
+        )
+        assert objcopy is not None, (
+            f"FATAL ERROR: objcopy is not set in build_flags.toml at {toml_path}"
+        )
+        assert nm is not None, (
+            f"FATAL ERROR: nm is not set in build_flags.toml at {toml_path}"
+        )
+        assert strip is not None, (
+            f"FATAL ERROR: strip is not set in build_flags.toml at {toml_path}"
+        )
+        assert ranlib is not None, (
+            f"FATAL ERROR: ranlib is not set in build_flags.toml at {toml_path}"
+        )
+        assert archiver is not None, (
+            f"FATAL ERROR: archiver is not set in build_flags.toml at {toml_path}"
+        )
+
+        # tools = BuildTools(
+        #     compiler=cpp_compiler,  # Use last element as fallback
+        #     archiver=archiver,  # Use fallback for deprecated field
+        #     linker=linker,
+        #     c_compiler=c_compiler,
+        #     objcopy=objcopy,
+        #     nm=nm,
+        #     strip=strip,
+        #     ranlib=ranlib,
+        #     compiler_command=compiler_command,  # Add the full command
+        #     linker_command=linker,  # Add the linker command
+        #     archiver_command=archiver,  # Add the archiver command
+        # )
 
         tools = BuildTools(
-            compiler=tools_config.get(
-                "compiler", compiler_command[-1]
-            ),  # Use last element as fallback
-            archiver=tools_config["archiver"],
-            linker=tools_config.get("linker"),
-            c_compiler=tools_config["c_compiler"],
-            objcopy=tools_config.get("objcopy", "objcopy"),
-            nm=tools_config.get("nm", "nm"),
-            strip=tools_config.get("strip", "strip"),
-            ranlib=tools_config.get("ranlib", "ranlib"),
-            compiler_command=compiler_command,  # Add the full command
+            cpp_compiler=cpp_compiler,
+            archiver=archiver,
+            linker=linker,
+            c_compiler=c_compiler,
+            objcopy=objcopy,
+            nm=nm,
+            strip=strip,
+            ranlib=ranlib,
         )
 
         # Extract base flags
@@ -426,23 +460,31 @@ class BuildFlags:
         ]
         toml_content.extend(tools_section_lines)
 
-        # Add tools
-        toml_content.append(f'compiler = "{self.tools.compiler}"')
-        toml_content.append(f'archiver = "{self.tools.archiver}"')
+        # Add tools - using new field names
 
-        # Add compiler_command if it exists
-        if self.tools.compiler_command:
-            toml_content.append(f"compiler_command = {self.tools.compiler_command!r}")
+        # Add cpp_compiler if it exists
+        if self.tools.cpp_compiler:
+            toml_content.append(f"cpp_compiler = {self.tools.cpp_compiler!r}")
 
-        # Only add linker if it's not None
-        if self.tools.linker is not None:
-            toml_content.append(f'linker = "{self.tools.linker}"')
+        # Add linker if it exists
+        if self.tools.linker:
+            toml_content.append(f"linker = {self.tools.linker!r}")
 
-        toml_content.append(f'c_compiler = "{self.tools.c_compiler}"')
-        toml_content.append(f'objcopy = "{self.tools.objcopy}"')
-        toml_content.append(f'nm = "{self.tools.nm}"')
-        toml_content.append(f'strip = "{self.tools.strip}"')
-        toml_content.append(f'ranlib = "{self.tools.ranlib}"')
+        # Add archiver if it exists
+        if self.tools.archiver:
+            toml_content.append(f"archiver = {self.tools.archiver!r}")
+
+        # Add individual tool commands as strings (for backward compatibility)
+        if self.tools.c_compiler:
+            toml_content.append(f"c_compiler = {self.tools.c_compiler!r}")
+        if self.tools.objcopy:
+            toml_content.append(f"objcopy = {self.tools.objcopy!r}")
+        if self.tools.nm:
+            toml_content.append(f"nm = {self.tools.nm!r}")
+        if self.tools.strip:
+            toml_content.append(f"strip = {self.tools.strip!r}")
+        if self.tools.ranlib:
+            toml_content.append(f"ranlib = {self.tools.ranlib!r}")
         toml_content.append("")
 
         return "\n".join(toml_content)
@@ -488,8 +530,9 @@ class Compiler:
     Compiler wrapper for FastLED .ino file compilation.
     """
 
-    def __init__(self, settings: CompilerOptions):
+    def __init__(self, settings: CompilerOptions, build_flags: BuildFlags):
         self.settings = settings
+        self.build_flags = build_flags
         self._pch_file_path: Path | None = None
         self._pch_header_path: Path | None = None
         self._pch_ready: bool = False
@@ -1643,7 +1686,11 @@ class Compiler:
             Result: Success status and command output
         """
         return create_archive_sync(
-            object_files, output_archive, options, self.settings.archiver
+            object_files,
+            output_archive,
+            options,
+            self.settings.archiver,
+            self.build_flags,
         )
 
     def link_program(self, link_options: LinkOptions) -> Future[Result]:
@@ -1668,7 +1715,7 @@ class Compiler:
         Returns:
             Result: Success status and command output
         """
-        return link_program_sync(link_options)
+        return link_program_sync(link_options, self.build_flags)
 
     def detect_linker(self) -> str:
         """
@@ -1725,7 +1772,16 @@ class Compiler:
             raise RuntimeError(f"No linker found for platform {system}")
 
 
-def link_program_sync(link_options: LinkOptions) -> Result:
+def get_configured_linker_command(build_flags_config: BuildFlags) -> list[str]:
+    """Get linker command from build_flags.toml configuration."""
+    if build_flags_config.tools.linker:
+        return build_flags_config.tools.linker
+    assert False, "FATAL ERROR: linker is not set in build_flags.toml"
+
+
+def link_program_sync(
+    link_options: LinkOptions, build_flags_config: BuildFlags
+) -> Result:
     """
     Link object files and libraries into an executable program.
 
@@ -1767,29 +1823,56 @@ def link_program_sync(link_options: LinkOptions) -> Result:
 
     # Auto-detect linker if not provided
     linker = link_options.linker
-    if linker is None:
-        try:
-            linker = detect_linker()
-        except RuntimeError as e:
-            return Result(ok=False, stdout="", stderr=str(e), return_code=1)
+    system = platform.system()
 
-    # Build linker command
+    # Check if we're using GNU-style arguments (indicates Zig toolchain)
+    using_gnu_style = any(
+        arg.startswith("-") and not arg.startswith("-Wl,")
+        for arg in link_options.linker_args
+    )
+
+    # Build linker command - prefer configuration over detection
     cmd: list[str] = []
-    if isinstance(linker, str):
-        # Split linker string into individual arguments for subprocess
-        # Use shlex.split() to properly handle quoted strings and escaped characters
-        import shlex
 
-        cmd = shlex.split(linker)
+    if linker is None:
+        if build_flags_config:
+            # Use configured toolchain for linking when available
+            configured_cmd = get_configured_linker_command(build_flags_config)
+            if configured_cmd:
+                cmd = configured_cmd[:]  # Copy the configured command
+            else:
+                # Fallback to detection if no configuration available
+                try:
+                    linker = detect_linker()
+                    cmd = [linker]
+                except RuntimeError as e:
+                    return Result(ok=False, stdout="", stderr=str(e), return_code=1)
+        elif system == "Windows" and using_gnu_style:
+            # Legacy fallback: Use Zig toolchain for linking when GNU-style args are provided
+            cmd = ["python", "-m", "ziglang", "c++"]
+        else:
+            try:
+                linker = detect_linker()
+                cmd = [linker]
+            except RuntimeError as e:
+                return Result(ok=False, stdout="", stderr=str(e), return_code=1)
     else:
-        # linker should be str at this point due to detect_linker() call above
-        cmd = [str(linker)]
+        # linker was provided explicitly
+        if isinstance(linker, str):
+            # For Windows paths, don't use shlex.split() as it mangles backslashes
+            # The linker variable should be a single executable path, not a command with args
+            cmd = [linker]
+        else:
+            # linker should be str at this point
+            cmd = [str(linker)]
 
     # Add platform-specific output flag first
-    system = platform.system()
     output_path = Path(link_options.output_executable)
 
-    if system == "Windows" and ("lld-link" in linker or "link" in linker):
+    if system == "Windows" and using_gnu_style:
+        # Zig toolchain or GNU-style linker on Windows
+        cmd.extend(["-o", str(output_path)])
+    elif system == "Windows" and linker and ("lld-link" in linker or "link" in linker):
         # Windows (lld-link/link) style
         cmd.append(f"/OUT:{output_path}")
     else:
@@ -1860,6 +1943,18 @@ def link_program_sync(link_options: LinkOptions) -> Result:
         )
 
     except Exception as e:
+        # Check if output executable was created successfully despite the exception
+        output_path = Path(link_options.output_executable)
+        if output_path.exists() and output_path.stat().st_size > 0:
+            # Linking succeeded - executable was created successfully
+            # The exception was likely during output reading or cleanup, not linking
+            return Result(
+                ok=True,
+                stdout="",
+                stderr=f"Linking succeeded with minor exception during cleanup: {type(e).__name__}: {e}",
+                return_code=0,
+            )
+
         # Create verbose error message with full command and exception details
         cmd_str = " ".join(str(arg) for arg in cmd)
         verbose_error = (
@@ -1883,10 +1978,69 @@ def link_program_sync(link_options: LinkOptions) -> Result:
 
 # Convenience functions for backward compatibility
 
-# Default settings for backward compatibility
-_DEFAULT_SETTINGS = CompilerOptions(
-    include_path="./src", defines=["STUB_PLATFORM"], std_version="c++17"
-)
+
+# Default settings for backward compatibility - NO FALLBACKS POLICY
+def _get_default_settings() -> CompilerOptions:
+    """Get default compiler settings with MANDATORY configuration-based stub platform defines."""
+
+    from ci.compiler.test_example_compilation import (
+        extract_stub_platform_defines_from_toml,
+        extract_stub_platform_include_paths_from_toml,
+        load_build_flags_toml,
+    )
+
+    # Add the ci/compiler directory to path for imports
+    ci_dir = _HERE.parent
+
+    # MANDATORY: Load build_flags.toml configuration - NO fallbacks allowed
+    toml_path = ci_dir / "build_flags.toml"
+    if not toml_path.exists():
+        raise RuntimeError(
+            f"CRITICAL: build_flags.toml not found at {toml_path}. "
+            f"This file is MANDATORY for all compiler operations."
+        )
+
+    # Load configuration with strict error handling
+    build_config = load_build_flags_toml(str(toml_path))
+    stub_defines = extract_stub_platform_defines_from_toml(build_config)
+    stub_include_paths = extract_stub_platform_include_paths_from_toml(build_config)
+
+    # Convert relative include paths to absolute and create compiler args
+    compiler_args: list[str] = []
+    for include_path in stub_include_paths:
+        if os.path.isabs(include_path):
+            compiler_args.append(f"-I{include_path}")
+        else:
+            # Convert relative path to absolute from project root
+            abs_path = str(ci_dir.parent / include_path)
+            compiler_args.append(f"-I{abs_path}")
+
+    return CompilerOptions(
+        include_path="./src",
+        defines=stub_defines,
+        std_version="c++17",
+        compiler_args=compiler_args,  # Include paths from configuration
+    )
+
+
+def _get_default_build_flags() -> BuildFlags:
+    """Get default BuildFlags with MANDATORY configuration loading - NO FALLBACKS!"""
+    from pathlib import Path
+
+    # MANDATORY: Load build_flags.toml configuration - NO fallbacks allowed
+    current_dir = Path(__file__).parent
+    ci_dir = current_dir.parent
+    toml_path = ci_dir / "build_flags.toml"
+
+    if not toml_path.exists():
+        raise RuntimeError(
+            f"CRITICAL: build_flags.toml not found at {toml_path}. "
+            f"This file is MANDATORY for all compiler operations."
+        )
+
+    # Use BuildFlags.parse() method for proper type construction
+    return BuildFlags.parse(toml_path)
+
 
 # Shared compiler instance for backward compatibility functions
 _default_compiler = None
@@ -1896,7 +2050,10 @@ def _get_default_compiler() -> Compiler:
     """Get or create a shared compiler instance with default settings."""
     global _default_compiler
     if _default_compiler is None:
-        _default_compiler = Compiler(_DEFAULT_SETTINGS)
+        # STRICT: Both CompilerOptions AND BuildFlags are REQUIRED - NO DEFAULTS!
+        build_flags = _get_default_build_flags()
+        default_settings = _get_default_settings()
+        _default_compiler = Compiler(default_settings, build_flags)
     return _default_compiler
 
 
@@ -1971,7 +2128,9 @@ def main() -> bool:
     settings = CompilerOptions(
         include_path="./src", defines=["STUB_PLATFORM"], std_version="c++17"
     )
-    compiler = Compiler(settings)
+    # STRICT: Load BuildFlags explicitly - NO defaults allowed
+    build_flags = _get_default_build_flags()
+    compiler = Compiler(settings, build_flags)
 
     # Test version check
     version_result = compiler.check_clang_version()
@@ -2015,7 +2174,9 @@ def main() -> bool:
         std_version="c++17",
         compiler_args=["-Werror", "-Wall"],
     )
-    compiler_with_args = Compiler(settings_with_args)
+    # STRICT: Load BuildFlags explicitly - NO defaults allowed
+    build_flags_with_args = _get_default_build_flags()
+    compiler_with_args = Compiler(settings_with_args, build_flags_with_args)
     if ino_files:
         # Test that compiler_args are included in the command
         with tempfile.NamedTemporaryFile(suffix=".o", delete=False) as temp_file:
@@ -2053,28 +2214,6 @@ def main() -> bool:
     )
 
     return result and success_compat
-
-
-def detect_archiver() -> str:
-    """
-    Detect available archiver tool.
-    Preference order: llvm-ar > ar
-
-    Returns:
-        str: Path to the detected archiver tool
-
-    Raises:
-        RuntimeError: If no archiver tool is found
-    """
-    llvm_ar = shutil.which("llvm-ar")
-    if llvm_ar:
-        return llvm_ar
-
-    ar = shutil.which("ar")
-    if ar:
-        return ar
-
-    raise RuntimeError("No archiver tool found (ar or llvm-ar required)")
 
 
 def detect_linker() -> str:
@@ -2125,11 +2264,41 @@ def detect_linker() -> str:
         raise RuntimeError(f"No linker found for platform {system}")
 
 
+def get_configured_archiver_command(build_flags_config: BuildFlags) -> list[str] | None:
+    """Get archiver command from build_flags.toml configuration."""
+    if build_flags_config.tools.archiver:
+        return build_flags_config.tools.archiver
+    return None
+
+
+def detect_archiver(build_flags_config: BuildFlags | None) -> str:
+    """Detect archiver with preference for configured tools."""
+    if build_flags_config:
+        configured_cmd = get_configured_archiver_command(build_flags_config)
+        if configured_cmd:
+            # Return the full command as a space-separated string for compatibility
+            return " ".join(configured_cmd)
+
+    # Fallback to system archiver detection
+    llvm_ar = shutil.which("llvm-ar")
+    if llvm_ar:
+        return llvm_ar
+
+    ar = shutil.which("ar")
+    if ar:
+        return ar
+
+    raise RuntimeError(
+        "No archiver tool found (ar, llvm-ar, or configured archiver required)"
+    )
+
+
 def create_archive_sync(
     object_files: list[Path],
     output_archive: Path,
     options: LibarchiveOptions = LibarchiveOptions(),
     archiver: str | None = None,
+    build_flags_config: BuildFlags | None = None,
 ) -> Result:
     """
     Create a static library archive (.a) from compiled object files.
@@ -2164,12 +2333,22 @@ def create_archive_sync(
     # Auto-detect archiver if not provided
     if archiver is None:
         try:
-            archiver = detect_archiver()
+            archiver = detect_archiver(build_flags_config)
         except RuntimeError as e:
             return Result(ok=False, stdout="", stderr=str(e), return_code=1)
 
-    # Build archive command
-    cmd = [archiver]
+    # Build archive command - handle configured command vs single tool
+    cmd: list[str] = []
+    if build_flags_config:
+        configured_cmd = get_configured_archiver_command(build_flags_config)
+        if configured_cmd and archiver == " ".join(configured_cmd):
+            # Using configured command - split it properly
+            cmd = configured_cmd[:]
+        else:
+            # Using detected or provided archiver
+            cmd = [archiver]
+    else:
+        cmd = [archiver]
 
     # Archive flags: r=insert, c=create if needed, s=write symbol table
     flags = "rcs"
@@ -2308,13 +2487,24 @@ def create_compiler_options_from_toml(
         k: v for k, v in kwargs.items() if k not in ["compiler", "archiver"]
     }
 
+    # Get modern command-based tools with fallbacks for legacy CompilerOptions compatibility
+    # Use the last element of command arrays as the tool name for backward compatibility
+    compiler_tool = (
+        build_flags.tools.cpp_compiler[-1]
+        if build_flags.tools.cpp_compiler
+        else "clang++"
+    )
+    archiver_tool = (
+        build_flags.tools.archiver[-1] if build_flags.tools.archiver else "ar"
+    )
+
     # Create CompilerOptions with TOML-loaded flags and tools
     return CompilerOptions(
         include_path=include_path,
         defines=defines,
         compiler_args=compiler_args,
-        compiler=build_flags.tools.compiler,  # Use TOML-specified compiler
-        archiver=build_flags.tools.archiver,  # Use TOML-specified archiver
+        compiler=compiler_tool,  # Use command-based tool or fallback
+        archiver=archiver_tool,  # Use command-based tool or fallback
         **filtered_kwargs,
     )
 

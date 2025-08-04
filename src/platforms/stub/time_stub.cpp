@@ -2,6 +2,7 @@
 #ifdef FASTLED_STUB_IMPL  // Only use this if explicitly defined.
 
 #include "time_stub.h"
+#include "fl/function.h"
 #include <chrono>
 #include <thread>
 
@@ -12,6 +13,9 @@
 #endif
 
 static auto start_time = std::chrono::system_clock::now();
+
+// Global delay function override for fast testing
+static fl::function<void(uint32_t)> g_delay_override;
 
 extern "C" {
 
@@ -30,6 +34,13 @@ uint32_t micros() {
 }
 
 void delay(int ms) {
+    // Use override function if set (for fast testing)
+    if (g_delay_override) {
+        g_delay_override(static_cast<uint32_t>(ms));
+        return;
+    }
+
+    // Default delay implementation
 #ifdef FASTLED_USE_PTHREAD_DELAY
     if (ms <= 0) {
         return; // nothing to wait for
@@ -66,5 +77,10 @@ void yield() {
 #endif // __EMSCRIPTEN__
 
 } // extern "C"
+
+// Function to set delay override (C++ linkage for test runner)
+void setDelayFunction(const fl::function<void(uint32_t)>& delayFunc) {
+    g_delay_override = delayFunc;
+}
 
 #endif  // FASTLED_STUB_IMPL
