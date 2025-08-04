@@ -108,7 +108,7 @@ class CacheAwareCompiler:
             )
         else:
             log_fn("[CACHE] All files unchanged - no compilation needed!")
-            result = self._create_success_result(len(ino_files))
+            result = self._create_success_result(len(ino_files), ino_files)
 
         # Log final stats
         if total_files > 0:
@@ -165,16 +165,44 @@ class CacheAwareCompiler:
         finally:
             self.compiler.find_cpp_files_for_example = original_method
 
-    def _create_success_result(self, file_count: int):
+    def _create_success_result(
+        self, file_count: int, ino_files: Optional[List[Path]] = None
+    ):
         """Create a successful compilation result for cached files."""
         from ci.compiler.test_example_compilation import CompilationResult
+
+        # For cached files, we need to populate object_file_map with existing object files
+        # so that linking can proceed properly
+        object_file_map: Dict[Path, List[Path]] = {}
+        if ino_files:
+            for ino_file in ino_files:
+                # Find existing object files for this example
+                example_name = ino_file.parent.name
+                build_dir = Path(".build/examples") / example_name
+
+                obj_files: List[Path] = []
+                if build_dir.exists():
+                    # Look for the main .ino object file
+                    ino_obj = build_dir / f"{ino_file.stem}.o"
+                    if ino_obj.exists():
+                        obj_files.append(ino_obj)
+
+                    # Look for additional .cpp files in the same directory as the .ino
+                    cpp_files = self.compiler.find_cpp_files_for_example(ino_file)
+                    for cpp_file in cpp_files:
+                        cpp_obj = build_dir / f"{cpp_file.stem}.o"
+                        if cpp_obj.exists():
+                            obj_files.append(cpp_obj)
+
+                if obj_files:
+                    object_file_map[ino_file] = obj_files
 
         return CompilationResult(
             successful_count=file_count,
             failed_count=0,
             compile_time=0.0,
             failed_examples=[],
-            object_file_map={},
+            object_file_map=object_file_map,
         )
 
 

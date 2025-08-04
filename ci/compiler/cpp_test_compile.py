@@ -235,12 +235,12 @@ def create_unit_test_fastled_library(
     clean: bool = False, use_pch: bool = True
 ) -> Path | None:
     """Create libfastled.a static library specifically for unit tests with FASTLED_FORCE_NAMESPACE=1.
-    
+
     CRITICAL: Unit tests need their own separate library from examples because they use
     different compilation flags. Unit tests require FASTLED_FORCE_NAMESPACE=1 to put
     all symbols in the fl:: namespace that the tests expect.
     """
-    
+
     # Unit tests get their own separate library directory under .build/fastled/unit/
     fastled_build_dir = BUILD_DIR.parent / ".build" / "fastled" / "unit"
     fastled_build_dir.mkdir(parents=True, exist_ok=True)
@@ -270,14 +270,14 @@ def create_unit_test_fastled_library(
             parallel=True,
         )
 
-                # CRITICAL: Add required defines for unit test library compilation
+        # CRITICAL: Add required defines for unit test library compilation
         if library_compiler.settings.defines is None:
             library_compiler.settings.defines = []
-        
+
         # Add FASTLED_FORCE_NAMESPACE=1 to export symbols in fl:: namespace
         library_compiler.settings.defines.append("FASTLED_FORCE_NAMESPACE=1")
         print("[LIBRARY] Added FASTLED_FORCE_NAMESPACE=1 to library compiler")
-        
+
         # Add FASTLED_TESTING=1 to include MockTimeProvider and test utility functions
         library_compiler.settings.defines.append("FASTLED_TESTING=1")
         print("[LIBRARY] Added FASTLED_TESTING=1 to library compiler")
@@ -563,9 +563,7 @@ def compile_unit_tests_python_api(
     # Step 2: Build FastLED library using optimized examples paradigm
     print("Building FastLED library...")
 
-    fastled_lib_path = create_unit_test_fastled_library(
-        clean, use_pch=use_pch
-    )
+    fastled_lib_path = create_unit_test_fastled_library(clean, use_pch=use_pch)
 
     # Step 3: Compile and link each test (PARALLEL OPTIMIZATION)
     print(f"Compiling {len(test_files)} tests...")
