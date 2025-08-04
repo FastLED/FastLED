@@ -426,17 +426,15 @@ def compile_unit_tests_python_api(
         
         # Create static library from object files
         if fastled_objects:
-            from .clang_compiler import ArchiveOptions
+            print(f"Creating FastLED library: {fastled_lib_path}")
             
-            archive_options = ArchiveOptions(
-                output_archive=str(fastled_lib_path),
-                object_files=fastled_objects
-            )
+            # Convert string paths to Path objects for the archive creation
+            fastled_object_paths = [Path(obj) for obj in fastled_objects]
             
-            archive_future = compiler.create_static_library(archive_options)
+            archive_future = compiler.create_archive(fastled_object_paths, Path(fastled_lib_path))
             archive_result = archive_future.result()
             
-            if archive_result.return_code != 0:
+            if not archive_result.ok:
                 print(f"Warning: Failed to create FastLED library: {archive_result.stderr}")
                 # Continue without the library
                 fastled_lib_path = None
