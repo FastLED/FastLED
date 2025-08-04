@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # pyright: reportUnknownMemberType=false, reportReturnType=false, reportMissingParameterType=false
 import argparse
+import hashlib
 import json
 import os
 import shutil
@@ -8,10 +9,18 @@ import subprocess
 import sys
 import time
 from pathlib import Path
-from typing import Set, Tuple
+from typing import Dict, List, Optional, Set, Tuple
 
 from ci.util.paths import PROJECT_ROOT
 from ci.util.running_process import RunningProcess
+
+from .clang_compiler import (
+    BuildFlags,
+    Compiler,
+    CompilerOptions,
+    LinkOptions,
+    test_clang_accessibility,
+)
 
 
 BUILD_DIR = PROJECT_ROOT / "tests" / ".build"
@@ -19,6 +28,91 @@ BUILD_DIR.mkdir(parents=True, exist_ok=True)
 CACHE_DIR = PROJECT_ROOT / ".cache"
 CACHE_DIR.mkdir(parents=True, exist_ok=True)
 TEST_FILES_LIST = CACHE_DIR / "test_files_list.txt"
+
+
+# ============================================================================
+# HASH-BASED LINKING CACHE (same optimization as examples)
+# ============================================================================
+
+
+def calculate_file_hash(file_path: Path) -> str:
+    """Calculate SHA256 hash of a file (same as FastLEDTestCompiler)"""
+    if not file_path.exists():
+        return "no_file"
+
+    hash_sha256 = hashlib.sha256()
+    with open(file_path, "rb") as f:
+        for chunk in iter(lambda: f.read(4096), b""):
+            hash_sha256.update(chunk)
+    return hash_sha256.hexdigest()
+
+
+def calculate_linker_args_hash(linker_args: list[str]) -> str:
+    """Calculate SHA256 hash of linker arguments (same as FastLEDTestCompiler)"""
+    args_str = "|".join(sorted(linker_args))
+    hash_sha256 = hashlib.sha256()
+    hash_sha256.update(args_str.encode("utf-8"))
+    return hash_sha256.hexdigest()
+
+
+def calculate_link_cache_key(
+    object_files: list[str | Path], fastled_lib_path: Path, linker_args: list[str]
+) -> str:
+    """Calculate comprehensive cache key for linking (same as examples)"""
+    # Calculate hash for each object file
+    obj_hashes: list[str] = []
+    for obj_file in object_files:
+        obj_hashes.append(calculate_file_hash(Path(obj_file)))
+
+    # Combine object file hashes in a stable way (sorted by path for consistency)
+    sorted_obj_paths = sorted(str(obj) for obj in object_files)
+    sorted_obj_hashes: list[str] = []
+    for obj_path in sorted_obj_paths:
+        obj_file = Path(obj_path)
+        sorted_obj_hashes.append(calculate_file_hash(obj_file))
+
+    combined_obj_hash = hashlib.sha256(
+        "|".join(sorted_obj_hashes).encode("utf-8")
+    ).hexdigest()
+
+    # Calculate other hashes
+    fastled_hash = calculate_file_hash(fastled_lib_path)
+    linker_hash = calculate_linker_args_hash(linker_args)
+
+    # Combine all components (same format as FastLEDTestCompiler)
+    combined = f"fastled:{fastled_hash}|objects:{combined_obj_hash}|flags:{linker_hash}"
+    final_hash = hashlib.sha256(combined.encode("utf-8")).hexdigest()
+
+    return final_hash[:16]  # Use first 16 chars for readability
+
+
+def get_link_cache_dir() -> Path:
+    """Get the link cache directory (same as examples)"""
+    cache_dir = Path(".build/link_cache")
+    cache_dir.mkdir(parents=True, exist_ok=True)
+    return cache_dir
+
+
+def get_cached_executable(test_name: str, cache_key: str) -> Optional[Path]:
+    """Check if cached executable exists (same as examples)"""
+    cache_dir = get_link_cache_dir()
+    cached_exe = cache_dir / f"{test_name}_{cache_key}.exe"
+    return cached_exe if cached_exe.exists() else None
+
+
+def cache_executable(test_name: str, cache_key: str, exe_path: Path) -> None:
+    """Cache an executable for future use (same as examples)"""
+    cache_dir = get_link_cache_dir()
+    cached_exe = cache_dir / f"{test_name}_{cache_key}.exe"
+    try:
+        shutil.copy2(exe_path, cached_exe)
+    except Exception as e:
+        print(f"Warning: Failed to cache {test_name}: {e}")
+
+
+# ============================================================================
+# END HASH-BASED LINKING CACHE
+# ============================================================================
 
 
 def get_test_files() -> Set[str]:
@@ -89,13 +183,15 @@ USE_CLANG = False
 def get_unit_test_fastled_sources() -> list[Path]:
     """Get essential FastLED .cpp files for unit test library creation (optimized paradigm)."""
     # Always work from project root
-    project_root = Path(__file__).parent.parent.parent  # Go up from ci/compiler/ to project root
+    project_root = Path(
+        __file__
+    ).parent.parent.parent  # Go up from ci/compiler/ to project root
     src_dir = project_root / "src"
 
     # Core FastLED files that must be included for unit tests
     core_files: list[Path] = [
         src_dir / "FastLED.cpp",
-        src_dir / "colorutils.cpp", 
+        src_dir / "colorutils.cpp",
         src_dir / "hsv2rgb.cpp",
     ]
 
@@ -115,10 +211,12 @@ def get_unit_test_fastled_sources() -> list[Path]:
         # Skip stub_main.cpp since unit tests have their own main
         if cpp_file.name == "stub_main.cpp":
             continue
-            
+
         # Skip platform-specific files that aren't needed for unit tests
         rel_path_str = str(cpp_file)
-        if any(skip in rel_path_str for skip in ['wasm', 'esp', 'avr', 'arm', 'teensy']):
+        if any(
+            skip in rel_path_str for skip in ["wasm", "esp", "avr", "arm", "teensy"]
+        ):
             continue
 
         if cpp_file.exists() and cpp_file not in seen_files:
@@ -129,16 +227,16 @@ def get_unit_test_fastled_sources() -> list[Path]:
 
 
 def create_unit_test_fastled_library(
-    compiler: "Compiler", fastled_build_dir: Path, clean: bool = False
+    compiler: Compiler, fastled_build_dir: Path, clean: bool = False
 ) -> Path | None:
     """Create libfastled.a static library using optimized examples paradigm."""
-    
+
     lib_file = fastled_build_dir / "libfastled.a"
-    
+
     if lib_file.exists() and not clean:
         print(f"[LIBRARY] Using existing FastLED library: {lib_file}")
         return lib_file
-    
+
     print("[LIBRARY] Creating FastLED static library...")
 
     # Get FastLED sources using optimized selection
@@ -154,7 +252,7 @@ def create_unit_test_fastled_library(
     futures: list[tuple] = []
     project_root = Path(__file__).parent.parent.parent
     src_dir = project_root / "src"
-    
+
     for cpp_file in fastled_sources:
         # Create unique object file name by including relative path to prevent collisions
         # Convert path separators to underscores to create valid filename
@@ -178,11 +276,17 @@ def create_unit_test_fastled_library(
                 fastled_objects.append(obj_file)
                 compiled_count += 1
             else:
-                print(f"[LIBRARY] WARNING: Failed to compile {cpp_file.relative_to(src_dir)}: {result.stderr[:100]}...")
+                print(
+                    f"[LIBRARY] WARNING: Failed to compile {cpp_file.relative_to(src_dir)}: {result.stderr[:100]}..."
+                )
         except Exception as e:
-            print(f"[LIBRARY] WARNING: Exception compiling {cpp_file.relative_to(src_dir)}: {e}")
+            print(
+                f"[LIBRARY] WARNING: Exception compiling {cpp_file.relative_to(src_dir)}: {e}"
+            )
 
-    print(f"[LIBRARY] Successfully compiled {compiled_count}/{len(fastled_sources)} FastLED sources")
+    print(
+        f"[LIBRARY] Successfully compiled {compiled_count}/{len(fastled_sources)} FastLED sources"
+    )
 
     if not fastled_objects:
         print("[LIBRARY] ERROR: No FastLED source files compiled successfully")
@@ -202,23 +306,28 @@ def create_unit_test_fastled_library(
     return lib_file
 
 
-def create_unit_test_compiler(use_pch: bool = True, enable_static_analysis: bool = False) -> "Compiler":
+def create_unit_test_compiler(
+    use_pch: bool = True, enable_static_analysis: bool = False
+) -> Compiler:
     """Create compiler optimized for unit test compilation with PCH support."""
-    from .clang_compiler import Compiler, CompilerOptions, BuildFlags
-    
+
     # Always work from the project root, not from ci/compiler
-    project_root = Path(__file__).parent.parent.parent  # Go up from ci/compiler/ to project root
+    project_root = Path(
+        __file__
+    ).parent.parent.parent  # Go up from ci/compiler/ to project root
     current_dir = project_root
     src_path = current_dir / "src"
-    
-    # Load build flags configuration  
+
+    # Load build flags configuration
     build_flags_path = current_dir / "ci" / "build_flags.toml"
-    build_flags = BuildFlags.parse(build_flags_path, quick_build=True, strict_mode=False)
-    
+    build_flags = BuildFlags.parse(
+        build_flags_path, quick_build=True, strict_mode=False
+    )
+
     # Unit test specific defines
     unit_test_defines = [
         "FASTLED_UNIT_TEST=1",
-        "FASTLED_FORCE_NAMESPACE=1", 
+        "FASTLED_FORCE_NAMESPACE=1",
         "FASTLED_USE_PROGMEM=0",
         "STUB_PLATFORM",
         "ARDUINO=10808",
@@ -234,11 +343,11 @@ def create_unit_test_compiler(use_pch: bool = True, enable_static_analysis: bool
         "FASTLED_NO_ATEXIT=1",
         "DOCTEST_CONFIG_NO_EXCEPTIONS_BUT_WITH_ALL_ASSERTS",
     ]
-    
+
     # Unit test specific compiler args
     unit_test_args = [
         "-std=gnu++17",
-        "-fpermissive", 
+        "-fpermissive",
         "-Wall",
         "-Wextra",
         "-Wno-deprecated-register",
@@ -247,7 +356,7 @@ def create_unit_test_compiler(use_pch: bool = True, enable_static_analysis: bool
         "-fno-rtti",
         "-O1",
         "-g0",
-        "-fno-inline-functions", 
+        "-fno-inline-functions",
         "-fno-vectorize",
         "-fno-unroll-loops",
         "-fno-strict-aliasing",
@@ -256,7 +365,7 @@ def create_unit_test_compiler(use_pch: bool = True, enable_static_analysis: bool
         f"-I{current_dir / 'tests'}",
         f"-I{src_path / 'platforms' / 'stub'}",
     ]
-    
+
     # PCH configuration with unit test specific headers
     pch_output_path = None
     pch_header_content = None
@@ -264,7 +373,7 @@ def create_unit_test_compiler(use_pch: bool = True, enable_static_analysis: bool
         cache_dir = current_dir / ".build" / "cache"
         cache_dir.mkdir(parents=True, exist_ok=True)
         pch_output_path = str(cache_dir / "fastled_unit_test_pch.hpp.pch")
-        
+
         # Unit test specific PCH header content
         pch_header_content = """// FastLED Unit Test PCH - Common headers for faster test compilation
 #pragma once
@@ -299,10 +408,12 @@ def create_unit_test_compiler(use_pch: bool = True, enable_static_analysis: bool
 using namespace fl;
 """
         print(f"[PCH] Unit tests will use precompiled headers: {pch_output_path}")
-        print(f"[PCH] PCH includes: test.h, FastLED.h, lib8tion.h, colorutils.h, and more")
+        print(
+            f"[PCH] PCH includes: test.h, FastLED.h, lib8tion.h, colorutils.h, and more"
+        )
     else:
         print("[PCH] Precompiled headers disabled for unit tests")
-    
+
     # Determine compiler
     compiler_cmd = "python -m ziglang c++"
     if USE_CLANG:
@@ -312,7 +423,7 @@ using namespace fl;
         print("USING ZIG COMPILER FOR UNIT TESTS")
     else:
         print("USING DEFAULT COMPILER FOR UNIT TESTS")
-    
+
     settings = CompilerOptions(
         include_path=str(src_path),
         defines=unit_test_defines,
@@ -324,39 +435,45 @@ using namespace fl;
         pch_header_content=pch_header_content,
         parallel=True,
     )
-    
+
     return Compiler(settings, build_flags)
 
 
 def compile_unit_tests_python_api(
-    specific_test: str | None = None, 
+    specific_test: str | None = None,
     enable_static_analysis: bool = False,
     use_pch: bool = True,
-    clean: bool = False
+    clean: bool = False,
 ) -> None:
     """Compile unit tests using the fast Python API instead of CMake."""
     from .clang_compiler import Compiler, LinkOptions
-    
+
     print("=" * 60)
     print("COMPILING UNIT TESTS WITH PYTHON API (8x faster than CMake)")
     print("=" * 60)
-    
+
     if clean:
         print("Cleaning build directory...")
         shutil.rmtree(BUILD_DIR, ignore_errors=True)
         BUILD_DIR.mkdir(parents=True, exist_ok=True)
-    
+
     # Create optimized compiler for unit tests
-    compiler = create_unit_test_compiler(use_pch=use_pch, enable_static_analysis=enable_static_analysis)
-    
+    compiler = create_unit_test_compiler(
+        use_pch=use_pch, enable_static_analysis=enable_static_analysis
+    )
+
     # Find all test files - work from project root
     project_root = Path(__file__).parent.parent.parent
     tests_dir = project_root / "tests"
     test_files = []
-    
+
     if specific_test:
         # Handle specific test
-        test_name = specific_test if specific_test.startswith("test_") else f"test_{specific_test}"
+        test_name = (
+            specific_test
+            if specific_test.startswith("test_")
+            else f"test_{specific_test}"
+        )
         test_file = tests_dir / f"{test_name}.cpp"
         if test_file.exists():
             test_files = [test_file]
@@ -367,92 +484,199 @@ def compile_unit_tests_python_api(
         # Find all test files
         test_files = list(tests_dir.glob("test_*.cpp"))
         print(f"Found {len(test_files)} unit test files")
-    
+
     if not test_files:
         print("No test files found")
         return
-        
+
     # Ensure output directory exists
     bin_dir = BUILD_DIR / "bin"
     bin_dir.mkdir(parents=True, exist_ok=True)
-    
+
     # Step 1: Compile doctest main once
     print("Compiling doctest main...")
     doctest_main_path = tests_dir / "doctest_main.cpp"
     doctest_main_obj = bin_dir / "doctest_main.o"
-    
+
     if not doctest_main_obj.exists() or clean:
         doctest_compile_future = compiler.compile_cpp_file(
-            cpp_path=str(doctest_main_path),
-            output_path=str(doctest_main_obj)
+            cpp_path=str(doctest_main_path), output_path=str(doctest_main_obj)
         )
         doctest_result = doctest_compile_future.result()
-        
+
         if doctest_result.return_code != 0:
-            raise RuntimeError(f"Failed to compile doctest main: {doctest_result.stderr}")
-    
+            raise RuntimeError(
+                f"Failed to compile doctest main: {doctest_result.stderr}"
+            )
+
     # Step 2: Build FastLED library using optimized examples paradigm
     print("Building FastLED library...")
     fastled_build_dir = project_root / ".build" / "fastled"
     fastled_build_dir.mkdir(parents=True, exist_ok=True)
-    
+
     fastled_lib_path = create_unit_test_fastled_library(
         compiler, fastled_build_dir, clean
     )
-    
-    # Step 3: Compile and link each test
+
+    # Step 3: Compile and link each test (PARALLEL OPTIMIZATION)
     print(f"Compiling {len(test_files)} tests...")
     start_time = time.time()
-    
+
+    # Phase 1: Start all compilations in parallel (NON-BLOCKING)
+    print("🚀 Starting parallel compilation...")
+    compile_start = time.time()
+    compile_futures = {}
+    test_info = {}
+
     for test_file in test_files:
         test_name = test_file.stem
         executable_path = bin_dir / test_name
         object_path = bin_dir / f"{test_name}.o"
-        
+
+        test_info[test_name] = {
+            "test_file": test_file,
+            "executable_path": executable_path,
+            "object_path": object_path,
+        }
+
         print(f"  Compiling {test_name}...")
-        
+
+        # Start compilation (NON-BLOCKING)
+        compile_future = compiler.compile_cpp_file(
+            cpp_path=str(test_file), output_path=str(object_path)
+        )
+        compile_futures[test_name] = compile_future
+
+    # Phase 2: Wait for all compilations to complete and check cache before linking
+    compile_dispatch_time = time.time() - compile_start
+    print(
+        f"⏳ Waiting for compilations to complete... (dispatch took {compile_dispatch_time:.2f}s)"
+    )
+    compile_wait_start = time.time()
+    link_futures = {}
+    cache_hits = 0
+    success_count = 0
+
+    for test_name, compile_future in compile_futures.items():
         try:
-            # Compile test to object file
-            compile_future = compiler.compile_cpp_file(
-                cpp_path=str(test_file),
-                output_path=str(object_path)
-            )
-            
-            compile_result = compile_future.result()
-            
+            compile_result = (
+                compile_future.result()
+            )  # BLOCKING WAIT for this specific test
+
             if compile_result.return_code != 0:
-                raise RuntimeError(f"Compilation failed for {test_name}: {compile_result.stderr}")
-            
-            # Link to executable with doctest main and FastLED library (same as examples)
-            object_files = [object_path, doctest_main_obj]
-            static_libraries = []
+                print(f"❌ Compilation failed for {test_name}: {compile_result.stderr}")
+                continue
+
+            # Prepare linking info (same logic as before)
+            info = test_info[test_name]
+            executable_path = info["executable_path"]
+            object_path = info["object_path"]
+
+            tests_with_own_main = ["test_example_compilation"]
+            if test_name in tests_with_own_main:
+                object_files: list[str | Path] = [object_path]
+            else:
+                object_files: list[str | Path] = [object_path, doctest_main_obj]
+
             linker_args = ["-pthread"]
-            
+
+            # HASH-BASED CACHE CHECK (same as examples)
+            if not fastled_lib_path:
+                print(f"⚠️  No FastLED library found, skipping cache for {test_name}")
+                cache_key = "no_fastled_lib"
+                cached_exe = None
+            else:
+                cache_key = calculate_link_cache_key(
+                    object_files, fastled_lib_path, linker_args
+                )
+                cached_exe = get_cached_executable(test_name, cache_key)
+
+            if cached_exe:
+                # Cache hit! Copy cached executable to target location
+                try:
+                    shutil.copy2(cached_exe, executable_path)
+                    cache_hits += 1
+                    success_count += 1
+                    print(f"  ⚡ {test_name}: Using cached executable (cache hit)")
+                    continue  # Skip linking entirely
+                except Exception as e:
+                    print(f"  ⚠️  Failed to copy cached {test_name}, will relink: {e}")
+                    # Fall through to actual linking
+
+            # Cache miss - proceed with actual linking
+            static_libraries = []
             if fastled_lib_path and fastled_lib_path.exists():
                 static_libraries.append(fastled_lib_path)
-            
+
             link_options = LinkOptions(
                 output_executable=str(executable_path),
                 object_files=object_files,
                 static_libraries=static_libraries,
-                linker_args=linker_args
+                linker_args=linker_args,
             )
-            
+
+            # Start linking (NON-BLOCKING) and store cache info for later
             link_future = compiler.link_program(link_options)
-            link_result = link_future.result()
-            
-            if link_result.return_code != 0:
-                print(f"Warning: Linking failed for {test_name}: {link_result.stderr}")
-                continue  # Skip failed links but continue with other tests
-                
+            link_futures[test_name] = {
+                "future": link_future,
+                "cache_key": cache_key,
+                "executable_path": executable_path,
+            }
+
         except Exception as e:
-            print(f"ERROR compiling {test_name}: {e}")
-            continue  # Continue with other tests
-    
+            print(f"❌ ERROR compiling {test_name}: {e}")
+            continue
+
+    # Phase 3: Wait for all linking to complete and cache successful results
+    compile_wait_time = time.time() - compile_wait_start
+    print(
+        f"🔗 Waiting for linking to complete... (compilation took {compile_wait_time:.2f}s)"
+    )
+    link_start = time.time()
+    cache_misses = 0
+
+    for test_name, link_info in link_futures.items():
+        try:
+            link_future = link_info["future"]
+            cache_key = link_info["cache_key"]
+            executable_path = link_info["executable_path"]
+
+            link_result = link_future.result()  # BLOCKING WAIT for this specific test
+
+            if link_result.return_code != 0:
+                print(f"⚠️  Linking failed for {test_name}: {link_result.stderr}")
+                cache_misses += 1
+                continue
+            else:
+                success_count += 1
+                cache_misses += 1  # This was a fresh link, not from cache
+
+                # Cache the successful executable for future use (same as examples)
+                cache_executable(test_name, cache_key, executable_path)
+
+        except Exception as e:
+            print(f"❌ ERROR linking {test_name}: {e}")
+            cache_misses += 1
+            continue
+
+    link_time = time.time() - link_start
     compilation_time = time.time() - start_time
+
     print(f"✅ Unit test compilation completed in {compilation_time:.2f}s")
-    print(f"   Average: {compilation_time/len(test_files):.2f}s per test")
+    print(f"   📊 Time breakdown:")
+    print(f"      • Dispatch: {compile_dispatch_time:.2f}s")
+    print(f"      • Compilation: {compile_wait_time:.2f}s")
+    print(f"      • Linking: {link_time:.2f}s")
+    print(f"   🎯 Cache statistics (archive + hash linking optimization):")
+    print(f"      • Cache hits: {cache_hits} (skipped linking)")
+    print(f"      • Cache misses: {cache_misses} (fresh linking)")
+    print(
+        f"      • Cache hit ratio: {cache_hits / max(1, cache_hits + cache_misses) * 100:.1f}%"
+    )
+    print(f"   Successfully compiled: {success_count}/{len(test_files)} tests")
+    print(f"   Average: {compilation_time / len(test_files):.2f}s per test")
     print(f"   Output directory: {bin_dir}")
+    print(f"   Cache directory: {get_link_cache_dir()}")
 
 
 def parse_arguments():
@@ -476,16 +700,12 @@ def parse_arguments():
         action="store_true",
         help="Enable static analysis (IWYU, clang-tidy)",
     )
-    parser.add_argument(
-        "--no-unity", action="store_true", help="Disable unity build"
-    )
+    parser.add_argument("--no-unity", action="store_true", help="Disable unity build")
     parser.add_argument(
         "--no-pch", action="store_true", help="Disable precompiled headers (PCH)"
     )
 
-    parser.add_argument(
-        "--verbose", action="store_true", help="Enable verbose output"
-    )
+    parser.add_argument("--verbose", action="store_true", help="Enable verbose output")
     return parser.parse_args()
 
 
@@ -581,7 +801,7 @@ def main() -> None:
             USE_CLANG = False
 
     if USE_CLANG:
-        if not _has_system_clang_compiler():
+        if not test_clang_accessibility():
             print(
                 "Clang compiler not found in PATH, falling back to Zig-clang compiler"
             )
@@ -609,16 +829,18 @@ def main() -> None:
         save_test_files_list()
 
     # Unit tests now use optimized Python API by default (same as examples)
-    use_pch = not getattr(args, 'no_pch', False)  # Default to PCH enabled unless --no-pch specified
-    
+    use_pch = not getattr(
+        args, "no_pch", False
+    )  # Default to PCH enabled unless --no-pch specified
+
     # Use the optimized Python API with PCH optimization (now default for unit tests)
     compile_unit_tests_python_api(
         specific_test=args.test,
         enable_static_analysis=args.check,
         use_pch=use_pch,
-        clean=need_clean
+        clean=need_clean,
     )
-    
+
     update_build_info(build_info)
     print("FastLED library compiled successfully.")
 

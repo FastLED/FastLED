@@ -150,17 +150,13 @@ class LinkOptions:
     output_executable: str | Path  # Output executable path
 
     # Input files
-    object_files: list[str | Path] = field(
-        default_factory=list[str | Path]
-    )  # .o files to link
-    static_libraries: list[str | Path] = field(
-        default_factory=list[str | Path]
-    )  # .a files to link
+    object_files: list[str | Path] = field(default_factory=list)  # .o files to link
+    static_libraries: list[str | Path] = field(default_factory=list)  # .a files to link
 
     # Linker configuration
     linker: str | None = None  # Custom linker path (auto-detected if None)
     linker_args: list[str] = field(
-        default_factory=list[str]
+        default_factory=list
     )  # All linker command line arguments
 
     # Platform-specific defaults can be added via helper functions

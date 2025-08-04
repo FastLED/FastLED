@@ -116,7 +116,6 @@ def parse_args(args: Optional[list[str]] = None) -> TestArgs:
         help="Force sequential test execution",
     )
 
-
     parsed_args = parser.parse_args(args)
 
     # Convert argparse.Namespace to TestArgs dataclass

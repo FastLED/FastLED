@@ -405,9 +405,9 @@ def _compile_tests_python(
     try:
         # Use the optimized cpp_test_compile system directly
         import subprocess
-        
+
         cmd = ["uv", "run", "python", "-m", "ci.compiler.cpp_test_compile"]
-        
+
         if specific_test:
             cmd.extend(["--test", specific_test])
         if clean:
@@ -418,11 +418,13 @@ def _compile_tests_python(
             cmd.append("--check")
         if "--no-pch" in unknown_args:
             cmd.append("--no-pch")
-            
+
         print("🚀 Using optimized Python API with PCH optimization")
         result = subprocess.run(cmd)
         if result.returncode != 0:
-            raise RuntimeError(f"Unit test compilation failed with return code {result.returncode}")
+            raise RuntimeError(
+                f"Unit test compilation failed with return code {result.returncode}"
+            )
 
     except Exception as e:
         print(f"Failed to compile with optimized Python API: {e}")
