@@ -77,6 +77,9 @@ strip = ["uv", "run", "python", "-m", "ziglang", "strip"]
 ranlib = ["uv", "run", "python", "-m", "ziglang", "ranlib"]
 archiver = ["uv", "run", "python", "-m", "ziglang", "ar"]
 
+[archive]
+flags = "rcsD"
+
 [linking.base]
 flags = ["-pthread"]
 
@@ -135,6 +138,9 @@ nm = ["arm-nm"]
 strip = ["arm-strip"]
 ranlib = ["arm-ranlib"]
 
+[archive]
+flags = "rcsD"
+
 [linking.base]
 flags = ["-pthread"]
 """
@@ -168,6 +174,9 @@ nm = ["custom-nm"]
 strip = ["custom-strip"]
 ranlib = ["custom-ranlib"]
 # All tools must be provided - no defaults allowed
+
+[archive]
+flags = "rcsD"
 """
 
         test_file = self.create_test_toml(toml_content)
@@ -325,6 +334,9 @@ nm = ["alias-nm"]
 strip = ["alias-strip"]
 ranlib = ["alias-ranlib"]
 archiver = ["alias-archiver"]
+
+[archive]
+flags = "rcsD"
 """
 
         test_file = self.create_test_toml(toml_content)

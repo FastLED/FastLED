@@ -169,6 +169,7 @@ class LinkOptions:
 @dataclass
 class ArchiveOptions:
     """Archive creation options loaded from build_flags.toml"""
+
     flags: str  # Archive flags (e.g., "rcsD" for deterministic builds)
 
 
@@ -328,7 +329,7 @@ class BuildFlags:
                 f"[archive]\n"
                 f'flags = "rcsD"  # r=insert, c=create, s=symbol table, D=deterministic'
             )
-        
+
         archive_config = config["archive"]
         if "flags" not in archive_config:
             raise RuntimeError(
@@ -338,7 +339,7 @@ class BuildFlags:
                 f"[archive]\n"
                 f'flags = "rcsD"  # r=insert, c=create, s=symbol table, D=deterministic'
             )
-            
+
         archive_options = ArchiveOptions(flags=archive_config["flags"])
 
         # Extract base flags
@@ -516,6 +517,16 @@ class BuildFlags:
         if self.tools.ranlib:
             toml_content.append(f"ranlib = {self.tools.ranlib!r}")
         toml_content.append("")
+
+        # [archive] section
+        archive_section_lines = [
+            "[archive]",
+            "# Archive creation flags for deterministic builds",
+            "",
+            f'flags = "{self.archive.flags}"',
+            "",
+        ]
+        toml_content.extend(archive_section_lines)
 
         return "\n".join(toml_content)
 
@@ -2384,13 +2395,17 @@ def create_archive_sync(
         cmd = [archiver]
 
     # Archive flags: MUST come from build_flags.toml - NO DEFAULTS
-    if not build_flags_config or not hasattr(build_flags_config, 'archive') or not hasattr(build_flags_config.archive, 'flags'):
+    if (
+        not build_flags_config
+        or not hasattr(build_flags_config, "archive")
+        or not hasattr(build_flags_config.archive, "flags")
+    ):
         raise RuntimeError(
             "CRITICAL: Archive flags not found in build_flags.toml. "
             "Please ensure [archive] section with 'flags' is configured."
         )
     flags = build_flags_config.archive.flags
-    
+
     if options.use_thin:
         flags += "T"  # Add thin archive flag
 
