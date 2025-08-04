@@ -59,18 +59,61 @@ from pathlib import Path
 from typing import List
 from ci.compiler.clang_compiler import CompilerOptions, BuildFlags
 
+def get_build_configuration_hash(
+    build_flags: BuildFlags,
+    compiler_options: CompilerOptions
+) -> str:
+    """Generate comprehensive configuration hash for validation (not filename)."""
+    
+    # Create comprehensive build signature from ALL configuration elements
+    config_elements = []
+    
+    # All compiler flags matter (not just optimization/debug)
+    config_elements.append(f"compiler_flags:{sorted(build_flags.compiler_flags)}")
+    
+    # All preprocessor defines matter
+    config_elements.append(f"defines:{sorted(build_flags.defines)}")
+    
+    # All linker flags matter
+    config_elements.append(f"link_flags:{sorted(build_flags.link_flags)}")
+    
+    # Compiler path and version matter
+    config_elements.append(f"compiler:{compiler_options.compiler}")
+    config_elements.append(f"compiler_args:{sorted(compiler_options.compiler_args)}")
+    
+    # Language standard and other critical settings
+    config_elements.append(f"std_version:{compiler_options.std_version}")
+    config_elements.append(f"include_path:{compiler_options.include_path}")
+    config_elements.append(f"defines_opt:{sorted(compiler_options.defines or [])}")
+    
+    # Create stable hash from all elements
+    combined_config = "|".join(config_elements)
+    return hashlib.sha256(combined_config.encode('utf-8')).hexdigest()
+
 def get_build_configuration_name(
     build_flags: BuildFlags,
     compiler_options: CompilerOptions
 ) -> str:
-    """Generate stable cache name based on build configuration."""
+    """Generate stable cache filename based on semantic build type."""
     
-    # Determine build type from compiler flags
-    is_debug = any(flag in ["-g", "-ggdb", "-O0"] for flag in build_flags.compiler_flags)
+    # Determine build type from compiler flags for stable naming
+    is_debug = any(flag in ["-g", "-ggdb", "-g3"] for flag in build_flags.compiler_flags)
     is_optimized = any(flag.startswith("-O") and flag != "-O0" for flag in build_flags.compiler_flags)
+    is_test = any("test" in define.lower() or "TEST" in define for define in build_flags.defines)
+    is_stub = any("STUB" in define for define in build_flags.defines)
     
-    # Check for common build variants
-    if is_debug and not is_optimized:
+    # Generate semantic name for cache file (gets overwritten, no accumulation)
+    if is_test and is_debug:
+        return "test-debug"
+    elif is_test and is_optimized:
+        return "test-release"
+    elif is_test:
+        return "test-default"
+    elif is_stub and is_debug:
+        return "stub-debug"
+    elif is_stub and is_optimized:
+        return "stub-release"
+    elif is_debug and not is_optimized:
         return "debug"
     elif is_optimized and not is_debug:
         return "release"
@@ -99,11 +142,12 @@ def calculate_file_hash(file_path: Path) -> str:
 ```
 .build/
 ├── library_cache/
-│   ├── libfastled-debug.a          # Debug build library
-│   ├── libfastled-debug.json       # Debug build metadata
-│   ├── libfastled-release.a        # Release build library
-│   ├── libfastled-release.json     # Release build metadata
-│   └── libfastled-default.a        # Default build library
+│   ├── libfastled-debug.a          # Debug build library (stable name)
+│   ├── libfastled-debug.json       # Debug metadata + comprehensive config_hash
+│   ├── libfastled-release.a        # Release build library (stable name)
+│   ├── libfastled-release.json     # Release metadata + comprehensive config_hash
+│   ├── libfastled-test-debug.a     # Test debug build (stable name)
+│   └── libfastled-test-debug.json  # Test debug metadata + comprehensive config_hash
 └── link_cache/                     # Existing linking cache
     └── ...
 ```
@@ -113,15 +157,11 @@ def calculate_file_hash(file_path: Path) -> str:
 ```json
 {
     "cache_name": "libfastled-debug",
-    "cache_version": "v1",
+    "cache_version": "v2",
     "created_at": "2024-01-15T10:30:45Z",
-    "library_hash": "a1b2c3d4e5f6g7h8",
+    "library_hash": "f8e7d6c5b4a39281",
     "library_timestamp": 1705315845,
-    "build_config": {
-        "type": "debug",
-        "defines": ["STUB_PLATFORM", "FASTLED_UNIT_TEST=1"],
-        "key_flags": ["-g", "-O0", "-std=gnu++17"]
-    },
+    "config_hash": "a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0u1v2w3x4y5z6",
     "library_size": 2048576,
     "build_time": 3.45,
     "fastled_version": "main-commit-abc123"
@@ -147,7 +187,7 @@ def check_library_cache(
     """Check if cached library exists and is valid using fast timestamp + hash fallback."""
     
     try:
-        # Get stable cache name
+        # Get stable cache name based on semantic build type
         config_name = get_build_configuration_name(build_flags, compiler_options)
         
         library_file = cache_dir / f"libfastled-{config_name}.a"
@@ -167,13 +207,11 @@ def check_library_cache(
             library_file.unlink(missing_ok=True)
             return None
         
-        # Check if build configuration changed (linking flags, etc.)
-        cached_config = metadata.get("build_config", {})
-        current_defines = sorted(build_flags.defines)
-        current_key_flags = [f for f in build_flags.compiler_flags if f.startswith(("-O", "-g"))]
+        # Check if build configuration changed (ANY flags, defines, compiler settings)
+        cached_config_hash = metadata.get("config_hash", "")
+        current_config_hash = get_build_configuration_hash(build_flags, compiler_options)
         
-        if (cached_config.get("defines") != current_defines or 
-            cached_config.get("key_flags") != current_key_flags):
+        if cached_config_hash != current_config_hash:
             return None  # Build configuration changed
         
         # Fast path: Check timestamp first
@@ -224,20 +262,19 @@ def store_library_cache(
         library_hash = calculate_file_hash(cached_library)
         library_timestamp = int(cached_library.stat().st_mtime)
         
+        # Calculate comprehensive config hash for validation
+        config_hash = get_build_configuration_hash(build_flags, compiler_options)
+        
         # Create metadata
-            metadata = {
+        metadata = {
             "cache_name": f"libfastled-{config_name}",
-            "cache_version": "v1",
-                "created_at": datetime.now().isoformat(),
+            "cache_version": "v2",
+            "created_at": datetime.now().isoformat(),
             "library_hash": library_hash,
             "library_timestamp": library_timestamp,
-            "build_config": {
-                "type": config_name,
-                    "defines": sorted(build_flags.defines),
-                "key_flags": [f for f in build_flags.compiler_flags if f.startswith(("-O", "-g"))]
-            },
+            "config_hash": config_hash,  # Comprehensive configuration hash for validation
             "library_size": cached_library.stat().st_size,
-                "build_time": build_time,
+            "build_time": build_time,
             "fastled_version": get_fastled_version()
         }
         
@@ -420,7 +457,7 @@ def check_sketch_cache(
     """Check if cached sketch object exists and is valid."""
     
     try:
-        # Generate cache name based on sketch + build config
+        # Generate cache name based on sketch + semantic build config
         sketch_name = sketch_file.stem
         config_name = get_build_configuration_name(build_flags, compiler_options)
         
@@ -434,6 +471,13 @@ def check_sketch_cache(
         # Load metadata
         with open(metadata_file, 'r', encoding='utf-8') as f:
             metadata = json.load(f)
+        
+        # Check if build configuration changed (comprehensive validation)
+        cached_config_hash = metadata.get("config_hash", "")
+        current_config_hash = get_build_configuration_hash(build_flags, compiler_options)
+        
+        if cached_config_hash != current_config_hash:
+            return None  # Build configuration changed
         
         # Fast path: Check sketch timestamp
         current_timestamp = int(sketch_file.stat().st_mtime)
@@ -470,6 +514,7 @@ def store_sketch_cache(
     
     sketch_name = sketch_file.stem
     config_name = get_build_configuration_name(build_flags, compiler_options)
+    config_hash = get_build_configuration_hash(build_flags, compiler_options)
     metadata_file = cache_dir / f"{sketch_name}-{config_name}.o.json"
     
     metadata = {
@@ -477,7 +522,7 @@ def store_sketch_cache(
         "sketch_hash": calculate_file_hash(sketch_file),
         "sketch_timestamp": int(sketch_file.stat().st_mtime),
         "obj_file": obj_file.name,
-        "build_config": config_name,
+        "config_hash": config_hash,  # Comprehensive configuration hash for validation
         "compiled_at": datetime.now().isoformat(),
         "compile_time": build_time
     }
@@ -569,18 +614,18 @@ def store_link_cache(
 ```
 .build/
 ├── library_cache/
-│   ├── libfastled-debug.a      # Cached FastLED library
-│   └── libfastled-debug.json   # Library metadata
+│   ├── libfastled-debug.a      # Cached FastLED library (stable semantic name)
+│   └── libfastled-debug.json   # Library metadata + comprehensive config_hash
 ├── sketch_cache/
-│   ├── Blink-debug.o           # Cached sketch object
-│   ├── Blink-debug.o.json      # Sketch metadata
-│   ├── DemoReel100-debug.o     # Another sketch object
-│   └── DemoReel100-debug.o.json # Its metadata
+│   ├── Blink-debug.o           # Cached sketch object (stable semantic name)
+│   ├── Blink-debug.o.json      # Sketch metadata + comprehensive config_hash
+│   ├── DemoReel100-debug.o     # Another sketch object (same config type)
+│   └── DemoReel100-debug.o.json # Its metadata + comprehensive config_hash
 └── examples/
     ├── Blink.exe               # Final executable
-    ├── Blink.exe.json          # Link metadata (both inputs)
+    ├── Blink.exe.json          # Link metadata (both inputs + flags)
     ├── DemoReel100.exe         # Another executable
-    └── DemoReel100.exe.json    # Its metadata
+    └── DemoReel100.exe.json    # Its metadata (both inputs + flags)
 ```
 
 #### Updated Link Metadata Format
@@ -590,7 +635,7 @@ def store_link_cache(
     "exe_name": "Blink.exe",
     "sketch_hash": "b2c3d4e5f6g7h8i9",
     "sketch_name": "Blink-debug.o",
-    "library_hash": "a1b2c3d4e5f6g7h8",
+    "library_hash": "f8e7d6c5b4a39281",
     "library_name": "libfastled-debug.a",
     "link_flags": ["-L.", "-lfastled", "-static"],
     "linked_at": "2024-01-15T10:30:45Z",
@@ -797,10 +842,10 @@ $ bash test --examples Blink
 [SUCCESS] Blink.exe completed in 5.2 seconds
 
 # Second run (same command) - BLAZING FAST!
-$ bash test --examples Blink
-[LIBRARY] CACHED: Using cached FastLED library: libfastled-debug.a     # 0.01s
-[SKETCH] CACHED: Using cached sketch object: Blink-debug.o             # 0.01s
-[LINKING] CACHED: Using cached executable: Blink.exe                   # 0.01s
+$ bash test --examples Blink  
+[LIBRARY] CACHED: Using cached FastLED library: libfastled-debug.a     # 0.01s (stable name!)
+[SKETCH] CACHED: Using cached sketch object: Blink-debug.o             # 0.01s (stable name!)
+[LINKING] CACHED: Using cached executable: Blink.exe                   # 0.01s (hash validated!)
 [SUCCESS] Blink.exe completed in 0.05 seconds                          # 99% faster!
 ```
 
@@ -810,8 +855,8 @@ $ bash test --examples Blink
 ```bash
 # Edit Blink.ino, then run again
 $ bash test --examples Blink
-[LIBRARY] CACHED: Using cached FastLED library: libfastled-debug.a     # 0.01s (cached!)
-[SKETCH] Compiling Blink.ino...                                        # 0.5-1s (rebuild)
+[LIBRARY] CACHED: Using cached FastLED library: libfastled-debug.a     # 0.01s (stable name!)
+[SKETCH] Compiling Blink.ino...                                        # 0.5-1s (rebuild - overwrites Blink-debug.o)
 [LINKING] Linking Blink.exe...                                         # 1-2s (rebuild)  
 [SUCCESS] Blink.exe completed in 1.8 seconds                           # 65% faster
 ```
@@ -820,8 +865,8 @@ $ bash test --examples Blink
 ```bash
 # Edit FastLED source, then run again  
 $ bash test --examples Blink
-[LIBRARY] Compiling FastLED sources (allsrc build)...                  # 3-4s (rebuild)
-[SKETCH] CACHED: Using cached sketch object: Blink-debug.o             # 0.01s (cached!)
+[LIBRARY] Compiling FastLED sources (allsrc build)...                  # 3-4s (rebuild - overwrites libfastled-debug.a)
+[SKETCH] CACHED: Using cached sketch object: Blink-debug.o             # 0.01s (stable name!)
 [LINKING] Linking Blink.exe...                                         # 1-2s (rebuild)
 [SUCCESS] Blink.exe completed in 4.2 seconds                           # 20% faster
 ```
@@ -829,8 +874,8 @@ $ bash test --examples Blink
 **Scenario 3: Different example, same build config**
 ```bash
 $ bash test --examples DemoReel100
-[LIBRARY] CACHED: Using cached FastLED library: libfastled-debug.a     # 0.01s (cached!)
-[SKETCH] Compiling DemoReel100.ino...                                  # 0.5-1s (new sketch)
+[LIBRARY] CACHED: Using cached FastLED library: libfastled-debug.a     # 0.01s (stable name!)
+[SKETCH] Compiling DemoReel100.ino...                                  # 0.5-1s (creates DemoReel100-debug.o)
 [LINKING] Linking DemoReel100.exe...                                   # 1-2s (new exe)
 [SUCCESS] DemoReel100.exe completed in 1.8 seconds                     # 65% faster
 ```
@@ -858,6 +903,102 @@ $ bash test --examples DemoReel100
 
 ## Summary
 
+This caching approach fixes the critical flaw in typical partial flag checking and provides bulletproof cache validation:
+
+### **🧹 SMART CACHE MANAGEMENT: Semantic Names + Comprehensive Validation**
+
+**❌ NAIVE APPROACH (Hash-based filenames):**
+```
+libfastled-a1b2c3d4e5f6.a    # Every flag change = new file
+libfastled-x7y8z9a0b1c2.a    # Accumulates forever 
+libfastled-m3n4o5p6q7r8.a    # Needs garbage collection
+libfastled-b4r5t6y7u8i9.a    # Cache directory pollution
+```
+
+**✅ SMART APPROACH (Semantic names + metadata validation):**
+```
+libfastled-debug.a           # Stable filename, gets overwritten
+libfastled-debug.json        # Contains comprehensive config_hash for validation  
+libfastled-release.a         # Different semantic type
+libfastled-release.json      # Contains different config_hash
+```
+
+**Benefits:**
+- ✅ **Natural cache replacement**: Same build type overwrites previous cache
+- ✅ **No accumulation**: Debug builds replace old debug builds automatically
+- ✅ **Clean cache directory**: Only a few semantic cache files exist
+- ✅ **No garbage collection needed**: Self-managing cache
+- ✅ **Comprehensive validation**: Full config_hash in metadata ensures correctness
+
+### **🔥 CRITICAL FIX: Comprehensive Flag Validation**
+
+**❌ BROKEN (Typical Approach):**
+```python
+# Only checks optimization/debug flags - DANGEROUS!
+key_flags = [f for f in flags if f.startswith(("-O", "-g"))]
+```
+
+**✅ FIXED (Our Approach):**
+```python
+# Checks ALL configuration elements - SAFE!
+config_elements = []
+
+# ALL compiler flags (not just optimization flags!)
+config_elements.append(f"compiler_flags:{sorted(build_flags.compiler_flags)}")
+
+# ALL preprocessor defines  
+config_elements.append(f"defines:{sorted(build_flags.defines)}")
+
+# ALL linker flags
+config_elements.append(f"link_flags:{sorted(build_flags.link_flags)}")
+
+# ALL compiler settings  
+config_elements.append(f"compiler:{compiler_options.compiler}")
+config_elements.append(f"compiler_args:{sorted(compiler_options.compiler_args)}")
+config_elements.append(f"std_version:{compiler_options.std_version}")
+config_elements.append(f"include_path:{compiler_options.include_path}")
+
+# Create comprehensive hash from ALL configuration
+config_hash = sha256("|".join(config_elements).encode('utf-8')).hexdigest()[:12]
+```
+
+**Why This Matters:**
+- **Include paths**: `-I/some/path` vs `-I/other/path` → Different headers, different output
+- **Language standard**: `-std=c++17` vs `-std=c++14` → Different language features  
+- **Architecture**: `-march=native` vs `-march=x86-64` → Different instruction sets
+- **Warning levels**: `-Wall` vs `-Wall -Wextra` → Different compile-time checks
+- **Feature defines**: `-DFASTLED_FEATURE=1` → Different code paths
+- **Platform flags**: `-DSTUB_PLATFORM` vs `-DAVR_PLATFORM` → Different platform code
+- **Debug symbols**: `-g` vs `-g3` → Different debug information levels
+- **Optimization**: `-O2` vs `-O3` → Different code generation
+- **Sanitizers**: `-fsanitize=address` → Different runtime checking
+
+**Traditional "key_flags" approach would miss ALL of these and serve stale binaries!**
+
+### **🎯 COMPREHENSIVE FLAG TRACKING PRINCIPLE**
+
+**CRITICAL RULE: ANY flag change = cache invalidation**
+
+```python
+# ✅ CORRECT: Track every single flag that affects compilation
+all_flags_that_matter = (
+    build_flags.compiler_flags +     # Every -O, -g, -I, -D, -std, -march, etc.
+    build_flags.defines +            # Every -DDEFINE=value
+    build_flags.link_flags +         # Every linker flag  
+    compiler_options.compiler_args + # Every additional compiler argument
+    [compiler_options.compiler] +    # Compiler path/version
+    [compiler_options.std_version] + # Language standard
+    [compiler_options.include_path]  # Include directory
+)
+
+# NEVER do partial tracking:
+# ❌ WRONG: key_flags = [f for f in flags if f.startswith("-O")]
+# ❌ WRONG: key_flags = [f for f in flags if f in ["-g", "-O0"]]  
+# ❌ WRONG: Any subset filtering whatsoever!
+```
+
+### **Cache Validation Strategy**
+
 This caching approach is much simpler than traditional build systems because:
 
 ### **No Dependency Tracking Needed**
@@ -873,20 +1014,22 @@ This caching approach is much simpler than traditional build systems because:
 ```
 .build/
 ├── library_cache/
-│   ├── libfastled-debug.a      # Cached FastLED library
-│   └── libfastled-debug.json   # Library metadata
+│   ├── libfastled-debug.a      # Cached FastLED library (stable semantic name)
+│   └── libfastled-debug.json   # Library metadata + comprehensive config_hash
 ├── sketch_cache/
-│   ├── Blink-debug.o           # Cached sketch objects
-│   └── Blink-debug.o.json      # Sketch metadata
+│   ├── Blink-debug.o           # Cached sketch objects (stable semantic name)
+│   └── Blink-debug.o.json      # Sketch metadata + comprehensive config_hash
 └── examples/
     ├── Blink.exe               # Final executables
-    └── Blink.exe.json          # Link metadata (both inputs)
+    └── Blink.exe.json          # Link metadata (both inputs + all flags)
 ```
 
 ### **Three Independent Cache Stages**
-1. **Library Cache**: FastLED source → `libfastled-debug.a` (3-4s → 0.01s)
-2. **Sketch Cache**: Sketch file → `Blink-debug.o` (0.5-1s → 0.01s)  
-3. **Link Cache**: Both objects → `Blink.exe` (1-2s → 0.01s)
+1. **Library Cache**: FastLED source → `libfastled-{semantic_name}.a` (3-4s → 0.01s)
+2. **Sketch Cache**: Sketch file → `{sketch}-{semantic_name}.o` (0.5-1s → 0.01s)  
+3. **Link Cache**: Both objects → `{sketch}.exe` (1-2s → 0.01s)
+
+**Key Insight**: Stable semantic filenames (debug, release, test-debug) get **overwritten** naturally, preventing cache accumulation while comprehensive `config_hash` validation in metadata ensures correctness.
 
 ### **99%+ Performance Improvement**
 From 5-7 seconds down to 50ms for fully cached builds - making development iteration nearly instant.
