@@ -671,6 +671,17 @@ class Compiler:
             if header_path.exists():
                 dependencies.append(header_path)
 
+        # CRITICAL: Add ALL source files in src/** directory
+        # PCH contains namespace configuration and other build settings that
+        # can be affected by any source file change
+        src_dir = Path(self.settings.include_path)
+        if src_dir.exists():
+            # Add all header files recursively in src/
+            for pattern in ["**/*.h", "**/*.hpp"]:
+                for header in src_dir.glob(pattern):
+                    if header.is_file():
+                        dependencies.append(header)
+
         # Platform-specific headers
         platform_dir = Path(self.settings.include_path) / "platforms"
         if platform_dir.exists():
