@@ -93,7 +93,7 @@ class FL_ALIGN FixedVector {
         assign_array(values, N);
     }
 
-    FixedVector(FixedVector &&other) {
+    FixedVector(FixedVector &&other) : current_size(0) {
         fl::swap(*this, other);
         other.clear();
     }

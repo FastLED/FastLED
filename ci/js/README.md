@@ -2,18 +2,6 @@
 
 This directory contains JavaScript linting tools for the FastLED project, using Node.js + ESLint for **fast** JavaScript validation.
 
-## Scripts
-
-- **`lint-js-fast`** - Fast JavaScript linting using Node.js + ESLint (critical issues only)
-
-## Usage
-
-### From Project Root
-
-```bash
-# Fast JavaScript linting (recommended)
-bash ci/js/lint-js-fast
-```
 
 ### Via Main Lint Script (Recommended)
 
@@ -41,7 +29,7 @@ This will:
 - Download Node.js binary to `.js-tools/node/`
 - Install ESLint to `.js-tools/node_modules/`
 - Create ESLint configuration in `.js-tools/.eslintrc.js`
-- Create fast linting script `ci/js/lint-js-fast`
+- Create fast linting script `.cache/js-tools/lint-js-fast`
 
 ## Philosophy: Fast Only
 

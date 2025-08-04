@@ -49,7 +49,7 @@ uv run ci/setup-js-linting-fast.py
 ### Direct Linting Commands
 ```bash
 # Fast JavaScript linting (recommended)
-bash ci/js/lint-js-fast
+bash .cache/js-tools/lint-js-fast
 
 # Full project linting (includes JavaScript when available)
 bash lint
@@ -151,7 +151,7 @@ If you see "JavaScript linting tools not found":
 uv run ci/setup-js-linting-fast.py
 
 # Verify installation
-bash ci/js/lint-js-fast
+bash .cache/js-tools/lint-js-fast
 ```
 
 ### Performance Issues
@@ -164,7 +164,7 @@ If linting is slow:
 If linting fails:
 - Check ESLint configuration: `.js-tools/.eslintrc.js`
 - Verify Node.js modules: `.js-tools/node_modules/.bin/eslint`
-- Test manually: `bash ci/js/lint-js-fast`
+- Test manually: `bash .cache/js-tools/lint-js-fast`
 
 ## 📝 Files Created
 
@@ -173,7 +173,7 @@ The fast linting setup creates:
 - `.js-tools/node_modules/` - ESLint installation
 - `.js-tools/.eslintrc.js` - ESLint configuration
 - `.js-tools/package.json` - Node.js package definition
-- `ci/js/lint-js-fast` - Fast linting script
+- `.cache/js-tools/lint-js-fast` - Fast linting script
 
 ## 🎯 Best Practices
 

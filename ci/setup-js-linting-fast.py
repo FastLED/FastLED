@@ -268,7 +268,7 @@ else
 fi
 """
 
-    script_path = Path("ci/js/lint-js-fast")
+    script_path = TOOLS_DIR / "lint-js-fast"
     with open(script_path, "w") as f:
         f.write(script_content)
 
@@ -290,7 +290,7 @@ def main():
 
         print("\\nFast JavaScript linting setup complete!")
         print("\\nUsage:")
-        print("  bash ci/js/lint-js-fast    # Fast linting with ESLint")
+        print("  bash .cache/js-tools/lint-js-fast    # Fast linting with ESLint")
         print("  For more info: ci/js/README.md")
 
     except Exception as e:

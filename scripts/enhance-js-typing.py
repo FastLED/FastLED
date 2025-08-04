@@ -430,7 +430,7 @@ export {};
         summary.append(f"  • uv run scripts/enhance-js-typing.py --approach performance") 
         summary.append(f"  • uv run scripts/enhance-js-typing.py --approach types --file <path>")
         summary.append(f"  • uv run scripts/enhance-js-typing.py --approach configs")
-        summary.append(f"  • bash ci/js/lint-js-fast    # Fast ESLint linting")
+        summary.append(f"  • bash .cache/js-tools/lint-js-fast    # Fast ESLint linting")
         summary.append(f"  • bash lint                  # Full project linting")
         
         summary.append("\n" + "=" * 80)
