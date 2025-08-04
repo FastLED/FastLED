@@ -386,14 +386,21 @@ def store_sketch_cache(
         sketch_name = sketch_file.stem
         config_name = get_build_configuration_name(build_flags, compiler_options)
         config_hash = get_build_configuration_hash(build_flags, compiler_options)
-        metadata_file = cache_dir / f"{sketch_name}-{config_name}.o.json"
+
         cache_dir.mkdir(parents=True, exist_ok=True)
+
+        # Copy the compiled object file to cache
+        cached_obj_file = cache_dir / f"{sketch_name}-{config_name}.o"
+        metadata_file = cache_dir / f"{sketch_name}-{config_name}.o.json"
+
+        if obj_file.exists():
+            shutil.copy2(obj_file, cached_obj_file)
 
         metadata = {
             "sketch_name": sketch_name,
             "sketch_hash": calculate_file_hash(sketch_file),
             "sketch_timestamp": int(sketch_file.stat().st_mtime),
-            "obj_file": obj_file.name,
+            "obj_file": cached_obj_file.name,
             "config_hash": config_hash,  # Comprehensive configuration hash for validation
             "compiled_at": datetime.now().isoformat(),
             "compile_time": build_time,
