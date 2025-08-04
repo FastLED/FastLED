@@ -24,14 +24,6 @@ def setup_environment(args: TestArgs) -> None:
         os.environ["FASTLED_ALL_SRC"] = "1"
         print("Quick mode enabled. FASTLED_ALL_SRC=1")
 
-    # Handle legacy flag - set environment variable for subprocesses
-    if args.legacy:
-        os.environ["USE_CMAKE"] = "1"
-        print("Legacy mode enabled. Using CMake build system.")
-    else:
-        # Ensure USE_CMAKE is not set
-        os.environ.pop("USE_CMAKE", None)
-
     # Handle build flags
     if args.show_compile:
         os.environ["FASTLED_TEST_SHOW_COMPILE"] = "1"

@@ -81,7 +81,7 @@ class TestArgs:
     unity: bool = False
     no_unity: bool = False  # Disable unity builds for cpp tests and examples
     full: bool = False
-    legacy: bool = False  # Use legacy CMake system instead of new Python API
+
     no_parallel: bool = False  # Force sequential test execution
 
 

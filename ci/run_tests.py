@@ -45,10 +45,9 @@ def _get_test_patterns() -> List[str]:
 
 def discover_tests(build_dir: Path, specific_test: Optional[str] = None) -> List[Path]:
     """Find test executables in the build directory"""
-    # Check multiple possible test directories (legacy Python vs optimized Python API)
+    # Check test directory
     possible_test_dirs = [
-        Path("tests") / ".build" / "bin",  # Optimized Python API system
-        # Note: Legacy Python system uses the same directory as optimized system
+        Path("tests") / ".build" / "bin",  # Python build system
     ]
 
     test_dir = None

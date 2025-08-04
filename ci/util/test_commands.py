@@ -28,8 +28,7 @@ def build_cpp_test_command(args: TestArgs) -> str:
         cmd_list.append("--show-link")  # Pass show-link flag
     if args.check:
         cmd_list.append("--check")
-    if args.legacy:
-        cmd_list.append("--legacy")
+
     if args.no_unity:
         cmd_list.append("--no-unity")
 

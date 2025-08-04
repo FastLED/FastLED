@@ -297,7 +297,6 @@ def compile_tests(
     clean: bool = False,
     unknown_args: list[str] = [],
     specific_test: str | None = None,
-    use_legacy_system: bool = False,
     quick_build: bool = True,
     *,
     verbose: bool = False,
@@ -305,90 +304,20 @@ def compile_tests(
     show_link: bool = False,
 ) -> None:
     """
-    Compile C++ tests with A/B testing support between Legacy Python and Optimized Python API systems.
-
-    Note: Both systems are Python-based; "legacy" refers to the older Python implementation.
-    Performance: 15-30s (Legacy) → 2-4s (Optimized Python API) = 8x improvement
-    Memory Usage: 2-4GB (Legacy) → 200-500MB (Optimized Python API) = 80% reduction
+    Compile C++ tests using the Python build system.
     """
     os.chdir(str(PROJECT_ROOT))
+    print("🔧 Compiling tests using Python build system")
 
-    # Determine build system: --legacy flag takes precedence, then environment variable
-    if use_legacy_system:
-        use_python_api = False
-        print("🔧 Using LEGACY Python build system (--legacy flag)")
-    else:
-        # Check environment variable - USE_CMAKE=1 forces legacy system, default is new
-        use_cmake_env = os.environ.get("USE_CMAKE", "").lower() in (
-            "1",
-            "true",
-            "yes",
-        )
-        use_python_api = not use_cmake_env
-        if use_cmake_env:
-            print("🔧 Using LEGACY Python build system (USE_CMAKE env var)")
-        else:
-            print("🆕 Using Python API build system (default)")
-
-    if use_python_api:
-        # New Python system (8x faster)
-        _compile_tests_python(
-            clean,
-            unknown_args,
-            specific_test,
-            quick_build=quick_build,
-            verbose=verbose,
-            show_compile=show_compile,
-            show_link=show_link,
-        )
-    else:
-        # Legacy Python system
-        _compile_tests_legacy(clean, unknown_args, specific_test)
-
-
-def _compile_tests_legacy(
-    clean: bool = False,
-    unknown_args: list[str] = [],
-    specific_test: str | None = None,
-    *,
-    verbose: bool = False,
-    show_compile: bool = False,
-    show_link: bool = False,
-) -> None:
-    """Legacy Python compilation system (preserved for gradual migration)"""
-    if verbose:
-        print("Compiling tests using legacy Python system...")
-    command = ["uv", "run", "-m", "ci.compiler.cpp_test_compile"]
-    if clean:
-        command.append("--clean")
-    if specific_test:
-        command.extend(["--test", specific_test])
-    command.extend(unknown_args)
-    return_code, output = run_command(" ".join(command))
-    if return_code != 0:
-        print("Compilation failed:")
-        print(output)  # Always show output on failure
-        failure = TestFailureInfo(
-            test_name="legacy_python_compilation",
-            command=" ".join(command),
-            return_code=return_code,
-            output=output,
-            error_type="legacy_python_compilation_error",
-        )
-        raise CompilationFailedException("Legacy Python compilation failed", [failure])
-    print("Compilation successful.")
-
-    # Check if static analysis was requested and warn about IWYU availability
-    if "--check" in unknown_args:
-        if not check_iwyu_available():
-            print(
-                "⚠️  WARNING: IWYU (include-what-you-use) not found - static analysis will be limited"
-            )
-            print("   Install IWYU to enable include analysis:")
-            print("     Windows: Install via LLVM or build from source")
-            print("     Ubuntu/Debian: sudo apt install iwyu")
-            print("     macOS: brew install include-what-you-use")
-            print("     Or build from source: https://include-what-you-use.org/")
+    _compile_tests_python(
+        clean,
+        unknown_args,
+        specific_test,
+        quick_build=quick_build,
+        verbose=verbose,
+        show_compile=show_compile,
+        show_link=show_link,
+    )
 
 
 def _compile_tests_python(
@@ -401,7 +330,7 @@ def _compile_tests_python(
     show_compile: bool = False,
     show_link: bool = False,
 ) -> None:
-    """Optimized Python API system with PCH (same as examples)"""
+    """Python build system with PCH optimization"""
     # Use the optimized cpp_test_compile system directly
     import subprocess
 
@@ -418,7 +347,7 @@ def _compile_tests_python(
     if "--no-pch" in unknown_args:
         cmd.append("--no-pch")
 
-    print("🚀 Using optimized Python API with PCH optimization")
+    print("🚀 Using Python build system with PCH optimization")
     result = subprocess.run(cmd)
     if result.returncode != 0:
         raise RuntimeError(
@@ -428,7 +357,6 @@ def _compile_tests_python(
 
 def run_tests(
     specific_test: str | None = None,
-    use_legacy_system: bool = False,
     *,
     verbose: bool = False,
     show_compile: bool = False,
@@ -436,90 +364,8 @@ def run_tests(
 ) -> None:
     """
     Run compiled tests with GDB crash analysis support.
-
-    This function works with both the optimized Python compiler API and legacy Python system,
-    automatically detecting which system was used and finding the appropriate executables.
-    All existing GDB crash analysis functionality is preserved.
     """
-
-    # Determine which system to use: --legacy flag takes precedence, then environment variable
-    if use_legacy_system:
-        use_python_api = False
-    else:
-        # Check environment variable - USE_CMAKE=1 forces legacy system, default is new
-        use_cmake_env = os.environ.get("USE_CMAKE", "").lower() in (
-            "1",
-            "true",
-            "yes",
-        )
-        use_python_api = not use_cmake_env
-
-    if use_python_api:
-        # New Python system - try to get executables from test compiler
-        _run_tests_python(specific_test)
-    else:
-        # Legacy Python system - use traditional .build/bin directory
-        _run_tests_legacy(specific_test)
-
-
-def _run_tests_legacy(
-    specific_test: str | None = None,
-    *,
-    verbose: bool = False,
-    show_compile: bool = False,
-    show_link: bool = False,
-) -> None:
-    """Run tests from legacy Python build system (preserving existing logic)"""
-    test_dir = os.path.join("tests")
-    if not os.path.exists(test_dir):
-        print(f"Test directory not found: {test_dir}")
-        sys.exit(1)
-
-    print("Running tests from legacy Python build...")
-    failed_tests: list[FailedTest] = []
-    files = os.listdir(test_dir)
-    # filter out all pdb files (windows) and only keep test_ cpp files
-    files = [
-        f
-        for f in files
-        if not f.endswith(".pdb") and f.startswith("test_") and f.endswith(".cpp")
-    ]
-
-    # If specific test is specified, filter for just that test
-    if specific_test:
-        # Check if the test name already starts with "test_" prefix
-        if specific_test.startswith("test_"):
-            test_name = specific_test
-        else:
-            test_name = f"test_{specific_test}"
-
-        if sys.platform == "win32":
-            test_name += ".exe"
-
-        # Modified to support partial matching (case-insensitive)
-        matching_files = []
-        for f in files:
-            # Check for exact match (case-insensitive)
-            if f.lower() == test_name.lower():
-                matching_files.append(f)
-                break
-
-            # Check for partial match in the filename (case-insensitive)
-            base_name = f.replace("test_", "").replace(".cpp", "")
-            if sys.platform == "win32":
-                base_name = base_name.replace(".exe", "")
-
-            if specific_test.lower() in base_name.lower():
-                matching_files.append(f)
-
-        if matching_files:
-            files = matching_files
-        else:
-            print(f"Test {test_name} not found in {test_dir}")
-            sys.exit(1)
-
-    _execute_test_files(files, test_dir, failed_tests, specific_test)
-    _handle_test_results(failed_tests)
+    _run_tests_python(specific_test)
 
 
 def _run_tests_python(
@@ -529,8 +375,8 @@ def _run_tests_python(
     show_compile: bool = False,
     show_link: bool = False,
 ) -> None:
-    """Run tests from new Python compiler API system"""
-    # Import the new test compiler system
+    """Run tests from Python build system"""
+    # Import the test compiler system
     from ci.compiler.test_compiler import FastLEDTestCompiler
 
     # Get test executables from Python build system
@@ -545,7 +391,7 @@ def _run_tests_python(
         print(f"No test executables found for: {test_name}")
         sys.exit(1)
 
-    print(f"Running {len(test_executables)} tests from Python API build...")
+    print(f"Running {len(test_executables)} tests from Python build...")
 
     # Print list of tests that will be executed
     print("Tests to execute:")
@@ -950,11 +796,7 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Enable static analysis (IWYU, clang-tidy)",
     )
-    parser.add_argument(
-        "--legacy",
-        action="store_true",
-        help="Use legacy Python system instead of optimized Python API (8x slower)",
-    )
+
     parser.add_argument(
         "--no-unity",
         action="store_true",
@@ -989,7 +831,7 @@ def main() -> None:
         # only_run_failed_test feature to be implemented in future
         _ = args.only_run_failed_test
         use_clang = args.clang
-        use_legacy_system = args.legacy
+
         no_unity = args.no_unity
         quick_build = (
             not args.debug
@@ -1011,7 +853,6 @@ def main() -> None:
                 clean=args.clean,
                 unknown_args=passthrough_args,
                 specific_test=specific_test,
-                use_legacy_system=use_legacy_system,
                 quick_build=quick_build,
                 verbose=args.verbose,
                 show_compile=args.show_compile,
@@ -1022,7 +863,6 @@ def main() -> None:
             if specific_test:
                 run_tests(
                     specific_test,
-                    use_legacy_system=use_legacy_system,
                     verbose=args.verbose,
                     show_compile=args.show_compile,
                     show_link=args.show_link,
@@ -1031,7 +871,6 @@ def main() -> None:
                 # Use our own test runner instead of CTest since CTest integration is broken
                 run_tests(
                     None,
-                    use_legacy_system=use_legacy_system,
                     verbose=args.verbose,
                     show_compile=args.show_compile,
                     show_link=args.show_link,

@@ -105,11 +105,7 @@ def parse_args(args: Optional[list[str]] = None) -> TestArgs:
         action="store_true",
         help="Run full integration tests including compilation + linking + program execution",
     )
-    parser.add_argument(
-        "--legacy",
-        action="store_true",
-        help="Use legacy CMake system instead of new Python API (8x slower)",
-    )
+
     parser.add_argument(
         "--no-parallel",
         action="store_true",
@@ -141,7 +137,6 @@ def parse_args(args: Optional[list[str]] = None) -> TestArgs:
         unity=parsed_args.unity,
         no_unity=parsed_args.no_unity,
         full=parsed_args.full,
-        legacy=parsed_args.legacy,
         no_parallel=parsed_args.no_parallel,
     )
 

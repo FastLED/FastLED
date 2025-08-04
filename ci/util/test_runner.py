@@ -326,8 +326,7 @@ def create_unit_test_process(
         compile_cmd.append("--show-link")
     if args.check:
         compile_cmd.append("--check")
-    if args.legacy:
-        compile_cmd.append("--legacy")
+
     if args.clang:
         compile_cmd.append("--clang")
     if args.gcc:
