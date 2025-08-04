@@ -1355,7 +1355,9 @@ def link_examples_with_cache(
                     shutil.copy2(cached_exe, executable_path)
                     linked_count += 1
                     cache_hits += 1
-                    log_timing(f"[LINKING] {green_text('SUCCESS (CACHED)')}: {executable_name}")
+                    log_timing(
+                        f"[LINKING] {green_text('SUCCESS (CACHED)')}: {executable_name}"
+                    )
                     continue  # Skip actual linking
                 except Exception as e:
                     log_timing(
@@ -1377,7 +1379,9 @@ def link_examples_with_cache(
             if link_result.ok:
                 linked_count += 1
                 cache_misses += 1
-                log_timing(f"[LINKING] {orange_text('SUCCESS (REBUILT)')}: {executable_name}")
+                log_timing(
+                    f"[LINKING] {orange_text('SUCCESS (REBUILT)')}: {executable_name}"
+                )
 
                 # Cache the newly linked executable for future use
                 cache_executable(example_name, cache_key, executable_path)

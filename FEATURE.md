@@ -1,1035 +1,1231 @@
-# FastLED Library Caching System
+# Fingerprint Cache Feature
 
-## Problem Statement
+## Overview
 
-The FastLED example compilation system currently rebuilds the entire FastLED static library (`libfastled.a`) on every test run, even when no source files have changed. This causes:
+A two-layer file change detection system that efficiently determines if source files have been modified by combining fast modification time checks with slower but accurate MD5 hash verification.
 
-1. **Slow rebuild times**: All FastLED source files are recompiled as a single unit every time (~3-4 seconds)
-2. **Linking cache misses**: Since the library file changes (timestamps/metadata), the linking cache always misses
-3. **Poor developer experience**: Repeated `bash test --examples` runs are unnecessarily slow
-
-## Current Behavior
-
-```bash
-# First run
-[LIBRARY] Compiling FastLED sources (allsrc build)...
-[LIBRARY] Creating static library: .build\fastled\libfastled.a
-[LINKING] SUCCESS (REBUILT): Blink.exe
-[LINKING] Cache: 0 hits, 1 misses (0.0% hit rate)
-
-# Second run (same example)
-[LIBRARY] Compiling FastLED sources (allsrc build)...  # ← Should be cached
-[LIBRARY] Creating static library: .build\fastled\libfastled.a
-[LINKING] SUCCESS (REBUILT): Blink.exe                 # ← Should be cached
-[LINKING] Cache: 0 hits, 1 misses (0.0% hit rate)
-```
-
-## Desired Behavior
-
-```bash
-# First run
-[LIBRARY] Compiling FastLED sources (allsrc build)...
-[LIBRARY] Creating static library: libfastled-release.a
-[LINKING] SUCCESS (REBUILT): Blink.exe
-[LINKING] Cache: 0 hits, 1 misses (0.0% hit rate)
-
-# Second run (same example)
-[LIBRARY] CACHED: Using existing FastLED library: libfastled-release.a
-[LINKING] SUCCESS (CACHED): Blink.exe
-[LINKING] Cache: 1 hits, 0 misses (100.0% hit rate)
-```
-
-## Proposed Solution: Simple Library Caching
-
-### Core Architecture
-
-The FastLED library caching system will use **stable naming** with **content validation** for the allsrc build system. Since FastLED compiles as a single compilation unit, we only need to cache the final library file.
-
-**Key Insight**: We don't need to track source file dependencies! The library file itself contains all the information we need:
-- **Fast path**: Same timestamp = same file (sub-millisecond check)
-- **Medium path**: Different timestamp but same hash = source changes didn't affect output (50ms check)
-- **Slow path**: Different hash = rebuild needed (3-4s compilation)
-
-#### Cache Naming Strategy
+## API
 
 ```python
-import hashlib
-import json
-from pathlib import Path
-from typing import List
-from ci.compiler.clang_compiler import CompilerOptions, BuildFlags
-
-def get_build_configuration_hash(
-    build_flags: BuildFlags,
-    compiler_options: CompilerOptions
-) -> str:
-    """Generate comprehensive configuration hash for validation (not filename)."""
+def has_changed(src_path: Path, previous_modtime: float, cache_file: Path) -> bool | FileNotFoundError:
+    """
+    Determine if a source file has changed since the last known modification time.
     
-    # Create comprehensive build signature from ALL configuration elements
-    config_elements = []
-    
-    # All compiler flags matter (not just optimization/debug)
-    config_elements.append(f"compiler_flags:{sorted(build_flags.compiler_flags)}")
-    
-    # All preprocessor defines matter
-    config_elements.append(f"defines:{sorted(build_flags.defines)}")
-    
-    # All linker flags matter
-    config_elements.append(f"link_flags:{sorted(build_flags.link_flags)}")
-    
-    # Compiler path and version matter
-    config_elements.append(f"compiler:{compiler_options.compiler}")
-    config_elements.append(f"compiler_args:{sorted(compiler_options.compiler_args)}")
-    
-    # Language standard and other critical settings
-    config_elements.append(f"std_version:{compiler_options.std_version}")
-    config_elements.append(f"include_path:{compiler_options.include_path}")
-    config_elements.append(f"defines_opt:{sorted(compiler_options.defines or [])}")
-    
-    # Create stable hash from all elements
-    combined_config = "|".join(config_elements)
-    return hashlib.sha256(combined_config.encode('utf-8')).hexdigest()
-
-def get_build_configuration_name(
-    build_flags: BuildFlags,
-    compiler_options: CompilerOptions
-) -> str:
-    """Generate stable cache filename based on semantic build type."""
-    
-    # Determine build type from compiler flags for stable naming
-    is_debug = any(flag in ["-g", "-ggdb", "-g3"] for flag in build_flags.compiler_flags)
-    is_optimized = any(flag.startswith("-O") and flag != "-O0" for flag in build_flags.compiler_flags)
-    is_test = any("test" in define.lower() or "TEST" in define for define in build_flags.defines)
-    is_stub = any("STUB" in define for define in build_flags.defines)
-    
-    # Generate semantic name for cache file (gets overwritten, no accumulation)
-    if is_test and is_debug:
-        return "test-debug"
-    elif is_test and is_optimized:
-        return "test-release"
-    elif is_test:
-        return "test-default"
-    elif is_stub and is_debug:
-        return "stub-debug"
-    elif is_stub and is_optimized:
-        return "stub-release"
-    elif is_debug and not is_optimized:
-        return "debug"
-    elif is_optimized and not is_debug:
-        return "release"
-    elif is_optimized and is_debug:
-        return "release-debug"
-    else:
-        return "default"
-
-def calculate_file_hash(file_path: Path) -> str:
-    """Calculate SHA256 hash of a file for content validation."""
-    if not file_path.exists():
-        return "no_file"
-    
-    hash_sha256 = hashlib.sha256()
-    try:
-        with open(file_path, "rb") as f:
-            for chunk in iter(lambda: f.read(4096), b""):
-                hash_sha256.update(chunk)
-        return hash_sha256.hexdigest()[:16]  # Short hash for efficiency
-    except (OSError, IOError):
-        return "error"
+    Args:
+        src_path: Path to the source file to check
+        previous_modtime: Previously known modification time (Unix timestamp)
+        cache_file: Path to the fingerprint cache file
+        
+    Returns:
+        True if the file has changed, False if unchanged
+        Exception if not found.
+    """
 ```
 
-#### Cache Storage Structure
+## Cache Structure
 
-```
-.build/
-├── library_cache/
-│   ├── libfastled-debug.a          # Debug build library (stable name)
-│   ├── libfastled-debug.json       # Debug metadata + comprehensive config_hash
-│   ├── libfastled-release.a        # Release build library (stable name)
-│   ├── libfastled-release.json     # Release metadata + comprehensive config_hash
-│   ├── libfastled-test-debug.a     # Test debug build (stable name)
-│   └── libfastled-test-debug.json  # Test debug metadata + comprehensive config_hash
-└── link_cache/                     # Existing linking cache
-    └── ...
-```
-
-#### Simplified Metadata Format
+The cache is stored as a JSON file with the following format:
 
 ```json
 {
-    "cache_name": "libfastled-debug",
-    "cache_version": "v2",
-    "created_at": "2024-01-15T10:30:45Z",
-    "library_hash": "f8e7d6c5b4a39281",
-    "library_timestamp": 1705315845,
-    "config_hash": "a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0u1v2w3x4y5z6",
-    "library_size": 2048576,
-    "build_time": 3.45,
-    "fastled_version": "main-commit-abc123"
+    "/path/to/file1.cpp": {"modification_time": 1699123456.789, "md5_hash": "d41d8cd98f00b204e9800998ecf8427e"},
+    "/path/to/file2.h": {"modification_time": 1699123460.123, "md5_hash": "098f6bcd4621d373cade4e832627b4f6"},
+    "/path/to/dir/file3.py": {"modification_time": 1699123465.456, "md5_hash": "5d41402abc4b2a76b9719d911017c592"}
 }
 ```
 
-### Implementation Details
+Each entry contains:
+- **Key**: Absolute file path (string)
+- **Value**: Cache entry object with:
+  - `modification_time`: Modification time (float, Unix timestamp with fractional seconds)
+  - `md5_hash`: MD5 hash (string, hexadecimal)
 
-#### 1. Simple Cache Check Function
+## Algorithm
 
-```python
-import json
-import shutil
-from pathlib import Path
-from typing import Optional
-from ci.compiler.clang_compiler import CompilerOptions, BuildFlags
+### Two-Layer Verification Process
 
-def check_library_cache(
-    build_flags: BuildFlags,
-    compiler_options: CompilerOptions,
-    cache_dir: Path
-) -> Optional[Path]:
-    """Check if cached library exists and is valid using fast timestamp + hash fallback."""
-    
-    try:
-        # Get stable cache name based on semantic build type
-        config_name = get_build_configuration_name(build_flags, compiler_options)
-        
-        library_file = cache_dir / f"libfastled-{config_name}.a"
-        metadata_file = cache_dir / f"libfastled-{config_name}.json"
-        
-        # Quick existence check
-        if not metadata_file.exists() or not library_file.exists():
-            return None
-        
-        # Load metadata
-        try:
-            with open(metadata_file, 'r', encoding='utf-8') as f:
-                metadata = json.load(f)
-        except (json.JSONDecodeError, OSError, IOError):
-            # Corrupted metadata - remove both files
-            metadata_file.unlink(missing_ok=True)
-            library_file.unlink(missing_ok=True)
-            return None
-        
-        # Check if build configuration changed (ANY flags, defines, compiler settings)
-        cached_config_hash = metadata.get("config_hash", "")
-        current_config_hash = get_build_configuration_hash(build_flags, compiler_options)
-        
-        if cached_config_hash != current_config_hash:
-            return None  # Build configuration changed
-        
-        # Fast path: Check timestamp first
-        current_timestamp = int(library_file.stat().st_mtime)
-        cached_timestamp = metadata.get("library_timestamp", 0)
-        
-        if current_timestamp == cached_timestamp:
-            return library_file  # Same timestamp = same file (fast!)
-        
-        # Medium path: Timestamp differs, check hash
-        current_hash = calculate_file_hash(library_file)
-        cached_hash = metadata.get("library_hash", "")
-        
-        if current_hash == cached_hash:
-            # Same content, update timestamp in metadata for next time
-            metadata["library_timestamp"] = current_timestamp
-            with open(metadata_file, 'w', encoding='utf-8') as f:
-                json.dump(metadata, f, indent=2, sort_keys=True)
-        return library_file
-        
-        # Hash differs = content changed = need rebuild
-        return None
-        
-    except Exception as e:
-        print(f"Warning: Cache check failed: {e}")
-        return None
+1. **Layer 1 - Modification Time Check (Fast)**
+   - Retrieve current file modification time using `os.path.getmtime()`
+   - Compare with `previous_modtime` parameter
+   - If times match exactly → return False (no change detected)
+   - If times differ → proceed to Layer 2
 
-def store_library_cache(
-    library_file: Path,
-    build_flags: BuildFlags,
-    compiler_options: CompilerOptions,
-    cache_dir: Path,
-    build_time: float
-) -> bool:
-    """Store library in cache with stable naming."""
-    
-    try:
-        config_name = get_build_configuration_name(build_flags, compiler_options)
-        cache_dir.mkdir(parents=True, exist_ok=True)
-        
-        cached_library = cache_dir / f"libfastled-{config_name}.a"
-        metadata_file = cache_dir / f"libfastled-{config_name}.json"
-        
-        # Copy library file
-        shutil.copy2(library_file, cached_library)
-        
-        # Calculate hash and get timestamp of the cached library
-        library_hash = calculate_file_hash(cached_library)
-        library_timestamp = int(cached_library.stat().st_mtime)
-        
-        # Calculate comprehensive config hash for validation
-        config_hash = get_build_configuration_hash(build_flags, compiler_options)
-        
-        # Create metadata
-        metadata = {
-            "cache_name": f"libfastled-{config_name}",
-            "cache_version": "v2",
-            "created_at": datetime.now().isoformat(),
-            "library_hash": library_hash,
-            "library_timestamp": library_timestamp,
-            "config_hash": config_hash,  # Comprehensive configuration hash for validation
-            "library_size": cached_library.stat().st_size,
-            "build_time": build_time,
-            "fastled_version": get_fastled_version()
-        }
-        
-        # Write metadata
-        with open(metadata_file, 'w', encoding='utf-8') as f:
-            json.dump(metadata, f, indent=2, sort_keys=True)
-            
-            return True
-            
-        except Exception as e:
-            print(f"Warning: Failed to store library cache: {e}")
-            return False
-            
-def get_fastled_version() -> str:
-    """Get FastLED version/commit for cache validation."""
-    try:
-        import subprocess
-        result = subprocess.run(
-            ["git", "rev-parse", "--short", "HEAD"],
-            capture_output=True, text=True, timeout=5
-        )
-        if result.returncode == 0:
-            return f"commit-{result.stdout.strip()}"
-    except Exception:
-        pass
-    return "unknown"
+2. **Layer 2 - Content Verification (Accurate)**
+   - Compute MD5 hash of current file content
+   - If file exists in cache and cached modtime matches current modtime → use cached hash
+   - Otherwise: update cache with new `CacheEntry(modification_time, md5_hash)`
+   - Compare current hash with previous hash from cache to verify actual content change
+   - **Critical**: If hashes match despite modtime difference → return False (no content change)
+
+### Flow Diagram
+
+```
+src_path exists? ─NO─> FileNotFoundError
+     │ YES
+     ▼
+Current modtime == previous_modtime? ─YES─> Return False (no change)
+     │ NO
+     ▼
+File in cache? ─NO─> Compute MD5, Create CacheEntry, Assume changed (Return True)
+     │ YES
+     ▼
+Current modtime == cached_entry.modification_time? ─YES─> Use cached hash
+     │ NO                                                           │
+     ▼                                                              ▼
+Compute MD5, Update CacheEntry ─────────────────────────────> Compare current hash with previous cached hash
+                                                                     │
+                                                                     ▼
+                                                           Hashes equal? ─YES─> Return False (no content change)
+                                                                     │ NO
+                                                                     ▼
+                                                           Return True (content changed)
 ```
 
-#### 2. Integrated Library Creation Function
-
-```python
-import time
-import shutil
-from pathlib import Path
-from typing import Callable
-from datetime import datetime
-from ci.compiler.clang_compiler import Compiler
-
-
-def create_fastled_library_with_cache(
-    compiler: Compiler, 
-    fastled_build_dir: Path, 
-    log_timing: Callable[[str], None]
-) -> Path:
-    """Create libfastled.a static library with simple caching."""
-    
-    # Check cache first
-    cache_dir = Path(".build/library_cache")
-    cached_library = check_library_cache(
-        compiler.build_flags,
-        compiler.settings,
-        cache_dir
-    )
-    
-    config_name = get_build_configuration_name(compiler.build_flags, compiler.settings)
-    lib_file = fastled_build_dir / f"libfastled-{config_name}.a"
-    
-    if cached_library:
-        try:
-            # Copy cached library to build directory
-            shutil.copy2(cached_library, lib_file)
-            log_timing(f"[LIBRARY] CACHED: Using cached FastLED library: {cached_library.name}")
-            return lib_file
-        except (OSError, IOError) as e:
-            log_timing(f"[LIBRARY] Warning: Failed to copy cached library, rebuilding: {e}")
-    
-    # Cache miss - build library
-    build_start = time.time()
-    log_timing(f"[LIBRARY] Compiling FastLED sources (allsrc build)...")
-    
-    # Use existing create_fastled_library function for actual compilation
-    lib_file = create_fastled_library_no_cache(compiler, fastled_build_dir, log_timing)
-    
-    build_time = time.time() - build_start
-    
-    # Store in cache for future builds
-    cache_success = store_library_cache(
-        lib_file, compiler.build_flags, 
-        compiler.settings, cache_dir, build_time
-    )
-    
-    if cache_success:
-        log_timing(f"[LIBRARY] SUCCESS: FastLED library created and cached: {lib_file.name}")
-    else:
-        log_timing(f"[LIBRARY] SUCCESS: FastLED library created: {lib_file.name}")
-
-    return lib_file
-```
+## Implementation Details
 
 ### Cache Management
 
-#### Simple Cleanup
-
 ```python
-import shutil
-from datetime import datetime, timedelta
-from pathlib import Path
-from typing import Dict
-
-def cleanup_library_cache(cache_dir: Path = None, max_age_days: int = 7) -> Dict[str, int]:
-    """Clean up old library cache entries."""
-    if cache_dir is None:
-        cache_dir = Path(".build/library_cache")
-    
-    if not cache_dir.exists():
-        return {"removed_entries": 0, "freed_bytes": 0}
-    
-    removed_count = 0
-    freed_bytes = 0
-    cutoff_date = datetime.now() - timedelta(days=max_age_days)
-    
-    # Find all library and metadata files
-    for file_path in cache_dir.glob("libfastled-*.a"):
-        try:
-            # Check file age
-            file_mtime = datetime.fromtimestamp(file_path.stat().st_mtime)
-            if file_mtime < cutoff_date:
-                # Remove library and corresponding metadata
-                metadata_file = file_path.with_suffix('.json')
-                
-                size = file_path.stat().st_size
-                file_path.unlink(missing_ok=True)
-                metadata_file.unlink(missing_ok=True)
-                
-                removed_count += 1
-                freed_bytes += size
-                
-            except Exception as e:
-            print(f"Warning: Failed to remove cache file {file_path}: {e}")
-    
-    if removed_count > 0:
-        print(f"[CACHE] Cleanup: Removed {removed_count} entries, freed {freed_bytes // 1024 // 1024}MB")
-    
-    return {"removed_entries": removed_count, "freed_bytes": freed_bytes}
-
-def clear_library_cache(cache_dir: Path = None) -> bool:
-    """Clear all library cache entries."""
-    if cache_dir is None:
-        cache_dir = Path(".build/library_cache")
-    
-    try:
-        if cache_dir.exists():
-            shutil.rmtree(cache_dir)
-        return True
-    except Exception as e:
-        print(f"Warning: Failed to clear library cache: {e}")
-        return False
-
-def get_library_cache_stats(cache_dir: Path = None) -> Dict[str, int]:
-    """Get simple library cache statistics."""
-    if cache_dir is None:
-        cache_dir = Path(".build/library_cache")
-    
-    if not cache_dir.exists():
-        return {"total_entries": 0, "total_size_mb": 0}
-    
-    total_entries = 0
-    total_size = 0
-    
-    for library_file in cache_dir.glob("libfastled-*.a"):
-                if library_file.exists():
-                    total_entries += 1
-                    total_size += library_file.stat().st_size
-    
-    return {
-        "total_entries": total_entries,
-        "total_size_mb": total_size // 1024 // 1024
-    }
-```
-
-### 3. Sketch Compilation Cache
-
-```python
-def check_sketch_cache(
-    sketch_file: Path,
-    build_flags: BuildFlags,
-    compiler_options: CompilerOptions,
-    cache_dir: Path
-) -> Optional[Path]:
-    """Check if cached sketch object exists and is valid."""
-    
-    try:
-        # Generate cache name based on sketch + semantic build config
-        sketch_name = sketch_file.stem
-        config_name = get_build_configuration_name(build_flags, compiler_options)
-        
-        cached_obj = cache_dir / f"{sketch_name}-{config_name}.o"
-        metadata_file = cache_dir / f"{sketch_name}-{config_name}.o.json"
-        
-        # Quick existence check
-        if not cached_obj.exists() or not metadata_file.exists():
-            return None
-        
-        # Load metadata
-        with open(metadata_file, 'r', encoding='utf-8') as f:
-            metadata = json.load(f)
-        
-        # Check if build configuration changed (comprehensive validation)
-        cached_config_hash = metadata.get("config_hash", "")
-        current_config_hash = get_build_configuration_hash(build_flags, compiler_options)
-        
-        if cached_config_hash != current_config_hash:
-            return None  # Build configuration changed
-        
-        # Fast path: Check sketch timestamp
-        current_timestamp = int(sketch_file.stat().st_mtime)
-        cached_timestamp = metadata.get("sketch_timestamp", 0)
-        
-        if current_timestamp == cached_timestamp:
-            return cached_obj  # Same timestamp = same sketch
-        
-        # Medium path: Check sketch hash
-        current_hash = calculate_file_hash(sketch_file)
-        cached_hash = metadata.get("sketch_hash", "")
-        
-        if current_hash == cached_hash:
-            # Update timestamp in metadata
-            metadata["sketch_timestamp"] = current_timestamp
-            with open(metadata_file, 'w', encoding='utf-8') as f:
-                json.dump(metadata, f, indent=2, sort_keys=True)
-            return cached_obj
-        
-        return None  # Sketch changed
-        
-    except Exception:
-        return None
-
-def store_sketch_cache(
-    sketch_file: Path,
-    obj_file: Path,
-    build_flags: BuildFlags,
-    compiler_options: CompilerOptions,
-    cache_dir: Path,
-    build_time: float
-) -> None:
-    """Store sketch compilation metadata."""
-    
-    sketch_name = sketch_file.stem
-    config_name = get_build_configuration_name(build_flags, compiler_options)
-    config_hash = get_build_configuration_hash(build_flags, compiler_options)
-    metadata_file = cache_dir / f"{sketch_name}-{config_name}.o.json"
-    
-    metadata = {
-        "sketch_name": sketch_name,
-        "sketch_hash": calculate_file_hash(sketch_file),
-        "sketch_timestamp": int(sketch_file.stat().st_mtime),
-        "obj_file": obj_file.name,
-        "config_hash": config_hash,  # Comprehensive configuration hash for validation
-        "compiled_at": datetime.now().isoformat(),
-        "compile_time": build_time
-    }
-    
-    with open(metadata_file, 'w', encoding='utf-8') as f:
-        json.dump(metadata, f, indent=2, sort_keys=True)
-```
-
-### 4. Three-Stage Linking Cache
-
-```python
+import os
 import json
-import time
 from pathlib import Path
-from typing import List
-from datetime import datetime
+from dataclasses import dataclass
 
-def check_link_cache(
-    exe_file: Path,
-    sketch_obj: Path,
-    library_file: Path,
-    link_flags: List[str]
-) -> bool:
-    """Check if cached executable is valid using sketch + library hashes + link flags."""
-    
-    metadata_file = exe_file.with_suffix('.exe.json')
-    
-    # Quick existence check
-    if not exe_file.exists() or not metadata_file.exists():
-        return False
-    
-    try:
-        # Load link metadata
-        with open(metadata_file, 'r', encoding='utf-8') as f:
-            metadata = json.load(f)
-        
-        # Check if sketch object changed
-        current_sketch_hash = calculate_file_hash(sketch_obj)
-        cached_sketch_hash = metadata.get("sketch_hash", "")
-        
-        if current_sketch_hash != cached_sketch_hash:
-            return False  # Sketch changed, re-link needed
-        
-        # Check if library changed
-        current_lib_hash = calculate_file_hash(library_file)
-        cached_lib_hash = metadata.get("library_hash", "")
-        
-        if current_lib_hash != cached_lib_hash:
-            return False  # Library changed, re-link needed
-        
-        # Check if link flags changed
-        cached_link_flags = metadata.get("link_flags", [])
-        if sorted(link_flags) != sorted(cached_link_flags):
-            return False  # Link flags changed, re-link needed
-        
-        return True  # Cache hit!
-        
-    except Exception:
-        return False  # Error = re-link
+@dataclass
+class CacheEntry:
+    modification_time: float
+    md5_hash: str
 
-def store_link_cache(
-    exe_file: Path,
-    sketch_obj: Path,
-    library_file: Path,
-    link_flags: List[str],
-    build_time: float
-) -> None:
-    """Store linking metadata alongside executable."""
+class FingerprintCache:
+    def __init__(self, cache_file: Path):
+        self.cache_file = cache_file
+        self.cache = self._load_cache()
     
-    metadata_file = exe_file.with_suffix('.exe.json')
-    
-    metadata = {
-        "exe_name": exe_file.name,
-        "sketch_hash": calculate_file_hash(sketch_obj),
-        "sketch_name": sketch_obj.name,
-        "library_hash": calculate_file_hash(library_file),
-        "library_name": library_file.name,
-        "link_flags": sorted(link_flags),
-        "linked_at": datetime.now().isoformat(),
-        "link_time": build_time
-    }
-    
-    with open(metadata_file, 'w', encoding='utf-8') as f:
-        json.dump(metadata, f, indent=2, sort_keys=True)
+    def _load_cache(self) -> dict[str, CacheEntry]:
+        """Load cache from JSON file, return empty dict if file doesn't exist."""
+        if not self.cache_file.exists():
+            return {}
+            
+        try:
+            with open(self.cache_file, 'r') as f:
+                data = json.load(f)
+            
+            # Convert JSON dict to CacheEntry objects
+            cache = {}
+            for file_path, entry_data in data.items():
+                cache[file_path] = CacheEntry(
+                    modification_time=entry_data["modification_time"],
+                    md5_hash=entry_data["md5_hash"]
+                )
+            return cache
+        except (json.JSONDecodeError, KeyError, TypeError):
+            # Cache corrupted - start fresh
+            return {}
+        
+    def _save_cache(self) -> None:
+        """Save current cache state to JSON file."""
+        # Convert CacheEntry objects to JSON-serializable dict
+        data = {}
+        for file_path, entry in self.cache.items():
+            data[file_path] = {
+                "modification_time": entry.modification_time,
+                "md5_hash": entry.md5_hash
+            }
+            
+        with open(self.cache_file, 'w') as f:
+            json.dump(data, f, indent=2)
+        
+    def _compute_md5(self, file_path: Path) -> str:
+        """Compute MD5 hash of file content."""
+        
+    def has_changed(self, src_path: Path, previous_modtime: float) -> bool:
+        """Main API function implementing the two-layer check."""
+        if not src_path.exists():
+            raise FileNotFoundError(f"Source file not found: {src_path}")
+            
+        current_modtime = os.path.getmtime(src_path)
+        
+        # Layer 1: Quick modification time check
+        if current_modtime == previous_modtime:
+            return False  # No change detected
+        
+        file_key = str(src_path)
+        
+        # Layer 2: Content verification via hash comparison
+        if file_key in self.cache:
+            cached_entry = self.cache[file_key]
+            previous_hash = cached_entry.md5_hash  # Store previous hash before potential update
+            
+            if current_modtime == cached_entry.modification_time:
+                # File is cached with current modtime - use cached hash
+                current_hash = cached_entry.md5_hash
+            else:
+                # Cache is stale - compute new hash
+                current_hash = self._compute_md5(src_path)
+                self._update_cache_entry(src_path, current_modtime, current_hash)
+            
+            # Compare current hash with previous cached hash
+            # If they match, content hasn't actually changed despite modtime difference
+            return current_hash != previous_hash
+            
+        else:
+            # File not in cache - compute hash and cache it
+            current_hash = self._compute_md5(src_path)
+            self._update_cache_entry(src_path, current_modtime, current_hash)
+            return True  # Assume changed since we have no previous state to compare
+        
+    def _update_cache_entry(self, file_path: Path, modification_time: float, md5_hash: str) -> None:
+        """Update cache with new entry."""
+        self.cache[str(file_path)] = CacheEntry(
+            modification_time=modification_time,
+            md5_hash=md5_hash
+        )
 ```
 
-#### Three-Stage Cache Structure
+### Performance Characteristics
 
+- **Cache Hit (modtime unchanged)**: ~0.1ms per file (JSON lookup + timestamp comparison)
+- **Cache Miss (modtime changed)**: ~1-10ms per file (MD5 computation + cache update)
+- **False Positive Avoidance**: When modtime differs but content is identical, hash comparison correctly returns False
+- **Memory Usage**: ~100 bytes per cached file entry
+- **Disk Usage**: JSON cache file scales linearly with number of tracked files
+
+### Edge Case Handling
+
+**Scenario**: File modification time changes but content remains identical (e.g., file touched, copied with different timestamp)
+
+```python
+# Initial state: file.txt has modtime=1699123456.789, hash="abc123"
+cache.has_changed(Path("file.txt"), 1699123456.789)  # Returns False (exact match)
+
+# File gets touched but content unchanged: modtime=1699123999.000, hash="abc123" 
+cache.has_changed(Path("file.txt"), 1699123456.789)  # Returns False (hash comparison detects no content change)
+
+# File content actually changes: modtime=1699124000.000, hash="xyz789"
+cache.has_changed(Path("file.txt"), 1699123456.789)  # Returns True (both modtime and hash differ)
 ```
-.build/
-├── library_cache/
-│   ├── libfastled-debug.a      # Cached FastLED library (stable semantic name)
-│   └── libfastled-debug.json   # Library metadata + comprehensive config_hash
-├── sketch_cache/
-│   ├── Blink-debug.o           # Cached sketch object (stable semantic name)
-│   ├── Blink-debug.o.json      # Sketch metadata + comprehensive config_hash
-│   ├── DemoReel100-debug.o     # Another sketch object (same config type)
-│   └── DemoReel100-debug.o.json # Its metadata + comprehensive config_hash
-└── examples/
-    ├── Blink.exe               # Final executable
-    ├── Blink.exe.json          # Link metadata (both inputs + flags)
-    ├── DemoReel100.exe         # Another executable
-    └── DemoReel100.exe.json    # Its metadata (both inputs + flags)
+
+### Error Handling
+
+```python
+# File doesn't exist
+if not src_path.exists():
+    raise FileNotFoundError(f"Source file not found: {src_path}")
+
+# File read permission issues  
+try:
+    with open(src_path, 'rb') as f:
+        content = f.read()
+except IOError as e:
+    raise IOError(f"Cannot read file {src_path}: {e}")
+
+# Cache corruption (malformed JSON)
+try:
+    cache = json.loads(cache_content)
+except json.JSONDecodeError:
+    # Rebuild cache from scratch
+    cache = {}
 ```
 
-#### Updated Link Metadata Format
+## Usage Examples
 
-```json
-{
-    "exe_name": "Blink.exe",
-    "sketch_hash": "b2c3d4e5f6g7h8i9",
-    "sketch_name": "Blink-debug.o",
-    "library_hash": "f8e7d6c5b4a39281",
-    "library_name": "libfastled-debug.a",
-    "link_flags": ["-L.", "-lfastled", "-static"],
-    "linked_at": "2024-01-15T10:30:45Z",
-    "link_time": 1.23
+### Basic Usage
+
+```python
+from pathlib import Path
+import os
+
+cache_file = Path(".fastled_cache.json")
+cache = FingerprintCache(cache_file)
+
+# Check if source file changed
+src_file = Path("src/FastLED.cpp")
+last_known_modtime = 1699123456.789  # From previous build state
+
+if cache.has_changed(src_file, last_known_modtime):
+    print("File has changed - recompilation needed")
+    # Perform expensive operation (compilation, etc.)
+    new_modtime = os.path.getmtime(src_file)  # Store for next check
+else:
+    print("File unchanged - using cached result")
+```
+
+### Batch File Checking
+
+```python
+import os
+
+cache_file = Path(".fastled_cache.json")
+cache = FingerprintCache(cache_file)
+
+source_files = [
+    Path("src/FastLED.cpp"),
+    Path("src/hsv2rgb.cpp"), 
+    Path("src/power_mgt.cpp")
+]
+
+last_modtimes = {
+    "src/FastLED.cpp": 1699123456.789,
+    "src/hsv2rgb.cpp": 1699123460.123,
+    "src/power_mgt.cpp": 1699123465.456
 }
+
+changed_files = []
+for src_file in source_files:
+    if cache.has_changed(src_file, last_modtimes[str(src_file)]):
+        changed_files.append(src_file)
+
+if changed_files:
+    print(f"Changed files: {changed_files}")
+    # Update modtimes for next check
+    for src_file in changed_files:
+        last_modtimes[str(src_file)] = os.path.getmtime(src_file)
+    # Rebuild only what's necessary
 ```
 
-## Performance Benefits
+### Integration with Build Systems
 
-### Expected Improvements
+```python
+import os
 
-| Scenario | Before | After | Improvement |
-|----------|--------|-------|-------------|
-| **Library build (timestamp hit)** | 3-4s (always) | 3-4s (first) → 0.01s (cached) | **99.7% faster** |
-| **Library build (hash hit)** | 3-4s (always) | 3-4s (first) → 0.05s (cached) | **98% faster** |
-| **Sketch compile (timestamp hit)** | 0.5-1s (always) | 0.5-1s (first) → 0.01s (cached) | **99% faster** |
-| **Sketch compile (hash hit)** | 0.5-1s (always) | 0.5-1s (first) → 0.02s (cached) | **98% faster** |
-| **Linking (cache hit)** | 1-2s (always rebuilds) | 1-2s (first) → 0.01s (cached) | **99.5% faster** |
-| **Total rebuild (full cache hit)** | 5-7s | 5-7s (first) → 0.05s (cached) | **99.3% faster** |
+def should_rebuild(target: Path, sources: list[Path], cache_file: Path) -> bool:
+    """Determine if target needs rebuilding based on source changes."""
+    
+    cache = FingerprintCache(cache_file)
+    
+    if not target.exists():
+        return True  # Target doesn't exist, must build
+    
+    # Get target's modification time as baseline
+    target_modtime = os.path.getmtime(target)
+    
+    # Check if any source is newer than target
+    for src in sources:
+        if cache.has_changed(src, target_modtime):
+            return True
+            
+    return False  # All sources unchanged
+```
 
-### Cache Hit Scenarios
+## Benefits
 
-**Library Cache:**
-- **Same build configuration, no source changes**: 100% hit rate (timestamp check - fastest!)
-- **Same build configuration, source changes but same output**: 100% hit rate (hash check - fast!)
-- **Different compiler flags**: Cache miss (new config name)
-- **Source changes affecting output**: Cache miss (hash differs)
+### Performance Improvements
 
-**Sketch Cache:**
-- **Same sketch file, no changes**: 100% hit rate (timestamp check - fastest!)
-- **Same sketch content but different timestamp**: 100% hit rate (hash check - fast!)
-- **Different build configuration**: Cache miss (new config name)
-- **Sketch content changed**: Cache miss (hash differs)
+1. **Fast Path Optimization**: Modification time checks avoid expensive MD5 computation in ~95% of cases
+2. **Incremental Builds**: Only reprocess files that actually changed
+3. **Batch Processing**: Efficiently check hundreds of files in milliseconds
 
-**Linking Cache:**
-- **Same sketch hash + same library hash + same link flags**: 100% hit rate (sub-millisecond check)
-- **Either rebuilt but identical output**: 100% hit rate (same hashes)
-- **Different link flags**: Cache miss (re-link needed)
-- **Either input changed**: Cache miss (hash differs)
+### Reliability
+
+1. **Content-Based Detection**: MD5 hashes detect actual content changes, not just timestamp updates
+2. **False Positive Avoidance**: Returns False when modification time changes but content is identical
+3. **Robust to Clock Changes**: Handles system time adjustments and file copying
+4. **Cross-Platform**: Works consistently across Windows, macOS, and Linux
 
 ## Integration Points
 
-### 1. Replace Existing Caching Systems
-
-**Files to modify:**
-- `ci/compiler/test_example_compilation.py` - Replace `create_fastled_library()` and linking functions
-
-**Library caching integration:**
+### FastLED Build System
 
 ```python
-# Replace existing create_fastled_library() with:
-def create_fastled_library(
-    compiler: Compiler, fastled_build_dir: Path, log_timing: Callable[[str], None]
-) -> Path:
-    """Create libfastled.a static library with simple caching."""
-    return create_fastled_library_with_cache(compiler, fastled_build_dir, log_timing)
-```
+# In ci/ci-compile.py
+cache_file = Path(".build/fingerprint_cache.json")
+cache = FingerprintCache(cache_file)
 
-**Complete three-stage build integration:**
-
-```python
-import time
-from pathlib import Path
-from typing import List, Callable
-
-def build_example_with_cache(
-    compiler: Compiler,
-    sketch_file: Path,
-    output_exe: Path,
-    link_flags: List[str],
-    log_timing: Callable[[str], None]
-) -> bool:
-    """Complete three-stage build with caching: library + sketch + linking."""
+def compile_if_changed(example_path: Path, platform: str, cache_file: Path, last_compile_hash: str):
+    cache = FingerprintCache(cache_file)
+    source_files = list(example_path.glob("*.cpp")) + list(example_path.glob("*.h"))
     
-    # Stage 1: Build FastLED library (with caching)
-    library_cache_dir = Path(".build/library_cache")
-    library_file = create_fastled_library_with_cache(
-        compiler, library_cache_dir, log_timing
-    )
+    # Check if recompilation needed
+    rebuild_needed = False
+    for src_file in source_files:
+        if cache.has_changed(src_file, last_compile_hash):
+            rebuild_needed = True
+            break
     
-    # Stage 2: Compile sketch (with caching)
-    sketch_cache_dir = Path(".build/sketch_cache")
-    cached_sketch_obj = check_sketch_cache(
-        sketch_file, compiler.build_flags, compiler.settings, sketch_cache_dir
-    )
-    
-    config_name = get_build_configuration_name(compiler.build_flags, compiler.settings)
-    sketch_obj = sketch_cache_dir / f"{sketch_file.stem}-{config_name}.o"
-    
-    if cached_sketch_obj:
-        log_timing(f"[SKETCH] CACHED: Using cached sketch object: {cached_sketch_obj.name}")
-        sketch_obj = cached_sketch_obj
+    if rebuild_needed:
+        # Perform compilation
+        compile_example(example_path, platform)
     else:
-        # Compile sketch
-        build_start = time.time()
-        log_timing(f"[SKETCH] Compiling {sketch_file.name}...")
-        
-        compile_success = compile_sketch(compiler, sketch_file, sketch_obj)
-        if not compile_success:
-            return False
-        
-        build_time = time.time() - build_start
-        store_sketch_cache(
-            sketch_file, sketch_obj, compiler.build_flags, 
-            compiler.settings, sketch_cache_dir, build_time
-        )
-        log_timing(f"[SKETCH] SUCCESS: Sketch compiled and cached: {sketch_obj.name}")
-    
-    # Stage 3: Link sketch + library (with caching)
-    if check_link_cache(output_exe, sketch_obj, library_file, link_flags):
-        log_timing(f"[LINKING] CACHED: Using cached executable: {output_exe.name}")
-        return True
-    
-    # Link sketch + library
-    build_start = time.time()
-    log_timing(f"[LINKING] Linking {output_exe.name}...")
-    
-    link_success = perform_linking(compiler, sketch_obj, library_file, output_exe, link_flags)
-    
-    if link_success:
-        build_time = time.time() - build_start
-        store_link_cache(output_exe, sketch_obj, library_file, link_flags, build_time)
-        log_timing(f"[LINKING] SUCCESS: Executable created and cached: {output_exe.name}")
-    
-    return link_success
+        print(f"✓ {example_path.name} unchanged, skipping compilation")
 ```
 
-### 2. Three-Stage Cache Statistics
+### Testing Framework
 
 ```python
-def report_cache_statistics(log_timing: Callable[[str], None]):
-    """Report library, sketch, and linking cache statistics."""
+# In test.py
+def run_tests_if_changed(cache_file: Path, previous_run_hash: str):
+    cache = FingerprintCache(cache_file)
+    test_files = list(Path("tests/").glob("test_*.cpp"))
     
-    # Library cache stats
-    lib_stats = get_library_cache_stats()
-    lib_entries = lib_stats.get("total_entries", 0)
-    lib_size = lib_stats.get("total_size_mb", 0)
-    
-    # Sketch cache stats
-    sketch_entries = len(list(Path(".build/sketch_cache").glob("*.o")))
-    
-    # Linking cache stats
-    link_entries = len(list(Path(".build/examples").glob("*.exe.json")))
-    
-    log_timing(f"[CACHE] Library: {lib_entries} entries ({lib_size}MB)")
-    log_timing(f"[CACHE] Sketch: {sketch_entries} entries, Linking: {link_entries} entries")
+    for test_file in test_files:
+        if cache.has_changed(test_file, previous_run_hash):
+            run_single_test(test_file)
+        else:
+            print(f"✓ {test_file.name} unchanged, using cached results")
 ```
 
-## Implementation Plan
+## Future Enhancements
 
-### Phase 1: Library Caching
-- [ ] Add library cache functions to `test_example_compilation.py`
-- [ ] Replace `create_fastled_library()` with cached version
-- [ ] Test library caching with simple examples
+1. **Directory Watching**: Integrate with filesystem watchers for real-time change detection
+2. **Content Filtering**: Ignore whitespace-only changes or comment updates
+3. **Parallel Hashing**: Multi-threaded MD5 computation for large file sets
+4. **Compression**: Store cache using binary format for reduced disk usage
+5. **Network Caching**: Distributed cache for team development environments
 
-### Phase 2: Sketch Caching
-- [ ] Add sketch compilation cache functions
-- [ ] Integrate sketch caching into build pipeline
-- [ ] Test sketch caching independently
-
-### Phase 3: Linking Integration
-- [ ] Add three-stage linking cache functions
-- [ ] Integrate `build_example_with_cache()` workflow
-- [ ] Test complete three-stage caching
-
-### Phase 4: Polish & Statistics
-- [ ] Add comprehensive cache statistics reporting
-- [ ] Implement cache cleanup commands
-- [ ] Performance optimization and error handling
-
-## Success Criteria
-
-### **Primary Success Test**
-
-**Command:** `bash test --examples Blink`
-
-**Before Caching (Current Behavior):**
-```bash
-# First run
-$ bash test --examples Blink
-[LIBRARY] Compiling FastLED sources (allsrc build)...
-[LIBRARY] Creating static library: libfastled-debug.a     # 3-4 seconds
-[SKETCH] Compiling Blink.ino...                           # 0.5-1 second  
-[LINKING] Linking Blink.exe...                            # 1-2 seconds
-[SUCCESS] Blink.exe completed in 5.2 seconds
-
-# Second run (same command)
-$ bash test --examples Blink
-[LIBRARY] Compiling FastLED sources (allsrc build)...
-[LIBRARY] Creating static library: libfastled-debug.a     # 3-4 seconds (AGAIN!)
-[SKETCH] Compiling Blink.ino...                           # 0.5-1 second (AGAIN!)
-[LINKING] Linking Blink.exe...                            # 1-2 seconds (AGAIN!)
-[SUCCESS] Blink.exe completed in 5.1 seconds              # No improvement
-```
-
-**After Caching (Target Behavior):**
-```bash
-# First run
-$ bash test --examples Blink
-[LIBRARY] Compiling FastLED sources (allsrc build)...
-[LIBRARY] Creating static library: libfastled-debug.a     # 3-4 seconds
-[SKETCH] Compiling Blink.ino...                           # 0.5-1 second
-[LINKING] Linking Blink.exe...                            # 1-2 seconds  
-[SUCCESS] Blink.exe completed in 5.2 seconds
-
-# Second run (same command) - BLAZING FAST!
-$ bash test --examples Blink  
-[LIBRARY] CACHED: Using cached FastLED library: libfastled-debug.a     # 0.01s (stable name!)
-[SKETCH] CACHED: Using cached sketch object: Blink-debug.o             # 0.01s (stable name!)
-[LINKING] CACHED: Using cached executable: Blink.exe                   # 0.01s (hash validated!)
-[SUCCESS] Blink.exe completed in 0.05 seconds                          # 99% faster!
-```
-
-### **Additional Test Scenarios**
-
-**Scenario 1: Only sketch changes**
-```bash
-# Edit Blink.ino, then run again
-$ bash test --examples Blink
-[LIBRARY] CACHED: Using cached FastLED library: libfastled-debug.a     # 0.01s (stable name!)
-[SKETCH] Compiling Blink.ino...                                        # 0.5-1s (rebuild - overwrites Blink-debug.o)
-[LINKING] Linking Blink.exe...                                         # 1-2s (rebuild)  
-[SUCCESS] Blink.exe completed in 1.8 seconds                           # 65% faster
-```
-
-**Scenario 2: Only FastLED source changes**
-```bash
-# Edit FastLED source, then run again  
-$ bash test --examples Blink
-[LIBRARY] Compiling FastLED sources (allsrc build)...                  # 3-4s (rebuild - overwrites libfastled-debug.a)
-[SKETCH] CACHED: Using cached sketch object: Blink-debug.o             # 0.01s (stable name!)
-[LINKING] Linking Blink.exe...                                         # 1-2s (rebuild)
-[SUCCESS] Blink.exe completed in 4.2 seconds                           # 20% faster
-```
-
-**Scenario 3: Different example, same build config**
-```bash
-$ bash test --examples DemoReel100
-[LIBRARY] CACHED: Using cached FastLED library: libfastled-debug.a     # 0.01s (stable name!)
-[SKETCH] Compiling DemoReel100.ino...                                  # 0.5-1s (creates DemoReel100-debug.o)
-[LINKING] Linking DemoReel100.exe...                                   # 1-2s (new exe)
-[SUCCESS] DemoReel100.exe completed in 1.8 seconds                     # 65% faster
-```
-
-### **Success Metrics**
-
-- **Library cache hit rate**: Target 95%+ for repeated builds (timestamp + hash validation)
-- **Sketch cache hit rate**: Target 98%+ for repeated builds (timestamp + hash validation)  
-- **Linking cache hit rate**: Target 99%+ for repeated builds (hash + flags validation)
-- **Build time reduction**: 99%+ for fully cached builds (5+ seconds → 50ms)
-- **Developer satisfaction**: Second run completes in under 100ms
-
-### **Definition of Success**
-
-**✅ SUCCESS:** When a developer runs `bash test --examples Blink` twice in a row:
-- **First run**: Normal compile time (~5 seconds)
-- **Second run**: Blazing fast (<100ms) with clear "CACHED" messages
-- **Output clearly shows**: Which stages were cached vs rebuilt
-- **No functionality lost**: Executable works identically to non-cached version
-
-**✅ BONUS SUCCESS:** Intelligent partial caching works correctly:
-- Edit sketch → Only sketch recompiles, library stays cached
-- Edit FastLED → Only library recompiles, sketch stays cached  
-- Different example → Library cached, only new sketch compiles
-
-## Summary
-
-This caching approach fixes the critical flaw in typical partial flag checking and provides bulletproof cache validation:
-
-### **🧹 SMART CACHE MANAGEMENT: Semantic Names + Comprehensive Validation**
-
-**❌ NAIVE APPROACH (Hash-based filenames):**
-```
-libfastled-a1b2c3d4e5f6.a    # Every flag change = new file
-libfastled-x7y8z9a0b1c2.a    # Accumulates forever 
-libfastled-m3n4o5p6q7r8.a    # Needs garbage collection
-libfastled-b4r5t6y7u8i9.a    # Cache directory pollution
-```
-
-**✅ SMART APPROACH (Semantic names + metadata validation):**
-```
-libfastled-debug.a           # Stable filename, gets overwritten
-libfastled-debug.json        # Contains comprehensive config_hash for validation  
-libfastled-release.a         # Different semantic type
-libfastled-release.json      # Contains different config_hash
-```
-
-**Benefits:**
-- ✅ **Natural cache replacement**: Same build type overwrites previous cache
-- ✅ **No accumulation**: Debug builds replace old debug builds automatically
-- ✅ **Clean cache directory**: Only a few semantic cache files exist
-- ✅ **No garbage collection needed**: Self-managing cache
-- ✅ **Comprehensive validation**: Full config_hash in metadata ensures correctness
-
-### **🔥 CRITICAL FIX: Comprehensive Flag Validation**
-
-**❌ BROKEN (Typical Approach):**
-```python
-# Only checks optimization/debug flags - DANGEROUS!
-key_flags = [f for f in flags if f.startswith(("-O", "-g"))]
-```
-
-**✅ FIXED (Our Approach):**
-```python
-# Checks ALL configuration elements - SAFE!
-config_elements = []
-
-# ALL compiler flags (not just optimization flags!)
-config_elements.append(f"compiler_flags:{sorted(build_flags.compiler_flags)}")
-
-# ALL preprocessor defines  
-config_elements.append(f"defines:{sorted(build_flags.defines)}")
-
-# ALL linker flags
-config_elements.append(f"link_flags:{sorted(build_flags.link_flags)}")
-
-# ALL compiler settings  
-config_elements.append(f"compiler:{compiler_options.compiler}")
-config_elements.append(f"compiler_args:{sorted(compiler_options.compiler_args)}")
-config_elements.append(f"std_version:{compiler_options.std_version}")
-config_elements.append(f"include_path:{compiler_options.include_path}")
-
-# Create comprehensive hash from ALL configuration
-config_hash = sha256("|".join(config_elements).encode('utf-8')).hexdigest()[:12]
-```
-
-**Why This Matters:**
-- **Include paths**: `-I/some/path` vs `-I/other/path` → Different headers, different output
-- **Language standard**: `-std=c++17` vs `-std=c++14` → Different language features  
-- **Architecture**: `-march=native` vs `-march=x86-64` → Different instruction sets
-- **Warning levels**: `-Wall` vs `-Wall -Wextra` → Different compile-time checks
-- **Feature defines**: `-DFASTLED_FEATURE=1` → Different code paths
-- **Platform flags**: `-DSTUB_PLATFORM` vs `-DAVR_PLATFORM` → Different platform code
-- **Debug symbols**: `-g` vs `-g3` → Different debug information levels
-- **Optimization**: `-O2` vs `-O3` → Different code generation
-- **Sanitizers**: `-fsanitize=address` → Different runtime checking
-
-**Traditional "key_flags" approach would miss ALL of these and serve stale binaries!**
-
-### **🎯 COMPREHENSIVE FLAG TRACKING PRINCIPLE**
-
-**CRITICAL RULE: ANY flag change = cache invalidation**
+## Configuration
 
 ```python
-# ✅ CORRECT: Track every single flag that affects compilation
-all_flags_that_matter = (
-    build_flags.compiler_flags +     # Every -O, -g, -I, -D, -std, -march, etc.
-    build_flags.defines +            # Every -DDEFINE=value
-    build_flags.link_flags +         # Every linker flag  
-    compiler_options.compiler_args + # Every additional compiler argument
-    [compiler_options.compiler] +    # Compiler path/version
-    [compiler_options.std_version] + # Language standard
-    [compiler_options.include_path]  # Include directory
+# Configuration for advanced use cases - ALL VALUES REQUIRED
+@dataclass
+class FingerprintCacheConfig:
+    cache_file: Path
+    hash_algorithm: str  # md5, sha1, sha256
+    ignore_patterns: list[str]
+    max_cache_size: int  # Maximum number of cached entries
+    cache_ttl: int  # Cache entry TTL in seconds
+
+# Usage - all parameters must be explicitly provided
+config = FingerprintCacheConfig(
+    cache_file=Path(".fastled_cache.json"),
+    hash_algorithm="md5",
+    ignore_patterns=["*.tmp", "*.log"],
+    max_cache_size=10000,
+    cache_ttl=86400
 )
-
-# NEVER do partial tracking:
-# ❌ WRONG: key_flags = [f for f in flags if f.startswith("-O")]
-# ❌ WRONG: key_flags = [f for f in flags if f in ["-g", "-O0"]]  
-# ❌ WRONG: Any subset filtering whatsoever!
+cache = FingerprintCache(config.cache_file)
 ```
 
-### **Cache Validation Strategy**
+This fingerprint cache provides an efficient foundation for build optimization and change detection throughout the FastLED project.
 
-This caching approach is much simpler than traditional build systems because:
+## Integration Plan
 
-### **No Dependency Tracking Needed**
-- **Traditional**: Track thousands of header dependencies, complex makefiles
-- **FastLED**: Just validate the final output files (library + executable)
+### Phase 1: Core Implementation (Week 1-2)
 
-### **Two-Tier Validation**
-- **Fast path**: Timestamp comparison (sub-millisecond)
-- **Medium path**: Hash comparison (50ms)
-- **Slow path**: Full rebuild (3-4s)
+**Goal**: Create foundational fingerprint cache module with comprehensive testing.
 
-### **Three-Stage Cache Architecture**
+#### 1.1 Create Core Module
+- **File**: `ci/ci/fingerprint_cache.py`
+- **Classes**: `CacheEntry`, `FingerprintCache`, `FingerprintCacheConfig`
+- **Dependencies**: `pathlib`, `json`, `hashlib`, `os`, `typing`
+
+```python
+# ci/ci/fingerprint_cache.py
+from pathlib import Path
+from typing import Optional
+import json
+import hashlib
+import os
+from dataclasses import dataclass
+
+@dataclass
+class CacheEntry:
+    modification_time: float
+    md5_hash: str
+
+@dataclass
+class FingerprintCacheConfig:
+    cache_file: Path
+    hash_algorithm: str
+    ignore_patterns: list[str]
+    max_cache_size: int
+
+class FingerprintCache:
+    def __init__(self, config: FingerprintCacheConfig):
+        self.config = config
+        self.cache_file = config.cache_file
+        self.cache = self._load_cache()
+        
+    def _load_cache(self) -> dict[str, CacheEntry]:
+        # Implementation here
+        pass
+        
+    def has_changed(self, src_path: Path, previous_modtime: float) -> bool:
+        # Implementation here
+        pass
 ```
-.build/
-├── library_cache/
-│   ├── libfastled-debug.a      # Cached FastLED library (stable semantic name)
-│   └── libfastled-debug.json   # Library metadata + comprehensive config_hash
-├── sketch_cache/
-│   ├── Blink-debug.o           # Cached sketch objects (stable semantic name)
-│   └── Blink-debug.o.json      # Sketch metadata + comprehensive config_hash
-└── examples/
-    ├── Blink.exe               # Final executables
-    └── Blink.exe.json          # Link metadata (both inputs + all flags)
+
+## Testing
+
+### Test Environment Setup
+
+#### Directory Structure
+```
+test_fingerprint_cache/
+├── cache/
+│   └── test_cache.json         # Test cache file
+├── fixtures/
+│   ├── sample.cpp              # Test source files
+│   ├── header.h                # Various file types
+│   ├── config.json             # Different content types
+│   └── binary.o                # Binary files
+├── temp/
+│   └── (temporary test files)  # Created during tests
+└── scripts/
+    └── test_runner.py          # Test execution script
 ```
 
-### **Three Independent Cache Stages**
-1. **Library Cache**: FastLED source → `libfastled-{semantic_name}.a` (3-4s → 0.01s)
-2. **Sketch Cache**: Sketch file → `{sketch}-{semantic_name}.o` (0.5-1s → 0.01s)  
-3. **Link Cache**: Both objects → `{sketch}.exe` (1-2s → 0.01s)
+#### Test File Creation
 
-**Key Insight**: Stable semantic filenames (debug, release, test-debug) get **overwritten** naturally, preventing cache accumulation while comprehensive `config_hash` validation in metadata ensures correctness.
+```python
+import os
+import time
+import tempfile
+from pathlib import Path
 
-### **99%+ Performance Improvement**
-From 5-7 seconds down to 50ms for fully cached builds - making development iteration nearly instant.
+def setup_test_environment():
+    """Create test directory structure and sample files."""
+    
+    # Create test directory
+    test_dir = Path("test_fingerprint_cache")
+    test_dir.mkdir(exist_ok=True)
+    
+    # Create subdirectories
+    (test_dir / "cache").mkdir(exist_ok=True)
+    (test_dir / "fixtures").mkdir(exist_ok=True)
+    (test_dir / "temp").mkdir(exist_ok=True)
+    (test_dir / "scripts").mkdir(exist_ok=True)
+    
+    # Create sample test files with known content
+    test_files = {
+        "fixtures/sample.cpp": """
+#include <iostream>
+int main() {
+    std::cout << "Hello World" << std::endl;
+    return 0;
+}
+""",
+        "fixtures/header.h": """
+#pragma once
+#ifndef HEADER_H
+#define HEADER_H
+void function_declaration();
+#endif
+""",
+        "fixtures/config.json": """
+{
+    "version": "1.0",
+    "settings": {
+        "debug": true,
+        "optimization": 2
+    }
+}
+""",
+        "fixtures/empty.txt": "",
+        "fixtures/large.txt": "x" * 10000  # Large file for performance testing
+    }
+    
+    # Write test files
+    for file_path, content in test_files.items():
+        full_path = test_dir / file_path
+        with open(full_path, 'w') as f:
+            f.write(content)
+    
+    return test_dir
+
+def create_test_file(path: Path, content: str, modtime: float = None) -> Path:
+    """Create a test file with specific content and optional modification time."""
+    with open(path, 'w') as f:
+        f.write(content)
+    
+    if modtime:
+        # Set specific modification time
+        os.utime(path, (modtime, modtime))
+    
+    return path
+
+def touch_file(path: Path) -> float:
+    """Touch a file to update its modification time without changing content."""
+    # Wait a small amount to ensure modtime changes
+    time.sleep(0.01)
+    path.touch()
+    return os.path.getmtime(path)
+
+def modify_file_content(path: Path, new_content: str) -> float:
+    """Modify file content and return new modification time."""
+    time.sleep(0.01)  # Ensure modtime changes
+    with open(path, 'w') as f:
+        f.write(new_content)
+    return os.path.getmtime(path)
+```
+
+### Core Test Scenarios
+
+#### 1. Cache Hit Tests (Fast Path)
+```python
+def test_cache_hit_modtime_unchanged():
+    """Test that identical modtime returns False immediately."""
+    test_dir = setup_test_environment()
+    cache_file = test_dir / "cache" / "test_cache.json"
+    cache = FingerprintCache(cache_file)
+    
+    # Create test file
+    test_file = test_dir / "temp" / "test.txt"
+    create_test_file(test_file, "original content")
+    original_modtime = os.path.getmtime(test_file)
+    
+    # First call - file not in cache, should return True
+    result1 = cache.has_changed(test_file, original_modtime)
+    assert result1 == False, "Same modtime should return False"
+    
+    # Verify no MD5 computation occurred (check performance)
+    start_time = time.time()
+    result2 = cache.has_changed(test_file, original_modtime)
+    elapsed = time.time() - start_time
+    
+    assert result2 == False, "Same modtime should return False"
+    assert elapsed < 0.001, f"Cache hit should be <1ms, took {elapsed*1000:.2f}ms"
+
+def test_cache_hit_with_existing_cache():
+    """Test cache hit when file exists in cache with current modtime."""
+    test_dir = setup_test_environment()
+    cache_file = test_dir / "cache" / "test_cache.json"
+    cache = FingerprintCache(cache_file)
+    
+    # Create and cache a file
+    test_file = test_dir / "temp" / "cached.txt"
+    create_test_file(test_file, "cached content")
+    current_modtime = os.path.getmtime(test_file)
+    
+    # Prime the cache
+    cache.has_changed(test_file, current_modtime - 1)  # Different modtime to force caching
+    
+    # Test cache hit
+    result = cache.has_changed(test_file, current_modtime)
+    assert result == False, "File with current modtime in cache should return False"
+```
+
+#### 2. False Positive Avoidance Tests
+```python
+def test_modtime_changed_content_same():
+    """Critical test: modtime changes but content identical should return False."""
+    test_dir = setup_test_environment()
+    cache_file = test_dir / "cache" / "test_cache.json"
+    cache = FingerprintCache(cache_file)
+    
+    # Create test file
+    test_file = test_dir / "temp" / "touched.txt"
+    original_content = "unchanged content"
+    create_test_file(test_file, original_content)
+    original_modtime = os.path.getmtime(test_file)
+    
+    # Prime cache with original state
+    cache.has_changed(test_file, original_modtime - 1)  # Force caching
+    
+    # Touch file (change modtime but not content)
+    new_modtime = touch_file(test_file)
+    assert new_modtime != original_modtime, "Touch should change modtime"
+    
+    # Verify content is still the same
+    with open(test_file, 'r') as f:
+        current_content = f.read()
+    assert current_content == original_content, "Content should be unchanged"
+    
+    # Test the critical behavior: should return False despite modtime change
+    result = cache.has_changed(test_file, original_modtime)
+    assert result == False, "File with changed modtime but same content should return False"
+
+def test_file_copy_different_timestamp():
+    """Test copied files with different timestamps but identical content."""
+    test_dir = setup_test_environment()
+    cache_file = test_dir / "cache" / "test_cache.json"
+    cache = FingerprintCache(cache_file)
+    
+    # Create original file
+    original_file = test_dir / "temp" / "original.txt"
+    content = "file content for copying"
+    create_test_file(original_file, content)
+    original_modtime = os.path.getmtime(original_file)
+    
+    # Prime cache
+    cache.has_changed(original_file, original_modtime - 1)
+    
+    # Simulate file copy with different timestamp
+    import shutil
+    copied_file = test_dir / "temp" / "copied.txt"
+    shutil.copy2(original_file, copied_file)
+    
+    # Modify the copied file's timestamp
+    time.sleep(0.01)
+    new_modtime = time.time()
+    os.utime(copied_file, (new_modtime, new_modtime))
+    
+    # Test: different modtime, same content should return False
+    result = cache.has_changed(copied_file, original_modtime)
+    assert result == False, "Copied file with different timestamp but same content should return False"
+```
+
+#### 3. Content Change Detection Tests
+```python
+def test_content_actually_changed():
+    """Test that actual content changes are detected."""
+    test_dir = setup_test_environment()
+    cache_file = test_dir / "cache" / "test_cache.json"
+    cache = FingerprintCache(cache_file)
+    
+    # Create test file
+    test_file = test_dir / "temp" / "modified.txt"
+    original_content = "original content"
+    create_test_file(test_file, original_content)
+    original_modtime = os.path.getmtime(test_file)
+    
+    # Prime cache
+    cache.has_changed(test_file, original_modtime - 1)
+    
+    # Actually modify content
+    new_content = "modified content"
+    new_modtime = modify_file_content(test_file, new_content)
+    
+    # Should detect change
+    result = cache.has_changed(test_file, original_modtime)
+    assert result == True, "File with changed content should return True"
+
+def test_incremental_changes():
+    """Test multiple incremental changes to same file."""
+    test_dir = setup_test_environment()
+    cache_file = test_dir / "cache" / "test_cache.json"
+    cache = FingerprintCache(cache_file)
+    
+    test_file = test_dir / "temp" / "incremental.txt"
+    
+    # Version 1
+    content_v1 = "version 1"
+    create_test_file(test_file, content_v1)
+    modtime_v1 = os.path.getmtime(test_file)
+    
+    # Version 2  
+    content_v2 = "version 2"
+    modtime_v2 = modify_file_content(test_file, content_v2)
+    
+    # Version 3
+    content_v3 = "version 3"
+    modtime_v3 = modify_file_content(test_file, content_v3)
+    
+    # Test progression
+    assert cache.has_changed(test_file, modtime_v1) == True, "v1->v3 should detect change"
+    assert cache.has_changed(test_file, modtime_v2) == True, "v2->v3 should detect change"
+    assert cache.has_changed(test_file, modtime_v3) == False, "v3->v3 should be unchanged"
+```
+
+#### 4. Cache Management Tests
+```python
+def test_cache_persistence():
+    """Test that cache persists across FingerprintCache instances."""
+    test_dir = setup_test_environment()
+    cache_file = test_dir / "cache" / "persistent.json"
+    
+    # First cache instance
+    cache1 = FingerprintCache(cache_file)
+    test_file = test_dir / "temp" / "persistent.txt"
+    create_test_file(test_file, "persistent content")
+    modtime = os.path.getmtime(test_file)
+    
+    # Prime cache
+    cache1.has_changed(test_file, modtime - 1)
+    
+    # Second cache instance (reload from disk)
+    cache2 = FingerprintCache(cache_file)
+    
+    # Should use cached data
+    result = cache2.has_changed(test_file, modtime)
+    assert result == False, "New cache instance should load existing cache"
+
+def test_cache_corruption_recovery():
+    """Test graceful handling of corrupted cache files."""
+    test_dir = setup_test_environment()
+    cache_file = test_dir / "cache" / "corrupted.json"
+    
+    # Create corrupted cache file
+    with open(cache_file, 'w') as f:
+        f.write("{ invalid json content")
+    
+    # Should handle corruption gracefully
+    cache = FingerprintCache(cache_file)
+    test_file = test_dir / "temp" / "recovery.txt"
+    create_test_file(test_file, "recovery content")
+    modtime = os.path.getmtime(test_file)
+    
+    # Should work despite corrupted cache
+    result = cache.has_changed(test_file, modtime - 1)
+    assert result == True, "Should work with corrupted cache"
+```
+
+### Performance Testing
+
+#### 5. Performance Benchmarks
+```python
+def test_performance_cache_hit():
+    """Benchmark cache hit performance."""
+    test_dir = setup_test_environment()
+    cache_file = test_dir / "cache" / "perf.json"
+    cache = FingerprintCache(cache_file)
+    
+    # Create test files
+    test_files = []
+    for i in range(100):
+        test_file = test_dir / "temp" / f"perf_{i}.txt"
+        create_test_file(test_file, f"content {i}")
+        test_files.append(test_file)
+    
+    # Measure cache hit performance
+    start_time = time.time()
+    for test_file in test_files:
+        modtime = os.path.getmtime(test_file)
+        cache.has_changed(test_file, modtime)  # Cache hit
+    elapsed = time.time() - start_time
+    
+    avg_time = elapsed / len(test_files) * 1000  # ms per file
+    assert avg_time < 0.5, f"Cache hit average {avg_time:.2f}ms should be <0.5ms"
+
+def test_performance_large_files():
+    """Test performance with large files."""
+    test_dir = setup_test_environment()
+    cache_file = test_dir / "cache" / "large.json"
+    cache = FingerprintCache(cache_file)
+    
+    # Create large test file (1MB)
+    large_file = test_dir / "temp" / "large.txt"
+    large_content = "x" * (1024 * 1024)
+    create_test_file(large_file, large_content)
+    modtime = os.path.getmtime(large_file)
+    
+    # Measure MD5 computation time
+    start_time = time.time()
+    result = cache.has_changed(large_file, modtime - 1)  # Force MD5 computation
+    elapsed = time.time() - start_time
+    
+    assert result == True, "Large file should be detected as changed"
+    assert elapsed < 0.1, f"Large file processing {elapsed*1000:.2f}ms should be <100ms"
+```
+
+### Integration Testing
+
+#### 6. Build System Integration Tests
+```python
+def test_build_system_workflow():
+    """Test complete build system workflow."""
+    test_dir = setup_test_environment()
+    cache_file = test_dir / "cache" / "build.json"
+    cache = FingerprintCache(cache_file)
+    
+    # Simulate source files
+    source_files = [
+        test_dir / "temp" / "main.cpp",
+        test_dir / "temp" / "utils.cpp", 
+        test_dir / "temp" / "config.h"
+    ]
+    
+    # Create initial files
+    for i, src_file in enumerate(source_files):
+        create_test_file(src_file, f"source content {i}")
+    
+    # First build - all files should be "changed" (new)
+    changed_files = []
+    baseline_time = time.time() - 3600  # 1 hour ago
+    
+    for src_file in source_files:
+        if cache.has_changed(src_file, baseline_time):
+            changed_files.append(src_file)
+    
+    assert len(changed_files) == 3, "All new files should be detected as changed"
+    
+    # Second build - no changes
+    current_modtimes = [os.path.getmtime(f) for f in source_files]
+    changed_files = []
+    
+    for src_file, modtime in zip(source_files, current_modtimes):
+        if cache.has_changed(src_file, modtime):
+            changed_files.append(src_file)
+    
+    assert len(changed_files) == 0, "Unchanged files should not be detected as changed"
+    
+    # Third build - modify one file
+    modify_file_content(source_files[0], "modified main.cpp")
+    changed_files = []
+    
+    for src_file, modtime in zip(source_files, current_modtimes):
+        if cache.has_changed(src_file, modtime):
+            changed_files.append(src_file)
+    
+    assert len(changed_files) == 1, "Only modified file should be detected"
+    assert changed_files[0] == source_files[0], "Should detect the correct modified file"
+
+def run_all_tests():
+    """Execute all test scenarios."""
+    print("Setting up test environment...")
+    test_dir = setup_test_environment()
+    
+    print("Running core functionality tests...")
+    test_cache_hit_modtime_unchanged()
+    test_cache_hit_with_existing_cache()
+    
+    print("Running false positive avoidance tests...")
+    test_modtime_changed_content_same()
+    test_file_copy_different_timestamp()
+    
+    print("Running content change detection tests...")
+    test_content_actually_changed()
+    test_incremental_changes()
+    
+    print("Running cache management tests...")
+    test_cache_persistence()
+    test_cache_corruption_recovery()
+    
+    print("Running performance tests...")
+    test_performance_cache_hit()
+    test_performance_large_files()
+    
+    print("Running integration tests...")
+    test_build_system_workflow()
+    
+    print("✅ All tests passed!")
+
+if __name__ == "__main__":
+    run_all_tests()
+```
+
+### Test Execution
+
+#### Running the Test Suite
+```bash
+# Setup test environment
+cd test_fingerprint_cache/scripts/
+python test_runner.py
+
+# Run specific test categories
+python test_runner.py --category performance
+python test_runner.py --category integration  
+python test_runner.py --category edge-cases
+
+# Verbose output for debugging
+python test_runner.py --verbose
+
+# Clean up test files
+python test_runner.py --cleanup
+```
+
+#### Continuous Integration Tests
+```yaml
+# .github/workflows/fingerprint-cache-test.yml
+name: Fingerprint Cache Tests
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      - name: Run Fingerprint Cache Tests
+        run: |
+          cd test_fingerprint_cache/scripts/
+          python test_runner.py --ci
+      - name: Performance Benchmarks
+        run: |
+          python test_runner.py --category performance --benchmark
+```
+
+### Expected Test Results
+
+**Performance Targets**:
+- Cache hit: <0.5ms per file
+- Cache miss: <10ms per file (including MD5)
+- Large file (1MB): <100ms
+- 100 files batch: <50ms total
+
+**Reliability Targets**:
+- Zero false positives for touched files
+- Zero false negatives for content changes  
+- Graceful handling of cache corruption
+- Cross-platform consistency
+
+**Coverage Goals**:
+- Line coverage: >95%
+- Branch coverage: >90%  
+- Edge case coverage: 100%
+
+### Phase 2: Build System Integration (Week 3-4)
+
+**Goal**: Integrate cache into existing compilation workflows with backward compatibility.
+
+#### 2.1 Compilation System Integration
+- **File**: `ci/ci/clang_compiler.py` - Add cache-aware compilation
+- **File**: `ci/ci-compile.py` - Main entry point integration
+
+```python
+# ci/ci/clang_compiler.py modifications
+class Compiler:
+    def __init__(self, cache: FingerprintCache):
+        self.cache = cache
+    
+    def compile_if_changed(self, sources: list[Path], target: Path, baseline_hash: str) -> bool:
+        """Compile only if sources changed since last successful build"""
+        # Check if any source changed
+        rebuild_needed = self._check_sources_changed(sources, baseline_hash)
+        if rebuild_needed:
+            result = self._compile_always(sources, target)
+            if result:
+                self._update_cache_success(sources, target)
+            return result
+        else:
+            print(f"✓ {target.name} unchanged, skipping compilation")
+            return True
+            
+    def _check_sources_changed(self, sources: list[Path], baseline_hash: str) -> bool:
+        """Check if any source file has changed"""
+        for src_file in sources:
+            if self.cache.has_changed(src_file, baseline_hash):
+                return True
+        return False
+```
+
+#### 2.2 Example Compilation Integration
+- **File**: `ci/ci-compile.py` - Add `--use-cache` flag for gradual adoption
+
+```python
+# ci/ci-compile.py command line integration
+def parse_args(args: Optional[list[str]]) -> CompileArgs:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--use-cache", action="store_true", 
+                       help="Enable fingerprint cache for faster incremental builds")
+    parser.add_argument("--cache-file", type=Path, required=True,
+                       help="Path to fingerprint cache file")
+    # ... existing arguments
+    
+    parsed = parser.parse_args(args)
+    
+    # Create explicit config when cache is enabled
+    if parsed.use_cache:
+        cache_config = FingerprintCacheConfig(
+            cache_file=parsed.cache_file,
+            hash_algorithm="md5",
+            ignore_patterns=[],
+            max_cache_size=10000
+        )
+        parsed.cache_config = cache_config
+    return parsed
+```
+
+#### 2.3 Cache Management Commands
+- **File**: `ci/cache_manager.py` - Cache maintenance utilities
+
+```python
+# ci/cache_manager.py - Administrative tools
+def cache_status(cache_file: Path) -> None:
+    """Display cache statistics and health"""
+
+def cache_clean(cache_file: Path, max_age_days: int) -> None:
+    """Remove stale cache entries"""
+
+def cache_rebuild(source_dirs: list[Path], cache_file: Path) -> None:
+    """Rebuild cache from scratch by scanning source directories"""
+```
+
+### Phase 3: Testing Framework Integration (Week 5)
+
+**Goal**: Accelerate test execution by skipping unchanged test files.
+
+#### 3.1 Test Framework Integration
+- **File**: `test.py` - Add cache support to main test runner
+
+```python
+# test.py modifications
+def run_cpp_tests(args: TestArgs) -> bool:
+    if args.use_cache:
+        cache_config = FingerprintCacheConfig(
+            cache_file=Path(".build/test_cache.json"),
+            hash_algorithm="md5",
+            ignore_patterns=[],
+            max_cache_size=10000
+        )
+        cache = FingerprintCache(cache_config)
+        return run_cpp_tests_with_cache(args, cache)
+    else:
+        return run_cpp_tests_traditional(args)
+
+def run_cpp_tests_with_cache(args: TestArgs, cache: FingerprintCache) -> bool:
+    """Run only tests whose source files have changed"""
+    test_files = discover_test_files()
+    
+    for test_file in test_files:
+        if should_run_test(test_file, cache, args.baseline_hash):
+            run_single_test(test_file)
+        else:
+            print(f"✓ {test_file.name} unchanged, using cached results")
+```
+
+#### 3.2 Test Command Integration
+```bash
+# New command options
+bash test --use-cache                    # Enable cache for all tests
+bash test --use-cache --force-rebuild    # Rebuild cache and run all tests
+bash test --cache-stats                  # Show cache hit/miss statistics
+```
+
+### Phase 4: MCP Server Integration (Week 6)
+
+**Goal**: Expose cache functionality through MCP server for automated workflows.
+
+#### 4.1 MCP Server Tools
+- **File**: `mcp_server.py` - Add fingerprint cache tools
+
+```python
+# mcp_server.py - New tools
+@server.call_tool()
+async def fingerprint_cache_status(cache_file: str) -> list[TextContent]:
+    """Show fingerprint cache statistics and status"""
+
+@server.call_tool()
+async def fingerprint_cache_clean(cache_file: str, max_age_days: int) -> list[TextContent]:
+    """Clean stale entries from fingerprint cache"""
+
+@server.call_tool()
+async def compile_with_cache(board: str, examples: str, cache_file: str) -> list[TextContent]:
+    """Compile examples using fingerprint cache for optimization"""
+```
+
+#### 4.2 Background Agent Integration
+```python
+# Background agents can now use:
+# - fingerprint_cache_status tool for cache health monitoring
+# - compile_with_cache tool for optimized compilation
+# - fingerprint_cache_clean tool for maintenance
+```
+
+### Phase 5: Advanced Features (Week 7-8)
+
+**Goal**: Add sophisticated caching features for maximum performance.
+
+#### 5.1 Directory-Level Caching
+- **Feature**: Cache entire directory modification times
+- **Benefit**: Skip scanning unchanged directories entirely
+
+```python
+class DirectoryCache:
+    def directory_changed(self, dir_path: Path) -> bool:
+        """Check if any file in directory changed using directory modtime"""
+```
+
+#### 5.2 Dependency Tracking
+- **Feature**: Track file dependencies for smarter invalidation
+- **Example**: If header file changes, invalidate all dependent .cpp files
+
+```python
+class DependencyTracker:
+    def get_dependencies(self, source_file: Path) -> list[Path]:
+        """Extract #include dependencies from source file"""
+    
+    def invalidate_dependents(self, changed_file: Path) -> list[Path]:
+        """Find all files that depend on the changed file"""
+```
+
+#### 5.3 Build Result Caching
+- **Feature**: Cache compiled object files and link results
+- **Benefit**: Avoid recompilation even when switching branches
+
+### Phase 6: Performance Validation (Week 9)
+
+**Goal**: Measure and optimize cache performance across realistic workloads.
+
+#### 6.1 Performance Benchmarks
+```python
+# ci/benchmark_cache.py - Performance measurement suite
+def benchmark_cache_performance():
+    """Measure cache performance across different scenarios"""
+    
+    scenarios = [
+        "clean_build_1000_files",      # Worst case - all cache misses
+        "incremental_build_1_change",   # Best case - 1 miss, 999 hits  
+        "incremental_build_10_changes", # Typical case - 10 misses, 990 hits
+        "directory_scan_unchanged",     # Directory-level caching test
+    ]
+```
+
+#### 6.2 Real-World Testing
+- **Test environments**: CI/CD pipelines, developer workstations
+- **Metrics collection**: Build time reduction, cache hit rates, disk usage
+- **Target performance**:
+  - 50%+ reduction in incremental build times
+  - 90%+ cache hit rate in typical development
+  - <100MB cache file size for large projects
+
+### Phase 7: Production Rollout (Week 10)
+
+**Goal**: Enable cache by default with monitoring and rollback capability.
+
+#### 7.1 Default Enable Strategy
+```python
+# Gradual rollout approach:
+# 1. Default enabled for background agents (MCP server)
+# 2. Default enabled for CI/CD pipelines  
+# 3. Default enabled for all users with opt-out flag
+# 4. Remove opt-out flag after stability period
+```
+
+#### 7.2 Monitoring and Telemetry
+```python
+# ci/cache_telemetry.py - Performance monitoring
+def collect_cache_metrics() -> CacheMetrics:
+    """Collect cache performance data for analysis"""
+    
+@dataclass
+class CacheMetrics:
+    hit_rate: float
+    average_lookup_time: float
+    cache_size_mb: float
+    build_time_savings: float
+```
+
+#### 7.3 Documentation and Training
+- **Update README.md** with cache usage instructions
+- **Update development docs** with cache best practices
+- **Create troubleshooting guide** for cache-related issues
+
+### Integration Milestones
+
+| Week | Milestone | Success Criteria |
+|------|-----------|------------------|
+| 2 | Core Module Complete | 95% test coverage, all unit tests pass |
+| 4 | Build Integration | 30% faster incremental builds |
+| 5 | Test Integration | Test suite 50% faster on incremental runs |
+| 6 | MCP Integration | Background agents use cache successfully |
+| 8 | Advanced Features | Directory caching reduces scan time 80% |
+| 9 | Performance Validation | All benchmarks meet targets |
+| 10 | Production Ready | Cache enabled by default, <1% error rate |
+
+### Risk Mitigation
+
+#### 1. Cache Corruption
+- **Mitigation**: Automatic cache rebuilding on corruption detection
+- **Monitoring**: Cache validation checks in test suite
+
+#### 2. False Cache Hits
+- **Mitigation**: Content-based MD5 hashing prevents false positives
+- **Testing**: Extensive edge case testing (clock changes, file copying)
+
+#### 3. Performance Regression
+- **Mitigation**: Cache can be disabled via `--no-cache` flag
+- **Monitoring**: Continuous performance benchmarking
+
+#### 4. Disk Space Usage
+- **Mitigation**: Automatic cache cleanup of stale entries
+- **Monitoring**: Cache size limits and cleanup policies
+
+### Rollback Plan
+
+If cache causes issues:
+1. **Immediate**: Add `--no-cache` flag to disable cache
+2. **Short-term**: Default cache to disabled while debugging
+3. **Long-term**: Fix issues and re-enable with additional safeguards
+
+### Success Metrics
+
+- **Build Performance**: 30-50% reduction in incremental build times
+- **Test Performance**: 50%+ reduction in incremental test execution time  
+- **Developer Productivity**: Faster feedback loops for code changes
+- **CI/CD Efficiency**: Reduced pipeline execution times
+- **Resource Usage**: Lower CPU/disk usage for unchanged code
+
+This integration plan provides a systematic approach to rolling out the fingerprint cache feature across the FastLED project while maintaining stability and backward compatibility.
