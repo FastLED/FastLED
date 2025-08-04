@@ -387,7 +387,58 @@ def compile_unit_tests_python_api(
         if doctest_result.return_code != 0:
             raise RuntimeError(f"Failed to compile doctest main: {doctest_result.stderr}")
     
-    # Step 2: Compile and link each test (FastLED library creation handled by examples system)
+    # Step 2: Build FastLED library (same approach as examples)
+    print("Building FastLED library...")
+    fastled_lib_path = bin_dir / "libfastled.a"
+    
+    if not fastled_lib_path.exists() or clean:
+        # Find all FastLED source files (same approach as examples)
+        src_dir = project_root / "src"
+        fastled_sources = []
+        
+        # Add core FastLED sources
+        for cpp_file in src_dir.rglob("*.cpp"):
+            # Skip platform-specific files that aren't needed for unit tests
+            rel_path = str(cpp_file.relative_to(src_dir))
+            if not any(skip in rel_path for skip in ['wasm', 'esp', 'avr', 'arm', 'teensy']):
+                fastled_sources.append(cpp_file)
+        
+        print(f"Found {len(fastled_sources)} FastLED source files")
+        
+        # Compile all FastLED sources to object files
+        fastled_objects = []
+        for src_file in fastled_sources:
+            obj_name = f"fastled_{src_file.stem}.o"
+            obj_path = bin_dir / obj_name
+            
+            if not obj_path.exists() or clean:
+                compile_future = compiler.compile_cpp_file(
+                    cpp_path=str(src_file),
+                    output_path=str(obj_path)
+                )
+                
+                compile_result = compile_future.result()
+                if compile_result.return_code != 0:
+                    print(f"Warning: Failed to compile {src_file.name}: {compile_result.stderr}")
+                    continue  # Skip files that fail to compile
+            
+            fastled_objects.append(obj_path)
+        
+        # Create static library using the same approach as examples
+        if fastled_objects:
+            print(f"Creating FastLED library: {fastled_lib_path}")
+            
+            archive_future = compiler.create_archive(fastled_objects, fastled_lib_path)
+            archive_result = archive_future.result()
+            
+            if not archive_result.ok:
+                print(f"Warning: Failed to create FastLED library: {archive_result.stderr}")
+                fastled_lib_path = None
+        else:
+            print("Warning: No FastLED source files compiled successfully")
+            fastled_lib_path = None
+    
+    # Step 3: Compile and link each test
     print(f"Compiling {len(test_files)} tests...")
     start_time = time.time()
     
@@ -410,13 +461,18 @@ def compile_unit_tests_python_api(
             if compile_result.return_code != 0:
                 raise RuntimeError(f"Compilation failed for {test_name}: {compile_result.stderr}")
             
-            # Link to executable with doctest main (header-only FastLED approach)
+            # Link to executable with doctest main and FastLED library (same as examples)
             object_files = [object_path, doctest_main_obj]
+            static_libraries = []
             linker_args = ["-pthread"]
+            
+            if fastled_lib_path and fastled_lib_path.exists():
+                static_libraries.append(fastled_lib_path)
             
             link_options = LinkOptions(
                 output_executable=str(executable_path),
                 object_files=object_files,
+                static_libraries=static_libraries,
                 linker_args=linker_args
             )
             
