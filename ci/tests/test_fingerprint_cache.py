@@ -14,7 +14,7 @@ import shutil
 import tempfile
 import time
 from pathlib import Path
-from typing import Optional
+from typing import List, Optional
 from unittest import TestCase
 
 # Import the fingerprint cache module
@@ -279,7 +279,7 @@ class TestFingerprintCache(TestCase):
         cache = FingerprintCache(cache_file)
 
         # Create test files
-        test_files: list[Path] = []
+        test_files: List[Path] = []
         for i in range(10):  # Reduced for faster test execution
             test_file = self.temp_dir / f"perf_{i}.txt"
             self.create_test_file(test_file, f"content {i}")
@@ -390,7 +390,7 @@ class TestFingerprintCache(TestCase):
             self.create_test_file(src_file, f"source content {i}")
 
         # First build - all files should be "changed" (new)
-        changed_files: list[Path] = []
+        changed_files: List[Path] = []
         baseline_time = time.time() - 3600  # 1 hour ago
 
         for src_file in source_files:
@@ -403,7 +403,7 @@ class TestFingerprintCache(TestCase):
 
         # Second build - no changes
         current_modtimes = [os.path.getmtime(f) for f in source_files]
-        changed_files = []
+        changed_files: List[Path] = []
 
         for src_file, modtime in zip(source_files, current_modtimes):
             if cache.has_changed(src_file, modtime):
@@ -415,7 +415,7 @@ class TestFingerprintCache(TestCase):
 
         # Third build - modify one file
         self.modify_file_content(source_files[0], "modified main.cpp")
-        changed_files = []
+        changed_files: List[Path] = []
 
         for src_file, modtime in zip(source_files, current_modtimes):
             if cache.has_changed(src_file, modtime):

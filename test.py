@@ -188,6 +188,9 @@ def main() -> None:
 
             python_process.on_complete = start_examples_compilation
 
+            # Start the Python test process (since auto_run=False)
+            python_process.run()
+
             # Wait for Python tests to complete (which will trigger examples compilation)
             python_return_code = python_process.wait()
             if python_return_code != 0:

@@ -12,7 +12,6 @@ from typing import Any, Callable, Dict, List, Optional, Set
 
 from ci.ci.fingerprint_cache import FingerprintCache
 from ci.compiler.clang_compiler import Compiler
-from ci.compiler.test_example_compilation import CompilationResult
 
 
 class CacheAwareCompiler:
@@ -141,7 +140,7 @@ class CacheAwareCompiler:
         log_fn: Callable[[str], None],
         full_compilation: bool,
         verbose: bool,
-    ) -> CompilationResult:
+    ):
         """Run the actual compilation for changed files."""
         from ci.compiler.test_example_compilation import compile_examples_simple
 
@@ -166,8 +165,9 @@ class CacheAwareCompiler:
         finally:
             self.compiler.find_cpp_files_for_example = original_method
 
-    def _create_success_result(self, file_count: int) -> CompilationResult:
+    def _create_success_result(self, file_count: int):
         """Create a successful compilation result for cached files."""
+        from ci.compiler.test_example_compilation import CompilationResult
 
         return CompilationResult(
             successful_count=file_count,

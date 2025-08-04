@@ -10,6 +10,7 @@ import os
 import tempfile
 import time
 from pathlib import Path
+from typing import List
 
 from ci.ci.fingerprint_cache import FingerprintCache, has_changed
 
@@ -97,7 +98,7 @@ def demo_build_system_workflow() -> None:
         # Simulate first build
         print("\n--- First Build (all files new) ---")
         last_build_time = time.time() - 3600  # 1 hour ago
-        changed_files: list[str] = []
+        changed_files: List[str] = []
 
         for src_file in source_files:
             if cache.has_changed(src_file, last_build_time):
@@ -112,7 +113,7 @@ def demo_build_system_workflow() -> None:
 
         # Simulate second build (no changes)
         print("\n--- Second Build (no changes) ---")
-        changed_files = []
+        changed_files: List[str] = []
 
         for src_file, modtime in zip(source_files, current_modtimes):
             if cache.has_changed(src_file, modtime):
@@ -128,7 +129,7 @@ def demo_build_system_workflow() -> None:
         with open(source_files[0], "a") as f:
             f.write("\n// Added comment")
 
-        changed_files = []
+        changed_files: List[str] = []
         for src_file, modtime in zip(source_files, current_modtimes):
             if cache.has_changed(src_file, modtime):
                 changed_files.append(src_file.name)
@@ -149,7 +150,7 @@ def demo_performance() -> None:
 
         # Create multiple test files
         num_files = 20
-        test_files: list[Path] = []
+        test_files: List[Path] = []
 
         for i in range(num_files):
             test_file = temp_path / f"file_{i:03d}.cpp"
