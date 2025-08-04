@@ -279,6 +279,12 @@ class RunningProcess:
                     except (ValueError, OSError):
                         # Already closed, ignore
                         pass
+
+                # Set end time when stdout pumper finishes reading
+                # This captures the actual completion time of useful output
+                if self._end_time is None:
+                    self._end_time = time.time()
+
                 self.output_queue.put(None)  # End-of-stream marker
 
         # Start output reader thread
