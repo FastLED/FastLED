@@ -12,10 +12,13 @@ import subprocess
 import sys
 import tempfile
 import tomllib
+import time
 from concurrent.futures import Future, ThreadPoolExecutor
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, List, Sequence
+from typing import Any, List, Sequence, Dict, Optional, Set, Tuple, Union
+
+from ..ci.fingerprint_cache import FingerprintCache
 
 
 _HERE = Path(__file__).parent
@@ -577,6 +580,11 @@ class Compiler:
         self._pch_file_path: Path | None = None
         self._pch_header_path: Path | None = None
         self._pch_ready: bool = False
+        
+        # Initialize fingerprint cache for PCH optimization
+        cache_dir = Path(".build") / "cache"
+        cache_dir.mkdir(parents=True, exist_ok=True)
+        self._pch_cache = FingerprintCache(cache_dir / "pch_fingerprint_cache.json")
 
     def get_compiler_args(self) -> list[str]:
         """
@@ -638,6 +646,84 @@ class Compiler:
 """
         return default_content
 
+    def _get_pch_dependencies(self) -> List[Path]:
+        """
+        Get list of files that PCH depends on for change detection.
+        
+        Returns:
+            List of Path objects representing files that affect PCH validity
+        """
+        dependencies = []
+        
+        # FastLED.h is the main dependency
+        fastled_h = Path(self.settings.include_path) / "FastLED.h"
+        if fastled_h.exists():
+            dependencies.append(fastled_h)
+        
+        # Core FastLED headers that are commonly included
+        core_headers = [
+            "platforms.h",
+            "led_sysdefs.h", 
+            "hsv2rgb.h",
+            "colorutils.h",
+            "colorpalettes.h",
+            "fastled_config.h",
+        ]
+        
+        for header in core_headers:
+            header_path = Path(self.settings.include_path) / header
+            if header_path.exists():
+                dependencies.append(header_path)
+        
+        # Platform-specific headers
+        platform_dir = Path(self.settings.include_path) / "platforms"
+        if platform_dir.exists():
+            # Add common platform headers
+            for pattern in ["*.h", "*/*.h"]:
+                for header in platform_dir.glob(pattern):
+                    if header.is_file():
+                        dependencies.append(header)
+        
+        return dependencies
+
+    def _should_rebuild_pch(self) -> bool:
+        """
+        Check if PCH needs to be rebuilt based on dependency changes.
+        
+        Returns:
+            True if PCH should be rebuilt, False if cache is valid
+        """
+        if not self.settings.use_pch:
+            return False
+            
+        # Set PCH file path if using configured path
+        if self.settings.pch_output_path:
+            self._pch_file_path = Path(self.settings.pch_output_path)
+        
+        # If PCH file doesn't exist, need to build
+        if not self._pch_file_path or not self._pch_file_path.exists():
+            print("[PCH CACHE] PCH file doesn't exist, rebuilding required")
+            return True
+        
+        # Get PCH file modification time as baseline
+        pch_modtime = os.path.getmtime(self._pch_file_path)
+        
+        # Check if any PCH dependencies have changed
+        dependencies = self._get_pch_dependencies()
+        print(f"[PCH CACHE] Checking {len(dependencies)} PCH dependencies...")
+        
+        for dep_file in dependencies:
+            try:
+                if self._pch_cache.has_changed(dep_file, pch_modtime):
+                    print(f"[PCH CACHE] Dependency changed: {dep_file.name} - PCH rebuild required")
+                    return True
+            except FileNotFoundError:
+                print(f"[PCH CACHE] Dependency not found: {dep_file.name} - PCH rebuild required")
+                return True
+        
+        print("[PCH CACHE] All dependencies unchanged - using cached PCH")
+        return False
+
     def create_pch_file(self) -> bool:
         """
         Create a precompiled header file for faster compilation.
@@ -650,6 +736,15 @@ class Compiler:
         """
         if not self.settings.use_pch:
             return False
+        
+        # Check if existing PCH is still valid using fingerprint cache
+        if not self._should_rebuild_pch():
+            # PCH is still valid, reuse existing one
+            if self.settings.pch_output_path:
+                self._pch_file_path = Path(self.settings.pch_output_path)
+                self._pch_ready = True
+                print("[PCH CACHE] Reusing valid cached PCH file")
+                return True
 
         try:
             # Create PCH header content
@@ -756,6 +851,20 @@ class Compiler:
                     pch_header_path  # Keep track of header file for cleanup
                 )
                 self._pch_ready = True
+                
+                # Update fingerprint cache for all PCH dependencies
+                print("[PCH CACHE] PCH compilation successful, updating dependency cache...")
+                pch_modtime = os.path.getmtime(pch_output_path)
+                dependencies = self._get_pch_dependencies()
+                
+                for dep_file in dependencies:
+                    try:
+                        # Force cache update for each dependency
+                        self._pch_cache.has_changed(dep_file, pch_modtime - 1)
+                        print(f"[PCH CACHE] Cached dependency: {dep_file.name}")
+                    except FileNotFoundError:
+                        print(f"[PCH CACHE] Warning: Could not cache dependency: {dep_file.name}")
+                
                 return True
             else:
                 # PCH compilation failed, clean up and continue without PCH

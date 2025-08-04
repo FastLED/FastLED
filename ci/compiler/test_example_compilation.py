@@ -465,10 +465,12 @@ def create_fastled_compiler(
     # Combine base args with TOML flags
     all_args = base_args + toml_flags
 
-    # PCH output path in temp directory
+    # PCH output path in build cache directory (persistent)
     pch_output_path = None
     if use_pch:
-        pch_output_path = os.path.join(tempfile.gettempdir(), "fastled_pch.hpp.pch")
+        cache_dir = Path(".build") / "cache"
+        cache_dir.mkdir(parents=True, exist_ok=True)
+        pch_output_path = str(cache_dir / "fastled_pch.hpp.pch")
 
     # Determine compiler command (with or without cache)
     compiler_cmd = "python -m ziglang c++"
