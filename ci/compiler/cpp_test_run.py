@@ -400,64 +400,32 @@ def _compile_tests_python(
     show_compile: bool = False,
     show_link: bool = False,
 ) -> None:
-    """New Python compiler API system (8x faster than CMake)"""
+    """Optimized Python API system with PCH (same as examples)"""
 
     try:
-        # Import the new test compiler system
-        from ci.compiler.test_compiler import (
-            FastLEDTestCompiler,
-            check_iwyu_available,
-        )
+        # Use the optimized cpp_test_compile system directly
+        import subprocess
+        
+        cmd = ["uv", "run", "python", "-m", "ci.compiler.cpp_test_compile"]
+        
+        if specific_test:
+            cmd.extend(["--test", specific_test])
+        if clean:
+            cmd.append("--clean")
+        if verbose:
+            cmd.append("--verbose")
+        if "--check" in unknown_args:
+            cmd.append("--check")
+        if "--no-pch" in unknown_args:
+            cmd.append("--no-pch")
+            
+        print("🚀 Using optimized Python API with PCH optimization")
+        result = subprocess.run(cmd)
+        if result.returncode != 0:
+            raise RuntimeError(f"Unit test compilation failed with return code {result.returncode}")
 
-        # Check for --no-unity flag in unknown_args
-        no_unity = "--no-unity" in unknown_args
-
-        # Initialize the proven compiler system
-        test_compiler = FastLEDTestCompiler.create_for_unit_tests(
-            project_root=Path(PROJECT_ROOT),
-            clean_build=clean,
-            enable_static_analysis="--check" in unknown_args,
-            specific_test=specific_test,
-            quick_build=quick_build,
-            no_unity=no_unity,
-        )
-
-        # Compile all tests in parallel (8x faster than CMake)
-        compile_result = test_compiler.compile_all_tests(specific_test)
-
-        if not compile_result.success:
-            print("Compilation failed:")
-            failures = []
-            for error in compile_result.errors:
-                print(f"  {error.test_name}: {error.message}")
-                failures.append(
-                    TestFailureInfo(
-                        test_name=error.test_name,
-                        command="compilation",
-                        return_code=1,
-                        output=error.message,
-                        error_type="compilation_error",
-                    )
-                )
-            raise CompilationFailedException("Python API compilation failed", failures)
-
-        print(
-            f"Compilation successful - {compile_result.compiled_count} tests in {compile_result.duration:.2f}s"
-        )
-
-        # Handle static analysis warnings (preserving existing logic)
-        if "--check" in unknown_args and not check_iwyu_available():
-            print(
-                "⚠️  WARNING: IWYU (include-what-you-use) not found - static analysis will be limited"
-            )
-            print("   Install IWYU to enable include analysis:")
-            print("     Windows: Install via LLVM or build from source")
-            print("     Ubuntu/Debian: sudo apt install iwyu")
-            print("     macOS: brew install include-what-you-use")
-            print("     Or build from source: https://include-what-you-use.org/")
-
-    except ImportError as e:
-        print(f"Failed to import new Python compiler system: {e}")
+    except Exception as e:
+        print(f"Failed to compile with optimized Python API: {e}")
         print("Falling back to legacy CMake system...")
         _compile_tests_cmake(clean, unknown_args, specific_test)
 

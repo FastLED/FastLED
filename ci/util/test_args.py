@@ -115,11 +115,7 @@ def parse_args(args: Optional[list[str]] = None) -> TestArgs:
         action="store_true",
         help="Force sequential test execution",
     )
-    parser.add_argument(
-        "--python-api",
-        action="store_true",
-        help="Use experimental Python API with PCH optimization for unit tests (instead of stable CMake)",
-    )
+
 
     parsed_args = parser.parse_args(args)
 

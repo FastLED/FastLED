@@ -83,119 +83,7 @@ USE_ZIG = False
 USE_CLANG = False
 
 
-def _has_system_clang_compiler() -> bool:
-    CLANG = shutil.which("clang")
-    CLANGPP = shutil.which("clang++")
-    LLVM_AR = shutil.which("llvm-ar")
-    return CLANG is not None and CLANGPP is not None and LLVM_AR is not None
-
-
-def use_clang_compiler() -> Tuple[Path, Path, Path]:
-    assert _has_system_clang_compiler(), "Clang system compiler not found"
-    CLANG = shutil.which("clang")
-    CLANGPP = shutil.which("clang++")
-    LLVM_AR = shutil.which("llvm-ar")
-    assert CLANG is not None, "clang compiler not found"
-    assert CLANGPP is not None, "clang++ compiler not found"
-    assert LLVM_AR is not None, "llvm-ar not found"
-    # Set environment variables for C and C++ compilers
-    os.environ["CC"] = CLANG
-    os.environ["CXX"] = CLANGPP
-    os.environ["AR"] = LLVM_AR
-
-    os.environ["CXXFLAGS"] = os.environ.get("CXXFLAGS", "") + " -ferror-limit=1"
-    os.environ["CFLAGS"] = os.environ.get("CFLAGS", "") + " -ferror-limit=1"
-
-    if WASM_BUILD:
-        wasm_flags = [
-            "--target=wasm32",
-            "-O3",
-            "-flto",
-            # "-nostdlib",
-            # "-Wl,--no-entry",
-            # "-Wl,--export-all",
-            # "-Wl,--lto-O3",
-            # "-Wl,-z,stack-size=8388608",  # 8 * 1024 * 1024 (8MiB)
-        ]
-        os.environ["CFLAGS"] = " ".join(wasm_flags)
-        os.environ["CXXFLAGS"] = " ".join(wasm_flags)
-
-    print(f"CC: {CLANG}")
-    print(f"CXX: {CLANGPP}")
-    print(f"AR: {LLVM_AR}")
-
-    return Path(CLANG), Path(CLANGPP), Path(LLVM_AR)
-
-
-def use_zig_compiler() -> Tuple[Path, Path, Path]:
-    assert 0 == os.system("python -m ziglang version"), "Zig-clang compiler not found"
-    python_path_str: str | None = shutil.which("python")
-    assert python_path_str is not None, "python not found in PATH"
-    python_path = Path(python_path_str).resolve()
-    zig_command = f'"{python_path}" -m ziglang'
-    # We are going to build up shell scripts that look like cc, c++, and ar. It will contain the actual build command.
-    cc_path = BUILD_DIR / "cc"
-    cxx_path = BUILD_DIR / "c++"
-    ar_path = BUILD_DIR / "ar"
-    if sys.platform == "win32":
-        cc_path = cc_path.with_suffix(".cmd")
-        cxx_path = cxx_path.with_suffix(".cmd")
-        ar_path = ar_path.with_suffix(".cmd")
-        cc_path.write_text(f"@echo off\n{zig_command} cc %* 2>&1\n")
-        cxx_path.write_text(f"@echo off\n{zig_command} c++ %* 2>&1\n")
-        ar_path.write_text(f"@echo off\n{zig_command} ar %* 2>&1\n")
-    else:
-        cc_cmd = f'#!/bin/bash\n{zig_command} cc "$@"\n'
-        cxx_cmd = f'#!/bin/bash\n{zig_command} c++ "$@"\n'
-        ar_cmd = f'#!/bin/bash\n{zig_command} ar "$@"\n'
-        cc_path.write_text(cc_cmd)
-        cxx_path.write_text(cxx_cmd)
-        ar_path.write_text(ar_cmd)
-        cc_path.chmod(0o755)
-        cxx_path.chmod(0o755)
-        ar_path.chmod(0o755)
-
-    # if WASM_BUILD:
-    #     wasm_flags = [
-    #         # "--target=wasm32",
-    #         # "-O3",
-    #         # "-flto",
-    #         # "-nostdlib",
-    #         "-Wl,--no-entry",
-    #         # "-Wl,--export-all",
-    #         # "-Wl,--lto-O3",
-    #         "-Wl,-z,stack-size=8388608",  # 8 * 1024 * 1024 (8MiB)
-    #     ]
-    # os.environ["CFLAGS"] = " ".join(wasm_flags)
-    # os.environ["CXXFLAGS"] = " ".join(wasm_flags)
-
-    cc, cxx = cc_path, cxx_path
-    # use the system path, so on windows this looks like "C:\Program Files\Zig\zig.exe"
-    cc_path: Path | str = cc.resolve()
-    cxx_path: Path | str = cxx.resolve()
-    if sys.platform == "win32":
-        cc_path = str(cc_path).replace("/", "\\")
-        cxx_path = str(cxx_path).replace("/", "\\")
-
-    # print out the paths
-    print(f"CC: {cc_path}")
-    print(f"CXX: {cxx_path}")
-    print(f"AR: {ar_path}")
-    # sys.exit(1)
-
-    # Set environment variables for C and C++ compilers
-    os.environ["CC"] = str(cc_path)
-    os.environ["CXX"] = str(cxx_path)
-    os.environ["AR"] = str(ar_path)
-    return cc_path, cxx_path, ar_path
-
-
-def run_command(command: str, cwd: Path | None = None) -> None:
-    process = RunningProcess(command, cwd=cwd)
-    process.wait()
-    if process.returncode != 0:
-        print(f"{Path(__file__).name}: Error executing command: {command}")
-        sys.exit(1)
+# Legacy CMake helper functions removed - using optimized Python API
 
 
 def get_unit_test_fastled_sources() -> list[Path]:
@@ -567,162 +455,6 @@ def compile_unit_tests_python_api(
     print(f"   Output directory: {bin_dir}")
 
 
-def compile_fastled(
-    specific_test: str | None = None, enable_static_analysis: bool = False
-) -> None:
-    """Legacy CMake-based compilation - replaced by compile_unit_tests_python_api."""
-    print("⚠️  WARNING: Using legacy CMake system - this is 8x slower than the Python API")
-    print("    Consider using the new Python API for faster compilation")
-    
-    if USE_ZIG:
-        print("USING ZIG COMPILER")
-        rtn = subprocess.run(
-            "python -m ziglang version", shell=True, capture_output=True
-        ).returncode
-        zig_is_installed = rtn == 0
-        assert zig_is_installed, (
-            'Zig compiler not when using "python -m ziglang version" command'
-        )
-        use_zig_compiler()
-    elif USE_CLANG:
-        print("USING CLANG COMPILER")
-        use_clang_compiler()
-    else:
-        # Using default GCC compiler - add verbose output similar to Clang
-        print("USING GCC COMPILER (DEFAULT)")
-        print(
-            "⚠️  WARNING: GCC builds are ~5x slower than Clang due to poor unified compilation performance"
-        )
-        print("    Expected build time: 40+ seconds (vs 7 seconds for Clang)")
-        print("    To use faster Clang: bash test --clang")
-        print("    To force unified compilation: export FASTLED_ALL_SRC=1")
-        # Display compiler paths similar to use_clang_compiler()
-        gcc = shutil.which("gcc")
-        gpp = shutil.which("g++")
-        ar = shutil.which("ar")
-        if gcc:
-            print(f"CC: {gcc}")
-            # Set environment variable for GCC similar to Clang
-            os.environ["CC"] = gcc
-        if gpp:
-            print(f"CXX: {gpp}")
-            # Set environment variable for GCC similar to Clang
-            os.environ["CXX"] = gpp
-        if ar:
-            print(f"AR: {ar}")
-            # Set environment variable for AR similar to Clang
-            os.environ["AR"] = ar
-
-            # Add GCC performance optimization flags to improve compilation speed
-            # These flags significantly reduce compilation time for large unified builds
-            gcc_perf_flags = (
-                " -fmax-errors=10 -pipe -fno-var-tracking -fno-debug-types-section"
-            )
-            os.environ["CXXFLAGS"] = os.environ.get("CXXFLAGS", "") + gcc_perf_flags
-            print(
-                "Applied GCC performance optimizations: -pipe, -fno-var-tracking, -fno-debug-types-section"
-            )
-
-    # Apply CFLAGS for both GCC and other compilers
-    os.environ["CFLAGS"] = os.environ.get("CFLAGS", "") + " -fmax-errors=10"
-
-    cmake_configure_command_list: list[str] = [
-        "cmake",
-        "-S",
-        str(PROJECT_ROOT / "tests"),
-        "-B",
-        str(BUILD_DIR),
-        "-G",
-        "Ninja",
-        "-DCMAKE_VERBOSE_MAKEFILE=ON",
-        "-DCMAKE_EXPORT_COMPILE_COMMANDS=ON",
-    ]
-
-    if WASM_BUILD:
-        cmake_configure_command_list.extend(
-            [
-                "-DCMAKE_C_COMPILER_TARGET=wasm32-wasi",
-                "-DCMAKE_CXX_COMPILER_TARGET=wasm32-wasi",
-                "-DCMAKE_C_COMPILER_WORKS=TRUE",
-                "-DCMAKE_CXX_COMPILER_WORKS=TRUE",
-                "-DCMAKE_SYSTEM_NAME=Generic",
-                "-DCMAKE_CROSSCOMPILING=TRUE",
-                "-DCMAKE_EXE_LINKER_FLAGS=-Wl,--no-entry -Wl,--export-all -Wl,--lto-O3 -Wl,-z,stack-size=8388608",
-            ]
-        )
-
-    # Pass specific test name to CMake if specified
-    if specific_test is not None:
-        # Remove test_ prefix if present
-        if specific_test.startswith("test_"):
-            test_name = specific_test[5:]
-        else:
-            test_name = specific_test
-        cmake_configure_command_list.append(f"-DSPECIFIC_TEST={test_name}")
-
-    # Enable static analysis tools if requested
-    if enable_static_analysis:
-        cmake_configure_command_list.extend(
-            ["-DFASTLED_ENABLE_IWYU=ON", "-DFASTLED_ENABLE_CLANG_TIDY=ON"]
-        )
-        print("🔍 Static analysis requested: IWYU and clang-tidy")
-        print("   (CMake will check if tools are installed and warn if missing)")
-
-    cmake_configure_command = subprocess.list2cmdline(cmake_configure_command_list)
-    run_command(cmake_configure_command, cwd=BUILD_DIR)
-
-    # Normalize test name for build command
-    if specific_test is not None and specific_test.startswith("test_"):
-        specific_test = specific_test[5:]
-
-    # Build the project with explicit parallelization
-    import multiprocessing
-
-    cpu_count = multiprocessing.cpu_count()
-
-    # Allow override via environment variable
-    if os.environ.get("FASTLED_PARALLEL_JOBS"):
-        parallel_jobs = int(os.environ["FASTLED_PARALLEL_JOBS"])
-        print(f"Using custom parallel jobs: {parallel_jobs}")
-    else:
-        parallel_jobs = cpu_count * 2  # Use 2x CPU cores for better I/O utilization
-        print(f"Building with {parallel_jobs} parallel jobs ({cpu_count} CPU cores)")
-
-    # Add build timing and progress indicators
-    import time
-
-    if specific_test:
-        print(f"Building specific test: test_{specific_test}")
-        cmake_build_command = f"cmake --build {BUILD_DIR} --target test_{specific_test} --parallel {parallel_jobs}"
-    else:
-        print("Building all tests")
-        cmake_build_command = f"cmake --build {BUILD_DIR} --parallel {parallel_jobs}"
-
-    # Show expected timing for GCC builds
-    if not USE_CLANG and not USE_ZIG:
-        print(
-            "🕐 GCC build starting - this may take 40+ seconds due to unified compilation overhead..."
-        )
-        print("    Progress indicators will show build steps as they complete")
-
-    build_start_time = time.time()
-    run_command(cmake_build_command)
-    build_end_time = time.time()
-
-    build_duration = build_end_time - build_start_time
-    print(f"✅ FastLED library compiled successfully in {build_duration:.1f} seconds.")
-
-    # Provide performance feedback
-    if not USE_CLANG and not USE_ZIG and build_duration > 30:
-        print(
-            f"💡 Consider using Clang for faster builds: bash test --clang (expected ~7s vs {build_duration:.1f}s)"
-        )
-    elif build_duration > 60:
-        print(
-            f"⚠️  Build took longer than expected ({build_duration:.1f}s). Consider using --no-stack-trace if timeouts occur."
-        )
-
-
 def parse_arguments():
     parser = argparse.ArgumentParser(
         description="Compile FastLED library with different compiler options."
@@ -750,9 +482,7 @@ def parse_arguments():
     parser.add_argument(
         "--no-pch", action="store_true", help="Disable precompiled headers (PCH)"
     )
-    parser.add_argument(
-        "--python-api", action="store_true", help="Use experimental Python API with PCH optimization (instead of stable CMake)"
-    )
+
     parser.add_argument(
         "--verbose", action="store_true", help="Enable verbose output"
     )
@@ -878,23 +608,16 @@ def main() -> None:
         clean_build_directory()
         save_test_files_list()
 
-    # Unit tests use legacy CMake system by default (examples use Python API)
-    # This maintains compatibility while examples get the performance benefits
-    use_legacy = not getattr(args, 'python_api', False)  # Use legacy by default unless --python-api specified
+    # Unit tests now use optimized Python API by default (same as examples)
     use_pch = not getattr(args, 'no_pch', False)  # Default to PCH enabled unless --no-pch specified
     
-    if use_legacy:
-        # Use legacy CMake system (default for unit tests)
-        compile_fastled(args.test, enable_static_analysis=args.check)
-    else:
-        # Use the fast Python API with PCH optimization (for testing/examples)
-        print("🚀 Using experimental Python API with PCH optimization")
-        compile_unit_tests_python_api(
-            specific_test=args.test,
-            enable_static_analysis=args.check,
-            use_pch=use_pch,
-            clean=need_clean
-        )
+    # Use the optimized Python API with PCH optimization (now default for unit tests)
+    compile_unit_tests_python_api(
+        specific_test=args.test,
+        enable_static_analysis=args.check,
+        use_pch=use_pch,
+        clean=need_clean
+    )
     
     update_build_info(build_info)
     print("FastLED library compiled successfully.")
