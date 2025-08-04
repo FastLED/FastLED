@@ -56,17 +56,14 @@ Successfully integrated the fingerprint cache feature into FastLED's build syste
 
 ### Basic Usage
 ```bash
-# Cache is enabled by default for faster incremental builds
+# Cache is enabled by default - ultra-fast builds!
 uv run python ci/compiler/test_example_compilation.py Blink
 
-# Verbose cache output
+# See what the cache is doing  
 uv run python ci/compiler/test_example_compilation.py Blink DemoReel100 --cache-verbose
 
-# Disable cache (for debugging or benchmarking)
+# Disable cache when needed (debugging, benchmarking)
 uv run python ci/compiler/test_example_compilation.py Blink --no-fingerprint-cache
-
-# Force recompilation (ignore cache)
-uv run python ci/compiler/test_example_compilation.py Blink --force-recompile
 ```
 
 ### Performance Comparison
