@@ -198,6 +198,122 @@ def run_command(command: str, cwd: Path | None = None) -> None:
         sys.exit(1)
 
 
+def get_unit_test_fastled_sources() -> list[Path]:
+    """Get essential FastLED .cpp files for unit test library creation (optimized paradigm)."""
+    # Always work from project root
+    project_root = Path(__file__).parent.parent.parent  # Go up from ci/compiler/ to project root
+    src_dir = project_root / "src"
+
+    # Core FastLED files that must be included for unit tests
+    core_files: list[Path] = [
+        src_dir / "FastLED.cpp",
+        src_dir / "colorutils.cpp", 
+        src_dir / "hsv2rgb.cpp",
+    ]
+
+    # Find all .cpp files in key directories
+    additional_sources: list[Path] = []
+    for pattern in ["*.cpp", "lib8tion/*.cpp", "platforms/stub/*.cpp"]:
+        additional_sources.extend(list(src_dir.glob(pattern)))
+
+    # Include essential .cpp files from nested directories
+    additional_sources.extend(list(src_dir.rglob("*.cpp")))
+
+    # Filter out duplicates and ensure files exist
+    all_sources: list[Path] = []
+    seen_files: set[Path] = set()
+
+    for cpp_file in core_files + additional_sources:
+        # Skip stub_main.cpp since unit tests have their own main
+        if cpp_file.name == "stub_main.cpp":
+            continue
+            
+        # Skip platform-specific files that aren't needed for unit tests
+        rel_path_str = str(cpp_file)
+        if any(skip in rel_path_str for skip in ['wasm', 'esp', 'avr', 'arm', 'teensy']):
+            continue
+
+        if cpp_file.exists() and cpp_file not in seen_files:
+            all_sources.append(cpp_file)
+            seen_files.add(cpp_file)
+
+    return all_sources
+
+
+def create_unit_test_fastled_library(
+    compiler: "Compiler", fastled_build_dir: Path, clean: bool = False
+) -> Path | None:
+    """Create libfastled.a static library using optimized examples paradigm."""
+    
+    lib_file = fastled_build_dir / "libfastled.a"
+    
+    if lib_file.exists() and not clean:
+        print(f"[LIBRARY] Using existing FastLED library: {lib_file}")
+        return lib_file
+    
+    print("[LIBRARY] Creating FastLED static library...")
+
+    # Get FastLED sources using optimized selection
+    fastled_sources = get_unit_test_fastled_sources()
+    fastled_objects: list[Path] = []
+
+    obj_dir = fastled_build_dir / "obj"
+    obj_dir.mkdir(exist_ok=True)
+
+    print(f"[LIBRARY] Compiling {len(fastled_sources)} FastLED source files...")
+
+    # Compile each source file with optimized naming (same as examples)
+    futures: list[tuple] = []
+    project_root = Path(__file__).parent.parent.parent
+    src_dir = project_root / "src"
+    
+    for cpp_file in fastled_sources:
+        # Create unique object file name by including relative path to prevent collisions
+        # Convert path separators to underscores to create valid filename
+        if cpp_file.is_relative_to(src_dir):
+            rel_path = cpp_file.relative_to(src_dir)
+        else:
+            rel_path = cpp_file
+
+        # Replace path separators with underscores for unique object file names
+        obj_name = str(rel_path.with_suffix(".o")).replace("/", "_").replace("\\", "_")
+        obj_file = obj_dir / obj_name
+        future = compiler.compile_cpp_file(cpp_file, obj_file)
+        futures.append((future, obj_file, cpp_file))
+
+    # Wait for compilation to complete
+    compiled_count = 0
+    for future, obj_file, cpp_file in futures:
+        try:
+            result = future.result()
+            if result.ok:
+                fastled_objects.append(obj_file)
+                compiled_count += 1
+            else:
+                print(f"[LIBRARY] WARNING: Failed to compile {cpp_file.relative_to(src_dir)}: {result.stderr[:100]}...")
+        except Exception as e:
+            print(f"[LIBRARY] WARNING: Exception compiling {cpp_file.relative_to(src_dir)}: {e}")
+
+    print(f"[LIBRARY] Successfully compiled {compiled_count}/{len(fastled_sources)} FastLED sources")
+
+    if not fastled_objects:
+        print("[LIBRARY] ERROR: No FastLED source files compiled successfully")
+        return None
+
+    # Create static library using the same approach as examples
+    print(f"[LIBRARY] Creating static library: {lib_file}")
+
+    archive_future = compiler.create_archive(fastled_objects, lib_file)
+    archive_result = archive_future.result()
+
+    if not archive_result.ok:
+        print(f"[LIBRARY] ERROR: Library creation failed: {archive_result.stderr}")
+        return None
+
+    print(f"[LIBRARY] SUCCESS: FastLED library created: {lib_file}")
+    return lib_file
+
+
 def create_unit_test_compiler(use_pch: bool = True, enable_static_analysis: bool = False) -> "Compiler":
     """Create compiler optimized for unit test compilation with PCH support."""
     from .clang_compiler import Compiler, CompilerOptions, BuildFlags
@@ -387,56 +503,14 @@ def compile_unit_tests_python_api(
         if doctest_result.return_code != 0:
             raise RuntimeError(f"Failed to compile doctest main: {doctest_result.stderr}")
     
-    # Step 2: Build FastLED library (same approach as examples)
+    # Step 2: Build FastLED library using optimized examples paradigm
     print("Building FastLED library...")
-    fastled_lib_path = bin_dir / "libfastled.a"
+    fastled_build_dir = project_root / ".build" / "fastled"
+    fastled_build_dir.mkdir(parents=True, exist_ok=True)
     
-    if not fastled_lib_path.exists() or clean:
-        # Find all FastLED source files (same approach as examples)
-        src_dir = project_root / "src"
-        fastled_sources = []
-        
-        # Add core FastLED sources
-        for cpp_file in src_dir.rglob("*.cpp"):
-            # Skip platform-specific files that aren't needed for unit tests
-            rel_path = str(cpp_file.relative_to(src_dir))
-            if not any(skip in rel_path for skip in ['wasm', 'esp', 'avr', 'arm', 'teensy']):
-                fastled_sources.append(cpp_file)
-        
-        print(f"Found {len(fastled_sources)} FastLED source files")
-        
-        # Compile all FastLED sources to object files
-        fastled_objects = []
-        for src_file in fastled_sources:
-            obj_name = f"fastled_{src_file.stem}.o"
-            obj_path = bin_dir / obj_name
-            
-            if not obj_path.exists() or clean:
-                compile_future = compiler.compile_cpp_file(
-                    cpp_path=str(src_file),
-                    output_path=str(obj_path)
-                )
-                
-                compile_result = compile_future.result()
-                if compile_result.return_code != 0:
-                    print(f"Warning: Failed to compile {src_file.name}: {compile_result.stderr}")
-                    continue  # Skip files that fail to compile
-            
-            fastled_objects.append(obj_path)
-        
-        # Create static library using the same approach as examples
-        if fastled_objects:
-            print(f"Creating FastLED library: {fastled_lib_path}")
-            
-            archive_future = compiler.create_archive(fastled_objects, fastled_lib_path)
-            archive_result = archive_future.result()
-            
-            if not archive_result.ok:
-                print(f"Warning: Failed to create FastLED library: {archive_result.stderr}")
-                fastled_lib_path = None
-        else:
-            print("Warning: No FastLED source files compiled successfully")
-            fastled_lib_path = None
+    fastled_lib_path = create_unit_test_fastled_library(
+        compiler, fastled_build_dir, clean
+    )
     
     # Step 3: Compile and link each test
     print(f"Compiling {len(test_files)} tests...")
