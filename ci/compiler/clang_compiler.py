@@ -629,8 +629,11 @@ class Compiler:
                 pch_output_path = pch_header_path.with_suffix(".hpp.pch")
 
             # Build PCH compilation command using TOML configuration
-            # Use compiler_args from TOML without any filtering or hardcoding
-            cmd: list[str] = optimize_python_command(self.settings.compiler_args.copy())
+            # Start with the compiler command, then add args from TOML
+            compiler_parts = self.settings.compiler.split()
+            cmd: list[str] = optimize_python_command(
+                compiler_parts + self.settings.compiler_args.copy()
+            )
 
             # Add PCH-specific flags (don't override std version - use what's in TOML)
             cmd.extend(

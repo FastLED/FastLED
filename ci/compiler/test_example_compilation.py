@@ -1710,13 +1710,13 @@ class CompilationTestRunner:
                     "\n[SUCCESS] EXAMPLE COMPILATION + LINKING + EXECUTION TEST: SUCCESS"
                 )
                 self.log_timing(
-                    f"[SUCCESS] {results.successful_count}/{len(ino_files)} examples compiled, "
+                    f"[SUCCESS] {len(ino_files)} examples compiled ({results.successful_count} compilation jobs), "
                     f"{results.linked_count} linked, and {results.executed_count} executed successfully"
                 )
             else:
                 self.log_timing("\n[SUCCESS] EXAMPLE COMPILATION TEST: SUCCESS")
                 self.log_timing(
-                    f"[SUCCESS] {results.successful_count}/{len(ino_files)} examples compiled successfully"
+                    f"[SUCCESS] {len(ino_files)} examples compiled successfully ({results.successful_count} compilation jobs)"
                 )
 
             print(green_text("### SUCCESS ###"))
