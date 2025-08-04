@@ -30,6 +30,19 @@ class TestResult:
     output: str
 
 
+def _is_test_executable(f: Path) -> bool:
+    """Check if a file is a valid test executable"""
+    return (
+        f.is_file() and f.suffix not in [".o", ".obj", ".pdb"] and os.access(f, os.X_OK)
+    )
+
+
+def _get_test_patterns() -> List[str]:
+    """Get test patterns based on platform"""
+    # On Windows, check both .exe and no extension (Clang generates without .exe)
+    return ["test_*.exe", "test_*"] if sys.platform == "win32" else ["test_*"]
+
+
 def discover_tests(build_dir: Path, specific_test: Optional[str] = None) -> List[Path]:
     """Find test executables in the build directory"""
     # Check multiple possible test directories (legacy CMake vs optimized Python API)
@@ -41,14 +54,12 @@ def discover_tests(build_dir: Path, specific_test: Optional[str] = None) -> List
     test_dir = None
     for possible_dir in possible_test_dirs:
         if possible_dir.exists():
-            # Check if this directory has actual executable test files (not just .o files)
-            test_pattern = "test_*.exe" if sys.platform == "win32" else "test_*"
+            # Check if this directory has actual executable test files
             executable_tests = [
                 f
-                for f in possible_dir.glob(test_pattern)
-                if f.is_file()
-                and f.suffix not in [".o", ".obj", ".pdb"]
-                and os.access(f, os.X_OK)
+                for pattern in _get_test_patterns()
+                for f in possible_dir.glob(pattern)
+                if _is_test_executable(f)
             ]
             if executable_tests:
                 test_dir = possible_dir
@@ -59,28 +70,21 @@ def discover_tests(build_dir: Path, specific_test: Optional[str] = None) -> List
         sys.exit(1)
 
     test_files: List[Path] = []
-    # Use appropriate extension based on platform
-    test_pattern = "test_*.exe" if sys.platform == "win32" else "test_*"
-    for test_file in test_dir.glob(test_pattern):
-        if not test_file.is_file():
-            continue
-        # Skip object files and PDB files first
-        if test_file.suffix in [".o", ".obj", ".pdb"]:
-            continue
-        # Check if file is executable (for actual test executables vs object files)
-        if not os.access(test_file, os.X_OK):
-            continue
-        if specific_test:
-            # Support both "test_name" and "name" formats (case-insensitive)
-            test_stem = test_file.stem
-            test_name = test_stem.replace("test_", "")
-            if (
-                test_stem.lower() == specific_test.lower()
-                or test_name.lower() == specific_test.lower()
-            ):
+    for pattern in _get_test_patterns():
+        for test_file in test_dir.glob(pattern):
+            if not _is_test_executable(test_file):
+                continue
+            if specific_test:
+                # Support both "test_name" and "name" formats (case-insensitive)
+                test_stem = test_file.stem
+                test_name = test_stem.replace("test_", "")
+                if (
+                    test_stem.lower() == specific_test.lower()
+                    or test_name.lower() == specific_test.lower()
+                ):
+                    test_files.append(test_file)
+            else:
                 test_files.append(test_file)
-        else:
-            test_files.append(test_file)
 
     return test_files
 
@@ -90,7 +94,9 @@ def run_test(test_file: Path, verbose: bool = False) -> TestResult:
     start_time = time.time()
 
     # Build command with doctest flags
-    cmd = [str(test_file)]
+    # Convert to absolute path for Windows compatibility
+    test_executable = test_file.resolve()
+    cmd = [str(test_executable)]
     if not verbose:
         cmd.append("--minimal")  # Only show output for failures
 
@@ -115,7 +121,7 @@ def run_test(test_file: Path, verbose: bool = False) -> TestResult:
             encoding="utf-8",
             errors="replace",
             env=env,
-            shell=True if sys.platform == "win32" else False,  # Use shell on Windows
+            shell=False,  # Don't use shell to avoid path quoting issues
         )
 
         # Read output line by line
