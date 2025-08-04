@@ -171,6 +171,8 @@ class RunningProcess:
         self.on_complete = on_complete
         self.reader_thread: threading.Thread | None = None
         self.shutdown: threading.Event = threading.Event()
+        self._start_time: float | None = None
+        self._end_time: float | None = None
         if auto_run:
             self.run()
 
@@ -354,6 +356,9 @@ class RunningProcess:
         assert self.proc is not None  # For type checker
         rtn = self.proc.returncode
         assert rtn is not None  # Process has completed, so returncode exists
+        
+        # Record end time
+        self._end_time = time.time()
 
         # Wait for reader thread to finish and cleanup
         if self.reader_thread is not None:
@@ -392,6 +397,10 @@ class RunningProcess:
         """
         if self.proc is None:
             return
+
+        # Record end time when killed
+        if self._end_time is None:
+            self._end_time = time.time()
 
         # Signal reader thread to stop
         self.shutdown.set()
@@ -440,6 +449,23 @@ class RunningProcess:
         if self.proc is None:
             return None
         return self.proc.returncode
+
+    @property
+    def start_time(self) -> float | None:
+        """Get the process start time"""
+        return self._start_time
+    
+    @property
+    def end_time(self) -> float | None:
+        """Get the process end time"""
+        return self._end_time
+    
+    @property
+    def duration(self) -> float | None:
+        """Get the process duration in seconds, or None if not completed"""
+        if self._start_time is None or self._end_time is None:
+            return None
+        return self._end_time - self._start_time
 
     @property
     def stdout(self) -> str:

@@ -32,6 +32,14 @@ _IS_GITHUB_ACTIONS = os.getenv("GITHUB_ACTIONS") == "true"
 _TIMEOUT = 240 if _IS_GITHUB_ACTIONS else 60
 
 
+@dataclass
+class ProcessTiming:
+    """Information about a completed process execution for timing summary"""
+    name: str
+    duration: float
+    command: str
+
+
 @typechecked
 class TestOutputFormatter:
     """Formats test output in a consistent way"""
@@ -529,6 +537,63 @@ def _extract_test_name(command: str | list[str]) -> str:
     return "unknown_test"
 
 
+def _get_friendly_test_name(command: str | list[str]) -> str:
+    """Extract a user-friendly test name for display in summary table"""
+    if isinstance(command, list):
+        command = " ".join(command)
+    
+    # Simplify common command patterns to friendly names
+    if "no_using_namespace_fl_in_headers.py" in command:
+        return "namespace_check"
+    elif "cpp_test_run" in command and "ci.run_tests" in command:
+        return "unit_tests"
+    elif "test_example_compilation.py" in command:
+        return "example_compilation"
+    elif "pytest" in command and "ci/tests" in command:
+        return "python_tests"
+    elif "pytest" in command and "ci/test_integration" in command:
+        return "integration_tests"
+    elif "ci-compile" in command and "uno" in command:
+        return "uno_compilation"
+    else:
+        # Fallback to the existing extraction logic
+        return _extract_test_name(command)
+
+
+def _format_timing_summary(process_timings: List[ProcessTiming]) -> str:
+    """Format a summary table of process execution times"""
+    if not process_timings:
+        return ""
+    
+    # Sort by duration (longest first)
+    sorted_timings = sorted(process_timings, key=lambda x: x.duration, reverse=True)
+    
+    # Calculate column widths
+    max_name_width = max(len(timing.name) for timing in sorted_timings)
+    max_name_width = max(max_name_width, len("Test Name"))  # Ensure header fits
+    
+    # Create header
+    header = f"{'Test Name':<{max_name_width}} | {'Duration':>10}"
+    separator = f"{'-' * max_name_width}-+-{'-' * 10}"
+    
+    # Create rows
+    rows = []
+    for timing in sorted_timings:
+        duration_str = f"{timing.duration:.2f}s"
+        row = f"{timing.name:<{max_name_width}} | {duration_str:>10}"
+        rows.append(row)
+    
+    # Combine all parts
+    table_lines = [
+        "\nTest Execution Summary:",
+        separator,
+        header,
+        separator,
+    ] + rows + [separator]
+    
+    return "\n".join(table_lines)
+
+
 def _run_process_with_output(process: RunningProcess, verbose: bool = False) -> None:
     """
     Run a single process and handle its output
@@ -644,15 +709,18 @@ def _run_process_with_output(process: RunningProcess, verbose: bool = False) -> 
 
 def _run_processes_parallel(
     processes: list[RunningProcess], verbose: bool = False
-) -> None:
+) -> List[ProcessTiming]:
     """
     Run multiple test processes in parallel and handle their output
 
     Args:
         processes: List of RunningProcess objects to execute
+        
+    Returns:
+        List of ProcessTiming objects with execution times
     """
     if not processes:
-        return
+        return []
 
     # Create a shared output handler for formatting
     output_handler = ProcessOutputHandler(verbose=verbose)
@@ -687,6 +755,9 @@ def _run_processes_parallel(
 
     # Track failed processes for proper error reporting
     failed_processes: list[str] = []
+    
+    # Track completed processes for timing summary
+    completed_timings: List[ProcessTiming] = []
 
     # Update watchdog with current active processes
     set_active_processes([proc.command for proc in active_processes])
@@ -851,6 +922,15 @@ def _run_processes_parallel(
                         del last_activity_time[proc]  # Clean up tracking
                     any_activity = True
                     print(f"Process completed: {cmd}")
+                    
+                    # Collect timing data for summary
+                    if proc.duration is not None:
+                        timing = ProcessTiming(
+                            name=_get_friendly_test_name(cmd),
+                            duration=proc.duration,
+                            command=str(cmd)
+                        )
+                        completed_timings.append(timing)
 
                     # Update watchdog with remaining active processes
                     set_active_processes([p.command for p in active_processes])
@@ -908,11 +988,13 @@ def _run_processes_parallel(
     clear_active_processes()
 
     print("\nAll parallel tests completed successfully")
+    
+    return completed_timings
 
 
 def run_test_processes(
     processes: list[RunningProcess], parallel: bool = True, verbose: bool = False
-) -> None:
+) -> List[ProcessTiming]:
     """
     Run multiple test processes and handle their output
 
@@ -920,27 +1002,41 @@ def run_test_processes(
         processes: List of RunningProcess objects to execute
         parallel: Whether to run processes in parallel or sequentially (ignored if NO_PARALLEL is set)
         verbose: Whether to show all output
+        
+    Returns:
+        List of ProcessTiming objects with execution times
     """
     # Force sequential execution if NO_PARALLEL is setprint("NO_PARALLEL environment variable set - forcing sequential execution")
     if not processes:
         print("\033[92m###### SUCCESS ######\033[0m")
         print("No tests to run")
-        return
+        return []
 
     start_time = time.time()
+    timings: List[ProcessTiming] = []
 
     try:
         if parallel:
             # Run all processes in parallel with output interleaving
-            _run_processes_parallel(processes, verbose=verbose)
+            timings = _run_processes_parallel(processes, verbose=verbose)
         else:
             # Run processes sequentially with full output capture
             for process in processes:
                 _run_process_with_output(process, verbose)
+                # Collect timing data for sequential execution
+                if process.duration is not None:
+                    timing = ProcessTiming(
+                        name=_get_friendly_test_name(process.command),
+                        duration=process.duration,
+                        command=str(process.command)
+                    )
+                    timings.append(timing)
 
             # If we get here, all tests passed
             elapsed = time.time() - start_time
             print(f"\033[92m### SUCCESS ({elapsed:.2f}s) ###\033[0m")
+        
+        return timings
 
     except (TestExecutionFailedException, TestTimeoutException) as e:
         # Tests failed - print detailed info and re-raise for proper handling
@@ -1029,11 +1125,16 @@ def runner(args: TestArgs, src_code_change: bool = True) -> None:
         print()
 
         # Run processes (parallel unless NO_PARALLEL is set)
-        run_test_processes(
+        timings = run_test_processes(
             processes,
             parallel=will_run_parallel,
             verbose=args.verbose,
         )
+        
+        # Display timing summary
+        if timings:
+            summary = _format_timing_summary(timings)
+            print(summary)
     except (TestExecutionFailedException, TestTimeoutException) as e:
         # Print summary and exit with proper code
         print(f"\n\033[91m###### ERROR ######\033[0m")

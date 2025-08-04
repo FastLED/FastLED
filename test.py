@@ -198,6 +198,26 @@ def main() -> None:
             if examples_return_code != 0:
                 sys.exit(examples_return_code)
 
+            # Display timing summary for sequential execution
+            from ci.util.test_runner import ProcessTiming, _format_timing_summary, _get_friendly_test_name
+            timings = []
+            if python_process.duration is not None:
+                timings.append(ProcessTiming(
+                    name=_get_friendly_test_name(python_process.command),
+                    duration=python_process.duration,
+                    command=str(python_process.command)
+                ))
+            if examples_process.duration is not None:
+                timings.append(ProcessTiming(
+                    name=_get_friendly_test_name(examples_process.command),
+                    duration=examples_process.duration,
+                    command=str(examples_process.command)
+                ))
+            
+            if timings:
+                summary = _format_timing_summary(timings)
+                print(summary)
+
             print("Sequential test execution completed successfully")
         else:
             # Use normal test runner for other cases
