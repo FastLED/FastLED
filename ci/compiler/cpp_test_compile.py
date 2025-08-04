@@ -22,6 +22,7 @@ from .clang_compiler import (
     LinkOptions,
     test_clang_accessibility,
 )
+from .test_example_compilation import create_fastled_compiler
 
 
 # Configure logging
@@ -231,9 +232,14 @@ def get_unit_test_fastled_sources() -> list[Path]:
 
 
 def create_unit_test_fastled_library(
-    compiler: Compiler, fastled_build_dir: Path, clean: bool = False
+    fastled_build_dir: Path, clean: bool = False, use_pch: bool = True
 ) -> Path | None:
-    """Create libfastled.a static library using optimized examples paradigm."""
+    """Create libfastled.a static library using proper FastLED compiler (not unit test compiler).
+
+    CRITICAL: The FastLED library should NOT be compiled with unit test flags like
+    FASTLED_FORCE_NAMESPACE=1. It should use normal FastLED compilation flags.
+    The unit tests will then link against this library and use fl:: namespace.
+    """
 
     lib_file = fastled_build_dir / "libfastled.a"
 
@@ -241,7 +247,36 @@ def create_unit_test_fastled_library(
         print(f"[LIBRARY] Using existing FastLED library: {lib_file}")
         return lib_file
 
-    print("[LIBRARY] Creating FastLED static library...")
+    print("[LIBRARY] Creating FastLED static library with proper compiler flags...")
+
+    # Create a proper FastLED compiler (NOT unit test compiler) for the library
+    # This ensures the library is compiled without FASTLED_FORCE_NAMESPACE=1
+    print("[LIBRARY] Creating FastLED library compiler (without unit test flags)...")
+
+    # Save current directory and change to project root for create_fastled_compiler
+    import os
+
+    project_root = Path(__file__).parent.parent.parent
+    original_cwd = os.getcwd()
+    os.chdir(str(project_root))
+
+    try:
+        library_compiler = create_fastled_compiler(
+            use_pch=use_pch,
+            use_sccache=False,  # Disable sccache for library to avoid conflicts
+            parallel=True,
+        )
+
+        # CRITICAL: Add FASTLED_FORCE_NAMESPACE=1 to the library compiler so it exports
+        # symbols in the fl:: namespace that unit tests can link against
+        if library_compiler.settings.defines is None:
+            library_compiler.settings.defines = []
+        library_compiler.settings.defines.append("FASTLED_FORCE_NAMESPACE=1")
+        print("[LIBRARY] Added FASTLED_FORCE_NAMESPACE=1 to library compiler")
+
+    finally:
+        # Restore original working directory
+        os.chdir(original_cwd)
 
     # Get FastLED sources using optimized selection
     fastled_sources = get_unit_test_fastled_sources()
@@ -268,7 +303,7 @@ def create_unit_test_fastled_library(
         # Replace path separators with underscores for unique object file names
         obj_name = str(rel_path.with_suffix(".o")).replace("/", "_").replace("\\", "_")
         obj_file = obj_dir / obj_name
-        future = compiler.compile_cpp_file(cpp_file, obj_file)
+        future = library_compiler.compile_cpp_file(cpp_file, obj_file)
         futures.append((future, obj_file, cpp_file))
 
     # Wait for compilation to complete
@@ -299,7 +334,7 @@ def create_unit_test_fastled_library(
     # Create static library using the same approach as examples
     print(f"[LIBRARY] Creating static library: {lib_file}")
 
-    archive_future = compiler.create_archive(fastled_objects, lib_file)
+    archive_future = library_compiler.create_archive(fastled_objects, lib_file)
     archive_result = archive_future.result()
 
     if not archive_result.ok:
@@ -523,7 +558,7 @@ def compile_unit_tests_python_api(
     fastled_build_dir.mkdir(parents=True, exist_ok=True)
 
     fastled_lib_path = create_unit_test_fastled_library(
-        compiler, fastled_build_dir, clean
+        fastled_build_dir, clean, use_pch=use_pch
     )
 
     # Step 3: Compile and link each test (PARALLEL OPTIMIZATION)
