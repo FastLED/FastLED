@@ -76,6 +76,19 @@ class LinkingResult:
 
     linked_count: int
     failed_count: int
+    cache_hits: int = 0
+    cache_misses: int = 0
+
+    @property
+    def total_count(self) -> int:
+        """Total number of examples processed (linked + failed)"""
+        return self.linked_count + self.failed_count
+    
+    @property
+    def cache_hit_rate(self) -> float:
+        """Cache hit rate as percentage"""
+        total_processed = self.cache_hits + self.cache_misses
+        return (self.cache_hits / total_processed * 100) if total_processed > 0 else 0.0
 
 
 def load_build_flags_toml(toml_path: str) -> Dict[str, Any]:
@@ -1193,6 +1206,192 @@ def link_examples(
     return LinkingResult(linked_count=linked_count, failed_count=failed_count)
 
 
+def link_examples_with_cache(
+    object_file_map: Dict[Path, List[Path]],
+    fastled_lib: Path,
+    build_dir: Path,
+    compiler: Compiler,
+    log_timing: Callable[[str], None],
+) -> LinkingResult:
+    """
+    Link all examples into executable programs with intelligent caching.
+    
+    Leverages the existing FastLEDTestCompiler cache infrastructure to skip
+    linking when all input artifacts (object files, library, linker args) are unchanged.
+    """
+    import hashlib
+    from ci.compiler.clang_compiler import link_program_sync
+    
+    linked_count = 0
+    failed_count = 0
+    cache_hits = 0
+    cache_misses = 0
+    
+    # Create cache directory (same as FastLEDTestCompiler)
+    cache_dir = Path(".build/link_cache")
+    cache_dir.mkdir(parents=True, exist_ok=True)
+    
+    # Helper functions using the same algorithms as FastLEDTestCompiler
+    def calculate_file_hash(file_path: Path) -> str:
+        """Calculate SHA256 hash of a file (same as FastLEDTestCompiler._calculate_file_hash)"""
+        if not file_path.exists():
+            return "no_file"
+        
+        hash_sha256 = hashlib.sha256()
+        with open(file_path, "rb") as f:
+            for chunk in iter(lambda: f.read(4096), b""):
+                hash_sha256.update(chunk)
+        return hash_sha256.hexdigest()
+    
+    def calculate_linker_args_hash(linker_args: List[str]) -> str:
+        """Calculate SHA256 hash of linker arguments (same as FastLEDTestCompiler._calculate_linker_args_hash)"""
+        args_str = "|".join(sorted(linker_args))
+        hash_sha256 = hashlib.sha256()
+        hash_sha256.update(args_str.encode("utf-8"))
+        return hash_sha256.hexdigest()
+    
+    def calculate_multiple_objects_cache_key(
+        obj_files: List[Path], fastled_lib: Path, linker_args: List[str]
+    ) -> str:
+        """
+        Calculate cache key for multiple object files linking.
+        Extends FastLEDTestCompiler logic to handle multiple object files.
+        """
+        # Calculate hash for each object file
+        obj_hashes = []
+        for obj_file in obj_files:
+            obj_hashes.append(calculate_file_hash(obj_file))
+        
+        # Combine object file hashes in a stable way (sorted by path for consistency)
+        sorted_obj_paths = sorted(str(obj) for obj in obj_files)
+        sorted_obj_hashes = []
+        for obj_path in sorted_obj_paths:
+            obj_file = Path(obj_path)
+            sorted_obj_hashes.append(calculate_file_hash(obj_file))
+        
+        combined_obj_hash = hashlib.sha256(
+            "|".join(sorted_obj_hashes).encode("utf-8")
+        ).hexdigest()
+        
+        # Calculate other hashes
+        fastled_hash = calculate_file_hash(fastled_lib)
+        linker_hash = calculate_linker_args_hash(linker_args)
+        
+        # Combine all components (same format as FastLEDTestCompiler)
+        combined = f"fastled:{fastled_hash}|objects:{combined_obj_hash}|flags:{linker_hash}"
+        final_hash = hashlib.sha256(combined.encode("utf-8")).hexdigest()
+        
+        return final_hash[:16]  # Use first 16 chars for readability (same as FastLEDTestCompiler)
+    
+    def get_cached_executable(example_name: str, cache_key: str) -> Optional[Path]:
+        """Check if cached executable exists (same as FastLEDTestCompiler._get_cached_executable)"""
+        cached_exe = cache_dir / f"{example_name}_{cache_key}.exe"
+        return cached_exe if cached_exe.exists() else None
+    
+    def cache_executable(example_name: str, cache_key: str, exe_path: Path) -> None:
+        """Cache an executable (same as FastLEDTestCompiler._cache_executable)"""
+        if not exe_path.exists():
+            return
+        
+        cached_exe = cache_dir / f"{example_name}_{cache_key}.exe"
+        try:
+            shutil.copy2(exe_path, cached_exe)
+        except Exception as e:
+            log_timing(f"[LINKING] Warning: Failed to cache {example_name}: {e}")
+
+    for ino_file, obj_files in object_file_map.items():
+        example_name = ino_file.parent.name
+        example_build_dir = build_dir / example_name
+        
+        # Create executable name and path
+        executable_name = get_executable_name(example_name)
+        executable_path = example_build_dir / executable_name
+        
+        # Validate that all object files exist
+        missing_objects = [obj for obj in obj_files if not obj.exists()]
+        if missing_objects:
+            log_timing(
+                f"[LINKING] FAILED: {executable_name}: Missing object files: {[str(obj) for obj in missing_objects]}"
+            )
+            failed_count += 1
+            continue
+        
+        try:
+            # Create and compile main.cpp for this example
+            main_cpp_path = create_main_cpp_for_example(example_build_dir)
+            main_obj_path = example_build_dir / "main.o"
+            
+            main_future = compiler.compile_cpp_file(main_cpp_path, main_obj_path)
+            main_result: Result = main_future.result()
+            
+            if not main_result.ok:
+                log_timing(
+                    f"[LINKING] FAILED: {executable_name}: Failed to compile main.cpp: {main_result.stderr[:100]}..."
+                )
+                failed_count += 1
+                continue
+            
+            # Combine all object files for linking
+            all_obj_files = obj_files + [main_obj_path]
+            
+            # Get platform-specific linker arguments
+            linker_args = get_platform_linker_args()
+            
+            # Calculate cache key using the same algorithm as FastLEDTestCompiler
+            cache_key = calculate_multiple_objects_cache_key(
+                all_obj_files, fastled_lib, linker_args
+            )
+            
+            # Check for cached executable
+            cached_exe = get_cached_executable(example_name, cache_key)
+            if cached_exe:
+                try:
+                    # Copy cached executable to target location
+                    shutil.copy2(cached_exe, executable_path)
+                    linked_count += 1
+                    cache_hits += 1
+                    log_timing(f"[LINKING] CACHED: {executable_name} (cache hit)")
+                    continue  # Skip actual linking
+                except Exception as e:
+                    log_timing(f"[LINKING] Warning: Failed to copy cached {executable_name}, will relink: {e}")
+                    # Fall through to actual linking
+            
+            # No cache hit - perform actual linking using existing link_program_sync
+            link_options = LinkOptions(
+                output_executable=str(executable_path),
+                object_files=[str(obj) for obj in all_obj_files],
+                static_libraries=[str(fastled_lib)],
+                linker_args=linker_args,
+            )
+            
+            # Use link_program_sync for synchronous linking
+            link_result: Result = link_program_sync(link_options, compiler.build_flags)
+            
+            if link_result.ok:
+                linked_count += 1
+                cache_misses += 1
+                log_timing(f"[LINKING] SUCCESS: {executable_name}")
+                
+                # Cache the newly linked executable for future use
+                cache_executable(example_name, cache_key, executable_path)
+            else:
+                failed_count += 1
+                log_timing(
+                    f"[LINKING] FAILED: {executable_name}: {link_result.stderr[:200]}..."
+                )
+                
+        except Exception as e:
+            failed_count += 1
+            log_timing(f"[LINKING] FAILED: {executable_name}: Exception: {e}")
+    
+    return LinkingResult(
+        linked_count=linked_count, 
+        failed_count=failed_count,
+        cache_hits=cache_hits,
+        cache_misses=cache_misses
+    )
+
+
 @dataclass
 class CompilationTestConfig:
     """Configuration for the compilation test."""
@@ -1489,7 +1688,7 @@ class CompilationTestRunner:
             # Link examples
             self.log_timing("[LINKING] Linking example programs...")
             build_dir = Path(".build/examples")
-            linking_result = link_examples(
+            linking_result = link_examples_with_cache(
                 results.object_file_map,
                 fastled_lib,
                 build_dir,
@@ -1509,6 +1708,15 @@ class CompilationTestRunner:
                 self.log_timing(
                     f"[LINKING] WARNING: Linked {results.linked_count} programs, {results.linking_failed_count} failed"
                 )
+
+            # Report cache statistics
+            if hasattr(linking_result, 'cache_hits') and hasattr(linking_result, 'cache_misses'):
+                total_processed = linking_result.cache_hits + linking_result.cache_misses
+                if total_processed > 0:
+                    hit_rate = linking_result.cache_hit_rate
+                    self.log_timing(
+                        f"[LINKING] Cache: {linking_result.cache_hits} hits, {linking_result.cache_misses} misses ({hit_rate:.1f}% hit rate)"
+                    )
 
             self.log_timing(
                 f"[LINKING] Real linking completed in {results.linking_time:.2f}s"
