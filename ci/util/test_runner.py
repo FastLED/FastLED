@@ -367,8 +367,8 @@ def create_examples_test_process(
         cmd.append("--clean")
     if args.no_pch:
         cmd.append("--no-pch")
-    if args.cache:
-        cmd.append("--cache")
+    if not args.cache:
+        cmd.append("--no-cache")
     if args.unity:
         cmd.append("--unity")
     if args.full and args.examples is not None:

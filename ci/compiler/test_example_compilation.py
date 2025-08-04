@@ -1544,10 +1544,10 @@ class CompilationTestRunner:
 
         # Handle caching configuration
         if self.config.disable_sccache:
-            config_parts.append("cache: disabled (default)")
+            config_parts.append("cache: disabled")
         else:
             # Add cache info based on build config
-            config_parts.append("cache: enabled")
+            config_parts.append("cache: enabled (default)")
 
         pch_compatible_files: set[Path] = set()
         pch_incompatible_files: List[str] = []
@@ -2051,10 +2051,10 @@ if __name__ == "__main__":
         help="Disable precompiled headers (PCH) for compilation - useful for debugging or compatibility issues.",
     )
     parser.add_argument(
-        "--cache",
-        "--sccache",
+        "--no-cache",
+        "--no-sccache",
         action="store_true",
-        help="Enable sccache/ccache for compilation (disabled by default for faster clean builds).",
+        help="Disable sccache/ccache for compilation (cache is enabled by default for all builds and single builds).",
     )
     parser.add_argument(
         "--unity",
@@ -2097,7 +2097,7 @@ if __name__ == "__main__":
             specific_examples,
             args.clean,
             disable_pch=args.no_pch,
-            disable_sccache=not args.cache,
+            disable_sccache=args.no_cache,
             unity_build=args.unity,
             unity_custom_output=args.custom_output,
             unity_additional_flags=args.additional_flags,
