@@ -424,7 +424,15 @@ def compile_unit_tests_python_api(
                 raise RuntimeError(f"Compilation failed for {test_name}: {compile_result.stderr}")
             
             # Link to executable with doctest main and FastLED library (same as examples)
-            object_files = [object_path, doctest_main_obj]
+            # Special handling for tests that have their own main function
+            tests_with_own_main = ["test_example_compilation"]
+            if test_name in tests_with_own_main:
+                # These tests have their own main function and don't need doctest_main
+                object_files = [object_path]
+            else:
+                # Regular doctest-based unit tests need doctest_main
+                object_files = [object_path, doctest_main_obj]
+            
             static_libraries = []
             linker_args = ["-pthread"]
             
