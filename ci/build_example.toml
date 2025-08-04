@@ -1,16 +1,12 @@
 # ================================================================================================
-# FastLED Build Flags Configuration - LEGACY FILE
+# FastLED Example Build Flags Configuration
 # ================================================================================================
 # 
-# DEPRECATION NOTICE: This file is being replaced by specialized build configuration files:
-# - ci/build_unit.toml    - For unit test compilation
-# - ci/build_example.toml - For example compilation
-# 
-# This file remains for backward compatibility and will be removed in a future release.
-# New code should use the specific build configuration files above.
+# This file centralizes ALL compilation flags used by example compilation to ensure
+# they remain synchronized and compatible across the entire build system.
 #
-# This file centralizes ALL compilation flags used by both sketch compilation and libfastled 
-# compilation to ensure they remain synchronized and compatible across the entire build system.
+# Examples use the STUB platform for Arduino-compatible functionality without hardware
+# dependencies, but do NOT need unit test specific flags like FASTLED_FORCE_NAMESPACE.
 
 [tools]
 # Build tool configuration - Full compiler command with arguments
@@ -39,13 +35,12 @@ compiler_flags = [
 
 defines = [
     "STUB_PLATFORM",
-    "FASTLED_UNIT_TEST=1",
+    # NOTE: Examples do NOT get FASTLED_FORCE_NAMESPACE=1 - they use global namespace
 ]
 
 include_flags = [
     "-I.",
     "-Isrc",
-    "-Itests",
 ]
 
 [windows]
@@ -134,63 +129,11 @@ flags = [
     "-Werror=return-type",
 ]
 
-[test]
-# Test-specific preprocessor defines
-defines = [
-    # FastLED Test Configuration
-    "-DFASTLED_UNIT_TEST=1",                    # Identify as unit test build
-    "-DFASTLED_FORCE_NAMESPACE=1",              # Force namespace usage to avoid conflicts
-    "-DFASTLED_USE_PROGMEM=0",                  # Disable PROGMEM usage in tests
-    "-DSTUB_PLATFORM",                          # Use stub platform for testing
-    "-DARDUINO=10808",                          # Arduino version compatibility
-    "-DFASTLED_USE_STUB_ARDUINO",               # Use stub Arduino implementation
-    "-DSKETCH_HAS_LOTS_OF_MEMORY=1",            # Assume lots of memory available
-    "-DFASTLED_STUB_IMPL",                      # Use stub implementations
-    "-DFASTLED_USE_JSON_UI=1",                  # Enable JSON UI features
-    "-DFASTLED_TESTING",                        # Enable testing features
-    "-DFASTLED_NO_AUTO_NAMESPACE",              # Disable automatic namespace
-    "-DFASTLED_NO_PINMAP",                      # Disable pin mapping
-    "-DHAS_HARDWARE_PIN_SUPPORT",               # Enable hardware pin support
-    "-DFASTLED_DEBUG_LEVEL=1",                  # Set debug level
-    "-DFASTLED_NO_ATEXIT=1",                    # Disable atexit to fix Windows lld-link errors
-    "-DDOCTEST_CONFIG_NO_EXCEPTIONS_BUT_WITH_ALL_ASSERTS", # Doctest configuration
-]
-
-# Test-specific compiler flags
-compiler_flags = [
-    # Language Standard and Compatibility
-    "-std=c++17",                               # Base C++17 standard
-    "-std=gnu++17",                             # Use GNU C++17 standard with extensions
-    "-fpermissive",                             # Allow some non-conforming code patterns
-    
-    # Warning Configuration
-    "-Wall",                                    # Enable all warnings
-    "-Wextra",                                  # Enable extra warnings
-    "-Werror=return-type",                      # Error on missing return statements
-    
-    # Thread Safety and Runtime Behavior
-    "-fno-threadsafe-statics",                  # Disable thread-safe static initialization
-    "-fno-exceptions",                          # Disable C++ exceptions
-    "-fno-rtti",                                # Disable RTTI
-    
-    # PCH Support
-    "-fpch-instantiate-templates",              # Required for proper PCH template handling
-]
-
-# Test-specific include flags
-include_flags = [
-    "-I.",                                      # Current directory
-    "-Isrc",                                    # FastLED source directory
-    "-Itests",                                  # Test directory
-]
-
-
-
 [stub_platform]
 # ================================================================================================
-# STUB PLATFORM DEFINES FOR TESTING AND EXAMPLE COMPILATION
+# STUB PLATFORM DEFINES FOR EXAMPLE COMPILATION
 # ================================================================================================
-# These defines are used for compiling examples and tests on the STUB platform
+# These defines are used for compiling examples on the STUB platform
 # which provides Arduino-compatible functionality without hardware dependencies.
 
 defines = [

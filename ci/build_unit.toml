@@ -1,16 +1,12 @@
 # ================================================================================================
-# FastLED Build Flags Configuration - LEGACY FILE
+# FastLED Unit Test Build Flags Configuration
 # ================================================================================================
 # 
-# DEPRECATION NOTICE: This file is being replaced by specialized build configuration files:
-# - ci/build_unit.toml    - For unit test compilation
-# - ci/build_example.toml - For example compilation
-# 
-# This file remains for backward compatibility and will be removed in a future release.
-# New code should use the specific build configuration files above.
+# This file centralizes ALL compilation flags used by unit test compilation to ensure
+# they remain synchronized and compatible across the entire build system.
 #
-# This file centralizes ALL compilation flags used by both sketch compilation and libfastled 
-# compilation to ensure they remain synchronized and compatible across the entire build system.
+# Unit tests require special flags like FASTLED_FORCE_NAMESPACE=1 to put all symbols
+# in the fl:: namespace that the tests expect.
 
 [tools]
 # Build tool configuration - Full compiler command with arguments
@@ -40,6 +36,8 @@ compiler_flags = [
 defines = [
     "STUB_PLATFORM",
     "FASTLED_UNIT_TEST=1",
+    "FASTLED_FORCE_NAMESPACE=1",  # CRITICAL: Required for unit tests to access fl:: namespace
+    "FASTLED_TESTING=1",          # Enable test-specific functionality like MockTimeProvider
 ]
 
 include_flags = [
@@ -182,34 +180,6 @@ include_flags = [
     "-I.",                                      # Current directory
     "-Isrc",                                    # FastLED source directory
     "-Itests",                                  # Test directory
-]
-
-
-
-[stub_platform]
-# ================================================================================================
-# STUB PLATFORM DEFINES FOR TESTING AND EXAMPLE COMPILATION
-# ================================================================================================
-# These defines are used for compiling examples and tests on the STUB platform
-# which provides Arduino-compatible functionality without hardware dependencies.
-
-defines = [
-    "STUB_PLATFORM",                        # Enable STUB platform
-    "ARDUINO=10808",                         # Arduino version compatibility
-    "FASTLED_USE_STUB_ARDUINO",             # Use stub Arduino implementation
-    "FASTLED_STUB_IMPL",                    # Enable STUB platform Arduino function implementations
-    "SKETCH_HAS_LOTS_OF_MEMORY=1",          # Enable memory-intensive features for STUB platform
-    "FASTLED_HAS_ENGINE_EVENTS=1",          # Enable EngineEvents for UI components
-]
-
-# Include paths required for stub platform compilation
-include_paths = [
-    "src/platforms/stub",                   # Arduino.h stub for examples
-]
-
-# Additional compiler arguments for stub platform
-compiler_args = [
-    # No additional args currently needed - all flags come from [all] and [build_modes.quick] sections
 ]
 
 [archive]
