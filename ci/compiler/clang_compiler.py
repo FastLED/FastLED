@@ -167,6 +167,12 @@ class LinkOptions:
 
 
 @dataclass
+class ArchiveOptions:
+    """Archive creation options loaded from build_flags.toml"""
+    flags: str  # Archive flags (e.g., "rcsD" for deterministic builds)
+
+
+@dataclass
 class BuildTools:
     """Build tool paths and configurations"""
 
@@ -195,6 +201,7 @@ class BuildFlags:
     link_flags: List[str]
     strict_mode_flags: List[str]
     tools: BuildTools
+    archive: ArchiveOptions
 
     @classmethod
     def parse(
@@ -312,6 +319,28 @@ class BuildFlags:
             ranlib=ranlib,
         )
 
+        # Extract archive configuration - NO DEFAULTS, must be in build_flags.toml
+        if "archive" not in config:
+            raise RuntimeError(
+                f"CRITICAL: [archive] section missing from build_flags.toml at {toml_path}\n"
+                f"The [archive] section is required for deterministic builds.\n"
+                f"Example:\n"
+                f"[archive]\n"
+                f'flags = "rcsD"  # r=insert, c=create, s=symbol table, D=deterministic'
+            )
+        
+        archive_config = config["archive"]
+        if "flags" not in archive_config:
+            raise RuntimeError(
+                f"CRITICAL: archive.flags missing from build_flags.toml at {toml_path}\n"
+                f"Archive flags are required for proper static library creation.\n"
+                f"Example:\n"
+                f"[archive]\n"
+                f'flags = "rcsD"  # r=insert, c=create, s=symbol table, D=deterministic'
+            )
+            
+        archive_options = ArchiveOptions(flags=archive_config["flags"])
+
         # Extract base flags
         base_flags = cls(
             defines=config.get("all", {}).get("defines", []),
@@ -320,6 +349,7 @@ class BuildFlags:
             link_flags=config.get("linking", {}).get("base", {}).get("flags", []),
             strict_mode_flags=config.get("strict_mode", {}).get("flags", []),
             tools=tools,
+            archive=archive_options,
         )
 
         # Add platform-specific flags if available
@@ -2353,8 +2383,14 @@ def create_archive_sync(
     else:
         cmd = [archiver]
 
-    # Archive flags: r=insert, c=create if needed, s=write symbol table
-    flags = "rcs"
+    # Archive flags: MUST come from build_flags.toml - NO DEFAULTS
+    if not build_flags_config or not hasattr(build_flags_config, 'archive') or not hasattr(build_flags_config.archive, 'flags'):
+        raise RuntimeError(
+            "CRITICAL: Archive flags not found in build_flags.toml. "
+            "Please ensure [archive] section with 'flags' is configured."
+        )
+    flags = build_flags_config.archive.flags
+    
     if options.use_thin:
         flags += "T"  # Add thin archive flag
 
