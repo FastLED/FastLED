@@ -12,6 +12,7 @@ from typing import Any, Callable, Dict, List, Optional, Set
 
 from ci.ci.fingerprint_cache import FingerprintCache
 from ci.compiler.clang_compiler import Compiler
+from ci.compiler.test_example_compilation import CompilationResult
 
 
 class CacheAwareCompiler:
@@ -167,9 +168,8 @@ class CacheAwareCompiler:
 
     def _create_success_result(
         self, file_count: int, ino_files: Optional[List[Path]] = None
-    ):
+    ) -> CompilationResult:
         """Create a successful compilation result for cached files."""
-        from ci.compiler.test_example_compilation import CompilationResult
 
         # For cached files, we need to populate object_file_map with existing object files
         # so that linking can proceed properly
