@@ -387,61 +387,7 @@ def compile_unit_tests_python_api(
         if doctest_result.return_code != 0:
             raise RuntimeError(f"Failed to compile doctest main: {doctest_result.stderr}")
     
-    # Step 2: Build FastLED library if needed
-    print("Building FastLED library...")
-    fastled_lib_path = bin_dir / "libfastled.a"
-    
-    if not fastled_lib_path.exists() or clean:
-        # Find all FastLED source files
-        src_dir = project_root / "src"
-        fastled_sources = []
-        
-        # Add core FastLED sources
-        for cpp_file in src_dir.rglob("*.cpp"):
-            # Skip platform-specific files that aren't needed for unit tests
-            rel_path = str(cpp_file.relative_to(src_dir))
-            if not any(skip in rel_path for skip in ['wasm', 'esp', 'avr', 'arm', 'teensy']):
-                fastled_sources.append(cpp_file)
-        
-        print(f"Found {len(fastled_sources)} FastLED source files")
-        
-        # Compile all FastLED sources to object files
-        fastled_objects = []
-        for i, src_file in enumerate(fastled_sources):
-            obj_name = f"fastled_{src_file.stem}_{i}.o"  # Add index to avoid conflicts
-            obj_path = bin_dir / obj_name
-            
-            if not obj_path.exists() or clean:
-                compile_future = compiler.compile_cpp_file(
-                    cpp_path=str(src_file),
-                    output_path=str(obj_path)
-                )
-                
-                compile_result = compile_future.result()
-                if compile_result.return_code != 0:
-                    print(f"Warning: Failed to compile {src_file.name}: {compile_result.stderr}")
-                    continue  # Skip files that fail to compile
-            
-            fastled_objects.append(obj_path)
-        
-        # Create static library from object files
-        if fastled_objects:
-            print(f"Creating FastLED library: {fastled_lib_path}")
-            
-            # Convert string paths to Path objects for the archive creation
-            fastled_object_paths = [Path(obj) for obj in fastled_objects]
-            
-            archive_future = compiler.create_archive(fastled_object_paths, Path(fastled_lib_path))
-            archive_result = archive_future.result()
-            
-            if not archive_result.ok:
-                print(f"Warning: Failed to create FastLED library: {archive_result.stderr}")
-                # Continue without the library
-                fastled_lib_path = None
-        else:
-            fastled_lib_path = None
-    
-    # Step 3: Compile and link each test
+    # Step 2: Compile and link each test (FastLED library creation handled by examples system)
     print(f"Compiling {len(test_files)} tests...")
     start_time = time.time()
     
@@ -464,12 +410,9 @@ def compile_unit_tests_python_api(
             if compile_result.return_code != 0:
                 raise RuntimeError(f"Compilation failed for {test_name}: {compile_result.stderr}")
             
-            # Link to executable with doctest main and FastLED library
+            # Link to executable with doctest main (header-only FastLED approach)
             object_files = [object_path, doctest_main_obj]
             linker_args = ["-pthread"]
-            
-            if fastled_lib_path and fastled_lib_path.exists():
-                linker_args.append(str(fastled_lib_path))
             
             link_options = LinkOptions(
                 output_executable=str(executable_path),
@@ -678,7 +621,7 @@ def parse_arguments():
         "--no-pch", action="store_true", help="Disable precompiled headers (PCH)"
     )
     parser.add_argument(
-        "--legacy", action="store_true", help="Use legacy CMake system instead of fast Python API (8x slower)"
+        "--python-api", action="store_true", help="Use experimental Python API with PCH optimization (instead of stable CMake)"
     )
     parser.add_argument(
         "--verbose", action="store_true", help="Enable verbose output"
@@ -805,16 +748,17 @@ def main() -> None:
         clean_build_directory()
         save_test_files_list()
 
-    # Determine whether to use Python API or legacy CMake system
-    use_legacy = getattr(args, 'legacy', False)  # Use legacy only when --legacy specified
+    # Unit tests use legacy CMake system by default (examples use Python API)
+    # This maintains compatibility while examples get the performance benefits
+    use_legacy = not getattr(args, 'python_api', False)  # Use legacy by default unless --python-api specified
     use_pch = not getattr(args, 'no_pch', False)  # Default to PCH enabled unless --no-pch specified
     
     if use_legacy:
-        # Use legacy CMake system when explicitly requested
-        print("🔧 Using LEGACY CMake build system (--legacy flag)")
+        # Use legacy CMake system (default for unit tests)
         compile_fastled(args.test, enable_static_analysis=args.check)
     else:
-        # Use the fast Python API with PCH optimization (default)
+        # Use the fast Python API with PCH optimization (for testing/examples)
+        print("🚀 Using experimental Python API with PCH optimization")
         compile_unit_tests_python_api(
             specific_test=args.test,
             enable_static_analysis=args.check,
