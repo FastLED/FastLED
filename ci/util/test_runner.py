@@ -911,6 +911,19 @@ def _run_processes_parallel(
                         print(f"\nCommand failed: {cmd} with return code {returncode}")
                         print(f"\033[91m###### ERROR ######\033[0m")
                         print(f"Test failed: {test_name}")
+                        
+                        # Capture the actual output from the failed process
+                        try:
+                            actual_output = proc.stdout
+                            if actual_output.strip():
+                                print(f"\n=== ACTUAL OUTPUT FROM FAILED PROCESS ===")
+                                print(actual_output)
+                                print(f"=== END OF OUTPUT ===")
+                            else:
+                                actual_output = "No output captured from failed process"
+                        except Exception as e:
+                            actual_output = f"Error capturing output: {e}"
+                            
                         sys.stdout.flush()
                         for p in active_processes:
                             if p != proc:
@@ -919,7 +932,7 @@ def _run_processes_parallel(
                             test_name=test_name,
                             command=str(cmd),
                             return_code=returncode,
-                            output="Command failed with non-zero exit code",
+                            output=actual_output,
                             error_type="command_failure",
                         )
                         raise TestExecutionFailedException(
@@ -950,16 +963,33 @@ def _run_processes_parallel(
                     print(f"Error: {e}")
                     print(f"\033[91m###### ERROR ######\033[0m")
                     print(f"Test error: {test_name}")
+                    
+                    # Try to capture any available output
+                    try:
+                        actual_output = proc.stdout
+                        if actual_output.strip():
+                            print(f"\n=== PROCESS OUTPUT BEFORE ERROR ===")
+                            print(actual_output)
+                            print(f"=== END OF OUTPUT ===")
+                    except Exception as output_error:
+                        print(f"Could not capture process output: {output_error}")
+                        
                     failures: list[TestFailureInfo] = []
                     for p in active_processes:
                         failed_processes.append(p.command)  # Track all as failed
                         p.kill()
+                        # Try to capture output from this process too
+                        try:
+                            process_output = p.stdout if hasattr(p, 'stdout') else str(e)
+                        except Exception:
+                            process_output = str(e)
+                            
                         failures.append(
                             TestFailureInfo(
                                 test_name=_extract_test_name(p.command),
                                 command=str(p.command),
                                 return_code=1,
-                                output=str(e),
+                                output=process_output,
                                 error_type="process_wait_error",
                             )
                         )
