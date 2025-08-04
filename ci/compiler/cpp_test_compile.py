@@ -3,6 +3,7 @@
 import argparse
 import hashlib
 import json
+import logging
 import os
 import shutil
 import subprocess
@@ -22,6 +23,9 @@ from .clang_compiler import (
     test_clang_accessibility,
 )
 
+
+# Configure logging
+logger = logging.getLogger(__name__)
 
 BUILD_DIR = PROJECT_ROOT / "tests" / ".build"
 BUILD_DIR.mkdir(parents=True, exist_ok=True)
@@ -733,8 +737,19 @@ def should_clean_build(build_info: dict[str, str | dict[str, str]]) -> bool:
     if not build_info_file.exists():
         return True
 
-    with open(build_info_file, "r") as f:
-        old_build_info = json.load(f)
+    try:
+        with open(build_info_file, "r") as f:
+            old_build_info = json.load(f)
+    except (json.JSONDecodeError, ValueError) as e:
+        # If JSON is corrupted or empty, remove it and force clean build
+        logger.warning(
+            f"Corrupted build_info.json detected ({e}), removing and forcing clean build"
+        )
+        try:
+            build_info_file.unlink()
+        except OSError:
+            pass  # Ignore if we can't remove it
+        return True
 
     # If build parameters have changed, we need to rebuild
     if old_build_info != build_info:
