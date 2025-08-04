@@ -14,6 +14,7 @@ import argparse
 import os
 import platform
 import shutil
+import stat
 import subprocess
 import sys
 import tempfile
@@ -1193,8 +1194,48 @@ def link_examples(
             link_result: Result = link_future.result()
 
             if link_result.ok:
-                linked_count += 1
                 log_timing(f"[LINKING] SUCCESS: {executable_name}")
+
+                # Verify the executable was actually created
+                if executable_path.exists():
+                    try:
+                        file_stat = executable_path.stat()
+                        is_executable = bool(file_stat.st_mode & stat.S_IXUSR)
+                        log_timing(
+                            f"[LINKING] VERIFIED: {executable_name} created, size: {file_stat.st_size} bytes, executable: {is_executable}"
+                        )
+                        # Fix permissions if needed on Unix systems
+                        if not is_executable and not platform.system() == "Windows":
+                            try:
+                                executable_path.chmod(
+                                    executable_path.stat().st_mode
+                                    | stat.S_IXUSR
+                                    | stat.S_IXGRP
+                                    | stat.S_IXOTH
+                                )
+                                log_timing(
+                                    f"[LINKING] FIXED: Added execute permissions to {executable_name}"
+                                )
+                            except Exception as e:
+                                log_timing(
+                                    f"[LINKING] WARNING: Could not fix permissions for {executable_name}: {e}"
+                                )
+
+                        # Only count as success if executable actually exists and is valid
+                        linked_count += 1
+
+                    except Exception as e:
+                        log_timing(
+                            f"[LINKING] WARNING: Error checking created executable: {e}"
+                        )
+                        # Count as success anyway since file exists, just can't check it
+                        linked_count += 1
+                else:
+                    # CRITICAL BUG FIX: If executable doesn't exist, count as failure!
+                    failed_count += 1
+                    log_timing(
+                        f"[LINKING] FAILED: {executable_name} reported success but file not found at {executable_path}"
+                    )
             else:
                 failed_count += 1
                 log_timing(
@@ -1817,10 +1858,33 @@ class CompilationTestRunner:
             executable_path = example_dir / executable_name
 
             if not executable_path.exists():
+                # Enhanced logging to debug why executable is missing
                 self.log_timing(
-                    f"[EXECUTION] SKIPPED: {executable_name}: Executable not found"
+                    f"[EXECUTION] SKIPPED: {executable_name}: Executable not found at {executable_path}"
                 )
+                # Show what files actually exist in the directory
+                try:
+                    existing_files = list(example_dir.iterdir())
+                    self.log_timing(
+                        f"[EXECUTION] DEBUG: Directory {example_dir} contains: {[f.name for f in existing_files]}"
+                    )
+                except Exception as e:
+                    self.log_timing(f"[EXECUTION] DEBUG: Error listing directory: {e}")
                 continue
+
+            # Check executable permissions
+            import stat
+
+            try:
+                file_stat = executable_path.stat()
+                is_executable = bool(file_stat.st_mode & stat.S_IXUSR)
+                self.log_timing(
+                    f"[EXECUTION] DEBUG: {executable_name} exists, size: {file_stat.st_size} bytes, executable: {is_executable}"
+                )
+            except Exception as e:
+                self.log_timing(
+                    f"[EXECUTION] DEBUG: Error checking file permissions: {e}"
+                )
 
             try:
                 self.log_timing(f"[EXECUTION] Running: {executable_name}")
@@ -1859,8 +1923,21 @@ class CompilationTestRunner:
                     self.log_timing(
                         f"[EXECUTION] FAILED: {executable_name}: Exit code {result.returncode}"
                     )
-                    if result.stderr:
-                        self.log_timing(f"[EXECUTION] Error: {result.stderr[:200]}...")
+                    # Show both stdout and stderr for failed executions to help debug
+                    if result.stdout.strip():
+                        self.log_timing(f"[EXECUTION] Failed stdout:")
+                        for line in result.stdout.split("\n"):
+                            if line.strip():
+                                self.log_timing(f"[EXECUTION]   {line}")
+                    if result.stderr.strip():
+                        self.log_timing(f"[EXECUTION] Failed stderr:")
+                        for line in result.stderr.split("\n"):
+                            if line.strip():
+                                self.log_timing(f"[EXECUTION]   {line}")
+                    if not result.stdout.strip() and not result.stderr.strip():
+                        self.log_timing(
+                            f"[EXECUTION] No output captured from failed execution"
+                        )
 
             except subprocess.TimeoutExpired:
                 execution_failed_count += 1
