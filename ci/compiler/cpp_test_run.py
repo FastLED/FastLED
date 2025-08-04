@@ -305,17 +305,18 @@ def compile_tests(
     show_link: bool = False,
 ) -> None:
     """
-    Compile C++ tests with A/B testing support between CMake and Python API systems.
+    Compile C++ tests with A/B testing support between Legacy Python and Optimized Python API systems.
 
-    Performance: 15-30s (CMake) → 2-4s (Python API) = 8x improvement
-    Memory Usage: 2-4GB (CMake) → 200-500MB (Python API) = 80% reduction
+    Note: Both systems are Python-based; "legacy" refers to the older Python implementation.
+    Performance: 15-30s (Legacy) → 2-4s (Optimized Python API) = 8x improvement
+    Memory Usage: 2-4GB (Legacy) → 200-500MB (Optimized Python API) = 80% reduction
     """
     os.chdir(str(PROJECT_ROOT))
 
     # Determine build system: --legacy flag takes precedence, then environment variable
     if use_legacy_system:
         use_python_api = False
-        print("🔧 Using LEGACY CMake build system (--legacy flag)")
+        print("🔧 Using LEGACY Python build system (--legacy flag)")
     else:
         # Check environment variable - USE_CMAKE=1 forces legacy system, default is new
         use_cmake_env = os.environ.get("USE_CMAKE", "").lower() in (
@@ -325,7 +326,7 @@ def compile_tests(
         )
         use_python_api = not use_cmake_env
         if use_cmake_env:
-            print("🔧 Using LEGACY CMake build system (USE_CMAKE env var)")
+            print("🔧 Using LEGACY Python build system (USE_CMAKE env var)")
         else:
             print("🆕 Using Python API build system (default)")
 
@@ -341,11 +342,11 @@ def compile_tests(
             show_link=show_link,
         )
     else:
-        # Legacy CMake system
-        _compile_tests_cmake(clean, unknown_args, specific_test)
+        # Legacy Python system
+        _compile_tests_legacy(clean, unknown_args, specific_test)
 
 
-def _compile_tests_cmake(
+def _compile_tests_legacy(
     clean: bool = False,
     unknown_args: list[str] = [],
     specific_test: str | None = None,
@@ -354,9 +355,9 @@ def _compile_tests_cmake(
     show_compile: bool = False,
     show_link: bool = False,
 ) -> None:
-    """Legacy CMake compilation system (preserved for gradual migration)"""
+    """Legacy Python compilation system (preserved for gradual migration)"""
     if verbose:
-        print("Compiling tests using legacy CMake system...")
+        print("Compiling tests using legacy Python system...")
     command = ["uv", "run", "-m", "ci.compiler.cpp_test_compile"]
     if clean:
         command.append("--clean")
@@ -368,13 +369,13 @@ def _compile_tests_cmake(
         print("Compilation failed:")
         print(output)  # Always show output on failure
         failure = TestFailureInfo(
-            test_name="cmake_compilation",
+            test_name="legacy_python_compilation",
             command=" ".join(command),
             return_code=return_code,
             output=output,
-            error_type="cmake_compilation_error",
+            error_type="legacy_python_compilation_error",
         )
-        raise CompilationFailedException("CMake compilation failed", [failure])
+        raise CompilationFailedException("Legacy Python compilation failed", [failure])
     print("Compilation successful.")
 
     # Check if static analysis was requested and warn about IWYU availability
@@ -436,7 +437,7 @@ def run_tests(
     """
     Run compiled tests with GDB crash analysis support.
 
-    This function works with both the new Python compiler API and legacy CMake system,
+    This function works with both the optimized Python compiler API and legacy Python system,
     automatically detecting which system was used and finding the appropriate executables.
     All existing GDB crash analysis functionality is preserved.
     """
@@ -457,24 +458,24 @@ def run_tests(
         # New Python system - try to get executables from test compiler
         _run_tests_python(specific_test)
     else:
-        # Legacy CMake system - use traditional .build/bin directory
-        _run_tests_cmake(specific_test)
+        # Legacy Python system - use traditional .build/bin directory
+        _run_tests_legacy(specific_test)
 
 
-def _run_tests_cmake(
+def _run_tests_legacy(
     specific_test: str | None = None,
     *,
     verbose: bool = False,
     show_compile: bool = False,
     show_link: bool = False,
 ) -> None:
-    """Run tests from legacy CMake build system (preserving existing logic)"""
+    """Run tests from legacy Python build system (preserving existing logic)"""
     test_dir = os.path.join("tests")
     if not os.path.exists(test_dir):
         print(f"Test directory not found: {test_dir}")
         sys.exit(1)
 
-    print("Running tests from CMake build...")
+    print("Running tests from legacy Python build...")
     failed_tests: list[FailedTest] = []
     files = os.listdir(test_dir)
     # filter out all pdb files (windows) and only keep test_ cpp files
@@ -952,7 +953,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--legacy",
         action="store_true",
-        help="Use legacy CMake system instead of new Python API (8x slower)",
+        help="Use legacy Python system instead of optimized Python API (8x slower)",
     )
     parser.add_argument(
         "--no-unity",

@@ -17,7 +17,7 @@ else()
     message(STATUS "CMAKE_CXX_STANDARD already defined as: ${CMAKE_CXX_STANDARD}")
 endif()
 
-# Retrieve and print the flags passed from the parent (e.g. tests/CMakeLists.txt)
+# Retrieve and print the flags passed from the parent build system
 message(STATUS "Using compile flags from parent CMakeLists.txt")
 message(STATUS "COMMON_COMPILE_FLAGS: ${COMMON_COMPILE_FLAGS}")
 message(STATUS "COMMON_COMPILE_DEFINITIONS: ${COMMON_COMPILE_DEFINITIONS}")
