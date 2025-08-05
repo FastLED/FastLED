@@ -124,9 +124,10 @@ def extract_compiler_flags_from_toml(config: Dict[str, Any]) -> List[str]:
         if "compiler_flags" in all_section and isinstance(
             all_section["compiler_flags"], list
         ):
-            flags.extend(all_section["compiler_flags"])
+            compiler_flags: List[str] = list(all_section["compiler_flags"])
+            flags.extend(compiler_flags)
             print(
-                f"[CONFIG] Loaded {len(all_section['compiler_flags'])} universal compiler flags from [all] section"
+                f"[CONFIG] Loaded {len(compiler_flags)} universal compiler flags from [all] section"
             )
 
     # Then, extract flags from [build_modes.quick] section for sketch compilation
@@ -136,9 +137,10 @@ def extract_compiler_flags_from_toml(config: Dict[str, Any]) -> List[str]:
             quick_section: Dict[str, Any] = build_modes["quick"]
 
             if "flags" in quick_section and isinstance(quick_section["flags"], list):
-                flags.extend(quick_section["flags"])
+                quick_flags: List[str] = list(quick_section["flags"])
+                flags.extend(quick_flags)
                 print(
-                    f"[CONFIG] Loaded {len(quick_section['flags'])} quick mode flags from [build_modes.quick] section"
+                    f"[CONFIG] Loaded {len(quick_flags)} quick mode flags from [build_modes.quick] section"
                 )
 
     return flags
@@ -152,9 +154,10 @@ def extract_stub_platform_defines_from_toml(config: Dict[str, Any]) -> List[str]
     if "stub_platform" in config and isinstance(config["stub_platform"], dict):
         stub_section: Dict[str, Any] = config["stub_platform"]
         if "defines" in stub_section and isinstance(stub_section["defines"], list):
-            defines.extend(stub_section["defines"])
+            stub_defines: List[str] = list(stub_section["defines"])
+            defines.extend(stub_defines)
             print(
-                f"[CONFIG] Loaded {len(stub_section['defines'])} stub platform defines from [stub_platform] section"
+                f"[CONFIG] Loaded {len(stub_defines)} stub platform defines from [stub_platform] section"
             )
         else:
             raise RuntimeError(
@@ -195,9 +198,10 @@ def extract_stub_platform_include_paths_from_toml(config: Dict[str, Any]) -> Lis
         if "include_paths" in stub_section and isinstance(
             stub_section["include_paths"], list
         ):
-            include_paths.extend(stub_section["include_paths"])
+            stub_include_paths: List[str] = list(stub_section["include_paths"])
+            include_paths.extend(stub_include_paths)
             print(
-                f"[CONFIG] Loaded {len(stub_section['include_paths'])} stub platform include paths from [stub_platform] section"
+                f"[CONFIG] Loaded {len(stub_include_paths)} stub platform include paths from [stub_platform] section"
             )
         else:
             raise RuntimeError(
@@ -426,7 +430,7 @@ def create_fastled_compiler(
     print(f"[CONFIG] Added {len(base_args)} include paths from configuration")
 
     # Combine base args with TOML flags
-    all_args = base_args + toml_flags
+    all_args: List[str] = base_args + toml_flags
 
     # PCH output path in build cache directory (persistent)
     pch_output_path = None
@@ -437,7 +441,7 @@ def create_fastled_compiler(
 
     # Determine compiler command (with or without cache)
     compiler_cmd = "python -m ziglang c++"
-    cache_args = []
+    cache_args: List[str] = []
     print("Using direct compilation with ziglang c++")
 
     # Combine cache args with other args (cache args go first)

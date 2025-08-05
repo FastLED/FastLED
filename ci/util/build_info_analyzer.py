@@ -25,8 +25,8 @@ class CompilerInfo:
 
     cc_path: str = ""
     cxx_path: str = ""
-    cc_flags: List[str] = field(default_factory=list)
-    cxx_flags: List[str] = field(default_factory=list)
+    cc_flags: List[str] = field(default_factory=lambda: list())
+    cxx_flags: List[str] = field(default_factory=lambda: list())
     compiler_type: str = ""
     build_type: str = ""
 
@@ -36,9 +36,9 @@ class BuildInfo:
     """Complete build information for a platform"""
 
     board_name: str
-    defines: Dict[str, str] = field(default_factory=dict)
+    defines: Dict[str, str] = field(default_factory=lambda: dict())
     compiler_info: CompilerInfo = field(default_factory=CompilerInfo)
-    aliases: Dict[str, Optional[str]] = field(default_factory=dict)
+    aliases: Dict[str, Optional[str]] = field(default_factory=lambda: dict())
 
 
 class BuildInfoAnalyzer:
@@ -60,7 +60,7 @@ class BuildInfoAnalyzer:
         Returns:
             List of board names that have been built
         """
-        boards = []
+        boards: List[str] = []
         if not self.build_dir.exists():
             return boards
 

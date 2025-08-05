@@ -102,7 +102,7 @@ class CompileResult:
     success: bool
     compiled_count: int
     duration: float
-    errors: List["CompileError"] = field(default_factory=list)
+    errors: List["CompileError"] = field(default_factory=lambda: list())
 
 
 @dataclass

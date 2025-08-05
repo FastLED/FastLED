@@ -9,8 +9,9 @@ import shutil
 import subprocess
 import sys
 import time
+from concurrent.futures import Future
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Set, Tuple
+from typing import Any, Dict, List, Optional, Set, Tuple, Union
 
 from ci.util.paths import PROJECT_ROOT
 from ci.util.running_process import RunningProcess
@@ -593,8 +594,8 @@ def compile_unit_tests_python_api(
     # Phase 1: Start all compilations in parallel (NON-BLOCKING)
     print("🚀 Starting parallel compilation...")
     compile_start = time.time()
-    compile_futures = {}
-    test_info = {}
+    compile_futures: Dict[str, Future[Any]] = {}
+    test_info: Dict[str, Any] = {}
 
     for test_file in test_files:
         test_name = test_file.stem
@@ -621,7 +622,7 @@ def compile_unit_tests_python_api(
         f"⏳ Waiting for compilations to complete... (dispatch took {compile_dispatch_time:.2f}s)"
     )
     compile_wait_start = time.time()
-    link_futures = {}
+    link_futures: Dict[str, Dict[str, Any]] = {}
     cache_hits = 0
     success_count = 0
 
@@ -672,7 +673,7 @@ def compile_unit_tests_python_api(
                     # Fall through to actual linking
 
             # Cache miss - proceed with actual linking
-            static_libraries = []
+            static_libraries: List[Union[str, Path]] = []
             if fastled_lib_path and fastled_lib_path.exists():
                 static_libraries.append(fastled_lib_path)
 
@@ -826,12 +827,15 @@ def should_clean_build(build_info: dict[str, str | dict[str, str]]) -> bool:
     # If build parameters have changed, we need to rebuild
     if old_build_info != build_info:
         # Check if this is just a change in specific test target
-        old_args = old_build_info.get("ARGS", {})
-        new_args = build_info.get("ARGS", {})
+        old_args_raw = old_build_info.get("ARGS", {})
+        new_args_raw = build_info.get("ARGS", {})
 
         # Ensure ARGS is a dictionary
-        if not isinstance(old_args, dict) or not isinstance(new_args, dict):
+        if not isinstance(old_args_raw, dict) or not isinstance(new_args_raw, dict):
             return True
+
+        old_args: Dict[str, Any] = old_args_raw
+        new_args: Dict[str, Any] = new_args_raw
 
         # If only the specific test changed and everything else is the same,
         # we don't need to clean the build directory
@@ -839,8 +843,12 @@ def should_clean_build(build_info: dict[str, str | dict[str, str]]) -> bool:
         new_test = new_args.get("specific_test", "all")
 
         # Create copies without the specific_test field for comparison
-        old_args_no_test = {k: v for k, v in old_args.items() if k != "specific_test"}
-        new_args_no_test = {k: v for k, v in new_args.items() if k != "specific_test"}
+        old_args_no_test: Dict[str, Any] = {
+            k: v for k, v in old_args.items() if k != "specific_test"
+        }
+        new_args_no_test: Dict[str, Any] = {
+            k: v for k, v in new_args.items() if k != "specific_test"
+        }
 
         # If only the test target changed, don't clean
         if (

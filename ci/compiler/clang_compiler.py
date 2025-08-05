@@ -147,24 +147,24 @@ class LinkOptions:
     """Configuration options for program linking operations."""
 
     # Output configuration
-    output_executable: str | Path  # Output executable path
+    output_executable: Union[str, Path]  # Output executable path
 
     # Input files
     object_files: List[Union[str, Path]] = field(
-        default_factory=list
+        default_factory=lambda: []
     )  # .o files to link
     static_libraries: List[Union[str, Path]] = field(
-        default_factory=list
+        default_factory=lambda: []
     )  # .a files to link
 
     # Linker configuration
     linker: Optional[str] = None  # Custom linker path (auto-detected if None)
     linker_args: List[str] = field(
-        default_factory=list
+        default_factory=lambda: []
     )  # All linker command line arguments
 
     # Platform-specific defaults can be added via helper functions
-    temp_dir: str | Path | None = (
+    temp_dir: Optional[Union[str, Path]] = (
         None  # Custom temporary directory for intermediate files
     )
 

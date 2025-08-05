@@ -183,7 +183,7 @@ def apply_iwyu_fixes(source_dir: Path) -> int:
         return 1
 
     # Find all .h and .cpp files
-    cpp_files = []
+    cpp_files: List[Path] = []
     for pattern in ["**/*.cpp", "**/*.h", "**/*.hpp"]:
         cpp_files.extend(source_dir.glob(pattern))
 

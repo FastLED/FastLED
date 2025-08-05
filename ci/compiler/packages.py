@@ -145,9 +145,11 @@ class Platform(BaseModel):
         pattern=r"^SHA-256:[a-fA-F0-9]{64}$", description="SHA-256 checksum"
     )
     size_mb: float = Field(gt=0, alias="size", description="Archive size in megabytes")
-    boards: List[Board] = Field(default_factory=list, description="Supported boards")
+    boards: List[Board] = Field(
+        default_factory=lambda: [], description="Supported boards"
+    )
     tool_dependencies: List[ToolDependency] = Field(
-        default_factory=list,
+        default_factory=lambda: [],
         alias="toolsDependencies",
         description="Required tool dependencies",
     )
@@ -315,9 +317,9 @@ class Package(BaseModel):
     email: EmailStr = Field(description="Maintainer contact email")
     help: Help = Field(description="Help and documentation links")
     platforms: List[Platform] = Field(
-        default_factory=list, description="Available platforms"
+        default_factory=lambda: [], description="Available platforms"
     )
-    tools: List[Tool] = Field(default_factory=list, description="Available tools")
+    tools: List[Tool] = Field(default_factory=lambda: [], description="Available tools")
 
     @field_validator("platforms")
     @classmethod
@@ -478,7 +480,7 @@ class PackageManagerConfig(BaseModel):
 
     cache_dir: Path = Field(default_factory=lambda: Path.home() / ".arduino_packages")
     sources: List[HttpUrl] = Field(
-        default_factory=list, description="Package index URLs"
+        default_factory=lambda: [], description="Package index URLs"
     )
     timeout: int = Field(
         default=30, gt=0, le=300, description="Request timeout in seconds"

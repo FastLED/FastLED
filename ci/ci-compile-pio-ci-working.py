@@ -547,7 +547,7 @@ def main() -> int:
         f"Starting compilation for {len(boards)} boards with {len(example_paths)} examples"
     )
 
-    compilation_errors = []
+    compilation_errors: List[str] = []
 
     # Compile for each board
     for board in boards:

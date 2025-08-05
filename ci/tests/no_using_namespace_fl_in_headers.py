@@ -29,7 +29,7 @@ class NoUsingNamespaceFlInHeaderTester(unittest.TestCase):
 
     def test_no_using_namespace(self) -> None:
         """Searches through the program files to check for banned headers, excluding src/platforms."""
-        files_to_check = []
+        files_to_check: List[str] = []
         for root, _, files in os.walk(SRC_ROOT):
             for file in files:
                 if file.endswith(
@@ -38,7 +38,7 @@ class NoUsingNamespaceFlInHeaderTester(unittest.TestCase):
                     file_path = os.path.join(root, file)
                     files_to_check.append(file_path)
 
-        all_failings = []
+        all_failings: List[str] = []
         with ThreadPoolExecutor(max_workers=NUM_WORKERS) as executor:
             futures = [
                 executor.submit(self.check_file, file_path)

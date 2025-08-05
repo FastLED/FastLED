@@ -12,6 +12,7 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
+from typing import List
 
 from ci.compiler.clang_compiler import (
     BuildFlags,
@@ -311,7 +312,7 @@ void function{i}() {{
 
     def test_error_handling_no_objects(self):
         """Test error handling when no object files are provided - REAL error case."""
-        empty_objects = []
+        empty_objects: List[Path] = []
         archive_path = self.temp_dir / "test.a"
         options = LibarchiveOptions()
 

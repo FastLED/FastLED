@@ -12,7 +12,7 @@ SRC_ROOT = PROJECT_ROOT / "src"
 NUM_WORKERS = 1 if os.environ.get("NO_PARALLEL") else (os.cpu_count() or 1) * 4
 
 # Files that are allowed to not have #pragma once
-EXCLUDED_FILES = [
+EXCLUDED_FILES: List[str] = [
     # Add any exceptions here
 ]
 
@@ -90,7 +90,7 @@ class TestMissingPragmaOnce(unittest.TestCase):
         print(f"Found {len(files_to_check)} files to check")
 
         # Process files in parallel
-        all_failings = []
+        all_failings: List[str] = []
         with ThreadPoolExecutor(max_workers=NUM_WORKERS) as executor:
             futures = [
                 executor.submit(self.check_file, file_path)

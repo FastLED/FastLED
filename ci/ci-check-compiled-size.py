@@ -97,7 +97,11 @@ def main():
         print(f"Output: {output}")
         sys.exit(1)
 
-    size = int(size_match.group(1))
+    size_str = size_match.group(1)
+    if size_str is None:
+        print("Error: Size group is None")
+        sys.exit(1)
+    size = int(size_str)
 
     if args.max_size is not None and args.max_size > 0:
         max_size = args.max_size
