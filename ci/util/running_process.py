@@ -232,7 +232,6 @@ class RunningProcess:
             subprocess.CalledProcessError: If the command returns a non-zero exit code.
         """
         assert self.proc is None
-        self._start_time = time.time()  # Track when the process started
         self.proc = subprocess.Popen(
             self.command,
             shell=True,
@@ -243,6 +242,10 @@ class RunningProcess:
             encoding="utf-8",  # Explicitly use UTF-8
             errors="replace",  # Replace invalid chars instead of failing
         )
+
+        # Track start time after process is successfully created
+        # This excludes process creation overhead from timing measurements
+        self._start_time = time.time()
 
         def output_reader():
             """Continuously pump stdout to prevent subprocess from blocking on full pipe buffer"""
@@ -367,8 +370,10 @@ class RunningProcess:
         rtn = self.proc.returncode
         assert rtn is not None  # Process has completed, so returncode exists
 
-        # Record end time
-        self._end_time = time.time()
+        # Record end time only if not already set by output reader
+        # The output reader sets end time when stdout pumper finishes, which is more accurate
+        if self._end_time is None:
+            self._end_time = time.time()
 
         # Wait for reader thread to finish and cleanup
         if self.reader_thread is not None:
@@ -408,7 +413,7 @@ class RunningProcess:
         if self.proc is None:
             return
 
-        # Record end time when killed
+        # Record end time when killed (only if not already set by output reader)
         if self._end_time is None:
             self._end_time = time.time()
 
