@@ -244,6 +244,23 @@ protected:
 
 // The variables that our various asm statements use.  The same block of variables needs to be declared for
 // all the asm blocks because GCC is pretty stupid and it would clobber variables happily or optimize code away too aggressively
+
+// The existing code led to the generation of spurios move operations in the asm statements
+// that threw of timing when optimizing for debugging with -Og.
+// With the constraint "[b1] "=&a" (b1)", this is not any longer the case.
+// The new code appears to work in other circumstances as well, but it will only 
+// be activated when FASTLED_AVR_LEGACY_CODE == 0.
+// If FASTLED_AVR_LEGACY_CODE is not defined, then it will be set to 1 only
+// if the -Os (__OPTIMIZE_SIZE__) option has not been chosen.
+
+#ifndef FASTLED_AVR_LEGACY_CODE
+#ifdef __OPTIMIZE_SIZE__
+#define FASTLED_AVR_LEGACY_CODE 1
+#else
+#define FASTLED_AVR_LEGACY_CODE 0
+#endif
+#endif
+#if FASTLED_AVR_LEGACY_CODE
 #define ASM_VARS : /* write variables */				\
 				[count] "+x" (count),					\
 				[data] "+z" (data),						\
@@ -269,7 +286,35 @@ protected:
 				[O1] "M" (RGB_BYTE1(RGB_ORDER)),		\
 				[O2] "M" (RGB_BYTE2(RGB_ORDER))		\
 				: "cc" /* clobber registers */
-
+#else
+#warning "Experimental code to support debugging! Define FASTLED_AVR_LEGACY_CODE as 1 to force using legacy code."
+#define ASM_VARS : /* write variables */				\
+				[count] "+x" (count),					\
+				[data] "+z" (data),						\
+				[b1] "=&a" (b1),							\
+	                        [d0] "+r" (d0),							\
+				[d1] "+r" (d1),							\
+				[d2] "+r" (d2),							\
+				[loopvar] "+a" (loopvar),				\
+				[scale_base] "+a" (scale_base)			\
+				: /* use variables */					\
+				[ADV] "r" (advanceBy),					\
+				[b0] "a" (b0),							\
+				[hi] "r" (hi),							\
+				[lo] "r" (lo),							\
+				[s0] "r" (s0),					  		\
+				[s1] "r" (s1),							\
+				[s2] "r" (s2),							\
+				[e0] "r" (e0),							\
+				[e1] "r" (e1),							\
+				[e2] "r" (e2),							\
+				[PORT] ASM_VAR_PORT,                    \
+				[O0] "M" (RGB_BYTE0(RGB_ORDER)),		\
+				[O1] "M" (RGB_BYTE1(RGB_ORDER)),		\
+				[O2] "M" (RGB_BYTE2(RGB_ORDER))		\
+				: "cc" /* clobber registers */
+#endif
+	
 #if (FASTLED_ALLOW_INTERRUPTS == 1)
 #define HI1CLI cli()
 #define QLO2SEI sei()
