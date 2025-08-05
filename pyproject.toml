@@ -167,6 +167,11 @@ functionSignatureDisplay = "compact"
 # Task list tokens
 taskListTokens = ["TODO", "FIXME", "BUG", "HACK", "NOTE"]
 
+[tool.pytest.ini_options]
+markers = [
+    "full: marks tests as requiring the full test suite (deselected during quick Python-only runs)",
+]
+
 [[tool.pyright.executionEnvironments]]
 root = "."
 pythonVersion = "3.11"

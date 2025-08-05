@@ -173,7 +173,9 @@ def main() -> None:
             )
 
             # Create Python test process (runs first)
-            python_process = create_python_test_process(not args.no_stack_trace)
+            python_process = create_python_test_process(
+                not args.no_stack_trace, full_tests=True
+            )
 
             # Create examples compilation process with auto_run=False
             examples_process = create_examples_test_process(

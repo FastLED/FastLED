@@ -393,7 +393,9 @@ def create_examples_test_process(
     )
 
 
-def create_python_test_process(enable_stack_trace: bool) -> RunningProcess:
+def create_python_test_process(
+    enable_stack_trace: bool, full_tests: bool = False
+) -> RunningProcess:
     """Create a Python test process without starting it"""
     # Use list format for better environment handling
     cmd = [
@@ -406,6 +408,11 @@ def create_python_test_process(enable_stack_trace: bool) -> RunningProcess:
         "--durations=0",  # Show all durations
         "ci/tests",  # Test directory
     ]
+
+    # If not running full tests, exclude tests marked with @pytest.mark.full
+    if not full_tests:
+        cmd.extend(["-m", "not full"])
+
     return RunningProcess(
         cmd,
         auto_run=False,  # Don't auto-start - will be started in parallel later
@@ -461,9 +468,11 @@ def get_cpp_test_processes(
     return processes
 
 
-def get_python_test_processes(enable_stack_trace: bool) -> list[RunningProcess]:
+def get_python_test_processes(
+    enable_stack_trace: bool, full_tests: bool = False
+) -> list[RunningProcess]:
     """Return all processes needed for Python tests"""
-    return [create_python_test_process(enable_stack_trace)]
+    return [create_python_test_process(enable_stack_trace, full_tests)]
 
 
 def get_integration_test_processes(
@@ -1147,7 +1156,13 @@ def runner(args: TestArgs, src_code_change: bool = True) -> None:
 
         # Add Python tests if needed
         if test_categories.py or test_categories.py_only:
-            processes.append(create_python_test_process(enable_stack_trace))
+            # Pass full_tests=True if we're running integration tests or any form of full tests
+            full_tests = (
+                test_categories.integration
+                or test_categories.integration_only
+                or args.full
+            )
+            processes.append(create_python_test_process(enable_stack_trace, full_tests))
 
         # Add example tests if needed
         if test_categories.examples or test_categories.examples_only:
