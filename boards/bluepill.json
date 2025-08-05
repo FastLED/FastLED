@@ -1,0 +1,47 @@
+{
+    "build": {
+        "core": "maple",
+        "cpu": "cortex-m3",
+        "extra_flags": "-DSTM32F103C8 -DSTM32F1 -DARDUINO_GENERIC_STM32F103C8 -DARDUINO_ARCH_STM32",
+        "f_cpu": "72000000L",
+        "hwids": [
+            [
+                "0x1EAF",
+                "0x0003"
+            ]
+        ],
+        "ldscript": "jtag_c8.ld",
+        "mcu": "stm32f103c8",
+        "product_line": "STM32F103xx",
+        "variant": "STM32F103C8"
+    },
+    "connectivity": [
+        "can"
+    ],
+    "debug": {
+        "jlink_device": "STM32F103C8",
+        "openocd_board": "stm32f103c8_blue_pill",
+        "openocd_target": "stm32f1x",
+        "svd_path": "STM32F103.svd"
+    },
+    "frameworks": [
+        "arduino",
+        "stm32cube",
+        "libopencm3"
+    ],
+    "name": "Blue Pill STM32F103C8",
+    "upload": {
+        "maximum_ram_size": 20480,
+        "maximum_size": 65536,
+        "protocol": "stlink",
+        "protocols": [
+            "stlink",
+            "dfu",
+            "serial",
+            "blackmagic",
+            "jlink"
+        ]
+    },
+    "url": "https://stm32-base.org/boards/STM32F103C8T6-Blue-Pill",
+    "vendor": "Generic"
+}

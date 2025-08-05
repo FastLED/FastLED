@@ -1,835 +1,283 @@
-# FEATURE: Efficient Multi-Platform Build System Using pio run
+# New PlatformIO Testing System Design
 
-## Current Problem
+## Overview
 
-FastLED currently uses `pio ci` for multi-platform compilation testing, which is extremely inefficient:
+This document describes the design for a new testing system for FastLED that uses PlatformIO's `pio run` command directly with symlink directives and runtime source directory configuration.
 
-- **Each `pio ci` call creates a new project from scratch**
-- **Downloads dependencies repeatedly** for each example/board combination
-- **Runs Library Dependency Finder (LDF) every time** even when dependencies haven't changed
-- **No shared artifacts** between builds
-- **No incremental compilation benefits**
+## System Architecture
 
-Example current workflow:
-```bash
-pio ci example1.ino --board uno --lib src/
-pio ci example2.ino --board uno --lib src/  # Downloads deps again, runs LDF again
-pio ci example1.ino --board esp32dev --lib src/  # Downloads deps again, runs LDF again
-```
+### Core Components
 
-This results in:
-- **20-30 seconds per example** instead of 2-5 seconds for incremental builds
-- **Gigabytes of redundant downloads** across all board/example combinations
-- **CPU cycles wasted** on repetitive dependency resolution
+1. **Test Script**: `ci/tests/test_new_platformio.py` - Main test implementation
+2. **Root Script**: `uno2.py` - Convenience script for full UNO build testing
+3. **PlatformIO Configuration**: Dynamic `platformio.ini` generation with symlinks
+4. **Example Source Management**: Runtime configuration of source directories
 
-## Proposed Solution: pio run with --project-init
+### Key Features
 
-### Architecture Overview
+- **Direct PlatformIO Integration**: Uses `pio run` instead of `pio ci`
+- **Symlink Library Dependencies**: FastLED library linked via `symlink://` directive
+- **Runtime Source Directory**: Examples configured as source directory at runtime
+- **Automatic Cache Management**: PlatformIO `.pio` cache handled automatically
+- **Project Root Resolution**: Automatic detection of FastLED project root
 
-Replace `pio ci` with a two-phase approach:
+## Technical Implementation
 
-1. **Initialization Phase**: Use `pio project init` + `pio run` with full LDF for dependency establishment
-2. **Incremental Phase**: Use `pio run --disable-auto-clean` with LDF disabled for all subsequent builds
-
-### Phase 1: Project Initialization (First Run Only)
-
-For each board, create a persistent project structure:
-
-```bash
-# Create project structure for board
-pio project init --board uno --project-dir .build/projects/uno
-
-# Configure platformio.ini with FastLED dependencies
-cat >> .build/projects/uno/platformio.ini << EOF
-lib_deps = symlink://../../src
-lib_ldf_mode = chain  # Full dependency scanning
-lib_compat_mode = soft
-EOF
-
-# First build to establish dependencies and download packages
-pio run --project-dir .build/projects/uno
-```
-
-This phase:
-- ✅ **Downloads all platform packages** (toolchains, frameworks)
-- ✅ **Resolves all library dependencies** with full LDF scanning
-- ✅ **Compiles framework libraries** (Arduino core, etc.)
-- ✅ **Establishes build cache** and dependency graph
-
-### Phase 2: Incremental Compilation (All Subsequent Builds)
-
-For each example, use the established project with optimizations:
-
-```bash
-# Copy example to project src/ directory
-cp examples/Blink/Blink.ino .build/projects/uno/src/main.ino
-
-# Build with optimizations disabled
-pio run --project-dir .build/projects/uno \
-        --disable-auto-clean \
-        --project-option="lib_ldf_mode=off"
-```
-
-This phase:
-- ✅ **Skips dependency resolution** (LDF disabled)
-- ✅ **Reuses compiled framework libraries**
-- ✅ **Preserves build artifacts** (no auto-clean)
-- ✅ **Only compiles changed source files**
-
-### Manual Artifact Cleanup Strategy
-
-Since `--disable-auto-clean` prevents automatic cleanup:
-
-```bash
-# Clean artifacts manually when needed
-pio run --target clean --project-dir .build/projects/uno
-
-# Or clean specific object files
-rm -rf .build/projects/uno/.pio/build/uno/src/
-```
-
-Cleanup triggers:
-- **platformio.ini changes** (board configuration updates)
-- **Source directory structure changes** (new/removed header directories)
-- **Dependency updates** (FastLED version changes)
-- **Build flag changes** (optimization levels, defines)
-
-## Implementation Plan
-
-### Directory Structure
-
-```
-.build/
-├── projects/           # Persistent project directories
-│   ├── uno/           # Arduino UNO project
-│   │   ├── platformio.ini
-│   │   ├── src/       # Example source files (copied here)
-│   │   └── .pio/      # Build artifacts (preserved)
-│   ├── esp32dev/      # ESP32 project
-│   └── teensy31/      # Teensy 3.1 project
-└── cache/             # Shared package cache
-    └── packages/      # Downloaded toolchains/frameworks
-```
-
-### Algorithm Flow
+### 1. Project Root Resolution
 
 ```python
-def compile_multi_platform(boards: List[str], examples: List[str]):
-    for board in boards:
-        project_dir = f".build/projects/{board}"
-        
-        # Phase 1: Initialize if needed
-        if not project_exists(project_dir) or deps_changed():
-            initialize_project(board, project_dir)
-            build_initial(project_dir)  # Full LDF, download deps
-        
-        # Phase 2: Incremental builds
-        for example in examples:
-            copy_example_to_project(example, project_dir)
-            build_incremental(project_dir)  # LDF off, no auto-clean
-            
-        # Optional: Clean artifacts for next board
-        if clean_between_boards:
-            clean_project_artifacts(project_dir)
+def resolve_project_root() -> Path:
+    """Resolve the FastLED project root directory."""
+    current = Path(__file__).parent.resolve()
+    while current != current.parent:
+        if (current / "src" / "FastLED.h").exists():
+            return current
+        current = current.parent
+    raise RuntimeError("Could not find FastLED project root")
 ```
 
-### Configuration Changes
+### 2. PlatformIO Configuration Generation
 
-**platformio.ini template for each board:**
+The system generates a dynamic `platformio.ini` file with:
+
 ```ini
-[env:{board}]
-platform = {platform}
-board = {board}
+[platformio]
+src_dir = {example_path}  ; Runtime configured to examples/Blink/
+
+[env:uno]
+platform = atmelavr
+board = uno
 framework = arduino
 
-# FastLED as symlinked dependency
-lib_deps = symlink://../../src
+# FastLED library dependency (symlinked for efficiency)
+lib_deps = symlink://{fastled_src_path}
 
-# LDF Configuration (phase-dependent)
-lib_ldf_mode = chain    # Phase 1: full scanning
-lib_ldf_mode = off      # Phase 2: disabled
+# LDF Configuration
+lib_ldf_mode = deep+
+lib_compat_mode = off
 
-# Build optimizations
-lib_compat_mode = soft
-build_cache_dir = ../../cache
+# Build optimization
+build_cache_enable = true
 ```
 
-### API Design
+### 3. Build Directory Management
+
+- **Base Directory**: `.build/test_platformio/uno/`
+- **Cache Directory**: `.build/test_platformio/uno/.pio/`
+- **Source Symlink**: Points to selected example directory
+- **Library Symlink**: Points to FastLED `src/` directory
+
+### 4. Example Source Configuration
+
+The system supports flexible example selection:
 
 ```python
-class EfficientBuilder:
-    def __init__(self, base_dir: str = ".build"):
-        self.base_dir = Path(base_dir)
-        self.projects_dir = self.base_dir / "projects"
-        self.cache_dir = self.base_dir / "cache"
+def configure_example_source(project_dir: Path, example_name: str) -> Path:
+    """Configure the source directory to point to specified example."""
+    project_root = resolve_project_root()
+    example_path = project_root / "examples" / example_name
     
-    def initialize_board(self, board: Board) -> bool:
-        """Phase 1: Create project and establish dependencies"""
-        project_dir = self.projects_dir / board.name
-        
-        # Create project structure
-        run_cmd(["pio", "project", "init", 
-                 "--board", board.real_name,
-                 "--project-dir", str(project_dir)])
-        
-        # Configure platformio.ini
-        self.configure_platformio_ini(project_dir, board)
-        
-        # Initial build with full LDF
-        return self.run_pio_build(project_dir, full_ldf=True)
+    if not example_path.exists():
+        raise FileNotFoundError(f"Example not found: {example_path}")
     
-    def build_example(self, board: Board, example: Path) -> bool:
-        """Phase 2: Incremental build with optimizations"""
-        project_dir = self.projects_dir / board.name
-        
-        # Copy example to project
-        self.copy_example_source(example, project_dir / "src")
-        
-        # Build with optimizations
-        return self.run_pio_build(project_dir, 
-                                  disable_auto_clean=True,
-                                  disable_ldf=True)
-    
-    def run_pio_build(self, project_dir: Path, 
-                      disable_auto_clean: bool = False,
-                      disable_ldf: bool = False,
-                      full_ldf: bool = False) -> bool:
-        """Execute pio run with specified optimizations"""
-        cmd = ["pio", "run", "--project-dir", str(project_dir)]
-        
-        if disable_auto_clean:
-            cmd.append("--disable-auto-clean")
-        
-        if disable_ldf:
-            cmd.extend(["--project-option", "lib_ldf_mode=off"])
-        elif full_ldf:
-            cmd.extend(["--project-option", "lib_ldf_mode=chain"])
-        
-        return run_cmd(cmd).returncode == 0
+    return example_path
 ```
 
-## Performance Benefits
-
-### Expected Improvements
-
-**First Build (Initialization):**
-- **Current**: 45-60 seconds per board (pio ci overhead)
-- **New**: 30-45 seconds per board (pio run optimization)
-- **Improvement**: 25-33% faster initialization
-
-**Subsequent Builds (Incremental):**
-- **Current**: 20-30 seconds per example (full pio ci)
-- **New**: 2-5 seconds per example (incremental pio run)
-- **Improvement**: 85-90% faster incremental builds
-
-**Overall Multi-Platform Testing:**
-- **Current**: 50 examples × 10 boards × 25 seconds = ~3.5 hours
-- **New**: (10 boards × 45 seconds) + (500 builds × 3 seconds) = ~33 minutes
-- **Improvement**: 84% reduction in total build time
-
-### Resource Efficiency
-
-**Network Traffic:**
-- **Eliminate redundant downloads** of platform packages
-- **Share dependency cache** across all projects
-- **Reuse compiled libraries** between examples
-
-**Storage Efficiency:**
-- **Persistent build artifacts** prevent recompilation
-- **Shared package cache** reduces disk usage
-- **Incremental object files** only for changed sources
-
-**CPU Utilization:**
-- **Skip dependency resolution** for incremental builds
-- **Reuse compiled framework** libraries
-- **Parallel builds** possible with pio run -j flag
-
-## Implementation Strategy
-
-### Phase 1: Core Infrastructure
-1. **Modify ci-compile.py** to support both pio ci (current) and pio run (new) modes
-2. **Add project initialization** logic for board setup
-3. **Implement artifact management** and cleanup strategies
-4. **Add configuration templates** for platformio.ini generation
-
-### Phase 2: Optimization Features
-1. **Add LDF mode switching** (chain → off after initialization)
-2. **Implement smart cleanup** triggers (detect when cleanup needed)
-3. **Add shared cache management** for packages and dependencies
-4. **Parallel project initialization** for multiple boards
-
-### Phase 3: Advanced Features
-1. **Dependency change detection** (when to re-initialize projects)
-2. **Cross-example artifact sharing** (reuse compiled FastLED between examples)
-3. **Build cache persistence** across CI runs
-4. **Integration with existing symbol analysis** and size tracking
-
-### Compatibility and Migration
-
-**Backward Compatibility:**
-- Keep existing `pio ci` mode as fallback option
-- Add `--use-pio-run` flag to enable new system
-- Gradual migration with A/B testing
-
-**Risk Mitigation:**
-- **Validate builds match** between pio ci and pio run outputs
-- **Test on all supported platforms** before full migration
-- **Monitor build times** and failure rates during transition
-
-## Configuration Options
-
-### Build Modes
-
-```bash
-# Current system (backward compatibility)
-./compile --use-pio-ci uno --examples Blink
-
-# New efficient system
-./compile --use-pio-run uno --examples Blink
-
-# Hybrid mode (new system with fallback)
-./compile --efficient --fallback-pio-ci uno --examples Blink
-```
-
-### Cleanup Control
-
-```bash
-# Manual cleanup trigger
-./compile --clean-projects uno esp32dev
-
-# Automatic cleanup detection
-./compile --auto-clean-when-needed uno --examples Blink
-
-# Preserve artifacts across runs
-./compile --preserve-artifacts uno --examples Blink
-```
-
-### Performance Tuning
-
-```bash
-# Parallel project initialization
-./compile --parallel-init uno esp32dev teensy31
-
-# Shared dependency caching
-./compile --shared-cache --cache-dir /tmp/pio-cache
-
-# Advanced LDF control
-./compile --ldf-mode chain --disable-ldf-after-init
-```
-
-## Integration Points
-
-### Existing Systems Integration
-
-**Symbol Analysis:**
-- Works with pio run build outputs
-- Reuses existing ELF analysis tools
-- Maintains compatibility with size tracking
-
-**Build Info Generation:**
-- Continues to generate build_info.json
-- Uses pio run project directories
-- Maintains board configuration data
-
-**WASM Compilation:**
-- Benefits from faster incremental builds
-- Reuses established project structure
-- Maintains existing docker integration
-
-### CI/CD Integration
-
-**GitHub Actions:**
-- Faster PR validation builds
-- Reduced CI runtime costs
-- Better cache utilization
-
-**Local Development:**
-- Rapid iteration on examples
-- Faster multi-platform testing
-- Improved developer experience
-
-## Success Metrics
-
-### Performance Benchmarks
-
-**Build Time Reduction:**
-- Target: 80%+ reduction in multi-platform build time
-- Measure: Before/after comparison on standard example set
-- Monitor: Build time per example and total test suite time
-
-**Resource Utilization:**
-- Target: 60%+ reduction in network downloads
-- Target: 50%+ reduction in CPU utilization
-- Measure: Package download frequency and compilation cycles
-
-### Quality Assurance
-
-**Build Compatibility:**
-- Ensure pio run outputs match pio ci outputs exactly
-- Validate all supported board/example combinations
-- Test edge cases and error conditions
-
-**System Reliability:**
-- Monitor build failure rates before/after migration
-- Test cleanup and recovery mechanisms
-- Validate cross-platform consistency
-
-## Future Enhancements
-
-### Advanced Optimizations
-
-**Cross-Example Sharing:**
-- Share compiled FastLED objects between examples
-- Implement smart dependency tracking
-- Advanced incremental compilation strategies
-
-**Distributed Builds:**
-- Multi-machine project distribution
-- Shared remote cache systems
-- Cloud-based compilation acceleration
-
-**AI-Driven Optimization:**
-- Predict when cleanup is needed
-- Optimize build order for maximum cache reuse
-- Dynamic LDF mode selection based on change patterns
-
-This design provides a path to dramatically improve FastLED's multi-platform build performance while maintaining full compatibility and providing a smooth migration path.
-
-## Integration Planning
-
-This section details how the efficient pio run system will integrate into the existing FastLED codebase, leveraging current infrastructure while providing backward compatibility.
-
-### Existing Infrastructure Analysis
-
-FastLED has sophisticated build infrastructure that the new system must integrate with:
-
-**Current Entry Points:**
-- `./compile` - Bash wrapper script (entry point)
-- `ci/ci-compile.py` - Main compilation orchestrator using pio ci
-- `ci/util/concurrent_run.py` - Concurrent execution infrastructure
-- `ci/compiler/compile_for_board.py` - Board-specific compilation logic
-
-**Key Integration Points:**
-- **Concurrent execution system** via `concurrent_run()` with ThreadPoolExecutor
-- **Board configuration** via `ci/util/boards.py` and Board dataclass
-- **Symbol analysis integration** with existing tools
-- **Build info generation** for platform analysis
-- **CLI argument parsing** and interactive board selection
-
-### Integration Architecture
-
-#### Phase 1: Extend Current System (Backward Compatible)
-
-**Add pio run support alongside existing pio ci:**
+### 5. PlatformIO Command Execution
 
 ```python
-# ci/ci-compile.py - Enhanced main compilation function
-def compile_with_pio_run(
-    board: Board,
-    example_paths: list[Path], 
-    build_dir: str | None,
-    defines: list[str],
-    verbose: bool,
-    use_persistent_projects: bool = True,
-) -> tuple[bool, str]:
-    """New efficient compilation using pio run with persistent projects"""
-    
-    if not use_persistent_projects:
-        # Fallback to existing pio ci system
-        return compile_with_pio_ci(board, example_paths, build_dir, defines, verbose)
-    
-    # Phase 1: Initialize persistent project if needed
-    project_dir = ensure_project_initialized(board, build_dir, defines)
-    
-    # Phase 2: Incremental compilation for each example
-    for example_path in example_paths:
-        success, msg = compile_example_incremental(
-            board, example_path, project_dir, defines, verbose
-        )
-        if not success:
-            return False, msg
-    
-    return True, ""
-
-# New CLI flag for enabling pio run system
-def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(...)
-    # ... existing arguments ...
-    
-    # New build system options
-    parser.add_argument(
-        "--use-pio-run", 
-        action="store_true",
-        help="Use efficient pio run system instead of pio ci"
-    )
-    parser.add_argument(
-        "--clean-projects", 
-        action="store_true",
-        help="Clean persistent project directories before building"
-    )
-    parser.add_argument(
-        "--disable-incremental", 
-        action="store_true", 
-        help="Disable incremental compilation optimizations"
-    )
-```
-
-#### Phase 2: Integration with Concurrent Execution
-
-**Extend `concurrent_run` infrastructure for pio run:**
-
-```python
-# ci/util/concurrent_run.py - Enhanced for pio run support
-@dataclass
-class ConcurrentRunArgs:
-    # ... existing fields ...
-    use_pio_run: bool = False              # Enable new system
-    clean_projects: bool = False           # Clean before build
-    disable_incremental: bool = False      # Force full rebuilds
-    project_cache_dir: str | None = None   # Shared project cache
-
-def concurrent_run(args: ConcurrentRunArgs) -> int:
-    # ... existing initialization logic ...
-    
-    # NEW: Project initialization phase for pio run
-    if args.use_pio_run:
-        init_success = initialize_persistent_projects(args)
-        if not init_success:
-            return 1
-    
-    # Modified compilation logic to support both systems
-    with ThreadPoolExecutor(max_workers=num_cpus) as executor:
-        future_to_board: Dict[Future[Any], Board] = {}
-        
-        for board in projects:
-            # Choose compilation function based on system
-            compile_func = (
-                compile_examples_pio_run if args.use_pio_run 
-                else compile_examples  # existing function
-            )
-            
-            future = executor.submit(
-                compile_func,
-                board,
-                examples + extra_examples.get(board, []),
-                args.build_dir,
-                args.verbose,
-                libs=args.libs,
-                incremental=not args.disable_incremental,
-            )
-            future_to_board[future] = board
-        
-        # ... existing completion handling ...
-
-def initialize_persistent_projects(args: ConcurrentRunArgs) -> bool:
-    """Initialize persistent project directories for all boards"""
-    
-    # Use parallel initialization for efficiency
-    parallel_workers = min(len(args.projects), 4)  # Limit to prevent overload
-    
-    with ThreadPoolExecutor(max_workers=parallel_workers) as executor:
-        future_to_board: Dict[Future[Any], Board] = {}
-        
-        for board in args.projects:
-            future = executor.submit(
-                initialize_single_project,
-                board,
-                args.build_dir,
-                args.defines,
-                args.clean_projects,
-            )
-            future_to_board[future] = board
-        
-        # Check all initialization results
-        for future in as_completed(future_to_board):
-            board = future_to_board[future]
-            try:
-                success, msg = future.result()
-                if not success:
-                    locked_print(f"Failed to initialize project for {board.board_name}: {msg}")
-                    return False
-                locked_print(f"Initialized project for {board.board_name}")
-            except Exception as e:
-                locked_print(f"Exception initializing {board.board_name}: {e}")
-                return False
-    
-    return True
-```
-
-#### Phase 3: New Compilation Functions
-
-**Add pio run specific compilation logic:**
-
-```python
-# ci/compiler/compile_for_board.py - Enhanced for pio run
-def compile_examples_pio_run(
-    board: Board,
-    examples: list[Path],
-    build_dir: str | None,
-    verbose_on_failure: bool,
-    libs: list[str] | None,
-    incremental: bool = True,
-) -> tuple[bool, str]:
-    """Compile examples using efficient pio run system"""
-    
-    project_dir = get_project_directory(board, build_dir)
-    
-    for example in examples:
-        locked_print(f"\n*** Building {example} for {board.board_name} (pio run) ***")
-        
-        # Copy example to project src directory
-        success, msg = prepare_example_source(example, project_dir)
-        if not success:
-            return False, msg
-        
-        # Run incremental build
-        success, msg = run_pio_build_incremental(
-            project_dir, 
-            board, 
-            incremental=incremental,
-            verbose=verbose_on_failure
-        )
-        if not success:
-            return False, msg
-    
-    return True, ""
-
-def initialize_single_project(
-    board: Board,
-    build_dir: str | None,
-    defines: list[str],
-    clean_first: bool,
-) -> tuple[bool, str]:
-    """Initialize a persistent project directory for a board"""
-    
-    project_dir = get_project_directory(board, build_dir)
-    
-    # Clean if requested
-    if clean_first and project_dir.exists():
-        shutil.rmtree(project_dir)
-    
-    # Skip if already initialized and valid
-    if is_project_initialized(project_dir, board):
-        return True, f"Project already initialized for {board.board_name}"
-    
-    # Create project structure
-    cmd = [
-        "pio", "project", "init",
-        "--board", board.get_real_board_name(),
-        "--project-dir", str(project_dir),
-    ]
-    
-    result = subprocess.run(cmd, capture_output=True, text=True)
-    if result.returncode != 0:
-        return False, f"Failed to init project: {result.stderr}"
-    
-    # Configure platformio.ini
-    success, msg = configure_project_platformio_ini(project_dir, board, defines)
-    if not success:
-        return False, msg
-    
-    # Initial build to establish dependencies
-    success, msg = run_initial_project_build(project_dir, board)
-    if not success:
-        return False, msg
-    
-    return True, f"Successfully initialized project for {board.board_name}"
-
-def run_pio_build_incremental(
-    project_dir: Path,
-    board: Board,
-    incremental: bool,
-    verbose: bool,
-) -> tuple[bool, str]:
-    """Run pio build with incremental optimizations"""
-    
+def run_pio_build(project_dir: Path, verbose: bool = False) -> Tuple[bool, str]:
+    """Execute pio run command against the configured project."""
     cmd = ["pio", "run", "--project-dir", str(project_dir)]
-    
-    # Add incremental optimizations
-    if incremental:
-        cmd.append("--disable-auto-clean")
-        cmd.extend(["--project-option", "lib_ldf_mode=off"])
     
     if verbose:
         cmd.append("--verbose")
     
-    # Execute build
     result = subprocess.run(cmd, capture_output=True, text=True)
-    
-    if result.returncode == 0:
-        return True, "Build successful"
-    else:
-        return False, f"Build failed: {result.stderr}"
+    return result.returncode == 0, result.stdout + result.stderr
 ```
 
-#### Phase 4: CLI Integration
+## Test Implementation: `ci/tests/test_new_platformio.py`
 
-**Enhanced command line interface:**
+### Core Test Class
 
 ```python
-# ci/ci-compile.py - Updated main function
-def main() -> int:
-    args = parse_args()
+class TestNewPlatformIO(unittest.TestCase):
+    """Test new PlatformIO testing system."""
     
-    # ... existing board and example resolution ...
-    
-    # Choose build system based on arguments
-    if args.use_pio_run:
-        locked_print("Using efficient pio run build system")
+    def setUp(self) -> None:
+        """Set up test environment."""
+        self.project_root = resolve_project_root()
+        self.test_dir = Path(".build/test_platformio")
+        self.board_name = "uno"
         
-        # Create enhanced concurrent run args
-        run_args = ConcurrentRunArgs(
-            projects=boards,
-            examples=example_paths,
-            skip_init=args.skip_init,
-            defines=defines,
-            # ... existing args ...
-            use_pio_run=True,
-            clean_projects=args.clean_projects,
-            disable_incremental=args.disable_incremental,
-            project_cache_dir=args.build_dir,
+    def test_uno_blink_example(self) -> None:
+        """Test building Blink example for UNO target."""
+        # Resolve project root
+        project_root = resolve_project_root()
+        
+        # Set up build directory
+        project_dir = self.test_dir / self.board_name
+        project_dir.mkdir(parents=True, exist_ok=True)
+        
+        # Configure example source
+        example_path = configure_example_source(project_dir, "Blink")
+        
+        # Generate platformio.ini
+        success, msg = generate_platformio_ini(
+            project_dir, self.board_name, project_root, example_path
         )
+        self.assertTrue(success, f"Failed to generate platformio.ini: {msg}")
         
-        return concurrent_run(args=run_args)
-    else:
-        locked_print("Using traditional pio ci build system")
-        # ... existing pio ci logic ...
+        # Run pio build
+        success, output = run_pio_build(project_dir)
+        self.assertTrue(success, f"Build failed: {output}")
+        
+    def test_multiple_examples(self) -> None:
+        """Test building multiple examples in sequence."""
+        examples = ["Blink", "DemoReel100", "ColorPalette"]
+        
+        for example_name in examples:
+            with self.subTest(example=example_name):
+                # Configure and build each example
+                self._build_example(example_name)
+                
+    def _build_example(self, example_name: str) -> None:
+        """Helper to build a single example."""
+        project_dir = self.test_dir / self.board_name
+        project_dir.mkdir(parents=True, exist_ok=True)
+        
+        # Configure example source
+        example_path = configure_example_source(project_dir, example_name)
+        
+        # Update platformio.ini for new example
+        success, msg = generate_platformio_ini(
+            project_dir, self.board_name, self.project_root, example_path
+        )
+        self.assertTrue(success, f"Failed to configure {example_name}: {msg}")
+        
+        # Run build
+        success, output = run_pio_build(project_dir)
+        self.assertTrue(success, f"Failed to build {example_name}: {output}")
 ```
 
-### File Structure Integration
+### Utility Functions
 
-**New files to be created:**
+```python
+def generate_platformio_ini(
+    project_dir: Path, 
+    board_name: str, 
+    project_root: Path, 
+    example_path: Path
+) -> Tuple[bool, str]:
+    """Generate platformio.ini with symlink configuration."""
+    
+    fastled_src_path = project_root / "src"
+    
+    content = f"""[platformio]
+src_dir = {example_path}
 
-```
-ci/
-├── compiler/
-│   ├── pio_run_compiler.py          # New: pio run compilation logic
-│   └── project_manager.py           # New: persistent project management
-├── util/
-│   ├── project_cache.py             # New: project caching utilities
-│   └── incremental_build.py         # New: incremental build optimization
-└── templates/
-    └── platformio_ini.template      # New: platformio.ini template for projects
-```
-
-**Modified files:**
-
-```
-ci/
-├── ci-compile.py                    # Enhanced: Add pio run support
-├── util/
-│   └── concurrent_run.py            # Enhanced: Support pio run workflow
-└── compiler/
-    └── compile_for_board.py         # Enhanced: Add pio run compilation functions
-```
-
-### Configuration Integration
-
-**Enhanced platformio.ini template:**
-
-```ini
-# ci/templates/platformio_ini.template
 [env:{board_name}]
-platform = {platform}
+platform = atmelavr
 board = {board_name}
-framework = {framework}
+framework = arduino
 
-# FastLED dependency (symlinked for efficiency)
+# FastLED library dependency (symlinked for efficiency)
 lib_deps = symlink://{fastled_src_path}
 
-# LDF Configuration (dynamic based on phase)
-lib_ldf_mode = {ldf_mode}  # 'chain' for init, 'off' for incremental
-lib_compat_mode = soft
+# LDF Configuration
+lib_ldf_mode = deep+
+lib_compat_mode = off
 
 # Build optimization
-build_cache_dir = {cache_dir}
-{build_flags}
-{custom_options}
-```
-
-### Testing and Validation Integration
-
-**Extend existing test infrastructure:**
-
-```python
-# ci/tests/test_pio_run_integration.py - New comprehensive test
-class TestPioRunIntegration(unittest.TestCase):
+build_cache_enable = true
+"""
     
-    def test_concurrent_pio_run_vs_pio_ci(self):
-        """Validate pio run produces identical outputs to pio ci"""
-        
-    def test_incremental_build_performance(self):
-        """Measure performance improvements of incremental builds"""
-        
-    def test_project_initialization_concurrent(self):
-        """Test parallel project initialization"""
-        
-    def test_cleanup_and_recovery(self):
-        """Test cleanup mechanisms and error recovery"""
+    try:
+        platformio_ini = project_dir / "platformio.ini"
+        platformio_ini.write_text(content)
+        return True, "platformio.ini generated successfully"
+    except Exception as e:
+        return False, f"Failed to write platformio.ini: {e}"
 ```
 
-### Migration Strategy
+## Advantages of This System
 
-**Gradual rollout plan:**
+### 1. **Direct PlatformIO Integration**
+- Uses `pio run` which is more efficient than `pio ci`
+- Leverages PlatformIO's native caching mechanisms
+- Better integration with PlatformIO's project structure
 
-1. **Phase 1**: Add `--use-pio-run` flag (default: false)
-   - Parallel testing with existing system
-   - Validate output compatibility
+### 2. **Symlink Efficiency**
+- FastLED library linked via symlink for immediate reflection of changes
+- No copying of library files required
+- Faster builds due to symlink efficiency
 
-2. **Phase 2**: Enable for CI testing
-   - Use pio run in continuous integration
-   - Monitor performance and reliability
+### 3. **Runtime Source Configuration**
+- Examples can be switched without regenerating entire project
+- Flexible testing of different examples
+- Easy integration with CI/CD systems
 
-3. **Phase 3**: Default to pio run
-   - Change default to `--use-pio-run=true`
-   - Keep pio ci as fallback option
+### 4. **Automatic Cache Management**
+- PlatformIO `.pio` cache handled automatically
+- Incremental builds benefit from cached artifacts
+- Faster subsequent builds
 
-4. **Phase 4**: Full migration
-   - Remove pio ci code paths
-   - Optimize for pio run only
+### 5. **Clean Project Structure**
+- Isolated build directories
+- No interference with existing build systems
+- Easy cleanup and maintenance
 
-### Integration Testing Plan
+## Integration with Existing Systems
 
-**Compatibility validation:**
+### Compatibility
+- Works alongside existing `ci-compile.py` system
+- Uses separate build directories to avoid conflicts
+- Can be integrated into current CI workflows
 
-```bash
-# Test both systems produce identical results
-./compile uno --examples Blink --use-pio-ci > results_ci.log
-./compile uno --examples Blink --use-pio-run > results_run.log
+### Migration Path
+- Gradual adoption possible
+- Existing tests remain functional
+- Can be used for specific testing scenarios
 
-# Compare binary outputs
-diff results_ci.log results_run.log
+## Testing Strategy
 
-# Performance comparison
-time ./compile uno esp32dev --examples Blink,DemoReel100 --use-pio-ci
-time ./compile uno esp32dev --examples Blink,DemoReel100 --use-pio-run
-```
+### Unit Tests
+- Test project root resolution
+- Test platformio.ini generation
+- Test symlink configuration
+- Test build execution
 
-**Integration smoke tests:**
+### Integration Tests
+- Test with various examples
+- Test incremental builds
+- Test cache behavior
+- Test error handling
 
-```bash
-# Test concurrent execution
-./compile uno esp32dev teensy31 --examples Blink --use-pio-run
+### Performance Tests
+- Compare build times with current system
+- Measure cache effectiveness
+- Benchmark different example sizes
 
-# Test cleanup and recovery
-./compile uno --examples Blink --use-pio-run --clean-projects
+## Future Enhancements
 
-# Test symbol analysis integration  
-./compile uno --examples Blink --use-pio-run --symbols
-```
+### Multi-Board Support
+- Extend to support multiple board targets
+- Dynamic board configuration
+- Parallel board builds
 
-### Backward Compatibility Guarantees
+### Enhanced Caching
+- Shared cache across examples
+- Intelligent cache invalidation
+- Cross-project cache sharing
 
-**API Compatibility:**
-- All existing CLI arguments continue to work
-- `concurrent_run` function signature preserved
-- Board configuration format unchanged
-- Symbol analysis integration maintained
+### CI Integration
+- GitHub Actions integration
+- Automated testing workflows
+- Performance monitoring
 
-**Behavioral Compatibility:**
-- Build outputs identical between systems
-- Error handling and reporting consistent
-- Verbose logging format preserved
-- Exit codes and return values unchanged
+## Conclusion
 
-This integration plan provides a systematic approach to introducing the efficient pio run system while maintaining full compatibility with existing FastLED infrastructure and workflows.
+This new testing system provides a more efficient and flexible approach to testing FastLED with PlatformIO. By leveraging symlinks, runtime configuration, and native PlatformIO features, it offers improved build performance and better integration with the PlatformIO ecosystem.
+
+The system is designed to complement existing testing infrastructure while providing a modern, efficient alternative for specific testing scenarios.

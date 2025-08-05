@@ -128,7 +128,7 @@ void SetupTotallyRandomPalette()
 void SetupBlackAndWhiteStripedPalette()
 {
     // 'black out' all 16 palette entries...
-    fill_solid( currentPalette, 16, CRGB::Black);
+    fl::fill_solid( currentPalette, 16, CRGB::Black);
     // and set every fourth one to white.
     currentPalette[0] = CRGB::White;
     currentPalette[4] = CRGB::White;

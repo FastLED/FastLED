@@ -29,7 +29,7 @@ def old_way_unit_test_building():
     from ci.compiler.test_example_compilation import create_fastled_compiler
     from ci.compiler.cpp_test_compile import create_unit_test_fastled_library
     
-    compiler = create_fastled_compiler(use_pch=True, use_sccache=False, parallel=True)
+    compiler = create_fastled_compiler(use_pch=True, parallel=True)
     
     # Manual library building (duplicated logic)
     lib_file = create_unit_test_fastled_library(clean=False, use_pch=True)
@@ -91,7 +91,7 @@ def old_way_example_building():
     # OLD CODE (before refactor) - DO NOT USE
     """
     # Used same build_flags.toml as unit tests (wrong!)
-    compiler = create_fastled_compiler(use_pch=True, use_sccache=False, parallel=True)
+    compiler = create_fastled_compiler(use_pch=True, parallel=True)
     
     # Manual example compilation with wrong defines
     for example_file in example_files:
@@ -205,7 +205,7 @@ def show_api_simplification():
     print("BEFORE (scattered across multiple files):")
     print("""
     # In ci/compiler/test_example_compilation.py
-    compiler = create_fastled_compiler(use_pch=True, use_sccache=False, parallel=True)
+    compiler = create_fastled_compiler(use_pch=True, parallel=True)
     
     # In ci/compiler/cpp_test_compile.py  
     lib_file = create_unit_test_fastled_library(clean=False, use_pch=True)

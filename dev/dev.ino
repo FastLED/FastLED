@@ -14,4 +14,10 @@ void on_startup() {
 
 #endif  // ESP32
 
-#include "../examples/FestivalStick/FestivalStick.ino"
+#define DEFAULT_SKETCH "../examples/FestivalStick/FestivalStick.ino"
+
+#ifndef SKETCH_TARGET
+#define SKETCH_TARGET DEFAULT_SKETCH
+#endif
+
+#include SKETCH_TARGET

@@ -1,0 +1,56 @@
+{
+  "build": {
+    "arduino": {
+      "earlephilhower": {
+        "boot2_source": "boot2_generic_03h_2_padded_checksum.S",
+        "usb_vid": "0x2E8A",
+        "usb_pid": "0x000B"
+      }
+    },
+    "core": "earlephilhower",
+    "cpu": "cortex-m33",
+    "extra_flags": "-D ARDUINO_RASPBERRY_PI_PICO_2 -DARDUINO_ARCH_RP2350 -DUSBD_MAX_POWER_MA=250",
+    "f_cpu": "133000000L",
+    "hwids": [
+      [
+        "0x2E8A",
+        "0x00C0"
+      ],
+      [
+        "0x2E8A",
+        "0x000B"
+      ]
+    ],
+    "mcu": "rp2350",
+    "variant": "rpipico2"
+  },
+  "debug": {
+    "jlink_device": "RP2350_0",
+    "openocd_target": "rp2350.cfg",
+    "svd_path": "rp2350.svd"
+  },
+  "frameworks": [
+    "arduino"
+  ],
+  "name": "Pico 2",
+  "upload": {
+    "maximum_ram_size": 524288,
+    "maximum_size": 2097152,
+    "require_upload_port": true,
+    "native_usb": true,
+    "use_1200bps_touch": true,
+    "wait_for_upload_port": false,
+    "protocol": "picotool",
+    "protocols": [
+      "blackmagic",
+      "cmsis-dap",
+      "jlink",
+      "raspberrypi-swd",
+      "picotool",
+      "picoprobe",
+      "pico-debug"
+    ]
+  },
+  "url": "https://www.raspberrypi.org/products/raspberry-pi-pico/",
+  "vendor": "Raspberry Pi"
+}

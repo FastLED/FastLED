@@ -180,6 +180,22 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Disable all-source build (adds FASTLED_ALL_SRC=0 define)",
     )
+    parser.add_argument(
+        "--clean-projects",
+        action="store_true",
+        help="Clean persistent project directories before building",
+    )
+    parser.add_argument(
+        "--disable-incremental",
+        action="store_true",
+        help="Disable incremental compilation optimizations",
+    )
+
+    parser.add_argument(
+        "--keep",
+        action="store_true",
+        help="Keep build artifacts after compilation (disables auto-clean in pio run)",
+    )
     try:
         args = parser.parse_intermixed_args()
         unknown = []
@@ -983,45 +999,36 @@ def main() -> int:
         f"Starting compilation for {len(boards)} boards with {len(example_paths)} examples"
     )
 
-    compilation_errors: List[str] = []
-
-    # Compile for each board
-    for board in boards:
-        board_examples = example_paths.copy()
-        if board in extra_examples:
-            board_examples.extend(extra_examples[board])
-
-        success, message = compile_with_pio_ci(
-            board=board,
-            example_paths=board_examples,
-            build_dir=args.build_dir,
-            defines=defines,
-            verbose=args.verbose,
-        )
-
-        if not success:
-            compilation_errors.append(f"Board {board.board_name}: {message}")
-            locked_print(f"ERROR: Compilation failed for board {board.board_name}")
-            # Continue with other boards instead of stopping
-
-    # Run symbol analysis if requested
-    if args.symbols:
-        run_symbol_analysis(boards)
-
-    # Report results
-    elapsed_time = time.time() - start_time
-    time_str = time.strftime("%Mm:%Ss", time.gmtime(elapsed_time))
-
-    if compilation_errors:
-        locked_print(
-            f"\nCompilation finished in {time_str} with {len(compilation_errors)} error(s):"
-        )
-        for error in compilation_errors:
-            locked_print(f"  - {error}")
-        return 1
-    else:
-        locked_print(f"\nAll compilations completed successfully in {time_str}")
-        return 0
+    # Use efficient concurrent pio run system
+    from ci.util.concurrent_run import concurrent_run, ConcurrentRunArgs
+    
+    run_args = ConcurrentRunArgs(
+        projects=boards,
+        examples=example_paths,
+        skip_init=False,  # We handle initialization in pio run system
+        defines=defines,
+        customsdk=args.customsdk,
+        extra_packages=args.extra_packages.split(",") if args.extra_packages else [],
+        libs=None,  # Not used in pio run system
+        build_dir=args.build_dir,
+        extra_scripts=None,
+        cwd=None,
+        board_dir=None,
+        build_flags=None,
+        verbose=args.verbose,
+        extra_examples=extra_examples,
+        symbols=args.symbols,
+        # Pio run options
+        clean_projects=args.clean_projects,
+        disable_incremental=args.disable_incremental,
+        keep=args.keep,
+    )
+    
+    result = concurrent_run(run_args)
+    if result != 0:
+        return result
+    
+    return 0
 
 
 if __name__ == "__main__":

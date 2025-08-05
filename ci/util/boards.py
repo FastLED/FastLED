@@ -36,7 +36,7 @@ class Board:
     platform: str | None = None
     platform_needs_install: bool = False
     use_pio_run: bool = (
-        False  # some platforms like esp32-c2-devkitm-1 will only work with pio run
+        True  # pio run is now the default, set to False for platforms that need pio ci
     )
     platform_packages: str | None = None
     framework: str | None = None
@@ -63,11 +63,6 @@ class Board:
 
         if self.platform:
             options.append(f"platform={self.platform}")
-            # Add IDF ccache enable flag for ESP32 boards
-            if "espressif32" in self.platform:
-                if not self.defines:
-                    self.defines = []
-                self.defines.append("IDF_CCACHE_ENABLE=1")
 
         if self.platform_needs_install:
             options.append("platform_needs_install=true")

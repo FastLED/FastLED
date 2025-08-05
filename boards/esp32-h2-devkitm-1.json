@@ -1,0 +1,31 @@
+{
+  "build": {
+    "core": "esp32",
+    "f_cpu": "96000000L",
+    "f_flash": "64000000L",
+    "f_image": "48000000L",
+    "flash_mode": "qio",
+    "mcu": "esp32h2",
+    "variant": "esp32h2"
+  },
+  "connectivity": [
+    "bluetooth"
+  ],
+  "debug": {
+    "openocd_target": "esp32h2.cfg"
+  },
+  "frameworks": [
+    "arduino",
+    "espidf"
+  ],
+  "name": "Espressif ESP32-H2-DevKit",
+  "upload": {
+    "flash_size": "4MB",
+    "maximum_ram_size": 327680,
+    "maximum_size": 4194304,
+    "require_upload_port": true,
+    "speed": 460800
+  },
+  "url": "https://docs.espressif.com/projects/espressif-esp-dev-kits/en/latest/esp32h2/esp32-h2-devkitm-1/index.html",
+  "vendor": "Espressif"
+}

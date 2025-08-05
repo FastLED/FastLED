@@ -86,9 +86,8 @@ def parse_args(args: Optional[list[str]] = None) -> TestArgs:
     )
     parser.add_argument(
         "--no-cache",
-        "--no-sccache",
         action="store_true",
-        help="Disable sccache/ccache when running example compilation tests (cache is enabled by default for all builds and single builds)",
+        help="Disable cache when running example compilation tests (cache disabled by default)",
     )
     parser.add_argument(
         "--unity",

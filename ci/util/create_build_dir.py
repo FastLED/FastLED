@@ -304,6 +304,12 @@ def create_build_dir(
         cmd_list.append(f"--project-option=platform_packages={board.platform_packages}")
     if board.framework:
         cmd_list.append(f"--project-option=framework={board.framework}")
+    
+    # Add FastLED as local library with symlink
+    import pathlib
+    fastled_root_path = str((pathlib.Path(__file__).parent.parent.parent).resolve())
+    cmd_list.append(f"--project-option=lib_deps=symlink://{fastled_root_path}")
+    
     if board.board_build_core:
         cmd_list.append(f"--project-option=board_build.core={board.board_build_core}")
     if board.board_build_filesystem_size:
@@ -323,126 +329,12 @@ def create_build_dir(
     if no_install_deps:
         cmd_list.append("--no-install-dependencies")
 
-    # Add CCACHE configuration script
-    ccache_script = builddir / "ccache_config.py"
-    if not ccache_script.exists():
-        locked_print(
-            f"[Thread {thread_id}] Creating CCACHE configuration script at {ccache_script}"
-        )
-        with open(ccache_script, "w") as f:
-            f.write(
-                '''"""Configure CCACHE for PlatformIO builds."""
-
-import os
-import platform
-import subprocess
-from pathlib import Path
-
-Import("env")
-
-def is_ccache_available():
-    """Check if ccache is available in the system."""
-    try:
-        subprocess.run(["ccache", "--version"], capture_output=True, check=True)
-        return True
-    except (subprocess.CalledProcessError, FileNotFoundError):
-        return False
-
-def get_ccache_path():
-    """Get the full path to ccache executable."""
-    if platform.system() == "Windows":
-        # On Windows, look in chocolatey's bin directory
-        ccache_paths = [
-            "C:\\ProgramData\\chocolatey\\bin\\ccache.exe",
-            os.path.expanduser("~\\scoop\\shims\\ccache.exe")
-        ]
-        for path in ccache_paths:
-            if os.path.exists(path):
-                return path
-    else:
-        # On Unix-like systems, use which to find ccache
-        try:
-            return subprocess.check_output(["which", "ccache"]).decode().strip()
-        except subprocess.CalledProcessError:
-            pass
-    return None
-
-def configure_ccache(env):
-    """Configure CCACHE for the build environment."""
-    if not is_ccache_available():
-        print("CCACHE is not available. Skipping CCACHE configuration.")
-        return
-
-    ccache_path = get_ccache_path()
-    if not ccache_path:
-        print("Could not find CCACHE executable. Skipping CCACHE configuration.")
-        return
-
-    print(f"Found CCACHE at: {ccache_path}")
-
-    # Set up CCACHE environment variables if not already set
-    if "CCACHE_DIR" not in os.environ:
-        # STRICT: PROJECT_DIR must be explicitly set - NO fallbacks allowed
-        project_dir_for_ccache = env.get("PROJECT_DIR")
-        if not project_dir_for_ccache:
-            raise RuntimeError(
-                "CRITICAL: PROJECT_DIR environment variable is required for CCACHE_DIR setup. "
-                "Please set PROJECT_DIR to the project root directory."
-            )
-        ccache_dir = os.path.join(project_dir_for_ccache, ".ccache")
-        os.environ["CCACHE_DIR"] = ccache_dir
-        Path(ccache_dir).mkdir(parents=True, exist_ok=True)
-
-    # Configure CCACHE for this build
-    # STRICT: PROJECT_DIR must be explicitly set - NO fallbacks allowed
-    project_dir = env.get("PROJECT_DIR")
-    if not project_dir:
-        raise RuntimeError(
-            "CRITICAL: PROJECT_DIR environment variable is required but not set. "
-            "Please set PROJECT_DIR to the project root directory."
-        )
-    os.environ["CCACHE_BASEDIR"] = project_dir
-    os.environ["CCACHE_COMPRESS"] = "true"
-    os.environ["CCACHE_COMPRESSLEVEL"] = "6"
-    os.environ["CCACHE_MAXSIZE"] = "400M"
-
-    # Wrap compiler commands with ccache
-    # STRICT: CC and CXX must be explicitly set - NO fallbacks allowed
-    original_cc = env.get("CC")
-    if not original_cc:
-        raise RuntimeError(
-            "CRITICAL: CC environment variable is required but not set. "
-            "Please set CC to the C compiler path (e.g., gcc, clang)."
-        )
-    original_cxx = env.get("CXX")
-    if not original_cxx:
-        raise RuntimeError(
-            "CRITICAL: CXX environment variable is required but not set. "
-            "Please set CXX to the C++ compiler path (e.g., g++, clang++)."
-        )
-
-    # Don't wrap if already wrapped
-    if "ccache" not in original_cc:
-        env.Replace(
-            CC=f"{ccache_path} {original_cc}",
-            CXX=f"{ccache_path} {original_cxx}",
-        )
-        print(f"Wrapped CC: {env.get('CC')}")
-        print(f"Wrapped CXX: {env.get('CXX')}")
-
-    # Show CCACHE stats
-    subprocess.run([ccache_path, "--show-stats"], check=False)
-
-configure_ccache(env)'''
-            )
-
     # Get absolute paths for scripts
     project_root = Path.cwd()
     ci_flags_script = (project_root / "ci" / "ci-flags.py").resolve().as_posix()
-    ccache_script = (builddir / "ccache_config.py").resolve().as_posix()
 
     # Create a list of scripts with pre: prefix
-    script_list = [f"pre:{ci_flags_script}", f"pre:{ccache_script}"]
+    script_list = [f"pre:{ci_flags_script}"]
 
     # Add any additional scripts
     if extra_scripts:

@@ -30,7 +30,7 @@
     FL_DISABLE_WARNING_POP
 #else
     // Default fallback - assume Arduino-compatible millis() is available
-    #include <Arduino.h>  // ok include
+    //#include <Arduino.h>  // ok include
 #endif
 
 #ifdef FASTLED_TESTING

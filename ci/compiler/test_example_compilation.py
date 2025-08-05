@@ -254,46 +254,10 @@ def get_system_info() -> Dict[str, Union[str, int, float]]:
         }
 
 
-# Cache for expensive filesystem operations
-_cache_paths: Dict[str, Optional[str]] = {}
 
 
-def get_sccache_path() -> Optional[str]:
-    """Get the full path to sccache executable if available.
-
-    OPTIMIZED: Cached to avoid repeated filesystem checks.
-    """
-    if "sccache" in _cache_paths:
-        return _cache_paths["sccache"]
-
-    # First check system PATH
-    sccache_path = shutil.which("sccache")
-    if sccache_path:
-        _cache_paths["sccache"] = sccache_path
-        return sccache_path
-
-    # Check for sccache in the uv virtual environment
-    venv_sccache = Path(".venv/Scripts/sccache.exe")
-    if venv_sccache.exists():
-        path = str(venv_sccache.absolute())
-        _cache_paths["sccache"] = path
-        return path
-
-    _cache_paths["sccache"] = None
-    return None
 
 
-def get_ccache_path() -> Optional[str]:
-    """Get the full path to ccache executable if available.
-
-    OPTIMIZED: Cached to avoid repeated filesystem checks.
-    """
-    if "ccache" in _cache_paths:
-        return _cache_paths["ccache"]
-
-    path = shutil.which("ccache")
-    _cache_paths["ccache"] = path
-    return path
 
 
 def get_build_configuration() -> Dict[str, Union[bool, str]]:
@@ -303,17 +267,8 @@ def get_build_configuration() -> Dict[str, Union[bool, str]]:
     # Check unified compilation (note: simple build system uses direct compilation)
     config["unified_compilation"] = False  # Simple build system uses direct compilation
 
-    # Check compiler cache availability (ccache or sccache)
-    sccache_path = get_sccache_path()
-    ccache_path = get_ccache_path()
-
+    # Compiler cache disabled
     config["cache_type"] = "none"
-    if sccache_path:
-        config["cache_type"] = "sccache"
-        config["cache_path"] = sccache_path
-    elif ccache_path:
-        config["cache_type"] = "ccache"
-        config["cache_path"] = ccache_path
 
     # Build mode for simple build system
     config["build_mode"] = "simple_direct"
@@ -379,7 +334,7 @@ def check_pch_status(build_dir: Path) -> Dict[str, Union[bool, Path, int, str]]:
 
 
 def create_fastled_compiler(
-    use_pch: bool, use_sccache: bool, parallel: bool
+    use_pch: bool, parallel: bool
 ) -> Compiler:
     """Create compiler with standard FastLED settings for simple build system."""
     import os
@@ -1684,7 +1639,6 @@ class CompilationTestConfig:
     specific_examples: Optional[List[str]]
     clean_build: bool
     disable_pch: bool
-    disable_sccache: bool
     unity_build: bool
     unity_custom_output: Optional[str]
     unity_additional_flags: Optional[List[str]]
@@ -1747,7 +1701,6 @@ class CompilationTestRunner:
         try:
             compiler = create_fastled_compiler(
                 use_pch=not self.config.disable_pch,
-                use_sccache=not self.config.disable_sccache,
                 parallel=not self.config.no_parallel,
             )
 
@@ -1820,12 +1773,8 @@ class CompilationTestRunner:
         else:
             config_parts.append("Direct .ino compilation: enabled")
 
-        # Handle caching configuration
-        if self.config.disable_sccache:
-            config_parts.append("cache: disabled")
-        else:
-            # Add cache info based on build config
-            config_parts.append("cache: enabled (default)")
+        # Caching is disabled
+        config_parts.append("cache: disabled")
 
         pch_compatible_files: set[Path] = set()
         pch_incompatible_files: List[str] = []
@@ -2312,7 +2261,6 @@ def run_example_compilation_test(
     specific_examples: Optional[List[str]],
     clean_build: bool,
     disable_pch: bool,
-    disable_sccache: bool,
     unity_build: bool,
     unity_custom_output: Optional[str],
     unity_additional_flags: Optional[List[str]],
@@ -2330,7 +2278,6 @@ def run_example_compilation_test(
             specific_examples=specific_examples,
             clean_build=clean_build,
             disable_pch=disable_pch,
-            disable_sccache=disable_sccache,
             unity_build=unity_build,
             unity_custom_output=unity_custom_output,
             unity_additional_flags=unity_additional_flags,
@@ -2409,9 +2356,8 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "--no-cache",
-        "--no-sccache",
         action="store_true",
-        help="Disable sccache/ccache for compilation (cache is enabled by default for all builds and single builds).",
+        help="Disable cache for compilation (cache disabled by default).",
     )
     parser.add_argument(
         "--unity",
@@ -2470,7 +2416,6 @@ if __name__ == "__main__":
             specific_examples,
             args.clean,
             disable_pch=args.no_pch,
-            disable_sccache=args.no_cache,
             unity_build=args.unity,
             unity_custom_output=args.custom_output,
             unity_additional_flags=args.additional_flags,

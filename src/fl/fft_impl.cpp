@@ -1,10 +1,3 @@
-/// #include <Arduino.h>
-// #include <iostream>
-// #include "audio_types.h"
-// // #include "defs.h"
-// #include "thirdparty/cq_kernel/cq_kernel.h"
-// #include "thirdparty/cq_kernel/kiss_fftr.h"
-// #include "util.h"
 
 #ifndef FASTLED_INTERNAL
 #define FASTLED_INTERNAL 1

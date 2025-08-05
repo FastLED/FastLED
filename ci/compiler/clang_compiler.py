@@ -778,8 +778,8 @@ class Compiler:
         """
         Create a precompiled header file for faster compilation.
 
-        IMPORTANT: PCH generation bypasses sccache and uses direct clang++ compilation
-        to avoid compatibility issues. Only the actual translation unit compiles go through sccache.
+        IMPORTANT: PCH generation uses direct clang++ compilation
+        for maximum compatibility.
 
         Returns:
             bool: True if PCH creation was successful, False otherwise
@@ -858,7 +858,7 @@ class Compiler:
                 print(f"  {i}: {arg}")
             print()
 
-            # Compile PCH with direct compiler (no sccache) - use single stream to prevent buffer overflow
+            # Compile PCH with direct compiler - use single stream to prevent buffer overflow
             process = subprocess.Popen(
                 cmd,
                 stdout=subprocess.PIPE,
@@ -955,7 +955,7 @@ class Compiler:
     def check_clang_version(self) -> VersionCheckResult:
         """
         Check that ziglang c++ is accessible and return version information.
-        Handles cache-wrapped compilers (sccache/ccache) properly.
+        Handles ziglang c++ compiler properly.
 
         Returns:
             VersionCheckResult: Result containing success status, version string, and error message
@@ -1087,7 +1087,7 @@ class Compiler:
             cleanup_temp = False
 
         # Build compiler command
-        # Handle cache-wrapped compilers (sccache/ccache) or ziglang c++
+        # Handle ziglang c++ compiler
         if len(self.settings.compiler_args) > 0 and self.settings.compiler_args[
             0:4
         ] == ["python", "-m", "ziglang", "c++"]:
@@ -1112,23 +1112,12 @@ class Compiler:
             len(self.settings.compiler_args) > 0
             and self.settings.compiler_args[0] == "clang++"
         ):
-            # This is a cache-wrapped clang++, replace with optimized ziglang c++
+            # This is a clang++, replace with optimized ziglang c++
             cmd = ["python", "-m", "ziglang", "c++"]
             remaining_cache_args = self.settings.compiler_args[1:]
         else:
-            # This is a direct compiler call, use optimized ziglang c++
-            if self.settings.compiler.startswith("sccache"):
-                # When using sccache, we need to pass -- before the compiler arguments
-                cmd = [
-                    self.settings.compiler,
-                    "--",
-                    "python",
-                    "-m",
-                    "ziglang",
-                    "c++",
-                ]
-            else:
-                cmd = ["python", "-m", "ziglang", "c++"]
+            # Use ziglang c++ directly
+            cmd = ["python", "-m", "ziglang", "c++"]
             remaining_cache_args = self.settings.compiler_args
 
         # Add standard clang arguments
@@ -1297,7 +1286,7 @@ class Compiler:
             cleanup_temp = False
 
         # Build compiler command
-        # Handle cache-wrapped compilers (sccache/ccache) or ziglang c++
+        # Handle ziglang c++ compiler
         if len(self.settings.compiler_args) > 0 and self.settings.compiler_args[
             0:4
         ] == ["python", "-m", "ziglang", "c++"]:
@@ -1322,23 +1311,12 @@ class Compiler:
             len(self.settings.compiler_args) > 0
             and self.settings.compiler_args[0] == "clang++"
         ):
-            # This is a cache-wrapped clang++, replace with optimized ziglang c++
+            # This is a clang++, replace with optimized ziglang c++
             cmd = ["python", "-m", "ziglang", "c++"]
             remaining_cache_args = self.settings.compiler_args[1:]
         else:
-            # This is a direct compiler call, use optimized ziglang c++
-            if self.settings.compiler.startswith("sccache"):
-                # When using sccache, we need to pass -- before the compiler arguments
-                cmd = [
-                    self.settings.compiler,
-                    "--",
-                    "python",
-                    "-m",
-                    "ziglang",
-                    "c++",
-                ]
-            else:
-                cmd = ["python", "-m", "ziglang", "c++"]
+            # Use ziglang c++ directly
+            cmd = ["python", "-m", "ziglang", "c++"]
             remaining_cache_args = self.settings.compiler_args
 
         # Add standard clang arguments

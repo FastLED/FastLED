@@ -11,10 +11,10 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Dict, List
 
-from ci.compiler.compile_for_board import compile_examples, errors_happened
+from ci.compiler.compile_for_board import errors_happened
+from ci.compiler.pio_run_compiler import PioRunCompiler
 from ci.util.boards import Board  # type: ignore
 from ci.util.cpu_count import cpu_count
-from ci.util.create_build_dir import create_build_dir
 from ci.util.locked_print import locked_print
 
 
@@ -22,6 +22,34 @@ from ci.util.locked_print import locked_print
 PARRALLEL_PROJECT_INITIALIZATION = (
     os.environ.get("PARRALLEL_PROJECT_INITIALIZATION", "0") == "1"
 )
+
+
+
+def compile_examples_pio_run(
+    board: Board,
+    examples: list[Path],
+    build_dir: str | None,
+    verbose_on_failure: bool,
+    libs: list[str] | None,
+    defines: list[str] | None = None,
+    clean_first: bool = False,
+    incremental: bool = True,
+    keep: bool = False,
+) -> tuple[bool, str]:
+    """Compile examples using efficient pio run system."""
+    try:
+        compiler = PioRunCompiler(build_dir)
+        return compiler.compile_examples(
+            board=board,
+            examples=examples,
+            defines=defines,
+            verbose=verbose_on_failure,
+            clean_first=clean_first,
+            incremental=incremental,
+            keep=keep,
+        )
+    except Exception as e:
+        return False, f"Exception in pio run compilation: {e}"
 
 
 def _banner_print(msg: str) -> None:
@@ -54,6 +82,10 @@ class ConcurrentRunArgs:
     verbose: bool = False
     extra_examples: dict[Board, list[Path]] | None = None
     symbols: bool = False
+    # Pio run options
+    clean_projects: bool = False
+    disable_incremental: bool = False
+    keep: bool = False
 
 
 def concurrent_run(
@@ -79,113 +111,43 @@ def concurrent_run(
         locked_print(f"Changing to directory {cwd}")
         os.chdir(cwd)
 
-    start_time = time.time()
-    create_build_dir(
-        board=first_project,
-        defines=defines,
-        customsdk=customsdk,
-        no_install_deps=skip_init,
-        extra_packages=extra_packages,
-        build_dir=build_dir,
-        board_dir=board_dir,
-        build_flags=args.build_flags,
-        extra_scripts=extra_scripts,
-    )
-    diff = time.time() - start_time
-
-    msg = f"Build directory created in {diff:.2f} seconds for board"
-    locked_print(msg)
+    # Legacy create_build_dir removed - pio run system handles its own initialization
 
     verbose = args.verbose
-    # This is not memory/cpu bound but is instead network bound so we can run one thread
-    # per board to speed up the process.
-    parallel_init_workers = 1 if not PARRALLEL_PROJECT_INITIALIZATION else len(projects)
-    # Initialize the build directories for all boards
-    locked_print(
-        f"Initializing build directories for {len(projects)} boards with {parallel_init_workers} parallel workers"
-    )
-    with ThreadPoolExecutor(max_workers=parallel_init_workers) as executor:
-        future_to_board: Dict[Future[Any], Board] = {}
-        for board in projects:
-            locked_print(
-                f"Submitting build directory initialization for board: {board.board_name}"
-            )
-            future = executor.submit(
-                create_build_dir,
-                board,
-                defines,
-                customsdk,
-                skip_init,
-                extra_packages,
-                build_dir,
-                board_dir,
-                args.build_flags,
-                extra_scripts,
-            )
-            future_to_board[future] = board
-
-        completed_boards = 0
-        failed_boards = 0
-        for future in as_completed(future_to_board):
-            board = future_to_board[future]
-            try:
-                success, msg = future.result()
-                if not success:
-                    locked_print(
-                        f"ERROR: Failed to initialize build_dir for board {board.board_name}:\n{msg}"
-                    )
-                    failed_boards += 1
-                    # cancel all other tasks
-                    for f in future_to_board:
-                        if not f.done():
-                            f.cancel()
-                            locked_print(
-                                "Cancelled initialization for remaining boards due to failure"
-                            )
-                    return 1
-                else:
-                    completed_boards += 1
-                    locked_print(
-                        f"SUCCESS: Finished initializing build_dir for board {board.board_name} ({completed_boards}/{len(projects)})"
-                    )
-            except Exception as e:
-                locked_print(
-                    f"EXCEPTION: Build directory initialization failed for board {board.board_name}: {e}"
-                )
-                failed_boards += 1
-                # cancel all other tasks
-                for f in future_to_board:
-                    if not f.done():
-                        f.cancel()
-                        locked_print(
-                            "Cancelled initialization for remaining boards due to exception"
-                        )
-                return 1
-    init_end_time = time.time()
-    init_time = (init_end_time - start_time) / 60
-    locked_print(f"\nAll build directories initialized in {init_time:.2f} minutes.")
+    # Legacy build directory initialization removed - pio run system handles its own initialization
     errors: list[str] = []
     # Run the compilation process
     num_cpus = max(1, min(cpu_count(), len(projects)))
+    
+    # Use efficient pio run build system
+    locked_print("Using efficient pio run build system")
+    
     with ThreadPoolExecutor(max_workers=num_cpus) as executor:
-        future_to_board: Dict[Future[Any], Board] = {
-            executor.submit(
-                compile_examples,
+        future_to_board: Dict[Future[Any], Board] = {}
+        
+        for board in projects:
+            # Use pio run system with additional parameters
+            future = executor.submit(
+                compile_examples_pio_run,
                 board,
                 examples + extra_examples.get(board, []),
                 build_dir,
                 verbose,
-                libs=libs,
-            ): board
-            for board in projects
-        }
+                libs,
+                defines=defines,  # Pass defines for pio run  
+                clean_first=args.clean_projects,  # Clean first if requested
+                incremental=not args.disable_incremental,  # Incremental flag
+                keep=args.keep,  # Pass keep flag
+            )
+            future_to_board[future] = board
+            
         for future in as_completed(future_to_board):
             board = future_to_board[future]
             success, msg = future.result()
             if not success:
-                msg = f"Compilation failed for board {board}: {msg}"
+                msg = f"Compilation failed for board {board.board_name}: {msg}"
                 errors.append(msg)
-                locked_print(f"Compilation failed for board {board}: {msg}.\nStopping.")
+                locked_print(f"Compilation failed for board {board.board_name}: {msg}.\nStopping.")
                 for f in future_to_board:
                     f.cancel()
                 break
