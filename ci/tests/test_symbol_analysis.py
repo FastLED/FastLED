@@ -38,7 +38,9 @@ HERE = Path(__file__).resolve().parent.absolute()
 UNO = HERE / "uno"
 OUTPUT = HERE / "output"
 ELF_FILE = UNO / "firmware.elf"
-BUILD_INFO_PATH = PROJECT_ROOT / ".build" / "uno" / "build_info.json"
+BUILD_INFO_PATH = (
+    PROJECT_ROOT / ".build" / "fled" / "examples" / "uno" / "build_info.json"
+)
 
 
 PLATFORMIO_PATH = Path.home() / ".platformio"
@@ -181,6 +183,25 @@ class TestSymbolAnalysis(unittest.TestCase):
         nm_path = self.board_info["aliases"]["nm"]
         cppfilt_path = self.board_info["aliases"]["c++filt"]
         elf_file = self.board_info["prog_path"]
+
+        # If the ELF file from build_info doesn't exist, try the actual build location
+        if not Path(elf_file).exists():
+            # Fallback to the actual ELF file location
+            actual_elf_file = (
+                PROJECT_ROOT
+                / ".build"
+                / "fled"
+                / "examples"
+                / "uno"
+                / "Blink"
+                / ".pio"
+                / "build"
+                / "uno"
+                / "firmware.elf"
+            )
+            if actual_elf_file.exists():
+                elf_file = str(actual_elf_file)
+                print(f"Using actual ELF file location: {elf_file}")
 
         # Verify the ELF file exists
         self.assertTrue(Path(elf_file).exists(), f"ELF file should exist: {elf_file}")
@@ -354,6 +375,26 @@ class TestSymbolAnalysis(unittest.TestCase):
 
         # Run full analysis on actual build
         elf_file = self.board_info["prog_path"]
+
+        # If the ELF file from build_info doesn't exist, try the actual build location
+        if not Path(elf_file).exists():
+            # Fallback to the actual ELF file location
+            actual_elf_file = (
+                PROJECT_ROOT
+                / ".build"
+                / "fled"
+                / "examples"
+                / "uno"
+                / "Blink"
+                / ".pio"
+                / "build"
+                / "uno"
+                / "firmware.elf"
+            )
+            if actual_elf_file.exists():
+                elf_file = str(actual_elf_file)
+                print(f"Using actual ELF file location: {elf_file}")
+
         nm_path = self.board_info["aliases"]["nm"]
         cppfilt_path = self.board_info["aliases"]["c++filt"]
 

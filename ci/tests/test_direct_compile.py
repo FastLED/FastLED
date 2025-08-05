@@ -17,7 +17,9 @@ from ci.compiler.clang_compiler import (
     check_clang_version,
     compile_ino_file,
     find_ino_files,
-    test_clang_accessibility,
+)
+from ci.compiler.clang_compiler import (
+    test_clang_accessibility as check_clang_accessibility,
 )
 
 # MANDATORY: Import configuration functions - NO fallbacks allowed
@@ -32,7 +34,7 @@ def test_clang_accessibility_main():
     """Test that clang++ is accessible and working properly."""
     print("\n=== Testing clang++ accessibility ===")
 
-    success = test_clang_accessibility()
+    success = check_clang_accessibility()
     assert success, "Clang accessibility test failed"
 
 
@@ -113,7 +115,7 @@ def test_clang_accessibility_functions():
     print("\n=== Testing backward-compatible functions ===")
 
     # Test the standalone function version
-    success = test_clang_accessibility()
+    success = check_clang_accessibility()
     assert success, "Backward-compatible function test failed"
 
 

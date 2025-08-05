@@ -922,16 +922,17 @@ for x in range(5):
 ### Python Function Parameter and Return Types
 
 **🚨 MANDATORY: ALL function parameters MUST have explicit type annotations - NO EXCEPTIONS!**
+**🚨 MANDATORY: ALL function return types MUST have explicit type annotations - NO EXCEPTIONS!**
 **🚨 MANDATORY: NO DEFAULT VALUES in function parameters - NO EXCEPTIONS!**
 
 This rule applies to:
-- ✅ Regular function parameters (no defaults)
-- ✅ Method parameters (including self/cls, no defaults)
-- ✅ Lambda parameters (no defaults)
-- ✅ Callback function parameters (no defaults)
-- ✅ Generator function parameters (no defaults)
-- ✅ Async function parameters (no defaults)
-- ✅ Protocol method parameters (no defaults)
+- ✅ Regular function parameters (no defaults) AND return types
+- ✅ Method parameters (including self/cls, no defaults) AND return types
+- ✅ Lambda parameters (no defaults) AND return types
+- ✅ Callback function parameters (no defaults) AND return types
+- ✅ Generator function parameters (no defaults) AND return types
+- ✅ Async function parameters (no defaults) AND return types
+- ✅ Protocol method parameters (no defaults) AND return types
 
 **Examples:**
 
@@ -939,6 +940,10 @@ This rule applies to:
 # ❌ WRONG - Missing parameter types
 def process_data(data):
     return data
+
+# ❌ WRONG - Missing return type annotation
+def run_tests():
+    pass
 
 # ❌ WRONG - Partial typing and defaults
 def validate_user(name: str, age, enabled: bool = True):
@@ -948,9 +953,13 @@ def validate_user(name: str, age, enabled: bool = True):
 def process_data(data: bytes, validate: bool = True) -> bytes:
     return data
 
-# ✅ CORRECT - All parameters typed, no defaults
+# ✅ CORRECT - All parameters typed, no defaults, explicit return type
 def process_data(data: bytes, validate: bool) -> bytes:
     return data
+
+# ✅ CORRECT - Explicit return type for functions returning None
+def run_tests() -> None:
+    pass
 
 # ✅ CORRECT - Method parameters typed including self
 class DataProcessor:
@@ -964,6 +973,18 @@ callback: Callable[[int], None] = lambda x: None
 async def fetch_data(url: str) -> bytes:
     return await download(url)
 ```
+
+**Return Type Requirements:**
+- ✅ Functions that return nothing: `-> None`
+- ✅ Functions that return a value: `-> ReturnType`
+- ✅ Functions that return optional values: `-> Optional[ReturnType]` or `-> ReturnType | None`
+- ✅ Functions that return multiple types: `-> Union[Type1, Type2]` or `-> Type1 | Type2`
+- ✅ Generator functions: `-> Generator[YieldType, SendType, ReturnType]`
+- ✅ Async functions: `-> Awaitable[ReturnType]` or `async def func() -> ReturnType`
+
+**ABSOLUTELY FORBIDDEN:**
+- ❌ Functions without return type annotations: `def function():`
+- ❌ Methods without return type annotations: `def method(self):`
 
 **Protocol Method Parameters:**
 ```python
