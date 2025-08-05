@@ -12,6 +12,7 @@ from pathlib import Path
 from typing import Any, Dict, List
 
 from ci.compiler.compile_for_board import compile_examples, errors_happened
+from ci.compiler.pio_run_compiler import PioRunCompiler
 from ci.util.boards import Board  # type: ignore
 from ci.util.cpu_count import cpu_count
 from ci.util.create_build_dir import create_build_dir
@@ -22,6 +23,31 @@ from ci.util.locked_print import locked_print
 PARRALLEL_PROJECT_INITIALIZATION = (
     os.environ.get("PARRALLEL_PROJECT_INITIALIZATION", "0") == "1"
 )
+
+
+def compile_examples_pio_run(
+    board: Board,
+    examples: list[Path],
+    build_dir: str | None,
+    verbose: bool,
+    libs: list[str] | None,
+    defines: list[str] | None = None,
+    clean_first: bool = False,
+    incremental: bool = True,
+) -> tuple[bool, str]:
+    """Compile examples using efficient pio run system."""
+    try:
+        compiler = PioRunCompiler(build_dir)
+        return compiler.compile_examples(
+            board=board,
+            examples=examples,
+            defines=defines,
+            verbose=verbose,
+            clean_first=clean_first,
+            incremental=incremental,
+        )
+    except Exception as e:
+        return False, f"Exception in pio run compilation: {e}"
 
 
 def _banner_print(msg: str) -> None:
@@ -54,6 +80,10 @@ class ConcurrentRunArgs:
     verbose: bool = False
     extra_examples: dict[Board, list[Path]] | None = None
     symbols: bool = False
+    # New pio run options
+    use_pio_run: bool = False
+    clean_projects: bool = False
+    disable_incremental: bool = False
 
 
 def concurrent_run(
@@ -167,25 +197,49 @@ def concurrent_run(
     errors: list[str] = []
     # Run the compilation process
     num_cpus = max(1, min(cpu_count(), len(projects)))
+    
+    # Choose compilation function based on args
+    if args.use_pio_run:
+        locked_print("Using efficient pio run build system")
+        compile_func = compile_examples_pio_run
+    else:
+        locked_print("Using traditional pio ci build system")
+        compile_func = compile_examples
+    
     with ThreadPoolExecutor(max_workers=num_cpus) as executor:
-        future_to_board: Dict[Future[Any], Board] = {
-            executor.submit(
-                compile_examples,
-                board,
-                examples + extra_examples.get(board, []),
-                build_dir,
-                verbose,
-                libs=libs,
-            ): board
-            for board in projects
-        }
+        future_to_board: Dict[Future[Any], Board] = {}
+        
+        for board in projects:
+            if args.use_pio_run:
+                future = executor.submit(
+                    compile_func,
+                    board,
+                    examples + extra_examples.get(board, []),
+                    build_dir,
+                    verbose,
+                    libs,
+                    defines,  # Pass defines for pio run
+                    args.clean_projects,  # Clean first if requested
+                    not args.disable_incremental,  # Incremental flag
+                )
+            else:
+                future = executor.submit(
+                    compile_func,
+                    board,
+                    examples + extra_examples.get(board, []),
+                    build_dir,
+                    verbose,
+                    libs=libs,
+                )
+            future_to_board[future] = board
+            
         for future in as_completed(future_to_board):
             board = future_to_board[future]
             success, msg = future.result()
             if not success:
-                msg = f"Compilation failed for board {board}: {msg}"
+                msg = f"Compilation failed for board {board.board_name}: {msg}"
                 errors.append(msg)
-                locked_print(f"Compilation failed for board {board}: {msg}.\nStopping.")
+                locked_print(f"Compilation failed for board {board.board_name}: {msg}.\nStopping.")
                 for f in future_to_board:
                     f.cancel()
                 break

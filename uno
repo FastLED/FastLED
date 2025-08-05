@@ -2,4 +2,4 @@
 
 set -e
 
-./compile uno "$@" examples/Blink
+./compile uno "$@" examples/Blink --use-pio-run
