@@ -12,6 +12,7 @@ import sys
 import time
 import warnings
 from pathlib import Path
+from typing import List, Set
 
 from ci.util.boards import Board, get_board  # type: ignore
 from ci.util.locked_print import locked_print
@@ -224,8 +225,8 @@ def parse_args():
     return args
 
 
-def remove_duplicates(items: list[str]) -> list[str]:
-    seen = set()
+def remove_duplicates(items: List[str]) -> List[str]:
+    seen: Set[str] = set()
     out = []
     for item in items:
         if item not in seen:
@@ -234,7 +235,7 @@ def remove_duplicates(items: list[str]) -> list[str]:
     return out
 
 
-def choose_board_interactively(boards: list[str]) -> list[str]:
+def choose_board_interactively(boards: List[str]) -> List[str]:
     print("Available boards:")
     boards = remove_duplicates(sorted(boards))
     for i, board in enumerate(boards):

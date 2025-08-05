@@ -3,6 +3,7 @@
 import os
 import unittest
 from concurrent.futures import ThreadPoolExecutor
+from typing import List
 
 from ci.util.paths import PROJECT_ROOT
 
@@ -14,10 +15,10 @@ NUM_WORKERS = 1 if os.environ.get("NO_PARALLEL") else (os.cpu_count() or 1) * 4
 
 
 class NoUsingNamespaceFlInHeaderTester(unittest.TestCase):
-    def check_file(self, file_path) -> list[str]:
+    def check_file(self, file_path: str) -> List[str]:
         if "FastLED.h" in file_path:
             return []
-        failings: list[str] = []
+        failings: List[str] = []
         with open(file_path, "r", encoding="utf-8") as f:
             for line_number, line in enumerate(f, 1):
                 if line.startswith("//"):

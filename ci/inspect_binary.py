@@ -7,6 +7,7 @@ import subprocess
 import sys
 from pathlib import Path
 from tempfile import TemporaryDirectory
+from typing import Any, Dict
 
 from ci.util.bin_2_elf import bin_to_elf
 from ci.util.elf import dump_symbol_sizes
@@ -86,7 +87,7 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def load_build_info(build_info_path: Path) -> dict:
+def load_build_info(build_info_path: Path) -> Dict[str, Any]:
     """
     Load build information from a JSON file.
 

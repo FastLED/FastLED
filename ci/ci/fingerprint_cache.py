@@ -11,7 +11,7 @@ import json
 import os
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Optional
+from typing import Dict, Optional
 
 
 @dataclass
@@ -51,7 +51,7 @@ class FingerprintCache:
         self.cache_file = cache_file
         self.cache = self._load_cache()
 
-    def _load_cache(self) -> dict[str, CacheEntry]:
+    def _load_cache(self) -> Dict[str, CacheEntry]:
         """
         Load cache from JSON file, return empty dict if file doesn't exist.
 
@@ -66,7 +66,7 @@ class FingerprintCache:
                 data = json.load(f)
 
             # Convert JSON dict to CacheEntry objects
-            cache = {}
+            cache: Dict[str, CacheEntry] = {}
             for file_path, entry_data in data.items():
                 cache[file_path] = CacheEntry(
                     modification_time=entry_data["modification_time"],
