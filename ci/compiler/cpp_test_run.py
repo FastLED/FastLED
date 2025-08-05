@@ -20,20 +20,20 @@ from ci.util.paths import PROJECT_ROOT
 
 def optimize_python_command(cmd: list[str]) -> list[str]:
     """
-    Optimize command list by replacing 'python' with sys.executable for direct execution.
+    Optimize command list for subprocess execution in uv environment.
 
-    This avoids shell resolution overhead and ensures we use the exact Python interpreter
-    that's currently running, which is critical for virtual environments.
+    For python commands, we need to use 'uv run python' to ensure access to
+    installed packages like ziglang. Direct sys.executable bypasses uv environment.
 
     Args:
         cmd: Command list that may contain 'python' as first element
 
     Returns:
-        list[str]: Optimized command with 'python' replaced by sys.executable
+        list[str]: Optimized command with 'python' prefixed by 'uv run'
     """
-    if cmd and cmd[0] == "python":
-        # Replace 'python' with the current Python executable path
-        optimized_cmd = [sys.executable] + cmd[1:]
+    if cmd and (cmd[0] == "python" or cmd[0] == "python3"):
+        # Use uv run python to ensure access to uv-managed packages
+        optimized_cmd = ["uv", "run", "python"] + cmd[1:]
         return optimized_cmd
     return cmd
 

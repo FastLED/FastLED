@@ -1278,6 +1278,97 @@ args = parse_args(["--config", config_file, "--debug"])
 
 **Why:** This pattern enables flexible argument parsing for testing, scripting, and programmatic usage while maintaining backward compatibility with existing code that relies on sys.argv parsing.
 
+### Python Command Construction
+
+**🚨 MANDATORY: Use subprocess.list2cmdline() for all command construction - NO EXCEPTIONS!**
+
+**❌ WRONG - Using " ".join() for command construction:**
+```python
+# DANGEROUS - Breaks with spaces and special characters
+cmd_str = " ".join(cmd_list)
+command = " ".join(["python", "-m", "ziglang", "ar", "--option", "value with spaces"])
+# Result: python -m ziglang ar --option value with spaces  (BROKEN!)
+```
+
+**✅ CORRECT - Using subprocess.list2cmdline():**
+```python
+import subprocess
+
+# SAFE - Properly escapes spaces and special characters
+cmd_str = subprocess.list2cmdline(cmd_list)
+command = subprocess.list2cmdline(["python", "-m", "ziglang", "ar", "--option", "value with spaces"])
+# Result: python -m ziglang ar --option "value with spaces"  (CORRECT!)
+```
+
+**Why subprocess.list2cmdline() is mandatory:**
+- ✅ **Proper Escaping** - Handles spaces and special characters correctly
+- ✅ **Cross-Platform** - Works correctly on Windows, macOS, and Linux
+- ✅ **Security** - Prevents command injection vulnerabilities
+- ✅ **Reliability** - Avoids broken commands from malformed argument joining
+
+**When this rule applies:**
+- ✅ **Command line construction** for subprocess calls
+- ✅ **Debug output** showing commands that will be executed
+- ✅ **Error messages** displaying failed commands
+- ✅ **Logging** command execution for troubleshooting
+- ✅ **Any scenario** where command arguments are joined into a string
+
+**Key principle:** Never use `" ".join()` for command construction. Always use `subprocess.list2cmdline()` to ensure proper escaping and cross-platform compatibility.
+
+### Python Import Organization
+
+**🚨 MANDATORY: All system imports must be at the top of the file - NO EXCEPTIONS!**
+
+**❌ WRONG - Imports inside functions:**
+```python
+def test_archive(self):
+    import sys  # BAD - Import inside function
+    import os   # BAD - Import inside function
+    sys.argv.append("--test")
+    os.path.exists("/tmp")
+```
+
+**✅ CORRECT - Imports at module level:**
+```python
+import sys
+import os
+
+def test_archive(self) -> None:
+    sys.argv.append("--test")
+    os.path.exists("/tmp")
+```
+
+**Import organization rules:**
+- ✅ **Standard library imports** - Always at the top (sys, os, subprocess, etc.)
+- ✅ **Third-party imports** - After standard library imports
+- ✅ **Local imports** - After third-party imports  
+- ✅ **Alphabetical ordering** - Within each group, sort alphabetically
+- ✅ **Blank lines** - Separate each group with a blank line
+
+**Correct import structure:**
+```python
+# Standard library imports
+import os
+import subprocess
+import sys
+from pathlib import Path
+
+# Third-party imports
+import pytest
+from typeguard import typechecked
+
+# Local imports
+from ci.compiler.clang_compiler import BuildFlags
+from ci.util.paths import PROJECT_ROOT
+```
+
+**Rare exceptions (use sparingly):**
+- ✅ **Conditional imports** - When import depends on runtime conditions
+- ✅ **Circular import avoidance** - When needed to break circular dependencies
+- ✅ **Optional dependencies** - When gracefully handling missing packages
+
+**Key principle:** Module-level imports improve readability, enable static analysis, and make dependencies explicit. Function-level imports should be avoided except in exceptional circumstances.
+
 ### Python Exception Handling Rules
 
 **🚨 MANDATORY: All Python try-catch blocks must follow these requirements:**

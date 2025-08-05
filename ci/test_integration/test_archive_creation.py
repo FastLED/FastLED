@@ -7,6 +7,7 @@ Tests REAL archive creation functionality - no mocks!
 
 import os
 import stat
+import subprocess
 import sys
 import tempfile
 import unittest
@@ -20,8 +21,8 @@ from ci.compiler.clang_compiler import (
     LinkOptions,
     Result,
     create_archive_sync,
-    detect_archiver,
     detect_linker,
+    get_configured_archiver_command,
     link_program_sync,
 )
 from ci.util.paths import PROJECT_ROOT
@@ -54,14 +55,21 @@ class TestRealArchiveCreation(unittest.TestCase):
             )
         return BuildFlags.parse(build_flags_path)
 
-    def test_archiver_detection_real(self):
-        """Test real archiver detection on the system."""
+    def test_archiver_configuration_real(self):
+        """Test that archiver is properly configured in TOML."""
         try:
             build_flags = self._load_build_flags()
-            archiver = detect_archiver(build_flags)
-            self.assertTrue(archiver)  # Should return a valid path
-            self.assertTrue(Path(archiver).exists() or Path(archiver + ".exe").exists())
-            print(f"Found archiver: {archiver}")
+            configured_cmd = get_configured_archiver_command(build_flags)
+            self.assertIsNotNone(configured_cmd, "Archiver must be configured in TOML")
+            # Explicit type assertion for type checker
+            assert configured_cmd is not None  # Make type checker happy
+            self.assertTrue(
+                len(configured_cmd) > 0, "Archiver command must not be empty"
+            )
+            import subprocess
+
+            archiver_str = subprocess.list2cmdline(configured_cmd)
+            print(f"Configured archiver: {archiver_str}")
         except RuntimeError as e:
             self.fail(f"No archiver found on system: {e}")
 
@@ -265,15 +273,17 @@ void function{i}() {{
         # Create an archive first
         archive_path = self.test_compile_and_archive_blink()
 
-        # Use real archiver tool to list contents
+        # Use configured archiver tool to list contents
         build_flags = self._load_build_flags()
-        archiver = detect_archiver(build_flags)
+        configured_cmd = get_configured_archiver_command(build_flags)
+        self.assertIsNotNone(configured_cmd, "Archiver must be configured in TOML")
+        # Use the full configured archiver command (e.g., ["uv", "run", "python", "-m", "ziglang", "ar"])
+        assert configured_cmd is not None  # Type checker hint
+        archiver_cmd = configured_cmd[:]  # Full command including uv run python
 
-        import subprocess
-
-        list_result = subprocess.run(
-            [archiver, "t", str(archive_path)], capture_output=True, text=True
-        )
+        # Build full command for archive listing
+        full_cmd = archiver_cmd + ["t", str(archive_path)]
+        list_result = subprocess.run(full_cmd, capture_output=True, text=True)
 
         self.assertEqual(
             list_result.returncode, 0, f"Archive listing failed: {list_result.stderr}"

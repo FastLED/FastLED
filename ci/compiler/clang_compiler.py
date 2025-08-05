@@ -46,20 +46,20 @@ _EXECUTOR = ThreadPoolExecutor(max_workers=get_max_workers())
 
 def optimize_python_command(cmd: list[str]) -> list[str]:
     """
-    Optimize command list by replacing 'python' with sys.executable for direct execution.
+    Optimize command list for subprocess execution in uv environment.
 
-    This avoids shell resolution overhead and ensures we use the exact Python interpreter
-    that's currently running, which is critical for virtual environments.
+    For python commands, we need to use 'uv run python' to ensure access to
+    installed packages like ziglang. Direct sys.executable bypasses uv environment.
 
     Args:
         cmd: Command list that may contain 'python' as first element
 
     Returns:
-        list[str]: Optimized command with 'python' replaced by sys.executable
+        list[str]: Optimized command with 'python' prefixed by 'uv run'
     """
     if cmd and (cmd[0] == "python" or cmd[0] == "python3"):
-        # Replace 'python' with the current Python executable path
-        optimized_cmd = [sys.executable] + cmd[1:]
+        # Use uv run python to ensure access to uv-managed packages
+        optimized_cmd = ["uv", "run", "python"] + cmd[1:]
         return optimized_cmd
     return cmd
 
@@ -245,7 +245,7 @@ class BuildFlags:
                 f"The [tools] section is required and must define all compiler tools.\n"
                 f"Example:\n"
                 f"[tools]\n"
-                f'compiler_command = ["python", "-m", "ziglang", "c++"]\n'
+                f'compiler_command = ["uv", "run", "python", "-m", "ziglang", "c++"]\n'
                 f'c_compiler = "clang"'
             )
 
@@ -920,7 +920,9 @@ class Compiler:
                 # PCH compilation failed, clean up and continue without PCH
                 # Print debug info to help diagnose PCH issues
                 stderr_output = "\n".join(stderr_lines)
-                print(f"[DEBUG] PCH compilation failed with command: {' '.join(cmd)}")
+                print(
+                    f"[DEBUG] PCH compilation failed with command: {subprocess.list2cmdline(cmd)}"
+                )
                 print(f"[DEBUG] PCH error output: {stderr_output}")
                 os.unlink(pch_header_path)
                 return False
@@ -2159,7 +2161,7 @@ def link_program_sync(
             )
 
         # Create verbose error message with full command and exception details
-        cmd_str = " ".join(str(arg) for arg in cmd)
+        cmd_str = subprocess.list2cmdline(str(arg) for arg in cmd)
         verbose_error = (
             f"Linker command failed with exception: {type(e).__name__}: {e}\n"
             f"Failed command: {cmd_str}\n"
@@ -2387,7 +2389,7 @@ def main() -> bool:
 
         # Get the command that would be executed
         cmd = get_fastled_compile_command(ino_files[0], temp_output)
-        print(f"Command with compiler_args: {' '.join(cmd)}")
+        print(f"Command with compiler_args: {subprocess.list2cmdline(cmd)}")
 
         if "-Werror" not in cmd or "-Wall" not in cmd:
             print("X compiler_args not found in command")
@@ -2474,36 +2476,8 @@ def get_configured_archiver_command(build_flags_config: BuildFlags) -> list[str]
     return None
 
 
-def detect_archiver(build_flags_config: BuildFlags | None) -> str:
-    """Detect archiver with preference for configured tools."""
-    print(f"[ARCHIVER DETECT] Starting archiver detection...")
-
-    if build_flags_config:
-        configured_cmd = get_configured_archiver_command(build_flags_config)
-        if configured_cmd:
-            # Return the full command as a space-separated string for compatibility
-            archiver_cmd = " ".join(configured_cmd)
-            print(f"[ARCHIVER DETECT] Using configured archiver: {archiver_cmd}")
-            return archiver_cmd
-        else:
-            print(f"[ARCHIVER DETECT] No configured archiver found in build flags")
-
-    # Fallback to system archiver detection
-    print(f"[ARCHIVER DETECT] Falling back to system archiver detection...")
-
-    llvm_ar = shutil.which("llvm-ar")
-    if llvm_ar:
-        print(f"[ARCHIVER DETECT] Found llvm-ar: {llvm_ar}")
-        return llvm_ar
-
-    ar = shutil.which("ar")
-    if ar:
-        print(f"[ARCHIVER DETECT] Found system ar: {ar}")
-        return ar
-
-    raise RuntimeError(
-        "No archiver tool found (ar, llvm-ar, or configured archiver required)"
-    )
+# detect_archiver function REMOVED - auto-detection from environment is FORBIDDEN
+# All tools must be explicitly configured in TOML build configuration
 
 
 def create_archive_sync(
@@ -2520,7 +2494,8 @@ def create_archive_sync(
         object_files: List of .o files to include in archive
         output_archive: Output .a file path
         options: Archive generation options
-        archiver: Path to archiver tool (auto-detected if None)
+        archiver: Archiver command from TOML configuration (REQUIRED - no auto-detection)
+        build_flags_config: Build configuration with archive flags (REQUIRED)
 
     Returns:
         Result: Success status and command output
@@ -2543,25 +2518,46 @@ def create_archive_sync(
                 return_code=1,
             )
 
-    # Auto-detect archiver if not provided
+    # Archiver MUST be provided from TOML configuration - NO AUTO-DETECTION
     if archiver is None:
-        try:
-            archiver = detect_archiver(build_flags_config)
-        except RuntimeError as e:
-            return Result(ok=False, stdout="", stderr=str(e), return_code=1)
+        return Result(
+            ok=False,
+            stdout="",
+            stderr="CRITICAL: No archiver provided to create_archive_sync(). "
+            "Archiver must be configured in [tools] section of build TOML file. "
+            "Auto-detection from environment is NOT ALLOWED.",
+            return_code=1,
+        )
 
-    # Build archive command - handle configured command vs single tool
+    # Build archive command - STRICT configuration enforcement
     cmd: list[str] = []
     if build_flags_config:
         configured_cmd = get_configured_archiver_command(build_flags_config)
-        if configured_cmd and archiver == " ".join(configured_cmd):
-            # Using configured command - split it properly
+        if configured_cmd:
+            # Use configured command - verify it matches what was passed
+            configured_str = subprocess.list2cmdline(configured_cmd)
+            if archiver and archiver != configured_str:
+                print(f"[ARCHIVE WARNING] Archiver mismatch detected:")
+                print(f"  Passed archiver: '{archiver}'")
+                print(f"  Configured archiver: '{configured_str}'")
+                print(f"  Using configured archiver (takes precedence)")
+
             cmd = configured_cmd[:]
+            print(
+                f"[ARCHIVE] Using configured archiver command: {subprocess.list2cmdline(cmd)}"
+            )
         else:
-            # Using detected or provided archiver
-            cmd = [archiver]
+            raise RuntimeError(
+                f"CRITICAL: No archiver configured in build_flags_config.tools.archiver. "
+                f"Archiver fallbacks are NOT ALLOWED. "
+                f"Please configure archiver in [tools] section of your build TOML file."
+            )
     else:
-        cmd = [archiver]
+        raise RuntimeError(
+            f"CRITICAL: No build_flags_config provided to create_archive_sync(). "
+            f"Archive creation requires build configuration. "
+            f"System tool fallbacks are NOT ALLOWED to prevent silent configuration errors."
+        )
 
     # Archive flags: MUST come from build configuration TOML - NO DEFAULTS
     if (
@@ -2613,7 +2609,7 @@ def create_archive_sync(
     output_archive.parent.mkdir(parents=True, exist_ok=True)
 
     # Debug output for archiver command (helpful for diagnosing fallback issues)
-    print(f"[ARCHIVE] Using archiver command: {' '.join(cmd)}")
+    print(f"[ARCHIVE] Using archiver command: {subprocess.list2cmdline(cmd)}")
     print(f"[ARCHIVE] Archive flags: {flags}")
     print(f"[ARCHIVE] Platform: {system}")
 
@@ -2661,7 +2657,7 @@ def create_archive_sync(
             return_code=process.returncode,
         )
     except Exception as e:
-        error_msg = f"Archive command failed: {e}\nCommand was: {' '.join(cmd)}\nThis may indicate that the configured archiver is not available."
+        error_msg = f"Archive command failed: {e}\nCommand was: {subprocess.list2cmdline(cmd)}\nThis may indicate that the configured archiver is not available."
         print(f"[ARCHIVE ERROR] {error_msg}")
         return Result(ok=False, stdout="", stderr=error_msg, return_code=-1)
 
@@ -2742,16 +2738,24 @@ def create_compiler_options_from_toml(
         k: v for k, v in kwargs.items() if k not in ["compiler", "archiver"]
     }
 
-    # Get modern command-based tools with fallbacks for legacy CompilerOptions compatibility
-    # Use the last element of command arrays as the tool name for backward compatibility
-    compiler_tool = (
-        build_flags.tools.cpp_compiler[-1]
-        if build_flags.tools.cpp_compiler
-        else "clang++"
-    )
-    archiver_tool = (
-        build_flags.tools.archiver[-1] if build_flags.tools.archiver else "ar"
-    )
+    # STRICT: Compiler must be configured in TOML - NO DEFAULTS
+    if not build_flags.tools.cpp_compiler:
+        raise RuntimeError(
+            f"CRITICAL: No compiler configured in [tools] section of {toml_path}. "
+            f'Please add: cpp_compiler = ["uv", "run", "python", "-m", "ziglang", "c++"] '
+            f"or similar compiler configuration. "
+            f"Default tool fallbacks are NOT ALLOWED."
+        )
+    compiler_tool = subprocess.list2cmdline(build_flags.tools.cpp_compiler)
+    # STRICT: Archiver must be configured in TOML - NO DEFAULTS
+    if not build_flags.tools.archiver:
+        raise RuntimeError(
+            f"CRITICAL: No archiver configured in [tools] section of {toml_path}. "
+            f'Please add: archiver = ["uv", "run", "python", "-m", "ziglang", "ar"] '
+            f"or similar archiver configuration. "
+            f"Default tool fallbacks are NOT ALLOWED."
+        )
+    archiver_tool = subprocess.list2cmdline(build_flags.tools.archiver)
 
     # Create CompilerOptions with TOML-loaded flags and tools
     return CompilerOptions(
