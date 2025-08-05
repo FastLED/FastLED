@@ -10,7 +10,7 @@ import subprocess
 import sys
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, List
+from typing import Any, Dict, List, Tuple
 
 
 @dataclass
@@ -56,7 +56,7 @@ def demangle_symbol(mangled_name: str, cppfilt_path: str) -> str:
 
 def analyze_symbols(
     elf_file: str, nm_path: str, cppfilt_path: str
-) -> tuple[List[SymbolInfo], List[SymbolInfo], List[SymbolInfo]]:
+) -> Tuple[List[SymbolInfo], List[SymbolInfo], List[SymbolInfo]]:
     """Analyze symbols in ELF file using nm with C++ demangling"""
     print("Analyzing symbols...")
 
@@ -64,9 +64,9 @@ def analyze_symbols(
     cmd = f'"{nm_path}" --print-size --size-sort --radix=d "{elf_file}"'
     output = run_command(cmd)
 
-    symbols = []
-    fastled_symbols = []
-    large_symbols = []
+    symbols: List[SymbolInfo] = []
+    fastled_symbols: List[SymbolInfo] = []
+    large_symbols: List[SymbolInfo] = []
 
     print("Demangling C++ symbols...")
 
@@ -127,7 +127,7 @@ def analyze_map_file(map_file: str) -> Dict[str, List[str]]:
     """Analyze the map file to understand module dependencies"""
     print("Analyzing map file...")
 
-    dependencies = {}
+    dependencies: Dict[str, List[str]] = {}
     current_archive = None
 
     try:
@@ -161,7 +161,12 @@ def analyze_map_file(map_file: str) -> Dict[str, List[str]]:
     return dependencies
 
 
-def generate_report(symbols, fastled_symbols, large_symbols, dependencies):
+def generate_report(
+    symbols: List[SymbolInfo],
+    fastled_symbols: List[SymbolInfo],
+    large_symbols: List[SymbolInfo],
+    dependencies: Dict[str, List[str]],
+) -> Dict[str, Any]:
     """Generate a comprehensive report"""
     print("\n" + "=" * 80)
     print("ESP32 FASTLED SYMBOL ANALYSIS REPORT")
@@ -179,7 +184,9 @@ def generate_report(symbols, fastled_symbols, large_symbols, dependencies):
 
     # Largest FastLED symbols
     print("\nLARGEST FASTLED SYMBOLS (potential elimination targets):")
-    fastled_sorted = sorted(fastled_symbols, key=lambda x: x.size, reverse=True)
+    fastled_sorted: List[SymbolInfo] = sorted(
+        fastled_symbols, key=lambda x: x.size, reverse=True
+    )
     for i, sym in enumerate(fastled_sorted[:20]):
         display_name = sym.demangled_name
         print(f"  {i + 1:2d}. {sym.size:6d} bytes - {display_name}")
@@ -190,7 +197,7 @@ def generate_report(symbols, fastled_symbols, large_symbols, dependencies):
 
     # FastLED modules analysis
     print("\nFASTLED MODULES PULLED IN:")
-    fastled_modules = [
+    fastled_modules: List[str] = [
         mod
         for mod in dependencies.keys()
         if any(kw in mod.lower() for kw in ["fastled", "crgb", "led", "rmt", "strip"])
@@ -205,7 +212,7 @@ def generate_report(symbols, fastled_symbols, large_symbols, dependencies):
 
     # Largest overall symbols (non-FastLED)
     print("\nLARGEST NON-FASTLED SYMBOLS:")
-    non_fastled = [
+    non_fastled: List[SymbolInfo] = [
         s
         for s in large_symbols
         if not any(
@@ -213,7 +220,9 @@ def generate_report(symbols, fastled_symbols, large_symbols, dependencies):
             for keyword in ["fastled", "cfastled", "crgb", "hsv"]
         )
     ]
-    non_fastled_sorted = sorted(non_fastled, key=lambda x: x.size, reverse=True)
+    non_fastled_sorted: List[SymbolInfo] = sorted(
+        non_fastled, key=lambda x: x.size, reverse=True
+    )
 
     for i, sym in enumerate(non_fastled_sorted[:15]):
         display_name = sym.demangled_name
@@ -236,7 +245,7 @@ def generate_report(symbols, fastled_symbols, large_symbols, dependencies):
     }
 
     for feature, patterns in feature_patterns.items():
-        feature_symbols = [
+        feature_symbols: List[SymbolInfo] = [
             s for s in fastled_symbols if any(p in s.demangled_name for p in patterns)
         ]
         if feature_symbols:

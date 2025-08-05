@@ -14,7 +14,7 @@ import sys
 from collections import defaultdict
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+from typing import Any, Dict, Iterator, List, Optional, Tuple
 
 # Import board mapping system
 from ci.util.boards import get_board
@@ -47,8 +47,8 @@ class CallStats:
 
     functions_with_calls: int
     functions_called_by_others: int
-    most_called: List[Tuple[str, int]] = field(default_factory=list)
-    most_calling: List[Tuple[str, int]] = field(default_factory=list)
+    most_called: List[Tuple[str, int]] = field(default_factory=lambda: [])
+    most_calling: List[Tuple[str, int]] = field(default_factory=lambda: [])
 
 
 @dataclass
@@ -58,9 +58,9 @@ class AnalysisReport:
     board: str
     total_symbols: int
     total_size: int
-    largest_symbols: List[SymbolInfo] = field(default_factory=list)
-    type_breakdown: List[TypeBreakdown] = field(default_factory=list)
-    dependencies: Dict[str, List[str]] = field(default_factory=dict)
+    largest_symbols: List[SymbolInfo] = field(default_factory=lambda: [])
+    type_breakdown: List[TypeBreakdown] = field(default_factory=lambda: [])
+    dependencies: Dict[str, List[str]] = field(default_factory=lambda: {})
     call_graph: Optional[Dict[str, List[str]]] = None
     reverse_call_graph: Optional[Dict[str, List[str]]] = None
     call_stats: Optional[CallStats] = None
@@ -81,7 +81,7 @@ class DetailedAnalysisData:
 class TypeStats:
     """Statistics for symbol types with dictionary-like functionality"""
 
-    stats: Dict[str, TypeBreakdown] = field(default_factory=dict)
+    stats: Dict[str, TypeBreakdown] = field(default_factory=lambda: {})
 
     def add_symbol(self, symbol: SymbolInfo) -> None:
         """Add a symbol to the type statistics"""
@@ -91,13 +91,13 @@ class TypeStats:
         self.stats[sym_type].count += 1
         self.stats[sym_type].total_size += symbol.size
 
-    def items(self):
+    def items(self) -> List[Tuple[str, TypeBreakdown]]:
         """Return items for iteration, sorted by total_size descending"""
         return sorted(self.stats.items(), key=lambda x: x[1].total_size, reverse=True)
 
-    def values(self):
+    def values(self) -> List[TypeBreakdown]:
         """Return values for iteration"""
-        return self.stats.values()
+        return list(self.stats.values())
 
     def __getitem__(self, key: str) -> TypeBreakdown:
         """Allow dictionary-style access"""
@@ -143,8 +143,8 @@ def analyze_symbols(
     """Analyze ALL symbols in ELF file using both nm and readelf for comprehensive coverage"""
     print("Analyzing symbols with enhanced coverage...")
 
-    symbols = []
-    symbols_dict = {}  # To deduplicate by address+name
+    symbols: List[SymbolInfo] = []
+    symbols_dict: Dict[str, SymbolInfo] = {}  # To deduplicate by address+name
 
     # Method 1: Use readelf to get ALL symbols (including those without size)
     if readelf_path:
@@ -397,7 +397,7 @@ def analyze_function_calls(
 
 def build_reverse_call_graph(call_graph: Dict[str, List[str]]) -> Dict[str, List[str]]:
     """Build reverse call graph: function -> list of functions that call it"""
-    reverse_graph = defaultdict(list)
+    reverse_graph: defaultdict[str, List[str]] = defaultdict(list)
 
     for caller, callees in call_graph.items():
         for callee in callees:
@@ -410,8 +410,8 @@ def analyze_map_file(map_file: Path) -> Dict[str, List[str]]:
     """Analyze the map file to understand module dependencies"""
     print(f"Analyzing map file: {map_file}")
 
-    dependencies = {}
-    current_archive = None
+    dependencies: Dict[str, List[str]] = {}
+    current_archive: Optional[str] = None
 
     if not map_file.exists():
         print(f"Map file not found: {map_file}")
@@ -483,7 +483,7 @@ def generate_report(
         print(f"  Functions called by others: {len(reverse_call_graph)}")
 
     # Show source breakdown
-    source_stats = {}
+    source_stats: Dict[str, int] = {}
     for sym in symbols:
         source = sym.source
         if source not in source_stats:
@@ -652,7 +652,7 @@ def find_board_build_info(board_name: Optional[str] = None) -> Tuple[Path, str]:
             sys.exit(1)
 
     # Otherwise, find any available board
-    available_boards = []
+    available_boards: List[Tuple[Path, str]] = []
     for item in build_dir.iterdir():
         if item.is_dir():
             build_info_file = item / "build_info.json"
@@ -789,7 +789,7 @@ def main():
         exact_callers = reverse_call_graph.get(target_function, [])
 
         # Also search for partial matches
-        partial_matches = {}
+        partial_matches: Dict[str, List[str]] = {}
         for func_name, callers in reverse_call_graph.items():
             if (
                 target_function.lower() in func_name.lower()

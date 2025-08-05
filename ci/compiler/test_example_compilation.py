@@ -214,7 +214,11 @@ def extract_stub_platform_include_paths_from_toml(config: Dict[str, Any]) -> Lis
 
 
 def get_system_info() -> Dict[str, Union[str, int, float]]:
-    """Get detailed system configuration information."""
+    """Get basic system configuration information.
+
+    OPTIMIZED: Removed expensive subprocess calls for compiler detection
+    since we know the build system uses Zig/Clang after migration.
+    """
     try:
         # Get CPU information
         cpu_count = os.cpu_count() or 1
@@ -227,75 +231,9 @@ def get_system_info() -> Dict[str, Union[str, int, float]]:
         os_name = platform.system()
         os_version = platform.release()
 
-        # Get compiler information (try to detect Clang version)
-        compiler_info = "Unknown"
-        try:
-            # Use streaming to prevent buffer overflow
-            process = subprocess.Popen(
-                ["python", "-m", "ziglang", "c++", "--version"],
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                text=True,
-                bufsize=1,
-                encoding="utf-8",
-                errors="replace",
-            )
-
-            stdout_lines: list[str] = []
-            while True:
-                stdout_line = process.stdout.readline() if process.stdout else ""
-                if stdout_line:
-                    stdout_lines.append(stdout_line.rstrip())
-                if process.poll() is not None:
-                    remaining_stdout = process.stdout.read() if process.stdout else ""
-                    if remaining_stdout:
-                        for line in remaining_stdout.splitlines():
-                            stdout_lines.append(line.rstrip())
-                    break
-
-            if process.returncode == 0 and stdout_lines:
-                first_line = stdout_lines[0]
-                # Extract version from line like "clang version 15.0.0"
-                if "clang version" in first_line:
-                    version = first_line.split("clang version")[1].strip().split()[0]
-                    compiler_info = f"Clang {version}"
-        except:
-            try:
-                # Use streaming to prevent buffer overflow
-                process = subprocess.Popen(
-                    ["gcc", "--version"],
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.PIPE,
-                    text=True,
-                    bufsize=1,
-                    encoding="utf-8",
-                    errors="replace",
-                )
-
-                stdout_lines: list[str] = []
-                while True:
-                    stdout_line = process.stdout.readline() if process.stdout else ""
-                    if stdout_line:
-                        stdout_lines.append(stdout_line.rstrip())
-                    if process.poll() is not None:
-                        remaining_stdout = (
-                            process.stdout.read() if process.stdout else ""
-                        )
-                        if remaining_stdout:
-                            for line in remaining_stdout.splitlines():
-                                stdout_lines.append(line.rstrip())
-                        break
-                if process.returncode == 0:
-                    first_line = stdout_lines[0]
-                    if "gcc" in first_line.lower():
-                        # Extract version from line like "gcc (GCC) 11.2.0"
-                        import re
-
-                        match = re.search(r"(\d+\.\d+\.\d+)", first_line)
-                        if match:
-                            compiler_info = f"GCC {match.group(1)}"
-            except:
-                pass
+        # Use known compiler info since we're post-migration to Zig/Clang
+        # No expensive subprocess calls needed
+        compiler_info = "Zig/Clang (known)"
 
         return {
             "os": f"{os_name} {os_version}",
@@ -306,30 +244,52 @@ def get_system_info() -> Dict[str, Union[str, int, float]]:
     except Exception as e:
         return {
             "os": f"{platform.system()} {platform.release()}",
-            "compiler": "Unknown",
+            "compiler": "Zig/Clang (fallback)",
             "cpu_cores": os.cpu_count() or 1,
             "memory_gb": 8.0,  # Fallback estimate
         }
 
 
+# Cache for expensive filesystem operations
+_cache_paths: Dict[str, Optional[str]] = {}
+
+
 def get_sccache_path() -> Optional[str]:
-    """Get the full path to sccache executable if available."""
+    """Get the full path to sccache executable if available.
+
+    OPTIMIZED: Cached to avoid repeated filesystem checks.
+    """
+    if "sccache" in _cache_paths:
+        return _cache_paths["sccache"]
+
     # First check system PATH
     sccache_path = shutil.which("sccache")
     if sccache_path:
+        _cache_paths["sccache"] = sccache_path
         return sccache_path
 
     # Check for sccache in the uv virtual environment
     venv_sccache = Path(".venv/Scripts/sccache.exe")
     if venv_sccache.exists():
-        return str(venv_sccache.absolute())
+        path = str(venv_sccache.absolute())
+        _cache_paths["sccache"] = path
+        return path
 
+    _cache_paths["sccache"] = None
     return None
 
 
 def get_ccache_path() -> Optional[str]:
-    """Get the full path to ccache executable if available."""
-    return shutil.which("ccache")
+    """Get the full path to ccache executable if available.
+
+    OPTIMIZED: Cached to avoid repeated filesystem checks.
+    """
+    if "ccache" in _cache_paths:
+        return _cache_paths["ccache"]
+
+    path = shutil.which("ccache")
+    _cache_paths["ccache"] = path
+    return path
 
 
 def get_build_configuration() -> Dict[str, Union[bool, str]]:

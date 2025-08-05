@@ -8,6 +8,7 @@ import os
 import sys
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Any, Dict
 
 from ci.util.paths import BUILD
 
@@ -23,9 +24,9 @@ class Tools:
 
 
 def load_tools(build_info_path: Path) -> Tools:
-    build_info = json.loads(build_info_path.read_text())
-    board_info = build_info[next(iter(build_info))]
-    aliases = board_info["aliases"]
+    build_info: Dict[str, Any] = json.loads(build_info_path.read_text())
+    board_info: Dict[str, Any] = build_info[next(iter(build_info))]
+    aliases: Dict[str, str] = board_info["aliases"]
     as_path = Path(aliases["as"])
     ld_path = Path(aliases["ld"])
     objcopy_path = Path(aliases["objcopy"])
@@ -89,7 +90,7 @@ def _prompt_build() -> Path:
 def _prompt_object_file(build: Path) -> Path:
     # Look for object files in .pio/build directory
     build_dir = build / ".pio" / "build"
-    object_files = []
+    object_files: list[Path] = []
 
     # Walk through build directory to find .o files
     for root, _, files in os.walk(build_dir):

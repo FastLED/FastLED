@@ -5,25 +5,30 @@ import time
 import unittest
 from pathlib import Path
 
-from ci.util.paths import PROJECT_ROOT
-from ci.util.symbol_analysis import (
-    SymbolInfo,
-    analyze_map_file,
-    analyze_symbols,
-    build_reverse_call_graph,
-    find_board_build_info,
-    generate_report,
-)
-from ci.util.tools import Tools, load_tools
 
+# OPTIMIZED: Disabled by default to avoid expensive imports during test discovery
+_ENABLED = False
+
+from ci.util.paths import PROJECT_ROOT
+
+
+# Conditional imports to avoid expensive module loading when tests are disabled
+if _ENABLED:
+    from ci.util.symbol_analysis import (
+        SymbolInfo,
+        analyze_map_file,
+        analyze_symbols,
+        build_reverse_call_graph,
+        find_board_build_info,
+        generate_report,
+    )
+    from ci.util.tools import Tools, load_tools
 
 HERE = Path(__file__).resolve().parent.absolute()
 UNO = HERE / "uno"
 OUTPUT = HERE / "output"
 ELF_FILE = UNO / "firmware.elf"
 BUILD_INFO_PATH = PROJECT_ROOT / ".build" / "uno" / "build_info.json"
-
-_ENABLED = False
 
 
 PLATFORMIO_PATH = Path.home() / ".platformio"
@@ -94,7 +99,12 @@ class TestSymbolAnalysis(unittest.TestCase):
     @unittest.skipUnless(_ENABLED, "Tests disabled - set _ENABLED = True to run")
     def setUpClass(cls):
         """Set up test fixtures before running tests."""
+        if not _ENABLED:
+            return
         init()
+        # Import Tools dynamically to avoid import errors when disabled
+        from ci.util.tools import Tools, load_tools
+
         cls.tools: Tools = load_tools(BUILD_INFO_PATH)
 
         # Load build info for testing

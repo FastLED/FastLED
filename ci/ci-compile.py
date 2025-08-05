@@ -13,6 +13,7 @@ import sys
 import time
 import warnings
 from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple
 
 # Import from the local ci directory
 from ci.util.boards import Board, get_board  # type: ignore
@@ -114,7 +115,7 @@ EXTRA_EXAMPLES: dict[Board, list[str]] = {
 }
 
 
-def parse_args():
+def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Compile FastLED examples for various boards using pio ci.util."
     )
@@ -199,8 +200,8 @@ def parse_args():
     if unknown_examples:
         if not hasattr(args, "positional_examples") or args.positional_examples is None:
             args.positional_examples = []
-        # Type assertion to help the type checker
-        positional_examples: list[str] = args.positional_examples
+        # Type assertion to help the type checker - argparse returns Any but we know it's list[str]
+        positional_examples: List[str] = args.positional_examples or []
         positional_examples.extend(unknown_examples)
 
     # Only warn about actual unknown flags, not examples
@@ -295,7 +296,7 @@ def generate_build_info(
         temp_project.mkdir(parents=True, exist_ok=True)
 
         # Initialize a temporary project
-        cmd_list = [
+        cmd_list: List[str] = [
             "pio",
             "project",
             "init",
@@ -454,7 +455,7 @@ def compile_with_pio_ci(
 
     locked_print(f"*** Compiling examples for board {board_name} using pio ci ***")
 
-    errors = []
+    errors: List[str] = []
 
     for example_path in example_paths:
         locked_print(
@@ -513,7 +514,7 @@ def compile_with_pio_ci(
                 pass
 
         # Build pio ci command
-        cmd_list = [
+        cmd_list: List[str] = [
             "pio",
             "ci",
             str(ino_file),
@@ -533,8 +534,8 @@ def compile_with_pio_ci(
             cmd_list.append(cache_option)
 
         # Check for additional source directories in the example and collect them
-        example_include_dirs = []
-        example_src_dirs = []
+        example_include_dirs: List[str] = []
+        example_src_dirs: List[str] = []
 
         # Always show some level of scanning info
         has_subdirs = any(
@@ -637,7 +638,7 @@ def compile_with_pio_ci(
         if board.defines:
             all_defines.extend(board.defines)
 
-        build_flags_list = []
+        build_flags_list: List[str] = []
 
         # Add optimization report flag for all builds (generates optimization_report.txt)
         # The report will be created in the build directory where GCC runs
@@ -659,7 +660,7 @@ def compile_with_pio_ci(
             cmd_list.extend(["--project-option", f"build_flags={build_flags_str}"])
 
             # Show custom defines (excluding the optimization report flag)
-            custom_defines = [
+            custom_defines: List[str] = [
                 flag
                 for flag in build_flags_list
                 if flag.startswith("-D") and "FASTLED" in flag
@@ -754,8 +755,8 @@ def compile_with_pio_ci(
             )
 
             # Capture output lines in real-time with timestamp buffer
-            stdout_lines = []
-            timestamped_lines = []
+            stdout_lines: List[str] = []
+            timestamped_lines: List[str] = []
 
             if result.stdout:
                 for line in iter(result.stdout.readline, ""):
@@ -982,7 +983,7 @@ def main() -> int:
         f"Starting compilation for {len(boards)} boards with {len(example_paths)} examples"
     )
 
-    compilation_errors = []
+    compilation_errors: List[str] = []
 
     # Compile for each board
     for board in boards:

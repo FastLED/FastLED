@@ -10,7 +10,7 @@ import subprocess
 import time
 import warnings
 from pathlib import Path
-from typing import Any, Callable
+from typing import Any, Callable, Dict
 
 from ci.util.boards import Board  # type: ignore
 from ci.util.locked_print import locked_print
@@ -41,7 +41,7 @@ def _install_global_package(package: str) -> None:
     locked_print(f"*** Finished installing {package} ***")
 
 
-def insert_tool_aliases(meta_json: dict[str, dict]) -> None:
+def insert_tool_aliases(meta_json: Dict[str, Dict[str, Any]]) -> None:
     for board in meta_json.keys():
         aliases: dict[str, str | None] = {}
         cc_path = meta_json[board].get("cc_path")
