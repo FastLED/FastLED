@@ -7,7 +7,7 @@ import re
 import subprocess
 import sys
 from pathlib import Path
-from typing import Match
+from typing import Any, List, Match, Optional
 
 
 HERE = Path(__file__).resolve().parent
@@ -17,16 +17,17 @@ IS_GITHUB = "GITHUB_ACTIONS" in os.environ
 
 
 def run_command(
-    cmd_list: list[str],
+    cmd_list: List[str],
+    capture_output: bool = True,
     shell: bool = False,
-    check: bool = False,
-    capture_output: bool = False,
-) -> str | None:
-    check = check if check is not None else check
+    check: Optional[bool] = None,
+) -> Optional[str]:
+    """Run a command and return its output."""
+    actual_check = check if check is not None else False
     cmd = cmd_list if not shell else subprocess.list2cmdline(cmd_list)
 
-    result: subprocess.CompletedProcess = subprocess.run(
-        cmd, capture_output=capture_output, text=True, shell=shell, check=check
+    result: subprocess.CompletedProcess[str] = subprocess.run(
+        cmd, capture_output=capture_output, text=True, shell=shell, check=actual_check
     )
 
     if not capture_output:
@@ -96,7 +97,11 @@ def main():
         print(f"Output: {output}")
         sys.exit(1)
 
-    size = int(size_match.group(1))
+    size_str = size_match.group(1)  # type: ignore
+    if not size_str:
+        print("Error: Size group is empty")
+        sys.exit(1)
+    size = int(size_str)  # type: ignore
 
     if args.max_size is not None and args.max_size > 0:
         max_size = args.max_size

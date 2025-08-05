@@ -1,9 +1,10 @@
 import argparse
 import json
 from pathlib import Path
+from typing import Any, Dict
 
 
-def _get_board_info(path: Path) -> dict:
+def _get_board_info(path: Path) -> Dict[str, Any]:
     build_info = json.loads(path.read_text())
     assert build_info.keys(), f"No boards found in {build_info}"
     assert len(build_info.keys()) == 1, (

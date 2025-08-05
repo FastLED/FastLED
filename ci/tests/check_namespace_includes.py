@@ -10,45 +10,53 @@ This is used in CI/CD to prevent bad code patterns.
 import os
 import re
 import sys
+from pathlib import Path
+from typing import Any, Dict, List
 
 
-def find_includes_after_namespace(file_path):
+def find_includes_after_namespace(file_path: Path) -> List[int]:
     """
     Check if a C++ file has #include directives after namespace declarations.
 
     Args:
-        file_path (str): Path to the C++ file to check
+        file_path (Path): Path to the C++ file to check
 
     Returns:
-        list: List of line numbers where includes appear after namespaces
+        List[int]: List of line numbers where includes appear after namespaces
     """
     try:
         with open(file_path, "r", encoding="utf-8") as f:
-            lines = f.readlines()
-    except UnicodeDecodeError:
-        # Skip files that can't be decoded as UTF-8
+            content = f.readlines()
+
+        violations: List[int] = []
+        namespace_started = False
+
+        # Basic patterns
+        namespace_pattern = re.compile(r"^\s*namespace\s+\w+\s*\{")
+        include_pattern = re.compile(r"^\s*#\s*include")
+
+        for i, line in enumerate(content, 1):
+            line = line.strip()
+
+            # Skip empty lines and comments
+            if not line or line.startswith("//") or line.startswith("/*"):
+                continue
+
+            # Check for namespace declaration
+            if namespace_pattern.match(line):
+                namespace_started = True
+
+            # Check for #include after namespace started
+            if namespace_started and include_pattern.match(line):
+                violations.append(i)
+
+        return violations
+    except (UnicodeDecodeError, IOError):
+        # Skip files that can't be read
         return []
 
-    namespace_started = False
-    violations = []
 
-    namespace_pattern = re.compile(r"^\s*(namespace\s+\w+|namespace\s*{)")
-    include_pattern = re.compile(r'^\s*#\s*include\s*[<"].*[>"]')
-
-    for i, line in enumerate(lines, 1):
-        # Check if we're entering a namespace
-        if namespace_pattern.match(line):
-            namespace_started = True
-            continue
-
-        # Check for includes after namespace started
-        if namespace_started and include_pattern.match(line):
-            violations.append(i)
-
-    return violations
-
-
-def scan_cpp_files(directory="."):
+def scan_cpp_files(directory: str = ".") -> Dict[str, Any]:
     """
     Scan all C++ files in a directory for includes after namespace declarations.
 
@@ -56,61 +64,51 @@ def scan_cpp_files(directory="."):
         directory (str): Directory to scan for C++ files
 
     Returns:
-        dict: Dictionary mapping file paths to line numbers of violations
+        Dict[str, Any]: Dictionary mapping file paths to lists of violation line numbers
     """
-    violations = {}
-
-    # Find all C++ files
-    cpp_extensions = [".cpp", ".h", ".hpp", ".cc"]
-    skip_patterns = [
-        ".venv",
-        "node_modules",
-        "build",
-        ".build",
-        "third_party",
-        "ziglang",
-        "greenlet",
+    cpp_extensions = [
+        ".cpp",
+        ".cc",
+        ".cxx",
+        ".c++",
+        ".hpp",
+        ".h",
+        ".hh",
+        ".hxx",
+        ".h++",
     ]
+    violations: Dict[str, Any] = {}
 
     for root, dirs, files in os.walk(directory):
-        # Skip directories with third-party code
-        if any(pattern in root for pattern in skip_patterns):
-            continue
-
         for file in files:
+            file_path = os.path.join(root, file)
+
+            # Check if it's a C++ file
             if any(file.endswith(ext) for ext in cpp_extensions):
-                file_path = os.path.join(root, file)
-                try:
-                    line_numbers = find_includes_after_namespace(file_path)
-                    if line_numbers:
-                        violations[file_path] = line_numbers
-                except Exception as e:
-                    print(f"Error processing {file_path}: {e}")
+                line_numbers: List[int] = find_includes_after_namespace(Path(file_path))
+                if line_numbers:
+                    violations[file_path] = line_numbers
 
     return violations
 
 
-def main():
-    """Main function to run the script."""
-    print("Scanning for #include directives after namespace declarations...")
-
-    violations = scan_cpp_files(".")
+def main() -> None:
+    violations: Dict[str, Any] = scan_cpp_files()
 
     if violations:
-        print("\nFound violations:")
-        print("=================")
+        print("Found #include directives after namespace declarations:")
         for file_path, line_numbers in violations.items():
-            print(f"{file_path}:")
+            print(f"\n{file_path}:")
             for line_num in line_numbers:
                 print(f"  Line {line_num}")
-        print("\nPlease fix these issues by moving includes to the top of the file.")
-        return 1  # Return error code for CI/CD
+
+        failing: List[str] = list(violations.keys())
+        print(f"\nFailing files: {failing}")
+        sys.exit(1)
     else:
-        print(
-            "\nNo violations found! All includes are properly placed before namespace declarations."
-        )
-        return 0  # Return success code
+        print("No violations found.")
+        sys.exit(0)
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    main()

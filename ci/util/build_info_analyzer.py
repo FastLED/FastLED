@@ -16,7 +16,7 @@ import argparse
 import json
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 
 @dataclass
@@ -25,8 +25,8 @@ class CompilerInfo:
 
     cc_path: str = ""
     cxx_path: str = ""
-    cc_flags: List[str] = field(default_factory=list)
-    cxx_flags: List[str] = field(default_factory=list)
+    cc_flags: List[str] = field(default_factory=lambda: list())
+    cxx_flags: List[str] = field(default_factory=lambda: list())
     compiler_type: str = ""
     build_type: str = ""
 
@@ -36,9 +36,9 @@ class BuildInfo:
     """Complete build information for a platform"""
 
     board_name: str
-    defines: Dict[str, str] = field(default_factory=dict)
+    defines: Dict[str, str] = field(default_factory=lambda: dict())
     compiler_info: CompilerInfo = field(default_factory=CompilerInfo)
-    aliases: Dict[str, Optional[str]] = field(default_factory=dict)
+    aliases: Dict[str, Optional[str]] = field(default_factory=lambda: dict())
 
 
 class BuildInfoAnalyzer:
@@ -60,7 +60,7 @@ class BuildInfoAnalyzer:
         Returns:
             List of board names that have been built
         """
-        boards = []
+        boards: List[str] = []
         if not self.build_dir.exists():
             return boards
 
@@ -85,7 +85,7 @@ class BuildInfoAnalyzer:
             return build_info_path
         return None
 
-    def load_build_info(self, board_name: str) -> Optional[Dict]:
+    def load_build_info(self, board_name: str) -> Optional[Dict[str, Any]]:
         """
         Load and parse build_info.json for a board.
 
@@ -107,7 +107,7 @@ class BuildInfoAnalyzer:
             return None
 
     def get_board_key_from_build_info(
-        self, data: Dict, board_name: str
+        self, data: Dict[str, Any], board_name: str
     ) -> Optional[str]:
         """
         Get the actual board key used in build_info.json.
@@ -217,7 +217,7 @@ class BuildInfoAnalyzer:
 
         return True, aliases, ""
 
-    def get_all_info(self, board_name: str) -> Tuple[bool, Dict, str]:
+    def get_all_info(self, board_name: str) -> Tuple[bool, Dict[str, Any], str]:
         """
         Get all available information for a board.
 
@@ -237,7 +237,9 @@ class BuildInfoAnalyzer:
 
         return True, data[board_key], ""
 
-    def compare_defines(self, board1: str, board2: str) -> Tuple[bool, Dict, str]:
+    def compare_defines(
+        self, board1: str, board2: str
+    ) -> Tuple[bool, Dict[str, Any], str]:
         """
         Compare platform defines between two boards.
 
@@ -315,7 +317,7 @@ def print_toolchain_aliases(aliases: Dict[str, str], board_name: str):
             print(f"  {tool:10}: Not available")
 
 
-def print_comparison(comparison: Dict):
+def print_comparison(comparison: Dict[str, Any]):
     """Print a comparison between two boards."""
     board1 = comparison["board1"]
     board2 = comparison["board2"]

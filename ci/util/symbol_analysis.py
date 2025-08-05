@@ -518,7 +518,8 @@ def generate_report(
         # Show mangled name if different (non-enhanced mode)
         elif (
             not enhanced_mode
-            and "demangled_name" in sym
+            and hasattr(sym, "demangled_name")
+            and sym.demangled_name
             and sym.demangled_name != sym.name
         ):
             print(

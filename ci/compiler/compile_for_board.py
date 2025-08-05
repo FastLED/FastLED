@@ -9,6 +9,7 @@ import subprocess
 import time
 from pathlib import Path
 from threading import Lock
+from typing import List
 
 from ci.util.boards import Board  # type: ignore
 from ci.util.locked_print import locked_print
@@ -127,7 +128,7 @@ def compile_for_board_and_example(
     )
 
     # Capture output lines in real-time with timing
-    stdout_lines = []
+    stdout_lines: List[str] = []
     if result.stdout:
         for line in iter(result.stdout.readline, ""):
             if line:
@@ -183,7 +184,7 @@ def compile_for_board_and_example(
         )
 
         # Capture output lines in real-time with timing for verbose run
-        stdout_lines_verbose = []
+        stdout_lines_verbose: List[str] = []
         if result.stdout:
             for line in iter(result.stdout.readline, ""):
                 if line:

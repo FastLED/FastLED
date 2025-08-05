@@ -4,12 +4,13 @@ import os
 import subprocess
 import sys
 from pathlib import Path
+from typing import List
 
 from ci.util.paths import BUILD
 from ci.util.tools import load_tools
 
 
-def _list_builds() -> list[Path]:
+def _list_builds() -> List[Path]:
     str_paths = os.listdir(BUILD)
     paths = [BUILD / p for p in str_paths]
     dirs = [p for p in paths if p.is_dir()]
@@ -51,15 +52,7 @@ def _prompt_build() -> Path:
 def _prompt_object_file(build: Path) -> Path:
     # Look for object files in .pio/build directory
     build_dir = build / ".pio" / "build"
-    object_files = []
-
-    # Walk through build directory to find .o files
-    for root, _, files in os.walk(build_dir):
-        for file in files:
-            if file.endswith(".o") and "FrameworkArduino" not in file:
-                full_path = Path(root) / file
-                if "FrameworkArduino" not in full_path.parts:
-                    object_files.append(full_path)
+    object_files: List[Path] = list(build_dir.rglob("*.o"))
 
     if not object_files:
         print("Error: No object files found", file=sys.stderr)

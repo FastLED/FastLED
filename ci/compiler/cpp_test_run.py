@@ -12,6 +12,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from queue import Empty, PriorityQueue
 from threading import Event, Lock, Thread
+from typing import List
 
 import psutil
 
@@ -650,7 +651,7 @@ def _handle_test_results(
     """Handle test results and exit appropriately (preserving existing logic)"""
     if failed_tests:
         print("Failed tests summary:")
-        failures = []
+        failures: List[TestFailureInfo] = []
         for failed_test in failed_tests:
             print(
                 f"Test {failed_test.name} failed with return code {failed_test.return_code}"

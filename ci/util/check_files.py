@@ -77,7 +77,7 @@ class MultiCheckerFileProcessor:
             Dictionary mapping checker class name to list of issues found
         """
         # Initialize results dictionary for each checker
-        results = {}
+        results: Dict[str, List[str]] = {}
         for checker in checkers:
             checker_name = checker.__class__.__name__
             results[checker_name] = []
@@ -146,7 +146,7 @@ class GenericFileSearcher:
         Returns:
             List of all issues found across all files
         """
-        files_to_check = []
+        files_to_check: List[str] = []
 
         # Collect all files that should be processed
         for root, _, files in os.walk(start_dir):
@@ -156,7 +156,7 @@ class GenericFileSearcher:
                     files_to_check.append(file_path)
 
         # Process files in parallel
-        all_issues = []
+        all_issues: List[str] = []
         with ThreadPoolExecutor(max_workers=self.max_workers) as executor:
             futures = [
                 executor.submit(self._process_single_file, file_path, callback)
@@ -189,13 +189,13 @@ class GenericFileSearcher:
 
 
 def collect_files_to_check(
-    test_directories: List[str], extensions: List[str] | None = None
+    test_directories: List[str], extensions: Optional[List[str]] = None
 ) -> List[str]:
     """Collect all files to check from the given directories."""
     if extensions is None:
         extensions = [".cpp", ".h", ".hpp"]
 
-    files_to_check = []
+    files_to_check: List[str] = []
 
     # Search each directory
     for directory in test_directories:

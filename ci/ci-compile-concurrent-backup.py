@@ -16,11 +16,16 @@ This backup is kept for reference and potential future needs.
 """
 
 import argparse
+import concurrent.futures
+import io
+import multiprocessing
 import os
+import subprocess
 import sys
 import time
 import warnings
 from pathlib import Path
+from typing import List, Set
 
 from ci.util.boards import Board, get_board  # type: ignore
 from ci.util.concurrent_run import ConcurrentRunArgs, concurrent_run
@@ -269,9 +274,9 @@ def parse_args():
     return args
 
 
-def remove_duplicates(items: list[str]) -> list[str]:
-    seen = set()
-    out = []
+def remove_duplicates(items: List[str]) -> List[str]:
+    seen: Set[str] = set()
+    out: List[str] = []
     for item in items:
         if item not in seen:
             seen.add(item)
@@ -279,13 +284,13 @@ def remove_duplicates(items: list[str]) -> list[str]:
     return out
 
 
-def choose_board_interactively(boards: list[str]) -> list[str]:
+def choose_board_interactively(boards: List[str]) -> List[str]:
     print("Available boards:")
     boards = remove_duplicates(sorted(boards))
     for i, board in enumerate(boards):
         print(f"[{i}]: {board}")
     print("[all]: All boards")
-    out: list[str] = []
+    out: List[str] = []
     while True:
         try:
             # choice = int(input("Enter the number of the board(s) you want to compile to: "))

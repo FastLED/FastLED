@@ -7,13 +7,13 @@ from pathlib import Path
 
 
 # OPTIMIZED: Disabled by default to avoid expensive imports during test discovery
-_ENABLED = False
+_ENABLED = True
 
 from ci.util.paths import PROJECT_ROOT
 
 
-# Conditional imports to avoid expensive module loading when tests are disabled
-if _ENABLED:
+# Import dependencies
+try:
     from ci.util.symbol_analysis import (
         SymbolInfo,
         analyze_map_file,
@@ -23,6 +23,16 @@ if _ENABLED:
         generate_report,
     )
     from ci.util.tools import Tools, load_tools
+except ImportError:
+    # Set defaults for when imports fail
+    SymbolInfo = None  # type: ignore
+    analyze_map_file = None  # type: ignore
+    analyze_symbols = None  # type: ignore
+    build_reverse_call_graph = None  # type: ignore
+    find_board_build_info = None  # type: ignore
+    generate_report = None  # type: ignore
+    Tools = None  # type: ignore
+    load_tools = None  # type: ignore
 
 HERE = Path(__file__).resolve().parent.absolute()
 UNO = HERE / "uno"
@@ -133,13 +143,23 @@ class TestSymbolAnalysis(unittest.TestCase):
         self.assertGreater(len(symbols), 0, "Should find some symbols in ELF file")
 
         # Verify symbol structure
+        symbols_with_size = 0
         for symbol in symbols:
             self.assertIsInstance(symbol.address, str)
             self.assertIsInstance(symbol.size, int)
             self.assertIsInstance(symbol.type, str)
             self.assertIsInstance(symbol.name, str)
             self.assertIsInstance(symbol.demangled_name, str)
-            self.assertGreater(symbol.size, 0, "Symbol size should be positive")
+            self.assertGreaterEqual(
+                symbol.size, 0, "Symbol size should be non-negative"
+            )
+            if symbol.size > 0:
+                symbols_with_size += 1
+
+        # Ensure we have at least some symbols with actual size (not all zero-size)
+        self.assertGreater(
+            symbols_with_size, 0, "Should have at least some symbols with positive size"
+        )
 
         print(f"Found {len(symbols)} symbols")
 
@@ -173,8 +193,14 @@ class TestSymbolAnalysis(unittest.TestCase):
 
         # Check that we have symbols with reasonable sizes
         sizes = [s.size for s in symbols]
+        symbols_with_size = sum(1 for size in sizes if size > 0)
+        self.assertGreater(
+            symbols_with_size, 0, "Should have at least some symbols with positive size"
+        )
+        # All sizes should be non-negative (zero-size symbols are valid for undefined symbols, labels, etc.)
         self.assertTrue(
-            all(size > 0 for size in sizes), "All symbols should have positive sizes"
+            all(size >= 0 for size in sizes),
+            "All symbols should have non-negative sizes",
         )
 
         print(f"Analyzed {len(symbols)} symbols from build ELF: {elf_file}")

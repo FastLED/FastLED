@@ -28,7 +28,7 @@ def get_directory_hash(directory: Path, extensions: Optional[List[str]] = None) 
     if extensions is None:
         extensions = [".py"]
 
-    hashes = []
+    hashes: List[str] = []
     if directory.exists():
         for ext in extensions:
             for file_path in directory.rglob(f"*{ext}"):

@@ -24,7 +24,7 @@ import subprocess
 import sys
 import traceback
 from functools import partial
-from typing import Any, Generator, List, Optional, Tuple
+from typing import Any, Dict, Generator, List, Optional, Tuple, Union
 
 
 try:
@@ -169,18 +169,26 @@ def run_clang_format_diff(args: Any, file: str) -> Tuple[List[str], List[str]]:
     #   > -- http://clang.llvm.org/docs/InternalsManual.html#internals-diag-translation
     #
     # It's not pretty, due to Python 2 & 3 compatibility.
-    encoding_py3 = {}
+    encoding_py3: Dict[str, str] = {}
     if sys.version_info[0] >= 3:
         encoding_py3["encoding"] = "utf-8"
 
     try:
-        proc = subprocess.Popen(
-            invocation,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            universal_newlines=True,
-            **encoding_py3,
-        )
+        if sys.version_info[0] >= 3:
+            proc: subprocess.Popen[str] = subprocess.Popen(
+                invocation,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                universal_newlines=True,
+                encoding="utf-8",
+            )
+        else:
+            proc: subprocess.Popen[str] = subprocess.Popen(
+                invocation,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                universal_newlines=True,
+            )
     except OSError as exc:
         raise DiffError(
             "Command '{}' failed to start: {}".format(
