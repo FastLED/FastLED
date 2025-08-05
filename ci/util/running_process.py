@@ -140,7 +140,7 @@ class RunningProcess:
         cwd: Path | None = None,
         check: bool = False,
         auto_run: bool = True,
-        timeout: int = 120,  # sixty seconds
+        timeout: int = 120,  # 2 minutes.
         enable_stack_trace: bool = True,  # Enable stack trace dumping on timeout
         on_complete: Callable[[], None]
         | None = None,  # Callback to execute when process completes
