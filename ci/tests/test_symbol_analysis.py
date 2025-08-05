@@ -5,6 +5,8 @@ import time
 import unittest
 from pathlib import Path
 
+import pytest
+
 
 # OPTIMIZED: Disabled by default to avoid expensive imports during test discovery
 _ENABLED = True
@@ -106,6 +108,7 @@ def init() -> None:
             _compilation_done = True
 
 
+@pytest.mark.full
 class TestSymbolAnalysis(unittest.TestCase):
     @classmethod
     @unittest.skipUnless(_ENABLED, "Tests disabled - set _ENABLED = True to run")
