@@ -247,7 +247,9 @@ class RunningProcess:
         # This excludes process creation overhead from timing measurements
         self._start_time = time.time()
 
-        def output_reader():
+        count = 0
+
+        def output_reader() -> None:
             """Continuously pump stdout to prevent subprocess from blocking on full pipe buffer"""
             try:
                 assert self.proc is not None
@@ -258,7 +260,6 @@ class RunningProcess:
                 try:
                     for line in iter(self.proc.stdout.readline, ""):
                         if self.shutdown.is_set():
-                            self.output_queue.put(None)
                             break
 
                         # Strip whitespace and queue non-empty lines
@@ -268,15 +269,21 @@ class RunningProcess:
                             self.accumulated_output.append(
                                 line_stripped
                             )  # Also store for later retrieval
+
+                    # When the iter loop exits, we've reached EOF
+                    self.output_queue.put(None)
                 except (ValueError, OSError) as e:
                     # Handle "I/O operation on closed file" and similar errors
                     # This can happen if the process terminates while we're reading
                     if "closed file" in str(e) or "Bad file descriptor" in str(e):
                         # Normal shutdown - process stdout was closed
-                        pass
+                        self.output_queue.put(None)
+                        return
                     else:
                         # Unexpected error, log it but don't crash
                         print(f"Warning: Output reader encountered error: {e}")
+                        self.output_queue.put(None)
+                        return
 
             finally:
                 # Clean shutdown: close stream and signal end
@@ -316,7 +323,20 @@ class RunningProcess:
         """
 
         assert self.proc is not None
-        return self.output_queue.get(timeout=timeout)
+
+        expired_time = time.time() + timeout if timeout is not None else None
+
+        while True:
+            new_time = time.time()
+            if expired_time is not None and new_time > expired_time:
+                raise TimeoutError(f"Timeout after {timeout} seconds")
+            try:
+                line = self.output_queue.get(timeout=0.1)
+                return line
+            except queue.Empty:
+                continue
+
+        return None
 
     def poll(self) -> int | None:
         """
