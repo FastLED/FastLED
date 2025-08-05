@@ -192,7 +192,7 @@ class Platform(BaseModel):
 
     class Config:
         allow_population_by_field_name = True
-        schema_extra = {
+        schema_extra: Dict[str, Any] = {
             "example": {
                 "name": "ESP32 Arduino",
                 "architecture": "esp32",
@@ -375,7 +375,7 @@ class Package(BaseModel):
 
     class Config:
         allow_population_by_field_name = True
-        schema_extra = {
+        schema_extra: Dict[str, Any] = {
             "example": {
                 "name": "esp32",
                 "maintainer": "Espressif Systems",

@@ -834,8 +834,8 @@ def should_clean_build(build_info: dict[str, str | dict[str, str]]) -> bool:
         if not isinstance(old_args_raw, dict) or not isinstance(new_args_raw, dict):
             return True
 
-        old_args: Dict[str, Any] = old_args_raw
-        new_args: Dict[str, Any] = new_args_raw
+        old_args: Dict[str, Any] = old_args_raw  # type: ignore
+        new_args: Dict[str, Any] = new_args_raw  # type: ignore
 
         # If only the specific test changed and everything else is the same,
         # we don't need to clean the build directory

@@ -101,7 +101,7 @@ class TestPlatform:
 
     def test_valid_platform(self):
         """Test valid platform creation"""
-        platform_data = {
+        platform_data: Dict[str, Any] = {
             "name": "ESP32 Arduino",
             "architecture": "esp32",
             "version": "2.0.5",
@@ -142,7 +142,7 @@ class TestPackageIndexParser:
 
     def test_parse_valid_json(self):
         """Test parsing valid package index JSON"""
-        valid_json = {
+        valid_json: Dict[str, Any] = {
             "packages": [
                 {
                     "name": "test",
