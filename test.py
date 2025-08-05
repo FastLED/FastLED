@@ -87,8 +87,16 @@ def main() -> None:
         # Change to script directory first
         os.chdir(Path(__file__).parent)
 
+        # Determine watchdog timeout based on environment
+        timeout_seconds = 300  # Default timeout
+        if os.environ.get("_GITHUB") and os.environ.get("_WINDOWS"):
+            timeout_seconds = 600  # Extended timeout for GitHub Windows builds
+            print(
+                f"GitHub Windows environment detected - using extended timeout: {timeout_seconds} seconds"
+            )
+
         # Set up watchdog timer
-        watchdog = make_watch_dog_thread(seconds=300)
+        watchdog = make_watch_dog_thread(seconds=timeout_seconds)
 
         # Parse and process arguments
         args = parse_args()
