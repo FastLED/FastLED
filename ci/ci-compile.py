@@ -1000,8 +1000,8 @@ def main() -> int:
     )
 
     # Use efficient concurrent pio run system
-    from ci.util.concurrent_run import concurrent_run, ConcurrentRunArgs
-    
+    from ci.util.concurrent_run import ConcurrentRunArgs, concurrent_run
+
     run_args = ConcurrentRunArgs(
         projects=boards,
         examples=example_paths,
@@ -1023,11 +1023,11 @@ def main() -> int:
         disable_incremental=args.disable_incremental,
         keep=args.keep,
     )
-    
+
     result = concurrent_run(run_args)
     if result != 0:
         return result
-    
+
     return 0
 
 

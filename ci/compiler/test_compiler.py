@@ -66,9 +66,6 @@ from ci.compiler.clang_compiler import (
 )
 
 
-
-
-
 @dataclass
 class TestExecutable:
     """Represents a compiled test executable"""

@@ -3,6 +3,7 @@
 #if defined(ESP32)
 
 #include "esp_log.h"
+#include "fl/sketch_macros.h"
 
 // use gcc intialize constructor
 // to set log level to ESP_LOG_VERBOSE
@@ -20,4 +21,4 @@ void on_startup() {
 #define SKETCH_TARGET DEFAULT_SKETCH
 #endif
 
-#include SKETCH_TARGET
+#include FASTLED_STRINGIFY(KETCH_TARGET)

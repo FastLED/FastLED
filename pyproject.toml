@@ -35,6 +35,7 @@ dependencies = [
     "rich>=14.1.0",
     "emoji>=2.14.1",
     "pydantic[email]>=2.0.0",
+    "dirsync>=2.2.6",
 ]
 
 [build-system]

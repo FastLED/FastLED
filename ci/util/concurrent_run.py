@@ -24,7 +24,6 @@ PARRALLEL_PROJECT_INITIALIZATION = (
 )
 
 
-
 def compile_examples_pio_run(
     board: Board,
     examples: list[Path],
@@ -118,13 +117,13 @@ def concurrent_run(
     errors: list[str] = []
     # Run the compilation process
     num_cpus = max(1, min(cpu_count(), len(projects)))
-    
+
     # Use efficient pio run build system
     locked_print("Using efficient pio run build system")
-    
+
     with ThreadPoolExecutor(max_workers=num_cpus) as executor:
         future_to_board: Dict[Future[Any], Board] = {}
-        
+
         for board in projects:
             # Use pio run system with additional parameters
             future = executor.submit(
@@ -134,20 +133,22 @@ def concurrent_run(
                 build_dir,
                 verbose,
                 libs,
-                defines=defines,  # Pass defines for pio run  
+                defines=defines,  # Pass defines for pio run
                 clean_first=args.clean_projects,  # Clean first if requested
                 incremental=not args.disable_incremental,  # Incremental flag
                 keep=args.keep,  # Pass keep flag
             )
             future_to_board[future] = board
-            
+
         for future in as_completed(future_to_board):
             board = future_to_board[future]
             success, msg = future.result()
             if not success:
                 msg = f"Compilation failed for board {board.board_name}: {msg}"
                 errors.append(msg)
-                locked_print(f"Compilation failed for board {board.board_name}: {msg}.\nStopping.")
+                locked_print(
+                    f"Compilation failed for board {board.board_name}: {msg}.\nStopping."
+                )
                 for f in future_to_board:
                     f.cancel()
                 break

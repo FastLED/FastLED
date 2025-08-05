@@ -304,12 +304,13 @@ def create_build_dir(
         cmd_list.append(f"--project-option=platform_packages={board.platform_packages}")
     if board.framework:
         cmd_list.append(f"--project-option=framework={board.framework}")
-    
+
     # Add FastLED as local library with symlink
     import pathlib
+
     fastled_root_path = str((pathlib.Path(__file__).parent.parent.parent).resolve())
     cmd_list.append(f"--project-option=lib_deps=symlink://{fastled_root_path}")
-    
+
     if board.board_build_core:
         cmd_list.append(f"--project-option=board_build.core={board.board_build_core}")
     if board.board_build_filesystem_size:

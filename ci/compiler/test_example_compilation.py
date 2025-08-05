@@ -254,12 +254,6 @@ def get_system_info() -> Dict[str, Union[str, int, float]]:
         }
 
 
-
-
-
-
-
-
 def get_build_configuration() -> Dict[str, Union[bool, str]]:
     """Get build configuration information."""
     config: Dict[str, Union[bool, str]] = {}
@@ -333,9 +327,7 @@ def check_pch_status(build_dir: Path) -> Dict[str, Union[bool, Path, int, str]]:
     return {"exists": False, "path": None, "size": 0, "size_formatted": "0B"}  # type: ignore
 
 
-def create_fastled_compiler(
-    use_pch: bool, parallel: bool
-) -> Compiler:
+def create_fastled_compiler(use_pch: bool, parallel: bool) -> Compiler:
     """Create compiler with standard FastLED settings for simple build system."""
     import os
     import tempfile
