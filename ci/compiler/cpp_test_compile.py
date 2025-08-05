@@ -10,7 +10,7 @@ import subprocess
 import sys
 import time
 from pathlib import Path
-from typing import Dict, List, Optional, Set, Tuple
+from typing import Any, Dict, List, Optional, Set, Tuple
 
 from ci.util.paths import PROJECT_ROOT
 from ci.util.running_process import RunningProcess
@@ -122,7 +122,7 @@ def cache_executable(test_name: str, cache_key: str, exe_path: Path) -> None:
 
 def get_test_files() -> Set[str]:
     """Get a set of all test files"""
-    test_files = set()
+    test_files: Set[str] = set()
     tests_dir = PROJECT_ROOT / "tests"
     if tests_dir.exists():
         for file_path in tests_dir.rglob("test_*.cpp"):
@@ -296,7 +296,7 @@ def create_unit_test_fastled_library(
     print(f"[LIBRARY] Compiling {len(fastled_sources)} FastLED source files...")
 
     # Compile each source file with optimized naming (same as examples)
-    futures: list[tuple] = []
+    futures: List[Tuple[Any, ...]] = []
     project_root = Path(__file__).parent.parent.parent
     src_dir = project_root / "src"
 

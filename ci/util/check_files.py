@@ -77,7 +77,7 @@ class MultiCheckerFileProcessor:
             Dictionary mapping checker class name to list of issues found
         """
         # Initialize results dictionary for each checker
-        results = {}
+        results: Dict[str, List[str]] = {}
         for checker in checkers:
             checker_name = checker.__class__.__name__
             results[checker_name] = []

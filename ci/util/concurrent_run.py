@@ -9,6 +9,7 @@ import time
 from concurrent.futures import Future, ThreadPoolExecutor, as_completed
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Any, Dict, List
 
 from ci.compiler.compile_for_board import compile_examples, errors_happened
 from ci.util.boards import Board  # type: ignore
@@ -104,7 +105,7 @@ def concurrent_run(
         f"Initializing build directories for {len(projects)} boards with {parallel_init_workers} parallel workers"
     )
     with ThreadPoolExecutor(max_workers=parallel_init_workers) as executor:
-        future_to_board: dict[Future, Board] = {}
+        future_to_board: Dict[Future[Any], Board] = {}
         for board in projects:
             locked_print(
                 f"Submitting build directory initialization for board: {board.board_name}"
@@ -167,7 +168,7 @@ def concurrent_run(
     # Run the compilation process
     num_cpus = max(1, min(cpu_count(), len(projects)))
     with ThreadPoolExecutor(max_workers=num_cpus) as executor:
-        future_to_board = {
+        future_to_board: Dict[Future[Any], Board] = {
             executor.submit(
                 compile_examples,
                 board,
@@ -199,7 +200,7 @@ def concurrent_run(
     # Run symbol analysis if requested
     if args.symbols:
         locked_print("\nRunning symbol analysis on compiled outputs...")
-        symbol_analysis_errors = []
+        symbol_analysis_errors: List[str] = []
 
         for board in projects:
             try:

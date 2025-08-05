@@ -16,7 +16,7 @@ import argparse
 import json
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 
 @dataclass
@@ -85,7 +85,7 @@ class BuildInfoAnalyzer:
             return build_info_path
         return None
 
-    def load_build_info(self, board_name: str) -> Optional[Dict]:
+    def load_build_info(self, board_name: str) -> Optional[Dict[str, Any]]:
         """
         Load and parse build_info.json for a board.
 
@@ -107,7 +107,7 @@ class BuildInfoAnalyzer:
             return None
 
     def get_board_key_from_build_info(
-        self, data: Dict, board_name: str
+        self, data: Dict[str, Any], board_name: str
     ) -> Optional[str]:
         """
         Get the actual board key used in build_info.json.
@@ -217,7 +217,7 @@ class BuildInfoAnalyzer:
 
         return True, aliases, ""
 
-    def get_all_info(self, board_name: str) -> Tuple[bool, Dict, str]:
+    def get_all_info(self, board_name: str) -> Tuple[bool, Dict[str, Any], str]:
         """
         Get all available information for a board.
 
@@ -237,7 +237,9 @@ class BuildInfoAnalyzer:
 
         return True, data[board_key], ""
 
-    def compare_defines(self, board1: str, board2: str) -> Tuple[bool, Dict, str]:
+    def compare_defines(
+        self, board1: str, board2: str
+    ) -> Tuple[bool, Dict[str, Any], str]:
         """
         Compare platform defines between two boards.
 
@@ -315,7 +317,7 @@ def print_toolchain_aliases(aliases: Dict[str, str], board_name: str):
             print(f"  {tool:10}: Not available")
 
 
-def print_comparison(comparison: Dict):
+def print_comparison(comparison: Dict[str, Any]):
     """Print a comparison between two boards."""
     board1 = comparison["board1"]
     board2 = comparison["board2"]

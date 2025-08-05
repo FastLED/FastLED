@@ -10,7 +10,7 @@ import time
 import urllib.parse
 from pathlib import Path
 from queue import Queue
-from typing import Any, Callable
+from typing import Any, Callable, Match, Union
 
 
 def normalize_error_warning_paths(line: str) -> str:
@@ -66,11 +66,11 @@ def fix_path_separators(text: str) -> str:
         r'(?:[A-Za-z]:[\\\/]|[.]{0,2}[\\\/])[^\s:;"\'<>|*?]*[\\\/][^\s:;"\'<>|*?]*'
     )
 
-    def normalize_path_match(match):
-        path_str = match.group(0)
+    def normalize_path_match(match: Match[str]) -> str:
+        path_str: str = match.group(0)
         try:
             # Use pathlib to normalize the path separators for the current OS
-            normalized = str(
+            normalized: str = str(
                 Path(path_str).as_posix() if os.name != "nt" else Path(path_str)
             )
             return normalized
@@ -94,7 +94,7 @@ def resolve_relative_paths(text: str) -> str:
     # Example: /some/path/../other -> /some/other
     relative_pattern = r'([A-Za-z]:[\\\/](?:[^\\\/\s:;"\'<>|*?]+[\\\/])*)[^\\\/\s:;"\'<>|*?]+[\\\/]\.\.[\\\/]([^\\\/\s:;"\'<>|*?]+(?:[\\\/][^\\\/\s:;"\'<>|*?]+)*)'
 
-    def resolve_path_match(match):
+    def resolve_path_match(match: Match[str]) -> str:
         try:
             full_path = match.group(0)
             # Use pathlib to resolve the path

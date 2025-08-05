@@ -8,6 +8,7 @@ import json
 import subprocess
 import sys
 from pathlib import Path
+from typing import List
 
 
 def run_symbol_analysis(board_name: str):
@@ -75,7 +76,7 @@ def main():
     print("=" * 80)
 
     # List of boards to analyze (you can add more)
-    boards_to_analyze = []
+    boards_to_analyze: List[str] = []
 
     # Check which boards have build info available
     build_dir = Path(".build")
@@ -96,7 +97,7 @@ def main():
     )
 
     # Run symbol analysis for each board
-    successful_boards = []
+    successful_boards: List[str] = []
     for board in boards_to_analyze:
         if run_symbol_analysis(board):
             successful_boards.append(board)

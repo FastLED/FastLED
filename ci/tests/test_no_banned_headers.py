@@ -92,7 +92,7 @@ class BannedHeadersChecker(FileContentChecker):
 
     def check_file_content(self, file_content: FileContent) -> List[str]:
         """Check file content for banned headers."""
-        failings = []
+        failings: List[str] = []
 
         if len(self.banned_headers_list) == 0:
             return failings
@@ -114,7 +114,7 @@ class BannedHeadersChecker(FileContentChecker):
 
 
 def _test_no_banned_headers(
-    test_directories: list[str],
+    test_directories: List[str],
     banned_headers_list: List[str],
     on_fail: Callable[[str], None],
 ) -> None:

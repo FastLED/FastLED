@@ -276,7 +276,7 @@ def parse_args():
 
 def remove_duplicates(items: List[str]) -> List[str]:
     seen: Set[str] = set()
-    out = []
+    out: List[str] = []
     for item in items:
         if item not in seen:
             seen.add(item)

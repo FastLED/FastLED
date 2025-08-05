@@ -120,7 +120,7 @@ def extract_compiler_flags_from_toml(config: Dict[str, Any]) -> List[str]:
 
     # First, extract universal compiler flags from [all] section
     if "all" in config and isinstance(config["all"], dict):
-        all_section = config["all"]
+        all_section: Dict[str, Any] = config["all"]
         if "compiler_flags" in all_section and isinstance(
             all_section["compiler_flags"], list
         ):
@@ -131,9 +131,9 @@ def extract_compiler_flags_from_toml(config: Dict[str, Any]) -> List[str]:
 
     # Then, extract flags from [build_modes.quick] section for sketch compilation
     if "build_modes" in config and isinstance(config["build_modes"], dict):
-        build_modes = config["build_modes"]
+        build_modes: Dict[str, Any] = config["build_modes"]
         if "quick" in build_modes and isinstance(build_modes["quick"], dict):
-            quick_section = build_modes["quick"]
+            quick_section: Dict[str, Any] = build_modes["quick"]
 
             if "flags" in quick_section and isinstance(quick_section["flags"], list):
                 flags.extend(quick_section["flags"])
@@ -150,7 +150,7 @@ def extract_stub_platform_defines_from_toml(config: Dict[str, Any]) -> List[str]
 
     # Extract defines from [stub_platform] section
     if "stub_platform" in config and isinstance(config["stub_platform"], dict):
-        stub_section = config["stub_platform"]
+        stub_section: Dict[str, Any] = config["stub_platform"]
         if "defines" in stub_section and isinstance(stub_section["defines"], list):
             defines.extend(stub_section["defines"])
             print(
@@ -191,7 +191,7 @@ def extract_stub_platform_include_paths_from_toml(config: Dict[str, Any]) -> Lis
 
     # Extract include paths from [stub_platform] section
     if "stub_platform" in config and isinstance(config["stub_platform"], dict):
-        stub_section = config["stub_platform"]
+        stub_section: Dict[str, Any] = config["stub_platform"]
         if "include_paths" in stub_section and isinstance(
             stub_section["include_paths"], list
         ):
@@ -441,7 +441,7 @@ def create_fastled_compiler(
     print("Using direct compilation with ziglang c++")
 
     # Combine cache args with other args (cache args go first)
-    final_args = cache_args + all_args
+    final_args: List[str] = cache_args + all_args
 
     settings = CompilerOptions(
         include_path=src_path,
