@@ -2019,9 +2019,15 @@ class CompilationTestRunner:
             )
         self.log_timing(f"[SUMMARY]   Parallel compilation: {parallel_status}")
         self.log_timing(f"[SUMMARY]   Build time: {results.compile_time:.2f}s")
+
+        # Show both compilation speed and total throughput for complete picture
         if results.compile_time > 0:
             self.log_timing(
-                f"[SUMMARY]   Speed: {len(ino_files) / results.compile_time:.1f} examples/second"
+                f"[SUMMARY]   Compilation speed: {len(ino_files) / results.compile_time:.1f} examples/second"
+            )
+        if total_time > 0:
+            self.log_timing(
+                f"[SUMMARY]   Total throughput: {len(ino_files) / total_time:.1f} examples/second"
             )
 
         # Determine success
