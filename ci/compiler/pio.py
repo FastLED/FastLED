@@ -331,7 +331,7 @@ def _create_cache_build_script(build_dir: Path, cache_config: dict[str, str]) ->
     """Create a PlatformIO build script to set up compiler cache environment with shell trampolines."""
     script_path = build_dir / "cache_setup.py"
 
-    # Create the script content using raw strings and manual substitution
+    # Create the script content using raw strings with __VAR__ placeholders
     script_template = r'''#!/usr/bin/env python3
 """
 Cache setup script for PlatformIO builds.
@@ -355,44 +355,13 @@ except:
     has_projenv = False
     projenv = None
 
-# Dump the environment state to disk for inspection
-env_dump = {}
-for key in env.Dictionary():
-    try:
-        value = env[key]
-        # Convert to string to avoid JSON serialization issues
-        env_dump[key] = str(value)
-    except:
-        env_dump[key] = "<error getting value>"
-
-# Write environment dump to disk
-env_dump_path = "env_dump.json"
-with open(env_dump_path, "w") as f:
-    json.dump(env_dump, f, indent=2)
-print(f"Environment state dumped to: {env_dump_path}")
-
-# Also dump projenv if available
-if has_projenv:
-    projenv_dump = {}
-    for key in projenv.Dictionary():
-        try:
-            value = projenv[key]
-            projenv_dump[key] = str(value)
-        except:
-            projenv_dump[key] = "<error getting value>"
-    
-    projenv_dump_path = "projenv_dump.json"
-    with open(projenv_dump_path, "w") as f:
-        json.dump(projenv_dump, f, indent=2)
-    print(f"Projenv state dumped to: {projenv_dump_path}")
-
 # Set up cache environment variables
-cache_config = CACHE_CONFIG_PLACEHOLDER
+cache_config = __CACHE_CONFIG__
 
 # Set environment variables for cache tools
 for key, value in cache_config.items():
     if key not in ["SCCACHE_PATH", "CCACHE_PATH"]:
-        print(f"Setting cache environment: {key} = {value}")
+        print("Setting cache environment: " + key + " = " + value)
         env.Append(ENV={key: value})
         if has_projenv:
             projenv.Append(ENV={key: value})
@@ -409,9 +378,9 @@ if USE_CACHE:
     original_cc = env.get("CC")
     original_cxx = env.get("CXX")
     
-    print(f"DEBUG: Found compilers in env:")
-    print(f"  CC: {original_cc} (type: {type(original_cc)})")
-    print(f"  CXX: {original_cxx} (type: {type(original_cxx)})")
+    print("DEBUG: Found compilers in env:")
+    print("  CC: " + str(original_cc) + " (type: " + str(type(original_cc)) + ")")
+    print("  CXX: " + str(original_cxx) + " (type: " + str(type(original_cxx)) + ")")
     
     # Function to find full path to compiler
     def find_compiler_path(compiler_name):
@@ -421,44 +390,10 @@ if USE_CACHE:
         # First try shutil.which
         full_path = shutil.which(compiler_name)
         if full_path:
-            print(f"  Found {{compiler_name}} via which: {{full_path}}")
+            print("  Found " + compiler_name + " via which: " + full_path)
             return full_path
             
-        # Try to extract from environment PATH-like variables
-        import glob
-        import os
-        
-        # Check SCons environment for tool paths
-        for key in ['CCCOM', 'CXXCOM', 'CC', 'CXX']:
-            env_val = env.get(key)
-            if env_val and compiler_name in str(env_val):
-                # Extract the first path-like component
-                parts = str(env_val).split()
-                for part in parts:
-                    if compiler_name in part and ('/' in part or '\\\\' in part):
-                        print(f"  Found {{compiler_name}} in env[{{key}}]: {{part}}")
-                        return part
-        
-        # Look in common PlatformIO toolchain locations
-        import platform
-        if platform.system() == "Windows":
-            patterns = [
-                f"C:/Users/*/.platformio/packages/*/bin/{{compiler_name}}.exe",
-                f"C:/Users/*/.platformio/packages/*/bin/{{compiler_name}}",
-            ]
-        else:
-            patterns = [
-                f"/home/*/.platformio/packages/*/bin/{{compiler_name}}",
-                f"~/.platformio/packages/*/bin/{{compiler_name}}",
-            ]
-            
-        for pattern in patterns:
-            matches = glob.glob(os.path.expanduser(pattern))
-            if matches:
-                print(f"  Found {{compiler_name}} via glob: {{matches[0]}}")
-                return matches[0]
-        
-        print(f"  WARNING: Could not find full path for {{compiler_name}}, using as-is")
+        print("  WARNING: Could not find full path for " + compiler_name + ", using as-is")
         return compiler_name
     
     # Handle list-type compiler commands properly and find full paths
@@ -466,7 +401,7 @@ if USE_CACHE:
         cc_parts = [str(x) for x in original_cc]
         cc_binary = cc_parts[0] if cc_parts else "gcc"
         cc_full_path = find_compiler_path(cc_binary)
-        cc_cmd = f"{{cc_full_path}} {{' '.join(cc_parts[1:])}}" if len(cc_parts) > 1 else cc_full_path
+        cc_cmd = cc_full_path + " " + " ".join(cc_parts[1:]) if len(cc_parts) > 1 else cc_full_path
     else:
         cc_binary = str(original_cc) if original_cc else "gcc"
         cc_cmd = find_compiler_path(cc_binary)
@@ -475,36 +410,16 @@ if USE_CACHE:
         cxx_parts = [str(x) for x in original_cxx]
         cxx_binary = cxx_parts[0] if cxx_parts else "g++"
         cxx_full_path = find_compiler_path(cxx_binary)
-        cxx_cmd = f"{{cxx_full_path}} {{' '.join(cxx_parts[1:])}}" if len(cxx_parts) > 1 else cxx_full_path
+        cxx_cmd = cxx_full_path + " " + " ".join(cxx_parts[1:]) if len(cxx_parts) > 1 else cxx_full_path
     else:
         cxx_binary = str(original_cxx) if original_cxx else "g++"
         cxx_cmd = find_compiler_path(cxx_binary)
     
-    print(f"Final compiler commands:")
-    print(f"  CC command: {{cc_cmd}}")
-    print(f"  CXX command: {{cxx_cmd}}")
+    print("Final compiler commands:")
+    print("  CC command: " + str(cc_cmd))
+    print("  CXX command: " + str(cxx_cmd))
     
-    # Add toolchain paths to environment PATH so sccache can find dependencies
-    # Extract toolchain directory from compiler path
-    if cc_cmd and ("toolchain" in cc_cmd or "xtensa" in cc_cmd or "avr" in cc_cmd):
-        import os
-        # Extract the bin directory from the compiler path
-        if "/" in cc_cmd:
-            bin_dir = "/".join(cc_cmd.split("/")[:-1])
-        elif "\\\\" in cc_cmd:
-            bin_dir = "\\\\".join(cc_cmd.split("\\\\")[:-1])
-        else:
-            bin_dir = None
-            
-        if bin_dir and os.path.exists(bin_dir):
-            print(f"Adding toolchain bin directory to PATH: {{bin_dir}}")
-            current_path = env.get("ENV", {}).get("PATH", "")
-            new_path = f"{{bin_dir}};{{current_path}}" if current_path else bin_dir
-            env.Append(ENV={"PATH": new_path})
-            os.environ["PATH"] = f"{{bin_dir}};{{os.environ.get('PATH', '')}}"
-            print(f"Updated PATH for toolchain support")
-    
-    # Create shell script trampolines instead of direct wrapping
+    # Create shell script trampolines
     def create_trampoline_script(compiler_cmd, script_name):
         """Create a shell script trampoline that wraps cache tool with the compiler."""
         script_path = os.path.join(os.getcwd(), script_name)
@@ -523,38 +438,25 @@ if USE_CACHE:
         
         if platform.system() == "Windows":
             # Windows batch script
-            script_lines = [
-                "@echo off",
-                "REM Shell trampoline for " + cache_type + " + compiler",
-                "REM Generated by FastLED build system",
-                "",
-                "REM Set cache environment variables",
-                f"set {{cache_dir_var}}={{cache_dir}}",
-                f"set {{cache_size_var}}={{cache_size}}",
-                "",
-                "REM Execute " + cache_type + " with the compiler and all arguments",
-                f'"{{cache_executable}}" {{compiler_cmd}} %*'
-            ]
-            script_content = "\\n".join(script_lines)
+            script_content = "@echo off\n"
+            script_content += "REM Shell trampoline for " + cache_type + " + compiler\n"
+            script_content += "REM Generated by FastLED build system\n\n"
+            script_content += "REM Set cache environment variables\n"
+            script_content += "set " + cache_dir_var + "=" + cache_dir + "\n"
+            script_content += "set " + cache_size_var + "=" + cache_size + "\n\n"
+            script_content += "REM Execute " + cache_type + " with the compiler and all arguments\n"
+            script_content += '"' + cache_executable + '" ' + compiler_cmd + ' %*\n'
             script_path += ".bat"
         else:
             # Unix shell script
-            script_lines = [
-                "#!/bin/bash",
-                "# Shell trampoline for " + cache_type + " + compiler",
-                "# Generated by FastLED build system",
-                "",
-                "# Set cache environment variables",
-                f'export {{cache_dir_var}}="{{cache_dir}}"',
-                f'export {{cache_size_var}}="{{cache_size}}"',
-                "",
-                "# Execute " + cache_type + " with the compiler and all arguments",
-                f'exec "{{cache_executable}}" {{compiler_cmd}} "$@"'
-            ]
-            script_content = "\\n".join(script_lines)
-        
-        # Convert escaped newlines to actual newlines
-        script_content = script_content.replace("\\n", chr(10))
+            script_content = "#!/bin/bash\n"
+            script_content += "# Shell trampoline for " + cache_type + " + compiler\n"
+            script_content += "# Generated by FastLED build system\n\n"
+            script_content += "# Set cache environment variables\n"
+            script_content += "export " + cache_dir_var + '="' + cache_dir + '"\n'
+            script_content += "export " + cache_size_var + '="' + cache_size + '"\n\n'
+            script_content += "# Execute " + cache_type + " with the compiler and all arguments\n"
+            script_content += 'exec "' + cache_executable + '" ' + compiler_cmd + ' "$@"\n'
         
         # Write the script
         with open(script_path, 'w') as f:
@@ -565,7 +467,7 @@ if USE_CACHE:
             current_stat = os.stat(script_path)
             os.chmod(script_path, current_stat.st_mode | stat.S_IEXEC)
         
-        print(f"Created trampoline script: {script_path}")
+        print("Created trampoline script: " + script_path)
         return script_path
     
     # Create trampoline scripts for CC and CXX
@@ -576,17 +478,17 @@ if USE_CACHE:
     env.Replace(CC=cc_trampoline, CXX=cxx_trampoline)
     if has_projenv:
         projenv.Replace(CC=cc_trampoline, CXX=cxx_trampoline)
-        print(f"Applied {{cache_type}} trampolines to both env and projenv")
+        print("Applied " + cache_type + " trampolines to both env and projenv")
     else:
-        print(f"Applied {{cache_type}} trampolines to env (projenv not available)")
+        print("Applied " + cache_type + " trampolines to env (projenv not available)")
     
-    print(f"Compiler cache enabled: {{cache_type}} trampoline wrapping CC and CXX")
-    print(f"  Original CC: {{original_cc}}")
-    print(f"  Original CXX: {{original_cxx}}")  
-    print(f"  CC Trampoline: {{cc_trampoline}}")
-    print(f"  CXX Trampoline: {{cxx_trampoline}}")
+    print("Compiler cache enabled: " + cache_type + " trampoline wrapping CC and CXX")
+    print("  Original CC: " + str(original_cc))
+    print("  Original CXX: " + str(original_cxx))  
+    print("  CC Trampoline: " + cc_trampoline)
+    print("  CXX Trampoline: " + cxx_trampoline)
 elif cache_executable:
-    print(f"Warning: {{cache_type}} not found in PATH ({{cache_executable}); using default compilers")
+    print("Warning: " + cache_type + " not found in PATH (" + cache_executable + "); using default compilers")
 else:
     print("No cache executable configured; using default compilers")
 
@@ -601,8 +503,8 @@ else:  # ccache
 print("Cache environment configured successfully")
 '''
 
-    # Perform manual substitution
-    script_content = script_template.replace("CACHE_CONFIG_PLACEHOLDER", repr(cache_config))
+    # Perform manual substitution using __VAR__ pattern
+    script_content = script_template.replace("__CACHE_CONFIG__", repr(cache_config))
 
     script_path.write_text(script_content)
     print(f"Created cache setup script: {script_path}")
