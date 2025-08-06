@@ -327,302 +327,42 @@ def _setup_ccache_environment(board_name: str) -> bool:
     return True
 
 
-def _create_cache_build_script(build_dir: Path, cache_config: dict[str, str]) -> None:
-    """Create a PlatformIO build script to set up compiler cache environment."""
-    script_path = build_dir / "cache_setup.py"
-
-    script_content = f'''#!/usr/bin/env python3
-"""
-Cache setup script for PlatformIO builds.
-This script is executed by PlatformIO as a pre-build extra_script.
-"""
-
-# Import env and try to import projenv
-Import("env")
-import os
-import shutil
-import json
-
-# Try to import projenv if it exists
-try:
-    Import("projenv")
-    has_projenv = True
-except:
-    has_projenv = False
-    projenv = None
-
-# Dump the environment state to disk for inspection
-env_dump = {{}}
-for key in env.Dictionary():
-    try:
-        value = env[key]
-        # Convert to string to avoid JSON serialization issues
-        env_dump[key] = str(value)
-    except:
-        env_dump[key] = "<error getting value>"
-
-# Write environment dump to disk
-env_dump_path = "env_dump.json"
-with open(env_dump_path, "w") as f:
-    json.dump(env_dump, f, indent=2)
-print(f"Environment state dumped to: {{env_dump_path}}")
-
-# Also dump projenv if available
-if has_projenv:
-    projenv_dump = {{}}
-    for key in projenv.Dictionary():
-        try:
-            value = projenv[key]
-            projenv_dump[key] = str(value)
-        except:
-            projenv_dump[key] = "<error getting value>"
+def _copy_cache_build_script(build_dir: Path, cache_config: dict[str, str]) -> None:
+    """Copy the standalone cache setup script and set environment variables for configuration."""
+    import shutil
     
-    projenv_dump_path = "projenv_dump.json"
-    with open(projenv_dump_path, "w") as f:
-        json.dump(projenv_dump, f, indent=2)
-    print(f"Projenv state dumped to: {{projenv_dump_path}}")
-
-# Set up cache environment variables
-cache_config = {cache_config!r}
-
-# Set environment variables for cache tools
-for key, value in cache_config.items():
-    if key not in ["SCCACHE_PATH", "CCACHE_PATH", "CACHE_EXECUTABLE"]:
-        print(f"Setting cache environment: {{key}} = {{value}}")
-        env.Append(ENV={{key: value}})
-        if has_projenv:
-            projenv.Append(ENV={{key: value}})
-        os.environ[key] = value
-
-# Use exact pattern from working build_flags.py example
-cache_type = cache_config.get("CACHE_TYPE", "sccache")
-
-# Set xcache debug mode if requested
-if cache_type == "xcache" and os.environ.get("XCACHE_DEBUG"):
-    print("XCACHE_DEBUG enabled - verbose xcache output will be shown")
-    env.Append(ENV={{"XCACHE_DEBUG": "1"}})
-    if has_projenv:
-        projenv.Append(ENV={{"XCACHE_DEBUG": "1"}})
-
-# Get cache executable based on type
-if cache_type == "xcache":
-    cache_executable = cache_config.get("CACHE_EXECUTABLE")
-elif cache_type == "sccache":
-    cache_executable = cache_config.get("SCCACHE_PATH")
-else:
-    cache_executable = cache_config.get("CCACHE_PATH")
-
-# For xcache, create permanent wrapper scripts to avoid SCons response file conflicts
-xcache_wrapper_cc = None
-xcache_wrapper_cxx = None
-xcache_script = None
-python_executable = None
-
-# Check if cache is available
-if cache_type == "xcache":
-    # For xcache, check if the Python script exists and sccache is available
-    xcache_script = cache_config.get("XCACHE_PATH")
-    sccache_path = cache_config.get("SCCACHE_PATH")
-    python_executable = shutil.which("python")
-    USE_CACHE = (cache_executable and xcache_script and 
-                 os.path.exists(xcache_script) and python_executable and 
-                 sccache_path and shutil.which(sccache_path))
+    # Source script location
+    project_root = _resolve_project_root()
+    source_script = project_root / "ci" / "util" / "cache_setup.py"
+    dest_script = build_dir / "cache_setup.py"
     
-    if USE_CACHE:
-        print(f"xcache wrapper detected and configured")
-        print(f"  xcache path: {{cache_config.get('XCACHE_PATH')}}")
-        print(f"  cache executable: {{cache_executable}}")
-        print(f"  wrapper scripts will be created during build setup")
-else:
-    # For sccache/ccache, check if executable is in PATH
-    USE_CACHE = cache_executable and shutil.which(cache_executable)
-
-if USE_CACHE:
-    # Get current compilers - should now be the actual toolchain compilers in post: script
-    original_cc = env.get("CC")
-    original_cxx = env.get("CXX")
+    # Copy the standalone script
+    if not source_script.exists():
+        raise RuntimeError(f"Cache setup script not found: {source_script}")
     
-    print(f"DEBUG: Found compilers in env:")
-    print(f"  CC: {{original_cc}} (type: {{type(original_cc)}})")
-    print(f"  CXX: {{original_cxx}} (type: {{type(original_cxx)}})")
+    shutil.copy2(source_script, dest_script)
+    print(f"Copied cache setup script: {source_script} -> {dest_script}")
     
-    # Function to find full path to compiler
-    def find_compiler_path(compiler_name):
-        if not compiler_name:
-            return None
-            
-        # First try shutil.which
-        full_path = shutil.which(compiler_name)
-        if full_path:
-            print(f"  Found {{compiler_name}} via which: {{full_path}}")
-            return full_path
-            
-        # Try to extract from environment PATH-like variables
-        import glob
-        import os
-        
-        # Check SCons environment for tool paths
-        for key in ['CCCOM', 'CXXCOM', 'CC', 'CXX']:
-            env_val = env.get(key)
-            if env_val and compiler_name in str(env_val):
-                # Extract the first path-like component
-                parts = str(env_val).split()
-                for part in parts:
-                    if compiler_name in part and ('/' in part or '\\\\' in part):
-                        print(f"  Found {{compiler_name}} in env[{{key}}]: {{part}}")
-                        return part
-        
-        # Look in common PlatformIO toolchain locations
-        import platform
-        if platform.system() == "Windows":
-            patterns = [
-                f"C:/Users/*/.platformio/packages/*/bin/{{compiler_name}}.exe",
-                f"C:/Users/*/.platformio/packages/*/bin/{{compiler_name}}",
-            ]
-        else:
-            patterns = [
-                f"/home/*/.platformio/packages/*/bin/{{compiler_name}}",
-                f"~/.platformio/packages/*/bin/{{compiler_name}}",
-            ]
-            
-        for pattern in patterns:
-            matches = glob.glob(os.path.expanduser(pattern))
-            if matches:
-                print(f"  Found {{compiler_name}} via glob: {{matches[0]}}")
-                return matches[0]
-        
-        print(f"  WARNING: Could not find full path for {{compiler_name}}, using as-is")
-        return compiler_name
+    # Set environment variables for cache configuration
+    # These will be read by the cache_setup.py script
+    cache_type = cache_config.get("CACHE_TYPE", "sccache")
     
-    # Handle list-type compiler commands properly and find full paths
-    if isinstance(original_cc, list):
-        cc_parts = [str(x) for x in original_cc]
-        cc_binary = cc_parts[0] if cc_parts else "gcc"
-        cc_full_path = find_compiler_path(cc_binary)
-        cc_cmd = f"{{cc_full_path}} {{' '.join(cc_parts[1:])}}" if len(cc_parts) > 1 else cc_full_path
-    else:
-        cc_binary = str(original_cc) if original_cc else "gcc"
-        cc_cmd = find_compiler_path(cc_binary)
-        
-    if isinstance(original_cxx, list):
-        cxx_parts = [str(x) for x in original_cxx]
-        cxx_binary = cxx_parts[0] if cxx_parts else "g++"
-        cxx_full_path = find_compiler_path(cxx_binary)
-        cxx_cmd = f"{{cxx_full_path}} {{' '.join(cxx_parts[1:])}}" if len(cxx_parts) > 1 else cxx_full_path
-    else:
-        cxx_binary = str(original_cxx) if original_cxx else "g++"
-        cxx_cmd = find_compiler_path(cxx_binary)
+    os.environ["FASTLED_CACHE_TYPE"] = cache_type
+    os.environ["FASTLED_SCCACHE_DIR"] = cache_config.get("SCCACHE_DIR", "")
+    os.environ["FASTLED_SCCACHE_CACHE_SIZE"] = cache_config.get("SCCACHE_CACHE_SIZE", "2G")
+    os.environ["FASTLED_CACHE_DEBUG"] = "1" if os.environ.get("XCACHE_DEBUG") == "1" else "0"
     
-    print(f"Final compiler commands:")
-    print(f"  CC command: {{cc_cmd}}")
-    print(f"  CXX command: {{cxx_cmd}}")
-    
-    # Add toolchain paths to environment PATH so sccache can find dependencies
-    # Extract toolchain directory from compiler path
-    if cc_cmd and ("toolchain" in cc_cmd or "xtensa" in cc_cmd or "avr" in cc_cmd):
-        import os
-        # Extract the bin directory from the compiler path
-        if "/" in cc_cmd:
-            bin_dir = "/".join(cc_cmd.split("/")[:-1])
-        elif "\\\\" in cc_cmd:
-            bin_dir = "\\\\".join(cc_cmd.split("\\\\")[:-1])
-        else:
-            bin_dir = None
-            
-        if bin_dir and os.path.exists(bin_dir):
-            print(f"Adding toolchain bin directory to PATH: {{bin_dir}}")
-            current_path = env.get("ENV", {{}}).get("PATH", "")
-            new_path = f"{{bin_dir}};{{current_path}}" if current_path else bin_dir
-            env.Append(ENV={{"PATH": new_path}})
-            os.environ["PATH"] = f"{{bin_dir}};{{os.environ.get('PATH', '')}}"
-            print(f"Updated PATH for toolchain support")
-    
-    # Create wrapped compiler commands using proven pattern
     if cache_type == "xcache":
-        # Create permanent wrapper scripts at runtime with actual compiler paths
-        import platform
-        import stat
-        import os
-        
-        def create_runtime_wrapper(compiler_name, compiler_path):
-            """Create a wrapper script with the actual compiler path"""
-            xcache_path = cache_config.get("XCACHE_PATH")
-            python_cmd = "python"
-            build_dir = os.path.dirname(os.path.abspath("cache_setup.py"))
-            
-            if platform.system() == "Windows":
-                wrapper_path = os.path.join(build_dir, f"{{compiler_name}}_wrapper.bat")
-                wrapper_content = f"""@echo off
-REM Runtime xcache wrapper for {{compiler_name}}
-REM This avoids SCons response file conflicts
-
-if /i "%XCACHE_DEBUG%"=="1" (
-    echo XCACHE: Runtime wrapper for {{compiler_name}}: "{{python_cmd}}" "{{xcache_path}}" "{{compiler_path}}" %* >&2
-)
-
-REM Execute xcache with compiler path and all arguments
-"{{python_cmd}}" "{{xcache_path}}" "{{compiler_path}}" %*
-"""
-            else:
-                wrapper_path = os.path.join(build_dir, f"{{compiler_name}}_wrapper.sh")
-                wrapper_content = f"""#!/bin/bash
-# Runtime xcache wrapper for {{compiler_name}}
-# This avoids SCons response file conflicts
-
-if [ "$XCACHE_DEBUG" = "1" ]; then
-    echo "XCACHE: Runtime wrapper for {{compiler_name}}: {{python_cmd}} {{xcache_path}} {{compiler_path}} $@" >&2
-fi
-
-# Execute xcache with compiler path and all arguments
-exec "{{python_cmd}}" "{{xcache_path}}" "{{compiler_path}}" "$@"
-"""
-            
-            # Write wrapper script
-            with open(wrapper_path, 'w') as f:
-                f.write(wrapper_content)
-            
-            # Make executable on Unix systems
-            if platform.system() != "Windows":
-                os.chmod(wrapper_path, stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IXOTH)
-            
-            print(f"  Created runtime wrapper: {{wrapper_path}}")
-            return wrapper_path
-        
-        # Create wrapper scripts with actual compiler paths
-        CC = create_runtime_wrapper("gcc", cc_cmd)
-        CXX = create_runtime_wrapper("g++", cxx_cmd)
+        os.environ["FASTLED_CACHE_EXECUTABLE"] = cache_config.get("CACHE_EXECUTABLE", "")
+        os.environ["FASTLED_SCCACHE_PATH"] = cache_config.get("SCCACHE_PATH", "")
+        os.environ["FASTLED_XCACHE_PATH"] = cache_config.get("XCACHE_PATH", "")
+    elif cache_type == "sccache":
+        os.environ["FASTLED_CACHE_EXECUTABLE"] = cache_config.get("SCCACHE_PATH", "")
+        os.environ["FASTLED_SCCACHE_PATH"] = cache_config.get("SCCACHE_PATH", "")
     else:
-        # For sccache/ccache, use traditional wrapper pattern
-        CC = f"{{cache_executable}} {{cc_cmd}}"
-        CXX = f"{{cache_executable}} {{cxx_cmd}}"
+        os.environ["FASTLED_CACHE_EXECUTABLE"] = cache_config.get("CCACHE_PATH", "")
     
-    # Apply to both environments exactly like the working example
-    env.Replace(CC=CC, CXX=CXX)
-    if has_projenv:
-        projenv.Replace(CC=CC, CXX=CXX)
-        print(f"Applied {{cache_type}} to both env and projenv")
-    else:
-        print(f"Applied {{cache_type}} to env (projenv not available)")
-    
-    print(f"Compiler cache enabled: {{cache_type}} wrapping CC and CXX")
-    print(f"  Original CC: {{original_cc}}")
-    print(f"  Original CXX: {{original_cxx}}")  
-    print(f"  Wrapped CC: {{CC}}")
-    print(f"  Wrapped CXX: {{CXX}}")
-elif cache_executable:
-    print(f"Warning: {{cache_type}} not found in PATH ({{cache_executable}}); using default compilers")
-else:
-    print("No cache executable configured; using default compilers")
-
-# Set environment variables for cache tools
-env.Append(ENV={{"SCCACHE_DIR": cache_config.get("SCCACHE_DIR", "")}})
-env.Append(ENV={{"SCCACHE_CACHE_SIZE": cache_config.get("SCCACHE_CACHE_SIZE", "2G")}})
-
-print("Cache environment configured successfully")
-'''
-
-    script_path.write_text(script_content)
-    print(f"Created cache setup script: {script_path}")
+    print(f"Set cache environment variables for {cache_type} configuration")
 
 
 class FastLEDPaths:
@@ -1221,7 +961,7 @@ def _init_platformio_build(
             print(f"Added cache launcher flags: {launcher_flags}")
 
         # Create build script that will set up cache environment
-        _create_cache_build_script(build_dir, cache_config)
+        _copy_cache_build_script(build_dir, cache_config)
 
     # Optimization report generation is available but OFF by default
     # To enable optimization reports, add these flags to your board configuration:
