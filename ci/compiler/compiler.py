@@ -8,8 +8,17 @@ Defines the interface that all FastLED compiler implementations must follow.
 from abc import ABC, abstractmethod
 from concurrent.futures import Future
 from dataclasses import dataclass
+from enum import Enum
 from pathlib import Path
 from typing import Any
+
+
+class CacheType(Enum):
+    """Compiler cache type options."""
+
+    NO_CACHE = "no_cache"
+    CCACHE = "ccache"
+    SCCACHE = "sccache"
 
 
 @dataclass

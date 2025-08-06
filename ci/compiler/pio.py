@@ -17,13 +17,14 @@ import urllib.request
 import warnings
 from concurrent.futures import Future, ThreadPoolExecutor
 from dataclasses import dataclass
+from enum import Enum
 from pathlib import Path
 from typing import Any, Callable, Dict
 
 from dirsync import sync  # type: ignore
 from filelock import FileLock, Timeout  # type: ignore
 
-from ci.compiler.compiler import Compiler, InitResult, SketchResult
+from ci.compiler.compiler import CacheType, Compiler, InitResult, SketchResult
 from ci.util.boards import ALL, Board, create_board
 from ci.util.create_build_dir import insert_tool_aliases
 from ci.util.output_formatter import create_sketch_path_formatter
@@ -213,6 +214,7 @@ def _apply_board_specific_config(
     additional_defines: list[str] | None = None,
     additional_include_dirs: list[str] | None = None,
     additional_libs: list[str] | None = None,
+    cache_type: CacheType = CacheType.NO_CACHE,
 ) -> bool:
     """Apply board-specific build configuration from Board class."""
     # Use centralized path management
@@ -229,6 +231,18 @@ def _apply_board_specific_config(
         packages_dir=str(paths.packages_dir),
         project_root=str(_PROJECT_ROOT),
     )
+
+    # Add cache setup script if cache is configured
+    if cache_type != CacheType.NO_CACHE:
+        # Add extra_scripts line to the [env:board] section
+        config_lines = config_content.split("\n")
+        for i, line in enumerate(config_lines):
+            if line.startswith("[env:"):
+                # Insert extra_scripts after the env section header
+                config_lines.insert(i + 1, "extra_scripts = post:cache_setup.py")
+                break
+        config_content = "\n".join(config_lines)
+
     platformio_ini_path.write_text(config_content)
 
     # Log applied configurations for debugging
@@ -244,6 +258,199 @@ def _apply_board_specific_config(
         print(f"Using platform_packages: {board.platform_packages}")
 
     return True
+
+
+def _setup_ccache_environment(board_name: str) -> bool:
+    """Set up ccache environment variables for the current process."""
+    import shutil
+
+    # Check if ccache is available
+    ccache_path = shutil.which("ccache")
+    if not ccache_path:
+        print("CCACHE not found in PATH, compilation will proceed without caching")
+        return False
+
+    print(f"Setting up CCACHE environment: {ccache_path}")
+
+    # Set up ccache directory in the global .fastled directory
+    # Shared across all boards for maximum cache efficiency
+    paths = FastLEDPaths(board_name)
+    ccache_dir = paths.fastled_root / "ccache"
+    ccache_dir.mkdir(parents=True, exist_ok=True)
+
+    # Configure ccache environment variables
+    os.environ["CCACHE_DIR"] = str(ccache_dir)
+    os.environ["CCACHE_MAXSIZE"] = "2G"
+
+    print(f"CCACHE cache directory: {ccache_dir}")
+
+    # Set compiler wrapper environment variables that PlatformIO will use
+    # PlatformIO respects these environment variables for compiler selection
+    original_cc = os.environ.get("CC", "")
+    original_cxx = os.environ.get("CXX", "")
+
+    # Only wrap if not already wrapped
+    if "ccache" not in original_cc:
+        # Set environment variables that PlatformIO/SCons will use
+        os.environ["CC"] = (
+            f'"{ccache_path}" {original_cc}' if original_cc else f'"{ccache_path}" gcc'
+        )
+        os.environ["CXX"] = (
+            f'"{ccache_path}" {original_cxx}'
+            if original_cxx
+            else f'"{ccache_path}" g++'
+        )
+
+        print(f"Set CC environment variable: {os.environ['CC']}")
+        print(f"Set CXX environment variable: {os.environ['CXX']}")
+
+    print(f"CCACHE cache directory: {ccache_dir}")
+    print(f"CCACHE cache size limit: 2G")
+
+    # Show ccache statistics if available
+    try:
+        import subprocess
+
+        result = subprocess.run(
+            [ccache_path, "--show-stats"], capture_output=True, text=True, check=False
+        )
+        if result.returncode == 0:
+            print("CCACHE Statistics:")
+            for line in result.stdout.strip().split("\n"):
+                if line.strip():
+                    print(f"   {line}")
+        else:
+            print("CCACHE stats not available (cache empty or first run)")
+    except Exception as e:
+        print(f"Could not retrieve CCACHE stats: {e}")
+
+    return True
+
+
+def _create_cache_build_script(build_dir: Path, cache_config: dict[str, str]) -> None:
+    """Create a PlatformIO build script to set up compiler cache environment."""
+    script_path = build_dir / "cache_setup.py"
+
+    script_content = f'''#!/usr/bin/env python3
+"""
+Cache setup script for PlatformIO builds.
+This script is executed by PlatformIO as a pre-build extra_script.
+"""
+
+# Import env and try to import projenv
+Import("env")
+import os
+import shutil
+import json
+
+# Try to import projenv if it exists
+try:
+    Import("projenv")
+    has_projenv = True
+except:
+    has_projenv = False
+    projenv = None
+
+# Dump the environment state to disk for inspection
+env_dump = {{}}
+for key in env.Dictionary():
+    try:
+        value = env[key]
+        # Convert to string to avoid JSON serialization issues
+        env_dump[key] = str(value)
+    except:
+        env_dump[key] = "<error getting value>"
+
+# Write environment dump to disk
+env_dump_path = "env_dump.json"
+with open(env_dump_path, "w") as f:
+    json.dump(env_dump, f, indent=2)
+print(f"Environment state dumped to: {{env_dump_path}}")
+
+# Also dump projenv if available
+if has_projenv:
+    projenv_dump = {{}}
+    for key in projenv.Dictionary():
+        try:
+            value = projenv[key]
+            projenv_dump[key] = str(value)
+        except:
+            projenv_dump[key] = "<error getting value>"
+    
+    projenv_dump_path = "projenv_dump.json"
+    with open(projenv_dump_path, "w") as f:
+        json.dump(projenv_dump, f, indent=2)
+    print(f"Projenv state dumped to: {{projenv_dump_path}}")
+
+# Set up cache environment variables
+cache_config = {cache_config!r}
+
+# Set environment variables for cache tools
+for key, value in cache_config.items():
+    if key not in ["SCCACHE_PATH", "CCACHE_PATH"]:
+        print(f"Setting cache environment: {{key}} = {{value}}")
+        env.Append(ENV={{key: value}})
+        if has_projenv:
+            projenv.Append(ENV={{key: value}})
+        os.environ[key] = value
+
+# Use exact pattern from working build_flags.py example
+cache_type = cache_config.get("CACHE_TYPE", "sccache")
+cache_executable = cache_config.get("SCCACHE_PATH") if cache_type == "sccache" else cache_config.get("CCACHE_PATH")
+
+USE_CACHE = cache_executable and shutil.which(cache_executable)
+
+if USE_CACHE:
+    # Get current compilers - should now be the actual toolchain compilers in post: script
+    original_cc = env.get("CC")
+    original_cxx = env.get("CXX")
+    
+    print(f"DEBUG: Found compilers in env:")
+    print(f"  CC: {{original_cc}} (type: {{type(original_cc)}})")
+    print(f"  CXX: {{original_cxx}} (type: {{type(original_cxx)}})")
+    
+    # Handle list-type compiler commands properly
+    if isinstance(original_cc, list):
+        cc_cmd = " ".join(str(x) for x in original_cc)
+    else:
+        cc_cmd = str(original_cc) if original_cc else "gcc"
+        
+    if isinstance(original_cxx, list):
+        cxx_cmd = " ".join(str(x) for x in original_cxx)
+    else:
+        cxx_cmd = str(original_cxx) if original_cxx else "g++"
+    
+    # Create wrapped compiler commands using proven pattern
+    CC = f"{{cache_executable}} {{cc_cmd}}"
+    CXX = f"{{cache_executable}} {{cxx_cmd}}"
+    
+    # Apply to both environments exactly like the working example
+    env.Replace(CC=CC, CXX=CXX)
+    if has_projenv:
+        projenv.Replace(CC=CC, CXX=CXX)
+        print(f"Applied {{cache_type}} to both env and projenv")
+    else:
+        print(f"Applied {{cache_type}} to env (projenv not available)")
+    
+    print(f"Compiler cache enabled: {{cache_type}} wrapping CC and CXX")
+    print(f"  Original CC: {{original_cc}}")
+    print(f"  Original CXX: {{original_cxx}}")  
+    print(f"  Wrapped CC: {{CC}}")
+    print(f"  Wrapped CXX: {{CXX}}")
+elif cache_executable:
+    print(f"Warning: {{cache_type}} not found in PATH ({{cache_executable}}); using default compilers")
+else:
+    print("No cache executable configured; using default compilers")
+
+# Set environment variables for cache tools
+env.Append(ENV={{"SCCACHE_DIR": cache_config.get("SCCACHE_DIR", "")}})
+env.Append(ENV={{"SCCACHE_CACHE_SIZE": cache_config.get("SCCACHE_CACHE_SIZE", "2G")}})
+
+print("Cache environment configured successfully")
+'''
+
+    script_path.write_text(script_content)
+    print(f"Created cache setup script: {script_path}")
 
 
 class FastLEDPaths:
@@ -577,6 +784,154 @@ def _copy_boards_directory(project_root: Path, build_dir: Path) -> bool:
     return True
 
 
+def _get_cache_build_flags(board_name: str, cache_type: CacheType) -> dict[str, str]:
+    """Get environment variables for compiler cache configuration."""
+    if cache_type == CacheType.NO_CACHE:
+        print("No compiler cache configured")
+        return {}
+    elif cache_type == CacheType.SCCACHE:
+        return _get_sccache_build_flags(board_name)
+    elif cache_type == CacheType.CCACHE:
+        return _get_ccache_build_flags(board_name)
+    else:
+        print(f"Unknown cache type: {cache_type}")
+        return {}
+
+
+def _get_sccache_build_flags(board_name: str) -> dict[str, str]:
+    """Get build flags for SCCACHE configuration."""
+    import shutil
+
+    # Check if sccache is available
+    sccache_path = shutil.which("sccache")
+    if not sccache_path:
+        print("SCCACHE not found in PATH, compilation will proceed without caching")
+        return {}
+
+    print(f"Setting up SCCACHE build flags: {sccache_path}")
+
+    # Set up sccache directory in the global .fastled directory
+    # Shared across all boards for maximum cache efficiency
+    paths = FastLEDPaths(board_name)
+    sccache_dir = paths.fastled_root / "sccache"
+    sccache_dir.mkdir(parents=True, exist_ok=True)
+
+    print(f"SCCACHE cache directory: {sccache_dir}")
+    print(f"SCCACHE cache size limit: 2G")
+
+    # Return the sccache path and cache configuration
+    # We'll add this to build_flags using compiler launcher
+    config = {
+        "CACHE_TYPE": "sccache",
+        "SCCACHE_DIR": str(sccache_dir),
+        "SCCACHE_CACHE_SIZE": "2G",
+        "SCCACHE_PATH": sccache_path,
+    }
+
+    return config
+
+
+def _get_ccache_build_flags(board_name: str) -> dict[str, str]:
+    """Get environment variables for CCACHE configuration."""
+    import shutil
+
+    # Check if ccache is available
+    ccache_path = shutil.which("ccache")
+    if not ccache_path:
+        print("CCACHE not found in PATH, compilation will proceed without caching")
+        return {}
+
+    print(f"Setting up CCACHE build environment: {ccache_path}")
+
+    # Set up ccache directory in the global .fastled directory
+    # Shared across all boards for maximum cache efficiency
+    paths = FastLEDPaths(board_name)
+    ccache_dir = paths.fastled_root / "ccache"
+    ccache_dir.mkdir(parents=True, exist_ok=True)
+
+    print(f"CCACHE cache directory: {ccache_dir}")
+    print(f"CCACHE cache size limit: 2G")
+
+    # Return environment variables that PlatformIO will use
+    env_vars = {
+        "CACHE_TYPE": "ccache",
+        "CCACHE_DIR": str(ccache_dir),
+        "CCACHE_MAXSIZE": "2G",
+        "CCACHE_PATH": ccache_path,
+    }
+
+    return env_vars
+
+
+def _setup_sccache_environment(board_name: str) -> bool:
+    """Set up sccache environment variables for the current process."""
+    import shutil
+
+    # Check if sccache is available
+    sccache_path = shutil.which("sccache")
+    if not sccache_path:
+        print("SCCACHE not found in PATH, compilation will proceed without caching")
+        return False
+
+    print(f"Setting up SCCACHE environment: {sccache_path}")
+
+    # Set up sccache directory in the global .fastled directory
+    # Shared across all boards for maximum cache efficiency
+    paths = FastLEDPaths(board_name)
+    sccache_dir = paths.fastled_root / "sccache"
+    sccache_dir.mkdir(parents=True, exist_ok=True)
+
+    # Configure sccache environment variables
+    os.environ["SCCACHE_DIR"] = str(sccache_dir)
+    os.environ["SCCACHE_CACHE_SIZE"] = "2G"
+
+    print(f"SCCACHE cache directory: {sccache_dir}")
+
+    # Set compiler wrapper environment variables that PlatformIO will use
+    # PlatformIO respects these environment variables for compiler selection
+    original_cc = os.environ.get("CC", "")
+    original_cxx = os.environ.get("CXX", "")
+
+    # Only wrap if not already wrapped
+    if "sccache" not in original_cc:
+        # Set environment variables that PlatformIO/SCons will use
+        os.environ["CC"] = (
+            f'"{sccache_path}" {original_cc}'
+            if original_cc
+            else f'"{sccache_path}" gcc'
+        )
+        os.environ["CXX"] = (
+            f'"{sccache_path}" {original_cxx}'
+            if original_cxx
+            else f'"{sccache_path}" g++'
+        )
+
+        print(f"Set CC environment variable: {os.environ['CC']}")
+        print(f"Set CXX environment variable: {os.environ['CXX']}")
+
+    print(f"SCCACHE cache directory: {sccache_dir}")
+    print(f"SCCACHE cache size limit: 2G")
+
+    # Show sccache statistics if available
+    try:
+        import subprocess
+
+        result = subprocess.run(
+            [sccache_path, "--show-stats"], capture_output=True, text=True, check=False
+        )
+        if result.returncode == 0:
+            print("SCCACHE Statistics:")
+            for line in result.stdout.strip().split("\n"):
+                if line.strip():
+                    print(f"   {line}")
+        else:
+            print("SCCACHE stats not available (cache empty or first run)")
+    except Exception as e:
+        print(f"Could not retrieve SCCACHE stats: {e}")
+
+    return True
+
+
 def _copy_fastled_library(project_root: Path, build_dir: Path) -> bool:
     """Create symlink to FastLED library in the build directory."""
     lib_dir = build_dir / "lib" / "FastLED"
@@ -634,6 +989,7 @@ def _init_platformio_build(
     additional_defines: list[str] | None = None,
     additional_include_dirs: list[str] | None = None,
     additional_libs: list[str] | None = None,
+    cache_type: CacheType = CacheType.NO_CACHE,
 ) -> InitResult:
     """Initialize the PlatformIO build directory. Assumes lock is already held by caller."""
     project_root = _resolve_project_root()
@@ -663,6 +1019,22 @@ def _init_platformio_build(
         )
     board_with_sketch_include.build_flags.append("-Isrc/sketch")
 
+    # Set up compiler cache through build_flags if enabled and available
+    cache_config = _get_cache_build_flags(board.board_name, cache_type)
+    if cache_config:
+        print(f"Applied cache configuration: {list(cache_config.keys())}")
+
+        # Add compiler launcher build flags directly
+        sccache_path = cache_config.get("SCCACHE_PATH")
+        if sccache_path:
+            # Add build flags to use sccache as compiler launcher
+            launcher_flags = [f'-DCACHE_LAUNCHER="{sccache_path}"']
+            board_with_sketch_include.build_flags.extend(launcher_flags)
+            print(f"Added cache launcher flags: {launcher_flags}")
+
+        # Create build script that will set up cache environment
+        _create_cache_build_script(build_dir, cache_config)
+
     # Optimization report generation is available but OFF by default
     # To enable optimization reports, add these flags to your board configuration:
     # - "-fopt-info-all=optimization_report.txt" for detailed optimization info
@@ -678,6 +1050,7 @@ def _init_platformio_build(
         additional_defines,
         additional_include_dirs,
         additional_libs,
+        cache_type,
     ):
         return InitResult(
             success=False,
@@ -780,6 +1153,7 @@ class PioCompiler(Compiler):
         additional_defines: list[str] | None = None,
         additional_include_dirs: list[str] | None = None,
         additional_libs: list[str] | None = None,
+        cache_type: CacheType = CacheType.SCCACHE,
     ) -> None:
         # Call parent constructor
         super().__init__()
@@ -793,6 +1167,7 @@ class PioCompiler(Compiler):
         self.additional_defines = additional_defines
         self.additional_include_dirs = additional_include_dirs
         self.additional_libs = additional_libs
+        self.cache_type = cache_type
 
         # Use centralized path management
         self.paths = FastLEDPaths(self.board.board_name)
@@ -825,6 +1200,7 @@ class PioCompiler(Compiler):
             self.additional_defines,
             self.additional_include_dirs,
             self.additional_libs,
+            self.cache_type,
         )
         if result.success:
             self.initialized = True
@@ -890,6 +1266,8 @@ class PioCompiler(Compiler):
                 build_dir=self.build_dir,
                 example=example,
             )
+
+        # Cache configuration is handled through build flags during initialization
 
         # Run PlatformIO build
         run_cmd: list[str] = [
@@ -1330,6 +1708,7 @@ def run_pio_build(
     verbose: bool = False,
     additional_defines: list[str] | None = None,
     additional_include_dirs: list[str] | None = None,
+    cache_type: CacheType = CacheType.SCCACHE,
 ) -> list[Future[SketchResult]]:
     """Run build for specified examples and platform using new PlatformIO system.
 
@@ -1340,5 +1719,7 @@ def run_pio_build(
         additional_defines: Additional defines to add to build flags (e.g., ["FASTLED_DEFINE=0", "DEBUG=1"])
         additional_include_dirs: Additional include directories to add to build flags (e.g., ["src/platforms/sub", "external/libs"])
     """
-    pio = PioCompiler(board, verbose, additional_defines, additional_include_dirs)
+    pio = PioCompiler(
+        board, verbose, additional_defines, additional_include_dirs, None, cache_type
+    )
     return pio.build(examples)
