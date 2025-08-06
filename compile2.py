@@ -15,6 +15,11 @@ from ci.compiler.pio import PlatformIoBuilder, BuildResult, run_pio_build
 from ci.util.boards import ALL
 
 
+def yellow_text(text: str) -> str:
+    """Return text in yellow color using ANSI escape codes."""
+    return f"\033[33m{text}\033[0m"
+
+
 def _resolve_example_paths(examples: list[str]) -> list[str]:
     """Resolve example names or paths to appropriate format.
     
@@ -38,10 +43,10 @@ class Args:
     def parse_args() -> "Args":
         parser = argparse.ArgumentParser(description="FastLED Target Build Script")
         parser.add_argument(
-            "platform", nargs="?", help="Platform to build for (e.g. 'uno', 'esp32dev')"
+            "platform", nargs="?", help="Platform to build for (default: 'uno', e.g. 'esp32dev', 'teensy31')"
         )
         parser.add_argument(
-            "example", nargs="?", help="Optional example name to build"
+            "example", nargs="?", help="Optional example name to build (default: 'Blink')"
         )
         parser.add_argument(
             "--examples", help="Comma-separated list of examples to build (e.g. 'Blink,FestivalStick')"
@@ -97,9 +102,11 @@ class Args:
             
             sys.exit(0)
         
-        # Validate required arguments when not using --list
-        if not parsed_args.platform:
-            parser.error("Platform argument is required")
+        # Use defaults when not provided
+        platform = parsed_args.platform
+        if not platform:
+            platform = "uno"
+            print(yellow_text("WARNING: Board wasn't specified, assuming 'uno'"))
         
         # Handle examples logic
         examples: list[str] = []
@@ -110,14 +117,16 @@ class Args:
             # Add positional example if provided
             examples.append(parsed_args.example)
         
+        # Use default example if none provided
         if not examples:
-            parser.error("Must specify at least one example either as positional argument or via --examples")
+            examples = ["Blink"]
+            print(yellow_text("WARNING: Example wasn't specified, assuming 'Blink'"))
         
         # Resolve example names/paths
         resolved_examples = _resolve_example_paths(examples)
         
         return Args(
-            platform=parsed_args.platform,
+            platform=platform,
             examples=resolved_examples,
             verbose=parsed_args.verbose
         )
