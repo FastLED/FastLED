@@ -10,7 +10,7 @@ import argparse
 import sys
 from dataclasses import dataclass
 
-from ci.compiler.pio import PlatformIoBuilder, BuildResult
+from ci.compiler.pio import PlatformIoBuilder, BuildResult, run_pio_build
 
 
 @dataclass
@@ -40,34 +40,22 @@ def main() -> int:
     args = Args.parse_args()
 
     # Create PlatformIO builder with only the parameters it needs
-    builder = PlatformIoBuilder(board=args.board, verbose=args.verbose)
-    
-    # Initialize build environment
-    init_result = builder.init_build()
-    if not init_result.success:
-        print(f"Failed to initialize build: {init_result.output}")
-        return 1
+    # builder = PlatformIoBuilder(board=args.board, verbose=args.verbose)
+    futures = run_pio_build(args.board, args.examples, args.verbose)
 
-    results: list[BuildResult] = []
-    for example in args.examples:
-        print(f"Building example: {example}")
-        
-        # Build the example
-        result = builder.build(example)
-        results.append(result)
+
+    for future in futures:
+        result: BuildResult = future.result()
         if not result.success:
-            print(f"Failed to build {example}")
+            print(f"Failed to build {result.example}: {result.output}")
+            for future in futures:
+                future.cancel()
+            return 1
         else:
-            print(f"Successfully built {example}")
+            print(f"Successfully built {result.example}")
+    
 
-    failed_builds = [(args.examples[i], result) for i, result in enumerate(results) if not result.success]
-    if failed_builds:
-        print(f"Failed to build {len(failed_builds)} out of {len(results)} examples")
-        for example_name, result in failed_builds:
-            print(f"Error building {example_name}: {result.output}")
-        return 1
-
-    print(f"Successfully built all {len(results)} examples")
+    print(f"Successfully built all {len(args.examples)} examples")
     return 0
 
 

@@ -8,6 +8,7 @@ Provides a clean interface for building FastLED projects with PlatformIO.
 import shutil
 import subprocess
 import warnings
+from concurrent.futures import Future, ThreadPoolExecutor
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -16,8 +17,11 @@ from dirsync import sync  # type: ignore
 from ci.util.running_process import RunningProcess
 
 
+_EXECUTOR = ThreadPoolExecutor(max_workers=1)
+
+
 @dataclass
-class BuildResult:
+class InitResult:
     success: bool
     output: str
     build_dir: Path
@@ -28,17 +32,39 @@ class BuildResult:
 
 
 @dataclass
+class BuildResult:
+    success: bool
+    output: str
+    build_dir: Path
+    example: str
+
+
+@dataclass
 class BuildConfig:
     board: str
     framework: str = "arduino"
     platform: str = "atmelavr"
 
-    def to_platformio_ini(self) -> str:
+    def to_platformio_ini(self, lib_ldf_mode: str = "chain") -> str:
         out: list[str] = []
         out.append(f"[env:{self.board}]")
         out.append(f"platform = {self.platform}")
         out.append(f"board = {self.board}")
         out.append(f"framework = {self.framework}")
+        out.append(f"lib_ldf_mode = {lib_ldf_mode}")
+        # Enable library archiving to create static libraries and avoid recompilation
+        out.append("lib_archive = true")
+        # Add manual include path for FastLED library
+        if lib_ldf_mode == "off":
+            # When LDF is off, we need to manually include FastLED source files
+            # but with lib_archive=true, they'll be compiled into a static library
+            out.append("build_flags = -I lib/FastLED")
+            out.append(
+                "build_src_filter = +<*> +<../lib/FastLED/**/*.cpp> +<../lib/FastLED/**/*.c>"
+            )
+        else:
+            # When LDF is on, just provide the include path - LDF will handle the rest
+            out.append("build_flags = -I lib/FastLED")
         return "\n".join(out)
 
 
@@ -137,18 +163,12 @@ def copy_fastled_library(project_root: Path, build_dir: Path) -> bool:
             warnings.warn(f"Failed to copy FastLED library: {copy_error}")
             return False
 
-    # Copy library.json to the lib directory (not inside FastLED symlink)
-    library_json_src = project_root / "library.json"
-    library_json_dst = lib_dir / "library.json"
-    try:
-        shutil.copy2(library_json_src, library_json_dst)
-    except Exception as e:
-        warnings.warn(f"Failed to copy library.json: {e}")
-        return False
+    # Note: library.json is not needed since we manually set include path in platformio.ini
+
     return True
 
 
-def init_platformio_build(board: str, verbose: bool, example: str) -> BuildResult:
+def init_platformio_build(board: str, verbose: bool, example: str) -> InitResult:
     """Initialize the PlatformIO build directory."""
     platform = board
 
@@ -167,7 +187,7 @@ def init_platformio_build(board: str, verbose: bool, example: str) -> BuildResul
     ok_copy_src = copy_example_source(project_root, build_dir, example)
     if not ok_copy_src:
         warnings.warn(f"Example not found: {project_root / 'examples' / example}")
-        return BuildResult(
+        return InitResult(
             success=False,
             output=f"Example not found: {project_root / 'examples' / example}",
             build_dir=build_dir,
@@ -177,7 +197,7 @@ def init_platformio_build(board: str, verbose: bool, example: str) -> BuildResul
     ok_copy_fastled = copy_fastled_library(project_root, build_dir)
     if not ok_copy_fastled:
         warnings.warn(f"Failed to copy FastLED library")
-        return BuildResult(
+        return InitResult(
             success=False, output=f"Failed to copy FastLED library", build_dir=build_dir
         )
 
@@ -185,7 +205,7 @@ def init_platformio_build(board: str, verbose: bool, example: str) -> BuildResul
     ok_copy_boards = copy_boards_directory(project_root, build_dir)
     if not ok_copy_boards:
         warnings.warn(f"Failed to copy boards directory")
-        return BuildResult(
+        return InitResult(
             success=False,
             output=f"Failed to copy boards directory",
             build_dir=build_dir,
@@ -193,10 +213,48 @@ def init_platformio_build(board: str, verbose: bool, example: str) -> BuildResul
 
     # Write final platformio.ini
     build_config = BuildConfig(board=platform, framework="arduino", platform="atmelavr")
-    platformio_ini_content = build_config.to_platformio_ini()
+    platformio_ini_content = build_config.to_platformio_ini(lib_ldf_mode="chain")
     platformio_ini.write_text(platformio_ini_content)
 
-    return BuildResult(success=True, output="", build_dir=build_dir)
+    # Now do an initial build with Blink to ensure everything works
+    # Copy Blink example for the initial build
+    ok_copy_blink = copy_example_source(project_root, build_dir, "Blink")
+    if not ok_copy_blink:
+        warnings.warn(f"Blink example not found: {project_root / 'examples' / 'Blink'}")
+        return InitResult(
+            success=False,
+            output=f"Blink example not found: {project_root / 'examples' / 'Blink'}",
+            build_dir=build_dir,
+        )
+
+    # Run initial build with LDF enabled to set up the environment
+    run_cmd: list[str] = ["pio", "run", "--project-dir", str(build_dir)]
+    if verbose:
+        run_cmd.append("--verbose")
+
+    print(f"Running initial build command: {subprocess.list2cmdline(run_cmd)}")
+
+    running_process = RunningProcess(run_cmd, cwd=build_dir, auto_run=True)
+    while line := running_process.get_next_line():
+        if line is None:  # End of stream
+            break
+        print(line)
+
+    running_process.wait()
+
+    if running_process.returncode != 0:
+        return InitResult(
+            success=False,
+            output=f"Initial build failed: {running_process.stdout}",
+            build_dir=build_dir,
+        )
+
+    # After successful build, turn off the Library Dependency Finder for subsequent builds
+    # but keep the manual include path for FastLED
+    final_content_no_ldf = build_config.to_platformio_ini(lib_ldf_mode="off")
+    platformio_ini.write_text(final_content_no_ldf)
+
+    return InitResult(success=True, output="", build_dir=build_dir)
 
 
 def run_platform_build(board: str, verbose: bool, example: str) -> BuildResult:
@@ -211,7 +269,12 @@ def run_platform_build(board: str, verbose: bool, example: str) -> BuildResult:
     build_result = init_platformio_build(board, verbose, example)
     if not build_result.success:
         warnings.warn(f"Build failed: {build_result.output}")
-        return build_result
+        return BuildResult(
+            success=False,
+            output=build_result.output,
+            build_dir=build_result.build_dir,
+            example=example,
+        )
 
     build_dir = build_result.build_dir
     print(f"Build directory: {build_dir}")
@@ -234,12 +297,15 @@ def run_platform_build(board: str, verbose: bool, example: str) -> BuildResult:
         success=running_process.returncode == 0,
         output=running_process.stdout,
         build_dir=build_dir,
+        example=example,
     )
     print(f"Build result: {result.success}")
     if not result.success:
         warnings.warn(f"Build failed: {result.output}")
         return result
-    return BuildResult(success=True, output=result.output, build_dir=build_dir)
+    return BuildResult(
+        success=True, output=result.output, build_dir=build_dir, example=example
+    )
 
 
 class PlatformIoBuilder:
@@ -249,10 +315,10 @@ class PlatformIoBuilder:
         self.build_dir: Path | None = None
         self.initialized = False
 
-    def init_build(self) -> BuildResult:
+    def init_build(self) -> InitResult:
         """Initialize the PlatformIO build directory once."""
         if self.initialized and self.build_dir is not None:
-            return BuildResult(
+            return InitResult(
                 success=True, output="Already initialized", build_dir=self.build_dir
             )
 
@@ -268,7 +334,67 @@ class PlatformIoBuilder:
         if not self.initialized:
             init_result = self.init_build()
             if not init_result.success:
-                return init_result
+                return BuildResult(
+                    success=False,
+                    output=init_result.output,
+                    build_dir=init_result.build_dir,
+                    example=example,
+                )
 
-        # Build with specific parameters
-        return run_platform_build(self.board, self.verbose, example)
+        if self.build_dir is None:
+            return BuildResult(
+                success=False,
+                output="Build directory not initialized",
+                build_dir=Path(),
+                example=example,
+            )
+
+        # Copy example source to build directory
+        project_root = resolve_project_root()
+        ok_copy_src = copy_example_source(project_root, self.build_dir, example)
+        if not ok_copy_src:
+            return BuildResult(
+                success=False,
+                output=f"Example not found: {project_root / 'examples' / example}",
+                build_dir=self.build_dir,
+                example=example,
+            )
+
+        # Run PlatformIO build
+        run_cmd: list[str] = ["pio", "run", "--project-dir", str(self.build_dir)]
+        if self.verbose:
+            run_cmd.append("--verbose")
+
+        print(f"Running command: {subprocess.list2cmdline(run_cmd)}")
+
+        running_process = RunningProcess(run_cmd, cwd=self.build_dir, auto_run=True)
+        try:
+            while line := running_process.get_next_line():
+                if line is None:  # End of stream
+                    break
+                print(line)
+        except OSError as e:
+            # Handle output encoding issues on Windows
+            print(f"Output encoding issue: {e}")
+            pass
+
+        running_process.wait()
+
+        return BuildResult(
+            success=running_process.returncode == 0,
+            output=running_process.stdout,
+            build_dir=self.build_dir,
+            example=example,
+        )
+
+
+def run_pio_build(
+    board: str, examples: list[str], verbose: bool = False
+) -> list[Future[BuildResult]]:
+    """Run build for specified examples and platform using new PlatformIO system."""
+
+    pio = PlatformIoBuilder(board, verbose)
+    futures: list[Future[BuildResult]] = []
+    for example in examples:
+        futures.append(_EXECUTOR.submit(pio.build, example))
+    return futures
