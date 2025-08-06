@@ -25,8 +25,8 @@ from filelock import FileLock, Timeout  # type: ignore
 
 from ci.compiler.compiler import Compiler, InitResult, SketchResult
 from ci.util.boards import ALL, Board, create_board
-from ci.util.output_formatter import create_sketch_path_formatter
 from ci.util.create_build_dir import insert_tool_aliases
+from ci.util.output_formatter import create_sketch_path_formatter
 from ci.util.running_process import EndOfStream, RunningProcess
 
 
