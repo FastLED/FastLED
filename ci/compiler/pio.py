@@ -424,15 +424,15 @@ class PlatformIoBuilder:
         self.build_dir: Path | None = None
         self.initialized = False
 
-    def init_build(self) -> InitResult:
-        """Initialize the PlatformIO build directory once."""
+    def init_build(self, example: str) -> InitResult:
+        """Initialize the PlatformIO build directory once with the first example."""
         if self.initialized and self.build_dir is not None:
             return InitResult(
                 success=True, output="Already initialized", build_dir=self.build_dir
             )
 
-        # Initialize with specific parameters
-        result = _init_platformio_build(self.board, self.verbose, "Blink")
+        # Initialize with the actual first example being built
+        result = _init_platformio_build(self.board, self.verbose, example)
         if result.success:
             self.build_dir = result.build_dir
             self.initialized = True
@@ -441,7 +441,7 @@ class PlatformIoBuilder:
     def build(self, example: str) -> BuildResult:
         """Build a specific example."""
         if not self.initialized:
-            init_result = self.init_build()
+            init_result = self.init_build(example)
             if not init_result.success:
                 return BuildResult(
                     success=False,
@@ -449,6 +449,20 @@ class PlatformIoBuilder:
                     build_dir=init_result.build_dir,
                     example=example,
                 )
+            # If initialization succeeded and we just built the example, return success
+            if self.build_dir is None:
+                return BuildResult(
+                    success=False,
+                    output="Build directory not set after initialization",
+                    build_dir=Path(),
+                    example=example,
+                )
+            return BuildResult(
+                success=True,
+                output="Built during initialization",
+                build_dir=self.build_dir,
+                example=example,
+            )
 
         if self.build_dir is None:
             return BuildResult(

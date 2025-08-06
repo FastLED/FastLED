@@ -31,7 +31,7 @@ def red_text(text: str) -> str:
     return f"\033[31m{text}\033[0m"
 
 
-def create_banner(text: str, color_func: Callable[[str], str]) -> str:
+def create_banner(text: str, color_func: Callable[[str], str] | None = None) -> str:
     """Create a banner with the given text and color function."""
     # Create a banner box around the text
     border_char = "="
@@ -46,7 +46,7 @@ def create_banner(text: str, color_func: Callable[[str], str]) -> str:
     
     # Apply color to the entire banner
     banner = f"{top_border}\n{middle_line}\n{bottom_border}"
-    return color_func(banner)
+    return color_func(banner) if color_func else banner
 
 
 def _resolve_example_paths(examples: list[str]) -> list[str]:
