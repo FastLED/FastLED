@@ -2,18 +2,19 @@
 
 #include "fl/stdint.h"
 #include "fl/int.h"
+#include "fastled_progmem.h"  // For FL_ALIGN_PROGMEM
 
 // TODO: Figure out how to namespace these.
-typedef fl::u32 TProgmemRGBPalette16[16]; ///< CRGBPalette16 entries stored in
-                                           ///< PROGMEM memory
-typedef fl::u32 TProgmemHSVPalette16[16]; ///< CHSVPalette16 entries stored in
-                                           ///< PROGMEM memory
+typedef fl::u32 TProgmemRGBPalette16[16] FL_ALIGN_PROGMEM; ///< CRGBPalette16 entries stored in
+///< PROGMEM memory with proper alignment for DWORD reads
+typedef fl::u32 TProgmemHSVPalette16[16] FL_ALIGN_PROGMEM; ///< CHSVPalette16 entries stored in
+///< PROGMEM memory with proper alignment for DWORD reads
 /// Alias for TProgmemRGBPalette16
 #define TProgmemPalette16 TProgmemRGBPalette16
-typedef fl::u32 TProgmemRGBPalette32[32]; ///< CRGBPalette32 entries stored in
-                                           ///< PROGMEM memory
-typedef fl::u32 TProgmemHSVPalette32[32]; ///< CHSVPalette32 entries stored in
-                                           ///< PROGMEM memory
+typedef fl::u32 TProgmemRGBPalette32[32] FL_ALIGN_PROGMEM; ///< CRGBPalette32 entries stored in
+///< PROGMEM memory with proper alignment for DWORD reads
+typedef fl::u32 TProgmemHSVPalette32[32] FL_ALIGN_PROGMEM; ///< CHSVPalette32 entries stored in
+///< PROGMEM memory with proper alignment for DWORD reads
 /// Alias for TProgmemRGBPalette32
 #define TProgmemPalette32 TProgmemRGBPalette32
 

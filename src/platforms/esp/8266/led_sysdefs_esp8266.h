@@ -16,7 +16,14 @@ typedef volatile uint32_t RwReg;
 typedef uint32_t prog_uint32_t;
 
 
-// Default to NOT using PROGMEM here
+// ESP8266 PROGMEM Support:
+// PROGMEM is disabled by default due to alignment issues with DWORD reads.
+// The ESP8266 requires 4-byte alignment for 32-bit progmem reads, but the
+// TProgmemRGBPalette16 arrays were not properly aligned, causing crashes.
+// 
+// This has been fixed by adding FL_ALIGN_PROGMEM to the palette typedefs
+// in fl/colorutils_misc.h. PROGMEM can now be enabled if needed, but is
+// kept disabled for backwards compatibility and safety.
 #ifndef FASTLED_USE_PROGMEM
 # define FASTLED_USE_PROGMEM 0
 #endif
