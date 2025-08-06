@@ -389,6 +389,7 @@ ESP32_S3_DEVKITC_1 = Board(
     board_name="esp32s3",
     real_board_name="esp32-s3-devkitc-1",
     platform=ESP32_IDF_5_4_PIOARDUINO,
+    framework="arduino",
     board_partitions="huge_app.csv",
     build_unflags=["-DFASTLED_RMT5=0", "-DFASTLED_RMT5"],
 )
