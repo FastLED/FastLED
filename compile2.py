@@ -9,6 +9,7 @@ the new PlatformIO testing system.
 import shutil
 import subprocess
 import sys
+import argparse
 import warnings
 from dataclasses import dataclass
 from pathlib import Path
@@ -44,26 +45,26 @@ class BuildResult:
         return self.build_dir / "platformio.ini"
 
 
-import argparse
+
 
 
 @dataclass
 class Args:
-    example: str
+    board: str
+    examples: list[str]
     verbose: bool
-    platform: str
 
     @staticmethod
     def parse_args() -> "Args":
         parser = argparse.ArgumentParser(description="FastLED Target Build Script")
         parser.add_argument(
-            "--example", default="Blur", help="Example to build (default: Blur)"
+            "board", help="Board to build for (required)"
+        )
+        parser.add_argument(
+            "examples", nargs="+", help="One or more examples to build (required)"
         )
         parser.add_argument(
             "--verbose", action="store_true", help="Enable verbose output"
-        )
-        parser.add_argument(
-            "--platform", default="uno", help="Platform to build for (default: uno)"
         )
         return Args(**vars(parser.parse_args()))
 
@@ -108,11 +109,30 @@ def copy_example_source(project_root: Path, build_dir: Path, example: str) -> bo
     return True
 
 
+def copy_boards_directory(project_root: Path, build_dir: Path) -> bool:
+    """Copy boards directory to the build directory."""
+    boards_src = project_root / "boards"
+    boards_dst = build_dir / "boards"
+    
+    if not boards_src.exists():
+        warnings.warn(f"Boards directory not found: {boards_src}")
+        return False
+    
+    if boards_dst.exists():
+        shutil.rmtree(boards_dst)
+    
+    try:
+        shutil.copytree(boards_src, boards_dst)
+    except Exception as e:
+        warnings.warn(f"Failed to copy boards directory: {e}")
+        return False
+    
+    return True
+
+
 def copy_fastled_library(project_root: Path, build_dir: Path) -> bool:
     """Copy FastLED library to the build directory."""
     lib_dir = build_dir / "lib" / "FastLED"
-
-    sync(project_root / "src", lib_dir, action="sync")
 
     if lib_dir.exists():
         shutil.rmtree(lib_dir)
@@ -121,6 +141,9 @@ def copy_fastled_library(project_root: Path, build_dir: Path) -> bool:
     # Copy FastLED source files
     fastled_src_path = project_root / "src"
     shutil.copytree(fastled_src_path, lib_dir, dirs_exist_ok=True)
+    
+    # Now sync to keep it updated
+    sync(project_root / "src", lib_dir, action="sync")
 
     # Copy library.json to the FastLED lib directory
     library_json_src = project_root / "library.json"
@@ -133,12 +156,11 @@ def copy_fastled_library(project_root: Path, build_dir: Path) -> bool:
     return True
 
 
-def init_platformio_build(args: Args) -> BuildResult:
+def init_platformio_build(args: Args, example: str) -> BuildResult:
     """Initialize the PlatformIO build directory."""
 
-    example = args.example
     verbose = args.verbose
-    platform = args.platform
+    platform = args.board
 
     project_root = resolve_project_root()
     build_dir = project_root / ".build" / "test_platformio" / platform
@@ -168,6 +190,14 @@ def init_platformio_build(args: Args) -> BuildResult:
         return BuildResult(
             success=False, output=f"Failed to copy FastLED library", build_dir=build_dir
         )
+    
+    # Copy boards directory
+    ok_copy_boards = copy_boards_directory(project_root, build_dir)
+    if not ok_copy_boards:
+        warnings.warn(f"Failed to copy boards directory")
+        return BuildResult(
+            success=False, output=f"Failed to copy boards directory", build_dir=build_dir
+        )
     # platformio_ini.write_text(_PLATFORMIO_INI)
     build_config = BuildConfig(board=platform, framework="arduino", platform="atmelavr")
     platformio_ini_content = build_config.to_platformio_ini()
@@ -176,18 +206,17 @@ def init_platformio_build(args: Args) -> BuildResult:
     return BuildResult(success=True, output="", build_dir=build_dir)
 
 
-def run_platform_build(args: Args) -> BuildResult:
+def run_platform_build(args: Args, example: str) -> BuildResult:
     """Run build for specified example and platform using new PlatformIO system."""
-    example = args.example
     verbose = args.verbose
-    platform = args.platform
+    platform = args.board
 
     project_root = resolve_project_root()
     build_dir = project_root / ".build" / "test_platformio" / platform
     # Setup the build directory.
     build_dir.mkdir(parents=True, exist_ok=True)
 
-    build_result = init_platformio_build(args)
+    build_result = init_platformio_build(args, example)
     if not build_result.success:
         warnings.warn(f"Build failed: {build_result.output}")
         return build_result
@@ -223,18 +252,90 @@ def run_platform_build(args: Args) -> BuildResult:
     return BuildResult(success=True, output=result.output, build_dir=build_dir)
 
 
+def _run_build(build_dir: Path, verbose: bool) -> BuildResult:
+    """Run PlatformIO build in the specified directory."""
+
+    print(f"Build directory: {build_dir}")
+
+    run_cmd: list[str] = ["pio", "run", "--project-dir", str(build_dir)]
+    if verbose:
+        run_cmd.append("--verbose")
+    cwd = build_dir
+
+    print(f"Running command: {subprocess.list2cmdline(run_cmd)}")
+
+    running_process = RunningProcess(run_cmd, cwd=cwd, auto_run=True)
+    while line := running_process.get_next_line():
+        if line is None:  # End of stream
+            break
+        print(line)
+
+    running_process.wait()
+    result = BuildResult(
+        success=running_process.returncode == 0,
+        output=running_process.stdout,
+        build_dir=build_dir,
+    )
+    print(f"Build result: {result.success}")
+    if not result.success:
+        warnings.warn(f"Build failed: {result.output}")
+        return result
+    return BuildResult(success=True, output=result.output, build_dir=build_dir)
+
+
 def main() -> int:
     """Main entry point."""
 
     args = Args.parse_args()
 
-    result = run_platform_build(args)
-
-    if result.success:
-        return 0
-    else:
-        print(f"Error: {result.output}")
+    # Initialize the build directory once
+    project_root = resolve_project_root()
+    build_dir = project_root / ".build" / "test_platformio" / args.board
+    
+    # Initialize PlatformIO project once (using Blink as default for initialization)
+    init_result = init_platformio_build(args, "Blink")
+    if not init_result.success:
+        print(f"Failed to initialize build: {init_result.output}")
         return 1
+
+    results: list[BuildResult] = []
+    for example in args.examples:
+        print(f"Building example: {example}")
+        
+        # Copy example source to src directory (overwrites previous)
+        src_dir = build_dir / "src"
+        if src_dir.exists():
+            shutil.rmtree(src_dir)
+        src_dir.mkdir(parents=True, exist_ok=True)
+        
+        # Copy example files
+        example_path = project_root / "examples" / example
+        if not example_path.exists():
+            print(f"Example not found: {example_path}")
+            results.append(BuildResult(success=False, output=f"Example not found: {example}", build_dir=build_dir))
+            continue
+            
+        for file_path in example_path.iterdir():
+            if file_path.is_file():
+                shutil.copy2(file_path, src_dir)
+        
+        # Run the build
+        result = _run_build(build_dir, args.verbose)
+        results.append(result)
+        if not result.success:
+            print(f"Failed to build {example}")
+        else:
+            print(f"Successfully built {example}")
+
+    failed_builds = [(args.examples[i], result) for i, result in enumerate(results) if not result.success]
+    if failed_builds:
+        print(f"Failed to build {len(failed_builds)} out of {len(results)} examples")
+        for example_name, result in failed_builds:
+            print(f"Error building {example_name}: {result.output}")
+        return 1
+
+    print(f"Successfully built all {len(results)} examples")
+    return 0
 
 
 if __name__ == "__main__":
