@@ -17,7 +17,7 @@ from pathlib import Path
 from typing import Any, Callable, Dict
 
 from dirsync import sync  # type: ignore
-from filelock import FileLock  # type: ignore
+from filelock import FileLock, Timeout  # type: ignore
 
 from ci.util.boards import ALL, Board, get_board
 from ci.util.running_process import EndOfStream, RunningProcess
@@ -38,7 +38,10 @@ class CountingFileLock:
     def __init__(self, platform_name: str, build_dir: Path) -> None:
         self.platform_name = platform_name
         self.build_dir = build_dir
-        self.lock_file = build_dir.parent / f"{platform_name}.lock"
+
+        # Use centralized path management
+        self.paths = FastLEDPaths(platform_name)
+        self.lock_file = self.paths.platform_lock_file
         self._file_lock = FileLock(self.lock_file)  # type: ignore
         self._count = 0
         self._count_lock = threading.Lock()
@@ -91,8 +94,19 @@ class CountingFileLock:
                     self._is_acquired = True
                     print(f"Acquired lock for platform {self.platform_name}")
                     return
+            except KeyboardInterrupt as ke:
+                warnings.warn(
+                    f"Keyboard interrupt while acquiring lock for platform {self.platform_name}"
+                )
+                import _thread
+
+                _thread.interrupt_main()
+                raise ke
+            except Timeout:
+                # Handle timeout exceptions as failed acquisition (continue loop)
+                pass  # Continue the loop to check elapsed time and try again
             except Exception as e:
-                # If acquire fails completely, re-raise
+                # If acquire fails for other reasons, re-raise
                 raise
 
             # Check if we should show warning (after 1 second)
@@ -129,12 +143,14 @@ def _ensure_platform_installed(board: Board) -> bool:
     return True
 
 
-def _apply_board_specific_config(board: Board, platformio_ini_path: Path) -> bool:
+def _apply_board_specific_config(
+    board: Board, platformio_ini_path: Path, example: str
+) -> bool:
     """Apply board-specific build configuration from Board class."""
     # Board.to_platformio_ini() already handles this comprehensively
     # This function mainly for validation and logging
 
-    build_config = BuildConfig(board=board)
+    build_config = BuildConfig(board=board, example=example)
     config_content = build_config.to_platformio_ini()
     platformio_ini_path.write_text(config_content)
 
@@ -149,6 +165,128 @@ def _apply_board_specific_config(board: Board, platformio_ini_path: Path) -> boo
     return True
 
 
+class FastLEDPaths:
+    """Centralized path management for FastLED board-specific directories and files."""
+
+    def __init__(self, board_name: str, project_root: Path | None = None) -> None:
+        self.board_name = board_name
+        self.project_root = project_root or _resolve_project_root()
+        self.home_dir = Path.home()
+
+        # Base FastLED directory
+        self.fastled_root = self.home_dir / ".fastled"
+
+    @property
+    def build_dir(self) -> Path:
+        """Project-local build directory for this board."""
+        return self.project_root / ".build" / "test_platformio" / self.board_name
+
+    @property
+    def platform_lock_file(self) -> Path:
+        """Platform-specific build lock file."""
+        return self.build_dir.parent / f"{self.board_name}.lock"
+
+    @property
+    def global_package_lock_file(self) -> Path:
+        """Global package installation lock file."""
+        packages_lock_root = self.fastled_root / "pio" / "packages"
+        return packages_lock_root / f"{self.board_name}_global.lock"
+
+    @property
+    def core_dir(self) -> Path:
+        """PlatformIO core directory (build cache, platforms)."""
+        return self.fastled_root / "compile" / "pio" / self.board_name
+
+    @property
+    def packages_dir(self) -> Path:
+        """PlatformIO packages directory (toolchains, frameworks)."""
+        return self.fastled_root / "packages" / self.board_name
+
+    def ensure_directories_exist(self) -> None:
+        """Create all necessary directories."""
+        self.build_dir.mkdir(parents=True, exist_ok=True)
+        self.global_package_lock_file.parent.mkdir(parents=True, exist_ok=True)
+        self.core_dir.mkdir(parents=True, exist_ok=True)
+        self.packages_dir.mkdir(parents=True, exist_ok=True)
+
+
+class GlobalPackageLock:
+    """A FileLock for global package installation per board. Acquired once during first build and released after completion."""
+
+    def __init__(self, platform_name: str) -> None:
+        self.platform_name = platform_name
+
+        # Use centralized path management
+        self.paths = FastLEDPaths(platform_name)
+        self.lock_file = self.paths.global_package_lock_file
+        self._file_lock = FileLock(self.lock_file)  # type: ignore
+        self._is_acquired = False
+
+    def acquire(self) -> None:
+        """Acquire the global package installation lock for this board."""
+        if self._is_acquired:
+            return  # Already acquired
+
+        start_time = time.time()
+        warning_shown = False
+
+        while True:
+            # Try to acquire with very short timeout (non-blocking)
+            try:
+                success = self._file_lock.acquire(timeout=0.1)
+                if success:
+                    self._is_acquired = True
+                    print(
+                        f"Acquired global package lock for platform {self.platform_name}"
+                    )
+                    return
+            except Timeout:
+                # Handle timeout exceptions as failed acquisition (continue loop)
+                pass  # Continue the loop to check elapsed time and try again
+            except Exception as e:
+                # If acquire fails for other reasons, re-raise
+                raise
+
+            # Check if we should show warning (after 1 second)
+            elapsed = time.time() - start_time
+            if not warning_shown and elapsed >= 1.0:
+                yellow = "\033[33m"
+                reset = "\033[0m"
+                print(
+                    f"{yellow}Platform {self.platform_name} is waiting to acquire global package lock at {self.lock_file.parent}{reset}"
+                )
+                warning_shown = True
+
+            # Check for timeout (after 10 seconds - longer for package installation)
+            if elapsed >= 10.0:
+                raise TimeoutError(
+                    f"Failed to acquire global package lock for platform {self.platform_name} within 10 seconds. "
+                    f"Lock file: {self.lock_file}. "
+                    f"This may indicate another process is installing packages or a deadlock occurred."
+                )
+
+            # Small sleep to prevent excessive CPU usage while allowing interrupts
+            time.sleep(0.1)
+
+    def release(self) -> None:
+        """Release the global package installation lock."""
+        if not self._is_acquired:
+            return  # Not acquired
+
+        try:
+            self._file_lock.release()
+            self._is_acquired = False
+            print(f"Released global package lock for platform {self.platform_name}")
+        except Exception as e:
+            warnings.warn(
+                f"Failed to release global package lock for {self.platform_name}: {e}"
+            )
+
+    def is_acquired(self) -> bool:
+        """Check if the lock is currently acquired."""
+        return self._is_acquired
+
+
 @dataclass
 class InitResult:
     success: bool
@@ -161,7 +299,7 @@ class InitResult:
 
 
 @dataclass
-class BuildResult:
+class SketchResult:
     success: bool
     output: str
     build_dir: Path
@@ -171,26 +309,27 @@ class BuildResult:
 @dataclass
 class BuildConfig:
     board: Board  # Use Board class instead of individual fields
+    example: str | None = None  # Example name for dynamic build flags
 
     def to_platformio_ini(self) -> str:
         """Generate platformio.ini content using Board configuration."""
         out: list[str] = []
 
-        # Add global PlatformIO configuration section with custom cache location
-        home_dir = Path.home()
-        fastled_pio_home = home_dir / ".fastled" / "compile" / "pio"
+        # Use centralized path management
+        paths = FastLEDPaths(self.board.board_name)
 
-        # Create the directory if it doesn't exist
-        fastled_pio_home.mkdir(parents=True, exist_ok=True)
+        # Create the directories if they don't exist
+        paths.ensure_directories_exist()
 
         out.append("[platformio]")
-        out.append(f"core_dir = {fastled_pio_home}")
+        out.append(f"core_dir = {paths.core_dir}")
+        out.append(f"packages_dir = {paths.packages_dir}")
         out.append("")
 
         out.append(f"[env:{self.board.board_name}]")
 
-        # Use Board's comprehensive configuration
-        board_config = self.board.to_platformio_ini()
+        # Use Board's comprehensive configuration (pass example for dynamic build flags)
+        board_config = self.board.to_platformio_ini(example=self.example)
         # Extract everything after the section header
         lines = board_config.split("\n")[1:]  # Skip [env:...] line
         out.extend(line for line in lines if line.strip())
@@ -452,7 +591,7 @@ def _init_platformio_build(board: Board, verbose: bool, example: str) -> InitRes
     project_root = _resolve_project_root()
     build_dir = project_root / ".build" / "test_platformio" / board.board_name
 
-    # Lock is already held by build_many() - no need to acquire again
+    # Lock is already held by build() - no need to acquire again
 
     # Setup the build directory.
     build_dir.mkdir(parents=True, exist_ok=True)
@@ -467,7 +606,7 @@ def _init_platformio_build(board: Board, verbose: bool, example: str) -> InitRes
         )
 
     # Apply board-specific configuration
-    if not _apply_board_specific_config(board, platformio_ini):
+    if not _apply_board_specific_config(board, platformio_ini, example):
         return InitResult(
             success=False,
             output=f"Failed to apply board configuration for {board.board_name}",
@@ -513,12 +652,14 @@ def _init_platformio_build(board: Board, verbose: bool, example: str) -> InitRes
     # Print platformio.ini content for the initialization build
     platformio_ini_path = build_dir / "platformio.ini"
     if platformio_ini_path.exists():
+        print()  # Add newline before configuration section
         print("=" * 60)
         print("PLATFORMIO.INI CONFIGURATION:")
         print("=" * 60)
         ini_content = platformio_ini_path.read_text()
         print(ini_content)
         print("=" * 60)
+        print()  # Add newline after configuration section
 
     print(f"Running initial build command: {subprocess.list2cmdline(run_cmd)}")
     print(_create_building_banner(example))
@@ -550,7 +691,7 @@ def _init_platformio_build(board: Board, verbose: bool, example: str) -> InitRes
     return InitResult(success=True, output="", build_dir=build_dir)
 
 
-class PlatformIoBuilder:
+class PioCompiler:
     def __init__(self, board: Board | str, verbose: bool):
         # Convert string to Board object if needed
         if isinstance(board, str):
@@ -559,15 +700,18 @@ class PlatformIoBuilder:
             self.board = board
         self.verbose = verbose
 
-        # Set build directory immediately and ensure it exists
-        project_root = _resolve_project_root()
-        self.build_dir: Path = (
-            project_root / ".build" / "test_platformio" / self.board.board_name
-        )
-        self.build_dir.mkdir(parents=True, exist_ok=True)
+        # Use centralized path management
+        self.paths = FastLEDPaths(self.board.board_name)
+        self.build_dir: Path = self.paths.build_dir
+
+        # Ensure all directories exist
+        self.paths.ensure_directories_exist()
 
         # Create the counting file lock in constructor
         self._platform_lock = CountingFileLock(self.board.board_name, self.build_dir)
+
+        # Create the global package installation lock
+        self._global_package_lock = GlobalPackageLock(self.board.board_name)
 
         self.initialized = False
         self.executor = ThreadPoolExecutor(max_workers=1)
@@ -589,7 +733,7 @@ class PlatformIoBuilder:
         """Cancel all builds."""
         self.executor.shutdown(wait=False, cancel_futures=True)
 
-    def build_many(self, examples: list[str]) -> list[Future[BuildResult]]:
+    def build(self, examples: list[str]) -> list[Future[SketchResult]]:
         """Build a list of examples with proper lock management."""
         if not examples:
             return []
@@ -597,13 +741,24 @@ class PlatformIoBuilder:
         # Acquire the lock for N work units
         self._platform_lock.acquire(len(examples))
 
-        futures: list[Future[BuildResult]] = []
+        # Acquire the global package lock for the first build (package installation)
+        self._global_package_lock.acquire()
 
-        def create_decrement_callback() -> Callable[[Future[BuildResult]], None]:
+        futures: list[Future[SketchResult]] = []
+        global_lock_released = (
+            threading.Event()
+        )  # Track if global lock has been released
+
+        def create_decrement_callback() -> Callable[[Future[SketchResult]], None]:
             """Create callback that decrements lock count when future completes."""
 
-            def decrement_callback(future: Future[BuildResult]) -> None:
+            def decrement_callback(future: Future[SketchResult]) -> None:
                 self._platform_lock.decrement()
+
+                # Release global package lock when first build completes (only once)
+                if not global_lock_released.is_set():
+                    global_lock_released.set()
+                    self._global_package_lock.release()
 
             return decrement_callback
 
@@ -618,14 +773,14 @@ class PlatformIoBuilder:
 
         return futures
 
-    def _build_internal(self, example: str) -> BuildResult:
+    def _build_internal(self, example: str) -> SketchResult:
         """Internal build method without lock management."""
         # Copy example source to build directory
         project_root = _resolve_project_root()
         ok_copy_src = _copy_example_source(project_root, self.build_dir, example)
         if not ok_copy_src:
             error_msg = _get_example_error_message(project_root, example)
-            return BuildResult(
+            return SketchResult(
                 success=False,
                 output=error_msg,
                 build_dir=self.build_dir,
@@ -665,39 +820,100 @@ class PlatformIoBuilder:
 
         running_process.wait()
 
-        return BuildResult(
+        return SketchResult(
             success=running_process.returncode == 0,
             output=running_process.stdout,
             build_dir=self.build_dir,
             example=example,
         )
 
-    def _internal_build_no_lock(self, example: str) -> BuildResult:
-        """Build a specific example without lock management. Only call from build_many()."""
+    def _internal_build_no_lock(self, example: str) -> SketchResult:
+        """Build a specific example without lock management. Only call from build()."""
         if not self.initialized:
             init_result = self._internal_init_build_no_lock(example)
             if not init_result.success:
-                return BuildResult(
+                return SketchResult(
                     success=False,
                     output=init_result.output,
                     build_dir=init_result.build_dir,
                     example=example,
                 )
             # If initialization succeeded and we just built the example, return success
-            return BuildResult(
+            return SketchResult(
                 success=True,
                 output="Built during initialization",
                 build_dir=self.build_dir,
                 example=example,
             )
 
-        # No lock management - caller (build_many) handles locks
+        # No lock management - caller (build) handles locks
         return self._build_internal(example)
+
+    def clean(self) -> None:
+        """Clean build artifacts for this platform (acquire platform lock)."""
+        print(f"Cleaning build artifacts for platform {self.board.board_name}...")
+
+        # Acquire the platform lock to ensure no other builds are running
+        self._platform_lock.acquire(1)
+
+        try:
+            # Remove the local build directory
+            if self.build_dir.exists():
+                print(f"Removing build directory: {self.build_dir}")
+                shutil.rmtree(self.build_dir)
+                print(f"✅ Cleaned local build artifacts for {self.board.board_name}")
+            else:
+                print(
+                    f"✅ No build directory found for {self.board.board_name} (already clean)"
+                )
+        finally:
+            # Always decrement the lock
+            self._platform_lock.decrement()
+
+    def clean_all(self) -> None:
+        """Clean all build artifacts (local and global packages) for this platform."""
+        print(f"Cleaning all artifacts for platform {self.board.board_name}...")
+
+        # Acquire both platform and global package locks
+        self._platform_lock.acquire(1)
+        self._global_package_lock.acquire()
+
+        try:
+            # Clean local build artifacts first
+            if self.build_dir.exists():
+                print(f"Removing build directory: {self.build_dir}")
+                shutil.rmtree(self.build_dir)
+                print(f"✅ Cleaned local build artifacts for {self.board.board_name}")
+            else:
+                print(f"✅ No build directory found for {self.board.board_name}")
+
+            # Clean global packages directory
+            if self.paths.packages_dir.exists():
+                print(f"Removing global packages directory: {self.paths.packages_dir}")
+                shutil.rmtree(self.paths.packages_dir)
+                print(f"✅ Cleaned global packages for {self.board.board_name}")
+            else:
+                print(
+                    f"✅ No global packages directory found for {self.board.board_name}"
+                )
+
+            # Clean global core directory (build cache, platforms)
+            if self.paths.core_dir.exists():
+                print(f"Removing global core directory: {self.paths.core_dir}")
+                shutil.rmtree(self.paths.core_dir)
+                print(f"✅ Cleaned global core cache for {self.board.board_name}")
+            else:
+                print(f"✅ No global core directory found for {self.board.board_name}")
+
+        finally:
+            # Always release locks
+            self._global_package_lock.release()
+            self._platform_lock.decrement()
 
 
 def run_pio_build(
     board: Board | str, examples: list[str], verbose: bool = False
-) -> list[Future[BuildResult]]:
+) -> list[Future[SketchResult]]:
     """Run build for specified examples and platform using new PlatformIO system.
 
     Args:
@@ -705,5 +921,5 @@ def run_pio_build(
         examples: List of example names to build
         verbose: Enable verbose output
     """
-    pio = PlatformIoBuilder(board, verbose)
-    return pio.build_many(examples)
+    pio = PioCompiler(board, verbose)
+    return pio.build(examples)

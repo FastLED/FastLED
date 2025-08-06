@@ -162,7 +162,7 @@ def migration_benefits():
 
     print("\n6. SIMPLE ERROR HANDLING:")
     print("   Before: Manual error handling in compilation loops")
-    print("   After:  Structured BuildResult objects with clear success/failure")
+    print("   After:  Structured SketchResult objects with clear success/failure")
 
 
 def migration_checklist():

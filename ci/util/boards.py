@@ -48,12 +48,32 @@ class Board:
     defines: list[str] | None = None
     customsdk: str | None = None
     board_partitions: str | None = None  # Reserved for future use.
+    no_board_spec: bool = (
+        False  # For platforms like 'native' that don't need a board specification
+    )
 
     def __post_init__(self) -> None:
         ALL.append(self)
 
     def get_real_board_name(self) -> str:
         return self.real_board_name if self.real_board_name else self.board_name
+
+    def get_build_flags_for_example(self, example: str) -> list[str] | None:
+        """Get build flags for a specific example. For most boards, this returns the static build_flags.
+        For special platforms like 'native', this can dynamically generate example-specific flags."""
+        if self.board_name == "native" and self.build_flags:
+            # For native platform, dynamically update the include path for the specific example
+            dynamic_flags: list[str] = []
+            for flag in self.build_flags:
+                if flag.startswith("-DFASTLED_STUB_MAIN_INCLUDE_INO="):
+                    # Replace with the specific example path
+                    dynamic_flags.append(
+                        f'-DFASTLED_STUB_MAIN_INCLUDE_INO="../examples/{example}/{example}.ino"'
+                    )
+                else:
+                    dynamic_flags.append(flag)
+            return dynamic_flags
+        return self.build_flags
 
     def to_dictionary(self) -> dict[str, list[str]]:
         out: dict[str, list[str]] = {}
@@ -112,7 +132,7 @@ class Board:
         data_str = self.__repr__()
         return hash(data_str)
 
-    def to_platformio_ini(self) -> str:
+    def to_platformio_ini(self, example: str | None = None) -> str:
         """Return a `platformio.ini` snippet representing this board.
 
         The output is suitable for directly appending to a *platformio.ini* file
@@ -128,8 +148,9 @@ class Board:
         # Section header
         lines.append(f"[env:{self.board_name}]")
 
-        # Mandatory board identifier (use the *real* board name if provided)
-        lines.append(f"board = {self.get_real_board_name()}")
+        # Board identifier (skip for platforms that don't need board specification)
+        if not self.no_board_spec:
+            lines.append(f"board = {self.get_real_board_name()}")
 
         # Optional parameters -------------------------------------------------
         if self.platform:
@@ -159,7 +180,13 @@ class Board:
         build_flags_elements: list[str] = []
         if self.defines:
             build_flags_elements.extend(f"-D{define}" for define in self.defines)
-        if self.build_flags:
+
+        # Use dynamic build flags if example is provided (for native platform)
+        if example:
+            dynamic_build_flags = self.get_build_flags_for_example(example)
+            if dynamic_build_flags:
+                build_flags_elements.extend(dynamic_build_flags)
+        elif self.build_flags:
             build_flags_elements.extend(self.build_flags)
         if build_flags_elements:
             # Join all build flags with a space so that PlatformIO parses them
@@ -197,6 +224,7 @@ WEBTARGET = Board(
 NATIVE = Board(
     board_name="native",
     platform="platformio/native",
+    no_board_spec=True,  # Native platform doesn't need a board specification
     build_flags=[
         "-DFASTLED_STUB_IMPL",
         '-DFASTLED_STUB_MAIN_INCLUDE_INO="../examples/Blink/Blink.ino"',

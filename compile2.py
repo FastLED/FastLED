@@ -7,12 +7,13 @@ the new PlatformIO testing system.
 """
 
 import argparse
+import json
 import sys
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Callable
 
-from ci.compiler.pio import PlatformIoBuilder, BuildResult, run_pio_build
+from ci.compiler.pio import PioCompiler, SketchResult, run_pio_build
 from ci.util.boards import ALL
 
 
@@ -67,6 +68,8 @@ class Args:
     platform: str
     examples: list[str]
     verbose: bool
+    clean: bool
+    clean_all: bool
 
     @staticmethod
     def parse_args() -> "Args":
@@ -85,6 +88,15 @@ class Args:
         )
         parser.add_argument(
             "--list", action="store_true", help="List all available boards and examples in two-column format and exit"
+        )
+        parser.add_argument(
+            "--list-examples", action="store_true", help="List all available examples as JSON dictionary with relative paths and exit"
+        )
+        parser.add_argument(
+            "--clean", action="store_true", help="Clean build artifacts for the specified platform and exit"
+        )
+        parser.add_argument(
+            "--clean-all", action="store_true", help="Clean all build artifacts (local and global packages) for the specified platform and exit"
         )
         
         parsed_args = parser.parse_args()
@@ -131,6 +143,32 @@ class Args:
             
             sys.exit(0)
         
+        # Handle --list-examples option (exit early)
+        if parsed_args.list_examples:
+            examples_dict = {}
+            examples_dir = Path("examples")
+            
+            if examples_dir.exists():
+                for example_path in examples_dir.iterdir():
+                    if example_path.is_dir() and not example_path.name.startswith('.'):
+                        # Check if directory contains a .ino file
+                        ino_files = list(example_path.glob("*.ino"))
+                        if ino_files:
+                            # Use relative path from project root (handle both absolute and relative paths)
+                            try:
+                                if example_path.is_absolute():
+                                    relative_path = str(example_path.relative_to(Path.cwd()))
+                                else:
+                                    relative_path = str(example_path)
+                            except ValueError:
+                                # Fallback to just the example path
+                                relative_path = str(example_path)
+                            examples_dict[example_path.name] = relative_path
+            
+            # Output as JSON
+            print(json.dumps(examples_dict, indent=2, sort_keys=True))
+            sys.exit(0)
+        
         # Use defaults when not provided
         platform = parsed_args.platform
         if not platform:
@@ -157,7 +195,9 @@ class Args:
         return Args(
             platform=platform,
             examples=resolved_examples,
-            verbose=parsed_args.verbose
+            verbose=parsed_args.verbose,
+            clean=parsed_args.clean,
+            clean_all=parsed_args.clean_all
         )
 
 
@@ -165,11 +205,23 @@ def main() -> int:
     """Main entry point."""
 
     args = Args.parse_args()
-    pio = PlatformIoBuilder(args.platform, args.verbose)
+    pio = PioCompiler(args.platform, args.verbose)
+
+    # Handle clean operations (exit early)
+    if args.clean_all:
+        print(green_text(f"🧹 Starting clean-all operation for platform {args.platform}"))
+        pio.clean_all()
+        print(green_text(f"✅ Clean-all completed for platform {args.platform}"))
+        return 0
+    elif args.clean:
+        print(green_text(f"🧹 Starting clean operation for platform {args.platform}"))
+        pio.clean()
+        print(green_text(f"✅ Clean completed for platform {args.platform}"))
+        return 0
 
     # run_pio_build now accepts both Board objects and strings
     # The string will be automatically resolved to a Board object via get_board()
-    futures = pio.build_many(args.examples)
+    futures = pio.build(args.examples)
 
     def cancel_futures() -> None:
         pio.cancel_all()
@@ -179,11 +231,10 @@ def main() -> int:
         for future in futures:
             timeout = 60*60 if first else 60  # first build can be very long.
             first = False
-            result: BuildResult = future.result(timeout=timeout)
+            result: SketchResult = future.result(timeout=timeout)
             if not result.success:
                 error_banner = create_banner(f"BUILD FAILED: {result.example}", red_text)
                 print(f"\n{error_banner}")
-                print(f"Error details: {result.output}")
                 cancel_futures()
                 return 1
             else:
