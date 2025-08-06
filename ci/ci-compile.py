@@ -174,7 +174,11 @@ def resolve_example_path(example: str) -> str:
 
 
 def compile_board_examples(
-    board: Board, examples: List[str], defines: List[str], verbose: bool, enable_cache: bool
+    board: Board,
+    examples: List[str],
+    defines: List[str],
+    verbose: bool,
+    enable_cache: bool,
 ) -> tuple[bool, str]:
     """Compile examples for a single board using PioCompiler."""
     print(f"\n{'=' * 60}")
@@ -185,7 +189,7 @@ def compile_board_examples(
     try:
         # Determine cache type based on flag
         cache_type = CacheType.SCCACHE if enable_cache else CacheType.NO_CACHE
-        
+
         # Create PioCompiler instance
         compiler = PioCompiler(
             board=board,
