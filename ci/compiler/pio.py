@@ -19,6 +19,14 @@ from ci.util.running_process import RunningProcess
 
 _EXECUTOR = ThreadPoolExecutor(max_workers=1)
 
+_HERE = Path(__file__).parent.resolve()
+_PROJECT_ROOT = _HERE.parent.parent.resolve()
+_LIB_LDF_MODE = "chain"
+
+assert (_PROJECT_ROOT / "library.json").exists(), (
+    f"Library JSON not found at {_PROJECT_ROOT / 'library.json'}"
+)
+
 
 @dataclass
 class InitResult:
@@ -45,26 +53,17 @@ class BuildConfig:
     framework: str = "arduino"
     platform: str = "atmelavr"
 
-    def to_platformio_ini(self, lib_ldf_mode: str = "chain") -> str:
+    def to_platformio_ini(self) -> str:
         out: list[str] = []
         out.append(f"[env:{self.board}]")
         out.append(f"platform = {self.platform}")
         out.append(f"board = {self.board}")
         out.append(f"framework = {self.framework}")
-        out.append(f"lib_ldf_mode = {lib_ldf_mode}")
+        out.append(f"lib_ldf_mode = {_LIB_LDF_MODE}")
         # Enable library archiving to create static libraries and avoid recompilation
         out.append("lib_archive = true")
-        # Add manual include path for FastLED library
-        if lib_ldf_mode == "off":
-            # When LDF is off, we need to manually include FastLED source files
-            # but with lib_archive=true, they'll be compiled into a static library
-            out.append("build_flags = -I lib/FastLED")
-            out.append(
-                "build_src_filter = +<*> +<../lib/FastLED/**/*.cpp> +<../lib/FastLED/**/*.c>"
-            )
-        else:
-            # When LDF is on, just provide the include path - LDF will handle the rest
-            out.append("build_flags = -I lib/FastLED")
+
+        out.append(f"lib_deps = symlink://{_PROJECT_ROOT}")
         return "\n".join(out)
 
 
@@ -213,19 +212,19 @@ def init_platformio_build(board: str, verbose: bool, example: str) -> InitResult
 
     # Write final platformio.ini
     build_config = BuildConfig(board=platform, framework="arduino", platform="atmelavr")
-    platformio_ini_content = build_config.to_platformio_ini(lib_ldf_mode="chain")
+    platformio_ini_content = build_config.to_platformio_ini()
     platformio_ini.write_text(platformio_ini_content)
 
     # Now do an initial build with Blink to ensure everything works
     # Copy Blink example for the initial build
-    ok_copy_blink = copy_example_source(project_root, build_dir, "Blink")
-    if not ok_copy_blink:
-        warnings.warn(f"Blink example not found: {project_root / 'examples' / 'Blink'}")
-        return InitResult(
-            success=False,
-            output=f"Blink example not found: {project_root / 'examples' / 'Blink'}",
-            build_dir=build_dir,
-        )
+    # ok_copy_blink = copy_example_source(project_root, build_dir, "Blink")
+    # if not ok_copy_blink:
+    #     warnings.warn(f"Blink example not found: {project_root / 'examples' / 'Blink'}")
+    #     return InitResult(
+    #         success=False,
+    #         output=f"Blink example not found: {project_root / 'examples' / 'Blink'}",
+    #         build_dir=build_dir,
+    #     )
 
     # Run initial build with LDF enabled to set up the environment
     run_cmd: list[str] = ["pio", "run", "--project-dir", str(build_dir)]
@@ -251,7 +250,7 @@ def init_platformio_build(board: str, verbose: bool, example: str) -> InitResult
 
     # After successful build, turn off the Library Dependency Finder for subsequent builds
     # but keep the manual include path for FastLED
-    final_content_no_ldf = build_config.to_platformio_ini(lib_ldf_mode="off")
+    final_content_no_ldf = build_config.to_platformio_ini()
     platformio_ini.write_text(final_content_no_ldf)
 
     return InitResult(success=True, output="", build_dir=build_dir)
