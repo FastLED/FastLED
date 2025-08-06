@@ -24,20 +24,19 @@
                 "tests\\**\\*.cpp": "C++: Debug Test (Tests Directory)",
                 "tests/*.h": "C++: Debug Test (Tests Directory)",
                 "tests/**/*.h": "C++: Debug Test (Tests Directory)",
-                "*.py": "Python: Current File (UV)",
-                "test.py": "Python: FastLED Tests (UV)",
-                "ci/ci-compile.py": "Python: CI Compile (UV)",
-                "mcp_server.py": "Python: MCP Server (UV)",
+                "*.py": "Python: Current File (UV Debug)",
+                "test.py": "Python: Current File (UV Debug)",
+                "ci/ci-compile.py": "Python: Current File (UV Debug)",
+                "mcp_server.py": "Python: Current File (UV Debug)",
                 "*.ino": "Arduino: Run .ino with FastLED (Examples)",
                 "examples/**/*.ino": "Arduino: Run .ino with FastLED (Examples)"
             }
         },
         {
             "name": "Python: Current File",
-            "type": "python",
+            "type": "debugpy",
             "request": "launch",
             "program": "${file}",
-            "console": "integratedTerminal",
             "cwd": "${workspaceFolder}",
             "justMyCode": true
         },
@@ -51,12 +50,24 @@
             "internalConsoleOptions": "neverOpen"
         },
         {
+            "name": "Python: Current File (UV Debug)",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}",
+            "cwd": "${workspaceFolder}",
+            "justMyCode": true,
+            "python": "${workspaceFolder}/.venv/bin/python",
+            "args": [],
+            "windows": {
+                "python": "${workspaceFolder}/.venv/Scripts/python.exe"
+            }
+        },
+        {
             "name": "Arduino: Run .ino with FastLED (Examples)",
-            "type": "python",
+            "type": "debugpy",
             "request": "launch",
             "module": "fastled",
             "args": ["${file}", "--background-update", "--app", "--debug"],
-            "console": "integratedTerminal",
             "cwd": "${workspaceFolder}",
             "justMyCode": false
         },
@@ -93,10 +104,9 @@
         },
         {
             "name": "Python: FastLED Tests",
-            "type": "python",
+            "type": "debugpy",
             "request": "launch",
             "program": "${workspaceFolder}/test.py",
-            "console": "integratedTerminal",
             "cwd": "${workspaceFolder}",
             "args": ["--cpp"],
             "justMyCode": true
@@ -110,12 +120,12 @@
             "console": "integratedTerminal",
             "internalConsoleOptions": "neverOpen"
         },
+
         {
             "name": "Python: CI Compile",
-            "type": "python",
+            "type": "debugpy",
             "request": "launch",
             "program": "${workspaceFolder}/ci/ci-compile.py",
-            "console": "integratedTerminal",
             "cwd": "${workspaceFolder}",
             "args": ["uno", "--examples", "Blink"],
             "justMyCode": true
@@ -129,12 +139,12 @@
             "console": "integratedTerminal",
             "internalConsoleOptions": "neverOpen"
         },
+
         {
             "name": "Python: MCP Server",
-            "type": "python",
+            "type": "debugpy",
             "request": "launch",
             "program": "${workspaceFolder}/mcp_server.py",
-            "console": "integratedTerminal",
             "cwd": "${workspaceFolder}",
             "justMyCode": true
         },

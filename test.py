@@ -26,7 +26,6 @@ from ci.util.test_types import (
     calculate_fingerprint,
     process_test_flags,
 )
-from ci.util.watchdog_state import get_active_processes
 
 
 _CANCEL_WATCHDOG = threading.Event()
@@ -55,8 +54,8 @@ def make_watch_dog_thread(
 
         warnings.warn(f"Watchdog timer expired after {seconds} seconds.")
 
-        # Get current active processes to show which command is stuck
-        active_processes = get_active_processes()
+        # Watchdog state tracking has been removed - no active processes to show
+        active_processes: list[str] = []
 
         dump_main_thread_stack()
         print(f"Watchdog timer expired after {seconds} seconds - forcing exit")

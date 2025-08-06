@@ -2073,43 +2073,47 @@ class CompilationTestRunner:
                 if result.returncode == 0:
                     executed_count += 1
                     self.log_timing(f"[EXECUTION] SUCCESS: {executable_name}")
-                    # Always show output from executed programs (not just in verbose mode)
+                    # Only show output from executed programs in verbose mode
                     # Show both stdout and stderr as many platforms write to stderr
-                    output_shown = False
-                    if result.stdout.strip():
-                        self.log_timing(f"[EXECUTION] Output for {executable_name}:")
-                        for line in result.stdout.split("\n"):
-                            if line.strip():
-                                self.log_timing(f"[EXECUTION]   {line}")
-                        output_shown = True
-                    if result.stderr.strip():
-                        if not output_shown:
+                    if self.config.verbose:
+                        output_shown = False
+                        if result.stdout.strip():
                             self.log_timing(
                                 f"[EXECUTION] Output for {executable_name}:"
                             )
-                        for line in result.stderr.split("\n"):
-                            if line.strip():
-                                self.log_timing(f"[EXECUTION]   {line}")
+                            for line in result.stdout.split("\n"):
+                                if line.strip():
+                                    self.log_timing(f"[EXECUTION]   {line}")
+                            output_shown = True
+                        if result.stderr.strip():
+                            if not output_shown:
+                                self.log_timing(
+                                    f"[EXECUTION] Output for {executable_name}:"
+                                )
+                            for line in result.stderr.split("\n"):
+                                if line.strip():
+                                    self.log_timing(f"[EXECUTION]   {line}")
                 else:
                     execution_failed_count += 1
                     self.log_timing(
                         f"[EXECUTION] FAILED: {executable_name}: Exit code {result.returncode}"
                     )
-                    # Show both stdout and stderr for failed executions to help debug
-                    if result.stdout.strip():
-                        self.log_timing(f"[EXECUTION] Failed stdout:")
-                        for line in result.stdout.split("\n"):
-                            if line.strip():
-                                self.log_timing(f"[EXECUTION]   {line}")
-                    if result.stderr.strip():
-                        self.log_timing(f"[EXECUTION] Failed stderr:")
-                        for line in result.stderr.split("\n"):
-                            if line.strip():
-                                self.log_timing(f"[EXECUTION]   {line}")
-                    if not result.stdout.strip() and not result.stderr.strip():
-                        self.log_timing(
-                            f"[EXECUTION] No output captured from failed execution"
-                        )
+                    # Only show verbose output for failed executions in verbose mode
+                    if self.config.verbose:
+                        if result.stdout.strip():
+                            self.log_timing(f"[EXECUTION] Failed stdout:")
+                            for line in result.stdout.split("\n"):
+                                if line.strip():
+                                    self.log_timing(f"[EXECUTION]   {line}")
+                        if result.stderr.strip():
+                            self.log_timing(f"[EXECUTION] Failed stderr:")
+                            for line in result.stderr.split("\n"):
+                                if line.strip():
+                                    self.log_timing(f"[EXECUTION]   {line}")
+                        if not result.stdout.strip() and not result.stderr.strip():
+                            self.log_timing(
+                                f"[EXECUTION] No output captured from failed execution"
+                            )
 
             except subprocess.TimeoutExpired:
                 execution_failed_count += 1

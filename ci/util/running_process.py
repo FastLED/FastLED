@@ -182,6 +182,8 @@ class RunningProcess:
         self.shutdown: threading.Event = threading.Event()
         self._start_time: float | None = None
         self._end_time: float | None = None
+        self._stream_finished = False
+        self._time_last_stdout_line: float | None = None
         if auto_run:
             self.run()
 
@@ -232,6 +234,9 @@ class RunningProcess:
         except Exception as e:
             return f"Failed to dump stack trace: {e}"
 
+    def time_last_stdout_line(self) -> float | None:
+        return self._time_last_stdout_line
+
     def run(self) -> None:
         """
         Execute the command and stream its output to the queue.
@@ -255,8 +260,6 @@ class RunningProcess:
         # This excludes process creation overhead from timing measurements
         self._start_time = time.time()
 
-        count = 0
-
         def output_reader() -> None:
             """Continuously pump stdout to prevent subprocess from blocking on full pipe buffer"""
             try:
@@ -266,10 +269,12 @@ class RunningProcess:
                 # Continuously read lines to keep the stdout pipe drained
                 # This prevents the subprocess from blocking when its output buffer fills
                 try:
-                    for line in iter(self.proc.stdout.readline, ""):
+                    for line in iter(self.proc.stdout.readline, None):
+                        self._time_last_stdout_line = time.time()
+                        if line is None:
+                            break
                         if self.shutdown.is_set():
                             break
-
                         # Strip whitespace and queue non-empty lines
                         line_stripped = line.rstrip()
                         if line_stripped:  # Only queue non-empty lines
@@ -329,21 +334,30 @@ class RunningProcess:
             queue.Empty: If timeout is 0 or specified and no line is available
             TimeoutError: If the process times out
         """
+        if self._stream_finished:
+            return EndOfStream()
 
         assert self.proc is not None
 
         expired_time = time.time() + timeout if timeout is not None else None
 
         while True:
+            one_iteration = True
+            if self._stream_finished:
+                return EndOfStream()
+
             if expired_time is not None:
                 if time.time() > expired_time:
                     raise TimeoutError(f"Timeout after {timeout} seconds")
+
             if self.output_queue.empty():
-                time.sleep(0.01)
-                continue
+                if timeout != 0:
+                    time.sleep(0.01)
+                    continue
             try:
                 line = self.output_queue.get(timeout=0.1)
                 if line is None:
+                    self._stream_finished = True
                     return EndOfStream()
                 return line
             except queue.Empty:
@@ -354,11 +368,13 @@ class RunningProcess:
         Get the next line of output from the process.
         """
         try:
-            out = self.output_queue.get(timeout=0.01)
-            if out is None:
-                return EndOfStream()
+            out: str | EndOfStream = self.get_next_line(timeout=0)
+            if isinstance(out, EndOfStream):
+                return None
             return out
         except queue.Empty:
+            return None
+        except TimeoutError:
             return None
 
     def poll(self) -> int | None:
@@ -366,6 +382,10 @@ class RunningProcess:
         Check the return code of the process.
         """
         return self.proc.poll()
+
+    @property
+    def finished(self) -> bool:
+        return self.poll() is not None
 
     def wait(self) -> int:
         """
