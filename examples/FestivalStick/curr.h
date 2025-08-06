@@ -267,7 +267,6 @@ static uint32_t lastUpdateTime = 0;
 
 // Wave effect globals
 static uint32_t nextWaveTrigger = 0;
-static uint32_t lastWaveTriggerTime = 0;
 
 
 
