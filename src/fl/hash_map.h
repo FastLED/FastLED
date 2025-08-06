@@ -397,6 +397,8 @@ class FL_ALIGN HashMap {
     bool empty() const { return _size == 0; }
     fl::size capacity() const { return _buckets.size(); }
 
+
+
   private:
     static constexpr fl::size npos = fl::size(-1);
 
