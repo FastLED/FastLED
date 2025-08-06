@@ -194,7 +194,7 @@ class RunningProcess:
             command = subprocess.list2cmdline(command)
         self.command = command
         self.cwd = str(cwd) if cwd is not None else None
-        self.output_queue: Queue[str | None] = Queue()
+        self.output_queue: Queue[str | EndOfStream] = Queue()
         self.accumulated_output: list[str] = []  # Store all output for later retrieval
         self.proc: subprocess.Popen[Any] | None = None
         self.check = check
@@ -302,6 +302,7 @@ class RunningProcess:
                     for line in self.proc.stdout:
                         self._time_last_stdout_line = time.time()
                         if self.shutdown.is_set():
+                            self.output_queue.put(EndOfStream())
                             break
                         # Strip whitespace and transform line if formatter provided
                         line_stripped = line.rstrip()
@@ -319,18 +320,18 @@ class RunningProcess:
                             self.accumulated_output.append(transformed_line)
 
                     # When the loop exits, we've reached EOF
-                    self.output_queue.put(None)
+                    self.output_queue.put(EndOfStream())
                 except (ValueError, OSError) as e:
                     # Handle "I/O operation on closed file" and similar errors
                     # This can happen if the process terminates while we're reading
                     if "closed file" in str(e) or "Bad file descriptor" in str(e):
                         # Normal shutdown - process stdout was closed
-                        self.output_queue.put(None)
+                        self.output_queue.put(EndOfStream())
                         return
                     else:
                         # Unexpected error, log it but don't crash
                         print(f"Warning: Output reader encountered error: {e}")
-                        self.output_queue.put(None)
+                        self.output_queue.put(EndOfStream())
                         return
 
             finally:
@@ -347,7 +348,7 @@ class RunningProcess:
                 if self._end_time is None:
                     self._end_time = time.time()
 
-                self.output_queue.put(None)  # End-of-stream marker
+                self.output_queue.put(EndOfStream())  # End-of-stream marker
 
         # Start output reader thread
         self.reader_thread = threading.Thread(target=output_reader, daemon=True)
@@ -377,7 +378,6 @@ class RunningProcess:
         expired_time = time.time() + timeout if timeout is not None else None
 
         while True:
-            one_iteration = True
             if self._stream_finished:
                 return EndOfStream()
 
@@ -391,7 +391,7 @@ class RunningProcess:
                     continue
             try:
                 line = self.output_queue.get(timeout=0.1)
-                if line is None:
+                if isinstance(line, EndOfStream):
                     self._stream_finished = True
                     return EndOfStream()
                 return line
