@@ -269,10 +269,8 @@ class RunningProcess:
                 # Continuously read lines to keep the stdout pipe drained
                 # This prevents the subprocess from blocking when its output buffer fills
                 try:
-                    for line in iter(self.proc.stdout.readline, None):
+                    for line in self.proc.stdout:
                         self._time_last_stdout_line = time.time()
-                        if line is None:
-                            break
                         if self.shutdown.is_set():
                             break
                         # Strip whitespace and queue non-empty lines
@@ -283,7 +281,7 @@ class RunningProcess:
                                 line_stripped
                             )  # Also store for later retrieval
 
-                    # When the iter loop exits, we've reached EOF
+                    # When the loop exits, we've reached EOF
                     self.output_queue.put(None)
                 except (ValueError, OSError) as e:
                     # Handle "I/O operation on closed file" and similar errors

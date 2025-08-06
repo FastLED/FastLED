@@ -39,8 +39,8 @@ def main() -> int:
 
     args = Args.parse_args()
 
-    # Create PlatformIO builder with only the parameters it needs
-    # builder = PlatformIoBuilder(board=args.board, verbose=args.verbose)
+    # run_pio_build now accepts both Board objects and strings
+    # The string will be automatically resolved to a Board object via get_board()
     futures = run_pio_build(args.board, args.examples, args.verbose)
 
 

@@ -36,6 +36,7 @@ dependencies = [
     "emoji>=2.14.1",
     "pydantic[email]>=2.0.0",
     "dirsync>=2.2.6",
+    "filelock>=3.18.0",
 ]
 
 [build-system]

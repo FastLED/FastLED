@@ -14,6 +14,7 @@ from pathlib import Path
 
 from dirsync import sync  # type: ignore
 
+from ci.util.boards import ALL, Board, get_board
 from ci.util.running_process import EndOfStream, RunningProcess
 
 
@@ -26,6 +27,57 @@ _LIB_LDF_MODE = "chain"
 assert (_PROJECT_ROOT / "library.json").exists(), (
     f"Library JSON not found at {_PROJECT_ROOT / 'library.json'}"
 )
+
+
+def _get_platform_family(board: Board) -> str:
+    """Detect platform family from Board.platform."""
+    if not board.platform:
+        return "unknown"
+
+    platform = board.platform.lower()
+    if "atmel" in platform:
+        return "avr"
+    elif "espressif" in platform:
+        return "esp"
+    elif "apollo3" in platform:
+        return "apollo3"
+    elif "native" in platform:
+        return "native"
+    elif "rpi" in platform or "raspberrypi" in platform:
+        return "rpi"
+    else:
+        return "custom"
+
+
+def _ensure_platform_installed(board: Board) -> bool:
+    """Ensure the required platform is installed for the board."""
+    if not board.platform_needs_install:
+        return True
+
+    # Platform installation is handled by existing platform management code
+    # This is a placeholder for future platform installation logic
+    print(f"Platform installation needed for {board.board_name}: {board.platform}")
+    return True
+
+
+def _apply_board_specific_config(board: Board, platformio_ini_path: Path) -> bool:
+    """Apply board-specific build configuration from Board class."""
+    # Board.to_platformio_ini() already handles this comprehensively
+    # This function mainly for validation and logging
+
+    build_config = BuildConfig(board=board)
+    config_content = build_config.to_platformio_ini()
+    platformio_ini_path.write_text(config_content)
+
+    # Log applied configurations for debugging
+    if board.build_flags:
+        print(f"Applied build_flags: {board.build_flags}")
+    if board.defines:
+        print(f"Applied defines: {board.defines}")
+    if board.platform_packages:
+        print(f"Using platform_packages: {board.platform_packages}")
+
+    return True
 
 
 @dataclass
@@ -49,21 +101,24 @@ class BuildResult:
 
 @dataclass
 class BuildConfig:
-    board: str
-    framework: str = "arduino"
-    platform: str = "atmelavr"
+    board: Board  # Use Board class instead of individual fields
 
     def to_platformio_ini(self) -> str:
+        """Generate platformio.ini content using Board configuration."""
         out: list[str] = []
-        out.append(f"[env:{self.board}]")
-        out.append(f"platform = {self.platform}")
-        out.append(f"board = {self.board}")
-        out.append(f"framework = {self.framework}")
-        out.append(f"lib_ldf_mode = {_LIB_LDF_MODE}")
-        # Enable library archiving to create static libraries and avoid recompilation
-        out.append("lib_archive = true")
+        out.append(f"[env:{self.board.board_name}]")
 
+        # Use Board's comprehensive configuration
+        board_config = self.board.to_platformio_ini()
+        # Extract everything after the section header
+        lines = board_config.split("\n")[1:]  # Skip [env:...] line
+        out.extend(line for line in lines if line.strip())
+
+        # Add FastLED-specific configurations
+        out.append(f"lib_ldf_mode = {_LIB_LDF_MODE}")
+        out.append("lib_archive = true")
         out.append(f"lib_deps = symlink://{_PROJECT_ROOT}")
+
         return "\n".join(out)
 
 
@@ -236,21 +291,34 @@ def _copy_fastled_library(project_root: Path, build_dir: Path) -> bool:
     return True
 
 
-def _init_platformio_build(board: str, verbose: bool, example: str) -> InitResult:
+def _init_platformio_build(board: Board, verbose: bool, example: str) -> InitResult:
     """Initialize the PlatformIO build directory."""
-    platform = board
-
     project_root = _resolve_project_root()
-    build_dir = project_root / ".build" / "test_platformio" / platform
+    build_dir = project_root / ".build" / "test_platformio" / board.board_name
+
     # Setup the build directory.
     build_dir.mkdir(parents=True, exist_ok=True)
     platformio_ini = build_dir / "platformio.ini"
 
-    build_config = BuildConfig(board=platform, framework="arduino", platform="atmelavr")
-    platformio_ini_content = build_config.to_platformio_ini()
+    # Platform-specific handling
+    platform_family = _get_platform_family(board)
+    print(f"Detected platform family: {platform_family} for board {board.board_name}")
 
-    platformio_ini = build_dir / "platformio.ini"
-    platformio_ini.write_text(platformio_ini_content)
+    # Ensure platform is installed if needed
+    if not _ensure_platform_installed(board):
+        return InitResult(
+            success=False,
+            output=f"Failed to install platform for {board.board_name}",
+            build_dir=build_dir,
+        )
+
+    # Apply board-specific configuration
+    if not _apply_board_specific_config(board, platformio_ini):
+        return InitResult(
+            success=False,
+            output=f"Failed to apply board configuration for {board.board_name}",
+            build_dir=build_dir,
+        )
 
     ok_copy_src = _copy_example_source(project_root, build_dir, example)
     if not ok_copy_src:
@@ -279,10 +347,8 @@ def _init_platformio_build(board: str, verbose: bool, example: str) -> InitResul
             build_dir=build_dir,
         )
 
-    # Write final platformio.ini
-    build_config = BuildConfig(board=platform, framework="arduino", platform="atmelavr")
-    platformio_ini_content = build_config.to_platformio_ini()
-    platformio_ini.write_text(platformio_ini_content)
+    # Final platformio.ini is already written by _apply_board_specific_config
+    # No need to write it again
 
     # Run initial build with LDF enabled to set up the environment
     run_cmd: list[str] = ["pio", "run", "--project-dir", str(build_dir)]
@@ -307,17 +373,19 @@ def _init_platformio_build(board: str, verbose: bool, example: str) -> InitResul
             build_dir=build_dir,
         )
 
-    # After successful build, turn off the Library Dependency Finder for subsequent builds
-    # but keep the manual include path for FastLED
-    final_content_no_ldf = build_config.to_platformio_ini()
-    platformio_ini.write_text(final_content_no_ldf)
+    # After successful build, configuration is already properly set up
+    # Board configuration includes all necessary settings
 
     return InitResult(success=True, output="", build_dir=build_dir)
 
 
 class PlatformIoBuilder:
-    def __init__(self, board: str, verbose: bool):
-        self.board = board
+    def __init__(self, board: Board | str, verbose: bool):
+        # Convert string to Board object if needed
+        if isinstance(board, str):
+            self.board = get_board(board)
+        else:
+            self.board = board
         self.verbose = verbose
         self.build_dir: Path | None = None
         self.initialized = False
@@ -402,10 +470,15 @@ class PlatformIoBuilder:
 
 
 def run_pio_build(
-    board: str, examples: list[str], verbose: bool = False
+    board: Board | str, examples: list[str], verbose: bool = False
 ) -> list[Future[BuildResult]]:
-    """Run build for specified examples and platform using new PlatformIO system."""
+    """Run build for specified examples and platform using new PlatformIO system.
 
+    Args:
+        board: Board class instance or board name string (resolved via get_board())
+        examples: List of example names to build
+        verbose: Enable verbose output
+    """
     pio = PlatformIoBuilder(board, verbose)
     futures: list[Future[BuildResult]] = []
     for example in examples:
