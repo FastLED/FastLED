@@ -149,6 +149,7 @@ def _apply_board_specific_config(
     example: str,
     additional_defines: list[str] | None = None,
     additional_include_dirs: list[str] | None = None,
+    additional_libs: list[str] | None = None,
 ) -> bool:
     """Apply board-specific build configuration from Board class."""
     # Use centralized path management
@@ -160,6 +161,7 @@ def _apply_board_specific_config(
         example=example,
         additional_defines=additional_defines,
         additional_include_dirs=additional_include_dirs,
+        additional_libs=additional_libs,
         include_platformio_section=True,
         core_dir=str(paths.core_dir),
         packages_dir=str(paths.packages_dir),
@@ -585,6 +587,7 @@ def _init_platformio_build(
     example: str,
     additional_defines: list[str] | None = None,
     additional_include_dirs: list[str] | None = None,
+    additional_libs: list[str] | None = None,
 ) -> InitResult:
     """Initialize the PlatformIO build directory. Assumes lock is already held by caller."""
     project_root = _resolve_project_root()
@@ -621,6 +624,7 @@ def _init_platformio_build(
         example,
         additional_defines,
         additional_include_dirs,
+        additional_libs,
     ):
         return InitResult(
             success=False,
@@ -715,6 +719,7 @@ class PioCompiler:
         verbose: bool,
         additional_defines: list[str] | None = None,
         additional_include_dirs: list[str] | None = None,
+        additional_libs: list[str] | None = None,
     ):
         # Convert string to Board object if needed
         if isinstance(board, str):
@@ -724,6 +729,7 @@ class PioCompiler:
         self.verbose = verbose
         self.additional_defines = additional_defines
         self.additional_include_dirs = additional_include_dirs
+        self.additional_libs = additional_libs
 
         # Use centralized path management
         self.paths = FastLEDPaths(self.board.board_name)
@@ -755,6 +761,7 @@ class PioCompiler:
             example,
             self.additional_defines,
             self.additional_include_dirs,
+            self.additional_libs,
         )
         if result.success:
             self.initialized = True

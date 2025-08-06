@@ -96,6 +96,7 @@ class Args:
     clean: bool
     clean_all: bool
     additional_include_dirs: list[str] | None
+    additional_libs: list[str] | None
 
     @staticmethod
     def parse_args() -> "Args":
@@ -130,6 +131,10 @@ class Args:
         parser.add_argument(
             "-I", "--include", action="append", dest="include_dirs", 
             help="Additional include directories to add to build flags (can be used multiple times, e.g. -I src/platforms/sub)"
+        )
+        parser.add_argument(
+            "--lib", action="append", dest="additional_libs",
+            help="Additional libraries to add to lib_deps (can be used multiple times, e.g. --lib 'ArduinoJson@6.21.3' --lib 'WiFi')"
         )
         
         parsed_args = parser.parse_args()
@@ -227,7 +232,8 @@ class Args:
             verbose=parsed_args.verbose,
             clean=parsed_args.clean,
             clean_all=parsed_args.clean_all,
-            additional_include_dirs=parsed_args.include_dirs
+            additional_include_dirs=parsed_args.include_dirs,
+            additional_libs=parsed_args.additional_libs
         )
 
 
@@ -235,7 +241,7 @@ def main() -> int:
     """Main entry point."""
 
     args = Args.parse_args()
-    pio = PioCompiler(args.platform, args.verbose, additional_include_dirs=args.additional_include_dirs)
+    pio = PioCompiler(args.platform, args.verbose, additional_include_dirs=args.additional_include_dirs, additional_libs=args.additional_libs)
 
     # Handle clean operations (exit early)
     if args.clean_all:
