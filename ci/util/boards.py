@@ -139,7 +139,6 @@ class Board:
 
     def to_platformio_ini(
         self,
-        example: str | None = None,
         additional_defines: list[str] | None = None,
         additional_include_dirs: list[str] | None = None,
         additional_libs: list[str] | None = None,

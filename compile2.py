@@ -68,6 +68,7 @@ def _discover_all_examples() -> list[str]:
     return sorted(examples)
 
 
+
 def _resolve_example_paths(examples: list[str]) -> list[str]:
     """Resolve example names or paths to appropriate format.
     
@@ -97,6 +98,9 @@ class Args:
     clean_all: bool
     additional_include_dirs: list[str] | None
     additional_libs: list[str] | None
+    upload: bool
+    monitor: bool
+    install_udev: bool
 
     @staticmethod
     def parse_args() -> "Args":
@@ -135,6 +139,18 @@ class Args:
         parser.add_argument(
             "--lib", action="append", dest="additional_libs",
             help="Additional libraries to add to lib_deps (can be used multiple times, e.g. --lib 'ArduinoJson@6.21.3' --lib 'WiFi')"
+        )
+        parser.add_argument(
+            "--upload", action="store_true",
+            help="Upload (deploy) the example to the target device. Requires exactly one example."
+        )
+        parser.add_argument(
+            "--monitor", action="store_true", 
+            help="Start device monitor after upload. Implies --upload. Requires exactly one example."
+        )
+        parser.add_argument(
+            "--install-udev", action="store_true",
+            help="Install PlatformIO udev rules for USB device access on Linux (requires sudo)"
         )
         
         parsed_args = parser.parse_args()
@@ -198,6 +214,13 @@ class Args:
             print(json.dumps(examples_dict, indent=2, sort_keys=True))
             sys.exit(0)
         
+        # Handle --install-udev option (exit early)
+        if parsed_args.install_udev:
+            # Create a PioCompiler instance just for udev installation
+            pio = PioCompiler("uno", verbose=False)  # Platform doesn't matter for udev
+            success = pio.install_udev_rules()
+            sys.exit(0 if success else 1)
+        
         # Use defaults when not provided
         platform = parsed_args.platform
         if not platform:
@@ -223,6 +246,39 @@ class Args:
             examples = ["Blink"]
             print(yellow_text("WARNING: Example wasn't specified, assuming 'Blink'"))
         
+        # Handle upload/monitor validation
+        upload = parsed_args.upload
+        monitor = parsed_args.monitor
+        
+        # Monitor implies upload
+        if monitor:
+            upload = True
+        
+        # Validate upload/monitor modes require exactly one example
+        if upload or monitor:
+            # Count total examples before resolution
+            total_examples = 0
+            if parsed_args.examples:
+                if parsed_args.examples.strip().lower() == "all":
+                    total_examples = len(_discover_all_examples())
+                else:
+                    total_examples = len([ex.strip() for ex in parsed_args.examples.split(",") if ex.strip()])
+            if parsed_args.all:
+                total_examples = len(_discover_all_examples())
+            if parsed_args.example:
+                total_examples += 1
+            if not parsed_args.examples and not parsed_args.all and not parsed_args.example:
+                total_examples = 1  # Default "Blink" example
+            
+            if total_examples == 0:
+                print(red_text("ERROR: Upload/monitor mode requires exactly one example, but no examples specified."))
+                sys.exit(1)
+            elif total_examples > 1:
+                mode_name = "monitor" if monitor else "upload"
+                print(red_text(f"ERROR: {mode_name.capitalize()} mode requires exactly one example, but {total_examples} examples were specified."))
+                print(red_text(f"Please specify exactly one example when using --{mode_name}."))
+                sys.exit(1)
+
         # Resolve example names/paths
         resolved_examples = _resolve_example_paths(examples)
         
@@ -233,7 +289,10 @@ class Args:
             clean=parsed_args.clean,
             clean_all=parsed_args.clean_all,
             additional_include_dirs=parsed_args.include_dirs,
-            additional_libs=parsed_args.additional_libs
+            additional_libs=parsed_args.additional_libs,
+            upload=upload,
+            monitor=monitor,
+            install_udev=parsed_args.install_udev
         )
 
 
@@ -255,6 +314,54 @@ def main() -> int:
         print(green_text(f"✅ Clean completed for platform {args.platform}"))
         return 0
 
+    # Handle upload/monitor mode (single example only)
+    if args.upload or args.monitor:
+        # Check for udev rules on Linux before attempting upload
+        if not pio.check_udev_rules():
+            print(red_text("ERROR: PlatformIO udev rules are not installed on this Linux system."))
+            print(red_text("USB device access may fail without proper permissions."))
+            print("")
+            print(yellow_text("To install udev rules automatically, run:"))
+            print(yellow_text(f"  {sys.argv[0]} --install-udev"))
+            print("")
+            print(yellow_text("Or install manually with:"))
+            print(yellow_text("  curl -fsSL https://raw.githubusercontent.com/platformio/platformio-core/develop/platformio/assets/system/99-platformio-udev.rules | sudo tee /etc/udev/rules.d/99-platformio-udev.rules"))
+            print(yellow_text("  sudo service udev restart"))
+            print(yellow_text("  # or"))
+            print(yellow_text("  sudo udevadm control --reload-rules"))
+            print(yellow_text("  sudo udevadm trigger"))
+            print("")
+            print(red_text("After installing udev rules, you may need to restart your system."))
+            return 1
+        
+        example = args.examples[0]  # Validation ensures exactly one example
+        
+        if args.monitor:
+            print(green_text(f"📡 Starting upload and monitor for {example} on {args.platform}"))
+        else:
+            print(green_text(f"📤 Starting upload for {example} on {args.platform}"))
+        
+        try:
+            result = pio.deploy(example, monitor=args.monitor)
+            if result.success:
+                if args.monitor:
+                    print(green_text(f"✅ Upload and monitor completed for {example}"))
+                else:
+                    print(green_text(f"✅ Upload completed for {example}"))
+                return 0
+            else:
+                error_banner = create_banner(f"DEPLOY FAILED: {example}", red_text)
+                print(f"\n{error_banner}")
+                return 1
+        except KeyboardInterrupt:
+            print(f"\n{red_text('Deploy cancelled by user')}")
+            return 1
+        except Exception as e:
+            error_banner = create_banner(f"DEPLOY ERROR: {e}", red_text)
+            print(f"\n{error_banner}")
+            return 1
+
+    # Standard build mode (multiple examples)
     # run_pio_build now accepts both Board objects and strings
     # The string will be automatically resolved to a Board object via create_board()
     futures = pio.build(args.examples)

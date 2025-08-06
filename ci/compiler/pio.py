@@ -6,10 +6,12 @@ Provides a clean interface for building FastLED projects with PlatformIO.
 """
 
 import os
+import platform
 import shutil
 import subprocess
 import threading
 import time
+import urllib.request
 import warnings
 from concurrent.futures import Future, ThreadPoolExecutor
 from dataclasses import dataclass
@@ -158,7 +160,6 @@ def _apply_board_specific_config(
 
     # Generate platformio.ini content using the enhanced Board method
     config_content = board.to_platformio_ini(
-        example=example,
         additional_defines=additional_defines,
         additional_include_dirs=additional_include_dirs,
         additional_libs=additional_libs,
@@ -949,6 +950,218 @@ class PioCompiler:
             # Always release locks
             self._global_package_lock.release()
             self._platform_lock.decrement()
+
+    def deploy(
+        self, example: str, upload_port: str | None = None, monitor: bool = False
+    ) -> SketchResult:
+        """Deploy (upload) a specific example to the target device.
+
+        Args:
+            example: Name of the example to deploy
+            upload_port: Optional specific port for upload (e.g., "/dev/ttyUSB0", "COM3")
+            monitor: If True, attach to device monitor after successful upload
+        """
+        print(f"Deploying {example} to {self.board.board_name}...")
+
+        # Acquire platform lock for this operation
+        self._platform_lock.acquire(1)
+        lock_released = False
+
+        try:
+            # Ensure the build is initialized and the example is built
+            if not self.initialized:
+                init_result = self._internal_init_build_no_lock(example)
+                if not init_result.success:
+                    return SketchResult(
+                        success=False,
+                        output=init_result.output,
+                        build_dir=init_result.build_dir,
+                        example=example,
+                    )
+            else:
+                # Build the example first (ensures it's up to date)
+                build_result = self._build_internal(example)
+                if not build_result.success:
+                    return build_result
+
+            # Run PlatformIO upload command
+            upload_cmd: list[str] = [
+                "pio",
+                "run",
+                "--project-dir",
+                str(self.build_dir),
+                "--target",
+                "upload",
+            ]
+
+            if upload_port:
+                upload_cmd.extend(["--upload-port", upload_port])
+
+            if self.verbose:
+                upload_cmd.append("--verbose")
+
+            print(f"Running upload command: {subprocess.list2cmdline(upload_cmd)}")
+
+            # Start timer for upload
+            start_time = time.time()
+
+            running_process = RunningProcess(
+                upload_cmd, cwd=self.build_dir, auto_run=True
+            )
+            try:
+                while line := running_process.get_next_line(timeout=60):
+                    if isinstance(line, EndOfStream):
+                        break
+                    # Add timestamp to each line
+                    elapsed = time.time() - start_time
+                    print(f"{elapsed:.2f} {line}")
+            except OSError as e:
+                # Handle output encoding issues on Windows
+                elapsed = time.time() - start_time
+                print(f"{elapsed:.2f} Upload encoding issue: {e}")
+                pass
+
+            running_process.wait()
+
+            # Check if upload was successful
+            upload_success = running_process.returncode == 0
+            upload_output = running_process.stdout
+
+            if not upload_success:
+                return SketchResult(
+                    success=False,
+                    output=upload_output,
+                    build_dir=self.build_dir,
+                    example=example,
+                )
+
+            # Upload completed successfully - release the lock before monitor
+            print(f"✅ Upload completed successfully for {example}")
+            self._platform_lock.decrement()
+            lock_released = True
+
+            # If monitor is requested and upload was successful, start monitor
+            if monitor:
+                print(
+                    f"📡 Starting monitor for {example} on {self.board.board_name}..."
+                )
+                print("📝 Press Ctrl+C to exit monitor")
+
+                monitor_cmd: list[str] = [
+                    "pio",
+                    "device",
+                    "monitor",
+                    "--project-dir",
+                    str(self.build_dir),
+                ]
+
+                if upload_port:
+                    monitor_cmd.extend(["--port", upload_port])
+
+                print(
+                    f"Running monitor command: {subprocess.list2cmdline(monitor_cmd)}"
+                )
+
+                # Start monitor process (no lock needed for monitoring)
+                monitor_process = RunningProcess(
+                    monitor_cmd, cwd=self.build_dir, auto_run=True
+                )
+                try:
+                    while line := monitor_process.get_next_line(
+                        timeout=None
+                    ):  # No timeout for monitor
+                        if isinstance(line, EndOfStream):
+                            break
+                        print(line)  # No timestamp for monitor output
+                except KeyboardInterrupt:
+                    print("\n📡 Monitor stopped by user")
+                    monitor_process.terminate()
+                except OSError as e:
+                    print(f"Monitor encoding issue: {e}")
+                    pass
+
+                monitor_process.wait()
+
+            return SketchResult(
+                success=True,
+                output=upload_output,
+                build_dir=self.build_dir,
+                example=example,
+            )
+
+        finally:
+            # Only decrement the lock if it hasn't been released yet
+            if not lock_released:
+                self._platform_lock.decrement()
+
+    def check_udev_rules(self) -> bool:
+        """Check if PlatformIO udev rules are installed on Linux.
+
+        Returns:
+            True if udev rules are found or not applicable (non-Linux), False otherwise
+        """
+        if platform.system() != "Linux":
+            return True  # Not applicable on non-Linux systems
+
+        udev_rules_path = Path("/etc/udev/rules.d/99-platformio-udev.rules")
+        return udev_rules_path.exists()
+
+    def install_udev_rules(self) -> bool:
+        """Install PlatformIO udev rules on Linux.
+
+        Returns:
+            True if installation succeeded, False otherwise
+        """
+        if platform.system() != "Linux":
+            print("INFO: udev rules are only needed on Linux systems")
+            return True
+
+        udev_url = "https://raw.githubusercontent.com/platformio/platformio-core/develop/platformio/assets/system/99-platformio-udev.rules"
+        udev_rules_path = "/etc/udev/rules.d/99-platformio-udev.rules"
+
+        print("📡 Downloading PlatformIO udev rules...")
+
+        try:
+            # Download the udev rules
+            with urllib.request.urlopen(udev_url) as response:
+                udev_content = response.read().decode("utf-8")
+
+            # Write to temporary file first
+            temp_file = "/tmp/99-platformio-udev.rules"
+            with open(temp_file, "w") as f:
+                f.write(udev_content)
+
+            print("💾 Installing udev rules (requires sudo)...")
+
+            # Use sudo to copy to system location
+            result = subprocess.run(
+                ["sudo", "cp", temp_file, udev_rules_path],
+                capture_output=True,
+                text=True,
+            )
+
+            if result.returncode != 0:
+                print(f"ERROR: Failed to install udev rules: {result.stderr}")
+                return False
+
+            # Clean up temp file
+            os.unlink(temp_file)
+
+            print("✅ PlatformIO udev rules installed successfully!")
+            print("⚠️  To complete the installation, run one of the following:")
+            print("   sudo service udev restart")
+            print("   # or")
+            print("   sudo udevadm control --reload-rules")
+            print("   sudo udevadm trigger")
+            print(
+                "⚠️  You may also need to restart your system for the changes to take effect."
+            )
+
+            return True
+
+        except Exception as e:
+            print(f"ERROR: Failed to install udev rules: {e}")
+            return False
 
 
 def run_pio_build(
