@@ -16,7 +16,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
 # Import from the local ci directory
-from ci.util.boards import Board, get_board  # type: ignore
+from ci.util.boards import Board, create_board  # type: ignore
 from ci.util.create_build_dir import insert_tool_aliases
 from ci.util.locked_print import locked_print
 
@@ -918,7 +918,7 @@ def main() -> int:
     boards: list[Board] = []
     for board_name in boards_names:
         try:
-            board = get_board(board_name, no_project_options=False)
+            board = create_board(board_name, no_project_options=False)
             boards.append(board)
         except Exception as e:
             locked_print(f"ERROR: Failed to get board '{board_name}': {e}")

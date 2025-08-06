@@ -17,7 +17,7 @@ from pathlib import Path
 from typing import Any, Dict, Iterator, List, Optional, Tuple
 
 # Import board mapping system
-from ci.util.boards import get_board
+from ci.util.boards import create_board
 
 
 @dataclass
@@ -709,7 +709,7 @@ def main():
         build_info = json.load(f)
 
     # Get board info using proper board mapping
-    board = get_board(board_name)
+    board = create_board(board_name)
     real_board_name = board.get_real_board_name()
 
     # Try the real board name first, then fall back to directory name

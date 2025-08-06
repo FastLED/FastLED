@@ -70,6 +70,7 @@ class Args:
     verbose: bool
     clean: bool
     clean_all: bool
+    additional_include_dirs: list[str] | None
 
     @staticmethod
     def parse_args() -> "Args":
@@ -97,6 +98,10 @@ class Args:
         )
         parser.add_argument(
             "--clean-all", action="store_true", help="Clean all build artifacts (local and global packages) for the specified platform and exit"
+        )
+        parser.add_argument(
+            "-I", "--include", action="append", dest="include_dirs", 
+            help="Additional include directories to add to build flags (can be used multiple times, e.g. -I src/platforms/sub)"
         )
         
         parsed_args = parser.parse_args()
@@ -197,7 +202,8 @@ class Args:
             examples=resolved_examples,
             verbose=parsed_args.verbose,
             clean=parsed_args.clean,
-            clean_all=parsed_args.clean_all
+            clean_all=parsed_args.clean_all,
+            additional_include_dirs=parsed_args.include_dirs
         )
 
 
@@ -205,7 +211,7 @@ def main() -> int:
     """Main entry point."""
 
     args = Args.parse_args()
-    pio = PioCompiler(args.platform, args.verbose)
+    pio = PioCompiler(args.platform, args.verbose, additional_include_dirs=args.additional_include_dirs)
 
     # Handle clean operations (exit early)
     if args.clean_all:
@@ -220,7 +226,7 @@ def main() -> int:
         return 0
 
     # run_pio_build now accepts both Board objects and strings
-    # The string will be automatically resolved to a Board object via get_board()
+    # The string will be automatically resolved to a Board object via create_board()
     futures = pio.build(args.examples)
 
     def cancel_futures() -> None:

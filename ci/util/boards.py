@@ -51,9 +51,26 @@ class Board:
     no_board_spec: bool = (
         False  # For platforms like 'native' that don't need a board specification
     )
+    add_board_to_all: bool = True
 
     def __post_init__(self) -> None:
         ALL.append(self)
+
+    def clone(self) -> "Board":
+        from copy import deepcopy
+        from typing import Any
+
+        out = Board(
+            board_name=self.board_name,
+            add_board_to_all=False,
+        )
+        for field_name, field_info in self.__dataclass_fields__.items():
+            field_value: Any = getattr(self, field_name)
+            # Create deep copy for mutable types to avoid shared references
+            if isinstance(field_value, (list, dict)):
+                field_value = codeepcopypy(field_value)  # type: ignore[misc]
+            setattr(out, field_name, field_value)
+        return out
 
     def get_real_board_name(self) -> str:
         return self.real_board_name if self.real_board_name else self.board_name
@@ -545,11 +562,13 @@ def _make_board_map(boards: list[Board]) -> dict[str, Board]:
 _BOARD_MAP: dict[str, Board] = _make_board_map(ALL)
 
 
-def get_board(board_name: str, no_project_options: bool = False) -> Board:
+def create_board(board_name: str, no_project_options: bool = False) -> Board:
+    board: Board
     if no_project_options:
-        return Board(board_name=board_name)
+        board = Board(board_name=board_name)
     if board_name not in _BOARD_MAP:
         # empty board without any special overrides, assume platformio will know what to do with it.
-        return Board(board_name=board_name)
+        board = Board(board_name=board_name)
     else:
-        return _BOARD_MAP[board_name]
+        board = _BOARD_MAP[board_name]
+    return board.clone()

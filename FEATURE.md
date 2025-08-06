@@ -49,13 +49,13 @@ The Board class in `ci.util.boards` provides:
 
 #### ✅ 1.1 Update PlatformIoBuilder Constructor - IMPLEMENTED
 ```python
-from ci.util.boards import Board, get_board
+from ci.util.boards import Board, create_board
 
 class PlatformIoBuilder:
     def __init__(self, board: Board | str, verbose: bool):
         # Convert string to Board object if needed
         if isinstance(board, str):
-            self.board = get_board(board)
+            self.board = create_board(board)
         else:
             self.board = board
         self.verbose = verbose
@@ -97,7 +97,7 @@ def _init_platformio_build(board: Board, verbose: bool, example: str) -> InitRes
     # Uses board.platform for platform specification
 
 def run_pio_build(board: Board | str, examples: list[str], verbose: bool = False) -> list[Future[BuildResult]]:
-    # Accepts both Board class and string (automatically resolved via get_board())
+    # Accepts both Board class and string (automatically resolved via create_board())
 ```
 
 ### ✅ Phase 2: Platform Intelligence - COMPLETE
@@ -196,7 +196,7 @@ def run_pio_build(
     """Run build for specified examples and platform.
     
     Args:
-        board: Board class instance or board name string (resolved via get_board())
+        board: Board class instance or board name string (resolved via create_board())
         examples: List of example names to build
         verbose: Enable verbose output
     """
@@ -210,7 +210,7 @@ class PlatformIoBuilder:
     def __init__(self, board: Board | str, verbose: bool):
         # Convert string to Board object if needed
         if isinstance(board, str):
-            self.board = get_board(board)  # Uses existing get_board() function
+            self.board = create_board(board)  # Uses existing create_board() function
         else:
             self.board = board
 ```
@@ -223,12 +223,12 @@ class PlatformIoBuilder:
 - ✅ **Specialty boards**: Apollo3, Teensy, native platform support validated
 - ✅ **Platform installation**: Platform handling logic implemented 
 - ✅ **Build flag application**: Board-specific flags and defines applied correctly
-- ✅ **String compatibility**: Seamless string-to-Board conversion via get_board()
+- ✅ **String compatibility**: Seamless string-to-Board conversion via create_board()
 
 #### ✅ 5.2 Migration Strategy - NO MIGRATION NEEDED
 1. ✅ **Unified API**: Both Board objects and strings supported simultaneously
 2. ✅ **Zero breaking changes**: Existing string-based code works unchanged
-3. ✅ **Automatic resolution**: get_board() handles string-to-Board conversion
+3. ✅ **Automatic resolution**: create_board() handles string-to-Board conversion
 4. ✅ **Future-ready**: New code can use Board objects directly
 
 ## ✅ IMPLEMENTATION BENEFITS ACHIEVED
@@ -236,7 +236,7 @@ class PlatformIoBuilder:
 ### ✅ 1. Type Safety
 - ✅ **Compile-time validation**: Board configurations validated via Board class
 - ✅ **IDE support**: Full IntelliSense for board properties and methods
-- ✅ **Runtime error reduction**: get_board() provides safe string-to-Board conversion
+- ✅ **Runtime error reduction**: create_board() provides safe string-to-Board conversion
 
 ### ✅ 2. Platform Intelligence  
 - ✅ **Automatic platform detection**: _get_platform_family() identifies platform types
@@ -270,7 +270,7 @@ class PlatformIoBuilder:
 Perfect backward compatibility maintained:
 - ✅ **Dual API support**: Both Board objects and board name strings accepted
 - ✅ **Zero breaking changes**: All existing string-based code works unchanged  
-- ✅ **Automatic conversion**: get_board() transparently handles string resolution
+- ✅ **Automatic conversion**: create_board() transparently handles string resolution
 - ✅ **No migration needed**: Existing code continues to work without modification
 
 ## 🎉 SUCCESSFUL COMPLETION

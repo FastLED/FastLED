@@ -19,7 +19,7 @@ from typing import Any, Callable, Dict
 from dirsync import sync  # type: ignore
 from filelock import FileLock, Timeout  # type: ignore
 
-from ci.util.boards import ALL, Board, get_board
+from ci.util.boards import ALL, Board, create_board
 from ci.util.running_process import EndOfStream, RunningProcess
 
 
@@ -144,13 +144,22 @@ def _ensure_platform_installed(board: Board) -> bool:
 
 
 def _apply_board_specific_config(
-    board: Board, platformio_ini_path: Path, example: str
+    board: Board,
+    platformio_ini_path: Path,
+    example: str,
+    additional_defines: list[str] | None = None,
+    additional_include_dirs: list[str] | None = None,
 ) -> bool:
     """Apply board-specific build configuration from Board class."""
     # Board.to_platformio_ini() already handles this comprehensively
     # This function mainly for validation and logging
 
-    build_config = BuildConfig(board=board, example=example)
+    build_config = BuildConfig(
+        board=board,
+        example=example,
+        additional_defines=additional_defines,
+        additional_include_dirs=additional_include_dirs,
+    )
     config_content = build_config.to_platformio_ini()
     platformio_ini_path.write_text(config_content)
 
@@ -159,6 +168,10 @@ def _apply_board_specific_config(
         print(f"Applied build_flags: {board.build_flags}")
     if board.defines:
         print(f"Applied defines: {board.defines}")
+    if additional_defines:
+        print(f"Applied additional defines: {additional_defines}")
+    if additional_include_dirs:
+        print(f"Applied additional include dirs: {additional_include_dirs}")
     if board.platform_packages:
         print(f"Using platform_packages: {board.platform_packages}")
 
@@ -310,6 +323,12 @@ class SketchResult:
 class BuildConfig:
     board: Board  # Use Board class instead of individual fields
     example: str | None = None  # Example name for dynamic build flags
+    additional_defines: list[str] | None = (
+        None  # Additional defines to merge with board defines
+    )
+    additional_include_dirs: list[str] | None = (
+        None  # Additional include directories to merge with build flags
+    )
 
     def to_platformio_ini(self) -> str:
         """Generate platformio.ini content using Board configuration."""
@@ -332,7 +351,72 @@ class BuildConfig:
         board_config = self.board.to_platformio_ini(example=self.example)
         # Extract everything after the section header
         lines = board_config.split("\n")[1:]  # Skip [env:...] line
-        out.extend(line for line in lines if line.strip())
+
+        # Process lines to merge additional defines and include directories with existing build_flags
+        for line in lines:
+            line = line.strip()
+            if not line:
+                continue
+
+            # If this is a build_flags line and we have additional flags, merge them
+            if line.startswith("build_flags = ") and (
+                self.additional_defines or self.additional_include_dirs
+            ):
+                existing_flags = line[14:]  # Remove "build_flags = " prefix
+
+                # Build list of additional flags
+                additional_flag_parts: list[str] = []
+
+                # Add defines
+                if self.additional_defines:
+                    additional_flag_parts.extend(
+                        f"-D{define}" for define in self.additional_defines
+                    )
+
+                # Add include directories
+                if self.additional_include_dirs:
+                    additional_flag_parts.extend(
+                        f"-I{include_dir}"
+                        for include_dir in self.additional_include_dirs
+                    )
+
+                # Merge with existing flags
+                if additional_flag_parts:
+                    additional_flags = " ".join(additional_flag_parts)
+                    if existing_flags:
+                        merged_flags = f"{existing_flags} {additional_flags}"
+                    else:
+                        merged_flags = additional_flags
+                    out.append(f"build_flags = {merged_flags}")
+                else:
+                    out.append(line)
+            else:
+                out.append(line)
+
+        # If no build_flags line existed but we have additional flags, add them
+        if self.additional_defines or self.additional_include_dirs:
+            has_build_flags = any(
+                line.strip().startswith("build_flags = ") for line in lines
+            )
+            if not has_build_flags:
+                additional_flag_parts: list[str] = []
+
+                # Add defines
+                if self.additional_defines:
+                    additional_flag_parts.extend(
+                        f"-D{define}" for define in self.additional_defines
+                    )
+
+                # Add include directories
+                if self.additional_include_dirs:
+                    additional_flag_parts.extend(
+                        f"-I{include_dir}"
+                        for include_dir in self.additional_include_dirs
+                    )
+
+                if additional_flag_parts:
+                    additional_flags = " ".join(additional_flag_parts)
+                    out.append(f"build_flags = {additional_flags}")
 
         # Add FastLED-specific configurations
         out.append(f"lib_ldf_mode = {_LIB_LDF_MODE}")
@@ -586,7 +670,13 @@ def _copy_fastled_library(project_root: Path, build_dir: Path) -> bool:
     return True
 
 
-def _init_platformio_build(board: Board, verbose: bool, example: str) -> InitResult:
+def _init_platformio_build(
+    board: Board,
+    verbose: bool,
+    example: str,
+    additional_defines: list[str] | None = None,
+    additional_include_dirs: list[str] | None = None,
+) -> InitResult:
     """Initialize the PlatformIO build directory. Assumes lock is already held by caller."""
     project_root = _resolve_project_root()
     build_dir = project_root / ".build" / "test_platformio" / board.board_name
@@ -606,7 +696,9 @@ def _init_platformio_build(board: Board, verbose: bool, example: str) -> InitRes
         )
 
     # Apply board-specific configuration
-    if not _apply_board_specific_config(board, platformio_ini, example):
+    if not _apply_board_specific_config(
+        board, platformio_ini, example, additional_defines, additional_include_dirs
+    ):
         return InitResult(
             success=False,
             output=f"Failed to apply board configuration for {board.board_name}",
@@ -692,13 +784,21 @@ def _init_platformio_build(board: Board, verbose: bool, example: str) -> InitRes
 
 
 class PioCompiler:
-    def __init__(self, board: Board | str, verbose: bool):
+    def __init__(
+        self,
+        board: Board | str,
+        verbose: bool,
+        additional_defines: list[str] | None = None,
+        additional_include_dirs: list[str] | None = None,
+    ):
         # Convert string to Board object if needed
         if isinstance(board, str):
-            self.board = get_board(board)
+            self.board = create_board(board)
         else:
             self.board = board
         self.verbose = verbose
+        self.additional_defines = additional_defines
+        self.additional_include_dirs = additional_include_dirs
 
         # Use centralized path management
         self.paths = FastLEDPaths(self.board.board_name)
@@ -724,7 +824,13 @@ class PioCompiler:
             )
 
         # Initialize with the actual first example being built
-        result = _init_platformio_build(self.board, self.verbose, example)
+        result = _init_platformio_build(
+            self.board,
+            self.verbose,
+            example,
+            self.additional_defines,
+            self.additional_include_dirs,
+        )
         if result.success:
             self.initialized = True
         return result
@@ -912,14 +1018,20 @@ class PioCompiler:
 
 
 def run_pio_build(
-    board: Board | str, examples: list[str], verbose: bool = False
+    board: Board | str,
+    examples: list[str],
+    verbose: bool = False,
+    additional_defines: list[str] | None = None,
+    additional_include_dirs: list[str] | None = None,
 ) -> list[Future[SketchResult]]:
     """Run build for specified examples and platform using new PlatformIO system.
 
     Args:
-        board: Board class instance or board name string (resolved via get_board())
+        board: Board class instance or board name string (resolved via create_board())
         examples: List of example names to build
         verbose: Enable verbose output
+        additional_defines: Additional defines to add to build flags (e.g., ["FASTLED_DEFINE=0", "DEBUG=1"])
+        additional_include_dirs: Additional include directories to add to build flags (e.g., ["src/platforms/sub", "external/libs"])
     """
-    pio = PioCompiler(board, verbose)
+    pio = PioCompiler(board, verbose, additional_defines, additional_include_dirs)
     return pio.build(examples)

@@ -27,7 +27,7 @@ import warnings
 from pathlib import Path
 from typing import List, Set
 
-from ci.util.boards import Board, get_board  # type: ignore
+from ci.util.boards import Board, create_board  # type: ignore
 from ci.util.concurrent_run import ConcurrentRunArgs, concurrent_run
 from ci.util.locked_print import locked_print
 
@@ -333,7 +333,7 @@ def create_concurrent_run_args(args: argparse.Namespace) -> ConcurrentRunArgs:
         boards = args.boards.split(",") if args.boards else DEFAULT_BOARDS_NAMES
     projects: list[Board] = []
     for board in boards:
-        projects.append(get_board(board, no_project_options=args.no_project_options))
+        projects.append(create_board(board, no_project_options=args.no_project_options))
     extra_examples: dict[Board, list[Path]] = {}
     # Handle both positional and named examples
     if args.positional_examples:

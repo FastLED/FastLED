@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import Any, Dict
 
 
-def _get_board_info(path: Path) -> Dict[str, Any]:
+def _create_board_info(path: Path) -> Dict[str, Any]:
     build_info = json.loads(path.read_text())
     assert build_info.keys(), f"No boards found in {build_info}"
     assert len(build_info.keys()) == 1, (
@@ -16,7 +16,7 @@ def _get_board_info(path: Path) -> Dict[str, Any]:
 def check_firmware_size(board: str) -> int:
     root_build_dir = Path(".build") / board
     build_info_json = root_build_dir / "build_info.json"
-    board_info = _get_board_info(build_info_json)
+    board_info = _create_board_info(build_info_json)
     assert board_info, f"Board {board} not found in {build_info_json}"
     prog_path = Path(board_info["prog_path"])
     base_path = prog_path.parent

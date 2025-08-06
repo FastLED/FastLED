@@ -106,7 +106,7 @@ class BuildInfoAnalyzer:
             print(f"Error loading build_info.json for {board_name}: {e}")
             return None
 
-    def get_board_key_from_build_info(
+    def create_board_key_from_build_info(
         self, data: Dict[str, Any], board_name: str
     ) -> Optional[str]:
         """
@@ -151,7 +151,7 @@ class BuildInfoAnalyzer:
         if not data:
             return False, [], f"Build info not found for {board_name}"
 
-        board_key = self.get_board_key_from_build_info(data, board_name)
+        board_key = self.create_board_key_from_build_info(data, board_name)
         if not board_key:
             available_keys = list(data.keys())
             return False, [], f"Board key not found. Available keys: {available_keys}"
@@ -175,7 +175,7 @@ class BuildInfoAnalyzer:
         if not data:
             return False, CompilerInfo(), f"Build info not found for {board_name}"
 
-        board_key = self.get_board_key_from_build_info(data, board_name)
+        board_key = self.create_board_key_from_build_info(data, board_name)
         if not board_key:
             return False, CompilerInfo(), "Board key not found in build_info.json"
 
@@ -208,7 +208,7 @@ class BuildInfoAnalyzer:
         if not data:
             return False, {}, f"Build info not found for {board_name}"
 
-        board_key = self.get_board_key_from_build_info(data, board_name)
+        board_key = self.create_board_key_from_build_info(data, board_name)
         if not board_key:
             return False, {}, "Board key not found in build_info.json"
 
@@ -231,7 +231,7 @@ class BuildInfoAnalyzer:
         if not data:
             return False, {}, f"Build info not found for {board_name}"
 
-        board_key = self.get_board_key_from_build_info(data, board_name)
+        board_key = self.create_board_key_from_build_info(data, board_name)
         if not board_key:
             return False, {}, "Board key not found in build_info.json"
 
