@@ -121,6 +121,7 @@ template<uint8_t PIN> void CheckPin()
 }
 
 template<> void CheckPin<255> () {}
+template<> void CheckPin<0> () {}  // Base case to prevent recursion to -1
 
 
 template<uint8_t _PORT> const char *_GetPinPort(void *ptr) {
@@ -130,8 +131,13 @@ template<uint8_t _PORT> const char *_GetPinPort(void *ptr) {
 		return _GetPinPort<_PORT - 1>(ptr);
 	}
 }
-template<> const char *_GetPinPort<-1>(void *ptr) {
-	return NULL;
+
+template<> const char *_GetPinPort<0>(void *ptr) {
+	if (__FL_PORT_INFO<0>::hasPort() && (ptr == (void*)__FL_PORT_INFO<0>::portAddr())) {
+		return __FL_PORT_INFO<0>::portName();
+	} else {
+		return NULL;  // Base case - no more ports to check
+	}
 }
 
 const char *GetPinPort(void *ptr) {
