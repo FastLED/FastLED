@@ -13,6 +13,14 @@ from queue import Queue
 from typing import Any, Callable, Match, Union
 
 
+class EndOfStream(Exception):
+    """
+    Exception raised when the end of the stream is reached.
+    """
+
+    pass
+
+
 def normalize_error_warning_paths(line: str) -> str:
     r"""
     Normalize compiler output paths to use consistent separators.
@@ -305,7 +313,7 @@ class RunningProcess:
         self.reader_thread = threading.Thread(target=output_reader, daemon=True)
         self.reader_thread.start()
 
-    def get_next_line(self, timeout: float | None = None) -> str | None:
+    def get_next_line(self, timeout: float | None = None) -> str | EndOfStream:
         """
         Get the next line of output from the process.
 
@@ -332,11 +340,25 @@ class RunningProcess:
                 raise TimeoutError(f"Timeout after {timeout} seconds")
             try:
                 line = self.output_queue.get(timeout=0.1)
+                if line is None:
+                    return EndOfStream()
                 return line
             except queue.Empty:
                 continue
+            except TimeoutError:
+                continue
 
-        return None
+    def get_next_line_non_blocking(self) -> str | None | EndOfStream:
+        """
+        Get the next line of output from the process.
+        """
+        try:
+            out = self.output_queue.get(timeout=0.01)
+            if out is None:
+                return EndOfStream()
+            return out
+        except queue.Empty:
+            return None
 
     def poll(self) -> int | None:
         """

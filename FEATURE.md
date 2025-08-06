@@ -52,9 +52,6 @@ framework = arduino
 # FastLED library dependency (symlinked for efficiency)
 lib_deps = symlink://{fastled_src_path}
 
-# LDF Configuration
-lib_ldf_mode = deep+
-lib_compat_mode = off
 
 # Build optimization
 build_cache_enable = true

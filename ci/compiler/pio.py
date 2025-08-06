@@ -14,7 +14,7 @@ from pathlib import Path
 
 from dirsync import sync  # type: ignore
 
-from ci.util.running_process import RunningProcess
+from ci.util.running_process import EndOfStream, RunningProcess
 
 
 _EXECUTOR = ThreadPoolExecutor(max_workers=1)
@@ -324,8 +324,9 @@ def init_platformio_build(board: str, verbose: bool, example: str) -> InitResult
 
     running_process = RunningProcess(run_cmd, cwd=build_dir, auto_run=True)
     while line := running_process.get_next_line():
-        if line is None:  # End of stream
+        if isinstance(line, EndOfStream):
             break
+        assert isinstance(line, str)
         print(line)
 
     running_process.wait()

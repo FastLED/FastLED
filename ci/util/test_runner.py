@@ -12,7 +12,7 @@ from typing import Any, Callable, List, Optional, Pattern, Protocol, cast
 
 from typeguard import typechecked
 
-from ci.util.running_process import RunningProcess
+from ci.util.running_process import EndOfStream, RunningProcess
 from ci.util.test_exceptions import (
     TestExecutionFailedException,
     TestFailureInfo,
@@ -644,8 +644,8 @@ def _run_process_with_output(process: RunningProcess, verbose: bool = False) -> 
 
     while True:
         try:
-            line = process.get_next_line(timeout=_TIMEOUT)
-            if line is None:
+            line = process.get_next_line_non_blocking()
+            if isinstance(line, EndOfStream):
                 break
             print(f"  {line}")
         except KeyboardInterrupt:
@@ -654,20 +654,6 @@ def _run_process_with_output(process: RunningProcess, verbose: bool = False) -> 
             _thread.interrupt_main()
             process.kill()
             return
-        except queue.Empty:
-            # _TIMEOUT second timeout occurred while waiting for output - this indicates a problem
-            print(f"Timeout: No output from {process.command} for {_TIMEOUT} seconds")
-            process.kill()
-            failure = TestFailureInfo(
-                test_name=_extract_test_name(process.command),
-                command=str(process.command),
-                return_code=1,
-                output="Process timed out after {_TIMEOUT} seconds with no output",
-                error_type="process_timeout",
-            )
-            raise TestExecutionFailedException(
-                "Process timed out with no output", [failure]
-            )
         except Exception as e:
             print(f"Error processing output from {process.command}: {e}")
             print(f"Exception type: {type(e).__name__}")
@@ -830,44 +816,42 @@ def _run_processes_parallel(
 
         for proc in active_processes[:]:  # Copy list for safe modification
             cmd = proc.command
+            # Use consistent timeout for all output reading
             try:
-                # Use consistent timeout for all output reading
-                try:
-                    line = proc.get_next_line(timeout=0.1)  # 100ms timeout
-                    if line is not None:
-                        if line.strip():  # Only print non-empty lines
-                            # Use the shared output handler for proper formatting
-                            output_handler.handle_output_line(line, cmd)
+                line = proc.get_next_line(timeout=15)  # 15 sec timeout per line
 
-                        any_activity = True
-                        last_activity_time[proc] = time.time()  # Update activity time
+                is_done = isinstance(line, EndOfStream)
+                if is_done:
+                    break
+                if not is_done:
+                    assert isinstance(line, str)
+                    output_handler.handle_output_line(line, cmd)
 
-                        # After getting one line, quickly drain any additional output
-                        # This maintains responsiveness while avoiding tight polling loops
-                        while True:  # Keep draining until no more output
-                            try:
-                                additional_line = proc.get_next_line(
-                                    timeout=20
-                                )  # 10ms for draining
-                                if additional_line is None:
-                                    break  # End of stream
-                                if (
-                                    additional_line.strip()
-                                ):  # Only print non-empty lines
-                                    output_handler.handle_output_line(
-                                        additional_line, cmd
-                                    )
-                                any_activity = True
-                                last_activity_time[proc] = (
-                                    time.time()
-                                )  # Update activity time
-                            except queue.Empty:
-                                break  # No more output available right now
+                    any_activity = True
+                    last_activity_time[proc] = time.time()  # Update activity time
 
-                except queue.Empty:
-                    # No output available right now - this is normal and expected
-                    # Continue to process completion check
-                    pass
+                    # After getting one line, quickly drain any additional output
+                    # This maintains responsiveness while avoiding tight polling loops
+                    while True:  # Keep draining until no more output
+                        additional_line = proc.get_next_line_non_blocking()
+                        if isinstance(additional_line, EndOfStream):
+                            break
+                        if isinstance(additional_line, str):
+                            output_handler.handle_output_line(additional_line, cmd)
+                            any_activity = True
+                            last_activity_time[proc] = (
+                                time.time()
+                            )  # Update activity time
+                        else:
+                            assert additional_line is None
+                            break
+                        assert isinstance(additional_line, str)
+                        break
+
+            except queue.Empty:
+                # No output available right now - this is normal and expected
+                # Continue to process completion check
+                pass
 
             except TimeoutError:
                 print(f"\nProcess timed out: {cmd}")
@@ -889,6 +873,9 @@ def _run_processes_parallel(
                     )
                 raise TestTimeoutException("Process timeout", failures)
             except Exception as e:
+                import traceback
+
+                traceback.print_exc()
                 print(f"\nUnexpected error processing output from {cmd}: {e}")
                 print("\033[91m###### ERROR ######\033[0m")
                 print(f"Test failed due to unexpected error: {_extract_test_name(cmd)}")
@@ -903,7 +890,7 @@ def _run_processes_parallel(
                             command=str(p.command),
                             return_code=1,
                             output=str(e),
-                            error_type="unexpected_error",
+                            error_type=f"unexpected_error_{type(e).__name__}: {e}",
                         )
                     )
                 raise TestExecutionFailedException(

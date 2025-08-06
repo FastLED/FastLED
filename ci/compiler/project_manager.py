@@ -127,10 +127,6 @@ class ProjectManager:
 # FastLED library dependency (symlinked for efficiency)
 lib_deps = symlink://{fastled_src_path}
 
-# LDF Configuration (will be dynamically changed)
-lib_ldf_mode = deep+
-lib_compat_mode = no
-
 # Build optimization
 """
 
