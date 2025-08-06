@@ -46,8 +46,8 @@ public:
 
     // Accessors for the number field values.
     float value() const { return mValue; }
-    float min() const { return mMin; }
-    float max() const { return mMax; }
+    float getMin() const { return mMin; }
+    float getMax() const { return mMax; }
     
     void setValue(float value) { 
         if (value < mMin) {
