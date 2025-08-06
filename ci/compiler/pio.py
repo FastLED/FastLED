@@ -180,7 +180,7 @@ int main() {{
 
 def _copy_boards_directory(project_root: Path, build_dir: Path) -> bool:
     """Copy boards directory to the build directory."""
-    boards_src = project_root / "boards"
+    boards_src = project_root / "ci" / "boards"
     boards_dst = build_dir / "boards"
 
     if not boards_src.exists():
@@ -382,8 +382,8 @@ class PlatformIoBuilder:
 
         running_process = RunningProcess(run_cmd, cwd=self.build_dir, auto_run=True)
         try:
-            while line := running_process.get_next_line():
-                if line is None:  # End of stream
+            while line := running_process.get_next_line(timeout=60):
+                if isinstance(line, EndOfStream):
                     break
                 print(line)
         except OSError as e:
