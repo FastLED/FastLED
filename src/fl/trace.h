@@ -24,4 +24,4 @@ using TracePoint = fl::tuple<const char*, int, uint32_t>;
 } // namespace fl
 
 /// @brief A macro to capture the current source file, line number, and time.
-#define FL_TRACE fl::make_tuple(__FILE__, __LINE__, fl::time())
+#define FL_TRACE fl::make_tuple(__FILE__, int(__LINE__), fl::time())
