@@ -387,7 +387,7 @@ cache_config = {cache_config!r}
 
 # Set environment variables for cache tools
 for key, value in cache_config.items():
-    if key not in ["SCCACHE_PATH", "CCACHE_PATH"]:
+    if key not in ["SCCACHE_PATH", "CCACHE_PATH", "CACHE_EXECUTABLE"]:
         print(f"Setting cache environment: {{key}} = {{value}}")
         env.Append(ENV={{key: value}})
         if has_projenv:
@@ -396,9 +396,46 @@ for key, value in cache_config.items():
 
 # Use exact pattern from working build_flags.py example
 cache_type = cache_config.get("CACHE_TYPE", "sccache")
-cache_executable = cache_config.get("SCCACHE_PATH") if cache_type == "sccache" else cache_config.get("CCACHE_PATH")
 
-USE_CACHE = cache_executable and shutil.which(cache_executable)
+# Set xcache debug mode if requested
+if cache_type == "xcache" and os.environ.get("XCACHE_DEBUG"):
+    print("XCACHE_DEBUG enabled - verbose xcache output will be shown")
+    env.Append(ENV={{"XCACHE_DEBUG": "1"}})
+    if has_projenv:
+        projenv.Append(ENV={{"XCACHE_DEBUG": "1"}})
+
+# Get cache executable based on type
+if cache_type == "xcache":
+    cache_executable = cache_config.get("CACHE_EXECUTABLE")
+elif cache_type == "sccache":
+    cache_executable = cache_config.get("SCCACHE_PATH")
+else:
+    cache_executable = cache_config.get("CCACHE_PATH")
+
+# For xcache, create permanent wrapper scripts to avoid SCons response file conflicts
+xcache_wrapper_cc = None
+xcache_wrapper_cxx = None
+xcache_script = None
+python_executable = None
+
+# Check if cache is available
+if cache_type == "xcache":
+    # For xcache, check if the Python script exists and sccache is available
+    xcache_script = cache_config.get("XCACHE_PATH")
+    sccache_path = cache_config.get("SCCACHE_PATH")
+    python_executable = shutil.which("python")
+    USE_CACHE = (cache_executable and xcache_script and 
+                 os.path.exists(xcache_script) and python_executable and 
+                 sccache_path and shutil.which(sccache_path))
+    
+    if USE_CACHE:
+        print(f"xcache wrapper detected and configured")
+        print(f"  xcache path: {{cache_config.get('XCACHE_PATH')}}")
+        print(f"  cache executable: {{cache_executable}}")
+        print(f"  wrapper scripts will be created during build setup")
+else:
+    # For sccache/ccache, check if executable is in PATH
+    USE_CACHE = cache_executable and shutil.which(cache_executable)
 
 if USE_CACHE:
     # Get current compilers - should now be the actual toolchain compilers in post: script
@@ -501,8 +538,63 @@ if USE_CACHE:
             print(f"Updated PATH for toolchain support")
     
     # Create wrapped compiler commands using proven pattern
-    CC = f"{{cache_executable}} {{cc_cmd}}"
-    CXX = f"{{cache_executable}} {{cxx_cmd}}"
+    if cache_type == "xcache":
+        # Create permanent wrapper scripts at runtime with actual compiler paths
+        import platform
+        import stat
+        import os
+        
+        def create_runtime_wrapper(compiler_name, compiler_path):
+            """Create a wrapper script with the actual compiler path"""
+            xcache_path = cache_config.get("XCACHE_PATH")
+            python_cmd = "python"
+            build_dir = os.path.dirname(os.path.abspath("cache_setup.py"))
+            
+            if platform.system() == "Windows":
+                wrapper_path = os.path.join(build_dir, f"{{compiler_name}}_wrapper.bat")
+                wrapper_content = f"""@echo off
+REM Runtime xcache wrapper for {{compiler_name}}
+REM This avoids SCons response file conflicts
+
+if /i "%XCACHE_DEBUG%"=="1" (
+    echo XCACHE: Runtime wrapper for {{compiler_name}}: "{{python_cmd}}" "{{xcache_path}}" "{{compiler_path}}" %* >&2
+)
+
+REM Execute xcache with compiler path and all arguments
+"{{python_cmd}}" "{{xcache_path}}" "{{compiler_path}}" %*
+"""
+            else:
+                wrapper_path = os.path.join(build_dir, f"{{compiler_name}}_wrapper.sh")
+                wrapper_content = f"""#!/bin/bash
+# Runtime xcache wrapper for {{compiler_name}}
+# This avoids SCons response file conflicts
+
+if [ "$XCACHE_DEBUG" = "1" ]; then
+    echo "XCACHE: Runtime wrapper for {{compiler_name}}: {{python_cmd}} {{xcache_path}} {{compiler_path}} $@" >&2
+fi
+
+# Execute xcache with compiler path and all arguments
+exec "{{python_cmd}}" "{{xcache_path}}" "{{compiler_path}}" "$@"
+"""
+            
+            # Write wrapper script
+            with open(wrapper_path, 'w') as f:
+                f.write(wrapper_content)
+            
+            # Make executable on Unix systems
+            if platform.system() != "Windows":
+                os.chmod(wrapper_path, stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IXOTH)
+            
+            print(f"  Created runtime wrapper: {{wrapper_path}}")
+            return wrapper_path
+        
+        # Create wrapper scripts with actual compiler paths
+        CC = create_runtime_wrapper("gcc", cc_cmd)
+        CXX = create_runtime_wrapper("g++", cxx_cmd)
+    else:
+        # For sccache/ccache, use traditional wrapper pattern
+        CC = f"{{cache_executable}} {{cc_cmd}}"
+        CXX = f"{{cache_executable}} {{cxx_cmd}}"
     
     # Apply to both environments exactly like the working example
     env.Replace(CC=CC, CXX=CXX)
@@ -881,8 +973,9 @@ def _get_cache_build_flags(board_name: str, cache_type: CacheType) -> dict[str, 
 
 
 def _get_sccache_build_flags(board_name: str) -> dict[str, str]:
-    """Get build flags for SCCACHE configuration."""
+    """Get build flags for SCCACHE configuration with xcache wrapper support."""
     import shutil
+    from pathlib import Path
 
     # Check if sccache is available
     sccache_path = shutil.which("sccache")
@@ -901,13 +994,27 @@ def _get_sccache_build_flags(board_name: str) -> dict[str, str]:
     print(f"SCCACHE cache directory: {sccache_dir}")
     print(f"SCCACHE cache size limit: 2G")
 
-    # Return the sccache path and cache configuration
-    # We'll add this to build_flags using compiler launcher
+    # Get xcache wrapper path
+    project_root = _resolve_project_root()
+    xcache_path = project_root / "ci" / "util" / "xcache.py"
+
+    if xcache_path.exists():
+        print(f"Using xcache wrapper for ESP32S3 response file support: {xcache_path}")
+        cache_type = "xcache"
+        cache_executable_path = f"python {xcache_path}"
+    else:
+        print(f"xcache not found at {xcache_path}, using direct sccache")
+        cache_type = "sccache"
+        cache_executable_path = sccache_path
+
+    # Return the cache configuration
     config = {
-        "CACHE_TYPE": "sccache",
+        "CACHE_TYPE": cache_type,
         "SCCACHE_DIR": str(sccache_dir),
         "SCCACHE_CACHE_SIZE": "2G",
         "SCCACHE_PATH": sccache_path,
+        "XCACHE_PATH": str(xcache_path) if xcache_path.exists() else "",
+        "CACHE_EXECUTABLE": cache_executable_path,
     }
 
     return config
