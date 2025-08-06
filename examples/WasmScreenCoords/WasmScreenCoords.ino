@@ -9,19 +9,18 @@
 /// 4. When the compiler is done a web page will open.
 
 #include <Arduino.h>
-
-// printf
-#include <stdio.h>
-#include <string>
-#include <vector>
-
 #include <FastLED.h>
+#include "fl/vector.h"
+
+
 #include "fl/json.h"
 #include "fl/slice.h"
 #include "fl/screenmap.h"
 #include "fl/math_macros.h"
 
 using fl::vec2f;
+using fl::vector;
+
 
 #define LED_PIN 3
 #define BRIGHTNESS 96

@@ -3,5 +3,5 @@
 #if !SKETCH_HAS_LOTS_OF_MEMORY
 #include "platforms/sketch_fake.hpp"
 #else
-#include "wasm_impl.h"
+#include "NetTestImpl.h"
 #endif
