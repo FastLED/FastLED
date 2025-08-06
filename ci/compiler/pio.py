@@ -134,21 +134,54 @@ def _resolve_project_root() -> Path:
     raise RuntimeError("Could not find FastLED project root")
 
 
+def _get_example_error_message(project_root: Path, example: str) -> str:
+    """Generate appropriate error message for missing example.
+
+    Args:
+        project_root: FastLED project root directory
+        example: Example name or path that was not found
+
+    Returns:
+        Error message describing where the example was expected
+    """
+    example_path = Path(example)
+
+    if example_path.is_absolute():
+        return f"Example directory not found: {example}"
+    elif "/" in example or "\\" in example:
+        return f"Example directory not found: {example_path.resolve()}"
+    else:
+        return f"Example not found: {project_root / 'examples' / example}"
+
+
 def _copy_example_source(project_root: Path, build_dir: Path, example: str) -> bool:
     """Copy example source to the build directory with sketch subdirectory structure.
 
     Args:
         project_root: FastLED project root directory
         build_dir: Build directory for the target
-        example: Name of the example to copy
+        example: Name of the example to copy, or path to example directory
 
     Returns:
         True if successful, False if example not found
     """
-    # Configure example source
-    example_path = project_root / "examples" / example
-    if not example_path.exists():
-        return False
+    # Configure example source - handle both names and paths
+    example_path = Path(example)
+
+    if example_path.is_absolute():
+        # Absolute path - use as-is
+        if not example_path.exists():
+            return False
+    elif "/" in example or "\\" in example:
+        # Relative path - resolve relative to current directory
+        example_path = example_path.resolve()
+        if not example_path.exists():
+            return False
+    else:
+        # Just a name - resolve to examples directory
+        example_path = project_root / "examples" / example
+        if not example_path.exists():
+            return False
 
     # Create src and sketch directories (PlatformIO requirement with sketch subdirectory)
     src_dir = build_dir / "src"
@@ -322,10 +355,11 @@ def _init_platformio_build(board: Board, verbose: bool, example: str) -> InitRes
 
     ok_copy_src = _copy_example_source(project_root, build_dir, example)
     if not ok_copy_src:
-        warnings.warn(f"Example not found: {project_root / 'examples' / example}")
+        error_msg = _get_example_error_message(project_root, example)
+        warnings.warn(error_msg)
         return InitResult(
             success=False,
-            output=f"Example not found: {project_root / 'examples' / example}",
+            output=error_msg,
             build_dir=build_dir,
         )
 
@@ -428,9 +462,10 @@ class PlatformIoBuilder:
         project_root = _resolve_project_root()
         ok_copy_src = _copy_example_source(project_root, self.build_dir, example)
         if not ok_copy_src:
+            error_msg = _get_example_error_message(project_root, example)
             return BuildResult(
                 success=False,
-                output=f"Example not found: {project_root / 'examples' / example}",
+                output=error_msg,
                 build_dir=self.build_dir,
                 example=example,
             )
