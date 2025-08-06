@@ -401,11 +401,16 @@ class RunningProcess:
     def get_next_line_non_blocking(self) -> str | None | EndOfStream:
         """
         Get the next line of output from the process.
+
+        Returns:
+            str: Next line of output if available
+            None: No output available right now (should continue polling)
+            EndOfStream: Process has finished, no more output will be available
         """
         try:
             out: str | EndOfStream = self.get_next_line(timeout=0)
             if isinstance(out, EndOfStream):
-                return None
+                return EndOfStream()
             return out
         except queue.Empty:
             return None

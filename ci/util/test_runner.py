@@ -716,7 +716,11 @@ def _run_process_with_output(process: RunningProcess, verbose: bool = False) -> 
             line = process.get_next_line_non_blocking()
             if isinstance(line, EndOfStream):
                 break
-            print(f"  {line}")
+            if line is not None:
+                print(f"  {line}")
+            else:
+                # No output available right now, continue polling
+                time.sleep(0.01)  # Small sleep to avoid busy-wait
         except KeyboardInterrupt:
             import _thread
 
