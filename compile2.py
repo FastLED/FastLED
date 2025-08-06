@@ -45,7 +45,7 @@ def create_banner(text: str, color_func: Callable[[str], str] | None = None) -> 
     bottom_border = border_char * (total_width + 4)
     
     # Apply color to the entire banner
-    banner = f"{top_border}\n{middle_line}\n{bottom_border}"
+    banner = f"{top_border}\n{middle_line}\n{bottom_border}\n"
     return color_func(banner) if color_func else banner
 
 

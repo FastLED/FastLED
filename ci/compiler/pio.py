@@ -7,6 +7,7 @@ Provides a clean interface for building FastLED projects with PlatformIO.
 
 import shutil
 import subprocess
+import time
 import warnings
 from concurrent.futures import Future, ThreadPoolExecutor
 from dataclasses import dataclass
@@ -391,12 +392,17 @@ def _init_platformio_build(board: Board, verbose: bool, example: str) -> InitRes
 
     print(f"Running initial build command: {subprocess.list2cmdline(run_cmd)}")
 
+    # Start timer for this example
+    start_time = time.time()
+
     running_process = RunningProcess(run_cmd, cwd=build_dir, auto_run=True)
     while line := running_process.get_next_line():
         if isinstance(line, EndOfStream):
             break
         assert isinstance(line, str)
-        print(line)
+        # Add timestamp to each line
+        elapsed = time.time() - start_time
+        print(f"{elapsed:.2f} {line}")
 
     running_process.wait()
 
@@ -497,15 +503,21 @@ class PlatformIoBuilder:
 
         print(f"Running command: {subprocess.list2cmdline(run_cmd)}")
 
+        # Start timer for this example
+        start_time = time.time()
+
         running_process = RunningProcess(run_cmd, cwd=self.build_dir, auto_run=True)
         try:
             while line := running_process.get_next_line(timeout=60):
                 if isinstance(line, EndOfStream):
                     break
-                print(line)
+                # Add timestamp to each line
+                elapsed = time.time() - start_time
+                print(f"{elapsed:.2f} {line}")
         except OSError as e:
             # Handle output encoding issues on Windows
-            print(f"Output encoding issue: {e}")
+            elapsed = time.time() - start_time
+            print(f"{elapsed:.2f} Output encoding issue: {e}")
             pass
 
         running_process.wait()
