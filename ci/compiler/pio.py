@@ -524,13 +524,14 @@ def _copy_example_source(project_root: Path, build_dir: Path, example: str) -> b
         shutil.rmtree(sketch_dir)
     sketch_dir.mkdir(parents=True, exist_ok=True)
 
-    # Copy all files from example directory to sketch subdirectory
+    # Copy all files and subdirectories from example directory to sketch subdirectory
     ino_files: list[str] = []
     for file_path in example_path.iterdir():
+        if "fastled_js" in str(file_path):
+            # skip fastled_js output folder.
+            continue
+
         if file_path.is_file():
-            if "fastled_js" in str(file_path):
-                # skip fastled_js output folder.
-                continue
             shutil.copy2(file_path, sketch_dir)
             # Calculate relative paths for cleaner output
             try:
@@ -542,6 +543,16 @@ def _copy_example_source(project_root: Path, build_dir: Path, example: str) -> b
                 print(f"Copied {file_path} to {sketch_dir}")
             if file_path.suffix == ".ino":
                 ino_files.append(file_path.name)
+        elif file_path.is_dir():
+            # Recursively copy subdirectories
+            dest_subdir = sketch_dir / file_path.name
+            shutil.copytree(file_path, dest_subdir)
+            try:
+                rel_source = file_path.relative_to(Path.cwd())
+                rel_dest = dest_subdir.relative_to(Path.cwd())
+                print(f"Copied directory {rel_source} to {rel_dest}")
+            except ValueError:
+                print(f"Copied directory {file_path} to {dest_subdir}")
 
     # Create or update stub main.cpp that includes the .ino files
     main_cpp_content = _generate_main_cpp(ino_files)
@@ -574,6 +585,7 @@ def _generate_main_cpp(ino_files: list[str]) -> str:
     """
     includes: list[str] = []
     for ino_file in sorted(ino_files):
+        includes.append(f"#include <Arduino.h>")
         includes.append(f'#include "sketch/{ino_file}"')
 
     include_lines = "\n".join(includes)
