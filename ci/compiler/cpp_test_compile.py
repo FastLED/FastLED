@@ -267,7 +267,6 @@ def create_unit_test_fastled_library(
     try:
         library_compiler = create_fastled_compiler(
             use_pch=use_pch,
-            use_sccache=False,  # Disable sccache for library to avoid conflicts
             parallel=True,
         )
 

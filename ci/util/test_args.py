@@ -85,12 +85,6 @@ def parse_args(args: Optional[list[str]] = None) -> TestArgs:
         help="Disable precompiled headers (PCH) when running example compilation tests",
     )
     parser.add_argument(
-        "--no-cache",
-        "--no-sccache",
-        action="store_true",
-        help="Disable sccache/ccache when running example compilation tests (cache is enabled by default for all builds and single builds)",
-    )
-    parser.add_argument(
         "--unity",
         action="store_true",
         help="Enable UNITY build mode for examples - compile all source files as a single unit for improved performance",
@@ -133,7 +127,6 @@ def parse_args(args: Optional[list[str]] = None) -> TestArgs:
         check=parsed_args.check,
         examples=parsed_args.examples,
         no_pch=parsed_args.no_pch,
-        cache=not parsed_args.no_cache,
         unity=parsed_args.unity,
         no_unity=parsed_args.no_unity,
         full=parsed_args.full,

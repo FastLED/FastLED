@@ -6,13 +6,14 @@ import subprocess
 import sys
 import threading
 import time
+import traceback
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Callable, List, Optional, Pattern, Protocol, cast
 
 from typeguard import typechecked
 
-from ci.util.running_process import RunningProcess
+from ci.util.running_process import EndOfStream, RunningProcess
 from ci.util.test_exceptions import (
     TestExecutionFailedException,
     TestFailureInfo,
@@ -369,8 +370,6 @@ def create_examples_test_process(
         cmd.append("--clean")
     if args.no_pch:
         cmd.append("--no-pch")
-    if not args.cache:
-        cmd.append("--no-cache")
     if args.unity:
         cmd.append("--unity")
     if args.full and args.examples is not None:
@@ -644,8 +643,8 @@ def _run_process_with_output(process: RunningProcess, verbose: bool = False) -> 
 
     while True:
         try:
-            line = process.get_next_line(timeout=_TIMEOUT)
-            if line is None:
+            line = process.get_next_line_non_blocking()
+            if isinstance(line, EndOfStream):
                 break
             print(f"  {line}")
         except KeyboardInterrupt:
@@ -654,20 +653,6 @@ def _run_process_with_output(process: RunningProcess, verbose: bool = False) -> 
             _thread.interrupt_main()
             process.kill()
             return
-        except queue.Empty:
-            # _TIMEOUT second timeout occurred while waiting for output - this indicates a problem
-            print(f"Timeout: No output from {process.command} for {_TIMEOUT} seconds")
-            process.kill()
-            failure = TestFailureInfo(
-                test_name=_extract_test_name(process.command),
-                command=str(process.command),
-                return_code=1,
-                output="Process timed out after {_TIMEOUT} seconds with no output",
-                error_type="process_timeout",
-            )
-            raise TestExecutionFailedException(
-                "Process timed out with no output", [failure]
-            )
         except Exception as e:
             print(f"Error processing output from {process.command}: {e}")
             print(f"Exception type: {type(e).__name__}")
@@ -830,14 +815,18 @@ def _run_processes_parallel(
 
         for proc in active_processes[:]:  # Copy list for safe modification
             cmd = proc.command
-            try:
-                # Use consistent timeout for all output reading
+            # Use consistent timeout for all output reading
+
+            while True:
                 try:
-                    line = proc.get_next_line(timeout=0.1)  # 100ms timeout
-                    if line is not None:
-                        if line.strip():  # Only print non-empty lines
-                            # Use the shared output handler for proper formatting
-                            output_handler.handle_output_line(line, cmd)
+                    line = proc.get_next_line(timeout=60)  # 15 sec timeout per line
+
+                    is_done = isinstance(line, EndOfStream)
+                    if is_done:
+                        break
+                    if not is_done:
+                        assert isinstance(line, str)
+                        output_handler.handle_output_line(line, cmd)
 
                         any_activity = True
                         last_activity_time[proc] = time.time()  # Update activity time
@@ -845,167 +834,175 @@ def _run_processes_parallel(
                         # After getting one line, quickly drain any additional output
                         # This maintains responsiveness while avoiding tight polling loops
                         while True:  # Keep draining until no more output
-                            try:
-                                additional_line = proc.get_next_line(
-                                    timeout=20
-                                )  # 10ms for draining
-                                if additional_line is None:
-                                    break  # End of stream
-                                if (
-                                    additional_line.strip()
-                                ):  # Only print non-empty lines
-                                    output_handler.handle_output_line(
-                                        additional_line, cmd
-                                    )
+                            additional_line = proc.get_next_line_non_blocking()
+                            if isinstance(additional_line, EndOfStream):
+                                break
+                            if isinstance(additional_line, str):
+                                output_handler.handle_output_line(additional_line, cmd)
                                 any_activity = True
                                 last_activity_time[proc] = (
                                     time.time()
                                 )  # Update activity time
-                            except queue.Empty:
-                                break  # No more output available right now
+                            else:
+                                assert additional_line is None
+                                break
+                            assert isinstance(additional_line, str)
+                            break
 
                 except queue.Empty:
                     # No output available right now - this is normal and expected
                     # Continue to process completion check
                     pass
 
-            except TimeoutError:
-                print(f"\nProcess timed out: {cmd}")
-                print("\033[91m###### ERROR ######\033[0m")
-                print(f"Test failed due to timeout: {_extract_test_name(cmd)}")
-                sys.stdout.flush()
-                failures: list[TestFailureInfo] = []
-                for p in active_processes:
-                    failed_processes.append(p.command)  # Track all as failed
-                    p.kill()
-                    failures.append(
-                        TestFailureInfo(
-                            test_name=_extract_test_name(p.command),
-                            command=str(p.command),
-                            return_code=1,
-                            output="Process killed due to timeout",
-                            error_type="process_timeout",
-                        )
-                    )
-                raise TestTimeoutException("Process timeout", failures)
-            except Exception as e:
-                print(f"\nUnexpected error processing output from {cmd}: {e}")
-                print("\033[91m###### ERROR ######\033[0m")
-                print(f"Test failed due to unexpected error: {_extract_test_name(cmd)}")
-                sys.stdout.flush()
-                failures: list[TestFailureInfo] = []
-                for p in active_processes:
-                    failed_processes.append(p.command)  # Track all as failed
-                    p.kill()
-                    failures.append(
-                        TestFailureInfo(
-                            test_name=_extract_test_name(p.command),
-                            command=str(p.command),
-                            return_code=1,
-                            output=str(e),
-                            error_type="unexpected_error",
-                        )
-                    )
-                raise TestExecutionFailedException(
-                    "Unexpected error during test execution", failures
-                )
-
-            # Check process completion status
-            if proc.poll() is not None:
-                try:
-                    returncode = proc.wait()
-                    if returncode != 0:
-                        test_name = _extract_test_name(cmd)
-                        print(f"\nCommand failed: {cmd} with return code {returncode}")
-                        print(f"\033[91m###### ERROR ######\033[0m")
-                        print(f"Test failed: {test_name}")
-
-                        # Capture the actual output from the failed process
-                        try:
-                            actual_output = proc.stdout
-                            if actual_output.strip():
-                                print(f"\n=== ACTUAL OUTPUT FROM FAILED PROCESS ===")
-                                print(actual_output)
-                                print(f"=== END OF OUTPUT ===")
-                            else:
-                                actual_output = "No output captured from failed process"
-                        except Exception as e:
-                            actual_output = f"Error capturing output: {e}"
-
-                        sys.stdout.flush()
-                        for p in active_processes:
-                            if p != proc:
-                                p.kill()
-                        failure = TestFailureInfo(
-                            test_name=test_name,
-                            command=str(cmd),
-                            return_code=returncode,
-                            output=actual_output,
-                            error_type="command_failure",
-                        )
-                        raise TestExecutionFailedException(
-                            "Test command failed", [failure]
-                        )
-                    active_processes.remove(proc)
-                    if proc in last_activity_time:
-                        del last_activity_time[proc]  # Clean up tracking
-                    any_activity = True
-                    print(f"Process completed: {cmd}")
-
-                    # Collect timing data for summary
-                    if proc.duration is not None:
-                        timing = ProcessTiming(
-                            name=_get_friendly_test_name(cmd),
-                            duration=proc.duration,
-                            command=str(cmd),
-                        )
-                        completed_timings.append(timing)
-
-                    # Update watchdog with remaining active processes
-                    set_active_processes([p.command for p in active_processes])
-
+                except TimeoutError:
+                    print(f"\nProcess timed out: {cmd}")
+                    print("\033[91m###### ERROR ######\033[0m")
+                    print(f"Test failed due to timeout: {_extract_test_name(cmd)}")
                     sys.stdout.flush()
-                except Exception as e:
-                    test_name = _extract_test_name(cmd)
-                    print(f"\nError waiting for process: {cmd}")
-                    print(f"Error: {e}")
-                    print(f"\033[91m###### ERROR ######\033[0m")
-                    print(f"Test error: {test_name}")
-
-                    # Try to capture any available output
-                    try:
-                        actual_output = proc.stdout
-                        if actual_output.strip():
-                            print(f"\n=== PROCESS OUTPUT BEFORE ERROR ===")
-                            print(actual_output)
-                            print(f"=== END OF OUTPUT ===")
-                    except Exception as output_error:
-                        print(f"Could not capture process output: {output_error}")
-
                     failures: list[TestFailureInfo] = []
                     for p in active_processes:
                         failed_processes.append(p.command)  # Track all as failed
                         p.kill()
-                        # Try to capture output from this process too
-                        try:
-                            process_output = (
-                                p.stdout if hasattr(p, "stdout") else str(e)
-                            )
-                        except Exception:
-                            process_output = str(e)
-
                         failures.append(
                             TestFailureInfo(
                                 test_name=_extract_test_name(p.command),
                                 command=str(p.command),
                                 return_code=1,
-                                output=process_output,
-                                error_type="process_wait_error",
+                                output="Process killed due to timeout",
+                                error_type="process_timeout",
+                            )
+                        )
+
+                    raise TestTimeoutException("Process timeout", failures)
+                except Exception as e:
+                    import traceback
+
+                    traceback.print_exc()
+                    print(f"\nUnexpected error processing output from {cmd}: {e}")
+                    print("\033[91m###### ERROR ######\033[0m")
+                    print(
+                        f"Test failed due to unexpected error: {_extract_test_name(cmd)}"
+                    )
+                    sys.stdout.flush()
+                    failures: list[TestFailureInfo] = []
+                    for p in active_processes:
+                        failed_processes.append(p.command)  # Track all as failed
+                        p.kill()
+                        failures.append(
+                            TestFailureInfo(
+                                test_name=_extract_test_name(p.command),
+                                command=str(p.command),
+                                return_code=1,
+                                output=str(e),
+                                error_type=f"unexpected_error_{type(e).__name__}: {e}",
                             )
                         )
                     raise TestExecutionFailedException(
-                        "Error waiting for process", failures
+                        "Unexpected error during test execution", failures
                     )
+
+                # Check process completion status
+                if proc.poll() is not None:
+                    try:
+                        returncode = proc.wait()
+                        if returncode != 0:
+                            test_name = _extract_test_name(cmd)
+                            print(
+                                f"\nCommand failed: {cmd} with return code {returncode}"
+                            )
+                            print(f"\033[91m###### ERROR ######\033[0m")
+                            print(f"Test failed: {test_name}")
+
+                            # Capture the actual output from the failed process
+                            try:
+                                actual_output = proc.stdout
+                                if actual_output.strip():
+                                    print(
+                                        f"\n=== ACTUAL OUTPUT FROM FAILED PROCESS ==="
+                                    )
+                                    print(actual_output)
+                                    print(f"=== END OF OUTPUT ===")
+                                else:
+                                    actual_output = (
+                                        "No output captured from failed process"
+                                    )
+                            except Exception as e:
+                                actual_output = f"Error capturing output: {e}"
+
+                            sys.stdout.flush()
+                            for p in active_processes:
+                                if p != proc:
+                                    p.kill()
+                            failure = TestFailureInfo(
+                                test_name=test_name,
+                                command=str(cmd),
+                                return_code=returncode,
+                                output=actual_output,
+                                error_type="command_failure",
+                            )
+                            raise TestExecutionFailedException(
+                                "Test command failed", [failure]
+                            )
+                        active_processes.remove(proc)
+                        if proc in last_activity_time:
+                            del last_activity_time[proc]  # Clean up tracking
+                        any_activity = True
+                        print(f"Process completed: {cmd}")
+
+                        # Collect timing data for summary
+                        if proc.duration is not None:
+                            timing = ProcessTiming(
+                                name=_get_friendly_test_name(cmd),
+                                duration=proc.duration,
+                                command=str(cmd),
+                            )
+                            completed_timings.append(timing)
+
+                        # Update watchdog with remaining active processes
+                        set_active_processes([p.command for p in active_processes])
+
+                        sys.stdout.flush()
+                    except Exception as e:
+                        test_name = _extract_test_name(cmd)
+                        print(f"\nError waiting for process: {cmd}")
+                        print(f"Error: {e}")
+                        print(f"\033[91m###### ERROR ######\033[0m")
+                        print(f"Test error: {test_name}")
+
+                        # Try to capture any available output
+                        try:
+                            actual_output = proc.stdout
+                            if actual_output.strip():
+                                print(f"\n=== PROCESS OUTPUT BEFORE ERROR ===")
+                                print(actual_output)
+                                print(f"=== END OF OUTPUT ===")
+                        except Exception as output_error:
+                            print(f"Could not capture process output: {output_error}")
+
+                        failures: list[TestFailureInfo] = []
+                        for p in active_processes:
+                            failed_processes.append(p.command)  # Track all as failed
+                            p.kill()
+                            # Try to capture output from this process too
+                            try:
+                                process_output = (
+                                    p.stdout if hasattr(p, "stdout") else str(e)
+                                )
+                            except Exception:
+                                process_output = str(e)
+
+                            failures.append(
+                                TestFailureInfo(
+                                    test_name=_extract_test_name(p.command),
+                                    command=str(p.command),
+                                    return_code=1,
+                                    output=process_output,
+                                    error_type="process_wait_error",
+                                )
+                            )
+                        raise TestExecutionFailedException(
+                            "Error waiting for process", failures
+                        )
 
         # Only sleep if no activity was detected, and use a shorter sleep
         # This prevents excessive CPU usage while maintaining responsiveness

@@ -14,6 +14,7 @@ import psutil
 from ci.util.test_args import parse_args
 from ci.util.test_commands import run_command
 from ci.util.test_env import (
+    dump_main_thread_stack,
     get_process_tree_info,
     setup_environment,
     setup_force_exit,
@@ -30,27 +31,22 @@ from ci.util.watchdog_state import get_active_processes
 
 _CANCEL_WATCHDOG = threading.Event()
 
+_TIMEOUT_EVERYTHING = 300
 
-def dump_main_thread_stack() -> None:
-    """Dump stack trace of the main thread and process tree info"""
-    print("\n=== MAIN THREAD STACK TRACE ===")
-    for thread in threading.enumerate():
-        if thread.name == "MainThread":
-            print(f"\nThread {thread.name}:")
-            if thread.ident is not None:
-                frame = sys._current_frames().get(thread.ident)
-                if frame:
-                    traceback.print_stack(frame)
-    print("=== END STACK TRACE ===\n")
+_IS_WINDOWS = os.name == "nt"
 
-    # Dump process tree information
-    print("\n=== PROCESS TREE INFO ===")
-    print(get_process_tree_info(os.getpid()))
-    print("=== END PROCESS TREE INFO ===\n")
+if os.environ.get("_GITHUB"):
+    if _IS_WINDOWS:
+        _TIMEOUT_EVERYTHING = 900  # Extended timeout for GitHub Windows builds
+    else:
+        _TIMEOUT_EVERYTHING = 600  # Extended timeout for GitHub Linux builds
+    print(
+        f"GitHub Windows environment detected - using extended timeout: {_TIMEOUT_EVERYTHING} seconds"
+    )
 
 
 def make_watch_dog_thread(
-    seconds: int = 60,
+    seconds: int,
 ) -> threading.Thread:  # 60 seconds default timeout
     def watchdog_timer() -> None:
         time.sleep(seconds)
@@ -72,6 +68,9 @@ def make_watch_dog_thread(
         else:
             print("\n🚨 NO ACTIVE SUBPROCESSES DETECTED - MAIN PROCESS LIKELY HUNG")
 
+        traceback.print_stack()
+        time.sleep(0.5)
+
         os._exit(2)  # Exit with error code 2 to indicate timeout (SIGTERM)
 
     thr = threading.Thread(target=watchdog_timer, daemon=True, name="WatchdogTimer")
@@ -87,16 +86,8 @@ def main() -> None:
         # Change to script directory first
         os.chdir(Path(__file__).parent)
 
-        # Determine watchdog timeout based on environment
-        timeout_seconds = 300  # Default timeout
-        if os.environ.get("_GITHUB") and os.environ.get("_WINDOWS"):
-            timeout_seconds = 600  # Extended timeout for GitHub Windows builds
-            print(
-                f"GitHub Windows environment detected - using extended timeout: {timeout_seconds} seconds"
-            )
-
         # Set up watchdog timer
-        watchdog = make_watch_dog_thread(seconds=timeout_seconds)
+        watchdog = make_watch_dog_thread(seconds=_TIMEOUT_EVERYTHING)
 
         # Parse and process arguments
         args = parse_args()

@@ -63,11 +63,6 @@ class Board:
 
         if self.platform:
             options.append(f"platform={self.platform}")
-            # Add IDF ccache enable flag for ESP32 boards
-            if "espressif32" in self.platform:
-                if not self.defines:
-                    self.defines = []
-                self.defines.append("IDF_CCACHE_ENABLE=1")
 
         if self.platform_needs_install:
             options.append("platform_needs_install=true")

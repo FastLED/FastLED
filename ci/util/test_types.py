@@ -77,7 +77,6 @@ class TestArgs:
     check: bool = False
     examples: Optional[list[str]] = None
     no_pch: bool = False
-    cache: bool = False
     unity: bool = False
     no_unity: bool = False  # Disable unity builds for cpp tests and examples
     full: bool = False

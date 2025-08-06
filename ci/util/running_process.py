@@ -13,6 +13,14 @@ from queue import Queue
 from typing import Any, Callable, Match, Union
 
 
+class EndOfStream(Exception):
+    """
+    Exception raised when the end of the stream is reached.
+    """
+
+    pass
+
+
 def normalize_error_warning_paths(line: str) -> str:
     r"""
     Normalize compiler output paths to use consistent separators.
@@ -247,7 +255,9 @@ class RunningProcess:
         # This excludes process creation overhead from timing measurements
         self._start_time = time.time()
 
-        def output_reader():
+        count = 0
+
+        def output_reader() -> None:
             """Continuously pump stdout to prevent subprocess from blocking on full pipe buffer"""
             try:
                 assert self.proc is not None
@@ -258,7 +268,6 @@ class RunningProcess:
                 try:
                     for line in iter(self.proc.stdout.readline, ""):
                         if self.shutdown.is_set():
-                            self.output_queue.put(None)
                             break
 
                         # Strip whitespace and queue non-empty lines
@@ -268,15 +277,21 @@ class RunningProcess:
                             self.accumulated_output.append(
                                 line_stripped
                             )  # Also store for later retrieval
+
+                    # When the iter loop exits, we've reached EOF
+                    self.output_queue.put(None)
                 except (ValueError, OSError) as e:
                     # Handle "I/O operation on closed file" and similar errors
                     # This can happen if the process terminates while we're reading
                     if "closed file" in str(e) or "Bad file descriptor" in str(e):
                         # Normal shutdown - process stdout was closed
-                        pass
+                        self.output_queue.put(None)
+                        return
                     else:
                         # Unexpected error, log it but don't crash
                         print(f"Warning: Output reader encountered error: {e}")
+                        self.output_queue.put(None)
+                        return
 
             finally:
                 # Clean shutdown: close stream and signal end
@@ -298,7 +313,7 @@ class RunningProcess:
         self.reader_thread = threading.Thread(target=output_reader, daemon=True)
         self.reader_thread.start()
 
-    def get_next_line(self, timeout: float | None = None) -> str | None:
+    def get_next_line(self, timeout: float | None = None) -> str | EndOfStream:
         """
         Get the next line of output from the process.
 
@@ -316,7 +331,35 @@ class RunningProcess:
         """
 
         assert self.proc is not None
-        return self.output_queue.get(timeout=timeout)
+
+        expired_time = time.time() + timeout if timeout is not None else None
+
+        while True:
+            if expired_time is not None:
+                if time.time() > expired_time:
+                    raise TimeoutError(f"Timeout after {timeout} seconds")
+            if self.output_queue.empty():
+                time.sleep(0.01)
+                continue
+            try:
+                line = self.output_queue.get(timeout=0.1)
+                if line is None:
+                    return EndOfStream()
+                return line
+            except queue.Empty:
+                continue
+
+    def get_next_line_non_blocking(self) -> str | None | EndOfStream:
+        """
+        Get the next line of output from the process.
+        """
+        try:
+            out = self.output_queue.get(timeout=0.01)
+            if out is None:
+                return EndOfStream()
+            return out
+        except queue.Empty:
+            return None
 
     def poll(self) -> int | None:
         """

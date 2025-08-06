@@ -21,12 +21,23 @@
 */
 
 #include "fl/sketch_macros.h"
+#include "fl/warn.h"
 
 #if !SKETCH_HAS_LOTS_OF_MEMORY
 // Platform does not have enough memory
 // Other platforms have weird issues. Will revisit this later.
-void setup() {}
-void loop() {}
+#include <Arduino.h>
+
+void setup() {
+    // Use Serial.println instead of FL_WARN to prevent optimization away
+    Serial.begin(115200);
+    Serial.println("Chromancer.ino: setup() - Platform has insufficient memory for full demo");
+}
+void loop() {
+    // Use Serial.println instead of FL_WARN to prevent optimization away
+    Serial.println("Chromancer.ino: loop() - Platform has insufficient memory for full demo");
+    delay(1000); // Prevent rapid printing
+}
 #else
 
 #include "mapping.h"

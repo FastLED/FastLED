@@ -66,26 +66,6 @@ from ci.compiler.clang_compiler import (
 )
 
 
-def get_sccache_path() -> Optional[str]:
-    """Get the full path to sccache executable if available."""
-    # First check system PATH
-    sccache_path = shutil.which("sccache")
-    if sccache_path:
-        return sccache_path
-
-    # Check for sccache in the uv virtual environment
-    venv_sccache = Path(".venv/Scripts/sccache.exe")
-    if venv_sccache.exists():
-        return str(venv_sccache.absolute())
-
-    return None
-
-
-def get_ccache_path() -> Optional[str]:
-    """Get the full path to ccache executable if available."""
-    return shutil.which("ccache")
-
-
 @dataclass
 class TestExecutable:
     """Represents a compiled test executable"""
