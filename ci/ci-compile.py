@@ -126,6 +126,11 @@ def parse_args(args: Optional[list[str]] = None) -> argparse.Namespace:
         action="store_true",
         help="Print the list of supported boards and exit",
     )
+    parser.add_argument(
+        "--no-interactive",
+        action="store_true",
+        help="Disables interactive mode (deprecated)",
+    )
 
     try:
         parsed_args = parser.parse_intermixed_args(args)

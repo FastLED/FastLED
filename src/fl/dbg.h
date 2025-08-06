@@ -54,7 +54,7 @@ inline const char *fastled_file_offset(const char *file) {
 #define _FASTLED_DGB(X)                                                        \
     fl::println(                                                               \
         (fl::StrStream() << (fl::fastled_file_offset(__FILE__))                \
-                         << "(" << fl::u32(__LINE__) << "): " << X)                     \
+                         << "(" << int(__LINE__) << "): " << X)                     \
             .c_str())
 #endif
 

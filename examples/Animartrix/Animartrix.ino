@@ -148,10 +148,10 @@ void loop() {
     }
     fxEngine.draw(millis(), leds);
     uint32_t end = millis();
-    FL_WARN("*** DRAW TIME: " << (end - start) << "ms");
+    FL_WARN("*** DRAW TIME: " << int(end - start) << "ms");
     FastLED.show();
     uint32_t end2 = millis();
-    FL_WARN("*** SHOW + DRAW TIME: " << (end2 - start) << "ms");
+    FL_WARN("*** SHOW + DRAW TIME: " << int(end2 - start) << "ms");
 }
 
 
