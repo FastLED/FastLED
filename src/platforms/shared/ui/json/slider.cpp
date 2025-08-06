@@ -61,8 +61,8 @@ public:
 
     // Accessors for the slider values.
     float value() const { return mValue; }
-    float min() const { return mMin; }
-    float max() const { return mMax; }
+    float getMin() const { return mMin; }
+    float getMax() const { return mMax; }
     float step() const { return mStep; }
     
     void setValue(float value) { 
@@ -118,9 +118,9 @@ float JsonSliderImpl::value_normalized() const {
     return mInternal->value_normalized();
 }
 
-float JsonSliderImpl::getMax() const { return mInternal->max(); }
+float JsonSliderImpl::getMax() const { return mInternal->getMax(); }
 
-float JsonSliderImpl::getMin() const { return mInternal->min(); }
+float JsonSliderImpl::getMin() const { return mInternal->getMin(); }
 
 void JsonSliderImpl::setValue(float value) {
     mInternal->setValue(value);

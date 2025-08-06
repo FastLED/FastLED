@@ -34,6 +34,66 @@ _IS_GITHUB_ACTIONS = os.getenv("GITHUB_ACTIONS") == "true"
 _TIMEOUT = 240 if _IS_GITHUB_ACTIONS else 60
 
 
+def extract_error_snippet(accumulated_output: list[str], context_lines: int = 5) -> str:
+    """
+    Extract relevant error snippets from process output.
+
+    Searches for lines containing "error" (case insensitive) and extracts
+    a small context window around the first few error occurrences.
+
+    Args:
+        accumulated_output: List of output lines from the process
+        context_lines: Number of lines to capture before/after each error line (default: 5)
+
+    Returns:
+        Formatted string containing error snippets with minimal context
+    """
+    if not accumulated_output:
+        return "No output captured"
+
+    error_snippets: list[str] = []
+    error_pattern = re.compile(r"error", re.IGNORECASE)
+
+    # Find all lines that contain "error" (case insensitive)
+    error_line_indices: list[int] = []
+    for i, line in enumerate(accumulated_output):
+        if error_pattern.search(line):
+            error_line_indices.append(i)
+
+    if not error_line_indices:
+        # No specific errors found, return last 10 lines which might contain useful info
+        max_lines = min(10, len(accumulated_output))
+        return (
+            "No 'error' keyword found. Last "
+            + str(max_lines)
+            + " lines:\n"
+            + "\n".join(accumulated_output[-max_lines:])
+        )
+
+    # Extract context around first 2 errors only (to keep output concise)
+    max_errors_to_show = 2
+    for i, error_idx in enumerate(error_line_indices[:max_errors_to_show]):
+        # Calculate context window (5 lines before to 5 lines after the error)
+        start_idx = max(0, error_idx - context_lines)
+        end_idx = min(len(accumulated_output), error_idx + context_lines + 1)
+
+        snippet_lines: list[str] = []
+
+        for j in range(start_idx, end_idx):
+            line_marker = "➤ " if j == error_idx else "  "  # Mark the actual error line
+            snippet_lines.append(f"{line_marker}{accumulated_output[j]}")
+
+        error_snippets.append("\n".join(snippet_lines))
+
+    # Add summary if there are more errors
+    if len(error_line_indices) > max_errors_to_show:
+        error_snippets.append(
+            f"... and {len(error_line_indices) - max_errors_to_show} more error(s) found"
+        )
+
+    return "\n\n".join(error_snippets)
+
+
 @dataclass
 class ProcessTiming:
     """Information about a completed process execution for timing summary"""
@@ -1125,7 +1185,10 @@ def _run_processes_parallel(
     stuck_process_timeout = 300  # 5 mins without output indicates stuck process
 
     # Track failed processes for proper error reporting
-    failed_processes: list[str] = []
+    failed_processes: list[str] = []  # Processes killed due to timeout/stuck
+    exit_failed_processes: list[
+        tuple[RunningProcess, int]
+    ] = []  # Processes that failed with non-zero exit code
 
     # Track completed processes for timing summary
     completed_timings: List[ProcessTiming] = []
@@ -1179,10 +1242,23 @@ def _run_processes_parallel(
 
                 # Check if process has finished
                 if proc.finished:
+                    # Get the exit code to check for failure
+                    exit_code = proc.wait()
+
                     # Process completed, remove from active list
                     active_processes.remove(proc)
                     # Stop monitoring this process
                     stuck_monitor.stop_monitoring(proc)
+
+                    # Check for non-zero exit code (failure)
+                    if exit_code != 0:
+                        print(
+                            f"Process failed with exit code {exit_code}: {proc.command}"
+                        )
+                        exit_failed_processes.append((proc, exit_code))
+                        any_activity = True
+                        continue
+
                     # Update timing information
                     # Calculate duration properly - if process duration is None, calculate it manually
                     if proc.duration is not None:
@@ -1228,6 +1304,30 @@ def _run_processes_parallel(
             # This prevents excessive CPU usage while maintaining responsiveness
             if not any_activity:
                 time.sleep(0.01)  # 10ms sleep only when no activity
+
+        # Check for processes that failed with non-zero exit codes
+        if exit_failed_processes:
+            print(f"\n\033[91m###### ERROR ######\033[0m")
+            print(
+                f"Tests failed due to {len(exit_failed_processes)} process(es) with non-zero exit codes:"
+            )
+            for proc, exit_code in exit_failed_processes:
+                print(f"  - {proc.command} (exit code {exit_code})")
+            failures: list[TestFailureInfo] = []
+            for proc, exit_code in exit_failed_processes:
+                # Extract error snippet from process output
+                error_snippet = extract_error_snippet(proc.accumulated_output)
+
+                failures.append(
+                    TestFailureInfo(
+                        test_name=_extract_test_name(proc.command),
+                        command=str(proc.command),
+                        return_code=exit_code,
+                        output=error_snippet,
+                        error_type="exit_failure",
+                    )
+                )
+            raise TestExecutionFailedException("Tests failed", failures)
 
         # Check for failed processes - CRITICAL FIX
         if failed_processes:

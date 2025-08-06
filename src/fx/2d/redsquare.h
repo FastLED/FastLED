@@ -13,7 +13,7 @@ FASTLED_SMART_PTR(RedSquare);
 class RedSquare : public Fx2d {
   public:
     struct Math {
-        template <typename T> static T min(T a, T b) { return a < b ? a : b; }
+        template <typename T> static T Min(T a, T b) { return a < b ? a : b; }
     };
 
     RedSquare(const XYMap& xymap) : Fx2d(xymap) {}
@@ -21,7 +21,7 @@ class RedSquare : public Fx2d {
     void draw(DrawContext context) override {
         uint16_t width = getWidth();
         uint16_t height = getHeight();
-        uint16_t square_size = Math::min(width, height) / 2;
+        uint16_t square_size = Math::Min(width, height) / 2;
         uint16_t start_x = (width - square_size) / 2;
         uint16_t start_y = (height - square_size) / 2;
 

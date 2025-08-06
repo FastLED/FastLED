@@ -901,6 +901,7 @@ def create_fastled_library(
 
     # Wait for compilation to complete
     compiled_count = 0
+    failed_count = 0
     for future, obj_file, cpp_file in futures:
         try:
             result: Result = future.result()
@@ -908,17 +909,27 @@ def create_fastled_library(
                 fastled_objects.append(obj_file)
                 compiled_count += 1
             else:
+                failed_count += 1
                 log_timing(
-                    f"[LIBRARY] WARNING: Failed to compile {cpp_file.relative_to(Path('src'))}: {result.stderr[:100]}..."
+                    f"[LIBRARY] ERROR: Failed to compile {cpp_file.relative_to(Path('src'))}: {result.stderr[:300]}..."
                 )
         except Exception as e:
+            failed_count += 1
             log_timing(
-                f"[LIBRARY] WARNING: Exception compiling {cpp_file.relative_to(Path('src'))}: {e}"
+                f"[LIBRARY] ERROR: Exception compiling {cpp_file.relative_to(Path('src'))}: {e}"
             )
 
     log_timing(
         f"[LIBRARY] Successfully compiled {compiled_count}/{len(fastled_sources)} FastLED sources"
     )
+
+    # FAIL FAST: If any source files failed to compile, abort immediately
+    if failed_count > 0:
+        raise Exception(
+            f"CRITICAL: {failed_count} FastLED source files failed to compile. "
+            f"This indicates a serious build environment issue (likely PCH invalidation). "
+            f"All source files must compile successfully."
+        )
 
     if not fastled_objects:
         raise Exception("No FastLED source files compiled successfully")
@@ -1086,7 +1097,7 @@ def link_examples(
 
             if not main_result.ok:
                 log_timing(
-                    f"[LINKING] FAILED: {executable_name}: Failed to compile main.cpp: {main_result.stderr[:100]}..."
+                    f"[LINKING] FAILED: {executable_name}: Failed to compile main.cpp: {main_result.stderr[:300]}..."
                 )
                 failed_count += 1
                 continue
