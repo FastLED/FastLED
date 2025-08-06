@@ -473,6 +473,13 @@ class RunningProcess:
         rtn = self.proc.returncode
         assert rtn is not None  # Process has completed, so returncode exists
 
+        is_keyboard_interrupt = (rtn == -11) or (rtn == 3221225786)
+        if is_keyboard_interrupt:
+            import _thread
+            print("Keyboard interrupt detected, interrupting main thread")
+            _thread.interrupt_main()
+            return 1
+
         # Record end time only if not already set by output reader
         # The output reader sets end time when stdout pumper finishes, which is more accurate
         if self._end_time is None:
