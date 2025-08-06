@@ -131,21 +131,38 @@ def copy_boards_directory(project_root: Path, build_dir: Path) -> bool:
 
 
 def copy_fastled_library(project_root: Path, build_dir: Path) -> bool:
-    """Copy FastLED library to the build directory."""
+    """Create symlink to FastLED library in the build directory."""
     lib_dir = build_dir / "lib" / "FastLED"
+    lib_parent = build_dir / "lib"
 
+    # Remove existing FastLED directory if it exists
     if lib_dir.exists():
-        shutil.rmtree(lib_dir)
-    lib_dir.mkdir(parents=True, exist_ok=True)
-
-    # Copy FastLED source files
-    fastled_src_path = project_root / "src"
-    shutil.copytree(fastled_src_path, lib_dir, dirs_exist_ok=True)
+        if lib_dir.is_symlink():
+            lib_dir.unlink()
+        else:
+            shutil.rmtree(lib_dir)
     
-    # Now sync to keep it updated
-    sync(project_root / "src", lib_dir, action="sync")
+    # Create lib directory if it doesn't exist
+    lib_parent.mkdir(parents=True, exist_ok=True)
 
-    # Copy library.json to the FastLED lib directory
+    # Create symlink to FastLED source
+    fastled_src_path = project_root / "src"
+    try:
+        # Convert to absolute path for cross-platform compatibility
+        fastled_src_absolute = fastled_src_path.resolve()
+        lib_dir.symlink_to(fastled_src_absolute, target_is_directory=True)
+        print(f"Created symlink: {lib_dir} -> {fastled_src_absolute}")
+    except OSError as e:
+        warnings.warn(f"Failed to create symlink (trying copy fallback): {e}")
+        # Fallback to copy if symlink fails (e.g., no admin privileges on Windows)
+        try:
+            shutil.copytree(fastled_src_path, lib_dir, dirs_exist_ok=True)
+            print(f"Fallback: Copied FastLED library to {lib_dir}")
+        except Exception as copy_error:
+            warnings.warn(f"Failed to copy FastLED library: {copy_error}")
+            return False
+
+    # Copy library.json to the lib directory (not inside FastLED symlink)
     library_json_src = project_root / "library.json"
     library_json_dst = lib_dir / "library.json"
     try:
@@ -156,11 +173,10 @@ def copy_fastled_library(project_root: Path, build_dir: Path) -> bool:
     return True
 
 
-def init_platformio_build(args: Args, example: str) -> BuildResult:
+def init_platformio_build(board: str, verbose: bool, example: str) -> BuildResult:
     """Initialize the PlatformIO build directory."""
 
-    verbose = args.verbose
-    platform = args.board
+    platform = board
 
     project_root = resolve_project_root()
     build_dir = project_root / ".build" / "test_platformio" / platform
@@ -206,17 +222,16 @@ def init_platformio_build(args: Args, example: str) -> BuildResult:
     return BuildResult(success=True, output="", build_dir=build_dir)
 
 
-def run_platform_build(args: Args, example: str) -> BuildResult:
+def run_platform_build(board: str, verbose: bool, example: str) -> BuildResult:
     """Run build for specified example and platform using new PlatformIO system."""
-    verbose = args.verbose
-    platform = args.board
+    platform = board
 
     project_root = resolve_project_root()
     build_dir = project_root / ".build" / "test_platformio" / platform
     # Setup the build directory.
     build_dir.mkdir(parents=True, exist_ok=True)
 
-    build_result = init_platformio_build(args, example)
+    build_result = init_platformio_build(board, verbose, example)
     if not build_result.success:
         warnings.warn(f"Build failed: {build_result.output}")
         return build_result
@@ -283,17 +298,46 @@ def _run_build(build_dir: Path, verbose: bool) -> BuildResult:
     return BuildResult(success=True, output=result.output, build_dir=build_dir)
 
 
+class PlatformIoBuilder:
+    def __init__(self, board: str, verbose: bool):
+        self.board = board
+        self.verbose = verbose
+        self.build_dir: Path | None = None
+        self.initialized = False
+
+    def init_build(self) -> BuildResult:
+        """Initialize the PlatformIO build directory once."""
+        if self.initialized and self.build_dir is not None:
+            return BuildResult(success=True, output="Already initialized", build_dir=self.build_dir)
+        
+        # Initialize with specific parameters
+        result = init_platformio_build(self.board, self.verbose, "Blink")
+        if result.success:
+            self.build_dir = result.build_dir
+            self.initialized = True
+        return result
+
+    def build(self, example: str) -> BuildResult:
+        """Build a specific example."""
+        if not self.initialized:
+            init_result = self.init_build()
+            if not init_result.success:
+                return init_result
+        
+        # Build with specific parameters
+        return run_platform_build(self.board, self.verbose, example)
+
+
 def main() -> int:
     """Main entry point."""
 
     args = Args.parse_args()
 
-    # Initialize the build directory once
-    project_root = resolve_project_root()
-    build_dir = project_root / ".build" / "test_platformio" / args.board
+    # Create PlatformIO builder with only the parameters it needs
+    builder = PlatformIoBuilder(board=args.board, verbose=args.verbose)
     
-    # Initialize PlatformIO project once (using Blink as default for initialization)
-    init_result = init_platformio_build(args, "Blink")
+    # Initialize build environment
+    init_result = builder.init_build()
     if not init_result.success:
         print(f"Failed to initialize build: {init_result.output}")
         return 1
@@ -302,25 +346,8 @@ def main() -> int:
     for example in args.examples:
         print(f"Building example: {example}")
         
-        # Copy example source to src directory (overwrites previous)
-        src_dir = build_dir / "src"
-        if src_dir.exists():
-            shutil.rmtree(src_dir)
-        src_dir.mkdir(parents=True, exist_ok=True)
-        
-        # Copy example files
-        example_path = project_root / "examples" / example
-        if not example_path.exists():
-            print(f"Example not found: {example_path}")
-            results.append(BuildResult(success=False, output=f"Example not found: {example}", build_dir=build_dir))
-            continue
-            
-        for file_path in example_path.iterdir():
-            if file_path.is_file():
-                shutil.copy2(file_path, src_dir)
-        
-        # Run the build
-        result = _run_build(build_dir, args.verbose)
+        # Build the example
+        result = builder.build(example)
         results.append(result)
         if not result.success:
             print(f"Failed to build {example}")
