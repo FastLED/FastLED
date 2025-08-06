@@ -4,8 +4,8 @@
 /// @example SmartMatrix.ino
 
 // Platform detection logic
-#if defined(__arm__) && defined(TEENSYDUINO)
-#include "SmartMatrix.h"
+#if defined(__arm__) && defined(TEENSYDUINO) && defined(SmartMatrix_h)
+#include "SmartMatrixSketch.h"
 #else
 #include "platforms/sketch_fake.hpp"
 #endif
