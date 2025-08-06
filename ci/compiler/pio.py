@@ -409,16 +409,96 @@ if USE_CACHE:
     print(f"  CC: {{original_cc}} (type: {{type(original_cc)}})")
     print(f"  CXX: {{original_cxx}} (type: {{type(original_cxx)}})")
     
-    # Handle list-type compiler commands properly
+    # Function to find full path to compiler
+    def find_compiler_path(compiler_name):
+        if not compiler_name:
+            return None
+            
+        # First try shutil.which
+        full_path = shutil.which(compiler_name)
+        if full_path:
+            print(f"  Found {{compiler_name}} via which: {{full_path}}")
+            return full_path
+            
+        # Try to extract from environment PATH-like variables
+        import glob
+        import os
+        
+        # Check SCons environment for tool paths
+        for key in ['CCCOM', 'CXXCOM', 'CC', 'CXX']:
+            env_val = env.get(key)
+            if env_val and compiler_name in str(env_val):
+                # Extract the first path-like component
+                parts = str(env_val).split()
+                for part in parts:
+                    if compiler_name in part and ('/' in part or '\\\\' in part):
+                        print(f"  Found {{compiler_name}} in env[{{key}}]: {{part}}")
+                        return part
+        
+        # Look in common PlatformIO toolchain locations
+        import platform
+        if platform.system() == "Windows":
+            patterns = [
+                f"C:/Users/*/.platformio/packages/*/bin/{{compiler_name}}.exe",
+                f"C:/Users/*/.platformio/packages/*/bin/{{compiler_name}}",
+            ]
+        else:
+            patterns = [
+                f"/home/*/.platformio/packages/*/bin/{{compiler_name}}",
+                f"~/.platformio/packages/*/bin/{{compiler_name}}",
+            ]
+            
+        for pattern in patterns:
+            matches = glob.glob(os.path.expanduser(pattern))
+            if matches:
+                print(f"  Found {{compiler_name}} via glob: {{matches[0]}}")
+                return matches[0]
+        
+        print(f"  WARNING: Could not find full path for {{compiler_name}}, using as-is")
+        return compiler_name
+    
+    # Handle list-type compiler commands properly and find full paths
     if isinstance(original_cc, list):
-        cc_cmd = " ".join(str(x) for x in original_cc)
+        cc_parts = [str(x) for x in original_cc]
+        cc_binary = cc_parts[0] if cc_parts else "gcc"
+        cc_full_path = find_compiler_path(cc_binary)
+        cc_cmd = f"{{cc_full_path}} {{' '.join(cc_parts[1:])}}" if len(cc_parts) > 1 else cc_full_path
     else:
-        cc_cmd = str(original_cc) if original_cc else "gcc"
+        cc_binary = str(original_cc) if original_cc else "gcc"
+        cc_cmd = find_compiler_path(cc_binary)
         
     if isinstance(original_cxx, list):
-        cxx_cmd = " ".join(str(x) for x in original_cxx)
+        cxx_parts = [str(x) for x in original_cxx]
+        cxx_binary = cxx_parts[0] if cxx_parts else "g++"
+        cxx_full_path = find_compiler_path(cxx_binary)
+        cxx_cmd = f"{{cxx_full_path}} {{' '.join(cxx_parts[1:])}}" if len(cxx_parts) > 1 else cxx_full_path
     else:
-        cxx_cmd = str(original_cxx) if original_cxx else "g++"
+        cxx_binary = str(original_cxx) if original_cxx else "g++"
+        cxx_cmd = find_compiler_path(cxx_binary)
+    
+    print(f"Final compiler commands:")
+    print(f"  CC command: {{cc_cmd}}")
+    print(f"  CXX command: {{cxx_cmd}}")
+    
+    # Add toolchain paths to environment PATH so sccache can find dependencies
+    # Extract toolchain directory from compiler path
+    if cc_cmd and ("toolchain" in cc_cmd or "xtensa" in cc_cmd or "avr" in cc_cmd):
+        import os
+        # Extract the bin directory from the compiler path
+        if "/" in cc_cmd:
+            bin_dir = "/".join(cc_cmd.split("/")[:-1])
+        elif "\\\\" in cc_cmd:
+            bin_dir = "\\\\".join(cc_cmd.split("\\\\")[:-1])
+        else:
+            bin_dir = None
+            
+        if bin_dir and os.path.exists(bin_dir):
+            print(f"Adding toolchain bin directory to PATH: {{bin_dir}}")
+            current_path = env.get("ENV", {{}}).get("PATH", "")
+            new_path = f"{{bin_dir}};{{current_path}}" if current_path else bin_dir
+            env.Append(ENV={{"PATH": new_path}})
+            os.environ["PATH"] = f"{{bin_dir}};{{os.environ.get('PATH', '')}}"
+            print(f"Updated PATH for toolchain support")
     
     # Create wrapped compiler commands using proven pattern
     CC = f"{{cache_executable}} {{cc_cmd}}"
@@ -1325,6 +1405,44 @@ class PioCompiler(Compiler):
             example=example,
         )
 
+    def get_cache_stats(self) -> str:
+        """Get cache statistics as a formatted string."""
+        if self.cache_type == CacheType.NO_CACHE:
+            return ""
+
+        import shutil
+        import subprocess
+
+        cache_name = "sccache" if self.cache_type == CacheType.SCCACHE else "ccache"
+        cache_path = shutil.which(cache_name)
+
+        if not cache_path:
+            return f"{cache_name.upper()} not found in PATH"
+
+        try:
+            result = subprocess.run(
+                [cache_path, "--show-stats"],
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+
+            if result.returncode == 0:
+                stats_lines: list[str] = []
+                for line in result.stdout.strip().split("\n"):
+                    if line.strip():
+                        stats_lines.append(line)
+
+                # Add header with cache type
+                stats_output = f"{cache_name.upper()} STATISTICS:\n"
+                stats_output += "\n".join(stats_lines)
+                return stats_output
+            else:
+                return f"Failed to get {cache_name.upper()} statistics: {result.stderr}"
+
+        except Exception as e:
+            return f"Error retrieving {cache_name.upper()} statistics: {e}"
+
     def _internal_build_no_lock(self, example: str) -> SketchResult:
         """Build a specific example without lock management. Only call from build()."""
         if not self.initialized:
@@ -1719,4 +1837,36 @@ def run_pio_build(
     pio = PioCompiler(
         board, verbose, additional_defines, additional_include_dirs, None, cache_type
     )
-    return pio.build(examples)
+    futures = pio.build(examples)
+
+    # Show cache statistics after all builds complete
+    if cache_type != CacheType.NO_CACHE:
+        # Create a callback to show stats when all builds complete
+        def add_stats_callback():
+            completed_count = 0
+            total_count = len(futures)
+
+            def on_future_complete(future: Any) -> None:
+                nonlocal completed_count
+                completed_count += 1
+
+                # When all futures complete, show cache statistics
+                if completed_count == total_count:
+                    try:
+                        stats = pio.get_cache_stats()
+                        if stats:
+                            print("\n" + "=" * 60)
+                            print("CACHE STATISTICS")
+                            print("=" * 60)
+                            print(stats)
+                            print("=" * 60)
+                    except Exception as e:
+                        print(f"Warning: Could not retrieve cache statistics: {e}")
+
+            # Add callback to all futures
+            for future in futures:
+                future.add_done_callback(on_future_complete)
+
+        add_stats_callback()
+
+    return futures
