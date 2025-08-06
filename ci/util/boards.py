@@ -227,10 +227,6 @@ class Board:
                 f"-I{include_dir}" for include_dir in additional_include_dirs
             )
 
-        # Add sketch directory include path when project_root is provided (enables "shared/file.h" style includes)
-        if project_root:
-            build_flags_elements.append("-Isrc/sketch")
-
         if build_flags_elements:
             # Join all build flags with a space so that PlatformIO parses them
             lines.append(f"build_flags = {' '.join(build_flags_elements)}")

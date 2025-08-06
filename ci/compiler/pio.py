@@ -604,9 +604,23 @@ def _init_platformio_build(
             build_dir=build_dir,
         )
 
+    # Clone board and add sketch directory include path (enables "shared/file.h" style includes)
+    board_with_sketch_include = board.clone()
+    if board_with_sketch_include.build_flags is None:
+        board_with_sketch_include.build_flags = []
+    else:
+        board_with_sketch_include.build_flags = list(
+            board_with_sketch_include.build_flags
+        )
+    board_with_sketch_include.build_flags.append("-Isrc/sketch")
+
     # Apply board-specific configuration
     if not _apply_board_specific_config(
-        board, platformio_ini, example, additional_defines, additional_include_dirs
+        board_with_sketch_include,
+        platformio_ini,
+        example,
+        additional_defines,
+        additional_include_dirs,
     ):
         return InitResult(
             success=False,
