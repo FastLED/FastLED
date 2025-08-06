@@ -31,6 +31,10 @@ APOLLO3_2_2_0 = "https://github.com/nigelb/platform-apollo3blue"
 ALL: list["Board"] = []
 
 
+class Auto:
+    pass
+
+
 @dataclass
 class Board:
     board_name: str
@@ -64,9 +68,6 @@ class Board:
     def __post_init__(self) -> None:
         # Check if framework is set, warn and auto-set to arduino if missing (except for native/stub platforms)
         if self.framework is None and not self._is_native_or_stub_platform():
-            print(
-                f"WARNING: Board '{self.board_name}' has no framework specified. Auto-setting to 'arduino'."
-            )
             self.framework = "arduino"
 
         ALL.append(self)
