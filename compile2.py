@@ -110,6 +110,9 @@ class Args:
             "--examples", help="Comma-separated list of examples to build (e.g. 'Blink,FestivalStick') or 'All' to build all available examples"
         )
         parser.add_argument(
+            "--all", action="store_true", help="Build all available examples (shorthand for --examples All)"
+        )
+        parser.add_argument(
             "--verbose", action="store_true", help="Enable verbose output"
         )
         parser.add_argument(
@@ -198,9 +201,14 @@ class Args:
         
         # Handle examples logic
         examples: list[str] = []
+        if parsed_args.examples and parsed_args.all:
+            raise ValueError("Cannot specify both --examples and --all flags")
         if parsed_args.examples:
             # Split comma-separated examples from --examples flag
             examples = [ex.strip() for ex in parsed_args.examples.split(",") if ex.strip()]
+        if parsed_args.all:
+            # --all flag is shorthand for --examples All
+            examples = ["All"]
         if parsed_args.example:
             # Add positional example if provided
             examples.append(parsed_args.example)

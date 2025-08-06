@@ -628,6 +628,9 @@ def _init_platformio_build(
             build_dir=build_dir,
         )
 
+    # Print building banner first
+    print(_create_building_banner(example))
+
     ok_copy_src = _copy_example_source(project_root, build_dir, example)
     if not ok_copy_src:
         error_msg = _get_example_error_message(project_root, example)
@@ -677,7 +680,6 @@ def _init_platformio_build(
         print()  # Add newline after configuration section
 
     print(f"Running initial build command: {subprocess.list2cmdline(run_cmd)}")
-    print(_create_building_banner(example))
 
     # Start timer for this example
     start_time = time.time()
@@ -804,6 +806,9 @@ class PioCompiler:
 
     def _build_internal(self, example: str) -> SketchResult:
         """Internal build method without lock management."""
+        # Print building banner first
+        print(_create_building_banner(example))
+
         # Copy example source to build directory
         project_root = _resolve_project_root()
         ok_copy_src = _copy_example_source(project_root, self.build_dir, example)
@@ -828,7 +833,6 @@ class PioCompiler:
             run_cmd.append("--verbose")
 
         print(f"Running command: {subprocess.list2cmdline(run_cmd)}")
-        print(_create_building_banner(example))
 
         # Start timer for this example
         start_time = time.time()
