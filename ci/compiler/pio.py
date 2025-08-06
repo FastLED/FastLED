@@ -1094,17 +1094,83 @@ class PioCompiler:
             if not lock_released:
                 self._platform_lock.decrement()
 
+    def check_usb_permissions(self) -> tuple[bool, str]:
+        """Check if USB device access is properly configured on Linux.
+
+        Checks multiple methods for USB device access:
+        1. PlatformIO udev rules
+        2. User group membership (dialout, uucp, plugdev)
+        3. Alternative udev rules files
+
+        Returns:
+            Tuple of (has_access, status_message)
+        """
+        if platform.system() != "Linux":
+            return True, "Not applicable on non-Linux systems"
+
+        access_methods: list[str] = []
+
+        # Check 1: PlatformIO udev rules
+        udev_rules_path = Path("/etc/udev/rules.d/99-platformio-udev.rules")
+        if udev_rules_path.exists():
+            access_methods.append("PlatformIO udev rules")
+
+        # Check 2: User group membership
+        user_groups = self._get_user_groups()
+        usb_groups = ["dialout", "uucp", "plugdev", "tty"]
+        user_usb_groups = [group for group in usb_groups if group in user_groups]
+        if user_usb_groups:
+            access_methods.append(f"Group membership: {', '.join(user_usb_groups)}")
+
+        # Check 3: Alternative udev rules
+        alt_udev_files = [
+            "/etc/udev/rules.d/99-arduino.rules",
+            "/etc/udev/rules.d/50-platformio-udev.rules",
+            "/lib/udev/rules.d/99-platformio-udev.rules",
+        ]
+        for alt_file in alt_udev_files:
+            if Path(alt_file).exists():
+                access_methods.append(f"Alternative udev rules: {Path(alt_file).name}")
+
+        # Check 4: Root user (always has access)
+        if self._is_root_user():
+            access_methods.append("Root user privileges")
+
+        if access_methods:
+            status = f"USB access available via: {'; '.join(access_methods)}"
+            return True, status
+        else:
+            return False, "No USB device access methods detected"
+
+    def _get_user_groups(self) -> list[str]:
+        """Get list of groups the current user belongs to."""
+        try:
+            result = subprocess.run(["groups"], capture_output=True, text=True)
+            if result.returncode == 0:
+                return result.stdout.strip().split()
+            return []
+        except Exception:
+            return []
+
+    def _is_root_user(self) -> bool:
+        """Check if running as root user."""
+        try:
+            import os
+
+            return os.geteuid() == 0
+        except Exception:
+            return False
+
     def check_udev_rules(self) -> bool:
         """Check if PlatformIO udev rules are installed on Linux.
 
-        Returns:
-            True if udev rules are found or not applicable (non-Linux), False otherwise
-        """
-        if platform.system() != "Linux":
-            return True  # Not applicable on non-Linux systems
+        DEPRECATED: Use check_usb_permissions() instead for comprehensive checking.
 
-        udev_rules_path = Path("/etc/udev/rules.d/99-platformio-udev.rules")
-        return udev_rules_path.exists()
+        Returns:
+            True if any USB access method is available, False otherwise
+        """
+        has_access, _ = self.check_usb_permissions()
+        return has_access
 
     def install_udev_rules(self) -> bool:
         """Install PlatformIO udev rules on Linux.

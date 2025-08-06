@@ -316,23 +316,33 @@ def main() -> int:
 
     # Handle upload/monitor mode (single example only)
     if args.upload or args.monitor:
-        # Check for udev rules on Linux before attempting upload
-        if not pio.check_udev_rules():
-            print(red_text("ERROR: PlatformIO udev rules are not installed on this Linux system."))
-            print(red_text("USB device access may fail without proper permissions."))
+        # Check for USB permissions on Linux before attempting upload
+        has_usb_access, status_message = pio.check_usb_permissions()
+        
+        if not has_usb_access:
+            print(red_text("ERROR: No USB device access permissions detected on this Linux system."))
+            print(red_text("Upload to device may fail without proper permissions."))
             print("")
-            print(yellow_text("To install udev rules automatically, run:"))
+            print(yellow_text("SOLUTION OPTIONS:"))
+            print("")
+            print(yellow_text("Option 1 - Install udev rules (recommended):"))
             print(yellow_text(f"  {sys.argv[0]} --install-udev"))
             print("")
-            print(yellow_text("Or install manually with:"))
+            print(yellow_text("Option 2 - Add user to dialout group:"))
+            print(yellow_text("  sudo usermod -a -G dialout $USER"))
+            print(yellow_text("  # Then logout/login or restart"))
+            print("")
+            print(yellow_text("Option 3 - Manual udev rules install:"))
             print(yellow_text("  curl -fsSL https://raw.githubusercontent.com/platformio/platformio-core/develop/platformio/assets/system/99-platformio-udev.rules | sudo tee /etc/udev/rules.d/99-platformio-udev.rules"))
             print(yellow_text("  sudo service udev restart"))
             print(yellow_text("  # or"))
             print(yellow_text("  sudo udevadm control --reload-rules"))
             print(yellow_text("  sudo udevadm trigger"))
             print("")
-            print(red_text("After installing udev rules, you may need to restart your system."))
+            print(red_text("After making changes, you may need to logout/login or restart your system."))
             return 1
+        elif args.verbose:
+            print(green_text(f"✅ USB access detected: {status_message}"))
         
         example = args.examples[0]  # Validation ensures exactly one example
         
