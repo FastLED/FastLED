@@ -331,11 +331,12 @@ def _create_cache_build_script(build_dir: Path, cache_config: dict[str, str]) ->
     """Create a PlatformIO build script to set up compiler cache environment with shell trampolines."""
     script_path = build_dir / "cache_setup.py"
 
-    script_content = f'''#!/usr/bin/env python3
+    # Create the script content using raw strings and manual substitution
+    script_template = r'''#!/usr/bin/env python3
 """
 Cache setup script for PlatformIO builds.
 This script is executed by PlatformIO as a post-build extra_script.
-It creates shell script trampolines that wrap sccache with the detected compilers.
+It creates shell script trampolines that wrap cache tools with the detected compilers.
 """
 
 # Import env and try to import projenv
@@ -355,7 +356,7 @@ except:
     projenv = None
 
 # Dump the environment state to disk for inspection
-env_dump = {{}}
+env_dump = {}
 for key in env.Dictionary():
     try:
         value = env[key]
@@ -368,11 +369,11 @@ for key in env.Dictionary():
 env_dump_path = "env_dump.json"
 with open(env_dump_path, "w") as f:
     json.dump(env_dump, f, indent=2)
-print(f"Environment state dumped to: {{env_dump_path}}")
+print(f"Environment state dumped to: {env_dump_path}")
 
 # Also dump projenv if available
 if has_projenv:
-    projenv_dump = {{}}
+    projenv_dump = {}
     for key in projenv.Dictionary():
         try:
             value = projenv[key]
@@ -383,18 +384,18 @@ if has_projenv:
     projenv_dump_path = "projenv_dump.json"
     with open(projenv_dump_path, "w") as f:
         json.dump(projenv_dump, f, indent=2)
-    print(f"Projenv state dumped to: {{projenv_dump_path}}")
+    print(f"Projenv state dumped to: {projenv_dump_path}")
 
 # Set up cache environment variables
-cache_config = {cache_config!r}
+cache_config = CACHE_CONFIG_PLACEHOLDER
 
 # Set environment variables for cache tools
 for key, value in cache_config.items():
     if key not in ["SCCACHE_PATH", "CCACHE_PATH"]:
-        print(f"Setting cache environment: {{key}} = {{value}}")
-        env.Append(ENV={{key: value}})
+        print(f"Setting cache environment: {key} = {value}")
+        env.Append(ENV={key: value})
         if has_projenv:
-            projenv.Append(ENV={{key: value}})
+            projenv.Append(ENV={key: value})
         os.environ[key] = value
 
 # Use exact pattern from working build_flags.py example
@@ -409,8 +410,8 @@ if USE_CACHE:
     original_cxx = env.get("CXX")
     
     print(f"DEBUG: Found compilers in env:")
-    print(f"  CC: {{original_cc}} (type: {{type(original_cc)}})")
-    print(f"  CXX: {{original_cxx}} (type: {{type(original_cxx)}})")
+    print(f"  CC: {original_cc} (type: {type(original_cc)})")
+    print(f"  CXX: {original_cxx} (type: {type(original_cxx)})")
     
     # Function to find full path to compiler
     def find_compiler_path(compiler_name):
@@ -497,9 +498,9 @@ if USE_CACHE:
             
         if bin_dir and os.path.exists(bin_dir):
             print(f"Adding toolchain bin directory to PATH: {{bin_dir}}")
-            current_path = env.get("ENV", {{}}).get("PATH", "")
+            current_path = env.get("ENV", {}).get("PATH", "")
             new_path = f"{{bin_dir}};{{current_path}}" if current_path else bin_dir
-            env.Append(ENV={{"PATH": new_path}})
+            env.Append(ENV={"PATH": new_path}})
             os.environ["PATH"] = f"{{bin_dir}};{{os.environ.get('PATH', '')}}"
             print(f"Updated PATH for toolchain support")
     
@@ -591,14 +592,17 @@ else:
 
 # Set environment variables for cache tools
 if cache_type == "sccache":
-    env.Append(ENV={{"SCCACHE_DIR": cache_config.get("SCCACHE_DIR", "")}})
-    env.Append(ENV={{"SCCACHE_CACHE_SIZE": cache_config.get("SCCACHE_CACHE_SIZE", "2G")}})
+    env.Append(ENV={"SCCACHE_DIR": cache_config.get("SCCACHE_DIR", "")}})
+    env.Append(ENV={"SCCACHE_CACHE_SIZE": cache_config.get("SCCACHE_CACHE_SIZE", "2G")}})
 else:  # ccache
-    env.Append(ENV={{"CCACHE_DIR": cache_config.get("CCACHE_DIR", "")}})
-    env.Append(ENV={{"CCACHE_MAXSIZE": cache_config.get("CCACHE_MAXSIZE", "2G")}})
+    env.Append(ENV={"CCACHE_DIR": cache_config.get("CCACHE_DIR", "")}})
+    env.Append(ENV={"CCACHE_MAXSIZE": cache_config.get("CCACHE_MAXSIZE", "2G")}})
 
 print("Cache environment configured successfully")
 '''
+
+    # Perform manual substitution
+    script_content = script_template.replace("CACHE_CONFIG_PLACEHOLDER", repr(cache_config))
 
     script_path.write_text(script_content)
     print(f"Created cache setup script: {script_path}")
