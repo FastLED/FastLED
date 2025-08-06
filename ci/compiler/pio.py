@@ -693,15 +693,15 @@ def _copy_example_source(project_root: Path, build_dir: Path, example: str) -> b
             if file_path.suffix == ".ino":
                 ino_files.append(file_path.name)
         elif file_path.is_dir():
-            # Recursively copy subdirectories
+            # Recursively sync subdirectories for better caching
             dest_subdir = sketch_dir / file_path.name
-            shutil.copytree(file_path, dest_subdir)
+            sync(str(file_path), str(dest_subdir), "sync", purge=True)
             try:
                 rel_source = file_path.relative_to(Path.cwd())
                 rel_dest = dest_subdir.relative_to(Path.cwd())
-                print(f"Copied directory {rel_source} to {rel_dest}")
+                print(f"Synced directory {rel_source} to {rel_dest}")
             except ValueError:
-                print(f"Copied directory {file_path} to {dest_subdir}")
+                print(f"Synced directory {file_path} to {dest_subdir}")
 
     # Create or update stub main.cpp that includes the .ino files
     main_cpp_content = _generate_main_cpp(ino_files)
@@ -772,13 +772,11 @@ def _copy_boards_directory(project_root: Path, build_dir: Path) -> bool:
         warnings.warn(f"Boards directory not found: {boards_src}")
         return False
 
-    if boards_dst.exists():
-        shutil.rmtree(boards_dst)
-
     try:
-        shutil.copytree(boards_src, boards_dst)
+        # Use sync for better caching - purge=True removes extra files
+        sync(str(boards_src), str(boards_dst), "sync", purge=True)
     except Exception as e:
-        warnings.warn(f"Failed to copy boards directory: {e}")
+        warnings.warn(f"Failed to sync boards directory: {e}")
         return False
 
     return True
@@ -933,7 +931,7 @@ def _setup_sccache_environment(board_name: str) -> bool:
 
 
 def _copy_fastled_library(project_root: Path, build_dir: Path) -> bool:
-    """Create symlink to FastLED library in the build directory."""
+    """Copy FastLED library to build directory with proper library.json structure."""
     lib_dir = build_dir / "lib" / "FastLED"
     lib_parent = build_dir / "lib"
 
@@ -947,37 +945,36 @@ def _copy_fastled_library(project_root: Path, build_dir: Path) -> bool:
     # Create lib directory if it doesn't exist
     lib_parent.mkdir(parents=True, exist_ok=True)
 
-    # Create symlink to FastLED source
+    # Copy src/ directory into lib/FastLED using dirsync for better caching
     fastled_src_path = project_root / "src"
     try:
-        # Convert to absolute path for cross-platform compatibility
-        fastled_src_absolute = fastled_src_path.resolve()
-        lib_dir.symlink_to(fastled_src_absolute, target_is_directory=True)
+        # Ensure target directory exists for dirsync
+        lib_dir.mkdir(parents=True, exist_ok=True)
+
+        # Use dirsync.sync for efficient incremental synchronization
+        sync(str(fastled_src_path), str(lib_dir), "sync", purge=True)
+
+        # Copy library.json to the root of lib/FastLED
+        library_json_src = project_root / "library.json"
+        library_json_dst = lib_dir / "library.json"
+        if library_json_src.exists():
+            shutil.copy2(library_json_src, library_json_dst)
+
         # Calculate relative paths for cleaner output
         try:
             rel_lib_dir = lib_dir.relative_to(Path.cwd())
             rel_src_path = fastled_src_path.relative_to(Path.cwd())
-            print(f"Created symlink: {rel_lib_dir} -> {rel_src_path}")
+            print(f"Synced FastLED library: {rel_src_path} -> {rel_lib_dir}")
+            if library_json_src.exists():
+                print(f"Copied library.json to {rel_lib_dir}")
         except ValueError:
             # Fallback to absolute paths if relative calculation fails
-            print(f"Created symlink: {lib_dir} -> {fastled_src_absolute}")
-    except OSError as e:
-        warnings.warn(f"Failed to create symlink (trying copy fallback): {e}")
-        # Fallback to copy if symlink fails (e.g., no admin privileges on Windows)
-        try:
-            shutil.copytree(fastled_src_path, lib_dir, dirs_exist_ok=True)
-            # Calculate relative paths for cleaner output
-            try:
-                rel_lib_dir = lib_dir.relative_to(Path.cwd())
-                print(f"Fallback: Copied FastLED library to {rel_lib_dir}")
-            except ValueError:
-                # Fallback to absolute paths if relative calculation fails
-                print(f"Fallback: Copied FastLED library to {lib_dir}")
-        except Exception as copy_error:
-            warnings.warn(f"Failed to copy FastLED library: {copy_error}")
-            return False
-
-    # Note: library.json is not needed since we manually set include path in platformio.ini
+            print(f"Synced FastLED library to {lib_dir}")
+            if library_json_src.exists():
+                print(f"Copied library.json to {lib_dir}")
+    except Exception as sync_error:
+        warnings.warn(f"Failed to sync FastLED library: {sync_error}")
+        return False
 
     return True
 

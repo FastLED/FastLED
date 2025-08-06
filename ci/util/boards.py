@@ -285,19 +285,16 @@ class Board:
                 lines.append("lib_ldf_mode = chain")
             lines.append("lib_archive = true")
 
-            # Build lib_deps with FastLED symlink and additional libs
+            # Build lib_deps with additional libs only (FastLED is copied to lib/FastLED)
             # PlatformIO supports multiple lib_deps entries on separate lines
-            lib_deps_entries = [f"symlink://{project_root}"]
             if additional_libs:
-                lib_deps_entries.extend(additional_libs)
-
-            # Format as multi-line lib_deps for proper PlatformIO parsing
-            if len(lib_deps_entries) == 1:
-                lines.append(f"lib_deps = {lib_deps_entries[0]}")
-            else:
-                lines.append("lib_deps =")
-                for entry in lib_deps_entries:
-                    lines.append(f"    {entry}")
+                # Format as multi-line lib_deps for proper PlatformIO parsing
+                if len(additional_libs) == 1:
+                    lines.append(f"lib_deps = {additional_libs[0]}")
+                else:
+                    lines.append("lib_deps =")
+                    for entry in additional_libs:
+                        lines.append(f"    {entry}")
 
         return "\n".join(lines) + "\n"
 
