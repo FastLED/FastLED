@@ -419,7 +419,10 @@ class BuildConfig:
                     out.append(f"build_flags = {additional_flags}")
 
         # Add FastLED-specific configurations
-        out.append(f"lib_ldf_mode = {_LIB_LDF_MODE}")
+        # Only add default lib_ldf_mode if board doesn't specify its own
+        board_config_text = "\n".join(out)
+        if "lib_ldf_mode" not in board_config_text:
+            out.append(f"lib_ldf_mode = {_LIB_LDF_MODE}")
         out.append("lib_archive = true")
         out.append(f"lib_deps = symlink://{_PROJECT_ROOT}")
 

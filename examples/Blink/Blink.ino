@@ -2,6 +2,7 @@
 /// @brief   Blink the first LED of an LED strip
 /// @example Blink.ino
 
+#include <Arduino.h>
 #include <FastLED.h>
 
 // How many leds in your strip?

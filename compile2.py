@@ -50,6 +50,24 @@ def create_banner(text: str, color_func: Callable[[str], str] | None = None) -> 
     return color_func(banner) if color_func else banner
 
 
+def _discover_all_examples() -> list[str]:
+    """Discover all available examples by scanning the examples directory.
+    
+    Returns:
+        List of all available example names
+    """
+    examples: list[str] = []
+    examples_dir = Path("examples")
+    if examples_dir.exists():
+        for example_path in examples_dir.iterdir():
+            if example_path.is_dir() and not example_path.name.startswith('.'):
+                # Check if directory contains a .ino file
+                ino_files = list(example_path.glob("*.ino"))
+                if ino_files:
+                    examples.append(example_path.name)
+    return sorted(examples)
+
+
 def _resolve_example_paths(examples: list[str]) -> list[str]:
     """Resolve example names or paths to appropriate format.
     
@@ -59,8 +77,15 @@ def _resolve_example_paths(examples: list[str]) -> list[str]:
     Returns:
         List of resolved paths or names for the build system
     """
-    # Just pass through - the PlatformIO module now handles both names and paths
-    return examples
+    resolved_examples: list[str] = []
+    for example in examples:
+        if example.lower() == "all":
+            # Replace "All" with all available examples
+            all_examples = _discover_all_examples()
+            resolved_examples.extend(all_examples)
+        else:
+            resolved_examples.append(example)
+    return resolved_examples
 
 
 @dataclass
@@ -82,7 +107,7 @@ class Args:
             "example", nargs="?", help="Optional example name to build (default: 'Blink')"
         )
         parser.add_argument(
-            "--examples", help="Comma-separated list of examples to build (e.g. 'Blink,FestivalStick')"
+            "--examples", help="Comma-separated list of examples to build (e.g. 'Blink,FestivalStick') or 'All' to build all available examples"
         )
         parser.add_argument(
             "--verbose", action="store_true", help="Enable verbose output"
@@ -112,16 +137,7 @@ class Args:
             boards = sorted([board.board_name for board in ALL])
             
             # Get all available examples
-            examples_dir = Path("examples")
-            examples = []
-            if examples_dir.exists():
-                for example_path in examples_dir.iterdir():
-                    if example_path.is_dir() and not example_path.name.startswith('.'):
-                        # Check if directory contains a .ino file
-                        ino_files = list(example_path.glob("*.ino"))
-                        if ino_files:
-                            examples.append(example_path.name)
-            examples.sort()
+            examples = _discover_all_examples()
             
             # Calculate column widths
             header1 = "Available Boards"
@@ -234,6 +250,9 @@ def main() -> int:
 
     try:
         first = True
+        failed_examples: list[str] = []
+        successful_examples: list[str] = []
+        
         for future in futures:
             timeout = 60*60 if first else 60  # first build can be very long.
             first = False
@@ -241,11 +260,11 @@ def main() -> int:
             if not result.success:
                 error_banner = create_banner(f"BUILD FAILED: {result.example}", red_text)
                 print(f"\n{error_banner}")
-                cancel_futures()
-                return 1
+                failed_examples.append(result.example)
             else:
                 success_banner = create_banner(f"BUILD SUCCESS: {result.example}", green_text)
                 print(f"\n{success_banner}")
+                successful_examples.append(result.example)
     except KeyboardInterrupt:
         cancel_futures()
         print(f"\n{red_text('Build cancelled by user')}")
@@ -256,12 +275,32 @@ def main() -> int:
         cancel_futures()
         return 1
 
-    # Final success message for multiple examples
-    if len(args.examples) > 1:
-        final_banner = create_banner(f"ALL BUILDS COMPLETE: {len(args.examples)} examples", green_text)
-        print(f"\n{final_banner}")
+    # Print build summary
+    total_examples = len(args.examples)
+    successful_count = len(successful_examples)
+    failed_count = len(failed_examples)
     
-    return 0
+    if failed_examples:
+        # Print failure summary
+        failure_summary = create_banner(f"BUILD SUMMARY: {failed_count} FAILED, {successful_count} SUCCESS", red_text)
+        print(f"\n{failure_summary}")
+        print(f"\n{red_text('Failed examples:')}")
+        for example in failed_examples:
+            print(f"  {red_text('FAILED')}: {example}")
+        
+        if successful_examples:
+            print(f"\n{green_text('Successful examples:')}")
+            for example in successful_examples:
+                print(f"  {green_text('SUCCESS')}: {example}")
+        
+        return 1  # Exit with failure code if any builds failed
+    else:
+        # All builds succeeded
+        if total_examples > 1:
+            final_banner = create_banner(f"ALL BUILDS SUCCESS: {total_examples} examples", green_text)
+            print(f"\n{final_banner}")
+        
+        return 0
 
 
 if __name__ == "__main__":

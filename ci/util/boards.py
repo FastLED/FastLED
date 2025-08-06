@@ -1,7 +1,9 @@
 # dataclasses
 
 import json
+from copy import deepcopy
 from dataclasses import dataclass
+from typing import Any
 
 
 # An open source version of the esp-idf 5.1 platform for the ESP32 that
@@ -52,14 +54,17 @@ class Board:
         False  # For platforms like 'native' that don't need a board specification
     )
     add_board_to_all: bool = True
+    lib_compat_mode: str | None = (
+        None  # Library compatibility mode (e.g., 'off' for native platform)
+    )
+    lib_ldf_mode: str | None = (
+        None  # Library Dependency Finder mode (e.g., 'chain+' for enhanced dependency finding)
+    )
 
     def __post_init__(self) -> None:
         ALL.append(self)
 
     def clone(self) -> "Board":
-        from copy import deepcopy
-        from typing import Any
-
         out = Board(
             board_name=self.board_name,
             add_board_to_all=False,
@@ -68,29 +73,12 @@ class Board:
             field_value: Any = getattr(self, field_name)
             # Create deep copy for mutable types to avoid shared references
             if isinstance(field_value, (list, dict)):
-                field_value = codeepcopypy(field_value)  # type: ignore[misc]
+                field_value = deepcopy(field_value)  # type: ignore[misc]
             setattr(out, field_name, field_value)
         return out
 
     def get_real_board_name(self) -> str:
         return self.real_board_name if self.real_board_name else self.board_name
-
-    def get_build_flags_for_example(self, example: str) -> list[str] | None:
-        """Get build flags for a specific example. For most boards, this returns the static build_flags.
-        For special platforms like 'native', this can dynamically generate example-specific flags."""
-        if self.board_name == "native" and self.build_flags:
-            # For native platform, dynamically update the include path for the specific example
-            dynamic_flags: list[str] = []
-            for flag in self.build_flags:
-                if flag.startswith("-DFASTLED_STUB_MAIN_INCLUDE_INO="):
-                    # Replace with the specific example path
-                    dynamic_flags.append(
-                        f'-DFASTLED_STUB_MAIN_INCLUDE_INO="../examples/{example}/{example}.ino"'
-                    )
-                else:
-                    dynamic_flags.append(flag)
-            return dynamic_flags
-        return self.build_flags
 
     def to_dictionary(self) -> dict[str, list[str]]:
         out: dict[str, list[str]] = {}
@@ -198,12 +186,8 @@ class Board:
         if self.defines:
             build_flags_elements.extend(f"-D{define}" for define in self.defines)
 
-        # Use dynamic build flags if example is provided (for native platform)
-        if example:
-            dynamic_build_flags = self.get_build_flags_for_example(example)
-            if dynamic_build_flags:
-                build_flags_elements.extend(dynamic_build_flags)
-        elif self.build_flags:
+        # Use static build flags
+        if self.build_flags:
             build_flags_elements.extend(self.build_flags)
         if build_flags_elements:
             # Join all build flags with a space so that PlatformIO parses them
@@ -217,6 +201,14 @@ class Board:
         # Custom ESP-IDF sdkconfig override (ESP32-family boards)
         if self.customsdk:
             lines.append(f"custom_sdkconfig = {self.customsdk}")
+
+        # Library compatibility mode (for platforms like native that need special handling)
+        if self.lib_compat_mode:
+            lines.append(f"lib_compat_mode = {self.lib_compat_mode}")
+
+        # Library Dependency Finder mode (for enhanced dependency finding)
+        if self.lib_ldf_mode:
+            lines.append(f"lib_ldf_mode = {self.lib_ldf_mode}")
 
         return "\n".join(lines) + "\n"
 
@@ -242,10 +234,14 @@ NATIVE = Board(
     board_name="native",
     platform="platformio/native",
     no_board_spec=True,  # Native platform doesn't need a board specification
+    lib_compat_mode="off",  # Disable library compatibility checking for native platform
     build_flags=[
-        "-DFASTLED_STUB_IMPL",
-        '-DFASTLED_STUB_MAIN_INCLUDE_INO="../examples/Blink/Blink.ino"',
+        "-DFASTLED_STUB_IMPL",  # Enable stub platform implementations
+        "-DFASTLED_USE_STUB_ARDUINO",  # Enable Arduino stub implementations
+        "-DPLATFORM_NATIVE",  # Enable native platform stub compilation
         "-std=c++17",
+        "-I../../../src/platforms/stub",  # Include path for Arduino.h and other stub headers (relative to project dir)
+        "-I../../../src",  # Include path for FastLED.h and other source headers (relative to project dir)
     ],
 )
 
@@ -565,10 +561,10 @@ _BOARD_MAP: dict[str, Board] = _make_board_map(ALL)
 def create_board(board_name: str, no_project_options: bool = False) -> Board:
     board: Board
     if no_project_options:
-        board = Board(board_name=board_name)
+        board = Board(board_name=board_name, add_board_to_all=False)
     if board_name not in _BOARD_MAP:
         # empty board without any special overrides, assume platformio will know what to do with it.
-        board = Board(board_name=board_name)
+        board = Board(board_name=board_name, add_board_to_all=False)
     else:
         board = _BOARD_MAP[board_name]
     return board.clone()
