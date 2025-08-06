@@ -500,7 +500,7 @@ if USE_CACHE:
             print(f"Adding toolchain bin directory to PATH: {{bin_dir}}")
             current_path = env.get("ENV", {}).get("PATH", "")
             new_path = f"{{bin_dir}};{{current_path}}" if current_path else bin_dir
-            env.Append(ENV={"PATH": new_path}})
+            env.Append(ENV={"PATH": new_path})
             os.environ["PATH"] = f"{{bin_dir}};{{os.environ.get('PATH', '')}}"
             print(f"Updated PATH for toolchain support")
     
@@ -586,17 +586,17 @@ if USE_CACHE:
     print(f"  CC Trampoline: {{cc_trampoline}}")
     print(f"  CXX Trampoline: {{cxx_trampoline}}")
 elif cache_executable:
-    print(f"Warning: {{cache_type}} not found in PATH ({{cache_executable}}); using default compilers")
+    print(f"Warning: {{cache_type}} not found in PATH ({{cache_executable}); using default compilers")
 else:
     print("No cache executable configured; using default compilers")
 
 # Set environment variables for cache tools
 if cache_type == "sccache":
-    env.Append(ENV={"SCCACHE_DIR": cache_config.get("SCCACHE_DIR", "")}})
-    env.Append(ENV={"SCCACHE_CACHE_SIZE": cache_config.get("SCCACHE_CACHE_SIZE", "2G")}})
+    env.Append(ENV={"SCCACHE_DIR": cache_config.get("SCCACHE_DIR", "")})
+    env.Append(ENV={"SCCACHE_CACHE_SIZE": cache_config.get("SCCACHE_CACHE_SIZE", "2G")})
 else:  # ccache
-    env.Append(ENV={"CCACHE_DIR": cache_config.get("CCACHE_DIR", "")}})
-    env.Append(ENV={"CCACHE_MAXSIZE": cache_config.get("CCACHE_MAXSIZE", "2G")}})
+    env.Append(ENV={"CCACHE_DIR": cache_config.get("CCACHE_DIR", "")})
+    env.Append(ENV={"CCACHE_MAXSIZE": cache_config.get("CCACHE_MAXSIZE", "2G")})
 
 print("Cache environment configured successfully")
 '''
