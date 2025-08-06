@@ -21,6 +21,7 @@ from typing import Any, Callable, Dict
 from dirsync import sync  # type: ignore
 from filelock import FileLock, Timeout  # type: ignore
 
+from ci.compiler.compiler import Compiler, InitResult, SketchResult
 from ci.util.boards import ALL, Board, create_board
 from ci.util.running_process import EndOfStream, RunningProcess
 
@@ -307,23 +308,7 @@ class GlobalPackageLock:
         return self._is_acquired
 
 
-@dataclass
-class InitResult:
-    success: bool
-    output: str
-    build_dir: Path
-
-    @property
-    def platformio_ini(self) -> Path:
-        return self.build_dir / "platformio.ini"
-
-
-@dataclass
-class SketchResult:
-    success: bool
-    output: str
-    build_dir: Path
-    example: str
+# Remove duplicate dataclass definitions - use the ones from compiler.py
 
 
 def _resolve_project_root() -> Path:
@@ -713,7 +698,7 @@ def _init_platformio_build(
     return InitResult(success=True, output="", build_dir=build_dir)
 
 
-class PioCompiler:
+class PioCompiler(Compiler):
     def __init__(
         self,
         board: Board | str,
@@ -721,7 +706,10 @@ class PioCompiler:
         additional_defines: list[str] | None = None,
         additional_include_dirs: list[str] | None = None,
         additional_libs: list[str] | None = None,
-    ):
+    ) -> None:
+        # Call parent constructor
+        super().__init__()
+
         # Convert string to Board object if needed
         if isinstance(board, str):
             self.board = create_board(board)
@@ -1172,8 +1160,8 @@ class PioCompiler:
         has_access, _ = self.check_usb_permissions()
         return has_access
 
-    def install_udev_rules(self) -> bool:
-        """Install PlatformIO udev rules on Linux.
+    def install_usb_permissions(self) -> bool:
+        """Install platform-specific USB permissions (e.g., udev rules on Linux).
 
         Returns:
             True if installation succeeded, False otherwise
