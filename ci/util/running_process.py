@@ -10,7 +10,7 @@ import time
 import urllib.parse
 from pathlib import Path
 from queue import Queue
-from typing import Any, Callable, Match, Union
+from typing import Any, Callable, Match, Protocol, Union
 
 
 class EndOfStream(Exception):
@@ -19,6 +19,29 @@ class EndOfStream(Exception):
     """
 
     pass
+
+
+class OutputFormatter(Protocol):
+    """Protocol for output formatters that can be used with RunningProcess."""
+
+    def begin(self) -> None:
+        """Called when output processing begins. Starts internal timing."""
+        ...
+
+    def transform(self, line: str) -> str:
+        """Transform a single line of output.
+
+        Args:
+            line: Raw line from the process output
+
+        Returns:
+            Transformed line
+        """
+        ...
+
+    def end(self) -> None:
+        """Called when output processing ends. For completeness."""
+        ...
 
 
 def normalize_error_warning_paths(line: str) -> str:
@@ -152,6 +175,7 @@ class RunningProcess:
         enable_stack_trace: bool = True,  # Enable stack trace dumping on timeout
         on_complete: Callable[[], None]
         | None = None,  # Callback to execute when process completes
+        output_formatter: OutputFormatter | None = None,
     ):
         """
         Initialize the RunningProcess instance. Note that stderr is merged into stdout!!
@@ -164,6 +188,7 @@ class RunningProcess:
             timeout (int): Timeout in seconds for process execution. Default 30 seconds.
             enable_stack_trace (bool): If True, dump stack trace when process times out.
             on_complete (Callable[[], None] | None): Callback function to execute when process completes.
+            output_formatter (OutputFormatter | None): Optional formatter for processing output lines.
         """
         if isinstance(command, list):
             command = subprocess.list2cmdline(command)
@@ -178,6 +203,7 @@ class RunningProcess:
         self.timeout = timeout
         self.enable_stack_trace = enable_stack_trace
         self.on_complete = on_complete
+        self.output_formatter = output_formatter
         self.reader_thread: threading.Thread | None = None
         self.shutdown: threading.Event = threading.Event()
         self._start_time: float | None = None
@@ -260,6 +286,10 @@ class RunningProcess:
         # This excludes process creation overhead from timing measurements
         self._start_time = time.time()
 
+        # Start the output formatter if provided
+        if self.output_formatter:
+            self.output_formatter.begin()
+
         def output_reader() -> None:
             """Continuously pump stdout to prevent subprocess from blocking on full pipe buffer"""
             try:
@@ -273,13 +303,20 @@ class RunningProcess:
                         self._time_last_stdout_line = time.time()
                         if self.shutdown.is_set():
                             break
-                        # Strip whitespace and queue non-empty lines
+                        # Strip whitespace and transform line if formatter provided
                         line_stripped = line.rstrip()
-                        if line_stripped:  # Only queue non-empty lines
-                            self.output_queue.put(line_stripped)
-                            self.accumulated_output.append(
-                                line_stripped
-                            )  # Also store for later retrieval
+                        if line_stripped:  # Only process non-empty lines
+                            # Transform line if formatter is provided
+                            if self.output_formatter:
+                                transformed_line = self.output_formatter.transform(
+                                    line_stripped
+                                )
+                            else:
+                                transformed_line = line_stripped
+
+                            # Queue and store the transformed line
+                            self.output_queue.put(transformed_line)
+                            self.accumulated_output.append(transformed_line)
 
                     # When the loop exits, we've reached EOF
                     self.output_queue.put(None)
@@ -446,21 +483,16 @@ class RunningProcess:
                 self.shutdown.set()
                 self.reader_thread.join(timeout=0.05)  # 50ms for forced shutdown
 
-        # Drain any remaining output
-        while True:
-            try:
-                line = self.output_queue.get_nowait()
-                if line is None:  # End of output marker
-                    break
-            except queue.Empty:
-                break
-
         # Execute completion callback if provided
         if self.on_complete is not None:
             try:
                 self.on_complete()
             except Exception as e:
                 print(f"Warning: on_complete callback failed: {e}")
+
+        # End the output formatter if provided
+        if self.output_formatter:
+            self.output_formatter.end()
 
         return rtn
 

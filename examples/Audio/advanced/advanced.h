@@ -12,6 +12,7 @@
 #include "fl/fft.h"
 #include "fl/xymap.h"
 #include "fl/math.h"
+#include "fl/math_macros.h"
 
 using namespace fl;
 
@@ -167,12 +168,12 @@ void drawSpectrumBars(FFTBins* fft, float /* peak */) {
     
     int barWidth = WIDTH / NUM_BANDS;
     
-    for (int band = 0; band < NUM_BANDS && band < fft->bins_db.size(); band++) {
+    for (size_t band = 0; band < NUM_BANDS && band < fft->bins_db.size(); band++) {
         float magnitude = fft->bins_db[band];
         
         // Apply noise floor
         magnitude = magnitude / 100.0f;  // Normalize from dB
-        magnitude = max(0.0f, magnitude - noiseFloor.value());
+        magnitude = MAX(0.0f, magnitude - noiseFloor.value());
         
         // Smooth the FFT
         fftSmooth[band] = fftSmooth[band] * 0.8f + magnitude * 0.2f;
@@ -221,7 +222,7 @@ void drawRadialSpectrum(FFTBins* fft, float /* peak */) {
         if (band >= fft->bins_db.size()) continue;
         
         float magnitude = fft->bins_db[band] / 100.0f;
-        magnitude = max(0.0f, magnitude - noiseFloor.value());
+        magnitude = MAX(0.0f, magnitude - noiseFloor.value());
         magnitude *= audioGain.value() * autoGainValue;
         magnitude = fl::clamp(magnitude, 0.0f, 1.0f);
         
@@ -250,8 +251,8 @@ void drawWaveform(const Slice<const int16_t>& pcm, float /* peak */) {
     int samplesPerPixel = pcm.size() / WIDTH;
     int centerY = HEIGHT / 2;
     
-    for (int x = 0; x < WIDTH; x++) {
-        int sampleIndex = x * samplesPerPixel;
+    for (size_t x = 0; x < WIDTH; x++) {
+        size_t sampleIndex = x * samplesPerPixel;
         if (sampleIndex >= pcm.size()) break;
         
         // Get the raw sample value

@@ -8,6 +8,7 @@ Provides a clean interface for building FastLED projects with PlatformIO.
 import json
 import os
 import platform
+import re
 import shutil
 import subprocess
 import threading
@@ -24,6 +25,7 @@ from filelock import FileLock, Timeout  # type: ignore
 
 from ci.compiler.compiler import Compiler, InitResult, SketchResult
 from ci.util.boards import ALL, Board, create_board
+from ci.util.output_formatter import create_sketch_path_formatter
 from ci.util.create_build_dir import insert_tool_aliases
 from ci.util.running_process import EndOfStream, RunningProcess
 
@@ -739,14 +741,18 @@ def _init_platformio_build(
     # Start timer for this example
     start_time = time.time()
 
-    running_process = RunningProcess(run_cmd, cwd=build_dir, auto_run=True)
+    # Create formatter for path substitution and timestamping
+    formatter = create_sketch_path_formatter(example)
+
+    running_process = RunningProcess(
+        run_cmd, cwd=build_dir, auto_run=True, output_formatter=formatter
+    )
+    # Output is transformed by the formatter, but we need to print it
     while line := running_process.get_next_line():
         if isinstance(line, EndOfStream):
             break
-        assert isinstance(line, str)
-        # Add timestamp to each line
-        elapsed = time.time() - start_time
-        print(f"{elapsed:.2f} {line}")
+        # Print the transformed line
+        print(line)
 
     running_process.wait()
 
@@ -898,24 +904,37 @@ class PioCompiler(Compiler):
 
         print(f"Running command: {subprocess.list2cmdline(run_cmd)}")
 
-        # Start timer for this example
-        start_time = time.time()
+        # Create formatter for path substitution and timestamping
+        formatter = create_sketch_path_formatter(example)
 
-        running_process = RunningProcess(run_cmd, cwd=self.build_dir, auto_run=True)
+        running_process = RunningProcess(
+            run_cmd, cwd=self.build_dir, auto_run=True, output_formatter=formatter
+        )
         try:
+            # Output is transformed by the formatter, but we need to print it
             while line := running_process.get_next_line(timeout=60):
                 if isinstance(line, EndOfStream):
                     break
-                # Add timestamp to each line
-                elapsed = time.time() - start_time
-                print(f"{elapsed:.2f} {line}")
+                # Print the transformed line
+                print(line)
         except OSError as e:
             # Handle output encoding issues on Windows
-            elapsed = time.time() - start_time
-            print(f"{elapsed:.2f} Output encoding issue: {e}")
+            print(f"Output encoding issue: {e}")
             pass
 
         running_process.wait()
+
+        success = running_process.returncode == 0
+
+        # Print SUCCESS/FAILED message immediately in worker thread to avoid race conditions
+        if success:
+            green_color = "\033[32m"
+            reset_color = "\033[0m"
+            print(f"{green_color}SUCCESS: {example}{reset_color}")
+        else:
+            red_color = "\033[31m"
+            reset_color = "\033[0m"
+            print(f"{red_color}FAILED: {example}{reset_color}")
 
         # Check if build was successful
         build_success = running_process.returncode == 0
@@ -925,7 +944,7 @@ class PioCompiler(Compiler):
             _generate_build_info_json_from_existing_build(self.build_dir, self.board)
 
         return SketchResult(
-            success=build_success,
+            success=success,
             output=running_process.stdout,
             build_dir=self.build_dir,
             example=example,
@@ -936,6 +955,11 @@ class PioCompiler(Compiler):
         if not self.initialized:
             init_result = self._internal_init_build_no_lock(example)
             if not init_result.success:
+                # Print FAILED message immediately in worker thread
+                red_color = "\033[31m"
+                reset_color = "\033[0m"
+                print(f"{red_color}FAILED: {example}{reset_color}")
+
                 return SketchResult(
                     success=False,
                     output=init_result.output,
@@ -943,6 +967,11 @@ class PioCompiler(Compiler):
                     example=example,
                 )
             # If initialization succeeded and we just built the example, return success
+            # Print SUCCESS message immediately in worker thread
+            green_color = "\033[32m"
+            reset_color = "\033[0m"
+            print(f"{green_color}SUCCESS: {example}{reset_color}")
+
             return SketchResult(
                 success=True,
                 output="Built during initialization",
@@ -1065,23 +1094,25 @@ class PioCompiler(Compiler):
 
             print(f"Running upload command: {subprocess.list2cmdline(upload_cmd)}")
 
-            # Start timer for upload
-            start_time = time.time()
+            # Create formatter for upload output
+            formatter = create_sketch_path_formatter(example)
 
             running_process = RunningProcess(
-                upload_cmd, cwd=self.build_dir, auto_run=True
+                upload_cmd,
+                cwd=self.build_dir,
+                auto_run=True,
+                output_formatter=formatter,
             )
             try:
+                # Output is transformed by the formatter, but we need to print it
                 while line := running_process.get_next_line(timeout=60):
                     if isinstance(line, EndOfStream):
                         break
-                    # Add timestamp to each line
-                    elapsed = time.time() - start_time
-                    print(f"{elapsed:.2f} {line}")
+                    # Print the transformed line
+                    print(line)
             except OSError as e:
                 # Handle output encoding issues on Windows
-                elapsed = time.time() - start_time
-                print(f"{elapsed:.2f} Upload encoding issue: {e}")
+                print(f"Upload encoding issue: {e}")
                 pass
 
             running_process.wait()

@@ -8,6 +8,7 @@ This replaces the previous complex compilation system with a simpler approach us
 
 import argparse
 import sys
+import threading
 import time
 from concurrent.futures import Future, as_completed
 from pathlib import Path
@@ -15,35 +16,77 @@ from typing import List, Optional, cast
 
 from ci.compiler.compiler import SketchResult
 from ci.compiler.pio import PioCompiler
-from ci.util.boards import Board, create_board
+from ci.util.boards import ALL, Board, create_board
 
 
-# Default boards to compile for
-DEFAULT_BOARDS_NAMES = [
-    "uno",  # Build is faster if this is first, because it's used for global init.
-    "esp32dev",
-    "esp01",  # ESP8266
-    "esp32c3",
-    "esp32c6",
-    "esp32s3",
-    "teensylc",
-    "teensy31",
-    "teensy41",
-    "digix",
-    "rpipico",
-    "rpipico2",
-]
+def green_text(text: str) -> str:
+    """Return text in green color."""
+    return f"\033[32m{text}\033[0m"
 
-# Default examples to compile
-DEFAULT_EXAMPLES = [
-    "Blink",
-    "DemoReel100",
-    "Fire2012",
-    "ColorPalette",
-    "Noise",
-    "Pride2015",
-    "Pacifica",
-]
+
+def red_text(text: str) -> str:
+    """Return text in red color."""
+    return f"\033[31m{text}\033[0m"
+
+
+def get_default_boards() -> List[str]:
+    """Get all board names from the ALL boards list, with preferred boards first."""
+    # These are the boards we want to compile first (preferred order)
+    # Order matters: UNO first because it's used for global init and builds faster
+    preferred_board_names = [
+        "uno",  # Build is faster if this is first, because it's used for global init.
+        "esp32dev",
+        "esp01",  # ESP8266
+        "esp32c3",
+        "esp32c6",
+        "esp32s3",
+        "teensylc",
+        "teensy31",
+        "teensy41",
+        "digix",
+        "rpipico",
+        "rpipico2",
+    ]
+
+    # Get all available board names from the ALL list
+    available_board_names = {board.board_name for board in ALL}
+
+    # Start with preferred boards that exist, warn about missing ones
+    default_boards: List[str] = []
+    for board_name in preferred_board_names:
+        if board_name in available_board_names:
+            default_boards.append(board_name)
+        else:
+            print(
+                f"WARNING: Preferred board '{board_name}' not found in available boards"
+            )
+
+    # Add all remaining boards (sorted for consistency)
+    remaining_boards = sorted(available_board_names - set(default_boards))
+    default_boards.extend(remaining_boards)
+
+    return default_boards
+
+
+def get_all_examples() -> List[str]:
+    """Get all available example names from the examples directory."""
+    project_root = Path(__file__).parent.parent.resolve()
+    examples_dir = project_root / "examples"
+
+    if not examples_dir.exists():
+        return []
+
+    examples: List[str] = []
+    for item in examples_dir.iterdir():
+        if item.is_dir():
+            # Check if it contains a .ino file with the same name
+            ino_file = item / f"{item.name}.ino"
+            if ino_file.exists():
+                examples.append(item.name)
+
+    # Sort for consistent ordering
+    examples.sort()
+    return examples
 
 
 def parse_args(args: Optional[list[str]] = None) -> argparse.Namespace:
@@ -79,16 +122,6 @@ def parse_args(args: Optional[list[str]] = None) -> argparse.Namespace:
         "--supported-boards",
         action="store_true",
         help="Print the list of supported boards and exit",
-    )
-    parser.add_argument(
-        "--allsrc",
-        action="store_true",
-        help="Enable all-source build (adds FASTLED_ALL_SRC=1 define)",
-    )
-    parser.add_argument(
-        "--no-allsrc",
-        action="store_true",
-        help="Disable all-source build (adds FASTLED_ALL_SRC=0 define)",
     )
 
     try:
@@ -161,21 +194,27 @@ def compile_board_examples(
         compilation_errors: List[str] = []
         successful_builds = 0
 
-        for future in as_completed(futures):
+        for future in futures:
             try:
                 result = future.result()
                 if result.success:
                     successful_builds += 1
-                    print(f"SUCCESS: {result.example}")
+                    # SUCCESS message is now printed by the worker thread
                 else:
                     compilation_errors.append(f"{result.example}: {result.output}")
-                    print(f"FAILED: {result.example}")
+                    # FAILED message is now printed by the worker thread
+            except KeyboardInterrupt:
+                print("Keyboard interrupt detected, cancelling builds")
+                compiler.cancel_all()
+                import _thread
+
+                _thread.interrupt_main()
+                raise
             except Exception as e:
                 compilation_errors.append(f"Build exception: {str(e)}")
                 print(f"EXCEPTION during build: {e}")
-
-        # Cleanup
-        compiler.cancel_all()
+                # Cleanup
+                compiler.cancel_all()
 
         if compilation_errors:
             error_msg = f"Failed to compile {len(compilation_errors)} examples:\n"
@@ -193,14 +232,14 @@ def main() -> int:
     args = parse_args()
 
     if args.supported_boards:
-        print(",".join(DEFAULT_BOARDS_NAMES))
+        print(",".join(get_default_boards()))
         return 0
 
     # Determine which boards to compile for
     if args.boards:
         boards_names = args.boards.split(",")
     else:
-        boards_names = DEFAULT_BOARDS_NAMES
+        boards_names = get_default_boards()
 
     # Get board objects
     boards: List[Board] = []
@@ -224,7 +263,8 @@ def main() -> int:
     elif args.examples:
         examples = args.examples.split(",")
     else:
-        examples = DEFAULT_EXAMPLES
+        # Compile all available examples since builds are fast now!
+        examples = get_all_examples()
 
     # Process example exclusions
     if args.exclude_examples:
@@ -243,12 +283,6 @@ def main() -> int:
     defines: List[str] = []
     if args.defines:
         defines.extend(args.defines.split(","))
-
-    # Add FASTLED_ALL_SRC define when --allsrc or --no-allsrc flag is specified
-    if args.allsrc:
-        defines.append("FASTLED_ALL_SRC=1")
-    elif args.no_allsrc:
-        defines.append("FASTLED_ALL_SRC=0")
 
     # Start compilation
     start_time = time.time()
