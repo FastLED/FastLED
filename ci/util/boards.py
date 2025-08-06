@@ -62,7 +62,34 @@ class Board:
     )
 
     def __post_init__(self) -> None:
+        # Check if framework is set, warn and auto-set to arduino if missing (except for native/stub platforms)
+        if self.framework is None and not self._is_native_or_stub_platform():
+            print(
+                f"WARNING: Board '{self.board_name}' has no framework specified. Auto-setting to 'arduino'."
+            )
+            self.framework = "arduino"
+
         ALL.append(self)
+
+    def _is_native_or_stub_platform(self) -> bool:
+        """Check if this is a native or stub platform that doesn't need a framework"""
+        # Check for native platform
+        if self.platform and (
+            "native" in self.platform.lower() or "stub" in self.platform.lower()
+        ):
+            return True
+
+        # Check for stub build flags
+        if self.build_flags:
+            for flag in self.build_flags:
+                if "FASTLED_STUB" in flag or "PLATFORM_NATIVE" in flag:
+                    return True
+
+        # Check no_board_spec flag (typically used for native platforms)
+        if self.no_board_spec:
+            return True
+
+        return False
 
     def clone(self) -> "Board":
         out = Board(
