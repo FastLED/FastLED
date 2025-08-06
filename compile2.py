@@ -10,6 +10,7 @@ import argparse
 import sys
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Callable
 
 from ci.compiler.pio import PlatformIoBuilder, BuildResult, run_pio_build
 from ci.util.boards import ALL
@@ -18,6 +19,34 @@ from ci.util.boards import ALL
 def yellow_text(text: str) -> str:
     """Return text in yellow color using ANSI escape codes."""
     return f"\033[33m{text}\033[0m"
+
+
+def green_text(text: str) -> str:
+    """Return text in green color using ANSI escape codes."""
+    return f"\033[32m{text}\033[0m"
+
+
+def red_text(text: str) -> str:
+    """Return text in red color using ANSI escape codes."""
+    return f"\033[31m{text}\033[0m"
+
+
+def create_banner(text: str, color_func: Callable[[str], str]) -> str:
+    """Create a banner with the given text and color function."""
+    # Create a banner box around the text
+    border_char = "="
+    padding = 2
+    text_width = len(text)
+    total_width = text_width + (padding * 2)
+    
+    # Create the banner lines
+    top_border = border_char * (total_width + 4)
+    middle_line = f"{border_char} {' ' * padding}{text}{' ' * padding} {border_char}"
+    bottom_border = border_char * (total_width + 4)
+    
+    # Apply color to the entire banner
+    banner = f"{top_border}\n{middle_line}\n{bottom_border}"
+    return color_func(banner)
 
 
 def _resolve_example_paths(examples: list[str]) -> list[str]:
@@ -149,17 +178,25 @@ def main() -> int:
         for future in futures:
             result: BuildResult = future.result(timeout=120)
             if not result.success:
-                print(f"Failed to build {result.example}: {result.output}")
+                error_banner = create_banner(f"BUILD FAILED: {result.example}", red_text)
+                print(f"\n{error_banner}")
+                print(f"Error details: {result.output}")
                 cancel_futures()
                 return 1
             else:
-                print(f"Successfully built {result.example}")
+                success_banner = create_banner(f"BUILD SUCCESS: {result.example}", green_text)
+                print(f"\n{success_banner}")
     except Exception as e:
-        print(f"Error: {e}")
+        error_banner = create_banner(f"BUILD ERROR: {e}", red_text)
+        print(f"\n{error_banner}")
         cancel_futures()
         return 1
 
-    print(f"Successfully built all {len(args.examples)} examples")
+    # Final success message for multiple examples
+    if len(args.examples) > 1:
+        final_banner = create_banner(f"ALL BUILDS COMPLETE: {len(args.examples)} examples", green_text)
+        print(f"\n{final_banner}")
+    
     return 0
 
 
