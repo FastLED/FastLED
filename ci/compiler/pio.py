@@ -28,6 +28,26 @@ assert (_PROJECT_ROOT / "library.json").exists(), (
 )
 
 
+_MAIN_CPP_TEMPLATE = """
+// Auto-generated main.cpp stub for PlatformIO
+// This file includes all .ino files from the sketch directory
+
+__INCLUDE_LINES__
+
+// main.cpp is required by PlatformIO but Arduino-style sketches
+// use setup() and loop() functions which are called automatically
+// by the FastLED/Arduino framework
+//
+//
+int main() {
+    setup();
+    while (true) {
+        loop();
+    }
+}
+"""
+
+
 @dataclass
 class InitResult:
     success: bool
@@ -80,7 +100,7 @@ def resolve_project_root() -> Path:
 
 
 def copy_example_source(project_root: Path, build_dir: Path, example: str) -> bool:
-    """Copy example source to the build directory.
+    """Copy example source to the build directory with sketch subdirectory structure.
 
     Args:
         project_root: FastLED project root directory
@@ -95,18 +115,87 @@ def copy_example_source(project_root: Path, build_dir: Path, example: str) -> bo
     if not example_path.exists():
         return False
 
-    # Copy example source to src directory (PlatformIO requirement)
+    # Create src and sketch directories (PlatformIO requirement with sketch subdirectory)
     src_dir = build_dir / "src"
-    if src_dir.exists():
-        shutil.rmtree(src_dir)
-    src_dir.mkdir(parents=True, exist_ok=True)
+    sketch_dir = src_dir / "sketch"
 
-    # Copy all files from example directory
+    # Create directories if they don't exist, but don't remove existing src_dir
+    src_dir.mkdir(exist_ok=True)
+
+    # Clean and recreate sketch subdirectory for fresh .ino files
+    if sketch_dir.exists():
+        shutil.rmtree(sketch_dir)
+    sketch_dir.mkdir(parents=True, exist_ok=True)
+
+    # Copy all files from example directory to sketch subdirectory
+    ino_files: list[str] = []
     for file_path in example_path.iterdir():
         if file_path.is_file():
-            shutil.copy2(file_path, src_dir)
+            if "fastled_js" in str(file_path):
+                # skip fastled_js output folder.
+                continue
+            shutil.copy2(file_path, sketch_dir)
+            print(f"Copied {file_path} to {sketch_dir}")
+            if file_path.suffix == ".ino":
+                ino_files.append(file_path.name)
+
+    # Create or update stub main.cpp that includes the .ino files
+    main_cpp_content = _generate_main_cpp(ino_files)
+    main_cpp_path = src_dir / "main.cpp"
+
+    # Only write main.cpp if content has changed to avoid triggering rebuilds
+    should_write = True
+    if main_cpp_path.exists():
+        try:
+            existing_content = main_cpp_path.read_text(encoding="utf-8")
+            should_write = existing_content != main_cpp_content
+        except (OSError, UnicodeDecodeError):
+            # If we can't read the existing file, write new content
+            should_write = True
+
+    if should_write:
+        main_cpp_path.write_text(main_cpp_content, encoding="utf-8")
 
     return True
+
+
+def _generate_main_cpp(ino_files: list[str]) -> str:
+    """Generate stub main.cpp content that includes .ino files from sketch directory.
+
+    Args:
+        ino_files: List of .ino filenames to include
+
+    Returns:
+        Content for main.cpp file
+    """
+    includes: list[str] = []
+    for ino_file in sorted(ino_files):
+        includes.append(f'#include "sketch/{ino_file}"')
+
+    include_lines = "\n".join(includes)
+
+    int_main = """
+int main() {{
+    setup();
+    while (true) {{
+        loop();
+    }}
+}}
+"""
+
+    main_cpp_content = f"""// Auto-generated main.cpp stub for PlatformIO
+// This file includes all .ino files from the sketch directory
+
+{include_lines}
+
+// main.cpp is required by PlatformIO but Arduino-style sketches
+// use setup() and loop() functions which are called automatically
+// by the FastLED/Arduino framework
+//
+//
+{int_main}
+"""
+    return main_cpp_content
 
 
 def copy_boards_directory(project_root: Path, build_dir: Path) -> bool:
@@ -360,7 +449,13 @@ class PlatformIoBuilder:
             )
 
         # Run PlatformIO build
-        run_cmd: list[str] = ["pio", "run", "--project-dir", str(self.build_dir)]
+        run_cmd: list[str] = [
+            "pio",
+            "run",
+            "--project-dir",
+            str(self.build_dir),
+            "--disable-auto-clean",
+        ]
         if self.verbose:
             run_cmd.append("--verbose")
 
