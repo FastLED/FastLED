@@ -137,7 +137,16 @@ class Board:
         data_str = self.__repr__()
         return hash(data_str)
 
-    def to_platformio_ini(self, example: str | None = None) -> str:
+    def to_platformio_ini(
+        self,
+        example: str | None = None,
+        additional_defines: list[str] | None = None,
+        additional_include_dirs: list[str] | None = None,
+        include_platformio_section: bool = False,
+        core_dir: str | None = None,
+        packages_dir: str | None = None,
+        project_root: str | None = None,
+    ) -> str:
         """Return a `platformio.ini` snippet representing this board.
 
         The output is suitable for directly appending to a *platformio.ini* file
@@ -147,8 +156,26 @@ class Board:
         included because they are consumed exclusively by the build helpers in
         the *ci/* folder and would be ignored (or flagged as errors) by
         PlatformIO itself.
+
+        Args:
+            example: Example name for dynamic build flags (currently unused)
+            additional_defines: Additional defines to merge with board defines
+            additional_include_dirs: Additional include directories to merge with build flags
+            include_platformio_section: Whether to include [platformio] section with core_dir/packages_dir
+            core_dir: PlatformIO core directory path
+            packages_dir: PlatformIO packages directory path
+            project_root: FastLED project root for lib_deps symlink
         """
         lines: list[str] = []
+
+        # Optional [platformio] section
+        if include_platformio_section:
+            lines.append("[platformio]")
+            if core_dir:
+                lines.append(f"core_dir = {core_dir}")
+            if packages_dir:
+                lines.append(f"packages_dir = {packages_dir}")
+            lines.append("")
 
         # Section header
         lines.append(f"[env:{self.board_name}]")
@@ -186,9 +213,24 @@ class Board:
         if self.defines:
             build_flags_elements.extend(f"-D{define}" for define in self.defines)
 
+        # Add additional defines
+        if additional_defines:
+            build_flags_elements.extend(f"-D{define}" for define in additional_defines)
+
         # Use static build flags
         if self.build_flags:
             build_flags_elements.extend(self.build_flags)
+
+        # Add additional include directories
+        if additional_include_dirs:
+            build_flags_elements.extend(
+                f"-I{include_dir}" for include_dir in additional_include_dirs
+            )
+
+        # Add sketch directory include path when project_root is provided (enables "shared/file.h" style includes)
+        if project_root:
+            build_flags_elements.append("-Isrc/sketch")
+
         if build_flags_elements:
             # Join all build flags with a space so that PlatformIO parses them
             lines.append(f"build_flags = {' '.join(build_flags_elements)}")
@@ -209,6 +251,15 @@ class Board:
         # Library Dependency Finder mode (for enhanced dependency finding)
         if self.lib_ldf_mode:
             lines.append(f"lib_ldf_mode = {self.lib_ldf_mode}")
+
+        # Add FastLED-specific configurations if project_root is provided
+        if project_root:
+            # Only add default lib_ldf_mode if board doesn't specify its own
+            current_config = "\n".join(lines)
+            if "lib_ldf_mode" not in current_config:
+                lines.append("lib_ldf_mode = chain")
+            lines.append("lib_archive = true")
+            lines.append(f"lib_deps = symlink://{project_root}")
 
         return "\n".join(lines) + "\n"
 

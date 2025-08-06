@@ -6,7 +6,7 @@
 // Standard Arduino define - indicates Arduino environment and version
 // Using a modern Arduino IDE version number (1.8.19 = 10819)
 #ifndef ARDUINO
-#define ARDUINO "FastLED Arduino Wasm Stub"
+#define ARDUINO 1
 #endif
 
 #include "fl/str.h"
@@ -20,11 +20,12 @@
 #include "fl/namespace.h"
 // Arduino timing functions - provided by time_stub.h
 #include "time_stub.h"
+#include "fl/math_macros.h"
 
 FASTLED_USING_NAMESPACE
 
-using std::max;
-using std::min;
+#define min MIN
+#define max MAX
 
 
 namespace fl {

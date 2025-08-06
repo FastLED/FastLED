@@ -25,7 +25,7 @@ from ci.util.running_process import EndOfStream, RunningProcess
 
 _HERE = Path(__file__).parent.resolve()
 _PROJECT_ROOT = _HERE.parent.parent.resolve()
-_LIB_LDF_MODE = "chain"
+
 
 assert (_PROJECT_ROOT / "library.json").exists(), (
     f"Library JSON not found at {_PROJECT_ROOT / 'library.json'}"
@@ -151,16 +151,20 @@ def _apply_board_specific_config(
     additional_include_dirs: list[str] | None = None,
 ) -> bool:
     """Apply board-specific build configuration from Board class."""
-    # Board.to_platformio_ini() already handles this comprehensively
-    # This function mainly for validation and logging
+    # Use centralized path management
+    paths = FastLEDPaths(board.board_name)
+    paths.ensure_directories_exist()
 
-    build_config = BuildConfig(
-        board=board,
+    # Generate platformio.ini content using the enhanced Board method
+    config_content = board.to_platformio_ini(
         example=example,
         additional_defines=additional_defines,
         additional_include_dirs=additional_include_dirs,
+        include_platformio_section=True,
+        core_dir=str(paths.core_dir),
+        packages_dir=str(paths.packages_dir),
+        project_root=str(_PROJECT_ROOT),
     )
-    config_content = build_config.to_platformio_ini()
     platformio_ini_path.write_text(config_content)
 
     # Log applied configurations for debugging
@@ -192,7 +196,7 @@ class FastLEDPaths:
     @property
     def build_dir(self) -> Path:
         """Project-local build directory for this board."""
-        return self.project_root / ".build" / "test_platformio" / self.board_name
+        return self.project_root / ".build" / "pio" / self.board_name
 
     @property
     def platform_lock_file(self) -> Path:
@@ -317,116 +321,6 @@ class SketchResult:
     output: str
     build_dir: Path
     example: str
-
-
-@dataclass
-class BuildConfig:
-    board: Board  # Use Board class instead of individual fields
-    example: str | None = None  # Example name for dynamic build flags
-    additional_defines: list[str] | None = (
-        None  # Additional defines to merge with board defines
-    )
-    additional_include_dirs: list[str] | None = (
-        None  # Additional include directories to merge with build flags
-    )
-
-    def to_platformio_ini(self) -> str:
-        """Generate platformio.ini content using Board configuration."""
-        out: list[str] = []
-
-        # Use centralized path management
-        paths = FastLEDPaths(self.board.board_name)
-
-        # Create the directories if they don't exist
-        paths.ensure_directories_exist()
-
-        out.append("[platformio]")
-        out.append(f"core_dir = {paths.core_dir}")
-        out.append(f"packages_dir = {paths.packages_dir}")
-        out.append("")
-
-        out.append(f"[env:{self.board.board_name}]")
-
-        # Use Board's comprehensive configuration (pass example for dynamic build flags)
-        board_config = self.board.to_platformio_ini(example=self.example)
-        # Extract everything after the section header
-        lines = board_config.split("\n")[1:]  # Skip [env:...] line
-
-        # Process lines to merge additional defines and include directories with existing build_flags
-        for line in lines:
-            line = line.strip()
-            if not line:
-                continue
-
-            # If this is a build_flags line and we have additional flags, merge them
-            if line.startswith("build_flags = ") and (
-                self.additional_defines or self.additional_include_dirs
-            ):
-                existing_flags = line[14:]  # Remove "build_flags = " prefix
-
-                # Build list of additional flags
-                additional_flag_parts: list[str] = []
-
-                # Add defines
-                if self.additional_defines:
-                    additional_flag_parts.extend(
-                        f"-D{define}" for define in self.additional_defines
-                    )
-
-                # Add include directories
-                if self.additional_include_dirs:
-                    additional_flag_parts.extend(
-                        f"-I{include_dir}"
-                        for include_dir in self.additional_include_dirs
-                    )
-
-                # Merge with existing flags
-                if additional_flag_parts:
-                    additional_flags = " ".join(additional_flag_parts)
-                    if existing_flags:
-                        merged_flags = f"{existing_flags} {additional_flags}"
-                    else:
-                        merged_flags = additional_flags
-                    out.append(f"build_flags = {merged_flags}")
-                else:
-                    out.append(line)
-            else:
-                out.append(line)
-
-        # If no build_flags line existed but we have additional flags, add them
-        if self.additional_defines or self.additional_include_dirs:
-            has_build_flags = any(
-                line.strip().startswith("build_flags = ") for line in lines
-            )
-            if not has_build_flags:
-                additional_flag_parts: list[str] = []
-
-                # Add defines
-                if self.additional_defines:
-                    additional_flag_parts.extend(
-                        f"-D{define}" for define in self.additional_defines
-                    )
-
-                # Add include directories
-                if self.additional_include_dirs:
-                    additional_flag_parts.extend(
-                        f"-I{include_dir}"
-                        for include_dir in self.additional_include_dirs
-                    )
-
-                if additional_flag_parts:
-                    additional_flags = " ".join(additional_flag_parts)
-                    out.append(f"build_flags = {additional_flags}")
-
-        # Add FastLED-specific configurations
-        # Only add default lib_ldf_mode if board doesn't specify its own
-        board_config_text = "\n".join(out)
-        if "lib_ldf_mode" not in board_config_text:
-            out.append(f"lib_ldf_mode = {_LIB_LDF_MODE}")
-        out.append("lib_archive = true")
-        out.append(f"lib_deps = symlink://{_PROJECT_ROOT}")
-
-        return "\n".join(out)
 
 
 def _resolve_project_root() -> Path:
@@ -694,7 +588,7 @@ def _init_platformio_build(
 ) -> InitResult:
     """Initialize the PlatformIO build directory. Assumes lock is already held by caller."""
     project_root = _resolve_project_root()
-    build_dir = project_root / ".build" / "test_platformio" / board.board_name
+    build_dir = project_root / ".build" / "pio" / board.board_name
 
     # Lock is already held by build() - no need to acquire again
 
