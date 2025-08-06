@@ -216,6 +216,18 @@ def compile_board_examples(
                 # Cleanup
                 compiler.cancel_all()
 
+        # Show compiler statistics after all builds complete
+        try:
+            stats = compiler.get_cache_stats()
+            if stats:
+                print("\n" + "=" * 60)
+                print("COMPILER STATISTICS")
+                print("=" * 60)
+                print(stats)
+                print("=" * 60)
+        except Exception as e:
+            print(f"Warning: Could not retrieve compiler statistics: {e}")
+
         if compilation_errors:
             error_msg = f"Failed to compile {len(compilation_errors)} examples:\n"
             error_msg += "\n".join(f"  - {error}" for error in compilation_errors)

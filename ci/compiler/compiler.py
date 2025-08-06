@@ -113,3 +113,15 @@ class Compiler(ABC):
             True if installation succeeded, False otherwise
         """
         pass
+
+    @abstractmethod
+    def get_cache_stats(self) -> str:
+        """Get compiler statistics as a formatted string.
+
+        This can include cache statistics, build metrics, performance data,
+        or any other relevant compiler statistics.
+
+        Returns:
+            Formatted string containing compiler statistics, or empty string if none available
+        """
+        pass

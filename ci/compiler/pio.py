@@ -775,6 +775,7 @@ def _copy_example_source(project_root: Path, build_dir: Path, example: str) -> b
         elif file_path.is_dir():
             # Recursively sync subdirectories for better caching
             dest_subdir = sketch_dir / file_path.name
+            dest_subdir.mkdir(parents=True, exist_ok=True)
             sync(str(file_path), str(dest_subdir), "sync", purge=True)
             try:
                 rel_source = file_path.relative_to(Path.cwd())
@@ -853,6 +854,9 @@ def _copy_boards_directory(project_root: Path, build_dir: Path) -> bool:
         return False
 
     try:
+        # Ensure target directory exists for dirsync
+        boards_dst.mkdir(parents=True, exist_ok=True)
+
         # Use sync for better caching - purge=True removes extra files
         sync(str(boards_src), str(boards_dst), "sync", purge=True)
     except Exception as e:
@@ -1406,7 +1410,10 @@ class PioCompiler(Compiler):
         )
 
     def get_cache_stats(self) -> str:
-        """Get cache statistics as a formatted string."""
+        """Get compiler statistics as a formatted string.
+
+        For PIO compiler, this includes cache statistics (sccache/ccache).
+        """
         if self.cache_type == CacheType.NO_CACHE:
             return ""
 
@@ -1850,18 +1857,18 @@ def run_pio_build(
                 nonlocal completed_count
                 completed_count += 1
 
-                # When all futures complete, show cache statistics
+                # When all futures complete, show compiler statistics
                 if completed_count == total_count:
                     try:
                         stats = pio.get_cache_stats()
                         if stats:
                             print("\n" + "=" * 60)
-                            print("CACHE STATISTICS")
+                            print("COMPILER STATISTICS")
                             print("=" * 60)
                             print(stats)
                             print("=" * 60)
                     except Exception as e:
-                        print(f"Warning: Could not retrieve cache statistics: {e}")
+                        print(f"Warning: Could not retrieve compiler statistics: {e}")
 
             # Add callback to all futures
             for future in futures:

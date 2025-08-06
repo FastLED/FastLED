@@ -217,8 +217,8 @@ void drawRadialSpectrum(FFTBins* fft, float /* peak */) {
     int centerX = WIDTH / 2;
     int centerY = HEIGHT / 2;
     
-    for (int angle = 0; angle < 360; angle += 6) {  // Reduced resolution
-        int band = (angle / 6) % NUM_BANDS;
+    for (size_t angle = 0; angle < 360; angle += 6) {  // Reduced resolution
+        size_t band = (angle / 6) % NUM_BANDS;
         if (band >= fft->bins_db.size()) continue;
         
         float magnitude = fft->bins_db[band] / 100.0f;
