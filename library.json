@@ -74,6 +74,6 @@
             "+<fl/*.cpp>",
             "+<sensors/**/*.cpp>"
         ],
-        "libArchive": false
+        "libArchive": true
     }
 }
