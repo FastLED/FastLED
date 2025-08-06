@@ -14,7 +14,7 @@ from concurrent.futures import Future, as_completed
 from pathlib import Path
 from typing import List, Optional, cast
 
-from ci.compiler.compiler import SketchResult
+from ci.compiler.compiler import CacheType, SketchResult
 from ci.compiler.pio import PioCompiler
 from ci.util.boards import ALL, Board, create_board
 
@@ -119,6 +119,9 @@ def parse_args(args: Optional[list[str]] = None) -> argparse.Namespace:
         "-v", "--verbose", action="store_true", help="Enable verbose output"
     )
     parser.add_argument(
+        "--cache", action="store_true", help="Enable sccache for faster compilation"
+    )
+    parser.add_argument(
         "--supported-boards",
         action="store_true",
         help="Print the list of supported boards and exit",
@@ -171,7 +174,7 @@ def resolve_example_path(example: str) -> str:
 
 
 def compile_board_examples(
-    board: Board, examples: List[str], defines: List[str], verbose: bool
+    board: Board, examples: List[str], defines: List[str], verbose: bool, enable_cache: bool
 ) -> tuple[bool, str]:
     """Compile examples for a single board using PioCompiler."""
     print(f"\n{'=' * 60}")
@@ -180,11 +183,15 @@ def compile_board_examples(
     print(f"{'=' * 60}")
 
     try:
+        # Determine cache type based on flag
+        cache_type = CacheType.SCCACHE if enable_cache else CacheType.NO_CACHE
+        
         # Create PioCompiler instance
         compiler = PioCompiler(
             board=board,
             verbose=verbose,
             additional_defines=defines,
+            cache_type=cache_type,
         )
 
         # Build all examples
@@ -311,6 +318,7 @@ def main() -> int:
             examples=examples,
             defines=defines,
             verbose=args.verbose,
+            enable_cache=args.cache,
         )
 
         if not success:

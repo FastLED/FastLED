@@ -1234,7 +1234,7 @@ class PioCompiler(Compiler):
         additional_defines: list[str] | None = None,
         additional_include_dirs: list[str] | None = None,
         additional_libs: list[str] | None = None,
-        cache_type: CacheType = CacheType.SCCACHE,
+        cache_type: CacheType = CacheType.NO_CACHE,
     ) -> None:
         # Call parent constructor
         super().__init__()
@@ -1830,7 +1830,7 @@ def run_pio_build(
     verbose: bool = False,
     additional_defines: list[str] | None = None,
     additional_include_dirs: list[str] | None = None,
-    cache_type: CacheType = CacheType.SCCACHE,
+    cache_type: CacheType = CacheType.NO_CACHE,
 ) -> list[Future[SketchResult]]:
     """Run build for specified examples and platform using new PlatformIO system.
 
