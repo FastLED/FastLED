@@ -5,21 +5,23 @@ PlatformIO Builder for FastLED
 Provides a clean interface for building FastLED projects with PlatformIO.
 """
 
+import os
 import shutil
 import subprocess
+import threading
 import time
 import warnings
 from concurrent.futures import Future, ThreadPoolExecutor
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Any, Callable, Dict
 
 from dirsync import sync  # type: ignore
+from filelock import FileLock  # type: ignore
 
 from ci.util.boards import ALL, Board, get_board
 from ci.util.running_process import EndOfStream, RunningProcess
 
-
-_EXECUTOR = ThreadPoolExecutor(max_workers=1)
 
 _HERE = Path(__file__).parent.resolve()
 _PROJECT_ROOT = _HERE.parent.parent.resolve()
@@ -30,24 +32,90 @@ assert (_PROJECT_ROOT / "library.json").exists(), (
 )
 
 
-def _get_platform_family(board: Board) -> str:
-    """Detect platform family from Board.platform."""
-    if not board.platform:
-        return "unknown"
+class CountingFileLock:
+    """A FileLock with atomic reference counting and explicit acquire(N)/decrement() methods."""
 
-    platform = board.platform.lower()
-    if "atmel" in platform:
-        return "avr"
-    elif "espressif" in platform:
-        return "esp"
-    elif "apollo3" in platform:
-        return "apollo3"
-    elif "native" in platform:
-        return "native"
-    elif "rpi" in platform or "raspberrypi" in platform:
-        return "rpi"
-    else:
-        return "custom"
+    def __init__(self, platform_name: str, build_dir: Path) -> None:
+        self.platform_name = platform_name
+        self.build_dir = build_dir
+        self.lock_file = build_dir.parent / f"{platform_name}.lock"
+        self._file_lock = FileLock(self.lock_file)  # type: ignore
+        self._count = 0
+        self._count_lock = threading.Lock()
+        self._is_acquired = False
+
+    def acquire(self, count: int) -> None:
+        """Acquire the lock for N work units."""
+        if count <= 0:
+            return
+
+        with self._count_lock:
+            was_zero = self._count == 0
+            self._count += count
+
+        if was_zero:
+            # Only acquire the file lock when going from 0 to N
+            self._acquire_with_warning()
+
+    def decrement(self) -> None:
+        """Decrement the count by 1. Releases lock when count reaches 0."""
+        with self._count_lock:
+            if self._count > 0:
+                self._count -= 1
+                should_release = self._count == 0
+            else:
+                should_release = False
+
+        if should_release:
+            # Only release the file lock when count reaches 0
+            try:
+                self._file_lock.release()
+                self._is_acquired = False
+                print(f"Released lock for platform {self.platform_name}")
+            except Exception as e:
+                warnings.warn(f"Failed to release lock for {self.platform_name}: {e}")
+
+    def _acquire_with_warning(self) -> None:
+        """Acquire the file lock using busy loop to allow keyboard interrupts."""
+        if self._is_acquired:
+            return  # Already acquired
+
+        start_time = time.time()
+        warning_shown = False
+
+        while True:
+            # Try to acquire with very short timeout (non-blocking)
+            try:
+                success = self._file_lock.acquire(timeout=0.1)
+                if success:
+                    self._is_acquired = True
+                    print(f"Acquired lock for platform {self.platform_name}")
+                    return
+            except Exception as e:
+                # If acquire fails completely, re-raise
+                raise
+
+            # Check if we should show warning (after 1 second)
+            elapsed = time.time() - start_time
+            if not warning_shown and elapsed >= 1.0:
+                yellow = "\033[33m"
+                reset = "\033[0m"
+                folder_path = self.build_dir.parent.absolute()
+                print(
+                    f"{yellow}Platform {self.platform_name} is waiting to acquire {folder_path}{reset}"
+                )
+                warning_shown = True
+
+            # Check for timeout (after 5 seconds)
+            if elapsed >= 5.0:
+                raise TimeoutError(
+                    f"Failed to acquire lock for platform {self.platform_name} within 5 seconds. "
+                    f"Lock file: {self.lock_file}. "
+                    f"This may indicate another process is holding the lock or a deadlock occurred."
+                )
+
+            # Small sleep to prevent excessive CPU usage while allowing interrupts
+            time.sleep(0.1)
 
 
 def _ensure_platform_installed(board: Board) -> bool:
@@ -107,6 +175,18 @@ class BuildConfig:
     def to_platformio_ini(self) -> str:
         """Generate platformio.ini content using Board configuration."""
         out: list[str] = []
+
+        # Add global PlatformIO configuration section with custom cache location
+        home_dir = Path.home()
+        fastled_pio_home = home_dir / ".fastled" / "compile" / "pio"
+
+        # Create the directory if it doesn't exist
+        fastled_pio_home.mkdir(parents=True, exist_ok=True)
+
+        out.append("[platformio]")
+        out.append(f"core_dir = {fastled_pio_home}")
+        out.append("")
+
         out.append(f"[env:{self.board.board_name}]")
 
         # Use Board's comprehensive configuration
@@ -133,6 +213,28 @@ def _resolve_project_root() -> Path:
             return current
         current = current.parent
     raise RuntimeError("Could not find FastLED project root")
+
+
+def _create_building_banner(example: str) -> str:
+    """Create a building banner for the given example."""
+    banner_text = f"BUILDING {example}"
+    border_char = "="
+    padding = 2
+    text_width = len(banner_text)
+    total_width = text_width + (padding * 2)
+
+    top_border = border_char * (total_width + 4)
+    middle_line = (
+        f"{border_char} {' ' * padding}{banner_text}{' ' * padding} {border_char}"
+    )
+    bottom_border = border_char * (total_width + 4)
+
+    banner = f"{top_border}\n{middle_line}\n{bottom_border}"
+
+    # Apply blue color using ANSI escape codes
+    blue_color = "\033[34m"
+    reset_color = "\033[0m"
+    return f"{blue_color}{banner}{reset_color}"
 
 
 def _get_example_error_message(project_root: Path, example: str) -> str:
@@ -204,7 +306,14 @@ def _copy_example_source(project_root: Path, build_dir: Path, example: str) -> b
                 # skip fastled_js output folder.
                 continue
             shutil.copy2(file_path, sketch_dir)
-            print(f"Copied {file_path} to {sketch_dir}")
+            # Calculate relative paths for cleaner output
+            try:
+                rel_source = file_path.relative_to(Path.cwd())
+                rel_dest = sketch_dir.relative_to(Path.cwd())
+                print(f"Copied {rel_source} to {rel_dest}")
+            except ValueError:
+                # Fallback to absolute paths if relative calculation fails
+                print(f"Copied {file_path} to {sketch_dir}")
             if file_path.suffix == ".ino":
                 ino_files.append(file_path.name)
 
@@ -309,13 +418,26 @@ def _copy_fastled_library(project_root: Path, build_dir: Path) -> bool:
         # Convert to absolute path for cross-platform compatibility
         fastled_src_absolute = fastled_src_path.resolve()
         lib_dir.symlink_to(fastled_src_absolute, target_is_directory=True)
-        print(f"Created symlink: {lib_dir} -> {fastled_src_absolute}")
+        # Calculate relative paths for cleaner output
+        try:
+            rel_lib_dir = lib_dir.relative_to(Path.cwd())
+            rel_src_path = fastled_src_path.relative_to(Path.cwd())
+            print(f"Created symlink: {rel_lib_dir} -> {rel_src_path}")
+        except ValueError:
+            # Fallback to absolute paths if relative calculation fails
+            print(f"Created symlink: {lib_dir} -> {fastled_src_absolute}")
     except OSError as e:
         warnings.warn(f"Failed to create symlink (trying copy fallback): {e}")
         # Fallback to copy if symlink fails (e.g., no admin privileges on Windows)
         try:
             shutil.copytree(fastled_src_path, lib_dir, dirs_exist_ok=True)
-            print(f"Fallback: Copied FastLED library to {lib_dir}")
+            # Calculate relative paths for cleaner output
+            try:
+                rel_lib_dir = lib_dir.relative_to(Path.cwd())
+                print(f"Fallback: Copied FastLED library to {rel_lib_dir}")
+            except ValueError:
+                # Fallback to absolute paths if relative calculation fails
+                print(f"Fallback: Copied FastLED library to {lib_dir}")
         except Exception as copy_error:
             warnings.warn(f"Failed to copy FastLED library: {copy_error}")
             return False
@@ -326,17 +448,15 @@ def _copy_fastled_library(project_root: Path, build_dir: Path) -> bool:
 
 
 def _init_platformio_build(board: Board, verbose: bool, example: str) -> InitResult:
-    """Initialize the PlatformIO build directory."""
+    """Initialize the PlatformIO build directory. Assumes lock is already held by caller."""
     project_root = _resolve_project_root()
     build_dir = project_root / ".build" / "test_platformio" / board.board_name
+
+    # Lock is already held by build_many() - no need to acquire again
 
     # Setup the build directory.
     build_dir.mkdir(parents=True, exist_ok=True)
     platformio_ini = build_dir / "platformio.ini"
-
-    # Platform-specific handling
-    platform_family = _get_platform_family(board)
-    print(f"Detected platform family: {platform_family} for board {board.board_name}")
 
     # Ensure platform is installed if needed
     if not _ensure_platform_installed(board):
@@ -390,7 +510,18 @@ def _init_platformio_build(board: Board, verbose: bool, example: str) -> InitRes
     if verbose:
         run_cmd.append("--verbose")
 
+    # Print platformio.ini content for the initialization build
+    platformio_ini_path = build_dir / "platformio.ini"
+    if platformio_ini_path.exists():
+        print("=" * 60)
+        print("PLATFORMIO.INI CONFIGURATION:")
+        print("=" * 60)
+        ini_content = platformio_ini_path.read_text()
+        print(ini_content)
+        print("=" * 60)
+
     print(f"Running initial build command: {subprocess.list2cmdline(run_cmd)}")
+    print(_create_building_banner(example))
 
     # Start timer for this example
     start_time = time.time()
@@ -427,12 +558,23 @@ class PlatformIoBuilder:
         else:
             self.board = board
         self.verbose = verbose
-        self.build_dir: Path | None = None
-        self.initialized = False
 
-    def init_build(self, example: str) -> InitResult:
+        # Set build directory immediately and ensure it exists
+        project_root = _resolve_project_root()
+        self.build_dir: Path = (
+            project_root / ".build" / "test_platformio" / self.board.board_name
+        )
+        self.build_dir.mkdir(parents=True, exist_ok=True)
+
+        # Create the counting file lock in constructor
+        self._platform_lock = CountingFileLock(self.board.board_name, self.build_dir)
+
+        self.initialized = False
+        self.executor = ThreadPoolExecutor(max_workers=1)
+
+    def _internal_init_build_no_lock(self, example: str) -> InitResult:
         """Initialize the PlatformIO build directory once with the first example."""
-        if self.initialized and self.build_dir is not None:
+        if self.initialized:
             return InitResult(
                 success=True, output="Already initialized", build_dir=self.build_dir
             )
@@ -440,44 +582,44 @@ class PlatformIoBuilder:
         # Initialize with the actual first example being built
         result = _init_platformio_build(self.board, self.verbose, example)
         if result.success:
-            self.build_dir = result.build_dir
             self.initialized = True
         return result
 
-    def build(self, example: str) -> BuildResult:
-        """Build a specific example."""
-        if not self.initialized:
-            init_result = self.init_build(example)
-            if not init_result.success:
-                return BuildResult(
-                    success=False,
-                    output=init_result.output,
-                    build_dir=init_result.build_dir,
-                    example=example,
-                )
-            # If initialization succeeded and we just built the example, return success
-            if self.build_dir is None:
-                return BuildResult(
-                    success=False,
-                    output="Build directory not set after initialization",
-                    build_dir=Path(),
-                    example=example,
-                )
-            return BuildResult(
-                success=True,
-                output="Built during initialization",
-                build_dir=self.build_dir,
-                example=example,
-            )
+    def cancel_all(self) -> None:
+        """Cancel all builds."""
+        self.executor.shutdown(wait=False, cancel_futures=True)
 
-        if self.build_dir is None:
-            return BuildResult(
-                success=False,
-                output="Build directory not initialized",
-                build_dir=Path(),
-                example=example,
-            )
+    def build_many(self, examples: list[str]) -> list[Future[BuildResult]]:
+        """Build a list of examples with proper lock management."""
+        if not examples:
+            return []
 
+        # Acquire the lock for N work units
+        self._platform_lock.acquire(len(examples))
+
+        futures: list[Future[BuildResult]] = []
+
+        def create_decrement_callback() -> Callable[[Future[BuildResult]], None]:
+            """Create callback that decrements lock count when future completes."""
+
+            def decrement_callback(future: Future[BuildResult]) -> None:
+                self._platform_lock.decrement()
+
+            return decrement_callback
+
+        # Submit all builds
+        for example in examples:
+            future = self.executor.submit(self._internal_build_no_lock, example)
+
+            # Add callback to decrement lock count on completion or cancellation
+            future.add_done_callback(create_decrement_callback())
+
+            futures.append(future)
+
+        return futures
+
+    def _build_internal(self, example: str) -> BuildResult:
+        """Internal build method without lock management."""
         # Copy example source to build directory
         project_root = _resolve_project_root()
         ok_copy_src = _copy_example_source(project_root, self.build_dir, example)
@@ -502,6 +644,7 @@ class PlatformIoBuilder:
             run_cmd.append("--verbose")
 
         print(f"Running command: {subprocess.list2cmdline(run_cmd)}")
+        print(_create_building_banner(example))
 
         # Start timer for this example
         start_time = time.time()
@@ -529,6 +672,28 @@ class PlatformIoBuilder:
             example=example,
         )
 
+    def _internal_build_no_lock(self, example: str) -> BuildResult:
+        """Build a specific example without lock management. Only call from build_many()."""
+        if not self.initialized:
+            init_result = self._internal_init_build_no_lock(example)
+            if not init_result.success:
+                return BuildResult(
+                    success=False,
+                    output=init_result.output,
+                    build_dir=init_result.build_dir,
+                    example=example,
+                )
+            # If initialization succeeded and we just built the example, return success
+            return BuildResult(
+                success=True,
+                output="Built during initialization",
+                build_dir=self.build_dir,
+                example=example,
+            )
+
+        # No lock management - caller (build_many) handles locks
+        return self._build_internal(example)
+
 
 def run_pio_build(
     board: Board | str, examples: list[str], verbose: bool = False
@@ -541,7 +706,4 @@ def run_pio_build(
         verbose: Enable verbose output
     """
     pio = PlatformIoBuilder(board, verbose)
-    futures: list[Future[BuildResult]] = []
-    for example in examples:
-        futures.append(_EXECUTOR.submit(pio.build, example))
-    return futures
+    return pio.build_many(examples)

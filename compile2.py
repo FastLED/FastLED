@@ -165,18 +165,21 @@ def main() -> int:
     """Main entry point."""
 
     args = Args.parse_args()
+    pio = PlatformIoBuilder(args.platform, args.verbose)
 
     # run_pio_build now accepts both Board objects and strings
     # The string will be automatically resolved to a Board object via get_board()
-    futures = run_pio_build(args.platform, args.examples, args.verbose)
+    futures = pio.build_many(args.examples)
 
     def cancel_futures() -> None:
-        for future in futures:
-            future.cancel()
+        pio.cancel_all()
 
     try:
+        first = True
         for future in futures:
-            result: BuildResult = future.result(timeout=120)
+            timeout = 60*60 if first else 60  # first build can be very long.
+            first = False
+            result: BuildResult = future.result(timeout=timeout)
             if not result.success:
                 error_banner = create_banner(f"BUILD FAILED: {result.example}", red_text)
                 print(f"\n{error_banner}")
@@ -186,6 +189,10 @@ def main() -> int:
             else:
                 success_banner = create_banner(f"BUILD SUCCESS: {result.example}", green_text)
                 print(f"\n{success_banner}")
+    except KeyboardInterrupt:
+        cancel_futures()
+        print(f"\n{red_text('Build cancelled by user')}")
+        return 1
     except Exception as e:
         error_banner = create_banner(f"BUILD ERROR: {e}", red_text)
         print(f"\n{error_banner}")
