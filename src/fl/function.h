@@ -90,6 +90,9 @@ private:
             static_assert(alignof(Function) <= alignof(max_align_t), 
                          "Lambda/functor requires stricter alignment than storage provides");
             
+            // Initialize the entire storage to zero to avoid copying uninitialized memory
+            fl::memfill(bytes, 0, kInlineLambdaSize);
+            
             // Construct the lambda/functor in-place
             new (bytes) Function(fl::move(f));
             
