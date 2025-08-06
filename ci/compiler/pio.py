@@ -5,6 +5,7 @@ PlatformIO Builder for FastLED
 Provides a clean interface for building FastLED projects with PlatformIO.
 """
 
+import json
 import os
 import platform
 import shutil
@@ -23,6 +24,7 @@ from filelock import FileLock, Timeout  # type: ignore
 
 from ci.compiler.compiler import Compiler, InitResult, SketchResult
 from ci.util.boards import ALL, Board, create_board
+from ci.util.create_build_dir import insert_tool_aliases
 from ci.util.running_process import EndOfStream, RunningProcess
 
 
@@ -144,6 +146,62 @@ def _ensure_platform_installed(board: Board) -> bool:
     # This is a placeholder for future platform installation logic
     print(f"Platform installation needed for {board.board_name}: {board.platform}")
     return True
+
+
+def _generate_build_info_json_from_existing_build(
+    build_dir: Path, board: Board
+) -> bool:
+    """Generate build_info.json from an existing PlatformIO build.
+
+    Args:
+        build_dir: Build directory containing the PlatformIO project
+        board: Board configuration
+
+    Returns:
+        True if build_info.json was successfully generated
+    """
+    try:
+        # Use existing project to get metadata (no temporary project needed)
+        metadata_cmd = ["pio", "project", "metadata", "--json-output"]
+        metadata_result = subprocess.run(
+            metadata_cmd,
+            capture_output=True,
+            text=True,
+            cwd=build_dir,
+            timeout=60,
+        )
+
+        if metadata_result.returncode != 0:
+            print(
+                f"Warning: Failed to get metadata for build_info.json: {metadata_result.stderr}"
+            )
+            return False
+
+        # Parse and save the metadata
+        try:
+            data = json.loads(metadata_result.stdout)
+
+            # Add tool aliases for symbol analysis and debugging
+            insert_tool_aliases(data)
+
+            # Save to build_info.json
+            build_info_path = build_dir / "build_info.json"
+            with open(build_info_path, "w") as f:
+                json.dump(data, f, indent=4, sort_keys=True)
+
+            print(f"✅ Generated build_info.json at {build_info_path}")
+            return True
+
+        except json.JSONDecodeError as e:
+            print(f"Warning: Failed to parse metadata JSON for build_info.json: {e}")
+            return False
+
+    except subprocess.TimeoutExpired:
+        print(f"Warning: Timeout generating build_info.json")
+        return False
+    except Exception as e:
+        print(f"Warning: Exception generating build_info.json: {e}")
+        return False
 
 
 def _apply_board_specific_config(
@@ -603,6 +661,13 @@ def _init_platformio_build(
         )
     board_with_sketch_include.build_flags.append("-Isrc/sketch")
 
+    # Optimization report generation is available but OFF by default
+    # To enable optimization reports, add these flags to your board configuration:
+    # - "-fopt-info-all=optimization_report.txt" for detailed optimization info
+    # - "-Wl,-Map,firmware.map" for memory map analysis
+    #
+    # Note: The infrastructure is in place to support optimization reports when needed
+
     # Apply board-specific configuration
     if not _apply_board_specific_config(
         board_with_sketch_include,
@@ -694,6 +759,9 @@ def _init_platformio_build(
 
     # After successful build, configuration is already properly set up
     # Board configuration includes all necessary settings
+
+    # Generate build_info.json after successful initialization build
+    _generate_build_info_json_from_existing_build(build_dir, board)
 
     return InitResult(success=True, output="", build_dir=build_dir)
 
@@ -849,8 +917,15 @@ class PioCompiler(Compiler):
 
         running_process.wait()
 
+        # Check if build was successful
+        build_success = running_process.returncode == 0
+
+        # Generate build_info.json after successful build
+        if build_success:
+            _generate_build_info_json_from_existing_build(self.build_dir, self.board)
+
         return SketchResult(
-            success=running_process.returncode == 0,
+            success=build_success,
             output=running_process.stdout,
             build_dir=self.build_dir,
             example=example,

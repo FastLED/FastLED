@@ -2,11 +2,31 @@
 import argparse
 import os
 import sys
+from pathlib import Path
 from typing import Optional
 
 from typeguard import typechecked
 
 from ci.util.test_types import TestArgs
+
+
+def _python_test_exists(test_name: str) -> bool:
+    """Check if a Python test file exists for the given test name"""
+    # Check for the test file in ci/tests directory
+    tests_dir = Path("ci/tests")
+
+    # Try various naming patterns for Python tests
+    possible_names = [
+        f"test_{test_name}.py",
+        f"{test_name}.py",
+    ]
+
+    for name in possible_names:
+        test_file = tests_dir / name
+        if test_file.exists():
+            return True
+
+    return False
 
 
 def parse_args(args: Optional[list[str]] = None) -> TestArgs:
@@ -20,7 +40,11 @@ def parse_args(args: Optional[list[str]] = None) -> TestArgs:
     parser.add_argument("--unit", action="store_true", help="Run C++ unit tests only")
     parser.add_argument("--py", action="store_true", help="Run Python tests only")
     parser.add_argument(
-        "test", type=str, nargs="?", default=None, help="Specific C++ test to run"
+        "test",
+        type=str,
+        nargs="?",
+        default=None,
+        help="Specific test to run (Python or C++)",
     )
 
     # Create mutually exclusive group for compiler selection
@@ -133,24 +157,30 @@ def parse_args(args: Optional[list[str]] = None) -> TestArgs:
         no_parallel=parsed_args.no_parallel,
     )
 
-    # Auto-enable --cpp and --verbose when a specific test is provided
+    # Auto-enable --py or --cpp mode when a specific test is provided
     if test_args.test:
-        if not test_args.cpp:
-            test_args.cpp = True
-            print(f"Auto-enabled --cpp mode for specific test: {test_args.test}")
-        # Auto-enable verbose for specific tests (disabled)
-        # if not test_args.verbose:
-        #     test_args.verbose = True
-        #     print(f"Auto-enabled --verbose mode for specific test: {test_args.test}")
-        # Also enable --unit when a specific test is provided without any other flags
-        if (
-            not test_args.unit
-            and not test_args.examples
-            and not test_args.py
-            and not test_args.full
-        ):
-            test_args.unit = True
-            print(f"Auto-enabled --unit mode for specific test: {test_args.test}")
+        # Check if this is a Python test first
+        if _python_test_exists(test_args.test):
+            # This is a Python test - enable Python mode
+            if not test_args.py and not test_args.cpp:
+                test_args.py = True
+                print(
+                    f"Auto-enabled --py mode for specific Python test: {test_args.test}"
+                )
+        else:
+            # This is not a Python test - assume it's a C++ test
+            if not test_args.cpp and not test_args.py:
+                test_args.cpp = True
+                print(f"Auto-enabled --cpp mode for specific test: {test_args.test}")
+            # Also enable --unit when a specific C++ test is provided without any other flags
+            if (
+                not test_args.unit
+                and not test_args.examples
+                and not test_args.py
+                and not test_args.full
+            ):
+                test_args.unit = True
+                print(f"Auto-enabled --unit mode for specific test: {test_args.test}")
 
     # Auto-enable --verbose when running unit tests (disabled)
     # if test_args.unit and not test_args.verbose:

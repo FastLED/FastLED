@@ -228,8 +228,10 @@ class Board:
             )
 
         if build_flags_elements:
-            # Join all build flags with a space so that PlatformIO parses them
-            lines.append(f"build_flags = {' '.join(build_flags_elements)}")
+            # Put each build flag on a separate line for better readability and debugging
+            lines.append("build_flags =")
+            for flag in build_flags_elements:
+                lines.append(f"    {flag}")
 
         if self.build_unflags:
             # PlatformIO accepts multiple *build_unflags* separated by spaces.

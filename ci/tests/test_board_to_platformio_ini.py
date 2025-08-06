@@ -43,14 +43,10 @@ class TestBoardToPlatformioIni(unittest.TestCase):
         )
         ini = board.to_platformio_ini()
         lines = self._ini_to_set(ini)
-        # The build_flags line should contain both the define and the custom flag
-        build_flags_line = next(
-            (line for line in lines if line.startswith("build_flags")), None
-        )
-        self.assertIsNotNone(build_flags_line)
-        assert build_flags_line is not None  # hint for type checker
-        self.assertIn("-DFASTLED_TEST=1", build_flags_line)
-        self.assertIn("-O2", build_flags_line)
+        # The build_flags are in multi-line format - check that both flags are present as separate lines
+        self.assertIn("build_flags =", lines)
+        self.assertIn("-DFASTLED_TEST=1", lines)
+        self.assertIn("-O2", lines)
 
 
 if __name__ == "__main__":
