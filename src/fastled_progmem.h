@@ -1,11 +1,16 @@
 #pragma once
 
+
+#include "fl/namespace.h"
+
 #if defined(__EMSCRIPTEN__) || defined(FASTLED_TESTING) || defined(FASTLED_STUB_IMPL)
 #include "platforms/null_progmem.h"
+#elif defined(ESP8266)
+#include "platforms/esp/8266/progmem_esp8266.h"
 #else
 
 
-#include "fl/namespace.h"
+
 
 /// @file fastled_progmem.h
 /// Wrapper definitions to allow seamless use of PROGMEM in environments that have it
@@ -46,6 +51,7 @@
 
 /// PROGMEM keyword for storage
 #define FL_PROGMEM                PROGMEM
+
 
 /// @name PROGMEM Read Functions
 /// Functions for reading data from PROGMEM memory.
