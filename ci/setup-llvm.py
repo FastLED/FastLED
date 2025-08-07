@@ -59,24 +59,35 @@ def find_tool_path(tool_name: str) -> Optional[Path]:
 def check_required_tools() -> Tuple[
     Dict[str, Optional[Path]], Dict[str, Optional[Path]]
 ]:
-    """Check for essential and extra LLVM/Clang tools on system PATH."""
-    essential_tools = [
+    """Check for essential and extra LLVM/Clang tools on system PATH.
+
+    On Windows, prefer lld-link as the linker front-end.
+    """
+    system_name = platform.system().lower()
+
+    essential_tools: List[str] = [
         "clang",
         "clang++",
         "llvm-ar",
         "llvm-nm",
         "llvm-objdump",
         "llvm-addr2line",
-        "lldb",
-        "lld",
         "llvm-strip",
         "llvm-objcopy",
     ]
 
-    extra_tools = [
+    # Linker tools differ across platforms
+    if system_name == "windows":
+        essential_tools.append("lld-link")
+    else:
+        essential_tools.append("lld")
+
+    # Useful developer tools (not strictly required for building)
+    extra_tools: List[str] = [
         "clangd",
         "clang-format",
         "clang-tidy",
+        "lldb",
     ]
 
     found_essential: Dict[str, Optional[Path]] = {}
@@ -97,7 +108,9 @@ def create_hard_links(source_tools: Dict[str, Path], target_dir: Path) -> None:
 
     for tool_name, source_path in source_tools.items():
         if source_path and source_path.exists():
-            target_path = bin_dir / tool_name
+            # Preserve original filename to keep extensions on Windows (e.g., .exe)
+            target_filename = source_path.name
+            target_path = bin_dir / target_filename
             try:
                 # Remove existing file if it exists
                 if target_path.exists():
@@ -115,6 +128,69 @@ def create_hard_links(source_tools: Dict[str, Path], target_dir: Path) -> None:
                     print(f"   ✓ Copied {tool_name}: {source_path} -> {target_path}")
                 except (OSError, PermissionError):
                     print(f"   ❌ Failed to copy {tool_name}")
+
+
+def find_tools_in_directories(
+    tool_names: List[str], directories: List[Path]
+) -> Dict[str, Optional[Path]]:
+    """Search for tools across a list of directories, returning first matches.
+
+    On Windows, will match executables with .exe suffix.
+    """
+    found: Dict[str, Optional[Path]] = {}
+    for tool in tool_names:
+        found[tool] = None
+
+    for directory in directories:
+        if not directory.exists():
+            continue
+        for tool in tool_names:
+            if found[tool] is not None:
+                continue
+            candidate: Path = directory / tool
+            if candidate.exists():
+                found[tool] = candidate
+                continue
+            # Try platform-specific suffix
+            if platform.system().lower() == "windows":
+                exe_candidate: Path = directory / f"{tool}.exe"
+                if exe_candidate.exists():
+                    found[tool] = exe_candidate
+    return found
+
+
+def get_windows_default_llvm_bins() -> List[Path]:
+    """Return common Windows LLVM bin directories to probe."""
+    roots: List[Path] = []
+    program_files: Optional[str] = os.environ.get("ProgramFiles")
+    program_files_x86: Optional[str] = os.environ.get("ProgramFiles(x86)")
+    chocolatey_lib: Optional[str] = os.environ.get("ChocolateyInstall")
+    scoop: Optional[str] = os.environ.get("SCOOP")
+
+    if program_files:
+        roots.append(Path(program_files) / "LLVM" / "bin")
+    if program_files_x86:
+        roots.append(Path(program_files_x86) / "LLVM" / "bin")
+    if chocolatey_lib:
+        roots.append(Path(chocolatey_lib) / "lib" / "llvm" / "tools" / "llvm" / "bin")
+    if scoop:
+        roots.append(Path(scoop) / "apps" / "llvm" / "current" / "bin")
+
+    # Also consider PATH entries explicitly
+    path_entries: List[str] = os.environ.get("PATH", "").split(os.pathsep)
+    for entry in path_entries:
+        # Only consider entries that look like LLVM bin directories
+        if "llvm" in entry.lower() and "bin" in entry.lower():
+            roots.append(Path(entry))
+    return roots
+
+
+def install_llvm_windows() -> bool:
+    """Deprecated: Automatic LLVM installation on Windows is not supported.
+
+    Always returns False to indicate no installation was performed.
+    """
+    return False
 
 
 def download_and_install_llvm(target_dir: Path) -> None:
@@ -206,7 +282,7 @@ def main() -> None:
     """Setup LLVM toolchain - check system first, fallback to package installation."""
     # Get target directory from command line
     if len(sys.argv) != 2:
-        print("Usage: python setup-llvm.py <target_directory>")
+        print("Usage: uv run python ci/setup-llvm.py <target_directory>")
         sys.exit(1)
 
     target_dir = Path(sys.argv[1])
@@ -215,11 +291,76 @@ def main() -> None:
     # Check platform compatibility
     is_unix_like, platform_name = is_linux_or_unix()
 
-    if not is_unix_like:
+    if platform_name == "windows":
+        print("🔍 Checking for existing LLVM/Clang tools on system (Windows)...")
+        clang_version_output = get_tool_version("clang")
+        if clang_version_output:
+            clang_version = get_clang_version_number(clang_version_output)
+            print(
+                f"Found system clang: version {clang_version if clang_version else 'unknown'}"
+            )
+        else:
+            clang_version = None
+
+        found_essential, found_extras = check_required_tools()
+        available_essential = {
+            name: path for name, path in found_essential.items() if path
+        }
+        missing_essential = [name for name, path in found_essential.items() if not path]
+
+        if len(available_essential) != len(found_essential):
+            # Probe common install directories (e.g., C:\Program Files\LLVM\bin)
+            probe_dirs = get_windows_default_llvm_bins()
+            print(
+                f"Probing default Windows LLVM locations: {', '.join(str(p) for p in probe_dirs)}"
+            )
+            probed = find_tools_in_directories(list(found_essential.keys()), probe_dirs)
+            for name, p in probed.items():
+                if p is not None and found_essential.get(name) is None:
+                    found_essential[name] = p
+
+            available_essential = {
+                name: path for name, path in found_essential.items() if path
+            }
+            missing_essential = [
+                name for name, path in found_essential.items() if not path
+            ]
+
+        if len(available_essential) == len(found_essential) and (
+            clang_version is None or clang_version < 19
+        ):
+            print(
+                "Note: Detected toolchain but clang < 19. Continuing; ensure compatibility with your build settings."
+            )
+
+        if len(available_essential) == len(found_essential):
+            print("✅ All essential tools found - using system tools")
+            all_available_tools = {
+                **available_essential,
+                **{n: p for n, p in found_extras.items() if p},
+            }
+            print(f"Creating hard links in {target_dir}...")
+            create_hard_links(all_available_tools, target_dir)
+
+            version_file = target_dir / "VERSION"
+            version_file.write_text(
+                f"system-clang-{clang_version if clang_version else 'unknown'}\n"
+            )
+            print(f"✅ Successfully linked {len(all_available_tools)} system tools")
+            missing_extras = [name for name, path in found_extras.items() if not path]
+            if missing_extras:
+                print(f"⚠️ Missing extra tools: {', '.join(missing_extras)}")
+            return
+
+        print(f"❌ Missing essential tools: {', '.join(missing_essential)}")
         print(
-            f"⚠️ Warning: Linux tools are only auto-installed on Linux/Unix, not {platform_name}"
+            "CRITICAL: Automatic installation of LLVM is not supported on Windows by this script."
         )
-        return
+        print(
+            "Please install LLVM for Windows manually (e.g., official installer from releases.llvm.org or the LLVM Windows installer), add its bin directory to PATH, and re-run:"
+        )
+        print("    uv run python ci/setup-llvm.py <target_directory>")
+        sys.exit(1)
 
     print("🔍 Checking for existing LLVM/Clang tools on system...")
 

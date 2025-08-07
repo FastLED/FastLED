@@ -19,7 +19,7 @@ uv add llvm-installer sys-detection
 
 # Run the installer
 echo "Running LLVM installer..."
-uv run python3 "$SCRIPT_DIR/ci/setup-llvm.py" "$CACHE_DIR"
+uv run python "$SCRIPT_DIR/ci/setup-llvm.py" "$CACHE_DIR"
 
 echo "✅ LLVM installation complete!"
 echo "Installation directory: $CACHE_DIR"
