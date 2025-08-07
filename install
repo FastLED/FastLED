@@ -19,6 +19,14 @@ fi
 
 echo "Setting up C++ development environment..."
 
+# Setup LLVM toolchain on Linux
+if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+    echo "Setting up LLVM toolchain for Linux..."
+    uv run ci/setup-llvm.py .cache/cc
+else
+    echo "Skipping LLVM setup (Linux only)..."
+fi
+
 # Build tests to generate compile_commands.json for clangd
 echo "Building C++ tests to generate compile_commands.json..."
 uv run -m ci.compiler.cpp_test_run --compile-only --clang --test test_function
