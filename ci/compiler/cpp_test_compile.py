@@ -390,7 +390,6 @@ def create_unit_test_compiler(
         "FASTLED_NO_ATEXIT=1",
         "DOCTEST_CONFIG_NO_EXCEPTIONS_BUT_WITH_ALL_ASSERTS",
         "ENABLE_CRASH_HANDLER",
-        "USE_LIBUNWIND",
         "RELEASE=1",  # Disable FASTLED_FORCE_DBG to avoid fl::println dependency
     ]
 
@@ -665,7 +664,7 @@ def compile_unit_tests_python_api(
             if os.name == "nt":  # Windows
                 linker_args = ["-ldbghelp", "-lpsapi"]
             else:  # Linux/macOS
-                linker_args = ["-pthread", "-lunwind"]
+                linker_args = ["-pthread"]
 
             # HASH-BASED CACHE CHECK (same as examples)
             if not fastled_lib_path:
