@@ -167,8 +167,8 @@ public:
     // Converting move constructor
     template<typename Y>
     shared_ptr(shared_ptr<Y>&& other) noexcept : ptr_(other.ptr_), control_block_(other.control_block_) {
-        this->swap(other);
-        other.reset();
+        other.ptr_ = nullptr;
+        other.control_block_ = nullptr;
     }
     
     // Constructor from weak_ptr
