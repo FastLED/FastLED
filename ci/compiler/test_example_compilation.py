@@ -2134,58 +2134,58 @@ class CompilationTestRunner:
             try:
                 self.log_timing(f"[EXECUTION] Running: {executable_name}")
 
-                # Run the executable with timeout
-                result = subprocess.run(
+                # Stream execution output to avoid pipe buffering hangs
+                proc = subprocess.Popen(
                     [str(executable_path.absolute())],
-                    capture_output=True,
-                    text=True,
-                    timeout=30,  # 30 second timeout
                     cwd=str(example_dir.absolute()),
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.STDOUT,
+                    universal_newlines=True,
+                    encoding="utf-8",
+                    errors="replace",
                 )
 
-                if result.returncode == 0:
+                start_ts = time.time()
+                captured_lines: list[str] = []
+                while True:
+                    if proc.stdout is None:
+                        break
+                    line = proc.stdout.readline()
+                    if not line:
+                        if proc.poll() is not None:
+                            break
+                    else:
+                        if self.config.verbose:
+                            self.log_timing(f"[EXECUTION]   {line.rstrip()}")
+                        captured_lines.append(line)
+
+                    # Enforce timeout
+                    if time.time() - start_ts > 30:
+                        proc.kill()
+                        raise subprocess.TimeoutExpired(
+                            cmd=str(executable_path.absolute()), timeout=30
+                        )
+
+                proc.wait()
+                rc = proc.returncode if proc.returncode is not None else -1
+
+                if rc == 0:
                     executed_count += 1
                     self.log_timing(f"[EXECUTION] SUCCESS: {executable_name}")
-                    # Only show output from executed programs in verbose mode
-                    # Show both stdout and stderr as many platforms write to stderr
-                    if self.config.verbose:
-                        output_shown = False
-                        if result.stdout.strip():
-                            self.log_timing(
-                                f"[EXECUTION] Output for {executable_name}:"
-                            )
-                            for line in result.stdout.split("\n"):
-                                if line.strip():
-                                    self.log_timing(f"[EXECUTION]   {line}")
-                            output_shown = True
-                        if result.stderr.strip():
-                            if not output_shown:
-                                self.log_timing(
-                                    f"[EXECUTION] Output for {executable_name}:"
-                                )
-                            for line in result.stderr.split("\n"):
-                                if line.strip():
-                                    self.log_timing(f"[EXECUTION]   {line}")
                 else:
                     execution_failed_count += 1
                     self.log_timing(
-                        f"[EXECUTION] FAILED: {executable_name}: Exit code {result.returncode}"
+                        f"[EXECUTION] FAILED: {executable_name}: Exit code {rc}"
                     )
-                    # Only show verbose output for failed executions in verbose mode
-                    if self.config.verbose:
-                        if result.stdout.strip():
-                            self.log_timing(f"[EXECUTION] Failed stdout:")
-                            for line in result.stdout.split("\n"):
-                                if line.strip():
-                                    self.log_timing(f"[EXECUTION]   {line}")
-                        if result.stderr.strip():
-                            self.log_timing(f"[EXECUTION] Failed stderr:")
-                            for line in result.stderr.split("\n"):
-                                if line.strip():
-                                    self.log_timing(f"[EXECUTION]   {line}")
-                        if not result.stdout.strip() and not result.stderr.strip():
+                    if self.config.verbose and captured_lines:
+                        self.log_timing(f"[EXECUTION] Failed output:")
+                        for line in captured_lines:
+                            if line.strip():
+                                self.log_timing(f"[EXECUTION]   {line.rstrip()}")
+                        # If nothing meaningful captured, note it
+                        if not any(line.strip() for line in captured_lines):
                             self.log_timing(
-                                f"[EXECUTION] No output captured from failed execution"
+                                "[EXECUTION] No output captured from failed execution"
                             )
 
             except subprocess.TimeoutExpired:
