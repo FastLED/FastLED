@@ -593,13 +593,8 @@ UISlider timeBitshift("Time Bitshift", 5, 0, 16, 1);
 UISlider timescale("Time Scale", 1, .1, 10, .1);
 
 // Advanced variant and palette controls
-UIDropdown variants("Noise Variants", {
-    variant_names[0], variant_names[1], variant_names[2], variant_names[3], variant_names[4],
-    variant_names[5], variant_names[6], variant_names[7], variant_names[8], variant_names[9]
-});
-UIDropdown palettes("Color Palettes", {
-    palette_names[0], palette_names[1], palette_names[2], palette_names[3], palette_names[4]
-});
+UIDropdown variants("Noise Variants", variant_names);
+UIDropdown palettes("Color Palettes", palette_names);
 UICheckbox autoCycle("Auto Cycle Effects", true);
 UICheckbox autoPalette("Auto Cycle Palettes", true);
 // This PIR type is special because it will bind to a pin for a real device,
