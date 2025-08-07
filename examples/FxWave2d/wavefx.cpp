@@ -282,25 +282,22 @@ ui_state ui() {
     fxBlend.setGlobalBlurPasses(blurPasses);       // Number of blur passes
 
     // Create parameter structures for each wave layer's blur settings
-    Blend2dParams lower_params = {
-        .blur_amount = blurAmountLower,            // Blur amount for lower layer
-        .blur_passes = blurPassesLower,            // Blur passes for lower layer
-    };
+    fl::Blend2dParams lower_params;
+    lower_params.blur_amount = blurAmountLower;    // Blur amount for lower layer
+    lower_params.blur_passes = blurPassesLower;    // Blur passes for lower layer
 
-    Blend2dParams upper_params = {
-        .blur_amount = blurAmountUpper,            // Blur amount for upper layer
-        .blur_passes = blurPassesUpper,            // Blur passes for upper layer
-    };
+    fl::Blend2dParams upper_params;
+    upper_params.blur_amount = blurAmountUpper;    // Blur amount for upper layer
+    upper_params.blur_passes = blurPassesUpper;    // Blur passes for upper layer
 
     // Apply the layer-specific blur parameters
     fxBlend.setParams(waveFxLower, lower_params);
     fxBlend.setParams(waveFxUpper, upper_params);
     
     // Return the current state of the UI buttons
-    ui_state state{
-        .button = button,         // Regular ripple button
-        .bigButton = buttonFancy, // Fancy effect button
-    };
+    ui_state state;
+    state.button = button;         // Regular ripple button
+    state.bigButton = buttonFancy; // Fancy effect button
     return state;
 }
 
