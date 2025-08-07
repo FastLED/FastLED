@@ -103,14 +103,11 @@ flags = [
 ]
 
 [linux]
-# Linux-specific build configuration for libunwind
+# Linux-specific build configuration – libunwind disabled (fallback to execinfo)
 link_flags = [
-    "-lunwind",                           # Link libunwind for stack traces
-    "-lunwind-x86_64",                    # Platform-specific libunwind functions
 ]
 
 defines = [
-    "USE_LIBUNWIND",                      # Enable libunwind crash handler
 ]
 
 [build_modes.quick]
@@ -178,7 +175,6 @@ defines = [
     "-DFASTLED_DEBUG_LEVEL=1",                  # Set debug level
     "-DFASTLED_NO_ATEXIT=1",                    # Disable atexit to fix Windows lld-link errors
     "-DDOCTEST_CONFIG_NO_EXCEPTIONS_BUT_WITH_ALL_ASSERTS", # Doctest configuration
-    "-DUSE_LIBUNWIND",                          # Enable libunwind crash handler
     "-DENABLE_CRASH_HANDLER",                   # Enable global crash handler in tests
 ]
 

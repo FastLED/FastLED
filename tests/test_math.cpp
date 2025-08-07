@@ -266,3 +266,9 @@ TEST_CASE("fl_min and fl_max type promotion") {
         CHECK_EQ(float_result, 750.5f);
     }
 }
+
+TEST_CASE("intentional crash - stack trace probe") {
+    // Force a crash to verify stack trace symbolization on Linux
+    volatile int* ptr = nullptr;
+    *ptr = 123;  // Intentional null dereference
+}
