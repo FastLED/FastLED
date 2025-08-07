@@ -17,7 +17,12 @@ export PYTHONUTF8=1
 export PYTHONIOENCODING=UTF-8
 
 set -ex
-uv venv --python 3.11
+if [ ! -d ".venv" ]; then
+    echo "Creating Python 3.11 virtual environment..."
+    uv venv --python 3.11
+else
+    echo "Virtual environment already exists. Skipping."
+fi
 uv pip install -e . --refresh-package fastled
 # This is needed to force the installation to finalize.
 uv run python -c "import os; _ = os.getcwd()"
