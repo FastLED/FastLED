@@ -49,7 +49,10 @@ get_platform_packages_paths: Optional[Any] = None
 cached_compiler_available: bool = False
 
 try:
-    from ci.util.cached_compiler import create_cached_toolchain, get_platform_packages_paths
+    from ci.util.cached_compiler import (
+        create_cached_toolchain,
+        get_platform_packages_paths,
+    )
 
     cached_compiler_available = True
 except ImportError as e:
@@ -155,7 +158,9 @@ if cached_compiler_available and cache_executable:
             )
             print("  cache executable: " + str(cache_executable))
 elif not cached_compiler_available:
-    print("WARNING: Python cached compiler system not available, cache will be disabled")
+    print(
+        "WARNING: Python cached compiler system not available, cache will be disabled"
+    )
 else:
     print(
         "Cache executable not found: "

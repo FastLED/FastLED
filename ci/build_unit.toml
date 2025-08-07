@@ -116,7 +116,6 @@ defines = [
 [build_modes.quick]
 flags = [
     "-O1",
-    "-g3",                            # Full debug symbols for crash debugging
     "-fno-inline-functions",
     "-fno-vectorize",
     "-fno-unroll-loops",
@@ -131,7 +130,6 @@ link_flags = []
 flags = [
     "-fsanitize=address",             # AddressSanitizer for memory error detection
     "-fsanitize=undefined",           # UndefinedBehaviorSanitizer for undefined behavior
-    "-g3",                            # Full debug symbols
     "-O1",                            # Light optimization for performance
     "-fno-omit-frame-pointer",        # Preserve stack frames for better debugging
     "-fno-optimize-sibling-calls",    # Better stack traces
@@ -197,7 +195,6 @@ compiler_flags = [
     "-Werror=return-type",                      # Error on missing return statements
     
     # Debug and Crash Handling
-    "-g3",                                      # Full debug symbols for crash analysis
     "-fno-omit-frame-pointer",                  # Preserve stack frames for debugging
     
     # AddressSanitizer and Memory Debugging
