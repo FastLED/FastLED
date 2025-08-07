@@ -8,6 +8,7 @@ import tempfile
 import threading
 import time
 import urllib.parse
+import warnings
 from pathlib import Path
 from queue import Queue
 from typing import Any, Callable, Match, Protocol, Union
@@ -286,6 +287,14 @@ class RunningProcess:
         # This excludes process creation overhead from timing measurements
         self._start_time = time.time()
 
+        # Register with global process manager
+        try:
+            from ci.util.running_process import RunningProcessManagerSingleton
+
+            RunningProcessManagerSingleton.register(self)
+        except Exception as e:
+            warnings.warn(f"RunningProcessManager.register failed: {e}")
+
         # Start the output formatter if provided
         if self.output_formatter:
             self.output_formatter.begin()
@@ -349,6 +358,16 @@ class RunningProcess:
                     self._end_time = time.time()
 
                 self.output_queue.put(EndOfStream())  # End-of-stream marker
+
+                # Unregister when stdout is fully drained
+                try:
+                    from ci.util.running_process import RunningProcessManagerSingleton
+
+                    RunningProcessManagerSingleton.unregister(self)
+                except Exception as e:
+                    warnings.warn(
+                        f"RunningProcessManager.unregister (drain) failed: {e}"
+                    )
 
         # Start output reader thread
         self.reader_thread = threading.Thread(target=output_reader, daemon=True)
@@ -421,7 +440,17 @@ class RunningProcess:
         """
         Check the return code of the process.
         """
-        return self.proc.poll()
+        if self.proc is None:
+            return None
+        rc = self.proc.poll()
+        if rc is not None:
+            try:
+                from ci.util.running_process import RunningProcessManagerSingleton
+
+                RunningProcessManagerSingleton.unregister(self)
+            except Exception as e:
+                warnings.warn(f"RunningProcessManager.unregister (poll) failed: {e}")
+        return rc
 
     @property
     def finished(self) -> bool:
@@ -507,6 +536,14 @@ class RunningProcess:
         if self.output_formatter:
             self.output_formatter.end()
 
+        # Unregister from global process manager on normal completion
+        try:
+            from ci.util.running_process import RunningProcessManagerSingleton
+
+            RunningProcessManagerSingleton.unregister(self)
+        except Exception as e:
+            warnings.warn(f"RunningProcessManager.unregister (wait) failed: {e}")
+
         return rtn
 
     def kill(self) -> None:
@@ -553,6 +590,14 @@ class RunningProcess:
             except queue.Empty:
                 break
 
+        # Ensure unregistration even on forced kill
+        try:
+            from ci.util.running_process import RunningProcessManagerSingleton
+
+            RunningProcessManagerSingleton.unregister(self)
+        except Exception as e:
+            warnings.warn(f"RunningProcessManager.unregister (kill) failed: {e}")
+
     def terminate(self) -> None:
         """
         Gracefully terminate the process with SIGTERM.
@@ -598,3 +643,60 @@ class RunningProcess:
         """
         # Return accumulated output (available even if process is still running)
         return "\n".join(self.accumulated_output)
+
+
+class RunningProcessManager:
+    """
+    Thread-safe registry of currently running processes for watchdog diagnostics.
+    """
+
+    def __init__(self) -> None:
+        self._lock = threading.RLock()
+        self._processes: list[RunningProcess] = []
+
+    def register(self, proc: RunningProcess) -> None:
+        with self._lock:
+            if proc not in self._processes:
+                self._processes.append(proc)
+
+    def unregister(self, proc: RunningProcess) -> None:
+        with self._lock:
+            try:
+                self._processes.remove(proc)
+            except ValueError:
+                pass
+
+    def list_active(self) -> list[RunningProcess]:
+        with self._lock:
+            return [p for p in self._processes if not p.finished]
+
+    def dump_active(self) -> None:
+        active = self.list_active()
+        if not active:
+            print("\nNO ACTIVE SUBPROCESSES DETECTED - MAIN PROCESS LIKELY HUNG")
+            return
+
+        print("\nSTUCK SUBPROCESS COMMANDS:")
+        now = time.time()
+        for idx, p in enumerate(active, 1):
+            pid: int | None = None
+            try:
+                if p.proc is not None:
+                    pid = p.proc.pid
+            except Exception:
+                pid = None
+
+            start: float | None = p.start_time
+            last_out: float | None = p.time_last_stdout_line()
+            duration_str = f"{(now - start):.1f}s" if start is not None else "?"
+            since_out_str = (
+                f"{(now - last_out):.1f}s" if last_out is not None else "no-output"
+            )
+
+            print(
+                f"  {idx}. cmd={p.command} pid={pid} duration={duration_str} last_output={since_out_str}"
+            )
+
+
+# Global singleton instance for convenient access
+RunningProcessManagerSingleton = RunningProcessManager()

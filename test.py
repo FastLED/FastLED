@@ -55,18 +55,16 @@ def make_watch_dog_thread(
 
         warnings.warn(f"Watchdog timer expired after {seconds} seconds.")
 
-        # Watchdog state tracking has been removed - no active processes to show
-        active_processes: list[str] = []
-
         dump_main_thread_stack()
         print(f"Watchdog timer expired after {seconds} seconds - forcing exit")
 
-        if active_processes:
-            print(f"\n🚨 STUCK SUBPROCESS COMMANDS:")
-            for i, cmd in enumerate(active_processes, 1):
-                print(f"  {i}. {cmd}")
-        else:
-            print("\n🚨 NO ACTIVE SUBPROCESSES DETECTED - MAIN PROCESS LIKELY HUNG")
+        # Dump outstanding running processes (if any)
+        try:
+            from ci.util.running_process import RunningProcessManagerSingleton
+
+            RunningProcessManagerSingleton.dump_active()
+        except Exception as e:
+            print(f"Failed to dump active processes: {e}")
 
         traceback.print_stack()
         time.sleep(0.5)
