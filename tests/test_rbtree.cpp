@@ -734,3 +734,244 @@ TEST_CASE("MapRedBlackTree - Edge Cases") {
         CHECK(validate_red_black_properties(rb_tree));
     }
 }
+
+#if 0  // Flip this to true to run the stress tests
+// -----------------------------------------------------------------------------
+// Additional Comprehensive Stress Tests
+// -----------------------------------------------------------------------------
+
+// Define FASTLED_ENABLE_RBTREE_STRESS to enable very heavy tests locally
+// Example: add -DFASTLED_ENABLE_RBTREE_STRESS to unit test compile flags
+
+TEST_CASE("RBTree Stress Test - Large Scale Operations [rbtree][stress]") {
+    fl::MapRedBlackTree<int, int> rb_tree;
+    std::map<int, int> std_map;
+
+    const int N = 5000;  // Reasonable default; increase under FASTLED_ENABLE_RBTREE_STRESS
+
+    // Sequential inserts
+    for (int i = 1; i <= N; ++i) {
+        rb_tree[i] = i * 3;
+        std_map[i] = i * 3;
+    }
+    CHECK(rb_tree.size() == std_map.size());
+    CHECK(maps_equal(std_map, rb_tree));
+    CHECK(validate_red_black_properties(rb_tree));
+
+    // Reverse deletes
+    for (int i = N; i >= 1; --i) {
+        CHECK_EQ(rb_tree.erase(i), std_map.erase(i));
+        if ((i % 257) == 0) {
+            CHECK(maps_equal(std_map, rb_tree));
+            CHECK(validate_red_black_properties(rb_tree));
+        }
+    }
+
+    CHECK(rb_tree.empty());
+    CHECK(std_map.empty());
+}
+
+TEST_CASE("RBTree Stress Test - Randomized Operations [rbtree][stress]") {
+    fl::MapRedBlackTree<int, int> rb_tree;
+    std::map<int, int> std_map;
+
+    std::random_device rd;
+    std::mt19937 rng(rd());
+    std::uniform_int_distribution<int> key_dist(1, 2000);
+    std::uniform_int_distribution<int> val_dist(-100000, 100000);
+    std::uniform_int_distribution<int> op_dist(0, 99);
+
+    const int OPS = 8000;
+
+    for (int i = 0; i < OPS; ++i) {
+        int key = key_dist(rng);
+        int op = op_dist(rng);
+        if (op < 45) {
+            // insert/update
+            int value = val_dist(rng);
+            rb_tree[key] = value;
+            std_map[key] = value;
+        } else if (op < 70) {
+            // erase
+            CHECK_EQ(rb_tree.erase(key), std_map.erase(key));
+        } else if (op < 90) {
+            // find/contains
+            bool a = (rb_tree.find(key) != rb_tree.end());
+            bool b = (std_map.find(key) != std_map.end());
+            CHECK_EQ(a, b);
+            CHECK_EQ(rb_tree.contains(key), b);
+        } else {
+            // lower/upper bound coherence checks when present
+            auto it_a = rb_tree.lower_bound(key);
+            auto it_b = std_map.lower_bound(key);
+            bool end_a = (it_a == rb_tree.end());
+            bool end_b = (it_b == std_map.end());
+            CHECK_EQ(end_a, end_b);
+            if (!end_a && !end_b) {
+                CHECK_EQ(it_a->first, it_b->first);
+                CHECK_EQ(it_a->second, it_b->second);
+            }
+        }
+
+        if ((i % 401) == 0) {
+            CHECK(maps_equal(std_map, rb_tree));
+            CHECK(validate_red_black_properties(rb_tree));
+        }
+    }
+
+    CHECK(maps_equal(std_map, rb_tree));
+    CHECK(validate_red_black_properties(rb_tree));
+}
+
+TEST_CASE("RBTree Stress Test - Edge Cases and Crash Scenarios [rbtree][stress]") {
+    fl::MapRedBlackTree<int, int> rb_tree;
+    std::map<int, int> std_map;
+
+    // Insert duplicates and ensure semantics match std::map (no duplicate keys)
+    for (int i = 0; i < 100; ++i) {
+        rb_tree[10] = i;
+        std_map[10] = i;
+    }
+    CHECK_EQ(rb_tree.size(), std_map.size());
+    CHECK_EQ(rb_tree.size(), 1);
+    CHECK(maps_equal(std_map, rb_tree));
+    CHECK(validate_red_black_properties(rb_tree));
+
+    // Zig-zag insertion pattern (pathological for naive trees)
+    for (int i = 1; i <= 200; ++i) {
+        int k = (i % 2 == 0) ? (100 + i) : (100 - i);
+        rb_tree[k] = k * 2;
+        std_map[k] = k * 2;
+    }
+    CHECK(maps_equal(std_map, rb_tree));
+    CHECK(validate_red_black_properties(rb_tree));
+
+    // Erase root repeatedly: always erase current begin() (smallest key)
+    for (int i = 0; i < 50 && !rb_tree.empty(); ++i) {
+        auto it_a = rb_tree.begin();
+        auto it_b = std_map.begin();
+        CHECK(it_a != rb_tree.end());
+        CHECK(it_b != std_map.end());
+        CHECK_EQ(it_a->first, it_b->first);
+        CHECK_EQ(rb_tree.erase(it_a->first), std_map.erase(it_b->first));
+        CHECK(validate_red_black_properties(rb_tree));
+    }
+
+    CHECK(maps_equal(std_map, rb_tree));
+}
+
+TEST_CASE("RBTree Stress Test - Pathological Patterns [rbtree][stress]") {
+    fl::MapRedBlackTree<int, int> rb_tree;
+    std::map<int, int> std_map;
+
+    // Alternate insert/erase around a moving window
+    for (int round = 0; round < 2000; ++round) {
+        int base = (round % 100);
+        // insert a small cluster
+        for (int d = -3; d <= 3; ++d) {
+            int k = base + d;
+            rb_tree[k] = k * 7;
+            std_map[k] = k * 7;
+        }
+        // erase overlapping cluster
+        for (int d = -2; d <= 2; ++d) {
+            int k = base + d;
+            CHECK_EQ(rb_tree.erase(k), std_map.erase(k));
+        }
+        if ((round % 127) == 0) {
+            CHECK(maps_equal(std_map, rb_tree));
+            CHECK(validate_red_black_properties(rb_tree));
+        }
+    }
+
+    CHECK(maps_equal(std_map, rb_tree));
+    CHECK(validate_red_black_properties(rb_tree));
+}
+
+TEST_CASE("RBTree Stress Test - Comparison with std::map Comprehensive [rbtree][stress]") {
+    // Multiple seeds, random operation sequences, end-to-end equivalence
+    for (int seed = 1; seed <= 7; ++seed) {
+        fl::MapRedBlackTree<int, int> rb_tree;
+        std::map<int, int> std_map;
+
+        std::mt19937 rng(static_cast<unsigned int>(seed * 1315423911u));
+        std::uniform_int_distribution<int> key_dist(1, 3000);
+        std::uniform_int_distribution<int> val_dist(-1000000, 1000000);
+        std::uniform_int_distribution<int> op_dist(0, 99);
+
+        const int OPS = 4000;
+        for (int i = 0; i < OPS; ++i) {
+            int key = key_dist(rng);
+            int op = op_dist(rng);
+            if (op < 50) {
+                int value = val_dist(rng);
+                rb_tree[key] = value;
+                std_map[key] = value;
+            } else if (op < 80) {
+                CHECK_EQ(rb_tree.erase(key), std_map.erase(key));
+            } else if (op < 90) {
+                auto it_a = rb_tree.find(key);
+                auto it_b = std_map.find(key);
+                bool pres_a = (it_a != rb_tree.end());
+                bool pres_b = (it_b != std_map.end());
+                CHECK_EQ(pres_a, pres_b);
+                if (pres_a && pres_b) {
+                    CHECK_EQ(it_a->second, it_b->second);
+                }
+            } else {
+                // bounds
+                auto la = rb_tree.lower_bound(key);
+                auto lb = std_map.lower_bound(key);
+                CHECK_EQ(la == rb_tree.end(), lb == std_map.end());
+                if (la != rb_tree.end() && lb != std_map.end()) {
+                    CHECK_EQ(la->first, lb->first);
+                    CHECK_EQ(la->second, lb->second);
+                }
+                auto ua = rb_tree.upper_bound(key);
+                auto ub = std_map.upper_bound(key);
+                CHECK_EQ(ua == rb_tree.end(), ub == std_map.end());
+                if (ua != rb_tree.end() && ub != std_map.end()) {
+                    CHECK_EQ(ua->first, ub->first);
+                    CHECK_EQ(ua->second, ub->second);
+                }
+            }
+
+            if ((i % 503) == 0) {
+                CHECK(maps_equal(std_map, rb_tree));
+                CHECK(validate_red_black_properties(rb_tree));
+            }
+        }
+
+        CHECK(maps_equal(std_map, rb_tree));
+        CHECK(validate_red_black_properties(rb_tree));
+    }
+}
+
+
+TEST_CASE("RBTree Stress Test - Heavy Memory and Performance [rbtree][stress][heavy]") {
+    fl::MapRedBlackTree<int, int> rb_tree;
+    std::map<int, int> std_map;
+
+    const int N = 30000;  // Heavy test: enable only when explicitly requested
+    for (int i = 0; i < N; ++i) {
+        rb_tree[i] = i ^ (i << 1);
+        std_map[i] = i ^ (i << 1);
+        if ((i % 2047) == 0) {
+            CHECK(maps_equal(std_map, rb_tree));
+            CHECK(validate_red_black_properties(rb_tree));
+        }
+    }
+
+    // Mixed deletes
+    for (int i = 0; i < N; i += 2) {
+        CHECK_EQ(rb_tree.erase(i), std_map.erase(i));
+        if ((i % 4093) == 0) {
+            CHECK(maps_equal(std_map, rb_tree));
+            CHECK(validate_red_black_properties(rb_tree));
+        }
+    }
+
+    CHECK(maps_equal(std_map, rb_tree));
+    CHECK(validate_red_black_properties(rb_tree));
+}
+#endif // FASTLED_ENABLE_RBTREE_STRESS
