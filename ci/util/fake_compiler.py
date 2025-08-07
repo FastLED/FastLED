@@ -19,32 +19,34 @@ from pathlib import Path
 from typing import Dict, List, Optional
 
 
-def find_toolchain_compiler(compiler_name: str, platform_packages_paths: List[str]) -> Optional[str]:
+def find_toolchain_compiler(
+    compiler_name: str, platform_packages_paths: List[str]
+) -> Optional[str]:
     """
     Find the real compiler binary in PlatformIO platform packages.
-    
+
     Args:
         compiler_name: Name of compiler (e.g., 'arm-none-eabi-gcc', 'gcc', 'clang')
         platform_packages_paths: List of paths to search for toolchain
-        
+
     Returns:
         Absolute path to compiler binary if found, None otherwise
     """
     # First check if compiler is already an absolute path
     if Path(compiler_name).is_absolute() and Path(compiler_name).exists():
         return str(Path(compiler_name).resolve())
-    
+
     # Check if compiler is in PATH
     path_compiler = shutil.which(compiler_name)
     if path_compiler:
         return str(Path(path_compiler).resolve())
-    
+
     # Search in platform packages directories
     for package_path in platform_packages_paths:
         package_dir = Path(package_path)
         if not package_dir.exists():
             continue
-            
+
         # Search for compiler in common toolchain subdirectories
         search_patterns = [
             f"bin/{compiler_name}",
@@ -52,13 +54,13 @@ def find_toolchain_compiler(compiler_name: str, platform_packages_paths: List[st
             f"**/bin/{compiler_name}",
             f"**/bin/{compiler_name}.exe",
         ]
-        
+
         for pattern in search_patterns:
             compiler_candidates = list(package_dir.glob(pattern))
             for candidate in compiler_candidates:
                 if candidate.is_file():
                     return str(candidate.resolve())
-    
+
     return None
 
 
@@ -67,24 +69,24 @@ def create_fake_compiler_script(
     cache_executable: str,
     real_compiler_path: str,
     output_dir: Path,
-    debug: bool = False
+    debug: bool = False,
 ) -> Path:
     """
     Create a Python script that acts as a fake compiler.
-    
+
     Args:
         compiler_name: Name for the fake compiler (e.g., 'gcc', 'g++')
         cache_executable: Path to cache tool (sccache, ccache, etc.)
         real_compiler_path: Path to the real compiler to wrap
         output_dir: Directory to create the fake compiler script
         debug: Enable debug output
-        
+
     Returns:
         Path to the created fake compiler script
     """
     script_name = f"fake_{compiler_name.replace('-', '_')}.py"
     script_path = output_dir / script_name
-    
+
     script_content = f'''#!/usr/bin/env python3
 """
 Fake compiler wrapper for {compiler_name}
@@ -147,14 +149,14 @@ def main() -> int:
 if __name__ == "__main__":
     sys.exit(main())
 '''
-    
+
     # Write the script
-    script_path.write_text(script_content, encoding='utf-8')
-    
+    script_path.write_text(script_content, encoding="utf-8")
+
     # Make executable on Unix systems
-    if os.name != 'nt':
+    if os.name != "nt":
         script_path.chmod(script_path.stat().st_mode | 0o755)
-    
+
     return script_path
 
 
@@ -163,29 +165,29 @@ def create_fake_toolchain(
     cache_config: Dict[str, str],
     platform_packages_paths: List[str],
     output_dir: Path,
-    debug: bool = False
+    debug: bool = False,
 ) -> Dict[str, str]:
     """
     Create a complete set of fake compiler scripts for a toolchain.
-    
+
     Args:
         toolchain_info: Mapping of tool names to real paths/names
         cache_config: Cache configuration (CACHE_EXECUTABLE, etc.)
         platform_packages_paths: Paths to search for real compilers
         output_dir: Directory to create fake scripts
         debug: Enable debug output
-        
+
     Returns:
         Mapping of tool names to fake script paths
     """
     output_dir.mkdir(parents=True, exist_ok=True)
-    
+
     cache_executable = cache_config.get("CACHE_EXECUTABLE", "sccache")
     fake_tools: Dict[str, str] = {}
-    
+
     # Standard compiler tools that should be wrapped with cache
     cacheable_tools = {"CC", "CXX", "gcc", "g++", "clang", "clang++"}
-    
+
     for tool_name, tool_path_or_name in toolchain_info.items():
         # Only wrap cacheable tools
         tool_base = Path(tool_path_or_name).name if tool_path_or_name else tool_name
@@ -193,51 +195,58 @@ def create_fake_toolchain(
             if debug:
                 print(f"Skipping non-cacheable tool: {tool_name} = {tool_path_or_name}")
             continue
-        
+
         # Find the real compiler
-        real_compiler_path = find_toolchain_compiler(tool_path_or_name, platform_packages_paths)
+        real_compiler_path = find_toolchain_compiler(
+            tool_path_or_name, platform_packages_paths
+        )
         if not real_compiler_path:
             if debug:
-                print(f"WARNING: Could not find real compiler for {tool_name} = {tool_path_or_name}")
+                print(
+                    f"WARNING: Could not find real compiler for {tool_name} = {tool_path_or_name}"
+                )
             continue
-        
+
         # Create fake compiler script
         fake_script = create_fake_compiler_script(
             compiler_name=tool_name,
             cache_executable=cache_executable,
             real_compiler_path=real_compiler_path,
             output_dir=output_dir,
-            debug=debug
+            debug=debug,
         )
-        
+
         # Use Python to execute the script
         fake_tools[tool_name] = f"python {fake_script}"
-        
+
         if debug:
-            print(f"Created fake {tool_name}: {fake_tools[tool_name]} -> {real_compiler_path}")
-    
+            print(
+                f"Created fake {tool_name}: {fake_tools[tool_name]} -> {real_compiler_path}"
+            )
+
     return fake_tools
 
 
 def get_platform_packages_paths() -> List[str]:
     """
     Get list of platform package paths from PlatformIO.
-    
+
     Returns:
         List of paths where platform packages are installed
     """
     paths: List[str] = []
-    
+
     # Try to get PlatformIO home directory
     try:
         result = subprocess.run(
             ["pio", "system", "info", "--json"],
             capture_output=True,
             text=True,
-            timeout=30
+            timeout=30,
         )
         if result.returncode == 0:
             import json
+
             info = json.loads(result.stdout)
             platformio_home = info.get("platformio_home_dir")
             if platformio_home:
@@ -247,38 +256,43 @@ def get_platform_packages_paths() -> List[str]:
                     for package_dir in packages_dir.iterdir():
                         if package_dir.is_dir():
                             paths.append(str(package_dir))
+    except KeyboardInterrupt:
+        print(f"Keyboard interrupt in get_platform_packages_paths")
+        import sys
+
+        sys.exit(1)
     except Exception:
         pass
-    
+
     # Fallback: common PlatformIO package locations
     common_locations = [
         Path.home() / ".platformio" / "packages",
-        Path.home() / ".fastled" / "packages", 
+        Path.home() / ".fastled" / "packages",
         Path("C:/Users") / os.environ.get("USERNAME", "") / ".platformio" / "packages",
         Path("C:/Users") / os.environ.get("USERNAME", "") / ".fastled" / "packages",
     ]
-    
+
     for location in common_locations:
         if location.exists():
             for package_dir in location.iterdir():
                 if package_dir.is_dir():
                     paths.append(str(package_dir))
-    
+
     return paths
 
 
 if __name__ == "__main__":
     # Test the fake compiler system
     print("Testing fake compiler system...")
-    
+
     # Get platform packages
     packages = get_platform_packages_paths()
     print(f"Found {len(packages)} platform packages")
-    
+
     # Test finding a common compiler
     test_compiler = find_toolchain_compiler("gcc", packages)
     print(f"Found gcc at: {test_compiler}")
-    
+
     # Create test fake compiler
     test_dir = Path(tempfile.mkdtemp())
     try:
@@ -287,7 +301,7 @@ if __name__ == "__main__":
             cache_config={"CACHE_EXECUTABLE": "sccache"},
             platform_packages_paths=packages,
             output_dir=test_dir,
-            debug=True
+            debug=True,
         )
         print(f"Created fake tools: {fake_tools}")
     finally:

@@ -433,7 +433,7 @@ def create_examples_test_process(
     args: TestArgs, enable_stack_trace: bool
 ) -> RunningProcess:
     """Create an examples test process without starting it"""
-    cmd = ["uv", "run", "python", "ci/compiler/test_example_compilation.py"]
+    cmd = ["uv", "run", "python", "-u", "ci/compiler/test_example_compilation.py"]
     if args.examples is not None:
         cmd.extend(args.examples)
     if args.clean:
@@ -710,13 +710,36 @@ def _run_process_with_output(process: RunningProcess, verbose: bool = False) -> 
     # Create single output handler instance to maintain state
     output_handler = ProcessOutputHandler(verbose=verbose)
     start_time = time.time()
+    timeout_seconds = 300  # 5 minutes timeout for individual processes
+    last_output_time = start_time
+    last_progress_log = start_time
+    progress_interval = 30  # Log progress every 30 seconds
 
     while True:
         try:
+            current_time = time.time()
+            elapsed_time = current_time - start_time
+            time_since_output = current_time - last_output_time
+
+            # Check for timeout
+            if elapsed_time > timeout_seconds:
+                process.kill()
+                failure = TestFailureInfo(
+                    test_name=_extract_test_name(process.command),
+                    command=str(process.command),
+                    return_code=124,  # Standard timeout exit code
+                    output=f"Process timeout after {elapsed_time:.1f} seconds (last output: {time_since_output:.1f}s ago)",
+                    error_type="timeout",
+                )
+                raise TestExecutionFailedException(
+                    f"Process timeout after {elapsed_time:.1f} seconds", [failure]
+                )
+
             line = process.get_next_line_non_blocking()
             if isinstance(line, EndOfStream):
                 break
             if line is not None:
+                last_output_time = current_time
                 print(f"  {line}")
             else:
                 # No output available right now, continue polling
@@ -1375,7 +1398,11 @@ def run_test_processes(
     Returns:
         List of ProcessTiming objects with execution times
     """
-    # Force sequential execution if NO_PARALLEL is setprint("NO_PARALLEL environment variable set - forcing sequential execution")
+    start_time = time.time()
+
+    # Force sequential execution if NO_PARALLEL is set
+    if os.environ.get("NO_PARALLEL"):
+        parallel = False
     if not processes:
         print("\033[92m###### SUCCESS ######\033[0m")
         print("No tests to run")
@@ -1405,6 +1432,8 @@ def run_test_processes(
             elapsed = time.time() - start_time
             print(f"\033[92m### SUCCESS ({elapsed:.2f}s) ###\033[0m")
 
+        total_elapsed = time.time() - start_time
+
         return timings
 
     except (TestExecutionFailedException, TestTimeoutException) as e:
@@ -1431,6 +1460,9 @@ def runner(args: TestArgs, src_code_change: bool = True) -> None:
         args: Parsed command line arguments
         src_code_change: Whether source code has changed since last run
     """
+    print(f"[TEST_RUNNER] Starting runner function")
+    print(f"[TEST_RUNNER] Args: {args}")
+    print(f"[TEST_RUNNER] Source code changed: {src_code_change}")
     try:
         # Determine test categories
         test_categories = TestCategories(
@@ -1483,6 +1515,7 @@ def runner(args: TestArgs, src_code_change: bool = True) -> None:
                 or test_categories.integration_only
                 or args.full
             )
+
             processes.append(create_python_test_process(enable_stack_trace, full_tests))
 
         # Add example tests if needed
@@ -1494,10 +1527,6 @@ def runner(args: TestArgs, src_code_change: bool = True) -> None:
 
         # Print summary of what we're about to run
         execution_mode = "in parallel" if will_run_parallel else "sequentially"
-        print(f"\nStarting {len(processes)} test processes {execution_mode}:")
-        for proc in processes:
-            print(f"  - {proc.command}")
-        print()
 
         # Run processes (parallel unless NO_PARALLEL is set)
         timings = run_test_processes(

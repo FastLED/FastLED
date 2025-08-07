@@ -476,6 +476,7 @@ class RunningProcess:
         is_keyboard_interrupt = (rtn == -11) or (rtn == 3221225786)
         if is_keyboard_interrupt:
             import _thread
+
             print("Keyboard interrupt detected, interrupting main thread")
             _thread.interrupt_main()
             return 1

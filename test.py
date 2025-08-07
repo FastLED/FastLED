@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+
 import json
 import os
 import sys
@@ -91,6 +92,20 @@ def main() -> None:
         # Parse and process arguments
         args = parse_args()
         args = process_test_flags(args)
+
+        # Adjust watchdog timeout based on test configuration
+        # Sequential examples compilation can take up to 30 minutes
+        if args.examples is not None and args.no_parallel:
+            # 35 minutes for sequential examples compilation
+            adjusted_timeout = 2100
+            print(
+                f"Adjusted watchdog timeout for sequential examples compilation: {adjusted_timeout} seconds"
+            )
+            # Cancel the existing watchdog and start a new one with adjusted timeout
+            _CANCEL_WATCHDOG.set()
+            time.sleep(0.1)  # Give time for the old watchdog to exit
+            _CANCEL_WATCHDOG.clear()
+            watchdog = make_watch_dog_thread(seconds=adjusted_timeout)
 
         # Handle --no-interactive flag
         if args.no_interactive:

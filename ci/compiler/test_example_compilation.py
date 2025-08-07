@@ -494,6 +494,9 @@ def compile_examples_simple(
         # Compile the .ino file
         if verbose:
             pch_status = "with PCH" if use_pch_for_file else "direct compilation"
+            print(
+                f"[VERBOSE] Compiling {ino_file.relative_to(Path('examples'))} ({pch_status})"
+            )
             log_timing(
                 f"[VERBOSE] Compiling {ino_file.relative_to(Path('examples'))} ({pch_status})"
             )
@@ -523,6 +526,9 @@ def compile_examples_simple(
 
             if verbose:
                 pch_status = "with PCH" if use_pch_for_file else "direct compilation"
+                print(
+                    f"[VERBOSE] Compiling {cpp_file.relative_to(Path('examples'))} ({pch_status})"
+                )
                 log_timing(
                     f"[VERBOSE] Compiling {cpp_file.relative_to(Path('examples'))} ({pch_status})"
                 )
@@ -1708,13 +1714,14 @@ class CompilationTestRunner:
             )
 
             # Verify compiler accessibility
+
             version_result = compiler.check_clang_version()
+
             if not version_result.success:
                 raise RuntimeError(
                     f"Compiler accessibility check failed: {version_result.error}"
                 )
 
-            self.log_timing(f"[COMPILER] Using {version_result.version}")
             return compiler, system_info, build_config
 
         except Exception as e:
@@ -1723,6 +1730,10 @@ class CompilationTestRunner:
     def discover_examples(self, compiler: Compiler) -> List[Path]:
         """Discover and validate .ino examples to compile."""
         self.log_timing("Discovering .ino examples...")
+        if self.config.verbose:
+            print(
+                f"[VERBOSE] Discovering examples with filter: {self.config.specific_examples}"
+            )
 
         try:
             filter_names = (
@@ -1755,10 +1766,18 @@ class CompilationTestRunner:
                 self.log_timing(
                     f"[DISCOVER] Found {len(ino_files)} specific examples: {', '.join([f.stem for f in ino_files])}"
                 )
+                if self.config.verbose:
+                    print(f"[VERBOSE] Specific examples found:")
+                    for ino_file in ino_files:
+                        print(f"[VERBOSE]   - {ino_file}")
             else:
                 self.log_timing(
                     f"[DISCOVER] Found {len(ino_files)} total .ino examples in examples/"
                 )
+                if self.config.verbose:
+                    print(f"[VERBOSE] All examples found:")
+                    for ino_file in ino_files:
+                        print(f"[VERBOSE]   - {ino_file.stem}")
 
             return ino_files
 
@@ -1859,6 +1878,15 @@ class CompilationTestRunner:
             f"[PERF] Parallel compilation: {parallel_status} (managed by compiler)"
         )
         self.log_timing("[PERF] Direct compilation enabled (no CMake overhead)")
+
+        if self.config.verbose:
+            print(f"[VERBOSE] Starting compilation with configuration:")
+            print(f"[VERBOSE]   - Examples: {len(ino_files)}")
+            print(f"[VERBOSE]   - PCH compatible: {len(pch_compatible_files)}")
+            print(f"[VERBOSE]   - PCH disabled: {self.config.disable_pch}")
+            print(f"[VERBOSE]   - Parallel: {not self.config.no_parallel}")
+            print(f"[VERBOSE]   - Full compilation: {self.config.full_compilation}")
+            print(f"[VERBOSE]   - Unity build: {self.config.unity_build}")
 
         self.log_timing(f"\n[BUILD] Starting example compilation...")
         self.log_timing(f"[BUILD] Target examples: {len(ino_files)}")
@@ -2193,6 +2221,16 @@ class CompilationTestRunner:
         # Performance summary
         self.log_timing(f"\n[SUMMARY] FastLED Example Compilation Performance:")
         self.log_timing(f"[SUMMARY]   Examples processed: {len(ino_files)}")
+
+        if self.config.verbose:
+            print(f"\n[VERBOSE] Detailed compilation results:")
+            print(f"[VERBOSE]   - Total examples: {len(ino_files)}")
+            print(f"[VERBOSE]   - Successful: {results.successful_count}")
+            print(f"[VERBOSE]   - Failed: {results.failed_count}")
+            print(f"[VERBOSE]   - Compilation time: {results.compile_time:.2f}s")
+            print(f"[VERBOSE]   - Linking time: {results.linking_time:.2f}s")
+            print(f"[VERBOSE]   - Execution time: {results.execution_time:.2f}s")
+            print(f"[VERBOSE]   - Total time: {total_time:.2f}s")
         self.log_timing(f"[SUMMARY]   Successful: {results.successful_count}")
         self.log_timing(f"[SUMMARY]   Failed: {results.failed_count}")
         if self.config.full_compilation:
@@ -2294,9 +2332,11 @@ def run_example_compilation_test(
         )
 
         # Create test runner
+
         runner = CompilationTestRunner(config)
 
         # Initialize system and compiler
+
         compiler, system_info, build_config = runner.initialize_system()
 
         # Discover examples to compile
@@ -2311,11 +2351,16 @@ def run_example_compilation_test(
         runner.setup_pch(compiler, pch_compatible_files)
 
         # Dump compiler information
-        runner.log_timing("\n[COMPILER] Dumping compiler flags...")
+
         compiler_args = compiler.get_compiler_args()
-        runner.log_timing(
-            f"[COMPILER] Full command: {' '.join(compiler_args)} <input_file> -o <output_file>"
-        )
+
+        if config.verbose:
+            print(f"\n[VERBOSE] Compiler configuration:")
+            print(f"[VERBOSE] Base compiler command: {' '.join(compiler_args[:3])}")
+            print(f"[VERBOSE] Compiler flags ({len(compiler_args) - 3} total):")
+            for i, arg in enumerate(compiler_args[3:], 1):
+                print(f"[VERBOSE]   {i:2d}. {arg}")
+            print()
 
         # Compile examples
         results = runner.compile_examples(
@@ -2418,6 +2463,7 @@ if __name__ == "__main__":
 
     # Pass specific examples to the test function
     specific_examples = args.examples if args.examples else None
+
     sys.exit(
         run_example_compilation_test(
             specific_examples,

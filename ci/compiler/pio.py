@@ -330,30 +330,36 @@ def _setup_ccache_environment(board_name: str) -> bool:
 def _copy_cache_build_script(build_dir: Path, cache_config: dict[str, str]) -> None:
     """Copy the standalone cache setup script and set environment variables for configuration."""
     import shutil
-    
+
     # Source script location
     project_root = _resolve_project_root()
     source_script = project_root / "ci" / "util" / "cache_setup.py"
     dest_script = build_dir / "cache_setup.py"
-    
+
     # Copy the standalone script
     if not source_script.exists():
         raise RuntimeError(f"Cache setup script not found: {source_script}")
-    
+
     shutil.copy2(source_script, dest_script)
     print(f"Copied cache setup script: {source_script} -> {dest_script}")
-    
+
     # Set environment variables for cache configuration
     # These will be read by the cache_setup.py script
     cache_type = cache_config.get("CACHE_TYPE", "sccache")
-    
+
     os.environ["FASTLED_CACHE_TYPE"] = cache_type
     os.environ["FASTLED_SCCACHE_DIR"] = cache_config.get("SCCACHE_DIR", "")
-    os.environ["FASTLED_SCCACHE_CACHE_SIZE"] = cache_config.get("SCCACHE_CACHE_SIZE", "2G")
-    os.environ["FASTLED_CACHE_DEBUG"] = "1" if os.environ.get("XCACHE_DEBUG") == "1" else "0"
-    
+    os.environ["FASTLED_SCCACHE_CACHE_SIZE"] = cache_config.get(
+        "SCCACHE_CACHE_SIZE", "2G"
+    )
+    os.environ["FASTLED_CACHE_DEBUG"] = (
+        "1" if os.environ.get("XCACHE_DEBUG") == "1" else "0"
+    )
+
     if cache_type == "xcache":
-        os.environ["FASTLED_CACHE_EXECUTABLE"] = cache_config.get("CACHE_EXECUTABLE", "")
+        os.environ["FASTLED_CACHE_EXECUTABLE"] = cache_config.get(
+            "CACHE_EXECUTABLE", ""
+        )
         os.environ["FASTLED_SCCACHE_PATH"] = cache_config.get("SCCACHE_PATH", "")
         os.environ["FASTLED_XCACHE_PATH"] = cache_config.get("XCACHE_PATH", "")
     elif cache_type == "sccache":
@@ -361,7 +367,7 @@ def _copy_cache_build_script(build_dir: Path, cache_config: dict[str, str]) -> N
         os.environ["FASTLED_SCCACHE_PATH"] = cache_config.get("SCCACHE_PATH", "")
     else:
         os.environ["FASTLED_CACHE_EXECUTABLE"] = cache_config.get("CCACHE_PATH", "")
-    
+
     print(f"Set cache environment variables for {cache_type} configuration")
 
 

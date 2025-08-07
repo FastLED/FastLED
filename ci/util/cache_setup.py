@@ -6,19 +6,33 @@ This script is executed by PlatformIO as a post-build extra_script.
 Configuration is passed through environment variables to avoid template string issues.
 """
 
-# Import env and try to import projenv
-Import("env")
+# ruff: noqa: F405, F821  # Suppress SCons-specific import and undefined name warnings
+
+import json
 import os
 import shutil
-import json
 import sys
 from pathlib import Path
+from typing import Any, Dict, List, Optional, Union
+
+
+# Import env and try to import projenv (SCons-specific imports)
+# These are dynamically available in PlatformIO/SCons environment
+try:
+    Import("env")  # type: ignore[name-defined]  # SCons-specific import
+    env: Any  # SCons environment object
+except NameError:
+    env = None  # For type checking when not in SCons context
+
 
 # Try to import projenv if it exists
+has_projenv: bool = False
+projenv: Optional[Any] = None
 try:
-    Import("projenv")
+    Import("projenv")  # type: ignore[name-defined]  # SCons-specific import
+    # projenv is now available in scope from Import
     has_projenv = True
-except:
+except (NameError, Exception):
     has_projenv = False
     projenv = None
 
@@ -29,22 +43,34 @@ project_root = current_dir.parent.parent  # Go up from .build/pio/board to proje
 if str(project_root) not in sys.path:
     sys.path.insert(0, str(project_root))
 
+# Import fake compiler functions with type stubs
+create_fake_toolchain: Optional[Any] = None
+get_platform_packages_paths: Optional[Any] = None
+fake_compiler_available: bool = False
+
 try:
     from ci.util.fake_compiler import create_fake_toolchain, get_platform_packages_paths
+
     fake_compiler_available = True
 except ImportError as e:
     print("WARNING: Could not import fake compiler module: " + str(e))
     fake_compiler_available = False
 
 # Debug: Dump the environment state to disk for inspection
-env_dump = {}
-for key in env.Dictionary():
-    try:
-        value = env[key]
-        # Convert to string to avoid JSON serialization issues
-        env_dump[key] = str(value)
-    except:
-        env_dump[key] = "<error getting value>"
+env_dump: Dict[str, str] = {}
+try:
+    if env is not None and hasattr(env, "Dictionary"):  # type: ignore[has-type]
+        for key in env.Dictionary():  # type: ignore[union-attr]
+            try:
+                value = env[key]  # type: ignore[index]
+                # Convert to string to avoid JSON serialization issues
+                env_dump[key] = str(value)  # type: ignore[arg-type]
+            except Exception:
+                env_dump[key] = "<error getting value>"
+    else:
+        env_dump["error"] = "env not available or missing Dictionary method"
+except Exception as e:
+    env_dump["error"] = f"Failed to access env: {e}"
 
 # Write environment dump to disk
 env_dump_path = "env_dump.json"
@@ -53,15 +79,15 @@ with open(env_dump_path, "w") as f:
 print("Environment state dumped to: " + env_dump_path)
 
 # Also dump projenv if available
-if has_projenv:
-    projenv_dump = {}
-    for key in projenv.Dictionary():
+if has_projenv and projenv is not None:
+    projenv_dump: Dict[str, str] = {}
+    for key in projenv.Dictionary():  # type: ignore
         try:
-            value = projenv[key]
+            value = projenv[key]  # type: ignore
             projenv_dump[key] = str(value)
-        except:
+        except Exception:
             projenv_dump[key] = "<error getting value>"
-    
+
     projenv_dump_path = "projenv_dump.json"
     with open(projenv_dump_path, "w") as f:
         json.dump(projenv_dump, f, indent=2)
@@ -84,18 +110,22 @@ print("  SCCACHE dir: " + sccache_dir)
 print("  Debug enabled: " + str(debug_enabled))
 
 # Set up cache environment variables for subprocess execution
-if sccache_dir:
-    env.Append(ENV={"SCCACHE_DIR": sccache_dir})
-    os.environ["SCCACHE_DIR"] = sccache_dir
+try:
+    if env is not None and hasattr(env, "Append"):  # type: ignore[has-type]
+        if sccache_dir:
+            env.Append(ENV={"SCCACHE_DIR": sccache_dir})  # type: ignore[union-attr]
+            os.environ["SCCACHE_DIR"] = sccache_dir
 
-if sccache_cache_size:
-    env.Append(ENV={"SCCACHE_CACHE_SIZE": sccache_cache_size})
-    os.environ["SCCACHE_CACHE_SIZE"] = sccache_cache_size
+        if sccache_cache_size:
+            env.Append(ENV={"SCCACHE_CACHE_SIZE": sccache_cache_size})  # type: ignore[union-attr]
+            os.environ["SCCACHE_CACHE_SIZE"] = sccache_cache_size
 
-if debug_enabled:
-    env.Append(ENV={"XCACHE_DEBUG": "1", "SCCACHE_DEBUG": "1"})
-    if has_projenv:
-        projenv.Append(ENV={"XCACHE_DEBUG": "1", "SCCACHE_DEBUG": "1"})
+        if debug_enabled:
+            env.Append(ENV={"XCACHE_DEBUG": "1", "SCCACHE_DEBUG": "1"})  # type: ignore[union-attr]
+            if has_projenv and projenv is not None and hasattr(projenv, "Append"):
+                projenv.Append(ENV={"XCACHE_DEBUG": "1", "SCCACHE_DEBUG": "1"})  # type: ignore[union-attr]
+except Exception as e:
+    print(f"Warning: Failed to set up cache environment: {e}")
 
 # Check if cache is available and fake compiler system can be used
 USE_CACHE = False
@@ -103,9 +133,14 @@ USE_CACHE = False
 if fake_compiler_available and cache_executable:
     if cache_type == "xcache":
         # For xcache, check if the Python script exists and sccache is available
-        USE_CACHE = (cache_executable and xcache_path and 
-                     Path(xcache_path).exists() and sccache_path and shutil.which(sccache_path))
-        
+        USE_CACHE = (
+            cache_executable
+            and xcache_path
+            and Path(xcache_path).exists()
+            and sccache_path
+            and shutil.which(sccache_path)
+        )
+
         if USE_CACHE:
             print("xcache wrapper detected and configured for Python fake compilers")
             print("  xcache path: " + str(xcache_path))
@@ -113,105 +148,295 @@ if fake_compiler_available and cache_executable:
     else:
         # For sccache/ccache, check if executable is in PATH
         USE_CACHE = shutil.which(cache_executable) is not None
-        
+
         if USE_CACHE:
-            print(str(cache_type) + " detected and configured for Python fake compilers")
+            print(
+                str(cache_type) + " detected and configured for Python fake compilers"
+            )
             print("  cache executable: " + str(cache_executable))
 elif not fake_compiler_available:
     print("WARNING: Python fake compiler system not available, cache will be disabled")
 else:
-    print("Cache executable not found: " + str(cache_executable) + ", cache will be disabled")
+    print(
+        "Cache executable not found: "
+        + str(cache_executable)
+        + ", cache will be disabled"
+    )
 
-if USE_CACHE:
+if USE_CACHE and env is not None and hasattr(env, "get"):  # type: ignore[has-type]
     # Get current compilers from environment
-    original_cc = env.get("CC")
-    original_cxx = env.get("CXX")
-    
+    original_cc = env.get("CC")  # type: ignore[union-attr]
+    original_cxx = env.get("CXX")  # type: ignore[union-attr]
+
     print("DEBUG: Found compilers in env:")
-    print("  CC: " + str(original_cc) + " (type: " + str(type(original_cc)) + ")")
-    print("  CXX: " + str(original_cxx) + " (type: " + str(type(original_cxx)) + ")")
-    
+    # Use repr for safer type conversion
+    cc_str = repr(original_cc)
+    cxx_str = repr(original_cxx)
+    cc_type_str = type(original_cc).__name__
+    cxx_type_str = type(original_cxx).__name__
+    print("  CC: " + cc_str + " (type: " + cc_type_str + ")")
+    print("  CXX: " + cxx_str + " (type: " + cxx_type_str + ")")
+
     # Extract compiler information for fake compiler generation
-    def extract_compiler_info(compiler_env_var):
+    def extract_compiler_info(compiler_env_var: Any) -> Optional[str]:
         """Extract compiler name from environment variable value."""
         if not compiler_env_var:
             return None
-        
+
         if isinstance(compiler_env_var, list):
-            return str(compiler_env_var[0]) if compiler_env_var else None
+            return str(compiler_env_var[0]) if compiler_env_var else None  # type: ignore[arg-type]
         else:
             # Handle string values like "arm-none-eabi-gcc" or "gcc"
-            return str(compiler_env_var).split()[0]
-    
+            return str(compiler_env_var).split()[0]  # type: ignore[arg-type]
+
     cc_name = extract_compiler_info(original_cc) or "gcc"
     cxx_name = extract_compiler_info(original_cxx) or "g++"
-    
+
     print("Extracted compiler names:")
     print("  CC name: " + str(cc_name))
     print("  CXX name: " + str(cxx_name))
-    
-    # Get platform packages paths for toolchain resolution
-    platform_packages = get_platform_packages_paths()
-    print("Found " + str(len(platform_packages)) + " platform package directories")
-    
+
     # Create toolchain info for fake compiler generation
-    toolchain_info = {
+    toolchain_info: Dict[str, str] = {
         "CC": cc_name,
         "CXX": cxx_name,
     }
-    
+
     # Create cache config for fake compiler system
-    cache_config = {
+    cache_config: Dict[str, str] = {
         "CACHE_TYPE": cache_type,
         "CACHE_EXECUTABLE": cache_executable,
         "SCCACHE_PATH": sccache_path,
         "SCCACHE_DIR": sccache_dir,
         "XCACHE_PATH": xcache_path,
     }
-    
-    # Create fake compiler scripts using Python system
-    fake_compilers_dir = Path(current_dir) / "fake_compilers"
-    fake_tools = create_fake_toolchain(
-        toolchain_info=toolchain_info,
-        cache_config=cache_config,
-        platform_packages_paths=platform_packages,
-        output_dir=fake_compilers_dir,
-        debug=debug_enabled
-    )
-    
+
+    # Check if toolset exists and is valid
+    # Create a cache key based on the configuration to invalidate cache when config changes
+    cache_key = f"{cc_name}_{cxx_name}_{cache_type}_{cache_executable}"
+
+    # Cache in the local build directory (e.g., .build/pio/uno/)
+    cache_file = Path(current_dir) / "compiler_cache.json"
+
+    fake_tools: Optional[Dict[str, str]] = None
+
+    # Try to load from persistent cache file
+    if cache_file.exists():
+        try:
+            import json
+
+            with open(cache_file, "r") as f:
+                cache_data = json.load(f)
+
+            cached_real_cc = cache_data.get("real_cc")
+            cached_real_cxx = cache_data.get("real_cxx")
+            cached_fake_cc = cache_data.get("fake_cc")
+            cached_fake_cxx = cache_data.get("fake_cxx")
+
+            if (
+                cached_real_cc
+                and cached_real_cxx
+                and cached_fake_cc
+                and cached_fake_cxx
+            ):
+                print("Found local compiler cache:")
+                print(f"  Cache file: {cache_file}")
+                print(f"  Real CC: {cached_real_cc}")
+                print(f"  Real CXX: {cached_real_cxx}")
+
+                # Check if fake compiler scripts still exist, recreate if needed
+                fake_cc_path = Path(cached_fake_cc.replace("python ", ""))
+                fake_cxx_path = Path(cached_fake_cxx.replace("python ", ""))
+
+                if fake_cc_path.exists() and fake_cxx_path.exists():
+                    # Fast path: use existing cached fake compilers
+                    fake_tools = {"CC": cached_fake_cc, "CXX": cached_fake_cxx}
+                    print(
+                        "SUCCESS: Using cached fake compilers (instant, no platform search needed):"
+                    )
+                    print(f"  CC: {cached_fake_cc}")
+                    print(f"  CXX: {cached_fake_cxx}")
+                    print("  Platform search skipped - using cached toolset")
+                else:
+                    print(
+                        "Fake compiler scripts missing, recreating with cached real paths..."
+                    )
+                    # Recreate fake compilers using cached real paths (fast)
+                    fake_compilers_dir = Path(current_dir) / "fake_compilers"
+                    fake_compilers_dir.mkdir(parents=True, exist_ok=True)
+
+                    from ci.util.fake_compiler import create_fake_compiler_script
+
+                    cache_executable = cache_config.get("CACHE_EXECUTABLE", "sccache")
+
+                    # Create fake CC script using cached real path
+                    fake_cc_script = create_fake_compiler_script(
+                        compiler_name="CC",
+                        cache_executable=cache_executable,
+                        real_compiler_path=cached_real_cc,
+                        output_dir=fake_compilers_dir,
+                        debug=debug_enabled,
+                    )
+
+                    # Create fake CXX script using cached real path
+                    fake_cxx_script = create_fake_compiler_script(
+                        compiler_name="CXX",
+                        cache_executable=cache_executable,
+                        real_compiler_path=cached_real_cxx,
+                        output_dir=fake_compilers_dir,
+                        debug=debug_enabled,
+                    )
+
+                    fake_tools = {
+                        "CC": f"python {fake_cc_script}",
+                        "CXX": f"python {fake_cxx_script}",
+                    }
+
+                    # Update cache file with new script paths
+                    cache_data["fake_cc"] = fake_tools["CC"]
+                    cache_data["fake_cxx"] = fake_tools["CXX"]
+
+                    with open(cache_file, "w") as f:
+                        json.dump(cache_data, f, indent=2)
+
+                    print("Recreated fake compilers using cached real paths:")
+                    print(f"  CC: {fake_tools['CC']}")
+                    print(f"  CXX: {fake_tools['CXX']}")
+        except Exception as e:
+            print(f"Warning: Failed to load cache file {cache_file}: {e}")
+            # Fall through to full recreation
+
+    # If no valid cache found, create the toolset from scratch
+    if fake_tools is None:
+        print("No valid cache found, creating compiler toolset from scratch...")
+        print("  This is the first compile or configuration changed")
+
+        # Get platform packages paths for toolchain resolution (expensive operation)
+        platform_packages: List[str] = []
+        if get_platform_packages_paths is not None:
+            print("Searching platform packages (this may take ~10 seconds)...")
+            platform_packages = get_platform_packages_paths()
+            print(f"Found {len(platform_packages)} platform package directories")
+
+        if create_fake_toolchain is not None:
+            try:
+                # Find the real compiler paths (expensive operation, done only once)
+                from ci.util.fake_compiler import find_toolchain_compiler
+
+                print("Resolving real compiler paths...")
+
+                real_cc_path = find_toolchain_compiler(cc_name, platform_packages)
+                real_cxx_path = find_toolchain_compiler(cxx_name, platform_packages)
+
+                if not real_cc_path or not real_cxx_path:
+                    print(f"ERROR: Could not find real compilers:")
+                    print(f"  CC '{cc_name}': {real_cc_path}")
+                    print(f"  CXX '{cxx_name}': {real_cxx_path}")
+                    fake_tools = None
+                else:
+                    print(f"Found real compilers:")
+                    print(f"  Real CC: {real_cc_path}")
+                    print(f"  Real CXX: {real_cxx_path}")
+
+                    # Create fake compiler scripts
+                    fake_compilers_dir = Path(current_dir) / "fake_compilers"
+                    fake_compilers_dir.mkdir(parents=True, exist_ok=True)
+
+                    from ci.util.fake_compiler import create_fake_compiler_script
+
+                    cache_executable = cache_config.get("CACHE_EXECUTABLE", "sccache")
+
+                    # Create fake CC script
+                    fake_cc_script = create_fake_compiler_script(
+                        compiler_name="CC",
+                        cache_executable=cache_executable,
+                        real_compiler_path=real_cc_path,
+                        output_dir=fake_compilers_dir,
+                        debug=debug_enabled,
+                    )
+
+                    # Create fake CXX script
+                    fake_cxx_script = create_fake_compiler_script(
+                        compiler_name="CXX",
+                        cache_executable=cache_executable,
+                        real_compiler_path=real_cxx_path,
+                        output_dir=fake_compilers_dir,
+                        debug=debug_enabled,
+                    )
+
+                    fake_tools = {
+                        "CC": f"python {fake_cc_script}",
+                        "CXX": f"python {fake_cxx_script}",
+                    }
+
+                    print("Created new compiler toolset:")
+                    print(f"  CC: {fake_tools['CC']}")
+                    print(f"  CXX: {fake_tools['CXX']}")
+
+                    # Save to local build directory cache file
+                    cache_data = {
+                        "cache_key": cache_key,
+                        "real_cc": real_cc_path,
+                        "real_cxx": real_cxx_path,
+                        "fake_cc": fake_tools["CC"],
+                        "fake_cxx": fake_tools["CXX"],
+                        "build_dir": str(current_dir),
+                        "platform_packages_count": len(platform_packages),
+                    }
+
+                    with open(cache_file, "w") as f:
+                        json.dump(cache_data, f, indent=2)
+
+                    print(f"Saved compiler toolset to local cache: {cache_file}")
+                    print("  This cache will persist across builds for this platform")
+
+            except Exception as e:
+                print("ERROR: Toolset creation failed with exception: " + str(e))
+                import traceback
+
+                traceback.print_exc()
+                fake_tools = None
+        else:
+            print("ERROR: create_fake_toolchain function is None")
+
     if fake_tools:
         # Use Python fake compilers instead of batch scripts
         new_cc = fake_tools.get("CC")
         new_cxx = fake_tools.get("CXX")
-        
+
         if new_cc and new_cxx:
             print("Created Python fake compilers:")
             print("  CC: " + str(new_cc))
             print("  CXX: " + str(new_cxx))
-            
+
             # Apply to both environments
-            env.Replace(CC=new_cc, CXX=new_cxx)
-            if has_projenv:
-                projenv.Replace(CC=new_cc, CXX=new_cxx)
+            env.Replace(CC=new_cc, CXX=new_cxx)  # type: ignore
+            if has_projenv and projenv is not None:
+                projenv.Replace(CC=new_cc, CXX=new_cxx)  # type: ignore
                 print("Applied Python fake compilers to both env and projenv")
             else:
                 print("Applied Python fake compilers to env (projenv not available)")
-            
+
             # Apply to library builders (critical for framework caching)
             try:
-                for lib_builder in env.GetLibBuilders():
-                    lib_builder.env.Replace(CC=new_cc, CXX=new_cxx)
-                    print("Applied Python fake compilers to library builder: " + str(getattr(lib_builder, 'name', 'unnamed')))
+                for lib_builder in env.GetLibBuilders():  # type: ignore
+                    lib_builder.env.Replace(CC=new_cc, CXX=new_cxx)  # type: ignore
+                    print(
+                        "Applied Python fake compilers to library builder: "
+                        + str(getattr(lib_builder, "name", "unnamed"))
+                    )
             except Exception as e:
                 print("WARNING: Could not apply to library builders: " + str(e))
-            
+
             print("Python fake compiler cache enabled: " + str(cache_type))
             print("  Original CC: " + str(original_cc))
             print("  Original CXX: " + str(original_cxx))
             print("  Fake CC: " + str(new_cc))
             print("  Fake CXX: " + str(new_cxx))
         else:
-            print("ERROR: Failed to create Python fake compilers, falling back to no cache")
+            print(
+                "ERROR: Failed to create Python fake compilers, falling back to no cache"
+            )
             USE_CACHE = False
     else:
         print("ERROR: Python fake compiler creation failed, falling back to no cache")
