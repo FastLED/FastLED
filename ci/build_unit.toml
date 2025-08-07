@@ -102,6 +102,17 @@ flags = [
     "-pthread",    # POSIX threads (not used on Windows)
 ]
 
+[linux]
+# Linux-specific build configuration for libunwind
+link_flags = [
+    "-lunwind",                           # Link libunwind for stack traces
+    "-lunwind-x86_64",                    # Platform-specific libunwind functions
+]
+
+defines = [
+    "USE_LIBUNWIND",                      # Enable libunwind crash handler
+]
+
 [build_modes.quick]
 flags = [
     "-O1",
@@ -169,6 +180,8 @@ defines = [
     "-DFASTLED_DEBUG_LEVEL=1",                  # Set debug level
     "-DFASTLED_NO_ATEXIT=1",                    # Disable atexit to fix Windows lld-link errors
     "-DDOCTEST_CONFIG_NO_EXCEPTIONS_BUT_WITH_ALL_ASSERTS", # Doctest configuration
+    "-DUSE_LIBUNWIND",                          # Enable libunwind crash handler
+    "-DENABLE_CRASH_HANDLER",                   # Enable global crash handler in tests
 ]
 
 # Test-specific compiler flags
@@ -207,10 +220,12 @@ include_flags = [
     "-Itests",                                  # Test directory
 ]
 
-# Test-specific linking flags for AddressSanitizer
+# Test-specific linking flags for AddressSanitizer and libunwind
 link_flags = [
     "-fsanitize=address",                       # Link AddressSanitizer runtime
     "-fsanitize=undefined",                     # Link UndefinedBehaviorSanitizer runtime
+    "-lunwind",                                 # Link libunwind for stack traces  
+    "-lunwind-x86_64",                          # Platform-specific libunwind functions
 ]
 
 [archive]
