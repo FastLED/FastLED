@@ -232,8 +232,9 @@ def _apply_board_specific_config(
         project_root=str(_PROJECT_ROOT),
     )
 
-    # Add cache setup script if cache is configured
-    if cache_type != CacheType.NO_CACHE:
+    # Add cache setup script if cache or optimization is configured
+    cache_config = _get_cache_build_flags(board.board_name, cache_type)
+    if cache_config:  # This includes both cache and optimization configurations
         # Add extra_scripts line to the [env:board] section
         config_lines = config_content.split("\n")
         for i, line in enumerate(config_lines):
@@ -328,7 +329,7 @@ def _setup_ccache_environment(board_name: str) -> bool:
 
 
 def _copy_cache_build_script(build_dir: Path, cache_config: dict[str, str]) -> None:
-    """Copy the standalone cache setup script and set environment variables for configuration."""
+    """Copy the cache/optimization setup script and set environment variables for configuration."""
     import shutil
 
     # Source script location
@@ -343,7 +344,7 @@ def _copy_cache_build_script(build_dir: Path, cache_config: dict[str, str]) -> N
     shutil.copy2(source_script, dest_script)
     print(f"Copied cache setup script: {source_script} -> {dest_script}")
 
-    # Set environment variables for cache configuration
+    # Set environment variables for cache/optimization configuration
     # These will be read by the cache_setup.py script
     cache_type = cache_config.get("CACHE_TYPE", "sccache")
 
@@ -356,7 +357,20 @@ def _copy_cache_build_script(build_dir: Path, cache_config: dict[str, str]) -> N
         "1" if os.environ.get("XCACHE_DEBUG") == "1" else "0"
     )
 
-    if cache_type == "xcache":
+    if cache_type == "optimization":
+        # Set optimization-specific environment variables
+        os.environ["FASTLED_BUILD_PHASE"] = cache_config.get("BUILD_PHASE", "capture")
+        os.environ["FASTLED_JSON_CAPTURE_DIR"] = cache_config.get(
+            "JSON_CAPTURE_DIR", ""
+        )
+        os.environ["FASTLED_OPTIMIZATION_DIR"] = cache_config.get(
+            "OPTIMIZATION_DIR", ""
+        )
+        os.environ["FASTLED_BOARD_NAME"] = cache_config.get("BOARD_NAME", "")
+        print(
+            f"Set optimization environment variables (phase: {cache_config.get('BUILD_PHASE')})"
+        )
+    elif cache_type == "xcache":
         os.environ["FASTLED_CACHE_EXECUTABLE"] = cache_config.get(
             "CACHE_EXECUTABLE", ""
         )
@@ -705,10 +719,25 @@ def _copy_boards_directory(project_root: Path, build_dir: Path) -> bool:
 
 
 def _get_cache_build_flags(board_name: str, cache_type: CacheType) -> dict[str, str]:
-    """Get environment variables for compiler cache configuration."""
+    """Get environment variables for compiler cache configuration with optimization support."""
     if cache_type == CacheType.NO_CACHE:
-        print("No compiler cache configured")
-        return {}
+        # Check if we should enable optimization even without cache
+        try:
+            from ci.util.boards import create_board
+            from ci.util.build_optimizer import detect_build_phase
+
+            board = create_board(board_name)
+            build_phase = detect_build_phase(board)
+
+            if build_phase in ["capture", "optimized"]:
+                print(f"Build optimization enabled (phase: {build_phase})")
+                return _get_optimization_build_flags(board_name, build_phase)
+            else:
+                print("No compiler cache or optimization configured")
+                return {}
+        except Exception as e:
+            print(f"No compiler cache configured (optimization check failed: {e})")
+            return {}
     elif cache_type == CacheType.SCCACHE:
         return _get_sccache_build_flags(board_name)
     elif cache_type == CacheType.CCACHE:
@@ -796,6 +825,46 @@ def _get_ccache_build_flags(board_name: str) -> dict[str, str]:
     }
 
     return env_vars
+
+
+def _get_optimization_build_flags(board_name: str, build_phase: str) -> dict[str, str]:
+    """Get build flags for FastLED compilation optimization."""
+    try:
+        from ci.util.boards import create_board
+        from ci.util.build_optimizer import setup_optimization_environment
+
+        board = create_board(board_name)
+        paths = FastLEDPaths(board_name)
+
+        print(f"Setting up FastLED build optimization (phase: {build_phase})")
+
+        # Set up optimization directories
+        json_capture_dir = paths.build_dir / "json_capture"
+        optimization_dir = paths.build_dir / "optimization"
+
+        # Create optimization environment
+        env_vars = setup_optimization_environment(board, build_phase)
+
+        # Add optimization-specific configuration
+        config = {
+            "CACHE_TYPE": "optimization",
+            "BUILD_PHASE": build_phase,
+            "JSON_CAPTURE_DIR": str(json_capture_dir),
+            "OPTIMIZATION_DIR": str(optimization_dir),
+            "BOARD_NAME": board_name,
+        }
+
+        config.update(env_vars)
+
+        print(f"Optimization directories:")
+        print(f"  JSON capture: {json_capture_dir}")
+        print(f"  Optimization: {optimization_dir}")
+
+        return config
+
+    except Exception as e:
+        print(f"Warning: Failed to set up optimization: {e}")
+        return {}
 
 
 def _setup_sccache_environment(board_name: str) -> bool:

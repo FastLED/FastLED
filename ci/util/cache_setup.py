@@ -49,7 +49,10 @@ get_platform_packages_paths: Optional[Any] = None
 cached_compiler_available: bool = False
 
 try:
-    from ci.util.cached_compiler import create_cached_toolchain, get_platform_packages_paths
+    from ci.util.cached_compiler import (
+        create_cached_toolchain,
+        get_platform_packages_paths,
+    )
 
     cached_compiler_available = True
 except ImportError as e:
@@ -127,10 +130,39 @@ try:
 except Exception as e:
     print(f"Warning: Failed to set up cache environment: {e}")
 
-# Check if cache is available and cached compiler system can be used
+# Check if cache/optimization is available and compiler system can be used
 USE_CACHE = False
+USE_OPTIMIZATION = False
 
-if cached_compiler_available and cache_executable:
+if cache_type == "optimization":
+    # For optimization, check if optimization modules are available
+    try:
+        # Import optimization modules to test availability
+        # These imports are at function level to test availability without affecting module load
+        import importlib.util
+
+        spec1 = importlib.util.find_spec("ci.util.build_optimizer")
+        spec2 = importlib.util.find_spec("ci.util.optimized_compiler")
+
+        USE_OPTIMIZATION = spec1 is not None and spec2 is not None
+
+        if USE_OPTIMIZATION:
+            build_phase = os.environ.get("FASTLED_BUILD_PHASE", "capture")
+            json_capture_dir = os.environ.get("FASTLED_JSON_CAPTURE_DIR", "")
+            board_name = os.environ.get("FASTLED_BOARD_NAME", "")
+
+            print("FastLED build optimization system enabled")
+            print(f"  Build phase: {build_phase}")
+            print(f"  JSON capture dir: {json_capture_dir}")
+            print(f"  Board: {board_name}")
+        else:
+            print("WARNING: FastLED optimization modules not available")
+
+    except Exception as e:
+        print(f"WARNING: Failed to check optimization availability: {e}")
+        USE_OPTIMIZATION = False
+
+elif cached_compiler_available and cache_executable:
     if cache_type == "xcache":
         # For xcache, check if the Python script exists and sccache is available
         USE_CACHE = (
@@ -154,16 +186,18 @@ if cached_compiler_available and cache_executable:
                 str(cache_type) + " detected and configured for Python cached compilers"
             )
             print("  cache executable: " + str(cache_executable))
-elif not cached_compiler_available:
-    print("WARNING: Python cached compiler system not available, cache will be disabled")
-else:
+elif not cached_compiler_available and not USE_OPTIMIZATION:
+    print(
+        "WARNING: Python cached compiler system not available, cache will be disabled"
+    )
+elif not USE_OPTIMIZATION:
     print(
         "Cache executable not found: "
         + str(cache_executable)
         + ", cache will be disabled"
     )
 
-if USE_CACHE and env is not None and hasattr(env, "get"):  # type: ignore[has-type]
+if (USE_CACHE or USE_OPTIMIZATION) and env is not None and hasattr(env, "get"):  # type: ignore[has-type]
     # Get current compilers from environment
     original_cc = env.get("CC")  # type: ignore[union-attr]
     original_cxx = env.get("CXX")  # type: ignore[union-attr]
@@ -318,7 +352,56 @@ if USE_CACHE and env is not None and hasattr(env, "get"):  # type: ignore[has-ty
             platform_packages = get_platform_packages_paths()
             print(f"Found {len(platform_packages)} platform package directories")
 
-        if create_cached_toolchain is not None:
+        if USE_OPTIMIZATION:
+            # Handle optimization compiler setup
+            try:
+                from ci.util.boards import create_board
+                from ci.util.optimized_compiler import create_optimized_toolchain
+
+                build_phase = os.environ.get("FASTLED_BUILD_PHASE", "capture")
+                json_capture_dir = Path(os.environ.get("FASTLED_JSON_CAPTURE_DIR", ""))
+                board_name = os.environ.get("FASTLED_BOARD_NAME", "")
+
+                if not board_name:
+                    print("ERROR: Board name not provided for optimization")
+                    cached_tools = None
+                else:
+                    print(
+                        f"Creating optimized compiler toolchain (phase: {build_phase})..."
+                    )
+
+                    board = create_board(board_name)
+
+                    # Create optimization directory
+                    optimization_dir = Path(current_dir) / "optimization"
+                    optimization_dir.mkdir(parents=True, exist_ok=True)
+
+                    # Create optimized toolchain
+                    cached_tools = create_optimized_toolchain(
+                        toolchain_info=toolchain_info,
+                        build_phase=build_phase,
+                        json_capture_dir=json_capture_dir,
+                        board=board,
+                        output_dir=optimization_dir,
+                        verbose=debug_enabled,
+                    )
+
+                    if cached_tools:
+                        print("SUCCESS: Created optimized compiler toolchain:")
+                        for tool, path in cached_tools.items():
+                            print(f"  {tool}: {path}")
+                    else:
+                        print("ERROR: Failed to create optimized toolchain")
+
+            except Exception as e:
+                print(f"ERROR: Failed to create optimized toolchain: {e}")
+                if debug_enabled:
+                    import traceback
+
+                    traceback.print_exc()
+                cached_tools = None
+
+        elif create_cached_toolchain is not None:
             try:
                 # Find the real compiler paths (expensive operation, done only once)
                 from ci.util.cached_compiler import find_toolchain_compiler
