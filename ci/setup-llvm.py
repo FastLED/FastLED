@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import os
+import platform
 import shutil
 import subprocess
 import sys
@@ -9,6 +10,17 @@ import tempfile
 import urllib.request
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
+
+
+def is_linux_or_unix() -> Tuple[bool, str]:
+    """Check if running on Linux or Unix-like system."""
+    system = platform.system().lower()
+    if system == "linux":
+        return True, "linux"
+    elif system in ["darwin", "freebsd", "openbsd", "netbsd"]:
+        return True, system
+    else:
+        return False, system
 
 
 def get_tool_version(tool_name: str) -> Optional[str]:
@@ -44,29 +56,38 @@ def find_tool_path(tool_name: str) -> Optional[Path]:
     return Path(tool_path) if tool_path else None
 
 
-def check_required_tools() -> Dict[str, Optional[Path]]:
-    """Check for all required LLVM/Clang tools on system PATH."""
-    required_tools = [
+def check_required_tools() -> Tuple[
+    Dict[str, Optional[Path]], Dict[str, Optional[Path]]
+]:
+    """Check for essential and extra LLVM/Clang tools on system PATH."""
+    essential_tools = [
         "clang",
         "clang++",
+        "llvm-ar",
+        "llvm-nm",
+        "llvm-objdump",
+        "llvm-addr2line",
+    ]
+
+    extra_tools = [
         "clangd",
         "clang-format",
         "clang-tidy",
         "lldb",
         "lld",
-        "llvm-ar",
-        "llvm-nm",
-        "llvm-objdump",
-        "llvm-addr2line",
         "llvm-strip",
         "llvm-objcopy",
     ]
 
-    found_tools: Dict[str, Optional[Path]] = {}
-    for tool in required_tools:
-        found_tools[tool] = find_tool_path(tool)
+    found_essential: Dict[str, Optional[Path]] = {}
+    for tool in essential_tools:
+        found_essential[tool] = find_tool_path(tool)
 
-    return found_tools
+    found_extras: Dict[str, Optional[Path]] = {}
+    for tool in extra_tools:
+        found_extras[tool] = find_tool_path(tool)
+
+    return found_essential, found_extras
 
 
 def create_hard_links(source_tools: Dict[str, Path], target_dir: Path) -> None:
@@ -191,6 +212,15 @@ def main() -> None:
     target_dir = Path(sys.argv[1])
     target_dir.mkdir(parents=True, exist_ok=True)
 
+    # Check platform compatibility
+    is_unix_like, platform_name = is_linux_or_unix()
+
+    if not is_unix_like:
+        print(
+            f"⚠️ Warning: Linux tools are only auto-installed on Linux/Unix, not {platform_name}"
+        )
+        return
+
     print("🔍 Checking for existing LLVM/Clang tools on system...")
 
     # Check if clang is available and get its version
@@ -202,44 +232,72 @@ def main() -> None:
         )
 
         if clang_version and clang_version >= 19:
-            print("✅ System clang 19+ detected - using system tools")
+            print("✅ System clang 19+ detected - checking tools")
 
-            # Check for all required tools
-            found_tools = check_required_tools()
-            available_tools = {name: path for name, path in found_tools.items() if path}
-            missing_tools = [name for name, path in found_tools.items() if not path]
+            # Check for essential and extra tools
+            found_essential, found_extras = check_required_tools()
+            available_essential = {
+                name: path for name, path in found_essential.items() if path
+            }
+            missing_essential = [
+                name for name, path in found_essential.items() if not path
+            ]
+            available_extras = {
+                name: path for name, path in found_extras.items() if path
+            }
+            missing_extras = [name for name, path in found_extras.items() if not path]
 
-            print(f"Found {len(available_tools)} of {len(found_tools)} required tools:")
-            for tool_name, tool_path in available_tools.items():
-                print(f"   ✓ {tool_name}: {tool_path}")
+            # Check if all essential tools are present
+            if len(available_essential) == len(found_essential):
+                print("✅ All essential tools found - using system tools")
 
-            if missing_tools:
-                print(f"Missing tools: {', '.join(missing_tools)}")
-                print(
-                    "   Some tools may not be available, but core functionality should work"
-                )
+                # Combine available tools for linking
+                all_available_tools = {**available_essential, **available_extras}
 
-            if available_tools:
                 print(f"Creating hard links in {target_dir}...")
-                create_hard_links(available_tools, target_dir)
+                create_hard_links(all_available_tools, target_dir)
 
                 # Create a simple version file
                 version_file = target_dir / "VERSION"
                 version_file.write_text(f"system-clang-{clang_version}\n")
 
-                print(f"✅ Successfully linked {len(available_tools)} system tools")
+                print(f"✅ Successfully linked {len(all_available_tools)} system tools")
+
+                # Warn about missing extras in one line
+                if missing_extras:
+                    print(f"⚠️ Missing extra tools: {', '.join(missing_extras)}")
+
                 return
             else:
-                print("❌ No system tools found, falling back to package installation")
+                # Missing essential tools - need to install LLVM
+                print(f"❌ Missing essential tools: {', '.join(missing_essential)}")
+                if platform_name == "linux":
+                    print("📦 Installing LLVM package to provide missing tools...")
+                    download_and_install_llvm(target_dir)
+                    return
+                else:
+                    print(
+                        f"⚠️ Cannot auto-install on {platform_name} - please install manually"
+                    )
+                    return
         else:
-            print(
-                f"System clang version {clang_version} < 19, falling back to package installation"
-            )
+            print(f"System clang version {clang_version} < 19")
+            if platform_name == "linux":
+                print("📦 Installing LLVM 18 package...")
+                download_and_install_llvm(target_dir)
+                return
+            else:
+                print(
+                    f"⚠️ Cannot auto-install on {platform_name} - please install manually"
+                )
+                return
     else:
-        print("No system clang found, falling back to package installation")
-
-    print("\n📦 Installing LLVM from package...")
-    download_and_install_llvm(target_dir)
+        print("No system clang found")
+        if platform_name == "linux":
+            print("📦 Installing LLVM package...")
+            download_and_install_llvm(target_dir)
+        else:
+            print(f"⚠️ Cannot auto-install on {platform_name} - please install manually")
 
 
 if __name__ == "__main__":
