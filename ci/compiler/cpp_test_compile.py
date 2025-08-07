@@ -564,6 +564,10 @@ def compile_unit_tests_python_api(
     # Ensure output directory exists
     bin_dir = BUILD_DIR / "bin"
     bin_dir.mkdir(parents=True, exist_ok=True)
+    
+    # Create clean execution directory as specified in requirements
+    clean_bin_dir = PROJECT_ROOT / "tests" / "bin"
+    clean_bin_dir.mkdir(parents=True, exist_ok=True)
 
     # Step 1: Compile doctest main once
     print("Compiling doctest main...")
@@ -663,6 +667,9 @@ def compile_unit_tests_python_api(
                 # Cache hit! Copy cached executable to target location
                 try:
                     shutil.copy2(cached_exe, executable_path)
+                    # Also copy to clean execution directory
+                    clean_executable_path = clean_bin_dir / f"{test_name}.exe"
+                    shutil.copy2(cached_exe, clean_executable_path)
                     cache_hits += 1
                     success_count += 1
                     print(f"  ⚡ {test_name}: Using cached executable (cache hit)")
@@ -721,6 +728,10 @@ def compile_unit_tests_python_api(
 
                 # Cache the successful executable for future use (same as examples)
                 cache_executable(test_name, cache_key, executable_path)
+                
+                # Also copy to clean execution directory
+                clean_executable_path = clean_bin_dir / f"{test_name}.exe"
+                shutil.copy2(executable_path, clean_executable_path)
 
         except Exception as e:
             print(f"❌ ERROR linking {test_name}: {e}")

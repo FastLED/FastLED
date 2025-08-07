@@ -524,6 +524,11 @@ class FastLEDTestCompiler:
             # Derive test name from object file
             test_name = obj_path.stem.replace("test_", "")
             exe_path = self.build_dir / f"test_{test_name}.exe"
+            
+            # Define clean execution path in tests/bin/ (this is where tests will actually run from)
+            tests_bin_dir = self.project_root / "tests" / "bin"
+            tests_bin_dir.mkdir(parents=True, exist_ok=True)
+            clean_exe_path = tests_bin_dir / f"test_{test_name}.exe"
 
             # Check if this test has its own main() function
             test_source = self.project_root / "tests" / f"test_{test_name}.cpp"
@@ -559,11 +564,13 @@ class FastLEDTestCompiler:
                 print(f"  {test_name}: Using cached executable (link cache hit)")
                 try:
                     shutil.copy2(cached_exe, exe_path)
+                    # Also copy to clean execution location
+                    shutil.copy2(cached_exe, clean_exe_path)
                     cache_hits += 1
 
                     test_exe = TestExecutable(
                         name=test_name,
-                        executable_path=exe_path,
+                        executable_path=clean_exe_path,  # Point to clean location for execution
                         test_source_path=test_source,
                     )
                     compiled_tests.append(test_exe)
@@ -623,9 +630,12 @@ class FastLEDTestCompiler:
 
             # Cache the newly linked executable for future use
             self._cache_executable(test_name, cache_key, exe_path)
+            
+            # Copy to clean execution location
+            shutil.copy2(exe_path, clean_exe_path)
 
             test_exe = TestExecutable(
-                name=test_name, executable_path=exe_path, test_source_path=test_source
+                name=test_name, executable_path=clean_exe_path, test_source_path=test_source  # Point to clean location for execution
             )
             compiled_tests.append(test_exe)
 
