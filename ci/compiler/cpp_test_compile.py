@@ -404,8 +404,8 @@ def create_unit_test_compiler(
         "-Wno-backslash-newline-escape",
         "-fno-exceptions",
         "-fno-rtti",
-        "-O0",           # No optimization for better debugging
-        "-g3",           # Maximum debug information
+        "-O0",  # No optimization for better debugging
+        "-g3",  # Maximum debug information
         "-fno-omit-frame-pointer",
         "-fstandalone-debug",  # Include debug info for all used types
         "-fno-inline-functions",
@@ -417,10 +417,12 @@ def create_unit_test_compiler(
         f"-I{current_dir / 'tests'}",
         f"-I{src_path / 'platforms' / 'stub'}",
     ]
-    
+
     # Add debug flags for DWARF symbols (works on all platforms including Windows GNU toolchain)
-    if os.name == 'nt':  # Windows with GNU toolchain
-        unit_test_args.extend(["-gdwarf-4"])  # Generate DWARF debug info for GNU debugging tools
+    if os.name == "nt":  # Windows with GNU toolchain
+        unit_test_args.extend(
+            ["-gdwarf-4"]
+        )  # Generate DWARF debug info for GNU debugging tools
 
     # PCH configuration with unit test specific headers
     pch_output_path = None
@@ -574,6 +576,10 @@ def compile_unit_tests_python_api(
     bin_dir = BUILD_DIR / "bin"
     bin_dir.mkdir(parents=True, exist_ok=True)
 
+    # Create clean execution directory as specified in requirements
+    clean_bin_dir = PROJECT_ROOT / "tests" / "bin"
+    clean_bin_dir.mkdir(parents=True, exist_ok=True)
+
     # Step 1: Compile doctest main once
     print("Compiling doctest main...")
     doctest_main_path = tests_dir / "doctest_main.cpp"
@@ -656,7 +662,7 @@ def compile_unit_tests_python_api(
                 object_files: list[str | Path] = [object_path, doctest_main_obj]
 
             # Platform-specific linker arguments for crash handler support
-            if os.name == 'nt':  # Windows
+            if os.name == "nt":  # Windows
                 linker_args = ["-ldbghelp", "-lpsapi"]
             else:  # Linux/macOS
                 linker_args = ["-pthread", "-lunwind"]
@@ -676,6 +682,9 @@ def compile_unit_tests_python_api(
                 # Cache hit! Copy cached executable to target location
                 try:
                     shutil.copy2(cached_exe, executable_path)
+                    # Also copy to clean execution directory
+                    clean_executable_path = clean_bin_dir / f"{test_name}.exe"
+                    shutil.copy2(cached_exe, clean_executable_path)
                     cache_hits += 1
                     success_count += 1
                     print(f"  ⚡ {test_name}: Using cached executable (cache hit)")
@@ -734,6 +743,10 @@ def compile_unit_tests_python_api(
 
                 # Cache the successful executable for future use (same as examples)
                 cache_executable(test_name, cache_key, executable_path)
+
+                # Also copy to clean execution directory
+                clean_executable_path = clean_bin_dir / f"{test_name}.exe"
+                shutil.copy2(executable_path, clean_executable_path)
 
         except Exception as e:
             print(f"❌ ERROR linking {test_name}: {e}")
