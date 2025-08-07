@@ -1,4 +1,21 @@
 #!/bin/bash
+# Ensure UTF-8 everywhere (console and Python), including on Windows msys/cygwin
+case "$OSTYPE" in
+  msys*|cygwin*)
+    if command -v chcp.com >/dev/null 2>&1; then
+      # Attempt to switch Windows code page to UTF-8 (65001)
+      chcp.com 65001 >NUL 2>NUL || chcp.com 65001 >/dev/null 2>&1
+    fi
+    ;;
+  *)
+    :
+    ;;
+esac
+export LANG=C.UTF-8
+export LC_ALL=C.UTF-8
+export PYTHONUTF8=1
+export PYTHONIOENCODING=UTF-8
+
 set -ex
 uv venv --python 3.11
 uv pip install -e . --refresh-package fastled
