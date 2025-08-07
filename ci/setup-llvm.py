@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
 
+import _thread
+import atexit
+import json
+import lzma
 import os
 import platform
 import shutil
@@ -7,9 +11,93 @@ import subprocess
 import sys
 import tarfile
 import tempfile
+import urllib.error
 import urllib.request
+import zipfile
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple, cast
+from typing import Any, Dict, List, Optional, Protocol, Tuple, cast
+
+from ci.util.resumable_downloader import ResumableDownloader
+
+
+class _SysConf(Protocol):
+    def short_os_name_and_version(self) -> str: ...
+
+    architecture: str
+
+
+import sys_detection
+from llvm_installer import LlvmInstaller
+
+
+_HERE = Path(__file__).parent
+_PROJECT_ROOT = _HERE.parent
+
+# Global download directory - lazily initialized
+_download_dir: Optional[Path] = None
+
+
+def _get_download_dir() -> Path:
+    """Get or create the download directory lazily."""
+    global _download_dir
+    if _download_dir is None:
+        _download_dir = _PROJECT_ROOT / ".cache" / "downloads"
+        _download_dir.mkdir(parents=True, exist_ok=True)
+        print(f"Created download directory: {_download_dir}")
+        # Register cleanup on exit as fallback
+        atexit.register(_cleanup_download_dir)
+    return _download_dir
+
+
+def _cleanup_download_dir() -> None:
+    """Clean up the download directory."""
+    global _download_dir
+    if _download_dir and _download_dir.exists():
+        try:
+            shutil.rmtree(_download_dir)
+            print(f"Cleaned up download directory: {_download_dir}")
+        except Exception as e:
+            print(
+                f"Warning: Failed to clean up download directory {_download_dir}: {e}"
+            )
+        _download_dir = None
+
+
+def _download(url: str, filename: str) -> Path:
+    """Download to the managed download directory.
+
+    Args:
+        url: URL to download
+        filename: Filename to save as (not full path)
+
+    Returns:
+        Path to the downloaded file
+    """
+    download_dir = _get_download_dir()
+    file_path = download_dir / filename
+
+    print(f"download {url} to {file_path}")
+
+    # Use resumable downloader for large files
+    downloader = ResumableDownloader(chunk_size=1024 * 1024)  # 1MB chunks
+
+    try:
+        downloader.download(url, file_path)
+    except Exception as e:
+        # Print download failure banner
+        url_truncated = url[:100]
+        banner_width = max(35, len(url_truncated) + 6)
+        banner_line = "#" * banner_width
+        print(f"\n{banner_line}")
+        print(
+            f"# DOWNLOAD FAILED FOR {url_truncated}{'...' if len(url) > 100 else ''} #"
+        )
+        print(f"{banner_line}")
+        print(f"Error: {e}")
+        print()
+        raise
+
+    return file_path
 
 
 def is_linux_or_unix() -> Tuple[bool, str]:
@@ -173,6 +261,58 @@ def find_tools_in_directories(
     return found
 
 
+def get_breadcrumb_file(target_dir: Path) -> Path:
+    """Get the path to the installation completion breadcrumb file."""
+    cache_dir = target_dir / ".cache" / "cc"
+    cache_dir.mkdir(parents=True, exist_ok=True)
+    return cache_dir / "done.txt"
+
+
+def create_breadcrumb(target_dir: Path) -> None:
+    """Create breadcrumb file to mark successful installation."""
+    breadcrumb = get_breadcrumb_file(target_dir)
+    breadcrumb.write_text(f"Installation completed at {os.path.basename(target_dir)}\n")
+    print(f"Created installation breadcrumb: {breadcrumb}")
+
+
+def check_existing_installation(target_dir: Path) -> Tuple[bool, bool]:
+    """Check if there's an existing installation and if it's complete.
+
+    Returns:
+        (has_artifacts, has_breadcrumb) - bool tuple indicating installation state
+    """
+    breadcrumb = get_breadcrumb_file(target_dir)
+    has_breadcrumb = breadcrumb.exists()
+
+    # Check for any installation artifacts
+    bin_dir = target_dir / "bin"
+    has_artifacts = bin_dir.exists() and any(bin_dir.iterdir())
+
+    return has_artifacts, has_breadcrumb
+
+
+def verify_clang_installation(target_dir: Path) -> bool:
+    """Test if clang is properly installed in target directory."""
+    bin_dir = target_dir / "bin"
+    clang_exe = (
+        bin_dir / "clang.exe"
+        if platform.system().lower() == "windows"
+        else bin_dir / "clang"
+    )
+
+    if not clang_exe.exists():
+        return False
+
+    # Test that clang can run and report version
+    try:
+        result = subprocess.run(
+            [str(clang_exe), "--version"], capture_output=True, text=True, timeout=5
+        )
+        return result.returncode == 0
+    except (subprocess.TimeoutExpired, FileNotFoundError, subprocess.SubprocessError):
+        return False
+
+
 def get_windows_default_llvm_bins() -> List[Path]:
     """Return common Windows LLVM bin directories to probe."""
     roots: List[Path] = []
@@ -215,132 +355,314 @@ def _run_subprocess(args: List[str], timeout_seconds: int) -> tuple[int, str, st
         return 1, "", f"Subprocess error: {e}"
 
 
-def install_llvm_windows() -> bool:
-    """Attempt to install LLVM toolchain on Windows using available package managers.
+def install_llvm_windows_direct(target_dir: Path) -> Path:
+    """Download and extract official LLVM Windows tar.xz archive into target_dir.
 
-    Order of attempts:
-      1) winget install LLVM.LLVM (silent)
-      2) choco install llvm -y
-      3) scoop install llvm
-
-    Returns True if any installer reports success, otherwise False.
+    Returns the extracted LLVM bin directory path on success.
+    Fails fast with a descriptive error on failure.
     """
-    # Try winget
-    winget_path = find_tool_path("winget")
-    if winget_path is not None:
-        print("Attempting LLVM installation via winget ...")
-        code, out, err = _run_subprocess(
-            [
-                str(winget_path),
-                "install",
-                "-e",
-                "--id",
-                "LLVM.LLVM",
-                "--source",
-                "winget",
-                "--silent",
-                "--accept-package-agreements",
-                "--accept-source-agreements",
-            ],
-            timeout_seconds=1800,
-        )
-        if code == 0:
-            print("OK: winget reports LLVM installation completed")
-            return True
-        print("WARN: winget failed to install LLVM")
-        if out:
-            print(out)
-        if err:
-            print(err)
+    # Prefer dynamically discovered releases; as fallback, try a small curated list
+    preferred_versions: List[str] = [
+        "20.1.8",
+        "20.1.7",
+        "20.1.6",
+        "19.1.8",
+        "19.1.7",
+        "19.1.6",
+    ]
 
-    # Try Chocolatey
-    choco_path = find_tool_path("choco")
-    if choco_path is not None:
-        print("Attempting LLVM installation via Chocolatey ...")
-        code, out, err = _run_subprocess(
-            [str(choco_path), "install", "llvm", "-y"], timeout_seconds=1800
-        )
-        if code == 0:
-            print("OK: Chocolatey reports LLVM installation completed")
-            return True
-        print("WARN: Chocolatey failed to install LLVM")
-        if out:
-            print(out)
-        if err:
-            print(err)
+    download_errors: List[str] = []
 
-    # Try Scoop
-    scoop_path = find_tool_path("scoop")
-    if scoop_path is not None:
-        print("Attempting LLVM installation via Scoop ...")
-        code, out, err = _run_subprocess(
-            [str(scoop_path), "install", "llvm"], timeout_seconds=1800
-        )
-        if code == 0:
-            print("OK: Scoop reports LLVM installation completed")
-            return True
-        print("WARN: Scoop failed to install LLVM")
-        if out:
-            print(out)
-        if err:
-            print(err)
+    # First, try to discover the latest available Windows tar.xz for majors 20 and 19
+    for probe_major in [20, 19]:
+        print(f"Attempting discovery for LLVM major version {probe_major}...")
+        discovered_url = discover_latest_github_llvm_win_zip(probe_major)
+        if discovered_url is not None:
+            print(f"Discovered URL for LLVM {probe_major}: {discovered_url}")
+            # Put discovered URL at the front of attempts
+            target_dir.mkdir(parents=True, exist_ok=True)
+            extract_root: Path = target_dir
 
-    print(
-        "CRITICAL: No supported Windows package manager (winget/choco/scoop) succeeded in installing LLVM."
-    )
-    return False
+            tmp_archive_path: Optional[Path] = None
+            try:
+                print(f"Attempting to download and extract LLVM {probe_major}...")
+                # Download to managed directory
+                tmp_archive_path = _download(
+                    discovered_url, f"llvm-discovered-{probe_major}.tar.xz"
+                )
+                extract_root = target_dir
+                with lzma.open(tmp_archive_path, "rb") as xz_file:
+                    with tarfile.open(fileobj=xz_file, mode="r") as tar:
+                        tar.extractall(extract_root, filter="data")
+            except KeyboardInterrupt:
+                print("Operation interrupted by user")
+                _thread.interrupt_main()
+                raise
+            except Exception as e:
+                print(f"Failed to download/extract LLVM {probe_major}: {e}")
+                download_errors.append(f"discovered-{probe_major}: {e}")
+            finally:
+                # Clean up the downloaded file immediately
+                if tmp_archive_path and tmp_archive_path.exists():
+                    try:
+                        tmp_archive_path.unlink()
+                        print(f"Cleaned up: {tmp_archive_path}")
+                    except Exception as e:
+                        print(f"Warning: Failed to clean up {tmp_archive_path}: {e}")
+
+            extracted_bin: Optional[Path] = None
+            for entry in extract_root.iterdir():
+                if not entry.is_dir():
+                    continue
+                candidate = entry / "bin" / "clang.exe"
+                if candidate.exists():
+                    extracted_bin = entry / "bin"
+                    break
+
+            if extracted_bin is not None:
+                print(
+                    f"SUCCESS: LLVM {probe_major} installed successfully via discovery!"
+                )
+                print("OK: Successfully installed LLVM (Windows tar.xz, discovered)")
+                print(f"   Installation directory: {extracted_bin.parent}")
+                print(f"   Bin directory: {extracted_bin}")
+                create_breadcrumb(target_dir)
+                return extracted_bin
+            else:
+                print(
+                    f"WARNING: LLVM {probe_major} downloaded but clang.exe not found in expected location"
+                )
+        else:
+            print(f"No URL discovered for LLVM major version {probe_major}")
+
+    # If discovery did not succeed, try curated versions list
+    print("\n" + "=" * 60)
+    print("Discovery failed for all major versions. Falling back to curated list...")
+    print("=" * 60 + "\n")
+
+    for version in preferred_versions:
+        base_url = (
+            "https://github.com/llvm/llvm-project/releases/download/"
+            f"llvmorg-{version}/clang+llvm-{version}-x86_64-pc-windows-msvc.tar.xz"
+        )
+        print(f"Attempting direct LLVM download for Windows: {base_url}")
+        try:
+            target_dir.mkdir(parents=True, exist_ok=True)
+
+            tmp_archive_path: Optional[Path] = None
+            try:
+                # Download to managed directory
+                tmp_archive_path = _download(base_url, f"llvm-{version}.tar.xz")
+            except KeyboardInterrupt:
+                print("Operation interrupted by user")
+                _thread.interrupt_main()
+                raise
+            except Exception as e:
+                download_errors.append(f"{version}: {e}")
+                # Clean up on download error
+                if tmp_archive_path and tmp_archive_path.exists():
+                    try:
+                        tmp_archive_path.unlink()
+                        print(f"Cleaned up after error: {tmp_archive_path}")
+                    except Exception:
+                        pass
+                continue
+
+            extract_root = target_dir
+            try:
+                with lzma.open(tmp_archive_path, "rb") as xz_file:
+                    with tarfile.open(fileobj=xz_file, mode="r") as tar:
+                        tar.extractall(extract_root, filter="data")
+            finally:
+                # Clean up the downloaded file immediately
+                if tmp_archive_path and tmp_archive_path.exists():
+                    try:
+                        tmp_archive_path.unlink()
+                        print(f"Cleaned up: {tmp_archive_path}")
+                    except Exception as e:
+                        print(f"Warning: Failed to clean up {tmp_archive_path}: {e}")
+
+            # Find extracted directory that contains bin/clang.exe
+            extracted_bin: Optional[Path] = None
+            for entry in extract_root.iterdir():
+                if not entry.is_dir():
+                    continue
+                candidate = entry / "bin" / "clang.exe"
+                if candidate.exists():
+                    extracted_bin = entry / "bin"
+                    break
+
+            if extracted_bin is None:
+                print(
+                    "ERROR: LLVM downloaded but clang.exe not found in expected location"
+                )
+                # Try next version
+                continue
+
+            print("OK: Successfully installed LLVM (Windows tar.xz)")
+            print(f"   Installation directory: {extracted_bin.parent}")
+            print(f"   Bin directory: {extracted_bin}")
+            create_breadcrumb(target_dir)
+            return extracted_bin
+
+        except KeyboardInterrupt:
+            print("Operation interrupted by user")
+            _thread.interrupt_main()
+            raise
+        except Exception as e:
+            download_errors.append(f"{version}: {e}")
+            continue
+
+    # If we reach here, all attempts failed
+    print("CRITICAL: Failed to download LLVM for Windows from official releases.")
+    if download_errors:
+        for err in download_errors:
+            print(f"  - {err}")
+    print("Please ensure internet access is available and retry.")
+    sys.exit(1)
+
+
+def discover_latest_github_llvm_win_zip(major: int) -> Optional[str]:
+    """Find the latest LLVM Windows tar.xz asset for a given major version via GitHub API.
+
+    Returns a browser_download_url string if found, otherwise None.
+    """
+    try:
+        per_page: int = 50
+        page: int = 1
+        max_pages: int = 3
+        while page <= max_pages:
+            api_url: str = (
+                "https://api.github.com/repos/llvm/llvm-project/releases"
+                f"?per_page={per_page}&page={page}"
+            )
+            req = urllib.request.Request(
+                api_url, headers={"User-Agent": "fastled-setup-llvm"}
+            )
+            with urllib.request.urlopen(req, timeout=20) as resp:
+                raw: str = resp.read().decode("utf-8")
+            releases_any: Any = json.loads(raw)
+            releases: list[dict[str, Any]] = []
+            if isinstance(releases_any, list):
+                tmp_list: list[Any] = cast(list[Any], releases_any)
+                filtered: list[dict[str, Any]] = []
+                k: int = 0
+                while k < len(tmp_list):
+                    item: Any = tmp_list[k]
+                    k += 1
+                    if isinstance(item, dict):
+                        filtered.append(cast(dict[str, Any], item))
+                releases = filtered
+
+            # Iterate releases
+            idx: int = 0
+            while idx < len(releases):
+                rel: dict[str, Any] = releases[idx]
+                idx += 1
+                tag_val: Any = rel.get("tag_name")
+                tag_name: Optional[str] = tag_val if isinstance(tag_val, str) else None
+                if tag_name is None:
+                    continue
+                # Expect tags like llvmorg-19.1.6
+                prefix: str = f"llvmorg-{major}."
+                if not tag_name.startswith(prefix):
+                    continue
+                assets_val: Any = rel.get("assets")
+                assets: list[dict[str, Any]] = (
+                    cast(list[dict[str, Any]], assets_val)
+                    if isinstance(assets_val, list)
+                    else []
+                )
+                filtered_assets: list[dict[str, Any]] = [
+                    a for a in assets if isinstance(a, dict)
+                ]
+                j: int = 0
+                while j < len(filtered_assets):
+                    asset: dict[str, Any] = filtered_assets[j]
+                    j += 1
+                    name_val: Any = asset.get("name")
+                    url_val: Any = asset.get("browser_download_url")
+                    name: Optional[str] = (
+                        name_val if isinstance(name_val, str) else None
+                    )
+                    url: Optional[str] = url_val if isinstance(url_val, str) else None
+                    if name is not None and url is not None:
+                        # Match e.g., clang+llvm-19.1.6-x86_64-pc-windows-msvc.tar.xz
+                        if (
+                            name.startswith(f"clang+llvm-{major}.")
+                            and "x86_64-pc-windows-msvc.tar.xz" in name
+                        ):
+                            return url
+            page += 1
+        return None
+    except urllib.error.URLError:
+        return None
 
 
 def download_and_install_llvm(target_dir: Path) -> None:
     """Download and install LLVM using llvm-installer package."""
-    try:
-        # Import llvm-installer
-        import sys_detection
-        from llvm_installer import LlvmInstaller
-    except ImportError as e:
-        print(
-            "CRITICAL: Missing required packages for LLVM installation helper.\n"
-            "Please install them with: uv add llvm-installer sys-detection"
-        )
-        print(f"Import error: {e}")
-        sys.exit(1)
-
     print("Detecting system configuration...")
     try:
-        local_sys_conf = sys_detection.local_sys_conf()
-        detected_os = local_sys_conf.short_os_name_and_version()
-        architecture = local_sys_conf.architecture
+        sys_conf_obj2: Any = sys_detection.local_sys_conf()
+        local_conf2: _SysConf = cast(_SysConf, sys_conf_obj2)
+        detected_os: str = local_conf2.short_os_name_and_version()
+        architecture: str = local_conf2.architecture
         print(f"Detected OS: {detected_os}")
         print(f"Architecture: {architecture}")
 
         # Use Ubuntu 24.04 as fallback since it's known to work
         # This package seems to be from YugabyteDB and has limited OS support
-        working_os = "ubuntu24.04"
+        working_os: str = "ubuntu24.04"
         if detected_os.startswith("ubuntu24") or detected_os.startswith("ubuntu22"):
             working_os = detected_os
 
         print(f"Using OS variant: {working_os}")
 
-        llvm_installer = LlvmInstaller(
+        llvm_installer: Any = LlvmInstaller(
             short_os_name_and_version=working_os, architecture=architecture
         )
 
-        # Try LLVM 18 (latest stable)
-        version = 18
-        print(f"Installing LLVM version {version}...")
-        llvm_url = llvm_installer.get_llvm_url(major_llvm_version=version)
-        print(f"Found LLVM {version} at: {llvm_url}")
+        # Prefer most recent supported major release for linux tarball path
+        llvm_url: str = ""
+        selected_version: Optional[int] = None
+        for version in [20, 19]:
+            try:
+                print(f"Installing LLVM version {version}...")
+                llvm_url = llvm_installer.get_llvm_url(major_llvm_version=version)
+                print(f"Found LLVM {version} at: {llvm_url}")
+                selected_version = version
+                break
+            except KeyboardInterrupt:
+                print("Operation interrupted by user")
+                _thread.interrupt_main()
+                raise
+            except Exception as e:
+                print(f"WARN: Could not resolve LLVM {version}: {e}")
+
+        if not llvm_url:
+            raise RuntimeError(
+                "Could not resolve a suitable LLVM download URL for Linux"
+            )
 
         # Download and extract
         print("Downloading LLVM package...")
-        with tempfile.NamedTemporaryFile(delete=False, suffix=".tar.gz") as tmp_file:
-            urllib.request.urlretrieve(llvm_url, tmp_file.name)
 
+        # Download to managed directory
+        tmp_archive_path: Path = _download(
+            llvm_url, f"llvm-linux-{selected_version or 'unknown'}.tar.gz"
+        )
+
+        try:
             print("Extracting LLVM package...")
-            with tarfile.open(tmp_file.name, "r:gz") as tar:
+            with tarfile.open(tmp_archive_path, "r:gz") as tar:
                 tar.extractall(target_dir, filter="data")
-
-        os.unlink(tmp_file.name)
+        finally:
+            # Clean up immediately after extraction
+            try:
+                tmp_archive_path.unlink()
+                print(f"Cleaned up: {tmp_archive_path}")
+            except Exception as e:
+                print(f"Warning: Failed to clean up {tmp_archive_path}: {e}")
 
         # Find the extracted directory and verify clang exists
         for extracted_dir in target_dir.iterdir():
@@ -348,7 +670,9 @@ def download_and_install_llvm(target_dir: Path) -> None:
                 clang_path = extracted_dir / "bin" / "clang"
 
                 if clang_path.exists():
-                    print(f"OK: Successfully installed LLVM {version}")
+                    print(
+                        f"OK: Successfully installed LLVM {selected_version if selected_version is not None else 'unknown'}"
+                    )
                     print(f"   Installation directory: {extracted_dir}")
                     print(f"   Clang binary: {clang_path}")
 
@@ -376,6 +700,10 @@ def download_and_install_llvm(target_dir: Path) -> None:
         print("ERROR: LLVM downloaded but clang not found in expected location")
         sys.exit(1)
 
+    except KeyboardInterrupt:
+        print("Operation interrupted by user")
+        _thread.interrupt_main()
+        raise
     except Exception as e:
         print(f"Error during installation: {e}")
         import traceback
@@ -386,12 +714,19 @@ def download_and_install_llvm(target_dir: Path) -> None:
 
 def main() -> None:
     """Setup LLVM toolchain - check system first, fallback to package installation."""
-    # Get target directory from command line
-    if len(sys.argv) != 2:
-        print("Usage: uv run python ci/setup-llvm.py <target_directory>")
+    # Get target directory from command line (optional)
+    if len(sys.argv) > 2:
+        print("Usage: uv run python ci/setup-llvm.py [target_directory]")
+        print("  target_directory: Optional. Defaults to .cache/cc in project root")
         sys.exit(1)
 
-    target_dir = Path(sys.argv[1])
+    if len(sys.argv) == 2:
+        target_dir = Path(sys.argv[1])
+    else:
+        # Default to project root .cache/cc directory
+        target_dir = _PROJECT_ROOT / ".cache" / "cc"
+        print(f"Using default target directory: {target_dir}")
+
     target_dir.mkdir(parents=True, exist_ok=True)
 
     # Check platform compatibility
@@ -399,6 +734,25 @@ def main() -> None:
 
     if platform_name == "windows":
         print("Checking for existing LLVM/Clang tools on system (Windows)...")
+
+        # Check for existing installation in target directory
+        has_artifacts, has_breadcrumb = check_existing_installation(target_dir)
+
+        if has_artifacts and not has_breadcrumb:
+            print("WARN: Found installation artifacts without completion marker")
+            print("     This suggests an incomplete or corrupted installation")
+            print("     Re-downloading LLVM to ensure proper installation...")
+        elif has_artifacts and has_breadcrumb:
+            if verify_clang_installation(target_dir):
+                print("OK: Valid LLVM installation found in target directory")
+                print("    Skipping download - clang installation verified")
+                return
+            else:
+                print(
+                    "WARN: Installation breadcrumb exists but clang verification failed"
+                )
+                print("     Re-downloading LLVM to fix installation...")
+
         clang_version_output = get_tool_version("clang")
         if clang_version_output:
             clang_version = get_clang_version_number(clang_version_output)
@@ -463,6 +817,7 @@ def main() -> None:
             bin_dir = target_dir / "bin"
             existing = [p for p in bin_dir.iterdir() if p.is_file()]
             print(f"OK: Tools available in {bin_dir}: {len(existing)} files")
+            create_breadcrumb(target_dir)
 
             # Warn about missing non-core tools
             missing_noncore = [
@@ -477,58 +832,50 @@ def main() -> None:
                 print(f"WARN: Missing extra tools: {', '.join(missing_extras)}")
             return
 
-        # Try to auto-install on Windows using available package managers
+        # Try to auto-install on Windows via direct GitHub download
         print(f"ERROR: Missing core tools: {', '.join(missing_core)}")
-        print("Attempting automatic LLVM installation on Windows...")
-        if not install_llvm_windows():
-            print(
-                "CRITICAL: Failed to install LLVM automatically. Please install LLVM for Windows manually (official installer or via your package manager), add its bin directory to PATH, and re-run.\n"
-                "Note: llvm-addr2line is REQUIRED for stack traces and test infrastructure."
-            )
-            print("    uv run python ci/setup-llvm.py <target_directory>")
-            sys.exit(1)
+        print("Downloading LLVM for Windows from GitHub releases...")
+        extracted_bin_dir = install_llvm_windows_direct(target_dir)
 
-        # Re-scan after installation
-        found_essential, found_extras = check_required_tools()
-        # Probe default locations again
-        probed_after = find_tools_in_directories(
-            list(found_essential.keys()), get_windows_default_llvm_bins()
+        # Collect tools from the extracted bin directory and link/copy them
+        tool_names: List[str] = [
+            "clang",
+            "clang++",
+            "lld-link",
+            "llvm-addr2line",
+            "llvm-ar",
+            "llvm-nm",
+            "llvm-objdump",
+            "llvm-strip",
+            "llvm-objcopy",
+            "clangd",
+            "clang-format",
+            "clang-tidy",
+            "lldb",
+        ]
+        discovered: Dict[str, Optional[Path]] = find_tools_in_directories(
+            tool_names, [extracted_bin_dir]
         )
-        for name, p in probed_after.items():
-            if p is not None and found_essential.get(name) is None:
-                found_essential[name] = p
+        available_tools: Dict[str, Path] = {}
+        for name, p in discovered.items():
+            if p is not None:
+                available_tools[name] = cast(Path, p)
 
-        # Re-evaluate core
-        missing_core = [name for name in core_required if not found_essential.get(name)]
-        if missing_core:
+        if not available_tools:
             print(
-                f"CRITICAL: LLVM installation incomplete. Still missing core tools: {', '.join(missing_core)}"
-            )
-            print(
-                "Please ensure LLVM's bin directory is on PATH and includes llvm-addr2line."
+                "CRITICAL: Extracted LLVM bin directory does not contain expected tools."
             )
             sys.exit(1)
-
-        # Proceed with linking
-        print("OK: LLVM installed - proceeding with available tools")
-        all_available_tools: Dict[str, Path] = {}
-        for name, path in found_essential.items():
-            if path is not None:
-                all_available_tools[name] = cast(Path, path)
-        for name, path in found_extras.items():
-            if path is not None:
-                all_available_tools[name] = cast(Path, path)
 
         print(f"Creating hard links in {target_dir}...")
-        create_hard_links(all_available_tools, target_dir)
+        create_hard_links(available_tools, target_dir)
 
         version_file = target_dir / "VERSION"
-        version_file.write_text(
-            f"system-clang-{clang_version if clang_version else 'unknown'}\n"
-        )
+        version_file.write_text("downloaded-llvm-windows\n")
         bin_dir = target_dir / "bin"
         existing = [p for p in bin_dir.iterdir() if p.is_file()]
         print(f"OK: Tools available in {bin_dir}: {len(existing)} files")
+        create_breadcrumb(target_dir)
         return
 
         print("Checking for existing LLVM/Clang tools on system...")
@@ -615,4 +962,8 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    finally:
+        # Clean up download directory at the end
+        _cleanup_download_dir()
