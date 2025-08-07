@@ -1453,6 +1453,31 @@ except KeyboardInterrupt:
 - ✅ **Specify exact exception types** instead of bare `except:`
 - ✅ **Re-raise `KeyboardInterrupt`** after cleanup to maintain interrupt behavior
 
+**MANDATORY when catching general Exception:** Whenever you catch a general `Exception`, you MUST also include an explicit `KeyboardInterrupt` handler, and it MUST appear before the general `Exception` clause.
+
+Wrong:
+```python
+try:
+    my_function()
+except Exception:
+    continue
+```
+
+Right:
+```python
+import _thread  # module-level import required by our import rules
+
+try:
+    my_function()
+except KeyboardInterrupt:
+    _thread.interrupt_main()
+    print("Keyboard interrupt!")
+    raise
+except Exception as e:
+    # Handle or re-raise as appropriate for your context
+    raise
+```
+
 **Complex Exception Handling Example:**
 ```python
 import _thread
