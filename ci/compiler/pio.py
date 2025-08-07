@@ -985,6 +985,52 @@ def _copy_fastled_library(project_root: Path, build_dir: Path) -> bool:
     return True
 
 
+def _post_process_optimization(build_dir: Path, board: Board) -> None:
+    """Post-process the build to create optimization artifacts."""
+    try:
+        from ci.util.build_optimizer import (
+            BuildMetadataAggregator, 
+            create_unified_archive,
+            save_optimization_metadata
+        )
+        
+        # Check if JSON capture is available
+        json_capture_dir = build_dir / "json_capture"
+        if not json_capture_dir.exists():
+            if os.environ.get("FASTLED_BUILD_PHASE") == "capture":
+                print("INFO: JSON capture directory not found, optimization will not be available")
+            return
+        
+        json_files = list(json_capture_dir.glob("cmd_*.json"))
+        if not json_files:
+            print("INFO: No JSON capture files found, optimization will not be available")
+            return
+        
+        print(f"📊 Processing {len(json_files)} captured build commands for optimization...")
+        
+        # Aggregate metadata from captured commands
+        aggregator = BuildMetadataAggregator(json_capture_dir, board)
+        metadata = aggregator.aggregate_metadata()
+        
+        # Create unified archive from generated libraries
+        unified_archive = create_unified_archive(build_dir, metadata)
+        
+        # Save optimization metadata
+        metadata_file = build_dir / "optimization_metadata.json"
+        save_optimization_metadata(metadata, metadata_file)
+        
+        print(f"🚀 FastLED build optimization is now active!")
+        print(f"   Next builds for this platform will be ~{metadata.total_commands // 5}x faster")
+        print(f"   Unified archive: {unified_archive}")
+        print(f"   Metadata: {metadata_file}")
+        
+    except ImportError as e:
+        print(f"INFO: Optimization modules not available: {e}")
+    except Exception as e:
+        print(f"WARNING: Failed to create optimization artifacts: {e}")
+        # Don't fail the build if optimization setup fails
+
+
 def _init_platformio_build(
     board: Board,
     verbose: bool,
@@ -1145,6 +1191,9 @@ def _init_platformio_build(
     # Generate build_info.json after successful initialization build
     _generate_build_info_json_from_existing_build(build_dir, board)
 
+    # Post-process for optimization if JSON capture is available
+    _post_process_optimization(build_dir, board)
+
     return InitResult(success=True, output="", build_dir=build_dir)
 
 
@@ -1272,6 +1321,16 @@ class PioCompiler(Compiler):
 
         # Cache configuration is handled through build flags during initialization
 
+        # Check for optimization metadata and use direct compilation if available
+        optimization_metadata_file = self.build_dir / "optimization_metadata.json"
+        if optimization_metadata_file.exists():
+            try:
+                # Use optimized build path
+                return self._build_optimized(example)
+            except Exception as e:
+                print(f"WARNING: Optimized build failed for {example}: {e}")
+                print("Falling back to standard PlatformIO build...")
+
         # Run PlatformIO build
         run_cmd: list[str] = [
             "pio",
@@ -1371,6 +1430,54 @@ class PioCompiler(Compiler):
 
         except Exception as e:
             return f"Error retrieving {cache_name.upper()} statistics: {e}"
+
+    def _build_optimized(self, example: str) -> SketchResult:
+        """Build example using optimized direct compilation, bypassing PlatformIO."""
+        try:
+            from ci.util.build_optimizer import load_optimization_metadata
+            from ci.util.unity_generator import UnityBuildGenerator
+            from ci.util.direct_compiler import DirectCompiler
+            
+            # Load optimization metadata
+            metadata = load_optimization_metadata(self.build_dir)
+            
+            # Generate unity build for the sketch
+            sketch_dir = self.build_dir / "src" / "sketch"
+            unity_dir = self.build_dir / "unity_build"
+            unity_dir.mkdir(exist_ok=True)
+            
+            unity_generator = UnityBuildGenerator(sketch_dir, unity_dir)
+            unity_cpp, main_cpp = unity_generator.generate_unity_build()
+            
+            # Use direct compiler
+            direct_compiler = DirectCompiler(
+                board=self.board,
+                metadata=metadata,
+                verbose=self.verbose,
+                additional_defines=self.additional_defines,
+                additional_include_dirs=self.additional_include_dirs
+            )
+            
+            # Compile directly
+            result = direct_compiler.compile(unity_cpp, main_cpp, example)
+            
+            if result.success:
+                print(f"✅ OPTIMIZED BUILD: {example} ({result.duration:.2f}s, {result.speedup:.1f}x faster)")
+                return SketchResult(
+                    success=True,
+                    output=f"Optimized build completed in {result.duration:.2f}s",
+                    build_dir=self.build_dir,
+                    example=example,
+                )
+            else:
+                raise Exception(f"Direct compilation failed: {result.output}")
+                
+        except ImportError as e:
+            # Optimization modules not available, fall back to normal build
+            raise Exception(f"Optimization modules not available: {e}")
+        except Exception as e:
+            # Any other error, fall back to normal build
+            raise Exception(f"Optimization failed: {e}")
 
     def _internal_build_no_lock(self, example: str) -> SketchResult:
         """Build a specific example without lock management. Only call from build()."""

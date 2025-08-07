@@ -303,9 +303,85 @@ def save_optimization_metadata(
     print(f"   Sketch commands: {metadata.sketch_commands}")
 
 
-def load_optimization_metadata(metadata_file: Path) -> BuildOptimizationMetadata:
-    """Load optimization metadata from JSON file."""
+def load_optimization_metadata(build_dir: Path) -> dict:
+    """Load optimization metadata from JSON file as dict."""
+    metadata_file = build_dir / "optimization_metadata.json"
+    
+    if not metadata_file.exists():
+        raise FileNotFoundError(f"Optimization metadata not found: {metadata_file}")
+        
+    with open(metadata_file) as f:
+        return json.load(f)
+
+
+def load_optimization_metadata_typed(metadata_file: Path) -> BuildOptimizationMetadata:
+    """Load optimization metadata from JSON file as typed object."""
     with open(metadata_file) as f:
         data = json.load(f)
 
     return BuildOptimizationMetadata(**data)
+
+
+def create_unified_archive(build_dir: Path, metadata: BuildOptimizationMetadata) -> Path:
+    """Create unified archive from all generated library archives."""
+    import shutil
+    import subprocess
+    import tempfile
+    
+    unified_archive = build_dir / "libfastled_unified.a"
+    
+    # Find all generated archives from the build
+    archive_patterns = [
+        ".pio/build/**/lib*.a",
+        "lib*/lib*.a"
+    ]
+    
+    archives = []
+    for pattern in archive_patterns:
+        archives.extend(build_dir.glob(pattern))
+    
+    # Filter out archives that are sketch-specific
+    framework_archives = []
+    for archive in archives:
+        archive_name = archive.name.lower()
+        # Include FastLED, Arduino framework, and standard libraries
+        if any(keyword in archive_name for keyword in 
+               ["fastled", "framework", "arduino", "spi", "wire", "eeprom"]):
+            framework_archives.append(archive)
+    
+    if not framework_archives:
+        print("WARNING: No framework archives found for unification")
+        return unified_archive
+    
+    print(f"Creating unified archive from {len(framework_archives)} libraries...")
+    
+    # Create temporary directory for extraction
+    with tempfile.TemporaryDirectory() as temp_dir:
+        temp_path = Path(temp_dir)
+        
+        # Extract all archives
+        for archive in framework_archives:
+            print(f"  Extracting: {archive.name}")
+            try:
+                subprocess.run([
+                    "ar", "x", str(archive)
+                ], cwd=temp_path, check=True, capture_output=True)
+            except subprocess.CalledProcessError as e:
+                print(f"WARNING: Failed to extract {archive}: {e}")
+                continue
+        
+        # Create unified archive from all extracted objects
+        object_files = list(temp_path.glob("*.o"))
+        if object_files:
+            print(f"  Creating unified archive with {len(object_files)} object files...")
+            try:
+                ar_cmd = ["ar", "rcs", str(unified_archive)] + [str(obj) for obj in object_files]
+                subprocess.run(ar_cmd, check=True, capture_output=True)
+                print(f"✅ Created unified archive: {unified_archive}")
+            except subprocess.CalledProcessError as e:
+                print(f"ERROR: Failed to create unified archive: {e}")
+                raise
+        else:
+            print("WARNING: No object files found to create unified archive")
+    
+    return unified_archive
