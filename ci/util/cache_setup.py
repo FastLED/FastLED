@@ -43,18 +43,18 @@ project_root = current_dir.parent.parent  # Go up from .build/pio/board to proje
 if str(project_root) not in sys.path:
     sys.path.insert(0, str(project_root))
 
-# Import fake compiler functions with type stubs
-create_fake_toolchain: Optional[Any] = None
+# Import cached compiler functions with type stubs
+create_cached_toolchain: Optional[Any] = None
 get_platform_packages_paths: Optional[Any] = None
-fake_compiler_available: bool = False
+cached_compiler_available: bool = False
 
 try:
-    from ci.util.fake_compiler import create_fake_toolchain, get_platform_packages_paths
+    from ci.util.cached_compiler import create_cached_toolchain, get_platform_packages_paths
 
-    fake_compiler_available = True
+    cached_compiler_available = True
 except ImportError as e:
-    print("WARNING: Could not import fake compiler module: " + str(e))
-    fake_compiler_available = False
+    print("WARNING: Could not import cached compiler module: " + str(e))
+    cached_compiler_available = False
 
 # Debug: Dump the environment state to disk for inspection
 env_dump: Dict[str, str] = {}
@@ -127,10 +127,10 @@ try:
 except Exception as e:
     print(f"Warning: Failed to set up cache environment: {e}")
 
-# Check if cache is available and fake compiler system can be used
+# Check if cache is available and cached compiler system can be used
 USE_CACHE = False
 
-if fake_compiler_available and cache_executable:
+if cached_compiler_available and cache_executable:
     if cache_type == "xcache":
         # For xcache, check if the Python script exists and sccache is available
         USE_CACHE = (
@@ -151,11 +151,11 @@ if fake_compiler_available and cache_executable:
 
         if USE_CACHE:
             print(
-                str(cache_type) + " detected and configured for Python fake compilers"
+                str(cache_type) + " detected and configured for Python cached compilers"
             )
             print("  cache executable: " + str(cache_executable))
-elif not fake_compiler_available:
-    print("WARNING: Python fake compiler system not available, cache will be disabled")
+elif not cached_compiler_available:
+    print("WARNING: Python cached compiler system not available, cache will be disabled")
 else:
     print(
         "Cache executable not found: "
@@ -218,7 +218,7 @@ if USE_CACHE and env is not None and hasattr(env, "get"):  # type: ignore[has-ty
     # Cache in the local build directory (e.g., .build/pio/uno/)
     cache_file = Path(current_dir) / "compiler_cache.json"
 
-    fake_tools: Optional[Dict[str, str]] = None
+    cached_tools: Optional[Dict[str, str]] = None
 
     # Try to load from persistent cache file
     if cache_file.exists():
@@ -249,65 +249,65 @@ if USE_CACHE and env is not None and hasattr(env, "get"):  # type: ignore[has-ty
                 fake_cxx_path = Path(cached_fake_cxx.replace("python ", ""))
 
                 if fake_cc_path.exists() and fake_cxx_path.exists():
-                    # Fast path: use existing cached fake compilers
-                    fake_tools = {"CC": cached_fake_cc, "CXX": cached_fake_cxx}
+                    # Fast path: use existing cached compilers
+                    cached_tools = {"CC": cached_fake_cc, "CXX": cached_fake_cxx}
                     print(
-                        "SUCCESS: Using cached fake compilers (instant, no platform search needed):"
+                        "SUCCESS: Using cached compilers (instant, no platform search needed):"
                     )
                     print(f"  CC: {cached_fake_cc}")
                     print(f"  CXX: {cached_fake_cxx}")
                     print("  Platform search skipped - using cached toolset")
                 else:
                     print(
-                        "Fake compiler scripts missing, recreating with cached real paths..."
+                        "Cached compiler scripts missing, recreating with cached real paths..."
                     )
-                    # Recreate fake compilers using cached real paths (fast)
-                    fake_compilers_dir = Path(current_dir) / "fake_compilers"
-                    fake_compilers_dir.mkdir(parents=True, exist_ok=True)
+                    # Recreate cached compilers using cached real paths (fast)
+                    cached_compilers_dir = Path(current_dir) / "cached_compilers"
+                    cached_compilers_dir.mkdir(parents=True, exist_ok=True)
 
-                    from ci.util.fake_compiler import create_fake_compiler_script
+                    from ci.util.cached_compiler import create_cached_compiler_script
 
                     cache_executable = cache_config.get("CACHE_EXECUTABLE", "sccache")
 
-                    # Create fake CC script using cached real path
-                    fake_cc_script = create_fake_compiler_script(
+                    # Create cached CC script using cached real path
+                    cached_cc_script = create_cached_compiler_script(
                         compiler_name="CC",
                         cache_executable=cache_executable,
                         real_compiler_path=cached_real_cc,
-                        output_dir=fake_compilers_dir,
+                        output_dir=cached_compilers_dir,
                         debug=debug_enabled,
                     )
 
-                    # Create fake CXX script using cached real path
-                    fake_cxx_script = create_fake_compiler_script(
+                    # Create cached CXX script using cached real path
+                    cached_cxx_script = create_cached_compiler_script(
                         compiler_name="CXX",
                         cache_executable=cache_executable,
                         real_compiler_path=cached_real_cxx,
-                        output_dir=fake_compilers_dir,
+                        output_dir=cached_compilers_dir,
                         debug=debug_enabled,
                     )
 
-                    fake_tools = {
-                        "CC": f"python {fake_cc_script}",
-                        "CXX": f"python {fake_cxx_script}",
+                    cached_tools = {
+                        "CC": f"python {cached_cc_script}",
+                        "CXX": f"python {cached_cxx_script}",
                     }
 
                     # Update cache file with new script paths
-                    cache_data["fake_cc"] = fake_tools["CC"]
-                    cache_data["fake_cxx"] = fake_tools["CXX"]
+                    cache_data["fake_cc"] = cached_tools["CC"]
+                    cache_data["fake_cxx"] = cached_tools["CXX"]
 
                     with open(cache_file, "w") as f:
                         json.dump(cache_data, f, indent=2)
 
-                    print("Recreated fake compilers using cached real paths:")
-                    print(f"  CC: {fake_tools['CC']}")
-                    print(f"  CXX: {fake_tools['CXX']}")
+                    print("Recreated cached compilers using cached real paths:")
+                    print(f"  CC: {cached_tools['CC']}")
+                    print(f"  CXX: {cached_tools['CXX']}")
         except Exception as e:
             print(f"Warning: Failed to load cache file {cache_file}: {e}")
             # Fall through to full recreation
 
     # If no valid cache found, create the toolset from scratch
-    if fake_tools is None:
+    if cached_tools is None:
         print("No valid cache found, creating compiler toolset from scratch...")
         print("  This is the first compile or configuration changed")
 
@@ -318,10 +318,10 @@ if USE_CACHE and env is not None and hasattr(env, "get"):  # type: ignore[has-ty
             platform_packages = get_platform_packages_paths()
             print(f"Found {len(platform_packages)} platform package directories")
 
-        if create_fake_toolchain is not None:
+        if create_cached_toolchain is not None:
             try:
                 # Find the real compiler paths (expensive operation, done only once)
-                from ci.util.fake_compiler import find_toolchain_compiler
+                from ci.util.cached_compiler import find_toolchain_compiler
 
                 print("Resolving real compiler paths...")
 
@@ -332,54 +332,54 @@ if USE_CACHE and env is not None and hasattr(env, "get"):  # type: ignore[has-ty
                     print(f"ERROR: Could not find real compilers:")
                     print(f"  CC '{cc_name}': {real_cc_path}")
                     print(f"  CXX '{cxx_name}': {real_cxx_path}")
-                    fake_tools = None
+                    cached_tools = None
                 else:
                     print(f"Found real compilers:")
                     print(f"  Real CC: {real_cc_path}")
                     print(f"  Real CXX: {real_cxx_path}")
 
-                    # Create fake compiler scripts
-                    fake_compilers_dir = Path(current_dir) / "fake_compilers"
-                    fake_compilers_dir.mkdir(parents=True, exist_ok=True)
+                    # Create cached compiler scripts
+                    cached_compilers_dir = Path(current_dir) / "cached_compilers"
+                    cached_compilers_dir.mkdir(parents=True, exist_ok=True)
 
-                    from ci.util.fake_compiler import create_fake_compiler_script
+                    from ci.util.cached_compiler import create_cached_compiler_script
 
                     cache_executable = cache_config.get("CACHE_EXECUTABLE", "sccache")
 
-                    # Create fake CC script
-                    fake_cc_script = create_fake_compiler_script(
+                    # Create cached CC script
+                    cached_cc_script = create_cached_compiler_script(
                         compiler_name="CC",
                         cache_executable=cache_executable,
                         real_compiler_path=real_cc_path,
-                        output_dir=fake_compilers_dir,
+                        output_dir=cached_compilers_dir,
                         debug=debug_enabled,
                     )
 
-                    # Create fake CXX script
-                    fake_cxx_script = create_fake_compiler_script(
+                    # Create cached CXX script
+                    cached_cxx_script = create_cached_compiler_script(
                         compiler_name="CXX",
                         cache_executable=cache_executable,
                         real_compiler_path=real_cxx_path,
-                        output_dir=fake_compilers_dir,
+                        output_dir=cached_compilers_dir,
                         debug=debug_enabled,
                     )
 
-                    fake_tools = {
-                        "CC": f"python {fake_cc_script}",
-                        "CXX": f"python {fake_cxx_script}",
+                    cached_tools = {
+                        "CC": f"python {cached_cc_script}",
+                        "CXX": f"python {cached_cxx_script}",
                     }
 
                     print("Created new compiler toolset:")
-                    print(f"  CC: {fake_tools['CC']}")
-                    print(f"  CXX: {fake_tools['CXX']}")
+                    print(f"  CC: {cached_tools['CC']}")
+                    print(f"  CXX: {cached_tools['CXX']}")
 
                     # Save to local build directory cache file
                     cache_data = {
                         "cache_key": cache_key,
                         "real_cc": real_cc_path,
                         "real_cxx": real_cxx_path,
-                        "fake_cc": fake_tools["CC"],
-                        "fake_cxx": fake_tools["CXX"],
+                        "fake_cc": cached_tools["CC"],
+                        "fake_cxx": cached_tools["CXX"],
                         "build_dir": str(current_dir),
                         "platform_packages_count": len(platform_packages),
                     }
@@ -395,17 +395,17 @@ if USE_CACHE and env is not None and hasattr(env, "get"):  # type: ignore[has-ty
                 import traceback
 
                 traceback.print_exc()
-                fake_tools = None
+                cached_tools = None
         else:
-            print("ERROR: create_fake_toolchain function is None")
+            print("ERROR: create_cached_toolchain function is None")
 
-    if fake_tools:
-        # Use Python fake compilers instead of batch scripts
-        new_cc = fake_tools.get("CC")
-        new_cxx = fake_tools.get("CXX")
+    if cached_tools:
+        # Use Python cached compilers instead of batch scripts
+        new_cc = cached_tools.get("CC")
+        new_cxx = cached_tools.get("CXX")
 
         if new_cc and new_cxx:
-            print("Created Python fake compilers:")
+            print("Created Python cached compilers:")
             print("  CC: " + str(new_cc))
             print("  CXX: " + str(new_cxx))
 
