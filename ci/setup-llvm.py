@@ -67,16 +67,16 @@ def check_required_tools() -> Tuple[
         "llvm-nm",
         "llvm-objdump",
         "llvm-addr2line",
+        "lldb",
+        "lld",
+        "llvm-strip",
+        "llvm-objcopy",
     ]
 
     extra_tools = [
         "clangd",
         "clang-format",
         "clang-tidy",
-        "lldb",
-        "lld",
-        "llvm-strip",
-        "llvm-objcopy",
     ]
 
     found_essential: Dict[str, Optional[Path]] = {}
