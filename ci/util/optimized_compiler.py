@@ -356,7 +356,7 @@ def create_optimized_toolchain(
         )
 
         # Use Python to execute the script
-        optimized_tools[tool_name] = f"python {optimized_script}"
+        optimized_tools[tool_name] = f"python3 {optimized_script}"
 
         if verbose:
             print(f"Created optimized {tool_name}: {optimized_tools[tool_name]}")
