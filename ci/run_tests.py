@@ -235,6 +235,19 @@ def main() -> None:
                     if not result.success:
                         failed_tests.append(result)
 
+                        # Early abort after 3 failures
+                        if len(failed_tests) >= 3:
+                            print(
+                                "Reached failure threshold (3). Aborting remaining unit tests."
+                            )
+                            # Cancel remaining futures and stop accepting new work
+                            try:
+                                executor.shutdown(wait=False, cancel_futures=True)
+                            except TypeError:
+                                # Python < 3.9: cancel_futures not available
+                                pass
+                            break
+
                 except Exception as e:
                     print(f"Error running {test_file.name}: {e}")
                     failed_tests.append(
@@ -245,6 +258,15 @@ def main() -> None:
                             output=str(e),
                         )
                     )
+                    if len(failed_tests) >= 3:
+                        print(
+                            "Reached failure threshold (3) due to errors. Aborting remaining unit tests."
+                        )
+                        try:
+                            executor.shutdown(wait=False, cancel_futures=True)
+                        except TypeError:
+                            pass
+                        break
 
         # Show summary
         total_duration = time.time() - start_time

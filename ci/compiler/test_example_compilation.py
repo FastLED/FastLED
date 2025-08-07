@@ -46,6 +46,10 @@ from ci.compiler.clang_compiler import (
 )
 
 
+# Abort threshold to prevent flooding logs with repeated failures
+MAX_FAILURES_BEFORE_ABORT = 3
+
+
 # Color output functions using ANSI escape codes
 def red_text(text: str) -> str:
     """Return text in red color."""
@@ -560,6 +564,7 @@ def compile_examples_simple(
 
     # Collect results as they complete with timeout to prevent hanging
     completed_count = 0
+    failure_count = 0
     for future in as_completed(
         future_to_file.keys(), timeout=_TIMEOUT
     ):  # 2 minute total timeout
@@ -588,14 +593,21 @@ def compile_examples_simple(
 
         # Show compilation errors immediately for better debugging
         if not result.ok and result.stderr.strip():
+            failure_count += 1
             log_timing(
                 f"[ERROR] Compilation failed for {source_file.relative_to(Path('examples'))}:"
             )
             error_lines = result.stderr.strip().split("\n")
-            for line in error_lines[:20]:  # Limit to first 20 lines
+            for line in error_lines[:20]:  # Limit to first 20 lines per file
                 log_timing(f"[ERROR]   {line}")
             if len(error_lines) > 20:
                 log_timing(f"[ERROR]   ... ({len(error_lines) - 20} more lines)")
+
+            if failure_count >= MAX_FAILURES_BEFORE_ABORT:
+                log_timing(
+                    f"[ERROR] Reached failure threshold ({MAX_FAILURES_BEFORE_ABORT}). Aborting remaining compilation jobs to avoid log spam."
+                )
+                break
 
         file_result: Dict[str, Any] = {
             "file": str(source_file.name),
@@ -1176,6 +1188,12 @@ def link_examples(
             failed_count += 1
             log_timing(f"[LINKING] FAILED: {executable_name}: Exception: {e}")
 
+        if failed_count >= MAX_FAILURES_BEFORE_ABORT:
+            log_timing(
+                f"[LINKING] Reached failure threshold ({MAX_FAILURES_BEFORE_ABORT}). Aborting further linking to avoid repeated errors."
+            )
+            break
+
     return LinkingResult(linked_count=linked_count, failed_count=failed_count)
 
 
@@ -1236,7 +1254,7 @@ def link_examples_with_cache(
                 no_parallel = getattr(config, "no_parallel", False)
                 break
             frame = frame.f_back
-    except:
+    except Exception:
         # Fallback: check environment variable
         import os
 
@@ -1340,6 +1358,11 @@ def link_examples_with_cache(
                 )
                 failed_count += 1
                 example_infos.remove(example_info)
+                if failed_count >= MAX_FAILURES_BEFORE_ABORT:
+                    log_timing(
+                        f"[LINKING] Reached failure threshold ({MAX_FAILURES_BEFORE_ABORT}) during preparation. Aborting."
+                    )
+                    return linked_count, failed_count, cache_hits, cache_misses
 
         # Phase 3: Separate cache hits from cache misses
         cache_hit_examples = [info for info in example_infos if info.is_cache_hit]
@@ -1448,11 +1471,21 @@ def link_examples_with_cache(
                             )
                         else:
                             failed_count += 1
+                            if failed_count >= MAX_FAILURES_BEFORE_ABORT:
+                                log_timing(
+                                    f"[LINKING] Reached failure threshold ({MAX_FAILURES_BEFORE_ABORT}). Aborting remaining linking jobs."
+                                )
+                                break
                     except Exception as e:
                         log_timing(
                             f"[LINKING] Exception linking {example_info.executable_name}: {e}"
                         )
                         failed_count += 1
+                        if failed_count >= MAX_FAILURES_BEFORE_ABORT:
+                            log_timing(
+                                f"[LINKING] Reached failure threshold ({MAX_FAILURES_BEFORE_ABORT}). Aborting remaining linking jobs."
+                            )
+                            break
 
         return linked_count, failed_count, cache_hits, cache_misses
 
@@ -2058,6 +2091,7 @@ class CompilationTestRunner:
             return results
 
         # Execute only the examples from this compilation run
+        failure_threshold_reached = False
         for ino_file in results.object_file_map.keys():
             example_name = ino_file.parent.name
             example_dir = build_dir / example_name
@@ -2164,6 +2198,13 @@ class CompilationTestRunner:
                 self.log_timing(
                     f"[EXECUTION] FAILED: {executable_name}: Exception: {e}"
                 )
+
+            if execution_failed_count >= MAX_FAILURES_BEFORE_ABORT:
+                self.log_timing(
+                    f"[EXECUTION] Reached failure threshold ({MAX_FAILURES_BEFORE_ABORT}). Aborting further execution to avoid repeated errors."
+                )
+                failure_threshold_reached = True
+                break
 
         execution_time = time.time() - execution_start
 

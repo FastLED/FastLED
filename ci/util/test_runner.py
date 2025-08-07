@@ -33,6 +33,9 @@ from ci.util.test_types import (
 _IS_GITHUB_ACTIONS = os.getenv("GITHUB_ACTIONS") == "true"
 _TIMEOUT = 240 if _IS_GITHUB_ACTIONS else 60
 
+# Abort threshold for total failures across all processes (unit + examples)
+MAX_FAILURES_BEFORE_ABORT = 3
+
 
 def extract_error_snippet(accumulated_output: list[str], context_lines: int = 5) -> str:
     """
@@ -1261,6 +1264,43 @@ def _run_processes_parallel(
                     stuck_signals, active_processes, failed_processes, stuck_monitor
                 )
 
+                # Early abort if failure threshold reached via stuck processes
+                if (
+                    len(exit_failed_processes) + len(failed_processes)
+                ) >= MAX_FAILURES_BEFORE_ABORT:
+                    print(
+                        f"\nExceeded failure threshold ({MAX_FAILURES_BEFORE_ABORT}). Aborting remaining tests."
+                    )
+                    # Kill any remaining active processes
+                    for p in active_processes:
+                        p.kill()
+                    # Build detailed failures
+                    failures: list[TestFailureInfo] = []
+                    for proc, exit_code in exit_failed_processes:
+                        error_snippet = extract_error_snippet(proc.accumulated_output)
+                        failures.append(
+                            TestFailureInfo(
+                                test_name=_extract_test_name(proc.command),
+                                command=str(proc.command),
+                                return_code=exit_code,
+                                output=error_snippet,
+                                error_type="exit_failure",
+                            )
+                        )
+                    for cmd in failed_processes:
+                        failures.append(
+                            TestFailureInfo(
+                                test_name=_extract_test_name(cmd),
+                                command=str(cmd),
+                                return_code=1,
+                                output="Process was killed due to timeout/stuck detection",
+                                error_type="killed_process",
+                            )
+                        )
+                    raise TestExecutionFailedException(
+                        "Exceeded failure threshold", failures
+                    )
+
             # Process each active test individually
             # Iterate backwards to safely remove processes from the list
             any_activity = False
@@ -1283,6 +1323,45 @@ def _run_processes_parallel(
                             f"Process failed with exit code {exit_code}: {proc.command}"
                         )
                         exit_failed_processes.append((proc, exit_code))
+                        # Early abort if we reached the failure threshold
+                        if (
+                            len(exit_failed_processes) + len(failed_processes)
+                        ) >= MAX_FAILURES_BEFORE_ABORT:
+                            print(
+                                f"\nExceeded failure threshold ({MAX_FAILURES_BEFORE_ABORT}). Aborting remaining tests."
+                            )
+                            # Kill remaining active processes
+                            for p in active_processes:
+                                if p is not proc:
+                                    p.kill()
+                            # Prepare failures with snippets
+                            failures: list[TestFailureInfo] = []
+                            for p, code in exit_failed_processes:
+                                error_snippet = extract_error_snippet(
+                                    p.accumulated_output
+                                )
+                                failures.append(
+                                    TestFailureInfo(
+                                        test_name=_extract_test_name(p.command),
+                                        command=str(p.command),
+                                        return_code=code,
+                                        output=error_snippet,
+                                        error_type="exit_failure",
+                                    )
+                                )
+                            for cmd in failed_processes:
+                                failures.append(
+                                    TestFailureInfo(
+                                        test_name=_extract_test_name(cmd),
+                                        command=str(cmd),
+                                        return_code=1,
+                                        output="Process was killed due to timeout/stuck detection",
+                                        error_type="killed_process",
+                                    )
+                                )
+                            raise TestExecutionFailedException(
+                                "Exceeded failure threshold", failures
+                            )
                         any_activity = True
                         continue
 
@@ -1416,17 +1495,35 @@ def run_test_processes(
             # Run all processes in parallel with output interleaving
             timings = _run_processes_parallel(processes, verbose=verbose)
         else:
-            # Run processes sequentially with full output capture
+            # Run processes sequentially with failure threshold handling
+            aggregated_failures: list[TestFailureInfo] = []
             for process in processes:
-                _run_process_with_output(process, verbose)
-                # Collect timing data for sequential execution
-                if process.duration is not None:
-                    timing = ProcessTiming(
-                        name=_get_friendly_test_name(process.command),
-                        duration=process.duration,
-                        command=str(process.command),
+                try:
+                    _run_process_with_output(process, verbose)
+                    # Collect timing data for sequential execution
+                    if process.duration is not None:
+                        timing = ProcessTiming(
+                            name=_get_friendly_test_name(process.command),
+                            duration=process.duration,
+                            command=str(process.command),
+                        )
+                        timings.append(timing)
+                except (TestExecutionFailedException, TestTimeoutException) as e:
+                    aggregated_failures.extend(e.failures)
+                    print(
+                        f"Encountered {len(aggregated_failures)} failure(s); threshold is {MAX_FAILURES_BEFORE_ABORT}"
                     )
-                    timings.append(timing)
+                    if len(aggregated_failures) >= MAX_FAILURES_BEFORE_ABORT:
+                        print(
+                            f"Exceeded failure threshold ({MAX_FAILURES_BEFORE_ABORT}). Aborting remaining tests."
+                        )
+                        raise TestExecutionFailedException(
+                            "Exceeded failure threshold", aggregated_failures
+                        )
+
+            if aggregated_failures:
+                # Some failures occurred but threshold not reached; report them
+                raise TestExecutionFailedException("Tests failed", aggregated_failures)
 
             # If we get here, all tests passed
             elapsed = time.time() - start_time
