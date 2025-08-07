@@ -157,7 +157,7 @@ private:
         return x;
     }
 
-    void deleteFixup(Node* x) {
+    void deleteFixup(Node* x, Node* xParent) {
         while (x != root_ && (x == nullptr || x->color == BLACK)) {
             if (x == (x && x->parent ? x->parent->left : nullptr)) {
                 Node* w = x && x->parent ? x->parent->right : nullptr;
@@ -603,22 +603,26 @@ public:
         
         Node* y = nodeToDelete;
         Node* x = nullptr;
+        Node* xParent = nullptr;
         Color originalColor = y->color;
         
         if (nodeToDelete->left == nullptr) {
             x = nodeToDelete->right;
+            xParent = nodeToDelete->parent;
             transplant(nodeToDelete, nodeToDelete->right);
         } else if (nodeToDelete->right == nullptr) {
             x = nodeToDelete->left;
+            xParent = nodeToDelete->parent;
             transplant(nodeToDelete, nodeToDelete->left);
         } else {
             y = minimum(nodeToDelete->right);
             originalColor = y->color;
             x = y->right;
-            
             if (y->parent == nodeToDelete) {
-                if (x) x->parent = y;
+                xParent = y;
+                if (x) x->parent = y; // ensure parent linkage when x exists
             } else {
+                xParent = y->parent;
                 transplant(y, y->right);
                 y->right = nodeToDelete->right;
                 y->right->parent = y;
@@ -635,7 +639,61 @@ public:
         --size_;
         
         if (originalColor == BLACK) {
-            deleteFixup(x);
+            // Use xParent to correctly handle cases where x is nullptr
+            while ((x != root_) && (x == nullptr || x->color == BLACK)) {
+                if (x == (xParent ? xParent->left : nullptr)) {
+                    Node* w = xParent ? xParent->right : nullptr;
+                    if (w && w->color == RED) {
+                        w->color = BLACK;
+                        if (xParent) { xParent->color = RED; rotateLeft(xParent); }
+                        w = xParent ? xParent->right : nullptr;
+                    }
+                    bool wLeftBlack = (!w || !w->left || w->left->color == BLACK);
+                    bool wRightBlack = (!w || !w->right || w->right->color == BLACK);
+                    if (wLeftBlack && wRightBlack) {
+                        if (w) w->color = RED;
+                        x = xParent;
+                        xParent = xParent ? xParent->parent : nullptr;
+                    } else {
+                        if (!w || (w->right == nullptr || w->right->color == BLACK)) {
+                            if (w && w->left) w->left->color = BLACK;
+                            if (w) { w->color = RED; rotateRight(w); }
+                            w = xParent ? xParent->right : nullptr;
+                        }
+                        if (w) w->color = xParent ? xParent->color : BLACK;
+                        if (xParent) xParent->color = BLACK;
+                        if (w && w->right) w->right->color = BLACK;
+                        if (xParent) rotateLeft(xParent);
+                        x = root_;
+                    }
+                } else {
+                    Node* w = xParent ? xParent->left : nullptr;
+                    if (w && w->color == RED) {
+                        w->color = BLACK;
+                        if (xParent) { xParent->color = RED; rotateRight(xParent); }
+                        w = xParent ? xParent->left : nullptr;
+                    }
+                    bool wRightBlack = (!w || !w->right || w->right->color == BLACK);
+                    bool wLeftBlack = (!w || !w->left || w->left->color == BLACK);
+                    if (wRightBlack && wLeftBlack) {
+                        if (w) w->color = RED;
+                        x = xParent;
+                        xParent = xParent ? xParent->parent : nullptr;
+                    } else {
+                        if (!w || (w->left == nullptr || w->left->color == BLACK)) {
+                            if (w && w->right) w->right->color = BLACK;
+                            if (w) { w->color = RED; rotateLeft(w); }
+                            w = xParent ? xParent->left : nullptr;
+                        }
+                        if (w) w->color = xParent ? xParent->color : BLACK;
+                        if (xParent) xParent->color = BLACK;
+                        if (w && w->left) w->left->color = BLACK;
+                        if (xParent) rotateRight(xParent);
+                        x = root_;
+                    }
+                }
+            }
+            if (x) x->color = BLACK;
         }
         
         return iterator(successor, this);
