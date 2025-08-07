@@ -92,7 +92,7 @@ private:
     }
 
     void insertFixup(Node* z) {
-        while (z->parent != nullptr && z->parent->color == RED) {
+        while (z->parent != nullptr && z->parent->parent != nullptr && z->parent->color == RED) {
             if (z->parent == z->parent->parent->left) {
                 Node* y = z->parent->parent->right;
                 if (y != nullptr && y->color == RED) {
