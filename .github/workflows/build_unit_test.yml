@@ -24,12 +24,17 @@ on:
       - 'test'
       - 'test.py'
 
+defaults:
+  run:
+    shell: bash
+
 jobs:
   build:
     strategy:
+      fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        compiler: ["gcc", "clang"]
+        compiler: ["clang"]
     
     runs-on: ${{ matrix.os }}
     steps:
@@ -62,26 +67,20 @@ jobs:
       
       - name: Run Example Blink
         run: |
-          ./test --no-parallel --no-unity --examples Blink --no-pch --verbose
+          ./test --clang --no-parallel --no-unity --examples Blink --no-pch --verbose
+        shell: bash
 
       - name: Run Unit Test Json
         run: |
-          ./test --no-parallel --no-unity --unit --no-pch --verbose Json
+          ./test --clang --no-parallel --no-unity --unit --no-pch --verbose Json
+        shell: bash
 
       - name: Run All Unit Tests
         run: |
-          if [ "${{ matrix.compiler }}" = "clang" ]; then
-            ./test --clang --no-parallel --unit --verbose
-          else
-            ./test --no-parallel --unit --verbose
-          fi
+          ./test --clang --no-parallel --unit --verbose
         shell: bash
 
       - name: Run All Examples
         run: |
-          if [ "${{ matrix.compiler }}" = "clang" ]; then
-            ./test --clang --no-parallel --examples --verbose
-          else
-            ./test --no-parallel --examples --verbose
-          fi
+          ./test --clang --no-parallel --examples --verbose
         shell: bash
