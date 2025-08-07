@@ -1256,6 +1256,7 @@ class PioCompiler(Compiler):
         )
         if result.success:
             self.initialized = True
+
         return result
 
     def cancel_all(self) -> None:
@@ -1304,6 +1305,7 @@ class PioCompiler(Compiler):
 
     def _build_internal(self, example: str) -> SketchResult:
         """Internal build method without lock management."""
+
         # Print building banner first
         print(_create_building_banner(example))
 
@@ -1481,7 +1483,13 @@ class PioCompiler(Compiler):
 
     def _internal_build_no_lock(self, example: str) -> SketchResult:
         """Build a specific example without lock management. Only call from build()."""
-        if not self.initialized:
+        # Check if build directory is already initialized (thread-safe)
+        platformio_ini = self.build_dir / "platformio.ini"
+        is_initialized = platformio_ini.exists()
+        
+
+        
+        if not is_initialized:
             init_result = self._internal_init_build_no_lock(example)
             if not init_result.success:
                 # Print FAILED message immediately in worker thread
@@ -1509,6 +1517,7 @@ class PioCompiler(Compiler):
             )
 
         # No lock management - caller (build) handles locks
+
         return self._build_internal(example)
 
     def clean(self) -> None:
