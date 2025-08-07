@@ -389,6 +389,9 @@ def create_unit_test_compiler(
         "FASTLED_DEBUG_LEVEL=1",
         "FASTLED_NO_ATEXIT=1",
         "DOCTEST_CONFIG_NO_EXCEPTIONS_BUT_WITH_ALL_ASSERTS",
+        "ENABLE_CRASH_HANDLER",
+        "USE_LIBUNWIND",
+        "RELEASE=1",  # Disable FASTLED_FORCE_DBG to avoid fl::println dependency
     ]
 
     # Unit test specific compiler args
@@ -401,8 +404,10 @@ def create_unit_test_compiler(
         "-Wno-backslash-newline-escape",
         "-fno-exceptions",
         "-fno-rtti",
-        "-O1",
-        "-g0",
+        "-O0",           # No optimization for better debugging
+        "-g3",           # Maximum debug information
+        "-fno-omit-frame-pointer",
+        "-fstandalone-debug",  # Include debug info for all used types
         "-fno-inline-functions",
         "-fno-vectorize",
         "-fno-unroll-loops",
@@ -412,6 +417,10 @@ def create_unit_test_compiler(
         f"-I{current_dir / 'tests'}",
         f"-I{src_path / 'platforms' / 'stub'}",
     ]
+    
+    # Add debug flags for DWARF symbols (works on all platforms including Windows GNU toolchain)
+    if os.name == 'nt':  # Windows with GNU toolchain
+        unit_test_args.extend(["-gdwarf-4"])  # Generate DWARF debug info for GNU debugging tools
 
     # PCH configuration with unit test specific headers
     pch_output_path = None
@@ -646,7 +655,11 @@ def compile_unit_tests_python_api(
             else:
                 object_files: list[str | Path] = [object_path, doctest_main_obj]
 
-            linker_args = ["-pthread"]
+            # Platform-specific linker arguments for crash handler support
+            if os.name == 'nt':  # Windows
+                linker_args = ["-ldbghelp", "-lpsapi"]
+            else:  # Linux/macOS
+                linker_args = ["-pthread", "-lunwind"]
 
             # HASH-BASED CACHE CHECK (same as examples)
             if not fastled_lib_path:

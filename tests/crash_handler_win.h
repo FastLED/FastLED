@@ -51,11 +51,14 @@ inline std::string demangle_symbol(const char* symbol_name) {
     return std::string(symbol_name);
 }
 
-inline std::string get_symbol_with_addr2line(DWORD64 address) {
+inline std::string get_symbol_with_gdb(DWORD64 address) {
+    printf("[DEBUG] get_symbol_with_gdb called with address: 0x%llx\n", address);
+    
     // Get the module base address to calculate file offset
     HMODULE hModule = nullptr;
     if (!GetModuleHandleExA(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS, 
                            (LPCSTR)address, &hModule)) {
+        printf("[DEBUG] GetModuleHandleExA failed\n");
         return "-- module not found";
     }
     
@@ -65,65 +68,120 @@ inline std::string get_symbol_with_addr2line(DWORD64 address) {
     // Get module filename
     char modulePath[MAX_PATH];
     if (!GetModuleFileNameA(hModule, modulePath, MAX_PATH)) {
+        printf("[DEBUG] GetModuleFileNameA failed\n");
         return "-- module path not found";
     }
     
-    // Only use addr2line for our test executable
+    printf("[DEBUG] Module path: %s\n", modulePath);
+    
+    // Use addr2line for all test executables (anything starting with "test_")
     char* fileName = strrchr(modulePath, '\\');
     if (!fileName) fileName = modulePath;
     else fileName++;
     
-    if (strstr(fileName, "test_double_free_crash.exe") == nullptr) {
-        return "-- not our executable";
+    printf("[DEBUG] File name: %s\n", fileName);
+    
+    if (strncmp(fileName, "test_", 5) != 0) {
+        printf("[DEBUG] Not a test executable, filename doesn't start with 'test_'\n");
+        return "-- not a test executable";
     }
     
-    // Build addr2line command
-    char command[1024];
-    snprintf(command, sizeof(command), 
-             "addr2line -e \"%s\" -f -C 0x%llx 2>nul", 
-             modulePath, fileOffset);
+    printf("[DEBUG] Test executable detected, proceeding with GDB\n");
     
-    // Execute addr2line
+    // Build gdb command for symbol resolution (much better with PE+DWARF than addr2line)
+    // Use a temporary script file to avoid quoting issues
+    static int script_counter = 0;
+    char script_name[256];
+    snprintf(script_name, sizeof(script_name), "gdb_temp_%d.gdb", ++script_counter);
+    
+    // Create temporary GDB script
+    FILE* script = fopen(script_name, "w");
+    if (!script) {
+        printf("[DEBUG] Failed to create GDB script file\n");
+        return "-- gdb script creation failed";
+    }
+    
+    fprintf(script, "file %s\n", modulePath);
+    fprintf(script, "info symbol 0x%llx\n", address);
+    fprintf(script, "info line *0x%llx\n", address);
+    fprintf(script, "quit\n");
+    fclose(script);
+    
+    printf("[DEBUG] Created GDB script: %s\n", script_name);
+    
+    // Build command using script file
+    char command[1024];
+    snprintf(command, sizeof(command), "gdb -batch -x %s 2>nul", script_name);
+    
+    printf("[DEBUG] Executing command: %s\n", command);
+    
+    // Execute gdb
     FILE* pipe = _popen(command, "r");
     if (!pipe) {
-        return "-- addr2line failed";
+        printf("[DEBUG] _popen failed\n");
+        return "-- gdb failed";
     }
     
-    char function[256] = {0};
-    char location[256] = {0};
+    char output[512] = {0};
+    std::string symbol_result;
+    std::string line_result;
     
-    // Read function name
-    if (fgets(function, sizeof(function), pipe)) {
+    // Read gdb output
+    while (fgets(output, sizeof(output), pipe)) {
+        std::string line(output);
+        
         // Remove newline
-        char* newline = strchr(function, '\n');
-        if (newline) *newline = '\0';
-    }
-    
-    // Read file:line
-    if (fgets(location, sizeof(location), pipe)) {
-        // Remove newline
-        char* newline = strchr(location, '\n');
-        if (newline) *newline = '\0';
+        if (!line.empty() && line.back() == '\n') {
+            line.pop_back();
+        }
+        
+        // Skip copyright and other non-symbol lines
+        if (line.find("Copyright") != std::string::npos ||
+            line.find("This GDB") != std::string::npos ||
+            line.find("License") != std::string::npos ||
+            line.empty()) {
+            continue;
+        }
+        
+        // Look for symbol information
+        if (line.find(" in section ") != std::string::npos) {
+            // Parse gdb "info symbol" output format: "symbol_name in section .text"
+            size_t in_pos = line.find(" in section ");
+            if (in_pos != std::string::npos) {
+                symbol_result = line.substr(0, in_pos);
+            }
+        } else if (line.find("No symbol matches") != std::string::npos) {
+            symbol_result = "-- symbol not found";
+        } else if (line.find("Line ") != std::string::npos && line.find(" of ") != std::string::npos) {
+            // Parse gdb "info line" output format: "Line 123 of \"file.cpp\" starts at address 0x..."
+            line_result = line;
+        } else if (line.find("No line number information") != std::string::npos) {
+            line_result = "-- no line info";
+        }
     }
     
     _pclose(pipe);
     
-    // Format result
+    // Clean up temporary script file
+    remove(script_name);
+    
+    printf("[DEBUG] GDB symbol_result: '%s'\n", symbol_result.c_str());
+    printf("[DEBUG] GDB line_result: '%s'\n", line_result.c_str());
+    
+    // Combine symbol and line information for comprehensive debugging
     std::string result;
-    if (strlen(function) > 0 && strcmp(function, "??") != 0) {
-        result = function;
-        if (strlen(location) > 0 && strcmp(location, "??:0") != 0) {
-            // Extract just filename from full path
-            char* justFile = strrchr(location, '/');
-            if (!justFile) justFile = strrchr(location, '\\');
-            if (justFile) justFile++;
-            else justFile = location;
-            result += " [" + std::string(justFile) + "]";
+    if (!symbol_result.empty() && symbol_result != "-- symbol not found") {
+        result = symbol_result;
+        if (!line_result.empty() && line_result != "-- no line info") {
+            result += " (" + line_result + ")";
         }
+    } else if (!line_result.empty() && line_result != "-- no line info") {
+        result = line_result;
     } else {
-        result = "-- symbol not found";
+        result = "-- no debug information available";
     }
     
+    printf("[DEBUG] Final result: '%s'\n", result.c_str());
     return result;
 }
 
@@ -132,13 +190,21 @@ inline void print_stacktrace_windows() {
     
     // Initialize symbol handler if not already done
     if (!g_symbols_initialized) {
-        // Set symbol options for better debugging
+        // Set symbol options for better debugging with Clang symbols
         SymSetOptions(SYMOPT_LOAD_LINES | 
                      SYMOPT_DEFERRED_LOADS | 
                      SYMOPT_UNDNAME | 
-                     SYMOPT_DEBUG);
+                     SYMOPT_DEBUG |
+                     SYMOPT_LOAD_ANYTHING |           // Load any kind of debug info
+                     SYMOPT_CASE_INSENSITIVE |        // Case insensitive symbol lookup
+                     SYMOPT_FAVOR_COMPRESSED |        // Prefer compressed symbols
+                     SYMOPT_INCLUDE_32BIT_MODULES |   // Include 32-bit modules
+                     SYMOPT_AUTO_PUBLICS);            // Automatically load public symbols
         
-        if (!SymInitialize(process, nullptr, TRUE)) {
+        // Try to initialize with symbol search path including current directory
+        char currentPath[MAX_PATH];
+        GetCurrentDirectoryA(MAX_PATH, currentPath);
+        if (!SymInitialize(process, currentPath, TRUE)) {
             DWORD error = GetLastError();
             printf("SymInitialize failed with error %lu (0x%lx)\n", error, error);
             printf("This may be due to missing debug symbols or insufficient permissions.\n");
@@ -175,12 +241,16 @@ inline void print_stacktrace_windows() {
         std::string moduleName = get_module_name(address);
         printf(" [%s]", moduleName.c_str());
         
-        // Try to get symbol information
-        if (g_symbols_initialized) {
+        // Try to get symbol information - prioritize gdb for DWARF symbols in PE files
+        std::string gdb_result = get_symbol_with_gdb(address);
+        if (gdb_result.find("--") != 0) {
+            printf(" %s", gdb_result.c_str());
+        } else if (g_symbols_initialized) {
+            // Fallback to Windows SymFromAddr API
             DWORD64 displacement = 0;
             if (SymFromAddr(process, address, &displacement, pSymbol)) {
                 std::string demangled = demangle_symbol(pSymbol->Name);
-                printf(" %s+0x%llx", demangled.c_str(), displacement);
+                printf(" %s+0x%llx (via Windows API)", demangled.c_str(), displacement);
                 
                 // Try to get line number
                 DWORD lineDisplacement = 0;
@@ -193,21 +263,14 @@ inline void print_stacktrace_windows() {
                 }
             } else {
                 DWORD error = GetLastError();
-                
-                // Try addr2line as fallback for DWARF symbols
-                std::string addr2line_result = get_symbol_with_addr2line(address);
-                if (addr2line_result.find("--") != 0) {
-                    printf(" %s (via addr2line)", addr2line_result.c_str());
+                if (error != ERROR_MOD_NOT_FOUND) {
+                    printf(" -- symbol lookup failed (error %lu)", error);
                 } else {
-                    if (error != ERROR_MOD_NOT_FOUND) {
-                        printf(" -- symbol lookup failed (error %lu)", error);
-                    } else {
-                        printf(" -- no debug symbols available");
-                    }
+                    printf(" -- no debug symbols available");
                 }
             }
         } else {
-            printf(" -- symbol handler not available");
+            printf(" -- no symbol resolution available");
         }
         printf("\n");
     }
