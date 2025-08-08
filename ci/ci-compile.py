@@ -12,8 +12,11 @@ import sys
 import threading
 import time
 from concurrent.futures import Future, as_completed
+from dataclasses import dataclass
 from pathlib import Path
 from typing import List, Optional, cast
+
+from typeguard import typechecked
 
 from ci.compiler.compiler import CacheType, SketchResult
 from ci.compiler.pio import PioCompiler
@@ -184,13 +187,22 @@ def resolve_example_path(example: str) -> str:
     return example
 
 
+@typechecked
+@dataclass
+class BoardCompilationResult:
+    """Aggregated result for compiling a set of examples on a single board."""
+
+    ok: bool
+    sketch_results: List[SketchResult]
+
+
 def compile_board_examples(
     board: Board,
     examples: List[str],
     defines: List[str],
     verbose: bool,
     enable_cache: bool,
-) -> tuple[bool, str]:
+) -> BoardCompilationResult:
     """Compile examples for a single board using PioCompiler."""
     print(f"\n{'=' * 60}")
     print(f"COMPILING BOARD: {board.board_name}")
@@ -213,18 +225,13 @@ def compile_board_examples(
         futures: List[Future[SketchResult]] = compiler.build(examples)
 
         # Wait for completion and collect results
-        compilation_errors: List[str] = []
-        successful_builds = 0
+        results: List[SketchResult] = []
 
         for future in futures:
             try:
                 result = future.result()
-                if result.success:
-                    successful_builds += 1
-                    # SUCCESS message is now printed by the worker thread
-                else:
-                    compilation_errors.append(f"{result.example}: {result.output}")
-                    # FAILED message is now printed by the worker thread
+                results.append(result)
+                # SUCCESS/FAILED messages are printed by worker threads
             except KeyboardInterrupt:
                 print("Keyboard interrupt detected, cancelling builds")
                 compiler.cancel_all()
@@ -233,7 +240,17 @@ def compile_board_examples(
                 _thread.interrupt_main()
                 raise
             except Exception as e:
-                compilation_errors.append(f"Build exception: {str(e)}")
+                # Represent unexpected exception as a failed SketchResult for consistency
+                from pathlib import Path as _Path
+
+                results.append(
+                    SketchResult(
+                        success=False,
+                        output=f"Build exception: {str(e)}",
+                        build_dir=_Path("."),
+                        example="<exception>",
+                    )
+                )
                 print(f"EXCEPTION during build: {e}")
                 # Cleanup
                 compiler.cancel_all()
@@ -250,15 +267,33 @@ def compile_board_examples(
         except Exception as e:
             print(f"Warning: Could not retrieve compiler statistics: {e}")
 
-        if compilation_errors:
-            error_msg = f"Failed to compile {len(compilation_errors)} examples:\n"
-            error_msg += "\n".join(f"  - {error}" for error in compilation_errors)
-            return False, error_msg
-        else:
-            return True, f"Successfully compiled {successful_builds} examples"
+        any_failures = False
+        for r in results:
+            if not r.success:
+                any_failures = True
+                break
+        return BoardCompilationResult(ok=not any_failures, sketch_results=results)
+    except KeyboardInterrupt:
+        print("Keyboard interrupt detected, cancelling builds")
+        import _thread
 
+        _thread.interrupt_main()
+        raise
     except Exception as e:
-        return False, f"Compiler setup failed: {str(e)}"
+        # Compiler could not be set up; return a single failed result to carry message
+        from pathlib import Path as _Path
+
+        return BoardCompilationResult(
+            ok=False,
+            sketch_results=[
+                SketchResult(
+                    success=False,
+                    output=f"Compiler setup failed: {str(e)}",
+                    build_dir=_Path("."),
+                    example="<setup>",
+                )
+            ],
+        )
 
 
 def main() -> int:
@@ -327,10 +362,11 @@ def main() -> int:
     )
 
     compilation_errors: List[str] = []
+    failed_example_names: List[str] = []
 
     # Compile for each board
     for board in boards:
-        success, message = compile_board_examples(
+        result = compile_board_examples(
             board=board,
             examples=examples,
             defines=defines,
@@ -338,9 +374,20 @@ def main() -> int:
             enable_cache=not args.no_cache,
         )
 
-        if not success:
-            compilation_errors.append(f"Board {board.board_name}: {message}")
-            print(f"ERROR: Compilation failed for board {board.board_name}")
+        if not result.ok:
+            # Record board-level error
+            compilation_errors.append(f"Board {board.board_name} failed")
+            print(red_text(f"ERROR: Compilation failed for board {board.board_name}"))
+            # Print each failing sketch's stdout and collect names for summary
+            for sketch in result.sketch_results:
+                if not sketch.success:
+                    if sketch.example and sketch.example not in failed_example_names:
+                        failed_example_names.append(sketch.example)
+                    print(f"\n{'-' * 60}")
+                    print(f"Sketch: {sketch.example}")
+                    print(f"{'-' * 60}")
+                    # Print the collected output for this sketch
+                    print(sketch.output)
             # Continue with other boards instead of stopping
 
     # Report results
@@ -353,6 +400,15 @@ def main() -> int:
         )
         for error in compilation_errors:
             print(f"  - {error}")
+        if failed_example_names:
+            print("")
+            print(red_text(f"ERROR! There were {len(failed_example_names)} failures:"))
+            # Sort for stable output
+            for name in sorted(failed_example_names):
+                # print(f"  {name}")
+                # same but in red
+                print(red_text(f"  {name}"))
+            print("")
         return 1
     else:
         print(f"\nAll compilations completed successfully in {time_str}")
