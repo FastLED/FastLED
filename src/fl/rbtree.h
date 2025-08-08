@@ -18,6 +18,8 @@ namespace fl {
 template <typename T, typename Compare = less<T>, typename Allocator = allocator_slab<char>>
 class RedBlackTree {
 public:
+    class iterator;
+    class const_iterator;
     using value_type = T;
     using size_type = fl::size;
     using difference_type = ptrdiff_t;
@@ -157,68 +159,57 @@ private:
         return x;
     }
 
+    // Fixed to properly use xParent when x is nullptr; removes unused parameter warning and centralizes erase fixup
     void deleteFixup(Node* x, Node* xParent) {
-        while (x != root_ && (x == nullptr || x->color == BLACK)) {
-            if (x == (x && x->parent ? x->parent->left : nullptr)) {
-                Node* w = x && x->parent ? x->parent->right : nullptr;
+        while ((x != root_) && (x == nullptr || x->color == BLACK)) {
+            if (x == (xParent ? xParent->left : nullptr)) {
+                Node* w = xParent ? xParent->right : nullptr;
                 if (w && w->color == RED) {
                     w->color = BLACK;
-                    if (x && x->parent) {
-                        x->parent->color = RED;
-                        rotateLeft(x->parent);
-                        w = x->parent->right;
-                    }
+                    if (xParent) { xParent->color = RED; rotateLeft(xParent); }
+                    w = xParent ? xParent->right : nullptr;
                 }
-                if (w && (w->left == nullptr || w->left->color == BLACK) &&
-                    (w->right == nullptr || w->right->color == BLACK)) {
-                    w->color = RED;
-                    x = x ? x->parent : nullptr;
+                bool wLeftBlack = (!w || !w->left || w->left->color == BLACK);
+                bool wRightBlack = (!w || !w->right || w->right->color == BLACK);
+                if (wLeftBlack && wRightBlack) {
+                    if (w) w->color = RED;
+                    x = xParent;
+                    xParent = xParent ? xParent->parent : nullptr;
                 } else {
-                    if (w && (w->right == nullptr || w->right->color == BLACK)) {
-                        if (w->left) w->left->color = BLACK;
-                        w->color = RED;
-                        rotateRight(w);
-                        w = x && x->parent ? x->parent->right : nullptr;
+                    if (!w || (w->right == nullptr || w->right->color == BLACK)) {
+                        if (w && w->left) w->left->color = BLACK;
+                        if (w) { w->color = RED; rotateRight(w); }
+                        w = xParent ? xParent->right : nullptr;
                     }
-                    if (w) {
-                        w->color = x && x->parent ? x->parent->color : BLACK;
-                        if (w->right) w->right->color = BLACK;
-                    }
-                    if (x && x->parent) {
-                        x->parent->color = BLACK;
-                        rotateLeft(x->parent);
-                    }
+                    if (w) w->color = xParent ? xParent->color : BLACK;
+                    if (xParent) xParent->color = BLACK;
+                    if (w && w->right) w->right->color = BLACK;
+                    if (xParent) rotateLeft(xParent);
                     x = root_;
                 }
             } else {
-                Node* w = x && x->parent ? x->parent->left : nullptr;
+                Node* w = xParent ? xParent->left : nullptr;
                 if (w && w->color == RED) {
                     w->color = BLACK;
-                    if (x && x->parent) {
-                        x->parent->color = RED;
-                        rotateRight(x->parent);
-                        w = x->parent->left;
-                    }
+                    if (xParent) { xParent->color = RED; rotateRight(xParent); }
+                    w = xParent ? xParent->left : nullptr;
                 }
-                if (w && (w->right == nullptr || w->right->color == BLACK) &&
-                    (w->left == nullptr || w->left->color == BLACK)) {
-                    w->color = RED;
-                    x = x ? x->parent : nullptr;
+                bool wRightBlack = (!w || !w->right || w->right->color == BLACK);
+                bool wLeftBlack = (!w || !w->left || w->left->color == BLACK);
+                if (wRightBlack && wLeftBlack) {
+                    if (w) w->color = RED;
+                    x = xParent;
+                    xParent = xParent ? xParent->parent : nullptr;
                 } else {
-                    if (w && (w->left == nullptr || w->left->color == BLACK)) {
-                        if (w->right) w->right->color = BLACK;
-                        w->color = RED;
-                        rotateLeft(w);
-                        w = x && x->parent ? x->parent->left : nullptr;
+                    if (!w || (w->left == nullptr || w->left->color == BLACK)) {
+                        if (w && w->right) w->right->color = BLACK;
+                        if (w) { w->color = RED; rotateLeft(w); }
+                        w = xParent ? xParent->left : nullptr;
                     }
-                    if (w) {
-                        w->color = x && x->parent ? x->parent->color : BLACK;
-                        if (w->left) w->left->color = BLACK;
-                    }
-                    if (x && x->parent) {
-                        x->parent->color = BLACK;
-                        rotateRight(x->parent);
-                    }
+                    if (w) w->color = xParent ? xParent->color : BLACK;
+                    if (xParent) xParent->color = BLACK;
+                    if (w && w->left) w->left->color = BLACK;
+                    if (xParent) rotateRight(xParent);
                     x = root_;
                 }
             }
@@ -254,8 +245,6 @@ private:
         
         Node* newNode = alloc_.allocate(1);
         if (newNode == nullptr) {
-            // Out of memory - this is a critical error
-            // In embedded systems, we can't recover from this
             return nullptr;
         }
         
@@ -265,11 +254,80 @@ private:
         return newNode;
     }
 
+    // Shared insert implementation to reduce duplication
+    template <typename U>
+    fl::pair<iterator, bool> insertImpl(U&& value) {
+        Node* parent = nullptr;
+        Node* current = root_;
+        
+        while (current != nullptr) {
+            parent = current;
+            if (comp_(value, current->data)) {
+                current = current->left;
+            } else if (comp_(current->data, value)) {
+                current = current->right;
+            } else {
+                return fl::pair<iterator, bool>(iterator(current, this), false);
+            }
+        }
+        
+        Node* newNode = alloc_.allocate(1);
+        if (newNode == nullptr) {
+            return fl::pair<iterator, bool>(end(), false);
+        }
+        
+        alloc_.construct(newNode, fl::forward<U>(value), RED, parent);
+        
+        if (parent == nullptr) {
+            root_ = newNode;
+        } else if (comp_(newNode->data, parent->data)) {
+            parent->left = newNode;
+        } else {
+            parent->right = newNode;
+        }
+        
+        insertFixup(newNode);
+        ++size_;
+        
+        return fl::pair<iterator, bool>(iterator(newNode, this), true);
+    }
+
+    // Bound helpers to avoid duplication between const/non-const
+    Node* lowerBoundNode(const value_type& value) const {
+        Node* current = root_;
+        Node* result = nullptr;
+        while (current != nullptr) {
+            if (!comp_(current->data, value)) {
+                result = current;
+                current = current->left;
+            } else {
+                current = current->right;
+            }
+        }
+        return result;
+    }
+
+    Node* upperBoundNode(const value_type& value) const {
+        Node* current = root_;
+        Node* result = nullptr;
+        while (current != nullptr) {
+            if (comp_(value, current->data)) {
+                result = current;
+                current = current->left;
+            } else {
+                current = current->right;
+            }
+        }
+        return result;
+    }
+
 public:
     // Iterator implementation
     class iterator {
         friend class RedBlackTree;
         friend class const_iterator;
+    public:
+        using value_type = T;
     private:
         Node* node_;
         const RedBlackTree* mTree;
@@ -330,7 +388,6 @@ public:
             if (node_) {
                 node_ = predecessor(node_);
             } else if (mTree && mTree->root_) {
-                // Decrementing from end() should give us the maximum element
                 node_ = mTree->maximum(mTree->root_);
             }
             return *this;
@@ -504,77 +561,11 @@ public:
     }
 
     fl::pair<iterator, bool> insert(const value_type& value) {
-        Node* parent = nullptr;
-        Node* current = root_;
-        
-        while (current != nullptr) {
-            parent = current;
-            if (comp_(value, current->data)) {
-                current = current->left;
-            } else if (comp_(current->data, value)) {
-                current = current->right;
-            } else {
-                // Value already exists
-                return fl::pair<iterator, bool>(iterator(current, this), false);
-            }
-        }
-        
-        Node* newNode = alloc_.allocate(1);
-        if (newNode == nullptr) {
-            return fl::pair<iterator, bool>(end(), false);
-        }
-        
-        alloc_.construct(newNode, value, RED, parent);
-        
-        if (parent == nullptr) {
-            root_ = newNode;
-        } else if (comp_(value, parent->data)) {
-            parent->left = newNode;
-        } else {
-            parent->right = newNode;
-        }
-        
-        insertFixup(newNode);
-        ++size_;
-        
-        return fl::pair<iterator, bool>(iterator(newNode, this), true);
+        return insertImpl(value);
     }
 
     fl::pair<iterator, bool> insert(value_type&& value) {
-        Node* parent = nullptr;
-        Node* current = root_;
-        
-        while (current != nullptr) {
-            parent = current;
-            if (comp_(value, current->data)) {
-                current = current->left;
-            } else if (comp_(current->data, value)) {
-                current = current->right;
-            } else {
-                // Value already exists
-                return fl::pair<iterator, bool>(iterator(current, this), false);
-            }
-        }
-        
-        Node* newNode = alloc_.allocate(1);
-        if (newNode == nullptr) {
-            return fl::pair<iterator, bool>(end(), false);
-        }
-        
-        alloc_.construct(newNode, fl::move(value), RED, parent);
-        
-        if (parent == nullptr) {
-            root_ = newNode;
-        } else if (comp_(newNode->data, parent->data)) {
-            parent->left = newNode;
-        } else {
-            parent->right = newNode;
-        }
-        
-        insertFixup(newNode);
-        ++size_;
-        
-        return fl::pair<iterator, bool>(iterator(newNode, this), true);
+        return insertImpl(fl::move(value));
     }
 
     template<typename... Args>
@@ -620,7 +611,7 @@ public:
             x = y->right;
             if (y->parent == nodeToDelete) {
                 xParent = y;
-                if (x) x->parent = y; // ensure parent linkage when x exists
+                if (x) x->parent = y;
             } else {
                 xParent = y->parent;
                 transplant(y, y->right);
@@ -639,61 +630,7 @@ public:
         --size_;
         
         if (originalColor == BLACK) {
-            // Use xParent to correctly handle cases where x is nullptr
-            while ((x != root_) && (x == nullptr || x->color == BLACK)) {
-                if (x == (xParent ? xParent->left : nullptr)) {
-                    Node* w = xParent ? xParent->right : nullptr;
-                    if (w && w->color == RED) {
-                        w->color = BLACK;
-                        if (xParent) { xParent->color = RED; rotateLeft(xParent); }
-                        w = xParent ? xParent->right : nullptr;
-                    }
-                    bool wLeftBlack = (!w || !w->left || w->left->color == BLACK);
-                    bool wRightBlack = (!w || !w->right || w->right->color == BLACK);
-                    if (wLeftBlack && wRightBlack) {
-                        if (w) w->color = RED;
-                        x = xParent;
-                        xParent = xParent ? xParent->parent : nullptr;
-                    } else {
-                        if (!w || (w->right == nullptr || w->right->color == BLACK)) {
-                            if (w && w->left) w->left->color = BLACK;
-                            if (w) { w->color = RED; rotateRight(w); }
-                            w = xParent ? xParent->right : nullptr;
-                        }
-                        if (w) w->color = xParent ? xParent->color : BLACK;
-                        if (xParent) xParent->color = BLACK;
-                        if (w && w->right) w->right->color = BLACK;
-                        if (xParent) rotateLeft(xParent);
-                        x = root_;
-                    }
-                } else {
-                    Node* w = xParent ? xParent->left : nullptr;
-                    if (w && w->color == RED) {
-                        w->color = BLACK;
-                        if (xParent) { xParent->color = RED; rotateRight(xParent); }
-                        w = xParent ? xParent->left : nullptr;
-                    }
-                    bool wRightBlack = (!w || !w->right || w->right->color == BLACK);
-                    bool wLeftBlack = (!w || !w->left || w->left->color == BLACK);
-                    if (wRightBlack && wLeftBlack) {
-                        if (w) w->color = RED;
-                        x = xParent;
-                        xParent = xParent ? xParent->parent : nullptr;
-                    } else {
-                        if (!w || (w->left == nullptr || w->left->color == BLACK)) {
-                            if (w && w->right) w->right->color = BLACK;
-                            if (w) { w->color = RED; rotateLeft(w); }
-                            w = xParent ? xParent->left : nullptr;
-                        }
-                        if (w) w->color = xParent ? xParent->color : BLACK;
-                        if (xParent) xParent->color = BLACK;
-                        if (w && w->left) w->left->color = BLACK;
-                        if (xParent) rotateRight(xParent);
-                        x = root_;
-                    }
-                }
-            }
-            if (x) x->color = BLACK;
+            deleteFixup(x, xParent);
         }
         
         return iterator(successor, this);
@@ -746,67 +683,23 @@ public:
     }
 
     iterator lower_bound(const value_type& value) {
-        Node* current = root_;
-        Node* result = nullptr;
-        
-        while (current != nullptr) {
-            if (!comp_(current->data, value)) {
-                result = current;
-                current = current->left;
-            } else {
-                current = current->right;
-            }
-        }
-        
-        return result ? iterator(result, this) : end();
+        Node* n = lowerBoundNode(value);
+        return n ? iterator(n, this) : end();
     }
 
     const_iterator lower_bound(const value_type& value) const {
-        Node* current = root_;
-        Node* result = nullptr;
-        
-        while (current != nullptr) {
-            if (!comp_(current->data, value)) {
-                result = current;
-                current = current->left;
-            } else {
-                current = current->right;
-            }
-        }
-        
-        return result ? const_iterator(result, this) : end();
+        Node* n = lowerBoundNode(value);
+        return n ? const_iterator(n, this) : end();
     }
 
     iterator upper_bound(const value_type& value) {
-        Node* current = root_;
-        Node* result = nullptr;
-        
-        while (current != nullptr) {
-            if (comp_(value, current->data)) {
-                result = current;
-                current = current->left;
-            } else {
-                current = current->right;
-            }
-        }
-        
-        return result ? iterator(result, this) : end();
+        Node* n = upperBoundNode(value);
+        return n ? iterator(n, this) : end();
     }
 
     const_iterator upper_bound(const value_type& value) const {
-        Node* current = root_;
-        Node* result = nullptr;
-        
-        while (current != nullptr) {
-            if (comp_(value, current->data)) {
-                result = current;
-                current = current->left;
-            } else {
-                current = current->right;
-            }
-        }
-        
-        return result ? const_iterator(result, this) : end();
+        Node* n = upperBoundNode(value);
+        return n ? const_iterator(n, this) : end();
     }
 
     // Observers

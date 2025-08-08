@@ -735,7 +735,7 @@ TEST_CASE("MapRedBlackTree - Edge Cases") {
     }
 }
 
-#if 0  // Flip this to true to run the stress tests
+#if 1  // Stress tests enabled for profiling
 // -----------------------------------------------------------------------------
 // Additional Comprehensive Stress Tests
 // -----------------------------------------------------------------------------
