@@ -143,7 +143,7 @@ Update: max overclock has been reported at +70%: https://www.reddit.com/r/FastLE
 ## Supported Platforms
 ### Arduino
 
-*The build system is under going optimization and the builds will appear red until that migration is complete. Despite the red status, everything still works*
+# The build system is under going optimization and the builds will appear red until that migration is complete. Despite the red status, everything still works
 
 [![uno](https://github.com/FastLED/FastLED/actions/workflows/build_uno.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_uno.yml)
 
