@@ -577,17 +577,17 @@ export class UILayoutPlacementManager {
         uiControls2.style.display = 'none';
       }
     } else if (isUltrawide) {
-      // 3×N grid (ultra-wide) - Use flexible sizing for UI columns
+      // 3×N grid (ultra-wide) - Place canvas in the middle between two UI columns
       const minUIWidth = 280; // Minimum width for UI columns
       const canvasWidth = this.layoutData.canvasSize;
 
-      console.log(`🔍 Ultra-wide layout: canvas=${canvasWidth}px, minUIWidth=${minUIWidth}px`);
+      console.log(`🔍 Ultra-wide layout (center canvas): canvas=${canvasWidth}px, minUIWidth=${minUIWidth}px`);
 
-      // Use flexible grid: fixed canvas width + two flexible UI columns
+      // Flexible UI columns on the sides, fixed canvas in the middle
       contentGrid.style.gridTemplateColumns =
-        `${canvasWidth}px minmax(${minUIWidth}px, 1fr) minmax(${minUIWidth}px, 1fr)`;
+        `minmax(${minUIWidth}px, 1fr) ${canvasWidth}px minmax(${minUIWidth}px, 1fr)`;
       contentGrid.style.gridTemplateRows = 'auto';
-      contentGrid.style.gridTemplateAreas = '"canvas ui ui2"';
+      contentGrid.style.gridTemplateAreas = '"ui canvas ui2"';
 
       // Show and configure second UI container
       if (uiControls2) {
@@ -609,6 +609,7 @@ export class UILayoutPlacementManager {
 
       // Configure first UI container for ultra-wide
       uiControls.style.minWidth = `${minUIWidth}px`;
+      uiControls.style.gridArea = 'ui';
 
       console.log('🔍 Ultra-wide grid applied:', contentGrid.style.gridTemplateColumns);
     }
