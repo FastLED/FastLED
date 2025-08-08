@@ -796,10 +796,10 @@ def _run_process_with_output(process: RunningProcess, verbose: bool = False) -> 
             print(f"Process completed: {process.command} (took {elapsed:.2f}s)")
             if isinstance(process.command, str) and process.command.endswith(".exe"):
                 print(f"Test {process.command} passed with return code {returncode}")
-    except Exception as e:
+    except TimeoutError as te:
         test_name = _extract_test_name(process.command)
         print(f"\nError waiting for process: {process.command}")
-        print(f"Error: {e}")
+        print(f"Error: {te}")
         print(f"\033[91m###### ERROR ######\033[0m")
         print(f"Test error: {test_name}")
         process.kill()
@@ -807,7 +807,7 @@ def _run_process_with_output(process: RunningProcess, verbose: bool = False) -> 
             test_name=test_name,
             command=str(process.command),
             return_code=1,
-            output=str(e),
+            output=str(te),
             error_type="process_wait_error",
         )
         raise TestExecutionFailedException("Error waiting for process", [failure])
