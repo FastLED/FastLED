@@ -104,16 +104,15 @@ def kill_process_tree(pid: int) -> None:
         pass  # Process already gone
 
 
-def dump_main_thread_stack() -> None:
+def dump_thread_stacks() -> None:
     """Dump stack trace of the main thread and process tree info"""
     print("\n=== MAIN THREAD STACK TRACE ===")
     for thread in threading.enumerate():
-        if thread.name == "MainThread":
-            print(f"\nThread {thread.name}:")
-            if thread.ident is not None:
-                frame = sys._current_frames().get(thread.ident)
-                if frame:
-                    traceback.print_stack(frame)
+        print(f"\nThread {thread.name}:")
+        if thread.ident is not None:
+            frame = sys._current_frames().get(thread.ident)
+            if frame:
+                traceback.print_stack(frame)
     print("=== END STACK TRACE ===\n")
 
     # Dump process tree information
@@ -134,7 +133,7 @@ def setup_watchdog(timeout: int = 60) -> threading.Thread:
         print(
             f"\n🚨 WATCHDOG TIMER EXPIRED - Process took too long! ({timeout} seconds)"
         )
-        dump_main_thread_stack()
+        dump_thread_stacks()
 
         # Kill all child processes and then ourselves
         kill_process_tree(os.getpid())

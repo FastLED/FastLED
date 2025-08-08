@@ -15,7 +15,7 @@ import psutil
 from ci.util.test_args import parse_args
 from ci.util.test_commands import run_command
 from ci.util.test_env import (
-    dump_main_thread_stack,
+    dump_thread_stacks,
     get_process_tree_info,
     setup_environment,
     setup_force_exit,
@@ -55,7 +55,7 @@ def make_watch_dog_thread(
 
         warnings.warn(f"Watchdog timer expired after {seconds} seconds.")
 
-        dump_main_thread_stack()
+        dump_thread_stacks()
         print(f"Watchdog timer expired after {seconds} seconds - forcing exit")
 
         # Dump outstanding running processes (if any)
