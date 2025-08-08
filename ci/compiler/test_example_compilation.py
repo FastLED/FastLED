@@ -44,6 +44,7 @@ from ci.compiler.clang_compiler import (
     LinkOptions,
     Result,
 )
+from ci.util.running_process import EndOfStream, RunningProcess
 
 
 # Abort threshold to prevent flooding logs with repeated failures
@@ -96,6 +97,15 @@ class LinkingResult:
         """Cache hit rate as percentage"""
         total_processed = self.cache_hits + self.cache_misses
         return (self.cache_hits / total_processed * 100) if total_processed > 0 else 0.0
+
+
+@dataclass
+class ExecutionFailure:
+    """Represents a failed example execution with identifying info and reason."""
+
+    name: str
+    reason: str
+    stdout: str
 
 
 def load_build_flags_toml(toml_path: str) -> Dict[str, Any]:
@@ -1728,6 +1738,7 @@ class CompilationTestResults:
     linked_count: int
     linking_failed_count: int
     object_file_map: Optional[Dict[Path, List[Path]]]
+    execution_failures: List[ExecutionFailure]
     # Sketch runner execution results
     executed_count: int = 0
     execution_failed_count: int = 0
@@ -2004,6 +2015,7 @@ class CompilationTestRunner:
                 linked_count=0,
                 linking_failed_count=0,
                 object_file_map=getattr(result, "object_file_map", None),
+                execution_failures=[],
             )
 
         except Exception as e:
@@ -2111,6 +2123,7 @@ class CompilationTestRunner:
 
         executed_count = 0
         execution_failed_count = 0
+        execution_failures: List[ExecutionFailure] = []
         build_dir = Path(".build/examples")
 
         # Only execute examples that were compiled and linked in this run
@@ -2161,43 +2174,34 @@ class CompilationTestRunner:
                     f"[EXECUTION] DEBUG: Error checking file permissions: {e}"
                 )
 
+            captured_lines: list[str] = []
             try:
                 self.log_timing(f"[EXECUTION] Running: {executable_name}")
 
-                # Stream execution output to avoid pipe buffering hangs
-                proc = subprocess.Popen(
-                    [str(executable_path.absolute())],
-                    cwd=str(example_dir.absolute()),
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.STDOUT,
-                    universal_newlines=True,
-                    encoding="utf-8",
-                    errors="replace",
+                # Use RunningProcess to execute and stream output
+                rp = RunningProcess(
+                    command=[str(executable_path.absolute())],
+                    cwd=example_dir.absolute(),
+                    check=False,
+                    auto_run=True,
+                    timeout=60,
+                    enable_stack_trace=True,
+                    on_complete=None,
+                    output_formatter=None,
                 )
 
-                start_ts = time.time()
-                captured_lines: list[str] = []
                 while True:
-                    if proc.stdout is None:
+                    out = rp.get_next_line_non_blocking()
+                    if isinstance(out, EndOfStream):
                         break
-                    line = proc.stdout.readline()
-                    if not line:
-                        if proc.poll() is not None:
-                            break
-                    else:
+                    if isinstance(out, str):
                         if self.config.verbose:
-                            self.log_timing(f"[EXECUTION]   {line.rstrip()}")
-                        captured_lines.append(line)
+                            self.log_timing(f"[EXECUTION]   {out}")
+                        captured_lines.append(out)
+                    else:
+                        time.sleep(0.1)
 
-                    # Enforce timeout
-                    if time.time() - start_ts > 30:
-                        proc.kill()
-                        raise subprocess.TimeoutExpired(
-                            cmd=str(executable_path.absolute()), timeout=30
-                        )
-
-                proc.wait()
-                rc = proc.returncode if proc.returncode is not None else -1
+                rc = rp.wait()
 
                 if rc == 0:
                     executed_count += 1
@@ -2206,6 +2210,13 @@ class CompilationTestRunner:
                     execution_failed_count += 1
                     self.log_timing(
                         f"[EXECUTION] FAILED: {executable_name}: Exit code {rc}"
+                    )
+                    execution_failures.append(
+                        ExecutionFailure(
+                            name=example_name,
+                            reason=f"exit code {rc}",
+                            stdout="\n".join(captured_lines),
+                        )
                     )
                     if self.config.verbose and captured_lines:
                         self.log_timing(f"[EXECUTION] Failed output:")
@@ -2218,15 +2229,37 @@ class CompilationTestRunner:
                                 "[EXECUTION] No output captured from failed execution"
                             )
 
-            except subprocess.TimeoutExpired:
+            except TimeoutError:
                 execution_failed_count += 1
                 self.log_timing(
                     f"[EXECUTION] FAILED: {executable_name}: Execution timeout (30s)"
+                )
+                captured_lines_safe: list[str] = (
+                    captured_lines if "captured_lines" in locals() else []
+                )
+                timeout_stdout: str = "\n".join(captured_lines_safe)
+                execution_failures.append(
+                    ExecutionFailure(
+                        name=example_name,
+                        reason="timeout (30s)",
+                        stdout=timeout_stdout,
+                    )
                 )
             except Exception as e:
                 execution_failed_count += 1
                 self.log_timing(
                     f"[EXECUTION] FAILED: {executable_name}: Exception: {e}"
+                )
+                captured_lines_safe2: list[str] = (
+                    captured_lines if "captured_lines" in locals() else []
+                )
+                exc_stdout: str = "\n".join(captured_lines_safe2)
+                execution_failures.append(
+                    ExecutionFailure(
+                        name=example_name,
+                        reason=f"exception: {e}",
+                        stdout=exc_stdout,
+                    )
                 )
 
             if execution_failed_count >= MAX_FAILURES_BEFORE_ABORT:
@@ -2255,6 +2288,7 @@ class CompilationTestRunner:
         results.executed_count = executed_count
         results.execution_failed_count = execution_failed_count
         results.execution_time = execution_time
+        results.execution_failures = execution_failures
 
         return results
 
@@ -2325,6 +2359,28 @@ class CompilationTestRunner:
             self.log_timing(
                 f"[SUMMARY]   Total throughput: {len(ino_files) / total_time:.1f} examples/second"
             )
+
+        # Detailed execution failure reporting (rich output without timestamps)
+        if self.config.full_compilation and results.execution_failed_count > 0:
+            print()
+            print("########################################################")
+            print("# ERROR: TEST EXECUTION FAILED (see detailed output below) #")
+            print("########################################################")
+            print()
+            for failure in results.execution_failures:
+                print(f"{failure.name} failed with:\n")
+                preview: str = failure.stdout or failure.reason
+                preview = preview.strip()
+                if len(preview) > 300:
+                    preview = preview[:300]
+                if preview:
+                    print(preview)
+                else:
+                    print("(no output captured)")
+                print("\n------------\n")
+            print("Failing tests (see detailed output above)")
+            for failure in results.execution_failures:
+                print(f"  * {failure.name}")
 
         # Determine success
         overall_success = results.failed_count == 0
