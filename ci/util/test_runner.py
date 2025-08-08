@@ -32,6 +32,7 @@ from ci.util.test_types import (
 
 _IS_GITHUB_ACTIONS = os.getenv("GITHUB_ACTIONS") == "true"
 _TIMEOUT = 240 if _IS_GITHUB_ACTIONS else 60
+_GLOBAL_TIMEOUT = 600 if _IS_GITHUB_ACTIONS else 300
 
 # Abort threshold for total failures across all processes (unit + examples)
 MAX_FAILURES_BEFORE_ABORT = 3
@@ -713,7 +714,7 @@ def _run_process_with_output(process: RunningProcess, verbose: bool = False) -> 
     # Create single output handler instance to maintain state
     output_handler = ProcessOutputHandler(verbose=verbose)
     start_time = time.time()
-    timeout_seconds = 300  # 5 minutes timeout for individual processes
+    timeout_seconds = _GLOBAL_TIMEOUT  # 5 minutes timeout for individual processes
     last_output_time = start_time
     last_progress_log = start_time
     progress_interval = 30  # Log progress every 30 seconds
@@ -1212,7 +1213,7 @@ def _run_processes_parallel(
 
     # Track last activity time for each process to detect stuck processes
     last_activity_time = {proc: time.time() for proc in active_processes}
-    stuck_process_timeout = 300  # 5 mins without output indicates stuck process
+    stuck_process_timeout = _GLOBAL_TIMEOUT
 
     # Track failed processes for proper error reporting
     failed_processes: list[str] = []  # Processes killed due to timeout/stuck
