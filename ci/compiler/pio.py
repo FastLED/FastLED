@@ -976,6 +976,21 @@ def _init_platformio_build(
     #
     # Note: The infrastructure is in place to support optimization reports when needed
 
+    # Always generate optimization artifacts into the board build directory
+    # Use absolute paths to ensure GCC/LD write into a known location even when the
+    # working directory changes inside PlatformIO builds.
+    try:
+        opt_report_path = (build_dir / "optimization_report.txt").resolve()
+        # GCC writes reports relative to the current working directory; provide absolute path
+        board_with_sketch_include.build_flags.append(
+            f"-fopt-info-all={opt_report_path.as_posix()}"
+        )
+        # Generate linker map in the board directory (file name is sufficient; PIO writes here)
+        board_with_sketch_include.build_flags.append("-Wl,-Map,firmware.map")
+    except Exception as _e:
+        # Non-fatal: continue without optimization artifacts if path resolution fails
+        pass
+
     # Apply board-specific configuration
     if not _apply_board_specific_config(
         board_with_sketch_include,
