@@ -1,4 +1,4 @@
-#ifndef __AVR__
+
 
 #include "fl/leds.h"
 #include "crgb.h"
@@ -45,5 +45,3 @@ Leds::Leds(CRGB *leds, u16 width, u16 height)
 
 
 } // namespace fl
-
-#endif // __AVR__
