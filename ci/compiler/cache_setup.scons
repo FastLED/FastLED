@@ -24,6 +24,7 @@ try:
 except NameError:
     env = None  # For type checking when not in SCons context
 
+_VERBOSE = os.environ.get("VERBOSE", "0") in ("1", "true", "True", "yes", "y")
 
 # Try to import projenv if it exists
 has_projenv: bool = False
@@ -426,10 +427,15 @@ if USE_CACHE and env is not None and hasattr(env, "get"):  # type: ignore[has-ty
             try:
                 for lib_builder in env.GetLibBuilders():  # type: ignore
                     lib_builder.env.Replace(CC=new_cc, CXX=new_cxx)  # type: ignore
-                    print(
-                        "Applied Python fake compilers to library builder: "
-                        + str(getattr(lib_builder, "name", "unnamed"))
-                    )
+                    if _VERBOSE:
+                        print(
+                            "Applied Python fake compilers to library builder: "
+                            + str(getattr(lib_builder, "name", "unnamed"))
+                        )
+            except KeyboardInterrupt:
+                import _thread
+                _thread.interrupt_main()
+                raise
             except Exception as e:
                 print("WARNING: Could not apply to library builders: " + str(e))
 

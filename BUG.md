@@ -2,7 +2,7 @@
 
 ## CURRENT STATUS: MAJOR PROGRESS - SYNTAX ERROR RESOLVED, NEW RUNTIME ISSUE IDENTIFIED
 
-**✅ FIXED: Template syntax error in cache_setup.py generation**
+**✅ FIXED: Template syntax error in cache_setup.scons generation**
 **🔍 NEW ISSUE: sccache "cannot find binary path" error**
 
 The framework cache fix implementation has made significant progress:
@@ -464,7 +464,7 @@ The core cache integration is now working, but sccache cannot locate the actual 
 
 **Generated Cache Setup Script:**
 ```python
-# Check .build/pio/due/cache_setup.py content
+# Check .build/pio/due/cache_setup.scons content
 # Verify library builder compiler assignments
 # Look for PATH environment configuration
 ```
@@ -540,7 +540,7 @@ PlatformIO has **three distinct levels** where compilers are resolved:
 ### Technical Details
 
 **Our Current Cache Script Configuration:**
-- ✅ Now runs as `pre:cache_setup.py` (fixed timing)
+- ✅ Now runs as `pre:cache_setup.scons` (fixed timing)
 - ✅ SCons environments configured before platform initialization 
 - ✅ Library builders properly receive cache wrapper configurations
 - ❌ sccache cannot locate compiler binaries at execution time
@@ -597,7 +597,7 @@ build_flags = [
 
 # In platformio.ini generation
 extra_scripts = [
-    "pre:cache_setup.py",  # Change from post: to pre:
+    "pre:cache_setup.scons",  # Change from post: to pre:
 ]
 ```
 
@@ -639,7 +639,7 @@ extra_scripts = [
    - Review platformio.ini generation for flag application
 
 2. **Change cache script timing**
-   - Move from `post:cache_setup.py` to `pre:cache_setup.py`
+   - Move from `post:cache_setup.scons` to `pre:cache_setup.scons`
    - Ensure cache setup happens before platform toolchain resolution
 
 3. **Add framework-specific cache flags**
@@ -719,7 +719,7 @@ This indicates:
 - Result: Generated script is syntactically correct
 
 **Cache Setup Timing (FIXED):**
-- Changed: `extra_scripts = post:cache_setup.py` → `extra_scripts = pre:cache_setup.py`
+- Changed: `extra_scripts = post:cache_setup.scons` → `extra_scripts = pre:cache_setup.scons`
 - Reason: Ensures cache setup runs before platform toolchain initialization
 - Result: Library builders receive cache configuration correctly
 

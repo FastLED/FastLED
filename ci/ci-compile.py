@@ -7,6 +7,7 @@ This replaces the previous complex compilation system with a simpler approach us
 """
 
 import argparse
+import os
 import sys
 import threading
 import time
@@ -119,7 +120,12 @@ def parse_args(args: Optional[list[str]] = None) -> argparse.Namespace:
         "-v", "--verbose", action="store_true", help="Enable verbose output"
     )
     parser.add_argument(
-        "--cache", action="store_true", help="Enable sccache for faster compilation"
+        "--no-cache", action="store_true", help="Disable sccache for faster compilation"
+    )
+    parser.add_argument(
+        "--cache",
+        action="store_true",
+        help="(Deprecated) Enable sccache for faster compilation",
     )
     parser.add_argument(
         "--supported-boards",
@@ -258,6 +264,8 @@ def compile_board_examples(
 def main() -> int:
     """Main function."""
     args = parse_args()
+    if args.verbose:
+        os.environ["VERBOSE"] = "1"
 
     if args.supported_boards:
         print(",".join(get_default_boards()))
@@ -327,7 +335,7 @@ def main() -> int:
             examples=examples,
             defines=defines,
             verbose=args.verbose,
-            enable_cache=args.cache,
+            enable_cache=not args.no_cache,
         )
 
         if not success:

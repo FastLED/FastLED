@@ -239,7 +239,7 @@ def _apply_board_specific_config(
         for i, line in enumerate(config_lines):
             if line.startswith("[env:"):
                 # Insert extra_scripts after the env section header
-                config_lines.insert(i + 1, "extra_scripts = post:cache_setup.py")
+                config_lines.insert(i + 1, "extra_scripts = post:cache_setup.scons")
                 break
         config_content = "\n".join(config_lines)
 
@@ -333,8 +333,8 @@ def _copy_cache_build_script(build_dir: Path, cache_config: dict[str, str]) -> N
 
     # Source script location
     project_root = _resolve_project_root()
-    source_script = project_root / "ci" / "util" / "cache_setup.py"
-    dest_script = build_dir / "cache_setup.py"
+    source_script = project_root / "ci" / "compiler" / "cache_setup.scons"
+    dest_script = build_dir / "cache_setup.scons"
 
     # Copy the standalone script
     if not source_script.exists():
@@ -344,7 +344,7 @@ def _copy_cache_build_script(build_dir: Path, cache_config: dict[str, str]) -> N
     print(f"Copied cache setup script: {source_script} -> {dest_script}")
 
     # Set environment variables for cache configuration
-    # These will be read by the cache_setup.py script
+    # These will be read by the cache_setup.scons script
     cache_type = cache_config.get("CACHE_TYPE", "sccache")
 
     os.environ["FASTLED_CACHE_TYPE"] = cache_type
@@ -1102,7 +1102,7 @@ class PioCompiler(Compiler):
         additional_defines: list[str] | None = None,
         additional_include_dirs: list[str] | None = None,
         additional_libs: list[str] | None = None,
-        cache_type: CacheType = CacheType.NO_CACHE,
+        cache_type: CacheType = CacheType.SCCACHE,
     ) -> None:
         # Call parent constructor
         super().__init__()
@@ -1698,7 +1698,7 @@ def run_pio_build(
     verbose: bool = False,
     additional_defines: list[str] | None = None,
     additional_include_dirs: list[str] | None = None,
-    cache_type: CacheType = CacheType.NO_CACHE,
+    cache_type: CacheType = CacheType.SCCACHE,
 ) -> list[Future[SketchResult]]:
     """Run build for specified examples and platform using new PlatformIO system.
 

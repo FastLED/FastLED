@@ -81,7 +81,7 @@ class OptimizedCompilerWrapper:
         raise NotImplementedError("Phase 2 implementation pending")
 ```
 
-**Integration Point**: Modify `cache_setup.py` to use `OptimizedCompilerWrapper` when available.
+**Integration Point**: Modify `cache_setup.scons` to use `OptimizedCompilerWrapper` when available.
 
 #### 1.2 Build Phase Detection System
 
