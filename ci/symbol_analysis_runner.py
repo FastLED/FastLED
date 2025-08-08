@@ -29,6 +29,10 @@ def main():
     # Check if build_info.json exists
     build_info_path = Path(".build") / args.board / "build_info.json"
     if not build_info_path.exists():
+        # Fall back to nested pio structure
+        build_info_path = Path(".build") / "pio" / args.board / "build_info.json"
+
+    if not build_info_path.exists():
         message = (
             f"Build info not found at {build_info_path}. Skipping symbol analysis."
         )

@@ -53,7 +53,7 @@ def demangle_gnu_linkonce_symbols(cpp_filt_path: Path, map_text: str) -> str:
         str: Map file content with demangled symbols.
     """
     # Extract all .gnu.linkonce.t symbols
-    pattern = r"\.gnu\.linkonce\.t\.(.+?)\s"
+    pattern = r"\.gnu\\.linkonce\\.t\\.(.+?)\\s"
     matches = re.findall(pattern, map_text)
 
     if not matches:
@@ -108,6 +108,11 @@ def main() -> int:
         root_build_dir = args.cwd / ".build"
     else:
         root_build_dir = Path(".build")
+
+    # Support nested PlatformIO structure: .build/pio/<board>
+    nested_pio_dir = root_build_dir / "pio"
+    if nested_pio_dir.is_dir():
+        root_build_dir = nested_pio_dir
 
     board_dirs = [d for d in root_build_dir.iterdir() if d.is_dir()]
     if not board_dirs:
