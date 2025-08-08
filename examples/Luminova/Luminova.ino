@@ -18,8 +18,7 @@ const uint8_t kPointGain = 128;  // 50%
 CRGB leds[NUM_LEDS];
 
 // UI control for animation speed (telemetry + control)
-static float gModelSpeed = 64.0f; // 1..255 logical speed
-fl::UISlider speed("Speed", 64, 1, 255, 1);
+
 
 // Provide the XY() function FastLED expects (in fl namespace) so blur2d can map properly.
 namespace fl {
@@ -102,7 +101,6 @@ void setup() {
   FastLED.setBrightness(BRIGHTNESS);
   FastLED.clear(true);
   // When user adjusts UI, reflect into model speed
-  speed.onChanged([](fl::UISlider &s){ gModelSpeed = s.value(); });
   // Provide screen map to UI with a specific LED diameter
   fl::XYMap xy = kMatrixSerpentineLayout
                    ? fl::XYMap::constructSerpentine(WIDTH, HEIGHT)
