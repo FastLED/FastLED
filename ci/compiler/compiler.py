@@ -17,7 +17,6 @@ class CacheType(Enum):
     """Compiler cache type options."""
 
     NO_CACHE = "no_cache"
-    CCACHE = "ccache"
     SCCACHE = "sccache"
 
 
