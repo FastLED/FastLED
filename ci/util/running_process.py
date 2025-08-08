@@ -158,6 +158,82 @@ if os.name == "nt":  # Windows
         pass
 
 
+class ProcessOutputReader:
+    """Dedicated reader that drains a process's stdout and enqueues lines.
+
+    This keeps the stdout pipe drained to prevent blocking and forwards
+    transformed, non-empty lines to the provided output queue. It also invokes
+    lifecycle callbacks for timing/unregister behaviors.
+    """
+
+    def __init__(
+        self,
+        proc: subprocess.Popen[Any],
+        output_queue: "Queue[str | EndOfStream]",
+        accumulated_output: list[str],
+        shutdown: threading.Event,
+        output_formatter: OutputFormatter | None,
+        on_update_last_line_ts: Callable[[float], None],
+        on_end: Callable[[], None],
+    ) -> None:
+        self._proc = proc
+        self._output_queue = output_queue
+        self._accumulated_output = accumulated_output
+        self._shutdown = shutdown
+        self._output_formatter = output_formatter
+        self._on_update_last_line_ts = on_update_last_line_ts
+        self._on_end = on_end
+
+    def run(self) -> None:
+        """Continuously read stdout lines and forward them until EOF or shutdown."""
+        try:
+            assert self._proc.stdout is not None
+
+            try:
+                for line in self._proc.stdout:
+                    self._on_update_last_line_ts(time.time())
+                    if self._shutdown.is_set():
+                        break
+
+                    line_stripped = line.rstrip()
+                    if not line_stripped:
+                        continue
+
+                    if self._output_formatter is not None:
+                        transformed_line = self._output_formatter.transform(
+                            line_stripped
+                        )
+                    else:
+                        transformed_line = line_stripped
+
+                    self._output_queue.put(transformed_line)
+                    self._accumulated_output.append(transformed_line)
+
+            except (ValueError, OSError) as e:
+                # Normal shutdown scenarios include closed file descriptors.
+                if "closed file" in str(e) or "Bad file descriptor" in str(e):
+                    pass
+                else:
+                    print(f"Warning: Output reader encountered error: {e}")
+            finally:
+                # Signal end-of-stream to consumers
+                self._output_queue.put(EndOfStream())
+        finally:
+            # Cleanup stream and invoke completion callback
+            if self._proc.stdout and not self._proc.stdout.closed:
+                try:
+                    self._proc.stdout.close()
+                except (ValueError, OSError):
+                    pass
+
+            # Notify parent for timing/unregistration
+            try:
+                self._on_end()
+            finally:
+                # Ensure a final end-of-stream marker is present
+                self._output_queue.put(EndOfStream())
+
+
 class RunningProcess:
     """
     A class to manage and stream output from a running subprocess.
@@ -299,77 +375,36 @@ class RunningProcess:
         if self.output_formatter:
             self.output_formatter.begin()
 
-        def output_reader() -> None:
-            """Continuously pump stdout to prevent subprocess from blocking on full pipe buffer"""
+        # Prepare output reader helper
+        assert self.proc is not None
+
+        def _on_update_last_line(ts: float) -> None:
+            self._time_last_stdout_line = ts
+
+        def _on_reader_end() -> None:
+            # Set end time when stdout pumper finishes; captures completion time of useful output
+            if self._end_time is None:
+                self._end_time = time.time()
+            # Unregister when stdout is fully drained
             try:
-                assert self.proc is not None
-                assert self.proc.stdout is not None
+                from ci.util.running_process import RunningProcessManagerSingleton
 
-                # Continuously read lines to keep the stdout pipe drained
-                # This prevents the subprocess from blocking when its output buffer fills
-                try:
-                    for line in self.proc.stdout:
-                        self._time_last_stdout_line = time.time()
-                        if self.shutdown.is_set():
-                            # EOF will be handled in the finally block
-                            break
-                        # Strip whitespace and transform line if formatter provided
-                        line_stripped = line.rstrip()
-                        if line_stripped:  # Only process non-empty lines
-                            # Transform line if formatter is provided
-                            if self.output_formatter:
-                                transformed_line = self.output_formatter.transform(
-                                    line_stripped
-                                )
-                            else:
-                                transformed_line = line_stripped
+                RunningProcessManagerSingleton.unregister(self)
+            except Exception as e:
+                warnings.warn(f"RunningProcessManager.unregister (drain) failed: {e}")
 
-                            # Queue and store the transformed line
-                            self.output_queue.put(transformed_line)
-                            self.accumulated_output.append(transformed_line)
-
-                    # When the loop exits, we've reached EOF, which will be handled in the finally block
-                except (ValueError, OSError) as e:
-                    # Handle "I/O operation on closed file" and similar errors
-                    # This can happen if the process terminates while we're reading
-                    if "closed file" in str(e) or "Bad file descriptor" in str(e):
-                        # Normal shutdown - process stdout was closed
-                        return
-                    else:
-                        # Unexpected error, log it but don't crash
-                        print(f"Warning: Output reader encountered error: {e}")
-                        return
-                finally:
-                    self.output_queue.put(EndOfStream())
-
-            finally:
-                # Clean shutdown: close stream and signal end
-                if self.proc and self.proc.stdout and not self.proc.stdout.closed:
-                    try:
-                        self.proc.stdout.close()
-                    except (ValueError, OSError):
-                        # Already closed, ignore
-                        pass
-
-                # Set end time when stdout pumper finishes reading
-                # This captures the actual completion time of useful output
-                if self._end_time is None:
-                    self._end_time = time.time()
-
-                self.output_queue.put(EndOfStream())  # End-of-stream marker
-
-                # Unregister when stdout is fully drained
-                try:
-                    from ci.util.running_process import RunningProcessManagerSingleton
-
-                    RunningProcessManagerSingleton.unregister(self)
-                except Exception as e:
-                    warnings.warn(
-                        f"RunningProcessManager.unregister (drain) failed: {e}"
-                    )
+        reader = ProcessOutputReader(
+            proc=self.proc,
+            output_queue=self.output_queue,
+            accumulated_output=self.accumulated_output,
+            shutdown=self.shutdown,
+            output_formatter=self.output_formatter,
+            on_update_last_line_ts=_on_update_last_line,
+            on_end=_on_reader_end,
+        )
 
         # Start output reader thread
-        self.reader_thread = threading.Thread(target=output_reader, daemon=True)
+        self.reader_thread = threading.Thread(target=reader.run, daemon=True)
         self.reader_thread.start()
 
     def get_next_line(self, timeout: float | None = None) -> str | EndOfStream:
