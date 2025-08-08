@@ -885,7 +885,10 @@ def get_fastled_core_sources() -> List[Path]:
 
 
 def create_fastled_library(
-    compiler: Compiler, fastled_build_dir: Path, log_timing: Callable[[str], None]
+    compiler: Compiler,
+    fastled_build_dir: Path,
+    log_timing: Callable[[str], None],
+    verbose: bool,
 ) -> Path:
     """Create libfastled.a static library."""
 
@@ -914,6 +917,8 @@ def create_fastled_library(
         # Replace path separators with underscores for unique object file names
         obj_name = str(rel_path.with_suffix(".o")).replace("/", "_").replace("\\", "_")
         obj_file = obj_dir / obj_name
+        if verbose:
+            log_timing(f"[LIBRARY] Compiling src/{rel_path} -> {obj_file.name}")
         future = compiler.compile_cpp_file(cpp_file, obj_file)
         futures.append((future, obj_file, cpp_file))
 
@@ -926,6 +931,10 @@ def create_fastled_library(
             if result.ok:
                 fastled_objects.append(obj_file)
                 compiled_count += 1
+                if verbose:
+                    log_timing(
+                        f"[LIBRARY] SUCCESS: {cpp_file.relative_to(Path('src'))}"
+                    )
             else:
                 failed_count += 1
                 log_timing(
@@ -2025,7 +2034,10 @@ class CompilationTestRunner:
             fastled_build_dir.mkdir(parents=True, exist_ok=True)
 
             fastled_lib = create_fastled_library(
-                compiler, fastled_build_dir, self.log_timing
+                compiler,
+                fastled_build_dir,
+                self.log_timing,
+                verbose=self.config.verbose,
             )
 
             # Link examples
