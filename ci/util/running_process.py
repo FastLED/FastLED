@@ -311,7 +311,7 @@ class RunningProcess:
                     for line in self.proc.stdout:
                         self._time_last_stdout_line = time.time()
                         if self.shutdown.is_set():
-                            self.output_queue.put(EndOfStream())
+                            # EOF will be handled in the finally block
                             break
                         # Strip whitespace and transform line if formatter provided
                         line_stripped = line.rstrip()
@@ -328,20 +328,19 @@ class RunningProcess:
                             self.output_queue.put(transformed_line)
                             self.accumulated_output.append(transformed_line)
 
-                    # When the loop exits, we've reached EOF
-                    self.output_queue.put(EndOfStream())
+                    # When the loop exits, we've reached EOF, which will be handled in the finally block
                 except (ValueError, OSError) as e:
                     # Handle "I/O operation on closed file" and similar errors
                     # This can happen if the process terminates while we're reading
                     if "closed file" in str(e) or "Bad file descriptor" in str(e):
                         # Normal shutdown - process stdout was closed
-                        self.output_queue.put(EndOfStream())
                         return
                     else:
                         # Unexpected error, log it but don't crash
                         print(f"Warning: Output reader encountered error: {e}")
-                        self.output_queue.put(EndOfStream())
                         return
+                finally:
+                    self.output_queue.put(EndOfStream())
 
             finally:
                 # Clean shutdown: close stream and signal end
