@@ -43,6 +43,7 @@ from typing import Any, Dict, List, Optional, Sequence, Set, Tuple
 from ci.ci.fingerprint_cache import FingerprintCache
 from ci.compiler.clang_compiler import BuildFlags, Compiler, CompilerOptions
 from ci.util.paths import PROJECT_ROOT
+from ci.util.running_process import subprocess_run
 
 
 class BuildType(Enum):
@@ -301,9 +302,15 @@ class BuildAPI:
 
         print(f"[BUILD API] Creating static library: {' '.join(cmd)}")
 
-        # Execute archiver command
+        # Execute archiver command using stdout-pumping wrapper
         try:
-            result = subprocess.run(cmd, capture_output=True, text=True, check=True)
+            _completed = subprocess_run(
+                command=cmd,
+                cwd=None,
+                check=True,
+                timeout=900,
+                enable_stack_trace=False,
+            )
             return True
         except subprocess.CalledProcessError as e:
             print(f"[BUILD API] Archiver failed: {e}")
@@ -462,12 +469,19 @@ class BuildAPI:
             + [str(self._library_file)]
             + ["-o", str(output_exe)]
         )
+        cmd_str = subprocess.list2cmdline(cmd)
 
-        print(f"[BUILD API] Linking: {' '.join(cmd)}")
+        print(f"[BUILD API] Linking: {cmd_str}")
 
-        # Execute linker
+        # Execute linker using stdout-pumping wrapper
         try:
-            result = subprocess.run(cmd, capture_output=True, text=True, check=True)
+            _completed = subprocess_run(
+                command=cmd,
+                cwd=None,
+                check=True,
+                timeout=900,
+                enable_stack_trace=False,
+            )
             return True
         except subprocess.CalledProcessError as e:
             print(f"[BUILD API] Linker failed: {e}")

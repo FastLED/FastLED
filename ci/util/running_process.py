@@ -700,3 +700,75 @@ class RunningProcessManager:
 
 # Global singleton instance for convenient access
 RunningProcessManagerSingleton = RunningProcessManager()
+
+
+def subprocess_run(
+    command: str | list[str],
+    cwd: Path | None,
+    check: bool,
+    timeout: int,
+    enable_stack_trace: bool,
+) -> subprocess.CompletedProcess[str]:
+    """Execute a command with stdout pumping and merged stderr, returning CompletedProcess.
+
+    This emulates subprocess.run() behavior using RunningProcess as the backend:
+    - Streams and drains stdout continuously to avoid pipe blocking
+    - Merges stderr into stdout
+    - Returns a standard subprocess.CompletedProcess with combined stdout
+    - Raises subprocess.CalledProcessError when check is True and exit code != 0
+
+    Args:
+        command: Command to execute (string or list of arguments).
+        cwd: Working directory to execute the command in. Must be provided explicitly.
+        check: When True, raise CalledProcessError if the command exits non-zero.
+        timeout: Maximum number of seconds to allow the process to run.
+        enable_stack_trace: Enable stack trace dumping on timeout for diagnostics.
+
+    Returns:
+        subprocess.CompletedProcess[str]: Completed process with combined stdout and return code.
+    """
+    # Use RunningProcess for robust stdout pumping with merged stderr
+    proc = RunningProcess(
+        command=command,
+        cwd=cwd,
+        check=False,
+        auto_run=True,
+        timeout=timeout,
+        enable_stack_trace=enable_stack_trace,
+        on_complete=None,
+        output_formatter=None,
+    )
+
+    try:
+        return_code: int = proc.wait()
+    except KeyboardInterrupt:
+        # Propagate interrupt behavior consistent with subprocess.run
+        raise
+    except TimeoutError as e:
+        # Align with subprocess.TimeoutExpired semantics by raising a CalledProcessError-like
+        # error with available output. Using TimeoutError here is consistent with internal RP.
+        completed_output: str = proc.stdout
+        raise RuntimeError(
+            f"CRITICAL: Process timed out after {timeout} seconds: {command}"
+        ) from e
+
+    combined_stdout: str = proc.stdout
+
+    # Construct CompletedProcess (stderr is merged into stdout by design)
+    completed = subprocess.CompletedProcess(
+        args=command,
+        returncode=return_code,
+        stdout=combined_stdout,
+        stderr=None,
+    )
+
+    if check and return_code != 0:
+        # Raise the standard exception with captured output
+        raise subprocess.CalledProcessError(
+            returncode=return_code,
+            cmd=command,
+            output=combined_stdout,
+            stderr=None,
+        )
+
+    return completed
