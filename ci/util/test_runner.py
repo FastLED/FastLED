@@ -745,9 +745,13 @@ def _run_process_with_output(process: RunningProcess, verbose: bool = False) -> 
             if line is not None:
                 last_output_time = current_time
                 print(f"  {line}")
-            else:
-                # No output available right now, continue polling
-                time.sleep(0.01)  # Small sleep to avoid busy-wait
+                continue
+            is_finished = process.finished
+            if is_finished:
+                break
+
+            # No output available right now, continue polling
+            time.sleep(0.01)  # Small sleep to avoid busy-wait
         except KeyboardInterrupt:
             import _thread
 
