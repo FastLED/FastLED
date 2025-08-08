@@ -23,3 +23,38 @@ This folder implements a simple video playback pipeline for LED arrays. It reads
 - `durationMicros()` reports the full duration for file sources, and `-1` for streams.
 
 This subsystem is optional, intended for MCUs with adequate RAM and I/O throughput.
+
+### Examples
+- Memory stream video (from `examples/FxGfx2Video/FxGfx2Video.ino`):
+  ```cpp
+  #include <FastLED.h>
+  #include "fl/bytestreammemory.h"
+  #include "fx/video.h"
+  using namespace fl;
+  #define W 22
+  #define H 22
+  #define NUM_LEDS (W*H)
+  CRGB leds[NUM_LEDS];
+  ByteStreamMemoryPtr stream = fl::make_shared<ByteStreamMemory>(3*NUM_LEDS*2);
+  Video video(NUM_LEDS, 2.0f); // 2 fps source
+  void setup(){ FastLED.addLeds<WS2811,2,GRB>(leds, NUM_LEDS); video.beginStream(stream); }
+  void loop(){ video.draw(millis(), leds); FastLED.show(); }
+  ```
+- SD card video (from `examples/FxSdCard/FxSdCard.ino`):
+  ```cpp
+  #include <FastLED.h>
+  #include "fx/video.h"
+  #include "fl/file_system.h"
+  using namespace fl;
+  #define W 32
+  #define H 32
+  #define NUM_LEDS (W*H)
+  CRGB leds[NUM_LEDS];
+  FileSystem fs;
+  Video video;
+  void setup(){
+    FastLED.addLeds<WS2811,2,GRB>(leds, NUM_LEDS);
+    video = fs.openVideo("data/video.rgb", NUM_LEDS, 60, 2);
+  }
+  void loop(){ video.draw(millis(), leds); FastLED.show(); }
+  ```

@@ -51,3 +51,30 @@ fx.draw(fl::Fx::DrawContext(millis(), leds));
 - Most code follows the standard FastLED license. Animartrix is free for non‑commercial use and paid otherwise. See [`src/fx/readme`](./readme) and headers for details.
 
 Explore each subfolder’s README to find the effect you want, then copy the corresponding header into your project and call `draw(...)` every frame.
+
+### Examples (from `examples/Fx*`)
+- 1D strip effects:
+  - Cylon: `examples/FxCylon/FxCylon.ino`
+  - DemoReel100: `examples/FxDemoReel100/FxDemoReel100.ino`
+  - Fire2012: `examples/FxFire2012/FxFire2012.ino`
+  - Pacifica: `examples/FxPacifica/FxPacifica.ino`
+  - Pride2015: `examples/FxPride2015/FxPride2015.ino`
+  - TwinkleFox: `examples/FxTwinkleFox/FxTwinkleFox.ino`
+- 2D matrix effects:
+  - NoisePalette: `examples/FxNoisePlusPalette/FxNoisePlusPalette.ino`
+  - WaveFx layered: `examples/FxWave2d/`
+- Video pipeline:
+  - Memory stream: `examples/FxGfx2Video/FxGfx2Video.ino`
+  - SD card playback: `examples/FxSdCard/FxSdCard.ino`
+
+Minimal 1D call pattern:
+```cpp
+fx.draw(fl::Fx::DrawContext(millis(), leds));
+FastLED.show();
+```
+Minimal 2D call pattern (requires `XYMap`):
+```cpp
+fl::NoisePalette fx(xyMap);
+fx.draw(fl::Fx::DrawContext(millis(), leds));
+FastLED.show();
+```

@@ -34,3 +34,48 @@ Animartrix is free for non‑commercial use and requires a paid license otherwis
 - **`CRGBPalette16`**: 16‑entry FastLED palette used by several mappers/effects.
 
 These effects are designed for more capable MCUs, but many run well on modern 8‑bit boards at modest sizes. Start with `RedSquare` to validate mapping, then try `NoisePalette` and `WaveFx` for richer motion.
+
+### Examples
+- NoisePalette (from `examples/FxNoisePlusPalette/FxNoisePlusPalette.ino`):
+  ```cpp
+  #include <FastLED.h>
+  #include "fx/2d/noisepalette.h"
+  using namespace fl;
+  #define W 16
+  #define H 16
+  #define NUM_LEDS (W*H)
+  CRGB leds[NUM_LEDS];
+  XYMap xyMap(W, H, /* serpentine? */ true);
+  NoisePalette fx(xyMap);
+  void setup(){ FastLED.addLeds<WS2811, 3, GRB>(leds, NUM_LEDS); FastLED.setBrightness(96); }
+  void loop(){ fx.draw(Fx::DrawContext(millis(), leds)); FastLED.show(); }
+  ```
+- WaveFx layered with Blend2d (from `examples/FxWave2d/`):
+  ```cpp
+  #include <FastLED.h>
+  #include "fx/2d/wave.h"
+  #include "fx/2d/blend.h"
+  using namespace fl;
+  #define W 64
+  #define H 64
+  CRGB leds[W*H];
+  XYMap xyMap(W, H, true);
+  Blend2d blender(xyMap);
+  auto lower = fl::make_shared<WaveFx>(xyMap, WaveFx::Args());
+  auto upper = fl::make_shared<WaveFx>(xyMap, WaveFx::Args());
+  void setup(){ FastLED.addLeds<WS2811, 3, GRB>(leds, W*H); blender.add(lower); blender.add(upper); }
+  void loop(){ blender.draw(Fx::DrawContext(millis(), leds)); FastLED.show(); }
+  ```
+- RedSquare (from concept in `redsquare.h`):
+  ```cpp
+  #include <FastLED.h>
+  #include "fx/2d/redsquare.h"
+  using namespace fl;
+  #define W 16
+  #define H 16
+  CRGB leds[W*H];
+  XYMap xyMap(W, H, true);
+  RedSquare fx(xyMap);
+  void setup(){ FastLED.addLeds<WS2811,3,GRB>(leds, W*H); }
+  void loop(){ fx.draw(Fx::DrawContext(millis(), leds)); FastLED.show(); }
+  ```

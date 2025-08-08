@@ -30,3 +30,95 @@ If you’re new to FastLED and C++: think of an effect as a small object you con
 - **`CRGB` / `CHSV`**: FastLED’s color types.
 
 Explore the headers to see per-effect parameters and internal logic; everything here is self-contained and ready to drop into your render loop.
+
+### Examples
+- Cylon (from `examples/FxCylon/FxCylon.ino`):
+  ```cpp
+  #include <FastLED.h>
+  #include "fx/1d/cylon.h"
+  using namespace fl;
+  #define NUM_LEDS 64
+  CRGB leds[NUM_LEDS];
+  Cylon cylon(NUM_LEDS);
+  void setup() {
+    FastLED.addLeds<WS2812, 2, RGB>(leds, NUM_LEDS);
+  }
+  void loop() {
+    cylon.draw(Fx::DrawContext(millis(), leds));
+    FastLED.show();
+    delay(cylon.delay_ms);
+  }
+  ```
+- DemoReel100 (from `examples/FxDemoReel100/FxDemoReel100.ino`):
+  ```cpp
+  #include <FastLED.h>
+  #include "fx/1d/demoreel100.h"
+  using namespace fl;
+  #define NUM_LEDS 64
+  CRGB leds[NUM_LEDS];
+  DemoReel100Ptr fx = fl::make_shared<DemoReel100>(NUM_LEDS);
+  void setup() { FastLED.addLeds<WS2811, 3, GRB>(leds, NUM_LEDS); }
+  void loop() {
+    fx->draw(Fx::DrawContext(millis(), leds));
+    FastLED.show();
+    FastLED.delay(1000/120);
+  }
+  ```
+- Fire2012 (from `examples/FxFire2012/FxFire2012.ino`):
+  ```cpp
+  #include <FastLED.h>
+  #include "fx/1d/fire2012.h"
+  using namespace fl;
+  #define NUM_LEDS 92
+  CRGB leds[NUM_LEDS];
+  Fire2012Ptr fire = fl::make_shared<Fire2012>(NUM_LEDS, 55, 120, false);
+  void setup() { FastLED.addLeds<WS2811, 5, GRB>(leds, NUM_LEDS); }
+  void loop() {
+    fire->draw(Fx::DrawContext(millis(), leds));
+    FastLED.show();
+    FastLED.delay(1000/30);
+  }
+  ```
+- Pacifica (from `examples/FxPacifica/FxPacifica.ino`):
+  ```cpp
+  #include <FastLED.h>
+  #include "fx/1d/pacifica.h"
+  using namespace fl;
+  #define NUM_LEDS 60
+  CRGB leds[NUM_LEDS];
+  Pacifica pacifica(NUM_LEDS);
+  void setup() { FastLED.addLeds<WS2812B, 3, GRB>(leds, NUM_LEDS); }
+  void loop() {
+    pacifica.draw(Fx::DrawContext(millis(), leds));
+    FastLED.show();
+  }
+  ```
+- Pride2015 (from `examples/FxPride2015/FxPride2015.ino`):
+  ```cpp
+  #include <FastLED.h>
+  #include "fx/1d/pride2015.h"
+  using namespace fl;
+  #define NUM_LEDS 200
+  CRGB leds[NUM_LEDS];
+  Pride2015 pride(NUM_LEDS);
+  void setup() { FastLED.addLeds<WS2811, 3, GRB>(leds, NUM_LEDS); }
+  void loop() {
+    pride.draw(Fx::DrawContext(millis(), leds));
+    FastLED.show();
+  }
+  ```
+- TwinkleFox (from `examples/FxTwinkleFox/FxTwinkleFox.ino`):
+  ```cpp
+  #include <FastLED.h>
+  #include "fx/1d/twinklefox.h"
+  using namespace fl;
+  #define NUM_LEDS 100
+  CRGB leds[NUM_LEDS];
+  TwinkleFox fx(NUM_LEDS);
+  void setup() { FastLED.addLeds<WS2811, 3, GRB>(leds, NUM_LEDS).setRgbw(); }
+  void loop() {
+    EVERY_N_SECONDS(SECONDS_PER_PALETTE) { fx.chooseNextColorPalette(fx.targetPalette); }
+    fx.draw(Fx::DrawContext(millis(), leds));
+    FastLED.show();
+  }
+  ```
