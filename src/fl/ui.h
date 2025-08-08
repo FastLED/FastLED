@@ -159,7 +159,7 @@ class UIButton : public UIElement {
     bool value() const { return clicked(); }
 
     void addRealButton(const Button& pin) {
-        mRealButton.reset(new Button(pin));
+        mRealButton = fl::make_shared<Button>(pin);
     }
 
     void click() { mImpl.click(); }
@@ -220,7 +220,7 @@ class UIButton : public UIElement {
   private:
     FunctionList<UIButton &> mCallbacks;
     Listener mListener;
-    fl::unique_ptr<Button> mRealButton;
+    fl::shared_ptr<Button> mRealButton;
 };
 
 class UICheckbox : public UIElement {
@@ -466,7 +466,7 @@ class UIDropdown : public UIElement {
     
     // Add a physical button that will advance to the next option when pressed
     void addNextButton(int pin) {
-        mNextButton.reset(new Button(pin));
+        mNextButton = fl::make_shared<Button>(pin);
     }
     
     // Advance to the next option (cycles back to first option after last)
@@ -521,7 +521,7 @@ class UIDropdown : public UIElement {
     int mLastFrameValue = -1;
     bool mLastFrameValueValid = false;
     Listener mListener;
-    fl::unique_ptr<Button> mNextButton;
+    fl::shared_ptr<Button> mNextButton;
 };
 
 class UIGroup {
