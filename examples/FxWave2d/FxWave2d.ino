@@ -22,6 +22,12 @@ which are blended together to create complex visual effects.
 #include <Arduino.h>      // Core Arduino functionality
 #include <FastLED.h>      // Main FastLED library for controlling LEDs
 
+#if !SKETCH_HAS_LOTS_OF_MEMORY
+// Platform does not have enough memory
+void setup() {}
+void loop() {}
+#else
+
 #include "wavefx.h"
 
 using namespace fl;        // Use the FastLED namespace for convenience
@@ -36,3 +42,4 @@ void loop() {
     // The main program loop that runs continuously
     wavefx_loop();
 }
+#endif
