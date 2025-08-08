@@ -503,12 +503,53 @@ export class UILayoutPlacementManager {
     const isLandscape = this.currentLayout === 'tablet' || this.currentLayout === 'desktop';
     const isPortrait = this.currentLayout === 'mobile';
 
+    // Determine if there are any UI elements to render. If none, switch to a
+    // single-pane canvas layout and avoid grid-based presentation entirely.
+    const hasUiElements = (() => {
+      const ui1HasChildren = uiControls && uiControls.classList.contains('active') && uiControls.children.length > 0;
+      const ui2HasChildren = uiControls2 && uiControls2.classList.contains('active') && uiControls2.children.length > 0;
+      return !!(ui1HasChildren || ui2HasChildren);
+    })();
+
     // Main container
     mainContainer.style.maxWidth = `${
       Math.min(this.layoutData.availableWidth + this.config.containerPadding * 2, 2000)
     }px`;
 
-    // Content grid - implements 1×N, 2×N, 3×N layout
+    // If there are no UI elements, present a simple centered canvas view and
+    // suppress grid styling to avoid reserving space for non-existent UI.
+    if (!hasUiElements) {
+      // Container: simple vertical flow centered
+      contentGrid.style.display = 'flex';
+      contentGrid.style.width = '100%';
+      contentGrid.style.flexDirection = 'column';
+      contentGrid.style.rowGap = `${this.config.verticalGap}px`;
+      contentGrid.style.justifyContent = 'flex-start';
+      contentGrid.style.alignItems = 'center';
+
+      // Clear any grid-specific properties that may have been set previously
+      contentGrid.style.gridTemplateColumns = '';
+      contentGrid.style.gridTemplateRows = '';
+      contentGrid.style.gridTemplateAreas = '';
+      contentGrid.style.gap = '';
+
+      // Ensure UI containers are hidden
+      if (uiControls) {
+        uiControls.style.display = 'none';
+      }
+      if (uiControls2) {
+        uiControls2.style.display = 'none';
+      }
+
+      // Canvas container should be centered in the flex layout
+      canvasContainer.style.gridArea = '';
+      canvasContainer.style.alignSelf = 'center';
+
+      // Nothing else to do for no-UI mode
+      return;
+    }
+
+    // Content grid - implements 1×N, 2×N, 3×N layout when UI exists
     contentGrid.style.display = 'grid';
     contentGrid.style.width = '100%';
     contentGrid.style.gap = `${this.config.verticalGap}px ${this.config.horizontalGap}px`;
