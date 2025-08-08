@@ -173,7 +173,7 @@ class RunningProcess:
         check: bool = False,
         auto_run: bool = True,
         timeout: int = 120,  # 2 minutes.
-        enable_stack_trace: bool = True,  # Enable stack trace dumping on timeout
+        enable_stack_trace: bool = False,  # Enable stack trace dumping on timeout
         on_complete: Callable[[], None]
         | None = None,  # Callback to execute when process completes
         output_formatter: OutputFormatter | None = None,
@@ -414,6 +414,9 @@ class RunningProcess:
                     return EndOfStream()
                 return line
             except queue.Empty:
+                if self.finished:
+                    self._stream_finished = True
+                    return EndOfStream()
                 continue
 
     def get_next_line_non_blocking(self) -> str | None | EndOfStream:
@@ -425,6 +428,9 @@ class RunningProcess:
             None: No output available right now (should continue polling)
             EndOfStream: Process has finished, no more output will be available
         """
+        if self._stream_finished:
+            return EndOfStream()
+
         try:
             out: str | EndOfStream = self.get_next_line(timeout=0)
             if isinstance(out, EndOfStream):
