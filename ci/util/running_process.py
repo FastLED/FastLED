@@ -11,7 +11,7 @@ import urllib.parse
 import warnings
 from pathlib import Path
 from queue import Queue
-from typing import Any, Callable, Match, Protocol, Union
+from typing import Any, Callable, Match, Union
 
 
 class EndOfStream(Exception):
@@ -22,27 +22,7 @@ class EndOfStream(Exception):
     pass
 
 
-class OutputFormatter(Protocol):
-    """Protocol for output formatters that can be used with RunningProcess."""
-
-    def begin(self) -> None:
-        """Called when output processing begins. Starts internal timing."""
-        ...
-
-    def transform(self, line: str) -> str:
-        """Transform a single line of output.
-
-        Args:
-            line: Raw line from the process output
-
-        Returns:
-            Transformed line
-        """
-        ...
-
-    def end(self) -> None:
-        """Called when output processing ends. For completeness."""
-        ...
+from ci.util.output_formatter import NullOutputFormatter, OutputFormatter
 
 
 def normalize_error_warning_paths(line: str) -> str:
@@ -139,23 +119,7 @@ def resolve_relative_paths(text: str) -> str:
     return re.sub(relative_pattern, resolve_path_match, text)
 
 
-# Configure console for UTF-8 output on Windows
-if os.name == "nt":  # Windows
-    # Try to set console to UTF-8 mode
-    try:
-        # Set stdout and stderr to UTF-8 encoding
-        # Note: reconfigure() was added in Python 3.7
-        if hasattr(sys.stdout, "reconfigure") and callable(
-            getattr(sys.stdout, "reconfigure", None)
-        ):
-            sys.stdout.reconfigure(encoding="utf-8", errors="replace")  # type: ignore[attr-defined]
-        if hasattr(sys.stderr, "reconfigure") and callable(
-            getattr(sys.stderr, "reconfigure", None)
-        ):
-            sys.stderr.reconfigure(encoding="utf-8", errors="replace")  # type: ignore[attr-defined]
-    except (AttributeError, OSError):
-        # Fallback for older Python versions or if reconfigure fails
-        pass
+# Console UTF-8 configuration is now handled globally in ci/__init__.py
 
 
 class ProcessOutputReader:
@@ -169,20 +133,18 @@ class ProcessOutputReader:
     def __init__(
         self,
         proc: subprocess.Popen[Any],
-        output_queue: "Queue[str | EndOfStream]",
-        accumulated_output: list[str],
         shutdown: threading.Event,
         output_formatter: OutputFormatter | None,
-        on_update_last_line_ts: Callable[[float], None],
+        on_output: Callable[[str | EndOfStream], None],
         on_end: Callable[[], None],
     ) -> None:
+        output_formatter = output_formatter or NullOutputFormatter()
         self._proc = proc
-        self._output_queue = output_queue
-        self._accumulated_output = accumulated_output
         self._shutdown = shutdown
         self._output_formatter = output_formatter
-        self._on_update_last_line_ts = on_update_last_line_ts
+        self._on_output = on_output
         self._on_end = on_end
+        self.last_stdout_ts: float | None = None
 
     def run(self) -> None:
         """Continuously read stdout lines and forward them until EOF or shutdown."""
@@ -191,7 +153,7 @@ class ProcessOutputReader:
 
             try:
                 for line in self._proc.stdout:
-                    self._on_update_last_line_ts(time.time())
+                    self.last_stdout_ts = time.time()
                     if self._shutdown.is_set():
                         break
 
@@ -199,31 +161,27 @@ class ProcessOutputReader:
                     if not line_stripped:
                         continue
 
-                    if self._output_formatter is not None:
-                        transformed_line = self._output_formatter.transform(
-                            line_stripped
-                        )
-                    else:
-                        transformed_line = line_stripped
+                    transformed_line = self._output_formatter.transform(line_stripped)
 
-                    self._output_queue.put(transformed_line)
-                    self._accumulated_output.append(transformed_line)
+                    self._on_output(transformed_line)
 
             except (ValueError, OSError) as e:
                 # Normal shutdown scenarios include closed file descriptors.
                 if "closed file" in str(e) or "Bad file descriptor" in str(e):
+                    warnings.warn(f"Output reader encountered closed file: {e}")
                     pass
                 else:
                     print(f"Warning: Output reader encountered error: {e}")
             finally:
                 # Signal end-of-stream to consumers
-                self._output_queue.put(EndOfStream())
+                self._on_output(EndOfStream())
         finally:
             # Cleanup stream and invoke completion callback
             if self._proc.stdout and not self._proc.stdout.closed:
                 try:
                     self._proc.stdout.close()
-                except (ValueError, OSError):
+                except (ValueError, OSError) as err:
+                    warnings.warn(f"Output reader encountered error: {err}")
                     pass
 
             # Notify parent for timing/unregistration
@@ -231,7 +189,7 @@ class ProcessOutputReader:
                 self._on_end()
             finally:
                 # Ensure a final end-of-stream marker is present
-                self._output_queue.put(EndOfStream())
+                self._on_output(EndOfStream())
 
 
 class RunningProcess:
@@ -280,7 +238,10 @@ class RunningProcess:
         self.timeout = timeout
         self.enable_stack_trace = enable_stack_trace
         self.on_complete = on_complete
-        self.output_formatter = output_formatter
+        # Always keep a non-None formatter
+        self.output_formatter = (
+            output_formatter if output_formatter is not None else NullOutputFormatter()
+        )
         self.reader_thread: threading.Thread | None = None
         self.shutdown: threading.Event = threading.Event()
         self._start_time: float | None = None
@@ -365,21 +326,20 @@ class RunningProcess:
 
         # Register with global process manager
         try:
-            from ci.util.running_process import RunningProcessManagerSingleton
+            from ci.util.running_process_manager import (
+                RunningProcessManagerSingleton,
+            )
 
             RunningProcessManagerSingleton.register(self)
         except Exception as e:
             warnings.warn(f"RunningProcessManager.register failed: {e}")
 
         # Start the output formatter if provided
-        if self.output_formatter:
-            self.output_formatter.begin()
+        # Begin formatter lifecycle
+        self.output_formatter.begin()
 
         # Prepare output reader helper
         assert self.proc is not None
-
-        def _on_update_last_line(ts: float) -> None:
-            self._time_last_stdout_line = ts
 
         def _on_reader_end() -> None:
             # Set end time when stdout pumper finishes; captures completion time of useful output
@@ -387,19 +347,27 @@ class RunningProcess:
                 self._end_time = time.time()
             # Unregister when stdout is fully drained
             try:
-                from ci.util.running_process import RunningProcessManagerSingleton
+                from ci.util.running_process_manager import (
+                    RunningProcessManagerSingleton,
+                )
 
                 RunningProcessManagerSingleton.unregister(self)
             except Exception as e:
                 warnings.warn(f"RunningProcessManager.unregister (drain) failed: {e}")
 
+        def _on_output(item: str | EndOfStream) -> None:
+            # Forward to queue and capture text lines for accumulated output
+            if isinstance(item, EndOfStream):
+                self.output_queue.put(item)
+            else:
+                self.output_queue.put(item)
+                self.accumulated_output.append(item)
+
         reader = ProcessOutputReader(
             proc=self.proc,
-            output_queue=self.output_queue,
-            accumulated_output=self.accumulated_output,
             shutdown=self.shutdown,
             output_formatter=self.output_formatter,
-            on_update_last_line_ts=_on_update_last_line,
+            on_output=_on_output,
             on_end=_on_reader_end,
         )
 
@@ -485,7 +453,9 @@ class RunningProcess:
         rc = self.proc.poll()
         if rc is not None:
             try:
-                from ci.util.running_process import RunningProcessManagerSingleton
+                from ci.util.running_process_manager import (
+                    RunningProcessManagerSingleton,
+                )
 
                 RunningProcessManagerSingleton.unregister(self)
             except Exception as e:
@@ -578,7 +548,9 @@ class RunningProcess:
 
         # Unregister from global process manager on normal completion
         try:
-            from ci.util.running_process import RunningProcessManagerSingleton
+            from ci.util.running_process_manager import (
+                RunningProcessManagerSingleton,
+            )
 
             RunningProcessManagerSingleton.unregister(self)
         except Exception as e:
@@ -632,7 +604,9 @@ class RunningProcess:
 
         # Ensure unregistration even on forced kill
         try:
-            from ci.util.running_process import RunningProcessManagerSingleton
+            from ci.util.running_process_manager import (
+                RunningProcessManagerSingleton,
+            )
 
             RunningProcessManagerSingleton.unregister(self)
         except Exception as e:
@@ -738,8 +712,7 @@ class RunningProcessManager:
             )
 
 
-# Global singleton instance for convenient access
-RunningProcessManagerSingleton = RunningProcessManager()
+# NOTE: Singleton moved to ci.util.running_process_manager for reuse
 
 
 def subprocess_run(
