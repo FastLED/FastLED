@@ -230,18 +230,11 @@ def _apply_board_specific_config(
         core_dir=str(paths.core_dir),
         packages_dir=str(paths.packages_dir),
         project_root=str(_PROJECT_ROOT),
+        build_cache_dir=str(paths.build_cache_dir),
+        extra_scripts=["post:cache_setup.scons"]
+        if cache_type != CacheType.NO_CACHE
+        else None,
     )
-
-    # Add cache setup script if cache is configured
-    if cache_type != CacheType.NO_CACHE:
-        # Add extra_scripts line to the [env:board] section
-        config_lines = config_content.split("\n")
-        for i, line in enumerate(config_lines):
-            if line.startswith("[env:"):
-                # Insert extra_scripts after the env section header
-                config_lines.insert(i + 1, "extra_scripts = post:cache_setup.scons")
-                break
-        config_content = "\n".join(config_lines)
 
     platformio_ini_path.write_text(config_content)
 
@@ -386,6 +379,11 @@ class FastLEDPaths:
     def build_dir(self) -> Path:
         """Project-local build directory for this board."""
         return self.project_root / ".build" / "pio" / self.board_name
+
+    @property
+    def build_cache_dir(self) -> Path:
+        """Project-local build cache directory for this board."""
+        return self.build_dir / "build_cache"
 
     @property
     def platform_lock_file(self) -> Path:

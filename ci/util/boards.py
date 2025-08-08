@@ -174,6 +174,8 @@ class Board:
         core_dir: str | None = None,
         packages_dir: str | None = None,
         project_root: str | None = None,
+        build_cache_dir: str | None = None,
+        extra_scripts: list[str] | None = None,
     ) -> str:
         """Return a `platformio.ini` snippet representing this board.
 
@@ -199,6 +201,8 @@ class Board:
         # Optional [platformio] section
         if include_platformio_section:
             lines.append("[platformio]")
+            if build_cache_dir:
+                lines.append(f"build_cache_dir = {build_cache_dir}")
             if core_dir:
                 lines.append(f"core_dir = {core_dir}")
             if packages_dir:
@@ -207,6 +211,8 @@ class Board:
 
         # Section header
         lines.append(f"[env:{self.board_name}]")
+        if extra_scripts:
+            lines.append(f"extra_scripts = {' '.join(extra_scripts)}")
 
         # Board identifier (skip for platforms that don't need board specification)
         if not self.no_board_spec:
