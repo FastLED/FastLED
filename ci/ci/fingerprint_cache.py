@@ -41,14 +41,16 @@ class FingerprintCache:
     2. Accurate content verification via MD5 hashing when needed
     """
 
-    def __init__(self, cache_file: Path):
+    def __init__(self, cache_file: Path, modtime_only: bool = False):
         """
         Initialize fingerprint cache.
 
         Args:
             cache_file: Path to JSON cache file
+            modtime_only: When True, disable hashing and rely solely on modtime.
         """
         self.cache_file = cache_file
+        self._modtime_only: bool = modtime_only
         self.cache = self._load_cache()
 
     def _load_cache(self) -> Dict[str, CacheEntry]:
@@ -138,6 +140,14 @@ class FingerprintCache:
             raise FileNotFoundError(f"Source file not found: {src_path}")
 
         current_modtime = os.path.getmtime(src_path)
+
+        # Optional mode: strictly use modification time only (no hashing)
+        # This is required for toolchains that invalidate PCH on any newer
+        # dependency regardless of content changes (e.g., Clang).
+        if self._modtime_only:
+            # Treat as changed only when file is newer than the reference time
+            # (keeps behavior stable when reference is an external artifact's mtime)
+            return current_modtime > previous_modtime
 
         # Layer 1: Quick modification time check
         if current_modtime == previous_modtime:

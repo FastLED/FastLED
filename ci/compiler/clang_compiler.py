@@ -619,7 +619,12 @@ class Compiler:
         # Initialize fingerprint cache for PCH optimization
         cache_dir = Path(".build") / "cache"
         cache_dir.mkdir(parents=True, exist_ok=True)
-        self._pch_cache = FingerprintCache(cache_dir / "pch_fingerprint_cache.json")
+        # For PCH validity, toolchains like Clang require strict modtime checks.
+        # Use modtime_only=True to avoid content-hash-based reuse that would
+        # conflict with Clang's mtime validation.
+        self._pch_cache = FingerprintCache(
+            cache_dir / "pch_fingerprint_cache.json", modtime_only=True
+        )
 
     def get_compiler_args(self) -> list[str]:
         """
