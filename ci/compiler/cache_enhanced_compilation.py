@@ -47,12 +47,59 @@ class CacheAwareCompiler:
                 if self.verbose:
                     print(f"[CACHE] Skipping unchanged: {file_path.name}")
                 return False
+        except KeyboardInterrupt:
+            import _thread
 
+            _thread.interrupt_main()
+            raise
         except Exception as e:
             if self.verbose:
                 print(f"[CACHE] Error checking {file_path.name}: {e}")
             self.stats["cache_misses"] += 1
             self.stats["files_compiled"] += 1
+            return True
+
+    def _headers_changed(self, baseline_time: float) -> bool:
+        """Detect if any relevant header dependency has changed since last run.
+
+        Uses the compiler's PCH dependency discovery to collect a conservative
+        set of headers that impact example compilation, then queries the
+        fingerprint cache to see if any actually changed content.
+        """
+        try:
+            # Reuse the compiler's dependency discovery (covers src/** and platforms/**)
+            dependencies: List[Path] = []
+            if hasattr(self.compiler, "_get_pch_dependencies"):
+                dependencies = self.compiler._get_pch_dependencies()  # type: ignore[attr-defined]
+            else:
+                # Fallback: hash all headers under the compiler's include path
+                include_root = Path(self.compiler.settings.include_path)
+                for pattern in ("**/*.h", "**/*.hpp"):
+                    dependencies.extend(include_root.glob(pattern))
+
+            changed_any = False
+            for dep in dependencies:
+                try:
+                    if self.cache.has_changed(dep, baseline_time):
+                        if self.verbose:
+                            print(f"[CACHE] Header changed: {dep}")
+                        changed_any = True
+                        break
+                except FileNotFoundError:
+                    # Missing dependency means we must rebuild conservatively
+                    if self.verbose:
+                        print(f"[CACHE] Header missing (forces rebuild): {dep}")
+                    changed_any = True
+                    break
+            return changed_any
+        except KeyboardInterrupt:
+            import _thread
+
+            _thread.interrupt_main()
+            raise
+        except Exception as e:
+            if self.verbose:
+                print(f"[CACHE] Header scan failed, forcing rebuild: {e}")
             return True
 
     def compile_with_cache(
@@ -71,10 +118,19 @@ class CacheAwareCompiler:
 
         start_time = time.time()
 
+        # If any header dependency changed, conservatively rebuild all example files
+        force_recompile_due_to_headers = self._headers_changed(baseline_time)
+        if force_recompile_due_to_headers and self.verbose:
+            print(
+                "[CACHE] Header dependency changes detected - forcing recompilation of example sources"
+            )
+
         # Check which files need compilation
         files_to_compile: List[Path] = []
         for ino_file in ino_files:
-            if self.should_compile(ino_file, baseline_time):
+            if force_recompile_due_to_headers or self.should_compile(
+                ino_file, baseline_time
+            ):
                 files_to_compile.append(ino_file)
 
         # Check .cpp files too
@@ -82,7 +138,9 @@ class CacheAwareCompiler:
         for ino_file in ino_files:
             cpp_files = self.compiler.find_cpp_files_for_example(ino_file)
             for cpp_file in cpp_files:
-                if self.should_compile(cpp_file, baseline_time):
+                if force_recompile_due_to_headers or self.should_compile(
+                    cpp_file, baseline_time
+                ):
                     cpp_files_to_compile.append(cpp_file)
 
         # Log cache results

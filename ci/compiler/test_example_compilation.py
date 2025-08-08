@@ -1534,11 +1534,29 @@ def link_examples_with_cache(
         # Calculate other hashes
         fastled_hash = calculate_file_hash(fastled_lib)
         linker_hash = calculate_linker_args_hash(linker_args)
+        # Include header dependency fingerprint to invalidate link cache when headers change
+        try:
+            header_hash = ""
+            if hasattr(compiler, "_get_pch_dependencies"):
+                dep_paths = compiler._get_pch_dependencies()  # type: ignore[attr-defined]
+                dep_hashes: List[str] = []
+                for p in dep_paths:
+                    dep_hashes.append(calculate_file_hash(p))
+                header_hash = hashlib.sha256(
+                    "|".join(dep_hashes).encode("utf-8")
+                ).hexdigest()
+            else:
+                header_hash = "no_header_info"
+        except KeyboardInterrupt:
+            import _thread
+
+            _thread.interrupt_main()
+            raise
+        except Exception:
+            header_hash = "header_scan_error"
 
         # Combine all components (same format as FastLEDTestCompiler)
-        combined = (
-            f"fastled:{fastled_hash}|objects:{combined_obj_hash}|flags:{linker_hash}"
-        )
+        combined = f"fastled:{fastled_hash}|objects:{combined_obj_hash}|flags:{linker_hash}|hdr:{header_hash}"
         final_hash = hashlib.sha256(combined.encode("utf-8")).hexdigest()
 
         return final_hash[
