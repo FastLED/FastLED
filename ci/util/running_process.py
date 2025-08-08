@@ -1,4 +1,5 @@
 # pyright: reportUnknownMemberType=false, reportMissingParameterType=false
+import _thread
 import os
 import queue
 import re
@@ -7,6 +8,7 @@ import sys
 import tempfile
 import threading
 import time
+import traceback
 import urllib.parse
 import warnings
 from pathlib import Path
@@ -243,11 +245,13 @@ class RunningProcess:
             output_formatter if output_formatter is not None else NullOutputFormatter()
         )
         self.reader_thread: threading.Thread | None = None
+        self.watcher_thread: threading.Thread | None = None
         self.shutdown: threading.Event = threading.Event()
         self._start_time: float | None = None
         self._end_time: float | None = None
         self._stream_finished = False
         self._time_last_stdout_line: float | None = None
+        self._termination_notified: bool = False
         if auto_run:
             self.run()
 
@@ -347,13 +351,9 @@ class RunningProcess:
                 self._end_time = time.time()
             # Unregister when stdout is fully drained
             try:
-                from ci.util.running_process_manager import (
-                    RunningProcessManagerSingleton,
-                )
-
-                RunningProcessManagerSingleton.unregister(self)
+                self._notify_terminated()
             except Exception as e:
-                warnings.warn(f"RunningProcessManager.unregister (drain) failed: {e}")
+                warnings.warn(f"RunningProcess termination notify (drain) failed: {e}")
 
         def _on_output(item: str | EndOfStream) -> None:
             # Forward to queue and capture text lines for accumulated output
@@ -374,6 +374,39 @@ class RunningProcess:
         # Start output reader thread
         self.reader_thread = threading.Thread(target=reader.run, daemon=True)
         self.reader_thread.start()
+
+        # Start watcher thread that polls for process termination every 100ms
+        def _watch_termination() -> None:
+            thread_id = threading.current_thread().ident
+            thread_name = threading.current_thread().name
+            try:
+                while not self.shutdown.is_set():
+                    # Use unified poll() so unregistration happens in one place
+                    rc = self.poll()
+                    if rc is not None:
+                        break
+                    time.sleep(0.1)
+            except KeyboardInterrupt:
+                print(f"Thread {thread_id} ({thread_name}) caught KeyboardInterrupt")
+                print(f"Stack trace for thread {thread_id}:")
+                traceback.print_exc()
+                _thread.interrupt_main()
+                raise
+            except Exception as e:
+                # Surface unexpected errors and keep behavior consistent
+                print(f"Watcher thread error in {thread_name}: {e}")
+                traceback.print_exc()
+
+        watcher_name = "RPWatcher"
+        try:
+            if self.proc is not None and self.proc.pid is not None:
+                watcher_name = f"RPWatcher-{self.proc.pid}"
+        except Exception:
+            pass
+        self.watcher_thread = threading.Thread(
+            target=_watch_termination, name=watcher_name, daemon=True
+        )
+        self.watcher_thread.start()
 
     def get_next_line(self, timeout: float | None = None) -> str | EndOfStream:
         """
@@ -452,14 +485,11 @@ class RunningProcess:
             return None
         rc = self.proc.poll()
         if rc is not None:
+            # Ensure unregistration only happens once
             try:
-                from ci.util.running_process_manager import (
-                    RunningProcessManagerSingleton,
-                )
-
-                RunningProcessManagerSingleton.unregister(self)
+                self._notify_terminated()
             except Exception as e:
-                warnings.warn(f"RunningProcessManager.unregister (poll) failed: {e}")
+                warnings.warn(f"RunningProcess termination notify (poll) failed: {e}")
         return rc
 
     @property
@@ -479,7 +509,7 @@ class RunningProcess:
 
         # Use a timeout to prevent hanging
         start_time = time.time()
-        while self.proc.poll() is None:
+        while self.poll() is None:
             if time.time() - start_time > self.timeout:
                 # Process is taking too long, dump stack trace if enabled
                 if self.enable_stack_trace:
@@ -548,13 +578,9 @@ class RunningProcess:
 
         # Unregister from global process manager on normal completion
         try:
-            from ci.util.running_process_manager import (
-                RunningProcessManagerSingleton,
-            )
-
-            RunningProcessManagerSingleton.unregister(self)
+            self._notify_terminated()
         except Exception as e:
-            warnings.warn(f"RunningProcessManager.unregister (wait) failed: {e}")
+            warnings.warn(f"RunningProcess termination notify (wait) failed: {e}")
 
         return rtn
 
@@ -586,6 +612,11 @@ class RunningProcess:
             print(f"Warning: Failed to kill process tree for {self.proc.pid}: {e}")
             try:
                 self.proc.kill()
+            except KeyboardInterrupt:
+                print(f"Keyboard interrupt detected, interrupting main thread")
+                _thread.interrupt_main()
+                self.proc.kill()
+                raise
             except Exception:
                 pass  # Process might already be dead
 
@@ -611,6 +642,28 @@ class RunningProcess:
             RunningProcessManagerSingleton.unregister(self)
         except Exception as e:
             warnings.warn(f"RunningProcessManager.unregister (kill) failed: {e}")
+
+    def _notify_terminated(self) -> None:
+        """Idempotent notification that the process has terminated.
+
+        Ensures unregister is called only once across multiple termination paths
+        (poll, wait, stdout drain, watcher thread) and records end time when
+        available.
+        """
+        if self._termination_notified:
+            return
+        self._termination_notified = True
+
+        # Record end time only if not already set
+        if self._end_time is None:
+            self._end_time = time.time()
+
+        try:
+            from ci.util.running_process_manager import RunningProcessManagerSingleton
+
+            RunningProcessManagerSingleton.unregister(self)
+        except Exception as e:
+            warnings.warn(f"RunningProcessManager.unregister notify failed: {e}")
 
     def terminate(self) -> None:
         """
