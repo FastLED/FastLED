@@ -27,100 +27,6 @@ class EndOfStream(Exception):
 from ci.util.output_formatter import NullOutputFormatter, OutputFormatter
 
 
-def normalize_error_warning_paths(line: str) -> str:
-    r"""
-    Normalize compiler output paths to use consistent separators.
-
-    CONSTRAINT: Only process lines containing "error:" or "warning:"
-    (Ignore -I include paths and other compiler flags)
-
-    Fixes:
-    - Mixed path separators (/ and \) in error/warning messages
-    - URL encoding (%3A -> :) in error/warning messages
-    - Relative path issues with .. in error/warning messages
-
-    Args:
-        line (str): Raw compiler output line
-
-    Returns:
-        str: Normalized line with fixed paths (only if it contains error/warning)
-    """
-    # Only process error and warning lines - ignore build command lines
-    if not any(keyword in line.lower() for keyword in ["error:", "warning:", "note:"]):
-        return line
-
-    try:
-        # Step 1: Decode URL encoding (e.g., %3A -> :)
-        decoded_line = urllib.parse.unquote(line)
-
-        # Step 2: Fix mixed path separators
-        normalized_line = fix_path_separators(decoded_line)
-
-        # Step 3: Resolve relative paths where beneficial
-        resolved_line = resolve_relative_paths(normalized_line)
-
-        return resolved_line
-
-    except Exception:
-        # If normalization fails for any reason, return original line
-        # This ensures we never break the build output
-        return line
-
-
-def fix_path_separators(text: str) -> str:
-    """
-    Convert paths to use native OS separators consistently.
-
-    This function identifies path-like strings and normalizes their separators
-    while being careful not to modify non-path content.
-    """
-    # Pattern to match path-like strings (drive letters, directories, files)
-    # Matches: C:\path\to\file, /path/to/file, .\relative\path, ../relative/path
-    path_pattern = (
-        r'(?:[A-Za-z]:[\\\/]|[.]{0,2}[\\\/])[^\s:;"\'<>|*?]*[\\\/][^\s:;"\'<>|*?]*'
-    )
-
-    def normalize_path_match(match: Match[str]) -> str:
-        path_str: str = match.group(0)
-        try:
-            # Use pathlib to normalize the path separators for the current OS
-            normalized: str = str(
-                Path(path_str).as_posix() if os.name != "nt" else Path(path_str)
-            )
-            return normalized
-        except (ValueError, OSError):
-            # If pathlib can't handle it, do simple separator replacement
-            if os.name == "nt":
-                return path_str.replace("/", "\\")
-            else:
-                return path_str.replace("\\", "/")
-
-    return re.sub(path_pattern, normalize_path_match, text)
-
-
-def resolve_relative_paths(text: str) -> str:
-    """
-    Resolve .. and other relative path components where beneficial.
-
-    This is conservative and only resolves paths that clearly benefit from it.
-    """
-    # Pattern to match paths with .. that can be resolved
-    # Example: /some/path/../other -> /some/other
-    relative_pattern = r'([A-Za-z]:[\\\/](?:[^\\\/\s:;"\'<>|*?]+[\\\/])*)[^\\\/\s:;"\'<>|*?]+[\\\/]\.\.[\\\/]([^\\\/\s:;"\'<>|*?]+(?:[\\\/][^\\\/\s:;"\'<>|*?]+)*)'
-
-    def resolve_path_match(match: Match[str]) -> str:
-        try:
-            full_path = match.group(0)
-            # Use pathlib to resolve the path
-            resolved = str(Path(full_path).resolve())
-            return resolved
-        except (ValueError, OSError):
-            # If resolution fails, return original
-            return match.group(0)
-
-    return re.sub(relative_pattern, resolve_path_match, text)
-
-
 # Console UTF-8 configuration is now handled globally in ci/__init__.py
 
 
@@ -151,6 +57,12 @@ class ProcessOutputReader:
     def run(self) -> None:
         """Continuously read stdout lines and forward them until EOF or shutdown."""
         try:
+            # Begin formatter lifecycle within the reader context
+            try:
+                self._output_formatter.begin()
+            except Exception as e:
+                warnings.warn(f"Output formatter begin() failed: {e}")
+
             assert self._proc.stdout is not None
 
             try:
@@ -181,6 +93,8 @@ class ProcessOutputReader:
                     pass
                 # Propagate to main thread and re-raise
                 _thread.interrupt_main()
+                # EOF
+                self._on_output(EndOfStream())
                 raise
 
             except (ValueError, OSError) as e:
@@ -206,6 +120,11 @@ class ProcessOutputReader:
             try:
                 self._on_end()
             finally:
+                # End formatter lifecycle within the reader context
+                try:
+                    self._output_formatter.end()
+                except Exception as e:
+                    warnings.warn(f"Output formatter end() failed: {e}")
                 # Ensure a final end-of-stream marker is present
                 self._on_output(EndOfStream())
 
@@ -353,9 +272,7 @@ class RunningProcess:
         except Exception as e:
             warnings.warn(f"RunningProcessManager.register failed: {e}")
 
-        # Start the output formatter if provided
-        # Begin formatter lifecycle
-        self.output_formatter.begin()
+        # Output formatter lifecycle is managed by ProcessOutputReader
 
         # Prepare output reader helper
         assert self.proc is not None
@@ -586,9 +503,7 @@ class RunningProcess:
             except Exception as e:
                 print(f"Warning: on_complete callback failed: {e}")
 
-        # End the output formatter if provided
-        if self.output_formatter:
-            self.output_formatter.end()
+        # Output formatter end is handled by ProcessOutputReader
 
         # Unregister from global process manager on normal completion
         try:
