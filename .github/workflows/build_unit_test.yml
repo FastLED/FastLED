@@ -48,11 +48,12 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Setup uv
-        uses: astral-sh/setup-uv@v5
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
         with:
           enable-cache: true
-          cache-dependency-glob: "pyproject.toml"
+          cache-dependency-glob: "**/pyproject.toml"
+          version: "0.8.0" # 0.8.8 has problems with deployment on linux.
       
 
       - name: Install
