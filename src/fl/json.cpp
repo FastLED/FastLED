@@ -36,49 +36,12 @@ namespace fl {
 
 
 
-// Cache for float representation checks
-struct FloatValidationCache {
-    static constexpr size_t CACHE_SIZE = 128;
-    struct CacheEntry {
-        double value;
-        bool canRepresent;
-        bool valid;
-    };
-    
-    static ThreadLocal<CacheEntry[CACHE_SIZE]> cache;
-    static ThreadLocal<size_t> cacheIndex;
-    
-    static bool lookup(double value, bool& result) {
-        auto& entries = cache.access();
-        for (size_t i = 0; i < CACHE_SIZE; ++i) {
-            if (entries[i].valid && entries[i].value == value) {
-                result = entries[i].canRepresent;
-                return true;
-            }
-        }
-        return false;
-    }
-    
-    static void store(double value, bool canRepresent) {
-        auto& entries = cache.access();
-        auto& index = cacheIndex.access();
-        entries[index] = {value, canRepresent, true};
-        index = (index + 1) % CACHE_SIZE;
-    }
-};
-
-ThreadLocal<FloatValidationCache::CacheEntry[FloatValidationCache::CACHE_SIZE]> FloatValidationCache::cache;
-ThreadLocal<size_t> FloatValidationCache::cacheIndex;
-
 // Helper function to check if a double can be reasonably represented as a float
 // Used for debug logging - may appear unused in release builds
 FL_DISABLE_WARNING_PUSH
 FL_DISABLE_WARNING(unused-function)
 static bool canBeRepresentedAsFloat(double value) {
-    bool result;
-    if (FloatValidationCache::lookup(value, result)) {
-        return result;
-    }
+
     
     auto isnan = [](double value) -> bool {
         return value != value;
@@ -86,7 +49,6 @@ static bool canBeRepresentedAsFloat(double value) {
     
     // Check for special values
     if (isnan(value)) {
-        FloatValidationCache::store(value, true);
         return true; // These can be represented as float
     }
     
@@ -94,14 +56,12 @@ static bool canBeRepresentedAsFloat(double value) {
     // Reject values that are clearly beyond float precision (beyond 2^24 for integers)
     // or outside the float range
     if (fl::fl_abs(value) > 16777216.0) { // 2^24 - beyond which floats lose integer precision
-        FloatValidationCache::store(value, false);
         return false;
     }
     
     // For values within reasonable range, allow conversion even with minor precision loss
     // This handles cases like 300000.14159 which should be convertible to float
     // even though it loses some precision
-    FloatValidationCache::store(value, true);
     return true;
 }
 FL_DISABLE_WARNING_POP    
