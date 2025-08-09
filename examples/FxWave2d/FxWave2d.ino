@@ -21,6 +21,7 @@ which are blended together to create complex visual effects.
 
 #include <Arduino.h>      // Core Arduino functionality
 #include <FastLED.h>      // Main FastLED library for controlling LEDs
+#include "fl/sketch_macros.h"
 
 #if !SKETCH_HAS_LOTS_OF_MEMORY
 // Platform does not have enough memory

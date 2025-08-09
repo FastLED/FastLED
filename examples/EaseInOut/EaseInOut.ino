@@ -5,5 +5,5 @@
 void setup() {}
 void loop() {}
 #else
-#include "EasyInOut.h"
+#include "EaseInOut.h"
 #endif

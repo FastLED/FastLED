@@ -21,6 +21,10 @@ from ci.util.test_exceptions import (
 )
 
 
+_HERE = Path(__file__).parent
+_PROJECT_ROOT = _HERE.parent
+
+
 @dataclass
 class TestResult:
     """Result of a test execution"""
@@ -41,14 +45,14 @@ def _is_test_executable(f: Path) -> bool:
 def _get_test_patterns() -> List[str]:
     """Get test patterns based on platform"""
     # On Windows, check both .exe and no extension (Clang generates without .exe)
-    return ["test_*.exe", "test_*"] if sys.platform == "win32" else ["test_*"]
+    return ["test_*.exe"] if sys.platform == "win32" else ["test_*"]
 
 
 def discover_tests(build_dir: Path, specific_test: Optional[str] = None) -> List[Path]:
     """Find test executables in the build directory"""
     # Check test directory
     possible_test_dirs = [
-        Path("tests") / ".build" / "bin",  # Python build system
+        _PROJECT_ROOT / "tests" / "bin",  # Python build system
     ]
 
     test_dir = None

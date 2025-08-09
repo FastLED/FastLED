@@ -21,6 +21,8 @@ which are blended together to create complex visual effects.
 #include <Arduino.h>      // Core Arduino functionality
 #include <FastLED.h>      // Main FastLED library for controlling LEDs
 
+#if SKETCH_HAS_LOTS_OF_MEMORY
+
 #include "fl/math_macros.h"  // Math helper functions and macros
 #include "fl/time_alpha.h"   // Time-based alpha/transition effects
 #include "fl/ui.h"           // UI components for the FastLED web compiler
@@ -396,3 +398,6 @@ void wavefx_loop() {
     // Send the color data to the actual LEDs
     FastLED.show();
 }
+
+
+#endif  // SKETCH_HAS_LOTS_OF_MEMORY
