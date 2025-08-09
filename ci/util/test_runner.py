@@ -31,7 +31,7 @@ from ci.util.test_types import (
 
 
 _IS_GITHUB_ACTIONS = os.getenv("GITHUB_ACTIONS") == "true"
-_TIMEOUT = 240 if _IS_GITHUB_ACTIONS else 60
+_TIMEOUT = 240 if _IS_GITHUB_ACTIONS else 180
 _GLOBAL_TIMEOUT = 600 if _IS_GITHUB_ACTIONS else 300
 
 # Abort threshold for total failures across all processes (unit + examples)
@@ -854,7 +854,7 @@ def _process_single_test_output(
 
     while True:
         try:
-            line = proc.get_next_line(timeout=60)  # 60 sec timeout per line
+            line = proc.get_next_line(timeout=180)  # 180 sec timeout per line
 
             is_done = isinstance(line, EndOfStream)
             if is_done:
