@@ -532,7 +532,13 @@ ATTINY88 = Board(
 
 # ATtiny1604
 ATTINY1604 = Board(
-    board_name="ATtiny1604",
+    board_name="attiny1604",
+    platform="atmelmegaavr",
+)
+
+# attiny4313
+ATTINY4313 = Board(
+    board_name="attiny4313",
     platform="atmelmegaavr",
 )
 
