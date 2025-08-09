@@ -33,6 +33,46 @@ ESP32 family support with multiple clockless backends.
 Notes:
 - Prefer RMT on modern IDF; I2S for high strip counts with uniform timings; SPI path only for WS2812.
 
+## I2S support by board (parallel output)
+
+FastLED supports the parallel I2S clockless driver on the following ESP32 targets in this tree:
+
+- ESP32 (classic, e.g., "ESP32Dev")
+  - Enable via build flags (PlatformIO `platformio.ini`):
+    ```ini
+    [env:esp32dev]
+    platform = espressif32
+    board = esp32dev
+    framework = arduino
+    build_flags =
+      -D FASTLED_ESP32_I2S=1
+      ; Optional tuning:
+      ; -D FASTLED_ESP32_I2S_NUM_DMA_BUFFERS=4   ; 2–16; 4 often reduces Wi‑Fi flicker
+      ; -D I2S_DEVICE=0                          ; default 0
+    ```
+  - Driver files: `clockless_i2s_esp32.h`, `i2s/i2s_esp32dev.*`
+  - Constraints: all lanes use identical timing (same LED chipset); up to 24 lanes.
+
+- ESP32-S3
+  - Enable via build flags (PlatformIO `platformio.ini`):
+    ```ini
+    [env:esp32s3]
+    platform = espressif32
+    board = esp32-s3-devkitc-1
+    framework = arduino
+    build_flags =
+      -D FASTLED_ESP32_I2S=1
+      ; Optional:
+      ; -D FASTLED_ESP32_I2S_NUM_DMA_BUFFERS=4
+    ```
+  - Driver files: `clockless_i2s_esp32s3.*` (wraps a dedicated S3 I2S clockless implementation)
+  - Notes: requires a compatible Arduino-ESP32 core/IDF; see version checks in `clockless_i2s_esp32s3.h`.
+
+Additional I2S defines and guidance:
+- `FASTLED_I2S_MAX_CONTROLLERS` (default 24): maximum parallel lanes
+- `FASTLED_ESP32_I2S_NUM_DMA_BUFFERS` (default 2): set to 4 to reduce flicker when ISRs (e.g., Wi‑Fi) are active
+- All I2S lanes must share the same chipset/timings; choose RMT instead when per‑lane timing differs
+
 ## Optional feature defines
 
 - **`FASTLED_USE_PROGMEM`**: Control PROGMEM usage on ESP32. Default `0` in `led_sysdefs_esp32.h`.
@@ -79,3 +119,62 @@ Notes:
   - **`F_CPU_RMT_CLOCK_MANUALLY_DEFINED`**: If defined, sets `F_CPU_RMT` explicitly for SoCs where APB clock detection is problematic (e.g., some C6/H2 variants). Otherwise `F_CPU_RMT` derives from `APB_CLK_FREQ`.
 
 Unless otherwise noted, all defines should be placed before including `FastLED.h` in your sketch.
+
+## RMT backends (IDF4 vs IDF5) and how to select
+
+Two RMT implementations exist and are selected by IDF version unless you override it:
+
+- RMT4 (ESP‑IDF v4): legacy FastLED RMT driver in `rmt_4/`
+- RMT5 (ESP‑IDF v5): uses the ESP‑IDF v5 LED Strip driver via `IRmtStrip` in `rmt_5/`
+
+Selection rules:
+- Default: `ESP_IDF_VERSION` decides. On IDF < 5, RMT5 is disabled; on IDF ≥ 5, RMT5 is enabled.
+- To force RMT4 on IDF5, set this build define (PlatformIO `platformio.ini`):
+  ```ini
+  build_flags =
+    -D FASTLED_RMT5=0
+  ```
+  This ensures only one RMT implementation is compiled. Do not link/use the IDF v5 `led_strip` driver in the same binary when forcing RMT4.
+
+Important compatibility note:
+- The RMT4 and RMT5 drivers cannot co‑exist in the same sketch/binary. Mixing both (e.g., using IDF v5 `led_strip` alongside FastLED’s RMT4) will trigger an Espressif runtime abort at startup.
+
+Behavioral differences and practical guidance:
+- RMT4 (IDF4)
+  - Tends to be more resistant to visible flicker during heavy Wi‑Fi/BLE activity, especially when combined with the IDF4 builtin driver path:
+    ```c++
+    #define FASTLED_RMT_BUILTIN_DRIVER 1  // IDF4 only
+    ```
+  - Uses more RAM when the builtin driver is enabled because full symbol buffers are staged.
+
+- RMT5 (IDF5)
+  - Asynchronous, DMA‑backed LED driver. Your sketch can continue running while a frame is transmitted.
+  - Recommended on modern IDF when you want concurrent work during frame output.
+
+- I2S (parallel)
+  - Also DMA‑driven; while frame data is being transferred to the peripheral, your loop can continue doing work. Use more DMA buffers (`FASTLED_ESP32_I2S_NUM_DMA_BUFFERS 4`) to improve resilience under interrupt load.
+
+Quick PlatformIO examples
+
+- Force RMT4 on IDF5 (legacy path) and, when using IDF4, enable builtin RMT driver for flicker resistance:
+  ```ini
+  [env:esp32dev_rmt4]
+  platform = espressif32
+  board = esp32dev
+  framework = arduino
+  build_flags =
+    -D FASTLED_RMT5=0
+    ; On IDF4 only, you may also add:
+    ; -D FASTLED_RMT_BUILTIN_DRIVER=1
+  ```
+
+- Enable I2S on ESP32Dev or ESP32‑S3 with extra DMA buffers:
+  ```ini
+  [env:esp32dev_i2s]
+  platform = espressif32
+  board = esp32dev
+  framework = arduino
+  build_flags =
+    -D FASTLED_ESP32_I2S=1
+    -D FASTLED_ESP32_I2S_NUM_DMA_BUFFERS=4
+  ```
