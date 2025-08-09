@@ -19,7 +19,7 @@
 CRGB leds[NUM_LEDS];
 
 void setup() { 
-    Serial.begin(9600);
+    //Serial.begin(9600);
     //Serial.println("BLINK setup starting");
     
     // Uncomment/edit one of the following lines for your leds arrangement.
@@ -69,7 +69,7 @@ void setup() {
 }
 
 void loop() { 
-  Serial.println("BLINK");
+  //Serial.println("BLINK");
   
   // Turn the LED on, then pause
   leds[0] = CRGB::Red;
