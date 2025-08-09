@@ -425,9 +425,10 @@ def create_unit_test_process(
     both_cmds.extend(compile_cmd)
     both_cmds.extend(["&&"])
     both_cmds.extend(test_cmd)
+    cmd_str = subprocess.list2cmdline(both_cmds)
 
     return RunningProcess(
-        both_cmds,
+        cmd_str,
         enable_stack_trace=enable_stack_trace,
         timeout=_TIMEOUT,  # 2 minutes timeout
         auto_run=True,
