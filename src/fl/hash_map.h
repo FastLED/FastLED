@@ -400,7 +400,7 @@ class FL_ALIGN HashMap {
 
 
   private:
-    static constexpr fl::size npos = fl::size(-1);
+    inline static const fl::size npos = static_cast<fl::size>(-1);
 
     // Helper methods to check entry state
     bool is_occupied(fl::size idx) const { return _occupied.test(idx); }
