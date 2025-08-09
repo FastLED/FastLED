@@ -76,8 +76,8 @@ SuperSample getSuperSample() {
 }
 
 void triggerRipple(WaveSimulation2D &waveSim) {
-    int x = random() % WIDTH;
-    int y = random() % HEIGHT;
+    int x = random(WIDTH);
+    int y = random(HEIGHT);
     waveSim.setf(x, y, 1);
 }
 

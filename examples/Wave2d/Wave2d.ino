@@ -5,7 +5,6 @@
 #include "Wave2d.h"
 
 #else
-void setup() {}
-void loop() {}
+#include "platforms/sketch_fake.hpp"
 
 #endif  // SKETCH_HAS_LOTS_OF_MEMORY

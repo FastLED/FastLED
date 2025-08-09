@@ -1,13 +1,25 @@
-
-// This is an prototype example for the ObjectFLED library for massive pins on
-// teensy40/41.
+/// BasicTest example to demonstrate massive parallel output with FastLED using
+/// ObjectFLED for Teensy 4.0/4.1.
+///
+/// This mode will support upto 42 parallel strips of WS2812 LEDS! ~7x that of OctoWS2811!
+///
+/// The theoritical limit of Teensy 4.0, if frames per second is not a concern, is
+/// more than 200k pixels. However, realistically, to run 42 strips at 550 pixels
+/// each at 60fps, is 23k pixels.
+///
+/// @author Kurt Funderburg
+/// @reddit: reddit.com/u/Tiny_Structure_7
+/// The FastLED code was written by Zach Vorhies
 
 #if !defined(__IMXRT1062__) // Teensy 4.0/4.1 only.
 #include "platforms/sketch_fake.hpp"
 #else
 
+// As if FastLED 3.9.12, this is no longer needed for Teensy 4.0/4.1.
 #define FASTLED_USES_OBJECTFLED
 
+// Optional define to override the latch delay (microseconds)
+// #define FASTLED_OBJECTFLED_LATCH_DELAY 75
 #include "FastLED.h"
 #include "fl/warn.h"
 
@@ -22,8 +34,8 @@ using namespace fl;
 CRGB leds1[NUM_LEDS1];
 CRGB leds2[NUM_LEDS2];
 
-void wait_for_serial() {
-    uint32_t end_timeout = millis() + 3000;
+void wait_for_serial(uint32_t timeout = 3000) {
+    uint32_t end_timeout = millis();
     while (!Serial && end_timeout > millis()) {}
 }
 
@@ -38,17 +50,9 @@ void print_startup_info() {
         tempmonGetTemp() * 9.0 / 5.0 + 32, 800000 * 1.6 / 1000000.0);
 }
 
-void dump_last_crash() {
-  if (CrashReport) {
-    Serial.println("CrashReport:");
-    Serial.println(CrashReport);
-  }
-}
-
 void setup() {
     Serial.begin(115200);
-    wait_for_serial();
-    dump_last_crash();
+    wait_for_serial(3000);
     CLEDController& c1 = FastLED.addLeds<WS2812, PIN_FIRST, GRB>(leds1, NUM_LEDS1);
     CLEDController& c2 = FastLED.addLeds<WS2812, PIN_SECOND, GRB>(leds2, NUM_LEDS2);
     if (IS_RGBW) {

@@ -13,11 +13,7 @@
 #endif  // ESP32
 
 #if IS_ESP32_S3
-
 #include "Esp32S3I2SDemo.h"
-
 #else
-void setup() {}
-void loop() {}
-
+#include "platforms/sketch_fake.hpp"
 #endif
