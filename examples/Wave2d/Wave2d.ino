@@ -2,7 +2,7 @@
 
 #if SKETCH_HAS_LOTS_OF_MEMORY
 
-#include "wave2d.h"
+#include "Wave2d.h"
 
 #else
 void setup() {}
