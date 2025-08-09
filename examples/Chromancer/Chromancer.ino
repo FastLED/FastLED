@@ -53,7 +53,6 @@ void loop() {
 
 #include "./screenmap.json.h"
 #include "./mapping.h"
-#include "./net.h"
 #include "./ripple.h"
 #include "./detail.h"
 
@@ -249,16 +248,12 @@ void setup() {
     FastLED.addLeds<WS2812, 4>(blue_leds, lengths[BlueStrip]).setScreenMap(blue);
 
     FastLED.show();
-    net_init();
 }
 
 
 void loop() {
     unsigned long benchmark = millis();
     FL_UNUSED(benchmark);
-    net_loop();
-
-
 
     // Fade all dots to create trails
     for (int strip = 0; strip < 40; strip++) {
