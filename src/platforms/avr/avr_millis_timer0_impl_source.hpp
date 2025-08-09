@@ -32,7 +32,13 @@
 
 #define ABS(x) ((x) < 0 ? -(x) : (x))
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 volatile unsigned long timer_millis = 0;
+#ifdef __cplusplus
+}
+#endif
 
 ISR(TCA0_OVF_vect)
 {

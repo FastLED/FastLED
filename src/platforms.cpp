@@ -8,17 +8,19 @@
 // The variable is already defined in avr_millis_timer_null_counter.hpp when needed,
 // so redefining it here caused multiple-definition linkage errors.
 
-// Fix for ATtiny1604 - provide weak timer_millis symbol when building normally.
-// When compiling using FASTLED_ALL_SRC, avr_millis_timer_null_counter.hpp already
-// provides this symbol, so we skip the definition here to avoid a duplicate.
-#if defined(__AVR_ATtiny1604__)
-#ifdef __cplusplus
+// Provide a single consolidated weak timer_millis symbol for AVR tiny/x-y parts
+// whose cores do not export it, satisfying MS_COUNTER binding in led_sysdefs_avr.h.
+// This complements avr_millis_timer_null_counter.hpp when that TU is not built.
+#if defined(__AVR__)
+#  if defined(__AVR_ATtiny1604__) || defined(ARDUINO_attinyxy6) || defined(__AVR_ATtinyxy6__) || defined(__AVR_ATtiny1616__)
+#    ifdef __cplusplus
 extern "C" {
-#endif
+#    endif
 __attribute__((weak)) volatile unsigned long timer_millis = 0;
-#ifdef __cplusplus
+#    ifdef __cplusplus
 }
-#endif
+#    endif
+#  endif
 #endif
 
 // Interrupt handlers cannot be defined in the header.
