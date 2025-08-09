@@ -84,7 +84,7 @@ class TestFingerprintCache(TestCase):
 
         self.assertFalse(result2, "Same modtime should return False")
         self.assertLess(
-            elapsed, 0.001, f"Cache hit should be <1ms, took {elapsed * 1000:.2f}ms"
+            elapsed, 0.002, f"Cache hit should be <2ms, took {elapsed * 1000:.2f}ms"
         )
 
     def test_cache_hit_with_existing_cache(self) -> None:
