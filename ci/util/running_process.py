@@ -245,7 +245,7 @@ class RunningProcess:
         check: bool = False,
         auto_run: bool = True,
         shell: bool | None = None,
-        timeout: int = 240,  # 4 minutes.
+        timeout: int | None = None,  # None means no global timeout
         enable_stack_trace: bool = False,  # Enable stack trace dumping on timeout
         on_complete: Callable[[], None]
         | None = None,  # Callback to execute when process completes
@@ -259,7 +259,7 @@ class RunningProcess:
             cwd (Path | None): The working directory to execute the command in.
             check (bool): If True, raise an exception if the command returns a non-zero exit code.
             auto_run (bool): If True, automatically run the command when the instance is created.
-            timeout (int): Timeout in seconds for process execution. Default 30 seconds.
+            timeout (int | None): Timeout in seconds for process execution. None disables the global timeout.
             enable_stack_trace (bool): If True, dump stack trace when process times out.
             on_complete (Callable[[], None] | None): Callback function to execute when process completes.
             output_formatter (OutputFormatter | None): Optional formatter for processing output lines.
@@ -563,7 +563,7 @@ class RunningProcess:
         start_time = time.time()
         while self.poll() is None:
             cmd_str = self.get_command_str()
-            if time.time() - start_time > self.timeout:
+            if self.timeout is not None and (time.time() - start_time) > self.timeout:
                 # Process is taking too long, dump stack trace if enabled
                 if self.enable_stack_trace:
                     print(
