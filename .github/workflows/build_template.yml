@@ -98,6 +98,17 @@ jobs:
           ./compile --no-interactive  ${{ inputs.args }} | tee build.log
         shell: bash
 
+
+      - name: Failure log summary (last 100 lines)
+        if: failure()
+        continue-on-error: true
+        run: |
+          echo "############################################"
+          echo "Last 100 lines of build.log (most recent output)"
+          echo "############################################"
+          tail -n 100 build.log || true
+        shell: bash
+
       - name: Find platformio.ini file and print it out
         if: always()
         continue-on-error: true
@@ -187,6 +198,7 @@ jobs:
         with:
           name: build-log-${{ steps.generate_id.outputs.timestamp }}-${{ github.sha }}-${{ steps.generate_id.outputs.random_hex }}
           path: build.log
+
 
       - name: Check build status
         if: failure()
