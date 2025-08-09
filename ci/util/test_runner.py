@@ -634,12 +634,31 @@ def _get_friendly_test_name(command: str | list[str]) -> str:
         command = " ".join(command)
 
     # Simplify common command patterns to friendly names
-    if "no_using_namespace_fl_in_headers.py" in command:
-        return "namespace_check"
-    elif "cpp_test_run" in command and "ci.run_tests" in command:
+    if "cpp_test_run" in command and "ci.run_tests" in command:
         return "unit_tests"
     elif "test_example_compilation.py" in command:
-        return "example_compilation"
+        # Show script name plus example targets, e.g. "test_example_compilation.py Luminova"
+        try:
+            import os
+
+            tokens = command.split()
+            # Find the script token and collect following non-flag args as examples
+            for i, tok in enumerate(tokens):
+                normalized = tok.strip('"')
+                if normalized.endswith("test_example_compilation.py"):
+                    script_name = os.path.basename(normalized)
+                    example_parts: list[str] = []
+                    for t in tokens[i + 1 :]:
+                        if t.startswith("-"):
+                            break
+                        example_parts.append(t.strip('"'))
+                    if example_parts:
+                        return f"{script_name} {' '.join(example_parts)}"
+                    return script_name
+        except Exception:
+            # Fall back to generic extraction on any unexpected parsing issue
+            pass
+        return _extract_test_name(command)
     elif "pytest" in command and "ci/tests" in command:
         return "python_tests"
     elif "pytest" in command and "ci/test_integration" in command:
@@ -1399,7 +1418,7 @@ def _run_processes_parallel(
                         duration = 0.0
 
                     timing = ProcessTiming(
-                        name=_extract_test_name(proc.command),
+                        name=_get_friendly_test_name(proc.command),
                         command=subprocess.list2cmdline(proc.command),
                         duration=duration,
                     )
