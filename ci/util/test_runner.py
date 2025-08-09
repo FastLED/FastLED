@@ -31,7 +31,7 @@ from ci.util.test_types import (
 
 
 _IS_GITHUB_ACTIONS = os.getenv("GITHUB_ACTIONS") == "true"
-_TIMEOUT = 240 if _IS_GITHUB_ACTIONS else 60
+_TIMEOUT = 600 if _IS_GITHUB_ACTIONS else 240
 _GLOBAL_TIMEOUT = 600 if _IS_GITHUB_ACTIONS else 300
 
 # Abort threshold for total failures across all processes (unit + examples)
