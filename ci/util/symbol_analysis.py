@@ -624,20 +624,14 @@ def generate_report(
 def find_board_build_info(board_name: Optional[str] = None) -> Tuple[Path, str]:
     """Find build info for a specific board or detect available boards"""
     # Detect build directory
-    possible_build_dirs = [
-        Path("../../.build"),
-        Path("../.build"),
-        Path(".build"),
-        Path("../../build"),
-        Path("../build"),
-        Path("build"),
-    ]
-
-    build_dir = None
-    for build_path in possible_build_dirs:
-        if build_path.exists():
-            build_dir = build_path
+    current = Path.cwd()
+    build_dir: Optional[Path] = None
+    while current != current.parent:
+        candidate = current / ".build"
+        if candidate.exists():
+            build_dir = candidate
             break
+        current = current.parent
 
     if not build_dir:
         print("Error: Could not find build directory (.build)")
@@ -645,20 +639,37 @@ def find_board_build_info(board_name: Optional[str] = None) -> Tuple[Path, str]:
 
     # If specific board requested, look for it
     if board_name:
+        # 1) Direct board directory: .build/<board>/build_info.json
         board_dir = build_dir / board_name
         if board_dir.exists() and (board_dir / "build_info.json").exists():
             return board_dir / "build_info.json", board_name
-        else:
-            print(f"Error: Board '{board_name}' not found or missing build_info.json")
-            sys.exit(1)
+
+        # 2) PlatformIO nested directory: .build/pio/<board>/build_info.json
+        pio_board_dir = build_dir / "pio" / board_name
+        if pio_board_dir.exists() and (pio_board_dir / "build_info.json").exists():
+            return pio_board_dir / "build_info.json", board_name
+
+        print(f"Error: Board '{board_name}' not found or missing build_info.json")
+        sys.exit(1)
 
     # Otherwise, find any available board
     available_boards: List[Tuple[Path, str]] = []
+
+    # 1) Direct children of .build
     for item in build_dir.iterdir():
         if item.is_dir():
             build_info_file = item / "build_info.json"
             if build_info_file.exists():
                 available_boards.append((build_info_file, item.name))
+
+    # 2) Nested PlatformIO structure .build/pio/*
+    pio_dir = build_dir / "pio"
+    if pio_dir.exists() and pio_dir.is_dir():
+        for item in pio_dir.iterdir():
+            if item.is_dir():
+                build_info_file = item / "build_info.json"
+                if build_info_file.exists():
+                    available_boards.append((build_info_file, item.name))
 
     if not available_boards:
         print(f"Error: No boards with build_info.json found in {build_dir}")
