@@ -11,6 +11,7 @@ import warnings
 from pathlib import Path
 from queue import Queue
 from typing import Any, Callable, ContextManager, Iterator
+import shlex
 
 
 class EndOfStream(Exception):
@@ -265,7 +266,14 @@ class RunningProcess:
             shell (bool | None): If None, infer from command type.
         """
         if shell is None:
-            shell = isinstance(command, list)
+            # Default: use shell only when given a string, or when a list includes shell metachars
+            if isinstance(command, str):
+                shell = True
+            elif isinstance(command, list):
+                shell_meta = {"&&", "||", "|", ";", ">", "<", "2>", "&"}
+                shell = any(part in shell_meta for part in command)
+            else:
+                shell = False
         self.command = command
         self.shell: bool = shell
         self.cwd = str(cwd) if cwd is not None else None
@@ -358,14 +366,15 @@ class RunningProcess:
         """
         assert self.proc is None
         shell = self.shell
-        if isinstance(self.command, str) and not shell:
-            warnings.warn(
-                f"RunningProcess: command is a list, but shell is True: {self.command}"
-            )
-            shell = False
+        popen_command: str | list[str]
+        if shell and isinstance(self.command, list):
+            # Convert list to a single shell string with proper quoting
+            popen_command = " ".join(shlex.quote(part) for part in self.command)
+        else:
+            popen_command = self.command
 
         self.proc = subprocess.Popen(
-            self.command,
+            popen_command,
             shell=shell,
             cwd=self.cwd,
             stdout=subprocess.PIPE,
