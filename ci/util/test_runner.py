@@ -461,8 +461,10 @@ def create_examples_test_process(
         1800 if args.no_parallel else 600
     )  # 30 minutes for sequential, 10 minutes for parallel
 
+    cmd_str = subprocess.list2cmdline(cmd)
+
     return RunningProcess(
-        cmd, auto_run=False, enable_stack_trace=enable_stack_trace, timeout=timeout
+        cmd_str, auto_run=False, enable_stack_trace=enable_stack_trace, timeout=timeout
     )
 
 
@@ -486,8 +488,10 @@ def create_python_test_process(
     if not full_tests:
         cmd.extend(["-m", "not full"])
 
+    cmd_str = subprocess.list2cmdline(cmd)
+
     return RunningProcess(
-        subprocess.list2cmdline(cmd),
+        cmd_str,
         auto_run=False,  # Don't auto-start - will be started in parallel later
         enable_stack_trace=enable_stack_trace,
         timeout=_TIMEOUT,  # 2 minute timeout for Python tests
