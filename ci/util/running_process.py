@@ -2,26 +2,19 @@
 import _thread
 import os
 import queue
-import re
 import subprocess
-import sys
 import tempfile
 import threading
 import time
 import traceback
-import urllib.parse
 import warnings
 from pathlib import Path
 from queue import Queue
-from typing import Any, Callable, Match, Union
+from typing import Any, Callable
 
 
 class EndOfStream(Exception):
-    """
-    Exception raised when the end of the stream is reached.
-    """
-
-    pass
+    """Sentinel used to indicate end-of-stream from the reader."""
 
 
 from ci.util.output_formatter import NullOutputFormatter, OutputFormatter
@@ -53,6 +46,13 @@ class ProcessOutputReader:
         self._on_output = on_output
         self._on_end = on_end
         self.last_stdout_ts: float | None = None
+        self._eos_emitted: bool = False
+
+    def _emit_eos_once(self) -> None:
+        """Ensure EndOfStream is only forwarded a single time."""
+        if not self._eos_emitted:
+            self._eos_emitted = True
+            self._on_output(EndOfStream())
 
     def run(self) -> None:
         """Continuously read stdout lines and forward them until EOF or shutdown."""
@@ -94,7 +94,7 @@ class ProcessOutputReader:
                 # Propagate to main thread and re-raise
                 _thread.interrupt_main()
                 # EOF
-                self._on_output(EndOfStream())
+                self._emit_eos_once()
                 raise
 
             except (ValueError, OSError) as e:
@@ -105,8 +105,8 @@ class ProcessOutputReader:
                 else:
                     print(f"Warning: Output reader encountered error: {e}")
             finally:
-                # Signal end-of-stream to consumers
-                self._on_output(EndOfStream())
+                # Signal end-of-stream to consumers exactly once
+                self._emit_eos_once()
         finally:
             # Cleanup stream and invoke completion callback
             if self._proc.stdout and not self._proc.stdout.closed:
@@ -125,8 +125,49 @@ class ProcessOutputReader:
                     self._output_formatter.end()
                 except Exception as e:
                     warnings.warn(f"Output formatter end() failed: {e}")
-                # Ensure a final end-of-stream marker is present
-                self._on_output(EndOfStream())
+
+
+class ProcessWatcher:
+    """Background watcher that polls a process until it terminates."""
+
+    def __init__(self, running_process: "RunningProcess") -> None:
+        self._rp = running_process
+        self._thread: threading.Thread | None = None
+
+    def start(self) -> None:
+        name: str = "RPWatcher"
+        try:
+            if self._rp.proc is not None and self._rp.proc.pid is not None:
+                name = f"RPWatcher-{self._rp.proc.pid}"
+        except Exception:
+            pass
+
+        self._thread = threading.Thread(target=self._run, name=name, daemon=True)
+        self._thread.start()
+
+    def _run(self) -> None:
+        thread_id = threading.current_thread().ident
+        thread_name = threading.current_thread().name
+        try:
+            while not self._rp.shutdown.is_set():
+                rc: int | None = self._rp.poll()
+                if rc is not None:
+                    break
+                time.sleep(0.1)
+        except KeyboardInterrupt:
+            print(f"Thread {thread_id} ({thread_name}) caught KeyboardInterrupt")
+            print(f"Stack trace for thread {thread_id}:")
+            traceback.print_exc()
+            _thread.interrupt_main()
+            raise
+        except Exception as e:
+            # Surface unexpected errors and keep behavior consistent
+            print(f"Watcher thread error in {thread_name}: {e}")
+            traceback.print_exc()
+
+    @property
+    def thread(self) -> threading.Thread | None:
+        return self._thread
 
 
 class RunningProcess:
@@ -292,6 +333,8 @@ class RunningProcess:
             if isinstance(item, EndOfStream):
                 self.output_queue.put(item)
             else:
+                # Track time of last stdout line observed
+                self._time_last_stdout_line = time.time()
                 self.output_queue.put(item)
                 self.accumulated_output.append(item)
 
@@ -307,38 +350,10 @@ class RunningProcess:
         self.reader_thread = threading.Thread(target=reader.run, daemon=True)
         self.reader_thread.start()
 
-        # Start watcher thread that polls for process termination every 100ms
-        def _watch_termination() -> None:
-            thread_id = threading.current_thread().ident
-            thread_name = threading.current_thread().name
-            try:
-                while not self.shutdown.is_set():
-                    # Use unified poll() so unregistration happens in one place
-                    rc = self.poll()
-                    if rc is not None:
-                        break
-                    time.sleep(0.1)
-            except KeyboardInterrupt:
-                print(f"Thread {thread_id} ({thread_name}) caught KeyboardInterrupt")
-                print(f"Stack trace for thread {thread_id}:")
-                traceback.print_exc()
-                _thread.interrupt_main()
-                raise
-            except Exception as e:
-                # Surface unexpected errors and keep behavior consistent
-                print(f"Watcher thread error in {thread_name}: {e}")
-                traceback.print_exc()
-
-        watcher_name = "RPWatcher"
-        try:
-            if self.proc is not None and self.proc.pid is not None:
-                watcher_name = f"RPWatcher-{self.proc.pid}"
-        except Exception:
-            pass
-        self.watcher_thread = threading.Thread(
-            target=_watch_termination, name=watcher_name, daemon=True
-        )
-        self.watcher_thread.start()
+        # Start watcher thread via helper class and expose thread for compatibility
+        self._watcher = ProcessWatcher(self)
+        self._watcher.start()
+        self.watcher_thread = self._watcher.thread
 
     def get_next_line(self, timeout: float | None = None) -> str | EndOfStream:
         """
@@ -365,17 +380,17 @@ class RunningProcess:
                 if time.time() > expired_time:
                     raise TimeoutError(f"Timeout after {timeout} seconds")
 
+            if self.output_queue.empty():
+                if timeout != 0:
+                    time.sleep(0.01)
+                    continue
+
             # Peek without popping if EndOfStream is at the front
             with self.output_queue.mutex:
                 if len(self.output_queue.queue) > 0:
                     head = self.output_queue.queue[0]
                     if isinstance(head, EndOfStream):
                         return EndOfStream()
-
-            if self.output_queue.empty():
-                if timeout != 0:
-                    time.sleep(0.01)
-                    continue
 
             try:
                 # Safe to pop now; head is not EndOfStream
