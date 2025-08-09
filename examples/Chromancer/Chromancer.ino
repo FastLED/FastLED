@@ -40,20 +40,22 @@ void loop() {
 }
 #else
 
-#include "mapping.h"
-#include "net.h"
-#include "ripple.h"
+
 #include <FastLED.h>
-#include "detail.h"
+
 #include "fl/screenmap.h"
 #include "fl/math_macros.h"
 #include "fl/json.h"
 #include "fl/ui.h"
 #include "fl/map.h"
 
-#include "screenmap.json.h"
 #include "fl/str.h"
 
+#include "./screenmap.json.h"
+#include "./mapping.h"
+#include "./net.h"
+#include "./ripple.h"
+#include "./detail.h"
 
 using namespace fl;
 
