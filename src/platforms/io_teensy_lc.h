@@ -44,6 +44,17 @@ int _write(int file, const void *buf, size_t len) {
 }
 }  // extern "C"
 
+inline int _platform_write(const char* str) {
+    return _write(STDOUT_FILENO, str, strlen(str));
+}
+
+#else
+
+inline int _platform_write(const char* str) {
+    (void)str;
+    return 0;
+}
+
 #endif  // ARDUINO
 
 namespace fl {
@@ -53,19 +64,13 @@ namespace fl {
 
 inline void print_teensy_lc(const char* str) {
     if (!str) return;
-    
-    // No-op implementation to avoid _write linker dependencies
-    // Teensy LC users should use Serial.print() directly for output
-    // This prevents "undefined reference to _write" errors
-    (void)str; // Suppress unused parameter warning
+    _platform_write(str);
 }
 
 inline void println_teensy_lc(const char* str) {
     if (!str) return;
-    
-    // No-op implementation to avoid _write linker dependencies
-    // Teensy LC users should use Serial.println() directly for output
-    (void)str; // Suppress unused parameter warning
+    _platform_write(str);
+    _platform_write("\n");
 }
 
 // Input functions - no-op implementations for Teensy LC
