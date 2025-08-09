@@ -357,9 +357,16 @@ class RunningProcess:
             subprocess.CalledProcessError: If the command returns a non-zero exit code.
         """
         assert self.proc is None
+        shell = self.shell
+        if isinstance(self.command, str) and not shell:
+            warnings.warn(
+                f"RunningProcess: command is a list, but shell is True: {self.command}"
+            )
+            shell = False
+
         self.proc = subprocess.Popen(
             self.command,
-            shell=self.shell,
+            shell=shell,
             cwd=self.cwd,
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,  # Merge stderr into stdout
