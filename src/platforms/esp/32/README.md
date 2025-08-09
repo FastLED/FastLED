@@ -26,9 +26,30 @@ ESP32 family support with multiple clockless backends.
 - `clock_cycles.h`: Timing helpers.
 
 ## Behavior & selection
-- Define one of: `FASTLED_ESP32_HAS_RMT`, `FASTLED_ESP32_HAS_CLOCKLESS_SPI`, or `FASTLED_ESP32_I2S`.
+- Selection is auto-detected (RMT vs SPI) via `third_party/espressif/led_strip/src/enabled.h`. You can override with `FASTLED_ESP32_I2S` (force I2S) or `FASTLED_ESP32_USE_CLOCKLESS_SPI` (prefer SPI when available).
 - `ESP_IDF_VERSION` (from `esp_version.h`) determines RMT4 vs RMT5.
 - I2S requires identical timing across all strips; RMT handles per‑channel timing.
 
 Notes:
 - Prefer RMT on modern IDF; I2S for high strip counts with uniform timings; SPI path only for WS2812.
+
+## Optional feature defines
+
+- `FASTLED_ESP32_I2S` (bool): Force the I2S-parallel clockless backend. All strips must share timing. Define before including `FastLED.h`.
+- `FASTLED_ESP32_USE_CLOCKLESS_SPI` (bool): Prefer the SPI-based WS2812 clockless driver when available instead of RMT.
+- `FASTLED_ESP32_ENABLE_LOGGING` (0|1): Control ESP logging inclusion. Defaults to 1 only when `SKETCH_HAS_LOTS_OF_MEMORY` is true; otherwise 0. Include `esp_log_control.h` before `esp_log.h`.
+- `FASTLED_ESP32_MINIMAL_ERROR_HANDLING` (defined): When logging is disabled, overrides `ESP_ERROR_CHECK` to abort without printing. Use to eliminate printf pulls.
+- `FASTLED_ESP32_SPI_BUS` (VSPI|HSPI|FSPI): Select SPI bus for hardware SPI backend. Defaults: VSPI; S2/S3 coerce to FSPI for flexible pins.
+- `FASTLED_ESP32_SPI_BULK_TRANSFER` (0|1): Use buffered SPI writes to reduce lock contention. Default 0.
+- `FASTLED_ESP32_SPI_BULK_TRANSFER_SIZE` (int): Chunk size when bulk transfer is enabled. Default 64 bytes.
+- `FASTLED_I2S_MAX_CONTROLLERS` (int): Max number of I2S controllers in parallel mode. Default 24.
+- `FASTLED_ESP32_I2S_NUM_DMA_BUFFERS` (int 3..16): Number of I2S DMA buffers. If <=2 or undefined, defaults to 2.
+- `I2S_DEVICE` (0|1): Select I2S peripheral index for parallel mode. Default 0.
+- `FASTLED_UNUSABLE_PIN_MASK` (bitmask): Override default mask of pins FastLED should avoid on your ESP32 variant. See `fastpin_esp32.h` for defaults.
+- `FASTLED_ALLOW_INTERRUPTS` (0|1): Allow brief interrupt windows during show to improve system responsiveness. Default 1; `INTERRUPT_THRESHOLD` default 0.
+- `FASTLED_USE_PROGMEM` (0|1): Control PROGMEM usage on ESP32. Default 0.
+- `FASTLED_DEBUG_COUNT_FRAME_RETRIES` (defined): Enable global counters `_frame_cnt` and `_retry_cnt` in clockless backends for debugging retry behavior.
+
+Notes:
+- RMT backend tuning: `FASTLED_RMT_BUILTIN_DRIVER` (IDF4 only) selects using the ESP core RMT driver (true) vs custom ISR (false, default). `FASTLED_RMT_MAX_CHANNELS` can limit TX channels; default depends on SOC caps.
+- Auto-detected capabilities: `FASTLED_ESP32_HAS_RMT`, `FASTLED_ESP32_HAS_CLOCKLESS_SPI`, and `FASTLED_RMT5` come from `third_party/espressif/led_strip/src/enabled.h` and generally should not be set manually.

@@ -17,3 +17,19 @@ ESP8266 family support (Xtensa).
 
 Notes:
 - Typical settings: `FASTLED_USE_PROGMEM=0`, `FASTLED_ALLOW_INTERRUPTS=1`; long ISRs will impact signal quality.
+
+## Optional feature defines
+
+- `FASTLED_ALL_PINS_HARDWARE_SPI` (defined): Enable the ESP8266 hardware SPI backend for clocked LEDs; see `fastspi_esp8266.h`.
+- Pin order selection (choose one):
+  - `FASTLED_ESP8266_RAW_PIN_ORDER`
+  - `FASTLED_ESP8266_NODEMCU_PIN_ORDER`
+  - `FASTLED_ESP8266_D1_PIN_ORDER`
+  If none is defined, NodeMCU order is selected when `ARDUINO_ESP8266_NODEMCU` is set, else RAW.
+- `FASTLED_ALLOW_INTERRUPTS` (0|1): Allow brief interrupt windows during show. Default 1; `INTERRUPT_THRESHOLD` default 0.
+- `FASTLED_USE_PROGMEM` (0|1): Control PROGMEM usage on ESP8266. Default 0.
+- `FASTLED_DEBUG_COUNT_FRAME_RETRIES` (defined): Enable `_frame_cnt`/`_retry_cnt` counters in clockless drivers for retry diagnostics.
+- `FASTLED_INTERRUPT_RETRY_COUNT` (int): Number of retries after ISR/NMI preemption before abandoning the frame in clockless paths.
+
+Notes:
+- `FASTLED_HAS_CLOCKLESS`/`FASTLED_HAS_BLOCKLESS` are provided by the implementation and not user-set.
