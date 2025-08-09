@@ -32,3 +32,9 @@ RGB order mapping:
 - FastLED `RGBW` (emulated white) → NeoPixelBus `NeoGrbwFeature` path in the RGBW controller
 
 Note: Actual defaults may change with NeoPixelBus releases; `NeoPixelBusMethodSelector<DATA_PIN>::DefaultMethod` is the source of truth at compile time.
+
+## Optional feature defines
+
+- **`FASTLED_USE_NEOPIXEL_BUS`**: Default `0` (unless building docs). When `1`, enables the NeoPixelBus adapter; requires `NeoPixelBus.h`. If the header is missing, the adapter disables itself with an error.
+
+Define before including `FastLED.h`.

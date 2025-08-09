@@ -13,3 +13,10 @@ Teensy 3.6 (MK66FX1M0) support.
 Notes:
 - Similar to K20 timing model with higher clocks; observe interrupt thresholds for consistent output.
  - DWT cycle counter is used by clockless; ensure it is enabled early for precise timing.
+
+## Optional feature defines
+
+- **`FASTLED_USE_PROGMEM`**: Default `1` on some Teensy3 cores.
+- **`FASTLED_ALLOW_INTERRUPTS`**: Default `1`. Enables `FASTLED_ACCURATE_CLOCK`.
+
+Define before including `FastLED.h`.

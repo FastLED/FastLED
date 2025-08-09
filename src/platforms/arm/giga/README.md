@@ -12,3 +12,11 @@ Support for Arduino GIGA R1 based on STM32H747.
 Notes:
 - Uses ARM irq enable/disable wrappers for timing-critical sections.
  - `led_sysdef_arm_giga.h` sets `FASTLED_USE_PROGMEM=0`, enables interrupts, and defines `F_CPU` (e.g., 480MHz) for timing math.
+
+## Optional feature defines
+
+- **`FASTLED_USE_PROGMEM`**: Default `0`.
+- **`FASTLED_ALLOW_INTERRUPTS`**: Default `1`. Enables `FASTLED_ACCURATE_CLOCK` when `1`.
+- **`FASTLED_NO_PINMAP`**: Indicates pin maps are not stored in PROGMEM.
+
+Define before including `FastLED.h`.

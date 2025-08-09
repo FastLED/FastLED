@@ -39,3 +39,13 @@ Quirks:
 
 - Strict ISR timing: for WS281x, set `FASTLED_ALLOW_INTERRUPTS=0` on small AVRs for best signal integrity.
 - SPI routes differ (SPI vs SPI0, UART MSPI). The SPI backend handles these variants; verify MOSI/SCK pins per board.
+
+## Optional feature defines
+
+- **`FASTLED_USE_PROGMEM`**: Default `1` on AVR. Required for flash‑resident tables.
+- **`FASTLED_ALLOW_INTERRUPTS`**: Default `0` on AVR. You may set to `1` on faster parts but expect tighter timing constraints.
+- **`FASTLED_FORCE_SOFTWARE_SPI`**: Force software (bit‑bang) SPI even when hardware SPI is available (commented hint in `fastspi_avr.h`).
+- **`FASTLED_DEFINE_AVR_MILLIS_TIMER0_IMPL`**: Force Timer0 millis provider implementation for boards lacking Arduino `millis()`.
+- **`FASTLED_DEFINE_TIMER_WEAK_SYMBOL`**: Control weak symbol export for `timer_millis` in `avr_millis_timer_source.cpp`.
+
+Define these before including `FastLED.h`.

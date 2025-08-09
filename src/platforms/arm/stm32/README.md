@@ -13,3 +13,13 @@ STM32 family support (e.g., F1 series).
 Notes:
 - Some families prefer different pin backends (legacy/new); choose the appropriate header for your core.
  - Many STM32 Arduino cores map `pinMode` to HAL; direct register variants in `fastpin_*` may differ across series.
+
+## Optional feature defines
+
+- **`FASTLED_ALLOW_INTERRUPTS`**: Default `0`. Clockless timing on STM32 typically runs with interrupts off for stability.
+- **`FASTLED_ACCURATE_CLOCK`**: Enabled automatically when interrupts are allowed to keep timing math correct.
+- **`FASTLED_USE_PROGMEM`**: Default `0` (flat memory model / memory‑mapped flash).
+- **`FASTLED_NO_PINMAP`**: Defined to indicate no PROGMEM‑backed pin maps are used on this platform.
+- **`FASTLED_NEEDS_YIELD`**: Defined to signal scheduling/yield points might be required in some cores.
+
+Place defines before including `FastLED.h`.

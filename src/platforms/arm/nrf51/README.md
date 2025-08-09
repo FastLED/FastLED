@@ -12,3 +12,11 @@ Nordic nRF51 family support.
 Notes:
 - Lower-clock Cortex-M0; carefully budget interrupt windows when using clockless.
  - Prefer fewer parallel lanes or shorter strips with clockless to maintain timing margins.
+
+## Optional feature defines
+
+- **`FASTLED_USE_PROGMEM`**: Default `0`.
+- **`FASTLED_ALLOW_INTERRUPTS`**: Default `1`.
+- **`FASTLED_ALL_PINS_HARDWARE_SPI`**: Enabled by default when not forcing software SPI.
+
+Define before including `FastLED.h`.

@@ -13,3 +13,11 @@ Teensy LC (MKL26Z64) support.
 Notes:
 - LC has tighter timing/memory limits; keep critical sections minimal.
  - Verify `FASTLED_USE_PROGMEM` and interrupt policy per toolchain; defaults may differ between cores.
+
+## Optional feature defines
+
+- **`FASTLED_USE_PROGMEM`**: Default `1` on LC cores.
+- **`FASTLED_ALLOW_INTERRUPTS`**: Default `1`. Enables `FASTLED_ACCURATE_CLOCK`.
+- **`FASTLED_SPI_BYTE_ONLY`**: Present in sysdefs indicating SPI byte granularity optimization.
+
+Define before including `FastLED.h`.

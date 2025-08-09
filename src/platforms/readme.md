@@ -9,6 +9,7 @@ Table of Contents
 - [Picking the right path](#picking-the-right-path)
 - [Backend selection cheat sheet](#backend-selection-cheat-sheet)
 - [Troubleshooting and tips](#troubleshooting-and-tips)
+- [Optional feature defines by platform](#optional-feature-defines-by-platform)
 - [How to implement a clockless controller](#how-to-implement-a-clockless-controller)
   - [T1/T2/T3 vs T0H/T0L/T1H/T1L](#t1t2t3-vs-t0ht0lt1ht1l)
   - [Multilane output](#multilane-output)
@@ -211,3 +212,69 @@ Platforms without PROGMEM (or where it’s a no‑op in this codebase):
 - Most ARM families (SAMD, STM32, nRF, RP2040) and ESP32 use memory‑mapped flash; PROGMEM macros are disabled here via `FASTLED_USE_PROGMEM=0`.
 
 Check each platform’s `led_sysdefs_*` header for the recommended PROGMEM and interrupt policy.
+
+### Optional feature defines by platform
+
+Below is a non-exhaustive list of optional or tunable feature-defines, grouped by platform. Define these before including `FastLED.h` in your sketch.
+
+- ESP32 (`esp/32`)
+  - General: `FASTLED_USE_PROGMEM` (default 0), `FASTLED_ALLOW_INTERRUPTS` (default 1), `FASTLED_ESP32_RAW_PIN_ORDER`
+  - Backend selection: `FASTLED_ESP32_I2S`, `FASTLED_ESP32_USE_CLOCKLESS_SPI` (WS2812-only). RMT is selected by default when available
+  - SPI: `FASTLED_ALL_PINS_HARDWARE_SPI`, `FASTLED_ESP32_SPI_BUS` (VSPI/HSPI/FSPI), `FASTLED_ESP32_SPI_BULK_TRANSFER` (0/1), `FASTLED_ESP32_SPI_BULK_TRANSFER_SIZE`
+  - RMT (IDF4): `FASTLED_RMT_BUILTIN_DRIVER`, `FASTLED_RMT_SERIAL_DEBUG`, `FASTLED_RMT_MEM_WORDS_PER_CHANNEL`, `FASTLED_RMT_MEM_BLOCKS`, `FASTLED_RMT_MAX_CONTROLLERS`, `FASTLED_RMT_MAX_CHANNELS`, `FASTLED_RMT_MAX_TICKS_FOR_GTX_SEM`, `FASTLED_ESP32_FLASH_LOCK`
+  - RMT (IDF5): uses DMA internally (`FASTLED_RMT_USE_DMA` marker)
+  - I2S: `I2S_DEVICE`, `FASTLED_I2S_MAX_CONTROLLERS`, `FASTLED_ESP32_I2S_NUM_DMA_BUFFERS`
+  - Logging/size: `FASTLED_ESP32_ENABLE_LOGGING`, `FASTLED_ESP32_MINIMAL_ERROR_HANDLING`
+  - Clock override: `F_CPU_RMT_CLOCK_MANUALLY_DEFINED`
+  - Misc: `FASTLED_INTERRUPT_RETRY_COUNT`, `FASTLED_DEBUG_COUNT_FRAME_RETRIES`
+
+- ESP8266 (`esp/8266`)
+  - General: `FASTLED_USE_PROGMEM` (default 0), `FASTLED_ALLOW_INTERRUPTS` (default 1)
+  - Pin order: `FASTLED_ESP8266_RAW_PIN_ORDER`, `FASTLED_ESP8266_NODEMCU_PIN_ORDER`, `FASTLED_ESP8266_D1_PIN_ORDER`
+  - SPI: `FASTLED_ALL_PINS_HARDWARE_SPI`
+  - Debug: `FASTLED_DEBUG_COUNT_FRAME_RETRIES`
+  - Global: `FASTLED_INTERRUPT_RETRY_COUNT`
+
+- AVR (`avr`)
+  - `FASTLED_USE_PROGMEM` (default 1), `FASTLED_ALLOW_INTERRUPTS` (default 0), `FASTLED_FORCE_SOFTWARE_SPI`
+  - Millis provider: `FASTLED_DEFINE_AVR_MILLIS_TIMER0_IMPL`, `FASTLED_DEFINE_TIMER_WEAK_SYMBOL`
+
+- ARM SAMD21 (`arm/d21`) and SAMD51 (`arm/d51`)
+  - `FASTLED_USE_PROGMEM` (default 0), `FASTLED_ALLOW_INTERRUPTS` (default 1, enables `FASTLED_ACCURATE_CLOCK`)
+
+- STM32/GIGA (`arm/stm32`, `arm/giga`)
+  - `FASTLED_USE_PROGMEM` (default 0), `FASTLED_ALLOW_INTERRUPTS` (STM32 default 0), `FASTLED_ACCURATE_CLOCK` (when interrupts on), `FASTLED_NO_PINMAP`, `FASTLED_NEEDS_YIELD`
+
+- Teensy 3.x K20/K66 (`arm/k20`, `arm/k66`)
+  - `FASTLED_USE_PROGMEM` (often 1), `FASTLED_ALLOW_INTERRUPTS` (1), `FASTLED_ACCURATE_CLOCK`
+  - ObjectFLED: `FASTLED_OBJECTFLED_LATCH_DELAY`
+
+- Teensy LC KL26 (`arm/kl26`)
+  - `FASTLED_USE_PROGMEM` (1), `FASTLED_ALLOW_INTERRUPTS` (1), `FASTLED_SPI_BYTE_ONLY`
+
+- RP2040 (`arm/rp2040`)
+  - `FASTLED_USE_PROGMEM` (0), `FASTLED_ALLOW_INTERRUPTS` (1), `FASTLED_ACCURATE_CLOCK`
+  - Clockless selection: `FASTLED_RP2040_CLOCKLESS_PIO` (1), `FASTLED_RP2040_CLOCKLESS_IRQ_SHARED` (1), `FASTLED_RP2040_CLOCKLESS_M0_FALLBACK` (0)
+
+- nRF51 (`arm/nrf51`)
+  - `FASTLED_USE_PROGMEM` (0), `FASTLED_ALLOW_INTERRUPTS` (1), `FASTLED_ALL_PINS_HARDWARE_SPI`
+
+- nRF52 (`arm/nrf52`)
+  - `FASTLED_USE_PROGMEM` (0), `FASTLED_ALLOW_INTERRUPTS` (1)
+  - SPI/clockless options: `FASTLED_ALL_PINS_HARDWARE_SPI`, `FASTLED_NRF52_SPIM`, `FASTLED_NRF52_ENABLE_PWM_INSTANCE0`, `FASTLED_NRF52_NEVER_INLINE`, `FASTLED_NRF52_MAXIMUM_PIXELS_PER_STRING`, `FASTLED_NRF52_PWM_ID`, `FASTLED_NRF52_SUPPRESS_UNTESTED_BOARD_WARNING`
+
+- Renesas UNO R4 (`arm/renesas`)
+  - `FASTLED_USE_PROGMEM` (0), `FASTLED_ALLOW_INTERRUPTS` (1), `FASTLED_NO_PINMAP`
+
+- Adafruit adapter (`adafruit`)
+  - `FASTLED_USE_ADAFRUIT_NEOPIXEL` (0/1)
+
+- NeoPixelBus adapter (`neopixelbus`)
+  - `FASTLED_USE_NEOPIXEL_BUS` (0/1)
+
+- WASM (`wasm`)
+  - `FASTLED_STUB_IMPL`, `FASTLED_HAS_MILLIS` (1), `FASTLED_USE_PROGMEM` (0), `FASTLED_ALLOW_INTERRUPTS` (1)
+
+- Stub/native tests (`stub`)
+  - `FASTLED_STUB_IMPL`, `FASTLED_HAS_MILLIS` (1), `FASTLED_ALLOW_INTERRUPTS` (1), `FASTLED_USE_PROGMEM` (0)
+  - Stub helpers: `FASTLED_USE_PTHREAD_DELAY`, `FASTLED_USE_PTHREAD_YIELD`

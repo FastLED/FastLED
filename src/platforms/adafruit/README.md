@@ -14,6 +14,11 @@ Adafruit_NeoPixel integration providing a FastLED‑compatible clockless control
 - This path is useful when Adafruit’s platform backends (e.g., some boards/cores) are preferred or more stable for your setup.
 - Performance characteristics and memory usage follow Adafruit_NeoPixel; expect different throughput vs native FastLED clockless drivers.
 
+## Optional feature defines
+
+- **`FASTLED_USE_ADAFRUIT_NEOPIXEL`**: Default `0` (unless building docs via `FASTLED_DOXYGEN`). When `1`, enables the Adafruit adapter; requires `Adafruit_NeoPixel.h`.
+
+Define before including `FastLED.h`.
 ## Compatibility and color order
 
 Supported color orders: FastLED’s `PixelController` handles byte reordering before passing data to Adafruit_NeoPixel. Typical orders like GRB/RGB/BRG are supported transparently.

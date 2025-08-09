@@ -25,3 +25,12 @@ Recommended exported patterns:
 ## Behavior and constraints
 - Follows a pure data‑export approach for C++↔JS boundaries: C++ allocates/returns buffers and JS polls/reads; no embedded JS in C++.
 - Exported function signatures are a contract with JS (e.g., `getFrameData`, `freeFrameData`, `getStripPixelData`); changes require synchronized JS updates.
+
+## Optional feature defines
+
+- **`FASTLED_STUB_IMPL`**: Enables stubbed Arduino/system behaviors for WASM builds (set in `led_sysdefs_wasm.h`).
+- **`FASTLED_HAS_MILLIS`**: Default `1`.
+- **`FASTLED_USE_PROGMEM`**: Default `0`.
+- **`FASTLED_ALLOW_INTERRUPTS`**: Default `1`.
+
+Define before including `FastLED.h` if overriding defaults.

@@ -14,3 +14,10 @@ Notes:
 ### Compile-time expectations
 - `FASTLED_USE_PROGMEM`: 0 (per ARM SAMD guidance)
 - `FASTLED_ALLOW_INTERRUPTS`: driver tolerates short windows; long ISRs may force a retry/punt
+
+## Optional feature defines
+
+- **`FASTLED_USE_PROGMEM`**: Default `0`.
+- **`FASTLED_ALLOW_INTERRUPTS`**: Default `1`. Enables `FASTLED_ACCURATE_CLOCK` when `1`.
+
+Define before including `FastLED.h`.

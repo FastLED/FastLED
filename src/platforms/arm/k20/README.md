@@ -17,3 +17,12 @@ Teensy 3.0/3.1/3.2 support (MK20DX family).
 Notes:
 - DWT cycle counter is used for precise timing; interrupt windows are checked to punt frames when overrun.
  - Consider `FASTLED_ALLOW_INTERRUPTS=1` for responsiveness; long ISRs risk jitter and retries.
+
+## Optional feature defines
+
+- **`FASTLED_USE_PROGMEM`**: Default `1` on some Teensy3 cores.
+- **`FASTLED_ALLOW_INTERRUPTS`**: Default `1`. Enables `FASTLED_ACCURATE_CLOCK`.
+- **ObjectFLED**
+  - **`FASTLED_OBJECTFLED_LATCH_DELAY`**: WS2812 latch delay microseconds for ObjectFLED path (default `300`).
+
+Place defines before including `FastLED.h`.

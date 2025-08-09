@@ -12,3 +12,10 @@ SAMD51 (Feather/Itsy M4, Wio Terminal) support.
 Notes:
 - Higher clock speeds and interrupt policy can affect jitter; prefer short critical sections.
  - Typical settings: `FASTLED_USE_PROGMEM=0`; consider enabling interrupts with careful ISR timing.
+
+## Optional feature defines
+
+- **`FASTLED_USE_PROGMEM`**: Default `0`.
+- **`FASTLED_ALLOW_INTERRUPTS`**: Default `1`. Enables `FASTLED_ACCURATE_CLOCK` when `1`.
+
+Define before including `FastLED.h`.
