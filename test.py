@@ -175,7 +175,7 @@ def main() -> None:
 
             # Create Python test process (runs first)
             python_process = create_python_test_process(
-                not args.no_stack_trace, full_tests=True
+                enable_stack_trace=False, full_tests=True
             )
 
             # Create examples compilation process with auto_run=False
@@ -202,6 +202,8 @@ def main() -> None:
             # Wait for Python tests to complete (which will trigger examples compilation)
             python_return_code = python_process.wait()
             if python_return_code != 0:
+                python_stdout = python_process.stdout
+                print(f"Python test process stdout: {python_stdout}")
                 sys.exit(python_return_code)
 
             if args.verbose:

@@ -3,6 +3,49 @@
 #include <stddef.h>
 #include <string.h>
 
+// We meed to define a missing _write function for the Teensy LC.
+// This regardless of whether the user prints or not, because of the SD card
+// system, the platformio build system will try to link to libc, which needs
+// to resolve _write.
+// https://forum.pjrc.com/index.php?threads/undefined-reference-to-_write.71420/
+#if defined(ARDUINO)
+
+#include <Arduino.h> // ok include
+#include <unistd.h>
+#include <cerrno>
+#undef errno
+extern int errno;
+// ^^^^ Add these 4 lines to your includes
+
+
+extern "C" {
+int _write(int file, const void *buf, size_t len) {
+  if (len == 0) {
+    return 0;
+  }
+  static Print *volatile stdPrint = &Serial;
+
+  Print *out;
+
+  // Send both stdout and stderr to stdPrint
+  if (file == STDOUT_FILENO || file == STDERR_FILENO) {
+    out = stdPrint;
+  } else if (file == STDIN_FILENO) {
+    errno = EBADF;
+    return -1;
+  } else {
+    out = (Print *)file;
+  }
+
+  if (out == nullptr) {
+    return len;
+  }
+  return out->write((const uint8_t *)buf, len);
+}
+}  // extern "C"
+
+#endif  // ARDUINO
+
 namespace fl {
 
 // Low-level Teensy LC print functions that avoid _write dependencies

@@ -1248,7 +1248,11 @@ def _run_processes_parallel(
     # Monitor all processes for output and completion
     active_processes = processes.copy()
     start_time = time.time()
-    global_timeout = max(p.timeout for p in processes) + 60  # Add 1 minute buffer
+
+    runner_timeouts: list[int] = [p.timeout for p in processes if p.timeout is not None]
+    global_timeout: int | None = None
+    if runner_timeouts:
+        global_timeout = max(runner_timeouts) + 60  # Add 1 minute buffer
 
     # Track last activity time for each process to detect stuck processes
     last_activity_time = {proc: time.time() for proc in active_processes}
@@ -1272,11 +1276,15 @@ def _run_processes_parallel(
             stuck_monitor.start_monitoring(proc)
 
         def time_expired() -> bool:
+            if global_timeout is None:
+                return False
+            assert global_timeout is not None
             return time.time() - start_time > global_timeout
 
         while active_processes:
             # Check global timeout
             if time_expired():
+                assert global_timeout is not None
                 print(f"\nGlobal timeout reached after {global_timeout} seconds")
                 print("\033[91m###### ERROR ######\033[0m")
                 print("Tests failed due to global timeout")
