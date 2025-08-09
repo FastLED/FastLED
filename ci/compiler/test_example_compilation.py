@@ -2174,32 +2174,25 @@ class CompilationTestRunner:
                     f"[EXECUTION] DEBUG: Error checking file permissions: {e}"
                 )
 
-            captured_lines: list[str] = []
+            rp = RunningProcess(
+                command=[str(executable_path.absolute())],
+                cwd=example_dir.absolute(),
+                check=False,
+                auto_run=True,
+                enable_stack_trace=True,
+                on_complete=None,
+                output_formatter=None,
+            )
+
             try:
                 self.log_timing(f"[EXECUTION] Running: {executable_name}")
 
                 # Use RunningProcess to execute and stream output
-                rp = RunningProcess(
-                    command=[str(executable_path.absolute())],
-                    cwd=example_dir.absolute(),
-                    check=False,
-                    auto_run=True,
-                    timeout=60,
-                    enable_stack_trace=True,
-                    on_complete=None,
-                    output_formatter=None,
-                )
 
-                while True:
-                    out = rp.get_next_line_non_blocking()
-                    if isinstance(out, EndOfStream):
-                        break
-                    if isinstance(out, str):
+                with rp.line_iter(timeout=60) as it:
+                    for line in it:
                         if self.config.verbose:
-                            self.log_timing(f"[EXECUTION]   {out}")
-                        captured_lines.append(out)
-                    else:
-                        time.sleep(0.1)
+                            self.log_timing(f"[EXECUTION]   {line}")
 
                 rc = rp.wait()
 
@@ -2215,16 +2208,14 @@ class CompilationTestRunner:
                         ExecutionFailure(
                             name=example_name,
                             reason=f"exit code {rc}",
-                            stdout="\n".join(captured_lines),
+                            stdout=rp.stdout,
                         )
                     )
-                    if self.config.verbose and captured_lines:
+                    if self.config.verbose:
                         self.log_timing(f"[EXECUTION] Failed output:")
-                        for line in captured_lines:
-                            if line.strip():
-                                self.log_timing(f"[EXECUTION]   {line.rstrip()}")
                         # If nothing meaningful captured, note it
-                        if not any(line.strip() for line in captured_lines):
+                        stdout = rp.stdout
+                        if not stdout.strip():
                             self.log_timing(
                                 "[EXECUTION] No output captured from failed execution"
                             )
@@ -2234,10 +2225,7 @@ class CompilationTestRunner:
                 self.log_timing(
                     f"[EXECUTION] FAILED: {executable_name}: Execution timeout (30s)"
                 )
-                captured_lines_safe: list[str] = (
-                    captured_lines if "captured_lines" in locals() else []
-                )
-                timeout_stdout: str = "\n".join(captured_lines_safe)
+                timeout_stdout: str = "\n".join(rp.stdout)
                 execution_failures.append(
                     ExecutionFailure(
                         name=example_name,
@@ -2250,10 +2238,8 @@ class CompilationTestRunner:
                 self.log_timing(
                     f"[EXECUTION] FAILED: {executable_name}: Exception: {e}"
                 )
-                captured_lines_safe2: list[str] = (
-                    captured_lines if "captured_lines" in locals() else []
-                )
-                exc_stdout: str = "\n".join(captured_lines_safe2)
+
+                exc_stdout: str = "\n".join(rp.stdout)
                 execution_failures.append(
                     ExecutionFailure(
                         name=example_name,

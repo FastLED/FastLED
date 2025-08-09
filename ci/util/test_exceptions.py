@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Custom exceptions for test failures that need to bubble up to callers."""
 
+import subprocess
 from dataclasses import dataclass
 from typing import List, Optional
 
@@ -57,8 +58,14 @@ class FastLEDTestException(Exception):
         details.append(f"{'=' * 50}")
 
         for i, failure in enumerate(self.failures, 1):
+            cmd_str: str = (
+                subprocess.list2cmdline(failure.command)
+                if isinstance(failure.command, list)
+                else failure.command
+            )
+            assert isinstance(cmd_str, str)
             details.append(f"\n{i}. {failure.test_name}")
-            details.append(f"   Command: {failure.command}")
+            details.append(f"   Command: {cmd_str}")
             details.append(f"   Error Type: {failure.error_type}")
             details.append(f"   Exit Code: {failure.return_code}")
             details.append(f"   Output:")

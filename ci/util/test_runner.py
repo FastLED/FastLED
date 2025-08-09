@@ -487,7 +487,7 @@ def create_python_test_process(
         cmd.extend(["-m", "not full"])
 
     return RunningProcess(
-        cmd,
+        subprocess.list2cmdline(cmd),
         auto_run=False,  # Don't auto-start - will be started in parallel later
         enable_stack_trace=enable_stack_trace,
         timeout=_TIMEOUT,  # 2 minute timeout for Python tests
@@ -695,12 +695,13 @@ def _run_process_with_output(process: RunningProcess, verbose: bool = False) -> 
     # Only start the process if it's not already running
     if process.proc is None:
         process.run()
+        cmd_str = process.get_command_str()
         process_name = (
             process.command.split()[0]
             if isinstance(process.command, str)
             else process.command[0]
         )
-        print(f"Started: {process.command}")
+        print(f"Started: {cmd_str}")
     else:
         process_name = (
             process.command.split()[0]
@@ -793,7 +794,9 @@ def _run_process_with_output(process: RunningProcess, verbose: bool = False) -> 
             raise TestExecutionFailedException("Test command failed", [failure])
         else:
             elapsed = time.time() - output_handler.formatter._start_time
-            print(f"Process completed: {process.command} (took {elapsed:.2f}s)")
+            print(
+                f"Process completed: {process.get_command_str()} (took {elapsed:.2f}s)"
+            )
             if isinstance(process.command, str) and process.command.endswith(".exe"):
                 print(f"Test {process.command} passed with return code {returncode}")
     except TimeoutError as te:
@@ -888,7 +891,9 @@ def _process_single_test_output(
             sys.stdout.flush()
             failures: list[TestFailureInfo] = []
             for p in active_processes:
-                failed_processes.append(p.command)  # Track all as failed
+                failed_processes.append(
+                    subprocess.list2cmdline(p.command)
+                )  # Track all as failed
                 p.kill()
                 failures.append(
                     TestFailureInfo(
@@ -911,7 +916,9 @@ def _process_single_test_output(
             sys.stdout.flush()
             failures: list[TestFailureInfo] = []
             for p in active_processes:
-                failed_processes.append(p.command)  # Track all as failed
+                failed_processes.append(
+                    subprocess.list2cmdline(p.command)
+                )  # Track all as failed
                 p.kill()
                 failures.append(
                     TestFailureInfo(
@@ -957,6 +964,8 @@ def _handle_process_completion(
     """
     proc = proc_state.process
     cmd = proc_state.command
+    if isinstance(cmd, list):
+        cmd = subprocess.list2cmdline(cmd)
 
     try:
         returncode = proc.wait()
@@ -1166,7 +1175,7 @@ def _handle_stuck_processes(
             proc.kill()  # This now kills the entire process tree
 
             # Track this as a failure
-            failed_processes.append(proc.command)
+            failed_processes.append(subprocess.list2cmdline(proc.command))
 
             active_processes.remove(proc)
             monitor.stop_monitoring(proc)
@@ -1204,11 +1213,12 @@ def _run_processes_parallel(
 
     # Start processes that aren't already running
     for proc in processes:
+        cmd_str = proc.get_command_str()
         if proc.proc is None:  # Only start if not already running
             proc.run()
-            print(f"Started: {proc.command}")
+            print(f"Started: {cmd_str}")
         else:
-            print(f"Process already running: {proc.command}")
+            print(f"Process already running: {cmd_str}")
 
     # Monitor all processes for output and completion
     active_processes = processes.copy()
@@ -1248,7 +1258,7 @@ def _run_processes_parallel(
                 failures: list[TestFailureInfo] = []
                 for p in active_processes:
                     failed_processes.append(
-                        p.command
+                        subprocess.list2cmdline(p.command)
                     )  # Track all active processes as failed
                     p.kill()
                     failures.append(
@@ -1293,6 +1303,7 @@ def _run_processes_parallel(
                             )
                         )
                     for cmd in failed_processes:
+                        cmd = subprocess.list2cmdline(cmd)
                         failures.append(
                             TestFailureInfo(
                                 test_name=_extract_test_name(cmd),
@@ -1355,10 +1366,11 @@ def _run_processes_parallel(
                                     )
                                 )
                             for cmd in failed_processes:
+                                cmd_str = subprocess.list2cmdline(cmd)
                                 failures.append(
                                     TestFailureInfo(
-                                        test_name=_extract_test_name(cmd),
-                                        command=str(cmd),
+                                        test_name=_extract_test_name(cmd_str),
+                                        command=cmd_str,
                                         return_code=1,
                                         output="Process was killed due to timeout/stuck detection",
                                         error_type="killed_process",
@@ -1382,28 +1394,13 @@ def _run_processes_parallel(
 
                     timing = ProcessTiming(
                         name=_extract_test_name(proc.command),
-                        command=proc.command,
+                        command=subprocess.list2cmdline(proc.command),
                         duration=duration,
                     )
                     completed_timings.append(timing)
-                    print(f"Process completed: {proc.command}")
+                    print(f"Process completed: {proc.get_command_str()}")
                     any_activity = True
                     continue
-
-                # Process any pending output from this process
-                try:
-                    while True:
-                        line = proc.get_next_line(
-                            timeout=0.001
-                        )  # Non-blocking check for output
-                        if isinstance(line, EndOfStream):
-                            break
-                        # Handle the output line
-                        output_handler.handle_output_line(line, proc.command)
-                        any_activity = True
-                except Exception:
-                    # No more output available, continue
-                    pass
 
                 # Update last activity time if we have stdout activity
                 stdout_time = proc.time_last_stdout_line()

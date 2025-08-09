@@ -10,7 +10,7 @@ import traceback
 import warnings
 from pathlib import Path
 from queue import Queue
-from typing import Any, Callable
+from typing import Any, Callable, ContextManager, Iterator
 
 
 class EndOfStream(Exception):
@@ -191,6 +191,44 @@ class ProcessWatcher:
         return self._thread
 
 
+class _RunningProcessLineIterator(ContextManager[Iterator[str]], Iterator[str]):
+    """Context-managed iterator over a RunningProcess's output lines.
+
+    Yields only strings (never None). Stops on EndOfStream or when a per-line
+    timeout elapses.
+    """
+
+    def __init__(self, rp: "RunningProcess", timeout: float | None) -> None:
+        self._rp = rp
+        self._timeout = timeout
+
+    # Context manager protocol
+    def __enter__(self) -> "_RunningProcessLineIterator":
+        return self
+
+    def __exit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc: BaseException | None,
+        tb: Any | None,
+    ) -> bool:
+        # Do not suppress exceptions
+        return False
+
+    # Iterator protocol
+    def __iter__(self) -> Iterator[str]:
+        return self
+
+    def __next__(self) -> str:
+        next_item: str | EndOfStream = self._rp.get_next_line(timeout=self._timeout)
+
+        if isinstance(next_item, EndOfStream):
+            raise StopIteration
+
+        # Must be a string by contract
+        return next_item
+
+
 class RunningProcess:
     """
     A class to manage and stream output from a running subprocess.
@@ -205,6 +243,7 @@ class RunningProcess:
         cwd: Path | None = None,
         check: bool = False,
         auto_run: bool = True,
+        shell: bool | None = None,
         timeout: int = 240,  # 4 minutes.
         enable_stack_trace: bool = False,  # Enable stack trace dumping on timeout
         on_complete: Callable[[], None]
@@ -223,10 +262,12 @@ class RunningProcess:
             enable_stack_trace (bool): If True, dump stack trace when process times out.
             on_complete (Callable[[], None] | None): Callback function to execute when process completes.
             output_formatter (OutputFormatter | None): Optional formatter for processing output lines.
+            shell (bool | None): If None, infer from command type.
         """
-        if isinstance(command, list):
-            command = subprocess.list2cmdline(command)
+        if shell is None:
+            shell = isinstance(command, list)
         self.command = command
+        self.shell: bool = shell
         self.cwd = str(cwd) if cwd is not None else None
         self.output_queue: Queue[str | EndOfStream] = Queue()
         self.accumulated_output: list[str] = []  # Store all output for later retrieval
@@ -250,6 +291,13 @@ class RunningProcess:
         self._termination_notified: bool = False
         if auto_run:
             self.run()
+
+    def get_command_str(self) -> str:
+        return (
+            subprocess.list2cmdline(self.command)
+            if isinstance(self.command, list)
+            else self.command
+        )
 
     def _dump_stack_trace(self) -> str:
         """
@@ -311,7 +359,7 @@ class RunningProcess:
         assert self.proc is None
         self.proc = subprocess.Popen(
             self.command,
-            shell=True,
+            shell=self.shell,
             cwd=self.cwd,
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,  # Merge stderr into stdout
@@ -498,13 +546,15 @@ class RunningProcess:
         # Use a timeout to prevent hanging
         start_time = time.time()
         while self.poll() is None:
+            cmd_str = self.get_command_str()
             if time.time() - start_time > self.timeout:
                 # Process is taking too long, dump stack trace if enabled
                 if self.enable_stack_trace:
                     print(
                         f"\nProcess timeout after {self.timeout} seconds, dumping stack trace..."
                     )
-                    print(f"Command: {self.command}")
+
+                    print(f"Command: {cmd_str}")
                     print(f"Process ID: {self.proc.pid}")
 
                     try:
@@ -518,10 +568,10 @@ class RunningProcess:
                         print(f"Failed to dump stack trace: {e}")
 
                 # Kill the process
-                print(f"Killing timed out process: {self.command}")
+                print(f"Killing timed out process: {cmd_str}")
                 self.kill()
                 raise TimeoutError(
-                    f"Process timed out after {self.timeout} seconds: {self.command}"
+                    f"Process timed out after {self.timeout} seconds: {cmd_str}"
                 )
             time.sleep(0.01)  # Check every 10ms
 
@@ -700,6 +750,17 @@ class RunningProcess:
         """
         # Return accumulated output (available even if process is still running)
         return "\n".join(self.accumulated_output)
+
+    def line_iter(self, timeout: float | None) -> _RunningProcessLineIterator:
+        """Return a context-managed iterator over output lines.
+
+        Args:
+            timeout: Per-line timeout in seconds. None waits indefinitely for each line.
+
+        Returns:
+            A context-managed iterator yielding non-empty, transformed stdout lines.
+        """
+        return _RunningProcessLineIterator(self, timeout)
 
 
 # NOTE: RunningProcessManager and its singleton live in ci/util/running_process_manager.py

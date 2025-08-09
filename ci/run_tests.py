@@ -14,6 +14,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import List, Optional
 
+from ci.util.running_process import RunningProcess
 from ci.util.test_exceptions import (
     TestExecutionFailedException,
     TestFailureInfo,
@@ -100,55 +101,22 @@ def run_test(test_file: Path, verbose: bool = False) -> TestResult:
         cmd.append("--minimal")  # Only show output for failures
 
     try:
-        # Start process with pipe for stdout/stderr
-        # Get current environment and ensure PATH includes Windows system directories
-        env = os.environ.copy()
-        if sys.platform == "win32":
-            # Add Windows system directories to PATH if not already present
-            system32 = os.path.join(
-                os.environ.get("SystemRoot", r"C:\Windows"), "System32"
-            )
-            if system32 not in env.get("PATH", ""):
-                env["PATH"] = system32 + os.pathsep + env.get("PATH", "")
-
-        process = subprocess.Popen(
-            cmd,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,  # Redirect stderr to stdout
-            bufsize=1,  # Line buffered
-            universal_newlines=True,  # Text mode
-            encoding="utf-8",
-            errors="replace",
-            env=env,
-            shell=False,  # Don't use shell to avoid path quoting issues
+        process = RunningProcess(
+            command=cmd,
+            cwd=Path(".").absolute(),
+            check=False,
+            shell=False,
+            auto_run=True,
         )
 
-        # Read output line by line
-        output_lines: List[str] = []
-        try:
-            while True:
-                if process.stdout is None:
-                    break
-
-                line = process.stdout.readline()
-                if not line and process.poll() is not None:
-                    break
-
-                output_lines.append(line)
-                if verbose:
-                    # Show output in real-time if verbose mode
-                    sys.stdout.write(line)
-                    sys.stdout.flush()
-
-        finally:
-            # Always close stdout
-            if process.stdout:
-                process.stdout.close()
+        with process.line_iter(timeout=30) as it:
+            for line in it:
+                print(line)
 
         # Wait for process to complete
         process.wait()
-        success = process.returncode == 0
-        output = "".join(output_lines)
+        success = process.poll() == 0
+        output = process.stdout
 
     except Exception as e:
         success = False

@@ -59,6 +59,40 @@ class TestRunningProcess(unittest.TestCase):
         combined: str = "\n".join(captured_lines).strip()
         self.assertIn("hello", combined)
 
+    def test_line_iter_basic(self: "TestRunningProcess") -> None:
+        """Validate context-managed line iteration yields only strings and completes."""
+
+        command: list[str] = [
+            "uv",
+            "run",
+            "python",
+            "-c",
+            "print('a'); print('b'); print('c')",
+        ]
+
+        rp: RunningProcess = RunningProcess(
+            command=command,
+            cwd=Path(".").absolute(),
+            check=False,
+            auto_run=True,
+            timeout=10,
+            enable_stack_trace=False,
+            on_complete=None,
+            output_formatter=None,
+        )
+
+        iter_lines: List[str] = []
+        with rp.line_iter(timeout=5) as it:
+            for ln in it:
+                # Should always be a string, never None
+                self.assertIsInstance(ln, str)
+                iter_lines.append(ln)
+
+        # Process should have finished; ensure exit success
+        rc: int = rp.wait()
+        self.assertEqual(rc, 0)
+        self.assertEqual(iter_lines, ["a", "b", "c"])
+
 
 class _UpperFormatter:
     """Simple OutputFormatter that records begin/end calls and uppercases lines."""
