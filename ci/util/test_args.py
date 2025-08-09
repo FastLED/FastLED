@@ -129,6 +129,12 @@ def parse_args(args: Optional[list[str]] = None) -> TestArgs:
         action="store_true",
         help="Force sequential test execution",
     )
+    parser.add_argument(
+        "--unity-chunks",
+        type=int,
+        default=1,
+        help="Number of unity chunks when building libfastled.a (default: 1)",
+    )
 
     parsed_args = parser.parse_args(args)
 
@@ -155,6 +161,7 @@ def parse_args(args: Optional[list[str]] = None) -> TestArgs:
         no_unity=parsed_args.no_unity,
         full=parsed_args.full,
         no_parallel=parsed_args.no_parallel,
+        unity_chunks=parsed_args.unity_chunks,
     )
 
     # Auto-enable --py or --cpp mode when a specific test is provided
