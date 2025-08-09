@@ -1,6 +1,7 @@
 #pragma once
 
 #if defined(__AVR__) \
+  || defined(__AVR_ATtiny85__) \
   || defined(ARDUINO_TEENSYLC) \
   || defined(ARDUINO_TEENSY30) \
   || defined(__MK20DX256__) \
