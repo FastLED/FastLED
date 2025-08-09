@@ -248,8 +248,8 @@ class FL_ALIGN HashMap {
             mark_occupied(idx);
             ++_size;
         } else {
-            FASTLED_ASSERT(idx != npos, "HashMap::insert: invalid index at "
-                                            << idx << " which is " << npos);
+            FASTLED_ASSERT(idx != npos(), "HashMap::insert: invalid index at "
+                                            << idx << " which is " << npos());
             _buckets[idx].value = value;
         }
     }
@@ -277,8 +277,8 @@ class FL_ALIGN HashMap {
             mark_occupied(idx);
             ++_size;
         } else {
-            FASTLED_ASSERT(idx != npos, "HashMap::insert: invalid index at "
-                                            << idx << " which is " << npos);
+            FASTLED_ASSERT(idx != npos(), "HashMap::insert: invalid index at "
+                                            << idx << " which is " << npos());
             _buckets[idx].value = fl::move(value);
         }
     }
@@ -286,7 +286,7 @@ class FL_ALIGN HashMap {
     // remove key; returns true if removed
     bool remove(const Key &key) {
         auto idx = find_index(key);
-        if (idx == npos)
+        if (idx == npos())
             return false;
         mark_deleted(idx);
         --_size;
@@ -323,27 +323,27 @@ class FL_ALIGN HashMap {
     // find pointer to value or nullptr
     T *find_value(const Key &key) {
         auto idx = find_index(key);
-        return idx == npos ? nullptr : &_buckets[idx].value;
+        return idx == npos() ? nullptr : &_buckets[idx].value;
     }
 
     const T *find_value(const Key &key) const {
         auto idx = find_index(key);
-        return idx == npos ? nullptr : &_buckets[idx].value;
+        return idx == npos() ? nullptr : &_buckets[idx].value;
     }
 
     iterator find(const Key &key) {
         auto idx = find_index(key);
-        return idx == npos ? end() : iterator(this, idx);
+        return idx == npos() ? end() : iterator(this, idx);
     }
 
     const_iterator find(const Key &key) const {
         auto idx = find_index(key);
-        return idx == npos ? end() : const_iterator(this, idx);
+        return idx == npos() ? end() : const_iterator(this, idx);
     }
 
     bool contains(const Key &key) const {
         auto idx = find_index(key);
-        return idx != npos;
+        return idx != npos();
     }
 
     // access or default-construct
@@ -356,7 +356,7 @@ class FL_ALIGN HashMap {
         is_new = p.second;
         
         // Check if find_slot failed to find a valid slot (HashMap is full)
-        if (idx == npos) {
+        if (idx == npos()) {
             // Need to resize to make room
             if (needs_rehash()) {
                 // if half the buckets are tombstones, rehash inline to prevent
@@ -376,8 +376,8 @@ class FL_ALIGN HashMap {
             idx = p.first;
             is_new = p.second;
             
-            // If still npos after resize, something is seriously wrong
-            if (idx == npos) {
+            // If still npos() after resize, something is seriously wrong
+            if (idx == npos()) {
                 // This should never happen after a successful resize
                 static T default_value{};
                 return default_value;
@@ -400,7 +400,9 @@ class FL_ALIGN HashMap {
 
 
   private:
-    inline static const fl::size npos = static_cast<fl::size>(-1);
+    static fl::size npos() {
+        return static_cast<fl::size>(-1);
+    }
 
     // Helper methods to check entry state
     bool is_occupied(fl::size idx) const { return _occupied.test(idx); }
@@ -446,7 +448,7 @@ class FL_ALIGN HashMap {
         const fl::size cap = _buckets.size();
         const fl::size mask = cap - 1;
         const fl::size h = _hash(key) & mask;
-        fl::size first_tomb = npos;
+        fl::size first_tomb = npos();
 
         if (cap <= 8) {
             // linear probing
@@ -454,9 +456,9 @@ class FL_ALIGN HashMap {
                 const fl::size idx = (h + i) & mask;
 
                 if (is_empty(idx))
-                    return {first_tomb != npos ? first_tomb : idx, true};
+                    return {first_tomb != npos() ? first_tomb : idx, true};
                 if (is_deleted(idx)) {
-                    if (first_tomb == npos)
+                    if (first_tomb == npos())
                         first_tomb = idx;
                 } else if (is_occupied(idx) && _equal(_buckets[idx].key, key)) {
                     return {idx, false};
@@ -469,9 +471,9 @@ class FL_ALIGN HashMap {
                 const fl::size idx = (h + i + i * i) & mask;
 
                 if (is_empty(idx))
-                    return {first_tomb != npos ? first_tomb : idx, true};
+                    return {first_tomb != npos() ? first_tomb : idx, true};
                 if (is_deleted(idx)) {
-                    if (first_tomb == npos)
+                    if (first_tomb == npos())
                         first_tomb = idx;
                 } else if (is_occupied(idx) && _equal(_buckets[idx].key, key)) {
                     return {idx, false};
@@ -482,9 +484,9 @@ class FL_ALIGN HashMap {
                 const fl::size idx = (h + i) & mask;
 
                 if (is_empty(idx))
-                    return {first_tomb != npos ? first_tomb : idx, true};
+                    return {first_tomb != npos() ? first_tomb : idx, true};
                 if (is_deleted(idx)) {
-                    if (first_tomb == npos)
+                    if (first_tomb == npos())
                         first_tomb = idx;
                 } else if (is_occupied(idx) && _equal(_buckets[idx].key, key)) {
                     return {idx, false};
@@ -492,7 +494,7 @@ class FL_ALIGN HashMap {
             }
         }
 
-        return {npos, false};
+        return {npos(), false};
     }
 
     enum {
@@ -510,7 +512,7 @@ class FL_ALIGN HashMap {
             for (fl::size i = 0; i < cap; ++i) {
                 const fl::size idx = (h + i) & mask;
                 if (is_empty(idx))
-                    return npos;
+                    return npos();
                 if (is_occupied(idx) && _equal(_buckets[idx].key, key))
                     return idx;
             }
@@ -520,7 +522,7 @@ class FL_ALIGN HashMap {
             for (; i < kQuadraticProbingTries; ++i) {
                 const fl::size idx = (h + i + i * i) & mask;
                 if (is_empty(idx))
-                    return npos;
+                    return npos();
                 if (is_occupied(idx) && _equal(_buckets[idx].key, key))
                     return idx;
             }
@@ -528,13 +530,13 @@ class FL_ALIGN HashMap {
             for (; i < cap; ++i) {
                 const fl::size idx = (h + i) & mask;
                 if (is_empty(idx))
-                    return npos;
+                    return npos();
                 if (is_occupied(idx) && _equal(_buckets[idx].key, key))
                     return idx;
             }
         }
 
-        return npos;
+        return npos();
     }
 
     fl::size find_unoccupied_index_using_bitset(
@@ -574,7 +576,7 @@ class FL_ALIGN HashMap {
                 return idx;
             }
         }
-        return npos;
+        return npos();
     }
 
     void rehash(fl::size new_cap) {
@@ -636,11 +638,11 @@ class FL_ALIGN HashMap {
             //                state");
 
             fl::size idx = find_unoccupied_index_using_bitset(e.key, occupied);
-            if (idx == npos) {
+            if (idx == npos()) {
                 // no more space
                 FASTLED_ASSERT(
                     false, "HashMap::rehash_inline_no_resize: invalid index at "
-                               << idx << " which is " << npos);
+                               << idx << " which is " << npos());
                 return;
             }
             // if idx < pos then we are moving the entry to a new location
@@ -660,12 +662,12 @@ class FL_ALIGN HashMap {
                 auto key = tmp.ptr()->key;
                 fl::size new_idx =
                     find_unoccupied_index_using_bitset(key, occupied);
-                if (new_idx == npos) {
+                if (new_idx == npos()) {
                     // no more space
                     FASTLED_ASSERT(
                         false,
                         "HashMap::rehash_inline_no_resize: invalid index at "
-                            << new_idx << " which is " << npos);
+                            << new_idx << " which is " << npos());
                     return;
                 }
                 occupied.set(new_idx);
