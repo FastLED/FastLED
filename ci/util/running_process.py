@@ -369,7 +369,7 @@ class RunningProcess:
         popen_command: str | list[str]
         if shell and isinstance(self.command, list):
             # Convert list to a single shell string with proper quoting
-            popen_command = " ".join(shlex.quote(part) for part in self.command)
+            popen_command = subprocess.list2cmdline(self.command)
         else:
             popen_command = self.command
 
