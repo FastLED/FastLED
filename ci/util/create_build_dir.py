@@ -44,37 +44,86 @@ def _install_global_package(package: str) -> None:
 def insert_tool_aliases(meta_json: Dict[str, Dict[str, Any]]) -> None:
     for board in meta_json.keys():
         aliases: dict[str, str | None] = {}
-        cc_path = meta_json[board].get("cc_path")
-        cc_path = Path(cc_path) if cc_path else None
-        if cc_path:
-            # get the prefix of the base name of the compiler.
-            cc_base = cc_path.name
-            parent = cc_path.parent
-            prefix = cc_base.split("gcc")[0]
-            suffix = cc_path.suffix
-            # create the aliases
-            for tool in [
-                "gcc",
-                "g++",
-                "ar",
-                "objcopy",
-                "objdump",
-                "size",
-                "nm",
-                "ld",
-                "as",
-                "ranlib",
-                "strip",
-                "c++filt",
-                "readelf",
-                "addr2line",
-            ]:
-                name = f"{prefix}{tool}" + suffix
-                tool_path = Path(str(parent / name))
+        cc_path_value = meta_json[board].get("cc_path")
+        resolved_cc_path: Path | None = None
+        if cc_path_value:
+            try:
+                candidate = Path(str(cc_path_value))
+                if candidate.is_absolute() and candidate.exists():
+                    resolved_cc_path = candidate
+                elif candidate.exists():
+                    resolved_cc_path = candidate.resolve()
+                else:
+                    which_result = shutil.which(
+                        candidate.name if candidate.name else str(candidate)
+                    )
+                    if which_result:
+                        resolved_cc_path = Path(which_result)
+            except Exception:
+                resolved_cc_path = None
+
+        # Try to infer toolchain bin directory and prefix from either CC or GDB path
+        tool_bin_dir: Path | None = None
+        tool_prefix: str = ""
+        tool_suffix: str = ""
+
+        if resolved_cc_path and resolved_cc_path.exists():
+            cc_base = resolved_cc_path.name
+            tool_bin_dir = resolved_cc_path.parent
+            tool_prefix = cc_base.split("gcc")[0] if "gcc" in cc_base else ""
+            tool_suffix = resolved_cc_path.suffix
+        else:
+            gdb_path_value = meta_json[board].get("gdb_path")
+            if gdb_path_value:
+                try:
+                    gdb_path = Path(str(gdb_path_value))
+                    if not gdb_path.exists():
+                        which_gdb = shutil.which(gdb_path.name)
+                        if which_gdb:
+                            gdb_path = Path(which_gdb)
+                    if gdb_path.exists():
+                        tool_bin_dir = gdb_path.parent
+                        gdb_base = gdb_path.name
+                        # Derive prefix like 'arm-none-eabi-' from 'arm-none-eabi-gdb'
+                        tool_prefix = (
+                            gdb_base.split("gdb")[0] if "gdb" in gdb_base else ""
+                        )
+                        tool_suffix = gdb_path.suffix
+                except Exception:
+                    pass
+
+        tools = [
+            "gcc",
+            "g++",
+            "ar",
+            "objcopy",
+            "objdump",
+            "size",
+            "nm",
+            "ld",
+            "as",
+            "ranlib",
+            "strip",
+            "c++filt",
+            "readelf",
+            "addr2line",
+        ]
+
+        if tool_bin_dir is not None:
+            for tool in tools:
+                name = f"{tool_prefix}{tool}" + tool_suffix
+                tool_path = tool_bin_dir / name
                 if tool_path.exists():
                     aliases[tool] = str(tool_path)
                 else:
-                    aliases[tool] = None
+                    which_result = shutil.which(name)
+                    aliases[tool] = str(Path(which_result)) if which_result else None
+        else:
+            # Fallback: resolve via PATH only
+            for tool in tools:
+                which_result = shutil.which(tool)
+                aliases[tool] = str(Path(which_result)) if which_result else None
+
         meta_json[board]["aliases"] = aliases
 
 
