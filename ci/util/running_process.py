@@ -167,6 +167,22 @@ class ProcessOutputReader:
 
                     self._on_output(transformed_line)
 
+            except KeyboardInterrupt:
+                # Per project rules, handle interrupts in threads explicitly
+                thread_id = threading.current_thread().ident
+                thread_name = threading.current_thread().name
+                print(f"Thread {thread_id} ({thread_name}) caught KeyboardInterrupt")
+                print(f"Stack trace for thread {thread_id}:")
+                traceback.print_exc()
+                # Try to ensure child process is terminated promptly
+                try:
+                    self._proc.kill()
+                except Exception:
+                    pass
+                # Propagate to main thread and re-raise
+                _thread.interrupt_main()
+                raise
+
             except (ValueError, OSError) as e:
                 # Normal shutdown scenarios include closed file descriptors.
                 if "closed file" in str(e) or "Bad file descriptor" in str(e):
@@ -208,7 +224,7 @@ class RunningProcess:
         cwd: Path | None = None,
         check: bool = False,
         auto_run: bool = True,
-        timeout: int = 120,  # 2 minutes.
+        timeout: int = 240,  # 4 minutes.
         enable_stack_trace: bool = False,  # Enable stack trace dumping on timeout
         on_complete: Callable[[], None]
         | None = None,  # Callback to execute when process completes
@@ -249,7 +265,6 @@ class RunningProcess:
         self.shutdown: threading.Event = threading.Event()
         self._start_time: float | None = None
         self._end_time: float | None = None
-        self._stream_finished = False
         self._time_last_stdout_line: float | None = None
         self._termination_notified: bool = False
         if auto_run:
@@ -424,34 +439,39 @@ class RunningProcess:
             queue.Empty: If timeout is 0 or specified and no line is available
             TimeoutError: If the process times out
         """
-        if self._stream_finished:
-            return EndOfStream()
-
         assert self.proc is not None
 
         expired_time = time.time() + timeout if timeout is not None else None
 
         while True:
-            if self._stream_finished:
-                return EndOfStream()
-
             if expired_time is not None:
                 if time.time() > expired_time:
                     raise TimeoutError(f"Timeout after {timeout} seconds")
+
+            # Peek without popping if EndOfStream is at the front
+            with self.output_queue.mutex:
+                if len(self.output_queue.queue) > 0:
+                    head = self.output_queue.queue[0]
+                    if isinstance(head, EndOfStream):
+                        return EndOfStream()
 
             if self.output_queue.empty():
                 if timeout != 0:
                     time.sleep(0.01)
                     continue
+
             try:
-                line = self.output_queue.get(timeout=0.1)
-                if isinstance(line, EndOfStream):
-                    self._stream_finished = True
+                # Safe to pop now; head is not EndOfStream
+                item: str | EndOfStream = self.output_queue.get(timeout=0.1)
+                if isinstance(item, EndOfStream):
+                    # In rare race conditions, EndOfStream could appear after peek; do not consume
+                    # Put it back at the front to preserve semantics
+                    with self.output_queue.mutex:
+                        self.output_queue.queue.appendleft(item)
                     return EndOfStream()
-                return line
+                return item
             except queue.Empty:
                 if self.finished:
-                    self._stream_finished = True
                     return EndOfStream()
                 continue
 
@@ -464,16 +484,10 @@ class RunningProcess:
             None: No output available right now (should continue polling)
             EndOfStream: Process has finished, no more output will be available
         """
-        if self._stream_finished:
-            return EndOfStream()
-
+        # Peek without consuming EndOfStream
         try:
-            out: str | EndOfStream = self.get_next_line(timeout=0)
-            if isinstance(out, EndOfStream):
-                return EndOfStream()
-            return out
-        except queue.Empty:
-            return None
+            line: str | EndOfStream = self.get_next_line(timeout=0)
+            return line
         except TimeoutError:
             return None
 
@@ -607,31 +621,35 @@ class RunningProcess:
             from ci.util.test_env import kill_process_tree
 
             kill_process_tree(self.proc.pid)
+        except KeyboardInterrupt:
+            print("Keyboard interrupt detected, interrupting main thread")
+            _thread.interrupt_main()
+            try:
+                self.proc.kill()
+            except (ProcessLookupError, PermissionError, OSError, ValueError) as e:
+                print(f"Warning: Failed to kill process tree for {self.proc.pid}: {e}")
+                pass
+            raise
         except Exception as e:
             # Fallback to simple kill if tree kill fails
             print(f"Warning: Failed to kill process tree for {self.proc.pid}: {e}")
             try:
                 self.proc.kill()
-            except KeyboardInterrupt:
-                print(f"Keyboard interrupt detected, interrupting main thread")
-                _thread.interrupt_main()
-                self.proc.kill()
-                raise
-            except Exception:
+            except (ProcessLookupError, PermissionError, OSError, ValueError):
                 pass  # Process might already be dead
 
         # Wait for reader thread to finish
         if self.reader_thread is not None:
             self.reader_thread.join(timeout=0.05)  # 50ms should be plenty for cleanup
 
-        # Drain any remaining output
-        while True:
-            try:
-                line = self.output_queue.get_nowait()
-                if line is None:  # End of output marker
-                    break
-            except queue.Empty:
-                break
+        # # Drain any remaining output
+        # while True:
+        #     try:
+        #         line = self.output_queue.get_nowait()
+        #         if line is None:  # End of output marker
+        #             break
+        #     except queue.Empty:
+        #         break
 
         # Ensure unregistration even on forced kill
         try:
@@ -712,60 +730,7 @@ class RunningProcess:
         return "\n".join(self.accumulated_output)
 
 
-class RunningProcessManager:
-    """
-    Thread-safe registry of currently running processes for watchdog diagnostics.
-    """
-
-    def __init__(self) -> None:
-        self._lock = threading.RLock()
-        self._processes: list[RunningProcess] = []
-
-    def register(self, proc: RunningProcess) -> None:
-        with self._lock:
-            if proc not in self._processes:
-                self._processes.append(proc)
-
-    def unregister(self, proc: RunningProcess) -> None:
-        with self._lock:
-            try:
-                self._processes.remove(proc)
-            except ValueError:
-                pass
-
-    def list_active(self) -> list[RunningProcess]:
-        with self._lock:
-            return [p for p in self._processes if not p.finished]
-
-    def dump_active(self) -> None:
-        active = self.list_active()
-        if not active:
-            print("\nNO ACTIVE SUBPROCESSES DETECTED - MAIN PROCESS LIKELY HUNG")
-            return
-
-        print("\nSTUCK SUBPROCESS COMMANDS:")
-        now = time.time()
-        for idx, p in enumerate(active, 1):
-            pid: int | None = None
-            try:
-                if p.proc is not None:
-                    pid = p.proc.pid
-            except Exception:
-                pid = None
-
-            start: float | None = p.start_time
-            last_out: float | None = p.time_last_stdout_line()
-            duration_str = f"{(now - start):.1f}s" if start is not None else "?"
-            since_out_str = (
-                f"{(now - last_out):.1f}s" if last_out is not None else "no-output"
-            )
-
-            print(
-                f"  {idx}. cmd={p.command} pid={pid} duration={duration_str} last_output={since_out_str}"
-            )
-
-
-# NOTE: Singleton moved to ci.util.running_process_manager for reuse
+# NOTE: RunningProcessManager and its singleton live in ci/util/running_process_manager.py
 
 
 def subprocess_run(
