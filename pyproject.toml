@@ -24,7 +24,6 @@ dependencies = [
     "download",
     "httpx",
     "pytest-xdist",
-    "fastled>=1.4.30",
     "sccache>=0.10.0",
     "psutil",
     "toml>=0.10.2",
@@ -39,6 +38,7 @@ dependencies = [
     "filelock>=3.18.0",
     "llvm-installer>=1.4.10",
     "sys-detection>=1.3.4",
+    "fastled>=1.4.35",
 ]
 
 [build-system]
