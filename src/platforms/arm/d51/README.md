@@ -1,14 +1,7 @@
-# FastLED Platform: ARM SAMD51 (d51)
+# FastLED Platform: SAMD51 (M4)
 
-SAMD51 (Feather/Itsy M4, Wio Terminal) support.
+## Optional feature defines
 
-## Files (quick pass)
-- `fastled_arm_d51.h`: Aggregator; includes `fastpin_arm_d51.h`, `clockless_arm_d51.h`, and SPI core where applicable.
-- `fastpin_arm_d51.h`: Pin helpers for SAMD51.
-- `led_sysdefs_arm_d51.h`: System defines for SAMD51.
-- `clockless_arm_d51.h`: Clockless WS281x driver for SAMD51.
-- `README.txt`: Historical notes on tested boards.
-
-Notes:
-- Higher clock speeds and interrupt policy can affect jitter; prefer short critical sections.
- - Typical settings: `FASTLED_USE_PROGMEM=0`; consider enabling interrupts with careful ISR timing.
+- `FASTLED_ALLOW_INTERRUPTS` (0|1): Default 1.
+- `INTERRUPT_THRESHOLD` (cycles/us): Default 1.
+- `FASTLED_FORCE_SOFTWARE_PINS` / `FASTLED_FORCE_SOFTWARE_SPI` (defined): Force software paths.

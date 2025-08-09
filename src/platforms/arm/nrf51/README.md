@@ -1,14 +1,8 @@
-# FastLED Platform: nRF51
+# FastLED Platform: Nordic nRF51
 
-Nordic nRF51 family support.
+## Optional feature defines
 
-## Files (quick pass)
-- `fastled_arm_nrf51.h`: Aggregator; includes pin/SPI/clockless.
-- `fastpin_arm_nrf51.h`: Pin helpers.
-- `fastspi_arm_nrf51.h`: SPI backend.
-- `clockless_arm_nrf51.h`: Clockless driver for nRF51.
-- `led_sysdefs_arm_nrf51.h`: System defines for nRF51.
-
-Notes:
-- Lower-clock Cortex-M0; carefully budget interrupt windows when using clockless.
- - Prefer fewer parallel lanes or shorter strips with clockless to maintain timing margins.
+- `FASTLED_FORCE_SOFTWARE_SPI` (defined): Force software SPI (disables HW SPI).
+- `LED_TIMER` (NRF_TIMERx): Timer used for timing; default `NRF_TIMER1`.
+- `FASTLED_ALLOW_INTERRUPTS` (0|1): Default 1.
+- `FASTLED_USE_PROGMEM` (0|1): Default 0.

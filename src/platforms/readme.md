@@ -98,3 +98,7 @@ RP2040 (PIO clockless) needs no special defines; use standard WS2812 addLeds cal
 - Power and level shifting matter: WS281x typically need 5V data at sufficient current; ensure a common ground between controller and LEDs.
 - On ARM families, PROGMEM is typically disabled (`FASTLED_USE_PROGMEM=0`); on AVR it is enabled.
 - For very large installations, consider parallel outputs (OctoWS2811 on Teensy, I2S‑parallel on ESP32) and DMA‑friendly patterns.
+
+### Notes on configuration defines
+
+- Each platform README includes an "Optional feature defines" section with the macros you can override in your sketch. If a platform folder lacks a README, see its `led_sysdefs_*.h`, `fastpin_*.h`, and controller headers for documented defaults.

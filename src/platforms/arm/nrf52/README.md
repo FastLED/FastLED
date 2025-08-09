@@ -1,15 +1,11 @@
-# FastLED Platform: nRF52
+# FastLED Platform: Nordic nRF52
 
-Nordic nRF52 family support.
+## Optional feature defines
 
-## Files (quick pass)
-- `fastled_arm_nrf52.h`: Aggregator; includes pin/SPI/clockless and sysdefs.
-- `fastpin_arm_nrf52.h`, `fastpin_arm_nrf52_variants.h`: Pin helpers/variants.
-- `fastspi_arm_nrf52.h`: SPI backend.
-- `clockless_arm_nrf52.h`: Clockless driver.
-- `arbiter_nrf52.h`: PWM arbitration utility (selects/guards PWM instances for drivers).
-- `led_sysdefs_arm_nrf52.h`: System defines for nRF52.
-
-Notes:
-- Requires `CLOCKLESS_FREQUENCY` definition in many setups; PWM resources may be shared and must be arbitrated.
- - `arbiter_nrf52.h` exposes a small API to acquire/release PWM instances safely across users; ensure ISR handlers are lightweight.
+- `FASTLED_FORCE_SOFTWARE_SPI` (defined): Force software SPI (disables SPIM usage).
+- `FASTLED_NRF52_SPIM` (NRF_SPIMx): Select SPIM instance (e.g., `NRF_SPIM0`).
+- `FASTLED_NRF52_ENABLE_PWM_INSTANCE{0..3}` (defined): Enable one or more PWM instances used by the clockless engine.
+- `FASTLED_NRF52_NEVER_INLINE` (defined): Adjust inlining policy for performance/size.
+- `FASTLED_NRF52_DEBUGPRINT(...)` (macro): Hook for debug printing.
+- `FASTLED_ALLOW_INTERRUPTS` (0|1): Default 1.
+- `FASTLED_USE_PROGMEM` (0|1): Default 0.

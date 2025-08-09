@@ -1,14 +1,11 @@
-# FastLED Platform: RP2040
+# FastLED Platform: RP2040 (Raspberry Pi Pico)
 
-Raspberry Pi Pico (RP2040) support.
+## Optional feature defines
 
-## Files (quick pass)
-- `fastled_arm_rp2040.h`: Aggregator; includes pin and clockless.
-- `fastpin_arm_rp2040.h`: Pin helpers.
-- `clockless_arm_rp2040.h`: Clockless driver using PIO.
-- `pio_asm.h`, `pio_gen.h`: PIO assembly and program generator for T1/T2/T3‑tuned clockless output.
-- `led_sysdefs_arm_rp2040.h`: System defines for RP2040.
-
-Notes:
-- Uses PIO program assembled at runtime; ensure T1/T2/T3 match LED timing.
- - `clockless_arm_rp2040.h` configures wrap targets and delays via `pio_gen.h`; changes to timing require regenerating the program.
+- `FASTLED_RP2040_CLOCKLESS_PIO` (0|1): Use PIO+DMA non-blocking clockless output. Default 1.
+- `FASTLED_RP2040_CLOCKLESS_IRQ_SHARED` (0|1): Install shared IRQ handler for DMA IRQ0. Default 1.
+- `FASTLED_RP2040_CLOCKLESS_M0_FALLBACK` (0|1): Enable M0 blocking fallback when PIO unavailable. Default 0.
+- `FASTLED_FORCE_SOFTWARE_SPI` (defined): Use software SPI instead of hardware.
+- `FASTLED_FORCE_SOFTWARE_PINS` (defined): Force software pin access.
+- `FASTLED_ALLOW_INTERRUPTS` (0|1): Default 1.
+- `FASTLED_USE_PROGMEM` (0|1): Default 0.

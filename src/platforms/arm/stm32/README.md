@@ -1,15 +1,8 @@
 # FastLED Platform: STM32
 
-STM32 family support (e.g., F1 series).
+## Optional feature defines
 
-## Files (quick pass)
-- `fastled_arm_stm32.h`: Aggregator; includes pin and clockless.
-- `fastpin_arm_stm32.h`, `fastpin_arm_stm_legacy.h`, `fastpin_arm_stm_new.h`: Pin helpers/variants.
-- `clockless_arm_stm32.h`: Clockless driver for STM32.
-- `armpin.h`: Generic ARM pin template utilities.
-- `cm3_regs.h`: CM3 register helpers.
-- `led_sysdefs_arm_stm32.h`: System defines for STM32.
-
-Notes:
-- Some families prefer different pin backends (legacy/new); choose the appropriate header for your core.
- - Many STM32 Arduino cores map `pinMode` to HAL; direct register variants in `fastpin_*` may differ across series.
+- `FASTLED_ALLOW_INTERRUPTS` (0|1): Allow brief interrupts during show; default 0.
+- `USE_NEW_STM32_PIN_DEFINITIONS` (defined): Force the newer pin mapping for STM32F1 boards.
+- `FASTLED_FORCE_SOFTWARE_PINS` (defined): Force software pin access.
+- `FASTLED_USE_PROGMEM` (0|1): Default 0.

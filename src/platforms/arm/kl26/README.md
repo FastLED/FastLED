@@ -1,15 +1,8 @@
-# FastLED Platform: Teensy LC (KL26)
+# FastLED Platform: Teensy LC (MKL26)
 
-Teensy LC (MKL26Z64) support.
+## Optional feature defines
 
-## Files (quick pass)
-- `fastled_arm_kl26.h`: Aggregator; includes pin/SPI/clockless.
-- `fastpin_arm_kl26.h`: Pin helpers.
-- `fastspi_arm_kl26.h`: SPI output backend.
-- `clockless_arm_kl26.h`: Clockless driver for LC.
-- `ws2812serial_controller.h` (via k20 include): Serial WS2812 controller reuse.
-- `led_sysdefs_arm_kl26.h`: System defines for KL26.
-
-Notes:
-- LC has tighter timing/memory limits; keep critical sections minimal.
- - Verify `FASTLED_USE_PROGMEM` and interrupt policy per toolchain; defaults may differ between cores.
+- `FASTLED_SPI_BYTE_ONLY` (defined): Use byte-only SPI optimization (enabled by platform).
+- `FASTLED_ALLOW_INTERRUPTS` (0|1): Default 1.
+- `FASTLED_USE_PROGMEM` (0|1): Default 1.
+- `FASTLED_FORCE_SOFTWARE_PINS` / `FASTLED_FORCE_SOFTWARE_SPI` (defined): Force software paths.

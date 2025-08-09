@@ -1,15 +1,8 @@
-# FastLED Platform: Teensy 3.6 (K66)
+# FastLED Platform: Teensy 3.6 (MK66)
 
-Teensy 3.6 (MK66FX1M0) support.
+## Optional feature defines
 
-## Files (quick pass)
-- `fastled_arm_k66.h`: Aggregator; includes pin/SPI/clockless and reuses some K20 helpers.
-- `fastpin_arm_k66.h`: Pin helpers.
-- `fastspi_arm_k66.h`: SPI output backend.
-- `clockless_arm_k66.h`: Single-lane clockless driver (DWT counter).
-- `clockless_block_arm_k66.h`: Block/multi-lane variant.
-- `led_sysdefs_arm_k66.h`: System defines for K66.
-
-Notes:
-- Similar to K20 timing model with higher clocks; observe interrupt thresholds for consistent output.
- - DWT cycle counter is used by clockless; ensure it is enabled early for precise timing.
+- `USE_OCTOWS2811` (defined): Enable OctoWS2811 parallel output integration.
+- `FASTLED_ALLOW_INTERRUPTS` (0|1): Default 1.
+- `FASTLED_USE_PROGMEM` (0|1): Default 1.
+- `FASTLED_FORCE_SOFTWARE_PINS` / `FASTLED_FORCE_SOFTWARE_SPI` (defined): Force software paths.
