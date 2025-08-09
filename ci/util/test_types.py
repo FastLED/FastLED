@@ -82,6 +82,7 @@ class TestArgs:
     full: bool = False
 
     no_parallel: bool = False  # Force sequential test execution
+    unity_chunks: int = 1  # Number of unity chunks for libfastled build
 
 
 @typechecked

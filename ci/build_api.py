@@ -41,7 +41,13 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Sequence, Set, Tuple
 
 from ci.ci.fingerprint_cache import FingerprintCache
-from ci.compiler.clang_compiler import BuildFlags, Compiler, CompilerOptions
+from ci.compiler.clang_compiler import (
+    BuildFlags,
+    Compiler,
+    CompilerOptions,
+    LibarchiveOptions,
+)
+from ci.compiler.test_example_compilation import get_fastled_core_sources
 from ci.util.paths import PROJECT_ROOT
 from ci.util.running_process import subprocess_run
 
@@ -240,37 +246,94 @@ class BuildAPI:
             print(f"[BUILD API] Reusing existing library: {self._library_file}")
             return True
 
-        # Build library by compiling all FastLED source files
-        fastled_src_dir = PROJECT_ROOT / "src"
-        cpp_files = list(fastled_src_dir.rglob("*.cpp"))
+        # Prefer UNITY chunk build for faster library creation
+        try:
+            unity_dir = self.artifacts_dir / "unity"
+            unity_dir.mkdir(parents=True, exist_ok=True)
 
-        if not cpp_files:
-            print(f"[BUILD API] No FastLED source files found in {fastled_src_dir}")
-            return False
-
-        print(f"[BUILD API] Found {len(cpp_files)} FastLED source files to compile")
-
-        # Compile all source files to object files
-        object_files: List[Path] = []
-        for src_file in cpp_files:
-            obj_file = self.artifacts_dir / f"{src_file.stem}.o"
-
-            # Compile source file
-            success = self._compiler.compile_cpp_file(src_file, obj_file)
-            if success:
-                object_files.append(obj_file)
-            else:
-                print(f"[BUILD API] Failed to compile {src_file}")
+            # Collect FastLED core sources (consistent with example compilation)
+            all_sources = [
+                p for p in get_fastled_core_sources() if p.name != "stub_main.cpp"
+            ]
+            if not all_sources:
+                print("[BUILD API] No FastLED sources found for unity build")
                 return False
 
-        # Create static library from object files
-        success = self._create_static_library(object_files, self._library_file)
-        if success:
-            print(f"[BUILD API] Library built successfully: {self._library_file}")
-        else:
-            print(f"[BUILD API] Library build failed")
+            # Deterministic sort relative to project root
+            project_root = PROJECT_ROOT
 
-        return success
+            def sort_key(p: Path) -> str:
+                try:
+                    rel = p.relative_to(project_root)
+                except Exception:
+                    rel = p
+                return rel.as_posix()
+
+            all_sources = sorted(all_sources, key=sort_key)
+
+            # Partition into chunks (1..4 typical)
+            total = len(all_sources)
+            max_chunks = min(4, max(1, (os.cpu_count() or 2) // 2))
+            chunks = max_chunks if total >= max_chunks else max(1, total)
+
+            # Prepare compile options (PCH off for unity)
+            compile_opts = CompilerOptions(
+                include_path=self._compiler.settings.include_path,
+                compiler=self._compiler.settings.compiler,
+                defines=self._compiler.settings.defines,
+                std_version=self._compiler.settings.std_version,
+                compiler_args=self._compiler.settings.compiler_args,
+                use_pch=False,
+                additional_flags=["-c"],
+                parallel=self.parallel,
+            )
+
+            # Compute chunk sizes
+            base = total // chunks
+            rem = total % chunks
+            start = 0
+            unity_objects: list[Path] = []
+
+            for i in range(chunks):
+                size = base + (1 if i < rem else 0)
+                end = start + size
+                group = all_sources[start:end]
+                start = end
+
+                if not group:
+                    continue
+
+                unity_cpp = unity_dir / f"unity{i + 1}.cpp"
+                # Use synchronous path to simplify error handling here
+                result = self._compiler._compile_unity_sync(
+                    compile_opts,
+                    group,
+                    unity_output_path=unity_cpp,
+                )
+                if not result.ok:
+                    print(f"[BUILD API] Unity chunk {i + 1} failed: {result.stderr}")
+                    return False
+                unity_objects.append(unity_cpp.with_suffix(".o"))
+
+            if not unity_objects:
+                print("[BUILD API] No unity objects produced")
+                return False
+
+            # Archive unity objects into the final library
+            archive_result = self._compiler.create_archive(
+                unity_objects, self._library_file, LibarchiveOptions()
+            ).result()
+            if not archive_result.ok:
+                print(f"[BUILD API] Archive creation failed: {archive_result.stderr}")
+                return False
+
+            print(
+                f"[BUILD API] Library built successfully (UNITY): {self._library_file}"
+            )
+            return True
+        except Exception as e:
+            print(f"[BUILD API] UNITY library build failed with exception: {e}")
+            return False
 
     def _create_static_library(
         self, object_files: List[Path], output_lib: Path

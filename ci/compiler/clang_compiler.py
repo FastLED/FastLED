@@ -5,6 +5,7 @@ Clang compiler accessibility and testing functions for FastLED.
 Supports the simple build system approach outlined in FEATURE.md.
 """
 
+import _thread
 import os
 import platform
 import shutil
@@ -13,6 +14,7 @@ import sys
 import tempfile
 import time
 import tomllib
+import warnings
 from concurrent.futures import Future, ThreadPoolExecutor
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -116,6 +118,25 @@ class Result:
     stdout: str
     stderr: str
     return_code: int
+
+
+@dataclass
+class UnityChunkResult:
+    """Result for a single unity chunk compilation."""
+
+    ok: bool
+    unity_cpp: Path
+    object_path: Path
+    stderr: str
+    return_code: int
+
+
+@dataclass
+class UnityChunksResult:
+    """Aggregate result for a chunked unity build."""
+
+    success: bool
+    chunks: list[UnityChunkResult]
 
 
 @dataclass
@@ -239,6 +260,9 @@ class BuildFlags:
             raise FileNotFoundError(
                 f"Required build_flags.toml not found at {toml_path}"
             )
+        except KeyboardInterrupt:
+            _thread.interrupt_main()
+            raise
         except Exception as e:
             raise RuntimeError(f"Failed to parse build_flags.toml: {e}")
 
@@ -936,6 +960,9 @@ class Compiler:
                 os.unlink(pch_header_path)
                 return False
 
+        except KeyboardInterrupt:
+            _thread.interrupt_main()
+            raise
         except Exception as e:
             # PCH creation failed, continue without PCH
             print(f"[DEBUG] PCH creation exception: {e}")
@@ -946,12 +973,18 @@ class Compiler:
         if self._pch_file_path and self._pch_file_path.exists():
             try:
                 os.unlink(self._pch_file_path)
-            except:
+            except KeyboardInterrupt:
+                _thread.interrupt_main()
+                raise
+            except Exception:
                 pass
         if self._pch_header_path and self._pch_header_path.exists():
             try:
                 os.unlink(self._pch_header_path)
-            except:
+            except KeyboardInterrupt:
+                _thread.interrupt_main()
+                raise
+            except Exception:
                 pass
         self._pch_file_path = None
         self._pch_header_path = None
@@ -1025,6 +1058,9 @@ class Compiler:
                     version="",
                     error=f"ziglang c++ version check failed: {stderr_result}",
                 )
+        except KeyboardInterrupt:
+            _thread.interrupt_main()
+            raise
         except Exception as e:
             return VersionCheckResult(
                 success=False, version="", error=f"ziglang c++ not accessible: {str(e)}"
@@ -1221,11 +1257,14 @@ class Compiler:
                 return_code=process.returncode,
             )
 
+        except KeyboardInterrupt:
+            _thread.interrupt_main()
+            raise
         except Exception as e:
             if cleanup_temp and os.path.exists(output_path):
                 try:
                     os.unlink(output_path)
-                except:
+                except Exception:
                     pass
 
             return Result(ok=False, stdout="", stderr=str(e), return_code=-1)
@@ -1422,11 +1461,14 @@ class Compiler:
                 return_code=process.returncode,
             )
 
+        except KeyboardInterrupt:
+            _thread.interrupt_main()
+            raise
         except Exception as e:
             if cleanup_temp and os.path.exists(output_path):
                 try:
                     os.unlink(output_path)
-                except:
+                except Exception:
                     pass
 
             return Result(ok=False, stdout="", stderr=str(e), return_code=-1)
@@ -1626,6 +1668,9 @@ class Compiler:
             # If we didn't find FastLED.h at all, assume PCH is still ok (might be included indirectly)
             return True
 
+        except KeyboardInterrupt:
+            _thread.interrupt_main()
+            raise
         except Exception:
             # If we can't analyze the file, err on the side of caution and disable PCH
             return False
@@ -1655,6 +1700,35 @@ class Compiler:
             compile_options,
             list_of_cpp_files,
             unity_output_path,
+        )
+
+    def compile_unity_chunks(
+        self,
+        compile_options: CompilerOptions,
+        list_of_cpp_files: list[str | Path],
+        chunks: int,
+        unity_dir: str | Path | None = None,
+        no_parallel: bool = False,
+    ) -> Future[UnityChunksResult]:
+        """Compile a chunked UNITY build producing N unity{n}.o objects.
+
+        Args:
+            compile_options: Compilation options (PCH is forced off for UNITY)
+            list_of_cpp_files: Input .cpp files (will be sorted deterministically)
+            chunks: Number of chunks (>=1). Capped to number of files.
+            unity_dir: Directory to write unity{n}.cpp/.o (temp dir if None)
+            no_parallel: If True, compile sequentially
+
+        Returns:
+            Future[UnityChunksResult]
+        """
+        return _EXECUTOR.submit(
+            self._compile_unity_chunks_sync,
+            compile_options,
+            list_of_cpp_files,
+            chunks,
+            unity_dir,
+            no_parallel,
         )
 
     def _compile_unity_sync(
@@ -1734,11 +1808,15 @@ class Compiler:
 
             if should_write:
                 unity_path.write_text(unity_content, encoding="utf-8")
+        except KeyboardInterrupt:
+            _thread.interrupt_main()
+            raise
         except Exception as e:
             if cleanup_unity and unity_path.exists():
                 try:
                     unity_path.unlink()
-                except:
+                except Exception:
+                    warnings.warn(f"Failed to unlink unity.cpp: {e}")
                     pass
             return Result(
                 ok=False,
@@ -1783,17 +1861,20 @@ class Compiler:
 
             return result
 
+        except KeyboardInterrupt:
+            _thread.interrupt_main()
+            raise
         except Exception as e:
             # Clean up temporary files on exception
             if cleanup_unity and unity_path.exists():
                 try:
                     unity_path.unlink()
-                except:
+                except Exception:
                     pass
             if cleanup_obj and output_path and os.path.exists(output_path):
                 try:
                     os.unlink(output_path)
-                except:
+                except Exception:
                     pass
 
             return Result(
@@ -1802,6 +1883,174 @@ class Compiler:
                 stderr=f"Unity compilation failed: {e}",
                 return_code=-1,
             )
+
+    def _compile_unity_chunks_sync(
+        self,
+        compile_options: CompilerOptions,
+        list_of_cpp_files: Sequence[str | Path],
+        chunks: int,
+        unity_dir: str | Path | None = None,
+        no_parallel: bool = False,
+    ) -> UnityChunksResult:
+        if not list_of_cpp_files:
+            return UnityChunksResult(success=False, chunks=[])
+
+        # Normalize and validate inputs
+        cpp_paths: list[Path] = []
+        for cpp_file in list_of_cpp_files:
+            p = Path(cpp_file).resolve()
+            if not p.exists() or p.suffix != ".cpp":
+                return UnityChunksResult(success=False, chunks=[])
+            cpp_paths.append(p)
+
+        # Deterministic ordering
+        project_root = Path.cwd()
+
+        def sort_key(p: Path) -> str:
+            try:
+                rel = p.relative_to(project_root)
+            except Exception:
+                rel = p
+            return rel.as_posix()
+
+        cpp_paths = sorted(cpp_paths, key=sort_key)
+
+        total = len(cpp_paths)
+        chunks = max(1, min(chunks, total))
+        base = total // chunks
+        rem = total % chunks
+
+        # Resolve unity dir
+        cleanup_dir = False
+        if unity_dir is None:
+            temp_dir = compile_options.temp_dir or tempfile.gettempdir()
+            unity_root = Path(temp_dir) / f"fastled_unity_{os.getpid()}"
+            unity_root.mkdir(parents=True, exist_ok=True)
+            cleanup_dir = True
+        else:
+            unity_root = Path(unity_dir)
+            unity_root.mkdir(parents=True, exist_ok=True)
+
+        # Build per-chunk unity files
+        chunk_results: list[UnityChunkResult] = []
+        compile_futures: list[tuple[int, Future[Result], Path, Path]] = []
+
+        start = 0
+        for i in range(chunks):
+            size = base + (1 if i < rem else 0)
+            end = start + size
+            group = cpp_paths[start:end]
+            start = end
+
+            unity_cpp = unity_root / f"unity{i + 1}.cpp"
+
+            # Generate content (idempotent write if content unchanged)
+            unity_content = self._generate_unity_content(group)
+            try:
+                should_write = True
+                if unity_cpp.exists():
+                    try:
+                        if unity_cpp.read_text(encoding="utf-8") == unity_content:
+                            should_write = False
+                    except KeyboardInterrupt:
+                        _thread.interrupt_main()
+                        raise
+                    except Exception:
+                        # If we cannot read for comparison, fall back to writing
+                        should_write = True
+                if should_write:
+                    unity_cpp.write_text(unity_content, encoding="utf-8")
+            except KeyboardInterrupt:
+                _thread.interrupt_main()
+                raise
+            except Exception as e:
+                if cleanup_dir:
+                    try:
+                        unity_cpp.unlink(missing_ok=True)
+                    except KeyboardInterrupt:
+                        _thread.interrupt_main()
+                        raise
+                    except Exception:
+                        pass
+                return UnityChunksResult(success=False, chunks=[])
+
+            obj_path = unity_cpp.with_suffix(".o")
+
+            # Force unity builds to not use PCH
+            additional_flags = list(compile_options.additional_flags or [])
+            if "-c" not in additional_flags:
+                additional_flags.insert(0, "-c")
+            per_file_options = CompilerOptions(
+                include_path=compile_options.include_path,
+                compiler=compile_options.compiler,
+                defines=compile_options.defines,
+                std_version=compile_options.std_version,
+                compiler_args=compile_options.compiler_args,
+                use_pch=False,
+                additional_flags=additional_flags,
+                parallel=compile_options.parallel,
+                temp_dir=compile_options.temp_dir,
+                archiver=compile_options.archiver,
+                archiver_args=compile_options.archiver_args,
+                pch_header_content=compile_options.pch_header_content,
+                pch_output_path=compile_options.pch_output_path,
+            )
+
+            if no_parallel:
+                res = self._compile_cpp_file_sync(
+                    unity_cpp, obj_path, per_file_options.additional_flags, False
+                )
+                chunk_results.append(
+                    UnityChunkResult(
+                        ok=res.ok,
+                        unity_cpp=unity_cpp,
+                        object_path=obj_path,
+                        stderr=res.stderr,
+                        return_code=res.return_code,
+                    )
+                )
+                if not res.ok and cleanup_dir:
+                    try:
+                        unity_cpp.unlink(missing_ok=True)
+                        obj_path.unlink(missing_ok=True)
+                    except KeyboardInterrupt:
+                        _thread.interrupt_main()
+                        raise
+                    except Exception:
+                        pass
+                    return UnityChunksResult(success=False, chunks=chunk_results)
+            else:
+                fut = _EXECUTOR.submit(
+                    self._compile_cpp_file_sync,
+                    unity_cpp,
+                    obj_path,
+                    per_file_options.additional_flags,
+                    False,
+                )
+                compile_futures.append((i, fut, unity_cpp, obj_path))
+
+        if not no_parallel:
+            for i, fut, unity_cpp, obj_path in compile_futures:
+                res = fut.result()
+                chunk_results.append(
+                    UnityChunkResult(
+                        ok=res.ok,
+                        unity_cpp=unity_cpp,
+                        object_path=obj_path,
+                        stderr=res.stderr,
+                        return_code=res.return_code,
+                    )
+                )
+                if not res.ok and cleanup_dir:
+                    try:
+                        unity_cpp.unlink(missing_ok=True)
+                        obj_path.unlink(missing_ok=True)
+                    except Exception:
+                        pass
+
+        success = all(c.ok for c in chunk_results) and len(chunk_results) == chunks
+        # Note: we do not remove files on success; caller may need them for archiving
+        return UnityChunksResult(success=success, chunks=chunk_results)
 
     def _generate_unity_content(self, cpp_paths: list[Path]) -> str:
         """
@@ -2134,6 +2383,9 @@ def link_program_sync(
             return_code=process.returncode,
         )
 
+    except KeyboardInterrupt:
+        _thread.interrupt_main()
+        raise
     except Exception as e:
         # Check if output executable was created successfully despite the exception
         output_path = Path(link_options.output_executable)
@@ -2643,6 +2895,9 @@ def create_archive_sync(
             stderr="\n".join(stderr_lines),
             return_code=process.returncode,
         )
+    except KeyboardInterrupt:
+        _thread.interrupt_main()
+        raise
     except Exception as e:
         error_msg = f"Archive command failed: {e}\nCommand was: {subprocess.list2cmdline(cmd)}\nThis may indicate that the configured archiver is not available."
         print(f"[ARCHIVE ERROR] {error_msg}")
