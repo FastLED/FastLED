@@ -41,6 +41,7 @@ using fl::ColorFromPaletteExtended;
 using fl::fill_palette;
 using fl::fill_gradient;
 using fl::fill_rainbow;
+using fl::fill_rainbow_circular;
 using fl::fill_solid;
 using fl::fill_palette_circular;
 using fl::map_data_into_colors_through_palette;
