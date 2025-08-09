@@ -43,7 +43,7 @@ using namespace fl;
 #define CentreY (HEIGHT / 2) - 1
 
 // NUM_LEDS = WIDTH * HEIGHT
-#define PIXELPIN 18
+#define PIXELPIN 3  // universal pin that works on all platforms
 #define NUM_LEDS      120
 #define LAST_VISIBLE_LED 119
 
