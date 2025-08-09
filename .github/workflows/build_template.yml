@@ -95,18 +95,35 @@ jobs:
       - name: Build FastLED examples with "./compile --no-interactive  ${{ inputs.args }}"
         run: |
           set -o pipefail
-          ./compile --no-interactive  ${{ inputs.args }} | tee build.log
+          ./compile --no-interactive --log-failures failures  ${{ inputs.args }} | tee build.log
         shell: bash
 
 
-      - name: Failure log summary (last 100 lines)
-        if: failure()
+      - name: Build summary and failure logs
         continue-on-error: true
         run: |
           echo "############################################"
           echo "Last 100 lines of build.log (most recent output)"
           echo "############################################"
           tail -n 100 build.log || true
+
+          echo ""
+          echo "############################################"
+          echo "Failure logs (if any)"
+          echo "############################################"
+          fail_dir="failures"
+          if [ -d "$fail_dir" ] && ls "$fail_dir"/*.log >/dev/null 2>&1; then
+            for f in "$fail_dir"/*.log; do
+              echo "----------------------"
+              echo "$(basename "$f")"
+              echo "----------------------"
+              # Print the failure log content
+              cat "$f"
+              echo ""
+            done
+          else
+            echo "ALL EXAMPLES SUCCESSFULLY COMPILED"
+          fi
         shell: bash
 
       - name: Find platformio.ini file and print it out

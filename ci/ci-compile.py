@@ -140,6 +140,11 @@ def parse_args(args: Optional[list[str]] = None) -> argparse.Namespace:
         action="store_true",
         help="Disables interactive mode (deprecated)",
     )
+    parser.add_argument(
+        "--log-failures",
+        type=str,
+        help="Directory to write per-example failure logs (created on first failure)",
+    )
 
     try:
         parsed_args = parser.parse_intermixed_args(args)
@@ -363,6 +368,9 @@ def main() -> int:
 
     compilation_errors: List[str] = []
     failed_example_names: List[str] = []
+    failure_logs_dir: Optional[Path] = (
+        Path(args.log_failures) if getattr(args, "log_failures", None) else None
+    )
 
     # Compile for each board
     for board in boards:
@@ -383,6 +391,27 @@ def main() -> int:
                 if not sketch.success:
                     if sketch.example and sketch.example not in failed_example_names:
                         failed_example_names.append(sketch.example)
+                    # Write per-example failure logs when requested
+                    if failure_logs_dir is not None:
+                        try:
+                            failure_logs_dir.mkdir(parents=True, exist_ok=True)
+                            safe_name = f"{sketch.example}.log"
+                            log_path = failure_logs_dir / safe_name
+                            with log_path.open(
+                                "a", encoding="utf-8", errors="ignore"
+                            ) as f:
+                                f.write(sketch.output)
+                                f.write("\n")
+                        except KeyboardInterrupt:
+                            print("Keyboard interrupt detected, cancelling builds")
+                            import _thread
+
+                            _thread.interrupt_main()
+                            raise
+                        except Exception as e:
+                            print(
+                                f"Warning: Could not write failure log for {sketch.example}: {e}"
+                            )
                     print(f"\n{'-' * 60}")
                     print(f"Sketch: {sketch.example}")
                     print(f"{'-' * 60}")
