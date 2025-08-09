@@ -371,6 +371,7 @@ def create_namespace_check_process(enable_stack_trace: bool) -> RunningProcess:
     """Create a namespace check process without starting it"""
     return RunningProcess(
         "uv run python ci/tests/no_using_namespace_fl_in_headers.py",
+        shell=True,
         auto_run=False,  # Don't auto-start - will be started in parallel later
         enable_stack_trace=enable_stack_trace,
     )
