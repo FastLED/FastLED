@@ -150,6 +150,27 @@ class ProcessWatcher:
         thread_name = threading.current_thread().name
         try:
             while not self._rp.shutdown.is_set():
+                # Enforce per-process timeout independently of wait()
+                if (
+                    self._rp.timeout is not None
+                    and self._rp.start_time is not None
+                    and (time.time() - self._rp.start_time) > self._rp.timeout
+                ):
+                    print(
+                        f"Process timeout after {self._rp.timeout} seconds (watcher), killing: {self._rp.command}"
+                    )
+                    if self._rp.enable_stack_trace:
+                        try:
+                            print("\n" + "=" * 80)
+                            print("STACK TRACE DUMP (GDB Output)")
+                            print("=" * 80)
+                            print(self._rp._dump_stack_trace())
+                            print("=" * 80)
+                        except Exception as e:
+                            print(f"Watcher stack trace dump failed: {e}")
+                    self._rp.kill()
+                    break
+
                 rc: int | None = self._rp.poll()
                 if rc is not None:
                     break
@@ -373,17 +394,32 @@ class RunningProcess:
         """
         assert self.proc is not None
 
+        # Fast non-blocking path: honor timeout==0 by peeking before raising
+        if timeout == 0:
+            # Peek EOS without consuming
+            with self.output_queue.mutex:
+                if len(self.output_queue.queue) > 0:
+                    head = self.output_queue.queue[0]
+                    if isinstance(head, EndOfStream):
+                        return EndOfStream()
+            # Try immediate get
+            try:
+                item_nb: str | EndOfStream = self.output_queue.get_nowait()
+                if isinstance(item_nb, EndOfStream):
+                    with self.output_queue.mutex:
+                        self.output_queue.queue.appendleft(item_nb)
+                    return EndOfStream()
+                return item_nb
+            except queue.Empty:
+                if self.finished:
+                    return EndOfStream()
+                raise TimeoutError("Timeout after 0 seconds")
+
         expired_time = time.time() + timeout if timeout is not None else None
 
         while True:
-            if expired_time is not None:
-                if time.time() > expired_time:
-                    raise TimeoutError(f"Timeout after {timeout} seconds")
-
-            if self.output_queue.empty():
-                if timeout != 0:
-                    time.sleep(0.01)
-                    continue
+            if expired_time is not None and time.time() > expired_time:
+                raise TimeoutError(f"Timeout after {timeout} seconds")
 
             # Peek without popping if EndOfStream is at the front
             with self.output_queue.mutex:
@@ -392,12 +428,18 @@ class RunningProcess:
                     if isinstance(head, EndOfStream):
                         return EndOfStream()
 
+            # Nothing available yet; wait briefly in blocking mode
+            if self.output_queue.empty():
+                time.sleep(0.01)
+                if self.finished and self.output_queue.empty():
+                    return EndOfStream()
+                continue
+
             try:
                 # Safe to pop now; head is not EndOfStream
                 item: str | EndOfStream = self.output_queue.get(timeout=0.1)
                 if isinstance(item, EndOfStream):
                     # In rare race conditions, EndOfStream could appear after peek; do not consume
-                    # Put it back at the front to preserve semantics
                     with self.output_queue.mutex:
                         self.output_queue.queue.appendleft(item)
                     return EndOfStream()
