@@ -5,7 +5,7 @@
 #else
 #include "sdkconfig.h"
 
-#ifdef CONFIG_IDF_TARGET_ESP32
+#ifdef CONFIG_IDF_TARGET_ESP32S3
 #define IS_ESP32_S3 1
 #else
 #define IS_ESP32_S3 0
