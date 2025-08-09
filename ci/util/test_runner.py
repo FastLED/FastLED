@@ -1348,6 +1348,11 @@ def _run_processes_parallel(
             for i in range(len(active_processes) - 1, -1, -1):
                 proc = active_processes[i]
 
+                if verbose:
+                    with proc.line_iter(timeout=60) as line_iter:
+                        for line in line_iter:
+                            print(line)
+
                 # Check if process has finished
                 if proc.finished:
                     # Get the exit code to check for failure

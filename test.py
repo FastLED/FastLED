@@ -204,10 +204,20 @@ def main() -> None:
             # Start the Python test process (since auto_run=False)
             python_process.run()
 
+            if args.verbose:
+                with python_process.line_iter(timeout=None) as line_iter:
+                    for line in line_iter:
+                        print(line)
+
             # Wait for Python tests to complete (which will trigger examples compilation)
             python_return_code = python_process.wait()
             if python_return_code != 0:
                 sys.exit(python_return_code)
+
+            if args.verbose:
+                with examples_process.line_iter(timeout=None) as line_iter:
+                    for line in line_iter:
+                        print(line)
 
             # Wait for examples compilation to complete
             examples_return_code = examples_process.wait()
