@@ -17,3 +17,23 @@ ESP8266 family support (Xtensa).
 
 Notes:
 - Typical settings: `FASTLED_USE_PROGMEM=0`, `FASTLED_ALLOW_INTERRUPTS=1`; long ISRs will impact signal quality.
+
+## Optional feature defines
+
+- **`FASTLED_USE_PROGMEM`**: Control PROGMEM usage. Default `0` in `led_sysdefs_esp8266.h`.
+- **`FASTLED_ALLOW_INTERRUPTS`**: Allow interrupts during show. Default `1` in `led_sysdefs_esp8266.h`.
+- **`FASTLED_INTERRUPT_RETRY_COUNT`**: Max retries when a frame aborts due to long ISRs/NMIs. Default `2` (see `fastled_config.h`). Used by both single-lane and block drivers.
+
+- **Pin order selection** (choose one before including `FastLED.h`):
+  - **`FASTLED_ESP8266_RAW_PIN_ORDER`**: Use raw GPIO numbering.
+  - **`FASTLED_ESP8266_NODEMCU_PIN_ORDER`**: Use NodeMCU D0/D1 labeling.
+  - **`FASTLED_ESP8266_D1_PIN_ORDER`**: Use Wemos D1-style mapping.
+  - If none are defined, the code defaults to NodeMCU on `ARDUINO_ESP8266_NODEMCU`, otherwise raw pin order.
+
+- **SPI backend**
+  - **`FASTLED_ALL_PINS_HARDWARE_SPI`**: Route clocked LED chipsets via the hardware SPI driver. See `fastspi_esp8266.h` notes.
+
+- **Debugging / diagnostics**
+  - **`FASTLED_DEBUG_COUNT_FRAME_RETRIES`**: When defined, counts and reports frame retries due to timing interference during show(). Helpful for diagnosing ISR contention.
+
+Place these defines before including `FastLED.h` in your sketch.
