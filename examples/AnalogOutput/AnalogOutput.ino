@@ -2,7 +2,9 @@
 /// @brief   Demonstrates how to use FastLED color functions even without a "pixel-addressible" smart LED strip.
 /// @example AnalogOutput.ino
 
+#include <Arduino.h>
 #include <FastLED.h>
+
 
 // Example showing how to use FastLED color functions
 // even when you're NOT using a "pixel-addressible" smart LED strip.
@@ -66,4 +68,3 @@ void setup() {
   // Flash the "hello" color sequence: R, G, B, black.
   colorBars();
 }
-

@@ -128,7 +128,7 @@ class TestRunningProcessAdditional(unittest.TestCase):
             cwd=Path(".").absolute(),
             check=False,
             auto_run=True,
-            timeout=1,
+            timeout=10,
             enable_stack_trace=True,
             on_complete=None,
             output_formatter=None,

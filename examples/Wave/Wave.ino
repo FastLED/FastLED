@@ -83,7 +83,7 @@ void loop() {
     static int x = 0;
     if (button.clicked()) {
         // If button click then select a random position in the wave.
-        x = random() % NUM_LEDS;
+        x = random(NUM_LEDS);
     }
     if (button.isPressed()) {
         FASTLED_WARN("Button is pressed at " << x);
