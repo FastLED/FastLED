@@ -4,6 +4,7 @@
   || defined(__AVR_ATtiny85__) \
   || defined(ARDUINO_TEENSYLC) \
   || defined(ARDUINO_TEENSY30) \
+  || defined(__MK20DX128__) \
   || defined(__MK20DX256__) \
   || defined(STM32F1) \
   || defined(ESP8266) \
