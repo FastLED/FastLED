@@ -1316,6 +1316,47 @@ class PioCompiler(Compiler):
         except Exception as e:
             return f"Error retrieving {cache_name.upper()} statistics: {e}"
 
+    def build_fastled_unity_archive(
+        self,
+        chunks: int = 1,
+        no_parallel: bool = False,
+        output_archive: Path | None = None,
+        unity_dir: Path | None = None,
+        use_pch: bool = False,
+    ) -> Path:
+        """Build libfastled.a using a chunked UNITY build of src/** behind the PIO API.
+
+        Args:
+            chunks: Number of unity chunks (default 1)
+            no_parallel: Compile chunks sequentially when True
+            output_archive: Output archive path (default .build/fastled/libfastled.a)
+            unity_dir: Directory to place generated unity{N}.cpp/.o (default .build/fastled/unity)
+            use_pch: Enable PCH for the underlying compiler (not recommended for unity)
+
+        Returns:
+            Path to the created archive
+        """
+        from ci.compiler.unity_archive import build_unity_chunks_and_archive
+        from ci.compiler.test_example_compilation import create_fastled_compiler
+        
+        # Anchor to project root
+        project_root = _resolve_project_root()
+        cwd_backup = os.getcwd()
+        try:
+            os.chdir(project_root)
+            compiler = create_fastled_compiler(use_pch=use_pch, parallel=(not no_parallel))
+            out_path = output_archive or (project_root / ".build/fastled/libfastled.a")
+            udir = unity_dir or (project_root / ".build/fastled/unity")
+            return build_unity_chunks_and_archive(
+                compiler=compiler,
+                chunks=chunks,
+                output_archive=Path(out_path),
+                unity_dir=Path(udir),
+                no_parallel=no_parallel,
+            )
+        finally:
+            os.chdir(cwd_backup)
+
     def _internal_build_no_lock(self, example: str) -> SketchResult:
         """Build a specific example without lock management. Only call from build()."""
         if not self.initialized:
