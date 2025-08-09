@@ -12,6 +12,7 @@ from typing import Optional
 
 import psutil
 
+from ci.util.running_process_manager import RunningProcessManagerSingleton
 from ci.util.test_args import parse_args
 from ci.util.test_commands import run_command
 from ci.util.test_env import (
@@ -31,15 +32,10 @@ from ci.util.test_types import (
 
 _CANCEL_WATCHDOG = threading.Event()
 
-_TIMEOUT_EVERYTHING = 300
-
-_IS_WINDOWS = os.name == "nt"
+_TIMEOUT_EVERYTHING = 600
 
 if os.environ.get("_GITHUB"):
-    if _IS_WINDOWS:
-        _TIMEOUT_EVERYTHING = 900  # Extended timeout for GitHub Windows builds
-    else:
-        _TIMEOUT_EVERYTHING = 600  # Extended timeout for GitHub Linux builds
+    _TIMEOUT_EVERYTHING = 1200  # Extended timeout for GitHub Linux builds
     print(
         f"GitHub Windows environment detected - using extended timeout: {_TIMEOUT_EVERYTHING} seconds"
     )
@@ -60,8 +56,6 @@ def make_watch_dog_thread(
 
         # Dump outstanding running processes (if any)
         try:
-            from ci.util.running_process import RunningProcessManagerSingleton
-
             RunningProcessManagerSingleton.dump_active()
         except Exception as e:
             print(f"Failed to dump active processes: {e}")
@@ -84,26 +78,22 @@ def main() -> None:
         # Change to script directory first
         os.chdir(Path(__file__).parent)
 
-        # Set up watchdog timer
-        watchdog = make_watch_dog_thread(seconds=_TIMEOUT_EVERYTHING)
-
         # Parse and process arguments
         args = parse_args()
         args = process_test_flags(args)
 
+        timeout = _TIMEOUT_EVERYTHING
         # Adjust watchdog timeout based on test configuration
         # Sequential examples compilation can take up to 30 minutes
         if args.examples is not None and args.no_parallel:
             # 35 minutes for sequential examples compilation
-            adjusted_timeout = 2100
+            timeout = 2100
             print(
-                f"Adjusted watchdog timeout for sequential examples compilation: {adjusted_timeout} seconds"
+                f"Adjusted watchdog timeout for sequential examples compilation: {timeout} seconds"
             )
-            # Cancel the existing watchdog and start a new one with adjusted timeout
-            _CANCEL_WATCHDOG.set()
-            time.sleep(0.1)  # Give time for the old watchdog to exit
-            _CANCEL_WATCHDOG.clear()
-            watchdog = make_watch_dog_thread(seconds=adjusted_timeout)
+
+        # Set up watchdog timer
+        watchdog = make_watch_dog_thread(seconds=timeout)
 
         # Handle --no-interactive flag
         if args.no_interactive:
