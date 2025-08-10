@@ -28,6 +28,6 @@ on:
 
 jobs:
   build:
-    uses: ./.github/workflows/build_template_board.yml
+    uses: ./.github/workflows/build_template.yml
     with:
       args: esp32c2
