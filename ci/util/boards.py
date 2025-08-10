@@ -432,6 +432,12 @@ ESP32_S2_DEVKITM_1 = Board(
     platform=ESP32_IDF_5_3_PIOARDUINO,
 )
 
+ESP32_UPESY_WROOM = Board(
+    board_name="upesy_wroom",
+    real_board_name="upesy_wroom",
+    platform="espressif32",
+)
+
 ESP32_H2_DEVKITM_1 = Board(
     board_name="esp32-h2-devkitm-1",
     platform_needs_install=True,  # Install platform package to get the boards
