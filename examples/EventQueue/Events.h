@@ -4,9 +4,7 @@
 #include "fl/function.h"
 #include "fl/time.h"
 #include "fl/int.h"
-#include "fl/vector.h"
 #include "fl/functional.h"
-#include "fl/async.h"
 
 // Simple event queue for examples only. Not part of the core library API.
 struct EventItem {
@@ -61,17 +59,4 @@ public:
 private:
     fl::PriorityQueue<EventItem, EarlierFirst> _queue;
     fl::u32 _nextId;
-};
-
-// Async runner adapter so Events participates in fl::async_run()
-class EventsRunner : public fl::async_runner {
-public:
-    explicit EventsRunner(Events& events) : _events(events) {}
-
-    void update() override { _events.update(); }
-    bool has_active_tasks() const override { return !_events.empty(); }
-    size_t active_task_count() const override { return static_cast<size_t>(_events.size()); }
-
-private:
-    Events& _events;
 };

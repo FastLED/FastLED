@@ -5,10 +5,13 @@
 // Events events;
 // events.add(fl::time() + 1000, []{ start_graphics(); });
 // events.add(fl::time() + 2000, []{ play_next(); });
-// In loop(): fl::async_run();
+// In loop(): processEvents(); FastLED.show();
 
 Events events;
-EventsRunner* eventsRunner = nullptr;
+
+void processEvents() {
+    events.update();
+}
 
 void start_graphics() {
     // placeholder for user action
@@ -19,22 +22,18 @@ void play_next() {
 }
 
 void setup() {
-    // Register the events runner so events fire when fl::async_run() is called
-    static EventsRunner runner(events);
-    eventsRunner = &runner;
-    fl::AsyncManager::instance().register_runner(eventsRunner);
-
     // Schedule demo events
     events.add(fl::time() + 1000, []{ start_graphics(); });
     events.add(fl::time() + 2000, []{ play_next(); });
-
-    // Or relative helper
     events.add_after(3000, []{ /* another action */ });
 }
 
 void loop() {
-    // Pump async; will invoke EventsRunner::update() which fires ready events
-    fl::async_run();
+    // Manually pump events every iteration before rendering
+    processEvents();
 
     // Do other work here...
+
+    // Update LEDs after processing events
+    FastLED.show();
 }
