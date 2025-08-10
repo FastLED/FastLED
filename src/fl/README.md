@@ -419,6 +419,231 @@ Why: Efficient frame manipulation for LED matrices and coordinate spaces.
 // Downscale a high‑res buffer to a target raster (API varies by adapter)
 ```
 
+#### Graphics Deep Dive
+
+This section explains how the major graphics utilities fit together and how to use them effectively for high‑quality, high‑performance rendering on LED strips, matrices, and complex shapes.
+
+- **Wave simulation (1D/2D)**
+  - Headers: `wave_simulation.h`, `wave_simulation_real.h`
+  - Concepts:
+    - Super‑sampling for quality: choose `SuperSample` factors to run an internal high‑resolution simulation and downsample for display.
+    - Consistent speed at higher quality: call `setExtraFrames(u8)` to update the simulation multiple times per frame to maintain perceived speed when super‑sampling.
+    - Output accessors: `getf`, `geti16`, `getu8` return float/fixed/byte values; 2D version offers cylindrical wrapping via `setXCylindrical(true)`.
+  - Tips for “faster” updates:
+    - Use `setExtraFrames()` to advance multiple internal steps per visual frame without changing your outer timing.
+    - Prefer `getu8(...)` when feeding color functions or gradients on constrained devices.
+
+- **fl::Leds – array and mapped matrix**
+  - Header: `leds.h`; mapping: `xymap.h`
+  - `fl::Leds` wraps a `CRGB*` so you can treat it as:
+    - A plain `CRGB*` via implicit conversion for classic FastLED APIs.
+    - A 2D surface via `operator()(x, y)` that respects an `XYMap` (serpentine, line‑by‑line, LUT, or custom function).
+  - Construction:
+    - `Leds(CRGB* leds, u16 width, u16 height)` for quick serpentine/rectangular usage.
+    - `Leds(CRGB* leds, const XYMap& xymap)` for full control (serpentine, rectangular, user function, or LUT).
+  - Access and safety:
+    - `at(x, y)`/`operator()(x, y)` map to the correct LED index; out‑of‑bounds is safe and returns a sentinel.
+    - `operator[]` exposes row‑major access when the map is serpentine or line‑by‑line.
+
+- **Matrix mapping (XYMap)**
+  - Header: `xymap.h`
+  - Create maps for common layouts:
+    - `XYMap::constructSerpentine(w, h)` for typical pre‑wired panels.
+    - `XYMap::constructRectangularGrid(w, h)` for row‑major matrices.
+    - `XYMap::constructWithUserFunction(w, h, XYFunction)` for custom wiring.
+    - `XYMap::constructWithLookUpTable(...)` for arbitrary wiring via LUT.
+  - Utilities:
+    - `mapToIndex(x, y)` maps coordinates to strip index.
+    - `has(x, y)` tests bounds; `toScreenMap()` converts to a float UI mapping.
+
+- **XY paths and path rendering (xypath)**
+  - Headers: `xypath.h`, `xypath_impls.h`, `xypath_renderer.h`, helpers in `tile2x2.h`, `transform.h`.
+  - Purpose: parameterized paths in 
+    \([0,1] \to (x,y)\) for drawing lines/curves/shapes with subpixel precision.
+  - Ready‑made paths: point, line, circle, heart, Archimedean spiral, rose curves, phyllotaxis, Gielis superformula, and Catmull‑Rom splines with editable control points.
+  - Rendering:
+    - Subpixel sampling via `Tile2x2_u8` enables high quality on low‑res matrices.
+    - Use `XYPath::drawColor` or `drawGradient` to rasterize into an `fl::Leds` surface.
+    - `XYPath::rasterize` writes into a sparse raster for advanced composition.
+  - Transforms and bounds:
+    - `setDrawBounds(w, h)` and `setTransform(TransformFloat)` control framing and animation transforms.
+
+- **Subpixel “splat” rendering (Tile2x2)**
+  - Header: `tile2x2.h`
+  - Concept: represent a subpixel footprint as a 2×2 tile of coverage values (u8 alphas). When a subpixel position moves between LEDs, neighboring LEDs get proportional contributions.
+  - Use cases:
+    - `Tile2x2_u8::draw(color, xymap, out)` to composite with color per‑pixel.
+    - Custom blending: `tile.draw(xymap, visitor)` to apply your own alpha/compositing.
+    - Wrapped tiles: `Tile2x2_u8_wrap` supports cylindrical wrap with interpolation for continuous effects.
+
+- **Downscale**
+  - Header: `downscale.h`
+  - Purpose: resample from a higher‑resolution buffer to a smaller target, preserving features.
+  - APIs:
+    - `downscale(src, srcXY, dst, dstXY)` general case.
+    - `downscaleHalf(...)` optimized 2× reduction (square or mapped) used automatically when sizes match.
+
+- **Upscale**
+  - Header: `upscale.h`
+  - Purpose: bilinear upsampling from a low‑res buffer to a larger target.
+  - APIs:
+    - `upscale(input, output, inW, inH, xyMap)` auto‑selects optimized paths.
+    - `upscaleRectangular` and `upscaleRectangularPowerOf2` bypass XY mapping for straight row‑major layouts.
+    - Float reference versions exist for validation.
+
+- **Corkscrew (cylindrical projection)**
+  - Header: `corkscrew.h`
+  - Goal: draw into a rectangular buffer and project onto a tightly wrapped helical/cylindrical LED layout.
+  - Inputs and sizing:
+    - `CorkscrewInput{ totalTurns, numLeds, Gap, invert }` defines geometry; helper `calculateWidth()/calculateHeight()` provide rectangle dimensions for buffer allocation.
+  - Mapping and iteration:
+    - `Corkscrew::at_exact(i)` returns the exact position for LED i; `at_wrap(float)` returns a wrapped `Tile2x2_u8_wrap` footprint for subpixel‑accurate sampling.
+    - Use `toScreenMap(diameter)` to produce a `ScreenMap` for UI overlays or browser visualization.
+  - Rectangular buffer integration:
+    - `getBuffer()/data()` provide a lazily‑initialized rectangle; `fillBuffer/clearBuffer` manage it.
+    - `readFrom(source_grid, use_multi_sampling)` projects from a high‑def source grid to the corkscrew using multi‑sampling for quality.
+
+  - Examples
+
+    1) Manual per‑frame draw (push every frame)
+
+    ```cpp
+    #include <FastLED.h>
+    #include "fl/corkscrew.h"
+    #include "fl/grid.h"
+    #include "fl/time.h"
+
+    // Your physical LED buffer
+    constexpr uint16_t NUM_LEDS = 144;
+    CRGB leds[NUM_LEDS];
+
+    // Define a corkscrew geometry (e.g., 19 turns tightly wrapped)
+    fl::Corkscrew::Input input(/*totalTurns=*/19.0f, /*numLeds=*/NUM_LEDS);
+    fl::Corkscrew cork(input);
+
+    // A simple rectangular source grid to draw into (unwrapped cylinder)
+    // Match the corkscrew's recommended rectangle
+    const uint16_t W = cork.cylinder_width();
+    const uint16_t H = cork.cylinder_height();
+    fl::Grid<CRGB> rect(W, H);
+
+    void draw_pattern(uint32_t t_ms) {
+        // Example: time‑animated gradient on the unwrapped cylinder
+        for (uint16_t y = 0; y < H; ++y) {
+            for (uint16_t x = 0; x < W; ++x) {
+                uint8_t hue = uint8_t((x * 255u) / (W ? W : 1)) + uint8_t((t_ms / 10) & 0xFF);
+                rect(x, y) = CHSV(hue, 255, 255);
+            }
+        }
+    }
+
+    void project_to_strip() {
+        // For each LED index i on the physical strip, sample the unwrapped
+        // rectangle using the subpixel footprint from at_wrap(i)
+        for (uint16_t i = 0; i < NUM_LEDS; ++i) {
+            auto tile = cork.at_wrap(float(i));
+            // tile.at(u,v) gives {absolute_pos, alpha}
+            // Blend the 2x2 neighborhood from the rectangular buffer
+            uint16_t r = 0, g = 0, b = 0, a_sum = 0;
+            for (uint16_t vy = 0; vy < 2; ++vy) {
+                for (uint16_t vx = 0; vx < 2; ++vx) {
+                    auto entry = tile.at(vx, vy); // pair<vec2i16, u8>
+                    const auto pos = entry.first; // absolute cylinder coords
+                    const uint8_t a = entry.second; // alpha 0..255
+                    if (pos.x >= 0 && pos.x < int(W) && pos.y >= 0 && pos.y < int(H) && a > 0) {
+                        const CRGB& c = rect(uint16_t(pos.x), uint16_t(pos.y));
+                        r += uint16_t(c.r) * a;
+                        g += uint16_t(c.g) * a;
+                        b += uint16_t(c.b) * a;
+                        a_sum += a;
+                    }
+                }
+            }
+            if (a_sum == 0) {
+                leds[i] = CRGB::Black;
+            } else {
+                leds[i].r = uint8_t(r / a_sum);
+                leds[i].g = uint8_t(g / a_sum);
+                leds[i].b = uint8_t(b / a_sum);
+            }
+        }
+    }
+
+    void setup() {
+        FastLED.addLeds<WS2812B, 5, GRB>(leds, NUM_LEDS);
+    }
+
+    void loop() {
+        uint32_t t = fl::time();
+        draw_pattern(t);
+        project_to_strip();
+        FastLED.show();
+    }
+    ```
+
+    2) Automate with task::before_frame (draw right before render)
+
+    Use the per‑frame task API; no direct EngineEvents binding is needed. Per‑frame tasks are scheduled via `fl::task` and integrated with the frame lifecycle by the async system.
+
+    ```cpp
+    #include <FastLED.h>
+    #include "fl/task.h"
+    #include "fl/async.h"
+    #include "fl/corkscrew.h"
+    #include "fl/grid.h"
+
+    constexpr uint16_t NUM_LEDS = 144;
+    CRGB leds[NUM_LEDS];
+
+    fl::Corkscrew cork(fl::Corkscrew::Input(19.0f, NUM_LEDS));
+    const uint16_t W = cork.cylinder_width();
+    const uint16_t H = cork.cylinder_height();
+    fl::Grid<CRGB> rect(W, H);
+
+    static void draw_pattern(uint32_t t_ms, fl::Grid<CRGB>& dst);
+    static void project_to_strip(const fl::Corkscrew& c, const fl::Grid<CRGB>& src, CRGB* out, uint16_t n);
+
+    void setup() {
+        FastLED.addLeds<WS2812B, 5, GRB>(leds, NUM_LEDS);
+
+        // Register a before_frame task that runs immediately before each render
+        fl::task::before_frame().then([&](){
+            uint32_t t = fl::time();
+            draw_pattern(t, rect);
+            project_to_strip(cork, rect, leds, NUM_LEDS);
+        });
+    }
+
+    void loop() {
+        // The before_frame task is invoked automatically at the right time
+        FastLED.show();
+        // Optionally pump other async work
+        fl::async_yield();
+    }
+    ```
+
+    - The manual approach gives explicit control each frame.
+    - The `task::before_frame()` approach schedules work just‑in‑time before rendering without manual event wiring. Use `task::after_frame()` for post‑render work.
+
+- **High‑definition HSV16**
+  - Headers: `hsv16.h`, implementation in `hsv16.cpp`
+  - `fl::HSV16` stores 16‑bit H/S/V for high‑precision conversion to `CRGB` without banding; construct from `CRGB` or manually, and convert via `ToRGB()` or implicit cast.
+  - Color boost:
+    - `HSV16::colorBoost(EaseType saturation_function, EaseType luminance_function)` applies a saturation‑space boost similar to gamma, tuned separately for saturation and luminance to counter LED gamut/compression (e.g., WS2812).
+
+- **Easing functions (accurate 8/16‑bit)**
+  - Header: `ease.h`
+  - Accurate ease‑in/out functions with 8‑ and 16‑bit variants for quad/cubic/sine families, plus dispatchers: `ease8(type, ...)`, `ease16(type, ...)`.
+  - Use to shape animation curves, palette traversal, or time alpha outputs.
+
+- **Time alpha**
+  - Header: `time_alpha.h`
+  - Helpers for time‑based interpolation: `time_alpha8/16/f` compute progress in a window `[start, end]`.
+  - Stateful helpers:
+    - `TimeRamp(rise, latch, fall)` for a full rise‑hold‑fall cycle.
+    - `TimeClampedTransition(duration)` for a clamped one‑shot.
+  - Use cases: envelope control for brightness, effect blending, or gating simulation energy over time.
+
 ### JSON Utilities
 
 - Safe JSON access: `json.h`
@@ -446,6 +671,101 @@ Why: Cross‑platform text formatting, buffered I/O, and optional file access on
 Why: Familiar patterns with embedded‑appropriate implementations and compiler‑portable controls.
 
 ### Audio and Reactive Systems
+
+### UI System (JSON UI)
+
+FastLED includes a JSON‑driven UI layer that can expose controls (sliders, buttons, checkboxes, number fields, dropdowns, titles, descriptions, help, audio visualizers) for interactive demos and remote control.
+
+- **Availability by platform**
+  - **AVR and other low‑memory chipsets**: disabled by default. The UI is not compiled in on constrained targets.
+  - **WASM build**: enabled. The web UI is available and connects to the running sketch.
+  - **Other platforms**: can be enabled if the platform supplies a bridge. See `platforms/ui_defs.h` for the compile‑time gate and platform includes.
+
+- **Key headers and switches**
+  - `platforms/ui_defs.h`: controls `FASTLED_USE_JSON_UI` (defaults to 1 on WASM, 0 elsewhere).
+  - `fl/ui.h`: C++ UI element classes (UISlider, UIButton, UICheckbox, UINumberField, UIDropdown, UITitle, UIDescription, UIHelp, UIAudio, UIGroup).
+  - `platforms/shared/ui/json/ui_manager.h`: platform‑agnostic JSON UI manager that integrates with `EngineEvents`.
+  - `platforms/shared/ui/json/readme.md`: implementation guide and JSON protocol.
+
+- **Lifecycle and data flow**
+  - The UI system uses an update manager (`JsonUiManager`) and is integrated with `EngineEvents`:
+    - On frame lifecycle events, new UI elements are exported as JSON; inbound updates are processed after frames.
+    - This enables remote control: UI state can be driven locally (browser) or by remote senders issuing JSON updates.
+  - Send (sketch → UI): when components are added or changed, `JsonUiManager` emits JSON to the platform bridge.
+  - Receive (UI → sketch): the platform calls `JsonUiManager::updateUiComponents(const char*)` with a JSON object; changes are applied on `onEndFrame()`.
+
+- **Registering handlers to send/receive JSON**
+  - Platform bridge constructs the manager with a function that forwards JSON to the UI:
+    - `JsonUiManager(Callback updateJs)` where `updateJs(const char*)` transports JSON to the front‑end (WASM example uses JS bindings in `src/platforms/wasm/ui.cpp`).
+  - To receive UI updates from the front‑end, call:
+    - `MyPlatformUiManager::instance().updateUiComponents(json_str)` to queue changes; `onEndFrame()` applies them.
+
+- **Sketch‑side usage examples**
+
+  Basic setup with controls and groups:
+
+  ```cpp
+  #include <FastLED.h>
+  #include "fl/ui.h"
+
+  UISlider brightness("Brightness", 128, 0, 255);
+  UICheckbox enabled("Enabled", true);
+  UIButton reset("Reset");
+  UIDropdown mode("Mode", {fl::string("Rainbow"), fl::string("Waves"), fl::string("Solid")});
+  UITitle title("Demo Controls");
+  UIDescription desc("Adjust parameters in real time");
+  UIHelp help("# Help\nUse the controls to tweak the effect.");
+
+  void setup() {
+      // Group controls visually in the UI
+      UIGroup group("Main", title, desc, brightness, enabled, mode, reset, help);
+
+      // Callbacks are pumped via EngineEvents; they trigger when values change
+      brightness.onChanged([](UISlider& s){ FastLED.setBrightness((uint8_t)s); });
+      enabled.onChanged([](UICheckbox& c){ /* toggle effect */ });
+      mode.onChanged([](UIDropdown& d){ /* change program by d.as_int() */ });
+      reset.onClicked([](){ /* reset animation state */ });
+  }
+  ```
+
+  Help component (see `examples/UITest/UITest.ino`):
+  ```cpp
+  UIHelp helpMarkdown(
+      R"(# FastLED UI\nThis area supports markdown, code blocks, and links.)");
+  helpMarkdown.setGroup("Documentation");
+  ```
+
+  Audio input UI (WASM‑enabled platforms):
+  ```cpp
+  UIAudio audio("Mic");
+  void loop() {
+      while (audio.hasNext()) {
+          auto sample = audio.next();
+          // Use sample data for visualizations
+      }
+      FastLED.show();
+  }
+  ```
+
+- **Platform bridge: sending and receiving JSON**
+  - Sending from sketch to UI: `JsonUiManager` invokes the `updateJs(const char*)` callback with JSON representing either:
+    - A JSON array of element definitions (on first export)
+    - A JSON object of state updates (on changes)
+  - Receiving from UI to sketch: the platform calls
+    - `JsonUiManager::updateUiComponents(const char* jsonStr)` where `jsonStr` is a JSON object like:
+      `{ "id_123": {"value": 200}, "id_456": {"pressed": true } }`
+  - The manager defers application until the end of the current frame via `onEndFrame()` to ensure consistency.
+
+- **WASM specifics**
+  - WASM builds provide the web UI and JS glue (see `src/platforms/wasm/ui.cpp` and `src/platforms/wasm/compiler/modules/ui_manager.js`).
+  - Element definitions may be routed directly to the browser UI manager to avoid feedback loops; updates are logged to an inspector, and inbound messages drive `updateUiComponents`.
+
+- **Enabling on other platforms**
+  - Implement a platform UI manager using `JsonUiManager` and provide the two weak functions the UI elements call:
+    - `void addJsonUiComponent(fl::weak_ptr<JsonUiInternal>)`
+    - `void removeJsonUiComponent(fl::weak_ptr<JsonUiInternal>)`
+  - Forward platform UI events into `updateUiComponents(jsonStr)`.
+  - Ensure `EngineEvents` are active so UI updates are exported and applied on frame boundaries.
 
 - Audio adapters and analysis: `audio.h`, `audio_reactive.h`
 - Engine hooks: `engine_events.h`
