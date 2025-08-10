@@ -2,6 +2,7 @@
 /// @brief   Simple one-dimensional fire animation with a programmable color palette
 /// @example Fire2012WithPalette.ino
 
+#include <Arduino.h>
 #include <FastLED.h>
 
 #define LED_PIN     5
@@ -139,7 +140,7 @@ void setup() {
   
   // Third, here's a simpler, three-step gradient, from black to red to white
   //   gPal = CRGBPalette16( CRGB::Black, CRGB::Red, CRGB::White);
-
+  Serial.println("setup");
 }
 
 void loop()

@@ -10,9 +10,12 @@
 
 // UIDescription: This example shows how to blur a strip of LEDs in 2d.
 
+#include <Arduino.h>
+#include <FastLED.h>
+
 #include "fl/ui.h"
 #include "fl/xymap.h"
-#include <FastLED.h>
+
 
 using namespace fl;
 
@@ -34,6 +37,7 @@ void setup() {
     FastLED.addLeds<WS2812B, DATA_PIN, GRB>(leds, NUM_LEDS)
       .setScreenMap(xymap);  // Necessary when using the FastLED web compiler to display properly on a web page.
     FastLED.setBrightness(BRIGHTNESS);
+    Serial.println("setup");
 }
 
 void loop() {
