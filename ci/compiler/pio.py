@@ -657,7 +657,7 @@ def _generate_main_cpp(ino_files: list[str]) -> str:
     include_lines = "\n".join(includes)
 
     int_main = """
-int main() {{
+__attribute__((weak)) int main() {{
     setup();
     while (true) {{
         loop();
