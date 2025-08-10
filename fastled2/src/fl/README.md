@@ -31,6 +31,34 @@ Common building blocks:
 
 ---
 
+## Type traits and perfect forwarding (`fl/type_traits.h`)
+
+Use `fl/type_traits.h` and `fl/utility.h` for compile‑time type inspection and value category utilities without pulling in the full standard library:
+
+- Core utilities: `fl::move`, `fl::forward` (from `fl/utility.h`) for efficient transfers and perfect forwarding
+- Common traits: `fl::is_same`, `fl::remove_reference`, `fl::decay`, `fl::enable_if`, `fl::conditional`, `fl::integral_constant`, `fl::true_type`, `fl::false_type`
+- Detection and SFINAE: enable/disable overloads or templates based on type properties
+
+Example:
+
+```cpp
+#include "fl/type_traits.h"
+#include "fl/utility.h"
+
+template <typename T,
+          typename = typename fl::enable_if<!fl::is_same<T, void>::value>::type>
+T pass_through(T&& value) {
+    return fl::forward<T>(value);
+}
+```
+
+Guidance:
+- Prefer `fl::move` and `fl::forward` over raw casts
+- Use traits to constrain templates instead of static_asserts on values
+- Keep APIs generic but portable by leaning on `fl/` traits rather than `std::` in embedded code
+
+---
+
 ## Small, practical examples
 
 Using containers and views:
