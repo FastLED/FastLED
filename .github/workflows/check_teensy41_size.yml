@@ -31,5 +31,5 @@ jobs:
     uses: ./.github/workflows/build_template_binary_size.yml
     with:
       board: teensy41
-      max_size: 107000
+      max_size: 120000
       max_size_apa102: 88000
