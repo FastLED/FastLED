@@ -50,7 +50,7 @@ int y_speed=1111;
 void setup() {
   // initialize the x/y and time values
   random16_set_seed(8934);
-  random16_add_entropy(analogRead(3));
+  random16_add_entropy( random16());
 
   Serial.begin(57600);
   Serial.println("resetting!");

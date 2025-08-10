@@ -427,7 +427,7 @@ ESP32_S3_DEVKITC_1 = Board(
 
 ESP32_S2_DEVKITM_1 = Board(
     board_name="esp32s2",
-    real_board_name="esp32dev",
+    real_board_name="lolin_s2_mini ",
     board_build_mcu="esp32s2",
     platform=ESP32_IDF_5_3_PIOARDUINO,
 )
