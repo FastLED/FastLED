@@ -141,7 +141,9 @@ def main() -> int:
         # Execute the cache tool with real compiler and arguments
         result = subprocess.run(command, cwd=os.getcwd())
         return result.returncode
-        
+    except KeyboardInterrupt:
+        print(f"Keyboard interrupt in cached compiler {{compiler_name}}", file=sys.stderr)
+        return 1
     except Exception as e:
         print(f"ERROR in cached compiler {{compiler_name}}: {{e}}", file=sys.stderr)
         return 1
