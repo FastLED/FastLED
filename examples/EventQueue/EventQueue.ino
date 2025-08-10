@@ -3,15 +3,13 @@
 
 // Example-only API usage
 // Events events;
+// EventsRunner runner(events);
 // events.add(fl::time() + 1000, []{ start_graphics(); });
 // events.add(fl::time() + 2000, []{ play_next(); });
-// In loop(): processEvents(); FastLED.show();
+// In loop(): runner.processEvents(); FastLED.show();
 
 Events events;
-
-void processEvents() {
-    events.update();
-}
+EventsRunner runner(events);
 
 void start_graphics() {
     // placeholder for user action
@@ -30,7 +28,7 @@ void setup() {
 
 void loop() {
     // Manually pump events every iteration before rendering
-    processEvents();
+    runner.processEvents();
 
     // Do other work here...
 

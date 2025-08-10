@@ -60,3 +60,16 @@ private:
     fl::PriorityQueue<EventItem, EarlierFirst> _queue;
     fl::u32 _nextId;
 };
+
+// Manually-pumped runner for this example
+class EventsRunner {
+public:
+    explicit EventsRunner(Events& events) : _events(events) {}
+
+    void processEvents() { _events.update(); }
+
+    Events& events() { return _events; }
+
+private:
+    Events& _events;
+};
