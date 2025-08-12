@@ -210,32 +210,65 @@ def _collect_source_files(root: Path, exclude: list[str], verbose: bool) -> list
 def main(entry_args: Optional[list[str]] = None) -> int:
     args = parse_args(entry_args)
 
+    # Log startup context
+    print("[compile-commands] Starting generation")
+    print(f"[compile-commands] Project root: {PROJECT_ROOT}")
+    print(f"[compile-commands] Config (BuildFlags TOML): {args.config}")
+    print(f"[compile-commands] Output path: {args.output}")
+    if args.exclude:
+        print(f"[compile-commands] Excluding directories: {args.exclude}")
+    else:
+        print("[compile-commands] No excluded directories configured")
+
     # Determine BuildFlags TOML path
     _assert_config_exists(args.config)
 
     # Collect source files
+    source_root = PROJECT_ROOT / "src"
+    print(f"[compile-commands] Source root: {source_root}")
     sources = _collect_source_files(
-        PROJECT_ROOT / "src",
+        source_root,
         exclude=args.exclude,
         verbose=args.verbose,
     )
+    print(f"[compile-commands] Discovered {len(sources)} source files")
 
     # Delegate to canonical commands_json() using BuildFlags toolchain
-    if args.verbose:
-        print(
-            f"Generating compile_commands.json from {args.config} with {len(sources)} sources"
-        )
+    print("[compile-commands] Generating compile_commands.json entries...")
     commands_json(
         config_path=args.config,
-        include_root=PROJECT_ROOT / "src",
+        include_root=source_root,
         sources=sources,
         output_json=args.output,
         quick_build=True,
         strict_mode=False,
     )
 
+    # Post-generation verification
+    if not args.output.exists():
+        print(
+            f"CRITICAL: Generation completed but output file was not found at {args.output}"
+        )
+        return 2
+
+    try:
+        text = args.output.read_text(encoding="utf-8")
+        # Best-effort count of entries to report status
+        import json as _json
+        from typing import cast
+
+        entries = cast(list[dict[str, Any]], _json.loads(text))
+        num_entries = len(entries) if isinstance(entries, list) else 0
+        print(
+            f"[compile-commands] Wrote {num_entries} entries to {args.output} (size: {args.output.stat().st_size} bytes)"
+        )
+    except Exception as e:  # noqa: BLE001
+        print(
+            f"WARNING: Output written to {args.output} but could not parse JSON for summary: {e}"
+        )
+
     if args.verbose:
-        print("Done.")
+        print("[compile-commands] Done.")
     return 0
 
 
