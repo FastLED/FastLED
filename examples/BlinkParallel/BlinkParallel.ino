@@ -6,7 +6,7 @@
 #include "FastLED.h"
 
 
-#ifdef SKETCH_HAS_LOTS_OF_MEMORY
+#if SKETCH_HAS_LOTS_OF_MEMORY
 // How many leds in your strip?
 #define NUM_LEDS 256
 #else
