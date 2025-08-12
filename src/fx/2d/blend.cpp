@@ -33,6 +33,12 @@ Str Blend2d::fxName() const {
 }
 
 void Blend2d::add(Fx2dPtr layer, const Params &p) {
+    if (!layer->getXYMap().isRectangularGrid()) {
+        if (!getXYMap().isRectangularGrid()) {
+            FASTLED_WARN("Blend2d has a xymap, but so does the Sub layer " << layer->fxName() << ", the sub layer will have it's map replaced with a rectangular map, to avoid double transformation.");
+            layer->setXYMap(XYMap::constructRectangularGrid(layer->getWidth(), layer->getHeight()));
+        }
+    }
     uint8_t blurAmount = p.blur_amount;
     uint8_t blurPasses = p.blur_passes;
     Entry entry(layer, blurAmount, blurPasses);
