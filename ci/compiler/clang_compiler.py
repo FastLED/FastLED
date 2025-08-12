@@ -3099,116 +3099,51 @@ def commands_json(
                 f"This file is required."
             )
 
-        # Try canonical BuildFlags path first. If configuration is minimal (no linker, etc.)
-        # fall back to a lightweight parser compatible with ci/build_commands.toml.
-        try:
-            build_flags = BuildFlags.parse(config_path, quick_build, strict_mode)
-            settings = create_compiler_options_from_toml(
-                toml_path=config_path,
-                include_path=str(include_root),
-                quick_build=quick_build,
-                strict_mode=strict_mode,
+        # Single-source-of-truth configuration via BuildFlags.parse
+        build_flags = BuildFlags.parse(config_path, quick_build, strict_mode)
+        settings = create_compiler_options_from_toml(
+            toml_path=config_path,
+            include_path=str(include_root),
+            quick_build=quick_build,
+            strict_mode=strict_mode,
+        )
+
+        # Validate tools are present (no defaults allowed)
+        if not build_flags.tools.cpp_compiler:
+            raise RuntimeError(
+                f"CRITICAL: [tools].cpp_compiler missing in {config_path}. "
+                f"Please configure compiler tokens."
             )
 
-            # Validate tools are present (no defaults allowed)
-            if not build_flags.tools.cpp_compiler:
-                raise RuntimeError(
-                    f"CRITICAL: [tools].cpp_compiler missing in {config_path}. "
-                    f"Please configure compiler tokens."
-                )
+        # Prepare output directory
+        output_json.parent.mkdir(parents=True, exist_ok=True)
 
-            # Prepare output directory
-            output_json.parent.mkdir(parents=True, exist_ok=True)
+        # Object directory for per-file outputs (mirrors prior generator)
+        objects_dir: Path = include_root.parent / ".build" / "compile_commands"
+        objects_dir.mkdir(parents=True, exist_ok=True)
 
-            # Object directory for per-file outputs (mirrors prior generator)
-            objects_dir: Path = include_root.parent / ".build" / "compile_commands"
-            objects_dir.mkdir(parents=True, exist_ok=True)
+        entries: List[Dict[str, Any]] = []
+        for src in sources:
+            obj_path: Path = (objects_dir / src.with_suffix(".o").name).resolve()
+            program_tokens: List[str] = list(build_flags.tools.cpp_compiler)
+            defines_tokens: List[str] = list(build_flags.defines)
 
-            entries: List[Dict[str, Any]] = []
-            for src in sources:
-                obj_path: Path = (objects_dir / src.with_suffix(".o").name).resolve()
-                program_tokens: List[str] = list(build_flags.tools.cpp_compiler)
-                defines_tokens: List[str] = list(build_flags.defines)
+            args_list = _build_arguments_for_tu(
+                tool_tokens=program_tokens,
+                include_root=include_root,
+                settings=settings,
+                defines_from_build=defines_tokens,
+                source_file=src,
+                object_output=obj_path,
+            )
 
-                args_list = _build_arguments_for_tu(
-                    tool_tokens=program_tokens,
-                    include_root=include_root,
-                    settings=settings,
-                    defines_from_build=defines_tokens,
-                    source_file=src,
-                    object_output=obj_path,
-                )
-
-                entry: Dict[str, Any] = {
-                    "directory": str(include_root.parent.resolve()),
-                    "file": str(src.resolve()),
-                    "arguments": args_list,
-                    "command": subprocess.list2cmdline(args_list),
-                }
-                entries.append(entry)
-
-        except Exception as primary_error:
-            # Fallback: minimal schema (tools.cpp_compiler, flags.compiler_flags/defines/include_paths)
-            # This supports ci/build_commands.toml without requiring full toolchain fields.
-            with open(config_path, "rb") as f:
-                config = tomllib.load(f)
-
-            if (
-                "tools" not in config
-                or "flags" not in config
-                or "cpp_compiler" not in config["tools"]
-            ):
-                # Re-raise original error if config is not minimal schema
-                raise primary_error
-
-            tools_cfg = config["tools"]
-            flags_cfg = config["flags"]
-
-            program_tokens: List[str] = [str(t) for t in tools_cfg["cpp_compiler"]]
-            compiler_flags: List[str] = [
-                str(x) for x in flags_cfg.get("compiler_flags", [])
-            ]
-            defines: List[str] = [str(x) for x in flags_cfg.get("defines", [])]
-            include_paths: List[str] = [
-                str(x) for x in flags_cfg.get("include_paths", [])
-            ]
-            system_include_paths: List[str] = [
-                str(x) for x in flags_cfg.get("system_include_paths", [])
-            ]
-
-            # Prepare output directory
-            output_json.parent.mkdir(parents=True, exist_ok=True)
-            objects_dir: Path = include_root.parent / ".build" / "compile_commands"
-            objects_dir.mkdir(parents=True, exist_ok=True)
-
-            entries: List[Dict[str, Any]] = []
-            for src in sources:
-                obj_path: Path = (objects_dir / src.with_suffix(".o").name).resolve()
-
-                args: List[str] = []
-                args.extend(program_tokens)
-                # Use provided flags exactly; do not invent defaults
-                args.extend(compiler_flags)
-                # Include paths as absolute -I flags
-                for p in include_paths:
-                    args.append(f"-I{str((include_root.parent / p).resolve())}")
-                # System include paths as absolute -isystem flags
-                for sp in system_include_paths:
-                    args.append(f"-isystem{str((include_root.parent / sp).resolve())}")
-                # Defines as single-token -DNAME[=VALUE]
-                for d in defines:
-                    args.append(_normalize_define_to_token(d))
-                # Compile-only invocation
-                args.extend(["-c", str(src)])
-                args.extend(["-o", str(obj_path)])
-
-                entry = {
-                    "directory": str(include_root.parent.resolve()),
-                    "file": str(src.resolve()),
-                    "arguments": args,
-                    "command": subprocess.list2cmdline(args),
-                }
-                entries.append(entry)
+            entry: Dict[str, Any] = {
+                "directory": str(include_root.parent.resolve()),
+                "file": str(src.resolve()),
+                "arguments": args_list,
+                "command": subprocess.list2cmdline(args_list),
+            }
+            entries.append(entry)
 
         # Write JSON (common to both paths)
         import json

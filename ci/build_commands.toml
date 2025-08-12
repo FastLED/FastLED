@@ -1,15 +1,32 @@
-[tools]
-# Compiler invocation expressed as a list of tokens
-cpp_compiler = ["uv", "run", "python", "-m", "ziglang", "c++"]
-
-[flags]
-# GNU-style flags; the build system will translate as needed
-compiler_flags = ["-std=gnu++17", "-fpermissive", "-Wall", "-Wextra"]
-# Choose platform-defines appropriate for your use case (e.g., STUB_PLATFORM or __EMSCRIPTEN__)
-
-defines = ["STUB_PLATFORM", "__EMSCRIPTEN__"]
-include_paths = ["src"]
-# System include paths (treated as -isystem)
-system_include_paths = [
-  "src/platforms/stub"
+[all]
+# Universal defines and compiler flags for compile-commands generation
+defines = [
+  "STUB_PLATFORM",
+  "__EMSCRIPTEN__"
 ]
+compiler_flags = [
+  "-std=gnu++17",
+  "-fpermissive",
+  "-Wall",
+  "-Wextra"
+]
+# Include flags are passed verbatim; use -I and -isystem as needed
+include_flags = [
+  "-Isrc",
+  "-isystemsrc/platforms/stub"
+]
+
+[tools]
+# Tool configuration required by BuildFlags.parse
+cpp_compiler = ["uv", "run", "python", "-m", "ziglang", "c++"]
+linker = ["uv", "run", "python", "-m", "ziglang", "c++"]
+archiver = ["uv", "run", "python", "-m", "ziglang", "ar"]
+c_compiler = ["uv", "run", "python", "-m", "ziglang", "cc"]
+objcopy = ["uv", "run", "python", "-m", "ziglang", "objcopy"]
+nm = ["uv", "run", "python", "-m", "ziglang", "nm"]
+strip = ["uv", "run", "python", "-m", "ziglang", "strip"]
+ranlib = ["uv", "run", "python", "-m", "ziglang", "ranlib"]
+
+[archive]
+# Required by BuildFlags.parse; not used for compile-commands generation
+flags = "rcsD"
