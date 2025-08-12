@@ -7,6 +7,10 @@
 #include "driver/ledc.h"
 #include "esp32-hal-ledc.h"
 
+// Ancient versions of Esp32 on Arduino did not have analogWrite() defined. Therefore
+// on all esp32 platforms, we define it ourselves. It's hard to detect the idf3.3 so we
+// just define analogWrite() for **all** platforms, but leave it as a weak symbol so that
+// it auto disables on new platforms.
 FL_WEAK void analogWrite(uint8_t pin, int value) {
   // Setup PWM channel for the pin if not already done
   static bool channels_setup[16] = {false}; // ESP32 has 16 PWM channels
