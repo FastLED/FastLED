@@ -403,10 +403,10 @@ def create_unit_test_compiler(
         "-Wno-backslash-newline-escape",
         "-fno-exceptions",
         "-fno-rtti",
-        "-O0",  # No optimization for better debugging
-        "-g3",  # Maximum debug information
+        "-O0",  # No optimization
+        "-g0",  # Disable debug information
         "-fno-omit-frame-pointer",
-        "-fstandalone-debug",  # Include debug info for all used types
+        # removed: -fstandalone-debug
         "-fno-inline-functions",
         "-fno-vectorize",
         "-fno-unroll-loops",
@@ -418,10 +418,9 @@ def create_unit_test_compiler(
     ]
 
     # Add debug flags for DWARF symbols (works on all platforms including Windows GNU toolchain)
-    if os.name == "nt":  # Windows with GNU toolchain
-        unit_test_args.extend(
-            ["-gdwarf-4"]
-        )  # Generate DWARF debug info for GNU debugging tools
+    # Removed Windows-specific DWARF debug info to keep unit tests free of debug symbols
+    # if os.name == "nt":  # Windows with GNU toolchain
+    #     unit_test_args.extend(["-gdwarf-4"])  # Generate DWARF debug info for GNU debugging tools
 
     # PCH configuration with unit test specific headers
     pch_output_path = None
