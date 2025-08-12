@@ -10,6 +10,7 @@
 #include "fl/clamp.h"
 #include "fl/lut.h"
 #include "fl/memory.h"
+#include "fl/deprecated.h"
 #include "fl/xmap.h" // Include xmap.h for LUT16
 
 namespace fl {
@@ -52,9 +53,13 @@ class XYMap {
     static XYMap constructRectangularGrid(u16 width, u16 height,
                                           u16 offset = 0);
 
+    // This isn't working right, but the user function works just fine. The discussion
+    // is here:
+    // https://www.reddit.com/r/FastLED/comments/1kwwvcd/using_screenmap_with_nonstandard_led_layouts/
+    // Remember that this is open source software so if you want to fix it, go for it.
     static XYMap constructWithLookUpTable(u16 width, u16 height,
                                           const u16 *lookUpTable,
-                                          u16 offset = 0);
+                                          u16 offset = 0) FASTLED_DEPRECATED("Use XYMap::constructWithUserFunction instaed or please fix this function.");
 
     static XYMap constructSerpentine(u16 width, u16 height,
                                      u16 offset = 0);

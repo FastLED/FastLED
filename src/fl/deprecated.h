@@ -22,3 +22,7 @@
   #endif
   #define FASTLED_DEPRECATED_CLASS(msg)
 #endif
+
+
+#define FL_DEPRECATED(msg) FASTLED_DEPRECATED(msg)
+#define FL_DEPRECATED_CLASS(msg) FASTLED_DEPRECATED_CLASS(msg)
