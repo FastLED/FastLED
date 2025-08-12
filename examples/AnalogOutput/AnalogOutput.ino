@@ -5,6 +5,11 @@
 #include <Arduino.h>
 #include <FastLED.h>
 
+#ifdef ESP32
+// ESP32 IDF 3.3 compatibility - analogWrite declaration
+void analogWrite(uint8_t pin, int value);
+#endif
+
 
 // Example showing how to use FastLED color functions
 // even when you're NOT using a "pixel-addressible" smart LED strip.
@@ -68,3 +73,31 @@ void setup() {
   // Flash the "hello" color sequence: R, G, B, black.
   colorBars();
 }
+
+#ifdef ESP32
+// ESP32 IDF 3.3 compatibility - analogWrite definition
+void analogWrite(uint8_t pin, int value) {
+  // Setup PWM channel for the pin if not already done
+  static bool channels_setup[16] = {false}; // ESP32 has 16 PWM channels
+  static uint8_t channel_counter = 0;
+  
+  // Find or assign channel for this pin
+  static uint8_t pin_to_channel[40] = {255}; // ESP32 has up to 40 GPIO pins, 255 = unassigned
+  if (pin_to_channel[pin] == 255) {
+    pin_to_channel[pin] = channel_counter++;
+    if (channel_counter > 15) channel_counter = 0; // Wrap around
+  }
+  
+  uint8_t channel = pin_to_channel[pin];
+  
+  // Setup channel if not already done
+  if (!channels_setup[channel]) {
+    ledcSetup(channel, 5000, 8); // 5kHz frequency, 8-bit resolution
+    ledcAttachPin(pin, channel);
+    channels_setup[channel] = true;
+  }
+  
+  // Write PWM value (0-255 for 8-bit resolution)
+  ledcWrite(channel, value);
+}
+#endif
