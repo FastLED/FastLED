@@ -3172,6 +3172,9 @@ def commands_json(
             include_paths: List[str] = [
                 str(x) for x in flags_cfg.get("include_paths", [])
             ]
+            system_include_paths: List[str] = [
+                str(x) for x in flags_cfg.get("system_include_paths", [])
+            ]
 
             # Prepare output directory
             output_json.parent.mkdir(parents=True, exist_ok=True)
@@ -3189,6 +3192,9 @@ def commands_json(
                 # Include paths as absolute -I flags
                 for p in include_paths:
                     args.append(f"-I{str((include_root.parent / p).resolve())}")
+                # System include paths as absolute -isystem flags
+                for sp in system_include_paths:
+                    args.append(f"-isystem{str((include_root.parent / sp).resolve())}")
                 # Defines as single-token -DNAME[=VALUE]
                 for d in defines:
                     args.append(_normalize_define_to_token(d))

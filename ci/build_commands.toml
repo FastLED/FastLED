@@ -7,10 +7,9 @@ cpp_compiler = ["uv", "run", "python", "-m", "ziglang", "c++"]
 compiler_flags = ["-std=gnu++17", "-fpermissive", "-Wall", "-Wextra"]
 # Choose platform-defines appropriate for your use case (e.g., STUB_PLATFORM or __EMSCRIPTEN__)
 
-defines = ["STUB_PLATFORM"]
+defines = ["STUB_PLATFORM", "__EMSCRIPTEN__"]
 include_paths = ["src"]
-
-[filters]
-# Exclude platform-specific subtrees that are not part of your default library build
-exclude_dirs = ["src/platforms/avr", "src/platforms/esp", "src/platforms/wasm", "src/platforms/win"]
-
+# System include paths (treated as -isystem)
+system_include_paths = [
+  "src/platforms/stub"
+]
