@@ -59,7 +59,7 @@ class XYMap {
     // Remember that this is open source software so if you want to fix it, go for it.
     static XYMap constructWithLookUpTable(u16 width, u16 height,
                                           const u16 *lookUpTable,
-                                          u16 offset = 0) FASTLED_DEPRECATED("Use XYMap::constructWithUserFunction instaed or please fix this function.");
+                                          u16 offset = 0);
 
     static XYMap constructSerpentine(u16 width, u16 height,
                                      u16 offset = 0);
