@@ -11,7 +11,7 @@ from pathlib import Path
 from threading import Lock
 from typing import List
 
-from ci.util.boards import Board  # type: ignore
+from ci.boards import Board  # type: ignore
 from ci.util.locked_print import locked_print
 
 

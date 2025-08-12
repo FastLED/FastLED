@@ -1,6 +1,6 @@
 import unittest
 
-from ci.util.boards import Board
+from ci.boards import Board
 
 
 class TestBoardToPlatformioIni(unittest.TestCase):

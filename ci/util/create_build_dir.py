@@ -12,7 +12,7 @@ import warnings
 from pathlib import Path
 from typing import Any, Callable, Dict
 
-from ci.util.boards import Board  # type: ignore
+from ci.boards import Board  # type: ignore
 from ci.util.locked_print import locked_print
 
 

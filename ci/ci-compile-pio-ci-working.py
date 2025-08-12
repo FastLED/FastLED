@@ -14,7 +14,7 @@ import warnings
 from pathlib import Path
 from typing import List, Set
 
-from ci.util.boards import Board, create_board  # type: ignore
+from ci.boards import Board, create_board  # type: ignore
 from ci.util.locked_print import locked_print
 
 

@@ -16,7 +16,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
 # Import from the local ci directory
-from ci.util.boards import Board, create_board  # type: ignore
+from ci.boards import Board, create_board  # type: ignore
 from ci.util.create_build_dir import insert_tool_aliases
 from ci.util.locked_print import locked_print
 

@@ -18,9 +18,9 @@ from typing import List, Optional, cast
 
 from typeguard import typechecked
 
+from ci.boards import ALL, Board, create_board
 from ci.compiler.compiler import CacheType, SketchResult
 from ci.compiler.pio import PioCompiler
-from ci.util.boards import ALL, Board, create_board
 
 
 def green_text(text: str) -> str:
