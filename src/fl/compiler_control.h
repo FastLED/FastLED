@@ -117,16 +117,6 @@
   #define FL_OPTIMIZATION_LEVEL_O0_END   /* nothing */
 #endif
 
-// 6/29/2025 - Differences in all src vs individual compilation was 35 to 39 seconds.
-// #define FASTLED_ALL_SRC 0
-
-// All Source Build Control
-// When FASTLED_ALL_SRC is enabled, all source is compiled into a single translation unit
-// Compiler-specific defaults: Clang=faster with unified, GCC=slower with unified
-#ifndef FASTLED_ALL_SRC
-  #define FASTLED_ALL_SRC 0
+#ifndef FL_WEAK
+#define FL_WEAK __attribute__((weak))
 #endif
-
-// #if FASTLED_ALL_SRC == 1
-// #error "FASTLED_ALL_SRC is defined"
-// #endif
