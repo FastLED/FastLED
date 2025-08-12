@@ -8,6 +8,14 @@ FastLED Library
 [![Documentation](https://img.shields.io/badge/Docs-Doxygen-blue.svg)](http://fastled.io/docs)
 [![Reddit](https://img.shields.io/badge/reddit-/r/FastLED-orange.svg?logo=reddit)](https://www.reddit.com/r/FastLED/)
 
+## About
+
+Want to control a strip of leds? Or control 10's of thousands? FastLED has your back.
+
+FastLED is a robust and massively parallel-led driver for Arduino, Esp32, RaspberryPi,  Atmega, Teensy, Uno, Apollo3 Arm and more. Also runs on dirt cheap sub $1 devices, due to it's incredibly small compile size. High end devices can drive upto ~30k LEDS (Teensy) and ~20k on ESP32. Supports nearly every single LED chipset in existence. Background rendering (ESP32/Teensy/RaspberriPi) means you can respond to user input while the leds render. FastLED is the third [most popular library on Arduino](https://docs.arduino.cc/libraries/).
+
+FastLED has recently begun to evolve. While before the FastLED codebase was just a highly compatible cross platform LED driver, now it is becoming a cross platform way to generate visualizers that run on AVR, esp32, teensy, Rasperri PI etc
+
 ## Table of Contents
 
 - [About](#about)
@@ -63,12 +71,6 @@ FastLED Library
 
 
 
-
-Want to control a strip of leds? Or control 10's of thousands? FastLED has your back.
-
-FastLED is a robust and massively parallel-led driver for Arduino, Esp32, RaspberryPi,  Atmega, Teensy, Uno, Apollo3 Arm and more. Also runs on dirt cheap sub $1 devices, due to it's incredibly small compile size. High end devices can drive upto ~30k LEDS (Teensy) and ~20k on ESP32. Supports nearly every single LED chipset in existence. Background rendering (ESP32/Teensy/RaspberriPi) means you can respond to user input while the leds render. FastLED is the third [most popular library on Arduino](https://docs.arduino.cc/libraries/).
-
-FastLED has recently begun to evolve. While before the FastLED codebase was just a highly compatible cross platform LED driver, now it is becoming a cross platform way to generate visualizers that run on AVR, esp32, teensy, Rasperri PI etc
 
 ## Documentation
 
