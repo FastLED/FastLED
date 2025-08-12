@@ -5,6 +5,7 @@
 /// emphasizing clean syntax, type safety, default values, and robust
 /// handling of missing fields.
 
+#include <Arduino.h>
 #include "FastLED.h"
 #include "fl/json.h" // Assumed ideal JSON API header
 
