@@ -135,6 +135,11 @@ def parse_args(args: Optional[list[str]] = None) -> TestArgs:
         default=1,
         help="Number of unity chunks when building libfastled.a (default: 1)",
     )
+    parser.add_argument(
+        "--debug",
+        action="store_true",
+        help="Enable debug mode for C++ unit tests (e.g., full debug symbols)",
+    )
 
     parsed_args = parser.parse_args(args)
 
@@ -162,6 +167,7 @@ def parse_args(args: Optional[list[str]] = None) -> TestArgs:
         full=parsed_args.full,
         no_parallel=parsed_args.no_parallel,
         unity_chunks=parsed_args.unity_chunks,
+        debug=parsed_args.debug,
     )
 
     # Auto-enable --py or --cpp mode when a specific test is provided

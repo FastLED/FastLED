@@ -347,6 +347,9 @@ def _compile_tests_python(
         cmd.append("--check")
     if "--no-pch" in unknown_args:
         cmd.append("--no-pch")
+    # Forward debug mode to the compiler when quick_build is disabled
+    if not quick_build:
+        cmd.append("--debug")
 
     print("🚀 Using Python build system with PCH optimization")
     result = subprocess.run(cmd)

@@ -411,6 +411,8 @@ def create_unit_test_process(
         compile_cmd.append("--no-unity")
     if args.no_pch:
         compile_cmd.append("--no-pch")
+    if args.debug:
+        compile_cmd.append("--debug")
 
     # subprocess.run(compile_cmd, check=True)
 
