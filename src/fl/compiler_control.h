@@ -42,7 +42,12 @@
   #define FL_DISABLE_FORMAT_TRUNCATION \
     FL_DISABLE_WARNING(format-truncation)
   #define FL_DISABLE_WARNING_NULL_DEREFERENCE
-  #define FL_DISABLE_WARNING_IMPLICIT_FALLTHROUGH FL_DISABLE_WARNING(implicit-fallthrough)
+  // implicit-fallthrough warning requires GCC >= 7.0
+  #if (__GNUC__*100 + __GNUC_MINOR__) >= 700
+    #define FL_DISABLE_WARNING_IMPLICIT_FALLTHROUGH FL_DISABLE_WARNING(implicit-fallthrough)
+  #else
+    #define FL_DISABLE_WARNING_IMPLICIT_FALLTHROUGH
+  #endif
 #else
   #define FL_DISABLE_WARNING_GLOBAL_CONSTRUCTORS
   #define FL_DISABLE_WARNING_SELF_ASSIGN_OVERLOADED
