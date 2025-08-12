@@ -24,6 +24,7 @@ FastLED Library
   - [New in 3.9.8 - Massive Teensy 4.1 & 4.0 WS2812 LED output](#new-in-398---massive-teensy-41--40-ws2812-led-output)
   - [New in 3.9.2 - Overclocking of WS2812](#new-in-392---overclocking-of-ws2812)
   - [New in 3.7.7 - RGBW LED Strip Support](#new-in-377---rgbw-led-strip-support)
+- [Platform Defines](#platform-defines)
 - [Supported Platforms](#supported-platforms)
   - [Arduino](#arduino)
   - [Teensy](#teensy)
@@ -191,6 +192,28 @@ Update: max overclock has been reported at +70%: https://www.reddit.com/r/FastLE
 
 ![image (1)](https://github.com/user-attachments/assets/d4892626-3dc6-4d6d-a740-49ddad495fa5)
 
+
+## Platform Defines
+
+FastLED supports platform-specific configuration through preprocessor defines. These defines allow you to customize library behavior for specific hardware platforms:
+
+### Teensy 4.0/4.1
+- **`FASTLED_NOT_USES_OBJECTFLED`** - Disables ObjectFLED integration for WS2812 LEDs
+  - By default, ObjectFLED is automatically enabled on Teensy 4.0/4.1 for enhanced performance
+  - Add this define before including FastLED to use the standard driver instead
+  ```cpp
+  #define FASTLED_NOT_USES_OBJECTFLED
+  #include <FastLED.h>
+  ```
+
+- **`USE_WS2812SERIAL`** - Enables WS2812Serial hardware-based serial controller
+  - Uses Teensy's hardware serial ports for high-performance WS2812 LED control
+  - Requires the WS2812Serial library by Paul Stoffregen
+  - Provides non-blocking LED updates using dedicated hardware
+  ```cpp
+  #define USE_WS2812SERIAL
+  #include <FastLED.h>
+  ```
 
 ## Supported Platforms
 ### Arduino
