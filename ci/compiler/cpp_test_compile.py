@@ -15,6 +15,7 @@ from typing import Any, Dict, List, Optional, Set, Tuple, Union
 
 from ci.util.paths import PROJECT_ROOT
 from ci.util.running_process import RunningProcess
+from ci.util.test_args import parse_args as parse_global_test_args
 
 from .clang_compiler import (
     BuildFlags,
@@ -354,7 +355,7 @@ def create_unit_test_fastled_library(
 
 
 def create_unit_test_compiler(
-    use_pch: bool = True, enable_static_analysis: bool = False
+    use_pch: bool = True, enable_static_analysis: bool = False, *, debug: bool = False
 ) -> Compiler:
     """Create compiler optimized for unit test compilation with PCH support."""
 
@@ -403,10 +404,8 @@ def create_unit_test_compiler(
         "-Wno-backslash-newline-escape",
         "-fno-exceptions",
         "-fno-rtti",
-        "-O0",  # No optimization
-        "-g0",  # Disable debug information
+        # Optimization/debug controls set below based on debug flag
         "-fno-omit-frame-pointer",
-        # removed: -fstandalone-debug
         "-fno-inline-functions",
         "-fno-vectorize",
         "-fno-unroll-loops",
@@ -417,10 +416,22 @@ def create_unit_test_compiler(
         f"-I{src_path / 'platforms' / 'stub'}",
     ]
 
-    # Add debug flags for DWARF symbols (works on all platforms including Windows GNU toolchain)
-    # Removed Windows-specific DWARF debug info to keep unit tests free of debug symbols
-    # if os.name == "nt":  # Windows with GNU toolchain
-    #     unit_test_args.extend(["-gdwarf-4"])  # Generate DWARF debug info for GNU debugging tools
+    # Apply quick vs debug modes
+    if debug:
+        unit_test_args.extend([
+            "-O0",
+            "-g3",
+            "-fstandalone-debug",
+        ])
+        if os.name == "nt":
+            unit_test_args.extend(["-gdwarf-4"])  # GNU debug info for Windows GNU toolchain
+    else:
+        unit_test_args.extend([
+            "-O0",
+            "-g0",
+        ])
+
+    # Note: DWARF flags are added above conditionally when debug=True
 
     # PCH configuration with unit test specific headers
     pch_output_path = None
@@ -500,6 +511,8 @@ def compile_unit_tests_python_api(
     enable_static_analysis: bool = False,
     use_pch: bool = True,
     clean: bool = False,
+    *,
+    debug: bool = False,
 ) -> bool:
     """Compile unit tests using the fast Python API instead of CMake.
 
@@ -519,7 +532,7 @@ def compile_unit_tests_python_api(
 
     # Create optimized compiler for unit tests
     compiler = create_unit_test_compiler(
-        use_pch=use_pch, enable_static_analysis=enable_static_analysis
+        use_pch=use_pch, enable_static_analysis=enable_static_analysis, debug=debug
     )
 
     # Find all test files - work from project root
@@ -804,6 +817,7 @@ def parse_arguments():
     parser.add_argument(
         "--no-pch", action="store_true", help="Disable precompiled headers (PCH)"
     )
+    parser.add_argument("--debug", action="store_true", help="Enable debug symbols")
 
     parser.add_argument("--verbose", action="store_true", help="Enable verbose output")
     return parser.parse_args()
@@ -957,6 +971,7 @@ def main() -> None:
         enable_static_analysis=args.check,
         use_pch=use_pch,
         clean=need_clean,
+        debug=args.debug,
     )
 
     if compilation_successful:
