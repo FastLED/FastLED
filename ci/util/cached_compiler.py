@@ -84,8 +84,8 @@ def create_cached_compiler_script(
     Returns:
         Path to the created cached compiler script
     """
-    script_name = f"cached_{compiler_name.replace('-', '_')}.py"
-    script_path = output_dir / script_name
+    script_base = f"cached_{compiler_name.replace('-', '_')}"
+    script_py = output_dir / f"{script_base}.py"
 
     script_content = f'''#!/usr/bin/env python3
 """
@@ -153,13 +153,19 @@ if __name__ == "__main__":
 '''
 
     # Write the script
-    script_path.write_text(script_content, encoding="utf-8")
+    script_py.write_text(script_content, encoding="utf-8")
 
     # Make executable on Unix systems
     if os.name != "nt":
-        script_path.chmod(script_path.stat().st_mode | 0o755)
+        script_py.chmod(script_py.stat().st_mode | 0o755)
+        return script_py
 
-    return script_path
+    # On Windows, create a .cmd shim so our wrapper is the program token
+    script_cmd = output_dir / f"{script_base}.cmd"
+    # Use system python; PlatformIO environment provides the right interpreter
+    cmd_content = f'@echo off\r\npython "{script_py}" %*\r\nexit /b %ERRORLEVEL%\r\n'
+    script_cmd.write_text(cmd_content, encoding="utf-8")
+    return script_cmd
 
 
 def create_cached_toolchain(
@@ -218,8 +224,8 @@ def create_cached_toolchain(
             debug=debug,
         )
 
-        # Use Python to execute the script
-        cached_tools[tool_name] = f"python {cached_script}"
+        # Use returned script path directly (Windows: .cmd shim; Unix: executable .py)
+        cached_tools[tool_name] = str(cached_script)
 
         if debug:
             print(

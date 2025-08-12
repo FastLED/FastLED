@@ -294,8 +294,8 @@ if USE_CACHE and env is not None and hasattr(env, "get"):  # type: ignore[has-ty
                     )
 
                     cached_tools = {
-                        "CC": f"python {cached_cc_script}",
-                        "CXX": f"python {cached_cxx_script}",
+                        "CC": str(cached_cc_script),
+                        "CXX": str(cached_cxx_script),
                     }
 
                     # Update cache file with new script paths
@@ -371,8 +371,8 @@ if USE_CACHE and env is not None and hasattr(env, "get"):  # type: ignore[has-ty
                     )
 
                     cached_tools = {
-                        "CC": f"python {cached_cc_script}",
-                        "CXX": f"python {cached_cxx_script}",
+                        "CC": str(cached_cc_script),
+                        "CXX": str(cached_cxx_script),
                     }
 
                     print("Created new compiler toolset:")
