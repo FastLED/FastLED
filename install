@@ -57,32 +57,8 @@ fi
 echo "Building C++ tests to generate compile_commands.json..."
 uv run -m ci.compiler.cpp_test_run --compile-only --clang --test test_function
 
-# Copy compile_commands.json to project root for clangd IntelliSense
-if [ -f tests/.build/compile_commands.json ]; then
-    echo "Copying compile_commands.json for clangd support..."
-    cp tests/.build/compile_commands.json compile_commands.json
-    echo "✅ clangd support enabled - IntelliSense should work in VSCode"
-elif [ -f compile_commands.json ]; then
-    echo "✅ compile_commands.json already exists - clangd support enabled"
-else
-    echo "Generating basic compile_commands.json for clangd support..."
-    cat > compile_commands.json << 'EOF'
-[
-  {
-    "directory": "/workspace",
-    "command": "python -m ziglang c++ -std=gnu++17 -fpermissive -Wall -Wextra -Wno-deprecated-register -Wno-backslash-newline-escape -fno-exceptions -fno-rtti -O1 -g0 -fno-inline-functions -fno-vectorize -fno-unroll-loops -fno-strict-aliasing -I. -Isrc -Itests -I/workspace/src/platforms/stub -I/workspace/src -DFASTLED_UNIT_TEST=1 -DFASTLED_FORCE_NAMESPACE=1 -DFASTLED_USE_PROGMEM=0 -DSTUB_PLATFORM -DARDUINO=10808 -DFASTLED_USE_STUB_ARDUINO -DSKETCH_HAS_LOTS_OF_MEMORY=1 -DFASTLED_STUB_IMPL -DFASTLED_USE_JSON_UI=1 -DFASTLED_TESTING -DFASTLED_NO_AUTO_NAMESPACE -DFASTLED_NO_PINMAP -DHAS_HARDWARE_PIN_SUPPORT -DFASTLED_DEBUG_LEVEL=1 -DFASTLED_NO_ATEXIT=1 -DDOCTEST_CONFIG_NO_EXCEPTIONS_BUT_WITH_ALL_ASSERTS -c",
-    "file": "/workspace/src/FastLED.cpp"
-  },
-  {
-    "directory": "/workspace",
-    "command": "python -m ziglang c++ -std=gnu++17 -fpermissive -Wall -Wextra -Wno-deprecated-register -Wno-backslash-newline-escape -fno-exceptions -fno-rtti -O1 -g0 -fno-inline-functions -fno-vectorize -fno-unroll-loops -fno-strict-aliasing -I. -Isrc -Itests -I/workspace/src/platforms/stub -I/workspace/src -DFASTLED_UNIT_TEST=1 -DFASTLED_FORCE_NAMESPACE=1 -DFASTLED_USE_PROGMEM=0 -DSTUB_PLATFORM -DARDUINO=10808 -DFASTLED_USE_STUB_ARDUINO -DSKETCH_HAS_LOTS_OF_MEMORY=1 -DFASTLED_STUB_IMPL -DFASTLED_USE_JSON_UI=1 -DFASTLED_TESTING -DFASTLED_NO_AUTO_NAMESPACE -DFASTLED_NO_PINMAP -DHAS_HARDWARE_PIN_SUPPORT -DFASTLED_DEBUG_LEVEL=1 -DFASTLED_NO_ATEXIT=1 -DDOCTEST_CONFIG_NO_EXCEPTIONS_BUT_WITH_ALL_ASSERTS -c",
-    "file": "/workspace/tests/test_function.cpp"
-  }
-]
-EOF
-    echo "✅ Basic compile_commands.json created for clangd support"
-    echo "    For full compile database, you can run './generate_compile_commands.sh'"
-fi
+echo "Generating auto complete for VSCode (compile_commands.json)"
+uv run ci/compile-commands.py 
 
 echo "Setting up JavaScript development environment..."
 

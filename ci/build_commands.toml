@@ -1,0 +1,16 @@
+[tools]
+# Compiler invocation expressed as a list of tokens
+cpp_compiler = ["uv", "run", "python", "-m", "ziglang", "c++"]
+
+[flags]
+# GNU-style flags; the build system will translate as needed
+compiler_flags = ["-std=gnu++17", "-fpermissive", "-Wall", "-Wextra"]
+# Choose platform-defines appropriate for your use case (e.g., STUB_PLATFORM or __EMSCRIPTEN__)
+
+defines = ["STUB_PLATFORM"]
+include_paths = ["src"]
+
+[filters]
+# Exclude platform-specific subtrees that are not part of your default library build
+exclude_dirs = ["src/platforms/avr", "src/platforms/esp", "src/platforms/wasm", "src/platforms/win"]
+

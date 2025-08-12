@@ -3015,3 +3015,207 @@ if __name__ == "__main__":
 
     success = main()
     sys.exit(0 if success else 1)
+
+# --------------------------------------------------------------------------------------
+# Compile Commands JSON generation
+# --------------------------------------------------------------------------------------
+
+
+def _normalize_define_to_token(define: str) -> str:
+    """Normalize a define into a single "-DNAME[=VALUE]" token.
+
+    Args:
+        define: Define that may or may not start with "-D" and may include "=VALUE"
+
+    Returns:
+        A single token in the form "-DNAME" or "-DNAME=VALUE".
+    """
+    # Strip any existing leading -D
+    value: str = define[2:] if define.startswith("-D") else define
+    return f"-D{value}"
+
+
+def _build_arguments_for_tu(
+    tool_tokens: List[str],
+    include_root: Path,
+    settings: "CompilerOptions",
+    defines_from_build: List[str],
+    source_file: Path,
+    object_output: Path,
+) -> List[str]:
+    """Compose the full arguments list for a single translation unit.
+
+    This mirrors the real build by using the tool tokens from BuildFlags, the
+    include root, normalized defines, and compiler args from CompilerOptions.
+    """
+    args: List[str] = []
+
+    # Program tokens (e.g. ["uv","run","python","-m","ziglang","c++"]) as-is
+    args.extend(tool_tokens)
+
+    # Language specification and standard version where available
+    args.extend(["-x", "c++"])
+    if settings.std_version:
+        args.append(f"-std={settings.std_version}")
+
+    # Base include for project source root
+    args.append(f"-I{str(include_root)}")
+
+    # Normalized defines (single-token -DNAME[=VALUE])
+    for d in defines_from_build:
+        args.append(_normalize_define_to_token(d))
+
+    # Additional compiler args from settings (already include flags from TOML)
+    for a in settings.compiler_args:
+        args.append(a)
+
+    # Compile only
+    args.extend(["-c", str(source_file)])
+    args.extend(["-o", str(object_output)])
+
+    return args
+
+
+def commands_json(
+    config_path: Path,
+    include_root: Path,
+    sources: List[Path],
+    output_json: Path,
+    quick_build: bool = True,
+    strict_mode: bool = False,
+) -> None:
+    """Emit compile_commands.json compatible entries using the BuildFlags toolchain.
+
+    - Loads BuildFlags via BuildFlags.parse(config_path, quick_build, strict_mode)
+    - Creates CompilerOptions via create_compiler_options_from_toml(...)
+    - For each source, composes the arguments array using tool tokens and flags
+    - Writes JSON array to output_json with both "arguments" and "command" fields
+    """
+    try:
+        # Fail fast on missing configuration
+        if not config_path.exists():
+            raise RuntimeError(
+                f"CRITICAL: Build flags TOML not found at {config_path}. "
+                f"This file is required."
+            )
+
+        # Try canonical BuildFlags path first. If configuration is minimal (no linker, etc.)
+        # fall back to a lightweight parser compatible with ci/build_commands.toml.
+        try:
+            build_flags = BuildFlags.parse(config_path, quick_build, strict_mode)
+            settings = create_compiler_options_from_toml(
+                toml_path=config_path,
+                include_path=str(include_root),
+                quick_build=quick_build,
+                strict_mode=strict_mode,
+            )
+
+            # Validate tools are present (no defaults allowed)
+            if not build_flags.tools.cpp_compiler:
+                raise RuntimeError(
+                    f"CRITICAL: [tools].cpp_compiler missing in {config_path}. "
+                    f"Please configure compiler tokens."
+                )
+
+            # Prepare output directory
+            output_json.parent.mkdir(parents=True, exist_ok=True)
+
+            # Object directory for per-file outputs (mirrors prior generator)
+            objects_dir: Path = include_root.parent / ".build" / "compile_commands"
+            objects_dir.mkdir(parents=True, exist_ok=True)
+
+            entries: List[Dict[str, Any]] = []
+            for src in sources:
+                obj_path: Path = (objects_dir / src.with_suffix(".o").name).resolve()
+                program_tokens: List[str] = list(build_flags.tools.cpp_compiler)
+                defines_tokens: List[str] = list(build_flags.defines)
+
+                args_list = _build_arguments_for_tu(
+                    tool_tokens=program_tokens,
+                    include_root=include_root,
+                    settings=settings,
+                    defines_from_build=defines_tokens,
+                    source_file=src,
+                    object_output=obj_path,
+                )
+
+                entry: Dict[str, Any] = {
+                    "directory": str(include_root.parent.resolve()),
+                    "file": str(src.resolve()),
+                    "arguments": args_list,
+                    "command": subprocess.list2cmdline(args_list),
+                }
+                entries.append(entry)
+
+        except Exception as primary_error:
+            # Fallback: minimal schema (tools.cpp_compiler, flags.compiler_flags/defines/include_paths)
+            # This supports ci/build_commands.toml without requiring full toolchain fields.
+            with open(config_path, "rb") as f:
+                config = tomllib.load(f)
+
+            if (
+                "tools" not in config
+                or "flags" not in config
+                or "cpp_compiler" not in config["tools"]
+            ):
+                # Re-raise original error if config is not minimal schema
+                raise primary_error
+
+            tools_cfg = config["tools"]
+            flags_cfg = config["flags"]
+
+            program_tokens: List[str] = [str(t) for t in tools_cfg["cpp_compiler"]]
+            compiler_flags: List[str] = [
+                str(x) for x in flags_cfg.get("compiler_flags", [])
+            ]
+            defines: List[str] = [str(x) for x in flags_cfg.get("defines", [])]
+            include_paths: List[str] = [
+                str(x) for x in flags_cfg.get("include_paths", [])
+            ]
+
+            # Prepare output directory
+            output_json.parent.mkdir(parents=True, exist_ok=True)
+            objects_dir: Path = include_root.parent / ".build" / "compile_commands"
+            objects_dir.mkdir(parents=True, exist_ok=True)
+
+            entries: List[Dict[str, Any]] = []
+            for src in sources:
+                obj_path: Path = (objects_dir / src.with_suffix(".o").name).resolve()
+
+                args: List[str] = []
+                args.extend(program_tokens)
+                # Use provided flags exactly; do not invent defaults
+                args.extend(compiler_flags)
+                # Include paths as absolute -I flags
+                for p in include_paths:
+                    args.append(f"-I{str((include_root.parent / p).resolve())}")
+                # Defines as single-token -DNAME[=VALUE]
+                for d in defines:
+                    args.append(_normalize_define_to_token(d))
+                # Compile-only invocation
+                args.extend(["-c", str(src)])
+                args.extend(["-o", str(obj_path)])
+
+                entry = {
+                    "directory": str(include_root.parent.resolve()),
+                    "file": str(src.resolve()),
+                    "arguments": args,
+                    "command": subprocess.list2cmdline(args),
+                }
+                entries.append(entry)
+
+        # Write JSON (common to both paths)
+        import json
+
+        with output_json.open("w", encoding="utf-8") as f:
+            f.write(json.dumps(entries, indent=2))
+            f.write("\n")
+
+    except KeyboardInterrupt:
+        _thread.interrupt_main()
+        raise
+    except FileNotFoundError as e:
+        raise RuntimeError(f"CRITICAL: Required file not found: {e}")
+    except Exception as e:
+        # Re-raise with context
+        raise RuntimeError(f"CRITICAL: Failed to generate compile_commands.json: {e}")
