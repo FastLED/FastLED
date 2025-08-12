@@ -16,6 +16,18 @@ FastLED is a robust and massively parallel-led driver for Arduino, Esp32, Raspbe
 
 FastLED has recently begun to evolve. While before the FastLED codebase was just a highly compatible cross platform LED driver, now it is becoming a cross platform way to generate visualizers that run on AVR, esp32, teensy, Rasperri PI etc
 
+
+## Star History
+
+<a href="https://star-history.com/#fastled/fastled&Date">
+ <picture>
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=fastled/fastled&type=Date&theme=dark" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=fastled/fastled&type=Date" />
+   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=fastled/fastled&type=Date" />
+ </picture>
+</a>
+
+
 ## Table of Contents
 
 - [About](#about)
@@ -75,16 +87,6 @@ FastLED has recently begun to evolve. While before the FastLED codebase was just
 ## Documentation
 
 Can be found [here](https://fastled.io/docs/files.html)
-
-## Star History
-
-<a href="https://star-history.com/#fastled/fastled&Date">
- <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=fastled/fastled&type=Date&theme=dark" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=fastled/fastled&type=Date" />
-   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=fastled/fastled&type=Date" />
- </picture>
-</a>
 
 
 ## About
