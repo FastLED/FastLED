@@ -64,14 +64,26 @@ def find_sccache() -> Optional[str]:
     return None
 
 
+def _strip_outer_quotes(text: str) -> str:
+    """Strip one pair of matching outer quotes from a string if present."""
+    if len(text) >= 2 and ((text[0] == '"' and text[-1] == '"') or (text[0] == "'" and text[-1] == "'")):
+        return text[1:-1]
+    return text
+
+
 def detect_response_files(args: List[str]) -> List[str]:
-    """Detect response file arguments (@file.tmp) in command line."""
+    """Detect response file arguments (@file.tmp) in command line.
+
+    Handles both @file.rsp and @"file with spaces.rsp" forms (common on Windows).
+    """
     response_files: List[str] = []
     for arg in args:
         if arg.startswith("@") and len(arg) > 1:
-            response_file = arg[1:]
-            if os.path.isfile(response_file):
-                response_files.append(response_file)
+            response_file = _strip_outer_quotes(arg[1:])
+            # Normalize Windows-style paths
+            response_file_path = os.path.normpath(response_file)
+            if os.path.isfile(response_file_path):
+                response_files.append(response_file_path)
     return response_files
 
 
@@ -80,30 +92,63 @@ def create_compiler_wrapper_script(config: XCacheConfig) -> Path:
 
     # Determine platform-appropriate script type
     is_windows = os.name == "nt"
-    script_suffix = ".bat" if is_windows else ".sh"
 
-    # Create temporary script file
+    # On Windows, prefer a Python wrapper to avoid cmd.exe quoting quirks with @response files
+    if is_windows:
+        script_fd, script_path = tempfile.mkstemp(
+            suffix=".py", prefix="xcache_compiler_", dir=config.temp_dir
+        )
+        try:
+            wrapper_content = f'''#!/usr/bin/env python3
+import os
+import subprocess
+import sys
+
+DEBUG = {str(config.debug)}
+SCCACHE = r"{config.sccache_path}"
+COMPILER = r"{config.compiler_path}"
+
+def main() -> int:
+    cmd = [SCCACHE, COMPILER] + sys.argv[1:]
+    if DEBUG:
+        try:
+            # Print to stderr to avoid interfering with stdout piping
+            print("XCACHE: Wrapper executing (Windows/Py): " + ' '.join(cmd), file=sys.stderr)
+        except Exception:
+            pass
+    try:
+        # Preserve exact argv to keep @response files intact
+        proc = subprocess.Popen(cmd)
+        return proc.wait()
+    except FileNotFoundError as e:
+        print(f"XCACHE ERROR: Command not found: {e}", file=sys.stderr)
+        return 127
+    except Exception as e:
+        print(f"XCACHE ERROR: Execution failed: {e}", file=sys.stderr)
+        return 1
+
+if __name__ == '__main__':
+    sys.exit(main())
+'''
+            with os.fdopen(script_fd, "w", encoding="utf-8") as f:
+                f.write(wrapper_content)
+            return Path(script_path)
+        except Exception:
+            try:
+                os.close(script_fd)
+                os.unlink(script_path)
+            except Exception:
+                pass
+            raise
+
+    # Unix shell script path
     script_fd, script_path = tempfile.mkstemp(
-        suffix=script_suffix, prefix="xcache_compiler_", dir=config.temp_dir
+        suffix=".sh", prefix="xcache_compiler_", dir=config.temp_dir
     )
 
     try:
-        if is_windows:
-            # Create Windows batch file
-            wrapper_content = f'''@echo off
-REM Temporary xcache compiler wrapper script
-REM Acts as alias for: sccache <actual_compiler>
-
-if /i "{config.debug}"=="true" (
-    echo XCACHE: Wrapper executing: "{config.sccache_path}" "{config.compiler_path}" %* >&2
-)
-
-REM Execute sccache with the actual compiler and all arguments (including response files)
-"{config.sccache_path}" "{config.compiler_path}" %*
-'''
-        else:
-            # Create Unix shell script
-            wrapper_content = f'''#!/bin/bash
+        # Create Unix shell script
+        wrapper_content = f'''#!/bin/bash
 # Temporary xcache compiler wrapper script
 # Acts as alias for: sccache <actual_compiler>
 
@@ -119,11 +164,9 @@ exec "{config.sccache_path}" "{config.compiler_path}" "$@"
         with os.fdopen(script_fd, "w", encoding="utf-8") as f:
             f.write(wrapper_content)
 
-        # Make script executable (Unix only)
+        # Make script executable
         script_path_obj = Path(script_path)
-        if not is_windows:
-            script_path_obj.chmod(script_path_obj.stat().st_mode | stat.S_IEXEC)
-
+        script_path_obj.chmod(script_path_obj.stat().st_mode | stat.S_IEXEC)
         return script_path_obj
 
     except Exception:
@@ -208,7 +251,10 @@ def execute_with_wrapper(config: XCacheConfig, args: List[str]) -> int:
         # Execute the original command but replace the compiler with our wrapper
         # The wrapper script will handle: sccache <actual_compiler> "$@"
         # Response files are passed through and handled normally by the system
-        command = [str(wrapper_script)] + args
+        if os.name == "nt":
+            command = [sys.executable, str(wrapper_script)] + args
+        else:
+            command = [str(wrapper_script)] + args
 
         if config.debug:
             print(
@@ -216,10 +262,10 @@ def execute_with_wrapper(config: XCacheConfig, args: List[str]) -> int:
             )
             print(f"XCACHE: Wrapper script path: {wrapper_script}", file=sys.stderr)
             print(
-                f"XCACHE: Wrapper script exists: {wrapper_script.exists()}",
+                f"XCACHE: Wrapper script exists: {Path(wrapper_script).exists()}",
                 file=sys.stderr,
             )
-            if wrapper_script.exists():
+            if Path(wrapper_script).exists():
                 print(
                     f"XCACHE: Wrapper script executable: {os.access(wrapper_script, os.X_OK)}",
                     file=sys.stderr,
@@ -253,9 +299,9 @@ def execute_with_wrapper(config: XCacheConfig, args: List[str]) -> int:
         return 1
     finally:
         # Clean up wrapper script
-        if wrapper_script and wrapper_script.exists():
+        if wrapper_script and Path(wrapper_script).exists():
             try:
-                wrapper_script.unlink()
+                Path(wrapper_script).unlink()
             except Exception:
                 pass
 
