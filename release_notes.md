@@ -1,5 +1,7 @@
 FastLED 3.10.2
 ==============
+  * TODO
+    * ObjectFLED -> Disable by default (go back to the standard driver)
   * **APA102HD Gamma Correction Algorithm**: Completely rewritten with closed-form mathematical solution
     * Thanks https://github.com/gwgill!
     * Graph of the old algorithms quantization issues can be see here:
