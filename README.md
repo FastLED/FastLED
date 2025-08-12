@@ -218,15 +218,6 @@ FastLED supports platform-specific configuration through preprocessor defines. T
 ### AVR (Arduino UNO, ATmega, ATtiny)
 AVR boards require specific configuration for optimal performance:
 
-- **`FASTLED_USE_PROGMEM`** - Controls flash memory usage for tables and palettes
-  - Default: `1` (enabled) on AVR - stores constant data in flash instead of RAM
-  - Reduces RAM usage on memory-constrained AVR devices
-  - Required for color palettes and lookup tables on AVR
-  ```cpp
-  #define FASTLED_USE_PROGMEM 1  // Default on AVR
-  #include <FastLED.h>
-  ```
-
 - **`FASTLED_ALLOW_INTERRUPTS`** - Controls interrupt handling during LED updates
   - Default: `0` (disabled) on AVR for precise timing
   - Set to `1` only on faster AVR parts if you need interrupt responsiveness
@@ -241,22 +232,6 @@ AVR boards require specific configuration for optimal performance:
   - Slower than hardware SPI but works on any pins
   ```cpp
   #define FASTLED_FORCE_SOFTWARE_SPI
-  #include <FastLED.h>
-  ```
-
-- **`FASTLED_DEFINE_AVR_MILLIS_TIMER0_IMPL`** - Provides millis() timer implementation
-  - For ATtiny boards that lack Arduino's millis() function
-  - Creates minimal Timer0-based millis counter
-  ```cpp
-  #define FASTLED_DEFINE_AVR_MILLIS_TIMER0_IMPL
-  #include <FastLED.h>
-  ```
-
-- **`FASTLED_DEFINE_TIMER_WEAK_SYMBOL`** - Controls timer symbol export
-  - Advanced: controls weak symbol export for timer_millis
-  - Typically only needed for custom timer implementations
-  ```cpp
-  #define FASTLED_DEFINE_TIMER_WEAK_SYMBOL
   #include <FastLED.h>
   ```
 
