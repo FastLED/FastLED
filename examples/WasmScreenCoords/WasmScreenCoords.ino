@@ -10,6 +10,10 @@
 
 #include <Arduino.h>
 #include <FastLED.h>
+
+
+#ifdef __EMSCRIPTEN__
+
 #include "fl/vector.h"
 
 
@@ -68,3 +72,17 @@ void setup() {
 void loop() {
     FastLED.show();
 }
+
+
+#else
+
+void setup() {
+    Serial.begin(115200);
+    Serial.println("setup");
+}
+
+void loop() {
+    Serial.println("loop");
+}
+
+#endif  // __EMSCRIPTEN__

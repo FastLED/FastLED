@@ -19,8 +19,14 @@
 
 using namespace fl;
 
+
+#if SKETCH_HAS_LOTS_OF_MEMORY
 #define WIDTH 22
 #define HEIGHT 22
+#else
+#define WIDTH 12
+#define HEIGHT 12
+#endif
 
 #define NUM_LEDS (WIDTH * HEIGHT)
 #define BLUR_AMOUNT 172

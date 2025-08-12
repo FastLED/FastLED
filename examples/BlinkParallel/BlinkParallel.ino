@@ -5,8 +5,13 @@
 
 #include "FastLED.h"
 
+
+#ifdef SKETCH_HAS_LOTS_OF_MEMORY
 // How many leds in your strip?
 #define NUM_LEDS 256
+#else
+#define NUM_LEDS 16
+#endif
 
 // Demo of driving multiple WS2812 strips on different pins
 
