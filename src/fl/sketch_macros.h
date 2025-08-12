@@ -2,9 +2,10 @@
 
 #if defined(__AVR__) \
   || defined(__AVR_ATtiny85__) \
-  || defined(__AVR_ATmega32U4__) \
   || defined(__AVR_ATtiny88__) \
+  || defined(__AVR_ATmega32U4__) \
   || defined(ARDUINO_attinyxy6) \
+  || defined(ARDUINO_attinyxy4) \
   || defined(ARDUINO_TEENSYLC) \
   || defined(ARDUINO_TEENSY30) \
   || defined(__MK20DX128__) \
