@@ -195,104 +195,7 @@ Update: max overclock has been reported at +70%: https://www.reddit.com/r/FastLE
 ![image (1)](https://github.com/user-attachments/assets/d4892626-3dc6-4d6d-a740-49ddad495fa5)
 
 
-## Platform Defines
 
-FastLED supports platform-specific configuration through preprocessor defines. These defines allow you to customize library behavior for specific hardware platforms:
-
-### Teensy 4.0/4.1
-- **`FASTLED_NOT_USES_OBJECTFLED`** - Disables ObjectFLED integration for WS2812 LEDs
-  - By default, ObjectFLED is automatically enabled on Teensy 4.0/4.1 for enhanced performance
-  - Add this define before including FastLED to use the standard driver instead
-  ```cpp
-  #define FASTLED_NOT_USES_OBJECTFLED
-  #include <FastLED.h>
-  ```
-
-- **`USE_WS2812SERIAL`** - Enables WS2812Serial hardware-based serial controller
-  - Uses Teensy's hardware serial ports for high-performance WS2812 LED control
-  - Requires the WS2812Serial library by Paul Stoffregen
-  - Provides non-blocking LED updates using dedicated hardware
-  ```cpp
-  #define USE_WS2812SERIAL
-  #include <FastLED.h>
-  ```
-
-### AVR (Arduino UNO, ATmega, ATtiny)
-AVR boards require specific configuration for optimal performance:
-
-- **`FASTLED_ALLOW_INTERRUPTS`** - Controls interrupt handling during LED updates
-  - Default: `0` (disabled) on AVR for precise timing
-  - Set to `1` only on faster AVR parts if you need interrupt responsiveness
-  - May cause timing glitches on WS2812 LEDs if enabled
-  ```cpp
-  #define FASTLED_ALLOW_INTERRUPTS 0  // Recommended for AVR
-  #include <FastLED.h>
-  ```
-
-- **`FASTLED_FORCE_SOFTWARE_SPI`** - Forces bit-bang SPI instead of hardware SPI
-  - Use when hardware SPI pins are unavailable or conflicting
-  - Slower than hardware SPI but works on any pins
-  ```cpp
-  #define FASTLED_FORCE_SOFTWARE_SPI
-  #include <FastLED.h>
-  ```
-
-**Supported AVR Families:**
-- ATmega328P/32U4/1280/2560 (Arduino UNO, Leonardo, Mega)
-- ATmega4809 (Arduino Nano Every) with VPORT mappings  
-- ATtiny85/84/861 and newer tinyAVR 0/1-series variants
-- Custom ATtiny/ATmega variants with appropriate pin definitions
-
-**Performance Notes:**
-- Disable interrupts during LED updates for best timing (`FASTLED_ALLOW_INTERRUPTS=0`)
-- Use PROGMEM to conserve RAM on memory-limited devices
-- Consider hardware vs software SPI based on available pins and performance needs
-
-### ESP32 / ESP32-S3
-Configuration varies by platform:
-
-- **`FASTLED_ESP32_I2S`** - Enables I2S parallel output for multiple LED strips
-  - Supports up to 24 parallel strips (ESP32Dev) or 16 strips (ESP32-S3) 
-  - All strips must use identical timing/chipset
-  - Provides DMA-backed non-blocking updates
-  ```ini
-  [env:esp32dev]
-  platform = espressif32
-  board = esp32dev
-  framework = arduino
-  build_flags =
-    -D FASTLED_ESP32_I2S=1
-    -D FASTLED_ESP32_I2S_NUM_DMA_BUFFERS=4  ; Reduces Wi-Fi flicker
-  ```
-
-- **FASTLED_USES_ESP32S3_I2S** - Enables I2S parallel output for multiple LED strips
-  - Supports up to 16 parallel strips (ESP32-S3) 
-  - All strips must use identical timing/chipset
-  - Provides DMA-backed non-blocking updates
-  ```ini
-  [env:esp32s3]
-  platform = espressif32
-  board = esp32s3
-  framework = arduino
-  build_flags =
-    -D FASTLED_USES_ESP32S3_I2S=1
-    -D FASTLED_ESP32_I2S_NUM_DMA_BUFFERS=4  ; Reduces Wi-Fi flicker
-
-- **`FASTLED_RMT_BUILTIN_DRIVER`** - Uses ESP-IDF built-in RMT driver (IDF4 only)
-  - Reduces flicker during Wi-Fi/BLE activity but uses more RAM
-  - Only available on ESP-IDF v4.x
-  ```ini
-  [env:esp32dev]
-  build_flags = -D FASTLED_RMT_BUILTIN_DRIVER=1
-  ```
-
-- **`FASTLED_RMT5`** - Controls RMT driver version selection
-  - Set to `0` to force legacy RMT4 driver on ESP-IDF v5.x
-  - RMT4 and RMT5 drivers cannot coexist
-  ```ini
-  [env:esp32dev]
-  build_flags = -D FASTLED_RMT5=0
-  ```
 
 ## Supported Platforms
 ### Arduino
@@ -517,6 +420,104 @@ If you are willing to make a custom board with shift registers, then the ESp32S3
   * Esp32DEV: https://github.com/hpwit/I2SClocklessVirtualLedDriver
   * Esp32-S3: https://github.com/hpwit/I2SClockLessLedVirtualDriveresp32s3
 
+## Platform Defines
+
+FastLED supports platform-specific configuration through preprocessor defines. These defines allow you to customize library behavior for specific hardware platforms:
+
+### Teensy 4.0/4.1
+- **`FASTLED_NOT_USES_OBJECTFLED`** - Disables ObjectFLED integration for WS2812 LEDs
+  - By default, ObjectFLED is automatically enabled on Teensy 4.0/4.1 for enhanced performance
+  - Add this define before including FastLED to use the standard driver instead
+  ```cpp
+  #define FASTLED_NOT_USES_OBJECTFLED
+  #include <FastLED.h>
+  ```
+
+- **`USE_WS2812SERIAL`** - Enables WS2812Serial hardware-based serial controller
+  - Uses Teensy's hardware serial ports for high-performance WS2812 LED control
+  - Requires the WS2812Serial library by Paul Stoffregen
+  - Provides non-blocking LED updates using dedicated hardware
+  ```cpp
+  #define USE_WS2812SERIAL
+  #include <FastLED.h>
+  ```
+
+### AVR (Arduino UNO, ATmega, ATtiny)
+AVR boards require specific configuration for optimal performance:
+
+- **`FASTLED_ALLOW_INTERRUPTS`** - Controls interrupt handling during LED updates
+  - Default: `0` (disabled) on AVR for precise timing
+  - Set to `1` only on faster AVR parts if you need interrupt responsiveness
+  - May cause timing glitches on WS2812 LEDs if enabled
+  ```cpp
+  #define FASTLED_ALLOW_INTERRUPTS 0  // Recommended for AVR
+  #include <FastLED.h>
+  ```
+
+- **`FASTLED_FORCE_SOFTWARE_SPI`** - Forces bit-bang SPI instead of hardware SPI
+  - Use when hardware SPI pins are unavailable or conflicting
+  - Slower than hardware SPI but works on any pins
+  ```cpp
+  #define FASTLED_FORCE_SOFTWARE_SPI
+  #include <FastLED.h>
+  ```
+
+**Supported AVR Families:**
+- ATmega328P/32U4/1280/2560 (Arduino UNO, Leonardo, Mega)
+- ATmega4809 (Arduino Nano Every) with VPORT mappings  
+- ATtiny85/84/861 and newer tinyAVR 0/1-series variants
+- Custom ATtiny/ATmega variants with appropriate pin definitions
+
+**Performance Notes:**
+- Disable interrupts during LED updates for best timing (`FASTLED_ALLOW_INTERRUPTS=0`)
+- Use PROGMEM to conserve RAM on memory-limited devices
+- Consider hardware vs software SPI based on available pins and performance needs
+
+### ESP32 / ESP32-S3
+Configuration varies by platform:
+
+- **`FASTLED_ESP32_I2S`** - Enables I2S parallel output for multiple LED strips
+  - Supports up to 24 parallel strips (ESP32Dev) or 16 strips (ESP32-S3) 
+  - All strips must use identical timing/chipset
+  - Provides DMA-backed non-blocking updates
+  ```ini
+  [env:esp32dev]
+  platform = espressif32
+  board = esp32dev
+  framework = arduino
+  build_flags =
+    -D FASTLED_ESP32_I2S=1
+    -D FASTLED_ESP32_I2S_NUM_DMA_BUFFERS=4  ; Reduces Wi-Fi flicker
+  ```
+
+- **FASTLED_USES_ESP32S3_I2S** - Enables I2S parallel output for multiple LED strips
+  - Supports up to 16 parallel strips (ESP32-S3) 
+  - All strips must use identical timing/chipset
+  - Provides DMA-backed non-blocking updates
+  ```ini
+  [env:esp32s3]
+  platform = espressif32
+  board = esp32s3
+  framework = arduino
+  build_flags =
+    -D FASTLED_USES_ESP32S3_I2S=1
+    -D FASTLED_ESP32_I2S_NUM_DMA_BUFFERS=4  ; Reduces Wi-Fi flicker
+
+- **`FASTLED_RMT_BUILTIN_DRIVER`** - Uses ESP-IDF built-in RMT driver (IDF4 only)
+  - Reduces flicker during Wi-Fi/BLE activity but uses more RAM
+  - Only available on ESP-IDF v4.x
+  ```ini
+  [env:esp32dev]
+  build_flags = -D FASTLED_RMT_BUILTIN_DRIVER=1
+  ```
+
+- **`FASTLED_RMT5`** - Controls RMT driver version selection
+  - Set to `0` to force legacy RMT4 driver on ESP-IDF v5.x
+  - RMT4 and RMT5 drivers cannot coexist
+  ```ini
+  [env:esp32dev]
+  build_flags = -D FASTLED_RMT5=0
+  ```
 
 ## Development
 
