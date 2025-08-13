@@ -256,12 +256,62 @@ if USE_CACHE and env is not None and hasattr(env, "get"):  # type: ignore[has-ty
 
                 if fake_cc_path.exists() and fake_cxx_path.exists():
                     # Fast path: use existing cached compilers
-                    cached_tools = {"CC": cached_fake_cc, "CXX": cached_fake_cxx}
+                    # On Windows, ensure we have .cmd shims to avoid 'python script.py @file'
+                    # causing Python to treat @file as the script name.
+                    import sys as _sys
+                    import os as _os
+
+                    is_win = (
+                        _os.name == "nt"
+                        or _sys.platform.startswith("win")
+                        or _sys.platform.startswith("cygwin")
+                        or _sys.platform.startswith("msys")
+                    )
+
+                    def _ensure_cmd_wrapper(fake_str: str, real_path: str) -> str:
+                        p = Path(fake_str.replace("python ", ""))
+                        if is_win and p.suffix.lower() == ".py":
+                            cmd = p.with_suffix(".cmd")
+                            if not cmd.exists():
+                                # Create missing .cmd wrapper now
+                                from ci.util.cached_compiler import create_cached_compiler_script
+                                out_dir = p.parent
+                                created = create_cached_compiler_script(
+                                    compiler_name=p.stem.split("cached_")[-1],
+                                    cache_executable=cache_config.get("CACHE_EXECUTABLE", "sccache"),
+                                    real_compiler_path=real_path,
+                                    output_dir=out_dir,
+                                    debug=debug_enabled,
+                                )
+                                cmd = Path(str(created).replace("python ", ""))
+                            if cmd.exists():
+                                return str(cmd)
+                        return fake_str
+
+                    # Create/choose proper wrapper paths
+                    new_cc = _ensure_cmd_wrapper(cached_fake_cc, cached_real_cc)
+                    new_cxx = _ensure_cmd_wrapper(cached_fake_cxx, cached_real_cxx)
+
+                    cached_tools = {"CC": new_cc, "CXX": new_cxx}
+
+                    # Update cache file if we switched to .cmd
+                    try:
+                        if new_cc != cached_fake_cc or new_cxx != cached_fake_cxx:
+                            cache_data["fake_cc"] = new_cc
+                            cache_data["fake_cxx"] = new_cxx
+                            with open(cache_file, "w") as f:
+                                json.dump(cache_data, f, indent=2)
+                    except KeyboardInterrupt as ke:
+                        import _thread
+                        _thread.interrupt_main()
+                        raise ke
+                    except Exception:
+                        pass
                     print(
                         "SUCCESS: Using cached compilers (instant, no platform search needed):"
                     )
-                    print(f"  CC: {cached_fake_cc}")
-                    print(f"  CXX: {cached_fake_cxx}")
+                    print(f"  CC: {cached_tools['CC']}")
+                    print(f"  CXX: {cached_tools['CXX']}")
                     print("  Platform search skipped - using cached toolset")
                 else:
                     print(

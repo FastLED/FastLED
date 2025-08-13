@@ -11,6 +11,7 @@ toolchain with cache support. Unlike batch scripts, Python wrappers can:
 """
 
 import os
+import platform
 import shutil
 import subprocess
 import sys
@@ -155,8 +156,19 @@ if __name__ == "__main__":
     # Write the script
     script_py.write_text(script_content, encoding="utf-8")
 
-    # Make executable on Unix systems
-    if os.name != "nt":
+    # Detect Windows reliably, including MSYS/Cygwin Git-Bash environments where
+    # os.name may report 'posix'. In those cases we still need a .cmd shim so
+    # that response files ("@file.tmp") are not misinterpreted by 'python'.
+    is_windows = (
+        os.name == "nt"
+        or sys.platform.startswith("win")
+        or sys.platform.startswith("cygwin")
+        or sys.platform.startswith("msys")
+        or platform.system().lower().startswith(("windows", "msys", "cygwin"))
+    )
+
+    # Make executable script on Unix-like systems
+    if not is_windows:
         script_py.chmod(script_py.stat().st_mode | 0o755)
         return script_py
 
