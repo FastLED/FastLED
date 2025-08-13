@@ -980,9 +980,13 @@ def _init_platformio_build(
     try:
         opt_report_path = (build_dir / "optimization_report.txt").resolve()
         # GCC writes reports relative to the current working directory; provide absolute path
-        board_with_sketch_include.build_flags.append(
-            f"-fopt-info-all={opt_report_path.as_posix()}"
-        )
+
+        # ESP32-C2 platform cannot work with -fopt-info-all, suppress it for this platform
+        if board.board_name != "esp32c2":
+            board_with_sketch_include.build_flags.append(
+                f"-fopt-info-all={opt_report_path.as_posix()}"
+            )
+
         # Generate linker map in the board directory (file name is sufficient; PIO writes here)
         board_with_sketch_include.build_flags.append("-Wl,-Map,firmware.map")
     except Exception as _e:
