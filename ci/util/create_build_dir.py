@@ -69,10 +69,16 @@ def insert_tool_aliases(meta_json: Dict[str, Dict[str, Any]]) -> None:
 
         if resolved_cc_path and resolved_cc_path.exists():
             cc_base = resolved_cc_path.name
-            tool_bin_dir = resolved_cc_path.parent
-            tool_prefix = cc_base.split("gcc")[0] if "gcc" in cc_base else ""
-            tool_suffix = resolved_cc_path.suffix
-        else:
+            # If cc_path points at a real gcc binary, derive prefix/suffix from it.
+            # If it's a wrapper (e.g. cached_CC.cmd) without "gcc" in the name,
+            # fall back to using gdb_path to derive the actual toolchain prefix/suffix.
+            if "gcc" in cc_base:
+                tool_bin_dir = resolved_cc_path.parent
+                tool_prefix = cc_base.split("gcc")[0]
+                tool_suffix = resolved_cc_path.suffix
+            else:
+                resolved_cc_path = None  # Force gdb-based fallback below
+        if resolved_cc_path is None:
             gdb_path_value = meta_json[board].get("gdb_path")
             if gdb_path_value:
                 try:
