@@ -1,0 +1,94 @@
+Initial build failed: 0.13 Processing esp32c2 (board: esp32-c2-devkitm-1; platform: https://github.com/pioarduino/platform-espressif32.git#develop; framework: arduino)
+0.13 --------------------------------------------------------------------------------
+0.44 Verbose mode can be enabled via `-v, --verbose` option
+0.54 Error: Failed to install Python dependencies into penv
+0.54 Error output: /home/ubuntu/.fastled/compile/pio/esp32c2/penv/bin/python: No module named pip
+0.58 ========================== [FAILED] Took 0.45 seconds ==========================
+Initial build failed: 0.16 Processing esp32c2 (board: esp32-c2-devkitm-1; platform: https://github.com/pioarduino/platform-espressif32.git#develop; framework: arduino)
+0.16 --------------------------------------------------------------------------------
+0.47 Verbose mode can be enabled via `-v, --verbose` option
+0.86 CONFIGURATION: https://docs.platformio.org/page/boards/espressif32/esp32-c2-devkitm-1.html
+0.86 PLATFORM: Espressif 32 (55.3.30+develop.sha.9651ee8) > Espressif ESP32-C2-DevKitM-1
+0.86 HARDWARE: ESP32C2 120MHz, 272KB RAM, 4MB Flash
+0.86 DEBUG: Current (cmsis-dap) External (cmsis-dap, esp-bridge, esp-prog, iot-bus-jtag, jlink, minimodule, olimex-arm-usb-ocd, olimex-arm-usb-ocd-h, olimex-arm-usb-tiny-h, olimex-jtag-tiny, tumpa)
+0.86 PACKAGES:
+0.86  - contrib-piohome @ 3.4.4
+0.86  - framework-arduino-c2-skeleton-lib @ 5.5.0+sha.cbe9388f45
+0.86  - framework-arduinoespressif32 @ 3.3.0
+0.86  - framework-arduinoespressif32-libs @ 5.5.0+sha.b66b5448e0
+0.86  - framework-espidf @ 3.50500.0 (5.5.0)
+0.86  - tool-cmake @ 3.30.2
+0.86  - tool-esp-rom-elfs @ 2024.10.11
+0.86  - tool-esptoolpy @ 5.0.2
+0.86  - tool-mklittlefs @ 3.2.0
+0.86  - tool-ninja @ 1.13.1
+0.86  - tool-scons @ 4.40801.0 (4.8.1)
+0.86  - toolchain-riscv32-esp @ 14.2.0+20241119
+0.87 *** Compile Arduino IDF libs for esp32c2 ***
+0.89 *** Add "custom_sdkconfig" settings to IDF sdkconfig.defaults ***
+0.89 Replace: CONFIG_IDF_TARGET="esp32c2" with: CONFIG_IDF_TARGET=esp32c2
+0.89 Replace: CONFIG_ESPTOOLPY_FLASHMODE_QIO=y with: CONFIG_ESPTOOLPY_FLASHMODE_QIO=y
+0.89 Replace: CONFIG_ESPTOOLPY_FLASHFREQ_60M=y with: CONFIG_ESPTOOLPY_FLASHFREQ_60M=y
+0.89 Replace: CONFIG_ESPTOOLPY_FLASHFREQ="60m" with: CONFIG_ESPTOOLPY_FLASHFREQ="60m"
+0.89 Add: # CONFIG_ESPTOOLPY_FLASHFREQ_80M is not set
+0.90 Warning! Arduino framework as an ESP-IDF component doesn't handle the `variant` field! The default `esp32` variant will be used.
+0.90 Reading CMake configuration...
+5.91 Generating assembly for certificate bundle...
+6.06 LDF: Library Dependency Finder -> https://bit.ly/configure-pio-ldf
+6.06 LDF Modes: Finder ~ chain, Compatibility ~ soft
+6.12 Found 42 compatible libraries
+6.12 Scanning dependencies...
+6.12 No dependencies
+6.13 Building in release mode
+6.13 Environment state dumped to: env_dump.json
+6.13 Projenv state dumped to: projenv_dump.json
+6.13 Cache configuration from environment:
+6.13   Cache type: xcache
+6.13   Cache executable: python /workspace/ci/util/xcache.py
+6.13   SCCACHE path: /workspace/.venv/bin/sccache
+6.13   SCCACHE dir: /home/ubuntu/.fastled/sccache
+6.13   Debug enabled: False
+6.13 xcache wrapper detected and configured for Python fake compilers
+6.13   xcache path: /workspace/ci/util/xcache.py
+6.13   cache executable: python /workspace/ci/util/xcache.py
+6.13 DEBUG: Found compilers in env:
+6.13   CC: 'riscv32-esp-elf-gcc' (type: str)
+6.13   CXX: 'riscv32-esp-elf-g++' (type: str)
+6.13 Extracted compiler names:
+6.13   CC name: riscv32-esp-elf-gcc
+6.13   CXX name: riscv32-esp-elf-g++
+6.13 Found local compiler cache:
+6.13   Cache file: /workspace/.build/pio/esp32c2/compiler_cache.json
+6.13   Real CC: /home/ubuntu/.fastled/packages/esp32c2/toolchain-riscv32-esp/bin/riscv32-esp-elf-gcc
+6.13   Real CXX: /home/ubuntu/.fastled/packages/esp32c2/toolchain-riscv32-esp/bin/riscv32-esp-elf-g++
+6.13 SUCCESS: Using cached compilers (instant, no platform search needed):
+6.13   CC: /workspace/.build/pio/esp32c2/cached_compilers/cached_CC.py
+6.13   CXX: /workspace/.build/pio/esp32c2/cached_compilers/cached_CXX.py
+6.13   Platform search skipped - using cached toolset
+6.13 Created Python cached compilers:
+6.13   CC: /workspace/.build/pio/esp32c2/cached_compilers/cached_CC.py
+6.13   CXX: /workspace/.build/pio/esp32c2/cached_compilers/cached_CXX.py
+6.13 Applied Python fake compilers to both env and projenv
+6.13 Python fake compiler cache enabled: xcache
+6.13   Original CC: riscv32-esp-elf-gcc
+6.13   Original CXX: riscv32-esp-elf-g++
+6.13   Fake CC: /workspace/.build/pio/esp32c2/cached_compilers/cached_CC.py
+6.13   Fake CXX: /workspace/.build/pio/esp32c2/cached_compilers/cached_CXX.py
+6.13 Python fake compiler cache environment configured successfully
+6.23 Retrieved `.pio/build/esp32c2/.dummy/sketch.cpp.o' from cache
+6.24 Retrieved `.pio/build/esp32c2/.dummy/arduino-lib-builder-gcc.c.o' from cache
+6.25 Retrieved `.pio/build/esp32c2/.dummy/arduino-lib-builder-cpp.cpp.o' from cache
+6.25 Retrieved `.pio/build/esp32c2/.dummy/arduino-lib-builder-as.S.o' from cache
+6.25 Generating LD script .pio/build/esp32c2/esp-idf/esp_system/ld/memory.ld.in
+6.25 CMake Error at .pio/build/esp32c2/esp-idf/esp_system/ld/linker_script_generator.cmake:6 (message):
+6.25   Can't generate .pio/build/esp32c2/esp-idf/esp_system/ld/memory.ld.in
+6.25   RET_CODE: no such file or directory
+6.25   ERROR_MESSAGE:
+6.26 Generating LD script .pio/build/esp32c2/esp-idf/esp_system/ld/sections.ld.in
+6.26 *** [.pio/build/esp32c2/esp-idf/esp_system/ld/memory.ld.in] Error 1
+6.26 CMake Error at .pio/build/esp32c2/esp-idf/esp_system/ld/linker_script_generator.cmake:6 (message):
+6.26   Can't generate .pio/build/esp32c2/esp-idf/esp_system/ld/sections.ld.in
+6.26   RET_CODE: no such file or directory
+6.26   ERROR_MESSAGE:
+6.26 *** [.pio/build/esp32c2/esp-idf/esp_system/ld/sections.ld.in] Error 1
+6.40 ========================== [FAILED] Took 6.24 seconds ==========================

@@ -466,17 +466,32 @@ if USE_CACHE and env is not None and hasattr(env, "get"):  # type: ignore[has-ty
             print("  CXX: " + str(new_cxx))
 
             # Apply to both environments
-            env.Replace(CC=new_cc, CXX=new_cxx)  # type: ignore
-            if has_projenv and projenv is not None:
-                projenv.Replace(CC=new_cc, CXX=new_cxx)  # type: ignore
-                print("Applied Python fake compilers to both env and projenv")
+            # NOTE: For ESP32C2 (espressif32 + esp-idf), the build system's
+            # linker script generator constructs a path using TOOLCHAIN_DIR/bin/$CC
+            # and thus expects $CC to be a bare compiler name (e.g. riscv32-esp-elf-gcc).
+            # Replacing CC with an absolute path to a Python wrapper breaks that logic.
+            # To preserve compatibility, skip CC/CXX replacement for the esp32c2 PIOENV.
+            try:
+                pioenv = str(env.get("PIOENV", "")) if env is not None else ""
+            except Exception:
+                pioenv = ""
+
+            skip_cc_wrap_for_ldgen = pioenv == "esp32c2"
+            if skip_cc_wrap_for_ldgen:
+                print("Skipping CC/CXX wrapper for 'esp32c2' to preserve ESP-IDF ldgen compatibility")
             else:
-                print("Applied Python fake compilers to env (projenv not available)")
+                env.Replace(CC=new_cc, CXX=new_cxx)  # type: ignore
+                if has_projenv and projenv is not None:
+                    projenv.Replace(CC=new_cc, CXX=new_cxx)  # type: ignore
+                    print("Applied Python fake compilers to both env and projenv")
+                else:
+                    print("Applied Python fake compilers to env (projenv not available)")
 
             # Apply to library builders (critical for framework caching)
             try:
                 for lib_builder in env.GetLibBuilders():  # type: ignore
-                    lib_builder.env.Replace(CC=new_cc, CXX=new_cxx)  # type: ignore
+                    if not skip_cc_wrap_for_ldgen:
+                        lib_builder.env.Replace(CC=new_cc, CXX=new_cxx)  # type: ignore
                     if _VERBOSE:
                         print(
                             "Applied Python fake compilers to library builder: "
