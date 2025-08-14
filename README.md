@@ -101,24 +101,6 @@ void loop() {
 **🎯 Performance**: 8x faster compilation • Zero-cost global brightness • High-performance 8-bit math  
 **🔧 Developer Experience**: Quick platform switching • Extensive examples • Active community support
 
-## ⭐ Community Growth
-
-<a href="https://star-history.com/#fastled/fastled&Date">
- <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=fastled/fastled&type=Date&theme=dark" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=fastled/fastled&type=Date" />
-   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=fastled/fastled&type=Date" />
- </picture>
-</a>
-
-## 🆕 Latest Feature
-
-**FastLED 3.10.0: Animartrix Out of Beta** - Advanced animation framework for complex LED visualizations and effects.
-
-[![FastLED Animartrix Demo](https://fastled.github.io/assets/fastled_3_10_animartrix.jpg)](https://fastled.github.io/assets/fastled_3_10_animartrix.mp4)
-
-[**📋 View All Features & Updates**](#-latest-features) • [**📺 Live Demos**](https://zackees.github.io/fastled-wasm/)
-
 ## Table of Contents
 
 - [🆕 Latest Feature](#-latest-feature)
@@ -130,18 +112,38 @@ void loop() {
 - [🎮 Advanced Features](#-advanced-features)
 - [🤝 Contributing](#-contributing)
 
+## ⭐ Community Growth
 
-
+<a href="https://star-history.com/#fastled/fastled&Date">
+ <picture>
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=fastled/fastled&type=Date&theme=dark" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=fastled/fastled&type=Date" />
+   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=fastled/fastled&type=Date" />
+ </picture>
+</a>
 
 ## 🆕 Latest Features
 
-| **3.10.0** | **3.9.16** | **3.9.13** | **3.9.10** |
-|------------|------------|------------|------------|
-| [**Animartrix**](https://fastled.github.io/assets/fastled_3_10_animartrix.mp4)<br/>Advanced animation framework out of beta | [**WaveFx**](examples/FxWave2d/FxWave2d.ino)<br/>Multi-layer compositing & time-based animation | [**HD107 Turbo**](#new-in-3913-hd107-turbo-40mhz-led-support)<br/>40MHz LED support | [**ESP32 SPI**](#new-in-3910-super-stable-ws2812-spi-driver-for-esp32)<br/>Super stable WS2812 driver |
+### **FastLED 3.10.0: Animartrix Out of Beta**
+Advanced animation framework for complex LED visualizations and effects.
 
-| **3.9.8** | **3.9.2** | **3.7.7** | **More Features** |
-|-----------|-----------|-----------|-------------------|
-| [**Massive Teensy**](#new-in-398---massive-teensy-41--40-ws2812-led-output)<br/>50 parallel pins on 4.1 | [**WS2812 Overclock**](#new-in-392---overclocking-of-ws2812)<br/>Up to 70% speed boost | [**RGBW Support**](#new-in-377---rgbw-led-strip-support)<br/>White channel LED strips | [📋 Full Changelog](https://github.com/FastLED/FastLED/releases)<br/>[📺 Demo Videos](https://zackees.github.io/fastled-wasm/) |
+[![FastLED Animartrix Demo](https://fastled.github.io/assets/fastled_3_10_animartrix.jpg)](https://fastled.github.io/assets/fastled_3_10_animartrix.mp4)
+
+### **FastLED 3.9.16: WaveFx / Multi Layer Compositing**
+Multi-layer compositing & time-based animation control for tech-artists.
+
+
+https://github.com/user-attachments/assets/ff8e0432-3e0d-47cc-a444-82ce27f562af
+
+| **3.9.13** | **3.9.10** | **3.9.8** | **3.9.2** |
+|------------|------------|-----------|-----------|
+| [**HD107 Turbo**](#new-in-3913-hd107-turbo-40mhz-led-support)<br/>40MHz LED support | [**ESP32 SPI**](#new-in-3910-super-stable-ws2812-spi-driver-for-esp32)<br/>Super stable WS2812 driver | [**Massive Teensy**](#new-in-398---massive-teensy-41--40-ws2812-led-output)<br/>50 parallel pins on 4.1 | [**WS2812 Overclock**](#new-in-392---overclocking-of-ws2812)<br/>Up to 70% speed boost |
+
+| **3.7.7** | **More Features** |
+|-----------|-------------------|
+| [**RGBW Support**](#new-in-377---rgbw-led-strip-support)<br/>White channel LED strips | [📋 Full Changelog](https://github.com/FastLED/FastLED/releases)<br/>[📺 Demo Videos](https://zackees.github.io/fastled-wasm/) |
+
+[**📺 Live Demos**](https://zackees.github.io/fastled-wasm/) • [**📋 Full Changelog**](https://github.com/FastLED/FastLED/releases)
 
 <details>
 <summary>📖 <strong>Detailed Feature Information</strong> (Click to expand)</summary>
