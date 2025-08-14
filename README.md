@@ -379,3 +379,4 @@ Zach has this to say about FastLED:
 **💫 In memory of Daniel Garcia and the vision that transforms programmers into LED artists**
 
 *To stay updated on the latest feature releases, please click the `Watch` button in the upper right*
+"" 
