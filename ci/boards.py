@@ -411,7 +411,7 @@ ESP32_C3_DEVKITM_1 = Board(
     platform=ESP32_IDF_5_3_PIOARDUINO,
 )
 
-ESP32_C6_DEVKITC_1 = Board(
+ESP32_C5_DEVKITC_1 = Board(
     board_name="esp32c5",
     real_board_name="esp32-c5-devkitc-1",
     platform=ESP32_IDF_5_5_PIOARDUINO,
