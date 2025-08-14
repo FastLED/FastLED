@@ -98,7 +98,7 @@ void loop() {
 | Drive 30,000 LEDs on Teensy 4.1 | Runs on $0.50 ATtiny chips | ESP32/Teensy render while you code | Works on 50+ platforms |
 | 50 parallel strips on Teensy | <2KB on Arduino Uno | Never miss user input | Nearly every LED chipset |
 
-**🎯 Performance**: 8x faster compilation • Zero-cost global brightness • High-performance 8-bit math  
+**🎯 Performance**: Zero-cost global brightness • High-performance 8-bit math, memory efficient on platforms that need it.
 **🔧 Developer Experience**: Quick platform switching • Extensive examples • Active community support
 
 ## Table of Contents
