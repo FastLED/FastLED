@@ -6,7 +6,8 @@
       "Bash(./compile esp32dev_idf33 AnalogOutput)",
       "Bash(echo $PS1)",
       "Bash(echo $VIRTUAL_ENV)",
-      "Bash(grep:*)"
+      "Bash(grep:*)",
+      "WebSearch"
     ],
     "deny": []
   }
