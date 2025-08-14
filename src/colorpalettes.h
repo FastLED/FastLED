@@ -4,7 +4,7 @@
 #define __INC_COLORPALETTES_H
 
 // #include "FastLED.h"
-#include "fl/colorutils.h"
+#include "colorutils.h"
 #include "fastled_progmem.h"
 
 /// @file colorpalettes.h
