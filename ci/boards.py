@@ -531,6 +531,11 @@ MAPLE_MINI = Board(
     platform="ststm32",
 )
 
+HY_TINYSTM103TB = Board(
+    board_name="hy_tinystm103tb",
+    platform="ststm32",
+)
+
 ATTINY88 = Board(
     board_name="attiny88",
     platform="atmelavr",

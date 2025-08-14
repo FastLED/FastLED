@@ -214,7 +214,7 @@ def _apply_board_specific_config(
     additional_defines: list[str] | None = None,
     additional_include_dirs: list[str] | None = None,
     additional_libs: list[str] | None = None,
-    cache_type: CacheType = CacheType.NO_CACHE,
+    cache_config: dict[str, str] | None = None,
 ) -> bool:
     """Apply board-specific build configuration from Board class."""
     # Use centralized path management
@@ -231,9 +231,7 @@ def _apply_board_specific_config(
         packages_dir=str(paths.packages_dir),
         project_root=str(_PROJECT_ROOT),
         build_cache_dir=str(paths.build_cache_dir),
-        extra_scripts=["post:cache_setup.scons"]
-        if cache_type != CacheType.NO_CACHE
-        else None,
+        extra_scripts=["post:cache_setup.scons"] if cache_config else None,
     )
 
     platformio_ini_path.write_text(config_content)
@@ -1001,7 +999,7 @@ def _init_platformio_build(
         additional_defines,
         additional_include_dirs,
         additional_libs,
-        cache_type,
+        cache_config,
     ):
         return InitResult(
             success=False,
