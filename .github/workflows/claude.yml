@@ -19,16 +19,33 @@ jobs:
       (github.event_name == 'issues' && (contains(github.event.issue.body, '@claude') || contains(github.event.issue.title, '@claude')))
     runs-on: ubuntu-latest
     permissions:
-      contents: read
-      pull-requests: read
-      issues: read
+      contents: write
+      pull-requests: write
+      issues: write
       id-token: write
       actions: read # Required for Claude to read CI results on PRs
     steps:
-      - name: Checkout repository
+      - name: Get PR branch information (for PR comments)
+        if: github.event.issue.pull_request
+        uses: xt0rted/pull-request-comment-branch@v3
+        id: comment-branch
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Checkout repository (PR branch)
+        if: github.event.issue.pull_request
         uses: actions/checkout@v4
         with:
-          fetch-depth: 1
+          repository: ${{ steps.comment-branch.outputs.head_repo }}
+          ref: ${{ steps.comment-branch.outputs.head_ref }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0  # Full history for better context
+
+      - name: Checkout repository (default for issues/reviews)
+        if: '!github.event.issue.pull_request'
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Run Claude Code
         id: claude
