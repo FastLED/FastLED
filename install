@@ -18,8 +18,8 @@ export PYTHONIOENCODING=UTF-8
 
 set -ex
 if [ ! -d ".venv" ]; then
-    echo "Creating Python 3.11 virtual environment..."
-    uv venv --python 3.11
+    echo "Creating Python 3.13 virtual environment..."
+    uv venv --python 3.13
 else
     echo "Virtual environment already exists. Skipping."
 fi
