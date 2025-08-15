@@ -214,7 +214,7 @@ def _apply_board_specific_config(
     additional_defines: list[str] | None = None,
     additional_include_dirs: list[str] | None = None,
     additional_libs: list[str] | None = None,
-    cache_config: dict[str, str] | None = None,
+    cache_type: CacheType = CacheType.NO_CACHE,
 ) -> bool:
     """Apply board-specific build configuration from Board class."""
     # Use centralized path management
@@ -231,7 +231,9 @@ def _apply_board_specific_config(
         packages_dir=str(paths.packages_dir),
         project_root=str(_PROJECT_ROOT),
         build_cache_dir=str(paths.build_cache_dir),
-        extra_scripts=["post:cache_setup.scons"] if cache_config else None,
+        extra_scripts=["post:cache_setup.scons"]
+        if cache_type != CacheType.NO_CACHE
+        else None,
     )
 
     platformio_ini_path.write_text(config_content)
@@ -999,7 +1001,7 @@ def _init_platformio_build(
         additional_defines,
         additional_include_dirs,
         additional_libs,
-        cache_config,
+        cache_type,
     ):
         return InitResult(
             success=False,
@@ -1037,6 +1039,19 @@ def _init_platformio_build(
             output=f"Failed to copy boards directory",
             build_dir=build_dir,
         )
+
+    # Create sdkconfig.defaults if framework has "espidf" in it for esp32c2 board
+    frameworks = {f.strip() for f in (board.framework or "").split(",")}
+    if {"arduino", "espidf"}.issubset(frameworks):
+        sdkconfig_path = build_dir / "sdkconfig.defaults"
+        print(f"Creating sdkconfig.defaults file")
+        try:
+            sdkconfig_path.write_text("CONFIG_FREERTOS_HZ=1000\r\nCONFIG_AUTOSTART_ARDUINO=y")
+            with open(sdkconfig_path, "r", encoding="utf-8", errors="ignore") as f:
+                for line in f:
+                    print(line, end="") 
+        except Exception as e:
+            warnings.warn(f"Failed to write sdkconfig: {e}")
 
     # Final platformio.ini is already written by _apply_board_specific_config
     # No need to write it again
