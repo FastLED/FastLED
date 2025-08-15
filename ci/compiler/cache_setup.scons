@@ -124,6 +124,15 @@ try:
             env.Append(ENV={"SCCACHE_CACHE_SIZE": sccache_cache_size})  # type: ignore[union-attr]
             os.environ["SCCACHE_CACHE_SIZE"] = sccache_cache_size
 
+        # Ensure sccache binary directory is on PATH so xcache can find it even
+        # inside ESP-IDF's virtual environments where PATH is heavily modified.
+        if sccache_path:
+            sccache_dir_path = str(Path(sccache_path).parent)
+            env.PrependENVPath("PATH", sccache_dir_path)  # type: ignore[union-attr]
+            if has_projenv and projenv is not None and hasattr(projenv, "PrependENVPath"):
+                projenv.PrependENVPath("PATH", sccache_dir_path)  # type: ignore[union-attr]
+            os.environ["PATH"] = sccache_dir_path + os.pathsep + os.environ.get("PATH", "")
+
         if debug_enabled:
             env.Append(ENV={"XCACHE_DEBUG": "1", "SCCACHE_DEBUG": "1"})  # type: ignore[union-attr]
             if has_projenv and projenv is not None and hasattr(projenv, "Append"):

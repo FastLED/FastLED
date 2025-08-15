@@ -620,6 +620,14 @@ def _copy_example_source(project_root: Path, build_dir: Path, example: str) -> b
             except ValueError:
                 print(f"Synced directory {file_path} to {dest_subdir}")
 
+    # espidf builds create the CMakeLists.txt automatically if not present
+    # need to delete the old file to ensure that all folders are included in the new file
+
+    oldCMakelist = ".build/pio/esp32c2/src/CMakeLists.txt"
+    if os.path.exists(oldCMakelist):
+        os.remove(oldCMakelist)
+        print(f"Removed old CMakeList.txt: {oldCMakelist}")
+
     # Create or update stub main.cpp that includes the .ino files
     main_cpp_content = _generate_main_cpp(ino_files)
     main_cpp_path = src_dir / "main.cpp"
@@ -1039,6 +1047,19 @@ def _init_platformio_build(
             output=f"Failed to copy boards directory",
             build_dir=build_dir,
         )
+
+    # Create sdkconfig.defaults if framework has "espidf" in it for esp32c2 board
+    frameworks = {f.strip() for f in (board.framework or "").split(",")}
+    if {"arduino", "espidf"}.issubset(frameworks):
+        sdkconfig_path = build_dir / "sdkconfig.defaults"
+        print(f"Creating sdkconfig.defaults file")
+        try:
+            sdkconfig_path.write_text("CONFIG_FREERTOS_HZ=1000\r\nCONFIG_AUTOSTART_ARDUINO=y")
+            with open(sdkconfig_path, "r", encoding="utf-8", errors="ignore") as f:
+                for line in f:
+                    print(line, end="") 
+        except Exception as e:
+            warnings.warn(f"Failed to write sdkconfig: {e}")
 
     # Final platformio.ini is already written by _apply_board_specific_config
     # No need to write it again
