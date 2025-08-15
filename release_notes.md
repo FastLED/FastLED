@@ -2,6 +2,7 @@ FastLED 3.10.2
 ==============
   * TODO
     * ObjectFLED -> Disable by default (go back to the standard driver)
+  * ESP32-C5 is now supported.
   * Blend2d will now replace a subfx XYMap (when necessary) to prevent double mapping. A warning will be issued.
   * **APA102HD Gamma Correction Algorithm**: Completely rewritten with closed-form mathematical solution
     * Thanks https://github.com/gwgill!

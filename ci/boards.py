@@ -15,6 +15,7 @@ ESP32_IDF_5_1_PIOARDUINO = "https://github.com/pioarduino/platform-espressif32/r
 # TODO: Upgrade toolkit to 5.3
 ESP32_IDF_5_3_PIOARDUINO = "https://github.com/pioarduino/platform-espressif32/releases/download/53.03.10/platform-espressif32.zip"
 ESP32_IDF_5_4_PIOARDUINO = "https://github.com/pioarduino/platform-espressif32/releases/download/54.03.20/platform-espressif32.zip"
+ESP32_IDF_5_5_PIOARDUINO = "https://github.com/pioarduino/platform-espressif32/releases/download/55.03.30-2/platform-espressif32.zip"
 ESP32_IDF_5_1_PIOARDUINO_LATEST = (
     "https://github.com/pioarduino/platform-espressif32.git#develop"
 )
@@ -406,6 +407,12 @@ ESP32_C3_DEVKITM_1 = Board(
     board_name="esp32c3",
     real_board_name="esp32-c3-devkitm-1",
     platform=ESP32_IDF_5_3_PIOARDUINO,
+)
+
+ESP32_C5_DEVKITC_1 = Board(
+    board_name="esp32c5",
+    real_board_name="esp32-c5-devkitc-1",
+    platform=ESP32_IDF_5_5_PIOARDUINO,
 )
 
 ESP32_C6_DEVKITC_1 = Board(

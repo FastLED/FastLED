@@ -113,6 +113,11 @@ public:
 // NOTE: GPIO 43 & 44 commonly used for UART and may cause flashes when uploading.
 #define FASTLED_UNUSABLE_PIN_MASK (0ULL | _FL_BIT(27) | _FL_BIT(28) | _FL_BIT(29) | _FL_BIT(30) | _FL_BIT(31) | _FL_BIT(32))
 
+#elif CONFIG_IDF_TARGET_ESP32C5
+
+// GPIO 13,14 (USB_D*), 15-18,20-22 used by default for SPI flash.
+#define FASTLED_UNUSABLE_PIN_MASK (0ULL | _FL_BIT(13) | _FL_BIT(14) | _FL_BIT(15) | _FL_BIT(16) | _FL_BIT(17) | _FL_BIT(18) | _FL_BIT(20) | _FL_BIT(21) | _FL_BIT(22))
+
 #elif CONFIG_IDF_TARGET_ESP32C6
 
 // GPIO 20-22, 24-26 used by default for SPI flash.

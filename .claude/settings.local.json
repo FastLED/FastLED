@@ -3,7 +3,12 @@
     "allow": [
       "Bash(python:*)",
       "Bash(uv run:*)",
-      "Bash(./compile esp32dev_idf33 AnalogOutput)"
+      "Bash(./compile esp32dev_idf33 AnalogOutput)",
+      "Bash(echo $PS1)",
+      "Bash(echo $VIRTUAL_ENV)",
+      "Bash(grep:*)",
+      "WebSearch",
+      "WebFetch(domain:github.com)"
     ],
     "deny": []
   }
