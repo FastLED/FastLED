@@ -283,6 +283,14 @@ def main() -> int:
     # Check for debug mode
     debug = os.environ.get("XCACHE_DEBUG", "").lower() in ("1", "true", "yes")
 
+    # Some ESP-IDF build steps (e.g., linker script generation) invoke the
+    # compiler purely as a preprocessor (e.g. `-E -P`) on linker scripts.
+    # These operations are not real compilations and often confuse sccache,
+    # so bypass the cache entirely in this situation.
+    if "-E" in compiler_args and "-P" in compiler_args:
+        cmd = [compiler_path] + compiler_args
+        return subprocess.call(cmd)
+
     # Find sccache
     sccache_path = find_sccache()
     if not sccache_path:

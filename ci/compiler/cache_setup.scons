@@ -37,22 +37,6 @@ except (NameError, Exception):
     has_projenv = False
     projenv = None
 
-# Skip cache setup for frameworks that don't work well with cached compilers
-frameworks = []
-try:
-    if env is not None:
-        fw_val = env.get("PIOFRAMEWORK", [])
-        if isinstance(fw_val, str):
-            frameworks = [fw.strip() for fw in fw_val.split(",")]
-        elif isinstance(fw_val, (list, tuple)):
-            frameworks = list(fw_val)
-except Exception:
-    pass
-
-if "arduino" in frameworks and "espidf" in frameworks:
-    print(f"Skipping cache setup for frameworks: {frameworks}")
-    sys.exit(0)
-
 # Add project root to Python path for fake compiler imports
 # Note: We're in the build directory, go up to project root
 current_dir = Path(os.getcwd()).resolve()
@@ -139,6 +123,15 @@ try:
         if sccache_cache_size:
             env.Append(ENV={"SCCACHE_CACHE_SIZE": sccache_cache_size})  # type: ignore[union-attr]
             os.environ["SCCACHE_CACHE_SIZE"] = sccache_cache_size
+
+        # Ensure sccache binary directory is on PATH so xcache can find it even
+        # inside ESP-IDF's virtual environments where PATH is heavily modified.
+        if sccache_path:
+            sccache_dir_path = str(Path(sccache_path).parent)
+            env.PrependENVPath("PATH", sccache_dir_path)  # type: ignore[union-attr]
+            if has_projenv and projenv is not None and hasattr(projenv, "PrependENVPath"):
+                projenv.PrependENVPath("PATH", sccache_dir_path)  # type: ignore[union-attr]
+            os.environ["PATH"] = sccache_dir_path + os.pathsep + os.environ.get("PATH", "")
 
         if debug_enabled:
             env.Append(ENV={"XCACHE_DEBUG": "1", "SCCACHE_DEBUG": "1"})  # type: ignore[union-attr]
