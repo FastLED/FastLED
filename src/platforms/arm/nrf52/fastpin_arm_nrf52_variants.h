@@ -747,13 +747,13 @@
     _FL_DEFPIN( 3, 29, 0); // D3  is P0.29 
     _FL_DEFPIN( 4, 4, 0); // D4  is P0.4
     _FL_DEFPIN( 5, 5, 0); // D5  is P0.5
-    _FL_DEFPIN( 6, 43, 1); // D6  is P1.11    <-- 11 to 43
-    _FL_DEFPIN( 7, 44, 1); // D7  is P1.12    <-- 12 to 44
+    _FL_DEFPIN( 6, 43, 1); // D6  is P1.43
+    _FL_DEFPIN( 7, 44, 1); // D7  is P1.44
     
     // Arduino pins 8..15
-    _FL_DEFPIN( 8, 45, 1); // D8  is P1.13    <-- 13 to 45
-    _FL_DEFPIN( 9, 46, 1); // D9  is P1.14    <-- 14 to 46
-    _FL_DEFPIN(10, 47, 1); // D10 is P1.15    <-- 15 to 47
+    _FL_DEFPIN( 8, 45, 1); // D8  is P1.45
+    _FL_DEFPIN( 9, 46, 1); // D9  is P1.46
+    _FL_DEFPIN(10, 47, 1); // D10 is P1.47
 
     _FL_DEF_INVALID_PIN(11, 26, 0); // D11 is P0.26 (LED RED)
     _FL_DEF_INVALID_PIN(12, 6, 0); // D12 is P0.06 (LED BLUE)
@@ -797,13 +797,13 @@
     _FL_DEFPIN( 3, 29, 0); // D3  is P0.29 
     _FL_DEFPIN( 4, 4, 0); // D4  is P0.4
     _FL_DEFPIN( 5, 5, 0); // D5  is P0.5
-    _FL_DEFPIN( 6, 43, 1); // D6  is P1.11    <-- 11 to 43
-    _FL_DEFPIN( 7, 44, 1); // D7  is P1.12    <-- 12 to 44
+    _FL_DEFPIN( 6, 43, 1); // D6  is P1.43
+    _FL_DEFPIN( 7, 44, 1); // D7  is P1.44
     
     // Arduino pins 8..15
-    _FL_DEFPIN( 8, 45, 1); // D8  is P1.13    <-- 13 to 45
-    _FL_DEFPIN( 9, 46, 1); // D9  is P1.14    <-- 14 to 46
-    _FL_DEFPIN(10, 47, 1); // D10 is P1.15    <-- 15 to 47
+    _FL_DEFPIN( 8, 45, 1); // D8  is P1.45
+    _FL_DEFPIN( 9, 46, 1); // D9  is P1.46
+    _FL_DEFPIN(10, 47, 1); // D10 is P1.47
 
     _FL_DEF_INVALID_PIN(11, 26, 0); // D11 is P0.26 (LED RED)
     _FL_DEF_INVALID_PIN(12, 6, 0); // D12 is P0.06 (LED BLUE)
@@ -884,7 +884,7 @@
     _DEFPIN_ARM_IDENTITY_P0( 6); // P0.06 (A5)
     _DEFPIN_ARM_IDENTITY_P0( 7); // P0.07
     _DEFPIN_ARM_IDENTITY_P0( 8); // P0.08
-    _DEFPIN_ARM_IDnENTITY_P0( 9); // P0.09
+    _DEFPIN_ARM_IDENTITY_P0( 9); // P0.09
     _DEFPIN_ARM_IDENTITY_P0(10); // P0.10
     _DEFPIN_ARM_IDENTITY_P0(11); // P0.11
     _DEFPIN_ARM_IDENTITY_P0(12); // P0.12
