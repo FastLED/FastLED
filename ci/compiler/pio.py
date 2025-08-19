@@ -1054,10 +1054,12 @@ def _init_platformio_build(
         sdkconfig_path = build_dir / "sdkconfig.defaults"
         print(f"Creating sdkconfig.defaults file")
         try:
-            sdkconfig_path.write_text("CONFIG_FREERTOS_HZ=1000\r\nCONFIG_AUTOSTART_ARDUINO=y")
+            sdkconfig_path.write_text(
+                "CONFIG_FREERTOS_HZ=1000\r\nCONFIG_AUTOSTART_ARDUINO=y"
+            )
             with open(sdkconfig_path, "r", encoding="utf-8", errors="ignore") as f:
                 for line in f:
-                    print(line, end="") 
+                    print(line, end="")
         except Exception as e:
             warnings.warn(f"Failed to write sdkconfig: {e}")
 
