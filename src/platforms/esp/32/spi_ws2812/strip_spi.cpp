@@ -35,18 +35,13 @@ led_strip_handle_t configure_led(int pin, uint32_t led_count, led_model_t led_mo
         .strip_gpio_num = pin, // The GPIO that connected to the LED strip's data line
         .max_leds = led_count,      // The number of LEDs in the strip,
         .led_model = led_model,        // LED strip model
-        // set the color order of the strip: GRB
-        .color_component_format = {
-            .format = {
-                .r_pos = 0, // red is the second byte in the color data
-                .g_pos = 1, // green is the first byte in the color data
-                .b_pos = 2, // blue is the third byte in the color data
-                .num_components = 3, // total 3 color components
-            },
-        },
+        // set the color order of the strip: RGB
+        .color_component_format = LED_STRIP_COLOR_COMPONENT_FMT_RGB,
         .flags = {
             .invert_out = false, // don't invert the output signal
-        }
+        },
+        // use default timings initialization, avoid compiler warnings
+        .timings = {},
     };
 
     // LED strip backend configuration: SPI
