@@ -4,17 +4,12 @@
 /// This file contains the actual Adafruit_NeoPixel integration, keeping the
 /// dependency isolated from header files to avoid PlatformIO LDF issues.
 
+#include <Adafruit_NeoPixel.h>
 
 
-#ifndef FASTLED_INTERNAL
-#define FASTLED_INTERNAL 1
-#endif
-#include "FastLED.h"
-
-#include "Adafruit_NeoPixel.h"
 #include "fl/unique_ptr.h"
 #include "pixel_iterator.h"
-#include "./clockless.h"
+#include "platforms/adafruit/driver.h"
 
 namespace fl {
 
