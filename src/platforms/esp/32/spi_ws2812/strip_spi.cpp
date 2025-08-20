@@ -18,6 +18,7 @@
 #include "esp_err.h"
 
 #include "strip_spi.h"
+#include "SpiResourceManager.hpp"
 
 #include "rgbw.h"
 #include "fl/warn.h"
@@ -60,45 +61,15 @@ led_strip_handle_t configure_led(int pin, uint32_t led_count, led_model_t led_mo
     return led_strip;
 }
 
-struct SpiHostUsed {
-    spi_host_device_t spi_host;
-    bool used;
-};
-
-static SpiHostUsed gSpiHostUsed[] = {
-    {SPI2_HOST, false},  // in order of preference
-#if SOC_SPI_PERIPH_NUM > 2
-    {SPI3_HOST, false},
-#endif
-    {SPI1_HOST, false},
-};
-
-static spi_host_device_t getNextAvailableSpiHost()
+static esp_err_t getNextAvailableSpiHost(int pin, uint32_t led_count, bool with_dma, 
+                                         spi_host_device_t* out_spi_host, led_strip_handle_t* out_strip)
 {
-    for (int i = 0; i < sizeof(gSpiHostUsed) / sizeof(gSpiHostUsed[0]); i++)
-    {
-        if (!gSpiHostUsed[i].used)
-        {
-            gSpiHostUsed[i].used = true;
-            return gSpiHostUsed[i].spi_host;
-        }
-    }
-    ESP_ERROR_CHECK(ESP_ERR_NOT_FOUND);
-    return SPI_HOST_MAX;
+    return SpiResourceManager::getInstance().getNextAvailableSpiHost(pin, led_count, with_dma, out_spi_host, out_strip);
 }
-
 
 static void releaseSpiHost(spi_host_device_t spi_host)
 {
-    for (int i = 0; i < sizeof(gSpiHostUsed) / sizeof(gSpiHostUsed[0]); i++)
-    {
-        if (gSpiHostUsed[i].spi_host == spi_host)
-        {
-            gSpiHostUsed[i].used = false;
-            return;
-        }
-    }
-    ESP_ERROR_CHECK(ESP_ERR_NOT_FOUND);
+    SpiResourceManager::getInstance().releaseSpiHost(spi_host);
 }
 
 
@@ -106,62 +77,96 @@ class SpiStripWs2812 : public ISpiStripWs2812 {
 public:
     SpiStripWs2812(int pin, uint32_t led_count, ISpiStripWs2812::SpiHostMode spi_bus_mode, ISpiStripWs2812::DmaMode dma_mode = DMA_AUTO)
         : mIsRgbw(false), // SPI implementation currently only supports RGB
-          mLedCount(led_count)
+          mLedCount(led_count),
+          mStrip(nullptr)
     {
+        bool with_dma = dma_mode == ISpiStripWs2812::DMA_ENABLED || dma_mode == ISpiStripWs2812::DMA_AUTO;
+        
         switch (spi_bus_mode) {
-            case ISpiStripWs2812::SPI_HOST_MODE_AUTO:
-                mSpiHost = getNextAvailableSpiHost();
+            case ISpiStripWs2812::SPI_HOST_MODE_AUTO: {
+                esp_err_t result = getNextAvailableSpiHost(pin, led_count, with_dma, &mSpiHost, &mStrip);
+                if (result != ESP_OK) {
+                    FASTLED_ESP_LOGE(STRIP_SPI_TAG, "Failed to find available SPI host: %s", esp_err_to_name(result));
+                    mStrip = nullptr;
+                    return;
+                }
                 break;
+            }
             case ISpiStripWs2812::SPI_HOST_MODE_1:
                 mSpiHost = SPI1_HOST;
+                mStrip = configure_led(pin, led_count, LED_MODEL_WS2812, mSpiHost, with_dma);
                 break;
             case ISpiStripWs2812::SPI_HOST_MODE_2:
                 mSpiHost = SPI2_HOST;
+                mStrip = configure_led(pin, led_count, LED_MODEL_WS2812, mSpiHost, with_dma);
                 break;
 #if SOC_SPI_PERIPH_NUM > 2
             case ISpiStripWs2812::SPI_HOST_MODE_3:
                 mSpiHost = SPI3_HOST;
+                mStrip = configure_led(pin, led_count, LED_MODEL_WS2812, mSpiHost, with_dma);
                 break;
 #endif
             default:
-                ESP_ERROR_CHECK(ESP_ERR_NOT_SUPPORTED);
+                FASTLED_ESP_LOGE(STRIP_SPI_TAG, "Unsupported SPI host mode: %d", spi_bus_mode);
+                mStrip = nullptr;
+                return;
         }
-
-        bool with_dma = dma_mode == ISpiStripWs2812::DMA_ENABLED || dma_mode == ISpiStripWs2812::DMA_AUTO;
-        led_strip_handle_t led_strip = configure_led(pin, led_count, LED_MODEL_WS2812, mSpiHost, with_dma);
-        mStrip = led_strip;
+        
+        if (!mStrip) {
+            FASTLED_ESP_LOGE(STRIP_SPI_TAG, "Failed to initialize LED strip");
+        }
     }
 
     ~SpiStripWs2812() override
     {
-        waitDone();
-        led_strip_del(mStrip);
-        releaseSpiHost(mSpiHost);
-        mStrip = nullptr;
+        if (mStrip) {
+            waitDone();
+            led_strip_del(mStrip);
+            releaseSpiHost(mSpiHost);
+            mStrip = nullptr;
+        }
     }
 
     void setPixel(uint32_t index, uint8_t red, uint8_t green, uint8_t blue) override
     {
-        ESP_ERROR_CHECK(led_strip_set_pixel(mStrip, index, red, green, blue));
+        if (!mStrip) {
+            FASTLED_ESP_LOGW(STRIP_SPI_TAG, "Cannot set pixel: LED strip not initialized");
+            return;
+        }
+        esp_err_t result = led_strip_set_pixel(mStrip, index, red, green, blue);
+        if (result != ESP_OK) {
+            FASTLED_ESP_LOGW(STRIP_SPI_TAG, "Failed to set pixel %u: %s", index, esp_err_to_name(result));
+        }
     }
 
     void drawAsync() override
     {
+        if (!mStrip) {
+            FASTLED_ESP_LOGW(STRIP_SPI_TAG, "Cannot draw: LED strip not initialized");
+            return;
+        }
         if (mDrawIssued)
         {
             waitDone();
         }
-        ESP_ERROR_CHECK(led_strip_refresh_async(mStrip));
-        mDrawIssued = true;
+        esp_err_t result = led_strip_refresh_async(mStrip);
+        if (result == ESP_OK) {
+            mDrawIssued = true;
+        } else {
+            FASTLED_ESP_LOGW(STRIP_SPI_TAG, "Failed to start async refresh: %s", esp_err_to_name(result));
+        }
     }
 
     void waitDone() override
     {
-        if (!mDrawIssued)
+        if (!mStrip || !mDrawIssued)
         {
             return;
         }
-        ESP_ERROR_CHECK(led_strip_refresh_wait_done(mStrip));
+        esp_err_t result = led_strip_refresh_wait_done(mStrip);
+        if (result != ESP_OK) {
+            FASTLED_ESP_LOGW(STRIP_SPI_TAG, "Failed to wait for refresh completion: %s", esp_err_to_name(result));
+        }
         mDrawIssued = false;
     }
 
@@ -179,7 +184,14 @@ public:
 
     void clear()
     {
-        ESP_ERROR_CHECK(led_strip_clear(mStrip));
+        if (!mStrip) {
+            FASTLED_ESP_LOGW(STRIP_SPI_TAG, "Cannot clear: LED strip not initialized");
+            return;
+        }
+        esp_err_t result = led_strip_clear(mStrip);
+        if (result != ESP_OK) {
+            FASTLED_ESP_LOGW(STRIP_SPI_TAG, "Failed to clear LED strip: %s", esp_err_to_name(result));
+        }
     }
 
     void fill_color(uint8_t red, uint8_t green, uint8_t blue)
