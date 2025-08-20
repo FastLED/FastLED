@@ -109,8 +109,6 @@ string paletteOptions[] = {"Party", "Heat", "Ocean", "Forest", "Rainbow"};
 string renderModeOptions[] = { "Wave", "Animartrix", "Noise", "Position", "Fire" };
 
 
-
-
 UIDropdown paletteDropdown("Color Palette", paletteOptions);
 UIDropdown renderModeDropdown("Render Mode", renderModeOptions);
 
@@ -290,7 +288,6 @@ constexpr uint16_t CORKSCREW_HEIGHT =
 
 // vector<vec3f> mapCorkScrew = makeCorkScrew(args);
 ScreenMap screenMap;
-Grid<CRGB> frameBuffer;
 fl::shared_ptr<Grid<CRGB>> frameBufferPtr;
 
 // Wave effect objects - declared here but initialized in setup()
@@ -316,7 +313,6 @@ void setup() {
     // int width = corkscrew.cylinder_width();
     // int height = corkscrew.cylinder_height();
 
-    frameBuffer.reset(width, height);
     XYMap xyMap = XYMap::constructRectangularGrid(width, height, 0);
 
     // Use the corkscrew's internal buffer for the LED strip
@@ -674,8 +670,8 @@ CRGBPalette16 getWavePalette() {
 void triggerWaveRipple() {
     // Create a ripple at a random position within the central area
     float perc = 0.15f; // 15% margin from edges
-    int width = frameBuffer.width();
-    int height = frameBuffer.height();
+    int width = corkscrew.cylinderWidth();
+    int height = corkscrew.cylinderHeight();
     
     int min_x = perc * width;
     int max_x = (1 - perc) * width;
