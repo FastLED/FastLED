@@ -80,6 +80,10 @@ def main() -> None:
 
         # Parse and process arguments
         args = parse_args()
+
+        # Force sequential execution to avoid out of memory errors
+        args.no_parallel = True
+
         args = process_test_flags(args)
 
         timeout = _TIMEOUT_EVERYTHING
