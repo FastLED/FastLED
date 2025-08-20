@@ -1,4 +1,9 @@
 // Simple Adafruit Bridge Demo
+//
+// This example shows how to use the Adafruit_NeoPixel library with FastLED.
+// As long as the Adafruit_NeoPixel library is installed (that is #include <Adafruit_NeoPixel.h>
+// is present), this example will work. Otherwise you'll get warnings about a missing driver.
+
 #define FASTLED_USE_ADAFRUIT_NEOPIXEL
 #include "FastLED.h"
 

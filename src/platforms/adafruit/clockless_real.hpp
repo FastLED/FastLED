@@ -8,6 +8,7 @@
 
 
 #include "fl/unique_ptr.h"
+#include "fl/memory.h"
 #include "pixel_iterator.h"
 #include "platforms/adafruit/driver.h"
 
