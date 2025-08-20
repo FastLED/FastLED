@@ -186,20 +186,20 @@ TEST_CASE("TestCorkscrewBufferFunctionality") {
     uint16_t width = corkscrew.cylinder_width();
     uint16_t height = corkscrew.cylinder_height();
     
-    // Get the buffer and verify it's lazily initialized
-    fl::vector<CRGB>& buffer = corkscrew.getBuffer();
-    REQUIRE(buffer.size() == width * height);
+    // Get the surface and verify it's properly initialized
+    fl::Grid<CRGB>& surface = corkscrew.surface();
+    REQUIRE(surface.size() == width * height);
     
     // Fill the buffer with a simple pattern
     corkscrew.fillBuffer(CRGB::Red);
-    for (size_t i = 0; i < buffer.size(); ++i) {
-        REQUIRE(buffer[i] == CRGB::Red);
+    for (size_t i = 0; i < surface.size(); ++i) {
+        REQUIRE(surface.data()[i] == CRGB::Red);
     }
     
     // Clear the buffer
     corkscrew.clearBuffer();
-    for (size_t i = 0; i < buffer.size(); ++i) {
-        REQUIRE(buffer[i] == CRGB::Black);
+    for (size_t i = 0; i < surface.size(); ++i) {
+        REQUIRE(surface.data()[i] == CRGB::Black);
     }
     
     // Create a source fl::Grid<CRGB> object with a checkerboard pattern
@@ -225,10 +225,10 @@ TEST_CASE("TestCorkscrewBufferFunctionality") {
     bool found_green = false;
     int non_black_count = 0;
     
-    for (size_t i = 0; i < buffer.size(); ++i) {
-        if (buffer[i] == CRGB::Blue) found_blue = true;
-        if (buffer[i] == CRGB::Green) found_green = true;
-        if (buffer[i] != CRGB::Black) non_black_count++;
+    for (size_t i = 0; i < surface.size(); ++i) {
+        if (surface.data()[i] == CRGB::Blue) found_blue = true;
+        if (surface.data()[i] == CRGB::Green) found_green = true;
+        if (surface.data()[i] != CRGB::Black) non_black_count++;
     }
     
     // Should have found both colors in our checkerboard pattern
@@ -266,19 +266,19 @@ TEST_CASE("Corkscrew readFrom with bilinear interpolation") {
     // Read from the source into corkscrew buffer
     corkscrew.readFrom(source_grid);
     
-    // Get the buffer
-    const auto& buffer = corkscrew.getBuffer();
+    // Get the surface
+    const auto& surface = corkscrew.surface();
     
-    // Verify buffer size
-    REQUIRE_EQ(buffer.size(), static_cast<size_t>(corkscrew.cylinder_width() * corkscrew.cylinder_height()));
+    // Verify surface size
+    REQUIRE_EQ(surface.size(), static_cast<size_t>(corkscrew.cylinder_width() * corkscrew.cylinder_height()));
     
     // Check that some colors were captured 
     bool found_red_component = false;
     bool found_blue_component = false;
     int non_black_count = 0;
     
-    for (size_t i = 0; i < buffer.size(); ++i) {
-        const CRGB& color = buffer[i];
+    for (size_t i = 0; i < surface.size(); ++i) {
+        const CRGB& color = surface.data()[i];
         if (color.r > 0 || color.g > 0 || color.b > 0) {
             non_black_count++;
         }
@@ -331,11 +331,7 @@ TEST_CASE("Corkscrew CRGB* data access") {
         REQUIRE_EQ(data_ptr[i].b, 0);
     }
     
-    // Const access should also work
-    const Corkscrew& const_corkscrew = corkscrew;
-    const CRGB* const_data_ptr = const_corkscrew.data();
-    REQUIRE(const_data_ptr != nullptr);
-    REQUIRE(const_data_ptr == data_ptr); // Should be the same buffer
+    // Note: Removed const access test since we simplified the API to be non-const
     
     // Modify a pixel via the raw pointer
     if (expected_size > 0) {
@@ -346,11 +342,11 @@ TEST_CASE("Corkscrew CRGB* data access") {
         REQUIRE_EQ(data_ptr[0].g, 0);
         REQUIRE_EQ(data_ptr[0].b, 0);
         
-        // And verify it's also reflected in the buffer access
-        const auto& buffer = corkscrew.getBuffer();
-        REQUIRE_EQ(buffer[0].r, 255);
-        REQUIRE_EQ(buffer[0].g, 0);
-        REQUIRE_EQ(buffer[0].b, 0);
+        // And verify it's also reflected in the surface access
+        const auto& surface = corkscrew.surface();
+        REQUIRE_EQ(surface.data()[0].r, 255);
+        REQUIRE_EQ(surface.data()[0].g, 0);
+        REQUIRE_EQ(surface.data()[0].b, 0);
     }
 }
 

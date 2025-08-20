@@ -43,6 +43,9 @@
 #include "fl/pair.h"
 #include "fl/tile2x2.h"
 #include "fl/vector.h"
+#include "fl/shared_ptr.h"
+#include "fl/variant.h"
+#include "fl/span.h"
 #include "crgb.h"
 #include "fl/int.h"
 
@@ -93,6 +96,10 @@ struct CorkscrewInput {
     Gap gapParams;             // Gap parameters for gap accounting
     bool invert = false;           // If true, reverse the mapping order
     
+    // Pixel storage variants - can hold either external span or owned vector
+    using PixelStorage = fl::Variant<fl::span<CRGB>, fl::vector<CRGB, fl::allocator_psram<CRGB>>>;
+    PixelStorage pixelStorage; // Optional pixel storage - if empty, corkscrew manages its own surface
+    
     CorkscrewInput() = default;
     
     // Constructor with turns and LEDs
@@ -100,6 +107,22 @@ struct CorkscrewInput {
                    const Gap& gap = Gap())
         : totalTurns(total_turns), numLeds(leds), gapParams(gap),
           invert(invertMapping) {}
+    
+    // Constructor with external pixel buffer
+    CorkscrewInput(fl::span<CRGB> pixels, float total_turns, bool invertMapping = false, 
+                   const Gap& gap = Gap())
+        : totalTurns(total_turns), numLeds(static_cast<fl::u16>(pixels.size())), 
+          gapParams(gap), invert(invertMapping), pixelStorage(pixels) {}
+          
+    // Constructor for self-allocating PSRAM pixels
+    static CorkscrewInput createWithPSRAM(fl::u16 num_leds, float total_turns, 
+                                         bool invertMapping = false, const Gap& gap = Gap()) {
+        CorkscrewInput input(total_turns, num_leds, invertMapping, gap);
+        fl::vector<CRGB, fl::allocator_psram<CRGB>> owned_pixels;
+        owned_pixels.resize(num_leds);
+        input.pixelStorage = owned_pixels;
+        return input;
+    }
     
     // Rule of 5 for POD data
     CorkscrewInput(const CorkscrewInput &other) = default;
@@ -201,8 +224,13 @@ class Corkscrew {
     using Input = CorkscrewInput;
     using State = CorkscrewState;
     using iterator = CorkscrewState::iterator;
+    
+    // Pixel storage variants - can hold either external span or owned vector
+    using PixelStorage = fl::Variant<fl::span<CRGB>, fl::vector<CRGB, fl::allocator_psram<CRGB>>>;
 
+    // Constructor - handles all cases based on Input configuration
     Corkscrew(const Input &input);
+    
     Corkscrew(const Corkscrew &) = default;
     Corkscrew(Corkscrew &&) = default;
 
@@ -221,22 +249,22 @@ class Corkscrew {
     // Caching control
     void setCachingEnabled(bool enabled);
 
-    // New functionality: rectangular buffer and drawing
-    // Get access to the rectangular buffer (lazily initialized)
-    fl::vector<CRGB>& getBuffer();
-    const fl::vector<CRGB>& getBuffer() const;
+    // Enhanced surface handling with shared_ptr
+    fl::shared_ptr<fl::Grid<CRGB>> getOrCreateInputSurface();
     
-    // Get raw CRGB* access to the buffer (lazily initialized)
+    // Draw like a regular rectangle surface - access input surface directly
+    fl::Grid<CRGB>& surface();
+    
+    // Pixel storage access - works with both external and owned pixels
     CRGB* data();
-    const CRGB* data() const;
+    fl::size pixelCount() const;
+    
     
     // Read from fl::Grid<CRGB> object and populate our internal rectangular buffer
     // by sampling from the XY coordinates mapped to each corkscrew LED position
     // use_multi_sampling = true will use multi-sampling to sample from the source grid,
     // this will give a little bit better accuracy and the screenmap will be more accurate.
     void readFrom(const fl::Grid<CRGB>& source_grid, bool use_multi_sampling = true);
-    
-
     
     // Clear the rectangular buffer 
     void clearBuffer();
@@ -273,9 +301,12 @@ class Corkscrew {
     Input mInput; // The input parameters defining the corkscrew
     State mState; // The resulting cylindrical mapping
     
-    // Rectangular buffer for drawing (lazily initialized)
-    mutable fl::vector<CRGB> mCorkscrewLeds;
-    mutable bool mBufferInitialized = false;
+    // Enhanced pixel storage - variant supports both external and owned pixels
+    PixelStorage mPixelStorage;
+    bool mOwnsPixels = false; // Track whether we own the pixel data
+    
+    // Input surface for drawing operations
+    fl::shared_ptr<fl::Grid<CRGB>> mInputSurface;
     
     // Caching for Tile2x2_u8_wrap objects
     mutable fl::vector<Tile2x2_u8_wrap> mTileCache;

@@ -3,6 +3,7 @@
 
 #include "fl/span.h"
 #include "fl/vector.h"
+#include "fl/allocator.h"
 
 namespace fl {
 
@@ -82,7 +83,7 @@ template <typename T> class Grid {
             return NullValue(); // safe.
         }
     }
-    fl::vector<T> mData;
+    fl::vector<T, fl::allocator_psram<T>> mData;
     u32 mWidth = 0;
     u32 mHeight = 0;
     fl::MatrixSlice<T> mSlice;

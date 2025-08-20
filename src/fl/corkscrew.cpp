@@ -11,6 +11,7 @@
 #include "fl/leds.h"
 #include "fl/grid.h"
 #include "fl/screenmap.h"
+#include "fl/memory.h"
 #include "fl/int.h"
 
 
@@ -62,6 +63,22 @@ void generateState(const Corkscrew::Input &input, CorkscrewState *output) {
 
 Corkscrew::Corkscrew(const Corkscrew::Input &input) : mInput(input) {
     fl::generateState(mInput, &mState);
+    
+    // Check if input has pixel storage configured
+    if (!input.pixelStorage.empty()) {
+        // Copy the pixel storage from input
+        mPixelStorage = input.pixelStorage;
+        
+        // Determine if we own the pixels based on storage type
+        if (input.pixelStorage.template is<fl::vector<CRGB, fl::allocator_psram<CRGB>>>()) {
+            mOwnsPixels = true;
+        } else {
+            mOwnsPixels = false; // External span
+        }
+    } else {
+        // No pixel storage configured in input - we'll create surface on demand
+        mOwnsPixels = false;
+    }
 }
 
 vec2f Corkscrew::at_no_wrap(fl::u16 i) const {
@@ -190,35 +207,21 @@ void Corkscrew::initializeCache() const {
     }
 }
 
-// New rectangular buffer functionality implementation
-
-void Corkscrew::initializeBuffer() const {
-    if (!mBufferInitialized) {
-        fl::size buffer_size = static_cast<fl::size>(mState.width) * static_cast<fl::size>(mState.height);
-        mCorkscrewLeds.resize(buffer_size, CRGB::Black);
-        mBufferInitialized = true;
-    }
-}
-
-fl::vector<CRGB>& Corkscrew::getBuffer() {
-    initializeBuffer();
-    return mCorkscrewLeds;
-}
-
-const fl::vector<CRGB>& Corkscrew::getBuffer() const {
-    initializeBuffer();
-    return mCorkscrewLeds;
-}
-
 CRGB* Corkscrew::data() {
-    initializeBuffer();
-    return mCorkscrewLeds.data();
+    // Use variant storage if available, otherwise fall back to input surface
+    if (!mPixelStorage.empty()) {
+        if (mPixelStorage.template is<fl::span<CRGB>>()) {
+            return mPixelStorage.template get<fl::span<CRGB>>().data();
+        } else if (mPixelStorage.template is<fl::vector<CRGB, fl::allocator_psram<CRGB>>>()) {
+            return mPixelStorage.template get<fl::vector<CRGB, fl::allocator_psram<CRGB>>>().data();
+        }
+    }
+    
+    // Fall back to input surface data
+    auto surface = getOrCreateInputSurface();
+    return surface->data();
 }
 
-const CRGB* Corkscrew::data() const {
-    initializeBuffer();
-    return mCorkscrewLeds.data();
-}
 
 void Corkscrew::readFrom(const fl::Grid<CRGB>& source_grid, bool use_multi_sampling) {
 
@@ -227,12 +230,11 @@ void Corkscrew::readFrom(const fl::Grid<CRGB>& source_grid, bool use_multi_sampl
         return;
     }
 
-
-    // Initialize the buffer if not already done
-    initializeBuffer();
+    // Get or create the input surface
+    auto target_surface = getOrCreateInputSurface();
     
-    // Clear buffer first
-    clearBuffer();
+    // Clear surface first
+    target_surface->clear();
     
     // Iterate through each LED in the corkscrew
     for (fl::size led_idx = 0; led_idx < mInput.numLeds; ++led_idx) {
@@ -250,31 +252,29 @@ void Corkscrew::readFrom(const fl::Grid<CRGB>& source_grid, bool use_multi_sampl
         // Sample from the source fl::Grid using its at() method
         CRGB sampled_color = source_grid.at(coord.x, coord.y);
         
-        // Store the sampled color directly at the LED index position
-        mCorkscrewLeds[led_idx] = sampled_color;
+        // Store the sampled color directly in the target surface
+        if (led_idx < target_surface->size()) {
+            target_surface->data()[led_idx] = sampled_color;
+        }
     }
 }
 
 void Corkscrew::clearBuffer() {
-    initializeBuffer();
-    for (fl::size i = 0; i < mCorkscrewLeds.size(); ++i) {
-        mCorkscrewLeds[i] = CRGB::Black;
-    }
+    auto target_surface = getOrCreateInputSurface();
+    target_surface->clear();
 }
 
 void Corkscrew::fillBuffer(const CRGB& color) {
-    initializeBuffer();
-    for (fl::size i = 0; i < mCorkscrewLeds.size(); ++i) {
-        mCorkscrewLeds[i] = color;
+    auto target_surface = getOrCreateInputSurface();
+    for (fl::size i = 0; i < target_surface->size(); ++i) {
+        target_surface->data()[i] = color;
     }
 }
 
 void Corkscrew::readFromMulti(const fl::Grid<CRGB>& source_grid) const {
-    // Ensure buffer is initialized
-    initializeBuffer();
-    
-    // Clear buffer first
-    const_cast<Corkscrew*>(this)->clearBuffer();
+    // Get the target surface and clear it
+    auto target_surface = const_cast<Corkscrew*>(this)->getOrCreateInputSurface();
+    target_surface->clear();
     const u16 width = static_cast<u16>(source_grid.width());
     const u16 height = static_cast<u16>(source_grid.height());
     
@@ -318,9 +318,10 @@ void Corkscrew::readFromMulti(const fl::Grid<CRGB>& source_grid) const {
             final_color.b = static_cast<fl::u8>(b_accum / total_weight);
         }
         
-        // Store the result in the LED buffer at the LED index position
-        if (led_idx < mCorkscrewLeds.size()) {
-            mCorkscrewLeds[led_idx] = final_color;
+        // Store the result in the target surface at the LED index position
+        auto target_surface = const_cast<Corkscrew*>(this)->getOrCreateInputSurface();
+        if (led_idx < target_surface->size()) {
+            target_surface->data()[led_idx] = final_color;
         }
     }
 }
@@ -344,6 +345,34 @@ fl::ScreenMap Corkscrew::toScreenMap(float diameter) const {
     }
     
     return screenMap;
+}
+
+// Enhanced surface handling methods  
+fl::shared_ptr<fl::Grid<CRGB>> Corkscrew::getOrCreateInputSurface() {
+    if (!mInputSurface) {
+        // Create a new Grid with cylinder dimensions using PSRAM allocation
+        mInputSurface = fl::make_shared<fl::Grid<CRGB>>(mState.width, mState.height);
+    }
+    return mInputSurface;
+}
+
+fl::Grid<CRGB>& Corkscrew::surface() {
+    return *getOrCreateInputSurface();
+}
+
+
+fl::size Corkscrew::pixelCount() const {
+    // Use variant storage if available, otherwise fall back to legacy buffer size
+    if (!mPixelStorage.empty()) {
+        if (mPixelStorage.template is<fl::span<CRGB>>()) {
+            return mPixelStorage.template get<fl::span<CRGB>>().size();
+        } else if (mPixelStorage.template is<fl::vector<CRGB, fl::allocator_psram<CRGB>>>()) {
+            return mPixelStorage.template get<fl::vector<CRGB, fl::allocator_psram<CRGB>>>().size();
+        }
+    }
+    
+    // Fall back to input size
+    return mInput.numLeds;
 }
 
 } // namespace fl

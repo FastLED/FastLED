@@ -9,7 +9,8 @@
       "Bash(grep:*)",
       "WebSearch",
       "WebFetch(domain:github.com)",
-      "Bash(./test --examples)"
+      "Bash(./test --examples)",
+      "Bash(bash test:*)"
     ],
     "deny": []
   }
