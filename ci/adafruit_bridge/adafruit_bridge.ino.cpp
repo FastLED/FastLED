@@ -1,8 +1,7 @@
 
 
 
-#define FASTLED_USE_ADAFRUIT_NEOPIXEL 1
-#include "Adafruit_NeoPixel.h"
+#define FASTLED_USE_ADAFRUIT_NEOPIXEL
 #include "FastLED.h"
 
 // Test the non-template Adafruit bridge

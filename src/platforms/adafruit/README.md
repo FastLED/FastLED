@@ -6,7 +6,7 @@ Adafruit_NeoPixel integration providing a FastLED‑compatible clockless control
 - `clockless.h`: Adapter layer. Exposes a `ClocklessController` template that marshals FastLED pixel data to an `Adafruit_NeoPixel` instance. Requires `Adafruit_NeoPixel.h` to be available; timing (T1/T2/T3) is managed by the Adafruit library.
 
 ## Usage and detection
-- Controlled by `FASTLED_USE_ADAFRUIT_NEOPIXEL` (defaults to 0 unless building docs). If enabled but `Adafruit_NeoPixel.h` is missing, the adapter disables itself with an error.
+- Controlled by `FASTLED_USE_ADAFRUIT_NEOPIXEL` (defaults to undefined unless building docs). If enabled but `Adafruit_NeoPixel.h` is missing, the adapter disables itself with an error.
 - Color order: FastLED’s `PixelController` applies RGB ordering; the adapter always feeds RGB into Adafruit’s API.
 - Timings: `T1/T2/T3` template params are ignored here; Adafruit’s driver handles signal generation and timing per platform.
 
@@ -16,7 +16,7 @@ Adafruit_NeoPixel integration providing a FastLED‑compatible clockless control
 
 ## Optional feature defines
 
-- **`FASTLED_USE_ADAFRUIT_NEOPIXEL`**: Default `0` (unless building docs via `FASTLED_DOXYGEN`). When `1`, enables the Adafruit adapter; requires `Adafruit_NeoPixel.h`.
+- **`FASTLED_USE_ADAFRUIT_NEOPIXEL`**: Default undefined (unless building docs via `FASTLED_DOXYGEN`). When defined, enables the Adafruit adapter; requires `Adafruit_NeoPixel.h`.
 
 Define before including `FastLED.h`.
 ## Compatibility and color order
