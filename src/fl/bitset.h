@@ -22,7 +22,16 @@ template <fl::u32 N>
 using bitset_fixed = BitsetFixed<N>; // fixed size, no dynamic allocation.
 
 
+// TODO: move this to fl/math.h
+template<typename IntType>
+inline fl::u8 popcount(IntType value) {
+    return static_cast<fl::u8>(__builtin_popcount(value));
+}
 
+template<typename IntType>
+inline fl::u8 countr_zero(IntType value) {
+    return static_cast<fl::u8>(__builtin_ctz(value));
+}
 
 /// A simple fixed-size Bitset implementation similar to std::Bitset.
 template <fl::u32 N> class BitsetFixed {
@@ -134,7 +143,7 @@ template <fl::u32 N> class BitsetFixed {
         fl::u32 cnt = 0;
         // Count bits in all complete blocks
         for (fl::u32 i = 0; i < block_count - 1; ++i) {
-            cnt += __builtin_popcount(_blocks[i]);
+            cnt += fl::popcount(_blocks[i]);
         }
 
         // For the last block, we need to be careful about counting only valid
@@ -147,11 +156,11 @@ template <fl::u32 N> class BitsetFixed {
                 const fl::u32 valid_bits = N % bits_per_block;
                 // Create a mask with only the valid bits set to 1
                 block_type mask = (valid_bits == bits_per_block)
-                                      ? ~block_type(0)
+                                      ? static_cast<block_type>(~block_type(0))
                                       : ((block_type(1) << valid_bits) - 1);
                 last_block &= mask;
             }
-            cnt += __builtin_popcount(last_block);
+            cnt += fl::popcount(last_block);
         }
 
         return cnt;
@@ -178,7 +187,7 @@ template <fl::u32 N> class BitsetFixed {
                 // Create a mask for the valid bits in the last block
                 mask = (block_type(1) << (N % bits_per_block)) - 1;
             } else {
-                mask = ~block_type(0);
+                mask = static_cast<block_type>(~block_type(0));
             }
 
             if ((_blocks[block_count - 1] & mask) != mask) {
@@ -235,7 +244,7 @@ template <fl::u32 N> class BitsetFixed {
             if (block_idx == block_count - 1 && N % bits_per_block != 0) {
                 const fl::u32 valid_bits = N % bits_per_block;
                 block_type mask = (valid_bits == bits_per_block) 
-                    ? ~block_type(0) 
+                    ? static_cast<block_type>(~block_type(0)) 
                     : ((block_type(1) << valid_bits) - 1);
                 current_block &= mask;
             }
@@ -253,12 +262,12 @@ template <fl::u32 N> class BitsetFixed {
             // If there are any matching bits in this block
             if (current_block != 0) {
                 // Find the first set bit
-                fl::u32 bit_pos = __builtin_ctz(current_block);
+                fl::u32 bit_pos = fl::countr_zero(current_block);
                 fl::u32 absolute_pos = block_idx * bits_per_block + bit_pos;
                 
                 // Make sure we haven't gone past the end of the bitset
                 if (absolute_pos < N) {
-                    return absolute_pos;
+                    return static_cast<fl::i32>(absolute_pos);
                 }
             }
         }
@@ -288,7 +297,7 @@ template <fl::u32 N> class BitsetFixed {
         }
 
         if (run_length >= min_length) {
-            return run_start;
+            return static_cast<fl::i32>(run_start);
         }
         
         return -1; // No run found

@@ -96,6 +96,12 @@ static inline u32 hash_pair(u32 a, u32 b,
     return fast_hash32(h ^ b);
 }
 
+static inline u64 fast_hash64(u64 x) noexcept {
+    u32 x1 = static_cast<u32>(x & 0x00000000FFFFFFFF);
+    u32 x2 = static_cast<u32>(x >> 32);
+    return hash_pair(x1, x2);
+}
+
 //-----------------------------------------------------------------------------
 // Functor for hashing arbitrary byte‐ranges to a 32‐bit value
 //-----------------------------------------------------------------------------
@@ -182,10 +188,26 @@ template <typename T> struct Hash<fl::WeakPtr<T>> {
 
 #define FASTLED_DEFINE_FAST_HASH(T)                                            \
     template <> struct Hash<T> {                                               \
-        u32 operator()(const int &key) const noexcept {                   \
+        u32 operator()(const T &key) const noexcept {                   \
             return fast_hash32(key);                                           \
         }                                                                      \
     };
+
+template<> struct Hash<float> {
+    u32 operator()(const float &key) const noexcept {
+        u32 ikey = fl::bit_cast<u32>(key);
+        return fast_hash32(ikey);
+    }
+};
+
+template<> struct Hash<double> {
+    u32 operator()(const double &key) const noexcept {
+        u64 ikey = fl::bit_cast<u64>(key);
+        /// return fast_hash32(ikey);
+        return fast_hash32(ikey);
+    }
+};
+
 
 FASTLED_DEFINE_FAST_HASH(fl::u8)
 FASTLED_DEFINE_FAST_HASH(u16)

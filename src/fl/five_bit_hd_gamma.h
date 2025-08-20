@@ -183,7 +183,7 @@ inline void five_bit_bitshift(uint16_t r16, uint16_t g16, uint16_t b16,
         b8 = (b16 * scalef + 0x808000) >> 24;
 
         *out = CRGB(r8, g8, b8);
-        *out_power_5bit = scale;
+        *out_power_5bit = static_cast<uint8_t>(scale);
         return;
     }
 }

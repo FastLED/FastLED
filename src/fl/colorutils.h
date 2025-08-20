@@ -14,8 +14,16 @@
 #include "fl/fill.h"
 #include "fl/xymap.h"
 #include "lib8tion/memmove.h"
+#include "fl/compiler_control.h"
 
 // #include "pixeltypes.h"  // pulls in FastLED.h, beware.
+
+FL_DISABLE_WARNING_PUSH
+FL_DISABLE_WARNING_UNUSED_PARAMETER
+FL_DISABLE_WARNING_RETURN_TYPE
+FL_DISABLE_WARNING_IMPLICIT_INT_CONVERSION
+FL_DISABLE_WARNING_FLOAT_CONVERSION
+FL_DISABLE_WARNING_SIGN_CONVERSION
 
 #if !defined(FASTLED_USE_32_BIT_GRADIENT_FILL)
 #if defined(__AVR__)
@@ -1790,4 +1798,4 @@ void napplyGamma_video(CRGB *rgbarray, fl::u16 count, float gammaR,
 
 } // namespace fl
 
-#pragma GCC diagnostic pop
+FL_DISABLE_WARNING_POP

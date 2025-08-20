@@ -1,3 +1,5 @@
+#include "fl/compiler_control.h"
+
 #pragma once
 
 #include "lib8tion/config.h"
@@ -6,9 +8,10 @@
 #include "fastled_config.h"
 #include "lib8static.h"
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-#pragma GCC diagnostic ignored "-Wreturn-type"
+FL_DISABLE_WARNING_PUSH
+FL_DISABLE_WARNING_UNUSED_PARAMETER
+FL_DISABLE_WARNING_RETURN_TYPE
+FL_DISABLE_WARNING_IMPLICIT_INT_CONVERSION
 
 
 FASTLED_NAMESPACE_BEGIN

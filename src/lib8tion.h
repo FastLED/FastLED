@@ -7,6 +7,16 @@
 #include "lib8tion/types.h"
 #include "fl/deprecated.h"
 
+#include "fl/compiler_control.h"
+
+FL_DISABLE_WARNING_PUSH
+FL_DISABLE_WARNING_UNUSED_PARAMETER
+FL_DISABLE_WARNING_RETURN_TYPE
+FL_DISABLE_WARNING_IMPLICIT_INT_CONVERSION
+FL_DISABLE_WARNING_FLOAT_CONVERSION
+FL_DISABLE_WARNING_SIGN_CONVERSION
+
+
 #ifndef __INC_LED_SYSDEFS_H
 #error WTH?  led_sysdefs needs to be included first
 #endif
@@ -246,7 +256,7 @@ FASTLED_NAMESPACE_BEGIN
 /// Conversion from 16-bit fixed point (::sfract15) to IEEE754 32-bit float.
 LIB8STATIC float sfract15ToFloat( sfract15 y)
 {
-    return y / 32768.0;
+    return y / 32768.0f;
 }
 
 /// Conversion from IEEE754 float in the range (-1,1) to 16-bit fixed point (::sfract15).
@@ -254,7 +264,7 @@ LIB8STATIC float sfract15ToFloat( sfract15 y)
 /// representable range is 0.99996948242 to -0.99996948242, in steps of 0.00003051757.
 LIB8STATIC sfract15 floatToSfract15( float f)
 {
-    return f * 32768.0;
+    return static_cast<sfract15>(f * 32768.0f);
 }
 
 /// @} FloatConversions
@@ -1246,3 +1256,5 @@ typedef CEveryNTimePeriods<uint8_t,hours8> CEveryNHours;
 FASTLED_NAMESPACE_END
 
 #endif
+
+FL_DISABLE_WARNING_POP

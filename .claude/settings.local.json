@@ -8,7 +8,8 @@
       "Bash(echo $VIRTUAL_ENV)",
       "Bash(grep:*)",
       "WebSearch",
-      "WebFetch(domain:github.com)"
+      "WebFetch(domain:github.com)",
+      "Bash(./test --examples)"
     ],
     "deny": []
   }

@@ -70,7 +70,7 @@ template <typename T> inline T exp(T value) {
 // Constexpr version for compile-time evaluation (compatible with older C++
 // standards)
 constexpr int ceil_constexpr(float value) {
-    return static_cast<int>((value > static_cast<int>(value))
+    return static_cast<int>((value > static_cast<float>(static_cast<int>(value)))
                                 ? static_cast<int>(value) + 1
                                 : static_cast<int>(value));
 }

@@ -198,7 +198,7 @@ public:
         if (diameter <= 0.0f) {
             // screen map was not set.
             if (map.getTotal() <= (64*64)) {
-                screenmap.setDiameter(.1); // Assume small matrix is being used.
+                screenmap.setDiameter(.1f); // Assume small matrix is being used.
             }
         }
         fl::EngineEvents::onCanvasUiSet(this, screenmap);

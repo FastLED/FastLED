@@ -89,7 +89,7 @@ class bitset_dynamic {
     // Assign n bits to the value specified
     FL_DISABLE_WARNING_PUSH
     FL_DISABLE_WARNING_NULL_DEREFERENCE
-    void assign(fl::size n, bool value) {
+    void assign(fl::u32 n, bool value) {
         if (n > _size) {
             resize(n);
         }
@@ -103,7 +103,7 @@ class bitset_dynamic {
                 if (_size % bits_per_block != 0) {
                     fl::u32 last_block_idx = (_size - 1) / bits_per_block;
                     fl::u32 last_bit_pos = (_size - 1) % bits_per_block;
-                    block_type mask = (static_cast<block_type>(1) << (last_bit_pos + 1)) - 1;
+                    block_type mask = static_cast<block_type>((static_cast<block_type>(1) << (last_bit_pos + 1)) - 1);
                     _blocks[last_block_idx] &= mask;
                 }
             }
@@ -144,7 +144,7 @@ class bitset_dynamic {
             fl::u32 last_block_idx = (_size - 1) / bits_per_block;
             fl::u32 last_bit_pos = (_size - 1) % bits_per_block;
             block_type mask =
-                (static_cast<block_type>(1) << (last_bit_pos + 1)) - 1;
+                static_cast<block_type>((static_cast<block_type>(1) << (last_bit_pos + 1)) - 1);
             _blocks[last_block_idx] &= mask;
         }
     }
@@ -226,7 +226,7 @@ class bitset_dynamic {
             fl::u32 last_block_idx = (_size - 1) / bits_per_block;
             fl::u32 last_bit_pos = (_size - 1) % bits_per_block;
             block_type mask =
-                (static_cast<block_type>(1) << (last_bit_pos + 1)) - 1;
+                static_cast<block_type>((static_cast<block_type>(1) << (last_bit_pos + 1)) - 1);
             _blocks[last_block_idx] &= mask;
         }
     }
@@ -250,7 +250,7 @@ class bitset_dynamic {
         
         fl::u32 result = 0;
         for (fl::u32 i = 0; i < _block_count; ++i) {
-            result += __builtin_popcount(_blocks[i]);
+            result += static_cast<fl::u32>(__builtin_popcount(_blocks[i]));
         }
         return result;
     }
@@ -285,7 +285,7 @@ class bitset_dynamic {
         if (_block_count > 0) {
             fl::u32 last_bit_pos = (_size - 1) % bits_per_block;
             block_type mask =
-                (static_cast<block_type>(1) << (last_bit_pos + 1)) - 1;
+                static_cast<block_type>((static_cast<block_type>(1) << (last_bit_pos + 1)) - 1);
             return (_blocks[_block_count - 1] & mask) == mask;
         }
 
@@ -329,8 +329,8 @@ class bitset_dynamic {
             if (block_idx == _block_count - 1 && _size % bits_per_block != 0) {
                 const fl::u32 valid_bits = _size % bits_per_block;
                 block_type mask = (valid_bits == bits_per_block) 
-                    ? ~block_type(0) 
-                    : ((block_type(1) << valid_bits) - 1);
+                    ? static_cast<block_type>(~block_type(0)) 
+                    : static_cast<block_type>(((block_type(1) << valid_bits) - 1));
                 current_block &= mask;
             }
             
@@ -341,18 +341,18 @@ class bitset_dynamic {
             
             // For the first block, mask out bits before the offset
             if (block_idx == start_block && start_bit > 0) {
-                current_block &= ~((block_type(1) << start_bit) - 1);
+                current_block &= ~static_cast<block_type>(((block_type(1) << start_bit) - 1));
             }
             
             // If there are any matching bits in this block
             if (current_block != 0) {
                 // Find the first set bit
-                fl::u32 bit_pos = __builtin_ctz(current_block);
+                fl::u32 bit_pos = static_cast<fl::u32>(__builtin_ctz(current_block));
                 fl::u32 absolute_pos = block_idx * bits_per_block + bit_pos;
                 
                 // Make sure we haven't gone past the end of the bitset
                 if (absolute_pos < _size) {
-                    return absolute_pos;
+                    return static_cast<fl::i32>(absolute_pos);
                 }
             }
         }
@@ -440,7 +440,7 @@ class bitset_dynamic {
             fl::u32 last_block_idx = (_size - 1) / bits_per_block;
             fl::u32 last_bit_pos = (_size - 1) % bits_per_block;
             block_type mask =
-                (static_cast<block_type>(1) << (last_bit_pos + 1)) - 1;
+                static_cast<block_type>((static_cast<block_type>(1) << (last_bit_pos + 1)) - 1);
             result._blocks[last_block_idx] &= mask;
         }
 

@@ -215,8 +215,8 @@ class Corkscrew {
     iterator begin() { return iterator(this, 0); }
     iterator end() { return iterator(this, size()); }
 
-    fl::i16 cylinder_width() const { return mState.width; }
-    fl::i16 cylinder_height() const { return mState.height; }
+    fl::u16 cylinder_width() const { return mState.width; }
+    fl::u16 cylinder_height() const { return mState.height; }
 
     // Caching control
     void setCachingEnabled(bool enabled);

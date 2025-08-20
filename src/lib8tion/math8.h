@@ -6,6 +6,14 @@
 #include "intmap.h"
 #include "fl/namespace.h"
 
+#include "fl/compiler_control.h"
+
+
+FL_DISABLE_WARNING_PUSH
+FL_DISABLE_WARNING_UNUSED_PARAMETER
+FL_DISABLE_WARNING_RETURN_TYPE
+FL_DISABLE_WARNING_IMPLICIT_INT_CONVERSION
+
 FASTLED_NAMESPACE_BEGIN
 
 /// @file math8.h
@@ -34,7 +42,7 @@ LIB8STATIC_ALWAYS_INLINE uint8_t qadd8(uint8_t i, uint8_t j) {
     unsigned int t = i + j;
     if (t > 255)
         t = 255;
-    return t;
+    return static_cast<uint8_t>(t);
 #elif QADD8_AVRASM == 1
     asm volatile(
         /* First, add j to i, conditioning the C flag */
@@ -69,7 +77,7 @@ LIB8STATIC_ALWAYS_INLINE int8_t qadd7(int8_t i, int8_t j) {
         t = 127;
     else if (t < -128)
         t = -128;
-    return t;
+    return static_cast<int8_t>(t);
 #elif QADD7_AVRASM == 1
     asm volatile(
         /* First, add j to i, conditioning the V and C flags */
@@ -106,7 +114,7 @@ LIB8STATIC_ALWAYS_INLINE uint8_t qsub8(uint8_t i, uint8_t j) {
     int t = i - j;
     if (t < 0)
         t = 0;
-    return t;
+    return static_cast<uint8_t>(t);
 #elif QSUB8_AVRASM == 1
 
     asm volatile(
@@ -136,7 +144,7 @@ LIB8STATIC_ALWAYS_INLINE uint8_t qsub8(uint8_t i, uint8_t j) {
 LIB8STATIC_ALWAYS_INLINE uint8_t add8(uint8_t i, uint8_t j) {
 #if ADD8_C == 1
     int t = i + j;
-    return t;
+    return static_cast<uint8_t>(t);
 #elif ADD8_AVRASM == 1
     // Add j to i, period.
     asm volatile("add %0, %1" : "+r"(i) : "r"(j));
@@ -175,7 +183,7 @@ LIB8STATIC_ALWAYS_INLINE uint16_t add8to16(uint8_t i, uint16_t j) {
 LIB8STATIC_ALWAYS_INLINE uint8_t sub8(uint8_t i, uint8_t j) {
 #if SUB8_C == 1
     int t = i - j;
-    return t;
+    return static_cast<uint8_t>(t);
 #elif SUB8_AVRASM == 1
     // Subtract j from i, period.
     asm volatile("sub %0, %1" : "+r"(i) : "r"(j));
@@ -216,7 +224,10 @@ LIB8STATIC_ALWAYS_INLINE uint8_t avg8(uint8_t i, uint8_t j) {
 /// @returns mean average of i and j, rounded down
 LIB8STATIC_ALWAYS_INLINE uint16_t avg16(uint16_t i, uint16_t j) {
 #if AVG16_C == 1
-    return (uint32_t)((uint32_t)(i) + (uint32_t)(j)) >> 1;
+    // return (uint32_t)((uint32_t)(i) + (uint32_t)(j)) >> 1;
+    uint32_t tmp = i;
+    tmp += j;
+    return static_cast<uint16_t>(tmp >> 1);
 #elif AVG16_AVRASM == 1
     asm volatile(
         /* First, add jLo (heh) to iLo, 9th bit overflows into C flag */
@@ -271,7 +282,11 @@ LIB8STATIC_ALWAYS_INLINE uint8_t avg8r(uint8_t i, uint8_t j) {
 /// @returns mean average of i and j, rounded up
 LIB8STATIC_ALWAYS_INLINE uint16_t avg16r(uint16_t i, uint16_t j) {
 #if AVG16R_C == 1
-    return (uint32_t)((uint32_t)(i) + (uint32_t)(j) + 1) >> 1;
+    // return (uint32_t)((uint32_t)(i) + (uint32_t)(j) + 1) >> 1;
+    uint32_t tmp = i;
+    tmp += j;
+    tmp += 1;
+    return static_cast<uint16_t>(tmp >> 1);
 #elif AVG16R_AVRASM == 1
     asm volatile(
         /* First, add jLo (heh) to iLo, 9th bit overflows into C flag */
@@ -682,3 +697,5 @@ LIB8STATIC uint8_t blend8(uint8_t a, uint8_t b, uint8_t amountOfB) {
 /// @} lib8tion
 
 FASTLED_NAMESPACE_END
+
+FL_DISABLE_WARNING_POP

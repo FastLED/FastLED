@@ -63,6 +63,9 @@ class Tile2x2_u8 {
 
     // Inlined, yet customizable drawing access. This will only send you pixels
     // that are within the bounds of the XYMap.
+    // Why use a template? Speed.
+    // You have an array of Tile2x2_u8 in a draw list and you need to dispatch
+    // them fast. Templates will inline completely for max speed.
     template <typename XYVisitor>
     void draw(const XYMap &xymap, XYVisitor &visitor) const {
         for (u16 x = 0; x < 2; ++x) {
@@ -72,8 +75,18 @@ class Tile2x2_u8 {
                     int xx = mOrigin.x + x;
                     int yy = mOrigin.y + y;
                     if (xymap.has(xx, yy)) {
-                        int index = xymap(xx, yy);
-                        visitor.draw(vec2<i16>(xx, yy), index, value);
+                        // we know index cannot be -1 because we checked has(xx, yy) above.
+                        u16 ux = static_cast<u16>(xx);
+                        u16 uy = static_cast<u16>(yy);
+                        int index = xymap.mapToIndex(ux, uy);
+                        if (index >= 0) {
+                            u32 uindex = static_cast<u32>(index);
+                            vec2<u16> pt(ux, uy);
+                            visitor.draw(pt, uindex, value);
+                        } else {
+                          // Unexpected because has(xx, yy) is true above therefore
+                          // index cannot be < 0. TODO: low level log this.
+                        }
                     }
                 }
             }

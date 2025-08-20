@@ -145,9 +145,10 @@ struct SerialEmulation {
     }
     
     // Two-argument print overloads for formatting
-    void print(float val, int digits) { 
+    void print(float _val, int digits) { 
         // Clamp digits to reasonable range
         digits = digits < 0 ? 0 : (digits > 9 ? 9 : digits);
+        double val = static_cast<double>(_val);
         
         // Use literal format strings to avoid linter warnings
         switch(digits) {

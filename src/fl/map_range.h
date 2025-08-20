@@ -11,6 +11,7 @@
 
 FL_DISABLE_WARNING_PUSH
 FL_DISABLE_WARNING(float-equal)
+FL_DISABLE_WARNING(double-promotion)
 
 namespace fl {
 
@@ -79,7 +80,7 @@ template <> struct map_range_math<u8, u8> {
         i16 in_max16 = in_max;
         i16 out_min16 = out_min;
         i16 out_max16 = out_max;
-        i16 out16 = map_range<u16, u16>(v16, in_min16, in_max16,
+        i16 out16 = map_range<i16, i16>(v16, in_min16, in_max16,
                                                       out_min16, out_max16);
         if (out16 < 0) {
             out16 = 0;
