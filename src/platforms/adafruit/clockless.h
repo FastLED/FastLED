@@ -29,13 +29,13 @@
 
 #if FASTLED_USE_ADAFRUIT_NEOPIXEL
 
-#include "fl/namespace.h"
+
 #include "fl/memory.h"
-#include "controller.h"
+#include "fl/unique_ptr.h"
+#include "eorder.h"
 #include "pixel_controller.h"
-#include "pixel_iterator.h"
-#include "color.h"
-#include "fastled_config.h"
+
+class PixelIterator;
 
 namespace fl {
 

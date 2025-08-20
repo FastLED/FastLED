@@ -6,10 +6,16 @@
 
 #if FASTLED_USE_ADAFRUIT_NEOPIXEL
 
+#ifndef FASTLED_INTERNAL
+#define FASTLED_INTERNAL 1
+#endif
+#include "FastLED.h"
+
 // Only include Adafruit headers in the .cpp file
 #include "Adafruit_NeoPixel.h"
-#include "fl/memory.h"
+#include "fl/unique_ptr.h"
 #include "clockless.h"
+#include "pixel_iterator.h"
 
 namespace fl {
 
@@ -40,10 +46,11 @@ public:
         
         // Get pixel count from iterator
         int numPixels = pixelIterator.size();
+        auto rgbw = pixelIterator.get_rgbw();
         
         // Determine the appropriate NeoPixel type based on RGBW mode
         uint16_t neoPixelType = NEO_KHZ800;
-        if (mRgbw.active()) {
+        if (rgbw.active()) {
             neoPixelType |= NEO_RGBW;  // RGBW mode
         } else {
             neoPixelType |= NEO_RGB;   // RGB mode
@@ -52,7 +59,6 @@ public:
         // Create or recreate NeoPixel instance if needed
         if (!mNeoPixel || mNeoPixel->numPixels() != numPixels) {
             if (mNeoPixel) {
-                mNeoPixel->end();
                 mNeoPixel.reset();
             }
             mNeoPixel = fl::make_unique<Adafruit_NeoPixel>(
@@ -61,7 +67,7 @@ public:
         }
         
         // Convert pixel data using PixelIterator and send to Adafruit_NeoPixel
-        if (mRgbw.active()) {
+        if (rgbw.active()) {
             // RGBW mode
             for (int i = 0; pixelIterator.has(1); ++i) {
                 fl::u8 r, g, b, w;
@@ -86,7 +92,7 @@ public:
 
 // Static factory method implementation
 fl::unique_ptr<IAdafruitNeoPixelDriver> IAdafruitNeoPixelDriver::create() {
-    return fl::make_unique<AdafruitNeoPixelDriverImpl>();
+    return fl::unique_ptr<IAdafruitNeoPixelDriver>(new AdafruitNeoPixelDriverImpl());
 }
 
 } // namespace fl

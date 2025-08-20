@@ -14,6 +14,12 @@ struct default_delete {
     void operator()(T* ptr) const {
         delete ptr;
     }
+    
+    // Allow conversion from derived to base type deleters
+    template<typename U>
+    default_delete(const default_delete<U>&) noexcept {}
+    
+    default_delete() = default;
 };
 
 template<typename T>
