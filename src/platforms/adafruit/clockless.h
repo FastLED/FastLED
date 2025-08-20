@@ -39,20 +39,20 @@
 
 namespace fl {
 
-// Forward declaration - implementation in clockless.cpp
-class AdafruitNeoPixelDriver {
-private:
-    class Impl;
-    fl::unique_ptr<Impl> pImpl;
-    
+/// Interface for Adafruit NeoPixel driver - implementation in clockless.cpp
+class IAdafruitNeoPixelDriver {
 public:
-    AdafruitNeoPixelDriver();
-    ~AdafruitNeoPixelDriver();
-    void init(int dataPin, int numPixels);
-    void showPixels(PixelIterator& pixelIterator);
-    void updateLength(int numPixels);
-    int getPixelCount() const;
-    bool isInitialized() const;
+    /// Static factory method to create driver implementation
+    static fl::unique_ptr<IAdafruitNeoPixelDriver> create();
+
+    virtual ~IAdafruitNeoPixelDriver() = default;
+    
+    /// Initialize the driver with data pin and RGBW mode
+    virtual void init(int dataPin) = 0;
+    
+    /// Output pixels to the LED strip
+    virtual void showPixels(PixelIterator& pixelIterator) = 0;
+
 };
 
 /// WS2812/NeoPixel clockless controller using Adafruit_NeoPixel library as the underlying driver
@@ -68,11 +68,11 @@ public:
 template <int DATA_PIN, EOrder RGB_ORDER = GRB>
 class ClocklessController : public CPixelLEDController<RGB_ORDER> {
 private:
-    AdafruitNeoPixelDriver mDriver;
+    fl::unique_ptr<IAdafruitNeoPixelDriver> mDriver;
 
 public:
     /// Constructor - creates uninitialized controller
-    ClocklessController() = default;
+    ClocklessController(){}
     
     /// Destructor - automatic cleanup
     virtual ~ClocklessController() = default;
@@ -87,26 +87,19 @@ public:
     /// @param pixels the pixel controller containing LED data
     virtual void showPixels(PixelController<RGB_ORDER> &pixels) override {
         // Initialize driver if needed
-        if (!mDriver.isInitialized()) {
-            mDriver.init(DATA_PIN, pixels.size());
-        } else if (mDriver.getPixelCount() != pixels.size()) {
-            mDriver.updateLength(pixels.size());
-        }
-        
+        if (!mDriver) {
+            mDriver = IAdafruitNeoPixelDriver::create();
+            mDriver->init(DATA_PIN);
+        }        
         // Convert to PixelIterator and send to driver
-        auto pixelIterator = pixels.as_iterator(RgbwInvalid());
-        mDriver.showPixels(pixelIterator);
+        auto pixelIterator = pixels.as_iterator(this->getRgbw());
+        mDriver->showPixels(pixelIterator);
     }
 
 protected:
     /// Get the driver instance (for derived classes)
-    AdafruitNeoPixelDriver& getDriver() {
-        return mDriver;
-    }
-    
-    /// Check if the controller is initialized
-    bool isInitialized() const {
-        return mDriver.isInitialized();
+    IAdafruitNeoPixelDriver& getDriver() {
+        return *mDriver;
     }
 };
 
