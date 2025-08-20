@@ -16,45 +16,34 @@
 using namespace fl;
 
 TEST_CASE("Corkscrew Circle10 test") {
-    // Test the auto-calculating constructor
-    Corkscrew::Input input_auto(1.0f, 10); // 1 turn, 10 LEDs, defaults
-    Corkscrew::State output_auto = Corkscrew::generateState(input_auto);
+    // Test basic dimensional calculations using Corkscrew objects directly
     
-    // Verify auto-calculated dimensions
-    REQUIRE_EQ(output_auto.width, 10);  // ceil(10 LEDs / 1 turn) = 10
-    REQUIRE_EQ(output_auto.height, 1);  // ceil(1 turn) = 1
+    // Test simple case: 1 turn, 10 LEDs
+    Corkscrew corkscrew_simple(1.0f, 10);
+    REQUIRE_EQ(corkscrew_simple.cylinderWidth(), 10);   // ceil(10 LEDs / 1 turn) = 10
+    REQUIRE_EQ(corkscrew_simple.cylinderHeight(), 1);   // ceil(1 turn) = 1
     
-    // Test your specific example: 20 LEDs with 2 turns (10 LEDs per turn)
-    Corkscrew::Input input_example(2.0f, 20); // 2 turns, 20 LEDs, defaults
-    Corkscrew::State output_example = Corkscrew::generateState(input_example);
+    // Test 2 turns with 20 LEDs (10 LEDs per turn)
+    Corkscrew corkscrew_example(2.0f, 20);
+    REQUIRE_EQ(corkscrew_example.cylinderWidth(), 10);  // LEDs per turn
+    REQUIRE_EQ(corkscrew_example.cylinderHeight(), 2);  // Number of turns
     
-    // Verify: 20 LEDs / 2 turns = 10 LEDs per turn
-    REQUIRE_EQ(output_example.width, 10);  // LEDs per turn
-    REQUIRE_EQ(output_example.height, 2);  // Number of turns
-    
-    // Test default constructor
-    Corkscrew::Input input_default;
-    Corkscrew::State output_default = Corkscrew::generateState(input_default);
-    
-    // Verify defaults: 144 LEDs / 19 turns ≈ 7.58 → ceil = 8
-    REQUIRE_EQ(output_default.width, 8);   // ceil(144/19) = ceil(7.58) = 8
-    REQUIRE_EQ(output_default.height, 18); // Optimized: ceil(144/8) = ceil(18) = 18 (perfect match!)
+    // Test default case: 19 turns, 144 LEDs
+    Corkscrew corkscrew_default(19.0f, 144);
+    REQUIRE_EQ(corkscrew_default.cylinderWidth(), 8);   // ceil(144/19) = ceil(7.58) = 8
+    REQUIRE_EQ(corkscrew_default.cylinderHeight(), 18); // Optimized: ceil(144/8) = ceil(18) = 18
     
     // Test FestivalStick case: 19 turns, 288 LEDs 
-    Corkscrew::Input input_festival(19.0f, 288);
-    Corkscrew::State output_festival = Corkscrew::generateState(input_festival);
-    
-    // Debug the height calculation - should now optimize to prevent excess pixels
-    REQUIRE_EQ(output_festival.width, 16);  // ceil(288/19) = ceil(15.16) = 16  
-    REQUIRE_EQ(output_festival.height, 18); // ceil(288/16) = ceil(18) = 18 (optimized!)
+    Corkscrew corkscrew_festival(19.0f, 288);
+    REQUIRE_EQ(corkscrew_festival.cylinderWidth(), 16);  // ceil(288/19) = ceil(15.16) = 16  
+    REQUIRE_EQ(corkscrew_festival.cylinderHeight(), 18); // ceil(288/16) = ceil(18) = 18 (optimized!)
     
     // Verify grid size matches LED count
-    REQUIRE_EQ(output_festival.width * output_festival.height, 288);
+    REQUIRE_EQ(corkscrew_festival.cylinderWidth() * corkscrew_festival.cylinderHeight(), 288);
     
     // Check LED distribution - find max height position actually used
     float max_height = 0.0f;
     float min_height = 999.0f;
-    Corkscrew corkscrew_festival(input_festival);
     for (uint16_t i = 0; i < corkscrew_festival.size(); ++i) {
         vec2f pos = corkscrew_festival.at_no_wrap(i);
         max_height = MAX(max_height, pos.y);
@@ -68,43 +57,39 @@ TEST_CASE("Corkscrew Circle10 test") {
 
 TEST_CASE("Corkscrew LED distribution test") {
     // Test if LEDs actually reach the top row
-    Corkscrew::Input input(19.0f, 288); // FestivalStick case
-    Corkscrew::State output = Corkscrew::generateState(input);
-    Corkscrew corkscrew(input);
+    Corkscrew corkscrew(19.0f, 288); // FestivalStick case
     
     // Count how many LEDs map to each row
-    fl::vector<int> row_counts(output.height, 0);
+    fl::vector<int> row_counts(corkscrew.cylinderHeight(), 0);
     for (uint16_t i = 0; i < corkscrew.size(); ++i) {
         vec2f pos = corkscrew.at_no_wrap(i);
         int row = static_cast<int>(pos.y);
-        if (row >= 0 && row < output.height) {
+        if (row >= 0 && row < corkscrew.cylinderHeight()) {
             row_counts[row]++;
         }
     }
     
     // Check if top row (now row 17) has LEDs
-    REQUIRE(row_counts[output.height - 1] > 0); // Top row should have LEDs
+    REQUIRE(row_counts[corkscrew.cylinderHeight() - 1] > 0); // Top row should have LEDs
     REQUIRE(row_counts[0] > 0);  // Bottom row should have LEDs
 }
 
 TEST_CASE("Corkscrew two turns test") {
     // Test 2 turns with 2 LEDs per turn (4 LEDs total)
-    Corkscrew::Input input_two_turns(2.0f, 4); // 2 turns, 4 LEDs, defaults
-    Corkscrew::State output_two_turns = Corkscrew::generateState(input_two_turns);
+    Corkscrew corkscrew_two_turns(2.0f, 4); // 2 turns, 4 LEDs, defaults
     
     // Verify: 4 LEDs / 2 turns = 2 LEDs per turn
-    REQUIRE_EQ(output_two_turns.width, 2);   // LEDs per turn
-    REQUIRE_EQ(output_two_turns.height, 2);  // Number of turns
+    REQUIRE_EQ(corkscrew_two_turns.cylinderWidth(), 2);   // LEDs per turn
+    REQUIRE_EQ(corkscrew_two_turns.cylinderHeight(), 2);  // Number of turns
     
     // Verify grid size matches LED count
-    REQUIRE_EQ(output_two_turns.width * output_two_turns.height, 4);
+    REQUIRE_EQ(corkscrew_two_turns.cylinderWidth() * corkscrew_two_turns.cylinderHeight(), 4);
     
     // Test LED positioning across both turns
-    Corkscrew corkscrew_two_turns(input_two_turns);
     REQUIRE_EQ(corkscrew_two_turns.size(), 4);
     
     // Check that LEDs are distributed across both rows
-    fl::vector<int> row_counts(output_two_turns.height, 0);
+    fl::vector<int> row_counts(corkscrew_two_turns.cylinderHeight(), 0);
     
     // Unrolled loop for 4 LEDs
     vec2f pos0 = corkscrew_two_turns.at_no_wrap(0);
@@ -118,25 +103,25 @@ TEST_CASE("Corkscrew two turns test") {
     FL_WARN("pos3: " << pos3);
 
     int row0 = static_cast<int>(pos0.y);
-    if (row0 >= 0 && row0 < output_two_turns.height) {
+    if (row0 >= 0 && row0 < corkscrew_two_turns.cylinderHeight()) {
         row_counts[row0]++;
     }
     
     
     int row1 = static_cast<int>(pos1.y);
-    if (row1 >= 0 && row1 < output_two_turns.height) {
+    if (row1 >= 0 && row1 < corkscrew_two_turns.cylinderHeight()) {
         row_counts[row1]++;
     }
     
 
     int row2 = static_cast<int>(pos2.y);
-    if (row2 >= 0 && row2 < output_two_turns.height) {
+    if (row2 >= 0 && row2 < corkscrew_two_turns.cylinderHeight()) {
         row_counts[row2]++;
     }
     
 
     int row3 = static_cast<int>(pos3.y);
-    if (row3 >= 0 && row3 < output_two_turns.height) {
+    if (row3 >= 0 && row3 < corkscrew_two_turns.cylinderHeight()) {
         row_counts[row3]++;
     }
     
@@ -163,11 +148,10 @@ TEST_CASE("Constexpr corkscrew dimension calculation") {
     static_assert(default_height == 18, "Default height should be 18");
     
     // Verify runtime and compile-time versions match
-    fl::Corkscrew::Input runtime_input(19.0f, 288);
-    fl::Corkscrew::State runtime_output = fl::Corkscrew::generateState(runtime_input);
+    Corkscrew runtime_corkscrew(19.0f, 288);
     
-    REQUIRE_EQ(festival_width, runtime_output.width);
-    REQUIRE_EQ(festival_height, runtime_output.height);
+    REQUIRE_EQ(festival_width, runtime_corkscrew.cylinderWidth());
+    REQUIRE_EQ(festival_height, runtime_corkscrew.cylinderHeight());
     
     // Test simple perfect case: 100 LEDs, 10 turns = 10x10 grid
     constexpr uint16_t simple_width = fl::calculateCorkscrewWidth(10.0f, 100);
@@ -179,25 +163,27 @@ TEST_CASE("Constexpr corkscrew dimension calculation") {
 
 TEST_CASE("TestCorkscrewBufferFunctionality") {
     // Create a Corkscrew with 16 LEDs and 4 turns for simple testing
-    fl::Corkscrew::Input input(4.0f, 16, 0, false);
-    fl::Corkscrew corkscrew(input);
+    // Create a buffer for testing
+    fl::vector<CRGB> led_buffer(16);
+    fl::span<CRGB> led_span(led_buffer);
+    fl::Corkscrew corkscrew(4.0f, led_span, false);
     
     // Get the rectangular buffer dimensions
-    uint16_t width = corkscrew.cylinder_width();
-    uint16_t height = corkscrew.cylinder_height();
+    uint16_t width = corkscrew.cylinderWidth();
+    uint16_t height = corkscrew.cylinderHeight();
     
     // Get the surface and verify it's properly initialized
     fl::Grid<CRGB>& surface = corkscrew.surface();
     REQUIRE(surface.size() == width * height);
     
     // Fill the buffer with a simple pattern
-    corkscrew.fillBuffer(CRGB::Red);
+    corkscrew.fillInputSurface(CRGB::Red);
     for (size_t i = 0; i < surface.size(); ++i) {
         REQUIRE(surface.data()[i] == CRGB::Red);
     }
     
     // Clear the buffer
-    corkscrew.clearBuffer();
+    corkscrew.clear();
     for (size_t i = 0; i < surface.size(); ++i) {
         REQUIRE(surface.data()[i] == CRGB::Black);
     }
@@ -216,19 +202,28 @@ TEST_CASE("TestCorkscrewBufferFunctionality") {
         }
     }
     
-    // Read from the source grid into our internal buffer
-    corkscrew.readFrom(source_grid);
+    // First, copy the source grid to the corkscrew's surface, then draw
+    auto& corkscrew_surface = corkscrew.surface();
+    for (int y = 0; y < height; ++y) {
+        for (int x = 0; x < width; ++x) {
+            if (x < corkscrew_surface.width() && y < corkscrew_surface.height()) {
+                corkscrew_surface(x, y) = source_grid(x, y);
+            }
+        }
+    }
+    corkscrew.draw();
     
-    // Verify that the buffer has been populated with colors from the source
-    // Note: Not every pixel in the rectangular buffer may be written to by the corkscrew mapping
+    // Verify that the LED data has been populated with colors from the surface
+    // Note: Not every LED may be written to by the corkscrew mapping
     bool found_blue = false;
     bool found_green = false;
     int non_black_count = 0;
     
-    for (size_t i = 0; i < surface.size(); ++i) {
-        if (surface.data()[i] == CRGB::Blue) found_blue = true;
-        if (surface.data()[i] == CRGB::Green) found_green = true;
-        if (surface.data()[i] != CRGB::Black) non_black_count++;
+    CRGB* led_data = corkscrew.rawData();
+    for (size_t i = 0; i < corkscrew.size(); ++i) {
+        if (led_data[i] == CRGB::Blue) found_blue = true;
+        if (led_data[i] == CRGB::Green) found_green = true;
+        if (led_data[i] != CRGB::Black) non_black_count++;
     }
     
     // Should have found both colors in our checkerboard pattern
@@ -239,13 +234,10 @@ TEST_CASE("TestCorkscrewBufferFunctionality") {
 }
 
 TEST_CASE("Corkscrew readFrom with bilinear interpolation") {
-    // Create a small corkscrew for testing
-    Corkscrew::Input input;
-    input.numLeds = 12;  // 3x4 grid
-    input.totalTurns = 1.0f;
-    input.gapParams = Gap();
-    
-    Corkscrew corkscrew(input);
+    // Create a small corkscrew for testing with LED buffer
+    fl::vector<CRGB> led_buffer(12);
+    fl::span<CRGB> led_span(led_buffer);
+    Corkscrew corkscrew(1.0f, led_span, false);
     
     // Create a source grid - simple 3x4 pattern
     const uint16_t width = 3;
@@ -263,22 +255,28 @@ TEST_CASE("Corkscrew readFrom with bilinear interpolation") {
     source_grid(1, 1) = CRGB::Blue;   // Center-ish
     source_grid(1, 2) = CRGB::Blue;   // Center-ish
     
-    // Read from the source into corkscrew buffer
-    corkscrew.readFrom(source_grid);
+    // Copy source to corkscrew surface and draw
+    auto& corkscrew_surface2 = corkscrew.surface();
+    for (int y = 0; y < height; ++y) {
+        for (int x = 0; x < width; ++x) {
+            if (x < corkscrew_surface2.width() && y < corkscrew_surface2.height()) {
+                corkscrew_surface2(x, y) = source_grid(x, y);
+            }
+        }
+    }
+    corkscrew.draw();
     
-    // Get the surface
-    const auto& surface = corkscrew.surface();
+    // Verify LED count
+    REQUIRE_EQ(corkscrew.size(), 12);
     
-    // Verify surface size
-    REQUIRE_EQ(surface.size(), static_cast<size_t>(corkscrew.cylinder_width() * corkscrew.cylinder_height()));
-    
-    // Check that some colors were captured 
+    // Check that some colors were captured in the LED data
     bool found_red_component = false;
     bool found_blue_component = false;
     int non_black_count = 0;
     
-    for (size_t i = 0; i < surface.size(); ++i) {
-        const CRGB& color = surface.data()[i];
+    CRGB* led_data = corkscrew.rawData();
+    for (size_t i = 0; i < corkscrew.size(); ++i) {
+        const CRGB& color = led_data[i];
         if (color.r > 0 || color.g > 0 || color.b > 0) {
             non_black_count++;
         }
@@ -286,7 +284,7 @@ TEST_CASE("Corkscrew readFrom with bilinear interpolation") {
         if (color.b > 0) found_blue_component = true;
     }
     
-    // We should find some non-black pixels and some red components
+    // We should find some non-black LEDs and some red components
     REQUIRE(non_black_count > 0);
     REQUIRE(found_red_component);
     
@@ -309,20 +307,17 @@ TEST_CASE("Corkscrew readFrom with bilinear interpolation") {
 }
 
 TEST_CASE("Corkscrew CRGB* data access") {
-    // Create a corkscrew
-    Corkscrew::Input input;
-    input.numLeds = 6;
-    input.totalTurns = 1.0f;
-    input.gapParams = Gap();
-    
-    Corkscrew corkscrew(input);
+    // Create a corkscrew with LED buffer
+    fl::vector<CRGB> led_buffer(6);
+    fl::span<CRGB> led_span(led_buffer);
+    Corkscrew corkscrew(1.0f, led_span, false, Gap());
     
     // Get raw CRGB* access - this should trigger lazy allocation
-    CRGB* data_ptr = corkscrew.data();
+    CRGB* data_ptr = corkscrew.rawData();
     REQUIRE(data_ptr != nullptr);
     
     // Verify buffer was allocated with correct size
-    size_t expected_size = static_cast<size_t>(corkscrew.cylinder_width()) * static_cast<size_t>(corkscrew.cylinder_height());
+    size_t expected_size = static_cast<size_t>(corkscrew.cylinderWidth()) * static_cast<size_t>(corkscrew.cylinderHeight());
     
     // All pixels should be initialized to black
     for (size_t i = 0; i < expected_size; ++i) {
@@ -342,9 +337,9 @@ TEST_CASE("Corkscrew CRGB* data access") {
         REQUIRE_EQ(data_ptr[0].g, 0);
         REQUIRE_EQ(data_ptr[0].b, 0);
         
-        // And verify it's also reflected in the surface access
+        // Surface should remain separate from LED data
         const auto& surface = corkscrew.surface();
-        REQUIRE_EQ(surface.data()[0].r, 255);
+        REQUIRE_EQ(surface.data()[0].r, 0); // Surface should still be black
         REQUIRE_EQ(surface.data()[0].g, 0);
         REQUIRE_EQ(surface.data()[0].b, 0);
     }
@@ -352,8 +347,7 @@ TEST_CASE("Corkscrew CRGB* data access") {
 
 TEST_CASE("Corkscrew ScreenMap functionality") {
     // Create a simple corkscrew for testing
-    fl::Corkscrew::Input input(2.0f, 8); // 2 turns, 8 LEDs
-    fl::Corkscrew corkscrew(input);
+    fl::Corkscrew corkscrew(2.0f, 8, false, Gap()); // 2 turns, 8 LEDs
     
     // Test default diameter
     fl::ScreenMap screenMap = corkscrew.toScreenMap();
@@ -396,8 +390,7 @@ TEST_CASE("Corkscrew ScreenMap functionality") {
     REQUIRE(bounds.y >= 0.0f); // Should have some height (or 0 for single row)
     
     // Test a larger corkscrew to ensure it works with more complex cases
-    fl::Corkscrew::Input input_large(19.0f, 288); // FestivalStick case
-    fl::Corkscrew corkscrew_large(input_large);
+    fl::Corkscrew corkscrew_large(19.0f, 288, false, Gap()); // FestivalStick case
     fl::ScreenMap screenMap_large = corkscrew_large.toScreenMap(0.8f);
     
     REQUIRE_EQ(screenMap_large.getLength(), 288);
@@ -423,20 +416,9 @@ TEST_CASE("Corkscrew Gap struct functionality") {
     Gap fullGap(1.0f);
     REQUIRE_EQ(fullGap.gap, 1.0f);
     
-    // Test Gap struct in CorkscrewInput
-    Corkscrew::Input inputWithDefaultGap;
-    REQUIRE_EQ(inputWithDefaultGap.gapParams.gap, 0.0f);
-    
-    // Test CorkscrewInput constructor with Gap - need to specify invert first
-    Gap customGap(0.3f);
-    Corkscrew::Input inputWithCustomGap(19.0f, 144, false, customGap);
-    REQUIRE_EQ(inputWithCustomGap.gapParams.gap, 0.3f);
-    REQUIRE_EQ(inputWithCustomGap.totalTurns, 19.0f);
-    REQUIRE_EQ(inputWithCustomGap.numLeds, 144);
-    REQUIRE_EQ(inputWithCustomGap.invert, false);
-    
     // Test Corkscrew construction with Gap struct
-    Corkscrew corkscrewWithGap(inputWithCustomGap);
+    Gap customGap(0.3f);
+    Corkscrew corkscrewWithGap(19.0f, 144, false, customGap);
     REQUIRE_EQ(corkscrewWithGap.size(), 144);
     
     // Test that different gap values still produce valid corkscrews
@@ -444,13 +426,9 @@ TEST_CASE("Corkscrew Gap struct functionality") {
     Gap smallGap(0.1f);
     Gap largeGap(0.9f);
     
-    Corkscrew::Input inputNoGap(2.0f, 8, false, noGap);
-    Corkscrew::Input inputSmallGap(2.0f, 8, false, smallGap);
-    Corkscrew::Input inputLargeGap(2.0f, 8, false, largeGap);
-    
-    Corkscrew corkscrewNoGap(inputNoGap);
-    Corkscrew corkscrewSmallGap(inputSmallGap);
-    Corkscrew corkscrewLargeGap(inputLargeGap);
+    Corkscrew corkscrewNoGap(2.0f, 8, false, noGap);
+    Corkscrew corkscrewSmallGap(2.0f, 8, false, smallGap);
+    Corkscrew corkscrewLargeGap(2.0f, 8, false, largeGap);
     
     // All should have the same basic properties since gap computation is not implemented yet
     REQUIRE_EQ(corkscrewNoGap.size(), 8);
@@ -466,26 +444,24 @@ TEST_CASE("Corkscrew Gap struct functionality") {
     assignedGap = originalGap;
     REQUIRE_EQ(assignedGap.gap, 0.7f);
     
-    // Test Gap struct in state generation
-    Corkscrew::State stateWithGap = Corkscrew::generateState(inputWithCustomGap);
-    REQUIRE(stateWithGap.width > 0);
-    REQUIRE(stateWithGap.height > 0);
+    // Test Gap struct in corkscrew construction
+    Corkscrew corkscrewWithGap2(19.0f, 144, false, customGap);
+    REQUIRE(corkscrewWithGap2.cylinderWidth() > 0);
+    REQUIRE(corkscrewWithGap2.cylinderHeight() > 0);
 }
 
 TEST_CASE("Corkscrew Enhanced Gap - Specific user test: 2 LEDs, 1 turn, 1.0f gap every 1 LED") {
     // Test case: 2 LEDs, 1 turn, gap of 1.0f every 1 LED
     Gap gapEvery1(1, 1.0f); // Gap after every 1 LED, adds full 1.0 width unit
-    Corkscrew::Input input(1.0f, 2, false, gapEvery1); // 1 turn, 2 LEDs
-    Corkscrew corkscrew(input);
+    Corkscrew corkscrew(1.0f, 2, false, gapEvery1); // 1 turn, 2 LEDs
     
     // Get dimensions - accept whatever height the algorithm produces
-    uint16_t width = corkscrew.cylinder_width();
-    uint16_t height = corkscrew.cylinder_height();
+    uint16_t width = corkscrew.cylinderWidth();
     
-    FL_WARN("User test dimensions: width=" << width << " height=" << height);
+    FL_WARN("User test dimensions: width=" << width << " height=" << corkscrew.cylinderHeight());
     
     // Total turns should still be exactly 1
-    REQUIRE_EQ(input.totalTurns, 1.0f);
+    REQUIRE_EQ(1.0f, 1.0f);
     
     // Get positions for both LEDs (unwrapped and wrapped)
     vec2f pos0_unwrapped = corkscrew.at_no_wrap(0); // First LED, no gap yet
@@ -510,7 +486,7 @@ TEST_CASE("Corkscrew Enhanced Gap - Specific user test: 2 LEDs, 1 turn, 1.0f gap
     
     // First LED should be at or near starting position
     REQUIRE(pos0_unwrapped.x <= static_cast<float>(width));
-    REQUIRE(pos0_unwrapped.y <= input.totalTurns);
+    REQUIRE(pos0_unwrapped.y <= 1.0f);
     
     // Wrapped positions should be within the cylinder width
     REQUIRE(pos0_wrapped.x < static_cast<float>(width));
@@ -518,7 +494,7 @@ TEST_CASE("Corkscrew Enhanced Gap - Specific user test: 2 LEDs, 1 turn, 1.0f gap
     
     // The key test: total height should not exceed the specified turns
     float maxHeight = MAX(pos0_unwrapped.y, pos1_unwrapped.y);
-    REQUIRE(maxHeight <= input.totalTurns + 0.1f); // Small tolerance for floating point
+    REQUIRE(maxHeight <= 1.0f + 0.1f); // Small tolerance for floating point
     
     // LEDs should have different unwrapped positions due to gap
     bool unwrapped_different = (pos0_unwrapped.x != pos1_unwrapped.x) || (pos0_unwrapped.y != pos1_unwrapped.y);
@@ -538,12 +514,8 @@ TEST_CASE("Corkscrew gap test with 3 LEDs") {
     // Expected: LED0 at w=0, LED1 at w=3.0, LED2 at w=0 (back to start)
     
     Gap gapParams(1, 0.5f); // gap of 0.5 every 1 LED
-    Corkscrew::Input input_gap(1.0f, 3, false, gapParams); // 1 turn, 3 LEDs, gap
-    Corkscrew::State output_gap = Corkscrew::generateState(input_gap);
     
-    FL_WARN("Gap test dimensions: width=" << output_gap.width << " height=" << output_gap.height);
-    
-    Corkscrew corkscrew_gap(input_gap);
+    Corkscrew corkscrew_gap(1.0f, 3, false, gapParams);
     REQUIRE_EQ(corkscrew_gap.size(), 3);
     
     // Get LED positions
@@ -589,8 +561,7 @@ TEST_CASE("Corkscrew gap test with 3 LEDs") {
 
 TEST_CASE("Corkscrew caching functionality") {
     // Create a small corkscrew for testing
-    Corkscrew::Input input(2.0f, 10); // 2 turns, 10 LEDs
-    Corkscrew corkscrew(input);
+    Corkscrew corkscrew(2.0f, 10); // 2 turns, 10 LEDs
     
     // Test that caching is enabled by default
     Tile2x2_u8_wrap tile1 = corkscrew.at_wrap(1.0f);
@@ -610,8 +581,7 @@ TEST_CASE("Corkscrew caching functionality") {
 
 TEST_CASE("Corkscrew caching disable functionality") {
     // Create a small corkscrew for testing
-    Corkscrew::Input input(2.0f, 10); // 2 turns, 10 LEDs
-    Corkscrew corkscrew(input);
+    Corkscrew corkscrew(2.0f, 10); // 2 turns, 10 LEDs
     
     // Get a tile with caching enabled
     Tile2x2_u8_wrap tile_cached = corkscrew.at_wrap(1.0f);
@@ -653,8 +623,7 @@ TEST_CASE("Corkscrew caching disable functionality") {
 
 TEST_CASE("Corkscrew caching with edge cases") {
     // Create a small corkscrew for testing
-    Corkscrew::Input input(1.5f, 5); // 1.5 turns, 5 LEDs
-    Corkscrew corkscrew(input);
+    Corkscrew corkscrew(1.5f, 5); // 1.5 turns, 5 LEDs
     
     // Test caching with various float indices
     Tile2x2_u8_wrap tile0 = corkscrew.at_wrap(0.0f);

@@ -19,7 +19,7 @@ This is useful for web interfaces and visualization:
 Example usage:
 ```cpp
 // Create a corkscrew
-Corkscrew corkscrew(corkscrewInput);
+Corkscrew corkscrew(totalTurns, numLeds);
 
 // Create ScreenMap with 0.5cm LED diameter
 fl::ScreenMap screenMap = corkscrew.toScreenMap(0.5f);
@@ -42,12 +42,14 @@ fl::Leds grid(grid_buffer, width, height);
 // Draw your 2D patterns into the grid
 grid(x, y) = CRGB::Red;  // etc.
 
-// Read from the grid into the corkscrew's internal buffer
-corkscrew.readFrom(grid);
+// Draw patterns on the corkscrew's surface and map to LEDs
+auto& surface = corkscrew.surface();
+// Draw your patterns on the surface, then call draw() to map to LEDs
+corkscrew.draw();
 
-// Access the populated buffer
-auto& buffer = corkscrew.getBuffer();
-// The buffer now contains the corkscrew mapping of your 2D pattern
+// Access the LED pixel data
+auto ledData = corkscrew.data();  // Or corkscrew.rawData() for pointer
+// The LED data now contains the corkscrew mapping of your patterns
 ```
 */
 
@@ -86,12 +88,8 @@ UICheckbox cachingEnabled("Enable Tile Caching", true);
 
 // Tested on a 288 led (2x 144 max density led strip) with 19 turns
 // Auto-calculates optimal grid dimensions from turns and LEDs
-Corkscrew::Input corkscrewInput(CORKSCREW_TURNS, // 19 turns
-                                NUM_LEDS         // 288 leds
-);
-
-// Corkscrew::State corkscrewMap = fl::Corkscrew::generateMap(corkscrewInput);
-Corkscrew corkscrew(corkscrewInput);
+Corkscrew corkscrew(CORKSCREW_TURNS, // 19 turns
+                    NUM_LEDS);        // 288 leds
 
 // Create a corkscrew with:
 // - 30cm total length (300mm)
@@ -106,8 +104,8 @@ fl::ScreenMap screenMap;
 fl::Grid<CRGB> frameBuffer;
 
 void setup() {
-    int width = corkscrew.cylinder_width();
-    int height = corkscrew.cylinder_height();
+    int width = corkscrew.cylinderWidth();
+    int height = corkscrew.cylinderHeight();
 
     frameBuffer.reset(width, height);
     XYMap xyMap = XYMap::constructRectangularGrid(width, height, 0);

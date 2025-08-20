@@ -258,8 +258,7 @@ CRGBPalette16 noisePalette = PartyColors_p;
 uint8_t colorLoop = 1;
 
 // Option 1: Runtime Corkscrew (flexible, configurable at runtime)
-Corkscrew::Input corkscrewInput(CORKSCREW_TURNS, NUM_LEDS);
-Corkscrew corkscrew(corkscrewInput);
+Corkscrew corkscrew(CORKSCREW_TURNS, NUM_LEDS);
 
 // Simple position tracking - one variable for both modes
 static float currentPosition = 0.0f;
@@ -292,6 +291,7 @@ constexpr uint16_t CORKSCREW_HEIGHT =
 // vector<vec3f> mapCorkScrew = makeCorkScrew(args);
 ScreenMap screenMap;
 Grid<CRGB> frameBuffer;
+fl::shared_ptr<Grid<CRGB>> frameBufferPtr;
 
 // Wave effect objects - declared here but initialized in setup()
 WaveFxPtr waveFx;
@@ -321,7 +321,7 @@ void setup() {
 
     // Use the corkscrew's internal buffer for the LED strip
     CLEDController *controller =
-        &FastLED.addLeds<APA102HD, PIN_DATA, PIN_CLOCK, BGR>(corkscrew.data(), NUM_LEDS);
+        &FastLED.addLeds<APA102HD, PIN_DATA, PIN_CLOCK, BGR>(corkscrew.rawData(), NUM_LEDS);
 
     // CLEDController *controller =
     //     &FastLED.addLeds<WS2812, 3, BGR>(stripLeds, NUM_LEDS);
@@ -420,6 +420,8 @@ void setup() {
 
 
     waveFx->setCrgbMap(crgMap);
+
+    frameBufferPtr = corkscrew.getOrCreateInputSurface();
 }
 
 
@@ -456,8 +458,8 @@ void fillFrameBufferNoise() {
     uint16_t noise_x = now * noise_speed / 80;  // Slow drift in x
     uint16_t noise_y = now * noise_speed / 160; // Even slower drift in y (opposite direction)
     
-    int width = frameBuffer.width();
-    int height = frameBuffer.height();
+    int width = frameBufferPtr->width();
+    int height = frameBufferPtr->height();
     
     // Data smoothing for low speeds (from NoisePlusPalette example)
     uint8_t dataSmoothing = 0;
@@ -495,7 +497,7 @@ void fillFrameBufferNoise() {
             
             // Apply data smoothing if enabled
             if(dataSmoothing) {
-                CRGB oldColor = frameBuffer.at(x, y);
+                CRGB oldColor = frameBufferPtr->at(x, y);
                 uint8_t olddata = (oldColor.r + oldColor.g + oldColor.b) / 3; // Simple brightness extraction
                 uint8_t newdata = scale8(olddata, dataSmoothing) + scale8(data, 256 - dataSmoothing);
                 data = newdata;
@@ -527,7 +529,7 @@ void fillFrameBufferNoise() {
             EaseType lum_ease = getEaseType(luminanceFunction.value());
             color = color.colorBoost(sat_ease, lum_ease);
             
-            frameBuffer.at(x, y) = color;
+            frameBufferPtr->at(x, y) = color;
         }
     }
 }
@@ -556,7 +558,7 @@ void draw(float pos) {
                 if (alpha > 0) { // Only draw if there's some alpha
                     CRGB c = color;
                     c.nscale8(alpha); // Scale the color by the alpha value
-                    frameBuffer.at(wrapped_pos.x, wrapped_pos.y) = c;
+                    frameBufferPtr->at(wrapped_pos.x, wrapped_pos.y) = c;
                 }
             }
         }
@@ -573,7 +575,7 @@ void draw(float pos) {
         
         // Now map the cork screw position to the cylindrical buffer that we
         // will draw.
-        frameBuffer.at(pos_i16.x, pos_i16.y) = color; // Draw a blue pixel at (w, h)
+        frameBufferPtr->at(pos_i16.x, pos_i16.y) = color; // Draw a blue pixel at (w, h)
     }
 }
 
@@ -625,8 +627,8 @@ void fillFrameBufferFire(uint32_t now) {
     // Calculate the current y-offset for animation (makes the fire move)
     uint32_t y_speed = now * fireSpeedY.value();
     
-    int width = frameBuffer.width();
-    int height = frameBuffer.height();
+    int width = frameBufferPtr->width();
+    int height = frameBufferPtr->height();
     
     // Loop through every pixel in our cylindrical matrix
     for (int w = 0; w < width; w++) {
@@ -645,7 +647,7 @@ void fillFrameBufferFire(uint32_t now) {
             
             // Set the pixel in the frame buffer
             // Flip coordinates to make fire rise from bottom
-            frameBuffer.at((width - 1) - w, (height - 1) - h) = color;
+            frameBufferPtr->at((width - 1) - w, (height - 1) - h) = color;
         }
     }
 }
@@ -743,7 +745,7 @@ void drawWave(uint32_t now) {
     
     // Draw the wave effect directly to the frame buffer
     // Create a DrawContext for the wave renderer
-    Fx::DrawContext waveContext(now, frameBuffer.data());
+    Fx::DrawContext waveContext(now, frameBufferPtr->data());
     waveBlend->draw(waveContext);
 }
 
@@ -759,19 +761,22 @@ void drawAnimartrix(uint32_t now) {
     }
     
     // Draw the animartrix effect directly to the frame buffer
-    fxEngine->draw(now, frameBuffer.data());
+    CRGB* dst = corkscrew.rawData();
+    fxEngine->draw(now, dst);
 }
 
 void loop() {
 
     delay(4);
     uint32_t now = millis();
-    clear(frameBuffer);
+    frameBufferPtr->clear();
 
     if (allWhite) {
         CRGB whiteColor = CRGB(8, 8, 8);
-        for (size_t i = 0; i < frameBuffer.size(); ++i) {
-            frameBuffer.data()[i] = whiteColor;
+        for (u32 x = 0; x < frameBufferPtr->width(); x++) {
+            for (u32 y = 0; y < frameBufferPtr->height(); y++) {
+                frameBufferPtr->at(x, y) = whiteColor;
+            }
         }
     }
 
@@ -795,14 +800,13 @@ void loop() {
     }
 
 
-
-    
     // Use the new readFrom workflow:
     // 1. Read directly from the frameBuffer Grid into the corkscrew's internal buffer
     // use_multi_sampling = true will use multi-sampling to sample from the source grid,
     // this will give a little bit better accuracy and the screenmap will be more accurate.
     const bool use_multi_sampling = splatRendering;
-    corkscrew.readFrom(frameBuffer, use_multi_sampling);
+    // corkscrew.readFrom(frameBuffer, use_multi_sampling);
+    corkscrew.draw(use_multi_sampling);
     
     // The corkscrew's buffer is now populated and FastLED will display it directly
     
