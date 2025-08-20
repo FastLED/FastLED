@@ -5,6 +5,15 @@
 #include "fl/int.h"
 #include "fl/stdint.h"
 
+#include "fl/compiler_control.h"
+
+FL_DISABLE_WARNING_PUSH
+FL_DISABLE_WARNING_UNUSED_PARAMETER
+FL_DISABLE_WARNING_RETURN_TYPE
+FL_DISABLE_WARNING_IMPLICIT_INT_CONVERSION
+FL_DISABLE_WARNING_FLOAT_CONVERSION
+FL_DISABLE_WARNING_SIGN_CONVERSION
+
 /// ANSI: signed short _Accum.  8 bits int, 7 bits fraction
 /// @see accum88
 #define saccum87 i16
@@ -278,3 +287,5 @@ void fill_gradient_RGB(CRGB *leds, u16 numLeds, const CRGB &c1,
                        const CRGB &c2, const CRGB &c3, const CRGB &c4);
 
 } // namespace fl
+
+FL_DISABLE_WARNING_POP

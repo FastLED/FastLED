@@ -326,8 +326,8 @@ class FL_ALIGN FixedVector {
 
     void swap(FixedVector<T, N> &other) {
         if (this != &other) {
-            const int max_size = MAX(current_size, other.current_size);
-            for (int i = 0; i < max_size; ++i) {
+            const fl::size max_size = MAX(current_size, other.current_size);
+            for (fl::size i = 0; i < max_size; ++i) {
                 fl::swap(memory()[i], other.memory()[i]);
             }
             // swap the sizes
@@ -521,7 +521,8 @@ class FL_ALIGN HeapVector {
               typename = fl::enable_if_t<!fl::is_integral<InputIt>::value>>
     void assign(InputIt begin, InputIt end) {
         clear();
-        reserve(end - begin);
+        u32 n = static_cast<u32>(end - begin);
+        reserve(n);
         for (InputIt it = begin; it != end; ++it) {
             push_back(*it);
         }

@@ -96,7 +96,7 @@ static inline u32 hash_pair(u32 a, u32 b,
     return fast_hash32(h ^ b);
 }
 
-static inline u64 fast_hash64(u64 x) noexcept {
+static inline u32 fast_hash64(u64 x) noexcept {
     u32 x1 = static_cast<u32>(x & 0x00000000FFFFFFFF);
     u32 x2 = static_cast<u32>(x >> 32);
     return hash_pair(x1, x2);
@@ -186,13 +186,6 @@ template <typename T> struct Hash<fl::WeakPtr<T>> {
     }
 };
 
-#define FASTLED_DEFINE_FAST_HASH(T)                                            \
-    template <> struct Hash<T> {                                               \
-        u32 operator()(const T &key) const noexcept {                   \
-            return fast_hash32(key);                                           \
-        }                                                                      \
-    };
-
 template<> struct Hash<float> {
     u32 operator()(const float &key) const noexcept {
         u32 ikey = fl::bit_cast<u32>(key);
@@ -202,22 +195,62 @@ template<> struct Hash<float> {
 
 template<> struct Hash<double> {
     u32 operator()(const double &key) const noexcept {
-        u64 ikey = fl::bit_cast<u64>(key);
-        /// return fast_hash32(ikey);
-        return fast_hash32(ikey);
+        u64 ukey = fl::bit_cast<u64>(key);
+        return fast_hash64(ukey);
     }
 };
 
+template<> struct Hash<i32> {
+    u32 operator()(const i32 &key) const noexcept {
+        u32 ukey = static_cast<u32>(key);
+        return fast_hash32(ukey);
+    }
+};
 
-FASTLED_DEFINE_FAST_HASH(fl::u8)
-FASTLED_DEFINE_FAST_HASH(u16)
-FASTLED_DEFINE_FAST_HASH(u32)
-FASTLED_DEFINE_FAST_HASH(i8)
-FASTLED_DEFINE_FAST_HASH(i16)
-FASTLED_DEFINE_FAST_HASH(i32)
-FASTLED_DEFINE_FAST_HASH(float)
-FASTLED_DEFINE_FAST_HASH(double)
-FASTLED_DEFINE_FAST_HASH(bool)
+template<> struct Hash<bool> {
+    u32 operator()(const bool &key) const noexcept {
+        return fast_hash32(key);
+    }
+};
+
+template<> struct Hash<fl::u8> {
+    u32 operator()(const fl::u8 &key) const noexcept {
+        return fast_hash32(key);
+    }
+};
+
+template<> struct Hash<u16> {
+    u32 operator()(const u16 &key) const noexcept {
+        return fast_hash32(key);
+    }
+};
+
+template<> struct Hash<u32> {
+    u32 operator()(const u32 &key) const noexcept {
+        return fast_hash32(key);
+    }
+};
+
+template<> struct Hash<i8> {
+    u32 operator()(const i8 &key) const noexcept {
+        u8 v = static_cast<u8>(key);
+        return fast_hash32(v);
+    }
+};
+
+template<> struct Hash<i16> {
+    u32 operator()(const i16 &key) const noexcept {
+        u16 ukey = static_cast<u16>(key);
+        return fast_hash32(ukey);
+    }
+};
+
+// FASTLED_DEFINE_FAST_HASH(fl::u8)
+// FASTLED_DEFINE_FAST_HASH(u16)
+// FASTLED_DEFINE_FAST_HASH(u32)
+// FASTLED_DEFINE_FAST_HASH(i8)
+// FASTLED_DEFINE_FAST_HASH(i16)
+// FASTLED_DEFINE_FAST_HASH(bool)
 
 // FASTLED_DEFINE_FAST_HASH(int)
 

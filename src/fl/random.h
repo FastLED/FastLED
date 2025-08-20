@@ -141,7 +141,7 @@ public:
     /// @param n The upper bound (exclusive)
     /// @returns A random 16-bit number from 0 to n-1
     u16 random16(u16 n) {
-        return (*this)(n);
+        return static_cast<u16>((*this)(n));
     }
 
     /// Generate a 16-bit random number in the range [min, max)
@@ -149,7 +149,7 @@ public:
     /// @param max The upper bound (exclusive)
     /// @returns A random 16-bit number from min to max-1
     u16 random16(u16 min, u16 max) {
-        return (*this)(min, max);
+        return static_cast<u16>((*this)(min, max));
     }
 };
 

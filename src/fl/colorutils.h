@@ -768,7 +768,8 @@ class CRGBPalette16 {
     /// @copydoc CRGBPalette16(TProgmemRGBGradientPalette_bytes)
     CRGBPalette16 &operator=(TProgmemRGBGradientPalette_bytes progpal) {
         TRGBGradientPaletteEntryUnion *progent =
-            (TRGBGradientPaletteEntryUnion *)(progpal);
+            // (TRGBGradientPaletteEntryUnion *)(progpal);
+            fl::bit_cast<TRGBGradientPaletteEntryUnion *>(progpal);
         TRGBGradientPaletteEntryUnion u;
 
         // Count entries
@@ -814,7 +815,8 @@ class CRGBPalette16 {
     CRGBPalette16 &
     loadDynamicGradientPalette(TDynamicRGBGradientPalette_bytes gpal) {
         TRGBGradientPaletteEntryUnion *ent =
-            (TRGBGradientPaletteEntryUnion *)(gpal);
+            // (TRGBGradientPaletteEntryUnion *)(gpal);
+            fl::bit_cast<TRGBGradientPaletteEntryUnion *>(gpal);
         TRGBGradientPaletteEntryUnion u;
 
         // Count entries
@@ -1181,7 +1183,8 @@ class CRGBPalette32 {
     /// @copydoc CRGBPalette32(TProgmemRGBGradientPalette_bytes)
     CRGBPalette32 &operator=(TProgmemRGBGradientPalette_bytes progpal) {
         TRGBGradientPaletteEntryUnion *progent =
-            (TRGBGradientPaletteEntryUnion *)(progpal);
+            //(TRGBGradientPaletteEntryUnion *)(progpal);
+            fl::bit_cast<TRGBGradientPaletteEntryUnion *>(progpal);
         TRGBGradientPaletteEntryUnion u;
 
         // Count entries
@@ -1226,7 +1229,8 @@ class CRGBPalette32 {
     CRGBPalette32 &
     loadDynamicGradientPalette(TDynamicRGBGradientPalette_bytes gpal) {
         TRGBGradientPaletteEntryUnion *ent =
-            (TRGBGradientPaletteEntryUnion *)(gpal);
+            // (TRGBGradientPaletteEntryUnion *)(gpal);
+            fl::bit_cast<TRGBGradientPaletteEntryUnion *>(gpal);
         TRGBGradientPaletteEntryUnion u;
 
         // Count entries
@@ -1440,7 +1444,8 @@ class CRGBPalette256 {
     /// @copydoc CRGBPalette256(TProgmemRGBGradientPalette_bytes)
     CRGBPalette256 &operator=(TProgmemRGBGradientPalette_bytes progpal) {
         TRGBGradientPaletteEntryUnion *progent =
-            (TRGBGradientPaletteEntryUnion *)(progpal);
+            // (TRGBGradientPaletteEntryUnion *)(progpal);
+            fl::bit_cast<TRGBGradientPaletteEntryUnion *>(progpal);
         TRGBGradientPaletteEntryUnion u;
         u.dword = FL_PGM_READ_DWORD_NEAR(progent);
         CRGB rgbstart(u.r, u.g, u.b);
@@ -1463,7 +1468,8 @@ class CRGBPalette256 {
     CRGBPalette256 &
     loadDynamicGradientPalette(TDynamicRGBGradientPalette_bytes gpal) {
         TRGBGradientPaletteEntryUnion *ent =
-            (TRGBGradientPaletteEntryUnion *)(gpal);
+            //(TRGBGradientPaletteEntryUnion *)(gpal);
+            fl::bit_cast<TRGBGradientPaletteEntryUnion *>(gpal);
         TRGBGradientPaletteEntryUnion u;
         u = *ent;
         CRGB rgbstart(u.r, u.g, u.b);

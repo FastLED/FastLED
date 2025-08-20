@@ -153,12 +153,12 @@ Tile2x2_u8_wrap Corkscrew::calculateTileAtWrap(float i) const {
     // This is useful for rendering the corkscrew in a cylindrical way.
     Tile2x2_u8 tile = at_splat_extrapolate(i);
     Tile2x2_u8_wrap::Entry data[2][2];
-    vec2i16 origin = tile.origin();
+    vec2<u16> origin = tile.origin();
     for (fl::u8 x = 0; x < 2; x++) {
         for (fl::u8 y = 0; y < 2; y++) {
             // For each pixel in the tile, map it to the cylinder so that each subcomponent
             // is mapped to the correct position on the cylinder.
-            vec2i16 pos = origin + vec2i16(x, y);
+            vec2<u16> pos = origin + vec2<u16>(x, y);
             // now wrap the x-position
             pos.x = fmodf(pos.x, static_cast<float>(mState.width));
             data[x][y] = {pos, tile.at(x, y)};
@@ -275,6 +275,8 @@ void Corkscrew::readFromMulti(const fl::Grid<CRGB>& source_grid) const {
     
     // Clear buffer first
     const_cast<Corkscrew*>(this)->clearBuffer();
+    const u16 width = static_cast<u16>(source_grid.width());
+    const u16 height = static_cast<u16>(source_grid.height());
     
     // Iterate through each LED in the corkscrew
     for (fl::size led_idx = 0; led_idx < mInput.numLeds; ++led_idx) {
@@ -284,17 +286,17 @@ void Corkscrew::readFromMulti(const fl::Grid<CRGB>& source_grid) const {
         // Accumulate color from the 4 sample points with their weights
         fl::u32 r_accum = 0, g_accum = 0, b_accum = 0;
         fl::u32 total_weight = 0;
-        
+
         // Sample from each of the 4 corners of the tile
         for (fl::u8 x = 0; x < 2; x++) {
             for (fl::u8 y = 0; y < 2; y++) {
                 const auto& entry = tile.at(x, y);
-                vec2i16 pos = entry.first;   // position is the first element of the pair
+                vec2<u16> pos = entry.first;   // position is the first element of the pair
                 fl::u8 weight = entry.second; // weight is the second element of the pair
                 
                 // Bounds check for the source grid
-                if (pos.x >= 0 && pos.x < static_cast<fl::i16>(source_grid.width()) && 
-                    pos.y >= 0 && pos.y < static_cast<fl::i16>(source_grid.height())) {
+                if (pos.x >= 0 && pos.x < width && 
+                    pos.y >= 0 && pos.y < height) {
                     
                     // Sample from the source grid
                     CRGB sample_color = source_grid.at(pos.x, pos.y);

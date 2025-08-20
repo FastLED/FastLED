@@ -21,9 +21,19 @@
 #include "dither_mode.h"
 #include "pixel_iterator.h"
 #include "crgb.h"
+#include "fl/compiler_control.h"
+
+
 
 
 #include "FastLED.h"  // Problematic.
+
+
+FL_DISABLE_WARNING_PUSH
+FL_DISABLE_WARNING(sign-conversion)
+FL_DISABLE_WARNING(implicit-int-conversion)
+FL_DISABLE_WARNING(implicit-float-conversion)
+
 
 FASTLED_NAMESPACE_BEGIN
 
@@ -604,3 +614,6 @@ struct PixelController {
 
 
 FASTLED_NAMESPACE_END
+
+
+FL_DISABLE_WARNING_POP

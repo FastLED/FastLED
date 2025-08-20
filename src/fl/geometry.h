@@ -5,6 +5,13 @@
 #include "fl/compiler_control.h"
 #include "fl/move.h"
 
+#include "fl/compiler_control.h"
+
+FL_DISABLE_WARNING_PUSH
+FL_DISABLE_WARNING(float-conversion)
+FL_DISABLE_WARNING(sign-conversion)
+FL_DISABLE_WARNING(implicit-int-float-conversion)
+
 namespace fl {
 
 template <typename T> struct vec3 {
@@ -467,3 +474,5 @@ template <typename T> struct rect {
 };
 
 } // namespace fl
+
+FL_DISABLE_WARNING_POP

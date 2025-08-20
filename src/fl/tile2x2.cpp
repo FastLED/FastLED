@@ -12,22 +12,22 @@
 namespace fl {
 
 namespace {
-static vec2i16 wrap(const vec2i16 &v, const vec2i16 &size) {
+static vec2<u16> wrap(const vec2<u16> &v, const vec2<u16> &size) {
     // Wrap the vector v around the size
-    return vec2i16(v.x % size.x, v.y % size.y);
+    return vec2<u16>(v.x % size.x, v.y % size.y);
 }
 
-static vec2i16 wrap_x(const vec2i16 &v, const u16 width) {
+static vec2<u16> wrap_x(const vec2<u16> &v, const u16 width) {
     // Wrap the x component of the vector v around the size
-    return vec2i16(v.x % width, v.y);
+    return vec2<u16>(v.x % width, v.y);
 }
 } // namespace
 
 Tile2x2_u8_wrap::Tile2x2_u8_wrap() {
-    mData[0][0] = {vec2i16(0, 0), 0};
-    mData[0][1] = {vec2i16(0, 1), 0};
-    mData[1][0] = {vec2i16(1, 0), 0};
-    mData[1][1] = {vec2i16(1, 1), 0};
+    mData[0][0] = {vec2<u16>(0, 0), 0};
+    mData[0][1] = {vec2<u16>(0, 1), 0};
+    mData[1][0] = {vec2<u16>(1, 0), 0};
+    mData[1][1] = {vec2<u16>(1, 1), 0};
 }
 
 void Tile2x2_u8::Rasterize(const span<const Tile2x2_u8> &tiles,
@@ -54,11 +54,11 @@ void Tile2x2_u8::scale(u8 scale) {
 }
 
 Tile2x2_u8_wrap::Tile2x2_u8_wrap(const Tile2x2_u8 &from, u16 width) {
-    const vec2i16 origin = from.origin();
-    at(0, 0) = {wrap_x(vec2i16(origin.x, origin.y), width), from.at(0, 0)};
-    at(0, 1) = {wrap_x(vec2i16(origin.x, origin.y + 1), width), from.at(0, 1)};
-    at(1, 0) = {wrap_x(vec2i16(origin.x + 1, origin.y), width), from.at(1, 0)};
-    at(1, 1) = {wrap_x(vec2i16(origin.x + 1, origin.y + 1), width),
+    const vec2<u16> origin = from.origin();
+    at(0, 0) = {wrap_x(vec2<u16>(origin.x, origin.y), width), from.at(0, 0)};
+    at(0, 1) = {wrap_x(vec2<u16>(origin.x, origin.y + 1), width), from.at(0, 1)};
+    at(1, 0) = {wrap_x(vec2<u16>(origin.x + 1, origin.y), width), from.at(1, 0)};
+    at(1, 1) = {wrap_x(vec2<u16>(origin.x + 1, origin.y + 1), width),
                 from.at(1, 1)};
 }
 
@@ -87,15 +87,15 @@ const Tile2x2_u8_wrap::Entry &Tile2x2_u8_wrap::at(u16 x, u16 y) const {
 
 Tile2x2_u8_wrap::Tile2x2_u8_wrap(const Tile2x2_u8 &from, u16 width,
                                  u16 height) {
-    const vec2i16 origin = from.origin();
-    at(0, 0) = {wrap(vec2i16(origin.x, origin.y), vec2i16(width, height)),
+    const vec2<u16> origin = from.origin();
+    at(0, 0) = {wrap(vec2<u16>(origin.x, origin.y), vec2<u16>(width, height)),
                 from.at(0, 0)};
-    at(0, 1) = {wrap(vec2i16(origin.x, origin.y + 1), vec2i16(width, height)),
+    at(0, 1) = {wrap(vec2<u16>(origin.x, origin.y + 1), vec2<u16>(width, height)),
                 from.at(0, 1)};
-    at(1, 0) = {wrap(vec2i16(origin.x + 1, origin.y), vec2i16(width, height)),
+    at(1, 0) = {wrap(vec2<u16>(origin.x + 1, origin.y), vec2<u16>(width, height)),
                 from.at(1, 0)};
     at(1,
-       1) = {wrap(vec2i16(origin.x + 1, origin.y + 1), vec2i16(width, height)),
+       1) = {wrap(vec2<u16>(origin.x + 1, origin.y + 1), vec2<u16>(width, height)),
              from.at(1, 1)};
 }
 
@@ -118,10 +118,10 @@ Tile2x2_u8 Tile2x2_u8::MaxTile(const Tile2x2_u8 &a, const Tile2x2_u8 &b) {
     return result;
 }
 
-rect<i16> Tile2x2_u8::bounds() const {
-    vec2<i16> min = mOrigin;
-    vec2<i16> max = mOrigin + vec2<i16>(2, 2);
-    return rect<i16>(min, max);
+rect<u16> Tile2x2_u8::bounds() const {
+    vec2<u16> min = mOrigin;
+    vec2<u16> max = mOrigin + vec2<u16>(2, 2);
+    return rect<u16>(min, max);
 }
 
 fl::vector_fixed<Tile2x2_u8_wrap, 2> Tile2x2_u8_wrap::Interpolate(const Tile2x2_u8_wrap& a, const Tile2x2_u8_wrap& b, float t) {
@@ -148,7 +148,7 @@ fl::vector_fixed<Tile2x2_u8_wrap, 2> Tile2x2_u8_wrap::Interpolate(const Tile2x2_
             
             // For now, assume positions are the same or close enough
             // Use position from 'a' as the base
-            vec2i16 pos = data_a.first;
+            vec2<u16> pos = data_a.first;
             
             // Simple linear interpolation for alpha values
             u8 alpha_a = data_a.second;

@@ -12,21 +12,25 @@ template <typename T> inline T fl_abs(T value) {
     return value < 0 ? -value : value;
 }
 
+FL_DISABLE_WARNING_PUSH
+FL_DISABLE_WARNING(sign-compare)
+FL_DISABLE_WARNING(float-conversion)
+FL_DISABLE_WARNING(sign-conversion)
+FL_DISABLE_WARNING(implicit-int-conversion)
+FL_DISABLE_WARNING(implicit-float-conversion)
+
+
 // Template functions for MIN and MAX to avoid statement repetition
 // Returns the most promotable type between the two arguments
 template <typename T, typename U> inline common_type_t<T, U> fl_min(T a, U b) {
-    FL_DISABLE_WARNING_PUSH
-    FL_DISABLE_WARNING(sign-compare)
     return (a < b) ? a : b;
-    FL_DISABLE_WARNING_POP
 }
 
 template <typename T, typename U> inline common_type_t<T, U> fl_max(T a, U b) {
-    FL_DISABLE_WARNING_PUSH
-    FL_DISABLE_WARNING(sign-compare)
     return (a > b) ? a : b;
-    FL_DISABLE_WARNING_POP
 }
+
+FL_DISABLE_WARNING_POP
 } // namespace fl
 
 #ifndef MAX

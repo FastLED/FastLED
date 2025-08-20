@@ -98,7 +98,7 @@ if has_projenv and projenv is not None:
     print("Projenv state dumped to: " + projenv_dump_path)
 
 # Read cache configuration from environment variables
-cache_type = os.environ.get("FASTLED_CACHE_TYPE", "sccache")
+cache_type = os.environ.get("FASTLED_CACHE_TYPE", "no_cache")
 cache_executable = os.environ.get("FASTLED_CACHE_EXECUTABLE", "")
 sccache_path = os.environ.get("FASTLED_SCCACHE_PATH", "")
 sccache_dir = os.environ.get("FASTLED_SCCACHE_DIR", "")

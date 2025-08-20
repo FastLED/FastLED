@@ -162,7 +162,7 @@ void loop() {
         for (int dx = 0; dx < 2; ++dx) {
             for (int dy = 0; dy < 2; ++dy) {
                 auto data = pos_tile.at(dx, dy);
-                vec2i16 wrapped_pos = data.first; // Already wrapped position
+                vec2<u16> wrapped_pos = data.first; // Already wrapped position
                 uint8_t alpha = data.second;      // Alpha value
 
                 if (alpha > 0) { // Only draw if there's some alpha
@@ -175,7 +175,7 @@ void loop() {
     } else {
         // None splat rendering, looks aweful.
         vec2f pos_vec2f = corkscrew.at_no_wrap(pos);
-        vec2i16 pos_i16 = vec2i16(round(pos_vec2f.x), round(pos_vec2f.y));
+        vec2<u16> pos_i16 = vec2<u16>(round(pos_vec2f.x), round(pos_vec2f.y));
         // Now map the cork screw position to the cylindrical buffer that we
         // will draw.
         frameBuffer.at(pos_i16.x, pos_i16.y) =

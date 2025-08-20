@@ -63,7 +63,7 @@ class SoundLevelMeter {
     /// @param spl_floor  The SPL (dB SPL) that corresponds to your true
     /// noise-floor.
     /// @param smoothing_alpha  [0…1] how quickly to adapt floor; 0=instant min.
-    SoundLevelMeter(double spl_floor = 33.0f, double smoothing_alpha = 0.0);
+    SoundLevelMeter(double spl_floor = 33.0, double smoothing_alpha = 0.0);
 
     /// Process a block of int16 PCM samples.
     void processBlock(const fl::i16 *samples, fl::size count);
@@ -129,7 +129,7 @@ class AudioSampleImpl {
         if (n < 2) {
             return 0.f;
         }
-        return float(mZeroCrossings) / (n - 1);
+        return float(mZeroCrossings) / static_cast<float>(n - 1);
     }
 
   private:

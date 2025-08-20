@@ -26,7 +26,7 @@ struct XYDrawComposited {
         : mColor(fl::move(other.mColor)), mXYMap(fl::move(other.mXYMap)), mOut(other.mOut) {}
     XYDrawComposited &operator=(XYDrawComposited &&other) noexcept = delete;
     
-    void draw(const vec2<fl::i16> &pt, fl::u32 index, fl::u8 value);
+    void draw(const vec2<fl::u16> &pt, fl::u32 index, fl::u8 value);
     const CRGB mColor;
     const XYMap mXYMap;
     CRGB *mOut;
@@ -44,7 +44,7 @@ struct XYDrawGradient {
         : mGradient(fl::move(other.mGradient)), mXYMap(fl::move(other.mXYMap)), mOut(other.mOut) {}
     XYDrawGradient &operator=(XYDrawGradient &&other) noexcept = delete;
     
-    void draw(const vec2<fl::i16> &pt, fl::u32 index, fl::u8 value);
+    void draw(const vec2<fl::u16> &pt, fl::u32 index, fl::u8 value);
     const Gradient mGradient;
     const XYMap mXYMap;
     CRGB *mOut;
@@ -54,7 +54,7 @@ inline XYDrawComposited::XYDrawComposited(const CRGB &color, const XYMap &xymap,
                                           CRGB *out)
     : mColor(color), mXYMap(xymap), mOut(out) {}
 
-inline void XYDrawComposited::draw(const vec2<fl::i16> &pt, fl::u32 index,
+inline void XYDrawComposited::draw(const vec2<fl::u16> &pt, fl::u32 index,
                                    fl::u8 value) {
     FASTLED_UNUSED(pt);
     CRGB &c = mOut[index];
@@ -67,7 +67,7 @@ inline XYDrawGradient::XYDrawGradient(const Gradient &gradient,
                                       const XYMap &xymap, CRGB *out)
     : mGradient(gradient), mXYMap(xymap), mOut(out) {}
 
-inline void XYDrawGradient::draw(const vec2<fl::i16> &pt, fl::u32 index,
+inline void XYDrawGradient::draw(const vec2<fl::u16> &pt, fl::u32 index,
                                  fl::u8 value) {
     FASTLED_UNUSED(pt);
     CRGB c = mGradient.colorAt(value);

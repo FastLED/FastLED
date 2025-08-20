@@ -339,7 +339,7 @@ string &string::append(const Tile2x2_u8_wrap &tile) {
 
     append("Tile2x2_u8_wrap(");
     for (int i = 0; i < 4; i++) {
-        vec2i16 pos = data[i].first;
+        vec2<u16> pos = data[i].first;
         u8 alpha = data[i].second;
         append("(");
         append(pos.x);

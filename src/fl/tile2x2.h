@@ -26,14 +26,14 @@ class Tile2x2_u8 {
                           XYRasterU8Sparse *output);
 
     Tile2x2_u8() = default;
-    Tile2x2_u8(const vec2<i16> &origin) : mOrigin(origin) {}
+    Tile2x2_u8(const vec2<u16> &origin) : mOrigin(origin) {}
     Tile2x2_u8(const Tile2x2_u8 &) = default;
     Tile2x2_u8 &operator=(const Tile2x2_u8 &) = default;
     Tile2x2_u8(Tile2x2_u8 &&) = default;
 
     void scale(u8 scale);
 
-    void setOrigin(i16 x, i16 y) { mOrigin = vec2<i16>(x, y); }
+    void setOrigin(u16 x, u16 y) { mOrigin = vec2<u16>(x, y); }
 
     u8 &operator()(int x, int y) { return at(x, y); }
     u8 &at(int x, int y) { return mTile[y][x]; }
@@ -53,10 +53,10 @@ class Tile2x2_u8 {
 
     static Tile2x2_u8 MaxTile(const Tile2x2_u8 &a, const Tile2x2_u8 &b);
 
-    vec2<i16> origin() const { return mOrigin; }
+    vec2<u16> origin() const { return mOrigin; }
 
     /// bounds => [begin_x, end_x) (where end_x is exclusive)
-    rect<i16> bounds() const;
+    rect<u16> bounds() const;
 
     // Draws the subpixel tile to the led array.
     void draw(const CRGB &color, const XYMap &xymap, CRGB *out) const;
@@ -96,7 +96,7 @@ class Tile2x2_u8 {
   private:
     u8 mTile[2][2] = {};
     // Subpixels can be rendered outside the viewport so this must be signed.
-    vec2<i16> mOrigin;
+    vec2<u16> mOrigin;
 };
 
 class Tile2x2_u8_wrap {
@@ -105,7 +105,7 @@ class Tile2x2_u8_wrap {
     // the width of the cylinder and the y-coordinate wraps around the height.
     // This converts a tile2x2 to a wrapped x,y version.
   public:
-    using Entry = fl::pair<vec2i16, u8>;  // absolute position, alpha
+    using Entry = fl::pair<vec2<u16>, u8>;  // absolute position, alpha
     using Data = Entry[2][2];
 
     Tile2x2_u8_wrap();

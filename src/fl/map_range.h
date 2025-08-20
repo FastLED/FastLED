@@ -12,6 +12,11 @@
 FL_DISABLE_WARNING_PUSH
 FL_DISABLE_WARNING(float-equal)
 FL_DISABLE_WARNING(double-promotion)
+FL_DISABLE_WARNING(float-conversion)
+FL_DISABLE_WARNING(sign-conversion)
+FL_DISABLE_WARNING(implicit-int-conversion)
+FL_DISABLE_WARNING(implicit-float-conversion)
+
 
 namespace fl {
 

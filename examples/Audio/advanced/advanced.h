@@ -14,6 +14,17 @@
 #include "fl/math.h"
 #include "fl/math_macros.h"
 
+#include "fl/compiler_control.h"
+
+// This is used by fastled because we have extremely strict compiler settings.
+// Stock Arduino/Platformio does not need these.
+FL_DISABLE_WARNING_PUSH
+FL_DISABLE_WARNING(float-conversion)
+FL_DISABLE_WARNING(sign-conversion)
+FL_DISABLE_WARNING(implicit-float-conversion)
+FL_DISABLE_WARNING(implicit-int-float-conversion)
+
+
 using namespace fl;
 
 // Display configuration
@@ -66,7 +77,7 @@ UIAudio audio("Audio Input");
 // Global variables
 CRGB leds[NUM_LEDS];
 XYMap xyMap(WIDTH, HEIGHT, false);
-SoundLevelMeter soundMeter(0.0f, 0.0f);
+SoundLevelMeter soundMeter(0.0, 0.0);
 
 // Audio processing variables - keep these smaller for WebAssembly
 static const int NUM_BANDS = 16;  // Reduced from 32
@@ -84,8 +95,8 @@ float peakLevel = 0;
 uint8_t hue = 0;
 // Remove large static arrays for WebAssembly
 #ifndef __EMSCRIPTEN__
-float plasma[WIDTH][HEIGHT];
-uint8_t fireBuffer[WIDTH][HEIGHT] = {0};
+float plasma[WIDTH][HEIGHT] = {{0}};
+uint8_t fireBuffer[WIDTH][HEIGHT] = {{0}};
 #endif
 
 // Get current color palette
@@ -229,8 +240,8 @@ void drawRadialSpectrum(FFTBins* fft, float /* peak */) {
         int radius = magnitude * (MIN(WIDTH, HEIGHT) / 2);
         
         for (int r = 0; r < radius; r++) {
-            int x = centerX + (r * cos(angle * PI / 180.0f));
-            int y = centerY + (r * sin(angle * PI / 180.0f));
+            int x = centerX + (r * cosf(angle * PI / 180.0f));
+            int y = centerY + (r * sinf(angle * PI / 180.0f));
             
             if (x >= 0 && x < WIDTH && y >= 0 && y < HEIGHT) {
                 uint8_t colorIndex = fl::map_range<int, uint8_t>(r, 0, radius, 255, 0);
@@ -259,7 +270,7 @@ void drawWaveform(const Slice<const int16_t>& pcm, float /* peak */) {
         float sample = float(pcm[sampleIndex]) / 32768.0f;  // Normalize to -1.0 to 1.0
         
         // Apply logarithmic scaling to prevent saturation
-        float absSample = fabs(sample);
+        float absSample = fabsf(sample);
         float logAmplitude = 0.0f;
         
         if (absSample > 0.001f) {  // Avoid log(0)
@@ -416,10 +427,10 @@ void drawPlasmaWave(float peak) {
     
     for (int x = 0; x < WIDTH; x++) {
         for (int y = 0; y < HEIGHT; y++) {
-            float value = sin(x * 0.1f + time) + 
-                         sin(y * 0.1f - time) +
-                         sin((x + y) * 0.1f + time) +
-                         sin(sqrt(x * x + y * y) * 0.1f - time);
+            float value = sinf(x * 0.1f + time) + 
+                         sinf(y * 0.1f - time) +
+                         sinf((x + y) * 0.1f + time) +
+                         sinf(sqrtf(x * x + y * y) * 0.1f - time);
             
             value = (value + 4) / 8;  // Normalize to 0-1
             value *= audioGain.value() * autoGainValue;
@@ -480,7 +491,7 @@ void loop() {
         // Calculate peak
         int32_t maxSample = 0;
         for (size_t i = 0; i < sample.pcm().size(); i++) {
-            int32_t absSample = abs(sample.pcm()[i]);
+            int32_t absSample = fabsf(sample.pcm()[i]);
             if (absSample > maxSample) {
                 maxSample = absSample;
             }
@@ -549,3 +560,5 @@ void loop() {
     delay(1);
     #endif
 }
+
+FL_DISABLE_WARNING_POP

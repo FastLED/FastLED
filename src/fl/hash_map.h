@@ -26,6 +26,11 @@ and removals.
 #include "fl/compiler_control.h"
 #include "fl/math_macros.h"
 
+#include "fl/compiler_control.h"
+
+FL_DISABLE_WARNING_PUSH
+FL_DISABLE_WARNING(shorten-64-to-32)
+
 namespace fl {
 
 // // begin using declarations for stl compatibility
@@ -716,3 +721,5 @@ using unordered_map = HashMap<Key, T, Hash, KeyEqual>;
 // end using declarations for stl compatibility
 
 } // namespace fl
+
+FL_DISABLE_WARNING_POP

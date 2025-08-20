@@ -123,12 +123,19 @@ def parse_args(args: Optional[list[str]] = None) -> argparse.Namespace:
         "-v", "--verbose", action="store_true", help="Enable verbose output"
     )
     parser.add_argument(
-        "--no-cache", action="store_true", help="Disable sccache for faster compilation"
+        "--no-cache",
+        action="store_true",
+        help="Disable sccache for faster compilation (default is already disabled)",
+    )
+    parser.add_argument(
+        "--enable-cache",
+        action="store_true",
+        help="Enable sccache for faster compilation",
     )
     parser.add_argument(
         "--cache",
         action="store_true",
-        help="(Deprecated) Enable sccache for faster compilation",
+        help="(Deprecated) Enable sccache for faster compilation - use --enable-cache instead",
     )
     parser.add_argument(
         "--supported-boards",
@@ -385,7 +392,7 @@ def main() -> int:
             examples=examples,
             defines=defines,
             verbose=args.verbose,
-            enable_cache=not args.no_cache,
+            enable_cache=(args.enable_cache or args.cache) and not args.no_cache,
         )
 
         if not result.ok:
