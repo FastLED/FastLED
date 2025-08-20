@@ -23,7 +23,7 @@
 
 
 #if FASTLED_USE_ADAFRUIT_NEOPIXEL && !__has_include("Adafruit_NeoPixel.h")
-#error "Adafruit_NeoPixel.h not found, disabling FastLED_USE_ADAFRUIT_NEOPIXEL"
+#error "Adafruit_NeoPixel.h not found, disabling FASTLED_USE_ADAFRUIT_NEOPIXEL"
 #define FASTLED_USE_ADAFRUIT_NEOPIXEL 0
 #endif
 
