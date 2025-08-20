@@ -9,6 +9,7 @@
 /// 4. When the compiler is done a web page will open.
 
 #include <Arduino.h>
+#include <FastLED.h>
 
 
 #include "fl/json.h"
@@ -18,9 +19,9 @@
 #include "fl/screenmap.h"
 #include "fl/slice.h"
 #include "fl/ui.h"
-#include "FastLED.h"
+
 #include "sensors/pir.h"
-#include "timer.h"
+#include "./simple_timer.h"
 #include "fl/sstream.h"
 #include "fl/assert.h"
 
