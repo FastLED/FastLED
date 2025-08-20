@@ -39,34 +39,27 @@
 
 namespace fl {  
 
-/// Generic template driver for Adafruit-like clockless controllers
+/// WS2812 controller using Adafruit_NeoPixel as the underlying driver
 /// 
-/// This template provides the core functionality for any Adafruit_NeoPixel-based
-/// clockless controller. It handles the common patterns of initialization,
-/// pixel conversion, and output while allowing for customization through
-/// template parameters and virtual methods.
+/// This controller provides WS2812/NeoPixel support through the Adafruit_NeoPixel
+/// library, leveraging its platform-specific optimizations and proven reliability.
+/// Supports RGB color order conversion and handles initialization, pixel conversion,
+/// and output automatically.
 ///
 /// @tparam DATA_PIN the data pin for the LED strip
-/// @tparam T1 timing parameter (ignored, for template compatibility)
-/// @tparam T2 timing parameter (ignored, for template compatibility) 
-/// @tparam T3 timing parameter (ignored, for template compatibility)
 /// @tparam RGB_ORDER the RGB ordering for the LEDs (affects input processing, output to Adafruit is always RGB)
-/// @tparam XTRA0 extra parameter (ignored, for template compatibility)
-/// @tparam FLIP flip parameter (ignored, for template compatibility)
-/// @tparam WAIT_TIME wait time parameter (ignored, for template compatibility)
-template <int DATA_PIN, int T1, int T2, int T3, EOrder RGB_ORDER = GRB, 
-          int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 0>
-class AdafruitLikeClocklessT : public CPixelLEDController<RGB_ORDER> {
+template <int DATA_PIN, EOrder RGB_ORDER = GRB>
+class AdafruitWS2812Controller : public CPixelLEDController<RGB_ORDER> {
 private:
     fl::unique_ptr<Adafruit_NeoPixel> mNeoPixel;
     bool mInitialized;
 
 public:
     /// Constructor - creates uninitialized controller
-    AdafruitLikeClocklessT() : mNeoPixel(nullptr), mInitialized(false) {}
+    AdafruitWS2812Controller() : mNeoPixel(nullptr), mInitialized(false) {}
     
     /// Destructor - automatic cleanup via unique_ptr
-    virtual ~AdafruitLikeClocklessT() = default;
+    virtual ~AdafruitWS2812Controller() = default;
 
     /// Initialize the controller
     /// Creates the Adafruit_NeoPixel instance with RGB color order
@@ -181,23 +174,14 @@ protected:
 
 /// WS2812/NeoPixel clockless controller using Adafruit_NeoPixel library as the underlying driver
 /// 
-/// This controller follows the standard FastLED clockless controller template signature
-/// and provides duck typing compatibility with other FastLED clockless controllers.
-/// The timing parameters (T1, T2, T3) are ignored since Adafruit_NeoPixel handles
-/// timing internally with platform-specific optimizations.
+/// This controller provides a simple interface for WS2812/NeoPixel LEDs using the proven
+/// Adafruit_NeoPixel library for platform-specific optimizations.
 ///
 /// @tparam DATA_PIN the data pin for the LED strip
-/// @tparam T1 timing parameter (ignored, for template compatibility)
-/// @tparam T2 timing parameter (ignored, for template compatibility) 
-/// @tparam T3 timing parameter (ignored, for template compatibility)
 /// @tparam RGB_ORDER the RGB ordering for the LEDs (affects input processing, output to Adafruit is always RGB)
-/// @tparam XTRA0 extra parameter (ignored, for template compatibility)
-/// @tparam FLIP flip parameter (ignored, for template compatibility)
-/// @tparam WAIT_TIME wait time parameter (ignored, for template compatibility)
 /// @see https://github.com/adafruit/Adafruit_NeoPixel
-template <int DATA_PIN, int T1, int T2, int T3, EOrder RGB_ORDER = GRB, 
-          int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 0>
-class ClocklessController : public AdafruitLikeClocklessT<DATA_PIN, T1, T2, T3, RGB_ORDER, XTRA0, FLIP, WAIT_TIME> {
+template <int DATA_PIN, EOrder RGB_ORDER = GRB>
+class ClocklessController : public AdafruitWS2812Controller<DATA_PIN, RGB_ORDER> {
 public:
     /// Constructor - creates uninitialized controller
     ClocklessController() = default;
@@ -205,7 +189,7 @@ public:
     /// Destructor - automatic cleanup via base class
     ~ClocklessController() = default;
 
-    // The base class AdafruitLikeClocklessT provides all the default functionality
+    // The base class AdafruitWS2812Controller provides all the default functionality
     // This class can be extended to add WS2812-specific customizations if needed
 };
 
