@@ -1079,7 +1079,7 @@ class WS2812Controller800Khz:
 #elif FASTLED_USE_ADAFRUIT_NEOPIXEL
 #include "platforms/adafruit/clockless.h"
 template <fl::u8 DATA_PIN, EOrder RGB_ORDER = GRB>
-class WS2812Controller800Khz : public fl::ClocklessController<DATA_PIN, RGB_ORDER> {};
+class WS2812Controller800Khz : public fl::AdafruitWS2812Controller<DATA_PIN, RGB_ORDER> {};
 #else
 // WS2812 - 250ns, 625ns, 375ns
 template <fl::u8 DATA_PIN, EOrder RGB_ORDER = GRB>

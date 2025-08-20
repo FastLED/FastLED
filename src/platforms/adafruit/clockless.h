@@ -12,23 +12,6 @@
 /// - Adafruit_NeoPixel library must be included before FastLED
 /// - The controller is only available when Adafruit_NeoPixel.h is detected
 
-#ifndef FASTLED_USE_ADAFRUIT_NEOPIXEL
-#ifdef FASTLED_DOXYGEN
-#define FASTLED_USE_ADAFRUIT_NEOPIXEL 1
-#else
-#define FASTLED_USE_ADAFRUIT_NEOPIXEL 0
-#endif
-#endif
-
-
-
-#if FASTLED_USE_ADAFRUIT_NEOPIXEL && !__has_include("Adafruit_NeoPixel.h")
-#error "Adafruit_NeoPixel.h not found, disabling FASTLED_USE_ADAFRUIT_NEOPIXEL"
-#define FASTLED_USE_ADAFRUIT_NEOPIXEL 0
-#endif
-
-#if FASTLED_USE_ADAFRUIT_NEOPIXEL
-
 
 #include "fl/memory.h"
 #include "fl/unique_ptr.h"
@@ -66,16 +49,16 @@ public:
 /// @tparam RGB_ORDER the RGB ordering for the LEDs (affects input processing, output is always RGB)
 /// @see https://github.com/adafruit/Adafruit_NeoPixel
 template <int DATA_PIN, EOrder RGB_ORDER = GRB>
-class ClocklessController : public CPixelLEDController<RGB_ORDER> {
+class AdafruitWS2812Controller : public CPixelLEDController<RGB_ORDER> {
 private:
     fl::unique_ptr<IAdafruitNeoPixelDriver> mDriver;
 
 public:
     /// Constructor - creates uninitialized controller
-    ClocklessController(){}
+    AdafruitWS2812Controller(){}
     
     /// Destructor - automatic cleanup
-    virtual ~ClocklessController() = default;
+    virtual ~AdafruitWS2812Controller() = default;
 
     /// Initialize the controller
     virtual void init() override {
@@ -106,5 +89,3 @@ protected:
 
 
 } // namespace fl
-
-#endif  // FASTLED_USE_ADAFRUIT_NEOPIXEL
