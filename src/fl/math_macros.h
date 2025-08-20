@@ -14,10 +14,10 @@ template <typename T> inline T fl_abs(T value) {
 
 FL_DISABLE_WARNING_PUSH
 FL_DISABLE_WARNING(sign-compare)
-FL_DISABLE_WARNING(float-conversion)
-FL_DISABLE_WARNING(sign-conversion)
+FL_DISABLE_WARNING_FLOAT_CONVERSION
+FL_DISABLE_WARNING_SIGN_CONVERSION
 FL_DISABLE_WARNING_IMPLICIT_INT_CONVERSION
-FL_DISABLE_WARNING(implicit-float-conversion)
+FL_DISABLE_WARNING_FLOAT_CONVERSION
 
 
 // Template functions for MIN and MAX to avoid statement repetition

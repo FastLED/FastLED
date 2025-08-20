@@ -29,7 +29,7 @@ and removals.
 #include "fl/compiler_control.h"
 
 FL_DISABLE_WARNING_PUSH
-FL_DISABLE_WARNING(shorten-64-to-32)
+FL_DISABLE_WARNING_SHORTEN_64_TO_32
 
 namespace fl {
 

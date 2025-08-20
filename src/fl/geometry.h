@@ -8,9 +8,9 @@
 #include "fl/compiler_control.h"
 
 FL_DISABLE_WARNING_PUSH
-FL_DISABLE_WARNING(float-conversion)
-FL_DISABLE_WARNING(sign-conversion)
-FL_DISABLE_WARNING(implicit-int-float-conversion)
+FL_DISABLE_WARNING_FLOAT_CONVERSION
+FL_DISABLE_WARNING_SIGN_CONVERSION
+FL_DISABLE_WARNING_IMPLICIT_INT_CONVERSION
 
 namespace fl {
 
