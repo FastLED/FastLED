@@ -204,8 +204,8 @@ TEST_CASE("TestCorkscrewBufferFunctionality") {
     
     // First, copy the source grid to the corkscrew's surface, then draw
     auto& corkscrew_surface = corkscrew.surface();
-    for (int y = 0; y < height; ++y) {
-        for (int x = 0; x < width; ++x) {
+    for (u32 y = 0; y < height; ++y) {
+        for (u32 x = 0; x < width; ++x) {
             if (x < corkscrew_surface.width() && y < corkscrew_surface.height()) {
                 corkscrew_surface(x, y) = source_grid(x, y);
             }
@@ -257,8 +257,8 @@ TEST_CASE("Corkscrew readFrom with bilinear interpolation") {
     
     // Copy source to corkscrew surface and draw
     auto& corkscrew_surface2 = corkscrew.surface();
-    for (int y = 0; y < height; ++y) {
-        for (int x = 0; x < width; ++x) {
+    for (u32 y = 0; y < height; ++y) {
+        for (u32 x = 0; x < width; ++x) {
             if (x < corkscrew_surface2.width() && y < corkscrew_surface2.height()) {
                 corkscrew_surface2(x, y) = source_grid(x, y);
             }
@@ -536,7 +536,7 @@ TEST_CASE("Corkscrew gap test with 3 LEDs") {
     FL_WARN("LED1 unwrapped pos: (" << pos1_unwrap.x << "," << pos1_unwrap.y << ")");
     FL_WARN("LED2 unwrapped pos: (" << pos2_unwrap.x << "," << pos2_unwrap.y << ")");
     
-    FL_WARN("Calculated width: " << output_gap.width);
+    FL_WARN("Calculated width: " << corkscrew_gap.cylinderWidth());
     
     // Verify the corrected gap calculation produces expected results:
     // - LED0: unwrapped (0,0), wrapped (0,0)

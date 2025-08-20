@@ -31,7 +31,7 @@
 
 FL_DISABLE_WARNING_PUSH
 FL_DISABLE_WARNING(sign-conversion)
-FL_DISABLE_WARNING(implicit-int-conversion)
+FL_DISABLE_WARNING_IMPLICIT_INT_CONVERSION
 FL_DISABLE_WARNING(implicit-float-conversion)
 
 

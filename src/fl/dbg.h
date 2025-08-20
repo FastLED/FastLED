@@ -39,7 +39,7 @@ inline const char *fastled_file_offset(const char *file) {
 }
 } // namespace fl
 
-#if __EMSCRIPTEN__ || !defined(RELEASE)
+#if __EMSCRIPTEN__ || !defined(RELEASE) || defined(FASTLED_TESTING)
 #define FASTLED_FORCE_DBG 1
 #endif
 

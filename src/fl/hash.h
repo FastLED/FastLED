@@ -160,10 +160,7 @@ template <typename T> struct Hash<vec2<T>> {
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
 #endif
-        T packed[2];
-        fl::memfill(packed, 0, sizeof(packed));
-        packed[0] = key.x;
-        packed[1] = key.y; // Protect against alignment issues
+        T packed[2] = {key.x, key.y};
         const void *p = &packed[0];
         return MurmurHash3_x86_32(p, sizeof(packed));
 #ifndef __clang__
@@ -187,28 +184,27 @@ template <typename T> struct Hash<fl::WeakPtr<T>> {
 };
 
 template<> struct Hash<float> {
-    u32 operator()(const float &key) const noexcept {
+    u32 operator()(const float key) const noexcept {
         u32 ikey = fl::bit_cast<u32>(key);
         return fast_hash32(ikey);
     }
 };
 
 template<> struct Hash<double> {
-    u32 operator()(const double &key) const noexcept {
-        u64 ukey = fl::bit_cast<u64>(key);
-        return fast_hash64(ukey);
+    u32 operator()(const double& key) const noexcept {
+        return MurmurHash3_x86_32(&key, sizeof(double));
     }
 };
 
 template<> struct Hash<i32> {
-    u32 operator()(const i32 &key) const noexcept {
+    u32 operator()(const i32 key) const noexcept {
         u32 ukey = static_cast<u32>(key);
         return fast_hash32(ukey);
     }
 };
 
 template<> struct Hash<bool> {
-    u32 operator()(const bool &key) const noexcept {
+    u32 operator()(const bool key) const noexcept {
         return fast_hash32(key);
     }
 };
