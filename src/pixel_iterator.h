@@ -18,6 +18,9 @@ namespace fl {
 #define FASTLED_PIXEL_ITERATOR_HAS_APA102_HD 0
 #endif
 
+// Due to to the template nature of the PixelController class, the only we can make
+// it a concrete polymorphic class is to manually bind the functions and make our own
+// vtable. The PixelControllerVtable is cheaper than doing fl::functions.
 template<typename PixelControllerT>
 struct PixelControllerVtable {
   static void loadAndScaleRGBW(void* pixel_controller, Rgbw rgbw, uint8_t* b0_out, uint8_t* b1_out, uint8_t* b2_out, uint8_t* b3_out) {
