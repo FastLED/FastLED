@@ -582,7 +582,7 @@ struct PixelController {
         };
         EOrderW w_placement = rgbw.w_placement;
         // Apply w-component insertion.
-        rgbw_partial_reorder(
+        fl::rgbw_partial_reorder(
             w_placement, out[0], out[1], out[2],
             0, // Pre-ordered RGB data with a 0 white component.
             b0_out, b1_out, b2_out, b3_out);
@@ -593,7 +593,7 @@ struct PixelController {
         // Get the naive RGB data order in r,g,b order.
         CRGB rgb(mData[0], mData[1], mData[2]);
         uint8_t w = 0;
-        rgb_2_rgbw(rgbw.rgbw_mode,
+        fl::rgb_2_rgbw(rgbw.rgbw_mode,
                    rgbw.white_color_temp,
                    rgb.r, rgb.g, rgb.b,  // Input colors
                    mColorAdjustment.premixed.r, mColorAdjustment.premixed.g, mColorAdjustment.premixed.b,  // How these colors are scaled for color balance.
