@@ -7,10 +7,6 @@ Migrate the CRGB class and related color types from global namespace to `fl` nam
 
 ### Files to Review
 - `src/crgb.h` - Main CRGB class definition
-- `src/chsv.h` - CHSV class (HSV color representation)
-- `src/color.h` - Base color utilities
-- `src/pixeltypes.h` - Pixel type definitions
-- `src/colorutils.h` - Color utility functions
 
 ### Dependencies to Map
 - CRGB class methods and operators
@@ -23,6 +19,7 @@ Migrate the CRGB class and related color types from global namespace to `fl` nam
 
 ### Phase 1: Create Canonical fl Namespace Version
 1. **Create `src/fl/crgb.h`**
+   - use `cp` to copy the contents of `src/crgb.h` into `src/fl/crgb.h`
    - Move core CRGB class definition to fl namespace
    - Include all operators (+, -, *, /, etc.)
    - Include all color constants (Red, Green, Blue, etc.)

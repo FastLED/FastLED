@@ -43,7 +43,7 @@ protected:
     // Prepares data for the draw.
     virtual void showPixels(PixelController<RGB_ORDER> &pixels) override
     {
-        PixelIterator iterator = pixels.as_iterator(this->getRgbw());
+        fl::PixelIterator iterator = pixels.as_iterator(this->getRgbw());
         mRMTController.loadPixelData(iterator);
     }
 
