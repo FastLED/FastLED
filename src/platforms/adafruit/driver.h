@@ -1,15 +1,16 @@
 
 #include "fl/unique_ptr.h"
-
-class PixelIterator;
+#include "pixel_iterator.h"
 
 namespace fl {
+
+class PixelIterator;
 
 /// Interface for Adafruit NeoPixel driver - implementation in clockless.cpp
 class IAdafruitNeoPixelDriver {
 public:
     /// Static factory method to create driver implementation
-    static fl::unique_ptr<IAdafruitNeoPixelDriver> create();
+    static unique_ptr<IAdafruitNeoPixelDriver> create();
 
     virtual ~IAdafruitNeoPixelDriver() = default;
     

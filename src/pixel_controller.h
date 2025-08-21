@@ -24,8 +24,6 @@
 #include "fl/compiler_control.h"
 
 
-
-
 #include "FastLED.h"  // Problematic.
 
 
@@ -97,8 +95,8 @@ struct PixelController {
         kMask = MASK
     };
 
-    FASTLED_FORCE_INLINE PixelIterator as_iterator(const Rgbw& rgbw) {
-        return PixelIterator(this, rgbw);
+    FASTLED_FORCE_INLINE fl::PixelIterator as_iterator(const Rgbw& rgbw) {
+        return fl::PixelIterator(this, rgbw);
     }
 
     void disableColorAdjustment() {
@@ -601,7 +599,7 @@ struct PixelController {
                    mColorAdjustment.premixed.r, mColorAdjustment.premixed.g, mColorAdjustment.premixed.b,  // How these colors are scaled for color balance.
                    &rgb.r, &rgb.g, &rgb.b, &w);
         // Now finish the ordering so that the output is in the native led order for all of RGBW.
-        rgbw_partial_reorder(
+        fl::rgbw_partial_reorder(
             rgbw.w_placement,
             rgb.raw[b0_index],  // in-place re-ordering for the RGB data.
             rgb.raw[b1_index],

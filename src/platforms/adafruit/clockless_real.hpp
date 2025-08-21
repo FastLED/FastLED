@@ -17,7 +17,7 @@ namespace fl {
 // Concrete implementation of IAdafruitNeoPixelDriver
 class AdafruitNeoPixelDriverImpl : public IAdafruitNeoPixelDriver {
 private:
-    fl::unique_ptr<Adafruit_NeoPixel> mNeoPixel;
+    unique_ptr<Adafruit_NeoPixel> mNeoPixel;
     bool mInitialized;
     int mDataPin;
     
@@ -87,7 +87,7 @@ public:
 
 // Static factory method implementation
 fl::unique_ptr<IAdafruitNeoPixelDriver> IAdafruitNeoPixelDriver::create() {
-    return fl::unique_ptr<IAdafruitNeoPixelDriver>(new AdafruitNeoPixelDriverImpl());
+    return fl::make_unique<AdafruitNeoPixelDriverImpl>();
 }
 
 } // namespace fl
