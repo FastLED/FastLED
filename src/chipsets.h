@@ -792,11 +792,13 @@ class LPD1886Controller1250Khz : public FASTLED_CLOCKLESS_CONTROLLER<DATA_PIN, 2
 template <fl::u8 DATA_PIN, EOrder RGB_ORDER = RGB>
 class LPD1886Controller1250Khz_8bit : public FASTLED_CLOCKLESS_CONTROLLER<DATA_PIN, 2 * FMUL, 3 * FMUL, 2 * FMUL, RGB_ORDER> {};
 
+#if !FASTLED_WS2812_HAS_SPECIAL_DRIVER
 /// WS2812 controller class @ 800 KHz.
 /// @tparam DATA_PIN the data pin for these LEDs
 /// @tparam RGB_ORDER the RGB ordering for these LEDs
 template <fl::u8 DATA_PIN, EOrder RGB_ORDER = GRB>
 class WS2812Controller800Khz : public FASTLED_CLOCKLESS_CONTROLLER<DATA_PIN, 2 * FMUL, 5 * FMUL, 3 * FMUL, RGB_ORDER> {};
+#endif
 
 /// WS2815 controller class @ 400 KHz.
 /// @copydetails WS2812Controller800Khz
