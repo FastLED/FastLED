@@ -14,31 +14,20 @@ FASTLED_NAMESPACE_BEGIN
 
 class SpiResourceManager {
 private:
-    struct SpiHostInfo {
-        spi_host_device_t spi_host;
-        bool used_by_fastled;
-        bool bus_initialized_by_us;
-    };
-    
+    // Just track the preferred order of SPI hosts to try
 #if SOC_SPI_PERIPH_NUM > 2
     static constexpr int MAX_SPI_HOSTS = 3;
+    static constexpr spi_host_device_t SPI_HOST_ORDER[MAX_SPI_HOSTS] = {SPI2_HOST, SPI3_HOST, SPI1_HOST};
 #else
     static constexpr int MAX_SPI_HOSTS = 2;
+    static constexpr spi_host_device_t SPI_HOST_ORDER[MAX_SPI_HOSTS] = {SPI2_HOST, SPI1_HOST};
 #endif
-    SpiHostInfo mSpiHosts[MAX_SPI_HOSTS];
+    
     SemaphoreHandle_t mMutex;
     static const char* TAG;
     
     SpiResourceManager() {
         mMutex = xSemaphoreCreateMutex();
-        // Initialize SPI host info array in order of preference
-        mSpiHosts[0] = {SPI2_HOST, false, false};
-#if SOC_SPI_PERIPH_NUM > 2
-        mSpiHosts[1] = {SPI3_HOST, false, false};
-        mSpiHosts[2] = {SPI1_HOST, false, false};
-#else
-        mSpiHosts[1] = {SPI1_HOST, false, false};
-#endif
     }
     
     ~SpiResourceManager() {
@@ -63,21 +52,40 @@ public:
             return false;
         }
         
-        // Check if already used by FastLED
-        for (int i = 0; i < MAX_SPI_HOSTS; i++) {
-            if (mSpiHosts[i].spi_host == spi_host && mSpiHosts[i].used_by_fastled) {
-                ESP_LOGD(TAG, "SPI host %d already in use by FastLED", spi_host);
-                xSemaphoreGive(mMutex);
-                return false;
-            }
+        // Test if SPI bus is available by attempting to initialize it
+        // This will fail with ESP_ERR_INVALID_STATE if already in use
+        spi_bus_config_t bus_config = {
+            .mosi_io_num = -1,  // Will be set when actually used
+            .miso_io_num = -1,
+            .sclk_io_num = -1,
+            .quadwp_io_num = -1,
+            .quadhd_io_num = -1,
+            .max_transfer_sz = 0,
+            .flags = 0,
+            .intr_flags = 0
+        };
+        
+        esp_err_t init_result = spi_bus_initialize(spi_host, &bus_config, SPI_DMA_DISABLED);
+        bool available = false;
+        
+        if (init_result == ESP_OK) {
+            // Bus was not in use, we successfully initialized it
+            // Now free it immediately since we were just testing
+            spi_bus_free(spi_host);
+            available = true;
+            ESP_LOGD(TAG, "SPI host %d is available", spi_host);
+        } else if (init_result == ESP_ERR_INVALID_STATE) {
+            // Bus is already in use
+            ESP_LOGD(TAG, "SPI host %d already in use", spi_host);
+            available = false;
+        } else {
+            // Some other error occurred
+            ESP_LOGW(TAG, "SPI host %d test failed: %s", spi_host, esp_err_to_name(init_result));
+            available = false;
         }
         
-        // In Arduino ESP32, we'll assume the host is available if not used by FastLED
-        // The actual availability will be tested when trying to create the LED strip
-        ESP_LOGD(TAG, "SPI host %d availability check: available (FastLED tracking)", spi_host);
-        
         xSemaphoreGive(mMutex);
-        return true;
+        return available;
     }
     
     esp_err_t getNextAvailableSpiHost(int pin, uint32_t led_count, bool with_dma, 
@@ -93,20 +101,14 @@ public:
         
         esp_err_t result = ESP_ERR_NOT_FOUND;
         
+        // Try each SPI host in order of preference
         for (int i = 0; i < MAX_SPI_HOSTS; i++) {
-            spi_host_device_t spi_host = mSpiHosts[i].spi_host;
+            spi_host_device_t spi_host = SPI_HOST_ORDER[i];
             
-            // Skip if already used by FastLED
-            if (mSpiHosts[i].used_by_fastled) {
-                ESP_LOGD(TAG, "SPI host %d already in use by FastLED, skipping", spi_host);
-                continue;
-            }
-            
-            // In Arduino ESP32, we'll test availability by trying to create the LED strip directly
+            ESP_LOGD(TAG, "Testing SPI host %d for availability", spi_host);
             
             // Try to create LED strip with this SPI host
-            ESP_LOGD(TAG, "Attempting to use SPI host %d for LED strip", spi_host);
-            
+            // The led_strip_new_spi_device will handle SPI bus initialization internally
             led_strip_config_t strip_config = {
                 .strip_gpio_num = pin,
                 .max_leds = led_count,
@@ -130,9 +132,7 @@ public:
             esp_err_t strip_result = led_strip_new_spi_device(&strip_config, &spi_config, &led_strip);
             
             if (strip_result == ESP_OK) {
-                // Success! Mark as used and return
-                mSpiHosts[i].used_by_fastled = true;
-                mSpiHosts[i].bus_initialized_by_us = true;
+                // Success! Return the working SPI host and strip
                 *out_spi_host = spi_host;
                 *out_strip = led_strip;
                 result = ESP_OK;
@@ -158,18 +158,9 @@ public:
             return;
         }
         
-        for (int i = 0; i < MAX_SPI_HOSTS; i++) {
-            if (mSpiHosts[i].spi_host == spi_host) {
-                if (mSpiHosts[i].used_by_fastled) {
-                    mSpiHosts[i].used_by_fastled = false;
-                    mSpiHosts[i].bus_initialized_by_us = false;
-                    ESP_LOGD(TAG, "Released SPI host %d", spi_host);
-                } else {
-                    ESP_LOGW(TAG, "Attempted to release SPI host %d that was not marked as used", spi_host);
-                }
-                break;
-            }
-        }
+        // No internal state to track - the ESP32 SPI driver handles resource management
+        // This function is kept for API compatibility but doesn't need to do anything
+        ESP_LOGD(TAG, "Released SPI host %d (handled by ESP32 SPI driver)", spi_host);
         
         xSemaphoreGive(mMutex);
     }
