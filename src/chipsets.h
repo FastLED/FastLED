@@ -36,10 +36,9 @@
  #endif  // FASTLED_TEENSY4
 #endif  // FASTLED_CLOCKLESS_USES_NANOSECONDS
 
-
-#ifdef __IMXRT1062__
-#include "platforms/arm/k20/clockless_objectfled.h"
-#endif
+// So many platforms have specialized WS2812 controllers. Why? Because they
+// are the cheapest chipsets use. So we special case this.
+#include "platforms/chipsets_specialized_ws2812.h"
 
 /// @file chipsets.h
 /// Contains the bulk of the definitions for the various LED chipsets supported.
@@ -1054,34 +1053,8 @@ class WS2813Controller : public FASTLED_CLOCKLESS_CONTROLLER<DATA_PIN, C_NS_WS28
 #endif
 
 
-#if defined(__IMXRT1062__) && !defined(FASTLED_NOT_USES_OBJECTFLED)
-#if defined(FASTLED_USES_OBJECTFLED)
-#warning "FASTLED_USES_OBJECTFLED is now implicit for Teensy 4.0/4.1 for WS2812 and is no longer needed."
-#endif
-template <fl::u8 DATA_PIN, EOrder RGB_ORDER = GRB>
-class WS2812Controller800Khz:
-	public fl::ClocklessController_ObjectFLED_WS2812<
-		DATA_PIN,
-		RGB_ORDER> {
- public:
-    typedef fl::ClocklessController_ObjectFLED_WS2812<DATA_PIN, RGB_ORDER> Base;
-	WS2812Controller800Khz(): Base(FASTLED_OVERCLOCK) {}
-};
-#elif defined(FASTLED_USES_ESP32S3_I2S)
-#include "platforms/esp/32/clockless_i2s_esp32s3.h"
-#include "fl/int.h"
-template <fl::u8 DATA_PIN, EOrder RGB_ORDER = GRB>
-class WS2812Controller800Khz:
-	public fl::ClocklessController_I2S_Esp32_WS2812<
-		DATA_PIN,
-		RGB_ORDER
-	> {};
-#elif defined(FASTLED_USE_ADAFRUIT_NEOPIXEL)
-#include "platforms/adafruit/clockless.h"
-template <fl::u8 DATA_PIN, EOrder RGB_ORDER = GRB>
-class WS2812Controller800Khz : public fl::AdafruitWS2812Controller<DATA_PIN, RGB_ORDER> {};
-#else
-// WS2812 - 250ns, 625ns, 375ns
+
+#if !FASTLED_WS2812_HAS_SPECIAL_DRIVER
 template <fl::u8 DATA_PIN, EOrder RGB_ORDER = GRB>
 class WS2812Controller800Khz : public FASTLED_CLOCKLESS_CONTROLLER<
 	DATA_PIN,
@@ -1089,8 +1062,7 @@ class WS2812Controller800Khz : public FASTLED_CLOCKLESS_CONTROLLER<
 	C_NS_WS2812(FASTLED_WS2812_T2),
 	C_NS_WS2812(FASTLED_WS2812_T3),
 	RGB_ORDER> {};
-#endif  // defined(FASTLED_USES_OBJECTFLED)
-
+#endif
 
 // WS2811@400khz - 800ns, 800ns, 900ns
 template <fl::u8 DATA_PIN, EOrder RGB_ORDER = GRB>

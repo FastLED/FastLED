@@ -2,9 +2,6 @@
 /// Defines color channel ordering enumerations
 
 #pragma once
-#include "fl/namespace.h"
-
-FASTLED_NAMESPACE_BEGIN
 
 /// RGB color channel orderings, used when instantiating controllers to determine
 /// what order the controller should send data out in. The default ordering
@@ -29,5 +26,10 @@ enum EOrderW {
 	WDefault = W3
 };
 
-FASTLED_NAMESPACE_END
+namespace fl {
 
+// Import global enums into fl namespace using type aliases
+using EOrder = ::EOrder;
+using EOrderW = ::EOrderW;
+
+}

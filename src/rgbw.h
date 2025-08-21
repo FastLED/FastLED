@@ -5,12 +5,10 @@
 
 #include "fl/stdint.h"
 
-#include "fl/force_inline.h"
-#include "fl/namespace.h"
 #include "eorder.h"
+#include "fl/force_inline.h"
 
-FASTLED_NAMESPACE_BEGIN
-
+namespace fl {
 
 enum RGBW_MODE {
     kRGBWInvalid,
@@ -26,23 +24,23 @@ enum {
 };
 
 struct Rgbw {
-    explicit Rgbw(uint16_t white_color_temp = kRGBWDefaultColorTemp,
-                  RGBW_MODE rgbw_mode = kRGBWExactColors,
-                  EOrderW _w_placement = WDefault)
+    explicit Rgbw(uint16_t white_color_temp = fl::kRGBWDefaultColorTemp,
+                  fl::RGBW_MODE rgbw_mode = fl::kRGBWExactColors,
+                  fl::EOrderW _w_placement = WDefault)
         : white_color_temp(white_color_temp), w_placement(_w_placement),
           rgbw_mode(rgbw_mode) {}
     uint16_t white_color_temp = kRGBWDefaultColorTemp;
-    EOrderW w_placement = WDefault;
+    fl::EOrderW w_placement = WDefault;
     RGBW_MODE rgbw_mode = kRGBWExactColors;
     FASTLED_FORCE_INLINE bool active() const {
         return rgbw_mode != kRGBWInvalid;
     }
 
     static uint32_t size_as_rgb(uint32_t num_of_rgbw_pixels) {
-        // The ObjectFLED controller expects the raw pixel byte data in multiples of 3.
-        // In the case of src data not a multiple of 3, then we need to
-        // add pad bytes so that the delegate controller doesn't walk off the end
-        // of the array and invoke a buffer overflow panic.
+        // The ObjectFLED controller expects the raw pixel byte data in
+        // multiples of 3. In the case of src data not a multiple of 3, then we
+        // need to add pad bytes so that the delegate controller doesn't walk
+        // off the end of the array and invoke a buffer overflow panic.
         num_of_rgbw_pixels = (num_of_rgbw_pixels * 4 + 2) / 3;
         uint32_t extra = num_of_rgbw_pixels % 3 ? 1 : 0;
         num_of_rgbw_pixels += extra;
@@ -147,10 +145,10 @@ void set_rgb_2_rgbw_function(rgb_2_rgbw_function func);
 /// @brief   Converts RGB to RGBW using one of the functions.
 /// @details Dynamic version of the rgb_w_rgbw function with less chance for
 ///          the compiler to optimize.
-FASTLED_FORCE_INLINE void rgb_2_rgbw(
-    RGBW_MODE mode, uint16_t w_color_temperature, uint8_t r, uint8_t g,
-    uint8_t b, uint8_t r_scale, uint8_t g_scale, uint8_t b_scale,
-    uint8_t *out_r, uint8_t *out_g, uint8_t *out_b, uint8_t *out_w) {
+FASTLED_FORCE_INLINE void
+rgb_2_rgbw(RGBW_MODE mode, uint16_t w_color_temperature, uint8_t r, uint8_t g,
+           uint8_t b, uint8_t r_scale, uint8_t g_scale, uint8_t b_scale,
+           uint8_t *out_r, uint8_t *out_g, uint8_t *out_b, uint8_t *out_w) {
     switch (mode) {
     case kRGBWInvalid:
     case kRGBWNullWhitePixel:
@@ -196,9 +194,43 @@ rgb_2_rgbw(uint16_t w_color_temperature, uint8_t r, uint8_t g, uint8_t b,
 // and out_b0-out_b3 are the output RGBW in native LED chipset order.
 // w is the white component that needs to be inserted into the RGB data at
 // the correct position.
-void rgbw_partial_reorder(EOrderW w_placement, uint8_t b0, uint8_t b1,
+void rgbw_partial_reorder(fl::EOrderW w_placement, uint8_t b0, uint8_t b1,
                           uint8_t b2, uint8_t w, uint8_t *out_b0,
                           uint8_t *out_b1, uint8_t *out_b2, uint8_t *out_b3);
 
+} // namespace fl
 
-FASTLED_NAMESPACE_END
+using Rgbw = fl::Rgbw;
+using RgbwInvalid = fl::RgbwInvalid;
+using RgbwDefault = fl::RgbwDefault;
+using RgbwWhiteIsOff = fl::RgbwWhiteIsOff;
+using RGBW_MODE = fl::RGBW_MODE;
+
+enum {
+    kRGBWDefaultColorTemp = fl::kRGBWDefaultColorTemp,
+};
+
+constexpr RGBW_MODE kRGBWInvalid = fl::kRGBWInvalid;
+constexpr RGBW_MODE kRGBWNullWhitePixel = fl::kRGBWNullWhitePixel;
+constexpr RGBW_MODE kRGBWExactColors = fl::kRGBWExactColors;
+constexpr RGBW_MODE kRGBWBoostedWhite = fl::kRGBWBoostedWhite;
+constexpr RGBW_MODE kRGBWMaxBrightness = fl::kRGBWMaxBrightness;
+constexpr RGBW_MODE kRGBWUserFunction = fl::kRGBWUserFunction;
+
+
+template <fl::RGBW_MODE MODE>
+void rgb_2_rgbw(uint16_t w_color_temperature, uint8_t r, uint8_t g, uint8_t b,
+                uint8_t r_scale, uint8_t g_scale, uint8_t b_scale,
+                uint8_t *out_r, uint8_t *out_g, uint8_t *out_b,
+                uint8_t *out_w) {
+    fl::rgb_2_rgbw(MODE, w_color_temperature, r, g, b, r_scale, g_scale,
+                   b_scale, out_r, out_g, out_b, out_w);
+}
+
+inline void rgbw_partial_reorder(fl::EOrderW w_placement, uint8_t b0,
+                                 uint8_t b1, uint8_t b2, uint8_t w,
+                                 uint8_t *out_b0, uint8_t *out_b1,
+                                 uint8_t *out_b2, uint8_t *out_b3) {
+    fl::rgbw_partial_reorder(w_placement, b0, b1, b2, w, out_b0, out_b1, out_b2,
+                             out_b3);
+}

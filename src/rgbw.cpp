@@ -9,7 +9,8 @@
 #include "rgbw.h"
 
 
-FASTLED_NAMESPACE_BEGIN
+namespace fl {
+
 
 namespace {
 inline uint8_t min3(uint8_t a, uint8_t b, uint8_t c) {
@@ -162,4 +163,4 @@ void rgbw_partial_reorder(EOrderW w_placement, uint8_t b0, uint8_t b1,
     *out_b3 = out[3];
 }
 
-FASTLED_NAMESPACE_END
+} // namespace fl

@@ -19,10 +19,9 @@
 #include "pixel_controller.h"
 #include "platforms/adafruit/driver.h"
 
-class PixelIterator;
 
 namespace fl {
-
+class PixelIterator;
 
 /// WS2812/NeoPixel clockless controller using Adafruit_NeoPixel library as the underlying driver
 /// 
@@ -37,7 +36,7 @@ namespace fl {
 template <int DATA_PIN, EOrder RGB_ORDER = GRB>
 class AdafruitWS2812Controller : public CPixelLEDController<RGB_ORDER> {
 private:
-    fl::unique_ptr<IAdafruitNeoPixelDriver> mDriver;
+    fl::unique_ptr<fl::IAdafruitNeoPixelDriver> mDriver;
 
 public:
     /// Constructor - creates uninitialized controller
@@ -57,7 +56,7 @@ public:
     virtual void showPixels(PixelController<RGB_ORDER> &pixels) override {
         // Initialize driver if needed
         if (!mDriver) {
-            mDriver = IAdafruitNeoPixelDriver::create();
+            mDriver = fl::IAdafruitNeoPixelDriver::create();
             mDriver->init(DATA_PIN);
         }        
         // Convert to PixelIterator and send to driver
@@ -67,11 +66,8 @@ public:
 
 protected:
     /// Get the driver instance (for derived classes)
-    IAdafruitNeoPixelDriver& getDriver() {
+    fl::IAdafruitNeoPixelDriver& getDriver() {
         return *mDriver;
     }
 };
-
-
-
-} // namespace fl
+}  // namespace fl

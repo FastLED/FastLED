@@ -527,7 +527,7 @@ def compile_unit_tests_python_api(
     from .clang_compiler import Compiler, LinkOptions
 
     print("=" * 60)
-    print("COMPILING UNIT TESTS WITH PYTHON API (8x faster than CMake)")
+    print("COMPILING UNIT TESTS WITH PYTHON API")
     print("=" * 60)
 
     if clean:

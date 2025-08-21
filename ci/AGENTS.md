@@ -3,7 +3,7 @@
 ## 🔧 Python Build System
 
 ### Core Architecture
-FastLED uses a high-performance Python-based build system (8x faster than CMake):
+FastLED uses a high-performance Python-based build system:
 
 **Key Components:**
 - `ci/compiler/clang_compiler.py` - Core compiler with PCH and fingerprint cache
