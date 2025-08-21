@@ -4,14 +4,14 @@
 #pragma once
 
 #include "fl/stdint.h"
-#include <string.h>
+#include "fl/string.h"
 
-#include "fl/namespace.h"
+
 #include "rgbw.h"
 
 #include "crgb.h"
 
-FASTLED_NAMESPACE_BEGIN
+namespace fl {
 
 #ifndef FASTLED_PIXEL_ITERATOR_HAS_APA102_HD
 // Takes more memory, so disable by default.
@@ -184,16 +184,7 @@ class PixelIterator {
     #endif
 };
 
-FASTLED_NAMESPACE_END
+}  // namespace
 
-// Compatibility with namespace fl
-#if !FASTLED_IS_USING_NAMESPACE
-namespace fl {
-    //using PixelIterator = ::PixelIterator;
-    class PixelIterator : public ::PixelIterator {
-      public:
-      template<typename PixelControllerT>
-      PixelIterator(PixelControllerT* pc, Rgbw rgbw): ::PixelIterator(pc, rgbw) {}
-    };
-}
-#endif
+
+using PixelIterator = fl::PixelIterator;
