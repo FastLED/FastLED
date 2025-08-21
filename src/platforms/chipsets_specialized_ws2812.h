@@ -17,7 +17,7 @@
 #warning "FASTLED_USES_OBJECTFLED is now implicit for Teensy 4.0/4.1 for WS2812 and is no longer needed."
 #endif
 #include "platforms/arm/k20/clockless_objectfled.h"
-template <fl::u8 DATA_PIN, EOrder RGB_ORDER = GRB>
+template <fl::u8 DATA_PIN, EOrder RGB_ORDER = fl::GRB>
 class WS2812Controller800Khz:
 	public fl::ClocklessController_ObjectFLED_WS2812<
 		DATA_PIN,
@@ -29,7 +29,7 @@ class WS2812Controller800Khz:
 #define FASTLED_WS2812_HAS_SPECIAL_DRIVER 1
 #elif defined(FASTLED_USES_ESP32S3_I2S)
 #include "platforms/esp/32/clockless_i2s_esp32s3.h"
-template <fl::u8 DATA_PIN, EOrder RGB_ORDER = GRB>
+template <fl::u8 DATA_PIN, EOrder RGB_ORDER = fl::GRB>
 class WS2812Controller800Khz:
 	public fl::ClocklessController_I2S_Esp32_WS2812<
 		DATA_PIN,
@@ -38,7 +38,7 @@ class WS2812Controller800Khz:
 #define FASTLED_WS2812_HAS_SPECIAL_DRIVER 1
 #elif defined(FASTLED_USE_ADAFRUIT_NEOPIXEL)
 #include "platforms/adafruit/clockless.h"
-template <fl::u8 DATA_PIN, EOrder RGB_ORDER = GRB>
+template <fl::u8 DATA_PIN, EOrder RGB_ORDER = fl::GRB>
 class WS2812Controller800Khz : public fl::AdafruitWS2812Controller<DATA_PIN, RGB_ORDER> {};
 #define FASTLED_WS2812_HAS_SPECIAL_DRIVER 1
 #else
