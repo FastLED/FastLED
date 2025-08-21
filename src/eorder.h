@@ -3,33 +3,22 @@
 
 #pragma once
 
-/// RGB color channel orderings, used when instantiating controllers to determine
-/// what order the controller should send data out in. The default ordering
-/// is RGB.
-/// Within this enum, the red channel is 0, the green channel is 1, and the
-/// blue chanel is 2.
-enum EOrder {
-	RGB=0012,  ///< Red,   Green, Blue  (0012)
-	RBG=0021,  ///< Red,   Blue,  Green (0021)
-	GRB=0102,  ///< Green, Red,   Blue  (0102)
-	GBR=0120,  ///< Green, Blue,  Red   (0120)
-	BRG=0201,  ///< Blue,  Red,   Green (0201)
-	BGR=0210   ///< Blue,  Green, Red   (0210)
-};
+#include "fl/eorder.h"
 
-// After EOrder is applied this is where W is inserted for RGBW.
-enum EOrderW {
-	W3 = 0x3,  ///< White is fourth
-	W2 = 0x2,  ///< White is third
-	W1 = 0x1,  ///< White is second
-	W0 = 0x0,   ///< White is first
-	WDefault = W3
-};
+// Global aliases for backward compatibility
+using EOrder = fl::EOrder;
+using EOrderW = fl::EOrderW;
 
-namespace fl {
+// Bring enum values into global scope
+using fl::RGB;
+using fl::RBG;
+using fl::GRB;
+using fl::GBR;
+using fl::BRG;
+using fl::BGR;
 
-// Import global enums into fl namespace using type aliases
-using EOrder = ::EOrder;
-using EOrderW = ::EOrderW;
-
-}
+using fl::W3;
+using fl::W2;
+using fl::W1;
+using fl::W0;
+using fl::WDefault;

@@ -12,7 +12,8 @@
       "Bash(./test --examples)",
       "Bash(bash test:*)",
       "Bash(bash compile bluepill Blink)",
-      "Bash(./compile:*)"
+      "Bash(./compile:*)",
+      "Bash(rm:*)"
     ],
     "deny": []
   }
