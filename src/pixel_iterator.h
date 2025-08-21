@@ -190,7 +190,7 @@ FASTLED_NAMESPACE_END
 #if !FASTLED_IS_USING_NAMESPACE
 namespace fl {
     //using PixelIterator = ::PixelIterator;
-    class PixelIterator : ::PixelIterator {
+    class PixelIterator : public ::PixelIterator {
       public:
       template<typename PixelControllerT>
       PixelIterator(PixelControllerT* pc, Rgbw rgbw): ::PixelIterator(pc, rgbw) {}
