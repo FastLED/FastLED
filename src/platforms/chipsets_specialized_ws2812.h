@@ -11,6 +11,10 @@
 #include "fl/int.h"
 #include "eorder.h"
 
+#ifndef FASTLED_OVERCLOCK
+#error "This needs to be included by chipsets.h when FASTLED_OVERCLOCK is defined"
+#endif
+
 
 #if defined(__IMXRT1062__) && !defined(FASTLED_NOT_USES_OBJECTFLED)
 #if defined(FASTLED_USES_OBJECTFLED)

@@ -36,6 +36,24 @@
  #endif  // FASTLED_TEENSY4
 #endif  // FASTLED_CLOCKLESS_USES_NANOSECONDS
 
+
+// Allow overclocking of the clockless family of leds. 1.2 would be
+// 20% overclocking. In tests WS2812 can be overclocked at 20%, but
+// various manufacturers may be different.  This is a global value
+// which is overridable by each supported chipset.
+#ifdef FASTLED_LED_OVERCLOCK
+#warning "FASTLED_LED_OVERCLOCK has been changed to FASTLED_OVERCLOCK. Please update your code."
+#define FASTLED_OVERCLOCK FASTLED_LED_OVERCLOCK
+#endif
+
+#ifndef FASTLED_OVERCLOCK
+#define FASTLED_OVERCLOCK 1.0
+#else
+#ifndef FASTLED_OVERCLOCK_SUPPRESS_WARNING
+#warning "FASTLED_OVERCLOCK is now active, #define FASTLED_OVERCLOCK_SUPPRESS_WARNING to disable this warning"
+#endif
+#endif
+
 // So many platforms have specialized WS2812 controllers. Why? Because they
 // are the cheapest chipsets use. So we special case this.
 #include "platforms/chipsets_specialized_ws2812.h"
@@ -907,22 +925,7 @@ class SM16824EController : public FASTLED_CLOCKLESS_CONTROLLER<DATA_PIN, 3 * FMU
 
 #else
 
-// Allow overclocking of the clockless family of leds. 1.2 would be
-// 20% overclocking. In tests WS2812 can be overclocked at 20%, but
-// various manufacturers may be different.  This is a global value
-// which is overridable by each supported chipset.
-#ifdef FASTLED_LED_OVERCLOCK
-#warning "FASTLED_LED_OVERCLOCK has been changed to FASTLED_OVERCLOCK. Please update your code."
-#define FASTLED_OVERCLOCK FASTLED_LED_OVERCLOCK
-#endif
 
-#ifndef FASTLED_OVERCLOCK
-#define FASTLED_OVERCLOCK 1.0
-#else
-#ifndef FASTLED_OVERCLOCK_SUPPRESS_WARNING
-#warning "FASTLED_OVERCLOCK is now active, #define FASTLED_OVERCLOCK_SUPPRESS_WARNING to disable this warning"
-#endif
-#endif
 
 // WS2812 can be overclocked pretty aggressively, however, there are
 // some excellent articles that you should read about WS2812 overclocking
