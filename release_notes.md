@@ -1,4 +1,4 @@
-FastLED 3.10.3
+FastLED 3.10.2
 ==============
   * CORKSCREW MAPPING!
     * Want to create a light saber or festival stick? Before your options were to have vertical strips.
@@ -42,8 +42,12 @@ FastLED 3.10.3
       * `-DFASTLED_HSV_CONVERSION_RAINBOW`
       * `-DFASTLED_HSV_CONVERSION_SPECTRUM`
       * `-FASTLED_HSV_CONVERSION_FULL_SPECTRUM`
-  * CRGB::toVideoRGB_8bit()
-    * This is an alternative to gamma correction that preserves the hue but boosts the saturation, use it with WS2812 and other RGB8 controllers.
+  * [fl/fetch.h](src/fl/fetch.h)
+    * A non blocking http fetch library returning an [fl/promise.h](src/fl/promise.h)
+    * You can then await the promise with `fl::await` or install a callback to be invoked. The latter is recommended.
+  * [fl/json.h](src/fl/json.h) rewrite
+    * Much more ergonic library. Fast parsing for packed arrays of number
+    * The underlying ArduinoJson library is only ergonomic if you allow `std:string` and `std::sstream`, which is missing on platforms like avr. So we had to write our own api to handle this.
   * Platforms
     * ESP32-C5 is now supported.
     * ESP32 WS2812 SPI driver has a fix for it's async draw routine.
