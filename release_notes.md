@@ -1,36 +1,39 @@
-FastLED 3.10.2
+FastLED 3.10.3
 ==============
-  * TODO
-    * ObjectFLED -> Disable by default (go back to the standard driver)
-  * ESP32-C5 is now supported.
-  * Blend2d will now replace a subfx XYMap (when necessary) to prevent double mapping. A warning will be issued.
-  * Seeed XIAO nRF52840 Sense: Fixed incorrect pin mappings that were copied from Adafruit Feather board
-  * **APA102HD Gamma Correction Algorithm**: Completely rewritten with closed-form mathematical solution
-    * Thanks https://github.com/gwgill!
-    * Graph of the old algorithms quantization issues can be see here:
-      * https://www.argyllcms.com/APA102_loglog.svg
-  * STM32F1 pin mapping fixes (blue pill)
-    * https://github.com/FastLED/FastLED/pull/1973
-    * Thanks https://github.com/vishwamartur!
+  * CORKSCREW MAPPING!
+    * Want to create a light saber or festival stick? Before your options were to have vertical strips.
+    * Now you can use a corkscrew mapping [fl/corkscrew.h](src/fl/corkscrew.h), see [examples/FestivalStick](examples/FestivalStick/)
+      * You input the number of LEDS + number of turns.
+      * Corkscrew will provide a surface XY grid that you draw too.
+        * then call Corkscrew::draw(), and the current surface will be mapped to the corkscrew.
+        * Rendering is done via 2x2 bilinear sampling. Looks great!
+  * Animartrix - 30% faster due to forced `-O3` and `fastmath` compiler settings for this one file.
+  * Ease Functions - lots and lots of ease functions! Great for animations!
+    * see [fl/ease.h](src/fl/ease.h) and the demo [examples/Ease/Ease.ino](examples/Ease/Ease.ino)
+    * Fast! Everything is done in integer space.
   * 3D Perlin noise (`inoise8(x, y, z)`) range utilization improved from 72.9% to 88.6%
     * Significantly better quality for volumetric LED effects (3D fire, clouds, particles)
     * Uses industry-standard 12 edge vectors of a cube for optimal gradient coverage
-  * New high-resolution noise functions: `inoise8_hires(x)`, `inoise8_hires(x, y)`, `inoise8_hires(x, y, z)`
-    * Uses 16-bit precision internally, returns 8-bit values for drop-in replacement
-    * Alternative noise patterns with different coordinate scaling characteristics
-    * FxNoiseRing example updated to demonstrate usage
-  * **Adafruit_NeoPixel Integration**: Optional Adafruit_NeoPixel clockless controller support
-    * Enable with `#define FASTLED_USE_ADAFRUIT_NEOPIXEL 1` before including FastLED
-    * Provides modular `AdafruitLikeClocklessT` template driver for extensibility
-    * Leverages Adafruit_NeoPixel's proven platform-specific optimizations within FastLED ecosystem
-    * Drop-in replacement for standard FastLED clockless controllers with identical template signature
-    * Requires Adafruit_NeoPixel library to be included before FastLED
-    * Useful for environments where Adafruit_NeoPixel provides better platform compatibility
+  * **Adafruit NeoPixel Bridge**: Optional Adafruit_NeoPixel clockless controller support
+    * For some platforms Adafruits NeoPixel just works better.
+    * Enable with `#define FASTLED_USE_ADAFRUIT_NEOPIXEL` before including FastLED
+    * Now your WS2812 chipset will use the AdafruitNeopixel library (if installed)
   * New LED chipset: SM16824E
     * 3-Wire
     * See also: https://github.com/FastLED/FastLED/issues/1941#issuecomment-2981643952
   * apollo3_red (stm variant): beta support.
+  * HSV16 support
+    * CRGB -> HSV -> CRGB is highly lossy
+    * CRGB -> HSV16 -> CRGB is almost perfect.
+    * Integer based so it's fast.
+  * ColorBoost
+    * CRGB::colorBoost()
+    * Are you doing video on WS2812? Well then you probably are using gamma correction
+    * Color Boost is an alternative for gamma correction for the WS2812 and other RGB8 chipsets.
+      * It preserves luminosity but allows you to increase saturation.
+      * HSV16 is used to preserve color resolution.
   * HSV -> CRGB default conversion function can now be overriden.
+    * Thanks to https://github.com/ssilverman or this full spectrum HSV tweak.
     * If you just want to change it for your sketch you can use this:
       * `#define FASTLED_HSV_CONVERSION_RAINBOW` (default)
       * `#define FASTLED_HSV_CONVERSION_SPECTRUM`
@@ -41,7 +44,26 @@ FastLED 3.10.2
       * `-FASTLED_HSV_CONVERSION_FULL_SPECTRUM`
   * CRGB::toVideoRGB_8bit()
     * This is an alternative to gamma correction that preserves the hue but boosts the saturation, use it with WS2812 and other RGB8 controllers.
-  * Animartrix - 30% reduction in computation using selective -O3 and fast-math for the file.
+  * Platforms
+    * ESP32-C5 is now supported.
+    * ESP32 WS2812 SPI driver has a fix for it's async draw routine.
+    * Blend2d will now replace a subfx XYMap (when necessary) to prevent double mapping. A warning will be issued.
+    * Seeed XIAO nRF52840 Sense: Fixed incorrect pin mappings that were copied from Adafruit Feather board
+    * **APA102HD Gamma Correction Algorithm**: Completely rewritten with closed-form mathematical solution
+      * Thanks https://github.com/gwgill!
+      * Graph of the old algorithms quantization issues can be see here:
+        * https://www.argyllcms.com/APA102_loglog.svg
+    * STM32F1 pin mapping fixes (blue pill)
+      * https://github.com/FastLED/FastLED/pull/1973
+      * Thanks https://github.com/vishwamartur!
+  * Internal stuff
+    * FastLED is now way more strict in it's compiler settings. Warnings are treated as errors
+      * Lots of fixes, some code required amnesty.
+    * The examples now compile under clang and run for `./test`
+    * All examples now compile for ALL platforms.
+      * this was a major undertaking.
+      * required a rewrite of the testing infrastructure.
+      * Teensy41 took ~ 1 hours to compile 40 examples, now it can do 80 examples in ~8 mins
 
 
 FastLED 3.10.0
