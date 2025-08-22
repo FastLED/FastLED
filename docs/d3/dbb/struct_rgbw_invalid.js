@@ -1,5 +1,5 @@
 var struct_rgbw_invalid =
 [
-    [ "RgbwInvalid", "d3/dbb/struct_rgbw_invalid_a0ff7b33216d91c7509fe30361ba215ad.html#a0ff7b33216d91c7509fe30361ba215ad", null ],
-    [ "value", "d3/dbb/struct_rgbw_invalid_ad6d0a9d5a37ed924ad856d1340170978.html#ad6d0a9d5a37ed924ad856d1340170978", null ]
+    [ "RgbwInvalid", "d3/dbb/struct_rgbw_invalid_ae83da2fb3cec836ce8f0e24421a4d7da.html#ae83da2fb3cec836ce8f0e24421a4d7da", null ],
+    [ "value", "d3/dbb/struct_rgbw_invalid_a52a88c30a66231c8455d8a26b3a16de5.html#a52a88c30a66231c8455d8a26b3a16de5", null ]
 ];

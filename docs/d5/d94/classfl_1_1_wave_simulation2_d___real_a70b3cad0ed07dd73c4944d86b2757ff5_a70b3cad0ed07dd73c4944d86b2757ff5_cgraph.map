@@ -1,0 +1,9 @@
+<map id="fl::WaveSimulation2D_Real::WaveSimulation2D_Real" name="fl::WaveSimulation2D_Real::WaveSimulation2D_Real">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,27,232,67"/>
+<area shape="rect" id="Node000002" href="$d8/d78/examples_2_wave_2wave_8h_aa7d6eb4e4f91328bcee5e19a6a76ee4e.html#aa7d6eb4e4f91328bcee5e19a6a76ee4e" title=" " alt="" coords="310,5,405,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="232,31,296,23,296,28,232,36"/>
+<area shape="rect" id="Node000003" href="$d9/d75/namespacefl_1_1wave__detail_a56eca07a74cb918e4002c1e7baa40a5d.html#a56eca07a74cb918e4002c1e7baa40a5d" title=" " alt="" coords="280,55,435,95"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="232,58,267,62,266,67,232,63"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_a6072e119545650c71b6544cc0ce9e355.html#a6072e119545650c71b6544cc0ce9e355" title=" " alt="" coords="483,63,561,88"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="435,73,469,73,469,78,435,78"/>
+</map>

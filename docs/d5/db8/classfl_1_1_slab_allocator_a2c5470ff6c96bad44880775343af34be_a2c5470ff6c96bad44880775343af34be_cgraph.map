@@ -1,0 +1,10 @@
+<map id="fl::SlabAllocator::deallocate" name="fl::SlabAllocator::deallocate">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,5,137,45"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a10d5f94f3f6fc672a882eae3e736ec38.html#a10d5f94f3f6fc672a882eae3e736ec38" title=" " alt="" coords="365,13,480,38"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="138,20,185,19,317,19,352,20,352,25,317,24,185,24,138,25"/>
+<area shape="rect" id="Node000004" href="$d5/db8/classfl_1_1_slab_allocator_ac6585c97cf283b76466ffc333c28299e.html#ac6585c97cf283b76466ffc333c28299e" title=" " alt="" coords="185,33,317,73"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="138,33,172,38,171,44,137,38"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a213e289e084126c44de102393fb0d302.html#a213e289e084126c44de102393fb0d302" title=" " alt="" coords="528,13,617,38"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="480,23,514,23,514,28,480,28"/>
+<area shape="poly" id="edge4_Node000004_Node000002" title=" " alt="" coords="317,40,352,34,353,39,318,45"/>
+</map>

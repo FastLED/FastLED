@@ -1,5 +1,15 @@
 <map id="map32_to_16" name="map32_to_16">
-<area shape="rect" id="Node000001" title=" " alt="" coords="244,5,355,31"/>
-<area shape="rect" id="Node000002" href="$d0/dfa/structfl_1_1_transform16_a330fa5b714b5c5498469107d6e3596fa.html#a330fa5b714b5c5498469107d6e3596fa" title=" " alt="" coords="5,5,196,31"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="230,21,196,21,196,15,230,15"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="636,31,747,56"/>
+<area shape="rect" id="Node000002" href="$d8/d8c/transform_8cpp_ade8043ede62066d1f4666a7eece358d1.html#ade8043ede62066d1f4666a7eece358d1" title=" " alt="" coords="417,5,588,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="622,37,588,32,588,27,623,31"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a0704405150c9e2ea2647360203eef1a7.html#a0704405150c9e2ea2647360203eef1a7" title=" " alt="" coords="441,55,564,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="623,55,565,62,564,57,622,49"/>
+<area shape="rect" id="Node000004" href="$d4/d5d/structfl_1_1_h_s_v16_a66d9cc0fccee4175baaef83f1a2d7d7d.html#a66d9cc0fccee4175baaef83f1a2d7d7d" title=" " alt="" coords="239,55,369,80"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="427,70,370,70,370,65,427,65"/>
+<area shape="rect" id="Node000005" href="$d7/d82/struct_c_r_g_b_aafb129d5109b627df6c8401c6b5105ef.html#aafb129d5109b627df6c8401c6b5105ef" title="Allow construction from a fl::HSV16 color Enables automatic conversion from HSV16 to CRGB." alt="" coords="46,5,150,31"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="237,54,149,33,151,28,238,49"/>
+<area shape="rect" id="Node000006" href="$d4/d5d/structfl_1_1_h_s_v16_a0bd2c0fc64fc34d573637c10b849c320.html#a0bd2c0fc64fc34d573637c10b849c320" title=" " alt="" coords="19,55,177,80"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="225,70,178,70,178,65,225,65"/>
+<area shape="rect" id="Node000019" href="$d4/d5d/structfl_1_1_h_s_v16_a3ece902080f8d4dbaca82dbc974c58d0.html#a3ece902080f8d4dbaca82dbc974c58d0" title="Automatic conversion operator to CRGB Allows HSV16 to be automatically converted to CRGB." alt="" coords="5,104,191,129"/>
+<area shape="poly" id="edge6_Node000004_Node000019" title=" " alt="" coords="238,86,153,107,151,101,237,81"/>
 </map>

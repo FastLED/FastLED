@@ -1,0 +1,18 @@
+<map id="fl::rgb_2_rgbw" name="fl::rgb_2_rgbw">
+<area shape="rect" id="Node000001" title="Converts RGB to RGBW using one of the functions." alt="" coords="5,127,119,152"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a35c82b15730d0dfc7cff6d8c01195efa.html#a35c82b15730d0dfc7cff6d8c01195efa" title="Converts RGB to RGBW using a color transfer method from saturated color channels to white." alt="" coords="167,5,323,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="72,124,110,84,137,61,165,41,180,34,183,38,168,46,140,65,114,88,76,128"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_aa46254007dfd4f1355a0d27ccf1ed3cc.html#aa46254007dfd4f1355a0d27ccf1ed3cc" title="The minimum brigthness of the RGB channels is used to set the W channel." alt="" coords="170,55,319,95"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="98,124,173,97,175,102,100,129"/>
+<area shape="rect" id="Node000005" href="$d4/d36/namespacefl_a9c3983ed783b02689deb6db2088770cf.html#a9c3983ed783b02689deb6db2088770cf" title="Converts RGB to RGBW with the W channel set to black, always." alt="" coords="173,119,317,159"/>
+<area shape="poly" id="edge5_Node000001_Node000005" title=" " alt="" coords="119,137,159,137,159,142,119,142"/>
+<area shape="rect" id="Node000006" href="$d4/d36/namespacefl_a33e91c742cf15e2abb6db15b71d6ec3c.html#a33e91c742cf15e2abb6db15b71d6ec3c" title=" " alt="" coords="171,183,319,223"/>
+<area shape="poly" id="edge7_Node000001_Node000006" title=" " alt="" coords="100,150,175,176,173,181,98,155"/>
+<area shape="rect" id="Node000007" href="$d4/d36/namespacefl_aa7c583c1abae7d34b239f30adf730001.html#aa7c583c1abae7d34b239f30adf730001" title="Converts RGB to RGBW with a boosted white channel." alt="" coords="167,247,323,287"/>
+<area shape="poly" id="edge8_Node000001_Node000007" title=" " alt="" coords="76,150,115,190,168,233,178,239,175,244,165,238,111,194,72,154"/>
+<area shape="rect" id="Node000003" href="$d0/da8/group___scaling_gad7535ccda9c92470c4e6ee0265585555.html#gad7535ccda9c92470c4e6ee0265585555" title="Scale one byte by a second one, which is treated as the numerator of a fraction whose denominator is ..." alt="" coords="371,95,435,120"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="295,28,324,41,354,61,380,83,377,87,351,66,321,46,293,33"/>
+<area shape="poly" id="edge4_Node000004_Node000003" title=" " alt="" coords="320,88,358,96,357,101,319,93"/>
+<area shape="poly" id="edge6_Node000005_Node000003" title=" " alt="" coords="316,122,357,114,358,119,317,127"/>
+<area shape="poly" id="edge9_Node000007_Node000003" title=" " alt="" coords="304,245,321,233,344,210,363,183,389,131,394,134,367,185,348,213,324,237,307,249"/>
+</map>

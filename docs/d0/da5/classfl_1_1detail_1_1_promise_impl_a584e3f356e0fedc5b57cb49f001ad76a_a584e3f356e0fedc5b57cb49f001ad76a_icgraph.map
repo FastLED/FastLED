@@ -1,0 +1,7 @@
+<map id="fl::detail::PromiseImpl::value" name="fl::detail::PromiseImpl::value">
+<area shape="rect" id="Node000001" title="Get value (only valid if resolved)" alt="" coords="219,37,384,77"/>
+<area shape="rect" id="Node000002" href="$d0/da5/classfl_1_1detail_1_1_promise_impl_ab2eb8e7863d25ad67255cf265ac5e7bb.html#ab2eb8e7863d25ad67255cf265ac5e7bb" title="Resolve promise with value." alt="" coords="5,5,171,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="205,46,171,40,171,35,206,40"/>
+<area shape="rect" id="Node000003" href="$d0/da5/classfl_1_1detail_1_1_promise_impl_a1e11a17bbbeae6408df85939141e089b.html#a1e11a17bbbeae6408df85939141e089b" title=" " alt="" coords="5,69,171,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="206,74,171,80,171,74,205,69"/>
+</map>

@@ -1,0 +1,11 @@
+digraph "fl::allocator_inlined&lt; T, N, BaseAllocator &gt;"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  Node1 [id="Node000001",label="fl::allocator_inlined\l\< T, N, BaseAllocator \>",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
+  Node2 -> Node1 [id="edge1_Node000001_Node000002",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" m_inlined_storage",fontcolor="grey" ];
+  Node2 [id="Node000002",label="fl::allocator_inlined\l\< T, N, BaseAllocator\l \>::InlinedStorage",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$dc/d89/structfl_1_1allocator__inlined_1_1_inlined_storage.html",tooltip=" "];
+}

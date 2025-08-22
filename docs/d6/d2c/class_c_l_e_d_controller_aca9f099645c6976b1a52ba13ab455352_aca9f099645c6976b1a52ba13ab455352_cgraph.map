@@ -1,0 +1,5 @@
+<map id="CLEDController::clearLedDataInternal" name="CLEDController::clearLedDataInternal">
+<area shape="rect" id="Node000001" title="Zero out the LED data managed by this controller." alt="" coords="5,5,188,45"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a4b8a9d50bb843c25b6392094c34e7fb1.html#a4b8a9d50bb843c25b6392094c34e7fb1" title=" " alt="" coords="236,13,324,38"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="188,23,222,23,222,28,188,28"/>
+</map>

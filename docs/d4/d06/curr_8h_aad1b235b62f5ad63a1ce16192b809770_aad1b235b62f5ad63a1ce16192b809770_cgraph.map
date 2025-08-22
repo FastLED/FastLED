@@ -1,0 +1,21 @@
+<map id="getFirePaletteIndex" name="getFirePaletteIndex">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,153,153,179"/>
+<area shape="rect" id="Node000002" href="$d5/d98/group___math_ga162169ac0c2d1f3d01eaff8f32e1b415.html#ga162169ac0c2d1f3d01eaff8f32e1b415" title="Take the absolute value of a signed 8&#45;bit uint8_t." alt="" coords="231,5,284,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="88,151,133,99,165,68,200,40,217,30,219,35,203,44,168,72,137,103,92,155"/>
+<area shape="rect" id="Node000003" href="$d1/ddc/group___trig_ga4432f985c94f5bff715db402d767b0e8.html#ga4432f985c94f5bff715db402d767b0e8" title="Fast 8&#45;bit approximation of cos(x)." alt="" coords="231,55,283,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="98,151,200,89,217,80,220,85,203,94,101,156"/>
+<area shape="rect" id="Node000004" href="$d4/d06/curr_8h_a6291026554c31d08aa656b435659f87d.html#a6291026554c31d08aa656b435659f87d" title=" " alt="" coords="201,104,313,129"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="125,151,196,131,198,136,127,156"/>
+<area shape="rect" id="Node000005" href="$d4/d06/curr_8h_ae5627671efdbc8744b70a07b241913fb.html#ae5627671efdbc8744b70a07b241913fb" title=" " alt="" coords="214,153,301,179"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="154,163,200,163,200,169,154,169"/>
+<area shape="rect" id="Node000006" href="$d4/d06/curr_8h_a1e1fefcd259cf307570b6bee2dbde71c.html#a1e1fefcd259cf307570b6bee2dbde71c" title=" " alt="" coords="210,203,305,228"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="127,176,198,196,196,201,125,181"/>
+<area shape="rect" id="Node000007" href="$d8/df9/group___noise_generation_ga46e9de1842d8977b77bee089d0f3b25c.html#ga46e9de1842d8977b77bee089d0f3b25c" title="16&#45;bit, fixed point implementation of Perlin&#39;s noise." alt="" coords="219,252,296,277"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="102,177,203,237,216,244,213,248,200,242,99,181"/>
+<area shape="rect" id="Node000010" href="$d5/d98/group___math_gae261576a4c8155d6c0ba8615b2d2ecb3.html#gae261576a4c8155d6c0ba8615b2d2ecb3" title="Subtract one byte from another, saturating at 0x00." alt="" coords="227,301,288,327"/>
+<area shape="poly" id="edge9_Node000001_Node000010" title=" " alt="" coords="93,177,138,229,169,259,203,286,216,294,213,299,200,291,165,263,134,232,89,181"/>
+<area shape="rect" id="Node000008" href="$d8/df9/group___noise_generation_ga810bdc406dcf8fd5b7add9041aa18abd.html#ga810bdc406dcf8fd5b7add9041aa18abd" title="16&#45;bit, fixed point implementation of Perlin&#39;s noise without scaling." alt="" coords="361,252,469,277"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="296,262,347,262,347,267,296,267"/>
+<area shape="rect" id="Node000009" href="$d6/de8/noise_8cpp_a24cd7f7232e48b10b8bba34614a168b5.html#a24cd7f7232e48b10b8bba34614a168b5" title=" " alt="" coords="517,252,584,277"/>
+<area shape="poly" id="edge8_Node000008_Node000009" title=" " alt="" coords="469,262,504,262,504,267,469,267"/>
+</map>

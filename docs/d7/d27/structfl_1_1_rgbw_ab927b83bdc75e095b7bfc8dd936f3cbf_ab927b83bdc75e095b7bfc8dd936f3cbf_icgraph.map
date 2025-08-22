@@ -1,0 +1,9 @@
+<map id="fl::Rgbw::Rgbw" name="fl::Rgbw::Rgbw">
+<area shape="rect" id="Node000001" title=" " alt="" coords="220,55,337,80"/>
+<area shape="rect" id="Node000002" href="$dc/da6/structfl_1_1_rgbw_default_a4660f0c7686c715d97fac714ae09bbc4.html#a4660f0c7686c715d97fac714ae09bbc4" title=" " alt="" coords="5,5,172,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="215,54,138,33,139,28,217,49"/>
+<area shape="rect" id="Node000003" href="$d2/d73/structfl_1_1_rgbw_invalid_a52a88c30a66231c8455d8a26b3a16de5.html#a52a88c30a66231c8455d8a26b3a16de5" title=" " alt="" coords="7,55,170,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="206,70,170,70,170,65,206,65"/>
+<area shape="rect" id="Node000004" href="$d6/da6/structfl_1_1_rgbw_white_is_off_a4c1c8e3b614a731484ab47a3bf94b258.html#a4c1c8e3b614a731484ab47a3bf94b258" title=" " alt="" coords="17,105,160,145"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="223,87,156,107,155,102,222,82"/>
+</map>

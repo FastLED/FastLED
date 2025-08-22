@@ -11,8 +11,8 @@ var fastpin_8h =
     [ "_FL_DEFINE_PORT", "db/d65/fastpin_8h_aee857cc8afab1aa7af11a3c2f22dc94d.html#aee857cc8afab1aa7af11a3c2f22dc94d", null ],
     [ "_FL_DEFINE_PORT3", "db/d65/fastpin_8h_aecc2af2e3a64d6f736634822d71548ca.html#aecc2af2e3a64d6f736634822d71548ca", null ],
     [ "NO_PIN", "db/d65/fastpin_8h_a4af4244f8a09607e0d6a5d0ee80f1de8.html#a4af4244f8a09607e0d6a5d0ee80f1de8", null ],
-    [ "ptr_reg32_t", "db/d65/fastpin_8h_a3459200771dcb25906c9fe4857e76af7.html#a3459200771dcb25906c9fe4857e76af7", null ],
-    [ "reg32_t", "db/d65/fastpin_8h_aacb3c54d0417496589a08af0cbbb229b.html#aacb3c54d0417496589a08af0cbbb229b", null ],
+    [ "ptr_reg32_t", "db/d65/fastpin_8h_afcb4d76fe5b8dea8558542ecca421816.html#afcb4d76fe5b8dea8558542ecca421816", null ],
+    [ "reg32_t", "db/d65/fastpin_8h_adeb9ab7f3b79bcba7ab930327be6db48.html#adeb9ab7f3b79bcba7ab930327be6db48", null ],
     [ "FastPin< PIN >::sInPort", "db/d65/fastpin_8h_a9aee5a02205a533975f75452a4d9a366.html#a9aee5a02205a533975f75452a4d9a366", null ],
     [ "FastPin< PIN >::sPinMask", "db/d65/fastpin_8h_acc73a142140904088424fbb7f47d3a31.html#acc73a142140904088424fbb7f47d3a31", null ],
     [ "FastPin< PIN >::sPort", "db/d65/fastpin_8h_ae57faf828edbde8a46475a515f626582.html#ae57faf828edbde8a46475a515f626582", null ]

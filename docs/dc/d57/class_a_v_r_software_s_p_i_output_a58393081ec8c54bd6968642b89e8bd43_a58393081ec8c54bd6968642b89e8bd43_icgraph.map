@@ -10,7 +10,7 @@
 <area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="464,202,430,208,429,202,463,197"/>
 <area shape="rect" id="Node000009" href="$dc/d57/class_a_v_r_software_s_p_i_output_a20772a8fdfa75015731375c36ccb3515.html#a20772a8fdfa75015731375c36ccb3515" title="Write LED pixel data to the SPI interface." alt="" coords="260,261,429,301"/>
 <area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="510,214,430,252,402,264,400,259,428,247,508,209"/>
-<area shape="rect" id="Node000010" href="$dc/d57/class_a_v_r_software_s_p_i_output_a34421832d232a692d08d39d87733acd8.html#a34421832d232a692d08d39d87733acd8" title="Write a word (two bytes) over SPI." alt="" coords="260,325,429,365"/>
+<area shape="rect" id="Node000010" href="$dc/d57/class_a_v_r_software_s_p_i_output_a9ca78e0b9b6c242d6f898daa23552537.html#a9ca78e0b9b6c242d6f898daa23552537" title="Write a word (two bytes) over SPI." alt="" coords="260,325,429,365"/>
 <area shape="poly" id="edge9_Node000001_Node000010" title=" " alt="" coords="538,218,491,267,462,293,431,316,408,328,406,323,428,311,459,289,487,263,534,214"/>
 <area shape="rect" id="Node000005" href="$dc/d57/class_a_v_r_software_s_p_i_output_a8e0f5d9fd6f2c1e1eab4436c1b5cb23a.html#a8e0f5d9fd6f2c1e1eab4436c1b5cb23a" title="Write an array of data to the SPI interface." alt="" coords="24,133,193,173"/>
 <area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="246,156,193,156,193,151,246,151"/>

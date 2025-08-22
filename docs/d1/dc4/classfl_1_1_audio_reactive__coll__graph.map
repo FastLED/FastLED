@@ -1,0 +1,19 @@
+<map id="fl::AudioReactive" name="fl::AudioReactive">
+<area shape="rect" id="Node000001" title=" " alt="" coords="875,77,1007,103"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl.html#de/d0d/structfl_1_1_audio_config" title=" " alt="" coords="600,5,716,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="730,26,790,37,851,53,912,75,910,80,850,58,788,43,729,31"/>
+<area shape="rect" id="Node000003" href="$d1/d47/classfl_1_1_f_f_t.html" title=" " alt="" coords="627,55,689,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="702,68,875,82,874,87,702,73"/>
+<area shape="rect" id="Node000004" href="$d6/d2e/classfl_1_1unique__ptr.html" title=" " alt="" coords="343,31,485,85"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="499,59,627,64,627,69,499,64"/>
+<area shape="rect" id="Node000005" href="$d6/d2e/classfl_1_1unique__ptr.html" title=" " alt="" coords="8,38,143,78"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="157,55,342,55,342,61,157,61"/>
+<area shape="rect" id="Node000007" href="$d1/dd3/structfl_1_1_f_f_t_bins.html" title=" " alt="" coords="613,107,703,132"/>
+<area shape="poly" id="edge5_Node000001_Node000007" title=" " alt="" coords="716,113,850,101,874,98,875,103,851,106,716,118"/>
+<area shape="rect" id="Node000008" href="$db/ddd/classfl_1_1_heap_vector.html" title=" " alt="" coords="335,110,493,150"/>
+<area shape="poly" id="edge6_Node000007_Node000008" title=" " alt="" coords="507,123,613,119,613,124,508,129"/>
+<area shape="rect" id="Node000009" href="$db/ddd/classfl_1_1_heap_vector.html" title=" " alt="" coords="5,110,145,150"/>
+<area shape="poly" id="edge7_Node000008_Node000009" title=" " alt="" coords="159,127,335,127,335,133,159,133"/>
+<area shape="rect" id="Node000011" href="$d4/d36/namespacefl.html#d0/d36/structfl_1_1_audio_data" title=" " alt="" coords="605,160,711,185"/>
+<area shape="poly" id="edge8_Node000001_Node000011" title=" " alt="" coords="725,169,786,162,850,146,891,125,923,101,926,105,894,129,852,151,787,168,725,174"/>
+</map>

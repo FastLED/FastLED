@@ -20,7 +20,7 @@
 <!-- Node2 -->
 <g id="Node000002" class="node">
 <title>Node2</title>
-<g id="a_Node000002"><a xlink:href="../../d7/d68/class_pin_a5a2884f01bb407fd628f57553eaaa9f4.html#a5a2884f01bb407fd628f57553eaaa9f4" target="_top" xlink:title="Set the pin state to HIGH">
+<g id="a_Node000002"><a xlink:href="../../d7/d68/class_pin_a0ef99e3ca78ae92d51bba1682de1c6c1.html#a0ef99e3ca78ae92d51bba1682de1c6c1" target="_top" xlink:title="Set the pin state to HIGH">
 <polygon fill="white" stroke="#666666" points="150,-19 103,-19 103,0 150,0 150,-19"/>
 <text text-anchor="middle" x="126.5" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">Pin::hi</text>
 </a>

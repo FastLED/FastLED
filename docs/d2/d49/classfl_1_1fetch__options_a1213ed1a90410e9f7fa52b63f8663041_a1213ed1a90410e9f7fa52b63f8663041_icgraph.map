@@ -1,0 +1,49 @@
+<map id="fl::fetch_options::url" name="fl::fetch_options::url">
+<area shape="rect" id="Node000001" title="Get the URL for this request." alt="" coords="815,280,965,305"/>
+<area shape="rect" id="Node000002" href="$d2/d49/classfl_1_1fetch__options_a73eb354da4d72180fa2092519f04d8d5.html#a73eb354da4d72180fa2092519f04d8d5" title=" " alt="" coords="632,240,767,280"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="801,280,767,274,768,269,802,275"/>
+<area shape="rect" id="Node000020" href="$d2/d49/classfl_1_1fetch__options_ace31843e5769e94e3b0478ce8964b1fe.html#ace31843e5769e94e3b0478ce8964b1fe" title=" " alt="" coords="632,304,767,344"/>
+<area shape="poly" id="edge31_Node000001_Node000020" title=" " alt="" coords="802,310,768,316,767,311,801,305"/>
+<area shape="rect" id="Node000003" href="$d2/d49/classfl_1_1fetch__options_a38270ee520d0b35566a972e44006350b.html#a38270ee520d0b35566a972e44006350b" title="Set request body." alt="" coords="417,190,584,216"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="618,240,545,218,546,213,620,235"/>
+<area shape="rect" id="Node000016" href="$d2/d49/classfl_1_1fetch__options_a541c0709606193eb2057cafa1aa42a29.html#a541c0709606193eb2057cafa1aa42a29" title="Add header." alt="" coords="433,126,568,166"/>
+<area shape="poly" id="edge11_Node000002_Node000016" title=" " alt="" coords="662,234,624,206,583,180,558,168,560,163,585,175,627,202,665,229"/>
+<area shape="rect" id="Node000017" href="$d2/d49/classfl_1_1fetch__options_a06c20eb90ef7ea344d9df924bdd584b7.html#a06c20eb90ef7ea344d9df924bdd584b7" title="Set JSON body with proper content type." alt="" coords="420,305,581,330"/>
+<area shape="poly" id="edge20_Node000002_Node000017" title=" " alt="" coords="620,286,546,308,545,303,618,281"/>
+<area shape="rect" id="Node000018" href="$d2/d49/classfl_1_1fetch__options_aa90449d4362979dd61fec08bf5843099.html#aa90449d4362979dd61fec08bf5843099" title="Set HTTP method." alt="" coords="433,355,568,395"/>
+<area shape="poly" id="edge21_Node000002_Node000018" title=" " alt="" coords="641,290,634,295,620,307,610,320,601,332,586,345,564,357,561,353,582,341,597,329,606,317,616,304,630,290,638,285"/>
+<area shape="rect" id="Node000019" href="$d2/d49/classfl_1_1fetch__options_a1a19b6646176204db31d1ab58cab1e57.html#a1a19b6646176204db31d1ab58cab1e57" title="Set timeout in milliseconds." alt="" coords="433,240,568,280"/>
+<area shape="poly" id="edge22_Node000002_Node000019" title=" " alt="" coords="618,263,568,263,568,258,618,258"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_a075cee505b6fb33f50d091c72119fe1b.html#a075cee505b6fb33f50d091c72119fe1b" title="HTTP DELETE request." alt="" coords="231,240,349,265"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="433,222,346,242,344,237,432,216"/>
+<area shape="rect" id="Node000005" href="$d4/d36/namespacefl_af42605edbdf3f35d997e6da5be2c02a5.html#af42605edbdf3f35d997e6da5be2c02a5" title="HTTP GET request." alt="" coords="241,289,339,314"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="433,223,419,231,404,243,395,255,386,267,371,280,341,294,338,289,368,276,382,264,391,252,401,239,416,226,430,219"/>
+<area shape="rect" id="Node000011" href="$d4/d36/namespacefl_a022d6f3739e15bcb2c53ca8a989ef4cc.html#a022d6f3739e15bcb2c53ca8a989ef4cc" title="HTTP HEAD request." alt="" coords="235,338,345,364"/>
+<area shape="poly" id="edge6_Node000003_Node000011" title=" " alt="" coords="427,224,419,230,408,242,402,254,396,278,390,304,383,317,371,329,347,343,344,339,368,325,378,314,385,302,391,277,397,252,404,239,416,226,424,220"/>
+<area shape="rect" id="Node000012" href="$d4/d36/namespacefl_a275e9b11a1adc93d8fe97fd4c36a3fc8.html#a275e9b11a1adc93d8fe97fd4c36a3fc8" title="HTTP OPTIONS request." alt="" coords="211,42,369,68"/>
+<area shape="poly" id="edge7_Node000003_Node000012" title=" " alt="" coords="424,186,416,180,404,167,397,154,391,129,385,104,378,93,368,81,350,70,353,66,371,77,383,90,390,103,396,128,402,153,408,164,419,176,427,182"/>
+<area shape="rect" id="Node000013" href="$d4/d36/namespacefl_a637eab154a69618fb83024fb6ca7a623.html#a637eab154a69618fb83024fb6ca7a623" title="HTTP PATCH request." alt="" coords="233,92,347,117"/>
+<area shape="poly" id="edge8_Node000003_Node000013" title=" " alt="" coords="430,188,416,180,401,167,391,155,382,143,368,131,344,120,346,115,371,126,386,139,395,152,404,164,419,176,433,183"/>
+<area shape="rect" id="Node000014" href="$d4/d36/namespacefl_abd106b1e43c863c783b884d732271bc1.html#abd106b1e43c863c783b884d732271bc1" title="HTTP POST request." alt="" coords="237,141,343,166"/>
+<area shape="poly" id="edge9_Node000003_Node000014" title=" " alt="" coords="432,190,343,169,344,164,433,185"/>
+<area shape="rect" id="Node000015" href="$d4/d36/namespacefl_a5a10f48c7ebf47ace2e4c0243108fe69.html#a5a10f48c7ebf47ace2e4c0243108fe69" title="HTTP PUT request." alt="" coords="241,190,339,216"/>
+<area shape="poly" id="edge10_Node000003_Node000015" title=" " alt="" coords="403,206,339,206,339,200,403,200"/>
+<area shape="rect" id="Node000006" href="$d5/dec/_net_test_real_8h_a75e6549812ad7bff897e0c92a225878a.html#a75e6549812ad7bff897e0c92a225878a" title=" " alt="" coords="5,289,163,314"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="227,304,163,304,163,299,227,299"/>
+<area shape="poly" id="edge12_Node000016_Node000004" title=" " alt="" coords="429,174,419,180,405,192,396,204,386,217,371,229,344,242,342,237,368,225,382,213,391,201,401,189,416,176,426,170"/>
+<area shape="poly" id="edge13_Node000016_Node000005" title=" " alt="" coords="424,175,419,180,402,204,396,229,390,254,383,267,371,280,341,296,338,291,368,276,378,264,385,252,391,228,397,202,415,176,421,171"/>
+<area shape="poly" id="edge19_Node000016_Node000006" title=" " alt="" coords="474,117,429,70,400,49,368,32,324,16,287,9,252,13,212,32,180,58,154,91,133,128,117,166,97,239,89,289,84,289,92,237,112,164,129,125,150,88,176,55,209,28,251,8,288,3,326,11,370,27,403,44,432,66,478,113"/>
+<area shape="poly" id="edge14_Node000016_Node000011" title=" " alt="" coords="424,175,419,180,406,198,399,216,397,253,394,291,386,310,371,329,347,344,344,340,368,325,381,307,388,290,391,253,394,215,401,196,415,176,421,171"/>
+<area shape="poly" id="edge15_Node000016_Node000012" title=" " alt="" coords="451,121,368,82,337,70,338,65,370,77,453,117"/>
+<area shape="poly" id="edge16_Node000016_Node000013" title=" " alt="" coords="419,133,347,118,348,113,420,127"/>
+<area shape="poly" id="edge17_Node000016_Node000014" title=" " alt="" coords="420,152,344,154,344,149,419,146"/>
+<area shape="poly" id="edge18_Node000016_Node000015" title=" " alt="" coords="421,170,338,193,337,188,419,165"/>
+<area shape="poly" id="edge23_Node000019_Node000004" title=" " alt="" coords="419,260,349,257,349,252,420,255"/>
+<area shape="poly" id="edge24_Node000019_Node000005" title=" " alt="" coords="420,279,340,295,339,290,419,274"/>
+<area shape="poly" id="edge30_Node000019_Node000006" title=" " alt="" coords="427,290,419,296,404,317,398,338,390,360,371,379,329,397,292,399,255,392,210,379,177,367,146,350,99,317,102,313,149,346,179,362,212,374,256,387,293,394,328,391,368,374,386,357,393,337,399,314,415,292,424,285"/>
+<area shape="poly" id="edge25_Node000019_Node000011" title=" " alt="" coords="434,288,419,296,395,313,371,330,342,341,340,336,368,325,392,309,416,292,432,284"/>
+<area shape="poly" id="edge26_Node000019_Node000012" title=" " alt="" coords="421,235,415,229,401,209,394,190,391,153,388,116,381,99,367,81,352,70,355,66,371,77,386,96,394,115,397,152,400,189,406,207,419,225,425,231"/>
+<area shape="poly" id="edge27_Node000019_Node000013" title=" " alt="" coords="423,235,415,229,398,203,391,178,385,154,368,130,346,118,349,113,371,127,390,151,396,177,402,201,419,225,426,231"/>
+<area shape="poly" id="edge28_Node000019_Node000014" title=" " alt="" coords="428,237,416,229,401,216,391,204,382,192,368,180,343,168,345,164,371,176,386,188,396,200,405,213,419,225,431,232"/>
+<area shape="poly" id="edge29_Node000019_Node000015" title=" " alt="" coords="419,241,337,218,338,213,421,236"/>
+</map>

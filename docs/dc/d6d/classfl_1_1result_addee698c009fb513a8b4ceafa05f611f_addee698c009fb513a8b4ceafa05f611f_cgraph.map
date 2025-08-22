@@ -1,0 +1,10 @@
+<map id="fl::result::error_message" name="fl::result::error_message">
+<area shape="rect" id="Node000001" title="Get the error message as a convenience." alt="" coords="5,31,185,56"/>
+<area shape="rect" id="Node000002" href="$dc/d6d/classfl_1_1result_a6659dd0a3e0580c716fe00e214b0f079.html#a6659dd0a3e0580c716fe00e214b0f079" title="Get the error value." alt="" coords="233,5,348,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="185,29,220,24,220,30,186,34"/>
+<area shape="rect" id="Node000004" href="$dc/d6d/classfl_1_1result_ac2b044bd270c831d02dd736571640bac.html#ac2b044bd270c831d02dd736571640bac" title="Check if the result is successful." alt="" coords="396,55,495,80"/>
+<area shape="poly" id="edge4_Node000001_Node000004" title=" " alt="" coords="186,47,383,60,382,66,185,52"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_aaad7bab3a46c3353c72c671c8372be3e.html#aaad7bab3a46c3353c72c671c8372be3e" title=" " alt="" coords="416,5,475,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="348,15,402,15,402,21,348,21"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="332,28,392,48,390,53,330,33"/>
+</map>

@@ -50,10 +50,10 @@
 <!-- Node3 -->
 <g id="Node000003" class="node">
 <title>Node3</title>
-<g id="a_Node000003"><a xlink:href="../../d9/dc9/cq__kernel_8c.html" target="_top" xlink:title=" ">
+<g id="a_Node000003"><a xlink:href="../../d2/d90/cq__kernel_8cpp.html" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="220,-30 101,-30 101,0 220,0 220,-30"/>
 <text text-anchor="start" x="109" y="-18" font-family="Helvetica,sans-Serif" font-size="10.00">third_party/cq_kernel</text>
-<text text-anchor="middle" x="160.5" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">/cq_kernel.c</text>
+<text text-anchor="middle" x="160.5" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">/cq_kernel.cpp</text>
 </a>
 </g>
 </g>

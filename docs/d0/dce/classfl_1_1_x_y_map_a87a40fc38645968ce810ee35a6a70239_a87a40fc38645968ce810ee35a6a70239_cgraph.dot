@@ -8,9 +8,11 @@ digraph "fl::XYMap::convertToLookUpTable"
   rankdir="LR";
   Node1 [id="Node000001",label="fl::XYMap::convertToLook\lUpTable",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
   Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
-  Node2 [id="Node000002",label="fl::XYMap::mapToIndex",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/dce/classfl_1_1_x_y_map_a4c1c74f924f2e4c6e88b27965f6530d4.html#a4c1c74f924f2e4c6e88b27965f6530d4",tooltip=" "];
-  Node2 -> Node3 [id="edge2_Node000002_Node000003",color="steelblue1",style="solid",tooltip=" "];
-  Node3 [id="Node000003",label="fl::xy_line_by_line",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_aabd143143924c6bddbe62e4b21688e76.html#aabd143143924c6bddbe62e4b21688e76",tooltip=" "];
-  Node2 -> Node4 [id="edge3_Node000002_Node000004",color="steelblue1",style="solid",tooltip=" "];
-  Node4 [id="Node000004",label="fl::xy_serpentine",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a44d29156c0decceaf2ff1970ddbdde7c.html#a44d29156c0decceaf2ff1970ddbdde7c",tooltip=" "];
+  Node2 [id="Node000002",label="fl::make_shared",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a87ae8a24cc8b709a64f39370e71846af.html#a87ae8a24cc8b709a64f39370e71846af",tooltip=" "];
+  Node1 -> Node3 [id="edge2_Node000001_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::XYMap::mapToIndex",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/dce/classfl_1_1_x_y_map_aada92bd1653b986c29ba0ce863449046.html#aada92bd1653b986c29ba0ce863449046",tooltip=" "];
+  Node3 -> Node4 [id="edge3_Node000003_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl::xy_line_by_line",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a0b9a6b53502de07b22db515e4f136e2e.html#a0b9a6b53502de07b22db515e4f136e2e",tooltip=" "];
+  Node3 -> Node5 [id="edge4_Node000003_Node000005",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="fl::xy_serpentine",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_ad45d0b4c7ccce43d69da76336f568982.html#ad45d0b4c7ccce43d69da76336f568982",tooltip=" "];
 }

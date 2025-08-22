@@ -1,0 +1,11 @@
+<map id="drawLavaLamp" name="drawLavaLamp">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,31,127,56"/>
+<area shape="rect" id="Node000002" href="$d8/df9/group___noise_generation_ga46e9de1842d8977b77bee089d0f3b25c.html#ga46e9de1842d8977b77bee089d0f3b25c" title="16&#45;bit, fixed point implementation of Perlin&#39;s noise." alt="" coords="175,5,252,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="127,30,160,24,161,30,127,36"/>
+<area shape="rect" id="Node000005" href="$d8/dd0/_fire_cylinder_8h_a470cec2dcb21e474c257065bb93bfcd1.html#a470cec2dcb21e474c257065bb93bfcd1" title=" " alt="" coords="179,55,247,80"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="127,51,166,57,165,62,127,56"/>
+<area shape="rect" id="Node000003" href="$d8/df9/group___noise_generation_ga810bdc406dcf8fd5b7add9041aa18abd.html#ga810bdc406dcf8fd5b7add9041aa18abd" title="16&#45;bit, fixed point implementation of Perlin&#39;s noise without scaling." alt="" coords="300,5,408,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="252,15,286,15,286,21,252,21"/>
+<area shape="rect" id="Node000004" href="$d6/de8/noise_8cpp_a24cd7f7232e48b10b8bba34614a168b5.html#a24cd7f7232e48b10b8bba34614a168b5" title=" " alt="" coords="456,5,523,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="408,15,443,15,443,21,408,21"/>
+</map>

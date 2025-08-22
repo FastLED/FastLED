@@ -1,0 +1,31 @@
+digraph "fl::response::json"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="LR";
+  Node1 [id="Node000001",label="fl::response::json",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="Response body parsed as JSON (JavaScript-like API)"];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl::response::is_json",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/d4b/classfl_1_1response_af79b281c20f6d54c717321b329787401.html#af79b281c20f6d54c717321b329787401",tooltip="Check if response appears to contain JSON content."];
+  Node2 -> Node3 [id="edge2_Node000002_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::StrN::find",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dc/d96/classfl_1_1_str_n_a3d66ea4272adeb310d727edb78ceac91.html#a3d66ea4272adeb310d727edb78ceac91",tooltip=" "];
+  Node3 -> Node4 [id="edge3_Node000003_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl::StrN::c_str",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dc/d96/classfl_1_1_str_n_a67296b774f8201293edbbabbd1b642cb.html#a67296b774f8201293edbbabbd1b642cb",tooltip=" "];
+  Node2 -> Node5 [id="edge4_Node000002_Node000005",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="fl::response::get_content_type",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/d4b/classfl_1_1response_a330eca0371b3740387f8a8ffbbf01323.html#a330eca0371b3740387f8a8ffbbf01323",tooltip="Get content type convenience method."];
+  Node5 -> Node6 [id="edge5_Node000005_Node000006",color="steelblue1",style="solid",tooltip=" "];
+  Node6 [id="Node000006",label="fl::response::get_header",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d5/d4b/classfl_1_1response_a589fee303b366ab7853c5460832adf13.html#a589fee303b366ab7853c5460832adf13",tooltip="Get header value (like JavaScript response.headers.get())"];
+  Node1 -> Node8 [id="edge6_Node000001_Node000008",color="steelblue1",style="solid",tooltip=" "];
+  Node8 [id="Node000008",label="fl::response::parse\l_json_body",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/d4b/classfl_1_1response_a913de93f1614c93e29ae0c1b3219a0b1.html#a913de93f1614c93e29ae0c1b3219a0b1",tooltip="Parse JSON from response body with error handling."];
+  Node8 -> Node9 [id="edge7_Node000008_Node000009",color="steelblue1",style="solid",tooltip=" "];
+  Node9 [id="Node000009",label="fl::Json::is_null",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d13/classfl_1_1_json_a2b6bdd94f6d1444281b4fec156edc3a8.html#a2b6bdd94f6d1444281b4fec156edc3a8",tooltip=" "];
+  Node8 -> Node10 [id="edge8_Node000008_Node000010",color="steelblue1",style="solid",tooltip=" "];
+  Node10 [id="Node000010",label="fl::Json::parse",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d13/classfl_1_1_json_acba319cd1a600f1a88beeecab57d4e7c.html#acba319cd1a600f1a88beeecab57d4e7c",tooltip=" "];
+  Node10 -> Node11 [id="edge9_Node000010_Node000011",color="steelblue1",style="solid",tooltip=" "];
+  Node11 [id="Node000011",label="fl::Json::Json",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d13/classfl_1_1_json_a91ccda816a6cc752c1ce0379579ab2f7.html#a91ccda816a6cc752c1ce0379579ab2f7",tooltip=" "];
+  Node10 -> Node12 [id="edge10_Node000010_Node000012",color="steelblue1",style="solid",tooltip=" "];
+  Node12 [id="Node000012",label="fl::JsonValue::parse",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$da/dd6/structfl_1_1_json_value_a9015afeea1506f27937b06e8101377e7.html#a9015afeea1506f27937b06e8101377e7",tooltip=" "];
+  Node12 -> Node4 [id="edge11_Node000012_Node000004",color="steelblue1",style="solid",tooltip=" "];
+}

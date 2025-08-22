@@ -8,7 +8,11 @@ digraph "CLEDController::endShowLeds"
   rankdir="LR";
   Node1 [id="Node000001",label="CLEDController::endShowLeds",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
   Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
-  Node2 [id="Node000002",label="CLEDController::setDither",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/d2c/class_c_l_e_d_controller_a2a231accbeb00e6a6080a7e55274a279.html#a2a231accbeb00e6a6080a7e55274a279",tooltip="Set the dithering mode for this controller to use."];
+  Node2 [id="Node000002",label="fl::ptr_to_int",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a0a816710570151e78e9e72fb121db30f.html#a0a816710570151e78e9e72fb121db30f",tooltip=" "];
   Node2 -> Node3 [id="edge2_Node000002_Node000003",color="steelblue1",style="solid",tooltip=" "];
-  Node3 [id="Node000003",label="CLEDController::CLEDController",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/d2c/class_c_l_e_d_controller_a8c560c6d171f117dfd19c0f2ec780a32.html#a8c560c6d171f117dfd19c0f2ec780a32",tooltip="Create an led controller object, add it to the chain of controllers."];
+  Node3 [id="Node000003",label="fl::bit_cast",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a213e289e084126c44de102393fb0d302.html#a213e289e084126c44de102393fb0d302",tooltip=" "];
+  Node1 -> Node4 [id="edge3_Node000001_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="CLEDController::setDither",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/d2c/class_c_l_e_d_controller_af8b923d5138800906b5a8cc366eaa1a7.html#af8b923d5138800906b5a8cc366eaa1a7",tooltip="Set the dithering mode for this controller to use."];
+  Node4 -> Node5 [id="edge4_Node000004_Node000005",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="CLEDController::CLEDController",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/d2c/class_c_l_e_d_controller_a8c560c6d171f117dfd19c0f2ec780a32.html#a8c560c6d171f117dfd19c0f2ec780a32",tooltip="Create an led controller object, add it to the chain of controllers."];
 }

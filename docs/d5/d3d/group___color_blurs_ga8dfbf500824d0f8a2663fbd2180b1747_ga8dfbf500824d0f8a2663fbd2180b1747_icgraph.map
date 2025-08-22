@@ -1,0 +1,13 @@
+<map id="fl::blurRows" name="fl::blurRows">
+<area shape="rect" id="Node000001" title="Perform a blur1d() on every row of a rectangular matrix." alt="" coords="323,80,421,105"/>
+<area shape="rect" id="Node000002" href="$d5/d3d/group___color_blurs_gae8c57faab25bb9b60e0860795a85f968.html#gae8c57faab25bb9b60e0860795a85f968" title="Two&#45;dimensional blur filter." alt="" coords="196,80,275,105"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="309,95,275,95,275,90,309,90"/>
+<area shape="rect" id="Node000003" href="$d5/d3d/group___color_blurs_gaed939ae0deb8b8839da1b33c7bbd28a3.html#gaed939ae0deb8b8839da1b33c7bbd28a3" title="Legacy version of blur2d, which does not require an XYMap but instead implicitly binds to XY() functi..." alt="" coords="37,5,116,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="202,75,147,44,115,32,117,27,149,40,205,70"/>
+<area shape="rect" id="Node000004" href="$dc/d2b/classfl_1_1_blend2d_ad965648c61fd795366282d3b797a612f.html#ad965648c61fd795366282d3b797a612f" title=" " alt="" coords="11,55,142,80"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="182,87,142,80,143,75,183,82"/>
+<area shape="rect" id="Node000005" href="$d4/df2/classfl_1_1_luminova_aa775ddcb74da9d8ae057ac8e4c3c50cc.html#aa775ddcb74da9d8ae057ac8e4c3c50cc" title=" " alt="" coords="5,104,148,129"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="183,103,148,109,148,103,182,98"/>
+<area shape="rect" id="Node000006" href="$df/d42/_blur2d_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="51,153,102,179"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="203,115,149,143,103,161,101,156,147,138,200,110"/>
+</map>

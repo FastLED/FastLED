@@ -1,0 +1,10 @@
+<map id="fl::response::ok" name="fl::response::ok">
+<area shape="rect" id="Node000001" title="Check if response is successful (like JavaScript response.ok)" alt="" coords="327,31,448,56"/>
+<area shape="rect" id="Node000002" href="$d5/dec/_net_test_real_8h_ac300da999139e52ab96307f86d7fa84d.html#ac300da999139e52ab96307f86d7fa84d" title="APPROACH 3: JSON Response Handling with FastLED&#39;s ideal JSON API This demonstrates fetch responses wi..." alt="" coords="118,5,265,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="313,36,265,30,265,25,313,31"/>
+<area shape="rect" id="Node000004" href="$d5/dec/_net_test_real_8h_a63e6ab1f58438832fe951d98467c6db1.html#a63e6ab1f58438832fe951d98467c6db1" title=" " alt="" coords="104,55,279,80"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="313,55,279,59,278,54,313,50"/>
+<area shape="rect" id="Node000003" href="$d5/dec/_net_test_real_8h_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="5,31,56,56"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="105,34,57,42,56,37,104,29"/>
+<area shape="poly" id="edge4_Node000004_Node000003" title=" " alt="" coords="93,55,56,50,57,44,94,50"/>
+</map>

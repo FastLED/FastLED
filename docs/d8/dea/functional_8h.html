@@ -102,18 +102,19 @@ $(function(){initNavTree('d8/dea/functional_8h.html','../../'); initResizable(tr
 <div class="header">
   <div class="summary">
 <a href="#nested-classes">Classes</a> &#124;
-<a href="#namespaces">Namespaces</a>  </div>
+<a href="#namespaces">Namespaces</a> &#124;
+<a href="#func-members">Functions</a>  </div>
   <div class="headertitle"><div class="title">functional.h File Reference</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><code>#include &quot;<a class="el" href="../../dd/d98/ptr_8h_source.html">fl/ptr.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../d8/d0c/template__magic_8h_source.html">fl/template_magic.h</a>&quot;</code><br />
+<div class="textblock"><code>#include &quot;<a class="el" href="../../df/d63/type__traits_8h_source.html">fl/type_traits.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d5/d47/utility_8h_source.html">fl/utility.h</a>&quot;</code><br />
 </div><div class="textblock"><div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Include dependency graph for functional.h:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-0-content" class="dyncontent" style="display:none;">
-<div class="center"><iframe scrolling="no" frameborder="0" src="../../d1/da4/functional_8h__incl.svg" width="592" height="476"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<div class="center"><iframe scrolling="no" frameborder="0" src="../../d1/da4/functional_8h__incl.svg" width="358" height="478"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
 </div>
 </div><div class="textblock"><div id="dynsection-1" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-1-trigger" src="../../closed.png" alt="+"/> This graph shows which files directly or indirectly include this file:</div>
@@ -127,18 +128,40 @@ $(function(){initNavTree('d8/dea/functional_8h.html','../../'); initResizable(tr
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
 Classes</h2></td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d6/d07/structfl_1_1less.html">fl::less&lt; T &gt;</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Binary function object that returns whether the first argument is less than the second.  <a href="../../d6/d07/structfl_1_1less.html#details">More...</a><br /></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dd/d83/structfl_1_1detail_1_1is__member__data__pointer.html">fl::detail::is_member_data_pointer&lt; T &gt;</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d0/db6/structfl_1_1less_3_01void_01_4.html">fl::less&lt; void &gt;</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Specialization of less for void, allowing for transparent comparisons.  <a href="../../d0/db6/structfl_1_1less_3_01void_01_4.html#details">More...</a><br /></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d2/df5/structfl_1_1detail_1_1is__member__data__pointer_3_01_t_01_c_1_1_5_01_4.html">fl::detail::is_member_data_pointer&lt; T C::* &gt;</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/dc1/structfl_1_1detail_1_1is__pointer__like.html">fl::detail::is_pointer_like&lt; T &gt;</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dd/d18/structfl_1_1detail_1_1is__pointer__like_3_01fl_1_1_ptr_3_01_t_01_4_01_4.html">fl::detail::is_pointer_like&lt; fl::Ptr&lt; T &gt; &gt;</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d1/d18/structfl_1_1detail_1_1is__pointer__like_3_01fl_1_1unique__ptr_3_01_t_00_01_deleter_01_4_01_4.html">fl::detail::is_pointer_like&lt; fl::unique_ptr&lt; T, Deleter &gt; &gt;</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d0/dd7/structfl_1_1detail_1_1is__pointer__like_3_01_t_01_5_01_4.html">fl::detail::is_pointer_like&lt; T * &gt;</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dd/d6a/structfl_1_1detail_1_1use__pointer__syntax.html">fl::detail::use_pointer_syntax&lt; T &gt;</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="namespaces" name="namespaces"></a>
 Namespaces</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">namespace &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></td></tr>
-<tr class="memdesc:d4/d36/namespacefl"><td class="mdescLeft">&#160;</td><td class="mdescRight">Implements a simple red square effect for 2D LED grids. <br /></td></tr>
+<tr class="memdesc:d4/d36/namespacefl"><td class="mdescLeft">&#160;</td><td class="mdescRight">IMPORTANT! <br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">namespace &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../df/d9e/namespacefl_1_1detail.html">fl::detail</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
+Functions</h2></td></tr>
+<tr class="memitem:ae43a5e60b4668db43ea11a4ea167baff" id="r_ae43a5e60b4668db43ea11a4ea167baff"><td class="memTemplParams" colspan="2">template&lt;typename F, typename... Args&gt; </td></tr>
+<tr class="memitem:ae43a5e60b4668db43ea11a4ea167baff"><td class="memTemplItemLeft" align="right" valign="top">auto&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_ae43a5e60b4668db43ea11a4ea167baff.html#ae43a5e60b4668db43ea11a4ea167baff">fl::invoke</a> (F &amp;&amp;f, Args &amp;&amp;... <a class="el" href="../../d7/da1/old_8h_a690f84001beb455ff2f2bbd5fdcc79d5.html#a690f84001beb455ff2f2bbd5fdcc79d5">args</a>) -&gt; <a class="el" href="../../d4/d36/namespacefl_ae4063344291567fafa1980062d8fe798.html#ae4063344291567fafa1980062d8fe798">enable_if_t</a>&lt;!<a class="el" href="../../dd/d54/structfl_1_1is__member__function__pointer.html">is_member_function_pointer</a>&lt; typename <a class="el" href="../../d4/d36/namespacefl.html#dd/d2f/structfl_1_1remove__reference">remove_reference</a>&lt; F &gt;::type &gt;::value &amp;&amp;!<a class="el" href="../../dd/d83/structfl_1_1detail_1_1is__member__data__pointer.html">detail::is_member_data_pointer</a>&lt; typename <a class="el" href="../../d4/d36/namespacefl.html#dd/d2f/structfl_1_1remove__reference">remove_reference</a>&lt; F &gt;::type &gt;::value, decltype(<a class="el" href="../../d4/d36/namespacefl_aed7245c077ae6f226d13c9ea795694a8.html#aed7245c077ae6f226d13c9ea795694a8">fl::forward</a>&lt; F &gt;(f)(<a class="el" href="../../d4/d36/namespacefl_aed7245c077ae6f226d13c9ea795694a8.html#aed7245c077ae6f226d13c9ea795694a8">fl::forward</a>&lt; Args &gt;(<a class="el" href="../../d7/da1/old_8h_a690f84001beb455ff2f2bbd5fdcc79d5.html#a690f84001beb455ff2f2bbd5fdcc79d5">args</a>)...))&gt;</td></tr>
+<tr class="separator:ae43a5e60b4668db43ea11a4ea167baff"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aaa15742550566fdf5d1b372e56157e83" id="r_aaa15742550566fdf5d1b372e56157e83"><td class="memTemplParams" colspan="2">template&lt;typename F, typename T1&gt; </td></tr>
+<tr class="memitem:aaa15742550566fdf5d1b372e56157e83"><td class="memTemplItemLeft" align="right" valign="top">auto&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_aaa15742550566fdf5d1b372e56157e83.html#aaa15742550566fdf5d1b372e56157e83">fl::invoke</a> (F &amp;&amp;f, T1 &amp;&amp;t1) -&gt; <a class="el" href="../../d4/d36/namespacefl_ae4063344291567fafa1980062d8fe798.html#ae4063344291567fafa1980062d8fe798">enable_if_t</a>&lt; <a class="el" href="../../dd/d83/structfl_1_1detail_1_1is__member__data__pointer.html">detail::is_member_data_pointer</a>&lt; typename <a class="el" href="../../d4/d36/namespacefl.html#dd/d2f/structfl_1_1remove__reference">remove_reference</a>&lt; F &gt;::type &gt;::value &amp;&amp;!<a class="el" href="../../dd/d6a/structfl_1_1detail_1_1use__pointer__syntax.html">detail::use_pointer_syntax</a>&lt; T1 &gt;::value, decltype(<a class="el" href="../../d4/d36/namespacefl_aed7245c077ae6f226d13c9ea795694a8.html#aed7245c077ae6f226d13c9ea795694a8">fl::forward</a>&lt; T1 &gt;(t1).*f)&gt;</td></tr>
+<tr class="separator:aaa15742550566fdf5d1b372e56157e83"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a165dae1c4d4ff24e46ccb72bdcb4cdd9" id="r_a165dae1c4d4ff24e46ccb72bdcb4cdd9"><td class="memTemplParams" colspan="2">template&lt;typename F, typename T1, typename... Args&gt; </td></tr>
+<tr class="memitem:a165dae1c4d4ff24e46ccb72bdcb4cdd9"><td class="memTemplItemLeft" align="right" valign="top">auto&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_a165dae1c4d4ff24e46ccb72bdcb4cdd9.html#a165dae1c4d4ff24e46ccb72bdcb4cdd9">fl::invoke</a> (F &amp;&amp;f, T1 &amp;&amp;t1, Args &amp;&amp;... <a class="el" href="../../d7/da1/old_8h_a690f84001beb455ff2f2bbd5fdcc79d5.html#a690f84001beb455ff2f2bbd5fdcc79d5">args</a>) -&gt; <a class="el" href="../../d4/d36/namespacefl_ae4063344291567fafa1980062d8fe798.html#ae4063344291567fafa1980062d8fe798">enable_if_t</a>&lt; <a class="el" href="../../dd/d54/structfl_1_1is__member__function__pointer.html">is_member_function_pointer</a>&lt; typename <a class="el" href="../../d4/d36/namespacefl.html#dd/d2f/structfl_1_1remove__reference">remove_reference</a>&lt; F &gt;::type &gt;::value &amp;&amp;!<a class="el" href="../../dd/d6a/structfl_1_1detail_1_1use__pointer__syntax.html">detail::use_pointer_syntax</a>&lt; T1 &gt;::value, decltype((<a class="el" href="../../d4/d36/namespacefl_aed7245c077ae6f226d13c9ea795694a8.html#aed7245c077ae6f226d13c9ea795694a8">fl::forward</a>&lt; T1 &gt;(t1).*f)(<a class="el" href="../../d4/d36/namespacefl_aed7245c077ae6f226d13c9ea795694a8.html#aed7245c077ae6f226d13c9ea795694a8">fl::forward</a>&lt; Args &gt;(<a class="el" href="../../d7/da1/old_8h_a690f84001beb455ff2f2bbd5fdcc79d5.html#a690f84001beb455ff2f2bbd5fdcc79d5">args</a>)...))&gt;</td></tr>
+<tr class="separator:a165dae1c4d4ff24e46ccb72bdcb4cdd9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 </div><!-- contents -->
 </div><!-- doc-content -->
@@ -147,7 +170,7 @@ Namespaces</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dir_4d1829fa9bd13d7db71e765b2707b248.html">fl</a></li><li class="navelem"><a class="el" href="../../d8/dea/functional_8h.html">functional.h</a></li>
-    <li class="footer">Generated on Tue Jun 24 2025 00:58:14 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Fri Aug 22 2025 20:59:34 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

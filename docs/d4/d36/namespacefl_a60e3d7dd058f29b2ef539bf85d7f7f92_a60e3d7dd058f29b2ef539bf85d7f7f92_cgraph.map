@@ -1,0 +1,10 @@
+<map id="fl::fetch_active_requests" name="fl::fetch_active_requests">
+<area shape="rect" id="Node000001" title="Get number of active requests." alt="" coords="5,42,187,67"/>
+<area shape="rect" id="Node000002" href="$d3/d35/classfl_1_1_fetch_manager_a0c37d0cd5fd58f9ffcf6dbd1e76d5aa5.html#a0c37d0cd5fd58f9ffcf6dbd1e76d5aa5" title=" " alt="" coords="242,5,421,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="187,41,228,36,229,41,188,46"/>
+<area shape="rect" id="Node000003" href="$d3/d35/classfl_1_1_fetch_manager_a20782bda3d3b0d416fb8d54f0f732bfb.html#a20782bda3d3b0d416fb8d54f0f732bfb" title=" " alt="" coords="235,70,428,95"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="188,63,222,67,221,72,187,68"/>
+<area shape="rect" id="Node000004" href="$d9/d5b/classfl_1_1_singleton_a7e65fe8dee6b2a23a8b6138fa2c274cb.html#a7e65fe8dee6b2a23a8b6138fa2c274cb" title=" " alt="" coords="476,70,639,95"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="428,80,462,80,462,85,428,85"/>
+<area shape="poly" id="edge4_Node000004_Node000004" title=" " alt="" coords="521,72,513,62,517,52,532,46,557,43,589,47,601,57,598,61,587,52,557,49,533,51,521,56,518,61,525,68"/>
+</map>

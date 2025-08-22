@@ -1,0 +1,9 @@
+<map id="plotSoftDot" name="plotSoftDot">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,31,100,56"/>
+<area shape="rect" id="Node000002" href="$dc/db7/examples_2_luminova_2luminova_8h_a51ece01deb8ffb2d71d6487c4171e369.html#a51ece01deb8ffb2d71d6487c4171e369" title=" " alt="" coords="148,31,219,56"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="100,41,134,41,134,46,100,46"/>
+<area shape="rect" id="Node000003" href="$d0/da8/group___scaling_gad7535ccda9c92470c4e6ee0265585555.html#gad7535ccda9c92470c4e6ee0265585555" title="Scale one byte by a second one, which is treated as the numerator of a fraction whose denominator is ..." alt="" coords="267,5,331,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="218,33,253,25,254,31,220,38"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_a1a755d397081546e180267b49c276428.html#a1a755d397081546e180267b49c276428" title=" " alt="" coords="271,55,326,80"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="220,48,258,56,257,62,219,53"/>
+</map>

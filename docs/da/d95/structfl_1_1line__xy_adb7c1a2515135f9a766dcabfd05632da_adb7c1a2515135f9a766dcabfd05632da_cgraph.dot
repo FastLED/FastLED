@@ -9,4 +9,6 @@ digraph "fl::line_xy::distance_to"
   Node1 [id="Node000001",label="fl::line_xy::distance_to",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
   Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
   Node2 [id="Node000002",label="fl::line_xy::distance\l_to_line_with_point",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/d95/structfl_1_1line__xy_a3806df0bfbbf0471d8844a503abbbfda.html#a3806df0bfbbf0471d8844a503abbbfda",tooltip=" "];
+  Node2 -> Node3 [id="edge2_Node000002_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::equal",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_acdddf03e2d40b1af890e252ac40a9e1f.html#acdddf03e2d40b1af890e252ac40a9e1f",tooltip=" "];
 }

@@ -21,7 +21,7 @@
 <!-- Node2 -->
 <g id="Node000002" class="node">
 <title>Node2</title>
-<g id="a_Node000002"><a xlink:href="../../d6/dd4/class_r_e_f_hardware_s_p_i_output_aed13aeec47cdee6166451607311f181c.html#aed13aeec47cdee6166451607311f181c" target="_top" xlink:title="A full cycle of writing a value for len bytes, including select, release, and waiting.">
+<g id="a_Node000002"><a xlink:href="../../d6/dd4/class_r_e_f_hardware_s_p_i_output_afd6e4dc4be2499c9657b369a4db99f7f.html#afd6e4dc4be2499c9657b369a4db99f7f" target="_top" xlink:title="A full cycle of writing a value for len bytes, including select, release, and waiting.">
 <polygon fill="white" stroke="#666666" points="298,-126 167,-126 167,-96 298,-96 298,-126"/>
 <text text-anchor="start" x="175" y="-114" font-family="Helvetica,sans-Serif" font-size="10.00">REFHardwareSPIOutput</text>
 <text text-anchor="middle" x="232.5" y="-103" font-family="Helvetica,sans-Serif" font-size="10.00">::writeBytes</text>
@@ -40,7 +40,7 @@
 <!-- Node4 -->
 <g id="Node000004" class="node">
 <title>Node4</title>
-<g id="a_Node000004"><a xlink:href="../../d6/dd4/class_r_e_f_hardware_s_p_i_output_a727c7315fab0f11994b879ee8a27460f.html#a727c7315fab0f11994b879ee8a27460f" target="_top" xlink:title="A full cycle of writing a value for len bytes, including select, release, and waiting.">
+<g id="a_Node000004"><a xlink:href="../../d6/dd4/class_r_e_f_hardware_s_p_i_output_ae46b2c93ab765399fb1eb58bdd4ec56c.html#ae46b2c93ab765399fb1eb58bdd4ec56c" target="_top" xlink:title="A full cycle of writing a value for len bytes, including select, release, and waiting.">
 <polygon fill="white" stroke="#666666" points="298,-78 167,-78 167,-48 298,-48 298,-78"/>
 <text text-anchor="start" x="175" y="-66" font-family="Helvetica,sans-Serif" font-size="10.00">REFHardwareSPIOutput</text>
 <text text-anchor="middle" x="232.5" y="-55" font-family="Helvetica,sans-Serif" font-size="10.00">::writeBytesValue</text>
@@ -78,7 +78,7 @@
 <!-- Node3 -->
 <g id="Node000003" class="node">
 <title>Node3</title>
-<g id="a_Node000003"><a xlink:href="../../d6/dd4/class_r_e_f_hardware_s_p_i_output_a585373e81d2509a01429f74503b7b56b.html#a585373e81d2509a01429f74503b7b56b" target="_top" xlink:title="A full cycle of writing a value for len bytes, including select, release, and waiting.">
+<g id="a_Node000003"><a xlink:href="../../d6/dd4/class_r_e_f_hardware_s_p_i_output_a006f0c4c224b739dea4caa19def41bc0.html#a006f0c4c224b739dea4caa19def41bc0" target="_top" xlink:title="A full cycle of writing a value for len bytes, including select, release, and waiting.">
 <polygon fill="white" stroke="#666666" points="131,-126 0,-126 0,-96 131,-96 131,-126"/>
 <text text-anchor="start" x="8" y="-114" font-family="Helvetica,sans-Serif" font-size="10.00">REFHardwareSPIOutput</text>
 <text text-anchor="middle" x="65.5" y="-103" font-family="Helvetica,sans-Serif" font-size="10.00">::writeBytes</text>

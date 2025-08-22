@@ -30,6 +30,7 @@ var lib8tion_8h =
     [ "bseconds16", "d5/df2/group___timekeeping_ga52659d1994f2f21eb05080c97417e93b.html#ga52659d1994f2f21eb05080c97417e93b", null ],
     [ "cubicwave8", "d1/d7a/group___waveform_generators_ga06b04a0cf955ec107d49b76e0cb35225.html#ga06b04a0cf955ec107d49b76e0cb35225", null ],
     [ "div1024_32_16", "d5/df2/group___timekeeping_ga5f95d6e55b4986bd88f662528cef717e.html#ga5f95d6e55b4986bd88f662528cef717e", null ],
+    [ "ease16InOutCubic", "d4/dfe/group___easing_ga24caadc096137c891057ace81245e6da.html#ga24caadc096137c891057ace81245e6da", null ],
     [ "ease16InOutQuad", "d4/dfe/group___easing_ga095436838e41397fad4dd50bb81f7ae8.html#ga095436838e41397fad4dd50bb81f7ae8", null ],
     [ "ease8InOutApprox", "d4/dfe/group___easing_ga2f3ddd2c392eec959a15d86d9c014388.html#ga2f3ddd2c392eec959a15d86d9c014388", null ],
     [ "ease8InOutCubic", "d4/dfe/group___easing_ga3fa6d71702477e71d7c0dd864eb1d568.html#ga3fa6d71702477e71d7c0dd864eb1d568", null ],

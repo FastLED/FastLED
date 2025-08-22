@@ -82,10 +82,10 @@
 <g id="Node000002" class="node">
 <title>Node2</title>
 <g id="a_Node000002"><a xlink:title=" ">
-<polygon fill="white" stroke="#666666" points="244,-252 96,-252 96,-211 244,-211 244,-252"/>
-<text text-anchor="start" x="104" y="-240" font-family="Helvetica,sans-Serif" font-size="10.00">ClocklessController</text>
-<text text-anchor="start" x="104" y="-229" font-family="Helvetica,sans-Serif" font-size="10.00">&lt; DATA_PIN, 2 *FMUL,</text>
-<text text-anchor="middle" x="170" y="-218" font-family="Helvetica,sans-Serif" font-size="10.00"> 5 *FMUL, 3 *FMUL, GRB &gt;</text>
+<polygon fill="white" stroke="#666666" points="265.5,-252 74.5,-252 74.5,-211 265.5,-211 265.5,-252"/>
+<text text-anchor="start" x="82.5" y="-240" font-family="Helvetica,sans-Serif" font-size="10.00">FASTLED_CLOCKLESS_CONTROLLER</text>
+<text text-anchor="start" x="82.5" y="-229" font-family="Helvetica,sans-Serif" font-size="10.00">&lt; DATA_PIN, 2 *FMUL, 5 *FMUL,</text>
+<text text-anchor="middle" x="170" y="-218" font-family="Helvetica,sans-Serif" font-size="10.00"> 3 *FMUL, GRB &gt;</text>
 </a>
 </g>
 </g>

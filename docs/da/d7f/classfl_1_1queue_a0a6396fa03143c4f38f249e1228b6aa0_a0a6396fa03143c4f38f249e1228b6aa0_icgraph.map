@@ -1,0 +1,15 @@
+<map id="fl::queue::queue" name="fl::queue::queue">
+<area shape="rect" id="Node000001" title="Default constructor &#45; creates an empty queue." alt="" coords="325,104,452,129"/>
+<area shape="rect" id="Node000002" href="$da/d7f/classfl_1_1queue_a8160d991b490b7ed1526eb869d0feedf.html#a8160d991b490b7ed1526eb869d0feedf" title="Copy constructor." alt="" coords="138,5,265,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="359,97,321,70,276,44,248,33,250,28,279,40,324,66,362,93"/>
+<area shape="rect" id="Node000003" href="$da/d7f/classfl_1_1queue_a6a930bc0a366b68332d98691677fd1bf.html#a6a930bc0a366b68332d98691677fd1bf" title="Move constructor." alt="" coords="138,55,265,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="326,103,250,83,251,78,328,98"/>
+<area shape="rect" id="Node000004" href="$da/d7f/classfl_1_1queue_a50fbe02210650afd08dbf47c49bead55.html#a50fbe02210650afd08dbf47c49bead55" title="Copy assignment operator." alt="" coords="125,104,277,129"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="312,119,278,119,278,114,312,114"/>
+<area shape="rect" id="Node000005" href="$da/d7f/classfl_1_1queue_ad19d16bb50a21416ba70072d523ed4e8.html#ad19d16bb50a21416ba70072d523ed4e8" title="Move assignment operator." alt="" coords="125,153,277,179"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="328,135,251,156,250,151,326,130"/>
+<area shape="rect" id="Node000006" href="$da/d7f/classfl_1_1queue_a7a195e3499ef988538ef11e39ae8cee2.html#a7a195e3499ef988538ef11e39ae8cee2" title="Swap the contents with another queue." alt="" coords="141,203,261,228"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="362,140,323,167,279,192,247,205,245,200,276,188,320,162,359,136"/>
+<area shape="rect" id="Node000007" href="$d4/d36/namespacefl_ae24e32a84a80f74bc7280dc55f21bedf.html#ae24e32a84a80f74bc7280dc55f21bedf" title="Swap two queues." alt="" coords="5,203,77,228"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="127,218,78,218,78,213,127,213"/>
+</map>

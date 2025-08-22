@@ -1,0 +1,21 @@
+<map id="fl::HSV16::ToRGB" name="fl::HSV16::ToRGB">
+<area shape="rect" id="Node000001" title=" " alt="" coords="625,104,756,129"/>
+<area shape="rect" id="Node000002" href="$d7/d82/struct_c_r_g_b_aafb129d5109b627df6c8401c6b5105ef.html#aafb129d5109b627df6c8401c6b5105ef" title="Allow construction from a fl::HSV16 color Enables automatic conversion from HSV16 to CRGB." alt="" coords="433,55,537,80"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="623,103,536,82,537,77,625,98"/>
+<area shape="rect" id="Node000003" href="$d4/d5d/structfl_1_1_h_s_v16_a0bd2c0fc64fc34d573637c10b849c320.html#a0bd2c0fc64fc34d573637c10b849c320" title=" " alt="" coords="405,104,564,129"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="612,119,564,119,564,114,612,114"/>
+<area shape="rect" id="Node000016" href="$d4/d5d/structfl_1_1_h_s_v16_a3ece902080f8d4dbaca82dbc974c58d0.html#a3ece902080f8d4dbaca82dbc974c58d0" title="Automatic conversion operator to CRGB Allows HSV16 to be automatically converted to CRGB." alt="" coords="392,153,577,179"/>
+<area shape="poly" id="edge9_Node000001_Node000016" title=" " alt="" coords="624,135,539,156,538,151,623,130"/>
+<area shape="rect" id="Node000004" href="$d7/d82/struct_c_r_g_b_a8b78ce444d74f2bc9e63d83bfd1b17ad.html#a8b78ce444d74f2bc9e63d83bfd1b17ad" title=" " alt="" coords="208,104,344,129"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="391,119,344,119,344,114,391,114"/>
+<area shape="rect" id="Node000005" href="$d7/d82/struct_c_r_g_b_afaf81accfbf08b61cc7cf2a4735fd5d6.html#afaf81accfbf08b61cc7cf2a4735fd5d6" title=" " alt="" coords="15,5,151,31"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="246,98,206,71,159,44,130,33,132,28,161,40,208,66,249,94"/>
+<area shape="rect" id="Node000006" href="$d4/d06/curr_8h_a251ace8542fe093844e4ed2709e8a3d7.html#a251ace8542fe093844e4ed2709e8a3d7" title=" " alt="" coords="55,55,110,80"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="212,103,109,77,111,71,213,98"/>
+<area shape="rect" id="Node000010" href="$d4/d06/curr_8h_af9691ba6aeb226dd50626f04206c6e28.html#af9691ba6aeb226dd50626f04206c6e28" title=" " alt="" coords="11,104,154,129"/>
+<area shape="poly" id="edge6_Node000004_Node000010" title=" " alt="" coords="194,119,154,119,154,114,194,114"/>
+<area shape="rect" id="Node000012" href="$d4/d06/curr_8h_a27ef46fa8abd1dedd29a3904d81622d2.html#a27ef46fa8abd1dedd29a3904d81622d2" title=" " alt="" coords="5,153,160,179"/>
+<area shape="poly" id="edge7_Node000004_Node000012" title=" " alt="" coords="213,135,134,156,133,151,212,130"/>
+<area shape="rect" id="Node000014" href="$db/df4/_color_boost_8h_a4a0d1f144188c96aecbb5efd649d400a.html#a4a0d1f144188c96aecbb5efd649d400a" title=" " alt="" coords="27,203,138,228"/>
+<area shape="poly" id="edge8_Node000004_Node000014" title=" " alt="" coords="248,140,208,167,161,192,130,205,128,200,159,188,205,162,245,135"/>
+</map>

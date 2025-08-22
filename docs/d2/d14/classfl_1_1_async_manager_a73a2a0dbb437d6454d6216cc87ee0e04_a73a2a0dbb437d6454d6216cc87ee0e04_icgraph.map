@@ -1,0 +1,5 @@
+<map id="fl::AsyncManager::total_active_tasks" name="fl::AsyncManager::total_active_tasks">
+<area shape="rect" id="Node000001" title="Get total number of active tasks across all runners." alt="" coords="219,5,391,45"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a56974e1806274d7f5ae4908ee357f0f1.html#a56974e1806274d7f5ae4908ee357f0f1" title="Get the number of active async tasks across all systems." alt="" coords="5,13,171,38"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="204,28,171,28,171,23,204,23"/>
+</map>

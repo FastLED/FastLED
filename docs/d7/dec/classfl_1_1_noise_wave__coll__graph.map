@@ -1,13 +1,11 @@
 <map id="fl::NoiseWave" name="fl::NoiseWave">
-<area shape="rect" id="Node000001" title=" " alt="" coords="101,271,212,296"/>
-<area shape="rect" id="Node000002" href="$d4/d1c/classfl_1_1_fx1d.html" title=" " alt="" coords="61,168,132,193"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="113,204,152,269,148,272,108,206"/>
-<area shape="rect" id="Node000003" href="$da/d5d/classfl_1_1_fx.html" title=" " alt="" coords="25,80,80,105"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="67,117,93,166,88,169,63,119"/>
-<area shape="rect" id="Node000004" href="$d6/d16/classfl_1_1_referent.html" title=" " alt="" coords="5,5,100,31"/>
-<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="55,45,55,80,50,80,50,45"/>
-<area shape="rect" id="Node000011" href="$d7/d6c/classfl_1_1_x_map.html" title=" " alt="" coords="105,80,179,105"/>
-<area shape="poly" id="edge4_Node000002_Node000011" title=" " alt="" coords="132,119,105,169,101,166,127,117"/>
-<area shape="rect" id="Node000012" href="$da/d7a/struct_noise_generator.html" title=" " alt="" coords="156,168,280,193"/>
-<area shape="poly" id="edge5_Node000001_Node000012" title=" " alt="" coords="206,206,166,272,161,269,202,204"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="81,196,192,221"/>
+<area shape="rect" id="Node000002" href="$d4/d1c/classfl_1_1_fx1d.html" title=" " alt="" coords="41,93,112,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="93,129,132,195,128,197,88,132"/>
+<area shape="rect" id="Node000003" href="$da/d5d/classfl_1_1_fx.html" title=" " alt="" coords="5,5,60,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="47,42,73,92,68,94,43,44"/>
+<area shape="rect" id="Node000004" href="$d7/d6c/classfl_1_1_x_map.html" title=" " alt="" coords="85,5,159,31"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="112,44,85,94,81,92,107,42"/>
+<area shape="rect" id="Node000005" href="$da/d7a/struct_noise_generator.html" title=" " alt="" coords="136,93,260,119"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="186,132,146,197,141,195,182,129"/>
 </map>

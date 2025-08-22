@@ -1,0 +1,23 @@
+<map id="fl::AsyncManager::instance" name="fl::AsyncManager::instance">
+<area shape="rect" id="Node000001" title=" " alt="" coords="648,104,845,129"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a56974e1806274d7f5ae4908ee357f0f1.html#a56974e1806274d7f5ae4908ee357f0f1" title="Get the number of active async tasks across all systems." alt="" coords="423,5,589,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="711,99,659,71,599,44,564,33,566,28,601,40,661,67,713,95"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_aed180d94e7fc99eb693c3d520f5faf8e.html#aed180d94e7fc99eb693c3d520f5faf8e" title="Check if any async systems have active tasks." alt="" coords="432,55,580,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="670,104,568,83,569,77,671,99"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_a9b3631ee5771ef8d36a072368e1d49c7.html#a9b3631ee5771ef8d36a072368e1d49c7" title="Run all registered async tasks once." alt="" coords="454,104,558,129"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="634,119,558,119,558,114,634,114"/>
+<area shape="rect" id="Node000013" href="$d3/d35/classfl_1_1_fetch_manager_ad90db51c87593c14830be13da6fa0136.html#ad90db51c87593c14830be13da6fa0136" title=" " alt="" coords="412,154,600,194"/>
+<area shape="poly" id="edge9_Node000001_Node000013" title=" " alt="" coords="680,135,591,157,590,151,679,130"/>
+<area shape="rect" id="Node000014" href="$d3/d35/classfl_1_1_fetch_manager_a54544b6df1aaf16db800dc35ac76f1a4.html#a54544b6df1aaf16db800dc35ac76f1a4" title="Update this async runner (called during async pumping)" alt="" coords="415,219,597,244"/>
+<area shape="poly" id="edge10_Node000001_Node000014" title=" " alt="" coords="719,139,666,174,601,208,565,221,563,216,599,204,663,170,716,135"/>
+<area shape="rect" id="Node000005" href="$d4/d36/namespacefl_a490bb1b7e97181543efd2c62768edda8.html#a490bb1b7e97181543efd2c62768edda8" title="Platform&#45;specific async yield function." alt="" coords="222,31,337,56"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="440,103,411,94,363,70,330,59,331,54,365,65,413,89,441,98"/>
+<area shape="rect" id="Node000010" href="$d4/d36/namespacefl_a32df246b375c92eca035330e08a84c79.html#a32df246b375c92eca035330e08a84c79" title="Legacy manual update for fetch promises (use fl::async_run() for new code)" alt="" coords="218,80,341,105"/>
+<area shape="poly" id="edge6_Node000004_Node000010" title=" " alt="" coords="440,112,341,102,341,96,441,107"/>
+<area shape="rect" id="Node000011" href="$d5/d1b/examples_2_async_2async_8h_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="254,129,305,155"/>
+<area shape="poly" id="edge7_Node000004_Node000011" title=" " alt="" coords="441,127,305,142,305,137,440,121"/>
+<area shape="rect" id="Node000012" href="$d5/d69/classfl_1_1_fetch_engine_listener_abdd28a0ff482cd6b1a1ee9fb72d5656d.html#abdd28a0ff482cd6b1a1ee9fb72d5656d" title=" " alt="" coords="195,179,364,219"/>
+<area shape="poly" id="edge8_Node000004_Node000012" title=" " alt="" coords="441,135,413,144,365,168,334,182,332,177,363,164,411,140,440,130"/>
+<area shape="rect" id="Node000006" href="$d4/d36/namespacefl_a422168cc1b8dc2e0a10dfedf921ac003.html#a422168cc1b8dc2e0a10dfedf921ac003" title="Synchronously wait for a promise to complete (ONLY safe in top&#45;level contexts)" alt="" coords="5,31,147,56"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="208,46,147,46,147,41,208,41"/>
+</map>

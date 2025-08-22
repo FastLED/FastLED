@@ -20,7 +20,7 @@
 <!-- Node2 -->
 <g id="Node000002" class="node">
 <title>Node2</title>
-<g id="a_Node000002"><a xlink:href="../../d6/d2c/class_c_l_e_d_controller_a34a490a6be2f618ffe6ed7d60be5590a.html#a34a490a6be2f618ffe6ed7d60be5590a" target="_top" xlink:title=" ">
+<g id="a_Node000002"><a xlink:href="../../d6/d2c/class_c_l_e_d_controller_aec9132a980f2049f3e8acae28c77425a.html#aec9132a980f2049f3e8acae28c77425a" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="366,-56 201,-56 201,-37 366,-37 366,-56"/>
 <text text-anchor="middle" x="283.5" y="-44" font-family="Helvetica,sans-Serif" font-size="10.00">CLEDController::setScreenMap</text>
 </a>
@@ -56,7 +56,7 @@
 <!-- Node3 -->
 <g id="Node000003" class="node">
 <title>Node3</title>
-<g id="a_Node000003"><a xlink:href="../../d6/d2c/class_c_l_e_d_controller_ad06833b1f048a6e63f36ba0256b4e6bd.html#ad06833b1f048a6e63f36ba0256b4e6bd" target="_top" xlink:title=" ">
+<g id="a_Node000003"><a xlink:href="../../d6/d2c/class_c_l_e_d_controller_a5c9c089e913b688b78d74af3c4f2a29c.html#a5c9c089e913b688b78d74af3c4f2a29c" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="165,-56 0,-56 0,-37 165,-37 165,-56"/>
 <text text-anchor="middle" x="82.5" y="-44" font-family="Helvetica,sans-Serif" font-size="10.00">CLEDController::setScreenMap</text>
 </a>

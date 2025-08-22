@@ -47,7 +47,7 @@
   </g>
 </defs>
 <script type="application/ecmascript">
-var viewWidth = 944;
+var viewWidth = 941;
 var viewHeight = 147;
 var sectionId = 'dynsection-0';
 </script>
@@ -59,18 +59,18 @@ var sectionId = 'dynsection-0';
 <g id="Node000001" class="node">
 <title>Node1</title>
 <g id="a_Node000001"><a xlink:title=" ">
-<polygon fill="#999999" stroke="#666666" points="936,-78.5 814,-78.5 814,-59.5 936,-59.5 936,-78.5"/>
-<text text-anchor="middle" x="875" y="-66.5" font-family="Helvetica,sans-Serif" font-size="10.00">fl::WaveSimulation1D</text>
+<polygon fill="#999999" stroke="#666666" points="933,-78.5 811,-78.5 811,-59.5 933,-59.5 933,-78.5"/>
+<text text-anchor="middle" x="872" y="-66.5" font-family="Helvetica,sans-Serif" font-size="10.00">fl::WaveSimulation1D</text>
 </a>
 </g>
 </g>
 <!-- Node2 -->
 <g id="Node000002" class="node">
 <title>Node2</title>
-<g id="a_Node000002"><a xlink:href="../../df/d0b/classfl_1_1scoped__ptr.html" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#666666" points="746,-84 592,-84 592,-54 746,-54 746,-84"/>
-<text text-anchor="start" x="600" y="-72" font-family="Helvetica,sans-Serif" font-size="10.00">fl::scoped_ptr&lt; fl</text>
-<text text-anchor="middle" x="669" y="-61" font-family="Helvetica,sans-Serif" font-size="10.00">::WaveSimulation1D_Real &gt;</text>
+<g id="a_Node000002"><a xlink:href="../../d6/d2e/classfl_1_1unique__ptr.html" target="_top" xlink:title=" ">
+<polygon fill="white" stroke="#666666" points="743,-84 589,-84 589,-54 743,-54 743,-84"/>
+<text text-anchor="start" x="597" y="-72" font-family="Helvetica,sans-Serif" font-size="10.00">fl::unique_ptr&lt; fl</text>
+<text text-anchor="middle" x="666" y="-61" font-family="Helvetica,sans-Serif" font-size="10.00">::WaveSimulation1D_Real &gt;</text>
 </a>
 </g>
 </g>
@@ -78,18 +78,18 @@ var sectionId = 'dynsection-0';
 <g id="edge1_Node000001_Node000002" class="edge">
 <title>Node2&#45;&gt;Node1</title>
 <g id="a_edge1_Node000001_Node000002"><a xlink:title=" ">
-<path fill="none" stroke="#9a32cd" stroke-dasharray="5,2" d="M756.28,-69C775.62,-69 795.74,-69 813.75,-69"/>
-<polygon fill="#9a32cd" stroke="#9a32cd" points="756.25,-65.5 746.25,-69 756.25,-72.5 756.25,-65.5"/>
+<path fill="none" stroke="#9a32cd" stroke-dasharray="5,2" d="M753.28,-69C772.62,-69 792.74,-69 810.75,-69"/>
+<polygon fill="#9a32cd" stroke="#9a32cd" points="753.25,-65.5 743.25,-69 753.25,-72.5 753.25,-65.5"/>
 </a>
 </g>
-<text text-anchor="middle" x="780" y="-72" font-family="Helvetica,sans-Serif" font-size="10.00" fill="grey"> mSim</text>
+<text text-anchor="middle" x="777" y="-72" font-family="Helvetica,sans-Serif" font-size="10.00" fill="grey"> mSim</text>
 </g>
 <!-- Node3 -->
 <g id="Node000003" class="node">
 <title>Node3</title>
 <g id="a_Node000003"><a xlink:href="../../da/df9/classfl_1_1_wave_simulation1_d___real.html" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#666666" points="436,-126.5 287,-126.5 287,-107.5 436,-107.5 436,-126.5"/>
-<text text-anchor="middle" x="361.5" y="-114.5" font-family="Helvetica,sans-Serif" font-size="10.00">fl::WaveSimulation1D_Real</text>
+<polygon fill="white" stroke="#666666" points="433,-126.5 284,-126.5 284,-107.5 433,-107.5 433,-126.5"/>
+<text text-anchor="middle" x="358.5" y="-114.5" font-family="Helvetica,sans-Serif" font-size="10.00">fl::WaveSimulation1D_Real</text>
 </a>
 </g>
 </g>
@@ -97,19 +97,19 @@ var sectionId = 'dynsection-0';
 <g id="edge2_Node000002_Node000003" class="edge">
 <title>Node3&#45;&gt;Node2</title>
 <g id="a_edge2_Node000002_Node000003"><a xlink:title=" ">
-<path fill="none" stroke="#9a32cd" stroke-dasharray="5,2" d="M433.95,-105.91C474.94,-99.54 527.37,-91.36 574,-84 579.79,-83.09 585.79,-82.14 591.82,-81.18"/>
-<polygon fill="#9a32cd" stroke="#9a32cd" points="433.4,-102.46 424.05,-107.45 434.47,-109.38 433.4,-102.46"/>
+<path fill="none" stroke="#9a32cd" stroke-dasharray="5,2" d="M430.95,-105.91C471.94,-99.54 524.37,-91.36 571,-84 576.79,-83.09 582.79,-82.14 588.82,-81.18"/>
+<polygon fill="#9a32cd" stroke="#9a32cd" points="430.4,-102.46 421.05,-107.45 431.47,-109.38 430.4,-102.46"/>
 </a>
 </g>
-<text text-anchor="middle" x="514" y="-105" font-family="Helvetica,sans-Serif" font-size="10.00" fill="grey"> ptr_</text>
+<text text-anchor="middle" x="511" y="-105" font-family="Helvetica,sans-Serif" font-size="10.00" fill="grey"> ptr_</text>
 </g>
 <!-- Node4 -->
 <g id="Node000004" class="node">
 <title>Node4</title>
 <g id="a_Node000004"><a xlink:href="../../db/ddd/classfl_1_1_heap_vector.html" target="_top" xlink:title=" ">
-<polygon fill="#fff0f0" stroke="red" points="131,-132 0,-132 0,-102 131,-102 131,-132"/>
-<text text-anchor="start" x="8" y="-120" font-family="Helvetica,sans-Serif" font-size="10.00">fl::HeapVector&lt; T,</text>
-<text text-anchor="middle" x="65.5" y="-109" font-family="Helvetica,sans-Serif" font-size="10.00"> Allocator &gt;&lt; int16_t &gt;</text>
+<polygon fill="#fff0f0" stroke="red" points="120,-132 8,-132 8,-102 120,-102 120,-132"/>
+<text text-anchor="start" x="16" y="-120" font-family="Helvetica,sans-Serif" font-size="10.00">fl::HeapVector&lt; T,</text>
+<text text-anchor="middle" x="64" y="-109" font-family="Helvetica,sans-Serif" font-size="10.00"> Allocator &gt;&lt; i16 &gt;</text>
 </a>
 </g>
 </g>
@@ -117,21 +117,21 @@ var sectionId = 'dynsection-0';
 <g id="edge3_Node000003_Node000004" class="edge">
 <title>Node4&#45;&gt;Node3</title>
 <g id="a_edge3_Node000003_Node000004"><a xlink:title=" ">
-<path fill="none" stroke="#9a32cd" stroke-dasharray="5,2" d="M141.23,-117C185.87,-117 242.35,-117 286.81,-117"/>
-<polygon fill="#9a32cd" stroke="#9a32cd" points="141.02,-113.5 131.02,-117 141.02,-120.5 141.02,-113.5"/>
+<path fill="none" stroke="#9a32cd" stroke-dasharray="5,2" d="M130.08,-117C175.65,-117 236.61,-117 283.95,-117"/>
+<polygon fill="#9a32cd" stroke="#9a32cd" points="130.02,-113.5 120.02,-117 130.02,-120.5 130.02,-113.5"/>
 </a>
 </g>
-<text text-anchor="middle" x="209" y="-131" font-family="Helvetica,sans-Serif" font-size="10.00" fill="grey"> grid1</text>
-<text text-anchor="middle" x="209" y="-120" font-family="Helvetica,sans-Serif" font-size="10.00" fill="grey">grid2</text>
+<text text-anchor="middle" x="206" y="-131" font-family="Helvetica,sans-Serif" font-size="10.00" fill="grey"> grid1</text>
+<text text-anchor="middle" x="206" y="-120" font-family="Helvetica,sans-Serif" font-size="10.00" fill="grey">grid2</text>
 </g>
 <!-- Node7 -->
 <g id="Node000007" class="node">
 <title>Node7</title>
-<g id="a_Node000007"><a xlink:href="../../d8/d3d/structfl_1_1_pointer_deleter.html" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#666666" points="428,-89.5 295,-89.5 295,-48.5 428,-48.5 428,-89.5"/>
-<text text-anchor="start" x="303" y="-77.5" font-family="Helvetica,sans-Serif" font-size="10.00">fl::PointerDeleter</text>
-<text text-anchor="start" x="303" y="-66.5" font-family="Helvetica,sans-Serif" font-size="10.00">&lt; fl::WaveSimulation1D</text>
-<text text-anchor="middle" x="361.5" y="-55.5" font-family="Helvetica,sans-Serif" font-size="10.00">_Real &gt;</text>
+<g id="a_Node000007"><a xlink:href="../../d5/d2b/structfl_1_1default__delete.html" target="_top" xlink:title=" ">
+<polygon fill="white" stroke="#666666" points="425,-89.5 292,-89.5 292,-48.5 425,-48.5 425,-89.5"/>
+<text text-anchor="start" x="300" y="-77.5" font-family="Helvetica,sans-Serif" font-size="10.00">fl::default_delete</text>
+<text text-anchor="start" x="300" y="-66.5" font-family="Helvetica,sans-Serif" font-size="10.00">&lt; fl::WaveSimulation1D</text>
+<text text-anchor="middle" x="358.5" y="-55.5" font-family="Helvetica,sans-Serif" font-size="10.00">_Real &gt;</text>
 </a>
 </g>
 </g>
@@ -139,18 +139,18 @@ var sectionId = 'dynsection-0';
 <g id="edge4_Node000002_Node000007" class="edge">
 <title>Node7&#45;&gt;Node2</title>
 <g id="a_edge4_Node000002_Node000007"><a xlink:title=" ">
-<path fill="none" stroke="#9a32cd" stroke-dasharray="5,2" d="M438.12,-69C484.94,-69 544.87,-69 591.79,-69"/>
-<polygon fill="#9a32cd" stroke="#9a32cd" points="438.04,-65.5 428.04,-69 438.04,-72.5 438.04,-65.5"/>
+<path fill="none" stroke="#9a32cd" stroke-dasharray="5,2" d="M435.12,-69C481.94,-69 541.87,-69 588.79,-69"/>
+<polygon fill="#9a32cd" stroke="#9a32cd" points="435.04,-65.5 425.04,-69 435.04,-72.5 435.04,-65.5"/>
 </a>
 </g>
-<text text-anchor="middle" x="514" y="-72" font-family="Helvetica,sans-Serif" font-size="10.00" fill="grey"> deleter_</text>
+<text text-anchor="middle" x="511" y="-72" font-family="Helvetica,sans-Serif" font-size="10.00" fill="grey"> deleter_</text>
 </g>
 <!-- Node8 -->
 <g id="Node000008" class="node">
 <title>Node8</title>
-<g id="a_Node000008"><a xlink:href="../../d8/d3d/structfl_1_1_pointer_deleter.html" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#666666" points="129.5,-78.5 1.5,-78.5 1.5,-59.5 129.5,-59.5 129.5,-78.5"/>
-<text text-anchor="middle" x="65.5" y="-66.5" font-family="Helvetica,sans-Serif" font-size="10.00">fl::PointerDeleter&lt; T &gt;</text>
+<g id="a_Node000008"><a xlink:href="../../d5/d2b/structfl_1_1default__delete.html" target="_top" xlink:title=" ">
+<polygon fill="white" stroke="#666666" points="128,-78.5 0,-78.5 0,-59.5 128,-59.5 128,-78.5"/>
+<text text-anchor="middle" x="64" y="-66.5" font-family="Helvetica,sans-Serif" font-size="10.00">fl::default_delete&lt; T &gt;</text>
 </a>
 </g>
 </g>
@@ -158,20 +158,20 @@ var sectionId = 'dynsection-0';
 <g id="edge5_Node000007_Node000008" class="edge">
 <title>Node8&#45;&gt;Node7</title>
 <g id="a_edge5_Node000007_Node000008"><a xlink:title=" ">
-<path fill="none" stroke="orange" stroke-dasharray="5,2" d="M139.82,-69C187.45,-69 249,-69 294.99,-69"/>
-<polygon fill="orange" stroke="orange" points="139.57,-65.5 129.57,-69 139.57,-72.5 139.57,-65.5"/>
+<path fill="none" stroke="orange" stroke-dasharray="5,2" d="M138.27,-69C185.49,-69 246.36,-69 291.97,-69"/>
+<polygon fill="orange" stroke="orange" points="138.11,-65.5 128.11,-69 138.11,-72.5 138.11,-65.5"/>
 </a>
 </g>
-<text text-anchor="start" x="149" y="-83" font-family="Helvetica,sans-Serif" font-size="10.00" fill="grey"> &lt; fl::WaveSimulation1D</text>
-<text text-anchor="middle" x="209" y="-72" font-family="Helvetica,sans-Serif" font-size="10.00" fill="grey">_Real &gt;</text>
+<text text-anchor="start" x="146" y="-83" font-family="Helvetica,sans-Serif" font-size="10.00" fill="grey"> &lt; fl::WaveSimulation1D</text>
+<text text-anchor="middle" x="206" y="-72" font-family="Helvetica,sans-Serif" font-size="10.00" fill="grey">_Real &gt;</text>
 </g>
 <!-- Node9 -->
 <g id="Node000009" class="node">
 <title>Node9</title>
-<g id="a_Node000009"><a xlink:href="../../df/d0b/classfl_1_1scoped__ptr.html" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#666666" points="412.5,-30 310.5,-30 310.5,0 412.5,0 412.5,-30"/>
-<text text-anchor="start" x="318.5" y="-18" font-family="Helvetica,sans-Serif" font-size="10.00">fl::scoped_ptr&lt; T,</text>
-<text text-anchor="middle" x="361.5" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00"> Deleter &gt;</text>
+<g id="a_Node000009"><a xlink:href="../../d6/d2e/classfl_1_1unique__ptr.html" target="_top" xlink:title=" ">
+<polygon fill="white" stroke="#666666" points="409,-30 308,-30 308,0 409,0 409,-30"/>
+<text text-anchor="start" x="316" y="-18" font-family="Helvetica,sans-Serif" font-size="10.00">fl::unique_ptr&lt; T,</text>
+<text text-anchor="middle" x="358.5" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00"> Deleter &gt;</text>
 </a>
 </g>
 </g>
@@ -179,12 +179,12 @@ var sectionId = 'dynsection-0';
 <g id="edge6_Node000002_Node000009" class="edge">
 <title>Node9&#45;&gt;Node2</title>
 <g id="a_edge6_Node000002_Node000009"><a xlink:title=" ">
-<path fill="none" stroke="orange" stroke-dasharray="5,2" d="M423,-20.76C465.5,-25.36 523.54,-32.73 574,-43 588.6,-45.97 604.27,-49.97 618.55,-53.94"/>
-<polygon fill="orange" stroke="orange" points="423.14,-17.26 412.82,-19.68 422.4,-24.22 423.14,-17.26"/>
+<path fill="none" stroke="orange" stroke-dasharray="5,2" d="M419.58,-20.72C462.12,-25.31 520.37,-32.7 571,-43 585.6,-45.97 601.27,-49.97 615.55,-53.94"/>
+<polygon fill="orange" stroke="orange" points="419.71,-17.21 409.39,-19.64 418.97,-24.17 419.71,-17.21"/>
 </a>
 </g>
-<text text-anchor="start" x="454" y="-57" font-family="Helvetica,sans-Serif" font-size="10.00" fill="grey"> &lt; fl::WaveSimulation1D</text>
-<text text-anchor="middle" x="514" y="-46" font-family="Helvetica,sans-Serif" font-size="10.00" fill="grey">_Real &gt;</text>
+<text text-anchor="start" x="451" y="-57" font-family="Helvetica,sans-Serif" font-size="10.00" fill="grey"> &lt; fl::WaveSimulation1D</text>
+<text text-anchor="middle" x="511" y="-46" font-family="Helvetica,sans-Serif" font-size="10.00" fill="grey">_Real &gt;</text>
 </g>
 </g>
 </svg>

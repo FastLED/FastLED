@@ -1,0 +1,22 @@
+<map id="fl/task.h" name="fl/task.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="287,5,361,31"/>
+<area shape="rect" id="Node000002" href="$d5/d1b/examples_2_async_2async_8h.html" title=" " alt="" coords="5,152,205,207"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="299,41,143,154,140,150,296,37"/>
+<area shape="rect" id="Node000003" href="$d0/d95/async_8cpp.html" title=" " alt="" coords="229,167,328,192"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="320,44,285,167,279,166,314,43"/>
+<area shape="rect" id="Node000004" href="$df/d4c/src_2fl_2async_8h.html" title="Generic asynchronous task management for FastLED." alt="" coords="323,79,407,104"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="340,41,361,77,356,80,335,44"/>
+<area shape="rect" id="Node000008" href="$d9/d9c/task_8cpp.html" title=" " alt="" coords="558,167,647,192"/>
+<area shape="poly" id="edge12_Node000001_Node000008" title=" " alt="" coords="357,35,584,164,581,169,354,40"/>
+<area shape="poly" id="edge4_Node000004_Node000002" title=" " alt="" coords="318,111,185,155,184,149,316,106"/>
+<area shape="poly" id="edge6_Node000004_Node000003" title=" " alt="" coords="346,115,293,168,289,164,342,112"/>
+<area shape="rect" id="Node000005" href="$d5/dec/_net_test_real_8h.html" title=" " alt="" coords="257,255,457,309"/>
+<area shape="poly" id="edge5_Node000004_Node000005" title=" " alt="" coords="367,118,361,254,356,254,362,118"/>
+<area shape="rect" id="Node000006" href="$d9/ddd/fetch_8cpp.html" title=" " alt="" coords="482,269,577,295"/>
+<area shape="poly" id="edge7_Node000004_Node000006" title=" " alt="" coords="422,104,461,122,495,150,514,181,525,214,532,269,527,270,520,215,509,183,491,154,458,127,420,109"/>
+<area shape="rect" id="Node000007" href="$d6/d6a/fetch_8h.html" title="Unified HTTP fetch API for FastLED (cross&#45;platform)" alt="" coords="403,167,482,192"/>
+<area shape="poly" id="edge8_Node000004_Node000007" title=" " alt="" coords="387,113,434,164,430,168,383,116"/>
+<area shape="poly" id="edge11_Node000004_Node000008" title=" " alt="" coords="414,106,540,150,576,164,574,169,538,154,413,111"/>
+<area shape="poly" id="edge9_Node000007_Node000005" title=" " alt="" coords="426,204,382,256,378,253,422,201"/>
+<area shape="poly" id="edge10_Node000007_Node000006" title=" " alt="" coords="464,201,522,268,517,271,460,204"/>
+</map>

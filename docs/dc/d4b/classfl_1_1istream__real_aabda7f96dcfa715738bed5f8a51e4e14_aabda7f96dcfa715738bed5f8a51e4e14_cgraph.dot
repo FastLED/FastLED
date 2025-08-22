@@ -1,0 +1,32 @@
+digraph "fl::istream_real::operator&gt;&gt;"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="LR";
+  Node1 [id="Node000001",label="fl::istream_real::operator\>\>",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl::istream_real::istream_real",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dc/d4b/classfl_1_1istream__real_ab593846ff4a004fbc44ab28ac7a80e5f.html#ab593846ff4a004fbc44ab28ac7a80e5f",tooltip=" "];
+  Node1 -> Node3 [id="edge2_Node000001_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::istream_real::readToken",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dc/d4b/classfl_1_1istream__real_adf98bd57fc49ef2c902259cdbca94771.html#adf98bd57fc49ef2c902259cdbca94771",tooltip=" "];
+  Node3 -> Node4 [id="edge3_Node000003_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl::string::append",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/db2/classfl_1_1string_a78222786068d86a8463f4e408dc393eb.html#a78222786068d86a8463f4e408dc393eb",tooltip=" "];
+  Node3 -> Node5 [id="edge4_Node000003_Node000005",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="fl::available",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a01186a22a1055c583d5408c116c84ffa.html#a01186a22a1055c583d5408c116c84ffa",tooltip=" "];
+  Node3 -> Node6 [id="edge5_Node000003_Node000006",color="steelblue1",style="solid",tooltip=" "];
+  Node6 [id="Node000006",label="fl::StrN::clear",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dc/d96/classfl_1_1_str_n_a6f3fee5553f985b5b5d995e7232a4a71.html#a6f3fee5553f985b5b5d995e7232a4a71",tooltip=" "];
+  Node3 -> Node7 [id="edge6_Node000003_Node000007",color="steelblue1",style="solid",tooltip=" "];
+  Node7 [id="Node000007",label="fl::StrN::empty",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dc/d96/classfl_1_1_str_n_a1e1d92d46d9311b6cb1fc94170bc8d6b.html#a1e1d92d46d9311b6cb1fc94170bc8d6b",tooltip=" "];
+  Node3 -> Node8 [id="edge7_Node000003_Node000008",color="steelblue1",style="solid",tooltip=" "];
+  Node8 [id="Node000008",label="fl::istream_real::readLine",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dc/d4b/classfl_1_1istream__real_ab70ff31d4c958447b46066a17a55d047.html#ab70ff31d4c958447b46066a17a55d047",tooltip=" "];
+  Node8 -> Node5 [id="edge8_Node000008_Node000005",color="steelblue1",style="solid",tooltip=" "];
+  Node8 -> Node9 [id="edge9_Node000008_Node000009",color="steelblue1",style="solid",tooltip=" "];
+  Node9 [id="Node000009",label="fl::read",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a18e7608a302c3628c24710b27480641b.html#a18e7608a302c3628c24710b27480641b",tooltip=" "];
+  Node3 -> Node10 [id="edge10_Node000003_Node000010",color="steelblue1",style="solid",tooltip=" "];
+  Node10 [id="Node000010",label="fl::istream_real::skipWhitespace",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dc/d4b/classfl_1_1istream__real_a1896b88f9d1cb20dd178716dc97c60c7.html#a1896b88f9d1cb20dd178716dc97c60c7",tooltip=" "];
+  Node10 -> Node5 [id="edge11_Node000010_Node000005",color="steelblue1",style="solid",tooltip=" "];
+  Node10 -> Node8 [id="edge12_Node000010_Node000008",color="steelblue1",style="solid",tooltip=" "];
+  Node10 -> Node10 [id="edge13_Node000010_Node000010",color="steelblue1",style="solid",tooltip=" "];
+}

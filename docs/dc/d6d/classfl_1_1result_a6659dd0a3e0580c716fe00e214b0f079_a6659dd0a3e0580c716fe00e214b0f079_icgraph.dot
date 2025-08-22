@@ -1,0 +1,23 @@
+digraph "fl::result::error"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="RL";
+  Node1 [id="Node000001",label="fl::result::error",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="Get the error value."];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl::result::result",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dc/d6d/classfl_1_1result_aaa632b50087b0395d207c7a1498e3921.html#aaa632b50087b0395d207c7a1498e3921",tooltip="Construct an error result."];
+  Node1 -> Node3 [id="edge2_Node000001_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::result::result",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dc/d6d/classfl_1_1result_a8e9e1bb0b91d2c6ad30a6054e06bdcd4.html#a8e9e1bb0b91d2c6ad30a6054e06bdcd4",tooltip="Construct an error result (move)"];
+  Node1 -> Node4 [id="edge3_Node000001_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl::result::error_message",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dc/d6d/classfl_1_1result_addee698c009fb513a8b4ceafa05f611f.html#addee698c009fb513a8b4ceafa05f611f",tooltip="Get the error message as a convenience."];
+  Node4 -> Node5 [id="edge4_Node000004_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="test_await_approach",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/dec/_net_test_real_8h_a75e6549812ad7bff897e0c92a225878a.html#a75e6549812ad7bff897e0c92a225878a",tooltip=" "];
+  Node5 -> Node6 [id="edge5_Node000005_Node000006",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node6 [id="Node000006",label="loop",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/dec/_net_test_real_8h_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f",tooltip=" "];
+  Node4 -> Node7 [id="edge6_Node000004_Node000007",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node7 [id="Node000007",label="test_json_await",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/dec/_net_test_real_8h_a648cd3d90f8e240cbbfe5cb934057124.html#a648cd3d90f8e240cbbfe5cb934057124",tooltip="APPROACH 4: JSON Response with await pattern   Same JSON handling but using await_top_level for synch..."];
+  Node7 -> Node6 [id="edge7_Node000007_Node000006",dir="back",color="steelblue1",style="solid",tooltip=" "];
+}

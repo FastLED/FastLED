@@ -1,0 +1,56 @@
+digraph "fl::fetch_options::url"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="RL";
+  Node1 [id="Node000001",label="fl::fetch_options::url",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="Get the URL for this request."];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl::fetch_options::\lfetch_options",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d49/classfl_1_1fetch__options_a73eb354da4d72180fa2092519f04d8d5.html#a73eb354da4d72180fa2092519f04d8d5",tooltip=" "];
+  Node2 -> Node3 [id="edge2_Node000002_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::fetch_options::body",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d49/classfl_1_1fetch__options_a38270ee520d0b35566a972e44006350b.html#a38270ee520d0b35566a972e44006350b",tooltip="Set request body."];
+  Node3 -> Node4 [id="edge3_Node000003_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl::fetch_delete",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a075cee505b6fb33f50d091c72119fe1b.html#a075cee505b6fb33f50d091c72119fe1b",tooltip="HTTP DELETE request."];
+  Node3 -> Node5 [id="edge4_Node000003_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="fl::fetch_get",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d4/d36/namespacefl_af42605edbdf3f35d997e6da5be2c02a5.html#af42605edbdf3f35d997e6da5be2c02a5",tooltip="HTTP GET request."];
+  Node5 -> Node6 [id="edge5_Node000005_Node000006",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node6 [id="Node000006",label="test_await_approach",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d5/dec/_net_test_real_8h_a75e6549812ad7bff897e0c92a225878a.html#a75e6549812ad7bff897e0c92a225878a",tooltip=" "];
+  Node3 -> Node11 [id="edge6_Node000003_Node000011",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node11 [id="Node000011",label="fl::fetch_head",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a022d6f3739e15bcb2c53ca8a989ef4cc.html#a022d6f3739e15bcb2c53ca8a989ef4cc",tooltip="HTTP HEAD request."];
+  Node3 -> Node12 [id="edge7_Node000003_Node000012",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node12 [id="Node000012",label="fl::fetch_http_options",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a275e9b11a1adc93d8fe97fd4c36a3fc8.html#a275e9b11a1adc93d8fe97fd4c36a3fc8",tooltip="HTTP OPTIONS request."];
+  Node3 -> Node13 [id="edge8_Node000003_Node000013",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node13 [id="Node000013",label="fl::fetch_patch",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a637eab154a69618fb83024fb6ca7a623.html#a637eab154a69618fb83024fb6ca7a623",tooltip="HTTP PATCH request."];
+  Node3 -> Node14 [id="edge9_Node000003_Node000014",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node14 [id="Node000014",label="fl::fetch_post",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_abd106b1e43c863c783b884d732271bc1.html#abd106b1e43c863c783b884d732271bc1",tooltip="HTTP POST request."];
+  Node3 -> Node15 [id="edge10_Node000003_Node000015",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node15 [id="Node000015",label="fl::fetch_put",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a5a10f48c7ebf47ace2e4c0243108fe69.html#a5a10f48c7ebf47ace2e4c0243108fe69",tooltip="HTTP PUT request."];
+  Node2 -> Node16 [id="edge11_Node000002_Node000016",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node16 [id="Node000016",label="fl::fetch_options::\lheader",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d49/classfl_1_1fetch__options_a541c0709606193eb2057cafa1aa42a29.html#a541c0709606193eb2057cafa1aa42a29",tooltip="Add header."];
+  Node16 -> Node4 [id="edge12_Node000016_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node16 -> Node5 [id="edge13_Node000016_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node16 -> Node11 [id="edge14_Node000016_Node000011",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node16 -> Node12 [id="edge15_Node000016_Node000012",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node16 -> Node13 [id="edge16_Node000016_Node000013",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node16 -> Node14 [id="edge17_Node000016_Node000014",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node16 -> Node15 [id="edge18_Node000016_Node000015",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node16 -> Node6 [id="edge19_Node000016_Node000006",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 -> Node17 [id="edge20_Node000002_Node000017",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node17 [id="Node000017",label="fl::fetch_options::json",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d49/classfl_1_1fetch__options_a06c20eb90ef7ea344d9df924bdd584b7.html#a06c20eb90ef7ea344d9df924bdd584b7",tooltip="Set JSON body with proper content type."];
+  Node2 -> Node18 [id="edge21_Node000002_Node000018",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node18 [id="Node000018",label="fl::fetch_options::\lmethod",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d49/classfl_1_1fetch__options_aa90449d4362979dd61fec08bf5843099.html#aa90449d4362979dd61fec08bf5843099",tooltip="Set HTTP method."];
+  Node2 -> Node19 [id="edge22_Node000002_Node000019",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node19 [id="Node000019",label="fl::fetch_options::\ltimeout",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d49/classfl_1_1fetch__options_a1a19b6646176204db31d1ab58cab1e57.html#a1a19b6646176204db31d1ab58cab1e57",tooltip="Set timeout in milliseconds."];
+  Node19 -> Node4 [id="edge23_Node000019_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node19 -> Node5 [id="edge24_Node000019_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node19 -> Node11 [id="edge25_Node000019_Node000011",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node19 -> Node12 [id="edge26_Node000019_Node000012",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node19 -> Node13 [id="edge27_Node000019_Node000013",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node19 -> Node14 [id="edge28_Node000019_Node000014",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node19 -> Node15 [id="edge29_Node000019_Node000015",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node19 -> Node6 [id="edge30_Node000019_Node000006",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node20 [id="edge31_Node000001_Node000020",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node20 [id="Node000020",label="fl::fetch_options::\lfetch_options",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d49/classfl_1_1fetch__options_ace31843e5769e94e3b0478ce8964b1fe.html#ace31843e5769e94e3b0478ce8964b1fe",tooltip=" "];
+}

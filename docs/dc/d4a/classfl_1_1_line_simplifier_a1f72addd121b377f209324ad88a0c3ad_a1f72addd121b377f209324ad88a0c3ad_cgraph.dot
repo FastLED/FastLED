@@ -10,7 +10,7 @@ digraph "fl::LineSimplifier::simplifyInplace"
   Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
   Node2 [id="Node000002",label="fl::LineSimplifier\l::simplifyInplaceT",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dc/d4a/classfl_1_1_line_simplifier_a5ede8373d86a97315503c19f738c4c74.html#a5ede8373d86a97315503c19f738c4c74",tooltip=" "];
   Node2 -> Node3 [id="edge2_Node000002_Node000003",color="steelblue1",style="solid",tooltip=" "];
-  Node3 [id="Node000003",label="fl::LineSimplifier\l::simplifyT",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dc/d4a/classfl_1_1_line_simplifier_ab2ceacbb40ab8270441755fdcdd4e5e0.html#ab2ceacbb40ab8270441755fdcdd4e5e0",tooltip=" "];
+  Node3 [id="Node000003",label="fl::LineSimplifier\l::simplifyT",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dc/d4a/classfl_1_1_line_simplifier_a1e11a20d5458f02bdcba9d036c78ef9b.html#a1e11a20d5458f02bdcba9d036c78ef9b",tooltip=" "];
   Node3 -> Node4 [id="edge3_Node000003_Node000004",color="steelblue1",style="solid",tooltip=" "];
-  Node4 [id="Node000004",label="fl::LineSimplifier\l::simplifyInternal",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$dc/d4a/classfl_1_1_line_simplifier_a2536fb35718c3aebc8274b305b407dee.html#a2536fb35718c3aebc8274b305b407dee",tooltip=" "];
+  Node4 [id="Node000004",label="fl::LineSimplifier\l::simplifyInternal",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$dc/d4a/classfl_1_1_line_simplifier_a64f1c9e03f55225bcffbe6209dc1cda6.html#a64f1c9e03f55225bcffbe6209dc1cda6",tooltip=" "];
 }

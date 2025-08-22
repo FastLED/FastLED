@@ -117,22 +117,22 @@ $(function(){initNavTree('db/db1/classfl_1_1_pir_ab0fbb6125acd5a8844be0646b219c7
 
 <p>Returns true if the PIR is “latched on” (within latchMs of last trigger). </p>
 
-<p class="definition">Definition at line <a class="el" href="../../d2/da7/pir_8cpp_source.html#l00045">45</a> of file <a class="el" href="../../d2/da7/pir_8cpp_source.html">pir.cpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">   45</span>                             {</div>
-<div class="line"><span class="lineno">   46</span>    <span class="keywordtype">bool</span> currentState = <a class="code hl_variable" href="../../db/db1/classfl_1_1_pir_a2329792016d61d3a7cd0a6757096c70a.html#a2329792016d61d3a7cd0a6757096c70a">mPir</a>.detect();</div>
-<div class="line"><span class="lineno">   47</span>    <span class="keywordflow">if</span> (currentState &amp;&amp; !<a class="code hl_variable" href="../../db/db1/classfl_1_1_pir_ab89387583ea269383ad1bea57ce41c0c.html#ab89387583ea269383ad1bea57ce41c0c">mLastState</a>) {</div>
-<div class="line"><span class="lineno">   48</span>        <a class="code hl_variable" href="../../db/db1/classfl_1_1_pir_aa0a1254ec52d900d49e42f465751f836.html#aa0a1254ec52d900d49e42f465751f836">mRamp</a>.trigger(now);</div>
-<div class="line"><span class="lineno">   49</span>    }</div>
-<div class="line"><span class="lineno">   50</span>    <a class="code hl_variable" href="../../db/db1/classfl_1_1_pir_ab89387583ea269383ad1bea57ce41c0c.html#ab89387583ea269383ad1bea57ce41c0c">mLastState</a> = currentState;</div>
-<div class="line"><span class="lineno">   51</span>    <span class="keywordflow">return</span> <a class="code hl_variable" href="../../db/db1/classfl_1_1_pir_aa0a1254ec52d900d49e42f465751f836.html#aa0a1254ec52d900d49e42f465751f836">mRamp</a>.isActive(now);</div>
-<div class="line"><span class="lineno">   52</span>}</div>
+<p class="definition">Definition at line <a class="el" href="../../d2/da7/pir_8cpp_source.html#l00048">48</a> of file <a class="el" href="../../d2/da7/pir_8cpp_source.html">pir.cpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">   48</span>                             {</div>
+<div class="line"><span class="lineno">   49</span>    <span class="keywordtype">bool</span> currentState = <a class="code hl_variable" href="../../db/db1/classfl_1_1_pir_a2329792016d61d3a7cd0a6757096c70a.html#a2329792016d61d3a7cd0a6757096c70a">mPir</a>.detect();</div>
+<div class="line"><span class="lineno">   50</span>    <span class="keywordflow">if</span> (currentState &amp;&amp; !<a class="code hl_variable" href="../../db/db1/classfl_1_1_pir_ab89387583ea269383ad1bea57ce41c0c.html#ab89387583ea269383ad1bea57ce41c0c">mLastState</a>) {</div>
+<div class="line"><span class="lineno">   51</span>        <a class="code hl_variable" href="../../db/db1/classfl_1_1_pir_aa0a1254ec52d900d49e42f465751f836.html#aa0a1254ec52d900d49e42f465751f836">mRamp</a>.trigger(now);</div>
+<div class="line"><span class="lineno">   52</span>    }</div>
+<div class="line"><span class="lineno">   53</span>    <a class="code hl_variable" href="../../db/db1/classfl_1_1_pir_ab89387583ea269383ad1bea57ce41c0c.html#ab89387583ea269383ad1bea57ce41c0c">mLastState</a> = currentState;</div>
+<div class="line"><span class="lineno">   54</span>    <span class="keywordflow">return</span> <a class="code hl_variable" href="../../db/db1/classfl_1_1_pir_aa0a1254ec52d900d49e42f465751f836.html#aa0a1254ec52d900d49e42f465751f836">mRamp</a>.isActive(now);</div>
+<div class="line"><span class="lineno">   55</span>}</div>
 <div class="ttc" id="aclassfl_1_1_pir_a2329792016d61d3a7cd0a6757096c70a_html_a2329792016d61d3a7cd0a6757096c70a"><div class="ttname"><a href="../../db/db1/classfl_1_1_pir_a2329792016d61d3a7cd0a6757096c70a.html#a2329792016d61d3a7cd0a6757096c70a">fl::Pir::mPir</a></div><div class="ttdeci">PirLowLevel mPir</div><div class="ttdef"><b>Definition</b> <a href="../../d9/dd3/pir_8h_source.html#l00068">pir.h:68</a></div></div>
 <div class="ttc" id="aclassfl_1_1_pir_aa0a1254ec52d900d49e42f465751f836_html_aa0a1254ec52d900d49e42f465751f836"><div class="ttname"><a href="../../db/db1/classfl_1_1_pir_aa0a1254ec52d900d49e42f465751f836.html#aa0a1254ec52d900d49e42f465751f836">fl::Pir::mRamp</a></div><div class="ttdeci">TimeRamp mRamp</div><div class="ttdef"><b>Definition</b> <a href="../../d9/dd3/pir_8h_source.html#l00069">pir.h:69</a></div></div>
 <div class="ttc" id="aclassfl_1_1_pir_ab89387583ea269383ad1bea57ce41c0c_html_ab89387583ea269383ad1bea57ce41c0c"><div class="ttname"><a href="../../db/db1/classfl_1_1_pir_ab89387583ea269383ad1bea57ce41c0c.html#ab89387583ea269383ad1bea57ce41c0c">fl::Pir::mLastState</a></div><div class="ttdeci">bool mLastState</div><div class="ttdef"><b>Definition</b> <a href="../../d9/dd3/pir_8h_source.html#l00070">pir.h:70</a></div></div>
 </div><!-- fragment -->
 <p class="reference">References <a class="el" href="../../d9/dd3/pir_8h_source.html#l00070">mLastState</a>, <a class="el" href="../../d9/dd3/pir_8h_source.html#l00068">mPir</a>, and <a class="el" href="../../d9/dd3/pir_8h_source.html#l00069">mRamp</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d2/da7/pir_8cpp_source.html#l00054">transition()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d2/da7/pir_8cpp_source.html#l00057">transition()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the caller graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -150,7 +150,7 @@ $(function(){initNavTree('db/db1/classfl_1_1_pir_ab0fbb6125acd5a8844be0646b219c7
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../db/db1/classfl_1_1_pir.html">Pir</a></li>
-    <li class="footer">Generated on Tue Jun 24 2025 00:58:15 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Fri Aug 22 2025 20:59:36 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

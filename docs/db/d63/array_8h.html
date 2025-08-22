@@ -110,7 +110,10 @@ $(function(){initNavTree('db/d63/array_8h.html','../../'); initResizable(true); 
 <div class="contents">
 <div class="textblock"><code>#include &lt;<a class="el" href="../../da/d66/string_8h_source.html">string.h</a>&gt;</code><br />
 <code>#include &quot;<a class="el" href="../../db/d36/inplacenew_8h_source.html">fl/inplacenew.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d0/dda/memfill_8h_source.html">fl/memfill.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="../../df/d63/type__traits_8h_source.html">fl/type_traits.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../df/d72/bit__cast_8h_source.html">fl/bit_cast.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d6/d23/initializer__list_8h_source.html">fl/initializer_list.h</a>&quot;</code><br />
 </div><div class="textblock"><div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Include dependency graph for array.h:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -123,7 +126,7 @@ $(function(){initNavTree('db/d63/array_8h.html','../../'); initResizable(true); 
 <div id="dynsection-1-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-1-content" class="dyncontent" style="display:none;">
-<div class="center"><iframe scrolling="no" frameborder="0" src="../../d3/d43/array_8h__dep__incl.svg" width="230" height="110"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<div class="center"><iframe scrolling="no" frameborder="0" src="../../d3/d43/array_8h__dep__incl.svg" width="527" height="124"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
 </div>
 </div>
 <p><a href="../../db/d63/array_8h_source.html">Go to the source code of this file.</a></p>
@@ -137,7 +140,7 @@ Classes</h2></td></tr>
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="namespaces" name="namespaces"></a>
 Namespaces</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">namespace &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></td></tr>
-<tr class="memdesc:d4/d36/namespacefl"><td class="mdescLeft">&#160;</td><td class="mdescRight">Implements a simple red square effect for 2D LED grids. <br /></td></tr>
+<tr class="memdesc:d4/d36/namespacefl"><td class="mdescLeft">&#160;</td><td class="mdescRight">IMPORTANT! <br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="define-members" name="define-members"></a>
@@ -149,13 +152,13 @@ Macros</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:a2ff8b62e652eeb56b871af1e65b14938" id="r_a2ff8b62e652eeb56b871af1e65b14938"><td class="memTemplParams" colspan="2">template&lt;typename T, size_t N&gt; </td></tr>
+<tr class="memitem:a2ff8b62e652eeb56b871af1e65b14938" id="r_a2ff8b62e652eeb56b871af1e65b14938"><td class="memTemplParams" colspan="2">template&lt;typename T, fl::size N&gt; </td></tr>
 <tr class="memitem:a2ff8b62e652eeb56b871af1e65b14938"><td class="memTemplItemLeft" align="right" valign="top">bool&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_a2ff8b62e652eeb56b871af1e65b14938.html#a2ff8b62e652eeb56b871af1e65b14938">fl::operator!=</a> (const <a class="el" href="../../d4/dca/classfl_1_1array.html">array</a>&lt; T, N &gt; &amp;lhs, const <a class="el" href="../../d4/dca/classfl_1_1array.html">array</a>&lt; T, N &gt; &amp;rhs)</td></tr>
 <tr class="separator:a2ff8b62e652eeb56b871af1e65b14938"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa369b492c97d1616d8437747b823ebac" id="r_aa369b492c97d1616d8437747b823ebac"><td class="memTemplParams" colspan="2">template&lt;typename T, size_t N&gt; </td></tr>
+<tr class="memitem:aa369b492c97d1616d8437747b823ebac" id="r_aa369b492c97d1616d8437747b823ebac"><td class="memTemplParams" colspan="2">template&lt;typename T, fl::size N&gt; </td></tr>
 <tr class="memitem:aa369b492c97d1616d8437747b823ebac"><td class="memTemplItemLeft" align="right" valign="top">bool&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_aa369b492c97d1616d8437747b823ebac.html#aa369b492c97d1616d8437747b823ebac">fl::operator==</a> (const <a class="el" href="../../d4/dca/classfl_1_1array.html">array</a>&lt; T, N &gt; &amp;lhs, const <a class="el" href="../../d4/dca/classfl_1_1array.html">array</a>&lt; T, N &gt; &amp;rhs)</td></tr>
 <tr class="separator:aa369b492c97d1616d8437747b823ebac"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a1d899b704a244b75b314311218852cf7" id="r_a1d899b704a244b75b314311218852cf7"><td class="memTemplParams" colspan="2">template&lt;typename T, size_t N&gt; </td></tr>
+<tr class="memitem:a1d899b704a244b75b314311218852cf7" id="r_a1d899b704a244b75b314311218852cf7"><td class="memTemplParams" colspan="2">template&lt;typename T, fl::size N&gt; </td></tr>
 <tr class="memitem:a1d899b704a244b75b314311218852cf7"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_a1d899b704a244b75b314311218852cf7.html#a1d899b704a244b75b314311218852cf7">fl::swap</a> (<a class="el" href="../../d4/dca/classfl_1_1array.html">array</a>&lt; T, N &gt; &amp;lhs, <a class="el" href="../../d4/dca/classfl_1_1array.html">array</a>&lt; T, N &gt; &amp;rhs) noexcept(noexcept(lhs.swap(rhs)))</td></tr>
 <tr class="separator:a1d899b704a244b75b314311218852cf7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
@@ -166,7 +169,7 @@ Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dir_4d1829fa9bd13d7db71e765b2707b248.html">fl</a></li><li class="navelem"><a class="el" href="../../db/d63/array_8h.html">array.h</a></li>
-    <li class="footer">Generated on Tue Jun 24 2025 00:58:14 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Fri Aug 22 2025 20:59:34 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

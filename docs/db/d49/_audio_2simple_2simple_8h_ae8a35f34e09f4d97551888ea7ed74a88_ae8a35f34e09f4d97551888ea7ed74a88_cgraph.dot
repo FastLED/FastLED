@@ -1,0 +1,16 @@
+digraph "audioProcessingControls"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="LR";
+  Node1 [id="Node000001",label="audioProcessingControls",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="attackTimeSeconds",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/d49/_audio_2simple_2simple_8h_a8e96a63243fb29bb5e0a9709a3864706.html#a8e96a63243fb29bb5e0a9709a3864706",tooltip=" "];
+  Node1 -> Node3 [id="edge2_Node000001_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="decayTimeSeconds",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/d49/_audio_2simple_2simple_8h_a0f670a5f10f891700cc108dc119a6c33.html#a0f670a5f10f891700cc108dc119a6c33",tooltip=" "];
+  Node1 -> Node4 [id="edge3_Node000001_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="outputTimeSec",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/d49/_audio_2simple_2simple_8h_a16a9f66abb019cd4874806b4c1b9496a.html#a16a9f66abb019cd4874806b4c1b9496a",tooltip=" "];
+}

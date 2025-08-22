@@ -15,10 +15,12 @@ digraph "pixel_controller.h"
   Node4 -> Node5 [id="edge4_Node000004_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node5 [id="Node000005",label="controller.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d2/dd9/controller_8h.html",tooltip="deprecated: base definitions used by led controllers for writing out led data"];
   Node1 -> Node4 [id="edge5_Node000001_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node1 -> Node148 [id="edge6_Node000001_Node000148",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node148 [id="Node000148",label="fx/2d/animartrix.hpp",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d3/dc3/animartrix_8hpp.html",tooltip=" "];
-  Node148 -> Node50 [id="edge7_Node000148_Node000050",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node50 [id="Node000050",label="/home/runner/work/FastLED\l/FastLED/examples/FxEngine\l/FxEngine.ino",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/d35/_fx_engine_8ino.html",tooltip="Demonstrates how to use the FxEngine to switch between different effects on a 2D LED matrix."];
-  Node148 -> Node96 [id="edge8_Node000148_Node000096",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node96 [id="Node000096",label="/home/runner/work/FastLED\l/FastLED/examples/wasm\l/wasm.ino",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/dd3/wasm_8ino.html",tooltip="Demonstrates an advanced ino file with multiple effects and UI elements."];
+  Node1 -> Node156 [id="edge6_Node000001_Node000156",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node156 [id="Node000156",label="fx/2d/animartrix.hpp",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d3/dc3/animartrix_8hpp.html",tooltip=" "];
+  Node156 -> Node40 [id="edge7_Node000156_Node000040",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node40 [id="Node000040",label="/home/runner/work/FastLED\l/FastLED/examples/FestivalStick/curr.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d06/curr_8h.html",tooltip=" "];
+  Node156 -> Node52 [id="edge8_Node000156_Node000052",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node52 [id="Node000052",label="/home/runner/work/FastLED\l/FastLED/examples/FxEngine\l/FxEngine.ino",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/d35/_fx_engine_8ino.html",tooltip="Demonstrates FxEngine for switching between effects."];
+  Node156 -> Node103 [id="edge9_Node000156_Node000103",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node103 [id="Node000103",label="/home/runner/work/FastLED\l/FastLED/examples/wasm\l/wasm_impl.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/d40/wasm__impl_8h.html",tooltip=" "];
 }

@@ -41,16 +41,18 @@ digraph "Color3i::Color3i"
   Node14 -> Node15 [id="edge19_Node000014_Node000015",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node15 [id="Node000015",label="Color3i::Mul",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d12/struct_color3i_ace8773746358b0a1681b8ab2274d9b07.html#ace8773746358b0a1681b8ab2274d9b07",tooltip=" "];
   Node1 -> Node16 [id="edge20_Node000001_Node000016",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node16 [id="Node000016",label="Color3i::Orange",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d12/struct_color3i_ae57016137f2bdb07e54cac8a36267f84.html#ae57016137f2bdb07e54cac8a36267f84",tooltip=" "];
+  Node16 [id="Node000016",label="Color3i::operator=",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d12/struct_color3i_a9d158ca13411a770c83b4d891cb15037.html#a9d158ca13411a770c83b4d891cb15037",tooltip=" "];
   Node1 -> Node17 [id="edge21_Node000001_Node000017",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node17 [id="Node000017",label="Color3i::Red",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d12/struct_color3i_a7c3c8de250985b4c6f6c50891bd5aaf2.html#a7c3c8de250985b4c6f6c50891bd5aaf2",tooltip=" "];
+  Node17 [id="Node000017",label="Color3i::Orange",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d12/struct_color3i_ae57016137f2bdb07e54cac8a36267f84.html#ae57016137f2bdb07e54cac8a36267f84",tooltip=" "];
   Node1 -> Node18 [id="edge22_Node000001_Node000018",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node18 [id="Node000018",label="Color3i::Set",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d12/struct_color3i_af7dd06a8925d0fac45aa4fb7fd019bf5.html#af7dd06a8925d0fac45aa4fb7fd019bf5",tooltip=" "];
-  Node18 -> Node18 [id="edge23_Node000018_Node000018",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node1 -> Node19 [id="edge24_Node000001_Node000019",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node19 [id="Node000019",label="Color3i::Sub",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d12/struct_color3i_a72d9fb0aef1f82f5d6847077622bcf46.html#a72d9fb0aef1f82f5d6847077622bcf46",tooltip=" "];
+  Node18 [id="Node000018",label="Color3i::Red",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d12/struct_color3i_a7c3c8de250985b4c6f6c50891bd5aaf2.html#a7c3c8de250985b4c6f6c50891bd5aaf2",tooltip=" "];
+  Node1 -> Node19 [id="edge23_Node000001_Node000019",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node19 [id="Node000019",label="Color3i::Set",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d12/struct_color3i_af7dd06a8925d0fac45aa4fb7fd019bf5.html#af7dd06a8925d0fac45aa4fb7fd019bf5",tooltip=" "];
+  Node19 -> Node19 [id="edge24_Node000019_Node000019",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node1 -> Node20 [id="edge25_Node000001_Node000020",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node20 [id="Node000020",label="Color3i::White",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d12/struct_color3i_afb1dfa7f20038b97dff263091cbef278.html#afb1dfa7f20038b97dff263091cbef278",tooltip=" "];
+  Node20 [id="Node000020",label="Color3i::Sub",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d12/struct_color3i_a72d9fb0aef1f82f5d6847077622bcf46.html#a72d9fb0aef1f82f5d6847077622bcf46",tooltip=" "];
   Node1 -> Node21 [id="edge26_Node000001_Node000021",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node21 [id="Node000021",label="Color3i::Yellow",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d12/struct_color3i_a10db2c3732b34fbc867223d188be9d07.html#a10db2c3732b34fbc867223d188be9d07",tooltip=" "];
+  Node21 [id="Node000021",label="Color3i::White",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d12/struct_color3i_afb1dfa7f20038b97dff263091cbef278.html#afb1dfa7f20038b97dff263091cbef278",tooltip=" "];
+  Node1 -> Node22 [id="edge27_Node000001_Node000022",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node22 [id="Node000022",label="Color3i::Yellow",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d12/struct_color3i_a10db2c3732b34fbc867223d188be9d07.html#a10db2c3732b34fbc867223d188be9d07",tooltip=" "];
 }

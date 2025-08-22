@@ -1,0 +1,5 @@
+<map id="fl::common_type_impl&lt; T, double, typename enable_if&lt;(is_integral&lt; T &gt;::value||is_floating_point&lt; T &gt;::value) &amp;&amp;!is_same&lt; T, double &gt;::value &gt;::type &gt;" name="fl::common_type_impl&lt; T, double, typename enable_if&lt;(is_integral&lt; T &gt;::value||is_floating_point&lt; T &gt;::value) &amp;&amp;!is_same&lt; T, double &gt;::value &gt;::type &gt;">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,181,220,295"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl.html#d4/d2b/structfl_1_1common__type__impl" title=" " alt="" coords="29,5,196,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="115,59,115,181,110,181,110,59"/>
+</map>

@@ -1,0 +1,31 @@
+<map id="fl::fetch_options::header" name="fl::fetch_options::header">
+<area shape="rect" id="Node000001" title="Add header." alt="" coords="533,174,668,214"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a075cee505b6fb33f50d091c72119fe1b.html#a075cee505b6fb33f50d091c72119fe1b" title="HTTP DELETE request." alt="" coords="347,5,465,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="579,163,539,107,513,78,484,52,448,33,451,28,487,48,517,74,543,104,583,160"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_af42605edbdf3f35d997e6da5be2c02a5.html#af42605edbdf3f35d997e6da5be2c02a5" title="HTTP GET request." alt="" coords="357,107,455,132"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="544,171,484,146,451,135,453,129,486,141,546,166"/>
+<area shape="rect" id="Node000004" href="$d5/dec/_net_test_real_8h_a75e6549812ad7bff897e0c92a225878a.html#a75e6549812ad7bff897e0c92a225878a" title=" " alt="" coords="113,56,270,81"/>
+<area shape="poly" id="edge16_Node000001_Node000004" title=" " alt="" coords="573,165,534,128,510,110,484,96,431,79,375,69,320,65,270,65,270,60,320,60,375,64,432,74,486,92,513,106,537,124,576,162"/>
+<area shape="rect" id="Node000009" href="$d4/d36/namespacefl_a022d6f3739e15bcb2c53ca8a989ef4cc.html#a022d6f3739e15bcb2c53ca8a989ef4cc" title="HTTP HEAD request." alt="" coords="351,156,461,181"/>
+<area shape="poly" id="edge11_Node000001_Node000009" title=" " alt="" coords="519,186,461,178,462,173,520,181"/>
+<area shape="rect" id="Node000010" href="$d4/d36/namespacefl_a275e9b11a1adc93d8fe97fd4c36a3fc8.html#a275e9b11a1adc93d8fe97fd4c36a3fc8" title="HTTP OPTIONS request." alt="" coords="327,205,485,231"/>
+<area shape="poly" id="edge12_Node000001_Node000010" title=" " alt="" coords="520,207,486,211,485,206,519,201"/>
+<area shape="rect" id="Node000011" href="$d4/d36/namespacefl_a637eab154a69618fb83024fb6ca7a623.html#a637eab154a69618fb83024fb6ca7a623" title="HTTP PATCH request." alt="" coords="349,255,463,280"/>
+<area shape="poly" id="edge13_Node000001_Node000011" title=" " alt="" coords="545,222,486,246,453,257,451,252,484,241,543,217"/>
+<area shape="rect" id="Node000012" href="$d4/d36/namespacefl_abd106b1e43c863c783b884d732271bc1.html#abd106b1e43c863c783b884d732271bc1" title="HTTP POST request." alt="" coords="353,304,459,329"/>
+<area shape="poly" id="edge14_Node000001_Node000012" title=" " alt="" coords="573,226,534,262,487,295,460,306,458,302,484,290,531,258,569,222"/>
+<area shape="rect" id="Node000013" href="$d4/d36/namespacefl_a5a10f48c7ebf47ace2e4c0243108fe69.html#a5a10f48c7ebf47ace2e4c0243108fe69" title="HTTP PUT request." alt="" coords="357,353,455,379"/>
+<area shape="poly" id="edge15_Node000001_Node000013" title=" " alt="" coords="585,228,545,287,518,318,487,344,457,359,455,354,484,340,514,314,541,284,580,225"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="343,107,245,84,246,79,344,102"/>
+<area shape="rect" id="Node000006" href="$d5/dec/_net_test_real_8h_a648cd3d90f8e240cbbfe5cb934057124.html#a648cd3d90f8e240cbbfe5cb934057124" title="APPROACH 4: JSON Response with await pattern &#160;&#160;Same JSON handling but using await_top_level for synch..." alt="" coords="129,105,253,131"/>
+<area shape="poly" id="edge5_Node000003_Node000006" title=" " alt="" coords="343,122,253,121,254,116,343,116"/>
+<area shape="rect" id="Node000007" href="$d5/dec/_net_test_real_8h_ac300da999139e52ab96307f86d7fa84d.html#ac300da999139e52ab96307f86d7fa84d" title="APPROACH 3: JSON Response Handling with FastLED&#39;s ideal JSON API This demonstrates fetch responses wi..." alt="" coords="118,155,265,180"/>
+<area shape="poly" id="edge7_Node000003_Node000007" title=" " alt="" coords="344,136,249,157,248,152,343,131"/>
+<area shape="rect" id="Node000008" href="$d5/dec/_net_test_real_8h_a63e6ab1f58438832fe951d98467c6db1.html#a63e6ab1f58438832fe951d98467c6db1" title=" " alt="" coords="104,204,279,229"/>
+<area shape="poly" id="edge9_Node000003_Node000008" title=" " alt="" coords="345,137,328,146,314,157,305,169,295,181,280,194,252,206,250,201,277,189,292,178,301,166,310,153,325,141,342,133"/>
+<area shape="rect" id="Node000005" href="$d5/dec/_net_test_real_8h_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="5,131,56,156"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="122,88,105,95,74,113,49,133,45,128,71,109,103,90,120,83"/>
+<area shape="poly" id="edge6_Node000006_Node000005" title=" " alt="" coords="116,133,57,142,56,137,115,127"/>
+<area shape="poly" id="edge8_Node000007_Node000005" title=" " alt="" coords="104,157,56,150,57,144,105,152"/>
+<area shape="poly" id="edge10_Node000008_Node000005" title=" " alt="" coords="124,202,103,194,72,176,47,158,50,154,75,172,105,189,126,197"/>
+</map>

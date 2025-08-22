@@ -1,0 +1,13 @@
+<map id="fl::rgb_2_rgbw_exact" name="fl::rgb_2_rgbw_exact">
+<area shape="rect" id="Node000001" title="Converts RGB to RGBW using a color transfer method from saturated color channels to white." alt="" coords="657,70,813,95"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a2d47aae01409bfa0cab642e6d0a3f126.html#a2d47aae01409bfa0cab642e6d0a3f126" title="Converts RGB to RGBW using one of the functions." alt="" coords="483,41,596,66"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="643,72,596,64,597,59,644,66"/>
+<area shape="rect" id="Node000006" href="$d4/d36/namespacefl_aefd6226cb20125a11f8f45bbac83be79.html#aefd6226cb20125a11f8f45bbac83be79" title=" " alt="" coords="469,91,609,131"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="644,98,610,103,609,98,643,93"/>
+<area shape="rect" id="Node000003" href="$d0/dee/struct_pixel_controller_aa75c347910343e54b608faf4f4a002bd.html#aa75c347910343e54b608faf4f4a002bd" title=" " alt="" coords="243,5,421,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="469,47,421,40,422,35,469,41"/>
+<area shape="rect" id="Node000005" href="$d4/d36/namespacefl_af1506f367a7e9c2e80eeeac7cefa420c.html#af1506f367a7e9c2e80eeeac7cefa420c" title=" " alt="" coords="275,70,389,95"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="470,66,389,77,388,72,469,61"/>
+<area shape="rect" id="Node000004" href="$d5/d83/class_r_g_b_w_emulated_controller_aba9a2f023f2950dbcdf3c2482f765350.html#aba9a2f023f2950dbcdf3c2482f765350" title="Send the LED data to the strip." alt="" coords="5,5,195,45"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="229,28,195,28,195,23,229,23"/>
+</map>

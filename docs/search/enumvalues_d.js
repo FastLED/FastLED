@@ -10,7 +10,11 @@ var searchData=
   ['omnimodeoff_7',['OmniModeOff',['../d8/dd0/midi___defs_8h_aa1cfd7d9d1fe50ec27b566e854e98263.html#aa1cfd7d9d1fe50ec27b566e854e98263a2ce9dd3e9df12c4f1e566a176aaf791f',1,'midi_Defs.h']]],
   ['omnimodeon_8',['OmniModeOn',['../d8/dd0/midi___defs_8h_aa1cfd7d9d1fe50ec27b566e854e98263.html#aa1cfd7d9d1fe50ec27b566e854e98263a5497ab1f712be1082c83f50a6135f486',1,'midi_Defs.h']]],
   ['orange_9',['Orange',['../d7/d82/struct_c_r_g_b_aeb40a08b7cb90c1e21bd408261558b99.html#aeb40a08b7cb90c1e21bd408261558b99a2799bd3f9097b026f471e0b09ae0c724',1,'CRGB']]],
-  ['orangered_10',['OrangeRed',['../d7/d82/struct_c_r_g_b_aeb40a08b7cb90c1e21bd408261558b99.html#aeb40a08b7cb90c1e21bd408261558b99aeb4c56dcf36ff4c6d5157833ad0de3b2',1,'CRGB']]],
-  ['orchid_11',['Orchid',['../d7/d82/struct_c_r_g_b_aeb40a08b7cb90c1e21bd408261558b99.html#aeb40a08b7cb90c1e21bd408261558b99a64a8d8e9363db411f50c029da041a44f',1,'CRGB']]],
-  ['overcastsky_12',['OvercastSky',['../d0/d89/group___color_enums_ga251e9e8dc2c7b981786b71706522b2a9.html#gga251e9e8dc2c7b981786b71706522b2a9ad0aebf757f0aa8fc45ba282bd25006f7',1,'color.h']]]
+  ['orange1_10',['Orange1',['../d7/d82/struct_c_r_g_b_aeb40a08b7cb90c1e21bd408261558b99.html#aeb40a08b7cb90c1e21bd408261558b99a0a4a28b0874d510074023b639f59d97a',1,'CRGB']]],
+  ['orange2_11',['Orange2',['../d7/d82/struct_c_r_g_b_aeb40a08b7cb90c1e21bd408261558b99.html#aeb40a08b7cb90c1e21bd408261558b99a932328dc54361f75fe13f7db79e0c4ef',1,'CRGB']]],
+  ['orange3_12',['Orange3',['../d7/d82/struct_c_r_g_b_aeb40a08b7cb90c1e21bd408261558b99.html#aeb40a08b7cb90c1e21bd408261558b99ae3ff3d2fe4057ce3368333071317ad05',1,'CRGB']]],
+  ['orange4_13',['Orange4',['../d7/d82/struct_c_r_g_b_aeb40a08b7cb90c1e21bd408261558b99.html#aeb40a08b7cb90c1e21bd408261558b99a0d45ff407e3e66beb76dd321fae03d9b',1,'CRGB']]],
+  ['orangered_14',['OrangeRed',['../d7/d82/struct_c_r_g_b_aeb40a08b7cb90c1e21bd408261558b99.html#aeb40a08b7cb90c1e21bd408261558b99aeb4c56dcf36ff4c6d5157833ad0de3b2',1,'CRGB']]],
+  ['orchid_15',['Orchid',['../d7/d82/struct_c_r_g_b_aeb40a08b7cb90c1e21bd408261558b99.html#aeb40a08b7cb90c1e21bd408261558b99a64a8d8e9363db411f50c029da041a44f',1,'CRGB']]],
+  ['overcastsky_16',['OvercastSky',['../d0/d89/group___color_enums_ga251e9e8dc2c7b981786b71706522b2a9.html#gga251e9e8dc2c7b981786b71706522b2a9ad0aebf757f0aa8fc45ba282bd25006f7',1,'color.h']]]
 ];

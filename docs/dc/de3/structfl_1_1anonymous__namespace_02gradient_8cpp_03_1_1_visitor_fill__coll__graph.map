@@ -1,12 +1,12 @@
 <map id="fl::anonymous_namespace{gradient.cpp}::VisitorFill" name="fl::anonymous_namespace{gradient.cpp}::VisitorFill">
-<area shape="rect" id="Node000001" title=" " alt="" coords="67,181,263,221"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="59,181,255,221"/>
 <area shape="rect" id="Node000002" href="$d8/de4/classfl_1_1_slice.html" title=" " alt="" coords="5,93,141,119"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="96,126,149,179,145,183,92,130"/>
-<area shape="rect" id="Node000003" href="$d7/d82/struct_c_r_g_b.html" title="Representation of an RGB pixel (Red, Green, Blue)" alt="" coords="44,5,103,31"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="76,45,76,93,71,93,71,45"/>
-<area shape="rect" id="Node000004" href="$d8/de4/classfl_1_1_slice.html" title=" " alt="" coords="164,5,271,31"/>
-<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="188,40,94,95,92,91,185,35"/>
-<area shape="rect" id="Node000005" href="$d8/de4/classfl_1_1_slice.html" title=" " alt="" coords="166,93,349,119"/>
-<area shape="poly" id="edge5_Node000005_Node000004" title=" " alt="" coords="231,42,254,92,249,94,226,44"/>
-<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="239,130,186,183,182,179,235,126"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="95,127,142,179,138,183,91,130"/>
+<area shape="rect" id="Node000003" href="$d7/d82/struct_c_r_g_b.html" title="Representation of an RGB pixel (Red, Green, Blue)" alt="" coords="31,5,89,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="62,45,64,69,71,92,66,94,59,70,57,45"/>
+<area shape="rect" id="Node000004" href="$d8/de4/classfl_1_1_slice.html" title=" " alt="" coords="151,5,257,31"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="172,40,144,57,90,95,87,91,141,52,169,35"/>
+<area shape="rect" id="Node000005" href="$d8/de4/classfl_1_1_slice.html" title=" " alt="" coords="165,93,320,119"/>
+<area shape="poly" id="edge5_Node000005_Node000004" title=" " alt="" coords="217,42,240,92,235,94,212,44"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="225,130,177,183,173,179,221,127"/>
 </map>

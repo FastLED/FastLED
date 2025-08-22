@@ -1,0 +1,28 @@
+<map id="drawVUMeter" name="drawVUMeter">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,153,116,179"/>
+<area shape="rect" id="Node000002" href="$da/dc7/advanced_8h_abd84f2f97c080f743cb0de181adcd8c7.html#abd84f2f97c080f743cb0de181adcd8c7" title=" " alt="" coords="188,5,276,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="67,152,103,98,131,67,162,40,174,33,177,37,166,44,135,71,108,102,71,155"/>
+<area shape="rect" id="Node000003" href="$da/dc7/advanced_8h_a0ed30b4d8b30f57c54b525aa2eff5da8.html#a0ed30b4d8b30f57c54b525aa2eff5da8" title=" " alt="" coords="189,55,275,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="75,151,114,121,163,89,176,83,178,88,165,94,117,125,79,155"/>
+<area shape="rect" id="Node000004" href="$da/dc7/advanced_8h_afaa5f070126ac5184a648b484e7cf276.html#afaa5f070126ac5184a648b484e7cf276" title=" " alt="" coords="181,104,283,129"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="105,151,173,131,174,136,106,156"/>
+<area shape="rect" id="Node000008" href="$d1/dfb/colorutils_8h_a3d488dd1e2d27e99307310527e51cad3.html#a3d488dd1e2d27e99307310527e51cad3" title=" " alt="" coords="165,153,299,179"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="116,163,151,163,151,169,116,169"/>
+<area shape="rect" id="Node000009" href="$da/dc7/advanced_8h_ac17afe8b8a0d48cf8ffdaada59b5a7c4.html#ac17afe8b8a0d48cf8ffdaada59b5a7c4" title=" " alt="" coords="164,203,300,228"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="106,176,174,196,173,201,105,181"/>
+<area shape="rect" id="Node000011" href="$d8/dd0/_fire_cylinder_8h_a470cec2dcb21e474c257065bb93bfcd1.html#a470cec2dcb21e474c257065bb93bfcd1" title=" " alt="" coords="198,252,266,277"/>
+<area shape="poly" id="edge10_Node000001_Node000011" title=" " alt="" coords="79,177,117,206,165,237,186,247,184,252,163,242,114,210,75,181"/>
+<area shape="rect" id="Node000012" href="$db/d49/_audio_2simple_2simple_8h_a366541da4b022a2bc47a7dc02a1c1936.html#a366541da4b022a2bc47a7dc02a1c1936" title=" " alt="" coords="209,325,255,351"/>
+<area shape="poly" id="edge11_Node000001_Node000012" title=" " alt="" coords="73,177,111,227,166,287,202,316,198,320,162,291,107,230,69,180"/>
+<area shape="rect" id="Node000005" href="$da/dc7/advanced_8h_a40fb0ce80fe239814f5a2d21922802b3.html#a40fb0ce80fe239814f5a2d21922802b3" title=" " alt="" coords="362,55,453,80"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="277,101,348,81,349,86,279,107"/>
+<area shape="rect" id="Node000006" href="$d1/dfb/colorutils_8h_a399e4e094995b8e97420b89a2dd6548b.html#a399e4e094995b8e97420b89a2dd6548b" title=" " alt="" coords="348,104,467,129"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="284,114,334,114,334,119,284,119"/>
+<area shape="rect" id="Node000007" href="$d1/dfb/colorutils_8h_afcada3a28df2b4491cbee30297e39ea7.html#afcada3a28df2b4491cbee30297e39ea7" title="Fill a range of LEDs with a solid color." alt="" coords="369,153,445,179"/>
+<area shape="poly" id="edge6_Node000004_Node000007" title=" " alt="" coords="279,127,357,149,356,154,277,132"/>
+<area shape="rect" id="Node000010" href="$da/dc7/advanced_8h_af93246357d0df3ce571494e6b78abb6c.html#af93246357d0df3ce571494e6b78abb6c" title=" " alt="" coords="358,203,457,228"/>
+<area shape="poly" id="edge9_Node000009_Node000010" title=" " alt="" coords="300,213,344,213,344,218,300,218"/>
+<area shape="poly" id="edge12_Node000012_Node000012" title=" " alt="" coords="206,329,198,319,200,308,211,301,232,299,258,303,265,309,266,316,261,317,260,312,256,308,232,304,213,306,204,311,203,318,211,326"/>
+<area shape="rect" id="Node000013" href="$d8/de4/classfl_1_1_slice_abe7b0c2539b61d18d30ee571680d5a91.html#abe7b0c2539b61d18d30ee571680d5a91" title=" " alt="" coords="356,325,459,351"/>
+<area shape="poly" id="edge13_Node000012_Node000013" title=" " alt="" coords="256,335,342,335,342,341,256,341"/>
+</map>

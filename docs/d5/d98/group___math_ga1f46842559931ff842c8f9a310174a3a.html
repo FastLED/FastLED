@@ -129,29 +129,32 @@ $(function(){initNavTree('d5/d98/group___math_ga1f46842559931ff842c8f9a310174a3a
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>mean average of i and j, rounded down </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="../../d5/dd1/math8_8h_source.html#l00216">216</a> of file <a class="el" href="../../d5/dd1/math8_8h_source.html">math8.h</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  216</span>                                                                {</div>
-<div class="line"><span class="lineno">  217</span><span class="preprocessor">#if AVG16_C == 1</span></div>
-<div class="line"><span class="lineno">  218</span>    <span class="keywordflow">return</span> (uint32_t)((uint32_t)(i) + (uint32_t)(j)) &gt;&gt; 1;</div>
-<div class="line"><span class="lineno">  219</span><span class="preprocessor">#elif AVG16_AVRASM == 1</span></div>
-<div class="line"><span class="lineno">  220</span>    <span class="keyword">asm</span> <span class="keyword">volatile</span>(</div>
-<div class="line"><span class="lineno">  221</span>        <span class="comment">/* First, add jLo (heh) to iLo, 9th bit overflows into C flag */</span></div>
-<div class="line"><span class="lineno">  222</span>        <span class="stringliteral">&quot;add %A[i], %A[j]    \n\t&quot;</span></div>
-<div class="line"><span class="lineno">  223</span>        <span class="comment">/* Now, add C + jHi to iHi, 17th bit overflows into C flag */</span></div>
-<div class="line"><span class="lineno">  224</span>        <span class="stringliteral">&quot;adc %B[i], %B[j]    \n\t&quot;</span></div>
-<div class="line"><span class="lineno">  225</span>        <span class="comment">/* Divide iHi by two, moving C flag into high 16th bit, old 9th bit now</span></div>
-<div class="line"><span class="lineno">  226</span><span class="comment">           in</span></div>
-<div class="line"><span class="lineno">  227</span><span class="comment">           C */</span></div>
-<div class="line"><span class="lineno">  228</span>        <span class="stringliteral">&quot;ror %B[i]        \n\t&quot;</span></div>
-<div class="line"><span class="lineno">  229</span>        <span class="comment">/* Divide iLo by two, moving C flag into high 8th bit */</span></div>
-<div class="line"><span class="lineno">  230</span>        <span class="stringliteral">&quot;ror %A[i]        \n\t&quot;</span></div>
-<div class="line"><span class="lineno">  231</span>        : [i] <span class="stringliteral">&quot;+r&quot;</span>(i)</div>
-<div class="line"><span class="lineno">  232</span>        : [j] <span class="stringliteral">&quot;r&quot;</span>(j));</div>
-<div class="line"><span class="lineno">  233</span>    <span class="keywordflow">return</span> i;</div>
-<div class="line"><span class="lineno">  234</span><span class="preprocessor">#else</span></div>
-<div class="line"><span class="lineno">  235</span><span class="preprocessor">#error &quot;No implementation for avg16 available.&quot;</span></div>
-<div class="line"><span class="lineno">  236</span><span class="preprocessor">#endif</span></div>
-<div class="line"><span class="lineno">  237</span>}</div>
+<p class="definition">Definition at line <a class="el" href="../../d5/dd1/math8_8h_source.html#l00225">225</a> of file <a class="el" href="../../d5/dd1/math8_8h_source.html">math8.h</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  225</span>                                                                {</div>
+<div class="line"><span class="lineno">  226</span><span class="preprocessor">#if AVG16_C == 1</span></div>
+<div class="line"><span class="lineno">  227</span>    <span class="comment">// return (uint32_t)((uint32_t)(i) + (uint32_t)(j)) &gt;&gt; 1;</span></div>
+<div class="line"><span class="lineno">  228</span>    uint32_t tmp = i;</div>
+<div class="line"><span class="lineno">  229</span>    tmp += j;</div>
+<div class="line"><span class="lineno">  230</span>    <span class="keywordflow">return</span> <span class="keyword">static_cast&lt;</span>uint16_t<span class="keyword">&gt;</span>(tmp &gt;&gt; 1);</div>
+<div class="line"><span class="lineno">  231</span><span class="preprocessor">#elif AVG16_AVRASM == 1</span></div>
+<div class="line"><span class="lineno">  232</span>    <span class="keyword">asm</span> <span class="keyword">volatile</span>(</div>
+<div class="line"><span class="lineno">  233</span>        <span class="comment">/* First, add jLo (heh) to iLo, 9th bit overflows into C flag */</span></div>
+<div class="line"><span class="lineno">  234</span>        <span class="stringliteral">&quot;add %A[i], %A[j]    \n\t&quot;</span></div>
+<div class="line"><span class="lineno">  235</span>        <span class="comment">/* Now, add C + jHi to iHi, 17th bit overflows into C flag */</span></div>
+<div class="line"><span class="lineno">  236</span>        <span class="stringliteral">&quot;adc %B[i], %B[j]    \n\t&quot;</span></div>
+<div class="line"><span class="lineno">  237</span>        <span class="comment">/* Divide iHi by two, moving C flag into high 16th bit, old 9th bit now</span></div>
+<div class="line"><span class="lineno">  238</span><span class="comment">           in</span></div>
+<div class="line"><span class="lineno">  239</span><span class="comment">           C */</span></div>
+<div class="line"><span class="lineno">  240</span>        <span class="stringliteral">&quot;ror %B[i]        \n\t&quot;</span></div>
+<div class="line"><span class="lineno">  241</span>        <span class="comment">/* Divide iLo by two, moving C flag into high 8th bit */</span></div>
+<div class="line"><span class="lineno">  242</span>        <span class="stringliteral">&quot;ror %A[i]        \n\t&quot;</span></div>
+<div class="line"><span class="lineno">  243</span>        : [i] <span class="stringliteral">&quot;+r&quot;</span>(i)</div>
+<div class="line"><span class="lineno">  244</span>        : [j] <span class="stringliteral">&quot;r&quot;</span>(j));</div>
+<div class="line"><span class="lineno">  245</span>    <span class="keywordflow">return</span> i;</div>
+<div class="line"><span class="lineno">  246</span><span class="preprocessor">#else</span></div>
+<div class="line"><span class="lineno">  247</span><span class="preprocessor">#error &quot;No implementation for avg16 available.&quot;</span></div>
+<div class="line"><span class="lineno">  248</span><span class="preprocessor">#endif</span></div>
+<div class="line"><span class="lineno">  249</span>}</div>
 </div><!-- fragment -->
 <p class="reference">References <a class="el" href="../../d4/d7a/lib8static_8h_source.html#l00012">LIB8STATIC_ALWAYS_INLINE</a>.</p>
 
@@ -164,7 +167,7 @@ $(function(){initNavTree('d5/d98/group___math_ga1f46842559931ff842c8f9a310174a3a
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d5/d98/group___math.html">Basic Math Operations</a></li>
-    <li class="footer">Generated on Tue Jun 24 2025 00:58:14 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Fri Aug 22 2025 20:59:34 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

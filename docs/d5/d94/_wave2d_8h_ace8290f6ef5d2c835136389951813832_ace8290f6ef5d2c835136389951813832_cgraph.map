@@ -1,0 +1,13 @@
+<map id="waveSimControls" name="waveSimControls">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,104,141,129"/>
+<area shape="rect" id="Node000002" href="$d8/d78/examples_2_wave_2wave_8h_aa7d6eb4e4f91328bcee5e19a6a76ee4e.html#aa7d6eb4e4f91328bcee5e19a6a76ee4e" title=" " alt="" coords="195,5,290,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="91,102,188,40,199,34,201,39,191,44,94,106"/>
+<area shape="rect" id="Node000003" href="$d8/d78/examples_2_wave_2wave_8h_a59bd4956b290ca419c035740016664d4.html#a59bd4956b290ca419c035740016664d4" title=" " alt="" coords="196,55,289,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="117,101,184,82,185,87,118,107"/>
+<area shape="rect" id="Node000004" href="$d8/d78/examples_2_wave_2wave_8h_a158d39a9e3154e76a27c891bfc9ecd29.html#a158d39a9e3154e76a27c891bfc9ecd29" title=" " alt="" coords="213,104,272,129"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="141,114,199,114,199,119,141,119"/>
+<area shape="rect" id="Node000005" href="$d8/d78/examples_2_wave_2wave_8h_aa9be298a86379d387b10e37b53bc3e3d.html#aa9be298a86379d387b10e37b53bc3e3d" title=" " alt="" coords="189,153,296,179"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="118,127,185,147,184,152,117,132"/>
+<area shape="rect" id="Node000006" href="$d5/d94/_wave2d_8h_a7e65311e6ea71eef029422a1873b9c79.html#a7e65311e6ea71eef029422a1873b9c79" title=" " alt="" coords="202,203,283,228"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="95,127,191,188,203,194,200,199,188,192,92,132"/>
+</map>

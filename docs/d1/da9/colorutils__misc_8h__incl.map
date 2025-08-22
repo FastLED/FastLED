@@ -1,8 +1,13 @@
 <map id="fl/colorutils_misc.h" name="fl/colorutils_misc.h">
-<area shape="rect" id="Node000001" title=" " alt="" coords="5,5,149,31"/>
-<area shape="rect" id="Node000002" href="$df/dd8/stdint_8h.html" title=" " alt="" coords="42,79,113,104"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="80,31,80,65,75,65,75,31"/>
-<area shape="poly" id="edge3_Node000002_Node000002" title=" " alt="" coords="106,76,128,77,136,83,139,92,133,103,120,107,118,102,130,99,134,91,132,86,126,82,105,81"/>
-<area shape="rect" id="Node000003" title=" " alt="" coords="40,152,115,177"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="80,104,80,138,75,138,75,104"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="9,5,153,31"/>
+<area shape="rect" id="Node000002" href="$df/dd8/stdint_8h.html" title=" " alt="" coords="5,152,88,177"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="81,32,55,139,50,138,76,30"/>
+<area shape="rect" id="Node000004" href="$d3/d7e/int_8h.html" title=" " alt="" coords="85,79,147,104"/>
+<area shape="poly" id="edge4_Node000001_Node000004" title=" " alt="" coords="89,30,107,65,102,67,85,32"/>
+<area shape="poly" id="edge3_Node000002_Node000002" title=" " alt="" coords="77,149,102,151,111,156,115,165,107,176,91,181,90,175,104,172,109,164,107,159,101,156,77,155"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="9,225,84,251"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="49,178,49,212,44,212,44,178"/>
+<area shape="poly" id="edge5_Node000004_Node000002" title=" " alt="" coords="106,106,69,144,65,140,103,102"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="137,152,255,177"/>
+<area shape="poly" id="edge6_Node000004_Node000005" title=" " alt="" coords="131,102,175,141,171,145,127,106"/>
 </map>

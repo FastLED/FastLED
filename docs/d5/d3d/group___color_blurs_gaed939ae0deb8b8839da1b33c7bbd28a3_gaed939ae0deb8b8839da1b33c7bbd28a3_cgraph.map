@@ -1,0 +1,21 @@
+<map id="fl::blur2d" name="fl::blur2d">
+<area shape="rect" id="Node000001" title="Legacy version of blur2d, which does not require an XYMap but instead implicitly binds to XY() functi..." alt="" coords="5,108,84,133"/>
+<area shape="rect" id="Node000002" href="$d5/d3d/group___color_blurs_gae8c57faab25bb9b60e0860795a85f968.html#gae8c57faab25bb9b60e0860795a85f968" title="Two&#45;dimensional blur filter." alt="" coords="183,51,262,76"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="78,105,131,86,169,75,171,80,133,91,79,110"/>
+<area shape="rect" id="Node000007" href="$d0/dce/classfl_1_1_x_y_map_a3010416f64ffbc83528c291f762d133a.html#a3010416f64ffbc83528c291f762d133a" title=" " alt="" coords="132,101,313,141"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="84,118,119,118,119,123,84,123"/>
+<area shape="rect" id="Node000010" href="$de/d2f/_p_j_r_c_spectrum_analyzer_8h_a310eea447890e3471c6b27fd79dc94fc.html#a310eea447890e3471c6b27fd79dc94fc" title=" " alt="" coords="203,165,242,191"/>
+<area shape="poly" id="edge10_Node000001_Node000010" title=" " alt="" coords="79,131,133,150,191,167,189,172,131,155,78,136"/>
+<area shape="rect" id="Node000003" href="$d5/d3d/group___color_blurs_ga25fe770c4f43629983a507267ac50236.html#ga25fe770c4f43629983a507267ac50236" title="Perform a blur1d() on every column of a rectangular matrix." alt="" coords="369,5,489,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="262,52,357,31,358,36,263,57"/>
+<area shape="rect" id="Node000006" href="$d5/d3d/group___color_blurs_ga8dfbf500824d0f8a2663fbd2180b1747.html#ga8dfbf500824d0f8a2663fbd2180b1747" title="Perform a blur1d() on every row of a rectangular matrix." alt="" coords="380,55,479,80"/>
+<area shape="poly" id="edge4_Node000002_Node000006" title=" " alt="" coords="262,61,366,63,366,69,262,67"/>
+<area shape="rect" id="Node000004" href="$d7/d82/struct_c_r_g_b_a271bc2ba8b57b41d0c1cda3eed0eb8da.html#a271bc2ba8b57b41d0c1cda3eed0eb8da" title="Scale down a RGB to N/256ths of its current brightness, using &quot;plain math&quot; dimming rules." alt="" coords="545,43,663,68"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="490,28,532,37,531,43,489,33"/>
+<area shape="poly" id="edge5_Node000006_Node000004" title=" " alt="" coords="479,61,531,58,532,63,479,67"/>
+<area shape="rect" id="Node000008" href="$d0/dce/classfl_1_1_x_y_map_abdbc76293c26157ec67716a365bd5460.html#abdbc76293c26157ec67716a365bd5460" title=" " alt="" coords="361,104,497,129"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="313,116,348,116,348,121,314,122"/>
+<area shape="rect" id="Node000009" href="$d6/daf/direct_8h_a0b3fd115c40d6ac683a810a572fc6104.html#a0b3fd115c40d6ac683a810a572fc6104" title=" " alt="" coords="575,117,633,143"/>
+<area shape="poly" id="edge9_Node000007_Node000009" title=" " alt="" coords="314,134,362,139,429,142,497,139,561,133,562,138,498,145,429,148,361,145,313,139"/>
+<area shape="poly" id="edge8_Node000008_Node000009" title=" " alt="" coords="498,119,561,124,560,129,497,125"/>
+</map>

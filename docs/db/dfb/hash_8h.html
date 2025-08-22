@@ -103,15 +103,18 @@ $(function(){initNavTree('db/dfb/hash_8h.html','../../'); initResizable(true); }
   <div class="summary">
 <a href="#nested-classes">Classes</a> &#124;
 <a href="#namespaces">Namespaces</a> &#124;
-<a href="#define-members">Macros</a> &#124;
 <a href="#func-members">Functions</a>  </div>
   <div class="headertitle"><div class="title">hash.h File Reference</div></div>
 </div><!--header-->
 <div class="contents">
 <div class="textblock"><code>#include &quot;<a class="el" href="../../d1/d93/str_8h_source.html">fl/str.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../d8/d0c/template__magic_8h_source.html">fl/template_magic.h</a>&quot;</code><br />
-<code>#include &lt;<a class="el" href="../../df/dd8/stdint_8h_source.html">stdint.h</a>&gt;</code><br />
+<code>#include &quot;<a class="el" href="../../df/d63/type__traits_8h_source.html">fl/type_traits.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d3/d7e/int_8h_source.html">fl/int.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../df/dd8/stdint_8h_source.html">fl/stdint.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d4/d64/force__inline_8h_source.html">fl/force_inline.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d0/dda/memfill_8h_source.html">fl/memfill.h</a>&quot;</code><br />
 <code>#include &lt;<a class="el" href="../../da/d66/string_8h_source.html">string.h</a>&gt;</code><br />
+<code>#include &quot;<a class="el" href="../../d4/d54/compiler__control_8h_source.html">fl/compiler_control.h</a>&quot;</code><br />
 </div><div class="textblock"><div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Include dependency graph for hash.h:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -124,7 +127,7 @@ $(function(){initNavTree('db/dfb/hash_8h.html','../../'); initResizable(true); }
 <div id="dynsection-1-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-1-content" class="dyncontent" style="display:none;">
-<div class="center"><iframe scrolling="no" frameborder="0" src="../../da/db6/hash_8h__dep__incl.svg" width="556" height="330"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../da/db6/hash_8h__dep__incl.svg" width="100%" height="591"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
 </div>
 </div>
 <p><a href="../../db/dfb/hash_8h_source.html">Go to the source code of this file.</a></p>
@@ -137,9 +140,31 @@ Classes</h2></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d6/dfd/structfl_1_1_hash.html">fl::Hash&lt; T &gt;</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../df/d0b/structfl_1_1_hash_3_01_ptr_3_01_t_01_4_01_4.html">fl::Hash&lt; Ptr&lt; T &gt; &gt;</a></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d3/d88/structfl_1_1_hash_3_01bool_01_4.html">fl::Hash&lt; bool &gt;</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d0/d6e/structfl_1_1_hash_3_01double_01_4.html">fl::Hash&lt; double &gt;</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/dc2/structfl_1_1_hash_3_01fl_1_1shared__ptr_3_01_t_01_4_01_4.html">fl::Hash&lt; fl::shared_ptr&lt; T &gt; &gt;</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../df/dc3/structfl_1_1_hash_3_01fl_1_1string_01_4.html">fl::Hash&lt; fl::string &gt;</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d0/d2e/structfl_1_1_hash_3_01fl_1_1u8_01_4.html">fl::Hash&lt; fl::u8 &gt;</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d1/ddb/structfl_1_1_hash_3_01fl_1_1_weak_ptr_3_01_t_01_4_01_4.html">fl::Hash&lt; fl::WeakPtr&lt; T &gt; &gt;</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d6/d34/structfl_1_1_hash_3_01float_01_4.html">fl::Hash&lt; float &gt;</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d0/de3/structfl_1_1_hash_3_01i16_01_4.html">fl::Hash&lt; i16 &gt;</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../df/d44/structfl_1_1_hash_3_01i32_01_4.html">fl::Hash&lt; i32 &gt;</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d7/dd5/structfl_1_1_hash_3_01i8_01_4.html">fl::Hash&lt; i8 &gt;</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dd/d98/structfl_1_1_hash_3_01_t_01_5_01_4.html">fl::Hash&lt; T * &gt;</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d6/d11/structfl_1_1_hash_3_01u16_01_4.html">fl::Hash&lt; u16 &gt;</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../da/d7e/structfl_1_1_hash_3_01u32_01_4.html">fl::Hash&lt; u32 &gt;</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d2/d8c/structfl_1_1_hash_3_01vec2_3_01_t_01_4_01_4.html">fl::Hash&lt; vec2&lt; T &gt; &gt;</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -147,22 +172,19 @@ Classes</h2></td></tr>
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="namespaces" name="namespaces"></a>
 Namespaces</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">namespace &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></td></tr>
-<tr class="memdesc:d4/d36/namespacefl"><td class="mdescLeft">&#160;</td><td class="mdescRight">Implements a simple red square effect for 2D LED grids. <br /></td></tr>
+<tr class="memdesc:d4/d36/namespacefl"><td class="mdescLeft">&#160;</td><td class="mdescRight">IMPORTANT! <br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-</table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="define-members" name="define-members"></a>
-Macros</h2></td></tr>
-<tr class="memitem:a2395514466cb42adb56911f5a1d8e357" id="r_a2395514466cb42adb56911f5a1d8e357"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../db/dfb/hash_8h_a2395514466cb42adb56911f5a1d8e357.html#a2395514466cb42adb56911f5a1d8e357">FASTLED_DEFINE_FAST_HASH</a>(T)</td></tr>
-<tr class="separator:a2395514466cb42adb56911f5a1d8e357"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:a6bee8cc671025d02e9f6f2445d408aab" id="r_a6bee8cc671025d02e9f6f2445d408aab"><td class="memItemLeft" align="right" valign="top">static uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_a6bee8cc671025d02e9f6f2445d408aab.html#a6bee8cc671025d02e9f6f2445d408aab">fl::fast_hash32</a> (uint32_t <a class="el" href="../../d8/d2c/_fire2023_8ino_a58b753d86c1d8504daa0c369f659f674.html#a58b753d86c1d8504daa0c369f659f674">x</a>) noexcept</td></tr>
-<tr class="separator:a6bee8cc671025d02e9f6f2445d408aab"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa84478a9495c8522562e0872d95a118e" id="r_aa84478a9495c8522562e0872d95a118e"><td class="memItemLeft" align="right" valign="top">static uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_aa84478a9495c8522562e0872d95a118e.html#aa84478a9495c8522562e0872d95a118e">fl::hash_pair</a> (uint32_t a, uint32_t b, uint32_t seed=0) noexcept</td></tr>
-<tr class="separator:aa84478a9495c8522562e0872d95a118e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a506444f6df497ba00b0e7742576eb336" id="r_a506444f6df497ba00b0e7742576eb336"><td class="memItemLeft" align="right" valign="top">static uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_a506444f6df497ba00b0e7742576eb336.html#a506444f6df497ba00b0e7742576eb336">fl::MurmurHash3_x86_32</a> (const void *key, size_t len, uint32_t seed=0)</td></tr>
-<tr class="separator:a506444f6df497ba00b0e7742576eb336"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afafceec46b888cb738941f4b7b31b4e3" id="r_afafceec46b888cb738941f4b7b31b4e3"><td class="memItemLeft" align="right" valign="top">static u32&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_afafceec46b888cb738941f4b7b31b4e3.html#afafceec46b888cb738941f4b7b31b4e3">fl::fast_hash32</a> (u32 <a class="el" href="../../db/d49/_audio_2simple_2simple_8h_a6150e0515f7202e2fb518f7206ed97dc.html#a6150e0515f7202e2fb518f7206ed97dc">x</a>) noexcept</td></tr>
+<tr class="separator:afafceec46b888cb738941f4b7b31b4e3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3b00d9e68999bc407fb65daf5070f990" id="r_a3b00d9e68999bc407fb65daf5070f990"><td class="memItemLeft" align="right" valign="top">static u32&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_a3b00d9e68999bc407fb65daf5070f990.html#a3b00d9e68999bc407fb65daf5070f990">fl::fast_hash64</a> (u64 <a class="el" href="../../db/d49/_audio_2simple_2simple_8h_a6150e0515f7202e2fb518f7206ed97dc.html#a6150e0515f7202e2fb518f7206ed97dc">x</a>) noexcept</td></tr>
+<tr class="separator:a3b00d9e68999bc407fb65daf5070f990"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0222a86d3eefd0e9bd026cdb95331675" id="r_a0222a86d3eefd0e9bd026cdb95331675"><td class="memItemLeft" align="right" valign="top">static u32&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_a0222a86d3eefd0e9bd026cdb95331675.html#a0222a86d3eefd0e9bd026cdb95331675">fl::hash_pair</a> (u32 a, u32 b, u32 seed=0) noexcept</td></tr>
+<tr class="separator:a0222a86d3eefd0e9bd026cdb95331675"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a88285056a8ca55a31295982a9790efd2" id="r_a88285056a8ca55a31295982a9790efd2"><td class="memItemLeft" align="right" valign="top">static u32&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_a88285056a8ca55a31295982a9790efd2.html#a88285056a8ca55a31295982a9790efd2">fl::MurmurHash3_x86_32</a> (const void *key, fl::size len, u32 seed=0)</td></tr>
+<tr class="separator:a88285056a8ca55a31295982a9790efd2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 </div><!-- contents -->
 </div><!-- doc-content -->
@@ -171,7 +193,7 @@ Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dir_4d1829fa9bd13d7db71e765b2707b248.html">fl</a></li><li class="navelem"><a class="el" href="../../db/dfb/hash_8h.html">hash.h</a></li>
-    <li class="footer">Generated on Tue Jun 24 2025 00:58:14 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Fri Aug 22 2025 20:59:34 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

@@ -8,5 +8,7 @@ digraph "fl::GradientInlined::GradientInlined"
   rankdir="RL";
   Node1 [id="Node000001",label="fl::GradientInlined\l::GradientInlined",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
   Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node2 [id="Node000002",label="fl::GradientInlined\l::GradientInlined",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/db5/classfl_1_1_gradient_inlined_a6ab945c413e28f949587e463103e3839.html#a6ab945c413e28f949587e463103e3839",tooltip=" "];
+  Node2 [id="Node000002",label="fl::GradientInlined\l::GradientInlined",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/db5/classfl_1_1_gradient_inlined_ac63e815d2c173f83f5e5f020dc57a878.html#ac63e815d2c173f83f5e5f020dc57a878",tooltip=" "];
+  Node1 -> Node3 [id="edge2_Node000001_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::GradientInlined\l::operator=",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/db5/classfl_1_1_gradient_inlined_a4a3daa2bf7dca6c4dfabd1f10b9438e4.html#a4a3daa2bf7dca6c4dfabd1f10b9438e4",tooltip=" "];
 }

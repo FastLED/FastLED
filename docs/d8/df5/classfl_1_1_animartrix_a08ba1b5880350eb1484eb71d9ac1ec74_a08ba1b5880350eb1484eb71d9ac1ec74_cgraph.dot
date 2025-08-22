@@ -13,5 +13,5 @@ digraph "fl::Animartrix::fxNext"
   Node3 [id="Node000003",label="fl::Animartrix::fxSet",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d8/df5/classfl_1_1_animartrix_ad444f074926b414d014fcd4eff21e1bc.html#ad444f074926b414d014fcd4eff21e1bc",tooltip=" "];
   Node3 -> Node2 [id="edge3_Node000003_Node000002",color="steelblue1",style="solid",tooltip=" "];
   Node3 -> Node4 [id="edge4_Node000003_Node000004",color="steelblue1",style="solid",tooltip=" "];
-  Node4 [id="Node000004",label="fl::Animartrix::getAnimationName",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d8/df5/classfl_1_1_animartrix_af3a0f4b52a728fdebd782b1cfed25749.html#af3a0f4b52a728fdebd782b1cfed25749",tooltip=" "];
+  Node4 [id="Node000004",label="fl::Animartrix::getAnimartrixName",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d8/df5/classfl_1_1_animartrix_a1ec03ccb6c450a48540cfce69e4d45cc.html#a1ec03ccb6c450a48540cfce69e4d45cc",tooltip=" "];
 }

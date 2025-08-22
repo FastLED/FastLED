@@ -1,7 +1,11 @@
 <map id="fl/sstream.h" name="fl/sstream.h">
-<area shape="rect" id="Node000001" title=" " alt="" coords="199,5,298,31"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="471,5,570,31"/>
 <area shape="rect" id="Node000002" href="$df/d40/examples_2_corkscrew_2corkscrew_8h.html" title=" " alt="" coords="5,79,223,133"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="221,40,156,81,154,76,218,36"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="458,35,236,81,224,84,223,79,235,76,457,30"/>
 <area shape="rect" id="Node000003" href="$d4/d06/curr_8h.html" title=" " alt="" coords="247,86,519,126"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="280,36,355,84,352,88,277,40"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="492,40,415,88,412,84,489,36"/>
+<area shape="rect" id="Node000004" href="$d5/d77/_fx_noise_ring_8h.html" title=" " alt="" coords="544,79,775,133"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="553,36,618,76,616,81,550,40"/>
+<area shape="rect" id="Node000005" href="$d9/d9c/task_8cpp.html" title=" " alt="" coords="799,93,888,119"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="584,27,681,46,788,76,822,91,820,96,786,81,680,52,583,32"/>
 </map>

@@ -1,0 +1,10 @@
+<map id="noiseFloor" name="noiseFloor">
+<area shape="rect" id="Node000001" title=" " alt="" coords="309,31,400,56"/>
+<area shape="rect" id="Node000002" href="$da/dc7/advanced_8h_a1cb66ba9db640f75ab7a41376a7ce3bb.html#a1cb66ba9db640f75ab7a41376a7ce3bb" title=" " alt="" coords="104,5,261,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="295,37,262,32,262,27,296,32"/>
+<area shape="rect" id="Node000004" href="$da/dc7/advanced_8h_a7ebf00c71c3618212a09f31e43a347f6.html#a7ebf00c71c3618212a09f31e43a347f6" title=" " alt="" coords="110,55,255,80"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="296,54,256,60,255,55,296,49"/>
+<area shape="rect" id="Node000003" href="$da/dc7/advanced_8h_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="5,31,56,56"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="93,36,57,42,56,37,92,30"/>
+<area shape="poly" id="edge4_Node000004_Node000003" title=" " alt="" coords="96,56,56,50,57,45,97,51"/>
+</map>

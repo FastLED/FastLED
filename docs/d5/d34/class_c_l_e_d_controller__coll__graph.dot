@@ -10,5 +10,5 @@ digraph "CLEDController"
   Node2 [id="Node000002",label="CRGB",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d7/d82/struct_c_r_g_b.html",tooltip="Representation of an RGB pixel (Red, Green, Blue)"];
   Node1 -> Node1 [id="edge2_Node000001_Node000001",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" m_pHead\nm_pNext\nm_pTail",fontcolor="grey" ];
   Node3 -> Node1 [id="edge3_Node000001_Node000003",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" mRgbMode",fontcolor="grey" ];
-  Node3 [id="Node000003",label="Rgbw",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$db/d74/struct_rgbw.html",tooltip=" "];
+  Node3 [id="Node000003",label="fl::Rgbw",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d7/d27/structfl_1_1_rgbw.html",tooltip=" "];
 }

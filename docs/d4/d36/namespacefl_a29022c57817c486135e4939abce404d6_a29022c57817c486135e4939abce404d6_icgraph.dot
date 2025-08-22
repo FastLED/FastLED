@@ -8,9 +8,21 @@ digraph "fl::clear"
   rankdir="RL";
   Node1 [id="Node000001",label="fl::clear",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
   Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node2 [id="Node000002",label="clearLeds",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/d1a/examples_2_downscale_2downscale_8h_a5801a13917aa5f680d836b0543c4100b.html#a5801a13917aa5f680d836b0543c4100b",tooltip=" "];
+  Node2 [id="Node000002",label="fl::InlinedVector::\lassign",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/d18/classfl_1_1_inlined_vector_ae307146be74da01706e18c20abc00da6.html#ae307146be74da01706e18c20abc00da6",tooltip=" "];
   Node2 -> Node3 [id="edge2_Node000002_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node3 [id="Node000003",label="loop",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/d1a/examples_2_downscale_2downscale_8h_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f",tooltip=" "];
-  Node1 -> Node4 [id="edge3_Node000001_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node4 [id="Node000004",label="loop",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d06/curr_8h_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f",tooltip=" "];
+  Node3 [id="Node000003",label="fl::InlinedVector::\loperator=",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/d18/classfl_1_1_inlined_vector_a6d7e7dfc18a73729bb1606aec27e8574.html#a6d7e7dfc18a73729bb1606aec27e8574",tooltip=" "];
+  Node2 -> Node4 [id="edge3_Node000002_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl::LineSimplifierExact\l::safeCopy",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/d32/classfl_1_1_line_simplifier_exact_a95eec92ab0f3e1dfcc0984dc8728913b.html#a95eec92ab0f3e1dfcc0984dc8728913b",tooltip=" "];
+  Node4 -> Node5 [id="edge4_Node000004_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="fl::LineSimplifierExact\l::simplify",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d5/d32/classfl_1_1_line_simplifier_exact_a70e5f21b0f1f867c9a935ff78759b70c.html#a70e5f21b0f1f867c9a935ff78759b70c",tooltip=" "];
+  Node1 -> Node7 [id="edge5_Node000001_Node000007",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node7 [id="Node000007",label="fl::InlinedVector::\lassign",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/d18/classfl_1_1_inlined_vector_acbd9c1c43be2de866492780a8156acc1.html#acbd9c1c43be2de866492780a8156acc1",tooltip=" "];
+  Node1 -> Node8 [id="edge6_Node000001_Node000008",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node8 [id="Node000008",label="clearLeds",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/d1a/examples_2_downscale_2downscale_8h_a5801a13917aa5f680d836b0543c4100b.html#a5801a13917aa5f680d836b0543c4100b",tooltip=" "];
+  Node8 -> Node9 [id="edge7_Node000008_Node000009",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node9 [id="Node000009",label="loop",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/d1a/examples_2_downscale_2downscale_8h_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f",tooltip=" "];
+  Node1 -> Node10 [id="edge8_Node000001_Node000010",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node10 [id="Node000010",label="loop",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dd/d55/_ease_in_out_8h_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f",tooltip=" "];
+  Node1 -> Node11 [id="edge9_Node000001_Node000011",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node11 [id="Node000011",label="fl::InlinedVector::\loperator=",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/d18/classfl_1_1_inlined_vector_ae4df648c397f252920d104f21e00ab0b.html#ae4df648c397f252920d104f21e00ab0b",tooltip=" "];
 }

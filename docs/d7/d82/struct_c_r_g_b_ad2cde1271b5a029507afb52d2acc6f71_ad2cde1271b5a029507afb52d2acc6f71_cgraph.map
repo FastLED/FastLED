@@ -1,0 +1,19 @@
+<map id="CRGB::setHSV" name="CRGB::setHSV">
+<area shape="rect" id="Node000001" title="Allow assignment from hue, saturation, and value." alt="" coords="5,79,120,104"/>
+<area shape="rect" id="Node000002" href="$d7/d82/struct_c_r_g_b_a4b0cc1cfefd9e0c66ea5c6583181df46.html#a4b0cc1cfefd9e0c66ea5c6583181df46" title="Default constructor." alt="" coords="184,53,288,79"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="120,80,170,73,171,78,121,86"/>
+<area shape="rect" id="Node000003" href="$db/dd1/crgb_8h_a26eaa8327d3606b692249e6449529c3b.html#a26eaa8327d3606b692249e6449529c3b" title="HSV conversion function selection based on compile&#45;time defines This allows users to configure which ..." alt="" coords="168,103,304,128"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="121,97,155,101,154,107,120,102"/>
+<area shape="rect" id="Node000004" href="$df/d9d/hsv2rgb_8cpp_ae7340e11e083ac0a5ea4d3ce7c3a6ed1.html#ae7340e11e083ac0a5ea4d3ce7c3a6ed1" title=" " alt="" coords="352,29,515,55"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="272,100,303,88,351,64,371,56,373,61,353,68,305,92,274,105"/>
+<area shape="rect" id="Node000007" href="$df/d9d/hsv2rgb_8cpp_a38921429c0d177dee3c43d81ba6ea5ba.html#a38921429c0d177dee3c43d81ba6ea5ba" title=" " alt="" coords="367,103,500,128"/>
+<area shape="poly" id="edge6_Node000003_Node000007" title=" " alt="" coords="304,113,352,113,352,118,304,118"/>
+<area shape="rect" id="Node000008" href="$df/d9d/hsv2rgb_8cpp_aa9d490009cb1d6ea0491e60b724d360f.html#aa9d490009cb1d6ea0491e60b724d360f" title="Inline version of hsv2rgb_spectrum which returns a CRGB object." alt="" coords="362,176,505,201"/>
+<area shape="poly" id="edge8_Node000003_Node000008" title=" " alt="" coords="272,126,386,168,384,173,270,131"/>
+<area shape="rect" id="Node000005" href="$d4/d36/namespacefl_a486349f0901f5cf84e65769cc1b854cd.html#a486349f0901f5cf84e65769cc1b854cd" title=" " alt="" coords="563,5,645,31"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="514,28,549,23,549,28,515,33"/>
+<area shape="rect" id="Node000006" href="$d4/d36/namespacefl_a47dce91f91c991288fe7edefe2137bcf.html#a47dce91f91c991288fe7edefe2137bcf" title=" " alt="" coords="565,55,643,80"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="515,51,552,57,551,62,514,57"/>
+<area shape="poly" id="edge7_Node000007_Node000007" title=" " alt="" coords="405,104,399,94,402,85,414,78,433,76,457,79,467,88,463,92,454,84,433,81,415,83,406,88,404,94,409,101"/>
+<area shape="poly" id="edge9_Node000008_Node000008" title=" " alt="" coords="405,177,399,168,402,158,414,152,433,149,457,153,467,161,463,165,454,158,433,155,415,157,406,161,404,167,409,174"/>
+</map>

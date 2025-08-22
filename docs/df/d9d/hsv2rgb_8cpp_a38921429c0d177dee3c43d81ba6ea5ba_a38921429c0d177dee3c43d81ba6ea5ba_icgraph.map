@@ -1,0 +1,20 @@
+<map id="hsv2rgb_rainbow" name="hsv2rgb_rainbow">
+<area shape="rect" id="Node000001" title=" " alt="" coords="371,104,504,129"/>
+<area shape="poly" id="edge7_Node000001_Node000001" title=" " alt="" coords="469,94,460,86,437,83,418,85,408,89,406,95,412,102,407,105,401,96,404,86,417,80,437,77,462,81,473,90"/>
+<area shape="rect" id="Node000002" href="$db/dd1/crgb_8h_a080b0edd6f603b8b0785f9a3086a1416.html#a080b0edd6f603b8b0785f9a3086a1416" title=" " alt="" coords="187,29,323,55"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="395,100,322,68,292,57,294,52,324,64,397,96"/>
+<area shape="rect" id="Node000003" href="$db/dd1/crgb_8h_a26eaa8327d3606b692249e6449529c3b.html#a26eaa8327d3606b692249e6449529c3b" title="HSV conversion function selection based on compile&#45;time defines This allows users to configure which ..." alt="" coords="187,79,323,104"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="357,108,323,103,323,98,358,103"/>
+<area shape="rect" id="Node000008" href="$df/d9d/hsv2rgb_8cpp_af722826b0b5d16450ca3da28382e7eb3.html#af722826b0b5d16450ca3da28382e7eb3" title=" " alt="" coords="188,128,321,153"/>
+<area shape="poly" id="edge8_Node000001_Node000008" title=" " alt="" coords="358,130,322,135,321,129,357,125"/>
+<area shape="rect" id="Node000009" href="$de/dc1/_h_s_v_test_8h_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="229,177,280,203"/>
+<area shape="poly" id="edge9_Node000001_Node000009" title=" " alt="" coords="395,137,324,167,281,184,279,179,322,162,393,132"/>
+<area shape="rect" id="Node000004" href="$d7/d82/struct_c_r_g_b_a679618ea3efb525132e97c9f9faf8335.html#a679618ea3efb525132e97c9f9faf8335" title="Allow construction from a CHSV color." alt="" coords="20,5,124,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="204,76,186,68,138,44,109,33,111,28,140,40,188,64,206,71"/>
+<area shape="rect" id="Node000005" href="$d7/d82/struct_c_r_g_b_ac0ef642e7d3bb2fca4846255984fc888.html#ac0ef642e7d3bb2fca4846255984fc888" title="Allow assignment from HSV color." alt="" coords="5,55,139,80"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="172,83,139,79,140,73,173,78"/>
+<area shape="rect" id="Node000006" href="$d7/d82/struct_c_r_g_b_ad2cde1271b5a029507afb52d2acc6f71.html#ad2cde1271b5a029507afb52d2acc6f71" title="Allow assignment from hue, saturation, and value." alt="" coords="15,104,129,129"/>
+<area shape="poly" id="edge5_Node000003_Node000006" title=" " alt="" coords="173,105,130,111,129,106,173,100"/>
+<area shape="rect" id="Node000007" href="$d7/d82/struct_c_r_g_b_a394d6326dc399e0ffb746edb2be93c5c.html#a394d6326dc399e0ffb746edb2be93c5c" title="Allow assignment from just a hue." alt="" coords="15,153,129,179"/>
+<area shape="poly" id="edge6_Node000003_Node000007" title=" " alt="" coords="204,111,188,118,140,143,109,156,107,151,138,138,186,113,202,106"/>
+</map>

@@ -113,15 +113,17 @@ $(function(){initNavTree('d9/d72/memmove_8h_source.html','../../'); initResizabl
 <div class="line"><a id="l00014" name="l00014"></a><span class="lineno"><a class="line" href="../../d6/de6/group___fast_memory_ga78fd4f882354956108ebaf92f74abd42.html#ga78fd4f882354956108ebaf92f74abd42">   14</a></span><span class="keywordtype">void</span> * <a class="code hl_function" href="../../d6/de6/group___fast_memory_ga78fd4f882354956108ebaf92f74abd42.html#ga78fd4f882354956108ebaf92f74abd42">memset8</a> ( <span class="keywordtype">void</span> * ptr, uint8_t value, uint16_t num ) __attribute__ ((noinline)) ;  </div>
 <div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span>}</div>
 <div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="preprocessor">#else</span></div>
-<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="comment">// on non-AVR platforms, these names just call standard libc.</span></div>
-<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="preprocessor">#define memmove8 memmove</span></div>
-<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="preprocessor">#define memcpy8 memcpy</span></div>
-<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="preprocessor">#define memset8 memset</span></div>
-<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="preprocessor">#endif</span></div>
-<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span></div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="preprocessor">#include &quot;<a class="code" href="../../d0/dda/memfill_8h.html">fl/memfill.h</a>&quot;</span></div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="comment">// on non-AVR platforms, these names just call standard libc.</span></div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="preprocessor">#define memmove8 memmove</span></div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="preprocessor">#define memcpy8 fl::memcopy</span></div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="preprocessor">#define memset8 fl::memfill</span></div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span></div>
 <div class="ttc" id="agroup___fast_memory_ga391de93a4b6ccee545531826515f3fc3_html_ga391de93a4b6ccee545531826515f3fc3"><div class="ttname"><a href="../../d6/de6/group___fast_memory_ga391de93a4b6ccee545531826515f3fc3.html#ga391de93a4b6ccee545531826515f3fc3">memcpy8</a></div><div class="ttdeci">void * memcpy8(void *dst, const void *src, uint16_t num)</div><div class="ttdoc">Faster alternative to memcpy() on AVR.</div></div>
 <div class="ttc" id="agroup___fast_memory_ga78fd4f882354956108ebaf92f74abd42_html_ga78fd4f882354956108ebaf92f74abd42"><div class="ttname"><a href="../../d6/de6/group___fast_memory_ga78fd4f882354956108ebaf92f74abd42.html#ga78fd4f882354956108ebaf92f74abd42">memset8</a></div><div class="ttdeci">void * memset8(void *ptr, uint8_t value, uint16_t num)</div><div class="ttdoc">Faster alternative to memset() on AVR.</div></div>
 <div class="ttc" id="agroup___fast_memory_gaf5537d0243691002376d6a49566a47d4_html_gaf5537d0243691002376d6a49566a47d4"><div class="ttname"><a href="../../d6/de6/group___fast_memory_gaf5537d0243691002376d6a49566a47d4.html#gaf5537d0243691002376d6a49566a47d4">memmove8</a></div><div class="ttdeci">void * memmove8(void *dst, const void *src, uint16_t num)</div><div class="ttdoc">Faster alternative to memmove() on AVR.</div></div>
+<div class="ttc" id="amemfill_8h_html"><div class="ttname"><a href="../../d0/dda/memfill_8h.html">memfill.h</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.9.3-->
@@ -129,7 +131,7 @@ $(function(){initNavTree('d9/d72/memmove_8h_source.html','../../'); initResizabl
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dir_d91669bda445047ed1892ac77a05ddb9.html">lib8tion</a></li><li class="navelem"><a class="el" href="../../d9/d72/memmove_8h.html">memmove.h</a></li>
-    <li class="footer">Generated on Tue Jun 24 2025 00:58:14 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Fri Aug 22 2025 20:59:33 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

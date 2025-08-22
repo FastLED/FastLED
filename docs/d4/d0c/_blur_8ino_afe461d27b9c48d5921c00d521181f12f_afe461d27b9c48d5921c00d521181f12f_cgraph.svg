@@ -31,7 +31,7 @@
 <!-- Node2 -->
 <g id="Node000002" class="node">
 <title>Node2</title>
-<g id="a_Node000002"><a xlink:href="../../d1/dfb/colorutils_8h_ae274d00629fbcf59d98bea80f6f930ca.html#ae274d00629fbcf59d98bea80f6f930ca" target="_top" xlink:title="One&#45;dimensional blur filter.">
+<g id="a_Node000002"><a xlink:href="../../d1/dfb/colorutils_8h_a78e409790f4b9e58bd1f285ca1b8616b.html#a78e409790f4b9e58bd1f285ca1b8616b" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="142,-56 95,-56 95,-37 142,-37 142,-56"/>
 <text text-anchor="middle" x="118.5" y="-44" font-family="Helvetica,sans-Serif" font-size="10.00">blur1d</text>
 </a>
@@ -49,7 +49,7 @@
 <!-- Node3 -->
 <g id="Node000003" class="node">
 <title>Node3</title>
-<g id="a_Node000003"><a xlink:href="../../d1/dfb/colorutils_8h_a90ef14e5ef0cc07c435a39eca3ddc490.html#a90ef14e5ef0cc07c435a39eca3ddc490" target="_top" xlink:title=" ">
+<g id="a_Node000003"><a xlink:href="../../d1/dfb/colorutils_8h_a399e4e094995b8e97420b89a2dd6548b.html#a399e4e094995b8e97420b89a2dd6548b" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="163,-19 74,-19 74,0 163,0 163,-19"/>
 <text text-anchor="middle" x="118.5" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">fadeToBlackBy</text>
 </a>

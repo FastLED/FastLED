@@ -12,8 +12,8 @@
 <g id="Node000001" class="node">
 <title>Node1</title>
 <g id="a_Node000001"><a xlink:title=" ">
-<polygon fill="#999999" stroke="#666666" points="38,-74 0,-74 0,-55 38,-55 38,-74"/>
-<text text-anchor="middle" x="19" y="-62" font-family="Helvetica,sans-Serif" font-size="10.00">loop</text>
+<polygon fill="#999999" stroke="#666666" points="38,-56 0,-56 0,-37 38,-37 38,-56"/>
+<text text-anchor="middle" x="19" y="-44" font-family="Helvetica,sans-Serif" font-size="10.00">loop</text>
 </a>
 </g>
 </g>
@@ -30,17 +30,17 @@
 <g id="edge1_Node000001_Node000002" class="edge">
 <title>Node1&#45;&gt;Node2</title>
 <g id="a_edge1_Node000001_Node000002"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M38.07,-67.39C47.46,-68.88 59.58,-70.82 72.15,-72.83"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="71.85,-76.32 82.28,-74.44 72.95,-69.41 71.85,-76.32"/>
+<path fill="none" stroke="#63b8ff" d="M38.39,-53.32C48.78,-57.09 62.05,-61.75 74,-65.5 80.09,-67.41 86.52,-69.32 92.89,-71.15"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="92.2,-74.59 102.77,-73.94 94.1,-67.85 92.2,-74.59"/>
 </a>
 </g>
 </g>
 <!-- Node8 -->
 <g id="Node000008" class="node">
 <title>Node8</title>
-<g id="a_Node000008"><a xlink:href="../../d2/d0d/group___random_ga1078b2029a50e86c93ccf4e3e1d85e7d.html#ga1078b2029a50e86c93ccf4e3e1d85e7d" target="_top" xlink:title="Add entropy into the random number generator.">
-<polygon fill="white" stroke="#666666" points="206,-56 74,-56 74,-37 206,-37 206,-56"/>
-<text text-anchor="middle" x="140" y="-44" font-family="Helvetica,sans-Serif" font-size="10.00">random16_add_entropy</text>
+<g id="a_Node000008"><a xlink:href="../../d2/d0d/group___random_ga17034d936ef716efe820e11c1df043b0.html#ga17034d936ef716efe820e11c1df043b0" target="_top" xlink:title="Generate a 16&#45;bit random number.">
+<polygon fill="white" stroke="#666666" points="173,-56 107,-56 107,-37 173,-37 173,-56"/>
+<text text-anchor="middle" x="140" y="-44" font-family="Helvetica,sans-Serif" font-size="10.00">random16</text>
 </a>
 </g>
 </g>
@@ -48,15 +48,33 @@
 <g id="edge7_Node000001_Node000008" class="edge">
 <title>Node1&#45;&gt;Node8</title>
 <g id="a_edge7_Node000001_Node000008"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M38.07,-61.77C45.91,-60.58 55.64,-59.11 65.95,-57.55"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="66.61,-60.99 75.97,-56.03 65.56,-54.07 66.61,-60.99"/>
+<path fill="none" stroke="#63b8ff" d="M38.07,-46.5C53.58,-46.5 76.53,-46.5 96.63,-46.5"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="96.83,-50 106.83,-46.5 96.83,-43 96.83,-50"/>
+</a>
+</g>
+</g>
+<!-- Node9 -->
+<g id="Node000009" class="node">
+<title>Node9</title>
+<g id="a_Node000009"><a xlink:href="../../d2/d0d/group___random_ga1078b2029a50e86c93ccf4e3e1d85e7d.html#ga1078b2029a50e86c93ccf4e3e1d85e7d" target="_top" xlink:title="Add entropy into the random number generator.">
+<polygon fill="white" stroke="#666666" points="206,-19 74,-19 74,0 206,0 206,-19"/>
+<text text-anchor="middle" x="140" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">random16_add_entropy</text>
+</a>
+</g>
+</g>
+<!-- Node1&#45;&gt;Node9 -->
+<g id="edge8_Node000001_Node000009" class="edge">
+<title>Node1&#45;&gt;Node9</title>
+<g id="a_edge8_Node000001_Node000009"><a xlink:title=" ">
+<path fill="none" stroke="#63b8ff" d="M38.44,-40.16C48.85,-36.63 62.12,-32.22 74,-28.5 81.02,-26.3 88.49,-24.05 95.77,-21.89"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="96.92,-25.2 105.53,-19.03 94.95,-18.49 96.92,-25.2"/>
 </a>
 </g>
 </g>
 <!-- Node3 -->
 <g id="Node000003" class="node">
 <title>Node3</title>
-<g id="a_Node000003"><a xlink:href="../../d1/dfb/colorutils_8h_a74e1895d1234ab29fef4458532e91090.html#a74e1895d1234ab29fef4458532e91090" target="_top" xlink:title=" ">
+<g id="a_Node000003"><a xlink:href="../../d1/dfb/colorutils_8h_a3d488dd1e2d27e99307310527e51cad3.html#a3d488dd1e2d27e99307310527e51cad3" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="343,-167 242,-167 242,-148 343,-148 343,-167"/>
 <text text-anchor="middle" x="292.5" y="-155" font-family="Helvetica,sans-Serif" font-size="10.00">ColorFromPalette</text>
 </a>

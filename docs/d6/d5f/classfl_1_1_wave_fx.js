@@ -1,10 +1,10 @@
 var classfl_1_1_wave_fx =
 [
     [ "Args", "d6/d5f/classfl_1_1_wave_fx_a95c9a65bf6147be56b0dc1c96a031627.html#a95c9a65bf6147be56b0dc1c96a031627", null ],
-    [ "WaveFx", "d6/d5f/classfl_1_1_wave_fx_a3b178e616d310ad0fb2dfd9f0960a8e3.html#a3b178e616d310ad0fb2dfd9f0960a8e3", null ],
+    [ "WaveFx", "d6/d5f/classfl_1_1_wave_fx_a6cee8ec0838deb4d3842f47e672b9395.html#a6cee8ec0838deb4d3842f47e672b9395", null ],
     [ "addf", "d6/d5f/classfl_1_1_wave_fx_ac6706df26461f7fd5d81e10cba589c01.html#ac6706df26461f7fd5d81e10cba589c01", null ],
     [ "draw", "d6/d5f/classfl_1_1_wave_fx_a52f77dc9e40955e24c4223c82f3f5848.html#a52f77dc9e40955e24c4223c82f3f5848", null ],
-    [ "fxName", "d6/d5f/classfl_1_1_wave_fx_afbfa7a823a636833c66daa15ed767950.html#afbfa7a823a636833c66daa15ed767950", null ],
+    [ "fxName", "d6/d5f/classfl_1_1_wave_fx_af1aacd7fb6fdf1f3a9ec9f3cb226eddb.html#af1aacd7fb6fdf1f3a9ec9f3cb226eddb", null ],
     [ "getu8", "d6/d5f/classfl_1_1_wave_fx_a454ee66d71edad39b477c8a3040ea316.html#a454ee66d71edad39b477c8a3040ea316", null ],
     [ "setAutoUpdate", "d6/d5f/classfl_1_1_wave_fx_a35b76280dc308f7b6c0e6783bf6be390.html#a35b76280dc308f7b6c0e6783bf6be390", null ],
     [ "setCrgbMap", "d6/d5f/classfl_1_1_wave_fx_a52b902d8c3fe8b4fa0731e6b88957f3d.html#a52b902d8c3fe8b4fa0731e6b88957f3d", null ],

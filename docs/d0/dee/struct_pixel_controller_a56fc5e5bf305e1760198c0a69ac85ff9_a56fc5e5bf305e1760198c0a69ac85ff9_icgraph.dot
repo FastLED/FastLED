@@ -30,7 +30,7 @@ digraph "PixelController::loadAndScale"
   Node11 -> Node12 [id="edge11_Node000011_Node000012",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node12 [id="Node000012",label="PixelController::loadAnd\lScaleRGB",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/dee/struct_pixel_controller_a3c10f0dd3838aa2b18d28a20393c9333.html#a3c10f0dd3838aa2b18d28a20393c9333",tooltip=" "];
   Node12 -> Node13 [id="edge12_Node000012_Node000013",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node13 [id="Node000013",label="APA102Controller::getGlobal\lBrightnessAndScalingFactors",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d96/class_a_p_a102_controller_a299c89c516c1c32935e75f492137d872.html#a299c89c516c1c32935e75f492137d872",tooltip=" "];
+  Node13 [id="Node000013",label="APA102Controller::getGlobal\lBrightnessAndScalingFactors",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d96/class_a_p_a102_controller_a7a97b41a9641119f70eaf13369875ab2.html#a7a97b41a9641119f70eaf13369875ab2",tooltip=" "];
   Node13 -> Node14 [id="edge13_Node000013_Node000014",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node14 [id="Node000014",label="APA102Controller::showPixels\lDefault",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d4/d96/class_a_p_a102_controller_a632117bec47c6b4ba7e3ed1703478a42.html#a632117bec47c6b4ba7e3ed1703478a42",tooltip=" "];
   Node12 -> Node14 [id="edge14_Node000012_Node000014",dir="back",color="steelblue1",style="solid",tooltip=" "];

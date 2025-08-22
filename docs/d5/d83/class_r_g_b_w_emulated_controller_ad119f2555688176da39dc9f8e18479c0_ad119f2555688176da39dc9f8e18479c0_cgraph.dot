@@ -12,9 +12,5 @@ digraph "RGBWEmulatedController::RGBWEmulatedController"
   Node2 -> Node3 [id="edge2_Node000002_Node000003",color="steelblue1",style="solid",tooltip=" "];
   Node3 [id="Node000003",label="CLEDController::CLEDController",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/d2c/class_c_l_e_d_controller_a8c560c6d171f117dfd19c0f2ec780a32.html#a8c560c6d171f117dfd19c0f2ec780a32",tooltip="Create an led controller object, add it to the chain of controllers."];
   Node2 -> Node4 [id="edge3_Node000002_Node000004",color="steelblue1",style="solid",tooltip=" "];
-  Node4 [id="Node000004",label="RgbwDefault::value",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/d8d/struct_rgbw_default_a3320052ace2827713b345cc69df2cbe0.html#a3320052ace2827713b345cc69df2cbe0",tooltip=" "];
-  Node4 -> Node5 [id="edge4_Node000004_Node000005",color="steelblue1",style="solid",tooltip=" "];
-  Node5 [id="Node000005",label="Rgbw::Rgbw",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/d74/struct_rgbw_a58df62d45b76be5755b009d05e7abb0e.html#a58df62d45b76be5755b009d05e7abb0e",tooltip=" "];
-  Node4 -> Node6 [id="edge5_Node000004_Node000006",color="steelblue1",style="solid",tooltip=" "];
-  Node6 [id="Node000006",label="RgbwDefault::RgbwDefault",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/d8d/struct_rgbw_default_ae00a5e4c9f4e16e5da7b11664afb0384.html#ae00a5e4c9f4e16e5da7b11664afb0384",tooltip=" "];
+  Node4 [id="Node000004",label="RgbwDefault::value",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/d8d/struct_rgbw_default_a4660f0c7686c715d97fac714ae09bbc4.html#a4660f0c7686c715d97fac714ae09bbc4",tooltip=" "];
 }

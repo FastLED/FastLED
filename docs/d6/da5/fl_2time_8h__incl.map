@@ -1,0 +1,14 @@
+<map id="fl/time.h" name="fl/time.h">
+<area shape="rect" id="Node000001" title="Universal timing functions for FastLED." alt="" coords="85,5,161,31"/>
+<area shape="rect" id="Node000002" href="$df/d2a/namespace_8h.html" title="Implements the FastLED namespace macros." alt="" coords="5,79,127,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="116,33,86,70,82,66,112,29"/>
+<area shape="rect" id="Node000003" href="$d3/d7e/int_8h.html" title=" " alt="" coords="151,79,213,104"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="135,29,166,67,162,70,131,33"/>
+<area shape="rect" id="Node000004" href="$df/dd8/stdint_8h.html" title=" " alt="" coords="66,152,149,177"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="172,106,131,144,128,141,168,102"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="197,152,316,177"/>
+<area shape="poly" id="edge6_Node000003_Node000006" title=" " alt="" coords="196,102,236,141,233,144,192,106"/>
+<area shape="poly" id="edge5_Node000004_Node000004" title=" " alt="" coords="138,149,163,151,172,156,175,165,168,176,152,181,151,175,165,172,170,164,168,159,161,156,138,155"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="70,225,145,251"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="110,178,110,212,105,212,105,178"/>
+</map>

@@ -58,7 +58,7 @@ var sectionId = 'dynsection-1';
 <!-- Node1 -->
 <g id="Node000001" class="node">
 <title>Node1</title>
-<g id="a_Node000001"><a xlink:title="Corkscrew projection utilities.">
+<g id="a_Node000001"><a xlink:title="Corkscrew LED strip projection and rendering.">
 <polygon fill="#999999" stroke="#666666" points="325,-96 242,-96 242,-77 325,-77 325,-96"/>
 <text text-anchor="middle" x="283.5" y="-84" font-family="Helvetica,sans-Serif" font-size="10.00">fl/corkscrew.h</text>
 </a>

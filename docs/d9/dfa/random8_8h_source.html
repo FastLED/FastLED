@@ -108,7 +108,7 @@ $(function(){initNavTree('d9/dfa/random8_8h_source.html','../../'); initResizabl
 <div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="preprocessor">#ifndef __INC_LIB8TION_RANDOM_H</span></div>
 <div class="line"><a id="l00004" name="l00004"></a><span class="lineno"><a class="line" href="../../d9/dfa/random8_8h_adf395102f6a2a27a8d8edc36ec54985a.html#adf395102f6a2a27a8d8edc36ec54985a">    4</a></span><span class="preprocessor">#define __INC_LIB8TION_RANDOM_H</span></div>
 <div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span> </div>
-<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="preprocessor">#include &lt;<a class="code" href="../../df/dd8/stdint_8h.html">stdint.h</a>&gt;</span></div>
+<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="preprocessor">#include &quot;<a class="code" href="../../df/dd8/stdint_8h.html">fl/stdint.h</a>&quot;</span></div>
 <div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span> </div>
 <div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="preprocessor">#include &quot;<a class="code" href="../../d4/d7a/lib8static_8h.html">lib8tion/lib8static.h</a>&quot;</span></div>
 <div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span></div>
@@ -162,8 +162,8 @@ $(function(){initNavTree('d9/dfa/random8_8h_source.html','../../'); initResizabl
 <div class="foldopen" id="foldopen00080" data-start="{" data-end="}">
 <div class="line"><a id="l00080" name="l00080"></a><span class="lineno"><a class="line" href="../../d2/d0d/group___random_ga7236600fa1c01fc63665a9b8db508359.html#ga7236600fa1c01fc63665a9b8db508359">   80</a></span><a class="code hl_define" href="../../df/da2/group__lib8tion_gac735bdef91ee1e80778434336a622138.html#gac735bdef91ee1e80778434336a622138">LIB8STATIC</a> uint16_t <a class="code hl_function" href="../../d2/d0d/group___random_ga17034d936ef716efe820e11c1df043b0.html#ga17034d936ef716efe820e11c1df043b0">random16</a>(uint16_t lim) {</div>
 <div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span>    uint16_t r = <a class="code hl_function" href="../../d2/d0d/group___random_ga17034d936ef716efe820e11c1df043b0.html#ga17034d936ef716efe820e11c1df043b0">random16</a>();</div>
-<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span>    uint32_t <a class="code hl_variable" href="../../d6/de8/noise_8cpp_ad4f390ff52b49f726bfdf77302fbd4d5.html#ad4f390ff52b49f726bfdf77302fbd4d5">p</a> = (uint32_t)lim * (uint32_t)r;</div>
-<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span>    r = <a class="code hl_variable" href="../../d6/de8/noise_8cpp_ad4f390ff52b49f726bfdf77302fbd4d5.html#ad4f390ff52b49f726bfdf77302fbd4d5">p</a> &gt;&gt; 16;</div>
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span>    uint32_t p = (uint32_t)lim * (uint32_t)r;</div>
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span>    r = p &gt;&gt; 16;</div>
 <div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span>    <span class="keywordflow">return</span> r;</div>
 <div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span>}</div>
 </div>
@@ -198,7 +198,6 @@ $(function(){initNavTree('d9/dfa/random8_8h_source.html','../../'); initResizabl
 <div class="ttc" id="agroup___random_ga95e371c2438843e0ed1ed83412b28c99_html_ga95e371c2438843e0ed1ed83412b28c99"><div class="ttname"><a href="../../d2/d0d/group___random_ga95e371c2438843e0ed1ed83412b28c99.html#ga95e371c2438843e0ed1ed83412b28c99">random16_set_seed</a></div><div class="ttdeci">LIB8STATIC void random16_set_seed(uint16_t seed)</div><div class="ttdoc">Set the 16-bit seed used for the random number generator.</div><div class="ttdef"><b>Definition</b> <a href="#l00097">random8.h:97</a></div></div>
 <div class="ttc" id="agroup__lib8tion_gac735bdef91ee1e80778434336a622138_html_gac735bdef91ee1e80778434336a622138"><div class="ttname"><a href="../../df/da2/group__lib8tion_gac735bdef91ee1e80778434336a622138.html#gac735bdef91ee1e80778434336a622138">LIB8STATIC</a></div><div class="ttdeci">#define LIB8STATIC</div><div class="ttdoc">Define a LIB8TION member function as static inline with an &quot;unused&quot; attribute.</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d7a/lib8static_8h_source.html#l00010">lib8static.h:10</a></div></div>
 <div class="ttc" id="alib8static_8h_html"><div class="ttname"><a href="../../d4/d7a/lib8static_8h.html">lib8static.h</a></div><div class="ttdoc">Defines static inlining macros for lib8tion functions.</div></div>
-<div class="ttc" id="anoise_8cpp_ad4f390ff52b49f726bfdf77302fbd4d5_html_ad4f390ff52b49f726bfdf77302fbd4d5"><div class="ttname"><a href="../../d6/de8/noise_8cpp_ad4f390ff52b49f726bfdf77302fbd4d5.html#ad4f390ff52b49f726bfdf77302fbd4d5">p</a></div><div class="ttdeci">static FASTLED_NAMESPACE_BEGIN uint8_t const p[]</div><div class="ttdef"><b>Definition</b> <a href="../../d6/de8/noise_8cpp_source.html#l00030">noise.cpp:30</a></div></div>
 <div class="ttc" id="astdint_8h_html"><div class="ttname"><a href="../../df/dd8/stdint_8h.html">stdint.h</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
@@ -207,7 +206,7 @@ $(function(){initNavTree('d9/dfa/random8_8h_source.html','../../'); initResizabl
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dir_d91669bda445047ed1892ac77a05ddb9.html">lib8tion</a></li><li class="navelem"><a class="el" href="../../d9/dfa/random8_8h.html">random8.h</a></li>
-    <li class="footer">Generated on Tue Jun 24 2025 00:58:14 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Fri Aug 22 2025 20:59:33 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

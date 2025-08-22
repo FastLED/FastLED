@@ -103,132 +103,114 @@ var sectionId = 'dynsection-1';
 <!-- Node4 -->
 <g id="Node000004" class="node">
 <title>Node4</title>
-<g id="a_Node000004"><a xlink:href="../../d6/d16/classfl_1_1_referent.html" target="_top" xlink:title=" ">
-<polygon fill="#fff0f0" stroke="red" points="85.5,-189.5 14.5,-189.5 14.5,-170.5 85.5,-170.5 85.5,-189.5"/>
-<text text-anchor="middle" x="50" y="-177.5" font-family="Helvetica,sans-Serif" font-size="10.00">fl::Referent</text>
-</a>
-</g>
-</g>
-<!-- Node4&#45;&gt;Node3 -->
-<g id="edge3_Node000003_Node000004" class="edge">
-<title>Node4&#45;&gt;Node3</title>
-<g id="a_edge3_Node000003_Node000004"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M95.97,-180C149.96,-180 238.09,-180 277,-180"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="95.65,-176.5 85.65,-180 95.65,-183.5 95.65,-176.5"/>
-</a>
-</g>
-</g>
-<!-- Node11 -->
-<g id="Node000011" class="node">
-<title>Node11</title>
-<g id="a_Node000011"><a xlink:href="../../d0/dce/classfl_1_1_x_y_map.html" target="_top" xlink:title=" ">
+<g id="a_Node000004"><a xlink:href="../../d0/dce/classfl_1_1_x_y_map.html" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="328.5,-152.5 266.5,-152.5 266.5,-133.5 328.5,-133.5 328.5,-152.5"/>
 <text text-anchor="middle" x="297.5" y="-140.5" font-family="Helvetica,sans-Serif" font-size="10.00">fl::XYMap</text>
 </a>
 </g>
 </g>
-<!-- Node11&#45;&gt;Node2 -->
-<g id="edge4_Node000002_Node000011" class="edge">
-<title>Node11&#45;&gt;Node2</title>
-<g id="a_edge4_Node000002_Node000011"><a xlink:title=" ">
+<!-- Node4&#45;&gt;Node2 -->
+<g id="edge3_Node000002_Node000004" class="edge">
+<title>Node4&#45;&gt;Node2</title>
+<g id="a_edge3_Node000002_Node000004"><a xlink:title=" ">
 <path fill="none" stroke="#9a32cd" stroke-dasharray="5,2" d="M339,-143C390.41,-143 477.59,-143 520.73,-143"/>
 <polygon fill="#9a32cd" stroke="#9a32cd" points="338.91,-139.5 328.91,-143 338.91,-146.5 338.91,-139.5"/>
 </a>
 </g>
 <text text-anchor="middle" x="422.5" y="-146" font-family="Helvetica,sans-Serif" font-size="10.00" fill="grey"> mXyMap</text>
 </g>
-<!-- Node12 -->
-<g id="Node000012" class="node">
-<title>Node12</title>
-<g id="a_Node000012"><a xlink:href="../../db/ddd/classfl_1_1_heap_vector.html" target="_top" xlink:title=" ">
+<!-- Node5 -->
+<g id="Node000005" class="node">
+<title>Node5</title>
+<g id="a_Node000005"><a xlink:href="../../db/ddd/classfl_1_1_heap_vector.html" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="600,-97 495,-97 495,-67 600,-67 600,-97"/>
 <text text-anchor="start" x="503" y="-85" font-family="Helvetica,sans-Serif" font-size="10.00">fl::HeapVector&lt; fl</text>
 <text text-anchor="middle" x="547.5" y="-74" font-family="Helvetica,sans-Serif" font-size="10.00">::Blend2d::Entry &gt;</text>
 </a>
 </g>
 </g>
-<!-- Node12&#45;&gt;Node1 -->
-<g id="edge5_Node000001_Node000012" class="edge">
-<title>Node12&#45;&gt;Node1</title>
-<g id="a_edge5_Node000001_Node000012"><a xlink:title=" ">
+<!-- Node5&#45;&gt;Node1 -->
+<g id="edge4_Node000001_Node000005" class="edge">
+<title>Node5&#45;&gt;Node1</title>
+<g id="a_edge4_Node000001_Node000005"><a xlink:title=" ">
 <path fill="none" stroke="#9a32cd" stroke-dasharray="5,2" d="M610.09,-88.43C627.53,-90.39 646.53,-92.65 664,-95 669.77,-95.78 675.9,-96.68 681.84,-97.58"/>
 <polygon fill="#9a32cd" stroke="#9a32cd" points="610.34,-84.94 600.02,-87.31 609.57,-91.89 610.34,-84.94"/>
 </a>
 </g>
 <text text-anchor="middle" x="641" y="-98" font-family="Helvetica,sans-Serif" font-size="10.00" fill="grey"> mLayers</text>
 </g>
-<!-- Node13 -->
-<g id="Node000013" class="node">
-<title>Node13</title>
-<g id="a_Node000013"><a xlink:href="../../d3/d4d/structfl_1_1_blend2d_1_1_entry.html" target="_top" xlink:title=" ">
+<!-- Node6 -->
+<g id="Node000006" class="node">
+<title>Node6</title>
+<g id="a_Node000006"><a xlink:href="../../d3/d4d/structfl_1_1_blend2d_1_1_entry.html" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="347.5,-115.5 247.5,-115.5 247.5,-96.5 347.5,-96.5 347.5,-115.5"/>
 <text text-anchor="middle" x="297.5" y="-103.5" font-family="Helvetica,sans-Serif" font-size="10.00">fl::Blend2d::Entry</text>
 </a>
 </g>
 </g>
-<!-- Node13&#45;&gt;Node12 -->
-<g id="edge6_Node000012_Node000013" class="edge">
-<title>Node13&#45;&gt;Node12</title>
-<g id="a_edge6_Node000012_Node000013"><a xlink:title=" ">
+<!-- Node6&#45;&gt;Node5 -->
+<g id="edge5_Node000005_Node000006" class="edge">
+<title>Node6&#45;&gt;Node5</title>
+<g id="a_edge5_Node000005_Node000006"><a xlink:title=" ">
 <path fill="none" stroke="#9a32cd" stroke-dasharray="5,2" d="M357.82,-100.26C399.53,-96.22 454.81,-90.87 494.74,-87.01"/>
 <polygon fill="#9a32cd" stroke="#9a32cd" points="357.41,-96.78 347.79,-101.23 358.08,-103.75 357.41,-96.78"/>
 </a>
 </g>
 <text text-anchor="middle" x="422.5" y="-101" font-family="Helvetica,sans-Serif" font-size="10.00" fill="grey"> mArray</text>
 </g>
-<!-- Node14 -->
-<g id="Node000014" class="node">
-<title>Node14</title>
-<g id="a_Node000014"><a xlink:href="../../d8/dcd/classfl_1_1allocator.html" target="_top" xlink:title=" ">
+<!-- Node7 -->
+<g id="Node000007" class="node">
+<title>Node7</title>
+<g id="a_Node000007"><a xlink:href="../../d8/dcd/classfl_1_1allocator.html" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="347,-78 248,-78 248,-48 347,-48 347,-78"/>
 <text text-anchor="start" x="256" y="-66" font-family="Helvetica,sans-Serif" font-size="10.00">fl::allocator&lt; fl::</text>
 <text text-anchor="middle" x="297.5" y="-55" font-family="Helvetica,sans-Serif" font-size="10.00">Blend2d::Entry &gt;</text>
 </a>
 </g>
 </g>
-<!-- Node14&#45;&gt;Node12 -->
-<g id="edge7_Node000012_Node000014" class="edge">
-<title>Node14&#45;&gt;Node12</title>
-<g id="a_edge7_Node000012_Node000014"><a xlink:title=" ">
+<!-- Node7&#45;&gt;Node5 -->
+<g id="edge6_Node000005_Node000007" class="edge">
+<title>Node7&#45;&gt;Node5</title>
+<g id="a_edge6_Node000005_Node000007"><a xlink:title=" ">
 <path fill="none" stroke="#9a32cd" stroke-dasharray="5,2" d="M357.07,-65.21C391.95,-66.79 437.06,-69.3 477,-73 482.82,-73.54 488.89,-74.19 494.93,-74.9"/>
 <polygon fill="#9a32cd" stroke="#9a32cd" points="357.2,-61.71 347.06,-64.76 356.89,-68.7 357.2,-61.71"/>
 </a>
 </g>
 <text text-anchor="middle" x="422.5" y="-76" font-family="Helvetica,sans-Serif" font-size="10.00" fill="grey"> mAlloc</text>
 </g>
-<!-- Node15 -->
-<g id="Node000015" class="node">
-<title>Node15</title>
-<g id="a_Node000015"><a xlink:href="../../d8/dcd/classfl_1_1allocator.html" target="_top" xlink:title=" ">
+<!-- Node8 -->
+<g id="Node000008" class="node">
+<title>Node8</title>
+<g id="a_Node000008"><a xlink:href="../../d8/dcd/classfl_1_1allocator.html" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="100,-72.5 0,-72.5 0,-53.5 100,-53.5 100,-72.5"/>
 <text text-anchor="middle" x="50" y="-60.5" font-family="Helvetica,sans-Serif" font-size="10.00">fl::allocator&lt; T &gt;</text>
 </a>
 </g>
 </g>
-<!-- Node15&#45;&gt;Node14 -->
-<g id="edge8_Node000014_Node000015" class="edge">
-<title>Node15&#45;&gt;Node14</title>
-<g id="a_edge8_Node000014_Node000015"><a xlink:title=" ">
+<!-- Node8&#45;&gt;Node7 -->
+<g id="edge7_Node000007_Node000008" class="edge">
+<title>Node8&#45;&gt;Node7</title>
+<g id="a_edge7_Node000007_Node000008"><a xlink:title=" ">
 <path fill="none" stroke="orange" stroke-dasharray="5,2" d="M110.22,-63C152.39,-63 208.37,-63 247.91,-63"/>
 <polygon fill="orange" stroke="orange" points="110.09,-59.5 100.09,-63 110.09,-66.5 110.09,-59.5"/>
 </a>
 </g>
 <text text-anchor="middle" x="172.5" y="-66" font-family="Helvetica,sans-Serif" font-size="10.00" fill="grey"> &lt; fl::Blend2d::Entry &gt;</text>
 </g>
-<!-- Node16 -->
-<g id="Node000016" class="node">
-<title>Node16</title>
-<g id="a_Node000016"><a xlink:href="../../db/ddd/classfl_1_1_heap_vector.html" target="_top" xlink:title=" ">
+<!-- Node9 -->
+<g id="Node000009" class="node">
+<title>Node9</title>
+<g id="a_Node000009"><a xlink:href="../../db/ddd/classfl_1_1_heap_vector.html" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="350,-30 245,-30 245,0 350,0 350,-30"/>
 <text text-anchor="start" x="253" y="-18" font-family="Helvetica,sans-Serif" font-size="10.00">fl::HeapVector&lt; T,</text>
 <text text-anchor="middle" x="297.5" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00"> Allocator &gt;</text>
 </a>
 </g>
 </g>
-<!-- Node16&#45;&gt;Node12 -->
-<g id="edge9_Node000012_Node000016" class="edge">
-<title>Node16&#45;&gt;Node12</title>
-<g id="a_edge9_Node000012_Node000016"><a xlink:title=" ">
+<!-- Node9&#45;&gt;Node5 -->
+<g id="edge8_Node000005_Node000009" class="edge">
+<title>Node9&#45;&gt;Node5</title>
+<g id="a_edge8_Node000005_Node000009"><a xlink:title=" ">
 <path fill="none" stroke="orange" stroke-dasharray="5,2" d="M360.13,-23.38C394.95,-29.02 438.98,-37.71 477,-50 490.78,-54.45 505.42,-60.91 517.7,-66.87"/>
 <polygon fill="orange" stroke="orange" points="360.52,-19.9 350.1,-21.79 359.43,-26.81 360.52,-19.9"/>
 </a>

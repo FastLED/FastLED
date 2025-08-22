@@ -8,5 +8,7 @@ digraph "fl::WaveSimulation2D::setSuperSample"
   rankdir="LR";
   Node1 [id="Node000001",label="fl::WaveSimulation2D\l::setSuperSample",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
   Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
-  Node2 [id="Node000002",label="fl::WaveSimulation2D\l::init",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/d47/classfl_1_1_wave_simulation2_d_a245ddb20d194c237ca308fdd8487805c.html#a245ddb20d194c237ca308fdd8487805c",tooltip=" "];
+  Node2 [id="Node000002",label="fl::WaveSimulation2D\l::init",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/d47/classfl_1_1_wave_simulation2_d_ae729085b341ecdaef1ea2c4fa18bac40.html#ae729085b341ecdaef1ea2c4fa18bac40",tooltip=" "];
+  Node2 -> Node3 [id="edge2_Node000002_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="dampening",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d8/d78/examples_2_wave_2wave_8h_aa7d6eb4e4f91328bcee5e19a6a76ee4e.html#aa7d6eb4e4f91328bcee5e19a6a76ee4e",tooltip=" "];
 }

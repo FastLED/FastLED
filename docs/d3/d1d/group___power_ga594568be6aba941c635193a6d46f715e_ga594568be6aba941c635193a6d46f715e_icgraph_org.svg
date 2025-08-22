@@ -40,7 +40,7 @@
 <!-- Node6 -->
 <g id="Node000006" class="node">
 <title>Node6</title>
-<g id="a_Node000006"><a xlink:href="../../d3/d1d/group___power_gaeb674bb1095873cfaab1bc2796541020.html#gaeb674bb1095873cfaab1bc2796541020" target="_top" xlink:title="Determines the highest brightness level you can use and still stay under the specified power budget f...">
+<g id="a_Node000006"><a xlink:href="../../d3/d1d/group___power_ga14e3a08f0cae7e9617415b803c1f5946.html#ga14e3a08f0cae7e9617415b803c1f5946" target="_top" xlink:title="Determines the highest brightness level you can use and still stay under the specified power budget f...">
 <polygon fill="white" stroke="#666666" points="547,-30 403,-30 403,0 547,0 547,-30"/>
 <text text-anchor="start" x="411" y="-18" font-family="Helvetica,sans-Serif" font-size="10.00">calculate_max_brightness</text>
 <text text-anchor="middle" x="475" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">_for_power_mW</text>
@@ -78,7 +78,7 @@
 <!-- Node4 -->
 <g id="Node000004" class="node">
 <title>Node4</title>
-<g id="a_Node000004"><a xlink:href="../../dd/dbb/class_c_fast_l_e_d_ab07d62cdec036af9ede70cbd06ece40f.html#ab07d62cdec036af9ede70cbd06ece40f" target="_top" xlink:title="Set the maximum power to be used, given in milliwatts.">
+<g id="a_Node000004"><a xlink:href="../../dd/dbb/class_c_fast_l_e_d_a660c4ce3348e4463932f350be99215bf.html#a660c4ce3348e4463932f350be99215bf" target="_top" xlink:title="Set the maximum power to be used, given in milliwatts.">
 <polygon fill="white" stroke="#666666" points="367,-54 203,-54 203,-24 367,-24 367,-54"/>
 <text text-anchor="start" x="211" y="-42" font-family="Helvetica,sans-Serif" font-size="10.00">CFastLED::setMaxPowerInMilli</text>
 <text text-anchor="middle" x="285" y="-31" font-family="Helvetica,sans-Serif" font-size="10.00">Watts</text>
@@ -97,7 +97,7 @@
 <!-- Node5 -->
 <g id="Node000005" class="node">
 <title>Node5</title>
-<g id="a_Node000005"><a xlink:href="../../dd/dbb/class_c_fast_l_e_d_a996375a3f4a7b8c096f87d8a93c2b196.html#a996375a3f4a7b8c096f87d8a93c2b196" target="_top" xlink:title="Set the maximum power to be used, given in volts and milliamps.">
+<g id="a_Node000005"><a xlink:href="../../dd/dbb/class_c_fast_l_e_d_a1f82b444605e69e415de4bef8775bd37.html#a1f82b444605e69e415de4bef8775bd37" target="_top" xlink:title="Set the maximum power to be used, given in volts and milliamps.">
 <polygon fill="white" stroke="#666666" points="167,-54 0,-54 0,-24 167,-24 167,-54"/>
 <text text-anchor="start" x="8" y="-42" font-family="Helvetica,sans-Serif" font-size="10.00">CFastLED::setMaxPowerInVolts</text>
 <text text-anchor="middle" x="83.5" y="-31" font-family="Helvetica,sans-Serif" font-size="10.00">AndMilliamps</text>

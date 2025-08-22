@@ -1,8 +1,11 @@
 var searchData=
 [
-  ['element_5ftype_0',['element_type',['../da/d84/classfl_1_1_ptr_traits_a212fead9b8e8b6aa77d94400393b04d4.html#a212fead9b8e8b6aa77d94400393b04d4',1,'fl::PtrTraits']]],
+  ['element_5ftype_0',['element_type',['../da/d84/classfl_1_1_ptr_traits_a212fead9b8e8b6aa77d94400393b04d4.html#a212fead9b8e8b6aa77d94400393b04d4',1,'fl::PtrTraits::element_type'],['../d1/d74/classfl_1_1shared__ptr_a02409e1fce16eba1df56d19593265fe7.html#a02409e1fce16eba1df56d19593265fe7',1,'fl::shared_ptr::element_type'],['../d6/d2e/classfl_1_1unique__ptr_ae6b251340aa3a15366368e4c1f4be20b.html#ae6b251340aa3a15366368e4c1f4be20b',1,'fl::unique_ptr::element_type'],['../df/dcd/classfl_1_1unique__ptr_3_01_t_0f_0e_00_01_deleter_01_4_ae926aed0b42f97783e769ac91f1b3ec3.html#ae926aed0b42f97783e769ac91f1b3ec3',1,'fl::unique_ptr&lt; T[], Deleter &gt;::element_type'],['../d1/dd6/classfl_1_1weak__ptr_ad8137b6e65089b8ff0ce8dca6f4bac7c.html#ad8137b6e65089b8ff0ce8dca6f4bac7c',1,'fl::weak_ptr::element_type'],['../d6/d2e/classfl_1_1unique__ptr_ae6b251340aa3a15366368e4c1f4be20b.html#ae6b251340aa3a15366368e4c1f4be20b',1,'fl::unique_ptr&lt; T[], Deleter &gt;::element_type']]],
   ['enable_5fif_5ft_1',['enable_if_t',['../d4/d36/namespacefl_ae4063344291567fafa1980062d8fe798.html#ae4063344291567fafa1980062d8fe798',1,'fl']]],
-  ['equal_5fto_2',['equal_to',['../d4/d36/namespacefl_a83cfb60e98fbb2105b661547ccc0920e.html#a83cfb60e98fbb2105b661547ccc0920e',1,'fl']]],
-  ['equaltokey_3',['EqualToKey',['../d1/d5c/classfl_1_1_x_y_raster_u8_sparse_a79decbe077f79d16100f20781022bcba.html#a79decbe077f79d16100f20781022bcba',1,'fl::XYRasterU8Sparse']]],
-  ['errorcallback_4',['ErrorCallback',['../d8/dd0/midi___defs_8h_a1a7fd24af6a225d7896cc93b574f93c9.html#a1a7fd24af6a225d7896cc93b574f93c9',1,'midi_Defs.h']]]
+  ['entry_2',['Entry',['../df/d21/classfl_1_1_tile2x2__u8__wrap_aa268553e572352516ca9964e7b16eb45.html#aa268553e572352516ca9964e7b16eb45',1,'fl::Tile2x2_u8_wrap']]],
+  ['eorder_3',['EOrder',['../db/d07/eorder_8h_a3aba410ffe1f43e934fdc88e97cb7d02.html#a3aba410ffe1f43e934fdc88e97cb7d02',1,'eorder.h']]],
+  ['eorderw_4',['EOrderW',['../db/d07/eorder_8h_a1ebca3b5813569a74d197652a182a44e.html#a1ebca3b5813569a74d197652a182a44e',1,'eorder.h']]],
+  ['equal_5fto_5',['equal_to',['../d4/d36/namespacefl_a83cfb60e98fbb2105b661547ccc0920e.html#a83cfb60e98fbb2105b661547ccc0920e',1,'fl']]],
+  ['equaltokey_6',['EqualToKey',['../d1/d5c/classfl_1_1_x_y_raster_u8_sparse_a79decbe077f79d16100f20781022bcba.html#a79decbe077f79d16100f20781022bcba',1,'fl::XYRasterU8Sparse::EqualToKey'],['../d3/dca/classfl_1_1_x_y_raster_sparse___c_r_g_b_af1b6fbcf4994dd427a0c17b1633acee0.html#af1b6fbcf4994dd427a0c17b1633acee0',1,'fl::XYRasterSparse_CRGB::EqualToKey']]],
+  ['errorcallback_7',['ErrorCallback',['../d8/dd0/midi___defs_8h_a1a7fd24af6a225d7896cc93b574f93c9.html#a1a7fd24af6a225d7896cc93b574f93c9',1,'midi_Defs.h']]]
 ];

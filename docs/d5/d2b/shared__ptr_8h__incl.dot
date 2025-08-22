@@ -1,0 +1,47 @@
+digraph "fl/shared_ptr.h"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  Node1 [id="Node000001",label="fl/shared_ptr.h",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl/namespace.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/d2a/namespace_8h.html",tooltip="Implements the FastLED namespace macros."];
+  Node1 -> Node3 [id="edge2_Node000001_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl/type_traits.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/d63/type__traits_8h.html",tooltip=" "];
+  Node3 -> Node4 [id="edge3_Node000003_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="string.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/d66/string_8h.html",tooltip=" "];
+  Node4 -> Node5 [id="edge4_Node000004_Node000005",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="fl/str.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d1/d93/str_8h.html",tooltip=" "];
+  Node5 -> Node6 [id="edge5_Node000005_Node000006",color="steelblue1",style="solid",tooltip=" "];
+  Node6 [id="Node000006",label="fl/int.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d3/d7e/int_8h.html",tooltip=" "];
+  Node6 -> Node7 [id="edge6_Node000006_Node000007",color="steelblue1",style="solid",tooltip=" "];
+  Node7 [id="Node000007",label="fl/stdint.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$df/dd8/stdint_8h.html",tooltip=" "];
+  Node7 -> Node7 [id="edge7_Node000007_Node000007",color="steelblue1",style="solid",tooltip=" "];
+  Node5 -> Node4 [id="edge8_Node000005_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node5 -> Node2 [id="edge9_Node000005_Node000002",color="steelblue1",style="solid",tooltip=" "];
+  Node5 -> Node3 [id="edge10_Node000005_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node3 -> Node7 [id="edge11_Node000003_Node000007",color="steelblue1",style="solid",tooltip=" "];
+  Node3 -> Node2 [id="edge12_Node000003_Node000002",color="steelblue1",style="solid",tooltip=" "];
+  Node3 -> Node17 [id="edge13_Node000003_Node000017",color="steelblue1",style="solid",tooltip=" "];
+  Node17 [id="Node000017",label="fl/move.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d9/d83/move_8h.html",tooltip=" "];
+  Node3 -> Node6 [id="edge14_Node000003_Node000006",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node22 [id="edge15_Node000001_Node000022",color="steelblue1",style="solid",tooltip=" "];
+  Node22 [id="Node000022",label="fl/utility.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/d47/utility_8h.html",tooltip=" "];
+  Node22 -> Node3 [id="edge16_Node000022_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node7 [id="edge17_Node000001_Node000007",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node23 [id="edge18_Node000001_Node000023",color="steelblue1",style="solid",tooltip=" "];
+  Node23 [id="Node000023",label="fl/cstddef.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/d84/cstddef_8h.html",tooltip=" "];
+  Node1 -> Node32 [id="edge19_Node000001_Node000032",color="steelblue1",style="solid",tooltip=" "];
+  Node32 [id="Node000032",label="fl/bit_cast.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/d72/bit__cast_8h.html",tooltip=" "];
+  Node32 -> Node3 [id="edge20_Node000032_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node32 -> Node6 [id="edge21_Node000032_Node000006",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node47 [id="edge22_Node000001_Node000047",color="steelblue1",style="solid",tooltip=" "];
+  Node47 [id="Node000047",label="fl/atomic.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dd/d02/atomic_8h.html",tooltip=" "];
+  Node47 -> Node48 [id="edge23_Node000047_Node000048",color="steelblue1",style="solid",tooltip=" "];
+  Node48 [id="Node000048",label="fl/thread.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/dd5/thread_8h.html",tooltip=" "];
+  Node47 -> Node6 [id="edge24_Node000047_Node000006",color="steelblue1",style="solid",tooltip=" "];
+  Node47 -> Node44 [id="edge25_Node000047_Node000044",color="steelblue1",style="solid",tooltip=" "];
+  Node44 [id="Node000044",label="fl/align.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/ddf/align_8h.html",tooltip=" "];
+}

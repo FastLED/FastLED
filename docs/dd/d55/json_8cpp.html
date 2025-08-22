@@ -102,12 +102,20 @@ $(function(){initNavTree('dd/d55/json_8cpp.html','../../'); initResizable(true);
 <div class="header">
   <div class="summary">
 <a href="#namespaces">Namespaces</a> &#124;
+<a href="#define-members">Macros</a> &#124;
 <a href="#func-members">Functions</a>  </div>
   <div class="headertitle"><div class="title">json.cpp File Reference</div></div>
 </div><!--header-->
 <div class="contents">
 <div class="textblock"><code>#include &quot;<a class="el" href="../../d7/d91/fl_2json_8h_source.html">fl/json.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../d1/d93/str_8h_source.html">fl/str.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../da/d66/string_8h_source.html">fl/string.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d6/d68/vector_8h_source.html">fl/vector.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../dc/d44/deque_8h_source.html">fl/deque.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../dd/d67/function_8h_source.html">fl/function.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d1/dbc/sketch__macros_8h_source.html">fl/sketch_macros.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../df/db1/math_8h_source.html">fl/math.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d4/d54/compiler__control_8h_source.html">fl/compiler_control.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d8/d7a/thread__local_8h_source.html">fl/thread_local.h</a>&quot;</code><br />
 </div><div class="textblock"><div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Include dependency graph for json.cpp:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -121,15 +129,28 @@ $(function(){initNavTree('dd/d55/json_8cpp.html','../../'); initResizable(true);
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="namespaces" name="namespaces"></a>
 Namespaces</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">namespace &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></td></tr>
-<tr class="memdesc:d4/d36/namespacefl"><td class="mdescLeft">&#160;</td><td class="mdescRight">Implements a simple red square effect for 2D LED grids. <br /></td></tr>
+<tr class="memdesc:d4/d36/namespacefl"><td class="mdescLeft">&#160;</td><td class="mdescRight">IMPORTANT! <br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="define-members" name="define-members"></a>
+Macros</h2></td></tr>
+<tr class="memitem:ac58f2c111cc9989c86db2a7dc4fd84ca" id="r_ac58f2c111cc9989c86db2a7dc4fd84ca"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dd/d55/json_8cpp_ac58f2c111cc9989c86db2a7dc4fd84ca.html#ac58f2c111cc9989c86db2a7dc4fd84ca">INT16_MAX</a>&#160;&#160;&#160;32767</td></tr>
+<tr class="separator:ac58f2c111cc9989c86db2a7dc4fd84ca"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad4e9955955b27624963643eac448118a" id="r_ad4e9955955b27624963643eac448118a"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dd/d55/json_8cpp_ad4e9955955b27624963643eac448118a.html#ad4e9955955b27624963643eac448118a">INT16_MIN</a>&#160;&#160;&#160;(-32768)</td></tr>
+<tr class="separator:ad4e9955955b27624963643eac448118a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aeb4e270a084ee26fe73e799861bd0252" id="r_aeb4e270a084ee26fe73e799861bd0252"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dd/d55/json_8cpp_aeb4e270a084ee26fe73e799861bd0252.html#aeb4e270a084ee26fe73e799861bd0252">UINT8_MAX</a>&#160;&#160;&#160;255</td></tr>
+<tr class="separator:aeb4e270a084ee26fe73e799861bd0252"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:a2cd426a3d9c9d79c491b313912f3bcc0" id="r_a2cd426a3d9c9d79c491b313912f3bcc0"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_a2cd426a3d9c9d79c491b313912f3bcc0.html#a2cd426a3d9c9d79c491b313912f3bcc0">fl::parseJson</a> (const char *json, <a class="el" href="../../d4/d36/namespacefl.html#da/deb/classfl_1_1_json_document">fl::JsonDocument</a> *doc, <a class="el" href="../../d2/d24/classfl_1_1_str.html">Str</a> *_error)</td></tr>
-<tr class="separator:a2cd426a3d9c9d79c491b313912f3bcc0"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a966e65a21faacfa6fe6c00989a2f505c" id="r_a966e65a21faacfa6fe6c00989a2f505c"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_a966e65a21faacfa6fe6c00989a2f505c.html#a966e65a21faacfa6fe6c00989a2f505c">fl::toJson</a> (const <a class="el" href="../../d4/d36/namespacefl.html#da/deb/classfl_1_1_json_document">fl::JsonDocument</a> &amp;doc, <a class="el" href="../../d2/d24/classfl_1_1_str.html">Str</a> *jsonBuffer)</td></tr>
-<tr class="separator:a966e65a21faacfa6fe6c00989a2f505c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9c0782b2694d801c4c402ca0913732a8" id="r_a9c0782b2694d801c4c402ca0913732a8"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../d4/d54/compiler__control_8h_a373eeaf762a6a66a0a6984bd204a72dd.html#a373eeaf762a6a66a0a6984bd204a72dd">FL_DISABLE_WARNING_PUSH</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_a9c0782b2694d801c4c402ca0913732a8.html#a9c0782b2694d801c4c402ca0913732a8">fl::FL_DISABLE_WARNING</a> (unused-<a class="el" href="../../d4/d36/namespacefl.html#d0/ddd/classfl_1_1function">function</a>) static bool canBeRepresentedAsFloat(double value)</td></tr>
+<tr class="separator:a9c0782b2694d801c4c402ca0913732a8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2bd8c696cd5b26e05473cc38ab62524e" id="r_a2bd8c696cd5b26e05473cc38ab62524e"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../d4/d36/namespacefl_a91a759156383d3c5254527fa38bfa757.html#a91a759156383d3c5254527fa38bfa757">JsonObject</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_a2bd8c696cd5b26e05473cc38ab62524e.html#a2bd8c696cd5b26e05473cc38ab62524e">fl::get_empty_json_object</a> ()</td></tr>
+<tr class="separator:a2bd8c696cd5b26e05473cc38ab62524e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:addbb9457423c186b07bbb4922fa15c51" id="r_addbb9457423c186b07bbb4922fa15c51"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../d4/d54/compiler__control_8h_a888ec6cdc7563315545ced9cff7a5fbf.html#a888ec6cdc7563315545ced9cff7a5fbf">FL_DISABLE_WARNING_POP</a> <a class="el" href="../../da/dd6/structfl_1_1_json_value.html">JsonValue</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_addbb9457423c186b07bbb4922fa15c51.html#addbb9457423c186b07bbb4922fa15c51">fl::get_null_value</a> ()</td></tr>
+<tr class="separator:addbb9457423c186b07bbb4922fa15c51"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a05f36a95dfaa4ae2e42bec14c95762b4" id="r_a05f36a95dfaa4ae2e42bec14c95762b4"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../d2/db2/classfl_1_1string.html">fl::string</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_a05f36a95dfaa4ae2e42bec14c95762b4.html#a05f36a95dfaa4ae2e42bec14c95762b4">fl::serializeValue</a> (const <a class="el" href="../../da/dd6/structfl_1_1_json_value.html">JsonValue</a> &amp;value)</td></tr>
+<tr class="separator:a05f36a95dfaa4ae2e42bec14c95762b4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 </div><!-- contents -->
 </div><!-- doc-content -->
@@ -138,7 +159,7 @@ Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dir_4d1829fa9bd13d7db71e765b2707b248.html">fl</a></li><li class="navelem"><a class="el" href="../../dd/d55/json_8cpp.html">json.cpp</a></li>
-    <li class="footer">Generated on Tue Jun 24 2025 00:58:14 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Fri Aug 22 2025 20:59:34 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

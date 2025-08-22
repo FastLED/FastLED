@@ -1,0 +1,13 @@
+<map id="noiseScale" name="noiseScale">
+<area shape="rect" id="Node000001" title=" " alt="" coords="445,31,537,56"/>
+<area shape="rect" id="Node000002" href="$d4/d06/curr_8h_a27ef46fa8abd1dedd29a3904d81622d2.html#a27ef46fa8abd1dedd29a3904d81622d2" title=" " alt="" coords="243,5,397,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="431,37,397,32,398,27,432,32"/>
+<area shape="rect" id="Node000005" href="$d4/d06/curr_8h_a43ebf333941358d02612a6a8d90dbd14.html#a43ebf333941358d02612a6a8d90dbd14" title=" " alt="" coords="272,55,368,80"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="432,54,368,63,368,58,432,49"/>
+<area shape="rect" id="Node000003" href="$d4/d06/curr_8h_a889977e3c2cad101b68a8c97148ef3c0.html#a889977e3c2cad101b68a8c97148ef3c0" title=" " alt="" coords="104,5,195,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="229,21,195,21,195,15,229,15"/>
+<area shape="rect" id="Node000004" href="$d4/d06/curr_8h_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="5,5,56,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="90,21,56,21,56,15,90,15"/>
+<area shape="rect" id="Node000006" href="$d4/d06/curr_8h_a4fc01d736fe50cf5b977f755b675f11d.html#a4fc01d736fe50cf5b977f755b675f11d" title=" " alt="" coords="120,55,179,80"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="258,70,179,70,179,65,258,65"/>
+</map>

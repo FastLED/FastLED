@@ -64,9 +64,9 @@
 <!-- Node3 -->
 <g id="Node000003" class="node">
 <title>Node3</title>
-<g id="a_Node000003"><a xlink:href="../../db/d74/struct_rgbw.html" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#666666" points="170,-121 126,-121 126,-102 170,-102 170,-121"/>
-<text text-anchor="middle" x="148" y="-109" font-family="Helvetica,sans-Serif" font-size="10.00">Rgbw</text>
+<g id="a_Node000003"><a xlink:href="../../d7/d27/structfl_1_1_rgbw.html" target="_top" xlink:title=" ">
+<polygon fill="white" stroke="#666666" points="176,-121 120,-121 120,-102 176,-102 176,-121"/>
+<text text-anchor="middle" x="148" y="-109" font-family="Helvetica,sans-Serif" font-size="10.00">fl::Rgbw</text>
 </a>
 </g>
 </g>

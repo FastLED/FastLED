@@ -16,26 +16,26 @@
 <area shape="poly" id="edge12_Node000001_Node000013" title=" " alt="" coords="914,25,1250,77,1249,82,913,30"/>
 <area shape="rect" id="Node000015" href="$dd/d78/video_8h.html" title=" " alt="" coords="1633,79,1719,104"/>
 <area shape="poly" id="edge14_Node000001_Node000015" title=" " alt="" coords="914,21,1633,84,1632,89,914,27"/>
-<area shape="rect" id="Node000003" href="$db/d86/_fx_cylon_8ino.html" title=" " alt="" coords="5,152,208,207"/>
+<area shape="rect" id="Node000003" href="$db/d86/_fx_cylon_8ino.html" title="Cylon eye effect with ScreenMap." alt="" coords="5,152,208,207"/>
 <area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="145,117,124,153,119,151,140,115"/>
-<area shape="rect" id="Node000005" href="$d1/d8f/_fx_demo_reel100_8ino.html" title=" " alt="" coords="233,152,490,207"/>
+<area shape="rect" id="Node000005" href="$d1/d8f/_fx_demo_reel100_8ino.html" title="DemoReel100 effects collection with ScreenMap." alt="" coords="233,152,490,207"/>
 <area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="399,117,379,153,374,151,395,115"/>
-<area shape="rect" id="Node000007" href="$df/d57/_fx_fire2012_8ino.html" title=" " alt="" coords="515,152,736,207"/>
+<area shape="rect" id="Node000007" href="$df/d57/_fx_fire2012_8ino.html" title="Fire2012 effect with ScreenMap." alt="" coords="515,152,736,207"/>
 <area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="628,118,628,152,623,152,623,118"/>
-<area shape="rect" id="Node000010" href="$dc/ded/_fx_pacifica_8ino.html" title=" " alt="" coords="761,152,975,207"/>
+<area shape="rect" id="Node000010" href="$dc/ded/_fx_pacifica_8ino.html" title="Pacifica ocean effect with ScreenMap." alt="" coords="761,152,975,207"/>
 <area shape="poly" id="edge9_Node000009_Node000010" title=" " alt="" coords="923,116,892,154,887,150,918,113"/>
-<area shape="rect" id="Node000012" href="$d2/db0/_fx_pride2015_8ino.html" title=" " alt="" coords="999,152,1230,207"/>
+<area shape="rect" id="Node000012" href="$d2/db0/_fx_pride2015_8ino.html" title="Pride2015 effect with ScreenMap." alt="" coords="999,152,1230,207"/>
 <area shape="poly" id="edge11_Node000011_Node000012" title=" " alt="" coords="1110,117,1114,152,1109,152,1104,118"/>
 <area shape="rect" id="Node000014" href="$dd/d4d/_fx_twinkle_fox_8ino.html" title=" " alt="" coords="1255,152,1492,207"/>
 <area shape="poly" id="edge13_Node000013_Node000014" title=" " alt="" coords="1337,114,1359,151,1355,153,1332,117"/>
 <area shape="rect" id="Node000016" href="$d6/d8d/file__system_8h.html" title=" " alt="" coords="1517,167,1638,192"/>
 <area shape="poly" id="edge15_Node000015_Node000016" title=" " alt="" coords="1654,115,1593,168,1589,164,1651,111"/>
 <area shape="rect" id="Node000019" href="$d0/d05/video_8cpp.html" title=" " alt="" coords="1506,431,1609,456"/>
-<area shape="poly" id="edge27_Node000015_Node000019" title=" " alt="" coords="1683,117,1690,169,1691,238,1681,313,1670,350,1653,384,1640,400,1624,414,1590,433,1588,428,1621,410,1636,397,1648,381,1665,348,1676,312,1686,238,1684,169,1678,118"/>
+<area shape="poly" id="edge28_Node000015_Node000019" title=" " alt="" coords="1683,117,1690,169,1691,238,1681,313,1670,350,1653,384,1640,400,1624,414,1590,433,1588,428,1621,410,1636,397,1648,381,1665,348,1676,312,1686,238,1684,169,1678,118"/>
 <area shape="rect" id="Node000025" href="$df/d8e/fx__engine_8cpp.html" title=" " alt="" coords="1713,269,1844,295"/>
 <area shape="poly" id="edge22_Node000015_Node000025" title=" " alt="" coords="1691,115,1775,268,1770,270,1687,118"/>
-<area shape="rect" id="Node000026" href="$d9/d3c/fx__engine_8h.html" title=" " alt="" coords="1853,167,1968,192"/>
-<area shape="poly" id="edge23_Node000015_Node000026" title=" " alt="" coords="1722,106,1880,164,1878,169,1720,111"/>
+<area shape="rect" id="Node000026" href="$d9/d3c/fx__engine_8h.html" title=" " alt="" coords="1947,167,2061,192"/>
+<area shape="poly" id="edge23_Node000015_Node000026" title=" " alt="" coords="1733,105,1961,164,1960,169,1732,110"/>
 <area shape="rect" id="Node000017" href="$d4/d37/file__system_8cpp.html" title=" " alt="" coords="1228,269,1364,295"/>
 <area shape="poly" id="edge16_Node000016_Node000017" title=" " alt="" coords="1533,199,1329,272,1327,267,1532,194"/>
 <area shape="rect" id="Node000018" href="$d3/dfa/pixel__stream_8h.html" title=" " alt="" coords="1389,269,1563,295"/>
@@ -45,9 +45,11 @@
 <area shape="poly" id="edge18_Node000018_Node000019" title=" " alt="" coords="1468,309,1460,345,1460,364,1466,381,1478,397,1492,410,1526,428,1523,433,1489,414,1474,400,1462,384,1455,365,1454,344,1463,308"/>
 <area shape="poly" id="edge19_Node000018_Node000022" title=" " alt="" coords="1498,303,1548,355,1544,359,1494,307"/>
 <area shape="poly" id="edge20_Node000022_Node000019" title=" " alt="" coords="1560,396,1560,431,1555,431,1555,396"/>
-<area shape="poly" id="edge26_Node000026_Node000025" title=" " alt="" coords="1886,202,1795,271,1792,267,1883,198"/>
-<area shape="rect" id="Node000027" href="$d6/d35/_fx_engine_8ino.html" title="Demonstrates how to use the FxEngine to switch between different effects on a 2D LED matrix." alt="" coords="1869,255,2078,309"/>
-<area shape="poly" id="edge24_Node000026_Node000027" title=" " alt="" coords="1927,202,1959,253,1955,256,1923,205"/>
-<area shape="rect" id="Node000028" href="$d7/dd3/wasm_8ino.html" title="Demonstrates an advanced ino file with multiple effects and UI elements." alt="" coords="2103,255,2303,309"/>
-<area shape="poly" id="edge25_Node000026_Node000028" title=" " alt="" coords="1958,194,2127,252,2126,257,1956,199"/>
+<area shape="poly" id="edge27_Node000026_Node000025" title=" " alt="" coords="1967,200,1805,272,1803,267,1964,195"/>
+<area shape="rect" id="Node000027" href="$d4/d06/curr_8h.html" title=" " alt="" coords="1868,262,2140,302"/>
+<area shape="poly" id="edge24_Node000026_Node000027" title=" " alt="" coords="2007,206,2007,262,2001,262,2001,206"/>
+<area shape="rect" id="Node000028" href="$d6/d35/_fx_engine_8ino.html" title="Demonstrates FxEngine for switching between effects." alt="" coords="2165,255,2374,309"/>
+<area shape="poly" id="edge25_Node000026_Node000028" title=" " alt="" coords="2048,194,2201,252,2199,257,2046,199"/>
+<area shape="rect" id="Node000029" href="$da/d40/wasm__impl_8h.html" title=" " alt="" coords="2399,255,2599,309"/>
+<area shape="poly" id="edge26_Node000026_Node000029" title=" " alt="" coords="2076,191,2387,252,2399,255,2398,260,2386,257,2075,196"/>
 </map>

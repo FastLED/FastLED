@@ -1,0 +1,5 @@
+<map id="fl::easeInOutSine16" name="fl::easeInOutSine16">
+<area shape="rect" id="Node000001" title="16&#45;bit sine ease&#45;in/ease&#45;out function Takes an input value 0&#45;65535 and returns an eased value 0&#45;65535" alt="" coords="5,5,153,31"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a4f802b320dde9907457c9754e50d2edc.html#a4f802b320dde9907457c9754e50d2edc" title=" " alt="" coords="201,5,277,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="153,15,188,15,188,21,153,21"/>
+</map>

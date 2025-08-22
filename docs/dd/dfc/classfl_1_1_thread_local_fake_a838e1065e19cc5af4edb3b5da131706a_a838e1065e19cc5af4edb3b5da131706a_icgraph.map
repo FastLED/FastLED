@@ -1,11 +1,36 @@
 <map id="fl::ThreadLocalFake::access" name="fl::ThreadLocalFake::access">
-<area shape="rect" id="Node000001" title=" " alt="" coords="249,125,396,165"/>
-<area shape="rect" id="Node000002" href="$d3/d5c/namespacefl_1_1anonymous__namespace_02audio_8cpp_03_a63dcc803fe703f176b52e25bde0c3adf.html#a63dcc803fe703f176b52e25bde0c3adf" title=" " alt="" coords="5,29,201,69"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="275,121,200,84,169,72,171,67,202,79,277,116"/>
-<area shape="rect" id="Node000003" href="$d4/da7/namespacefl_1_1anonymous__namespace_02xypath_8cpp_03_a85e4c86634208307df5691237143a988.html#a85e4c86634208307df5691237143a988" title=" " alt="" coords="5,118,201,173"/>
-<area shape="poly" id="edge3_Node000001_Node000003" title=" " alt="" coords="236,148,202,148,202,143,236,143"/>
-<area shape="rect" id="Node000004" href="$dd/dfc/classfl_1_1_thread_local_fake_a3fc5f57fb8dae1d4622d33bcbdd16266.html#a3fc5f57fb8dae1d4622d33bcbdd16266" title=" " alt="" coords="30,197,177,237"/>
-<area shape="poly" id="edge5_Node000001_Node000004" title=" " alt="" coords="249,172,166,200,164,195,247,167"/>
-<area shape="poly" id="edge2_Node000002_Node000002" title=" " alt="" coords="140,18,127,11,103,8,82,10,70,15,65,21,67,28,62,30,60,20,66,10,81,5,103,3,129,6,143,13"/>
-<area shape="poly" id="edge4_Node000003_Node000003" title=" " alt="" coords="140,107,127,100,103,97,84,99,71,103,66,110,66,118,60,118,61,108,68,99,83,93,103,91,128,94,142,102"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="571,271,717,311"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a422168cc1b8dc2e0a10dfedf921ac003.html#a422168cc1b8dc2e0a10dfedf921ac003" title="Synchronously wait for a promise to complete (ONLY safe in top&#45;level contexts)" alt="" coords="354,55,495,80"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="630,260,614,221,591,176,560,131,521,94,494,80,497,75,524,89,564,127,595,173,619,218,635,258"/>
+<area shape="rect" id="Node000006" href="$d4/d36/namespacefl_a675c84477e2cbae46b10f43e0f8ace0c.html#a675c84477e2cbae46b10f43e0f8ace0c" title="Global default random number generator instance." alt="" coords="354,104,495,129"/>
+<area shape="poly" id="edge6_Node000001_Node000006" title=" " alt="" coords="623,261,582,201,553,170,521,144,494,131,497,127,524,140,557,166,586,197,628,258"/>
+<area shape="rect" id="Node000008" href="$d4/d36/namespacefl_a2bd8c696cd5b26e05473cc38ab62524e.html#a2bd8c696cd5b26e05473cc38ab62524e" title=" " alt="" coords="353,154,496,194"/>
+<area shape="poly" id="edge8_Node000001_Node000008" title=" " alt="" coords="607,265,567,236,521,208,494,197,496,192,524,204,570,231,610,260"/>
+<area shape="rect" id="Node000009" href="$d3/d5c/namespacefl_1_1anonymous__namespace_02audio_8cpp_03_a63dcc803fe703f176b52e25bde0c3adf.html#a63dcc803fe703f176b52e25bde0c3adf" title=" " alt="" coords="327,242,523,282"/>
+<area shape="poly" id="edge9_Node000001_Node000009" title=" " alt="" coords="557,282,523,278,523,272,557,277"/>
+<area shape="rect" id="Node000010" href="$d4/d36/namespacefl_addbb9457423c186b07bbb4922fa15c51.html#addbb9457423c186b07bbb4922fa15c51" title=" " alt="" coords="358,307,491,332"/>
+<area shape="poly" id="edge11_Node000001_Node000010" title=" " alt="" coords="557,305,492,313,491,308,557,300"/>
+<area shape="rect" id="Node000014" href="$d4/da7/namespacefl_1_1anonymous__namespace_02xypath_8cpp_03_a85e4c86634208307df5691237143a988.html#a85e4c86634208307df5691237143a988" title=" " alt="" coords="327,380,523,435"/>
+<area shape="poly" id="edge15_Node000001_Node000014" title=" " alt="" coords="594,320,478,382,476,378,592,315"/>
+<area shape="rect" id="Node000015" href="$dd/dfc/classfl_1_1_thread_local_fake_a745c387cc67a8cbe00cabaaa70d51268.html#a745c387cc67a8cbe00cabaaa70d51268" title=" " alt="" coords="349,459,500,499"/>
+<area shape="poly" id="edge17_Node000001_Node000015" title=" " alt="" coords="628,325,586,388,557,421,524,450,501,462,499,458,521,445,554,417,582,385,623,322"/>
+<area shape="rect" id="Node000016" href="$dd/dfc/classfl_1_1_thread_local_fake_a3fc5f57fb8dae1d4622d33bcbdd16266.html#a3fc5f57fb8dae1d4622d33bcbdd16266" title=" " alt="" coords="351,523,498,563"/>
+<area shape="poly" id="edge18_Node000001_Node000016" title=" " alt="" coords="636,325,620,368,597,418,565,469,524,513,500,528,497,524,521,509,561,466,592,416,615,366,631,324"/>
+<area shape="rect" id="Node000003" href="$d5/dec/_net_test_real_8h_a75e6549812ad7bff897e0c92a225878a.html#a75e6549812ad7bff897e0c92a225878a" title=" " alt="" coords="113,5,270,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="350,54,252,33,253,28,351,49"/>
+<area shape="rect" id="Node000005" href="$d5/dec/_net_test_real_8h_a648cd3d90f8e240cbbfe5cb934057124.html#a648cd3d90f8e240cbbfe5cb934057124" title="APPROACH 4: JSON Response with await pattern &#160;&#160;Same JSON handling but using await_top_level for synch..." alt="" coords="129,55,253,80"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="340,70,254,70,254,65,340,65"/>
+<area shape="rect" id="Node000004" href="$d5/dec/_net_test_real_8h_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="5,31,56,56"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="99,35,57,42,56,37,99,30"/>
+<area shape="poly" id="edge5_Node000005_Node000004" title=" " alt="" coords="115,59,56,50,57,44,116,53"/>
+<area shape="rect" id="Node000007" href="$d4/d36/namespacefl_a1af169c7aca24263575afb4044a94f12.html#a1af169c7aca24263575afb4044a94f12" title=" " alt="" coords="150,104,233,129"/>
+<area shape="poly" id="edge7_Node000006_Node000007" title=" " alt="" coords="340,119,233,119,233,114,340,114"/>
+<area shape="poly" id="edge10_Node000009_Node000009" title=" " alt="" coords="462,230,449,223,425,221,404,223,391,227,386,233,389,241,384,242,381,232,388,223,402,217,425,215,450,218,464,226"/>
+<area shape="rect" id="Node000011" href="$d5/d93/structfl_1_1_json_value_1_1const__iterator_1_1_key_value_a7d25d1835e72df4a437d157e0bd96909.html#a7d25d1835e72df4a437d157e0bd96909" title=" " alt="" coords="115,220,268,275"/>
+<area shape="poly" id="edge12_Node000010_Node000011" title=" " alt="" coords="357,306,326,297,267,277,269,272,327,291,359,300"/>
+<area shape="rect" id="Node000012" href="$df/dff/structfl_1_1_json_value_1_1iterator_1_1_key_value_a38a84e6319faf9716bf722959a1a8fc5.html#a38a84e6319faf9716bf722959a1a8fc5" title=" " alt="" coords="112,299,271,339"/>
+<area shape="poly" id="edge13_Node000010_Node000012" title=" " alt="" coords="344,322,271,322,271,317,344,317"/>
+<area shape="rect" id="Node000013" href="$da/dd6/structfl_1_1_json_value_a6d622a712caae494d9dd2228ef9b9d87.html#a6d622a712caae494d9dd2228ef9b9d87" title=" " alt="" coords="104,364,279,389"/>
+<area shape="poly" id="edge14_Node000010_Node000013" title=" " alt="" coords="360,338,244,367,243,361,358,333"/>
+<area shape="poly" id="edge16_Node000014_Node000014" title=" " alt="" coords="461,369,448,362,425,359,405,361,393,365,387,372,387,380,382,380,382,370,390,361,404,355,425,353,450,356,464,364"/>
 </map>

@@ -1,0 +1,21 @@
+<map id="fl::Scheduler::warn_no_then" name="fl::Scheduler::warn_no_then">
+<area shape="rect" id="Node000001" title=" " alt="" coords="632,101,775,141"/>
+<area shape="rect" id="Node000002" href="$d0/d38/classfl_1_1_scheduler_a782395f7e7cffb76da30963eae28b5ea.html#a782395f7e7cffb76da30963eae28b5ea" title=" " alt="" coords="429,79,584,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="618,111,584,106,585,100,619,105"/>
+<area shape="rect" id="Node000012" href="$d0/d38/classfl_1_1_scheduler_af8f3c7d1ebf85ebcdc09a02c06fc2d4b.html#af8f3c7d1ebf85ebcdc09a02c06fc2d4b" title=" " alt="" coords="429,129,584,169"/>
+<area shape="poly" id="edge7_Node000001_Node000012" title=" " alt="" coords="619,135,585,140,584,135,618,130"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a9b3631ee5771ef8d36a072368e1d49c7.html#a9b3631ee5771ef8d36a072368e1d49c7" title="Run all registered async tasks once." alt="" coords="250,79,354,104"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="415,94,354,94,354,89,415,89"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_a490bb1b7e97181543efd2c62768edda8.html#a490bb1b7e97181543efd2c62768edda8" title="Platform&#45;specific async yield function." alt="" coords="33,5,147,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="257,76,174,45,137,33,139,28,176,39,259,71"/>
+<area shape="rect" id="Node000009" href="$d4/d36/namespacefl_a32df246b375c92eca035330e08a84c79.html#a32df246b375c92eca035330e08a84c79" title="Legacy manual update for fetch promises (use fl::async_run() for new code)" alt="" coords="29,55,151,80"/>
+<area shape="poly" id="edge4_Node000003_Node000009" title=" " alt="" coords="236,87,151,77,152,72,237,81"/>
+<area shape="rect" id="Node000010" href="$d5/d1b/examples_2_async_2async_8h_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="65,104,115,129"/>
+<area shape="poly" id="edge5_Node000003_Node000010" title=" " alt="" coords="237,102,116,116,115,111,236,96"/>
+<area shape="rect" id="Node000011" href="$d5/d69/classfl_1_1_fetch_engine_listener_abdd28a0ff482cd6b1a1ee9fb72d5656d.html#abdd28a0ff482cd6b1a1ee9fb72d5656d" title=" " alt="" coords="5,154,175,194"/>
+<area shape="poly" id="edge6_Node000003_Node000011" title=" " alt="" coords="246,111,224,119,176,143,145,156,143,151,174,138,222,114,244,106"/>
+<area shape="rect" id="Node000013" href="$d0/d38/classfl_1_1_scheduler_ad35464102eaa035eb67524850901865a.html#ad35464102eaa035eb67524850901865a" title=" " alt="" coords="225,129,379,169"/>
+<area shape="poly" id="edge8_Node000012_Node000013" title=" " alt="" coords="416,151,379,151,379,146,416,146"/>
+<area shape="rect" id="Node000014" href="$d0/d38/classfl_1_1_scheduler_aa138fb500b3afcf1a29db4deb6aa971a.html#aa138fb500b3afcf1a29db4deb6aa971a" title=" " alt="" coords="223,193,381,233"/>
+<area shape="poly" id="edge9_Node000012_Node000014" title=" " alt="" coords="430,175,367,195,366,190,428,170"/>
+</map>

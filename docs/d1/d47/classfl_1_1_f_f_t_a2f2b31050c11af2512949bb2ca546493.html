@@ -123,39 +123,30 @@ $(function(){initNavTree('d1/d47/classfl_1_1_f_f_t_a2f2b31050c11af2512949bb2ca54
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../db/d03/fft_8cpp_source.html#l00037">37</a> of file <a class="el" href="../../db/d03/fft_8cpp_source.html">fft.cpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">   37</span>                                                {</div>
-<div class="line"><span class="lineno">   38</span>    Ptr&lt;FFTImpl&gt; *val = <a class="code hl_variable" href="../../d1/d47/classfl_1_1_f_f_t_a3c3c94f5a1833af32ff917259fac13a5.html#a3c3c94f5a1833af32ff917259fac13a5">mMap</a>-&gt;find_value(<a class="code hl_variable" href="../../d7/da1/old_8h_a690f84001beb455ff2f2bbd5fdcc79d5.html#a690f84001beb455ff2f2bbd5fdcc79d5">args</a>);</div>
-<div class="line"><span class="lineno">   39</span>    <span class="keywordflow">if</span> (val) {</div>
-<div class="line"><span class="lineno">   40</span>        <span class="comment">// we have it.</span></div>
-<div class="line"><span class="lineno">   41</span>        <span class="keywordflow">return</span> **val;</div>
-<div class="line"><span class="lineno">   42</span>    }</div>
-<div class="line"><span class="lineno">   43</span>    <span class="comment">// else we have to make a new one.</span></div>
-<div class="line"><span class="lineno">   44</span>    Ptr&lt;FFTImpl&gt; <a class="code hl_variable" href="../../d7/dfa/_p_j_r_c_spectrum_analyzer_8ino_a73e27170be4f75c0c95ba2891aa89837.html#a73e27170be4f75c0c95ba2891aa89837">fft</a> = <a class="code hl_function" href="../../d4/d36/namespacefl_aa46ba73e92c85e05f9ee42f4008cfbe0.html#aa46ba73e92c85e05f9ee42f4008cfbe0">NewPtr&lt;FFTImpl&gt;</a>(<a class="code hl_variable" href="../../d7/da1/old_8h_a690f84001beb455ff2f2bbd5fdcc79d5.html#a690f84001beb455ff2f2bbd5fdcc79d5">args</a>);</div>
-<div class="line"><span class="lineno">   45</span>    (*mMap)[<a class="code hl_variable" href="../../d7/da1/old_8h_a690f84001beb455ff2f2bbd5fdcc79d5.html#a690f84001beb455ff2f2bbd5fdcc79d5">args</a>] = <a class="code hl_variable" href="../../d7/dfa/_p_j_r_c_spectrum_analyzer_8ino_a73e27170be4f75c0c95ba2891aa89837.html#a73e27170be4f75c0c95ba2891aa89837">fft</a>;</div>
-<div class="line"><span class="lineno">   46</span>    <span class="keywordflow">return</span> *<a class="code hl_variable" href="../../d7/dfa/_p_j_r_c_spectrum_analyzer_8ino_a73e27170be4f75c0c95ba2891aa89837.html#a73e27170be4f75c0c95ba2891aa89837">fft</a>;</div>
-<div class="line"><span class="lineno">   47</span>}</div>
-<div class="ttc" id="a_p_j_r_c_spectrum_analyzer_8ino_a73e27170be4f75c0c95ba2891aa89837_html_a73e27170be4f75c0c95ba2891aa89837"><div class="ttname"><a href="../../d7/dfa/_p_j_r_c_spectrum_analyzer_8ino_a73e27170be4f75c0c95ba2891aa89837.html#a73e27170be4f75c0c95ba2891aa89837">fft</a></div><div class="ttdeci">AudioAnalyzeFFT1024 fft</div><div class="ttdef"><b>Definition</b> <a href="../../d7/dfa/_p_j_r_c_spectrum_analyzer_8ino_source.html#l00040">PJRCSpectrumAnalyzer.ino:40</a></div></div>
-<div class="ttc" id="aclassfl_1_1_f_f_t_a3c3c94f5a1833af32ff917259fac13a5_html_a3c3c94f5a1833af32ff917259fac13a5"><div class="ttname"><a href="../../d1/d47/classfl_1_1_f_f_t_a3c3c94f5a1833af32ff917259fac13a5.html#a3c3c94f5a1833af32ff917259fac13a5">fl::FFT::mMap</a></div><div class="ttdeci">scoped_ptr&lt; HashMap &gt; mMap</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d76/fft_8h_source.html#l00085">fft.h:85</a></div></div>
-<div class="ttc" id="anamespacefl_aa46ba73e92c85e05f9ee42f4008cfbe0_html_aa46ba73e92c85e05f9ee42f4008cfbe0"><div class="ttname"><a href="../../d4/d36/namespacefl_aa46ba73e92c85e05f9ee42f4008cfbe0.html#aa46ba73e92c85e05f9ee42f4008cfbe0">fl::NewPtr</a></div><div class="ttdeci">Ptr&lt; T &gt; NewPtr(Args... args)</div><div class="ttdef"><b>Definition</b> <a href="../../dd/d98/ptr_8h_source.html#l00451">ptr.h:451</a></div></div>
-<div class="ttc" id="aold_8h_a690f84001beb455ff2f2bbd5fdcc79d5_html_a690f84001beb455ff2f2bbd5fdcc79d5"><div class="ttname"><a href="../../d7/da1/old_8h_a690f84001beb455ff2f2bbd5fdcc79d5.html#a690f84001beb455ff2f2bbd5fdcc79d5">args</a></div><div class="ttdeci">corkscrew_args args</div><div class="ttdef"><b>Definition</b> <a href="../../d7/da1/old_8h_source.html#l00142">old.h:142</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../db/d03/fft_8cpp_source.html#l00051">51</a> of file <a class="el" href="../../db/d03/fft_8cpp_source.html">fft.cpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">   51</span>                                                {</div>
+<div class="line"><span class="lineno">   52</span>    fl::shared_ptr&lt;FFTImpl&gt; *val = <a class="code hl_variable" href="../../d1/d47/classfl_1_1_f_f_t_a3c3c94f5a1833af32ff917259fac13a5.html#a3c3c94f5a1833af32ff917259fac13a5">mMap</a>-&gt;find_value(<a class="code hl_variable" href="../../d7/da1/old_8h_a690f84001beb455ff2f2bbd5fdcc79d5.html#a690f84001beb455ff2f2bbd5fdcc79d5">args</a>);</div>
+<div class="line"><span class="lineno">   53</span>    <span class="keywordflow">if</span> (val) {</div>
+<div class="line"><span class="lineno">   54</span>        <span class="comment">// we have it.</span></div>
+<div class="line"><span class="lineno">   55</span>        <span class="keywordflow">return</span> **val;</div>
+<div class="line"><span class="lineno">   56</span>    }</div>
+<div class="line"><span class="lineno">   57</span>    <span class="comment">// else we have to make a new one.</span></div>
+<div class="line"><span class="lineno">   58</span>    fl::shared_ptr&lt;FFTImpl&gt; <a class="code hl_variable" href="../../de/d2f/_p_j_r_c_spectrum_analyzer_8h_a73e27170be4f75c0c95ba2891aa89837.html#a73e27170be4f75c0c95ba2891aa89837">fft</a> = <a class="code hl_function" href="../../d4/d36/namespacefl_a87ae8a24cc8b709a64f39370e71846af.html#a87ae8a24cc8b709a64f39370e71846af">fl::make_shared&lt;FFTImpl&gt;</a>(<a class="code hl_variable" href="../../d7/da1/old_8h_a690f84001beb455ff2f2bbd5fdcc79d5.html#a690f84001beb455ff2f2bbd5fdcc79d5">args</a>);</div>
+<div class="line"><span class="lineno">   59</span>    (*mMap)[<a class="code hl_variable" href="../../d7/da1/old_8h_a690f84001beb455ff2f2bbd5fdcc79d5.html#a690f84001beb455ff2f2bbd5fdcc79d5">args</a>] = <a class="code hl_variable" href="../../de/d2f/_p_j_r_c_spectrum_analyzer_8h_a73e27170be4f75c0c95ba2891aa89837.html#a73e27170be4f75c0c95ba2891aa89837">fft</a>;</div>
+<div class="line"><span class="lineno">   60</span>    <span class="keywordflow">return</span> *<a class="code hl_variable" href="../../de/d2f/_p_j_r_c_spectrum_analyzer_8h_a73e27170be4f75c0c95ba2891aa89837.html#a73e27170be4f75c0c95ba2891aa89837">fft</a>;</div>
+<div class="line"><span class="lineno">   61</span>}</div>
+<div class="ttc" id="a_p_j_r_c_spectrum_analyzer_8h_a73e27170be4f75c0c95ba2891aa89837_html_a73e27170be4f75c0c95ba2891aa89837"><div class="ttname"><a href="../../de/d2f/_p_j_r_c_spectrum_analyzer_8h_a73e27170be4f75c0c95ba2891aa89837.html#a73e27170be4f75c0c95ba2891aa89837">fft</a></div><div class="ttdeci">AudioAnalyzeFFT1024 fft</div><div class="ttdef"><b>Definition</b> <a href="../../de/d2f/_p_j_r_c_spectrum_analyzer_8h_source.html#l00042">PJRCSpectrumAnalyzer.h:42</a></div></div>
+<div class="ttc" id="aclassfl_1_1_f_f_t_a3c3c94f5a1833af32ff917259fac13a5_html_a3c3c94f5a1833af32ff917259fac13a5"><div class="ttname"><a href="../../d1/d47/classfl_1_1_f_f_t_a3c3c94f5a1833af32ff917259fac13a5.html#a3c3c94f5a1833af32ff917259fac13a5">fl::FFT::mMap</a></div><div class="ttdeci">scoped_ptr&lt; HashMap &gt; mMap</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d76/fft_8h_source.html#l00122">fft.h:122</a></div></div>
+<div class="ttc" id="anamespacefl_a87ae8a24cc8b709a64f39370e71846af_html_a87ae8a24cc8b709a64f39370e71846af"><div class="ttname"><a href="../../d4/d36/namespacefl_a87ae8a24cc8b709a64f39370e71846af.html#a87ae8a24cc8b709a64f39370e71846af">fl::make_shared</a></div><div class="ttdeci">shared_ptr&lt; T &gt; make_shared(Args &amp;&amp;... args)</div><div class="ttdef"><b>Definition</b> <a href="../../df/d6a/shared__ptr_8h_source.html#l00348">shared_ptr.h:348</a></div></div>
+<div class="ttc" id="aold_8h_a690f84001beb455ff2f2bbd5fdcc79d5_html_a690f84001beb455ff2f2bbd5fdcc79d5"><div class="ttname"><a href="../../d7/da1/old_8h_a690f84001beb455ff2f2bbd5fdcc79d5.html#a690f84001beb455ff2f2bbd5fdcc79d5">args</a></div><div class="ttdeci">corkscrew_args args</div><div class="ttdef"><b>Definition</b> <a href="../../d7/da1/old_8h_source.html#l00150">old.h:150</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d7/da1/old_8h_source.html#l00142">args</a>, <a class="el" href="../../d7/dfa/_p_j_r_c_spectrum_analyzer_8ino_source.html#l00040">fft</a>, <a class="el" href="../../d7/d76/fft_8h_source.html#l00085">mMap</a>, and <a class="el" href="../../dd/d98/ptr_8h_source.html#l00451">fl::NewPtr()</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../db/d03/fft_8cpp_source.html#l00024">run()</a>.</p>
+<p class="reference">References <a class="el" href="../../d7/da1/old_8h_source.html#l00150">args</a>, <a class="el" href="../../de/d2f/_p_j_r_c_spectrum_analyzer_8h_source.html#l00042">fft</a>, <a class="el" href="../../df/d6a/shared__ptr_8h_source.html#l00348">fl::make_shared()</a>, and <a class="el" href="../../d7/d76/fft_8h_source.html#l00122">mMap</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-0-content" class="dyncontent" style="display:none;">
-<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../d1/d47/classfl_1_1_f_f_t_a2f2b31050c11af2512949bb2ca546493_a2f2b31050c11af2512949bb2ca546493_cgraph.svg" width="100%" height="300"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
-</div>
-<div id="dynsection-1" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
-  <img id="dynsection-1-trigger" src="../../closed.png" alt="+"/> Here is the caller graph for this function:</div>
-<div id="dynsection-1-summary" class="dynsummary" style="display:block;">
-</div>
-<div id="dynsection-1-content" class="dyncontent" style="display:none;">
-<div class="center"><iframe scrolling="no" frameborder="0" src="../../d1/d47/classfl_1_1_f_f_t_a2f2b31050c11af2512949bb2ca546493_a2f2b31050c11af2512949bb2ca546493_icgraph.svg" width="500" height="36"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<div class="center"><iframe scrolling="no" frameborder="0" src="../../d1/d47/classfl_1_1_f_f_t_a2f2b31050c11af2512949bb2ca546493_a2f2b31050c11af2512949bb2ca546493_cgraph.svg" width="342" height="36"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
 </div>
 
 </div>
@@ -167,7 +158,7 @@ $(function(){initNavTree('d1/d47/classfl_1_1_f_f_t_a2f2b31050c11af2512949bb2ca54
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../d1/d47/classfl_1_1_f_f_t.html">FFT</a></li>
-    <li class="footer">Generated on Tue Jun 24 2025 00:58:15 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Fri Aug 22 2025 20:59:36 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

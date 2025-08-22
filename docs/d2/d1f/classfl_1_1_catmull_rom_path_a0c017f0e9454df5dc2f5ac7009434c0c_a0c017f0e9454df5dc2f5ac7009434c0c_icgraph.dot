@@ -16,5 +16,5 @@ digraph "fl::CatmullRomPath::params"
   Node1 -> Node5 [id="edge4_Node000001_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node5 [id="Node000005",label="fl::CatmullRomPath\l::compute",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d1f/classfl_1_1_catmull_rom_path_a6e5d18d26fcbf7bd8bf962b804626bed.html#a6e5d18d26fcbf7bd8bf962b804626bed",tooltip=" "];
   Node1 -> Node6 [id="edge5_Node000001_Node000006",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node6 [id="Node000006",label="fl::CatmullRomPath\l::size",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d1f/classfl_1_1_catmull_rom_path_aa242066ce688915cbf97cfa212e817b5.html#aa242066ce688915cbf97cfa212e817b5",tooltip="Get the number of control points."];
+  Node6 [id="Node000006",label="fl::CatmullRomPath\l::size",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d1f/classfl_1_1_catmull_rom_path_a003f74c931b4e70c5a7de6c8d4c5108c.html#a003f74c931b4e70c5a7de6c8d4c5108c",tooltip="Get the number of control points."];
 }

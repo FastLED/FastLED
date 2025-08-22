@@ -6,7 +6,7 @@ var class_pin =
     [ "~Pin", "d7/d68/class_pin_ab86af668f577dc4c39d7e191f9c157bd.html#ab86af668f577dc4c39d7e191f9c157bd", null ],
     [ "_init", "d7/d68/class_pin_a54600a4bc3f5cbefebd28abda2aebea8.html#a54600a4bc3f5cbefebd28abda2aebea8", null ],
     [ "fastset", "d7/d68/class_pin_a182ab9f12ccc742d2f790b8b394e0adb.html#a182ab9f12ccc742d2f790b8b394e0adb", null ],
-    [ "hi", "d7/d68/class_pin_a5a2884f01bb407fd628f57553eaaa9f4.html#a5a2884f01bb407fd628f57553eaaa9f4", null ],
+    [ "hi", "d7/d68/class_pin_a0ef99e3ca78ae92d51bba1682de1c6c1.html#a0ef99e3ca78ae92d51bba1682de1c6c1", null ],
     [ "hi", "d7/d68/class_pin_a60e2715b756d236bf8efdffae663b568.html#a60e2715b756d236bf8efdffae663b568", null ],
     [ "hival", "d7/d68/class_pin_adf6b32998416f1ea0314bb0c09279276.html#adf6b32998416f1ea0314bb0c09279276", null ],
     [ "isSelected", "d7/d68/class_pin_a4ad70f650448aec07fb9b4011d07cba4.html#a4ad70f650448aec07fb9b4011d07cba4", null ],
@@ -21,10 +21,10 @@ var class_pin =
     [ "setInput", "d7/d68/class_pin_a3b1c3fa3480cd4a57c065f2e8811543a.html#a3b1c3fa3480cd4a57c065f2e8811543a", null ],
     [ "setInputPullup", "d7/d68/class_pin_a8f151eca62dc95654d808d5787c70531.html#a8f151eca62dc95654d808d5787c70531", null ],
     [ "setOutput", "d7/d68/class_pin_a2309200ff683097b1aa8679ae3dc1e30.html#a2309200ff683097b1aa8679ae3dc1e30", null ],
-    [ "strobe", "d7/d68/class_pin_ac4ce6209c47e73e4cbc751d735c56e97.html#ac4ce6209c47e73e4cbc751d735c56e97", null ],
+    [ "strobe", "d7/d68/class_pin_a70efd9d054eba5312b34b64919821a03.html#a70efd9d054eba5312b34b64919821a03", null ],
     [ "toggle", "d7/d68/class_pin_a5ecffd86fb366af5ff559faf82a1fc81.html#a5ecffd86fb366af5ff559faf82a1fc81", null ],
     [ "mInPort", "d7/d68/class_pin_a766555da3c8cafb61865e94002a86a17.html#a766555da3c8cafb61865e94002a86a17", null ],
-    [ "mPin", "d7/d68/class_pin_ab58531216a712a0eae5f99ec501681a1.html#ab58531216a712a0eae5f99ec501681a1", null ],
+    [ "mPin", "d7/d68/class_pin_af480be92a0bf2b95100eb71ba7de17aa.html#af480be92a0bf2b95100eb71ba7de17aa", null ],
     [ "mPinMask", "d7/d68/class_pin_a8f4de8495daa82707684f1d7d2c87137.html#a8f4de8495daa82707684f1d7d2c87137", null ],
     [ "mPort", "d7/d68/class_pin_a05f9babc2d6ff4aad49fb1175a3570e7.html#a05f9babc2d6ff4aad49fb1175a3570e7", null ]
 ];

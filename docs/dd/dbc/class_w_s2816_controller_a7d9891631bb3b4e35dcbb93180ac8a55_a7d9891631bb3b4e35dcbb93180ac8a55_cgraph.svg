@@ -138,30 +138,12 @@ var sectionId = 'dynsection-0';
 </a>
 </g>
 </g>
-<!-- Node12 -->
-<g id="Node000012" class="node">
-<title>Node12</title>
-<g id="a_Node000012"><a xlink:href="../../d0/dee/struct_pixel_controller_a85305135ad8ad18edcd32dfc7431c660.html#a85305135ad8ad18edcd32dfc7431c660" target="_top" xlink:title="Get the length of the LED strip.">
-<polygon fill="white" stroke="#666666" points="336.5,-56 223.5,-56 223.5,-37 336.5,-37 336.5,-56"/>
-<text text-anchor="middle" x="280" y="-44" font-family="Helvetica,sans-Serif" font-size="10.00">PixelController::size</text>
-</a>
-</g>
-</g>
-<!-- Node1&#45;&gt;Node12 -->
-<g id="edge11_Node000001_Node000012" class="edge">
-<title>Node1&#45;&gt;Node12</title>
-<g id="a_edge11_Node000001_Node000012"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M105.12,-100.99C128.42,-91.21 166.34,-75.97 200,-65.5 208.04,-63 216.62,-60.63 225.05,-58.47"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="225.99,-61.85 234.84,-56.04 224.3,-55.06 225.99,-61.85"/>
-</a>
-</g>
-</g>
 <!-- Node13 -->
 <g id="Node000013" class="node">
 <title>Node13</title>
-<g id="a_Node000013"><a xlink:href="../../d0/dee/struct_pixel_controller_ac7cb7840989882cce60218ac43dbe8ef.html#ac7cb7840989882cce60218ac43dbe8ef" target="_top" xlink:title="Step the dithering forward.">
-<polygon fill="white" stroke="#666666" points="360,-19 200,-19 200,0 360,0 360,-19"/>
-<text text-anchor="middle" x="280" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">PixelController::stepDithering</text>
+<g id="a_Node000013"><a xlink:href="../../d0/dee/struct_pixel_controller_a85305135ad8ad18edcd32dfc7431c660.html#a85305135ad8ad18edcd32dfc7431c660" target="_top" xlink:title="Get the length of the LED strip.">
+<polygon fill="white" stroke="#666666" points="336.5,-56 223.5,-56 223.5,-37 336.5,-37 336.5,-56"/>
+<text text-anchor="middle" x="280" y="-44" font-family="Helvetica,sans-Serif" font-size="10.00">PixelController::size</text>
 </a>
 </g>
 </g>
@@ -169,6 +151,24 @@ var sectionId = 'dynsection-0';
 <g id="edge12_Node000001_Node000013" class="edge">
 <title>Node1&#45;&gt;Node13</title>
 <g id="a_edge12_Node000001_Node000013"><a xlink:title=" ">
+<path fill="none" stroke="#63b8ff" d="M105.12,-100.99C128.42,-91.21 166.34,-75.97 200,-65.5 208.04,-63 216.62,-60.63 225.05,-58.47"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="225.99,-61.85 234.84,-56.04 224.3,-55.06 225.99,-61.85"/>
+</a>
+</g>
+</g>
+<!-- Node14 -->
+<g id="Node000014" class="node">
+<title>Node14</title>
+<g id="a_Node000014"><a xlink:href="../../d0/dee/struct_pixel_controller_ac7cb7840989882cce60218ac43dbe8ef.html#ac7cb7840989882cce60218ac43dbe8ef" target="_top" xlink:title="Step the dithering forward.">
+<polygon fill="white" stroke="#666666" points="360,-19 200,-19 200,0 360,0 360,-19"/>
+<text text-anchor="middle" x="280" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">PixelController::stepDithering</text>
+</a>
+</g>
+</g>
+<!-- Node1&#45;&gt;Node14 -->
+<g id="edge13_Node000001_Node000014" class="edge">
+<title>Node1&#45;&gt;Node14</title>
+<g id="a_edge13_Node000001_Node000014"><a xlink:title=" ">
 <path fill="none" stroke="#63b8ff" d="M93.4,-100.92C112.82,-83.56 156.58,-46.92 200,-27.5 204.62,-25.44 209.5,-23.6 214.47,-21.96"/>
 <polygon fill="#63b8ff" stroke="#63b8ff" points="215.55,-25.29 224.11,-19.05 213.53,-18.59 215.55,-25.29"/>
 </a>
@@ -177,9 +177,9 @@ var sectionId = 'dynsection-0';
 <!-- Node6 -->
 <g id="Node000006" class="node">
 <title>Node6</title>
-<g id="a_Node000006"><a xlink:href="../../d1/d12/group__intmap_gab217a118917847ecb8148cdc41fa6e07.html#gab217a118917847ecb8148cdc41fa6e07" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#666666" points="494,-136 417,-136 417,-117 494,-117 494,-136"/>
-<text text-anchor="middle" x="455.5" y="-124" font-family="Helvetica,sans-Serif" font-size="10.00">map8_to_16</text>
+<g id="a_Node000006"><a xlink:href="../../da/dc7/advanced_8h_a96d9503945476f13a97c8f406269fcef.html#a96d9503945476f13a97c8f406269fcef" target="_top" xlink:title=" ">
+<polygon fill="white" stroke="#666666" points="489.5,-155 421.5,-155 421.5,-136 489.5,-136 489.5,-155"/>
+<text text-anchor="middle" x="455.5" y="-143" font-family="Helvetica,sans-Serif" font-size="10.00">brightness</text>
 </a>
 </g>
 </g>
@@ -187,17 +187,17 @@ var sectionId = 'dynsection-0';
 <g id="edge5_Node000005_Node000006" class="edge">
 <title>Node5&#45;&gt;Node6</title>
 <g id="a_edge5_Node000005_Node000006"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M347.09,-103.59C366.96,-107.83 388.38,-112.4 406.82,-116.33"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="406.21,-119.78 416.72,-118.44 407.67,-112.94 406.21,-119.78"/>
+<path fill="none" stroke="#63b8ff" d="M329.56,-104.53C339.65,-107.75 350.19,-111.18 360,-114.5 376.11,-119.96 379.87,-122.11 396,-127.5 401.35,-129.29 407.01,-131.11 412.6,-132.87"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="411.94,-136.34 422.53,-135.97 414.02,-129.65 411.94,-136.34"/>
 </a>
 </g>
 </g>
 <!-- Node7 -->
 <g id="Node000007" class="node">
 <title>Node7</title>
-<g id="a_Node000007"><a xlink:href="../../d0/dee/struct_pixel_controller_a060678fc5a4cf518e155ed3a6145b8d4.html#a060678fc5a4cf518e155ed3a6145b8d4" target="_top" xlink:title="Scale a value using the per&#45;channel scale data.">
-<polygon fill="white" stroke="#666666" points="515,-99 396,-99 396,-80 515,-80 515,-99"/>
-<text text-anchor="middle" x="455.5" y="-87" font-family="Helvetica,sans-Serif" font-size="10.00">PixelController::scale</text>
+<g id="a_Node000007"><a xlink:href="../../d1/d12/group__intmap_gab217a118917847ecb8148cdc41fa6e07.html#gab217a118917847ecb8148cdc41fa6e07" target="_top" xlink:title=" ">
+<polygon fill="white" stroke="#666666" points="494,-118 417,-118 417,-99 494,-99 494,-118"/>
+<text text-anchor="middle" x="455.5" y="-106" font-family="Helvetica,sans-Serif" font-size="10.00">map8_to_16</text>
 </a>
 </g>
 </g>
@@ -205,71 +205,89 @@ var sectionId = 'dynsection-0';
 <g id="edge6_Node000005_Node000007" class="edge">
 <title>Node5&#45;&gt;Node7</title>
 <g id="a_edge6_Node000005_Node000007"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M347.09,-89.5C359.78,-89.5 373.1,-89.5 385.88,-89.5"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="385.98,-93 395.98,-89.5 385.98,-86 385.98,-93"/>
-</a>
-</g>
-</g>
-<!-- Node11 -->
-<g id="Node000011" class="node">
-<title>Node11</title>
-<g id="a_Node000011"><a xlink:href="../../d0/da8/group___scaling_gaa51d5b048c2a4a20a00bddcdc257daaf.html#gaa51d5b048c2a4a20a00bddcdc257daaf" target="_top" xlink:title="Scale a 16&#45;bit unsigned value by an 8&#45;bit value, which is treated as the numerator of a fraction whos...">
-<polygon fill="white" stroke="#666666" points="491.5,-62 419.5,-62 419.5,-43 491.5,-43 491.5,-62"/>
-<text text-anchor="middle" x="455.5" y="-50" font-family="Helvetica,sans-Serif" font-size="10.00">scale16by8</text>
-</a>
-</g>
-</g>
-<!-- Node5&#45;&gt;Node11 -->
-<g id="edge10_Node000005_Node000011" class="edge">
-<title>Node5&#45;&gt;Node11</title>
-<g id="a_edge10_Node000005_Node000011"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M347.09,-75.41C367.87,-70.97 390.33,-66.18 409.31,-62.14"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="410.13,-65.54 419.18,-60.03 408.67,-58.69 410.13,-65.54"/>
+<path fill="none" stroke="#63b8ff" d="M347.09,-96.74C366.87,-98.9 388.18,-101.24 406.56,-103.25"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="406.4,-106.75 416.72,-104.36 407.16,-99.8 406.4,-106.75"/>
 </a>
 </g>
 </g>
 <!-- Node8 -->
 <g id="Node000008" class="node">
 <title>Node8</title>
-<g id="a_Node000008"><a xlink:href="../../d0/dee/struct_pixel_controller_ae44229e20fb4ba4473b057dcda87122e.html#ae44229e20fb4ba4473b057dcda87122e" target="_top" xlink:title="Copy constructor.">
-<polygon fill="#fff0f0" stroke="red" points="716,-118 551,-118 551,-99 716,-99 716,-118"/>
-<text text-anchor="middle" x="633.5" y="-106" font-family="Helvetica,sans-Serif" font-size="10.00">PixelController::PixelController</text>
+<g id="a_Node000008"><a xlink:href="../../d0/dee/struct_pixel_controller_a060678fc5a4cf518e155ed3a6145b8d4.html#a060678fc5a4cf518e155ed3a6145b8d4" target="_top" xlink:title="Scale a value using the per&#45;channel scale data.">
+<polygon fill="white" stroke="#666666" points="515,-81 396,-81 396,-62 515,-62 515,-81"/>
+<text text-anchor="middle" x="455.5" y="-69" font-family="Helvetica,sans-Serif" font-size="10.00">PixelController::scale</text>
 </a>
 </g>
 </g>
-<!-- Node7&#45;&gt;Node8 -->
-<g id="edge7_Node000007_Node000008" class="edge">
-<title>Node7&#45;&gt;Node8</title>
-<g id="a_edge7_Node000007_Node000008"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M515.11,-95.83C523.37,-96.72 532.03,-97.65 540.73,-98.59"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="540.64,-102.1 550.95,-99.7 541.39,-95.14 540.64,-102.1"/>
+<!-- Node5&#45;&gt;Node8 -->
+<g id="edge7_Node000005_Node000008" class="edge">
+<title>Node5&#45;&gt;Node8</title>
+<g id="a_edge7_Node000005_Node000008"><a xlink:title=" ">
+<path fill="none" stroke="#63b8ff" d="M347.09,-82.64C359.78,-81.33 373.1,-79.94 385.88,-78.62"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="386.39,-82.08 395.98,-77.57 385.67,-75.12 386.39,-82.08"/>
 </a>
 </g>
 </g>
-<!-- Node10 -->
-<g id="Node000010" class="node">
-<title>Node10</title>
-<g id="a_Node000010"><a xlink:href="../../d0/da8/group___scaling_gad7535ccda9c92470c4e6ee0265585555.html#gad7535ccda9c92470c4e6ee0265585555" target="_top" xlink:title="Scale one byte by a second one, which is treated as the numerator of a fraction whose denominator is ...">
-<polygon fill="white" stroke="#666666" points="657.5,-81 609.5,-81 609.5,-62 657.5,-62 657.5,-81"/>
-<text text-anchor="middle" x="633.5" y="-69" font-family="Helvetica,sans-Serif" font-size="10.00">scale8</text>
+<!-- Node12 -->
+<g id="Node000012" class="node">
+<title>Node12</title>
+<g id="a_Node000012"><a xlink:href="../../d0/da8/group___scaling_gaa51d5b048c2a4a20a00bddcdc257daaf.html#gaa51d5b048c2a4a20a00bddcdc257daaf" target="_top" xlink:title="Scale a 16&#45;bit unsigned value by an 8&#45;bit value, which is treated as the numerator of a fraction whos...">
+<polygon fill="white" stroke="#666666" points="491.5,-44 419.5,-44 419.5,-25 491.5,-25 491.5,-44"/>
+<text text-anchor="middle" x="455.5" y="-32" font-family="Helvetica,sans-Serif" font-size="10.00">scale16by8</text>
 </a>
 </g>
 </g>
-<!-- Node7&#45;&gt;Node10 -->
-<g id="edge9_Node000007_Node000010" class="edge">
-<title>Node7&#45;&gt;Node10</title>
-<g id="a_edge9_Node000007_Node000010"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M515.11,-83.51C543.03,-80.65 575.41,-77.34 599.08,-74.92"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="599.71,-78.37 609.3,-73.87 599,-71.41 599.71,-78.37"/>
+<!-- Node5&#45;&gt;Node12 -->
+<g id="edge11_Node000005_Node000012" class="edge">
+<title>Node5&#45;&gt;Node12</title>
+<g id="a_edge11_Node000005_Node000012"><a xlink:title=" ">
+<path fill="none" stroke="#63b8ff" d="M331.21,-74.47C340.78,-71.54 350.71,-68.46 360,-65.5 376.07,-60.38 379.98,-58.77 396,-53.5 402.19,-51.46 408.75,-49.32 415.16,-47.23"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="416.6,-50.44 425.03,-44.02 414.43,-43.79 416.6,-50.44"/>
 </a>
 </g>
 </g>
-<!-- Node8&#45;&gt;Node8 -->
-<g id="edge8_Node000008_Node000008" class="edge">
-<title>Node8&#45;&gt;Node8</title>
-<g id="a_edge8_Node000008_Node000008"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M606.07,-118.08C592.72,-126.73 601.86,-136 633.5,-136 654.76,-136 665.86,-131.82 666.81,-126.45"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="669.55,-124.26 660.93,-118.08 663.82,-128.28 669.55,-124.26"/>
+<!-- Node9 -->
+<g id="Node000009" class="node">
+<title>Node9</title>
+<g id="a_Node000009"><a xlink:href="../../d0/dee/struct_pixel_controller_ae44229e20fb4ba4473b057dcda87122e.html#ae44229e20fb4ba4473b057dcda87122e" target="_top" xlink:title="Copy constructor.">
+<polygon fill="#fff0f0" stroke="red" points="716,-100 551,-100 551,-81 716,-81 716,-100"/>
+<text text-anchor="middle" x="633.5" y="-88" font-family="Helvetica,sans-Serif" font-size="10.00">PixelController::PixelController</text>
+</a>
+</g>
+</g>
+<!-- Node8&#45;&gt;Node9 -->
+<g id="edge8_Node000008_Node000009" class="edge">
+<title>Node8&#45;&gt;Node9</title>
+<g id="a_edge8_Node000008_Node000009"><a xlink:title=" ">
+<path fill="none" stroke="#63b8ff" d="M515.11,-77.83C523.37,-78.72 532.03,-79.65 540.73,-80.59"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="540.64,-84.1 550.95,-81.7 541.39,-77.14 540.64,-84.1"/>
+</a>
+</g>
+</g>
+<!-- Node11 -->
+<g id="Node000011" class="node">
+<title>Node11</title>
+<g id="a_Node000011"><a xlink:href="../../d0/da8/group___scaling_gad7535ccda9c92470c4e6ee0265585555.html#gad7535ccda9c92470c4e6ee0265585555" target="_top" xlink:title="Scale one byte by a second one, which is treated as the numerator of a fraction whose denominator is ...">
+<polygon fill="white" stroke="#666666" points="657.5,-63 609.5,-63 609.5,-44 657.5,-44 657.5,-63"/>
+<text text-anchor="middle" x="633.5" y="-51" font-family="Helvetica,sans-Serif" font-size="10.00">scale8</text>
+</a>
+</g>
+</g>
+<!-- Node8&#45;&gt;Node11 -->
+<g id="edge10_Node000008_Node000011" class="edge">
+<title>Node8&#45;&gt;Node11</title>
+<g id="a_edge10_Node000008_Node000011"><a xlink:title=" ">
+<path fill="none" stroke="#63b8ff" d="M515.11,-65.51C543.03,-62.65 575.41,-59.34 599.08,-56.92"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="599.71,-60.37 609.3,-55.87 599,-53.41 599.71,-60.37"/>
+</a>
+</g>
+</g>
+<!-- Node9&#45;&gt;Node9 -->
+<g id="edge9_Node000009_Node000009" class="edge">
+<title>Node9&#45;&gt;Node9</title>
+<g id="a_edge9_Node000009_Node000009"><a xlink:title=" ">
+<path fill="none" stroke="#63b8ff" d="M606.07,-100.08C592.72,-108.73 601.86,-118 633.5,-118 654.76,-118 665.86,-113.82 666.81,-108.45"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="669.55,-106.26 660.93,-100.08 663.82,-110.28 669.55,-106.26"/>
 </a>
 </g>
 </g>

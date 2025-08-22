@@ -1,7 +1,11 @@
 <map id="CLEDController::endShowLeds" name="CLEDController::endShowLeds">
-<area shape="rect" id="Node000001" title=" " alt="" coords="5,5,223,31"/>
-<area shape="rect" id="Node000002" href="$d6/d2c/class_c_l_e_d_controller_a2a231accbeb00e6a6080a7e55274a279.html#a2a231accbeb00e6a6080a7e55274a279" title="Set the dithering mode for this controller to use." alt="" coords="271,5,459,31"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="223,15,257,15,257,21,223,21"/>
-<area shape="rect" id="Node000003" href="$d6/d2c/class_c_l_e_d_controller_a8c560c6d171f117dfd19c0f2ec780a32.html#a8c560c6d171f117dfd19c0f2ec780a32" title="Create an led controller object, add it to the chain of controllers." alt="" coords="507,5,733,31"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="459,15,493,15,493,21,459,21"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,31,223,56"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a0a816710570151e78e9e72fb121db30f.html#a0a816710570151e78e9e72fb121db30f" title=" " alt="" coords="315,5,415,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="222,30,301,22,301,27,223,35"/>
+<area shape="rect" id="Node000004" href="$d6/d2c/class_c_l_e_d_controller_af8b923d5138800906b5a8cc366eaa1a7.html#af8b923d5138800906b5a8cc366eaa1a7" title="Set the dithering mode for this controller to use." alt="" coords="271,55,459,80"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="223,51,258,54,257,60,222,56"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a213e289e084126c44de102393fb0d302.html#a213e289e084126c44de102393fb0d302" title=" " alt="" coords="575,5,665,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="415,15,561,15,561,21,415,21"/>
+<area shape="rect" id="Node000005" href="$d6/d2c/class_c_l_e_d_controller_a8c560c6d171f117dfd19c0f2ec780a32.html#a8c560c6d171f117dfd19c0f2ec780a32" title="Create an led controller object, add it to the chain of controllers." alt="" coords="507,55,733,80"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="459,65,493,65,493,70,459,70"/>
 </map>

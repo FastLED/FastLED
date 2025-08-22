@@ -1,0 +1,5 @@
+<map id="fl::rgb_2_rgbw_null_white_pixel" name="fl::rgb_2_rgbw_null_white_pixel">
+<area shape="rect" id="Node000001" title="Converts RGB to RGBW with the W channel set to black, always." alt="" coords="5,5,149,45"/>
+<area shape="rect" id="Node000002" href="$d0/da8/group___scaling_gad7535ccda9c92470c4e6ee0265585555.html#gad7535ccda9c92470c4e6ee0265585555" title="Scale one byte by a second one, which is treated as the numerator of a fraction whose denominator is ..." alt="" coords="197,13,261,38"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="149,23,184,23,184,28,149,28"/>
+</map>

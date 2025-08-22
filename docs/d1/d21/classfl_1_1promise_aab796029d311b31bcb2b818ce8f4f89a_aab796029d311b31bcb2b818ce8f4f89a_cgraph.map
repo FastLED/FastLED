@@ -1,0 +1,16 @@
+<map id="fl::promise::resolve" name="fl::promise::resolve">
+<area shape="rect" id="Node000001" title="Create a resolved promise with value (move version)" alt="" coords="5,80,152,105"/>
+<area shape="rect" id="Node000002" href="$d1/d21/classfl_1_1promise_a39a88af32b89bdcd2ade2da29f3397d5.html#a39a88af32b89bdcd2ade2da29f3397d5" title="Default constructor &#45; creates invalid promise." alt="" coords="388,5,540,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="103,77,147,57,199,39,289,24,374,17,374,22,289,29,201,45,149,62,105,82"/>
+<area shape="rect" id="Node000003" href="$d1/d21/classfl_1_1promise_a06ac99cdb6ae08a992c049504a395f06.html#a06ac99cdb6ae08a992c049504a395f06" title="Create a pending promise." alt="" coords="200,55,340,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="152,80,186,76,187,81,153,86"/>
+<area shape="rect" id="Node000005" href="$d4/d36/namespacefl_a0445ddcae69ac4e524ec18098eb84dbf.html#a0445ddcae69ac4e524ec18098eb84dbf" title=" " alt="" coords="233,104,307,129"/>
+<area shape="poly" id="edge5_Node000001_Node000005" title=" " alt="" coords="153,99,219,108,219,113,152,105"/>
+<area shape="rect" id="Node000006" href="$d1/d21/classfl_1_1promise_a915f95ce14f79b1a74c7c4b74053fdda.html#a915f95ce14f79b1a74c7c4b74053fdda" title="Get the result value (only valid if is_resolved() returns true)" alt="" coords="203,153,337,179"/>
+<area shape="poly" id="edge6_Node000001_Node000006" title=" " alt="" coords="111,103,201,140,219,146,218,151,199,144,109,108"/>
+<area shape="poly" id="edge3_Node000003_Node000002" title=" " alt="" coords="320,52,399,32,400,37,321,57"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_a87ae8a24cc8b709a64f39370e71846af.html#a87ae8a24cc8b709a64f39370e71846af" title=" " alt="" coords="401,55,527,80"/>
+<area shape="poly" id="edge4_Node000003_Node000004" title=" " alt="" coords="340,65,388,65,388,70,340,70"/>
+<area shape="rect" id="Node000007" href="$d1/d21/classfl_1_1promise_a912aa98a2d3d942da9a902f518d57a1a.html#a912aa98a2d3d942da9a902f518d57a1a" title="Check if promise is valid." alt="" coords="399,153,529,179"/>
+<area shape="poly" id="edge7_Node000006_Node000007" title=" " alt="" coords="338,163,385,163,385,169,338,169"/>
+</map>

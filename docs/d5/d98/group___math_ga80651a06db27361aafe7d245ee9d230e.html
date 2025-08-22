@@ -129,26 +129,26 @@ $(function(){initNavTree('d5/d98/group___math_ga80651a06db27361aafe7d245ee9d230e
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>mean average of i and j, rounded up </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="../../d5/dd1/math8_8h_source.html#l00245">245</a> of file <a class="el" href="../../d5/dd1/math8_8h_source.html">math8.h</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  245</span>                                                             {</div>
-<div class="line"><span class="lineno">  246</span><span class="preprocessor">#if AVG8R_C == 1</span></div>
-<div class="line"><span class="lineno">  247</span>    <span class="keywordflow">return</span> (i + j + 1) &gt;&gt; 1;</div>
-<div class="line"><span class="lineno">  248</span><span class="preprocessor">#elif AVG8R_AVRASM == 1</span></div>
-<div class="line"><span class="lineno">  249</span>    <span class="keyword">asm</span> <span class="keyword">volatile</span>(</div>
-<div class="line"><span class="lineno">  250</span>        <span class="comment">/* First, add j to i, 9th bit overflows into C flag */</span></div>
-<div class="line"><span class="lineno">  251</span>        <span class="stringliteral">&quot;add %0, %1          \n\t&quot;</span></div>
-<div class="line"><span class="lineno">  252</span>        <span class="comment">/* Divide by two, moving C flag into high 8th bit, old 1st bit now in C</span></div>
-<div class="line"><span class="lineno">  253</span><span class="comment">         */</span></div>
-<div class="line"><span class="lineno">  254</span>        <span class="stringliteral">&quot;ror %0              \n\t&quot;</span></div>
-<div class="line"><span class="lineno">  255</span>        <span class="comment">/* Add C flag */</span></div>
-<div class="line"><span class="lineno">  256</span>        <span class="stringliteral">&quot;adc %0, __zero_reg__\n\t&quot;</span></div>
-<div class="line"><span class="lineno">  257</span>        : <span class="stringliteral">&quot;+r&quot;</span>(i)</div>
-<div class="line"><span class="lineno">  258</span>        : <span class="stringliteral">&quot;r&quot;</span>(j));</div>
-<div class="line"><span class="lineno">  259</span>    <span class="keywordflow">return</span> i;</div>
-<div class="line"><span class="lineno">  260</span><span class="preprocessor">#else</span></div>
-<div class="line"><span class="lineno">  261</span><span class="preprocessor">#error &quot;No implementation for avg8r available.&quot;</span></div>
-<div class="line"><span class="lineno">  262</span><span class="preprocessor">#endif</span></div>
-<div class="line"><span class="lineno">  263</span>}</div>
+<p class="definition">Definition at line <a class="el" href="../../d5/dd1/math8_8h_source.html#l00257">257</a> of file <a class="el" href="../../d5/dd1/math8_8h_source.html">math8.h</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  257</span>                                                             {</div>
+<div class="line"><span class="lineno">  258</span><span class="preprocessor">#if AVG8R_C == 1</span></div>
+<div class="line"><span class="lineno">  259</span>    <span class="keywordflow">return</span> (i + j + 1) &gt;&gt; 1;</div>
+<div class="line"><span class="lineno">  260</span><span class="preprocessor">#elif AVG8R_AVRASM == 1</span></div>
+<div class="line"><span class="lineno">  261</span>    <span class="keyword">asm</span> <span class="keyword">volatile</span>(</div>
+<div class="line"><span class="lineno">  262</span>        <span class="comment">/* First, add j to i, 9th bit overflows into C flag */</span></div>
+<div class="line"><span class="lineno">  263</span>        <span class="stringliteral">&quot;add %0, %1          \n\t&quot;</span></div>
+<div class="line"><span class="lineno">  264</span>        <span class="comment">/* Divide by two, moving C flag into high 8th bit, old 1st bit now in C</span></div>
+<div class="line"><span class="lineno">  265</span><span class="comment">         */</span></div>
+<div class="line"><span class="lineno">  266</span>        <span class="stringliteral">&quot;ror %0              \n\t&quot;</span></div>
+<div class="line"><span class="lineno">  267</span>        <span class="comment">/* Add C flag */</span></div>
+<div class="line"><span class="lineno">  268</span>        <span class="stringliteral">&quot;adc %0, __zero_reg__\n\t&quot;</span></div>
+<div class="line"><span class="lineno">  269</span>        : <span class="stringliteral">&quot;+r&quot;</span>(i)</div>
+<div class="line"><span class="lineno">  270</span>        : <span class="stringliteral">&quot;r&quot;</span>(j));</div>
+<div class="line"><span class="lineno">  271</span>    <span class="keywordflow">return</span> i;</div>
+<div class="line"><span class="lineno">  272</span><span class="preprocessor">#else</span></div>
+<div class="line"><span class="lineno">  273</span><span class="preprocessor">#error &quot;No implementation for avg8r available.&quot;</span></div>
+<div class="line"><span class="lineno">  274</span><span class="preprocessor">#endif</span></div>
+<div class="line"><span class="lineno">  275</span>}</div>
 </div><!-- fragment -->
 <p class="reference">References <a class="el" href="../../d4/d7a/lib8static_8h_source.html#l00012">LIB8STATIC_ALWAYS_INLINE</a>.</p>
 
@@ -161,7 +161,7 @@ $(function(){initNavTree('d5/d98/group___math_ga80651a06db27361aafe7d245ee9d230e
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d5/d98/group___math.html">Basic Math Operations</a></li>
-    <li class="footer">Generated on Tue Jun 24 2025 00:58:14 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Fri Aug 22 2025 20:59:34 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

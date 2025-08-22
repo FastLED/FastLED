@@ -1,0 +1,12 @@
+<map id="fl::FetchManager::cleanup_completed_promises" name="fl::FetchManager::cleanup_completed_promises">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,74,195,114"/>
+<area shape="rect" id="Node000002" href="$d1/d21/classfl_1_1promise_afd67743e54c389fdb8e8662b545018c4.html#afd67743e54c389fdb8e8662b545018c4" title="Check if promise is completed (resolved or rejected)" alt="" coords="245,5,431,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="163,71,283,32,285,37,165,76"/>
+<area shape="rect" id="Node000003" href="$d1/d21/classfl_1_1promise_a912aa98a2d3d942da9a902f518d57a1a.html#a912aa98a2d3d942da9a902f518d57a1a" title="Check if promise is valid." alt="" coords="481,31,612,56"/>
+<area shape="poly" id="edge5_Node000001_Node000003" title=" " alt="" coords="195,81,467,50,468,55,195,86"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_a0445ddcae69ac4e524ec18098eb84dbf.html#a0445ddcae69ac4e524ec18098eb84dbf" title=" " alt="" coords="301,107,375,132"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="195,101,287,111,287,117,194,107"/>
+<area shape="rect" id="Node000005" href="$db/ddd/classfl_1_1_heap_vector_adf7d4744fc743896550a1b12b18972db.html#adf7d4744fc743896550a1b12b18972db" title=" " alt="" coords="243,156,433,181"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="157,111,243,141,274,150,273,155,242,146,155,117"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="432,27,468,31,467,36,431,32"/>
+</map>

@@ -1,0 +1,13 @@
+<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
+<area shape="rect" id="Node000000" href="$d7/d27/structfl_1_1_rgbw.html" title=" " alt="" coords="5,31,80,56"/>
+<area shape="rect" id="Node000001" href="$dc/da6/structfl_1_1_rgbw_default.html" title=" " alt="" coords="138,5,261,31"/>
+<area shape="poly" id="edge190_Node000000_Node000001" title=" " alt="" coords="93,33,137,25,138,31,94,38"/>
+<area shape="rect" id="Node000003" href="$d2/d73/structfl_1_1_rgbw_invalid.html" title=" " alt="" coords="140,55,259,80"/>
+<area shape="poly" id="edge191_Node000000_Node000003" title=" " alt="" coords="94,48,140,56,139,61,93,54"/>
+<area shape="rect" id="Node000004" href="$d6/da6/structfl_1_1_rgbw_white_is_off.html" title=" " alt="" coords="128,104,271,129"/>
+<area shape="poly" id="edge192_Node000000_Node000004" title=" " alt="" coords="77,61,129,89,160,101,158,106,127,94,74,66"/>
+<area shape="rect" id="Node000002" href="$db/d74/struct_rgbw.html" title=" " alt="" coords="13,80,72,105"/>
+<area shape="poly" id="edge193_Node000002_Node000001" title=" " alt="" coords="73,70,127,40,155,28,157,33,129,44,76,75"/>
+<area shape="poly" id="edge194_Node000002_Node000003" title=" " alt="" coords="85,83,140,74,140,80,86,88"/>
+<area shape="poly" id="edge195_Node000002_Node000004" title=" " alt="" coords="86,97,128,103,127,108,85,102"/>
+</map>

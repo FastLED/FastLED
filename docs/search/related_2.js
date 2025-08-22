@@ -1,5 +1,5 @@
 var searchData=
 [
-  ['fastledanimartrix_0',['FastLEDANIMartRIX',['../d8/df5/classfl_1_1_animartrix_aaf28e2fda1750fd5c61fd7d1844b5a87.html#aaf28e2fda1750fd5c61fd7d1844b5a87',1,'fl::Animartrix']]],
-  ['fl_3a_3asingleton_3c_20engineevents_20_3e_1',['Singleton&lt; EngineEvents &gt;',['../de/dca/classfl_1_1_engine_events_a21f29ee6fabf9e3c42a6b133e3bf4327.html#a21f29ee6fabf9e3c42a6b133e3bf4327',1,'fl::EngineEvents']]]
+  ['cfastled_0',['CFastLED',['../d6/d2c/class_c_l_e_d_controller_accc1d3beec363be81b003f84f4838d62.html#accc1d3beec363be81b003f84f4838d62',1,'CLEDController']]],
+  ['const_5fiterator_1',['const_iterator',['../de/d4c/classfl_1_1_red_black_tree_1_1iterator_ac220ce1c155db1ac44146c12d178056f.html#ac220ce1c155db1ac44146c12d178056f',1,'fl::RedBlackTree::iterator']]]
 ];

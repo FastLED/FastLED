@@ -1,0 +1,26 @@
+<map id="rainbowWave" name="rainbowWave">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,153,116,179"/>
+<area shape="rect" id="Node000002" href="$d7/d82/struct_c_r_g_b_a8b78ce444d74f2bc9e63d83bfd1b17ad.html#a8b78ce444d74f2bc9e63d83bfd1b17ad" title=" " alt="" coords="169,29,305,55"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="70,151,108,109,134,85,163,64,174,58,176,62,165,68,137,89,111,113,74,155"/>
+<area shape="rect" id="Node000023" href="$db/df4/_color_boost_8h_a25024660c22ffd945e7a0e9800d0d752.html#a25024660c22ffd945e7a0e9800d0d752" title=" " alt="" coords="185,79,289,104"/>
+<area shape="poly" id="edge7_Node000001_Node000023" title=" " alt="" coords="84,151,163,113,180,106,182,111,165,118,87,156"/>
+<area shape="rect" id="Node000024" href="$db/df4/_color_boost_8h_aa22bcb97ca40fd9d6445646fb86ebbe3.html#aa22bcb97ca40fd9d6445646fb86ebbe3" title=" " alt="" coords="164,128,309,153"/>
+<area shape="poly" id="edge8_Node000001_Node000024" title=" " alt="" coords="116,155,150,150,151,156,117,161"/>
+<area shape="rect" id="Node000025" href="$db/df4/_color_boost_8h_a102d2788cde431181ab6717a5dd34a47.html#a102d2788cde431181ab6717a5dd34a47" title=" " alt="" coords="197,177,276,203"/>
+<area shape="poly" id="edge9_Node000001_Node000025" title=" " alt="" coords="117,171,184,180,183,185,116,176"/>
+<area shape="rect" id="Node000026" href="$db/df4/_color_boost_8h_ac483a8d410fef50e841e927b0f6b81af.html#ac483a8d410fef50e841e927b0f6b81af" title=" " alt="" coords="165,227,308,252"/>
+<area shape="poly" id="edge10_Node000001_Node000026" title=" " alt="" coords="88,176,165,212,185,219,183,224,163,216,86,181"/>
+<area shape="rect" id="Node000027" href="$d4/d36/namespacefl_a6e552aa2e05110d18704374c274dec78.html#a6e552aa2e05110d18704374c274dec78" title="Universal millisecond timer &#45; returns milliseconds since system startup." alt="" coords="203,300,271,325"/>
+<area shape="poly" id="edge11_Node000001_Node000027" title=" " alt="" coords="76,177,115,216,166,261,205,290,202,294,162,265,112,220,73,181"/>
+<area shape="rect" id="Node000003" href="$d7/d82/struct_c_r_g_b_a4b0cc1cfefd9e0c66ea5c6583181df46.html#a4b0cc1cfefd9e0c66ea5c6583181df46" title="Default constructor." alt="" coords="385,5,489,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="304,31,370,23,371,29,305,37"/>
+<area shape="rect" id="Node000004" href="$d4/d5d/structfl_1_1_h_s_v16_a0bd2c0fc64fc34d573637c10b849c320.html#a0bd2c0fc64fc34d573637c10b849c320" title=" " alt="" coords="357,55,516,80"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="305,48,344,53,343,58,304,53"/>
+<area shape="rect" id="Node000005" href="$d4/d5d/structfl_1_1_h_s_v16_a22927102f80a3171aea08e861df47740.html#a22927102f80a3171aea08e861df47740" title=" " alt="" coords="564,5,696,31"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="486,52,565,32,567,37,488,57"/>
+<area shape="rect" id="Node000006" href="$d4/d36/namespacefl_a379be9b51f27141411271893ce683f5f.html#a379be9b51f27141411271893ce683f5f" title=" " alt="" coords="587,55,673,80"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="516,65,573,65,573,70,516,70"/>
+<area shape="rect" id="Node000019" href="$d4/d5d/structfl_1_1_h_s_v16_a66d9cc0fccee4175baaef83f1a2d7d7d.html#a66d9cc0fccee4175baaef83f1a2d7d7d" title=" " alt="" coords="565,104,695,129"/>
+<area shape="poly" id="edge6_Node000004_Node000019" title=" " alt="" coords="488,77,567,98,565,103,486,83"/>
+<area shape="poly" id="edge12_Node000027_Node000027" title=" " alt="" coords="207,301,201,292,204,282,217,276,237,273,261,277,271,286,268,290,259,282,237,279,218,281,208,285,206,291,212,298"/>
+</map>

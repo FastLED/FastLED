@@ -1,9 +1,11 @@
 <map id="fl/downscale.h" name="fl/downscale.h">
-<area shape="rect" id="Node000001" title=" " alt="" coords="231,5,346,31"/>
-<area shape="rect" id="Node000002" href="$d6/d1a/examples_2_downscale_2downscale_8h.html" title=" " alt="" coords="5,79,225,133"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="254,39,169,81,167,76,252,35"/>
-<area shape="rect" id="Node000003" href="$d0/de3/crgb_8cpp.html" title="Utility functions for the red, green, and blue (RGB) pixel struct." alt="" coords="250,93,327,119"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="291,45,291,93,286,93,286,45"/>
-<area shape="rect" id="Node000004" href="$d8/df9/downscale_8cpp.html" title=" " alt="" coords="351,93,482,119"/>
-<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="319,36,401,91,398,95,316,41"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="369,5,484,31"/>
+<area shape="rect" id="Node000002" href="$db/d49/_audio_2simple_2simple_8h.html" title=" " alt="" coords="5,79,205,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="371,37,204,81,203,76,370,32"/>
+<area shape="rect" id="Node000003" href="$d6/d1a/examples_2_downscale_2downscale_8h.html" title=" " alt="" coords="230,79,450,133"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="407,42,368,81,365,77,403,39"/>
+<area shape="rect" id="Node000004" href="$d0/de3/crgb_8cpp.html" title="Utility functions for the red, green, and blue (RGB) pixel struct." alt="" coords="475,93,552,119"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="450,38,503,91,499,95,446,42"/>
+<area shape="rect" id="Node000005" href="$d8/df9/downscale_8cpp.html" title=" " alt="" coords="576,93,707,119"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="470,34,613,91,612,96,468,38"/>
 </map>

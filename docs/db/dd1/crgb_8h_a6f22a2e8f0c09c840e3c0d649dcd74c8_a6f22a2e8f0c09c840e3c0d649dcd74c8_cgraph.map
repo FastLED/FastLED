@@ -1,0 +1,5 @@
+<map id="operator&#45;" name="operator&#45;">
+<area shape="rect" id="Node000001" title="Subtract one CRGB from another, saturating at 0x00 for each channel." alt="" coords="5,5,88,31"/>
+<area shape="rect" id="Node000002" href="$d5/d98/group___math_gae261576a4c8155d6c0ba8615b2d2ecb3.html#gae261576a4c8155d6c0ba8615b2d2ecb3" title="Subtract one byte from another, saturating at 0x00." alt="" coords="136,5,197,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="88,15,122,15,122,21,88,21"/>
+</map>

@@ -1,0 +1,30 @@
+<map id="draw" name="draw">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,179,60,204"/>
+<area shape="rect" id="Node000002" href="$df/d21/classfl_1_1_tile2x2__u8__wrap_a706ef3a4bc4a436faa4c253e26768c23.html#a706ef3a4bc4a436faa4c253e26768c23" title=" " alt="" coords="108,5,277,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="34,178,42,149,56,112,77,73,106,40,113,35,116,39,110,44,81,76,61,114,47,151,39,179"/>
+<area shape="rect" id="Node000003" href="$d7/d82/struct_c_r_g_b_a8b78ce444d74f2bc9e63d83bfd1b17ad.html#a8b78ce444d74f2bc9e63d83bfd1b17ad" title=" " alt="" coords="125,55,261,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="38,177,63,134,83,110,106,89,116,83,119,88,110,93,87,114,68,137,42,180"/>
+<area shape="rect" id="Node000024" href="$df/d40/examples_2_corkscrew_2corkscrew_8h_a3ce1eed35210653027031143f1cc1ef4.html#a3ce1eed35210653027031143f1cc1ef4" title=" " alt="" coords="149,104,237,129"/>
+<area shape="poly" id="edge8_Node000001_Node000024" title=" " alt="" coords="48,176,75,157,107,138,134,128,136,133,109,143,77,161,51,181"/>
+<area shape="rect" id="Node000025" href="$d4/d06/curr_8h_afc36fee082a53fb0053c5ff7d1e8ac17.html#afc36fee082a53fb0053c5ff7d1e8ac17" title=" " alt="" coords="141,153,245,179"/>
+<area shape="poly" id="edge9_Node000001_Node000025" title=" " alt="" coords="60,184,126,174,127,179,61,190"/>
+<area shape="rect" id="Node000026" href="$db/df4/_color_boost_8h_aa22bcb97ca40fd9d6445646fb86ebbe3.html#aa22bcb97ca40fd9d6445646fb86ebbe3" title=" " alt="" coords="120,203,265,228"/>
+<area shape="poly" id="edge10_Node000001_Node000026" title=" " alt="" coords="61,193,107,200,106,205,60,198"/>
+<area shape="rect" id="Node000027" href="$d7/d82/struct_c_r_g_b_a271bc2ba8b57b41d0c1cda3eed0eb8da.html#a271bc2ba8b57b41d0c1cda3eed0eb8da" title="Scale down a RGB to N/256ths of its current brightness, using &quot;plain math&quot; dimming rules." alt="" coords="134,252,251,277"/>
+<area shape="poly" id="edge11_Node000001_Node000027" title=" " alt="" coords="52,202,78,221,109,238,126,245,124,250,107,243,75,225,49,206"/>
+<area shape="rect" id="Node000028" href="$db/df4/_color_boost_8h_ac483a8d410fef50e841e927b0f6b81af.html#ac483a8d410fef50e841e927b0f6b81af" title=" " alt="" coords="121,301,264,327"/>
+<area shape="poly" id="edge13_Node000001_Node000028" title=" " alt="" coords="42,203,68,245,87,268,110,288,119,293,116,298,106,292,83,272,63,248,38,205"/>
+<area shape="rect" id="Node000029" href="$df/d40/examples_2_corkscrew_2corkscrew_8h_a5970e5592b757f2043212998e4add619.html#a5970e5592b757f2043212998e4add619" title=" " alt="" coords="133,351,253,376"/>
+<area shape="poly" id="edge14_Node000001_Node000029" title=" " alt="" coords="39,203,47,231,61,268,81,305,110,337,122,345,119,350,106,341,77,308,56,270,42,233,34,205"/>
+<area shape="rect" id="Node000004" href="$d7/d82/struct_c_r_g_b_a4b0cc1cfefd9e0c66ea5c6583181df46.html#a4b0cc1cfefd9e0c66ea5c6583181df46" title="Default constructor." alt="" coords="353,179,457,204"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="251,78,279,89,337,127,383,167,379,171,334,131,276,94,249,83"/>
+<area shape="rect" id="Node000005" href="$d4/d5d/structfl_1_1_h_s_v16_a0bd2c0fc64fc34d573637c10b849c320.html#a0bd2c0fc64fc34d573637c10b849c320" title=" " alt="" coords="325,55,484,80"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="261,65,312,65,312,70,261,70"/>
+<area shape="rect" id="Node000006" href="$d4/d5d/structfl_1_1_h_s_v16_a22927102f80a3171aea08e861df47740.html#a22927102f80a3171aea08e861df47740" title=" " alt="" coords="532,5,664,31"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="454,52,533,32,535,37,456,57"/>
+<area shape="rect" id="Node000007" href="$d4/d36/namespacefl_a379be9b51f27141411271893ce683f5f.html#a379be9b51f27141411271893ce683f5f" title=" " alt="" coords="555,55,641,80"/>
+<area shape="poly" id="edge6_Node000005_Node000007" title=" " alt="" coords="484,65,541,65,541,70,484,70"/>
+<area shape="rect" id="Node000020" href="$d4/d5d/structfl_1_1_h_s_v16_a66d9cc0fccee4175baaef83f1a2d7d7d.html#a66d9cc0fccee4175baaef83f1a2d7d7d" title=" " alt="" coords="533,104,663,129"/>
+<area shape="poly" id="edge7_Node000005_Node000020" title=" " alt="" coords="456,77,535,98,533,103,454,83"/>
+<area shape="poly" id="edge12_Node000027_Node000004" title=" " alt="" coords="240,249,276,238,360,207,362,212,278,243,242,255"/>
+</map>

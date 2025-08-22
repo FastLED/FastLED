@@ -1,0 +1,34 @@
+<map id="fl::await_top_level" name="fl::await_top_level">
+<area shape="rect" id="Node000001" title="Synchronously wait for a promise to complete (ONLY safe in top&#45;level contexts)" alt="" coords="5,205,147,231"/>
+<area shape="rect" id="Node000002" href="$dd/dfc/classfl_1_1_thread_local_fake_a838e1065e19cc5af4edb3b5da131706a.html#a838e1065e19cc5af4edb3b5da131706a" title=" " alt="" coords="215,15,361,55"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="82,204,123,138,155,99,193,65,202,59,205,64,196,69,159,103,127,141,86,206"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a490bb1b7e97181543efd2c62768edda8.html#a490bb1b7e97181543efd2c62768edda8" title="Platform&#45;specific async yield function." alt="" coords="231,80,345,105"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="86,203,130,160,160,135,193,114,216,105,218,109,196,119,163,140,134,164,90,207"/>
+<area shape="rect" id="Node000014" href="$d1/d21/classfl_1_1promise_a13a94578149cb4f8e85f643492411bf5.html#a13a94578149cb4f8e85f643492411bf5" title="Get the error (only valid if is_rejected() returns true)" alt="" coords="223,129,353,155"/>
+<area shape="poly" id="edge8_Node000001_Node000014" title=" " alt="" coords="110,203,194,171,236,157,238,162,196,177,112,208"/>
+<area shape="rect" id="Node000015" href="$d1/d21/classfl_1_1promise_a912aa98a2d3d942da9a902f518d57a1a.html#a912aa98a2d3d942da9a902f518d57a1a" title="Check if promise is valid." alt="" coords="429,255,560,280"/>
+<area shape="poly" id="edge16_Node000001_Node000015" title=" " alt="" coords="147,207,258,203,320,206,382,215,424,229,461,246,459,251,422,234,381,221,320,212,258,208,147,213"/>
+<area shape="rect" id="Node000016" href="$d1/d21/classfl_1_1promise_afd67743e54c389fdb8e8662b545018c4.html#afd67743e54c389fdb8e8662b545018c4" title="Check if promise is completed (resolved or rejected)" alt="" coords="195,231,381,256"/>
+<area shape="poly" id="edge10_Node000001_Node000016" title=" " alt="" coords="147,224,181,228,181,233,147,229"/>
+<area shape="rect" id="Node000017" href="$d1/d21/classfl_1_1promise_a35fe98fffd99be1d59765514b0d360d2.html#a35fe98fffd99be1d59765514b0d360d2" title="Check if promise is resolved (completed successfully)" alt="" coords="201,280,375,305"/>
+<area shape="poly" id="edge12_Node000001_Node000017" title=" " alt="" coords="106,228,196,265,223,274,221,279,194,270,104,233"/>
+<area shape="rect" id="Node000018" href="$d1/d21/classfl_1_1promise_a20e3006272cac1616befc01daf0f8d6e.html#a20e3006272cac1616befc01daf0f8d6e" title="Update promise state in main loop &#45; should be called periodically This processes pending callbacks wh..." alt="" coords="216,329,360,355"/>
+<area shape="poly" id="edge14_Node000001_Node000018" title=" " alt="" coords="91,229,135,271,164,294,196,314,214,322,212,327,193,319,161,299,131,275,87,233"/>
+<area shape="rect" id="Node000019" href="$d1/d21/classfl_1_1promise_a915f95ce14f79b1a74c7c4b74053fdda.html#a915f95ce14f79b1a74c7c4b74053fdda" title="Get the result value (only valid if is_resolved() returns true)" alt="" coords="221,379,355,404"/>
+<area shape="poly" id="edge17_Node000001_Node000019" title=" " alt="" coords="86,230,127,294,158,332,196,364,209,371,207,376,193,368,155,336,122,297,82,232"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_a9b3631ee5771ef8d36a072368e1d49c7.html#a9b3631ee5771ef8d36a072368e1d49c7" title="Run all registered async tasks once." alt="" coords="443,80,547,105"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="346,90,429,90,429,95,346,95"/>
+<area shape="rect" id="Node000005" href="$d2/d14/classfl_1_1_async_manager_aa67fcf70428a30d47b64dd5fbbcde94e.html#aa67fcf70428a30d47b64dd5fbbcde94e" title=" " alt="" coords="615,5,812,31"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="519,78,560,58,607,39,634,32,635,37,609,45,562,63,521,82"/>
+<area shape="rect" id="Node000007" href="$d0/d38/classfl_1_1_scheduler_a577f4a5d9194b1cd35a1619922be54a9.html#a577f4a5d9194b1cd35a1619922be54a9" title=" " alt="" coords="631,55,796,80"/>
+<area shape="poly" id="edge5_Node000004_Node000007" title=" " alt="" coords="547,84,616,76,617,81,547,89"/>
+<area shape="rect" id="Node000009" href="$d0/d38/classfl_1_1_scheduler_a782395f7e7cffb76da30963eae28b5ea.html#a782395f7e7cffb76da30963eae28b5ea" title=" " alt="" coords="636,104,791,129"/>
+<area shape="poly" id="edge6_Node000004_Node000009" title=" " alt="" coords="547,96,623,104,622,109,547,101"/>
+<area shape="rect" id="Node000013" href="$d2/d14/classfl_1_1_async_manager_aaa7cd3caf421514d33f889a8327b1c75.html#aaa7cd3caf421514d33f889a8327b1c75" title="Update all registered async runners." alt="" coords="608,153,819,179"/>
+<area shape="poly" id="edge7_Node000004_Node000013" title=" " alt="" coords="523,103,609,138,640,147,638,152,607,143,521,108"/>
+<area shape="poly" id="edge9_Node000014_Node000015" title=" " alt="" coords="338,152,383,172,432,206,473,242,469,246,429,211,380,176,336,157"/>
+<area shape="poly" id="edge11_Node000016_Node000015" title=" " alt="" coords="382,252,416,256,416,261,381,257"/>
+<area shape="poly" id="edge13_Node000017_Node000015" title=" " alt="" coords="375,279,415,274,416,280,376,285"/>
+<area shape="poly" id="edge15_Node000018_Node000015" title=" " alt="" coords="340,327,380,314,454,284,456,289,382,319,342,332"/>
+<area shape="poly" id="edge18_Node000019_Node000015" title=" " alt="" coords="350,376,380,364,431,327,471,288,475,292,435,331,383,368,352,381"/>
+</map>

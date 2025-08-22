@@ -32,7 +32,7 @@
 <!-- Node2 -->
 <g id="Node000002" class="node">
 <title>Node2</title>
-<g id="a_Node000002"><a xlink:href="../../d0/dc9/class_c_pixel_l_e_d_controller_a12a891e205028cffb6ce21857850416c.html#a12a891e205028cffb6ce21857850416c" target="_top" xlink:title="Write the passed in RGB data out to the LEDs managed by this controller.">
+<g id="a_Node000002"><a xlink:href="../../d0/dc9/class_c_pixel_l_e_d_controller_af68ac3dc99e466b6f1b71dc1f5f1bd06.html#af68ac3dc99e466b6f1b71dc1f5f1bd06" target="_top" xlink:title="Write the passed in RGB data out to the LEDs managed by this controller.">
 <polygon fill="white" stroke="#666666" points="113,-78 0,-78 0,-48 113,-48 113,-78"/>
 <text text-anchor="start" x="8" y="-66" font-family="Helvetica,sans-Serif" font-size="10.00">CPixelLEDController</text>
 <text text-anchor="middle" x="56.5" y="-55" font-family="Helvetica,sans-Serif" font-size="10.00">::show</text>
@@ -51,7 +51,7 @@
 <!-- Node3 -->
 <g id="Node000003" class="node">
 <title>Node3</title>
-<g id="a_Node000003"><a xlink:href="../../d0/dc9/class_c_pixel_l_e_d_controller_aa4c1675ad3be1055251ea482be2d7a15.html#aa4c1675ad3be1055251ea482be2d7a15" target="_top" xlink:title="Set all the LEDs on the controller to a given color.">
+<g id="a_Node000003"><a xlink:href="../../d0/dc9/class_c_pixel_l_e_d_controller_aab8df51126298945b1c08385b7b4cac1.html#aab8df51126298945b1c08385b7b4cac1" target="_top" xlink:title="Set all the LEDs on the controller to a given color.">
 <polygon fill="white" stroke="#666666" points="113,-30 0,-30 0,0 113,0 113,-30"/>
 <text text-anchor="start" x="8" y="-18" font-family="Helvetica,sans-Serif" font-size="10.00">CPixelLEDController</text>
 <text text-anchor="middle" x="56.5" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">::showColor</text>

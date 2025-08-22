@@ -1,0 +1,33 @@
+<map id="CRGB::colorBoost" name="CRGB::colorBoost">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,204,141,229"/>
+<area shape="rect" id="Node000002" href="$d7/d82/struct_c_r_g_b_a4b0cc1cfefd9e0c66ea5c6583181df46.html#a4b0cc1cfefd9e0c66ea5c6583181df46" title="Default constructor." alt="" coords="217,179,321,204"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="141,205,203,197,203,202,142,211"/>
+<area shape="rect" id="Node000003" href="$d4/d5d/structfl_1_1_h_s_v16_a0bd2c0fc64fc34d573637c10b849c320.html#a0bd2c0fc64fc34d573637c10b849c320" title=" " alt="" coords="189,228,348,253"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="142,222,176,227,175,232,141,228"/>
+<area shape="rect" id="Node000004" href="$d4/d5d/structfl_1_1_h_s_v16_a22927102f80a3171aea08e861df47740.html#a22927102f80a3171aea08e861df47740" title=" " alt="" coords="396,179,528,204"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="318,225,397,205,399,210,320,231"/>
+<area shape="rect" id="Node000005" href="$d4/d36/namespacefl_a379be9b51f27141411271893ce683f5f.html#a379be9b51f27141411271893ce683f5f" title=" " alt="" coords="419,228,505,253"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="348,238,405,238,405,243,348,243"/>
+<area shape="rect" id="Node000018" href="$d4/d5d/structfl_1_1_h_s_v16_a66d9cc0fccee4175baaef83f1a2d7d7d.html#a66d9cc0fccee4175baaef83f1a2d7d7d" title=" " alt="" coords="397,351,527,376"/>
+<area shape="poly" id="edge14_Node000003_Node000018" title=" " alt="" coords="291,251,431,341,428,346,289,256"/>
+<area shape="rect" id="Node000006" href="$d4/d36/namespacefl_ad72c4923c127f74a54ab7e156b28d5d5.html#ad72c4923c127f74a54ab7e156b28d5d5" title="16&#45;bit cubic ease&#45;in function Takes an input value 0&#45;65535 and returns an eased value 0&#45;65535" alt="" coords="587,5,721,31"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="503,229,526,213,541,192,548,171,549,128,550,84,558,62,574,40,578,36,582,40,578,44,563,65,555,85,554,128,553,172,546,194,530,217,506,233"/>
+<area shape="rect" id="Node000007" href="$d4/d36/namespacefl_aa0e7a0275fe7ddf505d351a33724c265.html#aa0e7a0275fe7ddf505d351a33724c265" title="16&#45;bit cubic ease&#45;in/ease&#45;out function Takes an input value 0&#45;65535 and returns an eased value 0&#45;6553..." alt="" coords="576,55,732,80"/>
+<area shape="poly" id="edge6_Node000005_Node000007" title=" " alt="" coords="503,228,526,213,538,198,544,183,549,152,554,121,561,105,574,89,579,85,583,89,578,93,566,108,559,123,554,153,550,185,543,201,530,217,506,233"/>
+<area shape="rect" id="Node000008" href="$d4/d36/namespacefl_ae91bd550c81885c8a8e51f535af70ac8.html#ae91bd550c81885c8a8e51f535af70ac8" title="16&#45;bit quadratic ease&#45;in/ease&#45;out function Takes an input value 0&#45;65535 and returns an eased value 0&#45;..." alt="" coords="577,104,731,129"/>
+<area shape="poly" id="edge7_Node000005_Node000008" title=" " alt="" coords="503,227,526,213,542,195,549,177,557,157,574,139,582,133,585,138,578,143,562,160,554,179,546,198,530,217,506,231"/>
+<area shape="rect" id="Node000009" href="$d4/d36/namespacefl_a272f8ac08e556ab824e8656b722e8529.html#a272f8ac08e556ab824e8656b722e8529" title="16&#45;bit sine ease&#45;in/ease&#45;out function Takes an input value 0&#45;65535 and returns an eased value 0&#45;65535" alt="" coords="580,153,728,179"/>
+<area shape="poly" id="edge8_Node000005_Node000009" title=" " alt="" coords="497,226,527,213,575,188,593,181,595,186,577,192,529,218,499,230"/>
+<area shape="rect" id="Node000011" href="$d4/d36/namespacefl_af3db54bd3d76a986ea75228f9b1cfafb.html#af3db54bd3d76a986ea75228f9b1cfafb" title="16&#45;bit quadratic ease&#45;in function Takes an input value 0&#45;65535 and returns an eased value 0&#45;65535" alt="" coords="589,203,719,228"/>
+<area shape="poly" id="edge9_Node000005_Node000011" title=" " alt="" coords="505,232,575,223,575,228,505,238"/>
+<area shape="rect" id="Node000013" href="$d4/d36/namespacefl_a4ddfc96e95c366a654d878d3a6c341a1.html#a4ddfc96e95c366a654d878d3a6c341a1" title="16&#45;bit sine ease&#45;in function Takes an input value 0&#45;65535 and returns an eased value 0&#45;65535" alt="" coords="591,252,717,277"/>
+<area shape="poly" id="edge10_Node000005_Node000013" title=" " alt="" coords="505,243,578,253,577,258,505,249"/>
+<area shape="rect" id="Node000014" href="$d4/d36/namespacefl_ac1c0b2ae91cb90c284e3d10a1f01d74a.html#ac1c0b2ae91cb90c284e3d10a1f01d74a" title="16&#45;bit cubic ease&#45;out function Takes an input value 0&#45;65535 and returns an eased value 0&#45;65535" alt="" coords="582,301,726,327"/>
+<area shape="poly" id="edge11_Node000005_Node000014" title=" " alt="" coords="492,251,577,286,600,294,598,299,575,291,490,256"/>
+<area shape="rect" id="Node000015" href="$d4/d36/namespacefl_a42c0f5402ce73331247c0541f876b379.html#a42c0f5402ce73331247c0541f876b379" title="16&#45;bit quadratic ease&#45;out function Takes an input value 0&#45;65535 and returns an eased value 0&#45;65535" alt="" coords="583,351,725,376"/>
+<area shape="poly" id="edge12_Node000005_Node000015" title=" " alt="" coords="477,252,519,293,547,316,577,336,593,343,590,348,575,340,544,320,516,297,473,256"/>
+<area shape="rect" id="Node000016" href="$d4/d36/namespacefl_a773803afa690a44f169246bbba9a5a74.html#a773803afa690a44f169246bbba9a5a74" title="16&#45;bit sine ease&#45;out function Takes an input value 0&#45;65535 and returns an eased value 0&#45;65535" alt="" coords="586,400,722,425"/>
+<area shape="poly" id="edge13_Node000005_Node000016" title=" " alt="" coords="474,252,524,324,553,361,578,385,589,392,586,397,574,389,549,365,520,327,470,255"/>
+<area shape="rect" id="Node000019" href="$d4/d36/namespacefl_a0704405150c9e2ea2647360203eef1a7.html#a0704405150c9e2ea2647360203eef1a7" title=" " alt="" coords="593,449,715,475"/>
+<area shape="poly" id="edge15_Node000018_Node000019" title=" " alt="" coords="482,374,524,404,577,434,596,442,594,447,575,439,521,408,479,378"/>
+</map>

@@ -1,0 +1,12 @@
+<map id="fl::Luminova::plotSoftDot" name="fl::Luminova::plotSoftDot">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,79,188,104"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a82b8852866205c90392fe4644d20f1f7.html#a82b8852866205c90392fe4644d20f1f7" title=" " alt="" coords="285,29,346,55"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="153,76,271,49,272,54,154,81"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a6072e119545650c71b6544cc0ce9e355.html#a6072e119545650c71b6544cc0ce9e355" title=" " alt="" coords="276,79,355,104"/>
+<area shape="poly" id="edge3_Node000001_Node000003" title=" " alt="" coords="188,89,262,89,262,94,188,94"/>
+<area shape="rect" id="Node000004" href="$d4/df2/classfl_1_1_luminova_a710ee5e9d675d629bd3566223d15bf5c.html#a710ee5e9d675d629bd3566223d15bf5c" title=" " alt="" coords="236,128,395,153"/>
+<area shape="poly" id="edge4_Node000001_Node000004" title=" " alt="" coords="154,101,246,122,244,128,153,107"/>
+<area shape="poly" id="edge2_Node000002_Node000002" title=" " alt="" coords="289,31,283,21,286,11,297,5,315,3,337,6,346,15,343,19,335,11,315,8,299,10,290,15,289,20,293,28"/>
+<area shape="rect" id="Node000005" href="$d0/da8/group___scaling_gad7535ccda9c92470c4e6ee0265585555.html#gad7535ccda9c92470c4e6ee0265585555" title="Scale one byte by a second one, which is treated as the numerator of a fraction whose denominator is ..." alt="" coords="443,128,507,153"/>
+<area shape="poly" id="edge5_Node000004_Node000005" title=" " alt="" coords="395,138,429,138,429,143,395,143"/>
+</map>

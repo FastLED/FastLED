@@ -1,24 +1,25 @@
 <map id="PixelController::loadAndScale_APA102_HD" name="PixelController::loadAndScale_APA102_HD">
-<area shape="rect" id="Node000001" title=" " alt="" coords="5,126,184,166"/>
-<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_aeae140ba48d511d1b20d6bd1b383b22b.html#aeae140ba48d511d1b20d6bd1b383b22b" title=" " alt="" coords="232,85,399,125"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="184,127,218,120,219,125,185,132"/>
-<area shape="rect" id="Node000012" href="$d0/dee/struct_pixel_controller_a060678fc5a4cf518e155ed3a6145b8d4.html#a060678fc5a4cf518e155ed3a6145b8d4" title="Scale a value using the per&#45;channel scale data." alt="" coords="236,161,395,187"/>
-<area shape="poly" id="edge8_Node000001_Node000012" title=" " alt="" coords="184,155,223,160,222,165,184,160"/>
-<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a702e9f65198e3877e48031e793eac2ff.html#a702e9f65198e3877e48031e793eac2ff" title=" " alt="" coords="467,57,646,97"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="398,92,453,86,453,91,399,98"/>
-<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_aae9d44cd34c016ac8522f638f4b2624d.html#aae9d44cd34c016ac8522f638f4b2624d" title=" " alt="" coords="729,5,867,31"/>
-<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="639,54,731,31,733,36,640,59"/>
-<area shape="rect" id="Node000009" href="$d0/da8/group___scaling_gaa51d5b048c2a4a20a00bddcdc257daaf.html#gaa51d5b048c2a4a20a00bddcdc257daaf" title="Scale a 16&#45;bit unsigned value by an 8&#45;bit value, which is treated as the numerator of a fraction whos..." alt="" coords="929,56,1025,81"/>
-<area shape="poly" id="edge7_Node000003_Node000009" title=" " alt="" coords="646,72,915,67,915,72,646,78"/>
-<area shape="rect" id="Node000010" href="$d4/d36/namespacefl_abeb8d8ef178da3a4dbbed27dc6c0c3c7.html#abeb8d8ef178da3a4dbbed27dc6c0c3c7" title=" " alt="" coords="715,106,881,146"/>
-<area shape="poly" id="edge5_Node000003_Node000010" title=" " alt="" coords="647,92,702,104,701,109,646,98"/>
-<area shape="poly" id="edge4_Node000004_Node000009" title=" " alt="" coords="845,28,919,50,918,55,843,33"/>
-<area shape="poly" id="edge6_Node000010_Node000009" title=" " alt="" coords="860,103,923,83,924,88,862,108"/>
-<area shape="rect" id="Node000013" href="$d0/dee/struct_pixel_controller_ae44229e20fb4ba4473b057dcda87122e.html#ae44229e20fb4ba4473b057dcda87122e" title="Copy constructor." alt="" coords="447,161,667,187"/>
-<area shape="poly" id="edge9_Node000012_Node000013" title=" " alt="" coords="395,171,433,171,433,177,395,177"/>
-<area shape="rect" id="Node000015" href="$d0/da8/group___scaling_gad7535ccda9c92470c4e6ee0265585555.html#gad7535ccda9c92470c4e6ee0265585555" title="Scale one byte by a second one, which is treated as the numerator of a fraction whose denominator is ..." alt="" coords="525,211,589,236"/>
-<area shape="poly" id="edge12_Node000012_Node000015" title=" " alt="" coords="379,184,511,211,510,217,378,189"/>
-<area shape="poly" id="edge10_Node000013_Node000013" title=" " alt="" coords="518,163,509,153,514,143,530,137,557,135,590,139,603,148,600,152,588,143,557,140,531,142,517,147,515,152,522,159"/>
-<area shape="rect" id="Node000014" href="$d0/dee/struct_pixel_controller_af3310e3a869dfeafae981291b76b572d.html#af3310e3a869dfeafae981291b76b572d" title=" " alt="" coords="720,171,876,196"/>
-<area shape="poly" id="edge11_Node000013_Node000014" title=" " alt="" coords="667,176,706,177,706,182,667,181"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,81,184,121"/>
+<area shape="rect" id="Node000002" href="$da/dc7/advanced_8h_a96d9503945476f13a97c8f406269fcef.html#a96d9503945476f13a97c8f406269fcef" title=" " alt="" coords="929,5,1020,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="173,78,232,66,366,44,472,31,715,15,821,13,916,14,915,19,821,18,715,21,473,37,367,50,232,71,174,83"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a079a3cfc47fd1c0c9096da728e812bec.html#a079a3cfc47fd1c0c9096da728e812bec" title=" " alt="" coords="232,81,399,121"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="184,98,219,98,219,103,184,103"/>
+<area shape="rect" id="Node000009" href="$d0/dee/struct_pixel_controller_a060678fc5a4cf518e155ed3a6145b8d4.html#a060678fc5a4cf518e155ed3a6145b8d4" title="Scale a value using the per&#45;channel scale data." alt="" coords="236,181,395,207"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="144,118,273,173,271,178,142,123"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_ad2fb43a2a5fd42f78b0ed9e97e30b020.html#ad2fb43a2a5fd42f78b0ed9e97e30b020" title=" " alt="" coords="452,81,661,121"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="399,98,439,98,439,103,399,103"/>
+<area shape="rect" id="Node000005" href="$d4/d36/namespacefl_ac5196e7510e1eaba77d095ff709c8e6d.html#ac5196e7510e1eaba77d095ff709c8e6d" title=" " alt="" coords="729,31,867,56"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="641,78,730,57,731,62,642,83"/>
+<area shape="rect" id="Node000006" href="$d4/d36/namespacefl_a867c25ef6a64b8bbb31fb4162e75e46e.html#a867c25ef6a64b8bbb31fb4162e75e46e" title=" " alt="" coords="715,81,881,121"/>
+<area shape="poly" id="edge6_Node000004_Node000006" title=" " alt="" coords="662,98,701,98,701,103,662,103"/>
+<area shape="rect" id="Node000008" href="$d0/da8/group___scaling_gaa51d5b048c2a4a20a00bddcdc257daaf.html#gaa51d5b048c2a4a20a00bddcdc257daaf" title="Scale a 16&#45;bit unsigned value by an 8&#45;bit value, which is treated as the numerator of a fraction whos..." alt="" coords="750,145,846,171"/>
+<area shape="poly" id="edge7_Node000004_Node000008" title=" " alt="" coords="642,118,737,141,736,146,641,123"/>
+<area shape="poly" id="edge5_Node000005_Node000002" title=" " alt="" coords="867,31,916,24,916,29,868,36"/>
+<area shape="rect" id="Node000010" href="$d0/dee/struct_pixel_controller_ae44229e20fb4ba4473b057dcda87122e.html#ae44229e20fb4ba4473b057dcda87122e" title="Copy constructor." alt="" coords="447,181,667,207"/>
+<area shape="poly" id="edge9_Node000009_Node000010" title=" " alt="" coords="395,191,433,191,433,197,395,197"/>
+<area shape="rect" id="Node000012" href="$d0/da8/group___scaling_gad7535ccda9c92470c4e6ee0265585555.html#gad7535ccda9c92470c4e6ee0265585555" title="Scale one byte by a second one, which is treated as the numerator of a fraction whose denominator is ..." alt="" coords="525,231,589,256"/>
+<area shape="poly" id="edge12_Node000009_Node000012" title=" " alt="" coords="379,204,511,231,510,237,378,209"/>
+<area shape="poly" id="edge10_Node000010_Node000010" title=" " alt="" coords="518,183,509,173,514,163,530,157,557,155,590,159,603,168,600,172,588,163,557,160,531,162,517,167,515,172,522,179"/>
+<area shape="rect" id="Node000011" href="$d0/dee/struct_pixel_controller_af3310e3a869dfeafae981291b76b572d.html#af3310e3a869dfeafae981291b76b572d" title=" " alt="" coords="720,195,876,220"/>
+<area shape="poly" id="edge11_Node000010_Node000011" title=" " alt="" coords="667,197,706,200,706,205,667,203"/>
 </map>

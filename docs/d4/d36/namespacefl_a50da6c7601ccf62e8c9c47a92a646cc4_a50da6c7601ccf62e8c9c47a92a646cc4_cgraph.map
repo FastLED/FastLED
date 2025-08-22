@@ -1,0 +1,18 @@
+<map id="fl::make_resolved_promise" name="fl::make_resolved_promise">
+<area shape="rect" id="Node000001" title="Convenience function to create a resolved promise." alt="" coords="5,31,203,56"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a0445ddcae69ac4e524ec18098eb84dbf.html#a0445ddcae69ac4e524ec18098eb84dbf" title=" " alt="" coords="287,5,361,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="203,29,273,21,273,26,204,35"/>
+<area shape="rect" id="Node000003" href="$d1/d21/classfl_1_1promise_a3e0fb912621e186951d09a10640f407b.html#a3e0fb912621e186951d09a10640f407b" title="Create a resolved promise with value." alt="" coords="251,55,397,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="203,51,237,55,237,61,203,57"/>
+<area shape="rect" id="Node000004" href="$d1/d21/classfl_1_1promise_a39a88af32b89bdcd2ade2da29f3397d5.html#a39a88af32b89bdcd2ade2da29f3397d5" title="Default constructor &#45; creates invalid promise." alt="" coords="633,5,785,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="378,52,445,39,619,21,620,26,446,45,379,57"/>
+<area shape="rect" id="Node000005" href="$d1/d21/classfl_1_1promise_a06ac99cdb6ae08a992c049504a395f06.html#a06ac99cdb6ae08a992c049504a395f06" title="Create a pending promise." alt="" coords="445,55,585,80"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="398,65,432,65,432,70,398,70"/>
+<area shape="rect" id="Node000007" href="$d1/d21/classfl_1_1promise_a915f95ce14f79b1a74c7c4b74053fdda.html#a915f95ce14f79b1a74c7c4b74053fdda" title="Get the result value (only valid if is_resolved() returns true)" alt="" coords="448,104,583,129"/>
+<area shape="poly" id="edge7_Node000003_Node000007" title=" " alt="" coords="375,77,452,98,451,103,373,83"/>
+<area shape="poly" id="edge5_Node000005_Node000004" title=" " alt="" coords="565,52,644,32,646,37,567,57"/>
+<area shape="rect" id="Node000006" href="$d4/d36/namespacefl_a87ae8a24cc8b709a64f39370e71846af.html#a87ae8a24cc8b709a64f39370e71846af" title=" " alt="" coords="647,55,772,80"/>
+<area shape="poly" id="edge6_Node000005_Node000006" title=" " alt="" coords="586,65,633,65,633,70,586,70"/>
+<area shape="rect" id="Node000008" href="$d1/d21/classfl_1_1promise_a912aa98a2d3d942da9a902f518d57a1a.html#a912aa98a2d3d942da9a902f518d57a1a" title="Check if promise is valid." alt="" coords="644,104,775,129"/>
+<area shape="poly" id="edge8_Node000007_Node000008" title=" " alt="" coords="583,114,630,114,630,119,583,119"/>
+</map>

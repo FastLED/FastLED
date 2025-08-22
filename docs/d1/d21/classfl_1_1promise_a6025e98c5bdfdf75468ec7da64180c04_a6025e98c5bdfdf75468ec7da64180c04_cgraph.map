@@ -1,0 +1,10 @@
+<map id="fl::promise::complete_with_value" name="fl::promise::complete_with_value">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,49,165,89"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a0445ddcae69ac4e524ec18098eb84dbf.html#a0445ddcae69ac4e524ec18098eb84dbf" title=" " alt="" coords="243,5,318,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="162,46,229,29,230,34,163,51"/>
+<area shape="rect" id="Node000003" href="$d1/d21/classfl_1_1promise_a912aa98a2d3d942da9a902f518d57a1a.html#a912aa98a2d3d942da9a902f518d57a1a" title="Check if promise is valid." alt="" coords="396,81,527,107"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="166,71,382,86,382,91,165,77"/>
+<area shape="rect" id="Node000004" href="$d1/d21/classfl_1_1promise_a915f95ce14f79b1a74c7c4b74053fdda.html#a915f95ce14f79b1a74c7c4b74053fdda" title="Get the result value (only valid if is_resolved() returns true)" alt="" coords="213,107,348,132"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="163,86,219,101,217,106,162,91"/>
+<area shape="poly" id="edge4_Node000004_Node000003" title=" " alt="" coords="348,107,382,102,382,108,349,113"/>
+</map>

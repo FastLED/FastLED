@@ -1,0 +1,14 @@
+<map id="outputTimeSec" name="outputTimeSec">
+<area shape="rect" id="Node000001" title=" " alt="" coords="399,80,519,105"/>
+<area shape="rect" id="Node000002" href="$da/db7/class_max_fade_tracker_a2fe1fbed3a5d86db91561f59bbaecaa0.html#a2fe1fbed3a5d86db91561f59bbaecaa0" title=" " alt="" coords="112,5,351,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="422,76,350,45,308,33,310,28,352,39,424,71"/>
+<area shape="rect" id="Node000003" href="$db/d49/_audio_2simple_2simple_8h_ad525290fdaba74653b8656d72c544053.html#ad525290fdaba74653b8656d72c544053" title=" " alt="" coords="164,55,299,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="385,87,299,77,299,72,385,82"/>
+<area shape="rect" id="Node000005" href="$db/d49/_audio_2simple_2simple_8h_a4fc01d736fe50cf5b977f755b675f11d.html#a4fc01d736fe50cf5b977f755b675f11d" title=" " alt="" coords="5,104,64,129"/>
+<area shape="poly" id="edge6_Node000001_Node000005" title=" " alt="" coords="385,99,64,118,64,112,385,94"/>
+<area shape="rect" id="Node000006" href="$db/d49/_audio_2simple_2simple_8h_ae8a35f34e09f4d97551888ea7ed74a88.html#ae8a35f34e09f4d97551888ea7ed74a88" title=" " alt="" coords="140,156,323,181"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="418,113,352,139,286,158,285,153,350,134,416,108"/>
+<area shape="rect" id="Node000004" href="$db/d49/_audio_2simple_2simple_8h_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="9,55,60,80"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="150,70,60,70,60,65,150,65"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="168,86,65,112,64,107,166,81"/>
+</map>

@@ -5,7 +5,7 @@ var classfl_1_1_demo_reel100 =
     [ "bpm", "d1/d60/classfl_1_1_demo_reel100_a72cc7eea48cf0be16b34fee7d4da64f4.html#a72cc7eea48cf0be16b34fee7d4da64f4", null ],
     [ "confetti", "d1/d60/classfl_1_1_demo_reel100_a0e2d05b31abfe3a8817db1d0d5d37d78.html#a0e2d05b31abfe3a8817db1d0d5d37d78", null ],
     [ "draw", "d1/d60/classfl_1_1_demo_reel100_a5f66b8a2f16f89f0180bd6e27f1563c6.html#a5f66b8a2f16f89f0180bd6e27f1563c6", null ],
-    [ "fxName", "d1/d60/classfl_1_1_demo_reel100_a324ea603a6b4c8b290cda38b2d481ed8.html#a324ea603a6b4c8b290cda38b2d481ed8", null ],
+    [ "fxName", "d1/d60/classfl_1_1_demo_reel100_a8b2e1bc1b9a930992852e0a3226931d2.html#a8b2e1bc1b9a930992852e0a3226931d2", null ],
     [ "juggle", "d1/d60/classfl_1_1_demo_reel100_ad98699eb2a5f15302d2b95e07f2f69d2.html#ad98699eb2a5f15302d2b95e07f2f69d2", null ],
     [ "nextPattern", "d1/d60/classfl_1_1_demo_reel100_a464aaf09e28b992fc28ec7db4d427607.html#a464aaf09e28b992fc28ec7db4d427607", null ],
     [ "rainbow", "d1/d60/classfl_1_1_demo_reel100_a909b94480bd56733de8cd1df1ffbd5fd.html#a909b94480bd56733de8cd1df1ffbd5fd", null ],

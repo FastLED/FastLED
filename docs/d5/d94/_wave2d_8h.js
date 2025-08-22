@@ -1,0 +1,26 @@
+var _wave2d_8h =
+[
+    [ "HEIGHT", "d5/d94/_wave2d_8h_aed89bd71aee8be823e8a20ec4e093c1e.html#aed89bd71aee8be823e8a20ec4e093c1e", null ],
+    [ "IS_SERPINTINE", "d5/d94/_wave2d_8h_aaef57fab56b804d85580f89cc5309d4d.html#aaef57fab56b804d85580f89cc5309d4d", null ],
+    [ "NUM_LEDS", "d5/d94/_wave2d_8h_a4c4ae9a4146ce8d6a5debc90300d9abd.html#a4c4ae9a4146ce8d6a5debc90300d9abd", null ],
+    [ "WIDTH", "d5/d94/_wave2d_8h_a241aeeb764887ae5e3de58b98f04b16d.html#a241aeeb764887ae5e3de58b98f04b16d", null ],
+    [ "autoTrigger", "d5/d94/_wave2d_8h_a4888587ada6e64ef92a816ee12037584.html#a4888587ada6e64ef92a816ee12037584", null ],
+    [ "button", "d5/d94/_wave2d_8h_ada49807b10df16f0bd3b499e1c672e46.html#ada49807b10df16f0bd3b499e1c672e46", null ],
+    [ "dampening", "d5/d94/_wave2d_8h_aa92f6cbe1659b0b36a8de605ba16fdf8.html#aa92f6cbe1659b0b36a8de605ba16fdf8", null ],
+    [ "description", "d5/d94/_wave2d_8h_a18a406afb54e913ae90a11f57e140da9.html#a18a406afb54e913ae90a11f57e140da9", null ],
+    [ "extraFrames", "d5/d94/_wave2d_8h_a0d69251721fadcf4207443742e5ab020.html#a0d69251721fadcf4207443742e5ab020", null ],
+    [ "getSuperSample", "d5/d94/_wave2d_8h_ad3facb26c8fe2270d260a10ea9aceb09.html#ad3facb26c8fe2270d260a10ea9aceb09", null ],
+    [ "halfDuplex", "d5/d94/_wave2d_8h_aec4b1d519a50955f86ed9e84d9135acb.html#aec4b1d519a50955f86ed9e84d9135acb", null ],
+    [ "loop", "d5/d94/_wave2d_8h_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f", null ],
+    [ "setup", "d5/d94/_wave2d_8h_a4fc01d736fe50cf5b977f755b675f11d.html#a4fc01d736fe50cf5b977f755b675f11d", null ],
+    [ "slider", "d5/d94/_wave2d_8h_a158d39a9e3154e76a27c891bfc9ecd29.html#a158d39a9e3154e76a27c891bfc9ecd29", null ],
+    [ "superSample", "d5/d94/_wave2d_8h_a3f6b9cd3ec3b7ff768a8adf5b4193817.html#a3f6b9cd3ec3b7ff768a8adf5b4193817", null ],
+    [ "title", "d5/d94/_wave2d_8h_aa91eecfe4e0a73cefbe1b24c6b65ac5c.html#aa91eecfe4e0a73cefbe1b24c6b65ac5c", null ],
+    [ "triggerControls", "d5/d94/_wave2d_8h_ae06edcfdcb1fee8bdaffd23b472b1cbb.html#ae06edcfdcb1fee8bdaffd23b472b1cbb", null ],
+    [ "triggerRipple", "d5/d94/_wave2d_8h_a9d11c16b7caa220080a8c45a73245b14.html#a9d11c16b7caa220080a8c45a73245b14", null ],
+    [ "waveSim", "d5/d94/_wave2d_8h_ab89e46f649f5728b68571d1aef1c08e5.html#ab89e46f649f5728b68571d1aef1c08e5", null ],
+    [ "waveSimControls", "d5/d94/_wave2d_8h_ace8290f6ef5d2c835136389951813832.html#ace8290f6ef5d2c835136389951813832", null ],
+    [ "xCyclical", "d5/d94/_wave2d_8h_a7e65311e6ea71eef029422a1873b9c79.html#a7e65311e6ea71eef029422a1873b9c79", null ],
+    [ "xyMap", "d5/d94/_wave2d_8h_a2a6b7912eaf3e7d2198d4e9f2c762632.html#a2a6b7912eaf3e7d2198d4e9f2c762632", null ],
+    [ "leds", "d5/d94/_wave2d_8h_a1b4f26a01e11d7eb2848bc41b0f6dd9d.html#a1b4f26a01e11d7eb2848bc41b0f6dd9d", null ]
+];

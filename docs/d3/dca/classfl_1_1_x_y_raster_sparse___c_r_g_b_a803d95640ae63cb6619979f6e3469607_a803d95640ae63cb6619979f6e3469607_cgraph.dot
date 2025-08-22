@@ -1,0 +1,26 @@
+digraph "fl::XYRasterSparse_CRGB::XYRasterSparse_CRGB"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="LR";
+  Node1 [id="Node000001",label="fl::XYRasterSparse\l_CRGB::XYRasterSparse_CRGB",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl::XYRasterSparse\l_CRGB::height",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d3/dca/classfl_1_1_x_y_raster_sparse___c_r_g_b_af48d505160fb8f61b07631e5e197a680.html#af48d505160fb8f61b07631e5e197a680",tooltip=" "];
+  Node2 -> Node3 [id="edge2_Node000002_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::XYRasterSparse\l_CRGB::bounds",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d3/dca/classfl_1_1_x_y_raster_sparse___c_r_g_b_ae53bdf9d69ca2b2112f2c5a23922517b.html#ae53bdf9d69ca2b2112f2c5a23922517b",tooltip=" "];
+  Node3 -> Node4 [id="edge3_Node000003_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl::XYRasterSparse\l_CRGB::bounds_pixels",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d3/dca/classfl_1_1_x_y_raster_sparse___c_r_g_b_a31cf1601bf36d1bf360defeddd6bc919.html#a31cf1601bf36d1bf360defeddd6bc919",tooltip=" "];
+  Node2 -> Node5 [id="edge4_Node000002_Node000005",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="fl::rect::height",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d48/structfl_1_1rect_a10a26664913a5c0d2c1bc90324eec211.html#a10a26664913a5c0d2c1bc90324eec211",tooltip=" "];
+  Node1 -> Node6 [id="edge5_Node000001_Node000006",color="steelblue1",style="solid",tooltip=" "];
+  Node6 [id="Node000006",label="fl::XYRasterSparse\l_CRGB::setBounds",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d3/dca/classfl_1_1_x_y_raster_sparse___c_r_g_b_af616261bdf49996f3ee0afe81c3f8b64.html#af616261bdf49996f3ee0afe81c3f8b64",tooltip=" "];
+  Node6 -> Node3 [id="edge6_Node000006_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node7 [id="edge7_Node000001_Node000007",color="steelblue1",style="solid",tooltip=" "];
+  Node7 [id="Node000007",label="fl::XYRasterSparse\l_CRGB::width",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d3/dca/classfl_1_1_x_y_raster_sparse___c_r_g_b_a4f8799f295573b78102592fe537dc9c3.html#a4f8799f295573b78102592fe537dc9c3",tooltip=" "];
+  Node7 -> Node3 [id="edge8_Node000007_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node7 -> Node8 [id="edge9_Node000007_Node000008",color="steelblue1",style="solid",tooltip=" "];
+  Node8 [id="Node000008",label="fl::rect::width",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d48/structfl_1_1rect_a53a34c983506bad429941593f00d022d.html#a53a34c983506bad429941593f00d022d",tooltip=" "];
+}

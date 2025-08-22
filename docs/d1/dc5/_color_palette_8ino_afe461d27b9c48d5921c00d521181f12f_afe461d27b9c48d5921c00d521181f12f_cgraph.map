@@ -1,9 +1,9 @@
 <map id="loop" name="loop">
-<area shape="rect" id="Node000001" title=" " alt="" coords="5,121,56,146"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,145,56,170"/>
 <area shape="rect" id="Node000002" href="$d1/dc5/_color_palette_8ino_a50c2e0f8c7120112ab44db6f47400021.html#a50c2e0f8c7120112ab44db6f47400021" title=" " alt="" coords="104,95,296,121"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="56,127,101,120,102,125,57,132"/>
-<area shape="rect" id="Node000008" href="$d1/dc5/_color_palette_8ino_ae6b0ecfd96a40d5cec6d0dba0a3685fe.html#ae6b0ecfd96a40d5cec6d0dba0a3685fe" title=" " alt="" coords="104,145,296,170"/>
-<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="57,134,97,140,97,145,56,139"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="55,148,142,122,143,127,57,153"/>
+<area shape="rect" id="Node000008" href="$d1/dc5/_color_palette_8ino_ae6b0ecfd96a40d5cec6d0dba0a3685fe.html#ae6b0ecfd96a40d5cec6d0dba0a3685fe" title=" " alt="" coords="104,169,296,194"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="57,158,97,164,97,169,56,163"/>
 <area shape="rect" id="Node000003" href="$d1/dc5/_color_palette_8ino_afea43f4d537a50569a537b9fa2bc2f26.html#afea43f4d537a50569a537b9fa2bc2f26" title=" " alt="" coords="347,5,551,45"/>
 <area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="235,93,343,55,367,47,369,52,345,60,237,98"/>
 <area shape="rect" id="Node000005" href="$d1/dc5/_color_palette_8ino_aea1a93f40934fd32c715042e04540d46.html#aea1a93f40934fd32c715042e04540d46" title=" " alt="" coords="344,70,553,95"/>
@@ -14,6 +14,8 @@
 <area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="551,23,590,23,590,28,551,28"/>
 <area shape="rect" id="Node000007" href="$d2/d0d/group___random_ga4e63c74426f6516f28470dc1b814aefe.html#ga4e63c74426f6516f28470dc1b814aefe" title="Generate an 8&#45;bit random number." alt="" coords="601,119,681,145"/>
 <area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="549,129,588,129,588,135,549,135"/>
-<area shape="rect" id="Node000009" href="$d1/dfb/colorutils_8h_a74e1895d1234ab29fef4458532e91090.html#a74e1895d1234ab29fef4458532e91090" title=" " alt="" coords="381,169,516,194"/>
-<area shape="poly" id="edge8_Node000008_Node000009" title=" " alt="" coords="296,164,368,171,367,176,296,169"/>
+<area shape="rect" id="Node000009" href="$da/dc7/advanced_8h_a96d9503945476f13a97c8f406269fcef.html#a96d9503945476f13a97c8f406269fcef" title=" " alt="" coords="403,169,494,194"/>
+<area shape="poly" id="edge8_Node000008_Node000009" title=" " alt="" coords="296,179,390,179,390,184,296,184"/>
+<area shape="rect" id="Node000010" href="$d1/dfb/colorutils_8h_a3d488dd1e2d27e99307310527e51cad3.html#a3d488dd1e2d27e99307310527e51cad3" title=" " alt="" coords="381,218,516,243"/>
+<area shape="poly" id="edge9_Node000008_Node000010" title=" " alt="" coords="265,191,371,213,370,218,264,197"/>
 </map>

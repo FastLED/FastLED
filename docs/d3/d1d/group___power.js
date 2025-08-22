@@ -1,7 +1,7 @@
 var group___power =
 [
     [ "calculate_max_brightness_for_power_mW", "d3/d1d/group___power_gafff15ebb8adee6a6c76fd46eb980397c.html#gafff15ebb8adee6a6c76fd46eb980397c", null ],
-    [ "calculate_max_brightness_for_power_mW", "d3/d1d/group___power_gaeb674bb1095873cfaab1bc2796541020.html#gaeb674bb1095873cfaab1bc2796541020", null ],
+    [ "calculate_max_brightness_for_power_mW", "d3/d1d/group___power_ga14e3a08f0cae7e9617415b803c1f5946.html#ga14e3a08f0cae7e9617415b803c1f5946", null ],
     [ "calculate_max_brightness_for_power_vmA", "d3/d1d/group___power_gab519e78baab1cfbaf62663c48c1c2f35.html#gab519e78baab1cfbaf62663c48c1c2f35", null ],
     [ "calculate_unscaled_power_mW", "d3/d1d/group___power_ga594568be6aba941c635193a6d46f715e.html#ga594568be6aba941c635193a6d46f715e", null ],
     [ "delay_at_max_brightness_for_power", "d3/d1d/group___power_ga555e128ef46e371cb5774c1fe3320728.html#ga555e128ef46e371cb5774c1fe3320728", null ],

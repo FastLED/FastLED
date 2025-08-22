@@ -7,5 +7,6 @@ var third__party_2arduinojson_2json_8h =
     [ "ARDUINOJSON_ENABLE_STD_STREAM", "d1/d9e/third__party_2arduinojson_2json_8h_a9df92f524f78471921cf8a272ed3b492.html#a9df92f524f78471921cf8a272ed3b492", null ],
     [ "ARDUINOJSON_ENABLE_STD_STRING", "d1/d9e/third__party_2arduinojson_2json_8h_af5b2b6b4e14c101382c65f3ca93f0014.html#af5b2b6b4e14c101382c65f3ca93f0014", null ],
     [ "ARDUINOJSON_ENABLE_STRING_VIEW", "d1/d9e/third__party_2arduinojson_2json_8h_a21eec5d4b774b6bf12cb2c2ebe156f48.html#a21eec5d4b774b6bf12cb2c2ebe156f48", null ],
+    [ "ARDUINOJSON_USE_LONG_LONG", "d1/d9e/third__party_2arduinojson_2json_8h_ad04364871efb11788ea94d5f5417072c.html#ad04364871efb11788ea94d5f5417072c", null ],
     [ "FASTLED_JSON_GUARD", "d1/d9e/third__party_2arduinojson_2json_8h_a2b4a696ef150f9316129e724c721a297.html#a2b4a696ef150f9316129e724c721a297", null ]
 ];

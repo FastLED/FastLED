@@ -9,4 +9,6 @@ digraph "fl::StrN::StrN"
   Node1 [id="Node000001",label="fl::StrN::StrN",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
   Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
   Node2 [id="Node000002",label="fl::StrN::copy",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dc/d96/classfl_1_1_str_n_ab410c80422fa2cfe87605dd9b32002c1.html#ab410c80422fa2cfe87605dd9b32002c1",tooltip=" "];
+  Node2 -> Node3 [id="edge2_Node000002_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::make_shared",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a87ae8a24cc8b709a64f39370e71846af.html#a87ae8a24cc8b709a64f39370e71846af",tooltip=" "];
 }

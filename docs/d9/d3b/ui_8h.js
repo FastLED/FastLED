@@ -6,6 +6,11 @@ var ui_8h =
     [ "fl::UICheckbox", "d7/dfe/classfl_1_1_u_i_checkbox.html", "d7/dfe/classfl_1_1_u_i_checkbox" ],
     [ "fl::UICheckbox::Listener", "de/d6f/structfl_1_1_u_i_checkbox_1_1_listener.html", "de/d6f/structfl_1_1_u_i_checkbox_1_1_listener" ],
     [ "fl::UIDescription", "de/d86/classfl_1_1_u_i_description.html", "de/d86/classfl_1_1_u_i_description" ],
+    [ "fl::UIDropdown", "d1/dc6/classfl_1_1_u_i_dropdown.html", "d1/dc6/classfl_1_1_u_i_dropdown" ],
+    [ "fl::UIDropdown::Listener", "da/da3/structfl_1_1_u_i_dropdown_1_1_listener.html", "da/da3/structfl_1_1_u_i_dropdown_1_1_listener" ],
+    [ "fl::UIElement", "df/d7b/classfl_1_1_u_i_element.html", "df/d7b/classfl_1_1_u_i_element" ],
+    [ "fl::UIGroup", "d4/d3a/classfl_1_1_u_i_group.html", "d4/d3a/classfl_1_1_u_i_group" ],
+    [ "fl::UIHelp", "df/d0e/classfl_1_1_u_i_help.html", "df/d0e/classfl_1_1_u_i_help" ],
     [ "fl::UINumberField", "d9/d5f/classfl_1_1_u_i_number_field.html", "d9/d5f/classfl_1_1_u_i_number_field" ],
     [ "fl::UINumberField::Listener", "d0/d0d/structfl_1_1_u_i_number_field_1_1_listener.html", "d0/d0d/structfl_1_1_u_i_number_field_1_1_listener" ],
     [ "fl::UISlider", "dd/d47/classfl_1_1_u_i_slider.html", "dd/d47/classfl_1_1_u_i_slider" ],
@@ -15,6 +20,7 @@ var ui_8h =
     [ "FL_NO_COPY", "d9/d3b/ui_8h_a3f12a6f103811ac4b69d42f3ddb08fe4.html#a3f12a6f103811ac4b69d42f3ddb08fe4", null ],
     [ "fl::FASTLED_UI_DEFINE_OPERATORS", "d4/d36/namespacefl_a17a25f9a9eb5be6d08ee831a92abbb57.html#a17a25f9a9eb5be6d08ee831a92abbb57", null ],
     [ "fl::FASTLED_UI_DEFINE_OPERATORS", "d4/d36/namespacefl_afdcefd5871d3520e7067b1382d7de7f8.html#afdcefd5871d3520e7067b1382d7de7f8", null ],
+    [ "fl::FASTLED_UI_DEFINE_OPERATORS", "d4/d36/namespacefl_aaad3a37b6c0d01c1a30e924dba0a4fc1.html#aaad3a37b6c0d01c1a30e924dba0a4fc1", null ],
     [ "fl::FASTLED_UI_DEFINE_OPERATORS", "d4/d36/namespacefl_a62401430f1f8254f5a13b7cb1e96281e.html#a62401430f1f8254f5a13b7cb1e96281e", null ],
     [ "fl::FASTLED_UI_DEFINE_OPERATORS", "d4/d36/namespacefl_acc16a00adb82fd4391ac38a63dd2eed3.html#acc16a00adb82fd4391ac38a63dd2eed3", null ]
 ];

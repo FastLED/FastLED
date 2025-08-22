@@ -1,55 +1,52 @@
 var index =
 [
-    [ "Documentation", "index.html#autotoc_md6", null ],
-    [ "Star History", "index.html#autotoc_md7", null ],
-    [ "About", "index.html#autotoc_md8", null ],
-    [ "Example", "index.html#autotoc_md9", null ],
-    [ "New Feature Announcements", "index.html#autotoc_md10", [
-      [ "New in 3.9.16: WaveFx / Multi Layer Compositing / Time-based animation control", "index.html#autotoc_md11", null ],
-      [ "New in 3.9.13: HD107 \"Turbo\" 40Mhz LED Support", "index.html#autotoc_md14", null ],
-      [ "New in 3.9.12: WS2816 \"HD\" LED support", "index.html#autotoc_md15", null ],
-      [ "New in 3.9.10: Super Stable WS2812 SPI driver for ESP32", "index.html#autotoc_md16", null ],
-      [ "New in 3.9.9: 16-way Yves I2S parallel driver for the ESP32-S3", "index.html#autotoc_md17", null ],
-      [ "New in 3.9.8 - Massive Teensy 4.1 & 4.0 WS2812 LED output", "index.html#autotoc_md18", null ],
-      [ "New in 3.9.2 - Overclocking of WS2812", "index.html#autotoc_md19", null ],
-      [ "New in 3.7.7 - RGBW LED Strip Support", "index.html#autotoc_md20", null ],
-      [ "Supported Platforms", "index.html#autotoc_md21", [
-        [ "Arduino", "index.html#autotoc_md22", null ],
-        [ "Teensy", "index.html#autotoc_md23", null ],
-        [ "NRF", "index.html#autotoc_md24", null ],
-        [ "Apollo3", "index.html#autotoc_md25", null ],
-        [ "STM", "index.html#autotoc_md26", null ],
-        [ "Raspberry Pi", "index.html#autotoc_md27", null ],
-        [ "Esp", "index.html#autotoc_md28", null ],
-        [ "x86", "index.html#autotoc_md29", null ],
-        [ "Wasm", "index.html#autotoc_md30", null ]
-      ] ],
-      [ "Compiled Library Size Check", "index.html#autotoc_md31", null ]
+    [ "⚡ Get Blinking in 30 Seconds", "index.html#autotoc_md275", null ],
+    [ "🚀 Why FastLED?", "index.html#autotoc_md276", null ],
+    [ "Table of Contents", "index.html#autotoc_md277", null ],
+    [ "⭐ Community Growth", "index.html#autotoc_md278", null ],
+    [ "🆕 Latest Features", "index.html#autotoc_md279", [
+      [ "Arduino Family", "index.html#autotoc_md266", null ],
+      [ "Teensy Series", "index.html#autotoc_md267", null ],
+      [ "NRF52 (Nordic)", "index.html#autotoc_md268", null ],
+      [ "Apollo3 (Ambiq)", "index.html#autotoc_md269", null ],
+      [ "STM32 (STMicroelectronics)", "index.html#autotoc_md270", null ],
+      [ "Raspberry Pi Pico", "index.html#autotoc_md271", null ],
+      [ "ESP32 (Espressif)", "index.html#autotoc_md272", null ],
+      [ "Specialty Platforms", "index.html#autotoc_md273", null ],
+      [ "Library Size Validation", "index.html#autotoc_md274", null ],
+      [ "FastLED 3.10.0: Animartrix Out of Beta", "index.html#autotoc_md280", null ],
+      [ "FastLED 3.9.16: WaveFx / Multi Layer Compositing", "index.html#autotoc_md281", null ]
     ] ],
-    [ "Install", "index.html#autotoc_md32", [
-      [ "Arduino IDE", "index.html#autotoc_md33", null ],
-      [ "PlatformIO", "index.html#autotoc_md34", null ]
+    [ "New in 3.10.0: Animartrix out of beta", "index.html#autotoc_md282", null ],
+    [ "New in 3.9.16: WaveFx / Multi Layer Compositing / Time-based animation control", "index.html#autotoc_md283", null ],
+    [ "New in 3.9.13: HD107 \"Turbo\" 40Mhz LED Support", "index.html#autotoc_md286", null ],
+    [ "New in 3.9.12: WS2816 \"HD\" LED support", "index.html#autotoc_md287", null ],
+    [ "New in 3.9.10: Super Stable WS2812 SPI driver for ESP32", "index.html#autotoc_md288", null ],
+    [ "New in 3.9.9: 16-way Yves I2S parallel driver for the ESP32-S3", "index.html#autotoc_md289", null ],
+    [ "New in 3.9.8 - Massive Teensy 4.1 & 4.0 WS2812 LED output", "index.html#autotoc_md290", null ],
+    [ "New in 3.9.2 - Overclocking of WS2812", "index.html#autotoc_md291", [
+      [ "New in 3.7.7 - RGBW LED Strip Support", "index.html#autotoc_md292", null ]
     ] ],
-    [ "How to maximize the number of parallel WS2812 outputs", "index.html#autotoc_md35", null ],
-    [ "Leader Boards: Stock Setups", "index.html#autotoc_md36", [
-      [ "Exotic Setups", "index.html#autotoc_md41", null ],
-      [ "Development", "index.html#autotoc_md42", [
-        [ "Teensy 4.0/4.1", "index.html#autotoc_md37", null ],
-        [ "ESP32DEV", "index.html#autotoc_md38", null ],
-        [ "ESP32-S3", "index.html#autotoc_md39", null ],
-        [ "RaspberriPi", "index.html#autotoc_md40", null ],
-        [ "Testing other devices", "index.html#autotoc_md43", null ]
-      ] ],
-      [ "Help and Support", "index.html#autotoc_md44", null ],
-      [ "Supported LED Chipsets", "index.html#autotoc_md45", null ],
-      [ "APA102 and the 'High Definition' Mode in FastLED", "index.html#autotoc_md46", null ]
+    [ "🌍 Platform Support", "index.html#autotoc_md293", [
+      [ "Platform Categories", "index.html#autotoc_md294", null ]
     ] ],
-    [ "Getting Started", "index.html#autotoc_md47", [
-      [ "Porting FastLED to a new platform", "index.html#autotoc_md50", null ],
-      [ "What about that name?", "index.html#autotoc_md51", null ],
-      [ "For more information", "index.html#autotoc_md52", null ],
-      [ "Daniel Garcia, Founder of FastLED", "index.html#autotoc_md53", null ],
-      [ "About the Current Contributor", "index.html#autotoc_md54", null ],
-      [ "Contributing", "index.html#autotoc_md55", null ]
-    ] ]
+    [ "📦 Installation", "index.html#autotoc_md295", [
+      [ "Quick Install Options", "index.html#autotoc_md296", null ],
+      [ "Template Projects", "index.html#autotoc_md297", null ]
+    ] ],
+    [ "📚 Documentation & Support", "index.html#autotoc_md298", null ],
+    [ "🎮 Advanced Features", "index.html#autotoc_md299", [
+      [ "Performance Leaders: Parallel Output Records", "index.html#autotoc_md300", null ],
+      [ "Exotic Setups (120+ Outputs!)", "index.html#autotoc_md301", null ],
+      [ "Supported LED Chipsets", "index.html#autotoc_md302", null ],
+      [ "APA102 High Definition Mode", "index.html#autotoc_md303", null ]
+    ] ],
+    [ "🛠️ Development & Contributing", "index.html#autotoc_md304", [
+      [ "Quick Development Setup", "index.html#autotoc_md305", null ],
+      [ "Testing Other Devices", "index.html#autotoc_md306", null ],
+      [ "How to Help", "index.html#autotoc_md307", null ],
+      [ "About FastLED", "index.html#autotoc_md308", null ]
+    ] ],
+    [ "Daniel Garcia, Founder of FastLED", "index.html#autotoc_md310", null ],
+    [ "About the Current Contributor", "index.html#autotoc_md311", null ]
 ];

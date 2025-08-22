@@ -1,0 +1,9 @@
+<map id="visualizationControls" name="visualizationControls">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,55,164,80"/>
+<area shape="rect" id="Node000002" href="$db/d49/_audio_2simple_2simple_8h_a4e62a5004c5cd105989b7e56ca330bc2.html#a4e62a5004c5cd105989b7e56ca330bc2" title=" " alt="" coords="235,5,324,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="135,52,221,30,222,35,136,57"/>
+<area shape="rect" id="Node000003" href="$db/d49/_audio_2simple_2simple_8h_a1332b3b4c2cd0084e45d8a9529f1c366.html#a1332b3b4c2cd0084e45d8a9529f1c366" title=" " alt="" coords="232,55,327,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="164,65,219,65,219,70,164,70"/>
+<area shape="rect" id="Node000004" href="$db/d49/_audio_2simple_2simple_8h_ad7c75dcea6bd64db48d9a182bb968ee7.html#ad7c75dcea6bd64db48d9a182bb968ee7" title=" " alt="" coords="212,104,347,129"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="136,77,216,98,214,103,135,83"/>
+</map>

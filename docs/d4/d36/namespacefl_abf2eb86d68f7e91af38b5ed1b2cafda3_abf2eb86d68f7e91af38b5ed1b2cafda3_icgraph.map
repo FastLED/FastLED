@@ -1,6 +1,18 @@
 <map id="fl::floor" name="fl::floor">
-<area shape="rect" id="Node000001" title=" " alt="" coords="264,29,331,55"/>
-<area shape="poly" id="edge1_Node000001_Node000001" title=" " alt="" coords="330,19,321,11,297,8,278,10,267,15,265,20,271,28,266,31,260,21,263,11,276,5,297,3,323,6,334,15"/>
-<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a0585edea80d3b23fb7fcd54b95a09bbc.html#a0585edea80d3b23fb7fcd54b95a09bbc" title="Traverse a grid segment using floating point arithmetic." alt="" coords="5,29,216,55"/>
-<area shape="poly" id="edge2_Node000001_Node000002" title=" " alt="" coords="250,45,216,45,216,39,250,39"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="649,121,716,146"/>
+<area shape="poly" id="edge1_Node000001_Node000001" title=" " alt="" coords="716,110,706,102,683,99,663,101,653,106,650,112,656,119,652,122,645,112,649,102,661,96,683,94,708,98,719,106"/>
+<area shape="rect" id="Node000002" href="$da/dd6/structfl_1_1_json_value_a9015afeea1506f27937b06e8101377e7.html#a9015afeea1506f27937b06e8101377e7" title=" " alt="" coords="423,95,569,121"/>
+<area shape="poly" id="edge2_Node000001_Node000002" title=" " alt="" coords="636,130,568,120,569,115,636,124"/>
+<area shape="rect" id="Node000015" href="$d4/d36/namespacefl_a0585edea80d3b23fb7fcd54b95a09bbc.html#a0585edea80d3b23fb7fcd54b95a09bbc" title="Traverse a grid segment using floating point arithmetic." alt="" coords="391,145,601,170"/>
+<area shape="poly" id="edge8_Node000001_Node000015" title=" " alt="" coords="636,142,595,147,594,142,635,137"/>
+<area shape="rect" id="Node000003" href="$d4/d13/classfl_1_1_json_acba319cd1a600f1a88beeecab57d4e7c.html#acba319cd1a600f1a88beeecab57d4e7c" title=" " alt="" coords="233,95,343,121"/>
+<area shape="poly" id="edge3_Node000002_Node000003" title=" " alt="" coords="409,111,343,111,343,105,409,105"/>
+<area shape="rect" id="Node000004" href="$d5/d4b/classfl_1_1response_a913de93f1614c93e29ae0c1b3219a0b1.html#a913de93f1614c93e29ae0c1b3219a0b1" title="Parse JSON from response body with error handling." alt="" coords="25,5,166,45"/>
+<area shape="poly" id="edge4_Node000003_Node000004" title=" " alt="" coords="250,92,184,60,154,48,156,43,186,55,253,87"/>
+<area shape="rect" id="Node000009" href="$d2/d78/classfl_1_1_screen_map_a00aec6179fcbe0275fe7ca8770540b3c.html#a00aec6179fcbe0275fe7ca8770540b3c" title=" " alt="" coords="5,70,185,95"/>
+<area shape="poly" id="edge5_Node000003_Node000009" title=" " alt="" coords="220,102,185,97,186,92,220,96"/>
+<area shape="rect" id="Node000013" href="$df/d37/classfl_1_1_file_system_a3f0ff67d5535787004eed6968145cc64.html#a3f0ff67d5535787004eed6968145cc64" title=" " alt="" coords="8,119,183,145"/>
+<area shape="poly" id="edge6_Node000003_Node000013" title=" " alt="" coords="220,119,183,124,182,118,220,114"/>
+<area shape="rect" id="Node000014" href="$d0/dd3/_json_sketch_8h_a4fc01d736fe50cf5b977f755b675f11d.html#a4fc01d736fe50cf5b977f755b675f11d" title=" " alt="" coords="66,169,125,194"/>
+<area shape="poly" id="edge7_Node000003_Node000014" title=" " alt="" coords="251,129,186,158,126,177,124,172,184,154,249,125"/>
 </map>

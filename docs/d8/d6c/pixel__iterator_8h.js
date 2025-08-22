@@ -1,15 +1,16 @@
 var pixel__iterator_8h =
 [
-    [ "PixelControllerVtable< PixelControllerT >", "d1/d72/struct_pixel_controller_vtable.html", "d1/d72/struct_pixel_controller_vtable" ],
-    [ "PixelIterator", "d2/d5b/class_pixel_iterator.html", "d2/d5b/class_pixel_iterator" ],
-    [ "advanceDataFunction", "d8/d6c/pixel__iterator_8h_a64e845e00bf1312fed8893eb4d071319.html#a64e845e00bf1312fed8893eb4d071319", null ],
-    [ "getHdScaleFunction", "d8/d6c/pixel__iterator_8h_ab460521c6b295c7313a3c92483dc6690.html#ab460521c6b295c7313a3c92483dc6690", null ],
-    [ "globalBrightness", "d8/d6c/pixel__iterator_8h_a75784fbd5e2bc48ac0be2e33b98231c8.html#a75784fbd5e2bc48ac0be2e33b98231c8", null ],
-    [ "hasFunction", "d8/d6c/pixel__iterator_8h_a6f9f6e98227c61fbe6719274e3c91850.html#a6f9f6e98227c61fbe6719274e3c91850", null ],
-    [ "loadAndScale_APA102_HDFunction", "d8/d6c/pixel__iterator_8h_ac83652c79f2a45be8bee53209b1f3247.html#ac83652c79f2a45be8bee53209b1f3247", null ],
-    [ "loadAndScale_WS2816_HDFunction", "d8/d6c/pixel__iterator_8h_a1852437f3b6630f68e2379fca4aa9375.html#a1852437f3b6630f68e2379fca4aa9375", null ],
-    [ "loadAndScaleRGBFunction", "d8/d6c/pixel__iterator_8h_a707f323bf759d3953faf6e868b299c9f.html#a707f323bf759d3953faf6e868b299c9f", null ],
-    [ "loadAndScaleRGBWFunction", "d8/d6c/pixel__iterator_8h_a566e16c04bfd8a088ad40bba343d43be.html#a566e16c04bfd8a088ad40bba343d43be", null ],
-    [ "sizeFunction", "d8/d6c/pixel__iterator_8h_a921cb5ab3b5af4e2a4432608312698a4.html#a921cb5ab3b5af4e2a4432608312698a4", null ],
-    [ "stepDitheringFunction", "d8/d6c/pixel__iterator_8h_a6a9c7f0f0b88f258a570b4a9c08d2d61.html#a6a9c7f0f0b88f258a570b4a9c08d2d61", null ]
+    [ "fl::PixelControllerVtable< PixelControllerT >", "d3/d9a/structfl_1_1_pixel_controller_vtable.html", "d3/d9a/structfl_1_1_pixel_controller_vtable" ],
+    [ "fl::PixelIterator", "d0/d09/classfl_1_1_pixel_iterator.html", "d0/d09/classfl_1_1_pixel_iterator" ],
+    [ "FASTLED_PIXEL_ITERATOR_HAS_APA102_HD", "d8/d6c/pixel__iterator_8h_ae82528417f55dca48ea7bb843017338c.html#ae82528417f55dca48ea7bb843017338c", null ],
+    [ "fl::advanceDataFunction", "d4/d36/namespacefl_ace91359e31025d2b215afcc408ad2245.html#ace91359e31025d2b215afcc408ad2245", null ],
+    [ "fl::getHdScaleFunction", "d4/d36/namespacefl_aaa3ce7d25a23311fb63cd09c0b0cd228.html#aaa3ce7d25a23311fb63cd09c0b0cd228", null ],
+    [ "fl::globalBrightness", "d4/d36/namespacefl_a26b4aed5b2cf9e08cf31b53a3b3cc892.html#a26b4aed5b2cf9e08cf31b53a3b3cc892", null ],
+    [ "fl::hasFunction", "d4/d36/namespacefl_a90c478852c0fe2653d1ac056b43d88f2.html#a90c478852c0fe2653d1ac056b43d88f2", null ],
+    [ "fl::loadAndScale_WS2816_HDFunction", "d4/d36/namespacefl_a0850fb74a2a50b17a175c752e8e8ac88.html#a0850fb74a2a50b17a175c752e8e8ac88", null ],
+    [ "fl::loadAndScaleRGBFunction", "d4/d36/namespacefl_ae7cd7980b327011721edeea61419a154.html#ae7cd7980b327011721edeea61419a154", null ],
+    [ "fl::loadAndScaleRGBWFunction", "d4/d36/namespacefl_ae6f4e115b786b21ab31d5d66934de08c.html#ae6f4e115b786b21ab31d5d66934de08c", null ],
+    [ "PixelIterator", "d8/d6c/pixel__iterator_8h_a20585dbb7aeecde76e3fe841f712527b.html#a20585dbb7aeecde76e3fe841f712527b", null ],
+    [ "fl::sizeFunction", "d4/d36/namespacefl_a3f1e04c4aa6f2e850504c1a68542c917.html#a3f1e04c4aa6f2e850504c1a68542c917", null ],
+    [ "fl::stepDitheringFunction", "d4/d36/namespacefl_a14c0872f27169b7cdbf51642f24b3fc2.html#a14c0872f27169b7cdbf51642f24b3fc2", null ]
 ];

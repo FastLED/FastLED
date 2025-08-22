@@ -62,7 +62,8 @@ var animartrix_8hpp =
       [ "fl::MODULE_EXPERIMENT_SM10", "d4/d36/namespacefl_a4717e431b6c23ec1a1afb5161dc1aa69.html#a4717e431b6c23ec1a1afb5161dc1aa69ab8b4fd90aefa539249bf9f624f85c867", null ],
       [ "fl::NUM_ANIMATIONS", "d4/d36/namespacefl_a4717e431b6c23ec1a1afb5161dc1aa69.html#a4717e431b6c23ec1a1afb5161dc1aa69a8a9d8df5da35f677fdccd1c606edaf6e", null ]
     ] ],
-    [ "fl::AnimartrixLoop", "d4/d36/namespacefl_ae54f817fa490cb5eb21b98cb2d12c6c3.html#ae54f817fa490cb5eb21b98cb2d12c6c3", null ],
+    [ "fl::AnimartrixLoop", "d4/d36/namespacefl_aa7c87150d16920a62a427c5ed62107f3.html#aa7c87150d16920a62a427c5ed62107f3", null ],
     [ "fl::FASTLED_SMART_PTR", "d4/d36/namespacefl_a1883555a2dad204b9d5ec5e330e3d001.html#a1883555a2dad204b9d5ec5e330e3d001", null ],
+    [ "fl::getAnimartrixName", "d4/d36/namespacefl_a00ade097fdc81c8144ac4478410aa5dd.html#a00ade097fdc81c8144ac4478410aa5dd", null ],
     [ "fl::ANIMATION_TABLE", "d4/d36/namespacefl_a0eac59d90e652e950c086b8173a902d1.html#a0eac59d90e652e950c086b8173a902d1", null ]
 ];

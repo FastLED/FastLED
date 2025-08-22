@@ -21,7 +21,7 @@
 <!-- Node2 -->
 <g id="Node000002" class="node">
 <title>Node2</title>
-<g id="a_Node000002"><a xlink:href="../../db/d74/struct_rgbw_a99a23acfbc448d69b2f50f87c133efcd.html#a99a23acfbc448d69b2f50f87c133efcd" target="_top" xlink:title=" ">
+<g id="a_Node000002"><a xlink:href="../../db/d74/struct_rgbw_aae6f455908e529f3e0f4c67cd724281f.html#aae6f455908e529f3e0f4c67cd724281f" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="284,-24.5 178,-24.5 178,-5.5 284,-5.5 284,-24.5"/>
 <text text-anchor="middle" x="231" y="-12.5" font-family="Helvetica,sans-Serif" font-size="10.00">Rgbw::size_as_rgb</text>
 </a>

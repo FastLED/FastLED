@@ -1,0 +1,9 @@
+<map id="audioProcessingControls" name="audioProcessingControls">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,55,188,80"/>
+<area shape="rect" id="Node000002" href="$db/d49/_audio_2simple_2simple_8h_a8e96a63243fb29bb5e0a9709a3864706.html#a8e96a63243fb29bb5e0a9709a3864706" title=" " alt="" coords="236,5,387,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="152,52,241,31,242,36,153,57"/>
+<area shape="rect" id="Node000003" href="$db/d49/_audio_2simple_2simple_8h_a0f670a5f10f891700cc108dc119a6c33.html#a0f670a5f10f891700cc108dc119a6c33" title=" " alt="" coords="237,55,385,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="189,65,224,65,224,70,189,70"/>
+<area shape="rect" id="Node000004" href="$db/d49/_audio_2simple_2simple_8h_a16a9f66abb019cd4874806b4c1b9496a.html#a16a9f66abb019cd4874806b4c1b9496a" title=" " alt="" coords="251,104,371,129"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="153,77,242,98,241,103,152,83"/>
+</map>

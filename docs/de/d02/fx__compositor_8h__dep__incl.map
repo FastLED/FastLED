@@ -1,11 +1,13 @@
 <map id="fx/detail/fx_compositor.h" name="fx/detail/fx_compositor.h">
-<area shape="rect" id="Node000001" title=" " alt="" coords="247,5,431,31"/>
-<area shape="rect" id="Node000002" href="$d9/d3c/fx__engine_8h.html" title=" " alt="" coords="282,79,397,104"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="342,44,342,79,337,79,337,44"/>
-<area shape="rect" id="Node000003" href="$d6/d35/_fx_engine_8ino.html" title="Demonstrates how to use the FxEngine to switch between different effects on a 2D LED matrix." alt="" coords="5,152,215,207"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="297,111,181,154,179,149,295,106"/>
-<area shape="rect" id="Node000004" href="$d7/dd3/wasm_8ino.html" title="Demonstrates an advanced ino file with multiple effects and UI elements." alt="" coords="239,152,439,207"/>
-<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="342,118,342,152,337,152,337,118"/>
-<area shape="rect" id="Node000005" href="$df/d8e/fx__engine_8cpp.html" title=" " alt="" coords="463,167,594,192"/>
-<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="378,107,504,164,502,169,376,112"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="429,5,613,31"/>
+<area shape="rect" id="Node000002" href="$d9/d3c/fx__engine_8h.html" title=" " alt="" coords="464,79,579,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="524,44,524,79,519,79,519,44"/>
+<area shape="rect" id="Node000003" href="$d4/d06/curr_8h.html" title=" " alt="" coords="5,159,277,199"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="458,110,225,162,224,157,457,104"/>
+<area shape="rect" id="Node000004" href="$d6/d35/_fx_engine_8ino.html" title="Demonstrates FxEngine for switching between effects." alt="" coords="302,152,511,207"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="496,115,443,154,440,150,493,110"/>
+<area shape="rect" id="Node000005" href="$da/d40/wasm__impl_8h.html" title=" " alt="" coords="536,152,736,207"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="549,110,603,150,599,154,546,115"/>
+<area shape="rect" id="Node000006" href="$df/d8e/fx__engine_8cpp.html" title=" " alt="" coords="760,167,891,192"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="582,105,749,149,794,164,792,169,747,155,581,110"/>
 </map>

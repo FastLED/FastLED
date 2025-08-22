@@ -1,0 +1,4 @@
+<map id="fl::time" name="fl::time">
+<area shape="rect" id="Node000001" title="Universal millisecond timer &#45; returns milliseconds since system startup." alt="" coords="5,29,73,55"/>
+<area shape="poly" id="edge1_Node000001_Node000001" title=" " alt="" coords="26,29,25,12,31,5,39,3,49,6,54,14,49,17,46,10,39,8,34,10,30,14,32,29"/>
+</map>

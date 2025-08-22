@@ -1,9 +1,11 @@
 <map id="fx/2d/animartrix_detail.hpp" name="fx/2d/animartrix_detail.hpp">
-<area shape="rect" id="Node000001" title=" " alt="" coords="125,5,324,31"/>
-<area shape="rect" id="Node000002" href="$d3/dc3/animartrix_8hpp.html" title=" " alt="" coords="147,79,302,104"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="227,44,227,79,222,79,222,44"/>
-<area shape="rect" id="Node000003" href="$d6/d35/_fx_engine_8ino.html" title="Demonstrates how to use the FxEngine to switch between different effects on a 2D LED matrix." alt="" coords="5,152,215,207"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="200,115,147,154,143,150,197,110"/>
-<area shape="rect" id="Node000004" href="$d7/dd3/wasm_8ino.html" title="Demonstrates an advanced ino file with multiple effects and UI elements." alt="" coords="239,152,439,207"/>
-<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="253,110,306,150,303,154,250,115"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="307,5,506,31"/>
+<area shape="rect" id="Node000002" href="$d3/dc3/animartrix_8hpp.html" title=" " alt="" coords="329,79,484,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="409,44,409,79,404,79,404,44"/>
+<area shape="rect" id="Node000003" href="$d4/d06/curr_8h.html" title=" " alt="" coords="5,159,277,199"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="359,111,201,162,199,157,357,106"/>
+<area shape="rect" id="Node000004" href="$d6/d35/_fx_engine_8ino.html" title="Demonstrates FxEngine for switching between effects." alt="" coords="302,152,511,207"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="409,118,409,152,404,152,404,118"/>
+<area shape="rect" id="Node000005" href="$da/d40/wasm__impl_8h.html" title=" " alt="" coords="536,152,736,207"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="451,106,567,149,565,154,449,111"/>
 </map>

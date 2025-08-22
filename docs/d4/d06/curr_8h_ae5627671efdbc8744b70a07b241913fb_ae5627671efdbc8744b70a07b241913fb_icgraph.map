@@ -1,0 +1,11 @@
+<map id="fireScaleX" name="fireScaleX">
+<area shape="rect" id="Node000001" title=" " alt="" coords="519,31,605,56"/>
+<area shape="rect" id="Node000002" href="$d4/d06/curr_8h_a577b85d2595519588a4f0da4a3e258c2.html#a577b85d2595519588a4f0da4a3e258c2" title=" " alt="" coords="355,5,438,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="505,37,438,27,439,22,506,32"/>
+<area shape="rect" id="Node000003" href="$d4/d06/curr_8h_aad1b235b62f5ad63a1ce16192b809770.html#aad1b235b62f5ad63a1ce16192b809770" title=" " alt="" coords="323,55,471,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="505,54,471,59,471,54,505,49"/>
+<area shape="rect" id="Node000004" href="$d4/d06/curr_8h_af9691ba6aeb226dd50626f04206c6e28.html#af9691ba6aeb226dd50626f04206c6e28" title=" " alt="" coords="132,55,275,80"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="309,70,275,70,275,65,309,65"/>
+<area shape="rect" id="Node000005" href="$d4/d06/curr_8h_ad5dd16b6abf44e3aad21ce2a4badf906.html#ad5dd16b6abf44e3aad21ce2a4badf906" title=" " alt="" coords="5,55,84,80"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="118,70,84,70,84,65,118,65"/>
+</map>

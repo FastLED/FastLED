@@ -1,12 +1,12 @@
 <map id="loop" name="loop">
 <area shape="rect" id="Node000001" title=" " alt="" coords="5,31,56,56"/>
-<area shape="rect" id="Node000002" href="$d5/d3d/group___color_blurs_ga868989588bffbf00f97f91e6d98adc8d.html#ga868989588bffbf00f97f91e6d98adc8d" title="Two&#45;dimensional blur filter." alt="" coords="104,31,183,56"/>
+<area shape="rect" id="Node000002" href="$d5/d3d/group___color_blurs_gae8c57faab25bb9b60e0860795a85f968.html#gae8c57faab25bb9b60e0860795a85f968" title="Two&#45;dimensional blur filter." alt="" coords="104,31,183,56"/>
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="56,41,90,41,90,46,56,46"/>
-<area shape="rect" id="Node000003" href="$d5/d3d/group___color_blurs_ga85831e1d1b3ea3468f0c4d39baf66378.html#ga85831e1d1b3ea3468f0c4d39baf66378" title="Perform a blur1d() on every column of a rectangular matrix." alt="" coords="231,5,351,31"/>
+<area shape="rect" id="Node000003" href="$d5/d3d/group___color_blurs_ga25fe770c4f43629983a507267ac50236.html#ga25fe770c4f43629983a507267ac50236" title="Perform a blur1d() on every column of a rectangular matrix." alt="" coords="231,5,351,31"/>
 <area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="182,34,217,28,217,33,183,39"/>
-<area shape="rect" id="Node000009" href="$d5/d3d/group___color_blurs_gae784c48b029a7a4da1f0e831792f2aae.html#gae784c48b029a7a4da1f0e831792f2aae" title="Perform a blur1d() on every row of a rectangular matrix." alt="" coords="241,55,340,80"/>
-<area shape="poly" id="edge4_Node000002_Node000009" title=" " alt="" coords="183,47,228,55,228,60,182,52"/>
-<area shape="rect" id="Node000004" href="$d7/d82/struct_c_r_g_b_a5a3c3370a7de840ac31c07f6dc9bdb63.html#a5a3c3370a7de840ac31c07f6dc9bdb63" title="Scale down a RGB to N/256ths of its current brightness, using &quot;plain math&quot; dimming rules." alt="" coords="399,31,516,56"/>
+<area shape="rect" id="Node000006" href="$d5/d3d/group___color_blurs_ga8dfbf500824d0f8a2663fbd2180b1747.html#ga8dfbf500824d0f8a2663fbd2180b1747" title="Perform a blur1d() on every row of a rectangular matrix." alt="" coords="241,55,340,80"/>
+<area shape="poly" id="edge4_Node000002_Node000006" title=" " alt="" coords="183,47,228,55,228,60,182,52"/>
+<area shape="rect" id="Node000004" href="$d7/d82/struct_c_r_g_b_a271bc2ba8b57b41d0c1cda3eed0eb8da.html#a271bc2ba8b57b41d0c1cda3eed0eb8da" title="Scale down a RGB to N/256ths of its current brightness, using &quot;plain math&quot; dimming rules." alt="" coords="399,31,516,56"/>
 <area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="351,24,385,30,385,35,350,30"/>
-<area shape="poly" id="edge5_Node000009_Node000004" title=" " alt="" coords="340,58,384,51,385,56,341,63"/>
+<area shape="poly" id="edge5_Node000006_Node000004" title=" " alt="" coords="340,58,384,51,385,56,341,63"/>
 </map>

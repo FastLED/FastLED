@@ -41,9 +41,9 @@
 <!-- Node3 -->
 <g id="Node000003" class="node">
 <title>Node3</title>
-<g id="a_Node000003"><a xlink:href="../../d2/d24/classfl_1_1_str.html" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#666666" points="84.5,-19 42.5,-19 42.5,0 84.5,0 84.5,-19"/>
-<text text-anchor="middle" x="63.5" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">fl::Str</text>
+<g id="a_Node000003"><a xlink:href="../../d2/db2/classfl_1_1string.html" target="_top" xlink:title=" ">
+<polygon fill="white" stroke="#666666" points="91.5,-19 35.5,-19 35.5,0 91.5,0 91.5,-19"/>
+<text text-anchor="middle" x="63.5" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">fl::string</text>
 </a>
 </g>
 </g>

@@ -1,0 +1,13 @@
+<map id="fl::HSV16toRGB" name="fl::HSV16toRGB">
+<area shape="rect" id="Node000001" title=" " alt="" coords="601,55,724,80"/>
+<area shape="rect" id="Node000002" href="$d4/d5d/structfl_1_1_h_s_v16_a66d9cc0fccee4175baaef83f1a2d7d7d.html#a66d9cc0fccee4175baaef83f1a2d7d7d" title=" " alt="" coords="423,55,553,80"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="588,70,554,70,554,65,588,65"/>
+<area shape="rect" id="Node000003" href="$d7/d82/struct_c_r_g_b_aafb129d5109b627df6c8401c6b5105ef.html#aafb129d5109b627df6c8401c6b5105ef" title="Allow construction from a fl::HSV16 color Enables automatic conversion from HSV16 to CRGB." alt="" coords="230,5,334,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="421,54,333,33,335,28,422,49"/>
+<area shape="rect" id="Node000004" href="$d4/d5d/structfl_1_1_h_s_v16_a0bd2c0fc64fc34d573637c10b849c320.html#a0bd2c0fc64fc34d573637c10b849c320" title=" " alt="" coords="203,55,361,80"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="409,70,362,70,362,65,409,65"/>
+<area shape="rect" id="Node000017" href="$d4/d5d/structfl_1_1_h_s_v16_a3ece902080f8d4dbaca82dbc974c58d0.html#a3ece902080f8d4dbaca82dbc974c58d0" title="Automatic conversion operator to CRGB Allows HSV16 to be automatically converted to CRGB." alt="" coords="189,104,375,129"/>
+<area shape="poly" id="edge5_Node000002_Node000017" title=" " alt="" coords="422,86,337,107,335,101,421,81"/>
+<area shape="rect" id="Node000005" href="$d7/d82/struct_c_r_g_b_a8b78ce444d74f2bc9e63d83bfd1b17ad.html#a8b78ce444d74f2bc9e63d83bfd1b17ad" title=" " alt="" coords="5,55,141,80"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="188,70,141,70,141,65,188,65"/>
+</map>

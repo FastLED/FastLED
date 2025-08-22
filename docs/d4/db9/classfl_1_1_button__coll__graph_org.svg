@@ -164,7 +164,7 @@
 <g id="a_Node000008"><a xlink:href="../../db/ddd/classfl_1_1_heap_vector.html" target="_top" xlink:title=" ">
 <polygon fill="#fff0f0" stroke="red" points="119,-170 0,-170 0,-118 119,-118 119,-170"/>
 <text text-anchor="start" x="8" y="-158" font-family="Helvetica,sans-Serif" font-size="10.00">fl::HeapVector&lt; T,</text>
-<text text-anchor="start" x="8" y="-147" font-family="Helvetica,sans-Serif" font-size="10.00"> Allocator &gt;&lt; fl::Pair</text>
+<text text-anchor="start" x="8" y="-147" font-family="Helvetica,sans-Serif" font-size="10.00"> Allocator &gt;&lt; fl::pair</text>
 <text text-anchor="start" x="8" y="-136" font-family="Helvetica,sans-Serif" font-size="10.00">&lt; int, function&lt; void</text>
 <text text-anchor="middle" x="59.5" y="-125" font-family="Helvetica,sans-Serif" font-size="10.00">(Args...)&gt; &gt; &gt;</text>
 </a>
@@ -235,7 +235,7 @@
 <g id="a_Node000014"><a xlink:href="../../db/ddd/classfl_1_1_heap_vector.html" target="_top" xlink:title=" ">
 <polygon fill="#fff0f0" stroke="red" points="119,-52 0,-52 0,0 119,0 119,-52"/>
 <text text-anchor="start" x="8" y="-40" font-family="Helvetica,sans-Serif" font-size="10.00">fl::HeapVector&lt; T,</text>
-<text text-anchor="start" x="8" y="-29" font-family="Helvetica,sans-Serif" font-size="10.00"> Allocator &gt;&lt; fl::Pair</text>
+<text text-anchor="start" x="8" y="-29" font-family="Helvetica,sans-Serif" font-size="10.00"> Allocator &gt;&lt; fl::pair</text>
 <text text-anchor="start" x="8" y="-18" font-family="Helvetica,sans-Serif" font-size="10.00">&lt; int, function&lt; void</text>
 <text text-anchor="middle" x="59.5" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">()&gt; &gt; &gt;</text>
 </a>

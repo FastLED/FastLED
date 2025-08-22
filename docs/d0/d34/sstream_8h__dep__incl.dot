@@ -10,4 +10,8 @@ digraph "fl/sstream.h"
   Node2 [id="Node000002",label="/home/runner/work/FastLED\l/FastLED/examples/Corkscrew\l/Corkscrew.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/d40/examples_2_corkscrew_2corkscrew_8h.html",tooltip=" "];
   Node1 -> Node3 [id="edge2_Node000001_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node3 [id="Node000003",label="/home/runner/work/FastLED\l/FastLED/examples/FestivalStick/curr.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d06/curr_8h.html",tooltip=" "];
+  Node1 -> Node4 [id="edge3_Node000001_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="/home/runner/work/FastLED\l/FastLED/examples/FxNoiseRing\l/FxNoiseRing.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/d77/_fx_noise_ring_8h.html",tooltip=" "];
+  Node1 -> Node5 [id="edge4_Node000001_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="fl/task.cpp",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d9/d9c/task_8cpp.html",tooltip=" "];
 }

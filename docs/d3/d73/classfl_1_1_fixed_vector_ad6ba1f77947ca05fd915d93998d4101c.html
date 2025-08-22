@@ -106,7 +106,7 @@ $(function(){initNavTree('d3/d73/classfl_1_1_fixed_vector_ad6ba1f77947ca05fd915d
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;typename T, size_t N&gt; </div>
+template&lt;typename T, fl::size N&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
@@ -125,34 +125,24 @@ template&lt;typename T, size_t N&gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d6/d68/vector_8h_source.html#l00187">187</a> of file <a class="el" href="../../d6/d68/vector_8h_source.html">vector.h</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  187</span>                                 {</div>
-<div class="line"><span class="lineno">  188</span>        <span class="keywordflow">if</span> (<a class="code hl_class" href="../../d3/d73/classfl_1_1_fixed_vector.html">pos</a> != <a class="code hl_function" href="../../d3/d73/classfl_1_1_fixed_vector_af8f3eb485dff77110efec26993f206c4.html#af8f3eb485dff77110efec26993f206c4">end</a>()) {</div>
-<div class="line"><span class="lineno">  189</span>            <a class="code hl_class" href="../../d3/d73/classfl_1_1_fixed_vector.html">pos</a>-&gt;~T();</div>
-<div class="line"><span class="lineno">  190</span>            <span class="comment">// shift all elements to the left</span></div>
-<div class="line"><span class="lineno">  191</span>            <span class="keywordflow">for</span> (<a class="code hl_typedef" href="../../d3/d73/classfl_1_1_fixed_vector_ab0f84506f726fc7616cdddff381a24ed.html#ab0f84506f726fc7616cdddff381a24ed">iterator</a> <a class="code hl_class" href="../../d3/d73/classfl_1_1_fixed_vector.html">p</a> = <a class="code hl_class" href="../../d3/d73/classfl_1_1_fixed_vector.html">pos</a>; <a class="code hl_class" href="../../d3/d73/classfl_1_1_fixed_vector.html">p</a> != <a class="code hl_function" href="../../d3/d73/classfl_1_1_fixed_vector_af8f3eb485dff77110efec26993f206c4.html#af8f3eb485dff77110efec26993f206c4">end</a>() - 1; ++<a class="code hl_class" href="../../d3/d73/classfl_1_1_fixed_vector.html">p</a>) {</div>
-<div class="line"><span class="lineno">  192</span>                <span class="keyword">new</span> (<a class="code hl_class" href="../../d3/d73/classfl_1_1_fixed_vector.html">p</a>)</div>
-<div class="line"><span class="lineno">  193</span>                    <a class="code hl_class" href="../../d3/d73/classfl_1_1_fixed_vector.html">T</a>(*(<a class="code hl_class" href="../../d3/d73/classfl_1_1_fixed_vector.html">p</a> + 1)); <span class="comment">// Use copy constructor instead of std::move</span></div>
-<div class="line"><span class="lineno">  194</span>                (<a class="code hl_class" href="../../d3/d73/classfl_1_1_fixed_vector.html">p</a> + 1)-&gt;~<a class="code hl_class" href="../../d3/d73/classfl_1_1_fixed_vector.html">T</a>();</div>
-<div class="line"><span class="lineno">  195</span>            }</div>
-<div class="line"><span class="lineno">  196</span>            --<a class="code hl_variable" href="../../d3/d73/classfl_1_1_fixed_vector_a5be7368b93e8d32c4f291620547ae33e.html#a5be7368b93e8d32c4f291620547ae33e">current_size</a>;</div>
-<div class="line"><span class="lineno">  197</span>        }</div>
-<div class="line"><span class="lineno">  198</span>        <span class="keywordflow">return</span> <a class="code hl_class" href="../../d3/d73/classfl_1_1_fixed_vector.html">pos</a>;</div>
-<div class="line"><span class="lineno">  199</span>    }</div>
-<div class="ttc" id="aclassfl_1_1_fixed_vector_a5be7368b93e8d32c4f291620547ae33e_html_a5be7368b93e8d32c4f291620547ae33e"><div class="ttname"><a href="../../d3/d73/classfl_1_1_fixed_vector_a5be7368b93e8d32c4f291620547ae33e.html#a5be7368b93e8d32c4f291620547ae33e">fl::FixedVector::current_size</a></div><div class="ttdeci">size_t current_size</div><div class="ttdef"><b>Definition</b> <a href="../../d6/d68/vector_8h_source.html#l00302">vector.h:302</a></div></div>
-<div class="ttc" id="aclassfl_1_1_fixed_vector_ab0f84506f726fc7616cdddff381a24ed_html_ab0f84506f726fc7616cdddff381a24ed"><div class="ttname"><a href="../../d3/d73/classfl_1_1_fixed_vector_ab0f84506f726fc7616cdddff381a24ed.html#ab0f84506f726fc7616cdddff381a24ed">fl::FixedVector::iterator</a></div><div class="ttdeci">T * iterator</div><div class="ttdef"><b>Definition</b> <a href="../../d6/d68/vector_8h_source.html#l00079">vector.h:79</a></div></div>
-<div class="ttc" id="aclassfl_1_1_fixed_vector_af8f3eb485dff77110efec26993f206c4_html_af8f3eb485dff77110efec26993f206c4"><div class="ttname"><a href="../../d3/d73/classfl_1_1_fixed_vector_af8f3eb485dff77110efec26993f206c4.html#af8f3eb485dff77110efec26993f206c4">fl::FixedVector::end</a></div><div class="ttdeci">iterator end()</div><div class="ttdef"><b>Definition</b> <a href="../../d6/d68/vector_8h_source.html#l00285">vector.h:285</a></div></div>
-<div class="ttc" id="aclassfl_1_1_fixed_vector_html"><div class="ttname"><a href="../../d3/d73/classfl_1_1_fixed_vector.html">fl::FixedVector</a></div><div class="ttdef"><b>Definition</b> <a href="../../d6/d68/vector_8h_source.html#l00070">vector.h:70</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../d6/d68/vector_8h_source.html#l00219">219</a> of file <a class="el" href="../../d6/d68/vector_8h_source.html">vector.h</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  219</span>                                 {</div>
+<div class="line"><span class="lineno">  220</span>        <span class="keywordflow">if</span> (<a class="code hl_class" href="../../d3/d73/classfl_1_1_fixed_vector.html">pos</a> != <a class="code hl_function" href="../../d3/d73/classfl_1_1_fixed_vector_af8f3eb485dff77110efec26993f206c4.html#af8f3eb485dff77110efec26993f206c4">end</a>()) {</div>
+<div class="line"><span class="lineno">  221</span>            <a class="code hl_class" href="../../d3/d73/classfl_1_1_fixed_vector.html">pos</a>-&gt;~T();</div>
+<div class="line"><span class="lineno">  222</span>            <span class="comment">// shift all elements to the left</span></div>
+<div class="line"><span class="lineno">  223</span>            <span class="keywordflow">for</span> (<a class="code hl_typedef" href="../../d3/d73/classfl_1_1_fixed_vector_ab0f84506f726fc7616cdddff381a24ed.html#ab0f84506f726fc7616cdddff381a24ed">iterator</a> <a class="code hl_class" href="../../d3/d73/classfl_1_1_fixed_vector.html">p</a> = <a class="code hl_class" href="../../d3/d73/classfl_1_1_fixed_vector.html">pos</a>; <a class="code hl_class" href="../../d3/d73/classfl_1_1_fixed_vector.html">p</a> != <a class="code hl_function" href="../../d3/d73/classfl_1_1_fixed_vector_af8f3eb485dff77110efec26993f206c4.html#af8f3eb485dff77110efec26993f206c4">end</a>() - 1; ++<a class="code hl_class" href="../../d3/d73/classfl_1_1_fixed_vector.html">p</a>) {</div>
+<div class="line"><span class="lineno">  224</span>                <span class="keyword">new</span> (<a class="code hl_class" href="../../d3/d73/classfl_1_1_fixed_vector.html">p</a>) <a class="code hl_class" href="../../d3/d73/classfl_1_1_fixed_vector.html">T</a>(<a class="code hl_class" href="../../d3/d73/classfl_1_1_fixed_vector.html">fl::move</a>(*(<a class="code hl_class" href="../../d3/d73/classfl_1_1_fixed_vector.html">p</a> + 1))); <span class="comment">// Use move constructor</span></div>
+<div class="line"><span class="lineno">  225</span>                (<a class="code hl_class" href="../../d3/d73/classfl_1_1_fixed_vector.html">p</a> + 1)-&gt;~<a class="code hl_class" href="../../d3/d73/classfl_1_1_fixed_vector.html">T</a>();</div>
+<div class="line"><span class="lineno">  226</span>            }</div>
+<div class="line"><span class="lineno">  227</span>            --<a class="code hl_variable" href="../../d3/d73/classfl_1_1_fixed_vector_acc956e3af41680e7b411b83b5825e3ee.html#acc956e3af41680e7b411b83b5825e3ee">current_size</a>;</div>
+<div class="line"><span class="lineno">  228</span>        }</div>
+<div class="line"><span class="lineno">  229</span>        <span class="keywordflow">return</span> <a class="code hl_class" href="../../d3/d73/classfl_1_1_fixed_vector.html">pos</a>;</div>
+<div class="line"><span class="lineno">  230</span>    }</div>
+<div class="ttc" id="aclassfl_1_1_fixed_vector_ab0f84506f726fc7616cdddff381a24ed_html_ab0f84506f726fc7616cdddff381a24ed"><div class="ttname"><a href="../../d3/d73/classfl_1_1_fixed_vector_ab0f84506f726fc7616cdddff381a24ed.html#ab0f84506f726fc7616cdddff381a24ed">fl::FixedVector::iterator</a></div><div class="ttdeci">T * iterator</div><div class="ttdef"><b>Definition</b> <a href="../../d6/d68/vector_8h_source.html#l00087">vector.h:87</a></div></div>
+<div class="ttc" id="aclassfl_1_1_fixed_vector_acc956e3af41680e7b411b83b5825e3ee_html_acc956e3af41680e7b411b83b5825e3ee"><div class="ttname"><a href="../../d3/d73/classfl_1_1_fixed_vector_acc956e3af41680e7b411b83b5825e3ee.html#acc956e3af41680e7b411b83b5825e3ee">fl::FixedVector::current_size</a></div><div class="ttdeci">fl::size current_size</div><div class="ttdef"><b>Definition</b> <a href="../../d6/d68/vector_8h_source.html#l00341">vector.h:341</a></div></div>
+<div class="ttc" id="aclassfl_1_1_fixed_vector_af8f3eb485dff77110efec26993f206c4_html_af8f3eb485dff77110efec26993f206c4"><div class="ttname"><a href="../../d3/d73/classfl_1_1_fixed_vector_af8f3eb485dff77110efec26993f206c4.html#af8f3eb485dff77110efec26993f206c4">fl::FixedVector::end</a></div><div class="ttdeci">iterator end()</div><div class="ttdef"><b>Definition</b> <a href="../../d6/d68/vector_8h_source.html#l00324">vector.h:324</a></div></div>
+<div class="ttc" id="aclassfl_1_1_fixed_vector_html"><div class="ttname"><a href="../../d3/d73/classfl_1_1_fixed_vector.html">fl::FixedVector</a></div><div class="ttdef"><b>Definition</b> <a href="../../d6/d68/vector_8h_source.html#l00078">vector.h:78</a></div></div>
 </div><!-- fragment -->
-<p class="reference">Referenced by <a class="el" href="../../d6/d68/vector_8h_source.html#l00201">fl::FixedVector&lt; PairKV, N &gt;::erase()</a>.</p>
-<div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
-  <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the caller graph for this function:</div>
-<div id="dynsection-0-summary" class="dynsummary" style="display:block;">
-</div>
-<div id="dynsection-0-content" class="dyncontent" style="display:none;">
-<div class="center"><iframe scrolling="no" frameborder="0" src="../../d3/d73/classfl_1_1_fixed_vector_ad6ba1f77947ca05fd915d93998d4101c_ad6ba1f77947ca05fd915d93998d4101c_icgraph.svg" width="391" height="51"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
-</div>
-
 </div>
 </div>
 </div><!-- contents -->
@@ -162,7 +152,7 @@ template&lt;typename T, size_t N&gt; </div>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../d3/d73/classfl_1_1_fixed_vector.html">FixedVector</a></li>
-    <li class="footer">Generated on Tue Jun 24 2025 00:58:15 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Fri Aug 22 2025 20:59:36 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

@@ -4,7 +4,8 @@ var structfl_1_1vec2 =
     [ "vec2", "d5/d5d/structfl_1_1vec2_ababe05053eab466e1b757d5837798521.html#ababe05053eab466e1b757d5837798521", null ],
     [ "vec2", "d5/d5d/structfl_1_1vec2_a1c07f1115faa72316f6490eccf756e9a.html#a1c07f1115faa72316f6490eccf756e9a", null ],
     [ "vec2", "d5/d5d/structfl_1_1vec2_a168abd6a1d990b2c2d1bb47ca836ec52.html#a168abd6a1d990b2c2d1bb47ca836ec52", null ],
-    [ "vec2", "d5/d5d/structfl_1_1vec2_a9b1a6aad3cc788b3b60bf3cdf87cca0b.html#a9b1a6aad3cc788b3b60bf3cdf87cca0b", null ],
+    [ "vec2", "d5/d5d/structfl_1_1vec2_a256f6d5f88910ff6e7022779c0e9d45c.html#a256f6d5f88910ff6e7022779c0e9d45c", null ],
+    [ "vec2", "d5/d5d/structfl_1_1vec2_a7d3fc3b427e243a0396f0407bb408ea4.html#a7d3fc3b427e243a0396f0407bb408ea4", null ],
     [ "cast", "d5/d5d/structfl_1_1vec2_af362199ecfa0e5e57bc3f50217afe174.html#af362199ecfa0e5e57bc3f50217afe174", null ],
     [ "distance", "d5/d5d/structfl_1_1vec2_a48b80e5d7a61e66ce408474e6539419f.html#a48b80e5d7a61e66ce408474e6539419f", null ],
     [ "getMax", "d5/d5d/structfl_1_1vec2_a6b03aa626ebdb7b8221806799a9d98b8.html#a6b03aa626ebdb7b8221806799a9d98b8", null ],
@@ -30,11 +31,12 @@ var structfl_1_1vec2 =
     [ "operator/=", "d5/d5d/structfl_1_1vec2_a344cbdf38650166105ca63a7ee2eeecb.html#a344cbdf38650166105ca63a7ee2eeecb", null ],
     [ "operator/=", "d5/d5d/structfl_1_1vec2_a47f598d213f799aa8e5f685406bf37d4.html#a47f598d213f799aa8e5f685406bf37d4", null ],
     [ "operator/=", "d5/d5d/structfl_1_1vec2_af9bb6f0a1b978cd2680b7990c63acfa0.html#af9bb6f0a1b978cd2680b7990c63acfa0", null ],
-    [ "operator/=", "d5/d5d/structfl_1_1vec2_aab71cf2ffe3c260af1866cfd46e10795.html#aab71cf2ffe3c260af1866cfd46e10795", null ],
+    [ "operator/=", "d5/d5d/structfl_1_1vec2_a2f9428428d6f2320eb12f164eddcc778.html#a2f9428428d6f2320eb12f164eddcc778", null ],
     [ "operator/=", "d5/d5d/structfl_1_1vec2_a76ecfd7aeec202e748da920d9f920331.html#a76ecfd7aeec202e748da920d9f920331", null ],
     [ "operator=", "d5/d5d/structfl_1_1vec2_a543aa88c3287fa36cc5a43bfa60c9159.html#a543aa88c3287fa36cc5a43bfa60c9159", null ],
+    [ "operator=", "d5/d5d/structfl_1_1vec2_acbab740b6d60f147a7cb32aef5331aff.html#acbab740b6d60f147a7cb32aef5331aff", null ],
     [ "operator==", "d5/d5d/structfl_1_1vec2_a9ed1900a369a8bb92c07535539fa08ea.html#a9ed1900a369a8bb92c07535539fa08ea", null ],
     [ "operator==", "d5/d5d/structfl_1_1vec2_a01e507193d90cf5901d0c87c3cca48d7.html#a01e507193d90cf5901d0c87c3cca48d7", null ],
-    [ "x", "d5/d5d/structfl_1_1vec2_aea826eb3005db761faa480174c9b2d44.html#aea826eb3005db761faa480174c9b2d44", null ],
-    [ "y", "d5/d5d/structfl_1_1vec2_a1aa417ec8750c03bb9470d7e2a2e34fd.html#a1aa417ec8750c03bb9470d7e2a2e34fd", null ]
+    [ "x", "d5/d5d/structfl_1_1vec2_a7fb6d3f81a093af442c44e8926e6b006.html#a7fb6d3f81a093af442c44e8926e6b006", null ],
+    [ "y", "d5/d5d/structfl_1_1vec2_a7fa3fbb51a98fcc66e3bc6b2bc23d0a5.html#a7fa3fbb51a98fcc66e3bc6b2bc23d0a5", null ]
 ];

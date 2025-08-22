@@ -6,5 +6,5 @@ var classfl_1_1_leds_x_y =
     [ "operator=", "de/d43/classfl_1_1_leds_x_y_ae6de58fa76101b7c2cd6770aa33d8eb2.html#ae6de58fa76101b7c2cd6770aa33d8eb2", null ],
     [ "setSerpentine", "de/d43/classfl_1_1_leds_x_y_aa276575a5d40d208b21c8ac16e6abcb3.html#aa276575a5d40d208b21c8ac16e6abcb3", null ],
     [ "setXyMap", "de/d43/classfl_1_1_leds_x_y_a55741e7ce7e567be9cdff0eba97a5824.html#a55741e7ce7e567be9cdff0eba97a5824", null ],
-    [ "mLeds", "de/d43/classfl_1_1_leds_x_y_a688ee65cf7d67b784b3c91a1077da954.html#a688ee65cf7d67b784b3c91a1077da954", null ]
+    [ "mLedsData", "de/d43/classfl_1_1_leds_x_y_aa403908dcd030532c58a1558f9a46a78.html#aa403908dcd030532c58a1558f9a46a78", null ]
 ];

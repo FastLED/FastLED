@@ -1,0 +1,9 @@
+<map id="fl::AsyncManager" name="fl::AsyncManager">
+<area shape="rect" id="Node000001" title="Async task manager (singleton)" alt="" coords="22,328,157,353"/>
+<area shape="rect" id="Node000002" href="$db/ddd/classfl_1_1_heap_vector.html" title=" " alt="" coords="5,211,173,265"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="92,279,92,328,87,328,87,279"/>
+<area shape="rect" id="Node000003" href="$db/ddd/classfl_1_1_heap_vector.html" title=" " alt="" coords="19,108,159,148"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="92,161,92,211,87,211,87,161"/>
+<area shape="rect" id="Node000004" href="$db/ddd/classfl_1_1_heap_vector.html" title=" " alt="" coords="19,5,159,45"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="92,59,92,108,87,108,87,59"/>
+</map>

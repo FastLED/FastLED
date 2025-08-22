@@ -1,0 +1,12 @@
+<map id="fl::blur2d" name="fl::blur2d">
+<area shape="rect" id="Node000001" title="Two&#45;dimensional blur filter." alt="" coords="5,31,84,56"/>
+<area shape="rect" id="Node000002" href="$d5/d3d/group___color_blurs_ga25fe770c4f43629983a507267ac50236.html#ga25fe770c4f43629983a507267ac50236" title="Perform a blur1d() on every column of a rectangular matrix." alt="" coords="132,5,252,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="84,34,118,28,119,33,84,39"/>
+<area shape="rect" id="Node000005" href="$d5/d3d/group___color_blurs_ga8dfbf500824d0f8a2663fbd2180b1747.html#ga8dfbf500824d0f8a2663fbd2180b1747" title="Perform a blur1d() on every row of a rectangular matrix." alt="" coords="143,55,241,80"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="84,47,130,55,129,60,84,52"/>
+<area shape="rect" id="Node000003" href="$d7/d82/struct_c_r_g_b_a271bc2ba8b57b41d0c1cda3eed0eb8da.html#a271bc2ba8b57b41d0c1cda3eed0eb8da" title="Scale down a RGB to N/256ths of its current brightness, using &quot;plain math&quot; dimming rules." alt="" coords="300,31,417,56"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="252,24,287,30,286,35,252,30"/>
+<area shape="rect" id="Node000004" href="$d7/d82/struct_c_r_g_b_a4b0cc1cfefd9e0c66ea5c6583181df46.html#a4b0cc1cfefd9e0c66ea5c6583181df46" title="Default constructor." alt="" coords="465,31,569,56"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="418,41,452,41,452,46,418,46"/>
+<area shape="poly" id="edge5_Node000005_Node000003" title=" " alt="" coords="241,58,286,51,286,56,242,63"/>
+</map>

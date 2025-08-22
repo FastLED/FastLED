@@ -8,5 +8,7 @@ digraph "fl::WeakPtr::lock"
   rankdir="RL";
   Node1 [id="Node000001",label="fl::WeakPtr::lock",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
   Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node2 [id="Node000002",label="fl::WeakPtr::operator==",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/d77/classfl_1_1_weak_ptr_a0e8a300bcc2b04d7f60b0ad7265f23da.html#a0e8a300bcc2b04d7f60b0ad7265f23da",tooltip=" "];
+  Node2 [id="Node000002",label="fl::string::append",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/db2/classfl_1_1string_aa0cc295634b7d0cd068a8caa626d6782.html#aa0cc295634b7d0cd068a8caa626d6782",tooltip=" "];
+  Node1 -> Node3 [id="edge2_Node000001_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::WeakPtr::operator==",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/d77/classfl_1_1_weak_ptr_a0e8a300bcc2b04d7f60b0ad7265f23da.html#a0e8a300bcc2b04d7f60b0ad7265f23da",tooltip=" "];
 }

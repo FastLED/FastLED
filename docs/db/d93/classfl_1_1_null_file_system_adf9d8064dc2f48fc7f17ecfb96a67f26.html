@@ -125,15 +125,24 @@ $(function(){initNavTree('db/d93/classfl_1_1_null_file_system_adf9d8064dc2f48fc7
 
 <p>Implements <a class="el" href="../../d7/d43/classfl_1_1_fs_impl_ab17f038f62b873ca4a21a8380e65cda9.html#ab17f038f62b873ca4a21a8380e65cda9">fl::FsImpl</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="../../d4/d37/file__system_8cpp_source.html#l00063">63</a> of file <a class="el" href="../../d4/d37/file__system_8cpp_source.html">file_system.cpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">   63</span>                                                       {</div>
-<div class="line"><span class="lineno">   64</span>        <a class="code hl_define" href="../../d8/d4b/unused_8h_a9de675fbd4d59f415613d91c159cf5b5.html#a9de675fbd4d59f415613d91c159cf5b5">FASTLED_UNUSED</a>(_path);</div>
-<div class="line"><span class="lineno">   65</span>        FileHandlePtr out = FileHandlePtr::TakeOwnership(<span class="keyword">new</span> NullFileHandle());</div>
-<div class="line"><span class="lineno">   66</span>        <span class="keywordflow">return</span> out;</div>
-<div class="line"><span class="lineno">   67</span>    }</div>
-<div class="ttc" id="aunused_8h_a9de675fbd4d59f415613d91c159cf5b5_html_a9de675fbd4d59f415613d91c159cf5b5"><div class="ttname"><a href="../../d8/d4b/unused_8h_a9de675fbd4d59f415613d91c159cf5b5.html#a9de675fbd4d59f415613d91c159cf5b5">FASTLED_UNUSED</a></div><div class="ttdeci">#define FASTLED_UNUSED(x)</div><div class="ttdef"><b>Definition</b> <a href="../../d8/d4b/unused_8h_source.html#l00003">unused.h:3</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../d4/d37/file__system_8cpp_source.html#l00065">65</a> of file <a class="el" href="../../d4/d37/file__system_8cpp_source.html">file_system.cpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">   65</span>                                                       {</div>
+<div class="line"><span class="lineno">   66</span>        <a class="code hl_define" href="../../d8/d4b/unused_8h_a9de675fbd4d59f415613d91c159cf5b5.html#a9de675fbd4d59f415613d91c159cf5b5">FASTLED_UNUSED</a>(_path);</div>
+<div class="line"><span class="lineno">   67</span>        fl::shared_ptr&lt;NullFileHandle&gt; ptr = <a class="code hl_function" href="../../d4/d36/namespacefl_a87ae8a24cc8b709a64f39370e71846af.html#a87ae8a24cc8b709a64f39370e71846af">fl::make_shared&lt;NullFileHandle&gt;</a>();</div>
+<div class="line"><span class="lineno">   68</span>        FileHandlePtr out = ptr;</div>
+<div class="line"><span class="lineno">   69</span>        <span class="keywordflow">return</span> out;</div>
+<div class="line"><span class="lineno">   70</span>    }</div>
+<div class="ttc" id="anamespacefl_a87ae8a24cc8b709a64f39370e71846af_html_a87ae8a24cc8b709a64f39370e71846af"><div class="ttname"><a href="../../d4/d36/namespacefl_a87ae8a24cc8b709a64f39370e71846af.html#a87ae8a24cc8b709a64f39370e71846af">fl::make_shared</a></div><div class="ttdeci">shared_ptr&lt; T &gt; make_shared(Args &amp;&amp;... args)</div><div class="ttdef"><b>Definition</b> <a href="../../df/d6a/shared__ptr_8h_source.html#l00348">shared_ptr.h:348</a></div></div>
+<div class="ttc" id="aunused_8h_a9de675fbd4d59f415613d91c159cf5b5_html_a9de675fbd4d59f415613d91c159cf5b5"><div class="ttname"><a href="../../d8/d4b/unused_8h_a9de675fbd4d59f415613d91c159cf5b5.html#a9de675fbd4d59f415613d91c159cf5b5">FASTLED_UNUSED</a></div><div class="ttdeci">#define FASTLED_UNUSED(x)</div><div class="ttdef"><b>Definition</b> <a href="../../d8/d4b/unused_8h_source.html#l00004">unused.h:4</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d8/d4b/unused_8h_source.html#l00003">FASTLED_UNUSED</a>.</p>
+<p class="reference">References <a class="el" href="../../d8/d4b/unused_8h_source.html#l00004">FASTLED_UNUSED</a>, and <a class="el" href="../../df/d6a/shared__ptr_8h_source.html#l00348">fl::make_shared()</a>.</p>
+<div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
+  <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
+<div id="dynsection-0-summary" class="dynsummary" style="display:block;">
+</div>
+<div id="dynsection-0-content" class="dyncontent" style="display:none;">
+<div class="center"><iframe scrolling="no" frameborder="0" src="../../db/d93/classfl_1_1_null_file_system_adf9d8064dc2f48fc7f17ecfb96a67f26_adf9d8064dc2f48fc7f17ecfb96a67f26_cgraph.svg" width="320" height="51"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+</div>
 
 </div>
 </div>
@@ -144,7 +153,7 @@ $(function(){initNavTree('db/d93/classfl_1_1_null_file_system_adf9d8064dc2f48fc7
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../db/d93/classfl_1_1_null_file_system.html">NullFileSystem</a></li>
-    <li class="footer">Generated on Tue Jun 24 2025 00:58:15 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Fri Aug 22 2025 20:59:36 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

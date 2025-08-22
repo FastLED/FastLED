@@ -130,26 +130,26 @@ $(function(){initNavTree('d5/d98/group___math_gaf170916b55c493ea038c1d96b338e059
 <dl class="section return"><dt>Returns</dt><dd>the product of i * j </dd></dl>
 <dl class="section note"><dt>Note</dt><dd>This does not saturate and may overflow! </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="../../d5/dd1/math8_8h_source.html#l00446">446</a> of file <a class="el" href="../../d5/dd1/math8_8h_source.html">math8.h</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  446</span>                                                            {</div>
-<div class="line"><span class="lineno">  447</span><span class="preprocessor">#if MUL8_C == 1</span></div>
-<div class="line"><span class="lineno">  448</span>    <span class="keywordflow">return</span> ((<span class="keywordtype">int</span>)i * (<span class="keywordtype">int</span>)(j)) &amp; 0xFF;</div>
-<div class="line"><span class="lineno">  449</span><span class="preprocessor">#elif MUL8_AVRASM == 1</span></div>
-<div class="line"><span class="lineno">  450</span>    <span class="keyword">asm</span> <span class="keyword">volatile</span>(</div>
-<div class="line"><span class="lineno">  451</span>        <span class="comment">/* Multiply 8-bit i * 8-bit j, giving 16-bit r1,r0 */</span></div>
-<div class="line"><span class="lineno">  452</span>        <span class="stringliteral">&quot;mul %0, %1          \n\t&quot;</span></div>
-<div class="line"><span class="lineno">  453</span>        <span class="comment">/* Extract the LOW 8-bits (r0) */</span></div>
-<div class="line"><span class="lineno">  454</span>        <span class="stringliteral">&quot;mov %0, r0          \n\t&quot;</span></div>
-<div class="line"><span class="lineno">  455</span>        <span class="comment">/* Restore r1 to &quot;0&quot;; it&#39;s expected to always be that */</span></div>
-<div class="line"><span class="lineno">  456</span>        <span class="stringliteral">&quot;clr __zero_reg__    \n\t&quot;</span></div>
-<div class="line"><span class="lineno">  457</span>        : <span class="stringliteral">&quot;+r&quot;</span>(i)</div>
-<div class="line"><span class="lineno">  458</span>        : <span class="stringliteral">&quot;r&quot;</span>(j)</div>
-<div class="line"><span class="lineno">  459</span>        : <span class="stringliteral">&quot;r0&quot;</span>, <span class="stringliteral">&quot;r1&quot;</span>);</div>
-<div class="line"><span class="lineno">  460</span>    <span class="keywordflow">return</span> i;</div>
-<div class="line"><span class="lineno">  461</span><span class="preprocessor">#else</span></div>
-<div class="line"><span class="lineno">  462</span><span class="preprocessor">#error &quot;No implementation for mul8 available.&quot;</span></div>
-<div class="line"><span class="lineno">  463</span><span class="preprocessor">#endif</span></div>
-<div class="line"><span class="lineno">  464</span>}</div>
+<p class="definition">Definition at line <a class="el" href="../../d5/dd1/math8_8h_source.html#l00462">462</a> of file <a class="el" href="../../d5/dd1/math8_8h_source.html">math8.h</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  462</span>                                                            {</div>
+<div class="line"><span class="lineno">  463</span><span class="preprocessor">#if MUL8_C == 1</span></div>
+<div class="line"><span class="lineno">  464</span>    <span class="keywordflow">return</span> ((<span class="keywordtype">int</span>)i * (<span class="keywordtype">int</span>)(j)) &amp; 0xFF;</div>
+<div class="line"><span class="lineno">  465</span><span class="preprocessor">#elif MUL8_AVRASM == 1</span></div>
+<div class="line"><span class="lineno">  466</span>    <span class="keyword">asm</span> <span class="keyword">volatile</span>(</div>
+<div class="line"><span class="lineno">  467</span>        <span class="comment">/* Multiply 8-bit i * 8-bit j, giving 16-bit r1,r0 */</span></div>
+<div class="line"><span class="lineno">  468</span>        <span class="stringliteral">&quot;mul %0, %1          \n\t&quot;</span></div>
+<div class="line"><span class="lineno">  469</span>        <span class="comment">/* Extract the LOW 8-bits (r0) */</span></div>
+<div class="line"><span class="lineno">  470</span>        <span class="stringliteral">&quot;mov %0, r0          \n\t&quot;</span></div>
+<div class="line"><span class="lineno">  471</span>        <span class="comment">/* Restore r1 to &quot;0&quot;; it&#39;s expected to always be that */</span></div>
+<div class="line"><span class="lineno">  472</span>        <span class="stringliteral">&quot;clr __zero_reg__    \n\t&quot;</span></div>
+<div class="line"><span class="lineno">  473</span>        : <span class="stringliteral">&quot;+r&quot;</span>(i)</div>
+<div class="line"><span class="lineno">  474</span>        : <span class="stringliteral">&quot;r&quot;</span>(j)</div>
+<div class="line"><span class="lineno">  475</span>        : <span class="stringliteral">&quot;r0&quot;</span>, <span class="stringliteral">&quot;r1&quot;</span>);</div>
+<div class="line"><span class="lineno">  476</span>    <span class="keywordflow">return</span> i;</div>
+<div class="line"><span class="lineno">  477</span><span class="preprocessor">#else</span></div>
+<div class="line"><span class="lineno">  478</span><span class="preprocessor">#error &quot;No implementation for mul8 available.&quot;</span></div>
+<div class="line"><span class="lineno">  479</span><span class="preprocessor">#endif</span></div>
+<div class="line"><span class="lineno">  480</span>}</div>
 </div><!-- fragment -->
 <p class="reference">References <a class="el" href="../../d4/d7a/lib8static_8h_source.html#l00012">LIB8STATIC_ALWAYS_INLINE</a>.</p>
 
@@ -162,7 +162,7 @@ $(function(){initNavTree('d5/d98/group___math_gaf170916b55c493ea038c1d96b338e059
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d5/d98/group___math.html">Basic Math Operations</a></li>
-    <li class="footer">Generated on Tue Jun 24 2025 00:58:14 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Fri Aug 22 2025 20:59:34 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

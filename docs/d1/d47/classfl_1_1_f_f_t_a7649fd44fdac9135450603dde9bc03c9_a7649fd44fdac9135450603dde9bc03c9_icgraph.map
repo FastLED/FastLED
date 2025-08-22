@@ -1,0 +1,13 @@
+<map id="fl::FFT::size" name="fl::FFT::size">
+<area shape="rect" id="Node000001" title=" " alt="" coords="613,60,708,85"/>
+<area shape="rect" id="Node000002" href="$d1/d47/classfl_1_1_f_f_t_af61f65d5f457c0cfe13794aa8fa9e4e6.html#af61f65d5f457c0cfe13794aa8fa9e4e6" title=" " alt="" coords="432,35,521,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="599,67,521,56,522,51,600,62"/>
+<area shape="rect" id="Node000007" href="$d1/d47/classfl_1_1_f_f_t_a9af4944e2e16559cc7a32d07ba421243.html#a9af4944e2e16559cc7a32d07ba421243" title=" " alt="" coords="388,84,565,109"/>
+<area shape="poly" id="edge5_Node000001_Node000007" title=" " alt="" coords="600,83,566,88,565,82,599,78"/>
+<area shape="rect" id="Node000003" href="$d0/de1/classfl_1_1_audio_sample_aa07d9fc1f757039c453a67dd030fcfd9.html#aa07d9fc1f757039c453a67dd030fcfd9" title=" " alt="" coords="193,35,340,60"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="418,50,340,50,340,45,418,45"/>
+<area shape="rect" id="Node000004" href="$da/dc7/advanced_8h_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="50,5,101,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="179,37,100,24,101,19,180,31"/>
+<area shape="rect" id="Node000005" href="$d3/d40/classfl_1_1_audio_reactive_a2fb8e16dd8530e5872d6f457683fe697.html#a2fb8e16dd8530e5872d6f457683fe697" title=" " alt="" coords="5,55,145,95"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="180,63,146,68,145,62,179,57"/>
+</map>

@@ -1,47 +1,60 @@
 <map id="qsub8" name="qsub8">
-<area shape="rect" id="Node000001" title="Subtract one byte from another, saturating at 0x00." alt="" coords="760,293,821,319"/>
-<area shape="rect" id="Node000002" href="$d4/dd0/_twinkle_fox_8ino_a14cf156bb2b5669bf1cc2c4859c9f443.html#a14cf156bb2b5669bf1cc2c4859c9f443" title=" " alt="" coords="538,5,699,31"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="787,279,784,230,773,166,749,101,732,71,710,45,693,33,696,29,714,41,736,68,754,99,778,165,789,229,792,279"/>
-<area shape="rect" id="Node000006" href="$de/db5/classfl_1_1_twinkle_fox_aff3c7b29001c2e1f4f6516e14000b22a.html#aff3c7b29001c2e1f4f6516e14000b22a" title=" " alt="" coords="533,55,704,95"/>
-<area shape="poly" id="edge4_Node000001_Node000006" title=" " alt="" coords="784,280,776,242,763,197,741,150,710,109,694,98,698,93,714,105,746,147,768,195,781,241,789,279"/>
-<area shape="rect" id="Node000010" href="$d5/d9b/classfl_1_1_fire2012_a39d20a6dc4f3a771b8b12696db9c4a15.html#a39d20a6dc4f3a771b8b12696db9c4a15" title=" " alt="" coords="551,120,686,145"/>
-<area shape="poly" id="edge7_Node000001_Node000010" title=" " alt="" coords="780,281,756,219,736,186,710,159,685,145,687,140,714,155,741,183,761,216,785,279"/>
-<area shape="rect" id="Node000011" href="$d9/d41/classfl_1_1_noise_palette_a22d1820b5a78e9ccfb4123ef9161f738.html#a22d1820b5a78e9ccfb4123ef9161f738" title=" " alt="" coords="525,169,712,195"/>
-<area shape="poly" id="edge8_Node000001_Node000011" title=" " alt="" coords="774,282,748,244,730,224,711,208,688,197,691,192,713,204,734,221,752,240,779,279"/>
-<area shape="rect" id="Node000013" href="$d4/d26/_fire2012_8ino_a381ceb87530dc5fee1be3e77d33b3a53.html#a381ceb87530dc5fee1be3e77d33b3a53" title=" " alt="" coords="579,219,658,244"/>
-<area shape="poly" id="edge10_Node000001_Node000013" title=" " alt="" coords="761,287,711,258,657,241,659,236,713,253,763,283"/>
-<area shape="rect" id="Node000015" href="$db/d92/_fire2012_with_palette_8ino_af5890ba18cb2066c5a24a358de991a89.html#af5890ba18cb2066c5a24a358de991a89" title=" " alt="" coords="542,268,695,293"/>
-<area shape="poly" id="edge12_Node000001_Node000015" title=" " alt="" coords="746,302,695,295,696,289,747,297"/>
-<area shape="rect" id="Node000017" href="$d5/d88/_fire_matrix_8h_a593fb12ac1f018e17ad0f8ee5eeaa6ba.html#a593fb12ac1f018e17ad0f8ee5eeaa6ba" title=" " alt="" coords="557,317,681,343"/>
-<area shape="poly" id="edge14_Node000001_Node000017" title=" " alt="" coords="747,315,681,324,680,319,746,309"/>
-<area shape="rect" id="Node000019" href="$d8/dd0/_fire_cylinder_8h_a617c5a2afa470899e1f864d74ff6506d.html#a617c5a2afa470899e1f864d74ff6506d" title=" " alt="" coords="557,367,681,392"/>
-<area shape="poly" id="edge16_Node000001_Node000019" title=" " alt="" coords="762,329,713,356,677,369,675,364,711,352,759,324"/>
-<area shape="rect" id="Node000021" href="$db/d87/group___pixel_types_ga6f22a2e8f0c09c840e3c0d649dcd74c8.html#ga6f22a2e8f0c09c840e3c0d649dcd74c8" title="Subtract one CRGB from another, saturating at 0x00 for each channel." alt="" coords="577,416,660,441"/>
-<area shape="poly" id="edge18_Node000001_Node000021" title=" " alt="" coords="778,332,751,370,734,389,713,406,688,418,661,426,660,421,686,413,711,401,730,385,747,367,774,329"/>
-<area shape="rect" id="Node000022" href="$d7/d82/struct_c_r_g_b_a53b2e467a153a12691da7f1906960d2b.html#a53b2e467a153a12691da7f1906960d2b" title="Subtract one CRGB from another, saturating at 0x00 for each channel." alt="" coords="549,465,688,491"/>
-<area shape="poly" id="edge19_Node000001_Node000022" title=" " alt="" coords="785,333,761,394,740,427,714,455,690,468,687,464,710,451,736,424,756,392,780,331"/>
-<area shape="rect" id="Node000023" href="$dd/dc7/group___h_s_v2_r_g_b_gab3d6aa6b1a86a5e9bb820c55c68fe4b9.html#gab3d6aa6b1a86a5e9bb820c55c68fe4b9" title="Recover approximate HSV values from RGB." alt="" coords="537,515,701,540"/>
-<area shape="poly" id="edge20_Node000001_Node000023" title=" " alt="" coords="789,333,782,371,768,417,746,464,731,485,714,504,694,517,691,512,710,500,727,482,742,461,763,415,777,370,784,332"/>
-<area shape="rect" id="Node000024" href="$d7/d82/struct_c_r_g_b_a986ac62988523a4371f8f90cf844924d.html#a986ac62988523a4371f8f90cf844924d" title="Subtract a constant from each channel, saturating at 0x00." alt="" coords="528,564,709,589"/>
-<area shape="poly" id="edge21_Node000001_Node000024" title=" " alt="" coords="792,333,788,380,776,440,753,501,735,530,714,555,697,566,694,562,710,551,731,527,748,499,771,438,782,379,786,332"/>
-<area shape="rect" id="Node000003" href="$d4/dd0/_twinkle_fox_8ino_aff322ac4b9956a48a5d4e90853178b9f.html#aff322ac4b9956a48a5d4e90853178b9f" title=" " alt="" coords="299,5,454,31"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="524,21,454,21,454,15,524,15"/>
-<area shape="rect" id="Node000004" href="$d4/dd0/_twinkle_fox_8ino_a6d0a3407d4b43c23c7bdd4aac9fc76fd.html#a6d0a3407d4b43c23c7bdd4aac9fc76fd" title=" " alt="" coords="61,5,172,31"/>
-<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="286,21,172,21,172,15,286,15"/>
-<area shape="rect" id="Node000007" href="$de/db5/classfl_1_1_twinkle_fox_a39614750a1a87e8a8be19c36f6c48677.html#a39614750a1a87e8a8be19c36f6c48677" title=" " alt="" coords="276,55,477,95"/>
-<area shape="poly" id="edge5_Node000006_Node000007" title=" " alt="" coords="520,78,477,78,477,73,520,73"/>
-<area shape="rect" id="Node000008" href="$de/db5/classfl_1_1_twinkle_fox_a67375829d0da55e17d3f74ac9817914d.html#a67375829d0da55e17d3f74ac9817914d" title=" " alt="" coords="5,63,228,88"/>
-<area shape="poly" id="edge6_Node000007_Node000008" title=" " alt="" coords="262,78,228,78,228,73,262,73"/>
-<area shape="rect" id="Node000012" href="$d9/d41/classfl_1_1_noise_palette_afc6cd594830dfdd146c45e7ab1d1905d.html#afc6cd594830dfdd146c45e7ab1d1905d" title=" " alt="" coords="297,169,457,195"/>
-<area shape="poly" id="edge9_Node000011_Node000012" title=" " alt="" coords="511,185,457,185,457,179,511,179"/>
-<area shape="rect" id="Node000014" href="$d4/d26/_fire2012_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="351,219,402,244"/>
-<area shape="poly" id="edge11_Node000013_Node000014" title=" " alt="" coords="565,234,402,234,402,229,565,229"/>
-<area shape="rect" id="Node000016" href="$db/d92/_fire2012_with_palette_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="351,268,402,293"/>
-<area shape="poly" id="edge13_Node000015_Node000016" title=" " alt="" coords="528,283,402,283,402,278,528,278"/>
-<area shape="rect" id="Node000018" href="$d5/d88/_fire_matrix_8h_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="351,317,402,343"/>
-<area shape="poly" id="edge15_Node000017_Node000018" title=" " alt="" coords="542,333,402,333,402,327,542,327"/>
-<area shape="rect" id="Node000020" href="$d8/dd0/_fire_cylinder_8h_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="351,367,402,392"/>
-<area shape="poly" id="edge17_Node000019_Node000020" title=" " alt="" coords="542,382,402,382,402,377,542,377"/>
-<area shape="rect" id="Node000025" href="$d7/d82/struct_c_r_g_b_a6b2d9ed6541cf5a3bdc791bc13af88bf.html#a6b2d9ed6541cf5a3bdc791bc13af88bf" title="Subtract a constant of &#39;1&#39; from each channel, saturating at 0x00." alt="" coords="311,564,443,589"/>
-<area shape="poly" id="edge22_Node000024_Node000025" title=" " alt="" coords="514,579,443,579,443,574,514,574"/>
+<area shape="rect" id="Node000001" title="Subtract one byte from another, saturating at 0x00." alt="" coords="859,317,920,343"/>
+<area shape="rect" id="Node000002" href="$d4/dd0/_twinkle_fox_8ino_a14cf156bb2b5669bf1cc2c4859c9f443.html#a14cf156bb2b5669bf1cc2c4859c9f443" title=" " alt="" coords="637,5,798,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="886,304,884,250,874,180,865,143,851,108,832,74,809,45,791,33,794,29,812,41,837,71,856,105,870,142,880,179,890,249,892,303"/>
+<area shape="rect" id="Node000006" href="$de/db5/classfl_1_1_twinkle_fox_aff3c7b29001c2e1f4f6516e14000b22a.html#aff3c7b29001c2e1f4f6516e14000b22a" title=" " alt="" coords="632,55,803,95"/>
+<area shape="poly" id="edge4_Node000001_Node000006" title=" " alt="" coords="883,304,877,261,865,209,842,156,827,131,809,109,794,98,797,93,813,105,832,128,847,153,870,208,883,260,889,303"/>
+<area shape="rect" id="Node000010" href="$d5/d9b/classfl_1_1_fire2012_a39d20a6dc4f3a771b8b12696db9c4a15.html#a39d20a6dc4f3a771b8b12696db9c4a15" title=" " alt="" coords="650,120,785,145"/>
+<area shape="poly" id="edge7_Node000001_Node000010" title=" " alt="" coords="881,305,873,271,859,232,838,192,809,159,784,145,786,140,812,155,842,189,864,229,878,270,886,303"/>
+<area shape="rect" id="Node000011" href="$d4/d06/curr_8h_a27ef46fa8abd1dedd29a3904d81622d2.html#a27ef46fa8abd1dedd29a3904d81622d2" title=" " alt="" coords="640,169,795,195"/>
+<area shape="poly" id="edge8_Node000001_Node000011" title=" " alt="" coords="876,306,851,255,832,230,809,208,789,197,791,192,812,204,836,226,855,253,881,303"/>
+<area shape="rect" id="Node000014" href="$d9/d41/classfl_1_1_noise_palette_a22d1820b5a78e9ccfb4123ef9161f738.html#a22d1820b5a78e9ccfb4123ef9161f738" title=" " alt="" coords="624,219,811,244"/>
+<area shape="poly" id="edge11_Node000001_Node000014" title=" " alt="" coords="867,308,841,281,809,258,784,247,786,242,812,253,845,277,871,304"/>
+<area shape="rect" id="Node000016" href="$d4/d26/_fire2012_8ino_a381ceb87530dc5fee1be3e77d33b3a53.html#a381ceb87530dc5fee1be3e77d33b3a53" title=" " alt="" coords="678,268,757,293"/>
+<area shape="poly" id="edge13_Node000001_Node000016" title=" " alt="" coords="845,318,810,307,756,293,758,287,811,302,846,313"/>
+<area shape="rect" id="Node000018" href="$db/d92/_fire2012_with_palette_8ino_af5890ba18cb2066c5a24a358de991a89.html#af5890ba18cb2066c5a24a358de991a89" title=" " alt="" coords="641,317,794,343"/>
+<area shape="poly" id="edge15_Node000001_Node000018" title=" " alt="" coords="845,333,794,333,794,327,845,327"/>
+<area shape="rect" id="Node000020" href="$d4/d06/curr_8h_aad1b235b62f5ad63a1ce16192b809770.html#aad1b235b62f5ad63a1ce16192b809770" title=" " alt="" coords="643,367,791,392"/>
+<area shape="poly" id="edge17_Node000001_Node000020" title=" " alt="" coords="846,346,811,357,767,369,765,364,810,351,845,341"/>
+<area shape="rect" id="Node000023" href="$d5/d88/_fire_matrix_8h_a593fb12ac1f018e17ad0f8ee5eeaa6ba.html#a593fb12ac1f018e17ad0f8ee5eeaa6ba" title=" " alt="" coords="655,416,779,441"/>
+<area shape="poly" id="edge21_Node000001_Node000023" title=" " alt="" coords="871,355,845,382,812,406,781,419,779,414,809,401,841,378,867,351"/>
+<area shape="rect" id="Node000025" href="$d8/dd0/_fire_cylinder_8h_a617c5a2afa470899e1f864d74ff6506d.html#a617c5a2afa470899e1f864d74ff6506d" title=" " alt="" coords="655,465,779,491"/>
+<area shape="poly" id="edge23_Node000001_Node000025" title=" " alt="" coords="881,357,855,407,836,433,812,455,781,470,778,466,809,450,832,429,850,404,876,354"/>
+<area shape="rect" id="Node000029" href="$d0/d4b/crgb_8hpp_a6f22a2e8f0c09c840e3c0d649dcd74c8.html#a6f22a2e8f0c09c840e3c0d649dcd74c8" title="Subtract one CRGB from another, saturating at 0x00 for each channel." alt="" coords="676,515,759,540"/>
+<area shape="poly" id="edge27_Node000001_Node000029" title=" " alt="" coords="886,357,878,390,863,430,842,470,812,504,787,519,760,527,758,521,785,514,809,500,838,467,858,428,872,389,881,356"/>
+<area shape="rect" id="Node000030" href="$d7/d82/struct_c_r_g_b_a53b2e467a153a12691da7f1906960d2b.html#a53b2e467a153a12691da7f1906960d2b" title="Subtract one CRGB from another, saturating at 0x00 for each channel." alt="" coords="648,564,787,589"/>
+<area shape="poly" id="edge28_Node000001_Node000030" title=" " alt="" coords="889,357,884,400,871,453,848,508,832,533,812,555,788,569,786,565,809,551,828,529,844,505,866,452,878,399,884,356"/>
+<area shape="rect" id="Node000031" href="$dd/dc7/group___h_s_v2_r_g_b_gab3d6aa6b1a86a5e9bb820c55c68fe4b9.html#gab3d6aa6b1a86a5e9bb820c55c68fe4b9" title="Recover approximate HSV values from RGB." alt="" coords="635,613,799,639"/>
+<area shape="poly" id="edge29_Node000001_Node000031" title=" " alt="" coords="891,357,889,409,878,475,868,510,854,544,836,576,812,604,797,615,793,611,809,600,832,573,849,542,863,508,873,474,883,408,886,357"/>
+<area shape="rect" id="Node000003" href="$d4/dd0/_twinkle_fox_8ino_aff322ac4b9956a48a5d4e90853178b9f.html#aff322ac4b9956a48a5d4e90853178b9f" title=" " alt="" coords="398,5,553,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="623,21,553,21,553,15,623,15"/>
+<area shape="rect" id="Node000004" href="$d4/dd0/_twinkle_fox_8ino_a6d0a3407d4b43c23c7bdd4aac9fc76fd.html#a6d0a3407d4b43c23c7bdd4aac9fc76fd" title=" " alt="" coords="160,5,271,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="384,21,271,21,271,15,384,15"/>
+<area shape="rect" id="Node000007" href="$de/db5/classfl_1_1_twinkle_fox_a7b4a385bedd751f63937469cc850ee1a.html#a7b4a385bedd751f63937469cc850ee1a" title=" " alt="" coords="375,55,576,95"/>
+<area shape="poly" id="edge5_Node000006_Node000007" title=" " alt="" coords="618,78,576,78,576,73,618,73"/>
+<area shape="rect" id="Node000008" href="$de/db5/classfl_1_1_twinkle_fox_a67375829d0da55e17d3f74ac9817914d.html#a67375829d0da55e17d3f74ac9817914d" title=" " alt="" coords="104,63,327,88"/>
+<area shape="poly" id="edge6_Node000007_Node000008" title=" " alt="" coords="361,78,327,78,327,73,361,73"/>
+<area shape="rect" id="Node000012" href="$d4/d06/curr_8h_a889977e3c2cad101b68a8c97148ef3c0.html#a889977e3c2cad101b68a8c97148ef3c0" title=" " alt="" coords="170,243,261,268"/>
+<area shape="poly" id="edge9_Node000011_Node000012" title=" " alt="" coords="626,185,506,192,375,209,308,226,250,245,249,240,306,221,374,203,506,186,626,180"/>
+<area shape="rect" id="Node000013" href="$d4/d06/curr_8h_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="5,275,56,300"/>
+<area shape="poly" id="edge10_Node000012_Node000013" title=" " alt="" coords="157,268,57,286,56,280,156,263"/>
+<area shape="rect" id="Node000015" href="$d9/d41/classfl_1_1_noise_palette_afc6cd594830dfdd146c45e7ab1d1905d.html#afc6cd594830dfdd146c45e7ab1d1905d" title=" " alt="" coords="395,219,555,244"/>
+<area shape="poly" id="edge12_Node000014_Node000015" title=" " alt="" coords="610,234,556,234,556,229,610,229"/>
+<area shape="rect" id="Node000017" href="$d4/d26/_fire2012_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="450,268,501,293"/>
+<area shape="poly" id="edge14_Node000016_Node000017" title=" " alt="" coords="664,283,501,283,501,278,664,278"/>
+<area shape="rect" id="Node000019" href="$db/d92/_fire2012_with_palette_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="450,317,501,343"/>
+<area shape="poly" id="edge16_Node000018_Node000019" title=" " alt="" coords="627,333,501,333,501,327,627,327"/>
+<area shape="rect" id="Node000021" href="$d4/d06/curr_8h_af9691ba6aeb226dd50626f04206c6e28.html#af9691ba6aeb226dd50626f04206c6e28" title=" " alt="" coords="404,367,547,392"/>
+<area shape="poly" id="edge18_Node000020_Node000021" title=" " alt="" coords="629,382,547,382,547,377,629,377"/>
+<area shape="rect" id="Node000022" href="$d4/d06/curr_8h_ad5dd16b6abf44e3aad21ce2a4badf906.html#ad5dd16b6abf44e3aad21ce2a4badf906" title=" " alt="" coords="176,336,255,361"/>
+<area shape="poly" id="edge19_Node000021_Node000022" title=" " alt="" coords="390,372,255,356,255,351,390,367"/>
+<area shape="poly" id="edge20_Node000022_Node000013" title=" " alt="" coords="163,334,55,298,57,293,164,329"/>
+<area shape="rect" id="Node000024" href="$d5/d88/_fire_matrix_8h_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="450,416,501,441"/>
+<area shape="poly" id="edge22_Node000023_Node000024" title=" " alt="" coords="641,431,501,431,501,426,641,426"/>
+<area shape="rect" id="Node000026" href="$d5/d77/_fx_noise_ring_8h_a7a1cdb28d8d83f314435a3a1dc13f17f.html#a7a1cdb28d8d83f314435a3a1dc13f17f" title=" " alt="" coords="448,465,503,491"/>
+<area shape="poly" id="edge24_Node000025_Node000026" title=" " alt="" coords="641,481,503,481,503,475,641,475"/>
+<area shape="rect" id="Node000028" href="$d8/dd0/_fire_cylinder_8h_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="450,515,501,540"/>
+<area shape="poly" id="edge26_Node000025_Node000028" title=" " alt="" coords="642,496,501,525,500,520,641,491"/>
+<area shape="rect" id="Node000027" href="$d5/d77/_fx_noise_ring_8h_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="190,465,241,491"/>
+<area shape="poly" id="edge25_Node000026_Node000027" title=" " alt="" coords="434,481,241,481,241,475,434,475"/>
 </map>

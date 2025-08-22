@@ -1,9 +1,0 @@
-<map id="fl::Corkscrew::Corkscrew" name="fl::Corkscrew::Corkscrew">
-<area shape="rect" id="Node000001" title=" " alt="" coords="5,5,187,31"/>
-<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a770b68b456de9038c4919bd91ffdc198.html#a770b68b456de9038c4919bd91ffdc198" title=" " alt="" coords="235,5,365,31"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="187,15,221,15,221,21,187,21"/>
-<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_aa811543ca59ee9b7d57f369e6be44cc9.html#aa811543ca59ee9b7d57f369e6be44cc9" title=" " alt="" coords="413,5,500,31"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="366,15,400,15,400,21,366,21"/>
-<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_a1d899b704a244b75b314311218852cf7.html#a1d899b704a244b75b314311218852cf7" title=" " alt="" coords="548,5,620,31"/>
-<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="500,15,535,15,535,21,500,21"/>
-</map>

@@ -1,0 +1,8 @@
+<map id="fl::XYRasterU8Sparse::drawGradient" name="fl::XYRasterU8Sparse::drawGradient">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,29,164,69"/>
+<area shape="rect" id="Node000002" href="$d1/d5c/classfl_1_1_x_y_raster_u8_sparse_acaaa8f4afad65e83f7271463779a2892.html#acaaa8f4afad65e83f7271463779a2892" title=" " alt="" coords="212,29,371,69"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="164,47,198,47,198,52,164,52"/>
+<area shape="rect" id="Node000003" href="$d1/d5c/classfl_1_1_x_y_raster_u8_sparse_ac3abed7a705055d47560f1d42561129e.html#ac3abed7a705055d47560f1d42561129e" title=" " alt="" coords="419,29,577,69"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="371,47,405,47,405,52,371,52"/>
+<area shape="poly" id="edge3_Node000003_Node000003" title=" " alt="" coords="459,30,457,20,463,11,477,5,498,3,522,6,535,13,533,18,520,11,498,8,478,10,467,15,462,21,464,28"/>
+</map>

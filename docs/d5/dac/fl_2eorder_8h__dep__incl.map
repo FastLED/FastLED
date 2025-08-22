@@ -1,0 +1,35 @@
+<map id="fl/eorder.h" name="fl/eorder.h">
+<area shape="rect" id="Node000001" title="Defines color channel ordering enumerations in the fl namespace." alt="" coords="217,5,304,31"/>
+<area shape="rect" id="Node000002" href="$db/d07/eorder_8h.html" title="Defines color channel ordering enumerations." alt="" coords="367,159,442,185"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="283,39,396,157,392,161,279,42"/>
+<area shape="rect" id="Node000159" href="$d6/d0a/fl_2rgbw_8h.html" title="Functions for red, green, blue, white (RGBW) output." alt="" coords="185,79,262,104"/>
+<area shape="poly" id="edge14_Node000001_Node000159" title=" " alt="" coords="251,44,232,80,227,77,246,42"/>
+<area shape="rect" id="Node000003" href="$db/d66/chipsets_8h.html" title="Contains the bulk of the definitions for the various LED chipsets supported." alt="" coords="367,313,455,339"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="408,198,413,313,408,313,403,199"/>
+<area shape="rect" id="Node000106" href="$d9/d57/cpixel__ledcontroller_8h.html" title="defines the templated version of the CLEDController class" alt="" coords="438,533,598,559"/>
+<area shape="poly" id="edge8_Node000002_Node000106" title=" " alt="" coords="457,183,508,204,534,219,557,238,576,258,588,277,595,298,597,325,597,401,589,442,572,480,550,512,531,535,527,531,546,509,567,477,584,440,591,400,591,325,589,299,583,279,572,261,554,242,531,224,506,209,455,188"/>
+<area shape="rect" id="Node000148" href="$d5/d4d/pixel__controller_8h.html" title="Low level pixel data writing class." alt="" coords="205,460,338,485"/>
+<area shape="poly" id="edge9_Node000002_Node000148" title=" " alt="" coords="396,198,279,460,274,458,392,196"/>
+<area shape="rect" id="Node000144" href="$d2/dba/pixeltypes_8h.html" title="Includes defintions for RGB and HSV pixels." alt="" coords="442,240,543,265"/>
+<area shape="poly" id="edge10_Node000002_Node000144" title=" " alt="" coords="429,192,481,238,478,242,426,196"/>
+<area shape="rect" id="Node000004" href="$db/d97/_fast_l_e_d_8h.html" title="central include file for FastLED, defines the CFastLED class/object" alt="" coords="369,387,454,412"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="414,352,414,387,409,387,409,352"/>
+<area shape="poly" id="edge4_Node000004_Node000106" title=" " alt="" coords="435,420,468,458,495,498,514,532,510,535,490,501,464,462,431,424"/>
+<area shape="rect" id="Node000124" href="$d1/d8d/rgbw_8cpp.html" title="Functions for red, green, blue, white (RGBW) output." alt="" coords="363,460,455,485"/>
+<area shape="poly" id="edge5_Node000004_Node000124" title=" " alt="" coords="413,426,412,460,406,460,408,426"/>
+<area shape="poly" id="edge6_Node000004_Node000148" title=" " alt="" coords="378,421,295,462,293,457,375,416"/>
+<area shape="poly" id="edge7_Node000148_Node000106" title=" " alt="" coords="325,487,479,531,477,536,323,492"/>
+<area shape="poly" id="edge12_Node000144_Node000003" title=" " alt="" coords="471,276,426,315,423,311,468,272"/>
+<area shape="poly" id="edge11_Node000144_Node000004" title=" " alt="" coords="491,280,483,309,470,340,449,367,428,388,424,384,445,364,465,337,478,308,486,279"/>
+<area shape="poly" id="edge13_Node000144_Node000106" title=" " alt="" coords="497,279,520,533,514,533,492,279"/>
+<area shape="poly" id="edge16_Node000159_Node000124" title=" " alt="" coords="239,115,256,151,285,225,303,284,323,341,359,411,378,437,398,458,394,461,374,440,354,413,318,344,298,285,280,226,252,153,234,117"/>
+<area shape="rect" id="Node000160" href="$d3/d8d/rectangular__draw__buffer_8cpp.html" title=" " alt="" coords="95,152,242,192"/>
+<area shape="poly" id="edge15_Node000159_Node000160" title=" " alt="" coords="210,117,184,153,180,150,205,114"/>
+<area shape="rect" id="Node000161" href="$d7/dbb/rgbw_8h.html" title="Functions for red, green, blue, white (RGBW) output." alt="" coords="5,159,71,185"/>
+<area shape="poly" id="edge17_Node000159_Node000161" title=" " alt="" coords="185,112,66,162,64,157,183,107"/>
+<area shape="poly" id="edge18_Node000161_Node000148" title=" " alt="" coords="58,195,112,264,264,458,260,461,108,267,54,198"/>
+<area shape="rect" id="Node000162" href="$d8/d6c/pixel__iterator_8h.html" title="Non&#45;templated low level pixel data writing class." alt="" coords="123,240,241,265"/>
+<area shape="poly" id="edge19_Node000161_Node000162" title=" " alt="" coords="72,189,162,237,159,242,70,194"/>
+<area shape="poly" id="edge20_Node000162_Node000003" title=" " alt="" coords="233,267,375,311,373,316,231,272"/>
+<area shape="poly" id="edge21_Node000162_Node000148" title=" " alt="" coords="194,277,269,459,264,461,190,279"/>
+</map>

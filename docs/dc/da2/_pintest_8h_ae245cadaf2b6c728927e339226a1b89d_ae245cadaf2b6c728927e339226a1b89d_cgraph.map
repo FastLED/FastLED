@@ -1,0 +1,9 @@
+<map id="_GetPinPort&lt; 0 &gt;" name="_GetPinPort&lt; 0 &gt;">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,55,141,80"/>
+<area shape="rect" id="Node000002" href="$d4/de9/struct_____f_l___p_o_r_t___i_n_f_o_a407030c6570cb7463ac9a76355abae35.html#a407030c6570cb7463ac9a76355abae35" title="Checks whether a port exists." alt="" coords="197,5,385,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="130,52,221,31,222,36,131,57"/>
+<area shape="rect" id="Node000003" href="$d4/de9/struct_____f_l___p_o_r_t___i_n_f_o_a3bab01aa4faddd77dcd6a567bcf50043.html#a3bab01aa4faddd77dcd6a567bcf50043" title="Gets the raw address of the port." alt="" coords="194,55,389,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="142,65,180,65,180,70,142,70"/>
+<area shape="rect" id="Node000004" href="$d4/de9/struct_____f_l___p_o_r_t___i_n_f_o_ad7cedd4bff6b75c60ddf249dade8dd1c.html#ad7cedd4bff6b75c60ddf249dade8dd1c" title="Gets the name of the port, as a C&#45;string." alt="" coords="189,104,393,129"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="131,77,222,98,221,104,130,83"/>
+</map>

@@ -1,0 +1,29 @@
+<map id="fl::HSV16::colorBoost" name="fl::HSV16::colorBoost">
+<area shape="rect" id="Node000001" title=" " alt="" coords="717,171,876,197"/>
+<area shape="rect" id="Node000002" href="$d7/d82/struct_c_r_g_b_a8b78ce444d74f2bc9e63d83bfd1b17ad.html#a8b78ce444d74f2bc9e63d83bfd1b17ad" title=" " alt="" coords="533,171,669,197"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="703,187,670,187,670,181,703,181"/>
+<area shape="rect" id="Node000003" href="$d7/d82/struct_c_r_g_b_afaf81accfbf08b61cc7cf2a4735fd5d6.html#afaf81accfbf08b61cc7cf2a4735fd5d6" title=" " alt="" coords="340,71,476,97"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="572,165,531,137,484,110,456,99,458,94,486,106,534,133,575,161"/>
+<area shape="rect" id="Node000004" href="$d4/d06/curr_8h_a251ace8542fe093844e4ed2709e8a3d7.html#a251ace8542fe093844e4ed2709e8a3d7" title=" " alt="" coords="381,121,435,146"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="538,170,435,143,436,138,540,165"/>
+<area shape="rect" id="Node000008" href="$d4/d06/curr_8h_af9691ba6aeb226dd50626f04206c6e28.html#af9691ba6aeb226dd50626f04206c6e28" title=" " alt="" coords="337,171,479,197"/>
+<area shape="poly" id="edge7_Node000002_Node000008" title=" " alt="" coords="520,187,480,187,480,181,520,181"/>
+<area shape="rect" id="Node000010" href="$d4/d06/curr_8h_a27ef46fa8abd1dedd29a3904d81622d2.html#a27ef46fa8abd1dedd29a3904d81622d2" title=" " alt="" coords="331,221,485,246"/>
+<area shape="poly" id="edge10_Node000002_Node000010" title=" " alt="" coords="539,203,460,223,458,218,537,197"/>
+<area shape="rect" id="Node000012" href="$db/df4/_color_boost_8h_a4a0d1f144188c96aecbb5efd649d400a.html#a4a0d1f144188c96aecbb5efd649d400a" title=" " alt="" coords="353,270,463,295"/>
+<area shape="poly" id="edge13_Node000002_Node000012" title=" " alt="" coords="574,207,534,235,486,261,458,272,456,267,484,256,531,230,571,203"/>
+<area shape="rect" id="Node000005" href="$d3/dca/classfl_1_1_x_y_raster_sparse___c_r_g_b_a074d01574c20917b45f65fb1afbf2cb1.html#a074d01574c20917b45f65fb1afbf2cb1" title=" " alt="" coords="123,5,264,45"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="367,127,329,110,314,97,304,84,295,72,281,60,259,48,262,43,284,55,299,68,309,81,318,94,332,106,369,122"/>
+<area shape="rect" id="Node000006" href="$d4/d36/namespacefl_a29ae9bad91ab6b7de10679e9325e90f6.html#a29ae9bad91ab6b7de10679e9325e90f6" title=" " alt="" coords="104,70,283,95"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="367,127,247,98,249,93,368,121"/>
+<area shape="rect" id="Node000007" href="$d4/d06/curr_8h_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="5,171,56,197"/>
+<area shape="poly" id="edge6_Node000004_Node000007" title=" " alt="" coords="367,136,248,142,176,149,105,161,57,176,55,171,103,156,176,144,248,136,367,131"/>
+<area shape="rect" id="Node000009" href="$d4/d06/curr_8h_ad5dd16b6abf44e3aad21ce2a4badf906.html#ad5dd16b6abf44e3aad21ce2a4badf906" title=" " alt="" coords="154,171,233,197"/>
+<area shape="poly" id="edge8_Node000008_Node000009" title=" " alt="" coords="323,187,233,187,233,181,323,181"/>
+<area shape="poly" id="edge9_Node000009_Node000007" title=" " alt="" coords="140,187,56,187,56,181,140,181"/>
+<area shape="rect" id="Node000011" href="$d4/d06/curr_8h_a889977e3c2cad101b68a8c97148ef3c0.html#a889977e3c2cad101b68a8c97148ef3c0" title=" " alt="" coords="148,221,239,246"/>
+<area shape="poly" id="edge11_Node000010_Node000011" title=" " alt="" coords="317,236,239,236,239,231,317,231"/>
+<area shape="poly" id="edge12_Node000011_Node000007" title=" " alt="" coords="134,220,103,211,56,195,57,190,105,205,135,215"/>
+<area shape="rect" id="Node000013" href="$db/df4/_color_boost_8h_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="168,270,219,295"/>
+<area shape="poly" id="edge14_Node000012_Node000013" title=" " alt="" coords="339,285,219,285,219,280,339,280"/>
+</map>

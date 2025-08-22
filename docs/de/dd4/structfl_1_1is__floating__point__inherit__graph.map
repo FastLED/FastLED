@@ -1,0 +1,15 @@
+<map id="fl::is_floating_point&lt; T &gt;" name="fl::is_floating_point&lt; T &gt;">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,173,188,198"/>
+<area shape="rect" id="Node000002" href="$df/d72/structfl_1_1is__floating__point_3_01_t_01_6_01_4.html" title=" " alt="" coords="347,5,492,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="119,161,160,126,211,92,279,62,346,40,347,45,281,67,213,97,163,130,123,165"/>
+<area shape="rect" id="Node000003" href="$d0/d26/structfl_1_1is__floating__point_3_01const_01_t_01_4.html" title=" " alt="" coords="347,69,492,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="143,165,211,141,346,104,347,109,213,147,144,170"/>
+<area shape="rect" id="Node000004" href="$d5/de0/structfl_1_1is__floating__point_3_01double_01_4.html" title=" " alt="" coords="347,133,492,173"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="202,172,346,158,347,163,202,178"/>
+<area shape="rect" id="Node000005" href="$d8/dcf/structfl_1_1is__floating__point_3_01float_01_4.html" title=" " alt="" coords="347,197,492,237"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="202,193,347,208,346,213,202,198"/>
+<area shape="rect" id="Node000006" href="$d2/dfa/structfl_1_1is__floating__point_3_01long_01double_01_4.html" title=" " alt="" coords="347,261,492,301"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="143,201,213,225,347,262,346,267,211,231,141,206"/>
+<area shape="rect" id="Node000007" href="$dd/dc3/structfl_1_1is__floating__point_3_01volatile_01_t_01_4.html" title=" " alt="" coords="347,325,492,365"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="122,206,163,242,213,276,280,306,347,327,345,332,279,311,211,281,160,246,119,210"/>
+</map>

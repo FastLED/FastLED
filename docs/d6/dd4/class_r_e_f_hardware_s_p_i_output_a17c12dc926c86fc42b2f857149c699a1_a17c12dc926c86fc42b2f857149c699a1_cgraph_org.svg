@@ -152,7 +152,7 @@
 <!-- Node17 -->
 <g id="Node000017" class="node">
 <title>Node17</title>
-<g id="a_Node000017"><a xlink:href="../../d6/dd4/class_r_e_f_hardware_s_p_i_output_a63c213c547fd413c258e9bfbf4c7b982.html#a63c213c547fd413c258e9bfbf4c7b982" target="_top" xlink:title="write a single bit out, which bit from the passed in byte is determined by template parameter">
+<g id="a_Node000017"><a xlink:href="../../d6/dd4/class_r_e_f_hardware_s_p_i_output_a025291692b96dd2f7fe0b5b6fe0cf979.html#a025291692b96dd2f7fe0b5b6fe0cf979" target="_top" xlink:title="write a single bit out, which bit from the passed in byte is determined by template parameter">
 <polygon fill="white" stroke="#666666" points="312.5,-78 181.5,-78 181.5,-48 312.5,-48 312.5,-78"/>
 <text text-anchor="start" x="189.5" y="-66" font-family="Helvetica,sans-Serif" font-size="10.00">REFHardwareSPIOutput</text>
 <text text-anchor="middle" x="247" y="-55" font-family="Helvetica,sans-Serif" font-size="10.00">::writeBit</text>
@@ -171,7 +171,7 @@
 <!-- Node18 -->
 <g id="Node000018" class="node">
 <title>Node18</title>
-<g id="a_Node000018"><a xlink:href="../../d6/dd4/class_r_e_f_hardware_s_p_i_output_a077457b7a802ee946db4b2f8117d5ad4.html#a077457b7a802ee946db4b2f8117d5ad4" target="_top" xlink:title="write a byte out via SPI (returns immediately on writing register)">
+<g id="a_Node000018"><a xlink:href="../../d6/dd4/class_r_e_f_hardware_s_p_i_output_a438152ebc26653c1c79c4d8c85747e5b.html#a438152ebc26653c1c79c4d8c85747e5b" target="_top" xlink:title="write a byte out via SPI (returns immediately on writing register)">
 <polygon fill="white" stroke="#666666" points="312.5,-30 181.5,-30 181.5,0 312.5,0 312.5,-30"/>
 <text text-anchor="start" x="189.5" y="-18" font-family="Helvetica,sans-Serif" font-size="10.00">REFHardwareSPIOutput</text>
 <text text-anchor="middle" x="247" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">::writeByte</text>

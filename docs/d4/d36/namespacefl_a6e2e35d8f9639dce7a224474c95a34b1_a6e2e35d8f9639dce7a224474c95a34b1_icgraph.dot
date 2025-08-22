@@ -1,0 +1,27 @@
+digraph "fl::sin32"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="RL";
+  Node1 [id="Node000001",label="fl::sin32",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl::easeOutSine16",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a773803afa690a44f169246bbba9a5a74.html#a773803afa690a44f169246bbba9a5a74",tooltip="16-bit sine ease-out function Takes an input value 0-65535 and returns an eased value 0-65535"];
+  Node2 -> Node3 [id="edge2_Node000002_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::ease16",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a131da4ad2964b203b7aed2a312f34448.html#a131da4ad2964b203b7aed2a312f34448",tooltip=" "];
+  Node2 -> Node4 [id="edge3_Node000002_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl::ease16",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a379be9b51f27141411271893ce683f5f.html#a379be9b51f27141411271893ce683f5f",tooltip=" "];
+  Node4 -> Node5 [id="edge4_Node000004_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="fl::HSV16::colorBoost",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d4/d5d/structfl_1_1_h_s_v16_a0bd2c0fc64fc34d573637c10b849c320.html#a0bd2c0fc64fc34d573637c10b849c320",tooltip=" "];
+  Node4 -> Node18 [id="edge5_Node000004_Node000018",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node18 [id="Node000018",label="loop",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dd/d55/_ease_in_out_8h_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f",tooltip=" "];
+  Node2 -> Node19 [id="edge6_Node000002_Node000019",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node19 [id="Node000019",label="fl::easeOutSine8",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a348b545d0e0a4637e517a5e2df2ca6c0.html#a348b545d0e0a4637e517a5e2df2ca6c0",tooltip="8-bit sine ease-out function Takes an input value 0-255 and returns an eased value 0-255 Smooth sinus..."];
+  Node19 -> Node20 [id="edge7_Node000019_Node000020",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node20 [id="Node000020",label="fl::ease8",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_ac368f20d137ff004c852fa35420cfa5e.html#ac368f20d137ff004c852fa35420cfa5e",tooltip=" "];
+  Node19 -> Node21 [id="edge8_Node000019_Node000021",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node21 [id="Node000021",label="fl::ease8",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_ad5bdf92d600b40d01c2d3a0d536a7c8c.html#ad5bdf92d600b40d01c2d3a0d536a7c8c",tooltip=" "];
+  Node21 -> Node18 [id="edge9_Node000021_Node000018",dir="back",color="steelblue1",style="solid",tooltip=" "];
+}

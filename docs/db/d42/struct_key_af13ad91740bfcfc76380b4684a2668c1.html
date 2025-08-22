@@ -119,62 +119,63 @@ $(function(){initNavTree('db/d42/struct_key_af13ad91740bfcfc76380b4684a2668c1.ht
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d9/d5c/_keyboard_8cpp_source.html#l00071">71</a> of file <a class="el" href="../../d9/d5c/_keyboard_8cpp_source.html">Keyboard.cpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">   71</span>                                                            {</div>
-<div class="line"><span class="lineno">   72</span>  <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../db/d42/struct_key_ab2bfd7c1e68242f10dc13a84a52e7b67.html#ab2bfd7c1e68242f10dc13a84a52e7b67">on_</a>) {</div>
-<div class="line"><span class="lineno">   73</span>    <span class="comment">// Intensity can be calculated by a </span></div>
-<div class="line"><span class="lineno">   74</span>    <span class="keywordtype">float</span> intensity = </div>
-<div class="line"><span class="lineno">   75</span>        <a class="code hl_function" href="../../db/d42/struct_key_abbe629a5358df091d6202309e8327b23.html#abbe629a5358df091d6202309e8327b23">CalcAttackDecayFactor</a>(now_ms - <a class="code hl_variable" href="../../db/d42/struct_key_aacec21e44be625a3163a6d01b761175d.html#aacec21e44be625a3163a6d01b761175d">event_time_</a>) *</div>
-<div class="line"><span class="lineno">   76</span>        <a class="code hl_function" href="../../db/d42/struct_key_ad1ebc123a10761ef1d1273e4afa30f61.html#ad1ebc123a10761ef1d1273e4afa30f61">VelocityFactor</a>() *</div>
-<div class="line"><span class="lineno">   77</span>        <a class="code hl_function" href="../../db/d42/struct_key_a7f137c239dd54c73259f0df8731b5164.html#a7f137c239dd54c73259f0df8731b5164">AttackRemapFactor</a>(now_ms);</div>
-<div class="line"><span class="lineno">   78</span> </div>
-<div class="line"><span class="lineno">   79</span>    <span class="comment">// This is FRAME RATE DEPENDENT FUNCTION!!!!</span></div>
-<div class="line"><span class="lineno">   80</span>    <span class="comment">// CHANGE TO TIME INDEPENDENT BEFORE SUBMIT.</span></div>
-<div class="line"><span class="lineno">   81</span>    <a class="code hl_variable" href="../../db/d42/struct_key_ad4eeb30a93ca6b8eb43b6a7c098f4b46.html#ad4eeb30a93ca6b8eb43b6a7c098f4b46">intensity_</a> = (.9f * intensity) + (.1f * <a class="code hl_variable" href="../../db/d42/struct_key_ad4eeb30a93ca6b8eb43b6a7c098f4b46.html#ad4eeb30a93ca6b8eb43b6a7c098f4b46">intensity_</a>);</div>
-<div class="line"><span class="lineno">   82</span>  } <span class="keywordflow">else</span> <span class="keywordflow">if</span>(<a class="code hl_variable" href="../../db/d42/struct_key_ad4eeb30a93ca6b8eb43b6a7c098f4b46.html#ad4eeb30a93ca6b8eb43b6a7c098f4b46">intensity_</a> &gt; 0.0f) {  <span class="comment">// major cpu hotspot.</span></div>
-<div class="line"><span class="lineno">   83</span> </div>
-<div class="line"><span class="lineno">   84</span>    <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../db/d42/struct_key_ab8a9dbfa64a039f7f0da53a840ac5ee1.html#ab8a9dbfa64a039f7f0da53a840ac5ee1">sustain_pedal_on_</a>) {</div>
-<div class="line"><span class="lineno">   85</span>      <span class="keywordtype">float</span> delta_s = delta_ms / 1000.f;</div>
-<div class="line"><span class="lineno">   86</span>      <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../db/d42/struct_key_ad4eeb30a93ca6b8eb43b6a7c098f4b46.html#ad4eeb30a93ca6b8eb43b6a7c098f4b46">intensity_</a> &gt; .5f) {</div>
-<div class="line"><span class="lineno">   87</span>        <span class="keyword">const</span> <span class="keywordtype">float</span> kRate = .12f;</div>
-<div class="line"><span class="lineno">   88</span>        <span class="comment">// Time flexible decay function. Stays accurate</span></div>
-<div class="line"><span class="lineno">   89</span>        <span class="comment">// even as the frame rate changes.</span></div>
-<div class="line"><span class="lineno">   90</span>        <span class="comment">// Formula: A = Pe^(r*t)</span></div>
-<div class="line"><span class="lineno">   91</span>        <a class="code hl_variable" href="../../db/d42/struct_key_ad4eeb30a93ca6b8eb43b6a7c098f4b46.html#ad4eeb30a93ca6b8eb43b6a7c098f4b46">intensity_</a> = <a class="code hl_variable" href="../../db/d42/struct_key_ad4eeb30a93ca6b8eb43b6a7c098f4b46.html#ad4eeb30a93ca6b8eb43b6a7c098f4b46">intensity_</a> * exp(-delta_s * kRate);</div>
-<div class="line"><span class="lineno">   92</span>      } <span class="keywordflow">else</span> {</div>
-<div class="line"><span class="lineno">   93</span>        <span class="comment">// Quickly fade at the bottom end of the transition.</span></div>
-<div class="line"><span class="lineno">   94</span>        <span class="keyword">const</span> <span class="keywordtype">float</span> kRate = .05f;</div>
-<div class="line"><span class="lineno">   95</span>        <a class="code hl_variable" href="../../db/d42/struct_key_ad4eeb30a93ca6b8eb43b6a7c098f4b46.html#ad4eeb30a93ca6b8eb43b6a7c098f4b46">intensity_</a> -= delta_s * kRate;</div>
-<div class="line"><span class="lineno">   96</span>      }</div>
-<div class="line"><span class="lineno">   97</span>    } <span class="keywordflow">else</span> {</div>
-<div class="line"><span class="lineno">   98</span>      <span class="keywordtype">float</span> delta_s = delta_ms / 1000.f;</div>
-<div class="line"><span class="lineno">   99</span>      <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../db/d42/struct_key_ad4eeb30a93ca6b8eb43b6a7c098f4b46.html#ad4eeb30a93ca6b8eb43b6a7c098f4b46">intensity_</a> &gt; .5f) {</div>
-<div class="line"><span class="lineno">  100</span>        <span class="keyword">const</span> <span class="keywordtype">float</span> kRate = 12.0f;</div>
-<div class="line"><span class="lineno">  101</span>        <span class="comment">// Time flexible decay function. Stays accurate</span></div>
-<div class="line"><span class="lineno">  102</span>        <span class="comment">// even as the frame rate changes.</span></div>
-<div class="line"><span class="lineno">  103</span>        <span class="comment">// Formula: A = Pe^(r*t)</span></div>
-<div class="line"><span class="lineno">  104</span>        <a class="code hl_variable" href="../../db/d42/struct_key_ad4eeb30a93ca6b8eb43b6a7c098f4b46.html#ad4eeb30a93ca6b8eb43b6a7c098f4b46">intensity_</a> = <a class="code hl_variable" href="../../db/d42/struct_key_ad4eeb30a93ca6b8eb43b6a7c098f4b46.html#ad4eeb30a93ca6b8eb43b6a7c098f4b46">intensity_</a> * exp(-delta_s * kRate);</div>
-<div class="line"><span class="lineno">  105</span>      } <span class="keywordflow">else</span> {</div>
-<div class="line"><span class="lineno">  106</span>        <span class="comment">// Quickly fade at the bottom end of the transition.</span></div>
-<div class="line"><span class="lineno">  107</span>        <span class="keyword">const</span> <span class="keywordtype">float</span> kRate = 2.0f;</div>
-<div class="line"><span class="lineno">  108</span>        <a class="code hl_variable" href="../../db/d42/struct_key_ad4eeb30a93ca6b8eb43b6a7c098f4b46.html#ad4eeb30a93ca6b8eb43b6a7c098f4b46">intensity_</a> -= delta_s * kRate;</div>
-<div class="line"><span class="lineno">  109</span>      }</div>
-<div class="line"><span class="lineno">  110</span> </div>
-<div class="line"><span class="lineno">  111</span>    }</div>
-<div class="line"><span class="lineno">  112</span>    <a class="code hl_variable" href="../../db/d42/struct_key_ad4eeb30a93ca6b8eb43b6a7c098f4b46.html#ad4eeb30a93ca6b8eb43b6a7c098f4b46">intensity_</a> = constrain(<a class="code hl_variable" href="../../db/d42/struct_key_ad4eeb30a93ca6b8eb43b6a7c098f4b46.html#ad4eeb30a93ca6b8eb43b6a7c098f4b46">intensity_</a>, 0.0f, 1.0f);</div>
-<div class="line"><span class="lineno">  113</span>  }</div>
-<div class="line"><span class="lineno">  114</span>}</div>
-<div class="ttc" id="astruct_key_a7f137c239dd54c73259f0df8731b5164_html_a7f137c239dd54c73259f0df8731b5164"><div class="ttname"><a href="../../db/d42/struct_key_a7f137c239dd54c73259f0df8731b5164.html#a7f137c239dd54c73259f0df8731b5164">Key::AttackRemapFactor</a></div><div class="ttdeci">float AttackRemapFactor(uint32_t now_ms)</div><div class="ttdef"><b>Definition</b> <a href="../../d9/d5c/_keyboard_8cpp_source.html#l00059">Keyboard.cpp:59</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../d9/d5c/_keyboard_8cpp_source.html#l00069">69</a> of file <a class="el" href="../../d9/d5c/_keyboard_8cpp_source.html">Keyboard.cpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">   69</span>                                                            {</div>
+<div class="line"><span class="lineno">   70</span>  <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../db/d42/struct_key_ab2bfd7c1e68242f10dc13a84a52e7b67.html#ab2bfd7c1e68242f10dc13a84a52e7b67">on_</a>) {</div>
+<div class="line"><span class="lineno">   71</span>    <span class="comment">// Intensity can be calculated by a </span></div>
+<div class="line"><span class="lineno">   72</span>    <span class="keywordtype">float</span> intensity = </div>
+<div class="line"><span class="lineno">   73</span>        <a class="code hl_function" href="../../db/d42/struct_key_abbe629a5358df091d6202309e8327b23.html#abbe629a5358df091d6202309e8327b23">CalcAttackDecayFactor</a>(now_ms - <a class="code hl_variable" href="../../db/d42/struct_key_aacec21e44be625a3163a6d01b761175d.html#aacec21e44be625a3163a6d01b761175d">event_time_</a>) *</div>
+<div class="line"><span class="lineno">   74</span>        <a class="code hl_function" href="../../db/d42/struct_key_ad1ebc123a10761ef1d1273e4afa30f61.html#ad1ebc123a10761ef1d1273e4afa30f61">VelocityFactor</a>() *</div>
+<div class="line"><span class="lineno">   75</span>        <a class="code hl_function" href="../../db/d42/struct_key_a7f137c239dd54c73259f0df8731b5164.html#a7f137c239dd54c73259f0df8731b5164">AttackRemapFactor</a>(now_ms);</div>
+<div class="line"><span class="lineno">   76</span> </div>
+<div class="line"><span class="lineno">   77</span>    <span class="comment">// This is FRAME RATE DEPENDENT FUNCTION!!!!</span></div>
+<div class="line"><span class="lineno">   78</span>    <span class="comment">// CHANGE TO TIME INDEPENDENT BEFORE SUBMIT.</span></div>
+<div class="line"><span class="lineno">   79</span>    <a class="code hl_variable" href="../../db/d42/struct_key_ad4eeb30a93ca6b8eb43b6a7c098f4b46.html#ad4eeb30a93ca6b8eb43b6a7c098f4b46">intensity_</a> = (.9f * intensity) + (.1f * <a class="code hl_variable" href="../../db/d42/struct_key_ad4eeb30a93ca6b8eb43b6a7c098f4b46.html#ad4eeb30a93ca6b8eb43b6a7c098f4b46">intensity_</a>);</div>
+<div class="line"><span class="lineno">   80</span>  } <span class="keywordflow">else</span> <span class="keywordflow">if</span>(<a class="code hl_variable" href="../../db/d42/struct_key_ad4eeb30a93ca6b8eb43b6a7c098f4b46.html#ad4eeb30a93ca6b8eb43b6a7c098f4b46">intensity_</a> &gt; 0.0f) {  <span class="comment">// major cpu hotspot.</span></div>
+<div class="line"><span class="lineno">   81</span> </div>
+<div class="line"><span class="lineno">   82</span>    <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../db/d42/struct_key_ab8a9dbfa64a039f7f0da53a840ac5ee1.html#ab8a9dbfa64a039f7f0da53a840ac5ee1">sustain_pedal_on_</a>) {</div>
+<div class="line"><span class="lineno">   83</span>      <span class="keywordtype">float</span> delta_s = delta_ms / 1000.f;</div>
+<div class="line"><span class="lineno">   84</span>      <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../db/d42/struct_key_ad4eeb30a93ca6b8eb43b6a7c098f4b46.html#ad4eeb30a93ca6b8eb43b6a7c098f4b46">intensity_</a> &gt; .5f) {</div>
+<div class="line"><span class="lineno">   85</span>        <span class="keyword">const</span> <span class="keywordtype">float</span> kRate = .12f;</div>
+<div class="line"><span class="lineno">   86</span>        <span class="comment">// Time flexible decay function. Stays accurate</span></div>
+<div class="line"><span class="lineno">   87</span>        <span class="comment">// even as the frame rate changes.</span></div>
+<div class="line"><span class="lineno">   88</span>        <span class="comment">// Formula: A = Pe^(r*t)</span></div>
+<div class="line"><span class="lineno">   89</span>        <a class="code hl_variable" href="../../db/d42/struct_key_ad4eeb30a93ca6b8eb43b6a7c098f4b46.html#ad4eeb30a93ca6b8eb43b6a7c098f4b46">intensity_</a> = <a class="code hl_variable" href="../../db/d42/struct_key_ad4eeb30a93ca6b8eb43b6a7c098f4b46.html#ad4eeb30a93ca6b8eb43b6a7c098f4b46">intensity_</a> * <a class="code hl_function" href="../../d4/d36/namespacefl_aa7af590ed35831bc251787adc813d504.html#aa7af590ed35831bc251787adc813d504">exp</a>(-delta_s * kRate);</div>
+<div class="line"><span class="lineno">   90</span>      } <span class="keywordflow">else</span> {</div>
+<div class="line"><span class="lineno">   91</span>        <span class="comment">// Quickly fade at the bottom end of the transition.</span></div>
+<div class="line"><span class="lineno">   92</span>        <span class="keyword">const</span> <span class="keywordtype">float</span> kRate = .05f;</div>
+<div class="line"><span class="lineno">   93</span>        <a class="code hl_variable" href="../../db/d42/struct_key_ad4eeb30a93ca6b8eb43b6a7c098f4b46.html#ad4eeb30a93ca6b8eb43b6a7c098f4b46">intensity_</a> -= delta_s * kRate;</div>
+<div class="line"><span class="lineno">   94</span>      }</div>
+<div class="line"><span class="lineno">   95</span>    } <span class="keywordflow">else</span> {</div>
+<div class="line"><span class="lineno">   96</span>      <span class="keywordtype">float</span> delta_s = delta_ms / 1000.f;</div>
+<div class="line"><span class="lineno">   97</span>      <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../db/d42/struct_key_ad4eeb30a93ca6b8eb43b6a7c098f4b46.html#ad4eeb30a93ca6b8eb43b6a7c098f4b46">intensity_</a> &gt; .5f) {</div>
+<div class="line"><span class="lineno">   98</span>        <span class="keyword">const</span> <span class="keywordtype">float</span> kRate = 12.0f;</div>
+<div class="line"><span class="lineno">   99</span>        <span class="comment">// Time flexible decay function. Stays accurate</span></div>
+<div class="line"><span class="lineno">  100</span>        <span class="comment">// even as the frame rate changes.</span></div>
+<div class="line"><span class="lineno">  101</span>        <span class="comment">// Formula: A = Pe^(r*t)</span></div>
+<div class="line"><span class="lineno">  102</span>        <a class="code hl_variable" href="../../db/d42/struct_key_ad4eeb30a93ca6b8eb43b6a7c098f4b46.html#ad4eeb30a93ca6b8eb43b6a7c098f4b46">intensity_</a> = <a class="code hl_variable" href="../../db/d42/struct_key_ad4eeb30a93ca6b8eb43b6a7c098f4b46.html#ad4eeb30a93ca6b8eb43b6a7c098f4b46">intensity_</a> * <a class="code hl_function" href="../../d4/d36/namespacefl_aa7af590ed35831bc251787adc813d504.html#aa7af590ed35831bc251787adc813d504">exp</a>(-delta_s * kRate);</div>
+<div class="line"><span class="lineno">  103</span>      } <span class="keywordflow">else</span> {</div>
+<div class="line"><span class="lineno">  104</span>        <span class="comment">// Quickly fade at the bottom end of the transition.</span></div>
+<div class="line"><span class="lineno">  105</span>        <span class="keyword">const</span> <span class="keywordtype">float</span> kRate = 2.0f;</div>
+<div class="line"><span class="lineno">  106</span>        <a class="code hl_variable" href="../../db/d42/struct_key_ad4eeb30a93ca6b8eb43b6a7c098f4b46.html#ad4eeb30a93ca6b8eb43b6a7c098f4b46">intensity_</a> -= delta_s * kRate;</div>
+<div class="line"><span class="lineno">  107</span>      }</div>
+<div class="line"><span class="lineno">  108</span> </div>
+<div class="line"><span class="lineno">  109</span>    }</div>
+<div class="line"><span class="lineno">  110</span>    <a class="code hl_variable" href="../../db/d42/struct_key_ad4eeb30a93ca6b8eb43b6a7c098f4b46.html#ad4eeb30a93ca6b8eb43b6a7c098f4b46">intensity_</a> = constrain(<a class="code hl_variable" href="../../db/d42/struct_key_ad4eeb30a93ca6b8eb43b6a7c098f4b46.html#ad4eeb30a93ca6b8eb43b6a7c098f4b46">intensity_</a>, 0.0f, 1.0f);</div>
+<div class="line"><span class="lineno">  111</span>  }</div>
+<div class="line"><span class="lineno">  112</span>}</div>
+<div class="ttc" id="anamespacefl_aa7af590ed35831bc251787adc813d504_html_aa7af590ed35831bc251787adc813d504"><div class="ttname"><a href="../../d4/d36/namespacefl_aa7af590ed35831bc251787adc813d504.html#aa7af590ed35831bc251787adc813d504">fl::exp</a></div><div class="ttdeci">T exp(T value)</div><div class="ttdef"><b>Definition</b> <a href="../../df/db1/math_8h_source.html#l00047">math.h:47</a></div></div>
+<div class="ttc" id="astruct_key_a7f137c239dd54c73259f0df8731b5164_html_a7f137c239dd54c73259f0df8731b5164"><div class="ttname"><a href="../../db/d42/struct_key_a7f137c239dd54c73259f0df8731b5164.html#a7f137c239dd54c73259f0df8731b5164">Key::AttackRemapFactor</a></div><div class="ttdeci">float AttackRemapFactor(uint32_t now_ms)</div><div class="ttdef"><b>Definition</b> <a href="../../d9/d5c/_keyboard_8cpp_source.html#l00057">Keyboard.cpp:57</a></div></div>
 <div class="ttc" id="astruct_key_aacec21e44be625a3163a6d01b761175d_html_aacec21e44be625a3163a6d01b761175d"><div class="ttname"><a href="../../db/d42/struct_key_aacec21e44be625a3163a6d01b761175d.html#aacec21e44be625a3163a6d01b761175d">Key::event_time_</a></div><div class="ttdeci">unsigned long event_time_</div><div class="ttdef"><b>Definition</b> <a href="../../df/d85/_keyboard_8h_source.html#l00041">Keyboard.h:41</a></div></div>
 <div class="ttc" id="astruct_key_ab2bfd7c1e68242f10dc13a84a52e7b67_html_ab2bfd7c1e68242f10dc13a84a52e7b67"><div class="ttname"><a href="../../db/d42/struct_key_ab2bfd7c1e68242f10dc13a84a52e7b67.html#ab2bfd7c1e68242f10dc13a84a52e7b67">Key::on_</a></div><div class="ttdeci">bool on_</div><div class="ttdef"><b>Definition</b> <a href="../../df/d85/_keyboard_8h_source.html#l00036">Keyboard.h:36</a></div></div>
 <div class="ttc" id="astruct_key_ab8a9dbfa64a039f7f0da53a840ac5ee1_html_ab8a9dbfa64a039f7f0da53a840ac5ee1"><div class="ttname"><a href="../../db/d42/struct_key_ab8a9dbfa64a039f7f0da53a840ac5ee1.html#ab8a9dbfa64a039f7f0da53a840ac5ee1">Key::sustain_pedal_on_</a></div><div class="ttdeci">bool sustain_pedal_on_</div><div class="ttdef"><b>Definition</b> <a href="../../df/d85/_keyboard_8h_source.html#l00038">Keyboard.h:38</a></div></div>
-<div class="ttc" id="astruct_key_abbe629a5358df091d6202309e8327b23_html_abbe629a5358df091d6202309e8327b23"><div class="ttname"><a href="../../db/d42/struct_key_abbe629a5358df091d6202309e8327b23.html#abbe629a5358df091d6202309e8327b23">Key::CalcAttackDecayFactor</a></div><div class="ttdeci">float CalcAttackDecayFactor(uint32_t delta_ms) const</div><div class="ttdef"><b>Definition</b> <a href="../../d9/d5c/_keyboard_8cpp_source.html#l00047">Keyboard.cpp:47</a></div></div>
-<div class="ttc" id="astruct_key_ad1ebc123a10761ef1d1273e4afa30f61_html_ad1ebc123a10761ef1d1273e4afa30f61"><div class="ttname"><a href="../../db/d42/struct_key_ad1ebc123a10761ef1d1273e4afa30f61.html#ad1ebc123a10761ef1d1273e4afa30f61">Key::VelocityFactor</a></div><div class="ttdeci">float VelocityFactor() const</div><div class="ttdef"><b>Definition</b> <a href="../../d9/d5c/_keyboard_8cpp_source.html#l00045">Keyboard.cpp:45</a></div></div>
+<div class="ttc" id="astruct_key_abbe629a5358df091d6202309e8327b23_html_abbe629a5358df091d6202309e8327b23"><div class="ttname"><a href="../../db/d42/struct_key_abbe629a5358df091d6202309e8327b23.html#abbe629a5358df091d6202309e8327b23">Key::CalcAttackDecayFactor</a></div><div class="ttdeci">float CalcAttackDecayFactor(uint32_t delta_ms) const</div><div class="ttdef"><b>Definition</b> <a href="../../d9/d5c/_keyboard_8cpp_source.html#l00045">Keyboard.cpp:45</a></div></div>
+<div class="ttc" id="astruct_key_ad1ebc123a10761ef1d1273e4afa30f61_html_ad1ebc123a10761ef1d1273e4afa30f61"><div class="ttname"><a href="../../db/d42/struct_key_ad1ebc123a10761ef1d1273e4afa30f61.html#ad1ebc123a10761ef1d1273e4afa30f61">Key::VelocityFactor</a></div><div class="ttdeci">float VelocityFactor() const</div><div class="ttdef"><b>Definition</b> <a href="../../d9/d5c/_keyboard_8cpp_source.html#l00043">Keyboard.cpp:43</a></div></div>
 <div class="ttc" id="astruct_key_ad4eeb30a93ca6b8eb43b6a7c098f4b46_html_ad4eeb30a93ca6b8eb43b6a7c098f4b46"><div class="ttname"><a href="../../db/d42/struct_key_ad4eeb30a93ca6b8eb43b6a7c098f4b46.html#ad4eeb30a93ca6b8eb43b6a7c098f4b46">Key::intensity_</a></div><div class="ttdeci">float intensity_</div><div class="ttdef"><b>Definition</b> <a href="../../df/d85/_keyboard_8h_source.html#l00046">Keyboard.h:46</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d9/d5c/_keyboard_8cpp_source.html#l00059">AttackRemapFactor()</a>, <a class="el" href="../../d9/d5c/_keyboard_8cpp_source.html#l00047">CalcAttackDecayFactor()</a>, <a class="el" href="../../df/d85/_keyboard_8h_source.html#l00041">event_time_</a>, <a class="el" href="../../df/d85/_keyboard_8h_source.html#l00046">intensity_</a>, <a class="el" href="../../df/d85/_keyboard_8h_source.html#l00036">on_</a>, <a class="el" href="../../df/d85/_keyboard_8h_source.html#l00038">sustain_pedal_on_</a>, and <a class="el" href="../../d9/d5c/_keyboard_8cpp_source.html#l00045">VelocityFactor()</a>.</p>
+<p class="reference">References <a class="el" href="../../d9/d5c/_keyboard_8cpp_source.html#l00057">AttackRemapFactor()</a>, <a class="el" href="../../d9/d5c/_keyboard_8cpp_source.html#l00045">CalcAttackDecayFactor()</a>, <a class="el" href="../../df/d85/_keyboard_8h_source.html#l00041">event_time_</a>, <a class="el" href="../../df/d85/_keyboard_8h_source.html#l00046">intensity_</a>, <a class="el" href="../../df/d85/_keyboard_8h_source.html#l00036">on_</a>, <a class="el" href="../../df/d85/_keyboard_8h_source.html#l00038">sustain_pedal_on_</a>, and <a class="el" href="../../d9/d5c/_keyboard_8cpp_source.html#l00043">VelocityFactor()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d9/d5c/_keyboard_8cpp_source.html#l00036">Update()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d9/d5c/_keyboard_8cpp_source.html#l00034">Update()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -199,7 +200,7 @@ $(function(){initNavTree('db/d42/struct_key_af13ad91740bfcfc76380b4684a2668c1.ht
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../db/d42/struct_key.html">Key</a></li>
-    <li class="footer">Generated on Tue Jun 24 2025 00:58:15 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Fri Aug 22 2025 20:59:35 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

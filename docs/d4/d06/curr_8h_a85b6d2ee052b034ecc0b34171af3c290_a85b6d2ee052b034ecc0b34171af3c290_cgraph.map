@@ -1,0 +1,15 @@
+<map id="processWaveAutoTrigger" name="processWaveAutoTrigger">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,80,188,105"/>
+<area shape="rect" id="Node000002" href="$d2/d0d/group___random_ga17034d936ef716efe820e11c1df043b0.html#ga17034d936ef716efe820e11c1df043b0" title="Generate a 16&#45;bit random number." alt="" coords="263,5,351,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="131,77,235,39,255,33,257,38,237,45,133,82"/>
+<area shape="rect" id="Node000003" href="$d4/d06/curr_8h_a5dc08f8e3d58e4fd7f9e3cec7509983c.html#a5dc08f8e3d58e4fd7f9e3cec7509983c" title=" " alt="" coords="236,55,379,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="188,79,222,75,223,80,188,84"/>
+<area shape="rect" id="Node000006" href="$d4/d06/curr_8h_aabd0b06f37678a5955f05cec01cca099.html#aabd0b06f37678a5955f05cec01cca099" title=" " alt="" coords="242,104,373,129"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="188,100,228,105,228,110,188,106"/>
+<area shape="rect" id="Node000007" href="$d4/d06/curr_8h_aff6b1d43683cd854f43beaffe3df4259.html#aff6b1d43683cd854f43beaffe3df4259" title=" " alt="" coords="237,153,378,179"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="135,103,258,146,256,151,133,108"/>
+<area shape="rect" id="Node000004" href="$df/d40/examples_2_corkscrew_2corkscrew_8h_a3ce1eed35210653027031143f1cc1ef4.html#a3ce1eed35210653027031143f1cc1ef4" title=" " alt="" coords="427,31,515,56"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="378,54,413,49,414,54,379,60"/>
+<area shape="rect" id="Node000005" href="$d2/d0d/group___random_ga4e63c74426f6516f28470dc1b814aefe.html#ga4e63c74426f6516f28470dc1b814aefe" title="Generate an 8&#45;bit random number." alt="" coords="431,80,511,105"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="379,76,418,82,417,87,378,81"/>
+</map>

@@ -20,7 +20,7 @@
 <!-- Node2 -->
 <g id="Node000002" class="node">
 <title>Node2</title>
-<g id="a_Node000002"><a xlink:href="../../d5/d3d/group___color_blurs_ga868989588bffbf00f97f91e6d98adc8d.html#ga868989588bffbf00f97f91e6d98adc8d" target="_top" xlink:title="Two&#45;dimensional blur filter.">
+<g id="a_Node000002"><a xlink:href="../../d5/d3d/group___color_blurs_gae8c57faab25bb9b60e0860795a85f968.html#gae8c57faab25bb9b60e0860795a85f968" target="_top" xlink:title="Two&#45;dimensional blur filter.">
 <polygon fill="white" stroke="#666666" points="259.5,-93 200.5,-93 200.5,-74 259.5,-74 259.5,-93"/>
 <text text-anchor="middle" x="230" y="-81" font-family="Helvetica,sans-Serif" font-size="10.00">fl::blur2d</text>
 </a>
@@ -35,37 +35,37 @@
 </a>
 </g>
 </g>
-<!-- Node10 -->
-<g id="Node000010" class="node">
-<title>Node10</title>
-<g id="a_Node000010"><a xlink:href="../../d0/dce/classfl_1_1_x_y_map_ab9c11882da60bac8e6cec1fde421b14e.html#ab9c11882da60bac8e6cec1fde421b14e" target="_top" xlink:title=" ">
+<!-- Node7 -->
+<g id="Node000007" class="node">
+<title>Node7</title>
+<g id="a_Node000007"><a xlink:href="../../d0/dce/classfl_1_1_x_y_map_a6faeccfa39121c788943e3dc1ae6507c.html#a6faeccfa39121c788943e3dc1ae6507c" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="326,-56 134,-56 134,-37 326,-37 326,-56"/>
 <text text-anchor="middle" x="230" y="-44" font-family="Helvetica,sans-Serif" font-size="10.00">fl::XYMap::constructRectangularGrid</text>
 </a>
 </g>
 </g>
-<!-- Node1&#45;&gt;Node10 -->
-<g id="edge6_Node000001_Node000010" class="edge">
-<title>Node1&#45;&gt;Node10</title>
-<g id="a_edge6_Node000001_Node000010"><a xlink:title=" ">
+<!-- Node1&#45;&gt;Node7 -->
+<g id="edge6_Node000001_Node000007" class="edge">
+<title>Node1&#45;&gt;Node7</title>
+<g id="a_edge6_Node000001_Node000007"><a xlink:title=" ">
 <path fill="none" stroke="#63b8ff" d="M98.44,-46.5C106.49,-46.5 115.1,-46.5 123.93,-46.5"/>
 <polygon fill="#63b8ff" stroke="#63b8ff" points="123.96,-50 133.96,-46.5 123.96,-43 123.96,-50"/>
 </a>
 </g>
 </g>
-<!-- Node13 -->
-<g id="Node000013" class="node">
-<title>Node13</title>
-<g id="a_Node000013"><a xlink:href="../../d7/d3e/classfl_1_1_fx2d_a96dec159104519d347041d11509b72f3.html#a96dec159104519d347041d11509b72f3" target="_top" xlink:title=" ">
+<!-- Node10 -->
+<g id="Node000010" class="node">
+<title>Node10</title>
+<g id="a_Node000010"><a xlink:href="../../d7/d3e/classfl_1_1_fx2d_a96dec159104519d347041d11509b72f3.html#a96dec159104519d347041d11509b72f3" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="276,-19 184,-19 184,0 276,0 276,-19"/>
 <text text-anchor="middle" x="230" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">fl::Fx2d::xyMap</text>
 </a>
 </g>
 </g>
-<!-- Node1&#45;&gt;Node13 -->
-<g id="edge10_Node000001_Node000013" class="edge">
-<title>Node1&#45;&gt;Node13</title>
-<g id="a_edge10_Node000001_Node000013"><a xlink:title=" ">
+<!-- Node1&#45;&gt;Node10 -->
+<g id="edge10_Node000001_Node000010" class="edge">
+<title>Node1&#45;&gt;Node10</title>
+<g id="a_edge10_Node000001_Node000010"><a xlink:title=" ">
 <path fill="none" stroke="#63b8ff" d="M94.01,-36.95C106.89,-34.19 121,-31.19 134,-28.5 146.74,-25.86 160.45,-23.08 173.38,-20.49"/>
 <polygon fill="#63b8ff" stroke="#63b8ff" points="174.43,-23.85 183.55,-18.46 173.06,-16.99 174.43,-23.85"/>
 </a>
@@ -74,7 +74,7 @@
 <!-- Node3 -->
 <g id="Node000003" class="node">
 <title>Node3</title>
-<g id="a_Node000003"><a xlink:href="../../d5/d3d/group___color_blurs_ga85831e1d1b3ea3468f0c4d39baf66378.html#ga85831e1d1b3ea3468f0c4d39baf66378" target="_top" xlink:title="Perform a blur1d() on every column of a rectangular matrix.">
+<g id="a_Node000003"><a xlink:href="../../d5/d3d/group___color_blurs_ga25fe770c4f43629983a507267ac50236.html#ga25fe770c4f43629983a507267ac50236" target="_top" xlink:title="Perform a blur1d() on every column of a rectangular matrix.">
 <polygon fill="white" stroke="#666666" points="458,-130 368,-130 368,-111 458,-111 458,-130"/>
 <text text-anchor="middle" x="413" y="-118" font-family="Helvetica,sans-Serif" font-size="10.00">fl::blurColumns</text>
 </a>
@@ -89,19 +89,19 @@
 </a>
 </g>
 </g>
-<!-- Node9 -->
-<g id="Node000009" class="node">
-<title>Node9</title>
-<g id="a_Node000009"><a xlink:href="../../d5/d3d/group___color_blurs_gae784c48b029a7a4da1f0e831792f2aae.html#gae784c48b029a7a4da1f0e831792f2aae" target="_top" xlink:title="Perform a blur1d() on every row of a rectangular matrix.">
+<!-- Node6 -->
+<g id="Node000006" class="node">
+<title>Node6</title>
+<g id="a_Node000006"><a xlink:href="../../d5/d3d/group___color_blurs_ga8dfbf500824d0f8a2663fbd2180b1747.html#ga8dfbf500824d0f8a2663fbd2180b1747" target="_top" xlink:title="Perform a blur1d() on every row of a rectangular matrix.">
 <polygon fill="white" stroke="#666666" points="450,-93 376,-93 376,-74 450,-74 450,-93"/>
 <text text-anchor="middle" x="413" y="-81" font-family="Helvetica,sans-Serif" font-size="10.00">fl::blurRows</text>
 </a>
 </g>
 </g>
-<!-- Node2&#45;&gt;Node9 -->
-<g id="edge4_Node000002_Node000009" class="edge">
-<title>Node2&#45;&gt;Node9</title>
-<g id="a_edge4_Node000002_Node000009"><a xlink:title=" ">
+<!-- Node2&#45;&gt;Node6 -->
+<g id="edge4_Node000002_Node000006" class="edge">
+<title>Node2&#45;&gt;Node6</title>
+<g id="a_edge4_Node000002_Node000006"><a xlink:title=" ">
 <path fill="none" stroke="#63b8ff" d="M259.68,-83.5C288.23,-83.5 332.49,-83.5 365.96,-83.5"/>
 <polygon fill="#63b8ff" stroke="#63b8ff" points="365.97,-87 375.97,-83.5 365.97,-80 365.97,-87"/>
 </a>
@@ -110,7 +110,7 @@
 <!-- Node4 -->
 <g id="Node000004" class="node">
 <title>Node4</title>
-<g id="a_Node000004"><a xlink:href="../../d7/d82/struct_c_r_g_b_a5a3c3370a7de840ac31c07f6dc9bdb63.html#a5a3c3370a7de840ac31c07f6dc9bdb63" target="_top" xlink:title="Scale down a RGB to N/256ths of its current brightness, using &quot;plain math&quot; dimming rules.">
+<g id="a_Node000004"><a xlink:href="../../d7/d82/struct_c_r_g_b_a271bc2ba8b57b41d0c1cda3eed0eb8da.html#a271bc2ba8b57b41d0c1cda3eed0eb8da" target="_top" xlink:title="Scale down a RGB to N/256ths of its current brightness, using &quot;plain math&quot; dimming rules.">
 <polygon fill="#fff0f0" stroke="red" points="588,-102 500,-102 500,-83 588,-83 588,-102"/>
 <text text-anchor="middle" x="544" y="-90" font-family="Helvetica,sans-Serif" font-size="10.00">CRGB::nscale8</text>
 </a>
@@ -125,55 +125,55 @@
 </a>
 </g>
 </g>
-<!-- Node9&#45;&gt;Node4 -->
-<g id="edge5_Node000009_Node000004" class="edge">
-<title>Node9&#45;&gt;Node4</title>
-<g id="a_edge5_Node000009_Node000004"><a xlink:title=" ">
+<!-- Node6&#45;&gt;Node4 -->
+<g id="edge5_Node000006_Node000004" class="edge">
+<title>Node6&#45;&gt;Node4</title>
+<g id="a_edge5_Node000006_Node000004"><a xlink:title=" ">
 <path fill="none" stroke="#63b8ff" d="M450.28,-86.03C462.51,-86.88 476.43,-87.86 489.7,-88.78"/>
 <polygon fill="#63b8ff" stroke="#63b8ff" points="489.46,-92.27 499.68,-89.48 489.95,-85.29 489.46,-92.27"/>
 </a>
 </g>
 </g>
-<!-- Node11 -->
-<g id="Node000011" class="node">
-<title>Node11</title>
-<g id="a_Node000011"><a xlink:href="../../d0/dce/classfl_1_1_x_y_map_a9985d6fbdcedd16a68209f204164b04f.html#a9985d6fbdcedd16a68209f204164b04f" target="_top" xlink:title=" ">
+<!-- Node8 -->
+<g id="Node000008" class="node">
+<title>Node8</title>
+<g id="a_Node000008"><a xlink:href="../../d0/dce/classfl_1_1_x_y_map_abdbc76293c26157ec67716a365bd5460.html#abdbc76293c26157ec67716a365bd5460" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="464,-56 362,-56 362,-37 464,-37 464,-56"/>
 <text text-anchor="middle" x="413" y="-44" font-family="Helvetica,sans-Serif" font-size="10.00">fl::XYMap::XYMap</text>
 </a>
 </g>
 </g>
-<!-- Node10&#45;&gt;Node11 -->
-<g id="edge7_Node000010_Node000011" class="edge">
-<title>Node10&#45;&gt;Node11</title>
-<g id="a_edge7_Node000010_Node000011"><a xlink:title=" ">
+<!-- Node7&#45;&gt;Node8 -->
+<g id="edge7_Node000007_Node000008" class="edge">
+<title>Node7&#45;&gt;Node8</title>
+<g id="a_edge7_Node000007_Node000008"><a xlink:title=" ">
 <path fill="none" stroke="#63b8ff" d="M326.01,-46.5C334.65,-46.5 343.23,-46.5 351.45,-46.5"/>
 <polygon fill="#63b8ff" stroke="#63b8ff" points="351.63,-50 361.63,-46.5 351.63,-43 351.63,-50"/>
 </a>
 </g>
 </g>
-<!-- Node12 -->
-<g id="Node000012" class="node">
-<title>Node12</title>
-<g id="a_Node000012"><a xlink:href="../../d6/daf/direct_8h_a0b3fd115c40d6ac683a810a572fc6104.html#a0b3fd115c40d6ac683a810a572fc6104" target="_top" xlink:title=" ">
+<!-- Node9 -->
+<g id="Node000009" class="node">
+<title>Node9</title>
+<g id="a_Node000009"><a xlink:href="../../d6/daf/direct_8h_a0b3fd115c40d6ac683a810a572fc6104.html#a0b3fd115c40d6ac683a810a572fc6104" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="566,-46 522,-46 522,-27 566,-27 566,-46"/>
 <text text-anchor="middle" x="544" y="-34" font-family="Helvetica,sans-Serif" font-size="10.00">offset</text>
 </a>
 </g>
 </g>
-<!-- Node10&#45;&gt;Node12 -->
-<g id="edge9_Node000010_Node000012" class="edge">
-<title>Node10&#45;&gt;Node12</title>
-<g id="a_edge9_Node000010_Node000012"><a xlink:title=" ">
+<!-- Node7&#45;&gt;Node9 -->
+<g id="edge9_Node000007_Node000009" class="edge">
+<title>Node7&#45;&gt;Node9</title>
+<g id="a_edge9_Node000007_Node000009"><a xlink:title=" ">
 <path fill="none" stroke="#63b8ff" d="M287.89,-36.96C310.84,-33.56 337.61,-30.17 362,-28.5 407.23,-25.41 418.72,-26.21 464,-28.5 479.84,-29.3 497.4,-31 511.94,-32.62"/>
 <polygon fill="#63b8ff" stroke="#63b8ff" points="511.58,-36.11 521.92,-33.78 512.39,-29.15 511.58,-36.11"/>
 </a>
 </g>
 </g>
-<!-- Node11&#45;&gt;Node12 -->
-<g id="edge8_Node000011_Node000012" class="edge">
-<title>Node11&#45;&gt;Node12</title>
-<g id="a_edge8_Node000011_Node000012"><a xlink:title=" ">
+<!-- Node8&#45;&gt;Node9 -->
+<g id="edge8_Node000008_Node000009" class="edge">
+<title>Node8&#45;&gt;Node9</title>
+<g id="a_edge8_Node000008_Node000009"><a xlink:title=" ">
 <path fill="none" stroke="#63b8ff" d="M464.24,-42.61C480.14,-41.37 497.26,-40.05 511.46,-38.95"/>
 <polygon fill="#63b8ff" stroke="#63b8ff" points="511.98,-42.42 521.68,-38.15 511.44,-35.44 511.98,-42.42"/>
 </a>

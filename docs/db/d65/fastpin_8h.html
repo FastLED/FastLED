@@ -113,9 +113,11 @@ $(function(){initNavTree('db/d65/fastpin_8h.html','../../'); initResizable(true)
 
 <p class="definition">Definition in file <a class="el" href="../../db/d65/fastpin_8h_source.html">fastpin.h</a>.</p>
 </div><div class="textblock"><code>#include &quot;<a class="el" href="../../db/d97/_fast_l_e_d_8h_source.html">FastLED.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d4/d54/compiler__control_8h_source.html">fl/compiler_control.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="../../d9/d3e/led__sysdefs_8h_source.html">led_sysdefs.h</a>&quot;</code><br />
-<code>#include &lt;stddef.h&gt;</code><br />
 <code>#include &quot;<a class="el" href="../../d8/d4b/unused_8h_source.html">fl/unused.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d3/d7e/int_8h_source.html">fl/int.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../df/d80/register_8h_source.html">fl/register.h</a>&quot;</code><br />
 </div><div class="textblock"><div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Include dependency graph for fastpin.h:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -128,7 +130,7 @@ $(function(){initNavTree('db/d65/fastpin_8h.html','../../'); initResizable(true)
 <div id="dynsection-1-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-1-content" class="dyncontent" style="display:none;">
-<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../d9/d45/fastpin_8h__dep__incl.svg" width="100%" height="536"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
+<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../d9/d45/fastpin_8h__dep__incl.svg" width="100%" height="459"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
 </div>
 </div>
 <p><a href="../../db/d65/fastpin_8h_source.html">Go to the source code of this file.</a></p>
@@ -173,22 +175,22 @@ Macros</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="typedef-members" name="typedef-members"></a>
 Typedefs</h2></td></tr>
-<tr class="memitem:a3459200771dcb25906c9fe4857e76af7" id="r_a3459200771dcb25906c9fe4857e76af7"><td class="memItemLeft" align="right" valign="top">typedef volatile uint32_t *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../db/d65/fastpin_8h_a3459200771dcb25906c9fe4857e76af7.html#a3459200771dcb25906c9fe4857e76af7">ptr_reg32_t</a></td></tr>
-<tr class="memdesc:a3459200771dcb25906c9fe4857e76af7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Pointer to a 32-bit register, volatile.  <br /></td></tr>
-<tr class="separator:a3459200771dcb25906c9fe4857e76af7"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aacb3c54d0417496589a08af0cbbb229b" id="r_aacb3c54d0417496589a08af0cbbb229b"><td class="memItemLeft" align="right" valign="top">typedef volatile uint32_t &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../db/d65/fastpin_8h_aacb3c54d0417496589a08af0cbbb229b.html#aacb3c54d0417496589a08af0cbbb229b">reg32_t</a></td></tr>
-<tr class="memdesc:aacb3c54d0417496589a08af0cbbb229b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reference to a 32-bit register, volatile.  <br /></td></tr>
-<tr class="separator:aacb3c54d0417496589a08af0cbbb229b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afcb4d76fe5b8dea8558542ecca421816" id="r_afcb4d76fe5b8dea8558542ecca421816"><td class="memItemLeft" align="right" valign="top">typedef volatile fl::u32 *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../db/d65/fastpin_8h_afcb4d76fe5b8dea8558542ecca421816.html#afcb4d76fe5b8dea8558542ecca421816">ptr_reg32_t</a></td></tr>
+<tr class="memdesc:afcb4d76fe5b8dea8558542ecca421816"><td class="mdescLeft">&#160;</td><td class="mdescRight">Pointer to a 32-bit register, volatile.  <br /></td></tr>
+<tr class="separator:afcb4d76fe5b8dea8558542ecca421816"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adeb9ab7f3b79bcba7ab930327be6db48" id="r_adeb9ab7f3b79bcba7ab930327be6db48"><td class="memItemLeft" align="right" valign="top">typedef volatile fl::u32 &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../db/d65/fastpin_8h_adeb9ab7f3b79bcba7ab930327be6db48.html#adeb9ab7f3b79bcba7ab930327be6db48">reg32_t</a></td></tr>
+<tr class="memdesc:adeb9ab7f3b79bcba7ab930327be6db48"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reference to a 32-bit register, volatile.  <br /></td></tr>
+<tr class="separator:adeb9ab7f3b79bcba7ab930327be6db48"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="var-members" name="var-members"></a>
 Variables</h2></td></tr>
-<tr class="memitem:a9aee5a02205a533975f75452a4d9a366" id="r_a9aee5a02205a533975f75452a4d9a366"><td class="memTemplParams" colspan="2">template&lt;uint8_t PIN&gt; </td></tr>
+<tr class="memitem:a9aee5a02205a533975f75452a4d9a366" id="r_a9aee5a02205a533975f75452a4d9a366"><td class="memTemplParams" colspan="2">template&lt;<a class="el" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> PIN&gt; </td></tr>
 <tr class="memitem:a9aee5a02205a533975f75452a4d9a366"><td class="memTemplItemLeft" align="right" valign="top">volatile RoReg *&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="../../db/d65/fastpin_8h_a9aee5a02205a533975f75452a4d9a366.html#a9aee5a02205a533975f75452a4d9a366">FastPin&lt; PIN &gt;::sInPort</a></td></tr>
 <tr class="separator:a9aee5a02205a533975f75452a4d9a366"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:acc73a142140904088424fbb7f47d3a31" id="r_acc73a142140904088424fbb7f47d3a31"><td class="memTemplParams" colspan="2">template&lt;uint8_t PIN&gt; </td></tr>
+<tr class="memitem:acc73a142140904088424fbb7f47d3a31" id="r_acc73a142140904088424fbb7f47d3a31"><td class="memTemplParams" colspan="2">template&lt;<a class="el" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> PIN&gt; </td></tr>
 <tr class="memitem:acc73a142140904088424fbb7f47d3a31"><td class="memTemplItemLeft" align="right" valign="top">RwReg&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="../../db/d65/fastpin_8h_acc73a142140904088424fbb7f47d3a31.html#acc73a142140904088424fbb7f47d3a31">FastPin&lt; PIN &gt;::sPinMask</a></td></tr>
 <tr class="separator:acc73a142140904088424fbb7f47d3a31"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae57faf828edbde8a46475a515f626582" id="r_ae57faf828edbde8a46475a515f626582"><td class="memTemplParams" colspan="2">template&lt;uint8_t PIN&gt; </td></tr>
+<tr class="memitem:ae57faf828edbde8a46475a515f626582" id="r_ae57faf828edbde8a46475a515f626582"><td class="memTemplParams" colspan="2">template&lt;<a class="el" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> PIN&gt; </td></tr>
 <tr class="memitem:ae57faf828edbde8a46475a515f626582"><td class="memTemplItemLeft" align="right" valign="top">volatile RwReg *&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="../../db/d65/fastpin_8h_ae57faf828edbde8a46475a515f626582.html#ae57faf828edbde8a46475a515f626582">FastPin&lt; PIN &gt;::sPort</a></td></tr>
 <tr class="separator:ae57faf828edbde8a46475a515f626582"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
@@ -199,7 +201,7 @@ Variables</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../db/d65/fastpin_8h.html">fastpin.h</a></li>
-    <li class="footer">Generated on Tue Jun 24 2025 00:58:14 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Fri Aug 22 2025 20:59:34 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

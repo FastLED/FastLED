@@ -1,0 +1,11 @@
+<map id="hsv2rgb_spectrum" name="hsv2rgb_spectrum">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,31,148,56"/>
+<area shape="rect" id="Node000002" href="$df/d9d/hsv2rgb_8cpp_a66f61978949a6830b138d1bf08257019.html#a66f61978949a6830b138d1bf08257019" title=" " alt="" coords="196,5,301,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="148,30,182,25,183,30,149,35"/>
+<area shape="rect" id="Node000005" href="$d0/da8/group___scaling_gad7535ccda9c92470c4e6ee0265585555.html#gad7535ccda9c92470c4e6ee0265585555" title="Scale one byte by a second one, which is treated as the numerator of a fraction whose denominator is ..." alt="" coords="217,55,281,80"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="149,51,204,58,203,64,148,56"/>
+<area shape="rect" id="Node000003" href="$df/d9d/hsv2rgb_8cpp_ae692746db35d0cdcd304d01497f92233.html#ae692746db35d0cdcd304d01497f92233" title="HSV to RGB implementation in raw C, platform independent." alt="" coords="349,5,471,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="302,15,336,15,336,21,302,21"/>
+<area shape="rect" id="Node000004" href="$d6/daf/direct_8h_a0b3fd115c40d6ac683a810a572fc6104.html#a0b3fd115c40d6ac683a810a572fc6104" title=" " alt="" coords="519,5,577,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="471,15,505,15,505,21,471,21"/>
+</map>

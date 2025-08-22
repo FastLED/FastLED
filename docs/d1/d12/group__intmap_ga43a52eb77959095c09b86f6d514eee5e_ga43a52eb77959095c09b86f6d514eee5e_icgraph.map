@@ -1,9 +1,25 @@
 <map id="map16_to_8" name="map16_to_8">
-<area shape="rect" id="Node000001" title=" " alt="" coords="633,13,736,38"/>
-<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_aae9d44cd34c016ac8522f638f4b2624d.html#aae9d44cd34c016ac8522f638f4b2624d" title=" " alt="" coords="447,13,585,38"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="619,28,586,28,586,23,619,23"/>
-<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a702e9f65198e3877e48031e793eac2ff.html#a702e9f65198e3877e48031e793eac2ff" title=" " alt="" coords="220,5,399,45"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="433,28,399,28,399,23,433,23"/>
-<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_aeae140ba48d511d1b20d6bd1b383b22b.html#aeae140ba48d511d1b20d6bd1b383b22b" title=" " alt="" coords="5,5,172,45"/>
-<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="206,28,172,28,172,23,206,23"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="605,55,708,80"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a30f7a4ad95720c501bbd2cd3c3a50542.html#a30f7a4ad95720c501bbd2cd3c3a50542" title="8&#45;bit sine ease&#45;in/ease&#45;out function Takes an input value 0&#45;255 and returns an eased value 0&#45;255 Smoo..." alt="" coords="417,55,557,80"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="592,70,558,70,558,65,592,65"/>
+<area shape="rect" id="Node000006" href="$d4/d36/namespacefl_a348b545d0e0a4637e517a5e2df2ca6c0.html#a348b545d0e0a4637e517a5e2df2ca6c0" title="8&#45;bit sine ease&#45;out function Takes an input value 0&#45;255 and returns an eased value 0&#45;255 Smooth sinus..." alt="" coords="423,5,551,31"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="598,53,531,33,533,28,600,48"/>
+<area shape="rect" id="Node000007" href="$d4/d36/namespacefl_a0704405150c9e2ea2647360203eef1a7.html#a0704405150c9e2ea2647360203eef1a7" title=" " alt="" coords="426,104,549,129"/>
+<area shape="poly" id="edge8_Node000001_Node000007" title=" " alt="" coords="600,87,533,106,531,101,598,81"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_ac368f20d137ff004c852fa35420cfa5e.html#ac368f20d137ff004c852fa35420cfa5e" title=" " alt="" coords="265,55,343,80"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="403,70,343,70,343,65,403,65"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_ad5bdf92d600b40d01c2d3a0d536a7c8c.html#ad5bdf92d600b40d01c2d3a0d536a7c8c" title=" " alt="" coords="265,5,343,31"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="426,54,342,31,344,26,427,48"/>
+<area shape="rect" id="Node000005" href="$dd/d55/_ease_in_out_8h_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="73,5,123,31"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="251,21,124,21,124,15,251,15"/>
+<area shape="poly" id="edge6_Node000006_Node000003" title=" " alt="" coords="427,37,344,60,342,54,426,32"/>
+<area shape="poly" id="edge7_Node000006_Node000004" title=" " alt="" coords="410,21,343,21,343,15,410,15"/>
+<area shape="rect" id="Node000008" href="$d4/d5d/structfl_1_1_h_s_v16_a66d9cc0fccee4175baaef83f1a2d7d7d.html#a66d9cc0fccee4175baaef83f1a2d7d7d" title=" " alt="" coords="239,104,369,129"/>
+<area shape="poly" id="edge9_Node000007_Node000008" title=" " alt="" coords="412,119,370,119,370,114,412,114"/>
+<area shape="rect" id="Node000009" href="$d7/d82/struct_c_r_g_b_aafb129d5109b627df6c8401c6b5105ef.html#aafb129d5109b627df6c8401c6b5105ef" title="Allow construction from a fl::HSV16 color Enables automatic conversion from HSV16 to CRGB." alt="" coords="46,55,150,80"/>
+<area shape="poly" id="edge10_Node000008_Node000009" title=" " alt="" coords="237,103,149,82,151,77,238,98"/>
+<area shape="rect" id="Node000010" href="$d4/d5d/structfl_1_1_h_s_v16_a0bd2c0fc64fc34d573637c10b849c320.html#a0bd2c0fc64fc34d573637c10b849c320" title=" " alt="" coords="19,104,177,129"/>
+<area shape="poly" id="edge11_Node000008_Node000010" title=" " alt="" coords="225,119,178,119,178,114,225,114"/>
+<area shape="rect" id="Node000023" href="$d4/d5d/structfl_1_1_h_s_v16_a3ece902080f8d4dbaca82dbc974c58d0.html#a3ece902080f8d4dbaca82dbc974c58d0" title="Automatic conversion operator to CRGB Allows HSV16 to be automatically converted to CRGB." alt="" coords="5,153,191,179"/>
+<area shape="poly" id="edge12_Node000008_Node000023" title=" " alt="" coords="238,135,153,156,151,151,237,130"/>
 </map>

@@ -123,26 +123,26 @@ $(function(){initNavTree('da/d39/classfl_1_1_audio_sample_impl_abc40b208aebb869c
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../da/d09/audio_8h_source.html#l00129">129</a> of file <a class="el" href="../../da/d09/audio_8h_source.html">audio.h</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  129</span>                             {</div>
-<div class="line"><span class="lineno">  130</span>        <a class="code hl_variable" href="../../da/d39/classfl_1_1_audio_sample_impl_a2773279eb293dde1b0dcbf6704240c5c.html#a2773279eb293dde1b0dcbf6704240c5c">mZeroCrossings</a> = 0;</div>
-<div class="line"><span class="lineno">  131</span>        <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../da/d39/classfl_1_1_audio_sample_impl_aef06d10780e4a863c1f383c4815d4335.html#aef06d10780e4a863c1f383c4815d4335">mSignedPcm</a>.size() &gt; 1) {</div>
-<div class="line"><span class="lineno">  132</span>            <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> i = 1; i &lt; <a class="code hl_variable" href="../../da/d39/classfl_1_1_audio_sample_impl_aef06d10780e4a863c1f383c4815d4335.html#aef06d10780e4a863c1f383c4815d4335">mSignedPcm</a>.size(); ++i) {</div>
-<div class="line"><span class="lineno">  133</span>                <span class="keyword">const</span> <span class="keywordtype">bool</span> crossed =</div>
-<div class="line"><span class="lineno">  134</span>                    (<a class="code hl_variable" href="../../da/d39/classfl_1_1_audio_sample_impl_aef06d10780e4a863c1f383c4815d4335.html#aef06d10780e4a863c1f383c4815d4335">mSignedPcm</a>[i - 1] &lt; 0 &amp;&amp; <a class="code hl_variable" href="../../da/d39/classfl_1_1_audio_sample_impl_aef06d10780e4a863c1f383c4815d4335.html#aef06d10780e4a863c1f383c4815d4335">mSignedPcm</a>[i] &gt;= 0) ||</div>
-<div class="line"><span class="lineno">  135</span>                    (<a class="code hl_variable" href="../../da/d39/classfl_1_1_audio_sample_impl_aef06d10780e4a863c1f383c4815d4335.html#aef06d10780e4a863c1f383c4815d4335">mSignedPcm</a>[i - 1] &gt;= 0 &amp;&amp; <a class="code hl_variable" href="../../da/d39/classfl_1_1_audio_sample_impl_aef06d10780e4a863c1f383c4815d4335.html#aef06d10780e4a863c1f383c4815d4335">mSignedPcm</a>[i] &lt; 0);</div>
-<div class="line"><span class="lineno">  136</span>                <span class="keywordflow">if</span> (crossed) {</div>
-<div class="line"><span class="lineno">  137</span>                    ++<a class="code hl_variable" href="../../da/d39/classfl_1_1_audio_sample_impl_a2773279eb293dde1b0dcbf6704240c5c.html#a2773279eb293dde1b0dcbf6704240c5c">mZeroCrossings</a>;</div>
-<div class="line"><span class="lineno">  138</span>                }</div>
-<div class="line"><span class="lineno">  139</span>            }</div>
-<div class="line"><span class="lineno">  140</span>        }</div>
-<div class="line"><span class="lineno">  141</span>    }</div>
-<div class="ttc" id="aclassfl_1_1_audio_sample_impl_a2773279eb293dde1b0dcbf6704240c5c_html_a2773279eb293dde1b0dcbf6704240c5c"><div class="ttname"><a href="../../da/d39/classfl_1_1_audio_sample_impl_a2773279eb293dde1b0dcbf6704240c5c.html#a2773279eb293dde1b0dcbf6704240c5c">fl::AudioSampleImpl::mZeroCrossings</a></div><div class="ttdeci">int16_t mZeroCrossings</div><div class="ttdef"><b>Definition</b> <a href="../../da/d09/audio_8h_source.html#l00144">audio.h:144</a></div></div>
-<div class="ttc" id="aclassfl_1_1_audio_sample_impl_aef06d10780e4a863c1f383c4815d4335_html_aef06d10780e4a863c1f383c4815d4335"><div class="ttname"><a href="../../da/d39/classfl_1_1_audio_sample_impl_aef06d10780e4a863c1f383c4815d4335.html#aef06d10780e4a863c1f383c4815d4335">fl::AudioSampleImpl::mSignedPcm</a></div><div class="ttdeci">VectorPCM mSignedPcm</div><div class="ttdef"><b>Definition</b> <a href="../../da/d09/audio_8h_source.html#l00143">audio.h:143</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../da/d09/audio_8h_source.html#l00136">136</a> of file <a class="el" href="../../da/d09/audio_8h_source.html">audio.h</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  136</span>                             {</div>
+<div class="line"><span class="lineno">  137</span>        <a class="code hl_variable" href="../../da/d39/classfl_1_1_audio_sample_impl_ac8fcfd9a427d7fb3bacf160423af4dee.html#ac8fcfd9a427d7fb3bacf160423af4dee">mZeroCrossings</a> = 0;</div>
+<div class="line"><span class="lineno">  138</span>        <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../da/d39/classfl_1_1_audio_sample_impl_aef06d10780e4a863c1f383c4815d4335.html#aef06d10780e4a863c1f383c4815d4335">mSignedPcm</a>.size() &gt; 1) {</div>
+<div class="line"><span class="lineno">  139</span>            <span class="keywordflow">for</span> (fl::size i = 1; i &lt; <a class="code hl_variable" href="../../da/d39/classfl_1_1_audio_sample_impl_aef06d10780e4a863c1f383c4815d4335.html#aef06d10780e4a863c1f383c4815d4335">mSignedPcm</a>.size(); ++i) {</div>
+<div class="line"><span class="lineno">  140</span>                <span class="keyword">const</span> <span class="keywordtype">bool</span> crossed =</div>
+<div class="line"><span class="lineno">  141</span>                    (<a class="code hl_variable" href="../../da/d39/classfl_1_1_audio_sample_impl_aef06d10780e4a863c1f383c4815d4335.html#aef06d10780e4a863c1f383c4815d4335">mSignedPcm</a>[i - 1] &lt; 0 &amp;&amp; <a class="code hl_variable" href="../../da/d39/classfl_1_1_audio_sample_impl_aef06d10780e4a863c1f383c4815d4335.html#aef06d10780e4a863c1f383c4815d4335">mSignedPcm</a>[i] &gt;= 0) ||</div>
+<div class="line"><span class="lineno">  142</span>                    (<a class="code hl_variable" href="../../da/d39/classfl_1_1_audio_sample_impl_aef06d10780e4a863c1f383c4815d4335.html#aef06d10780e4a863c1f383c4815d4335">mSignedPcm</a>[i - 1] &gt;= 0 &amp;&amp; <a class="code hl_variable" href="../../da/d39/classfl_1_1_audio_sample_impl_aef06d10780e4a863c1f383c4815d4335.html#aef06d10780e4a863c1f383c4815d4335">mSignedPcm</a>[i] &lt; 0);</div>
+<div class="line"><span class="lineno">  143</span>                <span class="keywordflow">if</span> (crossed) {</div>
+<div class="line"><span class="lineno">  144</span>                    ++<a class="code hl_variable" href="../../da/d39/classfl_1_1_audio_sample_impl_ac8fcfd9a427d7fb3bacf160423af4dee.html#ac8fcfd9a427d7fb3bacf160423af4dee">mZeroCrossings</a>;</div>
+<div class="line"><span class="lineno">  145</span>                }</div>
+<div class="line"><span class="lineno">  146</span>            }</div>
+<div class="line"><span class="lineno">  147</span>        }</div>
+<div class="line"><span class="lineno">  148</span>    }</div>
+<div class="ttc" id="aclassfl_1_1_audio_sample_impl_ac8fcfd9a427d7fb3bacf160423af4dee_html_ac8fcfd9a427d7fb3bacf160423af4dee"><div class="ttname"><a href="../../da/d39/classfl_1_1_audio_sample_impl_ac8fcfd9a427d7fb3bacf160423af4dee.html#ac8fcfd9a427d7fb3bacf160423af4dee">fl::AudioSampleImpl::mZeroCrossings</a></div><div class="ttdeci">fl::i16 mZeroCrossings</div><div class="ttdef"><b>Definition</b> <a href="../../da/d09/audio_8h_source.html#l00151">audio.h:151</a></div></div>
+<div class="ttc" id="aclassfl_1_1_audio_sample_impl_aef06d10780e4a863c1f383c4815d4335_html_aef06d10780e4a863c1f383c4815d4335"><div class="ttname"><a href="../../da/d39/classfl_1_1_audio_sample_impl_aef06d10780e4a863c1f383c4815d4335.html#aef06d10780e4a863c1f383c4815d4335">fl::AudioSampleImpl::mSignedPcm</a></div><div class="ttdeci">VectorPCM mSignedPcm</div><div class="ttdef"><b>Definition</b> <a href="../../da/d09/audio_8h_source.html#l00150">audio.h:150</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../da/d09/audio_8h_source.html#l00143">mSignedPcm</a>, and <a class="el" href="../../da/d09/audio_8h_source.html#l00144">mZeroCrossings</a>.</p>
+<p class="reference">References <a class="el" href="../../da/d09/audio_8h_source.html#l00150">mSignedPcm</a>, and <a class="el" href="../../da/d09/audio_8h_source.html#l00151">mZeroCrossings</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../da/d09/audio_8h_source.html#l00104">assign()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../da/d09/audio_8h_source.html#l00109">assign()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the caller graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -160,7 +160,7 @@ $(function(){initNavTree('da/d39/classfl_1_1_audio_sample_impl_abc40b208aebb869c
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../da/d39/classfl_1_1_audio_sample_impl.html">AudioSampleImpl</a></li>
-    <li class="footer">Generated on Tue Jun 24 2025 00:58:15 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Fri Aug 22 2025 20:59:36 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

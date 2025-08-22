@@ -1,5 +1,7 @@
 <map id="fl::scoped_array&lt; T, Deleter &gt;" name="fl::scoped_array&lt; T, Deleter &gt;">
-<area shape="rect" id="Node000001" title=" " alt="" coords="29,5,181,45"/>
-<area shape="rect" id="Node000002" href="$d3/d92/classfl_1_1scoped__array.html" title=" " alt="" coords="5,108,205,133"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="108,59,108,108,103,108,103,59"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="95,5,247,45"/>
+<area shape="rect" id="Node000002" href="$d3/d92/classfl_1_1scoped__array.html" title=" " alt="" coords="5,108,153,148"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="147,57,99,110,95,106,143,54"/>
+<area shape="rect" id="Node000003" href="$d3/d92/classfl_1_1scoped__array.html" title=" " alt="" coords="178,115,349,141"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="200,54,254,113,250,117,196,58"/>
 </map>

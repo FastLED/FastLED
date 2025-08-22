@@ -2,7 +2,7 @@
 <area shape="rect" id="Node000001" title=" " alt="" coords="5,80,184,105"/>
 <area shape="rect" id="Node000002" href="$d6/d6c/group___beat_generators_gaa46e5de1c4c27833359e7a97a18c839b.html#gaa46e5de1c4c27833359e7a97a18c839b" title="Generates a 16&#45;bit sine wave at a given BPM that oscillates within a given range." alt="" coords="256,55,343,80"/>
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="184,79,242,72,243,77,184,84"/>
-<area shape="rect" id="Node000006" href="$d4/d36/namespacefl_a90ef14e5ef0cc07c435a39eca3ddc490.html#a90ef14e5ef0cc07c435a39eca3ddc490" title=" " alt="" coords="232,104,367,129"/>
+<area shape="rect" id="Node000006" href="$d4/d36/namespacefl_a399e4e094995b8e97420b89a2dd6548b.html#a399e4e094995b8e97420b89a2dd6548b" title=" " alt="" coords="232,104,367,129"/>
 <area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="184,100,218,105,218,110,184,106"/>
 <area shape="rect" id="Node000003" href="$d6/d6c/group___beat_generators_gade6acbf6fd3c9d346148bccfcafb2fe2.html#gade6acbf6fd3c9d346148bccfcafb2fe2" title="Generates a 16&#45;bit &quot;sawtooth&quot; wave at a given BPM." alt="" coords="425,5,492,31"/>
 <area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="340,52,411,30,413,35,342,57"/>
@@ -10,6 +10,6 @@
 <area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="343,65,408,65,408,70,343,70"/>
 <area shape="rect" id="Node000004" href="$d6/d6c/group___beat_generators_ga1b48fc520db5f40910caf79974992395.html#ga1b48fc520db5f40910caf79974992395" title="Generates a 16&#45;bit &quot;sawtooth&quot; wave at a given BPM, with BPM specified in Q8.8 fixed&#45;point format." alt="" coords="551,5,617,31"/>
 <area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="492,15,537,15,537,21,492,21"/>
-<area shape="rect" id="Node000007" href="$d4/d36/namespacefl_ab90db73f2d846755d0b084e4af7af072.html#ab90db73f2d846755d0b084e4af7af072" title=" " alt="" coords="415,104,503,129"/>
+<area shape="rect" id="Node000007" href="$d4/d36/namespacefl_a5a8a33cdb0434211edc66189968155ea.html#a5a8a33cdb0434211edc66189968155ea" title=" " alt="" coords="415,104,503,129"/>
 <area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="367,114,401,114,401,119,367,119"/>
 </map>

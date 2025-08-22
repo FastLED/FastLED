@@ -106,7 +106,7 @@ $(function(){initNavTree('d0/dee/struct_pixel_controller_a358944f031ee8b8536d2f4
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="../../db/d07/eorder_8h_a3c26d076773aa0f331d3066b46dbc6a4.html#a3c26d076773aa0f331d3066b46dbc6a4">EOrder</a> RGB_ORDER, int LANES = 1, uint32_t MASK = 0xFFFFFFFF&gt; </div>
+template&lt;<a class="el" href="../../d4/d36/namespacefl_ab289ace8bd149d39b87ebd778e9abe23.html#ab289ace8bd149d39b87ebd778e9abe23">EOrder</a> RGB_ORDER, int LANES = 1, uint32_t MASK = 0xFFFFFFFF&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
@@ -133,21 +133,21 @@ template&lt;<a class="el" href="../../db/d07/eorder_8h_a3c26d076773aa0f331d3066b
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="../../d5/d4d/pixel__controller_8h_source.html#l00132">132</a> of file <a class="el" href="../../d5/d4d/pixel__controller_8h_source.html">pixel_controller.h</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  132</span>                              {</div>
-<div class="line"><span class="lineno">  133</span>        <span class="keywordtype">int</span> <a class="code hl_struct" href="../../d0/dee/struct_pixel_controller.html">nOffset</a> = 0;</div>
-<div class="line"><span class="lineno">  134</span>        <span class="keywordflow">for</span>(<span class="keywordtype">int</span> <a class="code hl_struct" href="../../d0/dee/struct_pixel_controller.html">i</a> = 0; <a class="code hl_struct" href="../../d0/dee/struct_pixel_controller.html">i</a> &lt; <a class="code hl_struct" href="../../d0/dee/struct_pixel_controller.html">LANES</a>; ++<a class="code hl_struct" href="../../d0/dee/struct_pixel_controller.html">i</a>) {</div>
-<div class="line"><span class="lineno">  135</span>            <a class="code hl_variable" href="../../d0/dee/struct_pixel_controller_a5ea77404f9ea28134291af923a79c82f.html#a5ea77404f9ea28134291af923a79c82f">mOffsets</a>[<a class="code hl_struct" href="../../d0/dee/struct_pixel_controller.html">i</a>] = <a class="code hl_struct" href="../../d0/dee/struct_pixel_controller.html">nOffset</a>;</div>
-<div class="line"><span class="lineno">  136</span>            <span class="keywordflow">if</span>((1&lt;&lt;<a class="code hl_struct" href="../../d0/dee/struct_pixel_controller.html">i</a>) &amp; <a class="code hl_struct" href="../../d0/dee/struct_pixel_controller.html">MASK</a>) { <a class="code hl_struct" href="../../d0/dee/struct_pixel_controller.html">nOffset</a> += (<a class="code hl_struct" href="../../d0/dee/struct_pixel_controller.html">len</a> * <a class="code hl_variable" href="../../d0/dee/struct_pixel_controller_a0f4eb594a337bc3a739e65b2a1e5c401.html#a0f4eb594a337bc3a739e65b2a1e5c401">mAdvance</a>); }</div>
-<div class="line"><span class="lineno">  137</span>        }</div>
-<div class="line"><span class="lineno">  138</span>    }</div>
-<div class="ttc" id="astruct_pixel_controller_a0f4eb594a337bc3a739e65b2a1e5c401_html_a0f4eb594a337bc3a739e65b2a1e5c401"><div class="ttname"><a href="../../d0/dee/struct_pixel_controller_a0f4eb594a337bc3a739e65b2a1e5c401.html#a0f4eb594a337bc3a739e65b2a1e5c401">PixelController::mAdvance</a></div><div class="ttdeci">int8_t mAdvance</div><div class="ttdoc">how many bytes to advance the pointer by each time. For CRGB this is 3.</div><div class="ttdef"><b>Definition</b> <a href="../../d5/d4d/pixel__controller_8h_source.html#l00082">pixel_controller.h:82</a></div></div>
-<div class="ttc" id="astruct_pixel_controller_a5ea77404f9ea28134291af923a79c82f_html_a5ea77404f9ea28134291af923a79c82f"><div class="ttname"><a href="../../d0/dee/struct_pixel_controller_a5ea77404f9ea28134291af923a79c82f.html#a5ea77404f9ea28134291af923a79c82f">PixelController::mOffsets</a></div><div class="ttdeci">int mOffsets[LANES]</div><div class="ttdoc">the number of bytes to offset each lane from the starting pointer</div><div class="ttdef"><b>Definition</b> <a href="../../d5/d4d/pixel__controller_8h_source.html#l00083">pixel_controller.h:83</a></div></div>
-<div class="ttc" id="astruct_pixel_controller_html"><div class="ttname"><a href="../../d0/dee/struct_pixel_controller.html">PixelController</a></div><div class="ttdoc">Pixel controller class.</div><div class="ttdef"><b>Definition</b> <a href="../../d5/d4d/pixel__controller_8h_source.html#l00076">pixel_controller.h:76</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../d5/d4d/pixel__controller_8h_source.html#l00139">139</a> of file <a class="el" href="../../d5/d4d/pixel__controller_8h_source.html">pixel_controller.h</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  139</span>                              {</div>
+<div class="line"><span class="lineno">  140</span>        <span class="keywordtype">int</span> <a class="code hl_struct" href="../../d0/dee/struct_pixel_controller.html">nOffset</a> = 0;</div>
+<div class="line"><span class="lineno">  141</span>        <span class="keywordflow">for</span>(<span class="keywordtype">int</span> <a class="code hl_struct" href="../../d0/dee/struct_pixel_controller.html">i</a> = 0; <a class="code hl_struct" href="../../d0/dee/struct_pixel_controller.html">i</a> &lt; <a class="code hl_struct" href="../../d0/dee/struct_pixel_controller.html">LANES</a>; ++<a class="code hl_struct" href="../../d0/dee/struct_pixel_controller.html">i</a>) {</div>
+<div class="line"><span class="lineno">  142</span>            <a class="code hl_variable" href="../../d0/dee/struct_pixel_controller_a5ea77404f9ea28134291af923a79c82f.html#a5ea77404f9ea28134291af923a79c82f">mOffsets</a>[<a class="code hl_struct" href="../../d0/dee/struct_pixel_controller.html">i</a>] = <a class="code hl_struct" href="../../d0/dee/struct_pixel_controller.html">nOffset</a>;</div>
+<div class="line"><span class="lineno">  143</span>            <span class="keywordflow">if</span>((1&lt;&lt;<a class="code hl_struct" href="../../d0/dee/struct_pixel_controller.html">i</a>) &amp; <a class="code hl_struct" href="../../d0/dee/struct_pixel_controller.html">MASK</a>) { <a class="code hl_struct" href="../../d0/dee/struct_pixel_controller.html">nOffset</a> += (<a class="code hl_struct" href="../../d0/dee/struct_pixel_controller.html">len</a> * <a class="code hl_variable" href="../../d0/dee/struct_pixel_controller_a0f4eb594a337bc3a739e65b2a1e5c401.html#a0f4eb594a337bc3a739e65b2a1e5c401">mAdvance</a>); }</div>
+<div class="line"><span class="lineno">  144</span>        }</div>
+<div class="line"><span class="lineno">  145</span>    }</div>
+<div class="ttc" id="astruct_pixel_controller_a0f4eb594a337bc3a739e65b2a1e5c401_html_a0f4eb594a337bc3a739e65b2a1e5c401"><div class="ttname"><a href="../../d0/dee/struct_pixel_controller_a0f4eb594a337bc3a739e65b2a1e5c401.html#a0f4eb594a337bc3a739e65b2a1e5c401">PixelController::mAdvance</a></div><div class="ttdeci">int8_t mAdvance</div><div class="ttdoc">how many bytes to advance the pointer by each time. For CRGB this is 3.</div><div class="ttdef"><b>Definition</b> <a href="../../d5/d4d/pixel__controller_8h_source.html#l00089">pixel_controller.h:89</a></div></div>
+<div class="ttc" id="astruct_pixel_controller_a5ea77404f9ea28134291af923a79c82f_html_a5ea77404f9ea28134291af923a79c82f"><div class="ttname"><a href="../../d0/dee/struct_pixel_controller_a5ea77404f9ea28134291af923a79c82f.html#a5ea77404f9ea28134291af923a79c82f">PixelController::mOffsets</a></div><div class="ttdeci">int mOffsets[LANES]</div><div class="ttdoc">the number of bytes to offset each lane from the starting pointer</div><div class="ttdef"><b>Definition</b> <a href="../../d5/d4d/pixel__controller_8h_source.html#l00090">pixel_controller.h:90</a></div></div>
+<div class="ttc" id="astruct_pixel_controller_html"><div class="ttname"><a href="../../d0/dee/struct_pixel_controller.html">PixelController</a></div><div class="ttdoc">Pixel controller class.</div><div class="ttdef"><b>Definition</b> <a href="../../d5/d4d/pixel__controller_8h_source.html#l00083">pixel_controller.h:83</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d5/d4d/pixel__controller_8h_source.html#l00082">mAdvance</a>, and <a class="el" href="../../d5/d4d/pixel__controller_8h_source.html#l00083">mOffsets</a>.</p>
+<p class="reference">References <a class="el" href="../../d5/d4d/pixel__controller_8h_source.html#l00089">mAdvance</a>, and <a class="el" href="../../d5/d4d/pixel__controller_8h_source.html#l00090">mOffsets</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d5/d4d/pixel__controller_8h_source.html#l00176">PixelController()</a>, <a class="el" href="../../d5/d4d/pixel__controller_8h_source.html#l00162">PixelController()</a>, and <a class="el" href="../../d5/d4d/pixel__controller_8h_source.html#l00147">PixelController()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d5/d4d/pixel__controller_8h_source.html#l00183">PixelController()</a>, <a class="el" href="../../d5/d4d/pixel__controller_8h_source.html#l00169">PixelController()</a>, and <a class="el" href="../../d5/d4d/pixel__controller_8h_source.html#l00154">PixelController()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the caller graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -165,7 +165,7 @@ template&lt;<a class="el" href="../../db/d07/eorder_8h_a3c26d076773aa0f331d3066b
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d0/dee/struct_pixel_controller.html">PixelController</a></li>
-    <li class="footer">Generated on Tue Jun 24 2025 00:58:15 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Fri Aug 22 2025 20:59:35 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

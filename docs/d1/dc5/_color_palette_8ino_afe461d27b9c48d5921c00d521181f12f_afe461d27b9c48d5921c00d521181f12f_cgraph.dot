@@ -22,5 +22,7 @@ digraph "loop"
   Node1 -> Node8 [id="edge7_Node000001_Node000008",color="steelblue1",style="solid",tooltip=" "];
   Node8 [id="Node000008",label="FillLEDsFromPaletteColors",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/dc5/_color_palette_8ino_ae6b0ecfd96a40d5cec6d0dba0a3685fe.html#ae6b0ecfd96a40d5cec6d0dba0a3685fe",tooltip=" "];
   Node8 -> Node9 [id="edge8_Node000008_Node000009",color="steelblue1",style="solid",tooltip=" "];
-  Node9 [id="Node000009",label="ColorFromPalette",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/dfb/colorutils_8h_a74e1895d1234ab29fef4458532e91090.html#a74e1895d1234ab29fef4458532e91090",tooltip=" "];
+  Node9 [id="Node000009",label="brightness",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/dc7/advanced_8h_a96d9503945476f13a97c8f406269fcef.html#a96d9503945476f13a97c8f406269fcef",tooltip=" "];
+  Node8 -> Node10 [id="edge9_Node000008_Node000010",color="steelblue1",style="solid",tooltip=" "];
+  Node10 [id="Node000010",label="ColorFromPalette",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/dfb/colorutils_8h_a3d488dd1e2d27e99307310527e51cad3.html#a3d488dd1e2d27e99307310527e51cad3",tooltip=" "];
 }

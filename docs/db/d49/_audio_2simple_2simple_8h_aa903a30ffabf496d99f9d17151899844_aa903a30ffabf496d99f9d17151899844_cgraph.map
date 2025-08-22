@@ -1,0 +1,9 @@
+<map id="generalControls" name="generalControls">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,55,131,80"/>
+<area shape="rect" id="Node000002" href="$db/d49/_audio_2simple_2simple_8h_a40151b460e79e282c52c7fc527f37eb6.html#a40151b460e79e282c52c7fc527f37eb6" title=" " alt="" coords="179,5,297,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="112,52,179,32,181,37,113,57"/>
+<area shape="rect" id="Node000003" href="$db/d49/_audio_2simple_2simple_8h_a54d81654e60c45e0c9383c772410c2d1.html#a54d81654e60c45e0c9383c772410c2d1" title=" " alt="" coords="187,55,289,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="131,65,173,65,173,70,131,70"/>
+<area shape="rect" id="Node000004" href="$db/d49/_audio_2simple_2simple_8h_a45d65e4095f4c89ab6cb02f2f81b87e7.html#a45d65e4095f4c89ab6cb02f2f81b87e7" title=" " alt="" coords="207,104,269,129"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="113,77,194,101,193,106,112,83"/>
+</map>

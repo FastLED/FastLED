@@ -55,7 +55,7 @@
 <g id="a_Node000003"><a xlink:href="../../da/dc5/structfl_1_1_inlined_memory_block.html" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="433.5,-30 296.5,-30 296.5,0 433.5,0 433.5,-30"/>
 <text text-anchor="start" x="304.5" y="-18" font-family="Helvetica,sans-Serif" font-size="10.00">fl::InlinedMemoryBlock</text>
-<text text-anchor="middle" x="365" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">&lt; fl::Pair&lt; int, int &gt;, N &gt;</text>
+<text text-anchor="middle" x="365" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">&lt; fl::pair&lt; int, int &gt;, N &gt;</text>
 </a>
 </g>
 </g>
@@ -67,7 +67,7 @@
 <polygon fill="orange" stroke="orange" points="132.73,-18.64 123.56,-23.93 134.03,-25.52 132.73,-18.64"/>
 </a>
 </g>
-<text text-anchor="start" x="167.5" y="-34" font-family="Helvetica,sans-Serif" font-size="10.00" fill="grey"> &lt; fl::Pair&lt; int, int</text>
+<text text-anchor="start" x="167.5" y="-34" font-family="Helvetica,sans-Serif" font-size="10.00" fill="grey"> &lt; fl::pair&lt; int, int</text>
 <text text-anchor="middle" x="211.5" y="-23" font-family="Helvetica,sans-Serif" font-size="10.00" fill="grey"> &gt;, N &gt;</text>
 </g>
 </g>

@@ -24,5 +24,5 @@ digraph "AVRSoftwareSPIOutput::writeByte"
   Node1 -> Node9 [id="edge8_Node000001_Node000009",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node9 [id="Node000009",label="AVRSoftwareSPIOutput\l::writePixels",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dc/d57/class_a_v_r_software_s_p_i_output_a20772a8fdfa75015731375c36ccb3515.html#a20772a8fdfa75015731375c36ccb3515",tooltip="Write LED pixel data to the SPI interface."];
   Node1 -> Node10 [id="edge9_Node000001_Node000010",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node10 [id="Node000010",label="AVRSoftwareSPIOutput\l::writeWord",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dc/d57/class_a_v_r_software_s_p_i_output_a34421832d232a692d08d39d87733acd8.html#a34421832d232a692d08d39d87733acd8",tooltip="Write a word (two bytes) over SPI."];
+  Node10 [id="Node000010",label="AVRSoftwareSPIOutput\l::writeWord",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dc/d57/class_a_v_r_software_s_p_i_output_a9ca78e0b9b6c242d6f898daa23552537.html#a9ca78e0b9b6c242d6f898daa23552537",tooltip="Write a word (two bytes) over SPI."];
 }

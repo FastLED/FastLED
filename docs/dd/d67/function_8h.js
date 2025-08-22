@@ -1,8 +1,5 @@
 var function_8h =
 [
-    [ "fl::function< R(Args...)>", "d5/d9d/classfl_1_1function_3_01_r_07_args_8_8_8_08_4.html", "d5/d9d/classfl_1_1function_3_01_r_07_args_8_8_8_08_4" ],
-    [ "fl::function< R(Args...)>::Callable< F >", "dc/da9/structfl_1_1function_3_01_r_07_args_8_8_8_08_4_1_1_callable.html", "dc/da9/structfl_1_1function_3_01_r_07_args_8_8_8_08_4_1_1_callable" ],
-    [ "fl::function< R(Args...)>::CallableBase", "dd/d15/structfl_1_1function_3_01_r_07_args_8_8_8_08_4_1_1_callable_base.html", "dd/d15/structfl_1_1function_3_01_r_07_args_8_8_8_08_4_1_1_callable_base" ],
-    [ "fl::function< R(Args...)>::ConstMemCallable< C >", "d5/d17/structfl_1_1function_3_01_r_07_args_8_8_8_08_4_1_1_const_mem_callable.html", "d5/d17/structfl_1_1function_3_01_r_07_args_8_8_8_08_4_1_1_const_mem_callable" ],
-    [ "fl::function< R(Args...)>::MemCallable< C >", "dc/da3/structfl_1_1function_3_01_r_07_args_8_8_8_08_4_1_1_mem_callable.html", "dc/da3/structfl_1_1function_3_01_r_07_args_8_8_8_08_4_1_1_mem_callable" ]
+    [ "FASTLED_INLINE_LAMBDA_SIZE", "dd/d67/function_8h_a255e85529978bb20dbf35a725491f8cf.html#a255e85529978bb20dbf35a725491f8cf", null ],
+    [ "FL_DISABLE_WARNING", "dd/d67/function_8h_ade8043ede62066d1f4666a7eece358d1.html#ade8043ede62066d1f4666a7eece358d1", null ]
 ];

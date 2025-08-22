@@ -101,7 +101,7 @@ $(function(){initNavTree('d4/d36/namespacefl_a29ae9bad91ab6b7de10679e9325e90f6.h
 
 <div class="contents">
 <a id="a29ae9bad91ab6b7de10679e9325e90f6" name="a29ae9bad91ab6b7de10679e9325e90f6"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a29ae9bad91ab6b7de10679e9325e90f6">&#9670;&#160;</a></span>FASTLED_SMART_PTR() <span class="overload">[30/51]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a29ae9bad91ab6b7de10679e9325e90f6">&#9670;&#160;</a></span>FASTLED_SMART_PTR() <span class="overload">[31/52]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -115,6 +115,66 @@ $(function(){initNavTree('d4/d36/namespacefl_a29ae9bad91ab6b7de10679e9325e90f6.h
       </table>
 </div><div class="memdoc">
 
+<p class="definition">Definition at line <a class="el" href="../../d5/d82/video__impl_8h_source.html#l00020">20</a> of file <a class="el" href="../../d5/d82/video__impl_8h_source.html">video_impl.h</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">   22</span>                {</div>
+<div class="line"><span class="lineno">   23</span>  <span class="keyword">public</span>:</div>
+<div class="line"><span class="lineno">   24</span>    <span class="keyword">enum</span> {</div>
+<div class="line"><span class="lineno">   25</span>        kSizeRGB8 = 3,</div>
+<div class="line"><span class="lineno">   26</span>    };</div>
+<div class="line"><span class="lineno">   27</span>    <span class="comment">// frameHistoryCount is the number of frames to keep in the buffer after</span></div>
+<div class="line"><span class="lineno">   28</span>    <span class="comment">// draw. This allows for time based effects like syncing video speed to</span></div>
+<div class="line"><span class="lineno">   29</span>    <span class="comment">// audio triggers.</span></div>
+<div class="line"><span class="lineno">   30</span>    VideoImpl(<span class="keywordtype">size_t</span> pixelsPerFrame, <span class="keywordtype">float</span> fpsVideo,</div>
+<div class="line"><span class="lineno">   31</span>              <span class="keywordtype">size_t</span> frameHistoryCount = 0);</div>
+<div class="line"><span class="lineno">   32</span>    ~VideoImpl();</div>
+<div class="line"><span class="lineno">   33</span>    <span class="comment">// Api</span></div>
+<div class="line"><span class="lineno">   34</span>    <span class="keywordtype">void</span> <a class="code hl_function" href="../../d4/d36/namespacefl_a44ec854fe5278548217eba95585d0e58.html#a44ec854fe5278548217eba95585d0e58">begin</a>(fl::FileHandlePtr h);</div>
+<div class="line"><span class="lineno">   35</span>    <span class="keywordtype">void</span> beginStream(fl::ByteStreamPtr s);</div>
+<div class="line"><span class="lineno">   36</span>    <span class="keywordtype">void</span> setFade(fl::u32 fadeInTime, fl::u32 fadeOutTime);</div>
+<div class="line"><span class="lineno">   37</span>    <span class="keywordtype">bool</span> <a class="code hl_function" href="../../d4/d06/curr_8h_a251ace8542fe093844e4ed2709e8a3d7.html#a251ace8542fe093844e4ed2709e8a3d7">draw</a>(fl::u32 now, <a class="code hl_struct" href="../../d7/d82/struct_c_r_g_b.html">CRGB</a> *<a class="code hl_variable" href="../../d8/d21/_adafruit_bridge_8ino_a1b4f26a01e11d7eb2848bc41b0f6dd9d.html#a1b4f26a01e11d7eb2848bc41b0f6dd9d">leds</a>);</div>
+<div class="line"><span class="lineno">   38</span>    <span class="keywordtype">void</span> <a class="code hl_function" href="../../d4/d36/namespacefl_a56e7d4811c99d9aa696932bcb89a50b1.html#a56e7d4811c99d9aa696932bcb89a50b1">end</a>();</div>
+<div class="line"><span class="lineno">   39</span>    <span class="keywordtype">bool</span> rewind();</div>
+<div class="line"><span class="lineno">   40</span>    <span class="comment">// internal use</span></div>
+<div class="line"><span class="lineno">   41</span>    <span class="keywordtype">bool</span> <a class="code hl_function" href="../../d4/d06/curr_8h_a251ace8542fe093844e4ed2709e8a3d7.html#a251ace8542fe093844e4ed2709e8a3d7">draw</a>(fl::u32 now, Frame *frame);</div>
+<div class="line"><span class="lineno">   42</span>    <span class="keywordtype">bool</span> full() <span class="keyword">const</span>;</div>
+<div class="line"><span class="lineno">   43</span>    <span class="keywordtype">void</span> setTimeScale(<span class="keywordtype">float</span> <a class="code hl_function" href="../../d8/dd0/_fire_cylinder_8h_a0cfaf25385886642355a25f291ffd36b.html#a0cfaf25385886642355a25f291ffd36b">timeScale</a>);</div>
+<div class="line"><span class="lineno">   44</span>    <span class="keywordtype">float</span> <a class="code hl_function" href="../../d8/dd0/_fire_cylinder_8h_a0cfaf25385886642355a25f291ffd36b.html#a0cfaf25385886642355a25f291ffd36b">timeScale</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> mTimeScale; }</div>
+<div class="line"><span class="lineno">   45</span>    <span class="keywordtype">size_t</span> pixelsPerFrame()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> mPixelsPerFrame; }</div>
+<div class="line"><span class="lineno">   46</span>    <span class="keywordtype">void</span> pause(fl::u32 now);</div>
+<div class="line"><span class="lineno">   47</span>    <span class="keywordtype">void</span> resume(fl::u32 now);</div>
+<div class="line"><span class="lineno">   48</span>    <span class="keywordtype">bool</span> needsFrame(fl::u32 now) <span class="keyword">const</span>;</div>
+<div class="line"><span class="lineno">   49</span>    int32_t durationMicros() <span class="keyword">const</span>; <span class="comment">// -1 if this is a stream.</span></div>
+<div class="line"><span class="lineno">   50</span> </div>
+<div class="line"><span class="lineno">   51</span>  <span class="keyword">private</span>:</div>
+<div class="line"><span class="lineno">   52</span>    <span class="keywordtype">bool</span> updateBufferIfNecessary(fl::u32 prev, fl::u32 now);</div>
+<div class="line"><span class="lineno">   53</span>    <span class="keywordtype">bool</span> updateBufferFromFile(fl::u32 now, <span class="keywordtype">bool</span> <a class="code hl_function" href="../../d4/d36/namespacefl_aed7245c077ae6f226d13c9ea795694a8.html#aed7245c077ae6f226d13c9ea795694a8">forward</a>);</div>
+<div class="line"><span class="lineno">   54</span>    <span class="keywordtype">bool</span> updateBufferFromStream(fl::u32 now);</div>
+<div class="line"><span class="lineno">   55</span>    fl::u32 mPixelsPerFrame = 0;</div>
+<div class="line"><span class="lineno">   56</span>    PixelStreamPtr mStream;</div>
+<div class="line"><span class="lineno">   57</span>    fl::u32 mPrevNow = 0;</div>
+<div class="line"><span class="lineno">   58</span>    FrameInterpolatorPtr mFrameInterpolator;</div>
+<div class="line"><span class="lineno">   59</span>    TimeWarpPtr mTime;</div>
+<div class="line"><span class="lineno">   60</span>    fl::u32 mFadeInTime = 1000;</div>
+<div class="line"><span class="lineno">   61</span>    fl::u32 mFadeOutTime = 1000;</div>
+<div class="line"><span class="lineno">   62</span>    <span class="keywordtype">float</span> mTimeScale = 1.0f;</div>
+<div class="line"><span class="lineno">   63</span>};</div>
+<div class="ttc" id="a_adafruit_bridge_8ino_a1b4f26a01e11d7eb2848bc41b0f6dd9d_html_a1b4f26a01e11d7eb2848bc41b0f6dd9d"><div class="ttname"><a href="../../d8/d21/_adafruit_bridge_8ino_a1b4f26a01e11d7eb2848bc41b0f6dd9d.html#a1b4f26a01e11d7eb2848bc41b0f6dd9d">leds</a></div><div class="ttdeci">CRGB leds[NUM_LEDS]</div><div class="ttdef"><b>Definition</b> <a href="../../d8/d21/_adafruit_bridge_8ino_source.html#l00013">AdafruitBridge.ino:13</a></div></div>
+<div class="ttc" id="a_fire_cylinder_8h_a0cfaf25385886642355a25f291ffd36b_html_a0cfaf25385886642355a25f291ffd36b"><div class="ttname"><a href="../../d8/dd0/_fire_cylinder_8h_a0cfaf25385886642355a25f291ffd36b.html#a0cfaf25385886642355a25f291ffd36b">timeScale</a></div><div class="ttdeci">TimeWarp timeScale(0, 1.0f)</div></div>
+<div class="ttc" id="acurr_8h_a251ace8542fe093844e4ed2709e8a3d7_html_a251ace8542fe093844e4ed2709e8a3d7"><div class="ttname"><a href="../../d4/d06/curr_8h_a251ace8542fe093844e4ed2709e8a3d7.html#a251ace8542fe093844e4ed2709e8a3d7">draw</a></div><div class="ttdeci">void draw(float pos)</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d06/curr_8h_source.html#l00538">curr.h:538</a></div></div>
+<div class="ttc" id="anamespacefl_a44ec854fe5278548217eba95585d0e58_html_a44ec854fe5278548217eba95585d0e58"><div class="ttname"><a href="../../d4/d36/namespacefl_a44ec854fe5278548217eba95585d0e58.html#a44ec854fe5278548217eba95585d0e58">fl::begin</a></div><div class="ttdeci">constexpr T * begin(T(&amp;array)[N]) noexcept</div><div class="ttdef"><b>Definition</b> <a href="../../d5/db6/range__access_8h_source.html#l00009">range_access.h:9</a></div></div>
+<div class="ttc" id="anamespacefl_a56e7d4811c99d9aa696932bcb89a50b1_html_a56e7d4811c99d9aa696932bcb89a50b1"><div class="ttname"><a href="../../d4/d36/namespacefl_a56e7d4811c99d9aa696932bcb89a50b1.html#a56e7d4811c99d9aa696932bcb89a50b1">fl::end</a></div><div class="ttdeci">constexpr T * end(T(&amp;array)[N]) noexcept</div><div class="ttdef"><b>Definition</b> <a href="../../d5/db6/range__access_8h_source.html#l00015">range_access.h:15</a></div></div>
+<div class="ttc" id="anamespacefl_aed7245c077ae6f226d13c9ea795694a8_html_aed7245c077ae6f226d13c9ea795694a8"><div class="ttname"><a href="../../d4/d36/namespacefl_aed7245c077ae6f226d13c9ea795694a8.html#aed7245c077ae6f226d13c9ea795694a8">fl::forward</a></div><div class="ttdeci">constexpr T &amp;&amp; forward(typename remove_reference&lt; T &gt;::type &amp;t) noexcept</div><div class="ttdef"><b>Definition</b> <a href="../../df/d63/type__traits_8h_source.html#l00213">type_traits.h:213</a></div></div>
+<div class="ttc" id="astruct_c_r_g_b_html"><div class="ttname"><a href="../../d7/d82/struct_c_r_g_b.html">CRGB</a></div><div class="ttdoc">Representation of an RGB pixel (Red, Green, Blue)</div><div class="ttdef"><b>Definition</b> <a href="../../db/dd1/crgb_8h_source.html#l00086">crgb.h:86</a></div></div>
+</div><!-- fragment -->
+<p class="reference">References <a class="el" href="../../d5/db6/range__access_8h_source.html#l00009">begin()</a>, <a class="el" href="../../d4/d06/curr_8h_source.html#l00538">draw()</a>, <a class="el" href="../../d5/db6/range__access_8h_source.html#l00015">end()</a>, <a class="el" href="../../df/d63/type__traits_8h_source.html#l00213">forward()</a>, <a class="el" href="../../d8/d21/_adafruit_bridge_8ino_source.html#l00013">leds</a>, and <a class="el" href="../../d8/dd0/_fire_cylinder_8h_a0cfaf25385886642355a25f291ffd36b.html#a0cfaf25385886642355a25f291ffd36b">timeScale()</a>.</p>
+<div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
+  <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
+<div id="dynsection-0-summary" class="dynsummary" style="display:block;">
+</div>
+<div id="dynsection-0-content" class="dyncontent" style="display:none;">
+<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../d4/d36/namespacefl_a29ae9bad91ab6b7de10679e9325e90f6_a29ae9bad91ab6b7de10679e9325e90f6_cgraph.svg" width="100%" height="586"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
+</div>
+
 </div>
 </div>
 </div><!-- contents -->
@@ -124,7 +184,7 @@ $(function(){initNavTree('d4/d36/namespacefl_a29ae9bad91ab6b7de10679e9325e90f6.h
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li>
-    <li class="footer">Generated on Tue Jun 24 2025 00:58:15 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Fri Aug 22 2025 20:59:36 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

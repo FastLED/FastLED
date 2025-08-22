@@ -1,0 +1,26 @@
+<map id="fl::XYRasterSparse_CRGB::draw" name="fl::XYRasterSparse_CRGB::draw">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,171,147,211"/>
+<area shape="rect" id="Node000002" href="$d4/d06/curr_8h_a251ace8542fe093844e4ed2709e8a3d7.html#a251ace8542fe093844e4ed2709e8a3d7" title=" " alt="" coords="195,179,249,204"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="147,189,181,189,181,194,147,194"/>
+<area shape="rect" id="Node000003" href="$df/d21/classfl_1_1_tile2x2__u8__wrap_a706ef3a4bc4a436faa4c253e26768c23.html#a706ef3a4bc4a436faa4c253e26768c23" title=" " alt="" coords="297,5,467,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="223,178,231,149,245,112,266,73,296,40,302,35,305,39,299,44,271,76,250,114,236,151,229,179"/>
+<area shape="rect" id="Node000004" href="$d7/d82/struct_c_r_g_b_a8b78ce444d74f2bc9e63d83bfd1b17ad.html#a8b78ce444d74f2bc9e63d83bfd1b17ad" title=" " alt="" coords="314,55,450,80"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="227,177,253,134,272,110,296,89,305,83,308,88,299,93,276,114,257,137,232,180"/>
+<area shape="rect" id="Node000025" href="$df/d40/examples_2_corkscrew_2corkscrew_8h_a3ce1eed35210653027031143f1cc1ef4.html#a3ce1eed35210653027031143f1cc1ef4" title=" " alt="" coords="338,104,426,129"/>
+<area shape="poly" id="edge6_Node000002_Node000025" title=" " alt="" coords="237,176,264,157,296,138,323,128,325,133,298,143,267,161,240,181"/>
+<area shape="rect" id="Node000026" href="$d4/d06/curr_8h_afc36fee082a53fb0053c5ff7d1e8ac17.html#afc36fee082a53fb0053c5ff7d1e8ac17" title=" " alt="" coords="330,153,434,179"/>
+<area shape="poly" id="edge7_Node000002_Node000026" title=" " alt="" coords="249,184,316,174,316,179,250,190"/>
+<area shape="rect" id="Node000027" href="$db/df4/_color_boost_8h_aa22bcb97ca40fd9d6445646fb86ebbe3.html#aa22bcb97ca40fd9d6445646fb86ebbe3" title=" " alt="" coords="309,203,455,228"/>
+<area shape="poly" id="edge8_Node000002_Node000027" title=" " alt="" coords="250,193,296,200,295,205,249,198"/>
+<area shape="rect" id="Node000028" href="$d7/d82/struct_c_r_g_b_a271bc2ba8b57b41d0c1cda3eed0eb8da.html#a271bc2ba8b57b41d0c1cda3eed0eb8da" title="Scale down a RGB to N/256ths of its current brightness, using &quot;plain math&quot; dimming rules." alt="" coords="323,252,441,277"/>
+<area shape="poly" id="edge9_Node000002_Node000028" title=" " alt="" coords="242,202,299,237,318,245,316,250,296,242,239,206"/>
+<area shape="rect" id="Node000029" href="$db/df4/_color_boost_8h_ac483a8d410fef50e841e927b0f6b81af.html#ac483a8d410fef50e841e927b0f6b81af" title=" " alt="" coords="311,301,453,327"/>
+<area shape="poly" id="edge11_Node000002_Node000029" title=" " alt="" coords="232,203,258,244,277,267,299,287,311,294,308,298,296,291,273,271,253,247,227,206"/>
+<area shape="rect" id="Node000030" href="$df/d40/examples_2_corkscrew_2corkscrew_8h_a5970e5592b757f2043212998e4add619.html#a5970e5592b757f2043212998e4add619" title=" " alt="" coords="322,351,442,376"/>
+<area shape="poly" id="edge12_Node000002_Node000030" title=" " alt="" coords="229,203,250,267,271,304,299,336,311,344,308,349,296,340,267,307,246,269,224,205"/>
+<area shape="rect" id="Node000005" href="$d7/d82/struct_c_r_g_b_a4b0cc1cfefd9e0c66ea5c6583181df46.html#a4b0cc1cfefd9e0c66ea5c6583181df46" title="Default constructor." alt="" coords="542,177,646,203"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="440,78,468,89,526,127,572,166,568,170,523,131,465,94,438,83"/>
+<area shape="rect" id="Node000006" href="$d4/d5d/structfl_1_1_h_s_v16_a0bd2c0fc64fc34d573637c10b849c320.html#a0bd2c0fc64fc34d573637c10b849c320" title=" " alt="" coords="515,55,673,80"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="450,65,501,65,501,70,450,70"/>
+<area shape="poly" id="edge10_Node000028_Node000005" title=" " alt="" coords="427,249,466,237,548,206,550,210,468,242,428,254"/>
+</map>

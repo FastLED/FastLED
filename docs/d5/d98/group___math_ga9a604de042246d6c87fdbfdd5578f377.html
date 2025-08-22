@@ -135,24 +135,24 @@ $(function(){initNavTree('d5/d98/group___math_ga9a604de042246d6c87fdbfdd5578f377
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>a byte value between a and b, inclusive </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="../../d5/dd1/math8_8h_source.html#l00667">667</a> of file <a class="el" href="../../d5/dd1/math8_8h_source.html">math8.h</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  667</span>                                                                   {</div>
-<div class="line"><span class="lineno">  668</span>    <span class="comment">// This version loses precision in the integer math</span></div>
-<div class="line"><span class="lineno">  669</span>    <span class="comment">// and can actually return results outside of the range</span></div>
-<div class="line"><span class="lineno">  670</span>    <span class="comment">// from a to b.  Its use is not recommended.</span></div>
-<div class="line"><span class="lineno">  671</span>    uint8_t result;</div>
-<div class="line"><span class="lineno">  672</span>    uint8_t amountOfA = 255 - amountOfB;</div>
-<div class="line"><span class="lineno">  673</span>    result = <a class="code hl_function" href="../../d0/da5/group___scaling_dirty_ga7386235cada3aca429b189681d2ec56d.html#ga7386235cada3aca429b189681d2ec56d">scale8_LEAVING_R1_DIRTY</a>(a, amountOfA) +</div>
-<div class="line"><span class="lineno">  674</span>             <a class="code hl_function" href="../../d0/da5/group___scaling_dirty_ga7386235cada3aca429b189681d2ec56d.html#ga7386235cada3aca429b189681d2ec56d">scale8_LEAVING_R1_DIRTY</a>(b, amountOfB);</div>
-<div class="line"><span class="lineno">  675</span>    <a class="code hl_function" href="../../d0/da5/group___scaling_dirty_ga3fade00fb4cf5b937b973128198a7a79.html#ga3fade00fb4cf5b937b973128198a7a79">cleanup_R1</a>();</div>
-<div class="line"><span class="lineno">  676</span>    <span class="keywordflow">return</span> result;</div>
-<div class="line"><span class="lineno">  677</span>}</div>
-<div class="ttc" id="agroup___scaling_dirty_ga3fade00fb4cf5b937b973128198a7a79_html_ga3fade00fb4cf5b937b973128198a7a79"><div class="ttname"><a href="../../d0/da5/group___scaling_dirty_ga3fade00fb4cf5b937b973128198a7a79.html#ga3fade00fb4cf5b937b973128198a7a79">cleanup_R1</a></div><div class="ttdeci">LIB8STATIC_ALWAYS_INLINE void cleanup_R1()</div><div class="ttdoc">Clean up the r1 register after a series of *LEAVING_R1_DIRTY calls.</div><div class="ttdef"><b>Definition</b> <a href="../../db/d91/scale8_8h_source.html#l00339">scale8.h:339</a></div></div>
-<div class="ttc" id="agroup___scaling_dirty_ga7386235cada3aca429b189681d2ec56d_html_ga7386235cada3aca429b189681d2ec56d"><div class="ttname"><a href="../../d0/da5/group___scaling_dirty_ga7386235cada3aca429b189681d2ec56d.html#ga7386235cada3aca429b189681d2ec56d">scale8_LEAVING_R1_DIRTY</a></div><div class="ttdeci">LIB8STATIC_ALWAYS_INLINE uint8_t scale8_LEAVING_R1_DIRTY(uint8_t i, fract8 scale)</div><div class="ttdoc">This version of scale8() does not clean up the R1 register on AVR.</div><div class="ttdef"><b>Definition</b> <a href="../../db/d91/scale8_8h_source.html#l00176">scale8.h:176</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../d5/dd1/math8_8h_source.html#l00683">683</a> of file <a class="el" href="../../d5/dd1/math8_8h_source.html">math8.h</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  683</span>                                                                   {</div>
+<div class="line"><span class="lineno">  684</span>    <span class="comment">// This version loses precision in the integer math</span></div>
+<div class="line"><span class="lineno">  685</span>    <span class="comment">// and can actually return results outside of the range</span></div>
+<div class="line"><span class="lineno">  686</span>    <span class="comment">// from a to b.  Its use is not recommended.</span></div>
+<div class="line"><span class="lineno">  687</span>    uint8_t result;</div>
+<div class="line"><span class="lineno">  688</span>    uint8_t amountOfA = 255 - amountOfB;</div>
+<div class="line"><span class="lineno">  689</span>    result = <a class="code hl_function" href="../../d0/da5/group___scaling_dirty_ga7386235cada3aca429b189681d2ec56d.html#ga7386235cada3aca429b189681d2ec56d">scale8_LEAVING_R1_DIRTY</a>(a, amountOfA) +</div>
+<div class="line"><span class="lineno">  690</span>             <a class="code hl_function" href="../../d0/da5/group___scaling_dirty_ga7386235cada3aca429b189681d2ec56d.html#ga7386235cada3aca429b189681d2ec56d">scale8_LEAVING_R1_DIRTY</a>(b, amountOfB);</div>
+<div class="line"><span class="lineno">  691</span>    <a class="code hl_function" href="../../d0/da5/group___scaling_dirty_ga3fade00fb4cf5b937b973128198a7a79.html#ga3fade00fb4cf5b937b973128198a7a79">cleanup_R1</a>();</div>
+<div class="line"><span class="lineno">  692</span>    <span class="keywordflow">return</span> result;</div>
+<div class="line"><span class="lineno">  693</span>}</div>
+<div class="ttc" id="agroup___scaling_dirty_ga3fade00fb4cf5b937b973128198a7a79_html_ga3fade00fb4cf5b937b973128198a7a79"><div class="ttname"><a href="../../d0/da5/group___scaling_dirty_ga3fade00fb4cf5b937b973128198a7a79.html#ga3fade00fb4cf5b937b973128198a7a79">cleanup_R1</a></div><div class="ttdeci">LIB8STATIC_ALWAYS_INLINE void cleanup_R1()</div><div class="ttdoc">Clean up the r1 register after a series of *LEAVING_R1_DIRTY calls.</div><div class="ttdef"><b>Definition</b> <a href="../../db/d91/scale8_8h_source.html#l00343">scale8.h:343</a></div></div>
+<div class="ttc" id="agroup___scaling_dirty_ga7386235cada3aca429b189681d2ec56d_html_ga7386235cada3aca429b189681d2ec56d"><div class="ttname"><a href="../../d0/da5/group___scaling_dirty_ga7386235cada3aca429b189681d2ec56d.html#ga7386235cada3aca429b189681d2ec56d">scale8_LEAVING_R1_DIRTY</a></div><div class="ttdeci">LIB8STATIC_ALWAYS_INLINE uint8_t scale8_LEAVING_R1_DIRTY(uint8_t i, fract8 scale)</div><div class="ttdoc">This version of scale8() does not clean up the R1 register on AVR.</div><div class="ttdef"><b>Definition</b> <a href="../../db/d91/scale8_8h_source.html#l00180">scale8.h:180</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../db/d91/scale8_8h_source.html#l00339">cleanup_R1()</a>, <a class="el" href="../../d4/d7a/lib8static_8h_source.html#l00010">LIB8STATIC</a>, and <a class="el" href="../../db/d91/scale8_8h_source.html#l00176">scale8_LEAVING_R1_DIRTY()</a>.</p>
+<p class="reference">References <a class="el" href="../../db/d91/scale8_8h_source.html#l00343">cleanup_R1()</a>, <a class="el" href="../../d4/d7a/lib8static_8h_source.html#l00010">LIB8STATIC</a>, and <a class="el" href="../../db/d91/scale8_8h_source.html#l00180">scale8_LEAVING_R1_DIRTY()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d0/de3/crgb_8cpp_source.html#l00054">CRGB::blend()</a>, and <a class="el" href="../../da/d2d/colorutils_8cpp_source.html#l00019">fl::nblend()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d0/de3/crgb_8cpp_source.html#l00055">CRGB::blend()</a>, and <a class="el" href="../../da/d2d/colorutils_8cpp_source.html#l00020">fl::nblend()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -177,7 +177,7 @@ $(function(){initNavTree('d5/d98/group___math_ga9a604de042246d6c87fdbfdd5578f377
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d5/d98/group___math.html">Basic Math Operations</a></li>
-    <li class="footer">Generated on Tue Jun 24 2025 00:58:14 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Fri Aug 22 2025 20:59:34 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

@@ -8,7 +8,7 @@ digraph "CRGB::lerp16"
   rankdir="LR";
   Node1 [id="Node000001",label="CRGB::lerp16",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="Return a new CRGB object after performing a linear interpolation between this object and the passed i..."];
   Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
-  Node2 [id="Node000002",label="CRGB::CRGB",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/d82/struct_c_r_g_b_a08d8e05a3fcdb88dedb886cad9cbd3fa.html#a08d8e05a3fcdb88dedb886cad9cbd3fa",tooltip="Default constructor."];
+  Node2 [id="Node000002",label="CRGB::CRGB",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/d82/struct_c_r_g_b_a4b0cc1cfefd9e0c66ea5c6583181df46.html#a4b0cc1cfefd9e0c66ea5c6583181df46",tooltip="Default constructor."];
   Node1 -> Node3 [id="edge2_Node000001_Node000003",color="steelblue1",style="solid",tooltip=" "];
   Node3 [id="Node000003",label="lerp16by16",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/d19/group___linear_interpolation_ga7c02960d0f26e90054c7312e5f9a55b3.html#ga7c02960d0f26e90054c7312e5f9a55b3",tooltip="Linear interpolation between two unsigned 16-bit values, with 16-bit fraction."];
   Node3 -> Node4 [id="edge3_Node000003_Node000004",color="steelblue1",style="solid",tooltip=" "];

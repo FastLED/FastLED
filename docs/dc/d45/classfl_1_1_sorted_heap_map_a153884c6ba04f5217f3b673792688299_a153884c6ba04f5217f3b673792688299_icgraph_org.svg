@@ -24,7 +24,7 @@
 <g id="a_Node000002"><a xlink:href="../../dc/d45/classfl_1_1_sorted_heap_map_ad5bf23df42c2647d0c618fd1f3feed14.html#ad5bf23df42c2647d0c618fd1f3feed14" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="116,-41 0,-41 0,0 116,0 116,-41"/>
 <text text-anchor="start" x="8" y="-29" font-family="Helvetica,sans-Serif" font-size="10.00">fl::SortedHeapMap&lt;</text>
-<text text-anchor="start" x="8" y="-18" font-family="Helvetica,sans-Serif" font-size="10.00"> uint32_t, FramePtr,</text>
+<text text-anchor="start" x="8" y="-18" font-family="Helvetica,sans-Serif" font-size="10.00"> fl::u32, FramePtr,</text>
 <text text-anchor="middle" x="58" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00"> Less &gt;::operator==</text>
 </a>
 </g>

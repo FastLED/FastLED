@@ -1,30 +1,29 @@
 <map id="fl::LineSimplifier&lt; NumberT &gt;" name="fl::LineSimplifier&lt; NumberT &gt;">
-<area shape="rect" id="Node000001" title=" " alt="" coords="1316,69,1443,109"/>
-<area shape="rect" id="Node000002" href="$d6/d6a/classfl_1_1_bitset_inlined.html" title=" " alt="" coords="1058,23,1189,63"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="1203,55,1316,75,1315,80,1202,60"/>
-<area shape="rect" id="Node000003" href="$d6/d6a/classfl_1_1_bitset_inlined.html" title=" " alt="" coords="731,12,891,37"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="905,28,1058,37,1058,42,904,33"/>
-<area shape="rect" id="Node000004" href="$d6/d6a/classfl_1_1_bitset_inlined.html" title="A Bitset implementation with inline storage that can grow if needed." alt="" coords="376,5,536,31"/>
-<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="550,17,731,21,731,26,550,22"/>
-<area shape="rect" id="Node000007" href="$da/d18/classfl_1_1_inlined_vector.html" title=" " alt="" coords="1056,97,1191,152"/>
-<area shape="poly" id="edge4_Node000001_Node000007" title=" " alt="" coords="1204,113,1292,101,1315,97,1316,102,1292,106,1204,118"/>
-<area shape="rect" id="Node000008" href="$d3/d73/classfl_1_1_fixed_vector.html" title=" " alt="" coords="388,55,524,109"/>
-<area shape="poly" id="edge5_Node000007_Node000008" title=" " alt="" coords="538,77,761,78,897,85,1032,99,1056,104,1055,109,1032,105,896,90,761,83,538,82"/>
-<area shape="rect" id="Node000009" href="$da/dc5/structfl_1_1_inlined_memory_block.html" title=" " alt="" coords="5,29,188,69"/>
-<area shape="poly" id="edge6_Node000008_Node000009" title=" " alt="" coords="202,56,388,73,388,78,201,61"/>
-<area shape="rect" id="Node000011" href="$d3/d73/classfl_1_1_fixed_vector.html" title=" " alt="" coords="12,119,181,144"/>
-<area shape="poly" id="edge7_Node000008_Node000011" title=" " alt="" coords="195,123,272,116,352,105,387,97,388,103,352,110,272,121,195,128"/>
-<area shape="rect" id="Node000021" href="$d3/d73/classfl_1_1_fixed_vector.html" title=" " alt="" coords="386,134,526,174"/>
-<area shape="poly" id="edge14_Node000021_Node000011" title=" " alt="" coords="169,144,212,150,303,155,386,154,386,160,303,160,212,155,168,149"/>
-<area shape="rect" id="Node000012" href="$db/ddd/classfl_1_1_heap_vector.html" title=" " alt="" coords="740,222,881,262"/>
-<area shape="poly" id="edge8_Node000007_Node000012" title=" " alt="" coords="883,215,1031,161,1059,150,1061,154,1033,166,885,220"/>
-<area shape="rect" id="Node000013" href="$d5/def/structfl_1_1_pair.html" title=" " alt="" coords="389,199,523,224"/>
-<area shape="poly" id="edge9_Node000012_Node000013" title=" " alt="" coords="537,216,740,233,740,239,537,221"/>
-<area shape="rect" id="Node000017" href="$d8/dcd/classfl_1_1allocator.html" title=" " alt="" coords="389,249,523,289"/>
-<area shape="poly" id="edge10_Node000012_Node000017" title=" " alt="" coords="536,263,706,253,740,249,740,254,707,258,537,269"/>
-<area shape="rect" id="Node000019" href="$db/ddd/classfl_1_1_heap_vector.html" title=" " alt="" coords="386,313,526,353"/>
-<area shape="poly" id="edge11_Node000012_Node000019" title=" " alt="" coords="539,319,620,305,706,283,767,260,769,265,707,289,622,310,540,325"/>
-<area shape="rect" id="Node000020" href="$da/d18/classfl_1_1_inlined_vector.html" title=" " alt="" coords="737,133,884,173"/>
-<area shape="poly" id="edge12_Node000007_Node000020" title=" " alt="" coords="898,142,1056,128,1056,133,898,148"/>
-<area shape="poly" id="edge13_Node000020_Node000021" title=" " alt="" coords="540,151,737,150,737,156,540,156"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="1317,204,1444,244"/>
+<area shape="rect" id="Node000002" href="$da/d18/classfl_1_1_inlined_vector.html" title=" " alt="" coords="1038,154,1173,209"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="1186,191,1318,212,1317,217,1186,196"/>
+<area shape="rect" id="Node000003" href="$d3/d73/classfl_1_1_fixed_vector.html" title=" " alt="" coords="378,31,514,86"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="528,60,624,68,743,82,873,104,1001,133,1050,151,1048,156,999,139,872,109,743,88,624,74,527,66"/>
+<area shape="rect" id="Node000004" href="$da/dc5/structfl_1_1_inlined_memory_block.html" title=" " alt="" coords="5,5,188,45"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="202,33,378,50,378,55,201,38"/>
+<area shape="rect" id="Node000006" href="$d3/d73/classfl_1_1_fixed_vector.html" title=" " alt="" coords="12,95,181,121"/>
+<area shape="poly" id="edge4_Node000003_Node000006" title=" " alt="" coords="195,101,272,94,352,83,377,77,378,82,352,88,273,100,195,106"/>
+<area shape="rect" id="Node000014" href="$d3/d73/classfl_1_1_fixed_vector.html" title=" " alt="" coords="376,111,516,151"/>
+<area shape="poly" id="edge11_Node000014_Node000006" title=" " alt="" coords="169,121,212,127,297,131,376,131,376,136,297,136,212,132,168,126"/>
+<area shape="rect" id="Node000007" href="$db/ddd/classfl_1_1_heap_vector.html" title=" " alt="" coords="714,211,857,251"/>
+<area shape="poly" id="edge5_Node000002_Node000007" title=" " alt="" coords="870,215,1038,189,1038,194,870,220"/>
+<area shape="rect" id="Node000008" href="$d5/db3/structfl_1_1pair.html" title=" " alt="" coords="379,175,513,201"/>
+<area shape="poly" id="edge6_Node000007_Node000008" title=" " alt="" coords="528,195,688,215,714,218,713,223,688,220,527,200"/>
+<area shape="rect" id="Node000010" href="$d8/dcd/classfl_1_1allocator.html" title=" " alt="" coords="379,225,513,265"/>
+<area shape="poly" id="edge7_Node000007_Node000010" title=" " alt="" coords="527,239,714,231,714,236,527,245"/>
+<area shape="rect" id="Node000012" href="$db/ddd/classfl_1_1_heap_vector.html" title=" " alt="" coords="376,296,516,336"/>
+<area shape="poly" id="edge8_Node000007_Node000012" title=" " alt="" coords="529,296,687,257,720,248,721,253,689,263,530,301"/>
+<area shape="rect" id="Node000016" href="$db/ddd/classfl_1_1_heap_vector.html" title=" " alt="" coords="715,288,855,328"/>
+<area shape="poly" id="edge14_Node000016_Node000012" title=" " alt="" coords="530,320,607,322,688,320,715,317,715,322,688,325,607,328,530,325"/>
+<area shape="rect" id="Node000013" href="$da/d18/classfl_1_1_inlined_vector.html" title=" " alt="" coords="712,144,859,184"/>
+<area shape="poly" id="edge9_Node000002_Node000013" title=" " alt="" coords="872,166,1038,175,1038,180,872,171"/>
+<area shape="poly" id="edge10_Node000013_Node000014" title=" " alt="" coords="530,136,712,154,711,159,529,141"/>
+<area shape="rect" id="Node000015" href="$db/ddd/classfl_1_1_heap_vector.html" title=" " alt="" coords="1024,247,1187,287"/>
+<area shape="poly" id="edge12_Node000001_Node000015" title=" " alt="" coords="1200,249,1317,231,1318,236,1201,255"/>
+<area shape="poly" id="edge13_Node000015_Node000016" title=" " alt="" coords="869,295,1023,275,1024,280,870,300"/>
 </map>

@@ -1,0 +1,5 @@
+<map id="fl::promise::is_rejected" name="fl::promise::is_rejected">
+<area shape="rect" id="Node000001" title="Check if promise is rejected (completed with error)" alt="" coords="5,5,176,31"/>
+<area shape="rect" id="Node000002" href="$d1/d21/classfl_1_1promise_a912aa98a2d3d942da9a902f518d57a1a.html#a912aa98a2d3d942da9a902f518d57a1a" title="Check if promise is valid." alt="" coords="224,5,355,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="176,15,210,15,210,21,176,21"/>
+</map>

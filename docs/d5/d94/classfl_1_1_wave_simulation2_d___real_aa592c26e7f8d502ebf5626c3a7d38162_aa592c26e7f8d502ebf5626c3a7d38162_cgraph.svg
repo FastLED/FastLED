@@ -32,7 +32,7 @@
 <!-- Node2 -->
 <g id="Node000002" class="node">
 <title>Node2</title>
-<g id="a_Node000002"><a xlink:href="../../d9/d75/namespacefl_1_1wave__detail_a9ca9a055f84e9653e43a239c491d5108.html#a9ca9a055f84e9653e43a239c491d5108" target="_top" xlink:title=" ">
+<g id="a_Node000002"><a xlink:href="../../d9/d75/namespacefl_1_1wave__detail_a56eca07a74cb918e4002c1e7baa40a5d.html#a56eca07a74cb918e4002c1e7baa40a5d" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="274,-30 158,-30 158,0 274,0 274,-30"/>
 <text text-anchor="start" x="166" y="-18" font-family="Helvetica,sans-Serif" font-size="10.00">fl::wave_detail::float</text>
 <text text-anchor="middle" x="216" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">_to_fixed</text>

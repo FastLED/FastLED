@@ -106,17 +106,20 @@ $(function(){initNavTree('df/d29/dprint_8h_source.html','../../'); initResizable
 <a href="../../df/d29/dprint_8h.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span> </div>
 <div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="preprocessor">#pragma once</span></div>
 <div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span> </div>
-<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span> </div>
-<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="keyword">extern</span> <span class="keywordtype">bool</span> <a class="code hl_variable" href="../../dd/dd5/dprint_8cpp_a05c120132db8916c2e7883c085a6fcaf.html#a05c120132db8916c2e7883c085a6fcaf">is_debugging</a>;</div>
-<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="comment">//#define ENABLE_DPRINT</span></div>
-<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="preprocessor">#ifdef ENABLE_DPRINT</span></div>
-<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="preprocessor"> #define dprint(x) if (is_debugging) { Serial.print(x); }</span></div>
-<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="preprocessor"> #define dprintln(x) if (is_debugging) { Serial.println(x); }</span></div>
-<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="preprocessor">#else</span></div>
-<div class="line"><a id="l00011" name="l00011"></a><span class="lineno"><a class="line" href="../../df/d29/dprint_8h_a1f26413d4abaec9e43e0734dddc1db7a.html#a1f26413d4abaec9e43e0734dddc1db7a">   11</a></span><span class="preprocessor"> #define dprint(x)</span></div>
-<div class="line"><a id="l00012" name="l00012"></a><span class="lineno"><a class="line" href="../../df/d29/dprint_8h_a841cac3f63b25edb3183df5bed0d94d3.html#a841cac3f63b25edb3183df5bed0d94d3">   12</a></span><span class="preprocessor"> #define dprintln(x)</span></div>
-<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="preprocessor">#include &quot;<a class="code" href="../../d8/d4b/unused_8h.html">fl/unused.h</a>&quot;</span></div>
+<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span> </div>
+<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span> </div>
+<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="keyword">extern</span> <span class="keywordtype">bool</span> <a class="code hl_variable" href="../../dd/dd5/dprint_8cpp_a05c120132db8916c2e7883c085a6fcaf.html#a05c120132db8916c2e7883c085a6fcaf">is_debugging</a>;</div>
+<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="comment">//#define ENABLE_DPRINT</span></div>
+<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="preprocessor">#ifdef ENABLE_DPRINT</span></div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="preprocessor"> #define dprint(x) if (is_debugging) { Serial.print(x); }</span></div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="preprocessor"> #define dprintln(x) if (is_debugging) { Serial.println(x); }</span></div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="preprocessor">#else</span></div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno"><a class="line" href="../../df/d29/dprint_8h_a1f26413d4abaec9e43e0734dddc1db7a.html#a1f26413d4abaec9e43e0734dddc1db7a">   13</a></span><span class="preprocessor"> #define dprint(x) FL_UNUSED(x)</span></div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno"><a class="line" href="../../df/d29/dprint_8h_a841cac3f63b25edb3183df5bed0d94d3.html#a841cac3f63b25edb3183df5bed0d94d3">   14</a></span><span class="preprocessor"> #define dprintln(x) FL_UNUSED(x)</span></div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="preprocessor">#endif</span></div>
 <div class="ttc" id="adprint_8cpp_a05c120132db8916c2e7883c085a6fcaf_html_a05c120132db8916c2e7883c085a6fcaf"><div class="ttname"><a href="../../dd/dd5/dprint_8cpp_a05c120132db8916c2e7883c085a6fcaf.html#a05c120132db8916c2e7883c085a6fcaf">is_debugging</a></div><div class="ttdeci">bool is_debugging</div><div class="ttdef"><b>Definition</b> <a href="../../dd/dd5/dprint_8cpp_source.html#l00005">dprint.cpp:5</a></div></div>
+<div class="ttc" id="aunused_8h_html"><div class="ttname"><a href="../../d8/d4b/unused_8h.html">unused.h</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.9.3-->
@@ -124,7 +127,7 @@ $(function(){initNavTree('df/d29/dprint_8h_source.html','../../'); initResizable
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dir_d28a4824dc47e487b107a5db32ef43c4.html">examples</a></li><li class="navelem"><a class="el" href="../../dir_786f9dc3989cf40b3de9df2d18ba04d7.html">LuminescentGrand</a></li><li class="navelem"><a class="el" href="../../dir_82c6f96b5a39b3aa6c2c41086d3f3d73.html">shared</a></li><li class="navelem"><a class="el" href="../../df/d29/dprint_8h.html">dprint.h</a></li>
-    <li class="footer">Generated on Tue Jun 24 2025 00:58:14 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Fri Aug 22 2025 20:59:33 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

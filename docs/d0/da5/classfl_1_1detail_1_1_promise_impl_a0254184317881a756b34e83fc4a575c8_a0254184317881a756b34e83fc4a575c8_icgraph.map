@@ -1,0 +1,15 @@
+<map id="fl::detail::PromiseImpl::process_callbacks" name="fl::detail::PromiseImpl::process_callbacks">
+<area shape="rect" id="Node000001" title="Process pending callbacks." alt="" coords="219,165,384,205"/>
+<area shape="rect" id="Node000002" href="$d0/da5/classfl_1_1detail_1_1_promise_impl_a5e5047d0b011ea0f0fff6aa36a1cb5f5.html#a5e5047d0b011ea0f0fff6aa36a1cb5f5" title="Reject promise with error." alt="" coords="5,5,171,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="273,156,228,107,169,60,148,48,150,43,172,55,231,103,277,153"/>
+<area shape="rect" id="Node000003" href="$d0/da5/classfl_1_1detail_1_1_promise_impl_ab2eb8e7863d25ad67255cf265ac5e7bb.html#ab2eb8e7863d25ad67255cf265ac5e7bb" title="Resolve promise with value." alt="" coords="5,69,171,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="248,161,170,124,141,112,143,107,172,119,251,157"/>
+<area shape="rect" id="Node000004" href="$d0/da5/classfl_1_1detail_1_1_promise_impl_a1e11a17bbbeae6408df85939141e089b.html#a1e11a17bbbeae6408df85939141e089b" title=" " alt="" coords="5,133,171,173"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="205,174,171,168,171,163,206,168"/>
+<area shape="rect" id="Node000005" href="$d0/da5/classfl_1_1detail_1_1_promise_impl_af3956b530aa32fcc0d976beb65eda48a.html#af3956b530aa32fcc0d976beb65eda48a" title="Set error callback." alt="" coords="5,197,171,237"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="206,202,171,208,171,202,205,197"/>
+<area shape="rect" id="Node000006" href="$d0/da5/classfl_1_1detail_1_1_promise_impl_a2eabb6a283524b7a992c19466364efec.html#a2eabb6a283524b7a992c19466364efec" title="Set success callback." alt="" coords="5,261,171,301"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="251,214,172,252,143,264,141,259,170,247,248,209"/>
+<area shape="rect" id="Node000007" href="$d0/da5/classfl_1_1detail_1_1_promise_impl_a036a196a1aa17af85e4ef7dbdd851741.html#a036a196a1aa17af85e4ef7dbdd851741" title="Update promise state &#45; processes callbacks if needed." alt="" coords="5,325,171,365"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="277,218,231,267,172,316,150,328,148,323,169,311,228,263,273,214"/>
+</map>

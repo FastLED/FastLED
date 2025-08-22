@@ -1,0 +1,13 @@
+<map id="fl::detail::is_pointer_like&lt; fl::Ptr&lt; T &gt; &gt;" name="fl::detail::is_pointer_like&lt; fl::Ptr&lt; T &gt; &gt;">
+<area shape="rect" id="Node000001" title=" " alt="" coords="7,309,161,349"/>
+<area shape="rect" id="Node000002" href="$d1/d55/structfl_1_1integral__constant.html" title=" " alt="" coords="32,108,123,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="55,145,36,165,18,191,9,218,8,232,12,246,33,280,60,307,57,311,29,283,7,248,3,232,4,217,14,188,31,162,51,141"/>
+<area shape="rect" id="Node000005" href="$d4/dc1/structfl_1_1detail_1_1is__pointer__like.html" title=" " alt="" coords="21,207,168,247"/>
+<area shape="poly" id="edge6_Node000005_Node000002" title=" " alt="" coords="84,147,94,206,89,207,79,148"/>
+<area shape="rect" id="Node000003" href="$d1/d55/structfl_1_1integral__constant.html" title=" " alt="" coords="69,5,219,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="93,55,81,71,76,89,77,108,72,108,71,89,76,68,89,52"/>
+<area shape="rect" id="Node000004" href="$d1/d55/structfl_1_1integral__constant.html" title=" " alt="" coords="169,157,253,183"/>
+<area shape="poly" id="edge4_Node000004_Node000003" title=" " alt="" coords="175,55,184,68,202,116,211,156,206,158,197,118,179,71,170,58"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="216,196,213,241,206,265,194,287,179,301,162,312,159,307,176,297,190,284,202,263,208,240,210,196"/>
+<area shape="poly" id="edge5_Node000001_Node000005" title=" " alt="" coords="89,261,88,271,86,309,81,309,83,270,84,260"/>
+</map>

@@ -22,7 +22,7 @@
 <!-- Node2 -->
 <g id="Node000002" class="node">
 <title>Node2</title>
-<g id="a_Node000002"><a xlink:href="../../db/df1/structfl_1_1anonymous__namespace_02wave_8cpp_03_1_1_batch_draw_a8a6b1a20cf3d7779f99f5a47bfb95f27.html#a8a6b1a20cf3d7779f99f5a47bfb95f27" target="_top" xlink:title=" ">
+<g id="a_Node000002"><a xlink:href="../../db/df1/structfl_1_1anonymous__namespace_02wave_8cpp_03_1_1_batch_draw_a2709186938dcd339bdec623103ab07bf.html#a2709186938dcd339bdec623103ab07bf" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="166,-35.5 0,-35.5 0,-5.5 166,-5.5 166,-35.5"/>
 <text text-anchor="start" x="8" y="-23.5" font-family="Helvetica,sans-Serif" font-size="10.00">fl::anonymous_namespace</text>
 <text text-anchor="middle" x="83" y="-12.5" font-family="Helvetica,sans-Serif" font-size="10.00">{wave::cpp}::BatchDraw::push</text>

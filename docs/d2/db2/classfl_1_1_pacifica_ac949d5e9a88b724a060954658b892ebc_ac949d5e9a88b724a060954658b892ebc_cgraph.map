@@ -1,23 +1,25 @@
 <map id="fl::Pacifica::pacifica_one_layer" name="fl::Pacifica::pacifica_one_layer">
-<area shape="rect" id="Node000001" title=" " alt="" coords="5,105,151,145"/>
-<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a74e1895d1234ab29fef4458532e91090.html#a74e1895d1234ab29fef4458532e91090" title=" " alt="" coords="199,87,349,113"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="150,113,185,109,185,114,151,119"/>
-<area shape="rect" id="Node000011" href="$d0/da8/group___scaling_ga1ff8ac00ad78e22acc7bb7445bfdb145.html#ga1ff8ac00ad78e22acc7bb7445bfdb145" title="Scale a 16&#45;bit unsigned value by an 16&#45;bit value, which is treated as the numerator of a fraction who..." alt="" coords="238,137,310,162"/>
-<area shape="poly" id="edge11_Node000001_Node000011" title=" " alt="" coords="151,132,224,141,224,146,150,137"/>
-<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a924fc8748f53389e55fdc63bfc14b805.html#a924fc8748f53389e55fdc63bfc14b805" title=" " alt="" coords="397,37,472,62"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="314,85,383,63,385,68,316,90"/>
-<area shape="rect" id="Node000006" href="$d0/da5/group___scaling_dirty_ga3fade00fb4cf5b937b973128198a7a79.html#ga3fade00fb4cf5b937b973128198a7a79" title="Clean up the r1 register after a series of *LEAVING_R1_DIRTY calls." alt="" coords="700,13,797,38"/>
-<area shape="poly" id="edge6_Node000002_Node000006" title=" " alt="" coords="288,85,334,51,364,34,397,21,474,7,552,3,625,6,687,12,686,18,625,11,552,8,474,12,398,27,366,39,337,56,291,89"/>
-<area shape="rect" id="Node000007" href="$d0/da5/group___scaling_dirty_ga7386235cada3aca429b189681d2ec56d.html#ga7386235cada3aca429b189681d2ec56d" title="This version of scale8() does not clean up the R1 register on AVR." alt="" coords="651,62,847,87"/>
-<area shape="poly" id="edge10_Node000002_Node000007" title=" " alt="" coords="349,93,637,78,637,83,350,99"/>
-<area shape="rect" id="Node000008" href="$d4/d36/namespacefl_a8ef00cea89dd1023f79e4d6d33883a40.html#a8ef00cea89dd1023f79e4d6d33883a40" title="Helper function to divide a number by 16, aka four logical shift right (LSR)&#39;s." alt="" coords="399,138,470,163"/>
-<area shape="poly" id="edge7_Node000002_Node000008" title=" " alt="" coords="316,110,387,133,385,138,314,115"/>
-<area shape="rect" id="Node000009" href="$d6/d19/group___linear_interpolation_gaf65357c7aeca9778e5a2f80a6bac2b5d.html#gaf65357c7aeca9778e5a2f80a6bac2b5d" title="Map from one full&#45;range 8&#45;bit value into a narrower range of 8&#45;bit values, possibly a range of hues." alt="" coords="405,187,464,213"/>
-<area shape="poly" id="edge8_Node000002_Node000009" title=" " alt="" coords="327,110,351,122,367,135,376,147,399,174,403,177,400,181,395,178,372,150,363,138,348,126,325,115"/>
-<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_aa1e0cd66825220bead12cfc1ab7f33c6.html#aa1e0cd66825220bead12cfc1ab7f33c6" title=" " alt="" coords="520,37,603,62"/>
-<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="473,47,506,47,506,52,473,52"/>
-<area shape="poly" id="edge4_Node000004_Node000006" title=" " alt="" coords="602,42,686,31,687,36,603,47"/>
-<area shape="poly" id="edge5_Node000004_Node000007" title=" " alt="" coords="603,52,642,58,641,63,602,57"/>
-<area shape="rect" id="Node000010" href="$d0/da8/group___scaling_gad7535ccda9c92470c4e6ee0265585555.html#gad7535ccda9c92470c4e6ee0265585555" title="Scale one byte by a second one, which is treated as the numerator of a fraction whose denominator is ..." alt="" coords="529,187,593,213"/>
-<area shape="poly" id="edge9_Node000009_Node000010" title=" " alt="" coords="464,197,515,197,515,203,464,203"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,136,151,176"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a3d488dd1e2d27e99307310527e51cad3.html#a3d488dd1e2d27e99307310527e51cad3" title=" " alt="" coords="199,118,349,144"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="150,144,185,140,185,145,151,150"/>
+<area shape="rect" id="Node000012" href="$d0/da8/group___scaling_ga1ff8ac00ad78e22acc7bb7445bfdb145.html#ga1ff8ac00ad78e22acc7bb7445bfdb145" title="Scale a 16&#45;bit unsigned value by an 16&#45;bit value, which is treated as the numerator of a fraction who..." alt="" coords="238,168,310,193"/>
+<area shape="poly" id="edge12_Node000001_Node000012" title=" " alt="" coords="151,163,224,172,224,177,150,168"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a924fc8748f53389e55fdc63bfc14b805.html#a924fc8748f53389e55fdc63bfc14b805" title=" " alt="" coords="405,42,480,68"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="302,116,400,71,402,76,304,121"/>
+<area shape="rect" id="Node000006" href="$d0/da5/group___scaling_dirty_ga3fade00fb4cf5b937b973128198a7a79.html#ga3fade00fb4cf5b937b973128198a7a79" title="Clean up the r1 register after a series of *LEAVING_R1_DIRTY calls." alt="" coords="716,18,813,44"/>
+<area shape="poly" id="edge7_Node000002_Node000006" title=" " alt="" coords="283,116,328,70,360,46,396,27,436,15,477,8,560,3,638,7,703,16,702,21,638,12,560,8,478,13,437,21,398,32,363,50,332,74,287,120"/>
+<area shape="rect" id="Node000007" href="$d0/da5/group___scaling_dirty_ga7386235cada3aca429b189681d2ec56d.html#ga7386235cada3aca429b189681d2ec56d" title="This version of scale8() does not clean up the R1 register on AVR." alt="" coords="667,68,863,93"/>
+<area shape="poly" id="edge11_Node000002_Node000007" title=" " alt="" coords="349,121,653,89,653,94,350,126"/>
+<area shape="rect" id="Node000008" href="$da/dc7/advanced_8h_a96d9503945476f13a97c8f406269fcef.html#a96d9503945476f13a97c8f406269fcef" title=" " alt="" coords="397,144,488,169"/>
+<area shape="poly" id="edge6_Node000002_Node000008" title=" " alt="" coords="350,140,384,145,383,150,349,145"/>
+<area shape="rect" id="Node000009" href="$d4/d36/namespacefl_ab169b38b75fd1ab29b3dc61a32497ff1.html#ab169b38b75fd1ab29b3dc61a32497ff1" title="Helper function to divide a number by 16, aka four logical shift right (LSR)&#39;s." alt="" coords="407,193,478,218"/>
+<area shape="poly" id="edge8_Node000002_Node000009" title=" " alt="" coords="320,141,350,153,409,184,406,188,348,157,318,146"/>
+<area shape="rect" id="Node000010" href="$d6/d19/group___linear_interpolation_gaf65357c7aeca9778e5a2f80a6bac2b5d.html#gaf65357c7aeca9778e5a2f80a6bac2b5d" title="Map from one full&#45;range 8&#45;bit value into a narrower range of 8&#45;bit values, possibly a range of hues." alt="" coords="413,242,472,268"/>
+<area shape="poly" id="edge9_Node000002_Node000010" title=" " alt="" coords="331,141,351,153,368,172,377,191,384,210,399,229,403,232,400,236,395,233,380,212,372,193,364,175,348,157,328,146"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_aa1e0cd66825220bead12cfc1ab7f33c6.html#aa1e0cd66825220bead12cfc1ab7f33c6" title=" " alt="" coords="536,42,619,68"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="480,52,522,52,522,58,480,58"/>
+<area shape="poly" id="edge4_Node000004_Node000006" title=" " alt="" coords="618,47,702,36,703,42,619,52"/>
+<area shape="poly" id="edge5_Node000004_Node000007" title=" " alt="" coords="619,58,658,63,657,68,618,63"/>
+<area shape="rect" id="Node000011" href="$d0/da8/group___scaling_gad7535ccda9c92470c4e6ee0265585555.html#gad7535ccda9c92470c4e6ee0265585555" title="Scale one byte by a second one, which is treated as the numerator of a fraction whose denominator is ..." alt="" coords="545,242,609,268"/>
+<area shape="poly" id="edge10_Node000010_Node000011" title=" " alt="" coords="473,252,532,252,532,258,473,258"/>
 </map>

@@ -1,0 +1,30 @@
+digraph "fl::AsyncManager::instance"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="RL";
+  Node1 [id="Node000001",label="fl::AsyncManager::instance",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl::async_active_tasks",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a56974e1806274d7f5ae4908ee357f0f1.html#a56974e1806274d7f5ae4908ee357f0f1",tooltip="Get the number of active async tasks across all systems."];
+  Node1 -> Node3 [id="edge2_Node000001_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::async_has_tasks",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_aed180d94e7fc99eb693c3d520f5faf8e.html#aed180d94e7fc99eb693c3d520f5faf8e",tooltip="Check if any async systems have active tasks."];
+  Node1 -> Node4 [id="edge3_Node000001_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl::async_run",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a9b3631ee5771ef8d36a072368e1d49c7.html#a9b3631ee5771ef8d36a072368e1d49c7",tooltip="Run all registered async tasks once."];
+  Node4 -> Node5 [id="edge4_Node000004_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="fl::async_yield",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a490bb1b7e97181543efd2c62768edda8.html#a490bb1b7e97181543efd2c62768edda8",tooltip="Platform-specific async yield function."];
+  Node5 -> Node6 [id="edge5_Node000005_Node000006",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node6 [id="Node000006",label="fl::await_top_level",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d4/d36/namespacefl_a422168cc1b8dc2e0a10dfedf921ac003.html#a422168cc1b8dc2e0a10dfedf921ac003",tooltip="Synchronously wait for a promise to complete (ONLY safe in top-level contexts)"];
+  Node4 -> Node10 [id="edge6_Node000004_Node000010",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node10 [id="Node000010",label="fl::fetch_update",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a32df246b375c92eca035330e08a84c79.html#a32df246b375c92eca035330e08a84c79",tooltip="Legacy manual update for fetch promises (use fl::async_run() for new code)"];
+  Node4 -> Node11 [id="edge7_Node000004_Node000011",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node11 [id="Node000011",label="loop",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/d1b/examples_2_async_2async_8h_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f",tooltip=" "];
+  Node4 -> Node12 [id="edge8_Node000004_Node000012",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node12 [id="Node000012",label="fl::FetchEngineListener\l::onEndFrame",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/d69/classfl_1_1_fetch_engine_listener_abdd28a0ff482cd6b1a1ee9fb72d5656d.html#abdd28a0ff482cd6b1a1ee9fb72d5656d",tooltip=" "];
+  Node1 -> Node13 [id="edge9_Node000001_Node000013",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node13 [id="Node000013",label="fl::FetchManager::register\l_promise",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d3/d35/classfl_1_1_fetch_manager_ad90db51c87593c14830be13da6fa0136.html#ad90db51c87593c14830be13da6fa0136",tooltip=" "];
+  Node1 -> Node14 [id="edge10_Node000001_Node000014",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node14 [id="Node000014",label="fl::FetchManager::update",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d3/d35/classfl_1_1_fetch_manager_a54544b6df1aaf16db800dc35ac76f1a4.html#a54544b6df1aaf16db800dc35ac76f1a4",tooltip="Update this async runner (called during async pumping)"];
+}

@@ -1,0 +1,14 @@
+<map id="fl::result::value" name="fl::result::value">
+<area shape="rect" id="Node000001" title="Get the success value (const)" alt="" coords="309,80,428,105"/>
+<area shape="rect" id="Node000002" href="$dc/d6d/classfl_1_1result_acc690f602e9ff433fba4c01421d4071a.html#acc690f602e9ff433fba4c01421d4071a" title="Construct a successful result." alt="" coords="123,5,243,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="330,76,260,44,228,33,230,28,262,40,332,71"/>
+<area shape="rect" id="Node000003" href="$dc/d6d/classfl_1_1result_a57861c36ebacc39d97c829d98cc09962.html#a57861c36ebacc39d97c829d98cc09962" title="Construct a successful result (move)" alt="" coords="123,55,243,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="296,85,243,78,243,73,296,80"/>
+<area shape="rect" id="Node000004" href="$d5/dec/_net_test_real_8h_a75e6549812ad7bff897e0c92a225878a.html#a75e6549812ad7bff897e0c92a225878a" title=" " alt="" coords="104,104,261,129"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="296,105,262,109,261,104,296,99"/>
+<area shape="rect" id="Node000006" href="$d5/dec/_net_test_real_8h_a648cd3d90f8e240cbbfe5cb934057124.html#a648cd3d90f8e240cbbfe5cb934057124" title="APPROACH 4: JSON Response with await pattern &#160;&#160;Same JSON handling but using await_top_level for synch..." alt="" coords="121,153,245,179"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="330,114,262,143,227,156,225,151,260,138,328,109"/>
+<area shape="rect" id="Node000005" href="$d5/dec/_net_test_real_8h_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="5,129,56,155"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="93,134,57,140,56,135,92,129"/>
+<area shape="poly" id="edge6_Node000006_Node000005" title=" " alt="" coords="107,157,56,149,57,143,108,151"/>
+</map>

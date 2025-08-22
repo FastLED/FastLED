@@ -1,0 +1,9 @@
+<map id="fadeToBlack" name="fadeToBlack">
+<area shape="rect" id="Node000001" title=" " alt="" coords="277,31,379,56"/>
+<area shape="rect" id="Node000002" href="$db/d49/_audio_2simple_2simple_8h_aa903a30ffabf496d99f9d17151899844.html#aa903a30ffabf496d99f9d17151899844" title=" " alt="" coords="104,5,229,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="263,36,229,30,230,25,264,31"/>
+<area shape="rect" id="Node000003" href="$db/d49/_audio_2simple_2simple_8h_a14465a272f307648128a667b03e3fa31.html#a14465a272f307648128a667b03e3fa31" title=" " alt="" coords="133,55,201,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="265,55,201,65,200,60,264,50"/>
+<area shape="rect" id="Node000004" href="$db/d49/_audio_2simple_2simple_8h_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="5,55,56,80"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="119,70,56,70,56,65,119,65"/>
+</map>

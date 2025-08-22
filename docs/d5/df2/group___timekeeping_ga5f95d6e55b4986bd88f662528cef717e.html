@@ -119,31 +119,31 @@ $(function(){initNavTree('d5/df2/group___timekeeping_ga5f95d6e55b4986bd88f662528
 <p>You'd think this would be just </p><div class="fragment"><div class="line">result = (in32 &gt;&gt; 10) &amp; 0xFFFF;</div>
 </div><!-- fragment --><p> And on ARM, that's what you want and all is well. But on AVR that code turns into a loop that executes a four-byte shift ten times: 40 shifts in all, plus loop overhead. This routine gets exactly the same result with just six shifts (vs 40), and no loop overhead. Used to convert millis to "binary seconds" aka bseconds: one bsecond == 1024 millis. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../df/da5/lib8tion_8h_source.html#l01022">1022</a> of file <a class="el" href="../../df/da5/lib8tion_8h_source.html">lib8tion.h</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno"> 1023</span>{</div>
-<div class="line"><span class="lineno"> 1024</span>    uint16_t out16;</div>
-<div class="line"><span class="lineno"> 1025</span><span class="preprocessor">#if defined(__AVR__)</span></div>
-<div class="line"><span class="lineno"> 1026</span>    <span class="keyword">asm</span> <span class="keyword">volatile</span> (</div>
-<div class="line"><span class="lineno"> 1027</span>        <span class="stringliteral">&quot;  lsr %D[in]  \n\t&quot;</span></div>
-<div class="line"><span class="lineno"> 1028</span>        <span class="stringliteral">&quot;  ror %C[in]  \n\t&quot;</span></div>
-<div class="line"><span class="lineno"> 1029</span>        <span class="stringliteral">&quot;  ror %B[in]  \n\t&quot;</span></div>
-<div class="line"><span class="lineno"> 1030</span>        <span class="stringliteral">&quot;  lsr %D[in]  \n\t&quot;</span></div>
-<div class="line"><span class="lineno"> 1031</span>        <span class="stringliteral">&quot;  ror %C[in]  \n\t&quot;</span></div>
-<div class="line"><span class="lineno"> 1032</span>        <span class="stringliteral">&quot;  ror %B[in]  \n\t&quot;</span></div>
-<div class="line"><span class="lineno"> 1033</span>        <span class="stringliteral">&quot;  mov %B[out],%C[in] \n\t&quot;</span></div>
-<div class="line"><span class="lineno"> 1034</span>        <span class="stringliteral">&quot;  mov %A[out],%B[in] \n\t&quot;</span></div>
-<div class="line"><span class="lineno"> 1035</span>        : [in] <span class="stringliteral">&quot;+r&quot;</span> (in32),</div>
-<div class="line"><span class="lineno"> 1036</span>        [out] <span class="stringliteral">&quot;=r&quot;</span> (out16)</div>
-<div class="line"><span class="lineno"> 1037</span>    );</div>
-<div class="line"><span class="lineno"> 1038</span><span class="preprocessor">#else</span></div>
-<div class="line"><span class="lineno"> 1039</span>    out16 = (in32 &gt;&gt; 10) &amp; 0xFFFF;</div>
-<div class="line"><span class="lineno"> 1040</span><span class="preprocessor">#endif</span></div>
-<div class="line"><span class="lineno"> 1041</span>    <span class="keywordflow">return</span> out16;</div>
-<div class="line"><span class="lineno"> 1042</span>}</div>
+<p class="definition">Definition at line <a class="el" href="../../df/da5/lib8tion_8h_source.html#l00902">902</a> of file <a class="el" href="../../df/da5/lib8tion_8h_source.html">lib8tion.h</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  903</span>{</div>
+<div class="line"><span class="lineno">  904</span>    uint16_t out16;</div>
+<div class="line"><span class="lineno">  905</span><span class="preprocessor">#if defined(__AVR__)</span></div>
+<div class="line"><span class="lineno">  906</span>    <span class="keyword">asm</span> <span class="keyword">volatile</span> (</div>
+<div class="line"><span class="lineno">  907</span>        <span class="stringliteral">&quot;  lsr %D[in]  \n\t&quot;</span></div>
+<div class="line"><span class="lineno">  908</span>        <span class="stringliteral">&quot;  ror %C[in]  \n\t&quot;</span></div>
+<div class="line"><span class="lineno">  909</span>        <span class="stringliteral">&quot;  ror %B[in]  \n\t&quot;</span></div>
+<div class="line"><span class="lineno">  910</span>        <span class="stringliteral">&quot;  lsr %D[in]  \n\t&quot;</span></div>
+<div class="line"><span class="lineno">  911</span>        <span class="stringliteral">&quot;  ror %C[in]  \n\t&quot;</span></div>
+<div class="line"><span class="lineno">  912</span>        <span class="stringliteral">&quot;  ror %B[in]  \n\t&quot;</span></div>
+<div class="line"><span class="lineno">  913</span>        <span class="stringliteral">&quot;  mov %B[out],%C[in] \n\t&quot;</span></div>
+<div class="line"><span class="lineno">  914</span>        <span class="stringliteral">&quot;  mov %A[out],%B[in] \n\t&quot;</span></div>
+<div class="line"><span class="lineno">  915</span>        : [in] <span class="stringliteral">&quot;+r&quot;</span> (in32),</div>
+<div class="line"><span class="lineno">  916</span>        [out] <span class="stringliteral">&quot;=r&quot;</span> (out16)</div>
+<div class="line"><span class="lineno">  917</span>    );</div>
+<div class="line"><span class="lineno">  918</span><span class="preprocessor">#else</span></div>
+<div class="line"><span class="lineno">  919</span>    out16 = (in32 &gt;&gt; 10) &amp; 0xFFFF;</div>
+<div class="line"><span class="lineno">  920</span><span class="preprocessor">#endif</span></div>
+<div class="line"><span class="lineno">  921</span>    <span class="keywordflow">return</span> out16;</div>
+<div class="line"><span class="lineno">  922</span>}</div>
 </div><!-- fragment -->
 <p class="reference">References <a class="el" href="../../d4/d7a/lib8static_8h_source.html#l00010">LIB8STATIC</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../df/da5/lib8tion_8h_source.html#l01047">bseconds16()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../df/da5/lib8tion_8h_source.html#l00927">bseconds16()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the caller graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -161,7 +161,7 @@ $(function(){initNavTree('d5/df2/group___timekeeping_ga5f95d6e55b4986bd88f662528
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d5/df2/group___timekeeping.html">Timekeeping Functions</a></li>
-    <li class="footer">Generated on Tue Jun 24 2025 00:58:15 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Fri Aug 22 2025 20:59:35 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

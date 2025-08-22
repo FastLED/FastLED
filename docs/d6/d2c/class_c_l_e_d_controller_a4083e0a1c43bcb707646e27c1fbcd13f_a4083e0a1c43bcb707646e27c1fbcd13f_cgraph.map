@@ -1,0 +1,7 @@
+<map id="CLEDController::getAdjustment" name="CLEDController::getAdjustment">
+<area shape="rect" id="Node000001" title="Get the combined brightness/color adjustment for this controller." alt="" coords="5,5,229,31"/>
+<area shape="rect" id="Node000002" href="$d7/d82/struct_c_r_g_b_afa1e763c2cf9c1be3be1f77dba809d94.html#afa1e763c2cf9c1be3be1f77dba809d94" title="Calculates the combined color adjustment to the LEDs at a given scale, color correction,..." alt="" coords="277,5,476,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="229,15,263,15,263,21,229,21"/>
+<area shape="rect" id="Node000003" href="$d7/d82/struct_c_r_g_b_a4b0cc1cfefd9e0c66ea5c6583181df46.html#a4b0cc1cfefd9e0c66ea5c6583181df46" title="Default constructor." alt="" coords="524,5,628,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="476,15,510,15,510,21,476,21"/>
+</map>

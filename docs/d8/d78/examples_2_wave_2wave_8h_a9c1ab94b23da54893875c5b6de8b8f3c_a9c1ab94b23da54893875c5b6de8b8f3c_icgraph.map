@@ -1,0 +1,20 @@
+<map id="waveSim" name="waveSim">
+<area shape="rect" id="Node000001" title=" " alt="" coords="357,191,440,217"/>
+<area shape="rect" id="Node000002" href="$d0/da7/classfl_1_1_wave_crgb_gradient_map_a3f367b06e59e5870edd0c448e17132cf.html#a3f367b06e59e5870edd0c448e17132cf" title=" " alt="" coords="113,5,301,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="385,180,355,123,334,92,308,66,277,48,280,43,311,62,338,89,360,120,390,177"/>
+<area shape="rect" id="Node000003" href="$d5/d94/_wave2d_8h_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="5,191,56,217"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="381,181,351,142,331,124,308,110,253,89,206,82,159,88,105,110,82,127,63,149,39,192,35,190,59,146,78,123,103,106,158,83,206,76,254,84,310,106,334,120,355,139,385,178"/>
+<area shape="rect" id="Node000004" href="$d0/da7/classfl_1_1_wave_crgb_gradient_map_a64b47c5974a273ba9eb82eb0b0cd0218.html#a64b47c5974a273ba9eb82eb0b0cd0218" title=" " alt="" coords="113,120,301,160"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="350,189,308,175,272,163,274,158,310,169,351,184"/>
+<area shape="rect" id="Node000005" href="$dc/dce/classfl_1_1_wave_crgb_map_a4e540aecb9e334b7281416dd42b56d44.html#a4e540aecb9e334b7281416dd42b56d44" title=" " alt="" coords="104,184,309,224"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="344,207,310,207,310,201,344,201"/>
+<area shape="rect" id="Node000006" href="$de/d99/classfl_1_1_wave_crgb_map_default_aad5b5500fc88e04447d81d92447b49b3.html#aad5b5500fc88e04447d81d92447b49b3" title=" " alt="" coords="117,248,297,288"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="351,224,310,239,274,250,272,245,308,233,350,219"/>
+<area shape="rect" id="Node000007" href="$d8/d78/examples_2_wave_2wave_8h_a6abe41ca388c9afca0fda9ae263570b2.html#a6abe41ca388c9afca0fda9ae263570b2" title=" " alt="" coords="153,362,260,387"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="391,231,363,293,340,325,311,353,287,366,261,373,260,368,285,361,308,349,336,322,358,290,386,229"/>
+<area shape="rect" id="Node000009" href="$d5/d94/_wave2d_8h_a9d11c16b7caa220080a8c45a73245b14.html#a9d11c16b7caa220080a8c45a73245b14" title=" " alt="" coords="153,313,260,338"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="384,230,353,267,333,286,311,302,286,314,261,321,260,316,284,309,308,298,330,282,349,264,380,226"/>
+<area shape="rect" id="Node000008" href="$d8/d78/examples_2_wave_2wave_8h_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="5,362,56,387"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="140,377,56,377,56,372,140,372"/>
+<area shape="poly" id="edge9_Node000009_Node000003" title=" " alt="" coords="139,318,103,302,80,283,61,260,36,218,40,215,65,257,83,279,105,298,141,314"/>
+</map>

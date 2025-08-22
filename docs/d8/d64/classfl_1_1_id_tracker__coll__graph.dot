@@ -1,0 +1,19 @@
+digraph "fl::IdTracker"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  Node1 [id="Node000001",label="fl::IdTracker",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="Thread-safe ID tracker that maps void* pointers to unique integer IDs."];
+  Node2 -> Node1 [id="edge1_Node000001_Node000002",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" mMutex",fontcolor="grey" ];
+  Node2 [id="Node000002",label="fl::MutexFake\< void \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$df/d98/classfl_1_1_mutex_fake.html",tooltip=" "];
+  Node3 -> Node2 [id="edge2_Node000002_Node000003",dir="back",color="orange",style="dashed",tooltip=" ",label=" \< void \>",fontcolor="grey" ];
+  Node3 [id="Node000003",label="fl::MutexFake\< T \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$df/d98/classfl_1_1_mutex_fake.html",tooltip=" "];
+  Node4 -> Node1 [id="edge3_Node000001_Node000004",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" mPointerToId",fontcolor="grey" ];
+  Node4 [id="Node000004",label="fl::HashMap\< Key, T,\l Hash, KeyEqual \>\< void\l *, int \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$dc/de6/classfl_1_1_hash_map.html",tooltip=" "];
+  Node5 -> Node4 [id="edge4_Node000004_Node000005",dir="back",color="orange",style="dashed",tooltip=" ",label=" \< void *, int \>",fontcolor="grey" ];
+  Node5 [id="Node000005",label="fl::HashMap\< Key, T,\l Hash, KeyEqual \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$dc/de6/classfl_1_1_hash_map.html",tooltip=" "];
+  Node6 -> Node5 [id="edge5_Node000005_Node000006",dir="back",color="orange",style="dashed",tooltip=" ",label=" \< Key, T, Hash, KeyEqual \>",fontcolor="grey" ];
+  Node6 [id="Node000006",label="fl::HashMap\< Key, T,\l Hash, KeyEqual, INLINED\l_COUNT \>",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$dc/de6/classfl_1_1_hash_map.html",tooltip=" "];
+}

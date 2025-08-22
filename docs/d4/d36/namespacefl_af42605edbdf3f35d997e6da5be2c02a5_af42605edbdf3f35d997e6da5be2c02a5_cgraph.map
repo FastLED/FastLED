@@ -1,0 +1,30 @@
+<map id="fl::fetch_get" name="fl::fetch_get">
+<area shape="rect" id="Node000001" title="HTTP GET request." alt="" coords="5,134,104,159"/>
+<area shape="rect" id="Node000002" href="$d2/d49/classfl_1_1fetch__options_a38270ee520d0b35566a972e44006350b.html#a38270ee520d0b35566a972e44006350b" title="Set request body." alt="" coords="161,134,328,159"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="104,144,147,144,147,149,104,149"/>
+<area shape="rect" id="Node000005" href="$d4/d36/namespacefl_a614354323511a444f4f3d295d6a41db8.html#a614354323511a444f4f3d295d6a41db8" title="Internal helper to execute a fetch request and return a promise." alt="" coords="152,249,337,274"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="68,158,104,196,127,216,153,234,170,242,168,246,151,238,124,220,100,199,64,161"/>
+<area shape="rect" id="Node000013" href="$d2/d49/classfl_1_1fetch__options_a541c0709606193eb2057cafa1aa42a29.html#a541c0709606193eb2057cafa1aa42a29" title="Add header." alt="" coords="177,5,312,45"/>
+<area shape="poly" id="edge11_Node000001_Node000013" title=" " alt="" coords="65,132,100,95,151,55,163,48,166,53,153,60,104,98,68,136"/>
+<area shape="rect" id="Node000014" href="$d2/d49/classfl_1_1fetch__options_a79495f6a025bd4851500804ad92f81ba.html#a79495f6a025bd4851500804ad92f81ba" title="Get the options for this request." alt="" coords="177,184,312,224"/>
+<area shape="poly" id="edge13_Node000001_Node000014" title=" " alt="" coords="98,157,165,177,164,182,97,162"/>
+<area shape="rect" id="Node000015" href="$d2/d49/classfl_1_1fetch__options_a1a19b6646176204db31d1ab58cab1e57.html#a1a19b6646176204db31d1ab58cab1e57" title="Set timeout in milliseconds." alt="" coords="177,69,312,109"/>
+<area shape="poly" id="edge14_Node000001_Node000015" title=" " alt="" coords="97,131,164,111,165,116,98,136"/>
+<area shape="rect" id="Node000003" href="$d2/d49/classfl_1_1fetch__options_a73eb354da4d72180fa2092519f04d8d5.html#a73eb354da4d72180fa2092519f04d8d5" title=" " alt="" coords="400,69,535,109"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="294,131,386,107,388,113,295,137"/>
+<area shape="rect" id="Node000004" href="$d2/d49/classfl_1_1fetch__options_a1213ed1a90410e9f7fa52b63f8663041.html#a1213ed1a90410e9f7fa52b63f8663041" title="Get the URL for this request." alt="" coords="597,77,748,102"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="535,87,584,87,584,92,535,92"/>
+<area shape="rect" id="Node000006" href="$d1/d21/classfl_1_1promise_a3e0fb912621e186951d09a10640f407b.html#a3e0fb912621e186951d09a10640f407b" title="Create a resolved promise with value." alt="" coords="394,273,541,298"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="338,269,381,273,380,279,337,274"/>
+<area shape="rect" id="Node000012" href="$d5/d4b/classfl_1_1response_a32fccb19fb4d302d7dc444cf9659c302.html#a32fccb19fb4d302d7dc444cf9659c302" title=" " alt="" coords="385,223,549,249"/>
+<area shape="poly" id="edge10_Node000005_Node000012" title=" " alt="" coords="337,248,372,244,372,249,338,253"/>
+<area shape="rect" id="Node000007" href="$d1/d21/classfl_1_1promise_a39a88af32b89bdcd2ade2da29f3397d5.html#a39a88af32b89bdcd2ade2da29f3397d5" title="Default constructor &#45; creates invalid promise." alt="" coords="796,298,948,323"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="541,287,782,302,782,308,541,293"/>
+<area shape="rect" id="Node000008" href="$d1/d21/classfl_1_1promise_a06ac99cdb6ae08a992c049504a395f06.html#a06ac99cdb6ae08a992c049504a395f06" title="Create a pending promise." alt="" coords="603,323,743,349"/>
+<area shape="poly" id="edge7_Node000006_Node000008" title=" " alt="" coords="520,296,608,317,607,323,519,301"/>
+<area shape="rect" id="Node000010" href="$d1/d21/classfl_1_1promise_a915f95ce14f79b1a74c7c4b74053fdda.html#a915f95ce14f79b1a74c7c4b74053fdda" title="Get the result value (only valid if is_resolved() returns true)" alt="" coords="605,222,740,247"/>
+<area shape="poly" id="edge9_Node000006_Node000010" title=" " alt="" coords="519,270,607,248,608,253,520,275"/>
+<area shape="poly" id="edge8_Node000008_Node000007" title=" " alt="" coords="742,324,782,319,783,325,743,330"/>
+<area shape="poly" id="edge12_Node000013_Node000003" title=" " alt="" coords="313,42,387,64,386,69,311,47"/>
+<area shape="poly" id="edge15_Node000015_Node000003" title=" " alt="" coords="312,87,386,87,386,92,312,92"/>
+</map>

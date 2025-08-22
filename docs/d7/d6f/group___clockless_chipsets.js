@@ -34,6 +34,8 @@ var group___clockless_chipsets =
     [ "SK6822Controller< DATA_PIN, RGB_ORDER >", "db/dc8/class_s_k6822_controller.html", null ],
     [ "SM16703< DATA_PIN, RGB_ORDER >", "dd/d92/class_s_m16703.html", null ],
     [ "SM16703Controller< DATA_PIN, RGB_ORDER >", "de/d77/class_s_m16703_controller.html", null ],
+    [ "SM16824E< DATA_PIN, RGB_ORDER >", "df/daa/class_s_m16824_e.html", null ],
+    [ "SM16824EController< DATA_PIN, RGB_ORDER >", "d5/de7/class_s_m16824_e_controller.html", null ],
     [ "TM1803< DATA_PIN, RGB_ORDER >", "d5/d26/class_t_m1803.html", null ],
     [ "TM1803Controller400Khz< DATA_PIN, RGB_ORDER >", "d0/da8/class_t_m1803_controller400_khz.html", null ],
     [ "TM1804< DATA_PIN, RGB_ORDER >", "d6/d8a/class_t_m1804.html", null ],
@@ -65,6 +67,7 @@ var group___clockless_chipsets =
     [ "WS2815Controller< DATA_PIN, RGB_ORDER >", "de/d5f/class_w_s2815_controller.html", null ],
     [ "WS2816< DATA_PIN, RGB_ORDER >", "dc/d9f/class_w_s2816.html", null ],
     [ "WS2852< DATA_PIN, RGB_ORDER >", "df/d10/class_w_s2852.html", null ],
+    [ "CLOCKLESS_FREQUENCY", "d7/d6f/group___clockless_chipsets_gaf56f7c119dbc6c3babb2ae887b60cc04.html#gaf56f7c119dbc6c3babb2ae887b60cc04", null ],
     [ "FMUL", "d7/d6f/group___clockless_chipsets_ga21e124974d43423655bca453500f8378.html#ga21e124974d43423655bca453500f8378", null ],
     [ "HAS_DMX_SERIAL", "d7/d6f/group___clockless_chipsets_gad25cc7362bddaaf030f656cc924703de.html#gad25cc7362bddaaf030f656cc924703de", null ],
     [ "HAS_DMX_SIMPLE", "d7/d6f/group___clockless_chipsets_ga278b64a1353068fb1562202130337615.html#ga278b64a1353068fb1562202130337615", null ]

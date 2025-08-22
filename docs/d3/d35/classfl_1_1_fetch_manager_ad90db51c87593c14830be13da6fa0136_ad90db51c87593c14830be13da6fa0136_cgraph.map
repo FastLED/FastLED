@@ -1,0 +1,18 @@
+<map id="fl::FetchManager::register_promise" name="fl::FetchManager::register_promise">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,73,193,113"/>
+<area shape="rect" id="Node000002" href="$de/dca/classfl_1_1_engine_events_a0ec4bb952e2d965c309f69af153ce8d3.html#a0ec4bb952e2d965c309f69af153ce8d3" title=" " alt="" coords="241,5,452,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="151,70,241,39,271,31,272,37,242,45,152,75"/>
+<area shape="rect" id="Node000003" href="$d2/d14/classfl_1_1_async_manager_aa67fcf70428a30d47b64dd5fbbcde94e.html#aa67fcf70428a30d47b64dd5fbbcde94e" title=" " alt="" coords="248,55,445,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="193,80,234,76,234,81,194,86"/>
+<area shape="rect" id="Node000005" href="$d4/d36/namespacefl_a2db2912842971bc75bc5528219bedc95.html#a2db2912842971bc75bc5528219bedc95" title=" " alt="" coords="284,104,409,129"/>
+<area shape="poly" id="edge5_Node000001_Node000005" title=" " alt="" coords="194,99,270,107,270,112,193,104"/>
+<area shape="rect" id="Node000007" href="$d2/d14/classfl_1_1_async_manager_ab067de3736a88ec886daafdb6b9046ea.html#ab067de3736a88ec886daafdb6b9046ea" title="Register an async runner." alt="" coords="251,154,443,194"/>
+<area shape="poly" id="edge7_Node000001_Node000007" title=" " alt="" coords="157,110,242,139,267,147,265,152,240,145,155,115"/>
+<area shape="rect" id="Node000004" href="$d9/d5b/classfl_1_1_singleton_a7e65fe8dee6b2a23a8b6138fa2c274cb.html#a7e65fe8dee6b2a23a8b6138fa2c274cb" title=" " alt="" coords="500,55,663,80"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="445,65,486,65,486,70,445,70"/>
+<area shape="poly" id="edge4_Node000004_Node000004" title=" " alt="" coords="543,56,535,46,539,36,555,30,581,28,614,32,627,41,624,46,612,37,581,33,556,35,543,40,540,46,547,53"/>
+<area shape="rect" id="Node000006" href="$d4/d36/namespacefl_aed7245c077ae6f226d13c9ea795694a8.html#aed7245c077ae6f226d13c9ea795694a8" title=" " alt="" coords="537,104,625,129"/>
+<area shape="poly" id="edge6_Node000005_Node000006" title=" " alt="" coords="410,114,524,114,524,119,410,119"/>
+<area shape="rect" id="Node000008" href="$d4/d36/namespacefl_a13d1bba7e6e0ab19d967c1b146313efe.html#a13d1bba7e6e0ab19d967c1b146313efe" title=" " alt="" coords="550,161,613,187"/>
+<area shape="poly" id="edge8_Node000007_Node000008" title=" " alt="" coords="443,171,536,171,536,177,443,177"/>
+</map>

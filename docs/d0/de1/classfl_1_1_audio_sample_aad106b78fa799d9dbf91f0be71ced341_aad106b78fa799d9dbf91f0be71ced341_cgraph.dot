@@ -17,6 +17,6 @@ digraph "fl::AudioSample::rms"
   Node3 -> Node2 [id="edge5_Node000003_Node000002",color="steelblue1",style="solid",tooltip=" "];
   Node1 -> Node1 [id="edge6_Node000001_Node000001",color="steelblue1",style="solid",tooltip=" "];
   Node1 -> Node5 [id="edge7_Node000001_Node000005",color="steelblue1",style="solid",tooltip=" "];
-  Node5 [id="Node000005",label="fl::AudioSample::size",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/de1/classfl_1_1_audio_sample_addc477c77925ca41c4c1597efbfb2204.html#addc477c77925ca41c4c1597efbfb2204",tooltip=" "];
+  Node5 [id="Node000005",label="fl::AudioSample::size",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/de1/classfl_1_1_audio_sample_a487aa2e70e20c9531a2603e26ea15d62.html#a487aa2e70e20c9531a2603e26ea15d62",tooltip=" "];
   Node5 -> Node2 [id="edge8_Node000005_Node000002",color="steelblue1",style="solid",tooltip=" "];
 }

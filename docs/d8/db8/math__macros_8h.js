@@ -14,5 +14,8 @@ var math__macros_8h =
     [ "MAX", "d8/db8/math__macros_8h_afa99ec4acc4ecb2dc3c2d05da15d0e3f.html#afa99ec4acc4ecb2dc3c2d05da15d0e3f", null ],
     [ "MIN", "d8/db8/math__macros_8h_a3acffbd305ee72dcd4593c0d8af64a4f.html#a3acffbd305ee72dcd4593c0d8af64a4f", null ],
     [ "PI", "d8/db8/math__macros_8h_a598a3330b3c21701223ee0ca14316eca.html#a598a3330b3c21701223ee0ca14316eca", null ],
-    [ "fl::fl_abs", "d4/d36/namespacefl_a37eb210c0692e8e71004a6b2edfe6c0b.html#a37eb210c0692e8e71004a6b2edfe6c0b", null ]
+    [ "fl::fl_abs", "d4/d36/namespacefl_a37eb210c0692e8e71004a6b2edfe6c0b.html#a37eb210c0692e8e71004a6b2edfe6c0b", null ],
+    [ "fl::FL_DISABLE_WARNING", "d4/d36/namespacefl_a002344e834b0375e76ae823bd488d289.html#a002344e834b0375e76ae823bd488d289", null ],
+    [ "fl::fl_max", "d4/d36/namespacefl_a486349f0901f5cf84e65769cc1b854cd.html#a486349f0901f5cf84e65769cc1b854cd", null ],
+    [ "fl::fl_min", "d4/d36/namespacefl_a47dce91f91c991288fe7edefe2137bcf.html#a47dce91f91c991288fe7edefe2137bcf", null ]
 ];

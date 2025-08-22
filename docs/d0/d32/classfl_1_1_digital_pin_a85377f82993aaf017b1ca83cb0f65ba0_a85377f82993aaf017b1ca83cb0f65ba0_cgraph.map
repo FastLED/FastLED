@@ -2,5 +2,7 @@
 <area shape="rect" id="Node000001" title=" " alt="" coords="5,29,180,55"/>
 <area shape="rect" id="Node000002" href="$d0/d32/classfl_1_1_digital_pin_ae034367cbe43c3a93a34d68d936c8107.html#ae034367cbe43c3a93a34d68d936c8107" title=" " alt="" coords="228,29,400,55"/>
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="180,39,214,39,214,45,180,45"/>
-<area shape="poly" id="edge2_Node000002_Node000002" title=" " alt="" coords="278,31,270,21,274,11,289,5,314,3,345,6,357,15,354,20,343,11,314,8,290,10,278,15,275,20,282,28"/>
+<area shape="poly" id="edge2_Node000002_Node000002" title=" " alt="" coords="282,31,275,21,279,11,292,5,314,3,341,6,352,15,349,19,339,11,314,8,293,10,282,15,280,20,286,28"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a87ae8a24cc8b709a64f39370e71846af.html#a87ae8a24cc8b709a64f39370e71846af" title=" " alt="" coords="448,29,573,55"/>
+<area shape="poly" id="edge3_Node000002_Node000003" title=" " alt="" coords="400,39,434,39,434,45,400,45"/>
 </map>

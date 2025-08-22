@@ -124,36 +124,36 @@ $(function(){initNavTree('db/d37/class_keyboard_state_af3b786ba848c2366f40115cd8
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d9/d5c/_keyboard_8cpp_source.html#l00149">149</a> of file <a class="el" href="../../d9/d5c/_keyboard_8cpp_source.html">Keyboard.cpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  149</span>                                                                               {</div>
-<div class="line"><span class="lineno">  150</span><span class="preprocessor">#ifdef DEBUG_KEYBOARD</span></div>
-<div class="line"><span class="lineno">  151</span>  <a class="code hl_define" href="../../df/d29/dprint_8h_a1f26413d4abaec9e43e0734dddc1db7a.html#a1f26413d4abaec9e43e0734dddc1db7a">dprint</a>(<span class="stringliteral">&quot;HandleNoteOff:&quot;</span>);</div>
-<div class="line"><span class="lineno">  152</span>  </div>
-<div class="line"><span class="lineno">  153</span>  <a class="code hl_define" href="../../df/d29/dprint_8h_a1f26413d4abaec9e43e0734dddc1db7a.html#a1f26413d4abaec9e43e0734dddc1db7a">dprint</a>(<span class="stringliteral">&quot;midi_note = &quot;</span>);</div>
-<div class="line"><span class="lineno">  154</span>  <a class="code hl_define" href="../../df/d29/dprint_8h_a1f26413d4abaec9e43e0734dddc1db7a.html#a1f26413d4abaec9e43e0734dddc1db7a">dprint</a>(midi_note);</div>
-<div class="line"><span class="lineno">  155</span>  </div>
-<div class="line"><span class="lineno">  156</span>  <a class="code hl_define" href="../../df/d29/dprint_8h_a1f26413d4abaec9e43e0734dddc1db7a.html#a1f26413d4abaec9e43e0734dddc1db7a">dprint</a>(<span class="stringliteral">&quot;, velocity = &quot;</span>);</div>
-<div class="line"><span class="lineno">  157</span>  <a class="code hl_define" href="../../df/d29/dprint_8h_a841cac3f63b25edb3183df5bed0d94d3.html#a841cac3f63b25edb3183df5bed0d94d3">dprintln</a>(velocity);</div>
-<div class="line"><span class="lineno">  158</span><span class="preprocessor">#endif</span></div>
+<p class="definition">Definition at line <a class="el" href="../../d9/d5c/_keyboard_8cpp_source.html#l00147">147</a> of file <a class="el" href="../../d9/d5c/_keyboard_8cpp_source.html">Keyboard.cpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  147</span>                                                                               {</div>
+<div class="line"><span class="lineno">  148</span><span class="preprocessor">#ifdef DEBUG_KEYBOARD</span></div>
+<div class="line"><span class="lineno">  149</span>  <a class="code hl_define" href="../../df/d29/dprint_8h_a1f26413d4abaec9e43e0734dddc1db7a.html#a1f26413d4abaec9e43e0734dddc1db7a">dprint</a>(<span class="stringliteral">&quot;HandleNoteOff:&quot;</span>);</div>
+<div class="line"><span class="lineno">  150</span>  </div>
+<div class="line"><span class="lineno">  151</span>  <a class="code hl_define" href="../../df/d29/dprint_8h_a1f26413d4abaec9e43e0734dddc1db7a.html#a1f26413d4abaec9e43e0734dddc1db7a">dprint</a>(<span class="stringliteral">&quot;midi_note = &quot;</span>);</div>
+<div class="line"><span class="lineno">  152</span>  <a class="code hl_define" href="../../df/d29/dprint_8h_a1f26413d4abaec9e43e0734dddc1db7a.html#a1f26413d4abaec9e43e0734dddc1db7a">dprint</a>(midi_note);</div>
+<div class="line"><span class="lineno">  153</span>  </div>
+<div class="line"><span class="lineno">  154</span>  <a class="code hl_define" href="../../df/d29/dprint_8h_a1f26413d4abaec9e43e0734dddc1db7a.html#a1f26413d4abaec9e43e0734dddc1db7a">dprint</a>(<span class="stringliteral">&quot;, velocity = &quot;</span>);</div>
+<div class="line"><span class="lineno">  155</span>  <a class="code hl_define" href="../../df/d29/dprint_8h_a841cac3f63b25edb3183df5bed0d94d3.html#a841cac3f63b25edb3183df5bed0d94d3">dprintln</a>(velocity);</div>
+<div class="line"><span class="lineno">  156</span><span class="preprocessor">#endif</span></div>
+<div class="line"><span class="lineno">  157</span> </div>
+<div class="line"><span class="lineno">  158</span>  Key* key = <a class="code hl_function" href="../../db/d37/class_keyboard_state_aabaa53bea4f73d33d643c297b199c496.html#aabaa53bea4f73d33d643c297b199c496">GetKey</a>(midi_note);</div>
 <div class="line"><span class="lineno">  159</span> </div>
-<div class="line"><span class="lineno">  160</span>  Key* key = <a class="code hl_function" href="../../db/d37/class_keyboard_state_aabaa53bea4f73d33d643c297b199c496.html#aabaa53bea4f73d33d643c297b199c496">GetKey</a>(midi_note);</div>
-<div class="line"><span class="lineno">  161</span> </div>
-<div class="line"><span class="lineno">  162</span>  <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../db/d37/class_keyboard_state_a9d646ca8c490219be924db314c6e3e1c.html#a9d646ca8c490219be924db314c6e3e1c">sustain_pedal_</a>) {</div>
-<div class="line"><span class="lineno">  163</span>    key-&gt;<a class="code hl_function" href="../../db/d42/struct_key_a2280240471eb2ce07a8199d9f48b97b1.html#a2280240471eb2ce07a8199d9f48b97b1">SetSustained</a>();</div>
-<div class="line"><span class="lineno">  164</span>  } <span class="keywordflow">else</span> {</div>
-<div class="line"><span class="lineno">  165</span>    key-&gt;<a class="code hl_function" href="../../db/d42/struct_key_a03534d492ab55aa8e9c24165e76b4356.html#a03534d492ab55aa8e9c24165e76b4356">SetOff</a>(now_ms);</div>
-<div class="line"><span class="lineno">  166</span>  }</div>
-<div class="line"><span class="lineno">  167</span>}</div>
+<div class="line"><span class="lineno">  160</span>  <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../db/d37/class_keyboard_state_a9d646ca8c490219be924db314c6e3e1c.html#a9d646ca8c490219be924db314c6e3e1c">sustain_pedal_</a>) {</div>
+<div class="line"><span class="lineno">  161</span>    key-&gt;<a class="code hl_function" href="../../db/d42/struct_key_a2280240471eb2ce07a8199d9f48b97b1.html#a2280240471eb2ce07a8199d9f48b97b1">SetSustained</a>();</div>
+<div class="line"><span class="lineno">  162</span>  } <span class="keywordflow">else</span> {</div>
+<div class="line"><span class="lineno">  163</span>    key-&gt;<a class="code hl_function" href="../../db/d42/struct_key_a03534d492ab55aa8e9c24165e76b4356.html#a03534d492ab55aa8e9c24165e76b4356">SetOff</a>(now_ms);</div>
+<div class="line"><span class="lineno">  164</span>  }</div>
+<div class="line"><span class="lineno">  165</span>}</div>
 <div class="ttc" id="aclass_keyboard_state_a9d646ca8c490219be924db314c6e3e1c_html_a9d646ca8c490219be924db314c6e3e1c"><div class="ttname"><a href="../../db/d37/class_keyboard_state_a9d646ca8c490219be924db314c6e3e1c.html#a9d646ca8c490219be924db314c6e3e1c">KeyboardState::sustain_pedal_</a></div><div class="ttdeci">bool sustain_pedal_</div><div class="ttdef"><b>Definition</b> <a href="../../df/d85/_keyboard_8h_source.html#l00102">Keyboard.h:102</a></div></div>
-<div class="ttc" id="aclass_keyboard_state_aabaa53bea4f73d33d643c297b199c496_html_aabaa53bea4f73d33d643c297b199c496"><div class="ttname"><a href="../../db/d37/class_keyboard_state_aabaa53bea4f73d33d643c297b199c496.html#aabaa53bea4f73d33d643c297b199c496">KeyboardState::GetKey</a></div><div class="ttdeci">Key * GetKey(int midi_pitch)</div><div class="ttdef"><b>Definition</b> <a href="../../d9/d5c/_keyboard_8cpp_source.html#l00207">Keyboard.cpp:207</a></div></div>
-<div class="ttc" id="adprint_8h_a1f26413d4abaec9e43e0734dddc1db7a_html_a1f26413d4abaec9e43e0734dddc1db7a"><div class="ttname"><a href="../../df/d29/dprint_8h_a1f26413d4abaec9e43e0734dddc1db7a.html#a1f26413d4abaec9e43e0734dddc1db7a">dprint</a></div><div class="ttdeci">#define dprint(x)</div><div class="ttdef"><b>Definition</b> <a href="../../df/d29/dprint_8h_source.html#l00011">dprint.h:11</a></div></div>
-<div class="ttc" id="adprint_8h_a841cac3f63b25edb3183df5bed0d94d3_html_a841cac3f63b25edb3183df5bed0d94d3"><div class="ttname"><a href="../../df/d29/dprint_8h_a841cac3f63b25edb3183df5bed0d94d3.html#a841cac3f63b25edb3183df5bed0d94d3">dprintln</a></div><div class="ttdeci">#define dprintln(x)</div><div class="ttdef"><b>Definition</b> <a href="../../df/d29/dprint_8h_source.html#l00012">dprint.h:12</a></div></div>
-<div class="ttc" id="astruct_key_a03534d492ab55aa8e9c24165e76b4356_html_a03534d492ab55aa8e9c24165e76b4356"><div class="ttname"><a href="../../db/d42/struct_key_a03534d492ab55aa8e9c24165e76b4356.html#a03534d492ab55aa8e9c24165e76b4356">Key::SetOff</a></div><div class="ttdeci">void SetOff(uint32_t now_ms)</div><div class="ttdef"><b>Definition</b> <a href="../../d9/d5c/_keyboard_8cpp_source.html#l00025">Keyboard.cpp:25</a></div></div>
-<div class="ttc" id="astruct_key_a2280240471eb2ce07a8199d9f48b97b1_html_a2280240471eb2ce07a8199d9f48b97b1"><div class="ttname"><a href="../../db/d42/struct_key_a2280240471eb2ce07a8199d9f48b97b1.html#a2280240471eb2ce07a8199d9f48b97b1">Key::SetSustained</a></div><div class="ttdeci">void SetSustained()</div><div class="ttdef"><b>Definition</b> <a href="../../d9/d5c/_keyboard_8cpp_source.html#l00032">Keyboard.cpp:32</a></div></div>
+<div class="ttc" id="aclass_keyboard_state_aabaa53bea4f73d33d643c297b199c496_html_aabaa53bea4f73d33d643c297b199c496"><div class="ttname"><a href="../../db/d37/class_keyboard_state_aabaa53bea4f73d33d643c297b199c496.html#aabaa53bea4f73d33d643c297b199c496">KeyboardState::GetKey</a></div><div class="ttdeci">Key * GetKey(int midi_pitch)</div><div class="ttdef"><b>Definition</b> <a href="../../d9/d5c/_keyboard_8cpp_source.html#l00208">Keyboard.cpp:208</a></div></div>
+<div class="ttc" id="adprint_8h_a1f26413d4abaec9e43e0734dddc1db7a_html_a1f26413d4abaec9e43e0734dddc1db7a"><div class="ttname"><a href="../../df/d29/dprint_8h_a1f26413d4abaec9e43e0734dddc1db7a.html#a1f26413d4abaec9e43e0734dddc1db7a">dprint</a></div><div class="ttdeci">#define dprint(x)</div><div class="ttdef"><b>Definition</b> <a href="../../df/d29/dprint_8h_source.html#l00013">dprint.h:13</a></div></div>
+<div class="ttc" id="adprint_8h_a841cac3f63b25edb3183df5bed0d94d3_html_a841cac3f63b25edb3183df5bed0d94d3"><div class="ttname"><a href="../../df/d29/dprint_8h_a841cac3f63b25edb3183df5bed0d94d3.html#a841cac3f63b25edb3183df5bed0d94d3">dprintln</a></div><div class="ttdeci">#define dprintln(x)</div><div class="ttdef"><b>Definition</b> <a href="../../df/d29/dprint_8h_source.html#l00014">dprint.h:14</a></div></div>
+<div class="ttc" id="astruct_key_a03534d492ab55aa8e9c24165e76b4356_html_a03534d492ab55aa8e9c24165e76b4356"><div class="ttname"><a href="../../db/d42/struct_key_a03534d492ab55aa8e9c24165e76b4356.html#a03534d492ab55aa8e9c24165e76b4356">Key::SetOff</a></div><div class="ttdeci">void SetOff(uint32_t now_ms)</div><div class="ttdef"><b>Definition</b> <a href="../../d9/d5c/_keyboard_8cpp_source.html#l00023">Keyboard.cpp:23</a></div></div>
+<div class="ttc" id="astruct_key_a2280240471eb2ce07a8199d9f48b97b1_html_a2280240471eb2ce07a8199d9f48b97b1"><div class="ttname"><a href="../../db/d42/struct_key_a2280240471eb2ce07a8199d9f48b97b1.html#a2280240471eb2ce07a8199d9f48b97b1">Key::SetSustained</a></div><div class="ttdeci">void SetSustained()</div><div class="ttdef"><b>Definition</b> <a href="../../d9/d5c/_keyboard_8cpp_source.html#l00030">Keyboard.cpp:30</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../df/d29/dprint_8h_source.html#l00011">dprint</a>, <a class="el" href="../../df/d29/dprint_8h_source.html#l00012">dprintln</a>, <a class="el" href="../../d9/d5c/_keyboard_8cpp_source.html#l00207">GetKey()</a>, <a class="el" href="../../d9/d5c/_keyboard_8cpp_source.html#l00025">Key::SetOff()</a>, <a class="el" href="../../d9/d5c/_keyboard_8cpp_source.html#l00032">Key::SetSustained()</a>, and <a class="el" href="../../df/d85/_keyboard_8h_source.html#l00102">sustain_pedal_</a>.</p>
+<p class="reference">References <a class="el" href="../../df/d29/dprint_8h_source.html#l00013">dprint</a>, <a class="el" href="../../df/d29/dprint_8h_source.html#l00014">dprintln</a>, <a class="el" href="../../d9/d5c/_keyboard_8cpp_source.html#l00208">GetKey()</a>, <a class="el" href="../../d9/d5c/_keyboard_8cpp_source.html#l00023">Key::SetOff()</a>, <a class="el" href="../../d9/d5c/_keyboard_8cpp_source.html#l00030">Key::SetSustained()</a>, and <a class="el" href="../../df/d85/_keyboard_8h_source.html#l00102">sustain_pedal_</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d9/d5c/_keyboard_8cpp_source.html#l00116">HandleNoteOn()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d9/d5c/_keyboard_8cpp_source.html#l00114">HandleNoteOn()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -178,7 +178,7 @@ $(function(){initNavTree('db/d37/class_keyboard_state_af3b786ba848c2366f40115cd8
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../db/d37/class_keyboard_state.html">KeyboardState</a></li>
-    <li class="footer">Generated on Tue Jun 24 2025 00:58:15 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Fri Aug 22 2025 20:59:35 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

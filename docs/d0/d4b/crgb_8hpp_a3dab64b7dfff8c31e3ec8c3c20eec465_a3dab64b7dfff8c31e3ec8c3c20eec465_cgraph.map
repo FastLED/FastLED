@@ -1,0 +1,7 @@
+<map id="operator%" name="operator%">
+<area shape="rect" id="Node000001" title="Scale using CRGB::nscale8_video()" alt="" coords="5,5,96,31"/>
+<area shape="rect" id="Node000002" href="$d7/d82/struct_c_r_g_b_af4cad72bcd9b925d527a3af3a8d956e6.html#af4cad72bcd9b925d527a3af3a8d956e6" title="Scale down a RGB to N/256ths of it&#39;s current brightness using &quot;video&quot; dimming rules." alt="" coords="144,5,304,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="96,15,130,15,130,21,96,21"/>
+<area shape="rect" id="Node000003" href="$d7/d82/struct_c_r_g_b_a4b0cc1cfefd9e0c66ea5c6583181df46.html#a4b0cc1cfefd9e0c66ea5c6583181df46" title="Default constructor." alt="" coords="352,5,456,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="304,15,338,15,338,21,304,21"/>
+</map>

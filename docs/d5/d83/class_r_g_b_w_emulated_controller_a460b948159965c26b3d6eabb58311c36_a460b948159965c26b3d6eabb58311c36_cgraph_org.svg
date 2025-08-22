@@ -39,7 +39,7 @@
 <!-- Node3 -->
 <g id="Node000003" class="node">
 <title>Node3</title>
-<g id="a_Node000003"><a xlink:href="../../db/d74/struct_rgbw_a99a23acfbc448d69b2f50f87c133efcd.html#a99a23acfbc448d69b2f50f87c133efcd" target="_top" xlink:title=" ">
+<g id="a_Node000003"><a xlink:href="../../db/d74/struct_rgbw_aae6f455908e529f3e0f4c67cd724281f.html#aae6f455908e529f3e0f4c67cd724281f" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="289,-19 183,-19 183,0 289,0 289,-19"/>
 <text text-anchor="middle" x="236" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">Rgbw::size_as_rgb</text>
 </a>

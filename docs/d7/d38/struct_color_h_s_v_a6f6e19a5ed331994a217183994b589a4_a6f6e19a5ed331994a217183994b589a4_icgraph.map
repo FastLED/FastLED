@@ -1,8 +1,10 @@
 <map id="ColorHSV::Set" name="ColorHSV::Set">
-<area shape="rect" id="Node000001" title=" " alt="" coords="204,31,315,56"/>
-<area shape="poly" id="edge3_Node000001_Node000001" title=" " alt="" coords="291,20,282,12,259,9,240,11,231,16,229,22,234,29,230,32,223,22,227,13,239,6,259,4,284,8,294,16"/>
-<area shape="rect" id="Node000002" href="$d7/d38/struct_color_h_s_v_a96b48bdd2929d6171ac9ff48d5842686.html#a96b48bdd2929d6171ac9ff48d5842686" title=" " alt="" coords="5,5,156,31"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="190,36,156,31,157,26,191,31"/>
-<area shape="rect" id="Node000003" href="$d7/d38/struct_color_h_s_v_acc31df9461840708cf1cb3ae1b347caf.html#acc31df9461840708cf1cb3ae1b347caf" title=" " alt="" coords="5,55,156,80"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="191,55,157,60,156,55,190,50"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="209,55,320,80"/>
+<area shape="poly" id="edge4_Node000001_Node000001" title=" " alt="" coords="297,44,287,36,265,33,246,35,236,40,233,46,239,53,235,56,228,46,232,37,244,30,265,28,290,32,300,40"/>
+<area shape="rect" id="Node000002" href="$d7/d38/struct_color_h_s_v_a96b48bdd2929d6171ac9ff48d5842686.html#a96b48bdd2929d6171ac9ff48d5842686" title=" " alt="" coords="8,5,159,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="203,53,130,33,132,28,205,48"/>
+<area shape="rect" id="Node000003" href="$d7/d38/struct_color_h_s_v_acc31df9461840708cf1cb3ae1b347caf.html#acc31df9461840708cf1cb3ae1b347caf" title=" " alt="" coords="8,55,159,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="196,70,159,70,159,65,196,65"/>
+<area shape="rect" id="Node000004" href="$d7/d38/struct_color_h_s_v_a481986bc292103501bd7c5eb6da382c4.html#a481986bc292103501bd7c5eb6da382c4" title=" " alt="" coords="5,104,161,129"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="205,86,132,106,130,101,203,81"/>
 </map>

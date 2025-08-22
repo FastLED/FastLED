@@ -12,5 +12,5 @@ digraph "CPixelLEDController&lt; RGB_ORDER, LANES, MASK &gt;"
   Node3 [id="Node000003",label="CRGB",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d7/d82/struct_c_r_g_b.html",tooltip="Representation of an RGB pixel (Red, Green, Blue)"];
   Node2 -> Node2 [id="edge3_Node000002_Node000002",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" m_pHead\nm_pNext\nm_pTail",fontcolor="grey" ];
   Node4 -> Node2 [id="edge4_Node000002_Node000004",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" mRgbMode",fontcolor="grey" ];
-  Node4 [id="Node000004",label="Rgbw",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$db/d74/struct_rgbw.html",tooltip=" "];
+  Node4 [id="Node000004",label="fl::Rgbw",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d7/d27/structfl_1_1_rgbw.html",tooltip=" "];
 }

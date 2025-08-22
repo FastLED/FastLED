@@ -107,9 +107,9 @@ $(function(){initNavTree('d4/dfe/group___easing_ga2f3ddd2c392eec959a15d86d9c0143
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="../../df/da2/group__lib8tion_gac735bdef91ee1e80778434336a622138.html#gac735bdef91ee1e80778434336a622138">LIB8STATIC</a> <a class="el" href="../../db/d58/group___fractional_types_ga5d6d013429a5b8a09d564d6137217644.html#ga5d6d013429a5b8a09d564d6137217644">fract8</a> ease8InOutApprox </td>
+          <td class="memname"><a class="el" href="../../df/da2/group__lib8tion_gac735bdef91ee1e80778434336a622138.html#gac735bdef91ee1e80778434336a622138">LIB8STATIC</a> <a class="el" href="../../d4/d36/namespacefl_a4f8ec02ccee51aa3af6db05861cdd4e5.html#a4f8ec02ccee51aa3af6db05861cdd4e5">fract8</a> ease8InOutApprox </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="../../db/d58/group___fractional_types_ga5d6d013429a5b8a09d564d6137217644.html#ga5d6d013429a5b8a09d564d6137217644">fract8</a></td>          <td class="paramname"><span class="paramname"><em>i</em></span></td><td>)</td>
+          <td class="paramtype"><a class="el" href="../../d4/d36/namespacefl_a4f8ec02ccee51aa3af6db05861cdd4e5.html#a4f8ec02ccee51aa3af6db05861cdd4e5">fract8</a></td>          <td class="paramname"><span class="paramname"><em>i</em></span></td><td>)</td>
           <td></td>
         </tr>
       </table>
@@ -118,25 +118,25 @@ $(function(){initNavTree('d4/dfe/group___easing_ga2f3ddd2c392eec959a15d86d9c0143
 <p>Fast, rough 8-bit ease-in/ease-out function. </p>
 <p>Shaped approximately like <a class="el" href="../../d4/dfe/group___easing_ga3fa6d71702477e71d7c0dd864eb1d568.html#ga3fa6d71702477e71d7c0dd864eb1d568" title="8-bit cubic ease-in / ease-out function.">ease8InOutCubic()</a>, it's never off by more than a couple of percent from the actual cubic S-curve, and it executes more than twice as fast. Use when the cycles are more important than visual smoothness. Asm version takes around 7 cycles on AVR. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../df/da5/lib8tion_8h_source.html#l00653">653</a> of file <a class="el" href="../../df/da5/lib8tion_8h_source.html">lib8tion.h</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  654</span>{</div>
-<div class="line"><span class="lineno">  655</span>    <span class="keywordflow">if</span>( i &lt; 64) {</div>
-<div class="line"><span class="lineno">  656</span>        <span class="comment">// start with slope 0.5</span></div>
-<div class="line"><span class="lineno">  657</span>        i /= 2;</div>
-<div class="line"><span class="lineno">  658</span>    } <span class="keywordflow">else</span> <span class="keywordflow">if</span>( i &gt; (255 - 64)) {</div>
-<div class="line"><span class="lineno">  659</span>        <span class="comment">// end with slope 0.5</span></div>
-<div class="line"><span class="lineno">  660</span>        i = 255 - i;</div>
-<div class="line"><span class="lineno">  661</span>        i /= 2;</div>
-<div class="line"><span class="lineno">  662</span>        i = 255 - i;</div>
-<div class="line"><span class="lineno">  663</span>    } <span class="keywordflow">else</span> {</div>
-<div class="line"><span class="lineno">  664</span>        <span class="comment">// in the middle, use slope 192/128 = 1.5</span></div>
-<div class="line"><span class="lineno">  665</span>        i -= 64;</div>
-<div class="line"><span class="lineno">  666</span>        i += (i / 2);</div>
-<div class="line"><span class="lineno">  667</span>        i += 32;</div>
-<div class="line"><span class="lineno">  668</span>    }</div>
-<div class="line"><span class="lineno">  669</span> </div>
-<div class="line"><span class="lineno">  670</span>    <span class="keywordflow">return</span> i;</div>
-<div class="line"><span class="lineno">  671</span>}</div>
+<p class="definition">Definition at line <a class="el" href="../../df/da5/lib8tion_8h_source.html#l00533">533</a> of file <a class="el" href="../../df/da5/lib8tion_8h_source.html">lib8tion.h</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  534</span>{</div>
+<div class="line"><span class="lineno">  535</span>    <span class="keywordflow">if</span>( i &lt; 64) {</div>
+<div class="line"><span class="lineno">  536</span>        <span class="comment">// start with slope 0.5</span></div>
+<div class="line"><span class="lineno">  537</span>        i /= 2;</div>
+<div class="line"><span class="lineno">  538</span>    } <span class="keywordflow">else</span> <span class="keywordflow">if</span>( i &gt; (255 - 64)) {</div>
+<div class="line"><span class="lineno">  539</span>        <span class="comment">// end with slope 0.5</span></div>
+<div class="line"><span class="lineno">  540</span>        i = 255 - i;</div>
+<div class="line"><span class="lineno">  541</span>        i /= 2;</div>
+<div class="line"><span class="lineno">  542</span>        i = 255 - i;</div>
+<div class="line"><span class="lineno">  543</span>    } <span class="keywordflow">else</span> {</div>
+<div class="line"><span class="lineno">  544</span>        <span class="comment">// in the middle, use slope 192/128 = 1.5</span></div>
+<div class="line"><span class="lineno">  545</span>        i -= 64;</div>
+<div class="line"><span class="lineno">  546</span>        i += (i / 2);</div>
+<div class="line"><span class="lineno">  547</span>        i += 32;</div>
+<div class="line"><span class="lineno">  548</span>    }</div>
+<div class="line"><span class="lineno">  549</span> </div>
+<div class="line"><span class="lineno">  550</span>    <span class="keywordflow">return</span> i;</div>
+<div class="line"><span class="lineno">  551</span>}</div>
 </div><!-- fragment -->
 <p class="reference">References <a class="el" href="../../d4/d7a/lib8static_8h_source.html#l00010">LIB8STATIC</a>.</p>
 
@@ -149,7 +149,7 @@ $(function(){initNavTree('d4/dfe/group___easing_ga2f3ddd2c392eec959a15d86d9c0143
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/dfe/group___easing.html">Easing Functions</a></li>
-    <li class="footer">Generated on Tue Jun 24 2025 00:58:14 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Fri Aug 22 2025 20:59:34 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

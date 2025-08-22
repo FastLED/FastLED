@@ -1,0 +1,5 @@
+<map id="operator+" name="operator+">
+<area shape="rect" id="Node000001" title="Add one CRGB to another, saturating at 0xFF for each channel." alt="" coords="5,5,93,31"/>
+<area shape="rect" id="Node000002" href="$d5/d98/group___math_ga07133b3085824d0fcd4f5086d286c4b5.html#ga07133b3085824d0fcd4f5086d286c4b5" title="Add one byte to another, saturating at 0xFF." alt="" coords="141,5,204,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="94,15,128,15,128,21,94,21"/>
+</map>

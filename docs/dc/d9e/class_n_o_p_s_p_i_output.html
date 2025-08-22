@@ -109,11 +109,11 @@ $(function(){initNavTree('dc/d9e/class_n_o_p_s_p_i_output.html','../../'); initR
 </div><!--header-->
 <div class="contents">
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><div class="compoundTemplParams">template&lt;uint8_t _DATA_PIN, uint8_t _CLOCK_PIN, uint32_t _SPI_CLOCK_DIVIDER&gt;<br />
+<div class="textblock"><div class="compoundTemplParams">template&lt;<a class="el" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> _DATA_PIN, <a class="el" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> _CLOCK_PIN, uint32_t _SPI_CLOCK_DIVIDER&gt;<br />
 class NOPSPIOutput&lt; _DATA_PIN, _CLOCK_PIN, _SPI_CLOCK_DIVIDER &gt;</div><p>A nop/stub class, mostly to show the SPI methods that are needed/used by the various SPI chipset implementations. </p>
 <p>Should be used as a definition for the set of methods that the spi implementation classes should use (since C++ doesn't support the idea of interfaces - it's possible this could be done with virtual classes, need to decide if i want that overhead) </p>
 
-<p class="definition">Definition at line <a class="el" href="../../d1/d36/fastspi__nop_8h_source.html#l00020">20</a> of file <a class="el" href="../../d1/d36/fastspi__nop_8h_source.html">fastspi_nop.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d1/d36/fastspi__nop_8h_source.html#l00021">21</a> of file <a class="el" href="../../d1/d36/fastspi__nop_8h_source.html">fastspi_nop.h</a>.</p>
 </div>
 <p><code>#include &lt;<a class="el" href="../../d1/d36/fastspi__nop_8h_source.html">fastspi_nop.h</a>&gt;</code></p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
@@ -147,16 +147,16 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a6d1c46106879fc835ad6ba8149b20068" id="r_a6d1c46106879fc835ad6ba8149b20068"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dc/d9e/class_n_o_p_s_p_i_output_a6d1c46106879fc835ad6ba8149b20068.html#a6d1c46106879fc835ad6ba8149b20068">waitFully</a> ()</td></tr>
 <tr class="memdesc:a6d1c46106879fc835ad6ba8149b20068"><td class="mdescLeft">&#160;</td><td class="mdescRight">wait until all queued up data has been written  <br /></td></tr>
 <tr class="separator:a6d1c46106879fc835ad6ba8149b20068"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af5485fc346e12c50480b969e5b242636" id="r_af5485fc346e12c50480b969e5b242636"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dc/d9e/class_n_o_p_s_p_i_output_af5485fc346e12c50480b969e5b242636.html#af5485fc346e12c50480b969e5b242636">writeByte</a> (uint8_t b)</td></tr>
-<tr class="memdesc:af5485fc346e12c50480b969e5b242636"><td class="mdescLeft">&#160;</td><td class="mdescRight">write a byte out via SPI (returns immediately on writing register)  <br /></td></tr>
-<tr class="separator:af5485fc346e12c50480b969e5b242636"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7b33548cfee1f5cda7a8a48fa45ee460" id="r_a7b33548cfee1f5cda7a8a48fa45ee460"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dc/d9e/class_n_o_p_s_p_i_output_a7b33548cfee1f5cda7a8a48fa45ee460.html#a7b33548cfee1f5cda7a8a48fa45ee460">writeBytes</a> (uint8_t *data, int len)</td></tr>
-<tr class="memdesc:a7b33548cfee1f5cda7a8a48fa45ee460"><td class="mdescLeft">&#160;</td><td class="mdescRight">A full cycle of writing a raw block of data out, including select, release, and waiting.  <br /></td></tr>
-<tr class="separator:a7b33548cfee1f5cda7a8a48fa45ee460"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2f8e72323c827eb869b222b5a36ebbc1" id="r_a2f8e72323c827eb869b222b5a36ebbc1"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dc/d9e/class_n_o_p_s_p_i_output_a2f8e72323c827eb869b222b5a36ebbc1.html#a2f8e72323c827eb869b222b5a36ebbc1">writeBytesValue</a> (uint8_t value, int len)</td></tr>
-<tr class="memdesc:a2f8e72323c827eb869b222b5a36ebbc1"><td class="mdescLeft">&#160;</td><td class="mdescRight">A full cycle of writing a value for len bytes, including select, release, and waiting.  <br /></td></tr>
-<tr class="separator:a2f8e72323c827eb869b222b5a36ebbc1"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a36d9217652b6f56522482476e06fd51e" id="r_a36d9217652b6f56522482476e06fd51e"><td class="memTemplParams" colspan="2">template&lt;uint8_t FLAGS, class D, <a class="el" href="../../db/d07/eorder_8h_a3c26d076773aa0f331d3066b46dbc6a4.html#a3c26d076773aa0f331d3066b46dbc6a4">EOrder</a> RGB_ORDER&gt; </td></tr>
+<tr class="memitem:a556216f6f16361ca0bc6b1be4bca6e57" id="r_a556216f6f16361ca0bc6b1be4bca6e57"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dc/d9e/class_n_o_p_s_p_i_output_a556216f6f16361ca0bc6b1be4bca6e57.html#a556216f6f16361ca0bc6b1be4bca6e57">writeByte</a> (<a class="el" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> b)</td></tr>
+<tr class="memdesc:a556216f6f16361ca0bc6b1be4bca6e57"><td class="mdescLeft">&#160;</td><td class="mdescRight">write a byte out via SPI (returns immediately on writing register)  <br /></td></tr>
+<tr class="separator:a556216f6f16361ca0bc6b1be4bca6e57"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1a870e52a6f145f48d9a3913af028de7" id="r_a1a870e52a6f145f48d9a3913af028de7"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dc/d9e/class_n_o_p_s_p_i_output_a1a870e52a6f145f48d9a3913af028de7.html#a1a870e52a6f145f48d9a3913af028de7">writeBytes</a> (<a class="el" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> *data, int len)</td></tr>
+<tr class="memdesc:a1a870e52a6f145f48d9a3913af028de7"><td class="mdescLeft">&#160;</td><td class="mdescRight">A full cycle of writing a raw block of data out, including select, release, and waiting.  <br /></td></tr>
+<tr class="separator:a1a870e52a6f145f48d9a3913af028de7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abab417663858c70008eedd0346a97b04" id="r_abab417663858c70008eedd0346a97b04"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dc/d9e/class_n_o_p_s_p_i_output_abab417663858c70008eedd0346a97b04.html#abab417663858c70008eedd0346a97b04">writeBytesValue</a> (<a class="el" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> value, int len)</td></tr>
+<tr class="memdesc:abab417663858c70008eedd0346a97b04"><td class="mdescLeft">&#160;</td><td class="mdescRight">A full cycle of writing a value for len bytes, including select, release, and waiting.  <br /></td></tr>
+<tr class="separator:abab417663858c70008eedd0346a97b04"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a36d9217652b6f56522482476e06fd51e" id="r_a36d9217652b6f56522482476e06fd51e"><td class="memTemplParams" colspan="2">template&lt;<a class="el" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> FLAGS, class D, <a class="el" href="../../d4/d36/namespacefl_ab289ace8bd149d39b87ebd778e9abe23.html#ab289ace8bd149d39b87ebd778e9abe23">EOrder</a> RGB_ORDER&gt; </td></tr>
 <tr class="memitem:a36d9217652b6f56522482476e06fd51e"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="../../dc/d9e/class_n_o_p_s_p_i_output_a36d9217652b6f56522482476e06fd51e.html#a36d9217652b6f56522482476e06fd51e">writePixels</a> (<a class="el" href="../../d0/dee/struct_pixel_controller.html">PixelController</a>&lt; RGB_ORDER &gt; pixels, void *context=NULL)</td></tr>
 <tr class="memdesc:a36d9217652b6f56522482476e06fd51e"><td class="mdescLeft">&#160;</td><td class="mdescRight">write out pixel data from the given <a class="el" href="../../d0/dee/struct_pixel_controller.html" title="Pixel controller class.">PixelController</a> object  <br /></td></tr>
 <tr class="separator:a36d9217652b6f56522482476e06fd51e"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -166,17 +166,17 @@ Public Member Functions</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-static-methods" name="pub-static-methods"></a>
 Static Public Member Functions</h2></td></tr>
-<tr class="memitem:a9b0cd7fa63b1cff86c61f796aa8a6637" id="r_a9b0cd7fa63b1cff86c61f796aa8a6637"><td class="memTemplParams" colspan="2">template&lt;uint8_t BIT&gt; </td></tr>
-<tr class="memitem:a9b0cd7fa63b1cff86c61f796aa8a6637"><td class="memTemplItemLeft" align="right" valign="top">static void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="../../dc/d9e/class_n_o_p_s_p_i_output_a9b0cd7fa63b1cff86c61f796aa8a6637.html#a9b0cd7fa63b1cff86c61f796aa8a6637">writeBit</a> (uint8_t b)</td></tr>
-<tr class="memdesc:a9b0cd7fa63b1cff86c61f796aa8a6637"><td class="mdescLeft">&#160;</td><td class="mdescRight">not the most efficient mechanism in the world - but should be enough for sm16716 and friends  <br /></td></tr>
-<tr class="separator:a9b0cd7fa63b1cff86c61f796aa8a6637"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9b0cd7fa63b1cff86c61f796aa8a6637" id="r_a9b0cd7fa63b1cff86c61f796aa8a6637"><td class="memTemplParams" colspan="2">template&lt;uint8_t BIT&gt; </td></tr>
-<tr class="memitem:a9b0cd7fa63b1cff86c61f796aa8a6637"><td class="memTemplItemLeft" align="right" valign="top">static void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="../../dc/d9e/class_n_o_p_s_p_i_output_a9b0cd7fa63b1cff86c61f796aa8a6637.html#a9b0cd7fa63b1cff86c61f796aa8a6637">writeBit</a> (uint8_t b)</td></tr>
-<tr class="memdesc:a9b0cd7fa63b1cff86c61f796aa8a6637"><td class="mdescLeft">&#160;</td><td class="mdescRight">write a single bit out, which bit from the passed in byte is determined by template parameter  <br /></td></tr>
-<tr class="separator:a9b0cd7fa63b1cff86c61f796aa8a6637"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7c67ce1f9d44cfcac9b94fa9f097835f" id="r_a7c67ce1f9d44cfcac9b94fa9f097835f"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dc/d9e/class_n_o_p_s_p_i_output_a7c67ce1f9d44cfcac9b94fa9f097835f.html#a7c67ce1f9d44cfcac9b94fa9f097835f">writeBytesValueRaw</a> (uint8_t value, int len)</td></tr>
-<tr class="memdesc:a7c67ce1f9d44cfcac9b94fa9f097835f"><td class="mdescLeft">&#160;</td><td class="mdescRight">A raw set of writing byte values, assumes setup/init/waiting done elsewhere (static for use by adjustment classes)  <br /></td></tr>
-<tr class="separator:a7c67ce1f9d44cfcac9b94fa9f097835f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac23c1250510663d7320cf59ef153ba83" id="r_ac23c1250510663d7320cf59ef153ba83"><td class="memTemplParams" colspan="2">template&lt;<a class="el" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> BIT&gt; </td></tr>
+<tr class="memitem:ac23c1250510663d7320cf59ef153ba83"><td class="memTemplItemLeft" align="right" valign="top">static void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="../../dc/d9e/class_n_o_p_s_p_i_output_ac23c1250510663d7320cf59ef153ba83.html#ac23c1250510663d7320cf59ef153ba83">writeBit</a> (<a class="el" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> b)</td></tr>
+<tr class="memdesc:ac23c1250510663d7320cf59ef153ba83"><td class="mdescLeft">&#160;</td><td class="mdescRight">not the most efficient mechanism in the world - but should be enough for sm16716 and friends  <br /></td></tr>
+<tr class="separator:ac23c1250510663d7320cf59ef153ba83"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac23c1250510663d7320cf59ef153ba83" id="r_ac23c1250510663d7320cf59ef153ba83"><td class="memTemplParams" colspan="2">template&lt;<a class="el" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> BIT&gt; </td></tr>
+<tr class="memitem:ac23c1250510663d7320cf59ef153ba83"><td class="memTemplItemLeft" align="right" valign="top">static void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="../../dc/d9e/class_n_o_p_s_p_i_output_ac23c1250510663d7320cf59ef153ba83.html#ac23c1250510663d7320cf59ef153ba83">writeBit</a> (<a class="el" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> b)</td></tr>
+<tr class="memdesc:ac23c1250510663d7320cf59ef153ba83"><td class="mdescLeft">&#160;</td><td class="mdescRight">write a single bit out, which bit from the passed in byte is determined by template parameter  <br /></td></tr>
+<tr class="separator:ac23c1250510663d7320cf59ef153ba83"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a54612abed6ec87e8ba84ee2fb17c1c62" id="r_a54612abed6ec87e8ba84ee2fb17c1c62"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dc/d9e/class_n_o_p_s_p_i_output_a54612abed6ec87e8ba84ee2fb17c1c62.html#a54612abed6ec87e8ba84ee2fb17c1c62">writeBytesValueRaw</a> (<a class="el" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> value, int len)</td></tr>
+<tr class="memdesc:a54612abed6ec87e8ba84ee2fb17c1c62"><td class="mdescLeft">&#160;</td><td class="mdescRight">A raw set of writing byte values, assumes setup/init/waiting done elsewhere (static for use by adjustment classes)  <br /></td></tr>
+<tr class="separator:a54612abed6ec87e8ba84ee2fb17c1c62"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-attribs" name="pri-attribs"></a>
 Private Attributes</h2></td></tr>
@@ -193,7 +193,7 @@ Private Attributes</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dc/d9e/class_n_o_p_s_p_i_output.html">NOPSPIOutput</a></li>
-    <li class="footer">Generated on Tue Jun 24 2025 00:58:15 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Fri Aug 22 2025 20:59:35 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

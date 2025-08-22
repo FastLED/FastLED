@@ -115,9 +115,9 @@ $(function(){initNavTree('d1/dfb/colorutils_8h_a180d83b9f32efe5825c8612fa8720d79
       </table>
 </div><div class="memdoc">
 <b>Value:</b><div class="fragment"><div class="line">  FL_ALIGN_PROGMEM \</div>
-<div class="line">  extern <span class="keyword">const</span> <a class="code hl_typedef" href="../../dd/db2/colorutils__misc_8h_a5c6ee5f16c2e9dcea972adc5b582218c.html#a5c6ee5f16c2e9dcea972adc5b582218c">TProgmemRGBGradientPalette_byte</a> X[] <a class="code hl_define" href="../../df/dab/fastled__progmem_8h_af4d0ad0021dafa1c293cb3363a82ee8f.html#af4d0ad0021dafa1c293cb3363a82ee8f">FL_PROGMEM</a> =</div>
-<div class="ttc" id="acolorutils__misc_8h_a5c6ee5f16c2e9dcea972adc5b582218c_html_a5c6ee5f16c2e9dcea972adc5b582218c"><div class="ttname"><a href="../../dd/db2/colorutils__misc_8h_a5c6ee5f16c2e9dcea972adc5b582218c.html#a5c6ee5f16c2e9dcea972adc5b582218c">TProgmemRGBGradientPalette_byte</a></div><div class="ttdeci">const uint8_t TProgmemRGBGradientPalette_byte</div><div class="ttdoc">Byte of an RGB gradient, stored in PROGMEM memory.</div><div class="ttdef"><b>Definition</b> <a href="../../dd/db2/colorutils__misc_8h_source.html#l00020">colorutils_misc.h:20</a></div></div>
-<div class="ttc" id="afastled__progmem_8h_af4d0ad0021dafa1c293cb3363a82ee8f_html_af4d0ad0021dafa1c293cb3363a82ee8f"><div class="ttname"><a href="../../df/dab/fastled__progmem_8h_af4d0ad0021dafa1c293cb3363a82ee8f.html#af4d0ad0021dafa1c293cb3363a82ee8f">FL_PROGMEM</a></div><div class="ttdeci">#define FL_PROGMEM</div><div class="ttdoc">PROGMEM keyword for storage.</div><div class="ttdef"><b>Definition</b> <a href="../../df/dab/fastled__progmem_8h_source.html#l00048">fastled_progmem.h:48</a></div></div>
+<div class="line">  extern <span class="keyword">const</span> <a class="code hl_typedef" href="../../dd/db2/colorutils__misc_8h_ac609526d053cb23ca61c11f04f548d21.html#ac609526d053cb23ca61c11f04f548d21">TProgmemRGBGradientPalette_byte</a> X[] <a class="code hl_define" href="../../df/dab/fastled__progmem_8h_af4d0ad0021dafa1c293cb3363a82ee8f.html#af4d0ad0021dafa1c293cb3363a82ee8f">FL_PROGMEM</a> =</div>
+<div class="ttc" id="acolorutils__misc_8h_ac609526d053cb23ca61c11f04f548d21_html_ac609526d053cb23ca61c11f04f548d21"><div class="ttname"><a href="../../dd/db2/colorutils__misc_8h_ac609526d053cb23ca61c11f04f548d21.html#ac609526d053cb23ca61c11f04f548d21">TProgmemRGBGradientPalette_byte</a></div><div class="ttdeci">const fl::u8 TProgmemRGBGradientPalette_byte</div><div class="ttdoc">Byte of an RGB gradient, stored in PROGMEM memory.</div><div class="ttdef"><b>Definition</b> <a href="../../dd/db2/colorutils__misc_8h_source.html#l00021">colorutils_misc.h:21</a></div></div>
+<div class="ttc" id="afastled__progmem_8h_af4d0ad0021dafa1c293cb3363a82ee8f_html_af4d0ad0021dafa1c293cb3363a82ee8f"><div class="ttname"><a href="../../df/dab/fastled__progmem_8h_af4d0ad0021dafa1c293cb3363a82ee8f.html#af4d0ad0021dafa1c293cb3363a82ee8f">FL_PROGMEM</a></div><div class="ttdeci">#define FL_PROGMEM</div><div class="ttdoc">PROGMEM keyword for storage.</div><div class="ttdef"><b>Definition</b> <a href="../../df/dab/fastled__progmem_8h_source.html#l00053">fastled_progmem.h:53</a></div></div>
 </div><!-- fragment -->
 <p>Defines a static RGB palette very compactly using a series of connected color gradients. </p>
 <p>For example, if you want the first 3/4ths of the palette to be a slow gradient ramping from black to red, and then the remaining 1/4 of the palette to be a quicker ramp to white, you specify just three points: the starting black point (at index 0), the red midpoint (at index 192), and the final white point (at index 255). It looks like this: </p><div class="fragment"><div class="line">index:  0                                    192          255</div>
@@ -128,7 +128,7 @@ $(function(){initNavTree('d1/dfb/colorutils_8h_a180d83b9f32efe5825c8612fa8720d79
 <div class="line">    192, 255,   0,   0,  <span class="comment">/* at index 192, red(255,0,0) */</span></div>
 <div class="line">    255, 255, 255, 255   <span class="comment">/* at index 255, white(255,255,255) */</span></div>
 <div class="line">};</div>
-<div class="ttc" id="acolorutils_8h_a180d83b9f32efe5825c8612fa8720d79_html_a180d83b9f32efe5825c8612fa8720d79"><div class="ttname"><a href="#a180d83b9f32efe5825c8612fa8720d79">DEFINE_GRADIENT_PALETTE</a></div><div class="ttdeci">#define DEFINE_GRADIENT_PALETTE(X)</div><div class="ttdoc">Defines a static RGB palette very compactly using a series of connected color gradients.</div><div class="ttdef"><b>Definition</b> <a href="../../d1/dfb/colorutils_8h_source.html#l00112">colorutils.h:112</a></div></div>
+<div class="ttc" id="acolorutils_8h_a180d83b9f32efe5825c8612fa8720d79_html_a180d83b9f32efe5825c8612fa8720d79"><div class="ttname"><a href="#a180d83b9f32efe5825c8612fa8720d79">DEFINE_GRADIENT_PALETTE</a></div><div class="ttdeci">#define DEFINE_GRADIENT_PALETTE(X)</div><div class="ttdoc">Defines a static RGB palette very compactly using a series of connected color gradients.</div><div class="ttdef"><b>Definition</b> <a href="../../d1/dfb/colorutils_8h_source.html#l00121">colorutils.h:121</a></div></div>
 </div><!-- fragment --><p>This format is designed for compact storage. The example palette here takes up just 12 bytes of PROGMEM (flash) storage, and zero bytes of SRAM when not currently in use.</p>
 <p>To use one of these gradient palettes, simply assign it into a CRGBPalette16 or a CRGBPalette256, like this: </p><div class="fragment"><div class="line">CRGBPalette16 pal = black_to_red_to_white_p;</div>
 </div><!-- fragment --><p>When the assignment is made, the gradients are expanded out into either 16 or 256 palette entries, depending on the kind of palette object they're assigned to.</p>
@@ -136,12 +136,12 @@ $(function(){initNavTree('d1/dfb/colorutils_8h_a180d83b9f32efe5825c8612fa8720d79
  </dd></dl>
 <dl class="section user"><dt></dt><dd></dd></dl>
 <dl class="section warning"><dt>Warning</dt><dd>At this point, these gradient palette definitions <b>MUST</b> be stored in PROGMEM on AVR-based Arduinos. If you use the <code>DEFINE_GRADIENT_PALETTE</code> macro, this is taken of automatically.</dd></dl>
-<p><a class="el" href="../../dd/db2/colorutils__misc_8h_a5c6ee5f16c2e9dcea972adc5b582218c.html#a5c6ee5f16c2e9dcea972adc5b582218c" title="Byte of an RGB gradient, stored in PROGMEM memory.">TProgmemRGBGradientPalette_byte</a> must remain in the global namespace. </p>
+<p><a class="el" href="../../dd/db2/colorutils__misc_8h_ac609526d053cb23ca61c11f04f548d21.html#ac609526d053cb23ca61c11f04f548d21" title="Byte of an RGB gradient, stored in PROGMEM memory.">TProgmemRGBGradientPalette_byte</a> must remain in the global namespace. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../d1/dfb/colorutils_8h_source.html#l00112">112</a> of file <a class="el" href="../../d1/dfb/colorutils_8h_source.html">colorutils.h</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  112</span><span class="preprocessor">#define DEFINE_GRADIENT_PALETTE(X) \</span></div>
-<div class="line"><span class="lineno">  113</span><span class="preprocessor">  FL_ALIGN_PROGMEM \</span></div>
-<div class="line"><span class="lineno">  114</span><span class="preprocessor">  extern const TProgmemRGBGradientPalette_byte X[] FL_PROGMEM =</span></div>
+<p class="definition">Definition at line <a class="el" href="../../d1/dfb/colorutils_8h_source.html#l00121">121</a> of file <a class="el" href="../../d1/dfb/colorutils_8h_source.html">colorutils.h</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  121</span><span class="preprocessor">#define DEFINE_GRADIENT_PALETTE(X) \</span></div>
+<div class="line"><span class="lineno">  122</span><span class="preprocessor">  FL_ALIGN_PROGMEM \</span></div>
+<div class="line"><span class="lineno">  123</span><span class="preprocessor">  extern const TProgmemRGBGradientPalette_byte X[] FL_PROGMEM =</span></div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -152,7 +152,7 @@ $(function(){initNavTree('d1/dfb/colorutils_8h_a180d83b9f32efe5825c8612fa8720d79
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d1/dfb/colorutils_8h.html">colorutils.h</a></li>
-    <li class="footer">Generated on Tue Jun 24 2025 00:58:14 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Fri Aug 22 2025 20:59:34 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

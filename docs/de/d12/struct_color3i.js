@@ -17,6 +17,7 @@ var struct_color3i =
     [ "Mul", "de/d12/struct_color3i_a64153c1deac24bb364c7a1d539dd1368.html#a64153c1deac24bb364c7a1d539dd1368", null ],
     [ "Mul", "de/d12/struct_color3i_ace8773746358b0a1681b8ab2274d9b07.html#ace8773746358b0a1681b8ab2274d9b07", null ],
     [ "Mulf", "de/d12/struct_color3i_a04acf7d63a029280c574586025b08d76.html#a04acf7d63a029280c574586025b08d76", null ],
+    [ "operator=", "de/d12/struct_color3i_a9d158ca13411a770c83b4d891cb15037.html#a9d158ca13411a770c83b4d891cb15037", null ],
     [ "Orange", "de/d12/struct_color3i_ae57016137f2bdb07e54cac8a36267f84.html#ae57016137f2bdb07e54cac8a36267f84", null ],
     [ "Print", "de/d12/struct_color3i_aad06b12d0409c14558f0f04d5c0468f0.html#aad06b12d0409c14558f0f04d5c0468f0", null ],
     [ "Red", "de/d12/struct_color3i_a7c3c8de250985b4c6f6c50891bd5aaf2.html#a7c3c8de250985b4c6f6c50891bd5aaf2", null ],

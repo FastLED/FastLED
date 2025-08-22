@@ -1,0 +1,14 @@
+<map id="fl::Corkscrew::size" name="fl::Corkscrew::size">
+<area shape="rect" id="Node000001" title=" " alt="" coords="484,104,623,129"/>
+<area shape="rect" id="Node000002" href="$dc/d82/classfl_1_1_corkscrew_a3e7d0671427b3880cd2d10afcb9d937d.html#a3e7d0671427b3880cd2d10afcb9d937d" title=" " alt="" coords="241,5,423,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="524,98,483,70,435,44,401,33,403,28,437,40,486,66,527,94"/>
+<area shape="rect" id="Node000003" href="$dc/d82/classfl_1_1_corkscrew_a30f843807d7d7e774bdebaea2f0e611c.html#a30f843807d7d7e774bdebaea2f0e611c" title=" " alt="" coords="263,55,401,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="482,104,389,83,390,77,483,98"/>
+<area shape="rect" id="Node000004" href="$dc/d82/classfl_1_1_corkscrew_afc866c07f3695ae1247a32642d72a0b6.html#afc866c07f3695ae1247a32642d72a0b6" title=" " alt="" coords="241,104,423,129"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="470,119,423,119,423,114,470,114"/>
+<area shape="rect" id="Node000005" href="$dc/d82/classfl_1_1_corkscrew_ae794bd16cfd4173badfcb46bd03257ae.html#ae794bd16cfd4173badfcb46bd03257ae" title=" " alt="" coords="5,180,180,205"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="481,135,436,143,181,183,180,178,436,138,480,129"/>
+<area shape="rect" id="Node000006" href="$dc/d82/classfl_1_1_corkscrew_a433919707f059662d23b3c7e4afa0641.html#a433919707f059662d23b3c7e4afa0641" title=" " alt="" coords="228,205,436,231"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="524,139,483,164,437,188,383,208,381,203,435,184,481,160,521,135"/>
+<area shape="poly" id="edge6_Node000006_Node000005" title=" " alt="" coords="214,208,180,205,180,199,215,203"/>
+</map>

@@ -24,5 +24,9 @@ var searchData=
   ['line_5fsimplification_2ecpp_21',['line_simplification.cpp',['../de/ddb/line__simplification_8cpp.html',1,'']]],
   ['line_5fsimplification_2eh_22',['line_simplification.h',['../d8/da7/line__simplification_8h.html',1,'']]],
   ['luminescentgrand_2eino_23',['LuminescentGrand.ino',['../d8/de5/_luminescent_grand_8ino.html',1,'']]],
-  ['lut_2eh_24',['lut.h',['../db/d54/lut_8h.html',1,'']]]
+  ['luminova_2ecpp_24',['luminova.cpp',['../d2/d10/luminova_8cpp.html',1,'']]],
+  ['luminova_2eh_25',['Luminova.h',['../dc/db7/examples_2_luminova_2luminova_8h.html',1,'']]],
+  ['luminova_2eh_26',['luminova.h',['../d4/dd9/src_2fx_22d_2luminova_8h.html',1,'']]],
+  ['luminova_2eino_27',['Luminova.ino',['../db/dd5/_luminova_8ino.html',1,'']]],
+  ['lut_2eh_28',['lut.h',['../db/d54/lut_8h.html',1,'']]]
 ];

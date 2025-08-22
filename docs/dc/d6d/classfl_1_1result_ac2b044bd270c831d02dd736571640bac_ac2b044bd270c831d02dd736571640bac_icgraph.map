@@ -1,0 +1,30 @@
+<map id="fl::result::ok" name="fl::result::ok">
+<area shape="rect" id="Node000001" title="Check if the result is successful." alt="" coords="657,207,756,232"/>
+<area shape="rect" id="Node000002" href="$dc/d6d/classfl_1_1result_a6659dd0a3e0580c716fe00e214b0f079.html#a6659dd0a3e0580c716fe00e214b0f079" title="Get the error value." alt="" coords="467,55,581,80"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="689,196,655,148,633,123,608,102,571,83,573,78,611,97,637,120,660,145,693,193"/>
+<area shape="rect" id="Node000005" href="$dc/d6d/classfl_1_1result_addee698c009fb513a8b4ceafa05f611f.html#addee698c009fb513a8b4ceafa05f611f" title="Get the error message as a convenience." alt="" coords="211,156,391,181"/>
+<area shape="poly" id="edge7_Node000001_Node000005" title=" " alt="" coords="643,209,609,203,391,178,391,173,610,198,644,204"/>
+<area shape="rect" id="Node000006" href="$d5/dec/_net_test_real_8h_a75e6549812ad7bff897e0c92a225878a.html#a75e6549812ad7bff897e0c92a225878a" title=" " alt="" coords="5,156,163,181"/>
+<area shape="poly" id="edge9_Node000001_Node000006" title=" " alt="" coords="671,202,608,175,500,147,412,135,324,136,211,146,137,159,136,153,210,141,323,131,413,129,501,141,610,170,673,197"/>
+<area shape="rect" id="Node000008" href="$d5/dec/_net_test_real_8h_a648cd3d90f8e240cbbfe5cb934057124.html#a648cd3d90f8e240cbbfe5cb934057124" title="APPROACH 4: JSON Response with await pattern &#160;&#160;Same JSON handling but using await_top_level for synch..." alt="" coords="22,207,146,232"/>
+<area shape="poly" id="edge10_Node000001_Node000008" title=" " alt="" coords="644,222,146,222,146,217,644,217"/>
+<area shape="rect" id="Node000009" href="$dc/d6d/classfl_1_1result_a3dbe3a8472d34cf81aece88600bd8e04.html#a3dbe3a8472d34cf81aece88600bd8e04" title="Boolean conversion operator (same as ok())" alt="" coords="439,257,609,283"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="648,238,571,260,570,255,646,233"/>
+<area shape="rect" id="Node000010" href="$dc/d6d/classfl_1_1result_ad10496f22ba1916f67593fc4cb8bcdc2.html#ad10496f22ba1916f67593fc4cb8bcdc2" title="Get the success value (mutable)" alt="" coords="465,307,583,332"/>
+<area shape="poly" id="edge11_Node000001_Node000010" title=" " alt="" coords="684,244,651,272,611,298,583,309,581,304,608,293,648,267,681,240"/>
+<area shape="rect" id="Node000011" href="$dc/d6d/classfl_1_1result_a8c36716d4a5e21c2b42707c839305328.html#a8c36716d4a5e21c2b42707c839305328" title="Get the success value (const)" alt="" coords="241,257,360,283"/>
+<area shape="poly" id="edge12_Node000001_Node000011" title=" " alt="" coords="697,246,665,300,640,326,611,347,565,364,526,367,486,360,438,347,403,335,369,318,317,285,320,281,372,314,405,330,439,342,487,355,526,362,564,359,608,342,637,322,660,296,692,243"/>
+<area shape="rect" id="Node000003" href="$dc/d6d/classfl_1_1result_aaa632b50087b0395d207c7a1498e3921.html#aaa632b50087b0395d207c7a1498e3921" title="Construct an error result." alt="" coords="241,5,361,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="453,54,358,33,360,28,454,49"/>
+<area shape="rect" id="Node000004" href="$dc/d6d/classfl_1_1result_a8e9e1bb0b91d2c6ad30a6054e06bdcd4.html#a8e9e1bb0b91d2c6ad30a6054e06bdcd4" title="Construct an error result (move)" alt="" coords="241,55,361,80"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="453,70,361,70,361,65,453,65"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="484,88,331,158,329,154,481,83"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="197,171,163,171,163,166,197,166"/>
+<area shape="poly" id="edge6_Node000005_Node000008" title=" " alt="" coords="233,187,140,209,138,204,232,182"/>
+<area shape="poly" id="edge15_Node000011_Node000006" title=" " alt="" coords="266,252,218,224,162,196,128,184,130,179,164,192,220,220,269,248"/>
+<area shape="poly" id="edge16_Node000011_Node000008" title=" " alt="" coords="232,257,138,235,140,229,233,252"/>
+<area shape="rect" id="Node000012" href="$dc/d6d/classfl_1_1result_acc690f602e9ff433fba4c01421d4071a.html#acc690f602e9ff433fba4c01421d4071a" title="Construct a successful result." alt="" coords="24,256,144,281"/>
+<area shape="poly" id="edge13_Node000011_Node000012" title=" " alt="" coords="227,272,144,272,144,266,227,267"/>
+<area shape="rect" id="Node000013" href="$dc/d6d/classfl_1_1result_a57861c36ebacc39d97c829d98cc09962.html#a57861c36ebacc39d97c829d98cc09962" title="Construct a successful result (move)" alt="" coords="24,305,144,331"/>
+<area shape="poly" id="edge14_Node000011_Node000013" title=" " alt="" coords="230,288,143,308,141,303,229,283"/>
+</map>

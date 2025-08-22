@@ -1,0 +1,16 @@
+<map id="setup" name="setup">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,93,64,119"/>
+<area shape="rect" id="Node000002" href="$db/d49/_audio_2simple_2simple_8h_a8e96a63243fb29bb5e0a9709a3864706.html#a8e96a63243fb29bb5e0a9709a3864706" title=" " alt="" coords="295,5,445,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="51,91,78,73,111,57,197,33,280,21,281,26,198,39,113,62,81,78,54,95"/>
+<area shape="rect" id="Node000003" href="$db/d49/_audio_2simple_2simple_8h_ad525290fdaba74653b8656d72c544053.html#ad525290fdaba74653b8656d72c544053" title=" " alt="" coords="112,93,247,119"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="64,103,98,103,98,109,64,109"/>
+<area shape="rect" id="Node000004" href="$db/d49/_audio_2simple_2simple_8h_a0f670a5f10f891700cc108dc119a6c33.html#a0f670a5f10f891700cc108dc119a6c33" title=" " alt="" coords="296,80,444,105"/>
+<area shape="poly" id="edge6_Node000001_Node000004" title=" " alt="" coords="64,92,111,78,155,73,199,72,282,77,282,82,199,77,155,79,113,83,65,97"/>
+<area shape="rect" id="Node000005" href="$db/d49/_audio_2simple_2simple_8h_a16a9f66abb019cd4874806b4c1b9496a.html#a16a9f66abb019cd4874806b4c1b9496a" title=" " alt="" coords="310,129,430,155"/>
+<area shape="poly" id="edge8_Node000001_Node000005" title=" " alt="" coords="65,115,113,129,208,140,296,142,296,147,208,145,111,134,63,120"/>
+<area shape="rect" id="Node000006" href="$db/d49/_audio_2simple_2simple_8h_a7d6443a96ed2d7946976549c970e568f.html#a7d6443a96ed2d7946976549c970e568f" title=" " alt="" coords="146,195,213,220"/>
+<area shape="poly" id="edge7_Node000001_Node000006" title=" " alt="" coords="50,117,78,144,114,173,136,186,134,191,110,178,74,148,46,121"/>
+<area shape="poly" id="edge3_Node000003_Node000002" title=" " alt="" coords="207,91,328,34,330,39,209,96"/>
+<area shape="poly" id="edge4_Node000003_Node000004" title=" " alt="" coords="247,99,282,96,283,101,247,104"/>
+<area shape="poly" id="edge5_Node000003_Node000005" title=" " alt="" coords="247,116,297,126,296,131,246,121"/>
+</map>

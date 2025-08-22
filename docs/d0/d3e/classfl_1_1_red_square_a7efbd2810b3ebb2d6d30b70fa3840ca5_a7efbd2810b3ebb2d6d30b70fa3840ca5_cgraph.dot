@@ -12,5 +12,5 @@ digraph "fl::RedSquare::draw"
   Node1 -> Node3 [id="edge2_Node000001_Node000003",color="steelblue1",style="solid",tooltip=" "];
   Node3 [id="Node000003",label="fl::Fx2d::getWidth",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/d3e/classfl_1_1_fx2d_ad43b84d2abcda8905bdcd35f9a8c46ff.html#ad43b84d2abcda8905bdcd35f9a8c46ff",tooltip=" "];
   Node1 -> Node4 [id="edge3_Node000001_Node000004",color="steelblue1",style="solid",tooltip=" "];
-  Node4 [id="Node000004",label="fl::RedSquare::Math::min",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/de1/structfl_1_1_red_square_1_1_math_a8d4274f1ecbd10587e4a7bfda0694072.html#a8d4274f1ecbd10587e4a7bfda0694072",tooltip=" "];
+  Node4 [id="Node000004",label="fl::RedSquare::Math::Min",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/de1/structfl_1_1_red_square_1_1_math_a23b41cb75ca00a902281e8c31465293d.html#a23b41cb75ca00a902281e8c31465293d",tooltip=" "];
 }

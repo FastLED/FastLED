@@ -8,7 +8,9 @@ digraph "fl::UISliderImpl::setValue"
   rankdir="RL";
   Node1 [id="Node000001",label="fl::UISliderImpl::setValue",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
   Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node2 [id="Node000002",label="fl::UISliderImpl::operator=",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/d67/classfl_1_1_u_i_slider_impl_ad1a07ed68b5a0ec35cf9a7739e26f4e7.html#ad1a07ed68b5a0ec35cf9a7739e26f4e7",tooltip=" "];
+  Node2 [id="Node000002",label="FL_DISABLE_WARNING",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d38/ui_8cpp_ade8043ede62066d1f4666a7eece358d1.html#ade8043ede62066d1f4666a7eece358d1",tooltip=" "];
   Node1 -> Node3 [id="edge2_Node000001_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node3 [id="Node000003",label="fl::UISliderImpl::operator=",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/d67/classfl_1_1_u_i_slider_impl_a5a4f965551e7a35e7ecc5e85534ad563.html#a5a4f965551e7a35e7ecc5e85534ad563",tooltip=" "];
+  Node3 [id="Node000003",label="fl::UISliderImpl::operator=",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/d67/classfl_1_1_u_i_slider_impl_ad1a07ed68b5a0ec35cf9a7739e26f4e7.html#ad1a07ed68b5a0ec35cf9a7739e26f4e7",tooltip=" "];
+  Node1 -> Node4 [id="edge3_Node000001_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl::UISliderImpl::operator=",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/d67/classfl_1_1_u_i_slider_impl_a5a4f965551e7a35e7ecc5e85534ad563.html#a5a4f965551e7a35e7ecc5e85534ad563",tooltip=" "];
 }

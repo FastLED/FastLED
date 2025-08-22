@@ -1,0 +1,27 @@
+digraph "fl::MapRedBlackTree&lt; Key, Value, Compare, Allocator &gt;"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="LR";
+  Node1 [id="Node000001",label="fl::MapRedBlackTree\l\< Key, Value, Compare,\l Allocator \>",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
+  Node2 -> Node1 [id="edge1_Node000001_Node000002",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" mTree",fontcolor="grey" ];
+  Node2 [id="Node000002",label="fl::RedBlackTree\< value\l_type, PairCompare, allocator\l_slab\< char \> \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$dd/d28/classfl_1_1_red_black_tree.html",tooltip=" "];
+  Node3 -> Node2 [id="edge2_Node000002_Node000003",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" root_",fontcolor="grey" ];
+  Node3 [id="Node000003",label="fl::RedBlackTree\< T,\l Compare, Allocator\l \>::Node",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d5/d2d/structfl_1_1_red_black_tree_1_1_node.html",tooltip=" "];
+  Node3 -> Node3 [id="edge3_Node000003_Node000003",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" left\nparent\nright",fontcolor="grey" ];
+  Node4 -> Node2 [id="edge4_Node000002_Node000004",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" comp_",fontcolor="grey" ];
+  Node4 [id="Node000004",label="fl::MapRedBlackTree\l\< Key, Value, Compare,\l Allocator \>::PairCompare",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d4/dd0/structfl_1_1_map_red_black_tree_1_1_pair_compare.html",tooltip=" "];
+  Node5 -> Node2 [id="edge5_Node000002_Node000005",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" alloc_",fontcolor="grey" ];
+  Node5 [id="Node000005",label="fl::allocator_slab\l\< char \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d2/d79/classfl_1_1allocator__slab.html",tooltip=" "];
+  Node6 -> Node5 [id="edge6_Node000005_Node000006",dir="back",color="orange",style="dashed",tooltip=" ",label=" \< char \>",fontcolor="grey" ];
+  Node6 [id="Node000006",label="fl::allocator_slab\l\< T, SLAB_SIZE \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d2/d79/classfl_1_1allocator__slab.html",tooltip=" "];
+  Node7 -> Node2 [id="edge7_Node000002_Node000007",dir="back",color="orange",style="dashed",tooltip=" ",label=" \< value_type, PairCompare,\l allocator_slab\< char \> \>",fontcolor="grey" ];
+  Node7 [id="Node000007",label="fl::RedBlackTree\< T,\l Compare, Allocator \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$dd/d28/classfl_1_1_red_black_tree.html",tooltip=" "];
+  Node3 -> Node7 [id="edge8_Node000007_Node000003",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" root_",fontcolor="grey" ];
+  Node8 -> Node7 [id="edge9_Node000007_Node000008",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" comp_",fontcolor="grey" ];
+  Node8 [id="Node000008",label="fl::less\< T \>",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d6/d07/structfl_1_1less.html",tooltip=" "];
+  Node5 -> Node7 [id="edge10_Node000007_Node000005",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" alloc_",fontcolor="grey" ];
+}

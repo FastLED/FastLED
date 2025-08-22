@@ -106,7 +106,7 @@ $(function(){initNavTree('da/dc5/structfl_1_1_inlined_memory_block_ac7adc8a37e4b
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;typename T, size_t N&gt; </div>
+template&lt;typename T, fl::size N&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
@@ -125,21 +125,21 @@ template&lt;typename T, size_t N&gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d6/d68/vector_8h_source.html#l00044">44</a> of file <a class="el" href="../../d6/d68/vector_8h_source.html">vector.h</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">   44</span>                {</div>
-<div class="line"><span class="lineno">   45</span>        <a class="code hl_typedef" href="../../da/dc5/structfl_1_1_inlined_memory_block_a01520fdd9ef85204b0cdd42cdc83f57b.html#a01520fdd9ef85204b0cdd42cdc83f57b">MemoryType</a> *<a class="code hl_struct" href="../../da/dc5/structfl_1_1_inlined_memory_block.html">begin</a> = &amp;<a class="code hl_variable" href="../../da/dc5/structfl_1_1_inlined_memory_block_aef24fca6a272c09dbd36c332a04afd24.html#aef24fca6a272c09dbd36c332a04afd24">mMemoryBlock</a>[0];</div>
-<div class="line"><span class="lineno">   46</span>        <a class="code hl_struct" href="../../da/dc5/structfl_1_1_inlined_memory_block.html">uintptr_t</a> <a class="code hl_struct" href="../../da/dc5/structfl_1_1_inlined_memory_block.html">shift_up</a> =</div>
-<div class="line"><span class="lineno">   47</span>            <span class="keyword">reinterpret_cast&lt;</span><a class="code hl_struct" href="../../da/dc5/structfl_1_1_inlined_memory_block.html">uintptr_t</a><span class="keyword">&gt;</span>(<a class="code hl_struct" href="../../da/dc5/structfl_1_1_inlined_memory_block.html">begin</a>) &amp; (<span class="keyword">sizeof</span>(<a class="code hl_typedef" href="../../da/dc5/structfl_1_1_inlined_memory_block_a01520fdd9ef85204b0cdd42cdc83f57b.html#a01520fdd9ef85204b0cdd42cdc83f57b">MemoryType</a>) - 1);</div>
-<div class="line"><span class="lineno">   48</span>        <a class="code hl_typedef" href="../../da/dc5/structfl_1_1_inlined_memory_block_a01520fdd9ef85204b0cdd42cdc83f57b.html#a01520fdd9ef85204b0cdd42cdc83f57b">MemoryType</a> *<a class="code hl_struct" href="../../da/dc5/structfl_1_1_inlined_memory_block.html">raw</a> = <a class="code hl_struct" href="../../da/dc5/structfl_1_1_inlined_memory_block.html">begin</a> + <a class="code hl_struct" href="../../da/dc5/structfl_1_1_inlined_memory_block.html">shift_up</a>;</div>
-<div class="line"><span class="lineno">   49</span>        <span class="keywordflow">return</span> <span class="keyword">reinterpret_cast&lt;</span><a class="code hl_struct" href="../../da/dc5/structfl_1_1_inlined_memory_block.html">T</a> *<span class="keyword">&gt;</span>(<a class="code hl_struct" href="../../da/dc5/structfl_1_1_inlined_memory_block.html">raw</a>);</div>
-<div class="line"><span class="lineno">   50</span>    }</div>
-<div class="ttc" id="astructfl_1_1_inlined_memory_block_a01520fdd9ef85204b0cdd42cdc83f57b_html_a01520fdd9ef85204b0cdd42cdc83f57b"><div class="ttname"><a href="../../da/dc5/structfl_1_1_inlined_memory_block_a01520fdd9ef85204b0cdd42cdc83f57b.html#a01520fdd9ef85204b0cdd42cdc83f57b">fl::InlinedMemoryBlock::MemoryType</a></div><div class="ttdeci">uintptr_t MemoryType</div><div class="ttdef"><b>Definition</b> <a href="../../d6/d68/vector_8h_source.html#l00020">vector.h:20</a></div></div>
-<div class="ttc" id="astructfl_1_1_inlined_memory_block_aef24fca6a272c09dbd36c332a04afd24_html_aef24fca6a272c09dbd36c332a04afd24"><div class="ttname"><a href="../../da/dc5/structfl_1_1_inlined_memory_block_aef24fca6a272c09dbd36c332a04afd24.html#aef24fca6a272c09dbd36c332a04afd24">fl::InlinedMemoryBlock::mMemoryBlock</a></div><div class="ttdeci">MemoryType mMemoryBlock[kBlockSize]</div><div class="ttdef"><b>Definition</b> <a href="../../d6/d68/vector_8h_source.html#l00042">vector.h:42</a></div></div>
-<div class="ttc" id="astructfl_1_1_inlined_memory_block_html"><div class="ttname"><a href="../../da/dc5/structfl_1_1_inlined_memory_block.html">fl::InlinedMemoryBlock</a></div><div class="ttdef"><b>Definition</b> <a href="../../d6/d68/vector_8h_source.html#l00018">vector.h:18</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../d6/d68/vector_8h_source.html#l00051">51</a> of file <a class="el" href="../../d6/d68/vector_8h_source.html">vector.h</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">   51</span>                {</div>
+<div class="line"><span class="lineno">   52</span>        <a class="code hl_typedef" href="../../da/dc5/structfl_1_1_inlined_memory_block_a92a21476f894597ee5a661ab687d1c4c.html#a92a21476f894597ee5a661ab687d1c4c">MemoryType</a> *<a class="code hl_struct" href="../../da/dc5/structfl_1_1_inlined_memory_block.html">begin</a> = &amp;<a class="code hl_variable" href="../../da/dc5/structfl_1_1_inlined_memory_block_aef24fca6a272c09dbd36c332a04afd24.html#aef24fca6a272c09dbd36c332a04afd24">mMemoryBlock</a>[0];</div>
+<div class="line"><span class="lineno">   53</span>        <a class="code hl_struct" href="../../da/dc5/structfl_1_1_inlined_memory_block.html">fl::uptr</a> <a class="code hl_struct" href="../../da/dc5/structfl_1_1_inlined_memory_block.html">shift_up</a> =</div>
+<div class="line"><span class="lineno">   54</span>            <span class="keyword">reinterpret_cast&lt;</span><a class="code hl_struct" href="../../da/dc5/structfl_1_1_inlined_memory_block.html">fl::uptr</a><span class="keyword">&gt;</span>(<a class="code hl_struct" href="../../da/dc5/structfl_1_1_inlined_memory_block.html">begin</a>) &amp; (<span class="keyword">sizeof</span>(<a class="code hl_typedef" href="../../da/dc5/structfl_1_1_inlined_memory_block_a92a21476f894597ee5a661ab687d1c4c.html#a92a21476f894597ee5a661ab687d1c4c">MemoryType</a>) - 1);</div>
+<div class="line"><span class="lineno">   55</span>        <a class="code hl_typedef" href="../../da/dc5/structfl_1_1_inlined_memory_block_a92a21476f894597ee5a661ab687d1c4c.html#a92a21476f894597ee5a661ab687d1c4c">MemoryType</a> *<a class="code hl_struct" href="../../da/dc5/structfl_1_1_inlined_memory_block.html">raw</a> = <a class="code hl_struct" href="../../da/dc5/structfl_1_1_inlined_memory_block.html">begin</a> + <a class="code hl_struct" href="../../da/dc5/structfl_1_1_inlined_memory_block.html">shift_up</a>;</div>
+<div class="line"><span class="lineno">   56</span>        <span class="keywordflow">return</span> <span class="keyword">reinterpret_cast&lt;</span><a class="code hl_struct" href="../../da/dc5/structfl_1_1_inlined_memory_block.html">T</a> *<span class="keyword">&gt;</span>(<a class="code hl_struct" href="../../da/dc5/structfl_1_1_inlined_memory_block.html">raw</a>);</div>
+<div class="line"><span class="lineno">   57</span>    }</div>
+<div class="ttc" id="astructfl_1_1_inlined_memory_block_a92a21476f894597ee5a661ab687d1c4c_html_a92a21476f894597ee5a661ab687d1c4c"><div class="ttname"><a href="../../da/dc5/structfl_1_1_inlined_memory_block_a92a21476f894597ee5a661ab687d1c4c.html#a92a21476f894597ee5a661ab687d1c4c">fl::InlinedMemoryBlock::MemoryType</a></div><div class="ttdeci">fl::uptr MemoryType</div><div class="ttdef"><b>Definition</b> <a href="../../d6/d68/vector_8h_source.html#l00026">vector.h:26</a></div></div>
+<div class="ttc" id="astructfl_1_1_inlined_memory_block_aef24fca6a272c09dbd36c332a04afd24_html_aef24fca6a272c09dbd36c332a04afd24"><div class="ttname"><a href="../../da/dc5/structfl_1_1_inlined_memory_block_aef24fca6a272c09dbd36c332a04afd24.html#aef24fca6a272c09dbd36c332a04afd24">fl::InlinedMemoryBlock::mMemoryBlock</a></div><div class="ttdeci">MemoryType mMemoryBlock[kBlockSize]</div><div class="ttdef"><b>Definition</b> <a href="../../d6/d68/vector_8h_source.html#l00049">vector.h:49</a></div></div>
+<div class="ttc" id="astructfl_1_1_inlined_memory_block_html"><div class="ttname"><a href="../../da/dc5/structfl_1_1_inlined_memory_block.html">fl::InlinedMemoryBlock</a></div><div class="ttdef"><b>Definition</b> <a href="../../d6/d68/vector_8h_source.html#l00024">vector.h:24</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d5/db6/range__access_8h_source.html#l00009">fl::begin()</a>, and <a class="el" href="../../d6/d68/vector_8h_source.html#l00042">mMemoryBlock</a>.</p>
+<p class="reference">References <a class="el" href="../../d5/db6/range__access_8h_source.html#l00009">fl::begin()</a>, and <a class="el" href="../../d6/d68/vector_8h_source.html#l00049">mMemoryBlock</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d6/d68/vector_8h_source.html#l00029">InlinedMemoryBlock()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d6/d68/vector_8h_source.html#l00036">InlinedMemoryBlock()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -164,7 +164,7 @@ template&lt;typename T, size_t N&gt; </div>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../da/dc5/structfl_1_1_inlined_memory_block.html">InlinedMemoryBlock</a></li>
-    <li class="footer">Generated on Tue Jun 24 2025 00:58:15 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Fri Aug 22 2025 20:59:36 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

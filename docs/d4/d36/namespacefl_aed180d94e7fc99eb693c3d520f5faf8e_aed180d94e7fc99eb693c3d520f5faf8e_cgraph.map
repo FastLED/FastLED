@@ -1,0 +1,10 @@
+<map id="fl::async_has_tasks" name="fl::async_has_tasks">
+<area shape="rect" id="Node000001" title="Check if any async systems have active tasks." alt="" coords="5,42,153,67"/>
+<area shape="rect" id="Node000002" href="$d2/d14/classfl_1_1_async_manager_a78288aec382e2935bad040aeaa298051.html#a78288aec382e2935bad040aeaa298051" title="Check if there are any active async tasks." alt="" coords="217,5,383,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="154,42,203,35,204,41,154,47"/>
+<area shape="rect" id="Node000003" href="$d2/d14/classfl_1_1_async_manager_aa67fcf70428a30d47b64dd5fbbcde94e.html#aa67fcf70428a30d47b64dd5fbbcde94e" title=" " alt="" coords="201,70,399,95"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="154,61,188,66,187,71,154,67"/>
+<area shape="rect" id="Node000004" href="$d9/d5b/classfl_1_1_singleton_a7e65fe8dee6b2a23a8b6138fa2c274cb.html#a7e65fe8dee6b2a23a8b6138fa2c274cb" title=" " alt="" coords="447,70,609,95"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="399,80,433,80,433,85,399,85"/>
+<area shape="poly" id="edge4_Node000004_Node000004" title=" " alt="" coords="491,72,483,62,487,52,503,46,528,43,560,47,572,57,569,61,558,52,528,49,504,51,491,56,488,61,495,68"/>
+</map>

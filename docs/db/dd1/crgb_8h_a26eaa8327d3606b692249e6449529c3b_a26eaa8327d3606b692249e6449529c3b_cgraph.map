@@ -1,0 +1,15 @@
+<map id="hsv2rgb_dispatch" name="hsv2rgb_dispatch">
+<area shape="rect" id="Node000001" title="HSV conversion function selection based on compile&#45;time defines This allows users to configure which ..." alt="" coords="5,103,141,128"/>
+<area shape="rect" id="Node000002" href="$df/d9d/hsv2rgb_8cpp_ae7340e11e083ac0a5ea4d3ce7c3a6ed1.html#ae7340e11e083ac0a5ea4d3ce7c3a6ed1" title=" " alt="" coords="189,29,352,55"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="101,100,188,64,210,56,212,61,190,68,103,105"/>
+<area shape="rect" id="Node000005" href="$df/d9d/hsv2rgb_8cpp_a38921429c0d177dee3c43d81ba6ea5ba.html#a38921429c0d177dee3c43d81ba6ea5ba" title=" " alt="" coords="204,103,337,128"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="142,113,190,113,190,118,142,118"/>
+<area shape="rect" id="Node000006" href="$df/d9d/hsv2rgb_8cpp_aa9d490009cb1d6ea0491e60b724d360f.html#aa9d490009cb1d6ea0491e60b724d360f" title="Inline version of hsv2rgb_spectrum which returns a CRGB object." alt="" coords="199,176,342,201"/>
+<area shape="poly" id="edge6_Node000001_Node000006" title=" " alt="" coords="110,126,223,168,221,173,108,131"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a486349f0901f5cf84e65769cc1b854cd.html#a486349f0901f5cf84e65769cc1b854cd" title=" " alt="" coords="400,5,483,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="352,28,386,23,387,28,352,33"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_a47dce91f91c991288fe7edefe2137bcf.html#a47dce91f91c991288fe7edefe2137bcf" title=" " alt="" coords="402,55,481,80"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="352,51,389,57,388,62,352,57"/>
+<area shape="poly" id="edge5_Node000005_Node000005" title=" " alt="" coords="242,104,236,94,239,85,251,78,271,76,294,79,304,88,301,92,292,84,271,81,253,83,243,88,241,94,247,101"/>
+<area shape="poly" id="edge7_Node000006_Node000006" title=" " alt="" coords="242,177,236,168,239,158,251,152,271,149,294,153,304,161,301,165,292,158,271,155,253,157,243,161,241,167,247,174"/>
+</map>

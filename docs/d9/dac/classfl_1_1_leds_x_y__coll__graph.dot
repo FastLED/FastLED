@@ -12,5 +12,5 @@ digraph "fl::LedsXY&lt; W, H &gt;"
   Node3 [id="Node000003",label="fl::XYMap",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d0/dce/classfl_1_1_x_y_map.html",tooltip=" "];
   Node4 -> Node2 [id="edge3_Node000002_Node000004",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" mLeds",fontcolor="grey" ];
   Node4 [id="Node000004",label="CRGB",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d7/d82/struct_c_r_g_b.html",tooltip="Representation of an RGB pixel (Red, Green, Blue)"];
-  Node4 -> Node1 [id="edge4_Node000001_Node000004",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" mLeds",fontcolor="grey" ];
+  Node4 -> Node1 [id="edge4_Node000001_Node000004",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" mLedsData",fontcolor="grey" ];
 }

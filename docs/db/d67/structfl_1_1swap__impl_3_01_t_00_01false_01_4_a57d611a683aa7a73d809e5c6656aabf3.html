@@ -129,14 +129,24 @@ template&lt;typename T&gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../df/d63/type__traits_8h_source.html#l00415">415</a> of file <a class="el" href="../../df/d63/type__traits_8h_source.html">type_traits.h</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  415</span>                                  {</div>
-<div class="line"><span class="lineno">  416</span>        <a class="code hl_struct" href="../../d4/d36/namespacefl.html#de/d17/structfl_1_1swap__impl">T</a> <a class="code hl_struct" href="../../d4/d36/namespacefl.html#de/d17/structfl_1_1swap__impl">tmp</a> = <a class="code hl_struct" href="../../d4/d36/namespacefl.html#de/d17/structfl_1_1swap__impl">a</a>;</div>
-<div class="line"><span class="lineno">  417</span>        <a class="code hl_struct" href="../../d4/d36/namespacefl.html#de/d17/structfl_1_1swap__impl">a</a> = <a class="code hl_struct" href="../../d4/d36/namespacefl.html#de/d17/structfl_1_1swap__impl">b</a>;</div>
-<div class="line"><span class="lineno">  418</span>        <a class="code hl_struct" href="../../d4/d36/namespacefl.html#de/d17/structfl_1_1swap__impl">b</a> = <a class="code hl_struct" href="../../d4/d36/namespacefl.html#de/d17/structfl_1_1swap__impl">tmp</a>;</div>
-<div class="line"><span class="lineno">  419</span>    }</div>
-<div class="ttc" id="anamespacefl_html_de/d17/structfl_1_1swap__impl"><div class="ttname"><a href="../../d4/d36/namespacefl.html#de/d17/structfl_1_1swap__impl">fl::swap_impl</a></div><div class="ttdef"><b>Definition</b> <a href="../../df/d63/type__traits_8h_source.html#l00411">type_traits.h:411</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../df/d63/type__traits_8h_source.html#l00693">693</a> of file <a class="el" href="../../df/d63/type__traits_8h_source.html">type_traits.h</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  693</span>                                  {</div>
+<div class="line"><span class="lineno">  694</span>        <a class="code hl_struct" href="../../d4/d36/namespacefl.html#de/d17/structfl_1_1swap__impl">T</a> <a class="code hl_struct" href="../../d4/d36/namespacefl.html#de/d17/structfl_1_1swap__impl">tmp</a> = <a class="code hl_function" href="../../d4/d36/namespacefl_a0445ddcae69ac4e524ec18098eb84dbf.html#a0445ddcae69ac4e524ec18098eb84dbf">fl::move</a>(<a class="code hl_struct" href="../../d4/d36/namespacefl.html#de/d17/structfl_1_1swap__impl">a</a>);</div>
+<div class="line"><span class="lineno">  695</span>        <a class="code hl_struct" href="../../d4/d36/namespacefl.html#de/d17/structfl_1_1swap__impl">a</a> = <a class="code hl_function" href="../../d4/d36/namespacefl_a0445ddcae69ac4e524ec18098eb84dbf.html#a0445ddcae69ac4e524ec18098eb84dbf">fl::move</a>(<a class="code hl_struct" href="../../d4/d36/namespacefl.html#de/d17/structfl_1_1swap__impl">b</a>);</div>
+<div class="line"><span class="lineno">  696</span>        <a class="code hl_struct" href="../../d4/d36/namespacefl.html#de/d17/structfl_1_1swap__impl">b</a> = <a class="code hl_function" href="../../d4/d36/namespacefl_a0445ddcae69ac4e524ec18098eb84dbf.html#a0445ddcae69ac4e524ec18098eb84dbf">fl::move</a>(<a class="code hl_struct" href="../../d4/d36/namespacefl.html#de/d17/structfl_1_1swap__impl">tmp</a>);</div>
+<div class="line"><span class="lineno">  697</span>    }</div>
+<div class="ttc" id="anamespacefl_a0445ddcae69ac4e524ec18098eb84dbf_html_a0445ddcae69ac4e524ec18098eb84dbf"><div class="ttname"><a href="../../d4/d36/namespacefl_a0445ddcae69ac4e524ec18098eb84dbf.html#a0445ddcae69ac4e524ec18098eb84dbf">fl::move</a></div><div class="ttdeci">constexpr remove_reference&lt; T &gt;::type &amp;&amp; move(T &amp;&amp;t) noexcept</div><div class="ttdef"><b>Definition</b> <a href="../../d9/d83/move_8h_source.html#l00027">move.h:27</a></div></div>
+<div class="ttc" id="anamespacefl_html_de/d17/structfl_1_1swap__impl"><div class="ttname"><a href="../../d4/d36/namespacefl.html#de/d17/structfl_1_1swap__impl">fl::swap_impl</a></div><div class="ttdef"><b>Definition</b> <a href="../../df/d63/type__traits_8h_source.html#l00689">type_traits.h:689</a></div></div>
 </div><!-- fragment -->
+<p class="reference">References <a class="el" href="../../d9/d83/move_8h_source.html#l00027">fl::move()</a>.</p>
+<div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
+  <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
+<div id="dynsection-0-summary" class="dynsummary" style="display:block;">
+</div>
+<div id="dynsection-0-content" class="dyncontent" style="display:none;">
+<div class="center"><iframe scrolling="no" frameborder="0" src="../../db/d67/structfl_1_1swap__impl_3_01_t_00_01false_01_4_a57d611a683aa7a73d809e5c6656aabf3_a57d611a683aa7a73d809e5c6656aabf3_cgraph.svg" width="304" height="51"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+</div>
+
 </div>
 </div>
 </div><!-- contents -->
@@ -146,7 +156,7 @@ template&lt;typename T&gt; </div>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../db/d67/structfl_1_1swap__impl_3_01_t_00_01false_01_4.html">swap_impl&lt; T, false &gt;</a></li>
-    <li class="footer">Generated on Tue Jun 24 2025 00:58:16 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Fri Aug 22 2025 20:59:37 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

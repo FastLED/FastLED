@@ -33,6 +33,9 @@ var animartrix__detail_8hpp =
       [ "red", "d6/d74/namespaceanimartrix__detail.html#a1278ce22b0e505c59591cd2dcb1a3715", null ]
     ] ],
     [ "ANIMARTRIX_PRINT", "d3/d3b/animartrix__detail_8hpp_a0c4ac69cd03530dd55918f190ca7b54d.html#a0c4ac69cd03530dd55918f190ca7b54d", null ],
+    [ "FL_ANIMARTRIX_USES_FAST_MATH", "d3/d3b/animartrix__detail_8hpp_a93d7e9e30f37085b5713d68d555297ba.html#a93d7e9e30f37085b5713d68d555297ba", null ],
+    [ "FL_COS_F", "d3/d3b/animartrix__detail_8hpp_ab047972fe6f8998243020ea48036d960.html#ab047972fe6f8998243020ea48036d960", null ],
+    [ "FL_SIN_F", "d3/d3b/animartrix__detail_8hpp_a2f435eaa93424c913f6d6ede5db0071e.html#a2f435eaa93424c913f6d6ede5db0071e", null ],
     [ "num_oscillators", "d3/d3b/animartrix__detail_8hpp_afba8e8ea55de16f225b6445d7f1b4e42.html#afba8e8ea55de16f225b6445d7f1b4e42", null ],
     [ "PI", "d3/d3b/animartrix__detail_8hpp_a598a3330b3c21701223ee0ca14316eca.html#a598a3330b3c21701223ee0ca14316eca", null ],
     [ "animartrix_detail::P", "d6/d74/namespaceanimartrix__detail_a2c844e2153739ae517f8968d4087bb41.html#a2c844e2153739ae517f8968d4087bb41", null ],

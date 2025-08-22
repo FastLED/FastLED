@@ -1,0 +1,16 @@
+<map id="fl::promise::is_completed" name="fl::promise::is_completed">
+<area shape="rect" id="Node000001" title="Check if promise is completed (resolved or rejected)" alt="" coords="572,80,759,105"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a422168cc1b8dc2e0a10dfedf921ac003.html#a422168cc1b8dc2e0a10dfedf921ac003" title="Synchronously wait for a promise to complete (ONLY safe in top&#45;level contexts)" alt="" coords="359,51,500,76"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="558,82,500,75,501,69,559,77"/>
+<area shape="rect" id="Node000006" href="$d3/d35/classfl_1_1_fetch_manager_a812860476db2eb58c04be44261113083.html#a812860476db2eb58c04be44261113083" title=" " alt="" coords="335,101,524,141"/>
+<area shape="poly" id="edge6_Node000001_Node000006" title=" " alt="" coords="559,108,524,112,524,107,558,103"/>
+<area shape="rect" id="Node000003" href="$d5/dec/_net_test_real_8h_a75e6549812ad7bff897e0c92a225878a.html#a75e6549812ad7bff897e0c92a225878a" title=" " alt="" coords="117,5,274,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="349,51,261,33,262,28,350,45"/>
+<area shape="rect" id="Node000005" href="$d5/dec/_net_test_real_8h_a648cd3d90f8e240cbbfe5cb934057124.html#a648cd3d90f8e240cbbfe5cb934057124" title="APPROACH 4: JSON Response with await pattern &#160;&#160;Same JSON handling but using await_top_level for synch..." alt="" coords="133,55,257,80"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="345,67,257,69,257,64,345,62"/>
+<area shape="rect" id="Node000004" href="$d5/dec/_net_test_real_8h_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="5,31,56,56"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="103,35,56,42,56,37,103,30"/>
+<area shape="poly" id="edge5_Node000005_Node000004" title=" " alt="" coords="119,59,56,50,57,44,120,54"/>
+<area shape="rect" id="Node000007" href="$d3/d35/classfl_1_1_fetch_manager_a54544b6df1aaf16db800dc35ac76f1a4.html#a54544b6df1aaf16db800dc35ac76f1a4" title="Update this async runner (called during async pumping)" alt="" coords="104,108,287,133"/>
+<area shape="poly" id="edge7_Node000006_Node000007" title=" " alt="" coords="321,123,287,123,287,118,321,118"/>
+</map>

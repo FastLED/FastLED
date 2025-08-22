@@ -1,0 +1,16 @@
+<map id="fill_rainbow" name="fill_rainbow">
+<area shape="rect" id="Node000001" title="Fill a range of LEDs with a rainbow of colors." alt="" coords="620,68,717,93"/>
+<area shape="rect" id="Node000002" href="$d8/d21/_adafruit_bridge_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="509,24,560,49"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="616,66,559,47,561,42,617,61"/>
+<area shape="rect" id="Node000004" href="$d5/d25/_demo_reel100_8ino_a6784b2bb794bd47a615b7a9be2ebf7db.html#a6784b2bb794bd47a615b7a9be2ebf7db" title=" " alt="" coords="497,92,572,117"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="607,94,573,101,572,95,606,89"/>
+<area shape="rect" id="Node000003" href="$d0/dd3/_json_sketch_8h_a4fc01d736fe50cf5b977f755b675f11d.html#a4fc01d736fe50cf5b977f755b675f11d" title=" " alt="" coords="325,5,383,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="496,35,383,24,384,18,496,30"/>
+<area shape="rect" id="Node000005" href="$d1/d60/classfl_1_1_demo_reel100_adf8658f14d7667653b75247c06e7f8b6.html#adf8658f14d7667653b75247c06e7f8b6" title=" " alt="" coords="259,55,449,95"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="483,99,449,93,450,88,484,94"/>
+<area shape="rect" id="Node000006" href="$d5/d25/_demo_reel100_8ino_a1cecfe941bd75c57cea1a4f26c8ccb24.html#a1cecfe941bd75c57cea1a4f26c8ccb24" title=" " alt="" coords="281,120,427,145"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="484,115,427,124,427,119,483,110"/>
+<area shape="rect" id="Node000007" href="$d1/d60/classfl_1_1_demo_reel100_aad4b41d93c1a9f7acecea8b49cda7078.html#aad4b41d93c1a9f7acecea8b49cda7078" title=" " alt="" coords="5,145,211,171"/>
+<area shape="poly" id="edge7_Node000004_Node000007" title=" " alt="" coords="509,129,482,147,450,161,383,174,315,179,250,178,192,173,192,168,250,173,315,174,383,169,449,155,479,142,506,124"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="268,144,211,150,210,145,267,139"/>
+</map>

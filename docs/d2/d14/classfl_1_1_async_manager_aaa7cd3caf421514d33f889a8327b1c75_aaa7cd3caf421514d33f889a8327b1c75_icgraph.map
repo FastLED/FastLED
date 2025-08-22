@@ -1,0 +1,15 @@
+<map id="fl::AsyncManager::update_all" name="fl::AsyncManager::update_all">
+<area shape="rect" id="Node000001" title="Update all registered async runners." alt="" coords="564,80,775,105"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a9b3631ee5771ef8d36a072368e1d49c7.html#a9b3631ee5771ef8d36a072368e1d49c7" title="Run all registered async tasks once." alt="" coords="412,80,516,105"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="550,95,516,95,516,90,550,90"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a490bb1b7e97181543efd2c62768edda8.html#a490bb1b7e97181543efd2c62768edda8" title="Platform&#45;specific async yield function." alt="" coords="222,5,337,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="428,76,363,44,330,33,332,28,365,40,430,71"/>
+<area shape="rect" id="Node000008" href="$d4/d36/namespacefl_a32df246b375c92eca035330e08a84c79.html#a32df246b375c92eca035330e08a84c79" title="Legacy manual update for fetch promises (use fl::async_run() for new code)" alt="" coords="218,55,341,80"/>
+<area shape="poly" id="edge4_Node000002_Node000008" title=" " alt="" coords="398,86,340,78,341,73,399,81"/>
+<area shape="rect" id="Node000009" href="$d5/d1b/examples_2_async_2async_8h_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="254,104,305,129"/>
+<area shape="poly" id="edge5_Node000002_Node000009" title=" " alt="" coords="399,104,305,116,305,111,398,98"/>
+<area shape="rect" id="Node000010" href="$d5/d69/classfl_1_1_fetch_engine_listener_abdd28a0ff482cd6b1a1ee9fb72d5656d.html#abdd28a0ff482cd6b1a1ee9fb72d5656d" title=" " alt="" coords="195,154,364,194"/>
+<area shape="poly" id="edge6_Node000002_Node000010" title=" " alt="" coords="427,114,365,143,334,156,331,151,363,138,425,109"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_a422168cc1b8dc2e0a10dfedf921ac003.html#a422168cc1b8dc2e0a10dfedf921ac003" title="Synchronously wait for a promise to complete (ONLY safe in top&#45;level contexts)" alt="" coords="5,5,147,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="208,21,147,21,147,15,208,15"/>
+</map>

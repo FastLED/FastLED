@@ -1,0 +1,9 @@
+<map id="advanceFrame" name="advanceFrame">
+<area shape="rect" id="Node000001" title=" " alt="" coords="277,31,396,56"/>
+<area shape="rect" id="Node000002" href="$db/d49/_audio_2simple_2simple_8h_adbc2f4832c3a1f2465ef43bf20ed63a8.html#adbc2f4832c3a1f2465ef43bf20ed63a8" title=" " alt="" coords="127,5,206,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="263,35,206,26,206,21,264,30"/>
+<area shape="rect" id="Node000004" href="$db/d49/_audio_2simple_2simple_8h_aa903a30ffabf496d99f9d17151899844.html#aa903a30ffabf496d99f9d17151899844" title=" " alt="" coords="104,55,229,80"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="264,56,230,61,229,56,264,51"/>
+<area shape="rect" id="Node000003" href="$db/d49/_audio_2simple_2simple_8h_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="5,5,56,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="113,21,56,21,56,15,113,15"/>
+</map>

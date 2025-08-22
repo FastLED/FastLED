@@ -122,7 +122,7 @@ $(function(){initNavTree('dd/dc7/group___h_s_v2_r_g_b_ga704160ddb9173c3420a3dbfb
 <p>Convert an HSV value to RGB using a mathematically straight spectrum. </p>
 <p>This "spectrum" will have more green and blue than a "rainbow", and less yellow and orange.</p>
 <p><img src="https://raw.githubusercontent.com/FastLED/FastLED/gh-pages/images/HSV-spectrum-with-desc.jpg" alt="FastLED 'Spectrum' Hue Chart" class="inline"/></p>
-<dl class="section note"><dt>Note</dt><dd>This function wraps <a class="el" href="../../dd/dc7/group___h_s_v2_r_g_b_ga66f61978949a6830b138d1bf08257019.html#ga66f61978949a6830b138d1bf08257019" title="Convert an HSV value to RGB using a mathematically straight spectrum.">hsv2rgb_raw()</a> and rescales the hue value to fit the smaller range.</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>This function wraps <a class="el" href="../../dd/dc7/group___h_s_v2_r_g_b_ga66f61978949a6830b138d1bf08257019.html#ga66f61978949a6830b138d1bf08257019">hsv2rgb_raw()</a> and rescales the hue value to fit the smaller range.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">hsv</td><td><a class="el" href="../../dc/d53/struct_c_h_s_v.html" title="Representation of an HSV pixel (hue, saturation, value (aka brightness)).">CHSV</a> struct to convert to RGB. Max hue supported is HUE_MAX_SPECTRUM </td></tr>
@@ -130,34 +130,6 @@ $(function(){initNavTree('dd/dc7/group___h_s_v2_r_g_b_ga704160ddb9173c3420a3dbfb
   </table>
   </dd>
 </dl>
-
-<p class="definition">Definition at line <a class="el" href="../../df/d9d/hsv2rgb_8cpp_source.html#l00226">226</a> of file <a class="el" href="../../df/d9d/hsv2rgb_8cpp_source.html">hsv2rgb.cpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  227</span>{</div>
-<div class="line"><span class="lineno">  228</span>    <a class="code hl_struct" href="../../dc/d53/struct_c_h_s_v.html">CHSV</a> hsv2(hsv);</div>
-<div class="line"><span class="lineno">  229</span>    hsv2.hue = <a class="code hl_function" href="../../d0/da8/group___scaling_gad7535ccda9c92470c4e6ee0265585555.html#gad7535ccda9c92470c4e6ee0265585555">scale8</a>( hsv2.hue, 191);</div>
-<div class="line"><span class="lineno">  230</span>    <a class="code hl_function" href="../../dd/dc7/group___h_s_v2_r_g_b_ga66f61978949a6830b138d1bf08257019.html#ga66f61978949a6830b138d1bf08257019">hsv2rgb_raw</a>(hsv2, rgb);</div>
-<div class="line"><span class="lineno">  231</span>}</div>
-<div class="ttc" id="agroup___h_s_v2_r_g_b_ga66f61978949a6830b138d1bf08257019_html_ga66f61978949a6830b138d1bf08257019"><div class="ttname"><a href="../../dd/dc7/group___h_s_v2_r_g_b_ga66f61978949a6830b138d1bf08257019.html#ga66f61978949a6830b138d1bf08257019">hsv2rgb_raw</a></div><div class="ttdeci">void hsv2rgb_raw(const struct CHSV &amp;hsv, struct CRGB &amp;rgb)</div><div class="ttdoc">Convert an HSV value to RGB using a mathematically straight spectrum.</div><div class="ttdef"><b>Definition</b> <a href="../../df/d9d/hsv2rgb_8cpp_source.html#l00023">hsv2rgb.cpp:23</a></div></div>
-<div class="ttc" id="agroup___scaling_gad7535ccda9c92470c4e6ee0265585555_html_gad7535ccda9c92470c4e6ee0265585555"><div class="ttname"><a href="../../d0/da8/group___scaling_gad7535ccda9c92470c4e6ee0265585555.html#gad7535ccda9c92470c4e6ee0265585555">scale8</a></div><div class="ttdeci">LIB8STATIC_ALWAYS_INLINE uint8_t scale8(uint8_t i, fract8 scale)</div><div class="ttdoc">Scale one byte by a second one, which is treated as the numerator of a fraction whose denominator is ...</div><div class="ttdef"><b>Definition</b> <a href="../../db/d91/scale8_8h_source.html#l00040">scale8.h:40</a></div></div>
-<div class="ttc" id="astruct_c_h_s_v_html"><div class="ttname"><a href="../../dc/d53/struct_c_h_s_v.html">CHSV</a></div><div class="ttdoc">Representation of an HSV pixel (hue, saturation, value (aka brightness)).</div><div class="ttdef"><b>Definition</b> <a href="../../d8/dd0/chsv_8h_source.html#l00016">chsv.h:16</a></div></div>
-</div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../df/d9d/hsv2rgb_8cpp_source.html#l00023">hsv2rgb_raw()</a>, and <a class="el" href="../../db/d91/scale8_8h_source.html#l00040">scale8()</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../de/d9a/hsv2rgb_8h_source.html#l00092">hsv2rgb_spectrum()</a>, and <a class="el" href="../../df/d9d/hsv2rgb_8cpp_source.html#l00491">hsv2rgb_spectrum()</a>.</p>
-<div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
-  <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
-<div id="dynsection-0-summary" class="dynsummary" style="display:block;">
-</div>
-<div id="dynsection-0-content" class="dyncontent" style="display:none;">
-<div class="center"><iframe scrolling="no" frameborder="0" src="../../dd/dc7/group___h_s_v2_r_g_b_ga704160ddb9173c3420a3dbfb44674440_ga704160ddb9173c3420a3dbfb44674440_cgraph.svg" width="583" height="86"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
-</div>
-<div id="dynsection-1" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
-  <img id="dynsection-1-trigger" src="../../closed.png" alt="+"/> Here is the caller graph for this function:</div>
-<div id="dynsection-1-summary" class="dynsummary" style="display:block;">
-</div>
-<div id="dynsection-1-content" class="dyncontent" style="display:none;">
-<div class="center"><iframe scrolling="no" frameborder="0" src="../../dd/dc7/group___h_s_v2_r_g_b_ga704160ddb9173c3420a3dbfb44674440_ga704160ddb9173c3420a3dbfb44674440_icgraph.svg" width="344" height="86"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
-</div>
 
 </div>
 </div>
@@ -168,7 +140,7 @@ $(function(){initNavTree('dd/dc7/group___h_s_v2_r_g_b_ga704160ddb9173c3420a3dbfb
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dd/dc7/group___h_s_v2_r_g_b.html">HSV to RGB Conversion Functions</a></li>
-    <li class="footer">Generated on Tue Jun 24 2025 00:58:14 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Fri Aug 22 2025 20:59:35 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

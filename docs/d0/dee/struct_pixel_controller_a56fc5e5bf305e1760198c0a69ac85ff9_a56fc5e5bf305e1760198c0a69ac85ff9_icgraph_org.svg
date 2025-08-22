@@ -401,7 +401,7 @@
 <!-- Node13 -->
 <g id="Node000013" class="node">
 <title>Node13</title>
-<g id="a_Node000013"><a xlink:href="../../d4/d96/class_a_p_a102_controller_a299c89c516c1c32935e75f492137d872.html#a299c89c516c1c32935e75f492137d872" target="_top" xlink:title=" ">
+<g id="a_Node000013"><a xlink:href="../../d4/d96/class_a_p_a102_controller_a7a97b41a9641119f70eaf13369875ab2.html#a7a97b41a9641119f70eaf13369875ab2" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="354,-390 197,-390 197,-360 354,-360 354,-390"/>
 <text text-anchor="start" x="205" y="-378" font-family="Helvetica,sans-Serif" font-size="10.00">APA102Controller::getGlobal</text>
 <text text-anchor="middle" x="275.5" y="-367" font-family="Helvetica,sans-Serif" font-size="10.00">BrightnessAndScalingFactors</text>

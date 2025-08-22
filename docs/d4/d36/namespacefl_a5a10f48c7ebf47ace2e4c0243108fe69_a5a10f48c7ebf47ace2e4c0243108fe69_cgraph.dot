@@ -1,0 +1,37 @@
+digraph "fl::fetch_put"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="LR";
+  Node1 [id="Node000001",label="fl::fetch_put",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="HTTP PUT request."];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl::fetch_options::body",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d49/classfl_1_1fetch__options_a38270ee520d0b35566a972e44006350b.html#a38270ee520d0b35566a972e44006350b",tooltip="Set request body."];
+  Node2 -> Node3 [id="edge2_Node000002_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::fetch_options::\lfetch_options",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d49/classfl_1_1fetch__options_a73eb354da4d72180fa2092519f04d8d5.html#a73eb354da4d72180fa2092519f04d8d5",tooltip=" "];
+  Node3 -> Node4 [id="edge3_Node000003_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl::fetch_options::url",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d49/classfl_1_1fetch__options_a1213ed1a90410e9f7fa52b63f8663041.html#a1213ed1a90410e9f7fa52b63f8663041",tooltip="Get the URL for this request."];
+  Node1 -> Node5 [id="edge4_Node000001_Node000005",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="fl::execute_fetch_request",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a614354323511a444f4f3d295d6a41db8.html#a614354323511a444f4f3d295d6a41db8",tooltip="Internal helper to execute a fetch request and return a promise."];
+  Node5 -> Node6 [id="edge5_Node000005_Node000006",color="steelblue1",style="solid",tooltip=" "];
+  Node6 [id="Node000006",label="fl::promise::resolve",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d21/classfl_1_1promise_a3e0fb912621e186951d09a10640f407b.html#a3e0fb912621e186951d09a10640f407b",tooltip="Create a resolved promise with value."];
+  Node6 -> Node7 [id="edge6_Node000006_Node000007",color="steelblue1",style="solid",tooltip=" "];
+  Node7 [id="Node000007",label="fl::promise::promise",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d21/classfl_1_1promise_a39a88af32b89bdcd2ade2da29f3397d5.html#a39a88af32b89bdcd2ade2da29f3397d5",tooltip="Default constructor - creates invalid promise."];
+  Node6 -> Node8 [id="edge7_Node000006_Node000008",color="steelblue1",style="solid",tooltip=" "];
+  Node8 [id="Node000008",label="fl::promise::create",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d1/d21/classfl_1_1promise_a06ac99cdb6ae08a992c049504a395f06.html#a06ac99cdb6ae08a992c049504a395f06",tooltip="Create a pending promise."];
+  Node8 -> Node7 [id="edge8_Node000008_Node000007",color="steelblue1",style="solid",tooltip=" "];
+  Node6 -> Node10 [id="edge9_Node000006_Node000010",color="steelblue1",style="solid",tooltip=" "];
+  Node10 [id="Node000010",label="fl::promise::value",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d1/d21/classfl_1_1promise_a915f95ce14f79b1a74c7c4b74053fdda.html#a915f95ce14f79b1a74c7c4b74053fdda",tooltip="Get the result value (only valid if is_resolved() returns true)"];
+  Node5 -> Node12 [id="edge10_Node000005_Node000012",color="steelblue1",style="solid",tooltip=" "];
+  Node12 [id="Node000012",label="fl::response::set_body",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/d4b/classfl_1_1response_a32fccb19fb4d302d7dc444cf9659c302.html#a32fccb19fb4d302d7dc444cf9659c302",tooltip=" "];
+  Node1 -> Node13 [id="edge11_Node000001_Node000013",color="steelblue1",style="solid",tooltip=" "];
+  Node13 [id="Node000013",label="fl::fetch_options::\lheader",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d49/classfl_1_1fetch__options_a541c0709606193eb2057cafa1aa42a29.html#a541c0709606193eb2057cafa1aa42a29",tooltip="Add header."];
+  Node13 -> Node3 [id="edge12_Node000013_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node14 [id="edge13_Node000001_Node000014",color="steelblue1",style="solid",tooltip=" "];
+  Node14 [id="Node000014",label="fl::fetch_options::\loptions",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d49/classfl_1_1fetch__options_a79495f6a025bd4851500804ad92f81ba.html#a79495f6a025bd4851500804ad92f81ba",tooltip="Get the options for this request."];
+  Node1 -> Node15 [id="edge14_Node000001_Node000015",color="steelblue1",style="solid",tooltip=" "];
+  Node15 [id="Node000015",label="fl::fetch_options::\ltimeout",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d49/classfl_1_1fetch__options_a1a19b6646176204db31d1ab58cab1e57.html#a1a19b6646176204db31d1ab58cab1e57",tooltip="Set timeout in milliseconds."];
+  Node15 -> Node3 [id="edge15_Node000015_Node000003",color="steelblue1",style="solid",tooltip=" "];
+}

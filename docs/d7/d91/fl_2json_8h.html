@@ -104,58 +104,208 @@ $(function(){initNavTree('d7/d91/fl_2json_8h.html','../../'); initResizable(true
 <a href="#nested-classes">Classes</a> &#124;
 <a href="#namespaces">Namespaces</a> &#124;
 <a href="#define-members">Macros</a> &#124;
+<a href="#typedef-members">Typedefs</a> &#124;
 <a href="#func-members">Functions</a>  </div>
   <div class="headertitle"><div class="title">json.h File Reference</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
-  <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> This graph shows which files directly or indirectly include this file:</div>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>FastLED's Elegant JSON Library: <code><a class="el" href="../../d4/d13/classfl_1_1_json.html">fl::Json</a></code> </p>
+<p>The <code><a class="el" href="../../d4/d13/classfl_1_1_json.html">fl::Json</a></code> library provides a lightweight, type-safe, and highly ergonomic interface for both parsing and generating JSON data within the FastLED ecosystem.</p>
+<h2><a class="anchor" id="autotoc_md0"></a>
+Key Features &amp; Design Principles:</h2>
+<ul>
+<li><b>Fluid Chaining</b>: Effortlessly navigate nested JSON structures using <code>json["key"]["nested_key"]</code> or <code>json["array_key"][index]</code>.</li>
+<li><b>Default Values (<code>operator|</code>)</b>: The cornerstone of robust parsing. Safely extract values with a fallback, preventing crashes from missing keys or type mismatches: <code>int value = json["path"]["to"]["key"] | 123;</code></li>
+<li><b>Type Safety</b>: Methods return <code><a class="el" href="../../d4/d36/namespacefl_a451542d0bf4d13f0bc00e055c18e6726.html#a451542d0bf4d13f0bc00e055c18e6726">fl::optional</a>&lt;T&gt;</code> for explicit handling of potential absence or type errors, ensuring predictable behavior.</li>
+<li><b>Unified API</b>: A consistent and intuitive interface for both reading and writing JSON data.</li>
+<li><b>Explicit Creation</b>: Clearly define JSON objects and arrays using <code><a class="el" href="../../d4/d13/classfl_1_1_json_a93f1f93e980d2ea7e697847213a23935.html#a93f1f93e980d2ea7e697847213a23935">fl::Json::object()</a></code> and <code><a class="el" href="../../d4/d13/classfl_1_1_json_ab581af4715e0e3d6dcc7c890a168b873.html#ab581af4715e0e3d6dcc7c890a168b873">fl::Json::array()</a></code>.</li>
+</ul>
+<h2><a class="anchor" id="autotoc_md1"></a>
+Parsing JSON Data - The Clean Way:</h2>
+<p>Parse a JSON string and extract values with graceful defaults.</p>
+<div class="fragment"><div class="line"><span class="preprocessor">#include &quot;<a class="code" href="../../d7/d91/fl_2json_8h.html">fl/json.h</a>&quot;</span></div>
+<div class="line"><span class="preprocessor">#include &quot;<a class="code" href="../../de/d77/warn_8h.html">fl/warn.h</a>&quot;</span> <span class="comment">// For FL_WARN</span></div>
+<div class="line"> </div>
+<div class="line"><span class="keyword">const</span> <span class="keywordtype">char</span>* jsonStr = R<span class="stringliteral">&quot;({</span></div>
+<div class="line"><span class="stringliteral">  &quot;config&quot;: {</span></div>
+<div class="line"><span class="stringliteral">    &quot;brightness&quot;: 128,</span></div>
+<div class="line"><span class="stringliteral">    &quot;enabled&quot;: true,</span></div>
+<div class="line"><span class="stringliteral">    &quot;name&quot;: &quot;my_device&quot;</span></div>
+<div class="line"><span class="stringliteral">  },</span></div>
+<div class="line"><span class="stringliteral">  &quot;status&quot;: &quot;active&quot;</span></div>
+<div class="line"><span class="stringliteral">})&quot;;</span></div>
+<div class="line"><span class="stringliteral"></span> </div>
+<div class="line"><span class="stringliteral"><a class="code hl_class" href="../../d4/d13/classfl_1_1_json.html">fl::Json</a> jsonDoc = <a class="code hl_function" href="../../d4/d13/classfl_1_1_json_acba319cd1a600f1a88beeecab57d4e7c.html#acba319cd1a600f1a88beeecab57d4e7c">fl::Json::parse</a>(jsonStr);</span></div>
+<div class="line"><span class="stringliteral"></span> </div>
+<div class="line"><span class="stringliteral"></span><span class="comment">// Accessing an integer with a default value</span></div>
+<div class="line"><span class="keywordtype">int</span> <a class="code hl_function" href="../../da/dc7/advanced_8h_a96d9503945476f13a97c8f406269fcef.html#a96d9503945476f13a97c8f406269fcef">brightness</a> = jsonDoc[<span class="stringliteral">&quot;config&quot;</span>][<span class="stringliteral">&quot;brightness&quot;</span>] | 255; <span class="comment">// Result: 128</span></div>
+<div class="line"><a class="code hl_define" href="../../de/d77/warn_8h_a906151b6a1baa2784f6ae1496e6a316b.html#a906151b6a1baa2784f6ae1496e6a316b">FL_WARN</a>(<span class="stringliteral">&quot;Brightness: &quot;</span> &lt;&lt; <a class="code hl_function" href="../../da/dc7/advanced_8h_a96d9503945476f13a97c8f406269fcef.html#a96d9503945476f13a97c8f406269fcef">brightness</a>);</div>
+<div class="line"> </div>
+<div class="line"><span class="comment">// Accessing a boolean with a default value</span></div>
+<div class="line"><span class="keywordtype">bool</span> enabled = jsonDoc[<span class="stringliteral">&quot;config&quot;</span>][<span class="stringliteral">&quot;enabled&quot;</span>] | <span class="keyword">false</span>;    <span class="comment">// Result: true</span></div>
+<div class="line"><a class="code hl_define" href="../../de/d77/warn_8h_a906151b6a1baa2784f6ae1496e6a316b.html#a906151b6a1baa2784f6ae1496e6a316b">FL_WARN</a>(<span class="stringliteral">&quot;Enabled: &quot;</span> &lt;&lt; enabled);</div>
+<div class="line"> </div>
+<div class="line"><span class="comment">// Accessing a string with a default value</span></div>
+<div class="line"><a class="code hl_class" href="../../d2/db2/classfl_1_1string.html">fl::string</a> deviceName = jsonDoc[<span class="stringliteral">&quot;config&quot;</span>][<span class="stringliteral">&quot;name&quot;</span>] | <a class="code hl_class" href="../../d2/db2/classfl_1_1string.html">fl::string</a>(<span class="stringliteral">&quot;unknown&quot;</span>); <span class="comment">// Result: &quot;my_device&quot;</span></div>
+<div class="line"><a class="code hl_define" href="../../de/d77/warn_8h_a906151b6a1baa2784f6ae1496e6a316b.html#a906151b6a1baa2784f6ae1496e6a316b">FL_WARN</a>(<span class="stringliteral">&quot;Device Name: &quot;</span> &lt;&lt; deviceName);</div>
+<div class="line"> </div>
+<div class="line"><span class="comment">// Accessing a non-existent key with a default value</span></div>
+<div class="line"><span class="keywordtype">int</span> nonExistent = jsonDoc[<span class="stringliteral">&quot;config&quot;</span>][<span class="stringliteral">&quot;non_existent_key&quot;</span>] | 0; <span class="comment">// Result: 0</span></div>
+<div class="line"><a class="code hl_define" href="../../de/d77/warn_8h_a906151b6a1baa2784f6ae1496e6a316b.html#a906151b6a1baa2784f6ae1496e6a316b">FL_WARN</a>(<span class="stringliteral">&quot;Non-existent: &quot;</span> &lt;&lt; nonExistent);</div>
+<div class="ttc" id="aadvanced_8h_a96d9503945476f13a97c8f406269fcef_html_a96d9503945476f13a97c8f406269fcef"><div class="ttname"><a href="../../da/dc7/advanced_8h_a96d9503945476f13a97c8f406269fcef.html#a96d9503945476f13a97c8f406269fcef">brightness</a></div><div class="ttdeci">UISlider brightness(&quot;Brightness&quot;, 128, 0, 255, 1)</div></div>
+<div class="ttc" id="aclassfl_1_1_json_acba319cd1a600f1a88beeecab57d4e7c_html_acba319cd1a600f1a88beeecab57d4e7c"><div class="ttname"><a href="../../d4/d13/classfl_1_1_json_acba319cd1a600f1a88beeecab57d4e7c.html#acba319cd1a600f1a88beeecab57d4e7c">fl::Json::parse</a></div><div class="ttdeci">static Json parse(const fl::string &amp;txt)</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d91/fl_2json_8h_source.html#l02126">json.h:2126</a></div></div>
+<div class="ttc" id="aclassfl_1_1_json_html"><div class="ttname"><a href="../../d4/d13/classfl_1_1_json.html">fl::Json</a></div><div class="ttdef"><b>Definition</b> <a href="../../d7/d91/fl_2json_8h_source.html#l01620">json.h:1620</a></div></div>
+<div class="ttc" id="aclassfl_1_1string_html"><div class="ttname"><a href="../../d2/db2/classfl_1_1string.html">fl::string</a></div><div class="ttdef"><b>Definition</b> <a href="../../d1/d93/str_8h_source.html#l00594">str.h:594</a></div></div>
+<div class="ttc" id="afl_2json_8h_html"><div class="ttname"><a href="../../d7/d91/fl_2json_8h.html">json.h</a></div><div class="ttdoc">FastLED&#39;s Elegant JSON Library: fl::Json</div></div>
+<div class="ttc" id="awarn_8h_a906151b6a1baa2784f6ae1496e6a316b_html_a906151b6a1baa2784f6ae1496e6a316b"><div class="ttname"><a href="../../de/d77/warn_8h_a906151b6a1baa2784f6ae1496e6a316b.html#a906151b6a1baa2784f6ae1496e6a316b">FL_WARN</a></div><div class="ttdeci">#define FL_WARN</div><div class="ttdef"><b>Definition</b> <a href="../../de/d77/warn_8h_source.html#l00012">warn.h:12</a></div></div>
+<div class="ttc" id="awarn_8h_html"><div class="ttname"><a href="../../de/d77/warn_8h.html">warn.h</a></div></div>
+</div><!-- fragment --><h2><a class="anchor" id="autotoc_md2"></a>
+Generating JSON Data - Build with Ease:</h2>
+<p>Construct complex JSON objects and arrays programmatically.</p>
+<div class="fragment"><div class="line"><span class="preprocessor">#include &quot;<a class="code" href="../../d7/d91/fl_2json_8h.html">fl/json.h</a>&quot;</span></div>
+<div class="line"><span class="preprocessor">#include &quot;<a class="code" href="../../da/d66/string_8h.html">fl/string.h</a>&quot;</span></div>
+<div class="line"><span class="preprocessor">#include &quot;<a class="code" href="../../d6/d68/vector_8h.html">fl/vector.h</a>&quot;</span></div>
+<div class="line"><span class="preprocessor">#include &quot;<a class="code" href="../../de/d77/warn_8h.html">fl/warn.h</a>&quot;</span></div>
+<div class="line"> </div>
+<div class="line"><span class="comment">// Create a root JSON object</span></div>
+<div class="line"><a class="code hl_class" href="../../d4/d13/classfl_1_1_json.html">fl::Json</a> newJson = <a class="code hl_function" href="../../d4/d13/classfl_1_1_json_a93f1f93e980d2ea7e697847213a23935.html#a93f1f93e980d2ea7e697847213a23935">fl::Json::object</a>();</div>
+<div class="line"> </div>
+<div class="line"><span class="comment">// Set primitive values</span></div>
+<div class="line">newJson.<a class="code hl_function" href="../../d4/d13/classfl_1_1_json_a96d8778149c15f39425d134e725c0f53.html#a96d8778149c15f39425d134e725c0f53">set</a>(<span class="stringliteral">&quot;version&quot;</span>, 1.0);</div>
+<div class="line">newJson.<a class="code hl_function" href="../../d4/d13/classfl_1_1_json_a96d8778149c15f39425d134e725c0f53.html#a96d8778149c15f39425d134e725c0f53">set</a>(<span class="stringliteral">&quot;isActive&quot;</span>, <span class="keyword">true</span>);</div>
+<div class="line">newJson.<a class="code hl_function" href="../../d4/d13/classfl_1_1_json_a96d8778149c15f39425d134e725c0f53.html#a96d8778149c15f39425d134e725c0f53">set</a>(<span class="stringliteral">&quot;message&quot;</span>, <span class="stringliteral">&quot;Hello, FastLED!&quot;</span>);</div>
+<div class="line"> </div>
+<div class="line"><span class="comment">// Create and set a nested object</span></div>
+<div class="line"><a class="code hl_class" href="../../d4/d13/classfl_1_1_json.html">fl::Json</a> settings = <a class="code hl_function" href="../../d4/d13/classfl_1_1_json_a93f1f93e980d2ea7e697847213a23935.html#a93f1f93e980d2ea7e697847213a23935">fl::Json::object</a>();</div>
+<div class="line">settings.<a class="code hl_function" href="../../d4/d13/classfl_1_1_json_a96d8778149c15f39425d134e725c0f53.html#a96d8778149c15f39425d134e725c0f53">set</a>(<span class="stringliteral">&quot;mode&quot;</span>, <span class="stringliteral">&quot;dynamic&quot;</span>);</div>
+<div class="line">settings.<a class="code hl_function" href="../../d4/d13/classfl_1_1_json_a96d8778149c15f39425d134e725c0f53.html#a96d8778149c15f39425d134e725c0f53">set</a>(<span class="stringliteral">&quot;speed&quot;</span>, 50);</div>
+<div class="line">newJson.<a class="code hl_function" href="../../d4/d13/classfl_1_1_json_a96d8778149c15f39425d134e725c0f53.html#a96d8778149c15f39425d134e725c0f53">set</a>(<span class="stringliteral">&quot;settings&quot;</span>, settings);</div>
+<div class="line"> </div>
+<div class="line"><span class="comment">// Create and set a nested array</span></div>
+<div class="line"><a class="code hl_class" href="../../d4/d13/classfl_1_1_json.html">fl::Json</a> colors = <a class="code hl_function" href="../../d4/d13/classfl_1_1_json_ab581af4715e0e3d6dcc7c890a168b873.html#ab581af4715e0e3d6dcc7c890a168b873">fl::Json::array</a>();</div>
+<div class="line">colors.<a class="code hl_function" href="../../d4/d13/classfl_1_1_json_a97485f76ef6407f98c99636b05cf5307.html#a97485f76ef6407f98c99636b05cf5307">push_back</a>(<a class="code hl_class" href="../../d4/d13/classfl_1_1_json.html">fl::Json</a>(<span class="stringliteral">&quot;red&quot;</span>));</div>
+<div class="line">colors.<a class="code hl_function" href="../../d4/d13/classfl_1_1_json_a97485f76ef6407f98c99636b05cf5307.html#a97485f76ef6407f98c99636b05cf5307">push_back</a>(<a class="code hl_class" href="../../d4/d13/classfl_1_1_json.html">fl::Json</a>(<span class="stringliteral">&quot;green&quot;</span>));</div>
+<div class="line">colors.<a class="code hl_function" href="../../d4/d13/classfl_1_1_json_a97485f76ef6407f98c99636b05cf5307.html#a97485f76ef6407f98c99636b05cf5307">push_back</a>(<a class="code hl_class" href="../../d4/d13/classfl_1_1_json.html">fl::Json</a>(<span class="stringliteral">&quot;blue&quot;</span>));</div>
+<div class="line">newJson.<a class="code hl_function" href="../../d4/d13/classfl_1_1_json_a96d8778149c15f39425d134e725c0f53.html#a96d8778149c15f39425d134e725c0f53">set</a>(<span class="stringliteral">&quot;colors&quot;</span>, colors);</div>
+<div class="line"> </div>
+<div class="line"><span class="comment">// Convert the entire JSON object to a string</span></div>
+<div class="line"><a class="code hl_class" href="../../d2/db2/classfl_1_1string.html">fl::string</a> jsonString = newJson.<a class="code hl_function" href="../../d4/d13/classfl_1_1_json_a1739bfed700a1a81d78fb3a37c4ecea1.html#a1739bfed700a1a81d78fb3a37c4ecea1">to_string</a>();</div>
+<div class="line"><a class="code hl_define" href="../../de/d77/warn_8h_a906151b6a1baa2784f6ae1496e6a316b.html#a906151b6a1baa2784f6ae1496e6a316b">FL_WARN</a>(<span class="stringliteral">&quot;Generated JSON:\n&quot;</span> &lt;&lt; jsonString);</div>
+<div class="line"><span class="comment">// Expected output (formatting may vary):</span></div>
+<div class="line"><span class="comment">// {&quot;version&quot;:1.0,&quot;isActive&quot;:true,&quot;message&quot;:&quot;Hello, FastLED!&quot;,&quot;settings&quot;:{&quot;mode&quot;:&quot;dynamic&quot;,&quot;speed&quot;:50},&quot;colors&quot;:[&quot;red&quot;,&quot;green&quot;,&quot;blue&quot;]}</span></div>
+<div class="ttc" id="aclassfl_1_1_json_a1739bfed700a1a81d78fb3a37c4ecea1_html_a1739bfed700a1a81d78fb3a37c4ecea1"><div class="ttname"><a href="../../d4/d13/classfl_1_1_json_a1739bfed700a1a81d78fb3a37c4ecea1.html#a1739bfed700a1a81d78fb3a37c4ecea1">fl::Json::to_string</a></div><div class="ttdeci">fl::string to_string() const</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d91/fl_2json_8h_source.html#l02120">json.h:2120</a></div></div>
+<div class="ttc" id="aclassfl_1_1_json_a93f1f93e980d2ea7e697847213a23935_html_a93f1f93e980d2ea7e697847213a23935"><div class="ttname"><a href="../../d4/d13/classfl_1_1_json_a93f1f93e980d2ea7e697847213a23935.html#a93f1f93e980d2ea7e697847213a23935">fl::Json::object</a></div><div class="ttdeci">static Json object()</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d91/fl_2json_8h_source.html#l02141">json.h:2141</a></div></div>
+<div class="ttc" id="aclassfl_1_1_json_a96d8778149c15f39425d134e725c0f53_html_a96d8778149c15f39425d134e725c0f53"><div class="ttname"><a href="../../d4/d13/classfl_1_1_json_a96d8778149c15f39425d134e725c0f53.html#a96d8778149c15f39425d134e725c0f53">fl::Json::set</a></div><div class="ttdeci">void set(const fl::string &amp;key, const Json &amp;value)</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d91/fl_2json_8h_source.html#l02149">json.h:2149</a></div></div>
+<div class="ttc" id="aclassfl_1_1_json_a97485f76ef6407f98c99636b05cf5307_html_a97485f76ef6407f98c99636b05cf5307"><div class="ttname"><a href="../../d4/d13/classfl_1_1_json_a97485f76ef6407f98c99636b05cf5307.html#a97485f76ef6407f98c99636b05cf5307">fl::Json::push_back</a></div><div class="ttdeci">void push_back(const Json &amp;value)</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d91/fl_2json_8h_source.html#l02172">json.h:2172</a></div></div>
+<div class="ttc" id="aclassfl_1_1_json_ab581af4715e0e3d6dcc7c890a168b873_html_ab581af4715e0e3d6dcc7c890a168b873"><div class="ttname"><a href="../../d4/d13/classfl_1_1_json_ab581af4715e0e3d6dcc7c890a168b873.html#ab581af4715e0e3d6dcc7c890a168b873">fl::Json::array</a></div><div class="ttdeci">static Json array()</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d91/fl_2json_8h_source.html#l02137">json.h:2137</a></div></div>
+<div class="ttc" id="astring_8h_html"><div class="ttname"><a href="../../da/d66/string_8h.html">string.h</a></div></div>
+<div class="ttc" id="avector_8h_html"><div class="ttname"><a href="../../d6/d68/vector_8h.html">vector.h</a></div></div>
+</div><!-- fragment --><h2><a class="anchor" id="autotoc_md3"></a>
+Important Considerations:</h2>
+<ul>
+<li><b>Error Handling</b>: While <code>operator|</code> is powerful, for critical parsing steps (e.g., validating the root object), always use <code>has_value()</code> and <code>is_object()</code>/<code>is_array()</code> checks.</li>
+<li><b>Memory Management</b>: <code><a class="el" href="../../d4/d13/classfl_1_1_json.html">fl::Json</a></code> leverages <code><a class="el" href="../../d1/d74/classfl_1_1shared__ptr.html">fl::shared_ptr</a></code> internally, simplifying memory management. You typically won't need manual <code>new</code>/<code>delete</code>.</li>
+<li><b><code>fl::</code> Namespace</b>: Adhere to FastLED's convention; always use the <code>fl::</code> prefix for library components (e.g., <code><a class="el" href="../../d4/d13/classfl_1_1_json.html">fl::Json</a></code>, <code><a class="el" href="../../d2/db2/classfl_1_1string.html">fl::string</a></code>, <code><a class="el" href="../../d4/d36/namespacefl_ac5751abee4765bbb7a95c533359def7b.html#ac5751abee4765bbb7a95c533359def7b">fl::vector</a></code>). Avoid <code>std::</code> equivalents.</li>
+</ul>
+<p>HIGH LEVEL: For platforms with a lot of memory, this parsing library (ArduinoJson) will automatically be included. Othweise you'll just get Json -&gt; str encoding (and no parsing). You can check if you haee the full library by detecting if FASTLED_ENABLE_JSON is defined.</p>
+<p>It's important to note that ArduinoJson only is used for parsing. We use a custom serializer for output to string. But this is usually easy to do. For help serializing out, look at <a class="el" href="../../da/da4/sstream_8h.html">fl/sstream.h</a> for converting a collection of values to a string.</p>
+<p>It's entirely possible that our json string output serializer is NOT 100% correct with respect to complex string encoding (for example an HTML document). If you see bugs, then file an issue at <a href="https://github.com/fastled/FastLED/issues">https://github.com/fastled/FastLED/issues</a></p>
+<p>for string parsing, we should be full featured when FASTLED_ENABLE_JSON is defined (automiatic for SKETCH_HAS_LOTS_OF_MEMORY). If there is some string that doesn't correctly parse, use b64 encoding. For example, you might get better luck b64 encoding 1024 elements of small ints then manually deserializing to a <a class="el" href="../../d4/d36/namespacefl_ac5751abee4765bbb7a95c533359def7b.html#ac5751abee4765bbb7a95c533359def7b">fl::vector&lt;u8&gt;</a>. Infact, it's pretty much assured.</p>
+<p>That being said...</p>
+<p>This api is designed specifically to be fast for input &lt;--&gt; output of arrays of numbers in {u8, i16, float}. If you have a different encodings scheme, for example an array of tuples, then this library will be MUCH MUCH slower than Arduino Json. If you stick to the scheme we have optimized for (flat arrays of numbers and few dictionaries) then this api will be blazing fast. Otherwise? Expect pain: slowdowns and lots of memory consumption.</p>
+<p>Why?</p>
+<p>ArduinoJson only has a nice interface if you agree to bring in std::-everything. Ever bring in std::sstream? The amount of code that will be pulled for &lt;sstream&gt; will blow your mind. To keep things strict and tiny we have to take ArduinoJson and strip all the optional components out then seal the remaining api in cement and bolt on a nice fluid interface ontop. That's what <a class="el" href="../../d7/d91/fl_2json_8h.html" title="FastLED&#39;s Elegant JSON Library: fl::Json">fl/json.h</a> is.</p>
+<p>And the good news is - it works great!! And if it doesn't? File a bug and we'll have it fixed in the next release. </p>
+
+<p class="definition">Definition in file <a class="el" href="../../d7/d91/fl_2json_8h_source.html">json.h</a>.</p>
+</div><div class="textblock"><code>#include &quot;<a class="el" href="../../da/d66/string_8h_source.html">fl/string.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d6/d68/vector_8h_source.html">fl/vector.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d6/d13/hash__map_8h_source.html">fl/hash_map.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d6/d10/variant_8h_source.html">fl/variant.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../dc/d62/optional_8h_source.html">fl/optional.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../da/d4b/unique__ptr_8h_source.html">fl/unique_ptr.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../df/d6a/shared__ptr_8h_source.html">fl/shared_ptr.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d8/dea/functional_8h_source.html">fl/functional.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d1/d93/str_8h_source.html">fl/str.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d6/d17/promise_8h_source.html">fl/promise.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../de/d77/warn_8h_source.html">fl/warn.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d1/dbc/sketch__macros_8h_source.html">fl/sketch_macros.h</a>&quot;</code><br />
+</div><div class="textblock"><div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
+  <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Include dependency graph for json.h:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-0-content" class="dyncontent" style="display:none;">
-<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../dc/d67/fl_2json_8h__dep__incl.svg" width="100%" height="404"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
+<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../d6/d98/fl_2json_8h__incl.svg" width="100%" height="600"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
+</div>
+</div><div class="textblock"><div id="dynsection-1" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
+  <img id="dynsection-1-trigger" src="../../closed.png" alt="+"/> This graph shows which files directly or indirectly include this file:</div>
+<div id="dynsection-1-summary" class="dynsummary" style="display:block;">
+</div>
+<div id="dynsection-1-content" class="dyncontent" style="display:none;">
+<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../dc/d67/fl_2json_8h__dep__incl.svg" width="100%" height="600"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
 </div>
 </div>
 <p><a href="../../d7/d91/fl_2json_8h_source.html">Go to the source code of this file.</a></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
 Classes</h2></td></tr>
-<tr class="memitem:da/deb/classfl_1_1_json_document" id="r_da/deb/classfl_1_1_json_document"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl.html#da/deb/classfl_1_1_json_document">fl::JsonDocument</a></td></tr>
-<tr class="separator:da/deb/classfl_1_1_json_document"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dc/d99/structfl_1_1_default_value_visitor.html">fl::DefaultValueVisitor&lt; T &gt;</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/dda/structfl_1_1_float_conversion_visitor.html">fl::FloatConversionVisitor&lt; FloatType &gt;</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d9/d7b/structfl_1_1_float_conversion_visitor_3_01double_01_4.html">fl::FloatConversionVisitor&lt; double &gt;</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d7/dda/structfl_1_1_int_conversion_visitor.html">fl::IntConversionVisitor&lt; IntType &gt;</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d2/d26/structfl_1_1_int_conversion_visitor_3_01int64__t_01_4.html">fl::IntConversionVisitor&lt; int64_t &gt;</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d13/classfl_1_1_json.html">fl::Json</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../da/dd6/structfl_1_1_json_value.html">fl::JsonValue</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d5/d65/classfl_1_1_json_value_1_1array__iterator.html">fl::JsonValue::array_iterator&lt; T &gt;</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d3/d72/classfl_1_1_json_value_1_1const__iterator.html">fl::JsonValue::const_iterator</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d5/d93/structfl_1_1_json_value_1_1const__iterator_1_1_key_value.html">fl::JsonValue::const_iterator::KeyValue</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d3/dd8/structfl_1_1_json_value_1_1_is_array_visitor.html">fl::JsonValue::IsArrayVisitor</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d5/d80/classfl_1_1_json_value_1_1iterator.html">fl::JsonValue::iterator</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../df/dff/structfl_1_1_json_value_1_1iterator_1_1_key_value.html">fl::JsonValue::iterator::KeyValue</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../db/d38/structfl_1_1_parse_result.html">fl::ParseResult&lt; T &gt;</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../de/d51/structfl_1_1_string_conversion_visitor.html">fl::StringConversionVisitor</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="namespaces" name="namespaces"></a>
 Namespaces</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">namespace &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></td></tr>
-<tr class="memdesc:d4/d36/namespacefl"><td class="mdescLeft">&#160;</td><td class="mdescRight">Implements a simple red square effect for 2D LED grids. <br /></td></tr>
+<tr class="memdesc:d4/d36/namespacefl"><td class="mdescLeft">&#160;</td><td class="mdescRight">IMPORTANT! <br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="define-members" name="define-members"></a>
 Macros</h2></td></tr>
-<tr class="memitem:ab9f76be74317c656afc2190a2e9b3618" id="r_ab9f76be74317c656afc2190a2e9b3618"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d7/d91/fl_2json_8h_ab9f76be74317c656afc2190a2e9b3618.html#ab9f76be74317c656afc2190a2e9b3618">FASTLED_ENABLE_JSON</a>&#160;&#160;&#160;1</td></tr>
+<tr class="memitem:ab9f76be74317c656afc2190a2e9b3618" id="r_ab9f76be74317c656afc2190a2e9b3618"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d7/d91/fl_2json_8h_ab9f76be74317c656afc2190a2e9b3618.html#ab9f76be74317c656afc2190a2e9b3618">FASTLED_ENABLE_JSON</a>&#160;&#160;&#160;<a class="el" href="../../d1/dbc/sketch__macros_8h_af0fa82d87395831453998a199d597094.html#af0fa82d87395831453998a199d597094">SKETCH_HAS_LOTS_OF_MEMORY</a></td></tr>
 <tr class="separator:ab9f76be74317c656afc2190a2e9b3618"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="typedef-members" name="typedef-members"></a>
+Typedefs</h2></td></tr>
+<tr class="memitem:aa5e9413094daaa3bf2a6390ce60c088a" id="r_aa5e9413094daaa3bf2a6390ce60c088a"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_aa5e9413094daaa3bf2a6390ce60c088a.html#aa5e9413094daaa3bf2a6390ce60c088a">fl::JsonArray</a> = <a class="el" href="../../d4/d36/namespacefl_ac5751abee4765bbb7a95c533359def7b.html#ac5751abee4765bbb7a95c533359def7b">fl::vector</a>&lt;<a class="el" href="../../d1/d74/classfl_1_1shared__ptr.html">fl::shared_ptr</a>&lt;<a class="el" href="../../da/dd6/structfl_1_1_json_value.html">JsonValue</a>&gt;&gt;</td></tr>
+<tr class="separator:aa5e9413094daaa3bf2a6390ce60c088a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a91a759156383d3c5254527fa38bfa757" id="r_a91a759156383d3c5254527fa38bfa757"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_a91a759156383d3c5254527fa38bfa757.html#a91a759156383d3c5254527fa38bfa757">fl::JsonObject</a> = <a class="el" href="../../dc/de6/classfl_1_1_hash_map.html">fl::HashMap</a>&lt;<a class="el" href="../../d2/db2/classfl_1_1string.html">fl::string</a>, <a class="el" href="../../d1/d74/classfl_1_1shared__ptr.html">fl::shared_ptr</a>&lt;<a class="el" href="../../da/dd6/structfl_1_1_json_value.html">JsonValue</a>&gt;&gt;</td></tr>
+<tr class="separator:a91a759156383d3c5254527fa38bfa757"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:a2cd426a3d9c9d79c491b313912f3bcc0" id="r_a2cd426a3d9c9d79c491b313912f3bcc0"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_a2cd426a3d9c9d79c491b313912f3bcc0.html#a2cd426a3d9c9d79c491b313912f3bcc0">fl::parseJson</a> (const char *json, <a class="el" href="../../d4/d36/namespacefl.html#da/deb/classfl_1_1_json_document">fl::JsonDocument</a> *doc, <a class="el" href="../../d2/d24/classfl_1_1_str.html">Str</a> *_error)</td></tr>
-<tr class="separator:a2cd426a3d9c9d79c491b313912f3bcc0"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a966e65a21faacfa6fe6c00989a2f505c" id="r_a966e65a21faacfa6fe6c00989a2f505c"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_a966e65a21faacfa6fe6c00989a2f505c.html#a966e65a21faacfa6fe6c00989a2f505c">fl::toJson</a> (const <a class="el" href="../../d4/d36/namespacefl.html#da/deb/classfl_1_1_json_document">fl::JsonDocument</a> &amp;doc, <a class="el" href="../../d2/d24/classfl_1_1_str.html">Str</a> *jsonBuffer)</td></tr>
-<tr class="separator:a966e65a21faacfa6fe6c00989a2f505c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2bd8c696cd5b26e05473cc38ab62524e" id="r_a2bd8c696cd5b26e05473cc38ab62524e"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../d4/d36/namespacefl_a91a759156383d3c5254527fa38bfa757.html#a91a759156383d3c5254527fa38bfa757">JsonObject</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_a2bd8c696cd5b26e05473cc38ab62524e.html#a2bd8c696cd5b26e05473cc38ab62524e">fl::get_empty_json_object</a> ()</td></tr>
+<tr class="separator:a2bd8c696cd5b26e05473cc38ab62524e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:addbb9457423c186b07bbb4922fa15c51" id="r_addbb9457423c186b07bbb4922fa15c51"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../d4/d54/compiler__control_8h_a888ec6cdc7563315545ced9cff7a5fbf.html#a888ec6cdc7563315545ced9cff7a5fbf">FL_DISABLE_WARNING_POP</a> <a class="el" href="../../da/dd6/structfl_1_1_json_value.html">JsonValue</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_addbb9457423c186b07bbb4922fa15c51.html#addbb9457423c186b07bbb4922fa15c51">fl::get_null_value</a> ()</td></tr>
+<tr class="separator:addbb9457423c186b07bbb4922fa15c51"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
-<hr/><h2 class="groupheader">Class Documentation</h2>
-<a name="da/deb/classfl_1_1_json_document" id="da/deb/classfl_1_1_json_document"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#da/deb/classfl_1_1_json_document">&#9670;&#160;</a></span>fl::JsonDocument</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">class fl::JsonDocument</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
 </div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.9.3-->
@@ -163,7 +313,7 @@ Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dir_4d1829fa9bd13d7db71e765b2707b248.html">fl</a></li><li class="navelem"><a class="el" href="../../d7/d91/fl_2json_8h.html">json.h</a></li>
-    <li class="footer">Generated on Tue Jun 24 2025 00:58:14 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Fri Aug 22 2025 20:59:34 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

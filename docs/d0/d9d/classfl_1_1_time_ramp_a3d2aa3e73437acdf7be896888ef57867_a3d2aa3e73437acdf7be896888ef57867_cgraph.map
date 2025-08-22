@@ -1,0 +1,5 @@
+<map id="fl::TimeRamp::trigger" name="fl::TimeRamp::trigger">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,5,165,31"/>
+<area shape="rect" id="Node000002" href="$d0/d9d/classfl_1_1_time_ramp_a9f0b72e7ed74128fee2becc745d2ab72.html#a9f0b72e7ed74128fee2becc745d2ab72" title="Call this when you want to (re)start the ramp cycle." alt="" coords="213,5,373,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="165,15,199,15,199,21,165,21"/>
+</map>

@@ -1,0 +1,13 @@
+<map id="fl::Json::is_null" name="fl::Json::is_null">
+<area shape="rect" id="Node000001" title=" " alt="" coords="603,60,717,85"/>
+<area shape="rect" id="Node000002" href="$d5/d4b/classfl_1_1response_a913de93f1614c93e29ae0c1b3219a0b1.html#a913de93f1614c93e29ae0c1b3219a0b1" title="Parse JSON from response body with error handling." alt="" coords="397,23,538,63"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="588,64,538,57,538,51,589,59"/>
+<area shape="rect" id="Node000007" href="$df/d37/classfl_1_1_file_system_a3f0ff67d5535787004eed6968145cc64.html#a3f0ff67d5535787004eed6968145cc64" title=" " alt="" coords="380,88,555,113"/>
+<area shape="poly" id="edge5_Node000001_Node000007" title=" " alt="" coords="589,86,555,91,554,85,589,80"/>
+<area shape="rect" id="Node000003" href="$d5/d4b/classfl_1_1response_a1b8301f50ee0dc36b49ab157423d3a22.html#a1b8301f50ee0dc36b49ab157423d3a22" title="Response body parsed as JSON (JavaScript&#45;like API)" alt="" coords="200,31,332,56"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="383,46,332,46,332,41,383,41"/>
+<area shape="rect" id="Node000004" href="$d5/dec/_net_test_real_8h_a648cd3d90f8e240cbbfe5cb934057124.html#a648cd3d90f8e240cbbfe5cb934057124" title="APPROACH 4: JSON Response with await pattern &#160;&#160;Same JSON handling but using await_top_level for synch..." alt="" coords="17,5,141,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="186,35,140,29,141,24,186,30"/>
+<area shape="rect" id="Node000006" href="$d5/dec/_net_test_real_8h_ac300da999139e52ab96307f86d7fa84d.html#ac300da999139e52ab96307f86d7fa84d" title="APPROACH 3: JSON Response Handling with FastLED&#39;s ideal JSON API This demonstrates fetch responses wi..." alt="" coords="5,55,152,80"/>
+<area shape="poly" id="edge4_Node000003_Node000006" title=" " alt="" coords="186,56,152,61,152,55,186,51"/>
+</map>

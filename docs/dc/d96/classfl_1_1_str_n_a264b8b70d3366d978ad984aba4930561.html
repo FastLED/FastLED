@@ -106,7 +106,7 @@ $(function(){initNavTree('dc/d96/classfl_1_1_str_n_a264b8b70d3366d978ad984aba493
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;size_t SIZE = 64&gt; </div>
+template&lt;fl::size SIZE = FASTLED_STR_INLINED_SIZE&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
@@ -125,22 +125,22 @@ template&lt;size_t SIZE = 64&gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d1/d93/str_8h_source.html#l00277">277</a> of file <a class="el" href="../../d1/d93/str_8h_source.html">str.h</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  277</span>                          {</div>
-<div class="line"><span class="lineno">  278</span>        <span class="keywordflow">return</span> <a class="code hl_variable" href="../../dc/d96/classfl_1_1_str_n_a84b475483ef4518ddcdd01d7e5567b89.html#a84b475483ef4518ddcdd01d7e5567b89">mHeapData</a> ? <a class="code hl_variable" href="../../dc/d96/classfl_1_1_str_n_a84b475483ef4518ddcdd01d7e5567b89.html#a84b475483ef4518ddcdd01d7e5567b89">mHeapData</a>-&gt;data() : <a class="code hl_variable" href="../../dc/d96/classfl_1_1_str_n_ac30a0f6452bf9106425b063d7f60d820.html#ac30a0f6452bf9106425b063d7f60d820">mInlineData</a>;</div>
-<div class="line"><span class="lineno">  279</span>    }</div>
-<div class="ttc" id="aclassfl_1_1_str_n_a84b475483ef4518ddcdd01d7e5567b89_html_a84b475483ef4518ddcdd01d7e5567b89"><div class="ttname"><a href="../../dc/d96/classfl_1_1_str_n_a84b475483ef4518ddcdd01d7e5567b89.html#a84b475483ef4518ddcdd01d7e5567b89">fl::StrN::mHeapData</a></div><div class="ttdeci">StringHolderPtr mHeapData</div><div class="ttdef"><b>Definition</b> <a href="../../d1/d93/str_8h_source.html#l00111">str.h:111</a></div></div>
-<div class="ttc" id="aclassfl_1_1_str_n_ac30a0f6452bf9106425b063d7f60d820_html_ac30a0f6452bf9106425b063d7f60d820"><div class="ttname"><a href="../../dc/d96/classfl_1_1_str_n_ac30a0f6452bf9106425b063d7f60d820.html#ac30a0f6452bf9106425b063d7f60d820">fl::StrN::mInlineData</a></div><div class="ttdeci">char mInlineData[SIZE]</div><div class="ttdef"><b>Definition</b> <a href="../../d1/d93/str_8h_source.html#l00110">str.h:110</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../d1/d93/str_8h_source.html#l00330">330</a> of file <a class="el" href="../../d1/d93/str_8h_source.html">str.h</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  330</span>                          {</div>
+<div class="line"><span class="lineno">  331</span>        <span class="keywordflow">return</span> <a class="code hl_variable" href="../../dc/d96/classfl_1_1_str_n_a84b475483ef4518ddcdd01d7e5567b89.html#a84b475483ef4518ddcdd01d7e5567b89">mHeapData</a> ? <a class="code hl_variable" href="../../dc/d96/classfl_1_1_str_n_a84b475483ef4518ddcdd01d7e5567b89.html#a84b475483ef4518ddcdd01d7e5567b89">mHeapData</a>-&gt;data() : <a class="code hl_variable" href="../../dc/d96/classfl_1_1_str_n_ac30a0f6452bf9106425b063d7f60d820.html#ac30a0f6452bf9106425b063d7f60d820">mInlineData</a>;</div>
+<div class="line"><span class="lineno">  332</span>    }</div>
+<div class="ttc" id="aclassfl_1_1_str_n_a84b475483ef4518ddcdd01d7e5567b89_html_a84b475483ef4518ddcdd01d7e5567b89"><div class="ttname"><a href="../../dc/d96/classfl_1_1_str_n_a84b475483ef4518ddcdd01d7e5567b89.html#a84b475483ef4518ddcdd01d7e5567b89">fl::StrN::mHeapData</a></div><div class="ttdeci">StringHolderPtr mHeapData</div><div class="ttdef"><b>Definition</b> <a href="../../d1/d93/str_8h_source.html#l00142">str.h:142</a></div></div>
+<div class="ttc" id="aclassfl_1_1_str_n_ac30a0f6452bf9106425b063d7f60d820_html_ac30a0f6452bf9106425b063d7f60d820"><div class="ttname"><a href="../../dc/d96/classfl_1_1_str_n_ac30a0f6452bf9106425b063d7f60d820.html#ac30a0f6452bf9106425b063d7f60d820">fl::StrN::mInlineData</a></div><div class="ttdeci">char mInlineData[SIZE]</div><div class="ttdef"><b>Definition</b> <a href="../../d1/d93/str_8h_source.html#l00141">str.h:141</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d1/d93/str_8h_source.html#l00111">mHeapData</a>, and <a class="el" href="../../d1/d93/str_8h_source.html#l00110">mInlineData</a>.</p>
+<p class="reference">References <a class="el" href="../../d1/d93/str_8h_source.html#l00142">mHeapData</a>, and <a class="el" href="../../d1/d93/str_8h_source.html#l00141">mInlineData</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d1/d93/str_8h_source.html#l00281">operator[]()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d1/d93/str_8h_source.html#l00353">begin()</a>, <a class="el" href="../../d1/d93/str_8h_source.html#l00354">end()</a>, <a class="el" href="../../d1/d93/str_8h_source.html#l00334">operator[]()</a>, and <a class="el" href="../../d1/d93/str_8h_source.html#l00566">pop_back()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the caller graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-0-content" class="dyncontent" style="display:none;">
-<div class="center"><iframe scrolling="no" frameborder="0" src="../../dc/d96/classfl_1_1_str_n_a264b8b70d3366d978ad984aba4930561_a264b8b70d3366d978ad984aba4930561_icgraph.svg" width="364" height="36"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../dc/d96/classfl_1_1_str_n_a264b8b70d3366d978ad984aba4930561_a264b8b70d3366d978ad984aba4930561_icgraph.svg" width="100%" height="495"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
 </div>
 
 </div>
@@ -152,7 +152,7 @@ template&lt;size_t SIZE = 64&gt; </div>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../dc/d96/classfl_1_1_str_n.html">StrN</a></li>
-    <li class="footer">Generated on Tue Jun 24 2025 00:58:16 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Fri Aug 22 2025 20:59:37 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

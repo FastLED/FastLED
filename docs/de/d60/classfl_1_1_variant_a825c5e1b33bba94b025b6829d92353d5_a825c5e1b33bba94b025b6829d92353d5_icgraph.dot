@@ -8,7 +8,13 @@ digraph "fl::Variant::type_to_tag"
   rankdir="RL";
   Node1 [id="Node000001",label="fl::Variant::type_to_tag",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
   Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node2 [id="Node000002",label="fl::Variant\< const\l CRGBPalette16 *, const\l CRGBPalette32 *, const\l CRGBPalette256 *, GradientFunction\l \>::construct",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d60/classfl_1_1_variant_a378d62102f34b4aea27bd8292ac69fe6.html#a378d62102f34b4aea27bd8292ac69fe6",tooltip=" "];
+  Node2 [id="Node000002",label="fl::Variant\< fl::span\l\< CRGB \>, fl::vector\l\< CRGB, fl::allocator\l_psram\< CRGB \> \> \>::construct",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d60/classfl_1_1_variant_a378d62102f34b4aea27bd8292ac69fe6.html#a378d62102f34b4aea27bd8292ac69fe6",tooltip=" "];
   Node1 -> Node3 [id="edge2_Node000001_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node3 [id="Node000003",label="fl::Variant\< const\l CRGBPalette16 *, const\l CRGBPalette32 *, const\l CRGBPalette256 *, GradientFunction \>::is",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d60/classfl_1_1_variant_a3794348734afd949bb18bf9e2b9f9df8.html#a3794348734afd949bb18bf9e2b9f9df8",tooltip=" "];
+  Node3 [id="Node000003",label="fl::Variant\< fl::span\l\< CRGB \>, fl::vector\l\< CRGB, fl::allocator\l_psram\< CRGB \> \> \>::is",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d60/classfl_1_1_variant_a3794348734afd949bb18bf9e2b9f9df8.html#a3794348734afd949bb18bf9e2b9f9df8",tooltip=" "];
+  Node3 -> Node4 [id="edge3_Node000003_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl::Variant\< fl::span\l\< CRGB \>, fl::vector\l\< CRGB, fl::allocator\l_psram\< CRGB \> \> \>::ptr",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d60/classfl_1_1_variant_a65c4d26937c7abd48dd2597d3f2dc209.html#a65c4d26937c7abd48dd2597d3f2dc209",tooltip=" "];
+  Node4 -> Node5 [id="edge4_Node000004_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="fl::Variant\< fl::span\l\< CRGB \>, fl::vector\l\< CRGB, fl::allocator\l_psram\< CRGB \> \> \>::equals",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d60/classfl_1_1_variant_ade285535c978f61e20c3453fc1f3ed1a.html#ade285535c978f61e20c3453fc1f3ed1a",tooltip=" "];
+  Node3 -> Node6 [id="edge5_Node000003_Node000006",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node6 [id="Node000006",label="fl::Variant\< fl::span\l\< CRGB \>, fl::vector\l\< CRGB, fl::allocator\l_psram\< CRGB \> \> \>::ptr",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d60/classfl_1_1_variant_a212993ea4c2f159e94a7b15732eb7e07.html#a212993ea4c2f159e94a7b15732eb7e07",tooltip=" "];
 }

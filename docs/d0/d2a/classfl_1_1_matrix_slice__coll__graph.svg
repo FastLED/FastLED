@@ -32,8 +32,8 @@
 <g id="Node000002" class="node">
 <title>Node2</title>
 <g id="a_Node000002"><a xlink:href="../../d5/d5d/structfl_1_1vec2.html" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#666666" points="110,-96 2,-96 2,-77 110,-77 110,-96"/>
-<text text-anchor="middle" x="56" y="-84" font-family="Helvetica,sans-Serif" font-size="10.00">fl::vec2&lt; int32_t &gt;</text>
+<polygon fill="white" stroke="#666666" points="100.5,-96 11.5,-96 11.5,-77 100.5,-77 100.5,-96"/>
+<text text-anchor="middle" x="56" y="-84" font-family="Helvetica,sans-Serif" font-size="10.00">fl::vec2&lt; i32 &gt;</text>
 </a>
 </g>
 </g>
@@ -65,7 +65,7 @@
 <polygon fill="orange" stroke="orange" points="52.5,-132.87 56,-142.87 59.5,-132.87 52.5,-132.87"/>
 </a>
 </g>
-<text text-anchor="middle" x="86" y="-117" font-family="Helvetica,sans-Serif" font-size="10.00" fill="grey"> &lt; int32_t &gt;</text>
+<text text-anchor="middle" x="76.5" y="-117" font-family="Helvetica,sans-Serif" font-size="10.00" fill="grey"> &lt; i32 &gt;</text>
 </g>
 </g>
 </svg>

@@ -74,7 +74,7 @@
 <!-- Node5 -->
 <g id="Node000005" class="node">
 <title>Node5</title>
-<g id="a_Node000005"><a xlink:href="../../d8/df9/group___noise_generation_gabf6fbef9588c6d6ee35b7ad79fe14ace.html#gabf6fbef9588c6d6ee35b7ad79fe14ace" target="_top" xlink:title="8&#45;bit, fixed point implementation of Perlin&#39;s noise without scaling.">
+<g id="a_Node000005"><a xlink:href="../../d8/d5c/group___noise_gabf6fbef9588c6d6ee35b7ad79fe14ace.html#gabf6fbef9588c6d6ee35b7ad79fe14ace" target="_top" xlink:title="8&#45;bit, fixed point implementation of Perlin&#39;s noise without scaling.">
 <polygon fill="white" stroke="#666666" points="163,-130 88,-130 88,-111 163,-111 163,-130"/>
 <text text-anchor="middle" x="125.5" y="-118" font-family="Helvetica,sans-Serif" font-size="10.00">inoise8_raw</text>
 </a>
@@ -92,7 +92,7 @@
 <!-- Node6 -->
 <g id="Node000006" class="node">
 <title>Node6</title>
-<g id="a_Node000006"><a xlink:href="../../d8/df9/group___noise_generation_gae8a7338d2f14deb11f62086adf81dfe2.html#gae8a7338d2f14deb11f62086adf81dfe2" target="_top" xlink:title="8&#45;bit, fixed point implementation of Perlin&#39;s noise without scaling.">
+<g id="a_Node000006"><a xlink:href="../../d8/d5c/group___noise_gae8a7338d2f14deb11f62086adf81dfe2.html#gae8a7338d2f14deb11f62086adf81dfe2" target="_top" xlink:title="8&#45;bit, fixed point implementation of Perlin&#39;s noise without scaling.">
 <polygon fill="white" stroke="#666666" points="163,-93 88,-93 88,-74 163,-74 163,-93"/>
 <text text-anchor="middle" x="125.5" y="-81" font-family="Helvetica,sans-Serif" font-size="10.00">inoise8_raw</text>
 </a>
@@ -110,7 +110,7 @@
 <!-- Node7 -->
 <g id="Node000007" class="node">
 <title>Node7</title>
-<g id="a_Node000007"><a xlink:href="../../d8/df9/group___noise_generation_ga6c57ed3ea69e819c29602578ecbabd71.html#ga6c57ed3ea69e819c29602578ecbabd71" target="_top" xlink:title="8&#45;bit, fixed point implementation of Perlin&#39;s noise without scaling.">
+<g id="a_Node000007"><a xlink:href="../../d8/d5c/group___noise_ga6c57ed3ea69e819c29602578ecbabd71.html#ga6c57ed3ea69e819c29602578ecbabd71" target="_top" xlink:title="8&#45;bit, fixed point implementation of Perlin&#39;s noise without scaling.">
 <polygon fill="white" stroke="#666666" points="163,-56 88,-56 88,-37 163,-37 163,-56"/>
 <text text-anchor="middle" x="125.5" y="-44" font-family="Helvetica,sans-Serif" font-size="10.00">inoise8_raw</text>
 </a>

@@ -8,9 +8,5 @@ digraph "fl::Corkscrew::Corkscrew"
   rankdir="LR";
   Node1 [id="Node000001",label="fl::Corkscrew::Corkscrew",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
   Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
-  Node2 [id="Node000002",label="fl::Corkscrew::Corkscrew",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dc/d82/classfl_1_1_corkscrew_ada6c435df8589ef758bfd8733cad4bce.html#ada6c435df8589ef758bfd8733cad4bce",tooltip=" "];
-  Node2 -> Node3 [id="edge2_Node000002_Node000003",color="steelblue1",style="solid",tooltip=" "];
-  Node3 [id="Node000003",label="fl::generateState",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a770b68b456de9038c4919bd91ffdc198.html#a770b68b456de9038c4919bd91ffdc198",tooltip=" "];
-  Node3 -> Node4 [id="edge3_Node000003_Node000004",color="steelblue1",style="solid",tooltip=" "];
-  Node4 [id="Node000004",label="fl::reverse",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d4/d36/namespacefl_aa811543ca59ee9b7d57f369e6be44cc9.html#aa811543ca59ee9b7d57f369e6be44cc9",tooltip=" "];
+  Node2 [id="Node000002",label="fl::Corkscrew::Corkscrew",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dc/d82/classfl_1_1_corkscrew_a1ff55eaf5b64a8f8de8a2d123526d314.html#a1ff55eaf5b64a8f8de8a2d123526d314",tooltip=" "];
 }

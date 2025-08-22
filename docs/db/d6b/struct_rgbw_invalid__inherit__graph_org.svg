@@ -20,9 +20,9 @@
 <!-- Node2 -->
 <g id="Node000002" class="node">
 <title>Node2</title>
-<g id="a_Node000002"><a xlink:href="../../db/d74/struct_rgbw.html" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#666666" points="60.5,-74 16.5,-74 16.5,-55 60.5,-55 60.5,-74"/>
-<text text-anchor="middle" x="38.5" y="-62" font-family="Helvetica,sans-Serif" font-size="10.00">Rgbw</text>
+<g id="a_Node000002"><a xlink:href="../../d7/d27/structfl_1_1_rgbw.html" target="_top" xlink:title=" ">
+<polygon fill="white" stroke="#666666" points="66.5,-74 10.5,-74 10.5,-55 66.5,-55 66.5,-74"/>
+<text text-anchor="middle" x="38.5" y="-62" font-family="Helvetica,sans-Serif" font-size="10.00">fl::Rgbw</text>
 </a>
 </g>
 </g>

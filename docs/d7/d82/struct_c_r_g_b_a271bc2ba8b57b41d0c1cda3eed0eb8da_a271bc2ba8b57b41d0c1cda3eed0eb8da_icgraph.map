@@ -1,0 +1,32 @@
+<map id="CRGB::nscale8" name="CRGB::nscale8">
+<area shape="rect" id="Node000001" title="Scale down a RGB to N/256ths of its current brightness, using &quot;plain math&quot; dimming rules." alt="" coords="591,153,708,179"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a78e409790f4b9e58bd1f285ca1b8616b.html#a78e409790f4b9e58bd1f285ca1b8616b" title=" " alt="" coords="443,29,522,55"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="626,144,588,106,541,68,520,57,522,52,544,64,592,102,630,140"/>
+<area shape="rect" id="Node000003" href="$d5/d3d/group___color_blurs_ga25fe770c4f43629983a507267ac50236.html#ga25fe770c4f43629983a507267ac50236" title="Perform a blur1d() on every column of a rectangular matrix." alt="" coords="423,79,543,104"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="609,150,542,118,515,107,517,102,544,113,611,145"/>
+<area shape="rect" id="Node000009" href="$d5/d3d/group___color_blurs_ga8dfbf500824d0f8a2663fbd2180b1747.html#ga8dfbf500824d0f8a2663fbd2180b1747" title="Perform a blur1d() on every row of a rectangular matrix." alt="" coords="433,128,532,153"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="577,158,532,151,533,146,578,152"/>
+<area shape="rect" id="Node000010" href="$d4/d06/curr_8h_a251ace8542fe093844e4ed2709e8a3d7.html#a251ace8542fe093844e4ed2709e8a3d7" title=" " alt="" coords="455,177,510,203"/>
+<area shape="poly" id="edge10_Node000001_Node000010" title=" " alt="" coords="577,179,511,189,510,184,577,174"/>
+<area shape="rect" id="Node000014" href="$de/da4/group___noise_fill_ga6fcc17e60eac4b9dbb620f7e354177f1.html#ga6fcc17e60eac4b9dbb620f7e354177f1" title="Fill an LED matrix with random colors, using 8&#45;bit noise." alt="" coords="431,227,535,252"/>
+<area shape="poly" id="edge14_Node000001_Node000014" title=" " alt="" coords="611,187,544,218,517,229,515,224,542,213,608,182"/>
+<area shape="rect" id="Node000015" href="$df/d40/examples_2_corkscrew_2corkscrew_8h_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="457,276,508,301"/>
+<area shape="poly" id="edge15_Node000001_Node000015" title=" " alt="" coords="630,191,592,229,544,267,510,283,507,279,541,262,588,225,626,188"/>
+<area shape="rect" id="Node000004" href="$d5/d3d/group___color_blurs_gae8c57faab25bb9b60e0860795a85f968.html#gae8c57faab25bb9b60e0860795a85f968" title="Two&#45;dimensional blur filter." alt="" coords="246,79,325,104"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="409,94,325,94,325,89,409,89"/>
+<area shape="rect" id="Node000005" href="$d5/d3d/group___color_blurs_gaed939ae0deb8b8839da1b33c7bbd28a3.html#gaed939ae0deb8b8839da1b33c7bbd28a3" title="Legacy version of blur2d, which does not require an XYMap but instead implicitly binds to XY() functi..." alt="" coords="37,5,116,31"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="236,76,147,45,115,33,116,28,149,39,238,71"/>
+<area shape="rect" id="Node000006" href="$dc/d2b/classfl_1_1_blend2d_ad965648c61fd795366282d3b797a612f.html#ad965648c61fd795366282d3b797a612f" title=" " alt="" coords="11,55,142,80"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="232,88,142,77,143,72,232,83"/>
+<area shape="rect" id="Node000007" href="$d4/df2/classfl_1_1_luminova_aa775ddcb74da9d8ae057ac8e4c3c50cc.html#aa775ddcb74da9d8ae057ac8e4c3c50cc" title=" " alt="" coords="5,104,148,129"/>
+<area shape="poly" id="edge6_Node000004_Node000007" title=" " alt="" coords="233,100,148,111,148,105,232,95"/>
+<area shape="rect" id="Node000008" href="$df/d42/_blur2d_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="51,153,102,179"/>
+<area shape="poly" id="edge7_Node000004_Node000008" title=" " alt="" coords="234,107,197,119,149,143,103,160,101,156,147,138,195,114,232,102"/>
+<area shape="poly" id="edge9_Node000009_Node000004" title=" " alt="" coords="420,128,324,104,326,98,421,123"/>
+<area shape="rect" id="Node000011" href="$d3/dca/classfl_1_1_x_y_raster_sparse___c_r_g_b_a074d01574c20917b45f65fb1afbf2cb1.html#a074d01574c20917b45f65fb1afbf2cb1" title=" " alt="" coords="215,129,356,169"/>
+<area shape="poly" id="edge11_Node000010_Node000011" title=" " alt="" coords="441,184,356,166,357,161,443,179"/>
+<area shape="rect" id="Node000012" href="$d4/d36/namespacefl_a29ae9bad91ab6b7de10679e9325e90f6.html#a29ae9bad91ab6b7de10679e9325e90f6" title=" " alt="" coords="196,193,375,219"/>
+<area shape="poly" id="edge12_Node000010_Node000012" title=" " alt="" coords="442,196,375,201,375,196,441,191"/>
+<area shape="rect" id="Node000013" href="$d4/d06/curr_8h_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="260,243,311,268"/>
+<area shape="poly" id="edge13_Node000010_Node000013" title=" " alt="" coords="444,209,375,234,311,252,310,247,374,229,442,204"/>
+</map>

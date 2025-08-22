@@ -1,0 +1,11 @@
+<map id="SM16824E&lt; DATA_PIN, RGB_ORDER &gt;" name="SM16824E&lt; DATA_PIN, RGB_ORDER &gt;">
+<area shape="rect" id="Node000001" title="SM16824E controller class." alt="" coords="1072,49,1244,89"/>
+<area shape="rect" id="Node000002" href="$d5/de7/class_s_m16824_e_controller.html" title=" " alt="" coords="819,49,1023,89"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="1036,66,1072,66,1072,71,1036,71"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="309,5,584,60"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="598,41,819,58,818,64,597,47"/>
+<area shape="rect" id="Node000004" href="$d5/de7/class_s_m16824_e_controller.html" title="SM16824E controller class." alt="" coords="345,85,549,125"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="562,94,794,77,818,75,819,80,795,82,563,99"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="5,77,260,132"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="274,102,344,102,344,107,274,107"/>
+</map>

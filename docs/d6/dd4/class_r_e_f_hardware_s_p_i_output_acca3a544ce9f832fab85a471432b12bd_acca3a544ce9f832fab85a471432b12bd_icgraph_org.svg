@@ -21,7 +21,7 @@
 <!-- Node2 -->
 <g id="Node000002" class="node">
 <title>Node2</title>
-<g id="a_Node000002"><a xlink:href="../../d6/dd4/class_r_e_f_hardware_s_p_i_output_aed13aeec47cdee6166451607311f181c.html#aed13aeec47cdee6166451607311f181c" target="_top" xlink:title="A full cycle of writing a value for len bytes, including select, release, and waiting.">
+<g id="a_Node000002"><a xlink:href="../../d6/dd4/class_r_e_f_hardware_s_p_i_output_afd6e4dc4be2499c9657b369a4db99f7f.html#afd6e4dc4be2499c9657b369a4db99f7f" target="_top" xlink:title="A full cycle of writing a value for len bytes, including select, release, and waiting.">
 <polygon fill="white" stroke="#666666" points="298,-30 167,-30 167,0 298,0 298,-30"/>
 <text text-anchor="start" x="175" y="-18" font-family="Helvetica,sans-Serif" font-size="10.00">REFHardwareSPIOutput</text>
 <text text-anchor="middle" x="232.5" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">::writeBytes</text>
@@ -40,7 +40,7 @@
 <!-- Node3 -->
 <g id="Node000003" class="node">
 <title>Node3</title>
-<g id="a_Node000003"><a xlink:href="../../d6/dd4/class_r_e_f_hardware_s_p_i_output_a585373e81d2509a01429f74503b7b56b.html#a585373e81d2509a01429f74503b7b56b" target="_top" xlink:title="A full cycle of writing a value for len bytes, including select, release, and waiting.">
+<g id="a_Node000003"><a xlink:href="../../d6/dd4/class_r_e_f_hardware_s_p_i_output_a006f0c4c224b739dea4caa19def41bc0.html#a006f0c4c224b739dea4caa19def41bc0" target="_top" xlink:title="A full cycle of writing a value for len bytes, including select, release, and waiting.">
 <polygon fill="white" stroke="#666666" points="131,-30 0,-30 0,0 131,0 131,-30"/>
 <text text-anchor="start" x="8" y="-18" font-family="Helvetica,sans-Serif" font-size="10.00">REFHardwareSPIOutput</text>
 <text text-anchor="middle" x="65.5" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">::writeBytes</text>

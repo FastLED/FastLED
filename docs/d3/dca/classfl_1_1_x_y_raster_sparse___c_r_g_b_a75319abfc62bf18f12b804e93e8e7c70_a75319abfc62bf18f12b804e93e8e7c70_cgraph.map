@@ -1,0 +1,8 @@
+<map id="fl::XYRasterSparse_CRGB::clear" name="fl::XYRasterSparse_CRGB::clear">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,5,147,45"/>
+<area shape="rect" id="Node000002" href="$d3/dca/classfl_1_1_x_y_raster_sparse___c_r_g_b_abe26e1edfa8295c5641e4795688ebb5c.html#abe26e1edfa8295c5641e4795688ebb5c" title=" " alt="" coords="384,5,605,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="147,20,195,19,336,19,370,19,370,25,336,24,195,24,147,25"/>
+<area shape="rect" id="Node000003" href="$d3/dca/classfl_1_1_x_y_raster_sparse___c_r_g_b_a93d95d47b656e46ffdcbfe547786f6d3.html#a93d95d47b656e46ffdcbfe547786f6d3" title=" " alt="" coords="195,33,336,73"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="147,33,182,38,181,44,146,38"/>
+<area shape="poly" id="edge3_Node000003_Node000002" title=" " alt="" coords="336,42,370,38,370,43,337,47"/>
+</map>

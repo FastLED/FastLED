@@ -1,0 +1,44 @@
+digraph "fl::promise::promise"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="RL";
+  Node1 [id="Node000001",label="fl::promise::promise",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="Default constructor - creates invalid promise."];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl::promise::promise",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d21/classfl_1_1promise_a0cce1ec8f5d8bf7d546d8709d8bc7ff7.html#a0cce1ec8f5d8bf7d546d8709d8bc7ff7",tooltip="Copy constructor (promises are now copyable via shared implementation)"];
+  Node1 -> Node3 [id="edge2_Node000001_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::promise::promise",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d21/classfl_1_1promise_a37af20cb11860707823946a24671204a.html#a37af20cb11860707823946a24671204a",tooltip="Move constructor."];
+  Node1 -> Node4 [id="edge3_Node000001_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl::promise::catch_",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d21/classfl_1_1promise_a29ec0450db3375d4df384ce5c16def5b.html#a29ec0450db3375d4df384ce5c16def5b",tooltip="Register error callback - returns reference for chaining."];
+  Node1 -> Node5 [id="edge4_Node000001_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="fl::promise::create",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d21/classfl_1_1promise_a06ac99cdb6ae08a992c049504a395f06.html#a06ac99cdb6ae08a992c049504a395f06",tooltip="Create a pending promise."];
+  Node5 -> Node6 [id="edge5_Node000005_Node000006",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node6 [id="Node000006",label="fl::promise::reject",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d21/classfl_1_1promise_a40828f23712ac6dbabc9cd2f7d7634b6.html#a40828f23712ac6dbabc9cd2f7d7634b6",tooltip="Create a rejected promise with error."];
+  Node6 -> Node7 [id="edge6_Node000006_Node000007",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node7 [id="Node000007",label="fl::make_rejected_promise",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_aa8ba9adac097cc1e555a10bb31fb26d2.html#aa8ba9adac097cc1e555a10bb31fb26d2",tooltip="Convenience function to create a rejected promise (const char* overload)"];
+  Node6 -> Node8 [id="edge7_Node000006_Node000008",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node8 [id="Node000008",label="fl::make_rejected_promise",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_acede2a4bd76cfec481b34ef8d266b80e.html#acede2a4bd76cfec481b34ef8d266b80e",tooltip="Convenience function to create a rejected promise."];
+  Node6 -> Node9 [id="edge8_Node000006_Node000009",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node9 [id="Node000009",label="fl::promise::reject",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d21/classfl_1_1promise_ad3f1732ddc0bc7d3f0d4a6d43725e985.html#ad3f1732ddc0bc7d3f0d4a6d43725e985",tooltip="Create a rejected promise with error message."];
+  Node5 -> Node10 [id="edge9_Node000005_Node000010",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node10 [id="Node000010",label="fl::promise::resolve",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d21/classfl_1_1promise_a3e0fb912621e186951d09a10640f407b.html#a3e0fb912621e186951d09a10640f407b",tooltip="Create a resolved promise with value."];
+  Node10 -> Node11 [id="edge10_Node000010_Node000011",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node11 [id="Node000011",label="fl::execute_fetch_request",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d4/d36/namespacefl_a614354323511a444f4f3d295d6a41db8.html#a614354323511a444f4f3d295d6a41db8",tooltip="Internal helper to execute a fetch request and return a promise."];
+  Node10 -> Node25 [id="edge11_Node000010_Node000025",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node25 [id="Node000025",label="fl::make_resolved_promise",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a50da6c7601ccf62e8c9c47a92a646cc4.html#a50da6c7601ccf62e8c9c47a92a646cc4",tooltip="Convenience function to create a resolved promise."];
+  Node5 -> Node26 [id="edge12_Node000005_Node000026",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node26 [id="Node000026",label="fl::promise::resolve",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d21/classfl_1_1promise_aab796029d311b31bcb2b818ce8f4f89a.html#aab796029d311b31bcb2b818ce8f4f89a",tooltip="Create a resolved promise with value (move version)"];
+  Node1 -> Node27 [id="edge13_Node000001_Node000027",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node27 [id="Node000027",label="fl::promise::operator=",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d21/classfl_1_1promise_a93655ce9aedf5d2f57f015dc61aa0d20.html#a93655ce9aedf5d2f57f015dc61aa0d20",tooltip="Copy assignment operator."];
+  Node1 -> Node28 [id="edge14_Node000001_Node000028",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node28 [id="Node000028",label="fl::promise::operator=",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d21/classfl_1_1promise_a8cf4d1a2b88247968f98f07a2bce5be6.html#a8cf4d1a2b88247968f98f07a2bce5be6",tooltip="Move assignment operator."];
+  Node1 -> Node6 [id="edge15_Node000001_Node000006",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node9 [id="edge16_Node000001_Node000009",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node10 [id="edge17_Node000001_Node000010",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node26 [id="edge18_Node000001_Node000026",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node29 [id="edge19_Node000001_Node000029",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node29 [id="Node000029",label="fl::promise::then",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d21/classfl_1_1promise_ae10342734273b14abe3ba660f1a713ce.html#ae10342734273b14abe3ba660f1a713ce",tooltip="Register success callback - returns reference for chaining."];
+}

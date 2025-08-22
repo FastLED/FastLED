@@ -25,6 +25,7 @@ var led__strip__types_8h =
         [ "invert_out", "d4/d88/led__strip__types_8h.html#afcbd2844f563e498f804d8342589f29b", null ]
       ] ],
       [ "color_component_format", "d4/d88/led__strip__types_8h.html#a6a4e80c18b9c6c1855c8c3aa8a65d392", null ],
+      [ "external_pixel_buf", "d4/d88/led__strip__types_8h.html#af56685bf6187a8a069f6aa66a4312dd9", null ],
       [ "flags", "d4/d88/led__strip__types_8h.html#a941a2be212342c87539f2f7a6bced989", null ],
       [ "led_model", "d4/d88/led__strip__types_8h.html#a37c4df94f484de3c6941e6580a4e91ab", null ],
       [ "max_leds", "d4/d88/led__strip__types_8h.html#a9d2cc8718131d9a9e3dd15d8496e7941", null ],

@@ -1,0 +1,5 @@
+<map id="fl::fl_random::next_random32" name="fl::fl_random::next_random32">
+<area shape="rect" id="Node000001" title="Generate next 32&#45;bit random number using this instance&#39;s seed." alt="" coords="5,5,145,45"/>
+<area shape="rect" id="Node000002" href="$d4/da3/classfl_1_1fl__random_ad96698c9b4feb20286fa9c7189fb2e33.html#ad96698c9b4feb20286fa9c7189fb2e33" title="Generate next 16&#45;bit random number using this instance&#39;s seed." alt="" coords="193,5,333,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="146,23,179,23,179,28,146,28"/>
+</map>

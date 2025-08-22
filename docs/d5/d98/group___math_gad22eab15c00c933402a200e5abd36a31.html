@@ -130,24 +130,25 @@ $(function(){initNavTree('d5/d98/group___math_gad22eab15c00c933402a200e5abd36a31
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>the sum of i + j, 16-bit </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="../../d5/dd1/math8_8h_source.html#l00153">153</a> of file <a class="el" href="../../d5/dd1/math8_8h_source.html">math8.h</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  153</span>                                                                  {</div>
-<div class="line"><span class="lineno">  154</span><span class="preprocessor">#if ADD8_C == 1</span></div>
-<div class="line"><span class="lineno">  155</span>    uint16_t t = i + j;</div>
-<div class="line"><span class="lineno">  156</span>    <span class="keywordflow">return</span> t;</div>
-<div class="line"><span class="lineno">  157</span><span class="preprocessor">#elif ADD8_AVRASM == 1</span></div>
-<div class="line"><span class="lineno">  158</span>    <span class="comment">// Add i(one byte) to j(two bytes)</span></div>
-<div class="line"><span class="lineno">  159</span>    <span class="keyword">asm</span> <span class="keyword">volatile</span>(<span class="stringliteral">&quot;add %A[j], %[i]              \n\t&quot;</span></div>
-<div class="line"><span class="lineno">  160</span>                 <span class="stringliteral">&quot;adc %B[j], __zero_reg__      \n\t&quot;</span></div>
-<div class="line"><span class="lineno">  161</span>                 : [j] <span class="stringliteral">&quot;+r&quot;</span>(j)</div>
-<div class="line"><span class="lineno">  162</span>                 : [i] <span class="stringliteral">&quot;r&quot;</span>(i));</div>
-<div class="line"><span class="lineno">  163</span>    <span class="keywordflow">return</span> i;</div>
-<div class="line"><span class="lineno">  164</span><span class="preprocessor">#else</span></div>
-<div class="line"><span class="lineno">  165</span><span class="preprocessor">#error &quot;No implementation for add8to16 available.&quot;</span></div>
-<div class="line"><span class="lineno">  166</span><span class="preprocessor">#endif</span></div>
-<div class="line"><span class="lineno">  167</span>}</div>
+<p class="definition">Definition at line <a class="el" href="../../d5/dd1/math8_8h_source.html#l00162">162</a> of file <a class="el" href="../../d5/dd1/math8_8h_source.html">math8.h</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  162</span>                                                                  {</div>
+<div class="line"><span class="lineno">  163</span><span class="preprocessor">#if ADD8_C == 1</span></div>
+<div class="line"><span class="lineno">  164</span>    uint16_t <a class="code hl_variable" href="../../dc/db7/examples_2_luminova_2luminova_8h_ae96c939a2a46590dc79c7d9ca8331dfe.html#ae96c939a2a46590dc79c7d9ca8331dfe">t</a> = i + j;</div>
+<div class="line"><span class="lineno">  165</span>    <span class="keywordflow">return</span> <a class="code hl_variable" href="../../dc/db7/examples_2_luminova_2luminova_8h_ae96c939a2a46590dc79c7d9ca8331dfe.html#ae96c939a2a46590dc79c7d9ca8331dfe">t</a>;</div>
+<div class="line"><span class="lineno">  166</span><span class="preprocessor">#elif ADD8_AVRASM == 1</span></div>
+<div class="line"><span class="lineno">  167</span>    <span class="comment">// Add i(one byte) to j(two bytes)</span></div>
+<div class="line"><span class="lineno">  168</span>    <span class="keyword">asm</span> <span class="keyword">volatile</span>(<span class="stringliteral">&quot;add %A[j], %[i]              \n\t&quot;</span></div>
+<div class="line"><span class="lineno">  169</span>                 <span class="stringliteral">&quot;adc %B[j], __zero_reg__      \n\t&quot;</span></div>
+<div class="line"><span class="lineno">  170</span>                 : [j] <span class="stringliteral">&quot;+r&quot;</span>(j)</div>
+<div class="line"><span class="lineno">  171</span>                 : [i] <span class="stringliteral">&quot;r&quot;</span>(i));</div>
+<div class="line"><span class="lineno">  172</span>    <span class="keywordflow">return</span> i;</div>
+<div class="line"><span class="lineno">  173</span><span class="preprocessor">#else</span></div>
+<div class="line"><span class="lineno">  174</span><span class="preprocessor">#error &quot;No implementation for add8to16 available.&quot;</span></div>
+<div class="line"><span class="lineno">  175</span><span class="preprocessor">#endif</span></div>
+<div class="line"><span class="lineno">  176</span>}</div>
+<div class="ttc" id="aexamples_2_luminova_2luminova_8h_ae96c939a2a46590dc79c7d9ca8331dfe_html_ae96c939a2a46590dc79c7d9ca8331dfe"><div class="ttname"><a href="../../dc/db7/examples_2_luminova_2luminova_8h_ae96c939a2a46590dc79c7d9ca8331dfe.html#ae96c939a2a46590dc79c7d9ca8331dfe">t</a></div><div class="ttdeci">static uint32_t t</div><div class="ttdef"><b>Definition</b> <a href="../../dc/db7/examples_2_luminova_2luminova_8h_source.html#l00054">Luminova.h:54</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d4/d7a/lib8static_8h_source.html#l00012">LIB8STATIC_ALWAYS_INLINE</a>.</p>
+<p class="reference">References <a class="el" href="../../d4/d7a/lib8static_8h_source.html#l00012">LIB8STATIC_ALWAYS_INLINE</a>, and <a class="el" href="../../dc/db7/examples_2_luminova_2luminova_8h_source.html#l00054">t</a>.</p>
 
 </div>
 </div>
@@ -158,7 +159,7 @@ $(function(){initNavTree('d5/d98/group___math_gad22eab15c00c933402a200e5abd36a31
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d5/d98/group___math.html">Basic Math Operations</a></li>
-    <li class="footer">Generated on Tue Jun 24 2025 00:58:14 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Fri Aug 22 2025 20:59:34 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

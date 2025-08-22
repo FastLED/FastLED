@@ -1,0 +1,11 @@
+<map id="fireSpeedY" name="fireSpeedY">
+<area shape="rect" id="Node000001" title=" " alt="" coords="421,31,512,56"/>
+<area shape="rect" id="Node000002" href="$d4/d06/curr_8h_af9691ba6aeb226dd50626f04206c6e28.html#af9691ba6aeb226dd50626f04206c6e28" title=" " alt="" coords="231,5,373,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="407,37,373,32,374,26,408,32"/>
+<area shape="rect" id="Node000005" href="$d4/d06/curr_8h_a577b85d2595519588a4f0da4a3e258c2.html#a577b85d2595519588a4f0da4a3e258c2" title=" " alt="" coords="261,55,343,80"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="408,55,344,64,343,59,407,49"/>
+<area shape="rect" id="Node000003" href="$d4/d06/curr_8h_ad5dd16b6abf44e3aad21ce2a4badf906.html#ad5dd16b6abf44e3aad21ce2a4badf906" title=" " alt="" coords="104,5,183,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="217,21,183,21,183,15,217,15"/>
+<area shape="rect" id="Node000004" href="$d4/d06/curr_8h_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="5,5,56,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="90,21,57,21,57,15,90,15"/>
+</map>

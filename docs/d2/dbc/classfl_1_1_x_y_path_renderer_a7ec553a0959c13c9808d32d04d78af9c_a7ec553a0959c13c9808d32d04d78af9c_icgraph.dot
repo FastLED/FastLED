@@ -8,7 +8,7 @@ digraph "fl::XYPathRenderer::onTransformFloatChanged"
   rankdir="RL";
   Node1 [id="Node000001",label="fl::XYPathRenderer\l::onTransformFloatChanged",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
   Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node2 [id="Node000002",label="fl::XYPathRenderer\l::setDrawBounds",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/dbc/classfl_1_1_x_y_path_renderer_a6d6a54ba93b7fc01d6e23c47f6a68a84.html#a6d6a54ba93b7fc01d6e23c47f6a68a84",tooltip=" "];
+  Node2 [id="Node000002",label="fl::XYPathRenderer\l::setDrawBounds",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/dbc/classfl_1_1_x_y_path_renderer_ae58cfc59bc00e1d1a4085270f789edc5.html#ae58cfc59bc00e1d1a4085270f789edc5",tooltip=" "];
   Node1 -> Node3 [id="edge2_Node000001_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node3 [id="Node000003",label="fl::XYPathRenderer\l::setScale",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/dbc/classfl_1_1_x_y_path_renderer_a8a61c55f3e7844d4f2a80aa88ccd61de.html#a8a61c55f3e7844d4f2a80aa88ccd61de",tooltip=" "];
   Node1 -> Node4 [id="edge3_Node000001_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];

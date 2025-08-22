@@ -127,21 +127,24 @@ template&lt;typename T&gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d6/d10/variant_8h_source.html#l00106">106</a> of file <a class="el" href="../../d6/d10/variant_8h_source.html">variant.h</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  106</span>                                   {</div>
-<div class="line"><span class="lineno">  107</span>        <span class="keywordflow">return</span> <a class="code hl_function" href="../../de/d60/classfl_1_1_variant_a3794348734afd949bb18bf9e2b9f9df8.html#a3794348734afd949bb18bf9e2b9f9df8">is&lt;T&gt;</a>() ? <span class="keyword">reinterpret_cast&lt;</span><a class="code hl_class" href="../../de/d60/classfl_1_1_variant.html">T</a> *<span class="keyword">&gt;</span>(&amp;<a class="code hl_variable" href="../../de/d60/classfl_1_1_variant_a04b9d09d770d8a676ab61e278494d567.html#a04b9d09d770d8a676ab61e278494d567">_storage</a>) : <a class="code hl_class" href="../../de/d60/classfl_1_1_variant.html">nullptr</a>;</div>
-<div class="line"><span class="lineno">  108</span>    }</div>
-<div class="ttc" id="aclassfl_1_1_variant_a04b9d09d770d8a676ab61e278494d567_html_a04b9d09d770d8a676ab61e278494d567"><div class="ttname"><a href="../../de/d60/classfl_1_1_variant_a04b9d09d770d8a676ab61e278494d567.html#a04b9d09d770d8a676ab61e278494d567">fl::Variant::_storage</a></div><div class="ttdeci">char _storage[max_size&lt; Types... &gt;::value]</div><div class="ttdef"><b>Definition</b> <a href="../../d6/d10/variant_8h_source.html#l00255">variant.h:255</a></div></div>
-<div class="ttc" id="aclassfl_1_1_variant_a3794348734afd949bb18bf9e2b9f9df8_html_a3794348734afd949bb18bf9e2b9f9df8"><div class="ttname"><a href="../../de/d60/classfl_1_1_variant_a3794348734afd949bb18bf9e2b9f9df8.html#a3794348734afd949bb18bf9e2b9f9df8">fl::Variant::is</a></div><div class="ttdeci">bool is() const noexcept</div><div class="ttdef"><b>Definition</b> <a href="../../d6/d10/variant_8h_source.html#l00102">variant.h:102</a></div></div>
-<div class="ttc" id="aclassfl_1_1_variant_html"><div class="ttname"><a href="../../de/d60/classfl_1_1_variant.html">fl::Variant</a></div><div class="ttdef"><b>Definition</b> <a href="../../d6/d10/variant_8h_source.html#l00009">variant.h:9</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../d6/d10/variant_8h_source.html#l00110">110</a> of file <a class="el" href="../../d6/d10/variant_8h_source.html">variant.h</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  110</span>                                   {</div>
+<div class="line"><span class="lineno">  111</span>        <span class="keywordflow">if</span> (!<a class="code hl_function" href="../../de/d60/classfl_1_1_variant_a3794348734afd949bb18bf9e2b9f9df8.html#a3794348734afd949bb18bf9e2b9f9df8">is&lt;T&gt;</a>()) <span class="keywordflow">return</span> <span class="keyword">nullptr</span>;</div>
+<div class="line"><span class="lineno">  112</span>        <span class="comment">// Use bit_cast_ptr for safe type-punning on properly aligned storage</span></div>
+<div class="line"><span class="lineno">  113</span>        <span class="comment">// The storage is guaranteed to be properly aligned by alignas(max_align&lt;Types...&gt;::value)</span></div>
+<div class="line"><span class="lineno">  114</span>        <span class="keywordflow">return</span> <a class="code hl_function" href="../../d4/d36/namespacefl_a10d5f94f3f6fc672a882eae3e736ec38.html#a10d5f94f3f6fc672a882eae3e736ec38">fl::bit_cast_ptr&lt;T&gt;</a>(&amp;<a class="code hl_variable" href="../../de/d60/classfl_1_1_variant_a04b9d09d770d8a676ab61e278494d567.html#a04b9d09d770d8a676ab61e278494d567">_storage</a>[0]);</div>
+<div class="line"><span class="lineno">  115</span>    }</div>
+<div class="ttc" id="aclassfl_1_1_variant_a04b9d09d770d8a676ab61e278494d567_html_a04b9d09d770d8a676ab61e278494d567"><div class="ttname"><a href="../../de/d60/classfl_1_1_variant_a04b9d09d770d8a676ab61e278494d567.html#a04b9d09d770d8a676ab61e278494d567">fl::Variant::_storage</a></div><div class="ttdeci">char _storage[max_size&lt; Types... &gt;::value]</div><div class="ttdef"><b>Definition</b> <a href="../../d6/d10/variant_8h_source.html#l00294">variant.h:294</a></div></div>
+<div class="ttc" id="aclassfl_1_1_variant_a3794348734afd949bb18bf9e2b9f9df8_html_a3794348734afd949bb18bf9e2b9f9df8"><div class="ttname"><a href="../../de/d60/classfl_1_1_variant_a3794348734afd949bb18bf9e2b9f9df8.html#a3794348734afd949bb18bf9e2b9f9df8">fl::Variant::is</a></div><div class="ttdeci">bool is() const noexcept</div><div class="ttdef"><b>Definition</b> <a href="../../d6/d10/variant_8h_source.html#l00106">variant.h:106</a></div></div>
+<div class="ttc" id="anamespacefl_a10d5f94f3f6fc672a882eae3e736ec38_html_a10d5f94f3f6fc672a882eae3e736ec38"><div class="ttname"><a href="../../d4/d36/namespacefl_a10d5f94f3f6fc672a882eae3e736ec38.html#a10d5f94f3f6fc672a882eae3e736ec38">fl::bit_cast_ptr</a></div><div class="ttdeci">To * bit_cast_ptr(void *storage) noexcept</div><div class="ttdef"><b>Definition</b> <a href="../../df/d72/bit__cast_8h_source.html#l00054">bit_cast.h:54</a></div></div>
 </div><!-- fragment -->
-<p class="reference">Referenced by <a class="el" href="../../d6/d10/variant_8h_source.html#l00086">fl::Variant&lt; const CRGBPalette16 *, const CRGBPalette32 *, const CRGBPalette256 *, GradientFunction &gt;::emplace()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d6/d10/variant_8h_source.html#l00090">fl::Variant&lt; fl::span&lt; CRGB &gt;, fl::vector&lt; CRGB, fl::allocator_psram&lt; CRGB &gt; &gt; &gt;::emplace()</a>, <a class="el" href="../../d6/d10/variant_8h_source.html#l00129">fl::Variant&lt; fl::span&lt; CRGB &gt;, fl::vector&lt; CRGB, fl::allocator_psram&lt; CRGB &gt; &gt; &gt;::get()</a>, and <a class="el" href="../../d6/d10/variant_8h_source.html#l00140">fl::Variant&lt; fl::span&lt; CRGB &gt;, fl::vector&lt; CRGB, fl::allocator_psram&lt; CRGB &gt; &gt; &gt;::get()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the caller graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-0-content" class="dyncontent" style="display:none;">
-<div class="center"><iframe scrolling="no" frameborder="0" src="../../de/d60/classfl_1_1_variant_a65c4d26937c7abd48dd2597d3f2dc209_a65c4d26937c7abd48dd2597d3f2dc209_icgraph.svg" width="432" height="95"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<div class="center"><iframe scrolling="no" frameborder="0" src="../../de/d60/classfl_1_1_variant_a65c4d26937c7abd48dd2597d3f2dc209_a65c4d26937c7abd48dd2597d3f2dc209_icgraph.svg" width="400" height="267"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
 </div>
 
 </div>
@@ -153,7 +156,7 @@ template&lt;typename T&gt; </div>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../de/d60/classfl_1_1_variant.html">Variant</a></li>
-    <li class="footer">Generated on Tue Jun 24 2025 00:58:16 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Fri Aug 22 2025 20:59:37 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

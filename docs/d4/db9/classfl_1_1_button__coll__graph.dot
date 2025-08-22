@@ -21,13 +21,13 @@ digraph "fl::Button"
   Node7 -> Node6 [id="edge7_Node000006_Node000007",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node7 [id="Node000007",label="fl::FunctionListBase\l\< function\< void(Args...)\> \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d7/de3/classfl_1_1_function_list_base.html",tooltip=" "];
   Node8 -> Node7 [id="edge8_Node000007_Node000008",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" mFunctions",fontcolor="grey" ];
-  Node8 [id="Node000008",label="fl::HeapVector\< T,\l Allocator \>\< fl::Pair\l\< int, function\< void\l(Args...)\> \> \>",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$db/ddd/classfl_1_1_heap_vector.html",tooltip=" "];
+  Node8 [id="Node000008",label="fl::HeapVector\< T,\l Allocator \>\< fl::pair\l\< int, function\< void\l(Args...)\> \> \>",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$db/ddd/classfl_1_1_heap_vector.html",tooltip=" "];
   Node11 -> Node7 [id="edge9_Node000007_Node000011",dir="back",color="orange",style="dashed",tooltip=" ",label=" \< function\< void(Args...)\> \>",fontcolor="grey" ];
   Node11 [id="Node000011",label="fl::FunctionListBase\l\< FunctionType \>",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d7/de3/classfl_1_1_function_list_base.html",tooltip=" "];
   Node13 -> Node6 [id="edge10_Node000006_Node000013",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node13 [id="Node000013",label="fl::FunctionListBase\l\< function\< void()\> \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d7/de3/classfl_1_1_function_list_base.html",tooltip=" "];
   Node14 -> Node13 [id="edge11_Node000013_Node000014",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" mFunctions",fontcolor="grey" ];
-  Node14 [id="Node000014",label="fl::HeapVector\< T,\l Allocator \>\< fl::Pair\l\< int, function\< void\l()\> \> \>",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$db/ddd/classfl_1_1_heap_vector.html",tooltip=" "];
+  Node14 [id="Node000014",label="fl::HeapVector\< T,\l Allocator \>\< fl::pair\l\< int, function\< void\l()\> \> \>",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$db/ddd/classfl_1_1_heap_vector.html",tooltip=" "];
   Node11 -> Node13 [id="edge12_Node000013_Node000011",dir="back",color="orange",style="dashed",tooltip=" ",label=" \< function\< void()\> \>",fontcolor="grey" ];
   Node15 -> Node6 [id="edge13_Node000006_Node000015",dir="back",color="orange",style="dashed",tooltip=" ",label=" \< void \>",fontcolor="grey" ];
   Node15 [id="Node000015",label="fl::FunctionList\< Args \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d1/d5d/classfl_1_1_function_list.html",tooltip=" "];

@@ -1,0 +1,16 @@
+<map id="fl::detail::PromiseImpl&lt; T &gt;" name="fl::detail::PromiseImpl&lt; T &gt;">
+<area shape="rect" id="Node000001" title="Implementation class for promise &#45; holds the actual state and logic." alt="" coords="115,285,318,311"/>
+<area shape="rect" id="Node000002" href="$da/d46/structfl_1_1_error.html" title="Error type for promises." alt="" coords="55,190,125,215"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="116,222,164,259,200,283,197,288,160,263,112,226"/>
+<area shape="rect" id="Node000003" href="$d2/db2/classfl_1_1string.html" title=" " alt="" coords="53,95,127,120"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="93,134,93,190,87,190,87,134"/>
+<area shape="rect" id="Node000004" href="$dc/d96/classfl_1_1_str_n.html" title=" " alt="" coords="5,5,175,45"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="93,59,93,94,87,94,87,59"/>
+<area shape="rect" id="Node000006" href="$d4/d36/namespacefl.html#d4/d36/namespacefl" title=" " alt="" coords="149,183,284,223"/>
+<area shape="poly" id="edge4_Node000001_Node000006" title=" " alt="" coords="219,237,219,285,214,285,214,237"/>
+<area shape="rect" id="Node000007" href="$d4/d36/namespacefl.html#d0/ddd/classfl_1_1function" title=" " alt="" coords="232,95,361,120"/>
+<area shape="poly" id="edge5_Node000006_Node000007" title=" " alt="" coords="240,128,222,145,215,163,215,182,210,182,210,162,217,143,237,124"/>
+<area shape="rect" id="Node000008" href="$d4/d36/namespacefl.html#d4/d36/namespacefl" title=" " alt="" coords="308,183,451,223"/>
+<area shape="poly" id="edge7_Node000008_Node000007" title=" " alt="" coords="331,125,351,142,364,162,374,181,370,184,360,164,347,146,328,129"/>
+<area shape="poly" id="edge6_Node000001_Node000008" title=" " alt="" coords="360,235,329,264,301,278,272,288,271,283,299,273,326,259,356,231"/>
+</map>

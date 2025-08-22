@@ -1,0 +1,9 @@
+<map id="fl::promise::reject" name="fl::promise::reject">
+<area shape="rect" id="Node000001" title="Create a rejected promise with error." alt="" coords="248,55,384,80"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_aa8ba9adac097cc1e555a10bb31fb26d2.html#aa8ba9adac097cc1e555a10bb31fb26d2" title="Convenience function to create a rejected promise (const char* overload)" alt="" coords="5,5,200,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="247,54,158,33,159,28,248,49"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_acede2a4bd76cfec481b34ef8d266b80e.html#acede2a4bd76cfec481b34ef8d266b80e" title="Convenience function to create a rejected promise." alt="" coords="5,55,200,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="234,70,200,70,200,65,234,65"/>
+<area shape="rect" id="Node000004" href="$d1/d21/classfl_1_1promise_ad3f1732ddc0bc7d3f0d4a6d43725e985.html#ad3f1732ddc0bc7d3f0d4a6d43725e985" title="Create a rejected promise with error message." alt="" coords="35,104,171,129"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="248,86,159,107,158,101,247,81"/>
+</map>

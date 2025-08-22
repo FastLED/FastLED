@@ -1,0 +1,63 @@
+digraph "test_json_response"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="LR";
+  Node1 [id="Node000001",label="test_json_response",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="APPROACH 3: JSON Response Handling with FastLED's ideal JSON API This demonstrates fetch responses wi..."];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl::Json::contains",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d13/classfl_1_1_json_a9236fb7918653680f37ce9c4cbf0dc2a.html#a9236fb7918653680f37ce9c4cbf0dc2a",tooltip=" "];
+  Node1 -> Node3 [id="edge2_Node000001_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::fetch_get",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_af42605edbdf3f35d997e6da5be2c02a5.html#af42605edbdf3f35d997e6da5be2c02a5",tooltip="HTTP GET request."];
+  Node3 -> Node4 [id="edge3_Node000003_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl::fetch_options::body",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d49/classfl_1_1fetch__options_a38270ee520d0b35566a972e44006350b.html#a38270ee520d0b35566a972e44006350b",tooltip="Set request body."];
+  Node4 -> Node5 [id="edge4_Node000004_Node000005",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="fl::fetch_options::\lfetch_options",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d2/d49/classfl_1_1fetch__options_a73eb354da4d72180fa2092519f04d8d5.html#a73eb354da4d72180fa2092519f04d8d5",tooltip=" "];
+  Node3 -> Node7 [id="edge5_Node000003_Node000007",color="steelblue1",style="solid",tooltip=" "];
+  Node7 [id="Node000007",label="fl::execute_fetch_request",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a614354323511a444f4f3d295d6a41db8.html#a614354323511a444f4f3d295d6a41db8",tooltip="Internal helper to execute a fetch request and return a promise."];
+  Node7 -> Node8 [id="edge6_Node000007_Node000008",color="steelblue1",style="solid",tooltip=" "];
+  Node8 [id="Node000008",label="fl::promise::resolve",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d1/d21/classfl_1_1promise_a3e0fb912621e186951d09a10640f407b.html#a3e0fb912621e186951d09a10640f407b",tooltip="Create a resolved promise with value."];
+  Node7 -> Node14 [id="edge7_Node000007_Node000014",color="steelblue1",style="solid",tooltip=" "];
+  Node14 [id="Node000014",label="fl::response::set_body",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/d4b/classfl_1_1response_a32fccb19fb4d302d7dc444cf9659c302.html#a32fccb19fb4d302d7dc444cf9659c302",tooltip=" "];
+  Node3 -> Node15 [id="edge8_Node000003_Node000015",color="steelblue1",style="solid",tooltip=" "];
+  Node15 [id="Node000015",label="fl::fetch_options::\lheader",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d49/classfl_1_1fetch__options_a541c0709606193eb2057cafa1aa42a29.html#a541c0709606193eb2057cafa1aa42a29",tooltip="Add header."];
+  Node15 -> Node5 [id="edge9_Node000015_Node000005",color="steelblue1",style="solid",tooltip=" "];
+  Node3 -> Node16 [id="edge10_Node000003_Node000016",color="steelblue1",style="solid",tooltip=" "];
+  Node16 [id="Node000016",label="fl::fetch_options::\loptions",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d49/classfl_1_1fetch__options_a79495f6a025bd4851500804ad92f81ba.html#a79495f6a025bd4851500804ad92f81ba",tooltip="Get the options for this request."];
+  Node3 -> Node17 [id="edge11_Node000003_Node000017",color="steelblue1",style="solid",tooltip=" "];
+  Node17 [id="Node000017",label="fl::fetch_options::\ltimeout",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d49/classfl_1_1fetch__options_a1a19b6646176204db31d1ab58cab1e57.html#a1a19b6646176204db31d1ab58cab1e57",tooltip="Set timeout in milliseconds."];
+  Node17 -> Node5 [id="edge12_Node000017_Node000005",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node18 [id="edge13_Node000001_Node000018",color="steelblue1",style="solid",tooltip=" "];
+  Node18 [id="Node000018",label="fl::fill_solid",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/de3/group___color_fills_gafcada3a28df2b4491cbee30297e39ea7.html#gafcada3a28df2b4491cbee30297e39ea7",tooltip="Fill a range of LEDs with a solid color."];
+  Node1 -> Node19 [id="edge14_Node000001_Node000019",color="steelblue1",style="solid",tooltip=" "];
+  Node19 [id="Node000019",label="fl::Json::is_array",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d13/classfl_1_1_json_a00eda00b1da99d1db9ec08f63d82b892.html#a00eda00b1da99d1db9ec08f63d82b892",tooltip=" "];
+  Node1 -> Node20 [id="edge15_Node000001_Node000020",color="steelblue1",style="solid",tooltip=" "];
+  Node20 [id="Node000020",label="fl::response::is_json",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/d4b/classfl_1_1response_af79b281c20f6d54c717321b329787401.html#af79b281c20f6d54c717321b329787401",tooltip="Check if response appears to contain JSON content."];
+  Node20 -> Node21 [id="edge16_Node000020_Node000021",color="steelblue1",style="solid",tooltip=" "];
+  Node21 [id="Node000021",label="fl::StrN::find",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dc/d96/classfl_1_1_str_n_a3d66ea4272adeb310d727edb78ceac91.html#a3d66ea4272adeb310d727edb78ceac91",tooltip=" "];
+  Node21 -> Node22 [id="edge17_Node000021_Node000022",color="steelblue1",style="solid",tooltip=" "];
+  Node22 [id="Node000022",label="fl::StrN::c_str",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dc/d96/classfl_1_1_str_n_a67296b774f8201293edbbabbd1b642cb.html#a67296b774f8201293edbbabbd1b642cb",tooltip=" "];
+  Node20 -> Node23 [id="edge18_Node000020_Node000023",color="steelblue1",style="solid",tooltip=" "];
+  Node23 [id="Node000023",label="fl::response::get_content_type",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/d4b/classfl_1_1response_a330eca0371b3740387f8a8ffbbf01323.html#a330eca0371b3740387f8a8ffbbf01323",tooltip="Get content type convenience method."];
+  Node23 -> Node24 [id="edge19_Node000023_Node000024",color="steelblue1",style="solid",tooltip=" "];
+  Node24 [id="Node000024",label="fl::response::get_header",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d5/d4b/classfl_1_1response_a589fee303b366ab7853c5460832adf13.html#a589fee303b366ab7853c5460832adf13",tooltip="Get header value (like JavaScript response.headers.get())"];
+  Node1 -> Node26 [id="edge20_Node000001_Node000026",color="steelblue1",style="solid",tooltip=" "];
+  Node26 [id="Node000026",label="fl::response::json",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/d4b/classfl_1_1response_a1b8301f50ee0dc36b49ab157423d3a22.html#a1b8301f50ee0dc36b49ab157423d3a22",tooltip="Response body parsed as JSON (JavaScript-like API)"];
+  Node26 -> Node20 [id="edge21_Node000026_Node000020",color="steelblue1",style="solid",tooltip=" "];
+  Node26 -> Node27 [id="edge22_Node000026_Node000027",color="steelblue1",style="solid",tooltip=" "];
+  Node27 [id="Node000027",label="fl::response::parse\l_json_body",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/d4b/classfl_1_1response_a913de93f1614c93e29ae0c1b3219a0b1.html#a913de93f1614c93e29ae0c1b3219a0b1",tooltip="Parse JSON from response body with error handling."];
+  Node27 -> Node28 [id="edge23_Node000027_Node000028",color="steelblue1",style="solid",tooltip=" "];
+  Node28 [id="Node000028",label="fl::Json::is_null",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d13/classfl_1_1_json_a2b6bdd94f6d1444281b4fec156edc3a8.html#a2b6bdd94f6d1444281b4fec156edc3a8",tooltip=" "];
+  Node27 -> Node29 [id="edge24_Node000027_Node000029",color="steelblue1",style="solid",tooltip=" "];
+  Node29 [id="Node000029",label="fl::Json::parse",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d4/d13/classfl_1_1_json_acba319cd1a600f1a88beeecab57d4e7c.html#acba319cd1a600f1a88beeecab57d4e7c",tooltip=" "];
+  Node1 -> Node35 [id="edge25_Node000001_Node000035",color="steelblue1",style="solid",tooltip=" "];
+  Node35 [id="Node000035",label="fl::response::ok",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/d4b/classfl_1_1response_ab472532b087765875cbb00459edb578b.html#ab472532b087765875cbb00459edb578b",tooltip="Check if response is successful (like JavaScript response.ok)"];
+  Node1 -> Node36 [id="edge26_Node000001_Node000036",color="steelblue1",style="solid",tooltip=" "];
+  Node36 [id="Node000036",label="fl::Json::size",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d13/classfl_1_1_json_adbf66067309abb63839c5d0a43cb258e.html#adbf66067309abb63839c5d0a43cb258e",tooltip=" "];
+  Node1 -> Node37 [id="edge27_Node000001_Node000037",color="steelblue1",style="solid",tooltip=" "];
+  Node37 [id="Node000037",label="fl::response::status",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/d4b/classfl_1_1response_ab0dfb2ce40390826ab23a0447ba348a3.html#ab0dfb2ce40390826ab23a0447ba348a3",tooltip="HTTP status code (like JavaScript response.status)"];
+  Node1 -> Node38 [id="edge28_Node000001_Node000038",color="steelblue1",style="solid",tooltip=" "];
+  Node38 [id="Node000038",label="fl::response::status_text",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/d4b/classfl_1_1response_a60c35a8b2eafc7183d8df62452855ebd.html#a60c35a8b2eafc7183d8df62452855ebd",tooltip="HTTP status text (like JavaScript response.statusText)"];
+}

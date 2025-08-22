@@ -1,0 +1,16 @@
+<map id="fl::fetch_options" name="fl::fetch_options">
+<area shape="rect" id="Node000001" title="Fetch options builder (fluent interface)" alt="" coords="1297,110,1424,135"/>
+<area shape="rect" id="Node000002" href="$d2/db2/classfl_1_1string.html" title=" " alt="" coords="799,115,874,141"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="888,127,1020,130,1181,129,1297,124,1297,129,1181,135,1020,135,887,132"/>
+<area shape="rect" id="Node000005" href="$dd/dda/structfl_1_1_request_options.html" title="Request options (matches JavaScript fetch RequestInit)" alt="" coords="1040,79,1181,105"/>
+<area shape="poly" id="edge5_Node000005_Node000002" title=" " alt="" coords="887,119,1039,99,1040,104,888,124"/>
+<area shape="rect" id="Node000003" href="$dc/d96/classfl_1_1_str_n.html" title=" " alt="" coords="359,108,529,148"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="543,125,799,125,799,131,543,131"/>
+<area shape="rect" id="Node000004" href="$dc/d96/classfl_1_1_str_n.html" title=" " alt="" coords="5,115,131,141"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="145,125,359,125,359,131,145,131"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="1195,100,1297,112,1297,118,1195,105"/>
+<area shape="rect" id="Node000006" href="$de/dd4/classfl_1_1_map_red_black_tree.html" title=" " alt="" coords="739,5,935,75"/>
+<area shape="poly" id="edge6_Node000005_Node000006" title=" " alt="" coords="948,54,1017,67,1061,77,1059,82,1015,72,947,59"/>
+<area shape="rect" id="Node000007" href="$de/dd4/classfl_1_1_map_red_black_tree.html" title=" " alt="" coords="347,13,541,67"/>
+<area shape="poly" id="edge7_Node000006_Node000007" title=" " alt="" coords="555,37,738,37,738,43,555,43"/>
+</map>

@@ -1,0 +1,10 @@
+<map id="fl::await_top_level" name="fl::await_top_level">
+<area shape="rect" id="Node000001" title="Synchronously wait for a promise to complete (ONLY safe in top&#45;level contexts)" alt="" coords="309,31,451,56"/>
+<area shape="rect" id="Node000002" href="$d5/dec/_net_test_real_8h_a75e6549812ad7bff897e0c92a225878a.html#a75e6549812ad7bff897e0c92a225878a" title=" " alt="" coords="104,5,261,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="295,35,261,31,262,25,296,30"/>
+<area shape="rect" id="Node000004" href="$d5/dec/_net_test_real_8h_a648cd3d90f8e240cbbfe5cb934057124.html#a648cd3d90f8e240cbbfe5cb934057124" title="APPROACH 4: JSON Response with await pattern &#160;&#160;Same JSON handling but using await_top_level for synch..." alt="" coords="121,55,245,80"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="296,56,245,62,245,57,295,51"/>
+<area shape="rect" id="Node000003" href="$d5/dec/_net_test_real_8h_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="5,31,56,56"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="93,36,57,42,56,37,92,30"/>
+<area shape="poly" id="edge4_Node000004_Node000003" title=" " alt="" coords="107,58,56,50,57,45,108,53"/>
+</map>

@@ -1,0 +1,29 @@
+<map id="drawWaveform" name="drawWaveform">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,179,127,204"/>
+<area shape="rect" id="Node000002" href="$da/dc7/advanced_8h_abd84f2f97c080f743cb0de181adcd8c7.html#abd84f2f97c080f743cb0de181adcd8c7" title=" " alt="" coords="212,5,300,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="71,177,107,112,137,73,173,40,197,27,200,32,176,44,141,77,112,115,75,180"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a6072e119545650c71b6544cc0ce9e355.html#a6072e119545650c71b6544cc0ce9e355" title=" " alt="" coords="217,55,295,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="76,177,115,134,143,110,173,89,203,76,205,81,176,94,146,114,119,138,79,180"/>
+<area shape="rect" id="Node000004" href="$da/dc7/advanced_8h_afaa5f070126ac5184a648b484e7cf276.html#afaa5f070126ac5184a648b484e7cf276" title=" " alt="" coords="205,104,307,129"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="90,176,174,138,194,131,196,136,176,143,93,181"/>
+<area shape="rect" id="Node000008" href="$d1/dfb/colorutils_8h_a3d488dd1e2d27e99307310527e51cad3.html#a3d488dd1e2d27e99307310527e51cad3" title=" " alt="" coords="189,153,323,179"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="127,181,175,174,175,179,127,186"/>
+<area shape="rect" id="Node000009" href="$d7/d82/struct_c_r_g_b_aabdc26405d8c24356b7152b4c80daaa7.html#aabdc26405d8c24356b7152b4c80daaa7" title="fadeToBlackBy is a synonym for nscale8(), as a fade instead of a scale" alt="" coords="175,203,337,228"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="127,196,161,201,161,206,127,202"/>
+<area shape="rect" id="Node000011" href="$da/dc7/advanced_8h_ac17afe8b8a0d48cf8ffdaada59b5a7c4.html#ac17afe8b8a0d48cf8ffdaada59b5a7c4" title=" " alt="" coords="188,252,324,277"/>
+<area shape="poly" id="edge10_Node000001_Node000011" title=" " alt="" coords="95,202,176,237,199,245,197,250,174,242,92,206"/>
+<area shape="rect" id="Node000013" href="$d8/dd0/_fire_cylinder_8h_a470cec2dcb21e474c257065bb93bfcd1.html#a470cec2dcb21e474c257065bb93bfcd1" title=" " alt="" coords="222,301,290,327"/>
+<area shape="poly" id="edge12_Node000001_Node000013" title=" " alt="" coords="80,203,120,244,147,267,176,286,210,301,208,306,173,291,144,271,117,248,77,206"/>
+<area shape="rect" id="Node000014" href="$d8/de4/classfl_1_1_slice_abe7b0c2539b61d18d30ee571680d5a91.html#abe7b0c2539b61d18d30ee571680d5a91" title=" " alt="" coords="205,351,307,376"/>
+<area shape="poly" id="edge13_Node000001_Node000014" title=" " alt="" coords="75,203,112,267,141,305,176,337,193,347,191,351,173,341,137,309,107,270,71,206"/>
+<area shape="rect" id="Node000005" href="$da/dc7/advanced_8h_a40fb0ce80fe239814f5a2d21922802b3.html#a40fb0ce80fe239814f5a2d21922802b3" title=" " alt="" coords="399,55,490,80"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="305,101,385,80,386,85,306,107"/>
+<area shape="rect" id="Node000006" href="$d1/dfb/colorutils_8h_a399e4e094995b8e97420b89a2dd6548b.html#a399e4e094995b8e97420b89a2dd6548b" title=" " alt="" coords="385,104,504,129"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="308,114,371,114,371,119,308,119"/>
+<area shape="rect" id="Node000007" href="$d1/dfb/colorutils_8h_afcada3a28df2b4491cbee30297e39ea7.html#afcada3a28df2b4491cbee30297e39ea7" title="Fill a range of LEDs with a solid color." alt="" coords="407,153,483,179"/>
+<area shape="poly" id="edge6_Node000004_Node000007" title=" " alt="" coords="306,127,394,150,392,155,305,132"/>
+<area shape="rect" id="Node000010" href="$d7/d82/struct_c_r_g_b_a4b0cc1cfefd9e0c66ea5c6583181df46.html#a4b0cc1cfefd9e0c66ea5c6583181df46" title="Default constructor." alt="" coords="393,203,497,228"/>
+<area shape="poly" id="edge9_Node000009_Node000010" title=" " alt="" coords="338,213,379,213,379,218,338,218"/>
+<area shape="rect" id="Node000012" href="$da/dc7/advanced_8h_af93246357d0df3ce571494e6b78abb6c.html#af93246357d0df3ce571494e6b78abb6c" title=" " alt="" coords="395,252,494,277"/>
+<area shape="poly" id="edge11_Node000011_Node000012" title=" " alt="" coords="324,262,381,262,381,267,324,267"/>
+</map>

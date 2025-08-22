@@ -1,0 +1,9 @@
+<map id="CLEDController::setDither" name="CLEDController::setDither">
+<area shape="rect" id="Node000001" title="Set the dithering mode for this controller to use." alt="" coords="749,5,937,31"/>
+<area shape="rect" id="Node000002" href="$d6/d2c/class_c_l_e_d_controller_a49b221af013bf196c2068e2cbd1c299d.html#a49b221af013bf196c2068e2cbd1c299d" title=" " alt="" coords="484,5,701,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="736,21,702,21,702,15,736,15"/>
+<area shape="rect" id="Node000003" href="$d6/d2c/class_c_l_e_d_controller_a45c7ed2f111230bda9d329cf88a58eb4.html#a45c7ed2f111230bda9d329cf88a58eb4" title=" " alt="" coords="244,5,436,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="470,21,436,21,436,15,470,15"/>
+<area shape="rect" id="Node000004" href="$d6/d2c/class_c_l_e_d_controller_a6cd8a28d7585fba96407c9678c00d588.html#a6cd8a28d7585fba96407c9678c00d588" title="Clear out/zero out the given number of LEDs." alt="" coords="5,5,196,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="230,21,196,21,196,15,230,15"/>
+</map>

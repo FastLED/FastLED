@@ -38,7 +38,7 @@
 <!-- Node3 -->
 <g id="Node000003" class="node">
 <title>Node3</title>
-<g id="a_Node000003"><a xlink:href="../../d4/d8d/classfl_1_1_string_formatter_a563cb1110196a63cc6baeeb65ccd39af.html#a563cb1110196a63cc6baeeb65ccd39af" target="_top" xlink:title=" ">
+<g id="a_Node000003"><a xlink:href="../../d4/d8d/classfl_1_1_string_formatter_a40a6a0a8fbfb5359571b187bc04253d3.html#a40a6a0a8fbfb5359571b187bc04253d3" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="231,-30 126,-30 126,0 231,0 231,-30"/>
 <text text-anchor="start" x="134" y="-18" font-family="Helvetica,sans-Serif" font-size="10.00">fl::StringFormatter</text>
 <text text-anchor="middle" x="178.5" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">::parseFloat</text>
@@ -57,7 +57,7 @@
 <!-- Node4 -->
 <g id="Node000004" class="node">
 <title>Node4</title>
-<g id="a_Node000004"><a xlink:href="../../d7/d59/namespacefl_1_1string__functions_a1cb21467f5357bb585fccb785a24cd08.html#a1cb21467f5357bb585fccb785a24cd08" target="_top" xlink:title=" ">
+<g id="a_Node000004"><a xlink:href="../../d7/d59/namespacefl_1_1string__functions_a19b26d81ef5aaeb6d4cc279c820a2597.html#a19b26d81ef5aaeb6d4cc279c820a2597" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="374,-30 267,-30 267,0 374,0 374,-30"/>
 <text text-anchor="start" x="275" y="-18" font-family="Helvetica,sans-Serif" font-size="10.00">fl::string_functions</text>
 <text text-anchor="middle" x="320.5" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">::atoff</text>
@@ -70,6 +70,15 @@
 <g id="a_edge3_Node000003_Node000004"><a xlink:title=" ">
 <path fill="none" stroke="#63b8ff" d="M231.23,-15C239.43,-15 247.98,-15 256.4,-15"/>
 <polygon fill="#63b8ff" stroke="#63b8ff" points="256.58,-18.5 266.58,-15 256.58,-11.5 256.58,-18.5"/>
+</a>
+</g>
+</g>
+<!-- Node4&#45;&gt;Node4 -->
+<g id="edge4_Node000004_Node000004" class="edge">
+<title>Node4&#45;&gt;Node4</title>
+<g id="a_edge4_Node000004_Node000004"><a xlink:title=" ">
+<path fill="none" stroke="#63b8ff" d="M295.54,-30.28C289.99,-39.41 298.31,-48 320.5,-48 333.67,-48 341.96,-44.97 345.36,-40.6"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="348.86,-40.31 345.46,-30.28 341.86,-40.24 348.86,-40.31"/>
 </a>
 </g>
 </g>

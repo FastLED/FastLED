@@ -1,0 +1,9 @@
+<map id="fl::CHSV::CHSV" name="fl::CHSV::CHSV">
+<area shape="rect" id="Node000001" title="Default constructor." alt="" coords="200,55,317,80"/>
+<area shape="rect" id="Node000002" href="$db/ddc/structfl_1_1_c_h_s_v_a378204324c25c704de399ca957c89d6a.html#a378204324c25c704de399ca957c89d6a" title="Allow copy construction." alt="" coords="20,5,137,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="198,53,125,33,127,28,199,48"/>
+<area shape="rect" id="Node000003" href="$db/ddc/structfl_1_1_c_h_s_v_a46d1d28fe398b783f488ec22ac16c519.html#a46d1d28fe398b783f488ec22ac16c519" title="Allow copy construction." alt="" coords="5,55,152,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="186,70,152,70,152,65,186,65"/>
+<area shape="rect" id="Node000004" href="$db/ddc/structfl_1_1_c_h_s_v_ad9e0549d81d0e8d047789764c4eb951f.html#ad9e0549d81d0e8d047789764c4eb951f" title="Assign new HSV values." alt="" coords="15,104,143,129"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="199,86,127,106,125,101,198,81"/>
+</map>

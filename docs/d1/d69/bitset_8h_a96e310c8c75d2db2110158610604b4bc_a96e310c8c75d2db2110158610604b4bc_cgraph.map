@@ -1,0 +1,15 @@
+<map id="FL_DISABLE_WARNING" name="FL_DISABLE_WARNING">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,129,176,155"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a0445ddcae69ac4e524ec18098eb84dbf.html#a0445ddcae69ac4e524ec18098eb84dbf" title=" " alt="" coords="257,5,331,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="104,127,154,85,223,40,243,31,245,35,225,44,157,90,107,131"/>
+<area shape="rect" id="Node000003" href="$d6/daf/direct_8h_a0b3fd115c40d6ac683a810a572fc6104.html#a0b3fd115c40d6ac683a810a572fc6104" title=" " alt="" coords="265,55,323,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="123,127,223,89,251,79,253,84,225,94,125,132"/>
+<area shape="rect" id="Node000004" href="$db/dd1/crgb_8h_a8a80cf207f08b95b7e6d5775ec02ac4b.html#a8a80cf207f08b95b7e6d5775ec02ac4b" title="Combine two CRGB objects, taking the smallest value of each channel." alt="" coords="251,104,337,129"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="176,129,236,121,237,126,177,134"/>
+<area shape="rect" id="Node000005" href="$db/dd1/crgb_8h_a8a5083bb351fad245f328ae8066134ae.html#a8a5083bb351fad245f328ae8066134ae" title="Combine two CRGB objects, taking the largest value of each channel." alt="" coords="253,153,335,179"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="177,149,240,157,239,162,176,155"/>
+<area shape="rect" id="Node000006" href="$df/d9e/namespacefl_1_1detail_aa878a2c7d8c38f99002cb94c3d6d3465.html#aa878a2c7d8c38f99002cb94c3d6d3465" title=" " alt="" coords="224,203,364,228"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="128,152,246,195,244,200,126,157"/>
+<area shape="rect" id="Node000007" href="$d4/d36/namespacefl_a51af8617c16d4d2a40aca6d4f81a92c4.html#a51af8617c16d4d2a40aca6d4f81a92c4" title=" " alt="" coords="247,252,341,277"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="108,153,158,193,225,237,241,244,239,249,223,242,155,198,105,157"/>
+</map>

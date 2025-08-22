@@ -129,46 +129,45 @@ $(function(){initNavTree('d5/d98/group___math_ga17d0d692de142f4d4379b8cc899eaefb
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>the product of i * j, capping at 0xFF </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="../../d5/dd1/math8_8h_source.html#l00470">470</a> of file <a class="el" href="../../d5/dd1/math8_8h_source.html">math8.h</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  470</span>                                                             {</div>
-<div class="line"><span class="lineno">  471</span><span class="preprocessor">#if QMUL8_C == 1</span></div>
-<div class="line"><span class="lineno">  472</span>    <span class="keywordtype">unsigned</span> <a class="code hl_variable" href="../../d6/de8/noise_8cpp_ad4f390ff52b49f726bfdf77302fbd4d5.html#ad4f390ff52b49f726bfdf77302fbd4d5">p</a> = (unsigned)i * (<span class="keywordtype">unsigned</span>)j;</div>
-<div class="line"><span class="lineno">  473</span>    <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../d6/de8/noise_8cpp_ad4f390ff52b49f726bfdf77302fbd4d5.html#ad4f390ff52b49f726bfdf77302fbd4d5">p</a> &gt; 255)</div>
-<div class="line"><span class="lineno">  474</span>        <a class="code hl_variable" href="../../d6/de8/noise_8cpp_ad4f390ff52b49f726bfdf77302fbd4d5.html#ad4f390ff52b49f726bfdf77302fbd4d5">p</a> = 255;</div>
-<div class="line"><span class="lineno">  475</span>    <span class="keywordflow">return</span> <a class="code hl_variable" href="../../d6/de8/noise_8cpp_ad4f390ff52b49f726bfdf77302fbd4d5.html#ad4f390ff52b49f726bfdf77302fbd4d5">p</a>;</div>
-<div class="line"><span class="lineno">  476</span><span class="preprocessor">#elif QMUL8_AVRASM == 1</span></div>
-<div class="line"><span class="lineno">  477</span>    <span class="keyword">asm</span> <span class="keyword">volatile</span>(</div>
-<div class="line"><span class="lineno">  478</span>        <span class="comment">/* Multiply 8-bit i * 8-bit j, giving 16-bit r1,r0 */</span></div>
-<div class="line"><span class="lineno">  479</span>        <span class="stringliteral">&quot;  mul %0, %1          \n\t&quot;</span></div>
-<div class="line"><span class="lineno">  480</span>        <span class="comment">/* Extract the LOW 8-bits (r0) */</span></div>
-<div class="line"><span class="lineno">  481</span>        <span class="stringliteral">&quot;  mov %0, r0          \n\t&quot;</span></div>
-<div class="line"><span class="lineno">  482</span>        <span class="comment">/* If high byte of result is zero, all is well. */</span></div>
-<div class="line"><span class="lineno">  483</span>        <span class="stringliteral">&quot;  tst r1              \n\t&quot;</span></div>
-<div class="line"><span class="lineno">  484</span>        <span class="stringliteral">&quot;  breq Lnospill_%=    \n\t&quot;</span></div>
-<div class="line"><span class="lineno">  485</span>        <span class="comment">/* If high byte of result &gt; 0, saturate to 0xFF */</span></div>
-<div class="line"><span class="lineno">  486</span>        <span class="stringliteral">&quot;  ldi %0, 0xFF         \n\t&quot;</span></div>
-<div class="line"><span class="lineno">  487</span>        <span class="stringliteral">&quot;Lnospill_%=:          \n\t&quot;</span></div>
-<div class="line"><span class="lineno">  488</span>        <span class="comment">/* Restore r1 to &quot;0&quot;; it&#39;s expected to always be that */</span></div>
-<div class="line"><span class="lineno">  489</span>        <span class="stringliteral">&quot;  clr __zero_reg__    \n\t&quot;</span></div>
-<div class="line"><span class="lineno">  490</span>        : <span class="stringliteral">&quot;+d&quot;</span>(i) <span class="comment">// r16-r31, restricted by ldi</span></div>
-<div class="line"><span class="lineno">  491</span>        : <span class="stringliteral">&quot;r&quot;</span>(j)</div>
-<div class="line"><span class="lineno">  492</span>        : <span class="stringliteral">&quot;r0&quot;</span>, <span class="stringliteral">&quot;r1&quot;</span>);</div>
-<div class="line"><span class="lineno">  493</span>    <span class="keywordflow">return</span> i;</div>
-<div class="line"><span class="lineno">  494</span><span class="preprocessor">#else</span></div>
-<div class="line"><span class="lineno">  495</span><span class="preprocessor">#error &quot;No implementation for qmul8 available.&quot;</span></div>
-<div class="line"><span class="lineno">  496</span><span class="preprocessor">#endif</span></div>
-<div class="line"><span class="lineno">  497</span>}</div>
-<div class="ttc" id="anoise_8cpp_ad4f390ff52b49f726bfdf77302fbd4d5_html_ad4f390ff52b49f726bfdf77302fbd4d5"><div class="ttname"><a href="../../d6/de8/noise_8cpp_ad4f390ff52b49f726bfdf77302fbd4d5.html#ad4f390ff52b49f726bfdf77302fbd4d5">p</a></div><div class="ttdeci">static FASTLED_NAMESPACE_BEGIN uint8_t const p[]</div><div class="ttdef"><b>Definition</b> <a href="../../d6/de8/noise_8cpp_source.html#l00030">noise.cpp:30</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../d5/dd1/math8_8h_source.html#l00486">486</a> of file <a class="el" href="../../d5/dd1/math8_8h_source.html">math8.h</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  486</span>                                                             {</div>
+<div class="line"><span class="lineno">  487</span><span class="preprocessor">#if QMUL8_C == 1</span></div>
+<div class="line"><span class="lineno">  488</span>    <span class="keywordtype">unsigned</span> p = (unsigned)i * (<span class="keywordtype">unsigned</span>)j;</div>
+<div class="line"><span class="lineno">  489</span>    <span class="keywordflow">if</span> (p &gt; 255)</div>
+<div class="line"><span class="lineno">  490</span>        p = 255;</div>
+<div class="line"><span class="lineno">  491</span>    <span class="keywordflow">return</span> p;</div>
+<div class="line"><span class="lineno">  492</span><span class="preprocessor">#elif QMUL8_AVRASM == 1</span></div>
+<div class="line"><span class="lineno">  493</span>    <span class="keyword">asm</span> <span class="keyword">volatile</span>(</div>
+<div class="line"><span class="lineno">  494</span>        <span class="comment">/* Multiply 8-bit i * 8-bit j, giving 16-bit r1,r0 */</span></div>
+<div class="line"><span class="lineno">  495</span>        <span class="stringliteral">&quot;  mul %0, %1          \n\t&quot;</span></div>
+<div class="line"><span class="lineno">  496</span>        <span class="comment">/* Extract the LOW 8-bits (r0) */</span></div>
+<div class="line"><span class="lineno">  497</span>        <span class="stringliteral">&quot;  mov %0, r0          \n\t&quot;</span></div>
+<div class="line"><span class="lineno">  498</span>        <span class="comment">/* If high byte of result is zero, all is well. */</span></div>
+<div class="line"><span class="lineno">  499</span>        <span class="stringliteral">&quot;  tst r1              \n\t&quot;</span></div>
+<div class="line"><span class="lineno">  500</span>        <span class="stringliteral">&quot;  breq Lnospill_%=    \n\t&quot;</span></div>
+<div class="line"><span class="lineno">  501</span>        <span class="comment">/* If high byte of result &gt; 0, saturate to 0xFF */</span></div>
+<div class="line"><span class="lineno">  502</span>        <span class="stringliteral">&quot;  ldi %0, 0xFF         \n\t&quot;</span></div>
+<div class="line"><span class="lineno">  503</span>        <span class="stringliteral">&quot;Lnospill_%=:          \n\t&quot;</span></div>
+<div class="line"><span class="lineno">  504</span>        <span class="comment">/* Restore r1 to &quot;0&quot;; it&#39;s expected to always be that */</span></div>
+<div class="line"><span class="lineno">  505</span>        <span class="stringliteral">&quot;  clr __zero_reg__    \n\t&quot;</span></div>
+<div class="line"><span class="lineno">  506</span>        : <span class="stringliteral">&quot;+d&quot;</span>(i) <span class="comment">// r16-r31, restricted by ldi</span></div>
+<div class="line"><span class="lineno">  507</span>        : <span class="stringliteral">&quot;r&quot;</span>(j)</div>
+<div class="line"><span class="lineno">  508</span>        : <span class="stringliteral">&quot;r0&quot;</span>, <span class="stringliteral">&quot;r1&quot;</span>);</div>
+<div class="line"><span class="lineno">  509</span>    <span class="keywordflow">return</span> i;</div>
+<div class="line"><span class="lineno">  510</span><span class="preprocessor">#else</span></div>
+<div class="line"><span class="lineno">  511</span><span class="preprocessor">#error &quot;No implementation for qmul8 available.&quot;</span></div>
+<div class="line"><span class="lineno">  512</span><span class="preprocessor">#endif</span></div>
+<div class="line"><span class="lineno">  513</span>}</div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d4/d7a/lib8static_8h_source.html#l00012">LIB8STATIC_ALWAYS_INLINE</a>, and <a class="el" href="../../d6/de8/noise_8cpp_source.html#l00030">p</a>.</p>
+<p class="reference">References <a class="el" href="../../d4/d7a/lib8static_8h_source.html#l00012">LIB8STATIC_ALWAYS_INLINE</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d0/d4b/crgb_8hpp_source.html#l00193">operator*()</a>, and <a class="el" href="../../d0/d4b/crgb_8hpp_source.html#l00061">CRGB::operator*=()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d0/d4b/crgb_8hpp_source.html#l00202">operator*()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the caller graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-0-content" class="dyncontent" style="display:none;">
-<div class="center"><iframe scrolling="no" frameborder="0" src="../../d5/d98/group___math_ga17d0d692de142f4d4379b8cc899eaefb_ga17d0d692de142f4d4379b8cc899eaefb_icgraph.svg" width="262" height="86"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<div class="center"><iframe scrolling="no" frameborder="0" src="../../d5/d98/group___math_ga17d0d692de142f4d4379b8cc899eaefb_ga17d0d692de142f4d4379b8cc899eaefb_icgraph.svg" width="206" height="36"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
 </div>
 
 </div>
@@ -180,7 +179,7 @@ $(function(){initNavTree('d5/d98/group___math_ga17d0d692de142f4d4379b8cc899eaefb
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d5/d98/group___math.html">Basic Math Operations</a></li>
-    <li class="footer">Generated on Tue Jun 24 2025 00:58:14 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Fri Aug 22 2025 20:59:34 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

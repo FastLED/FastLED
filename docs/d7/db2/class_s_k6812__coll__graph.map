@@ -1,11 +1,11 @@
 <map id="SK6812&lt; DATA_PIN, RGB_ORDER &gt;" name="SK6812&lt; DATA_PIN, RGB_ORDER &gt;">
-<area shape="rect" id="Node000001" title="SK6812 controller class." alt="" coords="904,59,1089,99"/>
-<area shape="rect" id="Node000002" href="$d9/d05/class_s_k6812_controller.html" title=" " alt="" coords="671,59,855,99"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="868,76,904,76,904,81,868,81"/>
-<area shape="rect" id="Node000003" title=" " alt="" coords="253,5,435,75"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="449,47,671,68,670,73,449,52"/>
-<area shape="rect" id="Node000004" href="$d9/d05/class_s_k6812_controller.html" title="SK6812 controller class." alt="" coords="252,99,436,139"/>
-<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="449,106,670,85,671,90,450,111"/>
-<area shape="rect" id="Node000005" title=" " alt="" coords="5,91,203,146"/>
-<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="216,116,252,116,252,121,216,121"/>
+<area shape="rect" id="Node000001" title="SK6812 controller class." alt="" coords="1032,49,1217,89"/>
+<area shape="rect" id="Node000002" href="$d9/d05/class_s_k6812_controller.html" title=" " alt="" coords="799,49,983,89"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="996,66,1032,66,1032,71,996,71"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="309,5,564,60"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="578,41,799,59,798,64,578,46"/>
+<area shape="rect" id="Node000004" href="$d9/d05/class_s_k6812_controller.html" title="SK6812 controller class." alt="" coords="345,85,529,125"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="542,95,774,77,798,75,799,80,775,82,542,100"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="5,77,260,132"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="273,102,345,102,345,107,273,107"/>
 </map>

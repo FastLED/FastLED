@@ -117,37 +117,37 @@ $(function(){initNavTree('d5/d98/group___math_ga162169ac0c2d1f3d01eaff8f32e1b415
 
 <p>Take the absolute value of a signed 8-bit uint8_t. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../d5/dd1/math8_8h_source.html#l00500">500</a> of file <a class="el" href="../../d5/dd1/math8_8h_source.html">math8.h</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  500</span>                                               {</div>
-<div class="line"><span class="lineno">  501</span><span class="preprocessor">#if ABS8_C == 1</span></div>
-<div class="line"><span class="lineno">  502</span>    <span class="keywordflow">if</span> (i &lt; 0)</div>
-<div class="line"><span class="lineno">  503</span>        i = -i;</div>
-<div class="line"><span class="lineno">  504</span>    <span class="keywordflow">return</span> i;</div>
-<div class="line"><span class="lineno">  505</span><span class="preprocessor">#elif ABS8_AVRASM == 1</span></div>
-<div class="line"><span class="lineno">  506</span>    <span class="keyword">asm</span> <span class="keyword">volatile</span>(</div>
-<div class="line"><span class="lineno">  507</span>        <span class="comment">/* First, check the high bit, and prepare to skip if it&#39;s clear */</span></div>
-<div class="line"><span class="lineno">  508</span>        <span class="stringliteral">&quot;sbrc %0, 7 \n&quot;</span></div>
-<div class="line"><span class="lineno">  509</span> </div>
-<div class="line"><span class="lineno">  510</span>        <span class="comment">/* Negate the value */</span></div>
-<div class="line"><span class="lineno">  511</span>        <span class="stringliteral">&quot;neg %0     \n&quot;</span></div>
-<div class="line"><span class="lineno">  512</span> </div>
-<div class="line"><span class="lineno">  513</span>        : <span class="stringliteral">&quot;+r&quot;</span>(i)</div>
-<div class="line"><span class="lineno">  514</span>        : <span class="stringliteral">&quot;r&quot;</span>(i));</div>
-<div class="line"><span class="lineno">  515</span>    <span class="keywordflow">return</span> i;</div>
-<div class="line"><span class="lineno">  516</span><span class="preprocessor">#else</span></div>
-<div class="line"><span class="lineno">  517</span><span class="preprocessor">#error &quot;No implementation for abs8 available.&quot;</span></div>
-<div class="line"><span class="lineno">  518</span><span class="preprocessor">#endif</span></div>
-<div class="line"><span class="lineno">  519</span>}</div>
+<p class="definition">Definition at line <a class="el" href="../../d5/dd1/math8_8h_source.html#l00516">516</a> of file <a class="el" href="../../d5/dd1/math8_8h_source.html">math8.h</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  516</span>                                               {</div>
+<div class="line"><span class="lineno">  517</span><span class="preprocessor">#if ABS8_C == 1</span></div>
+<div class="line"><span class="lineno">  518</span>    <span class="keywordflow">if</span> (i &lt; 0)</div>
+<div class="line"><span class="lineno">  519</span>        i = -i;</div>
+<div class="line"><span class="lineno">  520</span>    <span class="keywordflow">return</span> i;</div>
+<div class="line"><span class="lineno">  521</span><span class="preprocessor">#elif ABS8_AVRASM == 1</span></div>
+<div class="line"><span class="lineno">  522</span>    <span class="keyword">asm</span> <span class="keyword">volatile</span>(</div>
+<div class="line"><span class="lineno">  523</span>        <span class="comment">/* First, check the high bit, and prepare to skip if it&#39;s clear */</span></div>
+<div class="line"><span class="lineno">  524</span>        <span class="stringliteral">&quot;sbrc %0, 7 \n&quot;</span></div>
+<div class="line"><span class="lineno">  525</span> </div>
+<div class="line"><span class="lineno">  526</span>        <span class="comment">/* Negate the value */</span></div>
+<div class="line"><span class="lineno">  527</span>        <span class="stringliteral">&quot;neg %0     \n&quot;</span></div>
+<div class="line"><span class="lineno">  528</span> </div>
+<div class="line"><span class="lineno">  529</span>        : <span class="stringliteral">&quot;+r&quot;</span>(i)</div>
+<div class="line"><span class="lineno">  530</span>        : <span class="stringliteral">&quot;r&quot;</span>(i));</div>
+<div class="line"><span class="lineno">  531</span>    <span class="keywordflow">return</span> i;</div>
+<div class="line"><span class="lineno">  532</span><span class="preprocessor">#else</span></div>
+<div class="line"><span class="lineno">  533</span><span class="preprocessor">#error &quot;No implementation for abs8 available.&quot;</span></div>
+<div class="line"><span class="lineno">  534</span><span class="preprocessor">#endif</span></div>
+<div class="line"><span class="lineno">  535</span>}</div>
 </div><!-- fragment -->
 <p class="reference">References <a class="el" href="../../d4/d7a/lib8static_8h_source.html#l00012">LIB8STATIC_ALWAYS_INLINE</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d5/d88/_fire_matrix_8h_source.html#l00115">getPaletteIndex()</a>, and <a class="el" href="../../d8/dd0/_fire_cylinder_8h_source.html#l00112">getPaletteIndex()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d4/d06/curr_8h_source.html#l00592">getFirePaletteIndex()</a>, <a class="el" href="../../d5/d88/_fire_matrix_8h_source.html#l00115">getPaletteIndex()</a>, and <a class="el" href="../../d8/dd0/_fire_cylinder_8h_source.html#l00112">getPaletteIndex()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the caller graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-0-content" class="dyncontent" style="display:none;">
-<div class="center"><iframe scrolling="no" frameborder="0" src="../../d5/d98/group___math_ga162169ac0c2d1f3d01eaff8f32e1b415_ga162169ac0c2d1f3d01eaff8f32e1b415_icgraph.svg" width="335" height="86"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<div class="center"><iframe scrolling="no" frameborder="0" src="../../d5/d98/group___math_ga162169ac0c2d1f3d01eaff8f32e1b415_ga162169ac0c2d1f3d01eaff8f32e1b415_icgraph.svg" width="578" height="184"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
 </div>
 
 </div>
@@ -159,7 +159,7 @@ $(function(){initNavTree('d5/d98/group___math_ga162169ac0c2d1f3d01eaff8f32e1b415
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d5/d98/group___math.html">Basic Math Operations</a></li>
-    <li class="footer">Generated on Tue Jun 24 2025 00:58:14 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Fri Aug 22 2025 20:59:34 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

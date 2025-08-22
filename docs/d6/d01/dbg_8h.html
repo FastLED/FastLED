@@ -108,12 +108,15 @@ $(function(){initNavTree('d6/d01/dbg_8h.html','../../'); initResizable(true); })
 </div><!--header-->
 <div class="contents">
 <div class="textblock"><code>#include &quot;<a class="el" href="../../d8/d00/strstream_8h_source.html">fl/strstream.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d1/dbc/sketch__macros_8h_source.html">fl/sketch_macros.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d3/d7e/int_8h_source.html">fl/int.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../df/dd8/stdint_8h_source.html">fl/stdint.h</a>&quot;</code><br />
 </div><div class="textblock"><div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Include dependency graph for dbg.h:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-0-content" class="dyncontent" style="display:none;">
-<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../d4/d5e/dbg_8h__incl.svg" width="100%" height="547"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
+<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../d4/d5e/dbg_8h__incl.svg" width="100%" height="600"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
 </div>
 </div><div class="textblock"><div id="dynsection-1" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-1-trigger" src="../../closed.png" alt="+"/> This graph shows which files directly or indirectly include this file:</div>
@@ -128,22 +131,30 @@ $(function(){initNavTree('d6/d01/dbg_8h.html','../../'); initResizable(true); })
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="namespaces" name="namespaces"></a>
 Namespaces</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">namespace &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></td></tr>
-<tr class="memdesc:d4/d36/namespacefl"><td class="mdescLeft">&#160;</td><td class="mdescRight">Implements a simple red square effect for 2D LED grids. <br /></td></tr>
+<tr class="memdesc:d4/d36/namespacefl"><td class="mdescLeft">&#160;</td><td class="mdescRight">IMPORTANT! <br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="define-members" name="define-members"></a>
 Macros</h2></td></tr>
+<tr class="memitem:a98a9801e0141354bf27f238a3021dc30" id="r_a98a9801e0141354bf27f238a3021dc30"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d6/d01/dbg_8h_a98a9801e0141354bf27f238a3021dc30.html#a98a9801e0141354bf27f238a3021dc30">_FASTLED_DGB</a>(X)</td></tr>
+<tr class="separator:a98a9801e0141354bf27f238a3021dc30"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad827e4b2bf1db9d697a566d6046b6f8b" id="r_ad827e4b2bf1db9d697a566d6046b6f8b"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d6/d01/dbg_8h_ad827e4b2bf1db9d697a566d6046b6f8b.html#ad827e4b2bf1db9d697a566d6046b6f8b">FASTLED_DBG</a>(X)</td></tr>
 <tr class="separator:ad827e4b2bf1db9d697a566d6046b6f8b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a930937edcc9079db4573928306510ff8" id="r_a930937edcc9079db4573928306510ff8"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d6/d01/dbg_8h_a930937edcc9079db4573928306510ff8.html#a930937edcc9079db4573928306510ff8">FASTLED_DBG_IF</a>(COND,  MSG)</td></tr>
 <tr class="separator:a930937edcc9079db4573928306510ff8"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8de0011cfc9a41673b8b9c3d01336c64" id="r_a8de0011cfc9a41673b8b9c3d01336c64"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d6/d01/dbg_8h_a8de0011cfc9a41673b8b9c3d01336c64.html#a8de0011cfc9a41673b8b9c3d01336c64">FASTLED_DBG_USE_PRINTF</a>&#160;&#160;&#160;0</td></tr>
-<tr class="separator:a8de0011cfc9a41673b8b9c3d01336c64"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afb526791ac1a233202a78095ae4ac6c3" id="r_afb526791ac1a233202a78095ae4ac6c3"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d6/d01/dbg_8h_afb526791ac1a233202a78095ae4ac6c3.html#afb526791ac1a233202a78095ae4ac6c3">FASTLED_FORCE_DBG</a>&#160;&#160;&#160;1</td></tr>
+<tr class="separator:afb526791ac1a233202a78095ae4ac6c3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0218bc096fb5986b597b84b2fe7b8fe9" id="r_a0218bc096fb5986b597b84b2fe7b8fe9"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d6/d01/dbg_8h_a0218bc096fb5986b597b84b2fe7b8fe9.html#a0218bc096fb5986b597b84b2fe7b8fe9">FASTLED_HAS_DBG</a>&#160;&#160;&#160;1</td></tr>
+<tr class="separator:a0218bc096fb5986b597b84b2fe7b8fe9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a24e902a454de17d63f17634ab5c9f908" id="r_a24e902a454de17d63f17634ab5c9f908"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d6/d01/dbg_8h_a24e902a454de17d63f17634ab5c9f908.html#a24e902a454de17d63f17634ab5c9f908">FL_DBG_PRINTLN_DECLARED</a></td></tr>
+<tr class="separator:a24e902a454de17d63f17634ab5c9f908"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
 <tr class="memitem:ae8e0626219073ef6b24d63a749af3283" id="r_ae8e0626219073ef6b24d63a749af3283"><td class="memItemLeft" align="right" valign="top">const char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_ae8e0626219073ef6b24d63a749af3283.html#ae8e0626219073ef6b24d63a749af3283">fl::fastled_file_offset</a> (const char *file)</td></tr>
 <tr class="separator:ae8e0626219073ef6b24d63a749af3283"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9f352398084225bd41027ac446323d83" id="r_a9f352398084225bd41027ac446323d83"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_a9f352398084225bd41027ac446323d83.html#a9f352398084225bd41027ac446323d83">fl::println</a> (const char *str)</td></tr>
+<tr class="separator:a9f352398084225bd41027ac446323d83"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 </div><!-- contents -->
 </div><!-- doc-content -->
@@ -152,7 +163,7 @@ Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dir_4d1829fa9bd13d7db71e765b2707b248.html">fl</a></li><li class="navelem"><a class="el" href="../../d6/d01/dbg_8h.html">dbg.h</a></li>
-    <li class="footer">Generated on Tue Jun 24 2025 00:58:14 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Fri Aug 22 2025 20:59:34 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

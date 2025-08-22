@@ -1,0 +1,16 @@
+<map id="fl::result::error" name="fl::result::error">
+<area shape="rect" id="Node000001" title="Get the error value." alt="" coords="537,55,652,80"/>
+<area shape="rect" id="Node000002" href="$dc/d6d/classfl_1_1result_aaa632b50087b0395d207c7a1498e3921.html#aaa632b50087b0395d207c7a1498e3921" title="Construct an error result." alt="" coords="339,5,459,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="530,54,450,33,451,28,531,49"/>
+<area shape="rect" id="Node000003" href="$dc/d6d/classfl_1_1result_a8e9e1bb0b91d2c6ad30a6054e06bdcd4.html#a8e9e1bb0b91d2c6ad30a6054e06bdcd4" title="Construct an error result (move)" alt="" coords="339,55,459,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="524,70,460,70,460,65,524,65"/>
+<area shape="rect" id="Node000004" href="$dc/d6d/classfl_1_1result_addee698c009fb513a8b4ceafa05f611f.html#addee698c009fb513a8b4ceafa05f611f" title="Get the error message as a convenience." alt="" coords="309,104,489,129"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="531,86,451,107,450,101,530,81"/>
+<area shape="rect" id="Node000005" href="$d5/dec/_net_test_real_8h_a75e6549812ad7bff897e0c92a225878a.html#a75e6549812ad7bff897e0c92a225878a" title=" " alt="" coords="104,79,261,104"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="295,107,261,103,262,98,296,102"/>
+<area shape="rect" id="Node000007" href="$d5/dec/_net_test_real_8h_a648cd3d90f8e240cbbfe5cb934057124.html#a648cd3d90f8e240cbbfe5cb934057124" title="APPROACH 4: JSON Response with await pattern &#160;&#160;Same JSON handling but using await_top_level for synch..." alt="" coords="121,128,245,153"/>
+<area shape="poly" id="edge6_Node000004_Node000007" title=" " alt="" coords="296,131,245,136,245,131,296,125"/>
+<area shape="rect" id="Node000006" href="$d5/dec/_net_test_real_8h_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="5,104,56,129"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="93,109,57,115,56,110,92,104"/>
+<area shape="poly" id="edge7_Node000007_Node000006" title=" " alt="" coords="107,131,56,123,57,118,108,126"/>
+</map>

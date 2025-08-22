@@ -1,0 +1,11 @@
+<map id="CRGB::CRGB" name="CRGB::CRGB">
+<area shape="rect" id="Node000001" title="Allow construction from a fl::HSV16 color Enables automatic conversion from HSV16 to CRGB." alt="" coords="5,31,109,56"/>
+<area shape="rect" id="Node000002" href="$d4/d5d/structfl_1_1_h_s_v16_a66d9cc0fccee4175baaef83f1a2d7d7d.html#a66d9cc0fccee4175baaef83f1a2d7d7d" title=" " alt="" coords="157,31,288,56"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="110,41,144,41,144,46,110,46"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a0704405150c9e2ea2647360203eef1a7.html#a0704405150c9e2ea2647360203eef1a7" title=" " alt="" coords="336,31,459,56"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="288,41,322,41,322,46,288,46"/>
+<area shape="rect" id="Node000004" href="$d1/d12/group__intmap_ga43a52eb77959095c09b86f6d514eee5e.html#ga43a52eb77959095c09b86f6d514eee5e" title=" " alt="" coords="511,5,613,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="459,31,497,25,497,31,459,37"/>
+<area shape="rect" id="Node000005" href="$d1/d12/group__intmap_ga941524c476a65f30ca1a31d5629f5de5.html#ga941524c476a65f30ca1a31d5629f5de5" title=" " alt="" coords="507,55,617,80"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="459,50,493,55,492,60,459,55"/>
+</map>

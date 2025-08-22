@@ -101,12 +101,12 @@ $(function(){initNavTree('da/d18/classfl_1_1_inlined_vector_a55a9caee505c3a2dfb5
 
 <div class="contents">
 <a id="a55a9caee505c3a2dfb5c4efb4f892b17" name="a55a9caee505c3a2dfb5c4efb4f892b17"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a55a9caee505c3a2dfb5c4efb4f892b17">&#9670;&#160;</a></span>push_back()</h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a55a9caee505c3a2dfb5c4efb4f892b17">&#9670;&#160;</a></span>push_back() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;typename T, size_t INLINED_SIZE&gt; </div>
+template&lt;typename T, fl::size INLINED_SIZE&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
@@ -125,36 +125,44 @@ template&lt;typename T, size_t INLINED_SIZE&gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d6/d68/vector_8h_source.html#l00965">965</a> of file <a class="el" href="../../d6/d68/vector_8h_source.html">vector.h</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  965</span>                                   {</div>
-<div class="line"><span class="lineno">  966</span>        <span class="keywordflow">if</span> (!<a class="code hl_variable" href="../../da/d18/classfl_1_1_inlined_vector_a80c480cd66d5172b0b507cdbf616ac3a.html#a80c480cd66d5172b0b507cdbf616ac3a">mUsingHeap</a>) {</div>
-<div class="line"><span class="lineno">  967</span>            <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../da/d18/classfl_1_1_inlined_vector_a64535340cee65a5425cde352673b3ee4.html#a64535340cee65a5425cde352673b3ee4">mFixed</a>.size() &lt; <a class="code hl_class" href="../../da/d18/classfl_1_1_inlined_vector.html">INLINED_SIZE</a>) {</div>
-<div class="line"><span class="lineno">  968</span>                <a class="code hl_variable" href="../../da/d18/classfl_1_1_inlined_vector_a64535340cee65a5425cde352673b3ee4.html#a64535340cee65a5425cde352673b3ee4">mFixed</a>.push_back(<a class="code hl_class" href="../../da/d18/classfl_1_1_inlined_vector.html">value</a>);</div>
-<div class="line"><span class="lineno">  969</span>                <span class="keywordflow">return</span>;</div>
-<div class="line"><span class="lineno">  970</span>            }</div>
-<div class="line"><span class="lineno">  971</span>            <span class="comment">// overflow: move inline data into heap</span></div>
-<div class="line"><span class="lineno">  972</span>            <a class="code hl_variable" href="../../da/d18/classfl_1_1_inlined_vector_a60fb97a5d55b2e0f0bfd6f1c4304f3f2.html#a60fb97a5d55b2e0f0bfd6f1c4304f3f2">mHeap</a>.reserve(<a class="code hl_class" href="../../da/d18/classfl_1_1_inlined_vector.html">INLINED_SIZE</a> * 2);</div>
-<div class="line"><span class="lineno">  973</span>            <span class="keywordflow">for</span> (<span class="keyword">auto</span> &amp;<a class="code hl_class" href="../../da/d18/classfl_1_1_inlined_vector.html">v</a> : <a class="code hl_variable" href="../../da/d18/classfl_1_1_inlined_vector_a64535340cee65a5425cde352673b3ee4.html#a64535340cee65a5425cde352673b3ee4">mFixed</a>) {</div>
-<div class="line"><span class="lineno">  974</span>                <a class="code hl_variable" href="../../da/d18/classfl_1_1_inlined_vector_a60fb97a5d55b2e0f0bfd6f1c4304f3f2.html#a60fb97a5d55b2e0f0bfd6f1c4304f3f2">mHeap</a>.push_back(<a class="code hl_class" href="../../da/d18/classfl_1_1_inlined_vector.html">v</a>);</div>
-<div class="line"><span class="lineno">  975</span>            }</div>
-<div class="line"><span class="lineno">  976</span>            <a class="code hl_variable" href="../../da/d18/classfl_1_1_inlined_vector_a64535340cee65a5425cde352673b3ee4.html#a64535340cee65a5425cde352673b3ee4">mFixed</a>.clear();</div>
-<div class="line"><span class="lineno">  977</span>            <a class="code hl_variable" href="../../da/d18/classfl_1_1_inlined_vector_a80c480cd66d5172b0b507cdbf616ac3a.html#a80c480cd66d5172b0b507cdbf616ac3a">mUsingHeap</a> = <span class="keyword">true</span>;</div>
-<div class="line"><span class="lineno">  978</span>        }</div>
-<div class="line"><span class="lineno">  979</span>        <a class="code hl_variable" href="../../da/d18/classfl_1_1_inlined_vector_a60fb97a5d55b2e0f0bfd6f1c4304f3f2.html#a60fb97a5d55b2e0f0bfd6f1c4304f3f2">mHeap</a>.push_back(<a class="code hl_class" href="../../da/d18/classfl_1_1_inlined_vector.html">value</a>);</div>
-<div class="line"><span class="lineno">  980</span>    }</div>
-<div class="ttc" id="aclassfl_1_1_inlined_vector_a60fb97a5d55b2e0f0bfd6f1c4304f3f2_html_a60fb97a5d55b2e0f0bfd6f1c4304f3f2"><div class="ttname"><a href="../../da/d18/classfl_1_1_inlined_vector_a60fb97a5d55b2e0f0bfd6f1c4304f3f2.html#a60fb97a5d55b2e0f0bfd6f1c4304f3f2">fl::InlinedVector::mHeap</a></div><div class="ttdeci">HeapVector&lt; T &gt; mHeap</div><div class="ttdef"><b>Definition</b> <a href="../../d6/d68/vector_8h_source.html#l01071">vector.h:1071</a></div></div>
-<div class="ttc" id="aclassfl_1_1_inlined_vector_a64535340cee65a5425cde352673b3ee4_html_a64535340cee65a5425cde352673b3ee4"><div class="ttname"><a href="../../da/d18/classfl_1_1_inlined_vector_a64535340cee65a5425cde352673b3ee4.html#a64535340cee65a5425cde352673b3ee4">fl::InlinedVector::mFixed</a></div><div class="ttdeci">FixedVector&lt; T, INLINED_SIZE &gt; mFixed</div><div class="ttdef"><b>Definition</b> <a href="../../d6/d68/vector_8h_source.html#l01070">vector.h:1070</a></div></div>
-<div class="ttc" id="aclassfl_1_1_inlined_vector_a80c480cd66d5172b0b507cdbf616ac3a_html_a80c480cd66d5172b0b507cdbf616ac3a"><div class="ttname"><a href="../../da/d18/classfl_1_1_inlined_vector_a80c480cd66d5172b0b507cdbf616ac3a.html#a80c480cd66d5172b0b507cdbf616ac3a">fl::InlinedVector::mUsingHeap</a></div><div class="ttdeci">bool mUsingHeap</div><div class="ttdef"><b>Definition</b> <a href="../../d6/d68/vector_8h_source.html#l01069">vector.h:1069</a></div></div>
-<div class="ttc" id="aclassfl_1_1_inlined_vector_html"><div class="ttname"><a href="../../da/d18/classfl_1_1_inlined_vector.html">fl::InlinedVector</a></div><div class="ttdef"><b>Definition</b> <a href="../../d6/d68/vector_8h_source.html#l00807">vector.h:807</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../d6/d68/vector_8h_source.html#l01061">1061</a> of file <a class="el" href="../../d6/d68/vector_8h_source.html">vector.h</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno"> 1061</span>                                   {</div>
+<div class="line"><span class="lineno"> 1062</span>        <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../da/d18/classfl_1_1_inlined_vector_a80c480cd66d5172b0b507cdbf616ac3a.html#a80c480cd66d5172b0b507cdbf616ac3a">mUsingHeap</a> || <a class="code hl_variable" href="../../da/d18/classfl_1_1_inlined_vector_a64535340cee65a5425cde352673b3ee4.html#a64535340cee65a5425cde352673b3ee4">mFixed</a>.size() == <a class="code hl_class" href="../../da/d18/classfl_1_1_inlined_vector.html">INLINED_SIZE</a>) {</div>
+<div class="line"><span class="lineno"> 1063</span>            <span class="keywordflow">if</span> (!<a class="code hl_variable" href="../../da/d18/classfl_1_1_inlined_vector_a80c480cd66d5172b0b507cdbf616ac3a.html#a80c480cd66d5172b0b507cdbf616ac3a">mUsingHeap</a> &amp;&amp; <a class="code hl_variable" href="../../da/d18/classfl_1_1_inlined_vector_a64535340cee65a5425cde352673b3ee4.html#a64535340cee65a5425cde352673b3ee4">mFixed</a>.size() == <a class="code hl_class" href="../../da/d18/classfl_1_1_inlined_vector.html">INLINED_SIZE</a>) {</div>
+<div class="line"><span class="lineno"> 1064</span>                <span class="comment">// transfer</span></div>
+<div class="line"><span class="lineno"> 1065</span>                <a class="code hl_variable" href="../../da/d18/classfl_1_1_inlined_vector_a60fb97a5d55b2e0f0bfd6f1c4304f3f2.html#a60fb97a5d55b2e0f0bfd6f1c4304f3f2">mHeap</a>.clear();</div>
+<div class="line"><span class="lineno"> 1066</span>                <a class="code hl_variable" href="../../da/d18/classfl_1_1_inlined_vector_a60fb97a5d55b2e0f0bfd6f1c4304f3f2.html#a60fb97a5d55b2e0f0bfd6f1c4304f3f2">mHeap</a>.reserve(<a class="code hl_class" href="../../da/d18/classfl_1_1_inlined_vector.html">INLINED_SIZE</a> + 1);</div>
+<div class="line"><span class="lineno"> 1067</span>                <span class="keywordflow">for</span> (<span class="keyword">auto</span> &amp;<a class="code hl_class" href="../../da/d18/classfl_1_1_inlined_vector.html">v</a> : <a class="code hl_variable" href="../../da/d18/classfl_1_1_inlined_vector_a64535340cee65a5425cde352673b3ee4.html#a64535340cee65a5425cde352673b3ee4">mFixed</a>) {</div>
+<div class="line"><span class="lineno"> 1068</span>                    <a class="code hl_variable" href="../../da/d18/classfl_1_1_inlined_vector_a60fb97a5d55b2e0f0bfd6f1c4304f3f2.html#a60fb97a5d55b2e0f0bfd6f1c4304f3f2">mHeap</a>.push_back(<a class="code hl_class" href="../../da/d18/classfl_1_1_inlined_vector.html">fl::move</a>(<a class="code hl_class" href="../../da/d18/classfl_1_1_inlined_vector.html">v</a>));</div>
+<div class="line"><span class="lineno"> 1069</span>                }</div>
+<div class="line"><span class="lineno"> 1070</span>                <a class="code hl_variable" href="../../da/d18/classfl_1_1_inlined_vector_a64535340cee65a5425cde352673b3ee4.html#a64535340cee65a5425cde352673b3ee4">mFixed</a>.clear();</div>
+<div class="line"><span class="lineno"> 1071</span>                <a class="code hl_variable" href="../../da/d18/classfl_1_1_inlined_vector_a80c480cd66d5172b0b507cdbf616ac3a.html#a80c480cd66d5172b0b507cdbf616ac3a">mUsingHeap</a> = <span class="keyword">true</span>;</div>
+<div class="line"><span class="lineno"> 1072</span>            }</div>
+<div class="line"><span class="lineno"> 1073</span>            <a class="code hl_variable" href="../../da/d18/classfl_1_1_inlined_vector_a60fb97a5d55b2e0f0bfd6f1c4304f3f2.html#a60fb97a5d55b2e0f0bfd6f1c4304f3f2">mHeap</a>.push_back(<a class="code hl_class" href="../../da/d18/classfl_1_1_inlined_vector.html">value</a>);</div>
+<div class="line"><span class="lineno"> 1074</span>        } <span class="keywordflow">else</span> {</div>
+<div class="line"><span class="lineno"> 1075</span>                <a class="code hl_variable" href="../../da/d18/classfl_1_1_inlined_vector_a64535340cee65a5425cde352673b3ee4.html#a64535340cee65a5425cde352673b3ee4">mFixed</a>.push_back(<a class="code hl_class" href="../../da/d18/classfl_1_1_inlined_vector.html">value</a>);</div>
+<div class="line"><span class="lineno"> 1076</span>        }</div>
+<div class="line"><span class="lineno"> 1077</span>            }</div>
+<div class="ttc" id="aclassfl_1_1_inlined_vector_a60fb97a5d55b2e0f0bfd6f1c4304f3f2_html_a60fb97a5d55b2e0f0bfd6f1c4304f3f2"><div class="ttname"><a href="../../da/d18/classfl_1_1_inlined_vector_a60fb97a5d55b2e0f0bfd6f1c4304f3f2.html#a60fb97a5d55b2e0f0bfd6f1c4304f3f2">fl::InlinedVector::mHeap</a></div><div class="ttdeci">HeapVector&lt; T &gt; mHeap</div><div class="ttdef"><b>Definition</b> <a href="../../d6/d68/vector_8h_source.html#l01211">vector.h:1211</a></div></div>
+<div class="ttc" id="aclassfl_1_1_inlined_vector_a64535340cee65a5425cde352673b3ee4_html_a64535340cee65a5425cde352673b3ee4"><div class="ttname"><a href="../../da/d18/classfl_1_1_inlined_vector_a64535340cee65a5425cde352673b3ee4.html#a64535340cee65a5425cde352673b3ee4">fl::InlinedVector::mFixed</a></div><div class="ttdeci">FixedVector&lt; T, INLINED_SIZE &gt; mFixed</div><div class="ttdef"><b>Definition</b> <a href="../../d6/d68/vector_8h_source.html#l01210">vector.h:1210</a></div></div>
+<div class="ttc" id="aclassfl_1_1_inlined_vector_a80c480cd66d5172b0b507cdbf616ac3a_html_a80c480cd66d5172b0b507cdbf616ac3a"><div class="ttname"><a href="../../da/d18/classfl_1_1_inlined_vector_a80c480cd66d5172b0b507cdbf616ac3a.html#a80c480cd66d5172b0b507cdbf616ac3a">fl::InlinedVector::mUsingHeap</a></div><div class="ttdeci">bool mUsingHeap</div><div class="ttdef"><b>Definition</b> <a href="../../d6/d68/vector_8h_source.html#l01209">vector.h:1209</a></div></div>
+<div class="ttc" id="aclassfl_1_1_inlined_vector_html"><div class="ttname"><a href="../../da/d18/classfl_1_1_inlined_vector.html">fl::InlinedVector</a></div><div class="ttdef"><b>Definition</b> <a href="../../d6/d68/vector_8h_source.html#l00888">vector.h:888</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d6/d68/vector_8h_source.html#l01070">mFixed</a>, <a class="el" href="../../d6/d68/vector_8h_source.html#l01071">mHeap</a>, and <a class="el" href="../../d6/d68/vector_8h_source.html#l01069">mUsingHeap</a>.</p>
+<p class="reference">References <a class="el" href="../../d6/d68/vector_8h_source.html#l01210">mFixed</a>, <a class="el" href="../../d6/d68/vector_8h_source.html#l01211">mHeap</a>, <a class="el" href="../../d9/d83/move_8h_source.html#l00027">fl::move()</a>, and <a class="el" href="../../d6/d68/vector_8h_source.html#l01209">mUsingHeap</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d6/d1a/examples_2_downscale_2downscale_8h_source.html#l00128">loop()</a>, and <a class="el" href="../../dd/d96/_downscale_2src_2xypaths_8cpp_source.html#l00013">anonymous_namespace{xypaths.cpp}::make_path()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d6/d1a/examples_2_downscale_2downscale_8h_source.html#l00132">loop()</a>, and <a class="el" href="../../dd/d96/_downscale_2src_2xypaths_8cpp_source.html#l00013">anonymous_namespace{xypaths.cpp}::make_path()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
-  <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the caller graph for this function:</div>
+  <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-0-content" class="dyncontent" style="display:none;">
+<div class="center"><iframe scrolling="no" frameborder="0" src="../../da/d18/classfl_1_1_inlined_vector_a55a9caee505c3a2dfb5c4efb4f892b17_a55a9caee505c3a2dfb5c4efb4f892b17_cgraph.svg" width="264" height="51"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+</div>
+<div id="dynsection-1" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
+  <img id="dynsection-1-trigger" src="../../closed.png" alt="+"/> Here is the caller graph for this function:</div>
+<div id="dynsection-1-summary" class="dynsummary" style="display:block;">
+</div>
+<div id="dynsection-1-content" class="dyncontent" style="display:none;">
 <div class="center"><iframe scrolling="no" frameborder="0" src="../../da/d18/classfl_1_1_inlined_vector_a55a9caee505c3a2dfb5c4efb4f892b17_a55a9caee505c3a2dfb5c4efb4f892b17_icgraph.svg" width="556" height="102"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
 </div>
 
@@ -167,7 +175,7 @@ template&lt;typename T, size_t INLINED_SIZE&gt; </div>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../da/d18/classfl_1_1_inlined_vector.html">InlinedVector</a></li>
-    <li class="footer">Generated on Tue Jun 24 2025 00:58:15 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Fri Aug 22 2025 20:59:36 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

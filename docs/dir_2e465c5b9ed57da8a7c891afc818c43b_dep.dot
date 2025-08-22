@@ -11,5 +11,7 @@ digraph "/home/runner/work/FastLED/FastLED/examples/FestivalStick"
   dir_2e465c5b9ed57da8a7c891afc818c43b [label="FestivalStick", fillcolor="#edf0f7", color="grey25", style="filled,bold", URL="dir_2e465c5b9ed57da8a7c891afc818c43b.html",tooltip=""];
   }
   dir_4d1829fa9bd13d7db71e765b2707b248 [label="fl", fillcolor="#edf0f7", color="grey25", style="filled", URL="dir_4d1829fa9bd13d7db71e765b2707b248.html",tooltip=""];
-  dir_2e465c5b9ed57da8a7c891afc818c43b->dir_4d1829fa9bd13d7db71e765b2707b248 [headlabel="10", labeldistance=1.5 headhref="dir_000029_000036.html" href="dir_000029_000036.html" color="steelblue1" fontcolor="steelblue1"];
+  dir_acbb946b833f21b16ec30aa21c4c3a72 [label="fx", fillcolor="#edf0f7", color="red", style="filled", URL="dir_acbb946b833f21b16ec30aa21c4c3a72.html",tooltip=""];
+  dir_2e465c5b9ed57da8a7c891afc818c43b->dir_4d1829fa9bd13d7db71e765b2707b248 [headlabel="13", labeldistance=1.5 headhref="dir_000034_000041.html" href="dir_000034_000041.html" color="steelblue1" fontcolor="steelblue1"];
+  dir_2e465c5b9ed57da8a7c891afc818c43b->dir_acbb946b833f21b16ec30aa21c4c3a72 [headlabel="4", labeldistance=1.5 headhref="dir_000034_000043.html" href="dir_000034_000043.html" color="steelblue1" fontcolor="steelblue1"];
 }

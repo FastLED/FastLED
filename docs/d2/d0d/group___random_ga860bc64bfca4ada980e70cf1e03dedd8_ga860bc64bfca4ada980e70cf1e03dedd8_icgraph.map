@@ -1,0 +1,5 @@
+<map id="random16_get_seed" name="random16_get_seed">
+<area shape="rect" id="Node000001" title="Get the current seed value for the random number generator." alt="" coords="229,5,384,31"/>
+<area shape="rect" id="Node000002" href="$d4/da3/classfl_1_1fl__random_af3dd3040d1ad262f534dcc5e4418a2b0.html#af3dd3040d1ad262f534dcc5e4418a2b0" title="Default constructor &#45; uses current global random seed." alt="" coords="5,5,181,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="216,21,181,21,181,15,216,15"/>
+</map>

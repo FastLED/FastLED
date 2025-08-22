@@ -1,25 +1,19 @@
 <map id="animartrix_detail::ANIMartRIX" name="animartrix_detail::ANIMartRIX">
-<area shape="rect" id="Node000001" title=" " alt="" coords="1333,133,1476,173"/>
-<area shape="rect" id="Node000002" href="$d6/d74/namespaceanimartrix__detail.html#d5/df4/structanimartrix__detail_1_1render__parameters" title=" " alt="" coords="1048,5,1195,45"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="1192,48,1212,55,1262,73,1311,94,1375,131,1372,135,1308,98,1260,78,1210,60,1190,53"/>
-<area shape="rect" id="Node000003" href="$d6/d74/namespaceanimartrix__detail.html#d5/d40/structanimartrix__detail_1_1oscillators" title=" " alt="" coords="1050,69,1193,109"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="1207,106,1334,135,1333,140,1206,111"/>
-<area shape="rect" id="Node000004" href="$d6/d74/namespaceanimartrix__detail.html#df/dfa/structanimartrix__detail_1_1modulators" title=" " alt="" coords="1050,133,1193,173"/>
-<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="1206,151,1333,151,1333,156,1206,156"/>
-<area shape="rect" id="Node000005" href="$d6/d74/namespaceanimartrix__detail.html#d1/d5c/structanimartrix__detail_1_1rgb" title=" " alt="" coords="1040,198,1203,223"/>
-<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="1200,193,1309,171,1332,166,1334,171,1310,176,1201,198"/>
-<area shape="rect" id="Node000006" href="$db/ddd/classfl_1_1_heap_vector.html" title=" " alt="" coords="1032,249,1211,289"/>
-<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="1224,249,1267,237,1308,220,1347,197,1380,171,1383,176,1350,201,1311,225,1268,242,1225,254"/>
-<area shape="rect" id="Node000007" href="$db/ddd/classfl_1_1_heap_vector.html" title=" " alt="" coords="752,257,924,282"/>
-<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="938,267,1032,267,1032,272,938,272"/>
-<area shape="rect" id="Node000008" href="$d8/dcd/classfl_1_1allocator.html" title=" " alt="" coords="372,233,527,258"/>
-<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="541,248,752,261,752,267,540,254"/>
-<area shape="rect" id="Node000009" href="$d8/dcd/classfl_1_1allocator.html" title=" " alt="" coords="5,207,139,233"/>
-<area shape="poly" id="edge8_Node000008_Node000009" title=" " alt="" coords="140,233,163,236,272,244,371,245,371,250,272,249,162,241,140,238"/>
-<area shape="rect" id="Node000011" href="$d8/dcd/classfl_1_1allocator.html" title=" " alt="" coords="551,177,721,217"/>
-<area shape="poly" id="edge11_Node000011_Node000009" title=" " alt="" coords="152,214,550,198,551,203,153,219"/>
-<area shape="rect" id="Node000010" href="$db/ddd/classfl_1_1_heap_vector.html" title=" " alt="" coords="379,293,519,333"/>
-<area shape="poly" id="edge12_Node000006_Node000010" title=" " alt="" coords="533,315,716,318,823,315,930,307,1042,287,1043,292,931,312,824,320,716,323,533,320"/>
-<area shape="poly" id="edge9_Node000007_Node000010" title=" " alt="" coords="533,301,721,280,751,277,752,282,722,285,534,307"/>
-<area shape="poly" id="edge10_Node000006_Node000011" title=" " alt="" coords="735,207,1008,247,1032,251,1031,256,1008,252,735,213"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="1077,133,1220,173"/>
+<area shape="rect" id="Node000002" href="$d6/d74/namespaceanimartrix__detail.html#d5/df4/structanimartrix__detail_1_1render__parameters" title=" " alt="" coords="792,5,939,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="936,48,956,55,1006,73,1055,94,1119,131,1116,135,1052,98,1004,78,954,60,934,53"/>
+<area shape="rect" id="Node000003" href="$d6/d74/namespaceanimartrix__detail.html#d5/d40/structanimartrix__detail_1_1oscillators" title=" " alt="" coords="794,69,937,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="951,106,1078,135,1077,140,950,111"/>
+<area shape="rect" id="Node000004" href="$d6/d74/namespaceanimartrix__detail.html#df/dfa/structanimartrix__detail_1_1modulators" title=" " alt="" coords="794,133,937,173"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="950,151,1077,151,1077,156,950,156"/>
+<area shape="rect" id="Node000005" href="$d6/d74/namespaceanimartrix__detail.html#d1/d5c/structanimartrix__detail_1_1rgb" title=" " alt="" coords="784,198,947,223"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="944,193,1053,171,1076,166,1078,171,1054,176,945,198"/>
+<area shape="rect" id="Node000006" href="$db/ddd/classfl_1_1_heap_vector.html" title=" " alt="" coords="776,249,955,289"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="968,249,1011,237,1052,220,1091,197,1124,171,1127,176,1094,201,1055,225,1012,242,969,254"/>
+<area shape="rect" id="Node000007" href="$d8/dcd/classfl_1_1allocator.html" title=" " alt="" coords="372,208,543,248"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="557,235,776,258,776,263,556,241"/>
+<area shape="rect" id="Node000008" href="$d8/dcd/classfl_1_1allocator.html" title=" " alt="" coords="5,215,139,241"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="152,225,372,225,372,231,152,231"/>
+<area shape="rect" id="Node000009" href="$db/ddd/classfl_1_1_heap_vector.html" title=" " alt="" coords="387,272,527,312"/>
+<area shape="poly" id="edge8_Node000006_Node000009" title=" " alt="" coords="541,288,752,279,775,277,776,282,752,284,541,293"/>
 </map>

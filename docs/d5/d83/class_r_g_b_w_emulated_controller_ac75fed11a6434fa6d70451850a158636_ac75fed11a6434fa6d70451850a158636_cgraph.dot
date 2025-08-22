@@ -8,5 +8,5 @@ digraph "RGBWEmulatedController::ensureBuffer"
   rankdir="LR";
   Node1 [id="Node000001",label="RGBWEmulatedController\l::ensureBuffer",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
   Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
-  Node2 [id="Node000002",label="Rgbw::size_as_rgb",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/d74/struct_rgbw_a99a23acfbc448d69b2f50f87c133efcd.html#a99a23acfbc448d69b2f50f87c133efcd",tooltip=" "];
+  Node2 [id="Node000002",label="Rgbw::size_as_rgb",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/d74/struct_rgbw_aae6f455908e529f3e0f4c67cd724281f.html#aae6f455908e529f3e0f4c67cd724281f",tooltip=" "];
 }

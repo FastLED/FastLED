@@ -113,6 +113,7 @@ $(function(){initNavTree('de/ded/bitswap_8h.html','../../'); initResizable(true)
 <p class="definition">Definition in file <a class="el" href="../../de/ded/bitswap_8h_source.html">bitswap.h</a>.</p>
 </div><div class="textblock"><code>#include &quot;<a class="el" href="../../db/d97/_fast_l_e_d_8h_source.html">FastLED.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="../../d4/d64/force__inline_8h_source.html">fl/force_inline.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d3/d7e/int_8h_source.html">fl/int.h</a>&quot;</code><br />
 </div><div class="textblock"><div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Include dependency graph for bitswap.h:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -125,7 +126,7 @@ $(function(){initNavTree('de/ded/bitswap_8h.html','../../'); initResizable(true)
 <div id="dynsection-1-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-1-content" class="dyncontent" style="display:none;">
-<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../dd/d8f/bitswap_8h__dep__incl.svg" width="100%" height="536"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
+<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../dd/d8f/bitswap_8h__dep__incl.svg" width="100%" height="459"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
 </div>
 </div>
 <p><a href="../../de/ded/bitswap_8h_source.html">Go to the source code of this file.</a></p>
@@ -203,13 +204,13 @@ __unnamed__</td>
 <td class="fielddoc">
 </td></tr>
 <tr><td class="fieldtype">
-<a id="aabab33af46370b5de438c01670d0e2cb" name="aabab33af46370b5de438c01670d0e2cb"></a>uint8_t</td>
+<a id="a29fec308a84d4a09de1159ae3cbda009" name="a29fec308a84d4a09de1159ae3cbda009"></a>u8</td>
 <td class="fieldname">
 bytes[8]</td>
 <td class="fielddoc">
 eight 8-bit values to load for swapping </td></tr>
 <tr><td class="fieldtype">
-<a id="a2d1f4e8932378c4519158248150d11b8" name="a2d1f4e8932378c4519158248150d11b8"></a>uint32_t</td>
+<a id="a9364025d7203347fd8751be93a13985b" name="a9364025d7203347fd8751be93a13985b"></a>u32</td>
 <td class="fieldname">
 word[2]</td>
 <td class="fielddoc">
@@ -267,7 +268,7 @@ __unnamed__</td>
 <td class="fielddoc">
 </td></tr>
 <tr><td class="fieldtype">
-<a id="abec3634476280a30569fd77b6d80be31" name="abec3634476280a30569fd77b6d80be31"></a>uint8_t</td>
+<a id="a3d64d96490059db99d8d67f04acd52ea" name="a3d64d96490059db99d8d67f04acd52ea"></a>u8</td>
 <td class="fieldname">
 raw</td>
 <td class="fielddoc">
@@ -290,49 +291,49 @@ the entire byte </td></tr>
 <table class="fieldtable">
 <tr><th colspan="3">Class Members</th></tr>
 <tr><td class="fieldtype">
-<a id="a5640486daa6880d667b76c958820361a" name="a5640486daa6880d667b76c958820361a"></a>uint32_t</td>
+<a id="a5640486daa6880d667b76c958820361a" name="a5640486daa6880d667b76c958820361a"></a>u32</td>
 <td class="fieldname">
 a0:1</td>
 <td class="fielddoc">
 bit 0 (0x01) </td></tr>
 <tr><td class="fieldtype">
-<a id="a8a8bb7cd343aa2ad99b7d762030857a2" name="a8a8bb7cd343aa2ad99b7d762030857a2"></a>uint32_t</td>
+<a id="a8a8bb7cd343aa2ad99b7d762030857a2" name="a8a8bb7cd343aa2ad99b7d762030857a2"></a>u32</td>
 <td class="fieldname">
 a1:1</td>
 <td class="fielddoc">
 bit 1 (0x02) </td></tr>
 <tr><td class="fieldtype">
-<a id="a693a9fdd4c2fd0700968fba0d07ff3c0" name="a693a9fdd4c2fd0700968fba0d07ff3c0"></a>uint32_t</td>
+<a id="a693a9fdd4c2fd0700968fba0d07ff3c0" name="a693a9fdd4c2fd0700968fba0d07ff3c0"></a>u32</td>
 <td class="fieldname">
 a2:1</td>
 <td class="fielddoc">
 bit 2 (0x04) </td></tr>
 <tr><td class="fieldtype">
-<a id="a9d607a663f3e9b0a90c3c8d4426640dc" name="a9d607a663f3e9b0a90c3c8d4426640dc"></a>uint32_t</td>
+<a id="a9d607a663f3e9b0a90c3c8d4426640dc" name="a9d607a663f3e9b0a90c3c8d4426640dc"></a>u32</td>
 <td class="fieldname">
 a3:1</td>
 <td class="fielddoc">
 bit 3 (0x08) </td></tr>
 <tr><td class="fieldtype">
-<a id="a894f782a148b33af1e39a0efed952d69" name="a894f782a148b33af1e39a0efed952d69"></a>uint32_t</td>
+<a id="a894f782a148b33af1e39a0efed952d69" name="a894f782a148b33af1e39a0efed952d69"></a>u32</td>
 <td class="fieldname">
 a4:1</td>
 <td class="fielddoc">
 bit 4 (0x10) </td></tr>
 <tr><td class="fieldtype">
-<a id="a32cfe6c19200b67afb7c3d0e1c43eadb" name="a32cfe6c19200b67afb7c3d0e1c43eadb"></a>uint32_t</td>
+<a id="a32cfe6c19200b67afb7c3d0e1c43eadb" name="a32cfe6c19200b67afb7c3d0e1c43eadb"></a>u32</td>
 <td class="fieldname">
 a5:1</td>
 <td class="fielddoc">
 bit 5 (0x20) </td></tr>
 <tr><td class="fieldtype">
-<a id="af74dd50cfec0f8549406fee6191d2f8d" name="af74dd50cfec0f8549406fee6191d2f8d"></a>uint32_t</td>
+<a id="af74dd50cfec0f8549406fee6191d2f8d" name="af74dd50cfec0f8549406fee6191d2f8d"></a>u32</td>
 <td class="fieldname">
 a6:1</td>
 <td class="fielddoc">
 bit 6 (0x40) </td></tr>
 <tr><td class="fieldtype">
-<a id="ac692562238d8c12c32434c50b96d56ae" name="ac692562238d8c12c32434c50b96d56ae"></a>uint32_t</td>
+<a id="ac692562238d8c12c32434c50b96d56ae" name="ac692562238d8c12c32434c50b96d56ae"></a>u32</td>
 <td class="fieldname">
 a7:1</td>
 <td class="fielddoc">
@@ -355,193 +356,193 @@ bit 7 (0x80) </td></tr>
 <table class="fieldtable">
 <tr><th colspan="3">Class Members</th></tr>
 <tr><td class="fieldtype">
-<a id="aaf45608c69eb1098fcc2c2d6ea81be61" name="aaf45608c69eb1098fcc2c2d6ea81be61"></a>uint32_t</td>
+<a id="adb56d2247497cfc90b4573b8191dc9d2" name="adb56d2247497cfc90b4573b8191dc9d2"></a>u32</td>
 <td class="fieldname">
 a0:1</td>
 <td class="fielddoc">
 byte 'a', bit 0 (0x00000000) </td></tr>
 <tr><td class="fieldtype">
-<a id="a76b0433eaf662ffa5629836d8059e962" name="a76b0433eaf662ffa5629836d8059e962"></a>uint32_t</td>
+<a id="a69c2758b71a332508748e217657781ba" name="a69c2758b71a332508748e217657781ba"></a>u32</td>
 <td class="fieldname">
 a1:1</td>
 <td class="fielddoc">
 byte 'a', bit 1 (0x00000002) </td></tr>
 <tr><td class="fieldtype">
-<a id="aaef6f28b11733262eb24d46b8a69ad17" name="aaef6f28b11733262eb24d46b8a69ad17"></a>uint32_t</td>
+<a id="acc90caf9f0174647de42c0d2888161ba" name="acc90caf9f0174647de42c0d2888161ba"></a>u32</td>
 <td class="fieldname">
 a2:1</td>
 <td class="fielddoc">
 byte 'a', bit 2 (0x00000004) </td></tr>
 <tr><td class="fieldtype">
-<a id="a2bb9c56031bc0e26b231ac33ba3ee851" name="a2bb9c56031bc0e26b231ac33ba3ee851"></a>uint32_t</td>
+<a id="aed576f78d45069eebafdfda8a42602f5" name="aed576f78d45069eebafdfda8a42602f5"></a>u32</td>
 <td class="fieldname">
 a3:1</td>
 <td class="fielddoc">
 byte 'a', bit 3 (0x00000008) </td></tr>
 <tr><td class="fieldtype">
-<a id="a194a0f8122b7c096bdfa25a1be9ef2e1" name="a194a0f8122b7c096bdfa25a1be9ef2e1"></a>uint32_t</td>
+<a id="ae4fa44b348da162a6b8ed1595814f737" name="ae4fa44b348da162a6b8ed1595814f737"></a>u32</td>
 <td class="fieldname">
 a4:1</td>
 <td class="fielddoc">
 byte 'a', bit 4 (0x00000010) </td></tr>
 <tr><td class="fieldtype">
-<a id="a412748c0d7d72736aa8b97c6e4224d8b" name="a412748c0d7d72736aa8b97c6e4224d8b"></a>uint32_t</td>
+<a id="ab30c13b327c209587d3e5b2fa909b17c" name="ab30c13b327c209587d3e5b2fa909b17c"></a>u32</td>
 <td class="fieldname">
 a5:1</td>
 <td class="fielddoc">
 byte 'a', bit 5 (0x00000020) </td></tr>
 <tr><td class="fieldtype">
-<a id="adcc8a238228e93e405b1413fd6403e69" name="adcc8a238228e93e405b1413fd6403e69"></a>uint32_t</td>
+<a id="a04f2871a39d2d4552885c458a6f933b9" name="a04f2871a39d2d4552885c458a6f933b9"></a>u32</td>
 <td class="fieldname">
 a6:1</td>
 <td class="fielddoc">
 byte 'a', bit 6 (0x00000040) </td></tr>
 <tr><td class="fieldtype">
-<a id="a3b49e618d4ddb50e7c1df65dfb7caf5b" name="a3b49e618d4ddb50e7c1df65dfb7caf5b"></a>uint32_t</td>
+<a id="a90fa7af996dbf3e992697c874aed2939" name="a90fa7af996dbf3e992697c874aed2939"></a>u32</td>
 <td class="fieldname">
 a7:1</td>
 <td class="fielddoc">
 byte 'a', bit 7 (0x00000080) </td></tr>
 <tr><td class="fieldtype">
-<a id="a4bb994c2ed456e701d2ab4d57d669317" name="a4bb994c2ed456e701d2ab4d57d669317"></a>uint32_t</td>
+<a id="af913673b8ba6ede9a282770b54bcce64" name="af913673b8ba6ede9a282770b54bcce64"></a>u32</td>
 <td class="fieldname">
 b0:1</td>
 <td class="fielddoc">
 byte 'b', bit 0 (0x00000100) </td></tr>
 <tr><td class="fieldtype">
-<a id="a76b8ba906d7eb00ebe2806a38a9c91f2" name="a76b8ba906d7eb00ebe2806a38a9c91f2"></a>uint32_t</td>
+<a id="a89d58ebd2b4bca2174af8f7a4316b9da" name="a89d58ebd2b4bca2174af8f7a4316b9da"></a>u32</td>
 <td class="fieldname">
 b1:1</td>
 <td class="fielddoc">
 byte 'b', bit 1 (0x00000200) </td></tr>
 <tr><td class="fieldtype">
-<a id="aa1b5735d6214d3b9ab991a2a44c7e4a8" name="aa1b5735d6214d3b9ab991a2a44c7e4a8"></a>uint32_t</td>
+<a id="a939e3690d3d557dcac4da27593600525" name="a939e3690d3d557dcac4da27593600525"></a>u32</td>
 <td class="fieldname">
 b2:1</td>
 <td class="fielddoc">
 byte 'b', bit 2 (0x00000400) </td></tr>
 <tr><td class="fieldtype">
-<a id="a67403de17343f076596c0aaf840e3eaf" name="a67403de17343f076596c0aaf840e3eaf"></a>uint32_t</td>
+<a id="a38f3dece68c8af1996514f70bea69dad" name="a38f3dece68c8af1996514f70bea69dad"></a>u32</td>
 <td class="fieldname">
 b3:1</td>
 <td class="fielddoc">
 byte 'b', bit 3 (0x00000800) </td></tr>
 <tr><td class="fieldtype">
-<a id="adada5fd53b415622cb805db1d6878259" name="adada5fd53b415622cb805db1d6878259"></a>uint32_t</td>
+<a id="a102e3510feace66b43729f0c3fd8d5d6" name="a102e3510feace66b43729f0c3fd8d5d6"></a>u32</td>
 <td class="fieldname">
 b4:1</td>
 <td class="fielddoc">
 byte 'b', bit 4 (0x00001000) </td></tr>
 <tr><td class="fieldtype">
-<a id="a7ecbd68603a75da0bd98609c30c037cc" name="a7ecbd68603a75da0bd98609c30c037cc"></a>uint32_t</td>
+<a id="ae24d2e4af75e83c5d614c63543b0a4e2" name="ae24d2e4af75e83c5d614c63543b0a4e2"></a>u32</td>
 <td class="fieldname">
 b5:1</td>
 <td class="fielddoc">
 byte 'b', bit 5 (0x00002000) </td></tr>
 <tr><td class="fieldtype">
-<a id="a15d95cc4d8ac1b1de28e28dd9da25659" name="a15d95cc4d8ac1b1de28e28dd9da25659"></a>uint32_t</td>
+<a id="a7ec6dfc78daf44ab0d8229125a720a0a" name="a7ec6dfc78daf44ab0d8229125a720a0a"></a>u32</td>
 <td class="fieldname">
 b6:1</td>
 <td class="fielddoc">
 byte 'b', bit 6 (0x00004000) </td></tr>
 <tr><td class="fieldtype">
-<a id="a8ecfb8a25a14c7bedd272c11beeb90b9" name="a8ecfb8a25a14c7bedd272c11beeb90b9"></a>uint32_t</td>
+<a id="a8ac356ac87c6070556cb4239295772f5" name="a8ac356ac87c6070556cb4239295772f5"></a>u32</td>
 <td class="fieldname">
 b7:1</td>
 <td class="fielddoc">
 byte 'b', bit 7 (0x00008000) </td></tr>
 <tr><td class="fieldtype">
-<a id="af19bf78fa32695ff3266f7817144d534" name="af19bf78fa32695ff3266f7817144d534"></a>uint32_t</td>
+<a id="aa85fec4681c796fda9827fcb5d35b9c5" name="aa85fec4681c796fda9827fcb5d35b9c5"></a>u32</td>
 <td class="fieldname">
 c0:1</td>
 <td class="fielddoc">
 byte 'c', bit 0 (0x00010000) </td></tr>
 <tr><td class="fieldtype">
-<a id="a201d80311b1db45a5be5f8f15c2d1fce" name="a201d80311b1db45a5be5f8f15c2d1fce"></a>uint32_t</td>
+<a id="ac9dcf0e966548942f6c8c3ba751d7810" name="ac9dcf0e966548942f6c8c3ba751d7810"></a>u32</td>
 <td class="fieldname">
 c1:1</td>
 <td class="fielddoc">
 byte 'c', bit 1 (0x00020000) </td></tr>
 <tr><td class="fieldtype">
-<a id="af62353204ff783dca725ecb17e1be6ef" name="af62353204ff783dca725ecb17e1be6ef"></a>uint32_t</td>
+<a id="a630e448645211d786ac4ccb30831a435" name="a630e448645211d786ac4ccb30831a435"></a>u32</td>
 <td class="fieldname">
 c2:1</td>
 <td class="fielddoc">
 byte 'c', bit 2 (0x00040000) </td></tr>
 <tr><td class="fieldtype">
-<a id="a05ac5ed449c60006c191d62dbc67e4c9" name="a05ac5ed449c60006c191d62dbc67e4c9"></a>uint32_t</td>
+<a id="a68a992ed712bfb65b2f5f93a4e695cff" name="a68a992ed712bfb65b2f5f93a4e695cff"></a>u32</td>
 <td class="fieldname">
 c3:1</td>
 <td class="fielddoc">
 byte 'c', bit 3 (0x00080000) </td></tr>
 <tr><td class="fieldtype">
-<a id="a189aa548f04856f56c1178a1c5366537" name="a189aa548f04856f56c1178a1c5366537"></a>uint32_t</td>
+<a id="a9d3a1a430de0b39cb31422c210ee17ee" name="a9d3a1a430de0b39cb31422c210ee17ee"></a>u32</td>
 <td class="fieldname">
 c4:1</td>
 <td class="fielddoc">
 byte 'c', bit 4 (0x00100000) </td></tr>
 <tr><td class="fieldtype">
-<a id="ad1e3617efc9dc608c1ede8fda0190bbf" name="ad1e3617efc9dc608c1ede8fda0190bbf"></a>uint32_t</td>
+<a id="a5ee8bbe1ce27188d1c57e0058adef43c" name="a5ee8bbe1ce27188d1c57e0058adef43c"></a>u32</td>
 <td class="fieldname">
 c5:1</td>
 <td class="fielddoc">
 byte 'c', bit 5 (0x00200000) </td></tr>
 <tr><td class="fieldtype">
-<a id="a192ea23edbf6c67b74049484ca13375a" name="a192ea23edbf6c67b74049484ca13375a"></a>uint32_t</td>
+<a id="a5f4b1568e8d7a0f774528d42bf0b2cce" name="a5f4b1568e8d7a0f774528d42bf0b2cce"></a>u32</td>
 <td class="fieldname">
 c6:1</td>
 <td class="fielddoc">
 byte 'c', bit 6 (0x00400000) </td></tr>
 <tr><td class="fieldtype">
-<a id="a5215342ef5fbc83a2df41951b19ccd85" name="a5215342ef5fbc83a2df41951b19ccd85"></a>uint32_t</td>
+<a id="a0f1ca41b2037c07c21ec6a2c72565193" name="a0f1ca41b2037c07c21ec6a2c72565193"></a>u32</td>
 <td class="fieldname">
 c7:1</td>
 <td class="fielddoc">
 byte 'c', bit 7 (0x00800000) </td></tr>
 <tr><td class="fieldtype">
-<a id="a7fd6345e61292153ff4c7fae931ca384" name="a7fd6345e61292153ff4c7fae931ca384"></a>uint32_t</td>
+<a id="ad47a401aa3504fe57ffb278f8acca919" name="ad47a401aa3504fe57ffb278f8acca919"></a>u32</td>
 <td class="fieldname">
 d0:1</td>
 <td class="fielddoc">
 byte 'd', bit 0 (0x01000000) </td></tr>
 <tr><td class="fieldtype">
-<a id="a6e70209d350d5da5d7acc1a3df93bd91" name="a6e70209d350d5da5d7acc1a3df93bd91"></a>uint32_t</td>
+<a id="af4ef09be8a37204748f5747b6701b017" name="af4ef09be8a37204748f5747b6701b017"></a>u32</td>
 <td class="fieldname">
 d1:1</td>
 <td class="fielddoc">
 byte 'd', bit 1 (0x02000000) </td></tr>
 <tr><td class="fieldtype">
-<a id="ac575c15de0020328034d288b0e9db866" name="ac575c15de0020328034d288b0e9db866"></a>uint32_t</td>
+<a id="a7ca10946980223adc60758a48789e3cd" name="a7ca10946980223adc60758a48789e3cd"></a>u32</td>
 <td class="fieldname">
 d2:1</td>
 <td class="fielddoc">
 byte 'd', bit 2 (0x04000000) </td></tr>
 <tr><td class="fieldtype">
-<a id="adae47f7ddd57c1e2a1191e6f7a0b4146" name="adae47f7ddd57c1e2a1191e6f7a0b4146"></a>uint32_t</td>
+<a id="a944d586b3acf161024a2d1c307ba2912" name="a944d586b3acf161024a2d1c307ba2912"></a>u32</td>
 <td class="fieldname">
 d3:1</td>
 <td class="fielddoc">
 byte 'd', bit 3 (0x08000000) </td></tr>
 <tr><td class="fieldtype">
-<a id="af59d256057cfb1c1f18ef34e602755c1" name="af59d256057cfb1c1f18ef34e602755c1"></a>uint32_t</td>
+<a id="a958ae5f6f20b9e9f366702e30d391550" name="a958ae5f6f20b9e9f366702e30d391550"></a>u32</td>
 <td class="fieldname">
 d4:1</td>
 <td class="fielddoc">
 byte 'd', bit 4 (0x10000000) </td></tr>
 <tr><td class="fieldtype">
-<a id="a3bfc21fb276e8419953e836ad6e5efb3" name="a3bfc21fb276e8419953e836ad6e5efb3"></a>uint32_t</td>
+<a id="a71f558d993fcfc3dde7b4923009f2d56" name="a71f558d993fcfc3dde7b4923009f2d56"></a>u32</td>
 <td class="fieldname">
 d5:1</td>
 <td class="fielddoc">
 byte 'd', bit 5 (0x20000000) </td></tr>
 <tr><td class="fieldtype">
-<a id="a11e81dc1eb753bbd1874177967fe808f" name="a11e81dc1eb753bbd1874177967fe808f"></a>uint32_t</td>
+<a id="a124bc784320be1b990215a35aab87eb0" name="a124bc784320be1b990215a35aab87eb0"></a>u32</td>
 <td class="fieldname">
 d6:1</td>
 <td class="fielddoc">
 byte 'd', bit 6 (0x40000000) </td></tr>
 <tr><td class="fieldtype">
-<a id="a252ecdef790a6c2aa1de231f8912b7c0" name="a252ecdef790a6c2aa1de231f8912b7c0"></a>uint32_t</td>
+<a id="ad66cf5f845e4463ac5f8cb1c64ba6dd7" name="ad66cf5f845e4463ac5f8cb1c64ba6dd7"></a>u32</td>
 <td class="fieldname">
 d7:1</td>
 <td class="fielddoc">
@@ -557,7 +558,7 @@ byte 'd', bit 7 (0x80000000) </td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../de/ded/bitswap_8h.html">bitswap.h</a></li>
-    <li class="footer">Generated on Tue Jun 24 2025 00:58:14 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Fri Aug 22 2025 20:59:34 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

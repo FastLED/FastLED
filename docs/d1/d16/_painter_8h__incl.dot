@@ -13,7 +13,7 @@ digraph "/home/runner/work/FastLED/FastLED/examples/LuminescentGrand/shared/Pain
   Node2 -> Node4 [id="edge3_Node000002_Node000004",color="steelblue1",style="solid",tooltip=" "];
   Node4 [id="Node000004",label="color.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/de1/examples_2_luminescent_grand_2shared_2color_8h.html",tooltip=" "];
   Node4 -> Node5 [id="edge4_Node000004_Node000005",color="steelblue1",style="solid",tooltip=" "];
-  Node5 [id="Node000005",label="stdint.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$df/dd8/stdint_8h.html",tooltip=" "];
+  Node5 [id="Node000005",label="fl/stdint.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$df/dd8/stdint_8h.html",tooltip=" "];
   Node5 -> Node5 [id="edge5_Node000005_Node000005",color="steelblue1",style="solid",tooltip=" "];
   Node2 -> Node7 [id="edge6_Node000002_Node000007",color="steelblue1",style="solid",tooltip=" "];
   Node7 [id="Node000007",label="./util.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d8/d3c/util_8h.html",tooltip=" "];

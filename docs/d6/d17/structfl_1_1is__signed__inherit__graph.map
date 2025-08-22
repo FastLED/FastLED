@@ -1,0 +1,19 @@
+<map id="fl::is_signed&lt; T &gt;" name="fl::is_signed&lt; T &gt;">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,183,143,208"/>
+<area shape="rect" id="Node000002" href="$d9/d79/structfl_1_1is__signed_3_01double_01_4.html" title=" " alt="" coords="301,5,475,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="83,169,113,112,137,82,165,57,197,40,232,28,300,16,301,21,233,33,199,45,168,62,140,85,118,114,87,171"/>
+<area shape="rect" id="Node000003" href="$db/d70/structfl_1_1is__signed_3_01float_01_4.html" title=" " alt="" coords="309,55,467,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="93,170,124,139,165,110,200,95,237,84,308,71,309,76,238,89,202,100,168,115,128,143,96,174"/>
+<area shape="rect" id="Node000004" href="$d1/dd5/structfl_1_1is__signed_3_01int_01_4.html" title=" " alt="" coords="315,104,461,129"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="112,175,166,154,242,136,314,123,315,128,243,141,167,159,114,180"/>
+<area shape="rect" id="Node000005" href="$d7/db1/structfl_1_1is__signed_3_01long_01_4.html" title=" " alt="" coords="309,153,467,179"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="156,185,309,171,309,176,157,190"/>
+<area shape="rect" id="Node000006" href="$df/d05/structfl_1_1is__signed_3_01long_01double_01_4.html" title=" " alt="" coords="317,203,459,243"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="157,206,167,207,317,218,316,224,166,213,156,211"/>
+<area shape="rect" id="Node000007" href="$d8/d25/structfl_1_1is__signed_3_01long_01long_01_4.html" title=" " alt="" coords="317,267,459,307"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="111,212,168,237,244,259,317,274,316,279,243,264,166,242,109,217"/>
+<area shape="rect" id="Node000008" href="$d0/d41/structfl_1_1is__signed_3_01short_01_4.html" title=" " alt="" coords="307,332,469,357"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="94,217,126,253,168,286,201,303,237,316,307,332,306,338,235,321,199,308,165,291,123,257,90,221"/>
+<area shape="rect" id="Node000009" href="$d0/dcf/structfl_1_1is__signed_3_01signed_01char_01_4.html" title=" " alt="" coords="309,382,467,422"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="86,220,98,250,115,285,139,319,168,348,201,367,237,381,310,396,309,401,236,386,199,372,165,352,134,323,111,287,93,252,81,222"/>
+</map>

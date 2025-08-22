@@ -20,7 +20,7 @@
 <!-- Node2 -->
 <g id="Node000002" class="node">
 <title>Node2</title>
-<g id="a_Node000002"><a xlink:href="../../df/d57/_fx_fire2012_8ino.html" target="_top" xlink:title=" ">
+<g id="a_Node000002"><a xlink:href="../../df/d57/_fx_fire2012_8ino.html" target="_top" xlink:title="Fire2012 effect with ScreenMap.">
 <polygon fill="white" stroke="#666666" points="166,-41 0,-41 0,0 166,0 166,-41"/>
 <text text-anchor="start" x="8" y="-29" font-family="Helvetica,sans-Serif" font-size="10.00">/home/runner/work/FastLED</text>
 <text text-anchor="start" x="8" y="-18" font-family="Helvetica,sans-Serif" font-size="10.00">/FastLED/examples/FxFire2012</text>

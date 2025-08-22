@@ -7,10 +7,8 @@ var _fast_l_e_d_8h =
     [ "_FL_MAP_CLOCKED_CHIPSET", "db/d97/_fast_l_e_d_8h_a0f7ec59f76e5b6e949268f112f93c412.html#a0f7ec59f76e5b6e949268f112f93c412", null ],
     [ "FASTLED_FAKE_SPI_FORWARDS_TO_FAKE_CLOCKLESS", "db/d97/_fast_l_e_d_8h_a47074a13009a68e567023696910c6f48.html#a47074a13009a68e567023696910c6f48", null ],
     [ "FASTLED_VERSION", "db/d97/_fast_l_e_d_8h_a2f9de4cfbd302323305a4ad0e99167f4.html#a2f9de4cfbd302323305a4ad0e99167f4", null ],
-    [ "FastSPI_LED", "db/d97/_fast_l_e_d_8h_a142a708c2ff8d157a967309a781ac815.html#a142a708c2ff8d157a967309a781ac815", null ],
-    [ "FastSPI_LED2", "db/d97/_fast_l_e_d_8h_ac30cd5abdb75244830caee11ae5a110c.html#ac30cd5abdb75244830caee11ae5a110c", null ],
     [ "NO_HARDWARE_PIN_SUPPORT", "db/d97/_fast_l_e_d_8h_ad745fb280b8fb379961f6520f18f775a.html#ad745fb280b8fb379961f6520f18f775a", null ],
-    [ "power_func", "db/d97/_fast_l_e_d_8h_aa8a26176bfad65ad4447edd2ca99145e.html#aa8a26176bfad65ad4447edd2ca99145e", null ],
+    [ "power_func", "db/d97/_fast_l_e_d_8h_ae35a6f671d142751029bb2371ce5872c.html#ae35a6f671d142751029bb2371ce5872c", null ],
     [ "EBlockChipsets", "db/d97/_fast_l_e_d_8h_adcf22542128a12d8c3c304777422c7cc.html#adcf22542128a12d8c3c304777422c7cc", null ],
     [ "ESM", "db/d97/_fast_l_e_d_8h_ac8839f06bbcecd0dc5bde0a94510a657.html#ac8839f06bbcecd0dc5bde0a94510a657", [
       [ "SMART_MATRIX", "db/d97/_fast_l_e_d_8h_ac8839f06bbcecd0dc5bde0a94510a657.html#ac8839f06bbcecd0dc5bde0a94510a657aad6c1549c0bf19cdf4ca4838d761987e", null ]
@@ -39,6 +37,6 @@ var _fast_l_e_d_8h =
     [ "SWS2812", "db/d97/_fast_l_e_d_8h_a5dd5101b1f189300219b06aaaaacff2e.html#a5dd5101b1f189300219b06aaaaacff2e", [
       [ "WS2812SERIAL", "db/d97/_fast_l_e_d_8h_a5dd5101b1f189300219b06aaaaacff2e.html#a5dd5101b1f189300219b06aaaaacff2ea272baf8a63080477fe5bffb2937db7c0", null ]
     ] ],
-    [ "cled_contoller_size", "db/d97/_fast_l_e_d_8h_a2b538932c69fe9ea1fca4758f268d05a.html#a2b538932c69fe9ea1fca4758f268d05a", null ],
+    [ "cled_contoller_size", "db/d97/_fast_l_e_d_8h_a7fc9dbf6b6f9ae03c2e6de945adba338.html#a7fc9dbf6b6f9ae03c2e6de945adba338", null ],
     [ "FastLED", "db/d97/_fast_l_e_d_8h_a7077a6a69b1339a4c04f4bb9ecc0ad3f.html#a7077a6a69b1339a4c04f4bb9ecc0ad3f", null ]
 ];

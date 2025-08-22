@@ -1,0 +1,9 @@
+<map id="CRGB::fadeToBlackBy" name="CRGB::fadeToBlackBy">
+<area shape="rect" id="Node000001" title="fadeToBlackBy is a synonym for nscale8(), as a fade instead of a scale" alt="" coords="319,42,481,67"/>
+<area shape="rect" id="Node000002" href="$d2/dba/structfl_1_1_x_y_draw_composited_ac05016f683e2bca8612a6991bb8bbb30.html#ac05016f683e2bca8612a6991bb8bbb30" title=" " alt="" coords="104,5,271,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="304,44,270,39,271,34,305,39"/>
+<area shape="rect" id="Node000003" href="$da/dc7/advanced_8h_a715d5587b1a493c350ae39b13e881463.html#a715d5587b1a493c350ae39b13e881463" title=" " alt="" coords="127,70,248,95"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="305,70,249,77,248,72,304,65"/>
+<area shape="rect" id="Node000004" href="$da/dc7/advanced_8h_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="5,70,56,95"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="113,85,56,85,56,80,113,80"/>
+</map>

@@ -1,5 +1,14 @@
 <map id="splatRendering" name="splatRendering">
-<area shape="rect" id="Node000001" title=" " alt="" coords="104,5,224,31"/>
-<area shape="rect" id="Node000002" href="$d4/d06/curr_8h_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="5,5,56,31"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="90,21,56,21,56,15,90,15"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="383,119,503,145"/>
+<area shape="rect" id="Node000002" href="$d4/d06/curr_8h_a251ace8542fe093844e4ed2709e8a3d7.html#a251ace8542fe093844e4ed2709e8a3d7" title=" " alt="" coords="256,69,311,94"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="388,118,310,92,312,87,390,113"/>
+<area shape="rect" id="Node000005" href="$d4/d06/curr_8h_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="69,119,120,145"/>
+<area shape="poly" id="edge5_Node000001_Node000005" title=" " alt="" coords="369,135,120,135,120,129,369,129"/>
+<area shape="rect" id="Node000006" href="$d4/d06/curr_8h_aa9aeb4e0895890b9fc7cb9ac85f41548.html#aa9aeb4e0895890b9fc7cb9ac85f41548" title=" " alt="" coords="232,170,335,195"/>
+<area shape="poly" id="edge6_Node000001_Node000006" title=" " alt="" coords="390,151,325,172,323,167,388,146"/>
+<area shape="rect" id="Node000003" href="$d3/dca/classfl_1_1_x_y_raster_sparse___c_r_g_b_a074d01574c20917b45f65fb1afbf2cb1.html#a074d01574c20917b45f65fb1afbf2cb1" title=" " alt="" coords="24,5,165,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="242,72,162,48,163,43,244,67"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_a29ae9bad91ab6b7de10679e9325e90f6.html#a29ae9bad91ab6b7de10679e9325e90f6" title=" " alt="" coords="5,70,184,95"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="242,84,184,85,184,79,242,79"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="243,95,121,128,120,123,242,90"/>
 </map>

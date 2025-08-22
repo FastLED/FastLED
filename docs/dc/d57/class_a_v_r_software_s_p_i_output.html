@@ -111,7 +111,7 @@ $(function(){initNavTree('dc/d57/class_a_v_r_software_s_p_i_output.html','../../
 </div><!--header-->
 <div class="contents">
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><div class="compoundTemplParams">template&lt;uint8_t DATA_PIN, uint8_t CLOCK_PIN, uint32_t SPI_SPEED&gt;<br />
+<div class="textblock"><div class="compoundTemplParams">template&lt;uint8_t DATA_PIN, uint8_t CLOCK_PIN, fl::u32 SPI_SPEED&gt;<br />
 class AVRSoftwareSPIOutput&lt; DATA_PIN, CLOCK_PIN, SPI_SPEED &gt;</div><p>Software SPI (aka bit-banging) support Includes aggressive optimizations for when the clock and data pin are on the same port. </p>
 <dl class="tparams"><dt>Template Parameters</dt><dd>
   <table class="tparams">
@@ -125,7 +125,7 @@ class AVRSoftwareSPIOutput&lt; DATA_PIN, CLOCK_PIN, SPI_SPEED &gt;</div><p>Softw
 <dl class="todo"><dt><b><a class="el" href="../../dd/da0/todo.html#_todo000010">Todo</a></b></dt><dd>Replace the select pin definition with a set of pins, to allow using mux hardware for routing in the future. <br  />
  </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="../../d9/d8d/fastspi__bitbang_8h_source.html#l00026">26</a> of file <a class="el" href="../../d9/d8d/fastspi__bitbang_8h_source.html">fastspi_bitbang.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d9/d8d/fastspi__bitbang_8h_source.html#l00027">27</a> of file <a class="el" href="../../d9/d8d/fastspi__bitbang_8h_source.html">fastspi_bitbang.h</a>.</p>
 </div>
 <p><code>#include &lt;<a class="el" href="../../d9/d8d/fastspi__bitbang_8h_source.html">fastspi_bitbang.h</a>&gt;</code></p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
@@ -173,7 +173,7 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:ac4ffa7160697ac63bbd7734b480308bc" id="r_ac4ffa7160697ac63bbd7734b480308bc"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dc/d57/class_a_v_r_software_s_p_i_output_ac4ffa7160697ac63bbd7734b480308bc.html#ac4ffa7160697ac63bbd7734b480308bc">writeBytesValue</a> (uint8_t value, int len)</td></tr>
 <tr class="memdesc:ac4ffa7160697ac63bbd7734b480308bc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write multiple bytes of the given value over SPI.  <br /></td></tr>
 <tr class="separator:ac4ffa7160697ac63bbd7734b480308bc"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a20772a8fdfa75015731375c36ccb3515" id="r_a20772a8fdfa75015731375c36ccb3515"><td class="memTemplParams" colspan="2">template&lt;uint8_t FLAGS, class D, <a class="el" href="../../db/d07/eorder_8h_a3c26d076773aa0f331d3066b46dbc6a4.html#a3c26d076773aa0f331d3066b46dbc6a4">EOrder</a> RGB_ORDER&gt; </td></tr>
+<tr class="memitem:a20772a8fdfa75015731375c36ccb3515" id="r_a20772a8fdfa75015731375c36ccb3515"><td class="memTemplParams" colspan="2">template&lt;uint8_t FLAGS, class D, <a class="el" href="../../d4/d36/namespacefl_ab289ace8bd149d39b87ebd778e9abe23.html#ab289ace8bd149d39b87ebd778e9abe23">EOrder</a> RGB_ORDER&gt; </td></tr>
 <tr class="memitem:a20772a8fdfa75015731375c36ccb3515"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="../../dc/d57/class_a_v_r_software_s_p_i_output_a20772a8fdfa75015731375c36ccb3515.html#a20772a8fdfa75015731375c36ccb3515">writePixels</a> (<a class="el" href="../../d0/dee/struct_pixel_controller.html">PixelController</a>&lt; RGB_ORDER &gt; pixels, void *context=NULL)</td></tr>
 <tr class="memdesc:a20772a8fdfa75015731375c36ccb3515"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write LED pixel data to the SPI interface.  <br /></td></tr>
 <tr class="separator:a20772a8fdfa75015731375c36ccb3515"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -205,9 +205,9 @@ Static Public Member Functions</h2></td></tr>
 <tr class="memitem:abada62794ed922c2798bf462a98b57f0" id="r_abada62794ed922c2798bf462a98b57f0"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dc/d57/class_a_v_r_software_s_p_i_output_abada62794ed922c2798bf462a98b57f0.html#abada62794ed922c2798bf462a98b57f0">writeBytesValueRaw</a> (uint8_t value, int len)</td></tr>
 <tr class="memdesc:abada62794ed922c2798bf462a98b57f0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write multiple bytes of the given value over SPI, without selecting the interface.  <br /></td></tr>
 <tr class="separator:abada62794ed922c2798bf462a98b57f0"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a34421832d232a692d08d39d87733acd8" id="r_a34421832d232a692d08d39d87733acd8"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dc/d57/class_a_v_r_software_s_p_i_output_a34421832d232a692d08d39d87733acd8.html#a34421832d232a692d08d39d87733acd8">writeWord</a> (uint16_t w)</td></tr>
-<tr class="memdesc:a34421832d232a692d08d39d87733acd8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write a word (two bytes) over SPI.  <br /></td></tr>
-<tr class="separator:a34421832d232a692d08d39d87733acd8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9ca78e0b9b6c242d6f898daa23552537" id="r_a9ca78e0b9b6c242d6f898daa23552537"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dc/d57/class_a_v_r_software_s_p_i_output_a9ca78e0b9b6c242d6f898daa23552537.html#a9ca78e0b9b6c242d6f898daa23552537">writeWord</a> (fl::u16 w)</td></tr>
+<tr class="memdesc:a9ca78e0b9b6c242d6f898daa23552537"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write a word (two bytes) over SPI.  <br /></td></tr>
+<tr class="separator:a9ca78e0b9b6c242d6f898daa23552537"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-types" name="pri-types"></a>
 Private Types</h2></td></tr>
@@ -215,9 +215,9 @@ Private Types</h2></td></tr>
 <tr class="separator:ade0ae62b59d3ff0b68d9b62b09ced372"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:acb0905a7f1e88bb01161bc67233fe352" id="r_acb0905a7f1e88bb01161bc67233fe352"><td class="memItemLeft" align="right" valign="top">typedef <a class="el" href="../../db/d3b/class_fast_pin.html">FastPin</a>&lt; <a class="el" href="../../d0/dc3/_blink_8ino_a23b348310475af5d6544794f1a167ee8.html#a23b348310475af5d6544794f1a167ee8">CLOCK_PIN</a> &gt;<a class="el" href="../../db/d3b/class_fast_pin.html">::port_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dc/d57/class_a_v_r_software_s_p_i_output_acb0905a7f1e88bb01161bc67233fe352.html#acb0905a7f1e88bb01161bc67233fe352">clock_t</a></td></tr>
 <tr class="separator:acb0905a7f1e88bb01161bc67233fe352"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:adb2257fd7cfe78447c77223ab34bc674" id="r_adb2257fd7cfe78447c77223ab34bc674"><td class="memItemLeft" align="right" valign="top">typedef <a class="el" href="../../db/d3b/class_fast_pin.html">FastPin</a>&lt; <a class="el" href="../../d0/dc3/_blink_8ino_adad67fe595ea440c8f8247ec2cddf070.html#adad67fe595ea440c8f8247ec2cddf070">DATA_PIN</a> &gt;<a class="el" href="../../db/d3b/class_fast_pin.html">::port_ptr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dc/d57/class_a_v_r_software_s_p_i_output_adb2257fd7cfe78447c77223ab34bc674.html#adb2257fd7cfe78447c77223ab34bc674">data_ptr_t</a></td></tr>
+<tr class="memitem:adb2257fd7cfe78447c77223ab34bc674" id="r_adb2257fd7cfe78447c77223ab34bc674"><td class="memItemLeft" align="right" valign="top">typedef <a class="el" href="../../db/d3b/class_fast_pin.html">FastPin</a>&lt; <a class="el" href="../../d8/d21/_adafruit_bridge_8ino_adad67fe595ea440c8f8247ec2cddf070.html#adad67fe595ea440c8f8247ec2cddf070">DATA_PIN</a> &gt;<a class="el" href="../../db/d3b/class_fast_pin.html">::port_ptr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dc/d57/class_a_v_r_software_s_p_i_output_adb2257fd7cfe78447c77223ab34bc674.html#adb2257fd7cfe78447c77223ab34bc674">data_ptr_t</a></td></tr>
 <tr class="separator:adb2257fd7cfe78447c77223ab34bc674"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad446f8b5a0e8df86934e8f93561907fe" id="r_ad446f8b5a0e8df86934e8f93561907fe"><td class="memItemLeft" align="right" valign="top">typedef <a class="el" href="../../db/d3b/class_fast_pin.html">FastPin</a>&lt; <a class="el" href="../../d0/dc3/_blink_8ino_adad67fe595ea440c8f8247ec2cddf070.html#adad67fe595ea440c8f8247ec2cddf070">DATA_PIN</a> &gt;<a class="el" href="../../db/d3b/class_fast_pin.html">::port_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dc/d57/class_a_v_r_software_s_p_i_output_ad446f8b5a0e8df86934e8f93561907fe.html#ad446f8b5a0e8df86934e8f93561907fe">data_t</a></td></tr>
+<tr class="memitem:ad446f8b5a0e8df86934e8f93561907fe" id="r_ad446f8b5a0e8df86934e8f93561907fe"><td class="memItemLeft" align="right" valign="top">typedef <a class="el" href="../../db/d3b/class_fast_pin.html">FastPin</a>&lt; <a class="el" href="../../d8/d21/_adafruit_bridge_8ino_adad67fe595ea440c8f8247ec2cddf070.html#adad67fe595ea440c8f8247ec2cddf070">DATA_PIN</a> &gt;<a class="el" href="../../db/d3b/class_fast_pin.html">::port_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dc/d57/class_a_v_r_software_s_p_i_output_ad446f8b5a0e8df86934e8f93561907fe.html#ad446f8b5a0e8df86934e8f93561907fe">data_t</a></td></tr>
 <tr class="separator:ad446f8b5a0e8df86934e8f93561907fe"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-static-methods" name="pri-static-methods"></a>
@@ -260,7 +260,7 @@ Private Attributes</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dc/d57/class_a_v_r_software_s_p_i_output.html">AVRSoftwareSPIOutput</a></li>
-    <li class="footer">Generated on Tue Jun 24 2025 00:58:15 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Fri Aug 22 2025 20:59:35 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

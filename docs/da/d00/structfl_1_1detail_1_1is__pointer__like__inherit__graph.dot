@@ -1,0 +1,24 @@
+digraph "fl::detail::is_pointer_like&lt; T &gt;"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="LR";
+  Node1 [id="Node000001",label="fl::detail::is_pointer\l_like\< T \>",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
+  Node2 -> Node1 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="false_type",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d1/d55/structfl_1_1integral__constant.html",tooltip=" "];
+  Node3 -> Node2 [id="edge2_Node000002_Node000003",dir="back",color="orange",style="dashed",tooltip=" ",label=" \< bool, false \>",fontcolor="grey" ];
+  Node3 [id="Node000003",label="fl::integral_constant\l\< T, v \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d1/d55/structfl_1_1integral__constant.html",tooltip=" "];
+  Node1 -> Node4 [id="edge3_Node000001_Node000004",dir="back",color="orange",style="dashed",tooltip=" ",label=" \< remove_reference\l\< T \>::type \>",fontcolor="grey" ];
+  Node4 [id="Node000004",label="fl::detail::is_pointer\l_like\< remove_reference\l\< T \>::type \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d4/dc1/structfl_1_1detail_1_1is__pointer__like.html",tooltip=" "];
+  Node4 -> Node5 [id="edge4_Node000004_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="fl::detail::use_pointer\l_syntax\< T \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$dd/d6a/structfl_1_1detail_1_1use__pointer__syntax.html",tooltip=" "];
+  Node1 -> Node6 [id="edge5_Node000001_Node000006",dir="back",color="orange",style="dashed",tooltip=" ",label=" \< T * \>",fontcolor="grey" ];
+  Node6 [id="Node000006",label="fl::detail::is_pointer\l_like\< T * \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d0/dd7/structfl_1_1detail_1_1is__pointer__like_3_01_t_01_5_01_4.html",tooltip=" "];
+  Node1 -> Node7 [id="edge6_Node000001_Node000007",dir="back",color="orange",style="dashed",tooltip=" ",label=" \< fl::Ptr\< T \> \>",fontcolor="grey" ];
+  Node7 [id="Node000007",label="fl::detail::is_pointer\l_like\< fl::Ptr\< T \> \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$dd/d18/structfl_1_1detail_1_1is__pointer__like_3_01fl_1_1_ptr_3_01_t_01_4_01_4.html",tooltip=" "];
+  Node1 -> Node8 [id="edge7_Node000001_Node000008",dir="back",color="orange",style="dashed",tooltip=" ",label=" \< fl::unique_ptr\< T,\l Deleter \> \>",fontcolor="grey" ];
+  Node8 [id="Node000008",label="fl::detail::is_pointer\l_like\< fl::unique_ptr\l\< T, Deleter \> \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d1/d18/structfl_1_1detail_1_1is__pointer__like_3_01fl_1_1unique__ptr_3_01_t_00_01_deleter_01_4_01_4.html",tooltip=" "];
+}

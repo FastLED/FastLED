@@ -9,6 +9,7 @@ var topics =
     [ "HSV to RGB Conversion Functions", "dd/dc7/group___h_s_v2_r_g_b.html", "dd/dc7/group___h_s_v2_r_g_b" ],
     [ "Input", "dc/df1/group__input.html", "dc/df1/group__input" ],
     [ "LED Chipset Controllers", "d4/d28/group___chipsets.html", "d4/d28/group___chipsets" ],
+    [ "Noise Fill Functions", "de/da4/group___noise_fill.html", "de/da4/group___noise_fill" ],
     [ "Noise Functions", "d8/d5c/group___noise.html", "d8/d5c/group___noise" ],
     [ "Output", "d7/db2/group__output.html", "d7/db2/group__output" ],
     [ "Pixel Data Sets", "de/d64/group___pixel_set.html", "de/d64/group___pixel_set" ],

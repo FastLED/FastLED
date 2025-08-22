@@ -107,7 +107,7 @@ $(function(){initNavTree('d5/d66/group___float_conversions_gaa2facbc0ec935e34c62
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="../../df/da2/group__lib8tion_gac735bdef91ee1e80778434336a622138.html#gac735bdef91ee1e80778434336a622138">LIB8STATIC</a> <a class="el" href="../../db/d58/group___fractional_types_ga00cb5dc9e5b477a58669a3e40bc473c2.html#ga00cb5dc9e5b477a58669a3e40bc473c2">sfract15</a> floatToSfract15 </td>
+          <td class="memname"><a class="el" href="../../df/da2/group__lib8tion_gac735bdef91ee1e80778434336a622138.html#gac735bdef91ee1e80778434336a622138">LIB8STATIC</a> <a class="el" href="../../d4/d36/namespacefl_a445918614662e4b7c289bf41acb44935.html#a445918614662e4b7c289bf41acb44935">sfract15</a> floatToSfract15 </td>
           <td>(</td>
           <td class="paramtype">float</td>          <td class="paramname"><span class="paramname"><em>f</em></span></td><td>)</td>
           <td></td>
@@ -115,13 +115,14 @@ $(function(){initNavTree('d5/d66/group___float_conversions_gaa2facbc0ec935e34c62
       </table>
 </div><div class="memdoc">
 
-<p>Conversion from IEEE754 float in the range (-1,1) to 16-bit fixed point (<a class="el" href="../../db/d58/group___fractional_types_ga00cb5dc9e5b477a58669a3e40bc473c2.html#ga00cb5dc9e5b477a58669a3e40bc473c2" title="ANSI: signed _Fract.">sfract15</a>). </p>
+<p>Conversion from IEEE754 float in the range (-1,1) to 16-bit fixed point (<a class="el" href="../../d4/d36/namespacefl_a445918614662e4b7c289bf41acb44935.html#a445918614662e4b7c289bf41acb44935" title="ANSI: signed _Fract.">sfract15</a>). </p>
 <dl class="section note"><dt>Note</dt><dd>The extremes of one and negative one are NOT representable! The representable range is 0.99996948242 to -0.99996948242, in steps of 0.00003051757. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="../../df/da5/lib8tion_8h_source.html#l00409">409</a> of file <a class="el" href="../../df/da5/lib8tion_8h_source.html">lib8tion.h</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  410</span>{</div>
-<div class="line"><span class="lineno">  411</span>    <span class="keywordflow">return</span> f * 32768.0;</div>
-<div class="line"><span class="lineno">  412</span>}</div>
+<p class="definition">Definition at line <a class="el" href="../../df/da5/lib8tion_8h_source.html#l00265">265</a> of file <a class="el" href="../../df/da5/lib8tion_8h_source.html">lib8tion.h</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  266</span>{</div>
+<div class="line"><span class="lineno">  267</span>    <span class="keywordflow">return</span> <span class="keyword">static_cast&lt;</span><a class="code hl_typedef" href="../../d4/d36/namespacefl_a445918614662e4b7c289bf41acb44935.html#a445918614662e4b7c289bf41acb44935">sfract15</a><span class="keyword">&gt;</span>(f * 32768.0f);</div>
+<div class="line"><span class="lineno">  268</span>}</div>
+<div class="ttc" id="anamespacefl_a445918614662e4b7c289bf41acb44935_html_a445918614662e4b7c289bf41acb44935"><div class="ttname"><a href="../../d4/d36/namespacefl_a445918614662e4b7c289bf41acb44935.html#a445918614662e4b7c289bf41acb44935">fl::sfract15</a></div><div class="ttdeci">i16 sfract15</div><div class="ttdoc">ANSI: signed _Fract.</div><div class="ttdef"><b>Definition</b> <a href="../../d3/d7e/int_8h_source.html#l00068">int.h:68</a></div></div>
 </div><!-- fragment -->
 <p class="reference">References <a class="el" href="../../d4/d7a/lib8static_8h_source.html#l00010">LIB8STATIC</a>.</p>
 
@@ -134,7 +135,7 @@ $(function(){initNavTree('d5/d66/group___float_conversions_gaa2facbc0ec935e34c62
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d5/d66/group___float_conversions.html">Float-to-Fixed and Fixed-to-Float Conversions</a></li>
-    <li class="footer">Generated on Tue Jun 24 2025 00:58:14 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Fri Aug 22 2025 20:59:35 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

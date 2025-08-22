@@ -18,11 +18,11 @@
 <area shape="poly" id="edge21_Node000003_Node000023" title=" " alt="" coords="434,227,509,218,509,223,434,232"/>
 <area shape="rect" id="Node000005" href="$d6/d6c/group___beat_generators_gaecd7cbfc2640407cabf75afcc7d9ddf4.html#gaecd7cbfc2640407cabf75afcc7d9ddf4" title="Generates an 8&#45;bit sine wave at a given BPM that oscillates within a given range." alt="" coords="707,5,785,31"/>
 <area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="576,102,621,72,677,40,693,33,695,38,680,44,624,76,579,106"/>
-<area shape="rect" id="Node000010" href="$d1/dfb/colorutils_8h_a74e1895d1234ab29fef4458532e91090.html#a74e1895d1234ab29fef4458532e91090" title=" " alt="" coords="679,55,813,80"/>
+<area shape="rect" id="Node000010" href="$d1/dfb/colorutils_8h_a3d488dd1e2d27e99307310527e51cad3.html#a3d488dd1e2d27e99307310527e51cad3" title=" " alt="" coords="679,55,813,80"/>
 <area shape="poly" id="edge5_Node000004_Node000010" title=" " alt="" coords="583,108,683,81,684,86,584,113"/>
 <area shape="rect" id="Node000011" href="$d8/dd0/_fire_cylinder_8h_a470cec2dcb21e474c257065bb93bfcd1.html#a470cec2dcb21e474c257065bb93bfcd1" title=" " alt="" coords="712,104,780,129"/>
 <area shape="poly" id="edge6_Node000004_Node000011" title=" " alt="" coords="584,114,698,114,698,119,584,119"/>
-<area shape="rect" id="Node000013" href="$d1/dfb/colorutils_8h_a90ef14e5ef0cc07c435a39eca3ddc490.html#a90ef14e5ef0cc07c435a39eca3ddc490" title=" " alt="" coords="687,203,805,228"/>
+<area shape="rect" id="Node000013" href="$d1/dfb/colorutils_8h_a399e4e094995b8e97420b89a2dd6548b.html#a399e4e094995b8e97420b89a2dd6548b" title=" " alt="" coords="687,203,805,228"/>
 <area shape="poly" id="edge8_Node000012_Node000013" title=" " alt="" coords="593,254,684,229,686,234,595,259"/>
 <area shape="rect" id="Node000014" href="$d2/d0d/group___random_ga17034d936ef716efe820e11c1df043b0.html#ga17034d936ef716efe820e11c1df043b0" title="Generate a 16&#45;bit random number." alt="" coords="866,329,954,355"/>
 <area shape="poly" id="edge9_Node000012_Node000014" title=" " alt="" coords="595,271,853,327,852,332,594,276"/>
@@ -31,7 +31,7 @@
 <area shape="poly" id="edge13_Node000016_Node000013" title=" " alt="" coords="590,171,684,197,683,202,589,177"/>
 <area shape="rect" id="Node000017" href="$d6/d6c/group___beat_generators_gaa46e5de1c4c27833359e7a97a18c839b.html#gaa46e5de1c4c27833359e7a97a18c839b" title="Generates a 16&#45;bit sine wave at a given BPM that oscillates within a given range." alt="" coords="703,153,789,179"/>
 <area shape="poly" id="edge12_Node000016_Node000017" title=" " alt="" coords="590,163,689,163,689,169,590,169"/>
-<area shape="rect" id="Node000020" href="$db/de9/_esp32_s3_i2_s_demo_8ino_a7a96d6e71a7754105104c5977efde754.html#a7a96d6e71a7754105104c5977efde754" title=" " alt="" coords="861,404,959,429"/>
+<area shape="rect" id="Node000020" href="$d1/dfb/colorutils_8h_a8cfac7f712d38ac9aa9bcd172283b453.html#a8cfac7f712d38ac9aa9bcd172283b453" title="Fill a range of LEDs with a rainbow of colors." alt="" coords="861,404,959,429"/>
 <area shape="poly" id="edge15_Node000019_Node000020" title=" " alt="" coords="784,414,847,414,847,419,784,419"/>
 <area shape="poly" id="edge20_Node000021_Node000019" title=" " alt="" coords="607,376,696,401,695,406,605,381"/>
 <area shape="rect" id="Node000022" href="$d5/d25/_demo_reel100_8ino_ab00a79f2963c57048ec1d9271fbfb2dd.html#ab00a79f2963c57048ec1d9271fbfb2dd" title=" " alt="" coords="703,355,789,380"/>

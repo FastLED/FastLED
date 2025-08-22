@@ -1,0 +1,42 @@
+<map id="fl/scoped_array.h" name="fl/scoped_array.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="516,5,647,31"/>
+<area shape="rect" id="Node000002" href="$d9/d43/circular__buffer_8h.html" title=" " alt="" coords="203,79,341,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="519,36,323,81,321,76,518,31"/>
+<area shape="rect" id="Node000007" href="$d9/df3/rectangular__draw__buffer_8h.html" title=" " alt="" coords="791,225,937,265"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="615,36,692,84,780,150,820,188,851,223,847,227,816,192,777,154,689,89,612,40"/>
+<area shape="rect" id="Node000009" href="$d0/d44/scoped__ptr_8h.html" title=" " alt="" coords="523,79,639,104"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="584,44,584,79,579,79,579,44"/>
+<area shape="rect" id="Node000003" href="$d1/d24/bytestreammemory_8h.html" title=" " alt="" coords="30,321,205,346"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="214,111,179,128,149,154,135,174,126,196,116,244,115,288,118,320,113,320,110,288,111,243,121,194,131,171,145,150,176,124,212,106"/>
+<area shape="rect" id="Node000006" href="$d5/da4/frame__interpolator_8cpp.html" title=" " alt="" coords="159,152,385,177"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="275,118,275,152,269,152,269,118"/>
+<area shape="rect" id="Node000004" href="$de/d95/bytestreammemory_8cpp.html" title=" " alt="" coords="5,401,195,427"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="114,360,105,402,100,401,109,359"/>
+<area shape="rect" id="Node000005" href="$d0/d05/video_8cpp.html" title=" " alt="" coords="219,401,322,427"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="153,350,249,399,247,403,151,355"/>
+<area shape="rect" id="Node000008" href="$d3/d8d/rectangular__draw__buffer_8cpp.html" title=" " alt="" coords="791,313,937,353"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="867,279,867,313,861,313,861,279"/>
+<area shape="rect" id="Node000010" href="$dd/d98/ptr_8h.html" title=" " alt="" coords="430,152,493,177"/>
+<area shape="poly" id="edge9_Node000009_Node000010" title=" " alt="" coords="551,113,482,154,480,149,549,109"/>
+<area shape="rect" id="Node000291" href="$d6/d68/vector_8h.html" title=" " alt="" coords="679,152,766,177"/>
+<area shape="poly" id="edge20_Node000009_Node000291" title=" " alt="" coords="617,108,701,149,698,154,615,112"/>
+<area shape="rect" id="Node000011" href="$df/d4c/src_2fl_2async_8h.html" title="Generic asynchronous task management for FastLED." alt="" coords="358,321,442,346"/>
+<area shape="poly" id="edge10_Node000010_Node000011" title=" " alt="" coords="418,180,382,198,366,211,353,227,348,239,348,251,356,277,372,300,389,319,385,322,368,303,352,279,343,252,343,238,348,224,362,207,379,194,416,175"/>
+<area shape="rect" id="Node000016" href="$d6/d6a/fetch_8h.html" title="Unified HTTP fetch API for FastLED (cross&#45;platform)" alt="" coords="361,401,439,427"/>
+<area shape="poly" id="edge12_Node000010_Node000016" title=" " alt="" coords="418,178,376,196,357,209,342,227,337,248,337,284,341,322,349,352,366,379,387,399,383,403,362,382,344,354,336,323,332,284,332,248,338,224,353,205,373,191,415,173"/>
+<area shape="rect" id="Node000018" href="$dc/d18/memory_8h.html" title=" " alt="" coords="139,233,237,258"/>
+<area shape="poly" id="edge13_Node000010_Node000018" title=" " alt="" coords="418,181,229,235,227,230,416,176"/>
+<area shape="rect" id="Node000364" href="$df/dc6/ptr_8cpp.html" title=" " alt="" coords="462,233,541,258"/>
+<area shape="poly" id="edge15_Node000010_Node000364" title=" " alt="" coords="476,189,498,231,493,234,471,191"/>
+<area shape="rect" id="Node000365" href="$d5/d94/ptr__impl_8h.html" title=" " alt="" coords="565,233,665,258"/>
+<area shape="poly" id="edge16_Node000010_Node000365" title=" " alt="" coords="490,182,587,230,584,235,488,186"/>
+<area shape="rect" id="Node000216" href="$db/da4/task_8h.html" title=" " alt="" coords="363,233,437,258"/>
+<area shape="poly" id="edge18_Node000010_Node000216" title=" " alt="" coords="446,190,411,234,407,231,442,186"/>
+<area shape="poly" id="edge11_Node000011_Node000016" title=" " alt="" coords="403,360,403,401,397,401,397,360"/>
+<area shape="poly" id="edge14_Node000018_Node000003" title=" " alt="" coords="172,270,129,322,125,318,168,267"/>
+<area shape="poly" id="edge17_Node000365_Node000010" title=" " alt="" coords="586,228,489,180,491,175,588,224"/>
+<area shape="poly" id="edge19_Node000216_Node000011" title=" " alt="" coords="403,272,403,320,397,320,397,272"/>
+<area shape="poly" id="edge23_Node000291_Node000007" title=" " alt="" coords="757,182,831,223,829,228,754,187"/>
+<area shape="poly" id="edge21_Node000291_Node000011" title=" " alt="" coords="720,192,706,231,695,250,679,267,651,287,621,302,557,322,494,332,442,335,442,330,494,327,556,317,619,297,649,282,676,263,690,247,702,228,715,190"/>
+<area shape="poly" id="edge22_Node000291_Node000016" title=" " alt="" coords="728,192,726,229,721,249,712,267,683,299,650,326,614,349,576,367,501,394,440,409,439,404,500,389,574,362,611,344,647,322,680,295,707,264,716,247,721,228,723,191"/>
+</map>

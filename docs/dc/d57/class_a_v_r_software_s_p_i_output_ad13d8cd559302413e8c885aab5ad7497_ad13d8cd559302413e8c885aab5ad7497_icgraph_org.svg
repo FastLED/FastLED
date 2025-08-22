@@ -220,7 +220,7 @@
 <!-- Node12 -->
 <g id="Node000012" class="node">
 <title>Node12</title>
-<g id="a_Node000012"><a xlink:href="../../dc/d57/class_a_v_r_software_s_p_i_output_a34421832d232a692d08d39d87733acd8.html#a34421832d232a692d08d39d87733acd8" target="_top" xlink:title="Write a word (two bytes) over SPI.">
+<g id="a_Node000012"><a xlink:href="../../dc/d57/class_a_v_r_software_s_p_i_output_a9ca78e0b9b6c242d6f898daa23552537.html#a9ca78e0b9b6c242d6f898daa23552537" target="_top" xlink:title="Write a word (two bytes) over SPI.">
 <polygon fill="white" stroke="#666666" points="318,-164 191,-164 191,-134 318,-134 318,-164"/>
 <text text-anchor="start" x="199" y="-152" font-family="Helvetica,sans-Serif" font-size="10.00">AVRSoftwareSPIOutput</text>
 <text text-anchor="middle" x="254.5" y="-141" font-family="Helvetica,sans-Serif" font-size="10.00">::writeWord</text>

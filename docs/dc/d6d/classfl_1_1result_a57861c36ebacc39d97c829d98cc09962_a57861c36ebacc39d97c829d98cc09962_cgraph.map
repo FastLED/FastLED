@@ -1,0 +1,11 @@
+<map id="fl::result::result" name="fl::result::result">
+<area shape="rect" id="Node000001" title="Construct a successful result (move)" alt="" coords="5,31,125,56"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a0445ddcae69ac4e524ec18098eb84dbf.html#a0445ddcae69ac4e524ec18098eb84dbf" title=" " alt="" coords="195,5,270,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="125,32,181,23,182,28,126,37"/>
+<area shape="rect" id="Node000003" href="$dc/d6d/classfl_1_1result_a8c36716d4a5e21c2b42707c839305328.html#a8c36716d4a5e21c2b42707c839305328" title="Get the success value (const)" alt="" coords="173,55,292,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="126,49,160,54,160,60,125,55"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_aaad7bab3a46c3353c72c671c8372be3e.html#aaad7bab3a46c3353c72c671c8372be3e" title=" " alt="" coords="360,29,419,55"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="292,55,346,46,347,51,293,60"/>
+<area shape="rect" id="Node000005" href="$dc/d6d/classfl_1_1result_ac2b044bd270c831d02dd736571640bac.html#ac2b044bd270c831d02dd736571640bac" title="Check if the result is successful." alt="" coords="340,79,439,104"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="293,74,327,79,326,84,292,79"/>
+</map>

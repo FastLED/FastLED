@@ -103,64 +103,64 @@ $(function(){initNavTree('d3/da7/led__strip__rmt__dev_8c_source.html','../../');
   <div class="headertitle"><div class="title">led_strip_rmt_dev.c</div></div>
 </div><!--header-->
 <div class="contents">
-<a href="../../d3/da7/led__strip__rmt__dev_8c.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span> </div>
+<a href="../../d3/da7/led__strip__rmt__dev_8c.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="preprocessor">#ifdef ESP32</span></div>
 <div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span> </div>
-<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="preprocessor">#ifdef ESP32</span></div>
+<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="preprocessor">#include &quot;<a class="code" href="../../df/d17/enabled_8h.html">enabled.h</a>&quot;</span></div>
 <div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span> </div>
-<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="preprocessor">#include &quot;<a class="code" href="../../df/d17/enabled_8h.html">enabled.h</a>&quot;</span></div>
+<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="preprocessor">#if FASTLED_RMT5</span></div>
 <div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span> </div>
-<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="preprocessor">#if FASTLED_RMT5</span></div>
+<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="preprocessor">#include &quot;<a class="code" href="../../d8/d4b/unused_8h.html">fl/unused.h</a>&quot;</span></div>
 <div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span> </div>
-<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="preprocessor">#include &quot;<a class="code" href="../../d8/d4b/unused_8h.html">fl/unused.h</a>&quot;</span></div>
-<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span> </div>
-<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span> </div>
-<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="comment">/*</span></div>
-<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="comment"> * SPDX-FileCopyrightText: 2022-2024 Espressif Systems (Shanghai) CO LTD</span></div>
-<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="comment"> *</span></div>
-<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="comment"> * SPDX-License-Identifier: Apache-2.0</span></div>
-<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="comment"> */</span></div>
-<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="preprocessor">#include &lt;stdlib.h&gt;</span></div>
-<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="preprocessor">#include &lt;<a class="code" href="../../da/d66/string_8h.html">string.h</a>&gt;</span></div>
-<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="preprocessor">#include &lt;sys/cdefs.h&gt;</span></div>
-<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="preprocessor">#include &quot;esp_log.h&quot;</span></div>
-<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="preprocessor">#include &quot;esp_check.h&quot;</span></div>
-<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="preprocessor">#include &quot;driver/rmt_tx.h&quot;</span></div>
-<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="preprocessor">#include &quot;<a class="code" href="../../df/d6e/led__strip_8h.html">led_strip.h</a>&quot;</span></div>
-<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="preprocessor">#include &quot;<a class="code" href="../../d9/dcc/led__strip__interface_8h.html">led_strip_interface.h</a>&quot;</span></div>
-<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="preprocessor">#include &quot;<a class="code" href="../../d3/d70/led__strip__rmt__encoder_8h.html">led_strip_rmt_encoder.h</a>&quot;</span></div>
-<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span> </div>
-<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span><span class="preprocessor">#define LED_STRIP_RMT_DEFAULT_RESOLUTION 10000000 </span><span class="comment">// 10MHz resolution</span></div>
-<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span><span class="preprocessor">#define LED_STRIP_RMT_DEFAULT_TRANS_QUEUE_SIZE 4</span></div>
-<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span> </div>
-<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span><span class="preprocessor">#ifndef LED_STRIP_RMT_DEFAULT_MEM_BLOCK_SYMBOLS_MULTIPLIER</span></div>
-<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span><span class="preprocessor">#if CONFIG_IDF_TARGET_ESP32C3</span></div>
-<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span><span class="comment">// Fixes https://github.com/FastLED/FastLED/issues/1846</span></div>
-<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span><span class="preprocessor">#define LED_STRIP_RMT_DEFAULT_MEM_BLOCK_SYMBOLS_MULTIPLIER 2</span></div>
-<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span><span class="preprocessor">#else</span></div>
-<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span><span class="preprocessor">#define LED_STRIP_RMT_DEFAULT_MEM_BLOCK_SYMBOLS_MULTIPLIER 1</span></div>
-<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span><span class="preprocessor">#endif</span></div>
-<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span><span class="preprocessor">#endif</span></div>
-<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span> </div>
-<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span><span class="comment">// the memory size of each RMT channel, in words (4 bytes)</span></div>
-<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span><span class="preprocessor">#ifndef LED_STRIP_RMT_DEFAULT_MEM_BLOCK_SYMBOLS</span></div>
-<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span><span class="preprocessor">#if CONFIG_IDF_TARGET_ESP32 || CONFIG_IDF_TARGET_ESP32S2</span></div>
-<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span><span class="preprocessor">#define LED_STRIP_RMT_DEFAULT_MEM_BLOCK_SYMBOLS (LED_STRIP_RMT_DEFAULT_MEM_BLOCK_SYMBOLS_MULTIPLIER * 64)</span></div>
-<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span><span class="preprocessor">#else</span></div>
-<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span><span class="preprocessor">#define LED_STRIP_RMT_DEFAULT_MEM_BLOCK_SYMBOLS (LED_STRIP_RMT_DEFAULT_MEM_BLOCK_SYMBOLS_MULTIPLIER * 48)</span></div>
-<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span><span class="preprocessor">#endif</span></div>
-<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span><span class="preprocessor">#endif</span></div>
-<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span> </div>
+<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span> </div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="comment">/*</span></div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="comment"> * SPDX-FileCopyrightText: 2022-2024 Espressif Systems (Shanghai) CO LTD</span></div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="comment"> *</span></div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="comment"> * SPDX-License-Identifier: Apache-2.0</span></div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="comment"> */</span></div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="preprocessor">#include &lt;stdlib.h&gt;</span></div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="preprocessor">#include &lt;<a class="code" href="../../da/d66/string_8h.html">string.h</a>&gt;</span></div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="preprocessor">#include &lt;sys/cdefs.h&gt;</span></div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="preprocessor">#include &quot;esp_log.h&quot;</span></div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="preprocessor">#include &quot;esp_check.h&quot;</span></div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="preprocessor">#include &quot;driver/rmt_tx.h&quot;</span></div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="preprocessor">#include &quot;<a class="code" href="../../df/d6e/led__strip_8h.html">led_strip.h</a>&quot;</span></div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="preprocessor">#include &quot;<a class="code" href="../../d9/dcc/led__strip__interface_8h.html">led_strip_interface.h</a>&quot;</span></div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="preprocessor">#include &quot;<a class="code" href="../../d3/d70/led__strip__rmt__encoder_8h.html">led_strip_rmt_encoder.h</a>&quot;</span></div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span> </div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="preprocessor">#define LED_STRIP_RMT_DEFAULT_RESOLUTION 10000000 </span><span class="comment">// 10MHz resolution</span></div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span><span class="preprocessor">#define LED_STRIP_RMT_DEFAULT_TRANS_QUEUE_SIZE 4</span></div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span> </div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span><span class="preprocessor">#ifndef LED_STRIP_RMT_DEFAULT_MEM_BLOCK_SYMBOLS_MULTIPLIER</span></div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span><span class="preprocessor">#if CONFIG_IDF_TARGET_ESP32C3</span></div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span><span class="comment">// Fixes https://github.com/FastLED/FastLED/issues/1846</span></div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span><span class="preprocessor">#define LED_STRIP_RMT_DEFAULT_MEM_BLOCK_SYMBOLS_MULTIPLIER 2</span></div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span><span class="preprocessor">#else</span></div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span><span class="preprocessor">#define LED_STRIP_RMT_DEFAULT_MEM_BLOCK_SYMBOLS_MULTIPLIER 1</span></div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span> </div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span><span class="comment">// the memory size of each RMT channel, in words (4 bytes)</span></div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span><span class="preprocessor">#ifndef LED_STRIP_RMT_DEFAULT_MEM_BLOCK_SYMBOLS</span></div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span><span class="preprocessor">#if CONFIG_IDF_TARGET_ESP32 || CONFIG_IDF_TARGET_ESP32S2</span></div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span><span class="preprocessor">#define LED_STRIP_RMT_DEFAULT_MEM_BLOCK_SYMBOLS (LED_STRIP_RMT_DEFAULT_MEM_BLOCK_SYMBOLS_MULTIPLIER * 64)</span></div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span><span class="preprocessor">#else</span></div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span><span class="preprocessor">#define LED_STRIP_RMT_DEFAULT_MEM_BLOCK_SYMBOLS (LED_STRIP_RMT_DEFAULT_MEM_BLOCK_SYMBOLS_MULTIPLIER * 48)</span></div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span> </div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span> </div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span><span class="keyword">static</span> <span class="keyword">const</span> <span class="keywordtype">char</span> *TAG = <span class="stringliteral">&quot;led_strip_rmt&quot;</span>;</div>
 <div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span> </div>
-<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span><span class="keyword">static</span> <span class="keyword">const</span> <span class="keywordtype">char</span> *TAG = <span class="stringliteral">&quot;led_strip_rmt&quot;</span>;</div>
-<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span> </div>
-<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span><span class="keyword">typedef</span> <span class="keyword">struct </span>{</div>
-<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>    <a class="code hl_struct" href="../../d9/dcc/led__strip__interface_8h.html#d5/dc0/structled__strip__t">led_strip_t</a> base;</div>
-<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>    rmt_channel_handle_t rmt_chan;</div>
-<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>    rmt_encoder_handle_t strip_encoder;</div>
-<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>    uint32_t strip_len;</div>
-<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>    uint8_t bytes_per_pixel;</div>
-<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>    <a class="code hl_union" href="../../d4/d88/led__strip__types_8h.html#d7/d22/unionled__color__component__format__t">led_color_component_format_t</a> component_fmt;</div>
-<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>    uint8_t pixel_buf[];</div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span><span class="keyword">typedef</span> <span class="keyword">struct </span>{</div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span>    <a class="code hl_struct" href="../../d9/dcc/led__strip__interface_8h.html#d5/dc0/structled__strip__t">led_strip_t</a> base;</div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span>    rmt_channel_handle_t rmt_chan;</div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>    rmt_encoder_handle_t strip_encoder;</div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>    rmt_transmit_config_t tx_conf; </div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>    uint32_t strip_len;</div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>    uint8_t bytes_per_pixel;</div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>    <a class="code hl_union" href="../../d4/d88/led__strip__types_8h.html#d7/d22/unionled__color__component__format__t">led_color_component_format_t</a> component_fmt;</div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>    uint8_t *pixel_buf;</div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>    <span class="keywordtype">bool</span> pixel_buf_allocated_internally; </div>
 <div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span>} led_strip_rmt_obj;</div>
 <div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span> </div>
 <div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span><span class="keyword">static</span> esp_err_t led_strip_rmt_set_pixel(<a class="code hl_struct" href="../../d9/dcc/led__strip__interface_8h.html#d5/dc0/structled__strip__t">led_strip_t</a> *strip, uint32_t index, uint32_t red, uint32_t green, uint32_t blue)</div>
@@ -203,44 +203,44 @@ $(function(){initNavTree('d3/da7/led__strip__rmt__dev_8c_source.html','../../');
 <div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span><span class="keyword">static</span> esp_err_t led_strip_rmt_refresh_async(<a class="code hl_struct" href="../../d9/dcc/led__strip__interface_8h.html#d5/dc0/structled__strip__t">led_strip_t</a> *strip)</div>
 <div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span>{</div>
 <div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span>    led_strip_rmt_obj *rmt_strip = __containerof(strip, led_strip_rmt_obj, base);</div>
-<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span>    rmt_transmit_config_t tx_conf = {</div>
-<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span>        .loop_count = 0,</div>
-<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span>    };</div>
-<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span> </div>
-<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span>    ESP_RETURN_ON_ERROR(rmt_enable(rmt_strip-&gt;rmt_chan), TAG, <span class="stringliteral">&quot;enable RMT channel failed&quot;</span>);</div>
-<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span>    ESP_RETURN_ON_ERROR(rmt_transmit(rmt_strip-&gt;rmt_chan, rmt_strip-&gt;strip_encoder, rmt_strip-&gt;pixel_buf,</div>
-<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span>                                     rmt_strip-&gt;strip_len * rmt_strip-&gt;bytes_per_pixel, &amp;tx_conf), TAG, <span class="stringliteral">&quot;transmit pixels by RMT failed&quot;</span>);</div>
-<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span>    <span class="keywordflow">return</span> ESP_OK;</div>
-<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span>}</div>
-<div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span> </div>
-<div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span><span class="keyword">static</span> esp_err_t led_strip_rmt_wait_for_done(<a class="code hl_struct" href="../../d9/dcc/led__strip__interface_8h.html#d5/dc0/structled__strip__t">led_strip_t</a> *strip)</div>
-<div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span>{</div>
-<div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span>    led_strip_rmt_obj *rmt_strip = __containerof(strip, led_strip_rmt_obj, base);</div>
-<div class="line"><a id="l00114" name="l00114"></a><span class="lineno">  114</span>    ESP_RETURN_ON_ERROR(rmt_tx_wait_all_done(rmt_strip-&gt;rmt_chan, -1), TAG, <span class="stringliteral">&quot;wait for RMT done failed&quot;</span>);</div>
-<div class="line"><a id="l00115" name="l00115"></a><span class="lineno">  115</span>    ESP_RETURN_ON_ERROR(rmt_disable(rmt_strip-&gt;rmt_chan), TAG, <span class="stringliteral">&quot;disable RMT channel failed&quot;</span>);</div>
-<div class="line"><a id="l00116" name="l00116"></a><span class="lineno">  116</span>    <span class="keywordflow">return</span> ESP_OK;</div>
-<div class="line"><a id="l00117" name="l00117"></a><span class="lineno">  117</span>}</div>
-<div class="line"><a id="l00118" name="l00118"></a><span class="lineno">  118</span> </div>
-<div class="line"><a id="l00119" name="l00119"></a><span class="lineno">  119</span><span class="keyword">static</span> esp_err_t led_strip_rmt_refresh(<a class="code hl_struct" href="../../d9/dcc/led__strip__interface_8h.html#d5/dc0/structled__strip__t">led_strip_t</a> *strip)</div>
-<div class="line"><a id="l00120" name="l00120"></a><span class="lineno">  120</span>{</div>
-<div class="line"><a id="l00121" name="l00121"></a><span class="lineno">  121</span>    ESP_RETURN_ON_ERROR(led_strip_rmt_refresh_async(strip), TAG, <span class="stringliteral">&quot;refresh async failed&quot;</span>);</div>
-<div class="line"><a id="l00122" name="l00122"></a><span class="lineno">  122</span>    ESP_RETURN_ON_ERROR(led_strip_rmt_wait_for_done(strip), TAG, <span class="stringliteral">&quot;wait for done failed&quot;</span>);</div>
-<div class="line"><a id="l00123" name="l00123"></a><span class="lineno">  123</span>    <span class="keywordflow">return</span> ESP_OK;</div>
-<div class="line"><a id="l00124" name="l00124"></a><span class="lineno">  124</span>}</div>
-<div class="line"><a id="l00125" name="l00125"></a><span class="lineno">  125</span> </div>
-<div class="line"><a id="l00126" name="l00126"></a><span class="lineno">  126</span><span class="keyword">static</span> esp_err_t led_strip_rmt_clear(<a class="code hl_struct" href="../../d9/dcc/led__strip__interface_8h.html#d5/dc0/structled__strip__t">led_strip_t</a> *strip)</div>
-<div class="line"><a id="l00127" name="l00127"></a><span class="lineno">  127</span>{</div>
-<div class="line"><a id="l00128" name="l00128"></a><span class="lineno">  128</span>    led_strip_rmt_obj *rmt_strip = __containerof(strip, led_strip_rmt_obj, base);</div>
-<div class="line"><a id="l00129" name="l00129"></a><span class="lineno">  129</span>    <span class="comment">// Write zero to turn off all leds</span></div>
-<div class="line"><a id="l00130" name="l00130"></a><span class="lineno">  130</span>    memset(rmt_strip-&gt;pixel_buf, 0, rmt_strip-&gt;strip_len * rmt_strip-&gt;bytes_per_pixel);</div>
-<div class="line"><a id="l00131" name="l00131"></a><span class="lineno">  131</span>    <span class="keywordflow">return</span> led_strip_rmt_refresh(strip);</div>
-<div class="line"><a id="l00132" name="l00132"></a><span class="lineno">  132</span>}</div>
-<div class="line"><a id="l00133" name="l00133"></a><span class="lineno">  133</span> </div>
-<div class="line"><a id="l00134" name="l00134"></a><span class="lineno">  134</span><span class="keyword">static</span> esp_err_t led_strip_rmt_del(<a class="code hl_struct" href="../../d9/dcc/led__strip__interface_8h.html#d5/dc0/structled__strip__t">led_strip_t</a> *strip)</div>
-<div class="line"><a id="l00135" name="l00135"></a><span class="lineno">  135</span>{</div>
-<div class="line"><a id="l00136" name="l00136"></a><span class="lineno">  136</span>    led_strip_rmt_obj *rmt_strip = __containerof(strip, led_strip_rmt_obj, base);</div>
-<div class="line"><a id="l00137" name="l00137"></a><span class="lineno">  137</span>    ESP_RETURN_ON_ERROR(rmt_del_channel(rmt_strip-&gt;rmt_chan), TAG, <span class="stringliteral">&quot;delete RMT channel failed&quot;</span>);</div>
-<div class="line"><a id="l00138" name="l00138"></a><span class="lineno">  138</span>    ESP_RETURN_ON_ERROR(rmt_del_encoder(rmt_strip-&gt;strip_encoder), TAG, <span class="stringliteral">&quot;delete strip encoder failed&quot;</span>);</div>
+<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span> </div>
+<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span>    ESP_RETURN_ON_ERROR(rmt_enable(rmt_strip-&gt;rmt_chan), TAG, <span class="stringliteral">&quot;enable RMT channel failed&quot;</span>);</div>
+<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span>    ESP_RETURN_ON_ERROR(rmt_transmit(rmt_strip-&gt;rmt_chan, rmt_strip-&gt;strip_encoder, rmt_strip-&gt;pixel_buf,</div>
+<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span>                                     rmt_strip-&gt;strip_len * rmt_strip-&gt;bytes_per_pixel, &amp;rmt_strip-&gt;tx_conf), TAG, <span class="stringliteral">&quot;transmit pixels by RMT failed&quot;</span>);</div>
+<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span>    <span class="keywordflow">return</span> ESP_OK;</div>
+<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span>}</div>
+<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span> </div>
+<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span><span class="keyword">static</span> esp_err_t led_strip_rmt_wait_for_done(<a class="code hl_struct" href="../../d9/dcc/led__strip__interface_8h.html#d5/dc0/structled__strip__t">led_strip_t</a> *strip)</div>
+<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span>{</div>
+<div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span>    led_strip_rmt_obj *rmt_strip = __containerof(strip, led_strip_rmt_obj, base);</div>
+<div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span>    ESP_RETURN_ON_ERROR(rmt_tx_wait_all_done(rmt_strip-&gt;rmt_chan, -1), TAG, <span class="stringliteral">&quot;wait for RMT done failed&quot;</span>);</div>
+<div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span>    ESP_RETURN_ON_ERROR(rmt_disable(rmt_strip-&gt;rmt_chan), TAG, <span class="stringliteral">&quot;disable RMT channel failed&quot;</span>);</div>
+<div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span>    <span class="keywordflow">return</span> ESP_OK;</div>
+<div class="line"><a id="l00114" name="l00114"></a><span class="lineno">  114</span>}</div>
+<div class="line"><a id="l00115" name="l00115"></a><span class="lineno">  115</span> </div>
+<div class="line"><a id="l00116" name="l00116"></a><span class="lineno">  116</span><span class="keyword">static</span> esp_err_t led_strip_rmt_refresh(<a class="code hl_struct" href="../../d9/dcc/led__strip__interface_8h.html#d5/dc0/structled__strip__t">led_strip_t</a> *strip)</div>
+<div class="line"><a id="l00117" name="l00117"></a><span class="lineno">  117</span>{</div>
+<div class="line"><a id="l00118" name="l00118"></a><span class="lineno">  118</span>    ESP_RETURN_ON_ERROR(led_strip_rmt_refresh_async(strip), TAG, <span class="stringliteral">&quot;refresh async failed&quot;</span>);</div>
+<div class="line"><a id="l00119" name="l00119"></a><span class="lineno">  119</span>    ESP_RETURN_ON_ERROR(led_strip_rmt_wait_for_done(strip), TAG, <span class="stringliteral">&quot;wait for done failed&quot;</span>);</div>
+<div class="line"><a id="l00120" name="l00120"></a><span class="lineno">  120</span>    <span class="keywordflow">return</span> ESP_OK;</div>
+<div class="line"><a id="l00121" name="l00121"></a><span class="lineno">  121</span>}</div>
+<div class="line"><a id="l00122" name="l00122"></a><span class="lineno">  122</span> </div>
+<div class="line"><a id="l00123" name="l00123"></a><span class="lineno">  123</span><span class="keyword">static</span> esp_err_t led_strip_rmt_clear(<a class="code hl_struct" href="../../d9/dcc/led__strip__interface_8h.html#d5/dc0/structled__strip__t">led_strip_t</a> *strip)</div>
+<div class="line"><a id="l00124" name="l00124"></a><span class="lineno">  124</span>{</div>
+<div class="line"><a id="l00125" name="l00125"></a><span class="lineno">  125</span>    led_strip_rmt_obj *rmt_strip = __containerof(strip, led_strip_rmt_obj, base);</div>
+<div class="line"><a id="l00126" name="l00126"></a><span class="lineno">  126</span>    <span class="comment">// Write zero to turn off all leds</span></div>
+<div class="line"><a id="l00127" name="l00127"></a><span class="lineno">  127</span>    memset(rmt_strip-&gt;pixel_buf, 0, rmt_strip-&gt;strip_len * rmt_strip-&gt;bytes_per_pixel);</div>
+<div class="line"><a id="l00128" name="l00128"></a><span class="lineno">  128</span>    <span class="keywordflow">return</span> led_strip_rmt_refresh(strip);</div>
+<div class="line"><a id="l00129" name="l00129"></a><span class="lineno">  129</span>}</div>
+<div class="line"><a id="l00130" name="l00130"></a><span class="lineno">  130</span> </div>
+<div class="line"><a id="l00131" name="l00131"></a><span class="lineno">  131</span><span class="keyword">static</span> esp_err_t led_strip_rmt_del(<a class="code hl_struct" href="../../d9/dcc/led__strip__interface_8h.html#d5/dc0/structled__strip__t">led_strip_t</a> *strip)</div>
+<div class="line"><a id="l00132" name="l00132"></a><span class="lineno">  132</span>{</div>
+<div class="line"><a id="l00133" name="l00133"></a><span class="lineno">  133</span>    led_strip_rmt_obj *rmt_strip = __containerof(strip, led_strip_rmt_obj, base);</div>
+<div class="line"><a id="l00134" name="l00134"></a><span class="lineno">  134</span>    ESP_RETURN_ON_ERROR(rmt_del_channel(rmt_strip-&gt;rmt_chan), TAG, <span class="stringliteral">&quot;delete RMT channel failed&quot;</span>);</div>
+<div class="line"><a id="l00135" name="l00135"></a><span class="lineno">  135</span>    ESP_RETURN_ON_ERROR(rmt_del_encoder(rmt_strip-&gt;strip_encoder), TAG, <span class="stringliteral">&quot;delete strip encoder failed&quot;</span>);</div>
+<div class="line"><a id="l00136" name="l00136"></a><span class="lineno">  136</span>    <span class="keywordflow">if</span> (rmt_strip-&gt;pixel_buf_allocated_internally) {</div>
+<div class="line"><a id="l00137" name="l00137"></a><span class="lineno">  137</span>      free(rmt_strip-&gt;pixel_buf);</div>
+<div class="line"><a id="l00138" name="l00138"></a><span class="lineno">  138</span>    }</div>
 <div class="line"><a id="l00139" name="l00139"></a><span class="lineno">  139</span>    free(rmt_strip);</div>
 <div class="line"><a id="l00140" name="l00140"></a><span class="lineno">  140</span>    <span class="keywordflow">return</span> ESP_OK;</div>
 <div class="line"><a id="l00141" name="l00141"></a><span class="lineno">  141</span>}</div>
@@ -271,67 +271,85 @@ $(function(){initNavTree('d3/da7/led__strip__rmt__dev_8c_source.html','../../');
 <div class="line"><a id="l00166" name="l00166"></a><span class="lineno">  166</span>    }</div>
 <div class="line"><a id="l00167" name="l00167"></a><span class="lineno">  167</span>    <span class="comment">// TODO: we assume each color component is 8 bits, may need to support other configurations in the future, e.g. 10bits per color component?</span></div>
 <div class="line"><a id="l00168" name="l00168"></a><span class="lineno">  168</span>    uint8_t bytes_per_pixel = component_fmt.<a class="code hl_variable" href="../../d4/d88/led__strip__types_8h.html#ae7119fc5e0d9d55d48a89b78c9698e5c">format</a>.<a class="code hl_variable" href="../../d4/d88/led__strip__types_8h.html#a44f72facd9eafbec1abdea93a796bece">num_components</a>;</div>
-<div class="line"><a id="l00169" name="l00169"></a><span class="lineno">  169</span>    rmt_strip = calloc(1, <span class="keyword">sizeof</span>(led_strip_rmt_obj) + led_config-&gt;<a class="code hl_variable" href="../../d4/d88/led__strip__types_8h.html#a9d2cc8718131d9a9e3dd15d8496e7941">max_leds</a> * bytes_per_pixel);</div>
+<div class="line"><a id="l00169" name="l00169"></a><span class="lineno">  169</span>    rmt_strip = calloc(1, <span class="keyword">sizeof</span>(led_strip_rmt_obj));</div>
 <div class="line"><a id="l00170" name="l00170"></a><span class="lineno">  170</span>    ESP_GOTO_ON_FALSE(rmt_strip, ESP_ERR_NO_MEM, err, TAG, <span class="stringliteral">&quot;no mem for rmt strip&quot;</span>);</div>
-<div class="line"><a id="l00171" name="l00171"></a><span class="lineno">  171</span>    uint32_t resolution = rmt_config-&gt;<a class="code hl_variable" href="../../da/d7c/led__strip__rmt_8h.html#ac0a5bfa5fdd021a41de4e6dfaf9b1113">resolution_hz</a> ? rmt_config-&gt;<a class="code hl_variable" href="../../da/d7c/led__strip__rmt_8h.html#ac0a5bfa5fdd021a41de4e6dfaf9b1113">resolution_hz</a> : LED_STRIP_RMT_DEFAULT_RESOLUTION;</div>
-<div class="line"><a id="l00172" name="l00172"></a><span class="lineno">  172</span> </div>
-<div class="line"><a id="l00173" name="l00173"></a><span class="lineno">  173</span>    <span class="comment">// for backward compatibility, if the user does not set the clk_src, use the default value</span></div>
-<div class="line"><a id="l00174" name="l00174"></a><span class="lineno">  174</span>    rmt_clock_source_t clk_src = RMT_CLK_SRC_DEFAULT;</div>
-<div class="line"><a id="l00175" name="l00175"></a><span class="lineno">  175</span>    <span class="keywordflow">if</span> (rmt_config-&gt;<a class="code hl_variable" href="../../da/d7c/led__strip__rmt_8h.html#aadffab2adfd58f5bd1c99ed36dc371c6">clk_src</a>) {</div>
-<div class="line"><a id="l00176" name="l00176"></a><span class="lineno">  176</span>        clk_src = rmt_config-&gt;<a class="code hl_variable" href="../../da/d7c/led__strip__rmt_8h.html#aadffab2adfd58f5bd1c99ed36dc371c6">clk_src</a>;</div>
-<div class="line"><a id="l00177" name="l00177"></a><span class="lineno">  177</span>    }</div>
-<div class="line"><a id="l00178" name="l00178"></a><span class="lineno">  178</span>    <span class="keywordtype">size_t</span> mem_block_symbols = LED_STRIP_RMT_DEFAULT_MEM_BLOCK_SYMBOLS;</div>
-<div class="line"><a id="l00179" name="l00179"></a><span class="lineno">  179</span>    <span class="comment">// override the default value if the user sets it</span></div>
-<div class="line"><a id="l00180" name="l00180"></a><span class="lineno">  180</span>    <span class="keywordflow">if</span> (rmt_config-&gt;<a class="code hl_variable" href="../../da/d7c/led__strip__rmt_8h.html#ae261b7a06d5971e52679eb58b91f4a43">mem_block_symbols</a>) {</div>
-<div class="line"><a id="l00181" name="l00181"></a><span class="lineno">  181</span>        mem_block_symbols = rmt_config-&gt;<a class="code hl_variable" href="../../da/d7c/led__strip__rmt_8h.html#ae261b7a06d5971e52679eb58b91f4a43">mem_block_symbols</a>;</div>
+<div class="line"><a id="l00171" name="l00171"></a><span class="lineno">  171</span>    </div>
+<div class="line"><a id="l00172" name="l00172"></a><span class="lineno">  172</span>    <span class="comment">// Check if external pixel buffer is provided</span></div>
+<div class="line"><a id="l00173" name="l00173"></a><span class="lineno">  173</span>    <span class="keywordflow">if</span> (led_config-&gt;<a class="code hl_variable" href="../../d4/d88/led__strip__types_8h.html#af56685bf6187a8a069f6aa66a4312dd9">external_pixel_buf</a> != NULL) {</div>
+<div class="line"><a id="l00174" name="l00174"></a><span class="lineno">  174</span>        <span class="comment">// Use the external pixel buffer provided by caller</span></div>
+<div class="line"><a id="l00175" name="l00175"></a><span class="lineno">  175</span>        rmt_strip-&gt;pixel_buf = led_config-&gt;<a class="code hl_variable" href="../../d4/d88/led__strip__types_8h.html#af56685bf6187a8a069f6aa66a4312dd9">external_pixel_buf</a>;</div>
+<div class="line"><a id="l00176" name="l00176"></a><span class="lineno">  176</span>        rmt_strip-&gt;pixel_buf_allocated_internally = <span class="keyword">false</span>;</div>
+<div class="line"><a id="l00177" name="l00177"></a><span class="lineno">  177</span>    } <span class="keywordflow">else</span> {</div>
+<div class="line"><a id="l00178" name="l00178"></a><span class="lineno">  178</span>        <span class="comment">// Allocate our own pixel buffer</span></div>
+<div class="line"><a id="l00179" name="l00179"></a><span class="lineno">  179</span>        rmt_strip-&gt;pixel_buf = calloc(led_config-&gt;<a class="code hl_variable" href="../../d4/d88/led__strip__types_8h.html#a9d2cc8718131d9a9e3dd15d8496e7941">max_leds</a> * bytes_per_pixel, <span class="keyword">sizeof</span>(uint8_t));</div>
+<div class="line"><a id="l00180" name="l00180"></a><span class="lineno">  180</span>        ESP_GOTO_ON_FALSE(rmt_strip-&gt;pixel_buf, ESP_ERR_NO_MEM, err, TAG, <span class="stringliteral">&quot;no mem for pixel buffer&quot;</span>);</div>
+<div class="line"><a id="l00181" name="l00181"></a><span class="lineno">  181</span>        rmt_strip-&gt;pixel_buf_allocated_internally = <span class="keyword">true</span>;</div>
 <div class="line"><a id="l00182" name="l00182"></a><span class="lineno">  182</span>    }</div>
-<div class="line"><a id="l00183" name="l00183"></a><span class="lineno">  183</span>    rmt_tx_channel_config_t rmt_chan_config = {</div>
-<div class="line"><a id="l00184" name="l00184"></a><span class="lineno">  184</span>        .clk_src = clk_src,</div>
-<div class="line"><a id="l00185" name="l00185"></a><span class="lineno">  185</span>        .gpio_num = led_config-&gt;<a class="code hl_variable" href="../../d4/d88/led__strip__types_8h.html#a606308f9a50c24ce5ea5d55b26502313">strip_gpio_num</a>,</div>
-<div class="line"><a id="l00186" name="l00186"></a><span class="lineno">  186</span>        .mem_block_symbols = mem_block_symbols,</div>
-<div class="line"><a id="l00187" name="l00187"></a><span class="lineno">  187</span>        .resolution_hz = resolution,</div>
-<div class="line"><a id="l00188" name="l00188"></a><span class="lineno">  188</span>        .trans_queue_depth = LED_STRIP_RMT_DEFAULT_TRANS_QUEUE_SIZE,</div>
-<div class="line"><a id="l00189" name="l00189"></a><span class="lineno">  189</span>        .flags.with_dma = rmt_config-&gt;<a class="code hl_variable" href="../../da/d7c/led__strip__rmt_8h.html#a3b4179e0521ed754142ef558a6c5c94b">flags</a>.<a class="code hl_variable" href="../../da/d7c/led__strip__rmt_8h.html#aad3ff980ce20eb031c0fcea641b94844">with_dma</a>,</div>
-<div class="line"><a id="l00190" name="l00190"></a><span class="lineno">  190</span>        .flags.invert_out = led_config-&gt;<a class="code hl_variable" href="../../d4/d88/led__strip__types_8h.html#a941a2be212342c87539f2f7a6bced989">flags</a>.<a class="code hl_variable" href="../../d4/d88/led__strip__types_8h.html#afcbd2844f563e498f804d8342589f29b">invert_out</a>,</div>
-<div class="line"><a id="l00191" name="l00191"></a><span class="lineno">  191</span>    };</div>
-<div class="line"><a id="l00192" name="l00192"></a><span class="lineno">  192</span>    ESP_GOTO_ON_ERROR(rmt_new_tx_channel(&amp;rmt_chan_config, &amp;rmt_strip-&gt;rmt_chan), err, TAG, <span class="stringliteral">&quot;create RMT TX channel failed&quot;</span>);</div>
-<div class="line"><a id="l00193" name="l00193"></a><span class="lineno">  193</span> </div>
-<div class="line"><a id="l00194" name="l00194"></a><span class="lineno">  194</span>    <a class="code hl_struct" href="../../d3/d70/led__strip__rmt__encoder_8h.html#d3/d26/structled__strip__encoder__config__t">led_strip_encoder_config_t</a> strip_encoder_conf = {</div>
-<div class="line"><a id="l00195" name="l00195"></a><span class="lineno">  195</span>        .resolution = resolution,</div>
-<div class="line"><a id="l00196" name="l00196"></a><span class="lineno">  196</span>        .led_model = led_config-&gt;<a class="code hl_variable" href="../../d4/d88/led__strip__types_8h.html#a37c4df94f484de3c6941e6580a4e91ab">led_model</a>,</div>
-<div class="line"><a id="l00197" name="l00197"></a><span class="lineno">  197</span>        .timings = led_config-&gt;<a class="code hl_variable" href="../../d4/d88/led__strip__types_8h.html#ac65620be0d073f99b59c2378b3be2edb">timings</a>,</div>
-<div class="line"><a id="l00198" name="l00198"></a><span class="lineno">  198</span>    };</div>
-<div class="line"><a id="l00199" name="l00199"></a><span class="lineno">  199</span>    ESP_GOTO_ON_ERROR(<a class="code hl_function" href="../../d3/d70/led__strip__rmt__encoder_8h_a367480d48d10d4288ae0ea8078b771f5.html#a367480d48d10d4288ae0ea8078b771f5">rmt_new_led_strip_encoder</a>(&amp;strip_encoder_conf, &amp;rmt_strip-&gt;strip_encoder), err, TAG, <span class="stringliteral">&quot;create LED strip encoder failed&quot;</span>);</div>
-<div class="line"><a id="l00200" name="l00200"></a><span class="lineno">  200</span> </div>
-<div class="line"><a id="l00201" name="l00201"></a><span class="lineno">  201</span>    rmt_strip-&gt;component_fmt = component_fmt;</div>
-<div class="line"><a id="l00202" name="l00202"></a><span class="lineno">  202</span>    rmt_strip-&gt;bytes_per_pixel = bytes_per_pixel;</div>
-<div class="line"><a id="l00203" name="l00203"></a><span class="lineno">  203</span>    rmt_strip-&gt;strip_len = led_config-&gt;<a class="code hl_variable" href="../../d4/d88/led__strip__types_8h.html#a9d2cc8718131d9a9e3dd15d8496e7941">max_leds</a>;</div>
-<div class="line"><a id="l00204" name="l00204"></a><span class="lineno">  204</span>    rmt_strip-&gt;base.set_pixel = led_strip_rmt_set_pixel;</div>
-<div class="line"><a id="l00205" name="l00205"></a><span class="lineno">  205</span>    rmt_strip-&gt;base.set_pixel_rgbw = led_strip_rmt_set_pixel_rgbw;</div>
-<div class="line"><a id="l00206" name="l00206"></a><span class="lineno">  206</span>    rmt_strip-&gt;base.refresh = led_strip_rmt_refresh;</div>
-<div class="line"><a id="l00207" name="l00207"></a><span class="lineno">  207</span>    rmt_strip-&gt;base.refresh_async = led_strip_rmt_refresh_async;</div>
-<div class="line"><a id="l00208" name="l00208"></a><span class="lineno">  208</span>    rmt_strip-&gt;base.refresh_wait_done = led_strip_rmt_wait_for_done;</div>
-<div class="line"><a id="l00209" name="l00209"></a><span class="lineno">  209</span>    rmt_strip-&gt;base.clear = led_strip_rmt_clear;</div>
-<div class="line"><a id="l00210" name="l00210"></a><span class="lineno">  210</span>    rmt_strip-&gt;base.del = led_strip_rmt_del;</div>
-<div class="line"><a id="l00211" name="l00211"></a><span class="lineno">  211</span> </div>
-<div class="line"><a id="l00212" name="l00212"></a><span class="lineno">  212</span>    *ret_strip = &amp;rmt_strip-&gt;base;</div>
-<div class="line"><a id="l00213" name="l00213"></a><span class="lineno">  213</span>    <span class="keywordflow">return</span> ESP_OK;</div>
-<div class="line"><a id="l00214" name="l00214"></a><span class="lineno">  214</span>err:</div>
-<div class="line"><a id="l00215" name="l00215"></a><span class="lineno">  215</span>    <span class="keywordflow">if</span> (rmt_strip) {</div>
-<div class="line"><a id="l00216" name="l00216"></a><span class="lineno">  216</span>        <span class="keywordflow">if</span> (rmt_strip-&gt;rmt_chan) {</div>
-<div class="line"><a id="l00217" name="l00217"></a><span class="lineno">  217</span>            rmt_del_channel(rmt_strip-&gt;rmt_chan);</div>
-<div class="line"><a id="l00218" name="l00218"></a><span class="lineno">  218</span>        }</div>
-<div class="line"><a id="l00219" name="l00219"></a><span class="lineno">  219</span>        <span class="keywordflow">if</span> (rmt_strip-&gt;strip_encoder) {</div>
-<div class="line"><a id="l00220" name="l00220"></a><span class="lineno">  220</span>            rmt_del_encoder(rmt_strip-&gt;strip_encoder);</div>
-<div class="line"><a id="l00221" name="l00221"></a><span class="lineno">  221</span>        }</div>
-<div class="line"><a id="l00222" name="l00222"></a><span class="lineno">  222</span>        free(rmt_strip);</div>
-<div class="line"><a id="l00223" name="l00223"></a><span class="lineno">  223</span>    }</div>
-<div class="line"><a id="l00224" name="l00224"></a><span class="lineno">  224</span>    <span class="keywordflow">return</span> ret;</div>
-<div class="line"><a id="l00225" name="l00225"></a><span class="lineno">  225</span>}</div>
+<div class="line"><a id="l00183" name="l00183"></a><span class="lineno">  183</span>    uint32_t resolution = rmt_config-&gt;<a class="code hl_variable" href="../../da/d7c/led__strip__rmt_8h.html#ac0a5bfa5fdd021a41de4e6dfaf9b1113">resolution_hz</a> ? rmt_config-&gt;<a class="code hl_variable" href="../../da/d7c/led__strip__rmt_8h.html#ac0a5bfa5fdd021a41de4e6dfaf9b1113">resolution_hz</a> : LED_STRIP_RMT_DEFAULT_RESOLUTION;</div>
+<div class="line"><a id="l00184" name="l00184"></a><span class="lineno">  184</span> </div>
+<div class="line"><a id="l00185" name="l00185"></a><span class="lineno">  185</span>    <span class="comment">// for backward compatibility, if the user does not set the clk_src, use the default value</span></div>
+<div class="line"><a id="l00186" name="l00186"></a><span class="lineno">  186</span>    rmt_clock_source_t clk_src = RMT_CLK_SRC_DEFAULT;</div>
+<div class="line"><a id="l00187" name="l00187"></a><span class="lineno">  187</span>    <span class="keywordflow">if</span> (rmt_config-&gt;<a class="code hl_variable" href="../../da/d7c/led__strip__rmt_8h.html#aadffab2adfd58f5bd1c99ed36dc371c6">clk_src</a>) {</div>
+<div class="line"><a id="l00188" name="l00188"></a><span class="lineno">  188</span>        clk_src = rmt_config-&gt;<a class="code hl_variable" href="../../da/d7c/led__strip__rmt_8h.html#aadffab2adfd58f5bd1c99ed36dc371c6">clk_src</a>;</div>
+<div class="line"><a id="l00189" name="l00189"></a><span class="lineno">  189</span>    }</div>
+<div class="line"><a id="l00190" name="l00190"></a><span class="lineno">  190</span>    <span class="keywordtype">size_t</span> mem_block_symbols = LED_STRIP_RMT_DEFAULT_MEM_BLOCK_SYMBOLS;</div>
+<div class="line"><a id="l00191" name="l00191"></a><span class="lineno">  191</span>    <span class="comment">// override the default value if the user sets it</span></div>
+<div class="line"><a id="l00192" name="l00192"></a><span class="lineno">  192</span>    <span class="keywordflow">if</span> (rmt_config-&gt;<a class="code hl_variable" href="../../da/d7c/led__strip__rmt_8h.html#ae261b7a06d5971e52679eb58b91f4a43">mem_block_symbols</a>) {</div>
+<div class="line"><a id="l00193" name="l00193"></a><span class="lineno">  193</span>        mem_block_symbols = rmt_config-&gt;<a class="code hl_variable" href="../../da/d7c/led__strip__rmt_8h.html#ae261b7a06d5971e52679eb58b91f4a43">mem_block_symbols</a>;</div>
+<div class="line"><a id="l00194" name="l00194"></a><span class="lineno">  194</span>    }</div>
+<div class="line"><a id="l00195" name="l00195"></a><span class="lineno">  195</span>    rmt_tx_channel_config_t rmt_chan_config = {</div>
+<div class="line"><a id="l00196" name="l00196"></a><span class="lineno">  196</span>        .clk_src = clk_src,</div>
+<div class="line"><a id="l00197" name="l00197"></a><span class="lineno">  197</span>        .gpio_num = led_config-&gt;<a class="code hl_variable" href="../../d4/d88/led__strip__types_8h.html#a606308f9a50c24ce5ea5d55b26502313">strip_gpio_num</a>,</div>
+<div class="line"><a id="l00198" name="l00198"></a><span class="lineno">  198</span>        .mem_block_symbols = mem_block_symbols,</div>
+<div class="line"><a id="l00199" name="l00199"></a><span class="lineno">  199</span>        .resolution_hz = resolution,</div>
+<div class="line"><a id="l00200" name="l00200"></a><span class="lineno">  200</span>        .trans_queue_depth = LED_STRIP_RMT_DEFAULT_TRANS_QUEUE_SIZE,</div>
+<div class="line"><a id="l00201" name="l00201"></a><span class="lineno">  201</span>        .flags.with_dma = rmt_config-&gt;<a class="code hl_variable" href="../../da/d7c/led__strip__rmt_8h.html#a3b4179e0521ed754142ef558a6c5c94b">flags</a>.<a class="code hl_variable" href="../../da/d7c/led__strip__rmt_8h.html#aad3ff980ce20eb031c0fcea641b94844">with_dma</a>,</div>
+<div class="line"><a id="l00202" name="l00202"></a><span class="lineno">  202</span>        .flags.invert_out = led_config-&gt;<a class="code hl_variable" href="../../d4/d88/led__strip__types_8h.html#a941a2be212342c87539f2f7a6bced989">flags</a>.<a class="code hl_variable" href="../../d4/d88/led__strip__types_8h.html#afcbd2844f563e498f804d8342589f29b">invert_out</a>,</div>
+<div class="line"><a id="l00203" name="l00203"></a><span class="lineno">  203</span>    };</div>
+<div class="line"><a id="l00204" name="l00204"></a><span class="lineno">  204</span>    ESP_GOTO_ON_ERROR(rmt_new_tx_channel(&amp;rmt_chan_config, &amp;rmt_strip-&gt;rmt_chan), err, TAG, <span class="stringliteral">&quot;create RMT TX channel failed&quot;</span>);</div>
+<div class="line"><a id="l00205" name="l00205"></a><span class="lineno">  205</span> </div>
+<div class="line"><a id="l00206" name="l00206"></a><span class="lineno">  206</span>    <a class="code hl_struct" href="../../d3/d70/led__strip__rmt__encoder_8h.html#d3/d26/structled__strip__encoder__config__t">led_strip_encoder_config_t</a> strip_encoder_conf = {</div>
+<div class="line"><a id="l00207" name="l00207"></a><span class="lineno">  207</span>        .resolution = resolution,</div>
+<div class="line"><a id="l00208" name="l00208"></a><span class="lineno">  208</span>        .led_model = led_config-&gt;<a class="code hl_variable" href="../../d4/d88/led__strip__types_8h.html#a37c4df94f484de3c6941e6580a4e91ab">led_model</a>,</div>
+<div class="line"><a id="l00209" name="l00209"></a><span class="lineno">  209</span>        .timings = led_config-&gt;<a class="code hl_variable" href="../../d4/d88/led__strip__types_8h.html#ac65620be0d073f99b59c2378b3be2edb">timings</a>,</div>
+<div class="line"><a id="l00210" name="l00210"></a><span class="lineno">  210</span>    };</div>
+<div class="line"><a id="l00211" name="l00211"></a><span class="lineno">  211</span>    ESP_GOTO_ON_ERROR(<a class="code hl_function" href="../../d3/d70/led__strip__rmt__encoder_8h_a367480d48d10d4288ae0ea8078b771f5.html#a367480d48d10d4288ae0ea8078b771f5">rmt_new_led_strip_encoder</a>(&amp;strip_encoder_conf, &amp;rmt_strip-&gt;strip_encoder), err, TAG, <span class="stringliteral">&quot;create LED strip encoder failed&quot;</span>);</div>
+<div class="line"><a id="l00212" name="l00212"></a><span class="lineno">  212</span> </div>
+<div class="line"><a id="l00213" name="l00213"></a><span class="lineno">  213</span>    rmt_strip-&gt;component_fmt = component_fmt;</div>
+<div class="line"><a id="l00214" name="l00214"></a><span class="lineno">  214</span>    rmt_strip-&gt;bytes_per_pixel = bytes_per_pixel;</div>
+<div class="line"><a id="l00215" name="l00215"></a><span class="lineno">  215</span>    rmt_strip-&gt;strip_len = led_config-&gt;<a class="code hl_variable" href="../../d4/d88/led__strip__types_8h.html#a9d2cc8718131d9a9e3dd15d8496e7941">max_leds</a>;</div>
+<div class="line"><a id="l00216" name="l00216"></a><span class="lineno">  216</span>    rmt_strip-&gt;tx_conf = (rmt_transmit_config_t){</div>
+<div class="line"><a id="l00217" name="l00217"></a><span class="lineno">  217</span>        .loop_count = 0,</div>
+<div class="line"><a id="l00218" name="l00218"></a><span class="lineno">  218</span>    };</div>
+<div class="line"><a id="l00219" name="l00219"></a><span class="lineno">  219</span>    rmt_strip-&gt;base.set_pixel = led_strip_rmt_set_pixel;</div>
+<div class="line"><a id="l00220" name="l00220"></a><span class="lineno">  220</span>    rmt_strip-&gt;base.set_pixel_rgbw = led_strip_rmt_set_pixel_rgbw;</div>
+<div class="line"><a id="l00221" name="l00221"></a><span class="lineno">  221</span>    rmt_strip-&gt;base.refresh = led_strip_rmt_refresh;</div>
+<div class="line"><a id="l00222" name="l00222"></a><span class="lineno">  222</span>    rmt_strip-&gt;base.refresh_async = led_strip_rmt_refresh_async;</div>
+<div class="line"><a id="l00223" name="l00223"></a><span class="lineno">  223</span>    rmt_strip-&gt;base.refresh_wait_done = led_strip_rmt_wait_for_done;</div>
+<div class="line"><a id="l00224" name="l00224"></a><span class="lineno">  224</span>    rmt_strip-&gt;base.clear = led_strip_rmt_clear;</div>
+<div class="line"><a id="l00225" name="l00225"></a><span class="lineno">  225</span>    rmt_strip-&gt;base.del = led_strip_rmt_del;</div>
 <div class="line"><a id="l00226" name="l00226"></a><span class="lineno">  226</span> </div>
-<div class="line"><a id="l00227" name="l00227"></a><span class="lineno">  227</span><span class="preprocessor">#endif  </span><span class="comment">// FASTLED_RMT5</span></div>
-<div class="line"><a id="l00228" name="l00228"></a><span class="lineno">  228</span> </div>
-<div class="line"><a id="l00229" name="l00229"></a><span class="lineno">  229</span><span class="preprocessor">#endif  </span><span class="comment">// ESP32</span></div>
+<div class="line"><a id="l00227" name="l00227"></a><span class="lineno">  227</span>    *ret_strip = &amp;rmt_strip-&gt;base;</div>
+<div class="line"><a id="l00228" name="l00228"></a><span class="lineno">  228</span>    <span class="keywordflow">return</span> ESP_OK;</div>
+<div class="line"><a id="l00229" name="l00229"></a><span class="lineno">  229</span>err:</div>
+<div class="line"><a id="l00230" name="l00230"></a><span class="lineno">  230</span>    <span class="keywordflow">if</span> (rmt_strip) {</div>
+<div class="line"><a id="l00231" name="l00231"></a><span class="lineno">  231</span>        <span class="keywordflow">if</span> (rmt_strip-&gt;rmt_chan) {</div>
+<div class="line"><a id="l00232" name="l00232"></a><span class="lineno">  232</span>            rmt_del_channel(rmt_strip-&gt;rmt_chan);</div>
+<div class="line"><a id="l00233" name="l00233"></a><span class="lineno">  233</span>        }</div>
+<div class="line"><a id="l00234" name="l00234"></a><span class="lineno">  234</span>        <span class="keywordflow">if</span> (rmt_strip-&gt;strip_encoder) {</div>
+<div class="line"><a id="l00235" name="l00235"></a><span class="lineno">  235</span>            rmt_del_encoder(rmt_strip-&gt;strip_encoder);</div>
+<div class="line"><a id="l00236" name="l00236"></a><span class="lineno">  236</span>        }</div>
+<div class="line"><a id="l00237" name="l00237"></a><span class="lineno">  237</span>        <span class="keywordflow">if</span> (rmt_strip-&gt;pixel_buf_allocated_internally) {</div>
+<div class="line"><a id="l00238" name="l00238"></a><span class="lineno">  238</span>            free(rmt_strip-&gt;pixel_buf);</div>
+<div class="line"><a id="l00239" name="l00239"></a><span class="lineno">  239</span>        }</div>
+<div class="line"><a id="l00240" name="l00240"></a><span class="lineno">  240</span>        free(rmt_strip);</div>
+<div class="line"><a id="l00241" name="l00241"></a><span class="lineno">  241</span>    }</div>
+<div class="line"><a id="l00242" name="l00242"></a><span class="lineno">  242</span>    <span class="keywordflow">return</span> ret;</div>
+<div class="line"><a id="l00243" name="l00243"></a><span class="lineno">  243</span>}</div>
+<div class="line"><a id="l00244" name="l00244"></a><span class="lineno">  244</span> </div>
+<div class="line"><a id="l00245" name="l00245"></a><span class="lineno">  245</span><span class="preprocessor">#endif  </span><span class="comment">// FASTLED_RMT5</span></div>
+<div class="line"><a id="l00246" name="l00246"></a><span class="lineno">  246</span> </div>
+<div class="line"><a id="l00247" name="l00247"></a><span class="lineno">  247</span><span class="preprocessor">#endif  </span><span class="comment">// ESP32</span></div>
 <div class="ttc" id="aenabled_8h_html"><div class="ttname"><a href="../../df/d17/enabled_8h.html">enabled.h</a></div></div>
 <div class="ttc" id="aled__strip_8h_html"><div class="ttname"><a href="../../df/d6e/led__strip_8h.html">led_strip.h</a></div></div>
 <div class="ttc" id="aled__strip__interface_8h_html"><div class="ttname"><a href="../../d9/dcc/led__strip__interface_8h.html">led_strip_interface.h</a></div></div>
@@ -358,14 +376,15 @@ $(function(){initNavTree('d3/da7/led__strip__rmt__dev_8c_source.html','../../');
 <div class="ttc" id="aled__strip__types_8h_html_a9d2cc8718131d9a9e3dd15d8496e7941"><div class="ttname"><a href="../../d4/d88/led__strip__types_8h.html#a9d2cc8718131d9a9e3dd15d8496e7941">led_strip_config_t::max_leds</a></div><div class="ttdeci">uint32_t max_leds</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d88/led__strip__types_8h_source.html#l00071">led_strip_types.h:71</a></div></div>
 <div class="ttc" id="aled__strip__types_8h_html_ab31530265f76a1e677f9bde230d8e72e"><div class="ttname"><a href="../../d4/d88/led__strip__types_8h.html#ab31530265f76a1e677f9bde230d8e72e">led_color_component_format_t::format_layout::g_pos</a></div><div class="ttdeci">uint32_t g_pos</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d88/led__strip__types_8h_source.html#l00050">led_strip_types.h:50</a></div></div>
 <div class="ttc" id="aled__strip__types_8h_html_ac2ec15238cda42e96a8b7eadfcf98d5d"><div class="ttname"><a href="../../d4/d88/led__strip__types_8h.html#ac2ec15238cda42e96a8b7eadfcf98d5d">led_color_component_format_t::format_layout::b_pos</a></div><div class="ttdeci">uint32_t b_pos</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d88/led__strip__types_8h_source.html#l00051">led_strip_types.h:51</a></div></div>
-<div class="ttc" id="aled__strip__types_8h_html_ac65620be0d073f99b59c2378b3be2edb"><div class="ttname"><a href="../../d4/d88/led__strip__types_8h.html#ac65620be0d073f99b59c2378b3be2edb">led_strip_config_t::timings</a></div><div class="ttdeci">led_strip_encoder_timings_t timings</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d88/led__strip__types_8h_source.html#l00079">led_strip_types.h:79</a></div></div>
+<div class="ttc" id="aled__strip__types_8h_html_ac65620be0d073f99b59c2378b3be2edb"><div class="ttname"><a href="../../d4/d88/led__strip__types_8h.html#ac65620be0d073f99b59c2378b3be2edb">led_strip_config_t::timings</a></div><div class="ttdeci">led_strip_encoder_timings_t timings</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d88/led__strip__types_8h_source.html#l00080">led_strip_types.h:80</a></div></div>
 <div class="ttc" id="aled__strip__types_8h_html_ae7119fc5e0d9d55d48a89b78c9698e5c"><div class="ttname"><a href="../../d4/d88/led__strip__types_8h.html#ae7119fc5e0d9d55d48a89b78c9698e5c">led_color_component_format_t::format</a></div><div class="ttdeci">struct led_color_component_format_t::format_layout format</div></div>
 <div class="ttc" id="aled__strip__types_8h_html_aebc169b859ae6853c146b3faf751088c"><div class="ttname"><a href="../../d4/d88/led__strip__types_8h.html#aebc169b859ae6853c146b3faf751088c">led_color_component_format_t::format_layout::w_pos</a></div><div class="ttdeci">uint32_t w_pos</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d88/led__strip__types_8h_source.html#l00052">led_strip_types.h:52</a></div></div>
-<div class="ttc" id="aled__strip__types_8h_html_afcbd2844f563e498f804d8342589f29b"><div class="ttname"><a href="../../d4/d88/led__strip__types_8h.html#afcbd2844f563e498f804d8342589f29b">led_strip_config_t::led_strip_extra_flags::invert_out</a></div><div class="ttdeci">uint32_t invert_out</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d88/led__strip__types_8h_source.html#l00077">led_strip_types.h:77</a></div></div>
+<div class="ttc" id="aled__strip__types_8h_html_af56685bf6187a8a069f6aa66a4312dd9"><div class="ttname"><a href="../../d4/d88/led__strip__types_8h.html#af56685bf6187a8a069f6aa66a4312dd9">led_strip_config_t::external_pixel_buf</a></div><div class="ttdeci">uint8_t * external_pixel_buf</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d88/led__strip__types_8h_source.html#l00075">led_strip_types.h:75</a></div></div>
+<div class="ttc" id="aled__strip__types_8h_html_afcbd2844f563e498f804d8342589f29b"><div class="ttname"><a href="../../d4/d88/led__strip__types_8h.html#afcbd2844f563e498f804d8342589f29b">led_strip_config_t::led_strip_extra_flags::invert_out</a></div><div class="ttdeci">uint32_t invert_out</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d88/led__strip__types_8h_source.html#l00078">led_strip_types.h:78</a></div></div>
 <div class="ttc" id="aled__strip__types_8h_html_d7/d22/unionled__color__component__format__t"><div class="ttname"><a href="../../d4/d88/led__strip__types_8h.html#d7/d22/unionled__color__component__format__t">led_color_component_format_t</a></div><div class="ttdoc">LED color component format.</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d88/led__strip__types_8h_source.html#l00047">led_strip_types.h:47</a></div></div>
 <div class="ttc" id="aled__strip__types_8h_html_da/d68/structled__strip__config__t"><div class="ttname"><a href="../../d4/d88/led__strip__types_8h.html#da/d68/structled__strip__config__t">led_strip_config_t</a></div><div class="ttdoc">LED Strip common configurations The common configurations are not specific to any backend peripheral.</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d88/led__strip__types_8h_source.html#l00069">led_strip_types.h:69</a></div></div>
 <div class="ttc" id="astring_8h_html"><div class="ttname"><a href="../../da/d66/string_8h.html">string.h</a></div></div>
-<div class="ttc" id="aunused_8h_a9de675fbd4d59f415613d91c159cf5b5_html_a9de675fbd4d59f415613d91c159cf5b5"><div class="ttname"><a href="../../d8/d4b/unused_8h_a9de675fbd4d59f415613d91c159cf5b5.html#a9de675fbd4d59f415613d91c159cf5b5">FASTLED_UNUSED</a></div><div class="ttdeci">#define FASTLED_UNUSED(x)</div><div class="ttdef"><b>Definition</b> <a href="../../d8/d4b/unused_8h_source.html#l00003">unused.h:3</a></div></div>
+<div class="ttc" id="aunused_8h_a9de675fbd4d59f415613d91c159cf5b5_html_a9de675fbd4d59f415613d91c159cf5b5"><div class="ttname"><a href="../../d8/d4b/unused_8h_a9de675fbd4d59f415613d91c159cf5b5.html#a9de675fbd4d59f415613d91c159cf5b5">FASTLED_UNUSED</a></div><div class="ttdeci">#define FASTLED_UNUSED(x)</div><div class="ttdef"><b>Definition</b> <a href="../../d8/d4b/unused_8h_source.html#l00004">unused.h:4</a></div></div>
 <div class="ttc" id="aunused_8h_html"><div class="ttname"><a href="../../d8/d4b/unused_8h.html">unused.h</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
@@ -374,7 +393,7 @@ $(function(){initNavTree('d3/da7/led__strip__rmt__dev_8c_source.html','../../');
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dir_c30bdf76ce759a4eae8387be42921388.html">third_party</a></li><li class="navelem"><a class="el" href="../../dir_16d1759c38bc39b721e8cd0df805ebae.html">espressif</a></li><li class="navelem"><a class="el" href="../../dir_1b2bd9daf010c2497001a4ecf4482125.html">led_strip</a></li><li class="navelem"><a class="el" href="../../dir_0d5f71e73f676efb5e997d1df1889c9d.html">src</a></li><li class="navelem"><a class="el" href="../../d3/da7/led__strip__rmt__dev_8c.html">led_strip_rmt_dev.c</a></li>
-    <li class="footer">Generated on Tue Jun 24 2025 00:58:14 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Fri Aug 22 2025 20:59:33 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

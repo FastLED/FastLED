@@ -10,5 +10,5 @@ digraph "RGBWEmulatedController::beginShowLeds"
   Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
   Node2 [id="Node000002",label="CLEDController::size",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/d2c/class_c_l_e_d_controller_a63f75cf7e55cf8da46db5fd27110bb3e.html#a63f75cf7e55cf8da46db5fd27110bb3e",tooltip="How many LEDs does this controller manage?"];
   Node1 -> Node3 [id="edge2_Node000001_Node000003",color="steelblue1",style="solid",tooltip=" "];
-  Node3 [id="Node000003",label="Rgbw::size_as_rgb",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/d74/struct_rgbw_a99a23acfbc448d69b2f50f87c133efcd.html#a99a23acfbc448d69b2f50f87c133efcd",tooltip=" "];
+  Node3 [id="Node000003",label="Rgbw::size_as_rgb",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/d74/struct_rgbw_aae6f455908e529f3e0f4c67cd724281f.html#aae6f455908e529f3e0f4c67cd724281f",tooltip=" "];
 }

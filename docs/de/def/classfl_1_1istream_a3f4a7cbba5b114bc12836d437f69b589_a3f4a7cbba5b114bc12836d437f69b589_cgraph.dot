@@ -1,0 +1,12 @@
+digraph "fl::istream::good"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="LR";
+  Node1 [id="Node000001",label="fl::istream::good",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl::istream_real::good",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dc/d4b/classfl_1_1istream__real_a235c67cedaad6a2e7745ed8bc04c35be.html#a235c67cedaad6a2e7745ed8bc04c35be",tooltip=" "];
+}

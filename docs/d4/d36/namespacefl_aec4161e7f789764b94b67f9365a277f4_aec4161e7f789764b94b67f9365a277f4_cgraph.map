@@ -1,0 +1,17 @@
+<map id="fl::upscale" name="fl::upscale">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,80,93,105"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a49ec31bbd180eb03839d5a3fb1ebd25b.html#a49ec31bbd180eb03839d5a3fb1ebd25b" title="Performs bilinear interpolation for upscaling an image." alt="" coords="183,5,329,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="68,78,101,58,140,40,169,31,171,36,142,44,104,63,71,82"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_afaddf1c4a2474243bdc613c1d6e37f37.html#afaddf1c4a2474243bdc613c1d6e37f37" title="Performs bilinear interpolation for upscaling an image." alt="" coords="181,104,331,129"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="94,95,167,104,167,109,93,100"/>
+<area shape="rect" id="Node000006" href="$d4/d36/namespacefl_a079778d9a1c3897463a1b8171ff69da2.html#a079778d9a1c3897463a1b8171ff69da2" title="Optimized upscale for rectangular/line&#45;by&#45;line XY maps." alt="" coords="173,55,339,80"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="93,85,159,77,159,82,94,90"/>
+<area shape="rect" id="Node000007" href="$d4/d36/namespacefl_a1e3cf3732e34b0b72f422b99394a9120.html#a1e3cf3732e34b0b72f422b99394a9120" title="Optimized upscale for rectangular/line&#45;by&#45;line XY maps (power&#45;of&#45;2 version)." alt="" coords="141,153,371,179"/>
+<area shape="poly" id="edge7_Node000001_Node000007" title=" " alt="" coords="72,103,104,121,142,138,171,147,170,152,140,143,102,126,70,108"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_aa24fef1c27fa0f275fb652055c8e1d21.html#aa24fef1c27fa0f275fb652055c8e1d21" title=" " alt="" coords="450,43,609,68"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="329,25,437,40,436,45,328,30"/>
+<area shape="rect" id="Node000005" href="$d4/d36/namespacefl_a36918068f364959acb5a80d126b92e3c.html#a36918068f364959acb5a80d126b92e3c" title=" " alt="" coords="419,116,640,141"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="332,117,405,121,405,126,332,123"/>
+<area shape="poly" id="edge6_Node000006_Node000003" title=" " alt="" coords="340,61,436,57,436,62,340,66"/>
+<area shape="poly" id="edge8_Node000007_Node000005" title=" " alt="" coords="349,151,422,141,423,146,350,156"/>
+</map>

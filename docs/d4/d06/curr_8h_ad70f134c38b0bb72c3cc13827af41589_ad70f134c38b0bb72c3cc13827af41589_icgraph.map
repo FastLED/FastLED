@@ -1,0 +1,9 @@
+<map id="positionFine" name="positionFine">
+<area shape="rect" id="Node000001" title=" " alt="" coords="303,31,404,56"/>
+<area shape="rect" id="Node000002" href="$d4/d06/curr_8h_a2242e5d85f2e458d4a9de6da98115976.html#a2242e5d85f2e458d4a9de6da98115976" title=" " alt="" coords="128,5,231,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="288,37,230,28,231,23,289,31"/>
+<area shape="rect" id="Node000004" href="$d4/d06/curr_8h_a341d63c170d97547d03274f54069381e.html#a341d63c170d97547d03274f54069381e" title=" " alt="" coords="104,55,255,80"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="290,55,255,60,255,54,289,49"/>
+<area shape="rect" id="Node000003" href="$d4/d06/curr_8h_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="5,5,56,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="114,21,56,21,56,15,114,15"/>
+</map>

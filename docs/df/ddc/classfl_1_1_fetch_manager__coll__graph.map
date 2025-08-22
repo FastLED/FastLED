@@ -1,0 +1,23 @@
+<map id="fl::FetchManager" name="fl::FetchManager">
+<area shape="rect" id="Node000001" title="Internal fetch manager for promise tracking." alt="" coords="1199,69,1329,95"/>
+<area shape="rect" id="Node000002" href="$d9/d7a/classfl_1_1async__runner.html" title="Generic asynchronous task runner interface." alt="" coords="878,5,1003,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="1018,29,1175,59,1209,67,1208,72,1174,65,1017,34"/>
+<area shape="rect" id="Node000003" href="$db/ddd/classfl_1_1_heap_vector.html" title=" " alt="" coords="849,55,1032,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="1046,79,1199,79,1199,85,1046,85"/>
+<area shape="rect" id="Node000004" href="$db/ddd/classfl_1_1_heap_vector.html" title=" " alt="" coords="451,35,591,75"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="605,58,849,74,849,79,604,63"/>
+<area shape="rect" id="Node000005" href="$db/ddd/classfl_1_1_heap_vector.html" title=" " alt="" coords="29,35,169,75"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="182,53,451,53,451,58,182,58"/>
+<area shape="rect" id="Node000006" href="$d6/d2e/classfl_1_1unique__ptr.html" title=" " alt="" coords="853,138,1029,178"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="1039,132,1208,92,1209,97,1040,137"/>
+<area shape="rect" id="Node000007" href="$d5/d69/classfl_1_1_fetch_engine_listener.html" title=" " alt="" coords="436,100,605,125"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="619,121,853,146,852,151,618,126"/>
+<area shape="rect" id="Node000008" href="$db/da2/classfl_1_1_engine_events_1_1_listener.html" title=" " alt="" coords="5,100,192,125"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="206,110,436,110,436,115,206,115"/>
+<area shape="rect" id="Node000009" href="$d5/d2b/structfl_1_1default__delete.html" title=" " alt="" coords="421,150,620,190"/>
+<area shape="poly" id="edge8_Node000006_Node000009" title=" " alt="" coords="634,164,853,158,853,163,634,169"/>
+<area shape="rect" id="Node000010" href="$d5/d2b/structfl_1_1default__delete.html" title=" " alt="" coords="13,157,184,183"/>
+<area shape="poly" id="edge9_Node000009_Node000010" title=" " alt="" coords="198,167,421,167,421,173,198,173"/>
+<area shape="rect" id="Node000011" href="$d6/d2e/classfl_1_1unique__ptr.html" title=" " alt="" coords="453,214,588,254"/>
+<area shape="poly" id="edge10_Node000006_Node000011" title=" " alt="" coords="601,221,708,206,825,185,865,175,867,181,826,190,709,211,602,227"/>
+</map>

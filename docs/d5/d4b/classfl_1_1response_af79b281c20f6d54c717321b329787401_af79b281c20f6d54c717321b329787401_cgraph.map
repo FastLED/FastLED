@@ -1,0 +1,13 @@
+<map id="fl::response::is_json" name="fl::response::is_json">
+<area shape="rect" id="Node000001" title="Check if response appears to contain JSON content." alt="" coords="5,31,156,56"/>
+<area shape="rect" id="Node000002" href="$dc/d96/classfl_1_1_str_n_a3d66ea4272adeb310d727edb78ceac91.html#a3d66ea4272adeb310d727edb78ceac91" title=" " alt="" coords="264,5,363,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="156,33,250,22,251,27,156,38"/>
+<area shape="rect" id="Node000004" href="$d5/d4b/classfl_1_1response_a330eca0371b3740387f8a8ffbbf01323.html#a330eca0371b3740387f8a8ffbbf01323" title="Get content type convenience method." alt="" coords="204,55,423,80"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="156,48,191,52,190,57,156,54"/>
+<area shape="rect" id="Node000003" href="$dc/d96/classfl_1_1_str_n_a67296b774f8201293edbbabbd1b642cb.html#a67296b774f8201293edbbabbd1b642cb" title=" " alt="" coords="507,5,613,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="363,15,494,15,494,21,363,21"/>
+<area shape="rect" id="Node000005" href="$d5/d4b/classfl_1_1response_a589fee303b366ab7853c5460832adf13.html#a589fee303b366ab7853c5460832adf13" title="Get header value (like JavaScript response.headers.get())" alt="" coords="471,55,649,80"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="423,65,457,65,457,70,423,70"/>
+<area shape="rect" id="Node000006" href="$d4/d36/namespacefl_a3b127995147ef801bf625e939aeae61a.html#a3b127995147ef801bf625e939aeae61a" title=" " alt="" coords="697,55,832,80"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="649,65,683,65,683,70,649,70"/>
+</map>

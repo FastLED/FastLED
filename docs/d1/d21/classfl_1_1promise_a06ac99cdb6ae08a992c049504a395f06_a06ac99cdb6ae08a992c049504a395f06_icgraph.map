@@ -1,0 +1,35 @@
+<map id="fl::promise::create" name="fl::promise::create">
+<area shape="rect" id="Node000001" title="Create a pending promise." alt="" coords="652,179,792,204"/>
+<area shape="rect" id="Node000002" href="$d1/d21/classfl_1_1promise_a40828f23712ac6dbabc9cd2f7d7634b6.html#a40828f23712ac6dbabc9cd2f7d7634b6" title="Create a rejected promise with error." alt="" coords="463,105,599,131"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="674,176,564,133,566,128,676,171"/>
+<area shape="rect" id="Node000006" href="$d1/d21/classfl_1_1promise_a3e0fb912621e186951d09a10640f407b.html#a3e0fb912621e186951d09a10640f407b" title="Create a resolved promise with value." alt="" coords="457,179,604,204"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="638,194,604,194,604,189,638,189"/>
+<area shape="rect" id="Node000022" href="$d1/d21/classfl_1_1promise_aab796029d311b31bcb2b818ce8f4f89a.html#aab796029d311b31bcb2b818ce8f4f89a" title="Create a resolved promise with value (move version)" alt="" coords="457,228,604,253"/>
+<area shape="poly" id="edge16_Node000001_Node000022" title=" " alt="" coords="660,210,582,230,580,225,658,205"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_aa8ba9adac097cc1e555a10bb31fb26d2.html#aa8ba9adac097cc1e555a10bb31fb26d2" title="Convenience function to create a rejected promise (const char* overload)" alt="" coords="213,31,408,56"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="489,102,408,70,369,59,371,53,410,65,491,97"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_acede2a4bd76cfec481b34ef8d266b80e.html#acede2a4bd76cfec481b34ef8d266b80e" title="Convenience function to create a rejected promise." alt="" coords="213,80,408,105"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="449,111,408,107,409,101,449,106"/>
+<area shape="rect" id="Node000005" href="$d1/d21/classfl_1_1promise_ad3f1732ddc0bc7d3f0d4a6d43725e985.html#ad3f1732ddc0bc7d3f0d4a6d43725e985" title="Create a rejected promise with error message." alt="" coords="243,129,379,155"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="449,130,379,137,378,132,449,124"/>
+<area shape="rect" id="Node000007" href="$d4/d36/namespacefl_a614354323511a444f4f3d295d6a41db8.html#a614354323511a444f4f3d295d6a41db8" title="Internal helper to execute a fetch request and return a promise." alt="" coords="218,179,403,204"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="443,194,403,194,403,189,443,189"/>
+<area shape="rect" id="Node000021" href="$d4/d36/namespacefl_a50da6c7601ccf62e8c9c47a92a646cc4.html#a50da6c7601ccf62e8c9c47a92a646cc4" title="Convenience function to create a resolved promise." alt="" coords="212,228,409,253"/>
+<area shape="poly" id="edge15_Node000006_Node000021" title=" " alt="" coords="461,210,369,231,368,225,459,204"/>
+<area shape="rect" id="Node000008" href="$d4/d36/namespacefl_a075cee505b6fb33f50d091c72119fe1b.html#a075cee505b6fb33f50d091c72119fe1b" title="HTTP DELETE request." alt="" coords="25,5,144,31"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="218,174,210,168,197,152,189,136,185,105,181,74,174,59,162,44,143,32,146,27,166,40,179,56,186,72,190,104,195,135,201,150,214,164,221,170"/>
+<area shape="rect" id="Node000009" href="$d4/d36/namespacefl_af42605edbdf3f35d997e6da5be2c02a5.html#af42605edbdf3f35d997e6da5be2c02a5" title="HTTP GET request." alt="" coords="35,55,134,80"/>
+<area shape="poly" id="edge8_Node000007_Node000009" title=" " alt="" coords="222,175,210,168,193,149,185,130,178,111,162,93,133,79,136,74,166,89,183,108,190,128,198,147,214,164,225,171"/>
+<area shape="rect" id="Node000015" href="$d4/d36/namespacefl_a022d6f3739e15bcb2c53ca8a989ef4cc.html#a022d6f3739e15bcb2c53ca8a989ef4cc" title="HTTP HEAD request." alt="" coords="29,104,140,129"/>
+<area shape="poly" id="edge9_Node000007_Node000015" title=" " alt="" coords="238,177,211,168,187,156,163,143,131,132,133,127,165,138,189,151,213,164,239,172"/>
+<area shape="rect" id="Node000016" href="$d4/d36/namespacefl_a275e9b11a1adc93d8fe97fd4c36a3fc8.html#a275e9b11a1adc93d8fe97fd4c36a3fc8" title="HTTP OPTIONS request." alt="" coords="5,153,164,179"/>
+<area shape="poly" id="edge10_Node000007_Node000016" title=" " alt="" coords="204,182,164,178,164,172,205,177"/>
+<area shape="rect" id="Node000017" href="$d4/d36/namespacefl_a637eab154a69618fb83024fb6ca7a623.html#a637eab154a69618fb83024fb6ca7a623" title="HTTP PATCH request." alt="" coords="27,203,142,228"/>
+<area shape="poly" id="edge11_Node000007_Node000017" title=" " alt="" coords="205,205,143,212,142,207,204,200"/>
+<area shape="rect" id="Node000018" href="$d4/d36/namespacefl_abd106b1e43c863c783b884d732271bc1.html#abd106b1e43c863c783b884d732271bc1" title="HTTP POST request." alt="" coords="31,252,138,277"/>
+<area shape="poly" id="edge12_Node000007_Node000018" title=" " alt="" coords="236,210,213,218,165,242,130,255,128,249,163,237,211,213,234,205"/>
+<area shape="rect" id="Node000019" href="$d4/d36/namespacefl_a5a10f48c7ebf47ace2e4c0243108fe69.html#a5a10f48c7ebf47ace2e4c0243108fe69" title="HTTP PUT request." alt="" coords="35,301,134,327"/>
+<area shape="poly" id="edge13_Node000007_Node000019" title=" " alt="" coords="222,212,214,217,198,234,190,253,182,272,166,291,136,306,133,302,162,287,178,269,185,251,193,232,210,213,219,208"/>
+<area shape="rect" id="Node000020" href="$d4/d36/namespacefl_a3375a843e45a8c85394a7524b1956fc0.html#a3375a843e45a8c85394a7524b1956fc0" title="Generic request with options (like fetch(url, options))" alt="" coords="21,351,148,376"/>
+<area shape="poly" id="edge14_Node000007_Node000020" title=" " alt="" coords="219,213,214,217,201,232,194,246,190,276,186,308,179,324,166,340,146,353,144,348,162,336,174,321,181,307,185,276,189,244,197,229,210,213,216,209"/>
+</map>

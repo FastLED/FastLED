@@ -1,0 +1,6 @@
+<map id="hsv2rgb_spectrum" name="hsv2rgb_spectrum">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,29,148,55"/>
+<area shape="rect" id="Node000002" href="$df/d9d/hsv2rgb_8cpp_aa9d490009cb1d6ea0491e60b724d360f.html#aa9d490009cb1d6ea0491e60b724d360f" title="Inline version of hsv2rgb_spectrum which returns a CRGB object." alt="" coords="196,29,339,55"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="148,39,183,39,183,45,148,45"/>
+<area shape="poly" id="edge2_Node000002_Node000002" title=" " alt="" coords="236,31,229,21,233,11,246,5,267,3,293,6,304,15,301,19,291,11,267,8,247,10,237,15,235,20,240,28"/>
+</map>

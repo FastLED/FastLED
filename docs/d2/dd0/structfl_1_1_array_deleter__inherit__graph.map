@@ -1,5 +1,7 @@
 <map id="fl::ArrayDeleter&lt; T &gt;" name="fl::ArrayDeleter&lt; T &gt;">
-<area shape="rect" id="Node000001" title=" " alt="" coords="24,5,183,31"/>
-<area shape="rect" id="Node000002" href="$df/db6/structfl_1_1_array_deleter.html" title=" " alt="" coords="5,93,201,119"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="106,45,106,93,101,93,101,45"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="87,5,246,31"/>
+<area shape="rect" id="Node000002" href="$df/db6/structfl_1_1_array_deleter.html" title=" " alt="" coords="5,93,149,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="148,42,97,95,94,91,144,39"/>
+<area shape="rect" id="Node000003" href="$df/db6/structfl_1_1_array_deleter.html" title=" " alt="" coords="174,101,341,126"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="190,39,205,53,248,99,245,102,201,57,187,42"/>
 </map>

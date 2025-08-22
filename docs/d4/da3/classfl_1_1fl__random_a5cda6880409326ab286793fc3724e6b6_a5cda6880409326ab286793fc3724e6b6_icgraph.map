@@ -1,0 +1,7 @@
+<map id="fl::fl_random::random8" name="fl::fl_random::random8">
+<area shape="rect" id="Node000001" title="Generate an 8&#45;bit random number." alt="" coords="223,31,392,56"/>
+<area shape="rect" id="Node000002" href="$d4/da3/classfl_1_1fl__random_a621aca74f6e222d212643af2eefebb37.html#a621aca74f6e222d212643af2eefebb37" title="Generate an 8&#45;bit random number in the range [min, max)" alt="" coords="5,5,175,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="209,35,174,30,175,25,209,29"/>
+<area shape="rect" id="Node000003" href="$d4/da3/classfl_1_1fl__random_aced73d4ef27558f6b46b6cb2a7d04ee1.html#aced73d4ef27558f6b46b6cb2a7d04ee1" title="Generate an 8&#45;bit random number in the range [0, n)" alt="" coords="5,55,175,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="209,57,175,61,174,55,209,52"/>
+</map>

@@ -126,7 +126,7 @@ $(function(){initNavTree('d5/d98/group___math_ga810cba6ac8e4f5c8a97cd41e9bb113b4
 
 <p>Subtract two numbers, and calculate the modulo of the difference and a third number, M. </p>
 <p>In other words, it returns (A-B) % M. It is designed as a compact mechanism for decrementing a "mode" switch and wrapping around back to "mode 0" when the switch goes past the start of the available range. e.g. if you have seven modes, this switches to the previous one and wraps around if needed: </p><div class="fragment"><div class="line">mode = <a class="code hl_function" href="#ga810cba6ac8e4f5c8a97cd41e9bb113b4">submod8</a>( mode, 1, 7);</div>
-<div class="ttc" id="agroup___math_ga810cba6ac8e4f5c8a97cd41e9bb113b4_html_ga810cba6ac8e4f5c8a97cd41e9bb113b4"><div class="ttname"><a href="#ga810cba6ac8e4f5c8a97cd41e9bb113b4">submod8</a></div><div class="ttdeci">LIB8STATIC uint8_t submod8(uint8_t a, uint8_t b, uint8_t m)</div><div class="ttdoc">Subtract two numbers, and calculate the modulo of the difference and a third number,...</div><div class="ttdef"><b>Definition</b> <a href="../../d5/dd1/math8_8h_source.html#l00425">math8.h:425</a></div></div>
+<div class="ttc" id="agroup___math_ga810cba6ac8e4f5c8a97cd41e9bb113b4_html_ga810cba6ac8e4f5c8a97cd41e9bb113b4"><div class="ttname"><a href="#ga810cba6ac8e4f5c8a97cd41e9bb113b4">submod8</a></div><div class="ttdeci">LIB8STATIC uint8_t submod8(uint8_t a, uint8_t b, uint8_t m)</div><div class="ttdoc">Subtract two numbers, and calculate the modulo of the difference and a third number,...</div><div class="ttdef"><b>Definition</b> <a href="../../d5/dd1/math8_8h_source.html#l00441">math8.h:441</a></div></div>
 </div><!-- fragment --> <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">a</td><td>dividend byte </td></tr>
@@ -138,22 +138,22 @@ $(function(){initNavTree('d5/d98/group___math_ga810cba6ac8e4f5c8a97cd41e9bb113b4
 <dl class="section return"><dt>Returns</dt><dd>remainder of (a - b) / m </dd></dl>
 <dl class="section see"><dt>See also</dt><dd><a class="el" href="../../d5/d98/group___math_gaa3beb6c31141a13c1a047b926d065ca2.html#gaa3beb6c31141a13c1a047b926d065ca2" title="Calculate the remainder of one unsigned 8-bit value divided by anoter, aka A % M.">mod8()</a> for notes on performance. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="../../d5/dd1/math8_8h_source.html#l00425">425</a> of file <a class="el" href="../../d5/dd1/math8_8h_source.html">math8.h</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  425</span>                                                            {</div>
-<div class="line"><span class="lineno">  426</span><span class="preprocessor">#if defined(__AVR__)</span></div>
-<div class="line"><span class="lineno">  427</span>    <span class="keyword">asm</span> <span class="keyword">volatile</span>(<span class="stringliteral">&quot;       sub %[a],%[b]    \n\t&quot;</span></div>
-<div class="line"><span class="lineno">  428</span>                 <span class="stringliteral">&quot;L_%=:  sub %[a],%[m]    \n\t&quot;</span></div>
-<div class="line"><span class="lineno">  429</span>                 <span class="stringliteral">&quot;       brcc L_%=        \n\t&quot;</span></div>
-<div class="line"><span class="lineno">  430</span>                 <span class="stringliteral">&quot;       add %[a],%[m]    \n\t&quot;</span></div>
-<div class="line"><span class="lineno">  431</span>                 : [a] <span class="stringliteral">&quot;+r&quot;</span>(a)</div>
-<div class="line"><span class="lineno">  432</span>                 : [b] <span class="stringliteral">&quot;r&quot;</span>(b), [m] <span class="stringliteral">&quot;r&quot;</span>(m));</div>
-<div class="line"><span class="lineno">  433</span><span class="preprocessor">#else</span></div>
-<div class="line"><span class="lineno">  434</span>    a -= b;</div>
-<div class="line"><span class="lineno">  435</span>    <span class="keywordflow">while</span> (a &gt;= m)</div>
-<div class="line"><span class="lineno">  436</span>        a -= m;</div>
-<div class="line"><span class="lineno">  437</span><span class="preprocessor">#endif</span></div>
-<div class="line"><span class="lineno">  438</span>    <span class="keywordflow">return</span> a;</div>
-<div class="line"><span class="lineno">  439</span>}</div>
+<p class="definition">Definition at line <a class="el" href="../../d5/dd1/math8_8h_source.html#l00441">441</a> of file <a class="el" href="../../d5/dd1/math8_8h_source.html">math8.h</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  441</span>                                                            {</div>
+<div class="line"><span class="lineno">  442</span><span class="preprocessor">#if defined(__AVR__)</span></div>
+<div class="line"><span class="lineno">  443</span>    <span class="keyword">asm</span> <span class="keyword">volatile</span>(<span class="stringliteral">&quot;       sub %[a],%[b]    \n\t&quot;</span></div>
+<div class="line"><span class="lineno">  444</span>                 <span class="stringliteral">&quot;L_%=:  sub %[a],%[m]    \n\t&quot;</span></div>
+<div class="line"><span class="lineno">  445</span>                 <span class="stringliteral">&quot;       brcc L_%=        \n\t&quot;</span></div>
+<div class="line"><span class="lineno">  446</span>                 <span class="stringliteral">&quot;       add %[a],%[m]    \n\t&quot;</span></div>
+<div class="line"><span class="lineno">  447</span>                 : [a] <span class="stringliteral">&quot;+r&quot;</span>(a)</div>
+<div class="line"><span class="lineno">  448</span>                 : [b] <span class="stringliteral">&quot;r&quot;</span>(b), [m] <span class="stringliteral">&quot;r&quot;</span>(m));</div>
+<div class="line"><span class="lineno">  449</span><span class="preprocessor">#else</span></div>
+<div class="line"><span class="lineno">  450</span>    a -= b;</div>
+<div class="line"><span class="lineno">  451</span>    <span class="keywordflow">while</span> (a &gt;= m)</div>
+<div class="line"><span class="lineno">  452</span>        a -= m;</div>
+<div class="line"><span class="lineno">  453</span><span class="preprocessor">#endif</span></div>
+<div class="line"><span class="lineno">  454</span>    <span class="keywordflow">return</span> a;</div>
+<div class="line"><span class="lineno">  455</span>}</div>
 </div><!-- fragment -->
 <p class="reference">References <a class="el" href="../../d4/d7a/lib8static_8h_source.html#l00010">LIB8STATIC</a>.</p>
 
@@ -166,7 +166,7 @@ $(function(){initNavTree('d5/d98/group___math_ga810cba6ac8e4f5c8a97cd41e9bb113b4
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d5/d98/group___math.html">Basic Math Operations</a></li>
-    <li class="footer">Generated on Tue Jun 24 2025 00:58:14 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Fri Aug 22 2025 20:59:34 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

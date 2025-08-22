@@ -112,9 +112,9 @@
 <!-- Node5 -->
 <g id="Node000005" class="node">
 <title>Node5</title>
-<g id="a_Node000005"><a xlink:href="../../db/d74/struct_rgbw.html" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#666666" points="250.5,-151 206.5,-151 206.5,-132 250.5,-132 250.5,-151"/>
-<text text-anchor="middle" x="228.5" y="-139" font-family="Helvetica,sans-Serif" font-size="10.00">Rgbw</text>
+<g id="a_Node000005"><a xlink:href="../../d7/d27/structfl_1_1_rgbw.html" target="_top" xlink:title=" ">
+<polygon fill="white" stroke="#666666" points="256.5,-151 200.5,-151 200.5,-132 256.5,-132 256.5,-151"/>
+<text text-anchor="middle" x="228.5" y="-139" font-family="Helvetica,sans-Serif" font-size="10.00">fl::Rgbw</text>
 </a>
 </g>
 </g>
@@ -122,8 +122,8 @@
 <g id="edge5_Node000003_Node000005" class="edge">
 <title>Node5&#45;&gt;Node3</title>
 <g id="a_edge5_Node000003_Node000005"><a xlink:title=" ">
-<path fill="none" stroke="#9a32cd" stroke-dasharray="5,2" d="M260.66,-140.72C305.02,-139.9 388.89,-139.47 460,-145.5 475.53,-146.82 492.43,-149.15 507.43,-151.53"/>
-<polygon fill="#9a32cd" stroke="#9a32cd" points="260.45,-137.22 250.52,-140.92 260.59,-144.22 260.45,-137.22"/>
+<path fill="none" stroke="#9a32cd" stroke-dasharray="5,2" d="M266.54,-140.61C312.15,-139.87 391.92,-139.73 460,-145.5 475.53,-146.82 492.43,-149.15 507.43,-151.53"/>
+<polygon fill="#9a32cd" stroke="#9a32cd" points="266.46,-137.11 256.53,-140.79 266.59,-144.11 266.46,-137.11"/>
 </a>
 </g>
 <text text-anchor="middle" x="388" y="-148.5" font-family="Helvetica,sans-Serif" font-size="10.00" fill="grey"> mRgbMode</text>

@@ -100,60 +100,23 @@ $(function(){initNavTree('d5/db2/_octo_w_s2811_8ino.html','../../'); initResizab
 </div>
 
 <div class="header">
-  <div class="summary">
-<a href="#define-members">Macros</a> &#124;
-<a href="#func-members">Functions</a> &#124;
-<a href="#var-members">Variables</a>  </div>
   <div class="headertitle"><div class="title">OctoWS2811.ino File Reference</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><code>#include &lt;OctoWS2811.h&gt;</code><br />
-<code>#include &lt;<a class="el" href="../../db/d97/_fast_l_e_d_8h_source.html">FastLED.h</a>&gt;</code><br />
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>OctoWS2811 example with platform detection. </p>
+
+<p class="definition">Definition in file <a class="el" href="../../d5/db2/_octo_w_s2811_8ino_source.html">OctoWS2811.ino</a>.</p>
+</div><div class="textblock"><code>#include &quot;platforms/sketch_fake.hpp&quot;</code><br />
 </div><div class="textblock"><div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Include dependency graph for OctoWS2811.ino:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-0-content" class="dyncontent" style="display:none;">
-<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../dd/dd9/_octo_w_s2811_8ino__incl.svg" width="100%" height="600"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
+<div class="center"><iframe scrolling="no" frameborder="0" src="../../dd/dd9/_octo_w_s2811_8ino__incl.svg" width="243" height="139"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
 </div>
 </div>
 <p><a href="../../d5/db2/_octo_w_s2811_8ino_source.html">Go to the source code of this file.</a></p>
-<table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="define-members" name="define-members"></a>
-Macros</h2></td></tr>
-<tr class="memitem:a79d10e672abb49ad63eeaa8aaef57c38" id="r_a79d10e672abb49ad63eeaa8aaef57c38"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d5/db2/_octo_w_s2811_8ino_a79d10e672abb49ad63eeaa8aaef57c38.html#a79d10e672abb49ad63eeaa8aaef57c38">BLUE</a>&#160;&#160;&#160;0x0000FF</td></tr>
-<tr class="separator:a79d10e672abb49ad63eeaa8aaef57c38"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:acfbc006ea433ad708fdee3e82996e721" id="r_acfbc006ea433ad708fdee3e82996e721"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d5/db2/_octo_w_s2811_8ino_acfbc006ea433ad708fdee3e82996e721.html#acfbc006ea433ad708fdee3e82996e721">GREEN</a>&#160;&#160;&#160;0x00FF00</td></tr>
-<tr class="separator:acfbc006ea433ad708fdee3e82996e721"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4c4ae9a4146ce8d6a5debc90300d9abd" id="r_a4c4ae9a4146ce8d6a5debc90300d9abd"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d5/db2/_octo_w_s2811_8ino_a4c4ae9a4146ce8d6a5debc90300d9abd.html#a4c4ae9a4146ce8d6a5debc90300d9abd">NUM_LEDS</a>&#160;&#160;&#160;1920</td></tr>
-<tr class="separator:a4c4ae9a4146ce8d6a5debc90300d9abd"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac5b6e19bf06822021f35602c59658de3" id="r_ac5b6e19bf06822021f35602c59658de3"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d5/db2/_octo_w_s2811_8ino_ac5b6e19bf06822021f35602c59658de3.html#ac5b6e19bf06822021f35602c59658de3">ORANGE</a>&#160;&#160;&#160;0xE05800</td></tr>
-<tr class="separator:ac5b6e19bf06822021f35602c59658de3"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ada419fe3b48fcf19daed7cc57ccf1174" id="r_ada419fe3b48fcf19daed7cc57ccf1174"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d5/db2/_octo_w_s2811_8ino_ada419fe3b48fcf19daed7cc57ccf1174.html#ada419fe3b48fcf19daed7cc57ccf1174">PINK</a>&#160;&#160;&#160;0xFF1088</td></tr>
-<tr class="separator:ada419fe3b48fcf19daed7cc57ccf1174"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8d23feea868a983c8c2b661e1e16972f" id="r_a8d23feea868a983c8c2b661e1e16972f"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d5/db2/_octo_w_s2811_8ino_a8d23feea868a983c8c2b661e1e16972f.html#a8d23feea868a983c8c2b661e1e16972f">RED</a>&#160;&#160;&#160;0xFF0000</td></tr>
-<tr class="separator:a8d23feea868a983c8c2b661e1e16972f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aba2347c28a444c7eb5d22d9896214dc2" id="r_aba2347c28a444c7eb5d22d9896214dc2"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d5/db2/_octo_w_s2811_8ino_aba2347c28a444c7eb5d22d9896214dc2.html#aba2347c28a444c7eb5d22d9896214dc2">USE_OCTOWS2811</a></td></tr>
-<tr class="separator:aba2347c28a444c7eb5d22d9896214dc2"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a87b537f5fa5c109d3c05c13d6b18f382" id="r_a87b537f5fa5c109d3c05c13d6b18f382"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d5/db2/_octo_w_s2811_8ino_a87b537f5fa5c109d3c05c13d6b18f382.html#a87b537f5fa5c109d3c05c13d6b18f382">WHITE</a>&#160;&#160;&#160;0xFFFFFF</td></tr>
-<tr class="separator:a87b537f5fa5c109d3c05c13d6b18f382"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:abf681265909adf3d3e8116c93c0ba179" id="r_abf681265909adf3d3e8116c93c0ba179"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d5/db2/_octo_w_s2811_8ino_abf681265909adf3d3e8116c93c0ba179.html#abf681265909adf3d3e8116c93c0ba179">YELLOW</a>&#160;&#160;&#160;0xFFFF00</td></tr>
-<tr class="separator:abf681265909adf3d3e8116c93c0ba179"><td class="memSeparator" colspan="2">&#160;</td></tr>
-</table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
-Functions</h2></td></tr>
-<tr class="memitem:a87dad6cde22368918813bc56504b0dee" id="r_a87dad6cde22368918813bc56504b0dee"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d5/db2/_octo_w_s2811_8ino_a87dad6cde22368918813bc56504b0dee.html#a87dad6cde22368918813bc56504b0dee">colorWipe</a> (int color, int wait)</td></tr>
-<tr class="separator:a87dad6cde22368918813bc56504b0dee"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:afe461d27b9c48d5921c00d521181f12f" id="r_afe461d27b9c48d5921c00d521181f12f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d5/db2/_octo_w_s2811_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f">loop</a> ()</td></tr>
-<tr class="separator:afe461d27b9c48d5921c00d521181f12f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4fc01d736fe50cf5b977f755b675f11d" id="r_a4fc01d736fe50cf5b977f755b675f11d"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d5/db2/_octo_w_s2811_8ino_a4fc01d736fe50cf5b977f755b675f11d.html#a4fc01d736fe50cf5b977f755b675f11d">setup</a> ()</td></tr>
-<tr class="separator:a4fc01d736fe50cf5b977f755b675f11d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-</table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="var-members" name="var-members"></a>
-Variables</h2></td></tr>
-<tr class="memitem:a1b4f26a01e11d7eb2848bc41b0f6dd9d" id="r_a1b4f26a01e11d7eb2848bc41b0f6dd9d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../d7/d82/struct_c_r_g_b.html">CRGB</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d5/db2/_octo_w_s2811_8ino_a1b4f26a01e11d7eb2848bc41b0f6dd9d.html#a1b4f26a01e11d7eb2848bc41b0f6dd9d">leds</a> [<a class="el" href="../../dd/d0f/_apa102_8ino_a4c4ae9a4146ce8d6a5debc90300d9abd.html#a4c4ae9a4146ce8d6a5debc90300d9abd">NUM_LEDS</a>]</td></tr>
-<tr class="separator:a1b4f26a01e11d7eb2848bc41b0f6dd9d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-</table>
 </div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.9.3-->
@@ -161,7 +124,7 @@ Variables</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dir_d28a4824dc47e487b107a5db32ef43c4.html">examples</a></li><li class="navelem"><a class="el" href="../../dir_ace4e50fcc955ba7d1af81fff465c2e8.html">OctoWS2811</a></li><li class="navelem"><a class="el" href="../../d5/db2/_octo_w_s2811_8ino.html">OctoWS2811.ino</a></li>
-    <li class="footer">Generated on Tue Jun 24 2025 00:58:14 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Fri Aug 22 2025 20:59:34 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

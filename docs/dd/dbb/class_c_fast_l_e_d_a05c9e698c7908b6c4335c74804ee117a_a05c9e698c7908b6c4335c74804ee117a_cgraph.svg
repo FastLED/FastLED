@@ -105,7 +105,7 @@ var sectionId = 'dynsection-0';
 <!-- Node4 -->
 <g id="Node000004" class="node">
 <title>Node4</title>
-<g id="a_Node000004"><a xlink:href="../../d6/d2c/class_c_l_e_d_controller_a44d20f088426191c82919c9cdbc63a35.html#a44d20f088426191c82919c9cdbc63a35" target="_top" xlink:title="Gets the maximum possible refresh rate of the strip.">
+<g id="a_Node000004"><a xlink:href="../../d6/d2c/class_c_l_e_d_controller_acb16ee97b0ae1dab30822384af780364.html#acb16ee97b0ae1dab30822384af780364" target="_top" xlink:title="Gets the maximum possible refresh rate of the strip.">
 <polygon fill="white" stroke="#666666" points="591,-142 398,-142 398,-123 591,-123 591,-142"/>
 <text text-anchor="middle" x="494.5" y="-130" font-family="Helvetica,sans-Serif" font-size="10.00">CLEDController::getMaxRefreshRate</text>
 </a>
@@ -141,7 +141,7 @@ var sectionId = 'dynsection-0';
 <!-- Node6 -->
 <g id="Node000006" class="node">
 <title>Node6</title>
-<g id="a_Node000006"><a xlink:href="../../de/dca/classfl_1_1_engine_events_a8ec266f9f7b35b9174d331cb6c338d80.html#a8ec266f9f7b35b9174d331cb6c338d80" target="_top" xlink:title=" ">
+<g id="a_Node000006"><a xlink:href="../../de/dca/classfl_1_1_engine_events_a348a8657cb766d026bbd411b33cf84c6.html#a348a8657cb766d026bbd411b33cf84c6" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="562,-67.5 427,-67.5 427,-37.5 562,-37.5 562,-67.5"/>
 <text text-anchor="start" x="435" y="-55.5" font-family="Helvetica,sans-Serif" font-size="10.00">fl::EngineEvents::onStrip</text>
 <text text-anchor="middle" x="494.5" y="-44.5" font-family="Helvetica,sans-Serif" font-size="10.00">Added</text>
@@ -157,74 +157,37 @@ var sectionId = 'dynsection-0';
 </a>
 </g>
 </g>
-<!-- Node11 -->
-<g id="Node000011" class="node">
-<title>Node11</title>
-<g id="a_Node000011"><a xlink:href="../../d6/d2c/class_c_l_e_d_controller_a6c8e2157d244ce8b1b878947ca7695d9.html#a6c8e2157d244ce8b1b878947ca7695d9" target="_top" xlink:title="Set the default array of LEDs to be used by this controller.">
+<!-- Node7 -->
+<g id="Node000007" class="node">
+<title>Node7</title>
+<g id="a_Node000007"><a xlink:href="../../d6/d2c/class_c_l_e_d_controller_a6c8e2157d244ce8b1b878947ca7695d9.html#a6c8e2157d244ce8b1b878947ca7695d9" target="_top" xlink:title="Set the default array of LEDs to be used by this controller.">
 <polygon fill="white" stroke="#666666" points="561.5,-19 427.5,-19 427.5,0 561.5,0 561.5,-19"/>
 <text text-anchor="middle" x="494.5" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">CLEDController::setLeds</text>
 </a>
 </g>
 </g>
-<!-- Node3&#45;&gt;Node11 -->
-<g id="edge8_Node000003_Node000011" class="edge">
-<title>Node3&#45;&gt;Node11</title>
-<g id="a_edge8_Node000003_Node000011"><a xlink:title=" ">
+<!-- Node3&#45;&gt;Node7 -->
+<g id="edge6_Node000003_Node000007" class="edge">
+<title>Node3&#45;&gt;Node7</title>
+<g id="a_edge6_Node000003_Node000007"><a xlink:title=" ">
 <path fill="none" stroke="#63b8ff" d="M303.02,-63.9C326.11,-53.9 364.06,-38.35 398,-28.5 407.44,-25.76 417.51,-23.29 427.45,-21.1"/>
 <polygon fill="#63b8ff" stroke="#63b8ff" points="428.25,-24.5 437.31,-19 426.8,-17.66 428.25,-24.5"/>
-</a>
-</g>
-</g>
-<!-- Node7 -->
-<g id="Node000007" class="node">
-<title>Node7</title>
-<g id="a_Node000007"><a xlink:href="../../de/dca/classfl_1_1_engine_events_a006e1f01b766436e0eec2e406b4512d5.html#a006e1f01b766436e0eec2e406b4512d5" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#666666" points="762.5,-107.5 661.5,-107.5 661.5,-77.5 762.5,-77.5 762.5,-107.5"/>
-<text text-anchor="start" x="669.5" y="-95.5" font-family="Helvetica,sans-Serif" font-size="10.00">fl::EngineEvents::</text>
-<text text-anchor="middle" x="712" y="-84.5" font-family="Helvetica,sans-Serif" font-size="10.00">_onStripAdded</text>
-</a>
-</g>
-</g>
-<!-- Node6&#45;&gt;Node7 -->
-<g id="edge6_Node000006_Node000007" class="edge">
-<title>Node6&#45;&gt;Node7</title>
-<g id="a_edge6_Node000006_Node000007"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M562.21,-64.88C590.72,-70.17 623.75,-76.3 651.43,-81.44"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="650.89,-84.9 661.36,-83.29 652.17,-78.02 650.89,-84.9"/>
 </a>
 </g>
 </g>
 <!-- Node8 -->
 <g id="Node000008" class="node">
 <title>Node8</title>
-<g id="a_Node000008"><a xlink:href="../../de/dca/classfl_1_1_engine_events_a34a4625c4fbcf754f70820bc4f0e418b.html#a34a4625c4fbcf754f70820bc4f0e418b" target="_top" xlink:title=" ">
-<polygon fill="#fff0f0" stroke="red" points="791,-59 633,-59 633,-40 791,-40 791,-59"/>
-<text text-anchor="middle" x="712" y="-47" font-family="Helvetica,sans-Serif" font-size="10.00">fl::EngineEvents::getInstance</text>
-</a>
-</g>
-</g>
-<!-- Node6&#45;&gt;Node8 -->
-<g id="edge7_Node000006_Node000008" class="edge">
-<title>Node6&#45;&gt;Node8</title>
-<g id="a_edge7_Node000006_Node000008"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M562.21,-51.57C581.35,-51.3 602.52,-51.01 622.75,-50.73"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="622.95,-54.23 632.9,-50.59 622.85,-47.23 622.95,-54.23"/>
-</a>
-</g>
-</g>
-<!-- Node12 -->
-<g id="Node000012" class="node">
-<title>Node12</title>
-<g id="a_Node000012"><a xlink:href="../../d6/d2c/class_c_l_e_d_controller_a8c560c6d171f117dfd19c0f2ec780a32.html#a8c560c6d171f117dfd19c0f2ec780a32" target="_top" xlink:title="Create an led controller object, add it to the chain of controllers.">
+<g id="a_Node000008"><a xlink:href="../../d6/d2c/class_c_l_e_d_controller_a8c560c6d171f117dfd19c0f2ec780a32.html#a8c560c6d171f117dfd19c0f2ec780a32" target="_top" xlink:title="Create an led controller object, add it to the chain of controllers.">
 <polygon fill="white" stroke="#666666" points="797,-19 627,-19 627,0 797,0 797,-19"/>
 <text text-anchor="middle" x="712" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">CLEDController::CLEDController</text>
 </a>
 </g>
 </g>
-<!-- Node11&#45;&gt;Node12 -->
-<g id="edge9_Node000011_Node000012" class="edge">
-<title>Node11&#45;&gt;Node12</title>
-<g id="a_edge9_Node000011_Node000012"><a xlink:title=" ">
+<!-- Node7&#45;&gt;Node8 -->
+<g id="edge7_Node000007_Node000008" class="edge">
+<title>Node7&#45;&gt;Node8</title>
+<g id="a_edge7_Node000007_Node000008"><a xlink:title=" ">
 <path fill="none" stroke="#63b8ff" d="M561.62,-9.5C578.95,-9.5 597.98,-9.5 616.48,-9.5"/>
 <polygon fill="#63b8ff" stroke="#63b8ff" points="616.69,-13 626.68,-9.5 616.68,-6 616.69,-13"/>
 </a>

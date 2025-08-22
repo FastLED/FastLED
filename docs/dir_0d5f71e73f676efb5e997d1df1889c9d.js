@@ -1,6 +1,6 @@
 var dir_0d5f71e73f676efb5e997d1df1889c9d =
 [
-    [ "enabled.h", "df/d17/enabled_8h.html", "df/d17/enabled_8h" ],
+    [ "enabled.h", "df/d17/enabled_8h.html", null ],
     [ "led_strip.h", "df/d6e/led__strip_8h.html", "df/d6e/led__strip_8h" ],
     [ "led_strip_api.c", "d8/de7/led__strip__api_8c.html", null ],
     [ "led_strip_interface.h", "d9/dcc/led__strip__interface_8h.html", "d9/dcc/led__strip__interface_8h" ],

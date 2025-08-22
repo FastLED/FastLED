@@ -6,5 +6,5 @@ digraph "Graphical Class Hierarchy"
   edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
   node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
   rankdir="LR";
-  Node0 [id="Node000000",label="fl::FsImpl::Visitor",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/d9e/structfl_1_1_fs_impl_1_1_visitor.html",tooltip=" "];
+  Node0 [id="Node000000",label="fl::common_type_impl\l\< T, U, typename enable\l_if\< is_integral\< T \>::\lvalue &&is_integral\< U \>\l::value &&!is_same\< T, U\l \>::value &&!((is_same\< T,\l i8 \>::value &&is_same\< U,\l u8 \>::value)\|\|(is_same\< T,\l u8 \>::value &&is_same\< U, i8\l \>::value))\>::type \>",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl.html#df/da8/structfl_1_1common__type__impl_3_01_t_00_01_u_00_01typename_01enable__if_3_01is__integral_3_01_tc1d1dacb3575c2f678010113279b7ebf",tooltip=" "];
 }

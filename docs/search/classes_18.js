@@ -9,5 +9,6 @@ var searchData=
   ['xypathgenerator_6',['XYPathGenerator',['../d9/d43/classfl_1_1_x_y_path_generator.html',1,'fl']]],
   ['xypathparams_7',['XYPathParams',['../da/d32/classfl_1_1_x_y_path_params.html',1,'fl']]],
   ['xypathrenderer_8',['XYPathRenderer',['../d2/dbc/classfl_1_1_x_y_path_renderer.html',1,'fl']]],
-  ['xyrasteru8sparse_9',['XYRasterU8Sparse',['../d1/d5c/classfl_1_1_x_y_raster_u8_sparse.html',1,'fl']]]
+  ['xyrastersparse_5fcrgb_9',['XYRasterSparse_CRGB',['../d3/dca/classfl_1_1_x_y_raster_sparse___c_r_g_b.html',1,'fl']]],
+  ['xyrasteru8sparse_10',['XYRasterU8Sparse',['../d1/d5c/classfl_1_1_x_y_raster_u8_sparse.html',1,'fl']]]
 ];

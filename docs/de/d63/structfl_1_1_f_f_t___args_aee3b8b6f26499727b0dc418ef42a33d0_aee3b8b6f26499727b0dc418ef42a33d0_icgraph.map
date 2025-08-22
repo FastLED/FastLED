@@ -1,5 +1,11 @@
 <map id="fl::FFT_Args::DefaultMaxFrequency" name="fl::FFT_Args::DefaultMaxFrequency">
-<area shape="rect" id="Node000001" title=" " alt="" coords="200,5,381,45"/>
-<area shape="rect" id="Node000002" href="$d0/de1/classfl_1_1_audio_sample_ac64f8011dd28714299f3ae7c1d8753eb.html#ac64f8011dd28714299f3ae7c1d8753eb" title=" " alt="" coords="5,13,152,38"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="186,28,152,28,152,23,186,23"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="576,27,757,67"/>
+<area shape="rect" id="Node000002" href="$d0/de1/classfl_1_1_audio_sample_aa07d9fc1f757039c453a67dd030fcfd9.html#aa07d9fc1f757039c453a67dd030fcfd9" title=" " alt="" coords="381,35,528,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="562,50,528,50,528,45,562,45"/>
+<area shape="rect" id="Node000003" href="$da/dc7/advanced_8h_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="238,5,289,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="367,37,288,24,289,19,368,31"/>
+<area shape="rect" id="Node000004" href="$d3/d40/classfl_1_1_audio_reactive_a2fb8e16dd8530e5872d6f457683fe697.html#a2fb8e16dd8530e5872d6f457683fe697" title=" " alt="" coords="193,55,333,95"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="368,63,334,68,333,62,367,57"/>
+<area shape="rect" id="Node000005" href="$d3/d40/classfl_1_1_audio_reactive_af5d11059f30ab27a6ad49570e3cd9fb3.html#af5d11059f30ab27a6ad49570e3cd9fb3" title=" " alt="" coords="5,55,145,95"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="179,78,146,78,146,73,179,73"/>
 </map>

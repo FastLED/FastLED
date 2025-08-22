@@ -113,10 +113,13 @@ $(function(){initNavTree('db/d66/chipsets_8h.html','../../'); initResizable(true
 </div><div class="textblock"><code>#include &quot;<a class="el" href="../../d2/dba/pixeltypes_8h_source.html">pixeltypes.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="../../dc/d44/five__bit__hd__gamma_8h_source.html">fl/five_bit_hd_gamma.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="../../d4/d64/force__inline_8h_source.html">fl/force_inline.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../df/d72/bit__cast_8h_source.html">fl/bit_cast.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="../../d8/d6c/pixel__iterator_8h_source.html">pixel_iterator.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="../../db/dd1/crgb_8h_source.html">crgb.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="../../db/d07/eorder_8h_source.html">eorder.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="../../df/d2a/namespace_8h_source.html">fl/namespace.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d8/db8/math__macros_8h_source.html">fl/math_macros.h</a>&quot;</code><br />
+<code>#include &quot;platforms/chipsets_specialized_ws2812.h&quot;</code><br />
 </div><div class="textblock"><div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Include dependency graph for chipsets.h:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -129,7 +132,7 @@ $(function(){initNavTree('db/d66/chipsets_8h.html','../../'); initResizable(true
 <div id="dynsection-1-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-1-content" class="dyncontent" style="display:none;">
-<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../d1/db6/chipsets_8h__dep__incl.svg" width="100%" height="536"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
+<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../d1/db6/chipsets_8h__dep__incl.svg" width="100%" height="459"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
 </div>
 </div>
 <p><a href="../../db/d66/chipsets_8h_source.html">Go to the source code of this file.</a></p>
@@ -205,6 +208,9 @@ Classes</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d8/df9/class_s_m16716_controller.html">SM16716Controller&lt; DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_SPEED &gt;</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">SM16716 controller class.  <a href="../../d8/df9/class_s_m16716_controller.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d5/de7/class_s_m16824_e_controller.html">SM16824EController&lt; DATA_PIN, RGB_ORDER &gt;</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="../../df/daa/class_s_m16824_e.html" title="SM16824E controller class.">SM16824E</a> controller class.  <a href="../../d5/de7/class_s_m16824_e_controller.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d0/da8/class_t_m1803_controller400_khz.html">TM1803Controller400Khz&lt; DATA_PIN, RGB_ORDER &gt;</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="../../d5/d26/class_t_m1803.html" title="TM1803 controller class.">TM1803</a> controller class.  <a href="../../d0/da8/class_t_m1803_controller400_khz.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -258,7 +264,15 @@ Classes</h2></td></tr>
 Macros</h2></td></tr>
 <tr class="memitem:ab4f6d700eec6612f7bbc512489ca055d" id="r_ab4f6d700eec6612f7bbc512489ca055d"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../db/d66/chipsets_8h_ab4f6d700eec6612f7bbc512489ca055d.html#ab4f6d700eec6612f7bbc512489ca055d">__INC_CHIPSETS_H</a></td></tr>
 <tr class="separator:ab4f6d700eec6612f7bbc512489ca055d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga21e124974d43423655bca453500f8378" id="r_ga21e124974d43423655bca453500f8378"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d7/d6f/group___clockless_chipsets_ga21e124974d43423655bca453500f8378.html#ga21e124974d43423655bca453500f8378">FMUL</a>&#160;&#160;&#160;(CLOCKLESS_FREQUENCY/8000000)</td></tr>
+<tr class="memitem:gaf56f7c119dbc6c3babb2ae887b60cc04" id="r_gaf56f7c119dbc6c3babb2ae887b60cc04"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d7/d6f/group___clockless_chipsets_gaf56f7c119dbc6c3babb2ae887b60cc04.html#gaf56f7c119dbc6c3babb2ae887b60cc04">CLOCKLESS_FREQUENCY</a>&#160;&#160;&#160;F_CPU</td></tr>
+<tr class="separator:gaf56f7c119dbc6c3babb2ae887b60cc04"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab2680a80d6618cb7014c281392ccef34" id="r_ab2680a80d6618cb7014c281392ccef34"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../db/d66/chipsets_8h_ab2680a80d6618cb7014c281392ccef34.html#ab2680a80d6618cb7014c281392ccef34">FASTLED_CLOCKLESS_CONTROLLER</a>&#160;&#160;&#160;fl::ClocklessController</td></tr>
+<tr class="separator:ab2680a80d6618cb7014c281392ccef34"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a57cd115a49094759c0671ea939c6e595" id="r_a57cd115a49094759c0671ea939c6e595"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../db/d66/chipsets_8h_a57cd115a49094759c0671ea939c6e595.html#a57cd115a49094759c0671ea939c6e595">FASTLED_CLOCKLESS_USES_NANOSECONDS</a>&#160;&#160;&#160;0</td></tr>
+<tr class="separator:a57cd115a49094759c0671ea939c6e595"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0d2a3510ab0da9bdcdf50f14aa54ce9f" id="r_a0d2a3510ab0da9bdcdf50f14aa54ce9f"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../db/d66/chipsets_8h_a0d2a3510ab0da9bdcdf50f14aa54ce9f.html#a0d2a3510ab0da9bdcdf50f14aa54ce9f">FASTLED_OVERCLOCK</a>&#160;&#160;&#160;1.0</td></tr>
+<tr class="separator:a0d2a3510ab0da9bdcdf50f14aa54ce9f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga21e124974d43423655bca453500f8378" id="r_ga21e124974d43423655bca453500f8378"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d7/d6f/group___clockless_chipsets_ga21e124974d43423655bca453500f8378.html#ga21e124974d43423655bca453500f8378">FMUL</a>&#160;&#160;&#160;(<a class="el" href="../../d7/d6f/group___clockless_chipsets_gaf56f7c119dbc6c3babb2ae887b60cc04.html#gaf56f7c119dbc6c3babb2ae887b60cc04">CLOCKLESS_FREQUENCY</a>/8000000)</td></tr>
 <tr class="memdesc:ga21e124974d43423655bca453500f8378"><td class="mdescLeft">&#160;</td><td class="mdescRight">Frequency multiplier for each clockless data interval.  <br /></td></tr>
 <tr class="separator:ga21e124974d43423655bca453500f8378"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
@@ -269,7 +283,7 @@ Macros</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../db/d66/chipsets_8h.html">chipsets.h</a></li>
-    <li class="footer">Generated on Tue Jun 24 2025 00:58:14 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Fri Aug 22 2025 20:59:34 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

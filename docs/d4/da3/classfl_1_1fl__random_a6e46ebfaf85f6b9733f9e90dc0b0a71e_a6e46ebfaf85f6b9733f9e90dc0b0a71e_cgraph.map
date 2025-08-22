@@ -1,0 +1,7 @@
+<map id="fl::fl_random::operator()" name="fl::fl_random::operator()">
+<area shape="rect" id="Node000001" title="Generate a random number." alt="" coords="5,13,181,38"/>
+<area shape="rect" id="Node000002" href="$d4/da3/classfl_1_1fl__random_a4a278033350f6d38a92bdbdca1bbae55.html#a4a278033350f6d38a92bdbdca1bbae55" title="Generate next 32&#45;bit random number using this instance&#39;s seed." alt="" coords="229,5,369,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="181,23,216,23,216,28,181,28"/>
+<area shape="rect" id="Node000003" href="$d4/da3/classfl_1_1fl__random_ad96698c9b4feb20286fa9c7189fb2e33.html#ad96698c9b4feb20286fa9c7189fb2e33" title="Generate next 16&#45;bit random number using this instance&#39;s seed." alt="" coords="417,5,557,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="370,23,403,23,403,28,370,28"/>
+</map>

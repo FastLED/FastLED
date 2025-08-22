@@ -1,0 +1,8 @@
+<map id="paletteDropdown" name="paletteDropdown">
+<area shape="rect" id="Node000001" title=" " alt="" coords="256,31,391,56"/>
+<area shape="rect" id="Node000002" href="$d4/d06/curr_8h_a43ebf333941358d02612a6a8d90dbd14.html#a43ebf333941358d02612a6a8d90dbd14" title=" " alt="" coords="112,5,208,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="242,33,208,28,209,23,243,28"/>
+<area shape="rect" id="Node000003" href="$d4/d06/curr_8h_a4fc01d736fe50cf5b977f755b675f11d.html#a4fc01d736fe50cf5b977f755b675f11d" title=" " alt="" coords="5,31,64,56"/>
+<area shape="poly" id="edge3_Node000001_Node000003" title=" " alt="" coords="242,46,64,46,64,41,242,41"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="99,33,65,40,64,35,98,28"/>
+</map>

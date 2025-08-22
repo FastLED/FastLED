@@ -1,0 +1,6 @@
+<map id="fl::exp" name="fl::exp">
+<area shape="rect" id="Node000001" title=" " alt="" coords="252,29,315,55"/>
+<area shape="poly" id="edge1_Node000001_Node000001" title=" " alt="" coords="315,19,306,11,283,8,264,10,255,15,253,20,258,28,254,31,247,21,251,11,263,5,283,3,308,6,318,15"/>
+<area shape="rect" id="Node000002" href="$da/db7/class_max_fade_tracker_aa9255133484e6365948fed774c4fa76d.html#aa9255133484e6365948fed774c4fa76d" title="Process one 512&#45;sample block; returns [0…1] with inertia." alt="" coords="5,29,204,55"/>
+<area shape="poly" id="edge2_Node000001_Node000002" title=" " alt="" coords="238,45,204,45,204,39,238,39"/>
+</map>

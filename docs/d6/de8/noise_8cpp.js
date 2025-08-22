@@ -1,7 +1,7 @@
 var noise_8cpp =
 [
     [ "FASTLED_INTERNAL", "d6/de8/noise_8cpp_a2d8dda85477a00deab830effc5159d33.html#a2d8dda85477a00deab830effc5159d33", null ],
-    [ "P", "d6/de8/noise_8cpp_a1a82c4835f55136d206fd9b693eaed81.html#a1a82c4835f55136d206fd9b693eaed81", null ],
+    [ "NOISE_P", "d6/de8/noise_8cpp_ae633137eb02a37d7d3c9d7b69be08f44.html#ae633137eb02a37d7d3c9d7b69be08f44", null ],
     [ "fill_2dnoise16", "de/da4/group___noise_fill_ga714a0f305e385a60d81a40d1f98b53fc.html#ga714a0f305e385a60d81a40d1f98b53fc", null ],
     [ "fill_2dnoise8", "de/da4/group___noise_fill_ga6fcc17e60eac4b9dbb620f7e354177f1.html#ga6fcc17e60eac4b9dbb620f7e354177f1", null ],
     [ "fill_noise16", "de/da4/group___noise_fill_ga8bf5ab0f87a6bb79204754ef2a62f960.html#ga8bf5ab0f87a6bb79204754ef2a62f960", null ],
@@ -30,12 +30,12 @@ var noise_8cpp =
     [ "inoise8", "d8/df9/group___noise_generation_gab9d952a5258caa93c05ebdde0140cf0e.html#gab9d952a5258caa93c05ebdde0140cf0e", null ],
     [ "inoise8", "d8/df9/group___noise_generation_ga9641aa87f0a5557f73004fb73f81bba5.html#ga9641aa87f0a5557f73004fb73f81bba5", null ],
     [ "inoise8", "d8/df9/group___noise_generation_gaa521ccca6038d7b5e881fe2e8f35d3bc.html#gaa521ccca6038d7b5e881fe2e8f35d3bc", null ],
-    [ "inoise8_raw", "d8/df9/group___noise_generation_gabf6fbef9588c6d6ee35b7ad79fe14ace.html#gabf6fbef9588c6d6ee35b7ad79fe14ace", null ],
-    [ "inoise8_raw", "d8/df9/group___noise_generation_gae8a7338d2f14deb11f62086adf81dfe2.html#gae8a7338d2f14deb11f62086adf81dfe2", null ],
-    [ "inoise8_raw", "d8/df9/group___noise_generation_ga6c57ed3ea69e819c29602578ecbabd71.html#ga6c57ed3ea69e819c29602578ecbabd71", null ],
+    [ "inoise8_raw", "d8/d5c/group___noise_gabf6fbef9588c6d6ee35b7ad79fe14ace.html#gabf6fbef9588c6d6ee35b7ad79fe14ace", null ],
+    [ "inoise8_raw", "d8/d5c/group___noise_gae8a7338d2f14deb11f62086adf81dfe2.html#gae8a7338d2f14deb11f62086adf81dfe2", null ],
+    [ "inoise8_raw", "d8/d5c/group___noise_ga6c57ed3ea69e819c29602578ecbabd71.html#ga6c57ed3ea69e819c29602578ecbabd71", null ],
     [ "lerp7by8", "d6/de8/noise_8cpp_ad89cf56a81ef482a0027a47eada176bb.html#ad89cf56a81ef482a0027a47eada176bb", null ],
     [ "selectBasedOnHashBit", "d6/de8/noise_8cpp_a7e9b66e76fd89c94ccb6f26fd713bdca.html#a7e9b66e76fd89c94ccb6f26fd713bdca", null ],
     [ "nmax", "d6/de8/noise_8cpp_a96f7525b7d6a9b4b64fe179dd064b104.html#a96f7525b7d6a9b4b64fe179dd064b104", null ],
     [ "nmin", "d6/de8/noise_8cpp_a2eec13b2f7aac3071397e40975c82e48.html#a2eec13b2f7aac3071397e40975c82e48", null ],
-    [ "p", "d6/de8/noise_8cpp_ad4f390ff52b49f726bfdf77302fbd4d5.html#ad4f390ff52b49f726bfdf77302fbd4d5", null ]
+    [ "noise_detail::p", "d2/dda/namespacenoise__detail_a2a3101485c672597b0c6f28dbcd31b9a.html#a2a3101485c672597b0c6f28dbcd31b9a", null ]
 ];

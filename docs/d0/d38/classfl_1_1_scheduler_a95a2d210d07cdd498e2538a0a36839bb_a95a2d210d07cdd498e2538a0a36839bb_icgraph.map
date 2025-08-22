@@ -1,0 +1,11 @@
+<map id="fl::Scheduler::add_task" name="fl::Scheduler::add_task">
+<area shape="rect" id="Node000001" title=" " alt="" coords="355,55,524,80"/>
+<area shape="rect" id="Node000002" href="$d7/d86/classfl_1_1task_a8edbe77a03a7c4b29115db65778bee74.html#a8edbe77a03a7c4b29115db65778bee74" title=" " alt="" coords="204,55,307,80"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="341,70,307,70,307,65,341,65"/>
+<area shape="rect" id="Node000003" href="$d7/d86/classfl_1_1task_a2f72951d9ee4e9182a111d4b99e659dd.html#a2f72951d9ee4e9182a111d4b99e659dd" title=" " alt="" coords="5,5,156,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="196,53,126,33,127,28,197,48"/>
+<area shape="rect" id="Node000004" href="$d7/d86/classfl_1_1task_a752e0a5451dfb3ac6e994f39926f6564.html#a752e0a5451dfb3ac6e994f39926f6564" title=" " alt="" coords="5,55,156,80"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="190,70,156,70,156,65,190,65"/>
+<area shape="rect" id="Node000005" href="$d5/d1b/examples_2_async_2async_8h_a4fc01d736fe50cf5b977f755b675f11d.html#a4fc01d736fe50cf5b977f755b675f11d" title=" " alt="" coords="51,104,110,129"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="198,86,111,111,110,106,196,81"/>
+</map>

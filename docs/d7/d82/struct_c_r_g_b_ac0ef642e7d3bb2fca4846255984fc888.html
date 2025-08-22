@@ -112,7 +112,7 @@ $(function(){initNavTree('d7/d82/struct_c_r_g_b_ac0ef642e7d3bb2fca4846255984fc88
         <tr>
           <td class="memname"><a class="el" href="../../d4/d64/force__inline_8h_a2f767b53d92c9d761d9f8d28a35d80c7.html#a2f767b53d92c9d761d9f8d28a35d80c7">FASTLED_FORCE_INLINE</a> <a class="el" href="../../d7/d82/struct_c_r_g_b.html">CRGB</a> &amp; CRGB::operator= </td>
           <td>(</td>
-          <td class="paramtype">const <a class="el" href="../../dc/d53/struct_c_h_s_v.html">CHSV</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>rhs</em></span></td><td>)</td>
+          <td class="paramtype">const <a class="el" href="../../db/ddc/structfl_1_1_c_h_s_v.html">CHSV</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>rhs</em></span></td><td>)</td>
           <td></td>
         </tr>
       </table>
@@ -125,20 +125,20 @@ $(function(){initNavTree('d7/d82/struct_c_r_g_b_ac0ef642e7d3bb2fca4846255984fc88
 
 <p>Allow assignment from HSV color. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../db/dd1/crgb_8h_source.html#l00197">197</a> of file <a class="el" href="../../db/dd1/crgb_8h_source.html">crgb.h</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  198</span>    {</div>
-<div class="line"><span class="lineno">  199</span>        <a class="code hl_function" href="../../db/d87/group___pixel_types_gab316cfeb8bd5f37d8faaf761ad3c834b.html#gab316cfeb8bd5f37d8faaf761ad3c834b">hsv2rgb_rainbow</a>( rhs, *<span class="keyword">this</span>);</div>
-<div class="line"><span class="lineno">  200</span>        <span class="keywordflow">return</span> *<span class="keyword">this</span>;</div>
-<div class="line"><span class="lineno">  201</span>    }</div>
-<div class="ttc" id="agroup___pixel_types_gab316cfeb8bd5f37d8faaf761ad3c834b_html_gab316cfeb8bd5f37d8faaf761ad3c834b"><div class="ttname"><a href="../../db/d87/group___pixel_types_gab316cfeb8bd5f37d8faaf761ad3c834b.html#gab316cfeb8bd5f37d8faaf761ad3c834b">hsv2rgb_rainbow</a></div><div class="ttdeci">void hsv2rgb_rainbow(const struct CHSV &amp;hsv, struct CRGB &amp;rgb)</div><div class="ttdoc">Forward declaration of hsv2rgb_rainbow here, to avoid circular dependencies.</div></div>
+<p class="definition">Definition at line <a class="el" href="../../db/dd1/crgb_8h_source.html#l00260">260</a> of file <a class="el" href="../../db/dd1/crgb_8h_source.html">crgb.h</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  261</span>    {</div>
+<div class="line"><span class="lineno">  262</span>        <a class="code hl_function" href="../../db/dd1/crgb_8h_a26eaa8327d3606b692249e6449529c3b.html#a26eaa8327d3606b692249e6449529c3b">hsv2rgb_dispatch</a>( rhs, *<span class="keyword">this</span>);</div>
+<div class="line"><span class="lineno">  263</span>        <span class="keywordflow">return</span> *<span class="keyword">this</span>;</div>
+<div class="line"><span class="lineno">  264</span>    }</div>
+<div class="ttc" id="acrgb_8h_a26eaa8327d3606b692249e6449529c3b_html_a26eaa8327d3606b692249e6449529c3b"><div class="ttname"><a href="../../db/dd1/crgb_8h_a26eaa8327d3606b692249e6449529c3b.html#a26eaa8327d3606b692249e6449529c3b">hsv2rgb_dispatch</a></div><div class="ttdeci">FASTLED_FORCE_INLINE void hsv2rgb_dispatch(const struct CHSV *phsv, struct CRGB *prgb, int numLeds)</div><div class="ttdoc">HSV conversion function selection based on compile-time defines This allows users to configure which ...</div><div class="ttdef"><b>Definition</b> <a href="../../db/dd1/crgb_8h_source.html#l00057">crgb.h:57</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d7/d82/struct_c_r_g_b_a08d8e05a3fcdb88dedb886cad9cbd3fa.html#a08d8e05a3fcdb88dedb886cad9cbd3fa">CRGB()</a>, <a class="el" href="../../d4/d64/force__inline_8h_source.html#l00006">FASTLED_FORCE_INLINE</a>, and <a class="el" href="../../db/d87/group___pixel_types_gab316cfeb8bd5f37d8faaf761ad3c834b.html#gab316cfeb8bd5f37d8faaf761ad3c834b">hsv2rgb_rainbow()</a>.</p>
+<p class="reference">References <a class="el" href="../../db/dd1/crgb_8h_source.html#l00158">CRGB()</a>, <a class="el" href="../../d4/d64/force__inline_8h_source.html#l00006">FASTLED_FORCE_INLINE</a>, and <a class="el" href="../../db/dd1/crgb_8h_source.html#l00057">hsv2rgb_dispatch()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-0-content" class="dyncontent" style="display:none;">
-<div class="center"><iframe scrolling="no" frameborder="0" src="../../d7/d82/struct_c_r_g_b_ac0ef642e7d3bb2fca4846255984fc888_ac0ef642e7d3bb2fca4846255984fc888_cgraph.svg" width="326" height="86"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../d7/d82/struct_c_r_g_b_ac0ef642e7d3bb2fca4846255984fc888_ac0ef642e7d3bb2fca4846255984fc888_cgraph.svg" width="100%" height="455"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
 </div>
 
 </div>
@@ -150,7 +150,7 @@ $(function(){initNavTree('d7/d82/struct_c_r_g_b_ac0ef642e7d3bb2fca4846255984fc88
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d7/d82/struct_c_r_g_b.html">CRGB</a></li>
-    <li class="footer">Generated on Tue Jun 24 2025 00:58:15 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Fri Aug 22 2025 20:59:35 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

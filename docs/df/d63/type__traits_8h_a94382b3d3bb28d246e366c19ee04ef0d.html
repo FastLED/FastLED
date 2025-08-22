@@ -129,23 +129,23 @@ $(function(){initNavTree('df/d63/type__traits_8h_a94382b3d3bb28d246e366c19ee04ef
 <div class="line">        <span class="keyword">const</span> CLASS &amp;obj, <span class="keyword">const</span> T &amp;pod) {                                      \</div>
 <div class="line">        <span class="keywordflow">return</span> obj OP pod;                                                     \</div>
 <div class="line">    }</div>
-<div class="ttc" id="anamespacefl_html_d5/d67/structfl_1_1enable__if"><div class="ttname"><a href="../../d4/d36/namespacefl.html#d5/d67/structfl_1_1enable__if">fl::enable_if</a></div><div class="ttdef"><b>Definition</b> <a href="../../df/d63/type__traits_8h_source.html#l00016">type_traits.h:16</a></div></div>
-<div class="ttc" id="astructfl_1_1is__pod_afa7bfa1cae3637566404d69866a85d98_html_afa7bfa1cae3637566404d69866a85d98"><div class="ttname"><a href="../../d5/dfa/structfl_1_1is__pod_afa7bfa1cae3637566404d69866a85d98.html#afa7bfa1cae3637566404d69866a85d98">fl::is_pod::value</a></div><div class="ttdeci">static constexpr bool value</div><div class="ttdef"><b>Definition</b> <a href="../../df/d63/type__traits_8h_source.html#l00237">type_traits.h:237</a></div></div>
-<div class="ttc" id="astructfl_1_1is__same_a72f864a2cfc4ec8e2f2849617d402f61_html_a72f864a2cfc4ec8e2f2849617d402f61"><div class="ttname"><a href="../../d3/d46/structfl_1_1is__same_a72f864a2cfc4ec8e2f2849617d402f61.html#a72f864a2cfc4ec8e2f2849617d402f61">fl::is_same::value</a></div><div class="ttdeci">static constexpr bool value</div><div class="ttdef"><b>Definition</b> <a href="../../df/d63/type__traits_8h_source.html#l00054">type_traits.h:54</a></div></div>
+<div class="ttc" id="anamespacefl_html_d5/d67/structfl_1_1enable__if"><div class="ttname"><a href="../../d4/d36/namespacefl.html#d5/d67/structfl_1_1enable__if">fl::enable_if</a></div><div class="ttdef"><b>Definition</b> <a href="../../df/d63/type__traits_8h_source.html#l00046">type_traits.h:46</a></div></div>
+<div class="ttc" id="astructfl_1_1is__pod_afa7bfa1cae3637566404d69866a85d98_html_afa7bfa1cae3637566404d69866a85d98"><div class="ttname"><a href="../../d5/dfa/structfl_1_1is__pod_afa7bfa1cae3637566404d69866a85d98.html#afa7bfa1cae3637566404d69866a85d98">fl::is_pod::value</a></div><div class="ttdeci">static constexpr bool value</div><div class="ttdef"><b>Definition</b> <a href="../../df/d63/type__traits_8h_source.html#l00261">type_traits.h:261</a></div></div>
+<div class="ttc" id="astructfl_1_1is__same_a72f864a2cfc4ec8e2f2849617d402f61_html_a72f864a2cfc4ec8e2f2849617d402f61"><div class="ttname"><a href="../../d3/d46/structfl_1_1is__same_a72f864a2cfc4ec8e2f2849617d402f61.html#a72f864a2cfc4ec8e2f2849617d402f61">fl::is_same::value</a></div><div class="ttdeci">static constexpr bool value</div><div class="ttdef"><b>Definition</b> <a href="../../df/d63/type__traits_8h_source.html#l00084">type_traits.h:84</a></div></div>
 </div><!-- fragment -->
-<p class="definition">Definition at line <a class="el" href="../../df/d63/type__traits_8h_source.html#l00490">490</a> of file <a class="el" href="../../df/d63/type__traits_8h_source.html">type_traits.h</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  490</span><span class="preprocessor">#define FASTLED_DEFINE_POD_COMPARISON_OPERATOR(CLASS, OP)                      \</span></div>
-<div class="line"><span class="lineno">  491</span><span class="preprocessor">    template &lt;typename T, typename U&gt;                                          \</span></div>
-<div class="line"><span class="lineno">  492</span><span class="preprocessor">    typename fl::enable_if&lt;                                                    \</span></div>
-<div class="line"><span class="lineno">  493</span><span class="preprocessor">        fl::is_same&lt;U, CLASS&gt;::value &amp;&amp; fl::is_pod&lt;T&gt;::value, bool&gt;::type      \</span></div>
-<div class="line"><span class="lineno">  494</span><span class="preprocessor">    operator OP(const T &amp;pod, const CLASS &amp;obj) {                              \</span></div>
-<div class="line"><span class="lineno">  495</span><span class="preprocessor">        return pod OP obj;                                                     \</span></div>
-<div class="line"><span class="lineno">  496</span><span class="preprocessor">    }                                                                          \</span></div>
-<div class="line"><span class="lineno">  497</span><span class="preprocessor">    template &lt;typename T&gt;                                                      \</span></div>
-<div class="line"><span class="lineno">  498</span><span class="preprocessor">    typename fl::enable_if&lt;fl::is_pod&lt;T&gt;::value, bool&gt;::type operator OP(      \</span></div>
-<div class="line"><span class="lineno">  499</span><span class="preprocessor">        const CLASS &amp;obj, const T &amp;pod) {                                      \</span></div>
-<div class="line"><span class="lineno">  500</span><span class="preprocessor">        return obj OP pod;                                                     \</span></div>
-<div class="line"><span class="lineno">  501</span><span class="preprocessor">    }</span></div>
+<p class="definition">Definition at line <a class="el" href="../../df/d63/type__traits_8h_source.html#l00775">775</a> of file <a class="el" href="../../df/d63/type__traits_8h_source.html">type_traits.h</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  775</span><span class="preprocessor">#define FASTLED_DEFINE_POD_COMPARISON_OPERATOR(CLASS, OP)                      \</span></div>
+<div class="line"><span class="lineno">  776</span><span class="preprocessor">    template &lt;typename T, typename U&gt;                                          \</span></div>
+<div class="line"><span class="lineno">  777</span><span class="preprocessor">    typename fl::enable_if&lt;                                                    \</span></div>
+<div class="line"><span class="lineno">  778</span><span class="preprocessor">        fl::is_same&lt;U, CLASS&gt;::value &amp;&amp; fl::is_pod&lt;T&gt;::value, bool&gt;::type      \</span></div>
+<div class="line"><span class="lineno">  779</span><span class="preprocessor">    operator OP(const T &amp;pod, const CLASS &amp;obj) {                              \</span></div>
+<div class="line"><span class="lineno">  780</span><span class="preprocessor">        return pod OP obj;                                                     \</span></div>
+<div class="line"><span class="lineno">  781</span><span class="preprocessor">    }                                                                          \</span></div>
+<div class="line"><span class="lineno">  782</span><span class="preprocessor">    template &lt;typename T&gt;                                                      \</span></div>
+<div class="line"><span class="lineno">  783</span><span class="preprocessor">    typename fl::enable_if&lt;fl::is_pod&lt;T&gt;::value, bool&gt;::type operator OP(      \</span></div>
+<div class="line"><span class="lineno">  784</span><span class="preprocessor">        const CLASS &amp;obj, const T &amp;pod) {                                      \</span></div>
+<div class="line"><span class="lineno">  785</span><span class="preprocessor">        return obj OP pod;                                                     \</span></div>
+<div class="line"><span class="lineno">  786</span><span class="preprocessor">    }</span></div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -156,7 +156,7 @@ $(function(){initNavTree('df/d63/type__traits_8h_a94382b3d3bb28d246e366c19ee04ef
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dir_4d1829fa9bd13d7db71e765b2707b248.html">fl</a></li><li class="navelem"><a class="el" href="../../df/d63/type__traits_8h.html">type_traits.h</a></li>
-    <li class="footer">Generated on Tue Jun 24 2025 00:58:14 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Fri Aug 22 2025 20:59:34 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

@@ -1,19 +1,17 @@
 <map id="scale8_video" name="scale8_video">
-<area shape="rect" id="Node000001" title="The &quot;video&quot; version of scale8() guarantees that the output will be only be zero if one or both of the..." alt="" coords="385,153,492,179"/>
-<area shape="rect" id="Node000002" href="$dc/d3e/group___dimming_gad21876a676bcf26c47f957faed23f9bb.html#gad21876a676bcf26c47f957faed23f9bb" title="Brighten a value (inverse of dim8_video())" alt="" coords="199,5,325,31"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="421,143,386,93,363,67,336,44,314,33,317,28,339,40,366,63,390,89,426,140"/>
-<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a6be261d46a697b439148bd58cf47fd0a.html#a6be261d46a697b439148bd58cf47fd0a" title=" " alt="" coords="187,55,337,80"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="412,146,377,119,336,94,309,83,311,78,339,89,380,115,415,142"/>
-<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_a0abed2322d49d568d48abc49134dfadb.html#a0abed2322d49d568d48abc49134dfadb" title=" " alt="" coords="187,104,337,129"/>
-<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="379,152,308,132,309,127,380,147"/>
-<area shape="rect" id="Node000005" href="$d4/d36/namespacefl_a3f1395bf04587dfd37d40bc8f4367995.html#a3f1395bf04587dfd37d40bc8f4367995" title=" " alt="" coords="187,153,337,179"/>
-<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="372,169,337,169,337,163,372,163"/>
-<area shape="rect" id="Node000006" href="$dc/d3e/group___dimming_ga40a13446a2022dc489be8b2a8f2fa494.html#ga40a13446a2022dc489be8b2a8f2fa494" title="Adjust a scaling value for dimming for video (value will never go below 1)" alt="" coords="213,203,311,228"/>
-<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="380,185,309,205,308,200,379,180"/>
-<area shape="rect" id="Node000007" href="$d4/d36/namespacefl_a76fb9fd4373aa9fb6e06b2d49e0861ec.html#a76fb9fd4373aa9fb6e06b2d49e0861ec" title=" " alt="" coords="211,252,313,277"/>
-<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="414,190,379,216,339,242,309,254,307,249,336,237,376,212,411,186"/>
-<area shape="rect" id="Node000008" href="$df/d9d/hsv2rgb_8cpp_a06ee0f21e1bf430ea547244f6ed4add8.html#a06ee0f21e1bf430ea547244f6ed4add8" title=" " alt="" coords="195,301,329,327"/>
-<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="425,192,390,242,366,268,339,291,314,304,312,299,336,286,362,264,386,238,421,189"/>
-<area shape="rect" id="Node000009" href="$dd/dc7/group___h_s_v2_r_g_b_ga30d4c5d63d1eab20b61e14f6429bf634.html#ga30d4c5d63d1eab20b61e14f6429bf634" title="Forward declaration of hsv2rgb_rainbow here, to avoid circular dependencies." alt="" coords="5,301,139,327"/>
-<area shape="poly" id="edge8_Node000008_Node000009" title=" " alt="" coords="182,317,139,317,139,311,182,311"/>
+<area shape="rect" id="Node000001" title="The &quot;video&quot; version of scale8() guarantees that the output will be only be zero if one or both of the..." alt="" coords="204,153,311,179"/>
+<area shape="rect" id="Node000002" href="$dc/d3e/group___dimming_gad21876a676bcf26c47f957faed23f9bb.html#gad21876a676bcf26c47f957faed23f9bb" title="Brighten a value (inverse of dim8_video())" alt="" coords="17,5,144,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="240,143,205,93,181,67,155,44,133,33,136,28,157,40,185,63,209,89,244,140"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a36a7be19ed0bffbb62d8dadc9016df39.html#a36a7be19ed0bffbb62d8dadc9016df39" title=" " alt="" coords="5,55,156,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="230,146,196,119,155,94,128,83,130,78,157,89,199,115,233,142"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_abe91de9cfdb9f5b98528582d69358180.html#abe91de9cfdb9f5b98528582d69358180" title=" " alt="" coords="5,104,156,129"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="197,152,127,132,128,127,199,147"/>
+<area shape="rect" id="Node000005" href="$d4/d36/namespacefl_a47a180e0f9f1a72bb559c6b66c19c55a.html#a47a180e0f9f1a72bb559c6b66c19c55a" title=" " alt="" coords="5,153,156,179"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="190,169,156,169,156,163,190,163"/>
+<area shape="rect" id="Node000006" href="$dc/d3e/group___dimming_ga40a13446a2022dc489be8b2a8f2fa494.html#ga40a13446a2022dc489be8b2a8f2fa494" title="Adjust a scaling value for dimming for video (value will never go below 1)" alt="" coords="31,203,130,228"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="199,185,128,205,127,200,197,180"/>
+<area shape="rect" id="Node000007" href="$d4/d36/namespacefl_aac6ad82ff641101be4fba19db9fc5dbe.html#aac6ad82ff641101be4fba19db9fc5dbe" title=" " alt="" coords="29,252,132,277"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="233,190,198,216,157,242,127,254,125,249,155,237,195,212,229,186"/>
+<area shape="rect" id="Node000008" href="$df/d9d/hsv2rgb_8cpp_a06ee0f21e1bf430ea547244f6ed4add8.html#a06ee0f21e1bf430ea547244f6ed4add8" title=" " alt="" coords="14,301,147,327"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="244,192,209,242,185,268,157,291,133,304,130,299,155,286,181,264,205,238,240,189"/>
 </map>

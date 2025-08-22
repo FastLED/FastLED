@@ -1,26 +1,28 @@
 <map id="fl::NoisePalette::mapNoiseToLEDsUsingPalette" name="fl::NoisePalette::mapNoiseToLEDsUsingPalette">
-<area shape="rect" id="Node000001" title=" " alt="" coords="5,210,200,250"/>
-<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a74e1895d1234ab29fef4458532e91090.html#a74e1895d1234ab29fef4458532e91090" title=" " alt="" coords="248,117,399,143"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="147,207,280,146,282,151,149,212"/>
-<area shape="rect" id="Node000011" href="$dc/d3e/group___dimming_gae51352a3522bb8eae5e17dbee97aa1aa.html#gae51352a3522bb8eae5e17dbee97aa1aa" title="Adjust a scaling value for dimming." alt="" coords="280,217,367,243"/>
-<area shape="poly" id="edge11_Node000001_Node000011" title=" " alt="" coords="200,227,266,227,266,233,200,233"/>
-<area shape="rect" id="Node000012" href="$d9/d41/classfl_1_1_noise_palette_a56d8e189481f0cad03ce451fb5d0d939.html#a56d8e189481f0cad03ce451fb5d0d939" title=" " alt="" coords="251,267,396,292"/>
-<area shape="poly" id="edge13_Node000001_Node000012" title=" " alt="" coords="193,247,253,261,252,266,192,253"/>
-<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a924fc8748f53389e55fdc63bfc14b805.html#a924fc8748f53389e55fdc63bfc14b805" title=" " alt="" coords="447,41,521,67"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="350,115,443,70,445,75,352,120"/>
-<area shape="rect" id="Node000006" href="$d0/da5/group___scaling_dirty_ga3fade00fb4cf5b937b973128198a7a79.html#ga3fade00fb4cf5b937b973128198a7a79" title="Clean up the r1 register after a series of *LEAVING_R1_DIRTY calls." alt="" coords="749,17,847,43"/>
-<area shape="poly" id="edge6_Node000002_Node000006" title=" " alt="" coords="333,115,377,69,410,44,446,26,483,15,522,8,601,3,674,6,736,15,736,20,674,12,601,8,523,13,484,20,448,31,412,49,381,73,337,119"/>
-<area shape="rect" id="Node000007" href="$d0/da5/group___scaling_dirty_ga7386235cada3aca429b189681d2ec56d.html#ga7386235cada3aca429b189681d2ec56d" title="This version of scale8() does not clean up the R1 register on AVR." alt="" coords="700,67,896,92"/>
-<area shape="poly" id="edge10_Node000002_Node000007" title=" " alt="" coords="399,119,686,88,687,94,399,125"/>
-<area shape="rect" id="Node000008" href="$d4/d36/namespacefl_a8ef00cea89dd1023f79e4d6d33883a40.html#a8ef00cea89dd1023f79e4d6d33883a40" title="Helper function to divide a number by 16, aka four logical shift right (LSR)&#39;s." alt="" coords="449,143,519,168"/>
-<area shape="poly" id="edge7_Node000002_Node000008" title=" " alt="" coords="399,139,436,145,435,150,399,144"/>
-<area shape="rect" id="Node000009" href="$d6/d19/group___linear_interpolation_gaf65357c7aeca9778e5a2f80a6bac2b5d.html#gaf65357c7aeca9778e5a2f80a6bac2b5d" title="Map from one full&#45;range 8&#45;bit value into a narrower range of 8&#45;bit values, possibly a range of hues." alt="" coords="455,192,513,217"/>
-<area shape="poly" id="edge8_Node000002_Node000009" title=" " alt="" coords="353,140,445,184,442,188,351,145"/>
-<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_aa1e0cd66825220bead12cfc1ab7f33c6.html#aa1e0cd66825220bead12cfc1ab7f33c6" title=" " alt="" coords="569,41,652,67"/>
-<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="522,51,556,51,556,57,522,57"/>
-<area shape="poly" id="edge4_Node000004_Node000006" title=" " alt="" coords="652,46,735,35,736,40,652,51"/>
-<area shape="poly" id="edge5_Node000004_Node000007" title=" " alt="" coords="652,57,691,62,690,67,652,62"/>
-<area shape="rect" id="Node000010" href="$d0/da8/group___scaling_gad7535ccda9c92470c4e6ee0265585555.html#gad7535ccda9c92470c4e6ee0265585555" title="Scale one byte by a second one, which is treated as the numerator of a fraction whose denominator is ..." alt="" coords="579,217,643,243"/>
-<area shape="poly" id="edge9_Node000009_Node000010" title=" " alt="" coords="514,208,566,218,564,223,513,213"/>
-<area shape="poly" id="edge12_Node000011_Node000010" title=" " alt="" coords="367,227,565,227,565,233,367,233"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,240,200,280"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a3d488dd1e2d27e99307310527e51cad3.html#a3d488dd1e2d27e99307310527e51cad3" title=" " alt="" coords="248,147,399,173"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="147,237,280,176,282,181,149,242"/>
+<area shape="rect" id="Node000012" href="$dc/d3e/group___dimming_gae51352a3522bb8eae5e17dbee97aa1aa.html#gae51352a3522bb8eae5e17dbee97aa1aa" title="Adjust a scaling value for dimming." alt="" coords="280,247,367,273"/>
+<area shape="poly" id="edge12_Node000001_Node000012" title=" " alt="" coords="200,257,266,257,266,263,200,263"/>
+<area shape="rect" id="Node000013" href="$d9/d41/classfl_1_1_noise_palette_a56d8e189481f0cad03ce451fb5d0d939.html#a56d8e189481f0cad03ce451fb5d0d939" title=" " alt="" coords="251,297,396,322"/>
+<area shape="poly" id="edge14_Node000001_Node000013" title=" " alt="" coords="193,278,253,291,252,296,192,283"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a924fc8748f53389e55fdc63bfc14b805.html#a924fc8748f53389e55fdc63bfc14b805" title=" " alt="" coords="455,46,529,71"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="344,145,457,76,460,81,347,150"/>
+<area shape="rect" id="Node000006" href="$d0/da5/group___scaling_dirty_ga3fade00fb4cf5b937b973128198a7a79.html#ga3fade00fb4cf5b937b973128198a7a79" title="Clean up the r1 register after a series of *LEAVING_R1_DIRTY calls." alt="" coords="765,22,863,47"/>
+<area shape="poly" id="edge7_Node000002_Node000006" title=" " alt="" coords="330,146,347,120,373,87,406,55,446,31,485,17,526,9,609,3,687,8,752,18,752,23,686,13,609,8,526,14,486,23,448,36,409,59,377,91,351,123,334,149"/>
+<area shape="rect" id="Node000007" href="$d0/da5/group___scaling_dirty_ga7386235cada3aca429b189681d2ec56d.html#ga7386235cada3aca429b189681d2ec56d" title="This version of scale8() does not clean up the R1 register on AVR." alt="" coords="716,71,912,97"/>
+<area shape="poly" id="edge11_Node000002_Node000007" title=" " alt="" coords="382,145,446,132,702,95,703,100,447,137,383,150"/>
+<area shape="rect" id="Node000008" href="$da/dc7/advanced_8h_a96d9503945476f13a97c8f406269fcef.html#a96d9503945476f13a97c8f406269fcef" title=" " alt="" coords="447,147,537,173"/>
+<area shape="poly" id="edge6_Node000002_Node000008" title=" " alt="" coords="399,157,433,157,433,163,399,163"/>
+<area shape="rect" id="Node000009" href="$d4/d36/namespacefl_ab169b38b75fd1ab29b3dc61a32497ff1.html#ab169b38b75fd1ab29b3dc61a32497ff1" title="Helper function to divide a number by 16, aka four logical shift right (LSR)&#39;s." alt="" coords="457,197,527,222"/>
+<area shape="poly" id="edge8_Node000002_Node000009" title=" " alt="" coords="368,170,444,193,443,198,367,175"/>
+<area shape="rect" id="Node000010" href="$d6/d19/group___linear_interpolation_gaf65357c7aeca9778e5a2f80a6bac2b5d.html#gaf65357c7aeca9778e5a2f80a6bac2b5d" title="Map from one full&#45;range 8&#45;bit value into a narrower range of 8&#45;bit values, possibly a range of hues." alt="" coords="463,246,521,271"/>
+<area shape="poly" id="edge9_Node000002_Node000010" title=" " alt="" coords="347,171,448,231,458,237,455,241,445,236,344,175"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_aa1e0cd66825220bead12cfc1ab7f33c6.html#aa1e0cd66825220bead12cfc1ab7f33c6" title=" " alt="" coords="585,46,668,71"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="529,56,571,56,571,61,529,61"/>
+<area shape="poly" id="edge4_Node000004_Node000006" title=" " alt="" coords="668,51,751,40,752,45,668,56"/>
+<area shape="poly" id="edge5_Node000004_Node000007" title=" " alt="" coords="668,62,707,67,706,72,668,67"/>
+<area shape="rect" id="Node000011" href="$d0/da8/group___scaling_gad7535ccda9c92470c4e6ee0265585555.html#gad7535ccda9c92470c4e6ee0265585555" title="Scale one byte by a second one, which is treated as the numerator of a fraction whose denominator is ..." alt="" coords="595,271,659,297"/>
+<area shape="poly" id="edge10_Node000010_Node000011" title=" " alt="" coords="522,262,581,273,580,278,521,267"/>
+<area shape="poly" id="edge13_Node000012_Node000011" title=" " alt="" coords="367,268,447,281,517,285,581,284,581,289,517,290,446,287,366,273"/>
 </map>

@@ -20,9 +20,10 @@ var searchData=
   ['_5f_5finc_5flib8tion_5frandom_5fh_17',['__INC_LIB8TION_RANDOM_H',['../d9/dfa/random8_8h_adf395102f6a2a27a8d8edc36ec54985a.html#adf395102f6a2a27a8d8edc36ec54985a',1,'random8.h']]],
   ['_5f_5finc_5flib8tion_5ftrig_5fh_18',['__INC_LIB8TION_TRIG_H',['../d3/db9/trig8_8h_a8637a715ff3c6508a9f334902716030f.html#a8637a715ff3c6508a9f334902716030f',1,'trig8.h']]],
   ['_5f_5fprog_5ftypes_5fcompat_5f_5f_19',['__PROG_TYPES_COMPAT__',['../db/d97/_fast_l_e_d_8h_a00167d1f0bf80faa62c6d8952f540f82.html#a00167d1f0bf80faa62c6d8952f540f82',1,'__PROG_TYPES_COMPAT__:&#160;FastLED.h'],['../da/d2d/colorutils_8cpp_a00167d1f0bf80faa62c6d8952f540f82.html#a00167d1f0bf80faa62c6d8952f540f82',1,'__PROG_TYPES_COMPAT__:&#160;colorutils.cpp']]],
-  ['_5ffl_5fdefine_5fport_20',['_FL_DEFINE_PORT',['../db/d65/fastpin_8h_aee857cc8afab1aa7af11a3c2f22dc94d.html#aee857cc8afab1aa7af11a3c2f22dc94d',1,'fastpin.h']]],
-  ['_5ffl_5fdefine_5fport3_21',['_FL_DEFINE_PORT3',['../db/d65/fastpin_8h_aecc2af2e3a64d6f736634822d71548ca.html#aecc2af2e3a64d6f736634822d71548ca',1,'fastpin.h']]],
-  ['_5ffl_5fmap_5fclocked_5fchipset_22',['_FL_MAP_CLOCKED_CHIPSET',['../db/d97/_fast_l_e_d_8h_a0f7ec59f76e5b6e949268f112f93c412.html#a0f7ec59f76e5b6e949268f112f93c412',1,'FastLED.h']]],
-  ['_5fno_5fexcept_23',['_NO_EXCEPT',['../db/d36/inplacenew_8h_a210b692758cdfe9f17ef5f8e5d11fd97.html#a210b692758cdfe9f17ef5f8e5d11fd97',1,'inplacenew.h']]],
-  ['_5fout_5fof_5fbound_24',['_OUT_OF_BOUND',['../d1/d74/______pixeltypes_8h_a50b59cb8609102dbb61f1e9e43f309fc.html#a50b59cb8609102dbb61f1e9e43f309fc',1,'___pixeltypes.h']]]
+  ['_5ffastled_5fdgb_20',['_FASTLED_DGB',['../d6/d01/dbg_8h_a98a9801e0141354bf27f238a3021dc30.html#a98a9801e0141354bf27f238a3021dc30',1,'dbg.h']]],
+  ['_5ffl_5fdefine_5fport_21',['_FL_DEFINE_PORT',['../db/d65/fastpin_8h_aee857cc8afab1aa7af11a3c2f22dc94d.html#aee857cc8afab1aa7af11a3c2f22dc94d',1,'fastpin.h']]],
+  ['_5ffl_5fdefine_5fport3_22',['_FL_DEFINE_PORT3',['../db/d65/fastpin_8h_aecc2af2e3a64d6f736634822d71548ca.html#aecc2af2e3a64d6f736634822d71548ca',1,'fastpin.h']]],
+  ['_5ffl_5fmap_5fclocked_5fchipset_23',['_FL_MAP_CLOCKED_CHIPSET',['../db/d97/_fast_l_e_d_8h_a0f7ec59f76e5b6e949268f112f93c412.html#a0f7ec59f76e5b6e949268f112f93c412',1,'FastLED.h']]],
+  ['_5fno_5fexcept_24',['_NO_EXCEPT',['../db/d36/inplacenew_8h_a210b692758cdfe9f17ef5f8e5d11fd97.html#a210b692758cdfe9f17ef5f8e5d11fd97',1,'inplacenew.h']]],
+  ['_5fout_5fof_5fbound_25',['_OUT_OF_BOUND',['../d1/d74/______pixeltypes_8h_a50b59cb8609102dbb61f1e9e43f309fc.html#a50b59cb8609102dbb61f1e9e43f309fc',1,'___pixeltypes.h']]]
 ];

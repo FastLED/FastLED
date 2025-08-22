@@ -87,7 +87,7 @@ var sectionId = 'dynsection-1';
 <!-- Node3 -->
 <g id="Node000003" class="node">
 <title>Node3</title>
-<g id="a_Node000003"><a xlink:href="../../dd/dbb/class_c_fast_l_e_d_ab07d62cdec036af9ede70cbd06ece40f.html#ab07d62cdec036af9ede70cbd06ece40f" target="_top" xlink:title="Set the maximum power to be used, given in milliwatts.">
+<g id="a_Node000003"><a xlink:href="../../dd/dbb/class_c_fast_l_e_d_a660c4ce3348e4463932f350be99215bf.html#a660c4ce3348e4463932f350be99215bf" target="_top" xlink:title="Set the maximum power to be used, given in milliwatts.">
 <polygon fill="white" stroke="#666666" points="367,-30 203,-30 203,0 367,0 367,-30"/>
 <text text-anchor="start" x="211" y="-18" font-family="Helvetica,sans-Serif" font-size="10.00">CFastLED::setMaxPowerInMilli</text>
 <text text-anchor="middle" x="285" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">Watts</text>
@@ -106,7 +106,7 @@ var sectionId = 'dynsection-1';
 <!-- Node4 -->
 <g id="Node000004" class="node">
 <title>Node4</title>
-<g id="a_Node000004"><a xlink:href="../../dd/dbb/class_c_fast_l_e_d_a996375a3f4a7b8c096f87d8a93c2b196.html#a996375a3f4a7b8c096f87d8a93c2b196" target="_top" xlink:title="Set the maximum power to be used, given in volts and milliamps.">
+<g id="a_Node000004"><a xlink:href="../../dd/dbb/class_c_fast_l_e_d_a1f82b444605e69e415de4bef8775bd37.html#a1f82b444605e69e415de4bef8775bd37" target="_top" xlink:title="Set the maximum power to be used, given in volts and milliamps.">
 <polygon fill="white" stroke="#666666" points="167,-30 0,-30 0,0 167,0 167,-30"/>
 <text text-anchor="start" x="8" y="-18" font-family="Helvetica,sans-Serif" font-size="10.00">CFastLED::setMaxPowerInVolts</text>
 <text text-anchor="middle" x="83.5" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">AndMilliamps</text>

@@ -8,5 +8,5 @@ digraph "fl::EngineEvents::onEndShowLeds"
   rankdir="RL";
   Node1 [id="Node000001",label="fl::EngineEvents::onEndShowLeds",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
   Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node2 [id="Node000002",label="CFastLED::show",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dd/dbb/class_c_fast_l_e_d_a83afdd1e2a21f33ac4f8d2610d6e331b.html#a83afdd1e2a21f33ac4f8d2610d6e331b",tooltip="Update all our controllers with the current led colors, using the passed in brightness."];
+  Node2 [id="Node000002",label="CFastLED::onEndShowLeds",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dd/dbb/class_c_fast_l_e_d_a2625d97885a0be65117dd5a5edcddb18.html#a2625d97885a0be65117dd5a5edcddb18",tooltip="Manually trigger the end show LEDs event."];
 }

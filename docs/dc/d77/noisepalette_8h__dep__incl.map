@@ -1,8 +1,8 @@
 <map id="fx/2d/noisepalette.h" name="fx/2d/noisepalette.h">
 <area shape="rect" id="Node000001" title="Demonstrates how to mix noise generation with color palettes on a 2D LED matrix." alt="" coords="263,5,415,31"/>
-<area shape="rect" id="Node000002" href="$d6/d35/_fx_engine_8ino.html" title="Demonstrates how to use the FxEngine to switch between different effects on a 2D LED matrix." alt="" coords="5,79,215,133"/>
+<area shape="rect" id="Node000002" href="$d6/d35/_fx_engine_8ino.html" title="Demonstrates FxEngine for switching between effects." alt="" coords="5,79,215,133"/>
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="297,38,181,81,179,76,295,33"/>
-<area shape="rect" id="Node000003" href="$d7/dd3/wasm_8ino.html" title="Demonstrates an advanced ino file with multiple effects and UI elements." alt="" coords="239,79,439,133"/>
+<area shape="rect" id="Node000003" href="$da/d40/wasm__impl_8h.html" title=" " alt="" coords="239,79,439,133"/>
 <area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="342,44,342,79,337,79,337,44"/>
 <area shape="rect" id="Node000004" href="$d6/d66/noisepalette_8cpp.html" title=" " alt="" coords="463,93,629,119"/>
 <area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="381,34,519,91,517,96,379,38"/>

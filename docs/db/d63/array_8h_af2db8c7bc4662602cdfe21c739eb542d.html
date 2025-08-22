@@ -124,14 +124,14 @@ $(function(){initNavTree('db/d63/array_8h_af2db8c7bc4662602cdfe21c739eb542d.html
       </table>
 </div><div class="memdoc">
 <b>Value:</b><div class="fragment"><div class="line">    TYPE NAME[SIZE];                                                           \</div>
-<div class="line">    memset(NAME, 0, <span class="keyword">sizeof</span>(TYPE) * (SIZE))</div>
+<div class="line">    fl::memfill(NAME, 0, <span class="keyword">sizeof</span>(TYPE) * (SIZE))</div>
 </div><!-- fragment -->
-<p class="definition">Definition at line <a class="el" href="../../db/d63/array_8h_source.html#l00169">169</a> of file <a class="el" href="../../db/d63/array_8h_source.html">array.h</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  169</span><span class="preprocessor">#define FASTLED_STACK_ARRAY(TYPE, NAME, SIZE)                                  \</span></div>
-<div class="line"><span class="lineno">  170</span><span class="preprocessor">    TYPE NAME[SIZE];                                                           \</span></div>
-<div class="line"><span class="lineno">  171</span><span class="preprocessor">    memset(NAME, 0, sizeof(TYPE) * (SIZE))</span></div>
+<p class="definition">Definition at line <a class="el" href="../../db/d63/array_8h_source.html#l00185">185</a> of file <a class="el" href="../../db/d63/array_8h_source.html">array.h</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  185</span><span class="preprocessor">#define FASTLED_STACK_ARRAY(TYPE, NAME, SIZE)                                  \</span></div>
+<div class="line"><span class="lineno">  186</span><span class="preprocessor">    TYPE NAME[SIZE];                                                           \</span></div>
+<div class="line"><span class="lineno">  187</span><span class="preprocessor">    fl::memfill(NAME, 0, sizeof(TYPE) * (SIZE))</span></div>
 </div><!-- fragment -->
-<p class="reference">Referenced by <a class="el" href="../../d1/dff/fft__impl_8cpp_source.html#l00067">fl::FFTContext::fft_unit_test()</a>, <a class="el" href="../../d6/de8/noise_8cpp_source.html#l00938">fill_2dnoise16()</a>, <a class="el" href="../../d6/de8/noise_8cpp_source.html#l00898">fill_2dnoise8()</a>, <a class="el" href="../../d6/de8/noise_8cpp_source.html#l00872">fill_noise16()</a>, and <a class="el" href="../../d6/de8/noise_8cpp_source.html#l00845">fill_noise8()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d1/dff/fft__impl_8cpp_source.html#l00070">fl::FFTContext::fft_unit_test()</a>, <a class="el" href="../../d6/de8/noise_8cpp_source.html#l00919">fill_2dnoise16()</a>, <a class="el" href="../../d6/de8/noise_8cpp_source.html#l00879">fill_2dnoise8()</a>, <a class="el" href="../../d6/de8/noise_8cpp_source.html#l00853">fill_noise16()</a>, and <a class="el" href="../../d6/de8/noise_8cpp_source.html#l00826">fill_noise8()</a>.</p>
 
 </div>
 </div>
@@ -142,7 +142,7 @@ $(function(){initNavTree('db/d63/array_8h_af2db8c7bc4662602cdfe21c739eb542d.html
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dir_4d1829fa9bd13d7db71e765b2707b248.html">fl</a></li><li class="navelem"><a class="el" href="../../db/d63/array_8h.html">array.h</a></li>
-    <li class="footer">Generated on Tue Jun 24 2025 00:58:14 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Fri Aug 22 2025 20:59:34 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

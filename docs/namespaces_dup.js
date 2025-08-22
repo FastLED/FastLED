@@ -14,16 +14,19 @@ var namespaces_dup =
       [ "__compile_test", "d2/dfc/namespaceanonymous__namespace_02type__traits_8cpp_03_a411dd689fc6f871fca8210c61e35f403.html#a411dd689fc6f871fca8210c61e35f403", null ]
     ] ],
     [ "anonymous_namespace{wave_simulation.cpp}", "d9/dbf/namespaceanonymous__namespace_02wave__simulation_8cpp_03.html", [
-      [ "half_duplex_blend_linear", "d9/dbf/namespaceanonymous__namespace_02wave__simulation_8cpp_03_ab7a696be5b5131c76c444ec0335e6ecb.html#ab7a696be5b5131c76c444ec0335e6ecb", null ],
-      [ "half_duplex_blend_sqrt_q15", "d9/dbf/namespaceanonymous__namespace_02wave__simulation_8cpp_03_a883a0b9da3b31cfdf65463e0214e7a7a.html#a883a0b9da3b31cfdf65463e0214e7a7a", null ]
+      [ "half_duplex_blend_linear", "d9/dbf/namespaceanonymous__namespace_02wave__simulation_8cpp_03_aeed60e71e77ac8e25f1a62823b91e627.html#aeed60e71e77ac8e25f1a62823b91e627", null ],
+      [ "half_duplex_blend_sqrt_q15", "d9/dbf/namespaceanonymous__namespace_02wave__simulation_8cpp_03_a44710ce1b7ea10192aeac7be83d99b69.html#a44710ce1b7ea10192aeac7be83d99b69", null ]
     ] ],
     [ "anonymous_namespace{xypaths.cpp}", "d7/d76/namespaceanonymous__namespace_02xypaths_8cpp_03.html", [
-      [ "make_path", "d7/d76/namespaceanonymous__namespace_02xypaths_8cpp_03_a8091017d8d8c14f1197f3480df54acf5.html#a8091017d8d8c14f1197f3480df54acf5", null ]
-    ] ],
-    [ "FASTLED_NAMESPACE_BEGIN", "d5/d1e/namespace_f_a_s_t_l_e_d___n_a_m_e_s_p_a_c_e___b_e_g_i_n.html", [
-      [ "divide_by_3", "d5/d1e/namespace_f_a_s_t_l_e_d___n_a_m_e_s_p_a_c_e___b_e_g_i_n_a4aa4bd3bd3593ae770fbc7233d26f79c.html#a4aa4bd3bd3593ae770fbc7233d26f79c", null ],
-      [ "min3", "d5/d1e/namespace_f_a_s_t_l_e_d___n_a_m_e_s_p_a_c_e___b_e_g_i_n_a4488d6e0ee54517f8e9b2b326bc165cf.html#a4488d6e0ee54517f8e9b2b326bc165cf", null ]
+      [ "make_path", "d7/d76/namespaceanonymous__namespace_02xypaths_8cpp_03_a03360f316cbdff675237eef12bc03d6a.html#a03360f316cbdff675237eef12bc03d6a", null ]
     ] ],
     [ "fl", "d4/d36/namespacefl.html", "d4/d36/namespacefl" ],
-    [ "gen", "dc/d8e/namespacegen.html", "dc/d8e/namespacegen" ]
+    [ "gen", "dc/d8e/namespacegen.html", "dc/d8e/namespacegen" ],
+    [ "noise_detail", "d2/dda/namespacenoise__detail.html", [
+      [ "p", "d2/dda/namespacenoise__detail_a2a3101485c672597b0c6f28dbcd31b9a.html#a2a3101485c672597b0c6f28dbcd31b9a", null ]
+    ] ],
+    [ "simplex_detail", "d9/d3c/namespacesimplex__detail.html", [
+      [ "p", "d9/d3c/namespacesimplex__detail_ad26e7cc9fca20e951e0c3e64607d0c76.html#ad26e7cc9fca20e951e0c3e64607d0c76", null ],
+      [ "simplex", "d9/d3c/namespacesimplex__detail_ae4b52ec05bf500db4a6ce98b85cda233.html#ae4b52ec05bf500db4a6ce98b85cda233", null ]
+    ] ]
 ];

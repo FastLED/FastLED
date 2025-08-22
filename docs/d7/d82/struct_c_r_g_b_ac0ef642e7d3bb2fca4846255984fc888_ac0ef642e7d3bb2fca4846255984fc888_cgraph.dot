@@ -8,7 +8,19 @@ digraph "CRGB::operator="
   rankdir="LR";
   Node1 [id="Node000001",label="CRGB::operator=",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="Allow assignment from HSV color."];
   Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
-  Node2 [id="Node000002",label="CRGB::CRGB",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/d82/struct_c_r_g_b_a08d8e05a3fcdb88dedb886cad9cbd3fa.html#a08d8e05a3fcdb88dedb886cad9cbd3fa",tooltip="Default constructor."];
+  Node2 [id="Node000002",label="CRGB::CRGB",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/d82/struct_c_r_g_b_a4b0cc1cfefd9e0c66ea5c6583181df46.html#a4b0cc1cfefd9e0c66ea5c6583181df46",tooltip="Default constructor."];
   Node1 -> Node3 [id="edge2_Node000001_Node000003",color="steelblue1",style="solid",tooltip=" "];
-  Node3 [id="Node000003",label="hsv2rgb_rainbow",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/d87/group___pixel_types_gab316cfeb8bd5f37d8faaf761ad3c834b.html#gab316cfeb8bd5f37d8faaf761ad3c834b",tooltip="Forward declaration of hsv2rgb_rainbow here, to avoid circular dependencies."];
+  Node3 [id="Node000003",label="hsv2rgb_dispatch",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/dd1/crgb_8h_a26eaa8327d3606b692249e6449529c3b.html#a26eaa8327d3606b692249e6449529c3b",tooltip="HSV conversion function selection based on compile-time defines This allows users to configure which ..."];
+  Node3 -> Node4 [id="edge3_Node000003_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="hsv2rgb_fullspectrum",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/d9d/hsv2rgb_8cpp_ae7340e11e083ac0a5ea4d3ce7c3a6ed1.html#ae7340e11e083ac0a5ea4d3ce7c3a6ed1",tooltip=" "];
+  Node4 -> Node5 [id="edge4_Node000004_Node000005",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="fl::fl_max",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a486349f0901f5cf84e65769cc1b854cd.html#a486349f0901f5cf84e65769cc1b854cd",tooltip=" "];
+  Node4 -> Node6 [id="edge5_Node000004_Node000006",color="steelblue1",style="solid",tooltip=" "];
+  Node6 [id="Node000006",label="fl::fl_min",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a47dce91f91c991288fe7edefe2137bcf.html#a47dce91f91c991288fe7edefe2137bcf",tooltip=" "];
+  Node3 -> Node7 [id="edge6_Node000003_Node000007",color="steelblue1",style="solid",tooltip=" "];
+  Node7 [id="Node000007",label="hsv2rgb_rainbow",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/d9d/hsv2rgb_8cpp_a38921429c0d177dee3c43d81ba6ea5ba.html#a38921429c0d177dee3c43d81ba6ea5ba",tooltip=" "];
+  Node7 -> Node7 [id="edge7_Node000007_Node000007",color="steelblue1",style="solid",tooltip=" "];
+  Node3 -> Node8 [id="edge8_Node000003_Node000008",color="steelblue1",style="solid",tooltip=" "];
+  Node8 [id="Node000008",label="hsv2rgb_spectrum",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/d9d/hsv2rgb_8cpp_aa9d490009cb1d6ea0491e60b724d360f.html#aa9d490009cb1d6ea0491e60b724d360f",tooltip="Inline version of hsv2rgb_spectrum which returns a CRGB object."];
+  Node8 -> Node8 [id="edge9_Node000008_Node000008",color="steelblue1",style="solid",tooltip=" "];
 }

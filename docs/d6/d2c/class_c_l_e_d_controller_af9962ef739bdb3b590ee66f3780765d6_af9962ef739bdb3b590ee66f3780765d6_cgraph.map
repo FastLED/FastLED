@@ -1,7 +1,11 @@
 <map id="CLEDController::beginShowLeds" name="CLEDController::beginShowLeds">
-<area shape="rect" id="Node000001" title=" " alt="" coords="5,31,235,56"/>
-<area shape="rect" id="Node000002" href="$d6/d2c/class_c_l_e_d_controller_a676f705adf93898739a405b85150a3e7.html#a676f705adf93898739a405b85150a3e7" title="Get the dithering option currently set for this controller." alt="" coords="283,5,472,31"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="235,29,269,26,269,31,235,35"/>
-<area shape="rect" id="Node000003" href="$d6/d2c/class_c_l_e_d_controller_a63f75cf7e55cf8da46db5fd27110bb3e.html#a63f75cf7e55cf8da46db5fd27110bb3e" title="How many LEDs does this controller manage?" alt="" coords="300,55,455,80"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="235,51,286,56,286,62,235,57"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,55,235,80"/>
+<area shape="rect" id="Node000002" href="$d6/d2c/class_c_l_e_d_controller_a87c584fec7d1644ca16371f8abd5e7a4.html#a87c584fec7d1644ca16371f8abd5e7a4" title="Get the dithering option currently set for this controller." alt="" coords="283,5,472,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="186,52,296,31,297,36,187,57"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_ae4967e09e6f3753c7dc0c2911cc2a7c1.html#ae4967e09e6f3753c7dc0c2911cc2a7c1" title=" " alt="" coords="327,55,427,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="235,65,314,65,314,70,235,70"/>
+<area shape="rect" id="Node000005" href="$d6/d2c/class_c_l_e_d_controller_a63f75cf7e55cf8da46db5fd27110bb3e.html#a63f75cf7e55cf8da46db5fd27110bb3e" title="How many LEDs does this controller manage?" alt="" coords="300,104,455,129"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="187,77,297,99,296,104,186,83"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_a213e289e084126c44de102393fb0d302.html#a213e289e084126c44de102393fb0d302" title=" " alt="" coords="520,55,609,80"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="428,65,506,65,506,70,428,70"/>
 </map>

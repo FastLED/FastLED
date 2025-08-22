@@ -1,0 +1,9 @@
+<map id="noiseControls" name="noiseControls">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,55,116,80"/>
+<area shape="rect" id="Node000002" href="$da/d40/wasm__impl_8h_ae5666c00dc45334dc2ee935ab20b4cac.html#ae5666c00dc45334dc2ee935ab20b4cac" title=" " alt="" coords="176,5,291,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="105,52,174,32,176,37,107,57"/>
+<area shape="rect" id="Node000003" href="$da/d40/wasm__impl_8h_ab8a1cf724f0390bbb874273aeabfc09a.html#ab8a1cf724f0390bbb874273aeabfc09a" title=" " alt="" coords="177,55,290,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="116,65,163,65,163,70,116,70"/>
+<area shape="rect" id="Node000004" href="$da/d40/wasm__impl_8h_a9ac54280e37e5554706dba5547417973.html#a9ac54280e37e5554706dba5547417973" title=" " alt="" coords="164,104,303,129"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="107,77,176,98,174,103,105,83"/>
+</map>

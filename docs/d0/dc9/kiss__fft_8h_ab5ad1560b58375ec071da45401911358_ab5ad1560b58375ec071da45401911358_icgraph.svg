@@ -67,7 +67,7 @@ var sectionId = 'dynsection-1';
 <!-- Node2 -->
 <g id="Node000002" class="node">
 <title>Node2</title>
-<g id="a_Node000002"><a xlink:href="../../de/d67/kiss__fftr_8c_aead7aaed139f58158b446ea623a8b8cb.html#aead7aaed139f58158b446ea623a8b8cb" target="_top" xlink:title=" ">
+<g id="a_Node000002"><a xlink:href="../../d2/da1/kiss__fftr_8cpp_aead7aaed139f58158b446ea623a8b8cb.html#aead7aaed139f58158b446ea623a8b8cb" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="401,-38 317,-38 317,-19 401,-19 401,-38"/>
 <text text-anchor="middle" x="359" y="-26" font-family="Helvetica,sans-Serif" font-size="10.00">kiss_fftr_alloc</text>
 </a>
@@ -103,7 +103,7 @@ var sectionId = 'dynsection-1';
 <!-- Node4 -->
 <g id="Node000004" class="node">
 <title>Node4</title>
-<g id="a_Node000004"><a xlink:href="../../d9/dc9/cq__kernel_8c_acb0a4650f9bfc767b5dbd46003ff1703.html#acb0a4650f9bfc767b5dbd46003ff1703" target="_top" xlink:title=" ">
+<g id="a_Node000004"><a xlink:href="../../d2/d90/cq__kernel_8cpp_acb0a4650f9bfc767b5dbd46003ff1703.html#acb0a4650f9bfc767b5dbd46003ff1703" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="281,-19 180,-19 180,0 281,0 281,-19"/>
 <text text-anchor="middle" x="230.5" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">generate_kernels</text>
 </a>

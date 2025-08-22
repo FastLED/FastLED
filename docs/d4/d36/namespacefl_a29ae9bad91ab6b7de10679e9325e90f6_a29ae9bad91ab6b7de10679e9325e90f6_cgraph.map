@@ -1,0 +1,34 @@
+<map id="fl::FASTLED_SMART_PTR" name="fl::FASTLED_SMART_PTR">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,228,184,253"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a44ec854fe5278548217eba95585d0e58.html#a44ec854fe5278548217eba95585d0e58" title=" " alt="" coords="239,129,313,155"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="118,226,238,159,241,164,120,230"/>
+<area shape="rect" id="Node000003" href="$d4/d06/curr_8h_a251ace8542fe093844e4ed2709e8a3d7.html#a251ace8542fe093844e4ed2709e8a3d7" title=" " alt="" coords="249,179,303,204"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="141,225,234,200,236,205,143,231"/>
+<area shape="rect" id="Node000032" href="$d4/d36/namespacefl_a56e7d4811c99d9aa696932bcb89a50b1.html#a56e7d4811c99d9aa696932bcb89a50b1" title=" " alt="" coords="245,228,307,253"/>
+<area shape="poly" id="edge14_Node000001_Node000032" title=" " alt="" coords="184,238,231,238,231,243,184,243"/>
+<area shape="rect" id="Node000033" href="$d4/d36/namespacefl_aed7245c077ae6f226d13c9ea795694a8.html#aed7245c077ae6f226d13c9ea795694a8" title=" " alt="" coords="232,277,320,303"/>
+<area shape="poly" id="edge15_Node000001_Node000033" title=" " alt="" coords="143,251,220,272,218,277,141,256"/>
+<area shape="rect" id="Node000034" href="$d8/dd0/_fire_cylinder_8h_a0cfaf25385886642355a25f291ffd36b.html#a0cfaf25385886642355a25f291ffd36b" title=" " alt="" coords="233,327,319,352"/>
+<area shape="poly" id="edge16_Node000001_Node000034" title=" " alt="" coords="120,251,241,318,238,322,118,256"/>
+<area shape="rect" id="Node000004" href="$df/d21/classfl_1_1_tile2x2__u8__wrap_a706ef3a4bc4a436faa4c253e26768c23.html#a706ef3a4bc4a436faa4c253e26768c23" title=" " alt="" coords="368,5,537,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="302,178,318,164,329,148,335,133,339,102,345,71,353,55,366,40,372,36,375,40,370,44,357,58,350,73,345,102,340,134,334,151,322,168,305,182"/>
+<area shape="rect" id="Node000005" href="$d7/d82/struct_c_r_g_b_a8b78ce444d74f2bc9e63d83bfd1b17ad.html#a8b78ce444d74f2bc9e63d83bfd1b17ad" title=" " alt="" coords="385,55,521,80"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="301,177,318,164,333,145,340,126,349,108,366,89,374,84,377,88,370,93,353,111,345,128,337,147,322,168,305,181"/>
+<area shape="rect" id="Node000026" href="$df/d40/examples_2_corkscrew_2corkscrew_8h_a3ce1eed35210653027031143f1cc1ef4.html#a3ce1eed35210653027031143f1cc1ef4" title=" " alt="" coords="409,104,497,129"/>
+<area shape="poly" id="edge7_Node000003_Node000026" title=" " alt="" coords="297,176,367,138,394,128,396,133,369,143,300,181"/>
+<area shape="rect" id="Node000027" href="$d4/d06/curr_8h_afc36fee082a53fb0053c5ff7d1e8ac17.html#afc36fee082a53fb0053c5ff7d1e8ac17" title=" " alt="" coords="401,153,505,179"/>
+<area shape="poly" id="edge8_Node000003_Node000027" title=" " alt="" coords="303,185,387,173,388,178,304,190"/>
+<area shape="rect" id="Node000028" href="$db/df4/_color_boost_8h_aa22bcb97ca40fd9d6445646fb86ebbe3.html#aa22bcb97ca40fd9d6445646fb86ebbe3" title=" " alt="" coords="380,203,525,228"/>
+<area shape="poly" id="edge9_Node000003_Node000028" title=" " alt="" coords="304,192,367,201,366,206,303,198"/>
+<area shape="rect" id="Node000029" href="$d7/d82/struct_c_r_g_b_a271bc2ba8b57b41d0c1cda3eed0eb8da.html#a271bc2ba8b57b41d0c1cda3eed0eb8da" title="Scale down a RGB to N/256ths of its current brightness, using &quot;plain math&quot; dimming rules." alt="" coords="394,252,511,277"/>
+<area shape="poly" id="edge10_Node000003_Node000029" title=" " alt="" coords="301,202,369,237,392,245,390,250,367,242,299,206"/>
+<area shape="rect" id="Node000030" href="$db/df4/_color_boost_8h_ac483a8d410fef50e841e927b0f6b81af.html#ac483a8d410fef50e841e927b0f6b81af" title=" " alt="" coords="381,301,524,327"/>
+<area shape="poly" id="edge12_Node000003_Node000030" title=" " alt="" coords="305,201,322,213,337,233,345,252,354,270,370,287,380,293,377,298,366,291,349,273,341,254,333,236,318,217,302,206"/>
+<area shape="rect" id="Node000031" href="$df/d40/examples_2_corkscrew_2corkscrew_8h_a5970e5592b757f2043212998e4add619.html#a5970e5592b757f2043212998e4add619" title=" " alt="" coords="393,351,513,376"/>
+<area shape="poly" id="edge13_Node000003_Node000031" title=" " alt="" coords="305,200,322,214,334,230,340,247,345,278,350,307,357,322,370,336,382,345,379,349,366,340,353,325,345,309,340,279,335,248,329,233,318,217,302,204"/>
+<area shape="rect" id="Node000006" href="$d7/d82/struct_c_r_g_b_a4b0cc1cfefd9e0c66ea5c6583181df46.html#a4b0cc1cfefd9e0c66ea5c6583181df46" title="Default constructor." alt="" coords="613,177,717,203"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="510,78,539,89,597,127,642,166,639,170,593,131,536,94,508,83"/>
+<area shape="rect" id="Node000007" href="$d4/d5d/structfl_1_1_h_s_v16_a0bd2c0fc64fc34d573637c10b849c320.html#a0bd2c0fc64fc34d573637c10b849c320" title=" " alt="" coords="585,55,744,80"/>
+<area shape="poly" id="edge6_Node000005_Node000007" title=" " alt="" coords="521,65,572,65,572,70,521,70"/>
+<area shape="poly" id="edge11_Node000029_Node000006" title=" " alt="" coords="498,249,536,237,619,206,621,210,538,242,499,254"/>
+</map>

@@ -127,7 +127,7 @@ $(function(){initNavTree('d8/de7/led__strip__api_8c_source.html','../../'); init
 <div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span>    <span class="keywordflow">return</span> strip-&gt;<a class="code hl_variable" href="../../d9/dcc/led__strip__interface_8h.html#a634f88b9e82155f97b6262e0b49565ef">set_pixel</a>(strip, index, red, green, blue);</div>
 <div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span>}</div>
 <div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span> </div>
-<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span>esp_err_t <a class="code hl_function" href="../../df/d6e/led__strip_8h_a3965ace5386d4c88d6e69ebebc76832d.html#a3965ace5386d4c88d6e69ebebc76832d">led_strip_set_pixel_hsv</a>(<a class="code hl_typedef" href="../../d4/d88/led__strip__types_8h_ad657ffc84034956011592dd970d5a9eb.html#ad657ffc84034956011592dd970d5a9eb">led_strip_handle_t</a> strip, uint32_t index, uint16_t hue, uint8_t saturation, uint8_t value)</div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span>esp_err_t <a class="code hl_function" href="../../df/d6e/led__strip_8h_a3965ace5386d4c88d6e69ebebc76832d.html#a3965ace5386d4c88d6e69ebebc76832d">led_strip_set_pixel_hsv</a>(<a class="code hl_typedef" href="../../d4/d88/led__strip__types_8h_ad657ffc84034956011592dd970d5a9eb.html#ad657ffc84034956011592dd970d5a9eb">led_strip_handle_t</a> strip, uint32_t index, uint16_t <a class="code hl_variable" href="../../d8/d21/_adafruit_bridge_8ino_ad7b7eb0b3e04af91bdd64715226c3c68.html#ad7b7eb0b3e04af91bdd64715226c3c68">hue</a>, uint8_t saturation, uint8_t value)</div>
 <div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span>{</div>
 <div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span>    ESP_RETURN_ON_FALSE(strip, ESP_ERR_INVALID_ARG, TAG, <span class="stringliteral">&quot;invalid argument&quot;</span>);</div>
 <div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span> </div>
@@ -138,8 +138,8 @@ $(function(){initNavTree('d8/de7/led__strip__api_8c_source.html','../../'); init
 <div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span>    uint32_t rgb_max = value;</div>
 <div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span>    uint32_t rgb_min = rgb_max * (255 - saturation) / 255.0f;</div>
 <div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span> </div>
-<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span>    uint32_t i = hue / 60;</div>
-<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>    uint32_t diff = hue % 60;</div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span>    uint32_t i = <a class="code hl_variable" href="../../d8/d21/_adafruit_bridge_8ino_ad7b7eb0b3e04af91bdd64715226c3c68.html#ad7b7eb0b3e04af91bdd64715226c3c68">hue</a> / 60;</div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>    uint32_t diff = <a class="code hl_variable" href="../../d8/d21/_adafruit_bridge_8ino_ad7b7eb0b3e04af91bdd64715226c3c68.html#ad7b7eb0b3e04af91bdd64715226c3c68">hue</a> % 60;</div>
 <div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span> </div>
 <div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>    <span class="comment">// RGB adjustment amount by hue</span></div>
 <div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>    uint32_t rgb_adj = (rgb_max - rgb_min) * diff / 60;</div>
@@ -221,6 +221,7 @@ $(function(){initNavTree('d8/de7/led__strip__api_8c_source.html','../../'); init
 <div class="line"><a id="l00116" name="l00116"></a><span class="lineno">  116</span><span class="preprocessor">#endif  </span><span class="comment">// FASTLED_RMT5 || FASTLED_ESP_HAS_CLOCKLESS_SPI</span></div>
 <div class="line"><a id="l00117" name="l00117"></a><span class="lineno">  117</span> </div>
 <div class="line"><a id="l00118" name="l00118"></a><span class="lineno">  118</span><span class="preprocessor">#endif  </span><span class="comment">// ESP32</span></div>
+<div class="ttc" id="a_adafruit_bridge_8ino_ad7b7eb0b3e04af91bdd64715226c3c68_html_ad7b7eb0b3e04af91bdd64715226c3c68"><div class="ttname"><a href="../../d8/d21/_adafruit_bridge_8ino_ad7b7eb0b3e04af91bdd64715226c3c68.html#ad7b7eb0b3e04af91bdd64715226c3c68">hue</a></div><div class="ttdeci">uint8_t hue</div><div class="ttdef"><b>Definition</b> <a href="../../d8/d21/_adafruit_bridge_8ino_source.html#l00014">AdafruitBridge.ino:14</a></div></div>
 <div class="ttc" id="aenabled_8h_html"><div class="ttname"><a href="../../df/d17/enabled_8h.html">enabled.h</a></div></div>
 <div class="ttc" id="aled__strip_8h_a1538dd2257d5cd57aa4994e4c7a5d666_html_a1538dd2257d5cd57aa4994e4c7a5d666"><div class="ttname"><a href="../../df/d6e/led__strip_8h_a1538dd2257d5cd57aa4994e4c7a5d666.html#a1538dd2257d5cd57aa4994e4c7a5d666">led_strip_clear</a></div><div class="ttdeci">esp_err_t led_strip_clear(led_strip_handle_t strip)</div><div class="ttdoc">Clear LED strip (turn off all LEDs)</div></div>
 <div class="ttc" id="aled__strip_8h_a26caccbd43185602f4ffcec157a70c87_html_a26caccbd43185602f4ffcec157a70c87"><div class="ttname"><a href="../../df/d6e/led__strip_8h_a26caccbd43185602f4ffcec157a70c87.html#a26caccbd43185602f4ffcec157a70c87">led_strip_set_pixel_rgbw</a></div><div class="ttdeci">esp_err_t led_strip_set_pixel_rgbw(led_strip_handle_t strip, uint32_t index, uint32_t red, uint32_t green, uint32_t blue, uint32_t white)</div><div class="ttdoc">Set RGBW for a specific pixel.</div></div>
@@ -246,7 +247,7 @@ $(function(){initNavTree('d8/de7/led__strip__api_8c_source.html','../../'); init
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dir_c30bdf76ce759a4eae8387be42921388.html">third_party</a></li><li class="navelem"><a class="el" href="../../dir_16d1759c38bc39b721e8cd0df805ebae.html">espressif</a></li><li class="navelem"><a class="el" href="../../dir_1b2bd9daf010c2497001a4ecf4482125.html">led_strip</a></li><li class="navelem"><a class="el" href="../../dir_0d5f71e73f676efb5e997d1df1889c9d.html">src</a></li><li class="navelem"><a class="el" href="../../d8/de7/led__strip__api_8c.html">led_strip_api.c</a></li>
-    <li class="footer">Generated on Tue Jun 24 2025 00:58:14 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Fri Aug 22 2025 20:59:33 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

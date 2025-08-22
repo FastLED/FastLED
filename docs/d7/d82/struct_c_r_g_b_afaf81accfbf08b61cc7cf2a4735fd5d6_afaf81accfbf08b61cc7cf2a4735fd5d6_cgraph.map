@@ -1,0 +1,16 @@
+<map id="CRGB::colorBoost" name="CRGB::colorBoost">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,29,141,55"/>
+<area shape="rect" id="Node000002" href="$d7/d82/struct_c_r_g_b_a4b0cc1cfefd9e0c66ea5c6583181df46.html#a4b0cc1cfefd9e0c66ea5c6583181df46" title="Default constructor." alt="" coords="401,5,505,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="141,35,386,19,387,25,142,40"/>
+<area shape="rect" id="Node000003" href="$d7/d82/struct_c_r_g_b_a8b78ce444d74f2bc9e63d83bfd1b17ad.html#a8b78ce444d74f2bc9e63d83bfd1b17ad" title=" " alt="" coords="189,55,325,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="142,49,176,54,176,59,141,54"/>
+<area shape="poly" id="edge3_Node000003_Node000002" title=" " alt="" coords="308,52,388,32,389,37,309,57"/>
+<area shape="rect" id="Node000004" href="$d4/d5d/structfl_1_1_h_s_v16_a0bd2c0fc64fc34d573637c10b849c320.html#a0bd2c0fc64fc34d573637c10b849c320" title=" " alt="" coords="373,55,532,80"/>
+<area shape="poly" id="edge4_Node000003_Node000004" title=" " alt="" coords="326,65,360,65,360,70,326,70"/>
+<area shape="rect" id="Node000005" href="$d4/d5d/structfl_1_1_h_s_v16_a22927102f80a3171aea08e861df47740.html#a22927102f80a3171aea08e861df47740" title=" " alt="" coords="580,5,712,31"/>
+<area shape="poly" id="edge5_Node000004_Node000005" title=" " alt="" coords="502,52,581,32,583,37,504,57"/>
+<area shape="rect" id="Node000006" href="$d4/d36/namespacefl_a379be9b51f27141411271893ce683f5f.html#a379be9b51f27141411271893ce683f5f" title=" " alt="" coords="603,55,689,80"/>
+<area shape="poly" id="edge6_Node000004_Node000006" title=" " alt="" coords="532,65,589,65,589,70,532,70"/>
+<area shape="rect" id="Node000019" href="$d4/d5d/structfl_1_1_h_s_v16_a66d9cc0fccee4175baaef83f1a2d7d7d.html#a66d9cc0fccee4175baaef83f1a2d7d7d" title=" " alt="" coords="581,104,711,129"/>
+<area shape="poly" id="edge7_Node000004_Node000019" title=" " alt="" coords="504,77,583,98,581,103,502,83"/>
+</map>

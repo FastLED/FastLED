@@ -20,7 +20,7 @@
 <!-- Node2 -->
 <g id="Node000002" class="node">
 <title>Node2</title>
-<g id="a_Node000002"><a xlink:href="../../d7/d68/class_pin_ac4ce6209c47e73e4cbc751d735c56e97.html#ac4ce6209c47e73e4cbc751d735c56e97" target="_top" xlink:title="Toggle the pin twice to create a short pulse.">
+<g id="a_Node000002"><a xlink:href="../../d7/d68/class_pin_a70efd9d054eba5312b34b64919821a03.html#a70efd9d054eba5312b34b64919821a03" target="_top" xlink:title="Toggle the pin twice to create a short pulse.">
 <polygon fill="white" stroke="#666666" points="68,-19 0,-19 0,0 68,0 68,-19"/>
 <text text-anchor="middle" x="34" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">Pin::strobe</text>
 </a>

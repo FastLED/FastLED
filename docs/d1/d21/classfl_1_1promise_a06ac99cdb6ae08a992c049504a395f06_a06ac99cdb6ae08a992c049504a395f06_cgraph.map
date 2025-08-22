@@ -1,0 +1,7 @@
+<map id="fl::promise::create" name="fl::promise::create">
+<area shape="rect" id="Node000001" title="Create a pending promise." alt="" coords="5,31,145,56"/>
+<area shape="rect" id="Node000002" href="$d1/d21/classfl_1_1promise_a39a88af32b89bdcd2ade2da29f3397d5.html#a39a88af32b89bdcd2ade2da29f3397d5" title="Default constructor &#45; creates invalid promise." alt="" coords="193,5,345,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="145,32,180,27,180,32,146,37"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a87ae8a24cc8b709a64f39370e71846af.html#a87ae8a24cc8b709a64f39370e71846af" title=" " alt="" coords="207,55,332,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="146,49,193,55,193,61,145,55"/>
+</map>

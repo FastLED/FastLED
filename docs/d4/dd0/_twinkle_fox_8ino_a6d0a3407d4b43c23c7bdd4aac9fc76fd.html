@@ -114,90 +114,90 @@ $(function(){initNavTree('d4/dd0/_twinkle_fox_8ino_a6d0a3407d4b43c23c7bdd4aac9fc
         </tr>
       </table>
 </div><div class="memdoc">
-<dl class="section examples"><dt>Examples</dt><dd><a class="el" href="../../df/d61/_twinkle_fox_8ino-example.html#a8">TwinkleFox.ino</a>.</dd>
+<dl class="section examples"><dt>Examples</dt><dd><a class="el" href="../../df/d61/_twinkle_fox_8ino-example.html#a1">TwinkleFox.ino</a>.</dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="../../d4/dd0/_twinkle_fox_8ino_source.html#l00147">147</a> of file <a class="el" href="../../d4/dd0/_twinkle_fox_8ino_source.html">TwinkleFox.ino</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  148</span>{</div>
-<div class="line"><span class="lineno">  149</span>  <span class="comment">// &quot;PRNG16&quot; is the pseudorandom number generator</span></div>
-<div class="line"><span class="lineno">  150</span>  <span class="comment">// It MUST be reset to the same starting value each time</span></div>
-<div class="line"><span class="lineno">  151</span>  <span class="comment">// this function is called, so that the sequence of &#39;random&#39;</span></div>
-<div class="line"><span class="lineno">  152</span>  <span class="comment">// numbers that it generates is (paradoxically) stable.</span></div>
-<div class="line"><span class="lineno">  153</span>  uint16_t PRNG16 = 11337;</div>
-<div class="line"><span class="lineno">  154</span>  </div>
-<div class="line"><span class="lineno">  155</span>  uint32_t clock32 = millis();</div>
-<div class="line"><span class="lineno">  156</span> </div>
-<div class="line"><span class="lineno">  157</span>  <span class="comment">// Set up the background color, &quot;bg&quot;.</span></div>
-<div class="line"><span class="lineno">  158</span>  <span class="comment">// if AUTO_SELECT_BACKGROUND_COLOR == 1, and the first two colors of</span></div>
-<div class="line"><span class="lineno">  159</span>  <span class="comment">// the current palette are identical, then a deeply faded version of</span></div>
-<div class="line"><span class="lineno">  160</span>  <span class="comment">// that color is used for the background color</span></div>
-<div class="line"><span class="lineno">  161</span>  <a class="code hl_struct" href="../../d7/d82/struct_c_r_g_b.html">CRGB</a> bg;</div>
-<div class="line"><span class="lineno">  162</span>  <span class="keywordflow">if</span>( (<a class="code hl_define" href="../../d1/df6/twinklefox_8h_a955388ff8ac9df46fcb461c73162c831.html#a955388ff8ac9df46fcb461c73162c831">AUTO_SELECT_BACKGROUND_COLOR</a> == 1) &amp;&amp;</div>
-<div class="line"><span class="lineno">  163</span>      (<a class="code hl_variable" href="../../d4/dd0/_twinkle_fox_8ino_aac9fb17164fd578e4779e81630e1470a.html#aac9fb17164fd578e4779e81630e1470a">gCurrentPalette</a>[0] == <a class="code hl_variable" href="../../d4/dd0/_twinkle_fox_8ino_aac9fb17164fd578e4779e81630e1470a.html#aac9fb17164fd578e4779e81630e1470a">gCurrentPalette</a>[1] )) {</div>
-<div class="line"><span class="lineno">  164</span>    bg = <a class="code hl_variable" href="../../d4/dd0/_twinkle_fox_8ino_aac9fb17164fd578e4779e81630e1470a.html#aac9fb17164fd578e4779e81630e1470a">gCurrentPalette</a>[0];</div>
-<div class="line"><span class="lineno">  165</span>    uint8_t bglight = bg.<a class="code hl_function" href="../../d7/d82/struct_c_r_g_b_a940908cc69606bdabe3b2d32a9097356.html#a940908cc69606bdabe3b2d32a9097356">getAverageLight</a>();</div>
-<div class="line"><span class="lineno">  166</span>    <span class="keywordflow">if</span>( bglight &gt; 64) {</div>
-<div class="line"><span class="lineno">  167</span>      bg.<a class="code hl_function" href="../../d7/d82/struct_c_r_g_b_a0441d6094ab8f98d800ec789c36b4461.html#a0441d6094ab8f98d800ec789c36b4461">nscale8_video</a>( 16); <span class="comment">// very bright, so scale to 1/16th</span></div>
-<div class="line"><span class="lineno">  168</span>    } <span class="keywordflow">else</span> <span class="keywordflow">if</span>( bglight &gt; 16) {</div>
-<div class="line"><span class="lineno">  169</span>      bg.<a class="code hl_function" href="../../d7/d82/struct_c_r_g_b_a0441d6094ab8f98d800ec789c36b4461.html#a0441d6094ab8f98d800ec789c36b4461">nscale8_video</a>( 64); <span class="comment">// not that bright, so scale to 1/4th</span></div>
-<div class="line"><span class="lineno">  170</span>    } <span class="keywordflow">else</span> {</div>
-<div class="line"><span class="lineno">  171</span>      bg.<a class="code hl_function" href="../../d7/d82/struct_c_r_g_b_a0441d6094ab8f98d800ec789c36b4461.html#a0441d6094ab8f98d800ec789c36b4461">nscale8_video</a>( 86); <span class="comment">// dim, scale to 1/3rd.</span></div>
-<div class="line"><span class="lineno">  172</span>    }</div>
-<div class="line"><span class="lineno">  173</span>  } <span class="keywordflow">else</span> {</div>
-<div class="line"><span class="lineno">  174</span>    bg = <a class="code hl_variable" href="../../d4/dd0/_twinkle_fox_8ino_ab16af5d73b6d424dd8a3632e6ee208a8.html#ab16af5d73b6d424dd8a3632e6ee208a8">gBackgroundColor</a>; <span class="comment">// just use the explicitly defined background color</span></div>
-<div class="line"><span class="lineno">  175</span>  }</div>
-<div class="line"><span class="lineno">  176</span> </div>
-<div class="line"><span class="lineno">  177</span>  uint8_t backgroundBrightness = bg.<a class="code hl_function" href="../../d7/d82/struct_c_r_g_b_a940908cc69606bdabe3b2d32a9097356.html#a940908cc69606bdabe3b2d32a9097356">getAverageLight</a>();</div>
-<div class="line"><span class="lineno">  178</span>  </div>
-<div class="line"><span class="lineno">  179</span>  <span class="keywordflow">for</span>( <a class="code hl_struct" href="../../d7/d82/struct_c_r_g_b.html">CRGB</a>&amp; pixel: L) {</div>
-<div class="line"><span class="lineno">  180</span>    PRNG16 = (uint16_t)(PRNG16 * 2053) + 1384; <span class="comment">// next &#39;random&#39; number</span></div>
-<div class="line"><span class="lineno">  181</span>    uint16_t myclockoffset16= PRNG16; <span class="comment">// use that number as clock offset</span></div>
-<div class="line"><span class="lineno">  182</span>    PRNG16 = (uint16_t)(PRNG16 * 2053) + 1384; <span class="comment">// next &#39;random&#39; number</span></div>
-<div class="line"><span class="lineno">  183</span>    <span class="comment">// use that number as clock speed adjustment factor (in 8ths, from 8/8ths to 23/8ths)</span></div>
-<div class="line"><span class="lineno">  184</span>    uint8_t myspeedmultiplierQ5_3 =  ((((PRNG16 &amp; 0xFF)&gt;&gt;4) + (PRNG16 &amp; 0x0F)) &amp; 0x0F) + 0x08;</div>
-<div class="line"><span class="lineno">  185</span>    uint32_t myclock30 = (uint32_t)((clock32 * myspeedmultiplierQ5_3) &gt;&gt; 3) + myclockoffset16;</div>
-<div class="line"><span class="lineno">  186</span>    uint8_t  myunique8 = PRNG16 &gt;&gt; 8; <span class="comment">// get &#39;salt&#39; value for this pixel</span></div>
-<div class="line"><span class="lineno">  187</span> </div>
-<div class="line"><span class="lineno">  188</span>    <span class="comment">// We now have the adjusted &#39;clock&#39; for this pixel, now we call</span></div>
-<div class="line"><span class="lineno">  189</span>    <span class="comment">// the function that computes what color the pixel should be based</span></div>
-<div class="line"><span class="lineno">  190</span>    <span class="comment">// on the &quot;brightness = f( time )&quot; idea.</span></div>
-<div class="line"><span class="lineno">  191</span>    <a class="code hl_struct" href="../../d7/d82/struct_c_r_g_b.html">CRGB</a> c = <a class="code hl_function" href="../../d4/dd0/_twinkle_fox_8ino_aff322ac4b9956a48a5d4e90853178b9f.html#aff322ac4b9956a48a5d4e90853178b9f">computeOneTwinkle</a>( myclock30, myunique8);</div>
-<div class="line"><span class="lineno">  192</span> </div>
-<div class="line"><span class="lineno">  193</span>    uint8_t cbright = c.<a class="code hl_function" href="../../d7/d82/struct_c_r_g_b_a940908cc69606bdabe3b2d32a9097356.html#a940908cc69606bdabe3b2d32a9097356">getAverageLight</a>();</div>
-<div class="line"><span class="lineno">  194</span>    int16_t deltabright = cbright - backgroundBrightness;</div>
-<div class="line"><span class="lineno">  195</span>    <span class="keywordflow">if</span>( deltabright &gt;= 32 || (!bg)) {</div>
-<div class="line"><span class="lineno">  196</span>      <span class="comment">// If the new pixel is significantly brighter than the background color, </span></div>
-<div class="line"><span class="lineno">  197</span>      <span class="comment">// use the new color.</span></div>
-<div class="line"><span class="lineno">  198</span>      pixel = c;</div>
-<div class="line"><span class="lineno">  199</span>    } <span class="keywordflow">else</span> <span class="keywordflow">if</span>( deltabright &gt; 0 ) {</div>
-<div class="line"><span class="lineno">  200</span>      <span class="comment">// If the new pixel is just slightly brighter than the background color,</span></div>
-<div class="line"><span class="lineno">  201</span>      <span class="comment">// mix a blend of the new color and the background color</span></div>
-<div class="line"><span class="lineno">  202</span>      pixel = <a class="code hl_function" href="../../d1/dfb/colorutils_8h_a924fc8748f53389e55fdc63bfc14b805.html#a924fc8748f53389e55fdc63bfc14b805">blend</a>( bg, c, deltabright * 8);</div>
-<div class="line"><span class="lineno">  203</span>    } <span class="keywordflow">else</span> { </div>
-<div class="line"><span class="lineno">  204</span>      <span class="comment">// if the new pixel is not at all brighter than the background color,</span></div>
-<div class="line"><span class="lineno">  205</span>      <span class="comment">// just use the background color.</span></div>
-<div class="line"><span class="lineno">  206</span>      pixel = bg;</div>
-<div class="line"><span class="lineno">  207</span>    }</div>
-<div class="line"><span class="lineno">  208</span>  }</div>
-<div class="line"><span class="lineno">  209</span>}</div>
-<div class="ttc" id="a_twinkle_fox_8ino_aac9fb17164fd578e4779e81630e1470a_html_aac9fb17164fd578e4779e81630e1470a"><div class="ttname"><a href="../../d4/dd0/_twinkle_fox_8ino_aac9fb17164fd578e4779e81630e1470a.html#aac9fb17164fd578e4779e81630e1470a">gCurrentPalette</a></div><div class="ttdeci">CRGBPalette16 gCurrentPalette</div><div class="ttdef"><b>Definition</b> <a href="../../d4/dd0/_twinkle_fox_8ino_source.html#l00113">TwinkleFox.ino:113</a></div></div>
-<div class="ttc" id="a_twinkle_fox_8ino_ab16af5d73b6d424dd8a3632e6ee208a8_html_ab16af5d73b6d424dd8a3632e6ee208a8"><div class="ttname"><a href="../../d4/dd0/_twinkle_fox_8ino_ab16af5d73b6d424dd8a3632e6ee208a8.html#ab16af5d73b6d424dd8a3632e6ee208a8">gBackgroundColor</a></div><div class="ttdeci">CRGB gBackgroundColor</div><div class="ttdef"><b>Definition</b> <a href="../../d4/dd0/_twinkle_fox_8ino_source.html#l00097">TwinkleFox.ino:97</a></div></div>
-<div class="ttc" id="a_twinkle_fox_8ino_aff322ac4b9956a48a5d4e90853178b9f_html_aff322ac4b9956a48a5d4e90853178b9f"><div class="ttname"><a href="../../d4/dd0/_twinkle_fox_8ino_aff322ac4b9956a48a5d4e90853178b9f.html#aff322ac4b9956a48a5d4e90853178b9f">computeOneTwinkle</a></div><div class="ttdeci">CRGB computeOneTwinkle(uint32_t ms, uint8_t salt)</div><div class="ttdef"><b>Definition</b> <a href="../../d4/dd0/_twinkle_fox_8ino_source.html#l00221">TwinkleFox.ino:221</a></div></div>
-<div class="ttc" id="acolorutils_8h_a924fc8748f53389e55fdc63bfc14b805_html_a924fc8748f53389e55fdc63bfc14b805"><div class="ttname"><a href="../../d1/dfb/colorutils_8h_a924fc8748f53389e55fdc63bfc14b805.html#a924fc8748f53389e55fdc63bfc14b805">blend</a></div><div class="ttdeci">CRGB blend(const CRGB &amp;p1, const CRGB &amp;p2, fract8 amountOfP2)</div><div class="ttdef"><b>Definition</b> <a href="../../da/d2d/colorutils_8cpp_source.html#l00060">colorutils.cpp:60</a></div></div>
-<div class="ttc" id="astruct_c_r_g_b_a0441d6094ab8f98d800ec789c36b4461_html_a0441d6094ab8f98d800ec789c36b4461"><div class="ttname"><a href="../../d7/d82/struct_c_r_g_b_a0441d6094ab8f98d800ec789c36b4461.html#a0441d6094ab8f98d800ec789c36b4461">CRGB::nscale8_video</a></div><div class="ttdeci">FASTLED_FORCE_INLINE CRGB &amp; nscale8_video(uint8_t scaledown)</div><div class="ttdoc">Scale down a RGB to N/256ths of it&#39;s current brightness using &quot;video&quot; dimming rules.</div><div class="ttdef"><b>Definition</b> <a href="../../d0/d4b/crgb_8hpp_source.html#l00069">crgb.hpp:69</a></div></div>
-<div class="ttc" id="astruct_c_r_g_b_a940908cc69606bdabe3b2d32a9097356_html_a940908cc69606bdabe3b2d32a9097356"><div class="ttname"><a href="../../d7/d82/struct_c_r_g_b_a940908cc69606bdabe3b2d32a9097356.html#a940908cc69606bdabe3b2d32a9097356">CRGB::getAverageLight</a></div><div class="ttdeci">FASTLED_FORCE_INLINE uint8_t getAverageLight() const</div><div class="ttdoc">Get the average of the R, G, and B values.</div><div class="ttdef"><b>Definition</b> <a href="../../d0/d4b/crgb_8hpp_source.html#l00149">crgb.hpp:149</a></div></div>
-<div class="ttc" id="astruct_c_r_g_b_html"><div class="ttname"><a href="../../d7/d82/struct_c_r_g_b.html">CRGB</a></div><div class="ttdoc">Representation of an RGB pixel (Red, Green, Blue)</div><div class="ttdef"><b>Definition</b> <a href="../../db/dd1/crgb_8h_source.html#l00055">crgb.h:55</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../d4/dd0/_twinkle_fox_8ino_source.html#l00157">157</a> of file <a class="el" href="../../d4/dd0/_twinkle_fox_8ino_source.html">TwinkleFox.ino</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  158</span>{</div>
+<div class="line"><span class="lineno">  159</span>  <span class="comment">// &quot;PRNG16&quot; is the pseudorandom number generator</span></div>
+<div class="line"><span class="lineno">  160</span>  <span class="comment">// It MUST be reset to the same starting value each time</span></div>
+<div class="line"><span class="lineno">  161</span>  <span class="comment">// this function is called, so that the sequence of &#39;random&#39;</span></div>
+<div class="line"><span class="lineno">  162</span>  <span class="comment">// numbers that it generates is (paradoxically) stable.</span></div>
+<div class="line"><span class="lineno">  163</span>  uint16_t PRNG16 = 11337;</div>
+<div class="line"><span class="lineno">  164</span>  </div>
+<div class="line"><span class="lineno">  165</span>  uint32_t clock32 = millis();</div>
+<div class="line"><span class="lineno">  166</span> </div>
+<div class="line"><span class="lineno">  167</span>  <span class="comment">// Set up the background color, &quot;bg&quot;.</span></div>
+<div class="line"><span class="lineno">  168</span>  <span class="comment">// if AUTO_SELECT_BACKGROUND_COLOR == 1, and the first two colors of</span></div>
+<div class="line"><span class="lineno">  169</span>  <span class="comment">// the current palette are identical, then a deeply faded version of</span></div>
+<div class="line"><span class="lineno">  170</span>  <span class="comment">// that color is used for the background color</span></div>
+<div class="line"><span class="lineno">  171</span>  <a class="code hl_struct" href="../../d7/d82/struct_c_r_g_b.html">CRGB</a> bg;</div>
+<div class="line"><span class="lineno">  172</span>  <span class="keywordflow">if</span>( (<a class="code hl_define" href="../../d1/df6/twinklefox_8h_a955388ff8ac9df46fcb461c73162c831.html#a955388ff8ac9df46fcb461c73162c831">AUTO_SELECT_BACKGROUND_COLOR</a> == 1) &amp;&amp;</div>
+<div class="line"><span class="lineno">  173</span>      (<a class="code hl_variable" href="../../d4/dd0/_twinkle_fox_8ino_aac9fb17164fd578e4779e81630e1470a.html#aac9fb17164fd578e4779e81630e1470a">gCurrentPalette</a>[0] == <a class="code hl_variable" href="../../d4/dd0/_twinkle_fox_8ino_aac9fb17164fd578e4779e81630e1470a.html#aac9fb17164fd578e4779e81630e1470a">gCurrentPalette</a>[1] )) {</div>
+<div class="line"><span class="lineno">  174</span>    bg = <a class="code hl_variable" href="../../d4/dd0/_twinkle_fox_8ino_aac9fb17164fd578e4779e81630e1470a.html#aac9fb17164fd578e4779e81630e1470a">gCurrentPalette</a>[0];</div>
+<div class="line"><span class="lineno">  175</span>    uint8_t bglight = bg.<a class="code hl_function" href="../../d7/d82/struct_c_r_g_b_a940908cc69606bdabe3b2d32a9097356.html#a940908cc69606bdabe3b2d32a9097356">getAverageLight</a>();</div>
+<div class="line"><span class="lineno">  176</span>    <span class="keywordflow">if</span>( bglight &gt; 64) {</div>
+<div class="line"><span class="lineno">  177</span>      bg.<a class="code hl_function" href="../../d7/d82/struct_c_r_g_b_af4cad72bcd9b925d527a3af3a8d956e6.html#af4cad72bcd9b925d527a3af3a8d956e6">nscale8_video</a>( 16); <span class="comment">// very bright, so scale to 1/16th</span></div>
+<div class="line"><span class="lineno">  178</span>    } <span class="keywordflow">else</span> <span class="keywordflow">if</span>( bglight &gt; 16) {</div>
+<div class="line"><span class="lineno">  179</span>      bg.<a class="code hl_function" href="../../d7/d82/struct_c_r_g_b_af4cad72bcd9b925d527a3af3a8d956e6.html#af4cad72bcd9b925d527a3af3a8d956e6">nscale8_video</a>( 64); <span class="comment">// not that bright, so scale to 1/4th</span></div>
+<div class="line"><span class="lineno">  180</span>    } <span class="keywordflow">else</span> {</div>
+<div class="line"><span class="lineno">  181</span>      bg.<a class="code hl_function" href="../../d7/d82/struct_c_r_g_b_af4cad72bcd9b925d527a3af3a8d956e6.html#af4cad72bcd9b925d527a3af3a8d956e6">nscale8_video</a>( 86); <span class="comment">// dim, scale to 1/3rd.</span></div>
+<div class="line"><span class="lineno">  182</span>    }</div>
+<div class="line"><span class="lineno">  183</span>  } <span class="keywordflow">else</span> {</div>
+<div class="line"><span class="lineno">  184</span>    bg = <a class="code hl_variable" href="../../d4/dd0/_twinkle_fox_8ino_ab16af5d73b6d424dd8a3632e6ee208a8.html#ab16af5d73b6d424dd8a3632e6ee208a8">gBackgroundColor</a>; <span class="comment">// just use the explicitly defined background color</span></div>
+<div class="line"><span class="lineno">  185</span>  }</div>
+<div class="line"><span class="lineno">  186</span> </div>
+<div class="line"><span class="lineno">  187</span>  uint8_t backgroundBrightness = bg.<a class="code hl_function" href="../../d7/d82/struct_c_r_g_b_a940908cc69606bdabe3b2d32a9097356.html#a940908cc69606bdabe3b2d32a9097356">getAverageLight</a>();</div>
+<div class="line"><span class="lineno">  188</span>  </div>
+<div class="line"><span class="lineno">  189</span>  <span class="keywordflow">for</span>( <a class="code hl_struct" href="../../d7/d82/struct_c_r_g_b.html">CRGB</a>&amp; pixel: L) {</div>
+<div class="line"><span class="lineno">  190</span>    PRNG16 = (uint16_t)(PRNG16 * 2053) + 1384; <span class="comment">// next &#39;random&#39; number</span></div>
+<div class="line"><span class="lineno">  191</span>    uint16_t myclockoffset16= PRNG16; <span class="comment">// use that number as clock offset</span></div>
+<div class="line"><span class="lineno">  192</span>    PRNG16 = (uint16_t)(PRNG16 * 2053) + 1384; <span class="comment">// next &#39;random&#39; number</span></div>
+<div class="line"><span class="lineno">  193</span>    <span class="comment">// use that number as clock speed adjustment factor (in 8ths, from 8/8ths to 23/8ths)</span></div>
+<div class="line"><span class="lineno">  194</span>    uint8_t myspeedmultiplierQ5_3 =  ((((PRNG16 &amp; 0xFF)&gt;&gt;4) + (PRNG16 &amp; 0x0F)) &amp; 0x0F) + 0x08;</div>
+<div class="line"><span class="lineno">  195</span>    uint32_t myclock30 = (uint32_t)((clock32 * myspeedmultiplierQ5_3) &gt;&gt; 3) + myclockoffset16;</div>
+<div class="line"><span class="lineno">  196</span>    uint8_t  myunique8 = PRNG16 &gt;&gt; 8; <span class="comment">// get &#39;salt&#39; value for this pixel</span></div>
+<div class="line"><span class="lineno">  197</span> </div>
+<div class="line"><span class="lineno">  198</span>    <span class="comment">// We now have the adjusted &#39;clock&#39; for this pixel, now we call</span></div>
+<div class="line"><span class="lineno">  199</span>    <span class="comment">// the function that computes what color the pixel should be based</span></div>
+<div class="line"><span class="lineno">  200</span>    <span class="comment">// on the &quot;brightness = f( time )&quot; idea.</span></div>
+<div class="line"><span class="lineno">  201</span>    <a class="code hl_struct" href="../../d7/d82/struct_c_r_g_b.html">CRGB</a> c = <a class="code hl_function" href="../../d4/dd0/_twinkle_fox_8ino_aff322ac4b9956a48a5d4e90853178b9f.html#aff322ac4b9956a48a5d4e90853178b9f">computeOneTwinkle</a>( myclock30, myunique8);</div>
+<div class="line"><span class="lineno">  202</span> </div>
+<div class="line"><span class="lineno">  203</span>    uint8_t cbright = c.<a class="code hl_function" href="../../d7/d82/struct_c_r_g_b_a940908cc69606bdabe3b2d32a9097356.html#a940908cc69606bdabe3b2d32a9097356">getAverageLight</a>();</div>
+<div class="line"><span class="lineno">  204</span>    int16_t deltabright = cbright - backgroundBrightness;</div>
+<div class="line"><span class="lineno">  205</span>    <span class="keywordflow">if</span>( deltabright &gt;= 32 || (!bg)) {</div>
+<div class="line"><span class="lineno">  206</span>      <span class="comment">// If the new pixel is significantly brighter than the background color, </span></div>
+<div class="line"><span class="lineno">  207</span>      <span class="comment">// use the new color.</span></div>
+<div class="line"><span class="lineno">  208</span>      pixel = c;</div>
+<div class="line"><span class="lineno">  209</span>    } <span class="keywordflow">else</span> <span class="keywordflow">if</span>( deltabright &gt; 0 ) {</div>
+<div class="line"><span class="lineno">  210</span>      <span class="comment">// If the new pixel is just slightly brighter than the background color,</span></div>
+<div class="line"><span class="lineno">  211</span>      <span class="comment">// mix a blend of the new color and the background color</span></div>
+<div class="line"><span class="lineno">  212</span>      pixel = <a class="code hl_function" href="../../d4/d36/namespacefl_a924fc8748f53389e55fdc63bfc14b805.html#a924fc8748f53389e55fdc63bfc14b805">blend</a>( bg, c, deltabright * 8);</div>
+<div class="line"><span class="lineno">  213</span>    } <span class="keywordflow">else</span> { </div>
+<div class="line"><span class="lineno">  214</span>      <span class="comment">// if the new pixel is not at all brighter than the background color,</span></div>
+<div class="line"><span class="lineno">  215</span>      <span class="comment">// just use the background color.</span></div>
+<div class="line"><span class="lineno">  216</span>      pixel = bg;</div>
+<div class="line"><span class="lineno">  217</span>    }</div>
+<div class="line"><span class="lineno">  218</span>  }</div>
+<div class="line"><span class="lineno">  219</span>}</div>
+<div class="ttc" id="a_twinkle_fox_8ino_aac9fb17164fd578e4779e81630e1470a_html_aac9fb17164fd578e4779e81630e1470a"><div class="ttname"><a href="../../d4/dd0/_twinkle_fox_8ino_aac9fb17164fd578e4779e81630e1470a.html#aac9fb17164fd578e4779e81630e1470a">gCurrentPalette</a></div><div class="ttdeci">CRGBPalette16 gCurrentPalette</div><div class="ttdef"><b>Definition</b> <a href="../../d4/dd0/_twinkle_fox_8ino_source.html#l00123">TwinkleFox.ino:123</a></div></div>
+<div class="ttc" id="a_twinkle_fox_8ino_ab16af5d73b6d424dd8a3632e6ee208a8_html_ab16af5d73b6d424dd8a3632e6ee208a8"><div class="ttname"><a href="../../d4/dd0/_twinkle_fox_8ino_ab16af5d73b6d424dd8a3632e6ee208a8.html#ab16af5d73b6d424dd8a3632e6ee208a8">gBackgroundColor</a></div><div class="ttdeci">CRGB gBackgroundColor</div><div class="ttdef"><b>Definition</b> <a href="../../d4/dd0/_twinkle_fox_8ino_source.html#l00107">TwinkleFox.ino:107</a></div></div>
+<div class="ttc" id="a_twinkle_fox_8ino_aff322ac4b9956a48a5d4e90853178b9f_html_aff322ac4b9956a48a5d4e90853178b9f"><div class="ttname"><a href="../../d4/dd0/_twinkle_fox_8ino_aff322ac4b9956a48a5d4e90853178b9f.html#aff322ac4b9956a48a5d4e90853178b9f">computeOneTwinkle</a></div><div class="ttdeci">CRGB computeOneTwinkle(uint32_t ms, uint8_t salt)</div><div class="ttdef"><b>Definition</b> <a href="../../d4/dd0/_twinkle_fox_8ino_source.html#l00231">TwinkleFox.ino:231</a></div></div>
+<div class="ttc" id="anamespacefl_a924fc8748f53389e55fdc63bfc14b805_html_a924fc8748f53389e55fdc63bfc14b805"><div class="ttname"><a href="../../d4/d36/namespacefl_a924fc8748f53389e55fdc63bfc14b805.html#a924fc8748f53389e55fdc63bfc14b805">fl::blend</a></div><div class="ttdeci">CRGB blend(const CRGB &amp;p1, const CRGB &amp;p2, fract8 amountOfP2)</div><div class="ttdef"><b>Definition</b> <a href="../../da/d2d/colorutils_8cpp_source.html#l00061">colorutils.cpp:61</a></div></div>
+<div class="ttc" id="astruct_c_r_g_b_a940908cc69606bdabe3b2d32a9097356_html_a940908cc69606bdabe3b2d32a9097356"><div class="ttname"><a href="../../d7/d82/struct_c_r_g_b_a940908cc69606bdabe3b2d32a9097356.html#a940908cc69606bdabe3b2d32a9097356">CRGB::getAverageLight</a></div><div class="ttdeci">FASTLED_FORCE_INLINE fl::u8 getAverageLight() const</div><div class="ttdoc">Get the average of the R, G, and B values.</div><div class="ttdef"><b>Definition</b> <a href="../../d0/d4b/crgb_8hpp_source.html#l00158">crgb.hpp:158</a></div></div>
+<div class="ttc" id="astruct_c_r_g_b_af4cad72bcd9b925d527a3af3a8d956e6_html_af4cad72bcd9b925d527a3af3a8d956e6"><div class="ttname"><a href="../../d7/d82/struct_c_r_g_b_af4cad72bcd9b925d527a3af3a8d956e6.html#af4cad72bcd9b925d527a3af3a8d956e6">CRGB::nscale8_video</a></div><div class="ttdeci">FASTLED_FORCE_INLINE CRGB &amp; nscale8_video(fl::u8 scaledown)</div><div class="ttdoc">Scale down a RGB to N/256ths of it&#39;s current brightness using &quot;video&quot; dimming rules.</div></div>
+<div class="ttc" id="astruct_c_r_g_b_html"><div class="ttname"><a href="../../d7/d82/struct_c_r_g_b.html">CRGB</a></div><div class="ttdoc">Representation of an RGB pixel (Red, Green, Blue)</div><div class="ttdef"><b>Definition</b> <a href="../../db/dd1/crgb_8h_source.html#l00086">crgb.h:86</a></div></div>
 <div class="ttc" id="atwinklefox_8h_a955388ff8ac9df46fcb461c73162c831_html_a955388ff8ac9df46fcb461c73162c831"><div class="ttname"><a href="../../d1/df6/twinklefox_8h_a955388ff8ac9df46fcb461c73162c831.html#a955388ff8ac9df46fcb461c73162c831">AUTO_SELECT_BACKGROUND_COLOR</a></div><div class="ttdeci">#define AUTO_SELECT_BACKGROUND_COLOR</div><div class="ttdef"><b>Definition</b> <a href="../../d1/df6/twinklefox_8h_source.html#l00101">twinklefox.h:101</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d1/df6/twinklefox_8h_source.html#l00101">AUTO_SELECT_BACKGROUND_COLOR</a>, <a class="el" href="../../da/d2d/colorutils_8cpp_source.html#l00060">blend()</a>, <a class="el" href="../../d4/dd0/_twinkle_fox_8ino_source.html#l00221">computeOneTwinkle()</a>, <a class="el" href="../../d4/dd0/_twinkle_fox_8ino_source.html#l00097">gBackgroundColor</a>, <a class="el" href="../../d4/dd0/_twinkle_fox_8ino_source.html#l00113">gCurrentPalette</a>, <a class="el" href="../../d0/d4b/crgb_8hpp_source.html#l00149">CRGB::getAverageLight()</a>, and <a class="el" href="../../d0/d4b/crgb_8hpp_source.html#l00069">CRGB::nscale8_video()</a>.</p>
+<p class="reference">References <a class="el" href="../../d1/df6/twinklefox_8h_source.html#l00101">AUTO_SELECT_BACKGROUND_COLOR</a>, <a class="el" href="../../da/d2d/colorutils_8cpp_source.html#l00061">fl::blend()</a>, <a class="el" href="../../d4/dd0/_twinkle_fox_8ino_source.html#l00231">computeOneTwinkle()</a>, <a class="el" href="../../d4/dd0/_twinkle_fox_8ino_source.html#l00107">gBackgroundColor</a>, <a class="el" href="../../d4/dd0/_twinkle_fox_8ino_source.html#l00123">gCurrentPalette</a>, <a class="el" href="../../d0/d4b/crgb_8hpp_source.html#l00158">CRGB::getAverageLight()</a>, and <a class="el" href="../../d7/d82/struct_c_r_g_b_af4cad72bcd9b925d527a3af3a8d956e6.html#af4cad72bcd9b925d527a3af3a8d956e6">CRGB::nscale8_video()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d4/dd0/_twinkle_fox_8ino_source.html#l00126">loop()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d4/dd0/_twinkle_fox_8ino_source.html#l00136">loop()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-0-content" class="dyncontent" style="display:none;">
-<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../d4/dd0/_twinkle_fox_8ino_a6d0a3407d4b43c23c7bdd4aac9fc76fd_a6d0a3407d4b43c23c7bdd4aac9fc76fd_cgraph.svg" width="100%" height="557"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
+<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../d4/dd0/_twinkle_fox_8ino_a6d0a3407d4b43c23c7bdd4aac9fc76fd_a6d0a3407d4b43c23c7bdd4aac9fc76fd_cgraph.svg" width="100%" height="589"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
 </div>
 <div id="dynsection-1" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-1-trigger" src="../../closed.png" alt="+"/> Here is the caller graph for this function:</div>
@@ -216,7 +216,7 @@ $(function(){initNavTree('d4/dd0/_twinkle_fox_8ino_a6d0a3407d4b43c23c7bdd4aac9fc
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dir_d28a4824dc47e487b107a5db32ef43c4.html">examples</a></li><li class="navelem"><a class="el" href="../../dir_3d7f0dd01d50ae27368def194e8e7b46.html">TwinkleFox</a></li><li class="navelem"><a class="el" href="../../d4/dd0/_twinkle_fox_8ino.html">TwinkleFox.ino</a></li>
-    <li class="footer">Generated on Tue Jun 24 2025 00:58:14 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Fri Aug 22 2025 20:59:34 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

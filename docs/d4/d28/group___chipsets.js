@@ -21,7 +21,7 @@ var group___chipsets =
     [ "RGBWEmulatedController< CONTROLLER, RGB_ORDER >::ControllerT", "d9/d4b/class_r_g_b_w_emulated_controller_1_1_controller_t.html", [
       [ "callBeginShowLeds", "d9/d4b/class_r_g_b_w_emulated_controller_1_1_controller_t_adcbb639de93a59ffc51498fdb163f9a8.html#adcbb639de93a59ffc51498fdb163f9a8", null ],
       [ "callEndShowLeds", "d9/d4b/class_r_g_b_w_emulated_controller_1_1_controller_t_a39c3c27804896526352b1ff011843bce.html#a39c3c27804896526352b1ff011843bce", null ],
-      [ "callShow", "d9/d4b/class_r_g_b_w_emulated_controller_1_1_controller_t_af272d6f5983b98c6141bf78ab09fa448.html#af272d6f5983b98c6141bf78ab09fa448", null ],
+      [ "callShow", "d9/d4b/class_r_g_b_w_emulated_controller_1_1_controller_t_acdf7fe1c34097f03bfcb18f2c54e3d1a.html#acdf7fe1c34097f03bfcb18f2c54e3d1a", null ],
       [ "RGBWEmulatedController< CONTROLLER, RGB_ORDER >", "d9/d4b/class_r_g_b_w_emulated_controller_1_1_controller_t_aa842e0af0bd8638c9be5c5f19400941d.html#aa842e0af0bd8638c9be5c5f19400941d", null ]
     ] ],
     [ "WS2816Controller< DATA_PIN, RGB_ORDER >", "dd/dbc/class_w_s2816_controller.html", [
@@ -41,7 +41,7 @@ var group___chipsets =
     [ "WS2816Controller< DATA_PIN, RGB_ORDER >::ControllerT", "d5/db3/class_w_s2816_controller_1_1_controller_t.html", [
       [ "callBeginShowLeds", "d5/db3/class_w_s2816_controller_1_1_controller_t_a179bcd510371dfb0cc53823d2f201b37.html#a179bcd510371dfb0cc53823d2f201b37", null ],
       [ "callEndShowLeds", "d5/db3/class_w_s2816_controller_1_1_controller_t_abcd95afba422701c2c97a4d04fea1de6.html#abcd95afba422701c2c97a4d04fea1de6", null ],
-      [ "callShow", "d5/db3/class_w_s2816_controller_1_1_controller_t_af66901d618f57481e5206ca963882e41.html#af66901d618f57481e5206ca963882e41", null ],
+      [ "callShow", "d5/db3/class_w_s2816_controller_1_1_controller_t_a694e3839da8eb4c67afef738517d6ff7.html#a694e3839da8eb4c67afef738517d6ff7", null ],
       [ "WS2816Controller< DATA_PIN, RGB_ORDER >", "d5/db3/class_w_s2816_controller_1_1_controller_t_a492510495d0f30a72347e7b994bf6d54.html#a492510495d0f30a72347e7b994bf6d54", null ]
     ] ]
 ];

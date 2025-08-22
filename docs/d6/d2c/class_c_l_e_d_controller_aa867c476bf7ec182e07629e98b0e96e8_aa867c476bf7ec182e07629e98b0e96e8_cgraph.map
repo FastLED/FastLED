@@ -1,0 +1,5 @@
+<map id="CLEDController::showColor" name="CLEDController::showColor">
+<area shape="rect" id="Node000001" title="Set all the LEDs to a given color." alt="" coords="5,5,201,31"/>
+<area shape="rect" id="Node000002" href="$da/dc7/advanced_8h_a96d9503945476f13a97c8f406269fcef.html#a96d9503945476f13a97c8f406269fcef" title=" " alt="" coords="249,5,340,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="202,15,236,15,236,21,202,21"/>
+</map>

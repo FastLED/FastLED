@@ -23,7 +23,7 @@
 <g id="a_Node000002"><a xlink:href="../../dc/d45/classfl_1_1_sorted_heap_map_a57cb802c21a91b12f97473cdb9f7f528.html#a57cb802c21a91b12f97473cdb9f7f528" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="115,-41 0,-41 0,0 115,0 115,-41"/>
 <text text-anchor="start" x="8" y="-29" font-family="Helvetica,sans-Serif" font-size="10.00">fl::SortedHeapMap&lt;</text>
-<text text-anchor="start" x="8" y="-18" font-family="Helvetica,sans-Serif" font-size="10.00"> uint32_t, FramePtr,</text>
+<text text-anchor="start" x="8" y="-18" font-family="Helvetica,sans-Serif" font-size="10.00"> fl::u32, FramePtr,</text>
 <text text-anchor="middle" x="57.5" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00"> Less &gt;::contains</text>
 </a>
 </g>

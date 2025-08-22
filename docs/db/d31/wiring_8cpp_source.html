@@ -162,30 +162,30 @@ $(function(){initNavTree('db/d31/wiring_8cpp_source.html','../../'); initResizab
 <div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span> </div>
 <div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span><span class="keywordtype">unsigned</span> <span class="keywordtype">long</span> micros() {</div>
 <div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span>        <span class="keywordtype">unsigned</span> <span class="keywordtype">long</span> m;</div>
-<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>        uint8_t oldSREG = SREG, t;</div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>        uint8_t oldSREG = SREG, <a class="code hl_variable" href="../../dc/db7/examples_2_luminova_2luminova_8h_ae96c939a2a46590dc79c7d9ca8331dfe.html#ae96c939a2a46590dc79c7d9ca8331dfe">t</a>;</div>
 <div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span> </div>
 <div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>        cli();</div>
 <div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>        m = FastLED_timer0_overflow_count; <span class="comment">// ._long;</span></div>
 <div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span><span class="preprocessor">#if defined(TCNT0)</span></div>
-<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span>        t = TCNT0;</div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span>        <a class="code hl_variable" href="../../dc/db7/examples_2_luminova_2luminova_8h_ae96c939a2a46590dc79c7d9ca8331dfe.html#ae96c939a2a46590dc79c7d9ca8331dfe">t</a> = TCNT0;</div>
 <div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span><span class="preprocessor">#elif defined(TCNT0L)</span></div>
-<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span>        t = TCNT0L;</div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span>        <a class="code hl_variable" href="../../dc/db7/examples_2_luminova_2luminova_8h_ae96c939a2a46590dc79c7d9ca8331dfe.html#ae96c939a2a46590dc79c7d9ca8331dfe">t</a> = TCNT0L;</div>
 <div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span><span class="preprocessor">#else</span></div>
 <div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span><span class="preprocessor">        #error TIMER 0 not defined</span></div>
 <div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span><span class="preprocessor">#endif</span></div>
 <div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span> </div>
 <div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span> </div>
 <div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span><span class="preprocessor">#ifdef TIFR0</span></div>
-<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span>        <span class="keywordflow">if</span> ((TIFR0 &amp; _BV(TOV0)) &amp;&amp; (t &lt; 255))</div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span>        <span class="keywordflow">if</span> ((TIFR0 &amp; _BV(TOV0)) &amp;&amp; (<a class="code hl_variable" href="../../dc/db7/examples_2_luminova_2luminova_8h_ae96c939a2a46590dc79c7d9ca8331dfe.html#ae96c939a2a46590dc79c7d9ca8331dfe">t</a> &lt; 255))</div>
 <div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span>                ++m;</div>
 <div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span><span class="preprocessor">#else</span></div>
-<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span>        <span class="keywordflow">if</span> ((TIFR &amp; _BV(TOV0)) &amp;&amp; (t &lt; 255))</div>
+<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span>        <span class="keywordflow">if</span> ((TIFR &amp; _BV(TOV0)) &amp;&amp; (<a class="code hl_variable" href="../../dc/db7/examples_2_luminova_2luminova_8h_ae96c939a2a46590dc79c7d9ca8331dfe.html#ae96c939a2a46590dc79c7d9ca8331dfe">t</a> &lt; 255))</div>
 <div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span>                ++m;</div>
 <div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span><span class="preprocessor">#endif</span></div>
 <div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span> </div>
 <div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span>        SREG = oldSREG;</div>
 <div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span> </div>
-<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span>        <span class="keywordflow">return</span> ((m &lt;&lt; 8) + t) * (64 / clockCyclesPerMicrosecond());</div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span>        <span class="keywordflow">return</span> ((m &lt;&lt; 8) + <a class="code hl_variable" href="../../dc/db7/examples_2_luminova_2luminova_8h_ae96c939a2a46590dc79c7d9ca8331dfe.html#ae96c939a2a46590dc79c7d9ca8331dfe">t</a>) * (64 / clockCyclesPerMicrosecond());</div>
 <div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span>}</div>
 <div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span> </div>
 <div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span><span class="keywordtype">void</span> delay(<span class="keywordtype">unsigned</span> <span class="keywordtype">long</span> ms)</div>
@@ -343,6 +343,7 @@ $(function(){initNavTree('db/d31/wiring_8cpp_source.html','../../'); initResizab
 <div class="line"><a id="l00241" name="l00241"></a><span class="lineno">  241</span><span class="preprocessor">#endif</span></div>
 <div class="line"><a id="l00242" name="l00242"></a><span class="lineno">  242</span> </div>
 <div class="ttc" id="a_fast_l_e_d_8h_html"><div class="ttname"><a href="../../db/d97/_fast_l_e_d_8h.html">FastLED.h</a></div><div class="ttdoc">central include file for FastLED, defines the CFastLED class/object</div></div>
+<div class="ttc" id="aexamples_2_luminova_2luminova_8h_ae96c939a2a46590dc79c7d9ca8331dfe_html_ae96c939a2a46590dc79c7d9ca8331dfe"><div class="ttname"><a href="../../dc/db7/examples_2_luminova_2luminova_8h_ae96c939a2a46590dc79c7d9ca8331dfe.html#ae96c939a2a46590dc79c7d9ca8331dfe">t</a></div><div class="ttdeci">static uint32_t t</div><div class="ttdef"><b>Definition</b> <a href="../../dc/db7/examples_2_luminova_2luminova_8h_source.html#l00054">Luminova.h:54</a></div></div>
 <div class="ttc" id="agroup__lib8tion_gac735bdef91ee1e80778434336a622138_html_gac735bdef91ee1e80778434336a622138"><div class="ttname"><a href="../../df/da2/group__lib8tion_gac735bdef91ee1e80778434336a622138.html#gac735bdef91ee1e80778434336a622138">LIB8STATIC</a></div><div class="ttdeci">#define LIB8STATIC</div><div class="ttdoc">Define a LIB8TION member function as static inline with an &quot;unused&quot; attribute.</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d7a/lib8static_8h_source.html#l00010">lib8static.h:10</a></div></div>
 <div class="ttc" id="anamespace_8h_a635bcfc55f9fe847cff797a4408f8aac_html_a635bcfc55f9fe847cff797a4408f8aac"><div class="ttname"><a href="../../df/d2a/namespace_8h_a635bcfc55f9fe847cff797a4408f8aac.html#a635bcfc55f9fe847cff797a4408f8aac">FASTLED_USING_NAMESPACE</a></div><div class="ttdeci">#define FASTLED_USING_NAMESPACE</div><div class="ttdef"><b>Definition</b> <a href="../../df/d2a/namespace_8h_source.html#l00030">namespace.h:30</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
@@ -352,7 +353,7 @@ $(function(){initNavTree('db/d31/wiring_8cpp_source.html','../../'); initResizab
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../db/d31/wiring_8cpp.html">wiring.cpp</a></li>
-    <li class="footer">Generated on Tue Jun 24 2025 00:58:14 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Fri Aug 22 2025 20:59:33 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

@@ -1,7 +1,7 @@
 <map id="TM1829Controller800Khz&lt; DATA_PIN, RGB_ORDER &gt;" name="TM1829Controller800Khz&lt; DATA_PIN, RGB_ORDER &gt;">
-<area shape="rect" id="Node000001" title="TM1829 controller class." alt="" coords="5,124,209,164"/>
-<area shape="poly" id="edge2_Node000001_Node000001" title=" " alt="" coords="224,139,236,144,210,150,209,145,231,144,223,144"/>
-<area shape="poly" id="edge3_Node000001_Node000001" title=" " alt="" coords="223,134,356,134,402,137,423,144,401,151,350,154,210,154,210,148,350,148,400,146,417,144,402,142,355,140,223,139"/>
-<area shape="rect" id="Node000002" title=" " alt="" coords="14,5,201,75"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="110,89,110,124,105,124,105,89"/>
+<area shape="rect" id="Node000001" title="TM1829 controller class." alt="" coords="309,83,513,123"/>
+<area shape="poly" id="edge2_Node000001_Node000001" title=" " alt="" coords="398,67,402,59,411,56,419,58,424,65,425,82,420,82,419,67,416,63,411,61,406,63,403,70"/>
+<area shape="poly" id="edge3_Node000001_Node000001" title=" " alt="" coords="386,70,385,56,389,44,398,35,411,32,427,37,436,49,437,66,431,83,426,82,432,65,431,51,424,41,411,37,400,40,394,47,391,57,392,70"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,75,260,130"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="274,100,309,100,309,105,274,105"/>
 </map>

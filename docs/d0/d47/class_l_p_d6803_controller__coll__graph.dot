@@ -15,7 +15,7 @@ digraph "LPD6803Controller&lt; DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_SPEED &gt;"
   Node4 [id="Node000004",label="CRGB",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d7/d82/struct_c_r_g_b.html",tooltip="Representation of an RGB pixel (Red, Green, Blue)"];
   Node3 -> Node3 [id="edge4_Node000003_Node000003",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" m_pHead\nm_pNext\nm_pTail",fontcolor="grey" ];
   Node5 -> Node3 [id="edge5_Node000003_Node000005",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" mRgbMode",fontcolor="grey" ];
-  Node5 [id="Node000005",label="Rgbw",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$db/d74/struct_rgbw.html",tooltip=" "];
+  Node5 [id="Node000005",label="fl::Rgbw",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d7/d27/structfl_1_1_rgbw.html",tooltip=" "];
   Node6 -> Node2 [id="edge6_Node000002_Node000006",dir="back",color="orange",style="dashed",tooltip=" ",label=" \< RGB \>",fontcolor="grey" ];
   Node6 [id="Node000006",label="CPixelLEDController\l\< RGB_ORDER, LANES,\l MASK \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d0/dc9/class_c_pixel_l_e_d_controller.html",tooltip="Template extension of the CLEDController class."];
   Node3 -> Node6 [id="edge7_Node000006_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];

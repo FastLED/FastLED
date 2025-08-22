@@ -1,0 +1,9 @@
+<map id="waveTriggerButton" name="waveTriggerButton">
+<area shape="rect" id="Node000001" title=" " alt="" coords="248,31,392,56"/>
+<area shape="rect" id="Node000002" href="$d4/d06/curr_8h_a4b2149c246013cb6bcde35e7bc4bf332.html#a4b2149c246013cb6bcde35e7bc4bf332" title=" " alt="" coords="107,5,197,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="234,33,197,27,198,22,235,28"/>
+<area shape="rect" id="Node000004" href="$d4/d06/curr_8h_a6cb2599b2d435cb3a2d023820192b03c.html#a6cb2599b2d435cb3a2d023820192b03c" title=" " alt="" coords="104,55,200,80"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="234,58,201,63,200,58,234,53"/>
+<area shape="rect" id="Node000003" href="$d4/d06/curr_8h_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="5,5,56,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="93,21,57,21,57,15,93,15"/>
+</map>

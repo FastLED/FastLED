@@ -1,0 +1,20 @@
+<map id="fl::easeInOutSine16" name="fl::easeInOutSine16">
+<area shape="rect" id="Node000001" title="16&#45;bit sine ease&#45;in/ease&#45;out function Takes an input value 0&#45;65535 and returns an eased value 0&#45;65535" alt="" coords="584,56,732,81"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a131da4ad2964b203b7aed2a312f34448.html#a131da4ad2964b203b7aed2a312f34448" title=" " alt="" coords="423,7,509,32"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="594,55,508,33,510,28,596,50"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a379be9b51f27141411271893ce683f5f.html#a379be9b51f27141411271893ce683f5f" title=" " alt="" coords="423,56,509,81"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="570,71,509,71,509,66,570,66"/>
+<area shape="rect" id="Node000018" href="$d4/d36/namespacefl_a30f7a4ad95720c501bbd2cd3c3a50542.html#a30f7a4ad95720c501bbd2cd3c3a50542" title="8&#45;bit sine ease&#45;in/ease&#45;out function Takes an input value 0&#45;255 and returns an eased value 0&#45;255 Smoo..." alt="" coords="396,107,536,132"/>
+<area shape="poly" id="edge6_Node000001_Node000018" title=" " alt="" coords="597,87,516,109,514,104,595,82"/>
+<area shape="rect" id="Node000004" href="$d4/d5d/structfl_1_1_h_s_v16_a0bd2c0fc64fc34d573637c10b849c320.html#a0bd2c0fc64fc34d573637c10b849c320" title=" " alt="" coords="189,5,348,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="409,57,318,33,320,28,411,52"/>
+<area shape="rect" id="Node000017" href="$dd/d55/_ease_in_out_8h_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="48,105,99,131"/>
+<area shape="poly" id="edge5_Node000003_Node000017" title=" " alt="" coords="410,75,307,83,190,97,99,115,98,110,189,91,307,77,409,69"/>
+<area shape="rect" id="Node000005" href="$d7/d82/struct_c_r_g_b_a8b78ce444d74f2bc9e63d83bfd1b17ad.html#a8b78ce444d74f2bc9e63d83bfd1b17ad" title=" " alt="" coords="5,5,141,31"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="175,21,142,21,142,15,175,15"/>
+<area shape="rect" id="Node000019" href="$d4/d36/namespacefl_ac368f20d137ff004c852fa35420cfa5e.html#ac368f20d137ff004c852fa35420cfa5e" title=" " alt="" coords="230,107,307,132"/>
+<area shape="poly" id="edge7_Node000018_Node000019" title=" " alt="" coords="382,122,308,122,308,117,382,117"/>
+<area shape="rect" id="Node000020" href="$d4/d36/namespacefl_ad5bdf92d600b40d01c2d3a0d536a7c8c.html#ad5bdf92d600b40d01c2d3a0d536a7c8c" title=" " alt="" coords="230,156,307,181"/>
+<area shape="poly" id="edge8_Node000018_Node000020" title=" " alt="" coords="402,138,308,162,307,157,401,133"/>
+<area shape="poly" id="edge9_Node000020_Node000017" title=" " alt="" coords="216,158,98,127,99,122,218,153"/>
+</map>

@@ -6,7 +6,8 @@ var classfl_1_1_u_i_button_impl =
     [ "clicked", "d6/d8d/classfl_1_1_u_i_button_impl_a6ebbe820cf3845a992ae30569e6c1e8b.html#a6ebbe820cf3845a992ae30569e6c1e8b", null ],
     [ "clickedCount", "d6/d8d/classfl_1_1_u_i_button_impl_ac8af5e9e7e1ec7afdb6a0272c29f10bf.html#ac8af5e9e7e1ec7afdb6a0272c29f10bf", null ],
     [ "isPressed", "d6/d8d/classfl_1_1_u_i_button_impl_a17c8d41a0befba2397d31c33454c7e95.html#a17c8d41a0befba2397d31c33454c7e95", null ],
-    [ "name", "d6/d8d/classfl_1_1_u_i_button_impl_a36b8a940997432efc0eac1db7d44f0ee.html#a36b8a940997432efc0eac1db7d44f0ee", null ],
+    [ "name", "d6/d8d/classfl_1_1_u_i_button_impl_a0f6e77a87c7d2b45268818e111159733.html#a0f6e77a87c7d2b45268818e111159733", null ],
     [ "operator bool", "d6/d8d/classfl_1_1_u_i_button_impl_ae2cd5e4fbbb3b1b7cce2d82cd60a7d93.html#ae2cd5e4fbbb3b1b7cce2d82cd60a7d93", null ],
-    [ "mName", "d6/d8d/classfl_1_1_u_i_button_impl_af03ce23d00858e68a08de639158adeb3.html#af03ce23d00858e68a08de639158adeb3", null ]
+    [ "setGroup", "d6/d8d/classfl_1_1_u_i_button_impl_a89f9a9a46f55901308c27b09b2773d5e.html#a89f9a9a46f55901308c27b09b2773d5e", null ],
+    [ "mName", "d6/d8d/classfl_1_1_u_i_button_impl_ae4b0f8a9ee7ed47470bd2d2143d84f08.html#ae4b0f8a9ee7ed47470bd2d2143d84f08", null ]
 ];

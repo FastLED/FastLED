@@ -1,0 +1,27 @@
+var classfl_1_1_slab_allocator =
+[
+    [ "Slab", "d9/d08/structfl_1_1_slab_allocator_1_1_slab.html", "d9/d08/structfl_1_1_slab_allocator_1_1_slab" ],
+    [ "SlabAllocator", "d5/db8/classfl_1_1_slab_allocator_a990659f8309d1da299a8f71e6254277f.html#a990659f8309d1da299a8f71e6254277f", null ],
+    [ "~SlabAllocator", "d5/db8/classfl_1_1_slab_allocator_a3f424aed23705771de20ef57d83adf20.html#a3f424aed23705771de20ef57d83adf20", null ],
+    [ "SlabAllocator", "d5/db8/classfl_1_1_slab_allocator_a48aa8585e4eadb0b2b257e042a44057b.html#a48aa8585e4eadb0b2b257e042a44057b", null ],
+    [ "SlabAllocator", "d5/db8/classfl_1_1_slab_allocator_aa75057f96234af07d8d996176fb1b469.html#aa75057f96234af07d8d996176fb1b469", null ],
+    [ "allocate", "d5/db8/classfl_1_1_slab_allocator_a9dae83b1437a14e7e16213dcd24ffe61.html#a9dae83b1437a14e7e16213dcd24ffe61", null ],
+    [ "allocateFromSlab", "d5/db8/classfl_1_1_slab_allocator_a4e736ca7963991951f7b5ad59045c89c.html#a4e736ca7963991951f7b5ad59045c89c", null ],
+    [ "cleanup", "d5/db8/classfl_1_1_slab_allocator_ad06822579c905f010308fb82a740924e.html#ad06822579c905f010308fb82a740924e", null ],
+    [ "createSlab", "d5/db8/classfl_1_1_slab_allocator_acb9ae4a203853cde8e453c26cbc932d6.html#acb9ae4a203853cde8e453c26cbc932d6", null ],
+    [ "deallocate", "d5/db8/classfl_1_1_slab_allocator_a2c5470ff6c96bad44880775343af34be.html#a2c5470ff6c96bad44880775343af34be", null ],
+    [ "deallocateToSlab", "d5/db8/classfl_1_1_slab_allocator_ac6585c97cf283b76466ffc333c28299e.html#ac6585c97cf283b76466ffc333c28299e", null ],
+    [ "findContiguousBlocks", "d5/db8/classfl_1_1_slab_allocator_abf8cdd021b9021f733fe695af13d7dc9.html#abf8cdd021b9021f733fe695af13d7dc9", null ],
+    [ "getActiveAllocations", "d5/db8/classfl_1_1_slab_allocator_ae2c557e13b027d4e7520d82adf77dc32.html#ae2c557e13b027d4e7520d82adf77dc32", null ],
+    [ "getSlabCount", "d5/db8/classfl_1_1_slab_allocator_ab02189d3a62a00433f54d09c7c050101.html#ab02189d3a62a00433f54d09c7c050101", null ],
+    [ "getTotalAllocated", "d5/db8/classfl_1_1_slab_allocator_a572c2a78b7e4658b871c35a467389bf5.html#a572c2a78b7e4658b871c35a467389bf5", null ],
+    [ "getTotalDeallocated", "d5/db8/classfl_1_1_slab_allocator_a18cea558793efb754a24ca250635ec0b.html#a18cea558793efb754a24ca250635ec0b", null ],
+    [ "operator=", "d5/db8/classfl_1_1_slab_allocator_a23aed9e654d1c79afd1943d0bb7786f4.html#a23aed9e654d1c79afd1943d0bb7786f4", null ],
+    [ "operator=", "d5/db8/classfl_1_1_slab_allocator_ac1a516c66ac6fc6e3f74a18db586bbde.html#ac1a516c66ac6fc6e3f74a18db586bbde", null ],
+    [ "BLOCK_SIZE", "d5/db8/classfl_1_1_slab_allocator_a01e0a0ff2cf05be7e2577eba34cede6b.html#a01e0a0ff2cf05be7e2577eba34cede6b", null ],
+    [ "BLOCKS_PER_SLAB", "d5/db8/classfl_1_1_slab_allocator_a1d5b8655c9c12c47c03d905ae373f51c.html#a1d5b8655c9c12c47c03d905ae373f51c", null ],
+    [ "SLAB_MEMORY_SIZE", "d5/db8/classfl_1_1_slab_allocator_a61ec1a81d258f4a3e8046f4678b21d6c.html#a61ec1a81d258f4a3e8046f4678b21d6c", null ],
+    [ "slabs_", "d5/db8/classfl_1_1_slab_allocator_ae1fff90680fd827a1a4421d3ec97226a.html#ae1fff90680fd827a1a4421d3ec97226a", null ],
+    [ "total_allocated_", "d5/db8/classfl_1_1_slab_allocator_a421e5cfe288753cc08a95222bfb5290f.html#a421e5cfe288753cc08a95222bfb5290f", null ],
+    [ "total_deallocated_", "d5/db8/classfl_1_1_slab_allocator_ac084bd01a1cb30d352734e3ba5e4ba0c.html#ac084bd01a1cb30d352734e3ba5e4ba0c", null ]
+];

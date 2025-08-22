@@ -101,60 +101,37 @@ $(function(){initNavTree('d1/d69/bitset_8h.html','../../'); initResizable(true);
 
 <div class="header">
   <div class="summary">
-<a href="#nested-classes">Classes</a> &#124;
-<a href="#namespaces">Namespaces</a> &#124;
-<a href="#typedef-members">Typedefs</a>  </div>
+<a href="#func-members">Functions</a>  </div>
   <div class="headertitle"><div class="title">bitset.h File Reference</div></div>
 </div><!--header-->
 <div class="contents">
 <div class="textblock"><code>#include &quot;<a class="el" href="../../de/d7a/bitset__dynamic_8h_source.html">fl/bitset_dynamic.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="../../df/d63/type__traits_8h_source.html">fl/type_traits.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="../../d6/d10/variant_8h_source.html">fl/variant.h</a>&quot;</code><br />
-<code>#include &lt;<a class="el" href="../../df/dd8/stdint_8h_source.html">stdint.h</a>&gt;</code><br />
+<code>#include &quot;<a class="el" href="../../df/dd8/stdint_8h_source.html">fl/stdint.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d3/d7e/int_8h_source.html">fl/int.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d4/d54/compiler__control_8h_source.html">fl/compiler_control.h</a>&quot;</code><br />
 </div><div class="textblock"><div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Include dependency graph for bitset.h:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-0-content" class="dyncontent" style="display:none;">
-<div class="center"><iframe scrolling="no" frameborder="0" src="../../d1/d8f/bitset_8h__incl.svg" width="536" height="403"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../d1/d8f/bitset_8h__incl.svg" width="100%" height="600"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
 </div>
 </div><div class="textblock"><div id="dynsection-1" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-1-trigger" src="../../closed.png" alt="+"/> This graph shows which files directly or indirectly include this file:</div>
 <div id="dynsection-1-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-1-content" class="dyncontent" style="display:none;">
-<div class="center"><iframe scrolling="no" frameborder="0" src="../../d5/d60/bitset_8h__dep__incl.svg" width="640" height="330"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../d5/d60/bitset_8h__dep__incl.svg" width="100%" height="600"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
 </div>
 </div>
 <p><a href="../../d1/d69/bitset_8h_source.html">Go to the source code of this file.</a></p>
 <table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
-Classes</h2></td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dd/d03/classfl_1_1_bitset_fixed.html">fl::BitsetFixed&lt; N &gt;</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">A simple fixed-size Bitset implementation similar to std::Bitset.  <a href="../../dd/d03/classfl_1_1_bitset_fixed.html#details">More...</a><br /></td></tr>
-<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../da/d6b/structfl_1_1_bitset_fixed_1_1_proxy.html">fl::BitsetFixed&lt; N &gt;::Proxy</a></td></tr>
-<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d6/d6a/classfl_1_1_bitset_inlined.html">fl::BitsetInlined&lt; N &gt;</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">A Bitset implementation with inline storage that can grow if needed.  <a href="../../d6/d6a/classfl_1_1_bitset_inlined.html#details">More...</a><br /></td></tr>
-<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d3/d83/structfl_1_1_bitset_inlined_1_1_proxy.html">fl::BitsetInlined&lt; N &gt;::Proxy</a></td></tr>
-<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-</table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="namespaces" name="namespaces"></a>
-Namespaces</h2></td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">namespace &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></td></tr>
-<tr class="memdesc:d4/d36/namespacefl"><td class="mdescLeft">&#160;</td><td class="mdescRight">Implements a simple red square effect for 2D LED grids. <br /></td></tr>
-<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-</table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="typedef-members" name="typedef-members"></a>
-Typedefs</h2></td></tr>
-<tr class="memitem:a0437758723a6d8c5844ffeac55304db8" id="r_a0437758723a6d8c5844ffeac55304db8"><td class="memTemplParams" colspan="2">template&lt;uint32_t N = 256&gt; </td></tr>
-<tr class="memitem:a0437758723a6d8c5844ffeac55304db8"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_a0437758723a6d8c5844ffeac55304db8.html#a0437758723a6d8c5844ffeac55304db8">fl::bitset</a> = <a class="el" href="../../d6/d6a/classfl_1_1_bitset_inlined.html">BitsetInlined</a>&lt;N&gt;</td></tr>
-<tr class="separator:a0437758723a6d8c5844ffeac55304db8"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aad1d99fd59d13815b0901846d1baf35f" id="r_aad1d99fd59d13815b0901846d1baf35f"><td class="memTemplParams" colspan="2">template&lt;uint32_t N&gt; </td></tr>
-<tr class="memitem:aad1d99fd59d13815b0901846d1baf35f"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_aad1d99fd59d13815b0901846d1baf35f.html#aad1d99fd59d13815b0901846d1baf35f">fl::bitset_fixed</a> = <a class="el" href="../../dd/d03/classfl_1_1_bitset_fixed.html">BitsetFixed</a>&lt;N&gt;</td></tr>
-<tr class="separator:aad1d99fd59d13815b0901846d1baf35f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
+Functions</h2></td></tr>
+<tr class="memitem:a96e310c8c75d2db2110158610604b4bc" id="r_a96e310c8c75d2db2110158610604b4bc"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../d4/d54/compiler__control_8h_a373eeaf762a6a66a0a6984bd204a72dd.html#a373eeaf762a6a66a0a6984bd204a72dd">FL_DISABLE_WARNING_PUSH</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d1/d69/bitset_8h_a96e310c8c75d2db2110158610604b4bc.html#a96e310c8c75d2db2110158610604b4bc">FL_DISABLE_WARNING</a> (double-promotion) FL_DISABLE_WARNING(float-conversion) FL_DISABLE_WARNING(sign-conversion) <a class="el" href="../../d4/d54/compiler__control_8h_a1898098c6485e6e2787500c9c895a025.html#a1898098c6485e6e2787500c9c895a025">FL_DISABLE_WARNING_IMPLICIT_INT_CONVERSION</a> <a class="el" href="../../d4/d54/compiler__control_8h_ad597a7b4a72f03310c0a569635c38e51.html#ad597a7b4a72f03310c0a569635c38e51">FL_DISABLE_WARNING_FLOAT_CONVERSION</a> namespace fl</td></tr>
+<tr class="separator:a96e310c8c75d2db2110158610604b4bc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 </div><!-- contents -->
 </div><!-- doc-content -->
@@ -163,7 +140,7 @@ Typedefs</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dir_4d1829fa9bd13d7db71e765b2707b248.html">fl</a></li><li class="navelem"><a class="el" href="../../d1/d69/bitset_8h.html">bitset.h</a></li>
-    <li class="footer">Generated on Tue Jun 24 2025 00:58:14 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Fri Aug 22 2025 20:59:34 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

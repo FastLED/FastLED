@@ -121,25 +121,38 @@ $(function(){initNavTree('dc/d2b/classfl_1_1_blend2d_a5ee229ce7c02bd25ae86ef184d
 
 <p class="definition">Definition at line <a class="el" href="../../d7/d68/blend_8cpp_source.html#l00035">35</a> of file <a class="el" href="../../d7/d68/blend_8cpp_source.html">blend.cpp</a>.</p>
 <div class="fragment"><div class="line"><span class="lineno">   35</span>                                                {</div>
-<div class="line"><span class="lineno">   36</span>    uint8_t <a class="code hl_variable" href="../../d9/d29/wavefx_8cpp_a056885282e56ce983d6a169af7d9ebca.html#a056885282e56ce983d6a169af7d9ebca">blurAmount</a> = <a class="code hl_variable" href="../../d6/de8/noise_8cpp_ad4f390ff52b49f726bfdf77302fbd4d5.html#ad4f390ff52b49f726bfdf77302fbd4d5">p</a>.blur_amount;</div>
-<div class="line"><span class="lineno">   37</span>    uint8_t <a class="code hl_variable" href="../../d9/d29/wavefx_8cpp_a0dd994990a1be99116a353959d1f26c8.html#a0dd994990a1be99116a353959d1f26c8">blurPasses</a> = <a class="code hl_variable" href="../../d6/de8/noise_8cpp_ad4f390ff52b49f726bfdf77302fbd4d5.html#ad4f390ff52b49f726bfdf77302fbd4d5">p</a>.blur_passes;</div>
-<div class="line"><span class="lineno">   38</span>    <a class="code hl_struct" href="../../d3/d4d/structfl_1_1_blend2d_1_1_entry.html">Entry</a> entry(layer, <a class="code hl_variable" href="../../d9/d29/wavefx_8cpp_a056885282e56ce983d6a169af7d9ebca.html#a056885282e56ce983d6a169af7d9ebca">blurAmount</a>, <a class="code hl_variable" href="../../d9/d29/wavefx_8cpp_a0dd994990a1be99116a353959d1f26c8.html#a0dd994990a1be99116a353959d1f26c8">blurPasses</a>);</div>
-<div class="line"><span class="lineno">   39</span>    <a class="code hl_variable" href="../../dc/d2b/classfl_1_1_blend2d_ac38d2a3bb6178dfb745fb1b0e34e5959.html#ac38d2a3bb6178dfb745fb1b0e34e5959">mLayers</a>.push_back(entry);</div>
-<div class="line"><span class="lineno">   40</span>}</div>
+<div class="line"><span class="lineno">   36</span>    <span class="keywordflow">if</span> (!layer-&gt;getXYMap().isRectangularGrid()) {</div>
+<div class="line"><span class="lineno">   37</span>        <span class="keywordflow">if</span> (!<a class="code hl_function" href="../../d7/d3e/classfl_1_1_fx2d_a452644c932e5fe45b781078d471370a3.html#a452644c932e5fe45b781078d471370a3">getXYMap</a>().isRectangularGrid()) {</div>
+<div class="line"><span class="lineno">   38</span>            <a class="code hl_define" href="../../de/d77/warn_8h_a0291e2b944eb41a7ca52786382e21e82.html#a0291e2b944eb41a7ca52786382e21e82">FASTLED_WARN</a>(<span class="stringliteral">&quot;Blend2d has a xymap, but so does the Sub layer &quot;</span> &lt;&lt; layer-&gt;fxName() &lt;&lt; <span class="stringliteral">&quot;, the sub layer will have it&#39;s map replaced with a rectangular map, to avoid double transformation.&quot;</span>);</div>
+<div class="line"><span class="lineno">   39</span>            layer-&gt;setXYMap(<a class="code hl_function" href="../../d0/dce/classfl_1_1_x_y_map_a6faeccfa39121c788943e3dc1ae6507c.html#a6faeccfa39121c788943e3dc1ae6507c">XYMap::constructRectangularGrid</a>(layer-&gt;getWidth(), layer-&gt;getHeight()));</div>
+<div class="line"><span class="lineno">   40</span>        }</div>
+<div class="line"><span class="lineno">   41</span>    }</div>
+<div class="line"><span class="lineno">   42</span>    uint8_t blurAmount = p.blur_amount;</div>
+<div class="line"><span class="lineno">   43</span>    uint8_t blurPasses = p.blur_passes;</div>
+<div class="line"><span class="lineno">   44</span>    <a class="code hl_struct" href="../../d3/d4d/structfl_1_1_blend2d_1_1_entry.html">Entry</a> entry(layer, blurAmount, blurPasses);</div>
+<div class="line"><span class="lineno">   45</span>    <a class="code hl_variable" href="../../dc/d2b/classfl_1_1_blend2d_ac38d2a3bb6178dfb745fb1b0e34e5959.html#ac38d2a3bb6178dfb745fb1b0e34e5959">mLayers</a>.push_back(entry);</div>
+<div class="line"><span class="lineno">   46</span>}</div>
 <div class="ttc" id="aclassfl_1_1_blend2d_ac38d2a3bb6178dfb745fb1b0e34e5959_html_ac38d2a3bb6178dfb745fb1b0e34e5959"><div class="ttname"><a href="../../dc/d2b/classfl_1_1_blend2d_ac38d2a3bb6178dfb745fb1b0e34e5959.html#ac38d2a3bb6178dfb745fb1b0e34e5959">fl::Blend2d::mLayers</a></div><div class="ttdeci">HeapVector&lt; Entry &gt; mLayers</div><div class="ttdef"><b>Definition</b> <a href="../../d8/d4e/blend_8h_source.html#l00058">blend.h:58</a></div></div>
-<div class="ttc" id="anoise_8cpp_ad4f390ff52b49f726bfdf77302fbd4d5_html_ad4f390ff52b49f726bfdf77302fbd4d5"><div class="ttname"><a href="../../d6/de8/noise_8cpp_ad4f390ff52b49f726bfdf77302fbd4d5.html#ad4f390ff52b49f726bfdf77302fbd4d5">p</a></div><div class="ttdeci">static FASTLED_NAMESPACE_BEGIN uint8_t const p[]</div><div class="ttdef"><b>Definition</b> <a href="../../d6/de8/noise_8cpp_source.html#l00030">noise.cpp:30</a></div></div>
+<div class="ttc" id="aclassfl_1_1_fx2d_a452644c932e5fe45b781078d471370a3_html_a452644c932e5fe45b781078d471370a3"><div class="ttname"><a href="../../d7/d3e/classfl_1_1_fx2d_a452644c932e5fe45b781078d471370a3.html#a452644c932e5fe45b781078d471370a3">fl::Fx2d::getXYMap</a></div><div class="ttdeci">XYMap &amp; getXYMap()</div><div class="ttdef"><b>Definition</b> <a href="../../d9/d43/fx2d_8h_source.html#l00027">fx2d.h:27</a></div></div>
+<div class="ttc" id="aclassfl_1_1_x_y_map_a6faeccfa39121c788943e3dc1ae6507c_html_a6faeccfa39121c788943e3dc1ae6507c"><div class="ttname"><a href="../../d0/dce/classfl_1_1_x_y_map_a6faeccfa39121c788943e3dc1ae6507c.html#a6faeccfa39121c788943e3dc1ae6507c">fl::XYMap::constructRectangularGrid</a></div><div class="ttdeci">static XYMap constructRectangularGrid(u16 width, u16 height, u16 offset=0)</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d09/xymap_8cpp_source.html#l00034">xymap.cpp:34</a></div></div>
 <div class="ttc" id="astructfl_1_1_blend2d_1_1_entry_html"><div class="ttname"><a href="../../d3/d4d/structfl_1_1_blend2d_1_1_entry.html">fl::Blend2d::Entry</a></div><div class="ttdef"><b>Definition</b> <a href="../../d8/d4e/blend_8h_source.html#l00050">blend.h:50</a></div></div>
-<div class="ttc" id="awavefx_8cpp_a056885282e56ce983d6a169af7d9ebca_html_a056885282e56ce983d6a169af7d9ebca"><div class="ttname"><a href="../../d9/d29/wavefx_8cpp_a056885282e56ce983d6a169af7d9ebca.html#a056885282e56ce983d6a169af7d9ebca">blurAmount</a></div><div class="ttdeci">UISlider blurAmount(&quot;Global Blur Amount&quot;, 0, 0, 172, 1)</div></div>
-<div class="ttc" id="awavefx_8cpp_a0dd994990a1be99116a353959d1f26c8_html_a0dd994990a1be99116a353959d1f26c8"><div class="ttname"><a href="../../d9/d29/wavefx_8cpp_a0dd994990a1be99116a353959d1f26c8.html#a0dd994990a1be99116a353959d1f26c8">blurPasses</a></div><div class="ttdeci">UISlider blurPasses(&quot;Global Blur Passes&quot;, 1, 1, 10, 1)</div></div>
+<div class="ttc" id="awarn_8h_a0291e2b944eb41a7ca52786382e21e82_html_a0291e2b944eb41a7ca52786382e21e82"><div class="ttname"><a href="../../de/d77/warn_8h_a0291e2b944eb41a7ca52786382e21e82.html#a0291e2b944eb41a7ca52786382e21e82">FASTLED_WARN</a></div><div class="ttdeci">#define FASTLED_WARN</div><div class="ttdef"><b>Definition</b> <a href="../../de/d77/warn_8h_source.html#l00007">warn.h:7</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d9/d29/wavefx_8cpp_a056885282e56ce983d6a169af7d9ebca.html#a056885282e56ce983d6a169af7d9ebca">blurAmount</a>, <a class="el" href="../../d9/d29/wavefx_8cpp_a0dd994990a1be99116a353959d1f26c8.html#a0dd994990a1be99116a353959d1f26c8">blurPasses</a>, <a class="el" href="../../d8/d4e/blend_8h_source.html#l00058">mLayers</a>, and <a class="el" href="../../d6/de8/noise_8cpp_source.html#l00030">p</a>.</p>
+<p class="reference">References <a class="el" href="../../d8/d4e/blend_8h_source.html#l00023">fl::Blend2dParams::blur_amount</a>, <a class="el" href="../../d8/d4e/blend_8h_source.html#l00024">fl::Blend2dParams::blur_passes</a>, <a class="el" href="../../d7/d09/xymap_8cpp_source.html#l00034">fl::XYMap::constructRectangularGrid()</a>, <a class="el" href="../../de/d77/warn_8h_source.html#l00007">FASTLED_WARN</a>, <a class="el" href="../../d9/d43/fx2d_8h_source.html#l00027">fl::Fx2d::getXYMap()</a>, and <a class="el" href="../../d8/d4e/blend_8h_source.html#l00058">mLayers</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d7/d68/blend_8cpp_source.html#l00042">add()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d7/d68/blend_8cpp_source.html#l00048">add()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
-  <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the caller graph for this function:</div>
+  <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-0-content" class="dyncontent" style="display:none;">
+<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../dc/d2b/classfl_1_1_blend2d_a5ee229ce7c02bd25ae86ef184dbccbcc_a5ee229ce7c02bd25ae86ef184dbccbcc_cgraph.svg" width="100%" height="383"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
+</div>
+<div id="dynsection-1" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
+  <img id="dynsection-1-trigger" src="../../closed.png" alt="+"/> Here is the caller graph for this function:</div>
+<div id="dynsection-1-summary" class="dynsummary" style="display:block;">
+</div>
+<div id="dynsection-1-content" class="dyncontent" style="display:none;">
 <div class="center"><iframe scrolling="no" frameborder="0" src="../../dc/d2b/classfl_1_1_blend2d_a5ee229ce7c02bd25ae86ef184dbccbcc_a5ee229ce7c02bd25ae86ef184dbccbcc_icgraph.svg" width="304" height="36"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
 </div>
 
@@ -152,7 +165,7 @@ $(function(){initNavTree('dc/d2b/classfl_1_1_blend2d_a5ee229ce7c02bd25ae86ef184d
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../dc/d2b/classfl_1_1_blend2d.html">Blend2d</a></li>
-    <li class="footer">Generated on Tue Jun 24 2025 00:58:15 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Fri Aug 22 2025 20:59:36 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

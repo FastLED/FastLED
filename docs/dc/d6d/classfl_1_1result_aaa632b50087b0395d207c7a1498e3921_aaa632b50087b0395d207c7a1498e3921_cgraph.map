@@ -1,0 +1,9 @@
+<map id="fl::result::result" name="fl::result::result">
+<area shape="rect" id="Node000001" title="Construct an error result." alt="" coords="5,31,125,56"/>
+<area shape="rect" id="Node000002" href="$dc/d6d/classfl_1_1result_a6659dd0a3e0580c716fe00e214b0f079.html#a6659dd0a3e0580c716fe00e214b0f079" title="Get the error value." alt="" coords="173,31,288,56"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="125,41,159,41,159,46,125,46"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_aaad7bab3a46c3353c72c671c8372be3e.html#aaad7bab3a46c3353c72c671c8372be3e" title=" " alt="" coords="356,5,415,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="288,31,342,22,343,28,289,37"/>
+<area shape="rect" id="Node000004" href="$dc/d6d/classfl_1_1result_ac2b044bd270c831d02dd736571640bac.html#ac2b044bd270c831d02dd736571640bac" title="Check if the result is successful." alt="" coords="336,55,435,80"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="289,50,323,55,322,60,288,55"/>
+</map>

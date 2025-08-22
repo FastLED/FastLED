@@ -1,4 +1,10 @@
 <map id="fl::AudioSample::rms" name="fl::AudioSample::rms">
-<area shape="rect" id="Node000001" title=" " alt="" coords="5,29,163,55"/>
-<area shape="poly" id="edge1_Node000001_Node000001" title=" " alt="" coords="111,19,103,11,84,8,68,10,59,15,57,20,62,28,57,31,52,21,55,11,66,5,84,3,106,6,115,15"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="415,35,572,60"/>
+<area shape="poly" id="edge2_Node000001_Node000001" title=" " alt="" coords="532,25,521,17,493,13,471,15,459,20,456,26,463,33,458,36,451,26,455,16,469,10,493,8,523,12,535,21"/>
+<area shape="rect" id="Node000002" href="$da/dc7/advanced_8h_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="255,5,305,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="401,37,305,24,306,19,401,32"/>
+<area shape="rect" id="Node000003" href="$d3/d40/classfl_1_1_audio_reactive_a7284a7527968daabb94441f3ce61a191.html#a7284a7527968daabb94441f3ce61a191" title=" " alt="" coords="193,55,367,95"/>
+<area shape="poly" id="edge3_Node000001_Node000003" title=" " alt="" coords="401,62,367,67,367,61,400,57"/>
+<area shape="rect" id="Node000004" href="$d3/d40/classfl_1_1_audio_reactive_af5d11059f30ab27a6ad49570e3cd9fb3.html#af5d11059f30ab27a6ad49570e3cd9fb3" title=" " alt="" coords="5,55,145,95"/>
+<area shape="poly" id="edge4_Node000003_Node000004" title=" " alt="" coords="179,78,146,78,146,73,179,73"/>
 </map>

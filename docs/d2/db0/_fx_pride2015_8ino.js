@@ -8,5 +8,5 @@ var _fx_pride2015_8ino =
     [ "loop", "d2/db0/_fx_pride2015_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f", null ],
     [ "setup", "d2/db0/_fx_pride2015_8ino_a4fc01d736fe50cf5b977f755b675f11d.html#a4fc01d736fe50cf5b977f755b675f11d", null ],
     [ "leds", "d2/db0/_fx_pride2015_8ino_a1b4f26a01e11d7eb2848bc41b0f6dd9d.html#a1b4f26a01e11d7eb2848bc41b0f6dd9d", null ],
-    [ "pride", "d2/db0/_fx_pride2015_8ino_ae9a4385e151588be4e7226b119670a09.html#ae9a4385e151588be4e7226b119670a09", null ]
+    [ "pride", "d2/db0/_fx_pride2015_8ino_ac52d331bc2a02f77aa651383ef6fc1ce.html#ac52d331bc2a02f77aa651383ef6fc1ce", null ]
 ];

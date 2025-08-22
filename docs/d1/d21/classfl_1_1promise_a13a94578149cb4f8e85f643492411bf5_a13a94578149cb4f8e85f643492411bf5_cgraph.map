@@ -1,0 +1,5 @@
+<map id="fl::promise::error" name="fl::promise::error">
+<area shape="rect" id="Node000001" title="Get the error (only valid if is_rejected() returns true)" alt="" coords="5,5,136,31"/>
+<area shape="rect" id="Node000002" href="$d1/d21/classfl_1_1promise_a912aa98a2d3d942da9a902f518d57a1a.html#a912aa98a2d3d942da9a902f518d57a1a" title="Check if promise is valid." alt="" coords="184,5,315,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="136,15,170,15,170,21,136,21"/>
+</map>

@@ -13,7 +13,7 @@ var struct_pixel_controller =
     [ "advanceAndLoadAndScale0", "d0/dee/struct_pixel_controller_a5ed1cdb992788946f8aa585e014491fa.html#a5ed1cdb992788946f8aa585e014491fa", null ],
     [ "advanceBy", "d0/dee/struct_pixel_controller_a4f02d52fbcd108b1b7e8110dac23c0b9.html#a4f02d52fbcd108b1b7e8110dac23c0b9", null ],
     [ "advanceData", "d0/dee/struct_pixel_controller_ab44f62f166d162bd1e3b095b368feef2.html#ab44f62f166d162bd1e3b095b368feef2", null ],
-    [ "as_iterator", "d0/dee/struct_pixel_controller_a4b2b64b760ed990acbfcd25a05faead2.html#a4b2b64b760ed990acbfcd25a05faead2", null ],
+    [ "as_iterator", "d0/dee/struct_pixel_controller_ad692558fd1412eb6bfeeb59a782fee47.html#ad692558fd1412eb6bfeeb59a782fee47", null ],
     [ "copy", "d0/dee/struct_pixel_controller_af3310e3a869dfeafae981291b76b572d.html#af3310e3a869dfeafae981291b76b572d", null ],
     [ "disableColorAdjustment", "d0/dee/struct_pixel_controller_a894ca45aa17aea485defc34967e0a19b.html#a894ca45aa17aea485defc34967e0a19b", null ],
     [ "dither", "d0/dee/struct_pixel_controller_a9f94a8f75b316b2a289283b3ee53ad5d.html#a9f94a8f75b316b2a289283b3ee53ad5d", null ],

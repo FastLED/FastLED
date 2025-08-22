@@ -7,6 +7,7 @@ var struct_color_h_s_v =
     [ "FromRGB", "d7/d38/struct_color_h_s_v_ac360c5be868ae4606e7a1df75adad682.html#ac360c5be868ae4606e7a1df75adad682", null ],
     [ "operator!=", "d7/d38/struct_color_h_s_v_ab70c0199d3125eacb49a40e3a9755a7c.html#ab70c0199d3125eacb49a40e3a9755a7c", null ],
     [ "operator=", "d7/d38/struct_color_h_s_v_a2ce0a178e81aba73b645aa3712e160e4.html#a2ce0a178e81aba73b645aa3712e160e4", null ],
+    [ "operator=", "d7/d38/struct_color_h_s_v_a481986bc292103501bd7c5eb6da382c4.html#a481986bc292103501bd7c5eb6da382c4", null ],
     [ "operator==", "d7/d38/struct_color_h_s_v_a035a3305ae1691a4e8a3bd39b02eb8e0.html#a035a3305ae1691a4e8a3bd39b02eb8e0", null ],
     [ "Print", "d7/d38/struct_color_h_s_v_a4212259712c2a5809e5cdb5d9333ac98.html#a4212259712c2a5809e5cdb5d9333ac98", null ],
     [ "Set", "d7/d38/struct_color_h_s_v_a6f6e19a5ed331994a217183994b589a4.html#a6f6e19a5ed331994a217183994b589a4", null ],

@@ -131,6 +131,8 @@ $(function(){initNavTree('d3/d97/detail_8h_ac1471539ff95a76883e9c8e83e8548ad.htm
   </tr>
 </table>
 </div><div class="memdoc">
+<dl class="section examples"><dt>Examples</dt><dd><a class="el" href="../../d1/dce/_chromancer_8ino-example.html#a22">Chromancer.ino</a>.</dd>
+</dl>
 
 <p class="definition">Definition at line <a class="el" href="../../d3/d97/detail_8h_source.html#l00006">6</a> of file <a class="el" href="../../d3/d97/detail_8h_source.html">detail.h</a>.</p>
 <div class="fragment"><div class="line"><span class="lineno">    6</span>                                                                                  {</div>
@@ -145,7 +147,7 @@ $(function(){initNavTree('d3/d97/detail_8h_ac1471539ff95a76883e9c8e83e8548ad.htm
 <div class="line"><span class="lineno">   15</span>    <span class="comment">// (not 1536, more on that below), but the full unsigned 16-bit type was</span></div>
 <div class="line"><span class="lineno">   16</span>    <span class="comment">// chosen for hue so that one&#39;s code can easily handle a contiguous color</span></div>
 <div class="line"><span class="lineno">   17</span>    <span class="comment">// wheel by allowing hue to roll over in either direction.</span></div>
-<div class="line"><span class="lineno">   18</span>    hue = (hue * 1530L + 32768) / 65536;</div>
+<div class="line"><span class="lineno">   18</span>    <a class="code hl_variable" href="../../d8/d21/_adafruit_bridge_8ino_ad7b7eb0b3e04af91bdd64715226c3c68.html#ad7b7eb0b3e04af91bdd64715226c3c68">hue</a> = (<a class="code hl_variable" href="../../d8/d21/_adafruit_bridge_8ino_ad7b7eb0b3e04af91bdd64715226c3c68.html#ad7b7eb0b3e04af91bdd64715226c3c68">hue</a> * 1530L + 32768) / 65536;</div>
 <div class="line"><span class="lineno">   19</span>    <span class="comment">// Because red is centered on the rollover point (the +32768 above,</span></div>
 <div class="line"><span class="lineno">   20</span>    <span class="comment">// essentially a fixed-point +0.5), the above actually yields 0 to 1530,</span></div>
 <div class="line"><span class="lineno">   21</span>    <span class="comment">// where 0 and 1530 would yield the same thing. Rather than apply a</span></div>
@@ -168,32 +170,32 @@ $(function(){initNavTree('d3/d97/detail_8h_ac1471539ff95a76883e9c8e83e8548ad.htm
 <div class="line"><span class="lineno">   38</span>    <span class="comment">// the constants below are not the multiples of 256 you might expect.</span></div>
 <div class="line"><span class="lineno">   39</span> </div>
 <div class="line"><span class="lineno">   40</span>    <span class="comment">// Convert hue to R,G,B (nested ifs faster than divide+mod+switch):</span></div>
-<div class="line"><span class="lineno">   41</span>    <span class="keywordflow">if</span> (hue &lt; 510) { <span class="comment">// Red to Green-1</span></div>
+<div class="line"><span class="lineno">   41</span>    <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../d8/d21/_adafruit_bridge_8ino_ad7b7eb0b3e04af91bdd64715226c3c68.html#ad7b7eb0b3e04af91bdd64715226c3c68">hue</a> &lt; 510) { <span class="comment">// Red to Green-1</span></div>
 <div class="line"><span class="lineno">   42</span>        b = 0;</div>
-<div class="line"><span class="lineno">   43</span>        <span class="keywordflow">if</span> (hue &lt; 255) { <span class="comment">//   Red to Yellow-1</span></div>
+<div class="line"><span class="lineno">   43</span>        <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../d8/d21/_adafruit_bridge_8ino_ad7b7eb0b3e04af91bdd64715226c3c68.html#ad7b7eb0b3e04af91bdd64715226c3c68">hue</a> &lt; 255) { <span class="comment">//   Red to Yellow-1</span></div>
 <div class="line"><span class="lineno">   44</span>            r = 255;</div>
-<div class="line"><span class="lineno">   45</span>            g = hue;       <span class="comment">//     g = 0 to 254</span></div>
+<div class="line"><span class="lineno">   45</span>            g = <a class="code hl_variable" href="../../d8/d21/_adafruit_bridge_8ino_ad7b7eb0b3e04af91bdd64715226c3c68.html#ad7b7eb0b3e04af91bdd64715226c3c68">hue</a>;       <span class="comment">//     g = 0 to 254</span></div>
 <div class="line"><span class="lineno">   46</span>        } <span class="keywordflow">else</span> {           <span class="comment">//   Yellow to Green-1</span></div>
-<div class="line"><span class="lineno">   47</span>            r = 510 - hue; <span class="comment">//     r = 255 to 1</span></div>
+<div class="line"><span class="lineno">   47</span>            r = 510 - <a class="code hl_variable" href="../../d8/d21/_adafruit_bridge_8ino_ad7b7eb0b3e04af91bdd64715226c3c68.html#ad7b7eb0b3e04af91bdd64715226c3c68">hue</a>; <span class="comment">//     r = 255 to 1</span></div>
 <div class="line"><span class="lineno">   48</span>            g = 255;</div>
 <div class="line"><span class="lineno">   49</span>        }</div>
-<div class="line"><span class="lineno">   50</span>    } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (hue &lt; 1020) { <span class="comment">// Green to Blue-1</span></div>
+<div class="line"><span class="lineno">   50</span>    } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../d8/d21/_adafruit_bridge_8ino_ad7b7eb0b3e04af91bdd64715226c3c68.html#ad7b7eb0b3e04af91bdd64715226c3c68">hue</a> &lt; 1020) { <span class="comment">// Green to Blue-1</span></div>
 <div class="line"><span class="lineno">   51</span>        r = 0;</div>
-<div class="line"><span class="lineno">   52</span>        <span class="keywordflow">if</span> (hue &lt; 765) { <span class="comment">//   Green to Cyan-1</span></div>
+<div class="line"><span class="lineno">   52</span>        <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../d8/d21/_adafruit_bridge_8ino_ad7b7eb0b3e04af91bdd64715226c3c68.html#ad7b7eb0b3e04af91bdd64715226c3c68">hue</a> &lt; 765) { <span class="comment">//   Green to Cyan-1</span></div>
 <div class="line"><span class="lineno">   53</span>            g = 255;</div>
-<div class="line"><span class="lineno">   54</span>            b = hue - 510;  <span class="comment">//     b = 0 to 254</span></div>
+<div class="line"><span class="lineno">   54</span>            b = <a class="code hl_variable" href="../../d8/d21/_adafruit_bridge_8ino_ad7b7eb0b3e04af91bdd64715226c3c68.html#ad7b7eb0b3e04af91bdd64715226c3c68">hue</a> - 510;  <span class="comment">//     b = 0 to 254</span></div>
 <div class="line"><span class="lineno">   55</span>        } <span class="keywordflow">else</span> {            <span class="comment">//   Cyan to Blue-1</span></div>
-<div class="line"><span class="lineno">   56</span>            g = 1020 - hue; <span class="comment">//     g = 255 to 1</span></div>
+<div class="line"><span class="lineno">   56</span>            g = 1020 - <a class="code hl_variable" href="../../d8/d21/_adafruit_bridge_8ino_ad7b7eb0b3e04af91bdd64715226c3c68.html#ad7b7eb0b3e04af91bdd64715226c3c68">hue</a>; <span class="comment">//     g = 255 to 1</span></div>
 <div class="line"><span class="lineno">   57</span>            b = 255;</div>
 <div class="line"><span class="lineno">   58</span>        }</div>
-<div class="line"><span class="lineno">   59</span>    } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (hue &lt; 1530) { <span class="comment">// Blue to Red-1</span></div>
+<div class="line"><span class="lineno">   59</span>    } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../d8/d21/_adafruit_bridge_8ino_ad7b7eb0b3e04af91bdd64715226c3c68.html#ad7b7eb0b3e04af91bdd64715226c3c68">hue</a> &lt; 1530) { <span class="comment">// Blue to Red-1</span></div>
 <div class="line"><span class="lineno">   60</span>        g = 0;</div>
-<div class="line"><span class="lineno">   61</span>        <span class="keywordflow">if</span> (hue &lt; 1275) {   <span class="comment">//   Blue to Magenta-1</span></div>
-<div class="line"><span class="lineno">   62</span>            r = hue - 1020; <span class="comment">//     r = 0 to 254</span></div>
+<div class="line"><span class="lineno">   61</span>        <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../d8/d21/_adafruit_bridge_8ino_ad7b7eb0b3e04af91bdd64715226c3c68.html#ad7b7eb0b3e04af91bdd64715226c3c68">hue</a> &lt; 1275) {   <span class="comment">//   Blue to Magenta-1</span></div>
+<div class="line"><span class="lineno">   62</span>            r = <a class="code hl_variable" href="../../d8/d21/_adafruit_bridge_8ino_ad7b7eb0b3e04af91bdd64715226c3c68.html#ad7b7eb0b3e04af91bdd64715226c3c68">hue</a> - 1020; <span class="comment">//     r = 0 to 254</span></div>
 <div class="line"><span class="lineno">   63</span>            b = 255;</div>
 <div class="line"><span class="lineno">   64</span>        } <span class="keywordflow">else</span> { <span class="comment">//   Magenta to Red-1</span></div>
 <div class="line"><span class="lineno">   65</span>            r = 255;</div>
-<div class="line"><span class="lineno">   66</span>            b = 1530 - hue; <span class="comment">//     b = 255 to 1</span></div>
+<div class="line"><span class="lineno">   66</span>            b = 1530 - <a class="code hl_variable" href="../../d8/d21/_adafruit_bridge_8ino_ad7b7eb0b3e04af91bdd64715226c3c68.html#ad7b7eb0b3e04af91bdd64715226c3c68">hue</a>; <span class="comment">//     b = 255 to 1</span></div>
 <div class="line"><span class="lineno">   67</span>        }</div>
 <div class="line"><span class="lineno">   68</span>    } <span class="keywordflow">else</span> { <span class="comment">// Last 0.5 Red (quicker than % operator)</span></div>
 <div class="line"><span class="lineno">   69</span>        r = 255;</div>
@@ -208,15 +210,9 @@ $(function(){initNavTree('d3/d97/detail_8h_ac1471539ff95a76883e9c8e83e8548ad.htm
 <div class="line"><span class="lineno">   78</span>           (((((g * s1) &gt;&gt; 8) + s2) * v1) &amp; 0xff00) |</div>
 <div class="line"><span class="lineno">   79</span>           (((((b * s1) &gt;&gt; 8) + s2) * v1) &gt;&gt; 8);</div>
 <div class="line"><span class="lineno">   80</span>}</div>
+<div class="ttc" id="a_adafruit_bridge_8ino_ad7b7eb0b3e04af91bdd64715226c3c68_html_ad7b7eb0b3e04af91bdd64715226c3c68"><div class="ttname"><a href="../../d8/d21/_adafruit_bridge_8ino_ad7b7eb0b3e04af91bdd64715226c3c68.html#ad7b7eb0b3e04af91bdd64715226c3c68">hue</a></div><div class="ttdeci">uint8_t hue</div><div class="ttdef"><b>Definition</b> <a href="../../d8/d21/_adafruit_bridge_8ino_source.html#l00014">AdafruitBridge.ino:14</a></div></div>
 </div><!-- fragment -->
-<p class="reference">Referenced by <a class="el" href="../../d1/ddb/_chromancer_8ino_source.html#l00214">loop()</a>.</p>
-<div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
-  <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the caller graph for this function:</div>
-<div id="dynsection-0-summary" class="dynsummary" style="display:block;">
-</div>
-<div id="dynsection-0-content" class="dyncontent" style="display:none;">
-<div class="center"><iframe scrolling="no" frameborder="0" src="../../d3/d97/detail_8h_ac1471539ff95a76883e9c8e83e8548ad_ac1471539ff95a76883e9c8e83e8548ad_icgraph.svg" width="308" height="36"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
-</div>
+<p class="reference">References <a class="el" href="../../d8/d21/_adafruit_bridge_8ino_source.html#l00014">hue</a>.</p>
 
 </div>
 </div>
@@ -227,7 +223,7 @@ $(function(){initNavTree('d3/d97/detail_8h_ac1471539ff95a76883e9c8e83e8548ad.htm
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dir_d28a4824dc47e487b107a5db32ef43c4.html">examples</a></li><li class="navelem"><a class="el" href="../../dir_63a7680d6f3f38816504e5ce30b76a13.html">Chromancer</a></li><li class="navelem"><a class="el" href="../../d3/d97/detail_8h.html">detail.h</a></li>
-    <li class="footer">Generated on Tue Jun 24 2025 00:58:14 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Fri Aug 22 2025 20:59:34 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

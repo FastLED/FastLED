@@ -1,34 +1,38 @@
 <map id="loop" name="loop">
-<area shape="rect" id="Node000001" title=" " alt="" coords="5,104,56,129"/>
-<area shape="rect" id="Node000002" href="$d4/dd0/_twinkle_fox_8ino_a328f611f7913b54364ddd78e16fa818c.html#a328f611f7913b54364ddd78e16fa818c" title=" " alt="" coords="116,31,295,56"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="55,104,161,59,163,64,57,109"/>
-<area shape="rect" id="Node000004" href="$d4/dd0/_twinkle_fox_8ino_a6d0a3407d4b43c23c7bdd4aac9fc76fd.html#a6d0a3407d4b43c23c7bdd4aac9fc76fd" title=" " alt="" coords="150,104,261,129"/>
-<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="56,114,136,114,136,119,56,119"/>
-<area shape="rect" id="Node000018" href="$d1/dfb/colorutils_8h_a95a41ac33135f9b0658d2de39ef63526.html#a95a41ac33135f9b0658d2de39ef63526" title=" " alt="" coords="104,153,307,179"/>
-<area shape="poly" id="edge16_Node000001_Node000018" title=" " alt="" coords="57,123,105,138,138,147,137,153,103,143,56,128"/>
-<area shape="rect" id="Node000003" href="$d5/d98/group___math_ga2bcd51c47538dbc933999382e272a7a7.html#ga2bcd51c47538dbc933999382e272a7a7" title="Add two numbers, and calculate the modulo of the sum and a third number, M." alt="" coords="400,5,483,31"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="295,31,386,21,387,26,295,36"/>
-<area shape="rect" id="Node000005" href="$d1/dfb/colorutils_8h_a924fc8748f53389e55fdc63bfc14b805.html#a924fc8748f53389e55fdc63bfc14b805" title=" " alt="" coords="412,55,471,80"/>
-<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="260,103,398,74,399,79,261,108"/>
-<area shape="rect" id="Node000006" href="$d4/dd0/_twinkle_fox_8ino_aff322ac4b9956a48a5d4e90853178b9f.html#aff322ac4b9956a48a5d4e90853178b9f" title=" " alt="" coords="364,104,519,129"/>
-<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="261,114,350,114,350,119,261,119"/>
-<area shape="rect" id="Node000011" href="$d7/d82/struct_c_r_g_b_a940908cc69606bdabe3b2d32a9097356.html#a940908cc69606bdabe3b2d32a9097356" title="Get the average of the R, G, and B values." alt="" coords="355,155,528,180"/>
-<area shape="poly" id="edge9_Node000004_Node000011" title=" " alt="" coords="261,126,368,149,367,154,260,131"/>
-<area shape="rect" id="Node000014" href="$d7/d82/struct_c_r_g_b_a0441d6094ab8f98d800ec789c36b4461.html#a0441d6094ab8f98d800ec789c36b4461" title="Scale down a RGB to N/256ths of it&#39;s current brightness using &quot;video&quot; dimming rules." alt="" coords="361,255,521,280"/>
-<area shape="poly" id="edge12_Node000004_Node000014" title=" " alt="" coords="261,121,285,128,308,138,324,150,334,162,357,190,416,243,412,247,353,193,330,165,321,154,305,143,283,133,260,126"/>
-<area shape="rect" id="Node000007" href="$d4/dd0/_twinkle_fox_8ino_a4a0681804cc2a596cf7821c15aafd777.html#a4a0681804cc2a596cf7821c15aafd777" title=" " alt="" coords="600,5,748,31"/>
-<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="499,102,527,89,541,77,550,65,559,52,575,40,588,33,590,38,577,44,563,56,554,68,545,81,529,94,501,106"/>
-<area shape="rect" id="Node000008" href="$d1/dfb/colorutils_8h_a74e1895d1234ab29fef4458532e91090.html#a74e1895d1234ab29fef4458532e91090" title=" " alt="" coords="607,55,741,80"/>
-<area shape="poly" id="edge7_Node000006_Node000008" title=" " alt="" coords="501,101,599,80,601,86,502,107"/>
-<area shape="rect" id="Node000009" href="$d4/dd0/_twinkle_fox_8ino_a14cf156bb2b5669bf1cc2c4859c9f443.html#a14cf156bb2b5669bf1cc2c4859c9f443" title=" " alt="" coords="593,104,755,129"/>
-<area shape="poly" id="edge8_Node000006_Node000009" title=" " alt="" coords="519,114,580,114,580,119,519,119"/>
-<area shape="rect" id="Node000012" href="$d0/da5/group___scaling_dirty_ga3fade00fb4cf5b937b973128198a7a79.html#ga3fade00fb4cf5b937b973128198a7a79" title="Clean up the r1 register after a series of *LEAVING_R1_DIRTY calls." alt="" coords="820,229,917,255"/>
-<area shape="poly" id="edge10_Node000011_Node000012" title=" " alt="" coords="528,162,645,167,710,176,773,190,807,203,838,220,835,224,805,208,771,195,709,181,645,173,528,167"/>
-<area shape="rect" id="Node000013" href="$d0/da5/group___scaling_dirty_ga7386235cada3aca429b189681d2ec56d.html#ga7386235cada3aca429b189681d2ec56d" title="This version of scale8() does not clean up the R1 register on AVR." alt="" coords="576,205,772,231"/>
-<area shape="poly" id="edge11_Node000011_Node000013" title=" " alt="" coords="501,178,603,200,601,205,500,183"/>
-<area shape="rect" id="Node000015" href="$d7/d82/struct_c_r_g_b_a08d8e05a3fcdb88dedb886cad9cbd3fa.html#a08d8e05a3fcdb88dedb886cad9cbd3fa" title="Default constructor." alt="" coords="622,255,726,280"/>
-<area shape="poly" id="edge13_Node000014_Node000015" title=" " alt="" coords="522,265,608,265,608,270,522,270"/>
-<area shape="rect" id="Node000016" href="$d0/da8/group___scaling_ga700b7f510f32e8c91385093c436c27d9.html#ga700b7f510f32e8c91385093c436c27d9" title="Scale three one&#45;byte values by a fourth one, which is treated as the numerator of a fraction whose de..." alt="" coords="609,304,739,329"/>
-<area shape="poly" id="edge14_Node000014_Node000016" title=" " alt="" coords="502,277,601,298,599,304,501,283"/>
-<area shape="poly" id="edge15_Node000016_Node000012" title=" " alt="" coords="736,301,771,290,834,259,836,264,773,295,737,306"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,107,56,132"/>
+<area shape="rect" id="Node000002" href="$d4/dd0/_twinkle_fox_8ino_a328f611f7913b54364ddd78e16fa818c.html#a328f611f7913b54364ddd78e16fa818c" title=" " alt="" coords="124,32,303,57"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="55,107,168,60,170,65,57,112"/>
+<area shape="rect" id="Node000004" href="$d4/dd0/_twinkle_fox_8ino_a6d0a3407d4b43c23c7bdd4aac9fc76fd.html#a6d0a3407d4b43c23c7bdd4aac9fc76fd" title=" " alt="" coords="158,107,269,132"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="56,117,144,117,144,122,56,122"/>
+<area shape="rect" id="Node000022" href="$d4/d36/namespacefl_ada525b8983539d793931dd074928bacd.html#ada525b8983539d793931dd074928bacd" title=" " alt="" coords="104,156,323,181"/>
+<area shape="poly" id="edge20_Node000001_Node000022" title=" " alt="" coords="57,126,105,141,141,150,140,155,103,146,56,131"/>
+<area shape="rect" id="Node000003" href="$d5/d98/group___math_ga2bcd51c47538dbc933999382e272a7a7.html#ga2bcd51c47538dbc933999382e272a7a7" title="Add two numbers, and calculate the modulo of the sum and a third number, M." alt="" coords="409,5,492,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="302,32,395,21,396,27,303,37"/>
+<area shape="rect" id="Node000005" href="$d4/d36/namespacefl_a924fc8748f53389e55fdc63bfc14b805.html#a924fc8748f53389e55fdc63bfc14b805" title=" " alt="" coords="788,105,863,131"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="269,106,370,91,556,78,637,80,740,91,775,99,774,104,740,97,637,85,556,83,371,97,269,111"/>
+<area shape="rect" id="Node000010" href="$d4/dd0/_twinkle_fox_8ino_aff322ac4b9956a48a5d4e90853178b9f.html#aff322ac4b9956a48a5d4e90853178b9f" title=" " alt="" coords="373,180,528,205"/>
+<area shape="poly" id="edge8_Node000004_Node000010" title=" " alt="" coords="270,127,323,141,409,172,407,177,322,146,268,132"/>
+<area shape="rect" id="Node000019" href="$d7/d82/struct_c_r_g_b_a940908cc69606bdabe3b2d32a9097356.html#a940908cc69606bdabe3b2d32a9097356" title="Get the average of the R, G, and B values." alt="" coords="911,257,1084,283"/>
+<area shape="poly" id="edge15_Node000004_Node000019" title=" " alt="" coords="270,120,298,128,324,141,342,160,350,179,357,198,372,216,423,251,468,269,517,280,579,290,669,299,759,299,844,292,916,282,917,288,845,297,760,304,669,305,578,295,516,285,466,274,421,255,369,220,352,201,345,181,337,163,321,145,296,133,268,126"/>
+<area shape="rect" id="Node000020" href="$d7/d82/struct_c_r_g_b_af4cad72bcd9b925d527a3af3a8d956e6.html#af4cad72bcd9b925d527a3af3a8d956e6" title="Scale down a RGB to N/256ths of it&#39;s current brightness using &quot;video&quot; dimming rules." alt="" coords="371,107,531,132"/>
+<area shape="poly" id="edge18_Node000004_Node000020" title=" " alt="" coords="269,117,357,117,357,122,269,122"/>
+<area shape="rect" id="Node000006" href="$d4/d36/namespacefl_aa1e0cd66825220bead12cfc1ab7f33c6.html#aa1e0cd66825220bead12cfc1ab7f33c6" title=" " alt="" coords="956,105,1039,131"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="863,115,942,115,942,121,863,121"/>
+<area shape="rect" id="Node000008" href="$d0/da5/group___scaling_dirty_ga3fade00fb4cf5b937b973128198a7a79.html#ga3fade00fb4cf5b937b973128198a7a79" title="Clean up the r1 register after a series of *LEAVING_R1_DIRTY calls." alt="" coords="1181,207,1279,232"/>
+<area shape="poly" id="edge6_Node000006_Node000008" title=" " alt="" coords="1019,128,1069,160,1133,192,1169,204,1167,209,1131,196,1067,164,1016,133"/>
+<area shape="rect" id="Node000009" href="$d0/da5/group___scaling_dirty_ga7386235cada3aca429b189681d2ec56d.html#ga7386235cada3aca429b189681d2ec56d" title="This version of scale8() does not clean up the R1 register on AVR." alt="" coords="1132,156,1328,181"/>
+<area shape="poly" id="edge7_Node000006_Node000009" title=" " alt="" coords="1039,124,1158,150,1157,156,1038,129"/>
+<area shape="rect" id="Node000011" href="$d4/dd0/_twinkle_fox_8ino_a4a0681804cc2a596cf7821c15aafd777.html#a4a0681804cc2a596cf7821c15aafd777" title=" " alt="" coords="585,205,733,231"/>
+<area shape="poly" id="edge9_Node000010_Node000011" title=" " alt="" coords="528,199,572,205,571,210,528,205"/>
+<area shape="rect" id="Node000012" href="$d4/d36/namespacefl_a3d488dd1e2d27e99307310527e51cad3.html#a3d488dd1e2d27e99307310527e51cad3" title=" " alt="" coords="584,156,735,181"/>
+<area shape="poly" id="edge10_Node000010_Node000012" title=" " alt="" coords="528,181,570,176,571,182,528,186"/>
+<area shape="rect" id="Node000017" href="$d4/dd0/_twinkle_fox_8ino_a14cf156bb2b5669bf1cc2c4859c9f443.html#a14cf156bb2b5669bf1cc2c4859c9f443" title=" " alt="" coords="579,255,740,280"/>
+<area shape="poly" id="edge14_Node000010_Node000017" title=" " alt="" coords="483,203,580,241,601,248,599,253,578,246,481,208"/>
+<area shape="poly" id="edge11_Node000012_Node000005" title=" " alt="" coords="701,153,774,131,775,136,703,158"/>
+<area shape="poly" id="edge12_Node000012_Node000008" title=" " alt="" coords="735,173,1168,211,1167,217,735,178"/>
+<area shape="poly" id="edge13_Node000012_Node000009" title=" " alt="" coords="735,166,1118,166,1118,171,735,171"/>
+<area shape="poly" id="edge16_Node000019_Node000008" title=" " alt="" coords="1056,255,1167,230,1168,235,1057,260"/>
+<area shape="poly" id="edge17_Node000019_Node000009" title=" " alt="" coords="1016,255,1067,224,1131,193,1160,183,1161,188,1133,198,1070,229,1019,260"/>
+<area shape="rect" id="Node000021" href="$d7/d82/struct_c_r_g_b_a4b0cc1cfefd9e0c66ea5c6583181df46.html#a4b0cc1cfefd9e0c66ea5c6583181df46" title="Default constructor." alt="" coords="607,107,711,132"/>
+<area shape="poly" id="edge19_Node000020_Node000021" title=" " alt="" coords="531,117,593,117,593,122,531,122"/>
 </map>

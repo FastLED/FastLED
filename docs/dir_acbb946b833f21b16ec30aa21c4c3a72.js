@@ -11,8 +11,8 @@ var dir_acbb946b833f21b16ec30aa21c4c3a72 =
     [ "fx2d.h", "d9/d43/fx2d_8h.html", "d9/d43/fx2d_8h" ],
     [ "fx_engine.cpp", "df/d8e/fx__engine_8cpp.html", null ],
     [ "fx_engine.h", "d9/d3c/fx__engine_8h.html", "d9/d3c/fx__engine_8h" ],
-    [ "time.cpp", "de/daf/time_8cpp.html", "de/daf/time_8cpp" ],
-    [ "time.h", "de/df7/time_8h.html", "de/df7/time_8h" ],
+    [ "time.cpp", "d5/d56/fx_2time_8cpp.html", "d5/d56/fx_2time_8cpp" ],
+    [ "time.h", "da/da2/fx_2time_8h.html", "da/da2/fx_2time_8h" ],
     [ "video.cpp", "d0/d05/video_8cpp.html", "d0/d05/video_8cpp" ],
     [ "video.h", "dd/d78/video_8h.html", "dd/d78/video_8h" ]
 ];

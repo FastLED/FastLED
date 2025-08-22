@@ -32,9 +32,9 @@
 <g id="Node000002" class="node">
 <title>Node2</title>
 <g id="a_Node000002"><a xlink:href="../../db/ddd/classfl_1_1_heap_vector.html" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#666666" points="140,-107 9,-107 9,-77 140,-77 140,-107"/>
-<text text-anchor="start" x="17" y="-95" font-family="Helvetica,sans-Serif" font-size="10.00">fl::HeapVector&lt; T,</text>
-<text text-anchor="middle" x="74.5" y="-84" font-family="Helvetica,sans-Serif" font-size="10.00"> Allocator &gt;&lt; int16_t &gt;</text>
+<polygon fill="white" stroke="#666666" points="130.5,-107 18.5,-107 18.5,-77 130.5,-77 130.5,-107"/>
+<text text-anchor="start" x="26.5" y="-95" font-family="Helvetica,sans-Serif" font-size="10.00">fl::HeapVector&lt; T,</text>
+<text text-anchor="middle" x="74.5" y="-84" font-family="Helvetica,sans-Serif" font-size="10.00"> Allocator &gt;&lt; i16 &gt;</text>
 </a>
 </g>
 </g>
@@ -67,7 +67,7 @@
 <polygon fill="orange" stroke="orange" points="71,-143.89 74.5,-153.89 78,-143.89 71,-143.89"/>
 </a>
 </g>
-<text text-anchor="middle" x="104.5" y="-128" font-family="Helvetica,sans-Serif" font-size="10.00" fill="grey"> &lt; int16_t &gt;</text>
+<text text-anchor="middle" x="95" y="-128" font-family="Helvetica,sans-Serif" font-size="10.00" fill="grey"> &lt; i16 &gt;</text>
 </g>
 <!-- Node4 -->
 <g id="Node000004" class="node">

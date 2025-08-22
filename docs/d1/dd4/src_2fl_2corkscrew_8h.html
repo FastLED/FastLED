@@ -102,44 +102,47 @@ $(function(){initNavTree('d1/dd4/src_2fl_2corkscrew_8h.html','../../'); initResi
 <div class="header">
   <div class="summary">
 <a href="#nested-classes">Classes</a> &#124;
-<a href="#namespaces">Namespaces</a>  </div>
+<a href="#namespaces">Namespaces</a> &#124;
+<a href="#func-members">Functions</a>  </div>
   <div class="headertitle"><div class="title">corkscrew.h File Reference</div></div>
 </div><!--header-->
 <div class="contents">
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>Corkscrew projection utilities. </p>
-<p>You want to draw on a rectangular surface, and have it map to a GOD DAMN CORKSCREW! Well guess what, this is the file for you.</p>
-<p>Corkscrew projection maps from Corkscrew angle height, (θ, h) to Cylindrical cartesian (w, h) space, where w = one turn of the Corkscrew. The corkscrew at (0) will map to the first index in the cylinder map at (0, 0). The last value is probly not at the max pixel value at (width - 1, height - 1), but could be.</p>
-<p>Inputs:</p><ul>
-<li>Total Height of the Corkscrew in centimeters</li>
-<li>Total angle of the Corkscrew (number of veritcal segments × 2π)</li>
-<li>Optional offset circumference (default 0)<ul>
-<li>Allows pixel-perfect corkscrew with gaps via circumference offsetting</li>
-<li>Example (accounting for gaps):<ul>
-<li>segment 0: offset circumference = 0, circumference = 100</li>
-<li>segment 1: offset circumference = 100.5, circumference = 100</li>
-<li>segment 2: offset circumference = 101, circumference = 100</li>
+<div class="textblock"><p>Corkscrew LED strip projection and rendering. </p>
+<p>The Corkscrew class provides a complete solution for drawing to densely-wrapped helical LED strips. It maps a cylindrical coordinate system to a linear LED strip, allowing you to draw on a rectangular surface and have it correctly projected onto the corkscrew topology.</p>
+<p>Usage:</p><ol type="1">
+<li>Create a Corkscrew with the number of turns and LEDs</li>
+<li>Draw patterns on the input surface using surface()</li>
+<li>Call <a class="el" href="../../d4/d06/curr_8h_a251ace8542fe093844e4ed2709e8a3d7.html#a251ace8542fe093844e4ed2709e8a3d7">draw()</a> to map the surface to LED pixels</li>
+<li>Access the final LED data via rawData()</li>
+</ol>
+<p>The class handles:</p><ul>
+<li>Automatic cylindrical dimension calculation</li>
+<li>Pixel storage (external span or internal allocation)</li>
+<li>Multi-sampling for smooth projections</li>
+<li>Gap compensation for non-continuous wrapping</li>
+<li>Iterator interface for advanced coordinate access</li>
 </ul>
-</li>
-</ul>
-</li>
-</ul>
-<p>Outputs:</p><ul>
-<li>Width and Height of the cylindrical map<ul>
-<li>Width is the circumference of one turn</li>
-<li>Height is the total number of vertical segments</li>
-</ul>
-</li>
-<li>Vector of vec2f {width, height} mapping corkscrew (r,c) to cylindrical {w,h} </li>
+<p>Parameters:</p><ul>
+<li>totalTurns: Number of helical turns around the cylinder</li>
+<li>numLeds: Total number of LEDs in the strip</li>
+<li>invert: Reverse the mapping direction (default: false)</li>
+<li>gapParams: Optional gap compensation for solder points in a strip. </li>
 </ul>
 
 <p class="definition">Definition in file <a class="el" href="../../d1/dd4/src_2fl_2corkscrew_8h_source.html">corkscrew.h</a>.</p>
 </div><div class="textblock"><code>#include &quot;<a class="el" href="../../da/da9/allocator_8h_source.html">fl/allocator.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="../../d4/d67/geometry_8h_source.html">fl/geometry.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../df/db1/math_8h_source.html">fl/math.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="../../d8/db8/math__macros_8h_source.html">fl/math_macros.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="../../d3/d41/pair_8h_source.html">fl/pair.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="../../d2/db4/tile2x2_8h_source.html">fl/tile2x2.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="../../d6/d68/vector_8h_source.html">fl/vector.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../df/d6a/shared__ptr_8h_source.html">fl/shared_ptr.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d6/d10/variant_8h_source.html">fl/variant.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d4/d7a/span_8h_source.html">fl/span.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../db/dd1/crgb_8h_source.html">crgb.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d3/d7e/int_8h_source.html">fl/int.h</a>&quot;</code><br />
 </div><div class="textblock"><div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Include dependency graph for corkscrew.h:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -161,19 +164,24 @@ $(function(){initNavTree('d1/dd4/src_2fl_2corkscrew_8h.html','../../'); initResi
 Classes</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dc/d82/classfl_1_1_corkscrew.html">fl::Corkscrew</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d6/d7c/structfl_1_1_corkscrew_input.html">fl::CorkscrewInput</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Generates a mapping from corkscrew to cylindrical coordinates.  <a href="../../d6/d7c/structfl_1_1_corkscrew_input.html#details">More...</a><br /></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/dd7/classfl_1_1_corkscrew_1_1iterator.html">fl::Corkscrew::iterator</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d76/structfl_1_1_corkscrew_state.html">fl::CorkscrewState</a></td></tr>
-<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../db/dde/classfl_1_1_corkscrew_state_1_1iterator.html">fl::CorkscrewState::iterator</a></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dd/deb/structfl_1_1_gap.html">fl::Gap</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Struct representing gap parameters for corkscrew mapping.  <a href="../../dd/deb/structfl_1_1_gap.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="namespaces" name="namespaces"></a>
 Namespaces</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">namespace &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></td></tr>
-<tr class="memdesc:d4/d36/namespacefl"><td class="mdescLeft">&#160;</td><td class="mdescRight">Implements a simple red square effect for 2D LED grids. <br /></td></tr>
+<tr class="memdesc:d4/d36/namespacefl"><td class="mdescLeft">&#160;</td><td class="mdescRight">IMPORTANT! <br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
+Functions</h2></td></tr>
+<tr class="memitem:a6d9e2d05199936169cb4429b9b5b4c30" id="r_a6d9e2d05199936169cb4429b9b5b4c30"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../d9/d13/cpp__compat_8h_a72f0657181cca64b44eb186b707eb380.html#a72f0657181cca64b44eb186b707eb380">constexpr</a> fl::u16&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_a6d9e2d05199936169cb4429b9b5b4c30.html#a6d9e2d05199936169cb4429b9b5b4c30">fl::calculateCorkscrewHeight</a> (float totalTurns, fl::u16 numLeds)</td></tr>
+<tr class="separator:a6d9e2d05199936169cb4429b9b5b4c30"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab443055b5ff8f551a327ad03e0bdd268" id="r_ab443055b5ff8f551a327ad03e0bdd268"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../d9/d13/cpp__compat_8h_a72f0657181cca64b44eb186b707eb380.html#a72f0657181cca64b44eb186b707eb380">constexpr</a> fl::u16&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_ab443055b5ff8f551a327ad03e0bdd268.html#ab443055b5ff8f551a327ad03e0bdd268">fl::calculateCorkscrewWidth</a> (float totalTurns, fl::u16 numLeds)</td></tr>
+<tr class="separator:ab443055b5ff8f551a327ad03e0bdd268"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 </div><!-- contents -->
 </div><!-- doc-content -->
@@ -182,7 +190,7 @@ Namespaces</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dir_4d1829fa9bd13d7db71e765b2707b248.html">fl</a></li><li class="navelem"><a class="el" href="../../d1/dd4/src_2fl_2corkscrew_8h.html">corkscrew.h</a></li>
-    <li class="footer">Generated on Tue Jun 24 2025 00:58:14 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Fri Aug 22 2025 20:59:34 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

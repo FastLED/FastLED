@@ -106,7 +106,7 @@ $(function(){initNavTree('dc/d96/classfl_1_1_str_n_ada1fdbf136adbc7c46b658a28f3b
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;size_t SIZE = 64&gt; </div>
+template&lt;fl::size SIZE = FASTLED_STR_INLINED_SIZE&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
@@ -125,21 +125,30 @@ template&lt;size_t SIZE = 64&gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d1/d93/str_8h_source.html#l00381">381</a> of file <a class="el" href="../../d1/d93/str_8h_source.html">str.h</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  381</span>                          {</div>
-<div class="line"><span class="lineno">  382</span>        <span class="keywordflow">return</span> <a class="code hl_function" href="../../d4/d8d/classfl_1_1_string_formatter_a563cb1110196a63cc6baeeb65ccd39af.html#a563cb1110196a63cc6baeeb65ccd39af">StringFormatter::parseFloat</a>(<a class="code hl_function" href="../../dc/d96/classfl_1_1_str_n_a67296b774f8201293edbbabbd1b642cb.html#a67296b774f8201293edbbabbd1b642cb">c_str</a>(), <a class="code hl_variable" href="../../dc/d96/classfl_1_1_str_n_a08e3728f0d16add179cda13e21b92b5f.html#a08e3728f0d16add179cda13e21b92b5f">mLength</a>);</div>
-<div class="line"><span class="lineno">  383</span>    }</div>
-<div class="ttc" id="aclassfl_1_1_str_n_a08e3728f0d16add179cda13e21b92b5f_html_a08e3728f0d16add179cda13e21b92b5f"><div class="ttname"><a href="../../dc/d96/classfl_1_1_str_n_a08e3728f0d16add179cda13e21b92b5f.html#a08e3728f0d16add179cda13e21b92b5f">fl::StrN::mLength</a></div><div class="ttdeci">size_t mLength</div><div class="ttdef"><b>Definition</b> <a href="../../d1/d93/str_8h_source.html#l00109">str.h:109</a></div></div>
-<div class="ttc" id="aclassfl_1_1_str_n_a67296b774f8201293edbbabbd1b642cb_html_a67296b774f8201293edbbabbd1b642cb"><div class="ttname"><a href="../../dc/d96/classfl_1_1_str_n_a67296b774f8201293edbbabbd1b642cb.html#a67296b774f8201293edbbabbd1b642cb">fl::StrN::c_str</a></div><div class="ttdeci">const char * c_str() const</div><div class="ttdef"><b>Definition</b> <a href="../../d1/d93/str_8h_source.html#l00273">str.h:273</a></div></div>
-<div class="ttc" id="aclassfl_1_1_string_formatter_a563cb1110196a63cc6baeeb65ccd39af_html_a563cb1110196a63cc6baeeb65ccd39af"><div class="ttname"><a href="../../d4/d8d/classfl_1_1_string_formatter_a563cb1110196a63cc6baeeb65ccd39af.html#a563cb1110196a63cc6baeeb65ccd39af">fl::StringFormatter::parseFloat</a></div><div class="ttdeci">static float parseFloat(const char *str, size_t len)</div><div class="ttdef"><b>Definition</b> <a href="../../d1/d1f/str_8cpp_source.html#l00222">str.cpp:222</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../d1/d93/str_8h_source.html#l00586">586</a> of file <a class="el" href="../../d1/d93/str_8h_source.html">str.h</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  586</span>                          {</div>
+<div class="line"><span class="lineno">  587</span>        <span class="keywordflow">return</span> <a class="code hl_function" href="../../d4/d8d/classfl_1_1_string_formatter_a40a6a0a8fbfb5359571b187bc04253d3.html#a40a6a0a8fbfb5359571b187bc04253d3">StringFormatter::parseFloat</a>(<a class="code hl_function" href="../../dc/d96/classfl_1_1_str_n_a67296b774f8201293edbbabbd1b642cb.html#a67296b774f8201293edbbabbd1b642cb">c_str</a>(), <a class="code hl_variable" href="../../dc/d96/classfl_1_1_str_n_afa45c054243b0a4dbf2c73abf9cb2f7e.html#afa45c054243b0a4dbf2c73abf9cb2f7e">mLength</a>);</div>
+<div class="line"><span class="lineno">  588</span>    }</div>
+<div class="ttc" id="aclassfl_1_1_str_n_a67296b774f8201293edbbabbd1b642cb_html_a67296b774f8201293edbbabbd1b642cb"><div class="ttname"><a href="../../dc/d96/classfl_1_1_str_n_a67296b774f8201293edbbabbd1b642cb.html#a67296b774f8201293edbbabbd1b642cb">fl::StrN::c_str</a></div><div class="ttdeci">const char * c_str() const</div><div class="ttdef"><b>Definition</b> <a href="../../d1/d93/str_8h_source.html#l00326">str.h:326</a></div></div>
+<div class="ttc" id="aclassfl_1_1_str_n_afa45c054243b0a4dbf2c73abf9cb2f7e_html_afa45c054243b0a4dbf2c73abf9cb2f7e"><div class="ttname"><a href="../../dc/d96/classfl_1_1_str_n_afa45c054243b0a4dbf2c73abf9cb2f7e.html#afa45c054243b0a4dbf2c73abf9cb2f7e">fl::StrN::mLength</a></div><div class="ttdeci">fl::size mLength</div><div class="ttdef"><b>Definition</b> <a href="../../d1/d93/str_8h_source.html#l00140">str.h:140</a></div></div>
+<div class="ttc" id="aclassfl_1_1_string_formatter_a40a6a0a8fbfb5359571b187bc04253d3_html_a40a6a0a8fbfb5359571b187bc04253d3"><div class="ttname"><a href="../../d4/d8d/classfl_1_1_string_formatter_a40a6a0a8fbfb5359571b187bc04253d3.html#a40a6a0a8fbfb5359571b187bc04253d3">fl::StringFormatter::parseFloat</a></div><div class="ttdeci">static float parseFloat(const char *str, fl::size len)</div><div class="ttdef"><b>Definition</b> <a href="../../d1/d1f/str_8cpp_source.html#l00296">str.cpp:296</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d1/d93/str_8h_source.html#l00273">c_str()</a>, <a class="el" href="../../d1/d93/str_8h_source.html#l00109">mLength</a>, and <a class="el" href="../../d1/d1f/str_8cpp_source.html#l00222">fl::StringFormatter::parseFloat()</a>.</p>
+<p class="reference">References <a class="el" href="../../d1/d93/str_8h_source.html#l00326">c_str()</a>, <a class="el" href="../../d1/d93/str_8h_source.html#l00140">mLength</a>, and <a class="el" href="../../d1/d1f/str_8cpp_source.html#l00296">fl::StringFormatter::parseFloat()</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../d7/d52/istream_8cpp_source.html#l00319">fl::istream_real::operator&gt;&gt;()</a>, and <a class="el" href="../../d7/d52/istream_8cpp_source.html#l00302">fl::istream_real::operator&gt;&gt;()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-0-content" class="dyncontent" style="display:none;">
 <div class="center"><iframe scrolling="no" frameborder="0" src="../../dc/d96/classfl_1_1_str_n_ada1fdbf136adbc7c46b658a28f3b058a_ada1fdbf136adbc7c46b658a28f3b058a_cgraph.svg" width="510" height="102"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+</div>
+<div id="dynsection-1" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
+  <img id="dynsection-1-trigger" src="../../closed.png" alt="+"/> Here is the caller graph for this function:</div>
+<div id="dynsection-1-summary" class="dynsummary" style="display:block;">
+</div>
+<div id="dynsection-1-content" class="dyncontent" style="display:none;">
+<div class="center"><iframe scrolling="no" frameborder="0" src="../../dc/d96/classfl_1_1_str_n_ada1fdbf136adbc7c46b658a28f3b058a_ada1fdbf136adbc7c46b658a28f3b058a_icgraph.svg" width="384" height="86"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
 </div>
 
 </div>
@@ -151,7 +160,7 @@ template&lt;size_t SIZE = 64&gt; </div>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../dc/d96/classfl_1_1_str_n.html">StrN</a></li>
-    <li class="footer">Generated on Tue Jun 24 2025 00:58:16 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Fri Aug 22 2025 20:59:37 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

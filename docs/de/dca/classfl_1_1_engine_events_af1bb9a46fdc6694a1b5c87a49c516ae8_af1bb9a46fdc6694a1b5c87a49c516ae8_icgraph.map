@@ -1,5 +1,5 @@
 <map id="fl::EngineEvents::onEndShowLeds" name="fl::EngineEvents::onEndShowLeds">
-<area shape="rect" id="Node000001" title=" " alt="" coords="177,5,416,31"/>
-<area shape="rect" id="Node000002" href="$dd/dbb/class_c_fast_l_e_d_a83afdd1e2a21f33ac4f8d2610d6e331b.html#a83afdd1e2a21f33ac4f8d2610d6e331b" title="Update all our controllers with the current led colors, using the passed in brightness." alt="" coords="5,5,129,31"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="163,21,130,21,130,15,163,15"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="248,5,487,31"/>
+<area shape="rect" id="Node000002" href="$dd/dbb/class_c_fast_l_e_d_a2625d97885a0be65117dd5a5edcddb18.html#a2625d97885a0be65117dd5a5edcddb18" title="Manually trigger the end show LEDs event." alt="" coords="5,5,200,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="234,21,200,21,200,15,234,15"/>
 </map>

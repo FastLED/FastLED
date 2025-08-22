@@ -1,0 +1,22 @@
+<map id="fl::promise::error" name="fl::promise::error">
+<area shape="rect" id="Node000001" title="Get the error (only valid if is_rejected() returns true)" alt="" coords="555,104,685,129"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a422168cc1b8dc2e0a10dfedf921ac003.html#a422168cc1b8dc2e0a10dfedf921ac003" title="Synchronously wait for a promise to complete (ONLY safe in top&#45;level contexts)" alt="" coords="356,47,497,72"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="562,103,469,75,471,69,564,97"/>
+<area shape="rect" id="Node000006" href="$d1/d21/classfl_1_1promise_a3d15b9a9e5f7d5fcb30290bdf9f3b5c9.html#a3d15b9a9e5f7d5fcb30290bdf9f3b5c9" title="Complete the promise with an error (used by networking library)" alt="" coords="347,97,507,137"/>
+<area shape="poly" id="edge6_Node000001_Node000006" title=" " alt="" coords="541,119,507,119,507,114,541,114"/>
+<area shape="rect" id="Node000007" href="$d1/d21/classfl_1_1promise_a40828f23712ac6dbabc9cd2f7d7634b6.html#a40828f23712ac6dbabc9cd2f7d7634b6" title="Create a rejected promise with error." alt="" coords="359,161,495,187"/>
+<area shape="poly" id="edge7_Node000001_Node000007" title=" " alt="" coords="564,136,471,164,469,159,562,131"/>
+<area shape="rect" id="Node000003" href="$d5/dec/_net_test_real_8h_a75e6549812ad7bff897e0c92a225878a.html#a75e6549812ad7bff897e0c92a225878a" title=" " alt="" coords="123,5,280,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="343,47,271,33,272,28,344,41"/>
+<area shape="rect" id="Node000005" href="$d5/dec/_net_test_real_8h_a648cd3d90f8e240cbbfe5cb934057124.html#a648cd3d90f8e240cbbfe5cb934057124" title="APPROACH 4: JSON Response with await pattern &#160;&#160;Same JSON handling but using await_top_level for synch..." alt="" coords="139,55,263,80"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="342,65,264,68,264,62,342,60"/>
+<area shape="rect" id="Node000004" href="$d5/dec/_net_test_real_8h_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="5,31,56,56"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="109,34,56,42,56,37,108,29"/>
+<area shape="poly" id="edge5_Node000005_Node000004" title=" " alt="" coords="125,59,56,49,56,44,126,54"/>
+<area shape="rect" id="Node000008" href="$d4/d36/namespacefl_aa8ba9adac097cc1e555a10bb31fb26d2.html#aa8ba9adac097cc1e555a10bb31fb26d2" title="Convenience function to create a rejected promise (const char* overload)" alt="" coords="104,112,299,137"/>
+<area shape="poly" id="edge8_Node000007_Node000008" title=" " alt="" coords="354,161,260,140,261,135,355,156"/>
+<area shape="rect" id="Node000009" href="$d4/d36/namespacefl_acede2a4bd76cfec481b34ef8d266b80e.html#acede2a4bd76cfec481b34ef8d266b80e" title="Convenience function to create a rejected promise." alt="" coords="104,161,299,187"/>
+<area shape="poly" id="edge9_Node000007_Node000009" title=" " alt="" coords="345,177,299,177,299,171,345,171"/>
+<area shape="rect" id="Node000010" href="$d1/d21/classfl_1_1promise_ad3f1732ddc0bc7d3f0d4a6d43725e985.html#ad3f1732ddc0bc7d3f0d4a6d43725e985" title="Create a rejected promise with error message." alt="" coords="133,211,269,236"/>
+<area shape="poly" id="edge10_Node000007_Node000010" title=" " alt="" coords="355,192,261,213,260,208,354,187"/>
+</map>

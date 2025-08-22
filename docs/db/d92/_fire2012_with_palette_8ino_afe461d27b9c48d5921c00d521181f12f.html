@@ -115,34 +115,35 @@ $(function(){initNavTree('db/d92/_fire2012_with_palette_8ino_afe461d27b9c48d5921
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../db/d92/_fire2012_with_palette_8ino_source.html#l00145">145</a> of file <a class="el" href="../../db/d92/_fire2012_with_palette_8ino_source.html">Fire2012WithPalette.ino</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  146</span>{</div>
-<div class="line"><span class="lineno">  147</span>  <span class="comment">// Add entropy to random number generator; we use a lot of it.</span></div>
-<div class="line"><span class="lineno">  148</span>  <a class="code hl_function" href="../../d2/d0d/group___random_ga1078b2029a50e86c93ccf4e3e1d85e7d.html#ga1078b2029a50e86c93ccf4e3e1d85e7d">random16_add_entropy</a>( random());</div>
-<div class="line"><span class="lineno">  149</span> </div>
-<div class="line"><span class="lineno">  150</span>  <span class="comment">// Fourth, the most sophisticated: this one sets up a new palette every</span></div>
-<div class="line"><span class="lineno">  151</span>  <span class="comment">// time through the loop, based on a hue that changes every time.</span></div>
-<div class="line"><span class="lineno">  152</span>  <span class="comment">// The palette is a gradient from black, to a dark color based on the hue,</span></div>
-<div class="line"><span class="lineno">  153</span>  <span class="comment">// to a light color based on the hue, to white.</span></div>
-<div class="line"><span class="lineno">  154</span>  <span class="comment">//</span></div>
-<div class="line"><span class="lineno">  155</span>  <span class="comment">//   static uint8_t hue = 0;</span></div>
-<div class="line"><span class="lineno">  156</span>  <span class="comment">//   hue++;</span></div>
-<div class="line"><span class="lineno">  157</span>  <span class="comment">//   CRGB darkcolor  = CHSV(hue,255,192); // pure hue, three-quarters brightness</span></div>
-<div class="line"><span class="lineno">  158</span>  <span class="comment">//   CRGB lightcolor = CHSV(hue,128,255); // half &#39;whitened&#39;, full brightness</span></div>
-<div class="line"><span class="lineno">  159</span>  <span class="comment">//   gPal = CRGBPalette16( CRGB::Black, darkcolor, lightcolor, CRGB::White);</span></div>
-<div class="line"><span class="lineno">  160</span> </div>
+<p class="definition">Definition at line <a class="el" href="../../db/d92/_fire2012_with_palette_8ino_source.html#l00146">146</a> of file <a class="el" href="../../db/d92/_fire2012_with_palette_8ino_source.html">Fire2012WithPalette.ino</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  147</span>{</div>
+<div class="line"><span class="lineno">  148</span>  <span class="comment">// Add entropy to random number generator; we use a lot of it.</span></div>
+<div class="line"><span class="lineno">  149</span>  <a class="code hl_function" href="../../d2/d0d/group___random_ga1078b2029a50e86c93ccf4e3e1d85e7d.html#ga1078b2029a50e86c93ccf4e3e1d85e7d">random16_add_entropy</a>( <a class="code hl_function" href="../../d2/d0d/group___random_ga17034d936ef716efe820e11c1df043b0.html#ga17034d936ef716efe820e11c1df043b0">random16</a>());</div>
+<div class="line"><span class="lineno">  150</span> </div>
+<div class="line"><span class="lineno">  151</span>  <span class="comment">// Fourth, the most sophisticated: this one sets up a new palette every</span></div>
+<div class="line"><span class="lineno">  152</span>  <span class="comment">// time through the loop, based on a hue that changes every time.</span></div>
+<div class="line"><span class="lineno">  153</span>  <span class="comment">// The palette is a gradient from black, to a dark color based on the hue,</span></div>
+<div class="line"><span class="lineno">  154</span>  <span class="comment">// to a light color based on the hue, to white.</span></div>
+<div class="line"><span class="lineno">  155</span>  <span class="comment">//</span></div>
+<div class="line"><span class="lineno">  156</span>  <span class="comment">//   static uint8_t hue = 0;</span></div>
+<div class="line"><span class="lineno">  157</span>  <span class="comment">//   hue++;</span></div>
+<div class="line"><span class="lineno">  158</span>  <span class="comment">//   CRGB darkcolor  = CHSV(hue,255,192); // pure hue, three-quarters brightness</span></div>
+<div class="line"><span class="lineno">  159</span>  <span class="comment">//   CRGB lightcolor = CHSV(hue,128,255); // half &#39;whitened&#39;, full brightness</span></div>
+<div class="line"><span class="lineno">  160</span>  <span class="comment">//   gPal = CRGBPalette16( CRGB::Black, darkcolor, lightcolor, CRGB::White);</span></div>
 <div class="line"><span class="lineno">  161</span> </div>
-<div class="line"><span class="lineno">  162</span>  <a class="code hl_function" href="../../db/d92/_fire2012_with_palette_8ino_af5890ba18cb2066c5a24a358de991a89.html#af5890ba18cb2066c5a24a358de991a89">Fire2012WithPalette</a>(); <span class="comment">// run simulation frame, using palette colors</span></div>
-<div class="line"><span class="lineno">  163</span>  </div>
-<div class="line"><span class="lineno">  164</span>  <a class="code hl_variable" href="../../d6/dda/_fast_l_e_d_8cpp_a8e94985674086ea368e1d51cbc0f82a9.html#a8e94985674086ea368e1d51cbc0f82a9">FastLED</a>.show(); <span class="comment">// display this frame</span></div>
-<div class="line"><span class="lineno">  165</span>  <a class="code hl_variable" href="../../d6/dda/_fast_l_e_d_8cpp_a8e94985674086ea368e1d51cbc0f82a9.html#a8e94985674086ea368e1d51cbc0f82a9">FastLED</a>.delay(1000 / <a class="code hl_define" href="../../d5/d25/_demo_reel100_8ino_a85f9d29551f1bf30f03229da27cb532f.html#a85f9d29551f1bf30f03229da27cb532f">FRAMES_PER_SECOND</a>);</div>
-<div class="line"><span class="lineno">  166</span>}</div>
+<div class="line"><span class="lineno">  162</span> </div>
+<div class="line"><span class="lineno">  163</span>  <a class="code hl_function" href="../../db/d92/_fire2012_with_palette_8ino_af5890ba18cb2066c5a24a358de991a89.html#af5890ba18cb2066c5a24a358de991a89">Fire2012WithPalette</a>(); <span class="comment">// run simulation frame, using palette colors</span></div>
+<div class="line"><span class="lineno">  164</span>  </div>
+<div class="line"><span class="lineno">  165</span>  <a class="code hl_variable" href="../../d6/dda/_fast_l_e_d_8cpp_a8e94985674086ea368e1d51cbc0f82a9.html#a8e94985674086ea368e1d51cbc0f82a9">FastLED</a>.show(); <span class="comment">// display this frame</span></div>
+<div class="line"><span class="lineno">  166</span>  <a class="code hl_variable" href="../../d6/dda/_fast_l_e_d_8cpp_a8e94985674086ea368e1d51cbc0f82a9.html#a8e94985674086ea368e1d51cbc0f82a9">FastLED</a>.delay(1000 / <a class="code hl_define" href="../../d5/d25/_demo_reel100_8ino_a85f9d29551f1bf30f03229da27cb532f.html#a85f9d29551f1bf30f03229da27cb532f">FRAMES_PER_SECOND</a>);</div>
+<div class="line"><span class="lineno">  167</span>}</div>
 <div class="ttc" id="a_demo_reel100_8ino_a85f9d29551f1bf30f03229da27cb532f_html_a85f9d29551f1bf30f03229da27cb532f"><div class="ttname"><a href="../../d5/d25/_demo_reel100_8ino_a85f9d29551f1bf30f03229da27cb532f.html#a85f9d29551f1bf30f03229da27cb532f">FRAMES_PER_SECOND</a></div><div class="ttdeci">#define FRAMES_PER_SECOND</div><div class="ttdef"><b>Definition</b> <a href="../../d5/d25/_demo_reel100_8ino_source.html#l00025">DemoReel100.ino:25</a></div></div>
-<div class="ttc" id="a_fast_l_e_d_8cpp_a8e94985674086ea368e1d51cbc0f82a9_html_a8e94985674086ea368e1d51cbc0f82a9"><div class="ttname"><a href="../../d6/dda/_fast_l_e_d_8cpp_a8e94985674086ea368e1d51cbc0f82a9.html#a8e94985674086ea368e1d51cbc0f82a9">FastLED</a></div><div class="ttdeci">FL_DISABLE_WARNING_PUSH FL_DISABLE_WARNING_GLOBAL_CONSTRUCTORS CFastLED FastLED</div><div class="ttdoc">Global LED strip management instance.</div><div class="ttdef"><b>Definition</b> <a href="../../d6/dda/_fast_l_e_d_8cpp_source.html#l00062">FastLED.cpp:62</a></div></div>
-<div class="ttc" id="a_fire2012_with_palette_8ino_af5890ba18cb2066c5a24a358de991a89_html_af5890ba18cb2066c5a24a358de991a89"><div class="ttname"><a href="../../db/d92/_fire2012_with_palette_8ino_af5890ba18cb2066c5a24a358de991a89.html#af5890ba18cb2066c5a24a358de991a89">Fire2012WithPalette</a></div><div class="ttdeci">void Fire2012WithPalette()</div><div class="ttdef"><b>Definition</b> <a href="../../db/d92/_fire2012_with_palette_8ino_source.html#l00060">Fire2012WithPalette.ino:60</a></div></div>
+<div class="ttc" id="a_fast_l_e_d_8cpp_a8e94985674086ea368e1d51cbc0f82a9_html_a8e94985674086ea368e1d51cbc0f82a9"><div class="ttname"><a href="../../d6/dda/_fast_l_e_d_8cpp_a8e94985674086ea368e1d51cbc0f82a9.html#a8e94985674086ea368e1d51cbc0f82a9">FastLED</a></div><div class="ttdeci">FL_DISABLE_WARNING_PUSH FL_DISABLE_WARNING_GLOBAL_CONSTRUCTORS CFastLED FastLED</div><div class="ttdoc">Global LED strip management instance.</div><div class="ttdef"><b>Definition</b> <a href="../../d6/dda/_fast_l_e_d_8cpp_source.html#l00074">FastLED.cpp:74</a></div></div>
+<div class="ttc" id="a_fire2012_with_palette_8ino_af5890ba18cb2066c5a24a358de991a89_html_af5890ba18cb2066c5a24a358de991a89"><div class="ttname"><a href="../../db/d92/_fire2012_with_palette_8ino_af5890ba18cb2066c5a24a358de991a89.html#af5890ba18cb2066c5a24a358de991a89">Fire2012WithPalette</a></div><div class="ttdeci">void Fire2012WithPalette()</div><div class="ttdef"><b>Definition</b> <a href="../../db/d92/_fire2012_with_palette_8ino_source.html#l00061">Fire2012WithPalette.ino:61</a></div></div>
 <div class="ttc" id="agroup___random_ga1078b2029a50e86c93ccf4e3e1d85e7d_html_ga1078b2029a50e86c93ccf4e3e1d85e7d"><div class="ttname"><a href="../../d2/d0d/group___random_ga1078b2029a50e86c93ccf4e3e1d85e7d.html#ga1078b2029a50e86c93ccf4e3e1d85e7d">random16_add_entropy</a></div><div class="ttdeci">LIB8STATIC void random16_add_entropy(uint16_t entropy)</div><div class="ttdoc">Add entropy into the random number generator.</div><div class="ttdef"><b>Definition</b> <a href="../../d9/dfa/random8_8h_source.html#l00103">random8.h:103</a></div></div>
+<div class="ttc" id="agroup___random_ga17034d936ef716efe820e11c1df043b0_html_ga17034d936ef716efe820e11c1df043b0"><div class="ttname"><a href="../../d2/d0d/group___random_ga17034d936ef716efe820e11c1df043b0.html#ga17034d936ef716efe820e11c1df043b0">random16</a></div><div class="ttdeci">LIB8STATIC uint16_t random16()</div><div class="ttdoc">Generate a 16-bit random number.</div><div class="ttdef"><b>Definition</b> <a href="../../d9/dfa/random8_8h_source.html#l00056">random8.h:56</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d6/dda/_fast_l_e_d_8cpp_source.html#l00062">FastLED</a>, <a class="el" href="../../db/d92/_fire2012_with_palette_8ino_source.html#l00060">Fire2012WithPalette()</a>, <a class="el" href="../../d5/d25/_demo_reel100_8ino_source.html#l00025">FRAMES_PER_SECOND</a>, and <a class="el" href="../../d9/dfa/random8_8h_source.html#l00103">random16_add_entropy()</a>.</p>
+<p class="reference">References <a class="el" href="../../d6/dda/_fast_l_e_d_8cpp_source.html#l00074">FastLED</a>, <a class="el" href="../../db/d92/_fire2012_with_palette_8ino_source.html#l00061">Fire2012WithPalette()</a>, <a class="el" href="../../d5/d25/_demo_reel100_8ino_source.html#l00025">FRAMES_PER_SECOND</a>, <a class="el" href="../../d9/dfa/random8_8h_source.html#l00056">random16()</a>, and <a class="el" href="../../d9/dfa/random8_8h_source.html#l00103">random16_add_entropy()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -160,7 +161,7 @@ $(function(){initNavTree('db/d92/_fire2012_with_palette_8ino_afe461d27b9c48d5921
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dir_d28a4824dc47e487b107a5db32ef43c4.html">examples</a></li><li class="navelem"><a class="el" href="../../dir_251c36837ef2b5132d93dde41ef3cbc8.html">Fire2012WithPalette</a></li><li class="navelem"><a class="el" href="../../db/d92/_fire2012_with_palette_8ino.html">Fire2012WithPalette.ino</a></li>
-    <li class="footer">Generated on Tue Jun 24 2025 00:58:14 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Fri Aug 22 2025 20:59:34 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

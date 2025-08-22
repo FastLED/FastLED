@@ -8,5 +8,5 @@ digraph "Pin::select"
   rankdir="LR";
   Node1 [id="Node000001",label="Pin::select",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="Set the pin state to HIGH"];
   Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
-  Node2 [id="Node000002",label="Pin::hi",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/d68/class_pin_a5a2884f01bb407fd628f57553eaaa9f4.html#a5a2884f01bb407fd628f57553eaaa9f4",tooltip="Set the pin state to HIGH"];
+  Node2 [id="Node000002",label="Pin::hi",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/d68/class_pin_a0ef99e3ca78ae92d51bba1682de1c6c1.html#a0ef99e3ca78ae92d51bba1682de1c6c1",tooltip="Set the pin state to HIGH"];
 }

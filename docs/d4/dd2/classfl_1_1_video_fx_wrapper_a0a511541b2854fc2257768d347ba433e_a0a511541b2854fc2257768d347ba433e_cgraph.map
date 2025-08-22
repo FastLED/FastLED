@@ -1,11 +1,5 @@
 <map id="fl::VideoFxWrapper::fxName" name="fl::VideoFxWrapper::fxName">
-<area shape="rect" id="Node000001" title=" " alt="" coords="5,35,152,75"/>
-<area shape="rect" id="Node000002" href="$d2/d24/classfl_1_1_str_a6d0c70299b2bd0c61da99ad9cecea0f1.html#a6d0c70299b2bd0c61da99ad9cecea0f1" title=" " alt="" coords="200,42,312,67"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="152,52,186,52,186,57,152,57"/>
-<area shape="rect" id="Node000003" href="$d2/d24/classfl_1_1_str_add9a817220bd29c8335d04d8c466cf04.html#add9a817220bd29c8335d04d8c466cf04" title=" " alt="" coords="406,13,489,38"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="312,43,392,31,393,36,313,49"/>
-<area shape="rect" id="Node000005" href="$dc/d96/classfl_1_1_str_n_a270fb921e74601bc45cc8513e8a075f7.html#a270fb921e74601bc45cc8513e8a075f7" title=" " alt="" coords="360,63,535,103"/>
-<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="313,60,347,65,346,71,312,65"/>
-<area shape="rect" id="Node000004" href="$dc/d96/classfl_1_1_str_n_ae1303fb18c4230406d75f3649da8711d.html#ae1303fb18c4230406d75f3649da8711d" title=" " alt="" coords="583,5,752,45"/>
-<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="489,23,569,23,569,28,489,28"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,5,152,45"/>
+<area shape="rect" id="Node000002" href="$d2/db2/classfl_1_1string_a78222786068d86a8463f4e408dc393eb.html#a78222786068d86a8463f4e408dc393eb" title=" " alt="" coords="200,13,331,38"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="152,23,186,23,186,28,152,28"/>
 </map>

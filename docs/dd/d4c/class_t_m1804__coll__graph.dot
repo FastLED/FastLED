@@ -10,9 +10,9 @@ digraph "TM1804&lt; DATA_PIN, RGB_ORDER &gt;"
   Node2 -> Node1 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node2 [id="Node000002",label="TM1809Controller800Khz\l\< DATA_PIN, RGB_ORDER \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d7/d07/class_t_m1809_controller800_khz.html",tooltip=" "];
   Node3 -> Node2 [id="edge2_Node000002_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node3 [id="Node000003",label="ClocklessController\l\< DATA_PIN, 2 *FMUL,\l 5 *FMUL, 3 *FMUL, RGB\l_ORDER \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",tooltip=" "];
+  Node3 [id="Node000003",label="FASTLED_CLOCKLESS_CONTROLLER\l\< DATA_PIN, 2 *FMUL, 5 *FMUL,\l 3 *FMUL, RGB_ORDER \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",tooltip=" "];
   Node4 -> Node2 [id="edge3_Node000002_Node000004",dir="back",color="orange",style="dashed",tooltip=" ",label=" \< DATA_PIN, RGB_ORDER \>",fontcolor="grey" ];
   Node4 [id="Node000004",label="TM1809Controller800Khz\l\< DATA_PIN, RGB_ORDER \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d7/d07/class_t_m1809_controller800_khz.html",tooltip="TM1809 controller class."];
   Node5 -> Node4 [id="edge4_Node000004_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node5 [id="Node000005",label="ClocklessController\l\< DATA_PIN, 2 *FMUL,\l 5 *FMUL, 3 *FMUL, RGB \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",tooltip=" "];
+  Node5 [id="Node000005",label="FASTLED_CLOCKLESS_CONTROLLER\l\< DATA_PIN, 2 *FMUL, 5 *FMUL,\l 3 *FMUL, RGB \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",tooltip=" "];
 }

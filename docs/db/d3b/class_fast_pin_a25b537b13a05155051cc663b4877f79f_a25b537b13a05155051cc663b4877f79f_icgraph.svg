@@ -303,7 +303,7 @@ var sectionId = 'dynsection-0';
 <!-- Node14 -->
 <g id="Node000014" class="node">
 <title>Node14</title>
-<g id="a_Node000014"><a xlink:href="../../dc/d57/class_a_v_r_software_s_p_i_output_a34421832d232a692d08d39d87733acd8.html#a34421832d232a692d08d39d87733acd8" target="_top" xlink:title="Write a word (two bytes) over SPI.">
+<g id="a_Node000014"><a xlink:href="../../dc/d57/class_a_v_r_software_s_p_i_output_a9ca78e0b9b6c242d6f898daa23552537.html#a9ca78e0b9b6c242d6f898daa23552537" target="_top" xlink:title="Write a word (two bytes) over SPI.">
 <polygon fill="white" stroke="#666666" points="127,-164 0,-164 0,-134 127,-134 127,-164"/>
 <text text-anchor="start" x="8" y="-152" font-family="Helvetica,sans-Serif" font-size="10.00">AVRSoftwareSPIOutput</text>
 <text text-anchor="middle" x="63.5" y="-141" font-family="Helvetica,sans-Serif" font-size="10.00">::writeWord</text>

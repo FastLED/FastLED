@@ -107,19 +107,21 @@ $(function(){initNavTree('df/dd9/algorithm_8h.html','../../'); initResizable(tru
 </div><!--header-->
 <div class="contents">
 <div class="textblock"><code>#include &quot;<a class="el" href="../../df/d63/type__traits_8h_source.html">fl/type_traits.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d9/d83/move_8h_source.html">fl/move.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d1/d79/random_8h_source.html">fl/random.h</a>&quot;</code><br />
 </div><div class="textblock"><div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Include dependency graph for algorithm.h:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-0-content" class="dyncontent" style="display:none;">
-<div class="center"><iframe scrolling="no" frameborder="0" src="../../d7/d55/algorithm_8h__incl.svg" width="291" height="256"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<div class="center"><iframe scrolling="no" frameborder="0" src="../../d7/d55/algorithm_8h__incl.svg" width="490" height="404"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
 </div>
 </div><div class="textblock"><div id="dynsection-1" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-1-trigger" src="../../closed.png" alt="+"/> This graph shows which files directly or indirectly include this file:</div>
 <div id="dynsection-1-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-1-content" class="dyncontent" style="display:none;">
-<div class="center"><iframe scrolling="no" frameborder="0" src="../../da/dd0/algorithm_8h__dep__incl.svg" width="138" height="110"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../da/dd0/algorithm_8h__dep__incl.svg" width="100%" height="558"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
 </div>
 </div>
 <p><a href="../../df/dd9/algorithm_8h_source.html">Go to the source code of this file.</a></p>
@@ -127,7 +129,9 @@ $(function(){initNavTree('df/dd9/algorithm_8h.html','../../'); initResizable(tru
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="namespaces" name="namespaces"></a>
 Namespaces</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">namespace &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></td></tr>
-<tr class="memdesc:d4/d36/namespacefl"><td class="mdescLeft">&#160;</td><td class="mdescRight">Implements a simple red square effect for 2D LED grids. <br /></td></tr>
+<tr class="memdesc:d4/d36/namespacefl"><td class="mdescLeft">&#160;</td><td class="mdescRight">IMPORTANT! <br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">namespace &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../df/d9e/namespacefl_1_1detail.html">fl::detail</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
@@ -153,21 +157,90 @@ Functions</h2></td></tr>
 <tr class="memitem:aed44481320ea05dc35927421d390717d" id="r_aed44481320ea05dc35927421d390717d"><td class="memTemplParams" colspan="2">template&lt;typename Iterator, typename T&gt; </td></tr>
 <tr class="memitem:aed44481320ea05dc35927421d390717d"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_aed44481320ea05dc35927421d390717d.html#aed44481320ea05dc35927421d390717d">fl::fill</a> (Iterator first, Iterator last, const T &amp;value)</td></tr>
 <tr class="separator:aed44481320ea05dc35927421d390717d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a13d1bba7e6e0ab19d967c1b146313efe" id="r_a13d1bba7e6e0ab19d967c1b146313efe"><td class="memTemplParams" colspan="2">template&lt;typename Iterator, typename T&gt; </td></tr>
+<tr class="memitem:a13d1bba7e6e0ab19d967c1b146313efe"><td class="memTemplItemLeft" align="right" valign="top">Iterator&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_a13d1bba7e6e0ab19d967c1b146313efe.html#a13d1bba7e6e0ab19d967c1b146313efe">fl::find</a> (Iterator first, Iterator last, const T &amp;value)</td></tr>
+<tr class="separator:a13d1bba7e6e0ab19d967c1b146313efe"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abad0fa56139df59d0468156984dbeb5e" id="r_abad0fa56139df59d0468156984dbeb5e"><td class="memTemplParams" colspan="2">template&lt;typename Iterator, typename UnaryPredicate&gt; </td></tr>
+<tr class="memitem:abad0fa56139df59d0468156984dbeb5e"><td class="memTemplItemLeft" align="right" valign="top">Iterator&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_abad0fa56139df59d0468156984dbeb5e.html#abad0fa56139df59d0468156984dbeb5e">fl::find_if</a> (Iterator first, Iterator last, UnaryPredicate pred)</td></tr>
+<tr class="separator:abad0fa56139df59d0468156984dbeb5e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9283840a7b738e7ebdbea8935af1f52c" id="r_a9283840a7b738e7ebdbea8935af1f52c"><td class="memTemplParams" colspan="2">template&lt;typename Iterator, typename UnaryPredicate&gt; </td></tr>
+<tr class="memitem:a9283840a7b738e7ebdbea8935af1f52c"><td class="memTemplItemLeft" align="right" valign="top">Iterator&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_a9283840a7b738e7ebdbea8935af1f52c.html#a9283840a7b738e7ebdbea8935af1f52c">fl::find_if_not</a> (Iterator first, Iterator last, UnaryPredicate pred)</td></tr>
+<tr class="separator:a9283840a7b738e7ebdbea8935af1f52c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a65d8f9d537301da150462a7e57119753" id="r_a65d8f9d537301da150462a7e57119753"><td class="memTemplParams" colspan="2">template&lt;typename Iterator, typename Compare&gt; </td></tr>
+<tr class="memitem:a65d8f9d537301da150462a7e57119753"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="../../df/d9e/namespacefl_1_1detail_a65d8f9d537301da150462a7e57119753.html#a65d8f9d537301da150462a7e57119753">fl::detail::heap_sort</a> (Iterator first, Iterator last, Compare comp)</td></tr>
+<tr class="separator:a65d8f9d537301da150462a7e57119753"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a82da88f317b2e5ccf9f9a1a2bae77352" id="r_a82da88f317b2e5ccf9f9a1a2bae77352"><td class="memTemplParams" colspan="2">template&lt;typename Iterator, typename Compare&gt; </td></tr>
+<tr class="memitem:a82da88f317b2e5ccf9f9a1a2bae77352"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="../../df/d9e/namespacefl_1_1detail_a82da88f317b2e5ccf9f9a1a2bae77352.html#a82da88f317b2e5ccf9f9a1a2bae77352">fl::detail::heapify</a> (Iterator first, Iterator last, Compare comp)</td></tr>
+<tr class="separator:a82da88f317b2e5ccf9f9a1a2bae77352"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8c04f3c3d6b52c20a5d2916afb4ad50b" id="r_a8c04f3c3d6b52c20a5d2916afb4ad50b"><td class="memTemplParams" colspan="2">template&lt;typename Iterator, typename Compare&gt; </td></tr>
+<tr class="memitem:a8c04f3c3d6b52c20a5d2916afb4ad50b"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="../../df/d9e/namespacefl_1_1detail_a8c04f3c3d6b52c20a5d2916afb4ad50b.html#a8c04f3c3d6b52c20a5d2916afb4ad50b">fl::detail::insertion_sort</a> (Iterator first, Iterator last, Compare comp)</td></tr>
+<tr class="separator:a8c04f3c3d6b52c20a5d2916afb4ad50b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab498a7f501bd7dae27de0d5d111718bd" id="r_ab498a7f501bd7dae27de0d5d111718bd"><td class="memTemplParams" colspan="2">template&lt;typename Iterator, typename T, typename Compare&gt; </td></tr>
+<tr class="memitem:ab498a7f501bd7dae27de0d5d111718bd"><td class="memTemplItemLeft" align="right" valign="top">Iterator&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="../../df/d9e/namespacefl_1_1detail_ab498a7f501bd7dae27de0d5d111718bd.html#ab498a7f501bd7dae27de0d5d111718bd">fl::detail::lower_bound_impl</a> (Iterator first, Iterator last, const T &amp;value, Compare comp)</td></tr>
+<tr class="separator:ab498a7f501bd7dae27de0d5d111718bd"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:abc9d253b533f32b6302c0e280c38d031" id="r_abc9d253b533f32b6302c0e280c38d031"><td class="memTemplParams" colspan="2">template&lt;typename Iterator&gt; </td></tr>
 <tr class="memitem:abc9d253b533f32b6302c0e280c38d031"><td class="memTemplItemLeft" align="right" valign="top">Iterator&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_abc9d253b533f32b6302c0e280c38d031.html#abc9d253b533f32b6302c0e280c38d031">fl::max_element</a> (Iterator first, Iterator last)</td></tr>
 <tr class="separator:abc9d253b533f32b6302c0e280c38d031"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a980b8372e145e6bd69dc2a688d998b61" id="r_a980b8372e145e6bd69dc2a688d998b61"><td class="memTemplParams" colspan="2">template&lt;typename Iterator, typename Compare&gt; </td></tr>
 <tr class="memitem:a980b8372e145e6bd69dc2a688d998b61"><td class="memTemplItemLeft" align="right" valign="top">Iterator&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_a980b8372e145e6bd69dc2a688d998b61.html#a980b8372e145e6bd69dc2a688d998b61">fl::max_element</a> (Iterator first, Iterator last, Compare comp)</td></tr>
 <tr class="separator:a980b8372e145e6bd69dc2a688d998b61"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2196987b9da11064d21ef6e0417f2999" id="r_a2196987b9da11064d21ef6e0417f2999"><td class="memTemplParams" colspan="2">template&lt;typename Iterator, typename Compare&gt; </td></tr>
+<tr class="memitem:a2196987b9da11064d21ef6e0417f2999"><td class="memTemplItemLeft" align="right" valign="top">Iterator&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="../../df/d9e/namespacefl_1_1detail_a2196987b9da11064d21ef6e0417f2999.html#a2196987b9da11064d21ef6e0417f2999">fl::detail::median_of_three</a> (Iterator first, Iterator middle, Iterator last, Compare comp)</td></tr>
+<tr class="separator:a2196987b9da11064d21ef6e0417f2999"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a55b345d477f1f03e93dacafec6e4acf8" id="r_a55b345d477f1f03e93dacafec6e4acf8"><td class="memTemplParams" colspan="2">template&lt;typename Iterator, typename Compare&gt; </td></tr>
+<tr class="memitem:a55b345d477f1f03e93dacafec6e4acf8"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="../../df/d9e/namespacefl_1_1detail_a55b345d477f1f03e93dacafec6e4acf8.html#a55b345d477f1f03e93dacafec6e4acf8">fl::detail::merge_inplace</a> (Iterator first, Iterator middle, Iterator last, Compare comp)</td></tr>
+<tr class="separator:a55b345d477f1f03e93dacafec6e4acf8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afdaa67dc83e168943ee28a7f9264b40b" id="r_afdaa67dc83e168943ee28a7f9264b40b"><td class="memTemplParams" colspan="2">template&lt;typename Iterator, typename Compare&gt; </td></tr>
+<tr class="memitem:afdaa67dc83e168943ee28a7f9264b40b"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="../../df/d9e/namespacefl_1_1detail_afdaa67dc83e168943ee28a7f9264b40b.html#afdaa67dc83e168943ee28a7f9264b40b">fl::detail::mergesort_impl</a> (Iterator first, Iterator last, Compare comp)</td></tr>
+<tr class="separator:afdaa67dc83e168943ee28a7f9264b40b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3e3cf6e77dbc30aca7a947e5372aadf3" id="r_a3e3cf6e77dbc30aca7a947e5372aadf3"><td class="memTemplParams" colspan="2">template&lt;typename Iterator&gt; </td></tr>
 <tr class="memitem:a3e3cf6e77dbc30aca7a947e5372aadf3"><td class="memTemplItemLeft" align="right" valign="top">Iterator&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_a3e3cf6e77dbc30aca7a947e5372aadf3.html#a3e3cf6e77dbc30aca7a947e5372aadf3">fl::min_element</a> (Iterator first, Iterator last)</td></tr>
 <tr class="separator:a3e3cf6e77dbc30aca7a947e5372aadf3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a46198b7a8006aeb54d90aeb8f9ff11ad" id="r_a46198b7a8006aeb54d90aeb8f9ff11ad"><td class="memTemplParams" colspan="2">template&lt;typename Iterator, typename Compare&gt; </td></tr>
 <tr class="memitem:a46198b7a8006aeb54d90aeb8f9ff11ad"><td class="memTemplItemLeft" align="right" valign="top">Iterator&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_a46198b7a8006aeb54d90aeb8f9ff11ad.html#a46198b7a8006aeb54d90aeb8f9ff11ad">fl::min_element</a> (Iterator first, Iterator last, Compare comp)</td></tr>
 <tr class="separator:a46198b7a8006aeb54d90aeb8f9ff11ad"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6d8de3d811d1929076314c478367d5b2" id="r_a6d8de3d811d1929076314c478367d5b2"><td class="memTemplParams" colspan="2">template&lt;typename Iterator, typename Compare&gt; </td></tr>
+<tr class="memitem:a6d8de3d811d1929076314c478367d5b2"><td class="memTemplItemLeft" align="right" valign="top">Iterator&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="../../df/d9e/namespacefl_1_1detail_a6d8de3d811d1929076314c478367d5b2.html#a6d8de3d811d1929076314c478367d5b2">fl::detail::partition</a> (Iterator first, Iterator last, Compare comp)</td></tr>
+<tr class="separator:a6d8de3d811d1929076314c478367d5b2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa2f29333b4122deedbbc32b7b0beb67b" id="r_aa2f29333b4122deedbbc32b7b0beb67b"><td class="memTemplParams" colspan="2">template&lt;typename Iterator, typename Compare&gt; </td></tr>
+<tr class="memitem:aa2f29333b4122deedbbc32b7b0beb67b"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="../../df/d9e/namespacefl_1_1detail_aa2f29333b4122deedbbc32b7b0beb67b.html#aa2f29333b4122deedbbc32b7b0beb67b">fl::detail::quicksort_impl</a> (Iterator first, Iterator last, Compare comp)</td></tr>
+<tr class="separator:aa2f29333b4122deedbbc32b7b0beb67b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8f70fde48982435dd95ef67cc80203c7" id="r_a8f70fde48982435dd95ef67cc80203c7"><td class="memTemplParams" colspan="2">template&lt;typename Iterator, typename T&gt; </td></tr>
+<tr class="memitem:a8f70fde48982435dd95ef67cc80203c7"><td class="memTemplItemLeft" align="right" valign="top">Iterator&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_a8f70fde48982435dd95ef67cc80203c7.html#a8f70fde48982435dd95ef67cc80203c7">fl::remove</a> (Iterator first, Iterator last, const T &amp;value)</td></tr>
+<tr class="separator:a8f70fde48982435dd95ef67cc80203c7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af2cd9d2a5fcf454d2de8c53845857212" id="r_af2cd9d2a5fcf454d2de8c53845857212"><td class="memTemplParams" colspan="2">template&lt;typename Iterator, typename UnaryPredicate&gt; </td></tr>
+<tr class="memitem:af2cd9d2a5fcf454d2de8c53845857212"><td class="memTemplItemLeft" align="right" valign="top">Iterator&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_af2cd9d2a5fcf454d2de8c53845857212.html#af2cd9d2a5fcf454d2de8c53845857212">fl::remove_if</a> (Iterator first, Iterator last, UnaryPredicate pred)</td></tr>
+<tr class="separator:af2cd9d2a5fcf454d2de8c53845857212"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa811543ca59ee9b7d57f369e6be44cc9" id="r_aa811543ca59ee9b7d57f369e6be44cc9"><td class="memTemplParams" colspan="2">template&lt;typename Iterator&gt; </td></tr>
 <tr class="memitem:aa811543ca59ee9b7d57f369e6be44cc9"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_aa811543ca59ee9b7d57f369e6be44cc9.html#aa811543ca59ee9b7d57f369e6be44cc9">fl::reverse</a> (Iterator first, Iterator last)</td></tr>
 <tr class="separator:aa811543ca59ee9b7d57f369e6be44cc9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a83ca9d78e95dfb978775a918fc4b00a8" id="r_a83ca9d78e95dfb978775a918fc4b00a8"><td class="memTemplParams" colspan="2">template&lt;typename Iterator&gt; </td></tr>
+<tr class="memitem:a83ca9d78e95dfb978775a918fc4b00a8"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="../../df/d9e/namespacefl_1_1detail_a83ca9d78e95dfb978775a918fc4b00a8.html#a83ca9d78e95dfb978775a918fc4b00a8">fl::detail::rotate_impl</a> (Iterator first, Iterator middle, Iterator last)</td></tr>
+<tr class="separator:a83ca9d78e95dfb978775a918fc4b00a8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1af169c7aca24263575afb4044a94f12" id="r_a1af169c7aca24263575afb4044a94f12"><td class="memTemplParams" colspan="2">template&lt;typename Iterator&gt; </td></tr>
+<tr class="memitem:a1af169c7aca24263575afb4044a94f12"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_a1af169c7aca24263575afb4044a94f12.html#a1af169c7aca24263575afb4044a94f12">fl::shuffle</a> (Iterator first, Iterator last)</td></tr>
+<tr class="separator:a1af169c7aca24263575afb4044a94f12"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:add478b3c4ca612e7fb62ba0fcb20172c" id="r_add478b3c4ca612e7fb62ba0fcb20172c"><td class="memTemplParams" colspan="2">template&lt;typename Iterator&gt; </td></tr>
+<tr class="memitem:add478b3c4ca612e7fb62ba0fcb20172c"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_add478b3c4ca612e7fb62ba0fcb20172c.html#add478b3c4ca612e7fb62ba0fcb20172c">fl::shuffle</a> (Iterator first, Iterator last, <a class="el" href="../../d4/da3/classfl_1_1fl__random.html">fl_random</a> &amp;rng)</td></tr>
+<tr class="separator:add478b3c4ca612e7fb62ba0fcb20172c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3d31e876b329017756726f122aacf2f2" id="r_a3d31e876b329017756726f122aacf2f2"><td class="memTemplParams" colspan="2">template&lt;typename Iterator, typename RandomGenerator&gt; </td></tr>
+<tr class="memitem:a3d31e876b329017756726f122aacf2f2"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_a3d31e876b329017756726f122aacf2f2.html#a3d31e876b329017756726f122aacf2f2">fl::shuffle</a> (Iterator first, Iterator last, RandomGenerator &amp;g)</td></tr>
+<tr class="separator:a3d31e876b329017756726f122aacf2f2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a598bae4f63ec4ee6b44179ca9a27ba13" id="r_a598bae4f63ec4ee6b44179ca9a27ba13"><td class="memTemplParams" colspan="2">template&lt;typename Iterator, typename Compare&gt; </td></tr>
+<tr class="memitem:a598bae4f63ec4ee6b44179ca9a27ba13"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="../../df/d9e/namespacefl_1_1detail_a598bae4f63ec4ee6b44179ca9a27ba13.html#a598bae4f63ec4ee6b44179ca9a27ba13">fl::detail::sift_down</a> (Iterator first, Iterator start, Iterator <a class="el" href="../../d4/d36/namespacefl_a56e7d4811c99d9aa696932bcb89a50b1.html#a56e7d4811c99d9aa696932bcb89a50b1">end</a>, Compare comp)</td></tr>
+<tr class="separator:a598bae4f63ec4ee6b44179ca9a27ba13"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adf614e2e0e1f94ed196d7345a4a1fa96" id="r_adf614e2e0e1f94ed196d7345a4a1fa96"><td class="memTemplParams" colspan="2">template&lt;typename Iterator&gt; </td></tr>
+<tr class="memitem:adf614e2e0e1f94ed196d7345a4a1fa96"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_adf614e2e0e1f94ed196d7345a4a1fa96.html#adf614e2e0e1f94ed196d7345a4a1fa96">fl::sort</a> (Iterator first, Iterator last)</td></tr>
+<tr class="separator:adf614e2e0e1f94ed196d7345a4a1fa96"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abfdc16d721df0c5970fede0c4e4c04ba" id="r_abfdc16d721df0c5970fede0c4e4c04ba"><td class="memTemplParams" colspan="2">template&lt;typename Iterator, typename Compare&gt; </td></tr>
+<tr class="memitem:abfdc16d721df0c5970fede0c4e4c04ba"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_abfdc16d721df0c5970fede0c4e4c04ba.html#abfdc16d721df0c5970fede0c4e4c04ba">fl::sort</a> (Iterator first, Iterator last, Compare comp)</td></tr>
+<tr class="separator:abfdc16d721df0c5970fede0c4e4c04ba"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a81905e029ac612690a69f2cf9c02f9a1" id="r_a81905e029ac612690a69f2cf9c02f9a1"><td class="memTemplParams" colspan="2">template&lt;typename Iterator&gt; </td></tr>
+<tr class="memitem:a81905e029ac612690a69f2cf9c02f9a1"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_a81905e029ac612690a69f2cf9c02f9a1.html#a81905e029ac612690a69f2cf9c02f9a1">fl::stable_sort</a> (Iterator first, Iterator last)</td></tr>
+<tr class="separator:a81905e029ac612690a69f2cf9c02f9a1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac55807b49c5bea2b60e924c234cf1660" id="r_ac55807b49c5bea2b60e924c234cf1660"><td class="memTemplParams" colspan="2">template&lt;typename Iterator, typename Compare&gt; </td></tr>
+<tr class="memitem:ac55807b49c5bea2b60e924c234cf1660"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_ac55807b49c5bea2b60e924c234cf1660.html#ac55807b49c5bea2b60e924c234cf1660">fl::stable_sort</a> (Iterator first, Iterator last, Compare comp)</td></tr>
+<tr class="separator:ac55807b49c5bea2b60e924c234cf1660"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 </div><!-- contents -->
 </div><!-- doc-content -->
@@ -176,7 +249,7 @@ Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dir_4d1829fa9bd13d7db71e765b2707b248.html">fl</a></li><li class="navelem"><a class="el" href="../../df/dd9/algorithm_8h.html">algorithm.h</a></li>
-    <li class="footer">Generated on Tue Jun 24 2025 00:58:14 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Fri Aug 22 2025 20:59:34 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

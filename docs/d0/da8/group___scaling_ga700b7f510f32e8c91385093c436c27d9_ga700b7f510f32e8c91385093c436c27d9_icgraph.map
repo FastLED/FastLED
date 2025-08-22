@@ -1,21 +1,5 @@
 <map id="nscale8x3_video" name="nscale8x3_video">
-<area shape="rect" id="Node000001" title="Scale three one&#45;byte values by a fourth one, which is treated as the numerator of a fraction whose de..." alt="" coords="733,80,864,105"/>
-<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a572c01969570d8ea54fa4eabf297d7bb.html#a572c01969570d8ea54fa4eabf297d7bb" title=" " alt="" coords="475,5,685,31"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="759,76,684,45,645,33,646,28,686,39,762,71"/>
-<area shape="rect" id="Node000003" href="$d7/d82/struct_c_r_g_b_a3b098899b112c2c9a7ad7490992e0d84.html#a3b098899b112c2c9a7ad7490992e0d84" title="fadeLightBy is a synonym for nscale8_video(), as a fade instead of a scale" alt="" coords="507,55,653,80"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="719,86,653,78,653,73,720,81"/>
-<area shape="rect" id="Node000004" href="$d7/d82/struct_c_r_g_b_a0441d6094ab8f98d800ec789c36b4461.html#a0441d6094ab8f98d800ec789c36b4461" title="Scale down a RGB to N/256ths of it&#39;s current brightness using &quot;video&quot; dimming rules." alt="" coords="500,104,660,129"/>
-<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="720,104,661,111,660,105,719,99"/>
-<area shape="rect" id="Node000010" href="$d7/d82/struct_c_r_g_b_ac7a79509725b4d54f710e757a15f2a97.html#ac7a79509725b4d54f710e757a15f2a97" title="%= is a synonym for nscale8_video()." alt="" coords="507,153,653,179"/>
-<area shape="poly" id="edge9_Node000001_Node000010" title=" " alt="" coords="760,114,686,143,642,156,640,151,684,138,758,109"/>
-<area shape="rect" id="Node000005" href="$de/db5/classfl_1_1_twinkle_fox_a67375829d0da55e17d3f74ac9817914d.html#a67375829d0da55e17d3f74ac9817914d" title=" " alt="" coords="204,55,427,80"/>
-<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="498,104,384,83,385,77,499,99"/>
-<area shape="rect" id="Node000007" href="$d4/dd0/_twinkle_fox_8ino_a6d0a3407d4b43c23c7bdd4aac9fc76fd.html#a6d0a3407d4b43c23c7bdd4aac9fc76fd" title=" " alt="" coords="260,104,371,129"/>
-<area shape="poly" id="edge6_Node000004_Node000007" title=" " alt="" coords="486,119,371,119,371,114,486,114"/>
-<area shape="rect" id="Node000009" href="$db/d87/group___pixel_types_ga3dab64b7dfff8c31e3ec8c3c20eec465.html#ga3dab64b7dfff8c31e3ec8c3c20eec465" title="Scale using CRGB::nscale8_video()" alt="" coords="270,153,361,179"/>
-<area shape="poly" id="edge8_Node000004_Node000009" title=" " alt="" coords="498,135,361,160,360,155,497,129"/>
-<area shape="rect" id="Node000006" href="$de/db5/classfl_1_1_twinkle_fox_ab5d3d43b11bed65afbd407071ee85eb8.html#ab5d3d43b11bed65afbd407071ee85eb8" title=" " alt="" coords="5,55,156,80"/>
-<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="190,70,156,70,156,65,190,65"/>
-<area shape="rect" id="Node000008" href="$d4/dd0/_twinkle_fox_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="55,104,106,129"/>
-<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="246,119,106,119,106,114,246,114"/>
+<area shape="rect" id="Node000001" title="Scale three one&#45;byte values by a fourth one, which is treated as the numerator of a fraction whose de..." alt="" coords="264,5,395,31"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a6a2c1ac508cdebdb083137793e219560.html#a6a2c1ac508cdebdb083137793e219560" title=" " alt="" coords="5,5,216,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="250,21,216,21,216,15,250,15"/>
 </map>

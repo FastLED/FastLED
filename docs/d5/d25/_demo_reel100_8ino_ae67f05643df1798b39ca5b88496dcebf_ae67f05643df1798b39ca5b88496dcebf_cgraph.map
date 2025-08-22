@@ -2,7 +2,7 @@
 <area shape="rect" id="Node000001" title=" " alt="" coords="5,55,75,80"/>
 <area shape="rect" id="Node000002" href="$d6/d6c/group___beat_generators_gaa46e5de1c4c27833359e7a97a18c839b.html#gaa46e5de1c4c27833359e7a97a18c839b" title="Generates a 16&#45;bit sine wave at a given BPM that oscillates within a given range." alt="" coords="139,29,225,55"/>
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="74,59,125,49,126,55,75,64"/>
-<area shape="rect" id="Node000006" href="$d1/dfb/colorutils_8h_a90ef14e5ef0cc07c435a39eca3ddc490.html#a90ef14e5ef0cc07c435a39eca3ddc490" title=" " alt="" coords="123,79,241,104"/>
+<area shape="rect" id="Node000006" href="$d1/dfb/colorutils_8h_a399e4e094995b8e97420b89a2dd6548b.html#a399e4e094995b8e97420b89a2dd6548b" title=" " alt="" coords="123,79,241,104"/>
 <area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="75,70,109,76,109,82,74,76"/>
 <area shape="rect" id="Node000003" href="$d6/d6c/group___beat_generators_gade6acbf6fd3c9d346148bccfcafb2fe2.html#gade6acbf6fd3c9d346148bccfcafb2fe2" title="Generates a 16&#45;bit &quot;sawtooth&quot; wave at a given BPM." alt="" coords="292,5,359,31"/>
 <area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="225,32,278,23,279,28,226,37"/>

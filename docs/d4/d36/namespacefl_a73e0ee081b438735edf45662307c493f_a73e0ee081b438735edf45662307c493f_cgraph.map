@@ -1,0 +1,25 @@
+<map id="fl::ColorFromPaletteExtended" name="fl::ColorFromPaletteExtended">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,177,216,203"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a924fc8748f53389e55fdc63bfc14b805.html#a924fc8748f53389e55fdc63bfc14b805" title=" " alt="" coords="272,76,347,101"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="136,175,270,105,273,110,138,180"/>
+<area shape="rect" id="Node000005" href="$d0/da5/group___scaling_dirty_ga3fade00fb4cf5b937b973128198a7a79.html#ga3fade00fb4cf5b937b973128198a7a79" title="Clean up the r1 register after a series of *LEAVING_R1_DIRTY calls." alt="" coords="719,25,816,51"/>
+<area shape="poly" id="edge9_Node000001_Node000005" title=" " alt="" coords="121,175,178,119,218,87,263,61,358,23,398,12,437,6,519,4,622,11,705,23,704,28,621,17,518,9,437,11,399,17,359,28,265,66,221,92,181,123,125,179"/>
+<area shape="rect" id="Node000006" href="$d0/da5/group___scaling_dirty_ga7386235cada3aca429b189681d2ec56d.html#ga7386235cada3aca429b189681d2ec56d" title="This version of scale8() does not clean up the R1 register on AVR." alt="" coords="669,127,865,152"/>
+<area shape="poly" id="edge14_Node000001_Node000006" title=" " alt="" coords="216,198,304,203,406,204,514,200,621,187,676,173,725,155,727,160,678,178,622,193,514,205,406,210,304,208,216,203"/>
+<area shape="rect" id="Node000007" href="$da/dc7/advanced_8h_a96d9503945476f13a97c8f406269fcef.html#a96d9503945476f13a97c8f406269fcef" title=" " alt="" coords="264,253,355,279"/>
+<area shape="poly" id="edge8_Node000001_Node000007" title=" " alt="" coords="146,200,263,246,262,251,144,205"/>
+<area shape="rect" id="Node000008" href="$d0/da8/group___scaling_ga39bf87e5526120889086cab19ac749b1.html#ga39bf87e5526120889086cab19ac749b1" title="Scale three one&#45;byte values by a fourth one, which is treated as the numerator of a fraction whose de..." alt="" coords="533,152,621,177"/>
+<area shape="poly" id="edge10_Node000001_Node000008" title=" " alt="" coords="216,182,519,165,520,170,216,187"/>
+<area shape="rect" id="Node000009" href="$d6/daf/direct_8h_a0b3fd115c40d6ac683a810a572fc6104.html#a0b3fd115c40d6ac683a810a572fc6104" title=" " alt="" coords="280,303,339,328"/>
+<area shape="poly" id="edge13_Node000001_Node000009" title=" " alt="" coords="131,201,265,289,273,294,271,298,263,294,128,205"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_aa1e0cd66825220bead12cfc1ab7f33c6.html#aa1e0cd66825220bead12cfc1ab7f33c6" title=" " alt="" coords="403,76,485,101"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="347,86,389,86,389,91,347,91"/>
+<area shape="rect" id="Node000004" href="$d5/d98/group___math_ga9a604de042246d6c87fdbfdd5578f377.html#ga9a604de042246d6c87fdbfdd5578f377" title="Blend a variable proportion (0&#45;255) of one byte to another." alt="" coords="544,51,611,76"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="485,78,530,70,531,75,486,84"/>
+<area shape="poly" id="edge6_Node000003_Node000005" title=" " alt="" coords="460,74,492,53,533,35,577,27,622,24,705,27,705,32,623,29,578,32,534,41,495,57,463,78"/>
+<area shape="poly" id="edge7_Node000003_Node000006" title=" " alt="" coords="486,92,673,122,672,127,486,98"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="611,56,705,44,705,49,611,62"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="611,74,723,119,721,124,609,79"/>
+<area shape="poly" id="edge11_Node000008_Node000005" title=" " alt="" coords="596,150,734,56,737,61,599,154"/>
+<area shape="poly" id="edge12_Node000008_Node000006" title=" " alt="" coords="621,156,658,151,659,157,622,162"/>
+</map>

@@ -1,0 +1,31 @@
+<map id="saturationFunction" name="saturationFunction">
+<area shape="rect" id="Node000001" title=" " alt="" coords="533,171,676,197"/>
+<area shape="rect" id="Node000002" href="$db/df4/_color_boost_8h_a537b04bfdfd3d7921afe25a32a166991.html#a537b04bfdfd3d7921afe25a32a166991" title=" " alt="" coords="335,23,481,49"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="584,162,542,111,514,85,484,62,461,51,463,46,487,58,518,81,546,108,589,158"/>
+<area shape="rect" id="Node000003" href="$d4/d06/curr_8h_ae45a573eb8aad7f464b6ceb7ea211881.html#ae45a573eb8aad7f464b6ceb7ea211881" title=" " alt="" coords="343,73,473,98"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="574,165,532,138,484,112,455,101,457,96,486,107,535,133,577,161"/>
+<area shape="rect" id="Node000004" href="$d4/d06/curr_8h_a251ace8542fe093844e4ed2709e8a3d7.html#a251ace8542fe093844e4ed2709e8a3d7" title=" " alt="" coords="381,122,435,147"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="540,171,435,144,437,139,541,165"/>
+<area shape="rect" id="Node000008" href="$d4/d06/curr_8h_af9691ba6aeb226dd50626f04206c6e28.html#af9691ba6aeb226dd50626f04206c6e28" title=" " alt="" coords="337,171,479,197"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="520,187,480,187,480,181,520,181"/>
+<area shape="rect" id="Node000010" href="$d4/d06/curr_8h_a27ef46fa8abd1dedd29a3904d81622d2.html#a27ef46fa8abd1dedd29a3904d81622d2" title=" " alt="" coords="331,221,485,246"/>
+<area shape="poly" id="edge10_Node000001_Node000010" title=" " alt="" coords="541,203,460,223,459,218,540,197"/>
+<area shape="rect" id="Node000012" href="$db/df4/_color_boost_8h_a4a0d1f144188c96aecbb5efd649d400a.html#a4a0d1f144188c96aecbb5efd649d400a" title=" " alt="" coords="353,270,463,295"/>
+<area shape="poly" id="edge13_Node000001_Node000012" title=" " alt="" coords="577,207,535,235,486,261,457,272,455,267,484,256,532,230,574,203"/>
+<area shape="rect" id="Node000014" href="$db/df4/_color_boost_8h_a4fc01d736fe50cf5b977f755b675f11d.html#a4fc01d736fe50cf5b977f755b675f11d" title=" " alt="" coords="379,319,437,345"/>
+<area shape="poly" id="edge15_Node000001_Node000014" title=" " alt="" coords="589,210,546,260,518,287,487,310,463,322,438,329,437,324,461,317,484,306,514,283,542,257,584,206"/>
+<area shape="rect" id="Node000005" href="$d3/dca/classfl_1_1_x_y_raster_sparse___c_r_g_b_a074d01574c20917b45f65fb1afbf2cb1.html#a074d01574c20917b45f65fb1afbf2cb1" title=" " alt="" coords="123,5,264,45"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="367,128,329,112,314,98,304,85,296,72,281,60,259,48,262,43,284,55,299,69,309,82,318,95,332,107,369,123"/>
+<area shape="rect" id="Node000006" href="$d4/d36/namespacefl_a29ae9bad91ab6b7de10679e9325e90f6.html#a29ae9bad91ab6b7de10679e9325e90f6" title=" " alt="" coords="104,70,283,95"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="366,128,246,98,247,93,368,122"/>
+<area shape="rect" id="Node000007" href="$d4/d06/curr_8h_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="5,171,56,197"/>
+<area shape="poly" id="edge6_Node000004_Node000007" title=" " alt="" coords="367,137,248,142,176,149,105,161,57,176,55,171,103,156,176,144,248,137,367,132"/>
+<area shape="rect" id="Node000009" href="$d4/d06/curr_8h_ad5dd16b6abf44e3aad21ce2a4badf906.html#ad5dd16b6abf44e3aad21ce2a4badf906" title=" " alt="" coords="154,171,233,197"/>
+<area shape="poly" id="edge8_Node000008_Node000009" title=" " alt="" coords="323,187,233,187,233,181,323,181"/>
+<area shape="poly" id="edge9_Node000009_Node000007" title=" " alt="" coords="140,187,56,187,56,181,140,181"/>
+<area shape="rect" id="Node000011" href="$d4/d06/curr_8h_a889977e3c2cad101b68a8c97148ef3c0.html#a889977e3c2cad101b68a8c97148ef3c0" title=" " alt="" coords="148,221,239,246"/>
+<area shape="poly" id="edge11_Node000010_Node000011" title=" " alt="" coords="317,236,239,236,239,231,317,231"/>
+<area shape="poly" id="edge12_Node000011_Node000007" title=" " alt="" coords="134,220,103,211,56,195,57,190,105,205,135,215"/>
+<area shape="rect" id="Node000013" href="$db/df4/_color_boost_8h_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="168,270,219,295"/>
+<area shape="poly" id="edge14_Node000012_Node000013" title=" " alt="" coords="339,285,219,285,219,280,339,280"/>
+</map>

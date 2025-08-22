@@ -1,13 +1,11 @@
 <map id="fl::TwinkleFox" name="fl::TwinkleFox">
-<area shape="rect" id="Node000001" title=" " alt="" coords="85,256,196,281"/>
-<area shape="rect" id="Node000002" href="$d4/d1c/classfl_1_1_fx1d.html" title=" " alt="" coords="61,168,132,193"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="111,205,137,254,132,257,107,207"/>
-<area shape="rect" id="Node000003" href="$da/d5d/classfl_1_1_fx.html" title=" " alt="" coords="25,80,80,105"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="67,117,93,166,88,169,63,119"/>
-<area shape="rect" id="Node000004" href="$d6/d16/classfl_1_1_referent.html" title=" " alt="" coords="5,5,100,31"/>
-<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="55,45,55,80,50,80,50,45"/>
-<area shape="rect" id="Node000011" href="$d7/d6c/classfl_1_1_x_map.html" title=" " alt="" coords="105,80,179,105"/>
-<area shape="poly" id="edge4_Node000002_Node000011" title=" " alt="" coords="132,119,105,169,101,166,127,117"/>
-<area shape="rect" id="Node000012" href="$d7/d82/struct_c_r_g_b.html" title="Representation of an RGB pixel (Red, Green, Blue)" alt="" coords="157,168,215,193"/>
-<area shape="poly" id="edge5_Node000001_Node000012" title=" " alt="" coords="176,207,149,257,145,254,171,205"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="65,181,176,207"/>
+<area shape="rect" id="Node000002" href="$d4/d1c/classfl_1_1_fx1d.html" title=" " alt="" coords="41,93,112,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="91,130,117,180,112,182,87,132"/>
+<area shape="rect" id="Node000003" href="$da/d5d/classfl_1_1_fx.html" title=" " alt="" coords="5,5,60,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="47,42,73,92,68,94,43,44"/>
+<area shape="rect" id="Node000004" href="$d7/d6c/classfl_1_1_x_map.html" title=" " alt="" coords="85,5,159,31"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="112,44,85,94,81,92,107,42"/>
+<area shape="rect" id="Node000005" href="$d7/d82/struct_c_r_g_b.html" title="Representation of an RGB pixel (Red, Green, Blue)" alt="" coords="137,93,195,119"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="156,132,129,182,125,180,151,130"/>
 </map>

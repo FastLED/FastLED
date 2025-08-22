@@ -125,27 +125,31 @@ template&lt;typename T&gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../dd/d98/ptr_8h_source.html#l00369">369</a> of file <a class="el" href="../../dd/d98/ptr_8h_source.html">ptr.h</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  369</span>                        {</div>
-<div class="line"><span class="lineno">  370</span>        <span class="keywordflow">if</span> (!<a class="code hl_variable" href="../../db/d77/classfl_1_1_weak_ptr_af4b1604256fc0cc6ee2ab1a352b3512b.html#af4b1604256fc0cc6ee2ab1a352b3512b">mWeakPtr</a>) {</div>
-<div class="line"><span class="lineno">  371</span>            <span class="keywordflow">return</span> <a class="code hl_class" href="../../db/d77/classfl_1_1_weak_ptr.html">Ptr&lt;T&gt;</a>();</div>
-<div class="line"><span class="lineno">  372</span>        }</div>
-<div class="line"><span class="lineno">  373</span>        <a class="code hl_class" href="../../db/d77/classfl_1_1_weak_ptr.html">T</a> *<a class="code hl_class" href="../../db/d77/classfl_1_1_weak_ptr.html">out</a> = <span class="keyword">static_cast&lt;</span><a class="code hl_class" href="../../db/d77/classfl_1_1_weak_ptr.html">T</a> *<span class="keyword">&gt;</span>(<a class="code hl_variable" href="../../db/d77/classfl_1_1_weak_ptr_af4b1604256fc0cc6ee2ab1a352b3512b.html#af4b1604256fc0cc6ee2ab1a352b3512b">mWeakPtr</a>-&gt;getReferent());</div>
-<div class="line"><span class="lineno">  374</span>        <span class="keywordflow">if</span> (<a class="code hl_class" href="../../db/d77/classfl_1_1_weak_ptr.html">out</a>-&gt;ref_count() == 0) {</div>
-<div class="line"><span class="lineno">  375</span>            <span class="comment">// This is a static object, so the refcount is 0.</span></div>
-<div class="line"><span class="lineno">  376</span>            <span class="keywordflow">return</span> <a class="code hl_function" href="../../d1/d56/classfl_1_1_ptr_a634e230ee0f4e89e43a2e127aca31aee.html#a634e230ee0f4e89e43a2e127aca31aee">Ptr&lt;T&gt;::NoTracking</a>(*<a class="code hl_class" href="../../db/d77/classfl_1_1_weak_ptr.html">out</a>);</div>
-<div class="line"><span class="lineno">  377</span>        }</div>
-<div class="line"><span class="lineno">  378</span>        <span class="comment">// This is a heap object, so we need to ref it.</span></div>
-<div class="line"><span class="lineno">  379</span>        <span class="keywordflow">return</span> <a class="code hl_function" href="../../d1/d56/classfl_1_1_ptr_a2895e9ece61a2b6fdd33f8195033cfbe.html#a2895e9ece61a2b6fdd33f8195033cfbe">Ptr&lt;T&gt;::TakeOwnership</a>(<span class="keyword">static_cast&lt;</span><a class="code hl_class" href="../../db/d77/classfl_1_1_weak_ptr.html">T</a> *<span class="keyword">&gt;</span>(<a class="code hl_class" href="../../db/d77/classfl_1_1_weak_ptr.html">out</a>));</div>
-<div class="line"><span class="lineno">  380</span>    }</div>
-<div class="ttc" id="aclassfl_1_1_ptr_a2895e9ece61a2b6fdd33f8195033cfbe_html_a2895e9ece61a2b6fdd33f8195033cfbe"><div class="ttname"><a href="../../d1/d56/classfl_1_1_ptr_a2895e9ece61a2b6fdd33f8195033cfbe.html#a2895e9ece61a2b6fdd33f8195033cfbe">fl::Ptr::TakeOwnership</a></div><div class="ttdeci">static Ptr TakeOwnership(T *ptr)</div><div class="ttdef"><b>Definition</b> <a href="../../dd/d98/ptr_8h_source.html#l00127">ptr.h:127</a></div></div>
-<div class="ttc" id="aclassfl_1_1_ptr_a634e230ee0f4e89e43a2e127aca31aee_html_a634e230ee0f4e89e43a2e127aca31aee"><div class="ttname"><a href="../../d1/d56/classfl_1_1_ptr_a634e230ee0f4e89e43a2e127aca31aee.html#a634e230ee0f4e89e43a2e127aca31aee">fl::Ptr::NoTracking</a></div><div class="ttdeci">static Ptr NoTracking(T &amp;referent)</div><div class="ttdef"><b>Definition</b> <a href="../../dd/d98/ptr_8h_source.html#l00132">ptr.h:132</a></div></div>
-<div class="ttc" id="aclassfl_1_1_weak_ptr_af4b1604256fc0cc6ee2ab1a352b3512b_html_af4b1604256fc0cc6ee2ab1a352b3512b"><div class="ttname"><a href="../../db/d77/classfl_1_1_weak_ptr_af4b1604256fc0cc6ee2ab1a352b3512b.html#af4b1604256fc0cc6ee2ab1a352b3512b">fl::WeakPtr::mWeakPtr</a></div><div class="ttdeci">Ptr&lt; WeakReferent &gt; mWeakPtr</div><div class="ttdef"><b>Definition</b> <a href="../../dd/d98/ptr_8h_source.html#l00397">ptr.h:397</a></div></div>
-<div class="ttc" id="aclassfl_1_1_weak_ptr_html"><div class="ttname"><a href="../../db/d77/classfl_1_1_weak_ptr.html">fl::WeakPtr</a></div><div class="ttdef"><b>Definition</b> <a href="../../dd/d98/ptr_8h_source.html#l00289">ptr.h:289</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../d5/d94/ptr__impl_8h_source.html#l00202">202</a> of file <a class="el" href="../../d5/d94/ptr__impl_8h_source.html">ptr_impl.h</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  202</span>                                     {</div>
+<div class="line"><span class="lineno">  203</span>    <span class="keywordflow">if</span> (!<a class="code hl_variable" href="../../db/d77/classfl_1_1_weak_ptr_af1ca9deb5393e7e7dbb36c90fa56c657.html#af1ca9deb5393e7e7dbb36c90fa56c657">mWeakPtr</a>) {</div>
+<div class="line"><span class="lineno">  204</span>        <span class="keywordflow">return</span> <a class="code hl_class" href="../../db/d77/classfl_1_1_weak_ptr.html">Ptr&lt;T&gt;</a>();</div>
+<div class="line"><span class="lineno">  205</span>    }</div>
+<div class="line"><span class="lineno">  206</span>    <a class="code hl_class" href="../../db/d77/classfl_1_1_weak_ptr.html">T</a> *<a class="code hl_class" href="../../db/d77/classfl_1_1_weak_ptr.html">out</a> = <span class="keyword">static_cast&lt;</span><a class="code hl_class" href="../../db/d77/classfl_1_1_weak_ptr.html">T</a> *<span class="keyword">&gt;</span>(<a class="code hl_variable" href="../../db/d77/classfl_1_1_weak_ptr_af1ca9deb5393e7e7dbb36c90fa56c657.html#af1ca9deb5393e7e7dbb36c90fa56c657">mWeakPtr</a>-&gt;getReferent());</div>
+<div class="line"><span class="lineno">  207</span>    <span class="keywordflow">if</span> (!<a class="code hl_class" href="../../db/d77/classfl_1_1_weak_ptr.html">out</a>) {</div>
+<div class="line"><span class="lineno">  208</span>        <span class="comment">// The referent has been destroyed</span></div>
+<div class="line"><span class="lineno">  209</span>        <span class="keywordflow">return</span> <a class="code hl_class" href="../../db/d77/classfl_1_1_weak_ptr.html">Ptr&lt;T&gt;</a>();</div>
+<div class="line"><span class="lineno">  210</span>    }</div>
+<div class="line"><span class="lineno">  211</span>    <span class="keywordflow">if</span> (<a class="code hl_class" href="../../db/d77/classfl_1_1_weak_ptr.html">out</a>-&gt;ref_count() == 0) {</div>
+<div class="line"><span class="lineno">  212</span>        <span class="comment">// This is a static object, so the refcount is 0.</span></div>
+<div class="line"><span class="lineno">  213</span>        <span class="keywordflow">return</span> <a class="code hl_function" href="../../d1/d56/classfl_1_1_ptr_a634e230ee0f4e89e43a2e127aca31aee.html#a634e230ee0f4e89e43a2e127aca31aee">Ptr&lt;T&gt;::NoTracking</a>(*<a class="code hl_class" href="../../db/d77/classfl_1_1_weak_ptr.html">out</a>);</div>
+<div class="line"><span class="lineno">  214</span>    }</div>
+<div class="line"><span class="lineno">  215</span>    <span class="comment">// This is a heap object, so we need to ref it.</span></div>
+<div class="line"><span class="lineno">  216</span>    <span class="keywordflow">return</span> <a class="code hl_function" href="../../d1/d56/classfl_1_1_ptr_a2895e9ece61a2b6fdd33f8195033cfbe.html#a2895e9ece61a2b6fdd33f8195033cfbe">Ptr&lt;T&gt;::TakeOwnership</a>(<span class="keyword">static_cast&lt;</span><a class="code hl_class" href="../../db/d77/classfl_1_1_weak_ptr.html">T</a> *<span class="keyword">&gt;</span>(<a class="code hl_class" href="../../db/d77/classfl_1_1_weak_ptr.html">out</a>));</div>
+<div class="line"><span class="lineno">  217</span>}</div>
+<div class="ttc" id="aclassfl_1_1_ptr_a2895e9ece61a2b6fdd33f8195033cfbe_html_a2895e9ece61a2b6fdd33f8195033cfbe"><div class="ttname"><a href="../../d1/d56/classfl_1_1_ptr_a2895e9ece61a2b6fdd33f8195033cfbe.html#a2895e9ece61a2b6fdd33f8195033cfbe">fl::Ptr::TakeOwnership</a></div><div class="ttdeci">static Ptr TakeOwnership(T *ptr)</div><div class="ttdef"><b>Definition</b> <a href="../../dd/d98/ptr_8h_source.html#l00124">ptr.h:124</a></div></div>
+<div class="ttc" id="aclassfl_1_1_ptr_a634e230ee0f4e89e43a2e127aca31aee_html_a634e230ee0f4e89e43a2e127aca31aee"><div class="ttname"><a href="../../d1/d56/classfl_1_1_ptr_a634e230ee0f4e89e43a2e127aca31aee.html#a634e230ee0f4e89e43a2e127aca31aee">fl::Ptr::NoTracking</a></div><div class="ttdeci">static Ptr NoTracking(T &amp;referent)</div><div class="ttdef"><b>Definition</b> <a href="../../dd/d98/ptr_8h_source.html#l00130">ptr.h:130</a></div></div>
+<div class="ttc" id="aclassfl_1_1_weak_ptr_af1ca9deb5393e7e7dbb36c90fa56c657_html_af1ca9deb5393e7e7dbb36c90fa56c657"><div class="ttname"><a href="../../db/d77/classfl_1_1_weak_ptr_af1ca9deb5393e7e7dbb36c90fa56c657.html#af1ca9deb5393e7e7dbb36c90fa56c657">fl::WeakPtr::mWeakPtr</a></div><div class="ttdeci">WeakReferent * mWeakPtr</div><div class="ttdef"><b>Definition</b> <a href="../../dd/d98/ptr_8h_source.html#l00234">ptr.h:234</a></div></div>
+<div class="ttc" id="aclassfl_1_1_weak_ptr_html"><div class="ttname"><a href="../../db/d77/classfl_1_1_weak_ptr.html">fl::WeakPtr</a></div><div class="ttdef"><b>Definition</b> <a href="../../dd/d98/ptr_8h_source.html#l00188">ptr.h:188</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../dd/d98/ptr_8h_source.html#l00397">mWeakPtr</a>, <a class="el" href="../../dd/d98/ptr_8h_source.html#l00132">fl::Ptr&lt; T &gt;::NoTracking()</a>, and <a class="el" href="../../dd/d98/ptr_8h_source.html#l00127">fl::Ptr&lt; T &gt;::TakeOwnership()</a>.</p>
+<p class="reference">References <a class="el" href="../../dd/d98/ptr_8h_source.html#l00234">mWeakPtr</a>, <a class="el" href="../../dd/d98/ptr_8h_source.html#l00130">fl::Ptr&lt; T &gt;::NoTracking()</a>, and <a class="el" href="../../dd/d98/ptr_8h_source.html#l00124">fl::Ptr&lt; T &gt;::TakeOwnership()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../dd/d98/ptr_8h_source.html#l00343">operator==()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d1/d93/str_8h_source.html#l00827">fl::string::append()</a>, and <a class="el" href="../../d5/d94/ptr__impl_8h_source.html#l00252">operator==()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -158,7 +162,7 @@ template&lt;typename T&gt; </div>
 <div id="dynsection-1-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-1-content" class="dyncontent" style="display:none;">
-<div class="center"><iframe scrolling="no" frameborder="0" src="../../db/d77/classfl_1_1_weak_ptr_ac52bc006cef9fef0774e23023aa5d9f2_ac52bc006cef9fef0774e23023aa5d9f2_icgraph.svg" width="363" height="36"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<div class="center"><iframe scrolling="no" frameborder="0" src="../../db/d77/classfl_1_1_weak_ptr_ac52bc006cef9fef0774e23023aa5d9f2_ac52bc006cef9fef0774e23023aa5d9f2_icgraph.svg" width="363" height="86"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
 </div>
 
 </div>
@@ -170,7 +174,7 @@ template&lt;typename T&gt; </div>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../db/d77/classfl_1_1_weak_ptr.html">WeakPtr</a></li>
-    <li class="footer">Generated on Tue Jun 24 2025 00:58:16 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Fri Aug 22 2025 20:59:37 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

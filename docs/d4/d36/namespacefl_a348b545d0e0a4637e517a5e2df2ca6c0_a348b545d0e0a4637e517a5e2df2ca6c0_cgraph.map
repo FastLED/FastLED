@@ -1,0 +1,11 @@
+<map id="fl::easeOutSine8" name="fl::easeOutSine8">
+<area shape="rect" id="Node000001" title="8&#45;bit sine ease&#45;out function Takes an input value 0&#45;255 and returns an eased value 0&#45;255 Smooth sinus..." alt="" coords="5,55,133,80"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a773803afa690a44f169246bbba9a5a74.html#a773803afa690a44f169246bbba9a5a74" title="16&#45;bit sine ease&#45;out function Takes an input value 0&#45;65535 and returns an eased value 0&#45;65535" alt="" coords="181,5,317,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="116,52,188,32,189,37,117,57"/>
+<area shape="rect" id="Node000004" href="$d1/d12/group__intmap_ga43a52eb77959095c09b86f6d514eee5e.html#ga43a52eb77959095c09b86f6d514eee5e" title=" " alt="" coords="198,55,301,80"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="134,65,184,65,184,70,134,70"/>
+<area shape="rect" id="Node000005" href="$d1/d12/group__intmap_gab217a118917847ecb8148cdc41fa6e07.html#gab217a118917847ecb8148cdc41fa6e07" title=" " alt="" coords="198,104,301,129"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="117,77,189,98,188,103,116,83"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a6e2e35d8f9639dce7a224474c95a34b1.html#a6e2e35d8f9639dce7a224474c95a34b1" title=" " alt="" coords="365,5,439,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="318,15,352,15,352,21,318,21"/>
+</map>

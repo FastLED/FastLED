@@ -1,7 +1,29 @@
 <map id="fl/thread_local.h" name="fl/thread_local.h">
-<area shape="rect" id="Node000001" title=" " alt="" coords="53,5,180,31"/>
-<area shape="rect" id="Node000002" href="$d1/ddc/audio_8cpp.html" title=" " alt="" coords="5,79,103,104"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="99,43,66,80,62,77,95,39"/>
-<area shape="rect" id="Node000003" href="$d4/d78/xypath_8cpp.html" title=" " alt="" coords="127,79,234,104"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="138,39,172,77,168,80,134,43"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="495,5,622,31"/>
+<area shape="rect" id="Node000002" href="$d6/d89/allocator_8cpp.html" title=" " alt="" coords="201,79,319,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="498,36,309,81,308,76,497,31"/>
+<area shape="rect" id="Node000003" href="$df/d4c/src_2fl_2async_8h.html" title="Generic asynchronous task management for FastLED." alt="" coords="343,79,427,104"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="519,38,415,81,413,76,517,33"/>
+<area shape="rect" id="Node000010" href="$d1/ddc/audio_8cpp.html" title=" " alt="" coords="451,79,549,104"/>
+<area shape="poly" id="edge11_Node000001_Node000010" title=" " alt="" coords="542,43,512,80,507,77,538,40"/>
+<area shape="rect" id="Node000011" href="$dd/d55/json_8cpp.html" title=" " alt="" coords="573,79,661,104"/>
+<area shape="poly" id="edge12_Node000001_Node000011" title=" " alt="" coords="579,40,610,77,606,80,575,43"/>
+<area shape="rect" id="Node000012" href="$de/daa/random_8cpp.html" title=" " alt="" coords="686,79,797,104"/>
+<area shape="poly" id="edge13_Node000001_Node000012" title=" " alt="" coords="602,33,712,76,710,81,600,38"/>
+<area shape="rect" id="Node000013" href="$d4/d78/xypath_8cpp.html" title=" " alt="" coords="821,79,928,104"/>
+<area shape="poly" id="edge14_Node000001_Node000013" title=" " alt="" coords="623,31,824,76,823,81,622,36"/>
+<area shape="rect" id="Node000004" href="$d5/d1b/examples_2_async_2async_8h.html" title=" " alt="" coords="5,152,205,207"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="335,111,191,155,190,149,334,106"/>
+<area shape="rect" id="Node000005" href="$d5/dec/_net_test_real_8h.html" title=" " alt="" coords="196,255,396,309"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="331,109,297,126,282,139,270,153,262,178,264,204,272,231,282,254,277,256,267,232,258,205,257,177,266,151,278,135,294,122,329,104"/>
+<area shape="rect" id="Node000006" href="$d0/d95/async_8cpp.html" title=" " alt="" coords="280,167,379,192"/>
+<area shape="poly" id="edge5_Node000003_Node000006" title=" " alt="" coords="373,117,339,168,335,165,368,114"/>
+<area shape="rect" id="Node000007" href="$d9/ddd/fetch_8cpp.html" title=" " alt="" coords="434,269,529,295"/>
+<area shape="poly" id="edge6_Node000003_Node000007" title=" " alt="" coords="442,107,473,124,497,151,507,183,506,216,498,247,489,270,484,268,493,245,501,215,502,183,492,153,469,128,439,111"/>
+<area shape="rect" id="Node000008" href="$d6/d6a/fetch_8h.html" title="Unified HTTP fetch API for FastLED (cross&#45;platform)" alt="" coords="403,167,482,192"/>
+<area shape="poly" id="edge7_Node000003_Node000008" title=" " alt="" coords="403,114,437,165,432,168,398,117"/>
+<area shape="rect" id="Node000009" href="$d9/d9c/task_8cpp.html" title=" " alt="" coords="558,167,647,192"/>
+<area shape="poly" id="edge10_Node000003_Node000009" title=" " alt="" coords="429,107,540,150,576,164,574,169,538,154,427,112"/>
+<area shape="poly" id="edge8_Node000008_Node000005" title=" " alt="" coords="416,202,336,257,333,252,413,198"/>
+<area shape="poly" id="edge9_Node000008_Node000007" title=" " alt="" coords="454,204,479,268,474,270,450,206"/>
 </map>

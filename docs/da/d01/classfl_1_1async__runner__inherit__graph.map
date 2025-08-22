@@ -1,0 +1,5 @@
+<map id="fl::async_runner" name="fl::async_runner">
+<area shape="rect" id="Node000001" title="Generic asynchronous task runner interface." alt="" coords="8,5,133,31"/>
+<area shape="rect" id="Node000002" href="$d3/d35/classfl_1_1_fetch_manager.html" title="Internal fetch manager for promise tracking." alt="" coords="5,79,136,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="73,44,73,79,68,79,68,44"/>
+</map>

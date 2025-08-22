@@ -47,7 +47,7 @@
   </g>
 </defs>
 <script type="application/ecmascript">
-var viewWidth = 638;
+var viewWidth = 644;
 var viewHeight = 386;
 var sectionId = 'dynsection-0';
 </script>
@@ -104,32 +104,13 @@ var sectionId = 'dynsection-0';
 </a>
 </g>
 </g>
-<!-- Node9 -->
-<g id="Node000009" class="node">
-<title>Node9</title>
-<g id="a_Node000009"><a xlink:href="../../df/d5e/classanimartrix__detail_1_1_a_n_i_mart_r_i_x_ac46f1605c69b2583e3e06bcb1bcb4cd3.html#ac46f1605c69b2583e3e06bcb1bcb4cd3" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#666666" points="299.5,-270 166.5,-270 166.5,-240 299.5,-240 299.5,-270"/>
-<text text-anchor="start" x="174.5" y="-258" font-family="Helvetica,sans-Serif" font-size="10.00">animartrix_detail::</text>
-<text text-anchor="middle" x="233" y="-247" font-family="Helvetica,sans-Serif" font-size="10.00">ANIMartRIX::colordodge</text>
-</a>
-</g>
-</g>
-<!-- Node1&#45;&gt;Node9 -->
-<g id="edge8_Node000001_Node000009" class="edge">
-<title>Node1&#45;&gt;Node9</title>
-<g id="a_edge8_Node000001_Node000009"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M78.55,-198.04C95.94,-208.42 120.28,-221.92 143,-231 148.11,-233.04 153.45,-234.97 158.87,-236.77"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="158.08,-240.2 168.67,-239.89 160.2,-233.52 158.08,-240.2"/>
-</a>
-</g>
-</g>
 <!-- Node10 -->
 <g id="Node000010" class="node">
 <title>Node10</title>
-<g id="a_Node000010"><a xlink:href="../../df/d5e/classanimartrix__detail_1_1_a_n_i_mart_r_i_x_a087a9473459c121592e78b11d617820b.html#a087a9473459c121592e78b11d617820b" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#666666" points="297,-174 169,-174 169,-144 297,-144 297,-174"/>
-<text text-anchor="start" x="177" y="-162" font-family="Helvetica,sans-Serif" font-size="10.00">animartrix_detail::</text>
-<text text-anchor="middle" x="233" y="-151" font-family="Helvetica,sans-Serif" font-size="10.00">ANIMartRIX::get_ready</text>
+<g id="a_Node000010"><a xlink:href="../../df/d5e/classanimartrix__detail_1_1_a_n_i_mart_r_i_x_ac46f1605c69b2583e3e06bcb1bcb4cd3.html#ac46f1605c69b2583e3e06bcb1bcb4cd3" target="_top" xlink:title=" ">
+<polygon fill="white" stroke="#666666" points="299.5,-270 166.5,-270 166.5,-240 299.5,-240 299.5,-270"/>
+<text text-anchor="start" x="174.5" y="-258" font-family="Helvetica,sans-Serif" font-size="10.00">animartrix_detail::</text>
+<text text-anchor="middle" x="233" y="-247" font-family="Helvetica,sans-Serif" font-size="10.00">ANIMartRIX::colordodge</text>
 </a>
 </g>
 </g>
@@ -137,56 +118,56 @@ var sectionId = 'dynsection-0';
 <g id="edge9_Node000001_Node000010" class="edge">
 <title>Node1&#45;&gt;Node10</title>
 <g id="a_edge9_Node000001_Node000010"><a xlink:title=" ">
+<path fill="none" stroke="#63b8ff" d="M78.55,-198.04C95.94,-208.42 120.28,-221.92 143,-231 148.11,-233.04 153.45,-234.97 158.87,-236.77"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="158.08,-240.2 168.67,-239.89 160.2,-233.52 158.08,-240.2"/>
+</a>
+</g>
+</g>
+<!-- Node11 -->
+<g id="Node000011" class="node">
+<title>Node11</title>
+<g id="a_Node000011"><a xlink:href="../../df/d5e/classanimartrix__detail_1_1_a_n_i_mart_r_i_x_a087a9473459c121592e78b11d617820b.html#a087a9473459c121592e78b11d617820b" target="_top" xlink:title=" ">
+<polygon fill="white" stroke="#666666" points="297,-174 169,-174 169,-144 297,-144 297,-174"/>
+<text text-anchor="start" x="177" y="-162" font-family="Helvetica,sans-Serif" font-size="10.00">animartrix_detail::</text>
+<text text-anchor="middle" x="233" y="-151" font-family="Helvetica,sans-Serif" font-size="10.00">ANIMartRIX::get_ready</text>
+</a>
+</g>
+</g>
+<!-- Node1&#45;&gt;Node11 -->
+<g id="edge10_Node000001_Node000011" class="edge">
+<title>Node1&#45;&gt;Node11</title>
+<g id="a_edge10_Node000001_Node000011"><a xlink:title=" ">
 <path fill="none" stroke="#63b8ff" d="M107.28,-175.86C123.42,-173.68 141.48,-171.24 158.73,-168.91"/>
 <polygon fill="#63b8ff" stroke="#63b8ff" points="159.33,-172.36 168.77,-167.55 158.4,-165.42 159.33,-172.36"/>
 </a>
 </g>
 </g>
-<!-- Node12 -->
-<g id="Node000012" class="node">
-<title>Node12</title>
-<g id="a_Node000012"><a xlink:href="../../df/d5e/classanimartrix__detail_1_1_a_n_i_mart_r_i_x_a867d92fbbe56d9cdbd02638db2795324.html#a867d92fbbe56d9cdbd02638db2795324" target="_top" xlink:title=" ">
+<!-- Node13 -->
+<g id="Node000013" class="node">
+<title>Node13</title>
+<g id="a_Node000013"><a xlink:href="../../df/d5e/classanimartrix__detail_1_1_a_n_i_mart_r_i_x_a867d92fbbe56d9cdbd02638db2795324.html#a867d92fbbe56d9cdbd02638db2795324" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="304.5,-222 161.5,-222 161.5,-192 304.5,-192 304.5,-222"/>
 <text text-anchor="start" x="169.5" y="-210" font-family="Helvetica,sans-Serif" font-size="10.00">animartrix_detail::</text>
 <text text-anchor="middle" x="233" y="-199" font-family="Helvetica,sans-Serif" font-size="10.00">ANIMartRIX::render_value</text>
 </a>
 </g>
 </g>
-<!-- Node1&#45;&gt;Node12 -->
-<g id="edge11_Node000001_Node000012" class="edge">
-<title>Node1&#45;&gt;Node12</title>
-<g id="a_edge11_Node000001_Node000012"><a xlink:title=" ">
+<!-- Node1&#45;&gt;Node13 -->
+<g id="edge12_Node000001_Node000013" class="edge">
+<title>Node1&#45;&gt;Node13</title>
+<g id="a_edge12_Node000001_Node000013"><a xlink:title=" ">
 <path fill="none" stroke="#63b8ff" d="M107.28,-190.14C121.06,-192 136.23,-194.05 151.11,-196.06"/>
 <polygon fill="#63b8ff" stroke="#63b8ff" points="150.97,-199.58 161.35,-197.45 151.91,-192.64 150.97,-199.58"/>
-</a>
-</g>
-</g>
-<!-- Node14 -->
-<g id="Node000014" class="node">
-<title>Node14</title>
-<g id="a_Node000014"><a xlink:href="../../df/d5e/classanimartrix__detail_1_1_a_n_i_mart_r_i_x_a67a30ae022755db342ddaafdeb1b7d9f.html#a67a30ae022755db342ddaafdeb1b7d9f" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#666666" points="315,-126 151,-126 151,-96 315,-96 315,-126"/>
-<text text-anchor="start" x="159" y="-114" font-family="Helvetica,sans-Serif" font-size="10.00">animartrix_detail::</text>
-<text text-anchor="middle" x="233" y="-103" font-family="Helvetica,sans-Serif" font-size="10.00">ANIMartRIX::rgb_sanity_check</text>
-</a>
-</g>
-</g>
-<!-- Node1&#45;&gt;Node14 -->
-<g id="edge14_Node000001_Node000014" class="edge">
-<title>Node1&#45;&gt;Node14</title>
-<g id="a_edge14_Node000001_Node000014"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M78.55,-167.96C95.94,-157.58 120.28,-144.08 143,-135 148.11,-132.96 153.45,-131.03 158.87,-129.23"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="160.2,-132.48 168.67,-126.11 158.08,-125.8 160.2,-132.48"/>
 </a>
 </g>
 </g>
 <!-- Node15 -->
 <g id="Node000015" class="node">
 <title>Node15</title>
-<g id="a_Node000015"><a xlink:href="../../df/d5e/classanimartrix__detail_1_1_a_n_i_mart_r_i_x_afa21f4025e5086d591b75af4884e2cf8.html#afa21f4025e5086d591b75af4884e2cf8" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#666666" points="288.5,-78 177.5,-78 177.5,-48 288.5,-48 288.5,-78"/>
-<text text-anchor="start" x="185.5" y="-66" font-family="Helvetica,sans-Serif" font-size="10.00">animartrix_detail::</text>
-<text text-anchor="middle" x="233" y="-55" font-family="Helvetica,sans-Serif" font-size="10.00">ANIMartRIX::screen</text>
+<g id="a_Node000015"><a xlink:href="../../df/d5e/classanimartrix__detail_1_1_a_n_i_mart_r_i_x_a67a30ae022755db342ddaafdeb1b7d9f.html#a67a30ae022755db342ddaafdeb1b7d9f" target="_top" xlink:title=" ">
+<polygon fill="white" stroke="#666666" points="315,-126 151,-126 151,-96 315,-96 315,-126"/>
+<text text-anchor="start" x="159" y="-114" font-family="Helvetica,sans-Serif" font-size="10.00">animartrix_detail::</text>
+<text text-anchor="middle" x="233" y="-103" font-family="Helvetica,sans-Serif" font-size="10.00">ANIMartRIX::rgb_sanity_check</text>
 </a>
 </g>
 </g>
@@ -194,18 +175,18 @@ var sectionId = 'dynsection-0';
 <g id="edge15_Node000001_Node000015" class="edge">
 <title>Node1&#45;&gt;Node15</title>
 <g id="a_edge15_Node000001_Node000015"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M64.28,-167.88C78.86,-146.58 108.3,-108.03 143,-87 150.56,-82.42 159,-78.7 167.58,-75.68"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="168.85,-78.95 177.3,-72.56 166.71,-72.29 168.85,-78.95"/>
+<path fill="none" stroke="#63b8ff" d="M78.55,-167.96C95.94,-157.58 120.28,-144.08 143,-135 148.11,-132.96 153.45,-131.03 158.87,-129.23"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="160.2,-132.48 168.67,-126.11 158.08,-125.8 160.2,-132.48"/>
 </a>
 </g>
 </g>
 <!-- Node16 -->
 <g id="Node000016" class="node">
 <title>Node16</title>
-<g id="a_Node000016"><a xlink:href="../../df/d5e/classanimartrix__detail_1_1_a_n_i_mart_r_i_x_abeda45d77e8e41b81cd1e24a004e7f0c.html#abeda45d77e8e41b81cd1e24a004e7f0c" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#666666" points="323,-30 143,-30 143,0 323,0 323,-30"/>
-<text text-anchor="start" x="151" y="-18" font-family="Helvetica,sans-Serif" font-size="10.00">animartrix_detail::</text>
-<text text-anchor="middle" x="233" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">ANIMartRIX::setPixelColorInternal</text>
+<g id="a_Node000016"><a xlink:href="../../df/d5e/classanimartrix__detail_1_1_a_n_i_mart_r_i_x_afa21f4025e5086d591b75af4884e2cf8.html#afa21f4025e5086d591b75af4884e2cf8" target="_top" xlink:title=" ">
+<polygon fill="white" stroke="#666666" points="288.5,-78 177.5,-78 177.5,-48 288.5,-48 288.5,-78"/>
+<text text-anchor="start" x="185.5" y="-66" font-family="Helvetica,sans-Serif" font-size="10.00">animartrix_detail::</text>
+<text text-anchor="middle" x="233" y="-55" font-family="Helvetica,sans-Serif" font-size="10.00">ANIMartRIX::screen</text>
 </a>
 </g>
 </g>
@@ -213,6 +194,25 @@ var sectionId = 'dynsection-0';
 <g id="edge16_Node000001_Node000016" class="edge">
 <title>Node1&#45;&gt;Node16</title>
 <g id="a_edge16_Node000001_Node000016"><a xlink:title=" ">
+<path fill="none" stroke="#63b8ff" d="M64.28,-167.88C78.86,-146.58 108.3,-108.03 143,-87 150.56,-82.42 159,-78.7 167.58,-75.68"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="168.85,-78.95 177.3,-72.56 166.71,-72.29 168.85,-78.95"/>
+</a>
+</g>
+</g>
+<!-- Node17 -->
+<g id="Node000017" class="node">
+<title>Node17</title>
+<g id="a_Node000017"><a xlink:href="../../df/d5e/classanimartrix__detail_1_1_a_n_i_mart_r_i_x_abeda45d77e8e41b81cd1e24a004e7f0c.html#abeda45d77e8e41b81cd1e24a004e7f0c" target="_top" xlink:title=" ">
+<polygon fill="white" stroke="#666666" points="323,-30 143,-30 143,0 323,0 323,-30"/>
+<text text-anchor="start" x="151" y="-18" font-family="Helvetica,sans-Serif" font-size="10.00">animartrix_detail::</text>
+<text text-anchor="middle" x="233" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">ANIMartRIX::setPixelColorInternal</text>
+</a>
+</g>
+</g>
+<!-- Node1&#45;&gt;Node17 -->
+<g id="edge17_Node000001_Node000017" class="edge">
+<title>Node1&#45;&gt;Node17</title>
+<g id="a_edge17_Node000001_Node000017"><a xlink:title=" ">
 <path fill="none" stroke="#63b8ff" d="M59.53,-167.75C70.08,-138.2 97.39,-73.07 143,-39 144.88,-37.6 146.83,-36.28 148.84,-35.04"/>
 <polygon fill="#63b8ff" stroke="#63b8ff" points="150.88,-37.91 158.01,-30.07 147.55,-31.76 150.88,-37.91"/>
 </a>
@@ -221,7 +221,7 @@ var sectionId = 'dynsection-0';
 <!-- Node4 -->
 <g id="Node000004" class="node">
 <title>Node4</title>
-<g id="a_Node000004"><a xlink:href="../../df/d5e/classanimartrix__detail_1_1_a_n_i_mart_r_i_x_aca68cf41172ac73c388dad51b3ab40ab.html#aca68cf41172ac73c388dad51b3ab40ab" target="_top" xlink:title=" ">
+<g id="a_Node000004"><a xlink:href="../../df/d5e/classanimartrix__detail_1_1_a_n_i_mart_r_i_x_a88634a3f659613d166f9453c905242b3.html#a88634a3f659613d166f9453c905242b3" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="482.5,-324 363.5,-324 363.5,-294 482.5,-294 482.5,-324"/>
 <text text-anchor="start" x="371.5" y="-312" font-family="Helvetica,sans-Serif" font-size="10.00">animartrix_detail::</text>
 <text text-anchor="middle" x="423" y="-301" font-family="Helvetica,sans-Serif" font-size="10.00">ANIMartRIX::getTime</text>
@@ -260,9 +260,9 @@ var sectionId = 'dynsection-0';
 <g id="Node000006" class="node">
 <title>Node6</title>
 <g id="a_Node000006"><a xlink:href="../../df/d5e/classanimartrix__detail_1_1_a_n_i_mart_r_i_x_af3fb7d297afe35dea7078be3836aa994.html#af3fb7d297afe35dea7078be3836aa994" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#666666" points="630,-321 523,-321 523,-291 630,-291 630,-321"/>
-<text text-anchor="start" x="531" y="-309" font-family="Helvetica,sans-Serif" font-size="10.00">animartrix_detail::</text>
-<text text-anchor="middle" x="576.5" y="-298" font-family="Helvetica,sans-Serif" font-size="10.00">ANIMartRIX::fade</text>
+<polygon fill="white" stroke="#666666" points="633,-345 526,-345 526,-315 633,-315 633,-345"/>
+<text text-anchor="start" x="534" y="-333" font-family="Helvetica,sans-Serif" font-size="10.00">animartrix_detail::</text>
+<text text-anchor="middle" x="579.5" y="-322" font-family="Helvetica,sans-Serif" font-size="10.00">ANIMartRIX::fade</text>
 </a>
 </g>
 </g>
@@ -270,8 +270,8 @@ var sectionId = 'dynsection-0';
 <g id="edge5_Node000005_Node000006" class="edge">
 <title>Node5&#45;&gt;Node6</title>
 <g id="a_edge5_Node000005_Node000006"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M471.52,-273.06C486.33,-277.75 502.81,-282.97 518.21,-287.85"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="517.56,-291.31 528.15,-291 519.67,-284.64 517.56,-291.31"/>
+<path fill="none" stroke="#63b8ff" d="M461.33,-273.1C469.86,-276.79 478.82,-280.88 487,-285 503.54,-293.33 506.47,-297.64 523,-306 526.14,-307.59 529.41,-309.17 532.72,-310.72"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="531.54,-314.03 542.09,-315 534.44,-307.66 531.54,-314.03"/>
 </a>
 </g>
 </g>
@@ -279,9 +279,9 @@ var sectionId = 'dynsection-0';
 <g id="Node000007" class="node">
 <title>Node7</title>
 <g id="a_Node000007"><a xlink:href="../../df/d5e/classanimartrix__detail_1_1_a_n_i_mart_r_i_x_acb625b48d9c1beec3067e0c38b7a0b22.html#acb625b48d9c1beec3067e0c38b7a0b22" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#666666" points="630,-273 523,-273 523,-243 630,-243 630,-273"/>
-<text text-anchor="start" x="531" y="-261" font-family="Helvetica,sans-Serif" font-size="10.00">animartrix_detail::</text>
-<text text-anchor="middle" x="576.5" y="-250" font-family="Helvetica,sans-Serif" font-size="10.00">ANIMartRIX::grad</text>
+<polygon fill="white" stroke="#666666" points="633,-297 526,-297 526,-267 633,-267 633,-297"/>
+<text text-anchor="start" x="534" y="-285" font-family="Helvetica,sans-Serif" font-size="10.00">animartrix_detail::</text>
+<text text-anchor="middle" x="579.5" y="-274" font-family="Helvetica,sans-Serif" font-size="10.00">ANIMartRIX::grad</text>
 </a>
 </g>
 </g>
@@ -289,8 +289,8 @@ var sectionId = 'dynsection-0';
 <g id="edge6_Node000005_Node000007" class="edge">
 <title>Node5&#45;&gt;Node7</title>
 <g id="a_edge6_Node000005_Node000007"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M478.69,-258C489.73,-258 501.41,-258 512.69,-258"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="512.91,-261.5 522.91,-258 512.91,-254.5 512.91,-261.5"/>
+<path fill="none" stroke="#63b8ff" d="M478.91,-266.53C490.83,-268.38 503.54,-270.35 515.74,-272.25"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="515.42,-275.74 525.84,-273.82 516.5,-268.83 515.42,-275.74"/>
 </a>
 </g>
 </g>
@@ -298,9 +298,9 @@ var sectionId = 'dynsection-0';
 <g id="Node000008" class="node">
 <title>Node8</title>
 <g id="a_Node000008"><a xlink:href="../../df/d5e/classanimartrix__detail_1_1_a_n_i_mart_r_i_x_a7ce0a9b9405217a5b8bf71c88bcb571b.html#a7ce0a9b9405217a5b8bf71c88bcb571b" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#666666" points="630,-225 523,-225 523,-195 630,-195 630,-225"/>
-<text text-anchor="start" x="531" y="-213" font-family="Helvetica,sans-Serif" font-size="10.00">animartrix_detail::</text>
-<text text-anchor="middle" x="576.5" y="-202" font-family="Helvetica,sans-Serif" font-size="10.00">ANIMartRIX::lerp</text>
+<polygon fill="white" stroke="#666666" points="633,-249 526,-249 526,-219 633,-219 633,-249"/>
+<text text-anchor="start" x="534" y="-237" font-family="Helvetica,sans-Serif" font-size="10.00">animartrix_detail::</text>
+<text text-anchor="middle" x="579.5" y="-226" font-family="Helvetica,sans-Serif" font-size="10.00">ANIMartRIX::lerp</text>
 </a>
 </g>
 </g>
@@ -308,53 +308,71 @@ var sectionId = 'dynsection-0';
 <g id="edge7_Node000005_Node000008" class="edge">
 <title>Node5&#45;&gt;Node8</title>
 <g id="a_edge7_Node000005_Node000008"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M471.52,-242.94C486.33,-238.25 502.81,-233.03 518.21,-228.15"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="519.67,-231.36 528.15,-225 517.56,-224.69 519.67,-231.36"/>
+<path fill="none" stroke="#63b8ff" d="M478.91,-249.47C490.83,-247.62 503.54,-245.65 515.74,-243.75"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="516.5,-247.17 525.84,-242.18 515.42,-240.26 516.5,-247.17"/>
 </a>
 </g>
 </g>
-<!-- Node11 -->
-<g id="Node000011" class="node">
-<title>Node11</title>
-<g id="a_Node000011"><a xlink:href="../../df/d5e/classanimartrix__detail_1_1_a_n_i_mart_r_i_x_ac384f7991b6c2a4906b1783b7aa59638.html#ac384f7991b6c2a4906b1783b7aa59638" target="_top" xlink:title=" ">
+<!-- Node9 -->
+<g id="Node000009" class="node">
+<title>Node9</title>
+<g id="a_Node000009"><a xlink:href="../../d6/d74/namespaceanimartrix__detail_a2c844e2153739ae517f8968d4087bb41.html#a2c844e2153739ae517f8968d4087bb41" target="_top" xlink:title=" ">
+<polygon fill="white" stroke="#666666" points="636,-200.5 523,-200.5 523,-181.5 636,-181.5 636,-200.5"/>
+<text text-anchor="middle" x="579.5" y="-188.5" font-family="Helvetica,sans-Serif" font-size="10.00">animartrix_detail::P</text>
+</a>
+</g>
+</g>
+<!-- Node5&#45;&gt;Node9 -->
+<g id="edge8_Node000005_Node000009" class="edge">
+<title>Node5&#45;&gt;Node9</title>
+<g id="a_edge8_Node000005_Node000009"><a xlink:title=" ">
+<path fill="none" stroke="#63b8ff" d="M461.33,-242.9C469.86,-239.21 478.82,-235.12 487,-231 503.54,-222.67 506.15,-217.7 523,-210 527.63,-207.88 532.56,-205.87 537.51,-204"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="538.74,-207.27 546.96,-200.59 536.37,-200.69 538.74,-207.27"/>
+</a>
+</g>
+</g>
+<!-- Node12 -->
+<g id="Node000012" class="node">
+<title>Node12</title>
+<g id="a_Node000012"><a xlink:href="../../df/d5e/classanimartrix__detail_1_1_a_n_i_mart_r_i_x_ac384f7991b6c2a4906b1783b7aa59638.html#ac384f7991b6c2a4906b1783b7aa59638" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="486.5,-174 359.5,-174 359.5,-144 486.5,-144 486.5,-174"/>
 <text text-anchor="start" x="367.5" y="-162" font-family="Helvetica,sans-Serif" font-size="10.00">animartrix_detail::</text>
 <text text-anchor="middle" x="423" y="-151" font-family="Helvetica,sans-Serif" font-size="10.00">ANIMartRIX::logOutput</text>
 </a>
 </g>
 </g>
-<!-- Node10&#45;&gt;Node11 -->
-<g id="edge10_Node000010_Node000011" class="edge">
-<title>Node10&#45;&gt;Node11</title>
-<g id="a_edge10_Node000010_Node000011"><a xlink:title=" ">
+<!-- Node11&#45;&gt;Node12 -->
+<g id="edge11_Node000011_Node000012" class="edge">
+<title>Node11&#45;&gt;Node12</title>
+<g id="a_edge11_Node000011_Node000012"><a xlink:title=" ">
 <path fill="none" stroke="#63b8ff" d="M297.12,-159C313.89,-159 332.13,-159 349.35,-159"/>
 <polygon fill="#63b8ff" stroke="#63b8ff" points="349.36,-162.5 359.36,-159 349.36,-155.5 349.36,-162.5"/>
 </a>
 </g>
 </g>
-<!-- Node12&#45;&gt;Node5 -->
-<g id="edge13_Node000012_Node000005" class="edge">
-<title>Node12&#45;&gt;Node5</title>
-<g id="a_edge13_Node000012_Node000005"><a xlink:title=" ">
+<!-- Node13&#45;&gt;Node5 -->
+<g id="edge14_Node000013_Node000005" class="edge">
+<title>Node13&#45;&gt;Node5</title>
+<g id="a_edge14_Node000013_Node000005"><a xlink:title=" ">
 <path fill="none" stroke="#63b8ff" d="M290.03,-222.08C300.96,-225.03 312.34,-228.11 323,-231 334.1,-234.01 345.91,-237.22 357.35,-240.34"/>
 <polygon fill="#63b8ff" stroke="#63b8ff" points="356.71,-243.79 367.28,-243.05 358.56,-237.04 356.71,-243.79"/>
 </a>
 </g>
 </g>
-<!-- Node13 -->
-<g id="Node000013" class="node">
-<title>Node13</title>
-<g id="a_Node000013"><a xlink:href="../../df/d5e/classanimartrix__detail_1_1_a_n_i_mart_r_i_x_a2006d9bb43b5840274de66a93529a29f.html#a2006d9bb43b5840274de66a93529a29f" target="_top" xlink:title=" ">
+<!-- Node14 -->
+<g id="Node000014" class="node">
+<title>Node14</title>
+<g id="a_Node000014"><a xlink:href="../../df/d5e/classanimartrix__detail_1_1_a_n_i_mart_r_i_x_a2006d9bb43b5840274de66a93529a29f.html#a2006d9bb43b5840274de66a93529a29f" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="487,-222 359,-222 359,-192 487,-192 487,-222"/>
 <text text-anchor="start" x="367" y="-210" font-family="Helvetica,sans-Serif" font-size="10.00">animartrix_detail::</text>
 <text text-anchor="middle" x="423" y="-199" font-family="Helvetica,sans-Serif" font-size="10.00">ANIMartRIX::map_float</text>
 </a>
 </g>
 </g>
-<!-- Node12&#45;&gt;Node13 -->
-<g id="edge12_Node000012_Node000013" class="edge">
-<title>Node12&#45;&gt;Node13</title>
-<g id="a_edge12_Node000012_Node000013"><a xlink:title=" ">
+<!-- Node13&#45;&gt;Node14 -->
+<g id="edge13_Node000013_Node000014" class="edge">
+<title>Node13&#45;&gt;Node14</title>
+<g id="a_edge13_Node000013_Node000014"><a xlink:title=" ">
 <path fill="none" stroke="#63b8ff" d="M304.54,-207C318.88,-207 333.99,-207 348.43,-207"/>
 <polygon fill="#63b8ff" stroke="#63b8ff" points="348.8,-210.5 358.8,-207 348.8,-203.5 348.8,-210.5"/>
 </a>

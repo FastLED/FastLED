@@ -1,9 +1,7 @@
 <map id="scale8_video_LEAVING_R1_DIRTY" name="scale8_video_LEAVING_R1_DIRTY">
-<area shape="rect" id="Node000001" title="This version of scale8_video() does not clean up the R1 register on AVR." alt="" coords="385,23,556,63"/>
-<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a432eb814ead291e90061f2e73a83c3b0.html#a432eb814ead291e90061f2e73a83c3b0" title=" " alt="" coords="187,5,337,31"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="371,34,337,30,338,24,372,29"/>
-<area shape="rect" id="Node000003" href="$df/d9d/hsv2rgb_8cpp_a06ee0f21e1bf430ea547244f6ed4add8.html#a06ee0f21e1bf430ea547244f6ed4add8" title=" " alt="" coords="195,55,329,80"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="372,57,329,62,329,57,371,52"/>
-<area shape="rect" id="Node000004" href="$dd/dc7/group___h_s_v2_r_g_b_ga30d4c5d63d1eab20b61e14f6429bf634.html#ga30d4c5d63d1eab20b61e14f6429bf634" title="Forward declaration of hsv2rgb_rainbow here, to avoid circular dependencies." alt="" coords="5,55,139,80"/>
-<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="182,70,139,70,139,65,182,65"/>
+<area shape="rect" id="Node000001" title="This version of scale8_video() does not clean up the R1 register on AVR." alt="" coords="204,23,375,63"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_af0ac54635bfbb14a22960c5e56408ed1.html#af0ac54635bfbb14a22960c5e56408ed1" title=" " alt="" coords="5,5,156,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="190,34,156,30,156,24,191,29"/>
+<area shape="rect" id="Node000003" href="$df/d9d/hsv2rgb_8cpp_a06ee0f21e1bf430ea547244f6ed4add8.html#a06ee0f21e1bf430ea547244f6ed4add8" title=" " alt="" coords="14,55,147,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="190,57,148,62,147,57,190,52"/>
 </map>

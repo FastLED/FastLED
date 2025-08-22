@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['queuestate_0',['QueueState',['../de/d10/classfl_1_1_rectangular_draw_buffer_a8a7ee487ac870855ded20e857acbfbbf.html#a8a7ee487ac870855ded20e857acbfbbf',1,'fl::RectangularDrawBuffer']]]
+  ['promisestate_5ft_0',['PromiseState_t',['../df/d9e/namespacefl_1_1detail_ac9d7ddf35218d3b5f801eaf9418f26a0.html#ac9d7ddf35218d3b5f801eaf9418f26a0',1,'fl::detail']]]
 ];

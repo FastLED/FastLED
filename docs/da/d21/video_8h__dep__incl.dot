@@ -32,9 +32,11 @@ digraph "fx/video.h"
   Node1 -> Node12 [id="edge15_Node000001_Node000012",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node12 [id="Node000012",label="fx/fx_engine.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d9/d3c/fx__engine_8h.html",tooltip=" "];
   Node12 -> Node13 [id="edge16_Node000012_Node000013",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node13 [id="Node000013",label="/home/runner/work/FastLED\l/FastLED/examples/FxEngine\l/FxEngine.ino",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/d35/_fx_engine_8ino.html",tooltip="Demonstrates how to use the FxEngine to switch between different effects on a 2D LED matrix."];
+  Node13 [id="Node000013",label="/home/runner/work/FastLED\l/FastLED/examples/FestivalStick/curr.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d06/curr_8h.html",tooltip=" "];
   Node12 -> Node14 [id="edge17_Node000012_Node000014",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node14 [id="Node000014",label="/home/runner/work/FastLED\l/FastLED/examples/wasm\l/wasm.ino",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/dd3/wasm_8ino.html",tooltip="Demonstrates an advanced ino file with multiple effects and UI elements."];
-  Node12 -> Node11 [id="edge18_Node000012_Node000011",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node1 -> Node5 [id="edge19_Node000001_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node14 [id="Node000014",label="/home/runner/work/FastLED\l/FastLED/examples/FxEngine\l/FxEngine.ino",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/d35/_fx_engine_8ino.html",tooltip="Demonstrates FxEngine for switching between effects."];
+  Node12 -> Node15 [id="edge18_Node000012_Node000015",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node15 [id="Node000015",label="/home/runner/work/FastLED\l/FastLED/examples/wasm\l/wasm_impl.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/d40/wasm__impl_8h.html",tooltip=" "];
+  Node12 -> Node11 [id="edge19_Node000012_Node000011",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node5 [id="edge20_Node000001_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];
 }

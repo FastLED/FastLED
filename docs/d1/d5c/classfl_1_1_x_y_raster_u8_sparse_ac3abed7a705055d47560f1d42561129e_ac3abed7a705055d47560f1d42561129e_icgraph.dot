@@ -9,5 +9,9 @@ digraph "fl::XYRasterU8Sparse::draw"
   Node1 [id="Node000001",label="fl::XYRasterU8Sparse\l::draw",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
   Node1 -> Node1 [id="edge1_Node000001_Node000001",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node1 -> Node2 [id="edge2_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node2 [id="Node000002",label="fl::XYRasterU8Sparse\l::drawGradient",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d5c/classfl_1_1_x_y_raster_u8_sparse_acaaa8f4afad65e83f7271463779a2892.html#acaaa8f4afad65e83f7271463779a2892",tooltip=" "];
+  Node2 [id="Node000002",label="fl::XYRasterU8Sparse\l::draw",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d5c/classfl_1_1_x_y_raster_u8_sparse_a9b2bf954962fbad2c01caea1f31db141.html#a9b2bf954962fbad2c01caea1f31db141",tooltip=" "];
+  Node1 -> Node3 [id="edge3_Node000001_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::XYRasterU8Sparse\l::drawGradient",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d5c/classfl_1_1_x_y_raster_u8_sparse_acaaa8f4afad65e83f7271463779a2892.html#acaaa8f4afad65e83f7271463779a2892",tooltip=" "];
+  Node3 -> Node4 [id="edge4_Node000003_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl::XYRasterU8Sparse\l::drawGradient",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d5c/classfl_1_1_x_y_raster_u8_sparse_a44ee037943dc74b1f43f5fea181bed1d.html#a44ee037943dc74b1f43f5fea181bed1d",tooltip=" "];
 }

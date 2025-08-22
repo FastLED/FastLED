@@ -1,0 +1,25 @@
+<map id="fl::HSV16::HSV16" name="fl::HSV16::HSV16">
+<area shape="rect" id="Node000001" title=" " alt="" coords="599,104,731,129"/>
+<area shape="rect" id="Node000002" href="$d4/d5d/structfl_1_1_h_s_v16_a34c2804abad3f305d729b3996def7caa.html#a34c2804abad3f305d729b3996def7caa" title=" " alt="" coords="405,5,537,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="635,98,595,70,550,44,521,33,523,28,552,40,598,66,638,93"/>
+<area shape="rect" id="Node000003" href="$d4/d5d/structfl_1_1_h_s_v16_a87ac3660045b9e5c56cf643f4d4c424e.html#a87ac3660045b9e5c56cf643f4d4c424e" title=" " alt="" coords="405,55,537,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="601,103,522,83,523,78,602,98"/>
+<area shape="rect" id="Node000004" href="$d4/d5d/structfl_1_1_h_s_v16_a0bd2c0fc64fc34d573637c10b849c320.html#a0bd2c0fc64fc34d573637c10b849c320" title=" " alt="" coords="392,104,551,129"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="585,119,551,119,551,114,585,114"/>
+<area shape="rect" id="Node000017" href="$d4/d5d/structfl_1_1_h_s_v16_a04d36265838fb30373c36b632b088c7d.html#a04d36265838fb30373c36b632b088c7d" title=" " alt="" coords="394,153,549,179"/>
+<area shape="poly" id="edge10_Node000001_Node000017" title=" " alt="" coords="602,135,523,156,522,151,601,130"/>
+<area shape="rect" id="Node000018" href="$d4/d5d/structfl_1_1_h_s_v16_af657f670b8f671722186a9dd93a0923b.html#af657f670b8f671722186a9dd93a0923b" title=" " alt="" coords="394,203,549,228"/>
+<area shape="poly" id="edge11_Node000001_Node000018" title=" " alt="" coords="637,140,598,167,552,192,520,205,518,200,550,188,595,162,634,136"/>
+<area shape="rect" id="Node000005" href="$d7/d82/struct_c_r_g_b_a8b78ce444d74f2bc9e63d83bfd1b17ad.html#a8b78ce444d74f2bc9e63d83bfd1b17ad" title=" " alt="" coords="208,104,344,129"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="378,119,345,119,345,114,378,114"/>
+<area shape="rect" id="Node000006" href="$d7/d82/struct_c_r_g_b_afaf81accfbf08b61cc7cf2a4735fd5d6.html#afaf81accfbf08b61cc7cf2a4735fd5d6" title=" " alt="" coords="15,5,151,31"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="246,98,206,71,159,44,130,33,132,28,161,40,208,66,249,94"/>
+<area shape="rect" id="Node000007" href="$d4/d06/curr_8h_a251ace8542fe093844e4ed2709e8a3d7.html#a251ace8542fe093844e4ed2709e8a3d7" title=" " alt="" coords="55,55,110,80"/>
+<area shape="poly" id="edge6_Node000005_Node000007" title=" " alt="" coords="212,103,109,77,111,71,213,98"/>
+<area shape="rect" id="Node000011" href="$d4/d06/curr_8h_af9691ba6aeb226dd50626f04206c6e28.html#af9691ba6aeb226dd50626f04206c6e28" title=" " alt="" coords="11,104,154,129"/>
+<area shape="poly" id="edge7_Node000005_Node000011" title=" " alt="" coords="194,119,154,119,154,114,194,114"/>
+<area shape="rect" id="Node000013" href="$d4/d06/curr_8h_a27ef46fa8abd1dedd29a3904d81622d2.html#a27ef46fa8abd1dedd29a3904d81622d2" title=" " alt="" coords="5,153,160,179"/>
+<area shape="poly" id="edge8_Node000005_Node000013" title=" " alt="" coords="213,135,134,156,133,151,212,130"/>
+<area shape="rect" id="Node000015" href="$db/df4/_color_boost_8h_a4a0d1f144188c96aecbb5efd649d400a.html#a4a0d1f144188c96aecbb5efd649d400a" title=" " alt="" coords="27,203,138,228"/>
+<area shape="poly" id="edge9_Node000005_Node000015" title=" " alt="" coords="248,140,208,167,161,192,130,205,128,200,159,188,205,162,245,135"/>
+</map>

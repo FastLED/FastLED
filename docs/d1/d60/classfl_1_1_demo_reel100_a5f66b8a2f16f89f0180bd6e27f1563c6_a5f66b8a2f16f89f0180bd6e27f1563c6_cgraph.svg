@@ -229,7 +229,7 @@ var sectionId = 'dynsection-0';
 <!-- Node10 -->
 <g id="Node000010" class="node">
 <title>Node10</title>
-<g id="a_Node000010"><a xlink:href="../../d1/dfb/colorutils_8h_a74e1895d1234ab29fef4458532e91090.html#a74e1895d1234ab29fef4458532e91090" target="_top" xlink:title=" ">
+<g id="a_Node000010"><a xlink:href="../../d1/dfb/colorutils_8h_a3d488dd1e2d27e99307310527e51cad3.html#a3d488dd1e2d27e99307310527e51cad3" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="606,-281 505,-281 505,-262 606,-262 606,-281"/>
 <text text-anchor="middle" x="555.5" y="-269" font-family="Helvetica,sans-Serif" font-size="10.00">ColorFromPalette</text>
 </a>
@@ -265,7 +265,7 @@ var sectionId = 'dynsection-0';
 <!-- Node13 -->
 <g id="Node000013" class="node">
 <title>Node13</title>
-<g id="a_Node000013"><a xlink:href="../../d1/dfb/colorutils_8h_a90ef14e5ef0cc07c435a39eca3ddc490.html#a90ef14e5ef0cc07c435a39eca3ddc490" target="_top" xlink:title=" ">
+<g id="a_Node000013"><a xlink:href="../../d1/dfb/colorutils_8h_a399e4e094995b8e97420b89a2dd6548b.html#a399e4e094995b8e97420b89a2dd6548b" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="600,-170 511,-170 511,-151 600,-151 600,-170"/>
 <text text-anchor="middle" x="555.5" y="-158" font-family="Helvetica,sans-Serif" font-size="10.00">fadeToBlackBy</text>
 </a>
@@ -346,7 +346,7 @@ var sectionId = 'dynsection-0';
 <!-- Node20 -->
 <g id="Node000020" class="node">
 <title>Node20</title>
-<g id="a_Node000020"><a xlink:href="../../db/de9/_esp32_s3_i2_s_demo_8ino_a7a96d6e71a7754105104c5977efde754.html#a7a96d6e71a7754105104c5977efde754" target="_top" xlink:title=" ">
+<g id="a_Node000020"><a xlink:href="../../d1/dfb/colorutils_8h_a8cfac7f712d38ac9aa9bcd172283b453.html#a8cfac7f712d38ac9aa9bcd172283b453" target="_top" xlink:title="Fill a range of LEDs with a rainbow of colors.">
 <polygon fill="white" stroke="#666666" points="715,-19 642,-19 642,0 715,0 715,-19"/>
 <text text-anchor="middle" x="678.5" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">fill_rainbow</text>
 </a>

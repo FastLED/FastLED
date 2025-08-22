@@ -32,7 +32,7 @@
 <!-- Node2 -->
 <g id="Node000002" class="node">
 <title>Node2</title>
-<g id="a_Node000002"><a xlink:href="../../dc/ded/_fx_pacifica_8ino.html" target="_top" xlink:title=" ">
+<g id="a_Node000002"><a xlink:href="../../dc/ded/_fx_pacifica_8ino.html" target="_top" xlink:title="Pacifica ocean effect with ScreenMap.">
 <polygon fill="white" stroke="#666666" points="177.5,-41 16.5,-41 16.5,0 177.5,0 177.5,-41"/>
 <text text-anchor="start" x="24.5" y="-29" font-family="Helvetica,sans-Serif" font-size="10.00">/home/runner/work/FastLED</text>
 <text text-anchor="start" x="24.5" y="-18" font-family="Helvetica,sans-Serif" font-size="10.00">/FastLED/examples/FxPacifica</text>

@@ -8,8 +8,5 @@ digraph "fl::UICheckbox::UICheckbox"
   rankdir="LR";
   Node1 [id="Node000001",label="fl::UICheckbox::UICheckbox",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
   Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
-  Node2 [id="Node000002",label="fl::UICheckboxImpl\l::UICheckboxImpl",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d2e/classfl_1_1_u_i_checkbox_impl_ad67db98e127fee84a13a9e26731373cf.html#ad67db98e127fee84a13a9e26731373cf",tooltip=" "];
-  Node2 -> Node3 [id="edge2_Node000002_Node000003",color="steelblue1",style="solid",tooltip=" "];
-  Node3 [id="Node000003",label="fl::UICheckboxImpl\l::value",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d2e/classfl_1_1_u_i_checkbox_impl_ac636a695e20dcb53580c27f99b279eea.html#ac636a695e20dcb53580c27f99b279eea",tooltip=" "];
-  Node1 -> Node3 [id="edge3_Node000001_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl::UICheckbox::value",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/dfe/classfl_1_1_u_i_checkbox_a999a2bc4a7105a7b8975aee0a48302c3.html#a999a2bc4a7105a7b8975aee0a48302c3",tooltip=" "];
 }

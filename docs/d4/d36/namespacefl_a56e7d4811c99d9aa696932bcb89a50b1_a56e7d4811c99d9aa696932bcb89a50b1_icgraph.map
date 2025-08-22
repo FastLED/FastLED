@@ -1,38 +1,45 @@
 <map id="fl::end" name="fl::end">
-<area shape="rect" id="Node000001" title=" " alt="" coords="685,311,748,337"/>
-<area shape="rect" id="Node000002" href="$da/d39/classfl_1_1_audio_sample_impl_a4680a44dd27a3029862a21c3dbe9ac75.html#a4680a44dd27a3029862a21c3dbe9ac75" title=" " alt="" coords="455,5,608,45"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="713,298,709,247,698,183,675,117,657,86,636,59,607,41,610,36,639,55,662,83,680,115,703,182,715,247,718,297"/>
-<area shape="rect" id="Node000003" href="$d4/df6/class_led_rope_t_c_l_a842cac2350fad4c68d21d232f6a8a4c0.html#a842cac2350fad4c68d21d232f6a8a4c0" title=" " alt="" coords="460,70,603,95"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="711,298,705,256,692,205,670,154,654,130,636,110,620,99,602,92,604,87,622,95,639,106,659,127,675,151,697,204,710,255,716,297"/>
-<area shape="rect" id="Node000004" href="$d4/df6/class_led_rope_t_c_l_a90f6e3d74b585d37be799107d77421c8.html#a90f6e3d74b585d37be799107d77421c8" title=" " alt="" coords="425,120,637,160"/>
-<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="706,299,682,236,662,203,636,174,618,162,621,158,639,170,666,199,687,234,711,297"/>
-<area shape="rect" id="Node000005" href="$dc/d96/classfl_1_1_str_n_a12b22d1807a3dcaedeb7e8920d0854b4.html#a12b22d1807a3dcaedeb7e8920d0854b4" title=" " alt="" coords="464,185,599,210"/>
-<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="699,301,672,265,636,232,595,213,597,208,639,227,676,261,703,298"/>
-<area shape="rect" id="Node000006" href="$dc/d96/classfl_1_1_str_n_aafcfa50cdae5aa91c45d0d98c01f265d.html#aafcfa50cdae5aa91c45d0d98c01f265d" title=" " alt="" coords="231,203,332,229"/>
-<area shape="poly" id="edge19_Node000001_Node000006" title=" " alt="" coords="687,305,663,289,636,276,555,251,472,234,395,225,332,220,333,215,395,220,473,229,557,246,638,271,666,284,690,300"/>
-<area shape="rect" id="Node000007" href="$d4/d36/namespacefl_acfaa9ea12b5d90b75331982e844c2626.html#acfaa9ea12b5d90b75331982e844c2626" title=" " alt="" coords="468,286,595,311"/>
-<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="671,321,594,310,595,305,672,315"/>
-<area shape="rect" id="Node000008" href="$d4/d36/namespacefl_a76248cce8d7b5923cdd01a26e6fccce8.html#a76248cce8d7b5923cdd01a26e6fccce8" title=" " alt="" coords="472,335,591,361"/>
-<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="672,332,591,343,591,338,671,327"/>
-<area shape="rect" id="Node000014" href="$d4/d36/namespacefl_a32fe6c8d73bfb819df6f8a16185feabc.html#a32fe6c8d73bfb819df6f8a16185feabc" title=" " alt="" coords="473,385,589,410"/>
-<area shape="poly" id="edge11_Node000001_Node000014" title=" " alt="" coords="688,347,638,374,590,390,589,384,636,370,686,342"/>
-<area shape="rect" id="Node000016" href="$d4/d36/namespacefl_a976c550d29f5d8ac9137288b1e946028.html#a976c550d29f5d8ac9137288b1e946028" title="Traverse a grid segment by selecting the cells that are crossed." alt="" coords="193,486,370,511"/>
-<area shape="poly" id="edge13_Node000001_Node000016" title=" " alt="" coords="704,350,678,388,660,408,639,424,597,438,523,455,353,489,352,483,522,450,596,433,636,419,656,404,673,385,700,347"/>
-<area shape="rect" id="Node000017" href="$d4/d36/namespacefl_a7206bc1b415f44667b2bb541529e4324.html#a7206bc1b415f44667b2bb541529e4324" title="Traverse a grid segment using fixed&#45;point 8.8 arithmetic." alt="" coords="435,486,628,511"/>
-<area shape="poly" id="edge14_Node000001_Node000017" title=" " alt="" coords="710,351,685,410,665,442,639,469,603,488,601,483,636,465,661,438,680,407,705,349"/>
-<area shape="rect" id="Node000018" href="$d4/d36/namespacefl_aa28553af69ffe6e3a60cde7f9fc02b4d.html#aa28553af69ffe6e3a60cde7f9fc02b4d" title=" " alt="" coords="435,535,628,561"/>
-<area shape="poly" id="edge16_Node000001_Node000018" title=" " alt="" coords="715,351,709,390,695,437,673,485,657,507,639,526,621,537,618,533,636,522,653,504,668,482,690,435,703,389,710,350"/>
-<area shape="rect" id="Node000019" href="$d4/d36/namespacefl_a0585edea80d3b23fb7fcd54b95a09bbc.html#a0585edea80d3b23fb7fcd54b95a09bbc" title="Traverse a grid segment using floating point arithmetic." alt="" coords="426,585,637,610"/>
-<area shape="poly" id="edge18_Node000001_Node000019" title=" " alt="" coords="718,351,714,399,702,460,679,522,661,550,639,575,623,587,620,582,636,571,657,547,674,520,697,458,709,399,713,351"/>
-<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="450,206,332,215,332,210,450,201"/>
-<area shape="rect" id="Node000009" href="$d8/d62/classfl_1_1_time_clamped_transition_a5b7eeb214cf644e38a7d385825aa82ef.html#a5b7eeb214cf644e38a7d385825aa82ef" title=" " alt="" coords="185,271,377,311"/>
-<area shape="poly" id="edge8_Node000008_Node000009" title=" " alt="" coords="461,335,368,313,370,308,462,330"/>
-<area shape="rect" id="Node000010" href="$d0/d9d/classfl_1_1_time_ramp_a17739bd3c0b0ea5b1aaac7670f4edfb0.html#a17739bd3c0b0ea5b1aaac7670f4edfb0" title="Compute current 0–255 output based on how much time has elapsed since trigger()." alt="" coords="196,335,367,361"/>
-<area shape="poly" id="edge9_Node000008_Node000010" title=" " alt="" coords="458,351,367,351,367,345,458,345"/>
-<area shape="rect" id="Node000011" href="$d9/d29/wavefx_8cpp_ad9a319c4c09fbbad4700861a49058f41.html#ad9a319c4c09fbbad4700861a49058f41" title=" " alt="" coords="5,335,137,361"/>
-<area shape="poly" id="edge10_Node000010_Node000011" title=" " alt="" coords="182,351,138,351,138,345,182,345"/>
-<area shape="rect" id="Node000015" href="$d8/d62/classfl_1_1_time_clamped_transition_a6fcaab03626cc5bd6423bdb8777eb358.html#a6fcaab03626cc5bd6423bdb8777eb358" title=" " alt="" coords="185,385,377,425"/>
-<area shape="poly" id="edge12_Node000014_Node000015" title=" " alt="" coords="460,402,378,405,377,400,460,397"/>
-<area shape="poly" id="edge15_Node000017_Node000016" title=" " alt="" coords="421,501,370,501,370,496,421,496"/>
-<area shape="poly" id="edge17_Node000018_Node000016" title=" " alt="" coords="452,535,346,514,347,509,454,530"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="700,414,763,439"/>
+<area shape="rect" id="Node000002" href="$da/d56/classfl_1_1_u_i_dropdown_impl_ab93541fc23ea3ed022131ff83b809436.html#ab93541fc23ea3ed022131ff83b809436" title=" " alt="" coords="473,5,619,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="725,400,717,322,702,220,680,122,666,85,650,59,636,47,618,39,621,34,639,43,654,56,671,82,685,121,707,219,722,321,731,400"/>
+<area shape="rect" id="Node000003" href="$da/d39/classfl_1_1_audio_sample_impl_aeb218e025a921782e078a44dddad6288.html#aeb218e025a921782e078a44dddad6288" title=" " alt="" coords="469,69,623,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="724,401,714,335,698,252,676,174,664,144,650,123,622,104,625,100,654,119,668,141,681,172,703,251,719,334,729,400"/>
+<area shape="rect" id="Node000004" href="$d4/df6/class_led_rope_t_c_l_a842cac2350fad4c68d21d232f6a8a4c0.html#a842cac2350fad4c68d21d232f6a8a4c0" title=" " alt="" coords="475,134,617,159"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="727,400,724,351,712,290,689,227,672,199,650,174,635,163,617,156,619,151,637,158,654,170,676,196,694,225,717,289,729,351,733,400"/>
+<area shape="rect" id="Node000005" href="$d4/df6/class_led_rope_t_c_l_a90f6e3d74b585d37be799107d77421c8.html#a90f6e3d74b585d37be799107d77421c8" title=" " alt="" coords="440,184,652,224"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="724,401,716,365,702,321,681,276,650,238,634,226,637,222,654,234,685,273,707,319,721,363,729,400"/>
+<area shape="rect" id="Node000006" href="$d4/d36/namespacefl_a29ae9bad91ab6b7de10679e9325e90f6.html#a29ae9bad91ab6b7de10679e9325e90f6" title=" " alt="" coords="457,249,635,274"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="720,402,695,344,676,314,650,289,628,276,631,272,654,285,680,311,700,342,725,400"/>
+<area shape="rect" id="Node000007" href="$da/d18/classfl_1_1_inlined_vector_a2c53eae5f908b921a55428b9212516bc.html#a2c53eae5f908b921a55428b9212516bc" title=" " alt="" coords="481,299,611,339"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="707,406,681,382,651,360,610,341,613,336,653,355,685,378,711,402"/>
+<area shape="rect" id="Node000008" href="$df/d9e/namespacefl_1_1detail_a65d8f9d537301da150462a7e57119753.html#a65d8f9d537301da150462a7e57119753" title=" " alt="" coords="5,410,152,435"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="686,413,652,404,526,389,427,389,200,409,152,414,152,409,200,404,427,384,526,384,652,399,688,407"/>
+<area shape="rect" id="Node000009" href="$df/d9e/namespacefl_1_1detail_a598bae4f63ec4ee6b44179ca9a27ba13.html#a598bae4f63ec4ee6b44179ca9a27ba13" title=" " alt="" coords="473,414,619,439"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="686,429,619,429,619,424,686,424"/>
+<area shape="rect" id="Node000011" href="$d4/d36/namespacefl_a30ffef286f7af85cf7ccca7d3bf8f5d8.html#a30ffef286f7af85cf7ccca7d3bf8f5d8" title=" " alt="" coords="483,463,609,489"/>
+<area shape="poly" id="edge12_Node000001_Node000011" title=" " alt="" coords="688,443,653,453,604,466,602,461,651,448,686,438"/>
+<area shape="rect" id="Node000012" href="$d4/d36/namespacefl_ac112e4a6b110c36f3ea7b9144269bbff.html#ac112e4a6b110c36f3ea7b9144269bbff" title=" " alt="" coords="487,513,605,538"/>
+<area shape="poly" id="edge13_Node000001_Node000012" title=" " alt="" coords="713,452,686,479,653,502,607,519,605,514,651,498,683,474,709,448"/>
+<area shape="rect" id="Node000015" href="$d4/d36/namespacefl_a8287b5572a9f4e18959e3ba2465c3a69.html#a8287b5572a9f4e18959e3ba2465c3a69" title=" " alt="" coords="488,562,604,587"/>
+<area shape="poly" id="edge16_Node000001_Node000015" title=" " alt="" coords="723,453,697,503,678,530,654,552,630,564,605,572,604,566,628,559,650,547,674,526,693,501,718,451"/>
+<area shape="rect" id="Node000017" href="$d4/d36/namespacefl_a976c550d29f5d8ac9137288b1e946028.html#a976c550d29f5d8ac9137288b1e946028" title="Traverse a grid segment by selecting the cells that are crossed." alt="" coords="207,690,385,715"/>
+<area shape="poly" id="edge18_Node000001_Node000017" title=" " alt="" coords="728,454,720,487,705,527,684,567,654,601,626,620,601,630,576,636,552,637,501,639,473,643,441,653,417,666,393,680,355,692,353,687,391,675,415,662,439,648,471,638,500,634,552,632,576,630,599,625,624,615,650,597,679,564,700,525,714,486,723,452"/>
+<area shape="rect" id="Node000018" href="$d4/d36/namespacefl_a7206bc1b415f44667b2bb541529e4324.html#a7206bc1b415f44667b2bb541529e4324" title="Traverse a grid segment using fixed&#45;point 8.8 arithmetic." alt="" coords="449,663,643,689"/>
+<area shape="poly" id="edge19_Node000001_Node000018" title=" " alt="" coords="731,453,724,495,711,547,689,600,673,624,654,646,622,665,619,661,650,642,669,621,684,597,706,545,719,494,725,453"/>
+<area shape="rect" id="Node000019" href="$d4/d36/namespacefl_aa28553af69ffe6e3a60cde7f9fc02b4d.html#aa28553af69ffe6e3a60cde7f9fc02b4d" title=" " alt="" coords="449,713,643,738"/>
+<area shape="poly" id="edge21_Node000001_Node000019" title=" " alt="" coords="733,454,731,506,720,573,710,609,696,643,678,675,654,703,638,715,635,710,650,699,673,672,692,641,705,607,715,572,726,506,728,453"/>
+<area shape="rect" id="Node000020" href="$d4/d36/namespacefl_a0585edea80d3b23fb7fcd54b95a09bbc.html#a0585edea80d3b23fb7fcd54b95a09bbc" title="Traverse a grid segment using floating point arithmetic." alt="" coords="441,762,651,787"/>
+<area shape="poly" id="edge23_Node000001_Node000020" title=" " alt="" coords="730,453,721,523,705,613,683,697,669,730,654,753,638,764,635,760,650,749,665,727,678,695,700,611,716,522,725,452"/>
+<area shape="poly" id="edge9_Node000009_Node000008" title=" " alt="" coords="459,429,152,426,152,421,459,423"/>
+<area shape="rect" id="Node000010" href="$df/d9e/namespacefl_1_1detail_a82da88f317b2e5ccf9f9a1a2bae77352.html#a82da88f317b2e5ccf9f9a1a2bae77352" title=" " alt="" coords="231,461,361,486"/>
+<area shape="poly" id="edge10_Node000009_Node000010" title=" " alt="" coords="464,445,362,464,361,459,463,439"/>
+<area shape="poly" id="edge11_Node000010_Node000008" title=" " alt="" coords="227,460,133,438,134,433,228,455"/>
+<area shape="rect" id="Node000013" href="$d8/d62/classfl_1_1_time_clamped_transition_a08a35e0e5d53cf2102d244d8ff93ad4c.html#a08a35e0e5d53cf2102d244d8ff93ad4c" title=" " alt="" coords="200,511,392,551"/>
+<area shape="poly" id="edge14_Node000012_Node000013" title=" " alt="" coords="473,530,392,531,392,526,472,524"/>
+<area shape="rect" id="Node000014" href="$d0/d9d/classfl_1_1_time_ramp_aa060cb7edcafe345e03bfac190e98fe4.html#aa060cb7edcafe345e03bfac190e98fe4" title="Compute current 0–255 output based on how much time has elapsed since trigger()." alt="" coords="211,575,381,601"/>
+<area shape="poly" id="edge15_Node000012_Node000014" title=" " alt="" coords="474,544,441,552,393,565,346,578,344,573,391,560,439,547,473,539"/>
+<area shape="rect" id="Node000016" href="$d8/d62/classfl_1_1_time_clamped_transition_ab588489064f1e95238f5414268909602.html#ab588489064f1e95238f5414268909602" title=" " alt="" coords="200,625,392,665"/>
+<area shape="poly" id="edge17_Node000015_Node000016" title=" " alt="" coords="487,594,368,628,367,623,486,589"/>
+<area shape="poly" id="edge20_Node000018_Node000017" title=" " alt="" coords="436,690,385,696,385,691,435,685"/>
+<area shape="poly" id="edge22_Node000019_Node000017" title=" " alt="" coords="435,718,385,713,385,708,436,713"/>
 </map>

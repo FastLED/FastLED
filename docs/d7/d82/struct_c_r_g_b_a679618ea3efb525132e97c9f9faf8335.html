@@ -101,7 +101,7 @@ $(function(){initNavTree('d7/d82/struct_c_r_g_b_a679618ea3efb525132e97c9f9faf833
 
 <div class="contents">
 <a id="a679618ea3efb525132e97c9f9faf8335" name="a679618ea3efb525132e97c9f9faf8335"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a679618ea3efb525132e97c9f9faf8335">&#9670;&#160;</a></span>CRGB() <span class="overload">[7/7]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a679618ea3efb525132e97c9f9faf8335">&#9670;&#160;</a></span>CRGB() <span class="overload">[7/8]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -112,7 +112,7 @@ $(function(){initNavTree('d7/d82/struct_c_r_g_b_a679618ea3efb525132e97c9f9faf833
         <tr>
           <td class="memname"><a class="el" href="../../d4/d64/force__inline_8h_a2f767b53d92c9d761d9f8d28a35d80c7.html#a2f767b53d92c9d761d9f8d28a35d80c7">FASTLED_FORCE_INLINE</a> CRGB::CRGB </td>
           <td>(</td>
-          <td class="paramtype">const <a class="el" href="../../dc/d53/struct_c_h_s_v.html">CHSV</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>rhs</em></span></td><td>)</td>
+          <td class="paramtype">const <a class="el" href="../../db/ddc/structfl_1_1_c_h_s_v.html">CHSV</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>rhs</em></span></td><td>)</td>
           <td></td>
         </tr>
       </table>
@@ -125,19 +125,19 @@ $(function(){initNavTree('d7/d82/struct_c_r_g_b_a679618ea3efb525132e97c9f9faf833
 
 <p>Allow construction from a <a class="el" href="../../dc/d53/struct_c_h_s_v.html" title="Representation of an HSV pixel (hue, saturation, value (aka brightness)).">CHSV</a> color. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../db/dd1/crgb_8h_source.html#l00147">147</a> of file <a class="el" href="../../db/dd1/crgb_8h_source.html">crgb.h</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  148</span>    {</div>
-<div class="line"><span class="lineno">  149</span>        <a class="code hl_function" href="../../db/d87/group___pixel_types_gab316cfeb8bd5f37d8faaf761ad3c834b.html#gab316cfeb8bd5f37d8faaf761ad3c834b">hsv2rgb_rainbow</a>( rhs, *<span class="keyword">this</span>);</div>
-<div class="line"><span class="lineno">  150</span>    }</div>
-<div class="ttc" id="agroup___pixel_types_gab316cfeb8bd5f37d8faaf761ad3c834b_html_gab316cfeb8bd5f37d8faaf761ad3c834b"><div class="ttname"><a href="../../db/d87/group___pixel_types_gab316cfeb8bd5f37d8faaf761ad3c834b.html#gab316cfeb8bd5f37d8faaf761ad3c834b">hsv2rgb_rainbow</a></div><div class="ttdeci">void hsv2rgb_rainbow(const struct CHSV &amp;hsv, struct CRGB &amp;rgb)</div><div class="ttdoc">Forward declaration of hsv2rgb_rainbow here, to avoid circular dependencies.</div></div>
+<p class="definition">Definition at line <a class="el" href="../../db/dd1/crgb_8h_source.html#l00206">206</a> of file <a class="el" href="../../db/dd1/crgb_8h_source.html">crgb.h</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  207</span>    {</div>
+<div class="line"><span class="lineno">  208</span>        <a class="code hl_function" href="../../db/dd1/crgb_8h_a26eaa8327d3606b692249e6449529c3b.html#a26eaa8327d3606b692249e6449529c3b">hsv2rgb_dispatch</a>( rhs, *<span class="keyword">this</span>);</div>
+<div class="line"><span class="lineno">  209</span>    }</div>
+<div class="ttc" id="acrgb_8h_a26eaa8327d3606b692249e6449529c3b_html_a26eaa8327d3606b692249e6449529c3b"><div class="ttname"><a href="../../db/dd1/crgb_8h_a26eaa8327d3606b692249e6449529c3b.html#a26eaa8327d3606b692249e6449529c3b">hsv2rgb_dispatch</a></div><div class="ttdeci">FASTLED_FORCE_INLINE void hsv2rgb_dispatch(const struct CHSV *phsv, struct CRGB *prgb, int numLeds)</div><div class="ttdoc">HSV conversion function selection based on compile-time defines This allows users to configure which ...</div><div class="ttdef"><b>Definition</b> <a href="../../db/dd1/crgb_8h_source.html#l00057">crgb.h:57</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d4/d64/force__inline_8h_source.html#l00006">FASTLED_FORCE_INLINE</a>, and <a class="el" href="../../db/d87/group___pixel_types_gab316cfeb8bd5f37d8faaf761ad3c834b.html#gab316cfeb8bd5f37d8faaf761ad3c834b">hsv2rgb_rainbow()</a>.</p>
+<p class="reference">References <a class="el" href="../../d4/d64/force__inline_8h_source.html#l00006">FASTLED_FORCE_INLINE</a>, and <a class="el" href="../../db/dd1/crgb_8h_source.html#l00057">hsv2rgb_dispatch()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-0-content" class="dyncontent" style="display:none;">
-<div class="center"><iframe scrolling="no" frameborder="0" src="../../d7/d82/struct_c_r_g_b_a679618ea3efb525132e97c9f9faf8335_a679618ea3efb525132e97c9f9faf8335_cgraph.svg" width="296" height="36"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<div class="center"><iframe scrolling="no" frameborder="0" src="../../d7/d82/struct_c_r_g_b_a679618ea3efb525132e97c9f9faf8335_a679618ea3efb525132e97c9f9faf8335_cgraph.svg" width="640" height="207"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
 </div>
 
 </div>
@@ -149,7 +149,7 @@ $(function(){initNavTree('d7/d82/struct_c_r_g_b_a679618ea3efb525132e97c9f9faf833
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d7/d82/struct_c_r_g_b.html">CRGB</a></li>
-    <li class="footer">Generated on Tue Jun 24 2025 00:58:15 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Fri Aug 22 2025 20:59:35 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

@@ -8,5 +8,5 @@ digraph "fl::InlinedVector::data"
   rankdir="RL";
   Node1 [id="Node000001",label="fl::InlinedVector::data",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
   Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node2 [id="Node000002",label="fl::Str::append",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d24/classfl_1_1_str_a41ab16ff19d7edec19e22e2c61515adb.html#a41ab16ff19d7edec19e22e2c61515adb",tooltip=" "];
+  Node2 [id="Node000002",label="fl::string::append",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/db2/classfl_1_1string_a27a670af96f18bcf5177087e12114af8.html#a27a670af96f18bcf5177087e12114af8",tooltip=" "];
 }

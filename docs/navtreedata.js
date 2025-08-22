@@ -25,13 +25,129 @@
 var NAVTREE =
 [
   [ "FastLED", "index.html", [
-    [ "FastLED Library", "index.html", "index" ],
+    [ "FastLED - The Universal LED Library", "index.html", "index" ],
+    [ "FastLED Source Tree (<tt>src/</tt>)", "d3/dcc/md__r_e_a_d_m_e.html", [
+      [ "Table of Contents", "d3/dcc/md__r_e_a_d_m_e.html#autotoc_md75", null ],
+      [ "Overview and Quick Start", "d3/dcc/md__r_e_a_d_m_e.html#autotoc_md77", [
+        [ "What lives in src/", "d3/dcc/md__r_e_a_d_m_e.html#autotoc_md78", null ],
+        [ "Include policy", "d3/dcc/md__r_e_a_d_m_e.html#autotoc_md79", null ]
+      ] ],
+      [ "Directory Map (7 major areas)", "d3/dcc/md__r_e_a_d_m_e.html#autotoc_md81", [
+        [ "Public headers and glue", "d3/dcc/md__r_e_a_d_m_e.html#autotoc_md82", null ],
+        [ "Core foundation: fl/", "d3/dcc/md__r_e_a_d_m_e.html#autotoc_md83", null ],
+        [ "Effects and graphics: fx/", "d3/dcc/md__r_e_a_d_m_e.html#autotoc_md84", null ],
+        [ "Platforms and HAL: platforms/", "d3/dcc/md__r_e_a_d_m_e.html#autotoc_md85", null ],
+        [ "Sensors and input: sensors/", "d3/dcc/md__r_e_a_d_m_e.html#autotoc_md86", null ],
+        [ "Fonts and assets: fonts/", "d3/dcc/md__r_e_a_d_m_e.html#autotoc_md87", null ],
+        [ "Third‑party and shims: third_party/", "d3/dcc/md__r_e_a_d_m_e.html#autotoc_md88", null ]
+      ] ],
+      [ "Quick Usage Examples", "d3/dcc/md__r_e_a_d_m_e.html#autotoc_md90", [
+        [ "Classic strip setup", "d3/dcc/md__r_e_a_d_m_e.html#autotoc_md91", null ],
+        [ "2D matrix with fl::Leds + XYMap", "d3/dcc/md__r_e_a_d_m_e.html#autotoc_md92", null ],
+        [ "Resampling pipeline (downscale/upscale)", "d3/dcc/md__r_e_a_d_m_e.html#autotoc_md93", null ],
+        [ "JSON UI (WASM)", "d3/dcc/md__r_e_a_d_m_e.html#autotoc_md94", null ]
+      ] ],
+      [ "Deep Dives by Area", "d3/dcc/md__r_e_a_d_m_e.html#autotoc_md96", [
+        [ "Public API surface", "d3/dcc/md__r_e_a_d_m_e.html#autotoc_md97", null ],
+        [ "Core foundation cross‑reference", "d3/dcc/md__r_e_a_d_m_e.html#autotoc_md98", null ],
+        [ "FX engine building blocks", "d3/dcc/md__r_e_a_d_m_e.html#autotoc_md99", null ],
+        [ "Platform layer and stubs", "d3/dcc/md__r_e_a_d_m_e.html#autotoc_md100", null ],
+        [ "WASM specifics", "d3/dcc/md__r_e_a_d_m_e.html#autotoc_md101", null ],
+        [ "Testing and compile‑time gates", "d3/dcc/md__r_e_a_d_m_e.html#autotoc_md102", null ]
+      ] ],
+      [ "Guidance for New Users", "d3/dcc/md__r_e_a_d_m_e.html#autotoc_md104", null ],
+      [ "Guidance for C++ Developers", "d3/dcc/md__r_e_a_d_m_e.html#autotoc_md105", null ]
+    ] ],
+    [ "FastLED Examples Agent Guidelines", "df/dbc/md__2home_2runner_2work_2_fast_l_e_d_2_fast_l_e_d_2examples_2_a_g_e_n_t_s.html", [
+      [ "🚨 CRITICAL: .INO FILE CREATION RULES", "df/dbc/md__2home_2runner_2work_2_fast_l_e_d_2_fast_l_e_d_2examples_2_a_g_e_n_t_s.html#autotoc_md109", [
+        [ "⚠️ THINK BEFORE CREATING .INO FILES ⚠️", "df/dbc/md__2home_2runner_2work_2_fast_l_e_d_2_fast_l_e_d_2examples_2_a_g_e_n_t_s.html#autotoc_md110", null ],
+        [ "🚫 WHEN NOT TO CREATE .INO FILES:", "df/dbc/md__2home_2runner_2work_2_fast_l_e_d_2_fast_l_e_d_2examples_2_a_g_e_n_t_s.html#autotoc_md111", null ],
+        [ "✅ WHEN TO CREATE .INO FILES:", "df/dbc/md__2home_2runner_2work_2_fast_l_e_d_2_fast_l_e_d_2examples_2_a_g_e_n_t_s.html#autotoc_md112", [
+          [ "Temporary Testing (.ino)", "df/dbc/md__2home_2runner_2work_2_fast_l_e_d_2_fast_l_e_d_2examples_2_a_g_e_n_t_s.html#autotoc_md113", null ],
+          [ "Significant New Feature Examples", "df/dbc/md__2home_2runner_2work_2_fast_l_e_d_2_fast_l_e_d_2examples_2_a_g_e_n_t_s.html#autotoc_md114", null ]
+        ] ],
+        [ "📋 CREATION CHECKLIST:", "df/dbc/md__2home_2runner_2work_2_fast_l_e_d_2_fast_l_e_d_2examples_2_a_g_e_n_t_s.html#autotoc_md115", null ],
+        [ "🔍 REVIEW CRITERIA:", "df/dbc/md__2home_2runner_2work_2_fast_l_e_d_2_fast_l_e_d_2examples_2_a_g_e_n_t_s.html#autotoc_md116", null ],
+        [ "❌ EXAMPLES OF WHAT NOT TO CREATE:", "df/dbc/md__2home_2runner_2work_2_fast_l_e_d_2_fast_l_e_d_2examples_2_a_g_e_n_t_s.html#autotoc_md117", null ],
+        [ "✅ EXAMPLES OF JUSTIFIED CREATIONS:", "df/dbc/md__2home_2runner_2work_2_fast_l_e_d_2_fast_l_e_d_2examples_2_a_g_e_n_t_s.html#autotoc_md118", null ],
+        [ "🧹 CLEANUP RESPONSIBILITY:", "df/dbc/md__2home_2runner_2work_2_fast_l_e_d_2_fast_l_e_d_2examples_2_a_g_e_n_t_s.html#autotoc_md119", null ]
+      ] ],
+      [ "Code Standards for Examples", "df/dbc/md__2home_2runner_2work_2_fast_l_e_d_2_fast_l_e_d_2examples_2_a_g_e_n_t_s.html#autotoc_md120", [
+        [ "Use fl:: Namespace (Not std::)", "df/dbc/md__2home_2runner_2work_2_fast_l_e_d_2_fast_l_e_d_2examples_2_a_g_e_n_t_s.html#autotoc_md121", null ],
+        [ "Memory Management", "df/dbc/md__2home_2runner_2work_2_fast_l_e_d_2_fast_l_e_d_2examples_2_a_g_e_n_t_s.html#autotoc_md122", null ],
+        [ "Debug Printing", "df/dbc/md__2home_2runner_2work_2_fast_l_e_d_2_fast_l_e_d_2examples_2_a_g_e_n_t_s.html#autotoc_md123", null ],
+        [ "No Emoticons or Emojis", "df/dbc/md__2home_2runner_2work_2_fast_l_e_d_2_fast_l_e_d_2examples_2_a_g_e_n_t_s.html#autotoc_md124", null ],
+        [ "JSON Usage - Ideal API Patterns", "df/dbc/md__2home_2runner_2work_2_fast_l_e_d_2_fast_l_e_d_2examples_2_a_g_e_n_t_s.html#autotoc_md125", null ]
+      ] ],
+      [ "Example Compilation Commands", "df/dbc/md__2home_2runner_2work_2_fast_l_e_d_2_fast_l_e_d_2examples_2_a_g_e_n_t_s.html#autotoc_md126", [
+        [ "Platform Compilation", "df/dbc/md__2home_2runner_2work_2_fast_l_e_d_2_fast_l_e_d_2examples_2_a_g_e_n_t_s.html#autotoc_md127", null ],
+        [ "WASM Compilation", "df/dbc/md__2home_2runner_2work_2_fast_l_e_d_2_fast_l_e_d_2examples_2_a_g_e_n_t_s.html#autotoc_md128", null ],
+        [ "WASM Testing Requirements", "df/dbc/md__2home_2runner_2work_2_fast_l_e_d_2_fast_l_e_d_2examples_2_a_g_e_n_t_s.html#autotoc_md129", null ]
+      ] ],
+      [ "Compiler Warning Suppression", "df/dbc/md__2home_2runner_2work_2_fast_l_e_d_2_fast_l_e_d_2examples_2_a_g_e_n_t_s.html#autotoc_md130", null ],
+      [ "Exception Handling", "df/dbc/md__2home_2runner_2work_2_fast_l_e_d_2_fast_l_e_d_2examples_2_a_g_e_n_t_s.html#autotoc_md131", null ],
+      [ "Memory Refresh Rule", "df/dbc/md__2home_2runner_2work_2_fast_l_e_d_2_fast_l_e_d_2examples_2_a_g_e_n_t_s.html#autotoc_md132", null ]
+    ] ],
+    [ "NoiseRing Enhanced Design Document", "dc/def/md__2home_2runner_2work_2_fast_l_e_d_2_fast_l_e_d_2examples_2_fx_noise_ring_2_n_o_i_s_e___r_i_n_g___i_d_e_a_s.html", [
+      [ "Overview", "dc/def/md__2home_2runner_2work_2_fast_l_e_d_2_fast_l_e_d_2examples_2_fx_noise_ring_2_n_o_i_s_e___r_i_n_g___i_d_e_a_s.html#autotoc_md182", null ],
+      [ "Core Features", "dc/def/md__2home_2runner_2work_2_fast_l_e_d_2_fast_l_e_d_2examples_2_fx_noise_ring_2_n_o_i_s_e___r_i_n_g___i_d_e_a_s.html#autotoc_md183", [
+        [ "Automatic Cycling", "dc/def/md__2home_2runner_2work_2_fast_l_e_d_2_fast_l_e_d_2examples_2_fx_noise_ring_2_n_o_i_s_e___r_i_n_g___i_d_e_a_s.html#autotoc_md184", null ],
+        [ "User Interface Controls", "dc/def/md__2home_2runner_2work_2_fast_l_e_d_2_fast_l_e_d_2examples_2_fx_noise_ring_2_n_o_i_s_e___r_i_n_g___i_d_e_a_s.html#autotoc_md185", null ]
+      ] ],
+      [ "10 Noise Variations - Detailed Algorithmic Implementation", "dc/def/md__2home_2runner_2work_2_fast_l_e_d_2_fast_l_e_d_2examples_2_fx_noise_ring_2_n_o_i_s_e___r_i_n_g___i_d_e_a_s.html#autotoc_md186", [
+        [ "\"Cosmic Swirl\" - Enhanced Perlin Flow", "dc/def/md__2home_2runner_2work_2_fast_l_e_d_2_fast_l_e_d_2examples_2_fx_noise_ring_2_n_o_i_s_e___r_i_n_g___i_d_e_a_s.html#autotoc_md187", null ],
+        [ "\"Electric Storm\" - High-Frequency Chaos", "dc/def/md__2home_2runner_2work_2_fast_l_e_d_2_fast_l_e_d_2examples_2_fx_noise_ring_2_n_o_i_s_e___r_i_n_g___i_d_e_a_s.html#autotoc_md188", null ],
+        [ "\"Lava Lamp\" - Slow Blobby Movement", "dc/def/md__2home_2runner_2work_2_fast_l_e_d_2_fast_l_e_d_2examples_2_fx_noise_ring_2_n_o_i_s_e___r_i_n_g___i_d_e_a_s.html#autotoc_md189", null ],
+        [ "\"Digital Rain\" - Matrix Cascade", "dc/def/md__2home_2runner_2work_2_fast_l_e_d_2_fast_l_e_d_2examples_2_fx_noise_ring_2_n_o_i_s_e___r_i_n_g___i_d_e_a_s.html#autotoc_md190", null ],
+        [ "\"Plasma Waves\" - FEATURED IMPLEMENTATION", "dc/def/md__2home_2runner_2work_2_fast_l_e_d_2_fast_l_e_d_2examples_2_fx_noise_ring_2_n_o_i_s_e___r_i_n_g___i_d_e_a_s.html#autotoc_md191", null ],
+        [ "\"Glitch City\" - Chaotic Digital Artifacts", "dc/def/md__2home_2runner_2work_2_fast_l_e_d_2_fast_l_e_d_2examples_2_fx_noise_ring_2_n_o_i_s_e___r_i_n_g___i_d_e_a_s.html#autotoc_md192", null ],
+        [ "\"Ocean Depths\" - Underwater Currents", "dc/def/md__2home_2runner_2work_2_fast_l_e_d_2_fast_l_e_d_2examples_2_fx_noise_ring_2_n_o_i_s_e___r_i_n_g___i_d_e_a_s.html#autotoc_md193", null ],
+        [ "\"Fire Dance\" - Upward Flame Simulation", "dc/def/md__2home_2runner_2work_2_fast_l_e_d_2_fast_l_e_d_2examples_2_fx_noise_ring_2_n_o_i_s_e___r_i_n_g___i_d_e_a_s.html#autotoc_md194", null ],
+        [ "\"Nebula Drift\" - Cosmic Cloud Simulation", "dc/def/md__2home_2runner_2work_2_fast_l_e_d_2_fast_l_e_d_2examples_2_fx_noise_ring_2_n_o_i_s_e___r_i_n_g___i_d_e_a_s.html#autotoc_md195", null ],
+        [ "\"Binary Pulse\" - Digital Heartbeat", "dc/def/md__2home_2runner_2work_2_fast_l_e_d_2_fast_l_e_d_2examples_2_fx_noise_ring_2_n_o_i_s_e___r_i_n_g___i_d_e_a_s.html#autotoc_md196", null ]
+      ] ],
+      [ "5 Color Palettes", "dc/def/md__2home_2runner_2work_2_fast_l_e_d_2_fast_l_e_d_2examples_2_fx_noise_ring_2_n_o_i_s_e___r_i_n_g___i_d_e_a_s.html#autotoc_md197", [
+        [ "\"Sunset Boulevard\"", "dc/def/md__2home_2runner_2work_2_fast_l_e_d_2_fast_l_e_d_2examples_2_fx_noise_ring_2_n_o_i_s_e___r_i_n_g___i_d_e_a_s.html#autotoc_md198", null ],
+        [ "\"Ocean Breeze\"", "dc/def/md__2home_2runner_2work_2_fast_l_e_d_2_fast_l_e_d_2examples_2_fx_noise_ring_2_n_o_i_s_e___r_i_n_g___i_d_e_a_s.html#autotoc_md199", null ],
+        [ "\"Neon Nights\"", "dc/def/md__2home_2runner_2work_2_fast_l_e_d_2_fast_l_e_d_2examples_2_fx_noise_ring_2_n_o_i_s_e___r_i_n_g___i_d_e_a_s.html#autotoc_md200", null ],
+        [ "\"Forest Whisper\"", "dc/def/md__2home_2runner_2work_2_fast_l_e_d_2_fast_l_e_d_2examples_2_fx_noise_ring_2_n_o_i_s_e___r_i_n_g___i_d_e_a_s.html#autotoc_md201", null ],
+        [ "\"Galaxy Express\"", "dc/def/md__2home_2runner_2work_2_fast_l_e_d_2_fast_l_e_d_2examples_2_fx_noise_ring_2_n_o_i_s_e___r_i_n_g___i_d_e_a_s.html#autotoc_md202", null ]
+      ] ],
+      [ "Implementation Strategy", "dc/def/md__2home_2runner_2work_2_fast_l_e_d_2_fast_l_e_d_2examples_2_fx_noise_ring_2_n_o_i_s_e___r_i_n_g___i_d_e_a_s.html#autotoc_md203", [
+        [ "Core Mathematical Framework", "dc/def/md__2home_2runner_2work_2_fast_l_e_d_2_fast_l_e_d_2examples_2_fx_noise_ring_2_n_o_i_s_e___r_i_n_g___i_d_e_a_s.html#autotoc_md204", null ],
+        [ "Enhanced Control System with Smooth Transitions", "dc/def/md__2home_2runner_2work_2_fast_l_e_d_2_fast_l_e_d_2examples_2_fx_noise_ring_2_n_o_i_s_e___r_i_n_g___i_d_e_a_s.html#autotoc_md205", null ],
+        [ "Data Structures and UI Integration", "dc/def/md__2home_2runner_2work_2_fast_l_e_d_2_fast_l_e_d_2examples_2_fx_noise_ring_2_n_o_i_s_e___r_i_n_g___i_d_e_a_s.html#autotoc_md206", null ],
+        [ "Integration with Existing Framework", "dc/def/md__2home_2runner_2work_2_fast_l_e_d_2_fast_l_e_d_2examples_2_fx_noise_ring_2_n_o_i_s_e___r_i_n_g___i_d_e_a_s.html#autotoc_md207", null ]
+      ] ],
+      [ "Technical Considerations", "dc/def/md__2home_2runner_2work_2_fast_l_e_d_2_fast_l_e_d_2examples_2_fx_noise_ring_2_n_o_i_s_e___r_i_n_g___i_d_e_a_s.html#autotoc_md208", [
+        [ "Performance Optimization", "dc/def/md__2home_2runner_2work_2_fast_l_e_d_2_fast_l_e_d_2examples_2_fx_noise_ring_2_n_o_i_s_e___r_i_n_g___i_d_e_a_s.html#autotoc_md209", null ],
+        [ "Memory Management", "dc/def/md__2home_2runner_2work_2_fast_l_e_d_2_fast_l_e_d_2examples_2_fx_noise_ring_2_n_o_i_s_e___r_i_n_g___i_d_e_a_s.html#autotoc_md210", null ],
+        [ "Mathematical Precision", "dc/def/md__2home_2runner_2work_2_fast_l_e_d_2_fast_l_e_d_2examples_2_fx_noise_ring_2_n_o_i_s_e___r_i_n_g___i_d_e_a_s.html#autotoc_md211", null ],
+        [ "User Experience", "dc/def/md__2home_2runner_2work_2_fast_l_e_d_2_fast_l_e_d_2examples_2_fx_noise_ring_2_n_o_i_s_e___r_i_n_g___i_d_e_a_s.html#autotoc_md212", null ]
+      ] ],
+      [ "First Pass Implementation: Plasma Waves", "dc/def/md__2home_2runner_2work_2_fast_l_e_d_2_fast_l_e_d_2examples_2_fx_noise_ring_2_n_o_i_s_e___r_i_n_g___i_d_e_a_s.html#autotoc_md213", [
+        [ "Why Start with Plasma Waves?", "dc/def/md__2home_2runner_2work_2_fast_l_e_d_2_fast_l_e_d_2examples_2_fx_noise_ring_2_n_o_i_s_e___r_i_n_g___i_d_e_a_s.html#autotoc_md214", null ],
+        [ "Development Strategy", "dc/def/md__2home_2runner_2work_2_fast_l_e_d_2_fast_l_e_d_2examples_2_fx_noise_ring_2_n_o_i_s_e___r_i_n_g___i_d_e_a_s.html#autotoc_md215", null ],
+        [ "Testing and Validation", "dc/def/md__2home_2runner_2work_2_fast_l_e_d_2_fast_l_e_d_2examples_2_fx_noise_ring_2_n_o_i_s_e___r_i_n_g___i_d_e_a_s.html#autotoc_md216", null ],
+        [ "Incremental Development Plan", "dc/def/md__2home_2runner_2work_2_fast_l_e_d_2_fast_l_e_d_2examples_2_fx_noise_ring_2_n_o_i_s_e___r_i_n_g___i_d_e_a_s.html#autotoc_md217", null ]
+      ] ],
+      [ "Advanced Graphics Techniques Demonstrated", "dc/def/md__2home_2runner_2work_2_fast_l_e_d_2_fast_l_e_d_2examples_2_fx_noise_ring_2_n_o_i_s_e___r_i_n_g___i_d_e_a_s.html#autotoc_md218", [
+        [ "Wave Interference Mathematics", "dc/def/md__2home_2runner_2work_2_fast_l_e_d_2_fast_l_e_d_2examples_2_fx_noise_ring_2_n_o_i_s_e___r_i_n_g___i_d_e_a_s.html#autotoc_md219", null ],
+        [ "Color Theory Implementation", "dc/def/md__2home_2runner_2work_2_fast_l_e_d_2_fast_l_e_d_2examples_2_fx_noise_ring_2_n_o_i_s_e___r_i_n_g___i_d_e_a_s.html#autotoc_md220", null ],
+        [ "Performance Optimization Strategies", "dc/def/md__2home_2runner_2work_2_fast_l_e_d_2_fast_l_e_d_2examples_2_fx_noise_ring_2_n_o_i_s_e___r_i_n_g___i_d_e_a_s.html#autotoc_md221", null ]
+      ] ],
+      [ "Future Enhancements", "dc/def/md__2home_2runner_2work_2_fast_l_e_d_2_fast_l_e_d_2examples_2_fx_noise_ring_2_n_o_i_s_e___r_i_n_g___i_d_e_a_s.html#autotoc_md222", [
+        [ "Advanced Features", "dc/def/md__2home_2runner_2work_2_fast_l_e_d_2_fast_l_e_d_2examples_2_fx_noise_ring_2_n_o_i_s_e___r_i_n_g___i_d_e_a_s.html#autotoc_md223", null ],
+        [ "Platform Extensions", "dc/def/md__2home_2runner_2work_2_fast_l_e_d_2_fast_l_e_d_2examples_2_fx_noise_ring_2_n_o_i_s_e___r_i_n_g___i_d_e_a_s.html#autotoc_md224", null ],
+        [ "Algorithm Enhancements", "dc/def/md__2home_2runner_2work_2_fast_l_e_d_2_fast_l_e_d_2examples_2_fx_noise_ring_2_n_o_i_s_e___r_i_n_g___i_d_e_a_s.html#autotoc_md225", null ]
+      ] ]
+    ] ],
     [ "Platform Porting Guide", "dd/d9e/md__2home_2runner_2work_2_fast_l_e_d_2_fast_l_e_d_2_p_o_r_t_i_n_g.html", [
-      [ "Fast porting for a new board on existing hardware", "dd/d9e/md__2home_2runner_2work_2_fast_l_e_d_2_fast_l_e_d_2_p_o_r_t_i_n_g.html#autotoc_md1", [
-        [ "Setting up the basic files/folders", "dd/d9e/md__2home_2runner_2work_2_fast_l_e_d_2_fast_l_e_d_2_p_o_r_t_i_n_g.html#autotoc_md2", null ],
-        [ "Porting fastpin.h", "dd/d9e/md__2home_2runner_2work_2_fast_l_e_d_2_fast_l_e_d_2_p_o_r_t_i_n_g.html#autotoc_md3", null ],
-        [ "Porting fastspi.h", "dd/d9e/md__2home_2runner_2work_2_fast_l_e_d_2_fast_l_e_d_2_p_o_r_t_i_n_g.html#autotoc_md4", null ],
-        [ "Porting clockless.h", "dd/d9e/md__2home_2runner_2work_2_fast_l_e_d_2_fast_l_e_d_2_p_o_r_t_i_n_g.html#autotoc_md5", null ]
+      [ "Fast porting for a new board on existing hardware", "dd/d9e/md__2home_2runner_2work_2_fast_l_e_d_2_fast_l_e_d_2_p_o_r_t_i_n_g.html#autotoc_md260", [
+        [ "Setting up the basic files/folders", "dd/d9e/md__2home_2runner_2work_2_fast_l_e_d_2_fast_l_e_d_2_p_o_r_t_i_n_g.html#autotoc_md261", null ],
+        [ "Porting fastpin.h", "dd/d9e/md__2home_2runner_2work_2_fast_l_e_d_2_fast_l_e_d_2_p_o_r_t_i_n_g.html#autotoc_md262", null ],
+        [ "Porting fastspi.h", "dd/d9e/md__2home_2runner_2work_2_fast_l_e_d_2_fast_l_e_d_2_p_o_r_t_i_n_g.html#autotoc_md263", null ],
+        [ "Porting clockless.h", "dd/d9e/md__2home_2runner_2work_2_fast_l_e_d_2_fast_l_e_d_2_p_o_r_t_i_n_g.html#autotoc_md264", null ]
       ] ]
     ] ],
     [ "Todo List", "dd/da0/todo.html", null ],
@@ -56,9 +172,9 @@ var NAVTREE =
         [ "All", "functions.html", "functions_dup" ],
         [ "Functions", "functions_func.html", "functions_func" ],
         [ "Variables", "functions_vars.html", "functions_vars" ],
-        [ "Typedefs", "functions_type.html", null ],
+        [ "Typedefs", "functions_type.html", "functions_type" ],
         [ "Enumerations", "functions_enum.html", null ],
-        [ "Enumerator", "functions_eval.html", null ],
+        [ "Enumerator", "functions_eval.html", "functions_eval" ],
         [ "Related Symbols", "functions_rela.html", null ]
       ] ]
     ] ],
@@ -81,54 +197,74 @@ var NAVTREE =
 var NAVTREEINDEX =
 [
 "annotated.html",
-"d0/d5c/classfl_1_1_sorted_heap_vector_a7e52d9a0615b7361a13f1d465a201da1.html#a7e52d9a0615b7361a13f1d465a201da1",
-"d0/db5/classfl_1_1_gradient_inlined_af2d141aca56cf7c85c5e9cb33cb49d31.html#af2d141aca56cf7c85c5e9cb33cb49d31",
-"d0/dee/struct_pixel_controller_a894ca45aa17aea485defc34967e0a19b.html#a894ca45aa17aea485defc34967e0a19b",
-"d1/d5c/classfl_1_1_x_y_raster_u8_sparse_a0a912982e407e681bd347b03a729b7da.html#a0a912982e407e681bd347b03a729b7da",
-"d1/d9f/classfl_1_1_gielis_curve_path_ac8b26ea0a8a19b4db23e18dd585116e7.html#ac8b26ea0a8a19b4db23e18dd585116e7",
-"d1/de0/classfl_1_1_frame_a18b6f7181804a0392e40796f46352115.html#a18b6f7181804a0392e40796f46352115",
-"d2/d24/classfl_1_1_str_aba35a0a5aa0771bfe859a88a9903d0f9.html#aba35a0a5aa0771bfe859a88a9903d0f9",
-"d2/d78/classfl_1_1_screen_map_a736a47f15d6262809d6438d1c2f4c5b1.html#a736a47f15d6262809d6438d1c2f4c5b1",
-"d2/df3/classfl_1_1_fixed_map_a3df8268f2e6f56bf468676209b3de6fe.html#a3df8268f2e6f56bf468676209b3de6fe",
-"d3/d56/classfl_1_1bitset__dynamic_acf671705402e82adbd0c38acff538e51.html#acf671705402e82adbd0c38acff538e51",
-"d3/d92/classfl_1_1scoped__array_ad8d42ab70515534ab3f8e1f46b61f665.html#ad8d42ab70515534ab3f8e1f46b61f665",
-"d4/d26/_fire2012_8ino_ab4e58b96c4493c06cc1dd38b52d7b79e.html#ab4e58b96c4493c06cc1dd38b52d7b79e",
-"d4/d36/namespacefl_a6bd47986e63cec13c1ca8180307db7bd.html#a6bd47986e63cec13c1ca8180307db7bd",
-"d4/d60/classfl_1_1_fx_engine_a6e8578dffb32b7feb7801af837afb3bd.html#a6e8578dffb32b7feb7801af837afb3bd",
-"d4/dca/classfl_1_1array_a276e4dd12221e346d23d0e2151d12898.html#a276e4dd12221e346d23d0e2151d12898",
-"d5/d25/brightness__bitshifter_8h_source.html",
-"d5/d88/_fire_matrix_8h_a0c0f405dd67d98c8d270257f6117c1a1.html#a0c0f405dd67d98c8d270257f6117c1a1",
-"d5/def/structfl_1_1_pair_a9d6eb9719047d68c25200af9849229cd.html#a9d6eb9719047d68c25200af9849229cd",
-"d6/d2c/class_c_l_e_d_controller_af6173cca91ee446766cc15102990d7bb.html#af6173cca91ee446766cc15102990d7bb",
-"d6/d74/namespaceanimartrix__detail.html#a1278ce22b0e505c59591cd2dcb1a3715",
-"d6/ddc/structfl_1_1anonymous__namespace_02gradient_8cpp_03_1_1_visitor_a6d844e6ff67e96ef259c033aced94597.html#a6d844e6ff67e96ef259c033aced94597",
-"d7/d6a/structfl_1_1_x_y_draw_gradient.html",
-"d7/d82/struct_c_r_g_b_aeb40a08b7cb90c1e21bd408261558b99.html#aeb40a08b7cb90c1e21bd408261558b99acc56fb672d5ce34230c171fb1f61a432",
-"d7/de3/classfl_1_1_function_list_base_ae07aeec4b24d5a695d96d80c72670714.html#ae07aeec4b24d5a695d96d80c72670714",
-"d8/d6c/pixel__iterator_8h_a64e845e00bf1312fed8893eb4d071319.html#a64e845e00bf1312fed8893eb4d071319",
-"d8/dd0/_fire_cylinder_8h_a7b4981b519c086f0e47af6cb0e151437.html#a7b4981b519c086f0e47af6cb0e151437",
-"d8/de4/classfl_1_1_slice_a7857edde6c7db9baed9effed3260d534.html#a7857edde6c7db9baed9effed3260d534",
-"d9/d33/classfl_1_1_object_f_l_e_d_a4e9ba96cbbd2df3feddbbe56b06a7ea2.html#a4e9ba96cbbd2df3feddbbe56b06a7ea2",
-"d9/d7c/class_w_s2811__400.html",
-"da/d18/classfl_1_1_inlined_vector_a79e3e5e99d5d283855bf5f43d38b2b79.html#a79e3e5e99d5d283855bf5f43d38b2b79",
-"da/d7c/led__strip__rmt_8h_source.html",
-"db/d07/eorder_8h_a3c26d076773aa0f331d3066b46dbc6a4.html#a3c26d076773aa0f331d3066b46dbc6a4a30447e9f6efa4afdd251f9afc1d5fb44",
-"db/d77/classfl_1_1_weak_ptr_a0e8a300bcc2b04d7f60b0ad7265f23da.html#a0e8a300bcc2b04d7f60b0ad7265f23da",
-"db/dc0/engine__events_8h.html",
-"db/df7/class_c_pixel_view_aa2b10d01a183235fcf62e50049c49dd4.html#aa2b10d01a183235fcf62e50049c49dd4",
-"dc/d4a/classfl_1_1_line_simplifier_adf4187b83b0963743ec28ef0e34c0868.html#adf4187b83b0963743ec28ef0e34c0868",
-"dc/d83/wavefx_8h.html",
-"dc/dcc/colorpalettes_8h.html",
-"dd/d29/classfl_1_1_point_path_a5f8f2c0f2a42519f95b37db15bf80011.html#a5f8f2c0f2a42519f95b37db15bf80011",
-"dd/d7c/structfl_1_1is__same_3_01_t_00_01_t_01_4_a7a9ec0e210733b738fa1926333265bcb.html#a7a9ec0e210733b738fa1926333265bcb",
-"dd/dd8/classfl_1_1_optional_afaf10df4eb07d404846294c9884fd119.html#afaf10df4eb07d404846294c9884fd119",
-"de/d60/classfl_1_1_variant_a825c5e1b33bba94b025b6829d92353d5.html#a825c5e1b33bba94b025b6829d92353d5",
-"de/da4/group___noise_fill_ga6fcc17e60eac4b9dbb620f7e354177f1.html#ga6fcc17e60eac4b9dbb620f7e354177f1",
-"df/d0f/classfl_1_1_pixels_a6425fddce6bd22bd2390ccdc285e285e.html#a6425fddce6bd22bd2390ccdc285e285e",
-"df/d5e/classanimartrix__detail_1_1_a_n_i_mart_r_i_x_a2f5c8ca6c79a5670cb90f83369e588e5.html#a2f5c8ca6c79a5670cb90f83369e588e5",
-"df/d6a/class_midi_interface_a682ed34e510ae5d9551d8ddbeb6b53ec.html#a682ed34e510ae5d9551d8ddbeb6b53ec",
-"dir_1e86eb05dfedeac38d51c0d61b4912b9.html",
-"globals_l.html"
+"d0/d4b/classfl_1_1_video_a407205594718b624b2ec288c9c18bbbe.html#a407205594718b624b2ec288c9c18bbbe",
+"d0/d98/class_color_palette_manager_ad4418fbad41db98705a0e599a2e3d749.html#ad4418fbad41db98705a0e599a2e3d749",
+"d0/dce/classfl_1_1_x_y_map_a464acdd5a6ce465a32fba1fda9862fa5.html#a464acdd5a6ce465a32fba1fda9862fa5",
+"d0/dee/struct_pixel_controller_aad6f8ce8a3aa9429025e67050e312929.html#aad6f8ce8a3aa9429025e67050e312929",
+"d1/d56/classfl_1_1_ptr_a4b6b952b8d8e861cdb64cc1a3672ce8d.html#a4b6b952b8d8e861cdb64cc1a3672ce8d",
+"d1/d74/classfl_1_1shared__ptr_a38cc8143d8d5fb96079309306196b677.html#a38cc8143d8d5fb96079309306196b677",
+"d1/dc0/classfl_1_1_byte_stream_memory_a425f737b4840ff4054f4400b4ab2e23f.html#a425f737b4840ff4054f4400b4ab2e23f",
+"d1/ddf/align_8h.html",
+"d2/d1f/classfl_1_1_catmull_rom_path_ae5bc34153257d7cb49ca32008f3109db.html#ae5bc34153257d7cb49ca32008f3109db",
+"d2/d78/classfl_1_1_screen_map_a0f7699554fd9fe34cd58b5d781203405.html#a0f7699554fd9fe34cd58b5d781203405",
+"d2/db2/classfl_1_1_pacifica_abcad182fe890999b9407d690fad1381a.html#abcad182fe890999b9407d690fad1381a",
+"d2/de0/namespacefl_1_1printf__detail_ac9026cabf78c126af3df04b25bccad80.html#ac9026cabf78c126af3df04b25bccad80",
+"d3/d40/classfl_1_1_audio_reactive_a1d04a627e9ba859efb9b14b48605c1b8.html#a1d04a627e9ba859efb9b14b48605c1b8",
+"d3/d5c/namespacefl_1_1anonymous__namespace_02audio_8cpp_03_a63dcc803fe703f176b52e25bde0c3adf.html#a63dcc803fe703f176b52e25bde0c3adf",
+"d3/d92/classfl_1_1scoped__array_a7e83544ab19ec9c3683fabb90cf951c3.html#a7e83544ab19ec9c3683fabb90cf951c3",
+"d3/dca/classfl_1_1_x_y_raster_sparse___c_r_g_b_af46be2cd25b5a9dadf4c079a711c8ae2.html#af46be2cd25b5a9dadf4c079a711c8ae2",
+"d4/d13/classfl_1_1_json_a2d493982196c474118851ba938057a33.html#a2d493982196c474118851ba938057a33",
+"d4/d36/namespacefl.html#a3d2a6649d5dd2c57e673d06b034656d5",
+"d4/d36/namespacefl_a3375a843e45a8c85394a7524b1956fc0.html#a3375a843e45a8c85394a7524b1956fc0",
+"d4/d36/namespacefl_a964d9f51bd69ec7269946cefb6507088.html#a964d9f51bd69ec7269946cefb6507088",
+"d4/d3a/classfl_1_1_u_i_group_a5162d9d84849036e0e16a79c06945c33.html#a5162d9d84849036e0e16a79c06945c33",
+"d4/d8d/classfl_1_1_string_formatter_a2b3dab310854c4235985f5629454312f.html#a2b3dab310854c4235985f5629454312f",
+"d4/dca/classfl_1_1array_a2d9d34e3be2fc2d4d99aab328e8ba038.html#a2d9d34e3be2fc2d4d99aab328e8ba038",
+"d4/df2/classfl_1_1_luminova.html#ad5cb32ae4c07a537e2d5d4aa291c3302",
+"d5/d2b/structfl_1_1default__delete_a29f061f8e51d198ff649f1aa8dafc673.html#a29f061f8e51d198ff649f1aa8dafc673",
+"d5/d5d/structfl_1_1vec2_aa2db78760b0afb1f5dd16caec2a93c6a.html#aa2db78760b0afb1f5dd16caec2a93c6a",
+"d5/d86/classfl_1_1_file_handle_a123224c428ab62bf7151d5862e2a733e.html#a123224c428ab62bf7151d5862e2a733e",
+"d5/db7/classfl_1_1_transform_float_impl_a66787dd9778800d1921e1030066c58cd.html#a66787dd9778800d1921e1030066c58cd",
+"d6/d18/classfl_1_1_l_u_t_a7882b0d75665abd32106dc0f425ef8c2.html#a7882b0d75665abd32106dc0f425ef8c2",
+"d6/d39/structfl_1_1is__integral_3_01short_01_4.html",
+"d6/dc0/ui__impl_8h_ad67ab3bdad16257795f36ee32534183d.html#ad67ab3bdad16257795f36ee32534183d",
+"d7/d35/_fx_sd_card_8ino_a4fc01d736fe50cf5b977f755b675f11d.html#a4fc01d736fe50cf5b977f755b675f11d",
+"d7/d82/struct_c_r_g_b_a3b96dc7b062f42c53f11ca27e4c5adfd.html#a3b96dc7b062f42c53f11ca27e4c5adfd",
+"d7/d84/cstddef_8h.html",
+"d7/dda/structfl_1_1_int_conversion_visitor_af2da9963a1b28350ca1e7d6b20d807fd.html#af2da9963a1b28350ca1e7d6b20d807fd",
+"d8/d11/classfl_1_1_catmull_rom_params_a5255601e58a76a89ded919cf8d5d103c.html#a5255601e58a76a89ded919cf8d5d103c",
+"d8/dab/_octo_w_s2811_demo_8h_a4fc01d736fe50cf5b977f755b675f11d.html#a4fc01d736fe50cf5b977f755b675f11d",
+"d8/dd0/midi___defs_8h_a60199bde936cb246c54a6f895a852bf5.html#a60199bde936cb246c54a6f895a852bf5",
+"d8/de4/classfl_1_1_slice_aa2c7b7e34b3bc0180abbcd706cbc7e7e.html#aa2c7b7e34b3bc0180abbcd706cbc7e7e",
+"d9/d33/classfl_1_1_object_f_l_e_d_acbf4e642637c1caaab67e42ee95b00dd.html#acbf4e642637c1caaab67e42ee95b00dd",
+"d9/d82/classfl_1_1_u_i_title_a63501411ae1747af0f49a880585af4fb.html#a63501411ae1747af0f49a880585af4fb",
+"d9/df4/classfl_1_1_x_y_path_acd5085c9cf75a7a7448ed22f9e529762.html#acd5085c9cf75a7a7448ed22f9e529762",
+"da/d46/structfl_1_1_error_a97d719109e638cccb6d4d4f33f851f38.html#a97d719109e638cccb6d4d4f33f851f38",
+"da/d89/crgb__hsv16_8cpp_a2d8dda85477a00deab830effc5159d33.html#a2d8dda85477a00deab830effc5159d33",
+"da/dc7/advanced_8h_ad7b7eb0b3e04af91bdd64715226c3c68.html#ad7b7eb0b3e04af91bdd64715226c3c68",
+"da/df8/structfl_1_1_u_i_slider_1_1_listener_a38793a1ec622a954d9fa39e0fe350694.html#a38793a1ec622a954d9fa39e0fe350694",
+"db/d58/group___fractional_types.html#de/d28/struct_i_e_e_e754binary32__t_8____unnamed0____",
+"db/d97/_fast_l_e_d_8h_ac06549dc4a351e2c8f1dda8ae81f7926.html#ac06549dc4a351e2c8f1dda8ae81f7926a3b67cd8706aa03d1d3e662a6199a87e2",
+"db/ddd/classfl_1_1_heap_vector_ad6c709ec7c24001303e05b2116c4cc50.html#ad6c709ec7c24001303e05b2116c4cc50",
+"dc/d3e/group___dimming_ga3f94d2455e0aa92133f77af8747b5914.html#ga3f94d2455e0aa92133f77af8747b5914",
+"dc/d4d/_wasm_screen_coords_8ino.html",
+"dc/d7c/structfl_1_1vec3_a9560a53faac5c070e5f3ba147dffb310.html#a9560a53faac5c070e5f3ba147dffb310",
+"dc/d96/classfl_1_1_str_n_a9343fec5bc90719387e46abd5619491a.html#a9343fec5bc90719387e46abd5619491a",
+"dc/dd3/_esp32_s3_i2_s_demo_8h_adad67fe595ea440c8f8247ec2cddf070.html#adad67fe595ea440c8f8247ec2cddf070",
+"dc/dfe/classfl_1_1deque_a7ee09406b19f270546d50d14a6387ec9.html#a7ee09406b19f270546d50d14a6387ec9",
+"dd/d29/classfl_1_1_point_path_a2efcd8c3d8d0580e1d16aea1cdc43516.html#a2efcd8c3d8d0580e1d16aea1cdc43516",
+"dd/d9e/md__2home_2runner_2work_2_fast_l_e_d_2_fast_l_e_d_2_p_o_r_t_i_n_g.html#autotoc_md264",
+"dd/dd8/classfl_1_1_optional_a6ac21e2492ec9412ec8afc5db6fd979a.html#a6ac21e2492ec9412ec8afc5db6fd979a",
+"de/d2b/_first_light_8ino_a1b4f26a01e11d7eb2848bc41b0f6dd9d.html#a1b4f26a01e11d7eb2848bc41b0f6dd9d",
+"de/d63/structfl_1_1_f_f_t___args_aee3b8b6f26499727b0dc418ef42a33d0.html#aee3b8b6f26499727b0dc418ef42a33d0",
+"de/db5/classfl_1_1_twinkle_fox_a7b4a385bedd751f63937469cc850ee1a.html#a7b4a385bedd751f63937469cc850ee1a",
+"de/ded/bitswap_8h.html#aed576f78d45069eebafdfda8a42602f5",
+"df/d37/classfl_1_1_file_system_a2350b8cc8235a759724d1356b2fb0359.html#a2350b8cc8235a759724d1356b2fb0359",
+"df/d5e/classanimartrix__detail_1_1_a_n_i_mart_r_i_x_ab46628347b5ab16e89c2f48f03c57ce0.html#ab46628347b5ab16e89c2f48f03c57ce0",
+"df/d84/avr__test_8h_source.html",
+"df/dc6/classgen_1_1_point.html",
+"functions_func.html",
+"index.html#autotoc_md306"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronization';

@@ -1,0 +1,10 @@
+<map id="fl::async_active_tasks" name="fl::async_active_tasks">
+<area shape="rect" id="Node000001" title="Get the number of active async tasks across all systems." alt="" coords="5,59,171,84"/>
+<area shape="rect" id="Node000002" href="$d2/d14/classfl_1_1_async_manager_aa67fcf70428a30d47b64dd5fbbcde94e.html#aa67fcf70428a30d47b64dd5fbbcde94e" title=" " alt="" coords="219,29,416,55"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="171,58,205,54,205,59,172,63"/>
+<area shape="rect" id="Node000004" href="$d2/d14/classfl_1_1_async_manager_a73a2a0dbb437d6454d6216cc87ee0e04.html#a73a2a0dbb437d6454d6216cc87ee0e04" title="Get total number of active tasks across all runners." alt="" coords="231,79,403,119"/>
+<area shape="poly" id="edge4_Node000001_Node000004" title=" " alt="" coords="171,79,218,85,217,90,171,84"/>
+<area shape="rect" id="Node000003" href="$d9/d5b/classfl_1_1_singleton_a7e65fe8dee6b2a23a8b6138fa2c274cb.html#a7e65fe8dee6b2a23a8b6138fa2c274cb" title=" " alt="" coords="464,29,627,55"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="416,39,450,39,450,45,416,45"/>
+<area shape="poly" id="edge3_Node000003_Node000003" title=" " alt="" coords="508,31,500,21,505,11,520,5,545,3,577,7,589,16,586,20,575,11,545,8,521,10,508,15,506,20,512,27"/>
+</map>

@@ -1,0 +1,14 @@
+digraph "fl::JsonValue"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="LR";
+  Node1 [id="Node000001",label="fl::JsonValue",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
+  Node2 -> Node1 [id="edge1_Node000001_Node000002",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" data",fontcolor="grey" ];
+  Node2 [id="Node000002",label="fl::Variant\< fl::nullptr\l_t, bool, int64_t, float,\l fl::string, JsonArray, JsonObject,\l fl::vector\< int16_t \>, fl::vector\l\< uint8_t \>, fl::vector\< float \> \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$de/d60/classfl_1_1_variant.html",tooltip=" "];
+  Node3 -> Node2 [id="edge2_Node000002_Node000003",dir="back",color="orange",style="dashed",tooltip=" ",label=" \< fl::nullptr_t, bool,\l int64_t, float, fl::\lstring, JsonArray, JsonObject,\l fl::vector\< int16_t \>, fl\l::vector\< uint8_t \>, fl::vector\l\< float \> \>",fontcolor="grey" ];
+  Node3 [id="Node000003",label="fl::Variant\< Types \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$de/d60/classfl_1_1_variant.html",tooltip=" "];
+}

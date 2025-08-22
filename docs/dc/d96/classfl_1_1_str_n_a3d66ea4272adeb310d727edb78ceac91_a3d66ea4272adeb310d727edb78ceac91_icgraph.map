@@ -1,0 +1,27 @@
+<map id="fl::StrN::find" name="fl::StrN::find">
+<area shape="rect" id="Node000001" title=" " alt="" coords="633,179,732,204"/>
+<area shape="rect" id="Node000002" href="$dc/d96/classfl_1_1_str_n_acb670ca40349865271f13549afd55335.html#acb670ca40349865271f13549afd55335" title=" " alt="" coords="418,5,547,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="670,167,638,104,614,72,584,44,547,28,549,23,587,40,618,68,642,102,674,165"/>
+<area shape="rect" id="Node000003" href="$dc/d96/classfl_1_1_str_n_a7f868cc582f7d3c94c5126fea897bf65.html#a7f868cc582f7d3c94c5126fea897bf65" title=" " alt="" coords="418,55,547,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="663,170,629,130,608,110,584,94,547,79,549,74,587,89,611,106,633,126,667,166"/>
+<area shape="rect" id="Node000004" href="$dc/d96/classfl_1_1_str_n_a491eb2ffc58bf6269b1a1a604809561b.html#a491eb2ffc58bf6269b1a1a604809561b" title=" " alt="" coords="418,104,547,129"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="648,174,584,143,547,132,548,127,586,138,650,169"/>
+<area shape="rect" id="Node000005" href="$dc/d96/classfl_1_1_str_n_a19121cafd2546e27001a48baeafc5d23.html#a19121cafd2546e27001a48baeafc5d23" title=" " alt="" coords="433,153,532,179"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="619,186,532,175,532,170,620,181"/>
+<area shape="rect" id="Node000006" href="$dc/d96/classfl_1_1_str_n_a09c4a95ee4076dccd36f6fcca703beb5.html#a09c4a95ee4076dccd36f6fcca703beb5" title=" " alt="" coords="433,203,532,228"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="620,201,532,212,532,207,619,196"/>
+<area shape="rect" id="Node000007" href="$d5/d4b/classfl_1_1response_af79b281c20f6d54c717321b329787401.html#af79b281c20f6d54c717321b329787401" title="Check if response appears to contain JSON content." alt="" coords="407,252,558,277"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="648,213,586,242,545,254,543,249,584,237,646,208"/>
+<area shape="rect" id="Node000012" href="$dc/d4b/classfl_1_1istream__real_a8f0d56f637760931439c9d9e03663944.html#a8f0d56f637760931439c9d9e03663944" title=" " alt="" coords="380,301,585,327"/>
+<area shape="poly" id="edge12_Node000001_Node000012" title=" " alt="" coords="667,217,633,256,611,276,587,292,561,304,558,299,584,288,608,271,629,252,663,213"/>
+<area shape="rect" id="Node000013" href="$dc/d4b/classfl_1_1istream__real_a8ca5d5b7033dc1286a7d7c842561ca1f.html#a8ca5d5b7033dc1286a7d7c842561ca1f" title=" " alt="" coords="380,351,585,376"/>
+<area shape="poly" id="edge13_Node000001_Node000013" title=" " alt="" coords="674,218,642,281,617,314,587,342,565,353,563,348,584,337,613,310,638,278,669,216"/>
+<area shape="rect" id="Node000008" href="$d5/d4b/classfl_1_1response_a1b8301f50ee0dc36b49ab157423d3a22.html#a1b8301f50ee0dc36b49ab157423d3a22" title="Response body parsed as JSON (JavaScript&#45;like API)" alt="" coords="200,252,332,277"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="394,267,332,267,332,262,394,262"/>
+<area shape="rect" id="Node000009" href="$d5/dec/_net_test_real_8h_a648cd3d90f8e240cbbfe5cb934057124.html#a648cd3d90f8e240cbbfe5cb934057124" title="APPROACH 4: JSON Response with await pattern &#160;&#160;Same JSON handling but using await_top_level for synch..." alt="" coords="17,228,141,253"/>
+<area shape="poly" id="edge10_Node000007_Node000009" title=" " alt="" coords="407,252,332,242,266,240,200,242,141,243,141,237,200,237,266,235,332,237,408,247"/>
+<area shape="rect" id="Node000011" href="$d5/dec/_net_test_real_8h_ac300da999139e52ab96307f86d7fa84d.html#ac300da999139e52ab96307f86d7fa84d" title="APPROACH 3: JSON Response Handling with FastLED&#39;s ideal JSON API This demonstrates fetch responses wi..." alt="" coords="5,277,152,303"/>
+<area shape="poly" id="edge11_Node000007_Node000011" title=" " alt="" coords="408,282,332,293,239,297,152,296,152,291,238,291,332,287,407,277"/>
+<area shape="poly" id="edge8_Node000008_Node000009" title=" " alt="" coords="186,257,140,251,141,246,186,252"/>
+<area shape="poly" id="edge9_Node000008_Node000011" title=" " alt="" coords="186,278,152,283,152,277,186,273"/>
+</map>

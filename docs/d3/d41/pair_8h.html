@@ -103,15 +103,26 @@ $(function(){initNavTree('d3/d41/pair_8h.html','../../'); initResizable(true); }
   <div class="summary">
 <a href="#nested-classes">Classes</a> &#124;
 <a href="#namespaces">Namespaces</a> &#124;
-<a href="#typedef-members">Typedefs</a>  </div>
+<a href="#typedef-members">Typedefs</a> &#124;
+<a href="#func-members">Functions</a>  </div>
   <div class="headertitle"><div class="title">pair.h File Reference</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
-  <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> This graph shows which files directly or indirectly include this file:</div>
+<div class="textblock"><code>#include &quot;<a class="el" href="../../d9/d83/move_8h_source.html">fl/move.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d4/d54/compiler__control_8h_source.html">fl/compiler_control.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../df/d63/type__traits_8h_source.html">fl/type_traits.h</a>&quot;</code><br />
+</div><div class="textblock"><div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
+  <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Include dependency graph for pair.h:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-0-content" class="dyncontent" style="display:none;">
+<div class="center"><iframe scrolling="no" frameborder="0" src="../../dc/da4/pair_8h__incl.svg" width="455" height="404"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+</div>
+</div><div class="textblock"><div id="dynsection-1" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
+  <img id="dynsection-1-trigger" src="../../closed.png" alt="+"/> This graph shows which files directly or indirectly include this file:</div>
+<div id="dynsection-1-summary" class="dynsummary" style="display:block;">
+</div>
+<div id="dynsection-1-content" class="dyncontent" style="display:none;">
 <div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../d0/d01/pair_8h__dep__incl.svg" width="100%" height="600"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
 </div>
 </div>
@@ -119,21 +130,225 @@ $(function(){initNavTree('d3/d41/pair_8h.html','../../'); initResizable(true); }
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
 Classes</h2></td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d5/def/structfl_1_1_pair.html">fl::Pair&lt; Key, Value &gt;</a></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d5/db3/structfl_1_1pair.html">fl::pair&lt; T1, T2 &gt;</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:d5/d2d/structfl_1_1pair__element_3_010_00_01_t1_00_01_t2_01_4" id="r_d5/d2d/structfl_1_1pair__element_3_010_00_01_t1_00_01_t2_01_4"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl.html#d5/d2d/structfl_1_1pair__element_3_010_00_01_t1_00_01_t2_01_4">fl::pair_element&lt; 0, T1, T2 &gt;</a></td></tr>
+<tr class="separator:d5/d2d/structfl_1_1pair__element_3_010_00_01_t1_00_01_t2_01_4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:d8/dbc/structfl_1_1pair__element_3_011_00_01_t1_00_01_t2_01_4" id="r_d8/dbc/structfl_1_1pair__element_3_011_00_01_t1_00_01_t2_01_4"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl.html#d8/dbc/structfl_1_1pair__element_3_011_00_01_t1_00_01_t2_01_4">fl::pair_element&lt; 1, T1, T2 &gt;</a></td></tr>
+<tr class="separator:d8/dbc/structfl_1_1pair__element_3_011_00_01_t1_00_01_t2_01_4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:d7/d90/structfl_1_1tuple__element_3_010_00_01pair_3_01_t1_00_01_t2_01_4_01_4" id="r_d7/d90/structfl_1_1tuple__element_3_010_00_01pair_3_01_t1_00_01_t2_01_4_01_4"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl.html#d7/d90/structfl_1_1tuple__element_3_010_00_01pair_3_01_t1_00_01_t2_01_4_01_4">fl::tuple_element&lt; 0, pair&lt; T1, T2 &gt; &gt;</a></td></tr>
+<tr class="separator:d7/d90/structfl_1_1tuple__element_3_010_00_01pair_3_01_t1_00_01_t2_01_4_01_4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:de/dc7/structfl_1_1tuple__element_3_011_00_01pair_3_01_t1_00_01_t2_01_4_01_4" id="r_de/dc7/structfl_1_1tuple__element_3_011_00_01pair_3_01_t1_00_01_t2_01_4_01_4"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl.html#de/dc7/structfl_1_1tuple__element_3_011_00_01pair_3_01_t1_00_01_t2_01_4_01_4">fl::tuple_element&lt; 1, pair&lt; T1, T2 &gt; &gt;</a></td></tr>
+<tr class="separator:de/dc7/structfl_1_1tuple__element_3_011_00_01pair_3_01_t1_00_01_t2_01_4_01_4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d3/d82/structfl_1_1tuple__size_3_01pair_3_01_t1_00_01_t2_01_4_01_4.html">fl::tuple_size&lt; pair&lt; T1, T2 &gt; &gt;</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="namespaces" name="namespaces"></a>
 Namespaces</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">namespace &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></td></tr>
-<tr class="memdesc:d4/d36/namespacefl"><td class="mdescLeft">&#160;</td><td class="mdescRight">Implements a simple red square effect for 2D LED grids. <br /></td></tr>
+<tr class="memdesc:d4/d36/namespacefl"><td class="mdescLeft">&#160;</td><td class="mdescRight">IMPORTANT! <br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="typedef-members" name="typedef-members"></a>
 Typedefs</h2></td></tr>
-<tr class="memitem:a639fab708bc546f4e6633471268db2bc" id="r_a639fab708bc546f4e6633471268db2bc"><td class="memTemplParams" colspan="2">template&lt;typename <a class="el" href="../../db/d42/struct_key.html">Key</a>, typename Value&gt; </td></tr>
-<tr class="memitem:a639fab708bc546f4e6633471268db2bc"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_a639fab708bc546f4e6633471268db2bc.html#a639fab708bc546f4e6633471268db2bc">fl::pair</a> = <a class="el" href="../../d5/def/structfl_1_1_pair.html">Pair</a>&lt;<a class="el" href="../../db/d42/struct_key.html">Key</a>, Value&gt;</td></tr>
-<tr class="separator:a639fab708bc546f4e6633471268db2bc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a413503284f9ea52cb03ab5ceb120b927" id="r_a413503284f9ea52cb03ab5ceb120b927"><td class="memTemplParams" colspan="2">template&lt;typename T1, typename T2&gt; </td></tr>
+<tr class="memitem:a413503284f9ea52cb03ab5ceb120b927"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_a413503284f9ea52cb03ab5ceb120b927.html#a413503284f9ea52cb03ab5ceb120b927">fl::Pair</a> = <a class="el" href="../../d5/db3/structfl_1_1pair.html">pair</a>&lt;T1, T2&gt;</td></tr>
+<tr class="separator:a413503284f9ea52cb03ab5ceb120b927"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
+Functions</h2></td></tr>
+<tr class="memitem:aacefbfecb7b23009e6808f8b1f21715f" id="r_aacefbfecb7b23009e6808f8b1f21715f"><td class="memTemplParams" colspan="2">template&lt;fl::size I, typename T1, typename T2&gt; </td></tr>
+<tr class="memitem:aacefbfecb7b23009e6808f8b1f21715f"><td class="memTemplItemLeft" align="right" valign="top">const <a class="el" href="../../d4/d36/namespacefl.html#db/d06/structfl_1_1pair__element">pair_element</a>&lt; I, T1, T2 &gt;::type &amp;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_aacefbfecb7b23009e6808f8b1f21715f.html#aacefbfecb7b23009e6808f8b1f21715f">fl::get</a> (const <a class="el" href="../../d5/db3/structfl_1_1pair.html">pair</a>&lt; T1, T2 &gt; &amp;p) noexcept</td></tr>
+<tr class="separator:aacefbfecb7b23009e6808f8b1f21715f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a51d8d1124db3ec1081969e8852a1ab41" id="r_a51d8d1124db3ec1081969e8852a1ab41"><td class="memTemplParams" colspan="2">template&lt;typename T, typename T1, typename T2&gt; </td></tr>
+<tr class="memitem:a51d8d1124db3ec1081969e8852a1ab41"><td class="memTemplItemLeft" align="right" valign="top">const T &amp;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_a51d8d1124db3ec1081969e8852a1ab41.html#a51d8d1124db3ec1081969e8852a1ab41">fl::get</a> (const <a class="el" href="../../d5/db3/structfl_1_1pair.html">pair</a>&lt; T1, T2 &gt; &amp;p) noexcept</td></tr>
+<tr class="separator:a51d8d1124db3ec1081969e8852a1ab41"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4af538be510f0827cb09f48b7b91a9a3" id="r_a4af538be510f0827cb09f48b7b91a9a3"><td class="memTemplParams" colspan="2">template&lt;fl::size I, typename T1, typename T2&gt; </td></tr>
+<tr class="memitem:a4af538be510f0827cb09f48b7b91a9a3"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="../../d4/d36/namespacefl.html#db/d06/structfl_1_1pair__element">pair_element</a>&lt; I, T1, T2 &gt;::type &amp;&amp;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_a4af538be510f0827cb09f48b7b91a9a3.html#a4af538be510f0827cb09f48b7b91a9a3">fl::get</a> (<a class="el" href="../../d5/db3/structfl_1_1pair.html">pair</a>&lt; T1, T2 &gt; &amp;&amp;p) noexcept</td></tr>
+<tr class="separator:a4af538be510f0827cb09f48b7b91a9a3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3e64eb3fb7505cac11b4ce5ccdbe6f47" id="r_a3e64eb3fb7505cac11b4ce5ccdbe6f47"><td class="memTemplParams" colspan="2">template&lt;typename T, typename T1, typename T2&gt; </td></tr>
+<tr class="memitem:a3e64eb3fb7505cac11b4ce5ccdbe6f47"><td class="memTemplItemLeft" align="right" valign="top">T &amp;&amp;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_a3e64eb3fb7505cac11b4ce5ccdbe6f47.html#a3e64eb3fb7505cac11b4ce5ccdbe6f47">fl::get</a> (<a class="el" href="../../d5/db3/structfl_1_1pair.html">pair</a>&lt; T1, T2 &gt; &amp;&amp;p) noexcept</td></tr>
+<tr class="separator:a3e64eb3fb7505cac11b4ce5ccdbe6f47"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aaad7bab3a46c3353c72c671c8372be3e" id="r_aaad7bab3a46c3353c72c671c8372be3e"><td class="memTemplParams" colspan="2">template&lt;fl::size I, typename T1, typename T2&gt; </td></tr>
+<tr class="memitem:aaad7bab3a46c3353c72c671c8372be3e"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="../../d4/d36/namespacefl.html#db/d06/structfl_1_1pair__element">pair_element</a>&lt; I, T1, T2 &gt;::type &amp;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_aaad7bab3a46c3353c72c671c8372be3e.html#aaad7bab3a46c3353c72c671c8372be3e">fl::get</a> (<a class="el" href="../../d5/db3/structfl_1_1pair.html">pair</a>&lt; T1, T2 &gt; &amp;p) noexcept</td></tr>
+<tr class="separator:aaad7bab3a46c3353c72c671c8372be3e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a213facfcecb258d1508ab24aaee406f1" id="r_a213facfcecb258d1508ab24aaee406f1"><td class="memTemplParams" colspan="2">template&lt;typename T, typename T1, typename T2&gt; </td></tr>
+<tr class="memitem:a213facfcecb258d1508ab24aaee406f1"><td class="memTemplItemLeft" align="right" valign="top">T &amp;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_a213facfcecb258d1508ab24aaee406f1.html#a213facfcecb258d1508ab24aaee406f1">fl::get</a> (<a class="el" href="../../d5/db3/structfl_1_1pair.html">pair</a>&lt; T1, T2 &gt; &amp;p) noexcept</td></tr>
+<tr class="separator:a213facfcecb258d1508ab24aaee406f1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2110560659dccee998f0b6d85303f7bc" id="r_a2110560659dccee998f0b6d85303f7bc"><td class="memTemplParams" colspan="2">template&lt;typename T1, typename T2&gt; </td></tr>
+<tr class="memitem:a2110560659dccee998f0b6d85303f7bc"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="../../d5/db3/structfl_1_1pair.html">pair</a>&lt; typename <a class="el" href="../../d4/d15/structfl_1_1decay.html">fl::decay</a>&lt; T1 &gt;::type, typename <a class="el" href="../../d4/d15/structfl_1_1decay.html">fl::decay</a>&lt; T2 &gt;::type &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_a2110560659dccee998f0b6d85303f7bc.html#a2110560659dccee998f0b6d85303f7bc">fl::make_pair</a> (T1 &amp;&amp;<a class="el" href="../../dc/db7/examples_2_luminova_2luminova_8h_ae96c939a2a46590dc79c7d9ca8331dfe.html#ae96c939a2a46590dc79c7d9ca8331dfe">t</a>, T2 &amp;&amp;u)</td></tr>
+<tr class="separator:a2110560659dccee998f0b6d85303f7bc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7d5cada519d258b9a7330e1183242315" id="r_a7d5cada519d258b9a7330e1183242315"><td class="memTemplParams" colspan="2">template&lt;typename T1, typename T2, typename U1, typename U2&gt; </td></tr>
+<tr class="memitem:a7d5cada519d258b9a7330e1183242315"><td class="memTemplItemLeft" align="right" valign="top">bool&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_a7d5cada519d258b9a7330e1183242315.html#a7d5cada519d258b9a7330e1183242315">fl::operator!=</a> (const <a class="el" href="../../d5/db3/structfl_1_1pair.html">pair</a>&lt; T1, T2 &gt; &amp;lhs, const <a class="el" href="../../d5/db3/structfl_1_1pair.html">pair</a>&lt; U1, U2 &gt; &amp;rhs)</td></tr>
+<tr class="separator:a7d5cada519d258b9a7330e1183242315"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9bd2cdedbf6335eb62f35325f70e5351" id="r_a9bd2cdedbf6335eb62f35325f70e5351"><td class="memTemplParams" colspan="2">template&lt;typename T1, typename T2, typename U1, typename U2&gt; </td></tr>
+<tr class="memitem:a9bd2cdedbf6335eb62f35325f70e5351"><td class="memTemplItemLeft" align="right" valign="top">bool&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_a9bd2cdedbf6335eb62f35325f70e5351.html#a9bd2cdedbf6335eb62f35325f70e5351">fl::operator&lt;</a> (const <a class="el" href="../../d5/db3/structfl_1_1pair.html">pair</a>&lt; T1, T2 &gt; &amp;lhs, const <a class="el" href="../../d5/db3/structfl_1_1pair.html">pair</a>&lt; U1, U2 &gt; &amp;rhs)</td></tr>
+<tr class="separator:a9bd2cdedbf6335eb62f35325f70e5351"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abb6df1fd8a4e005c5c592f35dc616bf6" id="r_abb6df1fd8a4e005c5c592f35dc616bf6"><td class="memTemplParams" colspan="2">template&lt;typename T1, typename T2, typename U1, typename U2&gt; </td></tr>
+<tr class="memitem:abb6df1fd8a4e005c5c592f35dc616bf6"><td class="memTemplItemLeft" align="right" valign="top">bool&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_abb6df1fd8a4e005c5c592f35dc616bf6.html#abb6df1fd8a4e005c5c592f35dc616bf6">fl::operator&lt;=</a> (const <a class="el" href="../../d5/db3/structfl_1_1pair.html">pair</a>&lt; T1, T2 &gt; &amp;lhs, const <a class="el" href="../../d5/db3/structfl_1_1pair.html">pair</a>&lt; U1, U2 &gt; &amp;rhs)</td></tr>
+<tr class="separator:abb6df1fd8a4e005c5c592f35dc616bf6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa7689d04b641519dd8586ba733ac7e23" id="r_aa7689d04b641519dd8586ba733ac7e23"><td class="memTemplParams" colspan="2">template&lt;typename T1, typename T2, typename U1, typename U2&gt; </td></tr>
+<tr class="memitem:aa7689d04b641519dd8586ba733ac7e23"><td class="memTemplItemLeft" align="right" valign="top">bool&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_aa7689d04b641519dd8586ba733ac7e23.html#aa7689d04b641519dd8586ba733ac7e23">fl::operator==</a> (const <a class="el" href="../../d5/db3/structfl_1_1pair.html">pair</a>&lt; T1, T2 &gt; &amp;lhs, const <a class="el" href="../../d5/db3/structfl_1_1pair.html">pair</a>&lt; U1, U2 &gt; &amp;rhs)</td></tr>
+<tr class="separator:aa7689d04b641519dd8586ba733ac7e23"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af9df33961d85c1cc2f062825437c3958" id="r_af9df33961d85c1cc2f062825437c3958"><td class="memTemplParams" colspan="2">template&lt;typename T1, typename T2, typename U1, typename U2&gt; </td></tr>
+<tr class="memitem:af9df33961d85c1cc2f062825437c3958"><td class="memTemplItemLeft" align="right" valign="top">bool&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_af9df33961d85c1cc2f062825437c3958.html#af9df33961d85c1cc2f062825437c3958">fl::operator&gt;</a> (const <a class="el" href="../../d5/db3/structfl_1_1pair.html">pair</a>&lt; T1, T2 &gt; &amp;lhs, const <a class="el" href="../../d5/db3/structfl_1_1pair.html">pair</a>&lt; U1, U2 &gt; &amp;rhs)</td></tr>
+<tr class="separator:af9df33961d85c1cc2f062825437c3958"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5d1584e86124440215b0df2fc5060163" id="r_a5d1584e86124440215b0df2fc5060163"><td class="memTemplParams" colspan="2">template&lt;typename T1, typename T2, typename U1, typename U2&gt; </td></tr>
+<tr class="memitem:a5d1584e86124440215b0df2fc5060163"><td class="memTemplItemLeft" align="right" valign="top">bool&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_a5d1584e86124440215b0df2fc5060163.html#a5d1584e86124440215b0df2fc5060163">fl::operator&gt;=</a> (const <a class="el" href="../../d5/db3/structfl_1_1pair.html">pair</a>&lt; T1, T2 &gt; &amp;lhs, const <a class="el" href="../../d5/db3/structfl_1_1pair.html">pair</a>&lt; U1, U2 &gt; &amp;rhs)</td></tr>
+<tr class="separator:a5d1584e86124440215b0df2fc5060163"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6e86a38269bdd0ff1307b5105bffbb01" id="r_a6e86a38269bdd0ff1307b5105bffbb01"><td class="memTemplParams" colspan="2">template&lt;typename T1, typename T2&gt; </td></tr>
+<tr class="memitem:a6e86a38269bdd0ff1307b5105bffbb01"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_a6e86a38269bdd0ff1307b5105bffbb01.html#a6e86a38269bdd0ff1307b5105bffbb01">fl::swap</a> (<a class="el" href="../../d5/db3/structfl_1_1pair.html">pair</a>&lt; T1, T2 &gt; &amp;lhs, <a class="el" href="../../d5/db3/structfl_1_1pair.html">pair</a>&lt; T1, T2 &gt; &amp;rhs) noexcept</td></tr>
+<tr class="separator:a6e86a38269bdd0ff1307b5105bffbb01"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
+<hr/><h2 class="groupheader">Class Documentation</h2>
+<a name="d5/d2d/structfl_1_1pair__element_3_010_00_01_t1_00_01_t2_01_4" id="d5/d2d/structfl_1_1pair__element_3_010_00_01_t1_00_01_t2_01_4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#d5/d2d/structfl_1_1pair__element_3_010_00_01_t1_00_01_t2_01_4">&#9670;&#160;</a></span>fl::pair_element&lt; 0, T1, T2 &gt;</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">struct fl::pair_element&lt; 0, T1, T2 &gt;</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<div id="dynsection-2" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
+  <img id="dynsection-2-trigger" src="../../closed.png" alt="+"/> Inheritance diagram for fl::pair_element&lt; 0, T1, T2 &gt;:</div>
+<div id="dynsection-2-summary" class="dynsummary" style="display:block;">
+</div>
+<div id="dynsection-2-content" class="dyncontent" style="display:none;">
+<div class="center"><iframe scrolling="no" frameborder="0" src="../../d5/d41/structfl_1_1pair__element_3_010_00_01_t1_00_01_t2_01_4__inherit__graph.svg" width="178" height="154"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<center><span class="legend">[<a target="top" href="../../graph_legend.html">legend</a>]</span></center></div>
+<div id="dynsection-3" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
+  <img id="dynsection-3-trigger" src="../../closed.png" alt="+"/> Collaboration diagram for fl::pair_element&lt; 0, T1, T2 &gt;:</div>
+<div id="dynsection-3-summary" class="dynsummary" style="display:block;">
+</div>
+<div id="dynsection-3-content" class="dyncontent" style="display:none;">
+<div class="center"><iframe scrolling="no" frameborder="0" src="../../d5/daf/structfl_1_1pair__element_3_010_00_01_t1_00_01_t2_01_4__coll__graph.svg" width="178" height="154"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<center><span class="legend">[<a target="top" href="../../graph_legend.html">legend</a>]</span></center></div>
+<table class="fieldtable">
+<tr><th colspan="3">Class Members</th></tr>
+<tr><td class="fieldtype">
+<a id="aef180d852fab0603c7c7fc725f16d38d" name="aef180d852fab0603c7c7fc725f16d38d"></a>typedef T1</td>
+<td class="fieldname">
+type T1</td>
+<td class="fielddoc">
+</td></tr>
+</table>
+
+</div>
+</div>
+<a name="d8/dbc/structfl_1_1pair__element_3_011_00_01_t1_00_01_t2_01_4" id="d8/dbc/structfl_1_1pair__element_3_011_00_01_t1_00_01_t2_01_4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#d8/dbc/structfl_1_1pair__element_3_011_00_01_t1_00_01_t2_01_4">&#9670;&#160;</a></span>fl::pair_element&lt; 1, T1, T2 &gt;</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">struct fl::pair_element&lt; 1, T1, T2 &gt;</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<div id="dynsection-4" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
+  <img id="dynsection-4-trigger" src="../../closed.png" alt="+"/> Inheritance diagram for fl::pair_element&lt; 1, T1, T2 &gt;:</div>
+<div id="dynsection-4-summary" class="dynsummary" style="display:block;">
+</div>
+<div id="dynsection-4-content" class="dyncontent" style="display:none;">
+<div class="center"><iframe scrolling="no" frameborder="0" src="../../df/d5d/structfl_1_1pair__element_3_011_00_01_t1_00_01_t2_01_4__inherit__graph.svg" width="178" height="154"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<center><span class="legend">[<a target="top" href="../../graph_legend.html">legend</a>]</span></center></div>
+<div id="dynsection-5" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
+  <img id="dynsection-5-trigger" src="../../closed.png" alt="+"/> Collaboration diagram for fl::pair_element&lt; 1, T1, T2 &gt;:</div>
+<div id="dynsection-5-summary" class="dynsummary" style="display:block;">
+</div>
+<div id="dynsection-5-content" class="dyncontent" style="display:none;">
+<div class="center"><iframe scrolling="no" frameborder="0" src="../../d4/d06/structfl_1_1pair__element_3_011_00_01_t1_00_01_t2_01_4__coll__graph.svg" width="178" height="154"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<center><span class="legend">[<a target="top" href="../../graph_legend.html">legend</a>]</span></center></div>
+<table class="fieldtable">
+<tr><th colspan="3">Class Members</th></tr>
+<tr><td class="fieldtype">
+<a id="a046cd1e374eb5e72936dcb6456e16fff" name="a046cd1e374eb5e72936dcb6456e16fff"></a>typedef T2</td>
+<td class="fieldname">
+type T2</td>
+<td class="fielddoc">
+</td></tr>
+</table>
+
+</div>
+</div>
+<a name="d7/d90/structfl_1_1tuple__element_3_010_00_01pair_3_01_t1_00_01_t2_01_4_01_4" id="d7/d90/structfl_1_1tuple__element_3_010_00_01pair_3_01_t1_00_01_t2_01_4_01_4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#d7/d90/structfl_1_1tuple__element_3_010_00_01pair_3_01_t1_00_01_t2_01_4_01_4">&#9670;&#160;</a></span>fl::tuple_element&lt; 0, pair&lt; T1, T2 &gt; &gt;</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">struct fl::tuple_element&lt; 0, pair&lt; T1, T2 &gt; &gt;</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<div id="dynsection-6" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
+  <img id="dynsection-6-trigger" src="../../closed.png" alt="+"/> Inheritance diagram for fl::tuple_element&lt; 0, pair&lt; T1, T2 &gt; &gt;:</div>
+<div id="dynsection-6-summary" class="dynsummary" style="display:block;">
+</div>
+<div id="dynsection-6-content" class="dyncontent" style="display:none;">
+<div class="center"><iframe scrolling="no" frameborder="0" src="../../dc/d7d/structfl_1_1tuple__element_3_010_00_01pair_3_01_t1_00_01_t2_01_4_01_4__inherit__graph.svg" width="232" height="154"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<center><span class="legend">[<a target="top" href="../../graph_legend.html">legend</a>]</span></center></div>
+<div id="dynsection-7" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
+  <img id="dynsection-7-trigger" src="../../closed.png" alt="+"/> Collaboration diagram for fl::tuple_element&lt; 0, pair&lt; T1, T2 &gt; &gt;:</div>
+<div id="dynsection-7-summary" class="dynsummary" style="display:block;">
+</div>
+<div id="dynsection-7-content" class="dyncontent" style="display:none;">
+<div class="center"><iframe scrolling="no" frameborder="0" src="../../db/dc3/structfl_1_1tuple__element_3_010_00_01pair_3_01_t1_00_01_t2_01_4_01_4__coll__graph.svg" width="232" height="154"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<center><span class="legend">[<a target="top" href="../../graph_legend.html">legend</a>]</span></center></div>
+<table class="fieldtable">
+<tr><th colspan="3">Class Members</th></tr>
+<tr><td class="fieldtype">
+<a id="ae6812ab40291f8a9739ed35b3e1ad025" name="ae6812ab40291f8a9739ed35b3e1ad025"></a>typedef T1</td>
+<td class="fieldname">
+type T1</td>
+<td class="fielddoc">
+</td></tr>
+</table>
+
+</div>
+</div>
+<a name="de/dc7/structfl_1_1tuple__element_3_011_00_01pair_3_01_t1_00_01_t2_01_4_01_4" id="de/dc7/structfl_1_1tuple__element_3_011_00_01pair_3_01_t1_00_01_t2_01_4_01_4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#de/dc7/structfl_1_1tuple__element_3_011_00_01pair_3_01_t1_00_01_t2_01_4_01_4">&#9670;&#160;</a></span>fl::tuple_element&lt; 1, pair&lt; T1, T2 &gt; &gt;</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">struct fl::tuple_element&lt; 1, pair&lt; T1, T2 &gt; &gt;</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<div id="dynsection-8" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
+  <img id="dynsection-8-trigger" src="../../closed.png" alt="+"/> Inheritance diagram for fl::tuple_element&lt; 1, pair&lt; T1, T2 &gt; &gt;:</div>
+<div id="dynsection-8-summary" class="dynsummary" style="display:block;">
+</div>
+<div id="dynsection-8-content" class="dyncontent" style="display:none;">
+<div class="center"><iframe scrolling="no" frameborder="0" src="../../d1/dac/structfl_1_1tuple__element_3_011_00_01pair_3_01_t1_00_01_t2_01_4_01_4__inherit__graph.svg" width="232" height="154"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<center><span class="legend">[<a target="top" href="../../graph_legend.html">legend</a>]</span></center></div>
+<div id="dynsection-9" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
+  <img id="dynsection-9-trigger" src="../../closed.png" alt="+"/> Collaboration diagram for fl::tuple_element&lt; 1, pair&lt; T1, T2 &gt; &gt;:</div>
+<div id="dynsection-9-summary" class="dynsummary" style="display:block;">
+</div>
+<div id="dynsection-9-content" class="dyncontent" style="display:none;">
+<div class="center"><iframe scrolling="no" frameborder="0" src="../../de/d13/structfl_1_1tuple__element_3_011_00_01pair_3_01_t1_00_01_t2_01_4_01_4__coll__graph.svg" width="232" height="154"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<center><span class="legend">[<a target="top" href="../../graph_legend.html">legend</a>]</span></center></div>
+<table class="fieldtable">
+<tr><th colspan="3">Class Members</th></tr>
+<tr><td class="fieldtype">
+<a id="ad6230fc190949a9ffdbabb2c1aaabc30" name="ad6230fc190949a9ffdbabb2c1aaabc30"></a>typedef T2</td>
+<td class="fieldname">
+type T2</td>
+<td class="fielddoc">
+</td></tr>
+</table>
+
+</div>
+</div>
 </div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.9.3-->
@@ -141,7 +356,7 @@ Typedefs</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dir_4d1829fa9bd13d7db71e765b2707b248.html">fl</a></li><li class="navelem"><a class="el" href="../../d3/d41/pair_8h.html">pair.h</a></li>
-    <li class="footer">Generated on Tue Jun 24 2025 00:58:14 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Fri Aug 22 2025 20:59:34 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

@@ -6,11 +6,11 @@
 <area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="363,70,330,70,330,65,363,65"/>
 <area shape="rect" id="Node000004" href="$d6/de8/noise_8cpp_a07165473858feff9f2415a77bf841731.html#a07165473858feff9f2415a77bf841731" title=" " alt="" coords="271,104,329,129"/>
 <area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="366,88,329,106,327,101,364,84"/>
-<area shape="rect" id="Node000005" href="$d8/df9/group___noise_generation_gabf6fbef9588c6d6ee35b7ad79fe14ace.html#gabf6fbef9588c6d6ee35b7ad79fe14ace" title="8&#45;bit, fixed point implementation of Perlin&#39;s noise without scaling." alt="" coords="123,55,223,80"/>
+<area shape="rect" id="Node000005" href="$d8/d5c/group___noise_gabf6fbef9588c6d6ee35b7ad79fe14ace.html#gabf6fbef9588c6d6ee35b7ad79fe14ace" title="8&#45;bit, fixed point implementation of Perlin&#39;s noise without scaling." alt="" coords="123,55,223,80"/>
 <area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="257,103,205,83,207,78,259,98"/>
-<area shape="rect" id="Node000006" href="$d8/df9/group___noise_generation_gae8a7338d2f14deb11f62086adf81dfe2.html#gae8a7338d2f14deb11f62086adf81dfe2" title="8&#45;bit, fixed point implementation of Perlin&#39;s noise without scaling." alt="" coords="123,104,223,129"/>
+<area shape="rect" id="Node000006" href="$d8/d5c/group___noise_gae8a7338d2f14deb11f62086adf81dfe2.html#gae8a7338d2f14deb11f62086adf81dfe2" title="8&#45;bit, fixed point implementation of Perlin&#39;s noise without scaling." alt="" coords="123,104,223,129"/>
 <area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="257,119,223,119,223,114,257,114"/>
-<area shape="rect" id="Node000007" href="$d8/df9/group___noise_generation_ga6c57ed3ea69e819c29602578ecbabd71.html#ga6c57ed3ea69e819c29602578ecbabd71" title="8&#45;bit, fixed point implementation of Perlin&#39;s noise without scaling." alt="" coords="123,153,223,179"/>
+<area shape="rect" id="Node000007" href="$d8/d5c/group___noise_ga6c57ed3ea69e819c29602578ecbabd71.html#ga6c57ed3ea69e819c29602578ecbabd71" title="8&#45;bit, fixed point implementation of Perlin&#39;s noise without scaling." alt="" coords="123,153,223,179"/>
 <area shape="poly" id="edge6_Node000004_Node000007" title=" " alt="" coords="259,135,207,156,205,151,257,130"/>
 <area shape="rect" id="Node000008" href="$d8/df9/group___noise_generation_gab9d952a5258caa93c05ebdde0140cf0e.html#gab9d952a5258caa93c05ebdde0140cf0e" title="8&#45;Bit, fixed point implementation of Perlin&#39;s noise." alt="" coords="5,104,75,129"/>
 <area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="124,151,74,132,76,127,126,146"/>

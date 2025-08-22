@@ -114,7 +114,8 @@ $(function(){initNavTree('db/d97/_fast_l_e_d_8h.html','../../'); initResizable(t
 <div class="textblock"><p>central include file for FastLED, defines the <a class="el" href="../../dd/dbb/class_c_fast_l_e_d.html" title="High level controller interface for FastLED.">CFastLED</a> class/object </p>
 
 <p class="definition">Definition in file <a class="el" href="../../db/d97/_fast_l_e_d_8h_source.html">FastLED.h</a>.</p>
-</div><div class="textblock"><code>#include &lt;<a class="el" href="../../df/dd8/stdint_8h_source.html">stdint.h</a>&gt;</code><br />
+</div><div class="textblock"><code>#include &quot;<a class="el" href="../../df/dd8/stdint_8h_source.html">fl/stdint.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d3/d4b/dll_8h_source.html">fl/dll.h</a>&quot;</code><br />
 <code>#include &lt;SmartMatrix.h&gt;</code><br />
 <code>#include &lt;OctoWS2811.h&gt;</code><br />
 <code>#include &quot;<a class="el" href="../../d4/d64/force__inline_8h_source.html">fl/force_inline.h</a>&quot;</code><br />
@@ -141,6 +142,7 @@ $(function(){initNavTree('db/d97/_fast_l_e_d_8h.html','../../'); initResizable(t
 <code>#include &quot;<a class="el" href="../../db/d66/chipsets_8h_source.html">chipsets.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="../../db/dc0/engine__events_8h_source.html">fl/engine_events.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="../../da/d78/leds_8h_source.html">fl/leds.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d3/d7e/int_8h_source.html">fl/int.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="../../d1/dbc/sketch__macros_8h_source.html">fl/sketch_macros.h</a>&quot;</code><br />
 </div><div class="textblock"><div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Include dependency graph for FastLED.h:</div>
@@ -203,6 +205,9 @@ Classes</h2></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dd/d92/class_s_m16703.html">SM16703&lt; DATA_PIN, RGB_ORDER &gt;</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="../../dd/d92/class_s_m16703.html" title="SM16703 controller class.">SM16703</a> controller class.  <a href="../../dd/d92/class_s_m16703.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../df/daa/class_s_m16824_e.html">SM16824E&lt; DATA_PIN, RGB_ORDER &gt;</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="../../df/daa/class_s_m16824_e.html" title="SM16824E controller class.">SM16824E</a> controller class.  <a href="../../df/daa/class_s_m16824_e.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d5/d26/class_t_m1803.html">TM1803&lt; DATA_PIN, RGB_ORDER &gt;</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="../../d5/d26/class_t_m1803.html" title="TM1803 controller class.">TM1803</a> controller class.  <a href="../../d5/d26/class_t_m1803.html#details">More...</a><br /></td></tr>
@@ -268,15 +273,9 @@ Macros</h2></td></tr>
 <tr class="separator:a00167d1f0bf80faa62c6d8952f540f82"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a47074a13009a68e567023696910c6f48" id="r_a47074a13009a68e567023696910c6f48"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../db/d97/_fast_l_e_d_8h_a47074a13009a68e567023696910c6f48.html#a47074a13009a68e567023696910c6f48">FASTLED_FAKE_SPI_FORWARDS_TO_FAKE_CLOCKLESS</a>&#160;&#160;&#160;0</td></tr>
 <tr class="separator:a47074a13009a68e567023696910c6f48"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2f9de4cfbd302323305a4ad0e99167f4" id="r_a2f9de4cfbd302323305a4ad0e99167f4"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../db/d97/_fast_l_e_d_8h_a2f9de4cfbd302323305a4ad0e99167f4.html#a2f9de4cfbd302323305a4ad0e99167f4">FASTLED_VERSION</a>&#160;&#160;&#160;301001</td></tr>
+<tr class="memitem:a2f9de4cfbd302323305a4ad0e99167f4" id="r_a2f9de4cfbd302323305a4ad0e99167f4"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../db/d97/_fast_l_e_d_8h_a2f9de4cfbd302323305a4ad0e99167f4.html#a2f9de4cfbd302323305a4ad0e99167f4">FASTLED_VERSION</a>&#160;&#160;&#160;3010002</td></tr>
 <tr class="memdesc:a2f9de4cfbd302323305a4ad0e99167f4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Current FastLED version number, as an integer.  <br /></td></tr>
 <tr class="separator:a2f9de4cfbd302323305a4ad0e99167f4"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a142a708c2ff8d157a967309a781ac815" id="r_a142a708c2ff8d157a967309a781ac815"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../db/d97/_fast_l_e_d_8h_a142a708c2ff8d157a967309a781ac815.html#a142a708c2ff8d157a967309a781ac815">FastSPI_LED</a>&#160;&#160;&#160;<a class="el" href="../../d6/dda/_fast_l_e_d_8cpp_a8e94985674086ea368e1d51cbc0f82a9.html#a8e94985674086ea368e1d51cbc0f82a9">FastLED</a></td></tr>
-<tr class="memdesc:a142a708c2ff8d157a967309a781ac815"><td class="mdescLeft">&#160;</td><td class="mdescRight">Alias of the FastLED instance for legacy purposes.  <br /></td></tr>
-<tr class="separator:a142a708c2ff8d157a967309a781ac815"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac30cd5abdb75244830caee11ae5a110c" id="r_ac30cd5abdb75244830caee11ae5a110c"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../db/d97/_fast_l_e_d_8h_ac30cd5abdb75244830caee11ae5a110c.html#ac30cd5abdb75244830caee11ae5a110c">FastSPI_LED2</a>&#160;&#160;&#160;<a class="el" href="../../d6/dda/_fast_l_e_d_8cpp_a8e94985674086ea368e1d51cbc0f82a9.html#a8e94985674086ea368e1d51cbc0f82a9">FastLED</a></td></tr>
-<tr class="memdesc:ac30cd5abdb75244830caee11ae5a110c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Alias of the FastLED instance for legacy purposes.  <br /></td></tr>
-<tr class="separator:ac30cd5abdb75244830caee11ae5a110c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad745fb280b8fb379961f6520f18f775a" id="r_ad745fb280b8fb379961f6520f18f775a"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../db/d97/_fast_l_e_d_8h_ad745fb280b8fb379961f6520f18f775a.html#ad745fb280b8fb379961f6520f18f775a">NO_HARDWARE_PIN_SUPPORT</a></td></tr>
 <tr class="memdesc:ad745fb280b8fb379961f6520f18f775a"><td class="mdescLeft">&#160;</td><td class="mdescRight">If no pin/port mappings are found, sends a warning message to the user during compilation.  <br /></td></tr>
 <tr class="separator:ad745fb280b8fb379961f6520f18f775a"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -308,9 +307,9 @@ Macros</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="typedef-members" name="typedef-members"></a>
 Typedefs</h2></td></tr>
-<tr class="memitem:aa8a26176bfad65ad4447edd2ca99145e" id="r_aa8a26176bfad65ad4447edd2ca99145e"><td class="memItemLeft" align="right" valign="top">typedef uint8_t(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../db/d97/_fast_l_e_d_8h_aa8a26176bfad65ad4447edd2ca99145e.html#aa8a26176bfad65ad4447edd2ca99145e">power_func</a>) (uint8_t <a class="el" href="../../d6/d43/funky_8cpp_ab7346c8b67db0b99afe3fe1eff3b5b38.html#ab7346c8b67db0b99afe3fe1eff3b5b38">scale</a>, uint32_t data)</td></tr>
-<tr class="memdesc:aa8a26176bfad65ad4447edd2ca99145e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Typedef for a power consumption calculation function.  <br /></td></tr>
-<tr class="separator:aa8a26176bfad65ad4447edd2ca99145e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae35a6f671d142751029bb2371ce5872c" id="r_ae35a6f671d142751029bb2371ce5872c"><td class="memItemLeft" align="right" valign="top">typedef <a class="el" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a>(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../db/d97/_fast_l_e_d_8h_ae35a6f671d142751029bb2371ce5872c.html#ae35a6f671d142751029bb2371ce5872c">power_func</a>) (<a class="el" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> <a class="el" href="../../d6/d9d/_noise_8ino_ab7346c8b67db0b99afe3fe1eff3b5b38.html#ab7346c8b67db0b99afe3fe1eff3b5b38">scale</a>, fl::u32 data)</td></tr>
+<tr class="memdesc:ae35a6f671d142751029bb2371ce5872c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Typedef for a power consumption calculation function.  <br /></td></tr>
+<tr class="separator:ae35a6f671d142751029bb2371ce5872c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="enum-members" name="enum-members"></a>
 Enumerations</h2></td></tr>
@@ -356,8 +355,8 @@ Enumerations</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:a2b538932c69fe9ea1fca4758f268d05a" id="r_a2b538932c69fe9ea1fca4758f268d05a"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../df/d2a/namespace_8h_a556e256b05a4b158f3606e4a978101ba.html#a556e256b05a4b158f3606e4a978101ba">FASTLED_NAMESPACE_BEGIN</a> uint16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../db/d97/_fast_l_e_d_8h_a2b538932c69fe9ea1fca4758f268d05a.html#a2b538932c69fe9ea1fca4758f268d05a">cled_contoller_size</a> ()</td></tr>
-<tr class="separator:a2b538932c69fe9ea1fca4758f268d05a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7fc9dbf6b6f9ae03c2e6de945adba338" id="r_a7fc9dbf6b6f9ae03c2e6de945adba338"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../df/d2a/namespace_8h_a556e256b05a4b158f3606e4a978101ba.html#a556e256b05a4b158f3606e4a978101ba">FASTLED_NAMESPACE_BEGIN</a> fl::u16&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../db/d97/_fast_l_e_d_8h_a7fc9dbf6b6f9ae03c2e6de945adba338.html#a7fc9dbf6b6f9ae03c2e6de945adba338">cled_contoller_size</a> ()</td></tr>
+<tr class="separator:a7fc9dbf6b6f9ae03c2e6de945adba338"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="var-members" name="var-members"></a>
 Variables</h2></td></tr>
@@ -372,7 +371,7 @@ Variables</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../db/d97/_fast_l_e_d_8h.html">FastLED.h</a></li>
-    <li class="footer">Generated on Tue Jun 24 2025 00:58:14 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Fri Aug 22 2025 20:59:34 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

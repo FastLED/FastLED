@@ -1,5 +1,7 @@
 <map id="fl::MatrixSlice&lt; T &gt;" name="fl::MatrixSlice&lt; T &gt;">
-<area shape="rect" id="Node000001" title=" " alt="" coords="24,5,173,31"/>
-<area shape="rect" id="Node000002" href="$d6/da3/classfl_1_1_matrix_slice.html" title=" " alt="" coords="5,93,192,119"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="101,45,101,93,96,93,96,45"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="117,5,267,31"/>
+<area shape="rect" id="Node000002" href="$d6/da3/classfl_1_1_matrix_slice.html" title=" " alt="" coords="5,93,184,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="170,42,110,95,106,91,167,38"/>
+<area shape="rect" id="Node000003" href="$d6/da3/classfl_1_1_matrix_slice.html" title=" " alt="" coords="209,93,370,119"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="217,38,278,91,274,95,214,42"/>
 </map>

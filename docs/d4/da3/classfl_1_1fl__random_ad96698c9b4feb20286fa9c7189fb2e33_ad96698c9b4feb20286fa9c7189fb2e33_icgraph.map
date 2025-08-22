@@ -1,0 +1,17 @@
+<map id="fl::fl_random::next_random16" name="fl::fl_random::next_random16">
+<area shape="rect" id="Node000001" title="Generate next 16&#45;bit random number using this instance&#39;s seed." alt="" coords="455,90,595,130"/>
+<area shape="rect" id="Node000002" href="$d4/da3/classfl_1_1fl__random_a4a278033350f6d38a92bdbdca1bbae55.html#a4a278033350f6d38a92bdbdca1bbae55" title="Generate next 32&#45;bit random number using this instance&#39;s seed." alt="" coords="248,33,388,73"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="440,89,388,75,389,69,442,84"/>
+<area shape="rect" id="Node000005" href="$d4/da3/classfl_1_1fl__random_ae8ff25279687ff01cfa91f38dee1a10d.html#ae8ff25279687ff01cfa91f38dee1a10d" title="Generate a 16&#45;bit random number." alt="" coords="229,97,407,123"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="441,113,407,113,407,107,441,107"/>
+<area shape="rect" id="Node000006" href="$d4/da3/classfl_1_1fl__random_a5cda6880409326ab286793fc3724e6b6.html#a5cda6880409326ab286793fc3724e6b6" title="Generate an 8&#45;bit random number." alt="" coords="233,147,403,172"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="441,133,373,149,372,144,440,127"/>
+<area shape="rect" id="Node000003" href="$d4/da3/classfl_1_1fl__random_a6e46ebfaf85f6b9733f9e90dc0b0a71e.html#a6e46ebfaf85f6b9733f9e90dc0b0a71e" title="Generate a random number." alt="" coords="5,5,181,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="234,42,176,33,177,28,234,37"/>
+<area shape="rect" id="Node000004" href="$d4/da3/classfl_1_1fl__random_a2238d5e8696ad9867763c410b037243f.html#a2238d5e8696ad9867763c410b037243f" title="Generate a random number in the range [0, n)" alt="" coords="5,55,181,80"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="234,61,182,64,182,59,234,55"/>
+<area shape="rect" id="Node000007" href="$d4/da3/classfl_1_1fl__random_a621aca74f6e222d212643af2eefebb37.html#a621aca74f6e222d212643af2eefebb37" title="Generate an 8&#45;bit random number in the range [min, max)" alt="" coords="9,117,178,143"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="219,149,178,144,179,138,220,144"/>
+<area shape="rect" id="Node000008" href="$d4/da3/classfl_1_1fl__random_aced73d4ef27558f6b46b6cb2a7d04ee1.html#aced73d4ef27558f6b46b6cb2a7d04ee1" title="Generate an 8&#45;bit random number in the range [0, n)" alt="" coords="9,167,178,192"/>
+<area shape="poly" id="edge7_Node000006_Node000008" title=" " alt="" coords="219,171,179,174,178,169,219,165"/>
+</map>

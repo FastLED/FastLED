@@ -40,10 +40,10 @@
 <!-- Node3 -->
 <g id="Node000003" class="node">
 <title>Node3</title>
-<g id="a_Node000003"><a xlink:href="../../d5/dda/structfl_1_1_str_stream_helper_3_01int_01_4.html" target="_top" xlink:title=" ">
+<g id="a_Node000003"><a xlink:href="../../d7/d0b/structfl_1_1_str_stream_helper_3_01fl_1_1u8_01_4.html" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="370,-126 260,-126 260,-96 370,-96 370,-126"/>
 <text text-anchor="start" x="268" y="-114" font-family="Helvetica,sans-Serif" font-size="10.00">fl::StrStreamHelper</text>
-<text text-anchor="middle" x="315" y="-103" font-family="Helvetica,sans-Serif" font-size="10.00">&lt; int &gt;</text>
+<text text-anchor="middle" x="315" y="-103" font-family="Helvetica,sans-Serif" font-size="10.00">&lt; fl::u8 &gt;</text>
 </a>
 </g>
 </g>
@@ -55,15 +55,15 @@
 <polygon fill="orange" stroke="orange" points="148.59,-91.21 138.29,-93.72 147.9,-98.18 148.59,-91.21"/>
 </a>
 </g>
-<text text-anchor="middle" x="199" y="-106" font-family="Helvetica,sans-Serif" font-size="10.00" fill="grey"> &lt; int &gt;</text>
+<text text-anchor="middle" x="199" y="-106" font-family="Helvetica,sans-Serif" font-size="10.00" fill="grey"> &lt; fl::u8 &gt;</text>
 </g>
 <!-- Node4 -->
 <g id="Node000004" class="node">
 <title>Node4</title>
-<g id="a_Node000004"><a xlink:href="../../dc/ddb/structfl_1_1_str_stream_helper_3_01uint8__t_01_4.html" target="_top" xlink:title=" ">
+<g id="a_Node000004"><a xlink:href="../../d5/dda/structfl_1_1_str_stream_helper_3_01int_01_4.html" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="370,-78 260,-78 260,-48 370,-48 370,-78"/>
 <text text-anchor="start" x="268" y="-66" font-family="Helvetica,sans-Serif" font-size="10.00">fl::StrStreamHelper</text>
-<text text-anchor="middle" x="315" y="-55" font-family="Helvetica,sans-Serif" font-size="10.00">&lt; uint8_t &gt;</text>
+<text text-anchor="middle" x="315" y="-55" font-family="Helvetica,sans-Serif" font-size="10.00">&lt; int &gt;</text>
 </a>
 </g>
 </g>
@@ -75,7 +75,7 @@
 <polygon fill="orange" stroke="orange" points="147.9,-75.82 138.29,-80.28 148.59,-82.79 147.9,-75.82"/>
 </a>
 </g>
-<text text-anchor="middle" x="199" y="-80" font-family="Helvetica,sans-Serif" font-size="10.00" fill="grey"> &lt; uint8_t &gt;</text>
+<text text-anchor="middle" x="199" y="-80" font-family="Helvetica,sans-Serif" font-size="10.00" fill="grey"> &lt; int &gt;</text>
 </g>
 <!-- Node5 -->
 <g id="Node000005" class="node">

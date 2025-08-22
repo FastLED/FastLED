@@ -1,0 +1,9 @@
+<map id="clearDisplay" name="clearDisplay">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,55,108,80"/>
+<area shape="rect" id="Node000002" href="$da/dc7/advanced_8h_a40fb0ce80fe239814f5a2d21922802b3.html#a40fb0ce80fe239814f5a2d21922802b3" title=" " alt="" coords="170,5,261,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="97,52,160,32,161,37,99,57"/>
+<area shape="rect" id="Node000003" href="$d1/dfb/colorutils_8h_a399e4e094995b8e97420b89a2dd6548b.html#a399e4e094995b8e97420b89a2dd6548b" title=" " alt="" coords="156,55,275,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="108,65,142,65,142,70,108,70"/>
+<area shape="rect" id="Node000004" href="$d1/dfb/colorutils_8h_afcada3a28df2b4491cbee30297e39ea7.html#afcada3a28df2b4491cbee30297e39ea7" title="Fill a range of LEDs with a solid color." alt="" coords="177,104,253,129"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="99,77,165,98,164,104,97,83"/>
+</map>
