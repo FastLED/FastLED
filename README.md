@@ -124,6 +124,12 @@ void loop() {
 
 ## 🆕 Latest Features
 
+## **FastLED 3.10.2: Corkscrew Mapping**
+
+See [examples/FestivalStick/FestivalStick.ino](examples/FestivalStick/FestivalStick.ino)
+
+https://github.com/user-attachments/assets/19af4b54-c189-482b-b13b-2d7f73efa4e0
+
 ### **FastLED 3.10.0: Animartrix Out of Beta**
 Advanced animation framework for complex LED visualizations and effects.
 
@@ -147,6 +153,12 @@ https://github.com/user-attachments/assets/ff8e0432-3e0d-47cc-a444-82ce27f562af
 
 <details>
 <summary>📖 <strong>Detailed Feature Information</strong> (Click to expand)</summary>
+
+## New in 3.10.2: Corkscrew Mapping
+
+See [examples/FestivalStick/FestivalStick.ino](examples/FestivalStick/FestivalStick.ino)
+
+https://github.com/user-attachments/assets/19af4b54-c189-482b-b13b-2d7f73efa4e0
 
 ## New in 3.10.0: Animartrix out of beta
 
