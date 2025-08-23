@@ -1,7 +1,7 @@
-/// @file    Rgb8Video.ino
-/// @brief   Animated rainbows optimized for video display on WS2812 LEDs using
-/// toVideoRGB_8bit().
-/// @example Rgb8Video.ino
+/// @file    ColorBoost.h
+/// @brief   Demo of CRGB::colorBoost() for video display on WS2812 LEDs using animated rainbow effect 
+/// (based on Pride2015 by Mark Kriegsman)
+/// @example ColorBoost.ino
 ///
 /// This sketch is fully compatible with the FastLED web compiler. To use it do the following:
 /// 1. Install Fastled: `pip install fastled`
@@ -9,13 +9,19 @@
 /// 3. Run the FastLED web compiler at root: `fastled`
 /// 4. When the compiler is done a web page will open.
 
+// Animated, ever-changing rainbows optimized for video display.
+// Uses CRGB::colorBoost() to boost saturation for better LED display.
+// Based on Pride2015 by Mark Kriegsman
+
 #include "FastLED.h"
 #include "fl/ease.h"
 
 using namespace fl;
 
+// WASM Configuration ********************************************
+
 UITitle title("ColorBoost");
-UIDescription description("ColorBoost is a function that boosts the saturation of a color without decimating the color from 8 bit -> gamma -> 8 bit (leaving only 8 colors for each component). Use the dropdown menus to select different easing functions for saturation and luminance. Use legacy gfx mode (?gfx=0) for best results.");
+UIDescription description("CRGB::colorBoost() is a function that boosts the saturation of a color without decimating the color from 8 bit -> gamma -> 8 bit (leaving only 8 colors for each component). Use the dropdown menus to select different easing functions for saturation and luminance. Use legacy gfx mode (?gfx=0) for best results.");
 
 UISlider satSlider("Saturation", 60, 0, 255, 1);
 
@@ -38,35 +44,27 @@ UIDropdown luminanceFunction("Luminance Function", easeOptions);
 // Group related color boost UI elements using UIGroup template multi-argument constructor
 UIGroup colorBoostControls("Color Boost", satSlider, saturationFunction, luminanceFunction);
 
-// Rgb8Video
-// Animated, ever-changing rainbows optimized for video display.
-// Uses CRGB::toVideoRGB_8bit() to boost saturation for better LED display.
-// Based on Pride2015 by Mark Kriegsman
+// Physical LED Configuration *********************************
 
-#define DATA_PIN 3
-#define DATA_PIN_2 4 // Second strip for original RGB comparison
-// #define CLK_PIN   4
-#define LED_TYPE WS2811
+#define DATA_PIN 2
+#define LED_TYPE WS2812
 #define COLOR_ORDER GRB
-#define NUM_LEDS_PER_STRIP 16
-#define NUM_STRIPS 16 // Changed from 2 to 100 for 100x100 matrix
-#define TOTAL_LEDS (NUM_LEDS_PER_STRIP * NUM_STRIPS) // 100x100 = 10,000 LEDs
-#define BRIGHTNESS 255
+#define WIDTH 22
+#define WIDTH 22 
+#define NUM_LEDS (WIDTH * HEIGHT)
+#define BRIGHTNESS 150
 
-// Combined LED array for both strips
-CRGB leds[TOTAL_LEDS];
+CRGB leds[NUM_LEDS];
 
 // fl::ScreenMap screenmap(lut.data(), lut.size());
-// fl::ScreenMap screenmap(TOTAL_LEDS);
+// fl::ScreenMap screenmap(NUM_LEDS);
 fl::XYMap xyMap =
-    fl::XYMap::constructRectangularGrid(NUM_LEDS_PER_STRIP, NUM_STRIPS);
+    fl::XYMap::constructRectangularGrid(WIDTH, HEIGHT);
 
 void setup() {
 
     // tell FastLED about the LED strip configuration
-    // First strip (original RGB) - indices 0-199
-
-    FastLED.addLeds<LED_TYPE, DATA_PIN_2, COLOR_ORDER>(leds, TOTAL_LEDS)
+    FastLED.addLeds<LED_TYPE, DATA_PIN, COLOR_ORDER>(leds, NUM_LEDS)
         .setCorrection(TypicalLEDStrip)
         .setScreenMap(xyMap);
     // set master brightness control
@@ -94,22 +92,24 @@ EaseType getEaseType(int value) {
     return EASE_NONE;
 }
 
-// Animated rainbow wave effect optimized for video display
+// Animated rainbow wave effect divided into three segments to compare:
+// - Normal colors (top)
+// - Colors optimized using colorBoost() (middle)
+// - Colors adjusted using gamma correction (bottom)
 void rainbowWave() {
     // Use millis() for consistent timing across different devices
     // Scale down millis() to get appropriate animation speed
     uint16_t time = millis() / 16;  // Adjust divisor to control wave speed
     uint8_t hueOffset = millis() / 32; // Adjust divisor to control hue rotation speed
 
-    // Iterate through the entire 100x100 matrix
-    for (uint16_t y = 0; y < NUM_STRIPS; y++) {
-        for (uint16_t x = 0; x < NUM_LEDS_PER_STRIP; x++) {
-            // Create a wave pattern using sine function based on position and
-            // time
+    // Iterate through the entire matrix
+    for (uint16_t y = 0; y < HEIGHT; y++) {
+        for (uint16_t x = 0; x < WIDTH; x++) {
+            // Create a wave pattern using sine function based on position and time
             uint8_t wave = sin8(time + (x * 8));
 
             // Calculate hue based on position and time for rainbow effect
-            uint8_t hue = hueOffset + (x * 255 / NUM_LEDS_PER_STRIP);
+            uint8_t hue = hueOffset + (x * 255 / WIDTH);
 
             // Use wave for both saturation and brightness variation
             // uint8_t sat = 255 - (wave / 4); // Subtle saturation variation
@@ -121,11 +121,11 @@ void rainbowWave() {
             // Upper half (rows 0-49): original colors
             // Lower half (rows 50-99): transformed colors using
             // toVideoRGB_8bit()
-            if (y > NUM_STRIPS / 3 * 2) {
-                // Upper half - original colors
+            if (y > HEIGHT / 3 * 2) {
+                // Upper third - original colors
                 leds[xyMap(x, y)] = original_color;
-            } else if (y > NUM_STRIPS / 3) {
-                // Middle half - transformed colors
+            } else if (y > HEIGHT / 3) {
+                // Middle third - colors transformed with colorBoost()
                 EaseType sat_ease = getEaseType(saturationFunction.as_int());
                 EaseType lum_ease = getEaseType(luminanceFunction.as_int());
                 leds[xyMap(x, y)] = original_color.colorBoost(sat_ease, lum_ease);
