@@ -1,6 +1,6 @@
 /// @file    ColorBoost.h
 /// @brief   Demo of CRGB::colorBoost() for video display on WS2812 LEDs using animated rainbow effect 
-/// (based on Pride2015 by Mark Kriegsman)
+///          (based on Pride2015 by Mark Kriegsman)
 /// @example ColorBoost.ino
 ///
 /// This sketch is fully compatible with the FastLED web compiler. To use it do the following:
@@ -9,16 +9,14 @@
 /// 3. Run the FastLED web compiler at root: `fastled`
 /// 4. When the compiler is done a web page will open.
 
-// Animated, ever-changing rainbows optimized for video display.
-// Uses CRGB::colorBoost() to boost saturation for better LED display.
-// Based on Pride2015 by Mark Kriegsman
+// This demo shows use of CRGB::colorBoost() to boost saturation for better LED display, compared to 
+// normal colors and colors adjusted with gamma correction.
+// The demo involves animated, ever-changing rainbows (based on Pride2015 by Mark Kriegsman).
 
 #include "FastLED.h"
 #include "fl/ease.h"
 
 using namespace fl;
-
-// WASM Configuration ********************************************
 
 UITitle title("ColorBoost");
 UIDescription description("CRGB::colorBoost() is a function that boosts the saturation of a color without decimating the color from 8 bit -> gamma -> 8 bit (leaving only 8 colors for each component). Use the dropdown menus to select different easing functions for saturation and luminance. Use legacy gfx mode (?gfx=0) for best results.");
@@ -44,13 +42,11 @@ UIDropdown luminanceFunction("Luminance Function", easeOptions);
 // Group related color boost UI elements using UIGroup template multi-argument constructor
 UIGroup colorBoostControls("Color Boost", satSlider, saturationFunction, luminanceFunction);
 
-// Physical LED Configuration *********************************
-
 #define DATA_PIN 2
 #define LED_TYPE WS2812
 #define COLOR_ORDER GRB
 #define WIDTH 22
-#define WIDTH 22 
+#define HEIGHT 22 
 #define NUM_LEDS (WIDTH * HEIGHT)
 #define BRIGHTNESS 150
 
@@ -92,7 +88,7 @@ EaseType getEaseType(int value) {
     return EASE_NONE;
 }
 
-// Animated rainbow wave effect divided into three segments to compare:
+// Animated rainbow wave effect (Pride2015), with matrix divided into three segments to compare:
 // - Normal colors (top)
 // - Colors optimized using colorBoost() (middle)
 // - Colors adjusted using gamma correction (bottom)
@@ -118,9 +114,6 @@ void rainbowWave() {
             // Create the original color using HSV
             CRGB original_color = CHSV(hue, satSlider.value(), bri);
 
-            // Upper half (rows 0-49): original colors
-            // Lower half (rows 50-99): transformed colors using
-            // toVideoRGB_8bit()
             if (y > HEIGHT / 3 * 2) {
                 // Upper third - original colors
                 leds[xyMap(x, y)] = original_color;
@@ -130,7 +123,7 @@ void rainbowWave() {
                 EaseType lum_ease = getEaseType(luminanceFunction.as_int());
                 leds[xyMap(x, y)] = original_color.colorBoost(sat_ease, lum_ease);
             } else {
-                // Lower half - transformed colors
+                // Lower third - colors transformed using gamma correction
                 float r = original_color.r / 255.f;
                 float g = original_color.g / 255.f;
                 float b = original_color.b / 255.f;
