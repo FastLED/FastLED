@@ -141,7 +141,7 @@ export class GraphicsManager {
       return false;
     }
 
-    return this.setupWebGL();
+    return this.initWebGL();
   }
 
   /**
@@ -178,6 +178,7 @@ export class GraphicsManager {
   /**
    * Initializes the WebGL rendering context and resources
    * Sets up shaders, buffers, and textures for LED rendering
+   * @returns {boolean} True if initialization was successful
    */
   initWebGL() {
     createShaders();
@@ -185,7 +186,7 @@ export class GraphicsManager {
     this.gl = canvas.getContext('webgl');
     if (!this.gl) {
       console.error('WebGL not supported');
-      return;
+      return false;
     }
 
     // Create shaders
@@ -225,6 +226,8 @@ export class GraphicsManager {
     this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_T, this.gl.CLAMP_TO_EDGE);
     this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, this.gl.NEAREST);
     this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MAG_FILTER, this.gl.NEAREST);
+    
+    return true;
   }
 
   /**
