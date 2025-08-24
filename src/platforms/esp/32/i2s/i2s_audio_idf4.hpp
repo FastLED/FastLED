@@ -78,7 +78,7 @@
 #endif
 
 #ifndef GPIO_NUM_8
-#define GPIO_NUM_8 (8)
+#define GPIO_NUM_8 (8)  
 #endif
 
 #ifndef GPIO_NUM_4
