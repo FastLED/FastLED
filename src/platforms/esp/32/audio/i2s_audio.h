@@ -26,9 +26,12 @@
 
 namespace fl {
 
+// Note: Right now these are esp specific, but they are designed to migrate to a common api.
+
 enum MicChannel {
     MicChannelL = 0,
     MicChannelR = 1,
+    MicChannelBoth = 2,
 };
 
 struct I2SStandardConfig {
@@ -64,28 +67,25 @@ public:
     // For example, the I2SPdmConfig is not supported on the ESP32-C3 and in this case it will return a null pointer
     // and the error_message will be set to a non-empty string.
     // Implimentation notes:
-    //   It's very important that the implimentation uses a esp task to fill in the buffer. The reason is that
-    //   there will be looooong delays during FastLED show() on some esp platforms, for example idf 4.4. If we 
+    //   It's very important that the implimentation uses a esp task / interrupt to fill in the buffer. The reason is that
+    //   there will be looooong delays during FastLED show() on some esp platforms, for example idf 4.4. If we do
+    //   poll only, then audio buffers can be dropped. However if using a task then the audio buffers will be
+    //   set internally via an interrupt / queue and then they can just be popped off the queue.
     static fl::shared_ptr<IEspI2SAudioSource> create(const I2SConfig& config, fl::string* error_message = nullptr);
 
 
     virtual ~IEspI2SAudioSource() = default;
     virtual void init() = 0;
+    // Starts the audio source.
     virtual void start() = 0;
+    // Stops the audio source, call this before light sleep.
     virtual void stop() = 0;
+
+    virtual bool error(fl::string* msg = nullptr) = 0;  // if an error occured then query it here.
+    // Transfer internal buffer to the caller.
     virtual void read(fl::vector_inlined<i16, IS2_AUDIO_BUFFER_LEN>* buffer) = 0;
+
 };
 
-// void i2s_audio_init(const I2SConfig& config);
-
-
-// // Worked in previous life but needs re-validation before becoming part of this api.
-// // HELP WANTED!
-// //void i2s_audio_enter_light_sleep();
-// //void i2s_audio_exit_light_sleep();
-// //void i2s_audio_shutdown();
-
-// size_t i2s_read_raw_samples(fl::vector_inlined<i16, IS2_AUDIO_BUFFER_LEN>* buffer);
-// double i2s_loudness_to_rms_imp441(double rms_loudness);
 
 }  // namespace fl
