@@ -26,9 +26,16 @@ namespace fl {
 
 struct I2SAudioConfig {
     bool wait_for_power_on = false;
+    int mPinWs;
+    int mPinSd;
+    int mPinClk;
+    int mI2sNum;
+    I2SAudioConfig(int pin_ws, int pin_sd, int pin_clk, int i2s_num)
+        : mPinWs(pin_ws), mPinSd(pin_sd), mPinClk(pin_clk), mI2sNum(i2s_num) {}
 };
 
-void i2s_audio_init(const I2SAudioConfig& config = I2SAudioConfig{});
+void i2s_audio_init(const I2SAudioConfig& config);
+
 
 // Worked in previous life but needs re-validation before becoming part of this api.
 // HELP WANTED!

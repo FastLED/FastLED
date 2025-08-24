@@ -8,33 +8,36 @@
 
 #include "i2s_audio.h"
 
-#include <Arduino.h>
-#include <stdint.h>
+// #include <Arduino.h>
+// #include <stdint.h>
+#include "fl/stdint.h"
 #include <driver/i2s.h>
 #include "fl/circular_buffer.h"
 #include "fl/printf.h"
+#include "fl/int.h"
 
 
 #ifndef GPIO_NUM_7
-#define GPIO_NUM_7 (7)
+#define GPIO_NUM_7 gpio_num_t(7)
 #endif
 
 #ifndef GPIO_NUM_8
-#define GPIO_NUM_8 (8)
+#define GPIO_NUM_8 gpio_num_t(8)
 #endif
 
 #ifndef GPIO_NUM_4
-#define GPIO_NUM_4 (4)
+#define GPIO_NUM_4 gpio_num_t(4)
 #endif
 
 #ifndef GPIO_NUM_10
-#define GPIO_NUM_10 (10)
+#define GPIO_NUM_10 gpio_num_t(10)
 #endif
 
 #ifndef I2S_NUM_0
 #define I2S_NUM_0 i2s_port_t(0)
 #endif
 
+#define AUDIO_BIT_RESOLUTION 16
 
 
 
@@ -85,13 +88,19 @@
 // not much else going on.) With CPU_CLK at 80MHz, the PLL can run at 'only' 320MHz; better yet would be to
 // run without the PLL, i.e. CPU_CLK = XTAL_CLK = 40MHz, which you could also try.
 
+namespace fl {
+
 namespace
 {
+  enum {
+    AUDIO_CHANNELS = 1,
+    AUDIO_SAMPLE_RATE = 44100,
+    AUDIO_DMA_BUFFER_COUNT = 8,
+  };
+  using audio_sample_t = fl::i16;
   static_assert(AUDIO_BIT_RESOLUTION == 16, "Only 16 bit resolution is supported");
   static_assert(AUDIO_CHANNELS == 1, "Only 1 channel is supported");
   static_assert(sizeof(audio_sample_t) == 2, "audio_sample_t must be 16 bit");
-  std::atomic<float> s_loudness_dB;
-  std::atomic<uint32_t> s_loudness_updated;
   int garbage_buffer_count = 0;
 
   const i2s_config_t i2s_config = {
@@ -185,160 +194,7 @@ namespace
     return 0;
   }
 
-  bool update_audio_samples(audio_buffer_t* dst)
-  {
-    // audio_sample_t buffer[IS2_AUDIO_BUFFER_LEN] = {0};
-    bool updated = false;
-    while (true)
-    {
-      size_t samples_read = read_raw_samples(*dst);
-      if (samples_read <= 0)
-      {
-        break;
-      }
-      if (garbage_buffer_count > 0)
-      {
-        --garbage_buffer_count;
-        continue;
-      }
-      updated = true;
-      float rms = calc_rms_loudness(*dst, samples_read);
-      s_loudness_dB.store(audio_loudness_to_dB(rms));
-      s_loudness_updated.store(millis());
-    }
-    return updated;
-  }
 
   bool s_audio_initialized = false;
 } // anonymous namespace
-
-void audio_task(void *pvParameters)
-{
-  while (true)
-  {
-    // Drain out all pending buffers.
-    while (update_audio_samples(nullptr))  // FIXME
-    {
-      ;
-    }
-    delay_task_ms(7);
-  }
-}
-
-void audio_init(bool wait_for_power_on)
-{
-  if (s_audio_initialized)
-  {
-    cout << "Audio already initialized." << endl;
-    return;
-  }
-  s_audio_initialized = true;
-  pinMode(PIN_AUDIO_PWR, OUTPUT);
-  digitalWrite(PIN_AUDIO_PWR, HIGH); // Power on the IS2 microphone.
-  i2s_audio_init();
-  if (wait_for_power_on)
-  {
-    delay_task_ms(POWER_ON_TIME_MS); // Wait for the microphone to power on.
-  }
-
-  // start a task to read the audio samples using psram
-  // TaskCreatePsramPinnedToCore(
-  //    audio_task, "audio_task", 4096, NULL, AUDIO_TASK_SAMPLING_PRIORITY, NULL, 0);
-
-#if ENABLE_AUDIO_TASK
-  xTaskCreatePinnedToCore(
-      audio_task, "audio_task", 4096, NULL, AUDIO_TASK_SAMPLING_PRIORITY, NULL, 0);
-#endif
-}
-
-// UNTESTED
-void audio_shutdown()
-{
-  // i2s_stop(I2S_NUM_0);          // Stop the I2S
-  // i2s_driver_uninstall(I2S_NUM_0); // Uninstall the driver
-  s_audio_initialized = false;
-}
-
-audio_state_t audio_update()
-{
-  audio_buffer_t buffer = {0};
-  uint32_t start_time = millis();
-  update_audio_samples(&buffer);
-#if ENABLE_AUDIO_TASK
-  for (int i = 0; i < 3; i++)
-  {
-    vPortYield();
-  }
-#endif
-  audio_state_t state = audio_state_t(audio_loudness_dB(), s_loudness_updated.load(), buffer);
-  return state;
-}
-
-float audio_loudness_dB() { return s_loudness_dB.load(); }
-
-// Audio
-
-void audio_loudness_test()
-{
-  Buffer<double> sample_buffer;
-  sample_buffer.init(32);
-  cout << "Done initializing audio buffers" << endl;
-
-  while (true)
-  {
-    // This is a test to see how loud the audio is.
-    // It's not used in the final product.
-    audio_sample_t buffer[IS2_AUDIO_BUFFER_LEN] = {0};
-    size_t samples_read = read_raw_samples(buffer);
-    if (samples_read > 0)
-    {
-      double rms_loudness = calc_rms_loudness(buffer, samples_read);
-      sample_buffer.write(&rms_loudness, 1);
-      double avg = 0;
-      for (size_t i = 0; i < sample_buffer.size(); ++i)
-      {
-        avg += sample_buffer[i];
-      }
-      avg /= sample_buffer.size();
-      String loudness_str = String(avg, 3);
-      // mymyprintf("Avg rms loudness: %s\n", loudness_str.c_str());
-      float dB = audio_loudness_to_dB(avg);
-      String dB_str = String(dB, 3);
-      PRINTF("dB: %s, loudness: %s\n", dB_str.c_str(), loudness_str.c_str());
-      // buffer->clear();
-      sample_buffer.clear();
-    }
-  }
-}
-
-void audio_enter_light_sleep()
-{
-  audio_sample_t buffer[IS2_AUDIO_BUFFER_LEN] = {0};
-  // i2s_stop(I2S_NUM_0);          // Stop the I2S
-  i2s_audio_shutdown();
-  // i2s_zero_dma_buffer(I2S_NUM_0);
-  digitalWrite(PIN_AUDIO_PWR, HIGH);
-  gpio_hold_en(PIN_I2S_WS);
-  gpio_hold_en(PIN_IS2_SD);
-  gpio_hold_en(PIN_I2S_SCK);
-  gpio_hold_en(PIN_AUDIO_PWR);
-}
-
-void audio_exit_light_sleep()
-{
-  gpio_hold_dis(PIN_I2S_WS);
-  gpio_hold_dis(PIN_IS2_SD);
-  gpio_hold_dis(PIN_I2S_SCK);
-  // gpio_hold_dis(PIN_AUDIO_PWR);
-  delay(160);
-  // i2s_start(I2S_NUM_0);
-  i2s_audio_init();
-  // audio_sample_t buffer[IS2_AUDIO_BUFFER_LEN] = {0};
-  // uint32_t future_time = millis() + 180;
-  // while (millis() < future_time) {
-  //   read_raw_samples(buffer);
-  // }
-  // delay(180);
-  // delay(POWER_ON_TIME_MS * 2);
-  //  garbage_buffer_count = 16;
-}
+}  // namespace fl

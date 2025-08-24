@@ -5,7 +5,7 @@
 
 namespace fl {
 
-void i2s_audio_init(const I2SAudioConfig& config = I2SAudioConfig{}) {
+void i2s_audio_init(const I2SAudioConfig& config) {
     FL_UNUSED(config);
 }
 
