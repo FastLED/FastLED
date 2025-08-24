@@ -69,6 +69,25 @@
 #define AUDIO_DMA_BUFFER_COUNT 3
 #define AUDIO_RECORDING_SECONDS 1
 
+#ifndef GPIO_NUM_7
+#define GPIO_NUM_7 (7)
+#endif
+
+#ifndef GPIO_NUM_8
+#define GPIO_NUM_8 (8)
+#endif
+
+#ifndef GPIO_NUM_4
+#define GPIO_NUM_4 (4)
+#endif
+
+#ifndef GPIO_NUM_10
+#define GPIO_NUM_10 (10)
+#endif
+
+
+
+
 #define PIN_I2S_WS GPIO_NUM_7  // TODO change this pins
 #define PIN_IS2_SD GPIO_NUM_8  // TODO change this pins
 #define PIN_I2S_SCK GPIO_NUM_4  // TODO change this pins
