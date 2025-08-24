@@ -71,6 +71,8 @@
 
 namespace fl {
 
+using audio_sample_t = int16_t;
+
 namespace {
 static_assert(AUDIO_BIT_RESOLUTION == 16,
               "Only 16 bit resolution is supported");
