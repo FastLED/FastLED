@@ -86,7 +86,7 @@
 #endif
 
 #ifndef I2S_NUM_0
-#define I2S_NUM_0 (0)
+#define I2S_NUM_0 i2s_port_t(0)
 #endif
 
 
