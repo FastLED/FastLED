@@ -3,8 +3,8 @@
 
 #include "i2s_audio.h"
 
-#include <driver/i2s.h>
-
+// #include <driver/i2s.h>
+#include <driver/i2s_std.h>
 #include "fl/iostream.h"
 #include "fl/stdint.h"
 #include "fl/atomic.h"
