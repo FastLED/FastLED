@@ -152,7 +152,7 @@ void i2s_audio_init(bool wait_for_power_on) {
     }
     s_i2s_audio_initialized = true;
     i2s_driver_install(I2S_NUM, &i2s_config, 0, NULL);
-    i2s_set_pin(I2S_NUM, &I2S_NUM);
+    i2s_set_pin(I2S_NUM, &pin_config);
     i2s_zero_dma_buffer(I2S_NUM);
     if (wait_for_power_on) {
         delay_task_ms(POWER_ON_TIME_MS); // Wait for the microphone to power on.
