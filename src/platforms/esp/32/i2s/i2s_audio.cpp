@@ -137,7 +137,7 @@ inline void delay_task_ms(uint32_t ms) { vTaskDelay(ms / portTICK_PERIOD_MS); }
 
 void i2s_audio_shutdown() {
     // i2s_stop(I2S_NUM_0);
-    i2s_driver_uninstall(I2S_NUM_0);
+    i2s_driver_uninstall(I2S_NUM);
     s_i2s_audio_initialized = false;
 }
 
@@ -147,9 +147,9 @@ void i2s_audio_init(bool wait_for_power_on) {
         return;
     }
     s_i2s_audio_initialized = true;
-    i2s_driver_install(I2S_NUM_0, &i2s_config, 0, NULL);
-    i2s_set_pin(I2S_NUM, &pin_config);
-    i2s_zero_dma_buffer(I2S_NUM_0);
+    i2s_driver_install(I2S_NUM, &i2s_config, 0, NULL);
+    i2s_set_pin(I2S_NUM, &I2S_NUM);
+    i2s_zero_dma_buffer(I2S_NUM);
     if (wait_for_power_on) {
         delay_task_ms(POWER_ON_TIME_MS); // Wait for the microphone to power on.
     }
@@ -160,7 +160,7 @@ size_t i2s_read_raw_samples(audio_sample_t (&buffer)[IS2_AUDIO_BUFFER_LEN]) {
     i2s_event_t event;
 
     esp_err_t result =
-        i2s_read(I2S_NUM_0, buffer, sizeof(buffer), &bytes_read, 0);
+        i2s_read(I2S_NUM, buffer, sizeof(buffer), &bytes_read, 0);
     if (result == ESP_OK) {
         if (bytes_read > 0) {
             // cout << "Bytes read: " << bytes_read << endl;
