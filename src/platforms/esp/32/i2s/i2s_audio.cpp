@@ -17,9 +17,41 @@
 //     ESP_IDF_VERSION_MINOR, \
 //     ESP_IDF_VERSION_PATCH)
 
-#warning "ESP_IDF_VERSION_MAJOR: " FASTLED_STRINGIFY(ESP_IDF_VERSION_MAJOR)
-#warning "ESP_IDF_VERSION_MINOR: " FASTLED_STRINGIFY(ESP_IDF_VERSION_MINOR)
-#warning "ESP_IDF_VERSION_PATCH: " FASTLED_STRINGIFY(ESP_IDF_VERSION_PATCH)
+// Try to display the actual values
+#pragma message("ESP_IDF_VERSION_MAJOR: " FASTLED_STRINGIFY(ESP_IDF_VERSION_MAJOR))
+#pragma message("ESP_IDF_VERSION_MINOR: " FASTLED_STRINGIFY(ESP_IDF_VERSION_MINOR))
+#pragma message("ESP_IDF_VERSION_PATCH: " FASTLED_STRINGIFY(ESP_IDF_VERSION_PATCH))
+
+// Also try runtime debugging
+static const char* esp_version_info = "ESP_IDF_VERSION: " FASTLED_STRINGIFY(ESP_IDF_VERSION_MAJOR) "." FASTLED_STRINGIFY(ESP_IDF_VERSION_MINOR) "." FASTLED_STRINGIFY(ESP_IDF_VERSION_PATCH);
+
+// Try using the packed version
+#pragma message("ESP_IDF_VERSION (packed): " FASTLED_STRINGIFY(ESP_IDF_VERSION))
+
+// Check if macros are defined
+#ifdef ESP_IDF_VERSION_MAJOR
+#pragma message("ESP_IDF_VERSION_MAJOR is defined")
+#else
+#pragma message("ESP_IDF_VERSION_MAJOR is NOT defined")
+#endif
+
+#ifdef ESP_IDF_VERSION
+#pragma message("ESP_IDF_VERSION is defined")
+#else
+#pragma message("ESP_IDF_VERSION is NOT defined")
+#endif
+
+// Test FASTLED_STRINGIFY with a known value
+#pragma message("FASTLED_STRINGIFY test: " FASTLED_STRINGIFY(42))
+
+// Alternative approach: define intermediate macros
+#define EXPAND_VERSION_MAJOR ESP_IDF_VERSION_MAJOR
+#define EXPAND_VERSION_MINOR ESP_IDF_VERSION_MINOR
+#define EXPAND_VERSION_PATCH ESP_IDF_VERSION_PATCH
+
+#pragma message("ESP_IDF_VERSION_MAJOR (expanded): " FASTLED_STRINGIFY(EXPAND_VERSION_MAJOR))
+#pragma message("ESP_IDF_VERSION_MINOR (expanded): " FASTLED_STRINGIFY(EXPAND_VERSION_MINOR))
+#pragma message("ESP_IDF_VERSION_PATCH (expanded): " FASTLED_STRINGIFY(EXPAND_VERSION_PATCH))
 
 
 #endif  // 
