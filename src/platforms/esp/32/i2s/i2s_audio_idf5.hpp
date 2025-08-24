@@ -15,6 +15,35 @@
 #include "fl/printf.h"
 
 
+#ifndef GPIO_NUM_7
+#define GPIO_NUM_7 (7)
+#endif
+
+#ifndef GPIO_NUM_8
+#define GPIO_NUM_8 (8)
+#endif
+
+#ifndef GPIO_NUM_4
+#define GPIO_NUM_4 (4)
+#endif
+
+#ifndef GPIO_NUM_10
+#define GPIO_NUM_10 (10)
+#endif
+
+#ifndef I2S_NUM_0
+#define I2S_NUM_0 i2s_port_t(0)
+#endif
+
+
+
+
+#define PIN_I2S_WS GPIO_NUM_7  // TODO change this pins
+#define PIN_IS2_SD GPIO_NUM_8  // TODO change this pins
+#define PIN_I2S_SCK GPIO_NUM_4  // TODO change this pins
+#define I2S_NUM I2S_NUM_0
+
+
 
 
 #define ENABLE_AUDIO_TASK 0
