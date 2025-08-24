@@ -139,30 +139,7 @@ namespace
     i2s_driver_uninstall(I2S_NUM_0);
   }
 
-  double audio_loudness_to_dB(double rms_loudness)
-  {
-    // This is a rough approximation of the loudness to dB scale.
-    // The data was taken from the following video featuring brown
-    // noise: https://www.youtube.com/watch?v=hXetO_bYcMo
-    // This linear regression was done on the following data:
-    // DB | LOUDNESS
-    // ---+---------
-    // 50 | 15
-    // 55 | 22
-    // 60 | 33
-    // 65 | 56
-    // 70 | 104
-    // 75 | 190
-    // 80 | 333
-    // This will produce an exponential regression of the form:
-    //  0.0833 * std::exp(0.119 * x);
-    // Below is the inverse exponential regression.
-    const float kCoefficient = 0.119f;
-    const float kIntercept = 0.0833f;
-    const float kInverseCoefficient = 1.0f / kCoefficient; // Maybe faster to precompute this.
-    const float kInverseIntercept = 1.0f / kIntercept;
-    return std::log(rms_loudness * kInverseIntercept) * kInverseCoefficient;
-  }
+
 
   float calc_rms_loudness(const audio_sample_t *samples, size_t num_samples)
   {

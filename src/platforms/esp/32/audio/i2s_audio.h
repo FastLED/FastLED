@@ -1,20 +1,5 @@
 
 
-/// BETA DRIVER FOR THE IMP441 MICROPHONE
-/// THIS IS NOT FINISHED YET
-/// right now the pins are hard coded to
-/// this driver will be considered "done" when all the pins are configurable.
-
-/// WordSelect pin is GPIO_NUM_7
-/// SerialData pin is GPIO_NUM_8
-/// SerialClock pin is GPIO_NUM_4
-/*
-#define PIN_I2S_WS GPIO_NUM_7  // TODO change this pins
-#define PIN_IS2_SD GPIO_NUM_8  // TODO change this pins
-#define PIN_I2S_SCK GPIO_NUM_4  // TODO change this pins
-*/
-
-
 #include "fl/stdint.h"
 #include "fl/int.h"
 #include "fl/vector.h"
