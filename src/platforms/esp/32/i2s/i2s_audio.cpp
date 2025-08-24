@@ -167,36 +167,6 @@ size_t i2s_read_raw_samples(audio_sample_t (&buffer)[IS2_AUDIO_BUFFER_LEN]) {
     return 0;
 }
 
-void i2s_audio_enter_light_sleep() {
-    // audio_sample_t buffer[IS2_AUDIO_BUFFER_LEN] = {0};
-    //  i2s_stop(I2S_NUM_0);          // Stop the I2S
-    i2s_audio_shutdown();
-    // i2s_zero_dma_buffer(I2S_NUM_0);
-    digitalWrite(PIN_AUDIO_PWR, HIGH);
-    gpio_hold_en(PIN_I2S_WS);
-    gpio_hold_en(PIN_IS2_SD);
-    gpio_hold_en(PIN_I2S_SCK);
-    gpio_hold_en(PIN_AUDIO_PWR);
-}
-
-void i2s_audio_exit_light_sleep() {
-    gpio_hold_dis(PIN_I2S_WS);
-    gpio_hold_dis(PIN_IS2_SD);
-    gpio_hold_dis(PIN_I2S_SCK);
-    // gpio_hold_dis(PIN_AUDIO_PWR);
-    delay(160);
-    // i2s_start(I2S_NUM_0);
-    i2s_audio_init(true);
-    // audio_sample_t buffer[IS2_AUDIO_BUFFER_LEN] = {0};
-    // uint32_t future_time = millis() + 180;
-    // while (millis() < future_time) {
-    //   read_raw_samples(buffer);
-    // }
-    // delay(180);
-    // delay(POWER_ON_TIME_MS * 2);
-    //  garbage_buffer_count = 16;
-}
-
 double i2s_loudness_to_rms_imp441(double rms_loudness) {
     // This is a rough approximation of the loudness to dB scale.
     // The data was taken from the following video featuring brown
