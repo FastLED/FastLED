@@ -1,4 +1,8 @@
 
+
+
+#ifdef ESP32
+
 #include <limits>
 //#include <driver/i2s_std.h>
 #include <driver/i2s.h>
@@ -197,3 +201,5 @@ double i2s_loudness_to_rms_imp441(double rms_loudness) {
 }
 
 }
+
+#endif // ESP32
