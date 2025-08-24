@@ -175,24 +175,6 @@ namespace
     return static_cast<float>(std::sqrt(mean_square));
   }
 
-  size_t read_raw_samples(audio_sample_t (&buffer)[IS2_AUDIO_BUFFER_LEN])
-  {
-    size_t bytes_read = 0;
-    i2s_event_t event;
-
-    uint32_t current_time = millis();
-    esp_err_t result = i2s_read(I2S_NUM_0, buffer, sizeof(buffer), &bytes_read, 0);
-    if (result == ESP_OK)
-    {
-      if (bytes_read > 0)
-      {
-        // cout << "Bytes read: " << bytes_read << endl;
-        const size_t count = bytes_read / sizeof(audio_sample_t);
-        return count;
-      }
-    }
-    return 0;
-  }
 
 
   bool s_audio_initialized = false;
