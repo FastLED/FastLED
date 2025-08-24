@@ -7,8 +7,7 @@
 
 #include "fl/iostream.h"
 #include "fl/stdint.h"
-
-#include "f/atomic.h"
+#include "fl/atomic.h"
 
 #include "alloc.h"
 #include "buffer.hpp"
