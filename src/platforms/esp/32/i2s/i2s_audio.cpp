@@ -91,7 +91,6 @@
 #define PIN_I2S_WS GPIO_NUM_7  // TODO change this pins
 #define PIN_IS2_SD GPIO_NUM_8  // TODO change this pins
 #define PIN_I2S_SCK GPIO_NUM_4  // TODO change this pins
-#define PIN_AUDIO_PWR GPIO_NUM_10  // TODO change this pins
 
 
 namespace fl {
@@ -130,6 +129,7 @@ inline void delay_task_ms(uint32_t ms) { vTaskDelay(ms / portTICK_PERIOD_MS); }
 
 } // anonymous namespace
 
+
 void i2s_audio_shutdown() {
     // i2s_stop(I2S_NUM_0);
     i2s_driver_uninstall(I2S_NUM_0);
@@ -142,8 +142,6 @@ void i2s_audio_init(bool wait_for_power_on) {
         return;
     }
     s_i2s_audio_initialized = true;
-    pinMode(PIN_AUDIO_PWR, OUTPUT);
-    digitalWrite(PIN_AUDIO_PWR, HIGH); // Power on the IS2 microphone.
     i2s_driver_install(I2S_NUM_0, &i2s_config, 0, NULL);
     i2s_set_pin(I2S_NUM, &pin_config);
     i2s_zero_dma_buffer(I2S_NUM_0);
