@@ -85,12 +85,17 @@
 #define GPIO_NUM_10 (10)
 #endif
 
+#ifndef I2S_NUM_0
+#define I2S_NUM_0 (0)
+#endif
+
 
 
 
 #define PIN_I2S_WS GPIO_NUM_7  // TODO change this pins
 #define PIN_IS2_SD GPIO_NUM_8  // TODO change this pins
 #define PIN_I2S_SCK GPIO_NUM_4  // TODO change this pins
+#define I2S_NUM I2S_NUM_0
 
 
 namespace fl {
