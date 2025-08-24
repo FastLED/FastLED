@@ -159,7 +159,6 @@ size_t i2s_read_raw_samples(audio_sample_t (&buffer)[IS2_AUDIO_BUFFER_LEN]) {
     size_t bytes_read = 0;
     i2s_event_t event;
 
-    uint32_t current_time = millis();
     esp_err_t result =
         i2s_read(I2S_NUM_0, buffer, sizeof(buffer), &bytes_read, 0);
     if (result == ESP_OK) {
