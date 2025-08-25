@@ -9,6 +9,6 @@ void setup() {}
 void loop() {}
 #else
 
-#include "curr.h"
+#include "burning_man.h"
 
 #endif
