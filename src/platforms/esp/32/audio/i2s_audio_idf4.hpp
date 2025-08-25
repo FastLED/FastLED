@@ -19,6 +19,8 @@
 // #include "buffer.hpp"
 // #include "fl/printf.h"
 #include "fl/circular_buffer.h"
+#include "driver/gpio.h"
+
 // #include "time.h"
 //#include <atomic>
 // #include <stdio.h>
