@@ -866,9 +866,18 @@ void loop() {
 
     static int state = 0;
 
-    if (button_clicked()) {
-        FL_WARN("Button clicked");
+    // Handle button presses using the new queryUiState function
+    int buttonState = queryUiState();
+    if (buttonState == kButtonShort) {
+        FL_WARN("Short button press - cycling visualizer");
         state = (state + 1) % 3;
+        const char* visualizerNames[] = {"Noise", "Wave", "Animartrix"};
+        FL_WARN("New visualizer: " << visualizerNames[state]);
+    } else if (buttonState == kButtonLong) {
+        FL_WARN("Long button press - changing visualizer");
+        state = (state + 1) % 3;  // Cycle through visualizers
+        const char* visualizerNames[] = {"Noise", "Wave", "Animartrix"};
+        FL_WARN("New visualizer: " << visualizerNames[state]);
     }
 
     switch (state) {
