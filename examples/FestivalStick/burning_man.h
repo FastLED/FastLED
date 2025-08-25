@@ -67,7 +67,7 @@ using namespace fl;
 #define PIN_BUTTON_GND 2
 
 // Button press duration constants (milliseconds)
-#define SHORT_PRESS_DURATION 200   // Less than 200ms = short press
+#define SHORT_PRESS_DURATION 6   // Less than 200ms = short press
 #define LONG_PRESS_DURATION 1000   // More than 1000ms = long press
 
 // Button state enum for queryUiState() function
@@ -196,7 +196,6 @@ UINumberField firePalette("Fire Palette", 0, 0, 2);
 UISlider waveSpeed("Wave Speed", 0.03f, 0.0f, 1.0f, 0.01f);
 UISlider waveDampening("Wave Dampening", 9.1f, 0.0f, 20.0f, 0.1f);
 UICheckbox waveHalfDuplex("Wave Half Duplex", true);
-UICheckbox waveAutoTrigger("Wave Auto Trigger", true);
 UISlider waveTriggerSpeed("Wave Trigger Speed", 0.5f, 0.0f, 1.0f, 0.01f);
 UIButton waveTriggerButton("Trigger Wave");
 UINumberField wavePalette("Wave Palette", 0, 0, 2);
@@ -255,7 +254,7 @@ DEFINE_GRADIENT_PALETTE(waveRainbowpal){
 // This automatically assigns all specified controls to the "Noise Controls" group
 UIGroup noiseGroup("Noise Controls", noiseScale, noiseSpeed, paletteDropdown);
 UIGroup fireGroup("Fire Controls", fireScaleXY, fireSpeedY, fireScaleX, fireInvSpeedZ, firePalette);
-UIGroup waveGroup("Wave Controls", waveSpeed, waveDampening, waveHalfDuplex, waveAutoTrigger, waveTriggerSpeed, waveTriggerButton, wavePalette, waveBlurAmount, waveBlurPasses);
+UIGroup waveGroup("Wave Controls", waveSpeed, waveDampening, waveHalfDuplex, waveTriggerSpeed, waveTriggerButton, wavePalette, waveBlurAmount, waveBlurPasses);
 UIGroup renderGroup("Render Options", renderModeDropdown, splatRendering, allWhite, brightness);
 UIGroup colorBoostGroup("Color Boost", saturationFunction, luminanceFunction);
 UIGroup pointGraphicsGroup("Point Graphics Mode", speed, positionCoarse, positionFine, positionExtraFine, autoAdvance);
@@ -774,30 +773,10 @@ void triggerWaveRipple() {
     FL_WARN("Wave ripple triggered at (" << x << ", " << y << ") with 2x2 pattern");
 }
 
-void processWaveAutoTrigger(uint32_t now) {
-    // Handle automatic wave triggering
-    if (waveAutoTrigger.value()) {
-        if (now >= nextWaveTrigger) {
-            triggerWaveRipple();
-            
-            // Calculate next trigger time based on speed
-            float speed = 1.0f - waveTriggerSpeed.value();
-            uint32_t min_interval = (uint32_t)(500 * speed);   // Minimum 500ms * speed
-            uint32_t max_interval = (uint32_t)(3000 * speed);  // Maximum 3000ms * speed
-            
-            // Ensure valid range
-            uint32_t min = MIN(min_interval, max_interval);
-            uint32_t max = MAX(min_interval, max_interval);
-            if (min >= max) max = min + 1;
-            
-            nextWaveTrigger = now + random16(min, max);
-        }
-    }
-}
 
 
 
-void drawWave(uint32_t now) {
+void drawWave(uint32_t now, bool trigger) {
     // Update wave parameters from UI
     waveFx->setSpeed(waveSpeed.value());
     waveFx->setDampening(waveDampening.value());
@@ -820,7 +799,11 @@ void drawWave(uint32_t now) {
     }
     
     // Handle auto-triggering
-    processWaveAutoTrigger(now);
+    if (trigger) {
+        triggerWaveRipple();
+    }
+
+
     
     // Draw the wave effect directly to the frame buffer
     // Create a DrawContext for the wave renderer
@@ -865,14 +848,12 @@ void loop() {
     float pos = combinedPosition * (corkscrew.size() - 1);
 
     static int state = 0;
+    bool triggered = false;
 
     // Handle button presses using the new queryUiState function
     int buttonState = queryUiState();
     if (buttonState == kButtonShort) {
-        FL_WARN("Short button press - cycling visualizer");
-        state = (state + 1) % 3;
-        const char* visualizerNames[] = {"Noise", "Wave", "Animartrix"};
-        FL_WARN("New visualizer: " << visualizerNames[state]);
+        triggered = true;
     } else if (buttonState == kButtonLong) {
         FL_WARN("Long button press - changing visualizer");
         state = (state + 1) % 3;  // Cycle through visualizers
@@ -886,7 +867,7 @@ void loop() {
             break;
 
         case 1:
-            drawWave(now);
+            drawWave(now, triggered);
             break;
         case 2:
             drawAnimartrix(now);
