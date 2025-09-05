@@ -65,6 +65,7 @@ class RectangularDrawBuffer {
     bool onQueuingStart();
     void queue(const DrawItem &item);
 
+    // Compiles the RectangularBuffer if necessary.
     // Safe to call multiple times before calling onQueueingStart() again.
     // Returns true on the first call, false after.
     bool onQueuingDone();
