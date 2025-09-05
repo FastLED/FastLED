@@ -69,6 +69,8 @@ class RectangularDrawBuffer {
     // Safe to call multiple times before calling onQueueingStart() again.
     // Returns true on the first call, false after.
     bool onQueuingDone();
+
+    // Valid after onQueueDone:
     u32 getMaxBytesInStrip() const;
     u32 getTotalBytes() const;
     void getBlockInfo(u32 *num_strips, u32 *bytes_per_strip,
