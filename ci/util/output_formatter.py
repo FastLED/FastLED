@@ -28,15 +28,16 @@ class NullOutputFormatter:
         return None
 
 
-class _PathSubstitutionFormatter:
-    """Formatter that replaces sketch source paths and prefixes timestamps."""
+class _MultiPathSubstitutionFormatter:
+    """Formatter that applies multiple path replacements and prefixes timestamps."""
 
-    def __init__(self, needle: str, regex_pattern: str, replacement: str) -> None:
-        self._needle: str = needle
-        self._regex_pattern: str = regex_pattern
-        self._replacement: str = replacement
+    def __init__(self, substitutions: list[tuple[str, str, str]]) -> None:
+        """Initialize with list of (needle, regex_pattern, replacement) tuples."""
+        self._substitutions: list[tuple[str, str, re.Pattern[str]]] = []
+        for needle, regex_pattern, replacement in substitutions:
+            compiled_pattern = re.compile(regex_pattern)
+            self._substitutions.append((needle, replacement, compiled_pattern))
         self._start_time: float = 0.0
-        self._compiled: re.Pattern[str] | None = None
 
     def begin(self) -> None:
         self._start_time = time.time()
@@ -52,17 +53,15 @@ class _PathSubstitutionFormatter:
         return None
 
     def _format_paths(self, line: str) -> str:
-        if self._needle not in line:
-            return line
-        if self._compiled is None:
-            self._compiled = re.compile(self._regex_pattern)
-        if self._compiled.search(line):
-            return self._compiled.sub(self._replacement, line)
-        return line
+        result = line
+        for needle, replacement, compiled_pattern in self._substitutions:
+            if needle in result and compiled_pattern.search(result):
+                result = compiled_pattern.sub(replacement, result)
+        return result
 
 
 def create_sketch_path_formatter(example: str) -> OutputFormatter:
-    """Create a formatter that maps src/sketch paths to examples/{example}/ and timestamps lines.
+    """Create a formatter that maps lib/FastLED paths to src/ and src/sketch paths to examples/{example}/ and timestamps lines.
 
     Args:
         example: Example name or path (e.g., "Pintest" or "examples/SmartMatrix").
@@ -77,8 +76,12 @@ def create_sketch_path_formatter(example: str) -> OutputFormatter:
     else:
         display_example_str = f"examples/{example}"
 
-    return _PathSubstitutionFormatter(
-        needle="sketch",
-        regex_pattern=r"src[/\\]+sketch[/\\]+",
-        replacement=f"{display_example_str}/",
-    )
+    # Define multiple path substitutions
+    substitutions = [
+        # Replace lib/FastLED/ paths with src/ for better UX
+        ("lib/FastLED", r"lib[/\\]+FastLED[/\\]+", "src/"),
+        # Replace src/sketch/ paths with examples/{example}/
+        ("sketch", r"src[/\\]+sketch[/\\]+", f"{display_example_str}/"),
+    ]
+
+    return _MultiPathSubstitutionFormatter(substitutions)
