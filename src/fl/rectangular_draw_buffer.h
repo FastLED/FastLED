@@ -4,8 +4,7 @@
 // Takes multiple CRGB arrays[] of different sizes and generates one CRGB
 // array of size MAX(WIDTH) * NUM_OF_STRIPS that contains them all.
 
-// This allows the flexible LED array usage in FastLED to blit to the block
-// led renderers
+// This allows the flexible LED array usage in FastLED for block renderers.
 
 // Needed by controllers that require a compact, rectangular buffer of pixel
 // data. Namely, ObjectFLED and the I2S controllers. This class handles using
