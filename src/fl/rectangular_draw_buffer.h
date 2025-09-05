@@ -41,18 +41,7 @@ struct DrawItem {
 // for that pin.
 class RectangularDrawBuffer {
   public:
-    typedef fl::HeapVector<DrawItem> DrawList;
-    // We manually manage the memory for the buffer of all LEDs so that it can
-    // go into psram on ESP32S3, which is managed by fl::PSRamAllocator.
-    scoped_array<u8> mAllLedsBufferUint8;
-    u32 mAllLedsBufferUint8Size = 0;
-    fl::FixedMap<u8, fl::span<u8>, 50> mPinToLedSegment;
-    DrawList mDrawList;
-    DrawList mPrevDrawList;
-    bool mDrawListChangedThisFrame = false;
 
-    enum QueueState { IDLE, QUEUEING, QUEUE_DONE };
-    QueueState mQueueState = IDLE;
 
     RectangularDrawBuffer() = default;
     ~RectangularDrawBuffer() = default;
@@ -75,6 +64,20 @@ class RectangularDrawBuffer {
     u32 getTotalBytes() const;
     void getBlockInfo(u32 *num_strips, u32 *bytes_per_strip,
                       u32 *total_bytes) const;
+
+// protected:
+    typedef fl::HeapVector<DrawItem> DrawList;
+    // We manually manage the memory for the buffer of all LEDs so that it can
+    // go into psram on ESP32S3, which is managed by fl::PSRamAllocator.
+    scoped_array<u8> mAllLedsBufferUint8;
+    u32 mAllLedsBufferUint8Size = 0;
+    fl::FixedMap<u8, fl::span<u8>, 50> mPinToLedSegment;
+    DrawList mDrawList;
+    DrawList mPrevDrawList;
+    bool mDrawListChangedThisFrame = false;
+
+    enum QueueState { IDLE, QUEUEING, QUEUE_DONE };
+    QueueState mQueueState = IDLE;
 };
 
 } // namespace fl
