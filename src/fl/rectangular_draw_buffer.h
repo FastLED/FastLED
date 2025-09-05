@@ -1,6 +1,21 @@
 
 #pragma once
 
+// Takes multiple CRGB arrays[] of different sizes and generates one CRGB
+// array of size MAX(WIDTH) * NUM_OF_STRIPS that contains them all.
+
+// This allows the flexible LED array usage in FastLED to blit to the block
+// led renderers
+
+// Needed by controllers that require a compact, rectangular buffer of pixel
+// data. Namely, ObjectFLED and the I2S controllers. This class handles using
+// multiple independent strips of LEDs, each with their own buffer of pixel
+// data. The strips are not necessarily contiguous in memory. One or more
+// DrawItems containing the pin number and number are queued up. When the
+// queue-ing is done, the buffers are compacted into the rectangular buffer.
+// Data access is achieved through a span<u8> representing the pixel data
+// for that pin.
+
 #include "fl/stdint.h"
 
 #include "fl/int.h"
@@ -31,14 +46,7 @@ struct DrawItem {
     }
 };
 
-// Needed by controllers that require a compact, rectangular buffer of pixel
-// data. Namely, ObjectFLED and the I2S controllers. This class handles using
-// multiple independent strips of LEDs, each with their own buffer of pixel
-// data. The strips are not necessarily contiguous in memory. One or more
-// DrawItems containing the pin number and number are queued up. When the
-// queue-ing is done, the buffers are compacted into the rectangular buffer.
-// Data access is achieved through a span<u8> representing the pixel data
-// for that pin.
+
 class RectangularDrawBuffer {
   public:
 
