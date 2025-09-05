@@ -16,6 +16,7 @@
       "Bash(rm:*)",
       "Bash(find:*)",
       "Bash(bash lint)",
+      "Bash(bash compile esp32s3 Blink)",
       "WebFetch(domain:docs.github.com)",
       "Bash(timeout:*)"
     ],
