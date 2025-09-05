@@ -15,7 +15,8 @@
       "Bash(./compile:*)",
       "Bash(rm:*)",
       "Bash(find:*)",
-      "Bash(bash lint)"
+      "Bash(bash lint)",
+      "Bash(bash compile esp32s3 Blink)"
     ],
     "deny": []
   }

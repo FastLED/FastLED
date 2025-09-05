@@ -16,7 +16,7 @@
 #define FASTLED_INTERNAL
 #include "FastLED.h"
 
-#include "third_party/yves/I2SClockLessLedDriveresp32s3/driver.h"
+#include "third_party/yves/I2SClockLessLedDriver/driver.h"
 
 #include "crgb.h"
 #include "eorder.h"
@@ -47,7 +47,7 @@ bool gPsramInited = false;
 class I2SEsp32S3_Group {
   public:
 
-    fl::unique_ptr<fl::I2SClocklessLedDriveresp32S3> mDriver;
+    fl::unique_ptr<fl::I2SClocklessLedDriver> mDriver;
     fl::RectangularDrawBuffer mRectDrawBuffer;
     bool mDrawn = false;
 
@@ -102,7 +102,7 @@ class I2SEsp32S3_Group {
                 num_leds_per_strip
             );
         }
-        mDriver->show();
+        mDriver->showPixels();
     }
 };
 
@@ -165,10 +165,10 @@ class Driver: public InternalI2SDriver {
     Driver() = default;
     ~Driver() override = default;
     void initled(uint8_t* leds, const int * pins, int numstrip, int NUM_LED_PER_STRIP) override {
-        mDriver.initled(leds, pins, numstrip, NUM_LED_PER_STRIP);
+        mDriver.initled(leds, const_cast<int*>(pins), numstrip, NUM_LED_PER_STRIP);
     }
     void show() override {
-        mDriver.show();
+        mDriver.showPixels();
     }
 
     void setBrightness(uint8_t brightness) override {
@@ -176,7 +176,7 @@ class Driver: public InternalI2SDriver {
     }
 
   private:
-    I2SClocklessLedDriveresp32S3 mDriver;
+    fl::I2SClocklessLedDriveresp32S3 mDriver;
 
 };
 
