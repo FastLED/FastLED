@@ -14,6 +14,13 @@ on:
       - 'library.json'
       - 'library.properties'
   pull_request_target:
+
+permissions:
+  contents: read        # Required to checkout code
+  actions: read         # Required for artifact operations  
+  id-token: write      # Required for artifact upload (OIDC)
+  pull-requests: read   # If needed to read PR info
+
 name: Arduino Library Lint
 jobs:
   lint:

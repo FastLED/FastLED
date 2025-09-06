@@ -28,6 +28,12 @@ on:
       - 'library.json'
       - 'library.properties'
 
+permissions:
+  contents: read        # Required to checkout code
+  actions: read         # Required for artifact operations  
+  id-token: write      # Required for artifact upload (OIDC)
+  pull-requests: read   # If needed to read PR info
+
 jobs:
   build:
     runs-on: ${{ matrix.os }}
