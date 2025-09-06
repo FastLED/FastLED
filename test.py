@@ -170,8 +170,13 @@ def main() -> None:
         # Run tests using the test runner with sequential example compilation
         # Check if we need to use sequential execution to avoid resource conflicts
         if not args.unit and not args.examples and not args.py and args.full:
-            # Full test mode - use sequential execution for example compilation
+            # Full test mode - use RunningProcessGroup for dependency-based execution
             from ci.util.running_process import RunningProcess
+            from ci.util.running_process_group import (
+                ExecutionMode,
+                ProcessExecutionConfig,
+                RunningProcessGroup,
+            )
             from ci.util.test_runner import (
                 create_examples_test_process,
                 create_python_test_process,
@@ -181,46 +186,40 @@ def main() -> None:
             python_process = create_python_test_process(
                 enable_stack_trace=False, full_tests=True
             )
+            python_process.auto_run = False
 
-            # Create examples compilation process with auto_run=False
+            # Create examples compilation process
             examples_process = create_examples_test_process(
                 args, not args.no_stack_trace
             )
             examples_process.auto_run = False
 
-            # Set up callback to start examples compilation after Python tests complete
-            def start_examples_compilation():
-                print("Python tests completed - starting examples compilation...")
-                examples_process.run()
+            # Configure sequential execution with dependencies
+            config = ProcessExecutionConfig(
+                execution_mode=ExecutionMode.SEQUENTIAL_WITH_DEPENDENCIES,
+                verbose=args.verbose,
+                timeout_seconds=2100,  # 35 minutes for sequential examples compilation
+            )
 
-            python_process.on_complete = start_examples_compilation
+            # Create process group and set up dependency
+            group = RunningProcessGroup(config=config, name="FullTestSequence")
+            group.add_process(python_process)
+            group.add_dependency(
+                examples_process, python_process
+            )  # examples depends on python
 
-            # Start the Python test process (since auto_run=False)
-            python_process.run()
+            try:
+                timings = group.run()
+                print("Sequential test execution completed successfully")
 
-            if args.verbose:
-                with python_process.line_iter(timeout=None) as line_iter:
-                    for line in line_iter:
-                        print(line)
-
-            # Wait for Python tests to complete (which will trigger examples compilation)
-            python_return_code = python_process.wait()
-            if python_return_code != 0:
-                python_stdout = python_process.stdout
-                print(f"Python test process stdout: {python_stdout}")
-                sys.exit(python_return_code)
-
-            if args.verbose:
-                with examples_process.line_iter(timeout=None) as line_iter:
-                    for line in line_iter:
-                        print(line)
-
-            # Wait for examples compilation to complete
-            examples_return_code = examples_process.wait()
-            if examples_return_code != 0:
-                sys.exit(examples_return_code)
-
-            print("Sequential test execution completed successfully")
+                # Print timing summary
+                if timings:
+                    print(f"\nExecution Summary:")
+                    for timing in timings:
+                        print(f"  {timing.name}: {timing.duration:.2f}s")
+            except Exception as e:
+                print(f"Sequential test execution failed: {e}")
+                sys.exit(1)
         else:
             # Use normal test runner for other cases
             test_runner(args, src_code_change)

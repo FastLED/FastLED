@@ -724,267 +724,6 @@ def _format_timing_summary(process_timings: List[ProcessTiming]) -> str:
     return "\n".join(table_lines)
 
 
-def _run_process_with_output(process: RunningProcess, verbose: bool = False) -> None:
-    """
-    Run a single process and handle its output
-    Uses improved timeout handling to prevent hanging
-
-    Args:
-        process: RunningProcess object to execute
-        verbose: Whether to show all output
-    """
-    # Only start the process if it's not already running
-    if process.proc is None:
-        process.run()
-        cmd_str = process.get_command_str()
-        process_name = (
-            process.command.split()[0]
-            if isinstance(process.command, str)
-            else process.command[0]
-        )
-        print(f"Started: {cmd_str}")
-    else:
-        process_name = (
-            process.command.split()[0]
-            if isinstance(process.command, str)
-            else process.command[0]
-        )
-
-    # Print test execution status
-    print(f"Running test: {process.command}")
-
-    # Create single output handler instance to maintain state
-    output_handler = ProcessOutputHandler(verbose=verbose)
-    start_time = time.time()
-    timeout_seconds = _GLOBAL_TIMEOUT  # 5 minutes timeout for individual processes
-    last_output_time = start_time
-    last_progress_log = start_time
-    progress_interval = 30  # Log progress every 30 seconds
-
-    while True:
-        try:
-            current_time = time.time()
-            elapsed_time = current_time - start_time
-            time_since_output = current_time - last_output_time
-
-            # Check for timeout
-            if elapsed_time > timeout_seconds:
-                process.kill()
-                failure = TestFailureInfo(
-                    test_name=_extract_test_name(process.command),
-                    command=str(process.command),
-                    return_code=124,  # Standard timeout exit code
-                    output=f"Process timeout after {elapsed_time:.1f} seconds (last output: {time_since_output:.1f}s ago)",
-                    error_type="timeout",
-                )
-                raise TestExecutionFailedException(
-                    f"Process timeout after {elapsed_time:.1f} seconds", [failure]
-                )
-
-            line = process.get_next_line_non_blocking()
-            if isinstance(line, EndOfStream):
-                break
-            if line is not None:
-                last_output_time = current_time
-                print(f"  {line}")
-                continue
-            is_finished = process.finished
-            if is_finished:
-                break
-
-            # No output available right now, continue polling
-            time.sleep(0.01)  # Small sleep to avoid busy-wait
-        except KeyboardInterrupt:
-            import _thread
-
-            _thread.interrupt_main()
-            process.kill()
-            return
-        except Exception as e:
-            print(f"Error processing output from {process.command}: {e}")
-            print(f"Exception type: {type(e).__name__}")
-            print(f"Exception details: {repr(e)}")
-            process.kill()
-            failure = TestFailureInfo(
-                test_name=_extract_test_name(process.command),
-                command=str(process.command),
-                return_code=1,
-                output=f"Exception: {type(e).__name__}: {e}",
-                error_type="process_error",
-            )
-            raise TestExecutionFailedException(
-                "Error processing test output", [failure]
-            )
-
-    # Process has completed, check return code
-    try:
-        returncode = process.wait()
-        if returncode != 0:
-            # Extract test name from command for better error reporting
-            test_name = _extract_test_name(process.command)
-            print(f"Command failed: {process.command}")
-            print(f"\033[91m###### ERROR ######\033[0m")
-            print(f"Test failed: {test_name}")
-            failure = TestFailureInfo(
-                test_name=test_name,
-                command=str(process.command),
-                return_code=returncode,
-                output="Command failed with non-zero exit code",
-                error_type="command_failure",
-            )
-            raise TestExecutionFailedException("Test command failed", [failure])
-        else:
-            elapsed = time.time() - output_handler.formatter._start_time
-            print(
-                f"Process completed: {process.get_command_str()} (took {elapsed:.2f}s)"
-            )
-            if isinstance(process.command, str) and process.command.endswith(".exe"):
-                print(f"Test {process.command} passed with return code {returncode}")
-    except TimeoutError as te:
-        test_name = _extract_test_name(process.command)
-        print(f"\nError waiting for process: {process.command}")
-        print(f"Error: {te}")
-        print(f"\033[91m###### ERROR ######\033[0m")
-        print(f"Test error: {test_name}")
-        process.kill()
-        failure = TestFailureInfo(
-            test_name=test_name,
-            command=str(process.command),
-            return_code=1,
-            output=str(te),
-            error_type="process_wait_error",
-        )
-        raise TestExecutionFailedException("Error waiting for process", [failure])
-
-
-def _process_single_test_output(
-    proc_state: ProcessState,
-    output_handler: "ProcessOutputHandler",
-    active_processes: list[RunningProcess],
-    failed_processes: list[str],
-    completed_timings: List[ProcessTiming],
-    last_activity_time: dict[RunningProcess, float],
-) -> bool:
-    """
-    Process output and completion for a single test process
-
-    Args:
-        proc_state: State information for the process
-        output_handler: Handler for formatting output
-        active_processes: List of currently active processes
-        failed_processes: List to track failed process commands
-        completed_timings: List to collect timing data
-        last_activity_time: Dictionary tracking activity times
-
-    Returns:
-        bool: True if any activity was detected, False otherwise
-
-    Raises:
-        TestTimeoutException: If process times out
-        TestExecutionFailedException: If process fails or encounters error
-    """
-    proc = proc_state.process
-    cmd = proc_state.command
-    any_activity = False
-
-    while True:
-        try:
-            line = proc.get_next_line(timeout=60)  # 60 sec timeout per line
-
-            is_done = isinstance(line, EndOfStream)
-            if is_done:
-                break
-            if not is_done:
-                assert isinstance(line, str)
-                output_handler.handle_output_line(line, cmd)
-
-                any_activity = True
-                last_activity_time[proc] = time.time()  # Update activity time
-
-                # After getting one line, quickly drain any additional output
-                # This maintains responsiveness while avoiding tight polling loops
-                while True:  # Keep draining until no more output
-                    additional_line = proc.get_next_line_non_blocking()
-                    if isinstance(additional_line, EndOfStream):
-                        break
-                    if isinstance(additional_line, str):
-                        output_handler.handle_output_line(additional_line, cmd)
-                        any_activity = True
-                        last_activity_time[proc] = time.time()  # Update activity time
-                    else:
-                        assert additional_line is None
-                        break
-                    assert isinstance(additional_line, str)
-                    break
-
-        except queue.Empty:
-            # No output available right now - this is normal and expected
-            # Continue to process completion check
-            pass
-
-        except TimeoutError:
-            print(f"\nProcess timed out: {cmd}")
-            print("\033[91m###### ERROR ######\033[0m")
-            print(f"Test failed due to timeout: {_extract_test_name(cmd)}")
-            import traceback
-
-            traceback.print_exc()
-            sys.stdout.flush()
-            failures: list[TestFailureInfo] = []
-            for p in active_processes:
-                failed_processes.append(
-                    subprocess.list2cmdline(p.command)
-                )  # Track all as failed
-                p.kill()
-                failures.append(
-                    TestFailureInfo(
-                        test_name=_extract_test_name(p.command),
-                        command=str(p.command),
-                        return_code=1,
-                        output="Process killed due to timeout",
-                        error_type="process_timeout",
-                    )
-                )
-            raise TestTimeoutException("Process timeout", failures)
-
-        except Exception as e:
-            import traceback
-
-            traceback.print_exc()
-            print(f"\nUnexpected error processing output from {cmd}: {e}")
-            print("\033[91m###### ERROR ######\033[0m")
-            print(f"Test failed due to unexpected error: {_extract_test_name(cmd)}")
-            sys.stdout.flush()
-            failures: list[TestFailureInfo] = []
-            for p in active_processes:
-                failed_processes.append(
-                    subprocess.list2cmdline(p.command)
-                )  # Track all as failed
-                p.kill()
-                failures.append(
-                    TestFailureInfo(
-                        test_name=_extract_test_name(p.command),
-                        command=str(p.command),
-                        return_code=1,
-                        output=str(e),
-                        error_type=f"unexpected_error_{type(e).__name__}: {e}",
-                    )
-                )
-            raise TestExecutionFailedException(
-                "Unexpected error during test execution", failures
-            )
-
-        # Check process completion status
-        if proc.poll() is not None:
-            _handle_process_completion(
-                proc_state, active_processes, completed_timings, last_activity_time
-            )
-            any_activity = True
-            break
-
-    return any_activity
-
-
 def _handle_process_completion(
     proc_state: ProcessState,
     active_processes: list[RunningProcess],
@@ -1227,6 +966,11 @@ def _run_processes_parallel(
     processes: list[RunningProcess], verbose: bool = False
 ) -> List[ProcessTiming]:
     """
+    DEPRECATED: Use RunningProcessGroup instead.
+
+    This function has been replaced by RunningProcessGroup.run()
+    for better maintainability and consistency.
+
     Run multiple test processes in parallel and handle their output
 
     Args:
@@ -1523,7 +1267,7 @@ def run_test_processes(
     processes: list[RunningProcess], parallel: bool = True, verbose: bool = False
 ) -> List[ProcessTiming]:
     """
-    Run multiple test processes and handle their output
+    Run multiple test processes using RunningProcessGroup
 
     Args:
         processes: List of RunningProcess objects to execute
@@ -1533,59 +1277,48 @@ def run_test_processes(
     Returns:
         List of ProcessTiming objects with execution times
     """
+    from ci.util.running_process_group import (
+        ExecutionMode,
+        ProcessExecutionConfig,
+        RunningProcessGroup,
+    )
+
     start_time = time.time()
 
     # Force sequential execution if NO_PARALLEL is set
     if os.environ.get("NO_PARALLEL"):
         parallel = False
+
     if not processes:
         print("\033[92m###### SUCCESS ######\033[0m")
         print("No tests to run")
         return []
 
-    start_time = time.time()
-    timings: List[ProcessTiming] = []
-
     try:
-        if parallel:
-            # Run all processes in parallel with output interleaving
-            timings = _run_processes_parallel(processes, verbose=verbose)
-        else:
-            # Run processes sequentially with failure threshold handling
-            aggregated_failures: list[TestFailureInfo] = []
-            for process in processes:
-                try:
-                    _run_process_with_output(process, verbose)
-                    # Collect timing data for sequential execution
-                    if process.duration is not None:
-                        timing = ProcessTiming(
-                            name=_get_friendly_test_name(process.command),
-                            duration=process.duration,
-                            command=str(process.command),
-                        )
-                        timings.append(timing)
-                except (TestExecutionFailedException, TestTimeoutException) as e:
-                    aggregated_failures.extend(e.failures)
-                    print(
-                        f"Encountered {len(aggregated_failures)} failure(s); threshold is {MAX_FAILURES_BEFORE_ABORT}"
-                    )
-                    if len(aggregated_failures) >= MAX_FAILURES_BEFORE_ABORT:
-                        print(
-                            f"Exceeded failure threshold ({MAX_FAILURES_BEFORE_ABORT}). Aborting remaining tests."
-                        )
-                        raise TestExecutionFailedException(
-                            "Exceeded failure threshold", aggregated_failures
-                        )
+        # Configure execution mode
+        execution_mode = (
+            ExecutionMode.PARALLEL if parallel else ExecutionMode.SEQUENTIAL
+        )
 
-            if aggregated_failures:
-                # Some failures occurred but threshold not reached; report them
-                raise TestExecutionFailedException("Tests failed", aggregated_failures)
+        config = ProcessExecutionConfig(
+            execution_mode=execution_mode,
+            verbose=verbose,
+            max_failures_before_abort=MAX_FAILURES_BEFORE_ABORT,
+            enable_stuck_detection=True,
+            stuck_timeout_seconds=_GLOBAL_TIMEOUT,
+        )
 
-            # If we get here, all tests passed
+        # Create and run process group
+        group = RunningProcessGroup(
+            processes=processes, config=config, name="TestProcesses"
+        )
+
+        timings = group.run()
+
+        # Success message for sequential execution
+        if not parallel:
             elapsed = time.time() - start_time
             print(f"\033[92m### SUCCESS ({elapsed:.2f}s) ###\033[0m")
-
-        total_elapsed = time.time() - start_time
 
         return timings
 
