@@ -199,6 +199,10 @@ class WaveSimulation2D {
     u32 getWidth() const;
     u32 getHeight() const;
 
+    // Configure whether to use the change grid tracking optimization
+    void setUseChangeGrid(bool enabled);
+    bool getUseChangeGrid() const { return mUseChangeGrid; }
+
     WaveSimulation2D_Real &real() { return *mSim; }
 
   private:
@@ -207,6 +211,7 @@ class WaveSimulation2D {
     u8 mExtraFrames = 0;
     u32 mMultiplier = 1; // Supersampling multiplier (e.g., 1, 2, 4, or 8).
     U8EasingFunction mU8Mode = WAVE_U8_MODE_LINEAR;
+    bool mUseChangeGrid = false; // Whether to use change grid tracking (default: disabled for better visuals)
     // Internal high-resolution simulation.
     fl::unique_ptr<WaveSimulation2D_Real> mSim;
     fl::Grid<i16> mChangeGrid; // Needed for multiple updates.

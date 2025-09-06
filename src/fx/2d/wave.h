@@ -74,6 +74,7 @@ struct WaveFxArgs {
     float speed = 0.16f;
     float dampening = 6.0f;
     bool x_cyclical = false;
+    bool use_change_grid = false; // Whether to use change grid tracking (default: disabled for better visuals)
     WaveCrgbMapPtr crgbMap;
 };
 
@@ -95,6 +96,7 @@ class WaveFx : public Fx2d {
         }
         setAutoUpdate(args.auto_updates);
         setXCylindrical(args.x_cyclical);
+        setUseChangeGrid(args.use_change_grid);
     }
 
     void setXCylindrical(bool on) { mWaveSim.setXCylindrical(on); }
@@ -122,6 +124,16 @@ class WaveFx : public Fx2d {
     void setEasingMode(U8EasingFunction mode) {
         // Set the easing mode for the 8-bit value.
         mWaveSim.setEasingMode(mode);
+    }
+
+    void setUseChangeGrid(bool enabled) {
+        // Set whether to use the change grid tracking optimization.
+        mWaveSim.setUseChangeGrid(enabled);
+    }
+
+    bool getUseChangeGrid() const {
+        // Get the current change grid tracking setting.
+        return mWaveSim.getUseChangeGrid();
     }
 
     void setf(size_t x, size_t y, float value) {

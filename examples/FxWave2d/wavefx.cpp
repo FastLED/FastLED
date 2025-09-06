@@ -49,6 +49,7 @@ UIButton buttonFancy("Trigger Fancy");                       // Button to trigge
 UICheckbox autoTrigger("Auto Trigger", true);                // Enable/disable automatic ripple triggering
 UISlider triggerSpeed("Trigger Speed", .5f, 0.0f, 1.0f, 0.01f); // Controls how frequently auto-triggers happen (lower = faster)
 UICheckbox easeModeSqrt("Ease Mode Sqrt", false);            // Changes how wave heights are calculated (sqrt gives more natural waves)
+UICheckbox useChangeGrid("Use Change Grid", false);           // Enable performance optimization (reduces visual oscillation)
 UISlider blurAmount("Global Blur Amount", 0, 0, 172, 1);     // Controls overall blur amount for all layers
 UISlider blurPasses("Global Blur Passes", 1, 1, 10, 1);      // Controls how many times blur is applied (more = smoother but slower)
 UISlider superSample("SuperSampleExponent", 1.f, 0.f, 3.f, 1.f); // Controls anti-aliasing quality (higher = better quality but more CPU)
@@ -73,6 +74,9 @@ UISlider blurPassesLower("Wave Lower: Blur Passes", 1, 1, 10, 1);      // Blur p
 UISlider fancySpeed("Fancy Speed", 796, 0, 1000, 1);                   // Speed of the fancy effect animation
 UISlider fancyIntensity("Fancy Intensity", 32, 1, 255, 1);             // Intensity/height of the fancy effect waves
 UISlider fancyParticleSpan("Fancy Particle Span", 0.06f, 0.01f, 0.2f, 0.01f); // Width of the fancy effect lines
+
+// Help text explaining the Use Change Grid feature
+UIHelp changeGridHelp("Use Change Grid preserves the set point over multiple iterations to ensure more stable results across simulation resolutions. However, turning it off may result in more dramatic effects and saves memory.");
 
 // Color palettes define the gradient of colors used for the wave effects
 // Each entry has the format: position (0-255), R, G, B
@@ -271,6 +275,7 @@ ui_state ui() {
     waveFxLower.setHalfDuplex(halfDuplexLower);    // Whether waves can go negative
     waveFxLower.setSuperSample(getSuperSample());  // Anti-aliasing quality
     waveFxLower.setEasingMode(easeMode);           // Wave height calculation method
+    waveFxLower.setUseChangeGrid(useChangeGrid);   // Performance optimization vs visual quality
 
     // Apply all settings from UI controls to the upper wave layer
     waveFxUpper.setSpeed(speedUpper);              // Wave propagation speed
@@ -278,6 +283,7 @@ ui_state ui() {
     waveFxUpper.setHalfDuplex(halfDuplexUpper);    // Whether waves can go negative
     waveFxUpper.setSuperSample(getSuperSample());  // Anti-aliasing quality
     waveFxUpper.setEasingMode(easeMode);           // Wave height calculation method
+    waveFxUpper.setUseChangeGrid(useChangeGrid);   // Performance optimization vs visual quality
     
     // Apply global blur settings to the blender
     fxBlend.setGlobalBlurAmount(blurAmount);       // Overall blur strength

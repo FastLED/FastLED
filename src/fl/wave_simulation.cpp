@@ -48,7 +48,10 @@ void WaveSimulation2D::init(u32 width, u32 height, SuperSample factor,
     u32 w = width * mMultiplier;
     u32 h = height * mMultiplier;
     mSim.reset(new WaveSimulation2D_Real(w, h, speed, dampening));
-    mChangeGrid.reset(w, h);
+    // Only allocate change grid if it's enabled (saves memory when disabled)
+    if (mUseChangeGrid) {
+        mChangeGrid.reset(w, h);
+    }
     // Extra frames are needed because the simulation slows down in
     // proportion to the supersampling factor.
     mExtraFrames = u8(factor) - 1;
@@ -82,10 +85,14 @@ i16 WaveSimulation2D::geti16(fl::size x, fl::size y) const {
             u32 xx = x * mult + i;
             u32 yy = y * mult + j;
             i32 pt = mSim->geti16(xx, yy);
-            // i32 ch_pt = mChangeGrid[(yy * mMultiplier) + xx];
-            i32 ch_pt = mChangeGrid(xx, yy);
-            if (ch_pt != 0) { // we got a hit.
-                sum += ch_pt;
+            if (mUseChangeGrid) {
+                // i32 ch_pt = mChangeGrid[(yy * mMultiplier) + xx];
+                i32 ch_pt = mChangeGrid(xx, yy);
+                if (ch_pt != 0) { // we got a hit.
+                    sum += ch_pt;
+                } else {
+                    sum += pt;
+                }
             } else {
                 sum += pt;
             }
@@ -163,24 +170,29 @@ void WaveSimulation2D::seti16(fl::size x, fl::size y, i16 v16) {
             fl::size xx = x * mult + i;
             fl::size yy = y * mult + j;
             if (mSim->has(xx, yy)) {
-                i16 &pt = mChangeGrid.at(xx, yy);
-                if (pt == 0) {
-                    // not set yet so set unconditionally.
-                    pt = v16;
-                } else {
-                    const bool sign_matches = (pt >= 0) == (v16 >= 0);
-                    if (!sign_matches) {
-                        // opposite signs, so overwrite
+                if (mUseChangeGrid) {
+                    i16 &pt = mChangeGrid.at(xx, yy);
+                    if (pt == 0) {
+                        // not set yet so set unconditionally.
                         pt = v16;
                     } else {
-                        // if the magnitude of the new pt is greater than what
-                        // was already there, then overwrite.
-                        u16 abs_pt = static_cast<u16>(ABS(pt));
-                        u16 abs_v16 = static_cast<u16>(ABS(v16));
-                        if (abs_v16 > abs_pt) {
+                        const bool sign_matches = (pt >= 0) == (v16 >= 0);
+                        if (!sign_matches) {
+                            // opposite signs, so overwrite
                             pt = v16;
+                        } else {
+                            // if the magnitude of the new pt is greater than what
+                            // was already there, then overwrite.
+                            u16 abs_pt = static_cast<u16>(ABS(pt));
+                            u16 abs_v16 = static_cast<u16>(ABS(v16));
+                            if (abs_v16 > abs_pt) {
+                                pt = v16;
+                            }
                         }
                     }
+                } else {
+                    // Directly set the value in the simulation when change grid is disabled
+                    mSim->seti16(xx, yy, v16);
                 }
             }
         }
@@ -197,32 +209,57 @@ void WaveSimulation2D::setf(fl::size x, fl::size y, float value) {
 }
 
 void WaveSimulation2D::update() {
-    const vec2<i16> min_max = mChangeGrid.minMax();
-    const bool has_updates = min_max != vec2<i16>(0, 0);
-    for (u8 i = 0; i < mExtraFrames + 1; ++i) {
-        if (has_updates) {
-            // apply them
-            const u32 w = mChangeGrid.width();
-            const u32 h = mChangeGrid.height();
-            for (u32 x = 0; x < w; ++x) {
-                for (u32 y = 0; y < h; ++y) {
-                    i16 v16 = mChangeGrid(x, y);
-                    if (v16 != 0) {
-                        mSim->seti16(x, y, v16);
+    if (mUseChangeGrid) {
+        const vec2<i16> min_max = mChangeGrid.minMax();
+        const bool has_updates = min_max != vec2<i16>(0, 0);
+        for (u8 i = 0; i < mExtraFrames + 1; ++i) {
+            if (has_updates) {
+                // apply them
+                const u32 w = mChangeGrid.width();
+                const u32 h = mChangeGrid.height();
+                for (u32 x = 0; x < w; ++x) {
+                    for (u32 y = 0; y < h; ++y) {
+                        i16 v16 = mChangeGrid(x, y);
+                        if (v16 != 0) {
+                            mSim->seti16(x, y, v16);
+                        }
                     }
                 }
             }
+            mSim->update();
         }
-        mSim->update();
+        // zero out mChangeGrid
+        mChangeGrid.clear();
+    } else {
+        // When change grid is disabled, just run the simulation updates
+        for (u8 i = 0; i < mExtraFrames + 1; ++i) {
+            mSim->update();
+        }
     }
-    // zero out mChangeGrid
-    mChangeGrid.clear();
 }
 
 u32 WaveSimulation2D::getWidth() const { return mOuterWidth; }
 u32 WaveSimulation2D::getHeight() const { return mOuterHeight; }
 
 void WaveSimulation2D::setExtraFrames(u8 extra) { mExtraFrames = extra; }
+
+void WaveSimulation2D::setUseChangeGrid(bool enabled) {
+    if (mUseChangeGrid == enabled) {
+        return; // No change needed
+    }
+    
+    mUseChangeGrid = enabled;
+    
+    if (mUseChangeGrid) {
+        // Allocate change grid if enabling
+        u32 w = mOuterWidth * mMultiplier;
+        u32 h = mOuterHeight * mMultiplier;
+        mChangeGrid.reset(w, h);
+    } else {
+        // Deallocate change grid if disabling (saves memory)
+        mChangeGrid.reset(0, 0);
+    }
+}
 
 WaveSimulation1D::WaveSimulation1D(u32 length, SuperSample factor,
                                    float speed, int dampening) {
