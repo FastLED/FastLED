@@ -199,6 +199,8 @@ def main() -> None:
                 execution_mode=ExecutionMode.SEQUENTIAL_WITH_DEPENDENCIES,
                 verbose=args.verbose,
                 timeout_seconds=2100,  # 35 minutes for sequential examples compilation
+                live_updates=True,  # Enable real-time display
+                display_type="auto",  # Auto-detect best display format
             )
 
             # Create process group and set up dependency
@@ -209,7 +211,28 @@ def main() -> None:
             )  # examples depends on python
 
             try:
+                # Start real-time display for full test mode
+                display_thread = None
+                if not args.verbose and config.live_updates:
+                    try:
+                        from ci.util.process_status_display import (
+                            display_process_status,
+                        )
+
+                        display_thread = display_process_status(
+                            group,
+                            display_type=config.display_type,
+                            update_interval=config.update_interval,
+                        )
+                    except ImportError:
+                        pass  # Fall back to normal execution
+
                 timings = group.run()
+
+                # Stop display thread if it was started
+                if display_thread:
+                    time.sleep(0.5)
+
                 print("Sequential test execution completed successfully")
 
                 # Print timing summary

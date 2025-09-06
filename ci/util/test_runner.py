@@ -1306,6 +1306,8 @@ def run_test_processes(
             max_failures_before_abort=MAX_FAILURES_BEFORE_ABORT,
             enable_stuck_detection=True,
             stuck_timeout_seconds=_GLOBAL_TIMEOUT,
+            live_updates=True,  # Enable real-time display
+            display_type="auto",  # Auto-detect best display format
         )
 
         # Create and run process group
@@ -1313,7 +1315,29 @@ def run_test_processes(
             processes=processes, config=config, name="TestProcesses"
         )
 
+        # Start real-time display if we have processes and live updates enabled
+        display_thread = None
+        if len(processes) > 0 and config.live_updates and not verbose:
+            # Only show live display if not in verbose mode (verbose already shows all output)
+            try:
+                from ci.util.process_status_display import display_process_status
+
+                display_thread = display_process_status(
+                    group,
+                    display_type=config.display_type,
+                    update_interval=config.update_interval,
+                )
+            except ImportError:
+                pass  # Fall back to normal execution if display not available
+            except Exception:
+                pass  # Fall back to normal execution on any display error
+
         timings = group.run()
+
+        # Stop display thread if it was started
+        if display_thread:
+            # Give it a moment to show final status
+            time.sleep(0.5)
 
         # Success message for sequential execution
         if not parallel:

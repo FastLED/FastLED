@@ -9,6 +9,7 @@ import threading
 import time
 import traceback
 from dataclasses import dataclass
+from datetime import datetime, timedelta
 from enum import Enum
 from typing import Dict, List, Optional, cast
 
@@ -41,6 +42,42 @@ class ExecutionMode(Enum):
 
 
 @dataclass
+class ProcessStatus:
+    """Real-time status information for a running process."""
+
+    name: str
+    is_alive: bool
+    is_completed: bool
+    start_time: datetime
+    running_duration: timedelta
+    last_output_line: Optional[str] = None
+    return_value: Optional[int] = None
+
+    @property
+    def running_time_seconds(self) -> float:
+        """Get running duration in seconds for display."""
+        return self.running_duration.total_seconds()
+
+
+@dataclass
+class GroupStatus:
+    """Status information for all processes in a group."""
+
+    group_name: str
+    processes: List[ProcessStatus]
+    total_processes: int
+    completed_processes: int
+    failed_processes: int
+
+    @property
+    def completion_percentage(self) -> float:
+        """Percentage of processes completed."""
+        if self.total_processes == 0:
+            return 100.0
+        return (self.completed_processes / self.total_processes) * 100.0
+
+
+@dataclass
 class ProcessExecutionConfig:
     """Configuration for how a process group should execute."""
 
@@ -50,6 +87,10 @@ class ProcessExecutionConfig:
     verbose: bool = False
     enable_stuck_detection: bool = True
     stuck_timeout_seconds: int = _GLOBAL_TIMEOUT
+    # Real-time display options
+    display_type: str = "auto"  # "auto", "rich", "textual", "ascii"
+    live_updates: bool = True
+    update_interval: float = 0.1
 
 
 class RunningProcessGroup:
@@ -72,6 +113,11 @@ class RunningProcessGroup:
         self.config = config or ProcessExecutionConfig()
         self.name = name
         self._dependencies: Dict[RunningProcess, List[RunningProcess]] = {}
+
+        # Status tracking
+        self._process_start_times: Dict[RunningProcess, datetime] = {}
+        self._process_last_output: Dict[RunningProcess, str] = {}
+        self._status_monitoring_active: bool = False
 
     def add_process(self, process: RunningProcess) -> None:
         """Add a process to the group.
@@ -147,6 +193,11 @@ class RunningProcessGroup:
                 sys.stdout.reconfigure(encoding="utf-8", errors="replace")  # type: ignore
             if hasattr(sys.stderr, "reconfigure"):
                 sys.stderr.reconfigure(encoding="utf-8", errors="replace")  # type: ignore
+
+        # Track start times and enable status monitoring
+        self._status_monitoring_active = True
+        for proc in self.processes:
+            self._track_process_start(proc)
 
         # Start processes that aren't already running
         for proc in self.processes:
@@ -267,8 +318,85 @@ class RunningProcessGroup:
             if stuck_monitor:
                 for proc in self.processes:
                     stuck_monitor.stop_monitoring(proc)
+            self._status_monitoring_active = False
 
         return completed_timings
+
+    def get_status(self) -> GroupStatus:
+        """Get current status of all processes in the group."""
+        process_statuses = []
+        completed = 0
+        failed = 0
+
+        for process in self.processes:
+            start_time = self._process_start_times.get(process)
+            if start_time is None:
+                # Process hasn't started yet, use current time
+                start_time = datetime.now()
+                running_duration = timedelta(0)
+            else:
+                running_duration = datetime.now() - start_time
+
+            # Get last output line from process
+            last_output = self._get_last_output_line(process)
+
+            # Get process name - use command friendly name if available
+            process_name = getattr(process, "name", None)
+            if not process_name:
+                if hasattr(process, "command"):
+                    process_name = _get_friendly_test_name(process.command)
+                else:
+                    process_name = f"Process-{id(process)}"
+
+            status = ProcessStatus(
+                name=process_name,
+                is_alive=not process.finished,
+                is_completed=process.finished,
+                start_time=start_time,
+                running_duration=running_duration,
+                last_output_line=last_output,
+                return_value=process.returncode,
+            )
+
+            process_statuses.append(status)
+
+            if status.is_completed:
+                completed += 1
+                if status.return_value != 0:
+                    failed += 1
+
+        return GroupStatus(
+            group_name=self.name,
+            processes=process_statuses,
+            total_processes=len(self.processes),
+            completed_processes=completed,
+            failed_processes=failed,
+        )
+
+    def _get_last_output_line(self, process: RunningProcess) -> Optional[str]:
+        """Extract the last line of output from a process."""
+        # Try to get from cached last output first
+        cached = self._process_last_output.get(process)
+        if cached:
+            return cached
+
+        # Fall back to accumulated output
+        if process.accumulated_output:
+            last_line = process.accumulated_output[-1].strip()
+            self._process_last_output[process] = last_line
+            return last_line
+
+        return None
+
+    def _track_process_start(self, process: RunningProcess) -> None:
+        """Record when a process starts for timing calculations."""
+        self._process_start_times[process] = datetime.now()
+
+    def _update_process_output(self, process: RunningProcess) -> None:
+        """Update cached last output line for a process."""
+        if process.accumulated_output:
+            last_line = process.accumulated_output[-1].strip()
+            self._process_last_output[process] = last_line
 
     def _handle_stuck_processes(
         self,
@@ -390,42 +518,52 @@ class RunningProcessGroup:
         """Execute processes in sequence."""
         completed_timings: List[ProcessTiming] = []
 
-        for process in self.processes:
-            print(f"Running: {process.get_command_str()}")
+        # Enable status monitoring
+        self._status_monitoring_active = True
+        try:
+            for process in self.processes:
+                print(f"Running: {process.get_command_str()}")
 
-            # Start the process if not already running
-            if process.proc is None:
-                process.run()
+                # Track process start time
+                self._track_process_start(process)
 
-            try:
-                exit_code = process.wait()
+                # Start the process if not already running
+                if process.proc is None:
+                    process.run()
 
-                # Collect timing data
-                if process.duration is not None:
-                    timing = ProcessTiming(
-                        name=_get_friendly_test_name(process.command),
-                        duration=process.duration,
-                        command=str(process.command),
-                    )
-                    completed_timings.append(timing)
+                try:
+                    exit_code = process.wait()
 
-                # Check for failure
-                if exit_code != 0:
-                    error_snippet = extract_error_snippet(process.accumulated_output)
-                    failure = TestFailureInfo(
-                        test_name=_extract_test_name(process.command),
-                        command=str(process.command),
-                        return_code=exit_code,
-                        output=error_snippet,
-                        error_type="exit_failure",
-                    )
-                    raise TestExecutionFailedException(
-                        f"Process failed with exit code {exit_code}", [failure]
-                    )
+                    # Collect timing data
+                    if process.duration is not None:
+                        timing = ProcessTiming(
+                            name=_get_friendly_test_name(process.command),
+                            duration=process.duration,
+                            command=str(process.command),
+                        )
+                        completed_timings.append(timing)
 
-            except Exception as e:
-                print(f"Process failed: {process.get_command_str()} - {e}")
-                raise
+                    # Check for failure
+                    if exit_code != 0:
+                        error_snippet = extract_error_snippet(
+                            process.accumulated_output
+                        )
+                        failure = TestFailureInfo(
+                            test_name=_extract_test_name(process.command),
+                            command=str(process.command),
+                            return_code=exit_code,
+                            output=error_snippet,
+                            error_type="exit_failure",
+                        )
+                        raise TestExecutionFailedException(
+                            f"Process failed with exit code {exit_code}", [failure]
+                        )
+
+                except Exception as e:
+                    print(f"Process failed: {process.get_command_str()} - {e}")
+                    raise
+        finally:
+            self._status_monitoring_active = False
 
         return completed_timings
 
@@ -435,63 +573,73 @@ class RunningProcessGroup:
         completed_processes: set[RunningProcess] = set()
         remaining_processes = self.processes.copy()
 
-        while remaining_processes:
-            # Find processes that can run (all dependencies completed)
-            ready_processes = []
-            for process in remaining_processes:
-                dependencies = self._dependencies.get(process, [])
-                if all(dep in completed_processes for dep in dependencies):
-                    ready_processes.append(process)
+        # Enable status monitoring
+        self._status_monitoring_active = True
+        try:
+            while remaining_processes:
+                # Find processes that can run (all dependencies completed)
+                ready_processes = []
+                for process in remaining_processes:
+                    dependencies = self._dependencies.get(process, [])
+                    if all(dep in completed_processes for dep in dependencies):
+                        ready_processes.append(process)
 
-            if not ready_processes:
-                # No processes can run - circular dependency or missing process
-                remaining_names = [
-                    _get_friendly_test_name(p.command) for p in remaining_processes
-                ]
-                raise RuntimeError(
-                    f"Circular dependency or missing dependency detected for: {remaining_names}"
-                )
-
-            # Run the first ready process
-            process = ready_processes[0]
-            print(f"Running: {process.get_command_str()}")
-
-            # Start the process if not already running
-            if process.proc is None:
-                process.run()
-
-            try:
-                exit_code = process.wait()
-
-                # Collect timing data
-                if process.duration is not None:
-                    timing = ProcessTiming(
-                        name=_get_friendly_test_name(process.command),
-                        duration=process.duration,
-                        command=str(process.command),
-                    )
-                    completed_timings.append(timing)
-
-                # Mark as completed
-                completed_processes.add(process)
-                remaining_processes.remove(process)
-
-                # Check for failure
-                if exit_code != 0:
-                    error_snippet = extract_error_snippet(process.accumulated_output)
-                    failure = TestFailureInfo(
-                        test_name=_extract_test_name(process.command),
-                        command=str(process.command),
-                        return_code=exit_code,
-                        output=error_snippet,
-                        error_type="exit_failure",
-                    )
-                    raise TestExecutionFailedException(
-                        f"Process failed with exit code {exit_code}", [failure]
+                if not ready_processes:
+                    # No processes can run - circular dependency or missing process
+                    remaining_names = [
+                        _get_friendly_test_name(p.command) for p in remaining_processes
+                    ]
+                    raise RuntimeError(
+                        f"Circular dependency or missing dependency detected for: {remaining_names}"
                     )
 
-            except Exception as e:
-                print(f"Process failed: {process.get_command_str()} - {e}")
-                raise
+                # Run the first ready process
+                process = ready_processes[0]
+                print(f"Running: {process.get_command_str()}")
+
+                # Track process start time
+                self._track_process_start(process)
+
+                # Start the process if not already running
+                if process.proc is None:
+                    process.run()
+
+                try:
+                    exit_code = process.wait()
+
+                    # Collect timing data
+                    if process.duration is not None:
+                        timing = ProcessTiming(
+                            name=_get_friendly_test_name(process.command),
+                            duration=process.duration,
+                            command=str(process.command),
+                        )
+                        completed_timings.append(timing)
+
+                    # Mark as completed
+                    completed_processes.add(process)
+                    remaining_processes.remove(process)
+
+                    # Check for failure
+                    if exit_code != 0:
+                        error_snippet = extract_error_snippet(
+                            process.accumulated_output
+                        )
+                        failure = TestFailureInfo(
+                            test_name=_extract_test_name(process.command),
+                            command=str(process.command),
+                            return_code=exit_code,
+                            output=error_snippet,
+                            error_type="exit_failure",
+                        )
+                        raise TestExecutionFailedException(
+                            f"Process failed with exit code {exit_code}", [failure]
+                        )
+
+                except Exception as e:
+                    print(f"Process failed: {process.get_command_str()} - {e}")
+                    raise
+        finally:
+            self._status_monitoring_active = False
 
         return completed_timings
