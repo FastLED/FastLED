@@ -133,6 +133,7 @@ export class UILayoutPlacementManager {
     this.handleLayoutChange = this.handleLayoutChange.bind(this);
     this.handleResize = this.handleResize.bind(this);
     this.forceLayoutUpdate = this.forceLayoutUpdate.bind(this);
+    this.handleContainerResize = this.handleContainerResize.bind(this);
 
     // Listen for breakpoint changes
     Object.values(this.breakpoints).forEach((mq) => {
@@ -141,6 +142,9 @@ export class UILayoutPlacementManager {
 
     // Listen for window resize for fine-grained adjustments
     globalThis.addEventListener('resize', this.handleResize);
+
+    // Set up ResizeObserver for container-specific resize handling
+    this.setupResizeObserver();
 
     // Add visibility change listener to re-apply layout when page becomes visible
     globalThis.addEventListener('visibilitychange', () => {
@@ -155,7 +159,107 @@ export class UILayoutPlacementManager {
     // Force layout update after a brief delay to handle any timing issues
     setTimeout(() => {
       this.forceLayoutUpdate();
+      // Re-observe containers in case they were created after initial setup
+      this.observeContainers();
     }, 100);
+  }
+
+  /**
+   * Set up ResizeObserver to monitor specific containers for size changes
+   */
+  setupResizeObserver() {
+    // Check if ResizeObserver is supported
+    if (typeof ResizeObserver === 'undefined') {
+      console.warn('ResizeObserver not supported, falling back to window resize events only');
+      return;
+    }
+
+    this.resizeObserver = new ResizeObserver((entries) => {
+      // Debounce ResizeObserver callbacks
+      clearTimeout(this.resizeObserverTimeout);
+      this.resizeObserverTimeout = setTimeout(() => {
+        this.handleContainerResize(entries);
+      }, 50);
+    });
+
+    // Observe key containers once they're available
+    this.observeContainers();
+  }
+
+  /**
+   * Start observing key layout containers
+   */
+  observeContainers() {
+    if (!this.resizeObserver) return;
+    
+    const containersToObserve = [
+      'main-container',
+      'content-grid', 
+      'canvas-container',
+      'ui-controls',
+      'ui-controls-2'
+    ];
+
+    // Track which containers we're already observing to avoid duplicates
+    if (!this.observedContainers) {
+      this.observedContainers = new Set();
+    }
+
+    containersToObserve.forEach(id => {
+      const element = document.getElementById(id);
+      if (element && !this.observedContainers.has(id)) {
+        this.resizeObserver.observe(element);
+        this.observedContainers.add(id);
+        console.log(`🔍 ResizeObserver: Now observing ${id}`);
+      }
+    });
+  }
+
+  /**
+   * Handle container resize events from ResizeObserver
+   * @param {ResizeObserverEntry[]} entries - Array of resize entries
+   */
+  handleContainerResize(entries) {
+    let shouldUpdate = false;
+    const layoutInfo = this.layoutData;
+
+    for (const entry of entries) {
+      const { target, contentRect } = entry;
+      const elementId = target.id;
+      
+      console.log(`🔍 Container resized: ${elementId} - ${contentRect.width}x${contentRect.height}`);
+
+      // Check if this resize affects our layout calculations
+      if (elementId === 'main-container' || elementId === 'content-grid') {
+        // Major container resize - always update
+        shouldUpdate = true;
+        break;
+      } 
+      else if (elementId === 'ui-controls' || elementId === 'ui-controls-2') {
+        // UI container resize - check if it significantly affects layout
+        const availableWidth = contentRect.width;
+        const widthDiff = Math.abs(availableWidth - (layoutInfo?.availableWidth || 0));
+        
+        if (widthDiff > 20) { // 20px threshold for UI container changes
+          shouldUpdate = true;
+          break;
+        }
+      }
+    }
+
+    if (shouldUpdate) {
+      console.log('🔍 ResizeObserver triggered layout update');
+      
+      // Check for layout mode changes first
+      const newLayout = this.detectLayout();
+      if (newLayout !== this.currentLayout) {
+        console.log(`🔍 ResizeObserver detected layout mode change: ${this.currentLayout} → ${newLayout}`);
+        this.currentLayout = newLayout;
+      }
+
+      this.layoutData = this.calculateLayoutData();
+      this.applyLayout();
+    }
   }
 
   /**
@@ -475,6 +579,11 @@ export class UILayoutPlacementManager {
       }),
     );
 
+    // Ensure ResizeObserver is watching all containers after layout changes
+    if (this.resizeObserver) {
+      setTimeout(() => this.observeContainers(), 50);
+    }
+
     console.log(`Applied ${this.currentLayout} layout: ${this.getGridDescription()}`);
   }
 
@@ -488,8 +597,19 @@ export class UILayoutPlacementManager {
       case 'tablet':
       case 'desktop':
         return '2×N grid (landscape)';
-      case 'ultrawide':
+      case 'ultrawide': {
+        // Check if we're actually using 3 columns or fell back to 2
+        const contentGrid = document.getElementById('content-grid');
+        if (contentGrid && contentGrid.style.gridTemplateAreas) {
+          const areas = contentGrid.style.gridTemplateAreas;
+          if (areas.includes('ui2')) {
+            return '3×N grid (ultra-wide)';
+          } else {
+            return '2×N grid (ultra-wide fallback)';
+          }
+        }
         return '3×N grid (ultra-wide)';
+      }
       default:
         return 'unknown grid';
     }
@@ -577,41 +697,59 @@ export class UILayoutPlacementManager {
         uiControls2.style.display = 'none';
       }
     } else if (isUltrawide) {
-      // 3×N grid (ultra-wide) - Place canvas in the middle between two UI columns
-      const minUIWidth = 280; // Minimum width for UI columns
-      const canvasWidth = this.layoutData.canvasSize;
+      // Check if we actually need the 3-column layout based on content
+      const shouldUseThreeColumns = this.shouldUseThreeColumnLayout(uiControls, uiControls2);
+      
+      if (shouldUseThreeColumns) {
+        // 3×N grid (ultra-wide) - Place canvas in the middle between two UI columns
+        const minUIWidth = 280; // Minimum width for UI columns
+        const canvasWidth = this.layoutData.canvasSize;
 
-      console.log(`🔍 Ultra-wide layout (center canvas): canvas=${canvasWidth}px, minUIWidth=${minUIWidth}px`);
+        console.log(`🔍 Ultra-wide layout (center canvas): canvas=${canvasWidth}px, minUIWidth=${minUIWidth}px`);
 
-      // Flexible UI columns on the sides, fixed canvas in the middle
-      contentGrid.style.gridTemplateColumns =
-        `minmax(${minUIWidth}px, 1fr) ${canvasWidth}px minmax(${minUIWidth}px, 1fr)`;
-      contentGrid.style.gridTemplateRows = 'auto';
-      contentGrid.style.gridTemplateAreas = '"ui canvas ui2"';
+        // Flexible UI columns on the sides, fixed canvas in the middle
+        contentGrid.style.gridTemplateColumns =
+          `minmax(${minUIWidth}px, 1fr) ${canvasWidth}px minmax(${minUIWidth}px, 1fr)`;
+        contentGrid.style.gridTemplateRows = 'auto';
+        contentGrid.style.gridTemplateAreas = '"ui canvas ui2"';
 
-      // Show and configure second UI container
-      if (uiControls2) {
-        console.log('🔍 Showing ui-controls-2 container');
-        uiControls2.style.display = 'flex';
-        uiControls2.style.flexDirection = 'column';
-        uiControls2.style.gap = '20px'; // Use 20px gaps between elements
-        uiControls2.style.alignItems = 'stretch'; // Allow elements to expand
-        uiControls2.style.gridArea = 'ui2';
-        uiControls2.style.width = '100%';
-        uiControls2.style.minWidth = `${minUIWidth}px`;
+        // Show and configure second UI container
+        if (uiControls2) {
+          console.log('🔍 Showing ui-controls-2 container');
+          uiControls2.style.display = 'flex';
+          uiControls2.style.flexDirection = 'column';
+          uiControls2.style.gap = '20px'; // Use 20px gaps between elements
+          uiControls2.style.alignItems = 'stretch'; // Allow elements to expand
+          uiControls2.style.gridArea = 'ui2';
+          uiControls2.style.width = '100%';
+          uiControls2.style.minWidth = `${minUIWidth}px`;
 
-        // Force the container to be visible
-        uiControls2.style.visibility = 'visible';
-        uiControls2.style.opacity = '1';
+          // Force the container to be visible
+          uiControls2.style.visibility = 'visible';
+          uiControls2.style.opacity = '1';
+        } else {
+          console.warn('🔍 ui-controls-2 container not found!');
+        }
+
+        // Configure first UI container for ultra-wide
+        uiControls.style.minWidth = `${minUIWidth}px`;
+        uiControls.style.gridArea = 'ui';
+
+        console.log('🔍 Ultra-wide grid applied:', contentGrid.style.gridTemplateColumns);
       } else {
-        console.warn('🔍 ui-controls-2 container not found!');
+        // Fall back to 2-column layout for insufficient content
+        console.log('🔍 Insufficient content for 3-column layout, using 2-column fallback');
+        
+        // Use 2×N grid layout similar to desktop
+        contentGrid.style.gridTemplateColumns = `${this.layoutData.canvasSize}px minmax(280px, 1fr)`;
+        contentGrid.style.gridTemplateRows = 'auto';
+        contentGrid.style.gridTemplateAreas = '"canvas ui"';
+
+        // Hide second UI container
+        if (uiControls2) {
+          uiControls2.style.display = 'none';
+        }
       }
-
-      // Configure first UI container for ultra-wide
-      uiControls.style.minWidth = `${minUIWidth}px`;
-      uiControls.style.gridArea = 'ui';
-
-      console.log('🔍 Ultra-wide grid applied:', contentGrid.style.gridTemplateColumns);
     }
 
     // Canvas container
@@ -627,6 +765,48 @@ export class UILayoutPlacementManager {
     uiControls.style.width = '100%';
 
     console.log(`Applied grid layout: ${this.getGridDescription()}`);
+  }
+
+  /**
+   * Determine if ultrawide layout should use 3 columns based on content amount
+   * @param {HTMLElement} uiControls - First UI container
+   * @param {HTMLElement} uiControls2 - Second UI container
+   * @returns {boolean} Whether to use 3-column layout
+   */
+  shouldUseThreeColumnLayout(uiControls, uiControls2) {
+    if (!uiControls || !uiControls2) return false;
+    
+    // Count total groups and elements across both containers
+    const container1Groups = uiControls.querySelectorAll('.ui-group').length;
+    const container2Groups = uiControls2.querySelectorAll('.ui-group').length;
+    const totalGroups = container1Groups + container2Groups;
+    
+    const container1Elements = uiControls.querySelectorAll('.ui-control').length;
+    const container2Elements = uiControls2.querySelectorAll('.ui-control').length;
+    const totalElements = container1Elements + container2Elements;
+    
+    // Only check if second container has content
+    const hasContentInSecondContainer = container2Groups > 0 || container2Elements > 0;
+    
+    // Thresholds for 3-column layout (matching UI manager thresholds)
+    const minGroupsFor3Col = 6;
+    const minElementsFor3Col = 12;
+    const minElementsPerGroup = 2;
+    
+    const hasEnoughGroups = totalGroups >= minGroupsFor3Col;
+    const hasEnoughElements = totalElements >= minElementsFor3Col;
+    const hasGoodDensity = totalGroups > 0 && (totalElements / totalGroups) >= minElementsPerGroup;
+    
+    const shouldUse3Col = hasContentInSecondContainer && (hasEnoughGroups || (hasEnoughElements && hasGoodDensity));
+    
+    console.log(`🔍 3-Column layout analysis:`);
+    console.log(`  Container 1: ${container1Groups} groups, ${container1Elements} elements`);
+    console.log(`  Container 2: ${container2Groups} groups, ${container2Elements} elements`);
+    console.log(`  Total: ${totalGroups} groups, ${totalElements} elements`);
+    console.log(`  Thresholds: ${minGroupsFor3Col} groups OR ${minElementsFor3Col} elements with ${minElementsPerGroup} avg density`);
+    console.log(`  Result: ${shouldUse3Col ? 'USE 3-COLUMN' : 'USE 2-COLUMN FALLBACK'}`);
+    
+    return shouldUse3Col;
   }
 
   /**
@@ -702,7 +882,17 @@ export class UILayoutPlacementManager {
   }
 
   /**
-   * Clean up event listeners
+   * Refresh ResizeObserver to watch for new containers (useful after dynamic UI changes)
+   */
+  refreshResizeObserver() {
+    if (this.resizeObserver) {
+      console.log('🔍 Refreshing ResizeObserver for new containers');
+      this.observeContainers();
+    }
+  }
+
+  /**
+   * Clean up event listeners and observers
    */
   destroy() {
     Object.values(this.breakpoints).forEach((mq) => {
@@ -710,6 +900,18 @@ export class UILayoutPlacementManager {
     });
     globalThis.removeEventListener('resize', this.handleResize);
     globalThis.removeEventListener('visibilitychange', this.forceLayoutUpdate);
+    
+    // Clean up ResizeObserver
+    if (this.resizeObserver) {
+      this.resizeObserver.disconnect();
+      this.resizeObserver = null;
+    }
+    
+    if (this.observedContainers) {
+      this.observedContainers.clear();
+    }
+    
     clearTimeout(this.resizeTimeout);
+    clearTimeout(this.resizeObserverTimeout);
   }
 }

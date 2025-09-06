@@ -821,6 +821,22 @@ export class JsonUiManager {
     /** @type {number} Counter to track UI element distribution in ultra-wide mode */
     this.elementDistributionIndex = 0;
 
+    /** @type {Object} Configuration for container spillover thresholds */
+    this.spilloverConfig = {
+      // For tablet/desktop (2-container layouts): need at least 4 groups or 8 total elements
+      twoContainer: {
+        minGroups: 4,        // At least 4 groups before using second container
+        minElements: 8,      // At least 8 total elements before using second container
+        minElementsPerGroup: 2  // Average elements per group threshold
+      },
+      // For ultrawide (3-container layouts): need at least 6 groups or 12 total elements
+      threeContainer: {
+        minGroups: 6,        // At least 6 groups before using all three areas
+        minElements: 12,     // At least 12 total elements before using all three areas
+        minElementsPerGroup: 2  // Average elements per group threshold
+      }
+    };
+
     // Initialize the UI Layout Placement Manager
     /** @type {UILayoutPlacementManager} Responsive layout management */
     this.layoutManager = new UILayoutPlacementManager();
@@ -846,6 +862,12 @@ export class JsonUiManager {
     if (window._pendingUiDebugMode !== undefined) {
       this.setDebugMode(window._pendingUiDebugMode);
       delete window._pendingUiDebugMode;
+    }
+
+    // Apply any pending spillover configuration
+    if (window._pendingSpilloverConfig !== undefined) {
+      this.updateSpilloverConfig(window._pendingSpilloverConfig);
+      delete window._pendingSpilloverConfig;
     }
   }
 
@@ -916,19 +938,19 @@ export class JsonUiManager {
    * Creates a collapsible group container for organizing UI elements
    * @param {string} groupName - Name of the group (displayed as header)
    * @param {HTMLElement} [targetContainer] - Specific container to use (optional)
+   * @param {number} [totalGroups] - Total number of groups for spillover analysis
+   * @param {number} [totalElements] - Total number of elements for spillover analysis
    * @returns {HTMLElement} The group container element
    */
-  createGroupContainer(groupName, targetContainer = null) {
-    // First check if group already exists in any container
-    if (this.groups.has(groupName)) {
-      return this.groups.get(groupName);
-    }
-    if (this.groups2.has(groupName)) {
-      return this.groups2.get(groupName);
+  createGroupContainer(groupName, targetContainer = null, totalGroups = 0, totalElements = 0) {
+    // First check if group already exists in ANY container and return it
+    const existingGroup = this.findExistingGroup(groupName);
+    if (existingGroup) {
+      return existingGroup;
     }
 
-    // Determine which container to use
-    const container = targetContainer || this.getTargetContainer();
+    // Determine which container to use - but ensure groups stay together
+    const container = targetContainer || this.getTargetContainerForGroup(groupName, totalGroups, totalElements);
     const groupsMap = this.getGroupsForContainer(container);
 
     const groupDiv = document.createElement('div');
@@ -1202,12 +1224,31 @@ export class JsonUiManager {
     // Optimize layout based on current screen size and element count
     this.optimizeLayoutForElements(groupedElements, ungroupedElements);
 
-    // Second pass: create groups and add elements with container distribution
-    // Add ungrouped elements first
+    // Second pass: create groups and add elements with smart container distribution
+    // First, analyze total content to determine if we need multiple containers
+    const totalGroups = groupedElements.size;
+    const totalElements = jsonData.length;
+    const sortedGroups = this.sortGroupsForOptimalLayout(groupedElements);
+    const groupContainerMap = new Map();
+    
+    if (this.debugMode) {
+      console.log(`🎵 UI Content Analysis: ${totalGroups} groups, ${totalElements} total elements`);
+    }
+    
+    // Pre-assign groups to containers to prevent splitting
+    for (const [groupName, elements] of sortedGroups) {
+      const groupInfo = this.createGroupContainer(groupName, null, totalGroups, totalElements);
+      groupContainerMap.set(groupName, groupInfo);
+    }
+
+    // Add ungrouped elements, distributing across containers intelligently
     if (ungroupedElements.length > 0) {
+      let ungroupedIndex = 0;
       ungroupedElements.forEach((data) => {
-        const targetContainer = this.getTargetContainer();
+        // For ungrouped elements, still distribute but consider existing group balance
+        const targetContainer = this.getBalancedTargetContainer(ungroupedIndex, totalGroups, totalElements);
         const ungroupedContainer = this.getUngroupedContainer(targetContainer);
+        ungroupedIndex++;
 
         const control = this.createControlElement(data);
         if (control) {
@@ -1218,11 +1259,9 @@ export class JsonUiManager {
       });
     }
 
-    // Add grouped elements with optimized ordering and distribution
-    const sortedGroups = this.sortGroupsForOptimalLayout(groupedElements);
-
+    // Add grouped elements (groups are already created and assigned containers)
     for (const [groupName, elements] of sortedGroups) {
-      const groupInfo = this.createGroupContainer(groupName);
+      const groupInfo = groupContainerMap.get(groupName);
 
       elements.forEach((data) => {
         const control = this.createControlElement(data);
@@ -1527,6 +1566,33 @@ export class JsonUiManager {
     window.uiManager = this;
   }
 
+  /**
+   * Update spillover configuration thresholds
+   * @param {Object} newConfig - New spillover configuration
+   * @param {Object} newConfig.twoContainer - 2-container thresholds
+   * @param {Object} newConfig.threeContainer - 3-container thresholds
+   */
+  updateSpilloverConfig(newConfig) {
+    if (newConfig.twoContainer) {
+      Object.assign(this.spilloverConfig.twoContainer, newConfig.twoContainer);
+    }
+    if (newConfig.threeContainer) {
+      Object.assign(this.spilloverConfig.threeContainer, newConfig.threeContainer);
+    }
+    
+    if (this.debugMode) {
+      console.log('🎵 Updated spillover configuration:', this.spilloverConfig);
+    }
+  }
+
+  /**
+   * Get current spillover configuration
+   * @returns {Object} Current spillover configuration
+   */
+  getSpilloverConfig() {
+    return JSON.parse(JSON.stringify(this.spilloverConfig));
+  }
+
   // Handle layout changes (enhanced for new system)
   onLayoutChange(layoutMode) {
     if (this.debugMode) {
@@ -1594,6 +1660,45 @@ export class JsonUiManager {
     return null;
   }
 
+  /**
+   * Get a balanced target container for ungrouped elements
+   * @param {number} elementIndex - Index of the current element
+   * @param {number} totalGroups - Total number of groups
+   * @param {number} totalElements - Total number of elements
+   * @returns {HTMLElement} The target container
+   */
+  getBalancedTargetContainer(elementIndex, totalGroups = 0, totalElements = 0) {
+    const layoutInfo = this.layoutManager.getLayoutInfo();
+
+    // Check if we should even use multiple containers
+    if (!this.shouldUseMultipleContainers(layoutInfo.mode, totalGroups, totalElements)) {
+      return document.getElementById(this.uiControlsId);
+    }
+
+    if (layoutInfo.mode === 'ultrawide') {
+      const container1 = document.getElementById(this.uiControlsId);
+      const container2 = document.getElementById(this.uiControls2Id);
+      
+      if (container1 && container2) {
+        // Balance based on total content (groups + ungrouped elements)
+        const container1Elements = container1.children.length;
+        const container2Elements = container2.children.length;
+        
+        // Use the container with fewer total elements
+        if (container2Elements < container1Elements) {
+          return container2;
+        } else if (container1Elements < container2Elements) {
+          return container1;
+        } else {
+          // Equal - alternate
+          return elementIndex % 2 === 0 ? container1 : container2;
+        }
+      }
+    }
+
+    return document.getElementById(this.uiControlsId);
+  }
+
   // Cleanup method to remove event listeners
   destroy() {
     if (this.layoutManager) {
@@ -1626,6 +1731,101 @@ export class JsonUiManager {
 
     // Default to main container for all other layouts
     return document.getElementById(this.uiControlsId);
+  }
+
+  /**
+   * Get the appropriate UI container for a specific group, ensuring groups don't get split
+   * @param {string} groupName - Name of the group
+   * @param {number} totalGroups - Total number of groups being created
+   * @param {number} totalElements - Total number of UI elements
+   * @returns {HTMLElement} The container where the group should be placed
+   */
+  getTargetContainerForGroup(groupName, totalGroups = 0, totalElements = 0) {
+    const layoutInfo = this.layoutManager.getLayoutInfo();
+
+    // Check if this group already exists in a container
+    const existingGroup = this.findExistingGroup(groupName);
+    if (existingGroup && existingGroup.parentContainer) {
+      return existingGroup.parentContainer;
+    }
+
+    // Check if we should even use multiple containers based on content amount
+    if (!this.shouldUseMultipleContainers(layoutInfo.mode, totalGroups, totalElements)) {
+      return document.getElementById(this.uiControlsId);
+    }
+
+    if (layoutInfo.mode === 'ultrawide') {
+      // For ultra-wide, try to balance containers by group count, not individual elements
+      const container1 = document.getElementById(this.uiControlsId);
+      const container2 = document.getElementById(this.uiControls2Id);
+      
+      if (container1 && container2) {
+        const groups1Count = this.groups.size;
+        const groups2Count = this.groups2.size;
+        
+        // Use the container with fewer groups
+        if (groups2Count < groups1Count) {
+          return container2;
+        }
+      }
+    }
+
+    // Default to main container
+    return document.getElementById(this.uiControlsId);
+  }
+
+  /**
+   * Determine if we should use multiple containers based on content amount
+   * @param {string} layoutMode - Current layout mode
+   * @param {number} totalGroups - Total number of groups
+   * @param {number} totalElements - Total number of elements
+   * @returns {boolean} Whether to use multiple containers
+   */
+  shouldUseMultipleContainers(layoutMode, totalGroups, totalElements) {
+    if (layoutMode === 'mobile') {
+      return false; // Mobile always uses single container
+    }
+
+    let thresholds;
+    if (layoutMode === 'ultrawide') {
+      thresholds = this.spilloverConfig.threeContainer;
+    } else if (layoutMode === 'tablet' || layoutMode === 'desktop') {
+      thresholds = this.spilloverConfig.twoContainer;
+    } else {
+      return false;
+    }
+
+    // Check if we meet the minimum thresholds for spillover
+    const hasEnoughGroups = totalGroups >= thresholds.minGroups;
+    const hasEnoughElements = totalElements >= thresholds.minElements;
+    const hasGoodGroupDensity = totalGroups > 0 && (totalElements / totalGroups) >= thresholds.minElementsPerGroup;
+
+    const shouldSpill = hasEnoughGroups || (hasEnoughElements && hasGoodGroupDensity);
+
+    if (this.debugMode) {
+      console.log(`🎵 Spillover analysis for ${layoutMode}:`);
+      console.log(`  Groups: ${totalGroups} (need ${thresholds.minGroups})`);
+      console.log(`  Elements: ${totalElements} (need ${thresholds.minElements})`);
+      console.log(`  Density: ${totalGroups > 0 ? (totalElements / totalGroups).toFixed(1) : 0} (need ${thresholds.minElementsPerGroup})`);
+      console.log(`  Result: ${shouldSpill ? 'USE MULTIPLE CONTAINERS' : 'USE SINGLE CONTAINER'}`);
+    }
+
+    return shouldSpill;
+  }
+
+  /**
+   * Find an existing group across all containers
+   * @param {string} groupName - Name of the group to find
+   * @returns {Object|null} The group info object or null if not found
+   */
+  findExistingGroup(groupName) {
+    if (this.groups.has(groupName)) {
+      return this.groups.get(groupName);
+    }
+    if (this.groups2.has(groupName)) {
+      return this.groups2.get(groupName);
+    }
+    return null;
   }
 
   /**
@@ -1685,7 +1885,7 @@ export class JsonUiManager {
   }
 }
 
-// Global debug controls for UI Manager
+// Global debug and configuration controls for UI Manager
 if (typeof window !== 'undefined') {
   window.setUiDebug = function (enabled = true) {
     // Access the global UI manager instance if available
@@ -1698,5 +1898,34 @@ if (typeof window !== 'undefined') {
       // Store the preference for when the manager is created
       window._pendingUiDebugMode = enabled;
     }
+  };
+
+  window.setUiSpilloverThresholds = function (config) {
+    if (window.uiManager && typeof window.uiManager.updateSpilloverConfig === 'function') {
+      window.uiManager.updateSpilloverConfig(config);
+    } else {
+      console.warn(
+        '🎵 UI Manager instance not found. Spillover config will be applied when manager is created.',
+      );
+      window._pendingSpilloverConfig = config;
+    }
+  };
+
+  window.getUiSpilloverThresholds = function () {
+    if (window.uiManager && typeof window.uiManager.getSpilloverConfig === 'function') {
+      return window.uiManager.getSpilloverConfig();
+    } else {
+      console.warn('🎵 UI Manager instance not found.');
+      return null;
+    }
+  };
+
+  // Example usage helper
+  window.setUiSpilloverExample = function () {
+    console.log('🎵 Example spillover configuration:');
+    console.log('setUiSpilloverThresholds({');
+    console.log('  twoContainer: { minGroups: 3, minElements: 6, minElementsPerGroup: 2 },');
+    console.log('  threeContainer: { minGroups: 5, minElements: 10, minElementsPerGroup: 2 }');
+    console.log('});');
   };
 }
