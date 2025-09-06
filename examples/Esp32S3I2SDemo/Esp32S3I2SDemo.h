@@ -39,7 +39,7 @@
 
 #define FASTLED_USES_ESP32S3_I2S  // Must define this before including FastLED.h
 
-
+#include <Arduino.h>
 #include "FastLED.h"
 #include "fl/assert.h"
 
@@ -161,7 +161,7 @@ void setup() {
     delay(6000);  // The long reset time here is to make it easier to flash the device during the development process.
 
     setup_i2s();
-    FastLED.setBrightness(32);
+    FastLED.setBrightness(16);
    
 }
 
@@ -200,6 +200,9 @@ void loop() {
     fill_rainbow(leds, NUM_LEDS, 0, 7);
     FastLED.show();
     delay(50);
+    EVERY_N_MILLISECONDS(1000) {
+        Serial.println("Stdout works.");
+    }
 }
 
 #endif  // ESP32
