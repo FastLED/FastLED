@@ -17,15 +17,55 @@ on:
         required: false
         default: ''
 
+permissions:
+  contents: read
+  actions: read
+  id-token: write
+  pull-requests: read
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
+      - name: Checkout trusted base branch code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.repository.default_branch || 'master' }}
+          path: trusted
+
+      - name: Checkout PR code
         uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          path: pr-code
+
+      - name: Merge safe source files from PR
+        run: |
+          # Copy ONLY safe source files from PR, never executable scripts
+          if [ -d "pr-code/src" ]; then
+            cp -r pr-code/src/* trusted/src/ 2>/dev/null || true
+          fi
+          if [ -d "pr-code/examples" ]; then
+            cp -r pr-code/examples/* trusted/examples/ 2>/dev/null || true
+          fi
+          if [ -f "pr-code/platformio.ini" ]; then
+            cp pr-code/platformio.ini trusted/
+          fi
+          if [ -f "pr-code/library.json" ]; then
+            cp pr-code/library.json trusted/
+          fi
+          if [ -f "pr-code/library.properties" ]; then
+            cp pr-code/library.properties trusted/
+          fi
+          if [ -f "pr-code/CMakeLists.txt" ]; then
+            cp pr-code/CMakeLists.txt trusted/
+          fi
+          # Change working directory to trusted for all subsequent steps
+          cd trusted
+        shell: bash
+
+      - name: Set working directory to trusted
+        run: echo "GITHUB_WORKSPACE=$GITHUB_WORKSPACE/trusted" >> $GITHUB_ENV
 
       - name: Install Python
         uses: actions/setup-python@v5
@@ -36,60 +76,71 @@ jobs:
         run: pip install uv
 
       - name: Check Compiled Program Size for ${{ inputs.board }}
+        working-directory: trusted
         run: uv run ci/ci-check-compiled-size.py ${{ inputs.board }} --max-size ${{ inputs.max_size }} --example Blink ${{ inputs.extra_args }}
 
       - name: Inspect Binary
         if: always()
         continue-on-error: true
+        working-directory: trusted
         run: |
           uv run ci/inspect_binary.py --first
 
       - name: Inspect Elf
         if: always()
         continue-on-error: true
+        working-directory: trusted
         run: |
           uv run ci/inspect_elf.py --first
 
       - name: Symbol Analysis
         if: always()
         continue-on-error: true
+        working-directory: trusted
         run: |
           uv run ci/symbol_analysis_runner.py --board ${{ inputs.board }} --example Blink --skip-on-failure
 
       - name: Check Compiled Program Size for ${{ inputs.board }} (Apa102)
+        working-directory: trusted
         run: uv run ci/ci-check-compiled-size.py ${{ inputs.board }} --max-size ${{ inputs.max_size_apa102 }} --example Apa102 ${{ inputs.extra_args }}
 
       - name: Inspect Binary
         if: always()
         continue-on-error: true
+        working-directory: trusted
         run: |
           uv run ci/inspect_binary.py --first
 
       - name: Inspect Elf
         if: always()
         continue-on-error: true
+        working-directory: trusted
         run: |
           uv run ci/inspect_elf.py --first
 
       - name: Symbol Analysis (Apa102)
         if: always()
         continue-on-error: true
+        working-directory: trusted
         run: |
           uv run ci/symbol_analysis_runner.py --board ${{ inputs.board }} --example Apa102 --skip-on-failure
 
       - name: Check Compiled Program Size for ${{ inputs.board }} (Apa102 with HD Color Mixing)
         if: inputs.board == 'attiny85'
+        working-directory: trusted
         run: uv run ci/ci-check-compiled-size.py ${{ inputs.board }} --example Apa102 ${{ inputs.extra_args }} --defines FASTLED_HD_COLOR_MIXING=1
 
       - name: Inspect Binary (HD Color Mixing)
         if: inputs.board == 'attiny85'
         continue-on-error: true
+        working-directory: trusted
         run: |
           uv run ci/inspect_binary.py --first
 
       - name: Inspect Elf (HD Color Mixing)
         if: inputs.board == 'attiny85'
         continue-on-error: true
+        working-directory: trusted
         run: |
           uv run ci/inspect_elf.py --first
 
@@ -103,7 +154,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: build-log-${{ steps.generate_id.outputs.timestamp }}-${{ github.sha }}-${{ steps.generate_id.outputs.random_hex }}
-          path: build.log
+          path: trusted/build.log
 
       - name: Check build status
         if: failure()

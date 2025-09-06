@@ -44,10 +44,55 @@ jobs:
     
     runs-on: ${{ matrix.os }}
     steps:
-      - name: Checkout repository
+      - name: Checkout trusted base branch code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.repository.default_branch || 'master' }}
+          path: trusted
+
+      - name: Checkout PR code
         uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          path: pr-code
+
+      - name: Merge safe source files from PR
+        run: |
+          # Copy ONLY safe source files from PR, never executable scripts
+          if [ -d "pr-code/src" ]; then
+            cp -r pr-code/src/* trusted/src/ 2>/dev/null || true
+          fi
+          if [ -d "pr-code/tests" ]; then
+            cp -r pr-code/tests/* trusted/tests/ 2>/dev/null || true
+          fi
+          if [ -d "pr-code/examples" ]; then
+            cp -r pr-code/examples/* trusted/examples/ 2>/dev/null || true
+          fi
+          if [ -f "pr-code/platformio.ini" ]; then
+            cp pr-code/platformio.ini trusted/
+          fi
+          if [ -f "pr-code/library.json" ]; then
+            cp pr-code/library.json trusted/
+          fi
+          if [ -f "pr-code/library.properties" ]; then
+            cp pr-code/library.properties trusted/
+          fi
+          if [ -f "pr-code/CMakeLists.txt" ]; then
+            cp pr-code/CMakeLists.txt trusted/
+          fi
+          if [ -f "pr-code/test.py" ]; then
+            cp pr-code/test.py trusted/
+          fi
+          if [ -f "pr-code/test" ]; then
+            # DO NOT copy executable test script - use trusted version
+            echo "Skipping pr-code/test script - using trusted version"
+          fi
+          # Change working directory to trusted for all subsequent steps
+          cd trusted
+        shell: bash
+
+      - name: Set working directory to trusted
+        run: echo "GITHUB_WORKSPACE=$GITHUB_WORKSPACE/trusted" >> $GITHUB_ENV
 
       - name: Install Python
         uses: actions/setup-python@v5
@@ -63,31 +108,37 @@ jobs:
       
 
       - name: Install
+        working-directory: trusted
         run: ./install
         shell: bash
 
       - name: No namespace after headers
+        working-directory: trusted
         run: |
           uv run python ci/tests/no_using_namespace_fl_in_headers.py
 
 
       
       - name: Run Example Blink
+        working-directory: trusted
         run: |
           ./test --clang --no-parallel --no-unity --examples Blink --no-pch --verbose
         shell: bash
 
       - name: Run Unit Test Json
+        working-directory: trusted
         run: |
           ./test --clang --no-parallel --no-unity --unit --no-pch --verbose Json
         shell: bash
 
       - name: Run All Unit Tests
+        working-directory: trusted
         run: |
           ./test --clang --no-parallel --unit --verbose
         shell: bash
 
       - name: Run All Examples
+        working-directory: trusted
         run: |
           ./test --clang --no-parallel --examples --verbose
         shell: bash

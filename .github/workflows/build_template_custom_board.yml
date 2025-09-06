@@ -7,14 +7,58 @@ on:
         required: true
         type: string
 
+permissions:
+  contents: read
+  actions: read
+  id-token: write
+  pull-requests: read
+
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
+      - name: Checkout trusted base branch code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.repository.default_branch || 'master' }}
+          path: trusted
+
+      - name: Checkout PR code
         uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          path: pr-code
+
+      - name: Merge safe source files from PR
+        run: |
+          # Copy ONLY safe source files from PR, never executable scripts
+          if [ -d "pr-code/src" ]; then
+            cp -r pr-code/src/* trusted/src/ 2>/dev/null || true
+          fi
+          if [ -d "pr-code/examples" ]; then
+            cp -r pr-code/examples/* trusted/examples/ 2>/dev/null || true
+          fi
+          if [ -d "pr-code/ci/boards" ]; then
+            cp -r pr-code/ci/boards/* trusted/ci/boards/ 2>/dev/null || true
+          fi
+          if [ -f "pr-code/platformio.ini" ]; then
+            cp pr-code/platformio.ini trusted/
+          fi
+          if [ -f "pr-code/library.json" ]; then
+            cp pr-code/library.json trusted/
+          fi
+          if [ -f "pr-code/library.properties" ]; then
+            cp pr-code/library.properties trusted/
+          fi
+          if [ -f "pr-code/CMakeLists.txt" ]; then
+            cp pr-code/CMakeLists.txt trusted/
+          fi
+          # Change working directory to trusted for all subsequent steps
+          cd trusted
+        shell: bash
+
+      - name: Set working directory to trusted
+        run: echo "GITHUB_WORKSPACE=$GITHUB_WORKSPACE/trusted" >> $GITHUB_ENV
 
       - name: Install Python
         uses: actions/setup-python@v5
@@ -23,22 +67,26 @@ jobs:
 
       # Use the fastest build to instantiate the ~/.platformio/boards folder
       - name: Pre-build to ensure ~/.platformio/boards folder is created
+        working-directory: trusted
         run: ./compile uno --examples Blink
         shell: bash
 
       # Copy the custom board JSON file to the PlatformIO boards folder
       - name: Copy ci/boards/*.json to ~/.platformio/boards
+        working-directory: trusted
         run: |
           mkdir -p ~/.platformio/boards
           cp ci/boards/*.json ~/.platformio/boards
 
       - name: Build FastLED examples
+        working-directory: trusted
         run: |
           set -o pipefail
           ./compile --no-interactive ${{ inputs.args }}| tee build.log
         shell: bash
 
       - name: Print out build_info.json
+        working-directory: trusted
         run: |
           build_info=$(find . -name build_info.json)
           if [ -f "$build_info" ]; then
@@ -49,6 +97,7 @@ jobs:
         if: always()
 
       - name: CPP Check
+        working-directory: trusted
         run: |
           # take the input.args and parse out the first element, which will be the board name
           # do this to input.args
@@ -67,7 +116,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: build-artifacts-${{ steps.generate_id.outputs.timestamp }}-${{ github.sha }}-${{ steps.generate_id.outputs.random_hex }}
-          path: .build/
+          path: trusted/.build/
           include-hidden-files: true
 
 
@@ -75,7 +124,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: build-log-${{ steps.generate_id.outputs.timestamp }}-${{ github.sha }}-${{ steps.generate_id.outputs.random_hex }}
-          path: build.log
+          path: trusted/build.log
 
       - name: Check build status
         if: failure()

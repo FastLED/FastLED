@@ -43,10 +43,45 @@ jobs:
         os: [ubuntu-24.04]
       fail-fast: false
     steps:
-      - name: Checkout code
+      - name: Checkout trusted base branch code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.repository.default_branch || 'master' }}
+          path: trusted
+
+      - name: Checkout PR code
         uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          path: pr-code
+
+      - name: Merge safe source files from PR
+        run: |
+          # Copy ONLY safe source files from PR, never executable scripts
+          if [ -d "pr-code/src" ]; then
+            cp -r pr-code/src/* trusted/src/ 2>/dev/null || true
+          fi
+          if [ -d "pr-code/examples" ]; then
+            cp -r pr-code/examples/* trusted/examples/ 2>/dev/null || true
+          fi
+          if [ -f "pr-code/platformio.ini" ]; then
+            cp pr-code/platformio.ini trusted/
+          fi
+          if [ -f "pr-code/library.json" ]; then
+            cp pr-code/library.json trusted/
+          fi
+          if [ -f "pr-code/library.properties" ]; then
+            cp pr-code/library.properties trusted/
+          fi
+          if [ -f "pr-code/CMakeLists.txt" ]; then
+            cp pr-code/CMakeLists.txt trusted/
+          fi
+          # Change working directory to trusted for all subsequent steps
+          cd trusted
+        shell: bash
+
+      - name: Set working directory to trusted
+        run: echo "GITHUB_WORKSPACE=$GITHUB_WORKSPACE/trusted" >> $GITHUB_ENV
 
 
       - name: Install Python
@@ -78,17 +113,20 @@ jobs:
           live-server --version
 
       - name: Compile fastled.js, fastled.wasm, and index.html
+        working-directory: trusted
         run: |
           fastled --just-compile examples/wasm
         continue-on-error: ${{ matrix.os != 'ubuntu-latest' }}
         shell: bash
 
       - name: Scan for wasm/js/html artifacts
+        working-directory: trusted
         run: |
           find . -name "*.wasm" -o -name "*.js" -o -name "*.html"
         continue-on-error: ${{ matrix.os != 'ubuntu-latest' }}
 
       - name: Check for required artifacts
+        working-directory: trusted
         run: |
           cd examples/wasm/fastled_js
           if [ ! -f fastled.js ] || [ ! -f fastled.wasm ] || [ ! -f index.html ]; then
@@ -107,10 +145,11 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: wasm-artifacts-${{ steps.generate_id.outputs.timestamp }}-${{ github.sha }}-${{ steps.generate_id.outputs.random_hex }}
-          path: examples/wasm/fastled_js/*.*
+          path: trusted/examples/wasm/fastled_js/*.*
           if-no-files-found: ${{ matrix.os == 'ubuntu-latest' && 'error' || 'ignore' }}
 
       - name: Verify FastLED_onFrame with Playwrite
+        working-directory: trusted
         run: |
           uv run ci/wasm_test.py
         continue-on-error: ${{ matrix.os != 'ubuntu-latest' }}

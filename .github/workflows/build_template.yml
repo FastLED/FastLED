@@ -16,14 +16,55 @@ on:
         required: false
         default: "ubuntu-latest"
 
+permissions:
+  contents: read
+  actions: read
+  id-token: write
+  pull-requests: read
+
 jobs:
   build:
     runs-on: ${{ inputs.runs-on }}
     steps:
-      - name: Checkout code
+      - name: Checkout trusted base branch code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.repository.default_branch || 'master' }}
+          path: trusted
+
+      - name: Checkout PR code
         uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          path: pr-code
+
+      - name: Merge safe source files from PR
+        run: |
+          # Copy ONLY safe source files from PR, never executable scripts
+          if [ -d "pr-code/src" ]; then
+            cp -r pr-code/src/* trusted/src/ 2>/dev/null || true
+          fi
+          if [ -d "pr-code/examples" ]; then
+            cp -r pr-code/examples/* trusted/examples/ 2>/dev/null || true
+          fi
+          if [ -f "pr-code/platformio.ini" ]; then
+            cp pr-code/platformio.ini trusted/
+          fi
+          if [ -f "pr-code/library.json" ]; then
+            cp pr-code/library.json trusted/
+          fi
+          if [ -f "pr-code/library.properties" ]; then
+            cp pr-code/library.properties trusted/
+          fi
+          if [ -f "pr-code/CMakeLists.txt" ]; then
+            cp pr-code/CMakeLists.txt trusted/
+          fi
+          # Change working directory to trusted for all subsequent steps
+          cd trusted
+        shell: bash
+
+      - name: Set working directory to trusted
+        run: echo "GITHUB_WORKSPACE=$GITHUB_WORKSPACE/trusted" >> $GITHUB_ENV
 
 
 
@@ -37,6 +78,7 @@ jobs:
       #      ${{ runner.os }}-build-
 
       - name: Pin python version
+        working-directory: trusted
         run: |
           echo "3.11" >> .python-version
 
@@ -50,7 +92,7 @@ jobs:
       - name: "Set up Python"
         uses: actions/setup-python@v5
         with:
-          python-version-file: ".python-version"
+          python-version-file: "trusted/.python-version"
 
       - name: Install CCACHE
         run: |
@@ -85,14 +127,17 @@ jobs:
 
       - name: Install Platform
         if: inputs.platform != ''
+        working-directory: trusted
         run: |
           uv run pio pkg -g install ${{ inputs.platform }}
 
       - name: PlatformIO Versions
+        working-directory: trusted
         run: |
           uv run platformio --version
 
       - name: Build FastLED examples with "./compile --no-interactive  ${{ inputs.args }}"
+        working-directory: trusted
         run: |
           set -o pipefail
           ./compile --no-interactive --log-failures failures  ${{ inputs.args }} | tee build.log
@@ -102,6 +147,7 @@ jobs:
       - name: Build summary and failure logs
         if: always()
         continue-on-error: true
+        working-directory: trusted
         run: |
           echo "############################################"
           echo "Last 100 lines of build.log (most recent output)"
@@ -130,6 +176,7 @@ jobs:
       - name: Find platformio.ini file and print it out
         if: always()
         continue-on-error: true
+        working-directory: trusted
         run: |
           platformio_ini=$(find ./.build -type f -name platformio.ini | head -n 1)
           if [ -f "$platformio_ini" ]; then
@@ -143,12 +190,14 @@ jobs:
 
       - name: Build Blink.ino for library info
         continue-on-error: true
+        working-directory: trusted
         run: |
           uv run ci/ci-compile.py ${{ inputs.args }} --examples Blink
         shell: bash
 
       - name: Print out build_info.json
         if: always()
+        working-directory: trusted
         run: |
           build_info=$(find . -name build_info.json)
           if [ -f "$build_info" ]; then
@@ -158,6 +207,7 @@ jobs:
           fi
 
       - name: CPP Check
+        working-directory: trusted
         run: |
           # take the input.args and parse out the first element, which will be the board name
           # do this to input.args
@@ -167,30 +217,35 @@ jobs:
 
       - name: Check Compiled size of last compiled example
         continue-on-error: true
+        working-directory: trusted
         run: |
           uv run ci/ci-check-compiled-size.py ${{ inputs.args }} --no-build
 
       - name: Inspect Binary
         if: always()
         continue-on-error: true
+        working-directory: trusted
         run: |
           uv run ci/inspect_binary.py --first
 
       - name: Inspect Elf
         if: always()
         continue-on-error: true
+        working-directory: trusted
         run: |
           uv run ci/inspect_elf.py --first
 
       - name: Optimization Report
         if: always()
         continue-on-error: true
+        working-directory: trusted
         run: |
           uv run ci/optimization_report.py --first
 
       - name: Symbol Analysis
         if: always()
         continue-on-error: true
+        working-directory: trusted
         run: |
           # Parse the board name from args (first element)
           python -c "print('${{ inputs.args }}'.split()[0])" > board.txt
@@ -208,14 +263,14 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: build-artifacts-${{ steps.generate_id.outputs.timestamp }}-${{ github.sha }}-${{ steps.generate_id.outputs.random_hex }}
-          path: .build/
+          path: trusted/.build/
           include-hidden-files: true
 
       - name: Upload build log
         uses: actions/upload-artifact@v4
         with:
           name: build-log-${{ steps.generate_id.outputs.timestamp }}-${{ github.sha }}-${{ steps.generate_id.outputs.random_hex }}
-          path: build.log
+          path: trusted/build.log
 
 
       - name: Check build status
