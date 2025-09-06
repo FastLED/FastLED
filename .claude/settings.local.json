@@ -15,7 +15,8 @@
       "Bash(./compile:*)",
       "Bash(rm:*)",
       "Bash(find:*)",
-      "Bash(bash lint)"
+      "Bash(bash lint)",
+      "WebFetch(domain:docs.github.com)"
     ],
     "deny": []
   }
