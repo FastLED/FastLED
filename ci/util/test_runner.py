@@ -74,8 +74,8 @@ def extract_error_snippet(accumulated_output: list[str], context_lines: int = 5)
             + "\n".join(accumulated_output[-max_lines:])
         )
 
-    # Extract context around first 2 errors only (to keep output concise)
-    max_errors_to_show = 2
+    # Extract context around first 5 errors (increased from 2 for better visibility)
+    max_errors_to_show = 5
     for i, error_idx in enumerate(error_line_indices[:max_errors_to_show]):
         # Calculate context window (5 lines before to 5 lines after the error)
         start_idx = max(0, error_idx - context_lines)
@@ -89,11 +89,21 @@ def extract_error_snippet(accumulated_output: list[str], context_lines: int = 5)
 
         error_snippets.append("\n".join(snippet_lines))
 
-    # Add summary if there are more errors
+    # Add summary if there are more errors - but show the actual error lines
     if len(error_line_indices) > max_errors_to_show:
-        error_snippets.append(
-            f"... and {len(error_line_indices) - max_errors_to_show} more error(s) found"
-        )
+        remaining_errors = error_line_indices[max_errors_to_show:]
+        additional_error_lines = []
+        for error_idx in remaining_errors[:3]:  # Show up to 3 more error lines
+            additional_error_lines.append(f"➤ {accumulated_output[error_idx]}")
+        
+        if additional_error_lines:
+            error_snippets.append("Additional errors found:")
+            error_snippets.append("\n".join(additional_error_lines))
+        
+        if len(remaining_errors) > 3:
+            error_snippets.append(
+                f"... and {len(remaining_errors) - 3} more error(s) found"
+            )
 
     return "\n\n".join(error_snippets)
 
@@ -497,7 +507,7 @@ def create_python_test_process(
     return RunningProcess(
         cmd_str,
         auto_run=False,  # Don't auto-start - will be started in parallel later
-        enable_stack_trace=enable_stack_trace,
+        enable_stack_trace=False,  # Always disable stack traces for Python tests  
         timeout=_TIMEOUT,  # 2 minute timeout for Python tests
     )
 
@@ -553,7 +563,7 @@ def get_python_test_processes(
     enable_stack_trace: bool, full_tests: bool = False
 ) -> list[RunningProcess]:
     """Return all processes needed for Python tests"""
-    return [create_python_test_process(enable_stack_trace, full_tests)]
+    return [create_python_test_process(False, full_tests)]  # Disable stack trace for Python tests
 
 
 def get_integration_test_processes(
@@ -581,7 +591,7 @@ def get_all_test_processes(
     if test_categories.examples:
         processes.append(create_examples_test_process(args, enable_stack_trace))
     if test_categories.py:
-        processes.append(create_python_test_process(enable_stack_trace))
+        processes.append(create_python_test_process(False))  # Disable stack trace for Python tests
     if test_categories.integration:
         processes.append(create_integration_test_process(args, enable_stack_trace))
 
@@ -1655,7 +1665,7 @@ def runner(args: TestArgs, src_code_change: bool = True) -> None:
                 or args.full
             )
 
-            processes.append(create_python_test_process(enable_stack_trace, full_tests))
+            processes.append(create_python_test_process(False, full_tests))  # Disable stack trace for Python tests
 
         # Add example tests if needed
         if test_categories.examples or test_categories.examples_only:
