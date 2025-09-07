@@ -8,6 +8,7 @@
 #include "fl/int.h"
 #include <math.h>
 #include "fl/stdint.h"
+#include "fl/span.h"
 
 namespace fl {
 
@@ -25,6 +26,12 @@ class AudioSample {
     AudioSample() {}
     AudioSample(const AudioSample &other) : mImpl(other.mImpl) {}
     AudioSample(AudioSampleImplPtr impl) : mImpl(impl) {}
+    ~AudioSample();
+    
+    // Constructor that takes raw audio data and handles pooling internally
+    AudioSample(fl::span<const fl::i16> span, fl::u32 timestamp = 0);
+
+
     AudioSample &operator=(const AudioSample &other);
     bool isValid() const { return mImpl != nullptr; }
 
@@ -114,6 +121,13 @@ class AudioSampleImpl {
     }
     const VectorPCM &pcm() const { return mSignedPcm; }
     fl::u32 timestamp() const { return mTimestamp; }
+    
+    // For object pool - reset internal state for reuse
+    void reset() {
+        mSignedPcm.clear();
+        mZeroCrossings = 0;
+        mTimestamp = 0;
+    }
 
     // "Zero crossing factor". High values > .4 indicate hissing
     // sounds. For example a microphone rubbing against a clothing.

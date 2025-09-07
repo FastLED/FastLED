@@ -2,6 +2,7 @@
 #include "audio.h"
 #include "fl/thread_local.h"
 #include "fl/int.h"
+#include "fl/mutex.h"
 
 namespace fl {
 
@@ -12,7 +13,50 @@ FFT &get_flex_fft() {
     return gFlexFFT.access();
 }
 
+// Object pool implementation
+
+struct AudioSamplePool {
+    static AudioSamplePool& instance() {
+        static AudioSamplePool s_pool;
+        return s_pool;
+    }
+    void put(AudioSampleImplPtr&& impl) {
+        {
+            fl::lock_guard<fl::mutex> lock(mutex);
+            if (impl && pool.size() < MAX_POOL_SIZE) {
+                // Reset the impl for reuse (clear internal state)
+                impl->reset();
+                pool.push_back(impl);
+                return;
+            }
+        }
+        // Pool is full, discard the impl
+        impl.reset();
+    }
+    AudioSampleImplPtr getOrCreate() {
+        {
+            fl::lock_guard<fl::mutex> lock(mutex);
+            if (!pool.empty()) {
+                AudioSampleImplPtr impl = pool.back();
+                pool.pop_back();
+                return impl;
+            }
+        }
+        return fl::make_shared<AudioSampleImpl>();
+    }
+
+    fl::vector<AudioSampleImplPtr> pool;
+    static constexpr fl::size MAX_POOL_SIZE = 8;
+    fl::mutex mutex;
+};
+
 } // namespace
+
+AudioSample::~AudioSample() {
+    if (mImpl) {
+        AudioSamplePool::instance().put(std::move(mImpl));
+    }
+}
 
 const AudioSample::VectorPCM &AudioSample::pcm() const {
     if (isValid()) {
@@ -136,5 +180,14 @@ void AudioSample::fft(FFTBins *out) const {
         FFT_Args::DefaultSampleRate(); // TODO: get sample rate from AudioSample
     get_flex_fft().run(sample, out, args);
 }
+
+
+AudioSample::AudioSample(fl::span<const fl::i16> span, fl::u32 timestamp) {
+    mImpl = AudioSamplePool::instance().getOrCreate();
+    auto begin = span.data();
+    auto end = begin + span.size();
+    mImpl->assign(begin, end, timestamp);
+}
+
 
 } // namespace fl

@@ -76,18 +76,17 @@ class I2S_Audio : public IAudioInput {
         
         // Update total samples counter
         mTotalSamplesRead += samples_read;
+
+        fl::span<const fl::i16> data(buf, samples_read);
         
-        // Create AudioSample with calculated timestamp
-        AudioSampleImplPtr impl = fl::make_shared<AudioSampleImpl>();
-        impl->assign(buf, buf + samples_read, timestamp_ms);
-        return AudioSample(impl);
+        // Create AudioSample with pooled AudioSampleImpl (pooling handled internally)
+        return AudioSample(data, timestamp_ms);
     }
 
   private:
     AudioConfigI2S mStdConfig;
     bool mHasError;
     fl::string mErrorMessage;
-    I2SContext mI2sContext;
     fl::optional<I2SContext> mI2sContextOpt;
     fl::u64 mTotalSamplesRead;
 };
