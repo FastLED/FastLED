@@ -116,6 +116,22 @@ public:
     // Returns invalid AudioSample on error or when no data is available.
     virtual AudioSample read() = 0;
 
+    // Read all available audio data and return as AudioSample. All AudioSamples
+    // returned by this will be valid.
+    size_t readAll(fl::vector_inlined<AudioSample, 16> *out) {
+        size_t count = 0;
+        while (true) {
+            AudioSample sample = read();
+            if (sample.isValid()) {
+                out->push_back(sample);
+                count++;
+            } else {
+                break;
+            }
+        }
+        return count;
+    }
+
 };
 
 
