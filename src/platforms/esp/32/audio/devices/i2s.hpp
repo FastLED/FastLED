@@ -7,27 +7,23 @@
 
 #include "platforms/esp/esp_version.h"
 
-// ESP32-C2 specific detection - no I2S hardware support
 #ifndef FASTLED_ESP32_I2S_SUPPORTED
     #if defined(CONFIG_IDF_TARGET_ESP32C2)
         #define FASTLED_ESP32_I2S_SUPPORTED 0
     #endif
 #endif
 
-// Default case - assume I2S is supported on other ESP32 variants
 #ifndef FASTLED_ESP32_I2S_SUPPORTED
-    #define FASTLED_ESP32_I2S_SUPPORTED 1
-#endif
-
-#if FASTLED_ESP32_I2S_SUPPORTED
     #if ESP_IDF_VERSION_5_OR_HIGHER
-    #include "platforms/esp/32/audio/devices/idf5_i2s_context.hpp"
+        #define FASTLED_ESP32_I2S_SUPPORTED 1
+        #include "platforms/esp/32/audio/devices/idf5_i2s_context.hpp"
     #elif ESP_IDF_VERSION_4_OR_HIGHER
-    #include "platforms/esp/32/audio/devices/idf4_i2s_context.hpp"
+        #define FASTLED_ESP32_I2S_SUPPORTED 1
+        #include "platforms/esp/32/audio/devices/idf4_i2s_context.hpp"
     #else
-    #error "This should not be reachable when using ESP-IDF < 4.0"
-    #endif  //
-#endif  // FASTLED_ESP32_I2S_SUPPORTED
+        #define FASTLED_ESP32_I2S_SUPPORTED 0
+    #endif
+#endif
 
 namespace fl {
 
