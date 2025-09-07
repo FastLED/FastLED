@@ -7,13 +7,16 @@
 
 #include "platforms/esp/esp_version.h"
 
-// Define I2S support for ESP32 variants that don't have I2S hardware
+// ESP32-C2 specific detection - no I2S hardware support
 #ifndef FASTLED_ESP32_I2S_SUPPORTED
     #if defined(CONFIG_IDF_TARGET_ESP32C2)
         #define FASTLED_ESP32_I2S_SUPPORTED 0
-    #else
-        #define FASTLED_ESP32_I2S_SUPPORTED 1
     #endif
+#endif
+
+// Default case - assume I2S is supported on other ESP32 variants
+#ifndef FASTLED_ESP32_I2S_SUPPORTED
+    #define FASTLED_ESP32_I2S_SUPPORTED 1
 #endif
 
 #if FASTLED_ESP32_I2S_SUPPORTED
@@ -105,10 +108,6 @@ class I2S_Audio : public IAudioInput {
 };
 
 #endif // FASTLED_ESP32_I2S_SUPPORTED
-
-#ifndef FASTLED_ESP32_I2S_SUPPORTED
-#error "FASTLED_ESP32_I2S_SUPPORTED should be defined by this point"  
-#endif
 
 #if !FASTLED_ESP32_I2S_SUPPORTED
 // Stub implementation for ESP32 variants without I2S support (e.g., ESP32-C2)
