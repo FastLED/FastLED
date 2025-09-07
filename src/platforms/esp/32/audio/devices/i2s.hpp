@@ -7,15 +7,27 @@
 
 #include "platforms/esp/esp_version.h"
 
-#if ESP_IDF_VERSION_5_OR_HIGHER
-#include "platforms/esp/32/audio/devices/idf5_i2s_context.hpp"
-#elif ESP_IDF_VERSION_4_OR_HIGHER
-#include "platforms/esp/32/audio/devices/idf4_i2s_context.hpp"
-#else
-#error "This should not be reachable when using ESP-IDF < 4.0"
-#endif  //
+#ifndef FASTLED_ESP32_I2S_SUPPORTED
+    #if defined(CONFIG_IDF_TARGET_ESP32C2)
+        #define FASTLED_ESP32_I2S_SUPPORTED 0
+    #endif
+#endif
+
+#ifndef FASTLED_ESP32_I2S_SUPPORTED
+    #if ESP_IDF_VERSION_5_OR_HIGHER
+        #define FASTLED_ESP32_I2S_SUPPORTED 1
+        #include "platforms/esp/32/audio/devices/idf5_i2s_context.hpp"
+    #elif ESP_IDF_VERSION_4_OR_HIGHER
+        #define FASTLED_ESP32_I2S_SUPPORTED 1
+        #include "platforms/esp/32/audio/devices/idf4_i2s_context.hpp"
+    #else
+        #define FASTLED_ESP32_I2S_SUPPORTED 0
+    #endif
+#endif
 
 namespace fl {
+
+#if FASTLED_ESP32_I2S_SUPPORTED
 
 class I2S_Audio : public IAudioInput {
   public:
@@ -90,5 +102,8 @@ class I2S_Audio : public IAudioInput {
     fl::optional<I2SContext> mI2sContextOpt;
     fl::u64 mTotalSamplesRead;
 };
+
+#endif // FASTLED_ESP32_I2S_SUPPORTED
+
 
 } // namespace fl
