@@ -17,7 +17,9 @@
       "Bash(find:*)",
       "Bash(bash lint)",
       "WebFetch(domain:docs.github.com)",
-      "Bash(timeout:*)"
+      "Bash(timeout:*)",
+      "Bash(bash compile:*)",
+      "WebFetch(domain:docs.espressif.com)"
     ],
     "deny": []
   }

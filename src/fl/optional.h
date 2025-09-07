@@ -26,6 +26,9 @@ template <typename T> class Optional {
     Optional(const T &value) : mValue(value) {}
     Optional(T &&value) : mValue(fl::move(value)) {}
     ~Optional() { mValue.reset(); }
+
+    void emplace(T &&value) { mValue = fl::move(value); }
+
     bool empty() const { return !mValue.template is<T>(); }
     bool has_value() const { return !empty(); }  // std::optional compatibility
     T *ptr() { return mValue.template ptr<T>(); }
@@ -54,6 +57,11 @@ template <typename T> class Optional {
 
     Optional &operator=(const T &value) {
         mValue = value;
+        return *this;
+    }
+    
+    Optional &operator=(T &&value) {
+        mValue = fl::move(value);
         return *this;
     }
 

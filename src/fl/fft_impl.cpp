@@ -25,7 +25,7 @@
 #include "fl/warn.h"
 
 #include "fl/memfill.h"
-// #define SAMPLES IS2_AUDIO_BUFFER_LEN
+
 #define AUDIO_SAMPLE_RATE 44100
 #define SAMPLES 512
 #define BANDS 16
