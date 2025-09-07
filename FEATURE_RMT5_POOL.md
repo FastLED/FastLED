@@ -794,13 +794,40 @@ led_strip_config_t strip_config = {
 
 **❌ IMPOSSIBLE**: Change buffer pointer after `led_strip_new_rmt_device()` creation
 - No API exists to modify `pixel_buf` after creation
-- Buffer pointer is fixed for the lifetime of the led_strip object
+- Buffer pointer is fixed for the lifetime of the led_strip object  
 - `rmt_transmit()` uses the internal `pixel_buf` pointer directly
+- **Third-party ESP-IDF led_strip implementation has no buffer transfer APIs**
+- The `pixel_buf` field is **read-only after creation** - no setter functions exist
 
 **✅ POSSIBLE**: Use external buffers that can be swapped at the controller level
 - ESP-IDF supports external pixel buffers via `external_pixel_buf` parameter
 - External buffers are **not freed** by the driver when destroyed
 - FastLED can manage buffer ownership and transfer
+
+### Critical Third-Party Implementation Analysis
+
+**ESP-IDF led_strip_rmt_obj Structure:**
+```cpp
+typedef struct {
+    led_strip_t base;
+    rmt_channel_handle_t rmt_chan;
+    rmt_encoder_handle_t strip_encoder;
+    uint32_t strip_len;
+    uint8_t bytes_per_pixel;
+    led_color_component_format_t component_fmt;
+    uint8_t *pixel_buf;                    // ← FIXED after creation
+    bool pixel_buf_allocated_internally;   // ← Only indicates ownership
+} led_strip_rmt_obj;
+```
+
+**Available Buffer APIs (Complete List):**
+- `led_strip_set_pixel()` - Writes to existing buffer
+- `led_strip_set_pixel_rgbw()` - Writes to existing buffer  
+- `led_strip_clear()` - Zeros existing buffer
+- `led_strip_refresh_async()` - Transmits from existing buffer
+- **NO APIs exist for**: buffer swapping, buffer updating, buffer reassignment
+
+**Confirmed Limitation**: The third-party ESP-IDF implementation provides **zero mechanisms** for transferring LED buffers between RMT instances after creation.
 
 ### Buffer Transfer Solution: Worker Reconfiguration
 
@@ -817,14 +844,17 @@ private:
 public:
     // Reconfigure worker with new controller's buffer
     bool reconfigure(const WorkerConfig& newConfig, uint8_t* controllerBuffer) {
-        // Must destroy and recreate led_strip with new buffer
+        // CRITICAL: Due to ESP-IDF limitation, buffer pointer cannot be changed
+        // after led_strip creation. Must ALWAYS recreate led_strip object
+        // even if configuration is identical but buffer is different.
+        
         if (mCurrentStrip) {
             // Wait for completion first
             if (isTransmitting()) {
                 led_strip_refresh_wait_done(mCurrentStrip);
             }
             
-            // Clean teardown
+            // Clean teardown - REQUIRED for buffer change
             led_strip_del(mCurrentStrip);
             mCurrentStrip = nullptr;
         }
@@ -925,18 +955,65 @@ public:
     
     void onWorkerComplete(RmtWorker* worker) {
         // Worker completed transmission
-        releaseWorker(worker);
         
-        // Start next queued controller if available
+        // CRITICAL DECISION: Only reconfigure if there are queued controllers
         if (!mQueuedControllers.empty()) {
+            // There are awaiting controllers - reconfigure immediately
             RmtController5* nextController = mQueuedControllers.front();
             mQueuedControllers.pop_front();
             
-            // Reconfigure same worker with next controller's buffer
+            // Reconfigure worker with next controller's buffer
+            // This involves teardown and recreation
             startController(nextController, worker);
+        } else {
+            // No queued controllers - keep worker configured and available
+            // NO TEARDOWN - preserve current configuration for efficiency
+            releaseWorker(worker);
         }
     }
 };
+```
+
+### Optimized Teardown Strategy
+
+**Key Insight**: RMT strip teardown should be **conditional** based on worker pool demand:
+
+#### When N ≤ K (No Queued Controllers)
+```cpp
+void onWorkerComplete(RmtWorker* worker) {
+    if (mQueuedControllers.empty()) {
+        // NO TEARDOWN - keep worker configured and ready
+        // Worker maintains its led_strip configuration
+        // Optimizes for next frame if same controller used again
+        releaseWorker(worker);
+    }
+}
+```
+
+#### When N > K (Queued Controllers Waiting)  
+```cpp
+void onWorkerComplete(RmtWorker* worker) {
+    if (!mQueuedControllers.empty()) {
+        // IMMEDIATE TEARDOWN AND RECONFIGURATION
+        // Next controller is waiting - reconfigure immediately
+        RmtController5* nextController = mQueuedControllers.front();
+        mQueuedControllers.pop_front();
+        
+        // This triggers teardown in reconfigure()
+        startController(nextController, worker);
+    }
+}
+```
+
+#### Buffer Change Requirement
+**CRITICAL**: Even with identical pin/LED count/timing configuration, **teardown is always required** when switching between different controller buffers:
+
+```cpp
+// Controller A has buffer at 0x12345678
+// Controller B has buffer at 0x87654321  
+// Even if both have same pin/count/timing:
+// - led_strip object MUST be recreated to use new buffer pointer
+// - ESP-IDF has no API to change pixel_buf after creation
 ```
 
 ### Buffer Transfer Implementation Details
