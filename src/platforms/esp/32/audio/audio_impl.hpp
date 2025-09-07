@@ -11,7 +11,7 @@
 namespace fl {
 
 // Static factory method implementation
-fl::shared_ptr<IAudioInput>
+inline fl::shared_ptr<IAudioInput>
 IAudioInput::create(const AudioConfig &config, fl::string *error_message) {
     if (config.is<AudioConfigI2S>()) {
 #if FASTLED_ESP32_I2S_SUPPORTED
