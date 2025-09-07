@@ -79,6 +79,18 @@ I2SContext make_context(const AudioConfigI2S &config) {
     i2s_std_config_t std_cfg = {
         .clk_cfg = I2S_STD_CLK_DEFAULT_CONFIG(sample_rate),
         .slot_cfg =
+#if SOC_I2S_HW_VERSION_1
+            {
+                .data_bit_width = bit_width,
+                .slot_bit_width = I2S_SLOT_BIT_WIDTH_32BIT,
+                .slot_mode = slot_mode,
+                .slot_mask = slot_mask,
+                .ws_width = 32,
+                .ws_pol = false,
+                .bit_shift = true,
+                .msb_right = false,
+            },
+#else
             {
                 .data_bit_width = bit_width,
                 .slot_bit_width = I2S_SLOT_BIT_WIDTH_32BIT,
@@ -91,6 +103,7 @@ I2SContext make_context(const AudioConfigI2S &config) {
                 .big_endian = false,
                 .bit_order_lsb = false,
             },
+#endif
         .gpio_cfg = {.bclk = static_cast<gpio_num_t>(pin_clk),
                      .ws = static_cast<gpio_num_t>(pin_ws),
                      .dout = GPIO_NUM_NC,
