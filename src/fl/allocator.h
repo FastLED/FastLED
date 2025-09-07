@@ -184,9 +184,9 @@ class SlabAllocator {
 private:
 
 
-    static constexpr fl::size BLOCK_SIZE = sizeof(T) > sizeof(void*) ? sizeof(T) : sizeof(void*);
+    static constexpr fl::size SLAB_BLOCK_SIZE = sizeof(T) > sizeof(void*) ? sizeof(T) : sizeof(void*);
     static constexpr fl::size BLOCKS_PER_SLAB = SLAB_SIZE;
-    static constexpr fl::size SLAB_MEMORY_SIZE = BLOCK_SIZE * BLOCKS_PER_SLAB;
+    static constexpr fl::size SLAB_MEMORY_SIZE = SLAB_BLOCK_SIZE * BLOCKS_PER_SLAB;
 
     struct Slab {
         Slab* next;
@@ -275,7 +275,7 @@ private:
             total_allocated_ += n;
             
             // Return pointer to the first block
-            return slab->memory + static_cast<fl::size>(start) * BLOCK_SIZE;
+            return slab->memory + static_cast<fl::size>(start) * SLAB_BLOCK_SIZE;
         }
         
         return nullptr;
@@ -293,7 +293,7 @@ private:
             u8* block_ptr = fl::bit_cast_ptr<u8>(ptr);
             
             if (block_ptr >= slab_start && block_ptr < slab_end) {
-                fl::size block_index = (block_ptr - slab_start) / BLOCK_SIZE;
+                fl::size block_index = (block_ptr - slab_start) / SLAB_BLOCK_SIZE;
                 
                 // Mark blocks as free in the bitset
                 for (fl::size i = 0; i < n; ++i) {
