@@ -14,7 +14,7 @@ IAudioInput::create(const AudioConfig &config, fl::string *error_message) {
         fl::shared_ptr<IAudioInput> out = fl::make_shared<fl::I2S_Audio>(std_config);
         return out;
     }
-    const char* ERROR_MESSAGE = "Unsupported I2S configuration";
+    const char* ERROR_MESSAGE = "Unsupported audio configuration";
     FL_WARN(ERROR_MESSAGE);
     if (error_message) {
         *error_message = ERROR_MESSAGE;
