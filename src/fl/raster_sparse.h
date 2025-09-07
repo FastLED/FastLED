@@ -293,13 +293,13 @@ class XYRasterSparse_CRGB {
     }
 
     rect<u16> bounds_pixels() const {
-        int min_x = 0;
+        u16 min_x = 0;
         bool min_x_set = false;
-        int min_y = 0;
+        u16 min_y = 0;
         bool min_y_set = false;
-        int max_x = 0;
+        u16 max_x = 0;
         bool max_x_set = false;
-        int max_y = 0;
+        u16 max_y = 0;
         bool max_y_set = false;
         for (const auto &it : mSparseGrid) {
             const vec2<u16> &pt = it.first;

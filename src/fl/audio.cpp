@@ -55,7 +55,7 @@ struct AudioSamplePool {
 
 AudioSample::~AudioSample() {
     if (mImpl) {
-        AudioSamplePool::instance().put(std::move(mImpl));
+        AudioSamplePool::instance().put(fl::move(mImpl));
     }
 }
 
