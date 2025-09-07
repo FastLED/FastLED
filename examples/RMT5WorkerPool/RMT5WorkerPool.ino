@@ -19,6 +19,9 @@
  * - Controlled queuing when N > K (strips > channels)
  */
 
+// Platform guard - only compile for ESP32 platforms
+#ifdef ESP32
+
 #include <FastLED.h>
 
 // Configuration - adjust for your hardware
@@ -222,3 +225,19 @@ void serialEvent() {
         }
     }
 }
+
+#else // !ESP32
+
+// Non-ESP32 platforms - provide minimal stub
+void setup() {
+    Serial.begin(115200);
+    Serial.println("RMT5WorkerPool example requires ESP32 platform");
+    Serial.println("This example is designed for ESP32 RMT5 hardware");
+    Serial.println("Please use an ESP32, ESP32-S2, ESP32-S3, or ESP32-C3 board");
+}
+
+void loop() {
+    delay(1000);
+}
+
+#endif // ESP32
