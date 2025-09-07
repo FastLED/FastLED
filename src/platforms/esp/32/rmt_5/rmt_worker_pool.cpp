@@ -11,6 +11,8 @@
 #include "platforms/esp/32/esp_log_control.h"
 #include "esp_log.h"
 #include "esp_timer.h"
+#include <cstring>  // for memcpy
+#include <cstdlib>  // for malloc, free
 
 #define RMT_WORKER_POOL_TAG "rmt_worker_pool"
 
@@ -259,8 +261,8 @@ RmtWorkerPool::~RmtWorkerPool() {
     }
     
     // Clean up buffer pool
-    for (auto& pair : mBuffersBySize) {
-        for (uint8_t* buffer : pair.second) {
+    for (uint8_t* buffer : mBufferPool) {
+        if (buffer) {
             free(buffer);
         }
     }
@@ -509,8 +511,9 @@ void RmtWorkerPool::processCompletionEvents() {
     xSemaphoreTake(mPoolMutex, portMAX_DELAY);
     
     // Check all busy workers for completion (non-blocking)
-    for (auto it = mBusyWorkers.begin(); it != mBusyWorkers.end();) {
-        RmtWorker* worker = *it;
+    // Use index-based iteration to avoid iterator invalidation issues
+    for (size_t i = 0; i < mBusyWorkers.size();) {
+        RmtWorker* worker = mBusyWorkers[i];
         
         // Non-blocking completion check
         if (worker->checkTransmissionComplete() || !worker->isTransmissionActive()) {
@@ -523,15 +526,16 @@ void RmtWorkerPool::processCompletionEvents() {
                 mQueuedControllers.erase(mQueuedControllers.begin());
                 
                 startControllerWithWorker(nextController, worker);
-                ++it; // Keep worker in busy list
+                i++; // Keep worker in busy list, advance index
             } else {
                 // No waiting controllers - release worker
-                it = mBusyWorkers.erase(it);
+                mBusyWorkers.erase(mBusyWorkers.begin() + i);
                 worker->reset();
                 mAvailableWorkers.push_back(worker);
+                // Don't increment i since we removed an element
             }
         } else {
-            ++it;
+            i++; // Advance to next worker
         }
     }
     
@@ -596,11 +600,13 @@ void RmtWorkerPool::processNextQueuedController() {
 uint8_t* RmtWorkerPool::acquireBuffer(size_t size) {
     size_t poolSize = roundUpToPowerOf2(size);
     
-    auto& buffers = mBuffersBySize[poolSize];
-    if (!buffers.empty()) {
-        uint8_t* buffer = buffers.back();
-        buffers.pop_back();
-        return buffer;
+    // Look for an existing buffer of adequate size
+    for (size_t i = 0; i < mBufferPool.size(); i++) {
+        if (mBufferPool[i] && mBufferSizes[i] >= poolSize) {
+            uint8_t* buffer = mBufferPool[i];
+            mBufferPool[i] = nullptr; // Mark as used
+            return buffer;
+        }
     }
     
     // Allocate new buffer
@@ -611,7 +617,19 @@ void RmtWorkerPool::releaseBuffer(uint8_t* buffer, size_t size) {
     if (!buffer) return;
     
     size_t poolSize = roundUpToPowerOf2(size);
-    mBuffersBySize[poolSize].push_back(buffer);
+    
+    // Find an empty slot or add to the end
+    for (size_t i = 0; i < mBufferPool.size(); i++) {
+        if (!mBufferPool[i]) {
+            mBufferPool[i] = buffer;
+            mBufferSizes[i] = poolSize;
+            return;
+        }
+    }
+    
+    // Add to end if no empty slot found
+    mBufferPool.push_back(buffer);
+    mBufferSizes.push_back(poolSize);
 }
 
 size_t RmtWorkerPool::roundUpToPowerOf2(size_t size) {

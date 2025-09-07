@@ -8,10 +8,10 @@
 #include "fl/stdint.h"
 #include "fl/namespace.h"
 #include "fl/vector.h"
+#include "strip_rmt.h"
 
 namespace fl {
 
-class IRmtStrip;
 struct RmtWorkerConfig;
 
 // NOTE: LED_STRIP_RMT_DEFAULT_MEM_BLOCK_SYMBOLS controls the memory block size.
@@ -62,6 +62,7 @@ private:
     void initializeWorkerConfig() const;
     void storePixelData(PixelIterator& pixels);
     static IRmtStrip::DmaMode convertDmaMode(DmaMode dma_mode);
+};
 
 } // namespace fl
 

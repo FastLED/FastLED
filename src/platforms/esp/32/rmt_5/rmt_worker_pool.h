@@ -10,6 +10,7 @@
 #include "fl/map.h"
 #include "strip_rmt.h"
 #include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
 #include "freertos/semphr.h"
 #include "freertos/queue.h"
 
@@ -159,8 +160,9 @@ private:
     bool assignWorkerToController(RmtController5* controller, RmtWorker* worker);
     void processNextQueuedController();
     
-    // Buffer pool management
-    fl::map<size_t, fl::vector<uint8_t*>> mBuffersBySize;
+    // Buffer pool management (simplified)
+    fl::vector<uint8_t*> mBufferPool;
+    fl::vector<size_t> mBufferSizes;
     uint8_t* acquireBuffer(size_t size);
     void releaseBuffer(uint8_t* buffer, size_t size);
     size_t roundUpToPowerOf2(size_t size);
