@@ -107,7 +107,38 @@ class I2S_Audio : public IAudioInput {
 #endif // FASTLED_ESP32_I2S_SUPPORTED
 
 #ifndef FASTLED_ESP32_I2S_SUPPORTED
-#error "FASTLED_ESP32_I2S_SUPPORTED should be defined by this point"
+#error "FASTLED_ESP32_I2S_SUPPORTED should be defined by this point"  
 #endif
+
+#if !FASTLED_ESP32_I2S_SUPPORTED
+// Stub implementation for ESP32 variants without I2S support (e.g., ESP32-C2)
+class I2S_Audio : public IAudioInput {
+public:
+    I2S_Audio(const AudioConfigI2S &config) {
+        FL_WARN("I2S audio not supported on this ESP32 variant (no I2S hardware)");
+    }
+    
+    ~I2S_Audio() {}
+    
+    void start() override {
+        FL_WARN("I2S audio not supported on this ESP32 variant");
+    }
+    
+    void stop() override {
+        FL_WARN("I2S audio not supported on this ESP32 variant");
+    }
+    
+    bool error(fl::string *msg = nullptr) override {
+        if (msg) {
+            *msg = "I2S audio not supported on this ESP32 variant (no I2S hardware)";
+        }
+        return true; // Always in error state
+    }
+    
+    AudioSample read() override {
+        return AudioSample(); // Return invalid sample
+    }
+};
+#endif // !FASTLED_ESP32_I2S_SUPPORTED
 
 } // namespace fl
