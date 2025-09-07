@@ -29,37 +29,44 @@
 // ESP32: 8 channels, ESP32-S3: 4 channels, ESP32-C3: 2 channels
 #define NUM_STRIPS 6
 
-// Pin assignments - adjust for your board
-const int LED_PINS[NUM_STRIPS] = {2, 4, 5, 18, 19, 21};
-
-// LED arrays
-CRGB strips[NUM_STRIPS][NUM_LEDS_PER_STRIP];
+// LED arrays for multiple strips
+CRGB strip1[NUM_LEDS_PER_STRIP];
+CRGB strip2[NUM_LEDS_PER_STRIP];
+CRGB strip3[NUM_LEDS_PER_STRIP];
+CRGB strip4[NUM_LEDS_PER_STRIP];
+CRGB strip5[NUM_LEDS_PER_STRIP];
+CRGB strip6[NUM_LEDS_PER_STRIP];
 
 // Animation state
 uint8_t hue = 0;
 unsigned long lastUpdate = 0;
 const unsigned long UPDATE_INTERVAL = 50; // 50ms = 20 FPS
 
+// Forward declaration
+void updateAnimation();
+
 void setup() {
     Serial.begin(115200);
     Serial.println("RMT5 Worker Pool Test Starting...");
     
-    // Initialize all LED strips
-    for (int i = 0; i < NUM_STRIPS; i++) {
-        switch (i) {
-            case 0: FastLED.addLeds<WS2812B, LED_PINS[0], GRB>(strips[0], NUM_LEDS_PER_STRIP); break;
-            case 1: FastLED.addLeds<WS2812B, LED_PINS[1], GRB>(strips[1], NUM_LEDS_PER_STRIP); break;
-            case 2: FastLED.addLeds<WS2812B, LED_PINS[2], GRB>(strips[2], NUM_LEDS_PER_STRIP); break;
-            case 3: FastLED.addLeds<WS2812B, LED_PINS[3], GRB>(strips[3], NUM_LEDS_PER_STRIP); break;
-            case 4: FastLED.addLeds<WS2812B, LED_PINS[4], GRB>(strips[4], NUM_LEDS_PER_STRIP); break;
-            case 5: FastLED.addLeds<WS2812B, LED_PINS[5], GRB>(strips[5], NUM_LEDS_PER_STRIP); break;
-        }
-    }
+    // Initialize LED strips with compile-time constant pins
+    // This will test the worker pool with 6 strips exceeding most ESP32 RMT limits
+    FastLED.addLeds<WS2812B, 2, GRB>(strip1, NUM_LEDS_PER_STRIP);
+    FastLED.addLeds<WS2812B, 4, GRB>(strip2, NUM_LEDS_PER_STRIP);
+    FastLED.addLeds<WS2812B, 5, GRB>(strip3, NUM_LEDS_PER_STRIP);
+    FastLED.addLeds<WS2812B, 18, GRB>(strip4, NUM_LEDS_PER_STRIP);
+    FastLED.addLeds<WS2812B, 19, GRB>(strip5, NUM_LEDS_PER_STRIP);
+    FastLED.addLeds<WS2812B, 21, GRB>(strip6, NUM_LEDS_PER_STRIP);
     
     FastLED.setBrightness(BRIGHTNESS);
     
-    Serial.printf("Initialized %d LED strips with %d LEDs each\n", NUM_STRIPS, NUM_LEDS_PER_STRIP);
-    Serial.printf("Total LEDs: %d\n", NUM_STRIPS * NUM_LEDS_PER_STRIP);
+    Serial.print("Initialized ");
+    Serial.print(NUM_STRIPS);
+    Serial.print(" LED strips with ");
+    Serial.print(NUM_LEDS_PER_STRIP);
+    Serial.println(" LEDs each");
+    Serial.print("Total LEDs: ");
+    Serial.println(NUM_STRIPS * NUM_LEDS_PER_STRIP);
     
     #if CONFIG_IDF_TARGET_ESP32
         Serial.println("Running on ESP32 (8 RMT channels available)");
@@ -102,7 +109,11 @@ void loop() {
         static int frameCount = 0;
         frameCount++;
         if (frameCount % 100 == 0) {
-            Serial.printf("Frame %d: FastLED.show() took %lu µs\n", frameCount, endTime - startTime);
+            Serial.print("Frame ");
+            Serial.print(frameCount);
+            Serial.print(": FastLED.show() took ");
+            Serial.print(endTime - startTime);
+            Serial.println(" µs");
         }
         
         // Advance animation
@@ -115,11 +126,13 @@ void loop() {
 
 void updateAnimation() {
     // Rainbow wave animation across all strips
+    CRGB* stripArrays[] = {strip1, strip2, strip3, strip4, strip5, strip6};
+    
     for (int strip = 0; strip < NUM_STRIPS; strip++) {
         for (int led = 0; led < NUM_LEDS_PER_STRIP; led++) {
             // Create a rainbow wave that moves across strips and LEDs
             uint8_t pixelHue = hue + (strip * 40) + (led * 8);
-            strips[strip][led] = CHSV(pixelHue, 255, 255);
+            stripArrays[strip][led] = CHSV(pixelHue, 255, 255);
         }
     }
 }
@@ -135,10 +148,12 @@ void testWorkerPoolPerformance() {
     const int TEST_ITERATIONS = 100;
     unsigned long totalTime = 0;
     
+    CRGB* stripArrays[] = {strip1, strip2, strip3, strip4, strip5, strip6};
+    
     for (int i = 0; i < TEST_ITERATIONS; i++) {
         // Update all strips with different patterns
         for (int strip = 0; strip < NUM_STRIPS; strip++) {
-            fill_rainbow(strips[strip], NUM_LEDS_PER_STRIP, i * 10 + strip * 30, 7);
+            fill_rainbow(stripArrays[strip], NUM_LEDS_PER_STRIP, i * 10 + strip * 30, 7);
         }
         
         // Measure show() performance
@@ -152,8 +167,14 @@ void testWorkerPoolPerformance() {
     }
     
     unsigned long avgTime = totalTime / TEST_ITERATIONS;
-    Serial.printf("Average FastLED.show() time over %d iterations: %lu µs\n", TEST_ITERATIONS, avgTime);
-    Serial.printf("Effective frame rate: %.1f FPS\n", 1000000.0 / avgTime);
+    Serial.print("Average FastLED.show() time over ");
+    Serial.print(TEST_ITERATIONS);
+    Serial.print(" iterations: ");
+    Serial.print(avgTime);
+    Serial.println(" µs");
+    Serial.print("Effective frame rate: ");
+    Serial.print(1000000.0 / avgTime);
+    Serial.println(" FPS");
 }
 
 void testStripIndependence() {
@@ -161,9 +182,10 @@ void testStripIndependence() {
     
     // Set each strip to a different solid color
     const CRGB colors[] = {CRGB::Red, CRGB::Green, CRGB::Blue, CRGB::Yellow, CRGB::Magenta, CRGB::Cyan};
+    CRGB* stripArrays[] = {strip1, strip2, strip3, strip4, strip5, strip6};
     
     for (int strip = 0; strip < NUM_STRIPS; strip++) {
-        fill_solid(strips[strip], NUM_LEDS_PER_STRIP, colors[strip % 6]);
+        fill_solid(stripArrays[strip], NUM_LEDS_PER_STRIP, colors[strip % 6]);
     }
     
     FastLED.show();
@@ -182,9 +204,16 @@ void serialEvent() {
         } else if (command == "independence") {
             testStripIndependence();
         } else if (command == "info") {
-            Serial.printf("Strips: %d, LEDs per strip: %d, Total LEDs: %d\n", 
-                         NUM_STRIPS, NUM_LEDS_PER_STRIP, NUM_STRIPS * NUM_LEDS_PER_STRIP);
-            Serial.printf("Current hue: %d, Frame count: %d\n", hue, millis() / UPDATE_INTERVAL);
+            Serial.print("Strips: ");
+            Serial.print(NUM_STRIPS);
+            Serial.print(", LEDs per strip: ");
+            Serial.print(NUM_LEDS_PER_STRIP);
+            Serial.print(", Total LEDs: ");
+            Serial.println(NUM_STRIPS * NUM_LEDS_PER_STRIP);
+            Serial.print("Current hue: ");
+            Serial.print(hue);
+            Serial.print(", Frame count: ");
+            Serial.println(millis() / UPDATE_INTERVAL);
         } else {
             Serial.println("Available commands:");
             Serial.println("  perf        - Run performance test");
