@@ -369,6 +369,96 @@ int RmtWorkerPool::getHardwareChannelCount() {
 }
 ```
 
+## Key Implementation Insights
+
+### Critical Async Decision Point
+The worker pool must make a **per-controller decision** at `showPixels()` time:
+
+```cpp
+void RmtController5::showPixels() {
+    RmtWorkerPool& pool = RmtWorkerPool::getInstance();
+    
+    // CRITICAL: This decision determines async vs blocking behavior
+    if (pool.hasAvailableWorker()) {
+        // ASYNC PATH: Start immediately and return
+        pool.startControllerImmediate(this);
+        return; // Returns immediately - preserves async!
+    } else {
+        // BLOCKING PATH: This specific controller must wait
+        pool.startControllerQueued(this); // May block with polling
+    }
+}
+```
+
+### ESP-IDF RMT Channel Management
+Direct integration with ESP-IDF RMT5 APIs instead of using led_strip wrapper:
+
+```cpp
+class RmtWorker {
+private:
+    rmt_channel_handle_t mChannel;
+    rmt_encoder_handle_t mEncoder;
+    
+public:
+    // Direct RMT channel creation for maximum control
+    bool createChannel(int pin) {
+        rmt_tx_channel_config_t config = {
+            .gpio_num = pin,
+            .clk_src = RMT_CLK_SRC_DEFAULT,
+            .resolution_hz = 10000000,
+            .mem_block_symbols = 64,
+            .trans_queue_depth = 1, // Single transmission per worker
+        };
+        
+        ESP_ERROR_CHECK(rmt_new_tx_channel(&config, &mChannel));
+        
+        // Register callback for async completion
+        rmt_tx_event_callbacks_t callbacks = {
+            .on_trans_done = onTransComplete,
+        };
+        ESP_ERROR_CHECK(rmt_tx_register_event_callbacks(mChannel, &callbacks, this));
+        
+        return true;
+    }
+    
+    void transmitAsync(uint8_t* pixelData, size_t dataSize) {
+        // Direct transmission - bypasses led_strip wrapper
+        ESP_ERROR_CHECK(rmt_enable(mChannel));
+        ESP_ERROR_CHECK(rmt_transmit(mChannel, mEncoder, pixelData, dataSize, &mTxConfig));
+        // Returns immediately - async transmission started
+    }
+};
+```
+
+### Polling Strategy Implementation
+Use `delayMicroseconds(100)` only for queued controllers:
+
+```cpp
+void RmtWorkerPool::startControllerQueued(RmtController5* controller) {
+    // Add to queue
+    mQueuedControllers.push_back(controller);
+    
+    // Poll until this controller gets a worker
+    while (true) {
+        if (RmtWorker* worker = tryAcquireWorker()) {
+            // Remove from queue and start
+            mQueuedControllers.remove(controller);
+            startControllerImmediate(controller, worker);
+            break;
+        }
+        
+        // Brief delay to prevent busy-wait
+        delayMicroseconds(100);
+        
+        // Yield periodically for FreeRTOS
+        static uint32_t pollCount = 0;
+        if (++pollCount % 50 == 0) {
+            yield();
+        }
+    }
+}
+```
+
 ## Implementation Plan
 
 ### Phase 1: Core Infrastructure
@@ -430,13 +520,236 @@ int RmtWorkerPool::getHardwareChannelCount() {
    - Memory usage analysis
    - Latency measurements
 
+## CRITICAL: Async Behavior Preservation
+
+**Key Requirement**: RMT5 currently provides async drawing where `endShowLeds()` returns immediately without waiting. This must be preserved when N ≤ K, and only use polling/waiting when N > K.
+
+### Current RMT5 Async Flow
+```cpp
+// Current behavior - MUST PRESERVE when N ≤ K
+void ClocklessController::endShowLeds(void *data) {
+    CPixelLEDController<RGB_ORDER>::endShowLeds(data);
+    mRMTController.showPixels();  // Calls drawAsync() - returns immediately!
+}
+```
+
+### Async Strategy for Worker Pool
+
+#### When N ≤ K (Preserve Full Async)
+- **Direct Assignment**: Each controller gets dedicated worker immediately
+- **No Waiting**: `endShowLeds()` returns immediately after starting transmission
+- **Callback-Driven**: Use ESP-IDF `rmt_tx_event_callbacks_t::on_trans_done` for completion
+- **Zero Overhead**: Maintain current performance characteristics
+
+#### When N > K (Controlled Polling)
+- **Immediate Start**: First K controllers start immediately (async)
+- **Queue Remaining**: Controllers K+1 through N queue for workers
+- **Polling Strategy**: Use `delayMicroseconds(100)` polling for queued controllers
+- **Callback Coordination**: Workers signal completion via callbacks to start next queued controller
+
+## ESP-IDF RMT5 Callback Integration
+
+### Callback Registration Pattern
+```cpp
+class RmtWorker {
+private:
+    rmt_channel_handle_t mRmtChannel;
+    RmtWorkerPool* mPool;
+    
+    static bool IRAM_ATTR onTransmissionComplete(
+        rmt_channel_handle_t channel,
+        const rmt_tx_done_event_data_t *edata,
+        void *user_data) {
+        
+        RmtWorker* worker = static_cast<RmtWorker*>(user_data);
+        worker->handleTransmissionComplete();
+        return false; // No high-priority task woken
+    }
+    
+public:
+    bool initialize() {
+        // Create RMT channel
+        rmt_tx_channel_config_t tx_config = {
+            .gpio_num = mPin,
+            .clk_src = RMT_CLK_SRC_DEFAULT,
+            .resolution_hz = 10000000, // 10MHz
+            .mem_block_symbols = 64,
+            .trans_queue_depth = 4,
+        };
+        
+        if (rmt_new_tx_channel(&tx_config, &mRmtChannel) != ESP_OK) {
+            return false;
+        }
+        
+        // Register completion callback
+        rmt_tx_event_callbacks_t callbacks = {
+            .on_trans_done = onTransmissionComplete,
+        };
+        
+        return rmt_tx_register_event_callbacks(mRmtChannel, &callbacks, this) == ESP_OK;
+    }
+    
+    void handleTransmissionComplete() {
+        // Signal pool that this worker is available
+        mPool->onWorkerComplete(this);
+    }
+};
+```
+
+## Revised Worker Pool Architecture
+
+### Async-Aware Worker Pool
+```cpp
+class RmtWorkerPool {
+public:
+    enum class DrawMode {
+        ASYNC_ONLY,    // N ≤ K: All controllers async
+        MIXED_MODE     // N > K: Some async, some polled
+    };
+    
+    void executeDrawCycle() {
+        const int numControllers = mRegisteredControllers.size();
+        const int numWorkers = mAvailableWorkers.size();
+        
+        if (numControllers <= numWorkers) {
+            // ASYNC_ONLY mode - preserve full async behavior
+            executeAsyncOnlyMode();
+        } else {
+            // MIXED_MODE - async for first K, polling for rest
+            executeMixedMode();
+        }
+    }
+    
+private:
+    void executeAsyncOnlyMode() {
+        // Start all controllers immediately - full async behavior preserved
+        for (auto* controller : mRegisteredControllers) {
+            RmtWorker* worker = acquireWorker(controller->getWorkerConfig());
+            startControllerAsync(controller, worker);
+        }
+        // Return immediately - no waiting!
+    }
+    
+    void executeMixedMode() {
+        // Start first K controllers immediately (async)
+        int startedCount = 0;
+        for (auto* controller : mRegisteredControllers) {
+            if (startedCount < mAvailableWorkers.size()) {
+                RmtWorker* worker = acquireWorker(controller->getWorkerConfig());
+                startControllerAsync(controller, worker);
+                startedCount++;
+            } else {
+                // Queue remaining controllers
+                mQueuedControllers.push_back(controller);
+            }
+        }
+        
+        // Poll for completion of queued controllers
+        while (!mQueuedControllers.empty()) {
+            delayMicroseconds(100); // Non-blocking poll interval
+            // Callback-driven worker completion will process queue
+        }
+    }
+    
+    void onWorkerComplete(RmtWorker* worker) {
+        // Called from ISR context via callback
+        releaseWorker(worker);
+        
+        // Start next queued controller if available
+        if (!mQueuedControllers.empty()) {
+            RmtController5* nextController = mQueuedControllers.front();
+            mQueuedControllers.pop_front();
+            
+            // Reconfigure worker and start transmission
+            startControllerAsync(nextController, worker);
+        }
+    }
+};
+```
+
+### Modified RmtController5 for Async Preservation
+```cpp
+class RmtController5 {
+public:
+    void showPixels() {
+        // This method MUST return immediately when N ≤ K
+        // Only block when this specific controller is queued (N > K)
+        
+        RmtWorkerPool& pool = RmtWorkerPool::getInstance();
+        
+        if (pool.canStartImmediately(this)) {
+            // Async path - return immediately
+            pool.startControllerImmediate(this);
+        } else {
+            // This controller is queued - must wait for worker
+            pool.startControllerQueued(this);
+        }
+    }
+};
+```
+
+## Polling Strategy Details
+
+### Microsecond Polling Pattern
+```cpp
+void RmtWorkerPool::waitForQueuedControllers() {
+    while (!mQueuedControllers.empty()) {
+        // Non-blocking check for available workers
+        if (hasAvailableWorker()) {
+            processNextQueuedController();
+        } else {
+            // Short delay to prevent busy-waiting
+            delayMicroseconds(100); // 100μs polling interval
+        }
+        
+        // Yield to other tasks periodically
+        static uint32_t pollCount = 0;
+        if (++pollCount % 50 == 0) { // Every 5ms (50 * 100μs)
+            yield();
+        }
+    }
+}
+```
+
+### Callback-Driven Queue Processing
+```cpp
+void RmtWorker::handleTransmissionComplete() {
+    // Called from ISR context - keep minimal
+    BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+    
+    // Signal completion to pool
+    xSemaphoreGiveFromISR(mPool->getCompletionSemaphore(), &xHigherPriorityTaskWoken);
+    
+    portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
+}
+
+void RmtWorkerPool::processCompletionEvents() {
+    // Called from main task context
+    while (xSemaphoreTake(mCompletionSemaphore, 0) == pdTRUE) {
+        // Process one completion event
+        if (!mQueuedControllers.empty()) {
+            RmtController5* nextController = mQueuedControllers.front();
+            mQueuedControllers.pop_front();
+            
+            // Find available worker and start next transmission
+            RmtWorker* worker = findAvailableWorker();
+            if (worker) {
+                startControllerAsync(nextController, worker);
+            }
+        }
+    }
+}
+```
+
 ## Benefits
 
-1. **Scalability**: Support unlimited LED strips (within memory constraints)
-2. **Backward Compatibility**: Existing code works unchanged
-3. **Resource Efficiency**: Optimal use of limited RMT hardware
-4. **Reliability**: Proper error handling and recovery
-5. **Performance**: Minimal overhead for worker switching
+1. **Async Preservation**: Full async behavior maintained when N ≤ K
+2. **Scalability**: Support unlimited LED strips (within memory constraints)
+3. **Backward Compatibility**: Existing code works unchanged
+4. **Resource Efficiency**: Optimal use of limited RMT hardware
+5. **Controlled Blocking**: Only blocks when specific controller is queued
+6. **Callback Efficiency**: ISR-driven completion for minimal latency
+7. **Polling Optimization**: 100μs intervals prevent busy-waiting
 
 ## Considerations
 
