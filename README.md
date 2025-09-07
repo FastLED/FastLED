@@ -6,10 +6,48 @@ Drive **30,000+ LEDs** on high-end devices • **Sub-$1 compatibility** on tiny 
 
 [![Arduino's 2nd Most Popular Library](https://www.ardu-badge.com/badge/FastLED.svg)](https://www.ardu-badge.com/FastLED) [![Build Status](https://github.com/FastLED/FastLED/workflows/build/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build.yml) [![Unit Tests](https://github.com/FastLED/FastLED/actions/workflows/build_unit_test.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_unit_test.yml) [![Documentation](https://img.shields.io/badge/Docs-Doxygen-blue.svg)](http://fastled.io/docs) [![Community](https://img.shields.io/badge/reddit-/r/FastLED-orange.svg?logo=reddit)](https://www.reddit.com/r/FastLED/)
 
-<details>
-<summary>📊 <strong>Detailed Build Status</strong> (Click to expand all platform badges)</summary>
 
-**The build system is undergoing optimization and some builds may appear red during migration. Despite any red status, everything still works.**
+## ⚡ Get Blinking in 30 Seconds
+
+```cpp
+#include <FastLED.h>
+#define NUM_LEDS 60
+CRGB leds[NUM_LEDS];
+
+void setup() { 
+  FastLED.addLeds<WS2812, 6>(leds, NUM_LEDS); 
+}
+
+void loop() {
+  leds[0] = CRGB::Red; FastLED.show(); delay(500);
+  leds[0] = CRGB::Blue; FastLED.show(); delay(500);
+}
+```
+
+**✅ Works on Arduino, ESP32, Teensy, Raspberry Pi, and 50+ other platforms**
+
+## 🚀 Why FastLED?
+
+| **Massive Scale** | **Tiny Footprint** | **Background Rendering** | **Universal** |
+|-------------------|---------------------|--------------------------|---------------|
+| Drive 30,000 LEDs on Teensy 4.1 | Runs on $0.50 ATtiny chips | ESP32/Teensy render while you code | Works on 50+ platforms |
+| 50 parallel strips on Teensy | <2KB on Arduino Uno | Never miss user input | Nearly every LED chipset |
+
+**🎯 Performance**: Zero-cost global brightness • High-performance 8-bit math, memory efficient on platforms that need it.
+**🔧 Developer Experience**: Quick platform switching • Extensive examples • Active community support
+
+## Table of Contents
+
+- [🆕 Latest Feature](#-latest-feature)
+- [⭐ Community Growth](#-community-growth)
+- [🆕 Latest Features](#-latest-features)
+- [🌍 Platform Support](#-platform-support)
+- [📦 Installation](#-installation)
+- [📚 Documentation & Support](#-documentation--support)
+- [🎮 Advanced Features](#-advanced-features)
+- [🤝 Contributing](#-contributing)
+
+📊 <strong>Detailed Build Status</strong>
 
 ### Arduino Family
 **Core Boards:** [![uno](https://github.com/FastLED/FastLED/actions/workflows/build_uno.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_uno.yml) [![nano_every](https://github.com/FastLED/FastLED/actions/workflows/build_nano_every.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_nano_every.yml) [![uno_r4_wifi](https://github.com/FastLED/FastLED/actions/workflows/build_uno_r4_wifif.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_uno_r4_wifif.yml) [![yun](https://github.com/FastLED/FastLED/actions/workflows/build_yun.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_yun.yml)
@@ -70,47 +108,6 @@ Drive **30,000+ LEDs** on high-end devices • **Sub-$1 compatibility** on tiny 
 
 **Teensy Platforms:** [![check_teensylc_size](https://github.com/FastLED/FastLED/actions/workflows/check_teensylc_size.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/check_teensylc_size.yml) [![check_teensy30_size](https://github.com/FastLED/FastLED/actions/workflows/check_teensy30_size.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/check_teensy30_size.yml) [![check_teensy31_size](https://github.com/FastLED/FastLED/actions/workflows/check_teensy31_size.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/check_teensy31_size.yml) [![teensy41_binary_size](https://github.com/FastLED/FastLED/actions/workflows/check_teensy41_size.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/check_teensy41_size.yml)
 
-</details>
-
-## ⚡ Get Blinking in 30 Seconds
-
-```cpp
-#include <FastLED.h>
-#define NUM_LEDS 60
-CRGB leds[NUM_LEDS];
-
-void setup() { 
-  FastLED.addLeds<WS2812, 6>(leds, NUM_LEDS); 
-}
-
-void loop() {
-  leds[0] = CRGB::Red; FastLED.show(); delay(500);
-  leds[0] = CRGB::Blue; FastLED.show(); delay(500);
-}
-```
-
-**✅ Works on Arduino, ESP32, Teensy, Raspberry Pi, and 50+ other platforms**
-
-## 🚀 Why FastLED?
-
-| **Massive Scale** | **Tiny Footprint** | **Background Rendering** | **Universal** |
-|-------------------|---------------------|--------------------------|---------------|
-| Drive 30,000 LEDs on Teensy 4.1 | Runs on $0.50 ATtiny chips | ESP32/Teensy render while you code | Works on 50+ platforms |
-| 50 parallel strips on Teensy | <2KB on Arduino Uno | Never miss user input | Nearly every LED chipset |
-
-**🎯 Performance**: Zero-cost global brightness • High-performance 8-bit math, memory efficient on platforms that need it.
-**🔧 Developer Experience**: Quick platform switching • Extensive examples • Active community support
-
-## Table of Contents
-
-- [🆕 Latest Feature](#-latest-feature)
-- [⭐ Community Growth](#-community-growth)
-- [🆕 Latest Features](#-latest-features)
-- [🌍 Platform Support](#-platform-support)
-- [📦 Installation](#-installation)
-- [📚 Documentation & Support](#-documentation--support)
-- [🎮 Advanced Features](#-advanced-features)
-- [🤝 Contributing](#-contributing)
 
 ## ⭐ Community Growth
 
