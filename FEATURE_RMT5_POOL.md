@@ -762,11 +762,11 @@ void RmtWorkerPool::processCompletionEvents() {
 
 The implementation maintains full backward compatibility. Existing code using `RmtController5` will automatically benefit from the worker pool without any changes required.
 
-## CRITICAL: LED Buffer Transfer Analysis
+## CRITICAL: LED Buffer Transfer Analysis - CORRECTED FINDINGS
 
 ### ESP-IDF LED Buffer Management
 
-**Key Finding**: The ESP-IDF led_strip driver **supports external pixel buffers** but **cannot change buffers after creation**.
+**Key Finding**: The ESP-IDF led_strip driver **supports external pixel buffers** and **buffer transfer IS possible through RMT channel recreation**.
 
 #### Current Buffer Architecture
 ```cpp
@@ -790,21 +790,20 @@ led_strip_config_t strip_config = {
 };
 ```
 
-### Buffer Transfer Constraints
+### Buffer Transfer Solution - RMT Channel Recreation
 
-**❌ IMPOSSIBLE**: Change buffer pointer after `led_strip_new_rmt_device()` creation
-- No API exists to modify `pixel_buf` after creation
-- Buffer pointer is fixed for the lifetime of the led_strip object  
-- `rmt_transmit()` uses the internal `pixel_buf` pointer directly
-- **Third-party ESP-IDF led_strip implementation has no buffer transfer APIs**
-- The `pixel_buf` field is **read-only after creation** - no setter functions exist
+**✅ POSSIBLE**: Buffer transfer through worker reconfiguration
+- **Destroy existing RMT channel** when switching controllers
+- **Create new RMT channel** with different external buffer
+- **Worker pool manages appropriately-sized buffers** for each controller's requirements
+- **RMT channels always use external buffers** owned by the worker pool
 
-**✅ POSSIBLE**: Use external buffers that can be swapped at the controller level
-- ESP-IDF supports external pixel buffers via `external_pixel_buf` parameter
-- External buffers are **not freed** by the driver when destroyed
-- FastLED can manage buffer ownership and transfer
+### Critical Insight: Buffer Size Requirements
 
-### Critical Third-Party Implementation Analysis
+**The Core Issue**: Different controllers need different buffer sizes:
+- **Controller A**: 100 RGB LEDs → 300 bytes buffer
+- **Controller B**: 200 RGBW LEDs → 800 bytes buffer  
+- **RMT Channel**: Must be recreated with appropriate buffer size for each controller
 
 **ESP-IDF led_strip_rmt_obj Structure:**
 ```cpp
@@ -815,8 +814,8 @@ typedef struct {
     uint32_t strip_len;
     uint8_t bytes_per_pixel;
     led_color_component_format_t component_fmt;
-    uint8_t *pixel_buf;                    // ← FIXED after creation
-    bool pixel_buf_allocated_internally;   // ← Only indicates ownership
+    uint8_t *pixel_buf;                    // ← MUST be external and pool-managed
+    bool pixel_buf_allocated_internally;   // ← Always false for worker pool
 } led_strip_rmt_obj;
 ```
 
@@ -825,91 +824,193 @@ typedef struct {
 - `led_strip_set_pixel_rgbw()` - Writes to existing buffer  
 - `led_strip_clear()` - Zeros existing buffer
 - `led_strip_refresh_async()` - Transmits from existing buffer
-- **NO APIs exist for**: buffer swapping, buffer updating, buffer reassignment
+- **KEY**: `led_strip_del()` does NOT free external buffers (pixel_buf_allocated_internally = false)
 
-**Confirmed Limitation**: The third-party ESP-IDF implementation provides **zero mechanisms** for transferring LED buffers between RMT instances after creation.
+**Confirmed Solution**: Buffer transfer achieved through:
+1. **Worker pool owns all RMT buffers** 
+2. **RMT channels destroyed/recreated** with appropriate buffer sizes
+3. **External buffer management** prevents buffer deallocation during RMT destruction
 
-### Buffer Transfer Solution: Worker Reconfiguration
+### Buffer Transfer Solution: Worker Pool Buffer Management
 
-Since buffers cannot be moved between existing led_strip objects, **workers must be recreated** with new configurations when switching between controllers.
+**CORRECTED APPROACH**: Worker pool manages all RMT buffers and handles buffer sizing for different controllers.
 
-#### Worker Buffer Management Strategy
+#### Worker Pool Buffer Management Strategy
 ```cpp
-class RmtWorker {
+class RmtWorkerPool {
 private:
-    led_strip_handle_t mCurrentStrip;
-    uint8_t* mCurrentBuffer;           // External buffer managed by FastLED
-    WorkerConfig mCurrentConfig;       // Current configuration
+    struct WorkerState {
+        IRmtStrip* strip;
+        uint8_t* worker_buffer;      // Pool-owned buffer for this worker
+        size_t buffer_capacity;      // Current buffer size
+        WorkerConfig current_config;
+        bool is_available;
+        bool transmission_active;
+    };
+    
+    fl::vector<WorkerState> mWorkers;
+    
+    // Buffer pool for different sizes
+    fl::map<size_t, fl::vector<uint8_t*>> mBuffersBySize;
     
 public:
-    // Reconfigure worker with new controller's buffer
-    bool reconfigure(const WorkerConfig& newConfig, uint8_t* controllerBuffer) {
-        // CRITICAL: Due to ESP-IDF limitation, buffer pointer cannot be changed
-        // after led_strip creation. Must ALWAYS recreate led_strip object
-        // even if configuration is identical but buffer is different.
+    bool assignWorkerToController(RmtController5* controller) {
+        const WorkerConfig& config = controller->getWorkerConfig();
+        const size_t requiredBufferSize = config.led_count * (config.is_rgbw ? 4 : 3);
         
-        if (mCurrentStrip) {
-            // Wait for completion first
-            if (isTransmitting()) {
-                led_strip_refresh_wait_done(mCurrentStrip);
-            }
+        // Find available worker
+        WorkerState* worker = findAvailableWorker();
+        if (!worker) return false;
+        
+        // Get appropriately sized buffer from pool
+        uint8_t* workerBuffer = acquireBuffer(requiredBufferSize);
+        if (!workerBuffer) return false;
+        
+        // CRITICAL: Wait for any active transmission to complete
+        if (worker->strip && worker->transmission_active) {
+            worker->strip->waitDone();
+            worker->transmission_active = false;
+        }
+        
+        // Destroy existing RMT channel if configuration changed
+        if (worker->strip && (!configCompatible(worker->current_config, config) || 
+                             worker->buffer_capacity < requiredBufferSize)) {
+            delete worker->strip;  // Destroy old RMT channel
+            worker->strip = nullptr;
             
-            // Clean teardown - REQUIRED for buffer change
-            led_strip_del(mCurrentStrip);
-            mCurrentStrip = nullptr;
+            // Release old buffer
+            releaseBuffer(worker->worker_buffer, worker->buffer_capacity);
         }
         
-        // Create new led_strip with controller's external buffer
-        led_strip_config_t config = {
-            .strip_gpio_num = newConfig.pin,
-            .max_leds = newConfig.ledCount,
-            .external_pixel_buf = controllerBuffer,  // ← Use controller's buffer
-            // ... other config from newConfig
-        };
+        // Copy controller's pixel data to worker's buffer
+        memcpy(workerBuffer, controller->getPixelBuffer(), controller->getBufferSize());
         
-        led_strip_rmt_config_t rmt_config = {
-            // ... RMT configuration
-        };
-        
-        esp_err_t result = led_strip_new_rmt_device(&config, &rmt_config, &mCurrentStrip);
-        if (result != ESP_OK) {
-            return false;
+        // Create new RMT channel with worker's external buffer
+        if (!worker->strip) {
+            worker->strip = IRmtStrip::CreateWithExternalBuffer(
+                config.pin, config.led_count, config.is_rgbw,
+                config.t0h, config.t0l, config.t1h, config.t1l, config.reset,
+                workerBuffer,  // Worker's buffer, not controller's buffer
+                config.dma_mode
+            );
+            
+            if (!worker->strip) {
+                releaseBuffer(workerBuffer, requiredBufferSize);
+                return false;
+            }
         }
         
-        mCurrentBuffer = controllerBuffer;
-        mCurrentConfig = newConfig;
+        worker->worker_buffer = workerBuffer;
+        worker->buffer_capacity = requiredBufferSize;
+        worker->current_config = config;
+        worker->is_available = false;
+        
+        // Start transmission
+        worker->strip->drawAsync();
+        worker->transmission_active = true;
         return true;
     }
     
-    // Start transmission using the current external buffer
-    bool startTransmission() {
-        if (!mCurrentStrip) return false;
+    void onWorkerComplete(WorkerState* worker) {
+        // Transmission complete - RMT hardware done with buffer
+        worker->transmission_active = false;
         
-        // Buffer data is already in mCurrentBuffer (controller's buffer)
-        // led_strip will read from this external buffer during transmission
-        return led_strip_refresh_async(mCurrentStrip) == ESP_OK;
+        if (!mQueuedControllers.empty()) {
+            // Assign to next waiting controller
+            RmtController5* nextController = mQueuedControllers.front();
+            mQueuedControllers.pop_front();
+            
+            const WorkerConfig& nextConfig = nextController->getWorkerConfig();
+            const size_t nextBufferSize = nextConfig.led_count * (nextConfig.is_rgbw ? 4 : 3);
+            
+            if (worker->buffer_capacity >= nextBufferSize && 
+                configCompatible(worker->current_config, nextConfig)) {
+                
+                // OPTIMIZATION: Reuse existing buffer and RMT channel
+                memcpy(worker->worker_buffer, nextController->getPixelBuffer(), nextController->getBufferSize());
+                worker->strip->drawAsync();
+                worker->transmission_active = true;
+                
+            } else {
+                // RECONFIGURE: Need different buffer size or RMT configuration
+                
+                // Release current buffer
+                releaseBuffer(worker->worker_buffer, worker->buffer_capacity);
+                
+                // Destroy RMT channel
+                delete worker->strip;
+                worker->strip = nullptr;
+                
+                // Get new appropriately-sized buffer
+                worker->worker_buffer = acquireBuffer(nextBufferSize);
+                if (!worker->worker_buffer) return;  // Failed to get buffer
+                
+                // Copy next controller's data
+                memcpy(worker->worker_buffer, nextController->getPixelBuffer(), nextController->getBufferSize());
+                
+                // Create new RMT channel with new buffer
+                worker->strip = IRmtStrip::CreateWithExternalBuffer(
+                    nextConfig.pin, nextConfig.led_count, nextConfig.is_rgbw,
+                    nextConfig.t0h, nextConfig.t0l, nextConfig.t1h, nextConfig.t1l, nextConfig.reset,
+                    worker->worker_buffer,  // New worker buffer
+                    nextConfig.dma_mode
+                );
+                
+                worker->buffer_capacity = nextBufferSize;
+                worker->current_config = nextConfig;
+                
+                // Start transmission
+                worker->strip->drawAsync();
+                worker->transmission_active = true;
+            }
+        } else {
+            // No waiting controllers - worker becomes available
+            worker->is_available = true;
+            // Keep buffer and RMT channel configured for potential reuse
+        }
+    }
+    
+private:
+    uint8_t* acquireBuffer(size_t size) {
+        // Round up to nearest power of 2 for efficient pooling
+        size_t poolSize = nextPowerOf2(size);
+        
+        auto& buffers = mBuffersBySize[poolSize];
+        if (!buffers.empty()) {
+            uint8_t* buffer = buffers.back();
+            buffers.pop_back();
+            return buffer;
+        }
+        
+        // Allocate new buffer
+        return (uint8_t*)malloc(poolSize);
+    }
+    
+    void releaseBuffer(uint8_t* buffer, size_t size) {
+        size_t poolSize = nextPowerOf2(size);
+        mBuffersBySize[poolSize].push_back(buffer);
     }
 };
 ```
 
-#### Controller Buffer Management
+#### Simplified Controller Implementation
 ```cpp
 class RmtController5 {
 private:
-    fl::vector<uint8_t> mPersistentBuffer;  // Controller owns its buffer
+    fl::vector<uint8_t> mPixelBuffer;  // Controller maintains its own data
     WorkerConfig mWorkerConfig;
     
 public:
     void loadPixelData(PixelIterator& pixels) {
-        // Store pixel data in persistent buffer
-        const int bytesPerPixel = mWorkerConfig.isRgbw ? 4 : 3;
+        // Store pixel data in persistent buffer (unchanged)
+        const int bytesPerPixel = mWorkerConfig.is_rgbw ? 4 : 3;
         const int bufferSize = pixels.size() * bytesPerPixel;
         
-        mPersistentBuffer.resize(bufferSize);
+        mPixelBuffer.resize(bufferSize);
         
         // Load pixel data into our persistent buffer
-        uint8_t* bufPtr = mPersistentBuffer.data();
-        if (mWorkerConfig.isRgbw) {
+        uint8_t* bufPtr = mPixelBuffer.data();
+        if (mWorkerConfig.is_rgbw) {
             while (pixels.has(1)) {
                 uint8_t r, g, b, w;
                 pixels.loadAndScaleRGBW(&r, &g, &b, &w);
@@ -928,49 +1029,14 @@ public:
         }
     }
     
-    // Provide buffer to worker pool
-    uint8_t* getPixelBuffer() { return mPersistentBuffer.data(); }
-    size_t getBufferSize() const { return mPersistentBuffer.size(); }
-};
-```
-
-#### Worker Pool Buffer Coordination
-```cpp
-class RmtWorkerPool {
-public:
-    void startController(RmtController5* controller, RmtWorker* worker) {
-        // Get controller's buffer and configuration
-        uint8_t* controllerBuffer = controller->getPixelBuffer();
-        const WorkerConfig& config = controller->getWorkerConfig();
-        
-        // Reconfigure worker with controller's buffer
-        if (!worker->reconfigure(config, controllerBuffer)) {
-            // Handle reconfiguration failure
-            return;
-        }
-        
-        // Start transmission - worker will read from controller's buffer
-        worker->startTransmission();
+    void showPixels() {
+        // Pool handles all buffer management internally
+        RmtWorkerPool::getInstance().assignWorkerToController(this);
     }
     
-    void onWorkerComplete(RmtWorker* worker) {
-        // Worker completed transmission
-        
-        // CRITICAL DECISION: Only reconfigure if there are queued controllers
-        if (!mQueuedControllers.empty()) {
-            // There are awaiting controllers - reconfigure immediately
-            RmtController5* nextController = mQueuedControllers.front();
-            mQueuedControllers.pop_front();
-            
-            // Reconfigure worker with next controller's buffer
-            // This involves teardown and recreation
-            startController(nextController, worker);
-        } else {
-            // No queued controllers - keep worker configured and available
-            // NO TEARDOWN - preserve current configuration for efficiency
-            releaseWorker(worker);
-        }
-    }
+    // Provide buffer access for pool management
+    uint8_t* getPixelBuffer() { return mPixelBuffer.data(); }
+    size_t getBufferSize() const { return mPixelBuffer.size(); }
 };
 ```
 
@@ -1034,23 +1100,68 @@ void onWorkerComplete(RmtWorker* worker) {
 - **Buffer Size Mismatches**: Validate buffer sizes during reconfiguration
 - **Transmission Errors**: Proper cleanup on transmission failures
 
-### Buffer Transfer Summary
+### Buffer Transfer Summary - CORRECTED
 
-**✅ SOLUTION**: Worker reconfiguration with external buffers
-1. **Controllers maintain persistent buffers** containing pixel data
-2. **Workers destroy/recreate led_strip objects** when switching controllers
-3. **External buffer pointers** are passed during led_strip creation
-4. **ESP-IDF transmits directly** from controller's external buffer
-5. **No buffer copying** required - efficient memory usage
+**✅ SOLUTION**: Worker pool buffer management with RMT channel recreation
+1. **Worker pool owns all RMT buffers** sized appropriately for each controller
+2. **Controllers maintain their own pixel data** in persistent buffers
+3. **Buffer copying required** from controller buffer to worker buffer
+4. **RMT channels destroyed/recreated** with appropriately-sized external buffers
+5. **ESP-IDF transmits from worker's external buffer** (not controller's buffer)
 
-**❌ NOT POSSIBLE**: Direct buffer pointer swapping
-- ESP-IDF led_strip API doesn't support changing buffers after creation
-- Internal `pixel_buf` pointer is fixed at creation time
+**✅ POSSIBLE**: Buffer transfer through worker reconfiguration
+- RMT channels can be destroyed and recreated with different external buffers
+- Worker pool manages buffer allocation and sizing
+- External buffers are not freed by ESP-IDF when RMT channels are destroyed
 
-**🔧 IMPLEMENTATION REQUIREMENT**: Workers must support full reconfiguration
-- Teardown current led_strip object
-- Create new led_strip with different external buffer
-- Handle reconfiguration failures and cleanup
+**🔧 IMPLEMENTATION REQUIREMENTS**: 
+- Worker pool must manage buffers of different sizes
+- RMT channel recreation required for buffer size changes
+- Transmission completion synchronization before reconfiguration
+- Buffer copying from controller to worker buffers
+
+## CORRECTED CONCLUSIONS AND RECOMMENDATIONS
+
+### Key Corrections to Original Analysis
+
+1. **Buffer Transfer IS Possible**: The original "NOT POSSIBLE" assessment was incorrect. Buffer transfer can be achieved through RMT channel recreation with appropriately-sized external buffers.
+
+2. **Worker Pool Must Manage Buffers**: The critical insight is that different controllers need different buffer sizes (RGB vs RGBW, different LED counts), so the worker pool must own and manage all RMT buffers.
+
+3. **Buffer Copying Required**: Unlike the original zero-copy approach, buffer copying from controller to worker is necessary to handle different buffer size requirements.
+
+4. **RMT Channel Recreation**: Workers must destroy and recreate RMT channels when switching between controllers with different requirements.
+
+### Recommended Implementation Strategy
+
+**✅ RECOMMENDED**: Worker Pool Buffer Management
+- **Worker pool owns all RMT buffers** sized for different controller requirements
+- **RMT channels use external buffers** managed by the worker pool
+- **Buffer copying** from controller persistent buffers to worker buffers
+- **RMT channel recreation** when buffer size or configuration changes
+- **Transmission synchronization** to ensure safe reconfiguration
+
+### Benefits of Corrected Approach
+
+- ✅ **Supports Variable Buffer Sizes**: Handles different LED counts and RGB/RGBW modes
+- ✅ **Proper Resource Management**: Worker pool manages buffer allocation/deallocation
+- ✅ **Clean Separation**: Controllers focus on pixel data, workers handle hardware
+- ✅ **Scalable Design**: Pool can optimize buffer reuse and minimize allocations
+- ✅ **Thread Safe**: Proper synchronization prevents buffer access conflicts
+
+### Performance Considerations
+
+- ❌ **Buffer Copying Overhead**: Required due to different controller buffer sizes
+- ✅ **Buffer Reuse Optimization**: Pool can reuse buffers for compatible configurations
+- ✅ **Minimal RMT Recreation**: Only when buffer size or configuration changes
+- ✅ **Efficient Memory Usage**: Pool manages buffer sizes optimally
+
+### Implementation Priority
+
+1. **Phase 1**: Implement basic worker pool with buffer management
+2. **Phase 2**: Add buffer size optimization and reuse logic
+3. **Phase 3**: Implement transmission synchronization and callbacks
+4. **Phase 4**: Add performance optimizations and error handling
 
 ## Future Enhancements
 
@@ -1058,4 +1169,4 @@ void onWorkerComplete(RmtWorker* worker) {
 2. **Smart Batching**: Group compatible strips to minimize reconfiguration
 3. **Dynamic Scaling**: Adjust worker count based on usage patterns
 4. **Metrics**: Add performance monitoring and statistics
-5. **Buffer Pool Optimization**: Cache led_strip objects for common configurations
+5. **Buffer Pool Optimization**: Advanced buffer size prediction and caching
