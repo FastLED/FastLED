@@ -762,9 +762,223 @@ void RmtWorkerPool::processCompletionEvents() {
 
 The implementation maintains full backward compatibility. Existing code using `RmtController5` will automatically benefit from the worker pool without any changes required.
 
+## CRITICAL: LED Buffer Transfer Analysis
+
+### ESP-IDF LED Buffer Management
+
+**Key Finding**: The ESP-IDF led_strip driver **supports external pixel buffers** but **cannot change buffers after creation**.
+
+#### Current Buffer Architecture
+```cpp
+typedef struct {
+    led_strip_t base;
+    rmt_channel_handle_t rmt_chan;
+    rmt_encoder_handle_t strip_encoder;
+    uint8_t *pixel_buf;                    // ← Buffer pointer (fixed at creation)
+    bool pixel_buf_allocated_internally;   // ← Ownership flag
+    // ... other fields
+} led_strip_rmt_obj;
+```
+
+#### Buffer Creation Options
+```cpp
+led_strip_config_t strip_config = {
+    .strip_gpio_num = pin,
+    .max_leds = led_count,
+    .external_pixel_buf = external_buffer,  // ← Can provide external buffer
+    // ... other config
+};
+```
+
+### Buffer Transfer Constraints
+
+**❌ IMPOSSIBLE**: Change buffer pointer after `led_strip_new_rmt_device()` creation
+- No API exists to modify `pixel_buf` after creation
+- Buffer pointer is fixed for the lifetime of the led_strip object
+- `rmt_transmit()` uses the internal `pixel_buf` pointer directly
+
+**✅ POSSIBLE**: Use external buffers that can be swapped at the controller level
+- ESP-IDF supports external pixel buffers via `external_pixel_buf` parameter
+- External buffers are **not freed** by the driver when destroyed
+- FastLED can manage buffer ownership and transfer
+
+### Buffer Transfer Solution: Worker Reconfiguration
+
+Since buffers cannot be moved between existing led_strip objects, **workers must be recreated** with new configurations when switching between controllers.
+
+#### Worker Buffer Management Strategy
+```cpp
+class RmtWorker {
+private:
+    led_strip_handle_t mCurrentStrip;
+    uint8_t* mCurrentBuffer;           // External buffer managed by FastLED
+    WorkerConfig mCurrentConfig;       // Current configuration
+    
+public:
+    // Reconfigure worker with new controller's buffer
+    bool reconfigure(const WorkerConfig& newConfig, uint8_t* controllerBuffer) {
+        // Must destroy and recreate led_strip with new buffer
+        if (mCurrentStrip) {
+            // Wait for completion first
+            if (isTransmitting()) {
+                led_strip_refresh_wait_done(mCurrentStrip);
+            }
+            
+            // Clean teardown
+            led_strip_del(mCurrentStrip);
+            mCurrentStrip = nullptr;
+        }
+        
+        // Create new led_strip with controller's external buffer
+        led_strip_config_t config = {
+            .strip_gpio_num = newConfig.pin,
+            .max_leds = newConfig.ledCount,
+            .external_pixel_buf = controllerBuffer,  // ← Use controller's buffer
+            // ... other config from newConfig
+        };
+        
+        led_strip_rmt_config_t rmt_config = {
+            // ... RMT configuration
+        };
+        
+        esp_err_t result = led_strip_new_rmt_device(&config, &rmt_config, &mCurrentStrip);
+        if (result != ESP_OK) {
+            return false;
+        }
+        
+        mCurrentBuffer = controllerBuffer;
+        mCurrentConfig = newConfig;
+        return true;
+    }
+    
+    // Start transmission using the current external buffer
+    bool startTransmission() {
+        if (!mCurrentStrip) return false;
+        
+        // Buffer data is already in mCurrentBuffer (controller's buffer)
+        // led_strip will read from this external buffer during transmission
+        return led_strip_refresh_async(mCurrentStrip) == ESP_OK;
+    }
+};
+```
+
+#### Controller Buffer Management
+```cpp
+class RmtController5 {
+private:
+    fl::vector<uint8_t> mPersistentBuffer;  // Controller owns its buffer
+    WorkerConfig mWorkerConfig;
+    
+public:
+    void loadPixelData(PixelIterator& pixels) {
+        // Store pixel data in persistent buffer
+        const int bytesPerPixel = mWorkerConfig.isRgbw ? 4 : 3;
+        const int bufferSize = pixels.size() * bytesPerPixel;
+        
+        mPersistentBuffer.resize(bufferSize);
+        
+        // Load pixel data into our persistent buffer
+        uint8_t* bufPtr = mPersistentBuffer.data();
+        if (mWorkerConfig.isRgbw) {
+            while (pixels.has(1)) {
+                uint8_t r, g, b, w;
+                pixels.loadAndScaleRGBW(&r, &g, &b, &w);
+                *bufPtr++ = r; *bufPtr++ = g; *bufPtr++ = b; *bufPtr++ = w;
+                pixels.advanceData();
+                pixels.stepDithering();
+            }
+        } else {
+            while (pixels.has(1)) {
+                uint8_t r, g, b;
+                pixels.loadAndScaleRGB(&r, &g, &b);
+                *bufPtr++ = r; *bufPtr++ = g; *bufPtr++ = b;
+                pixels.advanceData();
+                pixels.stepDithering();
+            }
+        }
+    }
+    
+    // Provide buffer to worker pool
+    uint8_t* getPixelBuffer() { return mPersistentBuffer.data(); }
+    size_t getBufferSize() const { return mPersistentBuffer.size(); }
+};
+```
+
+#### Worker Pool Buffer Coordination
+```cpp
+class RmtWorkerPool {
+public:
+    void startController(RmtController5* controller, RmtWorker* worker) {
+        // Get controller's buffer and configuration
+        uint8_t* controllerBuffer = controller->getPixelBuffer();
+        const WorkerConfig& config = controller->getWorkerConfig();
+        
+        // Reconfigure worker with controller's buffer
+        if (!worker->reconfigure(config, controllerBuffer)) {
+            // Handle reconfiguration failure
+            return;
+        }
+        
+        // Start transmission - worker will read from controller's buffer
+        worker->startTransmission();
+    }
+    
+    void onWorkerComplete(RmtWorker* worker) {
+        // Worker completed transmission
+        releaseWorker(worker);
+        
+        // Start next queued controller if available
+        if (!mQueuedControllers.empty()) {
+            RmtController5* nextController = mQueuedControllers.front();
+            mQueuedControllers.pop_front();
+            
+            // Reconfigure same worker with next controller's buffer
+            startController(nextController, worker);
+        }
+    }
+};
+```
+
+### Buffer Transfer Implementation Details
+
+#### Memory Safety
+- **Controller Ownership**: Each `RmtController5` owns its persistent buffer
+- **External Buffer Contract**: ESP-IDF won't free external buffers
+- **Worker Lifecycle**: Workers destroy/recreate led_strip objects as needed
+- **Buffer Validity**: Controllers must keep buffers valid during transmission
+
+#### Performance Considerations
+- **Reconfiguration Cost**: Creating new led_strip objects has overhead
+- **Buffer Copying**: No copying needed - workers use external buffers directly
+- **Memory Efficiency**: Only one buffer per controller (no duplication)
+
+#### Error Handling
+- **Reconfiguration Failures**: Handle led_strip creation failures gracefully
+- **Buffer Size Mismatches**: Validate buffer sizes during reconfiguration
+- **Transmission Errors**: Proper cleanup on transmission failures
+
+### Buffer Transfer Summary
+
+**✅ SOLUTION**: Worker reconfiguration with external buffers
+1. **Controllers maintain persistent buffers** containing pixel data
+2. **Workers destroy/recreate led_strip objects** when switching controllers
+3. **External buffer pointers** are passed during led_strip creation
+4. **ESP-IDF transmits directly** from controller's external buffer
+5. **No buffer copying** required - efficient memory usage
+
+**❌ NOT POSSIBLE**: Direct buffer pointer swapping
+- ESP-IDF led_strip API doesn't support changing buffers after creation
+- Internal `pixel_buf` pointer is fixed at creation time
+
+**🔧 IMPLEMENTATION REQUIREMENT**: Workers must support full reconfiguration
+- Teardown current led_strip object
+- Create new led_strip with different external buffer
+- Handle reconfiguration failures and cleanup
+
 ## Future Enhancements
 
 1. **Priority System**: Allow high-priority strips to get workers first
 2. **Smart Batching**: Group compatible strips to minimize reconfiguration
 3. **Dynamic Scaling**: Adjust worker count based on usage patterns
 4. **Metrics**: Add performance monitoring and statistics
+5. **Buffer Pool Optimization**: Cache led_strip objects for common configurations
