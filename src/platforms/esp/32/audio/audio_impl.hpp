@@ -1,6 +1,5 @@
 #pragma once
 
-#include "platforms/esp/32/audio/audio.h"
 #include "platforms/esp/32/audio/devices/i2s.hpp"
 #include "platforms/esp/32/audio/devices/null.hpp"
 

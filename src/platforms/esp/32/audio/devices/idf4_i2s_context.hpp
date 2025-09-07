@@ -10,8 +10,7 @@
 #include "fl/warn.h"
 #include "fl/int.h"
 #include "fl/sstream.h"
-
-#include "platforms/esp/audio/audio.h"
+#include "fl/audio_input.h"
 
 
 #define I2S_INTR_ALLOC_FLAGS 0

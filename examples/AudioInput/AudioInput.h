@@ -12,7 +12,8 @@
 #include "fl/sstream.h"
 #include "fl/type_traits.h"
 
-#include "platforms/esp/32/audio/audio.h"
+#include "fl/audio_input.h"
+
 #include "platforms/esp/32/audio/sound_util.h"
 
 using fl::i16;
@@ -25,7 +26,6 @@ using fl::i16;
 
 fl::AudioConfig config = fl::AudioConfig::CreateInmp441(I2S_WS_PIN, I2S_SD_PIN, I2S_CLK_PIN, I2S_CHANNEL);
 fl::shared_ptr<fl::IAudioInput> audioSource;
-fl::vector_inlined<fl::i16, I2S_AUDIO_BUFFER_LEN> audioBuffer;
 
 void setup() {
     Serial.begin(115200);
@@ -45,18 +45,7 @@ void setup() {
     }
 
 
-    // Initialize and start audio capture
-    Serial.println("Initializing audio capture...");
-    audioSource->init();
-
-    // Check for initialization errors
-    fl::string initErrorMsg;
-    if (audioSource->error(&initErrorMsg)) {
-        Serial.print("Audio init error: ");
-        Serial.println(initErrorMsg.c_str());
-        return;
-    }
-
+    // Start audio capture
     Serial.println("Starting audio capture...");
     audioSource->start();
 
@@ -91,16 +80,19 @@ void loop() {
     }
 
     // Read audio data
-    int bytesRead = audioSource->read(&audioBuffer);
+    fl::AudioSample sample = audioSource->read();
 
-    if (bytesRead > 0) {
+    if (sample.isValid()) {
         EVERY_N_MILLIS(100) {
-            i16* max_sample = fl::max_element(audioBuffer.begin(), audioBuffer.end());
-            i16* min_sample = fl::min_element(audioBuffer.begin(), audioBuffer.end());
+            const auto& audioBuffer = sample.pcm();
+            const i16* max_sample = fl::max_element(audioBuffer.begin(), audioBuffer.end());
+            const i16* min_sample = fl::min_element(audioBuffer.begin(), audioBuffer.end());
             fl::sstream ss;
-            ss << "\nRead " << bytesRead << " bytes\n";
+            ss << "\nRead " << audioBuffer.size() << " samples, timestamp: " << sample.timestamp() << "ms\n";
             ss << "Max sample: " << *max_sample << "\n";
             ss << "Min sample: " << *min_sample << "\n";
+            ss << "RMS: " << sample.rms() << "\n";
+            ss << "ZCF: " << sample.zcf() << "\n";
             FL_WARN(ss.str());
         }
     }

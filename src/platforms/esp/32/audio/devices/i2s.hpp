@@ -1,10 +1,9 @@
 
 #pragma once
 
-#include "fl/vector.h"
 #include "fl/warn.h"
+#include "fl/audio_input.h"
 
-#include "platforms/esp/32/audio/audio.h"
 
 #include "platforms/esp/esp_version.h"
 
@@ -23,12 +22,9 @@ class I2S_Audio : public IAudioInput {
     using I2SContext = esp_i2s::I2SContext;
 
     I2S_Audio(const AudioConfigI2S &config)
-        : mStdConfig(config), mHasError(false) {}
+        : mStdConfig(config), mHasError(false), mTotalSamplesRead(0) {}
 
     ~I2S_Audio() {}
-
-
-    void init() override {}
 
     void start() override {
         using namespace esp_i2s;
@@ -36,7 +32,9 @@ class I2S_Audio : public IAudioInput {
             FL_WARN("I2S channel is already initialized");
             return;
         }
-        mI2sContextOpt = i2s_audio_init(mStdConfig);
+        I2SContext ctx = i2s_audio_init(mStdConfig);
+        mI2sContextOpt = ctx;
+        mTotalSamplesRead = 0;  // Reset sample counter on start
     }
 
     void stop() override {
@@ -47,6 +45,7 @@ class I2S_Audio : public IAudioInput {
         }
         i2s_audio_destroy(*mI2sContextOpt);
         mI2sContextOpt = fl::nullopt;
+        mTotalSamplesRead = 0;  // Reset sample counter on stop
     }
 
     bool error(fl::string *msg = nullptr) override {
@@ -56,24 +55,32 @@ class I2S_Audio : public IAudioInput {
         return mHasError;
     }
 
-    int read(fl::vector_inlined<i16, I2S_AUDIO_BUFFER_LEN> *buffer) override {
+    AudioSample read() override {
         using namespace esp_i2s;
         if (!mI2sContextOpt) {
-            buffer->clear();
             FL_WARN("I2S channel is not initialized");
-            return -1;
+            return AudioSample();  // Invalid sample
         }
+        
         audio_sample_t buf[I2S_AUDIO_BUFFER_LEN];
-        I2SContext &ctx = *mI2sContextOpt;
-        int out = i2s_read_raw_samples(ctx, buf);
-        if (out < 0) {
-            return out;
+        const I2SContext &ctx = *mI2sContextOpt;
+        size_t samples_read_size = i2s_read_raw_samples(ctx, buf);
+        int samples_read = static_cast<int>(samples_read_size);
+        
+        if (samples_read <= 0) {
+            return AudioSample();  // Invalid sample
         }
-        if (out > 0) {
-            buffer->assign(buf, buf + out);
-            return static_cast<int>(buffer->size());
-        }
-        return 0;
+        
+        // Calculate timestamp based on sample rate and total samples read
+        fl::u32 timestamp_ms = static_cast<fl::u32>((mTotalSamplesRead * 1000ULL) / mStdConfig.mSampleRate);
+        
+        // Update total samples counter
+        mTotalSamplesRead += samples_read;
+        
+        // Create AudioSample with calculated timestamp
+        AudioSampleImplPtr impl = fl::make_shared<AudioSampleImpl>();
+        impl->assign(buf, buf + samples_read, timestamp_ms);
+        return AudioSample(impl);
     }
 
   private:
@@ -82,6 +89,7 @@ class I2S_Audio : public IAudioInput {
     fl::string mErrorMessage;
     I2SContext mI2sContext;
     fl::optional<I2SContext> mI2sContextOpt;
+    fl::u64 mTotalSamplesRead;
 };
 
 } // namespace fl

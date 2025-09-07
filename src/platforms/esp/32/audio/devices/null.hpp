@@ -20,11 +20,10 @@ public:
         }
         return true;
     }
-    // Transfer internal buffer to the caller.
-    // -1 on error, 0 on no data, >0 on number of bytes read
-    int read(fl::vector_inlined<i16, I2S_AUDIO_BUFFER_LEN>* buffer) override {
-        FL_UNUSED(buffer);
-        return -1;
+    // Read audio data and return as AudioSample with calculated timestamp.
+    // Returns invalid AudioSample on error or when no data is available.
+    AudioSample read() override {
+        return AudioSample();  // Always return invalid sample
     }
 
 };

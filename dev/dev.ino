@@ -14,4 +14,4 @@ void on_startup() {
 
 #endif  // ESP32
 
-#include "../examples/AudioI2S/AudioI2S.ino"
+#include "../examples/AudioInput/AudioInput.ino"

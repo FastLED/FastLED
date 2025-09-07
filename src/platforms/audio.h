@@ -9,7 +9,6 @@
 #include "soc/soc_caps.h"
 #if SOC_I2S_SUPPORTED
 #define FASTLED_HAS_AUDIO_INPUT 1
-#include "platforms/esp/32/audio/audio.h"
 #else
 #define FASTLED_HAS_AUDIO_INPUT 0
 #endif

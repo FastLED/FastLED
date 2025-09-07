@@ -8,6 +8,7 @@
 #include "fl/vector.h"
 #include "fl/variant.h"
 #include "fl/shared_ptr.h"
+#include "fl/audio.h"
 #include "platforms/audio.h"
 
 #ifndef FASTLED_HAS_AUDIO_INPUT
@@ -111,9 +112,9 @@ public:
     virtual void stop() = 0;
 
     virtual bool error(fl::string* msg = nullptr) = 0;  // if an error occured then query it here.
-    // Transfer internal buffer to the caller.
-    // -1 on error, 0 on no data, >0 on number of bytes read
-    virtual int read(fl::vector_inlined<i16, I2S_AUDIO_BUFFER_LEN>* buffer) = 0;
+    // Read audio data and return as AudioSample with calculated timestamp.
+    // Returns invalid AudioSample on error or when no data is available.
+    virtual AudioSample read() = 0;
 
 };
 
