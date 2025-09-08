@@ -5,7 +5,7 @@
 #ifdef ESP32
 #include "platforms/esp/esp_version.h"
 #if ESP_IDF_VERSION_5_OR_HIGHER
-#include "platforms/esp/32/audio/audio_impl.hpp"
+// Implementation is in platforms/esp/32/audio/audio_impl.cpp
 #else
 #include "fl/sketch_macros.h"
 #include "fl/shared_ptr.h"

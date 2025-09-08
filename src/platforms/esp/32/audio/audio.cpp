@@ -9,7 +9,7 @@
 
 
 #if ESP_IDF_VERSION_5_OR_HIGHER
-#include "platforms/esp/32/audio/audio_impl.hpp"
+// Implementation is in audio_impl.cpp
 #else
 namespace fl {
 fl::shared_ptr<IAudioInput>
