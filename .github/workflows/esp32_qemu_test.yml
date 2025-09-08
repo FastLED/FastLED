@@ -1,0 +1,231 @@
+name: ESP32 QEMU Test
+
+on:
+  push:
+    branches: [master]
+    paths: 
+      - 'src/**'
+      - 'examples/**'
+      - '.github/workflows/esp32_qemu_test.yml'
+  pull_request:
+    branches: [master]
+    paths: 
+      - 'src/**'
+      - 'examples/**'
+
+permissions:
+  contents: read
+  actions: read
+  id-token: write
+  pull-requests: read
+
+jobs:
+  esp32_qemu_test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        platform: [esp32dev]  # Start with ESP32DEV, can expand to esp32s3
+        example: [PinMode]     # Start with PinMode, can expand to Blink
+        
+    steps:
+      - name: Checkout trusted base branch code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.repository.default_branch || 'master' }}
+          path: trusted
+
+      - name: Checkout PR code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          path: pr-code
+
+      - name: Merge safe source files from PR
+        run: |
+          # Copy ONLY safe source files from PR, never executable scripts
+          if [ -d "pr-code/src" ]; then
+            cp -r pr-code/src/* trusted/src/ 2>/dev/null || true
+          fi
+          if [ -d "pr-code/examples" ]; then
+            cp -r pr-code/examples/* trusted/examples/ 2>/dev/null || true
+          fi
+          if [ -f "pr-code/platformio.ini" ]; then
+            cp pr-code/platformio.ini trusted/
+          fi
+          if [ -f "pr-code/library.json" ]; then
+            cp pr-code/library.json trusted/
+          fi
+          if [ -f "pr-code/library.properties" ]; then
+            cp pr-code/library.properties trusted/
+          fi
+          if [ -f "pr-code/CMakeLists.txt" ]; then
+            cp pr-code/CMakeLists.txt trusted/
+          fi
+        shell: bash
+
+      - name: Set working directory to trusted
+        run: echo "GITHUB_WORKSPACE=$GITHUB_WORKSPACE/trusted" >> $GITHUB_ENV
+
+      - name: Pin python version
+        working-directory: trusted
+        run: |
+          echo "3.11" >> .python-version
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+          cache-dependency-glob: "**/pyproject.toml"
+          version: "0.8.0"
+
+      - name: "Set up Python"
+        uses: actions/setup-python@v5
+        with:
+          python-version-file: "trusted/.python-version"
+
+      - name: Install CCACHE
+        run: |
+          if [ "$RUNNER_OS" == "Linux" ]; then
+            sudo apt-get update && sudo apt-get install -y ccache
+          elif [ "$RUNNER_OS" == "macOS" ]; then
+            brew install ccache
+          elif [ "$RUNNER_OS" == "Windows" ]; then
+            choco install ccache
+          fi
+        shell: bash
+
+      - name: Setup CCACHE
+        run: |
+          echo "CCACHE_BASEDIR=$GITHUB_WORKSPACE" >> $GITHUB_ENV
+          echo "CCACHE_DIR=$GITHUB_WORKSPACE/.ccache" >> $GITHUB_ENV
+          echo "CCACHE_COMPRESS=true" >> $GITHUB_ENV
+          echo "CCACHE_COMPRESSLEVEL=6" >> $GITHUB_ENV
+          echo "CCACHE_MAXSIZE=400M" >> $GITHUB_ENV
+          ccache --version
+          ccache --show-stats
+          ccache --zero-stats
+        shell: bash
+
+      - name: Cache CCACHE directory
+        uses: actions/cache@v4
+        with:
+          path: .ccache
+          key: ${{ runner.os }}-ccache-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-ccache-
+
+      - name: Build ESP32 example
+        working-directory: trusted
+        run: |
+          echo "Building ${{ matrix.example }} for ${{ matrix.platform }}"
+          uv run ci/ci-compile.py ${{ matrix.platform }} --examples ${{ matrix.example }}
+        shell: bash
+
+      - name: Verify build artifacts
+        working-directory: trusted
+        run: |
+          echo "Checking build artifacts..."
+          find .build -name "*.bin" -o -name "*.elf" | head -10
+          
+          # Check if the expected build directory exists
+          if [ -d ".build/${{ matrix.platform }}/${{ matrix.example }}" ]; then
+            echo "✅ Build directory found: .build/${{ matrix.platform }}/${{ matrix.example }}"
+            ls -la ".build/${{ matrix.platform }}/${{ matrix.example }}/"
+          else
+            echo "❌ Build directory not found"
+            echo "Available build directories:"
+            find .build -type d -name "${{ matrix.example }}" | head -5
+            exit 1
+          fi
+        shell: bash
+
+      - name: Run ESP32 example in QEMU
+        working-directory: trusted
+        uses: tobozo/esp32-qemu-sim@v1.0.3
+        with:
+          build-folder: ./.build/${{ matrix.platform }}/${{ matrix.example }}
+          flash-size: 4
+          qemu-timeout: 30
+
+      - name: Validate example execution
+        working-directory: trusted
+        run: |
+          echo "Validating QEMU execution results..."
+          
+          # Check if QEMU output file exists
+          if [ -f "qemu_output.log" ]; then
+            echo "✅ QEMU output log found"
+            echo "--- First 50 lines of QEMU output ---"
+            head -50 qemu_output.log
+            echo "--- Last 20 lines of QEMU output ---"
+            tail -20 qemu_output.log
+          else
+            echo "❌ QEMU output log not found"
+            echo "Available files:"
+            ls -la
+            exit 1
+          fi
+          
+          # Validate based on example type
+          case "${{ matrix.example }}" in
+            "PinMode")
+              if grep -q "Pin: .* is" qemu_output.log; then
+                echo "✅ ESP32 PinMode example executed successfully"
+                echo "Found expected GPIO output in QEMU logs"
+              else
+                echo "❌ ESP32 PinMode example failed to run properly"
+                echo "Expected GPIO output pattern 'Pin: X is HIGH/LOW' not found"
+                exit 1
+              fi
+              ;;
+            "Blink")
+              # Look for any sign the program started (even without serial output)
+              if grep -q -E "(rst:|boot:|ESP32|Brownout|Ready)" qemu_output.log; then
+                echo "✅ ESP32 Blink example executed successfully"
+                echo "Found ESP32 boot/execution indicators"
+              else
+                echo "❌ ESP32 Blink example failed to run properly"
+                echo "No ESP32 execution indicators found"
+                exit 1
+              fi
+              ;;
+            *)
+              echo "⚠️  Unknown example type, checking for basic execution"
+              if grep -q -E "(rst:|boot:|ESP32|Ready)" qemu_output.log; then
+                echo "✅ ESP32 example appears to have executed"
+              else
+                echo "❌ No clear execution indicators found"
+                exit 1
+              fi
+              ;;
+          esac
+        shell: bash
+
+      - name: Upload QEMU logs and build artifacts on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: esp32-qemu-failure-${{ matrix.platform }}-${{ matrix.example }}-${{ github.sha }}
+          path: |
+            trusted/qemu_output.log
+            trusted/.build/${{ matrix.platform }}/${{ matrix.example }}/
+          include-hidden-files: true
+
+      - name: Upload QEMU logs on success (for analysis)
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: esp32-qemu-success-${{ matrix.platform }}-${{ matrix.example }}-${{ github.sha }}
+          path: trusted/qemu_output.log
+
+      - name: Summary
+        if: always()
+        working-directory: trusted
+        run: |
+          echo "=== ESP32 QEMU Test Summary ==="
+          echo "Platform: ${{ matrix.platform }}"
+          echo "Example: ${{ matrix.example }}"
+          echo "Status: ${{ job.status }}"
+          if [ -f "qemu_output.log" ]; then
+            echo "QEMU output lines: $(wc -l < qemu_output.log)"
+          fi
