@@ -221,10 +221,10 @@ DEFINE_GRADIENT_PALETTE(waveBluepal){
 
 DEFINE_GRADIENT_PALETTE(waveGreenpal){
     0,   0,   0,   0,   // Black (no wave)
-    8,   128, 64,  64,  // Green with red tint (very low wave)
-    16,  255, 222, 222, // Pinkish red (low wave)
-    64,  255, 255, 255, // White (medium wave)
-    255, 255, 255, 255  // White (high wave)
+    32,  0,   64,  0,   // Dark green (low wave)
+    128, 0,   255, 0,   // Bright green (medium wave)
+    192, 128, 255, 128, // Light green (high wave)
+    255, 255, 255, 255  // White (maximum wave)
 };
 
 DEFINE_GRADIENT_PALETTE(waveRainbowpal){
@@ -344,7 +344,7 @@ void setup() {
     waveArgs.speed = 0.16f;                          // Wave propagation speed
     waveArgs.dampening = 6.0f;                       // Wave energy loss
     waveArgs.x_cyclical = true;                      // Enable cylindrical wrapping!
-    waveArgs.crgbMap = fl::make_shared<WaveCrgbGradientMap>(waveBluepal); // Default color palette
+    waveArgs.crgbMap = fl::make_shared<WaveCrgbGradientMap>(waveGreenpal); // Default color palette
     
     // Create wave effect with cylindrical mapping
     waveFx = fl::make_shared<WaveFx>(xyRect, waveArgs);
@@ -369,7 +369,8 @@ void setup() {
     
     // Set initial dropdown selections
     paletteDropdown.setSelectedIndex(0);    // Party
-    renderModeDropdown.setSelectedIndex(0); // Fire (new default)
+    renderModeDropdown.setSelectedIndex(0); // Wave (default to show green waves)
+    wavePalette.setValue(1);                // Set wave palette to green (index 1)
     
     // Add onChange callbacks for dropdowns
     paletteDropdown.onChanged([](UIDropdown &dropdown) {
@@ -659,11 +660,11 @@ CRGBPalette16 getWavePalette() {
     case 0:
         return waveBluepal;         // Electric blue waves
     case 1:
-        return waveGreenpal;        // Green/red waves  
+        return waveGreenpal;        // Green waves  
     case 2:
         return waveRainbowpal;      // Rainbow waves
     default:
-        return waveBluepal;         // Default to blue
+        return waveGreenpal;        // Default to green
     }
 }
 
