@@ -34,31 +34,31 @@ public:
     enum Color { RED, BLACK };
 
 private:
-    struct Node {
+    struct RBNode {
         value_type data;
         Color color;
-        Node* left;
-        Node* right;
-        Node* parent;
+        RBNode* left;
+        RBNode* right;
+        RBNode* parent;
 
-        Node(const value_type& val, Color c = RED, Node* p = nullptr)
+        RBNode(const value_type& val, Color c = RED, RBNode* p = nullptr)
             : data(val), color(c), left(nullptr), right(nullptr), parent(p) {}
         
         template<typename... Args>
-        Node(Color c, Node* p, Args&&... args)
+        RBNode(Color c, RBNode* p, Args&&... args)
             : data(fl::forward<Args>(args)...), color(c), left(nullptr), right(nullptr), parent(p) {}
     };
 
-    using NodeAllocator = typename Allocator::template rebind<Node>::other;
+    using NodeAllocator = typename Allocator::template rebind<RBNode>::other;
 
-    Node* root_;
+    RBNode* root_;
     fl::size size_;
     Compare comp_;
     NodeAllocator alloc_;
 
     // Helper methods
-    void rotateLeft(Node* x) {
-        Node* y = x->right;
+    void rotateLeft(RBNode* x) {
+        RBNode* y = x->right;
         x->right = y->left;
         if (y->left != nullptr) {
             y->left->parent = x;
@@ -75,8 +75,8 @@ private:
         x->parent = y;
     }
 
-    void rotateRight(Node* x) {
-        Node* y = x->left;
+    void rotateRight(RBNode* x) {
+        RBNode* y = x->left;
         x->left = y->right;
         if (y->right != nullptr) {
             y->right->parent = x;
@@ -93,10 +93,10 @@ private:
         x->parent = y;
     }
 
-    void insertFixup(Node* z) {
+    void insertFixup(RBNode* z) {
         while (z->parent != nullptr && z->parent->parent != nullptr && z->parent->color == RED) {
             if (z->parent == z->parent->parent->left) {
-                Node* y = z->parent->parent->right;
+                RBNode* y = z->parent->parent->right;
                 if (y != nullptr && y->color == RED) {
                     z->parent->color = BLACK;
                     y->color = BLACK;
@@ -112,7 +112,7 @@ private:
                     rotateRight(z->parent->parent);
                 }
             } else {
-                Node* y = z->parent->parent->left;
+                RBNode* y = z->parent->parent->left;
                 if (y != nullptr && y->color == RED) {
                     z->parent->color = BLACK;
                     y->color = BLACK;
@@ -132,7 +132,7 @@ private:
         root_->color = BLACK;
     }
 
-    void transplant(Node* u, Node* v) {
+    void transplant(RBNode* u, RBNode* v) {
         if (u->parent == nullptr) {
             root_ = v;
         } else if (u == u->parent->left) {
@@ -145,14 +145,14 @@ private:
         }
     }
 
-    Node* minimum(Node* x) const {
+    RBNode* minimum(RBNode* x) const {
         while (x->left != nullptr) {
             x = x->left;
         }
         return x;
     }
 
-    Node* maximum(Node* x) const {
+    RBNode* maximum(RBNode* x) const {
         while (x->right != nullptr) {
             x = x->right;
         }
@@ -160,10 +160,10 @@ private:
     }
 
     // Fixed to properly use xParent when x is nullptr; removes unused parameter warning and centralizes erase fixup
-    void deleteFixup(Node* x, Node* xParent) {
+    void deleteFixup(RBNode* x, RBNode* xParent) {
         while ((x != root_) && (x == nullptr || x->color == BLACK)) {
             if (x == (xParent ? xParent->left : nullptr)) {
-                Node* w = xParent ? xParent->right : nullptr;
+                RBNode* w = xParent ? xParent->right : nullptr;
                 if (w && w->color == RED) {
                     w->color = BLACK;
                     if (xParent) { xParent->color = RED; rotateLeft(xParent); }
@@ -188,7 +188,7 @@ private:
                     x = root_;
                 }
             } else {
-                Node* w = xParent ? xParent->left : nullptr;
+                RBNode* w = xParent ? xParent->left : nullptr;
                 if (w && w->color == RED) {
                     w->color = BLACK;
                     if (xParent) { xParent->color = RED; rotateRight(xParent); }
@@ -217,8 +217,8 @@ private:
         if (x) x->color = BLACK;
     }
 
-    Node* findNode(const value_type& value) const {
-        Node* current = root_;
+    RBNode* findNode(const value_type& value) const {
+        RBNode* current = root_;
         while (current != nullptr) {
             if (comp_(value, current->data)) {
                 current = current->left;
@@ -231,7 +231,7 @@ private:
         return nullptr;
     }
 
-    void destroyTree(Node* node) {
+    void destroyTree(RBNode* node) {
         if (node != nullptr) {
             destroyTree(node->left);
             destroyTree(node->right);
@@ -240,10 +240,10 @@ private:
         }
     }
 
-    Node* copyTree(Node* node, Node* parent = nullptr) {
+    RBNode* copyTree(RBNode* node, RBNode* parent = nullptr) {
         if (node == nullptr) return nullptr;
         
-        Node* newNode = alloc_.allocate(1);
+        RBNode* newNode = alloc_.allocate(1);
         if (newNode == nullptr) {
             return nullptr;
         }
@@ -257,8 +257,8 @@ private:
     // Shared insert implementation to reduce duplication
     template <typename U>
     fl::pair<iterator, bool> insertImpl(U&& value) {
-        Node* parent = nullptr;
-        Node* current = root_;
+        RBNode* parent = nullptr;
+        RBNode* current = root_;
         
         while (current != nullptr) {
             parent = current;
@@ -271,7 +271,7 @@ private:
             }
         }
         
-        Node* newNode = alloc_.allocate(1);
+        RBNode* newNode = alloc_.allocate(1);
         if (newNode == nullptr) {
             return fl::pair<iterator, bool>(end(), false);
         }
@@ -293,9 +293,9 @@ private:
     }
 
     // Bound helpers to avoid duplication between const/non-const
-    Node* lowerBoundNode(const value_type& value) const {
-        Node* current = root_;
-        Node* result = nullptr;
+    RBNode* lowerBoundNode(const value_type& value) const {
+        RBNode* current = root_;
+        RBNode* result = nullptr;
         while (current != nullptr) {
             if (!comp_(current->data, value)) {
                 result = current;
@@ -307,9 +307,9 @@ private:
         return result;
     }
 
-    Node* upperBoundNode(const value_type& value) const {
-        Node* current = root_;
-        Node* result = nullptr;
+    RBNode* upperBoundNode(const value_type& value) const {
+        RBNode* current = root_;
+        RBNode* result = nullptr;
         while (current != nullptr) {
             if (comp_(value, current->data)) {
                 result = current;
@@ -329,15 +329,15 @@ public:
     public:
         using value_type = T;
     private:
-        Node* node_;
+        RBNode* node_;
         const RedBlackTree* mTree;
 
-        Node* successor(Node* x) const {
+        RBNode* successor(RBNode* x) const {
             if (x == nullptr) return nullptr;
             if (x->right != nullptr) {
                 return mTree->minimum(x->right);
             }
-            Node* y = x->parent;
+            RBNode* y = x->parent;
             while (y != nullptr && x == y->right) {
                 x = y;
                 y = y->parent;
@@ -345,12 +345,12 @@ public:
             return y;
         }
 
-        Node* predecessor(Node* x) const {
+        RBNode* predecessor(RBNode* x) const {
             if (x == nullptr) return nullptr;
             if (x->left != nullptr) {
                 return mTree->maximum(x->left);
             }
-            Node* y = x->parent;
+            RBNode* y = x->parent;
             while (y != nullptr && x == y->left) {
                 x = y;
                 y = y->parent;
@@ -360,7 +360,7 @@ public:
 
     public:
         iterator() : node_(nullptr), mTree(nullptr) {}
-        iterator(Node* n, const RedBlackTree* t) : node_(n), mTree(t) {}
+        iterator(RBNode* n, const RedBlackTree* t) : node_(n), mTree(t) {}
 
         value_type& operator*() const { 
             FASTLED_ASSERT(node_ != nullptr, "RedBlackTree::iterator: dereferencing end iterator");
@@ -412,15 +412,15 @@ public:
         friend class RedBlackTree;
         friend class iterator;
     private:
-        const Node* node_;
+        const RBNode* node_;
         const RedBlackTree* mTree;
 
-        const Node* successor(const Node* x) const {
+        const RBNode* successor(const RBNode* x) const {
             if (x == nullptr) return nullptr;
             if (x->right != nullptr) {
                 return mTree->minimum(x->right);
             }
-            const Node* y = x->parent;
+            const RBNode* y = x->parent;
             while (y != nullptr && x == y->right) {
                 x = y;
                 y = y->parent;
@@ -428,12 +428,12 @@ public:
             return y;
         }
 
-        const Node* predecessor(const Node* x) const {
+        const RBNode* predecessor(const RBNode* x) const {
             if (x == nullptr) return nullptr;
             if (x->left != nullptr) {
                 return mTree->maximum(x->left);
             }
-            const Node* y = x->parent;
+            const RBNode* y = x->parent;
             while (y != nullptr && x == y->left) {
                 x = y;
                 y = y->parent;
@@ -443,7 +443,7 @@ public:
 
     public:
         const_iterator() : node_(nullptr), mTree(nullptr) {}
-        const_iterator(const Node* n, const RedBlackTree* t) : node_(n), mTree(t) {}
+        const_iterator(const RBNode* n, const RedBlackTree* t) : node_(n), mTree(t) {}
         const_iterator(const iterator& it) : node_(it.node_), mTree(it.mTree) {}
 
         const value_type& operator*() const { 
@@ -577,14 +577,14 @@ public:
     iterator erase(const_iterator pos) {
         if (pos.node_ == nullptr) return end();
         
-        Node* nodeToDelete = const_cast<Node*>(pos.node_);
-        Node* successor = nullptr;
+        RBNode* nodeToDelete = const_cast<RBNode*>(pos.node_);
+        RBNode* successor = nullptr;
         
         if (nodeToDelete->right != nullptr) {
             successor = minimum(nodeToDelete->right);
         } else {
-            Node* current = nodeToDelete;
-            Node* parent = current->parent;
+            RBNode* current = nodeToDelete;
+            RBNode* parent = current->parent;
             while (parent != nullptr && current == parent->right) {
                 current = parent;
                 parent = parent->parent;
@@ -592,9 +592,9 @@ public:
             successor = parent;
         }
         
-        Node* y = nodeToDelete;
-        Node* x = nullptr;
-        Node* xParent = nullptr;
+        RBNode* y = nodeToDelete;
+        RBNode* x = nullptr;
+        RBNode* xParent = nullptr;
         Color originalColor = y->color;
         
         if (nodeToDelete->left == nullptr) {
@@ -637,7 +637,7 @@ public:
     }
 
     fl::size erase(const value_type& value) {
-        Node* node = findNode(value);
+        RBNode* node = findNode(value);
         if (node == nullptr) return 0;
         
         erase(const_iterator(node, this));
@@ -657,12 +657,12 @@ public:
     }
 
     iterator find(const value_type& value) {
-        Node* node = findNode(value);
+        RBNode* node = findNode(value);
         return node ? iterator(node, this) : end();
     }
 
     const_iterator find(const value_type& value) const {
-        Node* node = findNode(value);
+        RBNode* node = findNode(value);
         return node ? const_iterator(node, this) : end();
     }
 
@@ -683,22 +683,22 @@ public:
     }
 
     iterator lower_bound(const value_type& value) {
-        Node* n = lowerBoundNode(value);
+        RBNode* n = lowerBoundNode(value);
         return n ? iterator(n, this) : end();
     }
 
     const_iterator lower_bound(const value_type& value) const {
-        Node* n = lowerBoundNode(value);
+        RBNode* n = lowerBoundNode(value);
         return n ? const_iterator(n, this) : end();
     }
 
     iterator upper_bound(const value_type& value) {
-        Node* n = upperBoundNode(value);
+        RBNode* n = upperBoundNode(value);
         return n ? iterator(n, this) : end();
     }
 
     const_iterator upper_bound(const value_type& value) const {
-        Node* n = upperBoundNode(value);
+        RBNode* n = upperBoundNode(value);
         return n ? const_iterator(n, this) : end();
     }
 
