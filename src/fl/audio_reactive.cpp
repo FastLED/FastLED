@@ -2,6 +2,7 @@
 #include "fl/math.h"
 #include "fl/span.h"
 #include "fl/int.h"
+#include "fl/memory.h"
 #include <math.h>
 
 namespace fl {
@@ -9,7 +10,14 @@ namespace fl {
 AudioReactive::AudioReactive() 
     : mFFTBins(16)  // Initialize with 16 frequency bins
 {
-    // No internal buffers needed
+    // Initialize enhanced beat detection components
+    mSpectralFluxDetector = fl::make_unique<SpectralFluxDetector>();
+    mPerceptualWeighting = fl::make_unique<PerceptualWeighting>();
+    
+    // Initialize previous magnitudes array to zero
+    for (fl::size i = 0; i < mPreviousMagnitudes.size(); ++i) {
+        mPreviousMagnitudes[i] = 0.0f;
+    }
 }
 
 AudioReactive::~AudioReactive() = default;
@@ -25,6 +33,17 @@ void AudioReactive::begin(const AudioConfig& config) {
     mAGCMultiplier = 1.0f;
     mMaxSample = 0.0f;
     mAverageLevel = 0.0f;
+    
+    // Reset enhanced beat detection components
+    if (mSpectralFluxDetector) {
+        mSpectralFluxDetector->reset();
+        mSpectralFluxDetector->setThreshold(config.spectralFluxThreshold);
+    }
+    
+    // Reset previous magnitudes
+    for (fl::size i = 0; i < mPreviousMagnitudes.size(); ++i) {
+        mPreviousMagnitudes[i] = 0.0f;
+    }
 }
 
 void AudioReactive::setConfig(const AudioConfig& config) {
@@ -42,7 +61,18 @@ void AudioReactive::processSample(const AudioSample& sample) {
     // Process the AudioSample immediately - timing is gated by sample availability
     processFFT(sample);
     updateVolumeAndPeak(sample);
+    
+    // Enhanced processing pipeline
+    calculateBandEnergies();
+    updateSpectralFlux();
+    
+    // Enhanced beat detection (includes original)
     detectBeat(currentTimeMs);
+    detectEnhancedBeats(currentTimeMs);
+    
+    // Apply perceptual weighting if enabled
+    applyPerceptualWeighting();
+    
     applyGain();
     applyScaling();
     smoothResults();
@@ -360,6 +390,34 @@ bool AudioReactive::isBeat() const {
     return mCurrentData.beatDetected;
 }
 
+bool AudioReactive::isBassBeat() const {
+    return mCurrentData.bassBeatDetected;
+}
+
+bool AudioReactive::isMidBeat() const {
+    return mCurrentData.midBeatDetected;
+}
+
+bool AudioReactive::isTrebleBeat() const {
+    return mCurrentData.trebleBeatDetected;
+}
+
+float AudioReactive::getSpectralFlux() const {
+    return mCurrentData.spectralFlux;
+}
+
+float AudioReactive::getBassEnergy() const {
+    return mCurrentData.bassEnergy;
+}
+
+float AudioReactive::getMidEnergy() const {
+    return mCurrentData.midEnergy;
+}
+
+float AudioReactive::getTrebleEnergy() const {
+    return mCurrentData.trebleEnergy;
+}
+
 fl::u8 AudioReactive::volumeToScale255() const {
     float vol = (mCurrentData.volume < 0.0f) ? 0.0f : ((mCurrentData.volume > 255.0f) ? 255.0f : mCurrentData.volume);
     return static_cast<fl::u8>(vol);
@@ -377,6 +435,95 @@ fl::u8 AudioReactive::frequencyToScale255(fl::u8 binIndex) const {
     float value = (mCurrentData.frequencyBins[binIndex] < 0.0f) ? 0.0f : 
                   ((mCurrentData.frequencyBins[binIndex] > 255.0f) ? 255.0f : mCurrentData.frequencyBins[binIndex]);
     return static_cast<fl::u8>(value);
+}
+
+// Enhanced beat detection methods
+void AudioReactive::calculateBandEnergies() {
+    // Calculate energy for bass frequencies (bins 0-1)
+    mCurrentData.bassEnergy = (mCurrentData.frequencyBins[0] + mCurrentData.frequencyBins[1]) / 2.0f;
+    
+    // Calculate energy for mid frequencies (bins 6-7)
+    mCurrentData.midEnergy = (mCurrentData.frequencyBins[6] + mCurrentData.frequencyBins[7]) / 2.0f;
+    
+    // Calculate energy for treble frequencies (bins 14-15)
+    mCurrentData.trebleEnergy = (mCurrentData.frequencyBins[14] + mCurrentData.frequencyBins[15]) / 2.0f;
+}
+
+void AudioReactive::updateSpectralFlux() {
+    if (!mSpectralFluxDetector) {
+        mCurrentData.spectralFlux = 0.0f;
+        return;
+    }
+    
+    // Calculate spectral flux from current and previous frequency bins
+    mCurrentData.spectralFlux = mSpectralFluxDetector->calculateSpectralFlux(
+        mCurrentData.frequencyBins, 
+        mPreviousMagnitudes.data()
+    );
+    
+    // Update previous magnitudes for next frame
+    for (int i = 0; i < 16; ++i) {
+        mPreviousMagnitudes[i] = mCurrentData.frequencyBins[i];
+    }
+}
+
+void AudioReactive::detectEnhancedBeats(fl::u32 currentTimeMs) {
+    // Reset beat flags
+    mCurrentData.bassBeatDetected = false;
+    mCurrentData.midBeatDetected = false;
+    mCurrentData.trebleBeatDetected = false;
+    
+    // Skip if enhanced beat detection is disabled
+    if (!mConfig.enableSpectralFlux && !mConfig.enableMultiBand) {
+        return;
+    }
+    
+    // Need minimum time since last beat for enhanced detection too
+    if (currentTimeMs - mLastBeatTime < BEAT_COOLDOWN) {
+        return;
+    }
+    
+    // Spectral flux-based beat detection
+    if (mConfig.enableSpectralFlux && mSpectralFluxDetector) {
+        bool onsetDetected = mSpectralFluxDetector->detectOnset(
+            mCurrentData.frequencyBins,
+            mPreviousMagnitudes.data()
+        );
+        
+        if (onsetDetected) {
+            // Enhance the traditional beat detection when spectral flux confirms
+            mCurrentData.beatDetected = true;
+            mLastBeatTime = currentTimeMs;
+        }
+    }
+    
+    // Multi-band beat detection
+    if (mConfig.enableMultiBand) {
+        // Bass beat detection (bins 0-1)
+        if (mCurrentData.bassEnergy > mConfig.bassThreshold) {
+            mCurrentData.bassBeatDetected = true;
+        }
+        
+        // Mid beat detection (bins 6-7)
+        if (mCurrentData.midEnergy > mConfig.midThreshold) {
+            mCurrentData.midBeatDetected = true;
+        }
+        
+        // Treble beat detection (bins 14-15)
+        if (mCurrentData.trebleEnergy > mConfig.trebleThreshold) {
+            mCurrentData.trebleBeatDetected = true;
+        }
+    }
+}
+
+void AudioReactive::applyPerceptualWeighting() {
+    // Apply perceptual weighting if available
+    if (mPerceptualWeighting) {
+        mPerceptualWeighting->applyAWeighting(mCurrentData);
+        
+        // Apply loudness compensation with reference level of 50.0f
+        mPerceptualWeighting->applyLoudnessCompensation(mCurrentData, 50.0f);
+    }
 }
 
 // Helper methods
@@ -405,6 +552,206 @@ float AudioReactive::computeRMS(const fl::vector<fl::i16>& samples) {
     }
     
     return sqrtf(sumSquares / samples.size());
+}
+
+// SpectralFluxDetector implementation
+SpectralFluxDetector::SpectralFluxDetector() 
+    : mFluxThreshold(0.1f)
+#if SKETCH_HAS_LOTS_OF_MEMORY
+    , mHistoryIndex(0)
+#endif
+{
+    // Initialize previous magnitudes to zero
+    for (fl::size i = 0; i < mPreviousMagnitudes.size(); ++i) {
+        mPreviousMagnitudes[i] = 0.0f;
+    }
+    
+#if SKETCH_HAS_LOTS_OF_MEMORY
+    // Initialize flux history to zero
+    for (fl::size i = 0; i < mFluxHistory.size(); ++i) {
+        mFluxHistory[i] = 0.0f;
+    }
+#endif
+}
+
+SpectralFluxDetector::~SpectralFluxDetector() = default;
+
+void SpectralFluxDetector::reset() {
+    for (fl::size i = 0; i < mPreviousMagnitudes.size(); ++i) {
+        mPreviousMagnitudes[i] = 0.0f;
+    }
+    
+#if SKETCH_HAS_LOTS_OF_MEMORY
+    for (fl::size i = 0; i < mFluxHistory.size(); ++i) {
+        mFluxHistory[i] = 0.0f;
+    }
+    mHistoryIndex = 0;
+#endif
+}
+
+bool SpectralFluxDetector::detectOnset(const float* currentBins, const float* /* previousBins */) {
+    float flux = calculateSpectralFlux(currentBins, mPreviousMagnitudes.data());
+    
+#if SKETCH_HAS_LOTS_OF_MEMORY
+    // Store flux in history for adaptive threshold calculation
+    mFluxHistory[mHistoryIndex] = flux;
+    mHistoryIndex = (mHistoryIndex + 1) % mFluxHistory.size();
+    
+    float adaptiveThreshold = calculateAdaptiveThreshold();
+    return flux > adaptiveThreshold;
+#else
+    // Simple fixed threshold for memory-constrained platforms
+    return flux > mFluxThreshold;
+#endif
+}
+
+float SpectralFluxDetector::calculateSpectralFlux(const float* currentBins, const float* previousBins) {
+    float flux = 0.0f;
+    
+    // Calculate spectral flux as sum of positive differences
+    for (int i = 0; i < 16; ++i) {
+        float diff = currentBins[i] - previousBins[i];
+        if (diff > 0.0f) {
+            flux += diff;
+        }
+    }
+    
+    // Update previous magnitudes for next calculation
+    for (int i = 0; i < 16; ++i) {
+        mPreviousMagnitudes[i] = currentBins[i];
+    }
+    
+    return flux;
+}
+
+void SpectralFluxDetector::setThreshold(float threshold) {
+    mFluxThreshold = threshold;
+}
+
+float SpectralFluxDetector::getThreshold() const {
+    return mFluxThreshold;
+}
+
+#if SKETCH_HAS_LOTS_OF_MEMORY
+float SpectralFluxDetector::calculateAdaptiveThreshold() {
+    // Calculate moving average of flux history
+    float sum = 0.0f;
+    for (fl::size i = 0; i < mFluxHistory.size(); ++i) {
+        sum += mFluxHistory[i];
+    }
+    float average = sum / mFluxHistory.size();
+    
+    // Adaptive threshold is base threshold plus some multiple of recent average
+    return mFluxThreshold + (average * 0.5f);
+}
+#endif
+
+// BeatDetectors implementation  
+BeatDetectors::BeatDetectors()
+    : mBassEnergy(0.0f), mMidEnergy(0.0f), mTrebleEnergy(0.0f)
+    , mPreviousBassEnergy(0.0f), mPreviousMidEnergy(0.0f), mPreviousTrebleEnergy(0.0f)
+{
+}
+
+BeatDetectors::~BeatDetectors() = default;
+
+void BeatDetectors::reset() {
+#if SKETCH_HAS_LOTS_OF_MEMORY
+    bass.reset();
+    mid.reset(); 
+    treble.reset();
+#else
+    combined.reset();
+#endif
+    
+    mBassEnergy = 0.0f;
+    mMidEnergy = 0.0f;
+    mTrebleEnergy = 0.0f;
+    mPreviousBassEnergy = 0.0f;
+    mPreviousMidEnergy = 0.0f;
+    mPreviousTrebleEnergy = 0.0f;
+}
+
+void BeatDetectors::detectBeats(const float* frequencyBins, AudioData& audioData) {
+    // Calculate current band energies
+    mBassEnergy = (frequencyBins[0] + frequencyBins[1]) / 2.0f;
+    mMidEnergy = (frequencyBins[6] + frequencyBins[7]) / 2.0f;
+    mTrebleEnergy = (frequencyBins[14] + frequencyBins[15]) / 2.0f;
+    
+#if SKETCH_HAS_LOTS_OF_MEMORY
+    // Use separate detectors for each band
+    audioData.bassBeatDetected = bass.detectOnset(&mBassEnergy, &mPreviousBassEnergy);
+    audioData.midBeatDetected = mid.detectOnset(&mMidEnergy, &mPreviousMidEnergy);
+    audioData.trebleBeatDetected = treble.detectOnset(&mTrebleEnergy, &mPreviousTrebleEnergy);
+#else
+    // Use simple threshold detection for memory-constrained platforms
+    audioData.bassBeatDetected = (mBassEnergy > mPreviousBassEnergy * 1.3f) && (mBassEnergy > 0.1f);
+    audioData.midBeatDetected = (mMidEnergy > mPreviousMidEnergy * 1.25f) && (mMidEnergy > 0.08f);
+    audioData.trebleBeatDetected = (mTrebleEnergy > mPreviousTrebleEnergy * 1.2f) && (mTrebleEnergy > 0.05f);
+#endif
+    
+    // Update previous energies
+    mPreviousBassEnergy = mBassEnergy;
+    mPreviousMidEnergy = mMidEnergy;
+    mPreviousTrebleEnergy = mTrebleEnergy;
+}
+
+void BeatDetectors::setThresholds(float bassThresh, float midThresh, float trebleThresh) {
+#if SKETCH_HAS_LOTS_OF_MEMORY
+    bass.setThreshold(bassThresh);
+    mid.setThreshold(midThresh);
+    treble.setThreshold(trebleThresh);
+#else
+    combined.setThreshold((bassThresh + midThresh + trebleThresh) / 3.0f);
+#endif
+}
+
+// PerceptualWeighting implementation
+PerceptualWeighting::PerceptualWeighting()
+#if SKETCH_HAS_LOTS_OF_MEMORY
+    : mHistoryIndex(0)
+#endif
+{
+#if SKETCH_HAS_LOTS_OF_MEMORY
+    // Initialize loudness history to zero
+    for (fl::size i = 0; i < mLoudnessHistory.size(); ++i) {
+        mLoudnessHistory[i] = 0.0f;
+    }
+#endif
+}
+
+PerceptualWeighting::~PerceptualWeighting() = default;
+
+void PerceptualWeighting::applyAWeighting(AudioData& data) const {
+    // Apply A-weighting coefficients to frequency bins
+    for (int i = 0; i < 16; ++i) {
+        data.frequencyBins[i] *= A_WEIGHTING_COEFFS[i];
+    }
+}
+
+void PerceptualWeighting::applyLoudnessCompensation(AudioData& data, float referenceLevel) const {
+    // Calculate current loudness level
+    float currentLoudness = data.volume;
+    
+    // Calculate compensation factor based on difference from reference
+    float compensationFactor = 1.0f;
+    if (currentLoudness < referenceLevel) {
+        // Boost quiet signals
+        compensationFactor = 1.0f + (referenceLevel - currentLoudness) / referenceLevel * 0.3f;
+    } else if (currentLoudness > referenceLevel * 1.5f) {
+        // Slightly reduce very loud signals  
+        compensationFactor = 1.0f - (currentLoudness - referenceLevel * 1.5f) / (referenceLevel * 2.0f) * 0.2f;
+    }
+    
+    // Apply compensation to frequency bins
+    for (int i = 0; i < 16; ++i) {
+        data.frequencyBins[i] *= compensationFactor;
+    }
+    
+#if SKETCH_HAS_LOTS_OF_MEMORY
+    // Store in history for future adaptive compensation (not implemented yet)
+    // This would be used for more sophisticated dynamic range compensation
+#endif
 }
 
 } // namespace fl

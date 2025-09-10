@@ -6,12 +6,19 @@
 #include "fl/stdint.h"
 #include "fl/int.h"
 #include "fl/audio.h"
+#include "fl/array.h"
+#include "fl/unique_ptr.h"
+#include "fl/sketch_macros.h"
 #include "crgb.h"
 #include "fl/colorutils.h"
 
 namespace fl {
 
-// Audio data structure - matches original WLED output
+// Forward declarations for enhanced beat detection
+class SpectralFluxDetector;
+class PerceptualWeighting;
+
+// Audio data structure - matches original WLED output with extensions
 struct AudioData {
     float volume = 0.0f;                    // Overall volume level (0-255)
     float volumeRaw = 0.0f;                 // Raw volume without smoothing
@@ -21,6 +28,15 @@ struct AudioData {
     float dominantFrequency = 0.0f;         // Major peak frequency (Hz)
     float magnitude = 0.0f;                 // FFT magnitude of dominant frequency
     fl::u32 timestamp = 0;                 // millis() when data was captured
+    
+    // Enhanced beat detection fields
+    bool bassBeatDetected = false;          // Bass-specific beat detection
+    bool midBeatDetected = false;           // Mid-range beat detection
+    bool trebleBeatDetected = false;        // Treble beat detection
+    float spectralFlux = 0.0f;              // Current spectral flux value
+    float bassEnergy = 0.0f;                // Energy in bass frequencies (0-1)
+    float midEnergy = 0.0f;                 // Energy in mid frequencies (6-7)
+    float trebleEnergy = 0.0f;              // Energy in treble frequencies (14-15)
 };
 
 struct AudioConfig {
@@ -32,6 +48,14 @@ struct AudioConfig {
     fl::u8 decay = 200;             // Decay time (ms) - how slow to respond to decreases
     u16 sampleRate = 22050;     // Sample rate (Hz)
     fl::u8 scalingMode = 3;         // 0=none, 1=log, 2=linear, 3=sqrt
+    
+    // Enhanced beat detection configuration
+    bool enableSpectralFlux = true;     // Enable spectral flux-based beat detection
+    bool enableMultiBand = true;        // Enable multi-band beat detection
+    float spectralFluxThreshold = 0.1f; // Threshold for spectral flux detection
+    float bassThreshold = 0.15f;        // Threshold for bass beat detection
+    float midThreshold = 0.12f;         // Threshold for mid beat detection
+    float trebleThreshold = 0.08f;      // Threshold for treble beat detection
 };
 
 class AudioReactive {
@@ -60,6 +84,15 @@ public:
     float getTreble() const;  // Average of bins 14-15
     bool isBeat() const;
     
+    // Enhanced beat detection accessors
+    bool isBassBeat() const;
+    bool isMidBeat() const;
+    bool isTrebleBeat() const;
+    float getSpectralFlux() const;
+    float getBassEnergy() const;
+    float getMidEnergy() const;
+    float getTrebleEnergy() const;
+    
     // Effect helpers
     fl::u8 volumeToScale255() const;
     CRGB volumeToColor(const CRGBPalette16& palette) const;
@@ -74,6 +107,12 @@ private:
     void smoothResults();
     void applyScaling();
     void applyGain();
+    
+    // Enhanced beat detection methods
+    void detectEnhancedBeats(fl::u32 currentTimeMs);
+    void calculateBandEnergies();
+    void updateSpectralFlux();
+    void applyPerceptualWeighting();
     
     // Helper methods
     float mapFrequencyBin(int fromBin, int toBin);
@@ -108,6 +147,134 @@ private:
     float mAGCMultiplier = 1.0f;
     float mMaxSample = 0.0f;
     float mAverageLevel = 0.0f;
+    
+    // Enhanced beat detection components
+    fl::unique_ptr<SpectralFluxDetector> mSpectralFluxDetector;
+    fl::unique_ptr<PerceptualWeighting> mPerceptualWeighting;
+    
+    // Enhanced beat detection state
+    fl::array<float, 16> mPreviousMagnitudes;
+};
+
+// Spectral flux-based onset detection for enhanced beat detection
+class SpectralFluxDetector {
+public:
+    SpectralFluxDetector();
+    ~SpectralFluxDetector();
+    
+    void reset();
+    bool detectOnset(const float* currentBins, const float* previousBins);
+    float calculateSpectralFlux(const float* currentBins, const float* previousBins);
+    void setThreshold(float threshold);
+    float getThreshold() const;
+    
+private:
+    float mFluxThreshold;
+    fl::array<float, 16> mPreviousMagnitudes;
+    
+#if SKETCH_HAS_LOTS_OF_MEMORY
+    fl::array<float, 32> mFluxHistory;      // For advanced smoothing
+    fl::size mHistoryIndex;
+    float calculateAdaptiveThreshold();
+#endif
+};
+
+// Multi-band beat detection for different frequency ranges
+struct BeatDetectors {
+    BeatDetectors();
+    ~BeatDetectors();
+    
+    void reset();
+    void detectBeats(const float* frequencyBins, AudioData& audioData);
+    void setThresholds(float bassThresh, float midThresh, float trebleThresh);
+    
+private:
+#if SKETCH_HAS_LOTS_OF_MEMORY
+    SpectralFluxDetector bass;     // 20-200 Hz (bins 0-1)
+    SpectralFluxDetector mid;      // 200-2000 Hz (bins 6-7)
+    SpectralFluxDetector treble;   // 2000-20000 Hz (bins 14-15)
+#else
+    SpectralFluxDetector combined; // Single detector for memory-constrained
+#endif
+    
+    // Energy tracking for band-specific thresholds
+    float mBassEnergy;
+    float mMidEnergy; 
+    float mTrebleEnergy;
+    float mPreviousBassEnergy;
+    float mPreviousMidEnergy;
+    float mPreviousTrebleEnergy;
+};
+
+// Perceptual audio weighting for psychoacoustic processing
+class PerceptualWeighting {
+public:
+    PerceptualWeighting();
+    ~PerceptualWeighting();
+    
+    void applyAWeighting(AudioData& data) const;
+    void applyLoudnessCompensation(AudioData& data, float referenceLevel) const;
+    
+private:
+    // A-weighting coefficients for 16-bin frequency analysis
+    static constexpr float A_WEIGHTING_COEFFS[16] = {
+        0.5f, 0.6f, 0.8f, 1.0f, 1.2f, 1.3f, 1.4f, 1.4f,
+        1.3f, 1.2f, 1.0f, 0.8f, 0.6f, 0.4f, 0.2f, 0.1f
+    };
+    
+#if SKETCH_HAS_LOTS_OF_MEMORY
+    fl::array<float, 16> mLoudnessHistory;  // For dynamic compensation
+    fl::size mHistoryIndex;
+#endif
+};
+
+// Circular buffer template for efficient audio streaming
+template<typename T, fl::size Size>
+class CircularBuffer {
+public:
+    CircularBuffer() : mWriteIndex(0), mReadIndex(0), mSize(0) {}
+    
+    void push(const T& item) {
+        mBuffer[mWriteIndex] = item;
+        mWriteIndex = (mWriteIndex + 1) % Size;
+        if (mSize < Size) {
+            mSize++;
+        } else {
+            // Buffer is full, advance read index
+            mReadIndex = (mReadIndex + 1) % Size;
+        }
+    }
+    
+    bool pop(T& item) {
+        if (empty()) {
+            return false;
+        }
+        item = mBuffer[mReadIndex];
+        mReadIndex = (mReadIndex + 1) % Size;
+        mSize--;
+        return true;
+    }
+    
+    bool full() const { return mSize == Size; }
+    bool empty() const { return mSize == 0; }
+    fl::size size() const { return mSize; }
+    fl::size capacity() const { return Size; }
+    
+    void clear() {
+        mWriteIndex = 0;
+        mReadIndex = 0;
+        mSize = 0;
+    }
+    
+private:
+    fl::array<T, Size> mBuffer;
+    fl::size mWriteIndex;
+    fl::size mReadIndex;
+    fl::size mSize;
+    
+#if SKETCH_HAS_LOTS_OF_MEMORY
+    fl::array<T, Size> mBackupBuffer;  // For advanced buffering strategies
+#endif
 };
 
 
