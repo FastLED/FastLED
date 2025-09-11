@@ -25,7 +25,7 @@ struct I2SContext {
     i2s_std_config_t std_config;
 };
 
-I2SContext make_context(const AudioConfigI2S &config) {
+inline I2SContext make_context(const AudioConfigI2S &config) {
     auto detect_slot_mode = [](AudioChannel value) -> i2s_slot_mode_t {
         switch (value) {
         case Left:
@@ -113,7 +113,7 @@ I2SContext make_context(const AudioConfigI2S &config) {
     return out;
 }
 
-I2SContext i2s_audio_init(const AudioConfigI2S &config) {
+inline I2SContext i2s_audio_init(const AudioConfigI2S &config) {
     I2SContext ctx = make_context(config);
 
     // Create I2S channel configuration with DMA buffer settings
@@ -137,7 +137,7 @@ I2SContext i2s_audio_init(const AudioConfigI2S &config) {
     return ctx;
 }
 
-size_t i2s_read_raw_samples(const I2SContext &ctx,
+inline size_t i2s_read_raw_samples(const I2SContext &ctx,
                             audio_sample_t (&buffer)[I2S_AUDIO_BUFFER_LEN]) {
     size_t bytes_read = 0;
 
@@ -153,7 +153,7 @@ size_t i2s_read_raw_samples(const I2SContext &ctx,
     return 0;
 }
 
-void i2s_audio_destroy(const I2SContext &ctx) {
+inline void i2s_audio_destroy(const I2SContext &ctx) {
     if (ctx.rx_handle != nullptr) {
         // Disable the channel first
         i2s_channel_disable(ctx.rx_handle);
