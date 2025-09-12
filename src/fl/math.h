@@ -1,7 +1,8 @@
 #pragma once
 
-
+#if defined(__has_include) && __has_include(<math.h>)
 #include <math.h>
+#endif // __has_include(<math.h>)
 
 // Exponential function - binds to standard library exp if available
 #ifndef FASTLED_HAS_EXP
@@ -9,10 +10,10 @@
 #if !defined(__has_include)
 #define FASTLED_HAS_EXP 0
 #else
-#if __has_include(<cmath>)
+#if defined(__has_include) && __has_include(<cmath.h>)
 #define FASTLED_HAS_EXP 1
 #include <cmath>  // ok include
-#elif __has_include(<math.h>)
+#if defined(__has_include) && __has_include(<math.h>)
 #define FASTLED_HAS_EXP 1
 #include <math.h>  // ok include
 #else

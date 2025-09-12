@@ -28,7 +28,9 @@
       "Bash(NO_PARALLEL=0 bash test --examples --verbose)",
       "Bash(export NO_PARALLEL=0)",
       "Bash(echo:*)",
-      "Bash(time bash:*)"
+      "Bash(time bash:*)",
+      "Bash(nm:*)",
+      "Bash(objdump:*)"
     ],
     "deny": []
   }

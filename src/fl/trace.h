@@ -19,7 +19,7 @@ namespace fl {
 
 /// @brief A structure to hold source trace information.
 /// Contains the file name, line number, and the time at which the trace was captured.
-using TracePoint = fl::tuple<const char*, int, uint32_t>;
+using TracePoint = fl::tuple<const char*, int, fl::u32>;
 
 } // namespace fl
 
