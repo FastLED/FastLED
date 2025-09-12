@@ -39,8 +39,7 @@ public:
     inline static void lo() __attribute__ ((always_inline)) { _GPIO::r()->BSRRH = _MASK; }
 #else
     inline static void hi() __attribute__ ((always_inline)) { _GPIO::r()->BSRR = _MASK; }
-    inline static void lo() __attribute__ ((always_inline)) { _GPIO::r()->BRR = _MASK; }
-    // inline static void lo() __attribute__ ((always_inline)) { _GPIO::r()->BSRR = (_MASK<<16); }
+    inline static void lo() __attribute__ ((always_inline)) { _GPIO::r()->BSRR = (_MASK<<16); }
 #endif
     inline static void set(FASTLED_REGISTER port_t val) __attribute__ ((always_inline)) { _GPIO::r()->ODR = val; }
 
@@ -61,7 +60,7 @@ public:
     inline static port_ptr_t cport() __attribute__ ((always_inline)) { return &_GPIO::r()->BSRRH; }
 #else
     inline static port_ptr_t sport() __attribute__ ((always_inline)) { return &_GPIO::r()->BSRR; }
-    inline static port_ptr_t cport() __attribute__ ((always_inline)) { return &_GPIO::r()->BRR; }
+    inline static port_ptr_t cport() __attribute__ ((always_inline)) { return &_GPIO::r()->BSRR; }
 #endif
 
     inline static port_t mask() __attribute__ ((always_inline)) { return _MASK; }
