@@ -717,6 +717,8 @@ PerceptualWeighting::PerceptualWeighting()
     for (fl::size i = 0; i < mLoudnessHistory.size(); ++i) {
         mLoudnessHistory[i] = 0.0f;
     }
+    // Suppress unused warning until mHistoryIndex is implemented
+    (void)mHistoryIndex;
 #endif
 }
 
