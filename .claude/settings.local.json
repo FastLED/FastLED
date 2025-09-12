@@ -21,7 +21,11 @@
       "Bash(bash compile:*)",
       "WebFetch(domain:docs.espressif.com)",
       "Bash(pio run:*)",
-      "Bash(git log:*)"
+      "Bash(git log:*)",
+      "Bash(NO_PARALLEL=0 bash test --examples --verbose)",
+      "Bash(export NO_PARALLEL=0)",
+      "Bash(echo:*)",
+      "Bash(time bash:*)"
     ],
     "deny": []
   }

@@ -81,8 +81,10 @@ def main() -> None:
         # Parse and process arguments
         args = parse_args()
 
-        # Force sequential execution to avoid out of memory errors
-        args.no_parallel = True
+        # Default to parallel execution for better performance
+        # Users can disable parallel compilation by setting NO_PARALLEL=1 or using --no-parallel
+        if os.environ.get("NO_PARALLEL", "0") == "1":
+            args.no_parallel = True
 
         args = process_test_flags(args)
 
