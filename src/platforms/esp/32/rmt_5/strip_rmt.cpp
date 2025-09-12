@@ -15,6 +15,7 @@
 #include "esp_err.h"
 #include "esp_check.h"
 #include "fl/namespace.h"
+#include "fl/assert.h"
 
 #define AUTO_MEMORY_BLOCK_SIZE 0
 
@@ -175,6 +176,20 @@ IRmtStrip *IRmtStrip::Create(
     uint32_t th0, uint32_t tl0, uint32_t th1, uint32_t tl1, uint32_t reset,
     DmaMode dma_config, uint8_t interrupt_priority, uint8_t* external_pixel_buf)
 {
+    return new RmtStrip(
+        pin, led_count, is_rgbw,
+        th0, tl0, th1, tl1, reset,
+        dma_config, interrupt_priority, external_pixel_buf
+    );
+}
+
+IRmtStrip *IRmtStrip::CreateWithExternalBuffer(
+    int pin, uint32_t led_count, bool is_rgbw,
+    uint32_t th0, uint32_t tl0, uint32_t th1, uint32_t tl1, uint32_t reset,
+    uint8_t* external_pixel_buf, DmaMode dma_config, uint8_t interrupt_priority)
+{
+    FL_ASSERT(external_pixel_buf != nullptr, "External pixel buffer cannot be null");
+    
     return new RmtStrip(
         pin, led_count, is_rgbw,
         th0, tl0, th1, tl1, reset,
