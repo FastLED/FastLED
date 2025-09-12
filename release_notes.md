@@ -1,3 +1,13 @@
+FastLED 3.10.3
+==============
+  * **STM32F4 Support Added**: BlackPill STM32F411CE and STM32F4 family support
+    * Resolves GitHub issue #726: "avr/io.h: No such file or directory" compilation error
+    * Added STM32F4 platform detection using canonical `STM32F4` preprocessor define
+    * Full GPIO pin mapping support for WeAct Studio BlackPill V2.0 (STM32F411CE)
+    * Consolidated STM32F1/STM32F4 pin definitions to reduce code duplication
+    * Added CI testing with GitHub Actions build badge for continuous validation
+    * Compatible with PlatformIO `ststm32` platform and Arduino framework
+
 FastLED 3.10.2
 ==============
   * CORKSCREW MAPPING!
