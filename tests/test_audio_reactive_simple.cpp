@@ -3,6 +3,7 @@
 #include "fl/math.h"
 #include <math.h>
 #include "fl/memory.h"
+#include "fl/circular_buffer.h"
 
 using namespace fl;
 
@@ -299,7 +300,7 @@ TEST_CASE("AudioReactive configuration validation") {
 
 TEST_CASE("AudioReactive CircularBuffer functionality") {
     // Test the CircularBuffer template directly
-    CircularBuffer<float, 8> buffer;
+    StaticCircularBuffer<float, 8> buffer;
     
     CHECK(buffer.empty());
     CHECK_FALSE(buffer.full());
