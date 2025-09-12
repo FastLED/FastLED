@@ -19,7 +19,8 @@
       "WebFetch(domain:docs.github.com)",
       "Bash(timeout:*)",
       "Bash(bash compile:*)",
-      "WebFetch(domain:docs.espressif.com)"
+      "WebFetch(domain:docs.espressif.com)",
+      "Bash(pio run:*)"
     ],
     "deny": []
   }
