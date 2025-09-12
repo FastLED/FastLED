@@ -11,7 +11,7 @@
 // IDF 4.4 and 5.0+ both have analogWrite() available, so this polyfill is only needed
 // for very old IDF versions. We use a weak symbol so it auto-disables on newer platforms.
 #if !ESP_IDF_VERSION_4_OR_HIGHER
-FL_WEAK void analogWrite(uint8_t pin, int value) {
+FL_LINK_WEAK void analogWrite(uint8_t pin, int value) {
   // Setup PWM channel for the pin if not already done
   static bool channels_setup[16] = {false}; // ESP32 has 16 PWM channels
   static uint8_t channel_counter = 0;
