@@ -27,7 +27,7 @@ FASTLED_USING_NAMESPACE
 #define cli() nvic_globalirq_disable()
 #define sei() nvic_globalirq_enable()
 
-#elif defined(STM32F1)
+#elif defined(STM32F1) || defined(STM32F4)
 // stm32duino
 
 #define cli() noInterrupts()
@@ -55,7 +55,7 @@ FASTLED_USING_NAMESPACE
 // pgmspace definitions
 #define PROGMEM
 
-#if !defined(STM32F1)
+#if !defined(STM32F1) && !defined(STM32F4)
 // The stm32duino core already defines these
 #define pgm_read_dword(addr) (*(const unsigned long *)(addr))
 #define pgm_read_dword_near(addr) pgm_read_dword(addr)
@@ -78,6 +78,10 @@ typedef volatile       uint8_t RwReg; /**< Read-Write 8-bit register (volatile u
 // F_CPU is already defined on stm32duino, but it's not constant.
 #undef F_CPU
 #define F_CPU 72000000
+#elif defined(STM32F4)
+// F_CPU is already defined on stm32duino, but it's not constant.
+#undef F_CPU
+#define F_CPU 100000000
 #else
 #define F_CPU 72000000
 #endif
@@ -88,4 +92,4 @@ typedef volatile       uint8_t RwReg; /**< Read-Write 8-bit register (volatile u
 extern "C" void yield();
 #endif
 
-#endif // defined(STM32F10X_MD) || defined(STM32F2XX)
+#endif

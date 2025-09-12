@@ -664,6 +664,13 @@ XIAO_ESP32S3 = Board(
     build_unflags=["-DFASTLED_RMT5=0", "-DFASTLED_RMT5"],
 )
 
+# STM32F4 Black Pill board - addresses GitHub issue #726
+BLACKPILL = Board(
+    board_name="blackpill",
+    real_board_name="blackpill_f411ce",
+    platform="ststm32",
+)
+
 
 def _make_board_map(boards: list[Board]) -> dict[str, Board]:
     # make board map, but assert on duplicate board names
