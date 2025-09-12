@@ -10,9 +10,8 @@
 
 namespace fl {
 
-// Static factory method implementation
-fl::shared_ptr<IAudioInput>
-IAudioInput::create(const AudioConfig &config, fl::string *error_message) {
+// Strong implementation overrides the weak default
+fl::shared_ptr<IAudioInput> platform_create_audio_input(const AudioConfig &config, fl::string *error_message) {
     if (config.is<AudioConfigI2S>()) {
 #if FASTLED_ESP32_I2S_SUPPORTED
         FL_WARN("Creating I2S standard mode audio source");

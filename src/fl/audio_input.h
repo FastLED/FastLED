@@ -135,4 +135,7 @@ public:
 };
 
 
+// Free function for audio input creation - can be overridden by platform-specific implementations
+fl::shared_ptr<IAudioInput> platform_create_audio_input(const AudioConfig& config, fl::string* error_message = nullptr) __attribute__((weak));
+
 }  // namespace fl
