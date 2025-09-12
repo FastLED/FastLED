@@ -10,10 +10,10 @@
 #if !defined(__has_include)
 #define FASTLED_HAS_EXP 0
 #else
-#if defined(__has_include) && __has_include(<cmath.h>)
+#if defined(__has_include) && __has_include(<cmath>)
 #define FASTLED_HAS_EXP 1
 #include <cmath>  // ok include
-#if defined(__has_include) && __has_include(<math.h>)
+#elif defined(__has_include) && __has_include(<math.h>)
 #define FASTLED_HAS_EXP 1
 #include <math.h>  // ok include
 #else
