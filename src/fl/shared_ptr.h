@@ -153,8 +153,8 @@ public:
     }
     
     // Converting copy constructor
-    template<typename Y>
-    shared_ptr(const shared_ptr<Y>& other) : ptr_(other.ptr_), control_block_(other.control_block_) {
+    template<typename Y, typename = typename fl::enable_if<fl::is_base_of<T, Y>::value || fl::is_base_of<Y, T>::value>::type>
+    shared_ptr(const shared_ptr<Y>& other) : ptr_(static_cast<T*>(other.ptr_)), control_block_(other.control_block_) {
         acquire();
     }
     
@@ -165,8 +165,8 @@ public:
     }
     
     // Converting move constructor
-    template<typename Y>
-    shared_ptr(shared_ptr<Y>&& other) noexcept : ptr_(other.ptr_), control_block_(other.control_block_) {
+    template<typename Y, typename = typename fl::enable_if<fl::is_base_of<T, Y>::value || fl::is_base_of<Y, T>::value>::type>
+    shared_ptr(shared_ptr<Y>&& other) noexcept : ptr_(static_cast<T*>(other.ptr_)), control_block_(other.control_block_) {
         other.ptr_ = nullptr;
         other.control_block_ = nullptr;
     }
