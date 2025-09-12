@@ -35,7 +35,27 @@ FASTLED_NAMESPACE_BEGIN
 template<class PIXEL_TYPE>
 class CPixelView;
 
-/// CPixelView for CRGB arrays
+/// @brief CPixelView specialized for CRGB pixel arrays - the most commonly used pixel view type.
+///
+/// CRGBSet provides all the functionality of CPixelView optimized for CRGB pixels.
+/// This is the primary interface for working with LED strips in FastLED.
+///
+/// **Quick Start:**
+/// ```cpp
+/// CRGB leds[NUM_LEDS];
+/// CRGBSet pixels(leds, NUM_LEDS);
+/// 
+/// // Basic operations
+/// pixels[0] = CRGB::Red;
+/// pixels.fill_solid(CRGB::Blue);
+/// pixels.fadeToBlackBy(64);
+/// 
+/// // Advanced effects
+/// pixels(0, 10).fill_rainbow(0, 25);      // Rainbow on first 10 LEDs
+/// pixels(20, 10).blur1d(128);             // Blur segment (reverse order)
+/// ```
+///
+/// @see CPixelView for full API documentation
 typedef CPixelView<CRGB> CRGBSet;
 
 /// Retrieve a pointer to a CRGB array, using a CRGBSet and an LED offset
@@ -51,10 +71,41 @@ CRGB *operator+(const CRGBSet & pixels, int offset);
 /// @brief Classes for managing logical groups of LEDs
 /// @{
 
-/// Represents a set of LED objects.  Provides the [] array operator, and works like a normal array in that case.
-/// This should be kept in sync with the set of functions provided by the other @ref PixelTypes as well as functions in colorutils.h.
-/// @tparam PIXEL_TYPE the type of LED data referenced in the class, e.g. CRGB.
-/// @note A pixel set is a window into another set of LED data, it is not its own set of LED data.
+/// @brief Represents a view/window into a set of LED pixels, providing array-like access and rich color operations.
+///
+/// CPixelView provides a non-owning view into LED pixel data with extensive manipulation capabilities.
+/// It supports forward and reverse iteration, subset operations, and a comprehensive set of color functions.
+/// 
+/// **Key Features:**
+/// - Array-like access with `operator[]`
+/// - Subset creation with `operator(start, end)` 
+/// - Reverse iteration when `start > end`
+/// - Rich color operations: fill, gradients, scaling, blending
+/// - Automatic conversion to `fl::span<T>` for modern C++ interop
+/// - Iterator support for range-based loops
+/// 
+/// **Common Usage Patterns:**
+/// ```cpp
+/// // Basic usage
+/// CRGB leds[100];
+/// CRGBSet pixels(leds, 100);
+/// pixels[0] = CRGB::Red;                    // Set individual pixel
+/// pixels.fill_solid(CRGB::Blue);           // Fill all pixels
+/// 
+/// // Subset operations  
+/// auto segment = pixels(10, 50);           // Forward subset (indices 10-50)
+/// auto reverse = pixels(50, 10);           // Reverse subset (50 down to 10)
+/// segment.fill_rainbow(0, 5);              // Apply rainbow to segment
+/// 
+/// // Modern C++ interop
+/// fl::span<CRGB> span = pixels;            // Automatic conversion
+/// std::fill(pixels.begin(), pixels.end(), CRGB::Green);  // STL algorithms
+/// ```
+///
+/// @tparam PIXEL_TYPE the type of LED data referenced, typically CRGB or CHSV
+/// @note This is a non-owning view - it references existing LED data, doesn't own it
+/// @see CRGBSet - typedef for CPixelView<CRGB>, the most common usage
+/// @see CRGBArray - version that owns its LED data
 template<class PIXEL_TYPE>
 class CPixelView {
 public:

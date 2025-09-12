@@ -20,7 +20,8 @@
       "Bash(timeout:*)",
       "Bash(bash compile:*)",
       "WebFetch(domain:docs.espressif.com)",
-      "Bash(pio run:*)"
+      "Bash(pio run:*)",
+      "Bash(git log:*)"
     ],
     "deny": []
   }
