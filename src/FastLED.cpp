@@ -49,7 +49,7 @@ volatile fl::u32 fuckit;
 #endif
 
 #if !FASTLED_NO_ATEXIT
-extern "C" __attribute__((weak)) int atexit(void (* /*func*/ )()) { return 0; }
+extern "C" FL_LINK_WEAK int atexit(void (* /*func*/ )()) { return 0; }
 #endif
 
 #ifdef FASTLED_NEEDS_YIELD
@@ -402,9 +402,9 @@ namespace __cxxabiv1
 	/* The ABI requires a 64-bit type.  */
 	__extension__ typedef int __guard __attribute__((mode(__DI__)));
 
-	extern "C" int __cxa_guard_acquire (__guard *) __attribute__((weak));
-	extern "C" void __cxa_guard_release (__guard *) __attribute__((weak));
-	extern "C" void __cxa_guard_abort (__guard *) __attribute__((weak));
+	extern "C" int __cxa_guard_acquire (__guard *) FL_LINK_WEAK;
+	extern "C" void __cxa_guard_release (__guard *) FL_LINK_WEAK;
+	extern "C" void __cxa_guard_abort (__guard *) FL_LINK_WEAK;
 
 	extern "C" int __cxa_guard_acquire (__guard *g)
 	{

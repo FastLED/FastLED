@@ -8,6 +8,7 @@
 #include "crgb.h"
 #include "fl/blur.h"
 #include "fl/colorutils_misc.h"
+#include "fl/compiler_control.h"
 #include "fl/deprecated.h"
 #include "fl/unused.h"
 #include "fl/xymap.h"
@@ -17,9 +18,9 @@
 namespace fl {
 
 // Legacy XY function. This is a weak symbol that can be overridden by the user.
-fl::u16 XY(fl::u8 x, fl::u8 y) __attribute__((weak));
+fl::u16 XY(fl::u8 x, fl::u8 y) FL_LINK_WEAK;
 
-__attribute__((weak)) fl::u16 XY(fl::u8 x, fl::u8 y) {
+FL_LINK_WEAK fl::u16 XY(fl::u8 x, fl::u8 y) {
     FASTLED_UNUSED(x);
     FASTLED_UNUSED(y);
     FASTLED_ASSERT(false, "the user didn't provide an XY function");

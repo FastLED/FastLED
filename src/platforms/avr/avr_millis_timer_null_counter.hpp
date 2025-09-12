@@ -1,5 +1,7 @@
 #pragma once
 
+#include "fl/compiler_control.h"
+
 // Defines a weak (or strong for some attiny x/y parts) symbol for timer_millis
 // to allow linking with boards whose core does not provide this variable.
 // led_sysdefs_avr.h declares this with C linkage, so ensure the definition
@@ -13,7 +15,7 @@ extern "C" {
 // For ATtiny1616 and similar boards that use TIMERD0, provide a strong symbol
 volatile unsigned long timer_millis = 0;
 #else
-__attribute__((weak)) volatile unsigned long timer_millis = 0;
+FL_LINK_WEAK volatile unsigned long timer_millis = 0;
 #endif
 
 #ifdef __cplusplus

@@ -141,6 +141,6 @@
   #define FL_OPTIMIZATION_LEVEL_O0_END   /* nothing */
 #endif
 
-#ifndef FL_WEAK
-#define FL_WEAK __attribute__((weak))
+#ifndef FL_LINK_WEAK
+#define FL_LINK_WEAK __attribute__((weak))
 #endif

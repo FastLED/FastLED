@@ -9,6 +9,7 @@
 #include "fl/variant.h"
 #include "fl/shared_ptr.h"
 #include "fl/audio.h"
+#include "fl/compiler_control.h"
 #include "platforms/audio.h"
 
 #ifndef FASTLED_HAS_AUDIO_INPUT
@@ -136,6 +137,6 @@ public:
 
 
 // Free function for audio input creation - can be overridden by platform-specific implementations
-fl::shared_ptr<IAudioInput> platform_create_audio_input(const AudioConfig& config, fl::string* error_message = nullptr) __attribute__((weak));
+fl::shared_ptr<IAudioInput> platform_create_audio_input(const AudioConfig& config, fl::string* error_message = nullptr) FL_LINK_WEAK;
 
 }  // namespace fl

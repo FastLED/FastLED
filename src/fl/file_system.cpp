@@ -1,6 +1,7 @@
 #include "fl/file_system.h"
 #include "fl/unused.h"
 #include "fl/warn.h"
+#include "fl/compiler_control.h"
 
 #ifdef __EMSCRIPTEN__
 #include "platforms/wasm/fs_wasm.h"
@@ -193,7 +194,7 @@ bool FileSystem::readText(const char *path, fl::string *out) {
 namespace fl {
 #if !FASTLED_HAS_SDCARD
 // Weak fallback implementation when SD library is not available
-__attribute__((weak)) FsImplPtr make_sdcard_filesystem(int cs_pin) {
+FL_LINK_WEAK FsImplPtr make_sdcard_filesystem(int cs_pin) {
     FASTLED_UNUSED(cs_pin);
     fl::shared_ptr<NullFileSystem> ptr = fl::make_shared<NullFileSystem>();
     FsImplPtr out = ptr;
