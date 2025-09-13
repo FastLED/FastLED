@@ -19,7 +19,7 @@
 // Check for Arduino I2S library availability
 #if FL_HAS_INCLUDE(<I2S.h>)
 #include <I2S.h>
-#define ARDUINO_I2S_SUPPORTED 1
+#define ARDUINO_I2S_SUPPORTED defined(I2S_PHILIPS_MODE) && defined(I2S_LEFT_JUSTIFIED_MODE) && defined(I2S_RIGHT_JUSTIFIED_MODE)
 #else
 #define ARDUINO_I2S_SUPPORTED 0
 #endif
