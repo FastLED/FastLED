@@ -1,5 +1,8 @@
 
-#if !__has_include("esp_memory_utils.h")
+
+#include "fl/has_include.h"
+
+#if !FL_HAS_INCLUDE("esp_memory_utils.h")
 #error                                                                         \
     "esp_memory_utils.h is not available, are you using esp-idf 4.4 or earlier?"
 #else
@@ -556,4 +559,4 @@ static bool IRAM_ATTR flush_ready(esp_lcd_panel_io_handle_t panel_io,
 #pragma pop_macro("FF")
 #pragma pop_macro("FF2")
 
-#endif // __has_include("esp_memory_utils.h")
+#endif // FL_HAS_INCLUDE("esp_memory_utils.h")

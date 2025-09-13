@@ -1,7 +1,9 @@
 #pragma once
 
+#include "fl/has_include.h"
+
 #ifndef FASTLED_MULTITHREADED
-#if defined(FASTLED_TESTING) && (defined(__has_include) && __has_include(<pthread.h>))
+#if defined(FASTLED_TESTING) && FL_HAS_INCLUDE(<pthread.h>)
 #define FASTLED_MULTITHREADED 1
 #else
 #define FASTLED_MULTITHREADED 0

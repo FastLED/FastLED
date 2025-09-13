@@ -4,10 +4,10 @@
 
 // Include math headers with better ESP32C2 compatibility
 #ifndef FASTLED_HAS_EXP
-#if __has_include(<cmath>)
+#if FL_HAS_INCLUDE(<cmath>)
   #define FASTLED_HAS_EXP 1
   #include <cmath>
-#elif __has_include(<math.h>)
+#elif FL_HAS_INCLUDE(<math.h>)
   #define FASTLED_HAS_EXP 1
   #include <math.h>
 #else

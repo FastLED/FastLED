@@ -12,6 +12,8 @@
 /// - NeoPixelBus library must be included before FastLED
 /// - The controller is only available when NeoPixelBus.h is detected
 
+#include "fl/has_include.h"
+
 #ifndef FASTLED_USE_NEOPIXEL_BUS
 #ifdef FASTLED_DOXYGEN
 #define FASTLED_USE_NEOPIXEL_BUS 1
@@ -20,7 +22,7 @@
 #endif
 #endif
 
-#if FASTLED_USE_NEOPIXEL_BUS && !__has_include("NeoPixelBus.h")
+#if FASTLED_USE_NEOPIXEL_BUS && !FL_HAS_INCLUDE("NeoPixelBus.h")
 #error "NeoPixelBus.h not found, disabling FASTLED_USE_NEOPIXEL_BUS"
 #define FASTLED_USE_NEOPIXEL_BUS 0
 #endif

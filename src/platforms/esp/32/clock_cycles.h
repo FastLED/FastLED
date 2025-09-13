@@ -2,29 +2,30 @@
 #pragma once
 
 #include "fl/stdint.h"
+#include "fl/has_include.h"
 
 #include "fl/stdint.h"
 #include "platforms/esp/esp_version.h"
 #if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 0, 0)
 #include "hal/cpu_hal.h"
 #define __cpu_hal_get_cycle_count esp_cpu_get_cycle_count
-#elif __has_include(<esp32-hal.h>) && ESP_IDF_VERSION > ESP_IDF_VERSION_VAL(3, 3, 5)
+#elif FL_HAS_INCLUDE(<esp32-hal.h>) && ESP_IDF_VERSION > ESP_IDF_VERSION_VAL(3, 3, 5)
 #include <esp32-hal.h>  // Relies on the Arduino core for ESP32
 inline uint32_t __cpu_hal_get_cycle_count() {
   return static_cast<uint32_t>(cpu_hal_get_cycle_count());
 }
-#elif __has_include(<hal/cpu_ll.h>)
+#elif FL_HAS_INCLUDE(<hal/cpu_ll.h>)
   // esp-idf v4.3.0+
 #include <hal/cpu_ll.h>
 inline uint32_t __cpu_hal_get_cycle_count() {
   return static_cast<uint32_t>(cpu_ll_get_cycle_count());
 }
-#elif __has_include(<esp_cpu.h>)  // First Fallback
+#elif FL_HAS_INCLUDE(<esp_cpu.h>)  // First Fallback
 #include <esp_cpu.h>
 inline uint32_t __cpu_hal_get_cycle_count() {
   return static_cast<uint32>(esp_cpu_get_cycle_count());
 }
-#elif __has_include(<xtensa/hal.h>)  // Second fallback
+#elif FL_HAS_INCLUDE(<xtensa/hal.h>)  // Second fallback
 #include <xtensa/hal.h>
 inline uint32_t __cpu_hal_get_cycle_count() {
   return static_cast<uint32_t>(xthal_get_ccount());

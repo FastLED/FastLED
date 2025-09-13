@@ -1,9 +1,11 @@
 #pragma once
 
+#include "fl/has_include.h"
 
-#if defined(__has_include) && __has_include(<math.h>)
+
+#if FL_HAS_INCLUDE(<math.h>)
 #include <math.h>  // for early definitions of M_PI and other math macros.
-#endif // __has_include(<math.h>)
+#endif // FL_HAS_INCLUDE(<math.h>)
 
 
 #include "fl/compiler_control.h"

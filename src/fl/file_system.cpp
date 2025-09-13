@@ -2,11 +2,12 @@
 #include "fl/unused.h"
 #include "fl/warn.h"
 #include "fl/compiler_control.h"
+#include "fl/has_include.h"
 
 #ifdef __EMSCRIPTEN__
 #include "platforms/wasm/fs_wasm.h"
 #define FASTLED_HAS_SDCARD 1
-#elif __has_include(<SD.h>) && __has_include(<fs.h>)
+#elif FL_HAS_INCLUDE(<SD.h>) && FL_HAS_INCLUDE(<fs.h>)
 // Include Arduino SD card implementation when SD library is available
 #include "platforms/fs_sdcard_arduino.hpp"
 #define FASTLED_HAS_SDCARD 1

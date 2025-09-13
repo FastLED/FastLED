@@ -10,6 +10,7 @@
 #include "fl/bit_cast.h"
 
 #include "fl/initializer_list.h"
+#include "fl/has_include.h"
 
  
 
@@ -185,12 +186,12 @@ void swap(array<T, N> &lhs,
 #define FASTLED_STACK_ARRAY(TYPE, NAME, SIZE)                                  \
     TYPE NAME[SIZE];                                                           \
     fl::memfill(NAME, 0, sizeof(TYPE) * (SIZE))
-#elif __has_include(<alloca.h>)
+#elif FL_HAS_INCLUDE(<alloca.h>)
 #include <alloca.h>
 #define FASTLED_STACK_ARRAY(TYPE, NAME, SIZE)                                  \
     TYPE *NAME = fl::bit_cast_ptr<TYPE>(alloca(sizeof(TYPE) * (SIZE)));      \
     fl::memfill(NAME, 0, sizeof(TYPE) * (SIZE))
-#elif __has_include(<cstdlib>)
+#elif FL_HAS_INCLUDE(<cstdlib>)
 #include <cstdlib>  // ok include
 #define FASTLED_STACK_ARRAY(TYPE, NAME, SIZE)                                  \
     TYPE *NAME = fl::bit_cast_ptr<TYPE>(alloca(sizeof(TYPE) * (SIZE)));      \

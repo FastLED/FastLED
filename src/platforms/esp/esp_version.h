@@ -15,13 +15,15 @@
 // available, then define any missing pieces. This prevents incorrect
 // feature detection such as compiling legacy polyfills on newer IDF.
 
+#include "fl/has_include.h"
+
 // Prefer official version header when available (Arduino-ESP32 / ESP-IDF 4+)
-#if __has_include(<esp_idf_version.h>)
+#if FL_HAS_INCLUDE(<esp_idf_version.h>)
 #include "esp_idf_version.h"
 #endif
 
 // Pull in sdkconfig if present (sometimes defines version components)
-#if __has_include("sdkconfig.h")
+#if FL_HAS_INCLUDE("sdkconfig.h")
 #include "sdkconfig.h"
 #endif
 
