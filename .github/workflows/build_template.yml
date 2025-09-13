@@ -39,13 +39,23 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
           path: pr-code
 
-      - name: Make LFS use the job token for all github.com calls
+      - name: Configure Git/LFS auth for ALL github.com traffic
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          git lfs install --force
-          # Route every https://github.com/... request (including LFS batch) through the job token
-          git config --global url."https://${GITHUB_TOKEN}:x-oauth-basic@github.com/".insteadOf "https://github.com/"
+              # Clean up any previous rewrites/headers so we don’t double-auth
+              git config --global --unset-all http.https://github.com/.extraheader || true
+              git config --global --unset-all url."https://".insteadof || true
+
+              # Proper Basic auth header for GitHub (LFS respects this)
+              printf "x-access-token:%s" "$GITHUB_TOKEN" | base64 -w0 > /tmp/gh.b64
+              git config --global http.https://github.com/.extraheader "AUTHORIZATION: Basic $(cat /tmp/gh.b64)"
+
+              # Ensure LFS is active on the runner (fresh VMs sometimes need this)
+              git lfs install --force
+
+              # (Optional) More robust over CI networks
+              git config --global lfs.concurrenttransfers 3
 
       - name: Merge safe source files from PR
         run: |
@@ -72,8 +82,8 @@ jobs:
           cd trusted
         shell: bash
 
-      - name: Set working directory to trusted
-        run: echo "GITHUB_WORKSPACE=$GITHUB_WORKSPACE/trusted" >> $GITHUB_ENV
+          - name: Set working directory to trusted
+            run: echo "GITHUB_WORKSPACE=$GITHUB_WORKSPACE/trusted" >> $GITHUB_ENV
 
 
 
