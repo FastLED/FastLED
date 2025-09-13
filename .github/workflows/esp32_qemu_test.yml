@@ -140,7 +140,7 @@ jobs:
         shell: bash
 
       - name: Run ESP32 example in QEMU
-        uses: tobozo/esp32-qemu-sim@v1.0.3
+        uses: tobozo/esp32-qemu-sim@v1.0.5
         with:
           working-directory: trusted
           build-folder: ./.build/${{ matrix.platform }}/${{ matrix.example }}
