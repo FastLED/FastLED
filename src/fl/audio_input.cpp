@@ -30,7 +30,7 @@
 #if FASTLED_USES_ARDUINO_AUDIO_INPUT
 #include "platforms/arduino/audio_input.hpp"
 #elif defined(ESP32)
-#include "platforms/esp/32/audio/audio_input.hpp"
+#include "platforms/esp/32/audio/audio_impl.hpp"
 #endif
 
 namespace fl {
