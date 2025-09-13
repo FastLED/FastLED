@@ -1,7 +1,7 @@
 #pragma once
 
 #include "platforms/esp/32/audio/devices/i2s.hpp"
-#include "platforms/esp/32/audio/devices/null.hpp"
+#include "platforms/audio_input_null.hpp"
 
 // Ensure FASTLED_ESP32_I2S_SUPPORTED is defined (included via i2s.hpp)
 #ifndef FASTLED_ESP32_I2S_SUPPORTED
@@ -10,8 +10,8 @@
 
 namespace fl {
 
-// Strong implementation overrides the weak default
-fl::shared_ptr<IAudioInput> platform_create_audio_input(const AudioConfig &config, fl::string *error_message) {
+// ESP32-specific audio input creation function
+fl::shared_ptr<IAudioInput> esp32_create_audio_input(const AudioConfig &config, fl::string *error_message) {
     if (config.is<AudioConfigI2S>()) {
 #if FASTLED_ESP32_I2S_SUPPORTED
         FL_WARN("Creating I2S standard mode audio source");

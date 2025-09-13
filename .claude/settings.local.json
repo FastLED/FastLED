@@ -30,7 +30,8 @@
       "Bash(echo:*)",
       "Bash(time bash:*)",
       "Bash(nm:*)",
-      "Bash(objdump:*)"
+      "Bash(objdump:*)",
+      "WebFetch(domain:docs.arduino.cc)"
     ],
     "deny": []
   }

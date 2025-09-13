@@ -5,7 +5,7 @@
 #include "fl/shared_ptr.h"
 #include "fl/memory.h"
 #include "fl/string.h"
-#include "platforms/esp/32/audio/devices/null.hpp"
+#include "platforms/audio_input_null.hpp"
 
 
 #if ESP_IDF_VERSION_5_OR_HIGHER
