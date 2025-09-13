@@ -4,6 +4,9 @@
 #define INTERRUPT_THRESHOLD 1
 #endif
 
+#define FASTLED_ARM
+#define FASTLED_ARM_M3
+
 // Default to allowing interrupts
 #ifndef FASTLED_ALLOW_INTERRUPTS
 #define FASTLED_ALLOW_INTERRUPTS 1

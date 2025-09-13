@@ -4,6 +4,10 @@
     "f_cpu": "39000000L",
     "mcu": "cortex-m33",
     "variant": "thingplusmatter",
+    "extra_flags": [
+      "-DMGM240PB32VNA",
+      "-DARDUINO_MAIN_TASK_STACK_SIZE=8192"
+    ],
     "arduino": {
       "matter_libs": "libMatterCore.a libSilabsChip.a"
     }
@@ -20,9 +24,5 @@
   },
   "url": "https://www.sparkfun.com/products/20270",
   "vendor": "Sparkfun",
-  "connectivity": [
-    "bluetooth",
-    "thread",
-    "zigbee"
-  ]
+  "connectivity": ["bluetooth", "thread", "zigbee"]
 }
