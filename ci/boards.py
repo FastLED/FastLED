@@ -21,7 +21,9 @@ ESP32_IDF_LATEST_PIOARDUINO = ESP32_IDF_5_5_PIOARDUINO
 ESP32_IDF_LATEST_PIOARDUINO = (
     "https://github.com/pioarduino/platform-espressif32.git#develop"
 )
-ESP32_IDF_4_4_LATEST = "https://github.com/platformio/platform-espressif32/archive/refs/tags/v4.4.0.zip"
+ESP32_IDF_4_4_LATEST = (
+    "https://github.com/platformio/platform-espressif32/archive/refs/tags/v4.4.0.zip"
+)
 APOLLO3_2_2_0 = "https://github.com/nigelb/platform-apollo3blue"
 # Top of trunk.
 # ESP32_IDF_5_1_PIOARDUINO = "https://github.com/pioarduino/platform-espressif32"
