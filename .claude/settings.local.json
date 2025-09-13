@@ -23,7 +23,7 @@
       "Bash(pio run:*)",
       "Bash(git log:*)",
       "Bash(test:*)",
-      "Bash(git submodule:*)",
+      "Bash(git:*)",
       "Bash(git remote get-url:*)",
       "Bash(NO_PARALLEL=0 bash test --examples --verbose)",
       "Bash(export NO_PARALLEL=0)",
@@ -33,7 +33,15 @@
       "Bash(objdump:*)",
       "WebFetch(domain:docs.platformio.org)",
       "WebFetch(domain:docs.arduino.cc)",
-      "Bash(cat:*)"
+      "Bash(cat:*)",
+      "Read(//c/Users/niteris/.platformio/packages/framework-arduino-silabs/variants/thingplusmatter/matter/**)",
+      "Read(//c/Users/niteris/.platformio/packages/framework-arduino-silabs/variants/thingplusmatter/**)",
+      "Read(//c/Users/niteris/.platformio/packages/framework-arduino-silabs/**)",
+      "Read(//c/Users/niteris/.fastled/global_cache/github_com_maxgerhardt_platform_siliconlabsefm32_archive_refs_heads_silabs_arduino_zip/extracted/**)",
+      "Read(//c/Users/niteris/.platformio/packages/**)",
+      "WebFetch(domain:docs.silabs.com)",
+      "Bash(for:*)",
+      "Bash(done)"
     ],
     "deny": []
   }

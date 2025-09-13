@@ -1,3 +1,15 @@
+/// @file fastpin_arm_mgm240.h
+/// @brief FastPin implementation for Silicon Labs MGM240 ARM Cortex-M33
+///
+/// This implementation provides hardware-accelerated GPIO operations for the
+/// MGM240SD22VNA microcontroller using Silicon Labs EMLIB.
+///
+/// Key features:
+/// - Atomic GPIO operations using DOUTSET/DOUTCLR registers
+/// - Race condition-free pin manipulation in interrupt environments
+/// - Direct Silicon Labs EMLIB integration for optimal performance
+/// - Template-based compile-time optimization
+
 #pragma once
 
 #include <stdint.h>
@@ -12,13 +24,14 @@
 
 FASTLED_NAMESPACE_BEGIN
 
-// Forward declare the base FastPin template
+/// Forward declaration of base FastPin template
 template<uint8_t PIN> class FastPin;
 
-// Initialize GPIO clock (needed for Silicon Labs devices)
+/// Initialize GPIO clock (required for Silicon Labs EFM32/EFR32 devices)
 void _mgm240_gpio_init();
 
-// GPIO port accessor structures (similar to nRF52 approach)
+/// @brief GPIO port accessor structures
+/// These provide compile-time port resolution for template-based FastPin operations
 struct __generated_struct_GPIO_PORT_A {
     static constexpr GPIO_Port_TypeDef port() { return gpioPortA; }
 };
@@ -35,77 +48,102 @@ struct __generated_struct_GPIO_PORT_D {
     static constexpr GPIO_Port_TypeDef port() { return gpioPortD; }
 };
 
-// Hardware pin template for MGM240 using ARM standard parameter order
+/// @brief Hardware pin template for MGM240 GPIO operations
+/// @tparam _MASK Bit mask for the pin within the port (1 << pin_number)
+/// @tparam _PORT_STRUCT Port accessor structure (e.g., __generated_struct_GPIO_PORT_A)
+/// @tparam _PORT_NUMBER Port number (0=A, 1=B, 2=C, 3=D)
+/// @tparam _PIN_NUMBER Pin number within the port (0-7 typically)
 template<uint32_t _MASK, typename _PORT_STRUCT, uint8_t _PORT_NUMBER, uint8_t _PIN_NUMBER> class _ARMPIN {
 public:
     typedef volatile uint32_t * port_ptr_t;
     typedef uint32_t port_t;
 
+    /// Configure pin as push-pull output
     FASTLED_FORCE_INLINE static void setOutput() {
         _mgm240_gpio_init();
         GPIO_PinModeSet(_PORT_STRUCT::port(), _PIN_NUMBER, gpioModePushPull, 0);
     }
 
+    /// Configure pin as input
     FASTLED_FORCE_INLINE static void setInput() {
         _mgm240_gpio_init();
         GPIO_PinModeSet(_PORT_STRUCT::port(), _PIN_NUMBER, gpioModeInput, 0);
     }
 
+    /// Set pin output high
     FASTLED_FORCE_INLINE static void hi() {
         GPIO_PinOutSet(_PORT_STRUCT::port(), _PIN_NUMBER);
     }
 
+    /// Set pin output low
     FASTLED_FORCE_INLINE static void lo() {
         GPIO_PinOutClear(_PORT_STRUCT::port(), _PIN_NUMBER);
     }
 
+    /// Set pin output based on value (non-zero = high, zero = low)
     FASTLED_FORCE_INLINE static void set(port_t val) {
         if(val) hi(); else lo();
     }
 
+    /// Generate a brief pulse by toggling twice
     FASTLED_FORCE_INLINE static void strobe() { toggle(); toggle(); }
+
+    /// Toggle pin output state
     FASTLED_FORCE_INLINE static void toggle() {
         GPIO_PinOutToggle(_PORT_STRUCT::port(), _PIN_NUMBER);
     }
 
+    /// Set pin high (port parameter ignored for compatibility)
     FASTLED_FORCE_INLINE static void hi(port_ptr_t port) { FL_UNUSED(port); hi(); }
+
+    /// Set pin low (port parameter ignored for compatibility)
     FASTLED_FORCE_INLINE static void lo(port_ptr_t port) { FL_UNUSED(port); lo(); }
 
+    /// Get port value with this pin set high
     FASTLED_FORCE_INLINE static port_t hival() {
         return GPIO_PortOutGet(_PORT_STRUCT::port()) | _MASK;
     }
 
+    /// Get port value with this pin set low
     FASTLED_FORCE_INLINE static port_t loval() {
         return GPIO_PortOutGet(_PORT_STRUCT::port()) & ~_MASK;
     }
 
+    /// Get pointer to GPIO port output register (for direct port manipulation)
     FASTLED_FORCE_INLINE static port_ptr_t port() {
-        // Return pointer to the GPIO port's DOUT register
         return &(GPIO->P[_PORT_STRUCT::port()].DOUT);
     }
 
+    /// Get pointer to atomic SET register for race-free high operations
     FASTLED_FORCE_INLINE static port_ptr_t sport() {
-        // MGM240 doesn't have atomic set registers, fallback to port() register
-        return port();
+        return &(GPIO->P[_PORT_STRUCT::port()].DOUTSET);
     }
 
+    /// Get pointer to atomic CLEAR register for race-free low operations
     FASTLED_FORCE_INLINE static port_ptr_t cport() {
-        // MGM240 doesn't have atomic clear registers, fallback to port() register
-        return port();
+        return &(GPIO->P[_PORT_STRUCT::port()].DOUTCLR);
     }
 
+    /// Fast port write operation (used by timing-critical code)
     FASTLED_FORCE_INLINE static void fastset(port_ptr_t port, port_t val) {
         *port = val;
     }
 
+    /// Get the bit mask for this pin within its port
     FASTLED_FORCE_INLINE static port_t mask() { return _MASK; }
 
+    /// Read pin input state
     FASTLED_FORCE_INLINE static bool isset() {
         return GPIO_PinInGet(_PORT_STRUCT::port(), _PIN_NUMBER) != 0;
     }
 };
 
-// Pin definition macro for MGM240 with direct register access
+/// @brief Pin definition macro for MGM240 FastPin specializations
+/// Creates a template specialization of FastPin for a specific Arduino pin number
+/// @param PIN Arduino pin number (0-25)
+/// @param BIT Pin number within the port (0-7)
+/// @param PORT_LETTER Port letter (A, B, C, D)
+/// @param MASK Bit mask for the pin (1 << BIT)
 #define _FL_DEFPIN(PIN, BIT, PORT_LETTER, MASK) template<> class FastPin<PIN> : public _ARMPIN<MASK, __generated_struct_GPIO_PORT_##PORT_LETTER, PORT_NUM_##PORT_LETTER, BIT> {};
 
 // Define port numbers for template parameters
@@ -114,9 +152,8 @@ public:
 #define PORT_NUM_C 2
 #define PORT_NUM_D 3
 
-// Arduino Nano Matter (MGM240SD22VNA) Pin Mappings
-// Based on Arduino Nano form factor and typical GPIO assignments
-// Note: These mappings should be verified against actual Arduino Nano Matter pinout
+// Pin mappings for Arduino Nano Matter (MGM240SD22VNA)
+// Based on Arduino Nano form factor - verify against hardware documentation
 
 // Digital pins 0-13 (Arduino Nano standard layout)
 _FL_DEFPIN(0,  0, A, (1 << 0));   // D0/RX  - PA00
