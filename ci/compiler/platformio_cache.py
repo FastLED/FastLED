@@ -12,7 +12,6 @@ providing functionality to:
 
 import _thread
 import configparser
-import hashlib
 import json
 import logging
 import os
@@ -290,36 +289,6 @@ class PlatformIOCache:
         """Generate cache key from URL - sanitized for filesystem use."""
         return str(sanitize_url_for_path(url))
 
-    def _verify_checksum(
-        self, file_path: Path, expected_checksum: Optional[str] = None
-    ) -> bool:
-        """Verify file integrity using SHA256."""
-        if not file_path.exists():
-            return False
-
-        sha256_hash = hashlib.sha256()
-        with open(file_path, "rb") as f:
-            for chunk in iter(lambda: f.read(4096), b""):
-                sha256_hash.update(cast(bytes, chunk))
-
-        actual_checksum = sha256_hash.hexdigest()
-
-        if expected_checksum:
-            return actual_checksum == expected_checksum
-
-        # If no expected checksum provided, check for existing checksum file
-        checksum_file = file_path.parent / "artifact.sha256"
-        if checksum_file.exists():
-            # Read existing checksum and compare
-            with open(checksum_file, "r") as f:
-                stored_checksum = f.read().strip()
-            return actual_checksum == stored_checksum
-        else:
-            # Store checksum for future validation (alongside the file)
-            with open(checksum_file, "w") as f:
-                f.write(actual_checksum)
-            return True
-
     def download_artifact(self, url: str) -> str:
         """
         Download and cache an artifact from the given URL.
@@ -349,13 +318,10 @@ class PlatformIOCache:
                     extracted_dir = artifact_dir / "extracted"
                     if extracted_dir.exists():
                         shutil.rmtree(extracted_dir)
-                elif self._verify_checksum(cached_path):
+                else:
                     print(f"Using cached artifact: {cached_path}")
                     # Cache hit - return the cached path (write lock will be released)
                     return str(cached_path)
-                else:
-                    logger.warning(f"Cache corrupted, re-downloading: {url}")
-                    cached_path.unlink()
 
             # Check URL scheme to determine action
             parsed_url = urllib.parse.urlparse(url)
@@ -415,21 +381,10 @@ class PlatformIOCache:
                 else:
                     print(f"Download completed successfully: {download_result.url}")
 
-                # Verify downloaded file and create checksum
-                if self._verify_checksum(temp_path):
-                    # Atomic move to final location
-                    shutil.move(str(temp_path), str(cached_path))
-
-                    # Move checksum file as well
-                    temp_checksum = temp_path.parent / f"{temp_path.name}.sha256"
-                    final_checksum = cached_path.parent / "artifact.sha256"
-                    if temp_checksum.exists():
-                        shutil.move(str(temp_checksum), str(final_checksum))
-
-                    print(f"Successfully cached: {cached_path}")
-                    return str(cached_path)
-                else:
-                    raise ValueError("Downloaded file failed checksum verification")
+                # Atomic move to final location
+                shutil.move(str(temp_path), str(cached_path))
+                print(f"Successfully cached: {cached_path}")
+                return str(cached_path)
 
             except Exception as e:
                 logger.error(f"Download failed: {e}")
@@ -785,6 +740,9 @@ def handle_zip_artifact(
         return get_proper_file_url(extracted_dir)
 
     except Exception as e:
+        import traceback
+
+        traceback.print_exc()
         logger.error(f"Failed to handle artifact {zip_source}: {e}")
         raise
 

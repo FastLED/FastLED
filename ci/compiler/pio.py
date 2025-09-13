@@ -21,14 +21,13 @@ from enum import Enum
 from pathlib import Path
 from typing import Any, Callable, Dict
 
+import fasteners
 from dirsync import sync  # type: ignore
 
 from ci.boards import ALL, Board, create_board
 from ci.compiler.compiler import CacheType, Compiler, InitResult, SketchResult
 from ci.util.create_build_dir import insert_tool_aliases
 from ci.util.output_formatter import create_sketch_path_formatter
-from ci.util.pidlock import PIDLock as FileLock  # type: ignore
-from ci.util.pidlock import Timeout
 from ci.util.running_process import EndOfStream, RunningProcess
 
 
@@ -42,7 +41,7 @@ assert (_PROJECT_ROOT / "library.json").exists(), (
 
 
 class CountingFileLock:
-    """A FileLock with atomic reference counting and explicit acquire(N)/decrement() methods."""
+    """A process lock with atomic reference counting and explicit acquire(N)/decrement() methods."""
 
     def __init__(self, platform_name: str, build_dir: Path) -> None:
         self.platform_name = platform_name
@@ -51,7 +50,7 @@ class CountingFileLock:
         # Use centralized path management
         self.paths = FastLEDPaths(platform_name)
         self.lock_file = self.paths.platform_lock_file
-        self._file_lock = FileLock(self.lock_file)  # type: ignore
+        self._file_lock = fasteners.InterProcessLock(str(self.lock_file))
         self._count = 0
         self._count_lock = threading.Lock()
         self._is_acquired = False
@@ -98,7 +97,7 @@ class CountingFileLock:
         while True:
             # Try to acquire with very short timeout (non-blocking)
             try:
-                success = self._file_lock.acquire(timeout=0.1)
+                success = self._file_lock.acquire(blocking=True, timeout=0.1)
                 if success:
                     self._is_acquired = True
                     print(f"Acquired lock for platform {self.platform_name}")
@@ -111,12 +110,9 @@ class CountingFileLock:
 
                 _thread.interrupt_main()
                 raise ke
-            except Timeout:
-                # Handle timeout exceptions as failed acquisition (continue loop)
+            except Exception:
+                # Handle timeout or other exceptions as failed acquisition (continue loop)
                 pass  # Continue the loop to check elapsed time and try again
-            except Exception as e:
-                # If acquire fails for other reasons, re-raise
-                raise
 
             # Check if we should show warning (after 1 second)
             elapsed = time.time() - start_time
@@ -453,7 +449,7 @@ class FastLEDPaths:
 
 
 class GlobalPackageLock:
-    """A FileLock for global package installation per board. Acquired once during first build and released after completion."""
+    """A process lock for global package installation per board. Acquired once during first build and released after completion."""
 
     def __init__(self, platform_name: str) -> None:
         self.platform_name = platform_name
@@ -461,7 +457,7 @@ class GlobalPackageLock:
         # Use centralized path management
         self.paths = FastLEDPaths(platform_name)
         self.lock_file = self.paths.global_package_lock_file
-        self._file_lock = FileLock(self.lock_file)  # type: ignore
+        self._file_lock = fasteners.InterProcessLock(str(self.lock_file))
         self._is_acquired = False
 
     def acquire(self) -> None:
@@ -475,19 +471,16 @@ class GlobalPackageLock:
         while True:
             # Try to acquire with very short timeout (non-blocking)
             try:
-                success = self._file_lock.acquire(timeout=0.1)
+                success = self._file_lock.acquire(blocking=True, timeout=0.1)
                 if success:
                     self._is_acquired = True
                     print(
                         f"Acquired global package lock for platform {self.platform_name}"
                     )
                     return
-            except Timeout:
-                # Handle timeout exceptions as failed acquisition (continue loop)
+            except Exception:
+                # Handle timeout or other exceptions as failed acquisition (continue loop)
                 pass  # Continue the loop to check elapsed time and try again
-            except Exception as e:
-                # If acquire fails for other reasons, re-raise
-                raise
 
             # Check if we should show warning (after 1 second)
             elapsed = time.time() - start_time

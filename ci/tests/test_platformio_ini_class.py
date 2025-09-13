@@ -236,7 +236,15 @@ framework = arduino
         # Verify URLs were replaced
         optimized_str = str(pio_ini)
         self.assertNotIn("https://github.com/pioarduino", optimized_str)
-        self.assertIn("file:///", optimized_str)
+        # On Windows, paths are returned directly, not as file:// URLs
+        import platform
+
+        if platform.system() == "Windows":
+            self.assertIn(
+                "extracted", optimized_str
+            )  # Check for the extracted directory
+        else:
+            self.assertIn("file:///", optimized_str)
 
         # Verify cache directory was created
         self.assertTrue(cache_dir.exists())
@@ -245,7 +253,13 @@ framework = arduino
         esp32dev_platform = pio_ini.get_option("env:esp32dev", "platform")
         esp32c3_platform = pio_ini.get_option("env:esp32c3", "platform")
         self.assertEqual(esp32dev_platform, esp32c3_platform)
-        self.assertTrue(esp32dev_platform.startswith("file:///"))
+        # On Windows, paths are returned directly, not as file:// URLs
+        import platform
+
+        if platform.system() == "Windows":
+            self.assertTrue(esp32dev_platform.endswith("extracted"))
+        else:
+            self.assertTrue(esp32dev_platform.startswith("file:///"))
 
 
 if __name__ == "__main__":

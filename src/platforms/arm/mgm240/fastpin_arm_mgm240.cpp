@@ -1,3 +1,6 @@
+// Only compile MGM240 code when building for MGM240 targets
+#if defined(ARDUINO_NANO_MATTER) || defined(MGM240SD22VNA) || defined(MGM240PB32VNA) || defined(EFR32MG24)
+
 #include "fastpin_arm_mgm240.h"
 
 // Include Silicon Labs EMLIB GPIO for direct register access
@@ -18,3 +21,5 @@ void _mgm240_gpio_init() {
 }
 
 FASTLED_NAMESPACE_END
+
+#endif // MGM240 target check

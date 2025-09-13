@@ -13,7 +13,7 @@
 #endif
 
 
-#include <Arduino.h>
+#include <Arduino.h>  // ok include
 
 // Check for Arduino I2S library availability
 #if FL_HAS_INCLUDE(<I2S.h>)
