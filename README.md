@@ -288,6 +288,118 @@ After installing the Arduino IDE, add FastLED through the Library Manager:
 - **ESP32DEV**: [120-output virtual driver](https://github.com/hpwit/I2SClocklessVirtualLedDriver)
 - **ESP32-S3**: [120-output S3 driver](https://github.com/hpwit/I2SClockLessLedVirtualDriveresp32s3) 
 
+### Parallel WS2812 Drivers
+
+FastLED supports several drivers for parallel WS2812 output.
+
+#### Teensy
+
+The following drivers are available for Teensy boards:
+
+##### WS2812Serial driver
+
+The `WS2812Serial` driver leverages serial ports for LED data transmission on Teensy boards.
+
+###### Usage
+To use this driver, you must define `USE_WS2812SERIAL` before including the FastLED header.
+
+```cpp
+#define USE_WS2812SERIAL
+#include <FastLED.h>
+```
+
+Then, use `WS2812SERIAL` as the chipset type in your `addLeds` call. The data pin is not used for this driver.
+
+```cpp
+FastLED.addLeds<WS2812SERIAL, /* DATA_PIN */, GRB>(leds, NUM_LEDS);
+```
+
+###### Supported Pins & Serial Ports
+
+| Port    | Teensy LC   | Teensy 3.2 | Teensy 3.5 | Teensy 3.6 | Teensy 4.0 | Teensy 4.1 |
+| :------ | :---------: | :--------: | :--------: | :--------: | :--------: | :--------: |
+| Serial1 | 1, 4, 5, 24 | 1, 5       | 1, 5, 26   | 1, 5, 26   | 1          | 1, 53      |
+| Serial2 |             | 10, 31     | 10         | 10         | 8          | 8          |
+| Serial3 |             | 8          | 8          | 8          | 14         | 14         |
+| Serial4 |             |            | 32         | 32         | 17         | 17         |
+| Serial5 |             |            | 33         | 33         | 20, 39     | 20, 47     |
+| Serial6 |             |            | 48         |            | 24         | 24         |
+| Serial7 |             |            |            |            | 29         | 29         |
+| Serial8 |             |            |            |            |            | 35         |
+
+##### ObjectFLED Driver
+
+The `ObjectFLED` driver is an advanced parallel output driver specifically optimized for Teensy 4.0 and 4.1 boards when using WS2812 LEDs. It is designed to provide high-performance, multi-pin output.
+
+By default, FastLED automatically uses the `ObjectFLED` driver for WS2812 LEDs on Teensy 4.0/4.1 boards.
+
+###### Disabling ObjectFLED (Reverting to Legacy Driver)
+If you encounter compatibility issues or wish to use the standard clockless driver instead of `ObjectFLED`, you can disable it by defining `FASTLED_NOT_USES_OBJECTFLED` before including the FastLED header:
+
+```cpp
+#define FASTLED_NOT_USES_OBJECTFLED
+#include <FastLED.h>
+```
+
+###### Re-enabling ObjectFLED (Explicitly)
+While `ObjectFLED` is the default for Teensy 4.0/4.1, you can explicitly enable it (though not strictly necessary) using:
+
+```cpp
+#define FASTLED_USES_OBJECTFLED
+#include <FastLED.h>
+```
+
+#### ESP32
+
+The following drivers are available for ESP32 boards:
+
+##### ESP32-S3 I2S Driver
+
+The `ESP32-S3 I2S` driver leverages the I2S peripheral for high-performance parallel WS2812 output on ESP32-S3 boards. This driver is a dedicated clockless implementation.
+
+###### Usage
+To use this driver, you must define `FASTLED_USES_ESP32S3_I2S` before including the FastLED header.
+
+```cpp
+#define FASTLED_USES_ESP32S3_I2S
+#include <FastLED.h>
+```
+
+Then, use `WS2812` as the chipset type in your `addLeds` call. The data pin will be configured by the I2S driver.
+
+```cpp
+FastLED.addLeds<WS2812, DATA_PIN, GRB>(leds, NUM_LEDS);
+```
+
+**Note:** This driver requires a compatible Arduino-ESP32 core/IDF.
+
+##### Generic ESP32 I2S Driver
+
+The generic `ESP32 I2S` driver provides parallel WS2812 output for various ESP32 boards (e.g., ESP32-DevKitC). It uses the I2S peripheral for efficient data transmission.
+
+###### Usage
+To use this driver, you must define `FASTLED_ESP32_I2S` before including the FastLED header.
+
+```cpp
+#define FASTLED_ESP32_I2S
+#include <FastLED.h>
+```
+
+Then, use `WS2812` as the chipset type in your `addLeds` call. The data pin will be configured by the I2S driver.
+
+```cpp
+FastLED.addLeds<WS2812, DATA_PIN, GRB>(leds, NUM_LEDS);
+```
+
+###### DMA Buffer Configuration
+For improved resilience under interrupt load (e.g., Wi-Fi activity), you can increase the number of I2S DMA buffers by defining `FASTLED_ESP32_I2S_NUM_DMA_BUFFERS`. A value of `4` is often recommended.
+
+```cpp
+#define FASTLED_ESP32_I2S_NUM_DMA_BUFFERS 4
+```
+
+**Note:** All I2S lanes must share the same chipset/timings. If per-lane timing differs, consider using the RMT driver instead. 
+
 ### Supported LED Chipsets
 
 FastLED supports virtually every LED chipset available:
