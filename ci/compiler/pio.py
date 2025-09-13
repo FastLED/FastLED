@@ -40,103 +40,6 @@ assert (_PROJECT_ROOT / "library.json").exists(), (
 )
 
 
-class CountingFileLock:
-    """A process lock with atomic reference counting and explicit acquire(N)/decrement() methods."""
-
-    def __init__(self, platform_name: str, build_dir: Path) -> None:
-        self.platform_name = platform_name
-        self.build_dir = build_dir
-
-        # Use centralized path management
-        self.paths = FastLEDPaths(platform_name)
-        self.lock_file = self.paths.platform_lock_file
-        self._file_lock = fasteners.InterProcessLock(str(self.lock_file))
-        self._count = 0
-        self._count_lock = threading.Lock()
-        self._is_acquired = False
-
-    def acquire(self, count: int) -> None:
-        """Acquire the lock for N work units."""
-        if count <= 0:
-            return
-
-        with self._count_lock:
-            was_zero = self._count == 0
-            self._count += count
-
-        if was_zero:
-            # Only acquire the file lock when going from 0 to N
-            self._acquire_with_warning()
-
-    def decrement(self) -> None:
-        """Decrement the count by 1. Releases lock when count reaches 0."""
-        with self._count_lock:
-            if self._count > 0:
-                self._count -= 1
-                should_release = self._count == 0
-            else:
-                should_release = False
-
-        if should_release:
-            # Only release the file lock when count reaches 0
-            try:
-                self._file_lock.release()
-                self._is_acquired = False
-                print(f"Released lock for platform {self.platform_name}")
-            except Exception as e:
-                warnings.warn(f"Failed to release lock for {self.platform_name}: {e}")
-
-    def _acquire_with_warning(self) -> None:
-        """Acquire the file lock using busy loop to allow keyboard interrupts."""
-        if self._is_acquired:
-            return  # Already acquired
-
-        start_time = time.time()
-        warning_shown = False
-
-        while True:
-            # Try to acquire with very short timeout (non-blocking)
-            try:
-                success = self._file_lock.acquire(blocking=True, timeout=0.1)
-                if success:
-                    self._is_acquired = True
-                    print(f"Acquired lock for platform {self.platform_name}")
-                    return
-            except KeyboardInterrupt as ke:
-                warnings.warn(
-                    f"Keyboard interrupt while acquiring lock for platform {self.platform_name}"
-                )
-                import _thread
-
-                _thread.interrupt_main()
-                raise ke
-            except Exception:
-                # Handle timeout or other exceptions as failed acquisition (continue loop)
-                pass  # Continue the loop to check elapsed time and try again
-
-            # Check if we should show warning (after 1 second)
-            elapsed = time.time() - start_time
-            if not warning_shown and elapsed >= 1.0:
-                yellow = "\033[33m"
-                reset = "\033[0m"
-                folder_path = self.build_dir.parent.absolute()
-                print(
-                    f"{yellow}Platform {self.platform_name} is waiting to acquire {folder_path}{reset}"
-                )
-                warning_shown = True
-
-            # Check for timeout (after 5 seconds)
-            if elapsed >= 5.0:
-                raise TimeoutError(
-                    f"Failed to acquire lock for platform {self.platform_name} within 5 seconds. "
-                    f"Lock file: {self.lock_file}. "
-                    f"This may indicate another process is holding the lock or a deadlock occurred."
-                )
-
-            # Small sleep to prevent excessive CPU usage while allowing interrupts
-            time.sleep(0.1)
-
-
 def _ensure_platform_installed(board: Board) -> bool:
     """Ensure the required platform is installed for the board."""
     if not board.platform_needs_install:
@@ -1152,6 +1055,18 @@ def _init_platformio_build(
     return InitResult(success=True, output="", build_dir=build_dir)
 
 
+class PlatformLock:
+    def __init__(self, lock_file: Path) -> None:
+        self.lock_file_path = lock_file
+        self.lock = fasteners.InterProcessLock(str(self.lock_file_path))
+
+    def acquire(self) -> None:
+        self.lock.acquire(blocking=True, timeout=5)
+
+    def release(self) -> None:
+        self.lock.release()
+
+
 class PioCompiler(Compiler):
     def __init__(
         self,
@@ -1182,6 +1097,7 @@ class PioCompiler(Compiler):
 
         # Use centralized path management
         self.paths = FastLEDPaths(self.board.board_name)
+        self.platform_lock = PlatformLock(self.paths.platform_lock_file)
 
         # Always override the cache directory with our resolved path
         self.paths._global_platformio_cache_dir = self.global_cache_dir
@@ -1189,9 +1105,6 @@ class PioCompiler(Compiler):
 
         # Ensure all directories exist
         self.paths.ensure_directories_exist()
-
-        # Create the counting file lock in constructor
-        self._platform_lock = CountingFileLock(self.board.board_name, self.build_dir)
 
         # Create the global package installation lock
         self._global_package_lock = GlobalPackageLock(self.board.board_name)
@@ -1230,38 +1143,40 @@ class PioCompiler(Compiler):
         if not examples:
             return []
 
-        # Acquire the lock for N work units
-        self._platform_lock.acquire(len(examples))
-
         # Acquire the global package lock for the first build (package installation)
-        self._global_package_lock.acquire()
+
+        count = len(examples)
+
+        def release_platform_lock(fut: Future[SketchResult]) -> None:
+            """Release the platform lock when all builds complete."""
+            nonlocal count
+            count -= 1
+            if count == 0:
+                print(f"Releasing platform lock: {self.platform_lock.lock_file_path}")
+                self.platform_lock.release()
 
         futures: list[Future[SketchResult]] = []
-        global_lock_released = (
-            threading.Event()
-        )  # Track if global lock has been released
-
-        def create_decrement_callback() -> Callable[[Future[SketchResult]], None]:
-            """Create callback that decrements lock count when future completes."""
-
-            def decrement_callback(future: Future[SketchResult]) -> None:
-                self._platform_lock.decrement()
-
-                # Release global package lock when first build completes (only once)
-                if not global_lock_released.is_set():
-                    global_lock_released.set()
-                    self._global_package_lock.release()
-
-            return decrement_callback
 
         # Submit all builds
-        for example in examples:
-            future = self.executor.submit(self._internal_build_no_lock, example)
+        self._global_package_lock.acquire()
+        try:
+            for example in examples:
+                future = self.executor.submit(self._internal_build_no_lock, example)
+                future.add_done_callback(release_platform_lock)
+                futures.append(future)
+        except KeyboardInterrupt:
+            print("KeyboardInterrupt: Cancelling all builds")
+            for future in futures:
+                future.cancel()
+            import _thread
 
-            # Add callback to decrement lock count on completion or cancellation
-            future.add_done_callback(create_decrement_callback())
-
-            futures.append(future)
+            _thread.interrupt_main()
+            raise
+        except Exception as e:
+            print(f"Exception: {e}")
+            for future in futures:
+                future.cancel()
+            raise
 
         return futures
 
@@ -1310,6 +1225,10 @@ class PioCompiler(Compiler):
                     break
                 # Print the transformed line
                 print(line)
+        except KeyboardInterrupt:
+            print("KeyboardInterrupt: Cancelling build")
+            running_process.terminate()
+            raise
         except OSError as e:
             # Handle output encoding issues on Windows
             print(f"Output encoding issue: {e}")
@@ -1420,9 +1339,6 @@ class PioCompiler(Compiler):
         """Clean build artifacts for this platform (acquire platform lock)."""
         print(f"Cleaning build artifacts for platform {self.board.board_name}...")
 
-        # Acquire the platform lock to ensure no other builds are running
-        self._platform_lock.acquire(1)
-
         try:
             # Remove the local build directory
             if self.build_dir.exists():
@@ -1434,15 +1350,13 @@ class PioCompiler(Compiler):
                     f"✅ No build directory found for {self.board.board_name} (already clean)"
                 )
         finally:
-            # Always decrement the lock
-            self._platform_lock.decrement()
+            pass  # we used to release the platform lock here, but we disabled it
 
     def clean_all(self) -> None:
         """Clean all build artifacts (local and global packages) for this platform."""
         print(f"Cleaning all artifacts for platform {self.board.board_name}...")
 
         # Acquire both platform and global package locks
-        self._platform_lock.acquire(1)
         self._global_package_lock.acquire()
 
         try:
@@ -1475,7 +1389,6 @@ class PioCompiler(Compiler):
         finally:
             # Always release locks
             self._global_package_lock.release()
-            self._platform_lock.decrement()
 
     def deploy(
         self, example: str, upload_port: str | None = None, monitor: bool = False
@@ -1488,10 +1401,6 @@ class PioCompiler(Compiler):
             monitor: If True, attach to device monitor after successful upload
         """
         print(f"Deploying {example} to {self.board.board_name}...")
-
-        # Acquire platform lock for this operation
-        self._platform_lock.acquire(1)
-        lock_released = False
 
         try:
             # Ensure the build is initialized and the example is built
@@ -1565,8 +1474,6 @@ class PioCompiler(Compiler):
 
             # Upload completed successfully - release the lock before monitor
             print(f"✅ Upload completed successfully for {example}")
-            self._platform_lock.decrement()
-            lock_released = True
 
             # If monitor is requested and upload was successful, start monitor
             if monitor:
@@ -1619,8 +1526,7 @@ class PioCompiler(Compiler):
 
         finally:
             # Only decrement the lock if it hasn't been released yet
-            if not lock_released:
-                self._platform_lock.decrement()
+            pass  # we used to release the platform lock here, but we disabled it
 
     def check_usb_permissions(self) -> tuple[bool, str]:
         """Check if USB device access is properly configured on Linux.
