@@ -27,11 +27,10 @@ done
 unset VIRTUAL_ENV
 
 echo "Linting tests/ for temporary cmake files"
-set +e
-rm -r tests/*.vcxproj
-rm -r tests/*.vcxproj.filters
-rm -r tests/*.sln
-set -e
+# Remove Visual Studio project files if they exist
+[ -n "$(find tests/ -name "*.vcxproj" 2>/dev/null)" ] && rm -r tests/*.vcxproj
+[ -n "$(find tests/ -name "*.vcxproj.filters" 2>/dev/null)" ] && rm -r tests/*.vcxproj.filters
+[ -n "$(find tests/ -name "*.sln" 2>/dev/null)" ] && rm -r tests/*.sln
 
 echo "🚀 Running FastLED Comprehensive Linting Suite"
 echo "=============================================="
