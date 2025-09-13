@@ -320,6 +320,50 @@ class RunningProcessGroup:
                     stuck_monitor.stop_monitoring(proc)
             self._status_monitoring_active = False
 
+        # Check for processes that failed with non-zero exit codes
+        if exit_failed_processes:
+            print(f"\n\033[91m###### ERROR ######\033[0m")
+            print(
+                f"Tests failed due to {len(exit_failed_processes)} process(es) with non-zero exit codes:"
+            )
+            for proc, exit_code in exit_failed_processes:
+                print(f"  - {proc.command} (exit code {exit_code})")
+            failures: list[TestFailureInfo] = []
+            for proc, exit_code in exit_failed_processes:
+                # Extract error snippet from process output
+                error_snippet = extract_error_snippet(proc.accumulated_output)
+
+                failures.append(
+                    TestFailureInfo(
+                        test_name=_extract_test_name(proc.command),
+                        command=str(proc.command),
+                        return_code=exit_code,
+                        output=error_snippet,
+                        error_type="exit_failure",
+                    )
+                )
+            raise TestExecutionFailedException("Tests failed", failures)
+
+        # Check for failed processes (killed due to timeout/stuck)
+        if failed_processes:
+            print(f"\n\033[91m###### ERROR ######\033[0m")
+            print(f"Tests failed due to {len(failed_processes)} killed process(es):")
+            for cmd in failed_processes:
+                print(f"  - {cmd}")
+            print("Processes were killed due to timeout/stuck detection")
+            failures: list[TestFailureInfo] = []
+            for cmd in failed_processes:
+                failures.append(
+                    TestFailureInfo(
+                        test_name=_extract_test_name(cmd),
+                        command=str(cmd),
+                        return_code=1,
+                        output="Process was killed due to timeout/stuck detection",
+                        error_type="killed_process",
+                    )
+                )
+            raise TestExecutionFailedException("Processes were killed", failures)
+
         return completed_timings
 
     def get_status(self) -> GroupStatus:
