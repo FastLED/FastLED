@@ -1,5 +1,5 @@
 
-#include "fl/has_define.h"
+#include "fl/has_include.h"
 
 #if !__has_include(<Adafruit_NeoPixel.h>)
 #include "platforms/adafruit/clockless_fake.hpp"
