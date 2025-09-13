@@ -7,6 +7,7 @@
 #include "fl/span.h"
 #include "fl/shared_ptr.h"
 #include "fl/has_include.h"
+#include "fl/unused.h"
 
 #if !FL_HAS_INCLUDE(<Arduino.h>)
   #error "This implementation requires Arduino.h - compile with Arduino framework"
@@ -192,6 +193,7 @@ fl::shared_ptr<IAudioInput> arduino_create_audio_input(const AudioConfig& config
 
 // Stub implementation for platforms without Arduino I2S support
 fl::shared_ptr<IAudioInput> arduino_create_audio_input(const AudioConfig& config, fl::string* error_message = nullptr) {
+    FL_UNUSED(config);
     const char* ERROR_MESSAGE = "Arduino I2S library not available - please install I2S library";
     FL_WARN(ERROR_MESSAGE);
     if (error_message) {

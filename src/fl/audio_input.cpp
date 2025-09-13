@@ -10,14 +10,12 @@
 #include "fl/has_include.h"
 #include "platforms/audio_input_null.hpp"
 
-// Include ESP32 audio input implementation if on ESP32
-#ifdef ESP32
-#include "platforms/esp/32/audio/audio_impl.hpp"
-#endif
 
-// Auto-determine Arduino usage if not explicitly set
+// Auto-determine Arduino usage if not explicitly set.  Force this to 1
+// if you want to test Arduino path for audio input on a platform with
+// native audio support.
 #ifndef FASTLED_USES_ARDUINO_AUDIO_INPUT
-  #if defined(ESP32)
+  #if defined(ESP32) && !defined(ESP8266)
     #define FASTLED_USES_ARDUINO_AUDIO_INPUT 0
   #elif FL_HAS_INCLUDE(<Arduino.h>)
     #define FASTLED_USES_ARDUINO_AUDIO_INPUT 1
@@ -26,10 +24,21 @@
   #endif
 #endif
 
-// Include the proper file.
+#if !FASTLED_USES_ARDUINO_AUDIO_INPUT
+#if defined(ESP32) && !defined(ESP8266)
+#define FASTLED_USES_ESP32_AUDIO_INPUT 1
+#else
+#define FASTLED_USES_ESP32_AUDIO_INPUT 0
+#endif
+#else
+#define FASTLED_USES_ESP32_AUDIO_INPUT 0
+#endif
+
+
+// Include ESP32 audio input implementation if on ESP32
 #if FASTLED_USES_ARDUINO_AUDIO_INPUT
 #include "platforms/arduino/audio_input.hpp"
-#elif defined(ESP32)
+#elif FASTLED_USES_ESP32_AUDIO_INPUT
 #include "platforms/esp/32/audio/audio_impl.hpp"
 #endif
 
@@ -40,13 +49,11 @@ namespace fl {
 fl::shared_ptr<IAudioInput> platform_create_audio_input(const AudioConfig &config, fl::string *error_message) {
     return arduino_create_audio_input(config, error_message);
 }
-
-#elif defined(ESP32)
+#elif FASTLED_USES_ESP32_AUDIO_INPUT
 // ESP32 native implementation
 fl::shared_ptr<IAudioInput> platform_create_audio_input(const AudioConfig &config, fl::string *error_message) {
     return esp32_create_audio_input(config, error_message);
 }
-
 #else
 // Weak default implementation - no audio support
 FL_LINK_WEAK
