@@ -3,20 +3,10 @@
     "core": "silabs",
     "f_cpu": "39000000L",
     "mcu": "cortex-m33",
-    "variant": "thingplusmatter"
-  },
-  "connectivity": [
-    "bluetooth",
-    "thread",
-    "wifi",
-    "zigbee"
-  ],
-  "debug": {
-    "jlink_device": "EFR32MG24B020F1536IM40",
-    "onboard_tools": [
-      "jlink"
-    ],
-    "svd_path": "EFR32MG24B020F1536IM40.svd"
+    "variant": "thingplusmatter",
+    "arduino": {
+      "matter_libs": "libMatterCore.a libSilabsChip.a"
+    }
   },
   "frameworks": [
     "arduino"
@@ -29,5 +19,10 @@
     "protocol": "jlink"
   },
   "url": "https://www.sparkfun.com/products/20270",
-  "vendor": "Sparkfun"
+  "vendor": "Sparkfun",
+  "connectivity": [
+    "bluetooth",
+    "thread",
+    "zigbee"
+  ]
 }
