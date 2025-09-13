@@ -1,4 +1,4 @@
-name: bluepill
+name: Bluepill (STM32F103C8)
 
 on:
   push:

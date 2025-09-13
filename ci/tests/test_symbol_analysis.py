@@ -12,29 +12,16 @@ import pytest
 _ENABLED = True
 
 from ci.util.paths import PROJECT_ROOT
+from ci.util.symbol_analysis import (
+    SymbolInfo,
+    analyze_map_file,
+    analyze_symbols,
+    build_reverse_call_graph,
+    find_board_build_info,
+    generate_report,
+)
+from ci.util.tools import Tools, load_tools
 
-
-# Import dependencies
-try:
-    from ci.util.symbol_analysis import (
-        SymbolInfo,
-        analyze_map_file,
-        analyze_symbols,
-        build_reverse_call_graph,
-        find_board_build_info,
-        generate_report,
-    )
-    from ci.util.tools import Tools, load_tools
-except ImportError:
-    # Set defaults for when imports fail
-    SymbolInfo = None  # type: ignore
-    analyze_map_file = None  # type: ignore
-    analyze_symbols = None  # type: ignore
-    build_reverse_call_graph = None  # type: ignore
-    find_board_build_info = None  # type: ignore
-    generate_report = None  # type: ignore
-    Tools = None  # type: ignore
-    load_tools = None  # type: ignore
 
 HERE = Path(__file__).resolve().parent.absolute()
 UNO = HERE / "uno"
