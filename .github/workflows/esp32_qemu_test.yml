@@ -140,9 +140,9 @@ jobs:
         shell: bash
 
       - name: Run ESP32 example in QEMU
-        working-directory: trusted
         uses: tobozo/esp32-qemu-sim@v1.0.3
         with:
+          working-directory: trusted
           build-folder: ./.build/${{ matrix.platform }}/${{ matrix.example }}
           flash-size: 4
           qemu-timeout: 30
