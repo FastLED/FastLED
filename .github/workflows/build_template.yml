@@ -82,8 +82,8 @@ jobs:
           cd trusted
         shell: bash
 
-          - name: Set working directory to trusted
-            run: echo "GITHUB_WORKSPACE=$GITHUB_WORKSPACE/trusted" >> $GITHUB_ENV
+      - name: Set working directory to trusted
+        run: echo "GITHUB_WORKSPACE=$GITHUB_WORKSPACE/trusted" >> $GITHUB_ENV
 
 
 
