@@ -126,15 +126,15 @@ jobs:
         run: |
           echo "Checking build artifacts..."
           find .build -name "*.bin" -o -name "*.elf" | head -10
-          
-          # Check if the expected build directory exists
-          if [ -d ".build/${{ matrix.platform }}/${{ matrix.example }}" ]; then
-            echo "✅ Build directory found: .build/${{ matrix.platform }}/${{ matrix.example }}"
-            ls -la ".build/${{ matrix.platform }}/${{ matrix.example }}/"
+
+          # Check if the expected build directory exists (PioCompiler creates .build/pio/{board_name}/)
+          if [ -d ".build/pio/${{ matrix.platform }}" ]; then
+            echo "✅ Build directory found: .build/pio/${{ matrix.platform }}"
+            ls -la ".build/pio/${{ matrix.platform }}/"
           else
             echo "❌ Build directory not found"
             echo "Available build directories:"
-            find .build -type d -name "${{ matrix.example }}" | head -5
+            find .build -type d | head -10
             exit 1
           fi
         shell: bash
@@ -143,7 +143,7 @@ jobs:
         uses: tobozo/esp32-qemu-sim@v1.0.5
         with:
           working-directory: trusted
-          build-folder: ./.build/${{ matrix.platform }}/${{ matrix.example }}
+          build-folder: ./.build/pio/${{ matrix.platform }}
           flash-size: 4
           qemu-timeout: 30
 
@@ -208,7 +208,7 @@ jobs:
           name: esp32-qemu-failure-${{ matrix.platform }}-${{ matrix.example }}-${{ github.sha }}
           path: |
             trusted/qemu_output.log
-            trusted/.build/${{ matrix.platform }}/${{ matrix.example }}/
+            trusted/.build/pio/${{ matrix.platform }}/
           include-hidden-files: true
 
       - name: Upload QEMU logs on success (for analysis)
