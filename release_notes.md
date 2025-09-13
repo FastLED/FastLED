@@ -12,7 +12,7 @@ FastLED 3.10.3
     * Added complete platform implementation with ARM Cortex-M33 @ 78MHz support
     * Silicon Labs EMLIB integration for optimized GPIO control and clock management
     * Clockless LED controller support for WS2812, SK6812, and other standard chipsets
-    * Board definitions for `mgm240s` target with `siliconlabsefm32` platform
+    * Board definitions for `mgm240` target with `siliconlabsefm32` platform
     * Added CI testing with GitHub Actions build badge for continuous validation
     * Compatible with Arduino framework and Matter/Thread wireless protocols
 

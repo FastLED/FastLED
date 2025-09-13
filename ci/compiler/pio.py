@@ -333,7 +333,7 @@ class FastLEDPaths:
     @property
     def packages_dir(self) -> Path:
         """PlatformIO packages directory (toolchains, frameworks)."""
-        return self.fastled_root / "packages" / self.board_name
+        return self.home_dir / ".platformio" / "packages"
 
     @property
     def global_platformio_cache_dir(self) -> Path:

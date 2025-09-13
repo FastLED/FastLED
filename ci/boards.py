@@ -680,16 +680,16 @@ BLACKPILL = Board(
 # Uses Silicon Labs EFM32 platform with Arduino framework support
 # Based on EFR32MG24 SoC with ARM Cortex-M33 @ 78MHz
 MGM240S = Board(
-    board_name="mgm240s",
-    real_board_name="sparkfun_thingplusmatter",  # Use the existing board JSON file
+    board_name="mgm240",
+    real_board_name="sparkfun_thingplus_matter",  # Use the existing board JSON file
     platform="siliconlabsefm32",
     platform_needs_install=True,
     platform_packages="framework-arduino-silabs@https://github.com/SiliconLabs/arduino.git",
     framework="arduino",
-    defines=[
-        "ARDUINO_NANO_MATTER",
-        "MGM240SD22VNA",
-    ],
+    #defines=[
+    #    "ARDUINO_NANO_MATTER",
+    #    "MGM240SD22VNA",
+    #],
 )
 
 
