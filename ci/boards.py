@@ -16,10 +16,12 @@ ESP32_IDF_5_1_PIOARDUINO = "https://github.com/pioarduino/platform-espressif32/r
 ESP32_IDF_5_3_PIOARDUINO = "https://github.com/pioarduino/platform-espressif32/releases/download/53.03.10/platform-espressif32.zip"
 ESP32_IDF_5_4_PIOARDUINO = "https://github.com/pioarduino/platform-espressif32/releases/download/54.03.20/platform-espressif32.zip"
 ESP32_IDF_5_5_PIOARDUINO = "https://github.com/pioarduino/platform-espressif32/releases/download/55.03.30-2/platform-espressif32.zip"
-ESP32_IDF_5_1_PIOARDUINO_LATEST = (
+ESP32_IDF_LATEST_PIOARDUINO = ESP32_IDF_5_5_PIOARDUINO
+
+ESP32_IDF_LATEST_PIOARDUINO = (
     "https://github.com/pioarduino/platform-espressif32.git#develop"
 )
-ESP32_IDF_4_4_LATEST = "platformio/espressif32"
+ESP32_IDF_4_4_LATEST = "https://github.com/platformio/platform-espressif32/archive/refs/tags/v4.4.0.zip"
 APOLLO3_2_2_0 = "https://github.com/nigelb/platform-apollo3blue"
 # Top of trunk.
 # ESP32_IDF_5_1_PIOARDUINO = "https://github.com/pioarduino/platform-espressif32"
@@ -443,8 +445,9 @@ ESP32_UPESY_WROOM = Board(
     platform="espressif32",
 )
 
-ESP32_H2_DEVKITM_1 = Board(
-    board_name="esp32-h2-devkitm-1",
+ESP32H2 = Board(
+    board_name="esp32h2",
+    real_board_name="esp32-h2-devkitm-1",
     platform_needs_install=True,  # Install platform package to get the boards
     platform=ESP32_IDF_5_3_PIOARDUINO,
 )
