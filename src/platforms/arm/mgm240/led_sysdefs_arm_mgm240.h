@@ -26,5 +26,3 @@
 #ifndef FASTLED_USE_PROGMEM
 #define FASTLED_USE_PROGMEM 0
 #endif
-
-#endif
