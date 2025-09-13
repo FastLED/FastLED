@@ -69,6 +69,7 @@
             "+<platforms/stub/**/*.cpp>",
             "+<platforms/wasm/**/*.cpp>",
             "+<platforms/shared/**.cpp>",
+            "+<platforms/arduino/**.cpp>",
             "+<platforms/adafruit/**/*.cpp>",
             "+<third_party/**/*.cpp>",
             "+<third_party/**/*.c>",
