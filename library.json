@@ -65,6 +65,7 @@
             "+<*.h>",
             "+<platforms/*.cpp>",
             "+<platforms/arm/k20/**/*.cpp>",
+            "+<platforms/arm/mgm240/**/*.cpp>",
             "+<platforms/esp/32/**/*.cpp>",
             "+<platforms/stub/**/*.cpp>",
             "+<platforms/wasm/**/*.cpp>",
