@@ -1,24 +1,19 @@
 #pragma once
 
+#include "fl/has_include.h"
+
 // Include math headers with better ESP32C2 compatibility
-#if defined(__has_include)
-  #if __has_include(<cmath>)
-    #define FASTLED_HAS_EXP 1
-    #include <cmath>
-  #elif __has_include(<math.h>)
-    #define FASTLED_HAS_EXP 1
-    #include <math.h>
-  #else
-    #define FASTLED_HAS_EXP 0
-  #endif
+#ifndef FASTLED_HAS_EXP
+#if __has_include(<cmath>)
+  #define FASTLED_HAS_EXP 1
+  #include <cmath>
+#elif __has_include(<math.h>)
+  #define FASTLED_HAS_EXP 1
+  #include <math.h>
 #else
-  // Fallback for compilers without __has_include
   #define FASTLED_HAS_EXP 0
 #endif
-
-#ifndef FASTLED_HAS_EXP
-#define FASTLED_HAS_EXP 0
-#endif
+#endif  // !FASTLED_HAS_EXP
 
 
 #include "fl/clamp.h"
