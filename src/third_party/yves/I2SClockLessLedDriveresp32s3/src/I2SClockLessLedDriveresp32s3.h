@@ -47,7 +47,7 @@
 #include "soc/gdma_reg.h"
 #include "platforms/esp/esp_version.h"
 
-#define IDF_5_3_OR_EARLIER (ESP_IDF_VERSION < ESP_IDF_VERSION_VAL(5, 4, 0))
+#define IDF_5_4_OR_EARLIER (ESP_IDF_VERSION < ESP_IDF_VERSION_VAL(5, 5, 0))
 
 // According to bug reports, this driver does not work well with the new WS2812-v5b. This is
 // probably due to the extrrra long reset time requirements of this chipset. so we put in
@@ -388,15 +388,15 @@ class I2SClocklessLedDriveresp32S3 {
         bus_config.bus_width = 16;
         bus_config.max_transfer_bytes =
             _nb_components * NUM_LED_PER_STRIP * 8 * 3 * 2 + __OFFSET + __OFFSET_END;
-        #if IDF_5_3_OR_EARLIER
+        #if IDF_5_4_OR_EARLIER
         #pragma GCC diagnostic push
         #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
         #endif
         // In IDF 5.3, psram_trans_align became deprecated. We kick the can down
-        // the road a little bit and suppress the warning until idf 5.4 arrives.
+        // the road a little bit and suppress the warning until idf 5.5 arrives.
         bus_config.psram_trans_align = LCD_DRIVER_PSRAM_DATA_ALIGNMENT;
         bus_config.sram_trans_align = 4;
-        #if IDF_5_3_OR_EARLIER
+        #if IDF_5_4_OR_EARLIER
         #pragma GCC diagnostic pop
         #endif
 
