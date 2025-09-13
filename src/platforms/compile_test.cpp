@@ -45,14 +45,14 @@ namespace fl {
 // any compile-time errors if the platform is not configured correctly.
 static void compile_tests() {
 
-    static_assert(fl::is_same<u32, uint32_t>::value, "u32 must be exactly uint32_t");
-    static_assert(fl::is_same<u16, uint16_t>::value, "u16 must be exactly uint16_t");
-    static_assert(fl::is_same<u8, uint8_t>::value, "u8 must be exactly uint8_t");
-    static_assert(fl::is_same<i32, int32_t>::value, "i32 must be exactly int32_t");
-    static_assert(fl::is_same<i16, int16_t>::value, "i16 must be exactly int16_t");
-    static_assert(fl::is_same<i8, int8_t>::value, "i8 must be exactly int8_t");
-    static_assert(fl::is_same<size, size_t>::value, "size must be exactly size_t");
-    static_assert(fl::is_same<uptr, uintptr_t>::value, "uptr must be exactly uintptr_t");
+    static_assert(fl::is_same<u32, uint32_t>::value, "u32 must be the same type as uint32_t");
+    static_assert(fl::is_same<u16, uint16_t>::value, "u16 must be the same type as uint16_t");
+    static_assert(fl::is_same<u8, uint8_t>::value, "u8 must be the same type as uint8_t");
+    static_assert(fl::is_same<i32, int32_t>::value, "i32 must be the same type as int32_t");
+    static_assert(fl::is_same<i16, int16_t>::value, "i16 must be the same type as int16_t");
+    static_assert(fl::is_same<i8, int8_t>::value, "i8 must be the same type as int8_t");
+    static_assert(fl::is_same<size, size_t>::value, "size must be the same type as size_t");
+    static_assert(fl::is_same<uptr, uintptr_t>::value, "uptr must be the same type as uintptr_t");
 
     // Size assertions for FastLED integer types
     static_assert(sizeof(i8) == 1, "i8 must be exactly 1 byte");
