@@ -78,6 +78,11 @@ void loop() {
 
 *Note: STM103TB has limited PlatformIO support
 
+### Silicon Labs (SiLabs)
+[![ThingPlusMatter_mgm240s](https://github.com/FastLED/FastLED/actions/workflows/build_mgm240s_thingplusmatter.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_mgm240s_thingplusmatter.yml)
+
+*MGM240 (EFR32MG24) support for Arduino Nano Matter and SparkFun Thing Plus Matter boards
+
 ### Raspberry Pi Pico
 [![rp2040](https://github.com/FastLED/FastLED/actions/workflows/build_rp2040.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_rp2040.yml) [![rp2350](https://github.com/FastLED/FastLED/actions/workflows/build_rp2350.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_rp2350.yml) [![rp2350B SparkfunXRP](https://github.com/FastLED/FastLED/actions/workflows/build_rp2350B.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_rp2350B.yml)
 
@@ -230,7 +235,7 @@ Update: max overclock has been reported at +70%: https://www.reddit.com/r/FastLE
 ### Platform Categories
 | **Arduino Family** | **ESP32 Series** | **Teensy** | **ARM** | **Specialty** |
 |--------------------|------------------|------------|---------|---------------|
-| Uno, Nano, Mega<br/>Due, Giga R1, R4 | ESP32, S2, S3, C3<br/>C6, H2, P4 | 3.0, 3.1, 4.0, 4.1<br/>LC + OctoWS2811 | STM32, NRF52<br/>Apollo3 | Raspberry Pi<br/>WASM, x86 |
+| Uno, Nano, Mega<br/>Due, Giga R1, R4 | ESP32, S2, S3, C3<br/>C6, H2, P4 | 3.0, 3.1, 4.0, 4.1<br/>LC + OctoWS2811 | STM32, NRF52<br/>Apollo3, Silicon Labs | Raspberry Pi<br/>WASM, x86 |
 
 **FastLED supports 50+ platforms!** From sub-$1 ATtiny chips to high-end Teensy 4.1 with 50 parallel outputs.
 

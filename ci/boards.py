@@ -676,6 +676,22 @@ BLACKPILL = Board(
     platform="ststm32",
 )
 
+# Silicon Labs MGM240S boards (Arduino Nano Matter, SparkFun Thing Plus Matter)
+# Uses Silicon Labs EFM32 platform with Arduino framework support
+# Based on EFR32MG24 SoC with ARM Cortex-M33 @ 78MHz
+MGM240S = Board(
+    board_name="mgm240s",
+    real_board_name="sparkfun_thingplusmatter",  # Use the existing board JSON file
+    platform="siliconlabsefm32",
+    platform_needs_install=True,
+    platform_packages="framework-arduino-silabs@https://github.com/SiliconLabs/arduino.git",
+    framework="arduino",
+    defines=[
+        "ARDUINO_NANO_MATTER",
+        "MGM240SD22VNA",
+    ],
+)
+
 
 def _make_board_map(boards: list[Board]) -> dict[str, Board]:
     # make board map, but assert on duplicate board names
