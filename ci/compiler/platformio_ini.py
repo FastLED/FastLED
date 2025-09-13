@@ -263,11 +263,12 @@ class PlatformIOIni:
         Returns:
             True if replacement was made, False otherwise
         """
+        replacement_made = False
         current_value = self.get_option(section, option)
         if current_value == old_url:
             self.set_option(section, option, new_url)
-            return True
-        return False
+            replacement_made = True
+        return replacement_made
 
     def validate_structure(self) -> List[str]:
         """

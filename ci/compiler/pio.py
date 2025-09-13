@@ -1059,12 +1059,16 @@ class PlatformLock:
     def __init__(self, lock_file: Path) -> None:
         self.lock_file_path = lock_file
         self.lock = fasteners.InterProcessLock(str(self.lock_file_path))
+        self.is_locked = False
 
     def acquire(self) -> None:
+        self.is_locked = True
         self.lock.acquire(blocking=True, timeout=5)
 
     def release(self) -> None:
-        self.lock.release()
+        if self.is_locked:
+            self.lock.release()
+            self.is_locked = False
 
 
 class PioCompiler(Compiler):
