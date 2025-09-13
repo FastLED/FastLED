@@ -7,6 +7,14 @@ FastLED 3.10.3
     * Consolidated STM32F1/STM32F4 pin definitions to reduce code duplication
     * Added CI testing with GitHub Actions build badge for continuous validation
     * Compatible with PlatformIO `ststm32` platform and Arduino framework
+  * **Silicon Labs MGM240 Support Added**: Arduino Nano Matter and SparkFun Thing Plus Matter support
+    * Resolves GitHub issue #1750: Platform support for MGM240 (EFR32MG24) wireless modules
+    * Added complete platform implementation with ARM Cortex-M33 @ 78MHz support
+    * Silicon Labs EMLIB integration for optimized GPIO control and clock management
+    * Clockless LED controller support for WS2812, SK6812, and other standard chipsets
+    * Board definitions for `mgm240s` target with `siliconlabsefm32` platform
+    * Added CI testing with GitHub Actions build badge for continuous validation
+    * Compatible with Arduino framework and Matter/Thread wireless protocols
 
 FastLED 3.10.2
 ==============
