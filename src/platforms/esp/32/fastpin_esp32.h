@@ -130,9 +130,8 @@ public:
 
 #elif CONFIG_IDF_TARGET_ESP32H2
 // 22 GPIO pins.  ESPIDF defines all pins as valid.
-// ESP32-H2 datasheet not yet available, when it is, mask the pins commonly used by SPI flash.
-#warning ESP32-H2 chip flash configuration not yet known.  Only pins defined by ESP-IDF will be masked.
-#define FASTLED_UNUSABLE_PIN_MASK (0ULL)
+// GPIO 15-21 are typically reserved for SPI0/1 flash communication.
+#define FASTLED_UNUSABLE_PIN_MASK (0ULL | _FL_BIT(15) | _FL_BIT(16) | _FL_BIT(17) | _FL_BIT(18) | _FL_BIT(19) | _FL_BIT(20) | _FL_BIT(21))
 #elif CONFIG_IDF_TARGET_ESP32C2
 #warning ESP32-C2 chip variant is in beta support.  Only pins defined by ESP-IDF will be masked.
 #define FASTLED_UNUSABLE_PIN_MASK (0ULL)
