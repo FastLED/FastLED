@@ -1159,13 +1159,17 @@ class PioCompiler(Compiler):
 
         # Submit all builds
         self._global_package_lock.acquire()
+        cancelled = threading.Event()
         try:
             for example in examples:
-                future = self.executor.submit(self._internal_build_no_lock, example)
+                future = self.executor.submit(
+                    self._internal_build_no_lock, example, cancelled
+                )
                 future.add_done_callback(release_platform_lock)
                 futures.append(future)
         except KeyboardInterrupt:
             print("KeyboardInterrupt: Cancelling all builds")
+            cancelled.set()
             for future in futures:
                 future.cancel()
             import _thread
@@ -1303,37 +1307,54 @@ class PioCompiler(Compiler):
         except Exception as e:
             return f"Error retrieving {cache_name.upper()} statistics: {e}"
 
-    def _internal_build_no_lock(self, example: str) -> SketchResult:
+    def _internal_build_no_lock(
+        self, example: str, cancelled: threading.Event
+    ) -> SketchResult:
         """Build a specific example without lock management. Only call from build()."""
-        if not self.initialized:
-            init_result = self._internal_init_build_no_lock(example)
-            if not init_result.success:
-                # Print FAILED message immediately in worker thread
-                red_color = "\033[31m"
-                reset_color = "\033[0m"
-                print(f"{red_color}FAILED: {example}{reset_color}")
-
-                return SketchResult(
-                    success=False,
-                    output=init_result.output,
-                    build_dir=init_result.build_dir,
-                    example=example,
-                )
-            # If initialization succeeded and we just built the example, return success
-            # Print SUCCESS message immediately in worker thread
-            green_color = "\033[32m"
-            reset_color = "\033[0m"
-            print(f"{green_color}SUCCESS: {example}{reset_color}")
-
+        if cancelled.is_set():
             return SketchResult(
-                success=True,
-                output="Built during initialization",
+                success=False,
+                output="Cancelled",
                 build_dir=self.build_dir,
                 example=example,
             )
+        try:
+            if not self.initialized:
+                init_result = self._internal_init_build_no_lock(example)
+                if not init_result.success:
+                    # Print FAILED message immediately in worker thread
+                    red_color = "\033[31m"
+                    reset_color = "\033[0m"
+                    print(f"{red_color}FAILED: {example}{reset_color}")
 
-        # No lock management - caller (build) handles locks
-        return self._build_internal(example)
+                    return SketchResult(
+                        success=False,
+                        output=init_result.output,
+                        build_dir=init_result.build_dir,
+                        example=example,
+                    )
+                # If initialization succeeded and we just built the example, return success
+                # Print SUCCESS message immediately in worker thread
+                green_color = "\033[32m"
+                reset_color = "\033[0m"
+                print(f"{green_color}SUCCESS: {example}{reset_color}")
+
+                return SketchResult(
+                    success=True,
+                    output="Built during initialization",
+                    build_dir=self.build_dir,
+                    example=example,
+                )
+
+            # No lock management - caller (build) handles locks
+            return self._build_internal(example)
+        except KeyboardInterrupt:
+            print("KeyboardInterrupt: Cancelling build")
+            cancelled.set()
+            import _thread
+
+            _thread.interrupt_main()
+            raise
 
     def clean(self) -> None:
         """Clean build artifacts for this platform (acquire platform lock)."""

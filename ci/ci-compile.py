@@ -283,6 +283,9 @@ def compile_board_examples(
                 compiler.cancel_all()
                 import _thread
 
+                for future in futures:
+                    future.cancel()
+
                 _thread.interrupt_main()
                 raise
             except Exception as e:
