@@ -27,4 +27,24 @@
 #define FASTLED_USE_PROGMEM 0
 #endif
 
+// Type definitions for register access
+typedef volatile uint32_t RwReg;  // ARM Cortex-M33 uses 32-bit registers
+typedef volatile uint32_t RoReg;  // Read-only register
+
+// Arduino compatibility - stub out pin manipulation functions
+// These are not used when hardware fastpin is available
+#ifndef digitalPinToBitMask
+#define digitalPinToBitMask(P) (1 << (P))
+#endif
+
+#ifndef digitalPinToPort
+#define digitalPinToPort(P) ((P) / 8)
+#endif
+
+#ifndef portOutputRegister
+#define portOutputRegister(P) ((volatile uint32_t*)(0x40000000 + (P) * 0x400))
+#endif
+
+#ifndef portInputRegister
+#define portInputRegister(P) ((volatile uint32_t*)(0x40000000 + (P) * 0x400))
 #endif

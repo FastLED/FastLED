@@ -14,7 +14,8 @@
     || defined(NRF52840_XXAA) || defined(ARDUINO_ARCH_APOLLO3) \
     || defined(FASTLED_APOLLO3) || defined(ARDUINO_ARCH_RP2040) \
     || defined(TARGET_RP2040) \
-    || defined(PICO_32BIT) || defined(ARDUINO_RASPBERRY_PI_PICO)
+    || defined(PICO_32BIT) || defined(ARDUINO_RASPBERRY_PI_PICO) \
+    || defined(ARDUINO_ARCH_SILABS)
 #define FASTLED_IS_ARM  // TODO centralize this.
 #endif
 #endif  // FASTLED_IS_ARM

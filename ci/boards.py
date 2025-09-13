@@ -685,10 +685,6 @@ MGM240S = Board(
     platform="https://github.com/maxgerhardt/platform-siliconlabsefm32/archive/refs/heads/silabs-arduino.zip",
     platform_needs_install=True,
     framework="arduino",
-    # defines=[
-    #    "ARDUINO_NANO_MATTER",
-    #    "MGM240SD22VNA",
-    # ],
 )
 
 

@@ -57,7 +57,7 @@
 #include "platforms/arm/renesas/led_sysdef_arm_renesas.h"
 #elif defined(ARDUINO_GIGA)|| defined(ARDUINO_GIGA_M7)
 #include "platforms/arm/giga/led_sysdef_arm_giga.h"
-#elif defined(ARDUINO_NANO_MATTER) || defined(MGM240SD22VNA) || defined(MGM240PB32VNA) || defined(EFR32MG24)
+#elif defined(ARDUINO_ARCH_SILABS)
 // Silicon Labs MGM240 (Arduino Nano Matter, SparkFun Thing Plus Matter)
 #include "platforms/arm/mgm240/led_sysdefs_arm_mgm240.h"
 #elif defined(__x86_64__) || defined(FASTLED_STUB_IMPL) || defined(__APPLE__) || defined(__linux__) || defined(__unix__) || defined(__EMSCRIPTEN__)
