@@ -152,6 +152,11 @@ def parse_args(args: Optional[list[str]] = None) -> argparse.Namespace:
         type=str,
         help="Directory to write per-example failure logs (created on first failure)",
     )
+    parser.add_argument(
+        "--global-cache",
+        type=str,
+        help="Override global PlatformIO cache directory path (for testing)",
+    )
 
     try:
         parsed_args = parser.parse_intermixed_args(args)
@@ -214,11 +219,33 @@ def compile_board_examples(
     defines: List[str],
     verbose: bool,
     enable_cache: bool,
+    global_cache_dir: Optional[Path] = None,
 ) -> BoardCompilationResult:
     """Compile examples for a single board using PioCompiler."""
+
+    # Resolve global cache directory immediately for display
+    resolved_cache_dir = None
+    if global_cache_dir is not None:
+        # User specified a path - use it exactly as provided
+        resolved_cache_dir = global_cache_dir.resolve()
+    else:
+        # Default path ends with 'global_cache'
+        resolved_cache_dir = Path.home() / ".fastled" / "global_cache"
+
     print(f"\n{'=' * 60}")
     print(f"COMPILING BOARD: {board.board_name}")
     print(f"EXAMPLES: {', '.join(examples)}")
+    print(f"GLOBAL CACHE: {resolved_cache_dir}")
+
+    # Show other cache directories
+    from ci.compiler.pio import FastLEDPaths
+
+    paths = FastLEDPaths(board.board_name)
+
+    print(f"BUILD CACHE: {paths.build_cache_dir}")
+    print(f"CORE DIR: {paths.core_dir}")
+    print(f"PACKAGES DIR: {paths.packages_dir}")
+
     print(f"{'=' * 60}")
 
     try:
@@ -235,6 +262,7 @@ def compile_board_examples(
         compiler = PioCompiler(
             board=board,
             verbose=verbose,
+            global_cache_dir=resolved_cache_dir,
             additional_defines=defines,
             cache_type=cache_type,
         )
@@ -387,12 +415,18 @@ def main() -> int:
 
     # Compile for each board
     for board in boards:
+        # Parse global cache directory if provided
+        global_cache_dir = None
+        if args.global_cache:
+            global_cache_dir = Path(args.global_cache)
+
         result = compile_board_examples(
             board=board,
             examples=examples,
             defines=defines,
             verbose=args.verbose,
             enable_cache=(args.enable_cache or args.cache) and not args.no_cache,
+            global_cache_dir=global_cache_dir,
         )
 
         if not result.ok:

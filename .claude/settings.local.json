@@ -32,7 +32,8 @@
       "Bash(nm:*)",
       "Bash(objdump:*)",
       "WebFetch(domain:docs.platformio.org)",
-      "WebFetch(domain:docs.arduino.cc)"
+      "WebFetch(domain:docs.arduino.cc)",
+      "Bash(cat:*)"
     ],
     "deny": []
   }

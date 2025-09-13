@@ -212,14 +212,14 @@ def _apply_board_specific_config(
     board: Board,
     platformio_ini_path: Path,
     example: str,
+    paths: "FastLEDPaths",
     additional_defines: list[str] | None = None,
     additional_include_dirs: list[str] | None = None,
     additional_libs: list[str] | None = None,
     cache_type: CacheType = CacheType.NO_CACHE,
 ) -> bool:
     """Apply board-specific build configuration from Board class."""
-    # Use centralized path management
-    paths = FastLEDPaths(board.board_name)
+    # Use provided paths object (which may have overrides)
     paths.ensure_directories_exist()
 
     # Generate platformio.ini content using the enhanced Board method
@@ -236,6 +236,33 @@ def _apply_board_specific_config(
         if cache_type != CacheType.NO_CACHE
         else None,
     )
+
+    # Apply PlatformIO cache optimization to speed up builds
+    try:
+        from ci.compiler.platformio_cache import PlatformIOCache
+        from ci.compiler.platformio_ini import PlatformIOIni
+
+        # Parse the generated INI content
+        pio_ini = PlatformIOIni.parseString(config_content)
+
+        # Set up global PlatformIO cache
+        cache = PlatformIOCache(paths.global_platformio_cache_dir)
+
+        # Optimize by downloading and caching packages, replacing URLs with local file:// paths
+        pio_ini.optimize(cache)
+
+        # Use the optimized content
+        config_content = str(pio_ini)
+        print(
+            f"Applied PlatformIO cache optimization using cache directory: {paths.global_platformio_cache_dir}"
+        )
+
+    except Exception as e:
+        # Graceful fallback to original URLs on cache failures
+        print(
+            f"Warning: PlatformIO cache optimization failed, using original URLs: {e}"
+        )
+        # config_content remains unchanged (original URLs)
 
     platformio_ini_path.write_text(config_content)
 
@@ -375,6 +402,8 @@ class FastLEDPaths:
 
         # Base FastLED directory
         self.fastled_root = self.home_dir / ".fastled"
+        # Initialize the optional cache directory override
+        self._global_platformio_cache_dir: Path | None = None
 
     @property
     def build_dir(self) -> Path:
@@ -407,12 +436,20 @@ class FastLEDPaths:
         """PlatformIO packages directory (toolchains, frameworks)."""
         return self.fastled_root / "packages" / self.board_name
 
+    @property
+    def global_platformio_cache_dir(self) -> Path:
+        """Global PlatformIO package cache directory (shared across all boards)."""
+        if self._global_platformio_cache_dir is not None:
+            return self._global_platformio_cache_dir
+        return self.fastled_root / "platformio_cache"
+
     def ensure_directories_exist(self) -> None:
         """Create all necessary directories."""
         self.build_dir.mkdir(parents=True, exist_ok=True)
         self.global_package_lock_file.parent.mkdir(parents=True, exist_ok=True)
         self.core_dir.mkdir(parents=True, exist_ok=True)
         self.packages_dir.mkdir(parents=True, exist_ok=True)
+        self.global_platformio_cache_dir.mkdir(parents=True, exist_ok=True)
 
 
 class GlobalPackageLock:
@@ -927,6 +964,7 @@ def _init_platformio_build(
     board: Board,
     verbose: bool,
     example: str,
+    paths: "FastLEDPaths",
     additional_defines: list[str] | None = None,
     additional_include_dirs: list[str] | None = None,
     additional_libs: list[str] | None = None,
@@ -1007,6 +1045,7 @@ def _init_platformio_build(
         board_with_sketch_include,
         platformio_ini,
         example,
+        paths,
         additional_defines,
         additional_include_dirs,
         additional_libs,
@@ -1125,6 +1164,7 @@ class PioCompiler(Compiler):
         self,
         board: Board | str,
         verbose: bool,
+        global_cache_dir: Path,
         additional_defines: list[str] | None = None,
         additional_include_dirs: list[str] | None = None,
         additional_libs: list[str] | None = None,
@@ -1144,8 +1184,14 @@ class PioCompiler(Compiler):
         self.additional_libs = additional_libs
         self.cache_type = cache_type
 
+        # Global cache directory is already resolved by caller
+        self.global_cache_dir = global_cache_dir
+
         # Use centralized path management
         self.paths = FastLEDPaths(self.board.board_name)
+
+        # Always override the cache directory with our resolved path
+        self.paths._global_platformio_cache_dir = self.global_cache_dir
         self.build_dir: Path = self.paths.build_dir
 
         # Ensure all directories exist
@@ -1172,6 +1218,7 @@ class PioCompiler(Compiler):
             self.board,
             self.verbose,
             example,
+            self.paths,
             self.additional_defines,
             self.additional_include_dirs,
             self.additional_libs,
@@ -1736,7 +1783,13 @@ def run_pio_build(
         additional_include_dirs: Additional include directories to add to build flags (e.g., ["src/platforms/sub", "external/libs"])
     """
     pio = PioCompiler(
-        board, verbose, additional_defines, additional_include_dirs, None, cache_type
+        board,
+        verbose,
+        Path.home() / ".fastled" / "platformio_cache",
+        additional_defines,
+        additional_include_dirs,
+        None,
+        cache_type,
     )
     futures = pio.build(examples)
 
