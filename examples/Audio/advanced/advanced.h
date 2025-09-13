@@ -21,8 +21,6 @@
 FL_DISABLE_WARNING_PUSH
 FL_DISABLE_WARNING(float-conversion)
 FL_DISABLE_WARNING(sign-conversion)
-FL_DISABLE_WARNING(implicit-float-conversion)
-FL_DISABLE_WARNING(implicit-int-float-conversion)
 
 
 using namespace fl;
