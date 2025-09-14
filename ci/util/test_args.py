@@ -140,6 +140,11 @@ def parse_args(args: Optional[list[str]] = None) -> TestArgs:
         action="store_true",
         help="Enable debug mode for C++ unit tests (e.g., full debug symbols)",
     )
+    parser.add_argument(
+        "--qemu-esp32s3",
+        nargs="*",
+        help="Run ESP32-S3 examples in QEMU emulation (optionally specify example names)",
+    )
 
     parsed_args = parser.parse_args(args)
 
@@ -168,6 +173,7 @@ def parse_args(args: Optional[list[str]] = None) -> TestArgs:
         no_parallel=parsed_args.no_parallel,
         unity_chunks=parsed_args.unity_chunks,
         debug=parsed_args.debug,
+        qemu_esp32s3=parsed_args.qemu_esp32s3,
     )
 
     # Auto-enable --py or --cpp mode when a specific test is provided

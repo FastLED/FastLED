@@ -17,6 +17,7 @@ import time
 from pathlib import Path
 from typing import List, Optional, Tuple
 
+
 class QEMURunner:
     def __init__(self, qemu_binary: Optional[Path] = None):
         self.qemu_binary = qemu_binary or self._find_qemu_binary()

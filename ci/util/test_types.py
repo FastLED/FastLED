@@ -84,6 +84,7 @@ class TestArgs:
     no_parallel: bool = False  # Force sequential test execution
     unity_chunks: int = 1  # Number of unity chunks for libfastled build
     debug: bool = False  # Enable debug mode for unit tests
+    qemu_esp32s3: Optional[list[str]] = None  # Run ESP32-S3 examples in QEMU
 
 
 @typechecked
@@ -99,6 +100,8 @@ class TestCategories:
     examples_only: bool
     py_only: bool
     integration_only: bool
+    qemu_esp32s3: bool
+    qemu_esp32s3_only: bool
 
     def __post_init__(self):
         # Type validation
@@ -111,6 +114,8 @@ class TestCategories:
             "examples_only",
             "py_only",
             "integration_only",
+            "qemu_esp32s3",
+            "qemu_esp32s3_only",
         ]:
             value = getattr(self, field_name)
             if not isinstance(value, bool):
@@ -131,7 +136,7 @@ def process_test_flags(args: TestArgs) -> TestArgs:
     """Process and validate test execution flags"""
 
     # Check which specific test flags are provided
-    specific_flags = [args.unit, args.examples is not None, args.py, args.full]
+    specific_flags = [args.unit, args.examples is not None, args.py, args.full, args.qemu_esp32s3 is not None]
     specific_count = sum(bool(flag) for flag in specific_flags)
 
     # If --cpp is provided, default to --unit --examples (no Python)
@@ -203,28 +208,39 @@ def determine_test_categories(args: TestArgs) -> TestCategories:
     py_enabled = args.py
     # Integration tests only run when --full is used alone (not with --examples)
     integration_enabled = args.full and args.examples is None
+    qemu_esp32s3_enabled = args.qemu_esp32s3 is not None
 
     return TestCategories(
         unit=unit_enabled,
         examples=examples_enabled,
         py=py_enabled,
         integration=integration_enabled,
+        qemu_esp32s3=qemu_esp32s3_enabled,
         unit_only=unit_enabled
         and not examples_enabled
         and not py_enabled
-        and not integration_enabled,
+        and not integration_enabled
+        and not qemu_esp32s3_enabled,
         examples_only=examples_enabled
         and not unit_enabled
         and not py_enabled
-        and not integration_enabled,
+        and not integration_enabled
+        and not qemu_esp32s3_enabled,
         py_only=py_enabled
         and not unit_enabled
         and not examples_enabled
-        and not integration_enabled,
+        and not integration_enabled
+        and not qemu_esp32s3_enabled,
         integration_only=integration_enabled
         and not unit_enabled
         and not examples_enabled
-        and not py_enabled,
+        and not py_enabled
+        and not qemu_esp32s3_enabled,
+        qemu_esp32s3_only=qemu_esp32s3_enabled
+        and not unit_enabled
+        and not examples_enabled
+        and not py_enabled
+        and not integration_enabled,
     )
 
 
