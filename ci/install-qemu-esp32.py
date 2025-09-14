@@ -1,0 +1,281 @@
+#!/usr/bin/env python3
+"""
+ESP32 QEMU Installation Script
+
+Installs ESP32-compatible QEMU emulator using ESP-IDF tools.
+Cross-platform support for Linux, macOS, and Windows.
+"""
+
+import os
+import platform
+import subprocess
+import sys
+import tempfile
+import urllib.request
+from pathlib import Path
+from typing import Optional
+
+def get_platform_info():
+    """Get platform-specific information for QEMU installation."""
+    system = platform.system().lower()
+    machine = platform.machine().lower()
+
+    # Normalize machine architecture
+    if machine in ['x86_64', 'amd64']:
+        arch = 'x86_64'
+    elif machine in ['aarch64', 'arm64']:
+        arch = 'arm64'
+    elif machine.startswith('arm'):
+        arch = 'arm'
+    else:
+        arch = machine
+
+    return system, arch
+
+def install_system_dependencies():
+    """Install system dependencies required for QEMU."""
+    system, _ = get_platform_info()
+
+    print("Installing system dependencies...")
+
+    if system == 'linux':
+        # Ubuntu/Debian dependencies
+        deps = [
+            'libgcrypt20', 'libglib2.0-0', 'libpixman-1-0',
+            'libsdl2-2.0-0', 'libslirp0'
+        ]
+
+        try:
+            # Check if we can install packages (requires sudo)
+            result = subprocess.run(
+                ['sudo', 'apt-get', 'update'],
+                capture_output=True, text=True
+            )
+            if result.returncode == 0:
+                subprocess.run(
+                    ['sudo', 'apt-get', 'install', '-y'] + deps,
+                    check=True
+                )
+                print("System dependencies installed")
+            else:
+                print("WARNING: Could not install system dependencies (sudo required)")
+                print("Please install manually:", ' '.join(deps))
+        except subprocess.CalledProcessError:
+            print("WARNING: Failed to install system dependencies")
+
+    elif system == 'darwin':
+        # macOS - dependencies usually available via system
+        print("macOS system dependencies should be available")
+
+    elif system == 'windows':
+        # Windows - QEMU binaries are self-contained
+        print("Windows - no additional dependencies required")
+
+def download_esp_idf_tools():
+    """Download and setup ESP-IDF tools for QEMU installation."""
+    tools_dir = Path.home() / '.espressif'
+    tools_dir.mkdir(exist_ok=True)
+
+    # ESP-IDF tools script URL
+    tools_url = "https://raw.githubusercontent.com/espressif/esp-idf/master/tools/idf_tools.py"
+    tools_script = tools_dir / 'idf_tools.py'
+
+    if not tools_script.exists():
+        print("Downloading ESP-IDF tools...")
+        urllib.request.urlretrieve(tools_url, tools_script)
+        print(f"Downloaded ESP-IDF tools to {tools_script}")
+
+    return tools_script
+
+
+def install_qemu_esp32():
+    """Install ESP32 QEMU using ESP-IDF tools."""
+    system, arch = get_platform_info()
+
+    print(f"Checking for ESP32 QEMU for {system}-{arch}...")
+
+    # Check if already installed
+    qemu_binary = find_qemu_binary()
+    if qemu_binary:
+        print("ESP32 QEMU already installed")
+        return True
+
+    # Try automated installation for CI environments
+    if os.getenv('CI') == 'true' or os.getenv('GITHUB_ACTIONS') == 'true':
+        print("CI environment detected, attempting automatic installation...")
+
+        if system == 'linux':
+            try:
+                # Try to install QEMU from package manager in CI
+                print("Installing QEMU via apt-get...")
+                result = subprocess.run([
+                    'sudo', 'apt-get', 'update'
+                ], capture_output=True, text=True)
+
+                if result.returncode == 0:
+                    result = subprocess.run([
+                        'sudo', 'apt-get', 'install', '-y',
+                        'qemu-system-misc', 'qemu-system-xtensa'
+                    ], capture_output=True, text=True)
+
+                    if result.returncode == 0:
+                        print("QEMU installed successfully via apt-get")
+                        return True
+                    else:
+                        print("Failed to install QEMU via apt-get")
+
+            except Exception as e:
+                print(f"Automatic installation failed: {e}")
+
+        # Fall back to providing instructions
+        print("Automatic installation not available for this platform in CI")
+
+    # If not found, provide installation instructions
+    print("ESP32 QEMU not found. Please install using one of these methods:")
+    print()
+
+    if system == 'windows':
+        print("Option 1: Install ESP-IDF (includes QEMU)")
+        print("  Download ESP-IDF from: https://docs.espressif.com/projects/esp-idf/en/latest/esp32/get-started/windows-setup.html")
+        print()
+        print("Option 2: Install QEMU manually")
+        print("  Download QEMU from: https://www.qemu.org/download/")
+        print("  Make sure qemu-system-xtensa.exe is in your PATH")
+
+    elif system == 'linux':
+        print("Option 1: Install via ESP-IDF")
+        print("  git clone --recursive https://github.com/espressif/esp-idf.git")
+        print("  cd esp-idf && ./install.sh esp32s3")
+        print("  source ./export.sh")
+        print()
+        print("Option 2: Install QEMU from package manager")
+        print("  sudo apt-get install qemu-system-misc qemu-system-xtensa")
+
+    elif system == 'darwin':
+        print("Option 1: Install via ESP-IDF")
+        print("  git clone --recursive https://github.com/espressif/esp-idf.git")
+        print("  cd esp-idf && ./install.sh esp32s3")
+        print("  source ./export.sh")
+        print()
+        print("Option 2: Install via Homebrew")
+        print("  brew install qemu")
+
+    print()
+    print("For CI/GitHub Actions, QEMU will be cached automatically once installed.")
+    return False
+
+def find_qemu_binary() -> Optional[Path]:
+    """Find the installed QEMU binary."""
+    system, _ = get_platform_info()
+
+    # Common paths where ESP-IDF tools install QEMU
+    possible_paths = [
+        Path.home() / '.espressif' / 'tools' / 'qemu-xtensa',
+        Path.home() / '.espressif' / 'python_env' / 'idf*' / 'bin',
+        Path('/opt/espressif/tools/qemu-xtensa'),
+    ]
+
+    binary_name = 'qemu-system-xtensa.exe' if system == 'windows' else 'qemu-system-xtensa'
+
+    # Search in possible paths
+    for base_path in possible_paths:
+        if base_path.exists():
+            for qemu_path in base_path.rglob(binary_name):
+                if qemu_path.is_file():
+                    print(f"Found QEMU binary at: {qemu_path}")
+                    return qemu_path
+
+    # Try PATH
+    try:
+        result = subprocess.run(['which', binary_name], capture_output=True, text=True)
+        if result.returncode == 0:
+            qemu_path = Path(result.stdout.strip())
+            print(f"Found QEMU binary in PATH: {qemu_path}")
+            return qemu_path
+    except:
+        pass
+
+    print("ERROR: Could not find QEMU binary")
+    return None
+
+def create_qemu_wrapper():
+    """Create a wrapper script for easy QEMU access."""
+    qemu_binary = find_qemu_binary()
+    if not qemu_binary:
+        return False
+
+    # Create wrapper in ci directory
+    ci_dir = Path(__file__).parent
+    wrapper_script = ci_dir / 'qemu-esp32.py'
+
+    wrapper_content = f'''#!/usr/bin/env python3
+"""
+ESP32 QEMU Runner Wrapper
+
+Automatically generated by install-qemu-esp32.py
+"""
+
+import subprocess
+import sys
+from pathlib import Path
+
+QEMU_BINARY = Path(r"{qemu_binary}")
+
+def run_qemu(args):
+    """Run QEMU with the given arguments."""
+    cmd = [str(QEMU_BINARY)] + args
+    return subprocess.run(cmd)
+
+if __name__ == "__main__":
+    # Pass through all arguments to QEMU
+    sys.exit(run_qemu(sys.argv[1:]).returncode)
+'''
+
+    wrapper_script.write_text(wrapper_content)
+    wrapper_script.chmod(0o755)
+
+    print(f"Created QEMU wrapper at: {wrapper_script}")
+    return True
+
+def main():
+    """Main installation routine."""
+    print("=== ESP32 QEMU Installation ===")
+
+    # Show platform info
+    system, arch = get_platform_info()
+    print(f"Platform: {system}-{arch}")
+
+    # Install system dependencies
+    install_system_dependencies()
+
+    # Install ESP32 QEMU
+    qemu_installed = install_qemu_esp32()
+
+    if qemu_installed:
+        # Create wrapper script
+        if not create_qemu_wrapper():
+            print("WARNING: Could not create wrapper script, but QEMU is available")
+    else:
+        print("QEMU installation required for ESP32 emulation")
+        sys.exit(1)
+
+    print("=== Installation Complete ===")
+    print("ESP32 QEMU is ready to use!")
+
+    # Test installation
+    qemu_binary = find_qemu_binary()
+    if qemu_binary:
+        try:
+            result = subprocess.run(
+                [str(qemu_binary), '--version'],
+                capture_output=True, text=True, timeout=10
+            )
+            if result.returncode == 0:
+                print(f"QEMU version: {result.stdout.strip()}")
+            else:
+                print("WARNING: QEMU installed but version check failed")
+        except Exception as e:
+            print(f"WARNING: Could not verify QEMU installation: {e}")
+
+if __name__ == "__main__":
+    main()

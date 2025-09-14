@@ -1,17 +1,18 @@
-name: ESP32 QEMU Test
+name: ESP32-S3 QEMU Test
 
 on:
   push:
     branches: [master]
-    paths: 
+    paths:
       - 'src/**'
       - 'examples/**'
       - '.github/workflows/esp32_qemu_test.yml'
   pull_request:
     branches: [master]
-    paths: 
+    paths:
       - 'src/**'
       - 'examples/**'
+      - '.github/workflows/esp32_qemu_test.yml'
 
 permissions:
   contents: read
@@ -20,13 +21,13 @@ permissions:
   pull-requests: read
 
 jobs:
-  esp32_qemu_test:
+  esp32s3_qemu_test:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        platform: [esp32dev]  # Start with ESP32DEV, can expand to esp32s3
-        example: [PinMode]     # Start with PinMode, can expand to Blink
-        
+        platform: [esp32s3]  # Focus on ESP32-S3 (4 RMT channels)
+        example: [BlinkParallel]  # Test with FL_WARN output
+
     steps:
       - name: Checkout trusted base branch code
         uses: actions/checkout@v4
@@ -114,7 +115,15 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-ccache-
 
-      - name: Build ESP32 example
+      - name: Cache ESP32 QEMU
+        uses: actions/cache@v4
+        with:
+          path: ~/.espressif
+          key: ${{ runner.os }}-esp32-qemu-${{ hashFiles('ci/install-qemu-esp32.py') }}
+          restore-keys: |
+            ${{ runner.os }}-esp32-qemu-
+
+      - name: Build ESP32-S3 example
         working-directory: trusted
         run: |
           echo "Building ${{ matrix.example }} for ${{ matrix.platform }}"
@@ -127,85 +136,133 @@ jobs:
           echo "Checking build artifacts..."
           find .build -name "*.bin" -o -name "*.elf" | head -10
 
-          # Check if the expected build directory exists (PioCompiler creates .build/pio/{board_name}/)
-          if [ -d ".build/pio/${{ matrix.platform }}" ]; then
-            echo "✅ Build directory found: .build/pio/${{ matrix.platform }}"
-            ls -la ".build/pio/${{ matrix.platform }}/"
+          echo "=== Build directory structure ==="
+          find .build -type d | head -10
+
+          # PlatformIO creates .build/pio/{platform} structure
+          BUILD_DIR=".build/pio/${{ matrix.platform }}"
+
+          if [ -d "$BUILD_DIR" ]; then
+            echo "✅ Build directory found: $BUILD_DIR"
+            ls -la "$BUILD_DIR/"
+
+            # Check for required QEMU files
+            echo "=== Checking for QEMU required files ==="
+            for file in firmware.bin bootloader.bin partitions.bin firmware.elf; do
+              if [ -f "$BUILD_DIR/$file" ]; then
+                echo "✅ Found: $file"
+              else
+                echo "❌ Missing: $file"
+              fi
+            done
           else
-            echo "❌ Build directory not found"
+            echo "❌ Build directory not found: $BUILD_DIR"
             echo "Available build directories:"
             find .build -type d | head -10
             exit 1
           fi
         shell: bash
 
-      - name: Run ESP32 example in QEMU
-        uses: tobozo/esp32-qemu-sim@v1.0.5
-        with:
-          working-directory: trusted
-          build-folder: ./.build/pio/${{ matrix.platform }}
-          flash-size: 4
-          qemu-timeout: 30
-
-      - name: Validate example execution
+      - name: Install ESP32 QEMU
         working-directory: trusted
         run: |
-          echo "Validating QEMU execution results..."
-          
+          echo "Installing ESP32 QEMU..."
+          uv run ci/install-qemu-esp32.py
+        shell: bash
+
+      - name: Run ESP32-S3 example in QEMU
+        working-directory: trusted
+        run: |
+          echo "Running ESP32-S3 example in QEMU..."
+          uv run ci/qemu-esp32.py \
+            .build/pio/${{ matrix.platform }} \
+            --flash-size 4 \
+            --timeout 30 \
+            --interrupt-regex "(FL_WARN.*test finished)|(guru meditation)|(abort\\(\\))|(LoadProhibited)"
+        shell: bash
+
+      - name: Validate FL_WARN output
+        working-directory: trusted
+        run: |
+          echo "=== Validating FL_WARN output in QEMU logs ==="
+
           # Check if QEMU output file exists
           if [ -f "qemu_output.log" ]; then
             echo "✅ QEMU output log found"
-            echo "--- First 50 lines of QEMU output ---"
-            head -50 qemu_output.log
-            echo "--- Last 20 lines of QEMU output ---"
-            tail -20 qemu_output.log
+            echo "--- First 100 lines of QEMU output ---"
+            head -100 qemu_output.log
+            echo "--- Last 50 lines of QEMU output ---"
+            tail -50 qemu_output.log
           else
             echo "❌ QEMU output log not found"
             echo "Available files:"
             ls -la
             exit 1
           fi
-          
-          # Validate based on example type
-          case "${{ matrix.example }}" in
-            "PinMode")
-              if grep -q "Pin: .* is" qemu_output.log; then
-                echo "✅ ESP32 PinMode example executed successfully"
-                echo "Found expected GPIO output in QEMU logs"
-              else
-                echo "❌ ESP32 PinMode example failed to run properly"
-                echo "Expected GPIO output pattern 'Pin: X is HIGH/LOW' not found"
-                exit 1
-              fi
-              ;;
-            "Blink")
-              # Look for any sign the program started (even without serial output)
-              if grep -q -E "(rst:|boot:|ESP32|Brownout|Ready)" qemu_output.log; then
-                echo "✅ ESP32 Blink example executed successfully"
-                echo "Found ESP32 boot/execution indicators"
-              else
-                echo "❌ ESP32 Blink example failed to run properly"
-                echo "No ESP32 execution indicators found"
-                exit 1
-              fi
-              ;;
-            *)
-              echo "⚠️  Unknown example type, checking for basic execution"
-              if grep -q -E "(rst:|boot:|ESP32|Ready)" qemu_output.log; then
-                echo "✅ ESP32 example appears to have executed"
-              else
-                echo "❌ No clear execution indicators found"
-                exit 1
-              fi
-              ;;
-          esac
+
+          # Check for crash patterns
+          if grep -q -E "(guru meditation|abort\\(\\)|LoadProhibited|IllegalInstruction)" qemu_output.log; then
+            echo "❌ ESP32-S3 crashed during execution"
+            echo "Crash indicators found in QEMU log"
+            exit 1
+          fi
+
+          # Validate FL_WARN output is present
+          if grep -q "FL_WARN:" qemu_output.log; then
+            echo "✅ FL_WARN macro output detected"
+            echo "FL_WARN messages found:"
+            grep "FL_WARN:" qemu_output.log | head -20
+          else
+            echo "❌ No FL_WARN output detected"
+            echo "Expected FL_WARN messages not found in QEMU log"
+            exit 1
+          fi
+
+          # Validate BlinkParallel startup
+          if grep -q "BlinkParallel setup starting" qemu_output.log; then
+            echo "✅ BlinkParallel setup started"
+          else
+            echo "❌ BlinkParallel startup message not found"
+            exit 1
+          fi
+
+          # Check for LED strip initialization
+          if grep -q "Initialized 4 LED strips" qemu_output.log; then
+            echo "✅ 4 LED strips initialized"
+          else
+            echo "⚠️  LED strip initialization message not found"
+          fi
+
+          # Check for loop execution
+          if grep -q "Starting loop iteration" qemu_output.log; then
+            echo "✅ Loop execution detected"
+          else
+            echo "⚠️  No loop execution messages found"
+          fi
+
+          # Check for test completion (after several loops)
+          if grep -q "FL_WARN.*test finished" qemu_output.log; then
+            echo "✅ FL_WARN test completion detected"
+          else
+            echo "⚠️  FL_WARN test completion not detected (may need more time)"
+          fi
+
+          # Validate boot success
+          if grep -q -E "(rst:|boot:|ESP32)" qemu_output.log; then
+            echo "✅ ESP32-S3 boot successful"
+          else
+            echo "❌ ESP32-S3 boot indicators not found"
+            exit 1
+          fi
+
+          echo "=== FL_WARN validation complete ==="
         shell: bash
 
       - name: Upload QEMU logs and build artifacts on failure
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: esp32-qemu-failure-${{ matrix.platform }}-${{ matrix.example }}-${{ github.sha }}
+          name: esp32s3-qemu-failure-${{ matrix.platform }}-${{ matrix.example }}-${{ github.sha }}
           path: |
             trusted/qemu_output.log
             trusted/.build/pio/${{ matrix.platform }}/
@@ -215,17 +272,19 @@ jobs:
         if: success()
         uses: actions/upload-artifact@v4
         with:
-          name: esp32-qemu-success-${{ matrix.platform }}-${{ matrix.example }}-${{ github.sha }}
+          name: esp32s3-qemu-success-${{ matrix.platform }}-${{ matrix.example }}-${{ github.sha }}
           path: trusted/qemu_output.log
 
       - name: Summary
         if: always()
         working-directory: trusted
         run: |
-          echo "=== ESP32 QEMU Test Summary ==="
+          echo "=== ESP32-S3 QEMU Test Summary ==="
           echo "Platform: ${{ matrix.platform }}"
           echo "Example: ${{ matrix.example }}"
           echo "Status: ${{ job.status }}"
           if [ -f "qemu_output.log" ]; then
             echo "QEMU output lines: $(wc -l < qemu_output.log)"
+            echo "FL_WARN count: $(grep -c 'FL_WARN:' qemu_output.log || echo 0)"
+            echo "Loop iterations: $(grep -c 'Starting loop iteration' qemu_output.log || echo 0)"
           fi
