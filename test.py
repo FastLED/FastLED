@@ -126,14 +126,12 @@ def run_qemu_tests(args: TestArgs) -> None:
         print(f"\n--- Testing {example} ---")
 
         try:
-            # Build the example for the specified platform
-            print(f"Building {example} for {platform.upper()}...")
-            build_result = subprocess.run(
-                ["uv", "run", "ci/ci-compile.py", platform, "--examples", example],
-                capture_output=True,
-                text=True,
-                timeout=600,
-            )
+            # Build the example for ESP32-S3
+            print(f"Building {example} for ESP32-S3...")
+            build_result = subprocess.run([
+                "uv", "run", "ci/ci-compile.py", "esp32s3",
+                "--examples", example
+            ], capture_output=True, text=True, timeout=600)
 
             if build_result.returncode != 0:
                 print(f"Build failed for {example}:")

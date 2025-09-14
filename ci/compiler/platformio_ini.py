@@ -1880,19 +1880,21 @@ class PlatformIOIni:
         self.config.write(output)
         return output.getvalue()
 
-    def optimize(self, cache: "PlatformIOCache") -> None:
+    def optimize(self, cache: "PlatformIOCache", full: bool = False) -> None:
         """
         Download all packages and swap URLs for local file path URLs.
 
         This method will:
-        1. Resolve platform/framework shorthand names to URLs using PlatformIO CLI
-        2. Replace shorthand names with resolved URLs in-place
+        1. Resolve platform shorthand names to URLs using PlatformIO CLI (only for *.zip URLs when full=False)
+        2. Replace shorthand names with resolved URLs in-place (only when full=True for frameworks)
         3. Find all platform and framework URLs that point to zip files
         4. Download and cache them using the provided PlatformIO cache system
         5. Replace the URLs in-place with local file:// URLs
 
         Args:
             cache: PlatformIOCache instance to use for downloading and caching packages.
+            full: When True, resolve all platform/framework shorthand names to URLs.
+                 When False (default), only optimize *.zip URLs for caching.
         """
         # Import here to avoid circular dependencies
         from ci.compiler.platformio_cache import _is_zip_web_url, handle_zip_artifact
@@ -1900,22 +1902,30 @@ class PlatformIOIni:
         cache_manager = cache
 
         # Step 1: Resolve shorthand platform names to URLs
-        logger.debug("Resolving platform shorthand names to URLs...")
-        platform_resolutions = self.resolve_platform_urls()
-        platform_replacements_made = 0
+        if full:
+            logger.debug("Resolving platform shorthand names to URLs...")
+            platform_resolutions = self.resolve_platform_urls()
+            platform_replacements_made = 0
 
-        for platform_name, resolved_url in platform_resolutions.items():
-            if resolved_url:
-                # Replace shorthand names with resolved URLs (regardless of whether they're zip URLs)
-                for section_name, option_name, current_url in self.get_platform_urls():
-                    if current_url == platform_name:
-                        self.replace_url(
-                            section_name, option_name, platform_name, resolved_url
-                        )
-                        platform_replacements_made += 1
-                        logger.debug(
-                            f"Resolved platform {platform_name} -> {resolved_url} in {section_name}"
-                        )
+            for platform_name, resolved_url in platform_resolutions.items():
+                if resolved_url:
+                    # Replace shorthand names with resolved URLs (regardless of whether they're zip URLs)
+                    for (
+                        section_name,
+                        option_name,
+                        current_url,
+                    ) in self.get_platform_urls():
+                        if current_url == platform_name:
+                            self.replace_url(
+                                section_name, option_name, platform_name, resolved_url
+                            )
+                            platform_replacements_made += 1
+                            logger.debug(
+                                f"Resolved platform {platform_name} -> {resolved_url} in {section_name}"
+                            )
+        else:
+            logger.debug("Skipping platform shorthand resolution (full=False)")
+            platform_replacements_made = 0
 
         if platform_replacements_made > 0:
             logger.info(
@@ -1923,29 +1933,37 @@ class PlatformIOIni:
             )
 
         # Step 2: Resolve shorthand framework names to URLs
-        logger.debug("Resolving framework shorthand names to URLs...")
-        framework_resolutions = self.resolve_framework_urls()
-        framework_replacements_made = 0
+        if full:
+            logger.debug("Resolving framework shorthand names to URLs...")
+            framework_resolutions = self.resolve_framework_urls()
+            framework_replacements_made = 0
 
-        for framework_name, resolved_url in framework_resolutions.items():
-            if resolved_url:
-                # Replace shorthand names with resolved URLs (regardless of whether they're zip URLs)
-                for section_name, option_name, current_url in self.get_framework_urls():
-                    if current_url == framework_name:
-                        self.replace_url(
-                            section_name, option_name, framework_name, resolved_url
-                        )
-                        framework_replacements_made += 1
-                        logger.debug(
-                            f"Resolved framework {framework_name} -> {resolved_url} in {section_name}"
-                        )
+            for framework_name, resolved_url in framework_resolutions.items():
+                if resolved_url:
+                    # Replace shorthand names with resolved URLs (regardless of whether they're zip URLs)
+                    for (
+                        section_name,
+                        option_name,
+                        current_url,
+                    ) in self.get_framework_urls():
+                        if current_url == framework_name:
+                            self.replace_url(
+                                section_name, option_name, framework_name, resolved_url
+                            )
+                            framework_replacements_made += 1
+                            logger.debug(
+                                f"Resolved framework {framework_name} -> {resolved_url} in {section_name}"
+                            )
+        else:
+            logger.debug("Skipping framework shorthand resolution (full=False)")
+            framework_replacements_made = 0
 
         if framework_replacements_made > 0:
             logger.info(
                 f"Resolved {framework_replacements_made} framework shorthand names"
             )
 
-        # Step 3: Find all platform and framework URLs that need optimization (after resolution)
+        # Step 3: Find all platform and framework URLs that need optimization (*.zip caching always happens)
         zip_artifacts: List[Tuple[str, bool, str]] = []
 
         # Scan platform URLs
