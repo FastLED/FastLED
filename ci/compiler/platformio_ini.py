@@ -9,12 +9,16 @@ be used by various tools that need to work with PlatformIO configuration files.
 
 import configparser
 import io
+import json
 import logging
 import os
 import re
+import subprocess
 import tempfile
+import time
 import uuid
 from dataclasses import dataclass, field
+from datetime import datetime, timedelta
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Tuple, Union
 
@@ -150,6 +154,237 @@ class ParsedPlatformIOConfig:
     platformio_section: Optional[PlatformIOSection] = None
     global_env_section: Optional[GlobalEnvSection] = None
     environments: Dict[str, EnvironmentSection] = field(default_factory=lambda: {})
+
+
+@dataclass
+class PackageInfo:
+    """
+    Information about a package/dependency.
+    """
+
+    name: str
+    type: str = ""
+    requirements: str = ""
+    url: str = ""
+    optional: bool = True
+    version: Optional[str] = None
+    description: Optional[str] = None
+
+
+@dataclass
+class PlatformUrlResolution:
+    """
+    Multi-value resolution result for a platform with different URL types.
+    """
+
+    name: str
+    git_url: Optional[str] = None
+    zip_url: Optional[str] = None
+    local_path: Optional[str] = None
+    version: Optional[str] = None
+    frameworks: List[str] = field(default_factory=lambda: [])
+    packages: List[PackageInfo] = field(default_factory=lambda: [])
+    homepage: Optional[str] = None
+
+    @property
+    def preferred_url(self) -> Optional[str]:
+        """Get the preferred URL for downloading (zip preferred for speed)."""
+        return self.zip_url or self.git_url
+
+    @property
+    def has_downloadable_url(self) -> bool:
+        """Check if there's a URL available for downloading."""
+        return bool(self.git_url or self.zip_url)
+
+
+@dataclass
+class FrameworkUrlResolution:
+    """
+    Multi-value resolution result for a framework with different URL types.
+    """
+
+    name: str
+    git_url: Optional[str] = None
+    zip_url: Optional[str] = None
+    local_path: Optional[str] = None
+    homepage: Optional[str] = None
+    platforms: List[str] = field(default_factory=lambda: [])
+    version: Optional[str] = None
+    title: Optional[str] = None
+    description: Optional[str] = None
+    url: Optional[str] = None  # Original URL from CLI response
+
+    @property
+    def preferred_url(self) -> Optional[str]:
+        """Get the preferred URL for downloading (zip preferred for speed)."""
+        return self.zip_url or self.git_url or self.url
+
+
+@dataclass
+class PlatformShowResponse:
+    """
+    Strongly typed representation of PlatformIO 'pio platform show' command response.
+    """
+
+    name: str
+    title: Optional[str] = None
+    version: Optional[str] = None
+    repository: Optional[str] = None
+    frameworks: List[str] = field(default_factory=list)  # type: ignore
+    packages: List[Dict[str, Any]] = field(  # type: ignore[reportUnknownVariableType]
+        default_factory=list
+    )  # Raw package data from CLI
+    homepage: Optional[str] = None
+    description: Optional[str] = None
+
+    @classmethod
+    def from_dict(cls, data: Dict[str, Any]) -> "PlatformShowResponse":
+        """Create PlatformShowResponse from raw CLI JSON response."""
+        return cls(
+            name=data.get("name", ""),
+            title=data.get("title"),
+            version=data.get("version"),
+            repository=data.get("repository"),
+            frameworks=data.get("frameworks", []),
+            packages=data.get("packages", []),
+            homepage=data.get("homepage"),
+            description=data.get("description"),
+        )
+
+
+@dataclass
+class FrameworkInfo:
+    """
+    Strongly typed representation of framework information from PlatformIO CLI.
+    """
+
+    name: str
+    title: Optional[str] = None
+    description: Optional[str] = None
+    url: Optional[str] = None
+    homepage: Optional[str] = None
+    platforms: List[str] = field(default_factory=list)  # type: ignore
+    version: Optional[str] = None
+
+    @classmethod
+    def from_dict(cls, data: Dict[str, Any]) -> "FrameworkInfo":
+        """Create FrameworkInfo from raw CLI JSON response."""
+        return cls(
+            name=data.get("name", ""),
+            title=data.get("title"),
+            description=data.get("description"),
+            url=data.get("url"),
+            homepage=data.get("homepage"),
+            platforms=data.get("platforms", []),
+            version=data.get("version"),
+        )
+
+
+@dataclass
+class PlatformCacheEntry:
+    """
+    Strongly typed representation of a platform cache entry for inspection.
+    """
+
+    repository_url: Optional[str]
+    version: Optional[str]
+    frameworks: List[str]
+    resolved_at: Optional[str]
+    expires_at: Optional[str]
+
+
+@dataclass
+class FrameworkCacheEntry:
+    """
+    Strongly typed representation of a framework cache entry for inspection.
+    """
+
+    url: Optional[str]
+    homepage: Optional[str]
+    platforms: List[str]
+    resolved_at: Optional[str]
+    expires_at: Optional[str]
+
+
+@dataclass
+class ResolvedUrlsCache:
+    """
+    Strongly typed representation of the complete resolved URLs cache.
+    """
+
+    platforms: Dict[str, PlatformCacheEntry] = field(default_factory=dict)  # type: ignore
+    frameworks: Dict[str, FrameworkCacheEntry] = field(default_factory=dict)  # type: ignore
+
+
+@dataclass
+class PlatformResolution:
+    """
+    Cached resolution of a platform shorthand name to its metadata.
+    """
+
+    name: str
+    repository_url: Optional[str] = None  # Kept for backward compatibility
+    packages_url: Optional[str] = None  # Kept for backward compatibility
+    version: Optional[str] = None
+    frameworks: List[str] = field(default_factory=lambda: [])
+    resolved_at: Optional[datetime] = None
+    ttl_hours: int = 24
+
+    # Enhanced multi-value fields
+    enhanced_resolution: Optional[PlatformUrlResolution] = None
+
+    @property
+    def git_url(self) -> Optional[str]:
+        """Get git URL from enhanced resolution or fall back to repository_url."""
+        if self.enhanced_resolution:
+            return self.enhanced_resolution.git_url
+        return (
+            self.repository_url
+            if self.repository_url and self.repository_url.endswith(".git")
+            else None
+        )
+
+    @property
+    def zip_url(self) -> Optional[str]:
+        """Get zip URL from enhanced resolution."""
+        if self.enhanced_resolution:
+            return self.enhanced_resolution.zip_url
+        return (
+            self.repository_url
+            if self.repository_url and self.repository_url.endswith(".zip")
+            else None
+        )
+
+
+@dataclass
+class FrameworkResolution:
+    """
+    Cached resolution of a framework shorthand name to its metadata.
+    """
+
+    name: str
+    url: Optional[str] = None  # Kept for backward compatibility
+    homepage: Optional[str] = None
+    platforms: List[str] = field(default_factory=lambda: [])
+    resolved_at: Optional[datetime] = None
+    ttl_hours: int = 24
+
+    # Enhanced multi-value fields
+    enhanced_resolution: Optional[FrameworkUrlResolution] = None
+
+    @property
+    def git_url(self) -> Optional[str]:
+        """Get git URL from enhanced resolution."""
+        if self.enhanced_resolution:
+            return self.enhanced_resolution.git_url
+        return self.url if self.url and self.url.endswith(".git") else None
+
+    @property
+    def zip_url(self) -> Optional[str]:
+        """Get zip URL from enhanced resolution."""
+        if self.enhanced_resolution:
+            return self.enhanced_resolution.zip_url
+        return self.url if self.url and self.url.endswith(".zip") else None
 
 
 def _resolve_variable_substitution(
@@ -1010,6 +1245,619 @@ class PlatformIOIni:
         """
         self._parsed_config = None
 
+    def _is_url(self, value: str) -> bool:
+        """Check if a value is already a URL (not a shorthand name)."""
+        if not value:
+            return False
+        return any(
+            value.startswith(scheme) for scheme in ("http://", "https://", "file://")
+        )
+
+    def _is_git_url(self, url: str) -> bool:
+        """Check if a URL is a git repository URL."""
+        if not url:
+            return False
+        # Git URLs typically end with .git or start with git://
+        return url.endswith(".git") or url.startswith("git://")
+
+    def _is_zip_url(self, url: str) -> bool:
+        """Check if a URL points to a zip file."""
+        if not url:
+            return False
+        return url.endswith(".zip") or ".zip?" in url
+
+    def _classify_url_type(self, url: str) -> str:
+        """Classify a URL as 'git', 'zip', 'file', or 'unknown'."""
+        if not url:
+            return "unknown"
+        if self._is_zip_url(url):
+            return "zip"
+        elif self._is_git_url(url):
+            return "git"
+        elif url.startswith("file://") or (
+            not self._is_url(url) and ("/" in url or "\\" in url)
+        ):
+            return "file"
+        else:
+            return "unknown"
+
+    def _extract_packages_from_platform_data(
+        self, platform_data: Dict[str, Any]
+    ) -> List[PackageInfo]:
+        """Extract package information from PlatformIO platform data (legacy method)."""
+        packages: List[PackageInfo] = []
+        packages_data = platform_data.get("packages", [])
+
+        for pkg_data in packages_data:
+            if not isinstance(pkg_data, dict):
+                continue
+
+            package = PackageInfo(
+                name=str(pkg_data.get("name", "")),  # type: ignore
+                type=str(pkg_data.get("type", "")),  # type: ignore
+                requirements=str(pkg_data.get("requirements", "")),  # type: ignore
+                url=str(pkg_data.get("url", "")),  # type: ignore
+                optional=bool(pkg_data.get("optional", True)),  # type: ignore
+                version=pkg_data.get("version"),  # type: ignore
+                description=pkg_data.get("description"),  # type: ignore
+            )
+            packages.append(package)
+
+        return packages
+
+    def _extract_packages_from_platform_response(
+        self, platform_show: PlatformShowResponse
+    ) -> List[PackageInfo]:
+        """Extract package information from typed PlatformShowResponse."""
+        packages: List[PackageInfo] = []
+
+        for pkg_data in platform_show.packages:
+            if not isinstance(pkg_data, dict):
+                continue
+
+            package = PackageInfo(
+                name=str(pkg_data.get("name", "")),  # type: ignore
+                type=str(pkg_data.get("type", "")),  # type: ignore
+                requirements=str(pkg_data.get("requirements", "")),  # type: ignore
+                url=str(pkg_data.get("url", "")),  # type: ignore
+                optional=bool(pkg_data.get("optional", True)),  # type: ignore
+                version=pkg_data.get("version"),  # type: ignore
+                description=pkg_data.get("description"),  # type: ignore
+            )
+            packages.append(package)
+
+        return packages
+
+    def _is_platform_cached(self, platform_name: str) -> bool:
+        """Check if platform resolution is cached and still valid."""
+        if not hasattr(self, "_platform_cache"):
+            self._platform_cache: Dict[str, PlatformResolution] = {}
+
+        if platform_name not in self._platform_cache:
+            return False
+
+        resolution = self._platform_cache[platform_name]
+        if not resolution.resolved_at:
+            return False
+
+        age = datetime.now() - resolution.resolved_at
+        return age < timedelta(hours=resolution.ttl_hours)
+
+    def _is_framework_cached(self, framework_name: str) -> bool:
+        """Check if framework resolution is cached and still valid."""
+        if not hasattr(self, "_framework_cache"):
+            self._framework_cache: Dict[str, FrameworkResolution] = {}
+
+        if framework_name not in self._framework_cache:
+            return False
+
+        resolution = self._framework_cache[framework_name]
+        if not resolution.resolved_at:
+            return False
+
+        age = datetime.now() - resolution.resolved_at
+        return age < timedelta(hours=resolution.ttl_hours)
+
+    def _run_pio_command(
+        self, args: List[str]
+    ) -> Optional[Union[Dict[str, Any], List[Dict[str, Any]]]]:
+        """Run a PlatformIO CLI command and return JSON output."""
+        try:
+            cmd = ["pio"] + args
+            logger.debug(f"Running PlatformIO command: {' '.join(cmd)}")
+
+            result = subprocess.run(
+                cmd,
+                capture_output=True,
+                text=True,
+                timeout=30,
+                check=True,
+            )
+
+            if result.stdout:
+                try:
+                    parsed_output = json.loads(result.stdout)
+                    # Return parsed output if it's a dict or list
+                    if isinstance(parsed_output, dict):
+                        return parsed_output  # type: ignore[reportUnknownVariableType]
+                    elif isinstance(parsed_output, list):
+                        return parsed_output  # type: ignore[reportUnknownVariableType]
+                    else:
+                        logger.warning(f"Unexpected JSON type: {type(parsed_output)}")
+                        return None
+                except json.JSONDecodeError as e:
+                    logger.error(f"Failed to parse PlatformIO JSON output: {e}")
+                    logger.debug(f"Raw output: {result.stdout[:500]}")
+                    return None
+
+            return None
+
+        except subprocess.TimeoutExpired:
+            cmd_str = " ".join(["pio"] + args)
+            logger.error(f"PlatformIO command timed out: {cmd_str}")
+        except subprocess.CalledProcessError as e:
+            cmd_str = " ".join(["pio"] + args)
+            logger.error(f"PlatformIO command failed: {e}")
+            logger.debug(f"Command output: {e.stdout}, Error: {e.stderr}")
+        except FileNotFoundError:
+            logger.error("PlatformIO CLI not found. Is it installed and in PATH?")
+        except Exception as e:
+            cmd_str = " ".join(["pio"] + args)
+            logger.error(f"Unexpected error running PlatformIO command: {e}")
+
+        return None
+
+    def _get_platform_show_typed(
+        self, platform_name: str
+    ) -> Optional[PlatformShowResponse]:
+        """Get typed platform information from PlatformIO CLI."""
+        raw_data = self._run_pio_command(
+            ["platform", "show", platform_name, "--json-output"]
+        )
+        if raw_data and isinstance(raw_data, dict):
+            try:
+                return PlatformShowResponse.from_dict(raw_data)  # type: ignore
+            except Exception as e:
+                logger.error(
+                    f"Failed to parse platform show response for {platform_name}: {e}"
+                )
+                return None
+        return None
+
+    def _get_frameworks_list_typed(self) -> List[FrameworkInfo]:
+        """Get typed list of available frameworks from PlatformIO CLI."""
+        raw_data = self._run_pio_command(["platform", "frameworks", "--json-output"])
+        if not raw_data:
+            return []
+
+        frameworks_list: List[FrameworkInfo] = []
+        try:
+            # Handle both dict and list responses
+            if isinstance(raw_data, dict):
+                frameworks_data = [raw_data]
+            elif isinstance(raw_data, list):
+                frameworks_data = raw_data
+            else:
+                logger.warning("Unexpected frameworks data type from PlatformIO")
+                return []
+
+            for fw_data in frameworks_data:
+                if isinstance(fw_data, dict):
+                    try:
+                        framework = FrameworkInfo.from_dict(fw_data)
+                        frameworks_list.append(framework)
+                    except Exception as e:
+                        logger.warning(f"Failed to parse framework data: {e}")
+                        continue
+
+        except Exception as e:
+            logger.error(f"Failed to parse frameworks list response: {e}")
+            return []
+
+        return frameworks_list
+
+    def resolve_platform_url(self, platform_name: str) -> Optional[str]:
+        """
+        Resolve a platform shorthand name to its repository URL.
+
+        Args:
+            platform_name: Platform name like 'espressif32', 'atmelavr', etc.
+
+        Returns:
+            The repository URL for the platform, or None if resolution fails.
+        """
+        if self._is_url(platform_name):
+            return platform_name
+
+        # Check cache first
+        if self._is_platform_cached(platform_name):
+            cached = self._platform_cache[platform_name]
+            logger.debug(f"Using cached platform resolution for {platform_name}")
+            return cached.repository_url
+
+        # Resolve via PlatformIO CLI
+        platform_data = self._run_pio_command(
+            ["platform", "show", platform_name, "--json-output"]
+        )
+
+        if not platform_data or not isinstance(platform_data, dict):
+            logger.warning(f"Failed to resolve platform: {platform_name}")
+            return None
+
+        # Extract repository URL from platform data
+        repository_url = platform_data.get("repository")
+        version = platform_data.get("version")
+        frameworks = platform_data.get("frameworks", [])
+
+        # Cache the resolution
+        if not hasattr(self, "_platform_cache"):
+            self._platform_cache: Dict[str, PlatformResolution] = {}
+
+        self._platform_cache[platform_name] = PlatformResolution(
+            name=platform_name,
+            repository_url=repository_url,
+            version=version,
+            frameworks=frameworks,
+            resolved_at=datetime.now(),
+        )
+
+        logger.debug(f"Resolved platform {platform_name} -> {repository_url}")
+        return repository_url
+
+    def resolve_platform_url_enhanced(
+        self, platform_name: str
+    ) -> Optional[PlatformUrlResolution]:
+        """
+        Resolve a platform shorthand name to comprehensive URL information.
+
+        Args:
+            platform_name: Platform name like 'espressif32', 'atmelavr', etc.
+
+        Returns:
+            PlatformUrlResolution with git_url, zip_url, packages, etc. or None if resolution fails.
+        """
+        # Check if it's already a URL or local path
+        url_type = self._classify_url_type(platform_name)
+        if url_type in ("git", "zip", "file"):
+            resolution = PlatformUrlResolution(name=platform_name)
+
+            if url_type == "git":
+                resolution.git_url = platform_name
+            elif url_type == "zip":
+                resolution.zip_url = platform_name
+            elif url_type == "file":
+                resolution.local_path = platform_name
+
+            return resolution
+
+        # Check cache first
+        if self._is_platform_cached(platform_name):
+            cached = self._platform_cache[platform_name]
+            logger.debug(
+                f"Using cached enhanced platform resolution for {platform_name}"
+            )
+            if cached.enhanced_resolution:
+                return cached.enhanced_resolution
+            # Fall back to creating resolution from cached data
+            return PlatformUrlResolution(
+                name=platform_name,
+                git_url=cached.git_url,
+                zip_url=cached.zip_url,
+                version=cached.version,
+                frameworks=cached.frameworks,
+            )
+
+        # Resolve via PlatformIO CLI using typed response
+        platform_show = self._get_platform_show_typed(platform_name)
+        if not platform_show:
+            logger.warning(f"Failed to resolve platform: {platform_name}")
+            return None
+
+        # Extract package information from typed response
+        packages = self._extract_packages_from_platform_response(platform_show)
+
+        # Classify the repository URL type
+        git_url = None
+        zip_url = None
+
+        if platform_show.repository:
+            url_type = self._classify_url_type(platform_show.repository)
+            if url_type == "git":
+                git_url = platform_show.repository
+            elif url_type == "zip":
+                zip_url = platform_show.repository
+
+        # Look for additional zip URLs in packages (some platforms have main zip URLs in packages)
+        for package in packages:
+            if package.requirements and self._is_zip_url(package.requirements):
+                # Prefer platform-level zip URLs over individual package URLs
+                if not zip_url and package.type in ("", "framework"):
+                    zip_url = package.requirements
+
+        resolution = PlatformUrlResolution(
+            name=platform_name,
+            git_url=git_url,
+            zip_url=zip_url,
+            version=platform_show.version,
+            frameworks=platform_show.frameworks,
+            packages=packages,
+            homepage=platform_show.homepage,
+        )
+
+        # Cache the enhanced resolution
+        if not hasattr(self, "_platform_cache"):
+            self._platform_cache: Dict[str, PlatformResolution] = {}
+
+        cached_resolution = PlatformResolution(
+            name=platform_name,
+            repository_url=git_url or zip_url,  # For backward compatibility
+            version=platform_show.version,
+            frameworks=platform_show.frameworks,
+            resolved_at=datetime.now(),
+            enhanced_resolution=resolution,
+        )
+        self._platform_cache[platform_name] = cached_resolution
+
+        logger.debug(
+            f"Enhanced resolution for {platform_name}: git={git_url}, zip={zip_url}, packages={len(packages)}"
+        )
+        return resolution
+
+    def resolve_framework_url(self, framework_name: str) -> Optional[str]:
+        """
+        Resolve a framework shorthand name to its URL.
+
+        Args:
+            framework_name: Framework name like 'arduino', 'espidf', etc.
+
+        Returns:
+            The URL for the framework, or None if resolution fails.
+        """
+        if self._is_url(framework_name):
+            return framework_name
+
+        # Check cache first
+        if self._is_framework_cached(framework_name):
+            cached = self._framework_cache[framework_name]
+            logger.debug(f"Using cached framework resolution for {framework_name}")
+            return cached.url
+
+        # Resolve via PlatformIO CLI using typed response
+        frameworks_list = self._get_frameworks_list_typed()
+
+        if not frameworks_list:
+            logger.warning("Failed to get frameworks list from PlatformIO")
+            return None
+
+        # Find the specific framework
+        framework_info: Optional[FrameworkInfo] = None
+        for fw in frameworks_list:
+            if fw.name == framework_name:
+                framework_info = fw
+                break
+
+        if not framework_info:
+            logger.warning(f"Framework not found: {framework_name}")
+            return None
+
+        # Extract URL from framework data
+        url = framework_info.url or framework_info.homepage
+        homepage = framework_info.homepage
+        platforms = framework_info.platforms
+
+        # Cache the resolution
+        if not hasattr(self, "_framework_cache"):
+            self._framework_cache: Dict[str, FrameworkResolution] = {}
+
+        self._framework_cache[framework_name] = FrameworkResolution(
+            name=framework_name,
+            url=url,
+            homepage=homepage,
+            platforms=platforms,
+            resolved_at=datetime.now(),
+        )
+
+        logger.debug(f"Resolved framework {framework_name} -> {url}")
+        return url
+
+    def resolve_framework_url_enhanced(
+        self, framework_name: str
+    ) -> Optional[FrameworkUrlResolution]:
+        """
+        Resolve a framework shorthand name to comprehensive URL information.
+
+        Args:
+            framework_name: Framework name like 'arduino', 'espidf', etc.
+
+        Returns:
+            FrameworkUrlResolution with git_url, zip_url, homepage, etc. or None if resolution fails.
+        """
+        if self._is_url(framework_name):
+            # If it's already a URL, create a resolution based on URL type
+            url_type = self._classify_url_type(framework_name)
+            resolution = FrameworkUrlResolution(name=framework_name)
+
+            if url_type == "git":
+                resolution.git_url = framework_name
+            elif url_type == "zip":
+                resolution.zip_url = framework_name
+
+            return resolution
+
+        # Check cache first
+        if self._is_framework_cached(framework_name):
+            cached = self._framework_cache[framework_name]
+            logger.debug(
+                f"Using cached enhanced framework resolution for {framework_name}"
+            )
+            if cached.enhanced_resolution:
+                return cached.enhanced_resolution
+            # Fall back to creating resolution from cached data
+            return FrameworkUrlResolution(
+                name=framework_name,
+                git_url=cached.git_url,
+                zip_url=cached.zip_url,
+                homepage=cached.homepage,
+                platforms=cached.platforms,
+                url=cached.url,  # Include the original URL
+            )
+
+        # Resolve via PlatformIO CLI using typed response
+        frameworks_list = self._get_frameworks_list_typed()
+
+        if not frameworks_list:
+            logger.warning("Failed to get frameworks list from PlatformIO")
+            return None
+
+        # Find the specific framework
+        framework_info: Optional[FrameworkInfo] = None
+        for fw in frameworks_list:
+            if fw.name == framework_name:
+                framework_info = fw
+                break
+
+        if not framework_info:
+            logger.warning(f"Framework not found: {framework_name}")
+            return None
+
+        # Classify URLs by type
+        git_url = None
+        zip_url = None
+
+        # Check the main URL
+        if framework_info.url:
+            url_type = self._classify_url_type(framework_info.url)
+            if url_type == "git":
+                git_url = framework_info.url
+            elif url_type == "zip":
+                zip_url = framework_info.url
+
+        # Check homepage URL as potential git repository
+        if framework_info.homepage and not git_url:
+            homepage_type = self._classify_url_type(framework_info.homepage)
+            if homepage_type == "git":
+                git_url = framework_info.homepage
+
+        resolution = FrameworkUrlResolution(
+            name=framework_name,
+            git_url=git_url,
+            zip_url=zip_url,
+            homepage=framework_info.homepage,
+            platforms=framework_info.platforms,
+            version=framework_info.version,
+            title=framework_info.title,
+            description=framework_info.description,
+            url=framework_info.url,  # Include the original URL from CLI response
+        )
+
+        # Cache the enhanced resolution
+        if not hasattr(self, "_framework_cache"):
+            self._framework_cache: Dict[str, FrameworkResolution] = {}
+
+        cached_resolution = FrameworkResolution(
+            name=framework_name,
+            url=git_url or zip_url or framework_info.url,  # For backward compatibility
+            homepage=framework_info.homepage,
+            platforms=framework_info.platforms,
+            resolved_at=datetime.now(),
+            enhanced_resolution=resolution,
+        )
+        self._framework_cache[framework_name] = cached_resolution
+
+        logger.debug(
+            f"Enhanced resolution for framework {framework_name}: git={git_url}, zip={zip_url}, homepage={framework_info.homepage}"
+        )
+        return resolution
+
+    def resolve_platform_urls(self) -> Dict[str, Optional[str]]:
+        """
+        Resolve all platform shorthand names in the configuration to URLs.
+
+        Returns:
+            Dictionary mapping platform names to their resolved URLs.
+        """
+        resolutions: Dict[str, Optional[str]] = {}
+
+        for section_name, option_name, platform_value in self.get_platform_urls():
+            if platform_value and not self._is_url(platform_value):
+                if platform_value not in resolutions:
+                    resolutions[platform_value] = self.resolve_platform_url(
+                        platform_value
+                    )
+
+        return resolutions
+
+    def resolve_framework_urls(self) -> Dict[str, Optional[str]]:
+        """
+        Resolve all framework shorthand names in the configuration to URLs.
+
+        Returns:
+            Dictionary mapping framework names to their resolved URLs.
+        """
+        resolutions: Dict[str, Optional[str]] = {}
+
+        for section_name, option_name, framework_value in self.get_framework_urls():
+            if framework_value and not self._is_url(framework_value):
+                if framework_value not in resolutions:
+                    resolutions[framework_value] = self.resolve_framework_url(
+                        framework_value
+                    )
+
+        return resolutions
+
+    def get_resolved_urls_cache(self) -> ResolvedUrlsCache:
+        """
+        Get cached resolution results for inspection.
+
+        Returns:
+            Strongly typed cache data with platform and framework resolutions.
+        """
+        result = ResolvedUrlsCache()
+
+        if hasattr(self, "_platform_cache"):
+            for name, resolution in self._platform_cache.items():
+                cache_entry = PlatformCacheEntry(
+                    repository_url=resolution.repository_url,
+                    version=resolution.version,
+                    frameworks=resolution.frameworks,
+                    resolved_at=resolution.resolved_at.isoformat()
+                    if resolution.resolved_at
+                    else None,
+                    expires_at=(
+                        resolution.resolved_at + timedelta(hours=resolution.ttl_hours)
+                    ).isoformat()
+                    if resolution.resolved_at
+                    else None,
+                )
+                result.platforms[name] = cache_entry
+
+        if hasattr(self, "_framework_cache"):
+            for name, resolution in self._framework_cache.items():
+                cache_entry = FrameworkCacheEntry(
+                    url=resolution.url,
+                    homepage=resolution.homepage,
+                    platforms=resolution.platforms,
+                    resolved_at=resolution.resolved_at.isoformat()
+                    if resolution.resolved_at
+                    else None,
+                    expires_at=(
+                        resolution.resolved_at + timedelta(hours=resolution.ttl_hours)
+                    ).isoformat()
+                    if resolution.resolved_at
+                    else None,
+                )
+                result.frameworks[name] = cache_entry
+
+        return result
+
+    def invalidate_resolution_cache(self) -> None:
+        """Clear cached URL resolutions."""
+        if hasattr(self, "_platform_cache"):
+            self._platform_cache.clear()
+        if hasattr(self, "_framework_cache"):
+            self._framework_cache.clear()
+        logger.debug("Cleared URL resolution cache")
+
     def __str__(self) -> str:
         """Return string representation of the configuration."""
         output = io.StringIO()
@@ -1021,9 +1869,11 @@ class PlatformIOIni:
         Download all packages and swap URLs for local file path URLs.
 
         This method will:
-        1. Find all platform and framework URLs that point to zip files
-        2. Download and cache them using the provided PlatformIO cache system
-        3. Replace the URLs in-place with local file:// URLs
+        1. Resolve platform/framework shorthand names to URLs using PlatformIO CLI
+        2. Replace shorthand names with resolved URLs in-place
+        3. Find all platform and framework URLs that point to zip files
+        4. Download and cache them using the provided PlatformIO cache system
+        5. Replace the URLs in-place with local file:// URLs
 
         Args:
             cache: PlatformIOCache instance to use for downloading and caching packages.
@@ -1033,7 +1883,53 @@ class PlatformIOIni:
 
         cache_manager = cache
 
-        # Find all platform and framework URLs that need optimization
+        # Step 1: Resolve shorthand platform names to URLs
+        logger.debug("Resolving platform shorthand names to URLs...")
+        platform_resolutions = self.resolve_platform_urls()
+        platform_replacements_made = 0
+
+        for platform_name, resolved_url in platform_resolutions.items():
+            if resolved_url:
+                # Replace shorthand names with resolved URLs (regardless of whether they're zip URLs)
+                for section_name, option_name, current_url in self.get_platform_urls():
+                    if current_url == platform_name:
+                        self.replace_url(
+                            section_name, option_name, platform_name, resolved_url
+                        )
+                        platform_replacements_made += 1
+                        logger.debug(
+                            f"Resolved platform {platform_name} -> {resolved_url} in {section_name}"
+                        )
+
+        if platform_replacements_made > 0:
+            logger.info(
+                f"Resolved {platform_replacements_made} platform shorthand names"
+            )
+
+        # Step 2: Resolve shorthand framework names to URLs
+        logger.debug("Resolving framework shorthand names to URLs...")
+        framework_resolutions = self.resolve_framework_urls()
+        framework_replacements_made = 0
+
+        for framework_name, resolved_url in framework_resolutions.items():
+            if resolved_url:
+                # Replace shorthand names with resolved URLs (regardless of whether they're zip URLs)
+                for section_name, option_name, current_url in self.get_framework_urls():
+                    if current_url == framework_name:
+                        self.replace_url(
+                            section_name, option_name, framework_name, resolved_url
+                        )
+                        framework_replacements_made += 1
+                        logger.debug(
+                            f"Resolved framework {framework_name} -> {resolved_url} in {section_name}"
+                        )
+
+        if framework_replacements_made > 0:
+            logger.info(
+                f"Resolved {framework_replacements_made} framework shorthand names"
+            )
+
+        # Step 3: Find all platform and framework URLs that need optimization (after resolution)
         zip_artifacts: List[Tuple[str, bool, str]] = []
 
         # Scan platform URLs
@@ -1046,7 +1942,11 @@ class PlatformIOIni:
             if _is_zip_web_url(url):
                 zip_artifacts.append((url, True, section_name))  # True = framework
 
-        # Deduplicate artifacts by URL to avoid redundant processing
+        if not zip_artifacts:
+            logger.debug("No zip artifacts found to cache after URL resolution")
+            return
+
+        # Step 4: Deduplicate artifacts by URL to avoid redundant processing
         unique_artifacts: Dict[
             str, Tuple[bool, str]
         ] = {}  # url -> (is_framework, env_section)
@@ -1054,7 +1954,11 @@ class PlatformIOIni:
             if artifact_url not in unique_artifacts:
                 unique_artifacts[artifact_url] = (is_framework, env_section)
 
-        # Process each unique artifact and collect URL replacements
+        logger.info(
+            f"Processing {len(unique_artifacts)} unique zip artifacts for caching"
+        )
+
+        # Step 5: Process each unique artifact and collect URL replacements
         replacements: Dict[str, str] = {}
         for artifact_url, (is_framework, env_section) in unique_artifacts.items():
             resolved_path = handle_zip_artifact(
@@ -1062,7 +1966,7 @@ class PlatformIOIni:
             )
             replacements[artifact_url] = resolved_path
 
-        # Apply replacements to the configuration
+        # Step 6: Apply replacements to the configuration
         if replacements:
             # Replace platform URLs
             for section_name, option_name, url in self.get_platform_urls():
@@ -1073,3 +1977,148 @@ class PlatformIOIni:
             for section_name, option_name, url in self.get_framework_urls():
                 if url in replacements:
                     self.replace_url(section_name, option_name, url, replacements[url])
+
+            logger.info(f"Replaced {len(replacements)} URLs with cached local paths")
+
+    def optimize_enhanced(self, cache: "PlatformIOCache") -> None:
+        """
+        Enhanced optimization using multi-value URL resolution.
+
+        This method leverages the enhanced resolution system to:
+        1. Resolve shorthand names to multiple URL types (git, zip)
+        2. Prefer zip URLs for faster caching when available
+        3. Fall back to git URLs when zip URLs are not available
+        4. Update local_path in resolution results after caching
+
+        Args:
+            cache: PlatformIOCache instance to use for downloading and caching packages.
+        """
+        # Import here to avoid circular dependencies
+        from ci.compiler.platformio_cache import _is_zip_web_url, handle_zip_artifact
+
+        cache_manager = cache
+
+        # Step 1: Resolve shorthand platform names using enhanced resolution
+        logger.debug("Resolving platform shorthand names using enhanced resolution...")
+        platform_replacements_made = 0
+        platform_resolutions: Dict[str, PlatformUrlResolution] = {}
+
+        for section_name, option_name, platform_value in self.get_platform_urls():
+            if platform_value and not self._is_url(platform_value):
+                if platform_value not in platform_resolutions:
+                    resolution = self.resolve_platform_url_enhanced(platform_value)
+                    if resolution:
+                        platform_resolutions[platform_value] = resolution
+
+        # Replace shorthand names with preferred URLs and track for caching
+        for platform_name, resolution in platform_resolutions.items():
+            preferred_url = resolution.preferred_url
+            if preferred_url:
+                for section_name, option_name, current_url in self.get_platform_urls():
+                    if current_url == platform_name:
+                        self.replace_url(
+                            section_name, option_name, platform_name, preferred_url
+                        )
+                        platform_replacements_made += 1
+                        logger.debug(
+                            f"Enhanced platform resolution {platform_name} -> {preferred_url} in {section_name}"
+                        )
+
+        if platform_replacements_made > 0:
+            logger.info(
+                f"Enhanced resolution of {platform_replacements_made} platform shorthand names"
+            )
+
+        # Step 2: Resolve shorthand framework names using enhanced resolution
+        logger.debug("Resolving framework shorthand names using enhanced resolution...")
+        framework_replacements_made = 0
+        framework_resolutions: Dict[str, FrameworkUrlResolution] = {}
+
+        for section_name, option_name, framework_value in self.get_framework_urls():
+            if framework_value and not self._is_url(framework_value):
+                if framework_value not in framework_resolutions:
+                    resolution = self.resolve_framework_url_enhanced(framework_value)
+                    if resolution:
+                        framework_resolutions[framework_value] = resolution
+
+        # Replace shorthand names with preferred URLs
+        for framework_name, resolution in framework_resolutions.items():
+            preferred_url = resolution.preferred_url
+            if preferred_url:
+                for section_name, option_name, current_url in self.get_framework_urls():
+                    if current_url == framework_name:
+                        self.replace_url(
+                            section_name, option_name, framework_name, preferred_url
+                        )
+                        framework_replacements_made += 1
+                        logger.debug(
+                            f"Enhanced framework resolution {framework_name} -> {preferred_url} in {section_name}"
+                        )
+
+        if framework_replacements_made > 0:
+            logger.info(
+                f"Enhanced resolution of {framework_replacements_made} framework shorthand names"
+            )
+
+        # Step 3: Cache downloadable URLs and update local paths
+        zip_artifacts: List[Tuple[str, bool, str]] = []
+
+        # Scan for zip URLs that can be cached
+        for section_name, option_name, url in self.get_platform_urls():
+            if _is_zip_web_url(url):
+                zip_artifacts.append((url, False, section_name))
+
+        for section_name, option_name, url in self.get_framework_urls():
+            if _is_zip_web_url(url):
+                zip_artifacts.append((url, True, section_name))
+
+        if not zip_artifacts:
+            logger.debug("No zip URLs found to cache after enhanced resolution")
+            return
+
+        # Process caching as before
+        unique_artifacts: Dict[str, Tuple[bool, str]] = {}
+        for artifact_url, is_framework, env_section in zip_artifacts:
+            if artifact_url not in unique_artifacts:
+                unique_artifacts[artifact_url] = (is_framework, env_section)
+
+        logger.info(
+            f"Processing {len(unique_artifacts)} unique zip artifacts for enhanced caching"
+        )
+
+        # Cache artifacts and collect replacements
+        replacements: Dict[str, str] = {}
+        for artifact_url, (is_framework, env_section) in unique_artifacts.items():
+            resolved_path = handle_zip_artifact(
+                artifact_url, cache_manager, env_section
+            )
+            replacements[artifact_url] = resolved_path
+
+        # Apply replacements and update resolution local_path fields
+        if replacements:
+            # Update platform resolutions with local paths
+            for platform_name, resolution in platform_resolutions.items():
+                if resolution.zip_url in replacements:
+                    resolution.local_path = replacements[resolution.zip_url]
+                elif resolution.git_url in replacements:
+                    resolution.local_path = replacements[resolution.git_url]
+
+            # Update framework resolutions with local paths
+            for framework_name, resolution in framework_resolutions.items():
+                if resolution.zip_url in replacements:
+                    resolution.local_path = replacements[resolution.zip_url]
+                elif resolution.git_url in replacements:
+                    resolution.local_path = replacements[resolution.git_url]
+
+            # Replace URLs in configuration
+            for section_name, option_name, url in self.get_platform_urls():
+                if url in replacements:
+                    self.replace_url(section_name, option_name, url, replacements[url])
+
+            for section_name, option_name, url in self.get_framework_urls():
+                if url in replacements:
+                    self.replace_url(section_name, option_name, url, replacements[url])
+
+            logger.info(
+                f"Enhanced caching: Replaced {len(replacements)} URLs with cached local paths"
+            )
