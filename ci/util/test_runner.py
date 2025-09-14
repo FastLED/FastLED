@@ -27,6 +27,7 @@ from ci.util.test_types import (
     TestResult,
     TestResultType,
     TestSuiteResult,
+    determine_test_categories,
 )
 
 
@@ -1375,28 +1376,7 @@ def runner(args: TestArgs, src_code_change: bool = True) -> None:
     print(f"[TEST_RUNNER] Source code changed: {src_code_change}")
     try:
         # Determine test categories
-        test_categories = TestCategories(
-            unit=args.unit,
-            examples=args.examples is not None,
-            py=args.py,
-            integration=args.full and args.examples is None,
-            unit_only=args.unit
-            and not args.examples
-            and not args.py
-            and not (args.full and args.examples is None),
-            examples_only=args.examples is not None
-            and not args.unit
-            and not args.py
-            and not (args.full and args.examples is None),
-            py_only=args.py
-            and not args.unit
-            and not args.examples
-            and not (args.full and args.examples is None),
-            integration_only=(args.full and args.examples is None)
-            and not args.unit
-            and not args.examples
-            and not args.py,
-        )
+        test_categories = determine_test_categories(args)
         enable_stack_trace = not args.no_stack_trace
 
         # Build up unified list of all processes to run

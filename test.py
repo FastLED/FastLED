@@ -94,9 +94,12 @@ def run_qemu_esp32s3_tests(args: TestArgs) -> None:
     # Install QEMU first
     print("Installing QEMU...")
     try:
-        result = subprocess.run([
-            "uv", "run", "ci/install-qemu-esp32.py"
-        ], capture_output=True, text=True, timeout=300)
+        result = subprocess.run(
+            ["uv", "run", "ci/install-qemu-esp32.py"],
+            capture_output=True,
+            text=True,
+            timeout=300,
+        )
 
         if result.returncode != 0:
             print(f"QEMU installation failed: {result.stderr}")
@@ -116,10 +119,12 @@ def run_qemu_esp32s3_tests(args: TestArgs) -> None:
         try:
             # Build the example for ESP32-S3
             print(f"Building {example} for ESP32-S3...")
-            build_result = subprocess.run([
-                "uv", "run", "ci/ci-compile.py", "esp32s3",
-                "--examples", example
-            ], capture_output=True, text=True, timeout=600)
+            build_result = subprocess.run(
+                ["uv", "run", "ci/ci-compile.py", "esp32s3", "--examples", example],
+                capture_output=True,
+                text=True,
+                timeout=600,
+            )
 
             if build_result.returncode != 0:
                 print(f"Build failed for {example}:")
@@ -140,13 +145,23 @@ def run_qemu_esp32s3_tests(args: TestArgs) -> None:
 
             # Run in QEMU
             print(f"Running {example} in QEMU...")
-            qemu_result = subprocess.run([
-                "uv", "run", "ci/qemu-esp32.py",
-                str(build_dir),
-                "--flash-size", "4",
-                "--timeout", "30",
-                "--interrupt-regex", "(FL_WARN.*test finished)|(guru meditation)|(abort\\(\\))|(LoadProhibited)"
-            ], capture_output=True, text=True, timeout=60)
+            qemu_result = subprocess.run(
+                [
+                    "uv",
+                    "run",
+                    "ci/qemu-esp32.py",
+                    str(build_dir),
+                    "--flash-size",
+                    "4",
+                    "--timeout",
+                    "30",
+                    "--interrupt-regex",
+                    "(FL_WARN.*test finished)|(guru meditation)|(abort\\(\\))|(LoadProhibited)",
+                ],
+                capture_output=True,
+                text=True,
+                timeout=60,
+            )
 
             if qemu_result.returncode == 0:
                 print(f"SUCCESS: {example} ran successfully in QEMU")

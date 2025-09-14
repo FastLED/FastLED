@@ -92,17 +92,20 @@ def download_esp_idf_tools():
     return tools_script
 
 
-def check_command_available(command):
+def check_command_available(command: str) -> bool:
     """Check if a command is available in PATH."""
     try:
-        result = subprocess.run([command, '--version'], capture_output=True, text=True, timeout=10)
+        result = subprocess.run(
+            [command, "--version"], capture_output=True, text=True, timeout=10
+        )
         return result.returncode == 0
     except (subprocess.TimeoutExpired, FileNotFoundError, subprocess.SubprocessError):
         return False
 
+
 def try_chocolatey_install():
     """Try to install QEMU using Chocolatey."""
-    if not check_command_available('choco'):
+    if not check_command_available("choco"):
         print("Chocolatey not found, skipping...")
         return False
 
@@ -110,15 +113,20 @@ def try_chocolatey_install():
         print("Installing QEMU via Chocolatey...")
         # Note: Chocolatey typically requires admin privileges for system-wide installs
         # But we'll try anyway as some packages can be installed locally
-        result = subprocess.run([
-            'choco', 'install', 'qemu', '-y', '--no-progress'
-        ], capture_output=True, text=True, timeout=300)
+        result = subprocess.run(
+            ["choco", "install", "qemu", "-y", "--no-progress"],
+            capture_output=True,
+            text=True,
+            timeout=300,
+        )
 
         if result.returncode == 0:
             print("QEMU installed successfully via Chocolatey")
             return True
         else:
-            print(f"Chocolatey installation failed. This may require administrator privileges.")
+            print(
+                f"Chocolatey installation failed. This may require administrator privileges."
+            )
             print(f"Error details: {result.stderr.strip()}")
             return False
 
@@ -126,20 +134,29 @@ def try_chocolatey_install():
         print(f"Chocolatey installation error: {e}")
         return False
 
+
 def try_winget_install():
     """Try to install QEMU using Windows Package Manager (winget)."""
-    if not check_command_available('winget'):
+    if not check_command_available("winget"):
         print("winget not found, skipping...")
         return False
 
     try:
         print("Installing QEMU via winget (user scope, no admin required)...")
-        result = subprocess.run([
-            'winget', 'install', 'SoftwareFreedomConservancy.QEMU',
-            '--scope', 'user',
-            '--accept-source-agreements',
-            '--accept-package-agreements'
-        ], capture_output=True, text=True, timeout=300)
+        result = subprocess.run(
+            [
+                "winget",
+                "install",
+                "SoftwareFreedomConservancy.QEMU",
+                "--scope",
+                "user",
+                "--accept-source-agreements",
+                "--accept-package-agreements",
+            ],
+            capture_output=True,
+            text=True,
+            timeout=300,
+        )
 
         if result.returncode == 0:
             print("QEMU installed successfully via winget")
@@ -148,11 +165,18 @@ def try_winget_install():
             print(f"winget user installation failed: {result.stderr}")
             # Try without --scope user as fallback
             print("Trying winget without user scope...")
-            result = subprocess.run([
-                'winget', 'install', 'SoftwareFreedomConservancy.QEMU',
-                '--accept-source-agreements',
-                '--accept-package-agreements'
-            ], capture_output=True, text=True, timeout=300)
+            result = subprocess.run(
+                [
+                    "winget",
+                    "install",
+                    "SoftwareFreedomConservancy.QEMU",
+                    "--accept-source-agreements",
+                    "--accept-package-agreements",
+                ],
+                capture_output=True,
+                text=True,
+                timeout=300,
+            )
 
             if result.returncode == 0:
                 print("QEMU installed successfully via winget (machine scope)")
@@ -164,13 +188,14 @@ def try_winget_install():
         print(f"winget installation error: {e}")
         return False
 
+
 def try_portable_qemu_install():
     """Try to download and install portable QEMU for Windows."""
     try:
         print("Attempting portable QEMU installation...")
 
         # Create local QEMU directory
-        qemu_dir = Path.home() / '.fastled' / 'qemu'
+        qemu_dir = Path.home() / ".fastled" / "qemu"
         qemu_dir.mkdir(parents=True, exist_ok=True)
 
         print(f"Downloading portable QEMU to {qemu_dir}...")
@@ -188,6 +213,7 @@ def try_portable_qemu_install():
         print(f"Portable installation error: {e}")
         return False
 
+
 def try_windows_package_managers():
     """Try installing QEMU using available Windows package managers."""
     print("Attempting automatic QEMU installation on Windows...")
@@ -196,7 +222,7 @@ def try_windows_package_managers():
     package_managers = [
         ("Chocolatey", try_chocolatey_install),
         ("winget", try_winget_install),
-        ("Portable QEMU", try_portable_qemu_install)
+        ("Portable QEMU", try_portable_qemu_install),
     ]
 
     for name, install_func in package_managers:
@@ -211,6 +237,7 @@ def try_windows_package_managers():
 
     print("All Windows package managers failed")
     return False
+
 
 def install_qemu_esp32():
     """Install ESP32 QEMU using ESP-IDF tools."""
@@ -259,7 +286,7 @@ def install_qemu_esp32():
             except Exception as e:
                 print(f"Automatic installation failed: {e}")
 
-        elif system == 'windows':
+        elif system == "windows":
             # Try Windows package managers
             if try_windows_package_managers():
                 return True
@@ -271,22 +298,28 @@ def install_qemu_esp32():
     print("ESP32 QEMU not found. Please install using one of these methods:")
     print()
 
-    if system == 'windows':
+    if system == "windows":
         print("Windows Installation Options:")
         print()
         print("Option 1: Package Managers")
-        if check_command_available('choco'):
+        if check_command_available("choco"):
             print("  choco install qemu -y  (may require admin privileges)")
         else:
             print("  First install Chocolatey: https://chocolatey.org/install")
             print("  Then run: choco install qemu -y")
-        if check_command_available('winget'):
-            print("  winget install SoftwareFreedomConservancy.QEMU --scope user  (user-level install)")
+        if check_command_available("winget"):
+            print(
+                "  winget install SoftwareFreedomConservancy.QEMU --scope user  (user-level install)"
+            )
         else:
-            print("  Update Windows to get winget, then: winget install SoftwareFreedomConservancy.QEMU --scope user")
+            print(
+                "  Update Windows to get winget, then: winget install SoftwareFreedomConservancy.QEMU --scope user"
+            )
         print()
         print("Option 2: ESP-IDF (includes QEMU)")
-        print("  Download ESP-IDF from: https://docs.espressif.com/projects/esp-idf/en/latest/esp32/get-started/windows-setup.html")
+        print(
+            "  Download ESP-IDF from: https://docs.espressif.com/projects/esp-idf/en/latest/esp32/get-started/windows-setup.html"
+        )
         print()
         print("Option 3: Manual QEMU Installation")
         print("  Download QEMU from: https://www.qemu.org/download/")
