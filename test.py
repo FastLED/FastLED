@@ -82,7 +82,9 @@ def run_qemu_tests(args: TestArgs) -> None:
 
     platform = args.qemu[0].lower()
     if platform != "esp32s3":
-        print(f"Error: Unsupported QEMU platform: {platform}. Only esp32s3 is currently supported.")
+        print(
+            f"Error: Unsupported QEMU platform: {platform}. Only esp32s3 is currently supported."
+        )
         sys.exit(1)
 
     print(f"Running {platform.upper()} QEMU tests...")
@@ -128,10 +130,12 @@ def run_qemu_tests(args: TestArgs) -> None:
         try:
             # Build the example for ESP32-S3
             print(f"Building {example} for ESP32-S3...")
-            build_result = subprocess.run([
-                "uv", "run", "ci/ci-compile.py", "esp32s3",
-                "--examples", example
-            ], capture_output=True, text=True, timeout=600)
+            build_result = subprocess.run(
+                ["uv", "run", "ci/ci-compile.py", "esp32s3", "--examples", example],
+                capture_output=True,
+                text=True,
+                timeout=600,
+            )
 
             if build_result.returncode != 0:
                 print(f"Build failed for {example}:")

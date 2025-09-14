@@ -141,7 +141,7 @@ def process_test_flags(args: TestArgs) -> TestArgs:
         args.examples is not None,
         args.py,
         args.full,
-        args.qemu_esp32s3 is not None,
+        args.qemu is not None,
     ]
     specific_count = sum(bool(flag) for flag in specific_flags)
 

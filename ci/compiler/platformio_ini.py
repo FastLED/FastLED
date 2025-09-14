@@ -1259,9 +1259,21 @@ class PlatformIOIni:
             return False
         # List of built-in PlatformIO frameworks that should remain as names, not URLs
         builtin_frameworks = {
-            "arduino", "espidf", "cmsis", "libopencm3", "mbed", "freertos",
-            "simba", "wiringpi", "pumbaa", "energia", "spl", "stm32cube",
-            "zephyr", "framework-arduinoespressif32", "framework-espidf"
+            "arduino",
+            "espidf",
+            "cmsis",
+            "libopencm3",
+            "mbed",
+            "freertos",
+            "simba",
+            "wiringpi",
+            "pumbaa",
+            "energia",
+            "spl",
+            "stm32cube",
+            "zephyr",
+            "framework-arduinoespressif32",
+            "framework-espidf",
         }
         return framework_name.lower() in builtin_frameworks
 
@@ -1813,7 +1825,11 @@ class PlatformIOIni:
         resolutions: Dict[str, Optional[str]] = {}
 
         for section_name, option_name, framework_value in self.get_framework_urls():
-            if framework_value and not self._is_url(framework_value) and not self._is_builtin_framework(framework_value):
+            if (
+                framework_value
+                and not self._is_url(framework_value)
+                and not self._is_builtin_framework(framework_value)
+            ):
                 if framework_value not in resolutions:
                     resolutions[framework_value] = self.resolve_framework_url(
                         framework_value
@@ -1901,62 +1917,54 @@ class PlatformIOIni:
 
         cache_manager = cache
 
-        # Step 1: Resolve shorthand platform names to URLs
-        if full:
-            logger.debug("Resolving platform shorthand names to URLs...")
-            platform_resolutions = self.resolve_platform_urls()
-            platform_replacements_made = 0
+        # Step 1: Resolve shorthand platform names to URLs (always happens)
+        logger.debug("Resolving platform shorthand names to URLs...")
+        platform_resolutions = self.resolve_platform_urls()
+        platform_replacements_made = 0
 
-            for platform_name, resolved_url in platform_resolutions.items():
-                if resolved_url:
-                    # Replace shorthand names with resolved URLs (regardless of whether they're zip URLs)
-                    for (
-                        section_name,
-                        option_name,
-                        current_url,
-                    ) in self.get_platform_urls():
-                        if current_url == platform_name:
-                            self.replace_url(
-                                section_name, option_name, platform_name, resolved_url
-                            )
-                            platform_replacements_made += 1
-                            logger.debug(
-                                f"Resolved platform {platform_name} -> {resolved_url} in {section_name}"
-                            )
-        else:
-            logger.debug("Skipping platform shorthand resolution (full=False)")
-            platform_replacements_made = 0
+        for platform_name, resolved_url in platform_resolutions.items():
+            if resolved_url:
+                # Replace shorthand names with resolved URLs (regardless of whether they're zip URLs)
+                for (
+                    section_name,
+                    option_name,
+                    current_url,
+                ) in self.get_platform_urls():
+                    if current_url == platform_name:
+                        self.replace_url(
+                            section_name, option_name, platform_name, resolved_url
+                        )
+                        platform_replacements_made += 1
+                        logger.debug(
+                            f"Resolved platform {platform_name} -> {resolved_url} in {section_name}"
+                        )
 
         if platform_replacements_made > 0:
             logger.info(
                 f"Resolved {platform_replacements_made} platform shorthand names"
             )
 
-        # Step 2: Resolve shorthand framework names to URLs
-        if full:
-            logger.debug("Resolving framework shorthand names to URLs...")
-            framework_resolutions = self.resolve_framework_urls()
-            framework_replacements_made = 0
+        # Step 2: Resolve shorthand framework names to URLs (always happens)
+        logger.debug("Resolving framework shorthand names to URLs...")
+        framework_resolutions = self.resolve_framework_urls()
+        framework_replacements_made = 0
 
-            for framework_name, resolved_url in framework_resolutions.items():
-                if resolved_url:
-                    # Replace shorthand names with resolved URLs (regardless of whether they're zip URLs)
-                    for (
-                        section_name,
-                        option_name,
-                        current_url,
-                    ) in self.get_framework_urls():
-                        if current_url == framework_name:
-                            self.replace_url(
-                                section_name, option_name, framework_name, resolved_url
-                            )
-                            framework_replacements_made += 1
-                            logger.debug(
-                                f"Resolved framework {framework_name} -> {resolved_url} in {section_name}"
-                            )
-        else:
-            logger.debug("Skipping framework shorthand resolution (full=False)")
-            framework_replacements_made = 0
+        for framework_name, resolved_url in framework_resolutions.items():
+            if resolved_url:
+                # Replace shorthand names with resolved URLs (regardless of whether they're zip URLs)
+                for (
+                    section_name,
+                    option_name,
+                    current_url,
+                ) in self.get_framework_urls():
+                    if current_url == framework_name:
+                        self.replace_url(
+                            section_name, option_name, framework_name, resolved_url
+                        )
+                        framework_replacements_made += 1
+                        logger.debug(
+                            f"Resolved framework {framework_name} -> {resolved_url} in {section_name}"
+                        )
 
         if framework_replacements_made > 0:
             logger.info(
@@ -2069,7 +2077,11 @@ class PlatformIOIni:
         framework_resolutions: Dict[str, FrameworkUrlResolution] = {}
 
         for section_name, option_name, framework_value in self.get_framework_urls():
-            if framework_value and not self._is_url(framework_value) and not self._is_builtin_framework(framework_value):
+            if (
+                framework_value
+                and not self._is_url(framework_value)
+                and not self._is_builtin_framework(framework_value)
+            ):
                 if framework_value not in framework_resolutions:
                     resolution = self.resolve_framework_url_enhanced(framework_value)
                     if resolution:
