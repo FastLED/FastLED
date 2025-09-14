@@ -134,27 +134,38 @@ jobs:
         working-directory: trusted
         run: |
           echo "Checking build artifacts..."
-          find .build -name "*.bin" -o -name "*.elf" | head -10
+          find .build -name "*.bin" -o -name "*.elf" | head -10 || true
 
           echo "=== Build directory structure ==="
-          find .build -type d | head -10
+          find .build -type d | head -10 || true
 
-          # PlatformIO creates .build/pio/{platform} structure
+          # PlatformIO creates .build/pio/{platform}/.pio/build/{platform} structure
           BUILD_DIR=".build/pio/${{ matrix.platform }}"
+          PIO_BUILD_DIR="$BUILD_DIR/.pio/build/${{ matrix.platform }}"
 
           if [ -d "$BUILD_DIR" ]; then
             echo "✅ Build directory found: $BUILD_DIR"
             ls -la "$BUILD_DIR/"
 
-            # Check for required QEMU files
+            # Check for required QEMU files in the nested PIO build directory
             echo "=== Checking for QEMU required files ==="
-            for file in firmware.bin bootloader.bin partitions.bin firmware.elf; do
-              if [ -f "$BUILD_DIR/$file" ]; then
-                echo "✅ Found: $file"
-              else
-                echo "❌ Missing: $file"
-              fi
-            done
+            if [ -d "$PIO_BUILD_DIR" ]; then
+              echo "✅ PlatformIO build directory found: $PIO_BUILD_DIR"
+              ls -la "$PIO_BUILD_DIR/"
+
+              for file in firmware.bin bootloader.bin partitions.bin firmware.elf; do
+                if [ -f "$PIO_BUILD_DIR/$file" ]; then
+                  echo "✅ Found: $file"
+                else
+                  echo "❌ Missing: $file"
+                fi
+              done
+            else
+              echo "❌ PlatformIO build directory not found: $PIO_BUILD_DIR"
+              echo "Contents of $BUILD_DIR:"
+              ls -la "$BUILD_DIR/" || true
+              exit 1
+            fi
           else
             echo "❌ Build directory not found: $BUILD_DIR"
             echo "Available build directories:"
@@ -175,7 +186,7 @@ jobs:
         run: |
           echo "Running ESP32-S3 example in QEMU..."
           uv run ci/qemu-esp32.py \
-            .build/pio/${{ matrix.platform }} \
+            .build/pio/${{ matrix.platform }}/.pio/build/${{ matrix.platform }} \
             --flash-size 4 \
             --timeout 30 \
             --interrupt-regex "(FL_WARN.*test finished)|(guru meditation)|(abort\\(\\))|(LoadProhibited)"
