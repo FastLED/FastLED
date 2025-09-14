@@ -84,7 +84,7 @@ class TestArgs:
     no_parallel: bool = False  # Force sequential test execution
     unity_chunks: int = 1  # Number of unity chunks for libfastled build
     debug: bool = False  # Enable debug mode for unit tests
-    qemu_esp32s3: Optional[list[str]] = None  # Run ESP32-S3 examples in QEMU
+    qemu: Optional[list[str]] = None  # Run examples in QEMU emulation
 
 
 @typechecked
@@ -214,7 +214,7 @@ def determine_test_categories(args: TestArgs) -> TestCategories:
     py_enabled = args.py
     # Integration tests only run when --full is used alone (not with --examples)
     integration_enabled = args.full and args.examples is None
-    qemu_esp32s3_enabled = args.qemu_esp32s3 is not None
+    qemu_esp32s3_enabled = args.qemu is not None
 
     return TestCategories(
         unit=unit_enabled,

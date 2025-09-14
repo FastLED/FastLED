@@ -1253,6 +1253,18 @@ class PlatformIOIni:
             value.startswith(scheme) for scheme in ("http://", "https://", "file://")
         )
 
+    def _is_builtin_framework(self, framework_name: str) -> bool:
+        """Check if a framework is a built-in PlatformIO framework that should not be resolved to URLs."""
+        if not framework_name:
+            return False
+        # List of built-in PlatformIO frameworks that should remain as names, not URLs
+        builtin_frameworks = {
+            "arduino", "espidf", "cmsis", "libopencm3", "mbed", "freertos",
+            "simba", "wiringpi", "pumbaa", "energia", "spl", "stm32cube",
+            "zephyr", "framework-arduinoespressif32", "framework-espidf"
+        }
+        return framework_name.lower() in builtin_frameworks
+
     def _is_git_url(self, url: str) -> bool:
         """Check if a URL is a git repository URL."""
         if not url:
@@ -1801,7 +1813,7 @@ class PlatformIOIni:
         resolutions: Dict[str, Optional[str]] = {}
 
         for section_name, option_name, framework_value in self.get_framework_urls():
-            if framework_value and not self._is_url(framework_value):
+            if framework_value and not self._is_url(framework_value) and not self._is_builtin_framework(framework_value):
                 if framework_value not in resolutions:
                     resolutions[framework_value] = self.resolve_framework_url(
                         framework_value
@@ -2039,7 +2051,7 @@ class PlatformIOIni:
         framework_resolutions: Dict[str, FrameworkUrlResolution] = {}
 
         for section_name, option_name, framework_value in self.get_framework_urls():
-            if framework_value and not self._is_url(framework_value):
+            if framework_value and not self._is_url(framework_value) and not self._is_builtin_framework(framework_value):
                 if framework_value not in framework_resolutions:
                     resolution = self.resolve_framework_url_enhanced(framework_value)
                     if resolution:
