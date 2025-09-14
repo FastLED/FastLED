@@ -19,7 +19,12 @@
 // Check for Arduino I2S library availability
 #if FL_HAS_INCLUDE(<I2S.h>)
 #include <I2S.h>
+// Check if this is a Renesas RA platform (Arduino Uno R4) which lacks proper I2S support
+#if defined(ARDUINO_UNOR4_WIFI) || defined(ARDUINO_UNOR4_MINIMA) || defined(ARDUINO_ARCH_RENESAS) || defined(ARDUINO_ARCH_RENESAS_UNO)
+#define ARDUINO_I2S_SUPPORTED 0
+#else
 #define ARDUINO_I2S_SUPPORTED defined(I2S_PHILIPS_MODE) && defined(I2S_LEFT_JUSTIFIED_MODE) && defined(I2S_RIGHT_JUSTIFIED_MODE)
+#endif
 #else
 #define ARDUINO_I2S_SUPPORTED 0
 #endif
