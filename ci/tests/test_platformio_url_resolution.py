@@ -336,16 +336,16 @@ class TestPlatformIOUrlResolution(unittest.TestCase):
             # debug_print(f"🏗️ Creating standardized test environment")
             # debug_print(f"   • INI content: {len(content.split())} lines")
             # debug_print(f"   • Temp directory: {self.temp_dir}")
+            pass
 
         self.test_ini.write_text(content)
         pio_ini = PlatformIOIni.parseFile(self.test_ini)
 
         if debug:
             sections = pio_ini.get_env_sections()
-            # debug_print(
-                f"   • Environment sections: {len(sections)} ({', '.join(sections)})"
-            )
+            # debug_print(f"   • Environment sections: {len(sections)} ({', '.join(sections)})")
             # debug_print(f"✓ Test environment ready")
+            pass
 
         return pio_ini, self.test_ini
 
@@ -360,14 +360,11 @@ class TestPlatformIOUrlResolution(unittest.TestCase):
             debug: Whether to print debug information
         """
         if debug:
-            # debug_print(
-                f"🔍 Verifying URL resolution{f' ({context})' if context else ''}"
-            )
+            # debug_print(f"🔍 Verifying URL resolution{f' ({context})' if context else ''}")
             # debug_print(f"   • Actual:   {actual_url}")
             # debug_print(f"   • Expected: {expected_url}")
-            # debug_print(
-                f"   • Match:    {'✅ Yes' if actual_url == expected_url else '❌ No'}"
-            )
+            # debug_print(f"   • Match:    {'✅ Yes' if actual_url == expected_url else '❌ No'}")
+            pass
 
         self.assertEqual(
             actual_url,
@@ -376,9 +373,8 @@ class TestPlatformIOUrlResolution(unittest.TestCase):
         )
 
         if debug:
-            # debug_print(
-                f"✓ URL verification successful{f' for {context}' if context else ''}"
-            )
+            # debug_print(f"✓ URL verification successful{f' for {context}' if context else ''}")
+            pass
 
     # =============================================================================
     # BASIC FUNCTIONALITY TESTS - Core URL Resolution Features
@@ -386,9 +382,7 @@ class TestPlatformIOUrlResolution(unittest.TestCase):
 
     def test_url_vs_shorthand_detection(self):
         """Test basic URL detection vs shorthand name detection - NO MOCKS."""
-        # debug_print(
-            f"\n🔍 Testing URL vs shorthand name detection (REAL IMPLEMENTATION)"
-        )
+        # debug_print(f"\n🔍 Testing URL vs shorthand name detection (REAL IMPLEMENTATION)")
 
         # SETUP - Create simple test environment (NO MOCKS NEEDED)
         pio_ini, _ = self._create_simple_test_environment()
@@ -424,22 +418,16 @@ class TestPlatformIOUrlResolution(unittest.TestCase):
 
         for test_input, expected in edge_cases:
             is_url_result = pio_ini._is_url(test_input)
-            # debug_print(
-                f"   • '{test_input}' → is_url: {is_url_result} (expected: {expected})"
-            )
+            # debug_print(f"   • '{test_input}' → is_url: {is_url_result} (expected: {expected})")
             self.assertEqual(
                 is_url_result, expected, f"Edge case '{test_input}' failed"
             )
 
-        # debug_print(
-            f"✅ URL detection works correctly for all test cases - REAL IMPLEMENTATION TESTED"
-        )
+        # debug_print(f"✅ URL detection works correctly for all test cases - REAL IMPLEMENTATION TESTED")
 
     def test_basic_platform_shorthand_resolution(self):
         """Test converting platform shorthand names to repository URLs using REAL PlatformIO CLI."""
-        # debug_print(
-            f"\n🏗️ Testing basic platform shorthand to URL conversion (REAL PlatformIO CLI)"
-        )
+        # debug_print(f"\n🏗️ Testing basic platform shorthand to URL conversion (REAL PlatformIO CLI)")
 
         # SETUP - Create environment (NO MOCKS!)
         pio_ini, _ = self._create_simple_test_environment()
@@ -476,13 +464,9 @@ class TestPlatformIOUrlResolution(unittest.TestCase):
                 f"Expected GitHub repository URL for {platform_name}, got: {resolved_url}",
             )
 
-            # debug_print(
-                f"   ✅ Real platform resolution successful: {platform_name} → {resolved_url}"
-            )
+            # debug_print(f"   ✅ Real platform resolution successful: {platform_name} → {resolved_url}")
 
-        # debug_print(
-            f"🎉 All REAL platform shorthand resolutions successful - no mocks used!"
-        )
+        # debug_print(f"🎉 All REAL platform shorthand resolutions successful - no mocks used!")
 
     def test_url_passthrough_behavior(self):
         """Test that existing URLs pass through unchanged - NO MOCKS NEEDED."""
@@ -546,9 +530,7 @@ class TestPlatformIOUrlResolution(unittest.TestCase):
         # TEST - First resolution should hit REAL CLI
         target_platform = "espressif32"  # Use a platform we know exists
 
-        # debug_print(
-            f"\n🚀 First resolution of '{target_platform}' (should hit REAL CLI)"
-        )
+        # debug_print(f"\n🚀 First resolution of '{target_platform}' (should hit REAL CLI)")
         first_result = pio_ini.resolve_platform_url(target_platform)
         first_call_count = cli_call_count
 
@@ -566,9 +548,7 @@ class TestPlatformIOUrlResolution(unittest.TestCase):
         # debug_print(f"✅ First resolution: ✓ Real CLI called, ✓ got real result")
 
         # TEST - Second resolution should use cache (no additional CLI calls)
-        # debug_print(
-            f"\n🚀 Second resolution of '{target_platform}' (should use cache, no CLI)"
-        )
+        # debug_print(f"\n🚀 Second resolution of '{target_platform}' (should use cache, no CLI)")
         second_result = pio_ini.resolve_platform_url(target_platform)
         second_call_count = cli_call_count
 
@@ -583,9 +563,7 @@ class TestPlatformIOUrlResolution(unittest.TestCase):
         )
 
         # debug_print(f"📍 Second result from cache: {second_result}")
-        # debug_print(
-            f"✅ Second resolution: ✓ No additional CLI calls, ✓ cache used correctly"
-        )
+        # debug_print(f"✅ Second resolution: ✓ No additional CLI calls, ✓ cache used correctly")
 
         # TEST - Verify cache contents
         # debug_print(f"\n🔍 Verifying cache contents")
@@ -600,9 +578,7 @@ class TestPlatformIOUrlResolution(unittest.TestCase):
         # debug_print(f"📋 Cached URL: {cached_url}")
         # debug_print(f"✅ Cache contents verified")
 
-        # debug_print(
-            f"🎉 Real caching mechanism works perfectly - tested with actual PlatformIO CLI!"
-        )
+        # debug_print(f"🎉 Real caching mechanism works perfectly - tested with actual PlatformIO CLI!")
 
     def test_cache_expiration_behavior(self):
         """Test that cache entries expire after TTL and get refreshed."""
@@ -641,6 +617,7 @@ class TestPlatformIOUrlResolution(unittest.TestCase):
             # debug_print(f"✅ Cache expiration logic works correctly")
         else:
             # debug_print(f"⚠️ No cache entry found to expire - test skipped")
+            pass
 
         # debug_print(f"🎉 Cache expiration behavior verified")
 
@@ -785,9 +762,7 @@ class TestPlatformIOUrlResolution(unittest.TestCase):
         # TEST 1: First resolution should hit CLI
         target_platform = "espressif32"
         expected_url = "https://github.com/pioarduino/platform-espressif32.git"
-        # debug_print(
-            f"\n🚀 Test 1: First resolution of '{target_platform}' (should hit CLI)"
-        )
+        # debug_print(f"\n🚀 Test 1: First resolution of '{target_platform}' (should hit CLI)")
 
         first_resolution_result = pio_ini.resolve_platform_url(target_platform)
         first_call_count = cli_call_count
@@ -802,9 +777,7 @@ class TestPlatformIOUrlResolution(unittest.TestCase):
         # debug_print(f"✅ First resolution successful and made expected CLI call")
 
         # TEST 2: Second resolution should use cache
-        # debug_print(
-            f"\n🚀 Test 2: Second resolution of '{target_platform}' (should use cache)"
-        )
+        # debug_print(f"\n🚀 Test 2: Second resolution of '{target_platform}' (should use cache)")
 
         second_resolution_result = pio_ini.resolve_platform_url(target_platform)
         second_call_count = cli_call_count
@@ -828,9 +801,7 @@ class TestPlatformIOUrlResolution(unittest.TestCase):
         # debug_print(f"\n🚀 Test 3: Verifying cache structure and contents")
 
         cache_contents = pio_ini.get_resolved_urls_cache()
-        # debug_print(
-            f"📋 Cache contains platforms: {list(cache_contents.platforms.keys())}"
-        )
+        # debug_print(f"📋 Cache contains platforms: {list(cache_contents.platforms.keys())}")
 
         self.assertIn(
             target_platform,
@@ -1211,15 +1182,14 @@ framework = arduino
             # debug_print(f"📞 Mock CLI called with: {' '.join(args)}")
             if args == ["platform", "show", "espressif32", "--json-output"]:
                 response = MOCK_ESP32_PLATFORM_FULL_RESPONSE
-                # debug_print(
-                    f"📋 Returning full ESP32 platform data (packages: {len(response['packages'])})"
-                )
+                # debug_print(f"📋 Returning full ESP32 platform data (packages: {len(response['packages'])})")
                 return response  # type: ignore
             elif args == ["platform", "show", "atmelavr", "--json-output"]:
                 response = MOCK_ATMELAVR_PLATFORM_RESPONSE
                 # debug_print(f"📋 Returning ATMegaAVR platform data")
                 return response  # type: ignore
             # debug_print(f"⚠️ No mock response for command")
+            pass
             return None
 
         pio_ini._run_pio_command = enhanced_mock_cli_handler
@@ -1227,9 +1197,7 @@ framework = arduino
 
         # EXECUTE - Test enhanced resolution for ESP32 platform
         target_platform = "espressif32"
-        # debug_print(
-            f"\n🚀 Testing enhanced resolution for platform: '{target_platform}'"
-        )
+        # debug_print(f"\n🚀 Testing enhanced resolution for platform: '{target_platform}'")
 
         platform_resolution = pio_ini.resolve_platform_url_enhanced(target_platform)
         # debug_print(f"📦 Resolution result type: {type(platform_resolution).__name__}")
@@ -1607,6 +1575,7 @@ def main():
     # debug_print(f"   Selected tests: {len(focused_tests)}")
     for test_name in focused_tests:
         # debug_print(f"   • {test_name}")
+        pass
     print()
 
     suite = unittest.TestSuite()
@@ -1615,6 +1584,7 @@ def main():
             suite.addTest(TestPlatformIOUrlResolution(test_name))
         except Exception as e:
             # debug_print(f"⚠️ Could not load test '{test_name}': {e}")
+            pass
 
     runner = unittest.TextTestRunner(verbosity=2, stream=sys.stdout, buffer=False)
 
@@ -1626,28 +1596,26 @@ def main():
     if result.wasSuccessful():
         # debug_print(f"✅ SUCCESS: All {result.testsRun} focused tests passed!")
         # debug_print("🎉 Design implementation working perfectly!")
+        pass
     else:
         failures = len(result.failures)
         errors = len(result.errors)
-        # debug_print(
-            f"❌ FAILURE: {failures} failures, {errors} errors out of {result.testsRun} tests"
-        )
+        # debug_print(f"❌ FAILURE: {failures} failures, {errors} errors out of {result.testsRun} tests")
+        pass
 
         if result.failures:
             # debug_print("\n📋 Test Failures:")
             for test, traceback in result.failures:
                 # debug_print(f"  • {test}")
-                # debug_print(
-                    f"    Error: {traceback.split()[-1] if traceback else 'Unknown failure'}"
-                )
+                # debug_print(f"    Error: {traceback.split()[-1] if traceback else 'Unknown failure'}")
+                pass
 
         if result.errors:
             # debug_print("\n🚨 Test Errors:")
             for test, traceback in result.errors:
                 # debug_print(f"  • {test}")
-                # debug_print(
-                    f"    Error: {traceback.split()[-1] if traceback else 'Unknown error'}"
-                )
+                # debug_print(f"    Error: {traceback.split()[-1] if traceback else 'Unknown error'}")
+                pass
 
     # debug_print(f"\n💡 DEBUGGING TIPS:")
     # debug_print(f"   • To run all tests: Comment out 'focused_tests' section")
