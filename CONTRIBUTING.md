@@ -53,6 +53,56 @@ ctest --test-dir tests/.build --output-on-failure
 # available via this tool.
 ```
 
+## QEMU Emulation Testing
+
+FastLED supports testing ESP32-S3 examples in QEMU emulation, providing a powerful way to validate code without physical hardware.
+
+### Running ESP32-S3 Examples in QEMU
+
+```bash
+# Test default examples (BlinkParallel, RMT5WorkerPool)
+./test --qemu esp32s3
+
+# Test specific examples
+./test --qemu esp32s3 BlinkParallel
+./test --qemu esp32s3 RMT5WorkerPool BlinkParallel
+
+# Quick validation test (setup verification only)
+FASTLED_QEMU_QUICK_TEST=true ./test --qemu esp32s3
+```
+
+### What QEMU Testing Does
+
+1. **Automatic QEMU Installation**: Downloads and sets up ESP32-S3 QEMU emulator
+2. **Cross-Platform Compilation**: Builds examples for ESP32-S3 target architecture
+3. **Emulated Execution**: Runs compiled firmware in QEMU virtual environment
+4. **Automated Validation**: Monitors execution for success/failure indicators
+
+### QEMU Test Output
+
+The QEMU tests provide detailed feedback:
+- **Build Status**: Compilation success/failure for each example
+- **Execution Results**: Runtime behavior in emulated environment
+- **Summary Statistics**: Pass/fail counts and timing information
+- **Error Details**: Specific failure reasons when tests don't pass
+
+### Supported Platforms
+
+Currently supported QEMU platforms:
+- **esp32s3**: ESP32-S3 SoC emulation
+
+Future platforms may include additional ESP32 variants as QEMU support expands.
+
+### Advanced QEMU Usage
+
+```bash
+# Run with verbose output to see detailed build and execution logs
+./test --qemu esp32s3 --verbose
+
+# Test in non-interactive mode (useful for CI/CD)
+./test --qemu esp32s3 --no-interactive
+```
+
 ## VSCode
 
 We also support VSCode and IntelliSense auto-completion when the free [platformio](https://marketplace.visualstudio.com/items?itemName=platformio.platformio-ide) extension is installed. The development sketch to test library changes can be found at [dev/dev.ino](dev/dev.ino).

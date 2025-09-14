@@ -71,15 +71,24 @@ def make_watch_dog_thread(
     return thr
 
 
-def run_qemu_esp32s3_tests(args: TestArgs) -> None:
-    """Run ESP32-S3 examples in QEMU emulation."""
+def run_qemu_tests(args: TestArgs) -> None:
+    """Run examples in QEMU emulation."""
     import subprocess
     from pathlib import Path
 
-    print(f"Running ESP32-S3 QEMU tests...")
+    if not args.qemu or len(args.qemu) < 1:
+        print("Error: --qemu requires a platform (e.g., esp32s3)")
+        sys.exit(1)
 
-    # Determine which examples to test
-    examples_to_test = args.qemu_esp32s3 if args.qemu_esp32s3 else ["BlinkParallel"]
+    platform = args.qemu[0].lower()
+    if platform != "esp32s3":
+        print(f"Error: Unsupported QEMU platform: {platform}. Only esp32s3 is currently supported.")
+        sys.exit(1)
+
+    print(f"Running {platform.upper()} QEMU tests...")
+
+    # Determine which examples to test (skip the platform argument)
+    examples_to_test = args.qemu[1:] if len(args.qemu) > 1 else ["BlinkParallel"]
     if not examples_to_test:  # Empty list means test all available examples
         examples_to_test = ["BlinkParallel", "RMT5WorkerPool"]
 
@@ -117,10 +126,10 @@ def run_qemu_esp32s3_tests(args: TestArgs) -> None:
         print(f"\n--- Testing {example} ---")
 
         try:
-            # Build the example for ESP32-S3
-            print(f"Building {example} for ESP32-S3...")
+            # Build the example for the specified platform
+            print(f"Building {example} for {platform.upper()}...")
             build_result = subprocess.run(
-                ["uv", "run", "ci/ci-compile.py", "esp32s3", "--examples", example],
+                ["uv", "run", "ci/ci-compile.py", platform, "--examples", example],
                 capture_output=True,
                 text=True,
                 timeout=600,
@@ -135,7 +144,7 @@ def run_qemu_esp32s3_tests(args: TestArgs) -> None:
             print(f"Build successful for {example}")
 
             # Check if build artifacts exist
-            build_dir = Path(f".build/pio/esp32s3")
+            build_dir = Path(f".build/pio/{platform}")
             if not build_dir.exists():
                 print(f"Build directory not found: {build_dir}")
                 failure_count += 1
@@ -179,7 +188,7 @@ def run_qemu_esp32s3_tests(args: TestArgs) -> None:
             failure_count += 1
 
     # Summary
-    print(f"\n=== QEMU ESP32-S3 Test Summary ===")
+    print(f"\n=== QEMU {platform.upper()} Test Summary ===")
     print(f"Examples tested: {len(examples_to_test)}")
     print(f"Successful: {success_count}")
     print(f"Failed: {failure_count}")
@@ -290,10 +299,10 @@ def main() -> None:
         )
         write_fingerprint(fingerprint_data)
 
-        # Handle QEMU ESP32-S3 testing
-        if args.qemu_esp32s3 is not None:
-            print("=== QEMU ESP32-S3 Testing ===")
-            run_qemu_esp32s3_tests(args)
+        # Handle QEMU testing
+        if args.qemu is not None:
+            print("=== QEMU Testing ===")
+            run_qemu_tests(args)
             return
 
         # Run tests using the test runner with sequential example compilation
