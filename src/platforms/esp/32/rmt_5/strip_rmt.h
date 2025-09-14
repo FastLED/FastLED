@@ -22,6 +22,13 @@ public:
         uint32_t th0, uint32_t tl0, uint32_t th1, uint32_t tl1, uint32_t reset,
         DmaMode dma_config = DMA_AUTO, uint8_t interrupt_priority = 3, 
         uint8_t* external_pixel_buf = nullptr);
+    
+    // Convenience method for worker pool usage with external buffer
+    static IRmtStrip* CreateWithExternalBuffer(
+        int pin, uint32_t led_count, bool is_rgbw,
+        uint32_t th0, uint32_t tl0, uint32_t th1, uint32_t tl1, uint32_t reset,
+        uint8_t* external_pixel_buf, DmaMode dma_config = DMA_AUTO, 
+        uint8_t interrupt_priority = 3);
 
     virtual ~IRmtStrip() {}
     virtual void setPixel(uint32_t index, uint8_t red, uint8_t green, uint8_t blue) = 0;

@@ -41,7 +41,11 @@
       "Read(//c/Users/niteris/.platformio/packages/**)",
       "WebFetch(domain:docs.silabs.com)",
       "Bash(for:*)",
-      "Bash(done)"
+      "Bash(done)",
+      "Bash(git rebase:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)"
     ],
     "deny": []
   }
