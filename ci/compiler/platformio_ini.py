@@ -1616,6 +1616,10 @@ class PlatformIOIni:
         if self._is_url(framework_name):
             return framework_name
 
+        # Special case for espidf - it's not in the global frameworks list but is commonly used
+        if framework_name == "espidf":
+            return "https://github.com/espressif/esp-idf"
+
         # Check cache first
         if self._is_framework_cached(framework_name):
             cached = self._framework_cache[framework_name]
