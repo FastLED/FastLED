@@ -69,11 +69,17 @@ class Board:
     lib_ldf_mode: str | None = (
         None  # Library Dependency Finder mode (e.g., 'chain+' for enhanced dependency finding)
     )
+    lib_ignore: list[str] | None = (
+        None  # Libraries to ignore during compilation (e.g., ['I2S'] for UNO R4 WiFi)
+    )
 
     def __post_init__(self) -> None:
         # Check if framework is set, warn and auto-set to arduino if missing (except for native/stub platforms)
         if self.framework is None and not self._is_native_or_stub_platform():
             self.framework = "arduino"
+
+        # Auto-detect and exclude problematic libraries based on environmental signals
+        self._auto_detect_library_exclusions()
 
         ALL.append(self)
 
@@ -94,6 +100,45 @@ class Board:
         # Check no_board_spec flag (typically used for native platforms)
         if self.no_board_spec:
             return True
+
+        return False
+
+    def _auto_detect_library_exclusions(self) -> None:
+        """Automatically detect and exclude libraries known to be broken on this platform."""
+
+        # Check for I2S library problems based on environmental signals
+        if self._should_ignore_i2s_library():
+            if not self.lib_ignore:
+                self.lib_ignore = []
+            if "I2S" not in self.lib_ignore:
+                self.lib_ignore.append("I2S")
+
+    def _should_ignore_i2s_library(self) -> bool:
+        """Detect if I2S library should be ignored based on platform characteristics."""
+
+        # Known problematic platforms - Renesas RA family
+        if self.platform == "renesas-ra":
+            return True
+
+        # Known problematic board names
+        problematic_boards = ["uno_r4_wifi", "uno_r4_minima"]
+        if self.board_name in problematic_boards:
+            return True
+
+        # Check for specific defines that indicate I2S problems
+        if self.defines:
+            problematic_defines = [
+                "ARDUINO_UNOR4_WIFI",
+                "ARDUINO_UNOR4_MINIMA",
+                "ARDUINO_ARCH_RENESAS",
+                "ARDUINO_ARCH_RENESAS_UNO",
+                "_RENESAS_RA_",
+                "ARDUINO_FSP",
+            ]
+            for define in self.defines:
+                # Check if define contains any problematic patterns
+                if any(prob_define in define for prob_define in problematic_defines):
+                    return True
 
         return False
 
@@ -288,6 +333,15 @@ class Board:
         # Library Dependency Finder mode (for enhanced dependency finding)
         if self.lib_ldf_mode:
             lines.append(f"lib_ldf_mode = {self.lib_ldf_mode}")
+
+        # Libraries to ignore during compilation
+        if self.lib_ignore:
+            if len(self.lib_ignore) == 1:
+                lines.append(f"lib_ignore = {self.lib_ignore[0]}")
+            else:
+                lines.append("lib_ignore =")
+                for lib in self.lib_ignore:
+                    lines.append(f"    {lib}")
 
         # Add FastLED-specific configurations if project_root is provided
         if project_root:
@@ -571,6 +625,7 @@ ATTINY1616 = Board(
 UNO_R4_WIFI = Board(
     board_name="uno_r4_wifi",
     platform="renesas-ra",
+    # I2S library auto-excluded due to missing r_i2s_api.h header in Arduino Renesas framework
 )
 
 NANO_EVERY = Board(

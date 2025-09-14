@@ -16,22 +16,38 @@
 
 #include <Arduino.h>  // ok include
 
-// Check for Arduino I2S library availability
+// Check for Arduino I2S library availability and completeness
 #if FL_HAS_INCLUDE(<I2S.h>)
 #include <I2S.h>
-// Check if this is a Renesas RA platform (Arduino Uno R4) which lacks proper I2S support
-#if defined(ARDUINO_UNOR4_WIFI) || defined(ARDUINO_UNOR4_MINIMA) || defined(ARDUINO_ARCH_RENESAS) || defined(ARDUINO_ARCH_RENESAS_UNO)
-#define ARDUINO_I2S_SUPPORTED 0
+
+// Define ARDUINO_I2S_FULLY_SUPPORTED only when ALL I2S components are present and functional
+#if defined(ARDUINO_UNOR4_WIFI) || defined(ARDUINO_UNOR4_MINIMA) || \
+    defined(ARDUINO_ARCH_RENESAS) || defined(ARDUINO_ARCH_RENESAS_UNO) || \
+    defined(_RENESAS_RA_) || defined(ARDUINO_FSP)
+    // Known broken: Renesas RA platforms with incomplete FSP I2S support
+    #define ARDUINO_I2S_FULLY_SUPPORTED 0
+    #define ARDUINO_I2S_BROKEN_REASON "Renesas FSP missing r_i2s_api.h header"
+#elif !defined(I2S_PHILIPS_MODE) || !defined(I2S_LEFT_JUSTIFIED_MODE) || !defined(I2S_RIGHT_JUSTIFIED_MODE)
+    // Missing essential I2S mode constants - incomplete library implementation
+    #define ARDUINO_I2S_FULLY_SUPPORTED 0
+    #define ARDUINO_I2S_BROKEN_REASON "Missing I2S mode constants (incomplete library)"
 #else
-#define ARDUINO_I2S_SUPPORTED defined(I2S_PHILIPS_MODE) && defined(I2S_LEFT_JUSTIFIED_MODE) && defined(I2S_RIGHT_JUSTIFIED_MODE)
+    // All required I2S components are present and platform is not known-broken
+    #define ARDUINO_I2S_FULLY_SUPPORTED 1
 #endif
+
 #else
-#define ARDUINO_I2S_SUPPORTED 0
+// No I2S.h header found - cannot support I2S audio input
+#define ARDUINO_I2S_FULLY_SUPPORTED 0
+#define ARDUINO_I2S_BROKEN_REASON "I2S.h header not available"
 #endif
+
+// Legacy compatibility define
+#define ARDUINO_I2S_SUPPORTED ARDUINO_I2S_FULLY_SUPPORTED
 
 namespace fl {
 
-#if ARDUINO_I2S_SUPPORTED
+#if ARDUINO_I2S_FULLY_SUPPORTED
 
 class Arduino_I2S_Audio : public IAudioInput {
 public:
@@ -194,12 +210,16 @@ fl::shared_ptr<IAudioInput> arduino_create_audio_input(const AudioConfig& config
     return fl::shared_ptr<IAudioInput>();  // Return null
 }
 
-#else // !ARDUINO_I2S_SUPPORTED
+#else // !ARDUINO_I2S_FULLY_SUPPORTED
 
-// Stub implementation for platforms without Arduino I2S support
+// Null audio implementation fallback for platforms without complete I2S support
 fl::shared_ptr<IAudioInput> arduino_create_audio_input(const AudioConfig& config, fl::string* error_message = nullptr) {
     FL_UNUSED(config);
+#ifdef ARDUINO_I2S_BROKEN_REASON
+    const char* ERROR_MESSAGE = "Arduino I2S not supported: " ARDUINO_I2S_BROKEN_REASON;
+#else
     const char* ERROR_MESSAGE = "Arduino I2S library not available - please install I2S library";
+#endif
     FL_WARN(ERROR_MESSAGE);
     if (error_message) {
         *error_message = ERROR_MESSAGE;
@@ -207,6 +227,6 @@ fl::shared_ptr<IAudioInput> arduino_create_audio_input(const AudioConfig& config
     return fl::shared_ptr<IAudioInput>();  // Return null
 }
 
-#endif // ARDUINO_I2S_SUPPORTED
+#endif // ARDUINO_I2S_FULLY_SUPPORTED
 
 } // namespace fl
