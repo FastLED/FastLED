@@ -157,6 +157,14 @@ def parse_args(args: Optional[list[str]] = None) -> argparse.Namespace:
         type=str,
         help="Override global PlatformIO cache directory path (for testing)",
     )
+    parser.add_argument(
+        "-o",
+        "--out",
+        type=str,
+        help="Output path for build artifact. Requires exactly one sketch. "
+        "If path ends with '/', treated as directory. If has suffix, treated as file. "
+        "Use '-o .' to save in current directory with sketch name.",
+    )
 
     try:
         parsed_args = parser.parse_intermixed_args(args)
@@ -345,6 +353,109 @@ def compile_board_examples(
         )
 
 
+def get_board_artifact_extension(board: Board) -> str:
+    """Get the primary artifact extension for a board."""
+    # Most Arduino-based boards produce .hex files
+    if board.framework and "arduino" in board.framework.lower():
+        return ".hex"
+
+    # ESP32 boards might produce .bin files in some cases, but typically .hex for Arduino framework
+    if board.board_name.startswith("esp"):
+        return (
+            ".hex"
+            if board.framework and "arduino" in board.framework.lower()
+            else ".bin"
+        )
+
+    # Default to .hex for most microcontroller boards
+    return ".hex"
+
+
+def validate_output_path(
+    output_path: str, sketch_name: str, board: Board
+) -> tuple[bool, str, str]:
+    """Validate output path and return (is_valid, resolved_path, error_message).
+
+    Args:
+        output_path: The user-specified output path
+        sketch_name: Name of the sketch being built
+        board: Board configuration
+
+    Returns:
+        Tuple of (is_valid, resolved_output_path, error_message)
+    """
+    import os
+
+    expected_ext = get_board_artifact_extension(board)
+
+    # Handle special case: -o .
+    if output_path == ".":
+        resolved_path = f"{sketch_name}{expected_ext}"
+        return True, resolved_path, ""
+
+    # If path ends with /, it's a directory
+    if output_path.endswith("/") or output_path.endswith("\\"):
+        resolved_path = os.path.join(output_path, f"{sketch_name}{expected_ext}")
+        return True, resolved_path, ""
+
+    # If path has an extension, it's a file - validate the extension
+    if "." in os.path.basename(output_path):
+        _, ext = os.path.splitext(output_path)
+        if ext != expected_ext:
+            return (
+                False,
+                "",
+                f"Output file extension '{ext}' doesn't match expected '{expected_ext}' for board '{board.board_name}'",
+            )
+        return True, output_path, ""
+
+    # Path doesn't end with / and has no extension - treat as directory
+    resolved_path = os.path.join(output_path, f"{sketch_name}{expected_ext}")
+    return True, resolved_path, ""
+
+
+def copy_build_artifact(
+    build_dir: Path, board: Board, sketch_name: str, output_path: str
+) -> bool:
+    """Copy the build artifact to the specified output path.
+
+    Args:
+        build_dir: Build directory path
+        board: Board configuration
+        sketch_name: Name of the sketch
+        output_path: Target output path
+
+    Returns:
+        True if successful, False otherwise
+    """
+    import os
+    import shutil
+
+    expected_ext = get_board_artifact_extension(board)
+
+    # Find the source artifact
+    # PlatformIO builds are in .build/pio/{board}/.pio/build/{board}/firmware.{ext}
+    artifact_dir = build_dir / ".pio" / "build" / board.board_name
+    source_artifact = artifact_dir / f"firmware{expected_ext}"
+
+    if not source_artifact.exists():
+        print(f"ERROR: Build artifact not found: {source_artifact}")
+        return False
+
+    # Ensure output directory exists
+    output_path_obj = Path(output_path)
+    output_path_obj.parent.mkdir(parents=True, exist_ok=True)
+
+    try:
+        print(f"Copying {source_artifact} to {output_path}")
+        shutil.copy2(source_artifact, output_path)
+        print(f"✅ Build artifact saved to: {output_path}")
+        return True
+    except Exception as e:
+        print(f"ERROR: Failed to copy build artifact: {e}")
+        return False
+
+
 def main() -> int:
     """Main function."""
     args = parse_args()
@@ -397,6 +508,30 @@ def main() -> int:
             resolve_example_path(example)
         except FileNotFoundError as e:
             print(f"ERROR: {e}")
+            return 1
+
+    # Validate -o/--out option requirements
+    if args.out:
+        if len(examples) != 1:
+            print(
+                f"ERROR: -o/--out option requires exactly one sketch, got {len(examples)}: {examples}"
+            )
+            return 1
+
+        if len(boards) != 1:
+            print(
+                f"ERROR: -o/--out option requires exactly one board, got {len(boards)}: {[b.board_name for b in boards]}"
+            )
+            return 1
+
+        # Validate the output path
+        sketch_name = examples[0]
+        board = boards[0]
+        is_valid, resolved_output_path, error_msg = validate_output_path(
+            args.out, sketch_name, board
+        )
+        if not is_valid:
+            print(f"ERROR: {error_msg}")
             return 1
 
     # Set up defines
@@ -468,6 +603,30 @@ def main() -> int:
                     # Print the collected output for this sketch
                     print(sketch.output)
             # Continue with other boards instead of stopping
+        else:
+            # Compilation succeeded - handle -o/--out option if specified
+            if args.out:
+                sketch_name = examples[0]  # We already validated there's exactly one
+                is_valid, resolved_output_path, _ = validate_output_path(
+                    args.out, sketch_name, board
+                )
+                if is_valid:
+                    # Find the build directory for this board
+                    project_root = Path(__file__).parent.parent.resolve()
+                    build_dir = project_root / ".build" / "pio" / board.board_name
+
+                    if not copy_build_artifact(
+                        build_dir, board, sketch_name, resolved_output_path
+                    ):
+                        compilation_errors.append(
+                            f"Failed to copy artifact for {board.board_name}"
+                        )
+                        print(
+                            red_text(
+                                f"ERROR: Failed to copy build artifact for {board.board_name}"
+                            )
+                        )
+                        return 1
 
     # Report results
     elapsed_time = time.time() - start_time
