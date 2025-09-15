@@ -352,34 +352,35 @@ def install_qemu_esp32():
 def find_qemu_binary() -> Optional[Path]:
     """Find the installed QEMU binary."""
     system, _ = get_platform_info()
-
-    # Common paths where ESP-IDF tools install QEMU
-    possible_paths = [
-        Path.home() / ".espressif" / "tools" / "qemu-xtensa",
-        Path.home() / ".espressif" / "python_env" / "idf*" / "bin",
-        Path("/opt/espressif/tools/qemu-xtensa"),
-    ]
-
     binary_name = (
         "qemu-system-xtensa.exe" if system == "windows" else "qemu-system-xtensa"
     )
 
-    # Search in possible paths
-    for base_path in possible_paths:
+    # ESP-IDF installation paths
+    esp_paths = [
+        Path.home() / ".espressif" / "tools" / "qemu-xtensa",
+        Path.home() / ".espressif" / "python_env",
+        Path("/opt/espressif/tools/qemu-xtensa"),
+    ]
+
+    for base_path in esp_paths:
         if base_path.exists():
             for qemu_path in base_path.rglob(binary_name):
                 if qemu_path.is_file():
                     print(f"Found QEMU binary at: {qemu_path}")
                     return qemu_path
 
-    # Try PATH
+    # Check system PATH
     try:
-        result = subprocess.run(["which", binary_name], capture_output=True, text=True)
+        cmd = ["where" if system == "windows" else "which", binary_name]
+        result = subprocess.run(cmd, capture_output=True, text=True)
         if result.returncode == 0:
-            qemu_path = Path(result.stdout.strip())
+            # Take first line in case of multiple results (Windows)
+            first_line = result.stdout.strip().split("\n")[0]
+            qemu_path = Path(first_line)
             print(f"Found QEMU binary in PATH: {qemu_path}")
             return qemu_path
-    except:
+    except (subprocess.SubprocessError, FileNotFoundError):
         pass
 
     print("ERROR: Could not find QEMU binary")

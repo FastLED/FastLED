@@ -7,133 +7,149 @@ Designed to replace the tobozo/esp32-qemu-sim GitHub Action.
 """
 
 import argparse
-import os
+import platform
 import re
-import signal
 import subprocess
 import sys
 import threading
 import time
 from pathlib import Path
-from typing import List, Optional, Tuple
+from typing import List, Optional, TextIO
+
+
+def get_binary_name() -> str:
+    """Get platform-specific QEMU binary name."""
+    return (
+        "qemu-system-xtensa.exe"
+        if platform.system().lower() == "windows"
+        else "qemu-system-xtensa"
+    )
+
+
+def find_executable(binary_name: str) -> Optional[Path]:
+    """Find executable in PATH using platform-appropriate command."""
+    try:
+        cmd = [
+            "where" if platform.system().lower() == "windows" else "which",
+            binary_name,
+        ]
+        result = subprocess.run(cmd, capture_output=True, text=True)
+        if result.returncode == 0:
+            # Take first line in case of multiple results (Windows 'where')
+            return Path(result.stdout.strip().split("\n")[0])
+    except (subprocess.SubprocessError, FileNotFoundError):
+        pass
+    return None
+
+
+def find_qemu_binary() -> Optional[Path]:
+    """Find QEMU ESP32 binary in common locations."""
+    binary_name = get_binary_name()
+
+    # ESP-IDF installation paths
+    esp_paths = [
+        Path.home() / ".espressif" / "tools" / "qemu-xtensa",
+        Path.home() / ".espressif" / "python_env",
+    ]
+
+    for base_path in esp_paths:
+        if base_path.exists():
+            for qemu_path in base_path.rglob(binary_name):
+                if qemu_path.is_file():
+                    return qemu_path
+
+    # Check system PATH
+    return find_executable(binary_name)
+
+
+def show_installation_help():
+    """Display platform-specific installation instructions."""
+    binary_name = get_binary_name()
+    print(f"ERROR: QEMU ESP32 emulator ({binary_name}) not found!")
+    print()
+
+    if platform.system().lower() == "windows":
+        print("To install QEMU on Windows:")
+        print("1. Chocolatey: choco install qemu -y")
+        print("2. winget: winget install SoftwareFreedomConservancy.QEMU --scope user")
+        print("3. Manual: Download from https://qemu.weilnetz.de/w64/")
+        print("4. ESP-IDF: uv run python ci/install-qemu-esp32.py")
+    else:
+        print("Run: uv run python ci/install-qemu-esp32.py")
 
 
 class QEMURunner:
     def __init__(self, qemu_binary: Optional[Path] = None):
-        self.qemu_binary = qemu_binary or self._find_qemu_binary()
-        self.process = None
+        self.qemu_binary = qemu_binary or self._get_qemu_binary()
+        self.process: Optional[subprocess.Popen[str]] = None
         self.output_lines: List[str] = []
         self.timeout_reached = False
 
-    def _find_qemu_binary(self) -> Path:
-        """Find the QEMU ESP32 binary."""
-        import platform
-
-        system = platform.system().lower()
-        binary_name = (
-            "qemu-system-xtensa.exe" if system == "windows" else "qemu-system-xtensa"
-        )
-
-        # Check if installed via ESP-IDF tools
-        esp_paths = [
-            Path.home() / ".espressif" / "tools" / "qemu-xtensa",
-            Path.home() / ".espressif" / "python_env",
-        ]
-
-        for base_path in esp_paths:
-            if base_path.exists():
-                for qemu_path in base_path.rglob(binary_name):
-                    if qemu_path.is_file():
-                        return qemu_path
-
-        # Try system PATH
-        try:
-            result = subprocess.run(
-                ["which", binary_name], capture_output=True, text=True
+    def _get_qemu_binary(self) -> Path:
+        """Get QEMU binary path or raise error."""
+        qemu_path = find_qemu_binary()
+        if not qemu_path:
+            raise FileNotFoundError(
+                f"Could not find {get_binary_name()}. Please run install-qemu-esp32.py first."
             )
-            if result.returncode == 0:
-                return Path(result.stdout.strip())
-        except:
-            pass
-
-        raise FileNotFoundError(
-            f"Could not find {binary_name}. Please run install-qemu-esp32.py first."
-        )
+        return qemu_path
 
     def build_qemu_command(self, build_folder: Path, flash_size: int = 4) -> List[str]:
-        """Build the QEMU command line arguments."""
-        cmd = [str(self.qemu_binary)]
+        """Build QEMU command line arguments."""
+        cmd = [
+            str(self.qemu_binary),
+            "-nographic",
+            "-machine",
+            "esp32s3",
+            "-m",
+            "8M",
+            "-drive",
+            f"file={build_folder}/flash.bin,if=mtd,format=raw",
+        ]
 
-        # Basic ESP32-S3 machine configuration
-        cmd.extend(
-            [
-                "-nographic",  # No GUI
-                "-machine",
-                "esp32s3",  # ESP32-S3 machine
-                "-m",
-                "8M",  # 8MB RAM
-            ]
-        )
-
-        # Flash configuration
-        flash_size_mb = f"{flash_size}MB"
-        cmd.extend(["-drive", f"file={build_folder}/flash.bin,if=mtd,format=raw"])
-
-        # Look for firmware files in build folder
-        firmware_bin = build_folder / "firmware.bin"
-        bootloader_bin = build_folder / "bootloader.bin"
-        partitions_bin = build_folder / "partitions.bin"
-
-        if firmware_bin.exists():
-            # Create combined flash image if needed
+        # Create flash image if firmware exists
+        if (build_folder / "firmware.bin").exists():
             self._create_flash_image(build_folder, flash_size)
 
         return cmd
 
     def _create_flash_image(self, build_folder: Path, flash_size: int):
-        """Create a combined flash image from ESP32 build artifacts."""
+        """Create combined flash image from ESP32 build artifacts."""
         flash_bin = build_folder / "flash.bin"
-
         if flash_bin.exists():
-            return  # Already exists
+            return
 
         print("Creating combined flash image...")
 
         # Create empty flash image
         flash_size_bytes = flash_size * 1024 * 1024
-        with open(flash_bin, "wb") as f:
-            f.write(b"\xff" * flash_size_bytes)
+        flash_bin.write_bytes(b"\xff" * flash_size_bytes)
 
-        # Use esptool.py to merge if available
         try:
-            # Look for esptool in the system or ESP-IDF
             esptool_cmd = self._find_esptool()
             if esptool_cmd:
                 self._merge_with_esptool(esptool_cmd, build_folder, flash_bin)
             else:
                 self._merge_manually(build_folder, flash_bin)
-
         except Exception as e:
             print(f"Warning: Could not create proper flash image: {e}")
 
     def _find_esptool(self) -> Optional[str]:
         """Find esptool.py executable."""
-        try:
-            # Try direct esptool.py
-            result = subprocess.run(["esptool.py", "--help"], capture_output=True)
-            if result.returncode == 0:
-                return "esptool.py"
-        except:
-            pass
+        # Try direct esptool.py
+        if find_executable("esptool.py"):
+            return "esptool.py"
 
+        # Try python -m esptool
         try:
-            # Try python -m esptool
             result = subprocess.run(
-                [sys.executable, "-m", "esptool", "--help"], capture_output=True
+                [sys.executable, "-m", "esptool", "--help"],
+                capture_output=True,
+                timeout=5,
             )
             if result.returncode == 0:
                 return f"{sys.executable} -m esptool"
-        except:
+        except (subprocess.SubprocessError, subprocess.TimeoutExpired):
             pass
 
         return None
@@ -156,20 +172,17 @@ class QEMURunner:
             "4MB",
         ]
 
-        # Add bootloader at 0x0
-        bootloader = build_folder / "bootloader.bin"
-        if bootloader.exists():
-            cmd.extend(["0x0", str(bootloader)])
+        # Add binaries at their offsets
+        binaries = [
+            ("bootloader.bin", "0x0"),
+            ("partitions.bin", "0x8000"),
+            ("firmware.bin", "0x10000"),
+        ]
 
-        # Add partition table at 0x8000
-        partitions = build_folder / "partitions.bin"
-        if partitions.exists():
-            cmd.extend(["0x8000", str(partitions)])
-
-        # Add firmware at 0x10000
-        firmware = build_folder / "firmware.bin"
-        if firmware.exists():
-            cmd.extend(["0x10000", str(firmware)])
+        for filename, offset in binaries:
+            bin_path = build_folder / filename
+            if bin_path.exists():
+                cmd.extend([offset, str(bin_path)])
 
         subprocess.run(cmd, check=True)
         print("Flash image created with esptool")
@@ -178,36 +191,28 @@ class QEMURunner:
         """Manually merge binary files at correct offsets."""
         print("WARNING: Manually merging binaries (esptool not found)")
 
+        binaries = [
+            ("bootloader.bin", 0x0),
+            ("partitions.bin", 0x8000),
+            ("firmware.bin", 0x10000),
+        ]
+
         with open(flash_bin, "r+b") as flash:
-            # Bootloader at 0x0
-            bootloader = build_folder / "bootloader.bin"
-            if bootloader.exists():
-                flash.seek(0x0)
-                flash.write(bootloader.read_bytes())
+            for filename, offset in binaries:
+                bin_path = build_folder / filename
+                if bin_path.exists():
+                    flash.seek(offset)
+                    flash.write(bin_path.read_bytes())
 
-            # Partition table at 0x8000
-            partitions = build_folder / "partitions.bin"
-            if partitions.exists():
-                flash.seek(0x8000)
-                flash.write(partitions.read_bytes())
-
-            # Firmware at 0x10000
-            firmware = build_folder / "firmware.bin"
-            if firmware.exists():
-                flash.seek(0x10000)
-                flash.write(firmware.read_bytes())
-
-    def _output_reader(self, process: "subprocess.Popen[bytes]") -> None:
+    def _output_reader(self, process: subprocess.Popen[str]) -> None:
         """Read output from QEMU process."""
         try:
-            while True:
-                output: bytes = process.stdout.readline()
-                if output == b"" and process.poll() is not None:
-                    break
-                if output:
-                    line: str = output.decode("utf-8").strip()
-                    self.output_lines.append(line)
-                    print(line, flush=True)
+            if process.stdout:
+                for line in iter(process.stdout.readline, ""):
+                    line = line.strip()
+                    if line:
+                        self.output_lines.append(line)
+                        print(line, flush=True)
         except Exception as e:
             print(f"Output reader error: {e}")
 
@@ -218,18 +223,16 @@ class QEMURunner:
         interrupt_regex: Optional[str] = None,
     ) -> int:
         """Run ESP32 firmware in QEMU."""
-        print(f"=== Running ESP32 firmware in QEMU ===")
+        print("=== Running ESP32 firmware in QEMU ===")
         print(f"Build folder: {build_folder}")
         print(f"Timeout: {timeout}s")
         if interrupt_regex:
             print(f"Interrupt pattern: {interrupt_regex}")
 
-        # Verify build folder exists
         if not build_folder.exists():
             print(f"ERROR: Build folder does not exist: {build_folder}")
             return 1
 
-        # Build QEMU command
         try:
             cmd = self.build_qemu_command(build_folder)
             print(f"QEMU command: {' '.join(cmd)}")
@@ -237,7 +240,6 @@ class QEMURunner:
             print(f"ERROR: Failed to build QEMU command: {e}")
             return 1
 
-        # Start QEMU process
         try:
             self.process = subprocess.Popen(
                 cmd,
@@ -254,15 +256,11 @@ class QEMURunner:
             output_thread.daemon = True
             output_thread.start()
 
-            # Wait for timeout or interrupt condition
+            # Wait for completion or timeout
             start_time = time.time()
             interrupt_pattern = re.compile(interrupt_regex) if interrupt_regex else None
 
-            while True:
-                # Check if process ended
-                if self.process.poll() is not None:
-                    break
-
+            while self.process.poll() is None:
                 # Check timeout
                 if time.time() - start_time > timeout:
                     print(f"WARNING: Timeout reached ({timeout}s)")
@@ -271,10 +269,10 @@ class QEMURunner:
 
                 # Check interrupt condition
                 if interrupt_pattern:
-                    for line in self.output_lines[-10:]:  # Check recent lines
+                    for line in self.output_lines[-10:]:
                         if interrupt_pattern.search(line):
                             print(f"SUCCESS: Interrupt condition met: {line}")
-                            time.sleep(2)  # Give a bit more time for final output
+                            time.sleep(2)  # Allow final output
                             break
                     else:
                         time.sleep(0.1)
@@ -283,7 +281,7 @@ class QEMURunner:
 
                 time.sleep(0.1)
 
-            # Terminate QEMU
+            # Cleanup process
             if self.process.poll() is None:
                 self.process.terminate()
                 try:
@@ -293,9 +291,7 @@ class QEMURunner:
 
             # Save output log
             log_file = Path("qemu_output.log")
-            with open(log_file, "w") as f:
-                f.write("\n".join(self.output_lines))
-
+            log_file.write_text("\n".join(self.output_lines))
             print(f"QEMU output saved to: {log_file}")
             print(f"Total output lines: {len(self.output_lines)}")
 
@@ -322,6 +318,11 @@ def main():
     )
 
     args = parser.parse_args()
+
+    # Check if QEMU is available
+    if not find_qemu_binary():
+        show_installation_help()
+        return 1
 
     runner = QEMURunner()
     return runner.run(
