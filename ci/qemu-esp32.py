@@ -97,6 +97,12 @@ class QEMURunner:
 
     def build_qemu_command(self, build_folder: Path, flash_size: int = 4) -> List[str]:
         """Build QEMU command line arguments."""
+        # Validate that flash_size is used correctly internally only
+        if not isinstance(flash_size, int) or flash_size <= 0:
+            raise ValueError(
+                f"Invalid flash_size: {flash_size}. Must be a positive integer."
+            )
+
         cmd = [
             str(self.qemu_binary),
             "-nographic",
@@ -111,6 +117,14 @@ class QEMURunner:
         # Create flash image if firmware exists
         if (build_folder / "firmware.bin").exists():
             self._create_flash_image(build_folder, flash_size)
+
+        # Validate that no custom script arguments are accidentally included
+        custom_args = ["--flash-size", "--timeout", "--interrupt-regex"]
+        for arg in cmd:
+            if any(custom_arg in str(arg) for custom_arg in custom_args):
+                raise ValueError(
+                    f"Custom script argument {arg} should not be passed to QEMU"
+                )
 
         return cmd
 
@@ -323,6 +337,33 @@ def main():
     )
 
     args = parser.parse_args()
+
+    # Validate arguments to prevent issues
+    if args.flash_size <= 0:
+        print(
+            f"ERROR: Invalid flash size: {args.flash_size}. Must be positive.",
+            file=sys.stderr,
+        )
+        return 1
+
+    if args.timeout <= 0:
+        print(
+            f"ERROR: Invalid timeout: {args.timeout}. Must be positive.",
+            file=sys.stderr,
+        )
+        return 1
+
+    # Ensure we're not accidentally being called as a wrapper for qemu-system-xtensa
+    if len(sys.argv) > 1 and any("qemu-system-xtensa" in arg for arg in sys.argv):
+        print(
+            "ERROR: This script should not be used as a wrapper for qemu-system-xtensa",
+            file=sys.stderr,
+        )
+        print(
+            "Use this script directly: python qemu-esp32.py <build_folder> [options]",
+            file=sys.stderr,
+        )
+        return 1
 
     # Check if QEMU is available
     if not find_qemu_binary():
