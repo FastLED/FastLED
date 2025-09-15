@@ -736,7 +736,7 @@ BLACKPILL = Board(
 # Based on EFR32MG24 SoC with ARM Cortex-M33 @ 78MHz
 MGM240S = Board(
     board_name="mgm240",
-    real_board_name="sparkfun_thingplus_matter",
+    real_board_name="sparkfun_thingplusmatter",
     platform="https://github.com/maxgerhardt/platform-siliconlabsefm32/archive/refs/heads/silabs-arduino.zip",
     platform_needs_install=True,
     framework="arduino",
