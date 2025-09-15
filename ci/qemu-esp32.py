@@ -16,6 +16,8 @@ import time
 from pathlib import Path
 from typing import List, Optional, TextIO
 
+from ci.util.running_process import RunningProcess
+
 
 def get_binary_name() -> str:
     """Get platform-specific QEMU binary name."""
@@ -82,9 +84,8 @@ def show_installation_help():
 class QEMURunner:
     def __init__(self, qemu_binary: Optional[Path] = None):
         self.qemu_binary = qemu_binary or self._get_qemu_binary()
-        self.process: Optional[subprocess.Popen[str]] = None
         self.output_lines: List[str] = []
-        self.timeout_reached = False
+        self.interrupt_met = False
 
     def _get_qemu_binary(self) -> Path:
         """Get QEMU binary path or raise error."""
@@ -219,18 +220,6 @@ class QEMURunner:
                     flash.seek(offset)
                     flash.write(bin_path.read_bytes())
 
-    def _output_reader(self, process: subprocess.Popen[str]) -> None:
-        """Read output from QEMU process."""
-        try:
-            if process.stdout:
-                for line in iter(process.stdout.readline, ""):
-                    line = line.strip()
-                    if line:
-                        self.output_lines.append(line)
-                        print(line, flush=True)
-        except Exception as e:
-            print(f"Output reader error: {e}")
-
     def run(
         self,
         build_folder: Path,
@@ -260,61 +249,44 @@ class QEMURunner:
             return 1
 
         try:
-            self.process = subprocess.Popen(
+            qemu_proc = RunningProcess(
                 cmd,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.STDOUT,
-                universal_newlines=True,
-                bufsize=1,
+                timeout=timeout,
+                auto_run=True,
             )
 
-            # Start output reader thread
-            output_thread = threading.Thread(
-                target=self._output_reader, args=(self.process,)
-            )
-            output_thread.daemon = True
-            output_thread.start()
-
-            # Wait for completion or timeout
-            start_time = time.time()
+            self.interrupt_met = False
             interrupt_pattern = re.compile(interrupt_regex) if interrupt_regex else None
+            self.output_lines = []
 
-            while self.process.poll() is None:
-                # Check timeout
-                if time.time() - start_time > timeout:
-                    print(f"WARNING: Timeout reached ({timeout}s)")
-                    self.timeout_reached = True
-                    break
-
-                # Check interrupt condition
-                if interrupt_pattern:
-                    for line in self.output_lines[-10:]:
-                        if interrupt_pattern.search(line):
+            try:
+                with qemu_proc.line_iter(timeout=timeout) as it:
+                    for line in it:
+                        print(line, flush=True)
+                        self.output_lines.append(line)
+                        if interrupt_pattern and interrupt_pattern.search(line):
                             print(f"SUCCESS: Interrupt condition met: {line}")
-                            time.sleep(2)  # Allow final output
-                            break
-                    else:
-                        time.sleep(0.1)
-                        continue
-                    break
+                            self.interrupt_met = True
+                            time.sleep(2)
+            except TimeoutError:
+                print(
+                    f"ERROR: QEMU timed out after {timeout} seconds of no output.",
+                    file=sys.stderr,
+                )
+                qemu_proc.kill()
+                return 1
 
-                time.sleep(0.1)
+            return_code = qemu_proc.wait()
 
-            # Cleanup process
-            if self.process.poll() is None:
-                self.process.terminate()
-                try:
-                    self.process.wait(timeout=5)
-                except subprocess.TimeoutExpired:
-                    self.process.kill()
-
-            # Save output log
             log_file = Path("qemu_output.log")
             log_file.write_text("\n".join(self.output_lines))
             print(f"QEMU output saved to: {log_file}")
             print(f"Total output lines: {len(self.output_lines)}")
 
-            return 0
+            if self.interrupt_met:
+                return 0
+
+            return return_code
 
         except Exception as e:
             print(f"ERROR: Error running QEMU: {e}", file=sys.stderr)
