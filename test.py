@@ -177,12 +177,14 @@ def run_qemu_tests(args: TestArgs) -> None:
 
             # Run in QEMU
             print(f"Running {example} in QEMU...")
+            # Use the nested PlatformIO build directory path to match GitHub action
+            pio_build_dir = build_dir / ".pio" / "build" / platform
             qemu_proc = RunningProcess(
                 [
                     "uv",
                     "run",
                     "ci/qemu-esp32.py",
-                    str(build_dir),
+                    str(pio_build_dir),
                     "--flash-size",
                     "4",
                     "--timeout",

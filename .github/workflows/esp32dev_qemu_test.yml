@@ -119,7 +119,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.espressif
-          key: ${{ runner.os }}-esp32-qemu-${{ hashFiles('ci/install_qemu_esp32.py') }}
+          key: ${{ runner.os }}-esp32-qemu-${{ hashFiles('ci/install-qemu.py') }}
           restore-keys: |
             ${{ runner.os }}-esp32-qemu-
 
@@ -186,7 +186,7 @@ jobs:
         run: |
           echo "Running ESP32-DEV example in QEMU..."
           uv run ci/qemu-esp32.py \
-            .build/pio/${{ matrix.platform }}/.pio/build/${{ matrix.platform }} \
+            .build/pio/${{ matrix.platform }} \
             --flash-size 4 \
             --timeout 30 \
             --interrupt-regex "(FL_WARN.*test finished)|(guru meditation)|(abort\(\))|(LoadProhibited)"
