@@ -355,17 +355,13 @@ def compile_board_examples(
 
 def get_board_artifact_extension(board: Board) -> str:
     """Get the primary artifact extension for a board."""
+    # ESP32/ESP8266 boards always produce .bin files
+    if board.board_name.startswith("esp"):
+        return ".bin"
+
     # Most Arduino-based boards produce .hex files
     if board.framework and "arduino" in board.framework.lower():
         return ".hex"
-
-    # ESP32 boards might produce .bin files in some cases, but typically .hex for Arduino framework
-    if board.board_name.startswith("esp"):
-        return (
-            ".hex"
-            if board.framework and "arduino" in board.framework.lower()
-            else ".bin"
-        )
 
     # Default to .hex for most microcontroller boards
     return ".hex"

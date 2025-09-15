@@ -96,28 +96,43 @@ class QEMURunner:
             )
         return qemu_path
 
-    def build_qemu_command(self, build_folder: Path, flash_size: int = 4) -> List[str]:
-        """Build QEMU command line arguments."""
+    def build_qemu_command(self, firmware_path: Path, flash_size: int = 4) -> List[str]:
+        """Build QEMU command line arguments.
+
+        Args:
+            firmware_path: Path to firmware.bin or directory containing build artifacts
+            flash_size: Flash size in MB
+        """
         # Validate that flash_size is used correctly internally only
         if not isinstance(flash_size, int) or flash_size <= 0:
             raise ValueError(
                 f"Invalid flash_size: {flash_size}. Must be a positive integer."
             )
 
+        # Determine if we have a direct firmware.bin or a build directory
+        if firmware_path.is_file() and firmware_path.suffix == ".bin":
+            # Direct firmware.bin path
+            flash_image_path = firmware_path.parent / "flash.bin"
+            self._create_flash_image_from_firmware(
+                firmware_path, flash_image_path, flash_size
+            )
+        else:
+            # Build directory path
+            flash_image_path = firmware_path / "flash.bin"
+            self._create_flash_image_from_build_dir(
+                firmware_path, flash_image_path, flash_size
+            )
+
         cmd = [
             str(self.qemu_binary),
             "-nographic",
             "-machine",
-            "esp32s3",
+            "esp32dev",
             "-m",
-            "8M",
+            "4M",  # Standard memory size for esp32dev
             "-drive",
-            f"file={build_folder}/flash.bin,if=mtd,format=raw",
+            f"file={flash_image_path},if=mtd,format=raw",
         ]
-
-        # Create flash image if firmware exists
-        if (build_folder / "firmware.bin").exists():
-            self._create_flash_image(build_folder, flash_size)
 
         # Validate that no custom script arguments are accidentally included
         custom_args = ["--flash-size", "--timeout", "--interrupt-regex"]
@@ -129,13 +144,40 @@ class QEMURunner:
 
         return cmd
 
-    def _create_flash_image(self, build_folder: Path, flash_size: int):
-        """Create combined flash image from ESP32 build artifacts."""
-        flash_bin = build_folder / "flash.bin"
+    def _create_flash_image_from_firmware(
+        self, firmware_bin: Path, flash_bin: Path, flash_size: int
+    ):
+        """Create flash image from a direct firmware.bin file."""
         if flash_bin.exists():
+            print(f"Using existing flash image: {flash_bin}")
             return
 
-        print("Creating combined flash image...")
+        print(f"Creating flash image from firmware: {firmware_bin}")
+
+        # Create empty flash image
+        flash_size_bytes = flash_size * 1024 * 1024
+        flash_bin.write_bytes(b"\xff" * flash_size_bytes)
+
+        try:
+            esptool_cmd = self._find_esptool()
+            if esptool_cmd:
+                # Use esptool to create proper flash image
+                self._merge_with_esptool_firmware(esptool_cmd, firmware_bin, flash_bin)
+            else:
+                # Simple manual merge - just write firmware at 0x10000
+                self._merge_manually_firmware(firmware_bin, flash_bin)
+        except Exception as e:
+            print(f"Warning: Could not create proper flash image: {e}")
+
+    def _create_flash_image_from_build_dir(
+        self, build_folder: Path, flash_bin: Path, flash_size: int
+    ):
+        """Create combined flash image from ESP32 build artifacts in a directory."""
+        if flash_bin.exists():
+            print(f"Using existing flash image: {flash_bin}")
+            return
+
+        print("Creating combined flash image from build directory...")
 
         # Create empty flash image
         flash_size_bytes = flash_size * 1024 * 1024
@@ -176,23 +218,33 @@ class QEMURunner:
         """Merge using esptool.py merge_bin command."""
         cmd = esptool_cmd.split() + [
             "--chip",
-            "esp32s3",
+            "esp32",  # Use esp32 chip type for esp32dev machine
             "merge_bin",
             "-o",
             str(flash_bin),
             "--flash_mode",
             "dio",
             "--flash_freq",
-            "80m",
+            "40m",  # Standard frequency for esp32
             "--flash_size",
             "4MB",
         ]
 
-        # Add binaries at their offsets
+        # Add binaries at their offsets - only use esp32dev firmware
+        firmware_path = build_folder / ".pio" / "build" / "esp32dev" / "firmware.bin"
+
+        if not firmware_path.exists():
+            print(
+                f"FATAL: ESP32dev firmware not found at {firmware_path}",
+                file=sys.stderr,
+            )
+            print("Please build for esp32dev target first.", file=sys.stderr)
+            sys.exit(1)
+
         binaries = [
-            ("bootloader.bin", "0x0"),
+            ("bootloader.bin", "0x1000"),  # ESP32 bootloader offset
             ("partitions.bin", "0x8000"),
-            ("firmware.bin", "0x10000"),
+            (firmware_path, "0x10000"),
         ]
 
         for filename, offset in binaries:
@@ -203,14 +255,62 @@ class QEMURunner:
         subprocess.run(cmd, check=True)
         print("Flash image created with esptool")
 
+    def _merge_with_esptool_firmware(
+        self, esptool_cmd: str, firmware_bin: Path, flash_bin: Path
+    ):
+        """Merge firmware.bin using esptool with minimal bootloader."""
+        cmd = esptool_cmd.split() + [
+            "--chip",
+            "esp32",
+            "merge_bin",
+            "-o",
+            str(flash_bin),
+            "--flash_mode",
+            "dio",
+            "--flash_freq",
+            "40m",
+            "--flash_size",
+            "4MB",
+            "0x10000",  # Application offset
+            str(firmware_bin),
+        ]
+
+        # Note: Without bootloader and partition table, QEMU may not boot properly
+        # but we'll try with just the app for now
+        print(f"Running: {' '.join(cmd)}")
+        subprocess.run(cmd, check=True)
+        print("Flash image created with esptool (firmware only)")
+
+    def _merge_manually_firmware(self, firmware_bin: Path, flash_bin: Path):
+        """Manually write firmware.bin to flash image."""
+        print("WARNING: Manually merging firmware (esptool not found)")
+        print("Note: Without bootloader, QEMU may not boot properly")
+
+        with open(flash_bin, "r+b") as flash:
+            # Write firmware at application offset
+            flash.seek(0x10000)
+            flash.write(firmware_bin.read_bytes())
+        print(f"Firmware written to flash image at offset 0x10000")
+
     def _merge_manually(self, build_folder: Path, flash_bin: Path):
         """Manually merge binary files at correct offsets."""
         print("WARNING: Manually merging binaries (esptool not found)")
 
+        # Find firmware binary - only use esp32dev firmware
+        firmware_path = build_folder / ".pio" / "build" / "esp32dev" / "firmware.bin"
+
+        if not firmware_path.exists():
+            print(
+                f"FATAL: ESP32dev firmware not found at {firmware_path}",
+                file=sys.stderr,
+            )
+            print("Please build for esp32dev target first.", file=sys.stderr)
+            sys.exit(1)
+
         binaries = [
-            ("bootloader.bin", 0x0),
+            ("bootloader.bin", 0x1000),  # ESP32 bootloader offset
             ("partitions.bin", 0x8000),
-            ("firmware.bin", 0x10000),
+            (firmware_path, 0x10000),
         ]
 
         with open(flash_bin, "r+b") as flash:
@@ -222,27 +322,32 @@ class QEMURunner:
 
     def run(
         self,
-        build_folder: Path,
+        firmware_path: Path,
         timeout: int = 30,
         interrupt_regex: Optional[str] = None,
         flash_size: int = 4,
     ) -> int:
-        """Run ESP32 firmware in QEMU."""
+        """Run ESP32 firmware in QEMU.
+
+        Args:
+            firmware_path: Path to firmware.bin file or build directory
+            timeout: Timeout in seconds
+            interrupt_regex: Regex pattern to interrupt execution
+            flash_size: Flash size in MB
+        """
         print("=== Running ESP32 firmware in QEMU ===")
-        print(f"Build folder: {build_folder}")
+        print(f"Firmware path: {firmware_path}")
         print(f"Timeout: {timeout}s")
         print(f"Flash size: {flash_size}MB")
         if interrupt_regex:
             print(f"Interrupt pattern: {interrupt_regex}")
 
-        if not build_folder.exists():
-            print(
-                f"ERROR: Build folder does not exist: {build_folder}", file=sys.stderr
-            )
+        if not firmware_path.exists():
+            print(f"ERROR: Path does not exist: {firmware_path}", file=sys.stderr)
             return 1
 
         try:
-            cmd = self.build_qemu_command(build_folder, flash_size)
+            cmd = self.build_qemu_command(firmware_path, flash_size)
             print(f"QEMU command: {' '.join(cmd)}")
         except Exception as e:
             print(f"ERROR: Failed to build QEMU command: {e}", file=sys.stderr)
@@ -296,7 +401,9 @@ class QEMURunner:
 def main():
     parser = argparse.ArgumentParser(description="Run ESP32 firmware in QEMU")
     parser.add_argument(
-        "build_folder", type=Path, help="Build folder containing firmware files"
+        "firmware_path",
+        type=Path,
+        help="Path to firmware.bin file or build directory containing firmware files",
     )
     parser.add_argument(
         "--flash-size", type=int, default=4, help="Flash size in MB (default: 4)"
@@ -344,7 +451,7 @@ def main():
 
     runner = QEMURunner()
     return runner.run(
-        build_folder=args.build_folder,
+        firmware_path=args.firmware_path,
         timeout=args.timeout,
         interrupt_regex=args.interrupt_regex,
         flash_size=args.flash_size,

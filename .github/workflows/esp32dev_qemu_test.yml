@@ -1,4 +1,4 @@
-name: ESP32-S3 QEMU Test
+name: ESP32-DEV QEMU Test
 
 on:
   push:
@@ -21,11 +21,11 @@ permissions:
   pull-requests: read
 
 jobs:
-  esp32s3_qemu_test:
+  esp32dev_qemu_test:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        platform: [esp32s3]  # Focus on ESP32-S3 (4 RMT channels)
+        platform: [esp32dev]  # Focus on ESP32-DEV (4 RMT channels)
         example: [BlinkParallel]  # Test with FL_WARN output
 
     steps:
@@ -123,7 +123,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-esp32-qemu-
 
-      - name: Build ESP32-S3 example
+      - name: Build ESP32-DEV example
         working-directory: trusted
         run: |
           echo "Building ${{ matrix.example }} for ${{ matrix.platform }}"
@@ -181,15 +181,15 @@ jobs:
           uv run ci/install-qemu.py
         shell: bash
 
-      - name: Run ESP32-S3 example in QEMU
+      - name: Run ESP32-DEV example in QEMU
         working-directory: trusted
         run: |
-          echo "Running ESP32-S3 example in QEMU..."
+          echo "Running ESP32-DEV example in QEMU..."
           uv run ci/qemu-esp32.py \
             .build/pio/${{ matrix.platform }}/.pio/build/${{ matrix.platform }} \
             --flash-size 4 \
             --timeout 30 \
-            --interrupt-regex "(FL_WARN.*test finished)|(guru meditation)|(abort\\(\\))|(LoadProhibited)"
+            --interrupt-regex "(FL_WARN.*test finished)|(guru meditation)|(abort\(\))|(LoadProhibited)"
         shell: bash
 
       - name: Validate FL_WARN output
@@ -212,8 +212,8 @@ jobs:
           fi
 
           # Check for crash patterns
-          if grep -q -E "(guru meditation|abort\\(\\)|LoadProhibited|IllegalInstruction)" qemu_output.log; then
-            echo "❌ ESP32-S3 crashed during execution"
+          if grep -q -E "(guru meditation|abort\(\)|LoadProhibited|IllegalInstruction)" qemu_output.log; then
+            echo "❌ ESP32-DEV crashed during execution"
             echo "Crash indicators found in QEMU log"
             exit 1
           fi
@@ -260,9 +260,9 @@ jobs:
 
           # Validate boot success
           if grep -q -E "(rst:|boot:|ESP32)" qemu_output.log; then
-            echo "✅ ESP32-S3 boot successful"
+            echo "✅ ESP32-DEV boot successful"
           else
-            echo "❌ ESP32-S3 boot indicators not found"
+            echo "❌ ESP32-DEV boot indicators not found"
             exit 1
           fi
 
@@ -273,7 +273,7 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: esp32s3-qemu-failure-${{ matrix.platform }}-${{ matrix.example }}-${{ github.sha }}
+          name: esp32dev-qemu-failure-${{ matrix.platform }}-${{ matrix.example }}-${{ github.sha }}
           path: |
             trusted/qemu_output.log
             trusted/.build/pio/${{ matrix.platform }}/
@@ -283,14 +283,14 @@ jobs:
         if: success()
         uses: actions/upload-artifact@v4
         with:
-          name: esp32s3-qemu-success-${{ matrix.platform }}-${{ matrix.example }}-${{ github.sha }}
+          name: esp32dev-qemu-success-${{ matrix.platform }}-${{ matrix.example }}-${{ github.sha }}
           path: trusted/qemu_output.log
 
       - name: Summary
         if: always()
         working-directory: trusted
         run: |
-          echo "=== ESP32-S3 QEMU Test Summary ==="
+          echo "=== ESP32-DEV QEMU Test Summary ==="
           echo "Platform: ${{ matrix.platform }}"
           echo "Example: ${{ matrix.example }}"
           echo "Status: ${{ job.status }}"
