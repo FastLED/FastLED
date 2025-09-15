@@ -7,8 +7,8 @@
 
 namespace fl {
 
-AudioReactive::AudioReactive() 
-    : mFFTBins(16)  // Initialize with 16 frequency bins
+AudioReactive::AudioReactive()
+    : mConfig{}, mFFTBins(16)  // Initialize with 16 frequency bins
 {
     // Initialize enhanced beat detection components
     mSpectralFluxDetector = fl::make_unique<SpectralFluxDetector>();
@@ -22,7 +22,7 @@ AudioReactive::AudioReactive()
 
 AudioReactive::~AudioReactive() = default;
 
-void AudioReactive::begin(const AudioConfig& config) {
+void AudioReactive::begin(const AudioReactiveConfig& config) {
     setConfig(config);
     
     // Reset state
@@ -46,7 +46,7 @@ void AudioReactive::begin(const AudioConfig& config) {
     }
 }
 
-void AudioReactive::setConfig(const AudioConfig& config) {
+void AudioReactive::setConfig(const AudioReactiveConfig& config) {
     mConfig = config;
 }
 

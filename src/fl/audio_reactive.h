@@ -39,7 +39,7 @@ struct AudioData {
     float trebleEnergy = 0.0f;              // Energy in treble frequencies (14-15)
 };
 
-struct AudioConfig {
+struct AudioReactiveConfig {
     fl::u8 gain = 128;              // Input gain (0-255)
     fl::u8 sensitivity = 128;       // AGC sensitivity
     bool agcEnabled = true;          // Auto gain control
@@ -48,7 +48,7 @@ struct AudioConfig {
     fl::u8 decay = 200;             // Decay time (ms) - how slow to respond to decreases
     u16 sampleRate = 22050;     // Sample rate (Hz)
     fl::u8 scalingMode = 3;         // 0=none, 1=log, 2=linear, 3=sqrt
-    
+
     // Enhanced beat detection configuration
     bool enableSpectralFlux = true;     // Enable spectral flux-based beat detection
     bool enableMultiBand = true;        // Enable multi-band beat detection
@@ -64,8 +64,8 @@ public:
     ~AudioReactive();
     
     // Setup
-    void begin(const AudioConfig& config = AudioConfig{});
-    void setConfig(const AudioConfig& config);
+    void begin(const AudioReactiveConfig& config = AudioReactiveConfig{});
+    void setConfig(const AudioReactiveConfig& config);
     
     // Process audio sample - this does all the work immediately
     void processSample(const AudioSample& sample);
@@ -119,7 +119,7 @@ private:
     float computeRMS(const fl::vector<fl::i16>& samples);
     
     // Configuration
-    AudioConfig mConfig;
+    AudioReactiveConfig mConfig;
     
     // FFT processing
     FFT mFFT;

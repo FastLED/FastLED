@@ -10,7 +10,7 @@ using namespace fl;
 TEST_CASE("AudioReactive basic functionality") {
     // Test basic initialization
     AudioReactive audio;
-    AudioConfig config;
+    AudioReactiveConfig config;
     config.sampleRate = 22050;
     config.gain = 128;
     config.agcEnabled = false;
@@ -56,7 +56,7 @@ TEST_CASE("AudioReactive basic functionality") {
 
 TEST_CASE("AudioReactive convenience functions") {
     AudioReactive audio;
-    AudioConfig config;
+    AudioReactiveConfig config;
     config.sampleRate = 22050;
     audio.begin(config);
     
@@ -77,7 +77,7 @@ TEST_CASE("AudioReactive convenience functions") {
 
 TEST_CASE("AudioReactive enhanced beat detection") {
     AudioReactive audio;
-    AudioConfig config;
+    AudioReactiveConfig config;
     config.sampleRate = 22050;
     config.enableSpectralFlux = true;
     config.enableMultiBand = true;
@@ -138,7 +138,7 @@ TEST_CASE("AudioReactive enhanced beat detection") {
 
 TEST_CASE("AudioReactive multi-band beat detection") {
     AudioReactive audio;
-    AudioConfig config;
+    AudioReactiveConfig config;
     config.enableMultiBand = true;
     config.bassThreshold = 0.05f;  // Lower thresholds for testing
     config.midThreshold = 0.05f;
@@ -186,7 +186,7 @@ TEST_CASE("AudioReactive multi-band beat detection") {
 
 TEST_CASE("AudioReactive spectral flux detection") {
     AudioReactive audio;
-    AudioConfig config;
+    AudioReactiveConfig config;
     config.enableSpectralFlux = true;
     config.spectralFluxThreshold = 0.01f; // Low threshold for testing
     
@@ -236,7 +236,7 @@ TEST_CASE("AudioReactive spectral flux detection") {
 
 TEST_CASE("AudioReactive perceptual weighting") {
     AudioReactive audio;
-    AudioConfig config;
+    AudioReactiveConfig config;
     config.sampleRate = 22050;
     
     audio.begin(config);
@@ -276,7 +276,7 @@ TEST_CASE("AudioReactive perceptual weighting") {
 
 TEST_CASE("AudioReactive configuration validation") {
     AudioReactive audio;
-    AudioConfig config;
+    AudioReactiveConfig config;
     
     // Test different configuration combinations
     config.enableSpectralFlux = false;
