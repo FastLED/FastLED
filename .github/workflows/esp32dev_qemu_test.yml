@@ -210,6 +210,20 @@ jobs:
             --interrupt-regex "(FL_WARN.*test finished)|(guru meditation)|(abort\(\))|(LoadProhibited)"
         shell: bash
 
+      - name: Display QEMU output log
+        if: always()
+        working-directory: trusted
+        run: |
+          echo "=== QEMU Output Log ==="
+          if [ -f "qemu_output.log" ]; then
+            cat qemu_output.log
+          else
+            echo "❌ qemu_output.log file not found"
+            echo "Available files:"
+            ls -la
+          fi
+        shell: bash
+
       - name: Validate FL_WARN output
         working-directory: trusted
         run: |
