@@ -1,85 +1,56 @@
-# Windows QEMU Permissions Error Investigation Report
+# ESP32 QEMU Testing - ROM File Challenge
 
-## Problem Summary
-The QEMU test command `bash test --qemu esp32dev` fails on Windows due to permissions error requiring administrator privileges.
+## Current Status
 
-## Error Analysis
+The ESP32 QEMU testing infrastructure has been mostly fixed, but is blocked by a missing ROM file requirement.
 
-### Root Cause
-The error occurs during the QEMU installation phase when attempting to run the QEMU installer executable. The specific error is:
+## What Was Fixed
 
+1. **Machine Type Error**: Changed "esp32dev" to "esp32" in `ci/qemu-esp32.py:130`
+2. **Firmware Path Detection**: Updated both esptool and manual merge functions to correctly find firmware files in build directories
+3. **esptool Integration**: Added esptool package and configured proper 4MB flash image creation with `--fill-flash-size` option
+4. **Flash Image Size**: Now creates proper 4MB flash images (0x400000 bytes) as required by ESP32 QEMU
+
+## Current Challenge
+
+ESP32 QEMU emulation fails with:
 ```
-[WinError 740] The requested operation requires elevation
+.cache\qemu\qemu-system-xtensa.exe: Error: -bios argument not set, and ROM code binary not found (1)
 ```
 
-### Error Location
-The permissions error originates in the ESP32 QEMU installation process within `ci/install-qemu.py`. The installer attempts three different installation methods, all failing with the same elevation error:
+The official Espressif QEMU (version 9.2.2 esp_develop_9.2.2_20250817) doesn't include built-in ROM code despite documentation suggesting it should.
 
-1. **Installation attempt 1**: `qemu-installer.exe /VERYSILENT /SUPPRESSMSGBOXES /DIR=<target_dir>`
-2. **Installation attempt 2**: `qemu-installer.exe /VERYSILENT /SUPPRESSMSGBOXES`
-3. **Installation attempt 3**: `qemu-installer.exe /S`
+## What Was Attempted
 
-All three attempts fail with `[WinError 740] The requested operation requires elevation`.
+1. **Official ROM Binary**: Downloaded `esp32-v3-rom.bin` from https://github.com/espressif/qemu/raw/esp-develop/pc-bios/esp32-v3-rom.bin
+2. **ROM ELF Files**: Attempted to download from https://github.com/espressif/esp-rom-elfs but releases returned "Not Found"
+3. **Various QEMU Parameters**: Tried `-bios`, `-kernel`, and no ROM arguments
+4. **Command Line Variations**: Tested different QEMU command configurations based on official documentation
 
-### Technical Details
+## Required Solution
 
-**Failing Command Sequence:**
-1. Command: `bash test --qemu esp32dev`
-2. Calls QEMU installation process
-3. Downloads QEMU installer: `qemu-w64-setup-20241220.exe`
-4. Attempts silent installation without administrator privileges
-5. **FAILS**: Windows requires elevation for installer execution
+Need to either:
+1. Find a working ESP32 ROM file (ELF format) that QEMU can load
+2. Configure ESP32 QEMU to use built-in ROM (if available)
+3. Use ESP-IDF's `idf.py qemu` approach instead of direct QEMU execution
+4. Switch to a different ESP32 emulation approach
 
-**File Locations:**
-- Installer downloaded to: `.cache\qemu\qemu-installer.exe`
-- Target installation directory: `C:\Users\niteris\dev\fastled\.cache\qemu`
-- Source URL: `https://qemu.weilnetz.de/w64/2024/qemu-w64-setup-20241220.exe`
+## Current Working Command
 
-## Impact
-- QEMU tests cannot run automatically on Windows
-- ESP32 emulation testing is blocked
-- CI/development workflow interrupted
+The fixed QEMU command that fails only due to ROM:
+```bash
+.cache\qemu\qemu-system-xtensa.exe -nographic -machine esp32 -drive file=.build\pio\esp32dev\.pio\build\esp32dev\flash.bin,if=mtd,format=raw -global driver=timer.esp32.timg,property=wdt_disable,value=true
+```
 
-## Recommended Solutions
+## Files Modified
 
-### Option 1: Use Espressif Official Signed Binaries (RECOMMENDED)
-**Modify the installation script to download and extract precompiled binaries directly from Espressif's official releases instead of using an installer:**
+- `ci/qemu-esp32.py` - Fixed machine type and firmware paths
+- `pyproject.toml` - Added esptool dependency
 
-**Direct Download URLs for Windows x64:**
-- **QEMU-Xtensa** (ESP32/ESP32-S2/ESP32-S3):
-  - URL: `https://github.com/espressif/qemu/releases/download/esp-develop-9.2.2-20250817/qemu-xtensa-softmmu-esp_develop_9.2.2_20250817-x86_64-w64-mingw32.tar.xz`
-  - SHA256: `ef550b912726997f3c1ff4a4fb13c1569e2b692efdc5c9f9c3c926a8f7c540fa`
-  - Size: 33.06 MB
+## Test Command
 
-- **QEMU-RISCV32** (ESP32-C3/ESP32-H2/ESP32-C2):
-  - URL: `https://github.com/espressif/qemu/releases/download/esp-develop-9.2.2-20250817/qemu-riscv32-softmmu-esp_develop_9.2.2_20250817-x86_64-w64-mingw32.tar.xz`
-  - SHA256: `9474015f24d27acb7516955ec932e5307226bd9d6652cdc870793ed36010ab73`
-  - Size: 35.47 MB
+```bash
+bash test --qemu esp32dev
+```
 
-**Implementation Approach:**
-1. Download the `.tar.xz` archives directly from GitHub releases
-2. Extract using Python's `tarfile` module (no admin privileges required)
-3. Copy binaries to `.cache/qemu` directory
-4. No installer execution needed - completely portable
-
-**Benefits:**
-- No administrator privileges required
-- Official Espressif signed binaries
-- Same binaries used by ESP-IDF
-- Automatic SHA256 verification
-- Portable installation
-
-### Option 2: Manual Administrator Installation
-Run the QEMU installer manually with administrator privileges:
-1. Navigate to `.cache\qemu\qemu-installer.exe`
-2. Right-click → "Run as administrator"
-3. Complete installation manually
-
-### Option 3: Pre-install QEMU System-wide
-Install QEMU globally with administrator privileges and ensure `qemu-system-xtensa.exe` is in system PATH.
-
-### Option 4: Skip QEMU Installation
-Use environment variable `FASTLED_QEMU_SKIP_INSTALL=true` to skip automatic installation if QEMU is already installed system-wide.
-
-## Status
-**Issue Confirmed**: Windows permissions error prevents automatic QEMU installation during test execution.
+All compilation works correctly. Only QEMU emulation is blocked by the ROM requirement.

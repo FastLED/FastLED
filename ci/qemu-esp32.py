@@ -123,16 +123,23 @@ class QEMURunner:
                 firmware_path, flash_image_path, flash_size
             )
 
+        # Check for ROM file
+        rom_path = Path(".cache") / "qemu" / "esp32-v3-rom.bin"
+
         cmd = [
             str(self.qemu_binary),
             "-nographic",
             "-machine",
-            "esp32dev",
-            "-m",
-            "4M",  # Standard memory size for esp32dev
+            "esp32",
             "-drive",
             f"file={flash_image_path},if=mtd,format=raw",
+            "-global",
+            "driver=timer.esp32.timg,property=wdt_disable,value=true",
         ]
+
+        # Add ROM file if available (try binary as BIOS)
+        if rom_path.exists():
+            cmd.extend(["-bios", str(rom_path)])
 
         # Validate that no custom script arguments are accidentally included
         custom_args = ["--flash-size", "--timeout", "--interrupt-regex"]
@@ -228,10 +235,17 @@ class QEMURunner:
             "40m",  # Standard frequency for esp32
             "--flash_size",
             "4MB",
+            "--fill-flash-size",
+            "4MB",
         ]
 
-        # Add binaries at their offsets - only use esp32dev firmware
-        firmware_path = build_folder / ".pio" / "build" / "esp32dev" / "firmware.bin"
+        # Add binaries at their offsets - check if we're in the actual build directory
+        if (build_folder / "firmware.bin").exists():
+            firmware_path = build_folder / "firmware.bin"
+        else:
+            firmware_path = (
+                build_folder / ".pio" / "build" / "esp32dev" / "firmware.bin"
+            )
 
         if not firmware_path.exists():
             print(
@@ -296,8 +310,13 @@ class QEMURunner:
         """Manually merge binary files at correct offsets."""
         print("WARNING: Manually merging binaries (esptool not found)")
 
-        # Find firmware binary - only use esp32dev firmware
-        firmware_path = build_folder / ".pio" / "build" / "esp32dev" / "firmware.bin"
+        # Find firmware binary - check if we're in the actual build directory
+        if (build_folder / "firmware.bin").exists():
+            firmware_path = build_folder / "firmware.bin"
+        else:
+            firmware_path = (
+                build_folder / ".pio" / "build" / "esp32dev" / "firmware.bin"
+            )
 
         if not firmware_path.exists():
             print(
