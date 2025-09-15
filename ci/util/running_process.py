@@ -4,6 +4,7 @@ import os
 import queue
 import shlex
 import subprocess
+import sys
 import tempfile
 import threading
 import time
@@ -375,9 +376,14 @@ class RunningProcess:
         if echo:
             remaining_lines = self.drain_stdout()
             for line in remaining_lines:
-                print(line)
+                print(
+                    line, flush=(os.name == "nt")
+                )  # Force flush only on Windows per-line
             if remaining_lines:
-                print(f"[Drained {len(remaining_lines)} final lines before timeout]")
+                print(
+                    f"[Drained {len(remaining_lines)} final lines before timeout]",
+                    flush=(os.name == "nt"),
+                )
 
         if self.enable_stack_trace:
             print(f"\nProcess timeout after {timeout} seconds, dumping stack trace...")
@@ -676,7 +682,13 @@ class RunningProcess:
                 lines = self.drain_stdout()
                 if lines:
                     for line in lines:
-                        print(line)
+                        # Use print flush=True for Windows compatibility, avoid separate flush calls
+                        print(
+                            line, flush=(os.name == "nt")
+                        )  # Force flush only on Windows per-line
+                    # Additional flush for Unix systems for better performance
+                    if os.name != "nt":
+                        sys.stdout.flush()
                     continue  # Check for more output immediately
 
             time.sleep(0.01)  # Check every 10ms
@@ -685,9 +697,14 @@ class RunningProcess:
         if echo:
             remaining_lines = self.drain_stdout()
             for line in remaining_lines:
-                print(line)
+                print(
+                    line, flush=(os.name == "nt")
+                )  # Force flush only on Windows per-line
             if remaining_lines:
-                print(f"[Drained {len(remaining_lines)} final lines after completion]")
+                print(
+                    f"[Drained {len(remaining_lines)} final lines after completion]",
+                    flush=(os.name == "nt"),
+                )
 
         # Process has completed, get return code
         assert self.proc is not None  # For type checker
@@ -721,7 +738,9 @@ class RunningProcess:
         if echo:
             final_lines = self.drain_stdout()
             for line in final_lines:
-                print(line)
+                print(
+                    line, flush=(os.name == "nt")
+                )  # Force flush only on Windows per-line
 
         # Execute completion callback if provided
         if self.on_complete is not None:

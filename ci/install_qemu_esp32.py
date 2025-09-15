@@ -4,6 +4,10 @@ ESP32 QEMU Installation Script
 
 Installs ESP32-compatible QEMU emulator using ESP-IDF tools.
 Cross-platform support for Linux, macOS, and Windows.
+
+WARNING: Never use sys.stdout.flush() in this file!
+It causes blocking issues on Windows that hang QEMU processes.
+Python's default buffering behavior works correctly across platforms.
 """
 
 import os
@@ -424,21 +428,16 @@ def install_qemu_esp32():
 
     # Check if already installed
     print("Searching for existing QEMU installation...")
-    sys.stdout.flush()
     qemu_binary = find_qemu_binary()
     print(f"IMMEDIATE DEBUG: find_qemu_binary returned: {qemu_binary}")
-    sys.stdout.flush()
     if qemu_binary:
         print("ESP32 QEMU already installed")
-        # sys.stdout.flush()
         return True
     else:
         print("No existing QEMU installation found")
-        # sys.stdout.flush()
 
     # Try automated installation
     print("Attempting automatic installation...")
-    # sys.stdout.flush()
 
     if system == "linux":
         # Check if we're in CI first for sudo operations
@@ -554,15 +553,12 @@ def install_qemu_esp32():
 def find_qemu_binary() -> Optional[Path]:
     """Find the installed QEMU binary."""
     print("IMMEDIATE DEBUG: find_qemu_binary() called")
-    sys.stdout.flush()
     system, _ = get_platform_info()
     print(f"IMMEDIATE DEBUG: got system: {system}")
-    sys.stdout.flush()
     binary_name = (
         "qemu-system-xtensa.exe" if system == "windows" else "qemu-system-xtensa"
     )
     print(f"IMMEDIATE DEBUG: looking for binary: {binary_name}")
-    sys.stdout.flush()
 
     # ESP-IDF installation paths and portable installation
     esp_paths = [
@@ -577,61 +573,44 @@ def find_qemu_binary() -> Optional[Path]:
 
     for base_path in esp_paths:
         print(f"Searching in: {base_path}")
-        sys.stdout.flush()
         try:
             if base_path.exists():
                 print(f"  Directory exists, searching for {binary_name}...")
-                sys.stdout.flush()
                 # Use a more targeted search to avoid hanging on large directories
                 print(f"  Starting recursive search in {base_path}...")
-                sys.stdout.flush()
                 for qemu_path in base_path.rglob(binary_name):
                     print(f"  Checking: {qemu_path}")
-                    sys.stdout.flush()
                     if qemu_path.is_file():
                         print(f"Found QEMU binary at: {qemu_path}")
-                        sys.stdout.flush()
                         return qemu_path
                 print(f"  No {binary_name} found in {base_path}")
-                sys.stdout.flush()
             else:
                 print(f"  Directory does not exist")
-                sys.stdout.flush()
         except Exception as e:
             print(f"  Error searching {base_path}: {e}")
-            sys.stdout.flush()
 
     # Check system PATH
     print("Checking system PATH...")
-    sys.stdout.flush()
     try:
         cmd = ["where" if system == "windows" else "which", binary_name]
         print(f"Running: {' '.join(cmd)}")
-        sys.stdout.flush()
         print("About to call subprocess.run...")
-        sys.stdout.flush()
         result = subprocess.run(cmd, capture_output=True, text=True, timeout=10)
         print("subprocess.run completed")
-        sys.stdout.flush()
         if result.returncode == 0:
             # Take first line in case of multiple results (Windows)
             first_line = result.stdout.strip().split("\n")[0]
             qemu_path = Path(first_line)
             print(f"Found QEMU binary in PATH: {qemu_path}")
-            sys.stdout.flush()
             return qemu_path
         else:
             print(f"Command returned code {result.returncode}")
-            sys.stdout.flush()
     except subprocess.TimeoutExpired:
         print("PATH check timed out after 10 seconds")
-        sys.stdout.flush()
     except (subprocess.SubprocessError, FileNotFoundError) as e:
         print(f"Error checking PATH: {e}")
-        sys.stdout.flush()
 
     print("ERROR: Could not find QEMU binary")
-    sys.stdout.flush()
     return None
 
 
@@ -647,40 +626,28 @@ def create_qemu_wrapper():
 def main():
     """Main installation routine."""
     print("IMMEDIATE DEBUG: main() function called")
-    sys.stdout.flush()  # Force flush to ensure output is shown
     print("=== ESP32 QEMU Installation ===")
-    sys.stdout.flush()
     print("Step 1/5: Starting installation process...")
-    sys.stdout.flush()
 
     # Show platform info
     print("Step 2/5: Detecting platform...")
-    sys.stdout.flush()
     system, arch = get_platform_info()
     print(f"IMMEDIATE DEBUG: get_platform_info completed, got: {system}, {arch}")
-    sys.stdout.flush()
     print(f"Platform: {system}-{arch}")
-    sys.stdout.flush()
 
     # Install system dependencies
     print("Step 3/5: Installing system dependencies...")
-    sys.stdout.flush()
     install_system_dependencies()
     print("IMMEDIATE DEBUG: install_system_dependencies completed")
-    sys.stdout.flush()
     print("System dependencies step completed")
-    sys.stdout.flush()
 
     # Install ESP32 QEMU
     print("Step 4/5: Installing ESP32 QEMU...")
-    sys.stdout.flush()
     qemu_installed = install_qemu_esp32()
     print(
         f"IMMEDIATE DEBUG: install_qemu_esp32 completed with result: {qemu_installed}"
     )
-    sys.stdout.flush()
     print(f"ESP32 QEMU installation step completed (success: {qemu_installed})")
-    sys.stdout.flush()
 
     if qemu_installed:
         # Create wrapper script

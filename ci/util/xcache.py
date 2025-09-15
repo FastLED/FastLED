@@ -6,6 +6,10 @@ This trampoline wrapper handles the ESP32S3 sccache problem where long command l
 use response files (@tmpfile.tmp) that sccache doesn't understand. It creates
 temporary wrapper scripts that act as compiler aliases.
 
+WARNING: Never use sys.stdout.flush() in this file!
+It causes blocking issues on Windows that hang subprocess processes.
+Python's default buffering behavior works correctly across platforms.
+
 Usage:
     xcache.py <compiler> [args...]
 
@@ -161,7 +165,6 @@ def execute_direct(config: XCacheConfig, args: List[str]) -> int:
                 break
             if output:
                 print(output.rstrip())  # Print to stdout, remove trailing newlines
-                sys.stdout.flush()
 
         # Wait for process to complete and get return code
         return_code = process.wait()
@@ -242,7 +245,6 @@ def execute_with_wrapper(config: XCacheConfig, args: List[str]) -> int:
                 break
             if output:
                 print(output.rstrip())  # Print to stdout, remove trailing newlines
-                sys.stdout.flush()
 
         # Wait for process to complete and get return code
         return_code = process.wait()

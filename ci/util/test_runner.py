@@ -1,4 +1,10 @@
 #!/usr/bin/env python3
+"""
+WARNING: sys.stdout.flush() causes blocking issues on Windows with QEMU/subprocess processes!
+Use conditional flushing: `if os.name != 'nt': sys.stdout.flush()` to avoid Windows blocking
+while maintaining real-time output visibility on Unix systems.
+"""
+
 import _thread
 import os
 import queue
@@ -768,7 +774,9 @@ def _handle_process_completion(
             except Exception as e:
                 actual_output = f"Error capturing output: {e}"
 
-            sys.stdout.flush()
+            # Flush output for real-time visibility (but avoid on Windows due to blocking issues)
+            if os.name != "nt":  # Only flush on non-Windows systems
+                sys.stdout.flush()
             for p in active_processes:
                 if p != proc:
                     p.kill()
@@ -795,7 +803,9 @@ def _handle_process_completion(
             )
             completed_timings.append(timing)
 
-        sys.stdout.flush()
+        # Flush output for real-time visibility (but avoid on Windows due to blocking issues)
+        if os.name != "nt":  # Only flush on non-Windows systems
+            sys.stdout.flush()
 
     except Exception as e:
         test_name = _extract_test_name(cmd)
