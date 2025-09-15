@@ -119,7 +119,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.espressif
-          key: ${{ runner.os }}-esp32-qemu-${{ hashFiles('ci/install-qemu-esp32.py') }}
+          key: ${{ runner.os }}-esp32-qemu-${{ hashFiles('ci/install_qemu_esp32.py') }}
           restore-keys: |
             ${{ runner.os }}-esp32-qemu-
 
@@ -178,7 +178,7 @@ jobs:
         working-directory: trusted
         run: |
           echo "Installing ESP32 QEMU..."
-          uv run ci/install-qemu-esp32.py
+          uv run ci/install-qemu.py
         shell: bash
 
       - name: Run ESP32-S3 example in QEMU

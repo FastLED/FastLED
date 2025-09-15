@@ -109,19 +109,27 @@ def run_qemu_tests(args: TestArgs) -> None:
     if not skip_install:
         # Install QEMU first
         print("Installing QEMU...")
+        print("This may take several minutes depending on your system...")
         try:
             install_proc = RunningProcess(
-                ["uv", "run", "ci/install-qemu-esp32.py"], timeout=300, auto_run=True
+                ["uv", "run", "ci/install-qemu.py"], timeout=300, auto_run=True
             )
 
-            # Stream output
-            for line in install_proc.line_iter(timeout=None):
-                print(line)
+            # Stream installation output in real-time for better user feedback
+            print("QEMU installation output:")
+            with install_proc.line_iter(timeout=None) as it:
+                for line in it:
+                    print(f"[QEMU Install] {line}")
 
             returncode = install_proc.wait()
             if returncode != 0:
                 print(f"QEMU installation failed with exit code: {returncode}")
+                if install_proc.stdout:
+                    print("Installation output:")
+                    print(install_proc.stdout)
                 sys.exit(1)
+            else:
+                print("QEMU installation completed successfully")
         except Exception as e:
             print(f"QEMU installation error: {e}")
             sys.exit(1)
@@ -145,8 +153,9 @@ def run_qemu_tests(args: TestArgs) -> None:
             )
 
             # Stream build output
-            for line in build_proc.line_iter(timeout=None):
-                print(line)
+            with build_proc.line_iter(timeout=None) as it:
+                for line in it:
+                    print(line)
 
             build_returncode = build_proc.wait()
             if build_returncode != 0:
@@ -185,8 +194,9 @@ def run_qemu_tests(args: TestArgs) -> None:
             )
 
             # Stream QEMU output
-            for line in qemu_proc.line_iter(timeout=None):
-                print(line)
+            with qemu_proc.line_iter(timeout=None) as it:
+                for line in it:
+                    print(line)
 
             qemu_returncode = qemu_proc.wait()
             if qemu_returncode == 0:

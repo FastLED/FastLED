@@ -2,50 +2,46 @@
 """
 Standalone QEMU Installation Script
 
-This is a convenience wrapper around install-qemu-esp32.py
+This is a convenience wrapper around install_qemu_esp32.py
 that can be called directly to install QEMU for ESP32 emulation.
 
 Usage:
   uv run ci/install-qemu.py
 """
 
-import subprocess
+import os
 import sys
-from pathlib import Path
+
+from install_qemu_esp32 import main as install_qemu_main
 
 
 def main():
     """Run the QEMU installation script."""
-    # Script is now in ci/ directory alongside install-qemu-esp32.py
-    script_dir = Path(__file__).parent
-    install_script = script_dir / "install-qemu-esp32.py"
-
-    if not install_script.exists():
-        print(f"Error: Installation script not found at {install_script}")
-        sys.exit(1)
-
     print("=== FastLED QEMU Installation ===")
-    print(f"Running installation script: {install_script}")
+    print("Starting QEMU installation process...")
+    print(f"Python executable: {sys.executable}")
+    print(f"Working directory: {os.getcwd()}")
     print()
 
     try:
-        # Run the actual installation script with streaming output
-        result = subprocess.run(
-            ["python", str(install_script)],
-            timeout=600,  # 10 minute timeout
-            # Don't capture output - let it stream to console
-        )
+        # Call the main function directly
+        print("Calling install_qemu_esp32.main()...")
+        install_qemu_main()
+        print("install_qemu_esp32.main() completed successfully")
 
-        sys.exit(result.returncode)
-
-    except subprocess.TimeoutExpired:
-        print("ERROR: QEMU installation timed out after 10 minutes")
-        sys.exit(1)
     except KeyboardInterrupt:
         print("\nInstallation cancelled by user")
         sys.exit(130)
+    except SystemExit as e:
+        print(f"SystemExit caught with code: {e.code}")
+        # Re-raise SystemExit to preserve exit codes
+        raise
     except Exception as e:
         print(f"ERROR: Installation failed: {e}")
+        import traceback
+
+        print("Full traceback:")
+        traceback.print_exc()
         sys.exit(1)
 
 

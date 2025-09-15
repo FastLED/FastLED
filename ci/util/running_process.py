@@ -235,7 +235,15 @@ class RunningProcess:
     A class to manage and stream output from a running subprocess.
 
     This class provides functionality to execute shell commands, stream their output
-    in real-time via a queue, and control the subprocess execution.
+    in real-time via a queue, and control the subprocess execution. It merges stderr
+    into stdout and provides thread-safe access to process output.
+
+    Key features:
+    - Real-time output streaming via queue
+    - Thread-safe output consumption
+    - Timeout protection with optional stack traces
+    - Echo mode for immediate output printing
+    - Process tree termination support
     """
 
     def __init__(
@@ -252,18 +260,20 @@ class RunningProcess:
         output_formatter: OutputFormatter | None = None,
     ):
         """
-        Initialize the RunningProcess instance. Note that stderr is merged into stdout!!
+        Initialize the RunningProcess instance.
+
+        Note: stderr is automatically merged into stdout for unified output handling.
 
         Args:
-            command (str): The command to execute.
-            cwd (Path | None): The working directory to execute the command in.
-            check (bool): If True, raise an exception if the command returns a non-zero exit code.
-            auto_run (bool): If True, automatically run the command when the instance is created.
-            timeout (int | None): Timeout in seconds for process execution. None disables the global timeout.
-            enable_stack_trace (bool): If True, dump stack trace when process times out.
-            on_complete (Callable[[], None] | None): Callback function to execute when process completes.
-            output_formatter (OutputFormatter | None): Optional formatter for processing output lines.
-            shell (bool | None): If None, infer from command type.
+            command: The command to execute as string or list of arguments.
+            cwd: Working directory to execute the command in.
+            check: If True, raise CalledProcessError if command returns non-zero exit code.
+            auto_run: If True, automatically start the command when instance is created.
+            shell: Shell execution mode. None auto-detects based on command type.
+            timeout: Global timeout in seconds for process execution. None disables timeout.
+            enable_stack_trace: If True, dump GDB stack trace when process times out.
+            on_complete: Callback function executed when process completes normally.
+            output_formatter: Optional formatter for transforming output lines.
         """
         if shell is None:
             # Default: use shell only when given a string, or when a list includes shell metachars
@@ -357,6 +367,82 @@ class RunningProcess:
     def time_last_stdout_line(self) -> float | None:
         return self._time_last_stdout_line
 
+    def _handle_timeout(self, timeout: float, echo: bool = False) -> None:
+        """Handle process timeout with optional stack trace and cleanup."""
+        cmd_str = self.get_command_str()
+
+        # Drain any remaining output before killing if echo is enabled
+        if echo:
+            remaining_lines = self.drain_stdout()
+            for line in remaining_lines:
+                print(line)
+            if remaining_lines:
+                print(f"[Drained {len(remaining_lines)} final lines before timeout]")
+
+        if self.enable_stack_trace:
+            print(f"\nProcess timeout after {timeout} seconds, dumping stack trace...")
+            print(f"Command: {cmd_str}")
+            print(f"Process ID: {self.proc.pid}")
+
+            try:
+                stack_trace = self._dump_stack_trace()
+                print("\n" + "=" * 80)
+                print("STACK TRACE DUMP (GDB Output)")
+                print("=" * 80)
+                print(stack_trace)
+                print("=" * 80)
+            except Exception as e:
+                print(f"Failed to dump stack trace: {e}")
+
+        print(f"Killing timed out process: {cmd_str}")
+        self.kill()
+        raise TimeoutError(f"Process timed out after {timeout} seconds: {cmd_str}")
+
+    def drain_stdout(self) -> list[str]:
+        """
+        Drain all currently pending stdout lines without blocking.
+
+        Consumes all available lines from the output queue until either the queue
+        is empty or EndOfStream is encountered. The EndOfStream sentinel is preserved
+        by get_next_line() for other callers.
+
+        Returns:
+            List of output lines that were available. Empty list if no output pending.
+        """
+        lines: list[str] = []
+
+        while True:
+            try:
+                line = self.get_next_line(timeout=0)
+                if isinstance(line, EndOfStream):
+                    break  # get_next_line already handled EndOfStream preservation
+                lines.append(line)
+            except TimeoutError:
+                break  # Queue is empty
+
+        return lines
+
+    def has_pending_output(self) -> bool:
+        """
+        Check if there are pending output lines without consuming them.
+
+        Returns:
+            True if output lines are available in the queue, False otherwise.
+            Returns False if only EndOfStream sentinel is present.
+        """
+        try:
+            with self.output_queue.mutex:
+                if len(self.output_queue.queue) == 0:
+                    return False
+                # If the only item is EndOfStream, no actual output is pending
+                if len(self.output_queue.queue) == 1 and isinstance(
+                    self.output_queue.queue[0], EndOfStream
+                ):
+                    return False
+                return True
+        except Exception:
+            return False
+
     def run(self) -> None:
         """
         Execute the command and stream its output to the queue.
@@ -449,12 +535,11 @@ class RunningProcess:
                     None means wait forever, 0 means don't wait.
 
         Returns:
-            The next line of output, or None if no more output is available
-            or the timeout was reached.
+            str: The next line of output if available.
+            EndOfStream: Process has finished, no more output will be available.
 
         Raises:
-            queue.Empty: If timeout is 0 or specified and no line is available
-            TimeoutError: If the process times out
+            TimeoutError: If timeout is reached before a line becomes available.
         """
         assert self.proc is not None
 
@@ -503,7 +588,7 @@ class RunningProcess:
                 # Safe to pop now; head is not EndOfStream
                 item: str | EndOfStream = self.output_queue.get(timeout=0.1)
                 if isinstance(item, EndOfStream):
-                    # In rare race conditions, EndOfStream could appear after peek; do not consume
+                    # In rare race conditions, EndOfStream could appear after peek; put back for other callers
                     with self.output_queue.mutex:
                         self.output_queue.queue.appendleft(item)
                     return EndOfStream()
@@ -515,18 +600,20 @@ class RunningProcess:
 
     def get_next_line_non_blocking(self) -> str | None | EndOfStream:
         """
-        Get the next line of output from the process.
+        Get the next line of output from the process without blocking.
 
         Returns:
             str: Next line of output if available
             None: No output available right now (should continue polling)
             EndOfStream: Process has finished, no more output will be available
         """
-        # Peek without consuming EndOfStream
         try:
             line: str | EndOfStream = self.get_next_line(timeout=0)
-            return line
+            return line  # get_next_line already handled EndOfStream preservation
         except TimeoutError:
+            # Check if process finished while we were waiting
+            if self.finished:
+                return EndOfStream()
             return None
 
     def poll(self) -> int | None:
@@ -548,48 +635,59 @@ class RunningProcess:
     def finished(self) -> bool:
         return self.poll() is not None
 
-    def wait(self) -> int:
+    def wait(self, echo: bool = False, timeout: float | None = None) -> int:
         """
         Wait for the process to complete with timeout protection.
 
+        When echo=True, continuously drains and prints stdout lines while waiting.
+        Performs final output drain after process completion and thread cleanup.
+
+        Args:
+            echo: If True, continuously print stdout lines as they become available.
+            timeout: Overall timeout in seconds. If None, uses instance timeout.
+                    If both are None, waits indefinitely.
+
+        Returns:
+            Process exit code.
+
         Raises:
             ValueError: If the process hasn't been started.
-            TimeoutError: If the process takes longer than the timeout.
+            TimeoutError: If the process exceeds the timeout duration.
         """
         if self.proc is None:
             raise ValueError("Process is not running.")
 
+        # Determine effective timeout: parameter > instance > none
+        effective_timeout = timeout if timeout is not None else self.timeout
+
         # Use a timeout to prevent hanging
         start_time = time.time()
+
         while self.poll() is None:
-            cmd_str = self.get_command_str()
-            if self.timeout is not None and (time.time() - start_time) > self.timeout:
-                # Process is taking too long, dump stack trace if enabled
-                if self.enable_stack_trace:
-                    print(
-                        f"\nProcess timeout after {self.timeout} seconds, dumping stack trace..."
-                    )
+            # Check overall timeout
+            if (
+                effective_timeout is not None
+                and (time.time() - start_time) > effective_timeout
+            ):
+                self._handle_timeout(effective_timeout, echo=echo)
 
-                    print(f"Command: {cmd_str}")
-                    print(f"Process ID: {self.proc.pid}")
+            # Echo: drain all available output, then sleep
+            if echo:
+                lines = self.drain_stdout()
+                if lines:
+                    for line in lines:
+                        print(line)
+                    continue  # Check for more output immediately
 
-                    try:
-                        stack_trace = self._dump_stack_trace()
-                        print("\n" + "=" * 80)
-                        print("STACK TRACE DUMP (GDB Output)")
-                        print("=" * 80)
-                        print(stack_trace)
-                        print("=" * 80)
-                    except Exception as e:
-                        print(f"Failed to dump stack trace: {e}")
-
-                # Kill the process
-                print(f"Killing timed out process: {cmd_str}")
-                self.kill()
-                raise TimeoutError(
-                    f"Process timed out after {self.timeout} seconds: {cmd_str}"
-                )
             time.sleep(0.01)  # Check every 10ms
+
+        # Process completed - drain any remaining output if echo is enabled
+        if echo:
+            remaining_lines = self.drain_stdout()
+            for line in remaining_lines:
+                print(line)
+            if remaining_lines:
+                print(f"[Drained {len(remaining_lines)} final lines after completion]")
 
         # Process has completed, get return code
         assert self.proc is not None  # For type checker
@@ -619,6 +717,12 @@ class RunningProcess:
                 self.shutdown.set()
                 self.reader_thread.join(timeout=0.05)  # 50ms for forced shutdown
 
+        # Final drain after reader threads shut down - catch any remaining queued output
+        if echo:
+            final_lines = self.drain_stdout()
+            for line in final_lines:
+                print(line)
+
         # Execute completion callback if provided
         if self.on_complete is not None:
             try:
@@ -638,10 +742,12 @@ class RunningProcess:
 
     def kill(self) -> None:
         """
-        Immediately terminate the process with SIGKILL and all child processes.
+        Immediately terminate the process and all child processes.
 
-        Raises:
-            ValueError: If the process hasn't been started.
+        Signals reader threads to shutdown, kills the entire process tree to prevent
+        orphaned processes, and waits for thread cleanup. Safe to call multiple times.
+
+        Note: Does not raise if process is already terminated or was never started.
         """
         if self.proc is None:
             return
@@ -759,10 +865,13 @@ class RunningProcess:
     @property
     def stdout(self) -> str:
         """
-        Get the complete stdout output of the process.
+        Get the complete stdout output accumulated so far.
+
+        Returns all output lines that have been processed by the reader thread,
+        joined with newlines. Available even while process is still running.
 
         Returns:
-            str: The complete stdout output as a string.
+            Complete stdout output as a string. Empty string if no output yet.
         """
         # Return accumulated output (available even if process is still running)
         return "\n".join(self.accumulated_output)
@@ -789,23 +898,29 @@ def subprocess_run(
     timeout: int,
     enable_stack_trace: bool,
 ) -> subprocess.CompletedProcess[str]:
-    """Execute a command with stdout pumping and merged stderr, returning CompletedProcess.
+    """
+    Execute a command with robust stdout handling, emulating subprocess.run().
 
-    This emulates subprocess.run() behavior using RunningProcess as the backend:
-    - Streams and drains stdout continuously to avoid pipe blocking
-    - Merges stderr into stdout
-    - Returns a standard subprocess.CompletedProcess with combined stdout
-    - Raises subprocess.CalledProcessError when check is True and exit code != 0
+    Uses RunningProcess as the backend to provide:
+    - Continuous stdout streaming to prevent pipe blocking
+    - Merged stderr into stdout for unified output
+    - Timeout protection with optional stack trace dumping
+    - Standard subprocess.CompletedProcess return value
 
     Args:
-        command: Command to execute (string or list of arguments).
-        cwd: Working directory to execute the command in. Must be provided explicitly.
-        check: When True, raise CalledProcessError if the command exits non-zero.
-        timeout: Maximum number of seconds to allow the process to run.
-        enable_stack_trace: Enable stack trace dumping on timeout for diagnostics.
+        command: Command to execute as string or list of arguments.
+        cwd: Working directory for command execution. Required parameter.
+        check: If True, raise CalledProcessError for non-zero exit codes.
+        timeout: Maximum execution time in seconds.
+        enable_stack_trace: Enable GDB stack trace dumping on timeout.
 
     Returns:
-        subprocess.CompletedProcess[str]: Completed process with combined stdout and return code.
+        CompletedProcess with combined stdout and process return code.
+        stderr field is None since it's merged into stdout.
+
+    Raises:
+        RuntimeError: If process times out (wraps TimeoutError).
+        CalledProcessError: If check=True and process exits with non-zero code.
     """
     # Use RunningProcess for robust stdout pumping with merged stderr
     proc = RunningProcess(

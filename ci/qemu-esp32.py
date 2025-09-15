@@ -74,9 +74,9 @@ def show_installation_help():
         print("1. Chocolatey: choco install qemu -y")
         print("2. winget: winget install SoftwareFreedomConservancy.QEMU --scope user")
         print("3. Manual: Download from https://qemu.weilnetz.de/w64/")
-        print("4. ESP-IDF: uv run python ci/install-qemu-esp32.py")
+        print("4. ESP-IDF: uv run ci/install-qemu.py")
     else:
-        print("Run: uv run python ci/install-qemu-esp32.py")
+        print("Run: uv run ci/install-qemu.py")
 
 
 class QEMURunner:
@@ -91,7 +91,7 @@ class QEMURunner:
         qemu_path = find_qemu_binary()
         if not qemu_path:
             raise FileNotFoundError(
-                f"Could not find {get_binary_name()}. Please run install-qemu-esp32.py first."
+                f"Could not find {get_binary_name()}. Please run install-qemu.py first."
             )
         return qemu_path
 
