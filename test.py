@@ -102,23 +102,29 @@ def run_qemu_tests(args: TestArgs) -> None:
         print("QEMU ESP32-S3 option is working correctly!")
         return
 
-    # Install QEMU first
-    print("Installing QEMU...")
-    try:
-        result = subprocess.run(
-            ["uv", "run", "ci/install-qemu-esp32.py"],
-            capture_output=True,
-            text=True,
-            timeout=300,
-        )
+    # Check if QEMU installation should be skipped
+    skip_install = os.getenv("FASTLED_QEMU_SKIP_INSTALL") == "true"
 
-        if result.returncode != 0:
-            print(f"QEMU installation failed: {result.stderr}")
-            print("QEMU may not be available, but continuing with test...")
-            # Don't exit - continue to show what the workflow would do
-    except Exception as e:
-        print(f"QEMU installation error: {e}")
-        print("Continuing with test simulation...")
+    if not skip_install:
+        # Install QEMU first
+        print("Installing QEMU...")
+        try:
+            result = subprocess.run(
+                ["uv", "run", "ci/install-qemu-esp32.py"],
+                capture_output=True,
+                text=True,
+                timeout=300,
+            )
+
+            if result.returncode != 0:
+                print(f"QEMU installation failed: {result.stderr}")
+                print("QEMU may not be available, but continuing with test...")
+                # Don't exit - continue to show what the workflow would do
+        except Exception as e:
+            print(f"QEMU installation error: {e}")
+            print("Continuing with test simulation...")
+    else:
+        print("Skipping QEMU installation (FASTLED_QEMU_SKIP_INSTALL=true)")
 
     success_count = 0
     failure_count = 0

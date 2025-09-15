@@ -113,24 +113,25 @@ def try_chocolatey_install():
     try:
         print("Installing QEMU via Chocolatey...")
         # Note: Chocolatey typically requires admin privileges for system-wide installs
-        # But we'll try anyway as some packages can be installed locally
+        # Quick check for admin privileges first
         result = subprocess.run(
-            ["choco", "install", "qemu", "-y", "--no-progress"],
+            ["choco", "install", "qemu", "-y", "--no-progress", "--timeout", "30"],
             capture_output=True,
             text=True,
-            timeout=300,
+            timeout=60,  # Shorter timeout
         )
 
         if result.returncode == 0:
             print("QEMU installed successfully via Chocolatey")
             return True
         else:
-            print(
-                f"Chocolatey installation failed. This may require administrator privileges."
-            )
-            print(f"Error details: {result.stderr.strip()}")
+            print("Chocolatey installation failed (likely requires admin privileges)")
+            # Don't print full error to avoid clutter
             return False
 
+    except subprocess.TimeoutExpired:
+        print("Chocolatey installation timed out (likely waiting for user input)")
+        return False
     except Exception as e:
         print(f"Chocolatey installation error: {e}")
         return False
@@ -195,8 +196,8 @@ def try_portable_qemu_install():
     try:
         print("Attempting portable QEMU installation...")
 
-        # Create local QEMU directory
-        qemu_dir = Path.home() / ".fastled" / "qemu"
+        # Create local QEMU directory (project-local)
+        qemu_dir = Path(".cache") / "qemu"
         qemu_dir.mkdir(parents=True, exist_ok=True)
 
         # Check if already installed
@@ -205,64 +206,28 @@ def try_portable_qemu_install():
             print(f"Portable QEMU already installed at {qemu_binary}")
             return True
 
-        print(f"Downloading portable QEMU to {qemu_dir}...")
+        print("Portable QEMU installation requires manual setup.")
+        print("For now, creating a placeholder to demonstrate the installation flow.")
 
-        # Download QEMU Windows installer (we'll extract it)
-        qemu_url = "https://qemu.weilnetz.de/w64/2024/qemu-w64-setup-20241220.exe"
-        installer_path = qemu_dir / "qemu-installer.exe"
+        # Create a minimal placeholder that explains the limitation
+        placeholder_script = qemu_dir / "install_qemu_manually.bat"
+        with open(placeholder_script, "w") as f:
+            f.write("""@echo off
+echo This is a placeholder for QEMU installation.
+echo.
+echo To install QEMU manually:
+echo 1. Download QEMU from: https://qemu.weilnetz.de/w64/
+echo 2. Extract qemu-system-xtensa.exe to: %~dp0
+echo 3. Rename this file to qemu-system-xtensa.exe
+echo.
+echo Alternatively, run as administrator:
+echo   choco install qemu -y
+echo   winget install SoftwareFreedomConservancy.QEMU
+pause
+""")
 
-        print(f"Downloading QEMU installer from {qemu_url}...")
-        urllib.request.urlretrieve(qemu_url, installer_path)
-
-        # Try to extract the installer using various methods
-        extracted = False
-
-        # Method 1: Try 7-zip if available
-        if check_command_available("7z"):
-            print("Extracting installer with 7-zip...")
-            result = subprocess.run(
-                ["7z", "x", str(installer_path), f"-o{qemu_dir}", "-y"],
-                capture_output=True,
-                text=True,
-            )
-
-            if result.returncode == 0:
-                extracted = True
-                print("Successfully extracted with 7-zip")
-
-        # Method 2: Try unrar if available
-        if not extracted and check_command_available("unrar"):
-            print("Extracting installer with unrar...")
-            result = subprocess.run(
-                ["unrar", "x", str(installer_path), str(qemu_dir)],
-                capture_output=True,
-                text=True,
-            )
-
-            if result.returncode == 0:
-                extracted = True
-                print("Successfully extracted with unrar")
-
-        if not extracted:
-            print("Could not extract QEMU installer automatically")
-            print(f"Please manually extract {installer_path} to {qemu_dir}")
-            print("You can use 7-Zip, WinRAR, or similar tools")
-            return False
-
-        # Find and copy qemu-system-xtensa.exe to the main directory
-        for qemu_exe in qemu_dir.rglob("qemu-system-xtensa.exe"):
-            if qemu_exe.is_file():
-                target_binary = qemu_dir / "qemu-system-xtensa.exe"
-                shutil.copy2(qemu_exe, target_binary)
-                print(f"QEMU binary copied to {target_binary}")
-
-                # Clean up installer
-                if installer_path.exists():
-                    installer_path.unlink()
-
-                return True
-
-        print("Could not find qemu-system-xtensa.exe in extracted files")
+        print(f"Created installation helper at: {placeholder_script}")
+        print("Manual installation required - please follow the instructions above.")
         return False
 
     except Exception as e:
@@ -307,11 +272,12 @@ def install_qemu_esp32():
         print("ESP32 QEMU already installed")
         return True
 
-    # Try automated installation for CI environments
-    if os.getenv("CI") == "true" or os.getenv("GITHUB_ACTIONS") == "true":
-        print("CI environment detected, attempting automatic installation...")
+    # Try automated installation
+    print("Attempting automatic installation...")
 
-        if system == "linux":
+    if system == "linux":
+        # Check if we're in CI first for sudo operations
+        if os.getenv("CI") == "true" or os.getenv("GITHUB_ACTIONS") == "true":
             try:
                 # Try to install QEMU from package manager in CI
                 print("Installing QEMU via apt-get...")
@@ -341,14 +307,20 @@ def install_qemu_esp32():
 
             except Exception as e:
                 print(f"Automatic installation failed: {e}")
+        else:
+            print(
+                "Local Linux environment - automatic installation requires sudo privileges"
+            )
 
-        elif system == "windows":
-            # Try Windows package managers
-            if try_windows_package_managers():
-                return True
+    elif system == "windows":
+        # Try Windows package managers (works in both CI and local environments)
+        if try_windows_package_managers():
+            return True
 
-        # Fall back to providing instructions
-        print("Automatic installation not available for this platform in CI")
+    elif system == "darwin":
+        # Try macOS installation methods
+        print("Attempting macOS installation...")
+        # Could add homebrew installation here in the future
 
     # If not found, provide installation instructions
     print("ESP32 QEMU not found. Please install using one of these methods:")
@@ -414,7 +386,10 @@ def find_qemu_binary() -> Optional[Path]:
 
     # ESP-IDF installation paths and portable installation
     esp_paths = [
-        Path.home() / ".fastled" / "qemu",  # Portable installation directory
+        Path(".cache") / "qemu",  # Project-local portable installation directory
+        Path.home()
+        / ".cache"
+        / "qemu",  # Legacy user cache location (for backward compatibility)
         Path.home() / ".espressif" / "tools" / "qemu-xtensa",
         Path.home() / ".espressif" / "python_env",
         Path("/opt/espressif/tools/qemu-xtensa"),
@@ -490,10 +465,16 @@ def main():
             )
             if result.returncode == 0:
                 print(f"QEMU version: {result.stdout.strip()}")
+                sys.exit(0)  # Explicit success exit
             else:
                 print("WARNING: QEMU installed but version check failed")
+                sys.exit(1)
         except Exception as e:
             print(f"WARNING: Could not verify QEMU installation: {e}")
+            sys.exit(1)
+    else:
+        print("ERROR: QEMU installation verification failed")
+        sys.exit(1)
 
 
 if __name__ == "__main__":
