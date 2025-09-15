@@ -46,8 +46,9 @@ def find_qemu_binary() -> Optional[Path]:
     """Find QEMU ESP32 binary in common locations."""
     binary_name = get_binary_name()
 
-    # ESP-IDF installation paths
+    # ESP-IDF installation paths and portable installation
     esp_paths = [
+        Path.home() / ".fastled" / "qemu",  # Portable installation directory
         Path.home() / ".espressif" / "tools" / "qemu-xtensa",
         Path.home() / ".espressif" / "python_env",
     ]

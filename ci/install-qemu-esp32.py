@@ -8,6 +8,7 @@ Cross-platform support for Linux, macOS, and Windows.
 
 import os
 import platform
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -198,15 +199,70 @@ def try_portable_qemu_install():
         qemu_dir = Path.home() / ".fastled" / "qemu"
         qemu_dir.mkdir(parents=True, exist_ok=True)
 
+        # Check if already installed
+        qemu_binary = qemu_dir / "qemu-system-xtensa.exe"
+        if qemu_binary.exists():
+            print(f"Portable QEMU already installed at {qemu_binary}")
+            return True
+
         print(f"Downloading portable QEMU to {qemu_dir}...")
 
-        # This is a simplified approach - in practice, we'd need to:
-        # 1. Download QEMU Windows binaries
-        # 2. Extract to local directory
-        # 3. Add to PATH or create wrapper script
+        # Download QEMU Windows installer (we'll extract it)
+        qemu_url = "https://qemu.weilnetz.de/w64/2024/qemu-w64-setup-20241220.exe"
+        installer_path = qemu_dir / "qemu-installer.exe"
 
-        print("WARNING: Portable QEMU installation not yet implemented")
-        print("Please install QEMU manually or use package managers")
+        print(f"Downloading QEMU installer from {qemu_url}...")
+        urllib.request.urlretrieve(qemu_url, installer_path)
+
+        # Try to extract the installer using various methods
+        extracted = False
+
+        # Method 1: Try 7-zip if available
+        if check_command_available("7z"):
+            print("Extracting installer with 7-zip...")
+            result = subprocess.run(
+                ["7z", "x", str(installer_path), f"-o{qemu_dir}", "-y"],
+                capture_output=True,
+                text=True,
+            )
+
+            if result.returncode == 0:
+                extracted = True
+                print("Successfully extracted with 7-zip")
+
+        # Method 2: Try unrar if available
+        if not extracted and check_command_available("unrar"):
+            print("Extracting installer with unrar...")
+            result = subprocess.run(
+                ["unrar", "x", str(installer_path), str(qemu_dir)],
+                capture_output=True,
+                text=True,
+            )
+
+            if result.returncode == 0:
+                extracted = True
+                print("Successfully extracted with unrar")
+
+        if not extracted:
+            print("Could not extract QEMU installer automatically")
+            print(f"Please manually extract {installer_path} to {qemu_dir}")
+            print("You can use 7-Zip, WinRAR, or similar tools")
+            return False
+
+        # Find and copy qemu-system-xtensa.exe to the main directory
+        for qemu_exe in qemu_dir.rglob("qemu-system-xtensa.exe"):
+            if qemu_exe.is_file():
+                target_binary = qemu_dir / "qemu-system-xtensa.exe"
+                shutil.copy2(qemu_exe, target_binary)
+                print(f"QEMU binary copied to {target_binary}")
+
+                # Clean up installer
+                if installer_path.exists():
+                    installer_path.unlink()
+
+                return True
+
+        print("Could not find qemu-system-xtensa.exe in extracted files")
         return False
 
     except Exception as e:
@@ -356,8 +412,9 @@ def find_qemu_binary() -> Optional[Path]:
         "qemu-system-xtensa.exe" if system == "windows" else "qemu-system-xtensa"
     )
 
-    # ESP-IDF installation paths
+    # ESP-IDF installation paths and portable installation
     esp_paths = [
+        Path.home() / ".fastled" / "qemu",  # Portable installation directory
         Path.home() / ".espressif" / "tools" / "qemu-xtensa",
         Path.home() / ".espressif" / "python_env",
         Path("/opt/espressif/tools/qemu-xtensa"),
