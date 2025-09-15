@@ -4,15 +4,33 @@ on:
   push:
     branches: [master]
     paths:
-      - 'src/**'
-      - 'examples/**'
-      - '.github/workflows/esp32_qemu_test.yml'
+      - 'src/**/*.cpp'
+      - 'src/**/*.h'
+      - 'examples/**/*.ino'
+      - 'examples/**/*.cpp'
+      - 'examples/**/*.h'
+      - 'ci/install-qemu.py'
+      - 'ci/qemu-esp32.py'
+      - 'ci/ci-compile.py'
+      - 'platformio.ini'
+      - 'CMakeLists.txt'
+      - 'library.json'
+      - '.github/workflows/esp32dev_qemu_test.yml'
   pull_request:
     branches: [master]
     paths:
-      - 'src/**'
-      - 'examples/**'
-      - '.github/workflows/esp32_qemu_test.yml'
+      - 'src/**/*.cpp'
+      - 'src/**/*.h'
+      - 'examples/**/*.ino'
+      - 'examples/**/*.cpp'
+      - 'examples/**/*.h'
+      - 'ci/install-qemu.py'
+      - 'ci/qemu-esp32.py'
+      - 'ci/ci-compile.py'
+      - 'platformio.ini'
+      - 'CMakeLists.txt'
+      - 'library.json'
+      - '.github/workflows/esp32dev_qemu_test.yml'
 
 permissions:
   contents: read
