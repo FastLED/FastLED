@@ -221,11 +221,13 @@ class QEMURunner:
         build_folder: Path,
         timeout: int = 30,
         interrupt_regex: Optional[str] = None,
+        flash_size: int = 4,
     ) -> int:
         """Run ESP32 firmware in QEMU."""
         print("=== Running ESP32 firmware in QEMU ===")
         print(f"Build folder: {build_folder}")
         print(f"Timeout: {timeout}s")
+        print(f"Flash size: {flash_size}MB")
         if interrupt_regex:
             print(f"Interrupt pattern: {interrupt_regex}")
 
@@ -234,7 +236,7 @@ class QEMURunner:
             return 1
 
         try:
-            cmd = self.build_qemu_command(build_folder)
+            cmd = self.build_qemu_command(build_folder, flash_size)
             print(f"QEMU command: {' '.join(cmd)}")
         except Exception as e:
             print(f"ERROR: Failed to build QEMU command: {e}")
@@ -329,6 +331,7 @@ def main():
         build_folder=args.build_folder,
         timeout=args.timeout,
         interrupt_regex=args.interrupt_regex,
+        flash_size=args.flash_size,
     )
 
 
