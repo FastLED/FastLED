@@ -66,7 +66,7 @@ def find_qemu_binary() -> Optional[Path]:
 def show_installation_help():
     """Display platform-specific installation instructions."""
     binary_name = get_binary_name()
-    print(f"ERROR: QEMU ESP32 emulator ({binary_name}) not found!")
+    print(f"ERROR: QEMU ESP32 emulator ({binary_name}) not found!", file=sys.stderr)
     print()
 
     if platform.system().lower() == "windows":
@@ -233,14 +233,16 @@ class QEMURunner:
             print(f"Interrupt pattern: {interrupt_regex}")
 
         if not build_folder.exists():
-            print(f"ERROR: Build folder does not exist: {build_folder}")
+            print(
+                f"ERROR: Build folder does not exist: {build_folder}", file=sys.stderr
+            )
             return 1
 
         try:
             cmd = self.build_qemu_command(build_folder, flash_size)
             print(f"QEMU command: {' '.join(cmd)}")
         except Exception as e:
-            print(f"ERROR: Failed to build QEMU command: {e}")
+            print(f"ERROR: Failed to build QEMU command: {e}", file=sys.stderr)
             return 1
 
         try:
@@ -301,7 +303,7 @@ class QEMURunner:
             return 0
 
         except Exception as e:
-            print(f"ERROR: Error running QEMU: {e}")
+            print(f"ERROR: Error running QEMU: {e}", file=sys.stderr)
             return 1
 
 

@@ -179,7 +179,10 @@ def run_qemu_tests(args: TestArgs) -> None:
                 success_count += 1
             else:
                 print(f"FAILED: {example} failed in QEMU:")
-                print(qemu_result.stderr)
+                if qemu_result.stderr:
+                    print("STDERR:", qemu_result.stderr)
+                if qemu_result.stdout:
+                    print("STDOUT:", qemu_result.stdout)
                 failure_count += 1
 
         except subprocess.TimeoutExpired:
