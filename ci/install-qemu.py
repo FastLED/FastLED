@@ -29,10 +29,11 @@ def main():
     print()
 
     try:
-        # Run the actual installation script
+        # Run the actual installation script with streaming output
         result = subprocess.run(
             ["python", str(install_script)],
             timeout=600,  # 10 minute timeout
+            # Don't capture output - let it stream to console
         )
 
         sys.exit(result.returncode)

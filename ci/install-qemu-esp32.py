@@ -19,8 +19,10 @@ from typing import Optional
 
 def get_platform_info():
     """Get platform-specific information for QEMU installation."""
+    print("Detecting platform information...")
     system = platform.system().lower()
     machine = platform.machine().lower()
+    print(f"System: {system}, Machine: {machine}")
 
     # Normalize machine architecture
     if machine in ["x86_64", "amd64"]:
@@ -53,10 +55,10 @@ def install_system_dependencies():
 
         try:
             # Check if we can install packages (requires sudo)
-            result = subprocess.run(
-                ["sudo", "apt-get", "update"], capture_output=True, text=True
-            )
+            print("Updating package list...")
+            result = subprocess.run(["sudo", "apt-get", "update"], text=True)
             if result.returncode == 0:
+                print("Installing system dependencies:", " ".join(deps))
                 subprocess.run(["sudo", "apt-get", "install", "-y"] + deps, check=True)
                 print("System dependencies installed")
             else:
@@ -87,36 +89,45 @@ def download_esp_idf_tools():
 
     if not tools_script.exists():
         print("Downloading ESP-IDF tools...")
+        print(f"Source: {tools_url}")
+        print(f"Destination: {tools_script}")
         urllib.request.urlretrieve(tools_url, tools_script)
         print(f"Downloaded ESP-IDF tools to {tools_script}")
+    else:
+        print(f"ESP-IDF tools already exist at {tools_script}")
 
     return tools_script
 
 
 def check_command_available(command: str) -> bool:
     """Check if a command is available in PATH."""
+    print(f"Checking if {command} is available...")
     try:
         result = subprocess.run(
             [command, "--version"], capture_output=True, text=True, timeout=10
         )
-        return result.returncode == 0
+        available = result.returncode == 0
+        print(f"{command} {'found' if available else 'not found'}")
+        return available
     except (subprocess.TimeoutExpired, FileNotFoundError, subprocess.SubprocessError):
+        print(f"{command} not found or timed out")
         return False
 
 
 def try_chocolatey_install():
     """Try to install QEMU using Chocolatey."""
+    print("Attempting Chocolatey installation...")
     if not check_command_available("choco"):
         print("Chocolatey not found, skipping...")
         return False
 
     try:
         print("Installing QEMU via Chocolatey...")
+        print("Note: This may require administrator privileges")
         # Note: Chocolatey typically requires admin privileges for system-wide installs
         # Quick check for admin privileges first
         result = subprocess.run(
-            ["choco", "install", "qemu", "-y", "--no-progress", "--timeout", "30"],
-            capture_output=True,
+            ["choco", "install", "qemu", "-y", "--timeout", "30"],
             text=True,
             timeout=60,  # Shorter timeout
         )
@@ -139,12 +150,14 @@ def try_chocolatey_install():
 
 def try_winget_install():
     """Try to install QEMU using Windows Package Manager (winget)."""
+    print("Attempting winget installation...")
     if not check_command_available("winget"):
         print("winget not found, skipping...")
         return False
 
     try:
         print("Installing QEMU via winget (user scope, no admin required)...")
+        print("This may take a few minutes...")
         result = subprocess.run(
             [
                 "winget",
@@ -155,7 +168,6 @@ def try_winget_install():
                 "--accept-source-agreements",
                 "--accept-package-agreements",
             ],
-            capture_output=True,
             text=True,
             timeout=300,
         )
@@ -164,7 +176,7 @@ def try_winget_install():
             print("QEMU installed successfully via winget")
             return True
         else:
-            print(f"winget user installation failed: {result.stderr}")
+            print("winget user installation failed")
             # Try without --scope user as fallback
             print("Trying winget without user scope...")
             result = subprocess.run(
@@ -175,7 +187,6 @@ def try_winget_install():
                     "--accept-source-agreements",
                     "--accept-package-agreements",
                 ],
-                capture_output=True,
                 text=True,
                 timeout=300,
             )
@@ -202,9 +213,12 @@ def try_portable_qemu_install():
 
         # Check if already installed
         qemu_binary = qemu_dir / "qemu-system-xtensa.exe"
+        print(f"Checking for existing portable QEMU at {qemu_binary}...")
         if qemu_binary.exists():
             print(f"Portable QEMU already installed at {qemu_binary}")
             return True
+        else:
+            print("Portable QEMU not found, proceeding with setup...")
 
         print("Portable QEMU installation requires manual setup.")
         print("For now, creating a placeholder to demonstrate the installation flow.")
@@ -247,14 +261,18 @@ def try_windows_package_managers():
     ]
 
     for name, install_func in package_managers:
-        print(f"Trying {name}...")
+        print(f"\nTrying {name}...")
+        print(f"Starting {name} installation process...")
         if install_func():
+            print(f"{name} installation completed, verifying...")
             # Verify installation worked
             if find_qemu_binary():
                 print(f"SUCCESS: QEMU installed via {name}")
                 return True
             else:
                 print(f"WARNING: {name} reported success but QEMU binary not found")
+        else:
+            print(f"{name} installation failed")
 
     print("All Windows package managers failed")
     return False
@@ -262,15 +280,19 @@ def try_windows_package_managers():
 
 def install_qemu_esp32():
     """Install ESP32 QEMU using ESP-IDF tools."""
+    print("\n=== Starting ESP32 QEMU Installation ===")
     system, arch = get_platform_info()
 
-    print(f"Checking for ESP32 QEMU for {system}-{arch}...")
+    print(f"\nChecking for ESP32 QEMU for {system}-{arch}...")
 
     # Check if already installed
+    print("Searching for existing QEMU installation...")
     qemu_binary = find_qemu_binary()
     if qemu_binary:
         print("ESP32 QEMU already installed")
         return True
+    else:
+        print("No existing QEMU installation found")
 
     # Try automated installation
     print("Attempting automatic installation...")
@@ -281,11 +303,13 @@ def install_qemu_esp32():
             try:
                 # Try to install QEMU from package manager in CI
                 print("Installing QEMU via apt-get...")
-                result = subprocess.run(
-                    ["sudo", "apt-get", "update"], capture_output=True, text=True
-                )
+                print("Updating package list...")
+                result = subprocess.run(["sudo", "apt-get", "update"], text=True)
 
                 if result.returncode == 0:
+                    print("Package list updated successfully")
+                    print("Installing QEMU packages...")
+                    print("Installing: qemu-system-misc qemu-system-xtensa")
                     result = subprocess.run(
                         [
                             "sudo",
@@ -295,15 +319,15 @@ def install_qemu_esp32():
                             "qemu-system-misc",
                             "qemu-system-xtensa",
                         ],
-                        capture_output=True,
                         text=True,
                     )
 
                     if result.returncode == 0:
-                        print("QEMU installed successfully via apt-get")
+                        print("QEMU packages installed successfully via apt-get")
                         return True
                     else:
-                        print("Failed to install QEMU via apt-get")
+                        print("Failed to install QEMU packages via apt-get")
+                        print("Return code:", result.returncode)
 
             except Exception as e:
                 print(f"Automatic installation failed: {e}")
@@ -313,13 +337,19 @@ def install_qemu_esp32():
             )
 
     elif system == "windows":
+        print("Windows platform detected, trying package managers...")
         # Try Windows package managers (works in both CI and local environments)
         if try_windows_package_managers():
+            print("Windows QEMU installation successful")
             return True
+        else:
+            print("All Windows installation methods failed")
 
     elif system == "darwin":
         # Try macOS installation methods
+        print("macOS platform detected")
         print("Attempting macOS installation...")
+        print("Note: Homebrew installation could be added here in the future")
         # Could add homebrew installation here in the future
 
     # If not found, provide installation instructions
@@ -396,15 +426,22 @@ def find_qemu_binary() -> Optional[Path]:
     ]
 
     for base_path in esp_paths:
+        print(f"Searching in: {base_path}")
         if base_path.exists():
+            print(f"  Directory exists, searching for {binary_name}...")
             for qemu_path in base_path.rglob(binary_name):
                 if qemu_path.is_file():
                     print(f"Found QEMU binary at: {qemu_path}")
                     return qemu_path
+            print(f"  No {binary_name} found in {base_path}")
+        else:
+            print(f"  Directory does not exist")
 
     # Check system PATH
+    print("Checking system PATH...")
     try:
         cmd = ["where" if system == "windows" else "which", binary_name]
+        print(f"Running: {' '.join(cmd)}")
         result = subprocess.run(cmd, capture_output=True, text=True)
         if result.returncode == 0:
             # Take first line in case of multiple results (Windows)
@@ -412,8 +449,10 @@ def find_qemu_binary() -> Optional[Path]:
             qemu_path = Path(first_line)
             print(f"Found QEMU binary in PATH: {qemu_path}")
             return qemu_path
-    except (subprocess.SubprocessError, FileNotFoundError):
-        pass
+        else:
+            print(f"Command returned code {result.returncode}")
+    except (subprocess.SubprocessError, FileNotFoundError) as e:
+        print(f"Error checking PATH: {e}")
 
     print("ERROR: Could not find QEMU binary")
     return None
@@ -454,9 +493,12 @@ def main():
     print("ESP32 QEMU is ready to use!")
 
     # Test installation
+    print("\n=== Verifying Installation ===")
     qemu_binary = find_qemu_binary()
     if qemu_binary:
+        print(f"Testing QEMU binary: {qemu_binary}")
         try:
+            print("Running version check...")
             result = subprocess.run(
                 [str(qemu_binary), "--version"],
                 capture_output=True,
@@ -465,9 +507,11 @@ def main():
             )
             if result.returncode == 0:
                 print(f"QEMU version: {result.stdout.strip()}")
+                print("Installation verification successful!")
                 sys.exit(0)  # Explicit success exit
             else:
                 print("WARNING: QEMU installed but version check failed")
+                print(f"Version check return code: {result.returncode}")
                 sys.exit(1)
         except Exception as e:
             print(f"WARNING: Could not verify QEMU installation: {e}")

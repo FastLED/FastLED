@@ -73,8 +73,9 @@ def make_watch_dog_thread(
 
 def run_qemu_tests(args: TestArgs) -> None:
     """Run examples in QEMU emulation."""
-    import subprocess
     from pathlib import Path
+
+    from ci.util.running_process import RunningProcess
 
     if not args.qemu or len(args.qemu) < 1:
         print("Error: --qemu requires a platform (e.g., esp32s3)")
@@ -109,20 +110,21 @@ def run_qemu_tests(args: TestArgs) -> None:
         # Install QEMU first
         print("Installing QEMU...")
         try:
-            result = subprocess.run(
-                ["uv", "run", "ci/install-qemu-esp32.py"],
-                capture_output=True,
-                text=True,
-                timeout=300,
+            install_proc = RunningProcess(
+                ["uv", "run", "ci/install-qemu-esp32.py"], timeout=300, auto_run=True
             )
 
-            if result.returncode != 0:
-                print(f"QEMU installation failed: {result.stderr}")
-                print("QEMU may not be available, but continuing with test...")
-                # Don't exit - continue to show what the workflow would do
+            # Stream output
+            for line in install_proc.line_iter(timeout=None):
+                print(line)
+
+            returncode = install_proc.wait()
+            if returncode != 0:
+                print(f"QEMU installation failed with exit code: {returncode}")
+                sys.exit(1)
         except Exception as e:
             print(f"QEMU installation error: {e}")
-            print("Continuing with test simulation...")
+            sys.exit(1)
     else:
         print("Skipping QEMU installation (FASTLED_QEMU_SKIP_INSTALL=true)")
 
@@ -136,16 +138,19 @@ def run_qemu_tests(args: TestArgs) -> None:
         try:
             # Build the example for ESP32-S3
             print(f"Building {example} for ESP32-S3...")
-            build_result = subprocess.run(
+            build_proc = RunningProcess(
                 ["uv", "run", "ci/ci-compile.py", "esp32s3", "--examples", example],
-                capture_output=True,
-                text=True,
                 timeout=600,
+                auto_run=True,
             )
 
-            if build_result.returncode != 0:
-                print(f"Build failed for {example}:")
-                print(build_result.stderr)
+            # Stream build output
+            for line in build_proc.line_iter(timeout=None):
+                print(line)
+
+            build_returncode = build_proc.wait()
+            if build_returncode != 0:
+                print(f"Build failed for {example} with exit code: {build_returncode}")
                 failure_count += 1
                 continue
 
@@ -162,7 +167,7 @@ def run_qemu_tests(args: TestArgs) -> None:
 
             # Run in QEMU
             print(f"Running {example} in QEMU...")
-            qemu_result = subprocess.run(
+            qemu_proc = RunningProcess(
                 [
                     "uv",
                     "run",
@@ -175,25 +180,24 @@ def run_qemu_tests(args: TestArgs) -> None:
                     "--interrupt-regex",
                     "(FL_WARN.*test finished)|(guru meditation)|(abort\\(\\))|(LoadProhibited)",
                 ],
-                capture_output=True,
-                text=True,
                 timeout=60,
+                auto_run=True,
             )
 
-            if qemu_result.returncode == 0:
+            # Stream QEMU output
+            for line in qemu_proc.line_iter(timeout=None):
+                print(line)
+
+            qemu_returncode = qemu_proc.wait()
+            if qemu_returncode == 0:
                 print(f"SUCCESS: {example} ran successfully in QEMU")
                 success_count += 1
             else:
-                print(f"FAILED: {example} failed in QEMU:")
-                if qemu_result.stderr:
-                    print("STDERR:", qemu_result.stderr)
-                if qemu_result.stdout:
-                    print("STDOUT:", qemu_result.stdout)
+                print(
+                    f"FAILED: {example} failed in QEMU with exit code: {qemu_returncode}"
+                )
                 failure_count += 1
 
-        except subprocess.TimeoutExpired:
-            print(f"TIMEOUT: {example} timed out during testing")
-            failure_count += 1
         except Exception as e:
             print(f"ERROR: {example} failed with exception: {e}")
             failure_count += 1
