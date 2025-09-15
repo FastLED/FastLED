@@ -17,9 +17,10 @@ import subprocess
 import sys
 import tempfile
 import threading
-import urllib.request
 from pathlib import Path
 from typing import Dict, List, Optional, Union
+
+from download import download  # type: ignore
 
 from ci.util.running_process import RunningProcess
 
@@ -108,7 +109,7 @@ def download_esp_idf_tools():
         print("Downloading ESP-IDF tools...")
         print(f"Source: {tools_url}")
         print(f"Destination: {tools_script}")
-        urllib.request.urlretrieve(tools_url, tools_script)
+        download(tools_url, tools_script)
         print(f"Downloaded ESP-IDF tools to {tools_script}")
     else:
         print(f"ESP-IDF tools already exist at {tools_script}")
@@ -131,153 +132,11 @@ def check_command_available(command: str) -> bool:
         return False
 
 
-def try_chocolatey_install():
-    """Try to install QEMU using Chocolatey with automated non-interactive installation."""
-    print("\n--- Chocolatey Installation Attempt ---")
-    print("Attempting Chocolatey installation...")
-    if not check_command_available("choco"):
-        print("Chocolatey not found, skipping...")
-        return False
-
+def try_direct_download_install():
+    """Download and install QEMU directly from the official source."""
     try:
-        print("Installing QEMU via Chocolatey (non-interactive mode)...")
-
-        # Use environment variable to bypass all prompts and set non-admin install location
-        env = os.environ.copy()
-        user_choco_dir = str(Path.home() / "chocolatey")
-        env["ChocolateyInstall"] = user_choco_dir
-
-        # Ensure the directory exists
-        Path(user_choco_dir).mkdir(parents=True, exist_ok=True)
-
-        # Try installation with comprehensive non-interactive flags
-        cmd = [
-            "choco",
-            "install",
-            "qemu",
-            "-y",  # Auto-confirm all prompts
-            "--force",  # Force installation
-            "--no-progress",  # Disable progress bars
-            "--execution-timeout",
-            "300",  # 5 minute execution timeout
-            "--fail-on-standard-error",  # Fail on stderr to avoid hanging
-            "--accept-license",  # Accept license automatically
-        ]
-
-        print(f"Running command: {' '.join(cmd)}")
-        print("Note: Using non-admin installation directory")
-        print("This may take several minutes, please wait...")
-
-        # Run with environment that forces user-level install
-        print("Starting Chocolatey process...")
-        process = RunningProcess(
-            cmd,
-            timeout=400,  # Overall timeout slightly longer than execution timeout
-        )
-        print("Process started, waiting for completion...")
-        result = process.wait(echo=True)
-        print(f"Chocolatey process completed with return code: {result}")
-
-        if result == 0:
-            print("QEMU installed successfully via Chocolatey (user scope)")
-            return True
-        else:
-            print(f"Chocolatey user installation failed (exit code: {result})")
-            # Show first few lines of error if it's short
-            stderr_output = process.stdout
-            if stderr_output and len(stderr_output) < 500:
-                print(f"Error details: {stderr_output.strip()[:200]}")
-
-            # If user install failed due to permissions, try a simple install without custom location
-            print("Attempting simple Chocolatey install...")
-            simple_cmd = ["choco", "install", "qemu", "-y", "--execution-timeout", "60"]
-
-            process = RunningProcess(
-                simple_cmd,
-                timeout=120,
-            )
-            result = process.wait(echo=True)
-
-            if result == 0:
-                print("QEMU installed successfully via Chocolatey (system scope)")
-                return True
-            else:
-                print(
-                    "Chocolatey installation failed (insufficient privileges or other error)"
-                )
-                return False
-
-    except subprocess.TimeoutExpired:
-        print("Chocolatey installation timed out (likely hung on user prompt)")
-        return False
-    except Exception as e:
-        print(f"Chocolatey installation error: {e}")
-        return False
-
-
-def try_winget_install():
-    """Try to install QEMU using Windows Package Manager (winget)."""
-    print("\n--- Winget Installation Attempt ---")
-    print("Attempting winget installation...")
-    if not check_command_available("winget"):
-        print("winget not found, skipping...")
-        return False
-
-    try:
-        print("Installing QEMU via winget (user scope, no admin required)...")
-        print("This may take a few minutes...")
-        print("Starting winget process...")
-        process = RunningProcess(
-            [
-                "winget",
-                "install",
-                "SoftwareFreedomConservancy.QEMU",
-                "--scope",
-                "user",
-                "--accept-source-agreements",
-                "--accept-package-agreements",
-            ],
-            timeout=300,
-        )
-        print("Process started, waiting for completion...")
-        result = process.wait(echo=True)
-        print(f"Winget process completed with return code: {result}")
-
-        if result == 0:
-            print("QEMU installed successfully via winget")
-            return True
-        else:
-            print("winget user installation failed")
-            # Try without --scope user as fallback
-            print("Trying winget without user scope...")
-            process = RunningProcess(
-                [
-                    "winget",
-                    "install",
-                    "SoftwareFreedomConservancy.QEMU",
-                    "--accept-source-agreements",
-                    "--accept-package-agreements",
-                ],
-                timeout=300,
-            )
-            result = process.wait(echo=True)
-
-            if result == 0:
-                print("QEMU installed successfully via winget (machine scope)")
-                return True
-            else:
-                return False
-
-    except Exception as e:
-        print(f"winget installation error: {e}")
-        return False
-
-
-def try_portable_qemu_install():
-    """Try to download and install portable QEMU for Windows."""
-    try:
-        print("\n--- Portable QEMU Installation Attempt ---")
-        print("Attempting portable QEMU installation...")
+        print("\n--- Direct Download Installation ---")
+        print("Downloading QEMU directly from official source...")
 
         # Create local QEMU directory (project-local)
         qemu_dir = Path(".cache") / "qemu"
@@ -285,20 +144,19 @@ def try_portable_qemu_install():
 
         # Check if already installed
         qemu_binary = qemu_dir / "qemu-system-xtensa.exe"
-        print(f"Checking for existing portable QEMU at {qemu_binary}...")
+        print(f"Checking for existing QEMU at {qemu_binary}...")
         if qemu_binary.exists():
-            print(f"Portable QEMU already installed at {qemu_binary}")
+            print(f"QEMU already installed at {qemu_binary}")
             return True
         else:
-            print("Portable QEMU not found, proceeding with download...")
+            print("QEMU not found, proceeding with download...")
 
-        # Download portable QEMU from official source
-        # Using the Windows portable version from qemu.weilnetz.de
-        print("Downloading portable QEMU for Windows...")
+        # Download QEMU from official source
+        print("Downloading QEMU for Windows...")
         print("This may take several minutes depending on your internet connection.")
 
-        # QEMU portable download URL (this is a well-known reliable source)
-        qemu_url = "https://qemu.weilnetz.de/w64/qemu-w64-setup-20250826.exe"
+        # QEMU download URL from the official Windows builds
+        qemu_url = "https://qemu.weilnetz.de/w64/2024/qemu-w64-setup-20241220.exe"
         installer_path = qemu_dir / "qemu-installer.exe"
 
         print(f"Downloading from: {qemu_url}")
@@ -306,22 +164,61 @@ def try_portable_qemu_install():
 
         try:
             # Download the installer
-            urllib.request.urlretrieve(qemu_url, installer_path)
+            download(qemu_url, installer_path)
             print(f"Download completed: {installer_path}")
 
-            # Run the installer in silent mode to extract to our directory
+            # Run the installer in silent mode
             print("Running QEMU installer in silent mode...")
-            install_cmd = [
-                str(installer_path),
-                "/S",  # Silent install
-                f"/D={qemu_dir.absolute()}",  # Install directory
+            print("Note: This may require administrator privileges")
+
+            # Try different installation approaches
+            install_attempts = [
+                # Attempt 1: Install to custom directory (may require admin)
+                [
+                    str(installer_path),
+                    "/VERYSILENT",  # Very silent install
+                    "/SUPPRESSMSGBOXES",  # Suppress message boxes
+                    f"/DIR={qemu_dir.absolute()}",  # Install directory
+                ],
+                # Attempt 2: Install to default location (may require admin)
+                [
+                    str(installer_path),
+                    "/VERYSILENT",  # Very silent install
+                    "/SUPPRESSMSGBOXES",  # Suppress message boxes
+                ],
+                # Attempt 3: Use basic silent install
+                [
+                    str(installer_path),
+                    "/S",  # Silent install
+                ],
             ]
 
-            process = RunningProcess(
-                install_cmd,
-                timeout=300,  # 5 minute timeout
-            )
-            result = process.wait(echo=True)
+            result = None
+            process = None
+            for i, install_cmd in enumerate(install_attempts, 1):
+                print(
+                    f"Installation attempt {i}/{len(install_attempts)}: {' '.join(install_cmd)}"
+                )
+                try:
+                    process = RunningProcess(
+                        install_cmd,
+                        timeout=300,  # 5 minute timeout
+                    )
+                    result = process.wait(echo=True)
+
+                    if result == 0:
+                        print(f"Installation attempt {i} succeeded")
+                        break
+                    else:
+                        print(
+                            f"Installation attempt {i} failed with exit code: {result}"
+                        )
+                        if i < len(install_attempts):
+                            print("Trying next installation method...")
+                except Exception as e:
+                    print(f"Installation attempt {i} failed with error: {e}")
+                    if i < len(install_attempts):
+                        print("Trying next installation method...")
 
             if result == 0:
                 print("QEMU installer completed successfully")
@@ -342,80 +239,45 @@ def try_portable_qemu_install():
                         if installer_path.exists():
                             installer_path.unlink()
 
-                        print("Portable QEMU installation completed successfully")
+                        print("Direct download installation completed successfully")
                         return True
 
                 print("QEMU installer completed but qemu-system-xtensa.exe not found")
             else:
                 print(f"QEMU installer failed with exit code: {result}")
-                stderr_output = process.stdout
-                if stderr_output:
-                    print(f"Error output: {stderr_output[:200]}")
+                if process:
+                    stderr_output = process.stdout
+                    if stderr_output:
+                        print(f"Error output: {stderr_output[:200]}")
 
         except Exception as download_error:
             print(f"Download/install error: {download_error}")
 
-        # If automated installation failed, create helpful instructions
-        print("Automated installation failed, creating manual installation guide...")
-
-        # Create a minimal placeholder that explains the limitation
-        placeholder_script = qemu_dir / "install_qemu_manually.bat"
-        with open(placeholder_script, "w") as f:
-            f.write("""@echo off
-echo Manual QEMU installation required.
-echo.
-echo Option 1: Download and install automatically:
-echo   1. Download QEMU from: https://qemu.weilnetz.de/w64/qemu-w64-setup-20240903.exe
-echo   2. Run the installer with admin privileges
-echo   3. Copy qemu-system-xtensa.exe to: %~dp0
-echo.
-echo Option 2: Portable extraction:
-echo   1. Download QEMU portable zip from: https://qemu.weilnetz.de/w64/
-echo   2. Extract qemu-system-xtensa.exe to: %~dp0
-echo.
-echo Option 3: Use package managers (requires admin):
-echo   choco install qemu -y
-echo   winget install SoftwareFreedomConservancy.QEMU
-echo.
-echo After installation, re-run the test command.
-pause
-""")
-
-        print(f"Created installation guide at: {placeholder_script}")
-        print("Please follow the manual installation instructions above.")
         return False
 
     except Exception as e:
-        print(f"Portable installation error: {e}")
+        print(f"Direct download installation error: {e}")
         return False
 
 
-def try_windows_package_managers():
-    """Try installing QEMU using available Windows package managers."""
+def try_windows_installation():
+    """Try installing QEMU using direct download for Windows."""
     print("Attempting automatic QEMU installation on Windows...")
 
-    # Try package managers in order of preference
-    package_managers = [
-        ("Chocolatey", try_chocolatey_install),
-        ("winget", try_winget_install),
-        ("Portable QEMU", try_portable_qemu_install),
-    ]
-
-    for name, install_func in package_managers:
-        print(f"\nTrying {name}...")
-        print(f"Starting {name} installation process...")
-        if install_func():
-            print(f"{name} installation completed, verifying...")
-            # Verify installation worked
-            if find_qemu_binary():
-                print(f"SUCCESS: QEMU installed via {name}")
-                return True
-            else:
-                print(f"WARNING: {name} reported success but QEMU binary not found")
+    # Use direct download as the primary method
+    print("Using direct download from official source...")
+    if try_direct_download_install():
+        print("Direct download installation completed, verifying...")
+        # Verify installation worked
+        if find_qemu_binary():
+            print("SUCCESS: QEMU installed via direct download")
+            return True
         else:
-            print(f"{name} installation failed")
+            print("WARNING: Direct download reported success but QEMU binary not found")
+    else:
+        print("Direct download installation failed")
 
-    print("All Windows package managers failed")
+    print("Windows QEMU installation failed")
     return False
 
 
@@ -480,13 +342,13 @@ def install_qemu_esp32():
             )
 
     elif system == "windows":
-        print("Windows platform detected, trying package managers...")
-        # Try Windows package managers (works in both CI and local environments)
-        if try_windows_package_managers():
+        print("Windows platform detected, using direct download...")
+        # Try direct download installation (works in both CI and local environments)
+        if try_windows_installation():
             print("Windows QEMU installation successful")
             return True
         else:
-            print("All Windows installation methods failed")
+            print("Windows installation failed")
 
     elif system == "darwin":
         # Try macOS installation methods
@@ -502,29 +364,19 @@ def install_qemu_esp32():
     if system == "windows":
         print("Windows Installation Options:")
         print()
-        print("Option 1: Package Managers")
-        if check_command_available("choco"):
-            print("  choco install qemu -y  (may require admin privileges)")
-        else:
-            print("  First install Chocolatey: https://chocolatey.org/install")
-            print("  Then run: choco install qemu -y")
-        if check_command_available("winget"):
-            print(
-                "  winget install SoftwareFreedomConservancy.QEMU --scope user  (user-level install)"
-            )
-        else:
-            print(
-                "  Update Windows to get winget, then: winget install SoftwareFreedomConservancy.QEMU --scope user"
-            )
+        print("Option 1: Direct Download (Recommended)")
+        print(
+            "  Download QEMU from: https://qemu.weilnetz.de/w64/2024/qemu-w64-setup-20241220.exe"
+        )
+        print("  Run the installer and ensure qemu-system-xtensa.exe is in your PATH")
         print()
         print("Option 2: ESP-IDF (includes QEMU)")
         print(
             "  Download ESP-IDF from: https://docs.espressif.com/projects/esp-idf/en/latest/esp32/get-started/windows-setup.html"
         )
         print()
-        print("Option 3: Manual QEMU Installation")
+        print("Option 3: Manual Installation")
         print("  Download QEMU from: https://www.qemu.org/download/")
-        print("  Or portable version from: https://qemu.weilnetz.de/w64/")
         print("  Make sure qemu-system-xtensa.exe is in your PATH")
 
     elif system == "linux":

@@ -48,7 +48,7 @@ def find_qemu_binary() -> Optional[Path]:
 
     # ESP-IDF installation paths and portable installation
     esp_paths = [
-        Path.home() / ".fastled" / "qemu",  # Portable installation directory
+        Path(".cache") / "qemu",  # Project-local portable installation directory
         Path.home() / ".espressif" / "tools" / "qemu-xtensa",
         Path.home() / ".espressif" / "python_env",
     ]
