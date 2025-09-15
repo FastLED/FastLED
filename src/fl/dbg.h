@@ -44,7 +44,7 @@ inline const char *fastled_file_offset(const char *file) {
 #endif
 
 // Debug printing: Enable only when explicitly requested to avoid ~5KB memory bloat
-#ifndef FASTLED_FORCE_DBG
+#if !defined(FASTLED_FORCE_DBG) || !SKETCH_HAS_LOTS_OF_MEMORY
 // By default, debug printing is disabled to prevent memory bloat in simple applications
 #define FASTLED_HAS_DBG 0
 #define _FASTLED_DGB(X) do { if (false) { fl::println(""); } } while(0)  // No-op that handles << operator
