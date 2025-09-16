@@ -21,7 +21,9 @@
 #endif
 
 /// ARM platform identification
-#define FASTLED_ARM
+#ifndef FASTLED_ARM
+#error "FASTLED_ARM must be defined before including this header. Ensure platforms/arm/is_arm.h is included first."
+#endif
 /// Use ARM Cortex-M3 compatibility mode for FastLED
 /// (Cortex-M33 is backward compatible with M3 instruction set)
 #define FASTLED_ARM_M3
