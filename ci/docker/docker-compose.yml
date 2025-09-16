@@ -1,0 +1,61 @@
+version: '3.8'
+
+services:
+  qemu-esp32:
+    build:
+      context: .
+      dockerfile: Dockerfile.qemu-esp32-lite
+    image: fastled/qemu-esp32:latest
+    container_name: fastled-qemu-esp32
+    volumes:
+      # Mount firmware directory
+      - ${FIRMWARE_DIR:-./firmware}:/workspace:ro
+      # Mount output directory for logs
+      - ${OUTPUT_DIR:-./output}:/output
+    environment:
+      - FIRMWARE=${FIRMWARE_FILE:-/workspace/firmware.bin}
+      - MACHINE=${MACHINE:-esp32}
+      - FLASH_SIZE=${FLASH_SIZE:-4}
+      - TIMEOUT=${TIMEOUT:-30}
+    command: []
+    stdin_open: false
+    tty: false
+    networks:
+      - qemu-network
+
+  qemu-esp32-interactive:
+    build:
+      context: .
+      dockerfile: Dockerfile.qemu-esp32-lite
+    image: fastled/qemu-esp32:latest
+    container_name: fastled-qemu-esp32-interactive
+    volumes:
+      - ${FIRMWARE_DIR:-./firmware}:/workspace:ro
+    environment:
+      - FIRMWARE=${FIRMWARE_FILE:-/workspace/firmware.bin}
+      - MACHINE=${MACHINE:-esp32}
+      - FLASH_SIZE=${FLASH_SIZE:-4}
+      - TIMEOUT=${TIMEOUT:-300}
+    stdin_open: true
+    tty: true
+    networks:
+      - qemu-network
+
+  # Service for building the Docker image
+  builder:
+    build:
+      context: .
+      dockerfile: Dockerfile.qemu-esp32-lite
+    image: fastled/qemu-esp32:latest
+    command: echo "Image built successfully"
+
+networks:
+  qemu-network:
+    driver: bridge
+
+# Volume definitions (optional, for persistent storage)
+volumes:
+  firmware:
+    driver: local
+  output:
+    driver: local

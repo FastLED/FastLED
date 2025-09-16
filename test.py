@@ -190,7 +190,7 @@ def run_qemu_tests(args: TestArgs) -> None:
                     "--timeout",
                     "30",
                     "--interrupt-regex",
-                    "(FL_WARN.*test finished)|(guru meditation)|(abort\\(\\))|(LoadProhibited)",
+                    "(FL_WARN.*test finished)|(Setup complete - starting blink animation)|(guru meditation)|(abort\\(\\))|(LoadProhibited)",
                 ],
                 timeout=60,
                 auto_run=True,

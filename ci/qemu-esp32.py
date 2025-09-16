@@ -123,8 +123,18 @@ class QEMURunner:
                 firmware_path, flash_image_path, flash_size
             )
 
-        # Check for ROM file
-        rom_path = Path(".cache") / "qemu" / "esp32-v3-rom.bin"
+        # Check for ROM file in multiple locations
+        rom_paths = [
+            Path(".cache") / "qemu" / "esp32-v3-rom.bin",
+            Path(".cache") / "qemu" / "qemu" / "share" / "qemu" / "esp32-v3-rom.bin",
+            Path(".cache") / "qemu" / "extracted" / "share" / "esp32-v3-rom.bin",
+        ]
+
+        rom_path = None
+        for path in rom_paths:
+            if path.exists():
+                rom_path = path
+                break
 
         cmd = [
             str(self.qemu_binary),
@@ -137,9 +147,20 @@ class QEMURunner:
             "driver=timer.esp32.timg,property=wdt_disable,value=true",
         ]
 
-        # Add ROM file if available (try binary as BIOS)
-        if rom_path.exists():
-            cmd.extend(["-bios", str(rom_path)])
+        # Set QEMU data directory if ROM files are available
+        if rom_path and rom_path.exists():
+            qemu_data_dir = rom_path.parent
+            cmd.extend(["-L", str(qemu_data_dir)])
+            print(f"Setting QEMU data directory: {qemu_data_dir}")
+
+        # Note: ESP32 ROM is built into QEMU machine, no need to load external ROM
+        # ESP32 QEMU machine has the ROM integrated, so we don't need to specify it
+        if rom_path and rom_path.exists():
+            print(
+                f"ROM file available at: {rom_path} (but not needed for ESP32 machine)"
+            )
+        else:
+            print("Note: ROM file not found, but ESP32 machine has integrated ROM")
 
         # Validate that no custom script arguments are accidentally included
         custom_args = ["--flash-size", "--timeout", "--interrupt-regex"]
@@ -226,16 +247,14 @@ class QEMURunner:
         cmd = esptool_cmd.split() + [
             "--chip",
             "esp32",  # Use esp32 chip type for esp32dev machine
-            "merge_bin",
+            "merge-bin",  # Updated command name
             "-o",
             str(flash_bin),
-            "--flash_mode",
+            "--flash-mode",  # Updated option name
             "dio",
-            "--flash_freq",
+            "--flash-freq",  # Updated option name
             "40m",  # Standard frequency for esp32
-            "--flash_size",
-            "4MB",
-            "--fill-flash-size",
+            "--flash-size",  # Updated option name
             "4MB",
         ]
 
@@ -256,15 +275,17 @@ class QEMURunner:
             sys.exit(1)
 
         binaries = [
-            ("bootloader.bin", "0x1000"),  # ESP32 bootloader offset
-            ("partitions.bin", "0x8000"),
-            (firmware_path, "0x10000"),
+            ("0x1000", build_folder / "bootloader.bin"),  # ESP32 bootloader offset
+            ("0x8000", build_folder / "partitions.bin"),
+            ("0x10000", firmware_path),
         ]
 
-        for filename, offset in binaries:
-            bin_path = build_folder / filename
+        for offset, bin_path in binaries:
             if bin_path.exists():
                 cmd.extend([offset, str(bin_path)])
+
+        # Add padding to 4MB at the end
+        cmd.extend(["--pad-to-size", "4MB"])
 
         subprocess.run(cmd, check=True)
         print("Flash image created with esptool")
@@ -276,14 +297,14 @@ class QEMURunner:
         cmd = esptool_cmd.split() + [
             "--chip",
             "esp32",
-            "merge_bin",
+            "merge-bin",  # Updated command name
             "-o",
             str(flash_bin),
-            "--flash_mode",
+            "--flash-mode",  # Updated option name
             "dio",
-            "--flash_freq",
+            "--flash-freq",  # Updated option name
             "40m",
-            "--flash_size",
+            "--flash-size",  # Updated option name
             "4MB",
             "0x10000",  # Application offset
             str(firmware_bin),

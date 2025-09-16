@@ -1,0 +1,106 @@
+# Dockerfile for ESP32 QEMU emulation environment
+# Based on ESP-IDF with QEMU support
+
+FROM espressif/idf:v5.1.2
+
+# Install additional dependencies for QEMU
+RUN apt-get update && apt-get install -y \
+    qemu-system-misc \
+    qemu-utils \
+    python3-pip \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Python dependencies for ESP tools
+RUN pip3 install --no-cache-dir \
+    esptool \
+    pyserial
+
+# Create workspace directory
+WORKDIR /workspace
+
+# Set up environment for QEMU ESP32
+ENV QEMU_ESP32_VERSION=esp-develop-8.2.0-20240122
+
+# Download and install ESP32 QEMU if not using system QEMU
+RUN mkdir -p /opt/qemu-esp32 && \
+    cd /opt/qemu-esp32 && \
+    wget -q https://github.com/espressif/qemu/releases/download/${QEMU_ESP32_VERSION}/qemu-xtensa-softmmu-esp_develop_8.2.0_20240122-x86_64-linux-gnu.tar.xz && \
+    tar -xf qemu-xtensa-softmmu-esp_develop_8.2.0_20240122-x86_64-linux-gnu.tar.xz && \
+    rm qemu-xtensa-softmmu-esp_develop_8.2.0_20240122-x86_64-linux-gnu.tar.xz && \
+    ln -sf /opt/qemu-esp32/qemu/bin/qemu-system-xtensa /usr/local/bin/qemu-system-xtensa
+
+# Download ESP32 ROM files for QEMU
+RUN mkdir -p /opt/esp-rom && \
+    cd /opt/esp-rom && \
+    wget -q https://github.com/espressif/qemu/raw/esp-develop/pc-bios/esp32-v3-rom.bin && \
+    wget -q https://github.com/espressif/qemu/raw/esp-develop/pc-bios/esp32-v3-rom-eco3.bin && \
+    wget -q https://github.com/espressif/qemu/raw/esp-develop/pc-bios/esp32c3-rom.bin && \
+    wget -q https://github.com/espressif/qemu/raw/esp-develop/pc-bios/esp32s2-rom.bin && \
+    wget -q https://github.com/espressif/qemu/raw/esp-develop/pc-bios/esp32s3-rom.bin
+
+# Set environment variables for ROM files
+ENV ESP_ROM_PATH=/opt/esp-rom
+ENV ESP32_ROM=${ESP_ROM_PATH}/esp32-v3-rom.bin
+ENV ESP32C3_ROM=${ESP_ROM_PATH}/esp32c3-rom.bin
+ENV ESP32S2_ROM=${ESP_ROM_PATH}/esp32s2-rom.bin
+ENV ESP32S3_ROM=${ESP_ROM_PATH}/esp32s3-rom.bin
+
+# Create helper script for running QEMU with proper settings
+RUN cat > /usr/local/bin/run-qemu-esp32 << 'EOF'
+#!/bin/bash
+# Helper script to run QEMU with ESP32 firmware
+
+FIRMWARE_PATH=${1:-/workspace/firmware.bin}
+MACHINE=${2:-esp32}
+FLASH_SIZE=${3:-4}
+
+# Select ROM file based on machine type
+case "$MACHINE" in
+    esp32)
+        ROM_FILE=$ESP32_ROM
+        ;;
+    esp32c3)
+        ROM_FILE=$ESP32C3_ROM
+        ;;
+    esp32s2)
+        ROM_FILE=$ESP32S2_ROM
+        ;;
+    esp32s3)
+        ROM_FILE=$ESP32S3_ROM
+        ;;
+    *)
+        echo "Unknown machine type: $MACHINE"
+        exit 1
+        ;;
+esac
+
+# Create flash image if needed
+FLASH_IMAGE=/tmp/flash_${RANDOM}.bin
+if [ -f "$FIRMWARE_PATH" ]; then
+    # Create empty flash image
+    dd if=/dev/zero of=$FLASH_IMAGE bs=1M count=$FLASH_SIZE 2>/dev/null
+    dd if=$FIRMWARE_PATH of=$FLASH_IMAGE bs=1 seek=$((0x10000)) conv=notrunc 2>/dev/null
+else
+    echo "Firmware not found: $FIRMWARE_PATH"
+    exit 1
+fi
+
+# Run QEMU
+exec qemu-system-xtensa \
+    -nographic \
+    -machine $MACHINE \
+    -bios $ROM_FILE \
+    -drive file=$FLASH_IMAGE,if=mtd,format=raw \
+    -global driver=timer.esp32.timg,property=wdt_disable,value=true \
+    "$@"
+EOF
+
+RUN chmod +x /usr/local/bin/run-qemu-esp32
+
+# Default command
+CMD ["/usr/local/bin/run-qemu-esp32"]
+
+# Labels
+LABEL maintainer="FastLED Team"
+LABEL description="ESP32 QEMU emulation environment for FastLED testing"
+LABEL version="1.0.0"

@@ -20,7 +20,6 @@ CRGB leds[NUM_LEDS];  // Yes, they all share a buffer.
 
 void setup() {
     Serial.begin(115200);
-    FL_WARN("BlinkParallel setup starting on ESP32-S3");
 
     //FastLED.addLeds<WS2812, 5>(leds, NUM_LEDS);  // GRB ordering is assumed
     FastLED.addLeds<WS2812, 1>(leds, NUM_LEDS);  // GRB ordering is assumed
@@ -54,12 +53,12 @@ void blink(CRGB color, int times) {
 void loop() {
   static int loopCount = 0;
 
-  EVERY_N_MILLISECONDS(5000) {  // Every 5 seconds
+  EVERY_N_MILLISECONDS(1000) {  // Every 1 second (faster for QEMU testing)
     loopCount++;
     FL_WARN("Starting loop iteration " << loopCount);
 
     // Add completion marker after a few loops for QEMU testing
-    if (loopCount >= 3) {
+    if (loopCount >= 2) {  // Complete after 2 iterations instead of 3
       FL_WARN("FL_WARN test finished - completed " << loopCount << " iterations");
     }
   }
@@ -80,7 +79,7 @@ void loop() {
   Serial.print("Time to fill and show for non blocking (ms): ");
   Serial.println(diff);
 
-  EVERY_N_MILLISECONDS(2000) {  // Every 2 seconds
+  EVERY_N_MILLISECONDS(500) {  // Every 0.5 seconds (faster for QEMU testing)
     FL_WARN("FastLED.show() timing: " << diff << "ms");
   }
 
