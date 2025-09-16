@@ -8,18 +8,7 @@
 #include "platforms/audio_input_null.hpp"
 
 
-#if ESP_IDF_VERSION_5_OR_HIGHER
-#include "platforms/esp/32/audio/audio_impl.hpp"
-#else
-namespace fl {
-fl::shared_ptr<IAudioInput>
-IAudioInput::create(const AudioConfig &config, fl::string *error_message) {
-    if (error_message) {
-        *error_message = "ESP32 platform not supported";
-    }
-    return fl::make_shared<fl::Null_Audio>();
-}
-}  // namespace fl
-#endif
+// This file is kept for potential future ESP32-specific audio implementations
+// The main audio creation logic is handled in src/fl/audio_input.cpp
 
 #endif  // 
