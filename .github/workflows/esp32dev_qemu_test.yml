@@ -141,73 +141,11 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-esp32-qemu-
 
-      - name: Build ESP32-DEV example
+      - name: Run ESP32-DEV QEMU test
         working-directory: trusted
         run: |
-          echo "Building ${{ matrix.example }} for ${{ matrix.platform }}"
-          uv run ci/ci-compile.py ${{ matrix.platform }} --examples ${{ matrix.example }}
-        shell: bash
-
-      - name: Verify build artifacts
-        working-directory: trusted
-        run: |
-          echo "Checking build artifacts..."
-          find .build -name "*.bin" -o -name "*.elf" | head -10 || true
-
-          echo "=== Build directory structure ==="
-          find .build -type d | head -10 || true
-
-          # PlatformIO creates .build/pio/{platform}/.pio/build/{platform} structure
-          BUILD_DIR=".build/pio/${{ matrix.platform }}"
-          PIO_BUILD_DIR="$BUILD_DIR/.pio/build/${{ matrix.platform }}"
-
-          if [ -d "$BUILD_DIR" ]; then
-            echo "✅ Build directory found: $BUILD_DIR"
-            ls -la "$BUILD_DIR/"
-
-            # Check for required QEMU files in the nested PIO build directory
-            echo "=== Checking for QEMU required files ==="
-            if [ -d "$PIO_BUILD_DIR" ]; then
-              echo "✅ PlatformIO build directory found: $PIO_BUILD_DIR"
-              ls -la "$PIO_BUILD_DIR/"
-
-              for file in firmware.bin bootloader.bin partitions.bin firmware.elf; do
-                if [ -f "$PIO_BUILD_DIR/$file" ]; then
-                  echo "✅ Found: $file"
-                else
-                  echo "❌ Missing: $file"
-                fi
-              done
-            else
-              echo "❌ PlatformIO build directory not found: $PIO_BUILD_DIR"
-              echo "Contents of $BUILD_DIR:"
-              ls -la "$BUILD_DIR/" || true
-              exit 1
-            fi
-          else
-            echo "❌ Build directory not found: $BUILD_DIR"
-            echo "Available build directories:"
-            find .build -type d | head -10
-            exit 1
-          fi
-        shell: bash
-
-      - name: Install ESP32 QEMU
-        working-directory: trusted
-        run: |
-          echo "Installing ESP32 QEMU..."
-          uv run ci/install-qemu.py
-        shell: bash
-
-      - name: Run ESP32-DEV example in QEMU
-        working-directory: trusted
-        run: |
-          echo "Running ESP32-DEV example in QEMU..."
-          uv run ci/qemu-esp32.py \
-            .build/pio/${{ matrix.platform }} \
-            --flash-size 4 \
-            --timeout 30 \
-            --interrupt-regex "(FL_WARN.*test finished)|(guru meditation)|(abort\(\))|(LoadProhibited)"
+          echo "Running QEMU test for ${{ matrix.platform }}"
+          bash test --qemu ${{ matrix.platform }}
         shell: bash
 
       - name: Display QEMU output log
