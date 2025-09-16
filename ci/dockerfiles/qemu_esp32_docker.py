@@ -21,7 +21,7 @@ from typing import Dict, List, Optional
 # Add parent directory to path to import DockerManager
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
-from ci.docker.DockerManager import DockerManager
+from ci.dockerfiles.DockerManager import DockerManager
 
 
 class DockerQEMURunner:
