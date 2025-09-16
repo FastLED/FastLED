@@ -17,7 +17,10 @@
 #include <Arduino.h>  // ok include
 
 // Check for Arduino I2S library availability and completeness
-#if FL_HAS_INCLUDE(<I2S.h>)
+#if defined(__SAMD21G18A__) || defined(__SAMD21J18A__) || defined(__SAMD21E17A__) || defined(__SAMD21E18A__)
+#define ARDUINO_I2S_FULLY_SUPPORTED 0
+#define ARDUINO_I2S_BROKEN_REASON "I2S not supported on SAMD21"
+#elif FL_HAS_INCLUDE(<I2S.h>)
 #include <I2S.h>
 
 // Define ARDUINO_I2S_FULLY_SUPPORTED only when ALL I2S components are present and functional
