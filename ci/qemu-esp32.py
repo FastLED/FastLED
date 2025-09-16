@@ -113,12 +113,16 @@ class QEMURunner:
         if firmware_path.is_file() and firmware_path.suffix == ".bin":
             # Direct firmware.bin path
             flash_image_path = firmware_path.parent / "flash.bin"
+            print(f"Creating flash image for firmware: {firmware_path}")
             self._create_flash_image_from_firmware(
                 firmware_path, flash_image_path, flash_size
             )
         else:
             # Build directory path
             flash_image_path = firmware_path / "flash.bin"
+            print(
+                f"Creating combined flash image from build directory: {firmware_path}"
+            )
             self._create_flash_image_from_build_dir(
                 firmware_path, flash_image_path, flash_size
             )
@@ -136,13 +140,18 @@ class QEMURunner:
                 rom_path = path
                 break
 
+        # Ensure flash image path is absolute and exists
+        flash_image_path = flash_image_path.resolve()
+        if not flash_image_path.exists():
+            raise FileNotFoundError(f"Flash image not found: {flash_image_path}")
+
         cmd = [
             str(self.qemu_binary),
             "-nographic",
             "-machine",
             "esp32",
             "-drive",
-            f"file={flash_image_path},if=mtd,format=raw",
+            f"file={str(flash_image_path)},if=mtd,format=raw",
             "-global",
             "driver=timer.esp32.timg,property=wdt_disable,value=true",
         ]
@@ -287,7 +296,26 @@ class QEMURunner:
         # Add padding to 4MB at the end
         cmd.extend(["--pad-to-size", "4MB"])
 
-        subprocess.run(cmd, check=True)
+        print(f"Running esptool command: {' '.join(cmd)}")
+        esptool_proc = RunningProcess(cmd, timeout=60, auto_run=True)
+
+        # Stream esptool output and check for errors
+        has_errors = False
+        with esptool_proc.line_iter(timeout=None) as it:
+            for line in it:
+                print(f"[esptool] {line}")
+                # Check for common esptool error patterns
+                if any(
+                    error_pattern in line.lower()
+                    for error_pattern in ["error", "failed", "exception"]
+                ):
+                    has_errors = True
+
+        returncode = esptool_proc.wait()
+        if returncode != 0:
+            raise subprocess.CalledProcessError(returncode, cmd)
+        if has_errors:
+            print("Warning: Errors detected in esptool output")
         print("Flash image created with esptool")
 
     def _merge_with_esptool_firmware(
@@ -312,8 +340,26 @@ class QEMURunner:
 
         # Note: Without bootloader and partition table, QEMU may not boot properly
         # but we'll try with just the app for now
-        print(f"Running: {' '.join(cmd)}")
-        subprocess.run(cmd, check=True)
+        print(f"Running esptool firmware command: {' '.join(cmd)}")
+        esptool_proc = RunningProcess(cmd, timeout=60, auto_run=True)
+
+        # Stream esptool output and check for errors
+        has_errors = False
+        with esptool_proc.line_iter(timeout=None) as it:
+            for line in it:
+                print(f"[esptool] {line}")
+                # Check for common esptool error patterns
+                if any(
+                    error_pattern in line.lower()
+                    for error_pattern in ["error", "failed", "exception"]
+                ):
+                    has_errors = True
+
+        returncode = esptool_proc.wait()
+        if returncode != 0:
+            raise subprocess.CalledProcessError(returncode, cmd)
+        if has_errors:
+            print("Warning: Errors detected in esptool output")
         print("Flash image created with esptool (firmware only)")
 
     def _merge_manually_firmware(self, firmware_bin: Path, flash_bin: Path):
