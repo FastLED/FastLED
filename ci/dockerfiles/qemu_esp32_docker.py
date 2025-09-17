@@ -19,6 +19,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
 
 from ci.dockerfiles.DockerManager import DockerManager
+from ci.util.running_process import RunningProcess
 
 
 def get_docker_env() -> Dict[str, str]:
@@ -47,6 +48,35 @@ def run_subprocess_safe(
     return subprocess.run(cmd, **kwargs)  # type: ignore[misc]
 
 
+def run_docker_command_streaming(cmd: List[str]) -> int:
+    """Run docker command with streaming output using RunningProcess."""
+    print(f"Executing: {' '.join(cmd)}")
+    proc = RunningProcess(cmd, env=get_docker_env(), auto_run=True)
+
+    # Stream all output to stdout
+    with proc.line_iter(timeout=None) as it:
+        for line in it:
+            print(line)
+
+    returncode = proc.wait()
+    if returncode != 0:
+        raise subprocess.CalledProcessError(returncode, cmd)
+    return returncode
+
+
+def run_docker_command_no_fail(cmd: List[str]) -> int:
+    """Run docker command with streaming output, but don't raise exceptions on failure."""
+    print(f"Executing: {' '.join(cmd)}")
+    proc = RunningProcess(cmd, env=get_docker_env(), auto_run=True)
+
+    # Stream all output to stdout
+    with proc.line_iter(timeout=None) as it:
+        for line in it:
+            print(line)
+
+    return proc.wait()
+
+
 class DockerQEMURunner:
     """Runner for ESP32 QEMU emulation using Docker containers."""
 
@@ -69,11 +99,12 @@ class DockerQEMURunner:
     def check_docker_available(self) -> bool:
         """Check if Docker is available and running."""
         try:
-            result = run_subprocess_safe(
-                ["docker", "version"], capture_output=True, text=True, timeout=5
+            proc = RunningProcess(
+                ["docker", "version"], env=get_docker_env(), auto_run=True
             )
-            return result.returncode == 0
-        except (subprocess.SubprocessError, FileNotFoundError):
+            returncode = proc.wait(timeout=5)
+            return returncode == 0
+        except (Exception, FileNotFoundError):
             return False
 
     def pull_image(self):
@@ -81,20 +112,20 @@ class DockerQEMURunner:
         print(f"Ensuring Docker image {self.docker_image} is available...")
         try:
             # Check if image exists locally
-            result = run_subprocess_safe(
+            proc = RunningProcess(
                 ["docker", "images", "-q", self.docker_image],
-                capture_output=True,
-                text=True,
+                env=get_docker_env(),
+                auto_run=True,
             )
-            if not result.stdout.strip():
+            stdout_lines: List[str] = []
+            with proc.line_iter(timeout=None) as it:
+                for line in it:
+                    stdout_lines.append(line)
+            result_stdout = "\n".join(stdout_lines)
+            if not result_stdout.strip():
                 # Image doesn't exist, pull it directly using docker command
                 print(f"Pulling Docker image: {self.docker_image}")
-                result = run_subprocess_safe(
-                    ["docker", "pull", self.docker_image],
-                    capture_output=True,
-                    text=True,
-                    check=True,
-                )
+                run_docker_command_streaming(["docker", "pull", self.docker_image])
                 print(f"Successfully pulled {self.docker_image}")
             else:
                 print(f"Image {self.docker_image} already available locally")
@@ -105,12 +136,7 @@ class DockerQEMURunner:
                 self.docker_image = self.ALTERNATIVE_IMAGE
                 try:
                     print(f"Pulling alternative Docker image: {self.docker_image}")
-                    result = run_subprocess_safe(
-                        ["docker", "pull", self.docker_image],
-                        capture_output=True,
-                        text=True,
-                        check=True,
-                    )
+                    run_docker_command_streaming(["docker", "pull", self.docker_image])
                     print(f"Successfully pulled {self.docker_image}")
                 except subprocess.CalledProcessError as e2:
                     print(f"Failed to pull alternative image: {e2}")
@@ -118,11 +144,8 @@ class DockerQEMURunner:
                     self.docker_image = self.FALLBACK_IMAGE
                     try:
                         print(f"Pulling fallback Docker image: {self.docker_image}")
-                        result = run_subprocess_safe(
-                            ["docker", "pull", self.docker_image],
-                            capture_output=True,
-                            text=True,
-                            check=True,
+                        run_docker_command_streaming(
+                            ["docker", "pull", self.docker_image]
                         )
                         print(f"Successfully pulled {self.docker_image}")
                     except subprocess.CalledProcessError as e3:
@@ -185,7 +208,9 @@ class DockerQEMURunner:
             shutil.rmtree(temp_dir, ignore_errors=True)
             raise e
 
-    def _create_flash_image(self, firmware_path: Path, output_path: Path, flash_size_mb: int = 4):
+    def _create_flash_image(
+        self, firmware_path: Path, output_path: Path, flash_size_mb: int = 4
+    ):
         """Create a proper flash image for QEMU ESP32.
 
         Args:
@@ -194,7 +219,9 @@ class DockerQEMURunner:
             flash_size_mb: Flash size in MB (must be 2, 4, 8, or 16)
         """
         if flash_size_mb not in [2, 4, 8, 16]:
-            raise ValueError(f"Flash size must be 2, 4, 8, or 16 MB, got {flash_size_mb}")
+            raise ValueError(
+                f"Flash size must be 2, 4, 8, or 16 MB, got {flash_size_mb}"
+            )
 
         flash_size = flash_size_mb * 1024 * 1024
 
@@ -206,7 +233,9 @@ class DockerQEMURunner:
 
         # Ensure we have exactly the right size
         if len(flash_data) > flash_size:
-            raise ValueError(f"Firmware size ({len(firmware_data)} bytes) exceeds flash size ({flash_size} bytes)")
+            raise ValueError(
+                f"Firmware size ({len(firmware_data)} bytes) exceeds flash size ({flash_size} bytes)"
+            )
 
         flash_data = flash_data[:flash_size]  # Truncate to exact size
 
@@ -272,7 +301,6 @@ exit 0
         cmd = ["bash", "-c", wrapper_script]
 
         return cmd
-
 
     def run(
         self,
@@ -384,16 +412,8 @@ exit 0
             if self.container_name:
                 try:
                     # Stop and remove container
-                    run_subprocess_safe(
-                        ["docker", "stop", self.container_name],
-                        capture_output=True,
-                        check=False,
-                    )
-                    run_subprocess_safe(
-                        ["docker", "rm", self.container_name],
-                        capture_output=True,
-                        check=False,
-                    )
+                    run_docker_command_no_fail(["docker", "stop", self.container_name])
+                    run_docker_command_no_fail(["docker", "rm", self.container_name])
                 except:
                     pass
 
