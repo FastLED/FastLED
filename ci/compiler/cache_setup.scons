@@ -37,13 +37,6 @@ except (NameError, Exception):
     has_projenv = False
     projenv = None
 
-# Add project root to Python path for fake compiler imports
-# Note: We're in the build directory, go up to project root
-current_dir = Path(os.getcwd()).resolve()
-project_root = current_dir.parent.parent  # Go up from .build/pio/board to project root
-if str(project_root) not in sys.path:
-    sys.path.insert(0, str(project_root))
-
 # Import cached compiler functions with type stubs
 create_cached_toolchain: Optional[Any] = None
 get_platform_packages_paths: Optional[Any] = None

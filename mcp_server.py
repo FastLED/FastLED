@@ -1381,8 +1381,6 @@ async def compile_examples(arguments: Dict[str, Any], project_root: Path) -> Cal
 
 async def code_fingerprint(arguments: Dict[str, Any], project_root: Path) -> CallToolResult:
     """Calculate code fingerprint."""
-    # Import the fingerprint function from test.py
-    sys.path.insert(0, str(project_root))
     from test import calculate_fingerprint
     
     directory = arguments.get("directory", "src")

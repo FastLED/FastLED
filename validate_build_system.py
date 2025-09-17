@@ -9,9 +9,6 @@ import tempfile
 from pathlib import Path
 import sys
 
-# Add the project root to the path
-sys.path.insert(0, str(Path(__file__).parent))
-
 try:
     from ci.build_api import create_unit_test_builder, create_example_builder, BuildType
     

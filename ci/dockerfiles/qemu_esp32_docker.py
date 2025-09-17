@@ -18,10 +18,6 @@ import time
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
 
-
-# Add parent directory to path to import DockerManager
-sys.path.insert(0, str(Path(__file__).parent.parent.parent))
-
 from ci.dockerfiles.DockerManager import DockerManager
 
 

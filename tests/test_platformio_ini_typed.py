@@ -9,9 +9,6 @@ import tempfile
 import os
 import sys
 
-# Add project root to path
-sys.path.insert(0, str(Path(__file__).parent.parent))
-
 from ci.compiler.platformio_ini import (
     PlatformIOIni,
     PlatformIOSection,
