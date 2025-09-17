@@ -163,6 +163,9 @@ def run_qemu_tests(args: TestArgs) -> None:
             # Set up output file for GitHub Actions
             output_file = "qemu_output.log"
 
+            # Determine machine type based on platform
+            machine_type = "esp32c3" if platform == "esp32c3" else "esp32"
+
             # Run QEMU in Docker
             qemu_returncode = docker_runner.run(
                 firmware_path=pio_build_dir,
@@ -171,6 +174,7 @@ def run_qemu_tests(args: TestArgs) -> None:
                 interrupt_regex=interrupt_regex,
                 interactive=False,
                 output_file=output_file,
+                machine=machine_type,
             )
 
             if qemu_returncode == 0:

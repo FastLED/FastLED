@@ -259,13 +259,25 @@ class DockerQEMURunner:
         """
         # For Linux containers, use a workaround to run QEMU through Docker Desktop's Windows integration
         firmware_path = f"{self.firmware_mount_path}/flash.bin"
-        rom_path = "/opt/qemu/esp32-v3-rom.bin"
 
-        # Use container's QEMU with proper ESP32 configuration
+        # Determine QEMU system and machine based on target
+        if machine == "esp32c3":
+            qemu_system = "qemu-system-riscv32"
+            qemu_machine = "esp32c3"
+            echo_target = "ESP32C3"
+        else:
+            # Default to ESP32 (Xtensa)
+            qemu_system = "qemu-system-xtensa"
+            qemu_machine = "esp32"
+            echo_target = "ESP32"
+
+        # Use container's QEMU with proper configuration
         wrapper_script = f'''#!/bin/bash
 set -e
-echo "Starting ESP32 QEMU emulation..."
+echo "Starting {echo_target} QEMU emulation..."
 echo "Firmware: {firmware_path}"
+echo "Machine: {qemu_machine}"
+echo "QEMU system: {qemu_system}"
 echo "Container: $(cat /etc/os-release | head -1)"
 
 # Check if firmware file exists
@@ -278,20 +290,41 @@ fi
 FIRMWARE_SIZE=$(stat -c%s "{firmware_path}")
 echo "Firmware size: $FIRMWARE_SIZE bytes"
 
-# Try different QEMU configurations depending on container
-if command -v qemu-system-xtensa >/dev/null 2>&1; then
-    echo "Found qemu-system-xtensa"
-    # For svenstaro/qemu-espressif or ESP-IDF containers
-    qemu-system-xtensa \\
-        -nographic \\
-        -machine esp32 \\
-        -drive file="{firmware_path}",if=mtd,format=raw \\
-        -global driver=timer.esp32.timg,property=wdt_disable,value=true \\
-        -monitor none \\
-        -serial stdio
+# Try different QEMU configurations depending on machine type
+if [ "{qemu_machine}" = "esp32c3" ]; then
+    # ESP32C3 uses RISC-V architecture
+    if command -v {qemu_system} >/dev/null 2>&1; then
+        echo "Found {qemu_system}"
+        {qemu_system} \\
+            -nographic \\
+            -machine {qemu_machine} \\
+            -drive file="{firmware_path}",if=mtd,format=raw \\
+            -monitor none \\
+            -serial stdio
+    else
+        echo "ERROR: {qemu_system} not found in container"
+        echo "Available QEMU systems:"
+        ls -la /usr/bin/qemu-* || echo "No QEMU systems found"
+        exit 1
+    fi
 else
-    echo "ERROR: qemu-system-xtensa not found in container"
-    exit 1
+    # ESP32 uses Xtensa architecture
+    if command -v {qemu_system} >/dev/null 2>&1; then
+        echo "Found {qemu_system}"
+        # For svenstaro/qemu-espressif or ESP-IDF containers
+        {qemu_system} \\
+            -nographic \\
+            -machine {qemu_machine} \\
+            -drive file="{firmware_path}",if=mtd,format=raw \\
+            -global driver=timer.esp32.timg,property=wdt_disable,value=true \\
+            -monitor none \\
+            -serial stdio
+    else
+        echo "ERROR: {qemu_system} not found in container"
+        echo "Available QEMU systems:"
+        ls -la /usr/bin/qemu-* || echo "No QEMU systems found"
+        exit 1
+    fi
 fi
 
 echo "QEMU execution completed"
@@ -310,8 +343,9 @@ exit 0
         interrupt_regex: Optional[str] = None,
         interactive: bool = False,
         output_file: Optional[str] = None,
+        machine: str = "esp32",
     ) -> int:
-        """Run ESP32 firmware in QEMU using Docker.
+        """Run ESP32/ESP32C3 firmware in QEMU using Docker.
 
         Args:
             firmware_path: Path to firmware.bin or build directory
@@ -320,6 +354,7 @@ exit 0
             interrupt_regex: Regex pattern to detect in output (informational only)
             interactive: Run in interactive mode (attach to container)
             output_file: Optional file path to write QEMU output to
+            machine: QEMU machine type (esp32, esp32c3, etc.)
 
         Returns:
             Exit code: actual QEMU/container exit code, except timeout returns 0
@@ -377,7 +412,7 @@ exit 0
 
             # Build QEMU command
             qemu_cmd = self.build_qemu_command(
-                firmware_name="firmware.bin", flash_size=flash_size
+                firmware_name="firmware.bin", flash_size=flash_size, machine=machine
             )
 
             print(f"Running QEMU in Docker container: {self.container_name}")
