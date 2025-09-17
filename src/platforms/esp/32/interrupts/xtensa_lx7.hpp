@@ -297,11 +297,20 @@ esp_err_t fastled_esp32s3_rmt_init_custom(
 /*
  * FASTLED_ESP_XTENSA_ASM_INTERRUPT_TRAMPOLINE
  *
- * Generates an inline assembly interrupt trampoline function that handles
- * the stack prologue/epilogue and calls a C function pointer.
+ * CRITICAL: This is specifically for EXPERIMENTAL interrupt levels 4-5 only.
+ * Xtensa REQUIRES assembly for high-priority interrupts (≥4) - C handlers
+ * are NOT supported at these levels on ESP32-S3.
  *
- * This macro works around GCC bugs with templates and IRAM directives by
- * generating the assembly trampoline inline.
+ * WHY ASSEMBLY IS MANDATORY ON XTENSA:
+ * - Levels 1-3: ESP-IDF supports C handlers with automatic cleanup
+ * - Levels 4-5: MUST use assembly - no C/RTOS facilities available
+ * - Hardware limitation: Xtensa high-priority interrupts bypass C runtime
+ * - Manual register save/restore required for proper operation
+ *
+ * ARCHITECTURAL CONTEXT:
+ * - Official FastLED RMT driver: Uses levels 1-3 with C handlers
+ * - Experimental bypassed RMT: Uses levels 4-5 requiring assembly
+ * - This trampoline bridges assembly requirement with C function calls
  *
  * Usage:
  *   FASTLED_ESP_XTENSA_ASM_INTERRUPT_TRAMPOLINE(my_isr, my_c_handler)

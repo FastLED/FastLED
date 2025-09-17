@@ -409,7 +409,94 @@ void IRAM_ATTR fastled_riscv_rmt_experimental_handler(void *arg);
     __attribute__((used)) \
     void new_function_name(void* arg) { \
         /* RISC-V can call C functions directly from interrupt context */ \
+        /* Simple C trampoline - no assembly required unlike Xtensa */ \
         function_pointer(arg); \
+    }
+
+/*
+ * FASTLED_ESP_RISCV_ASM_INTERRUPT_TRAMPOLINE (Advanced)
+ *
+ * CRITICAL: This is specifically for EXPERIMENTAL interrupt levels 4-7 only.
+ * ESP-IDF does NOT provide PLIC cleanup for custom high-priority interrupts
+ * that bypass the official RMT driver (levels 4-7).
+ *
+ * WHY MANUAL PLIC HANDLING IS REQUIRED:
+ * - Levels 1-3: ESP-IDF handles PLIC claim/complete automatically
+ * - Levels 4-7: CUSTOM implementation - ESP-IDF provides NO cleanup
+ * - Without PLIC complete: Interrupt storm occurs (continuous retriggering)
+ * - Manual PLIC protocol prevents system lockup in high-priority handlers
+ *
+ * ARCHITECTURAL CONTEXT:
+ * - Official FastLED RMT driver: Uses levels 1-3 with ESP-IDF management
+ * - Experimental bypassed RMT: Uses levels 4-7 requiring manual PLIC
+ * - This assembly handles the PLIC protocol ESP-IDF doesn't provide
+ *
+ * Usage:
+ *   FASTLED_ESP_RISCV_ASM_INTERRUPT_TRAMPOLINE(my_isr, my_c_handler)
+ *
+ * Generates:
+ *   void my_isr(void* arg) - assembly trampoline that calls my_c_handler
+ *
+ * Parameters:
+ *   new_function_name: Name of the generated interrupt handler function
+ *   function_pointer: C function to call from the trampoline
+ *
+ * The generated function has signature: void(void*)
+ * and is automatically placed in IRAM section.
+ */
+
+#define FASTLED_ESP_RISCV_ASM_INTERRUPT_TRAMPOLINE(new_function_name, function_pointer) \
+    __attribute__((section(".iram1"))) \
+    __attribute__((used)) \
+    __attribute__((naked)) \
+    void new_function_name(void* arg) { \
+        __asm__ volatile ( \
+            ".align 4\n" \
+            /* Create stack frame (16-byte aligned per RISC-V ABI) */ \
+            "addi sp, sp, -32\n" \
+            "sw   ra, 28(sp)\n"  /* Save return address */ \
+            "sw   a0, 24(sp)\n"  /* Save a0 (arg) */ \
+            "sw   a1, 20(sp)\n"  /* Save a1 */ \
+            "sw   a2, 16(sp)\n"  /* Save a2 */ \
+            "sw   a3, 12(sp)\n"  /* Save a3 */ \
+            "sw   a4,  8(sp)\n"  /* Save a4 */ \
+            "sw   a5,  4(sp)\n"  /* Save a5 */ \
+            "sw   t0,  0(sp)\n"  /* Save t0 */ \
+            \
+            /* CRITICAL: Claim interrupt from PLIC for levels 4-7 */ \
+            /* ESP-IDF does NOT handle this for experimental interrupts */ \
+            "li   t0, %1\n"      /* Load PLIC_CLAIM_BASE */ \
+            "lw   a1, 0(t0)\n"   /* a1 = interrupt_id */ \
+            "beqz a1, finish%=\n" /* spurious interrupt check */ \
+            \
+            /* Call C function with original arg in a0 */ \
+            "li   t0, %0\n"      /* Load function pointer */ \
+            "jalr ra, t0, 0\n"   /* Call C function */ \
+            \
+            /* CRITICAL: Complete interrupt in PLIC for levels 4-7 */ \
+            /* Without this: interrupt storm (continuous retriggering) */ \
+            /* ESP-IDF cleanup ONLY for levels 1-3, NOT 4-7 */ \
+            "li   t0, %2\n"      /* Load PLIC_COMPLETE_BASE */ \
+            "sw   a1, 0(t0)\n"   /* Complete interrupt_id */ \
+            \
+            "finish%=:\n" \
+            /* Restore registers from stack */ \
+            "lw   ra, 28(sp)\n"  /* Restore ra */ \
+            "lw   a0, 24(sp)\n"  /* Restore a0 */ \
+            "lw   a1, 20(sp)\n"  /* Restore a1 */ \
+            "lw   a2, 16(sp)\n"  /* Restore a2 */ \
+            "lw   a3, 12(sp)\n"  /* Restore a3 */ \
+            "lw   a4,  8(sp)\n"  /* Restore a4 */ \
+            "lw   a5,  4(sp)\n"  /* Restore a5 */ \
+            "lw   t0,  0(sp)\n"  /* Restore t0 */ \
+            "addi sp, sp, 32\n"  /* Restore stack pointer */ \
+            "ret\n"              /* Return */ \
+            : \
+            : "i" (function_pointer), \
+              "i" (FASTLED_PLIC_CLAIM_BASE), \
+              "i" (FASTLED_PLIC_COMPLETE_BASE) \
+            : "memory" \
+        ); \
     }
 
 /*
@@ -428,6 +515,101 @@ void IRAM_ATTR fastled_riscv_rmt_experimental_handler(void *arg);
  * esp_intr_alloc(ETS_RMT_INTR_SOURCE,
  *                ESP_INTR_FLAG_IRAM,
  *                my_rmt_isr, NULL, &handle);
+ */
+
+//=============================================================================
+// ASSEMBLY TRAMPOLINE AUDIT - CRITICAL TECHNICAL ISSUES
+//=============================================================================
+
+/*
+ * DETAILED TECHNICAL AUDIT OF FASTLED_ESP_RISCV_ASM_INTERRUPT_TRAMPOLINE
+ *
+ * The assembly trampoline implementation above contains multiple critical
+ * technical errors that make it unsuitable for production use:
+ *
+ * === CRITICAL FAILURES (WILL NOT COMPILE/RUN) ===
+ *
+ * 1. INVALID 64-BIT ADDRESSES ON 32-BIT ARCHITECTURE:
+ *    - FASTLED_PLIC_CLAIM_BASE = 0x600C200004 (40-bit address)
+ *    - ESP32-C3/C6 are 32-bit RISC-V cores (RV32IMC)
+ *    - Hardware cannot address beyond 0xFFFFFFFF
+ *    - Will cause memory access violations
+ *
+ * 2. LOAD IMMEDIATE INSTRUCTION OVERFLOW:
+ *    - "li t0, %1" cannot load 40-bit addresses
+ *    - RISC-V li pseudoinstruction limited to 32-bit values
+ *    - Requires multi-instruction sequence (lui + addi)
+ *    - Assembler will reject this code
+ *
+ * 3. INCORRECT JALR INSTRUCTION SYNTAX:
+ *    - "jalr ra, t0, 0" has redundant offset
+ *    - Should be "jalr ra, t0" or "jalr t0"
+ *    - Default offset is 0, making ", 0" unnecessary
+ *
+ * 4. INLINE ASSEMBLY CONSTRAINT VIOLATIONS:
+ *    - "i" constraint requires immediate values that fit in instruction
+ *    - 40-bit addresses violate this constraint
+ *    - Compiler will generate errors during assembly
+ *    - Should use "r" constraint with register loading
+ *
+ * 5. PLIC REGISTER ADDRESS CORRUPTION:
+ *    - CLAIM and COMPLETE use identical addresses (0x600C200004)
+ *    - Standard PLIC uses different addresses or access methods
+ *    - Addresses are unverified (TODO comments admit this)
+ *
+ * === ARCHITECTURAL VIOLATIONS ===
+ *
+ * 6. RISC-V CALLING CONVENTION VIOLATION:
+ *    - Overwrites a1 (second argument) with interrupt_id
+ *    - C function expects arguments in a0, a1 per RISC-V ABI
+ *    - Function receives corrupted argument list
+ *
+ * 7. REGISTER CORRUPTION WITHOUT PROPER RESTORATION:
+ *    - Loads interrupt_id into a1, then restores original a1
+ *    - interrupt_id is lost if C function needs it
+ *    - Creates debugging and logic issues
+ *
+ * 8. MISSING CLOBBER DECLARATIONS:
+ *    - Assembly modifies t0, a1 without declaring clobbers
+ *    - Compiler may optimize incorrectly
+ *    - Should include "t0", "a1" in clobber list
+ *
+ * === DESIGN ISSUES ===
+ *
+ * 9. SPURIOUS INTERRUPT HANDLING:
+ *    - Skips PLIC complete for spurious interrupts (a1 == 0)
+ *    - Standard PLIC may require completion regardless
+ *    - Could cause interrupt storms
+ *
+ * 10. EXCESSIVE REGISTER PRESERVATION:
+ *     - Saves 8 registers when fewer would suffice
+ *     - Over-engineering for simple trampoline function
+ *     - Performance impact without benefit
+ *
+ * 11. SECTION ATTRIBUTE REDUNDANCY:
+ *     - .iram1 section on naked function is unusual pattern
+ *     - Not wrong but unconventional
+ *
+ * === RECOMMENDATION ===
+ *
+ * DO NOT USE FASTLED_ESP_RISCV_ASM_INTERRUPT_TRAMPOLINE
+ *
+ * The assembly implementation is fundamentally broken and will not compile
+ * or function correctly. Use the simple C trampoline instead:
+ *
+ *   FASTLED_ESP_RISCV_INTERRUPT_TRAMPOLINE(my_isr, my_handler)
+ *
+ * RISC-V allows C handlers at any priority level, making assembly trampolines
+ * optional optimizations rather than requirements (unlike Xtensa).
+ *
+ * If assembly optimization is truly needed:
+ * 1. Fix all address and instruction syntax issues
+ * 2. Verify PLIC register addresses from ESP32-C3/C6 TRM
+ * 3. Implement proper calling convention
+ * 4. Add comprehensive testing on target hardware
+ *
+ * The current implementation demonstrates why assembly should be avoided
+ * unless absolutely necessary and thoroughly validated.
  */
 
 //=============================================================================
