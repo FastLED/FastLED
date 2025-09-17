@@ -80,7 +80,7 @@ def run_docker_command_no_fail(cmd: List[str]) -> int:
 class DockerQEMURunner:
     """Runner for ESP32 QEMU emulation using Docker containers."""
 
-    DEFAULT_IMAGE = "svenstaro/qemu-espressif:latest"
+    DEFAULT_IMAGE = "mluis/qemu-esp32:latest"
     ALTERNATIVE_IMAGE = "espressif/idf:latest"
     FALLBACK_IMAGE = "espressif/idf:release-v5.2"
 
@@ -262,16 +262,16 @@ class DockerQEMURunner:
 
         # Determine QEMU system and machine based on target
         if machine == "esp32c3":
-            qemu_system = "qemu-system-riscv32"
+            qemu_system = "/usr/local/bin/qemu-system-riscv32"
             qemu_machine = "esp32c3"
             echo_target = "ESP32C3"
         elif machine == "esp32s3":
-            qemu_system = "qemu-system-xtensa"
+            qemu_system = "/usr/local/bin/qemu-system-xtensa"
             qemu_machine = "esp32s3"
             echo_target = "ESP32S3"
         else:
             # Default to ESP32 (Xtensa)
-            qemu_system = "qemu-system-xtensa"
+            qemu_system = "/usr/local/bin/qemu-system-xtensa"
             qemu_machine = "esp32"
             echo_target = "ESP32"
 
@@ -294,41 +294,30 @@ fi
 FIRMWARE_SIZE=$(stat -c%s "{firmware_path}")
 echo "Firmware size: $FIRMWARE_SIZE bytes"
 
+# Copy firmware to writable location since QEMU needs write access
+cp "{firmware_path}" /tmp/flash.bin
+echo "Copied firmware to writable location: /tmp/flash.bin"
+
 # Try different QEMU configurations depending on machine type
 if [ "{qemu_machine}" = "esp32c3" ]; then
     # ESP32C3 uses RISC-V architecture
-    if command -v {qemu_system} >/dev/null 2>&1; then
-        echo "Found {qemu_system}"
-        {qemu_system} \\
-            -nographic \\
-            -machine {qemu_machine} \\
-            -drive file="{firmware_path}",if=mtd,format=raw \\
-            -monitor none \\
-            -serial stdio
-    else
-        echo "ERROR: {qemu_system} not found in container"
-        echo "Available QEMU systems:"
-        ls -la /usr/bin/qemu-* || echo "No QEMU systems found"
-        exit 1
-    fi
+    echo "Running {qemu_system} for {qemu_machine}"
+    {qemu_system} \\
+        -nographic \\
+        -machine {qemu_machine} \\
+        -drive file="/tmp/flash.bin",if=mtd,format=raw \\
+        -monitor none \\
+        -serial mon:stdio
 else
     # ESP32 uses Xtensa architecture
-    if command -v {qemu_system} >/dev/null 2>&1; then
-        echo "Found {qemu_system}"
-        # For svenstaro/qemu-espressif or ESP-IDF containers
-        {qemu_system} \\
-            -nographic \\
-            -machine {qemu_machine} \\
-            -drive file="{firmware_path}",if=mtd,format=raw \\
-            -global driver=timer.esp32.timg,property=wdt_disable,value=true \\
-            -monitor none \\
-            -serial stdio
-    else
-        echo "ERROR: {qemu_system} not found in container"
-        echo "Available QEMU systems:"
-        ls -la /usr/bin/qemu-* || echo "No QEMU systems found"
-        exit 1
-    fi
+    echo "Running {qemu_system} for {qemu_machine}"
+    {qemu_system} \\
+        -nographic \\
+        -machine {qemu_machine} \\
+        -drive file="/tmp/flash.bin",if=mtd,format=raw \\
+        -global driver=timer.esp32.timg,property=wdt_disable,value=true \\
+        -monitor none \\
+        -serial mon:stdio
 fi
 
 echo "QEMU execution completed"
