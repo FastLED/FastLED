@@ -54,8 +54,8 @@ def run_subprocess_safe(
 class DockerQEMURunner:
     """Runner for ESP32 QEMU emulation using Docker containers."""
 
-    DEFAULT_IMAGE = "ubuntu:latest"
-    ALTERNATIVE_IMAGE = "alpine:latest"
+    DEFAULT_IMAGE = "espressif/idf:latest"
+    ALTERNATIVE_IMAGE = "espressif/idf:release-v5.2"
 
     def __init__(self, docker_image: Optional[str] = None):
         """Initialize Docker QEMU runner.
@@ -193,42 +193,34 @@ class DockerQEMURunner:
         firmware_path = f"{self.firmware_mount_path}/flash.bin"
         rom_path = "/opt/qemu/esp32-v3-rom.bin"
 
-        # Use a wrapper approach - create a script that calls docker from within the container
-        # to run the Windows QEMU on the host
+        # Use the container's built-in QEMU from ESP-IDF
         wrapper_script = f'''#!/bin/bash
 set -e
 echo "Starting ESP32 QEMU emulation..."
 echo "Firmware: {firmware_path}"
-echo "ROM: {rom_path}"
 
-# Check if files exist
+# Check if firmware file exists
 if [ ! -f "{firmware_path}" ]; then
     echo "ERROR: Firmware file not found: {firmware_path}"
     exit 1
 fi
 
-if [ ! -f "{rom_path}" ]; then
-    echo "ERROR: ROM file not found: {rom_path}"
-    exit 1
-fi
+# Use ESP-IDF's QEMU which should be in the container
+qemu-system-xtensa \\
+    -nographic \\
+    -machine esp32 \\
+    -drive file="{firmware_path}",if=mtd,format=raw \\
+    -global driver=timer.esp32.timg,property=wdt_disable,value=true \\
+    -monitor none
 
-# For this demo, just simulate QEMU output and successful completion
-echo "ets Aug 08 2016 00:22:57"
-echo "rst:0x1 (POWERON_RESET),boot:0x13 (SPI_FAST_FLASH_BOOT)"
-echo "configsip: 0, SPIWP:0xee"
-echo "clk_drv:0x00,q_drv:0x00,d_drv:0x00,cs0_drv:0x00,hd_drv:0x00,wp_drv:0x00"
-echo "mode:DIO, clock div:2"
-echo "load:0x3fff0030,len:1184"
-echo "load:0x40078000,len:13192"
-echo "entry 0x400805e4"
-echo "Setup complete - starting blink animation"
-echo "FastLED QEMU simulation completed successfully"
+echo "QEMU execution completed"
 exit 0
 '''
 
         cmd = ["bash", "-c", wrapper_script]
 
         return cmd
+
 
     def run(
         self,
@@ -268,12 +260,6 @@ exit 0
             # Generate unique container name
             self.container_name = f"qemu_esp32_{int(time.time())}"
 
-            # Get host QEMU cache directory - convert to Unix-style path for Docker
-            host_qemu_dir = Path(".cache/qemu").resolve()
-            if not host_qemu_dir.exists():
-                print(f"ERROR: Host QEMU directory not found: {host_qemu_dir}")
-                return 1
-
             # Convert Windows paths to Docker-compatible paths
             def windows_to_docker_path(path_str: Union[str, Path]) -> str:
                 """Convert Windows path to Docker volume mount format."""
@@ -297,20 +283,13 @@ exit 0
 
                 return path_str
 
-            docker_qemu_path = windows_to_docker_path(host_qemu_dir)
             docker_firmware_path = windows_to_docker_path(temp_firmware_dir)
 
-            # Use Linux-style mount paths
-            qemu_mount_path = "/opt/qemu"
-
+            # Only mount the firmware directory - QEMU is built into the container
             volumes = {
                 docker_firmware_path: {
                     "bind": self.firmware_mount_path,
                     "mode": "ro",  # Read-only mount
-                },
-                docker_qemu_path: {
-                    "bind": qemu_mount_path,
-                    "mode": "ro",  # Read-only mount for QEMU binaries
                 },
             }
 
