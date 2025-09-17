@@ -23,7 +23,6 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        platform: [${{ inputs.platform }}]
         example: [BlinkParallel]  # Test with FL_WARN output
 
     steps:
@@ -124,8 +123,8 @@ jobs:
       - name: Run ${{ inputs.platform_display }} QEMU test
         working-directory: trusted
         run: |
-          echo "Running QEMU test for ${{ matrix.platform }}"
-          bash test --qemu ${{ matrix.platform }}
+          echo "Running QEMU test for ${{ inputs.platform }}"
+          bash test --qemu ${{ inputs.platform }}
         shell: bash
 
       - name: Display QEMU output log
@@ -229,17 +228,17 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ inputs.platform }}-qemu-failure-${{ matrix.platform }}-${{ matrix.example }}-${{ github.sha }}
+          name: ${{ inputs.platform }}-qemu-failure-${{ inputs.platform }}-${{ matrix.example }}-${{ github.sha }}
           path: |
             trusted/qemu_output.log
-            trusted/.build/pio/${{ matrix.platform }}/
+            trusted/.build/pio/${{ inputs.platform }}/
           include-hidden-files: true
 
       - name: Upload QEMU logs on success (for analysis)
         if: success()
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ inputs.platform }}-qemu-success-${{ matrix.platform }}-${{ matrix.example }}-${{ github.sha }}
+          name: ${{ inputs.platform }}-qemu-success-${{ inputs.platform }}-${{ matrix.example }}-${{ github.sha }}
           path: trusted/qemu_output.log
 
       - name: Summary
@@ -247,7 +246,7 @@ jobs:
         working-directory: trusted
         run: |
           echo "=== ${{ inputs.platform_display }} QEMU Test Summary ==="
-          echo "Platform: ${{ matrix.platform }}"
+          echo "Platform: ${{ inputs.platform }}"
           echo "Example: ${{ matrix.example }}"
           echo "Status: ${{ job.status }}"
           if [ -f "qemu_output.log" ]; then
