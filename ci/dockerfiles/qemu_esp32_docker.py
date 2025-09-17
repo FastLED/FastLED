@@ -16,7 +16,7 @@ import sys
 import tempfile
 import time
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional, Union
 
 
 # Add parent directory to path to import DockerManager
@@ -25,7 +25,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 from ci.dockerfiles.DockerManager import DockerManager
 
 
-def get_docker_env():
+def get_docker_env() -> Dict[str, str]:
     """Get environment for Docker commands, handling Git Bash/MSYS2 path conversion."""
     env = os.environ.copy()
     # Set UTF-8 encoding environment variables for Windows
@@ -41,12 +41,14 @@ def get_docker_env():
     return env
 
 
-def run_subprocess_safe(cmd, **kwargs):
+def run_subprocess_safe(
+    cmd: List[str], **kwargs: Any
+) -> subprocess.CompletedProcess[Any]:
     """Run subprocess with safe UTF-8 handling and error replacement."""
     kwargs.setdefault("encoding", "utf-8")
     kwargs.setdefault("errors", "replace")
     kwargs.setdefault("env", get_docker_env())
-    return subprocess.run(cmd, **kwargs)
+    return subprocess.run(cmd, **kwargs)  # type: ignore[misc]
 
 
 class DockerQEMURunner:
@@ -273,7 +275,7 @@ exit 0
                 return 1
 
             # Convert Windows paths to Docker-compatible paths
-            def windows_to_docker_path(path_str):
+            def windows_to_docker_path(path_str: Union[str, Path]) -> str:
                 """Convert Windows path to Docker volume mount format."""
                 import os
 

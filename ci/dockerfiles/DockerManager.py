@@ -52,21 +52,18 @@ class DockerManager:
 
                 returncode = proc.wait()
 
-                # Create a mock result object for compatibility
-                class MockResult:
-                    def __init__(self, returncode, stdout="", stderr=""):
-                        self.returncode = returncode
-                        self.stdout = stdout
-                        self.stderr = stderr
-
                 # Return success if pattern was found, regardless of container exit code
                 final_returncode = 0 if success_pattern_found else returncode
-                return MockResult(final_returncode, "", "")
+                return subprocess.CompletedProcess(
+                    args=full_command, returncode=final_returncode, stdout="", stderr=""
+                )
 
             except Exception as e:
                 print(f"Error during streaming: {e}")
                 returncode = proc.wait() if hasattr(proc, "wait") else 1
-                return MockResult(returncode, "", str(e))
+                return subprocess.CompletedProcess(
+                    args=full_command, returncode=returncode, stdout="", stderr=str(e)
+                )
         else:
             # Use regular subprocess for non-streaming commands
             result = subprocess.run(
