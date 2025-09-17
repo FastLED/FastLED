@@ -1,0 +1,40 @@
+name: ESP32-S3 QEMU Test
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - 'src/**/*.cpp'
+      - 'src/**/*.h'
+      - 'examples/**/*.ino'
+      - 'examples/**/*.cpp'
+      - 'examples/**/*.h'
+      - 'ci/install-qemu.py'
+      - 'ci/qemu-esp32.py'
+      - 'ci/ci-compile.py'
+      - 'platformio.ini'
+      - 'CMakeLists.txt'
+      - 'library.json'
+      - '.github/workflows/qemu_esp32s3_test.yml'
+  pull_request:
+    branches: [master]
+    paths:
+      - 'src/**/*.cpp'
+      - 'src/**/*.h'
+      - 'examples/**/*.ino'
+      - 'examples/**/*.cpp'
+      - 'examples/**/*.h'
+      - 'ci/install-qemu.py'
+      - 'ci/qemu-esp32.py'
+      - 'ci/ci-compile.py'
+      - 'platformio.ini'
+      - 'CMakeLists.txt'
+      - 'library.json'
+      - '.github/workflows/qemu_esp32s3_test.yml'
+
+jobs:
+  esp32s3_qemu_test:
+    uses: ./.github/workflows/build_qemu_template.yml
+    with:
+      platform: esp32s3
+      platform_display: ESP32-S3

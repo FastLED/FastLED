@@ -1,4 +1,4 @@
-name: ESP32-C3 QEMU Test
+name: ESP32-DEV QEMU Test
 
 on:
   push:
@@ -15,7 +15,7 @@ on:
       - 'platformio.ini'
       - 'CMakeLists.txt'
       - 'library.json'
-      - '.github/workflows/esp32c3_qemu_test.yml'
+      - '.github/workflows/qemu_esp32dev_test.yml'
   pull_request:
     branches: [master]
     paths:
@@ -30,11 +30,11 @@ on:
       - 'platformio.ini'
       - 'CMakeLists.txt'
       - 'library.json'
-      - '.github/workflows/esp32c3_qemu_test.yml'
+      - '.github/workflows/qemu_esp32dev_test.yml'
 
 jobs:
-  esp32c3_qemu_test:
+  esp32dev_qemu_test:
     uses: ./.github/workflows/build_qemu_template.yml
     with:
-      platform: esp32c3
-      platform_display: ESP32-C3
+      platform: esp32dev
+      platform_display: ESP32-DEV
