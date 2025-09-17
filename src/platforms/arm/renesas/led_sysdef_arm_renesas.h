@@ -1,7 +1,9 @@
 #ifndef __INC_LED_SYSDEFS_ARM_RENESAS_H
 #define __INC_LED_SYSDEFS_ARM_RENESAS_H
 
-#define FASTLED_ARM
+#ifndef FASTLED_ARM
+#error "FASTLED_ARM must be defined before including this header. Ensure platforms/arm/is_arm.h is included first."
+#endif
 
 #ifndef INTERRUPT_THRESHOLD
 #define INTERRUPT_THRESHOLD 1

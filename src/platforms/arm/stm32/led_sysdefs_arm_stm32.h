@@ -37,7 +37,9 @@ FASTLED_USING_NAMESPACE
 #error "Platform not supported"
 #endif
 
-#define FASTLED_ARM
+#ifndef FASTLED_ARM
+#error "FASTLED_ARM must be defined before including this header. Ensure platforms/arm/is_arm.h is included first."
+#endif
 
 #ifndef INTERRUPT_THRESHOLD
 #define INTERRUPT_THRESHOLD 1

@@ -7,6 +7,9 @@
 
 #include "fastled_config.h"
 
+// Include ARM platform detection before any ARM headers
+#include "platforms/arm/is_arm.h"
+
 // Arduino.h needed for convenience functions digitalPinToPort/BitMask/portOutputRegister and the pinMode methods.
 #if defined(ARDUINO) && !defined(__EMSCRIPTEN__)
 #include <Arduino.h>  // ok include

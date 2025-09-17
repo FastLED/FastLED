@@ -3,7 +3,9 @@
 
 #include "fl/force_inline.h"
 
-#define FASTLED_ARM
+#ifndef FASTLED_ARM
+#error "FASTLED_ARM must be defined before including this header. Ensure platforms/arm/is_arm.h is included first."
+#endif
 
 #ifndef F_CPU
     #define F_CPU 64000000 // the NRF52 series has a 64MHz CPU

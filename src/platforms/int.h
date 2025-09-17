@@ -10,7 +10,7 @@
     #include "platforms/esp/int.h"
 #elif defined(__AVR__)
     #include "platforms/avr/int.h"
-#elif defined(FASTLED_IS_ARM)
+#elif defined(FASTLED_ARM)
     // All ARM platforms (Due, Teensy, STM32, nRF52, Apollo3, etc.)
     #include "platforms/arm/int.h"
 #elif defined(__EMSCRIPTEN__)
