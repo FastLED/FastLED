@@ -1,6 +1,7 @@
 name: ESP32-C3 QEMU Test
 
 on:
+  workflow_dispatch:
   push:
     branches: [master]
     paths:
