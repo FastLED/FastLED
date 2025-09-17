@@ -50,8 +50,9 @@ def run_subprocess_safe(
 class DockerQEMURunner:
     """Runner for ESP32 QEMU emulation using Docker containers."""
 
-    DEFAULT_IMAGE = "espressif/idf:latest"
-    ALTERNATIVE_IMAGE = "espressif/idf:release-v5.2"
+    DEFAULT_IMAGE = "svenstaro/qemu-espressif:latest"
+    ALTERNATIVE_IMAGE = "espressif/idf:latest"
+    FALLBACK_IMAGE = "espressif/idf:release-v5.2"
 
     def __init__(self, docker_image: Optional[str] = None):
         """Initialize Docker QEMU runner.
@@ -99,7 +100,7 @@ class DockerQEMURunner:
                 print(f"Image {self.docker_image} already available locally")
         except subprocess.CalledProcessError as e:
             print(f"Warning: Failed to pull image {self.docker_image}: {e}")
-            if self.docker_image != self.ALTERNATIVE_IMAGE:
+            if self.docker_image == self.DEFAULT_IMAGE:
                 print(f"Trying alternative image: {self.ALTERNATIVE_IMAGE}")
                 self.docker_image = self.ALTERNATIVE_IMAGE
                 try:
@@ -113,7 +114,22 @@ class DockerQEMURunner:
                     print(f"Successfully pulled {self.docker_image}")
                 except subprocess.CalledProcessError as e2:
                     print(f"Failed to pull alternative image: {e2}")
-                    raise e2
+                    print(f"Trying fallback image: {self.FALLBACK_IMAGE}")
+                    self.docker_image = self.FALLBACK_IMAGE
+                    try:
+                        print(f"Pulling fallback Docker image: {self.docker_image}")
+                        result = run_subprocess_safe(
+                            ["docker", "pull", self.docker_image],
+                            capture_output=True,
+                            text=True,
+                            check=True,
+                        )
+                        print(f"Successfully pulled {self.docker_image}")
+                    except subprocess.CalledProcessError as e3:
+                        print(f"Failed to pull fallback image: {e3}")
+                        raise e3
+            else:
+                raise e
 
     def prepare_firmware(self, firmware_path: Path) -> Path:
         """Prepare firmware files for mounting into Docker container.
@@ -131,8 +147,8 @@ class DockerQEMURunner:
             if firmware_path.is_file() and firmware_path.suffix == ".bin":
                 # Copy single firmware file
                 shutil.copy2(firmware_path, temp_dir / "firmware.bin")
-                # Also create flash.bin for compatibility
-                shutil.copy2(firmware_path, temp_dir / "flash.bin")
+                # Create proper 4MB flash image for QEMU
+                self._create_flash_image(firmware_path, temp_dir / "flash.bin")
             else:
                 # Copy entire build directory
                 if firmware_path.is_dir():
@@ -149,13 +165,13 @@ class DockerQEMURunner:
                             for file in pio_build.glob(pattern):
                                 shutil.copy2(file, temp_dir)
 
-                    # Create flash.bin file that the QEMU script expects
+                    # Create proper flash.bin file from firmware.bin
                     firmware_bin = temp_dir / "firmware.bin"
                     if firmware_bin.exists():
-                        # Copy firmware.bin to flash.bin for compatibility
-                        shutil.copy2(firmware_bin, temp_dir / "flash.bin")
+                        # Create proper 4MB flash image for QEMU
+                        self._create_flash_image(firmware_bin, temp_dir / "flash.bin")
                     else:
-                        # Create a minimal flash.bin for testing
+                        # Create a minimal 4MB flash.bin for testing
                         flash_bin = temp_dir / "flash.bin"
                         flash_bin.write_bytes(
                             b"\xff" * (4 * 1024 * 1024)
@@ -168,6 +184,33 @@ class DockerQEMURunner:
             # Clean up on error
             shutil.rmtree(temp_dir, ignore_errors=True)
             raise e
+
+    def _create_flash_image(self, firmware_path: Path, output_path: Path, flash_size_mb: int = 4):
+        """Create a proper flash image for QEMU ESP32.
+
+        Args:
+            firmware_path: Path to the firmware.bin file
+            output_path: Path where to write the flash.bin
+            flash_size_mb: Flash size in MB (must be 2, 4, 8, or 16)
+        """
+        if flash_size_mb not in [2, 4, 8, 16]:
+            raise ValueError(f"Flash size must be 2, 4, 8, or 16 MB, got {flash_size_mb}")
+
+        flash_size = flash_size_mb * 1024 * 1024
+
+        # Read firmware content
+        firmware_data = firmware_path.read_bytes()
+
+        # Create flash image: firmware at beginning, rest filled with 0xFF
+        flash_data = firmware_data + b"\xff" * (flash_size - len(firmware_data))
+
+        # Ensure we have exactly the right size
+        if len(flash_data) > flash_size:
+            raise ValueError(f"Firmware size ({len(firmware_data)} bytes) exceeds flash size ({flash_size} bytes)")
+
+        flash_data = flash_data[:flash_size]  # Truncate to exact size
+
+        output_path.write_bytes(flash_data)
 
     def build_qemu_command(
         self,
@@ -189,11 +232,12 @@ class DockerQEMURunner:
         firmware_path = f"{self.firmware_mount_path}/flash.bin"
         rom_path = "/opt/qemu/esp32-v3-rom.bin"
 
-        # Use the container's built-in QEMU from ESP-IDF
+        # Use container's QEMU with proper ESP32 configuration
         wrapper_script = f'''#!/bin/bash
 set -e
 echo "Starting ESP32 QEMU emulation..."
 echo "Firmware: {firmware_path}"
+echo "Container: $(cat /etc/os-release | head -1)"
 
 # Check if firmware file exists
 if [ ! -f "{firmware_path}" ]; then
@@ -201,13 +245,25 @@ if [ ! -f "{firmware_path}" ]; then
     exit 1
 fi
 
-# Use ESP-IDF's QEMU which should be in the container
-qemu-system-xtensa \\
-    -nographic \\
-    -machine esp32 \\
-    -drive file="{firmware_path}",if=mtd,format=raw \\
-    -global driver=timer.esp32.timg,property=wdt_disable,value=true \\
-    -monitor none
+# Check firmware size
+FIRMWARE_SIZE=$(stat -c%s "{firmware_path}")
+echo "Firmware size: $FIRMWARE_SIZE bytes"
+
+# Try different QEMU configurations depending on container
+if command -v qemu-system-xtensa >/dev/null 2>&1; then
+    echo "Found qemu-system-xtensa"
+    # For svenstaro/qemu-espressif or ESP-IDF containers
+    qemu-system-xtensa \\
+        -nographic \\
+        -machine esp32 \\
+        -drive file="{firmware_path}",if=mtd,format=raw \\
+        -global driver=timer.esp32.timg,property=wdt_disable,value=true \\
+        -monitor none \\
+        -serial stdio
+else
+    echo "ERROR: qemu-system-xtensa not found in container"
+    exit 1
+fi
 
 echo "QEMU execution completed"
 exit 0
