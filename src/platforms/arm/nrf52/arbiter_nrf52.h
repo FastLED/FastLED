@@ -3,6 +3,9 @@
 
 #if defined(NRF52_SERIES)
 
+// Include ARM platform detection before led_sysdefs
+#include "../is_arm.h"
+
 #include "led_sysdefs_arm_nrf52.h"
 
 //FASTLED_NAMESPACE_BEGIN

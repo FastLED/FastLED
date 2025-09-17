@@ -20,6 +20,8 @@
 #if defined(FASTLED_USES_OBJECTFLED)
 #warning "FASTLED_USES_OBJECTFLED is now implicit for Teensy 4.0/4.1 for WS2812 and is no longer needed."
 #endif
+// Include ARM platform detection before ARM headers
+#include "arm/is_arm.h"
 #include "platforms/arm/k20/clockless_objectfled.h"
 template <fl::u8 DATA_PIN, EOrder RGB_ORDER = fl::GRB>
 class WS2812Controller800Khz:
