@@ -5,6 +5,9 @@
 #define FASTLED_INTERNAL
 #include "fl/compiler_control.h"
 
+// Include ARM platform detection before any ARM headers
+#include "platforms/arm/is_arm.h"
+
 // Removed duplicate weak definition of timer_millis for ATtiny1604.
 // The variable is already defined in avr_millis_timer_null_counter.hpp when needed,
 // so redefining it here caused multiple-definition linkage errors.
