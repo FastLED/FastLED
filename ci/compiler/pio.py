@@ -291,6 +291,199 @@ def _copy_cache_build_script(build_dir: Path, cache_config: dict[str, str]) -> N
     print(f"Set cache environment variables for {cache_type} configuration")
 
 
+def _find_platform_path_from_board(
+    board: "Board", paths: "FastLEDPaths"
+) -> Path | None:
+    """Find the platform path from board's platform URL using cache directory naming."""
+    from ci.boards import Board
+    from ci.util.url_utils import sanitize_url_for_path
+
+    if not board.platform:
+        print(f"No platform URL defined for board {board.board_name}")
+        return None
+
+    print(f"Looking for platform cache: {board.platform}")
+
+    # Convert platform URL to expected cache directory name
+    expected_cache_name = sanitize_url_for_path(board.platform)
+    print(f"Expected cache directory: {expected_cache_name}")
+
+    # Search in global cache directory
+    cache_dir = paths.global_platformio_cache_dir
+    expected_cache_path = cache_dir / expected_cache_name / "extracted"
+
+    if (
+        expected_cache_path.exists()
+        and (expected_cache_path / "platform.json").exists()
+    ):
+        print(f"Found platform cache: {expected_cache_path}")
+        return expected_cache_path
+
+    # Fallback: search for any directory that contains the platform name
+    # Extract platform name from URL (e.g., "platform-espressif32" from github URL)
+    platform_name = None
+    if "platform-" in board.platform:
+        # Extract platform name from URL path
+        parts = board.platform.split("/")
+        for part in parts:
+            if (
+                "platform-" in part
+                and not part.endswith(".git")
+                and not part.endswith(".zip")
+            ):
+                platform_name = part
+                break
+
+    if platform_name:
+        print(f"Searching for platform by name: {platform_name}")
+        for cache_item in cache_dir.glob(f"*{platform_name}*"):
+            extracted_path = cache_item / "extracted"
+            if extracted_path.exists() and (extracted_path / "platform.json").exists():
+                print(f"Found platform by name search: {extracted_path}")
+                return extracted_path
+
+    print(f"Platform cache not found for {board.board_name}")
+    return None
+
+
+def get_platform_required_packages(platform_path: Path) -> list[str]:
+    """Extract required package names from platform.json."""
+    import json
+
+    try:
+        platform_json = platform_path / "platform.json"
+        if not platform_json.exists():
+            return []
+
+        with open(platform_json, "r", encoding="utf-8") as f:
+            data = json.load(f)
+
+        packages = data.get("packages", {})
+        # Return all package names from the platform
+        return list(packages.keys())
+    except Exception as e:
+        print(f"Warning: Could not parse platform.json: {e}")
+        return []
+
+
+def get_installed_packages_from_pio() -> Dict[str, str]:
+    """Get installed packages using PlatformIO CLI."""
+    import re
+    import subprocess
+
+    try:
+        result = subprocess.run(
+            ["pio", "pkg", "list", "--global"],
+            capture_output=True,
+            text=True,
+            check=False,
+            timeout=30,
+        )
+
+        if result.returncode != 0:
+            print(f"Warning: pio pkg list failed: {result.stderr}")
+            return {}
+
+        packages: Dict[str, str] = {}
+        # Parse output like: "├── framework-arduinoespressif32-libs @ 5.3.0+sha.083aad99cf"
+        for line in result.stdout.split("\n"):
+            match = re.search(r"[├└]── ([^@\s]+)\s*@\s*([^\s]+)", line)
+            if match:
+                package_name, version = match.groups()
+                packages[package_name] = version
+
+        return packages
+    except Exception as e:
+        print(f"Warning: Could not get installed packages: {e}")
+        return {}
+
+
+def detect_and_fix_corrupted_packages_dynamic(
+    paths: "FastLEDPaths", board_name: str, platform_path: Path | None = None
+) -> Dict[str, bool]:
+    """Dynamically detect and fix corrupted packages based on platform requirements."""
+    import shutil
+
+    print("=== Dynamic Package Corruption Detection & Fix ===")
+    print(f"Board: {board_name}")
+    print(f"Packages dir: {paths.packages_dir}")
+
+    results: Dict[str, bool] = {}
+
+    # Get required packages from platform.json if available
+    platform_packages = []
+    if platform_path and platform_path.exists():
+        platform_packages = get_platform_required_packages(platform_path)
+        print(f"Platform packages found: {len(platform_packages)}")
+        if platform_packages:
+            print(
+                f"  Required packages: {', '.join(platform_packages[:5])}{'...' if len(platform_packages) > 5 else ''}"
+            )
+
+    # Get installed packages from PIO CLI
+    installed_packages = get_installed_packages_from_pio()
+    print(f"Installed packages found: {len(installed_packages)}")
+
+    # If we have platform info, focus on those packages, otherwise scan all installed
+    packages_to_check = []
+    if platform_packages:
+        # Check intersection of platform requirements and installed packages
+        packages_to_check = [
+            pkg for pkg in platform_packages if pkg in installed_packages
+        ]
+        print(
+            f"Checking {len(packages_to_check)} packages that are both required and installed"
+        )
+    else:
+        # Fallback: check all installed packages that look like frameworks
+        packages_to_check = [
+            pkg
+            for pkg in installed_packages.keys()
+            if "framework" in pkg.lower() or "toolchain" in pkg.lower()
+        ]
+        print(
+            f"Fallback: Checking {len(packages_to_check)} framework/toolchain packages"
+        )
+
+    if not packages_to_check:
+        print("No packages to check - using fallback hardcoded list")
+        packages_to_check = ["framework-arduinoespressif32-libs"]
+
+    # Check each package for corruption
+    for package_name in packages_to_check:
+        print(f"Checking package: {package_name}")
+        package_path = paths.packages_dir / package_name
+        print(f"  Package path: {package_path}")
+
+        exists = package_path.exists()
+        piopm_exists = (package_path / ".piopm").exists() if exists else False
+        manifest_exists = (package_path / "package.json").exists() if exists else False
+
+        print(f"  Package exists: {exists}")
+        print(f"  .piopm exists: {piopm_exists}")
+        print(f"  package.json exists: {manifest_exists}")
+
+        is_corrupted = exists and piopm_exists and not manifest_exists
+        if is_corrupted:
+            print(f"  -> CORRUPTED: Has .piopm but missing package.json")
+            print(f"  -> FIXING: Removing corrupted package...")
+            try:
+                # Safe deletion with lock already held by caller
+                shutil.rmtree(package_path)
+                print(f"  -> SUCCESS: Removed {package_name}")
+                print(f"  -> PlatformIO will re-download package automatically")
+                results[package_name] = True  # Was corrupted, now fixed
+            except Exception as e:
+                print(f"  -> ERROR: Failed to remove {package_name}: {e}")
+                results[package_name] = False  # Still corrupted
+        else:
+            print(f"  -> OK: Not corrupted")
+            results[package_name] = False  # Not corrupted
+
+    print("=== Dynamic Detection & Fix Complete ===")
+    return results
+
+
 class FastLEDPaths:
     """Centralized path management for FastLED board-specific directories and files."""
 
@@ -869,6 +1062,13 @@ def _init_platformio_build(
     """Initialize the PlatformIO build directory. Assumes lock is already held by caller."""
     project_root = _resolve_project_root()
     build_dir = project_root / ".build" / "pio" / board.board_name
+
+    # Check for and fix corrupted packages before building
+    # Find platform path based on board's platform URL (works for any platform)
+    platform_path = _find_platform_path_from_board(board, paths)
+    fixed_packages = detect_and_fix_corrupted_packages_dynamic(
+        paths, board.board_name, platform_path
+    )
 
     # Lock is already held by build() - no need to acquire again
 
