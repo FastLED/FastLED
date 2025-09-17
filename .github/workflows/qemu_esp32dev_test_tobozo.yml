@@ -1,0 +1,324 @@
+name: ESP32-DEV QEMU Test (tobozo)
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [master]
+    paths:
+      - 'src/**/*.cpp'
+      - 'src/**/*.h'
+      - 'examples/**/*.ino'
+      - 'examples/**/*.cpp'
+      - 'examples/**/*.h'
+      - 'platformio.ini'
+      - 'CMakeLists.txt'
+      - 'library.json'
+      - '.github/workflows/qemu_esp32dev_test_tobozo.yml'
+  pull_request:
+    branches: [master]
+    paths:
+      - 'src/**/*.cpp'
+      - 'src/**/*.h'
+      - 'examples/**/*.ino'
+      - 'examples/**/*.cpp'
+      - 'examples/**/*.h'
+      - 'platformio.ini'
+      - 'CMakeLists.txt'
+      - 'library.json'
+      - '.github/workflows/qemu_esp32dev_test_tobozo.yml'
+
+permissions:
+  contents: read
+  actions: read
+  id-token: write
+  pull-requests: read
+
+jobs:
+  esp32dev_qemu_test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        example: [BlinkParallel]  # Test with FL_WARN output
+
+    steps:
+      - name: Checkout trusted base branch code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.repository.default_branch || 'master' }}
+          path: trusted
+
+      - name: Checkout PR code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          path: pr-code
+
+      - name: Merge safe source files from PR
+        run: |
+          # Copy ONLY safe source files from PR, never executable scripts
+          if [ -d "pr-code/src" ]; then
+            cp -r pr-code/src/* trusted/src/ 2>/dev/null || true
+          fi
+          if [ -d "pr-code/examples" ]; then
+            cp -r pr-code/examples/* trusted/examples/ 2>/dev/null || true
+          fi
+          if [ -f "pr-code/platformio.ini" ]; then
+            cp pr-code/platformio.ini trusted/
+          fi
+          if [ -f "pr-code/library.json" ]; then
+            cp pr-code/library.json trusted/
+          fi
+          if [ -f "pr-code/library.properties" ]; then
+            cp pr-code/library.properties trusted/
+          fi
+          if [ -f "pr-code/CMakeLists.txt" ]; then
+            cp pr-code/CMakeLists.txt trusted/
+          fi
+        shell: bash
+
+      - name: Set working directory to trusted
+        run: echo "GITHUB_WORKSPACE=$GITHUB_WORKSPACE/trusted" >> $GITHUB_ENV
+
+      - name: Pin python version
+        working-directory: trusted
+        run: |
+          echo "3.11" >> .python-version
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+          cache-dependency-glob: "**/pyproject.toml"
+          version: "0.8.0"
+
+      - name: "Set up Python"
+        uses: actions/setup-python@v5
+        with:
+          python-version-file: "trusted/.python-version"
+
+      - name: Install Dependencies
+        working-directory: trusted
+        run: |
+          # Install Python dependencies needed for compilation
+          uv sync
+
+      - name: Install CCACHE
+        run: |
+          sudo apt-get update && sudo apt-get install -y ccache
+        shell: bash
+
+      - name: Setup CCACHE
+        run: |
+          echo "CCACHE_BASEDIR=$GITHUB_WORKSPACE" >> $GITHUB_ENV
+          echo "CCACHE_DIR=$GITHUB_WORKSPACE/.ccache" >> $GITHUB_ENV
+          echo "CCACHE_COMPRESS=true" >> $GITHUB_ENV
+          echo "CCACHE_COMPRESSLEVEL=6" >> $GITHUB_ENV
+          echo "CCACHE_MAXSIZE=400M" >> $GITHUB_ENV
+          ccache --version
+          ccache --show-stats
+          ccache --zero-stats
+        shell: bash
+
+      - name: Cache CCACHE directory
+        uses: actions/cache@v4
+        with:
+          path: .ccache
+          key: ${{ runner.os }}-ccache-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-ccache-
+
+      - name: Create build directory for QEMU
+        working-directory: trusted
+        run: |
+          mkdir -p qemu-build
+          echo "Created qemu-build directory for ESP32 binaries"
+
+      - name: Build ESP32 firmware
+        working-directory: trusted
+        run: |
+          echo "Building ${{ matrix.example }} for ESP32-DEV"
+
+          # Build the firmware and output to qemu-build directory
+          # Using uv run to ensure proper Python environment
+          uv run ci/ci-compile.py esp32dev --examples ${{ matrix.example }} -o qemu-build/firmware.bin
+
+          echo "Build completed. Contents of qemu-build directory:"
+          ls -la qemu-build/
+
+          # Now we need to find and copy the bootloader and partitions files
+          # These are typically in the PlatformIO build directory
+          echo "Looking for bootloader and partition files..."
+
+          # Find the PlatformIO build directory
+          # PlatformIO build directory is at .build/pio/esp32dev
+          PIO_BUILD_DIR=".build/pio/esp32dev"
+
+          if [ -n "$PIO_BUILD_DIR" ]; then
+            echo "Found PlatformIO build directory: $PIO_BUILD_DIR"
+
+            # Copy bootloader.bin if it exists
+            if [ -f "$PIO_BUILD_DIR/bootloader.bin" ]; then
+              cp "$PIO_BUILD_DIR/bootloader.bin" qemu-build/
+              echo "✅ Copied bootloader.bin"
+            else
+              # Try to find bootloader in subdirectories
+              BOOTLOADER=$(find "$PIO_BUILD_DIR" -name "bootloader.bin" 2>/dev/null | head -1)
+              if [ -n "$BOOTLOADER" ]; then
+                cp "$BOOTLOADER" qemu-build/bootloader.bin
+                echo "✅ Found and copied bootloader.bin from $BOOTLOADER"
+              else
+                echo "⚠️ bootloader.bin not found, will try default ESP32 bootloader"
+                # Download default ESP32 bootloader if needed
+                wget -q https://github.com/espressif/arduino-esp32/raw/master/tools/sdk/esp32/bin/bootloader_dio_80m.bin -O qemu-build/bootloader.bin
+                echo "✅ Downloaded default ESP32 bootloader"
+              fi
+            fi
+
+            # Copy partitions.bin if it exists
+            if [ -f "$PIO_BUILD_DIR/partitions.bin" ]; then
+              cp "$PIO_BUILD_DIR/partitions.bin" qemu-build/
+              echo "✅ Copied partitions.bin"
+            else
+              # Try to find partitions in subdirectories
+              PARTITIONS=$(find "$PIO_BUILD_DIR" -name "partitions.bin" 2>/dev/null | head -1)
+              if [ -n "$PARTITIONS" ]; then
+                cp "$PARTITIONS" qemu-build/partitions.bin
+                echo "✅ Found and copied partitions.bin from $PARTITIONS"
+              else
+                echo "⚠️ partitions.bin not found, creating default partition table"
+                # Create a simple default partition table
+                printf '# Name,   Type, SubType, Offset,  Size, Flags\nnvs,      data, nvs,     0x9000,  0x5000,\notadata,  data, ota,     0xe000,  0x2000,\napp0,     app,  ota_0,   0x10000, 0x140000,\nspiffs,   data, spiffs,  0x150000,0xb0000,\n' > qemu-build/partitions.csv
+                echo "✅ Created default partitions.csv"
+              fi
+            fi
+          else
+            echo "⚠️ PlatformIO build directory not found, using defaults"
+            # Download default bootloader
+            wget -q https://github.com/espressif/arduino-esp32/raw/master/tools/sdk/esp32/bin/bootloader_dio_80m.bin -O qemu-build/bootloader.bin
+            echo "✅ Downloaded default ESP32 bootloader"
+
+            # Create default partition table
+            printf '# Name,   Type, SubType, Offset,  Size, Flags\nnvs,      data, nvs,     0x9000,  0x5000,\notadata,  data, ota,     0xe000,  0x2000,\napp0,     app,  ota_0,   0x10000, 0x140000,\nspiffs,   data, spiffs,  0x150000,0xb0000,\n' > qemu-build/partitions.csv
+            echo "✅ Created default partitions.csv"
+          fi
+
+          echo "Final contents of qemu-build directory:"
+          ls -la qemu-build/
+
+          # Verify firmware.bin exists
+          if [ ! -f "qemu-build/firmware.bin" ]; then
+            echo "❌ firmware.bin not found after build"
+            exit 1
+          fi
+          echo "✅ firmware.bin size: $(stat -c%s qemu-build/firmware.bin) bytes"
+
+      - name: Run ESP32 in QEMU
+        id: qemu
+        uses: tobozo/esp32-qemu-sim@main
+        with:
+          build-folder: trusted/qemu-build
+          flash-size: 4
+          psram: "disabled"
+          qemu-timeout: "60"
+          timeout-interrupt-regex: "FL_WARN.*test finished"
+
+      - name: Display QEMU output
+        if: always()
+        run: |
+          echo "=== QEMU Serial Output ==="
+          echo "${{ steps.qemu.outputs.serial-output }}"
+
+      - name: Validate FL_WARN output
+        run: |
+          echo "=== Validating FL_WARN output in QEMU logs ==="
+
+          # Save output to file for easier processing
+          echo "${{ steps.qemu.outputs.serial-output }}" > qemu_output.log
+
+          # Check for crash patterns
+          if grep -q -E "(guru meditation|abort\(\)|LoadProhibited|IllegalInstruction)" qemu_output.log; then
+            echo "❌ ESP32-DEV crashed during execution"
+            echo "Crash indicators found in QEMU log"
+            exit 1
+          fi
+
+          # Validate FL_WARN output is present
+          if grep -q "FL_WARN:" qemu_output.log; then
+            echo "✅ FL_WARN macro output detected"
+            echo "FL_WARN messages found:"
+            grep "FL_WARN:" qemu_output.log | head -20
+          else
+            echo "❌ No FL_WARN output detected"
+            echo "Expected FL_WARN messages not found in QEMU log"
+            exit 1
+          fi
+
+          # Validate BlinkParallel startup
+          if grep -q "BlinkParallel setup starting" qemu_output.log; then
+            echo "✅ BlinkParallel setup started"
+          else
+            echo "❌ BlinkParallel startup message not found"
+            exit 1
+          fi
+
+          # Check for LED strip initialization
+          if grep -q "Initialized 4 LED strips" qemu_output.log; then
+            echo "✅ 4 LED strips initialized"
+          else
+            echo "⚠️  LED strip initialization message not found"
+          fi
+
+          # Check for loop execution
+          if grep -q "Starting loop iteration" qemu_output.log; then
+            echo "✅ Loop execution detected"
+          else
+            echo "⚠️  No loop execution messages found"
+          fi
+
+          # Check for test completion
+          if grep -q "FL_WARN.*test finished" qemu_output.log; then
+            echo "✅ FL_WARN test completion detected"
+          else
+            echo "⚠️  FL_WARN test completion not detected (may need more time)"
+          fi
+
+          # Validate boot success
+          if grep -q -E "(rst:|boot:|ESP32)" qemu_output.log; then
+            echo "✅ ESP32-DEV boot successful"
+          else
+            echo "❌ ESP32-DEV boot indicators not found"
+            exit 1
+          fi
+
+          echo "=== FL_WARN validation complete ==="
+        shell: bash
+
+      - name: Upload QEMU logs on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: esp32dev-qemu-failure-${{ matrix.example }}-${{ github.sha }}
+          path: |
+            qemu_output.log
+            trusted/qemu-build/
+          include-hidden-files: true
+
+      - name: Upload QEMU logs on success
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: esp32dev-qemu-success-${{ matrix.example }}-${{ github.sha }}
+          path: qemu_output.log
+
+      - name: Summary
+        if: always()
+        run: |
+          echo "=== ESP32-DEV QEMU Test Summary ==="
+          echo "Platform: esp32dev"
+          echo "Example: ${{ matrix.example }}"
+          echo "Status: ${{ job.status }}"
+          if [ -f "qemu_output.log" ]; then
+            echo "QEMU output lines: $(wc -l < qemu_output.log)"
+            echo "FL_WARN count: $(grep -c 'FL_WARN:' qemu_output.log || echo 0)"
+            echo "Loop iterations: $(grep -c 'Starting loop iteration' qemu_output.log || echo 0)"
+          fi
