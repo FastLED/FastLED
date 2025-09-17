@@ -7,6 +7,10 @@
 //
 // IMPORTANT: High-priority interrupts (≥4) on Xtensa MUST be written in
 // assembly language and cannot use most C/RTOS facilities.
+//
+// TODO: This assembly implementation is UNTESTED and most certainly WRONG.
+//       The assembly directives and implementation need to be researched and
+//       validated for Xtensa LX7 architecture before use.
 
 #include <stdint.h>
 #include "soc/soc.h"
@@ -391,6 +395,8 @@ esp_err_t fastled_esp32s3_rmt_init_custom(
 
 /*
  * Assembly Shim Implementation Template (Reference)
+ *
+ * TODO: RESEARCH NEEDED - These assembly directives need verification for LX7
  *
  * The actual assembly implementation should be in a separate .S file:
  * src/platforms/esp/32/interrupts/esp32_s3_asm.S

@@ -7,6 +7,10 @@
 //
 // IMPORTANT: Unlike Xtensa, RISC-V cores can use C handlers at any priority
 // level with proper IRAM placement and minimal restrictions.
+//
+// TODO: This implementation is UNTESTED and may contain errors.
+//       PLIC register addresses and assembly directives need research and
+//       validation for specific RISC-V ESP32 variants before use.
 
 #include <stdint.h>
 #include "soc/soc.h"
@@ -209,6 +213,8 @@ void IRAM_ATTR fastled_riscv_experimental_handler(void *arg);
  * 2. Enable: Enable interrupt source for current hart (CPU)
  * 3. Claim: Read which interrupt is pending (atomically claims it)
  * 4. Complete: Signal interrupt processing complete
+ *
+ * TODO: VERIFY - These PLIC addresses need validation from official TRM
  *
  * PLIC Base Addresses (ESP32-C3):
  * - Priority registers: 0x600C0000 + 4*source
@@ -430,6 +436,8 @@ void IRAM_ATTR fastled_riscv_rmt_experimental_handler(void *arg);
 
 /*
  * Assembly Shim Implementation (Optional for RISC-V)
+ *
+ * TODO: RESEARCH NEEDED - These RISC-V assembly directives need verification
  *
  * While not required like on Xtensa, assembly handlers can provide
  * minimal latency for extremely time-critical operations.
