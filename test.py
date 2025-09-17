@@ -83,7 +83,7 @@ def run_qemu_tests(args: TestArgs) -> None:
         sys.exit(1)
 
     platform = args.qemu[0].lower()
-    supported_platforms = ["esp32dev", "esp32c3"]
+    supported_platforms = ["esp32dev", "esp32c3", "esp32s3"]
     if platform not in supported_platforms:
         print(
             f"Error: Unsupported QEMU platform: {platform}. Supported platforms: {', '.join(supported_platforms)}"
@@ -164,7 +164,12 @@ def run_qemu_tests(args: TestArgs) -> None:
             output_file = "qemu_output.log"
 
             # Determine machine type based on platform
-            machine_type = "esp32c3" if platform == "esp32c3" else "esp32"
+            if platform == "esp32c3":
+                machine_type = "esp32c3"
+            elif platform == "esp32s3":
+                machine_type = "esp32s3"
+            else:
+                machine_type = "esp32"
 
             # Run QEMU in Docker
             qemu_returncode = docker_runner.run(

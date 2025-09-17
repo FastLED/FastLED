@@ -252,7 +252,7 @@ class DockerQEMURunner:
         Args:
             firmware_name: Name of firmware file in mounted directory
             flash_size: Flash size in MB
-            machine: QEMU machine type (esp32, esp32c3, etc.)
+            machine: QEMU machine type (esp32, esp32c3, esp32s3, etc.)
 
         Returns:
             List of command arguments for QEMU
@@ -265,6 +265,10 @@ class DockerQEMURunner:
             qemu_system = "qemu-system-riscv32"
             qemu_machine = "esp32c3"
             echo_target = "ESP32C3"
+        elif machine == "esp32s3":
+            qemu_system = "qemu-system-xtensa"
+            qemu_machine = "esp32s3"
+            echo_target = "ESP32S3"
         else:
             # Default to ESP32 (Xtensa)
             qemu_system = "qemu-system-xtensa"
@@ -345,7 +349,7 @@ exit 0
         output_file: Optional[str] = None,
         machine: str = "esp32",
     ) -> int:
-        """Run ESP32/ESP32C3 firmware in QEMU using Docker.
+        """Run ESP32/ESP32C3/ESP32S3 firmware in QEMU using Docker.
 
         Args:
             firmware_path: Path to firmware.bin or build directory
@@ -354,7 +358,7 @@ exit 0
             interrupt_regex: Regex pattern to detect in output (informational only)
             interactive: Run in interactive mode (attach to container)
             output_file: Optional file path to write QEMU output to
-            machine: QEMU machine type (esp32, esp32c3, etc.)
+            machine: QEMU machine type (esp32, esp32c3, esp32s3, etc.)
 
         Returns:
             Exit code: actual QEMU/container exit code, except timeout returns 0
