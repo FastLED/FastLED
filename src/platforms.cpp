@@ -30,6 +30,7 @@ FL_LINK_WEAK volatile unsigned long timer_millis = 0;
 // override any default weak definition.
 #if defined(NRF52_SERIES)
 
+    #include "platforms/arm/is_arm.h"
     #include "platforms/arm/nrf52/led_sysdefs_arm_nrf52.h"
     #include "platforms/arm/nrf52/arbiter_nrf52.h"
 
