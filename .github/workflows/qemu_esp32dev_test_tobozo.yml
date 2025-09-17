@@ -184,12 +184,14 @@ jobs:
               if [ -n "$PARTITIONS" ]; then
                 cp "$PARTITIONS" qemu-build/partitions.bin
                 echo "✅ Found and copied partitions.bin from $PARTITIONS"
-              else
-                echo "⚠️ partitions.bin not found, creating default partition table"
-                # Create a simple default partition table
-                printf '# Name,   Type, SubType, Offset,  Size, Flags\nnvs,      data, nvs,     0x9000,  0x5000,\notadata,  data, ota,     0xe000,  0x2000,\napp0,     app,  ota_0,   0x10000, 0x140000,\nspiffs,   data, spiffs,  0x150000,0xb0000,\n' > qemu-build/partitions.csv
-                echo "✅ Created default partitions.csv"
               fi
+            fi
+
+            # Always ensure partitions.csv exists for QEMU (required by tobozo/esp32-qemu-sim)
+            if [ ! -f "qemu-build/partitions.csv" ]; then
+              echo "⚠️ partitions.csv not found, creating default partition table"
+              printf '# Name,   Type, SubType, Offset,  Size, Flags\nnvs,      data, nvs,     0x9000,  0x6000,\notadata,  data, ota,     0xf000,  0x2000,\nfactory,  app,  factory, 0x10000, 0x140000,\nspiffs,   data, spiffs,  0x150000,0xb0000,\n' > qemu-build/partitions.csv
+              echo "✅ Created default partitions.csv"
             fi
           else
             echo "⚠️ PlatformIO build directory not found, using defaults"
@@ -198,7 +200,7 @@ jobs:
             echo "✅ Downloaded default ESP32 bootloader"
 
             # Create default partition table
-            printf '# Name,   Type, SubType, Offset,  Size, Flags\nnvs,      data, nvs,     0x9000,  0x5000,\notadata,  data, ota,     0xe000,  0x2000,\napp0,     app,  ota_0,   0x10000, 0x140000,\nspiffs,   data, spiffs,  0x150000,0xb0000,\n' > qemu-build/partitions.csv
+            printf '# Name,   Type, SubType, Offset,  Size, Flags\nnvs,      data, nvs,     0x9000,  0x6000,\notadata,  data, ota,     0xf000,  0x2000,\nfactory,  app,  factory, 0x10000, 0x140000,\nspiffs,   data, spiffs,  0x150000,0xb0000,\n' > qemu-build/partitions.csv
             echo "✅ Created default partitions.csv"
           fi
 
