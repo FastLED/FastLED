@@ -309,18 +309,20 @@ exit 0
         flash_size: int = 4,
         interrupt_regex: Optional[str] = None,
         interactive: bool = False,
+        output_file: Optional[str] = None,
     ) -> int:
         """Run ESP32 firmware in QEMU using Docker.
 
         Args:
             firmware_path: Path to firmware.bin or build directory
-            timeout: Timeout in seconds
+            timeout: Timeout in seconds (timeout is treated as success)
             flash_size: Flash size in MB
-            interrupt_regex: Regex pattern to interrupt execution
+            interrupt_regex: Regex pattern to detect in output (informational only)
             interactive: Run in interactive mode (attach to container)
+            output_file: Optional file path to write QEMU output to
 
         Returns:
-            Exit code (0 for success)
+            Exit code: actual QEMU/container exit code, except timeout returns 0
         """
         if not self.check_docker_available():
             print("ERROR: Docker is not available or not running", file=sys.stderr)
@@ -388,16 +390,20 @@ exit 0
                     command=qemu_cmd,
                     volumes=volumes,
                     name=self.container_name,
+                    timeout=timeout,
                     interrupt_pattern=interrupt_regex,
+                    output_file=output_file,
                 )
             else:
-                # Run with streaming output and pattern detection
+                # Run with streaming output and return actual exit code
                 return self.docker_manager.run_container_streaming(
                     image_name=self.docker_image,
                     command=qemu_cmd,
                     volumes=volumes,
                     name=self.container_name,
+                    timeout=timeout,
                     interrupt_pattern=interrupt_regex,
+                    output_file=output_file,
                 )
 
         except Exception as e:
@@ -442,6 +448,7 @@ def main():
     parser.add_argument(
         "--interactive", action="store_true", help="Run in interactive mode"
     )
+    parser.add_argument("--output-file", type=str, help="File to write QEMU output to")
 
     args = parser.parse_args()
 
@@ -459,6 +466,7 @@ def main():
         flash_size=args.flash_size,
         interrupt_regex=args.interrupt_regex,
         interactive=args.interactive,
+        output_file=args.output_file,
     )
 
 

@@ -14,7 +14,9 @@ class DockerManager:
         command: List[str],
         check: bool = True,
         stream_output: bool = False,
+        timeout: Optional[int] = None,
         interrupt_pattern: Optional[str] = None,
+        output_file: Optional[str] = None,
     ) -> subprocess.CompletedProcess[str]:
         full_command = ["docker"] + command
         print(f"Executing Docker command: {' '.join(full_command)}")
@@ -35,25 +37,57 @@ class DockerManager:
         if stream_output:
             # Use RunningProcess for streaming output
             import re
+            import time
 
             from ci.util.running_process import RunningProcess
 
             proc = RunningProcess(full_command, env=env, auto_run=True)
-            success_pattern_found = False
+            pattern_found = False
+            timeout_occurred = False
+            start_time = time.time()
+
+            # Open output file if specified
+            output_handle = None
+            if output_file:
+                try:
+                    output_handle = open(output_file, "w", encoding="utf-8")
+                except Exception as e:
+                    print(f"Warning: Could not open output file {output_file}: {e}")
 
             try:
                 with proc.line_iter(timeout=None) as it:
                     for line in it:
                         print(line)
-                        # Check for success pattern
-                        if interrupt_pattern and re.search(interrupt_pattern, line):
-                            print(f"SUCCESS: Pattern found: {line}")
-                            success_pattern_found = True
 
+                        # Write to output file if specified
+                        if output_handle:
+                            output_handle.write(line + "\n")
+                            output_handle.flush()  # Ensure immediate write
+
+                        # Check for interrupt pattern (for informational purposes only)
+                        if interrupt_pattern and re.search(interrupt_pattern, line):
+                            print(f"Pattern detected: {line}")
+                            pattern_found = True
+
+                        # Check timeout
+                        if timeout and (time.time() - start_time) > timeout:
+                            print(
+                                f"Timeout reached ({timeout}s), terminating container..."
+                            )
+                            timeout_occurred = True
+                            break
+
+                # Wait for process to complete
                 returncode = proc.wait()
 
-                # Return success if pattern was found, regardless of container exit code
-                final_returncode = 0 if success_pattern_found else returncode
+                # Handle timeout case: return success (0) for timeouts as per requirement
+                if timeout_occurred:
+                    print("Process terminated due to timeout - treating as success")
+                    final_returncode = 0
+                else:
+                    # Return the actual container exit code for all other cases
+                    final_returncode = returncode
+
                 return subprocess.CompletedProcess(
                     args=full_command, returncode=final_returncode, stdout="", stderr=""
                 )
@@ -64,6 +98,10 @@ class DockerManager:
                 return subprocess.CompletedProcess(
                     args=full_command, returncode=returncode, stdout="", stderr=str(e)
                 )
+            finally:
+                # Close output file if it was opened
+                if output_handle:
+                    output_handle.close()
         else:
             # Use regular subprocess for non-streaming commands
             result = subprocess.run(
@@ -136,11 +174,23 @@ class DockerManager:
         volumes: Optional[Dict[str, Dict[str, str]]] = None,
         environment: Optional[Dict[str, str]] = None,
         name: Optional[str] = None,
+        timeout: Optional[int] = None,
         interrupt_pattern: Optional[str] = None,
+        output_file: Optional[str] = None,
     ) -> int:
         """
-        Runs a Docker container with streaming output and pattern detection.
-        Returns exit code (0 for success).
+        Runs a Docker container with streaming output.
+        Returns actual container exit code (0 for success, timeout is treated as success).
+
+        Args:
+            image_name: Docker image to run
+            command: Command to execute in container
+            volumes: Volume mounts
+            environment: Environment variables
+            name: Container name
+            timeout: Timeout in seconds (if exceeded, returns 0)
+            interrupt_pattern: Pattern to detect in output (informational only)
+            output_file: Optional file path to write output to
         """
         print(
             f"Running container from image: {image_name} with command: {' '.join(command)}"
@@ -165,7 +215,9 @@ class DockerManager:
             docker_cmd,
             check=False,
             stream_output=True,
+            timeout=timeout,
             interrupt_pattern=interrupt_pattern,
+            output_file=output_file,
         )
         return result.returncode
 

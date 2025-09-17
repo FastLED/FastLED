@@ -160,6 +160,9 @@ def run_qemu_tests(args: TestArgs) -> None:
             # Set up interrupt regex pattern
             interrupt_regex = "(FL_WARN.*test finished)|(Setup complete - starting blink animation)|(guru meditation)|(abort\\(\\))|(LoadProhibited)"
 
+            # Set up output file for GitHub Actions
+            output_file = "qemu_output.log"
+
             # Run QEMU in Docker
             qemu_returncode = docker_runner.run(
                 firmware_path=pio_build_dir,
@@ -167,6 +170,7 @@ def run_qemu_tests(args: TestArgs) -> None:
                 flash_size=4,
                 interrupt_regex=interrupt_regex,
                 interactive=False,
+                output_file=output_file,
             )
 
             if qemu_returncode == 0:
