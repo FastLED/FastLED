@@ -72,9 +72,10 @@ def make_watch_dog_thread(
 
 
 def run_qemu_tests(args: TestArgs) -> None:
-    """Run examples in QEMU emulation."""
+    """Run examples in QEMU emulation using Docker."""
     from pathlib import Path
 
+    from ci.dockerfiles.qemu_esp32_docker import DockerQEMURunner
     from ci.util.running_process import RunningProcess
 
     if not args.qemu or len(args.qemu) < 1:
@@ -89,7 +90,7 @@ def run_qemu_tests(args: TestArgs) -> None:
         )
         sys.exit(1)
 
-    print(f"Running {platform.upper()} QEMU tests...")
+    print(f"Running {platform.upper()} QEMU tests using Docker...")
 
     # Determine which examples to test (skip the platform argument)
     examples_to_test = args.qemu[1:] if len(args.qemu) > 1 else ["BlinkParallel"]
@@ -100,42 +101,18 @@ def run_qemu_tests(args: TestArgs) -> None:
 
     # Quick test mode - just validate the setup
     if os.getenv("FASTLED_QEMU_QUICK_TEST") == "true":
-        print("Quick test mode - validating QEMU setup only")
-        print("QEMU ESP32-S3 option is working correctly!")
+        print("Quick test mode - validating Docker QEMU setup only")
+        print("QEMU ESP32 Docker option is working correctly!")
         return
 
-    # Check if QEMU installation should be skipped
-    skip_install = os.getenv("FASTLED_QEMU_SKIP_INSTALL") == "true"
+    # Initialize Docker QEMU runner
+    docker_runner = DockerQEMURunner()
 
-    if not skip_install:
-        # Install QEMU first
-        print("Installing QEMU...")
-        print("This may take several minutes depending on your system...")
-        try:
-            install_proc = RunningProcess(
-                ["uv", "run", "ci/install-qemu.py"], timeout=300, auto_run=True
-            )
-
-            # Stream installation output in real-time for better user feedback
-            print("QEMU installation output:")
-            with install_proc.line_iter(timeout=None) as it:
-                for line in it:
-                    print(f"[QEMU Install] {line}")
-
-            returncode = install_proc.wait()
-            if returncode != 0:
-                print(f"QEMU installation failed with exit code: {returncode}")
-                if install_proc.stdout:
-                    print("Installation output:")
-                    print(install_proc.stdout)
-                sys.exit(1)
-            else:
-                print("QEMU installation completed successfully")
-        except Exception as e:
-            print(f"QEMU installation error: {e}")
-            sys.exit(1)
-    else:
-        print("Skipping QEMU installation (FASTLED_QEMU_SKIP_INSTALL=true)")
+    # Check if Docker is available
+    if not docker_runner.check_docker_available():
+        print("ERROR: Docker is not available or not running")
+        print("Please install Docker and ensure it's running")
+        sys.exit(1)
 
     success_count = 0
     failure_count = 0
@@ -175,39 +152,29 @@ def run_qemu_tests(args: TestArgs) -> None:
 
             print(f"Build artifacts found in {build_dir}")
 
-            # Run in QEMU
-            print(f"Running {example} in QEMU...")
-            # Use the nested PlatformIO build directory path to match GitHub action
+            # Run in QEMU using Docker
+            print(f"Running {example} in Docker QEMU...")
+            # Use the nested PlatformIO build directory path
             pio_build_dir = build_dir / ".pio" / "build" / platform
-            qemu_proc = RunningProcess(
-                [
-                    "uv",
-                    "run",
-                    "ci/qemu-esp32.py",
-                    str(pio_build_dir),
-                    "--flash-size",
-                    "4",
-                    "--timeout",
-                    "30",
-                    "--interrupt-regex",
-                    "(FL_WARN.*test finished)|(Setup complete - starting blink animation)|(guru meditation)|(abort\\(\\))|(LoadProhibited)",
-                ],
-                timeout=60,
-                auto_run=True,
+
+            # Set up interrupt regex pattern
+            interrupt_regex = "(FL_WARN.*test finished)|(Setup complete - starting blink animation)|(guru meditation)|(abort\\(\\))|(LoadProhibited)"
+
+            # Run QEMU in Docker
+            qemu_returncode = docker_runner.run(
+                firmware_path=pio_build_dir,
+                timeout=30,
+                flash_size=4,
+                interrupt_regex=interrupt_regex,
+                interactive=False,
             )
 
-            # Stream QEMU output
-            with qemu_proc.line_iter(timeout=None) as it:
-                for line in it:
-                    print(line)
-
-            qemu_returncode = qemu_proc.wait()
             if qemu_returncode == 0:
-                print(f"SUCCESS: {example} ran successfully in QEMU")
+                print(f"SUCCESS: {example} ran successfully in Docker QEMU")
                 success_count += 1
             else:
                 print(
-                    f"FAILED: {example} failed in QEMU with exit code: {qemu_returncode}"
+                    f"FAILED: {example} failed in Docker QEMU with exit code: {qemu_returncode}"
                 )
                 failure_count += 1
 

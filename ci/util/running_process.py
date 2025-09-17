@@ -259,6 +259,7 @@ class RunningProcess:
         on_complete: Callable[[], None]
         | None = None,  # Callback to execute when process completes
         output_formatter: OutputFormatter | None = None,
+        env: dict[str, str] | None = None,  # Environment variables
     ):
         """
         Initialize the RunningProcess instance.
@@ -275,6 +276,7 @@ class RunningProcess:
             enable_stack_trace: If True, dump GDB stack trace when process times out.
             on_complete: Callback function executed when process completes normally.
             output_formatter: Optional formatter for transforming output lines.
+            env: Environment variables to pass to the subprocess. None uses current environment.
         """
         if shell is None:
             # Default: use shell only when given a string, or when a list includes shell metachars
@@ -288,6 +290,7 @@ class RunningProcess:
         self.command = command
         self.shell: bool = shell
         self.cwd = str(cwd) if cwd is not None else None
+        self.env = env
         self.output_queue: Queue[str | EndOfStream] = Queue()
         self.accumulated_output: list[str] = []  # Store all output for later retrieval
         self.proc: subprocess.Popen[Any] | None = None
@@ -474,6 +477,7 @@ class RunningProcess:
             text=True,  # Use text mode
             encoding="utf-8",  # Explicitly use UTF-8
             errors="replace",  # Replace invalid chars instead of failing
+            env=self.env,  # Use provided environment variables
         )
 
         # Track start time after process is successfully created

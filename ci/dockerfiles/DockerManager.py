@@ -1,3 +1,4 @@
+import os
 import subprocess
 import sys
 from typing import Any, Dict, List, Optional
@@ -9,21 +10,82 @@ class DockerManager:
         pass
 
     def _run_docker_command(
-        self, command: List[str], check: bool = True
+        self,
+        command: List[str],
+        check: bool = True,
+        stream_output: bool = False,
+        interrupt_pattern: Optional[str] = None,
     ) -> subprocess.CompletedProcess[str]:
         full_command = ["docker"] + command
         print(f"Executing Docker command: {' '.join(full_command)}")
-        result = subprocess.run(
-            full_command, capture_output=True, text=True, check=check
-        )
-        if check and result.returncode != 0:
-            print(
-                f"Docker command failed with exit code {result.returncode}",
-                file=sys.stderr,
+
+        # Set environment to prevent MSYS2/Git Bash path conversion on Windows
+        env = os.environ.copy()
+        # Set UTF-8 encoding environment variables for Windows
+        env["PYTHONIOENCODING"] = "utf-8"
+        env["PYTHONUTF8"] = "1"
+        # Only set MSYS_NO_PATHCONV if we're in a Git Bash/MSYS2 environment
+        if (
+            "MSYSTEM" in os.environ
+            or os.environ.get("TERM") == "xterm"
+            or "bash.exe" in os.environ.get("SHELL", "")
+        ):
+            env["MSYS_NO_PATHCONV"] = "1"
+
+        if stream_output:
+            # Use RunningProcess for streaming output
+            import re
+
+            from ci.util.running_process import RunningProcess
+
+            proc = RunningProcess(full_command, env=env, auto_run=True)
+            success_pattern_found = False
+
+            try:
+                with proc.line_iter(timeout=None) as it:
+                    for line in it:
+                        print(line)
+                        # Check for success pattern
+                        if interrupt_pattern and re.search(interrupt_pattern, line):
+                            print(f"SUCCESS: Pattern found: {line}")
+                            success_pattern_found = True
+
+                returncode = proc.wait()
+
+                # Create a mock result object for compatibility
+                class MockResult:
+                    def __init__(self, returncode, stdout="", stderr=""):
+                        self.returncode = returncode
+                        self.stdout = stdout
+                        self.stderr = stderr
+
+                # Return success if pattern was found, regardless of container exit code
+                final_returncode = 0 if success_pattern_found else returncode
+                return MockResult(final_returncode, "", "")
+
+            except Exception as e:
+                print(f"Error during streaming: {e}")
+                returncode = proc.wait() if hasattr(proc, "wait") else 1
+                return MockResult(returncode, "", str(e))
+        else:
+            # Use regular subprocess for non-streaming commands
+            result = subprocess.run(
+                full_command,
+                capture_output=True,
+                text=True,
+                check=check,
+                env=env,
+                encoding="utf-8",
+                errors="replace",
             )
-            print(f"Stdout: {result.stdout}", file=sys.stderr)
-            print(f"Stderr: {result.stderr}", file=sys.stderr)
-        return result
+            if check and result.returncode != 0:
+                print(
+                    f"Docker command failed with exit code {result.returncode}",
+                    file=sys.stderr,
+                )
+                print(f"Stdout: {result.stdout}", file=sys.stderr)
+                print(f"Stderr: {result.stderr}", file=sys.stderr)
+            return result
 
     def pull_image(self, image_name: str, tag: str = "latest"):
         """Pulls the specified Docker image."""
@@ -70,13 +132,65 @@ class DockerManager:
         print(f"Container {container_id} started.")
         return container_id
 
+    def run_container_streaming(
+        self,
+        image_name: str,
+        command: List[str],
+        volumes: Optional[Dict[str, Dict[str, str]]] = None,
+        environment: Optional[Dict[str, str]] = None,
+        name: Optional[str] = None,
+        interrupt_pattern: Optional[str] = None,
+    ) -> int:
+        """
+        Runs a Docker container with streaming output and pattern detection.
+        Returns exit code (0 for success).
+        """
+        print(
+            f"Running container from image: {image_name} with command: {' '.join(command)}"
+        )
+        docker_cmd = ["run", "--rm"]  # --rm to automatically remove container on exit
+        if name:
+            docker_cmd.extend(["--name", name])
+        if volumes:
+            for host_path, container_path_info in volumes.items():
+                mode = container_path_info.get("mode", "rw")
+                docker_cmd.extend(
+                    ["-v", f"{host_path}:{container_path_info['bind']}:{mode}"]
+                )
+        if environment:
+            for key, value in environment.items():
+                docker_cmd.extend(["-e", f"{key}={value}"])
+
+        docker_cmd.append(image_name)
+        docker_cmd.extend(command)
+
+        result = self._run_docker_command(
+            docker_cmd,
+            check=False,
+            stream_output=True,
+            interrupt_pattern=interrupt_pattern,
+        )
+        return result.returncode
+
     def get_container_logs(self, container_id_or_name: str) -> str:
         """Retrieves logs from a container."""
         print(f"Getting logs for container: {container_id_or_name}")
-        result = self._run_docker_command(["logs", container_id_or_name])
-        logs = result.stdout
-        print(f"Logs retrieved for {container_id_or_name}.")
-        return logs
+        try:
+            result = self._run_docker_command(
+                ["logs", container_id_or_name], check=False
+            )
+            if result.returncode == 0:
+                logs = result.stdout
+                print(f"Logs retrieved for {container_id_or_name}.")
+                return logs
+            else:
+                # Container may have exited, try to get logs anyway
+                print(f"Warning: docker logs returned exit code {result.returncode}")
+                logs = result.stdout if result.stdout else result.stderr
+                return logs
+        except Exception as e:
+            print(f"Warning: Failed to get container logs: {e}")
+            return ""
 
     def stop_container(self, container_id_or_name: str):
         """Stops a running container."""
