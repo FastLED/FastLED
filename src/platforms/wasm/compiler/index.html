@@ -41,19 +41,15 @@
             <span class="menu-label">Tools</span>
             <div class="menu-dropdown">
                 <div class="menu-dropdown-item" data-value="ui-events">UI Events</div>
+                <div class="menu-dropdown-item" data-action="video-mapper">FastLED Video Mapper</div>
             </div>
         </div>
     </div>
 
     <!-- Row 1: Title (always full width) -->
     <h1>FastLED</h1>
-    
-    <!-- Row 2: Description (always full width) -->
-    <div class="studio-link">
-        <a href="https://ledmapper.com" target="_blank">FastLED Video Mapper</a>
-    </div>
-    
-    <!-- Row 3: Responsive Grid (1×N, 2×N, 3×N) -->
+
+    <!-- Row 2: Responsive Grid (1×N, 2×N, 3×N) -->
     <div id="main-container">
         <div id="content-grid">
             <div id="canvas-container">
@@ -301,10 +297,15 @@
         item.addEventListener('click', function(e) {
             e.stopPropagation();
             const selectedValue = this.getAttribute('data-value');
-            console.log('Tools option selected:', selectedValue);
+            const selectedAction = this.getAttribute('data-action');
 
-            // Handle the selected option
-            handleToolsOptionChange(selectedValue);
+            if (selectedValue) {
+                console.log('Tools option selected:', selectedValue);
+                handleToolsOptionChange(selectedValue);
+            } else if (selectedAction) {
+                console.log('Tools action selected:', selectedAction);
+                handleToolsActionChange(selectedAction);
+            }
         });
     });
 
@@ -334,6 +335,15 @@
             } else {
                 console.warn('JSON Inspector not available yet');
             }
+            return;
+        }
+    }
+
+    // Handle tools action changes
+    function handleToolsActionChange(action) {
+        if (action === 'video-mapper') {
+            // Open FastLED Video Mapper in new tab
+            window.open('https://ledmapper.com', '_blank');
             return;
         }
     }
