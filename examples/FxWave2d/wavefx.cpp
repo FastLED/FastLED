@@ -358,13 +358,49 @@ void wavefx_setup() {
     // Create a screen map for visualization in the FastLED web compiler
     auto screenmap = xyMap.toScreenMap();
     screenmap.setDiameter(.2);  // Set the size of the LEDs in the visualization
-    
+
     // Initialize the LED strip:
     // - NEOPIXEL is the LED type
     // - 2 is the data pin number (for real hardware)
     // - setScreenMap connects our 2D coordinate system to the 1D LED array
     FastLED.addLeds<NEOPIXEL, 2>(leds, NUM_LEDS).setScreenMap(screenmap);
-    
+
+    // Set up UI groupings
+    // Main Controls
+    title.setGroup("Main Controls");
+    description.setGroup("Main Controls");
+    button.setGroup("Main Controls");
+    buttonFancy.setGroup("Main Controls");
+    autoTrigger.setGroup("Main Controls");
+    triggerSpeed.setGroup("Main Controls");
+
+    // Global Settings
+    xCyclical.setGroup("Global Settings");
+    easeModeSqrt.setGroup("Global Settings");
+    useChangeGrid.setGroup("Global Settings");
+    blurAmount.setGroup("Global Settings");
+    blurPasses.setGroup("Global Settings");
+    superSample.setGroup("Global Settings");
+
+    // Upper Wave Layer
+    speedUpper.setGroup("Upper Wave Layer");
+    dampeningUpper.setGroup("Upper Wave Layer");
+    halfDuplexUpper.setGroup("Upper Wave Layer");
+    blurAmountUpper.setGroup("Upper Wave Layer");
+    blurPassesUpper.setGroup("Upper Wave Layer");
+
+    // Lower Wave Layer
+    speedLower.setGroup("Lower Wave Layer");
+    dampeningLower.setGroup("Lower Wave Layer");
+    halfDuplexLower.setGroup("Lower Wave Layer");
+    blurAmountLower.setGroup("Lower Wave Layer");
+    blurPassesLower.setGroup("Lower Wave Layer");
+
+    // Fancy Effects
+    fancySpeed.setGroup("Fancy Effects");
+    fancyIntensity.setGroup("Fancy Effects");
+    fancyParticleSpan.setGroup("Fancy Effects");
+
     // Add both wave layers to the blender
     // The order matters - lower layer is added first (background)
     fxBlend.add(waveFxLower);
