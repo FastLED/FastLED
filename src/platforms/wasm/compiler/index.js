@@ -25,6 +25,7 @@ import { GraphicsManager } from './modules/graphics_manager.js';
 import { GraphicsManagerThreeJS } from './modules/graphics_manager_threejs.js';
 import { isDenseGrid } from './modules/graphics_utils.js';
 import { JsonInspector } from './modules/json_inspector.js';
+import { VideoRecorder } from './modules/video_recorder.js';
 
 // Import new pure JavaScript modules
 import { FastLEDAsyncController } from './modules/fastled_async_controller.js';
@@ -920,3 +921,94 @@ window.updateCanvas = updateCanvas;
 
 // Set up global error handlers
 setupGlobalErrorHandlers();
+
+/**
+ * Video Recording Setup
+ */
+let videoRecorder = null;
+
+/**
+ * Initializes the video recorder with canvas and audio context
+ */
+function initializeVideoRecorder() {
+  // Wait for DOM to be ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializeVideoRecorder);
+    return;
+  }
+
+  const canvas = document.getElementById('myCanvas');
+  const recordButton = document.getElementById('record-btn');
+
+  if (!canvas || !recordButton) {
+    console.warn('Canvas or record button not found, video recording disabled');
+    return;
+  }
+
+  // Try to get audio context if available
+  let audioContext = null;
+  if (typeof AudioContext !== 'undefined' || typeof webkitAudioContext !== 'undefined') {
+    try {
+      const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+      audioContext = new AudioContextClass();
+    } catch (error) {
+      console.warn('Could not create AudioContext for video recording:', error);
+    }
+  }
+
+  // Create video recorder instance
+  videoRecorder = new VideoRecorder({
+    canvas: canvas,
+    audioContext: audioContext,
+    fps: 30, // Default to 30 FPS
+    onStateChange: (isRecording) => {
+      // Update button visual state
+      if (isRecording) {
+        recordButton.classList.add('recording');
+        recordButton.title = 'Stop Recording';
+        // Update icon
+        const recordIcon = recordButton.querySelector('.record-icon');
+        const stopIcon = recordButton.querySelector('.stop-icon');
+        if (recordIcon) recordIcon.style.display = 'none';
+        if (stopIcon) stopIcon.style.display = 'block';
+      } else {
+        recordButton.classList.remove('recording');
+        recordButton.title = 'Start Recording';
+        // Update icon
+        const recordIcon = recordButton.querySelector('.record-icon');
+        const stopIcon = recordButton.querySelector('.stop-icon');
+        if (recordIcon) recordIcon.style.display = 'block';
+        if (stopIcon) stopIcon.style.display = 'none';
+      }
+    }
+  });
+
+  // Add click handler to record button
+  recordButton.addEventListener('click', (e) => {
+    e.preventDefault();
+    if (videoRecorder) {
+      videoRecorder.toggleRecording();
+    }
+  });
+
+  // Add keyboard shortcut (Ctrl+R or Cmd+R)
+  document.addEventListener('keydown', (e) => {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'r' && !e.shiftKey) {
+      e.preventDefault();
+      if (videoRecorder) {
+        videoRecorder.toggleRecording();
+      }
+    }
+  });
+
+  console.log('Video recorder initialized');
+}
+
+// Initialize video recorder
+initializeVideoRecorder();
+
+// Expose video recorder functions globally for debugging
+window.getVideoRecorder = () => videoRecorder;
+window.startVideoRecording = () => videoRecorder?.startRecording();
+window.stopVideoRecording = () => videoRecorder?.stopRecording();
+window.testVideoRecording = () => videoRecorder?.testRecording();

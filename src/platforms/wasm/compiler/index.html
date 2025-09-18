@@ -29,6 +29,7 @@
                 <div class="menu-dropdown-item" data-value="gfx-simple">gfx 0</div>
                 <div class="menu-dropdown-item" data-value="gfx-bloom">gfx 1</div>
                 <div class="menu-dropdown-item" data-value="ui-events">UI Events</div>
+                <div class="menu-dropdown-item" data-value="video-settings">Video Settings</div>
             </div>
         </div>
     </div>
@@ -47,6 +48,13 @@
             <div id="canvas-container">
                 <canvas id="myCanvas" width="16" height="16"></canvas>
                 <div id="canvas-label">stdout</div>
+                <!-- Video Recording Button -->
+                <button id="record-btn" class="record-button" title="Start/Stop Recording">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                        <circle class="record-icon" cx="12" cy="12" r="8"/>
+                        <rect class="stop-icon" x="8" y="8" width="8" height="8" style="display: none;"/>
+                    </svg>
+                </button>
                 <!-- JSON Inspector Button - Removed, now in gear menu -->
             </div>
             <div id="ui-controls"></div>
@@ -66,6 +74,65 @@
         <div class="popup-overlay" id="popup-overlay"></div>
         <div class="popup" id="output-popup">
             <pre id="output">stdout:</pre>
+        </div>
+
+        <!-- Video Settings Popup -->
+        <div class="popup-overlay" id="video-settings-overlay"></div>
+        <div class="popup video-settings-popup" id="video-settings-popup">
+            <h3>Video Recording Settings</h3>
+            <div class="settings-content">
+                <div class="setting-group">
+                    <label for="video-codec">Video Codec:</label>
+                    <select id="video-codec">
+                        <option value="video/webm;codecs=vp9">VP9 (WebM) - Recommended</option>
+                        <option value="video/webm;codecs=vp8">VP8 (WebM)</option>
+                        <option value="video/webm;codecs=h264">H.264 (WebM)</option>
+                        <option value="video/webm;codecs=av1">AV1 (WebM)</option>
+                        <option value="video/mp4;codecs=h264">H.264 (MP4)</option>
+                        <option value="video/mp4;codecs=avc1">AVC1 (MP4)</option>
+                        <option value="video/webm">WebM (Auto)</option>
+                    </select>
+                </div>
+
+                <div class="setting-group">
+                    <label for="video-bitrate">Video Bitrate (Mbps):</label>
+                    <input type="number" id="video-bitrate" min="1" max="50" value="10" step="0.5">
+                    <span class="bitrate-display">10 Mbps</span>
+                </div>
+
+                <div class="setting-group">
+                    <label for="audio-codec">Audio Codec:</label>
+                    <select id="audio-codec">
+                        <option value="opus">Opus (Recommended)</option>
+                        <option value="vorbis">Vorbis</option>
+                        <option value="aac">AAC</option>
+                        <option value="mp3">MP3</option>
+                    </select>
+                </div>
+
+                <div class="setting-group">
+                    <label for="audio-bitrate">Audio Bitrate (kbps):</label>
+                    <input type="number" id="audio-bitrate" min="32" max="320" value="128" step="16">
+                    <span class="bitrate-display">128 kbps</span>
+                </div>
+
+                <div class="setting-group">
+                    <label for="video-fps">Frame Rate (FPS):</label>
+                    <select id="video-fps">
+                        <option value="30">30 FPS</option>
+                        <option value="60">60 FPS</option>
+                        <option value="24">24 FPS</option>
+                        <option value="25">25 FPS</option>
+                        <option value="50">50 FPS</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="popup-buttons">
+                <button id="video-settings-apply" class="btn-apply">Apply</button>
+                <button id="video-settings-cancel" class="btn-cancel">Cancel</button>
+                <button id="video-settings-reset" class="btn-reset">Reset to Defaults</button>
+            </div>
         </div>
     </div>
 
@@ -224,6 +291,12 @@
             }
             return;
         }
+
+        if (option === 'video-settings') {
+            // Show video settings popup
+            showVideoSettingsPopup();
+            return;
+        }
         
         // Determine URL parameter based on selection
         let gfxParam = '';
@@ -256,6 +329,139 @@
             window.location.href = url.toString();
         }, 500);
     }
+
+    // Video Settings Popup Functions
+    const videoSettingsDefaults = {
+        videoCodec: 'video/webm;codecs=vp9',
+        videoBitrate: 10,
+        audioCodec: 'opus',
+        audioBitrate: 128,
+        fps: 30
+    };
+
+    let videoSettings = { ...videoSettingsDefaults };
+
+    // Load saved settings from localStorage
+    function loadVideoSettings() {
+        const saved = localStorage.getItem('videoRecordingSettings');
+        if (saved) {
+            try {
+                videoSettings = { ...videoSettingsDefaults, ...JSON.parse(saved) };
+            } catch (e) {
+                console.error('Failed to load video settings:', e);
+            }
+        }
+        return videoSettings;
+    }
+
+    // Save settings to localStorage
+    function saveVideoSettings() {
+        localStorage.setItem('videoRecordingSettings', JSON.stringify(videoSettings));
+    }
+
+    // Show video settings popup
+    function showVideoSettingsPopup() {
+        const overlay = document.getElementById('video-settings-overlay');
+        const popup = document.getElementById('video-settings-popup');
+
+        // Load current settings
+        loadVideoSettings();
+
+        // Set form values
+        document.getElementById('video-codec').value = videoSettings.videoCodec;
+        document.getElementById('video-bitrate').value = videoSettings.videoBitrate;
+        document.getElementById('audio-codec').value = videoSettings.audioCodec;
+        document.getElementById('audio-bitrate').value = videoSettings.audioBitrate;
+        document.getElementById('video-fps').value = videoSettings.fps;
+
+        // Update bitrate displays
+        updateBitrateDisplays();
+
+        // Show popup
+        overlay.style.display = 'block';
+        popup.style.display = 'block';
+        overlay.style.opacity = '0';
+        void overlay.offsetWidth;
+        overlay.style.opacity = '1';
+    }
+
+    // Hide video settings popup
+    function hideVideoSettingsPopup() {
+        const overlay = document.getElementById('video-settings-overlay');
+        const popup = document.getElementById('video-settings-popup');
+
+        overlay.style.opacity = '0';
+        setTimeout(() => {
+            overlay.style.display = 'none';
+            popup.style.display = 'none';
+        }, 200);
+    }
+
+    // Update bitrate display labels
+    function updateBitrateDisplays() {
+        const videoBitrate = document.getElementById('video-bitrate');
+        const audioBitrate = document.getElementById('audio-bitrate');
+
+        videoBitrate.nextElementSibling.textContent = `${videoBitrate.value} Mbps`;
+        audioBitrate.nextElementSibling.textContent = `${audioBitrate.value} kbps`;
+    }
+
+    // Setup video settings event handlers
+    document.getElementById('video-bitrate').addEventListener('input', updateBitrateDisplays);
+    document.getElementById('audio-bitrate').addEventListener('input', updateBitrateDisplays);
+
+    document.getElementById('video-settings-apply').addEventListener('click', () => {
+        // Collect settings
+        videoSettings.videoCodec = document.getElementById('video-codec').value;
+        videoSettings.videoBitrate = parseFloat(document.getElementById('video-bitrate').value);
+        videoSettings.audioCodec = document.getElementById('audio-codec').value;
+        videoSettings.audioBitrate = parseInt(document.getElementById('audio-bitrate').value);
+        videoSettings.fps = parseInt(document.getElementById('video-fps').value);
+
+        // Save settings
+        saveVideoSettings();
+
+        // Apply to video recorder if it exists
+        if (window.videoRecorder) {
+            window.videoRecorder.updateSettings(videoSettings);
+        }
+
+        // Show confirmation toast
+        const toast = document.createElement('div');
+        toast.className = 'toast-notification';
+        toast.textContent = 'Video settings saved';
+        document.body.appendChild(toast);
+        void toast.offsetHeight;
+        toast.classList.add('toast-notification-show');
+        setTimeout(() => {
+            toast.classList.add('toast-notification-hide');
+            toast.addEventListener('transitionend', () => {
+                if (toast.parentElement) {
+                    document.body.removeChild(toast);
+                }
+            }, {once: true});
+        }, 2000);
+
+        hideVideoSettingsPopup();
+    });
+
+    document.getElementById('video-settings-cancel').addEventListener('click', hideVideoSettingsPopup);
+
+    document.getElementById('video-settings-reset').addEventListener('click', () => {
+        // Reset to defaults
+        document.getElementById('video-codec').value = videoSettingsDefaults.videoCodec;
+        document.getElementById('video-bitrate').value = videoSettingsDefaults.videoBitrate;
+        document.getElementById('audio-codec').value = videoSettingsDefaults.audioCodec;
+        document.getElementById('audio-bitrate').value = videoSettingsDefaults.audioBitrate;
+        document.getElementById('video-fps').value = videoSettingsDefaults.fps;
+        updateBitrateDisplays();
+    });
+
+    document.getElementById('video-settings-overlay').addEventListener('click', hideVideoSettingsPopup);
+
+    // Expose functions globally
+    window.showVideoSettingsPopup = showVideoSettingsPopup;
+    window.getVideoSettings = loadVideoSettings;
 
     async function loadThreeJs() {
         console.log('Using ThreeJS modules:', window.threeJsModules);

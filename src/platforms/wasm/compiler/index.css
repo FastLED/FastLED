@@ -831,6 +831,74 @@ audio::-webkit-media-controls-mute-button {
     position: relative;
 }
 
+/* Recording Button Styles */
+.record-button {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    background: rgba(128, 128, 128, 0.3);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    z-index: 10;
+    color: #888;
+}
+
+.record-button:hover {
+    background: rgba(128, 128, 128, 0.5);
+    border-color: rgba(255, 255, 255, 0.5);
+    transform: scale(1.1);
+}
+
+.record-button.recording {
+    background: rgba(255, 0, 0, 0.3);
+    border-color: rgba(255, 0, 0, 0.8);
+    color: #ff0000;
+    animation: pulse 1.5s infinite;
+}
+
+.record-button.recording:hover {
+    background: rgba(255, 0, 0, 0.5);
+    border-color: rgba(255, 0, 0, 1);
+}
+
+.record-button svg {
+    width: 24px;
+    height: 24px;
+}
+
+/* Toggle record/stop icons */
+.record-button .stop-icon {
+    display: none;
+}
+
+.record-button.recording .record-icon {
+    display: none;
+}
+
+.record-button.recording .stop-icon {
+    display: block;
+}
+
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(255, 0, 0, 0.7);
+    }
+    70% {
+        box-shadow: 0 0 0 10px rgba(255, 0, 0, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(255, 0, 0, 0);
+    }
+}
+
 @keyframes labelFade {
     0% { opacity: 0; }
     3% { opacity: 0; }  /* Quick fade in (0.25s) */
@@ -1469,4 +1537,127 @@ audio::-webkit-media-controls-mute-button {
 .ui-control.slider-control:hover .slider-label-overlay,
 .ui-control.slider-control input[type="range"]:hover + .slider-label-overlay {
     opacity: 0.3;
+}
+
+/* Video Settings Popup Styles */
+.video-settings-popup {
+    width: 500px;
+    max-width: 90vw;
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+.video-settings-popup h3 {
+    margin: 0 0 20px 0;
+    color: #fff;
+    font-size: 1.4em;
+    border-bottom: 2px solid #333;
+    padding-bottom: 10px;
+}
+
+.settings-content {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    margin-bottom: 25px;
+}
+
+.setting-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.setting-group label {
+    color: #ccc;
+    font-size: 0.95em;
+    font-weight: 500;
+}
+
+.setting-group select,
+.setting-group input[type="number"] {
+    background-color: #2a2a2a;
+    color: #fff;
+    border: 1px solid #444;
+    border-radius: 4px;
+    padding: 8px 12px;
+    font-size: 14px;
+    transition: all 0.2s ease;
+}
+
+.setting-group select:hover,
+.setting-group input[type="number"]:hover {
+    border-color: #666;
+    background-color: #333;
+}
+
+.setting-group select:focus,
+.setting-group input[type="number"]:focus {
+    outline: none;
+    border-color: #4CAF50;
+    box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
+}
+
+.setting-group input[type="number"] {
+    width: 120px;
+}
+
+.bitrate-display {
+    display: inline-block;
+    margin-left: 10px;
+    color: #888;
+    font-size: 0.9em;
+    min-width: 80px;
+}
+
+.popup-buttons {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    padding-top: 20px;
+    border-top: 1px solid #333;
+}
+
+.popup-buttons button {
+    padding: 8px 20px;
+    border: none;
+    border-radius: 4px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-apply {
+    background-color: #4CAF50;
+    color: white;
+}
+
+.btn-apply:hover {
+    background-color: #45a049;
+}
+
+.btn-cancel {
+    background-color: #555;
+    color: white;
+}
+
+.btn-cancel:hover {
+    background-color: #666;
+}
+
+.btn-reset {
+    background-color: #ff9800;
+    color: white;
+}
+
+.btn-reset:hover {
+    background-color: #e68900;
+}
+
+#video-settings-overlay {
+    z-index: 1098;
+}
+
+#video-settings-popup {
+    z-index: 1099;
 }
