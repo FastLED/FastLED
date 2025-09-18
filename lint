@@ -96,8 +96,26 @@ if [ -f ".cache/js-tools/lint-js-fast" ] && [ -f "$ESLINT_EXE" ]; then
         exit 1
     fi
 else
-    echo -e "${BLUE}⚠️  Fast JavaScript linting not available. Skipping JavaScript linting.${NC}"
-    echo -e "${BLUE}💡 To enable fast JavaScript linting, run: uv run ci/setup-js-linting-fast.py${NC}"
+    echo -e "${BLUE}⚠️  Fast JavaScript linting not available. Setting up now...${NC}"
+    # Auto-setup JavaScript linting
+    if uv run ci/setup-js-linting-fast.py; then
+        echo -e "${GREEN}✅ JavaScript linting setup complete${NC}"
+        # Now run the linting
+        if [ -f ".cache/js-tools/lint-js-fast" ]; then
+            echo -e "${BLUE}🚀 Running JavaScript linting...${NC}"
+            if ! bash .cache/js-tools/lint-js-fast; then
+                echo -e "${RED}❌ JavaScript linting failed${NC}"
+                exit 1
+            fi
+        else
+            echo -e "${RED}❌ Failed to create lint script${NC}"
+            exit 1
+        fi
+    else
+        echo -e "${RED}❌ Failed to setup JavaScript linting${NC}"
+        echo -e "${BLUE}💡 You can manually run: uv run ci/setup-js-linting-fast.py${NC}"
+        # Don't exit with error, just skip JS linting
+    fi
 fi
 
 echo ""
