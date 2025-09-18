@@ -886,7 +886,7 @@ export class JsonUiManager {
         const actualElementId = elementId.startsWith('id_') ? elementId.substring(3) : elementId;
 
         const element = this.uiElements[actualElementId];
-        if (element) {
+        if (element && element.parentNode) {
           // Extract value from update data
           const value = updateData.value !== undefined ? updateData.value : updateData;
 
@@ -919,11 +919,43 @@ export class JsonUiManager {
           this.previousUiState[actualElementId] = value;
           // console.log(`*** C++→JS: Updated UI element '${actualElementId}' = ${value} ***`);
         } else {
+          // Element not found or removed from DOM, clean it up
+          if (this.uiElements[actualElementId] && !this.uiElements[actualElementId].parentNode) {
+            delete this.uiElements[actualElementId];
+            delete this.previousUiState[actualElementId];
+            console.log(`*** UI Manager: Cleaned up orphaned element '${actualElementId}' ***`);
+          }
           // console.warn(`*** C++→JS: Element '${actualElementId}' not found ***`);
         }
       }
     } catch (error) {
       console.error('*** C++→JS: Update error:', error, 'JSON:', jsonString);
+    }
+  }
+
+  /**
+   * Cleans up orphaned UI elements that have been removed from the DOM
+   * but are still referenced in our internal tracking
+   */
+  cleanupOrphanedElements() {
+    const orphanedIds = [];
+
+    for (const id in this.uiElements) {
+      if (!Object.prototype.hasOwnProperty.call(this.uiElements, id)) continue;
+
+      const element = this.uiElements[id];
+      if (!element || !element.parentNode) {
+        orphanedIds.push(id);
+      }
+    }
+
+    if (orphanedIds.length > 0) {
+      console.log(`*** UI Manager: Cleaning up ${orphanedIds.length} orphaned elements:`, orphanedIds);
+
+      for (const id of orphanedIds) {
+        delete this.uiElements[id];
+        delete this.previousUiState[id];
+      }
     }
   }
 
@@ -1086,6 +1118,14 @@ export class JsonUiManager {
     for (const id in this.uiElements) {
       if (!Object.prototype.hasOwnProperty.call(this.uiElements, id)) continue;
       const element = this.uiElements[id];
+
+      // Check if element is null or has been removed from DOM
+      if (!element || !element.parentNode) {
+        // Element has been removed, clean it up
+        delete this.uiElements[id];
+        continue;
+      }
+
       let currentValue;
       if (element.type === 'checkbox') {
         currentValue = element.checked;

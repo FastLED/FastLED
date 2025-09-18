@@ -16,11 +16,11 @@
  */
 const DEFAULT_VIDEO_CONFIG = {
   /** @type {string} Video MIME type for recording */
-  videoCodec: 'video/webm;codecs=vp9',
+  videoCodec: 'video/mp4;codecs=h264,aac',
   /** @type {number} Target video bitrate in Mbps */
   videoBitrate: 10,
   /** @type {string} Audio codec for recording */
-  audioCodec: 'opus',
+  audioCodec: 'aac',
   /** @type {number} Target audio bitrate in kbps */
   audioBitrate: 128,
   /** @type {number} Default frame rate */
@@ -28,11 +28,13 @@ const DEFAULT_VIDEO_CONFIG = {
 };
 
 /**
- * Fallback MIME types if VP9 is not supported
+ * Fallback MIME types if H.264/MP4 is not supported
  * @constant {string[]}
  */
 const FALLBACK_MIME_TYPES = [
+  'video/webm;codecs=vp9,opus',
   'video/webm;codecs=vp8,opus',
+  'video/webm;codecs=vp9',
   'video/webm;codecs=vp8',
   'video/webm',
   'video/mp4',
@@ -87,6 +89,12 @@ export class VideoRecorder {
     /** @type {string} */
     this.selectedMimeType = this.selectMimeType();
 
+    /** @type {number} Frame counter for logging */
+    this.frameCounter = 0;
+
+    /** @type {number} Recording start time */
+    this.recordingStartTime = 0;
+
     console.log('VideoRecorder initialized with settings:', this.settings);
     console.log('Selected MIME type:', this.selectedMimeType);
   }
@@ -132,28 +140,19 @@ export class VideoRecorder {
    * @returns {MediaStream} Combined media stream
    */
   createMediaStream() {
-    // Ensure canvas has some content by drawing a test pattern if it's blank
-    const ctx = this.canvas.getContext('2d');
-    const imageData = ctx.getImageData(0, 0, this.canvas.width, this.canvas.height);
-    const hasContent = imageData.data.some(pixel => pixel !== 0);
-
-    if (!hasContent) {
-      console.warn('Canvas appears to be blank, drawing test pattern');
-      ctx.fillStyle = '#ff0000';
-      ctx.fillRect(0, 0, this.canvas.width / 2, this.canvas.height / 2);
-      ctx.fillStyle = '#00ff00';
-      ctx.fillRect(this.canvas.width / 2, 0, this.canvas.width / 2, this.canvas.height / 2);
-      ctx.fillStyle = '#0000ff';
-      ctx.fillRect(0, this.canvas.height / 2, this.canvas.width / 2, this.canvas.height / 2);
-      ctx.fillStyle = '#ffff00';
-      ctx.fillRect(this.canvas.width / 2, this.canvas.height / 2, this.canvas.width / 2, this.canvas.height / 2);
+    // Validate canvas and context
+    if (!this.canvas) {
+      throw new Error('Canvas element is null or undefined');
     }
+
+    // Don't try to read canvas content since graphics manager might be using WebGL
+    // The video recorder will capture whatever is being rendered to the canvas
+    console.log('Video recorder creating media stream from canvas...');
 
     // Get video stream from canvas
     const videoStream = this.canvas.captureStream(this.fps);
 
     console.log('Canvas dimensions:', this.canvas.width, 'x', this.canvas.height);
-    console.log('Canvas has content:', hasContent);
     console.log('Video stream tracks:', videoStream.getVideoTracks().length);
     console.log('Video stream settings:', videoStream.getVideoTracks()[0]?.getSettings());
 
@@ -167,16 +166,31 @@ export class VideoRecorder {
       // Create audio destination node for capturing audio
       this.audioDestination = this.audioContext.createMediaStreamDestination();
 
-      // Connect all audio sources to the destination
-      // This assumes audio is being routed through the main gain node
-      // You may need to connect specific audio nodes here
-      const gainNode = this.audioContext.gain || this.audioContext.createGain();
-      gainNode.connect(this.audioDestination);
+      // Try to connect audio sources if they exist
+      // Look for common audio node patterns
+      if (this.audioContext.destination && this.audioContext.destination.connect) {
+        // Some browsers allow connecting from destination
+        try {
+          // Create a gain node to route audio properly
+          const gainNode = this.audioContext.createGain();
+          gainNode.connect(this.audioDestination);
+          console.log('Audio routing established via gain node');
+        } catch (e) {
+          console.warn('Could not establish audio routing:', e);
+        }
+      }
+
+      // Check if we have audio tracks
+      const audioTracks = this.audioDestination.stream.getAudioTracks();
+      if (audioTracks.length === 0) {
+        console.warn('No audio tracks available, recording video only');
+        return videoStream;
+      }
 
       // Combine video and audio tracks
       const combinedStream = new MediaStream([
         ...videoStream.getVideoTracks(),
-        ...this.audioDestination.stream.getAudioTracks(),
+        ...audioTracks,
       ]);
 
       console.log('Combined stream - Video tracks:', combinedStream.getVideoTracks().length);
@@ -218,14 +232,18 @@ export class VideoRecorder {
       // Create MediaRecorder instance
       this.mediaRecorder = new MediaRecorder(this.stream, options);
 
-      // Reset recorded chunks
+      // Reset recorded chunks and frame counter
       this.recordedChunks = [];
+      this.frameCounter = 0;
+      this.recordingStartTime = performance.now();
 
       // Set up event handlers
       this.mediaRecorder.ondataavailable = (event) => {
         console.log('Data available:', event.data.size, 'bytes');
         if (event.data.size > 0) {
           this.recordedChunks.push(event.data);
+          this.frameCounter++;
+          console.log(`frame ${this.frameCounter}`);
         }
       };
 
@@ -312,33 +330,55 @@ export class VideoRecorder {
       return;
     }
 
-    // Create a blob from recorded chunks
-    const blob = new Blob(this.recordedChunks, {
-      type: this.selectedMimeType || 'video/webm',
-    });
+    try {
+      // Create a blob from recorded chunks
+      const blob = new Blob(this.recordedChunks, {
+        type: this.selectedMimeType || 'video/webm',
+      });
 
-    // Generate filename with timestamp
-    const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
-    const filename = `fastled-recording-${timestamp}.webm`;
+      // Determine file extension from MIME type
+      let extension = '.webm'; // default
+      if (this.selectedMimeType) {
+        if (this.selectedMimeType.includes('mp4')) {
+          extension = '.mp4';
+        } else if (this.selectedMimeType.includes('webm')) {
+          extension = '.webm';
+        }
+      }
 
-    // Create download link
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.style.display = 'none';
-    a.href = url;
-    a.download = filename;
+      // Generate filename with timestamp
+      const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
+      const filename = `fastled-recording-${timestamp}${extension}`;
 
-    // Trigger download
-    document.body.appendChild(a);
-    a.click();
+      // Log recording statistics
+      const recordingDuration = (performance.now() - this.recordingStartTime) / 1000;
+      console.log(`Recording completed: ${this.frameCounter} frames in ${recordingDuration.toFixed(1)}s`);
+      console.log(`Average FPS: ${(this.frameCounter / recordingDuration).toFixed(1)}`);
+      console.log(`File size: ${(blob.size / 1024 / 1024).toFixed(2)} MB`);
 
-    // Cleanup
-    setTimeout(() => {
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-    }, 100);
+      // Create download link
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.style.display = 'none';
+      a.href = url;
+      a.download = filename;
 
-    console.log(`Recording saved as ${filename}`);
+      // Trigger download
+      document.body.appendChild(a);
+      a.click();
+
+      // Cleanup
+      setTimeout(() => {
+        if (document.body.contains(a)) {
+          document.body.removeChild(a);
+        }
+        URL.revokeObjectURL(url);
+      }, 100);
+
+      console.log(`Recording saved as ${filename}`);
+    } catch (error) {
+      console.error('Failed to save recording:', error);
+    }
   }
 
   /**
@@ -437,12 +477,43 @@ export class VideoRecorder {
    * Cleanup method to release resources
    */
   dispose() {
-    if (this.isRecording) {
-      this.stopRecording();
+    try {
+      if (this.isRecording) {
+        this.stopRecording();
+      }
+
+      // Clean up media recorder
+      if (this.mediaRecorder) {
+        this.mediaRecorder.ondataavailable = null;
+        this.mediaRecorder.onstop = null;
+        this.mediaRecorder.onerror = null;
+        this.mediaRecorder = null;
+      }
+
+      // Clean up stream
+      if (this.stream) {
+        this.stream.getTracks().forEach(track => {
+          track.stop();
+        });
+        this.stream = null;
+      }
+
+      // Clean up audio destination
+      if (this.audioDestination) {
+        this.audioDestination.disconnect();
+        this.audioDestination = null;
+      }
+
+      // Clear recorded chunks
+      this.recordedChunks = [];
+
+      // Clear references
+      this.canvas = null;
+      this.audioContext = null;
+      this.onStateChange = null;
+    } catch (error) {
+      console.error('Error during VideoRecorder disposal:', error);
     }
-    this.canvas = null;
-    this.audioContext = null;
-    this.onStateChange = null;
   }
 }
 

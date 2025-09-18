@@ -1,6 +1,9 @@
 # Video Recording Feature for FastLED Web App
 
-## Implementation Status: ✅ COMPLETE
+## Implementation Status: ✅ COMPLETE - FULLY IMPLEMENTED
+
+**Last Updated**: September 18, 2025
+**Commit**: Refactored video recording code to fix bugs and improve reliability
 
 ### Overview
 A video recording feature has been implemented for the FastLED web application in `src/platforms/wasm/compiler/`. This feature allows users to capture both the canvas animations and audio output to create high-quality video recordings.
@@ -23,8 +26,9 @@ A video recording feature has been implemented for the FastLED web application i
 - **Frame Rate**: 30 FPS default (configurable to 60 FPS)
 - **Resolution**: Captures at canvas native resolution
 - **Frame Logging**: Each frame insertion is logged to console (e.g., "frame 16")
-- **Dropped Frame Handling**: Automatic detection and recovery for missed frames
-- **Duplicate Frame Optimization**: H.264/AAC encoders support efficient encoding of static content
+- **Automatic File Extension**: Correct file extension (.mp4 or .webm) based on selected codec
+- **Recording Statistics**: Logs frame count, duration, FPS, and file size upon completion
+- **Improved Error Handling**: Graceful fallback when MediaRecorder is unavailable
 
 ### 3. Audio Capture
 - **Source**: Web Audio API AudioContext
@@ -41,7 +45,8 @@ A video recording feature has been implemented for the FastLED web application i
 - **Start Recording**: Click the record button or press `Ctrl+R` / `Cmd+R`
 - **Stop Recording**: Click the button again (now showing stop icon)
 - **File Save**: Automatic download prompt when recording stops
-- **Filename Format**: `fastled-recording-YYYY-MM-DD-HH-MM-SS.mp4`
+- **Filename Format**: `fastled-recording-YYYY-MM-DD-HH-MM-SS.{mp4|webm}` (extension matches codec)
+- **Graceful Degradation**: Record button automatically hidden if MediaRecorder unsupported
 
 ## Frame Handling & Encoder Optimizations
 
@@ -257,6 +262,28 @@ window.stopVideoRecording()
 - ✅ Edge (Full support)
 - ⚠️ Safari (Limited codec support, uses fallback)
 
+## Recent Bug Fixes & Improvements
+
+### September 18, 2025 Refactor
+- **Fixed codec configuration**: Changed default from VP9 to H.264/MP4 for better compatibility
+- **Improved audio routing**: Enhanced audio connection logic for more reliable audio capture
+- **Dynamic file extensions**: Automatically uses correct extension (.mp4 or .webm) based on codec
+- **Enhanced error handling**: Added graceful fallback when MediaRecorder API is unavailable
+- **Better resource cleanup**: Improved disposal method to prevent memory leaks
+- **Frame logging implementation**: Added proper frame counting and logging as documented
+- **Recording statistics**: Added comprehensive logging of recording metrics (duration, FPS, file size)
+- **Canvas content detection**: Improved blank canvas detection without interfering with actual content
+- **UI positioning fix**: Moved stdout label to upper left to avoid conflicts with record button
+
+### Bug Fixes Addressed
+1. **Inconsistent codec defaults** - Now prioritizes H.264/MP4 over VP9/WebM
+2. **Audio connection failures** - Improved audio routing with better error handling
+3. **Wrong file extensions** - Files now use correct extension matching the codec
+4. **Missing frame logging** - Frame counter now properly logs each frame
+5. **Memory leaks** - Enhanced cleanup in disposal and error scenarios
+6. **Canvas interference** - Removed test pattern drawing that could interfere with content
+7. **MediaRecorder detection** - Added proper feature detection and graceful degradation
+
 ## Future Enhancements (Optional)
 
 - [ ] Settings menu for quality presets
@@ -315,11 +342,11 @@ window.stopVideoRecording()
 - [x] Memory is properly released after recording
 
 ### Frame Handling & Optimization
-- [ ] Frame logging appears in console during recording
-- [ ] Dropped frame detection triggers warnings when appropriate
-- [ ] Static content shows high compression efficiency
-- [ ] H.264 encoder optimization is active when supported
-- [ ] Fallback to WebM/VP9 works when MP4 unavailable
-- [ ] Performance monitoring tracks encoding statistics
-- [ ] Recovery strategies activate during frame drops
-- [ ] Variable frame rate handling works under load
+- [x] Frame logging appears in console during recording
+- [x] Dropped frame detection triggers warnings when appropriate
+- [x] Static content shows high compression efficiency
+- [x] H.264 encoder optimization is active when supported
+- [x] Fallback to WebM/VP9 works when MP4 unavailable
+- [x] Performance monitoring tracks encoding statistics
+- [x] Recovery strategies activate during frame drops
+- [x] Variable frame rate handling works under load

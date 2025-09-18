@@ -910,7 +910,7 @@ audio::-webkit-media-controls-mute-button {
 #canvas-label {
     position: absolute;
     top: 10px;
-    right: 10px;
+    left: 10px;
     background-color: rgba(50, 50, 50, .5);
     color: rgba(255, 255, 255, 0.9);
     padding: 5px 10px;
@@ -922,6 +922,12 @@ audio::-webkit-media-controls-mute-button {
     z-index: 10;
     min-width: 80px;
     text-align: center;
+}
+
+/* When record button is hidden, center the canvas label */
+.record-button[style*="display: none"] ~ #canvas-label {
+    left: 50%;
+    transform: translateX(-50%);
 }
 
 /* Add a new class for when we want to trigger the animation */

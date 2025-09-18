@@ -748,6 +748,13 @@ async function localLoadFastLed(options) {
       delete window._pendingUiDebugMode;
     }
 
+    // Set up periodic cleanup of orphaned UI elements
+    setInterval(() => {
+      if (uiManager && uiManager.cleanupOrphanedElements) {
+        uiManager.cleanupOrphanedElements();
+      }
+    }, 5000); // Run cleanup every 5 seconds
+
     const { threeJs } = options;
     console.log('ThreeJS:', threeJs);
     const fastLedLoader = options.fastled;
@@ -911,6 +918,44 @@ function initializeVideoRecorder() {
     return;
   }
 
+  // Wait for canvas to be properly initialized with graphics manager
+  let retryCount = 0;
+  const maxRetries = 30; // Max 6 seconds of retrying
+
+  const tryInitialize = () => {
+    try {
+      // Check if graphics manager has been initialized (this is the real dependency)
+      if (typeof window.graphicsManager === 'undefined' && typeof graphicsManager === 'undefined') {
+        throw new Error('Graphics manager not initialized yet');
+      }
+
+      // Validate canvas element exists (without creating conflicting context)
+      if (!canvas || !canvas.getContext) {
+        throw new Error('Canvas not ready yet');
+      }
+
+      console.log('Video recorder initializing - canvas and graphics ready');
+      actuallyInitializeVideoRecorder(canvas, recordButton);
+    } catch (error) {
+      retryCount++;
+      if (retryCount < maxRetries) {
+        console.log(`Canvas/Graphics not ready yet (attempt ${retryCount}/${maxRetries}), retrying in 200ms...`);
+        setTimeout(tryInitialize, 200);
+      } else {
+        console.warn('Failed to initialize video recorder - canvas/graphics not ready after maximum retries');
+        recordButton.style.display = 'none';
+      }
+    }
+  };
+
+  // Start trying to initialize after a short delay
+  setTimeout(tryInitialize, 1000);
+}
+
+/**
+ * Actually initializes the video recorder once canvas is ready
+ */
+function actuallyInitializeVideoRecorder(canvas, recordButton) {
   // Try to get audio context if available
   let audioContext = null;
   if (typeof AudioContext !== 'undefined' || typeof webkitAudioContext !== 'undefined') {
@@ -922,12 +967,32 @@ function initializeVideoRecorder() {
     }
   }
 
-  // Create video recorder instance
-  videoRecorder = new VideoRecorder({
-    canvas: canvas,
-    audioContext: audioContext,
-    fps: 30, // Default to 30 FPS
-    onStateChange: (isRecording) => {
+  // Check if MediaRecorder is supported
+  if (typeof MediaRecorder === 'undefined') {
+    console.warn('MediaRecorder API not supported, video recording disabled');
+    recordButton.style.display = 'none';
+    return;
+  }
+
+  // Load video settings from localStorage or use defaults
+  const savedSettings = window.getVideoSettings ? window.getVideoSettings() : null;
+
+  try {
+    // Validate canvas is ready (without creating a context that would conflict with graphics manager)
+    if (!canvas.getContext) {
+      throw new Error('Canvas does not support getContext method');
+    }
+
+    // Don't create a context here - the graphics manager handles context creation
+    // Just validate the canvas element is ready for use
+
+    // Create video recorder instance
+    videoRecorder = new VideoRecorder({
+      canvas: canvas,
+      audioContext: audioContext,
+      fps: savedSettings?.fps || 30,
+      settings: savedSettings,
+      onStateChange: (isRecording) => {
       // Update button visual state
       if (isRecording) {
         recordButton.classList.add('recording');
@@ -967,11 +1032,18 @@ function initializeVideoRecorder() {
     }
   });
 
-  console.log('Video recorder initialized');
+    console.log('Video recorder initialized');
+  } catch (error) {
+    console.error('Failed to initialize video recorder:', error);
+    recordButton.style.display = 'none';
+  }
 }
 
-// Initialize video recorder
-initializeVideoRecorder();
+// Initialize video recorder after FastLED is ready
+// Don't initialize immediately - wait for FastLED to set up graphics
+setTimeout(() => {
+  initializeVideoRecorder();
+}, 2000); // Give FastLED time to initialize
 
 // Expose video recorder functions globally for debugging
 window.getVideoRecorder = () => videoRecorder;
