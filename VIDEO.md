@@ -13,6 +13,7 @@ A video recording feature has been implemented for the FastLED web application i
   - **Idle**: Gray circular button with a record icon (⚫)
   - **Recording**: Red pulsing button with a stop icon (⬛)
 - **Animation**: Smooth pulse effect when recording
+- **Note**: Stdout button should be moved to upper left of canvas to avoid conflict with record button placement
 
 ### 2. Video Capture Specifications
 - **Default Format**: MP4 with H.264 video codec and AAC audio codec
