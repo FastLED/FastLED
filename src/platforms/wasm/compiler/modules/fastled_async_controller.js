@@ -284,7 +284,6 @@ class FastLEDAsyncController {
 
             // Call extern_loop() to run one iteration of the FastLED loop
             if (shouldLog) {
-                console.log('🔄 Calling extern_loop() to pump FastLED loop (async)');
                 FASTLED_DEBUG_LOG('ASYNC_CONTROLLER', 'Calling extern_loop() to pump FastLED loop (async)...');
             }
 
