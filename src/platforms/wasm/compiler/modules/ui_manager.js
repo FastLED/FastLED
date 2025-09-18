@@ -86,9 +86,9 @@ function markdownToHtml(markdown) {
     /(<li(?:\s+class="ordered")?>.*?<\/li>(?:\s*<li(?:\s+class="ordered")?>.*?<\/li>)*)/gs,
     function (match) {
       if (match.includes('class="ordered"')) {
-        return '<ol>' + match.replace(/\s+class="ordered"/g, '') + '</ol>';
+        return `<ol>${  match.replace(/\s+class="ordered"/g, '')  }</ol>`;
       } else {
-        return '<ul>' + match + '</ul>';
+        return `<ul>${  match  }</ul>`;
       }
     },
   );
@@ -101,7 +101,7 @@ function markdownToHtml(markdown) {
       trimmed && !trimmed.startsWith('<h') && !trimmed.startsWith('<ul') &&
       !trimmed.startsWith('<ol') && !trimmed.startsWith('<pre')
     ) {
-      return '<p>' + trimmed.replace(/\n/g, '<br>') + '</p>';
+      return `<p>${  trimmed.replace(/\n/g, '<br>')  }</p>`;
     }
     return trimmed;
   }).join('\n');
@@ -465,7 +465,7 @@ function createHelp(element) {
   // Prepare content for tooltip and popup
   const markdownContent = element.markdownContent || '';
   const tooltipText = markdownContent.length > 200
-    ? markdownContent.substring(0, 200).trim() + '...'
+    ? `${markdownContent.substring(0, 200).trim()  }...`
     : markdownContent;
 
   // Convert markdown to HTML for popup
@@ -1095,7 +1095,7 @@ export class JsonUiManager {
       } else if (element.type === 'number') {
         currentValue = parseFloat(element.value);
       } else if (element.tagName === 'SELECT') {
-        currentValue = parseInt(element.value);
+        currentValue = parseInt(element.value, 10);
       } else if (element.type === 'file' && element.accept === 'audio/*') {
         // Handle audio input - get all accumulated sample blocks with timestamps
         if (
@@ -1543,7 +1543,7 @@ export class JsonUiManager {
       if (this.debugMode && data.type !== 'number-pair') {
         console.log(
           `🎵 UI Registered element: ID '${data.id}' (${data.type}${
-            data._layoutHint ? ', ' + data._layoutHint : ''
+            data._layoutHint ? `, ${  data._layoutHint}` : ''
           }) - Total: ${Object.keys(this.uiElements).length}`,
         );
       }

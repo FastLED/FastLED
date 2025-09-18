@@ -1002,7 +1002,7 @@ export class AudioManager {
           await this.cleanupPreviousAudioContext(audioInput.id);
 
           // Small delay to ensure cleanup is complete
-          await new Promise((resolve) => setTimeout(resolve, 100));
+          await new Promise((resolve) => { setTimeout(resolve, 100); });
 
           // Set up audio playback with fresh audio element
           const audio = this.createOrUpdateAudioElement(controlDiv);
@@ -1027,7 +1027,7 @@ export class AudioManager {
    * @param {File} file - The selected audio file
    */
   updateButtonText(button, file) {
-    button.textContent = file.name.length > 20 ? file.name.substring(0, 17) + '...' : file.name;
+    button.textContent = file.name.length > 20 ? `${file.name.substring(0, 17)  }...` : file.name;
   }
 
   /**

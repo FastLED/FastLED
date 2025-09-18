@@ -628,7 +628,7 @@ export class UILayoutPlacementManager {
     const hasUiElements = (() => {
       const ui1HasChildren = uiControls && uiControls.classList.contains('active') && uiControls.children.length > 0;
       const ui2HasChildren = uiControls2 && uiControls2.classList.contains('active') && uiControls2.children.length > 0;
-      return !!(ui1HasChildren || ui2HasChildren);
+      return Boolean(ui1HasChildren || ui2HasChildren);
     })();
 
     // Main container

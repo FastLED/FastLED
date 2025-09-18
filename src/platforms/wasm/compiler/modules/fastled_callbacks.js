@@ -65,7 +65,7 @@ globalThis.FastLED_onFrame = async function(frameData) {
         if (shouldLog) {
             FASTLED_DEBUG_LOG('CALLBACKS', 'Processing frame data', {
                 stripCount: frameData.length,
-                hasScreenMap: !!frameData.screenMap
+                hasScreenMap: Boolean(frameData.screenMap)
             });
         }
         

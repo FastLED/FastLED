@@ -35,7 +35,7 @@ class FastLEDAsyncController {
         this.frameInterval = 1000 / this.frameRate;
         
         FASTLED_DEBUG_LOG('ASYNC_CONTROLLER', 'Properties initialized', {
-            hasModule: !!this.module,
+            hasModule: Boolean(this.module),
             frameRate: this.frameRate,
             frameInterval: this.frameInterval
         });
@@ -305,7 +305,7 @@ class FastLEDAsyncController {
             if (shouldLog) {
                 FASTLED_DEBUG_LOG('ASYNC_CONTROLLER', 'Frame completed', {
                     frameCount: this.frameCount,
-                    frameTime: frameTime.toFixed(2) + 'ms',
+                    frameTime: `${frameTime.toFixed(2)  }ms`,
                     fps: this.getFPS().toFixed(1)
                 });
             }

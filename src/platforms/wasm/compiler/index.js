@@ -615,7 +615,7 @@ async function fastledLoadSetupLoop(
     const streamingFilesPromise = fetchAllFiles(streamingFiles, () => {
       console.log('All streaming files downloaded to FastLED.');
     });
-    const delay = new Promise((r) => setTimeout(r, 250));
+    const delay = new Promise((r) => { setTimeout(r, 250); });
     // Wait for either the time delay or the streaming files to be processed, whichever
     // happens first.
     await Promise.any([delay, streamingFilesPromise]);
