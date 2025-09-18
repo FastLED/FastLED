@@ -195,26 +195,8 @@ def setup_eslint():
         print(f"npm install stdout: {e.stdout}")
         raise
 
-    # Create minimal .eslintrc.js - FAST ONLY: Critical issues only
-    eslint_config = """module.exports = {
-  env: {
-    browser: true,
-    es2022: true,
-    worker: true
-  },
-  parserOptions: {
-    ecmaVersion: 2022,
-    sourceType: "module"
-  },
-  rules: {
-    // FAST LINTING: Only check for critical runtime issues
-    "no-debugger": "error",
-    "no-eval": "error"
-  }
-};"""
-
-    with open(TOOLS_DIR / ".eslintrc.js", "w") as f:
-        f.write(eslint_config)
+    # ESLint config is now in ci/.eslintrc.js (tracked in git)
+    # No need to create it here since it's already in version control
 
     print("SUCCESS: ESLint configured")
 
@@ -268,12 +250,12 @@ else
 fi
 """
 
-    script_path = TOOLS_DIR / "lint-js-fast"
-    with open(script_path, "w") as f:
-        f.write(script_content)
-
-    # Make executable on Unix systems
-    if platform.system() != "Windows":
+    # Lint script is now in ci/lint-js-fast (tracked in git)
+    # No need to create it here since it's already in version control
+    script_path = Path("ci/lint-js-fast")
+    # Script already exists in ci/ and is tracked in git
+    # Just ensure it's executable
+    if platform.system() != "Windows" and script_path.exists():
         os.chmod(script_path, 0o755)
 
     print("SUCCESS: Fast lint script created")
@@ -290,7 +272,7 @@ def main():
 
         print("\\nFast JavaScript linting setup complete!")
         print("\\nUsage:")
-        print("  bash .cache/js-tools/lint-js-fast    # Fast linting with ESLint")
+        print("  bash ci/lint-js-fast                 # Fast linting with ESLint")
         print("  For more info: ci/js/README.md")
 
     except Exception as e:

@@ -89,9 +89,9 @@ else
     ESLINT_EXE=".cache/js-tools/node_modules/.bin/eslint"
 fi
 
-if [ -f ".cache/js-tools/lint-js-fast" ] && [ -f "$ESLINT_EXE" ]; then
+if [ -f "ci/lint-js-fast" ] && [ -f "$ESLINT_EXE" ]; then
     echo -e "${BLUE}🚀 Using fast JavaScript linting (Node.js + ESLint)${NC}"
-    if ! bash .cache/js-tools/lint-js-fast; then
+    if ! bash ci/lint-js-fast; then
         echo -e "${RED}❌ Fast JavaScript linting failed${NC}"
         exit 1
     fi
@@ -101,9 +101,9 @@ else
     if uv run ci/setup-js-linting-fast.py; then
         echo -e "${GREEN}✅ JavaScript linting setup complete${NC}"
         # Now run the linting
-        if [ -f ".cache/js-tools/lint-js-fast" ]; then
+        if [ -f "ci/lint-js-fast" ]; then
             echo -e "${BLUE}🚀 Running JavaScript linting...${NC}"
-            if ! bash .cache/js-tools/lint-js-fast; then
+            if ! bash ci/lint-js-fast; then
                 echo -e "${RED}❌ JavaScript linting failed${NC}"
                 exit 1
             fi
