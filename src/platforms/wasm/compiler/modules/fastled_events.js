@@ -16,7 +16,7 @@
  */
 
 // Import debug logging
-import { FASTLED_DEBUG_LOG, FASTLED_DEBUG_ERROR, FASTLED_DEBUG_TRACE } from './fastled_debug_logger.js';
+import { FASTLED_DEBUG_LOG, FASTLED_DEBUG_TRACE } from './fastled_debug_logger.js';
 
 /**
  * FastLED Event System Class

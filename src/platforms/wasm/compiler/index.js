@@ -53,21 +53,7 @@ const DEFAULT_FRAME_RATE_60FPS = 60;
 /** Current frame rate setting */
 let frameRate = DEFAULT_FRAME_RATE_60FPS;
 
-/** Flag indicating if canvas data has been received */
-const receivedCanvas = false;
 
-/**
- * Screen mapping data structure containing strip-to-screen coordinate mappings
- * @type {Object} screenMap
- * @property {Object} strips - Map of strip ID to screen coordinate data
- * @property {number[]} absMin - Absolute minimum [x, y] coordinates
- * @property {number[]} absMax - Absolute maximum [x, y] coordinates
- */
-const screenMap = {
-  strips: {},
-  absMin: [0, 0],
-  absMax: [0, 0],
-};
 
 /** HTML element ID for the main rendering canvas */
 let canvasId;
@@ -123,7 +109,7 @@ let fastLEDController = null;
  * @param {Object} options - Loading options
  * @returns {Promise<null>} Always returns null (stub implementation)
  */
-let _loadFastLED = function (options) {
+let _loadFastLED = function () {
   // Stub to let the user/dev know that something went wrong.
   // This function is replaced with an async implementation, so it must be async for interface compatibility
   console.log('FastLED loader function was not set.');
@@ -243,7 +229,6 @@ function customPrintFunction(...args) {
 
 // Override console for custom logging behavior
 // Note: Modifying existing console properties instead of reassigning the global
-const originalConsole = console;
 console.log = log;
 console.warn = warn;
 console.error = _prev_error;
@@ -282,25 +267,6 @@ function jsAppendFileUint8(moduleInstance, path, blob) {
   moduleInstance._free(path_cstr);
 }
 
-/**
- * Calculates minimum and maximum values from coordinate arrays
- * @param {number[]} x_array - Array of X coordinates
- * @param {number[]} y_array - Array of Y coordinates
- * @returns {Array<Array<number>>} [[min_x, min_y], [max_x, max_y]]
- */
-function minMax(x_array, y_array) {
-  let min_x = x_array[0];
-  let min_y = y_array[0];
-  let max_x = x_array[0];
-  let max_y = y_array[0];
-  for (let i = 1; i < x_array.length; i++) {
-    min_x = Math.min(min_x, x_array[i]);
-    min_y = Math.min(min_y, y_array[i]);
-    max_x = Math.max(max_x, x_array[i]);
-    max_y = Math.max(max_y, y_array[i]);
-  }
-  return [[min_x, min_y], [max_x, max_y]];
-}
 
 /**
  * Partitions files into immediate and streaming categories based on extensions
@@ -770,7 +736,7 @@ async function localLoadFastLed(options) {
     uiManager = new JsonUiManager(uiControlsId);
 
     // Initialize JSON Inspector
-    const jsonInspector = new JsonInspector();
+    new JsonInspector();
 
     // Expose UI manager globally for debug functions and C++ module
     window.uiManager = uiManager;

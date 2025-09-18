@@ -40,10 +40,9 @@ class FastLEDAudioProcessor extends AudioWorkletProcessor {
    * Process audio data
    * @param {Float32Array[][]} inputs - Input audio data
    * @param {Float32Array[][]} outputs - Output audio data
-   * @param {Record<string, Float32Array>} parameters - Audio parameters
    * @returns {boolean} - Whether to continue processing
    */
-  process(inputs, outputs, parameters) {
+  process(inputs, outputs) {
     // Process input audio
     const input = inputs[0];
     if (!input || input.length === 0) {

@@ -411,13 +411,6 @@ function createDropdown(element) {
   return controlDiv;
 }
 
-function createUiControlsContainer() {
-  const container = document.getElementById(this.uiControlsId);
-  if (!container) {
-    console.error('UI controls container not found in the HTML');
-  }
-  return container;
-}
 
 function setTitle(titleData) {
   if (titleData && titleData.text) {
@@ -1236,7 +1229,7 @@ export class JsonUiManager {
     }
     
     // Pre-assign groups to containers to prevent splitting
-    for (const [groupName, elements] of sortedGroups) {
+    for (const [groupName] of sortedGroups) {
       const groupInfo = this.createGroupContainer(groupName, null, totalGroups, totalElements);
       groupContainerMap.set(groupName, groupInfo);
     }
@@ -1628,10 +1621,10 @@ export class JsonUiManager {
    * Adapt UI elements to new layout constraints
    */
   adaptToLayoutData(layoutData) {
-    const { uiColumns, uiColumnWidth, canExpand } = layoutData;
+    const { uiColumns } = layoutData;
 
     // Update group layouts based on available columns
-    this.groups.forEach((groupInfo, groupName) => {
+    this.groups.forEach((groupInfo) => {
       const { container } = groupInfo;
 
       // Adjust wide groups based on available columns

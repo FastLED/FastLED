@@ -74,12 +74,6 @@ const AUDIO_PROCESSOR_TYPES = {
   AUDIO_WORKLET: 'audio_worklet',
 };
 
-/**
- * Default processor type for fallback scenarios
- * ScriptProcessor is more widely supported across browsers
- * @constant {string}
- */
-const DEFAULT_PROCESSOR_TYPE = AUDIO_PROCESSOR_TYPES.SCRIPT_PROCESSOR;
 
 /**
  * TIMESTAMP IMPLEMENTATION DOCUMENTATION:
@@ -121,10 +115,9 @@ class AudioProcessor {
   /**
    * Initialize the audio processor
    * @abstract
-   * @param {MediaElementAudioSourceNode} source - Audio source node
    * @returns {Promise<void>}
    */
-  initialize(source) {
+  initialize() {
     // Base class method - returns rejected promise since it must be implemented by subclass
     return Promise.reject(new Error('initialize() must be implemented by subclass'));
   }
@@ -493,10 +486,9 @@ The system will automatically fall back to ScriptProcessor.`);
   /**
    * Diagnose the type of AudioWorklet loading error
    * @param {Error} error - The error that occurred
-   * @param {string} path - The path that failed to load
    * @returns {string} Error type description
    */
-  diagnoseAudioWorkletError(error, path) {
+  diagnoseAudioWorkletError(error) {
     const errorMsg = error.message.toLowerCase();
     const errorName = error.name;
 
@@ -760,7 +752,6 @@ export class AudioManager {
 
     // Try to create and initialize the preferred processor with fallback
     let processor = null;
-    let actualProcessorType = this.processorType;
 
     try {
       // First attempt: Try preferred processor type
@@ -780,7 +771,6 @@ export class AudioManager {
             sampleCallback,
           );
           await processor.initialize(source);
-          actualProcessorType = AUDIO_PROCESSOR_TYPES.SCRIPT_PROCESSOR;
           console.log(`🎵 Successfully using ${processor.getType()} processor`);
 
           // Update the AudioManager's processor type for future uses

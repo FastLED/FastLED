@@ -32,14 +32,6 @@ import { isDenseGrid } from './graphics_utils.js';
 /** Disable geometry merging for debugging (set to true to force individual LED objects) */
 const DISABLE_MERGE_GEOMETRIES = false;
 
-/**
- * Groups all LEDs together for processing (utility function)
- * @param {Array} leds - Array of LED objects to group
- * @returns {Array} The same array (no actual grouping performed)
- */
-function groupAllLeds(leds) {
-  return leds;
-}
 
 /**
  * Creates position calculator functions for mapping LED coordinates to 3D space
@@ -254,9 +246,8 @@ export class GraphicsManagerThreeJS {
   /**
    * Sets up the Three.js scene and camera
    * @private
-   * @param {Object} frameData - Frame data for scene configuration
    */
-  _setupScene(frameData) {
+  _setupScene() {
     const { THREE } = this.threeJsModules;
 
     // Create the scene
@@ -816,7 +807,7 @@ export class GraphicsManagerThreeJS {
    * Updates LED visuals based on position map data
    * @private
    */
-  _updateLedVisuals(positionMap, screenMap) {
+  _updateLedVisuals(positionMap) {
     const { THREE } = this.threeJsModules;
 
     // Use the stored bounds from setup
@@ -830,7 +821,7 @@ export class GraphicsManagerThreeJS {
 
     // Update LED positions and colors
     let ledIndex = 0;
-    for (const [_, ledData] of positionMap) { // eslint-disable-line
+    for (const [, ledData] of positionMap) {
       if (ledIndex >= this.leds.length) break;
 
       const led = this.leds[ledIndex];
@@ -904,7 +895,6 @@ export class GraphicsManagerThreeJS {
       // Update colors for each LED
       updates.forEach((update) => {
         const { index, color } = update;
-        const baseIndex = index * 3;
 
         // Each vertex of the geometry needs the color
         const verticesPerInstance = mesh.geometry.attributes.position.count / this.leds.length;
@@ -925,7 +915,7 @@ export class GraphicsManagerThreeJS {
    * Calculates a depth effect based on distance from center
    * @private
    */
-  _calculateDepthEffect(x, y) {
+  _calculateDepthEffect() {
     // With orthographic camera, we don't need a depth effect based on distance
     // But we can still use a small z-offset to prevent z-fighting
     return 0; // Fixed z position for orthographic view

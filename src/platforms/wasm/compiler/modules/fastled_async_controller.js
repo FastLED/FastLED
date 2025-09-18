@@ -466,9 +466,8 @@ class FastLEDAsyncController {
 
     /**
      * Schedules the next animation frame with adaptive frame rate
-     * @param {number} frameTime - Time taken for the current frame
      */
-    scheduleNextFrame(frameTime) {
+    scheduleNextFrame() {
         const avgFrameTime = this.getAverageFrameTime();
         
         if (avgFrameTime > 16) {
