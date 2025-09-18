@@ -34,8 +34,13 @@
             <div class="menu-dropdown">
                 <div class="menu-dropdown-item" data-value="gfx-simple">gfx 0</div>
                 <div class="menu-dropdown-item" data-value="gfx-bloom">gfx 1</div>
-                <div class="menu-dropdown-item" data-value="ui-events">UI Events</div>
                 <div class="menu-dropdown-item" data-value="video-settings">Video Settings</div>
+            </div>
+        </div>
+        <div class="menu-item">
+            <span class="menu-label">Tools</span>
+            <div class="menu-dropdown">
+                <div class="menu-dropdown-item" data-value="ui-events">UI Events</div>
             </div>
         </div>
     </div>
@@ -277,8 +282,8 @@
         });
     });
 
-    // Handle Settings menu items (formerly gear dropdown items)
-    const settingsMenuItems = document.querySelectorAll('.menu-item:last-child .menu-dropdown-item');
+    // Handle Settings menu items
+    const settingsMenuItems = document.querySelectorAll('.menu-item:nth-child(2) .menu-dropdown-item');
     settingsMenuItems.forEach(item => {
         item.addEventListener('click', function(e) {
             e.stopPropagation();
@@ -287,6 +292,19 @@
 
             // Handle the selected option
             handleGraphicsOptionChange(selectedValue);
+        });
+    });
+
+    // Handle Tools menu items
+    const toolsMenuItems = document.querySelectorAll('.menu-item:nth-child(3) .menu-dropdown-item');
+    toolsMenuItems.forEach(item => {
+        item.addEventListener('click', function(e) {
+            e.stopPropagation();
+            const selectedValue = this.getAttribute('data-value');
+            console.log('Tools option selected:', selectedValue);
+
+            // Handle the selected option
+            handleToolsOptionChange(selectedValue);
         });
     });
 
@@ -307,8 +325,8 @@
         }
     }
 
-    // Handle graphics option changes
-    function handleGraphicsOptionChange(option) {
+    // Handle tools option changes
+    function handleToolsOptionChange(option) {
         if (option === 'ui-events') {
             // Handle UI Events (JSON Inspector) without page reload
             if (window.jsonInspector) {
@@ -318,7 +336,10 @@
             }
             return;
         }
+    }
 
+    // Handle graphics option changes
+    function handleGraphicsOptionChange(option) {
         if (option === 'video-settings') {
             // Show video settings popup
             showVideoSettingsPopup();

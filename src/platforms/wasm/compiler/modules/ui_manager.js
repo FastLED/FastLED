@@ -1632,6 +1632,9 @@ export class JsonUiManager {
       console.log(`🎵 UI Manager: Layout changed to ${layoutMode}`);
     }
 
+    // CRITICAL FIX: Redistribute UI elements if second container becomes hidden
+    this.redistributeElementsIfNeeded();
+
     // Force layout update in case UI elements were added before layout was ready
     if (this.layoutManager) {
       this.layoutManager.forceLayoutUpdate();
@@ -1641,6 +1644,53 @@ export class JsonUiManager {
     setTimeout(() => {
       this.optimizeCurrentLayout();
     }, 100);
+  }
+
+  /**
+   * Redistribute UI elements from hidden containers to visible ones
+   * This fixes the bug where elements disappear when the layout changes
+   */
+  redistributeElementsIfNeeded() {
+    const uiControls2Container = document.getElementById(this.uiControls2Id);
+    if (!uiControls2Container) return;
+
+    // Check if the second container is hidden by CSS
+    const containerStyle = window.getComputedStyle(uiControls2Container);
+    const isSecondContainerVisible = containerStyle.display !== 'none' &&
+                                   containerStyle.visibility !== 'hidden' &&
+                                   containerStyle.opacity !== '0';
+
+    if (!isSecondContainerVisible && uiControls2Container.children.length > 0) {
+      if (this.debugMode) {
+        console.log(`🎵 Moving ${uiControls2Container.children.length} elements from hidden ui-controls-2 to ui-controls`);
+      }
+
+      const mainContainer = document.getElementById(this.uiControlsId);
+      if (mainContainer) {
+        // Move all children from the hidden container to the main container
+        while (uiControls2Container.children.length > 0) {
+          const element = uiControls2Container.children[0];
+          mainContainer.appendChild(element);
+        }
+
+        // Update our internal group tracking
+        this.groups2.forEach((groupInfo, groupName) => {
+          // Move group from groups2 to groups
+          this.groups.set(groupName, {
+            ...groupInfo,
+            parentContainer: mainContainer
+          });
+        });
+        this.groups2.clear();
+
+        // Reset ungrouped container reference
+        this.ungroupedContainer2 = null;
+
+        if (this.debugMode) {
+          console.log(`🎵 Redistributed elements to main container. Groups in main: ${this.groups.size}, Groups in secondary: ${this.groups2.size}`);
+        }
+      }
+    }
   }
 
   /**
@@ -1819,6 +1869,26 @@ export class JsonUiManager {
       return false; // Mobile always uses single container
     }
 
+    // CRITICAL FIX: Check if the second UI container is actually visible
+    // This prevents the bug where elements get placed in hidden containers
+    const uiControls2Container = document.getElementById(this.uiControls2Id);
+    if (!uiControls2Container) {
+      return false; // Second container doesn't exist
+    }
+
+    // Check if the second container is hidden by CSS (e.g., in tablet mode)
+    const containerStyle = window.getComputedStyle(uiControls2Container);
+    const isSecondContainerVisible = containerStyle.display !== 'none' &&
+                                   containerStyle.visibility !== 'hidden' &&
+                                   containerStyle.opacity !== '0';
+
+    if (!isSecondContainerVisible) {
+      if (this.debugMode) {
+        console.log(`🎵 Second UI container is hidden by CSS in ${layoutMode} mode - using single container`);
+      }
+      return false; // Don't use multiple containers if the second one is hidden
+    }
+
     let thresholds;
     if (layoutMode === 'ultrawide') {
       thresholds = this.spilloverConfig.threeContainer;
@@ -1840,6 +1910,7 @@ export class JsonUiManager {
       console.log(`  Groups: ${totalGroups} (need ${thresholds.minGroups})`);
       console.log(`  Elements: ${totalElements} (need ${thresholds.minElements})`);
       console.log(`  Density: ${totalGroups > 0 ? (totalElements / totalGroups).toFixed(1) : 0} (need ${thresholds.minElementsPerGroup})`);
+      console.log(`  Second container visible: ${isSecondContainerVisible}`);
       console.log(`  Result: ${shouldSpill ? 'USE MULTIPLE CONTAINERS' : 'USE SINGLE CONTAINER'}`);
     }
 
