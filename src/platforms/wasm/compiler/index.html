@@ -24,6 +24,12 @@
             </div>
         </div>
         <div class="menu-item">
+            <span class="menu-label">Tools</span>
+            <div class="menu-dropdown">
+                <div class="menu-dropdown-item" data-tool="placeholder">Placeholder Tool</div>
+            </div>
+        </div>
+        <div class="menu-item">
             <span class="menu-label">Settings</span>
             <div class="menu-dropdown">
                 <div class="menu-dropdown-item" data-value="gfx-simple">gfx 0</div>
@@ -258,6 +264,19 @@
         });
     });
 
+    // Handle Tools menu items
+    const toolsMenuItems = document.querySelectorAll('.menu-item:nth-child(2) .menu-dropdown-item');
+    toolsMenuItems.forEach(item => {
+        item.addEventListener('click', function(e) {
+            e.stopPropagation();
+            const toolAction = this.getAttribute('data-tool');
+            console.log('Tools action selected:', toolAction);
+
+            // Handle tool actions
+            handleToolAction(toolAction);
+        });
+    });
+
     // Handle Settings menu items (formerly gear dropdown items)
     const settingsMenuItems = document.querySelectorAll('.menu-item:last-child .menu-dropdown-item');
     settingsMenuItems.forEach(item => {
@@ -265,7 +284,7 @@
             e.stopPropagation();
             const selectedValue = this.getAttribute('data-value');
             console.log('Settings option selected:', selectedValue);
-            
+
             // Handle the selected option
             handleGraphicsOptionChange(selectedValue);
         });
@@ -277,6 +296,14 @@
             console.log('Save action triggered - forwarding to /save endpoint');
             // Forward to /save endpoint on the server
             window.location.href = '/save';
+        }
+    }
+
+    // Handle tool actions
+    function handleToolAction(action) {
+        if (action === 'placeholder') {
+            console.log('Placeholder tool action triggered');
+            // Add tool functionality here
         }
     }
 
