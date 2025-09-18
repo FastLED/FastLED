@@ -6,7 +6,7 @@
  */
 
 let FASTLED_DEBUG_ENABLED = false;
-let FASTLED_DEBUG_PREFIX = '[FASTLED_DEBUG]';
+const FASTLED_DEBUG_PREFIX = '[FASTLED_DEBUG]';
 
 /**
  * Main debug logging function - can be easily search/replaced

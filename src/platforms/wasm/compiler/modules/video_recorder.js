@@ -97,7 +97,7 @@ export class VideoRecorder {
    */
   selectMimeType() {
     // Start with the configured video codec
-    let mimeType = this.settings.videoCodec;
+    const mimeType = this.settings.videoCodec;
 
     // Log what we're starting with
     console.log('Original video codec setting:', mimeType);
