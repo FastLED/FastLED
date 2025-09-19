@@ -1395,6 +1395,12 @@ export class JsonUiManager {
         uiControls2Container.classList.add('active');
       }
 
+      // CRITICAL FIX: Force layout re-application now that UI elements are ready
+      // This ensures the layout manager detects the UI elements and doesn't hide containers
+      if (this.layoutManager) {
+        this.layoutManager.forceLayoutUpdate();
+      }
+
       // Trigger layout optimization after UI is visible
       setTimeout(() => {
         this.optimizeCurrentLayout();

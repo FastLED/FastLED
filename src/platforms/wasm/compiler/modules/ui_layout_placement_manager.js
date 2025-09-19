@@ -614,154 +614,113 @@ export class UILayoutPlacementManager {
   }
 
   /**
-   * Apply styles to main container elements
+   * Apply layout configuration via CSS custom properties and classes
+   * JS handles general layout decisions, CSS handles micro-layouts
    */
   applyContainerStyles(mainContainer, contentGrid, canvasContainer, uiControls, uiControls2) {
-    const isUltrawide = this.currentLayout === 'ultrawide';
-    const isLandscape = this.currentLayout === 'tablet' || this.currentLayout === 'desktop';
-    const isPortrait = this.currentLayout === 'mobile';
-
-    // Determine if there are any UI elements to render. If none, switch to a
-    // single-pane canvas layout and avoid grid-based presentation entirely.
+    // Determine if there are any UI elements to render
     const hasUiElements = (() => {
-      const ui1HasChildren = uiControls && uiControls.classList.contains('active') && uiControls.children.length > 0;
-      const ui2HasChildren = uiControls2 && uiControls2.classList.contains('active') && uiControls2.children.length > 0;
-      return Boolean(ui1HasChildren || ui2HasChildren);
+      // Check for children first (more reliable than 'active' class timing)
+      const ui1HasChildren = uiControls && uiControls.children.length > 0;
+      const ui2HasChildren = uiControls2 && uiControls2.children.length > 0;
+
+      // If containers have children, assume UI elements exist even without 'active' class
+      // This prevents race conditions where layout is applied before UI elements are fully initialized
+      if (ui1HasChildren || ui2HasChildren) {
+        return true;
+      }
+
+      // Fallback to checking active class for backward compatibility
+      const ui1IsActive = uiControls && uiControls.classList.contains('active') && ui1HasChildren;
+      const ui2IsActive = uiControls2 && uiControls2.classList.contains('active') && ui2HasChildren;
+      return Boolean(ui1IsActive || ui2IsActive);
     })();
 
-    // Main container
-    mainContainer.style.maxWidth = `${
-      Math.min(this.layoutData.availableWidth + this.config.containerPadding * 2, 2000)
-    }px`;
+    // 🎯 REFACTORED APPROACH: Set CSS custom properties instead of inline styles
+    // This allows CSS to handle micro-layouts while JS manages general layout
+    const root = document.documentElement;
 
-    // If there are no UI elements, present a simple centered canvas view and
-    // suppress grid styling to avoid reserving space for non-existent UI.
+    // Set layout data as CSS custom properties
+    root.style.setProperty('--layout-mode', this.currentLayout);
+    root.style.setProperty('--canvas-size', `${this.layoutData.canvasSize}px`);
+    root.style.setProperty('--ui-columns', `${this.layoutData.uiColumns}`);
+    root.style.setProperty('--ui-total-width', `${this.layoutData.uiTotalWidth || 280}px`);
+    root.style.setProperty('--container-max-width', `${Math.min(this.layoutData.availableWidth + this.config.containerPadding * 2, 2000)}px`);
+    root.style.setProperty('--has-ui-elements', hasUiElements ? '1' : '0');
+
+    // Apply layout mode class to main container for CSS targeting
+    mainContainer.className = mainContainer.className.replace(/layout-\w+/g, '');
+    mainContainer.classList.add(`layout-${this.currentLayout}`);
+
+    // 🎯 REFACTORED: Manage UI container visibility via classes instead of inline styles
     if (!hasUiElements) {
-      // Container: simple vertical flow centered
-      contentGrid.style.display = 'flex';
-      contentGrid.style.width = '100%';
-      contentGrid.style.flexDirection = 'column';
-      contentGrid.style.rowGap = `${this.config.verticalGap}px`;
-      contentGrid.style.justifyContent = 'flex-start';
-      contentGrid.style.alignItems = 'center';
+      // Apply no-UI mode class for CSS to handle layout
+      contentGrid.classList.add('no-ui-mode');
+      contentGrid.classList.remove('has-ui-mode');
 
-      // Clear any grid-specific properties that may have been set previously
-      contentGrid.style.gridTemplateColumns = '';
-      contentGrid.style.gridTemplateRows = '';
-      contentGrid.style.gridTemplateAreas = '';
-      contentGrid.style.gap = '';
-
-      // Ensure UI containers are hidden
+      // Ensure UI containers are hidden (only when truly no UI elements)
       if (uiControls) {
-        uiControls.style.display = 'none';
+        uiControls.classList.remove('active');
+        uiControls.classList.add('hidden');
       }
       if (uiControls2) {
-        uiControls2.style.display = 'none';
+        uiControls2.classList.remove('active');
+        uiControls2.classList.add('hidden');
       }
 
-      // Canvas container should be centered in the flex layout
-      canvasContainer.style.gridArea = '';
-      canvasContainer.style.alignSelf = 'center';
-
-      // Nothing else to do for no-UI mode
       return;
-    }
+    } else {
+      // Apply UI mode class for CSS to handle layout
+      contentGrid.classList.add('has-ui-mode');
+      contentGrid.classList.remove('no-ui-mode');
 
-    // Content grid - implements 1×N, 2×N, 3×N layout when UI exists
-    contentGrid.style.display = 'grid';
-    contentGrid.style.width = '100%';
-    contentGrid.style.gap = `${this.config.verticalGap}px ${this.config.horizontalGap}px`;
-    contentGrid.style.justifyContent = 'center';
-    contentGrid.style.alignItems = 'start';
-
-    if (isPortrait) {
-      // 1×N grid (portrait)
-      contentGrid.style.gridTemplateColumns = '1fr';
-      contentGrid.style.gridTemplateRows = 'auto auto';
-      contentGrid.style.gridTemplateAreas = '"canvas" "ui"';
-
-      // Hide second UI container
-      if (uiControls2) {
-        uiControls2.style.display = 'none';
+      // Ensure UI containers are visible
+      if (uiControls) {
+        uiControls.classList.add('active');
+        uiControls.classList.remove('hidden');
       }
-    } else if (isLandscape) {
-      // 2×N grid (landscape)
-      contentGrid.style.gridTemplateColumns = `${this.layoutData.canvasSize}px minmax(280px, 1fr)`;
-      contentGrid.style.gridTemplateRows = 'auto';
-      contentGrid.style.gridTemplateAreas = '"canvas ui"';
 
-      // Hide second UI container
+      // Handle second UI container based on layout mode
       if (uiControls2) {
-        uiControls2.style.display = 'none';
-      }
-    } else if (isUltrawide) {
-      // Check if we actually need the 3-column layout based on content
-      const shouldUseThreeColumns = this.shouldUseThreeColumnLayout(uiControls, uiControls2);
-
-      if (shouldUseThreeColumns) {
-        // 3×N grid (ultra-wide) - Place canvas in the middle between two UI columns
-        const minUIWidth = 280; // Minimum width for UI columns
-        const canvasWidth = this.layoutData.canvasSize;
-
-        console.log(`🔍 Ultra-wide layout (center canvas): canvas=${canvasWidth}px, minUIWidth=${minUIWidth}px`);
-
-        // Flexible UI columns on the sides, fixed canvas in the middle
-        contentGrid.style.gridTemplateColumns = `minmax(${minUIWidth}px, 1fr) ${canvasWidth}px minmax(${minUIWidth}px, 1fr)`;
-        contentGrid.style.gridTemplateRows = 'auto';
-        contentGrid.style.gridTemplateAreas = '"ui canvas ui2"';
-
-        // Show and configure second UI container
-        if (uiControls2) {
-          console.log('🔍 Showing ui-controls-2 container');
-          uiControls2.style.display = 'flex';
-          uiControls2.style.flexDirection = 'column';
-          uiControls2.style.gap = '20px'; // Use 20px gaps between elements
-          uiControls2.style.alignItems = 'stretch'; // Allow elements to expand
-          uiControls2.style.gridArea = 'ui2';
-          uiControls2.style.width = '100%';
-          uiControls2.style.minWidth = `${minUIWidth}px`;
-
-          // Force the container to be visible
-          uiControls2.style.visibility = 'visible';
-          uiControls2.style.opacity = '1';
+        if (this.currentLayout === 'ultrawide' && this.shouldUseThreeColumnLayout(uiControls, uiControls2)) {
+          uiControls2.classList.add('active');
+          uiControls2.classList.remove('hidden');
         } else {
-          console.warn('🔍 ui-controls-2 container not found!');
-        }
-
-        // Configure first UI container for ultra-wide
-        uiControls.style.minWidth = `${minUIWidth}px`;
-        uiControls.style.gridArea = 'ui';
-
-        console.log('🔍 Ultra-wide grid applied:', contentGrid.style.gridTemplateColumns);
-      } else {
-        // Fall back to 2-column layout for insufficient content
-        console.log('🔍 Insufficient content for 3-column layout, using 2-column fallback');
-
-        // Use 2×N grid layout similar to desktop
-        contentGrid.style.gridTemplateColumns = `${this.layoutData.canvasSize}px minmax(280px, 1fr)`;
-        contentGrid.style.gridTemplateRows = 'auto';
-        contentGrid.style.gridTemplateAreas = '"canvas ui"';
-
-        // Hide second UI container
-        if (uiControls2) {
-          uiControls2.style.display = 'none';
+          uiControls2.classList.remove('active');
+          uiControls2.classList.add('hidden');
         }
       }
     }
 
-    // Canvas container
-    canvasContainer.style.gridArea = 'canvas';
-    canvasContainer.style.justifySelf = 'center';
+    // 🎯 REFACTORED: CSS now handles all grid layout via custom properties and classes
+    // JS only provides the data, CSS handles the micro-layout implementation
 
-    // UI controls - Configure for optimal space usage
-    uiControls.style.gridArea = 'ui';
-    uiControls.style.display = 'flex';
-    uiControls.style.flexDirection = 'column';
-    uiControls.style.gap = '20px'; // Use 20px gaps between elements
-    uiControls.style.alignItems = 'stretch'; // Allow elements to expand to fill width
-    uiControls.style.width = '100%';
+    // Set gap values as CSS custom properties
+    root.style.setProperty('--vertical-gap', `${this.config.verticalGap}px`);
+    root.style.setProperty('--horizontal-gap', `${this.config.horizontalGap}px`);
 
-    console.log(`Applied grid layout: ${this.getGridDescription()}`);
+    // Layout-specific custom properties are already set above
+    // CSS will handle the actual grid template based on layout mode classes
+    // Add ultrawide-specific custom properties for three-column layout
+    if (this.currentLayout === 'ultrawide' && this.shouldUseThreeColumnLayout(uiControls, uiControls2)) {
+      const minUIWidth = Math.max(this.config.minUIColumnWidth, 280);
+      const maxCanvasSize = Math.min(this.config.maxCanvasSize, 800);
+      const canvasWidth = Math.min(this.layoutData.canvasSize, maxCanvasSize);
+
+      root.style.setProperty('--ultrawide-min-ui-width', `${minUIWidth}px`);
+      root.style.setProperty('--ultrawide-canvas-width', `${canvasWidth}px`);
+      root.style.setProperty('--use-three-columns', '1');
+
+      console.log('🔍 Ultra-wide three-column layout configured');
+    } else {
+      root.style.setProperty('--use-three-columns', '0');
+      console.log(`🔍 Layout configured: ${this.currentLayout}`);
+    }
+
+    // 🎯 REFACTORED: All container styling now handled by CSS via classes and custom properties
+    // No more inline styles - CSS takes full control of micro-layouts
+
+    console.log(`Applied layout: ${this.getGridDescription()}`);
   }
 
   /**
