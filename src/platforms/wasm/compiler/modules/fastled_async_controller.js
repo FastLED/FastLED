@@ -202,8 +202,9 @@ class FastLEDAsyncController {
   /**
      * Starts the async animation loop
      * Uses requestAnimationFrame for smooth, non-blocking animation
+     * @returns {Promise<void>} Promise that resolves when start is complete
      */
-  start() {
+  async start() {
     FASTLED_DEBUG_TRACE('ASYNC_CONTROLLER', 'start', 'ENTER');
 
     if (this.running) {
@@ -536,6 +537,33 @@ class FastLEDAsyncController {
     if (globalThis.FastLED_onUiElementsAdded) {
       await globalThis.FastLED_onUiElementsAdded(uiData);
     }
+  }
+
+  /**
+   * Check if the controller is currently running
+   * @returns {boolean} True if running, false otherwise
+   */
+  isRunning() {
+    return this.running;
+  }
+
+  /**
+   * Set the frame rate for the controller
+   * @param {number} rate - Frame rate in frames per second
+   */
+  setFrameRate(rate) {
+    if (typeof rate !== 'number' || rate <= 0) {
+      FASTLED_DEBUG_ERROR('ASYNC_CONTROLLER', 'Invalid frame rate', { rate });
+      return;
+    }
+
+    this.frameRate = rate;
+    this.frameInterval = 1000 / this.frameRate;
+
+    FASTLED_DEBUG_LOG('ASYNC_CONTROLLER', 'Frame rate updated', {
+      frameRate: this.frameRate,
+      frameInterval: this.frameInterval
+    });
   }
 }
 

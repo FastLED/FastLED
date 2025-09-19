@@ -867,6 +867,46 @@ export class JsonUiManager {
   }
 
   /**
+   * Initialize the UI manager
+   * @returns {Promise<void>} Promise that resolves when initialization is complete
+   */
+  async initialize() {
+    // Initialize the layout manager if not already done
+    if (!this.layoutManager) {
+      this.layoutManager = new UILayoutPlacementManager();
+    }
+
+    // Initialize UI recorder if not already done
+    if (!this.uiRecorder) {
+      this.uiRecorder = new UIRecorder();
+    }
+
+    // Set up any additional initialization as needed
+    this.initializationComplete = true;
+  }
+
+  /**
+   * Update a slider element with a new value
+   * @param {string} name - Name/ID of the slider element
+   * @param {number} value - New value for the slider
+   */
+  updateSlider(name, value) {
+    const element = this.uiElements[name];
+    if (element && element.type === 'range') {
+      element.value = value;
+
+      // Update the value display if it exists
+      const valueDisplay = document.getElementById(`${name}_value`);
+      if (valueDisplay) {
+        valueDisplay.textContent = value;
+      }
+
+      // Trigger change event
+      element.dispatchEvent(new Event('input', { bubbles: true }));
+    }
+  }
+
+  /**
    * Updates UI components from backend data (called by C++ backend)
    * Processes JSON updates and synchronizes UI element states
    * @param {string} jsonString - JSON string containing UI element updates

@@ -256,6 +256,35 @@ declare global {
 
     // JSON Inspector
     jsonInspector: JsonInspector;
+
+    // UI Debug and Configuration
+    setUiDebug: (enabled: boolean) => void;
+    setUiSpilloverThresholds: (config: any) => void;
+    getUiSpilloverThresholds: () => any;
+    setUiSpilloverExample: (config: any) => void;
+    _pendingSpilloverConfig: any;
+
+    // UI Recording and Playback
+    UIRecorder: any;
+    UIPlayback: any;
+    uiRecorder: any;
+    uiPlayback: any;
+    startUIRecording: () => void;
+    stopUIRecording: () => void;
+    getUIRecordingStatus: () => any;
+    exportUIRecording: () => any;
+    clearUIRecording: () => void;
+    loadUIRecordingForPlayback: (data: any) => void;
+    startUIPlayback: () => void;
+    pauseUIPlayback: () => void;
+    resumeUIPlayback: () => void;
+    stopUIPlayback: () => void;
+    setUIPlaybackSpeed: (speed: number) => void;
+    getUIPlaybackStatus: () => any;
+
+    // UI Test Functions
+    runUIRecorderTests: () => void;
+    demonstrateUIRecording: () => void;
   }
 
   interface Performance {

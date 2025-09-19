@@ -37,6 +37,20 @@ import './modules/fastled_callbacks.js';
 import { fastLEDEvents, fastLEDPerformanceMonitor } from './modules/fastled_events.js';
 import { FASTLED_DEBUG_LOG, FASTLED_DEBUG_ERROR, FASTLED_DEBUG_TRACE } from './modules/fastled_debug_logger.js';
 
+/**
+ * @typedef {Object} FrameData
+ * @property {number} strip_id - ID of the LED strip
+ * @property {string} type - Type of frame data
+ * @property {Uint8Array|number[]} pixel_data - Pixel color data
+ * @property {Object} screenMap - Screen mapping data for LED positions
+ */
+
+/**
+ * @typedef {Object} ScreenMapData
+ * @property {Object} absMax - Maximum coordinates
+ * @property {Object} absMin - Minimum coordinates
+ */
+
 /** URL parameters for runtime configuration */
 const urlParams = new URLSearchParams(window.location.search);
 
@@ -106,14 +120,14 @@ let fastLEDController = null;
 
 /**
  * Stub FastLED loader function (replaced during initialization)
- * @param {Object} options - Loading options (ignored in stub)
- * @returns {Promise<null>} Always returns null (stub implementation)
+ * @param {Object} _options - Loading options (ignored in stub)
+ * @returns {Promise<void>} Promise that resolves when initialization completes
  */
 let _loadFastLED = function (_options) {
   // Stub to let the user/dev know that something went wrong.
   // This function is replaced with an async implementation, so it must be async for interface compatibility
   console.log('FastLED loader function was not set.');
-  return Promise.resolve(null);
+  return Promise.resolve();
 };
 
 /**
@@ -144,7 +158,7 @@ function getTimeSinceEpoc() {
 /**
  * Print function (will be overridden during initialization)
  * @function
- * @param {...*} args - Arguments to print
+ * @param {...*} _args - Arguments to print
  */
 let print = function (..._args) {};
 
@@ -320,18 +334,26 @@ function updateCanvas(frameData) {
   }
   if (!graphicsManager) {
     const isDenseMap = isDenseGrid(frameData);
+
+    // Ensure graphicsArgs has required properties
+    const currentGraphicsArgs = {
+      canvasId: canvasId || 'canvas',
+      threeJsModules: graphicsArgs.threeJsModules || null,
+      ...graphicsArgs
+    };
+
     if (FORCE_THREEJS_RENDERER) {
       console.log('Creating Beautiful GraphicsManager with canvas ID (forced)', canvasId);
-      graphicsManager = new GraphicsManagerThreeJS(graphicsArgs);
+      graphicsManager = new GraphicsManagerThreeJS(currentGraphicsArgs);
     } else if (FORCE_FAST_RENDERER) {
       console.log('Creating Fast GraphicsManager with canvas ID (forced)', canvasId);
-      graphicsManager = new GraphicsManager(graphicsArgs);
+      graphicsManager = new GraphicsManager(currentGraphicsArgs);
     } else if (isDenseMap) {
       console.log('Creating Fast GraphicsManager with canvas ID', canvasId);
-      graphicsManager = new GraphicsManager(graphicsArgs);
+      graphicsManager = new GraphicsManager(currentGraphicsArgs);
     } else {
       console.log('Creating Beautiful GraphicsManager with canvas ID', canvasId);
-      graphicsManager = new GraphicsManagerThreeJS(graphicsArgs);
+      graphicsManager = new GraphicsManagerThreeJS(currentGraphicsArgs);
     }
     uiCanvasChanged = false;
   }
@@ -798,15 +820,14 @@ function getFastLEDPerformanceStats() {
 
 /**
  * Starts the FastLED animation loop (for external control)
- * @returns {boolean} True if started successfully, false otherwise
+ * @returns {Promise<void>} Promise that resolves when start is complete
  */
-function startFastLED() {
+async function startFastLED() {
   if (!fastLEDController) {
     console.error('FastLED controller not initialized');
-    return false;
+    return;
   }
-  fastLEDController.start();
-  return true;
+  await fastLEDController.start();
 }
 
 /**
@@ -824,20 +845,19 @@ function stopFastLED() {
 
 /**
  * Toggles the FastLED animation loop
- * @returns {boolean} True if now running, false if now stopped
+ * @returns {Promise<void>} Promise that resolves when toggle is complete
  */
-function toggleFastLED() {
+async function toggleFastLED() {
   if (!fastLEDController) {
     console.error('FastLED controller not initialized');
-    return false;
+    return;
   }
 
   if (fastLEDController.running) {
     fastLEDController.stop();
-    return false;
+  } else {
+    await fastLEDController.start();
   }
-  fastLEDController.start();
-  return true;
 }
 
 /**
@@ -956,7 +976,7 @@ function initializeVideoRecorder() {
 function actuallyInitializeVideoRecorder(canvas, recordButton) {
   // Try to get audio context if available
   let audioContext = null;
-  if (typeof AudioContext !== 'undefined' || typeof webkitAudioContext !== 'undefined') {
+  if (typeof AudioContext !== 'undefined' || typeof window.webkitAudioContext !== 'undefined') {
     try {
       const AudioContextClass = window.AudioContext || window.webkitAudioContext;
       audioContext = new AudioContextClass();

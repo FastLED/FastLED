@@ -30,6 +30,7 @@
  * @property {*} [data.value] - Element value (for update events)
  * @property {*} [data.previousValue] - Previous value (for update events)
  * @property {Object} [data.elementConfig] - Full element configuration (for add events)
+ * @property {Object} [data.elementSnapshot] - Element snapshot (for remove events)
  */
 
 /**
@@ -49,6 +50,12 @@
  * Records UI element changes for playback and analysis
  */
 export class UIRecorder {
+    /** Constants for ID generation */
+    static ID_GENERATION = {
+        BASE36_RADIX: 36,              // Base36 encoding (0-9, a-z)
+        RANDOM_STRING_START: 2,        // Start position for random string
+        RANDOM_STRING_LENGTH: 9        // Length of random string part
+    };
     /**
      * @param {Object} [options] - Configuration options
      * @param {boolean} [options.autoStart=false] - Start recording immediately
@@ -175,7 +182,7 @@ export class UIRecorder {
         const timestamp = this.getRelativeTimestamp();
         const event = {
             timestamp,
-            type: 'add',
+            type: /** @type {UIEventType} */ ('add'),
             elementId,
             data: {
                 elementType: elementConfig.type,
@@ -201,7 +208,7 @@ export class UIRecorder {
         const timestamp = this.getRelativeTimestamp();
         const event = {
             timestamp,
-            type: 'update',
+            type: /** @type {UIEventType} */ ('update'),
             elementId,
             data: {
                 value: newValue,
@@ -226,7 +233,7 @@ export class UIRecorder {
 
         const event = {
             timestamp,
-            type: 'remove',
+            type: /** @type {UIEventType} */ ('remove'),
             elementId,
             data: {
                 elementSnapshot: snapshot ? { ...snapshot } : null
@@ -397,9 +404,7 @@ export class UIRecorder {
      * @private
      */
     generateRecordingId() {
-        const RANDOM_STRING_START = 2;
-        const RANDOM_STRING_LENGTH = 9;
-        return `ui_recording_${Date.now()}_${Math.random().toString(36).substr(RANDOM_STRING_START, RANDOM_STRING_LENGTH)}`;
+        return `ui_recording_${Date.now()}_${Math.random().toString(UIRecorder.ID_GENERATION.BASE36_RADIX).substr(UIRecorder.ID_GENERATION.RANDOM_STRING_START, UIRecorder.ID_GENERATION.RANDOM_STRING_LENGTH)}`;
     }
 
     /**

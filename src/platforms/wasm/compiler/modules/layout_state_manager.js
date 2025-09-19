@@ -262,7 +262,7 @@ export class LayoutStateManager {
      * @private
      */
     calculateDesktopLayout(layout, availableWidth) {
-        const baseCanvasSize = Math.min(this.config.maxCanvasSize, availableWidth * 0.6);
+        const baseCanvasSize = Math.min(this.config.maxCanvasSize, availableWidth * this.config.canvasExpansionRatio);
         const remainingSpace = availableWidth - baseCanvasSize - this.config.horizontalGap;
 
         // Calculate UI columns that can fit

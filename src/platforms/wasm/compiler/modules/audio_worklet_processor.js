@@ -5,6 +5,9 @@
 
 /// <reference path="../types.d.ts" />
 
+// AudioWorklet global environment declarations
+/* global AudioWorkletProcessor, registerProcessor */
+
 /**
  * @extends AudioWorkletProcessor
  */

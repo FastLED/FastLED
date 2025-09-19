@@ -113,7 +113,7 @@ class AudioProcessor {
   /**
    * Initialize the audio processor
    * @abstract
-   * @param {MediaElementAudioSourceNode} [source] - Optional audio source node
+   * @param {MediaElementAudioSourceNode} [_source] - Optional audio source node
    * @returns {Promise<void>}
    */
   initialize(_source) {
@@ -485,7 +485,7 @@ The system will automatically fall back to ScriptProcessor.`);
   /**
    * Diagnose the type of AudioWorklet loading error
    * @param {Error} error - The error that occurred
-   * @param {string} [path] - Optional path that failed to load
+   * @param {string} [_path] - Optional path that failed to load
    * @returns {string} Error type description
    */
   diagnoseAudioWorkletError(error, _path) {

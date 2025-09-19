@@ -57,6 +57,39 @@ export class ColumnValidator {
         columnBalanceTolerance: 0.2    // 20% tolerance for column balance
     };
 
+    /** Layout dimension constants */
+    static LAYOUT_DIMENSIONS = {
+        DEFAULT_VIEWPORT_HEIGHT: 800,  // Default viewport height fallback
+        DEFAULT_UI_HEIGHT: 600,        // Default UI container height
+        MIN_VIEWPORT_WIDTH: 320,       // Minimum supported viewport width
+        MIN_CANVAS_SIZE: 200,          // Minimum canvas size warning threshold
+        MAX_CANVAS_SIZE: 1200,         // Maximum canvas size warning threshold
+        ELEMENT_SIZE_ESTIMATE: 100,    // Estimated pixel size per UI element
+        MIN_COLUMN_WIDTH_THRESHOLD: 300, // Threshold for column width recommendations
+        LARGE_COLUMN_WIDTH_THRESHOLD: 500, // Threshold for too-wide columns
+        HIGH_CONTENT_DENSITY: 15,      // High content density threshold
+        LOW_CONTENT_DENSITY: 5,        // Low content density threshold
+        WIDE_LAYOUT_THRESHOLD: 1400    // Threshold for wide layout optimizations
+    };
+
+    /** Optimization scoring constants */
+    static SCORING_CONSTANTS = {
+        ERROR_PENALTY: 20,             // Points deducted per error
+        WARNING_PENALTY: 5,            // Points deducted per warning
+        OPTIMAL_SPACE_MIN: 0.7,        // Optimal space utilization minimum
+        OPTIMAL_SPACE_MAX: 0.9,        // Optimal space utilization maximum
+        OPTIMAL_ASPECT_MIN: 1.3,       // Optimal aspect ratio minimum
+        OPTIMAL_ASPECT_MAX: 1.7,       // Optimal aspect ratio maximum
+        SPACE_WEIGHT: 0.4,             // Weight for space utilization in score
+        BALANCE_WEIGHT: 0.3,           // Weight for column balance in score
+        ASPECT_WEIGHT: 0.3,            // Weight for aspect ratio in score
+        LOW_SPACE_THRESHOLD: 0.6,      // Low space utilization threshold
+        HIGH_WHITESPACE_THRESHOLD: 0.5, // High whitespace ratio threshold
+        LOW_BALANCE_THRESHOLD: 0.7,    // Low column balance threshold
+        CANVAS_SCALE_FACTOR: 1.2,      // Canvas size optimization scaling
+        CANVAS_WIDTH_RATIO: 0.6        // Canvas to available width ratio
+    };
+
     /**
      * @param {Object} [thresholds] - Optional threshold overrides
      */
@@ -132,9 +165,9 @@ export class ColumnValidator {
      * @private
      */
     calculateMetrics(layout) {
-        const totalSpace = layout.viewportWidth * (layout.viewportHeight || 800);
+        const totalSpace = layout.viewportWidth * (layout.viewportHeight || ColumnValidator.LAYOUT_DIMENSIONS.DEFAULT_VIEWPORT_HEIGHT);
         const usedSpace = (layout.canvasSize * (layout.canvasHeight || layout.canvasSize)) +
-                         (layout.uiTotalWidth * (layout.uiHeight || 600));
+                         (layout.uiTotalWidth * (layout.uiHeight || ColumnValidator.LAYOUT_DIMENSIONS.DEFAULT_UI_HEIGHT));
 
         const spaceUtilization = Math.min(1, usedSpace / totalSpace);
 
@@ -163,13 +196,13 @@ export class ColumnValidator {
         const layoutWidth = layout.canvasSize + layout.uiTotalWidth;
         const layoutHeight = Math.max(
             layout.canvasHeight || layout.canvasSize,
-            layout.uiHeight || 600
+            layout.uiHeight || ColumnValidator.LAYOUT_DIMENSIONS.DEFAULT_UI_HEIGHT
         );
         const aspectRatio = layoutWidth / layoutHeight;
 
         // Calculate whitespace ratio
-        const contentArea = totalElements * 100; // Assume 100px per element
-        const totalArea = layout.uiTotalWidth * (layout.uiHeight || 600);
+        const contentArea = totalElements * ColumnValidator.LAYOUT_DIMENSIONS.ELEMENT_SIZE_ESTIMATE;
+        const totalArea = layout.uiTotalWidth * (layout.uiHeight || ColumnValidator.LAYOUT_DIMENSIONS.DEFAULT_UI_HEIGHT);
         const whitespaceRatio = Math.max(0, 1 - (contentArea / totalArea));
 
         return {
@@ -189,18 +222,18 @@ export class ColumnValidator {
      */
     validateDimensions(layout, result) {
         // Check viewport width
-        if (layout.viewportWidth < 320) {
-            result.errors.push('Viewport width is too small (< 320px)');
+        if (layout.viewportWidth < ColumnValidator.LAYOUT_DIMENSIONS.MIN_VIEWPORT_WIDTH) {
+            result.errors.push(`Viewport width is too small (< ${ColumnValidator.LAYOUT_DIMENSIONS.MIN_VIEWPORT_WIDTH}px)`);
             result.isValid = false;
         }
 
         // Check canvas size
-        if (layout.canvasSize < 200) {
-            result.warnings.push('Canvas size is very small (< 200px)');
+        if (layout.canvasSize < ColumnValidator.LAYOUT_DIMENSIONS.MIN_CANVAS_SIZE) {
+            result.warnings.push(`Canvas size is very small (< ${ColumnValidator.LAYOUT_DIMENSIONS.MIN_CANVAS_SIZE}px)`);
         }
 
-        if (layout.canvasSize > 1200) {
-            result.warnings.push('Canvas size is very large (> 1200px)');
+        if (layout.canvasSize > ColumnValidator.LAYOUT_DIMENSIONS.MAX_CANVAS_SIZE) {
+            result.warnings.push(`Canvas size is very large (> ${ColumnValidator.LAYOUT_DIMENSIONS.MAX_CANVAS_SIZE}px)`);
         }
     }
 
@@ -319,33 +352,35 @@ export class ColumnValidator {
         let score = 100;
 
         // Deduct for errors
-        score -= result.errors.length * 20;
+        score -= result.errors.length * ColumnValidator.SCORING_CONSTANTS.ERROR_PENALTY;
 
         // Deduct for warnings
-        score -= result.warnings.length * 5;
+        score -= result.warnings.length * ColumnValidator.SCORING_CONSTANTS.WARNING_PENALTY;
 
         // Factor in metrics
         const metrics = result.metrics;
 
         // Space utilization factor (optimal: 0.7-0.9)
-        const spaceScore = metrics.spaceUtilization < 0.7
-            ? metrics.spaceUtilization / 0.7
-            : metrics.spaceUtilization > 0.9
-                ? (1 - metrics.spaceUtilization) / 0.1
+        const spaceScore = metrics.spaceUtilization < ColumnValidator.SCORING_CONSTANTS.OPTIMAL_SPACE_MIN
+            ? metrics.spaceUtilization / ColumnValidator.SCORING_CONSTANTS.OPTIMAL_SPACE_MIN
+            : metrics.spaceUtilization > ColumnValidator.SCORING_CONSTANTS.OPTIMAL_SPACE_MAX
+                ? (1 - metrics.spaceUtilization) / (1 - ColumnValidator.SCORING_CONSTANTS.OPTIMAL_SPACE_MAX)
                 : 1;
 
         // Column balance factor
         const balanceScore = metrics.columnBalance;
 
         // Aspect ratio factor (optimal: 1.3-1.7)
-        const aspectScore = metrics.aspectRatio < 1.3
-            ? metrics.aspectRatio / 1.3
-            : metrics.aspectRatio > 1.7
-                ? Math.max(0, 2 - (metrics.aspectRatio / 1.7))
+        const aspectScore = metrics.aspectRatio < ColumnValidator.SCORING_CONSTANTS.OPTIMAL_ASPECT_MIN
+            ? metrics.aspectRatio / ColumnValidator.SCORING_CONSTANTS.OPTIMAL_ASPECT_MIN
+            : metrics.aspectRatio > ColumnValidator.SCORING_CONSTANTS.OPTIMAL_ASPECT_MAX
+                ? Math.max(0, 2 - (metrics.aspectRatio / ColumnValidator.SCORING_CONSTANTS.OPTIMAL_ASPECT_MAX))
                 : 1;
 
         // Combine factors
-        const metricsScore = (spaceScore * 0.4 + balanceScore * 0.3 + aspectScore * 0.3) * 100;
+        const metricsScore = (spaceScore * ColumnValidator.SCORING_CONSTANTS.SPACE_WEIGHT +
+                             balanceScore * ColumnValidator.SCORING_CONSTANTS.BALANCE_WEIGHT +
+                             aspectScore * ColumnValidator.SCORING_CONSTANTS.ASPECT_WEIGHT) * 100;
         score = Math.min(score, metricsScore);
 
         return Math.max(0, Math.round(score));
@@ -363,39 +398,39 @@ export class ColumnValidator {
         const metrics = result.metrics;
 
         // Space utilization recommendations
-        if (metrics.spaceUtilization < 0.6) {
+        if (metrics.spaceUtilization < ColumnValidator.SCORING_CONSTANTS.LOW_SPACE_THRESHOLD) {
             recommendations.push('Consider reducing container padding or increasing content size');
         }
 
-        if (metrics.spaceUtilization > 0.9) {
+        if (metrics.spaceUtilization > ColumnValidator.SCORING_CONSTANTS.OPTIMAL_SPACE_MAX) {
             recommendations.push('Add more spacing between elements for better readability');
         }
 
         // Column recommendations
-        if (layout.uiColumnWidth < 300 && layout.uiColumns > 1) {
+        if (layout.uiColumnWidth < ColumnValidator.LAYOUT_DIMENSIONS.MIN_COLUMN_WIDTH_THRESHOLD && layout.uiColumns > 1) {
             recommendations.push('Consider reducing the number of columns for wider column width');
         }
 
-        if (layout.uiColumnWidth > 500) {
+        if (layout.uiColumnWidth > ColumnValidator.LAYOUT_DIMENSIONS.LARGE_COLUMN_WIDTH_THRESHOLD) {
             recommendations.push('Consider adding more columns to better utilize horizontal space');
         }
 
         // Content density recommendations
-        if (metrics.contentDensity > 15) {
+        if (metrics.contentDensity > ColumnValidator.LAYOUT_DIMENSIONS.HIGH_CONTENT_DENSITY) {
             recommendations.push('Consider pagination or virtual scrolling for better performance');
         }
 
-        if (metrics.contentDensity < 5 && layout.uiColumns > 2) {
+        if (metrics.contentDensity < ColumnValidator.LAYOUT_DIMENSIONS.LOW_CONTENT_DENSITY && layout.uiColumns > 2) {
             recommendations.push('Consider reducing columns to consolidate content');
         }
 
         // Balance recommendations
-        if (metrics.columnBalance < 0.7) {
+        if (metrics.columnBalance < ColumnValidator.SCORING_CONSTANTS.LOW_BALANCE_THRESHOLD) {
             recommendations.push('Redistribute content more evenly between columns');
         }
 
         // Whitespace recommendations
-        if (metrics.whitespaceRatio > 0.5) {
+        if (metrics.whitespaceRatio > ColumnValidator.SCORING_CONSTANTS.HIGH_WHITESPACE_THRESHOLD) {
             recommendations.push('Reduce vertical spacing or add more content');
         }
 
@@ -419,15 +454,15 @@ export class ColumnValidator {
         }
 
         // Optimize canvas size
-        if (validation.metrics.spaceUtilization < 0.6) {
+        if (validation.metrics.spaceUtilization < ColumnValidator.SCORING_CONSTANTS.LOW_SPACE_THRESHOLD) {
             optimized.canvasSize = Math.min(
-                layout.canvasSize * 1.2,
-                layout.availableWidth * 0.6
+                layout.canvasSize * ColumnValidator.SCORING_CONSTANTS.CANVAS_SCALE_FACTOR,
+                layout.availableWidth * ColumnValidator.SCORING_CONSTANTS.CANVAS_WIDTH_RATIO
             );
         }
 
         // Optimize container visibility
-        if (layout.uiColumns === 1 && layout.availableWidth > 1400) {
+        if (layout.uiColumns === 1 && layout.availableWidth > ColumnValidator.LAYOUT_DIMENSIONS.WIDE_LAYOUT_THRESHOLD) {
             optimized.container2Visible = true;
             optimized.uiColumns = 2;
         }
