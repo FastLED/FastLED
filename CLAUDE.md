@@ -36,6 +36,9 @@ This project uses directory-specific agent guidelines. See:
 - **Use proper warning macros** from `fl/compiler_control.h`
 - **Follow existing code patterns** and naming conventions
 
+### JavaScript Code Standards
+- **After modifying any JavaScript files**: Always run `bash lint --js` to ensure proper formatting
+
 ### Memory Refresh Rule
 **🚨 ALL AGENTS: Read the relevant AGENTS.md file before concluding work to refresh memory about current project rules and requirements.**
 

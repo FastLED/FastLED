@@ -157,6 +157,26 @@ export class VideoRecorder {
     console.log('Video stream tracks:', videoStream.getVideoTracks().length);
     console.log('Video stream settings:', videoStream.getVideoTracks()[0]?.getSettings());
 
+    // Validate that we have video tracks
+    const videoTracks = videoStream.getVideoTracks();
+    if (videoTracks.length === 0) {
+      throw new Error('Canvas captureStream() did not produce any video tracks');
+    }
+
+    // Check if video tracks are enabled and not muted
+    videoTracks.forEach((track, index) => {
+      console.log(`Video track ${index}:`, {
+        enabled: track.enabled,
+        muted: track.muted,
+        readyState: track.readyState,
+        kind: track.kind,
+        id: track.id
+      });
+      if (track.readyState === 'ended') {
+        console.warn(`Video track ${index} is already ended`);
+      }
+    });
+
     // If no audio context, return video-only stream
     if (!this.audioContext) {
       console.log('No audio context, using video-only stream');
@@ -230,8 +250,21 @@ export class VideoRecorder {
         delete options.mimeType;
       }
 
-      // Create MediaRecorder instance
-      this.mediaRecorder = new MediaRecorder(this.stream, options);
+      // Try to create MediaRecorder instance with options first
+      try {
+        this.mediaRecorder = new MediaRecorder(this.stream, options);
+        console.log('MediaRecorder created with options:', options);
+      } catch (optionsError) {
+        console.warn('MediaRecorder failed with options, trying without options:', optionsError);
+        try {
+          // Fallback: create without options
+          this.mediaRecorder = new MediaRecorder(this.stream);
+          console.log('MediaRecorder created without options (browser default)');
+        } catch (basicError) {
+          console.error('MediaRecorder creation failed entirely:', basicError);
+          throw basicError;
+        }
+      }
 
       // Reset recorded chunks and frame counter
       this.recordedChunks = [];
@@ -239,6 +272,17 @@ export class VideoRecorder {
       this.recordingStartTime = performance.now();
 
       // Set up event handlers
+      this.mediaRecorder.onstart = () => {
+        console.log('MediaRecorder start event fired');
+        this.isRecording = true;
+        // Notify state change
+        if (this.onStateChange) {
+          this.onStateChange(true);
+        }
+        // Force a frame update to ensure we get data
+        this.requestFrameUpdate();
+      };
+
       this.mediaRecorder.ondataavailable = (event) => {
         console.log('Data available:', event.data.size, 'bytes');
         if (event.data.size > 0) {
@@ -256,6 +300,10 @@ export class VideoRecorder {
 
       this.mediaRecorder.onerror = (event) => {
         console.error('MediaRecorder error:', event.error);
+        this.isRecording = false;
+        if (this.onStateChange) {
+          this.onStateChange(false);
+        }
         this.stopRecording();
       };
 
@@ -266,15 +314,38 @@ export class VideoRecorder {
       console.log('Stream tracks:', this.stream.getTracks().map((t) => ({ kind: t.kind, enabled: t.enabled, muted: t.muted })));
 
       // Start recording with explicit timeslice to ensure data collection
-      this.mediaRecorder.start(1000); // Request data every 1 second
-      this.isRecording = true;
+      try {
+        // Try different timeslice values - some browsers are picky
+        const timeslice = 1000; // Default: 1 second
+        try {
+          this.mediaRecorder.start(timeslice);
+          console.log(`MediaRecorder.start(${timeslice}) called successfully`);
+        } catch (timesliceError) {
+          console.warn(`MediaRecorder.start(${timeslice}) failed, trying without timeslice:`, timesliceError);
+          this.mediaRecorder.start(); // Try without timeslice
+          console.log('MediaRecorder.start() called successfully (no timeslice)');
+        }
 
-      // Notify state change
-      if (this.onStateChange) {
-        this.onStateChange(true);
+        // Add a timeout to ensure we detect if recording fails to start
+        setTimeout(() => {
+          if (this.mediaRecorder && this.mediaRecorder.state !== 'recording') {
+            console.error('MediaRecorder failed to transition to recording state:', this.mediaRecorder.state);
+            this.isRecording = false;
+            if (this.onStateChange) {
+              this.onStateChange(false);
+            }
+          }
+        }, 500);
+
+      } catch (startError) {
+        console.error('MediaRecorder.start() failed:', startError);
+        this.isRecording = false;
+        if (this.onStateChange) {
+          this.onStateChange(false);
+        }
+        return false;
       }
 
-      console.log('Recording started');
       return true;
     } catch (error) {
       console.error('Failed to start recording:', error);
@@ -440,6 +511,35 @@ export class VideoRecorder {
    */
   getIsRecording() {
     return this.isRecording;
+  }
+
+  /**
+   * Forces a frame update to trigger canvas content capture
+   * This helps ensure MediaRecorder gets data when recording starts
+   */
+  requestFrameUpdate() {
+    try {
+      // Try to request a frame update if available
+      if (window.requestAnimationFrame) {
+        window.requestAnimationFrame(() => {
+          console.log('Frame update requested to trigger canvas capture');
+          // If we have access to a render function, call it
+          if (window.updateCanvas && typeof window.updateCanvas === 'function') {
+            try {
+              // Pass empty frame data with screenMap for canvas refresh during recording
+              const emptyFrameData = Object.assign([], {
+                screenMap: window.screenMap || undefined
+              });
+              window.updateCanvas(emptyFrameData);
+            } catch (e) {
+              console.warn('updateCanvas() call failed:', e);
+            }
+          }
+        });
+      }
+    } catch (e) {
+      console.warn('requestFrameUpdate failed:', e);
+    }
   }
 
   /**
