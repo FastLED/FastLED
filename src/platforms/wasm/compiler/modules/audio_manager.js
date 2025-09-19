@@ -113,7 +113,7 @@ class AudioProcessor {
   /**
    * Initialize the audio processor
    * @abstract
-   * @param {MediaElementAudioSourceNode} [_source] - Optional audio source node
+   * @param {MediaElementAudioSourceNode | MediaStreamAudioSourceNode} [_source] - Optional audio source node
    * @returns {Promise<void>}
    */
   initialize(_source) {
@@ -175,7 +175,7 @@ class ScriptProcessorAudioProcessor extends AudioProcessor {
 
   /**
    * Initialize the ScriptProcessor node and audio processing chain
-   * @param {MediaElementAudioSourceNode} source - Audio source node to connect
+   * @param {MediaElementAudioSourceNode | MediaStreamAudioSourceNode} source - Audio source node to connect
    * @returns {Promise<void>}
    */
   initialize(source) {
@@ -262,6 +262,11 @@ class AudioWorkletAudioProcessor extends AudioProcessor {
     console.log('🎵 AudioWorklet processor created');
   }
 
+  /**
+   * Initialize the AudioWorklet processor and audio processing chain
+   * @param {MediaElementAudioSourceNode | MediaStreamAudioSourceNode} source - Audio source node to connect
+   * @returns {Promise<void>}
+   */
   async initialize(source) {
     try {
       // Load the AudioWorklet module if not already loaded
@@ -624,6 +629,7 @@ export class AudioManager {
         audioBuffers: {}, // Store optimized audio buffer storage by ID
         audioProcessors: {}, // Store audio processors by ID
         audioSources: {}, // Store MediaElementSourceNodes by ID
+        mediaStreams: {}, // Store MediaStreams for microphone capture by ID
         hasActiveSamples: false,
         frequencyData: new Float32Array(0), // Store frequency analysis data
         timeData: new Float32Array(0), // Store time domain data
@@ -743,9 +749,16 @@ export class AudioManager {
       console.log(`🎵 Creating new AudioContext (state: ${audioContext.state})`);
     }
 
-    // Create audio source - this is where the error occurs if element is already connected
-    const source = audioContext.createMediaElementSource(audioElement);
-    source.connect(audioContext.destination); // Connect to output
+    // Create audio source - handle both file-based and stream-based audio
+    let source;
+    if (audioElement.srcObject && audioElement.srcObject instanceof MediaStream) {
+      // For microphone streams, create MediaStreamAudioSourceNode
+      source = audioContext.createMediaStreamSource(audioElement.srcObject);
+    } else {
+      // For file-based audio, create MediaElementAudioSourceNode
+      source = audioContext.createMediaElementSource(audioElement);
+      source.connect(audioContext.destination); // Connect to output (only for file-based)
+    }
 
     // Create sample callback for the processor
     const sampleCallback = (sampleBuffer, timestamp) => {
@@ -920,13 +933,16 @@ export class AudioManager {
     const controlDiv = this.createControlContainer(element);
 
     // Create file selection components
-    const { uploadButton, audioInput } = this.createFileSelectionComponents(element);
+    const { uploadButton, micButton, audioInput, buttonContainer } = this.createFileSelectionComponents(element);
 
     // Set up file selection handler
     this.setupFileSelectionHandler(uploadButton, audioInput, controlDiv);
 
+    // Set up microphone capture handler
+    this.setupMicrophoneHandler(micButton, controlDiv);
+
     // Add components to the container
-    controlDiv.appendChild(uploadButton);
+    controlDiv.appendChild(buttonContainer);
     controlDiv.appendChild(audioInput);
 
     return controlDiv;
@@ -962,11 +978,26 @@ export class AudioManager {
    * @returns {Object} The created components
    */
   createFileSelectionComponents(element) {
+    // Create button container for both buttons
+    const buttonContainer = document.createElement('div');
+    buttonContainer.className = 'audio-button-container';
+    buttonContainer.style.display = 'flex';
+    buttonContainer.style.gap = '8px';
+    buttonContainer.style.marginTop = '5px';
+
     // Create a custom upload button that matches other UI elements
     const uploadButton = document.createElement('button');
-    uploadButton.textContent = 'Select Audio File';
+    uploadButton.textContent = '📁 Audio File';
     uploadButton.className = 'audio-upload-button';
     uploadButton.id = `upload-btn-${element.id}`;
+    uploadButton.title = 'Select audio file from device';
+
+    // Create microphone button
+    const micButton = document.createElement('button');
+    micButton.textContent = '🎤 Microphone';
+    micButton.className = 'audio-mic-button';
+    micButton.id = `mic-btn-${element.id}`;
+    micButton.title = 'Capture audio from microphone';
 
     // Hidden file input
     const audioInput = document.createElement('input');
@@ -980,7 +1011,11 @@ export class AudioManager {
       audioInput.click();
     });
 
-    return { uploadButton, audioInput };
+    // Add buttons to container
+    buttonContainer.appendChild(uploadButton);
+    buttonContainer.appendChild(micButton);
+
+    return { uploadButton, micButton, audioInput, buttonContainer };
   }
 
   /**
@@ -1021,6 +1056,197 @@ export class AudioManager {
         }
       }
     });
+  }
+
+  /**
+   * Set up the microphone capture handler
+   * @param {HTMLButtonElement} micButton - The microphone button
+   * @param {HTMLElement} controlDiv - The control container
+   */
+  setupMicrophoneHandler(micButton, controlDiv) {
+    let isCapturing = false;
+
+    micButton.addEventListener('click', async () => {
+      if (!isCapturing) {
+        // Start microphone capture
+        try {
+          await this.startMicrophoneCapture(micButton, controlDiv);
+          isCapturing = true;
+        } catch (error) {
+          console.error('🎤 Failed to start microphone capture:', error);
+          this.showAudioError(controlDiv, 'Failed to access microphone. Please check permissions.');
+        }
+      } else {
+        // Stop microphone capture
+        await this.stopMicrophoneCapture(micButton, controlDiv);
+        isCapturing = false;
+      }
+    });
+  }
+
+  /**
+   * Start microphone capture
+   * @param {HTMLButtonElement} micButton - The microphone button
+   * @param {HTMLElement} controlDiv - The control container
+   */
+  async startMicrophoneCapture(micButton, controlDiv) {
+    try {
+      // Request microphone access
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: true,
+          autoGainControl: true,
+          sampleRate: 44100
+        }
+      });
+
+      // Update button state
+      micButton.textContent = '🛑 Stop Recording';
+      micButton.className = 'audio-mic-button recording';
+      micButton.title = 'Stop microphone recording';
+
+      // Get the audio input ID from the container
+      const audioInput = controlDiv.querySelector('input[type="file"]');
+      const audioId = audioInput ? audioInput.id : 'unknown';
+
+      // Clean up any previous audio context
+      await this.cleanupPreviousAudioContext(audioId);
+
+      // Small delay to ensure cleanup is complete
+      await new Promise((resolve) => { setTimeout(resolve, 100); });
+
+      // Create audio element for the stream
+      const audio = this.createStreamAudioElement(controlDiv, stream);
+
+      // Set up audio processing for the stream
+      await this.setupAudioAnalysis(audio);
+
+      // Update UI to show recording state
+      this.updateAudioProcessingIndicator(controlDiv);
+
+      // Store the stream for cleanup
+      this.storeMediaStream(audioId, stream);
+
+      console.log('🎤 Microphone capture started successfully');
+    } catch (error) {
+      console.error('🎤 Error starting microphone capture:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Stop microphone capture
+   * @param {HTMLButtonElement} micButton - The microphone button
+   * @param {HTMLElement} controlDiv - The control container
+   */
+  async stopMicrophoneCapture(micButton, controlDiv) {
+    try {
+      // Get the audio input ID from the container
+      const audioInput = controlDiv.querySelector('input[type="file"]');
+      const audioId = audioInput ? audioInput.id : 'unknown';
+
+      // Stop the media stream
+      const stream = this.getStoredMediaStream(audioId);
+      if (stream) {
+        stream.getTracks().forEach(track => track.stop());
+        this.clearStoredMediaStream(audioId);
+      }
+
+      // Clean up audio context
+      await this.cleanupPreviousAudioContext(audioId);
+
+      // Remove audio element
+      const existingAudio = controlDiv.querySelector('audio');
+      if (existingAudio) {
+        existingAudio.pause();
+        existingAudio.srcObject = null;
+        controlDiv.removeChild(existingAudio);
+      }
+
+      // Reset button state
+      micButton.textContent = '🎤 Microphone';
+      micButton.className = 'audio-mic-button';
+      micButton.title = 'Capture audio from microphone';
+
+      // Remove processing indicator
+      const existingIndicator = controlDiv.querySelector('.audio-indicator');
+      if (existingIndicator) {
+        controlDiv.removeChild(existingIndicator);
+      }
+
+      console.log('🎤 Microphone capture stopped');
+    } catch (error) {
+      console.error('🎤 Error stopping microphone capture:', error);
+    }
+  }
+
+  /**
+   * Create an audio element for the media stream
+   * @param {HTMLElement} container - The control container
+   * @param {MediaStream} stream - The media stream
+   * @returns {HTMLAudioElement} The audio element
+   */
+  createStreamAudioElement(container, stream) {
+    // Remove any existing audio element first
+    const existingAudio = container.querySelector('audio');
+    if (existingAudio) {
+      existingAudio.pause();
+      existingAudio.srcObject = null;
+      container.removeChild(existingAudio);
+    }
+
+    // Create new audio element for the stream
+    const audio = document.createElement('audio');
+    audio.controls = false; // Hide controls for microphone stream
+    audio.muted = true; // Mute to prevent feedback
+    audio.className = 'audio-player stream';
+    audio.srcObject = stream;
+
+    // Get the audio input ID from the container
+    const audioInput = container.querySelector('input[type="file"]');
+    const audioId = audioInput ? audioInput.id : 'unknown';
+    audio.setAttribute('data-audio-id', audioId);
+
+    container.appendChild(audio);
+
+    // Start playing the stream (muted)
+    audio.play().catch(err => {
+      console.warn('🎤 Could not auto-play stream (this is normal):', err);
+    });
+
+    return audio;
+  }
+
+  /**
+   * Store a media stream for later cleanup
+   * @param {string} audioId - The audio ID
+   * @param {MediaStream} stream - The media stream
+   */
+  storeMediaStream(audioId, stream) {
+    if (!window.audioData.mediaStreams) {
+      window.audioData.mediaStreams = {};
+    }
+    window.audioData.mediaStreams[audioId] = stream;
+  }
+
+  /**
+   * Get a stored media stream
+   * @param {string} audioId - The audio ID
+   * @returns {MediaStream|null} The stored stream or null
+   */
+  getStoredMediaStream(audioId) {
+    return window.audioData.mediaStreams?.[audioId] || null;
+  }
+
+  /**
+   * Clear a stored media stream
+   * @param {string} audioId - The audio ID
+   */
+  clearStoredMediaStream(audioId) {
+    if (window.audioData.mediaStreams?.[audioId]) {
+      delete window.audioData.mediaStreams[audioId];
+    }
   }
 
   /**
@@ -1114,6 +1340,13 @@ export class AudioManager {
     // Clean up sample references
     if (window.audioData?.audioSamples?.[inputId]) {
       delete window.audioData.audioSamples[inputId];
+    }
+
+    // Clean up media streams
+    if (window.audioData?.mediaStreams?.[inputId]) {
+      const stream = window.audioData.mediaStreams[inputId];
+      stream.getTracks().forEach(track => track.stop());
+      delete window.audioData.mediaStreams[inputId];
     }
 
     // Clean up any lingering audio elements in the DOM that might be associated with this ID
