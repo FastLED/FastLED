@@ -44,24 +44,27 @@ cd ../../src/platforms/wasm/compiler
 # Check if TypeScript is available (local installation first, then global)
 if [ -f "../../../../.cache/js-tools/node_modules/.bin/tsc.cmd" ]; then
     echo -e "${BLUE}Using local TypeScript for JSDoc type checking...${NC}"
-    if ../../../../.cache/js-tools/node_modules/.bin/tsc.cmd --noEmit --project jsconfig.json 2>/dev/null; then
+    if ../../../../.cache/js-tools/node_modules/.bin/tsc.cmd --noEmit --project jsconfig.json; then
         echo -e "${GREEN}✅ JSDoc type checking completed successfully${NC}"
     else
-        echo -e "${YELLOW}⚠️  JSDoc type checking found type issues (expected - will be addressed separately)${NC}"
+        echo -e "${RED}❌ JSDoc type checking failed with errors${NC}"
+        exit 1
     fi
 elif [ -f "../../../../.cache/js-tools/node_modules/.bin/tsc" ]; then
     echo -e "${BLUE}Using local TypeScript for JSDoc type checking...${NC}"
-    if ../../../../.cache/js-tools/node_modules/.bin/tsc --noEmit --project jsconfig.json 2>/dev/null; then
+    if ../../../../.cache/js-tools/node_modules/.bin/tsc --noEmit --project jsconfig.json; then
         echo -e "${GREEN}✅ JSDoc type checking completed successfully${NC}"
     else
-        echo -e "${YELLOW}⚠️  JSDoc type checking found type issues (expected - will be addressed separately)${NC}"
+        echo -e "${RED}❌ JSDoc type checking failed with errors${NC}"
+        exit 1
     fi
 elif command -v npx >/dev/null 2>&1 && npx tsc --version >/dev/null 2>&1; then
     echo -e "${BLUE}Using global TypeScript for JSDoc type checking...${NC}"
-    if npx tsc --noEmit --project jsconfig.json 2>/dev/null; then
+    if npx tsc --noEmit --project jsconfig.json; then
         echo -e "${GREEN}✅ JSDoc type checking completed successfully${NC}"
     else
-        echo -e "${YELLOW}⚠️  JSDoc type checking found type issues (expected - will be addressed separately)${NC}"
+        echo -e "${RED}❌ JSDoc type checking failed with errors${NC}"
+        exit 1
     fi
 else
     echo -e "${YELLOW}⚠️  TypeScript not found, skipping JSDoc type checking${NC}"
