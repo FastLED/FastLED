@@ -256,6 +256,105 @@ class UILayoutPlacementManager {
 - **Extensible**: Easy to add new layout modes and features
 - **Documentation**: Clear API documentation and usage examples
 
+## JSON UI Persistent State
+
+### State Management Architecture
+The system now includes comprehensive JSON-based state persistence implemented in commit `86d9b7d5d`. This enables:
+
+- **Persistent Layout State**: All layout configurations stored as JSON with atomic updates
+- **UI Element State Tracking**: Complete state management for UI elements with change events
+- **Recording/Playback System**: Full UI interaction recording and replay capabilities
+- **Container State Management**: Visibility and configuration state for all UI containers
+
+### Core State Components
+
+#### LayoutStateManager
+**Location**: `src/platforms/wasm/compiler/modules/layout_state_manager.js:487`
+
+Provides centralized JSON state management with:
+```javascript
+{
+  mode: 'mobile' | 'tablet' | 'desktop' | 'ultrawide',
+  viewportWidth: number,
+  availableWidth: number,
+  canvasSize: number,
+  uiColumns: number,
+  uiColumnWidth: number,
+  uiTotalWidth: number,
+  canExpand: boolean,
+  container2Visible: boolean,
+  totalGroups: number,
+  totalElements: number,
+  containers: {
+    'ui-controls': { visible: boolean, columns: number, width: number },
+    'ui-controls-2': { visible: boolean, columns: number, width: number }
+  }
+}
+```
+
+#### UIRecorder
+**Location**: `src/platforms/wasm/compiler/modules/ui_recorder.js:517`
+
+Records UI state changes as JSON events:
+```javascript
+{
+  recording: {
+    version: "1.0",
+    startTime: "ISO8601",
+    endTime: "ISO8601",
+    metadata: { recordingId: string, layoutMode: string, totalDuration: number }
+  },
+  events: [
+    {
+      timestamp: number,
+      type: 'add' | 'update' | 'remove',
+      elementId: string,
+      data: { elementType?: string, value?: any, previousValue?: any, elementConfig?: Object }
+    }
+  ]
+}
+```
+
+#### UIPlayback
+**Location**: `src/platforms/wasm/compiler/modules/ui_playback.js:596`
+
+Reconstructs UI from JSON state with:
+- Event-by-event playback with timing control
+- Speed control and pause/resume functionality
+- Element state validation and restoration
+- Progress tracking and timeline navigation
+
+### UI Reconstruction Benefits
+
+Instead of manipulating DOM objects directly, the JSON state system enables:
+
+1. **State-Driven Reconstruction**: Rebuild entire UI from current JSON state
+2. **Atomic Updates**: All changes applied atomically to prevent inconsistencies
+3. **Time Travel**: Navigate to any point in UI history via recorded states
+4. **State Validation**: Verify UI consistency against recorded state
+5. **Reproducible Layouts**: Exact recreation of UI configurations
+
+### Usage Pattern for Reconstruction
+
+```javascript
+// Get current UI state
+const currentState = layoutManager.stateManager.getState();
+
+// Reconstruct UI from state instead of DOM manipulation
+function reconstructUI(state) {
+  // Clear existing UI
+  clearAllContainers();
+
+  // Rebuild from JSON state
+  applyLayoutFromState(state);
+  recreateElementsFromState(state);
+  restoreContainerVisibility(state);
+}
+
+// Apply state changes
+layoutManager.stateManager.updateState(newStateData);
+```
+
 ## Integration Points
 
 ### UI Manager Integration
