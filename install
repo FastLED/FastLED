@@ -70,6 +70,50 @@ else
     echo "⚠️  Warning: JavaScript linter setup failed. You can retry with: uv run ci/setup-js-linting-fast.py"
 fi
 
+# Install TypeScript for JSDoc type checking
+echo "Installing TypeScript for JSDoc type checking..."
+if [ -d ".cache/js-tools" ]; then
+    echo "Installing TypeScript in local js-tools environment..."
+    cd .cache/js-tools
+    # Use the local Node.js installation to run npm
+    if [ -f "node/npm.cmd" ]; then
+        if ./node/npm.cmd install typescript; then
+            echo "✅ TypeScript installed successfully for JSDoc checking!"
+        else
+            echo "⚠️  Warning: TypeScript installation failed. JSDoc checking will be skipped."
+        fi
+    elif [ -f "node/bin/npm" ]; then
+        if ./node/bin/npm install typescript; then
+            echo "✅ TypeScript installed successfully for JSDoc checking!"
+        else
+            echo "⚠️  Warning: TypeScript installation failed. JSDoc checking will be skipped."
+        fi
+    else
+        echo "⚠️  Warning: Local npm not found in js-tools. Trying global installation..."
+        cd ../..
+        if command -v npm >/dev/null 2>&1; then
+            echo "Using global npm to install TypeScript..."
+            if npm install -g typescript; then
+                echo "✅ TypeScript installed globally for JSDoc checking!"
+            else
+                echo "⚠️  Warning: Global TypeScript installation failed. JSDoc checking will be skipped."
+            fi
+        else
+            echo "⚠️  Warning: npm not found. TypeScript cannot be installed. JSDoc checking will be skipped."
+        fi
+    fi
+    cd ../.. 2>/dev/null || true
+elif command -v npm >/dev/null 2>&1; then
+    echo "Using global npm to install TypeScript..."
+    if npm install -g typescript; then
+        echo "✅ TypeScript installed globally for JSDoc checking!"
+    else
+        echo "⚠️  Warning: Global TypeScript installation failed. JSDoc checking will be skipped."
+    fi
+else
+    echo "⚠️  Warning: npm not found. TypeScript cannot be installed. JSDoc checking will be skipped."
+fi
+
 echo "Setting up VSCode extensions..."
 
 # Install Auto Debug extension from local .vsix file
@@ -131,7 +175,7 @@ echo "🎉 Installation complete!"
 echo ""
 echo "To use:"
 echo "  - Run tests: bash test"
-echo "  - Run linting: bash lint (Python, C++, and JavaScript)"
+echo "  - Run linting: bash lint (Python, C++, and JavaScript with JSDoc type checking)"
 echo "  - Debug in VSCode: Open test file and press F5"
 echo "  - Auto Debug: Use '🎯 Auto Debug (Smart File Detection)' configuration"
 echo "  - clangd IntelliSense: Should work automatically in VSCode"

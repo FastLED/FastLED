@@ -1,0 +1,38 @@
+#!/bin/bash
+# FastLED JavaScript Linting Script (Node.js + ESLint - FAST!)
+
+# Colors for output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+NC='\033[0m' # No Color
+
+echo -e "${BLUE}FAST FastLED JavaScript Linting (Node.js + ESLint - FAST!)${NC}"
+
+# Check if ESLint is installed
+if [ ! -f ".cache/js-tools/node_modules/.bin/eslint.cmd" ]; then
+    echo -e "${RED}ERROR: ESLint not found. Run: uv run ci/setup-js-linting-fast.py${NC}"
+    exit 1
+fi
+
+# Find JavaScript files in WASM platform
+JS_FILES=$(find src/platforms/wasm -name "*.js" -type f 2>/dev/null)
+
+if [ -z "$JS_FILES" ]; then
+    echo -e "${YELLOW}WARNING: No JavaScript files found in src/platforms/wasm/${NC}"
+    exit 0
+fi
+
+echo -e "${BLUE}Found JavaScript files:${NC}"
+echo "$JS_FILES" | sed 's/^/  /'
+
+# Run ESLint using config from ci/ directory
+echo -e "${BLUE}Running ESLint...${NC}"
+cd .cache/js-tools
+if "./node_modules/.bin/eslint.cmd" --no-eslintrc --no-inline-config -c ../../ci/.eslintrc.js ../../src/platforms/wasm/compiler/*.js ../../src/platforms/wasm/compiler/modules/*.js; then
+    echo -e "${GREEN}SUCCESS: JavaScript linting completed successfully${NC}"
+else
+    echo -e "${RED}ERROR: JavaScript linting failed${NC}"
+    exit 1
+fi

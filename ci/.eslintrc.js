@@ -14,7 +14,7 @@ module.exports = {
     "no-eval": "error",
 
     // Essential quality rules
-    "no-unused-vars": "error",        // Catch unused variables/imports
+    "no-unused-vars": ["error", { "argsIgnorePattern": "^_" }], // Catch unused variables/imports, ignore underscore-prefixed
     "no-undef": "error",              // Catch undefined variables
     "eqeqeq": "error",                // Require === instead of ==
 
