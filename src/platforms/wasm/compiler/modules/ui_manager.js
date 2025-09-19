@@ -840,6 +840,12 @@ export class JsonUiManager {
       },
     };
 
+    /** @type {Array|null} Stored JSON data for rebuilding UI on layout changes */
+    this.lastJsonData = null;
+
+    /** @type {string|null} Current layout mode for tracking transitions */
+    this.currentLayout = null;
+
     // Initialize the UI Layout Placement Manager
     /** @type {UILayoutPlacementManager} Responsive layout management */
     this.layoutManager = new UILayoutPlacementManager();
@@ -1282,6 +1288,9 @@ export class JsonUiManager {
 
   addUiElements(jsonData) {
     console.log('UI elements added:', jsonData);
+
+    // Store the JSON data for potential layout rebuilds
+    this.lastJsonData = JSON.parse(JSON.stringify(jsonData));
 
     // Clear existing UI elements
     this.clearUiElements();
@@ -1859,17 +1868,119 @@ export class JsonUiManager {
       console.log(`🎵 UI Manager: Advanced layout change to ${layout}:`, data);
     }
 
-    // CRITICAL FIX: Redistribute UI elements if second container becomes hidden
-    // This is now the primary method for handling layout changes
-    this.redistributeElementsIfNeeded();
+    // Check if we need to rebuild the entire UI layout
+    const previousLayout = this.currentLayout;
+    this.currentLayout = layout;
 
-    // Adjust UI elements based on new layout data
-    this.adaptToLayoutData(data);
+    if (this.shouldRebuildLayout(previousLayout, layout)) {
+      if (this.debugMode) {
+        console.log(`🎵 UI Manager: Rebuilding UI layout from ${previousLayout} to ${layout}`);
+      }
+      this.rebuildUIFromStoredData();
+    } else {
+      // CRITICAL FIX: Redistribute UI elements if second container becomes hidden
+      // This is now the primary method for handling layout changes
+      this.redistributeElementsIfNeeded();
+
+      // Adjust UI elements based on new layout data
+      this.adaptToLayoutData(data);
+    }
 
     // Re-optimize layout for new mode
     setTimeout(() => {
       this.optimizeCurrentLayout();
     }, this.LAYOUT_OPTIMIZATION_DELAY); // Slightly longer delay to ensure redistribution completes first
+  }
+
+  /**
+   * Determine if a full UI rebuild is needed based on layout transitions
+   * @param {string|undefined} previousLayout - Previous layout mode
+   * @param {string} newLayout - New layout mode
+   * @returns {boolean} True if a full rebuild is needed
+   */
+  shouldRebuildLayout(previousLayout, newLayout) {
+    // Always rebuild if we have stored JSON data and the layout mode changes significantly
+    if (!this.lastJsonData || !previousLayout) {
+      return false;
+    }
+
+    // Rebuild on significant layout transitions that affect column count
+    const significantTransitions = [
+      // Transitions between 1-column and multi-column layouts
+      ['mobile', 'tablet'],
+      ['mobile', 'desktop'],
+      ['mobile', 'ultrawide'],
+      ['tablet', 'mobile'],
+      ['desktop', 'mobile'],
+      ['ultrawide', 'mobile'],
+      // Transitions between 2-column and 3-column layouts
+      ['tablet', 'ultrawide'],
+      ['desktop', 'ultrawide'],
+      ['ultrawide', 'tablet'],
+      ['ultrawide', 'desktop'],
+    ];
+
+    const transition = [previousLayout, newLayout];
+    return significantTransitions.some(([from, to]) =>
+      transition[0] === from && transition[1] === to
+    );
+  }
+
+  /**
+   * Rebuild the entire UI from stored JSON data
+   * This ensures optimal layout distribution for the new screen size
+   */
+  rebuildUIFromStoredData() {
+    if (!this.lastJsonData) {
+      if (this.debugMode) {
+        console.log('🎵 UI Manager: No stored JSON data available for rebuild');
+      }
+      return;
+    }
+
+    // Preserve current element values before rebuilding
+    const currentValues = {};
+    for (const [elementId, element] of Object.entries(this.uiElements)) {
+      if (element && element.parentNode) {
+        if (element.type === 'checkbox') {
+          currentValues[elementId] = element.checked;
+        } else if (element.tagName === 'SELECT') {
+          currentValues[elementId] = element.selectedIndex;
+        } else if (element.type === 'submit') {
+          currentValues[elementId] = element.getAttribute('data-pressed') === 'true';
+        } else {
+          currentValues[elementId] = element.value;
+        }
+      }
+    }
+
+    // Rebuild UI from stored JSON
+    this.addUiElements(this.lastJsonData);
+
+    // Restore preserved values
+    for (const [elementId, value] of Object.entries(currentValues)) {
+      const element = this.uiElements[elementId];
+      if (element && element.parentNode) {
+        if (element.type === 'checkbox') {
+          element.checked = Boolean(value);
+        } else if (element.tagName === 'SELECT') {
+          element.selectedIndex = value;
+        } else if (element.type === 'submit') {
+          element.setAttribute('data-pressed', value ? 'true' : 'false');
+          if (value) {
+            element.classList.add('active');
+          } else {
+            element.classList.remove('active');
+          }
+        } else {
+          element.value = value;
+        }
+      }
+    }
+
+    if (this.debugMode) {
+      console.log('🎵 UI Manager: UI rebuilt from stored JSON data with preserved values');
+    }
   }
 
   /**
