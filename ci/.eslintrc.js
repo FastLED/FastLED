@@ -26,7 +26,7 @@ module.exports = {
     // Additional rules based on WASM code analysis
     "radix": "error",                 // Require radix parameter for parseInt()
     "no-magic-numbers": ["warn", {    // Discourage magic numbers
-      "ignore": [-1000, -5, -1, 0, 1, 2, 3, 4, 5, 8, 10, 15, 16, 17, 20, 30, 32, 50, 60, 100, 200, 250, 300, 512, 1000, 1024, 32767, 44100, 1000000],
+      "ignore": [-1000, -5, -1, 0, 0.001, 0.2, 0.4, 0.5, 0.8, 0.9, 1, 1.1, 2, 3, 4, 5, 8, 10, 15, 16, 17, 20, 30, 32, 50, 60, 100, 200, 250, 255, 300, 512, 1000, 1024, 2000, 5000, 32767, 44100, 1000000],
       "ignoreArrayIndexes": true,
       "enforceConst": true,
       "ignoreDefaultValues": true,
@@ -42,9 +42,9 @@ module.exports = {
     }],
     "no-console": "off",              // Allow console for this debugging-heavy codebase
     "prefer-template": "warn",        // Prefer template literals over string concatenation
-    "no-implicit-coercion": "warn",   // Warn instead of error for implicit type coercion
-    "require-await": "warn",          // Warn instead of error for async functions without await
-    "no-await-in-loop": "warn",      // Warn about await in loops (performance)
+    "no-implicit-coercion": "off",    // Disable - DOM existence checks are common and clear
+    "require-await": "off",           // Disable - async API consistency is more important
+    "no-await-in-loop": "off",        // Disable - necessary for audio processing and sequential operations
     "no-promise-executor-return": "error", // Prevent return in Promise executor
     "prefer-promise-reject-errors": "error", // Require Error objects for Promise.reject
     "no-unreachable": "error",        // Catch unreachable code
