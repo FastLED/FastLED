@@ -848,16 +848,17 @@ export class JsonUiManager {
     /** @type {UIRecorder|null} UI recording functionality */
     this.uiRecorder = null;
 
-    // Listen for layout changes to potentially optimize UI element rendering
-    if (this.layoutManager.breakpoints) {
-      Object.values(this.layoutManager.breakpoints).forEach((mq) => {
-        mq.addEventListener('change', () => {
-          this.onLayoutChange(this.layoutManager.currentLayout);
-        });
-      });
-    }
+    /** @type {ReturnType<typeof setTimeout>|null} Timeout for debounced element redistribution */
+    this.redistributionTimeout = null;
+
+    // Timing constants
+    this.LAYOUT_OPTIMIZATION_DELAY = 150; // ms
+
+    // REMOVED legacy media query listeners to prevent duplicate event handling
+    // The UILayoutPlacementManager now handles all layout detection and changes
 
     // Listen for custom layout events from the enhanced layout manager
+    // This is the single source of truth for layout changes
     globalThis.addEventListener('layoutChanged', (e) => {
       this.onAdvancedLayoutChange(e.detail);
     });
@@ -1768,24 +1769,18 @@ export class JsonUiManager {
     return JSON.parse(JSON.stringify(this.spilloverConfig));
   }
 
-  // Handle layout changes (enhanced for new system)
+  // Handle layout changes (LEGACY - now deprecated)
+  // This method is kept for backward compatibility but should not be actively used
   onLayoutChange(layoutMode) {
     if (this.debugMode) {
-      console.log(`🎵 UI Manager: Layout changed to ${layoutMode}`);
+      console.log(`🎵 UI Manager: LEGACY layout change to ${layoutMode} (consider using onAdvancedLayoutChange instead)`);
     }
 
-    // CRITICAL FIX: Redistribute UI elements if second container becomes hidden
-    this.redistributeElementsIfNeeded();
+    // The new onAdvancedLayoutChange method handles all layout changes
+    // This method now just serves as a fallback to avoid breaking existing code
 
-    // Force layout update in case UI elements were added before layout was ready
-    if (this.layoutManager) {
-      this.layoutManager.forceLayoutUpdate();
-    }
-
-    // Re-optimize layout for new mode
-    setTimeout(() => {
-      this.optimizeCurrentLayout();
-    }, 100);
+    // NOTE: Do not duplicate redistribution logic here since onAdvancedLayoutChange
+    // will be called by the UILayoutPlacementManager for the same resize event
   }
 
   /**
@@ -1793,8 +1788,27 @@ export class JsonUiManager {
    * This fixes the bug where elements disappear when the layout changes
    */
   redistributeElementsIfNeeded() {
+    // Clear any pending redistribution to avoid multiple rapid calls
+    if (this.redistributionTimeout) {
+      clearTimeout(this.redistributionTimeout);
+    }
+
+    // Debounce redistribution to allow CSS transitions to complete
+    this.redistributionTimeout = setTimeout(() => {
+      this.performElementRedistribution();
+    }, 100); // Wait for CSS transitions to complete
+  }
+
+  /**
+   * Actually perform the element redistribution after debouncing
+   * @private
+   */
+  performElementRedistribution() {
     const uiControls2Container = document.getElementById(this.uiControls2Id);
     if (!uiControls2Container) return;
+
+    // Force a reflow to ensure CSS changes are applied
+    void uiControls2Container.offsetHeight;
 
     // Check if the second container is hidden by CSS
     const containerStyle = window.getComputedStyle(uiControls2Container);
@@ -1845,8 +1859,17 @@ export class JsonUiManager {
       console.log(`🎵 UI Manager: Advanced layout change to ${layout}:`, data);
     }
 
+    // CRITICAL FIX: Redistribute UI elements if second container becomes hidden
+    // This is now the primary method for handling layout changes
+    this.redistributeElementsIfNeeded();
+
     // Adjust UI elements based on new layout data
     this.adaptToLayoutData(data);
+
+    // Re-optimize layout for new mode
+    setTimeout(() => {
+      this.optimizeCurrentLayout();
+    }, this.LAYOUT_OPTIMIZATION_DELAY); // Slightly longer delay to ensure redistribution completes first
   }
 
   /**
@@ -1928,6 +1951,12 @@ export class JsonUiManager {
     if (this.layoutManager) {
       this.layoutManager.destroy();
       this.layoutManager = null;
+    }
+
+    // Clear any pending redistribution timeout
+    if (this.redistributionTimeout) {
+      clearTimeout(this.redistributionTimeout);
+      this.redistributionTimeout = null;
     }
 
     globalThis.removeEventListener('layoutChanged', this.onAdvancedLayoutChange);

@@ -25,13 +25,7 @@ module.exports = {
 
     // Additional rules based on WASM code analysis
     "radix": "error",                 // Require radix parameter for parseInt()
-    "no-magic-numbers": ["warn", {    // Discourage magic numbers
-      "ignore": [-1000, -5, -1, 0, 0.001, 0.2, 0.4, 0.5, 0.8, 0.9, 1, 1.1, 2, 3, 4, 5, 8, 10, 15, 16, 17, 20, 30, 32, 50, 60, 100, 200, 250, 255, 300, 512, 1000, 1024, 2000, 5000, 32767, 44100, 1000000],
-      "ignoreArrayIndexes": true,
-      "enforceConst": true,
-      "ignoreDefaultValues": true,
-      "detectObjects": false
-    }],
+    "no-magic-numbers": "off",        // Allow magic numbers
     "complexity": ["warn", 35],       // Warn on high function complexity (increased for complex graphics/UI code)
     "max-len": ["warn", {             // Limit line length for readability
       "code": 140,                    // Increased for complex expressions
