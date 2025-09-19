@@ -26,6 +26,10 @@ import { GraphicsManagerThreeJS } from './modules/graphics_manager_threejs.js';
 import { isDenseGrid } from './modules/graphics_utils.js';
 import { JsonInspector } from './modules/json_inspector.js';
 import { VideoRecorder } from './modules/video_recorder.js';
+// Import UI recording modules to make them available globally
+import './modules/ui_recorder.js';
+import './modules/ui_playback.js';
+import './modules/ui_recorder_test.js';
 
 // Import new pure JavaScript modules
 import { FastLEDAsyncController } from './modules/fastled_async_controller.js';

@@ -32,6 +32,7 @@
 
 import { AudioManager } from './audio_manager.js';
 import { UILayoutPlacementManager } from './ui_layout_placement_manager.js';
+import { UIRecorder } from './ui_recorder.js';
 
 /** Global instance of AudioManager for audio processing */
 const audioManager = new AudioManager();
@@ -831,6 +832,10 @@ export class JsonUiManager {
     /** @type {UILayoutPlacementManager} Responsive layout management */
     this.layoutManager = new UILayoutPlacementManager();
 
+    // Initialize the UI Recorder
+    /** @type {UIRecorder|null} UI recording functionality */
+    this.uiRecorder = null;
+
     // Listen for layout changes to potentially optimize UI element rendering
     this.layoutManager.mediaQuery
       ? this.layoutManager.mediaQuery.addEventListener('change', (e) => {
@@ -886,6 +891,7 @@ export class JsonUiManager {
         if (element && element.parentNode) {
           // Extract value from update data
           const value = updateData.value !== undefined ? updateData.value : updateData;
+          const previousValue = this.previousUiState[actualElementId];
 
           // Update the element based on its type
           if (element.type === 'checkbox') {
@@ -910,6 +916,11 @@ export class JsonUiManager {
             }
           } else {
             element.value = value;
+          }
+
+          // Record the update if recorder is active
+          if (this.uiRecorder && previousValue !== value) {
+            this.uiRecorder.recordElementUpdate(actualElementId, value, previousValue);
           }
 
           // Update our internal state tracking
@@ -1078,6 +1089,15 @@ export class JsonUiManager {
 
   // Clear all UI elements and groups
   clearUiElements() {
+    // Record removal of all elements if recorder is active
+    if (this.uiRecorder) {
+      for (const elementId in this.uiElements) {
+        if (Object.prototype.hasOwnProperty.call(this.uiElements, elementId)) {
+          this.uiRecorder.recordElementRemove(elementId);
+        }
+      }
+    }
+
     const uiControlsContainer = document.getElementById(this.uiControlsId);
     if (uiControlsContainer) {
       uiControlsContainer.innerHTML = '';
@@ -1550,6 +1570,12 @@ export class JsonUiManager {
       this.previousUiState[leftElement.id] = leftElement.value;
       this.previousUiState[rightElement.id] = rightElement.value;
 
+      // Record element addition if recorder is active
+      if (this.uiRecorder) {
+        this.uiRecorder.recordElementAdd(leftElement.id, leftElement);
+        this.uiRecorder.recordElementAdd(rightElement.id, rightElement);
+      }
+
       if (this.debugMode) {
         console.log(
           `🎵 UI Registered paired elements: IDs '${leftElement.id}' and '${rightElement.id}' (number-pair) - Total: ${Object.keys(this.uiElements).length}`,
@@ -1558,12 +1584,27 @@ export class JsonUiManager {
     } else if (data.type === 'button') {
       this.uiElements[data.id] = control.querySelector('button');
       this.previousUiState[data.id] = data.value;
+
+      // Record element addition if recorder is active
+      if (this.uiRecorder) {
+        this.uiRecorder.recordElementAdd(data.id, data);
+      }
     } else if (data.type === 'dropdown') {
       this.uiElements[data.id] = control.querySelector('select');
       this.previousUiState[data.id] = data.value;
+
+      // Record element addition if recorder is active
+      if (this.uiRecorder) {
+        this.uiRecorder.recordElementAdd(data.id, data);
+      }
     } else {
       this.uiElements[data.id] = control.querySelector('input');
       this.previousUiState[data.id] = data.value;
+
+      // Record element addition if recorder is active
+      if (this.uiRecorder) {
+        this.uiRecorder.recordElementAdd(data.id, data);
+      }
     }
 
     // Add layout classes based on element hints (only for non-paired elements)
@@ -1591,6 +1632,64 @@ export class JsonUiManager {
 
     // Store globally for layout manager access
     window.uiManager = this;
+  }
+
+  /**
+   * Starts UI recording
+   * @param {Object} [metadata] - Optional recording metadata
+   * @returns {string|null} Recording ID or null if failed
+   */
+  startUIRecording(metadata = {}) {
+    if (!this.uiRecorder) {
+      this.uiRecorder = new UIRecorder({
+        debugMode: this.debugMode,
+        maxEvents: 50000
+      });
+    }
+
+    return this.uiRecorder.startRecording(metadata);
+  }
+
+  /**
+   * Stops UI recording and returns the recording data
+   * @returns {Object|null} Recording data or null if no recording
+   */
+  stopUIRecording() {
+    if (this.uiRecorder) {
+      return this.uiRecorder.stopRecording();
+    }
+    return null;
+  }
+
+  /**
+   * Gets the current recording status
+   * @returns {Object} Recording status
+   */
+  getUIRecordingStatus() {
+    if (this.uiRecorder) {
+      return this.uiRecorder.getStatus();
+    }
+    return { isRecording: false, eventCount: 0 };
+  }
+
+  /**
+   * Exports current recording as JSON
+   * @returns {string|null} JSON string or null
+   */
+  exportUIRecording() {
+    if (this.uiRecorder) {
+      return this.uiRecorder.exportRecording();
+    }
+    return null;
+  }
+
+  /**
+   * Clears the current recording
+   */
+  clearUIRecording() {
+    if (this.uiRecorder) {
+      this.uiRecorder.clearRecording();
+    }
   }
 
   /**
