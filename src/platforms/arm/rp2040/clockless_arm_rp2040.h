@@ -58,7 +58,7 @@ static inline void __isr clockless_dma_complete_handler() {
 static bool clockless_isr_installed = false;
 #endif
 
-template <uint8_t DATA_PIN, int T1, int T2, int T3, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 50>
+template <uint8_t DATA_PIN, int T1, int T2, int T3, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 280>
 class ClocklessController : public CPixelLEDController<RGB_ORDER> {
 #if FASTLED_RP2040_CLOCKLESS_PIO
     int dma_channel = -1;

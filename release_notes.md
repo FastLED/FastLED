@@ -1,5 +1,12 @@
 FastLED 3.10.3
 ==============
+  * **WS2812B Reset Time Update**: Enhanced compatibility with newer WS2812B chipsets
+    * Updated default reset time from 50μs to 280μs across all platforms
+    * Fixes intermittent issues where only first LED responds to `fill_solid()` and similar operations
+    * Addresses GitHub issue #2067: WS2812B strips showing ~80% failure rate with latest FastLED
+    * Updated 18 ARM platform clockless controllers (Apollo3, STM32, SAMD, Teensy, etc.)
+    * ESP8266 clockless controller timing updated for better reliability
+    * Maintains backward compatibility while supporting newer WS2812B chip revisions
   * **STM32F4 Support Added**: BlackPill STM32F411CE and STM32F4 family support
     * Resolves GitHub issue #726: "avr/io.h: No such file or directory" compilation error
     * Added STM32F4 platform detection using canonical `STM32F4` preprocessor define
