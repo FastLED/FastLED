@@ -153,13 +153,20 @@ jobs:
           # PlatformIO build directory is at .build/pio/esp32dev
           PIO_BUILD_DIR=".build/pio/esp32dev"
 
-          if [ -n "$PIO_BUILD_DIR" ]; then
+          # The actual build artifacts are in .pio/build/esp32dev within the PIO_BUILD_DIR
+          PIO_ARTIFACTS_DIR="$PIO_BUILD_DIR/.pio/build/esp32dev"
+
+          if [ -d "$PIO_BUILD_DIR" ]; then
             echo "Found PlatformIO build directory: $PIO_BUILD_DIR"
+            echo "Checking artifacts directory: $PIO_ARTIFACTS_DIR"
 
             # Copy bootloader.bin if it exists
-            if [ -f "$PIO_BUILD_DIR/bootloader.bin" ]; then
+            if [ -f "$PIO_ARTIFACTS_DIR/bootloader.bin" ]; then
+              cp "$PIO_ARTIFACTS_DIR/bootloader.bin" qemu-build/
+              echo "✅ Copied bootloader.bin from artifacts directory"
+            elif [ -f "$PIO_BUILD_DIR/bootloader.bin" ]; then
               cp "$PIO_BUILD_DIR/bootloader.bin" qemu-build/
-              echo "✅ Copied bootloader.bin"
+              echo "✅ Copied bootloader.bin from build directory"
             else
               # Try to find bootloader in subdirectories
               BOOTLOADER=$(find "$PIO_BUILD_DIR" -name "bootloader.bin" 2>/dev/null | head -1)
@@ -175,15 +182,20 @@ jobs:
             fi
 
             # Copy partitions.bin if it exists
-            if [ -f "$PIO_BUILD_DIR/partitions.bin" ]; then
+            if [ -f "$PIO_ARTIFACTS_DIR/partitions.bin" ]; then
+              cp "$PIO_ARTIFACTS_DIR/partitions.bin" qemu-build/
+              echo "✅ Copied partitions.bin from artifacts directory"
+            elif [ -f "$PIO_BUILD_DIR/partitions.bin" ]; then
               cp "$PIO_BUILD_DIR/partitions.bin" qemu-build/
-              echo "✅ Copied partitions.bin"
+              echo "✅ Copied partitions.bin from build directory"
             else
               # Try to find partitions in subdirectories
               PARTITIONS=$(find "$PIO_BUILD_DIR" -name "partitions.bin" 2>/dev/null | head -1)
               if [ -n "$PARTITIONS" ]; then
                 cp "$PARTITIONS" qemu-build/partitions.bin
                 echo "✅ Found and copied partitions.bin from $PARTITIONS"
+              else
+                echo "⚠️ partitions.bin not found in build artifacts"
               fi
             fi
 
@@ -202,10 +214,69 @@ jobs:
             # Create default partition table
             printf '# Name,   Type, SubType, Offset,  Size, Flags\nnvs,      data, nvs,     0x9000,  0x6000,\notadata,  data, ota,     0xf000,  0x2000,\napp0,     app,  ota_0,   0x10000, 0x140000,\nspiffs,   data, spiffs,  0x150000,0xb0000,\n' > qemu-build/partitions.csv
             echo "✅ Created default partitions.csv"
+
+            # Create default boot_app0.bin (required by tobozo/esp32-qemu-sim)
+            dd if=/dev/zero bs=1 count=8192 | tr '\000' '\377' > qemu-build/boot_app0.bin
+            echo "✅ Created default boot_app0.bin"
+          fi
+
+          # Ensure boot_app0.bin exists if we have PIO_BUILD_DIR and it wasn't already created
+          if [ -d "$PIO_BUILD_DIR" ] && [ ! -f "qemu-build/boot_app0.bin" ]; then
+            if [ -f "$PIO_ARTIFACTS_DIR/boot_app0.bin" ]; then
+              cp "$PIO_ARTIFACTS_DIR/boot_app0.bin" qemu-build/
+              echo "✅ Copied boot_app0.bin from artifacts directory"
+            elif [ -f "$PIO_BUILD_DIR/boot_app0.bin" ]; then
+              cp "$PIO_BUILD_DIR/boot_app0.bin" qemu-build/
+              echo "✅ Copied boot_app0.bin from build directory"
+            else
+              # Try to find boot_app0 in subdirectories
+              BOOT_APP0=$(find "$PIO_BUILD_DIR" -name "boot_app0.bin" 2>/dev/null | head -1)
+              if [ -n "$BOOT_APP0" ]; then
+                cp "$BOOT_APP0" qemu-build/boot_app0.bin
+                echo "✅ Found and copied boot_app0.bin from $BOOT_APP0"
+              else
+                echo "⚠️ boot_app0.bin not found, creating default"
+                # Create a minimal boot_app0.bin (8KB of 0xFF)
+                dd if=/dev/zero bs=1 count=8192 | tr '\000' '\377' > qemu-build/boot_app0.bin
+                echo "✅ Created default boot_app0.bin"
+              fi
+            fi
+          fi
+
+          # Find and copy spiffs.bin (optional but recommended)
+          if [ -d "$PIO_BUILD_DIR" ]; then
+            if [ -f "$PIO_ARTIFACTS_DIR/spiffs.bin" ]; then
+              cp "$PIO_ARTIFACTS_DIR/spiffs.bin" qemu-build/
+              echo "✅ Copied spiffs.bin from artifacts directory"
+            elif [ -f "$PIO_BUILD_DIR/spiffs.bin" ]; then
+              cp "$PIO_BUILD_DIR/spiffs.bin" qemu-build/
+              echo "✅ Copied spiffs.bin from build directory"
+            else
+              SPIFFS=$(find "$PIO_BUILD_DIR" -name "spiffs.bin" 2>/dev/null | head -1)
+              if [ -n "$SPIFFS" ]; then
+                cp "$SPIFFS" qemu-build/spiffs.bin
+                echo "✅ Found and copied spiffs.bin from $SPIFFS"
+              else
+                echo "⚠️ spiffs.bin not found (optional)"
+              fi
+            fi
           fi
 
           echo "Final contents of qemu-build directory:"
           ls -la qemu-build/
+
+          echo "=== Detailed build directory analysis ==="
+          echo "PlatformIO build directory structure:"
+          if [ -d "$PIO_BUILD_DIR" ]; then
+            find "$PIO_BUILD_DIR" -type f -name "*.bin" -o -name "*.csv" | head -20
+          fi
+
+          echo "=== File sizes and verification ==="
+          for file in qemu-build/*.bin qemu-build/*.csv; do
+            if [ -f "$file" ]; then
+              echo "$(basename "$file"): $(stat -c%s "$file") bytes"
+            fi
+          done
 
           # Verify firmware.bin exists
           if [ ! -f "qemu-build/firmware.bin" ]; then
@@ -214,9 +285,30 @@ jobs:
           fi
           echo "✅ firmware.bin size: $(stat -c%s qemu-build/firmware.bin) bytes"
 
+      - name: Pre-QEMU verification
+        working-directory: trusted
+        run: |
+          echo "=== Pre-QEMU verification ==="
+          echo "Build folder path: $(pwd)/qemu-build"
+          echo "Build folder exists: $(test -d qemu-build && echo 'YES' || echo 'NO')"
+          echo "Build folder absolute path: $(realpath qemu-build 2>/dev/null || echo 'FAILED')"
+
+          echo "=== Required files verification ==="
+          required_files=("firmware.bin" "bootloader.bin" "partitions.bin" "partitions.csv" "boot_app0.bin")
+          for file in "${required_files[@]}"; do
+            if [ -f "qemu-build/$file" ]; then
+              echo "✅ $file: $(stat -c%s qemu-build/$file) bytes"
+            else
+              echo "❌ $file: MISSING"
+            fi
+          done
+
+          echo "=== All files in qemu-build ==="
+          ls -la qemu-build/
+
       - name: Run ESP32 in QEMU
         id: qemu
-        uses: tobozo/esp32-qemu-sim@main
+        uses: tobozo/esp32-qemu-sim@v1
         with:
           build-folder: trusted/qemu-build
           flash-size: 4
@@ -227,15 +319,49 @@ jobs:
       - name: Display QEMU output
         if: always()
         run: |
+          echo "=== QEMU Action Results ==="
+          echo "QEMU action conclusion: ${{ steps.qemu.conclusion }}"
+          echo "QEMU action outcome: ${{ steps.qemu.outcome }}"
+
           echo "=== QEMU Serial Output ==="
-          echo "${{ steps.qemu.outputs.serial-output }}"
+          if [ -n "${{ steps.qemu.outputs.serial-output }}" ]; then
+            echo "Serial output length: $(echo '${{ steps.qemu.outputs.serial-output }}' | wc -c) characters"
+            echo "Serial output lines: $(echo '${{ steps.qemu.outputs.serial-output }}' | wc -l) lines"
+            echo "${{ steps.qemu.outputs.serial-output }}"
+          else
+            echo "❌ No serial output captured from QEMU"
+          fi
+
+          echo "=== QEMU Debug Information ==="
+          if [ -n "${{ steps.qemu.outputs.qemu-log }}" ]; then
+            echo "QEMU log:"
+            echo "${{ steps.qemu.outputs.qemu-log }}"
+          else
+            echo "No QEMU log available"
+          fi
 
       - name: Validate FL_WARN output
         run: |
           echo "=== Validating FL_WARN output in QEMU logs ==="
 
+          # Check if QEMU step succeeded
+          if [ "${{ steps.qemu.conclusion }}" != "success" ]; then
+            echo "❌ QEMU action failed with conclusion: ${{ steps.qemu.conclusion }}"
+            echo "❌ QEMU action outcome: ${{ steps.qemu.outcome }}"
+            exit 1
+          fi
+
           # Save output to file for easier processing
           echo "${{ steps.qemu.outputs.serial-output }}" > qemu_output.log
+
+          # Check if we actually got any output
+          if [ ! -s qemu_output.log ]; then
+            echo "❌ No serial output captured from QEMU - empty or missing output"
+            echo "This indicates QEMU may not have started properly or ESP32 may not be booting"
+            exit 1
+          fi
+
+          echo "✅ QEMU output file created with $(wc -l < qemu_output.log) lines"
 
           # Check for crash patterns
           if grep -q -E "(guru meditation|abort\(\)|LoadProhibited|IllegalInstruction)" qemu_output.log; then
