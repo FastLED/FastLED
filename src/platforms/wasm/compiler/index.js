@@ -16,6 +16,9 @@
  * @module FastLED/Compiler
  */
 
+// Import type definitions for TypeScript checking
+/// <reference path="./types.d.ts" />
+
 
 import { JsonUiManager } from './modules/ui_manager.js';
 import { GraphicsManager } from './modules/graphics_manager.js';
@@ -92,17 +95,17 @@ let graphicsArgs = {};
 // Old implementation has been replaced with pure JavaScript architecture
 
 /**
- * Global reference to the current AsyncFastLEDController instance
- * @type {AsyncFastLEDController|null}
+ * Global reference to the current FastLEDAsyncController instance
+ * @type {FastLEDAsyncController|null}
  */
 let fastLEDController = null;
 
 /**
  * Stub FastLED loader function (replaced during initialization)
- * @param {Object} options - Loading options
+ * @param {Object} options - Loading options (ignored in stub)
  * @returns {Promise<null>} Always returns null (stub implementation)
  */
-let _loadFastLED = function () {
+let _loadFastLED = function (_options) {
   // Stub to let the user/dev know that something went wrong.
   // This function is replaced with an async implementation, so it must be async for interface compatibility
   console.log('FastLED loader function was not set.');
@@ -137,8 +140,9 @@ function getTimeSinceEpoc() {
 /**
  * Print function (will be overridden during initialization)
  * @function
+ * @param {...*} args - Arguments to print
  */
-let print = function () {};
+let print = function (..._args) {};
 
 /** Store reference to original console for fallback */
 const prev_console = console;
@@ -302,7 +306,7 @@ function getFileManifestJson(filesJson, frame_rate) {
 
 /**
  * Updates the canvas with new frame data from FastLED
- * @param {Array<Object>} frameData - Array of strip data with pixel information
+ * @param {FrameData} frameData - Frame data with pixel information and screen mapping
  */
 function updateCanvas(frameData) {
   // we are going to add the screenMap to the graphicsManager
@@ -692,7 +696,7 @@ function onModuleLoaded(fastLedLoader) {
     } else {
       console.log(
         'Could not detect a valid module loading for FastLED, expected function but got',
-        typeof fastledLoader,
+        typeof fastLedLoader,
       );
     }
   } catch (error) {
@@ -774,7 +778,7 @@ _loadFastLED = localLoadFastLed;
 
 /**
  * Gets the current FastLED controller instance
- * @returns {AsyncFastLEDController|null} Current controller instance or null
+ * @returns {FastLEDAsyncController|null} Current controller instance or null
  */
 function getFastLEDController() {
   return fastLEDController;

@@ -22,11 +22,11 @@ import { FASTLED_DEBUG_LOG, FASTLED_DEBUG_ERROR, FASTLED_DEBUG_TRACE } from './f
  * Frame rendering callback - pure JavaScript
  * Called for each animation frame with pixel data
  * @async
- * @param {Array<Object>} frameData - Array of strip data with pixel colors
- * @param {number} frameData[].strip_id - ID of the LED strip
- * @param {string} frameData[].type - Pixel format (e.g., "r8g8b8")
- * @param {Uint8Array} frameData[].pixel_data - Raw pixel data
- * @param {Object} frameData.screenMap - Screen coordinate mapping
+ * @param {FrameData} frameData - Frame data containing pixel information and screen mapping
+ * @param {number} frameData.strip_id - ID of the LED strip
+ * @param {string} frameData.type - Pixel format (e.g., "r8g8b8")
+ * @param {Uint8Array} frameData.pixel_data - Raw pixel data
+ * @param {ScreenMapData} frameData.screenMap - Screen coordinate mapping
  * @returns {Promise<void>} Promise that resolves when frame is rendered
  */
 globalThis.FastLED_onFrame = async function (frameData) {

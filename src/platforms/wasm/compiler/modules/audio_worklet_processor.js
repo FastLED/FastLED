@@ -3,6 +3,8 @@
  * Processes audio input for LED visualization
  */
 
+/// <reference path="../types.d.ts" />
+
 /**
  * @extends AudioWorkletProcessor
  */

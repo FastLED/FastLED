@@ -268,10 +268,10 @@ export class GraphicsManager {
   /**
    * Updates the canvas with new LED frame data
    * Processes strip data and renders LEDs to the WebGL texture
-   * @param {Array<Object>} frameData - Array of LED strip data
-   * @param {Object} frameData[].strip_id - Strip identifier
-   * @param {Uint8Array} frameData[].pixel_data - RGB pixel data (3 bytes per pixel)
-   * @param {Object} frameData.screenMap - Screen coordinate mapping data
+   * @param {FrameData} frameData - Frame data containing LED strip information
+   * @param {number} frameData.strip_id - Strip identifier
+   * @param {Uint8Array} frameData.pixel_data - RGB pixel data (3 bytes per pixel)
+   * @param {ScreenMapData} frameData.screenMap - Screen coordinate mapping data
    */
   updateCanvas(frameData) {
     // Check if frameData is null or invalid

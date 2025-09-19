@@ -113,9 +113,10 @@ class AudioProcessor {
   /**
    * Initialize the audio processor
    * @abstract
+   * @param {MediaElementAudioSourceNode} [source] - Optional audio source node
    * @returns {Promise<void>}
    */
-  initialize() {
+  initialize(_source) {
     // Base class method - returns rejected promise since it must be implemented by subclass
     return Promise.reject(new Error('initialize() must be implemented by subclass'));
   }
@@ -484,9 +485,10 @@ The system will automatically fall back to ScriptProcessor.`);
   /**
    * Diagnose the type of AudioWorklet loading error
    * @param {Error} error - The error that occurred
+   * @param {string} [path] - Optional path that failed to load
    * @returns {string} Error type description
    */
-  diagnoseAudioWorkletError(error) {
+  diagnoseAudioWorkletError(error, _path) {
     const errorMsg = error.message.toLowerCase();
     const errorName = error.name;
 
@@ -694,7 +696,7 @@ export class AudioManager {
   /**
    * Set up audio analysis for a given audio element
    * @param {HTMLAudioElement} audioElement - The audio element to analyze
-   * @returns {Object} Audio analysis components
+   * @returns {Promise<Object>} Audio analysis components
    */
   async setupAudioAnalysis(audioElement) {
     try {
@@ -727,7 +729,7 @@ export class AudioManager {
   /**
    * Create audio context and processing components with automatic fallback
    * @param {HTMLAudioElement} audioElement - The audio element to analyze
-   * @returns {Object} Created audio components
+   * @returns {Promise<Object>} Created audio components
    */
   async createAudioComponents(audioElement) {
     // Create audio context with browser compatibility
