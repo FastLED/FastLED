@@ -27,6 +27,16 @@
 
 /* eslint-disable no-console */
 /* eslint-disable no-restricted-syntax */
+
+/**
+ * @typedef {Object} GroupInfo
+ * @property {HTMLDivElement} container - The main container element
+ * @property {HTMLDivElement} content - The content container element
+ * @property {string} name - The group name
+ * @property {boolean} isWide - Whether the group is wide
+ * @property {boolean} isFullWidth - Whether the group is full width
+ * @property {HTMLElement} parentContainer - The parent container element
+ */
 /* eslint-disable max-len */
 /* eslint-disable guard-for-in */
 
@@ -187,10 +197,12 @@ function createNumberFieldPair(leftElement, rightElement) {
   pairContainer.appendChild(rightField);
 
   // Store reference to both elements for later registration
-  pairContainer._leftElement = leftElement;
-  pairContainer._rightElement = rightElement;
-  pairContainer._leftControl = leftField;
-  pairContainer._rightControl = rightField;
+  /** @type {HTMLDivElement & {_leftElement?: any, _rightElement?: any, _leftControl?: any, _rightControl?: any}} */
+  const containerWithProps = /** @type {any} */ (pairContainer);
+  containerWithProps._leftElement = leftElement;
+  containerWithProps._rightElement = rightElement;
+  containerWithProps._leftControl = leftField;
+  containerWithProps._rightControl = rightField;
 
   return pairContainer;
 }
@@ -265,13 +277,13 @@ function createSlider(element) {
   const slider = document.createElement('input');
   slider.type = 'range';
   slider.id = `slider-${element.id}`;
-  slider.min = Number.parseFloat(element.min);
-  slider.max = Number.parseFloat(element.max);
-  slider.value = Number.parseFloat(element.value);
+  slider.setAttribute('min', String(Number.parseFloat(String(element.min))));
+  slider.setAttribute('max', String(Number.parseFloat(String(element.max))));
+  slider.setAttribute('value', String(Number.parseFloat(String(element.value))));
 
   // Check if element.step exists and is not undefined/null
   if (element.step !== undefined && element.step !== null) {
-    slider.step = Number.parseFloat(element.step);
+    slider.setAttribute('step', String(Number.parseFloat(String(element.step))));
   } else {
     // Set a default step
     slider.step = 'any';
@@ -287,14 +299,14 @@ function createSlider(element) {
 
   const valueDisplay = document.createElement('span');
   valueDisplay.className = 'slider-value';
-  valueDisplay.textContent = element.value;
+  valueDisplay.textContent = String(element.value);
 
   overlayDiv.appendChild(labelText);
   overlayDiv.appendChild(valueDisplay);
 
   // Set initial value in next frame to ensure proper initialization
   setTimeout(() => {
-    slider.value = Number.parseFloat(element.value);
+    slider.setAttribute('value', String(Number.parseFloat(String(element.value))));
     valueDisplay.textContent = slider.value;
   }, 0);
 
@@ -794,10 +806,10 @@ export class JsonUiManager {
     /** @type {string} HTML element ID for the second UI controls container (ultra-wide mode) */
     this.uiControls2Id = 'ui-controls-2';
 
-    /** @type {Map<string, HTMLElement>} Track created UI groups */
+    /** @type {Map<string, GroupInfo>} Track created UI groups */
     this.groups = new Map();
 
-    /** @type {Map<string, HTMLElement>} Track created UI groups in second container */
+    /** @type {Map<string, GroupInfo>} Track created UI groups in second container */
     this.groups2 = new Map();
 
     /** @type {HTMLElement|null} Container for ungrouped UI items */
@@ -837,16 +849,13 @@ export class JsonUiManager {
     this.uiRecorder = null;
 
     // Listen for layout changes to potentially optimize UI element rendering
-    this.layoutManager.mediaQuery
-      ? this.layoutManager.mediaQuery.addEventListener('change', (e) => {
-        this.onLayoutChange(e.matches ? 'desktop' : 'portrait');
-      })
-      // Handle new breakpoint system
-      : Object.values(this.layoutManager.breakpoints).forEach((mq) => {
+    if (this.layoutManager.breakpoints) {
+      Object.values(this.layoutManager.breakpoints).forEach((mq) => {
         mq.addEventListener('change', () => {
           this.onLayoutChange(this.layoutManager.currentLayout);
         });
       });
+    }
 
     // Listen for custom layout events from the enhanced layout manager
     globalThis.addEventListener('layoutChanged', (e) => {
@@ -898,7 +907,7 @@ export class JsonUiManager {
       // Update the value display if it exists
       const valueDisplay = document.getElementById(`${name}_value`);
       if (valueDisplay) {
-        valueDisplay.textContent = value;
+        valueDisplay.textContent = String(value);
       }
 
       // Trigger change event
@@ -1013,7 +1022,7 @@ export class JsonUiManager {
    * @param {HTMLElement} [targetContainer] - Specific container to use (optional)
    * @param {number} [totalGroups] - Total number of groups for spillover analysis
    * @param {number} [totalElements] - Total number of elements for spillover analysis
-   * @returns {HTMLElement} The group container element
+   * @returns {GroupInfo} The group info object
    */
   createGroupContainer(groupName, targetContainer = null, totalGroups = 0, totalElements = 0) {
     // First check if group already exists in ANY container and return it
@@ -1525,11 +1534,11 @@ export class JsonUiManager {
       let height2 = 0;
 
       container1Groups.forEach((group) => {
-        height1 += group.offsetHeight;
+        height1 += /** @type {HTMLElement} */ (group).offsetHeight;
       });
 
       container2Groups.forEach((group) => {
-        height2 += group.offsetHeight;
+        height2 += /** @type {HTMLElement} */ (group).offsetHeight;
       });
 
       if (this.debugMode) {
@@ -2052,7 +2061,7 @@ export class JsonUiManager {
   /**
    * Find an existing group across all containers
    * @param {string} groupName - Name of the group to find
-   * @returns {Object|null} The group info object or null if not found
+   * @returns {GroupInfo|null} The group info object or null if not found
    */
   findExistingGroup(groupName) {
     if (this.groups.has(groupName)) {
@@ -2067,7 +2076,7 @@ export class JsonUiManager {
   /**
    * Get the appropriate groups map based on the target container
    * @param {HTMLElement} container - The target container
-   * @returns {Map<string, HTMLElement>} The groups map for the container
+   * @returns {Map<string, GroupInfo>} The groups map for the container
    */
   getGroupsForContainer(container) {
     if (container && container.id === this.uiControls2Id) {

@@ -79,7 +79,7 @@ export class UIPlayback {
         /** @type {number} */
         this.pausedDuration = 0;
 
-        /** @type {number|null} */
+        /** @type {number|NodeJS.Timeout|null} */
         this.playbackTimer = null;
 
         /** @type {Set<Function>} */
@@ -391,24 +391,27 @@ export class UIPlayback {
      * @private
      */
     applyElementUpdate(element, value) {
-        if (element.type === 'checkbox') {
-            element.checked = Boolean(value);
-        } else if (element.type === 'range') {
-            element.value = value;
+        const inputElement = /** @type {HTMLInputElement} */ (element);
+        const selectElement = /** @type {HTMLSelectElement} */ (element);
+
+        if (inputElement.type === 'checkbox') {
+            inputElement.checked = Boolean(value);
+        } else if (inputElement.type === 'range') {
+            inputElement.value = value;
             // Update display value if present
             const valueDisplay = element.parentElement?.querySelector('.slider-value');
             if (valueDisplay) {
                 valueDisplay.textContent = value;
             }
-        } else if (element.type === 'number') {
-            element.value = value;
+        } else if (inputElement.type === 'number') {
+            inputElement.value = value;
         } else if (element.tagName === 'SELECT') {
-            element.selectedIndex = value;
-        } else if (element.type === 'submit') {
+            selectElement.selectedIndex = value;
+        } else if (inputElement.type === 'submit') {
             element.setAttribute('data-pressed', value ? 'true' : 'false');
             element.classList.toggle('active', Boolean(value));
         } else {
-            element.value = value;
+            inputElement.value = value;
         }
 
         // Trigger change event to notify other systems

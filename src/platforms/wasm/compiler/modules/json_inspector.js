@@ -239,7 +239,7 @@ export class JsonInspector {
   }
 
   updateEventCounter() {
-    this.eventCountSpan.textContent = this.eventCounter;
+    this.eventCountSpan.textContent = String(this.eventCounter);
   }
 
   scrollToBottom() {

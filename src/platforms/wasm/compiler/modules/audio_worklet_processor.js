@@ -8,12 +8,14 @@
 // AudioWorklet global environment declarations
 /* global AudioWorkletProcessor, registerProcessor */
 
-// AudioWorkletProcessor will be available in the AudioWorklet context
-// These declarations are for TypeScript checking only
+// AudioWorklet globals are available at runtime in the AudioWorklet context
+// Using @ts-ignore to suppress TypeScript errors for these globals
 
 /**
- * @extends AudioWorkletProcessor
+ * FastLED Audio Processor for AudioWorklet context
+ * @class
  */
+// @ts-ignore - AudioWorkletProcessor is available in AudioWorklet context
 class FastLEDAudioProcessor extends AudioWorkletProcessor {
   constructor() {
     super();
@@ -24,6 +26,7 @@ class FastLEDAudioProcessor extends AudioWorkletProcessor {
     /**
      * @param {MessageEvent} event - Message event from main thread
      */
+    // @ts-ignore - port is available from AudioWorkletProcessor
     this.port.onmessage = (event) => {
       const { type, data } = event.data;
 
@@ -78,6 +81,7 @@ class FastLEDAudioProcessor extends AudioWorkletProcessor {
 
     // Create audio data packet
     if (this.initialized && (rms > 0.001 || peak > 0.001)) {
+      // @ts-ignore - currentTime is available from AudioWorkletProcessor
       const timestamp = Math.floor(this.currentTime * 1000);
 
       // Create sample data - convert to Int16 for efficiency
@@ -87,6 +91,7 @@ class FastLEDAudioProcessor extends AudioWorkletProcessor {
       }
 
       // Send processed audio data to main thread
+      // @ts-ignore - port is available from AudioWorkletProcessor
       this.port.postMessage({
         type: 'audioData',
         data: {
@@ -116,5 +121,6 @@ class FastLEDAudioProcessor extends AudioWorkletProcessor {
 
 // Register the processor
 console.log('🎵 FastLEDAudioProcessor: 📝 Registering worklet processor');
+// @ts-ignore - registerProcessor is available in AudioWorklet context
 registerProcessor('fastled-audio-processor', FastLEDAudioProcessor);
 console.log('🎵 FastLEDAudioProcessor: ✅ Worklet processor registered successfully');

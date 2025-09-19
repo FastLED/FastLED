@@ -51,10 +51,10 @@ export class ResizeCoordinator {
         /** @type {Map<string, Function>} */
         this.handlers = new Map();
 
-        /** @type {number|null} */
+        /** @type {number|NodeJS.Timeout|null} */
         this.debounceTimer = null;
 
-        /** @type {number|null} */
+        /** @type {number|NodeJS.Timeout|null} */
         this.throttleTimer = null;
 
         /** @type {ResizeEvent|null} */

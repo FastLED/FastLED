@@ -1,3 +1,5 @@
+/// <reference path="types.d.ts" />
+
 /**
  * FastLED WebAssembly Compiler Main Module
  *
@@ -42,13 +44,14 @@ import { FASTLED_DEBUG_LOG, FASTLED_DEBUG_ERROR, FASTLED_DEBUG_TRACE } from './m
  * @property {number} strip_id - ID of the LED strip
  * @property {string} type - Type of frame data
  * @property {Uint8Array|number[]} pixel_data - Pixel color data
- * @property {Object} screenMap - Screen mapping data for LED positions
+ * @property {ScreenMapData} screenMap - Screen mapping data for LED positions
  */
 
 /**
  * @typedef {Object} ScreenMapData
- * @property {Object} absMax - Maximum coordinates
- * @property {Object} absMin - Minimum coordinates
+ * @property {number[]} absMax - Maximum coordinates array
+ * @property {number[]} absMin - Minimum coordinates array
+ * @property {{ [key: string]: any }} strips - Strip configuration data
  */
 
 /** URL parameters for runtime configuration */
@@ -324,7 +327,7 @@ function getFileManifestJson(filesJson, frame_rate) {
 
 /**
  * Updates the canvas with new frame data from FastLED
- * @param {FrameData} frameData - Frame data with pixel information and screen mapping
+ * @param {FrameData | (Array & {screenMap?: ScreenMapData})} frameData - Frame data with pixel information and screen mapping
  */
 function updateCanvas(frameData) {
   // we are going to add the screenMap to the graphicsManager
@@ -333,7 +336,7 @@ function updateCanvas(frameData) {
     return;
   }
   if (!graphicsManager) {
-    const isDenseMap = isDenseGrid(frameData);
+    const isDenseMap = isDenseGrid(/** @type {import('./modules/graphics_utils.js').FrameData} */ (frameData));
 
     // Ensure graphicsArgs has required properties
     const currentGraphicsArgs = {

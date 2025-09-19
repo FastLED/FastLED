@@ -1,3 +1,5 @@
+/// <reference path="../types.d.ts" />
+
 /* eslint-disable no-console */
 /* eslint-disable guard-for-in */
 /* eslint-disable no-restricted-syntax */
@@ -19,19 +21,18 @@
 
 /**
  * @typedef {Object} ScreenMapData
- * @property {{ [key: string]: StripData }} strips
- * @property {number[]} [min]
- * @property {number[]} [max]
+ * @property {number[]} absMax - Maximum coordinates array
+ * @property {number[]} absMin - Minimum coordinates array
+ * @property {{ [key: string]: any }} strips - Strip configuration data
  */
 
 /**
- * @typedef {Object} FrameData
- * @property {ScreenMapData} screenMap
+ * @typedef {Array & {screenMap?: ScreenMapData}} FrameData
  */
 
 /**
  * Determines if the LED layout represents a dense grid
- * @param {FrameData} frameData - The frame data containing screen mapping information
+ * @param {FrameData | (Array & {screenMap?: ScreenMapData})} frameData - The frame data containing screen mapping information
  * @returns {boolean} - True if the layout is a dense grid (pixel density close to 1)
  */
 export function isDenseGrid(frameData) {

@@ -1,3 +1,5 @@
+/// <reference path="../types.d.ts" />
+
 /**
  * FastLED Pure JavaScript Callbacks Interface
  *
@@ -28,16 +30,16 @@ import { FASTLED_DEBUG_LOG, FASTLED_DEBUG_ERROR, FASTLED_DEBUG_TRACE } from './f
 
 /**
  * @typedef {Object} ScreenMapData
- * @property {Object} absMax - Maximum coordinates
- * @property {Object} absMin - Minimum coordinates
- * @property {Object} strips - Strip configuration data
+ * @property {number[]} absMax - Maximum coordinates array
+ * @property {number[]} absMin - Minimum coordinates array
+ * @property {{ [key: string]: any }} strips - Strip configuration data
  */
 
 /**
  * Frame rendering callback - pure JavaScript
  * Called for each animation frame with pixel data
  * @async
- * @param {Array & {screenMap?: ScreenMapData}} frameData - Array of frame data with optional screenMap property
+ * @param {(Array & {screenMap?: ScreenMapData}) | FrameData} frameData - Frame data (array with optional screenMap or FrameData object)
  * @returns {Promise<void>} Promise that resolves when frame is rendered
  */
 globalThis.FastLED_onFrame = async function (frameData) {
@@ -47,7 +49,7 @@ globalThis.FastLED_onFrame = async function (frameData) {
 
   if (shouldLog) {
     FASTLED_DEBUG_TRACE('CALLBACKS', 'FastLED_onFrame', 'ENTER', {
-      frameDataLength: frameData ? frameData.length : 0,
+      frameDataLength: frameData && Array.isArray(frameData) ? frameData.length : (frameData ? 'FrameData object' : 0),
       frameCount: globalThis.fastLEDFrameCount,
     });
   }

@@ -44,28 +44,52 @@ cd ../../src/platforms/wasm/compiler
 # Check if TypeScript is available (local installation first, then global)
 if [ -f "../../../../.cache/js-tools/node_modules/.bin/tsc.cmd" ]; then
     echo -e "${BLUE}Using local TypeScript for JSDoc type checking...${NC}"
-    if ../../../../.cache/js-tools/node_modules/.bin/tsc.cmd --noEmit --project jsconfig.json; then
-        echo -e "${GREEN}✅ JSDoc type checking completed successfully${NC}"
-    else
-        echo -e "${RED}❌ JSDoc type checking failed with errors${NC}"
-        exit 1
+    # Run TypeScript and filter out Node.js events library errors
+    TSC_OUTPUT=$(../../../../.cache/js-tools/node_modules/.bin/tsc.cmd --noEmit --project jsconfig.json 2>&1)
+    TSC_EXIT_CODE=$?
+    # Filter out the specific Node.js events error
+    FILTERED_OUTPUT=$(echo "$TSC_OUTPUT" | grep -v "node_modules/events/events.js.*Property 'context' does not exist on type 'Error'" || true)
+
+    if [ -n "$FILTERED_OUTPUT" ]; then
+        echo "$FILTERED_OUTPUT"
+        if [ $TSC_EXIT_CODE -ne 0 ]; then
+            echo -e "${RED}❌ JSDoc type checking failed with errors${NC}"
+            exit 1
+        fi
     fi
+    echo -e "${GREEN}✅ JSDoc type checking completed successfully${NC}"
 elif [ -f "../../../../.cache/js-tools/node_modules/.bin/tsc" ]; then
     echo -e "${BLUE}Using local TypeScript for JSDoc type checking...${NC}"
-    if ../../../../.cache/js-tools/node_modules/.bin/tsc --noEmit --project jsconfig.json; then
-        echo -e "${GREEN}✅ JSDoc type checking completed successfully${NC}"
-    else
-        echo -e "${RED}❌ JSDoc type checking failed with errors${NC}"
-        exit 1
+    # Run TypeScript and filter out Node.js events library errors
+    TSC_OUTPUT=$(../../../../.cache/js-tools/node_modules/.bin/tsc --noEmit --project jsconfig.json 2>&1)
+    TSC_EXIT_CODE=$?
+    # Filter out the specific Node.js events error
+    FILTERED_OUTPUT=$(echo "$TSC_OUTPUT" | grep -v "node_modules/events/events.js.*Property 'context' does not exist on type 'Error'" || true)
+
+    if [ -n "$FILTERED_OUTPUT" ]; then
+        echo "$FILTERED_OUTPUT"
+        if [ $TSC_EXIT_CODE -ne 0 ]; then
+            echo -e "${RED}❌ JSDoc type checking failed with errors${NC}"
+            exit 1
+        fi
     fi
+    echo -e "${GREEN}✅ JSDoc type checking completed successfully${NC}"
 elif command -v npx >/dev/null 2>&1 && npx tsc --version >/dev/null 2>&1; then
     echo -e "${BLUE}Using global TypeScript for JSDoc type checking...${NC}"
-    if npx tsc --noEmit --project jsconfig.json; then
-        echo -e "${GREEN}✅ JSDoc type checking completed successfully${NC}"
-    else
-        echo -e "${RED}❌ JSDoc type checking failed with errors${NC}"
-        exit 1
+    # Run TypeScript and filter out Node.js events library errors
+    TSC_OUTPUT=$(npx tsc --noEmit --project jsconfig.json 2>&1)
+    TSC_EXIT_CODE=$?
+    # Filter out the specific Node.js events error
+    FILTERED_OUTPUT=$(echo "$TSC_OUTPUT" | grep -v "node_modules/events/events.js.*Property 'context' does not exist on type 'Error'" || true)
+
+    if [ -n "$FILTERED_OUTPUT" ]; then
+        echo "$FILTERED_OUTPUT"
+        if [ $TSC_EXIT_CODE -ne 0 ]; then
+            echo -e "${RED}❌ JSDoc type checking failed with errors${NC}"
+            exit 1
+        fi
     fi
+    echo -e "${GREEN}✅ JSDoc type checking completed successfully${NC}"
 else
     echo -e "${YELLOW}⚠️  TypeScript not found, skipping JSDoc type checking${NC}"
     echo -e "${BLUE}💡 To enable JSDoc checking: Run the ./install script or npm install -g typescript${NC}"

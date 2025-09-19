@@ -24,8 +24,9 @@ interface FrameData {
  * Screen mapping data for LED strips
  */
 interface ScreenMapData {
-  absMax: { x: number; y: number; z: number };
-  absMin: { x: number; y: number; z: number };
+  absMax: number[];
+  absMin: number[];
+  strips: { [stripId: string]: any };
   [key: string]: any;
 }
 
@@ -213,14 +214,14 @@ declare global {
 
     // Graphics
     graphicsManager: GraphicsManager | GraphicsManagerThreeJS;
-    updateCanvas: (frameData: FrameData) => void;
+    updateCanvas: (frameData: FrameData | (any[] & {screenMap?: ScreenMapData})) => void;
     screenMap: ScreenMapData;
     handleStripMapping: any;
 
     // Audio
     audioData: AudioData;
     webkitAudioContext: typeof AudioContext;
-    setupAudioAnalysis: () => void;
+    setupAudioAnalysis: (audioElement?: HTMLAudioElement) => Promise<any>;
     getAudioCapabilities: () => any;
     setAudioProcessor: (processor: string) => void;
     useBestAudioProcessor: () => void;

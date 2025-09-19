@@ -17,6 +17,7 @@
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true,
+    "skipDefaultLibCheck": true,
     "lib": ["ES2021", "DOM"]
   },
   "include": [
@@ -25,8 +26,11 @@
     "**/*.d.ts"
   ],
   "exclude": [
+    "**/node_modules/**",
     "node_modules",
     "dist",
-    "build"
+    "build",
+    "../../../../../node_modules/**",
+    "../../../../../../node_modules/**"
   ]
 }

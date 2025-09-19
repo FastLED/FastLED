@@ -3,6 +3,7 @@
 set -e
 
 # Parse command line arguments
+JS_ONLY=false
 while [[ $# -gt 0 ]]; do
     case $1 in
         --help|-h)
@@ -10,10 +11,15 @@ while [[ $# -gt 0 ]]; do
             echo ""
             echo "Options:"
             echo "  --help   Show this help message"
+            echo "  --js     Run JavaScript linting only"
             echo ""
             echo "This script runs comprehensive linting for Python, C++, and JavaScript."
             echo "JavaScript linting: FAST ONLY (skips if not available)."
             exit 0
+            ;;
+        --js)
+            JS_ONLY=true
+            shift
             ;;
         *)
             echo "Unknown option: $1"
@@ -32,43 +38,48 @@ find tests/ -name "*.vcxproj" -exec rm {} \; 2>/dev/null || true
 find tests/ -name "*.vcxproj.filters" -exec rm {} \; 2>/dev/null || true
 find tests/ -name "*.sln" -exec rm {} \; 2>/dev/null || true
 
-echo "🚀 Running FastLED Comprehensive Linting Suite"
-echo "=============================================="
+if [ "$JS_ONLY" = true ]; then
+    echo "🌐 Running JavaScript Linting Only"
+    echo "==================================="
+else
+    echo "🚀 Running FastLED Comprehensive Linting Suite"
+    echo "=============================================="
 
-# Python linting
-echo ""
-echo "📝 PYTHON LINTING"
-echo "------------------"
-echo "Running ruff check (linting)"
-uv run ruff check --fix test.py
-uv run ruff check --fix ci --exclude ci/tmp/ --exclude ci/wasm/
-echo "Running ruff format (formatting + import sorting)"
-uv run ruff format test.py
-uv run ruff format ci --exclude ci/tmp/ --exclude ci/wasm/
-echo "Running pyright (all configured files)"
-uv run pyright
+    # Python linting
+    echo ""
+    echo "📝 PYTHON LINTING"
+    echo "------------------"
+    echo "Running ruff check (linting)"
+    uv run ruff check --fix test.py
+    uv run ruff check --fix ci --exclude ci/tmp/ --exclude ci/wasm/
+    echo "Running ruff format (formatting + import sorting)"
+    uv run ruff format test.py
+    uv run ruff format ci --exclude ci/tmp/ --exclude ci/wasm/
+    echo "Running pyright (all configured files)"
+    uv run pyright
 
-export CLANG_FORMAT_STYLE="{SortIncludes: false}"
+    export CLANG_FORMAT_STYLE="{SortIncludes: false}"
 
-# C++ linting
-echo ""
-echo "🔧 C++ LINTING"
-echo "---------------"
-folders=(
-    #"src/lib8tion"
-    #"src/platforms/stub"
-    #"src/platforms/apollo3"  # clang-format breaks apollo3
-    #"src/platforms/esp/8266"  # clang-format breaks esp8266
-    #"src/platforms/arm" # clang-format breaks arm
-    #"src/fx"
-    #"src/fl"
-    #"src/platforms/wasm"
-)
+    # C++ linting
+    echo ""
+    echo "🔧 C++ LINTING"
+    echo "---------------"
+    folders=(
+        #"src/lib8tion"
+        #"src/platforms/stub"
+        #"src/platforms/apollo3"  # clang-format breaks apollo3
+        #"src/platforms/esp/8266"  # clang-format breaks esp8266
+        #"src/platforms/arm" # clang-format breaks arm
+        #"src/fx"
+        #"src/fl"
+        #"src/platforms/wasm"
+    )
 
-for folder in "${folders[@]}"; do
-  echo "Running clang-format on $folder"
-  uv run ci/run-clang-format.py -i -r "$folder" || uv run ci/run-clang-format.py -i -r "$folder"
-done
+    for folder in "${folders[@]}"; do
+      echo "Running clang-format on $folder"
+      uv run ci/run-clang-format.py -i -r "$folder" || uv run ci/run-clang-format.py -i -r "$folder"
+    done
+fi
 
 # JavaScript linting and enhanced checking (now included by default)
 echo ""
@@ -119,11 +130,16 @@ else
 fi
 
 echo ""
-echo "🎉 All linting completed!"
+if [ "$JS_ONLY" = true ]; then
+    echo "🎉 JavaScript linting completed!"
+else
+    echo "🎉 All linting completed!"
+fi
 echo "========================="
 echo ""
 echo "💡 FOR AI AGENTS:"
 echo "  - Use 'bash lint' for comprehensive linting (Python, C++, and JavaScript)"
+echo "  - Use 'bash lint --js' for JavaScript linting only"
 echo "  - JavaScript linting: FAST ONLY (no slow fallback)"
 echo "  - To enable fast JavaScript linting: uv run ci/setup-js-linting-fast.py"
 echo "  - Use 'bash lint --help' for usage information"

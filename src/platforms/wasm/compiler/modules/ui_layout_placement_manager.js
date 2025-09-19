@@ -39,6 +39,7 @@
  * @property {number} minUIColumnWidth
  * @property {number} maxUIColumns
  * @property {number} canvasExpansionRatio
+ * @property {number} minContentRatio
  * @property {number} horizontalGap
  * @property {number} verticalGap
  */

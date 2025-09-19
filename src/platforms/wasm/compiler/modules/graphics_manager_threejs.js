@@ -28,6 +28,9 @@
 
 import { isDenseGrid } from './graphics_utils.js';
 
+// Declare THREE as global namespace for type checking
+/* global THREE */
+
 /** Disable geometry merging for debugging (set to true to force individual LED objects) */
 const DISABLE_MERGE_GEOMETRIES = false;
 
@@ -109,16 +112,16 @@ export class GraphicsManagerThreeJS {
     /** @type {Array} Array of merged mesh objects for performance */
     this.mergedMeshes = [];
 
-    /** @type {THREE.Scene|null} Three.js scene object */
+    /** @type {Object|null} Three.js scene object */
     this.scene = null;
 
-    /** @type {THREE.Camera|null} Three.js camera object */
+    /** @type {Object|null} Three.js camera object */
     this.camera = null;
 
-    /** @type {THREE.WebGLRenderer|null} Three.js WebGL renderer */
+    /** @type {Object|null} Three.js WebGL renderer */
     this.renderer = null;
 
-    /** @type {THREE.EffectComposer|null} Post-processing composer */
+    /** @type {Object|null} Post-processing composer */
     this.composer = null;
 
     // State tracking
@@ -184,7 +187,7 @@ export class GraphicsManagerThreeJS {
    */
   initThreeJS(frameData) {
     this._setupCanvasAndDimensions(frameData);
-    this._setupScene(frameData);
+    this._setupScene();
     this._setupRenderer();
     this._setupRenderPasses(frameData);
 
@@ -658,8 +661,9 @@ export class GraphicsManagerThreeJS {
     const positionMap = this._collectLedColorData(frameData);
 
     // Update LED visuals
-    if (frameData.screenMap) {
-      this._updateLedVisuals(positionMap, frameData.screenMap);
+    const screenMap = (/** @type {any} */ (frameData)).screenMap;
+    if (screenMap) {
+      this._updateLedVisuals(positionMap);
     } else {
       console.warn('No screenMap available for LED visual updates');
     }
@@ -707,18 +711,20 @@ export class GraphicsManagerThreeJS {
    * @returns {Map} - Map of LED positions to color data
    */
   _collectLedColorData(frameData) {
-    // Check if frameData has screenMap property
-    if (!frameData.screenMap) {
+    // Handle frameData as array or object with screenMap
+    const dataArray = Array.isArray(frameData) ? frameData : (frameData.data || []);
+    const screenMap = (/** @type {any} */ (frameData)).screenMap;
+
+    if (!screenMap) {
       console.warn('No screenMap found in frameData:', frameData);
       return new Map();
     }
 
-    const { screenMap } = frameData;
     const positionMap = new Map();
     const WARNING_COUNT = 10;
 
     // Process each strip
-    frameData.forEach((strip) => {
+    dataArray.forEach((strip) => {
       if (!strip) {
         console.warn('Null strip encountered, skipping');
         return;
@@ -833,7 +839,7 @@ export class GraphicsManagerThreeJS {
       const normalizedY = (y / height) * this.SCREEN_HEIGHT - this.SCREEN_HEIGHT / 2;
 
       // Get z position (fixed for orthographic camera)
-      const z = this._calculateDepthEffect(normalizedX, normalizedY);
+      const z = this._calculateDepthEffect();
 
       // Update LED position and color
       if (led._isMerged) {
@@ -955,4 +961,5 @@ export class GraphicsManagerThreeJS {
     // Update merged meshes with cleared colors
     this._updateMergedMeshes(mergedMeshUpdates);
   }
+
 }
