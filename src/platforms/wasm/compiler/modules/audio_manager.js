@@ -625,6 +625,9 @@ export class AudioManager {
         audioProcessors: {}, // Store audio processors by ID
         audioSources: {}, // Store MediaElementSourceNodes by ID
         hasActiveSamples: false,
+        frequencyData: new Float32Array(0), // Store frequency analysis data
+        timeData: new Float32Array(0), // Store time domain data
+        volume: 0 // Store current volume level
       };
     }
   }
@@ -1117,7 +1120,7 @@ export class AudioManager {
     const audioElements = document.querySelectorAll(
       `#audio-${inputId}, audio[data-audio-id="${inputId}"]`,
     );
-    audioElements.forEach((audio) => {
+    audioElements.forEach(/** @param {HTMLAudioElement} audio */(audio) => {
       audio.pause();
       audio.src = '';
       audio.load();
@@ -1214,10 +1217,10 @@ const audioManager = new AudioManager();
 /**
  * Make setupAudioAnalysis available globally
  * @param {HTMLAudioElement} audioElement - The audio element to analyze
- * @returns {Object} Audio analysis components
+ * @returns {Promise<Object>} Audio analysis components
  */
-window.setupAudioAnalysis = function (audioElement) {
-  return audioManager.setupAudioAnalysis(audioElement);
+window.setupAudioAnalysis = async function (audioElement) {
+  return await audioManager.setupAudioAnalysis(audioElement);
 };
 
 /**

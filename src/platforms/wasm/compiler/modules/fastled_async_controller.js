@@ -15,6 +15,14 @@
  * @module FastLEDAsyncController
  */
 
+/**
+ * @typedef {Object} FrameData
+ * @property {number} strip_id - ID of the LED strip
+ * @property {string} type - Type of frame data
+ * @property {Uint8Array|number[]} pixel_data - Pixel color data
+ * @property {Object} screenMap - Screen mapping data for LED positions
+ */
+
 // Import debug logging
 import { FASTLED_DEBUG_LOG, FASTLED_DEBUG_ERROR, FASTLED_DEBUG_TRACE } from './fastled_debug_logger.js';
 
@@ -309,7 +317,7 @@ class FastLEDAsyncController {
       }
 
       // Schedule next frame
-      this.scheduleNextFrame(frameTime);
+      this.scheduleNextFrame();
     } catch (error) {
       console.error('Fatal error in FastLED pure JavaScript async loop:', error);
       FASTLED_DEBUG_ERROR('ASYNC_CONTROLLER', 'Fatal error in loop', error);
@@ -407,7 +415,7 @@ class FastLEDAsyncController {
 
   /**
      * Render frame using user-defined callback
-     * @param {Array} frameData - Frame data with pixel information
+     * @param {FrameData|Array} frameData - Frame data with pixel information
      * @returns {Promise<void>} Promise that resolves when frame is rendered
      */
   async renderFrame(frameData) {

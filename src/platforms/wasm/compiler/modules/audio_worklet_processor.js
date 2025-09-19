@@ -8,6 +8,9 @@
 // AudioWorklet global environment declarations
 /* global AudioWorkletProcessor, registerProcessor */
 
+// AudioWorkletProcessor will be available in the AudioWorklet context
+// These declarations are for TypeScript checking only
+
 /**
  * @extends AudioWorkletProcessor
  */
