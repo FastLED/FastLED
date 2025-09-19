@@ -83,7 +83,7 @@ class FastLEDAudioProcessor extends AudioWorkletProcessor {
         type: 'audioData',
         data: {
           timestamp,
-          samples: samples,
+          samples,
           rms,
           peak,
           sampleRate: this.sampleRate,

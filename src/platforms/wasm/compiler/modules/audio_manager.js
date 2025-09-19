@@ -27,7 +27,6 @@
  */
 
 /* eslint-disable no-console */
-/* eslint-disable import/prefer-default-export */
 /* eslint-disable no-restricted-syntax */
 /* eslint-disable max-len */
 /* eslint-disable guard-for-in */
@@ -73,7 +72,6 @@ const AUDIO_PROCESSOR_TYPES = {
   /** @type {string} Modern AudioWorklet (audio thread) */
   AUDIO_WORKLET: 'audio_worklet',
 };
-
 
 /**
  * TIMESTAMP IMPLEMENTATION DOCUMENTATION:
@@ -188,7 +186,7 @@ class ScriptProcessorAudioProcessor extends AudioProcessor {
       if (!this.isProcessing) return;
 
       // Get input data from the left channel
-      const inputBuffer = audioProcessingEvent.inputBuffer;
+      const { inputBuffer } = audioProcessingEvent;
       const inputData = inputBuffer.getChannelData(0);
 
       // Convert float32 audio data to int16 range
@@ -288,7 +286,7 @@ class AudioWorkletAudioProcessor extends AudioProcessor {
           } catch (pathError) {
             // Collect detailed diagnostic information
             const diagnostic = {
-              path: path,
+              path,
               error: pathError.message,
               errorName: pathError.name,
               errorType: this.diagnoseAudioWorkletError(pathError, path),
@@ -604,7 +602,7 @@ export class AudioManager {
       processorType = AudioProcessorFactory.getBestProcessorType();
       console.log(`🎵 Auto-selected audio processor: ${processorType}`);
       console.log(
-        `🎵 (Will automatically fallback to ScriptProcessor if AudioWorklet fails to load)`,
+        '🎵 (Will automatically fallback to ScriptProcessor if AudioWorklet fails to load)',
       );
     }
 
@@ -674,11 +672,10 @@ export class AudioManager {
     if (this.isAudioWorkletSupported()) {
       this.setProcessorType(AUDIO_PROCESSOR_TYPES.AUDIO_WORKLET);
       return true;
-    } else {
-      console.warn('🎵 AudioWorklet not supported, using ScriptProcessor');
-      this.setProcessorType(AUDIO_PROCESSOR_TYPES.SCRIPT_PROCESSOR);
-      return false;
     }
+    console.warn('🎵 AudioWorklet not supported, using ScriptProcessor');
+    this.setProcessorType(AUDIO_PROCESSOR_TYPES.SCRIPT_PROCESSOR);
+    return false;
   }
 
   /**
@@ -1027,7 +1024,7 @@ export class AudioManager {
    * @param {File} file - The selected audio file
    */
   updateButtonText(button, file) {
-    button.textContent = file.name.length > 20 ? `${file.name.substring(0, 17)  }...` : file.name;
+    button.textContent = file.name.length > 20 ? `${file.name.substring(0, 17)}...` : file.name;
   }
 
   /**
@@ -1264,7 +1261,7 @@ window.useBestAudioProcessor = function () {
  */
 window.forceAudioWorklet = function () {
   audioManager.setProcessorType(AUDIO_PROCESSOR_TYPES.AUDIO_WORKLET);
-  console.log(`🎵 Forced AudioWorklet mode (with automatic ScriptProcessor fallback)`);
+  console.log('🎵 Forced AudioWorklet mode (with automatic ScriptProcessor fallback)');
   return audioManager.getProcessorType();
 };
 
@@ -1274,7 +1271,7 @@ window.forceAudioWorklet = function () {
  */
 window.forceScriptProcessor = function () {
   audioManager.setProcessorType(AUDIO_PROCESSOR_TYPES.SCRIPT_PROCESSOR);
-  console.log(`🎵 Forced ScriptProcessor mode`);
+  console.log('🎵 Forced ScriptProcessor mode');
   return audioManager.getProcessorType();
 };
 
@@ -1330,7 +1327,7 @@ window.testAudioWorkletPath = async function (customPath = null) {
           continue;
         }
 
-        console.log(`🎵    ✅ File exists and is accessible`);
+        console.log('🎵    ✅ File exists and is accessible');
       } catch (fetchError) {
         console.log(`🎵    ❌ Fetch error: ${fetchError.message}`);
         continue;
@@ -1339,7 +1336,7 @@ window.testAudioWorkletPath = async function (customPath = null) {
       // Now try loading as AudioWorklet module
       // deno-lint-ignore no-await-in-loop
       await testContext.audioWorklet.addModule(path);
-      console.log(`🎵    🎵 ✅ AudioWorklet module loaded successfully!`);
+      console.log('🎵    🎵 ✅ AudioWorklet module loaded successfully!');
 
       testContext.close();
       return true;
@@ -1364,8 +1361,8 @@ window.getAudioWorkletEnvironmentInfo = function () {
     host: window.location.host,
     pathname: window.location.pathname,
     isSecureContext: self.isSecureContext,
-    audioWorkletSupported: 'audioWorklet' in
-      (window.AudioContext || window.webkitAudioContext).prototype,
+    audioWorkletSupported: 'audioWorklet'
+      in (window.AudioContext || window.webkitAudioContext).prototype,
     userAgent: navigator.userAgent,
   };
 
@@ -1409,11 +1406,13 @@ window.getAudioBufferStats = function () {
     totalSamples: acc.totalSamples + stat.totalSamples,
     totalMemoryKB: acc.totalMemoryKB + stat.memoryEstimateKB,
     activeStreams: acc.activeStreams + 1,
-  }), { totalBufferCount: 0, totalSamples: 0, totalMemoryKB: 0, activeStreams: 0 });
+  }), {
+    totalBufferCount: 0, totalSamples: 0, totalMemoryKB: 0, activeStreams: 0,
+  });
 
   return {
     individual: stats,
-    totals: totals,
+    totals,
     limit: {
       maxBuffers: MAX_AUDIO_BUFFER_LIMIT,
       description:
@@ -1454,7 +1453,7 @@ class AudioBufferStorage {
     // Add new buffer
     this.buffers.push({
       samples: Array.from(sampleBuffer), // Convert to regular array for JSON serialization
-      timestamp: timestamp,
+      timestamp,
     });
     this.totalSamples += sampleBuffer.length;
   }

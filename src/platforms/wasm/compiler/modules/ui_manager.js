@@ -26,7 +26,6 @@
  */
 
 /* eslint-disable no-console */
-/* eslint-disable import/prefer-default-export */
 /* eslint-disable no-restricted-syntax */
 /* eslint-disable max-len */
 /* eslint-disable guard-for-in */
@@ -84,12 +83,11 @@ function markdownToHtml(markdown) {
   // Wrap consecutive <li> elements properly
   html = html.replace(
     /(<li(?:\s+class="ordered")?>.*?<\/li>(?:\s*<li(?:\s+class="ordered")?>.*?<\/li>)*)/gs,
-    function (match) {
+    (match) => {
       if (match.includes('class="ordered"')) {
-        return `<ol>${  match.replace(/\s+class="ordered"/g, '')  }</ol>`;
-      } else {
-        return `<ul>${  match  }</ul>`;
+        return `<ol>${match.replace(/\s+class="ordered"/g, '')}</ol>`;
       }
+      return `<ul>${match}</ul>`;
     },
   );
 
@@ -98,10 +96,10 @@ function markdownToHtml(markdown) {
   html = paragraphs.map((p) => {
     const trimmed = p.trim();
     if (
-      trimmed && !trimmed.startsWith('<h') && !trimmed.startsWith('<ul') &&
-      !trimmed.startsWith('<ol') && !trimmed.startsWith('<pre')
+      trimmed && !trimmed.startsWith('<h') && !trimmed.startsWith('<ul')
+      && !trimmed.startsWith('<ol') && !trimmed.startsWith('<pre')
     ) {
-      return `<p>${  trimmed.replace(/\n/g, '<br>')  }</p>`;
+      return `<p>${trimmed.replace(/\n/g, '<br>')}</p>`;
     }
     return trimmed;
   }).join('\n');
@@ -120,20 +118,20 @@ function groupAdjacentNumberFields(elements) {
 
   while (i < elements.length) {
     const current = elements[i];
-    
+
     // Check if current element is a number field and the next one is also a number field
     if (current.type === 'number' && i + 1 < elements.length && elements[i + 1].type === 'number') {
       const next = elements[i + 1];
-      
+
       // Create a paired element that will be handled specially
       result.push({
         type: 'number-pair',
         leftElement: current,
         rightElement: next,
         id: `pair-${current.id}-${next.id}`,
-        group: current.group // Use the group from the first element
+        group: current.group, // Use the group from the first element
       });
-      
+
       i += 2; // Skip both elements since we've paired them
     } else {
       // Add single element as-is
@@ -179,7 +177,7 @@ function createNumberFieldPair(leftElement, rightElement) {
   leftField.style.flex = '1';
   leftField.style.maxWidth = 'calc(50% - 10px)';
 
-  // Create right number field  
+  // Create right number field
   const rightField = createSingleNumberField(rightElement);
   rightField.style.flex = '1';
   rightField.style.maxWidth = 'calc(50% - 10px)';
@@ -269,7 +267,7 @@ function createSlider(element) {
   slider.min = Number.parseFloat(element.min);
   slider.max = Number.parseFloat(element.max);
   slider.value = Number.parseFloat(element.value);
-  
+
   // Check if element.step exists and is not undefined/null
   if (element.step !== undefined && element.step !== null) {
     slider.step = Number.parseFloat(element.step);
@@ -411,7 +409,6 @@ function createDropdown(element) {
   return controlDiv;
 }
 
-
 function setTitle(titleData) {
   if (titleData && titleData.text) {
     document.title = titleData.text;
@@ -465,7 +462,7 @@ function createHelp(element) {
   // Prepare content for tooltip and popup
   const markdownContent = element.markdownContent || '';
   const tooltipText = markdownContent.length > 200
-    ? `${markdownContent.substring(0, 200).trim()  }...`
+    ? `${markdownContent.substring(0, 200).trim()}...`
     : markdownContent;
 
   // Convert markdown to HTML for popup
@@ -818,16 +815,16 @@ export class JsonUiManager {
     this.spilloverConfig = {
       // For tablet/desktop (2-container layouts): need at least 4 groups or 8 total elements
       twoContainer: {
-        minGroups: 4,        // At least 4 groups before using second container
-        minElements: 8,      // At least 8 total elements before using second container
-        minElementsPerGroup: 2  // Average elements per group threshold
+        minGroups: 4, // At least 4 groups before using second container
+        minElements: 8, // At least 8 total elements before using second container
+        minElementsPerGroup: 2, // Average elements per group threshold
       },
       // For ultrawide (3-container layouts): need at least 6 groups or 12 total elements
       threeContainer: {
-        minGroups: 6,        // At least 6 groups before using all three areas
-        minElements: 12,     // At least 12 total elements before using all three areas
-        minElementsPerGroup: 2  // Average elements per group threshold
-      }
+        minGroups: 6, // At least 6 groups before using all three areas
+        minElements: 12, // At least 12 total elements before using all three areas
+        minElementsPerGroup: 2, // Average elements per group threshold
+      },
     };
 
     // Initialize the UI Layout Placement Manager
@@ -871,7 +868,7 @@ export class JsonUiManager {
    */
   updateUiComponents(jsonString) {
     // console.log('*** C++→JS: Backend update received:', jsonString);
-    
+
     // Log the inbound update to the inspector
     if (window.jsonInspector) {
       window.jsonInspector.logInboundEvent(jsonString, 'C++ → JS');
@@ -1189,11 +1186,9 @@ export class JsonUiManager {
       // console.log('*** SENDING TO BACKEND:', JSON.stringify(transformedChanges));
 
       // Check if there's audio data in the changes
-      const audioKeys = Object.keys(changes).filter((key) =>
-        this.uiElements[key] &&
-        this.uiElements[key].type === 'file' &&
-        this.uiElements[key].accept === 'audio/*'
-      );
+      const audioKeys = Object.keys(changes).filter((key) => this.uiElements[key]
+        && this.uiElements[key].type === 'file'
+        && this.uiElements[key].accept === 'audio/*');
 
       // Debug logging for audio processing (only when enabled)
       if (this.debugMode && audioKeys.length > 0) {
@@ -1207,7 +1202,7 @@ export class JsonUiManager {
       if (window.jsonInspector) {
         window.jsonInspector.logOutboundEvent(transformedChanges, 'JS → C++');
       }
-      
+
       // Return the transformed format
       return transformedChanges;
     }
@@ -1263,11 +1258,11 @@ export class JsonUiManager {
     const totalElements = jsonData.length;
     const sortedGroups = this.sortGroupsForOptimalLayout(groupedElements);
     const groupContainerMap = new Map();
-    
+
     if (this.debugMode) {
       console.log(`🎵 UI Content Analysis: ${totalGroups} groups, ${totalElements} total elements`);
     }
-    
+
     // Pre-assign groups to containers to prevent splitting
     for (const [groupName] of sortedGroups) {
       const groupInfo = this.createGroupContainer(groupName, null, totalGroups, totalElements);
@@ -1343,12 +1338,12 @@ export class JsonUiManager {
     // Mark elements that might benefit from wider layouts
     try {
       if (
-        data.type === 'audio' ||
-        data.type === 'slider' && data.name.toLowerCase().includes('spectrum')
+        data.type === 'audio'
+        || data.type === 'slider' && data.name.toLowerCase().includes('spectrum')
       ) {
         data._layoutHint = 'wide';
       }
-  
+
       // Mark elements that should always be full width
       if (data.type === 'help' || data.name.toLowerCase().includes('debug')) {
         data._layoutHint = 'full-width';
@@ -1356,7 +1351,6 @@ export class JsonUiManager {
     } catch (e) {
       console.log('Error adding element layout hints:', e, data);
     }
-
   }
 
   /**
@@ -1460,8 +1454,8 @@ export class JsonUiManager {
 
     // Handle ultra-wide mode with two separate containers
     if (
-      layoutInfo.mode === 'ultrawide' && uiControls2Container &&
-      uiControls2Container.children.length > 0
+      layoutInfo.mode === 'ultrawide' && uiControls2Container
+      && uiControls2Container.children.length > 0
     ) {
       // Balance between two containers
       const container1Groups = uiControlsContainer.querySelectorAll('.ui-group');
@@ -1544,13 +1538,13 @@ export class JsonUiManager {
   registerControlElement(control, data) {
     if (data.type === 'number-pair') {
       // Register both left and right elements separately
-      const leftElement = data.leftElement;
-      const rightElement = data.rightElement;
-      
+      const { leftElement } = data;
+      const { rightElement } = data;
+
       // Find the input elements within the paired control
       const leftInput = control._leftControl.querySelector('input');
       const rightInput = control._rightControl.querySelector('input');
-      
+
       this.uiElements[leftElement.id] = leftInput;
       this.uiElements[rightElement.id] = rightInput;
       this.previousUiState[leftElement.id] = leftElement.value;
@@ -1583,7 +1577,7 @@ export class JsonUiManager {
       if (this.debugMode && data.type !== 'number-pair') {
         console.log(
           `🎵 UI Registered element: ID '${data.id}' (${data.type}${
-            data._layoutHint ? `, ${  data._layoutHint}` : ''
+            data._layoutHint ? `, ${data._layoutHint}` : ''
           }) - Total: ${Object.keys(this.uiElements).length}`,
         );
       }
@@ -1612,7 +1606,7 @@ export class JsonUiManager {
     if (newConfig.threeContainer) {
       Object.assign(this.spilloverConfig.threeContainer, newConfig.threeContainer);
     }
-    
+
     if (this.debugMode) {
       console.log('🎵 Updated spillover configuration:', this.spilloverConfig);
     }
@@ -1656,9 +1650,9 @@ export class JsonUiManager {
 
     // Check if the second container is hidden by CSS
     const containerStyle = window.getComputedStyle(uiControls2Container);
-    const isSecondContainerVisible = containerStyle.display !== 'none' &&
-                                   containerStyle.visibility !== 'hidden' &&
-                                   containerStyle.opacity !== '0';
+    const isSecondContainerVisible = containerStyle.display !== 'none'
+                                   && containerStyle.visibility !== 'hidden'
+                                   && containerStyle.opacity !== '0';
 
     if (!isSecondContainerVisible && uiControls2Container.children.length > 0) {
       if (this.debugMode) {
@@ -1678,7 +1672,7 @@ export class JsonUiManager {
           // Move group from groups2 to groups
           this.groups.set(groupName, {
             ...groupInfo,
-            parentContainer: mainContainer
+            parentContainer: mainContainer,
           });
         });
         this.groups2.clear();
@@ -1761,21 +1755,20 @@ export class JsonUiManager {
     if (layoutInfo.mode === 'ultrawide') {
       const container1 = document.getElementById(this.uiControlsId);
       const container2 = document.getElementById(this.uiControls2Id);
-      
+
       if (container1 && container2) {
         // Balance based on total content (groups + ungrouped elements)
         const container1Elements = container1.children.length;
         const container2Elements = container2.children.length;
-        
+
         // Use the container with fewer total elements
         if (container2Elements < container1Elements) {
           return container2;
-        } else if (container1Elements < container2Elements) {
+        } if (container1Elements < container2Elements) {
           return container1;
-        } else {
-          // Equal - alternate
-          return elementIndex % 2 === 0 ? container1 : container2;
         }
+        // Equal - alternate
+        return elementIndex % 2 === 0 ? container1 : container2;
       }
     }
 
@@ -1841,11 +1834,11 @@ export class JsonUiManager {
       // For ultra-wide, try to balance containers by group count, not individual elements
       const container1 = document.getElementById(this.uiControlsId);
       const container2 = document.getElementById(this.uiControls2Id);
-      
+
       if (container1 && container2) {
         const groups1Count = this.groups.size;
         const groups2Count = this.groups2.size;
-        
+
         // Use the container with fewer groups
         if (groups2Count < groups1Count) {
           return container2;
@@ -1878,9 +1871,9 @@ export class JsonUiManager {
 
     // Check if the second container is hidden by CSS (e.g., in tablet mode)
     const containerStyle = window.getComputedStyle(uiControls2Container);
-    const isSecondContainerVisible = containerStyle.display !== 'none' &&
-                                   containerStyle.visibility !== 'hidden' &&
-                                   containerStyle.opacity !== '0';
+    const isSecondContainerVisible = containerStyle.display !== 'none'
+                                   && containerStyle.visibility !== 'hidden'
+                                   && containerStyle.opacity !== '0';
 
     if (!isSecondContainerVisible) {
       if (this.debugMode) {
@@ -2018,10 +2011,9 @@ if (typeof window !== 'undefined') {
   window.getUiSpilloverThresholds = function () {
     if (window.uiManager && typeof window.uiManager.getSpilloverConfig === 'function') {
       return window.uiManager.getSpilloverConfig();
-    } else {
-      console.warn('🎵 UI Manager instance not found.');
-      return null;
     }
+    console.warn('🎵 UI Manager instance not found.');
+    return null;
   };
 
   // Example usage helper

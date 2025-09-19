@@ -8,7 +8,6 @@
  */
 
 /* eslint-disable no-console */
-/* eslint-disable import/prefer-default-export */
 
 /**
  * Default video recording configuration
@@ -54,7 +53,9 @@ export class VideoRecorder {
    * @param {Object} [options.settings] - Recording settings (codec, bitrate, etc.)
    */
   constructor(options) {
-    const { canvas, audioContext, fps, onStateChange, settings } = options;
+    const {
+      canvas, audioContext, fps, onStateChange, settings,
+    } = options;
 
     /** @type {HTMLCanvasElement} */
     this.canvas = canvas;
@@ -221,7 +222,7 @@ export class VideoRecorder {
       const options = {
         mimeType: this.selectedMimeType,
         videoBitsPerSecond: this.settings.videoBitrate * 1000000, // Convert Mbps to bps
-        audioBitsPerSecond: this.settings.audioBitrate * 1000,    // Convert kbps to bps
+        audioBitsPerSecond: this.settings.audioBitrate * 1000, // Convert kbps to bps
       };
 
       // Remove mimeType if empty (use browser default)
@@ -262,7 +263,7 @@ export class VideoRecorder {
       console.log('MediaRecorder options:', options);
       console.log('MediaRecorder state:', this.mediaRecorder.state);
       console.log('Stream active:', this.stream.active);
-      console.log('Stream tracks:', this.stream.getTracks().map(t => ({ kind: t.kind, enabled: t.enabled, muted: t.muted })));
+      console.log('Stream tracks:', this.stream.getTracks().map((t) => ({ kind: t.kind, enabled: t.enabled, muted: t.muted })));
 
       // Start recording with explicit timeslice to ensure data collection
       this.mediaRecorder.start(1000); // Request data every 1 second
@@ -298,7 +299,7 @@ export class VideoRecorder {
 
       // Stop all tracks in the stream
       if (this.stream) {
-        this.stream.getTracks().forEach(track => track.stop());
+        this.stream.getTracks().forEach((track) => track.stop());
         this.stream = null;
       }
 
@@ -389,10 +390,9 @@ export class VideoRecorder {
     if (this.isRecording) {
       this.stopRecording();
       return false;
-    } else {
-      this.startRecording();
-      return true;
     }
+    this.startRecording();
+    return true;
   }
 
   /**
@@ -492,7 +492,7 @@ export class VideoRecorder {
 
       // Clean up stream
       if (this.stream) {
-        this.stream.getTracks().forEach(track => {
+        this.stream.getTracks().forEach((track) => {
           track.stop();
         });
         this.stream = null;

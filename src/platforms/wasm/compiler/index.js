@@ -16,9 +16,6 @@
  * @module FastLED/Compiler
  */
 
-/* eslint-disable import/prefer-default-export */
-
-/* eslint-disable import/extensions */
 
 import { JsonUiManager } from './modules/ui_manager.js';
 import { GraphicsManager } from './modules/graphics_manager.js';
@@ -32,8 +29,6 @@ import { FastLEDAsyncController } from './modules/fastled_async_controller.js';
 import './modules/fastled_callbacks.js';
 import { fastLEDEvents, fastLEDPerformanceMonitor } from './modules/fastled_events.js';
 import { FASTLED_DEBUG_LOG, FASTLED_DEBUG_ERROR, FASTLED_DEBUG_TRACE } from './modules/fastled_debug_logger.js';
-
-
 
 /** URL parameters for runtime configuration */
 const urlParams = new URLSearchParams(window.location.search);
@@ -52,8 +47,6 @@ const DEFAULT_FRAME_RATE_60FPS = 60;
 
 /** Current frame rate setting */
 let frameRate = DEFAULT_FRAME_RATE_60FPS;
-
-
 
 /** HTML element ID for the main rendering canvas */
 let canvasId;
@@ -86,7 +79,7 @@ let graphicsArgs = {};
  * NOTE: AsyncFastLEDController has been moved to fastled_async_controller.js
  * This is now imported as a pure JavaScript module for better separation of concerns
  * and to eliminate embedded JavaScript in C++ code.
- * 
+ *
  * The new FastLEDAsyncController provides:
  * - Pure JavaScript async patterns with proper Asyncify integration
  * - Clean data export/import with C++ via Module.cwrap
@@ -267,7 +260,6 @@ function jsAppendFileUint8(moduleInstance, path, blob) {
   moduleInstance._free(path_cstr);
 }
 
-
 /**
  * Partitions files into immediate and streaming categories based on extensions
  * @param {Array<Object>} filesJson - Array of file objects with path and data
@@ -353,60 +345,60 @@ function updateCanvas(frameData) {
  */
 async function FastLED_SetupAndLoop(moduleInstance, frame_rate) {
   FASTLED_DEBUG_TRACE('INDEX_JS', 'FastLED_SetupAndLoop', 'ENTER', { frame_rate });
-  
+
   try {
     FASTLED_DEBUG_LOG('INDEX_JS', 'Initializing FastLED with Pure JavaScript Architecture...');
     console.log('Initializing FastLED with Pure JavaScript Architecture...');
-    
+
     // Check if moduleInstance is valid
     FASTLED_DEBUG_LOG('INDEX_JS', 'Checking moduleInstance', {
       hasModule: !!moduleInstance,
       hasExternSetup: !!(moduleInstance && moduleInstance._extern_setup),
       hasExternLoop: !!(moduleInstance && moduleInstance._extern_loop),
-      hasCwrap: !!(moduleInstance && moduleInstance.cwrap)
+      hasCwrap: !!(moduleInstance && moduleInstance.cwrap),
     });
-    
+
     if (!moduleInstance) {
       throw new Error('moduleInstance is null or undefined');
     }
-    
+
     // Create the pure JavaScript async controller
     FASTLED_DEBUG_LOG('INDEX_JS', 'Creating FastLEDAsyncController...');
     fastLEDController = new FastLEDAsyncController(moduleInstance, frame_rate);
     FASTLED_DEBUG_LOG('INDEX_JS', 'FastLEDAsyncController created successfully');
-    
+
     // Expose controller globally for debugging and external control
     window.fastLEDController = fastLEDController;
-    
+
     // Expose event system globally
     window.fastLEDEvents = fastLEDEvents;
     window.fastLEDPerformanceMonitor = fastLEDPerformanceMonitor;
-    
+
     FASTLED_DEBUG_LOG('INDEX_JS', 'Globals exposed, calling controller.setup()...');
-    
+
     // Setup FastLED synchronously
     fastLEDController.setup();
-    
+
     FASTLED_DEBUG_LOG('INDEX_JS', 'Controller setup completed, starting animation loop...');
-    
+
     // Start the async animation loop
     fastLEDController.start();
-    
+
     FASTLED_DEBUG_LOG('INDEX_JS', 'Animation loop started, setting up UI controls...');
-    
+
     // Add UI controls for start/stop if elements exist
     const startBtn = document.getElementById('start-btn');
     const stopBtn = document.getElementById('stop-btn');
     const toggleBtn = document.getElementById('toggle-btn');
     const fpsDisplay = document.getElementById('fps-display');
-    
+
     FASTLED_DEBUG_LOG('INDEX_JS', 'UI controls found', {
       startBtn: !!startBtn,
       stopBtn: !!stopBtn,
       toggleBtn: !!toggleBtn,
-      fpsDisplay: !!fpsDisplay
+      fpsDisplay: !!fpsDisplay,
     });
-    
+
     if (startBtn) {
       startBtn.onclick = () => {
         FASTLED_DEBUG_LOG('INDEX_JS', 'Start button clicked');
@@ -418,14 +410,14 @@ async function FastLED_SetupAndLoop(moduleInstance, frame_rate) {
         }
       };
     }
-    
+
     if (stopBtn) {
       stopBtn.onclick = () => {
         FASTLED_DEBUG_LOG('INDEX_JS', 'Stop button clicked');
         fastLEDController.stop();
       };
     }
-    
+
     if (toggleBtn) {
       toggleBtn.onclick = () => {
         FASTLED_DEBUG_LOG('INDEX_JS', 'Toggle button clicked');
@@ -433,70 +425,69 @@ async function FastLED_SetupAndLoop(moduleInstance, frame_rate) {
         toggleBtn.textContent = isRunning ? 'Pause' : 'Resume';
       };
     }
-    
+
     // Performance monitoring display with event system integration
     if (fpsDisplay) {
       FASTLED_DEBUG_LOG('INDEX_JS', 'Setting up performance monitoring...');
       setInterval(() => {
         const fps = fastLEDController.getFPS();
         const frameTime = fastLEDController.getAverageFrameTime();
-        
+
         // Record performance metrics
         fastLEDPerformanceMonitor.recordFrameTime(frameTime);
-        
+
         // Update display
         fpsDisplay.textContent = `FPS: ${fps.toFixed(1)} | Frame: ${frameTime.toFixed(1)}ms`;
-        
+
         // Monitor memory usage if available
         if (performance.memory) {
           fastLEDPerformanceMonitor.recordMemoryUsage(performance.memory.usedJSHeapSize);
         }
       }, 1000);
     }
-    
+
     // Set up event monitoring for debugging
     if (window.fastLEDDebug) {
       fastLEDEvents.setDebugMode(true);
       FASTLED_DEBUG_LOG('INDEX_JS', 'Event debug mode enabled');
     }
-    
+
     FASTLED_DEBUG_LOG('INDEX_JS', 'Checking callback function availability...');
     const callbackStatus = {
       FastLED_onFrame: typeof globalThis.FastLED_onFrame,
       FastLED_processUiUpdates: typeof globalThis.FastLED_processUiUpdates,
       FastLED_onStripUpdate: typeof globalThis.FastLED_onStripUpdate,
       FastLED_onStripAdded: typeof globalThis.FastLED_onStripAdded,
-      FastLED_onUiElementsAdded: typeof globalThis.FastLED_onUiElementsAdded
+      FastLED_onUiElementsAdded: typeof globalThis.FastLED_onUiElementsAdded,
     };
-    
+
     FASTLED_DEBUG_LOG('INDEX_JS', 'Callback function status', callbackStatus);
-    
+
     console.log('FastLED Pure JavaScript Architecture initialized successfully');
     console.log('Available features:', {
       asyncController: !!fastLEDController,
       eventSystem: !!fastLEDEvents,
       performanceMonitor: !!fastLEDPerformanceMonitor,
-      callbacks: callbackStatus
+      callbacks: callbackStatus,
     });
-    
+
     FASTLED_DEBUG_LOG('INDEX_JS', 'FastLED_SetupAndLoop completed successfully');
     FASTLED_DEBUG_TRACE('INDEX_JS', 'FastLED_SetupAndLoop', 'EXIT');
-    
   } catch (error) {
     FASTLED_DEBUG_ERROR('INDEX_JS', 'Failed to initialize FastLED with Pure JavaScript Architecture', error);
     console.error('Failed to initialize FastLED with Pure JavaScript Architecture:', error);
-    
+
     // Emit error event
     if (fastLEDEvents) {
       fastLEDEvents.emitError('initialization', error.message, { stack: error.stack });
     }
-    
+
     // Show user-friendly error message if error display element exists
     const errorDisplay = document.getElementById('error-display');
     if (errorDisplay) {
       errorDisplay.textContent = 'Failed to load FastLED with Pure JavaScript Architecture. Please refresh the page.';
     }
-    
+
     throw error;
   }
 }
@@ -504,7 +495,7 @@ async function FastLED_SetupAndLoop(moduleInstance, frame_rate) {
 /**
  * NOTE: All callback functions have been moved to fastled_callbacks.js
  * This provides better separation of concerns and eliminates embedded JavaScript.
- * 
+ *
  * The pure JavaScript callbacks include:
  * - FastLED_onStripUpdate() - handles strip configuration changes
  * - FastLED_onStripAdded() - handles new strip registration
@@ -512,7 +503,7 @@ async function FastLED_SetupAndLoop(moduleInstance, frame_rate) {
  * - FastLED_processUiUpdates() - handles UI state collection
  * - FastLED_onUiElementsAdded() - handles UI element addition
  * - FastLED_onError() - handles error reporting
- * 
+ *
  * All callbacks are automatically available via the imported module.
  */
 
@@ -580,7 +571,7 @@ async function fastledLoadSetupLoop(
 
   // NOTE: Callback functions are now automatically registered by importing fastled_callbacks.js
   // No need to manually bind them here - they're pure JavaScript functions
-  
+
   // Verify that the pure JavaScript callbacks are properly loaded
   console.log('FastLED Pure JavaScript callbacks verified:', {
     FastLED_onUiElementsAdded: typeof globalThis.FastLED_onUiElementsAdded,
@@ -588,9 +579,9 @@ async function fastledLoadSetupLoop(
     FastLED_onStripAdded: typeof globalThis.FastLED_onStripAdded,
     FastLED_onStripUpdate: typeof globalThis.FastLED_onStripUpdate,
     FastLED_processUiUpdates: typeof globalThis.FastLED_processUiUpdates,
-    FastLED_onError: typeof globalThis.FastLED_onError
+    FastLED_onError: typeof globalThis.FastLED_onError,
   });
-  
+
   // Initialize event system integration
   if (fastLEDEvents) {
     console.log('FastLED Event System ready with stats:', fastLEDEvents.getEventStats());
@@ -641,8 +632,8 @@ function onModuleLoaded(fastLedLoader) {
    * @param {Array<Object>} filesJson - Files to load into virtual filesystem
    */
   async function __fastledLoadSetupLoop(moduleInstance, frameRate, filesJson) {
-    const exports_exist = moduleInstance && moduleInstance._extern_setup &&
-      moduleInstance._extern_loop;
+    const exports_exist = moduleInstance && moduleInstance._extern_setup
+      && moduleInstance._extern_loop;
     if (!exports_exist) {
       console.error('FastLED setup or loop functions are not available.');
       return;
@@ -832,14 +823,13 @@ function toggleFastLED() {
     console.error('FastLED controller not initialized');
     return false;
   }
-  
+
   if (fastLEDController.running) {
     fastLEDController.stop();
     return false;
-  } else {
-    fastLEDController.start();
-    return true;
   }
+  fastLEDController.start();
+  return true;
 }
 
 /**
@@ -850,19 +840,19 @@ function setupGlobalErrorHandlers() {
   // Handle unhandled promise rejections
   window.addEventListener('unhandledrejection', (event) => {
     console.error('Unhandled promise rejection in FastLED:', event.reason);
-    
+
     // Check if this is a FastLED-related error
     if (event.reason && (
-      event.reason.message?.includes('FastLED') ||
-      event.reason.message?.includes('extern_setup') ||
-      event.reason.message?.includes('extern_loop') ||
-      event.reason.stack?.includes('AsyncFastLEDController')
+      event.reason.message?.includes('FastLED')
+      || event.reason.message?.includes('extern_setup')
+      || event.reason.message?.includes('extern_loop')
+      || event.reason.stack?.includes('AsyncFastLEDController')
     )) {
       console.error('FastLED async error detected - stopping animation loop');
       if (fastLEDController) {
         fastLEDController.stop();
       }
-      
+
       // Show user-friendly error message
       const errorDisplay = document.getElementById('error-display');
       if (errorDisplay) {
@@ -988,49 +978,49 @@ function actuallyInitializeVideoRecorder(canvas, recordButton) {
 
     // Create video recorder instance
     videoRecorder = new VideoRecorder({
-      canvas: canvas,
-      audioContext: audioContext,
+      canvas,
+      audioContext,
       fps: savedSettings?.fps || 30,
       settings: savedSettings,
       onStateChange: (isRecording) => {
       // Update button visual state
-      if (isRecording) {
-        recordButton.classList.add('recording');
-        recordButton.title = 'Stop Recording';
-        // Update icon
-        const recordIcon = recordButton.querySelector('.record-icon');
-        const stopIcon = recordButton.querySelector('.stop-icon');
-        if (recordIcon) recordIcon.style.display = 'none';
-        if (stopIcon) stopIcon.style.display = 'block';
-      } else {
-        recordButton.classList.remove('recording');
-        recordButton.title = 'Start Recording';
-        // Update icon
-        const recordIcon = recordButton.querySelector('.record-icon');
-        const stopIcon = recordButton.querySelector('.stop-icon');
-        if (recordIcon) recordIcon.style.display = 'block';
-        if (stopIcon) stopIcon.style.display = 'none';
-      }
-    }
-  });
+        if (isRecording) {
+          recordButton.classList.add('recording');
+          recordButton.title = 'Stop Recording';
+          // Update icon
+          const recordIcon = recordButton.querySelector('.record-icon');
+          const stopIcon = recordButton.querySelector('.stop-icon');
+          if (recordIcon) recordIcon.style.display = 'none';
+          if (stopIcon) stopIcon.style.display = 'block';
+        } else {
+          recordButton.classList.remove('recording');
+          recordButton.title = 'Start Recording';
+          // Update icon
+          const recordIcon = recordButton.querySelector('.record-icon');
+          const stopIcon = recordButton.querySelector('.stop-icon');
+          if (recordIcon) recordIcon.style.display = 'block';
+          if (stopIcon) stopIcon.style.display = 'none';
+        }
+      },
+    });
 
-  // Add click handler to record button
-  recordButton.addEventListener('click', (e) => {
-    e.preventDefault();
-    if (videoRecorder) {
-      videoRecorder.toggleRecording();
-    }
-  });
-
-  // Add keyboard shortcut (Ctrl+R or Cmd+R)
-  document.addEventListener('keydown', (e) => {
-    if ((e.ctrlKey || e.metaKey) && e.key === 'r' && !e.shiftKey) {
+    // Add click handler to record button
+    recordButton.addEventListener('click', (e) => {
       e.preventDefault();
       if (videoRecorder) {
         videoRecorder.toggleRecording();
       }
-    }
-  });
+    });
+
+    // Add keyboard shortcut (Ctrl+R or Cmd+R)
+    document.addEventListener('keydown', (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'r' && !e.shiftKey) {
+        e.preventDefault();
+        if (videoRecorder) {
+          videoRecorder.toggleRecording();
+        }
+      }
+    });
 
     console.log('Video recorder initialized');
   } catch (error) {

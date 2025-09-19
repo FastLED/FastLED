@@ -8,7 +8,6 @@
  */
 
 /* eslint-disable no-console */
-/* eslint-disable import/prefer-default-export */
 /* eslint-disable no-restricted-syntax */
 /* eslint-disable max-len */
 /* eslint-disable guard-for-in */
@@ -226,7 +225,7 @@ export class GraphicsManager {
     this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_T, this.gl.CLAMP_TO_EDGE);
     this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, this.gl.NEAREST);
     this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MAG_FILTER, this.gl.NEAREST);
-    
+
     return true;
   }
 
@@ -280,7 +279,7 @@ export class GraphicsManager {
       console.warn('Received null frame data, skipping update');
       return;
     }
-    
+
     if (!Array.isArray(frameData)) {
       console.warn('Received non-array frame data:', frameData);
       return;
@@ -341,7 +340,7 @@ export class GraphicsManager {
 
       const data = strip.pixel_data;
       if (!data || typeof data.length !== 'number') {
-        console.warn(`Invalid pixel data for strip:`, strip);
+        console.warn('Invalid pixel data for strip:', strip);
         continue;
       }
 

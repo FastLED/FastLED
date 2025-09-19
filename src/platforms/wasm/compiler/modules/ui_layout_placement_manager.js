@@ -23,7 +23,6 @@
  */
 
 /* eslint-disable no-console */
-/* eslint-disable import/prefer-default-export */
 
 /**
  * @fileoverview UI Layout Placement Manager for FastLED
@@ -191,13 +190,13 @@ export class UILayoutPlacementManager {
    */
   observeContainers() {
     if (!this.resizeObserver) return;
-    
+
     const containersToObserve = [
       'main-container',
-      'content-grid', 
+      'content-grid',
       'canvas-container',
       'ui-controls',
-      'ui-controls-2'
+      'ui-controls-2',
     ];
 
     // Track which containers we're already observing to avoid duplicates
@@ -205,7 +204,7 @@ export class UILayoutPlacementManager {
       this.observedContainers = new Set();
     }
 
-    containersToObserve.forEach(id => {
+    containersToObserve.forEach((id) => {
       const element = document.getElementById(id);
       if (element && !this.observedContainers.has(id)) {
         this.resizeObserver.observe(element);
@@ -226,7 +225,7 @@ export class UILayoutPlacementManager {
     for (const entry of entries) {
       const { target, contentRect } = entry;
       const elementId = target.id;
-      
+
       console.log(`🔍 Container resized: ${elementId} - ${contentRect.width}x${contentRect.height}`);
 
       // Check if this resize affects our layout calculations
@@ -234,12 +233,11 @@ export class UILayoutPlacementManager {
         // Major container resize - always update
         shouldUpdate = true;
         break;
-      } 
-      else if (elementId === 'ui-controls' || elementId === 'ui-controls-2') {
+      } else if (elementId === 'ui-controls' || elementId === 'ui-controls-2') {
         // UI container resize - check if it significantly affects layout
         const availableWidth = contentRect.width;
         const widthDiff = Math.abs(availableWidth - (layoutInfo?.availableWidth || 0));
-        
+
         if (widthDiff > 20) { // 20px threshold for UI container changes
           shouldUpdate = true;
           break;
@@ -249,7 +247,7 @@ export class UILayoutPlacementManager {
 
     if (shouldUpdate) {
       console.log('🔍 ResizeObserver triggered layout update');
-      
+
       // Check for layout mode changes first
       const newLayout = this.detectLayout();
       if (newLayout !== this.currentLayout) {
@@ -356,8 +354,8 @@ export class UILayoutPlacementManager {
    * @returns {LayoutResult} Updated layout data for tablet
    */
   calculateTabletLayout(layoutData) {
-    const requiredWidth = this.config.minCanvasSize + this.config.minUIColumnWidth +
-      this.config.horizontalGap;
+    const requiredWidth = this.config.minCanvasSize + this.config.minUIColumnWidth
+      + this.config.horizontalGap;
 
     if (layoutData.availableWidth >= requiredWidth) {
       // Side-by-side layout
@@ -387,8 +385,8 @@ export class UILayoutPlacementManager {
    * @returns {LayoutResult} Updated layout data for desktop
    */
   calculateDesktopLayout(layoutData) {
-    const baseRequiredWidth = this.config.minCanvasSize + this.config.minUIColumnWidth +
-      this.config.horizontalGap;
+    const baseRequiredWidth = this.config.minCanvasSize + this.config.minUIColumnWidth
+      + this.config.horizontalGap;
 
     if (layoutData.availableWidth >= baseRequiredWidth) {
       // Calculate optimal canvas size
@@ -509,11 +507,11 @@ export class UILayoutPlacementManager {
   hasAnyLayoutChange(newLayoutData) {
     const threshold = 10; // Much smaller threshold for responsive updates
     return (
-      Math.abs(newLayoutData.canvasSize - this.layoutData.canvasSize) > threshold ||
-      newLayoutData.uiColumns !== this.layoutData.uiColumns ||
-      Math.abs(newLayoutData.uiColumnWidth - this.layoutData.uiColumnWidth) > threshold ||
-      Math.abs(newLayoutData.uiTotalWidth - this.layoutData.uiTotalWidth) > threshold ||
-      newLayoutData.viewportWidth !== this.layoutData.viewportWidth
+      Math.abs(newLayoutData.canvasSize - this.layoutData.canvasSize) > threshold
+      || newLayoutData.uiColumns !== this.layoutData.uiColumns
+      || Math.abs(newLayoutData.uiColumnWidth - this.layoutData.uiColumnWidth) > threshold
+      || Math.abs(newLayoutData.uiTotalWidth - this.layoutData.uiTotalWidth) > threshold
+      || newLayoutData.viewportWidth !== this.layoutData.viewportWidth
     );
   }
 
@@ -604,9 +602,8 @@ export class UILayoutPlacementManager {
           const areas = contentGrid.style.gridTemplateAreas;
           if (areas.includes('ui2')) {
             return '3×N grid (ultra-wide)';
-          } else {
-            return '2×N grid (ultra-wide fallback)';
           }
+          return '2×N grid (ultra-wide fallback)';
         }
         return '3×N grid (ultra-wide)';
       }
@@ -699,7 +696,7 @@ export class UILayoutPlacementManager {
     } else if (isUltrawide) {
       // Check if we actually need the 3-column layout based on content
       const shouldUseThreeColumns = this.shouldUseThreeColumnLayout(uiControls, uiControls2);
-      
+
       if (shouldUseThreeColumns) {
         // 3×N grid (ultra-wide) - Place canvas in the middle between two UI columns
         const minUIWidth = 280; // Minimum width for UI columns
@@ -708,8 +705,7 @@ export class UILayoutPlacementManager {
         console.log(`🔍 Ultra-wide layout (center canvas): canvas=${canvasWidth}px, minUIWidth=${minUIWidth}px`);
 
         // Flexible UI columns on the sides, fixed canvas in the middle
-        contentGrid.style.gridTemplateColumns =
-          `minmax(${minUIWidth}px, 1fr) ${canvasWidth}px minmax(${minUIWidth}px, 1fr)`;
+        contentGrid.style.gridTemplateColumns = `minmax(${minUIWidth}px, 1fr) ${canvasWidth}px minmax(${minUIWidth}px, 1fr)`;
         contentGrid.style.gridTemplateRows = 'auto';
         contentGrid.style.gridTemplateAreas = '"ui canvas ui2"';
 
@@ -739,7 +735,7 @@ export class UILayoutPlacementManager {
       } else {
         // Fall back to 2-column layout for insufficient content
         console.log('🔍 Insufficient content for 3-column layout, using 2-column fallback');
-        
+
         // Use 2×N grid layout similar to desktop
         contentGrid.style.gridTemplateColumns = `${this.layoutData.canvasSize}px minmax(280px, 1fr)`;
         contentGrid.style.gridTemplateRows = 'auto';
@@ -775,37 +771,37 @@ export class UILayoutPlacementManager {
    */
   shouldUseThreeColumnLayout(uiControls, uiControls2) {
     if (!uiControls || !uiControls2) return false;
-    
+
     // Count total groups and elements across both containers
     const container1Groups = uiControls.querySelectorAll('.ui-group').length;
     const container2Groups = uiControls2.querySelectorAll('.ui-group').length;
     const totalGroups = container1Groups + container2Groups;
-    
+
     const container1Elements = uiControls.querySelectorAll('.ui-control').length;
     const container2Elements = uiControls2.querySelectorAll('.ui-control').length;
     const totalElements = container1Elements + container2Elements;
-    
+
     // Only check if second container has content
     const hasContentInSecondContainer = container2Groups > 0 || container2Elements > 0;
-    
+
     // Thresholds for 3-column layout (matching UI manager thresholds)
     const minGroupsFor3Col = 6;
     const minElementsFor3Col = 12;
     const minElementsPerGroup = 2;
-    
+
     const hasEnoughGroups = totalGroups >= minGroupsFor3Col;
     const hasEnoughElements = totalElements >= minElementsFor3Col;
     const hasGoodDensity = totalGroups > 0 && (totalElements / totalGroups) >= minElementsPerGroup;
-    
+
     const shouldUse3Col = hasContentInSecondContainer && (hasEnoughGroups || (hasEnoughElements && hasGoodDensity));
-    
-    console.log(`🔍 3-Column layout analysis:`);
+
+    console.log('🔍 3-Column layout analysis:');
     console.log(`  Container 1: ${container1Groups} groups, ${container1Elements} elements`);
     console.log(`  Container 2: ${container2Groups} groups, ${container2Elements} elements`);
     console.log(`  Total: ${totalGroups} groups, ${totalElements} elements`);
     console.log(`  Thresholds: ${minGroupsFor3Col} groups OR ${minElementsFor3Col} elements with ${minElementsPerGroup} avg density`);
     console.log(`  Result: ${shouldUse3Col ? 'USE 3-COLUMN' : 'USE 2-COLUMN FALLBACK'}`);
-    
+
     return shouldUse3Col;
   }
 
@@ -900,17 +896,17 @@ export class UILayoutPlacementManager {
     });
     globalThis.removeEventListener('resize', this.handleResize);
     globalThis.removeEventListener('visibilitychange', this.forceLayoutUpdate);
-    
+
     // Clean up ResizeObserver
     if (this.resizeObserver) {
       this.resizeObserver.disconnect();
       this.resizeObserver = null;
     }
-    
+
     if (this.observedContainers) {
       this.observedContainers.clear();
     }
-    
+
     clearTimeout(this.resizeTimeout);
     clearTimeout(this.resizeObserverTimeout);
   }

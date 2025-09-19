@@ -15,7 +15,6 @@
  */
 
 /* eslint-disable no-console */
-/* eslint-disable import/prefer-default-export */
 /* eslint-disable no-restricted-syntax */
 /* eslint-disable max-len */
 /* eslint-disable guard-for-in */
@@ -31,7 +30,6 @@ import { isDenseGrid } from './graphics_utils.js';
 
 /** Disable geometry merging for debugging (set to true to force individual LED objects) */
 const DISABLE_MERGE_GEOMETRIES = false;
-
 
 /**
  * Creates position calculator functions for mapping LED coordinates to 3D space
@@ -51,9 +49,7 @@ function makePositionCalculators(frameData, screenWidth, screenHeight) {
      * @param {number} x - Screen X coordinate
      * @returns {number} 3D X position centered around origin
      */
-    calcXPosition: (x) => {
-      return (((x - screenMap.absMin[0]) / width) * screenWidth) - (screenWidth / 2);
-    },
+    calcXPosition: (x) => (((x - screenMap.absMin[0]) / width) * screenWidth) - (screenWidth / 2),
     /**
      * Calculates Y position in 3D space from screen coordinates
      * @param {number} y - Screen Y coordinate
@@ -309,7 +305,9 @@ export class GraphicsManagerThreeJS {
    * @private
    */
   _setupRenderPasses(frameData) {
-    const { THREE, EffectComposer, RenderPass, UnrealBloomPass } = this.threeJsModules;
+    const {
+      THREE, EffectComposer, RenderPass, UnrealBloomPass,
+    } = this.threeJsModules;
 
     // Create basic render pass
     const renderScene = new RenderPass(this.scene, this.camera);
@@ -477,9 +475,9 @@ export class GraphicsManagerThreeJS {
     const { screenMap } = frameData;
 
     // If BufferGeometryUtils is not available, fall back to individual LEDs
-    const BufferGeometryUtils = this.threeJsModules.BufferGeometryUtils;
-    const canMergeGeometries = this.useMergedGeometry && BufferGeometryUtils &&
-      !DISABLE_MERGE_GEOMETRIES;
+    const { BufferGeometryUtils } = this.threeJsModules;
+    const canMergeGeometries = this.useMergedGeometry && BufferGeometryUtils
+      && !DISABLE_MERGE_GEOMETRIES;
 
     if (!canMergeGeometries) {
       console.log('BufferGeometryUtils not available, falling back to individual LEDs');
@@ -641,7 +639,7 @@ export class GraphicsManagerThreeJS {
       console.warn('Received null frame data, skipping update');
       return;
     }
-    
+
     if (!Array.isArray(frameData)) {
       console.warn('Received non-array frame data:', frameData);
       return;
@@ -776,7 +774,9 @@ export class GraphicsManagerThreeJS {
 
         // Only update if this LED is brighter than any existing LED at this position
         if (!positionMap.has(posKey) || positionMap.get(posKey).brightness < brightness) {
-          positionMap.set(posKey, { x, y, r, g, b, brightness });
+          positionMap.set(posKey, {
+            x, y, r, g, b, brightness,
+          });
         }
       }
     });
@@ -813,8 +813,8 @@ export class GraphicsManagerThreeJS {
     // Use the stored bounds from setup
     const min_x = this.screenBounds.minX;
     const min_y = this.screenBounds.minY;
-    const width = this.screenBounds.width;
-    const height = this.screenBounds.height;
+    const { width } = this.screenBounds;
+    const { height } = this.screenBounds;
 
     // Track which merged meshes need updates
     const mergedMeshUpdates = new Map();
@@ -881,7 +881,7 @@ export class GraphicsManagerThreeJS {
       // Create or update the color attribute if needed
       if (!mesh.geometry.attributes.color) {
         // Create a new color attribute
-        const count = mesh.geometry.attributes.position.count;
+        const { count } = mesh.geometry.attributes.position;
         const colorArray = new Float32Array(count * 3);
         mesh.geometry.setAttribute('color', new THREE.BufferAttribute(colorArray, 3));
 
