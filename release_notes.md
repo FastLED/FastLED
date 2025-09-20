@@ -20,7 +20,6 @@ FastLED 3.10.3
     * Clockless LED controller support for WS2812, SK6812, and other standard chipsets
     * Board definitions for `mgm240` target with `siliconlabsefm32` platform
     * Added CI testing with GitHub Actions build badge for continuous validation
-    * Compatible with Arduino framework and Matter/Thread wireless protocols
 
 FastLED 3.10.2
 ==============
